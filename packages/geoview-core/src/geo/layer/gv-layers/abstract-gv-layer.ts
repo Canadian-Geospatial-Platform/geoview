@@ -36,6 +36,7 @@ import { NotImplementedError, NotSupportedError } from '@/core/exceptions/core-e
 import { LayerNotQueryableError } from '@/core/exceptions/layer-exceptions';
 import { createAliasLookup } from '@/geo/layer/gv-layers/utils';
 import { doUntil } from '@/core/utils/utilities';
+import { TypeJsonArray } from '@/api/config/types/config-types';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer layer.
@@ -698,6 +699,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       if (!features.length) return [];
 
       const outfields = layerConfig?.source?.featureInfo?.outfields;
+      const domainsLookup = layerConfig.getLayerMetadata()?.fields as TypeJsonArray | undefined;
 
       // Hold a dictionary built on the fly for the field domains
       const dictFieldDomains: { [fieldName: string]: codedValueType | rangeDomainType | null } = {};
@@ -725,7 +727,16 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
         if (layerStyle[geometryType]) {
           const styleSettings = layerStyle[geometryType]!;
           const { type } = styleSettings;
-          const featureStyle = processStyle[type][geometryType](styleSettings, feature, layerConfig.filterEquation, true, aliasLookup);
+
+          // Calculate the feature style
+          const featureStyle = processStyle[type][geometryType](
+            styleSettings,
+            feature,
+            layerConfig.filterEquation,
+            true,
+            domainsLookup,
+            aliasLookup
+          );
 
           // Sometimes data is not well fomrated and some features has no style associated, just throw a warning
           if (featureStyle === undefined) {
@@ -739,11 +750,19 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
           // Use string as dict key
           if (!imageSourceDict[styleString])
-            imageSourceDict[styleString] = getFeatureImageSource(feature, layerStyle, layerConfig.filterEquation, true, aliasLookup);
+            imageSourceDict[styleString] = getFeatureImageSource(
+              feature,
+              layerStyle,
+              layerConfig.filterEquation,
+              true,
+              domainsLookup,
+              aliasLookup
+            );
           imageSource = imageSourceDict[styleString];
         }
 
-        if (!imageSource) imageSource = getFeatureImageSource(feature, layerStyle, layerConfig.filterEquation, true, aliasLookup);
+        if (!imageSource)
+          imageSource = getFeatureImageSource(feature, layerStyle, layerConfig.filterEquation, true, domainsLookup, aliasLookup);
 
         let extent;
         if (feature.getGeometry()) extent = feature.getGeometry()!.getExtent();
