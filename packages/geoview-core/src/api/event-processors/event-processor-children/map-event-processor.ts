@@ -145,6 +145,17 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // Set map size
     store.getState().mapState.setterActions.setMapSize(size);
 
+    // Get the scale information
+    this.getScaleInfoFromDomElement(mapId)
+      .then((scale) => {
+        // Set the map scale
+        MapEventProcessor.setMapScale(mapId, scale);
+      })
+      .catch((error: unknown) => {
+        // Log error
+        logger.logPromiseFailed('in getScaleInfoFromDomElement in initMapControls', error);
+      });
+
     // set map interaction
     this.setInteraction(mapId, store.getState().mapState.interaction);
   }
@@ -211,19 +222,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @returns {Promise<TypeScaleInfo>} A Promise to receive scale information when the dom has it
    */
   static async getScaleInfoFromDomElement(mapId: string): Promise<TypeScaleInfo> {
-    try {
-      // Check if the scaleControl exists and is showing information, wait for it
-      await whenThisThen(
-        () =>
-          document.getElementById(`${mapId}-scaleControlBarMetric`)?.querySelector('.ol-scale-text') &&
-          document.getElementById(`${mapId}-scaleControlBarImperial`)?.querySelector('.ol-scale-text')
-      );
-    } catch (error: unknown) {
-      // Log
-      logger.logError(`Couldn't retrieve the scale information from the dom tree`, error);
-      // TODO: Check - Maybe we want to actually throw the exception here? Logging only for now until couple maps get tested.
-      // throw error;
-    }
+    // Check if the scaleControl exists and is showing information, wait for it
+    await whenThisThen(
+      () =>
+        document.getElementById(`${mapId}-scaleControlBarMetric`)?.querySelector('.ol-scale-text') &&
+        document.getElementById(`${mapId}-scaleControlBarImperial`)?.querySelector('.ol-scale-text')
+    );
 
     // Get metric values
     const scaleControlBarMetric = document.getElementById(`${mapId}-scaleControlBarMetric`);
