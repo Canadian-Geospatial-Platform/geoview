@@ -709,6 +709,7 @@ export function AddNewLayer(): JSX.Element {
   // TODO: refactor - remove the unstable nested component
   // eslint-disable-next-line react/no-unstable-nested-components
   function NavButtons({ isFirst = false, isLast = false, handleNext }: ButtonPropsLayerPanel): JSX.Element {
+    logger.logDebug('TEST', layerName);
     return isLoading ? (
       <Box sx={{ padding: 10 }}>
         <CircularProgressBase />
@@ -720,7 +721,7 @@ export function AddNewLayer(): JSX.Element {
           className="buttonOutlineFilled"
           size="small"
           type="text"
-          disabled={!stepButtonEnabled}
+          disabled={!stepButtonEnabled || (isLast && (layerName === undefined || layerName === ''))}
           onClick={handleNext}
         >
           {isLast ? t('layers.finish') : t('layers.continue')}

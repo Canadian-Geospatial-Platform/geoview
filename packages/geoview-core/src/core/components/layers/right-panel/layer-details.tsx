@@ -23,12 +23,7 @@ import {
   ListItem,
   List,
 } from '@/ui';
-import {
-  useLayerHighlightedLayer,
-  useLayerStoreActions,
-  useSelectorEntryConfigDefaultFilter,
-  useSelectorLayerServiceProjection,
-} from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerHighlightedLayer, useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import {
   useDataTableAllFeaturesDataArray,
@@ -46,7 +41,6 @@ import { Button } from '@/ui/button/button';
 import { KeyboardArrowDownIcon, KeyboardArrowUpIcon } from '@/ui/icons';
 import { useAppMetadataServiceURL } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { Switch } from '@/ui/switch/switch';
-import { useGeoViewMapId } from '@/app';
 
 interface LayerDetailsProps {
   layerDetails: TypeLegendLayer;
@@ -75,6 +69,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     refreshLayer,
     zoomToLayerExtent,
     getLayerBounds,
+    getLayerDefaultFilter,
+    getLayerServiceProjection,
     setLayerHoverable,
     setLayerQueryable,
   } = useLayerStoreActions();
@@ -84,8 +80,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const layersData = useDataTableAllFeaturesDataArray();
   const metadataUrl = useAppMetadataServiceURL();
   const selectedLayer = layersData.find((_layer) => _layer.layerPath === layerDetails?.layerPath);
-  const layerFilter = useSelectorEntryConfigDefaultFilter(useGeoViewMapId(), layerDetails.layerPath);
-  const layerNativeProjection = useSelectorLayerServiceProjection(useGeoViewMapId(), layerDetails.layerPath);
+  const layerFilter = getLayerDefaultFilter(layerDetails.layerPath);
+  const layerNativeProjection = getLayerServiceProjection(layerDetails.layerPath);
 
   // Is highlight button disabled?
   const isLayerHighlightCapable = layerDetails.controls?.highlight;
@@ -393,7 +389,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           </IconButton>
         </Button>
         <Collapse in={isInfoCollapse} sx={sxClasses.layerInfo}>
-          <Box>{`${t('layers.layerType')!}${layerDetails.type}`}</Box>
+          <Box>{`${t('layers.layerType')}${layerDetails.type}`}</Box>
           {layerNativeProjection && <Box>{`${t('layers.layerServiceProjection')}${layerNativeProjection}`}</Box>}
           {layerFilter && <Box>{`${t('layers.layerDefaultFilter')}${layerFilter}`}</Box>}
           {resources !== '' && (

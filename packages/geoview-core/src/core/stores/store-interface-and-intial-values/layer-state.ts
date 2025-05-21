@@ -49,7 +49,9 @@ export interface ILayerState {
     queryLayerEsriDynamic: (layerPath: string, objectIDs: number[]) => Promise<TypeFeatureInfoEntryPartial[]>;
     getLayer: (layerPath: string) => TypeLegendLayer | undefined;
     getLayerBounds: (layerPath: string) => number[] | undefined;
+    getLayerDefaultFilter: (layerPath: string) => string | undefined;
     getLayerDeleteInProgress: () => boolean;
+    getLayerServiceProjection: (layerPath: string) => string | undefined;
     refreshLayer: (layerPath: string) => void;
     setAllItemsVisibility: (layerPath: string, visibility: boolean) => void;
     setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => void;
@@ -184,9 +186,29 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       },
 
       /**
+       * Gets the default filter of the layer.
+       * @param {string} layerPath - The layer path of the layer to get the default filter for.
+       * @returns {string | undefined} The default filter or undefined
+       */
+      getLayerDefaultFilter: (layerPath: string): string | undefined => {
+        // Redirect to pProcessor
+        return LegendEventProcessor.getLayerEntryConfigDefaultFilter(get().mapId, layerPath);
+      },
+
+      /**
        * Get the LayerDeleteInProgress state.
        */
       getLayerDeleteInProgress: () => get().layerState.layerDeleteInProgress,
+
+      /**
+       * Gets the service native projection of the layer.
+       * @param {string} layerPath - The layer path of the layer to get the service projection for.
+       * @returns {string | undefined} The service projection or undefined
+       */
+      getLayerServiceProjection: (layerPath: string): string | undefined => {
+        // Redirect to processor
+        return LegendEventProcessor.getLayerServiceProjection(get().mapId, layerPath);
+      },
 
       /**
        * Refresh layer and set states to original values.
@@ -515,14 +537,4 @@ export const useSelectorLayerIcons = (layerPath: string): TypeLegendLayerItem[] 
     // Get the state value
     return LegendEventProcessor.findLayerByPath(state.layerState.legendLayers, layerPath)?.icons;
   });
-};
-
-export const useSelectorEntryConfigDefaultFilter = (mapId: string, layerPath: string): string | undefined => {
-  // Redirect to LegendEventProcessor
-  return LegendEventProcessor.getLayerEntryConfigDefaultFilter(mapId, layerPath);
-};
-
-export const useSelectorLayerServiceProjection = (mapId: string, layerPath: string): string | undefined => {
-  // Redirect to LegendEventProcessor
-  return LegendEventProcessor.getLayerServiceProjection(mapId, layerPath);
 };
