@@ -436,7 +436,7 @@ export function AddNewLayer(): JSX.Element {
           else if (layersTree.length === 1) setLayerName(layersTree[0]?.layerName ?? geoviewLayerConfig.geoviewLayerName);
 
           // If there is either no entries or a single entry that is not a layer, we will bypass tree selection, so set ID and name
-          if (layersTree.length === 0 || (layersTree.length === 1 && !layersTree[0].isLayerGroup)) {
+          if (layersTree.length > 0 || (layersTree.length === 1 && !layersTree[0].isLayerGroup)) {
             setLayerIdsToAdd([layersTree[0]?.layerId ?? idOfFirstLayerEntryConfig]);
             setLayerName(layersTree[0]?.layerName ?? nameOfFirstLayerEntryConfig ?? geoviewLayerConfig.geoviewLayerName);
           }
@@ -500,6 +500,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const handleStep3 = (): void => {
     let valid = true;
+
     if (layerIdsToAdd.length === 0) {
       if (!layerName) {
         valid = false;
@@ -613,8 +614,10 @@ export function AddNewLayer(): JSX.Element {
    * @param {ChangeEvent<HTMLInputElement>} event - TextField event
    */
   const handleNameLayer = (event: ChangeEvent<HTMLInputElement>): void => {
-    setStepButtonEnabled(true);
-    setLayerName(event.target.value);
+    if (event.target.value !== undefined) {
+      setStepButtonEnabled(true);
+      setLayerName(event.target.value);
+    }
   };
 
   /**
