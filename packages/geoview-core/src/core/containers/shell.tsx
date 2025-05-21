@@ -218,7 +218,7 @@ export function Shell(props: ShellProps): JSX.Element {
 
   useEffect(() => {
     if (show3dMap) {
-      document.getElementById(`mapTargetElement-${mapId}`)!.style.display = 'hidden';
+      document.getElementById(`mapTargetElement-${mapId}`)!.style.height = '0%';
       const button = {
         id: 'stacBrowserButtonId',
         tooltip: 'Open STAC Browser',
@@ -241,7 +241,7 @@ export function Shell(props: ShellProps): JSX.Element {
       if (mapViewer.appBarApi.getAppBarButtonPanelById('StacCatalogPanelId')) {
         mapViewer.appBarApi.removeAppbarPanel('StacCatalogPanelId', '3d_buttons');
       }
-      document.getElementById(`mapTargetElement-${mapId}`)!.style.display = 'flex';
+      document.getElementById(`mapTargetElement-${mapId}`)!.style.height = '100%';
     }
   });
 

@@ -766,5 +766,5 @@ export function CesiumMap(props: MapProps): JSX.Element {
     return () => {};
   });
 
-  return <div ref={oViewerRef} style={{ width: '100%', height: '100vh', display: 'block' }} />;
+  return <div ref={oViewerRef} style={{ width: '100%', height: '100%', display: 'block' }} />;
 }
