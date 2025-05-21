@@ -354,7 +354,7 @@ const ResponsiveGridLayout = forwardRef(
             isRightPanelVisible={isRightPanelVisible}
             isEnlarged={isEnlarged}
             fullWidth={fullWidth}
-            sxProps={{ zIndex: isFullScreen ? 'unset' : 100 }}
+            sxProps={{ zIndex: isFullScreen ? 'unset' : 100, alignContent: 'flex-end' }}
             className="responsive-layout-right-top"
           >
             <Box

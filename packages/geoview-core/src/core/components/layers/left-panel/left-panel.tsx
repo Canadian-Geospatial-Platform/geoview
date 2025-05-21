@@ -1,7 +1,5 @@
 import { useLayerDisplayState, useLayerLegendLayers } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { Box } from '@/ui';
 import { LayersList } from './layers-list';
-import { ToggleAll } from '../../toggle-all/toggle-all';
 import { AddNewLayer } from './add-new-layer/add-new-layer';
 import { logger } from '@/core/utils/logger';
 
@@ -23,9 +21,6 @@ export function LeftPanel({ showLayerDetailsPanel, isLayoutEnlarged }: LeftPanel
   }
 
   return (
-    <Box>
-      <ToggleAll source="layers" />
-      <LayersList layersList={legendLayers} depth={0} showLayerDetailsPanel={showLayerDetailsPanel} isLayoutEnlarged={isLayoutEnlarged} />
-    </Box>
+    <LayersList layersList={legendLayers} depth={0} showLayerDetailsPanel={showLayerDetailsPanel} isLayoutEnlarged={isLayoutEnlarged} />
   );
 }
