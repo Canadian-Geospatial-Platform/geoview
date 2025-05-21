@@ -86,7 +86,9 @@ export interface IMapState {
     resetBasemap: () => Promise<void>;
     setLegendCollapsed: (layerPath: string, newValue: boolean) => void;
     toggleLegendCollapsed: (layerPath: string) => void;
+    setAllLayersCollapsed: (collapsed: boolean) => void;
     setOrToggleLayerVisibility: (layerPath: string, newValue?: boolean) => boolean;
+    setAllLayersVisibility: (visibility: boolean) => void;
     setMapKeyboardPanInteractions: (panDelta: number) => void;
     setProjection: (projectionCode: TypeValidMapProjectionCodes) => void;
     setZoom: (zoom: number, duration?: number) => void;
@@ -376,6 +378,15 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       },
 
       /**
+       * Sets the collapsed state of all layers.
+       * @param {boolean} collapsed - The collapsed.
+       */
+      setAllLayersCollapsed: (collapsed: boolean): void => {
+        // Redirect to processor.
+        MapEventProcessor.setAllMapLayerCollapsed(get().mapId, collapsed);
+      },
+
+      /**
        * Sets or toggles the visibility of a layer.
        * @param {string} layerPath - The path of the layer.
        * @param {boolean} [newValue] - The new value of visibility.
@@ -383,6 +394,15 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       setOrToggleLayerVisibility: (layerPath: string, newValue?: boolean): boolean => {
         // Redirect to processor
         return MapEventProcessor.setOrToggleMapLayerVisibility(get().mapId, layerPath, newValue);
+      },
+
+      /**
+       * Sets the visibility of all layers.
+       * @param {boolean} visibility - The visibility.
+       */
+      setAllLayersVisibility: (visibility: boolean): void => {
+        // Redirect to processor.
+        MapEventProcessor.setAllMapLayerVisibility(get().mapId, visibility);
       },
 
       /**
@@ -1060,6 +1080,15 @@ export const useSelectorLayerVisibility = (layerPath: string): boolean => {
     (state) => MapEventProcessor.findMapLayerFromOrderedInfo(state.mapId, layerPath, state.mapState.orderedLayerInfo)?.visible || false
   );
 };
+
+export const useAllLayersVisible = (): boolean =>
+  useStore(useGeoViewStore(), (state) => state.mapState.orderedLayerInfo.every((layer) => layer.visible));
+
+export const useMapHasCollapsibleLayers = (): boolean =>
+  useStore(useGeoViewStore(), (state) => MapEventProcessor.getLegendCollapsibleLayers(state.mapId).length > 0);
+
+export const useAllLayersCollapsed = (): boolean =>
+  useStore(useGeoViewStore(), (state) => MapEventProcessor.getAllLegendLayersCollapsed(state.mapId));
 
 export const useSelectorLayerInVisibleRange = (layerPath: string): boolean => {
   // Hook

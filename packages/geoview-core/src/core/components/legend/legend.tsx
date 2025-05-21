@@ -1,6 +1,7 @@
 import { useTheme } from '@mui/material';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ToggleAll } from '../toggle-all/toggle-all';
 import { Box, Typography } from '@/ui';
 import {
   useGeoViewMapId,
@@ -188,6 +189,7 @@ export function Legend({ fullWidth, containerType = CONTAINER_TYPE.FOOTER_BAR }:
 
   return (
     <Box sx={sxClassesMain.container} id={`${mapId}-${containerType}-legendContainer`}>
+      <ToggleAll />
       <Box sx={styles.flexContainer}>{content}</Box>
     </Box>
   );

@@ -426,6 +426,7 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
   // Decide between using a controlled or uncontrolled input element for the lifetime of the component. More info: https://reactjs.org/link/controlled-components Error Component Stack
 
   let useTable: MRTTableInstance<ColumnsType> | null = null;
+
   // Create the Material React Table
   useTable = useMaterialReactTable({
     columns,

@@ -250,6 +250,12 @@
     "resizeTooltip": "Resize",
     "noTab": "No tab"
   },
+  "toggleAll": {
+    "show": "Show All",
+    "showTooltip": "Toggles the visibility of all layers in the map",
+    "collapse": "Collapse All",
+    "collapseTooltip": "Toggles whether sublayers are shown in the legend / layer list"
+  },
   "error": {
     "generic": "An error happened, contact us or view console for details",
     "metadata": {
