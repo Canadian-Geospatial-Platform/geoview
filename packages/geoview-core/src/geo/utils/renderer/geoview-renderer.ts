@@ -1223,7 +1223,8 @@ function createDefaultStyle(geometryType: TypeStyleGeometry, label: string): Typ
  * @param {string[]} fields - Fields involved in the unique value definition.
  * @param {TypeLayerStyleConfigInfo[]?} uniqueValueStyleInfo - Unique value configuration.
  * @param {Feature?} feature - Feature used to test the unique value conditions.
- *
+ * @param {TypeJsonArray?} domainsLookup - An optional lookup table to handle coded value domains.
+ * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
  * @returns {TypeLayerStyleConfigInfo | undefined} The Style created. Undefined if unable to create it.
  */
 function searchUniqueValueEntry(
@@ -1304,7 +1305,8 @@ function searchUniqueValueEntry(
  * @param {Feature?} feature - Feature used to test the unique value conditions.
  * @param {FilterNodeType[]?} filterEquation - Filter equation associated to the layer.
  * @param {boolean?} legendFilterIsOff - When true, do not apply legend filter.
- *
+ * @param {TypeJsonArray?} domainsLookup - An optional lookup table to handle coded value domains.
+ * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
  */
 function processUniqueValuePoint(
@@ -1341,7 +1343,8 @@ function processUniqueValuePoint(
  * @param {Feature?} feature - Feature used to test the unique value conditions.
  * @param {FilterNodeType[]?} filterEquation - Filter equation associated to the layer.
  * @param {boolean?} legendFilterIsOff - When true, do not apply legend filter.
- *
+ * @param {TypeJsonArray?} domainsLookup - An optional lookup table to handle coded value domains.
+ * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
  */
 function processUniqueLineString(
@@ -1375,7 +1378,8 @@ function processUniqueLineString(
  * @param {Feature?} feature - Feature used to test the unique value conditions.
  * @param {FilterNodeType[]?} filterEquation - Filter equation associated to the layer.
  * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
- *
+ * @param {TypeJsonArray?} domainsLookup - An optional lookup table to handle coded value domains.
+ * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
  */
 function processUniquePolygon(
@@ -1408,7 +1412,7 @@ function processUniquePolygon(
  * @param {string} field - Field involved in the class break definition.
  * @param {TypeLayerStyleConfigInfo[]} classBreakStyleInfo - Class break configuration.
  * @param {Feature} feature - Feature used to test the class break conditions.
- *
+ * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
  * @returns {number | undefined} The index of the entry. Undefined if unable to find it.
  */
 function searchClassBreakEntry(
@@ -1449,7 +1453,8 @@ function searchClassBreakEntry(
  * @param {Feature} feature - Feature used to test the unique value conditions.
  * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
  * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
- *
+ * @param {TypeJsonArray?} domainsLookup - An optional lookup table to handle coded value domains.
+ * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
  */
 function processClassBreaksPoint(
@@ -1480,7 +1485,8 @@ function processClassBreaksPoint(
  * @param {Feature} feature - Feature used to test the unique value conditions.
  * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
  * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
- *
+ * @param {TypeJsonArray?} domainsLookup - An optional lookup table to handle coded value domains.
+ * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
  */
 function processClassBreaksLineString(
@@ -1511,7 +1517,8 @@ function processClassBreaksLineString(
  * @param {Feature} feature - Feature used to test the unique value conditions.
  * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
  * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
- *
+ * @param {TypeJsonArray?} domainsLookup - An optional lookup table to handle coded value domains.
+ * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
  */
 function processClassBreaksPolygon(
@@ -1571,6 +1578,7 @@ export const processStyle: Record<TypeLayerStyleConfigType, Record<TypeStyleGeom
  * @param {string} label - The style label when one has to be created
  * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
  * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
+ * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
  * @param {() => Promise<string | null>} callbackWhenCreatingStyle - An optional callback to execute when a new style had to be created
  * @returns {Style | undefined} The style applied to the feature or undefined if not found.
  */
@@ -1629,6 +1637,8 @@ export function getAndCreateFeatureStyle(
  * @param {TypeStyleConfig} style - The style to use
  * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
  * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
+ * @param {TypeJsonArray?} domainsLookup - An optional lookup table to handle coded value domains.
+ * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
  * @returns {string} The icon associated to the feature or a default empty one.
  */
 export function getFeatureImageSource(
