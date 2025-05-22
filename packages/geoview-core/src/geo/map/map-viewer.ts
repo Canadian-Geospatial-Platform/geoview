@@ -1504,13 +1504,6 @@ export class MapViewer {
     // Log Marker Start
     logger.logMarkerStart(`readyMap-${this.mapId}`);
 
-    // Update the map controls based on the original map state (equivalent of initMapControls, just later in the process)
-    await this.#updateMapControls();
-
-    // Is ready
-    this.#mapReady = true;
-    this.#emitMapReady();
-
     // Load the guide
     AppEventProcessor.setGuide(this.mapId).catch((error: unknown) => {
       // Log
@@ -1529,6 +1522,13 @@ export class MapViewer {
 
     // Save in the store that the map is properly being displayed now
     MapEventProcessor.setMapDisplayed(this.mapId);
+
+    // Update the map controls based on the original map state (equivalent of initMapControls, just later in the process)
+    await this.#updateMapControls();
+
+    // Is ready
+    this.#mapReady = true;
+    this.#emitMapReady();
 
     // Register the map handlers
     this.#registerMapHandlers(this.map);
