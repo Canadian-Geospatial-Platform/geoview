@@ -316,8 +316,8 @@ export abstract class ConfigBaseClass {
     // Get all siblings which are in loaded
     const siblingsInLoaded = siblings.filter((lyrConfig) => lyrConfig.layerStatus === 'loaded');
 
-    // If at least one layer is loaded
-    if (siblingsInLoaded.length > 0) {
+    // If all siblings are loaded
+    if (siblings.length === siblingsInLoaded.length) {
       // Set the parent layer status as loaded
       currentConfig.parentLayerConfig.setLayerStatusLoaded();
       // Continue with the parent
