@@ -54,8 +54,8 @@ import { LayerEntryConfigError } from '@/core/exceptions/layer-entry-config-exce
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import {
   AbstractGVLayer,
-  IndividualLayerLoadedDelegate,
-  IndividualLayerLoadedEvent,
+  LayerLoadDelegate as GVLayerLoadDelegate,
+  LayerLoadEvent as GVLayerLoadEvent,
   LayerMessageDelegate,
   LayerMessageEvent,
 } from '@/geo/layer/gv-layers/abstract-gv-layer';
@@ -151,7 +151,16 @@ export class LayerApi {
   #onLayerAddedHandlers: LayerAddedDelegate[] = [];
 
   // Keep all callback delegates references
-  #onLayerLoadedHandlers: LayerLoadedDelegate[] = [];
+  #onLayerLoadedFirstHandlers: LayerLoadDelegate[] = [];
+
+  // Keep all callback delegates references
+  #onLayerLoadingHandlers: LayerLoadDelegate[] = [];
+
+  // Keep all callback delegates references
+  #onLayerLoadedHandlers: LayerLoadDelegate[] = [];
+
+  // Keep all callback delegates references
+  #onLayerAllLoadedHandlers: LayerLoadDelegate[] = [];
 
   // Keep all callback delegates references
   #onLayerErrorHandlers: LayerErrorDelegate[] = [];
@@ -168,8 +177,14 @@ export class LayerApi {
   // Keep a bounded reference to the handle layer message
   #boundedHandleLayerMessage: LayerMessageDelegate;
 
-  // Keep a bounded reference to the handle layer individual layer loaded
-  #boundedHandleIndividualLayerLoaded: IndividualLayerLoadedDelegate;
+  // Keep a bounded reference to the handle layer first load
+  #boundedHandleLayerFirstLoaded: GVLayerLoadDelegate;
+
+  // Keep a bounded reference to the handle layer loading
+  #boundedHandleLayerLoading: GVLayerLoadDelegate;
+
+  // Keep a bounded reference to the handle layer loaded
+  #boundedHandleLayerLoaded: GVLayerLoadDelegate;
 
   /**
    * Initializes layer types and listen to add/remove layer events from outside
@@ -188,7 +203,9 @@ export class LayerApi {
 
     // Keep a bounded reference to the handle
     this.#boundedHandleLayerMessage = this.#handleLayerMessage.bind(this);
-    this.#boundedHandleIndividualLayerLoaded = this.#handleIndividualLayerLoaded.bind(this);
+    this.#boundedHandleLayerFirstLoaded = this.#handleLayerFirstLoaded.bind(this);
+    this.#boundedHandleLayerLoading = this.#handleLayerLoading.bind(this);
+    this.#boundedHandleLayerLoaded = this.#handleLayerLoaded.bind(this);
   }
 
   /**
@@ -736,14 +753,15 @@ export class LayerApi {
         // Prepare listeners for changing the visibility
         MapEventProcessor.setMapOrderedLayerInfo(this.getMapId(), originalMapOrderedLayerInfo);
         originalMapOrderedLayerInfo.forEach((layerInfo) => {
-          function setLayerVisibility(sender: LayerApi, event: LayerLoadedEvent): void {
+          function setLayerVisibility(sender: LayerApi, event: LayerLoadEvent): void {
             if (layerInfo.layerPath === event.layerPath) {
               const { visible } = originalMapOrderedLayerInfo.filter((info) => info.layerPath === event.layerPath)[0];
               event.layer?.setVisible(visible);
-              sender.offLayerLoaded(setLayerVisibility);
+              // TODO: Bound this 'setLayerVisibility' function (like other ones) instead of creating a new one on each 'forEach'
+              sender.offLayerFirstLoaded(setLayerVisibility);
             }
           }
-          this.onLayerLoaded(setLayerVisibility);
+          this.onLayerFirstLoaded(setLayerVisibility);
         });
       })
       .catch((err) => logger.logError(err));
@@ -1402,18 +1420,12 @@ export class LayerApi {
    * Attaches event handlers to a layer
    * @private
    * @param {AbstractGVLayer} gvLayer - The layer instance to attach events to
-   * @returns {void}
-   *
-   * @fires LayerMessage - When a layer sends a message
-   * @fires LayerLoaded - When an individual layer is loaded on the map
-   *
    * @description
    * This method sets up the following event handlers:
    * - Layer message handling through onLayerMessage
-   * - Layer loading completion through onIndividualLayerLoaded
-   *   - Handles setting visible range properties
-   *   - Manages legend information and bounds
-   *
+   * - Layer first loading completion through onLayerFirstLoaded
+   * - All layer loading states through onLayerLoading
+   * - All layer loaded states through onLayerLoaded
    * @private
    */
   #registerLayerHandlers(gvLayer: AbstractGVLayer): void {
@@ -1421,7 +1433,13 @@ export class LayerApi {
     gvLayer.onLayerMessage(this.#boundedHandleLayerMessage);
 
     // Register a hook when a layer is loaded on the map
-    gvLayer.onIndividualLayerLoaded(this.#boundedHandleIndividualLayerLoaded);
+    gvLayer.onLayerFirstLoaded(this.#boundedHandleLayerFirstLoaded);
+
+    // Register a hook when a layer is going into loading state
+    gvLayer.onLayerLoading(this.#boundedHandleLayerLoading);
+
+    // Register a hook when a layer is going into loading state
+    gvLayer.onLayerLoaded(this.#boundedHandleLayerLoaded);
   }
 
   /**
@@ -1433,8 +1451,14 @@ export class LayerApi {
     // Unregisters handler on layer's message
     gvLayer.offLayerMessage(this.#boundedHandleLayerMessage);
 
+    // Unregisters handler on layers first loaded
+    gvLayer.offLayerFirstLoaded(this.#boundedHandleLayerFirstLoaded);
+
+    // Unregisters handler on layers loading
+    gvLayer.offLayerLoading(this.#boundedHandleLayerLoading);
+
     // Unregisters handler on layers loaded
-    gvLayer.offIndividualLayerLoaded(this.#boundedHandleIndividualLayerLoaded);
+    gvLayer.offLayerLoaded(this.#boundedHandleLayerLoaded);
   }
 
   /**
@@ -1477,21 +1501,50 @@ export class LayerApi {
   /**
    * Handles when a layer is loaded on the map
    * @param {AbstractGVLayer} layer - The layer that's become loaded.
-   * @param {IndividualLayerLoadedEvent} loadedEvent - The event associated with the layer.
+   * @param {GVLayerLoadEvent} loadEvent - The event associated with the layer.
    */
-  #handleIndividualLayerLoaded(layer: AbstractGVLayer, loadedEvent: IndividualLayerLoadedEvent): void {
+  #handleLayerFirstLoaded(layer: AbstractGVLayer, loadEvent: GVLayerLoadEvent): void {
     // Log
-    logger.logTraceCore(`LAYERS - 10 - ${loadedEvent.layerPath} loaded on map ${this.getMapId()}`);
+    logger.logTraceCore(`LAYERS - 10 - ${loadEvent.layerPath} loaded on map ${this.getMapId()}`);
 
     // Set in visible range property for all newly added layers
     this.#setLayerInVisibleRange(layer, layer.getLayerConfig());
 
     // Ensure that the layer bounds are set when the layer is loaded
-    const legendLayerInfo = LegendEventProcessor.getLegendLayerInfo(this.getMapId(), loadedEvent.layerPath);
-    if (legendLayerInfo && !legendLayerInfo.bounds) LegendEventProcessor.getLayerBounds(this.getMapId(), loadedEvent.layerPath);
+    const legendLayerInfo = LegendEventProcessor.getLegendLayerInfo(this.getMapId(), loadEvent.layerPath);
+    if (legendLayerInfo && !legendLayerInfo.bounds) LegendEventProcessor.getLayerBounds(this.getMapId(), loadEvent.layerPath);
 
     // Emit about it
-    this.#emitLayerLoaded({ layer, layerPath: loadedEvent.layerPath });
+    this.#emitLayerFirstLoaded({ layer, layerPath: loadEvent.layerPath });
+  }
+
+  /**
+   * Handles when a layer gets in loading stage on the map
+   * @param {AbstractGVLayer} layer - The layer that's become loading.
+   * @param {GVLayerLoadEvent} loadEvent - The event associated with the layer.
+   */
+  #handleLayerLoading(layer: AbstractGVLayer, loadEvent: GVLayerLoadEvent): void {
+    // Emit about it
+    this.#emitLayerLoading({ layer, layerPath: loadEvent.layerPath });
+  }
+
+  /**
+   * Handles when a layer gets in loaded stage on the map
+   * @param {AbstractGVLayer} layer - The layer that's become loaded.
+   * @param {GVLayerLoadEvent} loadEvent - The event associated with the layer.
+   */
+  #handleLayerLoaded(layer: AbstractGVLayer, loadEvent: GVLayerLoadEvent): void {
+    // Emit about it
+    this.#emitLayerLoaded({ layer, layerPath: loadEvent.layerPath });
+
+    // Check if all layers are loaded right now
+    const [allLoaded] = this.checkLayerStatus('loaded');
+
+    // If all loaded
+    if (allLoaded) {
+      // Emit about it
+      this.#emitLayerAllLoaded({ layer, layerPath: loadEvent.layerPath });
+    }
   }
 
   /**
@@ -1799,35 +1852,119 @@ export class LayerApi {
   }
 
   /**
-   * Emits an event to all handlers when the layer's features have been loaded on the map.
-   * @param {LayerLoadedEvent} event - The event to emit
+   * Emits an event to all handlers when a layer has been loaded for the first time on the map.
+   * @param {LayerLoadEvent} event - The event to emit
    * @private
    */
-  #emitLayerLoaded(event: LayerLoadedEvent): void {
+  #emitLayerFirstLoaded(event: LayerLoadEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerLoadedFirstHandlers, event);
+  }
+
+  /**
+   * Registers a layer first loaded event handler.
+   * @param {LayerLoadDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerFirstLoaded(callback: LayerLoadDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerLoadedFirstHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer first loaded event handler.
+   * @param {LayerLoadDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerFirstLoaded(callback: LayerLoadDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerLoadedFirstHandlers, callback);
+  }
+
+  /**
+   * Emits an event to all handlers when a layer has turned into a loading state on the map.
+   * @param {LayerLoadEvent} event - The event to emit
+   * @private
+   */
+  #emitLayerLoading(event: LayerLoadEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerLoadingHandlers, event);
+  }
+
+  /**
+   * Registers a layer loading event handler.
+   * @param {LayerLoadDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerLoading(callback: LayerLoadDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerLoadingHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer loading event handler.
+   * @param {LayerLoadDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerLoading(callback: LayerLoadDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerLoadingHandlers, callback);
+  }
+
+  /**
+   * Emits an event to all handlers when a layer has turned into a loaded state on the map.
+   * @param {LayerLoadEvent} event - The event to emit
+   * @private
+   */
+  #emitLayerLoaded(event: LayerLoadEvent): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onLayerLoadedHandlers, event);
   }
 
   /**
    * Registers a layer loaded event handler.
-   * @param {LayerLoadedDelegate} callback - The callback to be executed whenever the event is emitted
+   * @param {LayerLoadDelegate} callback - The callback to be executed whenever the event is emitted
    */
-  onLayerLoaded(callback: LayerLoadedDelegate): void {
+  onLayerLoaded(callback: LayerLoadDelegate): void {
     // Register the event handler
     EventHelper.onEvent(this.#onLayerLoadedHandlers, callback);
   }
 
   /**
    * Unregisters a layer loaded event handler.
-   * @param {LayerLoadedDelegate} callback - The callback to stop being called whenever the event is emitted
+   * @param {LayerLoadDelegate} callback - The callback to stop being called whenever the event is emitted
    */
-  offLayerLoaded(callback: LayerLoadedDelegate): void {
+  offLayerLoaded(callback: LayerLoadDelegate): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerLoadedHandlers, callback);
   }
 
   /**
-   * Emits an event to all handlers when the layer's features have been flag as error on the map.
+   * Emits an event to all handlers when all layers have turned into a loaded state on the map.
+   * @param {LayerLoadEvent} event - The event to emit
+   * @private
+   */
+  #emitLayerAllLoaded(event: LayerLoadEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerAllLoadedHandlers, event);
+  }
+
+  /**
+   * Registers a layer all loaded event handler.
+   * @param {LayerLoadDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerAllLoaded(callback: LayerLoadDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerAllLoadedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer all loaded event handler.
+   * @param {LayerLoadDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerAllLoaded(callback: LayerLoadDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerAllLoadedHandlers, callback);
+  }
+
+  /**
+   * Emits an event to all handlers when a layer has been flag as error on the map.
    * @param {LayerErrorEvent} event - The event to emit
    * @private
    */
@@ -2016,12 +2153,12 @@ export type LayerAddedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-export type LayerLoadedDelegate = EventDelegateBase<LayerApi, LayerLoadedEvent, void>;
+export type LayerLoadDelegate = EventDelegateBase<LayerApi, LayerLoadEvent, void>;
 
 /**
  * Define an event for the delegate
  */
-export type LayerLoadedEvent = {
+export type LayerLoadEvent = {
   // The loaded layer
   layer: AbstractGVLayer;
 
