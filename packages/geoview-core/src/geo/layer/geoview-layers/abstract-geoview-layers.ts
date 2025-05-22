@@ -980,7 +980,7 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
-   * Registers an individual layer message event handler.
+   * Registers a layer message event handler.
    * @param {LayerMessageEventDelegate} callback - The callback to be executed whenever the event is emitted
    */
   onLayerMessage(callback: LayerMessageDelegate): void {
@@ -989,7 +989,7 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
-   * Unregisters an individual layer message event handler.
+   * Unregisters a layer message event handler.
    * @param {LayerMessageEventDelegate} callback - The callback to stop being called whenever the event is emitted
    */
   offLayerMessage(callback: LayerMessageDelegate): void {
