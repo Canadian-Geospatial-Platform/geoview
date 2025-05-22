@@ -36,50 +36,6 @@ export function useToolbarActionMessage({
 
   const { setToolbarRowSelectedMessageEntry, setRowsFilteredEntry } = useDataTableStoreActions();
 
-  // show row selected message in the toolbar.
-  // useEffect(() => {
-  //   // Log
-  //   logger.logTraceUseEffect('USETOOLBARACTIONMESSAGE - rowSelection');
-
-  //   let message = datatableSettings[layerPath].toolbarRowSelectedMessageRecord ?? '';
-  //   if (tableInstance && tableInstance.getFilteredRowModel().rows.length !== data.features?.length) {
-  //     message = t('dataTable.rowsFiltered')
-  //       .replace('{rowsFiltered}', tableInstance.getFilteredRowModel().rows.length.toString())
-  //       .replace('{totalRows}', data.features?.length.toString() ?? '');
-  //   } else {
-  //     message = `${data.features?.length} ${t('dataTable.features')}`;
-  //   }
-
-  //   setToolbarRowSelectedMessageEntry(message, layerPath);
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [data.features, globalFilter]);
-
-  // show row filtered message in the toolbar.
-  // useEffect(() => {
-  //   // Log
-  //   logger.logTraceUseEffect('USETOOLBARACTIONMESSAGE - columnFilters', columnFilters);
-
-  //   let message = datatableSettings[layerPath].toolbarRowSelectedMessageRecord ?? '';
-  //   let length = 0;
-  //   if (tableInstance) {
-  //     const rowsFiltered = tableInstance.getFilteredRowModel();
-  //     if (rowsFiltered.rows.length !== data?.features?.length) {
-  //       length = rowsFiltered.rows.length;
-  //       message = t('dataTable.rowsFiltered')
-  //         .replace('{rowsFiltered}', rowsFiltered.rows.length.toString())
-  //         .replace('{totalRows}', data?.features?.length.toString() ?? '');
-  //     } else {
-  //       message = `${data.features?.length} ${t('dataTable.features')}`;
-  //       length = 0;
-  //     }
-  //     setRowsFilteredEntry(length, layerPath);
-  //   }
-
-  //   setToolbarRowSelectedMessageEntry(message, layerPath);
-
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [columnFilters, data.features, globalFilter]);
-
   // Set feature count message
   useEffect(() => {
     // Log
