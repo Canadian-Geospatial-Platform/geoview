@@ -257,8 +257,23 @@
         });
 
         // listen to layer loaded events
+        mapViewer.layer.onLayerFirstLoaded((sender, payload) => {
+          mapViewer.notifications.addNotificationSuccess(payload.layerPath + ' first loaded');
+        });
+
+        // listen to layer loaded events
+        mapViewer.layer.onLayerLoading((sender, payload) => {
+          mapViewer.notifications.addNotificationSuccess(payload.layerPath + ' loading...');
+        });
+
+        // listen to layer loaded events
         mapViewer.layer.onLayerLoaded((sender, payload) => {
           mapViewer.notifications.addNotificationSuccess(payload.layerPath + ' loaded');
+        });
+
+        // listen to layer loaded events
+        mapViewer.layer.onLayerAllLoaded((sender, payload) => {
+          mapViewer.notifications.addNotificationSuccess('All layers loaded');
         });
 
         // listen to layer error events
@@ -313,8 +328,8 @@
         // listen to individual layer loaded event
         // TODO: The gv layer does not exist at the time we attach the event. To make this work, we would
         // TO.DOCONT: need to implement a when-this-then internal approach.
-        mapViewer.layer.getGeoviewLayer(LYR_PATH_NON_METAL)?.onIndividualLayerLoaded((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess('Nonmetal mines has finished loading');
+        mapViewer.layer.getGeoviewLayer(LYR_PATH_NON_METAL)?.onLayerFirstLoaded((sender, payload) => {
+          mapViewer.notifications.addNotificationSuccess('Nonmetal mines has finished loading for first time');
           console.log(sender.getOLLayer().getSource().getFeatures());
         });
 
