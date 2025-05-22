@@ -184,21 +184,27 @@
       </ul>
       <h3>Events that will generate notifications:</h3>
       <ul>
-        <li>onLayerAdded</li>
-        <li>onLayerRemoved</li>
-        <li>onLayersLoaded</li>
-        <li>onLayerLoaded for Nonmetal mines</li>
-        <li>onVisibleChanged for Water Quantity</li>
-        <li>onLayerItemVisibilityToggled</li>
-        <li>onMapZoomEnd</li>
-        <li>onMapMoveEnd</li>
-        <li>onLayerStatusChanged for Water Quantity</li>
-        <li>onLayerFilterApplied for Water Quantity</li>
-        <li>onMapLanguageChanged</li>
-        <li>onBasemapChanged</li>
-        <li>onLayersReordered</li>
-        <li>onLayerOpacityChanged for Water Quantity</li>
-        <li>onMapAddedToDiv</li>
+        <li>cgpv.api.onMapAddedToDiv</li>
+        <li>mapViewer.onMapLanguageChanged</li>
+        <li>mapViewer.onMapMoveEnd</li>
+        <li>mapViewer.onMapZoomEnd</li>
+        <li>mapViewer.basemap.onBasemapChanged</li>
+        <li>mapViewer.layer.onLayerAdded</li>
+        <li>mapViewer.layer.onLayerError</li>
+        <li>mapViewer.layer.onLayerRemoved</li>
+        <li>mapViewer.layer.onLayerLoading for each layer loading on map</li>
+        <li>mapViewer.layer.onLayerLoaded for each layer loaded on map</li>
+        <li>mapViewer.layer.onLayerAllLoaded each time all layers are loaded (done loading) on map</li>
+        <li>mapViewer.layer.onLayerFirstLoaded one time per layer on their first load</li>
+        <li>mapViewer.layer.onLayerVisibilityToggled</li>
+        <li>mapViewer.layer.onLayerItemVisibilityToggled</li>
+        <li>mapViewer.stateApi.onLayersReordered</li>
+        <li>layerEntryConfig.onLayerStatusChanged for Water Quantity</li>
+        <li>layer.onLayerFirstLoaded one time for Nonmetal mines</li>
+        <li>layer.onVisibleChanged for Nonmetal mines</li>
+        <li>layer.onVisibleChanged for Water Quantity</li>
+        <li>layer.onLayerOpacityChanged for Water Quantity</li>
+        <li>layer.onLayerFilterApplied for Water Quantity</li>
       </ul>
     </div>
     <br>

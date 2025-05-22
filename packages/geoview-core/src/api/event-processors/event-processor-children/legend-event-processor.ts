@@ -174,6 +174,16 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
+   * Sets the layersAreLoading flag in the store
+   * @param {string} mapId - The map id
+   * @param {boolean} areLoading - Indicator if any layer is currently loading
+   */
+  static setLayersAreLoading(mapId: string, areLoading: boolean): void {
+    // Update the store
+    this.getLayerState(mapId).setterActions.setLayersAreLoading(areLoading);
+  }
+
+  /**
    * Gets the extent of a feature or group of features
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path
