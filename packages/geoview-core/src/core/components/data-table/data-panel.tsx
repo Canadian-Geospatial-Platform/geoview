@@ -9,7 +9,6 @@ import {
   useDataTableAllFeaturesDataArray,
   useDataTableLayerSettings,
   useDataTableStoreActions,
-  useDataTableTotalFeatures,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useMapVisibleLayers } from '@/core/stores/store-interface-and-intial-values/map-state';
 import {
@@ -26,6 +25,7 @@ import { MappedLayerDataType } from './data-table-types';
 import { CV_DEFAULT_APPBAR_CORE } from '@/api/config/types/config-constants';
 import { TypeContainerBox } from '@/core/types/global-types';
 import DataSkeleton from './data-skeleton';
+import { useAppShowUnsymbolizedFeatures } from '@/app';
 
 interface DataPanelType {
   fullWidth?: boolean;
@@ -51,13 +51,13 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
   const layerData = useDataTableAllFeaturesDataArray();
   const selectedLayerPath = useDataTableSelectedLayerPath();
   const datatableSettings = useDataTableLayerSettings();
-  const totalFeaturesQueried = useDataTableTotalFeatures();
   const { setSelectedLayerPath } = useDataTableStoreActions();
   const { triggerGetAllFeatureInfo } = useDataTableStoreActions();
   const selectedTab = useUIActiveFooterBarTabId();
   const visibleLayers = useMapVisibleLayers();
   const { tabGroup, isOpen } = useUIActiveAppBarTab();
   const appBarComponents = useUIAppbarComponents();
+  const showUnsymbolizedFeatures = useAppShowUnsymbolizedFeatures();
 
   // Create columns for data table.
   const mappedLayerData = useFeatureFieldInfos(layerData);
@@ -123,17 +123,21 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
       if (datatableSettings[layerPath] && datatableSettings[layerPath].rowsFilteredRecord) {
         return `${datatableSettings[layerPath].rowsFilteredRecord} ${t('dataTable.featureFiltered')}`;
       }
+
       let featureStr = t('dataTable.noFeatures');
-      const features = orderedLayerData?.find((layer) => layer.layerPath === layerPath)?.features?.length;
-      if (features !== undefined && !totalFeaturesQueried) {
-        featureStr = `${features} ${t('dataTable.features')}`;
+      let features = orderedLayerData?.find((layer) => layer.layerPath === layerPath)?.features;
+
+      // filter unsymbolized features if configured
+      if (!showUnsymbolizedFeatures) {
+        features = features?.filter((feature) => feature.featureIcon);
       }
-      if (features !== undefined && totalFeaturesQueried) {
-        featureStr = `${features} ${t('dataTable.features')} (${totalFeaturesQueried} ${t('dataTable.totalFeatures')})`;
+
+      if (features !== undefined) {
+        featureStr = `${features?.length} ${t('dataTable.features')}`;
       }
       return featureStr;
     },
-    [datatableSettings, orderedLayerData, t, totalFeaturesQueried]
+    [datatableSettings, orderedLayerData, showUnsymbolizedFeatures, t]
   );
 
   /**

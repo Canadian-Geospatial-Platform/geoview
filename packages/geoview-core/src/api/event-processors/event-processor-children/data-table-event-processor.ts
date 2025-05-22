@@ -128,15 +128,6 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Sets the total features returned from the query. Used when some features are filtered out
-   * @param {string} mapdId - The map identifier
-   * @param {number} total - The total number of features returned from the query
-   */
-  static setTotalFeatures(mapId: string, total?: number | undefined): void {
-    this.getDataTableState(mapId).setterActions.setTotalFeatures(total);
-  }
-
-  /**
    * Deletes the specified layer path from the all features layers sets in the store
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path to delete
