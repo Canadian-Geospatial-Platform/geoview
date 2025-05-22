@@ -127,7 +127,7 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
       let featureStr = t('dataTable.noFeatures');
       let features = orderedLayerData?.find((layer) => layer.layerPath === layerPath)?.features;
 
-      // filter unsymbolized features if configured
+      // Filter unsymbolized features if configured
       if (!showUnsymbolizedFeatures) {
         features = features?.filter((feature) => feature.featureIcon);
       }

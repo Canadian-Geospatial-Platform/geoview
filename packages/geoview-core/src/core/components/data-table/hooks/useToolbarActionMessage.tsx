@@ -31,9 +31,7 @@ export function useToolbarActionMessage({
 }: UseSelectedRowMessageProps): void {
   const { t } = useTranslation();
 
-  // get store values
-  // const datatableSettings = useDataTableLayerSettings();
-
+  // Get store values
   const { setToolbarRowSelectedMessageEntry, setRowsFilteredEntry } = useDataTableStoreActions();
 
   // Set feature count message
