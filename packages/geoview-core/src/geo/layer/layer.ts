@@ -1524,6 +1524,9 @@ export class LayerApi {
    * @param {GVLayerLoadEvent} loadEvent - The event associated with the layer.
    */
   #handleLayerLoading(layer: AbstractGVLayer, loadEvent: GVLayerLoadEvent): void {
+    // Update the store that at least 1 layer is loading
+    LegendEventProcessor.setLayersAreLoading(this.getMapId(), true);
+
     // Emit about it
     this.#emitLayerLoading({ layer, layerPath: loadEvent.layerPath });
   }
@@ -1542,6 +1545,9 @@ export class LayerApi {
 
     // If all loaded
     if (allLoaded) {
+      // Update the store that all layers are loaded at this point
+      LegendEventProcessor.setLayersAreLoading(this.getMapId(), false);
+
       // Emit about it
       this.#emitLayerAllLoaded({ layer, layerPath: loadEvent.layerPath });
     }
