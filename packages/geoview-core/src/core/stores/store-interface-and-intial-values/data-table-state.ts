@@ -69,7 +69,6 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
     selectedFeature: null,
     selectedLayerPath: '',
     tableFilters: {},
-    totalFeatures: undefined,
     // Initialize default
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
       set({

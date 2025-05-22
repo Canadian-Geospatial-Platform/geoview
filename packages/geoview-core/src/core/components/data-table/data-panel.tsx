@@ -10,6 +10,7 @@ import {
   useDataTableLayerSettings,
   useDataTableStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { useAppShowUnsymbolizedFeatures } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useMapVisibleLayers } from '@/core/stores/store-interface-and-intial-values/map-state';
 import {
   useUIActiveAppBarTab,
@@ -25,7 +26,6 @@ import { MappedLayerDataType } from './data-table-types';
 import { CV_DEFAULT_APPBAR_CORE } from '@/api/config/types/config-constants';
 import { TypeContainerBox } from '@/core/types/global-types';
 import DataSkeleton from './data-skeleton';
-import { useAppShowUnsymbolizedFeatures } from '@/app';
 
 interface DataPanelType {
   fullWidth?: boolean;
