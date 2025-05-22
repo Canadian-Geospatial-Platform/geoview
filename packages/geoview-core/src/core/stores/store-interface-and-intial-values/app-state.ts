@@ -306,6 +306,8 @@ export const useAppGeoviewHTMLElement = (): HTMLElement => useStore(useGeoViewSt
 export const useAppGeoviewAssetsURL = (): string => useStore(useGeoViewStore(), (state) => state.appState.geoviewAssetsURL);
 export const useAppGuide = (): TypeGuideObject | undefined => useStore(useGeoViewStore(), (state) => state.appState.guide);
 export const useAppNotifications = (): NotificationDetailsType[] => useStore(useGeoViewStore(), (state) => state.appState.notifications);
+export const useAppShowUnsymbolizedFeatures = (): boolean =>
+  useStore(useGeoViewStore(), (state) => state.appState.showUnsymbolizedFeatures);
 
 // GV these 2 selectors are use in app-start.tsx before context is assigned to the map
 // GV DO NOT USE this technique elsewhere, it is only to reload language and theme

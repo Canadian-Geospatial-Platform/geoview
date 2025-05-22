@@ -260,7 +260,9 @@
     "featureFiltered": "élément filtré(s)",
     "images": "Images",
     "close": "Fermer",
-    "noFeatures": "inconnue..."
+    "noFeatures": "inconnue...",
+    "showing": "affiché(s)",
+    "total": "total"
   },
   "geochart": {
     "noChartAvailable": "Cliquer sur une couche de la carte qui contient un graphique"

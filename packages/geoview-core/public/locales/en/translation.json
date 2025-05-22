@@ -261,7 +261,9 @@
     "featureFiltered": "features filtered",
     "images": "Images",
     "close": "Close",
-    "noFeatures": "unknown..."
+    "noFeatures": "unknown...",
+    "showing": "showing",
+    "total": "total"
   },
   "geoChart": {
     "noChartAvailable": "Click on the map on a layer with chart"

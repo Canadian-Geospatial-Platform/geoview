@@ -10,6 +10,7 @@ import {
   useDataTableLayerSettings,
   useDataTableStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { useAppShowUnsymbolizedFeatures } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useMapVisibleLayers } from '@/core/stores/store-interface-and-intial-values/map-state';
 import {
   useUIActiveAppBarTab,
@@ -56,6 +57,7 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
   const visibleLayers = useMapVisibleLayers();
   const { tabGroup, isOpen } = useUIActiveAppBarTab();
   const appBarComponents = useUIAppbarComponents();
+  const showUnsymbolizedFeatures = useAppShowUnsymbolizedFeatures();
 
   // Create columns for data table.
   const mappedLayerData = useFeatureFieldInfos(layerData);
@@ -121,14 +123,21 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
       if (datatableSettings[layerPath] && datatableSettings[layerPath].rowsFilteredRecord) {
         return `${datatableSettings[layerPath].rowsFilteredRecord} ${t('dataTable.featureFiltered')}`;
       }
+
       let featureStr = t('dataTable.noFeatures');
-      const features = orderedLayerData?.find((layer) => layer.layerPath === layerPath)?.features?.length;
+      let features = orderedLayerData?.find((layer) => layer.layerPath === layerPath)?.features;
+
+      // Filter unsymbolized features if configured
+      if (!showUnsymbolizedFeatures) {
+        features = features?.filter((feature) => feature.featureIcon);
+      }
+
       if (features !== undefined) {
-        featureStr = `${features} ${t('dataTable.features')}`;
+        featureStr = `${features?.length} ${t('dataTable.features')}`;
       }
       return featureStr;
     },
-    [datatableSettings, orderedLayerData, t]
+    [datatableSettings, orderedLayerData, showUnsymbolizedFeatures, t]
   );
 
   /**

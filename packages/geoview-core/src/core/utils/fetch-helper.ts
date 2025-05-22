@@ -184,8 +184,33 @@ export class Fetch {
       // Validate response
       if (!response.ok) throw new ResponseError(response);
 
-      // Get the text body of the response
-      const responseText = await response.text();
+      // Try different encodings to see which is the best
+      const buffer = await response.arrayBuffer();
+
+      const encodings = ['utf-8', 'windows-1252', 'iso-8859-1'];
+      let responseText = '';
+      let bestEncoding = '';
+
+      for (const encoding of encodings) {
+        const decoder = new TextDecoder(encoding);
+        const decodedText = decoder.decode(buffer);
+
+        // If no replacement character is found, use this encoding
+        if (!decodedText.includes('�')) {
+          responseText = decodedText;
+          bestEncoding = encoding;
+          break;
+        }
+
+        // If this is the first encoding or it has fewer replacement characters than previous best
+        if (!responseText || (decodedText.match(/�/g) || []).length < (responseText.match(/�/g) || []).length) {
+          responseText = decodedText;
+          bestEncoding = encoding;
+        }
+      }
+
+      // Log which encoding was used
+      logger.logInfo(`Using ${bestEncoding} encoding for ${url}`);
 
       // If data in the response
       if (responseText.trim() !== '') {
