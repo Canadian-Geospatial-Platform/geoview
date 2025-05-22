@@ -520,6 +520,43 @@ export function escapeRegExp(text: string): string {
 }
 
 /**
+ * Tries to read an ArrayBuffer into a string by guessing different encodings and returning the best that works to read the content.
+ * @param {ArrayBuffer} buffer - The array buffer to read from.
+ * @param {string[]} encodings - The encodings to try, defaults to ['utf-8', 'windows-1252', 'iso-8859-1'].
+ * @returns { text: string; encoding: string } The best text and the best encoding used for the text
+ */
+export function readTextWithBestEncoding(
+  buffer: ArrayBuffer,
+  encodings: string[] = ['utf-8', 'windows-1252', 'iso-8859-1']
+): { text: string; encoding: string } {
+  const uint8View = new Uint8Array(buffer);
+  let fallback: { text: string; encoding: string } | null = null;
+
+  // For each encoding to try
+  for (const encoding of encodings) {
+    try {
+      const decoder = new TextDecoder(encoding, { fatal: false });
+      const text = decoder.decode(uint8View);
+
+      // If no replacement characters are present, it's a clean decode
+      if (!text.includes('\uFFFD')) {
+        return { text, encoding };
+      }
+
+      // Save the first partially-decodable fallback
+      if (!fallback) {
+        fallback = { text, encoding };
+      }
+    } catch {
+      // Ignore decode errors
+    }
+  }
+
+  // If none are clean, return the first partially-decodable fallback
+  return fallback ?? { text: '', encoding: '' };
+}
+
+/**
  * Extract heading from guide content.
  * @param {string} content - Guide content to get heading from.
  * @returns {string} Content section heading
