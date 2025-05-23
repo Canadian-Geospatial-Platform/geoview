@@ -24,6 +24,7 @@ export interface IAppState {
   geolocatorServiceURL: string | undefined;
   metadataServiceURL: string | undefined;
   geoviewHTMLElement: HTMLElement;
+  height: number;
   geoviewAssetsURL: string;
   isCircularProgressActive: boolean;
   isCrosshairsActive: boolean;
@@ -72,6 +73,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
     geolocatorServiceURL: '',
     metadataServiceURL: '',
     geoviewHTMLElement: document.createElement('div'), // create an empty div before real one is assigned
+    height: 0,
     geoviewAssetsURL: getScriptAndAssetURL(),
     isCircularProgressActive: false,
     isCrosshairsActive: false,
@@ -84,6 +86,8 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
       const lang = VALID_DISPLAY_LANGUAGE.includes(geoviewConfig.displayLanguage as TypeDisplayLanguage)
         ? geoviewConfig.displayLanguage
         : 'en';
+      const geoviewHTMLElement = document.getElementById(get().mapId)!;
+
       set({
         appState: {
           ...get().appState,
@@ -92,7 +96,8 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
           displayTheme: geoviewConfig.theme || 'geo.ca',
           geolocatorServiceURL: geoviewConfig.serviceUrls?.geolocatorUrl,
           metadataServiceURL: geoviewConfig.serviceUrls?.metadataUrl,
-          geoviewHTMLElement: document.getElementById(get().mapId)!,
+          geoviewHTMLElement: geoviewHTMLElement!,
+          height: geoviewHTMLElement?.clientHeight || 600,
           showUnsymbolizedFeatures: geoviewConfig.globalSettings?.showUnsymbolizedFeatures || false,
         },
       });
@@ -303,6 +308,7 @@ export const useAppGeolocatorServiceURL = (): string | undefined =>
   useStore(useGeoViewStore(), (state) => state.appState.geolocatorServiceURL);
 export const useAppMetadataServiceURL = (): string | undefined => useStore(useGeoViewStore(), (state) => state.appState.metadataServiceURL);
 export const useAppGeoviewHTMLElement = (): HTMLElement => useStore(useGeoViewStore(), (state) => state.appState.geoviewHTMLElement);
+export const useAppHeight = (): number => useStore(useGeoViewStore(), (state) => state.appState.height);
 export const useAppGeoviewAssetsURL = (): string => useStore(useGeoViewStore(), (state) => state.appState.geoviewAssetsURL);
 export const useAppGuide = (): TypeGuideObject | undefined => useStore(useGeoViewStore(), (state) => state.appState.guide);
 export const useAppNotifications = (): NotificationDetailsType[] => useStore(useGeoViewStore(), (state) => state.appState.notifications);

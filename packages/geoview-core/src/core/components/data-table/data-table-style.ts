@@ -26,6 +26,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   tableCell: { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' },
   dataTableWrapper: {
+    height: '100%',
     '& .MuiTableContainer-root': {
       borderRadius: '6px',
     },
