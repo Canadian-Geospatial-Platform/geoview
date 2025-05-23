@@ -86,16 +86,16 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   #onLayerFilterAppliedHandlers: LayerFilterAppliedDelegate[] = [];
 
   // Keep all callback delegates references
-  #onLayerFirstLoadedHandlers: LayerLoadDelegate[] = [];
+  #onLayerFirstLoadedHandlers: LayerDelegate[] = [];
 
   // Keep all callback delegates references
-  #onLayerLoadingHandlers: LayerLoadDelegate[] = [];
+  #onLayerLoadingHandlers: LayerDelegate[] = [];
 
   // Keep all callback delegates references
-  #onLayerLoadedHandlers: LayerLoadDelegate[] = [];
+  #onLayerLoadedHandlers: LayerDelegate[] = [];
 
   // Keep all callback delegates references
-  #onLayerErrorHandlers: LayerLoadDelegate[] = [];
+  #onLayerErrorHandlers: LayerDelegate[] = [];
 
   // Keep all callback delegates references
   #onLayerMessageHandlers: LayerMessageDelegate[] = [];
@@ -175,7 +175,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     this.#startLoadingPeriodWatcher(this.loadingCounter);
 
     // Emit event for all layer load events
-    this.#emitLayerLoading({ layerPath: this.getLayerPath() });
+    this.#emitLayerLoading();
   }
 
   /**
@@ -210,14 +210,14 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       this.setVisible(layerConfig.initialSettings?.states?.visible !== false);
 
       // Emit event for the first time the layer got loaded
-      this.#emitLayerFirstLoaded({ layerPath: this.getLayerPath() });
+      this.#emitLayerFirstLoaded();
     }
 
     // Flag
     this.loadedOnce = true;
 
     // Emit event for all layer load events
-    this.#emitLayerLoaded({ layerPath: this.getLayerPath() });
+    this.#emitLayerLoaded();
   }
 
   /**
@@ -232,7 +232,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     const layerStatusBefore = this.getLayerConfig().layerStatus;
 
     // Emit event for all layer error events
-    this.#emitLayerError({ layerPath: this.getLayerPath() });
+    this.#emitLayerError();
 
     // If we were not error before
     if (layerStatusBefore !== 'error') {
@@ -262,7 +262,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     const layerStatusBefore = this.getLayerConfig().layerStatus;
 
     // Emit event for all layer error events
-    this.#emitLayerError({ layerPath: this.getLayerPath() });
+    this.#emitLayerError();
 
     // If we were not error before
     if (layerStatusBefore !== 'error') {
@@ -1066,112 +1066,108 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /**
    * Emits an event to all handlers when a layer have been first loaded on the map.
-   * @param {LayerLoadEvent} event - The event to emit
    * @private
    */
-  #emitLayerFirstLoaded(event: LayerLoadEvent): void {
+  #emitLayerFirstLoaded(): void {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onLayerFirstLoadedHandlers, event);
+    EventHelper.emitEvent(this, this.#onLayerFirstLoadedHandlers, undefined);
   }
 
   /**
    * Registers when a layer have been first loaded on the map event handler.
-   * @param {LayerLoadDelegate} callback - The callback to be executed whenever the event is emitted
+   * @param {LayerDelegate} callback - The callback to be executed whenever the event is emitted
    */
-  onLayerFirstLoaded(callback: LayerLoadDelegate): void {
+  onLayerFirstLoaded(callback: LayerDelegate): void {
     // Register the event handler
     EventHelper.onEvent(this.#onLayerFirstLoadedHandlers, callback);
   }
 
   /**
    * Unregisters when a layer have been first loaded on the map event handler.
-   * @param {LayerLoadDelegate} callback - The callback to stop being called whenever the event is emitted
+   * @param {LayerDelegate} callback - The callback to stop being called whenever the event is emitted
    */
-  offLayerFirstLoaded(callback: LayerLoadDelegate): void {
+  offLayerFirstLoaded(callback: LayerDelegate): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerFirstLoadedHandlers, callback);
   }
 
   /**
    * Emits an event to all handlers when a layer is turning into a loading stage on the map.
-   * @param {LayerLoadEvent} event - The event to emit
    * @private
    */
-  #emitLayerLoading(event: LayerLoadEvent): void {
+  #emitLayerLoading(): void {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onLayerLoadingHandlers, event);
+    EventHelper.emitEvent(this, this.#onLayerLoadingHandlers, undefined);
   }
 
   /**
    * Registers when a layer is turning into a loading stage event handler.
-   * @param {LayerLoadDelegate} callback - The callback to be executed whenever the event is emitted
+   * @param {LayerDelegate} callback - The callback to be executed whenever the event is emitted
    */
-  onLayerLoading(callback: LayerLoadDelegate): void {
+  onLayerLoading(callback: LayerDelegate): void {
     // Register the event handler
     EventHelper.onEvent(this.#onLayerLoadingHandlers, callback);
   }
 
   /**
    * Unregisters when a layer is turning into a loading stage event handler.
-   * @param {LayerLoadDelegate} callback - The callback to stop being called whenever the event is emitted
+   * @param {LayerDelegate} callback - The callback to stop being called whenever the event is emitted
    */
-  offLayerLoading(callback: LayerLoadDelegate): void {
+  offLayerLoading(callback: LayerDelegate): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerLoadingHandlers, callback);
   }
 
   /**
    * Emits an event to all handlers when a layer is turning into a loaded stage on the map.
-   * @param {LayerLoadEvent} event - The event to emit
    * @private
    */
-  #emitLayerLoaded(event: LayerLoadEvent): void {
+  #emitLayerLoaded(): void {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onLayerLoadedHandlers, event);
+    EventHelper.emitEvent(this, this.#onLayerLoadedHandlers, undefined);
   }
 
   /**
    * Registers when a layer is turning into a loaded stage event handler.
-   * @param {LayerLoadDelegate} callback - The callback to be executed whenever the event is emitted
+   * @param {LayerDelegate} callback - The callback to be executed whenever the event is emitted
    */
-  onLayerLoaded(callback: LayerLoadDelegate): void {
+  onLayerLoaded(callback: LayerDelegate): void {
     // Register the event handler
     EventHelper.onEvent(this.#onLayerLoadedHandlers, callback);
   }
 
   /**
    * Unregisters when a layer is turning into a loaded stage event handler.
-   * @param {LayerLoadDelegate} callback - The callback to stop being called whenever the event is emitted
+   * @param {LayerDelegate} callback - The callback to stop being called whenever the event is emitted
    */
-  offLayerLoaded(callback: LayerLoadDelegate): void {
+  offLayerLoaded(callback: LayerDelegate): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerLoadedHandlers, callback);
   }
 
   /**
    * Emits an event to all handlers when a layer is turning into an error stage on the map.
-   * @param {LayerLoadEvent} event - The event to emit
    * @private
    */
-  #emitLayerError(event: LayerLoadEvent): void {
+  #emitLayerError(): void {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onLayerErrorHandlers, event);
+    EventHelper.emitEvent(this, this.#onLayerErrorHandlers, undefined);
   }
 
   /**
    * Registers when a layer is turning into a error stage event handler.
-   * @param {LayerLoadDelegate} callback - The callback to be executed whenever the event is emitted
+   * @param {LayerDelegate} callback - The callback to be executed whenever the event is emitted
    */
-  onLayerError(callback: LayerLoadDelegate): void {
+  onLayerError(callback: LayerDelegate): void {
     // Register the event handler
     EventHelper.onEvent(this.#onLayerErrorHandlers, callback);
   }
 
   /**
    * Unregisters when a layer is turning into a error stage event handler.
-   * @param {LayerLoadDelegate} callback - The callback to stop being called whenever the event is emitted
+   * @param {LayerDelegate} callback - The callback to stop being called whenever the event is emitted
    */
-  offLayerError(callback: LayerLoadDelegate): void {
+  offLayerError(callback: LayerDelegate): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerErrorHandlers, callback);
   }
@@ -1243,11 +1239,6 @@ export type LegendQueriedEvent = {
 export type LegendQueriedDelegate = EventDelegateBase<AbstractGVLayer, LegendQueriedEvent, void>;
 
 /**
- * Define a delegate for the event handler function signature
- */
-export type LayerFilterAppliedDelegate = EventDelegateBase<AbstractGVLayer, LayerFilterAppliedEvent, void>;
-
-/**
  * Define an event for the delegate
  */
 export type LayerFilterAppliedEvent = {
@@ -1258,15 +1249,12 @@ export type LayerFilterAppliedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-export type LayerLoadDelegate = EventDelegateBase<AbstractGVLayer, LayerLoadEvent, void>;
+export type LayerFilterAppliedDelegate = EventDelegateBase<AbstractGVLayer, LayerFilterAppliedEvent, void>;
 
 /**
- * Define an event for the delegate
+ * Define a delegate for the event handler function signature
  */
-export type LayerLoadEvent = {
-  // The loaded layer
-  layerPath: string;
-};
+export type LayerDelegate = EventDelegateBase<AbstractGVLayer, undefined, void>;
 
 /**
  * Define a delegate for the event handler function signature
