@@ -233,9 +233,6 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
     if (layerStatus === 'error') {
       return t('legend.layerError');
     }
-    if (layerStatus === 'processing' || layerStatus === 'loading') {
-      return t('legend.layerLoading');
-    }
 
     if (layerChildren && layerChildren.length > 0) {
       return t('legend.subLayersCount').replace('{count}', layerChildren.length.toString());
