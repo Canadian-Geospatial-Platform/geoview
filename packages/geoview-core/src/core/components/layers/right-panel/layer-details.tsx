@@ -116,6 +116,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
   // GV Wrapped in useEffect since it was throwing a warning otherwise
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('LAYER DETAILS - Bounds', layerDetails);
     if (layerDetails.bounds === undefined || layerDetails.bounds![0] === Infinity) {
       const bounds = getLayerBounds(layerDetails.layerPath);
       if (bounds) layerDetails.bounds = bounds;

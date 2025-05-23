@@ -34,6 +34,7 @@ export const ItemsList = memo(function ItemsList({ items }: ItemsListProps): JSX
   // Direct mapping since we only reach this code if items has content
   // GV isVisible is part of key so that it forces a re-render when it changes
   // GV this is specifically because of esriFeature layers
+  // TODO Add a visibility hook for the individual classes to update this in the future
   return (
     <List sx={sxClasses.subList}>
       {items.map((item) => (
