@@ -8,7 +8,7 @@ import {
   useMapHasCollapsibleLayers,
   useMapStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useLayerDisplayState } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerDisplayState, useLayersAreLoading } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { logger } from '@/core/utils/logger';
 
 interface ToggleAllProps {
@@ -36,6 +36,7 @@ export function ToggleAll({ source = 'legend' }: ToggleAllProps): JSX.Element {
   const displayState = useLayerDisplayState();
   const allLayersVisible = useAllLayersVisible();
   const allLayersCollapsed = useAllLayersCollapsed();
+  const layersAreLoading = useLayersAreLoading();
   const hasCollapsibleLayers = useMapHasCollapsibleLayers();
   const { setAllLayersVisibility, setAllLayersCollapsed } = useMapStoreActions();
 
@@ -47,6 +48,10 @@ export function ToggleAll({ source = 'legend' }: ToggleAllProps): JSX.Element {
     setAllLayersCollapsed(!allLayersCollapsed);
   }, [allLayersCollapsed, setAllLayersCollapsed]);
 
+  // TODO Hide this component until all layers have loaded the first time.
+  // TO.DO May require something external as a useRef for the first time the !layerAreLoading didn't work
+  // TO.DO There's an odd interaction going on where the map initially has no layers (!layersAreLoading) and then starts loading the layers (layersAreLoading)
+  // TO.DO So need something more stable from the state
   return (
     <Box id="toggle-all" sx={toggleAllStyle}>
       {(source === 'legend' || displayState === 'view') && (
@@ -57,6 +62,7 @@ export function ToggleAll({ source = 'legend' }: ToggleAllProps): JSX.Element {
               checked={allLayersVisible}
               onChange={handleVisibilityToggle}
               label={t('toggleAll.show') || undefined}
+              disabled={layersAreLoading}
             />
           </span>
         </Tooltip>
@@ -69,6 +75,7 @@ export function ToggleAll({ source = 'legend' }: ToggleAllProps): JSX.Element {
               checked={allLayersCollapsed}
               onChange={handleCollapseToggle}
               label={t('toggleAll.collapse') || undefined}
+              disabled={layersAreLoading}
             />
           </span>
         </Tooltip>

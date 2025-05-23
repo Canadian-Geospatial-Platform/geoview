@@ -105,7 +105,7 @@ function IconButtonUI(props: IconButtonPropsExtend): JSX.Element {
   }
 
   return (
-    <Tooltip title={tooltip} placement={tooltipPlacement} TransitionComponent={Fade}>
+    <Tooltip title={tooltip} placement={tooltipPlacement} slots={{ transition: Fade }}>
       {createIconButtonUI()}
     </Tooltip>
   );

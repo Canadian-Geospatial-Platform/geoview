@@ -114,6 +114,20 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     };
   }, [layersData, layerDetails, selectedLayer]);
 
+  // GV Wrapped in useEffect since it was throwing a warning otherwise
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('LAYER DETAILS - Bounds', layerDetails);
+    if (layerDetails.bounds === undefined || layerDetails.bounds![0] === Infinity) {
+      const bounds = getLayerBounds(layerDetails.layerPath);
+      if (bounds) layerDetails.bounds = bounds;
+    }
+  }, [layerDetails, getLayerBounds]);
+
+  const handleRefreshLayer = (): void => {
+    refreshLayer(layerDetails.layerPath);
+  };
+
   const handleZoomTo = (): void => {
     zoomToLayerExtent(layerDetails.layerPath).catch((error: unknown) => {
       // Log
@@ -133,15 +147,6 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
       });
     }
     enableFocusTrap({ activeElementId: 'layerDataTable', callbackElementId: `table-details` });
-  };
-
-  if (layerDetails.bounds === undefined || layerDetails.bounds![0] === Infinity) {
-    const bounds = getLayerBounds(layerDetails.layerPath);
-    if (bounds) layerDetails.bounds = bounds;
-  }
-
-  const handleRefreshLayer = (): void => {
-    refreshLayer(layerDetails.layerPath);
   };
 
   const handleHighlightLayer = (): void => {
@@ -168,8 +173,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     if (!layerDetails.canToggle) {
       return (
         <IconButton disabled tooltip={t('layers.visibilityIsAlways') as string}>
-          {' '}
-          <CheckBoxIcon color="disabled" />{' '}
+          <CheckBoxIcon color="disabled" />
         </IconButton>
       );
     }
@@ -185,8 +189,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     if (!layerDetails.canToggle) {
       return (
         <IconButton disabled>
-          {' '}
-          <CheckBoxIcon color="disabled" />{' '}
+          <CheckBoxIcon color="disabled" />
         </IconButton>
       );
     }
