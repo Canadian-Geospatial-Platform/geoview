@@ -546,6 +546,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     // TODO Update after refactor, layerEntryConfig will not know initial settings
     const layerEntryConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath);
 
+    // Set the layer status to loading
+    layerEntryConfig?.setLayerStatusLoading();
+
     // If layer is group, refresh child layers
     if (layerEntryConfig && layerEntryIsGroupLayer(layerEntryConfig))
       layerEntryConfig.listOfLayerEntryConfig.forEach((entryConfig) => this.refreshLayer(mapId, entryConfig.layerPath));
