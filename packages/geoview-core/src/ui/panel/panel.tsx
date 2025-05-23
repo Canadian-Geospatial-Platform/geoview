@@ -120,7 +120,7 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
   }, [mapSize, panelGroupName, open]);
 
   return (
-    <Box sx={panelContainerStyles} ref={panelContainerRef}>
+    <Box sx={panelContainerStyles} ref={panelContainerRef} className={`appbar-panel-${panelGroupName}`}>
       <FocusTrapContainer open={isFocusTrapped} id="app-bar-focus-trap">
         <Card
           sx={{

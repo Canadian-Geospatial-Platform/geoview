@@ -181,7 +181,7 @@ _Note: Some tabs in the Footer Bar are also available as tools in the Side Bar, 
 <br>
 =2!legend=
 <a id="legendSection"></a>
-### ![]({{assetsURL}}/img/guide/sidebar/legend.svg) Legend [Top](#footerSection)
+<h3><img src="{{assetsURL}}/img/guide/sidebar/legend.svg" width="30"> Legend <a href="#footerSection">Top</a></h3>
 
 The **Legend** tab displays the symbology associated with the layers displayed on the map.
 
@@ -193,7 +193,7 @@ The symbology for the layer can be toggled open and closed which is expanded ben
 
 | Symbol | Name | Description |
 |----------------------|----------------------|----------------------|
-| <img src="{{assetsURL}}/img/guide/layers/scaleVisible.svg"  width="30"/> | Zoom to visibile scale| Zoom to the visible scale of the layer, moving the map may be necessary to locate features. _Note: Only available when layer is out of zoom_. |
+| <img src="{{assetsURL}}/img/guide/layers/scaleVisible.svg" width="30"/> | Zoom to visibile scale| Zoom to the visible scale of the layer, moving the map may be necessary to locate features. _Note: Only available when layer is out of zoom_. |
 | <img src="{{assetsURL}}/img/guide/footer/view_25.svg" width="30"/> | Toggle visibiity | Toggle the layer visibility. |
 | <img src="{{assetsURL}}/img/guide/layers/highlight_60.svg" width="30"/> | Highlight | Brings layer to the top, decreases opacity of other layers and displays layer boundary. |
 | <img src="{{assetsURL}}/img/guide/layers/zoom_60.svg" width="30"/> | Zoom to layer boundary | Pans and zooms the map so that the layer boundary is in view. |

@@ -178,7 +178,7 @@ _N.B. : Certains onglets dans la barre latérale se trouvent aussi sous forme d�
 <br>
 =2!legend=
 <a id="legendSection"></a>
-### ![]({{assetsURL}}/img/guide/sidebar/legend.svg) Légende [Haut de page](#footerSection)
+<h3><img src="{{assetsURL}}/img/guide/sidebar/legend.svg" width="30"> Légende <a href="#footerSection">Haut de page</a></h3>
 
 L’onglet **Légende** présente les symboles des couches affichées sur la carte.
 
