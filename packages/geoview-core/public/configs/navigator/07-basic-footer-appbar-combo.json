@@ -1,0 +1,46 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": false
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "ccc75c12-5acc-4a6a-959f-ef6f621147b9",
+        "geoviewLayerType": "geoCore"
+      },
+      {
+        "geoviewLayerId": "uniqueValueId",
+        "geoviewLayerName": "uniqueValue",
+        "metadataAccessPath": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/",
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+            {
+                "layerId": "1"
+            }
+        ]
+      }
+    ]
+  },
+  "theme": "geo.ca",
+  "footerBar": {
+    "tabs": {
+      "core": ["layers", "details", "data-table"]
+    }
+  },
+  "appBar": {
+    "tabs": {
+      "core": ["legend"]
+    },
+    "selectedTab": "legend"
+  },
+  "navBar": ["zoom", "fullscreen", "home", "location"],
+  "components": ["north-arrow", "overview-map"],
+  "corePackages": [],
+  "externalPackages": []
+}
