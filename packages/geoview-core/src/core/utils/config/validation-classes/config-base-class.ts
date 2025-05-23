@@ -277,8 +277,9 @@ export abstract class ConfigBaseClass {
   /**
    * Updates the status of all parents layers based on the status of their sibling layers.
    * This method checks the statuses of sibling layers (layers sharing the same parent).
+   * - If at least one sibling is in a 'loading' state, it sets the parent layer status to 'loading'.
+   * - If all siblings are in a 'loaded' state, it sets the parent layer status to 'loaded'.
    * - If all siblings are in an 'error' state, it sets the parent layer status to 'error'.
-   * - If at least one sibling is in a 'loaded' state, it sets the parent layer status to 'loaded'.
    * - If neither condition is met, the parent status remains unchanged.
    */
   updateLayerStatusParent(): void {
@@ -289,8 +290,9 @@ export abstract class ConfigBaseClass {
   /**
    * Recursively updates the status of the parent layer based on the status of its sibling layers.
    * This method checks the statuses of sibling layers (layers sharing the same parent).
+   * - If at least one sibling is in a 'loading' state, it sets the parent layer status to 'loading'.
+   * - If all siblings are in a 'loaded' state, it sets the parent layer status to 'loaded'.
    * - If all siblings are in an 'error' state, it sets the parent layer status to 'error'.
-   * - If at least one sibling is in a 'loaded' state, it sets the parent layer status to 'loaded'.
    * - If neither condition is met, the parent status remains unchanged.
    */
   static #updateLayerStatusParentRec(currentConfig: ConfigBaseClass): void {
@@ -300,13 +302,13 @@ export abstract class ConfigBaseClass {
     // Get all siblings of the layer
     const siblings = currentConfig.getSiblings(true);
 
-    // Get all siblings which are in error
-    const siblingsInError = siblings.filter((lyrConfig) => lyrConfig.layerStatus === 'error');
+    // Get all siblings which are in loading state
+    const siblingsInLoading = siblings.filter((lyrConfig) => lyrConfig.layerStatus === 'loading');
 
-    // If all siblings are in fact in error
-    if (siblings.length === siblingsInError.length) {
-      // Set the parent layer status as error
-      currentConfig.parentLayerConfig.setLayerStatusError();
+    // If at least one layer is loading
+    if (siblingsInLoading.length > 0) {
+      // Set the parent layer status as loaded
+      currentConfig.parentLayerConfig.setLayerStatusLoading();
       // Continue with the parent
       ConfigBaseClass.#updateLayerStatusParentRec(currentConfig.parentLayerConfig);
       return;
@@ -315,10 +317,22 @@ export abstract class ConfigBaseClass {
     // Get all siblings which are in loaded
     const siblingsInLoaded = siblings.filter((lyrConfig) => lyrConfig.layerStatus === 'loaded');
 
-    // If at least one layer is loaded
-    if (siblingsInLoaded.length > 0) {
+    // If all siblings are loaded
+    if (siblings.length === siblingsInLoaded.length) {
       // Set the parent layer status as loaded
       currentConfig.parentLayerConfig.setLayerStatusLoaded();
+      // Continue with the parent
+      ConfigBaseClass.#updateLayerStatusParentRec(currentConfig.parentLayerConfig);
+      return;
+    }
+
+    // Get all siblings which are in error
+    const siblingsInError = siblings.filter((lyrConfig) => lyrConfig.layerStatus === 'error');
+
+    // If all siblings are in fact in error
+    if (siblings.length === siblingsInError.length) {
+      // Set the parent layer status as error
+      currentConfig.parentLayerConfig.setLayerStatusError();
       // Continue with the parent
       ConfigBaseClass.#updateLayerStatusParentRec(currentConfig.parentLayerConfig);
     }

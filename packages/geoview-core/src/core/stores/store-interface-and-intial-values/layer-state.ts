@@ -40,6 +40,7 @@ export interface ILayerState {
   displayState: TypeLayersViewDisplayState;
   layerDeleteInProgress: boolean;
   selectedLayerSortingArrowId: string;
+  layersAreLoading: boolean;
   setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
 
   actions: {
@@ -73,6 +74,7 @@ export interface ILayerState {
     setLegendLayers: (legendLayers: TypeLegendLayer[]) => void;
     setSelectedLayerPath: (layerPath: string) => void;
     setSelectedLayerSortingArrowId: (arrowId: string) => void;
+    setLayersAreLoading: (areLoading: boolean) => void;
   };
 }
 
@@ -90,6 +92,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
     displayState: 'view',
     layerDeleteInProgress: false,
     selectedLayerSortingArrowId: '',
+
     // Initialize default
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
       set({
@@ -418,6 +421,15 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
           },
         });
       },
+
+      setLayersAreLoading: (areLoading: boolean) => {
+        set({
+          layerState: {
+            ...get().layerState,
+            layersAreLoading: areLoading,
+          },
+        });
+      },
     },
     // #endregion ACTIONS
   } as ILayerState;
@@ -452,7 +464,7 @@ export const useLayerSelectedLayerPath = (): string | null | undefined =>
 export const useLayerDisplayState = (): TypeLayersViewDisplayState => useStore(useGeoViewStore(), (state) => state.layerState.displayState);
 export const useSelectedLayerSortingArrowId = (): string =>
   useStore(useGeoViewStore(), (state) => state.layerState.selectedLayerSortingArrowId);
-
+export const useLayersAreLoading = (): boolean => useStore(useGeoViewStore(), (state) => state.layerState.layersAreLoading);
 export const useLayerStoreActions = (): LayerActions => useStore(useGeoViewStore(), (state) => state.layerState.actions);
 
 // computed gets

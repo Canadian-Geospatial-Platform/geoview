@@ -1275,37 +1275,11 @@ export class MapViewer {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async #handleMapMoveEnd(event: MapEvent): Promise<void> {
     try {
-      // Get the center coordinates
-      const centerCoordinates = this.getView().getCenter()!;
-
-      // Get the projection code
-      const projCode = this.getView().getProjection().getCode();
-
-      // Get the pointer position
-      const pointerPosition = {
-        projected: centerCoordinates,
-        pixel: this.map.getPixelFromCoordinate(centerCoordinates),
-        lnglat: Projection.transformPoints([centerCoordinates], projCode, Projection.PROJECTION_NAMES.LNGLAT)[0],
-        dragging: false,
-      };
-
-      // Get the degree rotation
-      const degreeRotation = this.getNorthArrowAngle();
-
-      // Get the north visibility
-      const isNorthVisible = this.getNorthVisibility();
-
-      // Get the map Extent
-      const extent = this.getView().calculateExtent();
-
-      // Get the scale information
-      const scale = await MapEventProcessor.getScaleInfoFromDomElement(this.mapId);
-
-      // Save in the store
-      MapEventProcessor.setMapMoveEnd(this.mapId, centerCoordinates, pointerPosition, degreeRotation, isNorthVisible, extent, scale);
+      // Update the store
+      await this.#updateMapControls();
 
       // Emit to the outside
-      this.#emitMapMoveEnd({ lnglat: centerCoordinates });
+      this.#emitMapMoveEnd({ lnglat: this.getView().getCenter()! });
     } catch (error: unknown) {
       // Log
       logger.logError('Failed in MapViewer.#handleMapMoveEnd', error);
@@ -1530,10 +1504,6 @@ export class MapViewer {
     // Log Marker Start
     logger.logMarkerStart(`readyMap-${this.mapId}`);
 
-    // Is ready
-    this.#mapReady = true;
-    this.#emitMapReady();
-
     // Load the guide
     AppEventProcessor.setGuide(this.mapId).catch((error: unknown) => {
       // Log
@@ -1550,12 +1520,15 @@ export class MapViewer {
     // GV This removes the spinning circle overlay and starts showing the map correctly in the html dom
     MapEventProcessor.setMapLoaded(this.mapId, true);
 
-    // Wait for the map height to be set before continuing, so padding is applied properly and such.
-    // TODO: Check/Clean - Do we still need this? Commenting it to see (2025-05-18)
-    // await delay(200);
-
-    // Save in the store that the map is property being displayed now
+    // Save in the store that the map is properly being displayed now
     MapEventProcessor.setMapDisplayed(this.mapId);
+
+    // Update the map controls based on the original map state (equivalent of initMapControls, just later in the process)
+    await this.#updateMapControls();
+
+    // Is ready
+    this.#mapReady = true;
+    this.#emitMapReady();
 
     // Register the map handlers
     this.#registerMapHandlers(this.map);
@@ -1590,6 +1563,40 @@ export class MapViewer {
     // inVisibleRange array when layers are loaded.
     // This is to trigger a 'this.#handleMapZoomEnd' once layers are loaded
     this.getView().dispatchEvent(new ObjectEvent('change:resolution', 'visibleRange', null));
+  }
+
+  /**
+   * Updates the map controls (the store) based on the current map view state.
+   */
+  async #updateMapControls(): Promise<void> {
+    // Get the center coordinates
+    const centerCoordinates = this.getView().getCenter()!;
+
+    // Get the projection code
+    const projCode = this.getView().getProjection().getCode();
+
+    // Get the pointer position
+    const pointerPosition = {
+      projected: centerCoordinates,
+      pixel: this.map.getPixelFromCoordinate(centerCoordinates),
+      lnglat: Projection.transformPoints([centerCoordinates], projCode, Projection.PROJECTION_NAMES.LNGLAT)[0],
+      dragging: false,
+    };
+
+    // Get the degree rotation
+    const degreeRotation = this.getNorthArrowAngle();
+
+    // Get the north visibility
+    const isNorthVisible = this.getNorthVisibility();
+
+    // Get the map Extent
+    const extent = this.getView().calculateExtent();
+
+    // Get the scale information
+    const scale = await MapEventProcessor.getScaleInfoFromDomElement(this.mapId);
+
+    // Save in the store
+    MapEventProcessor.setMapMoveEnd(this.mapId, centerCoordinates, pointerPosition, degreeRotation, isNorthVisible, extent, scale);
   }
 
   /**

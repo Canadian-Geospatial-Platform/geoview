@@ -1,9 +1,10 @@
-import { delay, xmlToJson } from '@/core/utils/utilities';
+import { delay, readTextWithBestEncoding, xmlToJson } from '@/core/utils/utilities';
 import {
   ResponseEmptyError,
   ResponseError,
   RequestAbortedError,
   RequestTimeoutError,
+  ResponseContentError,
   ResponseTypeError,
   NetworkError,
 } from '@/core/exceptions/core-exceptions';
@@ -107,6 +108,32 @@ export class Fetch {
   }
 
   /**
+   * Fetches a url for a json response in the form of an object (not an array) and validates the response doesn't actually contain an error.
+   * This is useful when a service (e.g. ArcGIS Server) returns a 200 with a response error embedded within it.
+   * @param {string} url - The url to fetch.
+   * @param {RequestInit?} init - The optional initialization parameters for the fetch.
+   * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
+   * @returns {Promise<T>} The fetched json response.
+   * @throws {ResponseError} If the response is not OK (non-2xx).
+   * @throws {ResponseEmptyError} If the JSON response is empty.
+   * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
+   * @throws {ResponseTypeError} If the response from the service is an array instead of an object.
+   * @throws {ResponseContentError} If the response actually contains an error within it.
+   * @throws {Error} For any other unexpected failures.
+   */
+  static async fetchEsriJsonAsObject(url: string, init?: RequestInit, timeoutMs?: number): Promise<TypeJsonObject> {
+    // Redirect
+    const result = await this.fetchJsonAsObject(url, init, timeoutMs);
+
+    // Check and throw exception if the content actually contains an embedded error
+    // (ArcGIS Server returns 200 even an error happened)
+    this.throwIfResponseHasEmbeddedError(result);
+
+    // Return the validated TypeJsonObject
+    return result as TypeJsonObject;
+  }
+
+  /**
    * Fetches a url for a json response in the form of an array (not an object).
    * @param {string} url - The url to fetch.
    * @param {RequestInit?} init - The optional initialization parameters for the fetch.
@@ -184,33 +211,12 @@ export class Fetch {
       // Validate response
       if (!response.ok) throw new ResponseError(response);
 
-      // Try different encodings to see which is the best
+      // Get the buffer array of the response
       const buffer = await response.arrayBuffer();
 
-      const encodings = ['utf-8', 'windows-1252', 'iso-8859-1'];
-      let responseText = '';
-      let bestEncoding = '';
-
-      for (const encoding of encodings) {
-        const decoder = new TextDecoder(encoding);
-        const decodedText = decoder.decode(buffer);
-
-        // If no replacement character is found, use this encoding
-        if (!decodedText.includes('�')) {
-          responseText = decodedText;
-          bestEncoding = encoding;
-          break;
-        }
-
-        // If this is the first encoding or it has fewer replacement characters than previous best
-        if (!responseText || (decodedText.match(/�/g) || []).length < (responseText.match(/�/g) || []).length) {
-          responseText = decodedText;
-          bestEncoding = encoding;
-        }
-      }
-
-      // Log which encoding was used
-      logger.logInfo(`Using ${bestEncoding} encoding for ${url}`);
+      // Guess the best encoding and return the best text we can from the buffer
+      const result = readTextWithBestEncoding(buffer);
+      const responseText = result.text;
 
       // If data in the response
       if (responseText.trim() !== '') {
@@ -336,6 +342,72 @@ export class Fetch {
   static fetchWithTimeout<T>(url: string, init?: RequestInit, timeoutMs: number = 7000): Promise<T> {
     // Redirect
     return Fetch.fetchJsonAs<T>(url, init, timeoutMs);
+  }
+
+  /**
+   * Throws an error if the provided response content contains an embedded error.
+   * Internally uses {@link Fetch.checkResponseForEmbeddedErrors} to validate the content.
+   * @param {unknown} content - The content to inspect.
+   * @throws {ResponseContentError} If the response contains an embedded error.
+   */
+  static throwIfResponseHasEmbeddedError(content: unknown): void {
+    // Check for the response content
+    const checked = Fetch.checkResponseForEmbeddedErrors(content);
+
+    // If not valid, throw the error
+    if (!checked.valid) throw new ResponseContentError(`${checked.code} | ${checked.error} | ${checked.details}`);
+  }
+
+  /**
+   * Checks a JSON response for embedded error information.
+   * This function is useful when working services which may return a 200 OK HTTP
+   * status but still embed an error object in the response payload.
+   * @param {unknown} content - The content response from the server (expecting a json, but can be text).
+   * @returns An object describing whether the response is valid, and if not, includes error details.
+   */
+  static checkResponseForEmbeddedErrors(content: unknown): VerifiedResponse {
+    let valid: boolean = true;
+    let code: number | undefined;
+    let message: string | undefined;
+    let details: string[] | undefined;
+    let json = content;
+
+    // If content is a string, try to read as JSON
+    if (typeof content === 'string') {
+      try {
+        // Parse the string as JSON
+        json = JSON.parse(content);
+      } catch (error: unknown) {
+        // Failed to parse it, return immediately as valid, don't mess with it
+        logger.logWarning('Failed to parse the content as json when verifying for errors.', error);
+        return { valid: true };
+      }
+    }
+
+    // If there's an error property
+    if (typeof json === 'object' && json !== null && 'error' in json) {
+      // Error
+      valid = false;
+      message = 'Error found in the content';
+
+      // Try to get the code
+      if (typeof json.error === 'object' && json.error !== null) {
+        if ('code' in json.error) {
+          code = json.error.code as number;
+        }
+        // Try to get the message
+        if ('message' in json.error) {
+          message = json.error.message as string;
+        }
+        // Try to get the details
+        if ('details' in json.error) {
+          details = json.error.details as string[];
+        }
+      }
+    }
+
+    // Return the result of the validation of the content
+    return { valid, code, error: message, details };
   }
 
   /**
@@ -504,3 +576,5 @@ export class Fetch {
       });
   }
 }
+
+export type VerifiedResponse = { valid: boolean; code?: number; error?: string; details?: string[] };
