@@ -67,7 +67,7 @@ const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick }: LegendLay
           secondary={<SecondaryControls layerPath={layerPath} />}
         />
       </Tooltip>
-      {((layerChildren && layerChildren.length > 1) || (layerItems && layerItems.length > 1) || layerType === CV_CONST_LAYER_TYPES.WMS) && (
+      {((layerChildren && layerChildren.length > 0) || (layerItems && layerItems.length > 1) || layerType === CV_CONST_LAYER_TYPES.WMS) && (
         <IconButton className="buttonOutline" edge="end" size="small" tooltip={tooltip}>
           {!isCollapsed ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
         </IconButton>

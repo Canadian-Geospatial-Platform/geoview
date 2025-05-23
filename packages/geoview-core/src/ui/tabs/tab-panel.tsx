@@ -15,6 +15,7 @@ export interface TypeTabPanelProps {
   children?: ReactNode;
   containerType?: TypeContainerBox;
   tabId: string;
+  className?: string;
 }
 
 /**

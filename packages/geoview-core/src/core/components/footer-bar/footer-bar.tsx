@@ -61,10 +61,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   const isMapFullScreen = useAppFullscreenActive();
   const footerPanelResizeValue = useUIFooterPanelResizeValue();
   const theme = useTheme();
-  const sxClasses = useMemo(
-    () => getSxClasses(theme, isMapFullScreen, footerPanelResizeValue),
-    [theme, isMapFullScreen, footerPanelResizeValue]
-  );
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // State & ref
   const tabsContainerRef = useRef<HTMLDivElement>();
@@ -255,6 +252,27 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     setActiveFooterBarTab(tab.id);
     setFooterBarIsCollapsed(false);
   };
+
+  /**
+   * Handles resizing the footerbar when toggling fullscreen
+   */
+  useEffect(() => {
+    if (!tabsContainerRef.current) {
+      return;
+    }
+
+    logger.logTraceUseEffect('FOOTER-BAR - handle full screen resize', isCollapsed);
+
+    // default values as set by the height of the div
+    let footerHeight = 'fit-content';
+
+    // adjust values from px to % to accomodate fullscreen plus page zoom
+    if (isMapFullScreen && !isCollapsed) {
+      footerHeight = `${footerPanelResizeValue}%`;
+    }
+
+    tabsContainerRef.current.style.height = footerHeight;
+  }, [tabsContainerRef, isCollapsed, isMapFullScreen, footerPanelResizeValue]);
 
   /**
    * Add plugins

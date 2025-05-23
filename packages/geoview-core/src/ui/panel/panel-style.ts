@@ -62,11 +62,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   panelContentContainer: {
     position: 'relative',
-    flexBasis: 'auto',
     overflow: 'hidden',
-    overflowY: 'hidden',
-    boxSizing: 'border-box',
-    marginBottom: '16px',
     '&:last-child': {
       paddingBottom: 0,
     },

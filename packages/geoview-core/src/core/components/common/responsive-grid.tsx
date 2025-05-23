@@ -127,7 +127,7 @@ const ResponsiveGridPanel = forwardRef(
       () => ({
         [theme.breakpoints.down(MOBILE_BREAKPOINT)]: {
           // eslint-disable-next-line no-nested-ternary
-          display: isLeftPanel ? (isRightPanelVisible ? 'none' : 'block') : !isRightPanelVisible ? 'none' : 'block',
+          display: isLeftPanel ? (isRightPanelVisible ? 'none' : 'block') : !isRightPanelVisible ? 'none' : 'flex',
         },
       }),
       [isRightPanelVisible, theme.breakpoints, isLeftPanel]
@@ -140,11 +140,6 @@ const ResponsiveGridPanel = forwardRef(
         className={className}
         size={isLeftPanel ? size.left : size.right}
         sx={{
-          ...(!fullWidth && displayStyles),
-          ...(fullWidth && {
-            // eslint-disable-next-line no-nested-ternary
-            display: isLeftPanel ? (isRightPanelVisible ? 'none' : 'block') : !isRightPanelVisible ? 'none' : 'block',
-          }),
           ...(isLeftPanel
             ? {}
             : {
@@ -154,6 +149,11 @@ const ResponsiveGridPanel = forwardRef(
                 },
               }),
           ...sxProps,
+          ...(!fullWidth && displayStyles),
+          ...(fullWidth && {
+            // eslint-disable-next-line no-nested-ternary
+            display: isLeftPanel ? (isRightPanelVisible ? 'none' : 'block') : !isRightPanelVisible ? 'none' : 'flex',
+          }),
         }}
         component="div"
         ref={ref}

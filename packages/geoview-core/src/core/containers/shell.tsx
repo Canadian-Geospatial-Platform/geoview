@@ -17,6 +17,7 @@ import {
   useAppCircularProgressActive,
   useAppFullscreenActive,
   useAppGeoviewHTMLElement,
+  useAppHeight,
 } from '@/core/stores/store-interface-and-intial-values/app-state';
 import {
   useUIActiveFocusItem,
@@ -55,7 +56,6 @@ export function Shell(props: ShellProps): JSX.Element {
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
-  const sxClasses = useMemo(() => getShellSxClasses(theme), [theme]);
 
   // State render additional components if added by api
   const [components, setComponents] = useState<Record<string, JSX.Element>>({});
@@ -79,17 +79,21 @@ export function Shell(props: ShellProps): JSX.Element {
   const footerPanelResizeValue = useUIFooterPanelResizeValue();
   const isFooterBarCollapsed = useUIFooterBarIsCollapsed();
   const geoviewElement = useAppGeoviewHTMLElement();
+  const appHeight = useAppHeight();
   const footerTabContainer = geoviewElement.querySelector(`[id^="${mapId}-tabsContainer"]`) as HTMLElement;
+
+  // SxClasses
+  const sxClasses = useMemo(() => getShellSxClasses(theme, appHeight), [theme, appHeight]);
 
   // Ref for container height
   const { mapShellContainerRef } = useMapResize({
     isMapFullScreen,
     isFooterBarCollapsed,
     footerPanelResizeValue,
-    mapLoaded,
     isFooterBar: !!geoviewConfig?.footerBar,
     geoviewElement,
     footerTabContainer,
+    appHeight,
   });
 
   // #region Handlers
@@ -218,14 +222,13 @@ export function Shell(props: ShellProps): JSX.Element {
       </Link>
       <FocusTrap open={activeTrapGeoView}>
         <Box id={`shell-${mapViewer.mapId}`} sx={sxClasses.shell} className="geoview-shell" tabIndex={-1} aria-hidden="true">
-          <CircularProgress isLoaded={mapLoaded} />
-          <CircularProgress isLoaded={!circularProgressActive} />
           <Box id={`map-${mapViewer.mapId}`} sx={sxClasses.mapShellContainer} className="mapContainer" ref={mapShellContainerRef}>
+            <CircularProgress isLoaded={mapLoaded} />
+            <CircularProgress isLoaded={!circularProgressActive} />
             <AppBar api={mapViewer.appBarApi} />
             <MapInfo />
             <Box sx={sxClasses.mapContainer}>
-              {/* FIXME Set/unset the height instead of 1000px */}
-              <Map viewer={mapViewer} mapHeight={mapShellContainerRef.current?.style.height || '1000px'} />
+              <Map viewer={mapViewer} />
             </Box>
             {interaction === 'dynamic' && <NavBar api={mapViewer.navBarApi} />}
             <Snackbar
