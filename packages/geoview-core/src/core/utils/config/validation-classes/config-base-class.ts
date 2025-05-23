@@ -277,8 +277,9 @@ export abstract class ConfigBaseClass {
   /**
    * Updates the status of all parents layers based on the status of their sibling layers.
    * This method checks the statuses of sibling layers (layers sharing the same parent).
+   * - If at least one sibling is in a 'loading' state, it sets the parent layer status to 'loading'.
+   * - If all siblings are in a 'loaded' state, it sets the parent layer status to 'loaded'.
    * - If all siblings are in an 'error' state, it sets the parent layer status to 'error'.
-   * - If at least one sibling is in a 'loaded' state, it sets the parent layer status to 'loaded'.
    * - If neither condition is met, the parent status remains unchanged.
    */
   updateLayerStatusParent(): void {
@@ -290,7 +291,7 @@ export abstract class ConfigBaseClass {
    * Recursively updates the status of the parent layer based on the status of its sibling layers.
    * This method checks the statuses of sibling layers (layers sharing the same parent).
    * - If at least one sibling is in a 'loading' state, it sets the parent layer status to 'loading'.
-   * - If at least one sibling is in a 'loaded' state, it sets the parent layer status to 'loaded'.
+   * - If all siblings are in a 'loaded' state, it sets the parent layer status to 'loaded'.
    * - If all siblings are in an 'error' state, it sets the parent layer status to 'error'.
    * - If neither condition is met, the parent status remains unchanged.
    */
