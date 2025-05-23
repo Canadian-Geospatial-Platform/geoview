@@ -48,6 +48,10 @@ export function ToggleAll({ source = 'legend' }: ToggleAllProps): JSX.Element {
     setAllLayersCollapsed(!allLayersCollapsed);
   }, [allLayersCollapsed, setAllLayersCollapsed]);
 
+  // TODO Hide this component until all layers have loaded the first time.
+  // TO.DO May require something external as a useRef for the first time the !layerAreLoading didn't work
+  // TO.DO There's an odd interaction going on where the map initially has no layers (!layersAreLoading) and then starts loading the layers (layersAreLoading)
+  // TO.DO So need something more stable from the state
   return (
     <Box id="toggle-all" sx={toggleAllStyle}>
       {(source === 'legend' || displayState === 'view') && (
