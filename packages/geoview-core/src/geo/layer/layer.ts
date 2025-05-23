@@ -29,6 +29,7 @@ import {
   layerEntryIsGroupLayer,
   TypeLayerStatus,
   GeoCoreLayerConfig,
+  CONST_LAYER_TYPES,
 } from '@/api/config/types/map-schema-types';
 import { GeoJSON, layerConfigIsGeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
 import { GeoPackage, layerConfigIsGeoPackage } from '@/geo/layer/geoview-layers/vector/geopackage';
@@ -1159,6 +1160,11 @@ export class LayerApi {
         // eslint-disable-next-line no-param-reassign
         if (toggledStyleInfo) toggledStyleInfo.visible = visibility;
       });
+
+      // Force a re-render of the layer source for ESRI Feature to make visibility changes take effect
+      if (this.#layerEntryConfigs[layerPath].schemaTag === CONST_LAYER_TYPES.ESRI_FEATURE) {
+        layer.getOLLayer().changed();
+      }
     }
 
     // Update the legend layers if necessary
