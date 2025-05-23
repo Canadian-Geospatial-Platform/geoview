@@ -3,6 +3,8 @@ import { useEffect, useRef, useCallback, MutableRefObject, useMemo, useState } f
 import { Box, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
+import { ProgressBar } from '@/ui';
+
 import { NorthArrow, NorthPoleFlag } from '@/core/components/north-arrow/north-arrow';
 import { Crosshair } from '@/core/components/crosshair/crosshair';
 import { OverviewMap } from '@/core/components/overview-map/overview-map';
@@ -17,6 +19,7 @@ import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 import { Plugin } from '@/api/plugin/plugin';
 import { logger } from '@/core/utils/logger';
 import { toJsonObject } from '@/api/config/types/config-types';
+import { useLayersAreLoading } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 type MapProps = {
   viewer: MapViewer;
@@ -48,6 +51,8 @@ export function Map(props: MapProps): JSX.Element {
   const northArrow = useMapNorthArrow();
   const mapLoaded = useMapLoaded();
   const mapStoreConfig = useGeoViewConfig();
+  const layersAreLoading = useLayersAreLoading();
+
   // flag to check if map is initialized. we added to prevent double rendering in StrictMode
   const isMapInitialized = useRef<boolean>(false);
   const [isMapReady, setIsMapReady] = useState(false);
@@ -121,6 +126,11 @@ export function Map(props: MapProps): JSX.Element {
           <HoverTooltip />
           {deviceSizeMedUp && overviewMap && viewer.map && <OverviewMap />}
         </>
+      )}
+      {layersAreLoading && (
+        <Box sx={sxClasses.progressBar}>
+          <ProgressBar />
+        </Box>
       )}
     </Box>
   );

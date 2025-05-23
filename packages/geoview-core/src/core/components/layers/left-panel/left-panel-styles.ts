@@ -74,6 +74,8 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap',
+        color: `${theme.palette.geoViewColor.textColor.main} !important`,
+        fontWeight: '400 !important',
       },
     },
   },
