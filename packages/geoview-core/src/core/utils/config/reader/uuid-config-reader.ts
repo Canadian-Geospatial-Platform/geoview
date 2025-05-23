@@ -237,10 +237,11 @@ export class UUIDmapConfigReader {
           // Add it
           listOfGeoviewLayerConfig.push(geoviewLayerConfig);
 
-          // If there's only the one layer, replace the layer name with the name from GeoCore
+          // If there's only the one layer AND customGeocoreLayerConfig.layerName is not provided, replace the layer name with the name from GeoCore
           if (
             listOfGeoviewLayerConfig[i].listOfLayerEntryConfig.length === 1 &&
-            !listOfGeoviewLayerConfig[i].listOfLayerEntryConfig[0].listOfLayerEntryConfig
+            !listOfGeoviewLayerConfig[i].listOfLayerEntryConfig[0].listOfLayerEntryConfig &&
+            customGeocoreLayerConfig.layerName === undefined
           ) {
             listOfGeoviewLayerConfig[i].listOfLayerEntryConfig[0].layerName = name as string;
           }

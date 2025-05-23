@@ -3,6 +3,8 @@ import { useEffect, useRef, useCallback, MutableRefObject, useMemo, useState } f
 import { Box, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
+import { ProgressBar } from '@/ui';
+
 import { NorthArrow, NorthPoleFlag } from '@/core/components/north-arrow/north-arrow';
 import { Crosshair } from '@/core/components/crosshair/crosshair';
 import { OverviewMap } from '@/core/components/overview-map/overview-map';
@@ -122,6 +124,18 @@ export function Map(props: MapProps): JSX.Element {
           {deviceSizeMedUp && overviewMap && viewer.map && <OverviewMap />}
         </>
       )}
+      <Box
+        sx={{
+          position: 'absolute',
+          bottom: '45px',
+          zIndex: 1100,
+          width: '100%',
+          ...sxClasses.progressBar,
+        }}
+        className="TESTS"
+      >
+        <ProgressBar />
+      </Box>
     </Box>
   );
 }

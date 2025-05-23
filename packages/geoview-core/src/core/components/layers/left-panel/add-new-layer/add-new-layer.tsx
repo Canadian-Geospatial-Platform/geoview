@@ -721,7 +721,7 @@ export function AddNewLayer(): JSX.Element {
           className="buttonOutlineFilled"
           size="small"
           type="text"
-          disabled={!stepButtonEnabled || (isLast && (layerName === undefined || layerName === ''))}
+          disabled={isLast ? layerName === undefined || layerName === '' : !stepButtonEnabled}
           onClick={handleNext}
         >
           {isLast ? t('layers.finish') : t('layers.continue')}
