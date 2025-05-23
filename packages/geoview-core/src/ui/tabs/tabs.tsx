@@ -22,6 +22,7 @@ import { getSxClasses } from '@/ui/tabs/tabs-style';
 import { TabPanel } from '@/ui/tabs/tab-panel';
 import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useUIHiddenTabs } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useAppFullscreenActive, useAppHeight } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { TypeContainerBox } from '@/core/types/global-types';
 import { handleEscapeKey } from '@/core/utils/utilities';
 
@@ -109,7 +110,7 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
   // TODO: refactor - language values should be pass as props
   const { t } = useTranslation<string>();
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const isMapFullScreen = useAppFullscreenActive();
 
   // State
   // boolean value in state reflects when tabs will be collapsed state, then value needs to false.
@@ -120,7 +121,10 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
   // TODO: refactor - Should decouple from store and values pass as props
   // Store
   const mapSize = useMapSize();
+  const appHeight = useAppHeight();
   const hiddenTabs = useUIHiddenTabs();
+
+  const sxClasses = useMemo(() => getSxClasses(theme, isMapFullScreen, appHeight), [theme, isMapFullScreen, appHeight]);
 
   // show/hide dropdown based on map size
   const initMobileDropdown = mapSize[0] !== 0 ? mapSize[0] < theme.breakpoints.values.sm : false;
@@ -257,7 +261,14 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
 
   const visibleTabs = useMemo(() => tabs.filter((tab) => !hiddenTabs.includes(tab.id)), [tabs, hiddenTabs]);
   return (
-    <Grid container sx={{ width: '100%', height: '100%' }}>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        width: '100%',
+        height: '100%',
+      }}
+    >
       <Grid container id="footerbar-header" sx={{ backgroundColor: theme.palette.geoViewColor.bgColor.dark[100], width: '100%' }}>
         <Grid size={{ xs: 7, sm: 10 }}>
           {!showMobileDropdown ? (
@@ -312,7 +323,7 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
           {rightButtons as ReactNode}
         </Grid>
       </Grid>
-      <Box id="tabPanel" sx={sxMerged}>
+      <Box id="tabPanel" sx={sxMerged} className="tab-panels-container">
         {tabPanels.map((tab, index) => {
           return tab ? (
             <TabPanel
@@ -323,6 +334,7 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
               tabId={tab.id}
               containerType={containerType}
               ref={tabPanelRef}
+              className="tab-panel"
             >
               {typeof tab?.content === 'string' ? <UseHtmlToReact htmlContent={(tab?.content as string) ?? ''} /> : tab.content}
             </TabPanel>
@@ -331,7 +343,7 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
           );
         })}
       </Box>
-    </Grid>
+    </Box>
   );
 }
 

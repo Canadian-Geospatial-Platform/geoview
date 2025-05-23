@@ -20,7 +20,6 @@ import { toJsonObject } from '@/api/config/types/config-types';
 
 type MapProps = {
   viewer: MapViewer;
-  mapHeight: string;
 };
 
 /**
@@ -33,10 +32,10 @@ export function Map(props: MapProps): JSX.Element {
   // Log
   logger.logTraceRender('components/map/map');
 
-  const { viewer, mapHeight } = props;
+  const { viewer } = props;
 
   const defaultTheme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(mapHeight), [mapHeight]);
+  const sxClasses = useMemo(() => getSxClasses(), []);
 
   // internal state - get ref to div element
   const mapElement = useRef<HTMLElement | undefined>();

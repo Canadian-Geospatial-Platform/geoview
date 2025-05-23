@@ -38,7 +38,7 @@ export const getFocusTrapSxClasses = (theme: Theme): SxStyles => {
  * @param {Theme} theme the theme object
  * @returns {Object} the sx classes object
  */
-export const getShellSxClasses = (theme: Theme): SxStyles => ({
+export const getShellSxClasses = (theme: Theme, appHeight: number): SxStyles => ({
   all: {
     height: '100%',
     width: '100%',
@@ -100,7 +100,7 @@ export const getShellSxClasses = (theme: Theme): SxStyles => ({
   mapShellContainer: {
     display: 'flex',
     flexDirection: 'row',
-    height: '100%',
+    height: `${appHeight}px`,
     width: '100%',
     position: 'relative',
     alignItems: 'stretch',

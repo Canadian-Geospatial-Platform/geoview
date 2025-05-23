@@ -77,6 +77,11 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
     transition: `${theme.transitions.duration.standard}ms ease`,
     position: 'absolute',
     left: '64px',
+    '&.appbar-panel-details': {
+      '.responsive-layout-right-main': {
+        // display: 'none'
+      },
+    },
   };
 
   useEffect(() => {
@@ -120,7 +125,7 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
   }, [mapSize, panelGroupName, open]);
 
   return (
-    <Box sx={panelContainerStyles} ref={panelContainerRef}>
+    <Box sx={panelContainerStyles} ref={panelContainerRef} className={`appbar-panel-${panelGroupName}`}>
       <FocusTrapContainer open={isFocusTrapped} id="app-bar-focus-trap">
         <Card
           sx={{
