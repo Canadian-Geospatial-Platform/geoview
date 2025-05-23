@@ -95,6 +95,9 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   #onLayerLoadedHandlers: LayerLoadDelegate[] = [];
 
   // Keep all callback delegates references
+  #onLayerErrorHandlers: LayerLoadDelegate[] = [];
+
+  // Keep all callback delegates references
   #onLayerMessageHandlers: LayerMessageDelegate[] = [];
 
   /**
@@ -228,6 +231,9 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     // Check the layer status before
     const layerStatusBefore = this.getLayerConfig().layerStatus;
 
+    // Emit event for all layer error events
+    this.#emitLayerError({ layerPath: this.getLayerPath() });
+
     // If we were not error before
     if (layerStatusBefore !== 'error') {
       // Set the layer config status to error to keep mirroring the AbstractGeoViewLayer for now
@@ -239,7 +245,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       // Emit about the error
       this.emitMessage('layers.errorNotLoaded', [this.getLayerName()], 'error', true);
     } else {
-      // We've already emitted an erorr to the user about the layer being in error, skip
+      // We've already emitted an error to the user about the layer being in error, skip
     }
   }
 
@@ -255,6 +261,9 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     // Check the layer status before
     const layerStatusBefore = this.getLayerConfig().layerStatus;
 
+    // Emit event for all layer error events
+    this.#emitLayerError({ layerPath: this.getLayerPath() });
+
     // If we were not error before
     if (layerStatusBefore !== 'error') {
       // Set the layer config status to error to keep mirroring the AbstractGeoViewLayer for now
@@ -266,7 +275,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       // Emit about the error
       this.emitMessage('layers.errorImageLoad', [this.getLayerName()], 'error', true);
     } else {
-      // We've already emitted an erorr to the user about the layer being in error, skip
+      // We've already emitted an error to the user about the layer being in error, skip
     }
   }
 
@@ -1137,6 +1146,34 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   offLayerLoaded(callback: LayerLoadDelegate): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerLoadedHandlers, callback);
+  }
+
+  /**
+   * Emits an event to all handlers when a layer is turning into an error stage on the map.
+   * @param {LayerLoadEvent} event - The event to emit
+   * @private
+   */
+  #emitLayerError(event: LayerLoadEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerErrorHandlers, event);
+  }
+
+  /**
+   * Registers when a layer is turning into a error stage event handler.
+   * @param {LayerLoadDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerError(callback: LayerLoadDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerErrorHandlers, callback);
+  }
+
+  /**
+   * Unregisters when a layer is turning into a error stage event handler.
+   * @param {LayerLoadDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerError(callback: LayerLoadDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerErrorHandlers, callback);
   }
 
   /**
