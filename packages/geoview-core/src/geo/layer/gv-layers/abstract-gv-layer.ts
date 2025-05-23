@@ -95,7 +95,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   #onLayerLoadedHandlers: LayerDelegate[] = [];
 
   // Keep all callback delegates references
-  #onLayerErrorHandlers: LayerDelegate[] = [];
+  #onLayerErrorHandlers: LayerErrorDelegate[] = [];
 
   // Keep all callback delegates references
   #onLayerMessageHandlers: LayerMessageDelegate[] = [];
@@ -232,7 +232,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     const layerStatusBefore = this.getLayerConfig().layerStatus;
 
     // Emit event for all layer error events
-    this.#emitLayerError();
+    this.#emitLayerError({ error: event });
 
     // If we were not error before
     if (layerStatusBefore !== 'error') {
@@ -262,7 +262,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     const layerStatusBefore = this.getLayerConfig().layerStatus;
 
     // Emit event for all layer error events
-    this.#emitLayerError();
+    this.#emitLayerError({ error: event });
 
     // If we were not error before
     if (layerStatusBefore !== 'error') {
@@ -1149,16 +1149,16 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * Emits an event to all handlers when a layer is turning into an error stage on the map.
    * @private
    */
-  #emitLayerError(): void {
+  #emitLayerError(event: LayerErrorEvent): void {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onLayerErrorHandlers, undefined);
+    EventHelper.emitEvent(this, this.#onLayerErrorHandlers, event);
   }
 
   /**
    * Registers when a layer is turning into a error stage event handler.
    * @param {LayerDelegate} callback - The callback to be executed whenever the event is emitted
    */
-  onLayerError(callback: LayerDelegate): void {
+  onLayerError(callback: LayerErrorDelegate): void {
     // Register the event handler
     EventHelper.onEvent(this.#onLayerErrorHandlers, callback);
   }
@@ -1167,7 +1167,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * Unregisters when a layer is turning into a error stage event handler.
    * @param {LayerDelegate} callback - The callback to stop being called whenever the event is emitted
    */
-  offLayerError(callback: LayerDelegate): void {
+  offLayerError(callback: LayerErrorDelegate): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerErrorHandlers, callback);
   }
@@ -1257,9 +1257,17 @@ export type LayerFilterAppliedDelegate = EventDelegateBase<AbstractGVLayer, Laye
 export type LayerDelegate = EventDelegateBase<AbstractGVLayer, undefined, void>;
 
 /**
+ * Define an event for the delegate
+ */
+export type LayerErrorEvent = {
+  // The error
+  error: unknown;
+};
+
+/**
  * Define a delegate for the event handler function signature
  */
-export type LayerMessageDelegate = EventDelegateBase<AbstractGVLayer, LayerMessageEvent, void>;
+export type LayerErrorDelegate = EventDelegateBase<AbstractGVLayer, LayerErrorEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -1271,3 +1279,8 @@ export type LayerMessageEvent = {
   messageType: SnackbarType;
   notification: boolean;
 };
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+export type LayerMessageDelegate = EventDelegateBase<AbstractGVLayer, LayerMessageEvent, void>;
