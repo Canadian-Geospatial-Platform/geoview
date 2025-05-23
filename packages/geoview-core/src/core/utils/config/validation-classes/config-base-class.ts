@@ -463,14 +463,14 @@ export abstract class ConfigBaseClass {
 }
 
 /**
- * Define a delegate for the event handler function signature.
- */
-export type LayerStatusChangedDelegate = EventDelegateBase<ConfigBaseClass, LayerStatusChangedEvent, void>;
-
-/**
  * Define an event for the delegate.
  */
 export type LayerStatusChangedEvent = {
   // The new layer status.
   layerStatus: TypeLayerStatus;
 };
+
+/**
+ * Define a delegate for the event handler function signature.
+ */
+export type LayerStatusChangedDelegate = EventDelegateBase<ConfigBaseClass, LayerStatusChangedEvent, void>;

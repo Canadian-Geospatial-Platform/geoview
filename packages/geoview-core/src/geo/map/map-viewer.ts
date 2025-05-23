@@ -319,6 +319,13 @@ export class MapViewer {
     // Load the Map itself and the UI controls
     MapEventProcessor.initMapControls(this.mapId);
 
+    // Reset the basemap
+    await MapEventProcessor.resetBasemap(this.mapId);
+
+    // Emit map init
+    this.#mapInit = true;
+    this.#emitMapInit();
+
     // Load the list of geoview layers in the config to add all layers on the map.
     // After this call, all first level layers have been registered.
     // TODO: refactor - remove the cast as MapConfigLayerEntry[] everywhere
@@ -332,13 +339,6 @@ export class MapViewer {
 
     // Prepare the FeatureHighlight now that the map is available
     this.layer.featureHighlight.init();
-
-    // Emit map init
-    this.#mapInit = true;
-    this.#emitMapInit();
-
-    // Reset the basemap
-    await MapEventProcessor.resetBasemap(this.mapId);
 
     // Ready the map
     return this.#readyMap();
