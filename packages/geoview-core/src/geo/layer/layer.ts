@@ -1579,8 +1579,8 @@ export class LayerApi {
   }
 
   /**
-   * Handles when a layer gets in loaded stage on the map
-   * @param {AbstractGVLayer} layer - The layer that's become loaded.
+   * Handles when a layer gets in error stage on the map
+   * @param {AbstractGVLayer} layer - The layer that's become error.
    * @param {GVLayerLoadEvent} loadEvent - The event associated with the layer.
    */
   #handleLayerError(layer: AbstractGVLayer, loadEvent: GVLayerLoadEvent): void {
