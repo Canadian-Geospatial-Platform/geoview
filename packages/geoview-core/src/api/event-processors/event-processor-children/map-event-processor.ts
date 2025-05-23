@@ -1356,11 +1356,22 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - Id of map.
    * @param {string} layerPath - Path of the layer to create config for.
    * @param {boolean | "hybrid"} overrideGeocoreServiceNames - Indicates if geocore layer names should be kept as is or returned to defaults.
-   * @returns {MapConfigLayerEntry} Geoview layer config object.
+   * @returns {MapConfigLayerEntry | undefined} Geoview layer config object.
    */
-  static #createGeoviewLayerConfig(mapId: string, layerPath: string, overrideGeocoreServiceNames: boolean | 'hybrid'): MapConfigLayerEntry {
+  static #createGeoviewLayerConfig(
+    mapId: string,
+    layerPath: string,
+    overrideGeocoreServiceNames: boolean | 'hybrid'
+  ): MapConfigLayerEntry | undefined {
     // Get needed info
-    const layerEntryConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath)!;
+    const layerEntryConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath);
+
+    // If not found, log warning and skip
+    if (!layerEntryConfig) {
+      // Log
+      logger.logWarning(`Couldn't find the layer entry config for layer path '${layerPath}'`);
+      return undefined;
+    }
 
     const { geoviewLayerConfig } = layerEntryConfig;
     const orderedLayerInfo = MapEventProcessor.findMapLayerFromOrderedInfo(mapId, layerPath);
@@ -1432,9 +1443,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
       );
 
       // Build list of geoview layer configs
-      const listOfGeoviewLayerConfig = layerOrder.map((layerPath) =>
-        this.#createGeoviewLayerConfig(mapId, layerPath, overrideGeocoreServiceNames)
-      );
+      const listOfGeoviewLayerConfig = layerOrder
+        .map((layerPath) => this.#createGeoviewLayerConfig(mapId, layerPath, overrideGeocoreServiceNames))
+        .filter((mapLayerEntry) => !!mapLayerEntry);
 
       // Get info for view
       const projection = this.getMapStateProtected(mapId).currentProjection as TypeValidMapProjectionCodes;
