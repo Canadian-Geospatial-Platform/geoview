@@ -89,4 +89,10 @@ export const getSxClasses = (mapHeight: string): SxStyles => ({
       },
     },
   },
+  progressBar: {
+    width: '100%',
+    position: 'absolute',
+    bottom: 45,
+    '> span': { height: '8px' },
+  },
 });

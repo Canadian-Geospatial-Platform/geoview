@@ -14,6 +14,7 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  ProgressBar,
   Tooltip,
   VisibilityOffOutlinedIcon,
   VisibilityOutlinedIcon,
@@ -50,7 +51,6 @@ import { Divider } from '@/ui/divider/divider';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useUISelectedFooterLayerListItemId } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { TypeLayerStatus, TypeLayerControls } from '@/api/config/types/map-schema-types';
-import { ProgressBar } from '@/ui/linear-progress/linear-progress';
 
 interface SingleLayerProps {
   layerPath: string;

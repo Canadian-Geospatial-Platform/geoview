@@ -1,12 +1,13 @@
 import { memo, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material';
-import { Box, ListItem, Tooltip, ListItemText, IconButton, KeyboardArrowDownIcon, KeyboardArrowUpIcon } from '@/ui';
+import { Box, ListItem, Tooltip, ListItemText, IconButton, KeyboardArrowDownIcon, KeyboardArrowUpIcon, ProgressBar } from '@/ui';
 import {
   useSelectorLayerName,
   useSelectorLayerItems,
   useSelectorLayerChildren,
   useSelectorLayerType,
+  useSelectorLayerStatus,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import {
   useMapStoreActions,
@@ -20,6 +21,7 @@ import { CollapsibleContent } from './legend-layer-container';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
 import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
+import { TypeLayerStatus } from '@/api/config/types/map-schema-types';
 
 interface LegendLayerProps {
   layerPath: string;
@@ -47,6 +49,7 @@ const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick }: LegendLay
   const isCollapsed = useSelectorLayerLegendCollapsed(layerPath);
   const inVisibleRange = useSelectorLayerInVisibleRange(layerPath);
   const layerType = useSelectorLayerType(layerPath);
+  const layerStatus: TypeLayerStatus | undefined = useSelectorLayerStatus(layerPath);
 
   // Log
   logger.logTraceUseMemo('components/legend/legend-layer - LegendLayerHeader', layerPath, isCollapsed);
@@ -68,6 +71,20 @@ const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick }: LegendLay
         <IconButton className="buttonOutline" edge="end" size="small" tooltip={tooltip}>
           {!isCollapsed ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
         </IconButton>
+      )}
+      {layerStatus === 'loading' && (
+        <Box
+          sx={{
+            position: 'absolute !important',
+            display: 'block !important',
+            bottom: '0',
+            width: '100%',
+            height: 'auto !important',
+            span: { height: '2px' },
+          }}
+        >
+          <ProgressBar />
+        </Box>
       )}
     </ListItem>
   );

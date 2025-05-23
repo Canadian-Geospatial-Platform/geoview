@@ -19,6 +19,7 @@ import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 import { Plugin } from '@/api/plugin/plugin';
 import { logger } from '@/core/utils/logger';
 import { toJsonObject } from '@/api/config/types/config-types';
+import { useLayersAreLoading } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 type MapProps = {
   viewer: MapViewer;
@@ -50,6 +51,8 @@ export function Map(props: MapProps): JSX.Element {
   const northArrow = useMapNorthArrow();
   const mapLoaded = useMapLoaded();
   const mapStoreConfig = useGeoViewConfig();
+  const layersAreLoading = useLayersAreLoading();
+
   // flag to check if map is initialized. we added to prevent double rendering in StrictMode
   const isMapInitialized = useRef<boolean>(false);
   const [isMapReady, setIsMapReady] = useState(false);
@@ -124,18 +127,11 @@ export function Map(props: MapProps): JSX.Element {
           {deviceSizeMedUp && overviewMap && viewer.map && <OverviewMap />}
         </>
       )}
-      <Box
-        sx={{
-          position: 'absolute',
-          bottom: '45px',
-          zIndex: 1100,
-          width: '100%',
-          ...sxClasses.progressBar,
-        }}
-        className="TESTS"
-      >
-        <ProgressBar />
-      </Box>
+      {layersAreLoading && (
+        <Box sx={sxClasses.progressBar}>
+          <ProgressBar />
+        </Box>
+      )}
     </Box>
   );
 }

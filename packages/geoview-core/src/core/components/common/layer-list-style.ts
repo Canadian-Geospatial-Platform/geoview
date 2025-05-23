@@ -109,6 +109,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     width: '100%',
     position: 'absolute',
     bottom: 0,
+    '> span': { height: '2px' },
   },
   progressBarSingleLayer: {
     position: 'absolute !important',
@@ -116,5 +117,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     bottom: '0',
     width: '100%',
     height: 'auto !important',
+    '> span': { height: '2px' },
   },
 });
