@@ -74,7 +74,7 @@ export declare class API {
      * @param {string} mapConfig - config passed in from the function call (string or url of a config path)
      * @param {number} divHeight - height of the div to inject the map in (mandatory if the map reloads)
      */
-    createMapFromConfig(divId: string, mapConfig: string, divHeight?: number): Promise<void>;
+    createMapFromConfig(divId: string, mapConfig: string, divHeight?: number): Promise<MapViewer>;
     /**
      * Registers a map viewer ready event callback.
      * @param {MapViewerReadyDelegate} callback - The callback to be executed whenever the event is emitted
@@ -99,7 +99,7 @@ export declare class API {
 /**
  * Define a delegate for the event handler function signature
  */
-type MapViewerReadyDelegate = EventDelegateBase<API, MapViewerReadyEvent, void>;
+export type MapViewerReadyDelegate = EventDelegateBase<API, MapViewerReadyEvent, void>;
 /**
  * Define an event for the delegate
  */
@@ -109,11 +109,10 @@ export type MapViewerReadyEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type MapAddedToDivDelegate = EventDelegateBase<API, MapAddedToDivEvent, void>;
+export type MapAddedToDivDelegate = EventDelegateBase<API, MapAddedToDivEvent, void>;
 /**
  * Define an event for the delegate
  */
 export type MapAddedToDivEvent = {
     mapId: string;
 };
-export {};

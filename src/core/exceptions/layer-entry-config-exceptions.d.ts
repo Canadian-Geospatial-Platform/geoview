@@ -44,19 +44,6 @@ export declare class LayerEntryConfigInvalidLayerEntryConfigError extends LayerE
     constructor(layerConfig: TypeLayerEntryConfig);
 }
 /**
- * Custom error class thrown when the GeoView layer configuration is invalid due to the layer ID not being a feature layer.
- * This error is specifically used when the provided layer ID does not correspond to a valid feature layer.
- * @extends {LayerEntryConfigError}
- */
-export declare class LayerEntryConfigLayerIdNotFeatureLayerError extends LayerEntryConfigError {
-    /**
-     * Constructor to initialize the LayerEntryConfigLayerIdNotFeatureLayerError.
-     * This error is thrown when the layer ID provided does not correspond to a feature layer.
-     * @param {TypeLayerEntryConfig} layerConfig - The configuration object associated with the GeoView layer.
-     */
-    constructor(layerConfig: TypeLayerEntryConfig);
-}
-/**
  * Custom error class thrown when the GeoView layer configuration is invalid due to an empty layer group.
  * This error is used when a layer group in the configuration is found to be empty, which is not allowed.
  * @extends {LayerEntryConfigError}

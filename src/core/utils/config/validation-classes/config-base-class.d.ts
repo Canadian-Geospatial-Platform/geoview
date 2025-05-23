@@ -2,6 +2,7 @@ import { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeGeoviewLayerConfig, TypeGeoviewLayerType, TypeLayerEntryType, TypeLayerInitialSettings, TypeLayerStatus } from '@/api/config/types/map-schema-types';
 import { TypeJsonObject } from '@/api/config/types/config-types';
 import { GroupLayerEntryConfig } from './group-layer-entry-config';
+import { TypeDateFragments } from '@/core/utils/date-mgt';
 /**
  * Base type used to define a GeoView layer to display on the map. Unless specified,its properties are not part of the schema.
  */
@@ -63,6 +64,13 @@ export declare abstract class ConfigBaseClass {
      */
     get layerStatus(): TypeLayerStatus;
     /**
+     * Gets the layer name of the entry layer or
+     * fallbacks on the geoviewLayerName from the GeoViewLayerConfig or
+     * fallbacks on the geoviewLayerId from the GeoViewLayerConfig or
+     * fallsback on the layerPath.
+     */
+    getLayerName(): string;
+    /**
      * Returns the sibling layer configurations of the current layer.
      * If the current layer has a parent, this method retrieves all layer entry
      * configs under the same parent. It can optionally exclude layers of type 'group'.
@@ -70,6 +78,11 @@ export declare abstract class ConfigBaseClass {
      * @returns {ConfigBaseClass[]} An array of sibling layer configurations. Returns an empty array if there is no parent.
      */
     getSiblings(includeGroups?: boolean): ConfigBaseClass[];
+    /**
+     * Gets the external fragments order if specified by the config, defaults to ISO_UTC.
+     * @returns {TypeDateFragments} The Date Fragments
+     */
+    getExternalFragmentsOrder(): TypeDateFragments;
     /**
      * Sets the layer status to registered.
      */
@@ -102,8 +115,9 @@ export declare abstract class ConfigBaseClass {
     /**
      * Updates the status of all parents layers based on the status of their sibling layers.
      * This method checks the statuses of sibling layers (layers sharing the same parent).
+     * - If at least one sibling is in a 'loading' state, it sets the parent layer status to 'loading'.
+     * - If all siblings are in a 'loaded' state, it sets the parent layer status to 'loaded'.
      * - If all siblings are in an 'error' state, it sets the parent layer status to 'error'.
-     * - If at least one sibling is in a 'loaded' state, it sets the parent layer status to 'loaded'.
      * - If neither condition is met, the parent status remains unchanged.
      */
     updateLayerStatusParent(): void;
@@ -161,11 +175,10 @@ export declare abstract class ConfigBaseClass {
 /**
  * Define a delegate for the event handler function signature.
  */
-type LayerStatusChangedDelegate = EventDelegateBase<ConfigBaseClass, LayerStatusChangedEvent, void>;
+export type LayerStatusChangedDelegate = EventDelegateBase<ConfigBaseClass, LayerStatusChangedEvent, void>;
 /**
  * Define an event for the delegate.
  */
 export type LayerStatusChangedEvent = {
     layerStatus: TypeLayerStatus;
 };
-export {};

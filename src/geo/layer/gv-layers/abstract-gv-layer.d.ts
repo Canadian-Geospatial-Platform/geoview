@@ -22,10 +22,20 @@ import { SnackbarType } from '@/core/utils/notifications';
  */
 export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
     #private;
-    static DEFAULT_HIT_TOLERANCE: number;
+    /** The default hit tolerance the query should be using */
+    static readonly DEFAULT_HIT_TOLERANCE: number;
+    /** The default loading period before we show a message to the user about a layer taking a long time to render on map */
+    static readonly DEFAULT_LOADING_PERIOD: number;
+    /** Indicates if the layer has become in loaded status at least once already */
+    loadedOnce: boolean;
+    /** Counts the number of times the loading happened. */
+    loadingCounter: number;
+    /** Marks the latest loading count for the layer.
+     * This useful to know when the put the layer loaded status back correctly with parallel processing happening */
+    loadingMarker: number;
     /**
      * Constructs a GeoView layer to manage an OpenLayer layer.
-     * @param {BaseLayer} olLayer - The OpenLayer layer.
+     * @param {Source} olSource - The OpenLayer Source.
      * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer configuration.
      */
     protected constructor(olSource: Source, layerConfig: AbstractBaseLayerEntryConfig);
@@ -42,16 +52,24 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
      */
     init(): void;
     /**
-     * Overridable method called when the layer has been loaded correctly
+     * Overridable method called when the layer has started to load itself on the map.
+     * @param {unknown} event - The event which is being triggered.
      */
-    protected onLoaded(): void;
+    protected onLoading(event: unknown): void;
     /**
-     * Overridable method called when the layer is in error and couldn't be loaded correctly
+     * Overridable method called when the layer has been loaded correctly.
+     * @param {unknown} event - The event which is being triggered.
+     */
+    protected onLoaded(event: unknown): void;
+    /**
+     * Overridable method called when the layer is in error and couldn't be loaded correctly.
+     * @param {unknown} event - The event which is being triggered.
      */
     protected onError(event: unknown): void;
     /**
      * Overridable method called when the layer image is in error and couldn't be loaded correctly.
      * We do not put the layer status as error, as this could be specific to a zoom level and the layer is otherwise fine.
+     * @param {unknown} event - The event which is being triggered.
      */
     protected onImageLoadError(event: unknown): void;
     /**
@@ -303,22 +321,42 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
      */
     offLayerStyleChanged(callback: LayerStyleChangedDelegate): void;
     /**
-     * Registers an individual layer loaded event handler.
-     * @param {IndividualLayerLoadedDelegate} callback - The callback to be executed whenever the event is emitted
+     * Registers when a layer have been first loaded on the map event handler.
+     * @param {LayerLoadDelegate} callback - The callback to be executed whenever the event is emitted
      */
-    onIndividualLayerLoaded(callback: IndividualLayerLoadedDelegate): void;
+    onLayerFirstLoaded(callback: LayerLoadDelegate): void;
     /**
-     * Unregisters an individual layer loaded event handler.
-     * @param {IndividualLayerLoadedDelegate} callback - The callback to stop being called whenever the event is emitted
+     * Unregisters when a layer have been first loaded on the map event handler.
+     * @param {LayerLoadDelegate} callback - The callback to stop being called whenever the event is emitted
      */
-    offIndividualLayerLoaded(callback: IndividualLayerLoadedDelegate): void;
+    offLayerFirstLoaded(callback: LayerLoadDelegate): void;
     /**
-     * Registers an individual layer message event handler.
+     * Registers when a layer is turning into a loading stage event handler.
+     * @param {LayerLoadDelegate} callback - The callback to be executed whenever the event is emitted
+     */
+    onLayerLoading(callback: LayerLoadDelegate): void;
+    /**
+     * Unregisters when a layer is turning into a loading stage event handler.
+     * @param {LayerLoadDelegate} callback - The callback to stop being called whenever the event is emitted
+     */
+    offLayerLoading(callback: LayerLoadDelegate): void;
+    /**
+     * Registers when a layer is turning into a loaded stage event handler.
+     * @param {LayerLoadDelegate} callback - The callback to be executed whenever the event is emitted
+     */
+    onLayerLoaded(callback: LayerLoadDelegate): void;
+    /**
+     * Unregisters when a layer is turning into a loaded stage event handler.
+     * @param {LayerLoadDelegate} callback - The callback to stop being called whenever the event is emitted
+     */
+    offLayerLoaded(callback: LayerLoadDelegate): void;
+    /**
+     * Registers a layer message event handler.
      * @param {LayerMessageEventDelegate} callback - The callback to be executed whenever the event is emitted
      */
     onLayerMessage(callback: LayerMessageDelegate): void;
     /**
-     * Unregisters an individual layer message event handler.
+     * Unregisters a layer message event handler.
      * @param {LayerMessageEventDelegate} callback - The callback to stop being called whenever the event is emitted
      */
     offLayerMessage(callback: LayerMessageDelegate): void;
@@ -326,7 +364,7 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerStyleChangedDelegate = EventDelegateBase<AbstractGVLayer, LayerStyleChangedEvent, void>;
+export type LayerStyleChangedDelegate = EventDelegateBase<AbstractGVLayer, LayerStyleChangedEvent, void>;
 /**
  * Define an event for the delegate
  */
@@ -340,7 +378,7 @@ export type LegendQueryingEvent = unknown;
 /**
  * Define a delegate for the event handler function signature
  */
-type LegendQueryingDelegate = EventDelegateBase<AbstractGVLayer, LegendQueryingEvent, void>;
+export type LegendQueryingDelegate = EventDelegateBase<AbstractGVLayer, LegendQueryingEvent, void>;
 /**
  * Define an event for the delegate
  */
@@ -350,11 +388,11 @@ export type LegendQueriedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type LegendQueriedDelegate = EventDelegateBase<AbstractGVLayer, LegendQueriedEvent, void>;
+export type LegendQueriedDelegate = EventDelegateBase<AbstractGVLayer, LegendQueriedEvent, void>;
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerFilterAppliedDelegate = EventDelegateBase<AbstractGVLayer, LayerFilterAppliedEvent, void>;
+export type LayerFilterAppliedDelegate = EventDelegateBase<AbstractGVLayer, LayerFilterAppliedEvent, void>;
 /**
  * Define an event for the delegate
  */
@@ -364,17 +402,17 @@ export type LayerFilterAppliedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type IndividualLayerLoadedDelegate = EventDelegateBase<AbstractGVLayer, IndividualLayerLoadedEvent, void>;
+export type LayerLoadDelegate = EventDelegateBase<AbstractGVLayer, LayerLoadEvent, void>;
 /**
  * Define an event for the delegate
  */
-export type IndividualLayerLoadedEvent = {
+export type LayerLoadEvent = {
     layerPath: string;
 };
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerMessageDelegate = EventDelegateBase<AbstractGVLayer, LayerMessageEvent, void>;
+export type LayerMessageDelegate = EventDelegateBase<AbstractGVLayer, LayerMessageEvent, void>;
 /**
  * Define an event for the delegate
  */
@@ -384,4 +422,3 @@ export type LayerMessageEvent = {
     messageType: SnackbarType;
     notification: boolean;
 };
-export {};

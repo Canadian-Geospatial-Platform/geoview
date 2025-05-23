@@ -8,10 +8,11 @@ import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import { Pixel } from 'ol/pixel';
 import { Projection as OLProjection } from 'ol/proj';
-import { FilterNodeArrayType } from '@/geo/utils/renderer/geoview-renderer-types';
+import { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { TypeFeatureInfoEntry, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import { TypeDateFragments } from '@/core/utils/date-mgt';
 /**
  * Abstract Geoview Layer managing an OpenLayer vector type layer.
  */
@@ -75,18 +76,10 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
      */
     protected getFeatureInfoAtLongLat(map: OLMap, lnglat: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
-     * Overrides when the layer gets in loaded status.
+     * Applies a view filter to a Vector layer's configuration by updating the layerConfig.filterEquation parameter.
+     * @param {string | undefined} filter - The raw filter string input (defaults to an empty string if not provided).
      */
-    protected onLoaded(): void;
-    /**
-     * Applies a view filter to the layer. When the combineLegendFilter flag is false, the filter parameter is used alone to display
-     * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
-     * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
-     * is done.
-     * @param {string} filter - A filter to be used in place of the getViewFilter value.
-     * @param {boolean} combineLegendFilter - Flag used to combine the legend filter and the filter together (default: true)
-     */
-    applyViewFilter(filter: string, combineLegendFilter?: boolean): void;
+    applyViewFilter(filter?: string | undefined): void;
     /**
      * Overrides the way to get the bounds for this layer type.
      * @param {OLProjection} projection - The projection to get the bounds into.
@@ -107,9 +100,22 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
      * @param {AbstractGVLayer} layer - The layer on which to work for the style.
      * @param {FeatureLike} feature - Feature that need its style to be defined.
      * @param {string} label - The style label when one has to be created
-     * @param {FilterNodeArrayType} filterEquation - Filter equation associated to the layer.
+     * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
      * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
      * @returns {Style} The style for the feature
      */
-    static calculateStyleForFeature(layer: AbstractGVLayer, feature: FeatureLike, label: string, filterEquation?: FilterNodeArrayType, legendFilterIsOff?: boolean): Style | undefined;
+    static calculateStyleForFeature(layer: AbstractGVLayer, feature: FeatureLike, label: string, filterEquation?: FilterNodeType[], legendFilterIsOff?: boolean): Style | undefined;
+    /**
+     * Applies a view filter to a vector layer configuration. The resulting filter is parsed and stored in the layer
+     * config's `filterEquation`, and triggers a re-evaluation of feature styles if applicable.
+     * If the layer config is invalid or the filter has not changed, no action is taken. Date values in the filter are also
+     * parsed using external fragments if available.
+     * @param {VectorLayerEntryConfig} layerConfig - The vector layer configuration to apply the filter to.
+     * @param {TypeDateFragments | undefined} externalDateFragments - Optional date fragments used to parse time-based filters.
+     * @param {AbstractGVLayer | undefined} layer - Optional GeoView layer containing that will get its source updated to trigger a redraw.
+     * @param {string | undefined} filter - A raw filter string to override the layer's view filter (default is an empty string).
+     * @param {(filterToUse: string) => void} [callbackWhenUpdated] - Optional callback invoked with the final filter string if updated.
+     * @throws {LayerInvalidLayerFilterError} If the filter cannot be parsed or applied due to a syntax or runtime issue.
+     */
+    static applyViewFilterOnConfig(layerConfig: VectorLayerEntryConfig, externalDateFragments: TypeDateFragments | undefined, layer: AbstractGVLayer | undefined, filter?: string | undefined, callbackWhenUpdated?: ((filterToUse: string) => void) | undefined): void;
 }

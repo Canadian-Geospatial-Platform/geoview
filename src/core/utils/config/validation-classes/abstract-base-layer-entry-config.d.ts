@@ -1,7 +1,7 @@
 import { TypeBaseVectorSourceInitialConfig, TypeSourceImageEsriInitialConfig, TypeSourceImageInitialConfig, TypeSourceImageStaticInitialConfig, TypeSourceWmsInitialConfig, TypeSourceTileInitialConfig, TypeLayerStyleConfig, TypeStyleGeometry, TypeLayerStyleSettings, TypeVectorSourceInitialConfig, TypeVectorTileSourceInitialConfig } from '@/api/config/types/map-schema-types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeJsonObject } from '@/api/config/types/config-types';
-import { FilterNodeArrayType } from '@/geo/utils/renderer/geoview-renderer-types';
+import { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { TimeDimension } from '@/app';
 /**
  * Base type used to define a GeoView layer to display on the map.
@@ -11,7 +11,7 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
     /** The ending element of the layer configuration path. */
     layerIdExtension?: string | undefined;
     /** The calculated filter equation */
-    filterEquation?: FilterNodeArrayType;
+    filterEquation?: FilterNodeType[];
     /** Indicates if filter is on/off */
     legendFilterIsOff: boolean;
     /** Source settings to apply to the GeoView layer source at creation time. */

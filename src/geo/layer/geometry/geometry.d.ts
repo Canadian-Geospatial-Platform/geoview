@@ -28,7 +28,7 @@ export declare class GeometryApi {
     geometries: Feature[];
     defaultGeometryGroupId: string;
     activeGeometryGroupIndex: number;
-    /** used to reference the map viewer */
+    /** Reference on the map viewer */
     mapViewer: MapViewer;
     /**
      * Constructs a Geometry class and creates a geometry group in the process.

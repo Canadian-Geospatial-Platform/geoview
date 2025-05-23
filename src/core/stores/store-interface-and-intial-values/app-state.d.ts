@@ -12,6 +12,7 @@ export interface IAppState {
     geolocatorServiceURL: string | undefined;
     metadataServiceURL: string | undefined;
     geoviewHTMLElement: HTMLElement;
+    height: number;
     geoviewAssetsURL: string;
     isCircularProgressActive: boolean;
     isCrosshairsActive: boolean;
@@ -20,7 +21,7 @@ export interface IAppState {
     showUnsymbolizedFeatures: boolean;
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
     actions: {
-        addMessage: (type: SnackbarType, message: string, param?: string[]) => void;
+        addMessage: (type: SnackbarType, messageKey: string, param?: string[]) => void;
         addNotification: (notif: NotificationDetailsType) => void;
         setCrosshairActive: (active: boolean) => void;
         setDisplayLanguage: (lang: TypeDisplayLanguage) => Promise<void>;
@@ -62,9 +63,11 @@ export declare const useAppFullscreenActive: () => boolean;
 export declare const useAppGeolocatorServiceURL: () => string | undefined;
 export declare const useAppMetadataServiceURL: () => string | undefined;
 export declare const useAppGeoviewHTMLElement: () => HTMLElement;
+export declare const useAppHeight: () => number;
 export declare const useAppGeoviewAssetsURL: () => string;
 export declare const useAppGuide: () => TypeGuideObject | undefined;
 export declare const useAppNotifications: () => NotificationDetailsType[];
+export declare const useAppShowUnsymbolizedFeatures: () => boolean;
 export declare const useAppDisplayLanguageById: (mapId: string) => TypeDisplayLanguage;
 export declare const useAppDisplayThemeById: (mapId: string) => TypeDisplayTheme;
 export declare const getAppCrosshairsActive: (mapId: string) => boolean;

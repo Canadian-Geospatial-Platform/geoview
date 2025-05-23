@@ -12,16 +12,22 @@ import { PointMarkers } from './point-markers';
  */
 export declare class FeatureHighlight {
     #private;
+    /** Reference on the map viewer */
+    mapViewer: MapViewer;
     /** The vector source to use for the highlight features */
     highlightSource: VectorSource;
     /** The hidden layer to display highlight. */
-    overlayLayer: VectorLayer;
-    pointMarkers: PointMarkers;
+    overlayLayer?: VectorLayer;
+    pointMarkers?: PointMarkers;
     /**
-     * Initializes feature higlight classes
-     * @param {MapViewer} mapViewer a reference to the map viewer
+     * Constructor
+     * @param {MapViewer} mapViewer - A reference to the map viewer
      */
     constructor(mapViewer: MapViewer);
+    /**
+     * Initializes the FeatureHightlight with the MapViewer, now that the map is accessible inside the MapViewer.
+     */
+    init(): void;
     /**
      * Changes the highlight color
      * @param {TypeHighlightColors} color - New color

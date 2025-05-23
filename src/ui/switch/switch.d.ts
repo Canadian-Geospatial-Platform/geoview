@@ -1,4 +1,7 @@
 import { SwitchProps } from '@mui/material';
+interface ExtendedSwitchProps extends SwitchProps {
+    label?: string;
+}
 /**
  * Create a customized Material UI Switch component.
  * This is a simple wrapper around MaterialSwitch that maintains
@@ -30,11 +33,11 @@ import { SwitchProps } from '@mui/material';
  * />
  * ```
  *
- * @param {SwitchProps} props - All valid Material-UI Switch props
+ * @param {ExtendedSwitchProps} props - All valid Material-UI Switch props
  * @returns {JSX.Element} The Switch component wrapped in FormControlLabel
  *
  * @see {@link https://mui.com/material-ui/react-switch/}
  */
-declare function SwitchUI(props: SwitchProps): JSX.Element;
+declare function SwitchUI(props: ExtendedSwitchProps): JSX.Element;
 export declare const Switch: typeof SwitchUI;
 export {};

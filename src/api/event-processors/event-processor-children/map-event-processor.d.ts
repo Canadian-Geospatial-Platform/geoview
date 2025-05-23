@@ -95,10 +95,16 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     static setZoom(mapId: string, zoom: number): void;
     static setIsMouseInsideMap(mapId: string, inside: boolean): void;
     static setRotation(mapId: string, rotation: number): void;
-    static setMapChangeSize(mapId: string, size: [number, number], scale: TypeScaleInfo): void;
+    static setMapSize(mapId: string, size: [number, number]): void;
+    static setMapScale(mapId: string, scale: TypeScaleInfo): void;
     static setMapMoveEnd(mapId: string, centerCoordinates: Coordinate, pointerPosition: TypeMapMouseInfo, degreeRotation: string, isNorthVisible: boolean, mapExtent: Extent, scale: TypeScaleInfo): void;
     static setInteraction(mapId: string, interaction: TypeInteraction): void;
     static setProjection(mapId: string, projectionCode: TypeValidMapProjectionCodes): Promise<void>;
+    /**
+     * Sets the home view
+     * @param mapId - The map id
+     * @param view - The view settings
+     */
     static setHomeButtonView(mapId: string, view: TypeMapViewSettings): void;
     static rotate(mapId: string, rotation: number): void;
     static zoom(mapId: string, zoom: number, duration?: number): void;
@@ -124,6 +130,8 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      */
     static findMapLayerAndChildrenFromOrderedInfo(mapId: string, layerPath: string, orderedLayerInfo?: TypeOrderedLayerInfo[]): TypeOrderedLayerInfo[];
     static getMapIndexFromOrderedLayerInfo(mapId: string, layerPath: string): number;
+    static getLegendCollapsibleLayers(mapId: string): TypeOrderedLayerInfo[];
+    static getAllLegendLayersCollapsed(mapId: string): boolean;
     static getMapLegendCollapsedFromOrderedLayerInfo(mapId: string, layerPath: string): boolean;
     static getMapVisibilityFromOrderedLayerInfo(mapId: string, layerPath: string): boolean;
     static getMapInVisibleRangeFromOrderedLayerInfo(mapId: string, layerPath: string): boolean;
@@ -159,7 +167,9 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     static setMapOrderedLayerInfo(mapId: string, orderedLayerInfo: TypeOrderedLayerInfo[]): void;
     static setMapLayerQueryable(mapId: string, layerPath: string, queryable: boolean): void;
     static setMapLegendCollapsed(mapId: string, layerPath: string, collapsed: boolean): void;
+    static setAllMapLayerCollapsed(mapId: string, newCollapsed: boolean): void;
     static setOrToggleMapLayerVisibility(mapId: string, layerPath: string, newValue?: boolean): boolean;
+    static setAllMapLayerVisibility(mapId: string, newVisibility: boolean): void;
     static reorderLayer(mapId: string, layerPath: string, move: number): void;
     /**
      * Replace a layer in the orderedLayerInfo array.

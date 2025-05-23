@@ -1,6 +1,6 @@
 import ImageLayer from 'ol/layer/Image';
 import { Coordinate } from 'ol/coordinate';
-import { ImageWMS } from 'ol/source';
+import { ImageArcGISRest, ImageWMS } from 'ol/source';
 import { Extent } from 'ol/extent';
 import { Projection as OLProjection } from 'ol/proj';
 import { Map as OLMap } from 'ol';
@@ -8,6 +8,9 @@ import { TypeWmsLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layer
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { TypeFeatureInfoEntry } from '@/api/config/types/map-schema-types';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
+import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
+import { TypeDateFragments } from '@/core/utils/date-mgt';
+import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 /**
  * Manages a WMS layer.
  *
@@ -68,10 +71,6 @@ export declare class GVWMS extends AbstractGVRaster {
      */
     onGetBounds(projection: OLProjection, stops: number): Extent | undefined;
     /**
-     * Overrides when the layer gets in loaded status.
-     */
-    protected onLoaded(): void;
-    /**
      * Sets the style to be used by the wms layer. This methode does nothing if the layer path can't be found.
      * @param {string} wmsStyleId - The style identifier that will be used.
      */
@@ -83,7 +82,19 @@ export declare class GVWMS extends AbstractGVRaster {
      * is done.
      * TODO ! The combination of the legend filter and the dimension filter probably does not apply to WMS. The code can be simplified.
      * @param {string} filter - An optional filter to be used in place of the getViewFilter value.
-     * @param {boolean} combineLegendFilter - Flag used to combine the legend filter and the filter together (default: true)
      */
-    applyViewFilter(filter: string, combineLegendFilter?: boolean): void;
+    applyViewFilter(filter?: string | undefined): void;
+    /**
+     * Applies a view filter to a WMS or an Esri Image layer's source by updating the source parameters.
+     * This function is responsible for generating the appropriate filter expression based on the layer configuration,
+     * optional style, and time-based fragments. It ensures the filter is only applied if it has changed or needs to be reset.
+     * @param {OgcWmsLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig - The configuration object for the WMS or Esri Image layer.
+     * @param {ImageWMS | ImageArcGISRest} source - The OpenLayers `ImageWMS` or `ImageArcGISRest` source instance to which the filter will be applied.
+     * @param {TypeDateFragments | undefined} externalDateFragments - Optional external date fragments used to assist in formatting time-based filters.
+     * @param {GVWMS | GVEsriImage | undefined} layer - Optional GeoView layer containing the source (if exists) in order to trigger a redraw.
+     * @param {string | undefined} filter - The raw filter string input (defaults to an empty string if not provided).
+     * @param {Function?} callbackWhenUpdated - Optional callback that is invoked with the final filter string if the layer was updated.
+     * @throws {LayerInvalidLayerFilterError} If the filter expression fails to parse or cannot be applied.
+     */
+    static applyViewFilterOnSource(layerConfig: OgcWmsLayerEntryConfig | EsriImageLayerEntryConfig, source: ImageWMS | ImageArcGISRest, externalDateFragments: TypeDateFragments | undefined, layer: GVWMS | GVEsriImage | undefined, filter?: string | undefined, callbackWhenUpdated?: ((filterToUse: string) => void) | undefined): void;
 }

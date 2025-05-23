@@ -44,18 +44,13 @@ export declare class GVEsriImage extends AbstractGVRaster {
      */
     onSetStyleAccordingToLegend(legend: TypeLegend): void;
     /**
-     * Overrides when the layer gets in loaded status.
-     */
-    protected onLoaded(): void;
-    /**
      * Applies a view filter to the layer. When the combineLegendFilter flag is false, the filter paramater is used alone to display
      * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
      * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
      * is done.
      * @param {string} filter - An optional filter to be used in place of the getViewFilter value.
-     * @param {boolean} combineLegendFilter - Flag used to combine the legend filter and the filter together (default: true)
      */
-    applyViewFilter(filter: string, combineLegendFilter?: boolean): void;
+    applyViewFilter(filter?: string | undefined): void;
     /**
      * Overrides the way to get the bounds for this layer type.
      * @param {OLProjection} projection - The projection to get the bounds into.

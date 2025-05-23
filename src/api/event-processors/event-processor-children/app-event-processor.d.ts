@@ -38,11 +38,11 @@ export declare class AppEventProcessor extends AbstractEventProcessor {
     /**
      * Adds a snackbar message (optional add to notification).
      * @param {SnackbarType} type - The type of message.
-     * @param {string} message - The message.
+     * @param {string} messageKey - The message key.
      * @param {string} param - Optional param to replace in the string if it is a key
      * @param {boolean} notification - True if we add the message to notification panel (default false)
      */
-    static addMessage(mapId: string, type: SnackbarType, message: string, param?: string[], notification?: boolean): void;
+    static addMessage(mapId: string, type: SnackbarType, messageKey: string, param?: string[], notification?: boolean): void;
     static addNotification(mapId: string, notif: NotificationDetailsType): Promise<void>;
     static removeNotification(mapId: string, key: string): void;
     static removeAllNotifications(mapId: string): void;

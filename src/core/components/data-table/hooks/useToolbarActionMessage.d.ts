@@ -6,6 +6,7 @@ interface UseSelectedRowMessageProps {
     tableInstance: MRTTableInstance<ColumnsType>;
     columnFilters: MRTColumnFiltersState;
     globalFilter: string;
+    showUnsymbolizedFeatures: boolean;
 }
 /**
  * Custom hook to set the selected/filtered row message for data table.
@@ -14,5 +15,5 @@ interface UseSelectedRowMessageProps {
  * @param {MRTTableInstance} tableInstance  object of the data table.
  * @param {MRTColumnFiltersState} columnFilters column filters set by the user on the table.
  */
-export declare function useToolbarActionMessage({ data, columnFilters, globalFilter, layerPath, tableInstance }: UseSelectedRowMessageProps): void;
+export declare function useToolbarActionMessage({ data, columnFilters, globalFilter, layerPath, tableInstance, showUnsymbolizedFeatures, }: UseSelectedRowMessageProps): void;
 export {};

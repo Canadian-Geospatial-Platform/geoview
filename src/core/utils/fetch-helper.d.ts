@@ -28,6 +28,21 @@ export declare class Fetch {
      */
     static fetchJsonAsObject(url: string, init?: RequestInit, timeoutMs?: number): Promise<TypeJsonObject>;
     /**
+     * Fetches a url for a json response in the form of an object (not an array) and validates the response doesn't actually contain an error.
+     * This is useful when a service (e.g. ArcGIS Server) returns a 200 with a response error embedded within it.
+     * @param {string} url - The url to fetch.
+     * @param {RequestInit?} init - The optional initialization parameters for the fetch.
+     * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
+     * @returns {Promise<T>} The fetched json response.
+     * @throws {ResponseError} If the response is not OK (non-2xx).
+     * @throws {ResponseEmptyError} If the JSON response is empty.
+     * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
+     * @throws {ResponseTypeError} If the response from the service is an array instead of an object.
+     * @throws {ResponseContentError} If the response actually contains an error within it.
+     * @throws {Error} For any other unexpected failures.
+     */
+    static fetchEsriJsonAsObject(url: string, init?: RequestInit, timeoutMs?: number): Promise<TypeJsonObject>;
+    /**
      * Fetches a url for a json response in the form of an array (not an object).
      * @param {string} url - The url to fetch.
      * @param {RequestInit?} init - The optional initialization parameters for the fetch.
@@ -108,7 +123,28 @@ export declare class Fetch {
      */
     static fetchWithTimeout<T>(url: string, init?: RequestInit, timeoutMs?: number): Promise<T>;
     /**
+     * Throws an error if the provided response content contains an embedded error.
+     * Internally uses {@link Fetch.checkResponseForEmbeddedErrors} to validate the content.
+     * @param {unknown} content - The content to inspect.
+     * @throws {ResponseContentError} If the response contains an embedded error.
+     */
+    static throwIfResponseHasEmbeddedError(content: unknown): void;
+    /**
+     * Checks a JSON response for embedded error information.
+     * This function is useful when working services which may return a 200 OK HTTP
+     * status but still embed an error object in the response payload.
+     * @param {unknown} content - The content response from the server (expecting a json, but can be text).
+     * @returns An object describing whether the response is valid, and if not, includes error details.
+     */
+    static checkResponseForEmbeddedErrors(content: unknown): VerifiedResponse;
+    /**
      * Tests different fetch situations to explain how to use fetching functions with combination of AbortControllers and/or timeouts.
      */
     static testJson(url: string): void;
 }
+export type VerifiedResponse = {
+    valid: boolean;
+    code?: number;
+    error?: string;
+    details?: string[];
+};
