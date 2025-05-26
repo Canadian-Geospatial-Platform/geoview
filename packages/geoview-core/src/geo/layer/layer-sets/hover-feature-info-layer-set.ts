@@ -91,21 +91,6 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
   }
 
   /**
-   * Get the ordered layer paths to query
-   * @returns {string[]} The ordered layer paths to query
-   */
-  #getOrderedLayerPaths(): string[] {
-    // Get the map layer order
-    const mapLayerOrder = this.layerApi.mapViewer.getMapLayerOrderInfo().filter((layer) => layer.inVisibleRange);
-    const resultSetLayers = new Set(Object.keys(this.resultSet));
-
-    // Filter and order the layers that are in our resultSet
-    return mapLayerOrder
-      .map((layer) => layer.layerPath)
-      .filter((layerPath) => resultSetLayers.has(layerPath) && this.resultSet[layerPath].eventListenerEnabled);
-  }
-
-  /**
    * Queries the features at the provided coordinate for all the registered layers.
    * @param {Coordinate} pixelCoordinate - The pixel coordinate where to query the features
    */
@@ -146,14 +131,17 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
         this.#abortControllers[layerPath] = new AbortController();
 
         // Process query on results data
-        AbstractLayerSet.queryLayerFeatures(
+        const promiseResult = AbstractLayerSet.queryLayerFeatures(
           this.layerApi.mapViewer.map,
           layer,
           queryType,
           pixelCoordinate,
           false,
           this.#abortControllers[layerPath]
-        )
+        );
+
+        // When the promise is done, propagate to store
+        promiseResult
           .then((arrayOfRecords) => {
             if (arrayOfRecords.length) {
               const nameField = arrayOfRecords![0].nameField || (Object.entries(arrayOfRecords![0].fieldInfo)[0] as unknown as string);
@@ -250,5 +238,20 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
       if (returnValue !== this.resultSet[key].eventListenerEnabled) returnValue = undefined;
     });
     return returnValue;
+  }
+
+  /**
+   * Get the ordered layer paths to query
+   * @returns {string[]} The ordered layer paths to query
+   */
+  #getOrderedLayerPaths(): string[] {
+    // Get the map layer order
+    const mapLayerOrder = this.layerApi.mapViewer.getMapLayerOrderInfo().filter((layer) => layer.inVisibleRange);
+    const resultSetLayers = new Set(Object.keys(this.resultSet));
+
+    // Filter and order the layers that are in our resultSet
+    return mapLayerOrder
+      .map((layer) => layer.layerPath)
+      .filter((layerPath) => resultSetLayers.has(layerPath) && this.resultSet[layerPath].eventListenerEnabled);
   }
 }

@@ -1507,7 +1507,7 @@ export class MapViewer {
     // Load the guide
     AppEventProcessor.setGuide(this.mapId).catch((error: unknown) => {
       // Log
-      logger.logPromiseFailed('in #setGuide in #readyMap', error);
+      logger.logPromiseFailed('in AppEventProcessor.setGuide in #readyMap', error);
     });
 
     // Check how load in milliseconds has it been processing thus far
