@@ -317,7 +317,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
           panelId: `Appbar${capitalize(tab)}PanelId`,
           panelGroupName: tab,
           type: CONTAINER_TYPE.APP_BAR,
-          title: capitalize(tab),
+          title: `${camelCase(tab)}.title`,
           icon: memoPanels[tab].icon,
           content: memoPanels[tab].content,
           width: getPanelWidth(tab),
