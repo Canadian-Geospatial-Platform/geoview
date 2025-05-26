@@ -81,6 +81,8 @@ export function isvalidComparedToInputSchema(schemaPath: string, targetObject: o
     }
     return true;
   }
+
+  // If the schema is not found, log an error and set the error flag on the target object
   logger.logError(`Cannot find schema ${schemaPath}`);
   (targetObject as MapFeatureConfig | EntryConfigBaseClass)?.setErrorDetectedFlag?.();
   return false;

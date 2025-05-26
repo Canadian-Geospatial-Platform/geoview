@@ -10,6 +10,7 @@ import { SxStyles } from '@/ui/style/types';
 export const getSxClasses = (theme: Theme): SxStyles =>
   ({
     guideContainer: {
+      height: '100%',
       '& .responsive-layout-right-main-content': {
         backgroundColor: theme.palette.geoViewColor.white,
         '&:focus-visible': {

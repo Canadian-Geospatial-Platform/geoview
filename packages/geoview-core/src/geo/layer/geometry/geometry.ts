@@ -49,7 +49,7 @@ export class GeometryApi {
   // index of the active geometry group used to add new geometries in the map
   activeGeometryGroupIndex = 0;
 
-  /** used to reference the map viewer */
+  /** Reference on the map viewer */
   mapViewer: MapViewer;
 
   // Keep all callback delegates references
@@ -62,9 +62,6 @@ export class GeometryApi {
   constructor(mapViewer: MapViewer) {
     this.mapViewer = mapViewer;
     this.#mapId = mapViewer.mapId;
-
-    // create default geometry group
-    this.createGeometryGroup(this.defaultGeometryGroupId);
   }
 
   /**

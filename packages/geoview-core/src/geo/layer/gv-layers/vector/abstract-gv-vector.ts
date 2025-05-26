@@ -10,8 +10,9 @@ import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import { Pixel } from 'ol/pixel';
 import { Projection as OLProjection } from 'ol/proj';
+import isEqual from 'lodash/isEqual';
 
-import { FilterNodeArrayType, NodeType } from '@/geo/utils/renderer/geoview-renderer-types';
+import { FilterNodeType, NodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { TypeFeatureInfoEntry, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
@@ -22,6 +23,8 @@ import { getExtentUnion, validateExtent } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions';
 import { NoExtentError } from '@/core/exceptions/geoview-exceptions';
+import { formatError } from '@/core/exceptions/core-exceptions';
+import { TypeDateFragments } from '@/core/utils/date-mgt';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer vector type layer.
@@ -55,6 +58,9 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
     // Init the layer options with initial settings
     AbstractGVVector.initOptionsWithInitialSettings(layerOptions, layerConfig);
+
+    // Apply the layer filter right away if any
+    AbstractGVVector.applyViewFilterOnConfig(layerConfig, layerConfig.getExternalFragmentsOrder(), undefined, layerConfig.layerFilter);
 
     // Create and set the OpenLayer layer
     this.olLayer = new VectorLayer<VectorSource<Feature<Geometry>>>(layerOptions);
@@ -183,56 +189,26 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   }
 
   /**
-   * Overrides when the layer gets in loaded status.
+   * Applies a view filter to a Vector layer's configuration by updating the layerConfig.filterEquation parameter.
+   * @param {string | undefined} filter - The raw filter string input (defaults to an empty string if not provided).
    */
-  protected override onLoaded(): void {
-    // Call parent
-    super.onLoaded();
-
-    // Apply view filter immediately
-    this.applyViewFilter(this.getLayerConfig().layerFilter || '');
-  }
-
-  /**
-   * Applies a view filter to the layer. When the combineLegendFilter flag is false, the filter parameter is used alone to display
-   * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
-   * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
-   * is done.
-   * @param {string} filter - A filter to be used in place of the getViewFilter value.
-   * @param {boolean} combineLegendFilter - Flag used to combine the legend filter and the filter together (default: true)
-   */
-  applyViewFilter(filter: string, combineLegendFilter: boolean = true): void {
+  applyViewFilter(filter: string | undefined = ''): void {
     // Log
     logger.logTraceCore('ABSTRACT-GV-VECTOR - applyViewFilter', this.getLayerPath());
 
-    const layerConfig = this.getLayerConfig();
-    const olLayer = this.getOLLayer();
-
-    // Update the layer config on the fly (maybe not ideal to do this?)
-    layerConfig.legendFilterIsOff = !combineLegendFilter;
-    if (combineLegendFilter) layerConfig.layerFilter = filter;
-
-    // Parse the filter value to use
-    let filterValueToUse: string = filter.replaceAll(/\s{2,}/g, ' ').trim();
-
-    try {
-      // Parse is some more for the dates
-      filterValueToUse = parseDateTimeValuesVector(filterValueToUse, this.getExternalFragmentsOrder());
-
-      // Analyze the layer filter
-      const filterEquation = analyzeLayerFilter([{ nodeType: NodeType.unprocessedNode, nodeValue: filterValueToUse }]);
-      layerConfig.filterEquation = filterEquation;
-    } catch (error: unknown) {
-      // Failed
-      throw new LayerInvalidLayerFilterError(layerConfig.layerPath, filterValueToUse, this.getLayerFilter(), error as Error);
-    }
-
-    olLayer.changed();
-
-    // Emit event
-    this.emitLayerFilterApplied({
-      filter: filterValueToUse,
-    });
+    // Redirect
+    AbstractGVVector.applyViewFilterOnConfig(
+      this.getLayerConfig(),
+      this.getExternalFragmentsOrder(),
+      this,
+      filter,
+      (filterToUse: string) => {
+        // Emit event
+        this.emitLayerFilterApplied({
+          filter: filterToUse,
+        });
+      }
+    );
   }
 
   /**
@@ -302,7 +278,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @param {AbstractGVLayer} layer - The layer on which to work for the style.
    * @param {FeatureLike} feature - Feature that need its style to be defined.
    * @param {string} label - The style label when one has to be created
-   * @param {FilterNodeArrayType} filterEquation - Filter equation associated to the layer.
+   * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
    * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
    * @returns {Style} The style for the feature
    */
@@ -310,7 +286,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     layer: AbstractGVLayer,
     feature: FeatureLike,
     label: string,
-    filterEquation?: FilterNodeArrayType,
+    filterEquation?: FilterNodeType[],
     legendFilterIsOff?: boolean
   ): Style | undefined {
     // Get the style
@@ -330,5 +306,81 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
         [geometryType]: { type: 'simple', hasDefault: false, fields: [], info: [theStyle] },
       });
     });
+  }
+
+  /**
+   * Applies a view filter to a vector layer configuration. The resulting filter is parsed and stored in the layer
+   * config's `filterEquation`, and triggers a re-evaluation of feature styles if applicable.
+   * If the layer config is invalid or the filter has not changed, no action is taken. Date values in the filter are also
+   * parsed using external fragments if available.
+   * @param {VectorLayerEntryConfig} layerConfig - The vector layer configuration to apply the filter to.
+   * @param {TypeDateFragments | undefined} externalDateFragments - Optional date fragments used to parse time-based filters.
+   * @param {AbstractGVLayer | undefined} layer - Optional GeoView layer containing that will get its source updated to trigger a redraw.
+   * @param {string | undefined} filter - A raw filter string to override the layer's view filter (default is an empty string).
+   * @param {(filterToUse: string) => void} [callbackWhenUpdated] - Optional callback invoked with the final filter string if updated.
+   * @throws {LayerInvalidLayerFilterError} If the filter cannot be parsed or applied due to a syntax or runtime issue.
+   */
+  static applyViewFilterOnConfig(
+    layerConfig: VectorLayerEntryConfig,
+    externalDateFragments: TypeDateFragments | undefined,
+    layer: AbstractGVLayer | undefined,
+    filter: string | undefined = '',
+    callbackWhenUpdated: ((filterToUse: string) => void) | undefined = undefined
+  ): void {
+    // Update the layer config on the fly (maybe not ideal to do this?)
+    // eslint-disable-next-line no-param-reassign
+    layerConfig.legendFilterIsOff = false;
+    // eslint-disable-next-line no-param-reassign
+    layerConfig.layerFilter = filter;
+
+    // Get the current filter
+    const currentFilter = layerConfig.filterEquation;
+
+    // Parse the filter value to use
+    let filterValueToUse: string = filter.replaceAll(/\s{2,}/g, ' ').trim();
+
+    try {
+      // Parse is some more for the dates
+      filterValueToUse = parseDateTimeValuesVector(filterValueToUse, externalDateFragments);
+
+      // Analyze the layer filter
+      const filterEquation = analyzeLayerFilter([{ nodeType: NodeType.unprocessedNode, nodeValue: filterValueToUse }]);
+
+      // Define what is considered the default filter
+      const isDefaultFilter = !filterValueToUse;
+
+      // Define what is a no operation
+      const isNewFilterEffectivelyNoop = isDefaultFilter && !currentFilter;
+
+      // Check whether the current filter is different from the new one
+      const filterChanged = !isEqual(layerConfig.filterEquation, filterEquation);
+
+      // Determine if we should apply or reset filter
+      const shouldUpdateFilter = (filterChanged && !isNewFilterEffectivelyNoop) || (!!currentFilter && isDefaultFilter);
+
+      // If should update the filtering
+      if (shouldUpdateFilter) {
+        // Update the filter equation
+        // eslint-disable-next-line no-param-reassign
+        layerConfig.filterEquation = filterEquation;
+
+        // Flag about the change.
+        // GV This will force a callback on the source style callback, which for us is the 'calculateStyleForFeature' function and
+        // GV since we've changed the filterEquation, the style will be recreated using that filterEquation.
+        layer?.getOLLayer().changed();
+
+        // Callback
+        callbackWhenUpdated?.(filterValueToUse);
+      }
+    } catch (error: unknown) {
+      // Failed
+      throw new LayerInvalidLayerFilterError(
+        layerConfig.layerPath,
+        layerConfig.getLayerName(),
+        filterValueToUse,
+        currentFilter?.join(','),
+        formatError(error)
+      );
+    }
   }
 }

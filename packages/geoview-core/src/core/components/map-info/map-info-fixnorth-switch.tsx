@@ -38,7 +38,7 @@ const NorthSwitch = memo(function NorthSwitch({
   tooltipText: string;
   visible: boolean;
 }) {
-  return visible ? <Switch size="small" onChange={onToggle} title={tooltipText} checked={isFixNorth} /> : null;
+  return visible ? <Switch size="small" onChange={onToggle} label={tooltipText} checked={isFixNorth} /> : null;
 });
 
 /**

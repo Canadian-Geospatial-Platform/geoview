@@ -12,6 +12,7 @@ import { TypeJsonObject } from '@/api/config/types/config-types';
 import { LAYER_STATUS } from '@/core/utils/constant';
 import { GroupLayerEntryConfig } from './group-layer-entry-config';
 import { NotImplementedError } from '@/core/exceptions/core-exceptions';
+import { DateMgt, TypeDateFragments } from '@/core/utils/date-mgt';
 
 /**
  * Base type used to define a GeoView layer to display on the map. Unless specified,its properties are not part of the schema.
@@ -149,6 +150,16 @@ export abstract class ConfigBaseClass {
   }
 
   /**
+   * Gets the layer name of the entry layer or
+   * fallbacks on the geoviewLayerName from the GeoViewLayerConfig or
+   * fallbacks on the geoviewLayerId from the GeoViewLayerConfig or
+   * fallsback on the layerPath.
+   */
+  getLayerName(): string {
+    return this.layerName || this.geoviewLayerConfig.geoviewLayerName || this.geoviewLayerConfig.geoviewLayerId || this.layerPath;
+  }
+
+  /**
    * Returns the sibling layer configurations of the current layer.
    * If the current layer has a parent, this method retrieves all layer entry
    * configs under the same parent. It can optionally exclude layers of type 'group'.
@@ -163,6 +174,14 @@ export abstract class ConfigBaseClass {
 
     // No siblings
     return [];
+  }
+
+  /**
+   * Gets the external fragments order if specified by the config, defaults to ISO_UTC.
+   * @returns {TypeDateFragments} The Date Fragments
+   */
+  getExternalFragmentsOrder(): TypeDateFragments {
+    return DateMgt.getDateFragmentsOrder(this.geoviewLayerConfig.externalDateFormat);
   }
 
   /**
@@ -224,8 +243,8 @@ export abstract class ConfigBaseClass {
     // GV For quick debug, uncomment the line
     // if (newLayerStatus === 'error') debugger;
 
-    // Check if we're not accidentally trying to set a status less than the current one
-    if (!this.isGreaterThanOrEqualTo(newLayerStatus)) {
+    // Check if we're not accidentally trying to set a status less than the current one (or setting loading, it's allowed to jump between loading and loaded)
+    if (!this.isGreaterThanOrEqualTo(newLayerStatus) || newLayerStatus === 'loading') {
       // eslint-disable-next-line no-underscore-dangle
       this._layerStatus = newLayerStatus;
 
@@ -258,8 +277,9 @@ export abstract class ConfigBaseClass {
   /**
    * Updates the status of all parents layers based on the status of their sibling layers.
    * This method checks the statuses of sibling layers (layers sharing the same parent).
+   * - If at least one sibling is in a 'loading' state, it sets the parent layer status to 'loading'.
+   * - If all siblings are in a 'loaded' state, it sets the parent layer status to 'loaded'.
    * - If all siblings are in an 'error' state, it sets the parent layer status to 'error'.
-   * - If at least one sibling is in a 'loaded' state, it sets the parent layer status to 'loaded'.
    * - If neither condition is met, the parent status remains unchanged.
    */
   updateLayerStatusParent(): void {
@@ -270,8 +290,9 @@ export abstract class ConfigBaseClass {
   /**
    * Recursively updates the status of the parent layer based on the status of its sibling layers.
    * This method checks the statuses of sibling layers (layers sharing the same parent).
+   * - If at least one sibling is in a 'loading' state, it sets the parent layer status to 'loading'.
+   * - If all siblings are in a 'loaded' state, it sets the parent layer status to 'loaded'.
    * - If all siblings are in an 'error' state, it sets the parent layer status to 'error'.
-   * - If at least one sibling is in a 'loaded' state, it sets the parent layer status to 'loaded'.
    * - If neither condition is met, the parent status remains unchanged.
    */
   static #updateLayerStatusParentRec(currentConfig: ConfigBaseClass): void {
@@ -281,13 +302,13 @@ export abstract class ConfigBaseClass {
     // Get all siblings of the layer
     const siblings = currentConfig.getSiblings(true);
 
-    // Get all siblings which are in error
-    const siblingsInError = siblings.filter((lyrConfig) => lyrConfig.layerStatus === 'error');
+    // Get all siblings which are in loading state
+    const siblingsInLoading = siblings.filter((lyrConfig) => lyrConfig.layerStatus === 'loading');
 
-    // If all siblings are in fact in error
-    if (siblings.length === siblingsInError.length) {
-      // Set the parent layer status as error
-      currentConfig.parentLayerConfig.setLayerStatusError();
+    // If at least one layer is loading
+    if (siblingsInLoading.length > 0) {
+      // Set the parent layer status as loaded
+      currentConfig.parentLayerConfig.setLayerStatusLoading();
       // Continue with the parent
       ConfigBaseClass.#updateLayerStatusParentRec(currentConfig.parentLayerConfig);
       return;
@@ -296,10 +317,22 @@ export abstract class ConfigBaseClass {
     // Get all siblings which are in loaded
     const siblingsInLoaded = siblings.filter((lyrConfig) => lyrConfig.layerStatus === 'loaded');
 
-    // If at least one layer is loaded
-    if (siblingsInLoaded.length > 0) {
+    // If all siblings are loaded
+    if (siblings.length === siblingsInLoaded.length) {
       // Set the parent layer status as loaded
       currentConfig.parentLayerConfig.setLayerStatusLoaded();
+      // Continue with the parent
+      ConfigBaseClass.#updateLayerStatusParentRec(currentConfig.parentLayerConfig);
+      return;
+    }
+
+    // Get all siblings which are in error
+    const siblingsInError = siblings.filter((lyrConfig) => lyrConfig.layerStatus === 'error');
+
+    // If all siblings are in fact in error
+    if (siblings.length === siblingsInError.length) {
+      // Set the parent layer status as error
+      currentConfig.parentLayerConfig.setLayerStatusError();
       // Continue with the parent
       ConfigBaseClass.#updateLayerStatusParentRec(currentConfig.parentLayerConfig);
     }
@@ -432,7 +465,7 @@ export abstract class ConfigBaseClass {
 /**
  * Define a delegate for the event handler function signature.
  */
-type LayerStatusChangedDelegate = EventDelegateBase<ConfigBaseClass, LayerStatusChangedEvent, void>;
+export type LayerStatusChangedDelegate = EventDelegateBase<ConfigBaseClass, LayerStatusChangedEvent, void>;
 
 /**
  * Define an event for the delegate.

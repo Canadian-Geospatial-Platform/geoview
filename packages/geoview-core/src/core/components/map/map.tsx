@@ -3,6 +3,8 @@ import { useEffect, useRef, useCallback, MutableRefObject, useMemo, useState } f
 import { Box, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
+import { ProgressBar } from '@/ui';
+
 import { NorthArrow, NorthPoleFlag } from '@/core/components/north-arrow/north-arrow';
 import { Crosshair } from '@/core/components/crosshair/crosshair';
 import { OverviewMap } from '@/core/components/overview-map/overview-map';
@@ -17,10 +19,10 @@ import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 import { Plugin } from '@/api/plugin/plugin';
 import { logger } from '@/core/utils/logger';
 import { toJsonObject } from '@/api/config/types/config-types';
+import { useLayersAreLoading } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 type MapProps = {
   viewer: MapViewer;
-  mapHeight: string;
 };
 
 /**
@@ -33,10 +35,10 @@ export function Map(props: MapProps): JSX.Element {
   // Log
   logger.logTraceRender('components/map/map');
 
-  const { viewer, mapHeight } = props;
+  const { viewer } = props;
 
   const defaultTheme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(mapHeight), [mapHeight]);
+  const sxClasses = useMemo(() => getSxClasses(), []);
 
   // internal state - get ref to div element
   const mapElement = useRef<HTMLElement | undefined>();
@@ -48,9 +50,13 @@ export function Map(props: MapProps): JSX.Element {
   const northArrow = useMapNorthArrow();
   const mapLoaded = useMapLoaded();
   const mapStoreConfig = useGeoViewConfig();
+  const layersAreLoading = useLayersAreLoading();
+
   // flag to check if map is initialized. we added to prevent double rendering in StrictMode
   const isMapInitialized = useRef<boolean>(false);
   const [isMapReady, setIsMapReady] = useState(false);
+
+  const hasRun = useRef(false);
 
   const initCGPVMap = useCallback((): void => {
     // Log
@@ -84,6 +90,13 @@ export function Map(props: MapProps): JSX.Element {
   useEffect(() => {
     logger.logTraceUseEffect('MAP - initCGPVMap');
 
+    // FIXME: Here, we're preventing a double run, because at this level it's not only impacting a rendering thing, it's impacting the core
+    // FIX.MECONT: and raising double mapReady events which doesn't make sense.
+    // FIX.MECONT: The core of the issue is that the map creation shouldn't be happening inside a 'useEffect' hook, which is a UI thing.
+    // Prevent double run, due to React's StrictMode in dev.
+    if (hasRun.current) return;
+    hasRun.current = true;
+
     if (mapElement.current && !isMapReady && !isMapInitialized.current) {
       // Create map
       viewer.createMap(mapElement.current);
@@ -112,6 +125,11 @@ export function Map(props: MapProps): JSX.Element {
           <HoverTooltip />
           {deviceSizeMedUp && overviewMap && viewer.map && <OverviewMap />}
         </>
+      )}
+      {layersAreLoading && (
+        <Box sx={sxClasses.progressBar}>
+          <ProgressBar />
+        </Box>
       )}
     </Box>
   );

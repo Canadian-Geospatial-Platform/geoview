@@ -95,19 +95,17 @@ export abstract class AbstractBaseLayer {
    * Gets the layer status
    * @returns The layer status
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getLayerStatus(): TypeLayerStatus {
     // Take the layer status from the config
     return this.getLayerConfig()!.layerStatus;
   }
 
   /**
-   * Gets the layer name
+   * Gets the layer name or fallsback on the layer name in the layer configuration.
    * @returns The layer name
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  getLayerName(): string | undefined {
-    return this.#layerName;
+  getLayerName(): string {
+    return this.#layerName || this.getLayerConfig().getLayerName();
   }
 
   /**
@@ -324,7 +322,7 @@ export type LayerNameChangedEvent = {
 /**
  * Define a delegate for the event handler function signature.
  */
-type LayerNameChangedDelegate = EventDelegateBase<AbstractBaseLayer, LayerNameChangedEvent, void>;
+export type LayerNameChangedDelegate = EventDelegateBase<AbstractBaseLayer, LayerNameChangedEvent, void>;
 
 /**
  * Define an event for the delegate

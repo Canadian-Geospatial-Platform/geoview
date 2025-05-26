@@ -82,7 +82,6 @@ export enum NodeType {
   group,
 }
 export type FilterNodeType = { nodeType: NodeType; nodeValue: null | string | number | boolean | string[] | number[] };
-export type FilterNodeArrayType = FilterNodeType[];
 export const binaryKeywors = ['is', 'is not', 'in', 'like', 'and', 'or', '<', '<=', '=', '<>', '>', '>=', '||', '/', '*', ','];
 export const unaryKeywords = ['not', 'upper', 'lower', 'date'];
 export const groupKeywords = ['(', ')'];

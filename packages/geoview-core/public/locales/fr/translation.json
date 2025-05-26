@@ -58,7 +58,7 @@
       "tooltip": "Attribution"
     },
     "disclaimer": {
-      "message": "Avertissement: Cette carte n'est fournie qu'à titre d'illustration. Les marqueurs représentent les emplacements approximatifs en fonction des données accessibles. Le gouvernement du Canada ne peut être tenu responsable de l'interprétation de l'information par une tierce partie. Le gouvernement du Canada se réserve le droit de modifier l’information à tout moment."
+      "message": "Avertissement: Cette carte n'est fournie qu'à titre d'illustration. Les marqueurs représentent les emplacements approximatifs en fonction des données accessibles. Le gouvernement du Canada ne peut être tenu responsable de l'interprétation de l'information par une tierce partie. Le gouvernement du Canada se réserve le droit de modifier l'information à tout moment."
     },
     "crosshair": "Utiliser les touches <strong>fléchées</strong>, <strong>+</strong> et <strong>-</strong> pour naviguer sur la carte, <strong>Entrée</strong> pour sélectionner et <strong>Shift+fléchées</strong> <strong>Haut</strong> et <strong>Bas</strong> pour modfier le déplacement."
   },
@@ -103,8 +103,7 @@
     "url": "Entrer l'URL ou l'identifiant Geocore",
     "urlNoGeocore": "Entrer l'URL",
     "layer": "Couche",
-    "stepOne": "Entrer l'URL/ l'identifiant Geocore",
-    "stepOneNoGeocore": "Entrer l'URL",
+    "stepOne": "Télécharger des données",
     "stepTwo": "Sélectionner le format",
     "stepThree": "Configurer la couche",
     "stepFour": "Entrer le nom",
@@ -112,17 +111,20 @@
     "name": "Nom",
     "layerSelect": "Sélectionner couche(s)",
     "errorDisabled": "Le type de couche « __param__ » est désactivé dans cette carte.",
-    "errorEmpty": "ne peut être vide",
-    "errorNone": "Pas de fichier ou de source ajouté",
-    "errorFile": "Seuls les fichiers geoJSON et CSV peuvent être utilisés",
-    "errorServer": "La source du __param__ n'est pas valide",
-    "errorNotLoaded": "Une erreur est survenue avec la couche '__param__'",
-    "errorImageLoad": "Une erreur est survenue avec l'image source pour la couche '__param__'",
-    "errorProj": "ne prend pas en charge la projection cartographique actuelle",
-    "fetchProgress": "Téléchargement des données... Téléchargé __param__ de __param__ enregistrements",
-    "fetchDone": "Données téléchargées - __param__ enregistrements",
-    "fetchStart": "Début du téléchargement des données...",
-    "slowFetch": "Le téléchargement de __param__ prend plus de temps que prévu",
+    "errorEmpty": "__param__ ne peut être vide.",
+    "errorNone": "Pas de fichier ou de source ajouté.",
+    "errorFile": "Seuls les fichiers geoJSON et CSV peuvent être utilisés.",
+    "errorServer": "La source du __param__ n'est pas valide.",
+    "errorNotLoaded": "Une erreur est survenue avec la couche '__param__'.",
+    "errorImageLoad": "Une erreur est survenue avec l'image source pour la couche '__param__'.",
+    "errorProj": "Projection __param__ invalide.",
+    "errorResponseNoFeaturesProperty": "La réponse du service ne contient pas de propriété 'features'.",
+    "errorNoBounds": "Impossible de trouver les limites pour la couche '__param__'.",
+    "errorNoExtent": "Aucune étendue définie pour la couche '__param__'.",
+    "errorInvalidExtent": "Étendue invalide '__param__'.",
+    "fetchProgress": "Téléchargement des données... Téléchargé __param__ de __param__ enregistrements.",
+    "fetchDone": "Données téléchargées - __param__ enregistrements.",
+    "fetchStart": "Téléchargement des données...",
     "only": "seulement",
     "opacity": "Opacité",
     "opacityMax": "Maximum du parent",
@@ -142,6 +144,8 @@
     "layerType": "Type : ",
     "layerResource": "Ressource : ",
     "layerMetadata": "Métadonnées : ",
+    "layerDefaultFilter": "Filtre par défault : ",
+    "layerServiceProjection": "Projection du service : ",
     "layerHoverable": "Info au passage de la souris",
     "layerQueryable": "Info au click de la souris"
   },
@@ -181,16 +185,36 @@
   },
   "validation": {
     "layer": {
-      "loadfailed": "Le chargement de la couche __param__ a échoué sur la carte",
-      "notfound": "La sous couche __param__ de la couche __param__ n'existe pas sur le serveur",
-      "createtwice": "On ne peut exécuter deux fois la méthode createGeoViewRasterLayers pour la couche __param__ sur la carte",
-      "usedtwice": "Utilisation en double de l'identifiant de couche __param__ sur la carte",
-      "multipleUUID": "Les couches GeoCore ne peuvent avoir qu'un seul identifiant par couche",
-      "vectorFeaturesFailed": "Échec lors du chargement des enregistrements vectorielles pour la couche __param__"
+      "loadfailed": "Le chargement de la couche '__param__' a échoué sur la carte.",
+      "layerIdNotFound": "L'identifiant '__param__' de la couche '__param__' est introuvable .",
+      "layerIdMustBeNumber": "L'identifiant de la couche ESRI doit être un nombre, mais était '__param__' pour la couche '__param__'.",
+      "createtwice": "On ne peut exécuter deux fois la méthode createGeoViewRasterLayers pour la couche '__param__'.",
+      "usedtwice": "Utilisation en double de l'identifiant de couche '__param__'.",
+      "multipleUUID": "Les couches GeoCore ne peuvent avoir qu'un seul identifiant GeoCore par couche.",
+      "vectorFeaturesFailed": "Échec lors du chargement des entités vectorielles pour la couche '__param__'.",
+      "invalidGeoviewLayerType": "Type de couche GeoView invalide '__param__'.",
+      "geoviewLayerIdMandatoryForLayerType": "geoviewLayerId est obligatoire pour une couche GeoView de type '__param__'.",
+      "metadataAccessPathMissing": "metadataAccessPath est obligatoire pour la couche GeoView '__param__' de type '__param__'.",
+      "dataAccessPathMissing": "dataAccessPath est obligatoire pour la couche GeoView '__param__'.",
+      "unableToFetch": "Impossible de récupérer et de lire les métadonnées pour la couche '__param__'.",
+      "serviceMetadataEmpty": "Les métadonnées du service sont vides pour la couche '__param__'.",
+      "invalidLayerFilter": "La couche '__param__' contient un filtre invalide.\nfiltre = '__param__'\nfiltre interne = '__param__'.",
+      "failedToCreateLayer": "Échec de la création de la couche '__param__'.",
+      "noCapabilitiesOrEmpty": "Aucune capacité trouvée (ou vide) pour la couche '__param__'.",
+      "wmsServiceFormatParameter": "Le paramètre 'Format' de GetFeatureInfo ne supporte que text/xml, text/html et text/plain pour les services WMS, '__param__'.",
+      "wmsSubLayerNotfound": "La sous-couche '__param__' de la couche '__param__' n'existe pas sur le serveur.",
+      "csvNoGeographicData": "Aucune donnée géographique trouvée dans le fichier CSV '__param__'.",
+      "invalidMetadata": "Métadonnées invalides (listOfLayerEntryConfig) empêchant le chargement de la couche '__param__'.",
+      "emptyLayerGroup": "Groupe de couches vide pour la couche '__param__'.",
+      "unableToCreateGroupLayer": "Impossible de créer le groupe de couches '__param__'.",
+      "vectorSourceUrlNotDefined": "L'URL de la source vectorielle n'est pas définie pour la couche '__param__'.",
+      "vectorTileLayerProjectionMismatch": "La projection de la couche vectorielle tuilée '__param__' ne correspond pas à celle de la carte.",
+      "extentParameterNotDefined": "Le paramètre extent n'est pas défini dans l'élément source pour la couche '__param__'.",
+      "projectionParameterNotDefined": "Le paramètre projection n'est pas défini dans l'élément source pour la couche '__param__'."
     },
     "schema": {
       "notFound": "Une erreur de schéma a été trouvée, vérifiez la console pour voir ce qui ne va pas.",
-      "wrongPath": "Impossible de trouver le schéma (__param__)"
+      "wrongPath": "Impossible de trouver le schéma '__param__'."
     },
     "changeDisplayLanguageLayers": "Les couches ne peuvent être chargée(s) de nouveau car la configuration ne supporte pas ce langage",
     "changeDisplayLanguage": "Seulement 'en' et 'fr' sont supporées",
@@ -224,7 +248,7 @@
     "zoom": "ZOOM",
     "details": "DÉTAILS",
     "exportBtn": "Télécharger",
-    "downloadAsGeoJSON": "Télécharger GeoJSON",
+    "downloadAsGeoJSON": "Télécharger GeoJSON __param__",
     "downloadAsCSV": "Télécharger CSV",
     "filterMap": "Filtrer la carte",
     "clearFilters": "Effacer les filtres",
@@ -236,7 +260,9 @@
     "featureFiltered": "élément filtré(s)",
     "images": "Images",
     "close": "Fermer",
-    "noFeatures": "inconnue..."
+    "noFeatures": "inconnue...",
+    "showing": "affiché(s)",
+    "total": "total"
   },
   "geochart": {
     "noChartAvailable": "Cliquer sur une couche de la carte qui contient un graphique"
@@ -249,29 +275,48 @@
     "resizeTooltip": "Redimensionner",
     "noTab": "Pas d'onglet"
   },
-  "error": {
-    "generic": "Une erreur est survenue, contactez nous ou regardez dans la console pour détails",
-    "metadata": {
-      "unableRead": "Impossible de lire les métadonnées",
-      "empty": "La valeur renvoyée est vide",
-      "capability": "La valeur renvoyée ne contient pas de Capability, de Layer ou est vide"
-    },
+  "toggleAll": {
+    "show": "Afficher tout",
+    "showTooltip": "Bascule la visibilité de toutes les couches de la carte",
+    "collapse": "Réduire tout",
+    "collapseTooltip": "Permet de déterminer si les sous-couches sont affichées dans la légende / liste des couches."
+  },
+  "warning": {
     "layer": {
-      "createGroup": "Impossible de créer une couche de groupe",
-      "emptyGroup": "Groupe de couches vide",
-      "esriId": "Le layerId ESRI doit être un nombre",
-      "esriIdNotFound": "Le layerId ESRI introuvable",
-      "notAbleToQuery": "Impossible de téléchager les données pour __param__",
-      "unsuportedProjection": "La projection de la couche __param__ ne correspond pas à la projection de la carte",
-      "noCSVGeometry": "Impossible de trouver des données géographiques dans la couche CSV __param__"
+      "slowFetch": "Le téléchargement de '__param__' prend plus de temps que prévu.",
+      "slowRender": "La couche '__param__' est lente à se dessiner sur la carte, svp patientez...",
+      "basemapTakingLongTime": "La couche de base prend plus de temps que prévu à répondre...",
+      "metadataTakingLongTime": "Les métadonnées pour la couche '__param__' prennent plus de temps que prévu à récupérer...",
+      "vectorTileRemoved": "La tuile vectorielle '__param__' a dû être retirée en raison d'un conflit de projection."
+    }
+  },
+  "error": {
+    "generic": "Une erreur est survenue, contactez nous ou regardez dans la console pour plus de détails.",
+    "layer": {
+      "layerNotFound": "La couche à l'emplacement '__param__' est introuvable.",
+      "notAGeoJsonLayer": "Ce n'est pas une couche GeoJSON pour la couche '__param__'.",
+      "notAnEsriDynamicLayer": "Ce n'est pas une couche dynamique Esri pour la couche '__param__'.",
+      "notAFeatureLayer": "L'identifiant de couche n'est pas une couche d'entités '__param__'.",
+      "notQueryableLayer": "La couche '__param__' n'est pas interrogeable.",
+      "notAbleToQuery": "Impossible de téléchager les données pour '__param__'."
+    },
+    "map": {
+      "mapIdNotFound": "La carte avec l'identifiant '__param__' est introuvable.",
+      "geoviewStoreNotFound": "Le 'React Store' sur la carte '__param__' est introuvable.",
+      "mapDivNotExists": "Div avec identifiant __param__ does not exist.",
+      "mapWrongCall": "Div avec identifiant __param__ a une classe 'geoview-map' et devrait être initialisé via un appel à 'cgpv.init()'."
     },
     "geocore": {
-      "uuidNotFound": "L'identifiant de couche GeoCore __param__ n'existe pas sur le serveur",
-      "invalidResponse": "Réponse invalide (__param__) retournée par le service GeoCore pour UUID __param__",
-      "noLayer": "Aucune couche retournée par le service GeoCore pour UUID __param__"
+      "uuidNotFound": "L'identifiant de couche GeoCore '__param__' n'existe pas sur le serveur.",
+      "invalidResponse": "Réponse invalide '__param__' retournée par le service GeoCore pour UUID '__param__'.",
+      "noLayer": "Aucune couche retournée par le service GeoCore pour UUID '__param__'."
     },
     "geolocator": {
       "noService": "Service de géolocalisation non disponible"
     }
+  },
+  "templates": {
+    "firstSnackbar": "Ceci est ma première notification !",
+    "canApplyFunction": "Je peux même appliquer une fonction"
   }
 }

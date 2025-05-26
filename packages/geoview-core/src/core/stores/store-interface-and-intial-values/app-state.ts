@@ -24,6 +24,7 @@ export interface IAppState {
   geolocatorServiceURL: string | undefined;
   metadataServiceURL: string | undefined;
   geoviewHTMLElement: HTMLElement;
+  height: number;
   geoviewAssetsURL: string;
   isCircularProgressActive: boolean;
   isCrosshairsActive: boolean;
@@ -34,7 +35,7 @@ export interface IAppState {
   setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
 
   actions: {
-    addMessage: (type: SnackbarType, message: string, param?: string[]) => void;
+    addMessage: (type: SnackbarType, messageKey: string, param?: string[]) => void;
     addNotification: (notif: NotificationDetailsType) => void;
     setCrosshairActive: (active: boolean) => void;
     setDisplayLanguage: (lang: TypeDisplayLanguage) => Promise<void>;
@@ -72,6 +73,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
     geolocatorServiceURL: '',
     metadataServiceURL: '',
     geoviewHTMLElement: document.createElement('div'), // create an empty div before real one is assigned
+    height: 0,
     geoviewAssetsURL: getScriptAndAssetURL(),
     isCircularProgressActive: false,
     isCrosshairsActive: false,
@@ -84,6 +86,8 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
       const lang = VALID_DISPLAY_LANGUAGE.includes(geoviewConfig.displayLanguage as TypeDisplayLanguage)
         ? geoviewConfig.displayLanguage
         : 'en';
+      const geoviewHTMLElement = document.getElementById(get().mapId)!;
+
       set({
         appState: {
           ...get().appState,
@@ -92,7 +96,8 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
           displayTheme: geoviewConfig.theme || 'geo.ca',
           geolocatorServiceURL: geoviewConfig.serviceUrls?.geolocatorUrl,
           metadataServiceURL: geoviewConfig.serviceUrls?.metadataUrl,
-          geoviewHTMLElement: document.getElementById(get().mapId)!,
+          geoviewHTMLElement: geoviewHTMLElement!,
+          height: geoviewHTMLElement?.clientHeight || 600,
           showUnsymbolizedFeatures: geoviewConfig.globalSettings?.showUnsymbolizedFeatures || false,
         },
       });
@@ -104,12 +109,12 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
       /**
        * Adds a snackbar message.
        * @param {SnackbarType} type - The type of message.
-       * @param {string} message - The message.
+       * @param {string} messageKey - The message.
        * @param {string} param - Optional param to replace in the string if it is a key
        */
-      addMessage: (type: SnackbarType, message: string, param?: string[]): void => {
+      addMessage: (type: SnackbarType, messageKey: string, param?: string[]): void => {
         // Redirect to processor
-        AppEventProcessor.addMessage(get().mapId, type, message, param);
+        AppEventProcessor.addMessage(get().mapId, type, messageKey, param);
       },
 
       /**
@@ -303,9 +308,12 @@ export const useAppGeolocatorServiceURL = (): string | undefined =>
   useStore(useGeoViewStore(), (state) => state.appState.geolocatorServiceURL);
 export const useAppMetadataServiceURL = (): string | undefined => useStore(useGeoViewStore(), (state) => state.appState.metadataServiceURL);
 export const useAppGeoviewHTMLElement = (): HTMLElement => useStore(useGeoViewStore(), (state) => state.appState.geoviewHTMLElement);
+export const useAppHeight = (): number => useStore(useGeoViewStore(), (state) => state.appState.height);
 export const useAppGeoviewAssetsURL = (): string => useStore(useGeoViewStore(), (state) => state.appState.geoviewAssetsURL);
 export const useAppGuide = (): TypeGuideObject | undefined => useStore(useGeoViewStore(), (state) => state.appState.guide);
 export const useAppNotifications = (): NotificationDetailsType[] => useStore(useGeoViewStore(), (state) => state.appState.notifications);
+export const useAppShowUnsymbolizedFeatures = (): boolean =>
+  useStore(useGeoViewStore(), (state) => state.appState.showUnsymbolizedFeatures);
 
 // GV these 2 selectors are use in app-start.tsx before context is assigned to the map
 // GV DO NOT USE this technique elsewhere, it is only to reload language and theme

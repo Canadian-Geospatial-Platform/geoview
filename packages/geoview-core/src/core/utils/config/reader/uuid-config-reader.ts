@@ -17,7 +17,7 @@ import {
   LayerGeoCoreUUIDNotFoundError,
 } from '@/core/exceptions/geocore-exceptions';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { NotSupportedError } from '@/core/exceptions/core-exceptions';
+import { formatError, NotSupportedError } from '@/core/exceptions/core-exceptions';
 
 // The GeoChart Json object coming out of the GeoCore response
 export type GeoChartGeoCoreConfig = TypeJsonObject & {
@@ -70,7 +70,7 @@ export class UUIDmapConfigReader {
       };
     } catch (error: unknown) {
       // If the promise had failed
-      if (!result) throw new LayerGeoCoreUUIDNotFoundError(uuids, error as Error);
+      if (!result) throw new LayerGeoCoreUUIDNotFoundError(uuids, formatError(error));
 
       // Re-throw the original error otherwise
       throw error;
@@ -237,10 +237,11 @@ export class UUIDmapConfigReader {
           // Add it
           listOfGeoviewLayerConfig.push(geoviewLayerConfig);
 
-          // If there's only the one layer, replace the layer name with the name from GeoCore
+          // If there's only the one layer AND customGeocoreLayerConfig.layerName is not provided, replace the layer name with the name from GeoCore
           if (
             listOfGeoviewLayerConfig[i].listOfLayerEntryConfig.length === 1 &&
-            !listOfGeoviewLayerConfig[i].listOfLayerEntryConfig[0].listOfLayerEntryConfig
+            !listOfGeoviewLayerConfig[i].listOfLayerEntryConfig[0].listOfLayerEntryConfig &&
+            customGeocoreLayerConfig.layerName === undefined
           ) {
             listOfGeoviewLayerConfig[i].listOfLayerEntryConfig[0].layerName = name as string;
           }

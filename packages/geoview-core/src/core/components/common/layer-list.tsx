@@ -2,11 +2,13 @@ import { ReactNode, memo, useCallback, useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { animated } from '@react-spring/web';
-import { Box, List, ListItem, ListItemButton, Paper, Tooltip, Typography } from '@/ui';
+import { Box, List, ListItem, ListItemButton, Paper, Tooltip, Typography, ProgressBar } from '@/ui';
+
 import { TypeFeatureInfoEntry, TypeQueryStatus, TypeLayerStatus } from '@/api/config/types/map-schema-types';
 import { getSxClasses } from './layer-list-style';
 import { LayerIcon } from './layer-icon';
 import { logger } from '@/core/utils/logger';
+import { useSelectorLayerStatus } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 export interface LayerListEntry {
   content?: string | ReactNode;
@@ -44,11 +46,8 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
-  // TODO: Use this pattern?
-  // const layerName: string | undefined = useSelectorLayerName(layer.layerPath);
-  // const layerStatus: TypeLayerStatus | undefined = useSelectorLayerStatus(layer.layerPath);
-  // const layerQueryStatus: TypeQueryStatus | undefined = useSelectorLayerQueryStatus(layer.layerPath);
-  // const layerTooltip = layerName ? `${layerName}, ${layer.layerFeatures}` : '';
+  // Store
+  const layerStatus = useSelectorLayerStatus(layer.layerPath);
 
   // Style
   const containerClass = [
@@ -127,7 +126,9 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
             >
               {layer.layerPath && !layer.content && <LayerIcon layerPath={layer.layerPath} />}
               <Box sx={sxClasses.listPrimaryText}>
-                <Typography component="div" className="layerTitle">{layer.layerName}</Typography>
+                <Typography component="div" className="layerTitle">
+                  {layer.layerName}
+                </Typography>
                 <Box display="flex" alignContent="center">
                   <Typography component="div" variant="subtitle1" noWrap display="block">
                     {getLayerStatus()}
@@ -135,6 +136,11 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
                 </Box>
               </Box>
             </ListItemButton>
+            {layerStatus === 'loading' && (
+              <Box sx={sxClasses.progressBar}>
+                <ProgressBar />
+              </Box>
+            )}
           </ListItem>
         </Box>
       </Tooltip>

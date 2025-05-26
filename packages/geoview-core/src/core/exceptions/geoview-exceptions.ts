@@ -36,6 +36,9 @@ export class GeoViewError extends Error {
     this.messageKey = messageKey;
     this.messageParams = messageParams;
 
+    // Translate the message in English by default to at least provide 'something' readable
+    this.message = this.translateMessage('en');
+
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, GeoViewError.prototype);
   }
@@ -87,7 +90,7 @@ export class MapViewerNotFoundError extends GeoViewError {
    * @param {string} mapId - The unique identifier of the map that was not found.
    */
   constructor(mapId: string) {
-    super(`Map with ID ${mapId} not found`);
+    super('error.map.mapIdNotFound', [mapId]);
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'MapViewerNotFoundError';
@@ -107,7 +110,7 @@ export class GeoViewStoreOnMapNotFoundError extends GeoViewError {
    * @param {string} mapId - The unique identifier of the map on which toe GeoView Store was not found.
    */
   constructor(mapId: string) {
-    super(`GeoView Store on Map ID ${mapId} not found`);
+    super('error.map.geoviewStoreNotFound', [mapId]);
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'GeoViewStoreOnMapNotFoundError';
@@ -119,21 +122,22 @@ export class GeoViewStoreOnMapNotFoundError extends GeoViewError {
 
 /**
  * Error thrown when GeoView map on a specific map ID already exist.
- * @extends {GeoViewError}
+ * @extends {Error}
  */
-export class GeoViewMapIdAlreadyExist extends GeoViewError {
+// GV This Error inherits from 'Error' directly, because it may happen 'before' the actual i18n is created.
+export class GeoViewMapIdAlreadyExistError extends Error {
   /**
-   * Creates an instance of GeoViewMapIdAlreadyExist.
+   * Creates an instance of GeoViewMapIdAlreadyExistError.
    * @param {string} mapId - The unique identifier of the map.
    */
   constructor(mapId: string) {
-    super(`GeoView Map ID ${mapId} alreday exist`);
+    super(`GeoView Map ID '${mapId}' already exist`);
 
     // Set a custom name for the error type to differentiate it from other error types
-    this.name = 'GeoViewMapIdAlreadyExist';
+    this.name = 'GeoViewMapIdAlreadyExistError';
 
     // Ensure correct inheritance (important for transpilation targets)
-    Object.setPrototypeOf(this, GeoViewMapIdAlreadyExist.prototype);
+    Object.setPrototypeOf(this, GeoViewMapIdAlreadyExistError.prototype);
   }
 }
 
@@ -147,7 +151,7 @@ export class InvalidProjectionError extends GeoViewError {
    * @param {string} projectionCode - The invalid projection code that caused the error.
    */
   constructor(projectionCode: string) {
-    super('Invalid projection code', [projectionCode]);
+    super('layers.errorProj', [projectionCode]);
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'InvalidProjectionError';
@@ -168,7 +172,7 @@ export class InvalidExtentError extends GeoViewError {
    * @param {Extent} extent - The invalid extent that caused the error.
    */
   constructor(extent: Extent) {
-    super('Invalid extent', [extent]);
+    super('layers.errorInvalidExtent', [extent]);
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'InvalidExtentError';
@@ -189,7 +193,7 @@ export class NoFeaturesPropertyError extends GeoViewError {
    * Creates an instance of NoFeaturesPropertyError.
    */
   constructor() {
-    super("The response from the service didn't provide a 'features' property.");
+    super('layers.errorResponseNoFeaturesProperty');
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'NoFeaturesPropertyError';
@@ -219,6 +223,26 @@ export class CoreBasemapCreationError extends GeoViewError {
 }
 
 /**
+ * Error thrown when the basemap creation process takes longer than expected.
+ * This error is typically used to notify that the basemap did not complete its creation
+ * within a predefined timeout period.
+ */
+export class BasemapTakingLongTimeError extends GeoViewError {
+  /**
+   * Constructs a BasemapTakingLongTimeError error for the specified map ID.
+   */
+  constructor() {
+    super('warning.layer.basemapTakingLongTime');
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'BasemapTakingLongTimeError';
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, BasemapTakingLongTimeError.prototype);
+  }
+}
+
+/**
  * Custom error class representing a failure to retrieve geographic bounds
  * for a specific map layer.
  * @extends {GeoViewError}
@@ -229,7 +253,7 @@ export class NoBoundsError extends GeoViewError {
    * @param {string} layerPath - The path or identifier of the layer that caused the error.
    */
   constructor(layerPath: string) {
-    super(`Couldn't find bounds for layer: ${layerPath}`);
+    super('layers.errorNoBounds', [layerPath]);
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'NoBoundsError';
@@ -248,15 +272,55 @@ export class NoBoundsError extends GeoViewError {
 export class NoExtentError extends GeoViewError {
   /**
    * Creates an instance of NoExtentError.
-   * @param {Extent} layerPath - The layer path for which we tried to get an Extent.
+   * @param {string} layerPath - The layer path for which we tried to get an Extent.
    */
   constructor(layerPath: string) {
-    super('No extent', [layerPath]);
+    super('layers.errorNoExtent', [layerPath]);
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'NoExtentError';
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, NoExtentError.prototype);
+  }
+}
+
+/**
+ * Error thrown when a map-related function is called at the wrong time or under invalid conditions during initialization.
+ * Typically used to indicate misuse of the initialization sequence.
+ */
+export class InitDivNotExistError extends GeoViewError {
+  /**
+   * Creates an instance of InitDivNotExistError.
+   * @param {string} mapId - The map id for which a wront function call was made.
+   */
+  constructor(mapId: string) {
+    super('error.map.mapDivNotExists', [mapId]);
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'InitDivNotExistError';
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, InitDivNotExistError.prototype);
+  }
+}
+
+/**
+ * Error thrown when a map-related function is called at the wrong time or under invalid conditions during initialization.
+ * Typically used to indicate misuse of the initialization sequence.
+ */
+export class InitMapWrongCallError extends GeoViewError {
+  /**
+   * Creates an instance of InitMapWrongCallError.
+   * @param {string} mapId - The map id for which a wront function call was made.
+   */
+  constructor(mapId: string) {
+    super('error.map.mapWrongCall', [mapId]);
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'InitMapWrongCallError';
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, InitMapWrongCallError.prototype);
   }
 }

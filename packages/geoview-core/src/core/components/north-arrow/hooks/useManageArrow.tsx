@@ -55,6 +55,11 @@ export const useManageArrow = (): ArrowReturn => {
     // Log
     logger.logTraceUseMemo('USE-MANAGE-ARROW - calculatedRotation, calculatedOffset');
 
+    // Constants
+    const ARROW_WIDTH = 24;
+    const mapWidth = mapSize[0] / 2;
+    const offsetX = mapWidth - ARROW_WIDTH / 2;
+
     // Early return if no arrow element
     if (!northArrowElement) {
       return { calculatedRotation: { angle: 0 }, calculatedOffset: 0 };
@@ -65,10 +70,11 @@ export const useManageArrow = (): ArrowReturn => {
       return { calculatedRotation: { angle: 0 }, calculatedOffset: 0 };
     }
 
-    // Constants
-    const ARROW_WIDTH = 24;
-    const mapWidth = mapSize[0] / 2;
-    const offsetX = mapWidth - ARROW_WIDTH / 2;
+    // Early return if zoom level is smaller the 5 and map center is near central meridian (keep rotation to 0)
+    const mapCenterLongitude: number = Projection.transformCoordinates(mapCenterCoord, 'EPSG:3978', 'EPSG:4326')![0] as number;
+    if (mapZoom < 5 && Math.abs(CENTRAL_MERIDIAN - mapCenterLongitude) < 10) {
+      return { calculatedRotation: { angle: 0 }, calculatedOffset: offsetX };
+    }
 
     // Handle Web Mercator Projection - simpler case first
     if (isWebMercator) {
@@ -98,8 +104,7 @@ export const useManageArrow = (): ArrowReturn => {
         const diff = Math.abs(mapRotation - rotationValue);
 
         // Calculate longitude factor
-        const centerLongitude = Projection.transformCoordinates(mapCenterCoord, 'EPSG:3978', 'EPSG:4326')![0];
-        const deviationFromCenter = (centerLongitude as number) - CENTRAL_MERIDIAN;
+        const deviationFromCenter = (mapCenterLongitude as number) - CENTRAL_MERIDIAN;
 
         if (Math.abs(deviationFromCenter) <= 3) {
           setRotation(0);

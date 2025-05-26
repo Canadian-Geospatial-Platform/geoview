@@ -29,6 +29,7 @@ import {
   layerEntryIsGroupLayer,
   TypeLayerStatus,
   GeoCoreLayerConfig,
+  CONST_LAYER_TYPES,
 } from '@/api/config/types/map-schema-types';
 import { GeoJSON, layerConfigIsGeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
 import { GeoPackage, layerConfigIsGeoPackage } from '@/geo/layer/geoview-layers/vector/geopackage';
@@ -49,10 +50,16 @@ import { AllFeatureInfoLayerSet } from '@/geo/layer/layer-sets/all-feature-info-
 import { LegendsLayerSet } from '@/geo/layer/layer-sets/legends-layer-set';
 import { FeatureInfoLayerSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
 import { formatError, NotSupportedError } from '@/core/exceptions/core-exceptions';
-import { LayerCreatedTwiceError, LayerNotGeoJsonError } from '@/core/exceptions/layer-exceptions';
+import { LayerCreatedTwiceError, LayerNotFoundError, LayerNotGeoJsonError } from '@/core/exceptions/layer-exceptions';
 import { LayerEntryConfigError } from '@/core/exceptions/layer-entry-config-exceptions';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
-import { AbstractGVLayer, LayerMessageEvent } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import {
+  AbstractGVLayer,
+  LayerLoadDelegate as GVLayerLoadDelegate,
+  LayerLoadEvent as GVLayerLoadEvent,
+  LayerMessageDelegate,
+  LayerMessageEvent,
+} from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVGeoJSON } from '@/geo/layer/gv-layers/vector/gv-geojson';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 import { getExtentUnion, getZoomFromScale } from '@/geo/utils/utilities';
@@ -90,7 +97,13 @@ export type GeoViewLayerAddedResult = {
  * @class LayerApi
  */
 export class LayerApi {
-  /** used to reference the map viewer */
+  // Maximum time duration to wait when registering a layer for the time slider
+  static #MAX_WAIT_TIME_SLIDER_REGISTRATION = 20000;
+
+  // Temporary debugging flag indicating if we want the WMS group layers to have their sub layers fully blown up
+  static DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS = false;
+
+  /** Reference on the map viewer */
   mapViewer: MapViewer;
 
   // used to access geometry API to create and manage geometries
@@ -139,7 +152,16 @@ export class LayerApi {
   #onLayerAddedHandlers: LayerAddedDelegate[] = [];
 
   // Keep all callback delegates references
-  #onLayerLoadedHandlers: LayerLoadedDelegate[] = [];
+  #onLayerLoadedFirstHandlers: LayerLoadDelegate[] = [];
+
+  // Keep all callback delegates references
+  #onLayerLoadingHandlers: LayerLoadDelegate[] = [];
+
+  // Keep all callback delegates references
+  #onLayerLoadedHandlers: LayerLoadDelegate[] = [];
+
+  // Keep all callback delegates references
+  #onLayerAllLoadedHandlers: LayerLoadDelegate[] = [];
 
   // Keep all callback delegates references
   #onLayerErrorHandlers: LayerErrorDelegate[] = [];
@@ -153,11 +175,17 @@ export class LayerApi {
   // Keep all callback delegates references
   #onLayerItemVisibilityToggledHandlers: LayerItemVisibilityToggledDelegate[] = [];
 
-  // Maximum time duration to wait when registering a layer for the time slider
-  static #MAX_WAIT_TIME_SLIDER_REGISTRATION = 20000;
+  // Keep a bounded reference to the handle layer message
+  #boundedHandleLayerMessage: LayerMessageDelegate;
 
-  // Temporary debugging flag indicating if we want the WMS group layers to have their sub layers fully blown up
-  static DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS = false;
+  // Keep a bounded reference to the handle layer first load
+  #boundedHandleLayerFirstLoaded: GVLayerLoadDelegate;
+
+  // Keep a bounded reference to the handle layer loading
+  #boundedHandleLayerLoading: GVLayerLoadDelegate;
+
+  // Keep a bounded reference to the handle layer loaded
+  #boundedHandleLayerLoaded: GVLayerLoadDelegate;
 
   /**
    * Initializes layer types and listen to add/remove layer events from outside
@@ -173,6 +201,12 @@ export class LayerApi {
 
     this.geometry = new GeometryApi(this.mapViewer);
     this.featureHighlight = new FeatureHighlight(this.mapViewer);
+
+    // Keep a bounded reference to the handle
+    this.#boundedHandleLayerMessage = this.#handleLayerMessage.bind(this);
+    this.#boundedHandleLayerFirstLoaded = this.#handleLayerFirstLoaded.bind(this);
+    this.#boundedHandleLayerLoading = this.#handleLayerLoading.bind(this);
+    this.#boundedHandleLayerLoaded = this.#handleLayerLoaded.bind(this);
   }
 
   /**
@@ -258,81 +292,6 @@ export class LayerApi {
   }
 
   /**
-   * Attaches event handlers to a layer
-   * @private
-   * @param {AbstractGVLayer} gvLayer - The layer instance to attach events to
-   * @returns {void}
-   *
-   * @fires LayerMessage - When a layer sends a message
-   * @fires LayerLoaded - When an individual layer is loaded on the map
-   *
-   * @description
-   * This method sets up the following event handlers:
-   * - Layer message handling through onLayerMessage
-   * - Layer loading completion through onIndividualLayerLoaded
-   *   - Handles setting visible range properties
-   *   - Manages legend information and bounds
-   *
-   * @private
-   */
-  #attachEventsOnLayer(gvLayer: AbstractGVLayer): void {
-    // Add a handler on layer's message
-    gvLayer.onLayerMessage(this.#handleLayerMessage.bind(this));
-
-    // Register a hook when a layer is loaded on the map
-    gvLayer.onIndividualLayerLoaded((sender, payload) => {
-      // Log
-      logger.logTraceCore(`LAYERS - 10 - ${payload.layerPath} loaded on map ${this.getMapId()}`);
-
-      // Set in visible range property for all newly added layers
-      this.#setLayerInVisibleRange(sender, gvLayer.getLayerConfig());
-
-      // Ensure that the layer bounds are set when the layer is loaded
-      const legendLayerInfo = LegendEventProcessor.getLegendLayerInfo(this.getMapId(), payload.layerPath);
-      if (legendLayerInfo && !legendLayerInfo.bounds) LegendEventProcessor.getLayerBounds(this.getMapId(), payload.layerPath);
-
-      this.#emitLayerLoaded({ layer: sender, layerPath: payload.layerPath });
-    });
-  }
-
-  /**
-   * Handles layer-specific messages and displays them through the map viewer's notification system
-   * @param {AbstractGVLayer} layer - The layer instance that triggered the message
-   * @param {LayerMessageEvent} layerMessageEvent - The message event containing notification details
-   * @param {string} layerMessageEvent.messageKey - Key for localized message lookup
-   * @param {string[]} layerMessageEvent.messageParams - Parameters to be inserted into the localized message
-   * @param {boolean} layerMessageEvent.notification - Notification configuration options
-   * @returns {void}
-   *
-   * @example
-   * handleLayerMessage(myLayer, {
-   *   messageKey: 'layers.fetchProgress',
-   *   messageParams: [50, 100],
-   *   messageType: 'error',
-   *   notification: true
-   * });
-   *
-   * @private
-   */
-  #handleLayerMessage(layer: AbstractGVLayer | AbstractGeoViewLayer, layerMessageEvent: LayerMessageEvent): void {
-    // Read event params for clarity
-    const { messageType } = layerMessageEvent;
-    const { messageKey } = layerMessageEvent;
-    const { messageParams } = layerMessageEvent;
-    const { notification } = layerMessageEvent;
-
-    if (messageType === 'info') {
-      this.mapViewer.notifications.showMessage(messageKey, messageParams, notification);
-    } else if (messageType === 'warning') {
-      this.mapViewer.notifications.showWarning(messageKey, messageParams, notification);
-    } else if (messageType === 'error') {
-      this.mapViewer.notifications.showError(messageKey, messageParams, notification);
-    } else if (messageType === 'success') {
-      this.mapViewer.notifications.showSuccess(messageKey, messageParams, notification);
-    }
-  }
-
-  /**
    * Returns the OpenLayer instance associated with the layer path.
    * @param {string} layerPath - The layer path to the layer's configuration.
    * @returns {BaseLayer} Returns the geoview instance associated to the layer path.
@@ -410,6 +369,7 @@ export class LayerApi {
       ? MapEventProcessor.getMapOrderedLayerInfo(this.getMapId())
       : [];
     const promisedLayers = await Promise.allSettled(promisesOfGeoCoreGeoviewLayers);
+
     // For each layers in the fulfilled promises only
     promisedLayers.forEach((promise) => {
       // If fullfilled
@@ -462,172 +422,6 @@ export class LayerApi {
 
     // Init ordered layer info (?)
     MapEventProcessor.setMapOrderedLayerInfo(this.getMapId(), orderedLayerInfos);
-  }
-
-  /**
-   * Show the errors that happened during layers loading.
-   * If it's an aggregate error, log and show all of them.
-   * If it's a regular error, log and show only that error.
-   * @param error - The error to log and show.
-   * @param geoviewLayerId - The Geoview layer id for which the error happened.
-   */
-  showLayerError(error: unknown, geoviewLayerId: string): void {
-    // If an aggregation error
-    if (error instanceof AggregateError) {
-      // For each errors
-      error.errors.forEach((layerError) => {
-        // Recursive call
-        this.showLayerError(layerError, geoviewLayerId);
-      });
-    } else {
-      // Cast the error
-      const theError = error as Error;
-
-      // Read the layer path if possible, more precise
-      let layerPathOrId = geoviewLayerId;
-      if (theError instanceof LayerEntryConfigError) {
-        layerPathOrId = theError.layerConfig.layerPath;
-      }
-
-      // Show error
-      this.mapViewer.notifications.showErrorFromError(theError, true);
-
-      // If the Error is GeoViewError, it has a translation
-      let { message } = theError;
-      if (theError instanceof GeoViewError) {
-        message = theError.translateMessage(this.mapViewer.getDisplayLanguage());
-      }
-
-      // Emit about it
-      this.#emitLayerError({ layerPath: layerPathOrId, error: message });
-    }
-  }
-
-  /**
-   * Validates the geoview layer configuration array to eliminate duplicate entries and inform the user.
-   * @param {MapConfigLayerEntry[]} mapConfigLayerEntries - The Map Config Layer Entries to validate.
-   * @returns {MapConfigLayerEntry[]} The new configuration with duplicate entries eliminated.
-   * @private
-   */
-  #deleteDuplicateAndMultipleUuidGeoviewLayerConfig(mapConfigLayerEntries?: MapConfigLayerEntry[]): MapConfigLayerEntry[] {
-    if (mapConfigLayerEntries && mapConfigLayerEntries.length > 0) {
-      const validGeoviewLayerConfigs = mapConfigLayerEntries.filter((geoviewLayerConfigToCreate, configToCreateIndex) => {
-        for (let configToTestIndex = 0; configToTestIndex < mapConfigLayerEntries.length; configToTestIndex++) {
-          if (
-            geoviewLayerConfigToCreate.geoviewLayerId === mapConfigLayerEntries[configToTestIndex].geoviewLayerId &&
-            // We keep the first instance of the duplicate entry.
-            configToCreateIndex > configToTestIndex
-          ) {
-            this.#printDuplicateGeoviewLayerConfigError(geoviewLayerConfigToCreate);
-            // Remove geoCore ordered layer info placeholder
-            if (MapEventProcessor.findMapLayerFromOrderedInfo(this.getMapId(), geoviewLayerConfigToCreate.geoviewLayerId))
-              MapEventProcessor.removeOrderedLayerInfo(this.getMapId(), geoviewLayerConfigToCreate.geoviewLayerId, false);
-
-            return false;
-          }
-        }
-        return true;
-      });
-      return validGeoviewLayerConfigs;
-    }
-    return [];
-  }
-
-  /**
-   * Prints an error message for the duplicate geoview layer configuration.
-   * @param {MapConfigLayerEntry} mapConfigLayerEntry - The Map Config Layer Entry in error.
-   * @private
-   */
-  #printDuplicateGeoviewLayerConfigError(mapConfigLayerEntry: MapConfigLayerEntry): void {
-    // Log
-    logger.logError(`Duplicate use of geoview layer identifier ${mapConfigLayerEntry.geoviewLayerId} on map ${this.getMapId()}`);
-
-    // Show the error
-    this.mapViewer.notifications.showError('validation.layer.usedtwice', [mapConfigLayerEntry.geoviewLayerId]);
-  }
-
-  /**
-   * TODO Add this function to utilties
-   * Gets all child paths from a parent path
-   * @param {string} parentPath - The parent path
-   * @returns {string[]} Child layer paths
-   */
-  #getAllChildPaths(parentPath: string): string[] {
-    const parentLayerEntryConfig = this.getLayerEntryConfig(parentPath)?.geoviewLayerConfig.listOfLayerEntryConfig;
-
-    if (!parentLayerEntryConfig) return [];
-
-    function getChildPaths(listOfLayerEntryConfig: TypeLayerEntryConfig[]): string[] {
-      const layerPaths: string[] = [];
-      listOfLayerEntryConfig.forEach((entryConfig) => {
-        layerPaths.push(entryConfig.layerPath);
-        if (entryConfig.listOfLayerEntryConfig) {
-          layerPaths.push(...getChildPaths(entryConfig.listOfLayerEntryConfig));
-        }
-      });
-      return layerPaths;
-    }
-
-    const layerPaths = getChildPaths(parentLayerEntryConfig);
-    return layerPaths;
-  }
-
-  /**
-   * Refreshes GeoCore Layers
-   */
-  reloadGeocoreLayers(): void {
-    const configs = this.getLayerEntryConfigs();
-    const originalMapOrderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfo(this.getMapId());
-    const parentPaths: string[] = [];
-
-    // Have to do the Promise allSettled so the new MapOrderedLayerInfo has all the children layerPaths
-    Promise.allSettled(
-      configs
-        .filter((config) => {
-          // Filter to just Geocore layers and not child layers
-          if (ConfigApi.isValidUUID(config.geoviewLayerConfig.geoviewLayerId) && config.parentLayerConfig === undefined) {
-            return true;
-          }
-          return false;
-        })
-        .map((config) => {
-          // Remove and add back in GeoCore Layers and return their promises
-          parentPaths.push(config.layerPath);
-          this.removeLayerUsingPath(config.layerPath);
-          return this.addGeoviewLayerByGeoCoreUUID(config.geoviewLayerConfig.geoviewLayerId);
-        })
-    )
-      .then(() => {
-        const originalLayerPaths = originalMapOrderedLayerInfo.map((info) => info.layerPath);
-
-        // Prepare listeners for removing previously removed layers
-        parentPaths.forEach((parentPath) => {
-          function removeChildLayers(sender: LayerApi): void {
-            const childPaths = sender.#getAllChildPaths(parentPath);
-            childPaths.forEach((childPath) => {
-              if (!originalLayerPaths.includes(childPath)) {
-                sender.removeLayerUsingPath(childPath);
-              }
-            });
-            sender.offLayerAdded(removeChildLayers);
-          }
-          this.onLayerAdded(removeChildLayers);
-        });
-
-        // Prepare listeners for changing the visibility
-        MapEventProcessor.setMapOrderedLayerInfo(this.getMapId(), originalMapOrderedLayerInfo);
-        originalMapOrderedLayerInfo.forEach((layerInfo) => {
-          function setLayerVisibility(sender: LayerApi, event: LayerLoadedEvent): void {
-            if (layerInfo.layerPath === event.layerPath) {
-              const { visible } = originalMapOrderedLayerInfo.filter((info) => info.layerPath === event.layerPath)[0];
-              event.layer?.setVisible(visible);
-              sender.offLayerLoaded(setLayerVisibility);
-            }
-          }
-          this.onLayerLoaded(setLayerVisibility);
-        });
-      })
-      .catch((err) => logger.logError(err));
   }
 
   /**
@@ -721,7 +515,7 @@ export class LayerApi {
     // TODO: Refactor - This should be dealt with the config classes and this line commented out, therefore, content of addGeoviewLayerStep2 becomes this addGeoviewLayer function.
     if (this.getGeoviewLayerIds().includes(geoviewLayerConfig.geoviewLayerId)) {
       // Throw that the geoview layer id was already created
-      throw new LayerCreatedTwiceError(geoviewLayerConfig.geoviewLayerId);
+      throw new LayerCreatedTwiceError(geoviewLayerConfig.geoviewLayerId, geoviewLayerConfig.geoviewLayerName);
     } else {
       // Process the addition of the layer
       const result: GeoViewLayerAddedResult = this.#addGeoviewLayerStep2(geoviewLayerConfig);
@@ -833,12 +627,6 @@ export class LayerApi {
         event.config
       );
 
-      const selectedLayerPath =
-        this.mapViewer.mapFeaturesConfig.footerBar?.selectedLayersLayerPath ||
-        this.mapViewer.mapFeaturesConfig.appBar?.selectedLayersLayerPath;
-      if (selectedLayerPath && event.config.layerPath.startsWith(selectedLayerPath))
-        LegendEventProcessor.setSelectedLayersTabLayer(this.getMapId(), selectedLayerPath as string);
-
       // If is an AbstractBaseLayerEntryConfig
       if (event.config instanceof AbstractBaseLayerEntryConfig) {
         // Set the map layer queryable
@@ -889,8 +677,8 @@ export class LayerApi {
       this.#gvLayers[layerConfig.layerPath] = gvLayer;
       this.#olLayers[layerConfig.layerPath] = gvLayer.getOLLayer();
 
-      // Attach the events handler
-      this.#attachEventsOnLayer(gvLayer);
+      // Register events handler for the layer
+      this.#registerLayerHandlers(gvLayer);
 
       // Init it
       gvLayer.init();
@@ -919,6 +707,65 @@ export class LayerApi {
 
     // Return the layer with the promise it'll be on the map
     return { layer: layerBeingAdded, promiseLayer };
+  }
+
+  /**
+   * Refreshes GeoCore Layers
+   */
+  reloadGeocoreLayers(): void {
+    const configs = this.getLayerEntryConfigs();
+    const originalMapOrderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfo(this.getMapId());
+    const parentPaths: string[] = [];
+
+    // Have to do the Promise allSettled so the new MapOrderedLayerInfo has all the children layerPaths
+    Promise.allSettled(
+      configs
+        .filter((config) => {
+          // Filter to just Geocore layers and not child layers
+          if (ConfigApi.isValidUUID(config.geoviewLayerConfig.geoviewLayerId) && config.parentLayerConfig === undefined) {
+            return true;
+          }
+          return false;
+        })
+        .map((config) => {
+          // Remove and add back in GeoCore Layers and return their promises
+          parentPaths.push(config.layerPath);
+          this.removeLayerUsingPath(config.layerPath);
+          return this.addGeoviewLayerByGeoCoreUUID(config.geoviewLayerConfig.geoviewLayerId);
+        })
+    )
+      .then(() => {
+        const originalLayerPaths = originalMapOrderedLayerInfo.map((info) => info.layerPath);
+
+        // Prepare listeners for removing previously removed layers
+        parentPaths.forEach((parentPath) => {
+          function removeChildLayers(sender: LayerApi): void {
+            const childPaths = sender.#getAllChildPaths(parentPath);
+            childPaths.forEach((childPath) => {
+              if (!originalLayerPaths.includes(childPath)) {
+                sender.removeLayerUsingPath(childPath);
+              }
+            });
+            sender.offLayerAdded(removeChildLayers);
+          }
+          this.onLayerAdded(removeChildLayers);
+        });
+
+        // Prepare listeners for changing the visibility
+        MapEventProcessor.setMapOrderedLayerInfo(this.getMapId(), originalMapOrderedLayerInfo);
+        originalMapOrderedLayerInfo.forEach((layerInfo) => {
+          function setLayerVisibility(sender: LayerApi, event: LayerLoadEvent): void {
+            if (layerInfo.layerPath === event.layerPath) {
+              const { visible } = originalMapOrderedLayerInfo.filter((info) => info.layerPath === event.layerPath)[0];
+              event.layer?.setVisible(visible);
+              // TODO: Bound this 'setLayerVisibility' function (like other ones) instead of creating a new one on each 'forEach'
+              sender.offLayerFirstLoaded(setLayerVisibility);
+            }
+          }
+          this.onLayerFirstLoaded(setLayerVisibility);
+        });
+      })
+      .catch((err) => logger.logError(err));
   }
 
   /**
@@ -967,124 +814,6 @@ export class LayerApi {
     });
   }
 
-  #setLayerInVisibleRange(gvLayer: AbstractGVLayer | GVGroupLayer, layerConfig: TypeLayerEntryConfig): void {
-    // Set the final maxZoom and minZoom values
-    // Skip the GVGroupLayers since we don't want to prevent the children from loading if they aren't initially
-    // in visible range. Inheritance has already been passed in the config and the group layer visibility will
-    // be handled in the map-viewer's handleMapZoomEnd by checking the children visibility
-    const mapView = this.mapViewer.getView();
-    if ((layerConfig.initialSettings.maxZoom || layerConfig.maxScale) && !(gvLayer instanceof GVGroupLayer)) {
-      let maxScaleZoomLevel = getZoomFromScale(mapView, layerConfig.maxScale);
-      maxScaleZoomLevel = maxScaleZoomLevel ? Math.ceil(maxScaleZoomLevel * 100) / 100 : undefined;
-      const maxZoom = Math.min(layerConfig.initialSettings.maxZoom ?? Infinity, maxScaleZoomLevel ?? Infinity);
-      gvLayer.setMaxZoom(maxZoom);
-    }
-
-    if ((layerConfig.initialSettings.minZoom || layerConfig.minScale) && !(gvLayer instanceof GVGroupLayer)) {
-      let minScaleZoomLevel = getZoomFromScale(mapView, layerConfig.minScale);
-      minScaleZoomLevel = minScaleZoomLevel ? Math.ceil(minScaleZoomLevel * 100) / 100 : undefined;
-      const minZoom = Math.max(layerConfig.initialSettings.minZoom ?? -Infinity, minScaleZoomLevel ?? -Infinity);
-      gvLayer.setMinZoom(minZoom);
-    }
-
-    const zoom = mapView.getZoom() as number;
-    const inVisibleRange = gvLayer.inVisibleRange(zoom) as boolean;
-    MapEventProcessor.setLayerInVisibleRange(this.getMapId(), gvLayer.getLayerPath(), inVisibleRange);
-  }
-
-  /**
-   * Continues the addition of the geoview layer.
-   * Adds the layer to the map if valid. If not (is a string) emits an error.
-   * @param {AbstractGeoViewLayer} geoviewLayer - The layer
-   * @private
-   */
-  #addToMap(geoviewLayer: AbstractGeoViewLayer): void {
-    // If no root layer is set, forget about it
-    if (!geoviewLayer.olRootLayer) return;
-
-    // If all layer status are good
-    if (!geoviewLayer.allLayerStatusAreGreaterThanOrEqualTo('error')) {
-      // Add the OpenLayers layer to the map officially
-      this.mapViewer.map.addLayer(geoviewLayer.olRootLayer);
-    }
-
-    // Log
-    logger.logInfo(`GeoView Layer ${geoviewLayer.geoviewLayerId} added to map ${this.getMapId()}`, geoviewLayer);
-
-    // Set the layer z indices
-    MapEventProcessor.setLayerZIndices(this.getMapId());
-  }
-
-  /**
-   * Registers layer information for the ordered layer info in the store.
-   * @param {TypeLayerEntryConfig} layerConfig - The layer configuration to be reordered.
-   * @private
-   */
-  #registerForOrderedLayerInfo(layerConfig: TypeLayerEntryConfig): void {
-    // If the map index for the given layer path hasn't been set yet
-    if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.getMapId(), layerConfig.layerPath) === -1) {
-      // Get the parent layer path
-      const parentLayerPathArray = layerConfig.layerPath.split('/');
-      parentLayerPathArray.pop();
-      const parentLayerPath = parentLayerPathArray.join('/');
-
-      // If the map index of a parent layer path has been set and it is a valid UUID, the ordered layer info is a place holder
-      // registered while the geocore layer info was fetched
-      if (
-        MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.getMapId(), parentLayerPath) !== -1 &&
-        ConfigApi.isValidUUID(parentLayerPath)
-      ) {
-        // Replace the placeholder ordered layer info
-        MapEventProcessor.replaceOrderedLayerInfo(this.getMapId(), layerConfig, parentLayerPath);
-      } else if (layerConfig.parentLayerConfig) {
-        // Here the map index of a sub layer path hasn't been set and there's a parent layer config for the current layer config
-        // Get the map index of the parent layer path
-        const parentLayerIndex = MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.getMapId(), parentLayerPath);
-
-        // Get the number of layers
-        const numberOfLayers = MapEventProcessor.findMapLayerAndChildrenFromOrderedInfo(this.getMapId(), parentLayerPath).length;
-
-        // If the map index of the parent has been set
-        if (parentLayerIndex !== -1) {
-          // Add the ordered layer information for the sub layer path based on the parent index + the number of child layers
-          MapEventProcessor.addOrderedLayerInfoByConfig(this.getMapId(), layerConfig, parentLayerIndex + numberOfLayers);
-        } else {
-          // If we get here, something went wrong and we have a sub layer being registered before the parent
-          logger.logError(`Sub layer ${layerConfig.layerPath} registered in layer order before parent layer`);
-          MapEventProcessor.addOrderedLayerInfoByConfig(this.getMapId(), layerConfig.parentLayerConfig!);
-        }
-      } else {
-        // Add the orderedLayerInfo for layer that hasn't been set and has no parent layer or geocore placeholder
-        MapEventProcessor.addOrderedLayerInfoByConfig(this.getMapId(), layerConfig);
-      }
-    }
-  }
-
-  /**
-   * Registers layer information for TimeSlider.
-   * @param {TypeLayerEntryConfig} layerConfig - The layer configuration to be unregistered.
-   * @private
-   */
-  async #registerForTimeSlider(layerConfig: TypeLayerEntryConfig): Promise<void> {
-    try {
-      // Wait until the layer is loaded (or processed?)
-      await whenThisThen(() => layerConfig.isGreaterThanOrEqualTo('processed'), LayerApi.#MAX_WAIT_TIME_SLIDER_REGISTRATION);
-      const geoviewLayer = this.getGeoviewLayer(layerConfig.layerPath);
-
-      // If the layer is loaded AND flag is true to use time dimension, continue
-      if (geoviewLayer instanceof AbstractGVLayer && geoviewLayer.getIsTimeAware() && geoviewLayer.getTemporalDimension()) {
-        // Check (if dimension is valid) and add time slider layer when needed
-        if (geoviewLayer.getTemporalDimension()!.isValid)
-          TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.getMapId(), layerConfig);
-      }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error: unknown) {
-      // Layer failed to load, abandon it for the TimeSlider registration, too bad.
-      // The error itself, regarding the loaded failure, is already being taken care of elsewhere.
-      // Here, we haven't even made it to a possible layer registration for a possible Time Slider, because we couldn't even get the layer to load anyways.
-    }
-  }
-
   /**
    * Unregisters the layer in the LayerApi to stop managing it.
    * @param {ConfigBaseClass} layerConfig - The layer entry config to unregister
@@ -1111,57 +840,12 @@ export class LayerApi {
   }
 
   /**
-   * Unregisters layer information from layer info store.
-   * @param {ConfigBaseClass} layerConfig - The layer configuration to be unregistered.
-   * @private
-   */
-  #unregisterFromOrderedLayerInfo(layerConfig: ConfigBaseClass): void {
-    // Remove from ordered layer info
-    MapEventProcessor.removeOrderedLayerInfo(this.getMapId(), layerConfig.layerPath);
-  }
-
-  /**
-   * Unregisters layer information from TimeSlider.
-   * @param {ConfigBaseClass} layerConfig - The layer configuration to be unregistered.
-   * @private
-   */
-  #unregisterFromTimeSlider(layerConfig: ConfigBaseClass): void {
-    // Remove from the TimeSlider
-    TimeSliderEventProcessor.removeTimeSliderLayer(this.getMapId(), layerConfig.layerPath);
-  }
-
-  /**
-   * Unregisters layer information from GeoChart.
-   * @param {ConfigBaseClass} layerConfig - The layer configuration to be unregistered.
-   * @private
-   */
-  #unregisterFromGeoChart(layerConfig: ConfigBaseClass): void {
-    // Remove from the GeoChart Charts
-    GeochartEventProcessor.removeGeochartChart(this.getMapId(), layerConfig.layerPath);
-  }
-
-  /**
-   * Unregisters layer information from Swiper.
-   * @param {ConfigBaseClass} layerConfig - The layer configuration to be unregistered.
-   * @private
-   */
-  #unregisterFromSwiper(layerConfig: ConfigBaseClass): void {
-    // Remove it from the Swiper
-    SwiperEventProcessor.removeLayerPath(this.getMapId(), layerConfig.layerPath);
-  }
-
-  /**
    * Checks if the layer results sets are all greater than or equal to the provided status
    */
-  checkLayerStatus(
-    status: TypeLayerStatus,
-    layerEntriesToCheck: MapConfigLayerEntry[] | undefined,
-    callbackNotGood?: (layerConfig: ConfigBaseClass) => void
-  ): [boolean, number] {
+  checkLayerStatus(status: TypeLayerStatus, callbackNotGood?: (layerConfig: ConfigBaseClass) => void): [boolean, number] {
     // If no layer entries at all or there are layer entries and there are geoview layers to check
-    let allGood = layerEntriesToCheck?.length === 0 || this.getGeoviewLayerIds().length > 0;
+    let allGood = true;
 
-    // For each registered layer entry
     this.getLayerEntryConfigs().forEach((layerConfig) => {
       const layerIsGood = ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo(status, [layerConfig]);
       if (!layerIsGood) {
@@ -1172,32 +856,7 @@ export class LayerApi {
     });
 
     // Return if all good
-    return [allGood, this.getGeoviewLayerIds().length];
-  }
-
-  /**
-   * Checks if the layer results sets are all ready using the resultSet from the FeatureInfo LayerSet
-   */
-  checkFeatureInfoLayerResultSetsReady(callbackNotReady?: (layerEntryConfig: AbstractBaseLayerEntryConfig) => void): boolean {
-    // For each registered layer entry
-    let allGood = true;
-    this.getLayerEntryConfigs().forEach((layerConfig) => {
-      // If not instance of AbstractBaseLayerEntryConfig, don't expect a result set
-      if (!(layerConfig instanceof AbstractBaseLayerEntryConfig)) return;
-      // If not queryable, don't expect a result set
-      if (!layerConfig.source?.featureInfo?.queryable) return;
-
-      const { resultSet } = this.featureInfoLayerSet;
-      const layerResultSetReady = Object.keys(resultSet).includes(layerConfig.layerPath);
-      if (!layerResultSetReady) {
-        // Callback about it
-        callbackNotReady?.(layerConfig);
-        allGood = false;
-      }
-    });
-
-    // Return if all good
-    return allGood;
+    return [allGood, this.getLayerEntryConfigs().length];
   }
 
   /**
@@ -1266,6 +925,10 @@ export class LayerApi {
 
         // Unregister layer config from the application
         this.unregisterLayerConfig(this.getLayerEntryConfig(registeredLayerPath)!);
+
+        // Unregister the events on the layer
+        if (this.#gvLayers[registeredLayerPath] instanceof AbstractGVLayer)
+          this.#unregisterLayerHandlers(this.#gvLayers[registeredLayerPath]);
 
         // Remove from registered layer configs
         delete this.#layerEntryConfigs[registeredLayerPath];
@@ -1497,6 +1160,11 @@ export class LayerApi {
         // eslint-disable-next-line no-param-reassign
         if (toggledStyleInfo) toggledStyleInfo.visible = visibility;
       });
+
+      // Force a re-render of the layer source for ESRI Feature to make visibility changes take effect
+      if (this.#layerEntryConfigs[layerPath].schemaTag === CONST_LAYER_TYPES.ESRI_FEATURE) {
+        layer.getOLLayer().changed();
+      }
     }
 
     // Update the legend layers if necessary
@@ -1620,29 +1288,29 @@ export class LayerApi {
     // Get the GeoviewLayer
     const gvLayer = this.getGeoviewLayer(layerPath);
 
-    // If of right type
-    if (gvLayer instanceof GVGeoJSON) {
-      // Override the GeoJson source
-      gvLayer.setGeojsonSource(geojson, this.mapViewer.getProjection());
+    // If not found
+    if (!gvLayer) throw new LayerNotFoundError(layerPath);
 
-      // Update the bounds in the store
-      const bounds = gvLayer.getBounds(this.mapViewer.getProjection(), MapViewer.DEFAULT_STOPS);
-      if (bounds) {
-        LegendEventProcessor.setLayerBounds(mapId, layerPath, bounds);
-      }
+    // If not of right type
+    if (!(gvLayer instanceof GVGeoJSON)) throw new LayerNotGeoJsonError(layerPath, gvLayer.getLayerName());
 
-      // Reset the feature info result set
-      FeatureInfoEventProcessor.resetResultSet(mapId, layerPath, 'name');
+    // Override the GeoJson source
+    gvLayer.setGeojsonSource(geojson, this.mapViewer.getProjection());
 
-      // Update feature info
-      DataTableEventProcessor.triggerGetAllFeatureInfo(mapId, layerPath).catch((error: unknown) => {
-        // Log
-        logger.logPromiseFailed(`Update all feature info in setGeojsonSource failed for layer ${layerPath}`, error);
-      });
-    } else {
-      // Layer not GeoJson
-      throw new LayerNotGeoJsonError(layerPath);
+    // Update the bounds in the store
+    const bounds = gvLayer.getBounds(this.mapViewer.getProjection(), MapViewer.DEFAULT_STOPS);
+    if (bounds) {
+      LegendEventProcessor.setLayerBounds(mapId, layerPath, bounds);
     }
+
+    // Reset the feature info result set
+    FeatureInfoEventProcessor.resetResultSet(mapId, layerPath, 'name');
+
+    // Update feature info
+    DataTableEventProcessor.triggerGetAllFeatureInfo(mapId, layerPath).catch((error: unknown) => {
+      // Log
+      logger.logPromiseFailed(`Update all feature info in setGeojsonSource failed for layer ${layerPath}`, error);
+    });
   }
 
   /**
@@ -1714,6 +1382,410 @@ export class LayerApi {
   }
 
   /**
+   * Show the errors that happened during layers loading.
+   * If it's an aggregate error, log and show all of them.
+   * If it's a regular error, log and show only that error.
+   * @param error - The error to log and show.
+   * @param geoviewLayerId - The Geoview layer id for which the error happened.
+   */
+  showLayerError(error: unknown, geoviewLayerId: string): void {
+    // If an aggregation error
+    if (error instanceof AggregateError) {
+      // For each errors
+      error.errors.forEach((layerError) => {
+        // Recursive call
+        this.showLayerError(layerError, geoviewLayerId);
+      });
+    } else {
+      // Cast the error
+      const theError = formatError(error);
+
+      // Read the layer path if possible, more precise
+      let layerPathOrId = geoviewLayerId;
+      if (theError instanceof LayerEntryConfigError) {
+        layerPathOrId = theError.layerConfig.layerPath;
+      }
+
+      // Show error
+      this.mapViewer.notifications.showErrorFromError(theError, true);
+
+      // If the Error is GeoViewError, it has a translation
+      let { message } = theError;
+      if (theError instanceof GeoViewError) {
+        message = theError.translateMessage(this.mapViewer.getDisplayLanguage());
+      }
+
+      // Emit about it
+      this.#emitLayerError({ layerPath: layerPathOrId, error: message });
+    }
+  }
+
+  // #region PRIVATE FUNCTIONS
+
+  /**
+   * Attaches event handlers to a layer
+   * @private
+   * @param {AbstractGVLayer} gvLayer - The layer instance to attach events to
+   * @description
+   * This method sets up the following event handlers:
+   * - Layer message handling through onLayerMessage
+   * - Layer first loading completion through onLayerFirstLoaded
+   * - All layer loading states through onLayerLoading
+   * - All layer loaded states through onLayerLoaded
+   * @private
+   */
+  #registerLayerHandlers(gvLayer: AbstractGVLayer): void {
+    // Add a handler on layer's message
+    gvLayer.onLayerMessage(this.#boundedHandleLayerMessage);
+
+    // Register a hook when a layer is loaded on the map
+    gvLayer.onLayerFirstLoaded(this.#boundedHandleLayerFirstLoaded);
+
+    // Register a hook when a layer is going into loading state
+    gvLayer.onLayerLoading(this.#boundedHandleLayerLoading);
+
+    // Register a hook when a layer is going into loading state
+    gvLayer.onLayerLoaded(this.#boundedHandleLayerLoaded);
+  }
+
+  /**
+   * Detaches the events registration on the layer
+   * @param {AbstractGVLayer} gvLayer - The layer to detach events registrations from.
+   * @private
+   */
+  #unregisterLayerHandlers(gvLayer: AbstractGVLayer): void {
+    // Unregisters handler on layer's message
+    gvLayer.offLayerMessage(this.#boundedHandleLayerMessage);
+
+    // Unregisters handler on layers first loaded
+    gvLayer.offLayerFirstLoaded(this.#boundedHandleLayerFirstLoaded);
+
+    // Unregisters handler on layers loading
+    gvLayer.offLayerLoading(this.#boundedHandleLayerLoading);
+
+    // Unregisters handler on layers loaded
+    gvLayer.offLayerLoaded(this.#boundedHandleLayerLoaded);
+  }
+
+  /**
+   * Handles layer-specific messages and displays them through the map viewer's notification system
+   * @param {AbstractGVLayer} layer - The layer instance that triggered the message
+   * @param {LayerMessageEvent} layerMessageEvent - The message event containing notification details
+   * @param {string} layerMessageEvent.messageKey - Key for localized message lookup
+   * @param {string[]} layerMessageEvent.messageParams - Parameters to be inserted into the localized message
+   * @param {boolean} layerMessageEvent.notification - Notification configuration options
+   * @returns {void}
+   *
+   * @example
+   * handleLayerMessage(myLayer, {
+   *   messageKey: 'layers.fetchProgress',
+   *   messageParams: [50, 100],
+   *   messageType: 'error',
+   *   notification: true
+   * });
+   *
+   * @private
+   */
+  #handleLayerMessage(layer: AbstractGVLayer | AbstractGeoViewLayer, layerMessageEvent: LayerMessageEvent): void {
+    // Read event params for clarity
+    const { messageType } = layerMessageEvent;
+    const { messageKey } = layerMessageEvent;
+    const { messageParams } = layerMessageEvent;
+    const { notification } = layerMessageEvent;
+
+    if (messageType === 'info') {
+      this.mapViewer.notifications.showMessage(messageKey, messageParams, notification);
+    } else if (messageType === 'warning') {
+      this.mapViewer.notifications.showWarning(messageKey, messageParams, notification);
+    } else if (messageType === 'error') {
+      this.mapViewer.notifications.showError(messageKey, messageParams, notification);
+    } else if (messageType === 'success') {
+      this.mapViewer.notifications.showSuccess(messageKey, messageParams, notification);
+    }
+  }
+
+  /**
+   * Handles when a layer is loaded on the map
+   * @param {AbstractGVLayer} layer - The layer that's become loaded.
+   * @param {GVLayerLoadEvent} loadEvent - The event associated with the layer.
+   */
+  #handleLayerFirstLoaded(layer: AbstractGVLayer, loadEvent: GVLayerLoadEvent): void {
+    // Log
+    logger.logTraceCore(`LAYERS - 10 - ${loadEvent.layerPath} loaded on map ${this.getMapId()}`);
+
+    // Set in visible range property for all newly added layers
+    this.#setLayerInVisibleRange(layer, layer.getLayerConfig());
+
+    // Ensure that the layer bounds are set when the layer is loaded
+    const legendLayerInfo = LegendEventProcessor.getLegendLayerInfo(this.getMapId(), loadEvent.layerPath);
+    if (legendLayerInfo && !legendLayerInfo.bounds) LegendEventProcessor.getLayerBounds(this.getMapId(), loadEvent.layerPath);
+
+    // Emit about it
+    this.#emitLayerFirstLoaded({ layer, layerPath: loadEvent.layerPath });
+  }
+
+  /**
+   * Handles when a layer gets in loading stage on the map
+   * @param {AbstractGVLayer} layer - The layer that's become loading.
+   * @param {GVLayerLoadEvent} loadEvent - The event associated with the layer.
+   */
+  #handleLayerLoading(layer: AbstractGVLayer, loadEvent: GVLayerLoadEvent): void {
+    // Update the store that at least 1 layer is loading
+    LegendEventProcessor.setLayersAreLoading(this.getMapId(), true);
+
+    // Emit about it
+    this.#emitLayerLoading({ layer, layerPath: loadEvent.layerPath });
+  }
+
+  /**
+   * Handles when a layer gets in loaded stage on the map
+   * @param {AbstractGVLayer} layer - The layer that's become loaded.
+   * @param {GVLayerLoadEvent} loadEvent - The event associated with the layer.
+   */
+  #handleLayerLoaded(layer: AbstractGVLayer, loadEvent: GVLayerLoadEvent): void {
+    // Emit about it
+    this.#emitLayerLoaded({ layer, layerPath: loadEvent.layerPath });
+
+    // Check if all layers are loaded right now
+    const [allLoaded] = this.checkLayerStatus('loaded');
+
+    // If all loaded
+    if (allLoaded) {
+      // Update the store that all layers are loaded at this point
+      LegendEventProcessor.setLayersAreLoading(this.getMapId(), false);
+
+      // Emit about it
+      this.#emitLayerAllLoaded({ layer, layerPath: loadEvent.layerPath });
+    }
+  }
+
+  /**
+   * Validates the geoview layer configuration array to eliminate duplicate entries and inform the user.
+   * @param {MapConfigLayerEntry[]} mapConfigLayerEntries - The Map Config Layer Entries to validate.
+   * @returns {MapConfigLayerEntry[]} The new configuration with duplicate entries eliminated.
+   * @private
+   */
+  #deleteDuplicateAndMultipleUuidGeoviewLayerConfig(mapConfigLayerEntries?: MapConfigLayerEntry[]): MapConfigLayerEntry[] {
+    if (mapConfigLayerEntries && mapConfigLayerEntries.length > 0) {
+      const validGeoviewLayerConfigs = mapConfigLayerEntries.filter((geoviewLayerConfigToCreate, configToCreateIndex) => {
+        for (let configToTestIndex = 0; configToTestIndex < mapConfigLayerEntries.length; configToTestIndex++) {
+          if (
+            geoviewLayerConfigToCreate.geoviewLayerId === mapConfigLayerEntries[configToTestIndex].geoviewLayerId &&
+            // We keep the first instance of the duplicate entry.
+            configToCreateIndex > configToTestIndex
+          ) {
+            this.#printDuplicateGeoviewLayerConfigError(geoviewLayerConfigToCreate);
+            // Remove geoCore ordered layer info placeholder
+            if (MapEventProcessor.findMapLayerFromOrderedInfo(this.getMapId(), geoviewLayerConfigToCreate.geoviewLayerId))
+              MapEventProcessor.removeOrderedLayerInfo(this.getMapId(), geoviewLayerConfigToCreate.geoviewLayerId, false);
+
+            return false;
+          }
+        }
+        return true;
+      });
+      return validGeoviewLayerConfigs;
+    }
+    return [];
+  }
+
+  /**
+   * Prints an error message for the duplicate geoview layer configuration.
+   * @param {MapConfigLayerEntry} mapConfigLayerEntry - The Map Config Layer Entry in error.
+   * @private
+   */
+  #printDuplicateGeoviewLayerConfigError(mapConfigLayerEntry: MapConfigLayerEntry): void {
+    // Log
+    logger.logError(`Duplicate use of geoview layer identifier ${mapConfigLayerEntry.geoviewLayerId} on map ${this.getMapId()}`);
+
+    // Show the error
+    this.mapViewer.notifications.showError('validation.layer.usedtwice', [mapConfigLayerEntry.geoviewLayerId]);
+  }
+
+  /**
+   * TODO Add this function to utilties
+   * Gets all child paths from a parent path
+   * @param {string} parentPath - The parent path
+   * @returns {string[]} Child layer paths
+   */
+  #getAllChildPaths(parentPath: string): string[] {
+    const parentLayerEntryConfig = this.getLayerEntryConfig(parentPath)?.geoviewLayerConfig.listOfLayerEntryConfig;
+
+    if (!parentLayerEntryConfig) return [];
+
+    function getChildPaths(listOfLayerEntryConfig: TypeLayerEntryConfig[]): string[] {
+      const layerPaths: string[] = [];
+      listOfLayerEntryConfig.forEach((entryConfig) => {
+        layerPaths.push(entryConfig.layerPath);
+        if (entryConfig.listOfLayerEntryConfig) {
+          layerPaths.push(...getChildPaths(entryConfig.listOfLayerEntryConfig));
+        }
+      });
+      return layerPaths;
+    }
+
+    const layerPaths = getChildPaths(parentLayerEntryConfig);
+    return layerPaths;
+  }
+
+  #setLayerInVisibleRange(gvLayer: AbstractGVLayer | GVGroupLayer, layerConfig: TypeLayerEntryConfig): void {
+    // Set the final maxZoom and minZoom values
+    // Skip the GVGroupLayers since we don't want to prevent the children from loading if they aren't initially
+    // in visible range. Inheritance has already been passed in the config and the group layer visibility will
+    // be handled in the map-viewer's handleMapZoomEnd by checking the children visibility
+    const mapView = this.mapViewer.getView();
+    if ((layerConfig.initialSettings.maxZoom || layerConfig.maxScale) && !(gvLayer instanceof GVGroupLayer)) {
+      let maxScaleZoomLevel = getZoomFromScale(mapView, layerConfig.maxScale);
+      maxScaleZoomLevel = maxScaleZoomLevel ? Math.ceil(maxScaleZoomLevel * 100) / 100 : undefined;
+      const maxZoom = Math.min(layerConfig.initialSettings.maxZoom ?? Infinity, maxScaleZoomLevel ?? Infinity);
+      gvLayer.setMaxZoom(maxZoom);
+    }
+
+    if ((layerConfig.initialSettings.minZoom || layerConfig.minScale) && !(gvLayer instanceof GVGroupLayer)) {
+      let minScaleZoomLevel = getZoomFromScale(mapView, layerConfig.minScale);
+      minScaleZoomLevel = minScaleZoomLevel ? Math.ceil(minScaleZoomLevel * 100) / 100 : undefined;
+      const minZoom = Math.max(layerConfig.initialSettings.minZoom ?? -Infinity, minScaleZoomLevel ?? -Infinity);
+      gvLayer.setMinZoom(minZoom);
+    }
+
+    const zoom = mapView.getZoom() as number;
+    const inVisibleRange = gvLayer.inVisibleRange(zoom) as boolean;
+    MapEventProcessor.setLayerInVisibleRange(this.getMapId(), gvLayer.getLayerPath(), inVisibleRange);
+  }
+
+  /**
+   * Continues the addition of the geoview layer.
+   * Adds the layer to the map if valid. If not (is a string) emits an error.
+   * @param {AbstractGeoViewLayer} geoviewLayer - The layer
+   * @private
+   */
+  #addToMap(geoviewLayer: AbstractGeoViewLayer): void {
+    // If no root layer is set, forget about it
+    if (!geoviewLayer.olRootLayer) return;
+
+    // If all layer status are good
+    if (!geoviewLayer.allLayerStatusAreGreaterThanOrEqualTo('error')) {
+      // Add the OpenLayers layer to the map officially
+      this.mapViewer.map.addLayer(geoviewLayer.olRootLayer);
+    }
+
+    // Log
+    logger.logInfo(`GeoView Layer ${geoviewLayer.geoviewLayerId} added to map ${this.getMapId()}`, geoviewLayer);
+
+    // Set the layer z indices
+    MapEventProcessor.setLayerZIndices(this.getMapId());
+  }
+
+  /**
+   * Registers layer information for the ordered layer info in the store.
+   * @param {TypeLayerEntryConfig} layerConfig - The layer configuration to be reordered.
+   * @private
+   */
+  #registerForOrderedLayerInfo(layerConfig: TypeLayerEntryConfig): void {
+    // If the map index for the given layer path hasn't been set yet
+    if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.getMapId(), layerConfig.layerPath) === -1) {
+      // Get the parent layer path
+      const parentLayerPathArray = layerConfig.layerPath.split('/');
+      parentLayerPathArray.pop();
+      const parentLayerPath = parentLayerPathArray.join('/');
+
+      // If the map index of a parent layer path has been set and it is a valid UUID, the ordered layer info is a place holder
+      // registered while the geocore layer info was fetched
+      if (
+        MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.getMapId(), parentLayerPath) !== -1 &&
+        ConfigApi.isValidUUID(parentLayerPath)
+      ) {
+        // Replace the placeholder ordered layer info
+        MapEventProcessor.replaceOrderedLayerInfo(this.getMapId(), layerConfig, parentLayerPath);
+      } else if (layerConfig.parentLayerConfig) {
+        // Here the map index of a sub layer path hasn't been set and there's a parent layer config for the current layer config
+        // Get the map index of the parent layer path
+        const parentLayerIndex = MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.getMapId(), parentLayerPath);
+
+        // Get the number of layers
+        const numberOfLayers = MapEventProcessor.findMapLayerAndChildrenFromOrderedInfo(this.getMapId(), parentLayerPath).length;
+
+        // If the map index of the parent has been set
+        if (parentLayerIndex !== -1) {
+          // Add the ordered layer information for the sub layer path based on the parent index + the number of child layers
+          MapEventProcessor.addOrderedLayerInfoByConfig(this.getMapId(), layerConfig, parentLayerIndex + numberOfLayers);
+        } else {
+          // If we get here, something went wrong and we have a sub layer being registered before the parent
+          logger.logError(`Sub layer ${layerConfig.layerPath} registered in layer order before parent layer`);
+          MapEventProcessor.addOrderedLayerInfoByConfig(this.getMapId(), layerConfig.parentLayerConfig!);
+        }
+      } else {
+        // Add the orderedLayerInfo for layer that hasn't been set and has no parent layer or geocore placeholder
+        MapEventProcessor.addOrderedLayerInfoByConfig(this.getMapId(), layerConfig);
+      }
+    }
+  }
+
+  /**
+   * Registers layer information for TimeSlider.
+   * @param {TypeLayerEntryConfig} layerConfig - The layer configuration to be unregistered.
+   * @private
+   */
+  async #registerForTimeSlider(layerConfig: TypeLayerEntryConfig): Promise<void> {
+    try {
+      // Wait until the layer is loaded (or processed?)
+      await whenThisThen(() => layerConfig.isGreaterThanOrEqualTo('processed'), LayerApi.#MAX_WAIT_TIME_SLIDER_REGISTRATION);
+      const geoviewLayer = this.getGeoviewLayer(layerConfig.layerPath);
+
+      // If the layer is loaded AND flag is true to use time dimension, continue
+      if (geoviewLayer instanceof AbstractGVLayer && geoviewLayer.getIsTimeAware() && geoviewLayer.getTemporalDimension()) {
+        // Check (if dimension is valid) and add time slider layer when needed
+        TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.getMapId(), geoviewLayer, layerConfig);
+      }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error: unknown) {
+      // Layer failed to load, abandon it for the TimeSlider registration, too bad.
+      // The error itself, regarding the loaded failure, is already being taken care of elsewhere.
+      // Here, we haven't even made it to a possible layer registration for a possible Time Slider, because we couldn't even get the layer to load anyways.
+    }
+  }
+
+  /**
+   * Unregisters layer information from layer info store.
+   * @param {ConfigBaseClass} layerConfig - The layer configuration to be unregistered.
+   * @private
+   */
+  #unregisterFromOrderedLayerInfo(layerConfig: ConfigBaseClass): void {
+    // Remove from ordered layer info
+    MapEventProcessor.removeOrderedLayerInfo(this.getMapId(), layerConfig.layerPath);
+  }
+
+  /**
+   * Unregisters layer information from TimeSlider.
+   * @param {ConfigBaseClass} layerConfig - The layer configuration to be unregistered.
+   * @private
+   */
+  #unregisterFromTimeSlider(layerConfig: ConfigBaseClass): void {
+    // Remove from the TimeSlider
+    TimeSliderEventProcessor.removeTimeSliderLayer(this.getMapId(), layerConfig.layerPath);
+  }
+
+  /**
+   * Unregisters layer information from GeoChart.
+   * @param {ConfigBaseClass} layerConfig - The layer configuration to be unregistered.
+   * @private
+   */
+  #unregisterFromGeoChart(layerConfig: ConfigBaseClass): void {
+    // Remove from the GeoChart Charts
+    GeochartEventProcessor.removeGeochartChart(this.getMapId(), layerConfig.layerPath);
+  }
+
+  /**
+   * Unregisters layer information from Swiper.
+   * @param {ConfigBaseClass} layerConfig - The layer configuration to be unregistered.
+   * @private
+   */
+  #unregisterFromSwiper(layerConfig: ConfigBaseClass): void {
+    // Remove it from the Swiper
+    SwiperEventProcessor.removeLayerPath(this.getMapId(), layerConfig.layerPath);
+  }
+
+  /**
    * Recursively gathers all bounds on the layers associated with the given layer path and store them in the bounds parameter.
    * @param {ConfigBaseClass} layerConfig - The layer config being processed
    * @param {Extent[]} bounds - The currently gathered bounds during the recursion
@@ -1759,6 +1831,8 @@ export class LayerApi {
       );
   }
 
+  // #endregion
+
   // #region EVENTS
 
   /**
@@ -1790,35 +1864,119 @@ export class LayerApi {
   }
 
   /**
-   * Emits an event to all handlers when the layer's features have been loaded on the map.
-   * @param {LayerLoadedEvent} event - The event to emit
+   * Emits an event to all handlers when a layer has been loaded for the first time on the map.
+   * @param {LayerLoadEvent} event - The event to emit
    * @private
    */
-  #emitLayerLoaded(event: LayerLoadedEvent): void {
+  #emitLayerFirstLoaded(event: LayerLoadEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerLoadedFirstHandlers, event);
+  }
+
+  /**
+   * Registers a layer first loaded event handler.
+   * @param {LayerLoadDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerFirstLoaded(callback: LayerLoadDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerLoadedFirstHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer first loaded event handler.
+   * @param {LayerLoadDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerFirstLoaded(callback: LayerLoadDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerLoadedFirstHandlers, callback);
+  }
+
+  /**
+   * Emits an event to all handlers when a layer has turned into a loading state on the map.
+   * @param {LayerLoadEvent} event - The event to emit
+   * @private
+   */
+  #emitLayerLoading(event: LayerLoadEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerLoadingHandlers, event);
+  }
+
+  /**
+   * Registers a layer loading event handler.
+   * @param {LayerLoadDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerLoading(callback: LayerLoadDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerLoadingHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer loading event handler.
+   * @param {LayerLoadDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerLoading(callback: LayerLoadDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerLoadingHandlers, callback);
+  }
+
+  /**
+   * Emits an event to all handlers when a layer has turned into a loaded state on the map.
+   * @param {LayerLoadEvent} event - The event to emit
+   * @private
+   */
+  #emitLayerLoaded(event: LayerLoadEvent): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onLayerLoadedHandlers, event);
   }
 
   /**
    * Registers a layer loaded event handler.
-   * @param {LayerLoadedDelegate} callback - The callback to be executed whenever the event is emitted
+   * @param {LayerLoadDelegate} callback - The callback to be executed whenever the event is emitted
    */
-  onLayerLoaded(callback: LayerLoadedDelegate): void {
+  onLayerLoaded(callback: LayerLoadDelegate): void {
     // Register the event handler
     EventHelper.onEvent(this.#onLayerLoadedHandlers, callback);
   }
 
   /**
    * Unregisters a layer loaded event handler.
-   * @param {LayerLoadedDelegate} callback - The callback to stop being called whenever the event is emitted
+   * @param {LayerLoadDelegate} callback - The callback to stop being called whenever the event is emitted
    */
-  offLayerLoaded(callback: LayerLoadedDelegate): void {
+  offLayerLoaded(callback: LayerLoadDelegate): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerLoadedHandlers, callback);
   }
 
   /**
-   * Emits an event to all handlers when the layer's features have been flag as error on the map.
+   * Emits an event to all handlers when all layers have turned into a loaded state on the map.
+   * @param {LayerLoadEvent} event - The event to emit
+   * @private
+   */
+  #emitLayerAllLoaded(event: LayerLoadEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerAllLoadedHandlers, event);
+  }
+
+  /**
+   * Registers a layer all loaded event handler.
+   * @param {LayerLoadDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerAllLoaded(callback: LayerLoadDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerAllLoadedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer all loaded event handler.
+   * @param {LayerLoadDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerAllLoaded(callback: LayerLoadDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerAllLoadedHandlers, callback);
+  }
+
+  /**
+   * Emits an event to all handlers when a layer has been flag as error on the map.
    * @param {LayerErrorEvent} event - The event to emit
    * @private
    */
@@ -1993,7 +2151,7 @@ export class LayerApi {
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerAddedDelegate = EventDelegateBase<LayerApi, LayerAddedEvent, void>;
+export type LayerAddedDelegate = EventDelegateBase<LayerApi, LayerAddedEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -2007,12 +2165,12 @@ export type LayerAddedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerLoadedDelegate = EventDelegateBase<LayerApi, LayerLoadedEvent, void>;
+export type LayerLoadDelegate = EventDelegateBase<LayerApi, LayerLoadEvent, void>;
 
 /**
  * Define an event for the delegate
  */
-export type LayerLoadedEvent = {
+export type LayerLoadEvent = {
   // The loaded layer
   layer: AbstractGVLayer;
 
@@ -2022,7 +2180,7 @@ export type LayerLoadedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerErrorDelegate = EventDelegateBase<LayerApi, LayerErrorEvent, void>;
+export type LayerErrorDelegate = EventDelegateBase<LayerApi, LayerErrorEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -2037,7 +2195,7 @@ export type LayerErrorEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerRemovedDelegate = EventDelegateBase<LayerApi, LayerRemovedEvent, void>;
+export type LayerRemovedDelegate = EventDelegateBase<LayerApi, LayerRemovedEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -2050,7 +2208,7 @@ export type LayerRemovedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerVisibilityToggledDelegate = EventDelegateBase<LayerApi, LayerVisibilityToggledEvent, void>;
+export type LayerVisibilityToggledDelegate = EventDelegateBase<LayerApi, LayerVisibilityToggledEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -2065,7 +2223,7 @@ export type LayerVisibilityToggledEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerItemVisibilityToggledDelegate = EventDelegateBase<LayerApi, LayerItemVisibilityToggledEvent, void>;
+export type LayerItemVisibilityToggledDelegate = EventDelegateBase<LayerApi, LayerItemVisibilityToggledEvent, void>;
 
 /**
  * Define an event for the delegate

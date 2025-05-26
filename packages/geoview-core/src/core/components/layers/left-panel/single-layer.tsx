@@ -14,6 +14,7 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  ProgressBar,
   Tooltip,
   VisibilityOffOutlinedIcon,
   VisibilityOutlinedIcon,
@@ -231,9 +232,6 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
 
     if (layerStatus === 'error') {
       return t('legend.layerError');
-    }
-    if (layerStatus === 'processing' || layerStatus === 'loading') {
-      return t('legend.layerLoading');
     }
 
     if (layerChildren && layerChildren.length > 0) {
@@ -521,6 +519,11 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
               </ListItemIcon>
             )}
           </ListItemButton>
+          {layerStatus === 'loading' && (
+            <Box sx={sxClasses.progressBarSingleLayer}>
+              <ProgressBar />
+            </Box>
+          )}
         </ListItem>
       </Tooltip>
       {memoCollapse}

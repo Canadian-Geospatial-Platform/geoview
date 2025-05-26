@@ -123,7 +123,7 @@ export class WMS extends AbstractGeoViewRaster {
                     // No Capability property
                     reject(
                       new PromiseRejectErrorWrapper(
-                        new LayerNoCapabilitiesError(layerConfig.geoviewLayerConfig.geoviewLayerId),
+                        new LayerNoCapabilitiesError(layerConfig.geoviewLayerConfig.geoviewLayerId, layerConfig.getLayerName()),
                         layerConfig
                       )
                     );
@@ -302,7 +302,7 @@ export class WMS extends AbstractGeoViewRaster {
 
     // Validate required data access path
     if (!source?.dataAccessPath) {
-      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath);
+      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath, layerConfig.getLayerName());
     }
 
     const { dataAccessPath } = source;
@@ -354,7 +354,14 @@ export class WMS extends AbstractGeoViewRaster {
       sourceOptions.projection = `EPSG:${source.projection}`;
     }
 
-    return new ImageWMS(sourceOptions);
+    // Create the source
+    const olSource = new ImageWMS(sourceOptions);
+
+    // Apply the filter on the source right away, before the first load
+    GVWMS.applyViewFilterOnSource(layerConfig, olSource, layerConfig.getExternalFragmentsOrder(), undefined, layerConfig.layerFilter);
+
+    // Return the source
+    return olSource;
   }
 
   /**
@@ -591,14 +598,14 @@ export class WMS extends AbstractGeoViewRaster {
       subLayerEntryConfig.layerName = subLayer.Title as string;
       newListOfLayerEntryConfig.push(subLayerEntryConfig as TypeLayerEntryConfig);
 
-      // Alert that we want to register an extra layer entry
-      this.emitLayerEntryRegisterInit({ config: subLayerEntryConfig });
-
       // If we don't want all sub layers (simulating the 'Private element not on object' error we had for long time)
       if (!this.fullSubLayers) {
         // Skip the rest on purpose (ref TODO: Bug above)
         throw new CancelledError();
       }
+
+      // Alert that we want to register an extra layer entry
+      this.emitLayerEntryRegisterInit({ config: subLayerEntryConfig });
     });
 
     // TODO: Bug - Continuation of the TODO Bug above.. Purposely don't do this anymore (the throw will cause skipping of this)

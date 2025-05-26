@@ -5,6 +5,11 @@ import { useTheme } from '@mui/material/styles';
 import { getSxClasses } from '@/ui/switch/switch-style';
 import { logger } from '@/core/utils/logger';
 
+// Extend SwitchProps to include some FormControlLabel Props
+interface ExtendedSwitchProps extends SwitchProps {
+  label?: string;
+}
+
 /**
  * Create a customized Material UI Switch component.
  * This is a simple wrapper around MaterialSwitch that maintains
@@ -36,22 +41,22 @@ import { logger } from '@/core/utils/logger';
  * />
  * ```
  *
- * @param {SwitchProps} props - All valid Material-UI Switch props
+ * @param {ExtendedSwitchProps} props - All valid Material-UI Switch props
  * @returns {JSX.Element} The Switch component wrapped in FormControlLabel
  *
  * @see {@link https://mui.com/material-ui/react-switch/}
  */
-function SwitchUI(props: SwitchProps): JSX.Element {
+function SwitchUI(props: ExtendedSwitchProps): JSX.Element {
   logger.logTraceRenderDetailed('ui/switch/switch', props);
 
   // Get constant from props
-  const { title, ...otherProps } = props;
+  const { label, ...otherProps } = props;
 
   // Hooks
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
-  return <MaterialFormControlLabel control={<MaterialSwitch {...otherProps} />} label={title} sx={sxClasses.formControl} />;
+  return <MaterialFormControlLabel control={<MaterialSwitch {...otherProps} />} label={label} sx={sxClasses.formControl} />;
 }
 
 export const Switch = SwitchUI;

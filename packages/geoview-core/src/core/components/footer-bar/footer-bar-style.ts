@@ -7,11 +7,9 @@ import { SxStyles } from '@/ui/style/types';
  * @param {Theme} theme the theme object
  * @returns {Object} the sx classes object
  */
-export const getSxClasses = (theme: Theme, isFullScreen: boolean, footerPanelResizeValue: number): SxStyles => ({
+export const getSxClasses = (theme: Theme): SxStyles => ({
   tabContent: {
-    maxHeight: isFullScreen ? `calc(${footerPanelResizeValue}vh - 40px)` : '660px', // maxHeight only when not fullscreen
-    height: isFullScreen ? `calc(${footerPanelResizeValue}vh - 40px)` : undefined, // height only when fullscreen (- padding)
-    overflowY: 'auto',
+    height: '100%',
   },
   tabsContainer: {
     position: 'relative',
@@ -19,8 +17,6 @@ export const getSxClasses = (theme: Theme, isFullScreen: boolean, footerPanelRes
     boxShadow: 2,
     width: '100%',
     transition: 'height 0.2s ease-out',
-    height: '55px',
-
     '&.MuiGrid-container': {
       background: theme.palette.geoViewColor.bgColor.dark[50],
     },

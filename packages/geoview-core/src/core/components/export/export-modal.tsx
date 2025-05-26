@@ -1,4 +1,4 @@
-import { ChangeEvent, MouseEventHandler, RefObject, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, MouseEventHandler, RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
@@ -16,6 +16,7 @@ import { logger } from '@/core/utils/logger';
 import { useLayerLegendLayers } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { LegendContainer } from '@/core/components/export/export-legend-utils';
 import { TypeLegendLayer } from '@/core/components/layers/types';
+import { getSxClasses } from './export-modal-style';
 
 /**
  * Export modal window component to export the viewer information in a PNG file
@@ -26,7 +27,6 @@ export default function ExportModal(): JSX.Element {
   const { t } = useTranslation();
   const mapId = useGeoViewMapId();
   const fileExportDefaultPrefixName = t('exportModal.fileExportDefaultPrefixName');
-  const imageDefaultWidth = 1738;
   const mapElement = useAppGeoviewHTMLElement();
   const mapViewport = mapElement.getElementsByClassName('ol-viewport')[0];
   const footerbarLegendContainer = mapElement.querySelector(`[id^="${mapId}-footerBar-legendContainer"]`);
@@ -55,6 +55,7 @@ export default function ExportModal(): JSX.Element {
   const { disableFocusTrap, setActiveAppBarTab } = useUIStoreActions();
   const activeModalId = useUIActiveFocusItem().activeElementId;
   const { isOpen } = useUIActiveAppBarTab();
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Get layers from the store
   const layersList = useLayerLegendLayers()
@@ -69,6 +70,40 @@ export default function ExportModal(): JSX.Element {
   // Set the legend layers
   const [legendLayers, setLegendLayers] = useState<TypeLegendLayer[]>([]);
 
+  interface TypeScale {
+    scaleId: string;
+    label: string;
+    borderBottom: boolean;
+  }
+
+  const SCALE_MODES = {
+    METRIC: 0,
+    IMPERIAL: 1,
+    NUMERIC: 2,
+  } as const;
+
+  // Memoize values
+  const scaleValues: TypeScale[] = useMemo(
+    () => [
+      {
+        scaleId: '0',
+        label: scale.labelGraphicMetric,
+        borderBottom: true,
+      },
+      {
+        scaleId: '1',
+        label: scale.labelGraphicImperial,
+        borderBottom: true,
+      },
+      {
+        scaleId: '2',
+        label: scale.labelNumeric,
+        borderBottom: false,
+      },
+    ],
+    [scale.labelGraphicMetric, scale.labelGraphicImperial, scale.labelNumeric]
+  );
+
   // resising image from dataurl
   async function resizeImageData(imageUri: string, inFileName: string): Promise<void> {
     const img = new Image();
@@ -76,17 +111,12 @@ export default function ExportModal(): JSX.Element {
     const ctx = imgCanvas.getContext('2d');
 
     img.addEventListener('load', () => {
-      if (img.naturalWidth >= imageDefaultWidth) {
-        exportPNG(img.src, inFileName);
-        return;
-      }
-
-      const dx = (imageDefaultWidth - img.naturalWidth) / 2;
+      const dx = 0;
       const dy = 0;
       const dHeight = img.naturalHeight;
 
       // IMAGE TO CANVAS
-      imgCanvas.width = imageDefaultWidth;
+      imgCanvas.width = img.naturalWidth;
       imgCanvas.height = dHeight;
 
       if (ctx) {
@@ -102,71 +132,6 @@ export default function ExportModal(): JSX.Element {
     img.src = imageUri; // load image
     await delay(1500);
   }
-
-  const exportMap = ((): void => {
-    if (exportContainerRef?.current && textFieldRef.current && exportTitleRef.current) {
-      // Hide the text field
-      textFieldRef.current.style.display = 'none';
-
-      // Update the title
-      exportTitleRef.current.style.padding = '1rem';
-      exportTitleRef.current.innerHTML = exportTitle;
-
-      setIsMapExporting(true);
-
-      // Create a temporary container
-      const tempContainer = document.createElement('div');
-      tempContainer.style.position = 'absolute';
-      tempContainer.style.left = '-9999px';
-      tempContainer.style.width = `${imageDefaultWidth}px`;
-
-      // Clone the content
-      const clonedContent = exportContainerRef.current.cloneNode(true) as HTMLDivElement;
-      const legendContainer = clonedContent.querySelector(`#${mapId}-legend-container`) as HTMLElement;
-      if (legendContainer) {
-        legendContainer.style.width = `${imageDefaultWidth}px`;
-      }
-      tempContainer.appendChild(clonedContent);
-      document.body.appendChild(tempContainer);
-
-      // Small delay to ensure content is rendered
-      setTimeout(() => {
-        htmlToImage
-          .toPng(clonedContent, {
-            backgroundColor: theme.palette.common.white,
-            fontEmbedCSS: '',
-            width: imageDefaultWidth,
-            height: clonedContent.offsetHeight,
-          })
-          .then((dataUrl) => {
-            setIsMapExporting(false);
-            // Clean up
-            document.body.removeChild(tempContainer);
-
-            resizeImageData(dataUrl, `${fileExportDefaultPrefixName}-${exportTitle !== '' ? exportTitle.trim() : mapId}`)
-              .then(() => {
-                setActiveAppBarTab(legendId, 'legend', false, false);
-                disableFocusTrap();
-              })
-              .catch((error: unknown) => {
-                logger.logError('Error while resizing the image', error);
-              });
-          })
-          .catch((error: unknown) => {
-            // Clean up on error too
-            document.body.removeChild(tempContainer);
-            setIsMapExporting(false);
-            logger.logError('Error while exporting the image', error);
-          });
-      }, 100);
-    }
-  }) as MouseEventHandler<HTMLButtonElement>;
-
-  const handleCloseModal = (): void => {
-    setActiveAppBarTab(legendId, 'legend', false, false);
-    disableFocusTrap();
-  };
-
   /**
    * Calculate the width of the canvas based on dialog box container width.
    * @param {HTMLDivElement} dialogBox - Container where canvas will be rendered.
@@ -180,6 +145,87 @@ export default function ExportModal(): JSX.Element {
 
     return dialogBox.clientWidth - paddingLeft - paddingRight;
   };
+  const exportMap = ((): void => {
+    if (exportContainerRef?.current && textFieldRef.current && exportTitleRef.current) {
+      // Hide the text field
+      textFieldRef.current.style.display = 'none';
+
+      // Update the title
+      exportTitleRef.current.style.padding = '1rem';
+      exportTitleRef.current.innerHTML = exportTitle;
+
+      setIsMapExporting(true);
+
+      // Create a temporary container
+      if (activeModalId === 'export' && mapImageRef.current && dialogRef.current) {
+        const dialogBox = dialogRef.current;
+        const tempContainer = document.createElement('div');
+        tempContainer.style.position = 'absolute';
+        tempContainer.style.left = '-9999px';
+        tempContainer.style.width = `${getCanvasWidth(dialogBox)}px`;
+
+        // Clone the content
+        const clonedContent = exportContainerRef.current.cloneNode(true) as HTMLDivElement;
+        const legendContainer = clonedContent.querySelector(`#${mapId}-legend-container`) as HTMLElement;
+        if (legendContainer) {
+          legendContainer.style.width = `${getCanvasWidth(dialogBox)}px`;
+        }
+        tempContainer.appendChild(clonedContent);
+        document.body.appendChild(tempContainer);
+
+        // Small delay to ensure content is rendered
+        setTimeout(() => {
+          htmlToImage
+            .toPng(clonedContent, {
+              backgroundColor: theme.palette.common.white,
+              fontEmbedCSS: '',
+              width: getCanvasWidth(dialogBox),
+              height: clonedContent.offsetHeight,
+            })
+            .then((dataUrl) => {
+              setIsMapExporting(false);
+              // Clean up
+              document.body.removeChild(tempContainer);
+
+              resizeImageData(dataUrl, `${fileExportDefaultPrefixName}-${exportTitle !== '' ? exportTitle.trim() : mapId}`)
+                .then(() => {
+                  setActiveAppBarTab(legendId, 'legend', false, false);
+                  disableFocusTrap();
+                })
+                .catch((error) => {
+                  logger.logError('Error while resizing the image', error);
+                });
+            })
+            .catch((error) => {
+              // Clean up on error too
+              document.body.removeChild(tempContainer);
+              setIsMapExporting(false);
+              logger.logError('Error while exporting the image', error);
+            });
+        }, 100);
+      }
+    }
+  }) as MouseEventHandler<HTMLButtonElement>;
+
+  const handleCloseModal = (): void => {
+    setActiveAppBarTab(legendId, 'legend', false, false);
+    disableFocusTrap();
+  };
+
+  // Callback
+  const getScaleWidth = useCallback(
+    (mode: number): string => {
+      switch (mode) {
+        case SCALE_MODES.METRIC:
+          return scale.lineWidthMetric;
+        case SCALE_MODES.IMPERIAL:
+          return scale.lineWidthImperial;
+        default:
+          return 'none';
+      }
+    },
+    [scale.lineWidthMetric, scale.lineWidthImperial, SCALE_MODES.METRIC, SCALE_MODES.IMPERIAL]
+  );
 
   useEffect(() => {
     // Log
@@ -214,7 +260,7 @@ export default function ExportModal(): JSX.Element {
             img.style.maxWidth = `${getCanvasWidth(dialogBox)}px`;
             mapImage.appendChild(img);
           })
-          .catch((error: unknown) => {
+          .catch((error) => {
             logger.logError('Error occured while converting map to image', error);
           });
         setIsLegendLoading(false);
@@ -249,12 +295,16 @@ export default function ExportModal(): JSX.Element {
             {isMapLoading && <Skeleton variant="rounded" width="100%" height={500} sx={{ bgcolor: theme.palette.grey[500] }} />}
           </Box>
           <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ padding: '1rem', paddingBottom: 0 }}>
-            <Box>
-              {!!scale.labelGraphicMetric && (
-                <Box>
-                  {scale.labelGraphicMetric} {t('exportModal.approx')} <hr />
-                </Box>
-              )}
+            <Box
+              component="span"
+              className="hasScaleLine interaction-static"
+              sx={{
+                ...getSxClasses(theme).scaleText,
+                borderBottom: '1px solid',
+                width: `${parseInt(getScaleWidth(0), 10) + 60}px`,
+              }}
+            >
+              {scaleValues[0].label} {t('exportModal.approx')}
             </Box>
             {northArrow && (
               <Box
@@ -276,17 +326,17 @@ export default function ExportModal(): JSX.Element {
           <Box ref={legendContainerRef}>
             {isLegendLoading && <Skeleton variant="rounded" width="100%" height={500} sx={{ bgcolor: theme.palette.grey[500] }} />}
           </Box>
-          <Box textAlign="center" key={t('mapctrl.disclaimer.message')} component="p" sx={{ margin: 0, marginBottom: '20px' }}>
+          <Box textAlign="center" key={t('mapctrl.disclaimer.message')} component="p" sx={{ ...sxClasses.disclaimerText }}>
             {t('mapctrl.disclaimer.message')}
           </Box>
           <Box textAlign="center">
             {mapAttributions.map((mapAttribution) => (
-              <Box key={mapAttribution} component="p" sx={{ margin: 0 }}>
+              <Box key={mapAttribution} component="p" sx={{ ...sxClasses.AttributionText }}>
                 {mapAttribution}
               </Box>
             ))}
           </Box>
-          <Box textAlign="center" sx={{ marginBottom: '1rem' }}>
+          <Box textAlign="center" sx={{ ...sxClasses.dateText }}>
             {DateMgt.formatDate(new Date(), 'YYYY-MM-DD, hh:mm:ss A')}
           </Box>
         </Box>

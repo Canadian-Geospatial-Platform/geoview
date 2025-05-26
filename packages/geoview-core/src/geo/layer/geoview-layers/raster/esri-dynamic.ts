@@ -171,7 +171,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     const { source } = layerConfig;
 
     if (!source?.dataAccessPath) {
-      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath);
+      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath, layerConfig.getLayerName());
     }
 
     const sourceOptions: SourceOptions = {
@@ -183,18 +183,44 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         ...(source.format && { format: source.format }),
       },
       crossOrigin: source.crossOrigin ?? 'Anonymous',
-      projection: source.projection ? `EPSG:${source.projection}` : undefined,
     };
 
-    const arcgisSource = new ImageArcGISRest(sourceOptions);
+    // If forcing service projection so that OpenLayers takes care of reprojecting locally on the map
+    if (source.forceServiceProjection) {
+      // Find the SRID from the layer metadata
+      const srid =
+        layerConfig.getLayerMetadata()?.sourceSpatialReference?.latestWkid || layerConfig.getLayerMetadata()?.sourceSpatialReference?.wkid;
+
+      // Tweak the source params and projection to force it to use the native projection of the service, not the projection of the map
+      // GV Set the image spatial reference to the service source - performance is better when open layers does the conversion
+      // GV.CONT Older versions of ArcGIS Server are not properly converted, so this is only used for version 10.8+
+      // GV This line (especially bboxSR) fixes an issue with EsriDynamic not taking in consideration the map projection in sourceOptions.projection (maybe an old Esri service?)
+      sourceOptions.projection = `EPSG:${srid}`;
+      sourceOptions.params!.imageSR = srid;
+      sourceOptions.params!.bboxSR = srid;
+    }
+
+    // Create the source
+    const olSource = new ImageArcGISRest(sourceOptions);
 
     // Raster layers do not accept layerDefs — must be cleared
     if (layerConfig.getServiceMetadata()?.layers?.[0]?.type === 'Raster Layer') {
-      const params = arcgisSource.getParams();
-      arcgisSource.updateParams({ ...params, layerDefs: '' });
+      const params = olSource.getParams();
+      olSource.updateParams({ ...params, layerDefs: '' });
     }
 
-    return arcgisSource;
+    // Apply the filter on the source right away, before the first load
+    GVEsriDynamic.applyViewFilterOnSource(
+      layerConfig,
+      olSource,
+      layerConfig.layerStyle,
+      layerConfig.getExternalFragmentsOrder(),
+      undefined,
+      layerConfig.layerFilter
+    );
+
+    // Return the source
+    return olSource;
   }
 }
 

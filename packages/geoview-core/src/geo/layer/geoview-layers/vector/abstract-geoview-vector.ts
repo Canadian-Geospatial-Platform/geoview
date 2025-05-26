@@ -25,6 +25,7 @@ import { Fetch } from '@/core/utils/fetch-helper';
 import { TypeJsonObject } from '@/api/config/types/config-types';
 import { LayerDataAccessPathMandatoryError, LayerNoGeographicDataInCSVError } from '@/core/exceptions/layer-exceptions';
 import { LayerEntryConfigVectorSourceURLNotDefinedError } from '@/core/exceptions/layer-entry-config-exceptions';
+import { doUntilPromises } from '@/core/utils/utilities';
 
 // Some constants
 const EXCLUDED_HEADERS_LAT = ['latitude', 'lat', 'y', 'ycoord', 'latitude|latitude', 'latitude | latitude'];
@@ -38,6 +39,9 @@ const NAME_FIELD_KEYWORDS = ['^name$', '^title$', '^label$'];
  * The AbstractGeoViewVector class.
  */
 export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
+  /** The maximum delay to wait before we warn about the features fetch taking a long time */
+  static readonly DEFAULT_WAIT_SLOW_FETCH_WARNING = 15 * 1000; // 15 seconds
+
   /**
    * Creates a VectorSource from a layer config.
    * @param {VectorTilesLayerEntryConfig} layerConfig - Configuration object for the vector tile layer.
@@ -47,7 +51,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     // Validate the dataAccessPath exists
     if (!layerConfig.source?.dataAccessPath) {
       // Throw error missing dataAccessPath
-      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath);
+      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath, layerConfig.getLayerName());
     }
 
     // Redirect
@@ -87,11 +91,25 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     // eslint-disable-next-line no-param-reassign, @typescript-eslint/no-misused-promises
     sourceOptions.loader = async (extent: Extent, resolution: number, projection: OLProjection, successCallback, failureCallback) => {
       try {
+        // TODO: Refactor - Here, the url is resolved by eventually grabbing it back from the OpenLayer source object.
+        // TO.DOCONT: The url should probably never have been 'set' in the OpenLayer Source in the first place.
+        // TO.DOCONT: Refactor this for a cleaner getUrl override per layer type class.
+        // TO.DOCONT: Later in here, inside #parseFeatures and inside #getEsriFeatures, there's a url.replace which replaces the
+        // TO.DOCONT: 'returnCountOnly=true' that was set in the onCreateVectorSource override. The fact that the source has a url is
+        // TO.DOCONT: making us think that it's used when actually it's not. The source.url property is ignored by OpenLayers when the
+        // TO.DOCONT: sourceOptions.loader callback is used like in our case here. Code should be rewritten more clearly.
         // Resolve the url
         const url = AbstractGeoViewVector.#resolveUrl(layerConfig, vectorSource, extent, resolution, projection);
 
         // Fetch the data
         const responseText = await AbstractGeoViewVector.#fetchData(url, sourceConfig);
+
+        // If Esri Feature
+        if (layerConfig.schemaTag === CONST_LAYER_TYPES.ESRI_FEATURE) {
+          // Check and throw exception if the content actually contains an embedded error
+          // (EsriFeature type of response might return an embedded error inside a 200 HTTP OK)
+          Fetch.throwIfResponseHasEmbeddedError(responseText);
+        }
 
         // Parse the result of the fetch to read the features
         const features = await this.#parseFeatures(url, responseText, layerConfig, vectorSource, projection, extent, readOptions);
@@ -111,7 +129,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         // Add the features in the source
         vectorSource.addFeatures(features);
 
-        // Call the success callback with the features. This will trigger the onLoad callback on the layer object (though it
+        // Call the success callback with the features. This will trigger the onLoaded callback on the layer object (though it
         // seems not to call it everytime, OL issue? if issue persists, maybe we want to setLayerStatus to loaded here?)
         successCallback?.(features);
 
@@ -260,23 +278,23 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     }
 
     // Get array of all the promises
-    const promises = urlArray.map((featureUrl) => Fetch.fetchJsonAsObject(featureUrl));
+    const promises = urlArray.map((featureUrl) => Fetch.fetchEsriJsonAsObject(featureUrl));
 
-    // TODO: message - Create message for all vector layer fetching. Create a centralized message creator for geoview-layers
-    // Prepare a setInterval to emitMessage every couple seconds while the promise is ongoing
-    const timeInterval = setInterval(() => {
-      // Emit message about the fetching being slow
-      this.emitMessage('layers.slowFetch', [this.geoviewLayerName || '...']);
-    }, 15000); // Log every 15 seconds
+    // Start a watcher for a slow fetch happening
+    doUntilPromises(
+      () => {
+        // Emit message about the fetching being slow
+        this.emitMessage('warning.layer.slowFetch', [this.geoviewLayerName]);
 
-    // Create an all promise for all of them and hook when the promise resolves/rejects
-    const allPromise = Promise.all(promises).finally(() => {
-      // Clear interval even if there's an error
-      clearInterval(timeInterval);
-    });
+        // Continue watcher
+        return false;
+      },
+      promises,
+      AbstractGeoViewVector.DEFAULT_WAIT_SLOW_FETCH_WARNING
+    );
 
     // Return the all promise
-    return allPromise;
+    return Promise.all(promises);
   }
 
   /**
@@ -385,7 +403,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
     if (latIndex === undefined || lonIndex === undefined) {
       // Failed
-      throw new LayerNoGeographicDataInCSVError(layerConfig.layerPath);
+      throw new LayerNoGeographicDataInCSVError(layerConfig.layerPath, layerConfig.getLayerName());
     }
 
     AbstractGeoViewVector.#processFeatureInfoConfig(headers, csvRows[1], EXCLUDED_HEADERS, layerConfig);

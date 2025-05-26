@@ -291,6 +291,34 @@ export class ResponseEmptyError extends Error {
     Object.setPrototypeOf(this, ResponseEmptyError.prototype);
   }
 }
+/**
+ * Custom error class for handling fetch response errors where the response body has an error inside of it.
+ * This is typically used when a fetch request returns a successful status but with error in the content itself.
+ * @extends {Error}
+ */
+export class ResponseContentError extends Error {
+  /**
+   * Constructor to initialize the ResponseContentError with an optional message.
+   * The default message is "Response contained an error in its content." to indicate that the response body contained an error.
+   * @param {string} message - The optional error message.
+   */
+  constructor(message: string = 'Response contained an error in its content.') {
+    // Pass the provided message (or default message) to the parent Error class
+    super(message);
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'ResponseContentError';
+
+    // Capture the stack trace (V8-specific engines like Chrome and Node.js)
+    // Omits the constructor call from the trace for cleaner debugging
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, ResponseContentError);
+    }
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, ResponseContentError.prototype);
+  }
+}
 
 /**
  * Error thrown when a response does not match the expected type.

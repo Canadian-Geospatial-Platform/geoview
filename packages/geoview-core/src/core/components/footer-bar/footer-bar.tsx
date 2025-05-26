@@ -61,10 +61,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   const isMapFullScreen = useAppFullscreenActive();
   const footerPanelResizeValue = useUIFooterPanelResizeValue();
   const theme = useTheme();
-  const sxClasses = useMemo(
-    () => getSxClasses(theme, isMapFullScreen, footerPanelResizeValue),
-    [theme, isMapFullScreen, footerPanelResizeValue]
-  );
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // State & ref
   const tabsContainerRef = useRef<HTMLDivElement>();
@@ -219,7 +216,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
       setFooterBarIsCollapsed(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [arrayOfLayerDataBatch, selectedTab]);
+  }, [arrayOfLayerDataBatch, selectedTab, setFooterBarIsCollapsed]);
   // Don't add isCollapsed in the dependency array, because it'll retrigger the useEffect
 
   /**
@@ -257,6 +254,27 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   };
 
   /**
+   * Handles resizing the footerbar when toggling fullscreen
+   */
+  useEffect(() => {
+    if (!tabsContainerRef.current) {
+      return;
+    }
+
+    logger.logTraceUseEffect('FOOTER-BAR - handle full screen resize', isCollapsed);
+
+    // default values as set by the height of the div
+    let footerHeight = 'fit-content';
+
+    // adjust values from px to % to accomodate fullscreen plus page zoom
+    if (isMapFullScreen && !isCollapsed) {
+      footerHeight = `${footerPanelResizeValue}%`;
+    }
+
+    tabsContainerRef.current.style.height = footerHeight;
+  }, [tabsContainerRef, isCollapsed, isMapFullScreen, footerPanelResizeValue]);
+
+  /**
    * Add plugins
    */
   useEffect(() => {
@@ -288,6 +306,13 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('FOOTER-BAR - mount');
+
+    // TODO: Refactor - Registering those handlers only when the component has been mounted can cause issues if 'someone' calls
+    // TO.DOCONT: mapViewer('map1').footerBarApi.createTab() before the component is actually mounted.
+    // TO.DOCONT: The handler when tabs are created should happen earlier and the ui component should only 'react' to store tabs values.
+    // TO.DOCONT: We had an issue where a custom footer tab was never appearing, because the 'createTab()' call was happening before
+    // TO.DOCONT: this FooterBar component was actually mounted. That being said, removing the 'mapLoaded' condition, before mounting
+    // TO.DOCONT: the FooterBar (in Footer-bar.tsx), was sufficient to fix the issue for now, but it should be addressed eventually.
 
     // Register footerbar tab created/removed handlers
     footerBarApi.onFooterTabCreated(handleAddTab);
@@ -350,7 +375,6 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
           logger.logPromiseFailed('api.plugin.loadScript(geochart) in useEffect in FooterBar', error);
         });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [footerBarTabsConfig, mapId]);
 
   // Scroll the footer into view on mouse click

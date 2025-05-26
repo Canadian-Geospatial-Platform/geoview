@@ -1,16 +1,9 @@
 import { useTheme } from '@mui/material';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ToggleAll } from '../toggle-all/toggle-all';
 import { Box, Typography } from '@/ui';
-import {
-  useGeoViewMapId,
-  useUIActiveAppBarTab,
-  useUIActiveFooterBarTabId,
-  useAppFullscreenActive,
-  useUIFooterPanelResizeValue,
-  useLayerLegendLayers,
-  useUIFooterBarIsCollapsed,
-} from '@/core/stores/';
+import { useGeoViewMapId, useUIActiveAppBarTab, useUIActiveFooterBarTabId, useLayerLegendLayers } from '@/core/stores/';
 import { logger } from '@/core/utils/logger';
 
 import { getSxClassesMain, getSxClasses } from './legend-styles';
@@ -61,13 +54,7 @@ export function Legend({ fullWidth, containerType = CONTAINER_TYPE.FOOTER_BAR }:
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
-  const isMapFullScreen = useAppFullscreenActive();
-  const footerPanelResizeValue = useUIFooterPanelResizeValue();
-  const footerBarIsCollapsed = useUIFooterBarIsCollapsed();
-  const sxClassesMain = useMemo(
-    () => getSxClassesMain(isMapFullScreen, footerPanelResizeValue, footerBarIsCollapsed, containerType),
-    [isMapFullScreen, footerPanelResizeValue, footerBarIsCollapsed, containerType]
-  );
+  const sxClassesMain = useMemo(() => getSxClassesMain(), []);
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // State
@@ -188,6 +175,7 @@ export function Legend({ fullWidth, containerType = CONTAINER_TYPE.FOOTER_BAR }:
 
   return (
     <Box sx={sxClassesMain.container} id={`${mapId}-${containerType}-legendContainer`}>
+      <ToggleAll />
       <Box sx={styles.flexContainer}>{content}</Box>
     </Box>
   );

@@ -273,7 +273,11 @@ export class ConfigValidation {
    */
   static #metadataAccessPathIsMandatory(geoviewLayerConfig: TypeGeoviewLayerConfig): void {
     if (!geoviewLayerConfig.metadataAccessPath) {
-      throw new LayerMetadataAccessPathMandatoryError(geoviewLayerConfig.geoviewLayerId, geoviewLayerConfig.geoviewLayerType);
+      throw new LayerMetadataAccessPathMandatoryError(
+        geoviewLayerConfig.geoviewLayerId,
+        geoviewLayerConfig.geoviewLayerType,
+        geoviewLayerConfig.geoviewLayerName
+      );
     }
   }
 

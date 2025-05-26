@@ -47,6 +47,12 @@ export class Notifications {
     });
   }
 
+  // TODO: Refactor - Small problem. These 'addNotificationXXXX' and 'showXXXX' functions are public, but the outside devs don't know about the message keys.
+  // TO.DOCONT: So when they try to do:
+  // TO.DOCONT: cgpv.api.getMapViewer('map1').notifications.addNotificationSuccess(`${LYR_PATH_UNIQUE} visibility set to ${payload.visible} - individual`);
+  // TO.DOCONT: For example, we log an error in logger about not having translation for 'that' messageKey which is not a message key.
+  // TO.DOCONT: Provide a addNotificationUsingKey and a 'showXXXXUsingKey' alternatives?
+
   /**
    * Adds a notification message
    * @param {string} messageKey - The message or a locale key to retrieve
@@ -100,9 +106,12 @@ export class Notifications {
    * @private
    */
   #showSnackbarMessage(type: SnackbarType, messageKey: string, params: unknown[], button?: ISnackbarButton): void {
+    // Get the localized message
+    const message = getLocalizedMessage(AppEventProcessor.getDisplayLanguage(this.mapId), messageKey, params);
+
     const snackbar: SnackBarOpenEvent = {
       snackbarType: type,
-      message: getLocalizedMessage(AppEventProcessor.getDisplayLanguage(this.mapId), messageKey, params),
+      message,
       button,
     };
     // Emit

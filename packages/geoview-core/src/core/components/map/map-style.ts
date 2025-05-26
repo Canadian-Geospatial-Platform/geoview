@@ -6,12 +6,12 @@ import { SxStyles } from '@/ui/style/types';
  * @param {string} mapHeight - The height of the map
  * @returns {Object} the sx classes object
  */
-export const getSxClasses = (mapHeight: string): SxStyles => ({
+export const getSxClasses = (): SxStyles => ({
   mapContainer: {
     display: 'flex',
-    flexDirection: '1 1 auto',
+    flexDirection: 'column',
     width: '100%',
-    height: mapHeight,
+    height: '100%',
     position: 'relative',
 
     '& .ol-viewport': {
@@ -88,5 +88,11 @@ export const getSxClasses = (mapHeight: string): SxStyles => ({
         },
       },
     },
+  },
+  progressBar: {
+    width: '100%',
+    position: 'absolute',
+    bottom: 45,
+    '> span': { height: '8px' },
   },
 });

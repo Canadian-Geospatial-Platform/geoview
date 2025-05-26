@@ -265,8 +265,9 @@
       }
 
       let importantLayersData;
-      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-      cgpv.init((mapId) => {
+
+      // Register handler when map has been initialized
+      cgpv.onMapInit((mapViewer) => {
         // fetch JSON config file to show in the text are section
         function fetchJSONData() {
           fetch('./configs/important-layers.json')
@@ -293,8 +294,11 @@
           initTableFields();
         });
 
-        listenToLegendLayerSetChanges('mapWM-state', 'map1');
+        listenToLegendLayerSetChanges('mapWM-state', mapViewer);
       });
+
+      // initialize cgpv
+      cgpv.init();
 
       // create snippets
       window.addEventListener('load', () => {
