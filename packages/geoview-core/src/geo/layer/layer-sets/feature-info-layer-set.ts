@@ -82,19 +82,6 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
   }
 
   /**
-   * Propagates the resultSetEntry to the store
-   * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry to propagate to the store
-   * @private
-   */
-  #propagateToStore(resultSetEntry: TypeFeatureInfoResultSetEntry, eventType: EventType = 'click'): void {
-    // Propagate
-    FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.getMapId(), eventType, resultSetEntry).catch((error: unknown) => {
-      // Log
-      logger.logPromiseFailed('FeatureInfoEventProcessor.propagateToStore in FeatureInfoLayerSet', error);
-    });
-  }
-
-  /**
    * Overrides the behavior to apply when deleting from the store
    * @param {string} layerPath - The layer path to delete from the store
    */
@@ -110,12 +97,12 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    */
   async queryLayers(longLatCoordinate: Coordinate): Promise<TypeFeatureInfoResultSet> {
     // FIXME: Watch out for code reentrancy between queries!
+    // FIX.MECONT: The AbortController helps a lot, but there could be some minor timing issues left
+    // FIX.MECONT: with the mutating this.resultSet.
     // FIX.MECONT: Consider using a LIFO pattern, per layer path, as the race condition resolution
-    // GV Each query should be distinct as far as the resultSet goes! The 'reinitialization' below isn't sufficient.
-    // GV As it is (and was like this before events refactor), the this.resultSet is mutating between async calls.
 
     // Prepare to hold all promises of features in the loop below
-    const allPromises: Promise<TypeFeatureInfoEntry[] | undefined | null>[] = [];
+    const allPromises: Promise<TypeFeatureInfoEntry[]>[] = [];
 
     // Query and event types of what we're doing
     const queryType = 'at_long_lat';
@@ -227,21 +214,6 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
   }
 
   /**
-   * Apply status to item in results set reference by the layer path and propagate to store
-   * @param {string} layerPath - The layer path
-   * @param {boolean} isEnable - Status to apply
-   * @private
-   */
-  #processListenerStatusChanged(layerPath: string, isEnable: boolean): void {
-    // Edit the result set
-    this.resultSet[layerPath].eventListenerEnabled = isEnable;
-    this.resultSet[layerPath].features = [];
-
-    // Propagate to store
-    this.#propagateToStore(this.resultSet[layerPath], 'name');
-  }
-
-  /**
    * Function used to enable listening of click events. When a layer path is not provided,
    * click events listening is enabled for all layers
    * @param {string} layerPath - Optional parameter used to enable only one layer
@@ -317,6 +289,34 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     }
 
     if (!sourceFeatureInfo.nameField) sourceFeatureInfo.nameField = sourceFeatureInfo.outfields[0].name;
+  }
+
+  /**
+   * Apply status to item in results set reference by the layer path and propagate to store
+   * @param {string} layerPath - The layer path
+   * @param {boolean} isEnable - Status to apply
+   * @private
+   */
+  #processListenerStatusChanged(layerPath: string, isEnable: boolean): void {
+    // Edit the result set
+    this.resultSet[layerPath].eventListenerEnabled = isEnable;
+    this.resultSet[layerPath].features = [];
+
+    // Propagate to store
+    this.#propagateToStore(this.resultSet[layerPath], 'name');
+  }
+
+  /**
+   * Propagates the resultSetEntry to the store
+   * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry to propagate to the store
+   * @private
+   */
+  #propagateToStore(resultSetEntry: TypeFeatureInfoResultSetEntry, eventType: EventType = 'click'): void {
+    // Propagate
+    FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.getMapId(), eventType, resultSetEntry).catch((error: unknown) => {
+      // Log
+      logger.logPromiseFailed('FeatureInfoEventProcessor.propagateToStore in FeatureInfoLayerSet', error);
+    });
   }
 
   /**

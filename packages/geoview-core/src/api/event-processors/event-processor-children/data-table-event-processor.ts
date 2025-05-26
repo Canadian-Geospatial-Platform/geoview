@@ -2,7 +2,6 @@ import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-pr
 import {
   IDataTableState,
   IDataTableSettings,
-  TypeAllFeatureInfoResultSet,
   TypeAllFeatureInfoResultSetEntry,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { logger } from '@/core/utils/logger';
@@ -102,9 +101,9 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
    * Shortcut to get the DataTable state for a given map id
    * @param {string} mapId - Id of the map.
    * @param {string} layerPath - Layer path to apply filter.
-   * @returns {Promise<TypeAllFeatureInfoResultSet | void>}
+   * @returns {Promise<TypeFeatureInfoEntry[] | void>}
    */
-  static triggerGetAllFeatureInfo(mapId: string, layerPath: string): Promise<TypeAllFeatureInfoResultSet | void> {
+  static triggerGetAllFeatureInfo(mapId: string, layerPath: string): Promise<TypeFeatureInfoEntry[] | void> {
     return MapEventProcessor.getMapViewerLayerAPI(mapId).allFeatureInfoLayerSet.queryLayer(layerPath, 'all');
   }
 

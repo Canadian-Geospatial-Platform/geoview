@@ -656,7 +656,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     curLayers: TypeLegendLayer[],
     layerPath: string,
     opacity: number,
-    isChild = false
+    isChild: boolean = false
   ): void {
     const layer = LegendEventProcessor.findLayerByPath(curLayers, layerPath);
     if (layer) {
