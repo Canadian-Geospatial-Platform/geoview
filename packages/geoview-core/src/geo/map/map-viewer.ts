@@ -806,7 +806,7 @@ export class MapViewer {
     const mapDiv = await this.remove(false);
 
     // TODO: There is still a problem with bad config schema value and layers loading... should be refactor when config is done
-    api.createMapFromConfig(mapDiv.id, JSON.stringify(config), height).catch((error: unknown) => {
+    api.createMapFromConfig(mapDiv.id, JSON.stringify(config), height, true).catch((error: unknown) => {
       // Log
       logger.logError(`Couldn't reload the map in map-viewer`, error);
     });
