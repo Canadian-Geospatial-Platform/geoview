@@ -1,5 +1,5 @@
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
-import { QueryType, TypeLayerEntryConfig } from '@/api/config/types/map-schema-types';
+import { QueryType, TypeFeatureInfoEntry, TypeLayerEntryConfig } from '@/api/config/types/map-schema-types';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
@@ -68,19 +68,6 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
   }
 
   /**
-   * Propagates the resultSetEntry to the store
-   * @param {TypeAllFeatureInfoResultSetEntry} resultSetEntry - The result set entry to propagate to the store
-   * @private
-   */
-  #propagateToStore(resultSetEntry: TypeAllFeatureInfoResultSetEntry): void {
-    // Only if the layerStatus is loaded
-    if (resultSetEntry.layerStatus === 'loaded') {
-      // Propagate
-      DataTableEventProcessor.propagateFeatureInfoToStore(this.getMapId(), resultSetEntry);
-    }
-  }
-
-  /**
    * Overrides the behavior to apply when deleting from the store
    * @param {string} layerPath - The layer path to delete from the store
    */
@@ -93,14 +80,14 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
    * Helper function used to launch the query on a layer to get all of its feature information.
    * @param {string} layerPath - The layerPath that will be queried
    * @param {QueryType} queryType - The query's type to perform
-   * @returns {Promise<TypeAllFeatureInfoResultSet | void>} A promise which will hold the result of the query
+   * @returns {Promise<TypeFeatureInfoEntry[] | void>} A promise which will hold the result of the query
    */
   // TODO: (future development) The queryType is a door opened to allow the triggering using a bounding box or a polygon.
-  queryLayer(layerPath: string, queryType: QueryType = 'all'): Promise<TypeAllFeatureInfoResultSet | void> {
+  queryLayer(layerPath: string, queryType: QueryType = 'all'): Promise<TypeFeatureInfoEntry[] | void> {
     // FIXME: Watch out for code reentrancy between queries!
-    // FIX.MECONT: Consider using a LIFO pattern, per layer path, as the race condition resolution
-    // GV Each query should be distinct as far as the resultSet goes! The 'reinitialization' below isn't sufficient.
-    // GV As it is (and was like this before events refactor), the this.resultSet is mutating between async calls.
+    // FIX.MECONT: The AbortController and the 'isDisabled' flag help a lot, but there could be some minor timing issues left
+    // FIX.MECONT: with the mutating this.resultSet.
+    // FIX.MECONT: Consider using a LIFO pattern, per layer path, as the race condition resolution.
 
     // If valid layer path
     if (this.resultSet[layerPath]) {
@@ -140,7 +127,10 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
           layerPath,
           false,
           this.#abortControllers[layerPath]
-        )
+        );
+
+        // When the promise is done, propagate to store
+        promiseResult
           .then((arrayOfRecords) => {
             // Use the response to align arrayOfRecords fields with layerConfig fields
             if (arrayOfRecords.length) {
@@ -194,5 +184,18 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
 
     // Return empty
     return Promise.resolve();
+  }
+
+  /**
+   * Propagates the resultSetEntry to the store
+   * @param {TypeAllFeatureInfoResultSetEntry} resultSetEntry - The result set entry to propagate to the store
+   * @private
+   */
+  #propagateToStore(resultSetEntry: TypeAllFeatureInfoResultSetEntry): void {
+    // Only if the layerStatus is loaded
+    if (resultSetEntry.layerStatus === 'loaded') {
+      // Propagate
+      DataTableEventProcessor.propagateFeatureInfoToStore(this.getMapId(), resultSetEntry);
+    }
   }
 }

@@ -110,16 +110,6 @@ export class LegendsLayerSet extends AbstractLayerSet {
   }
 
   /**
-   * Propagates the resultSetEntry to the store
-   * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry to propagate to the store
-   * @private
-   */
-  #propagateToStore(resultSetEntry: TypeLegendResultSetEntry): void {
-    // Propagate
-    LegendEventProcessor.propagateLegendToStore(this.getMapId(), resultSetEntry);
-  }
-
-  /**
    * Overrides the behavior to apply when deleting from the store
    * @param {string} layerPath - The layer path to delete form the store
    */
@@ -187,6 +177,16 @@ export class LegendsLayerSet extends AbstractLayerSet {
           logger.logPromiseFailed('legendPromise in #checkQueryLegend in LegendsLayerSet', error);
         });
     }
+  }
+
+  /**
+   * Propagates the resultSetEntry to the store
+   * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry to propagate to the store
+   * @private
+   */
+  #propagateToStore(resultSetEntry: TypeLegendResultSetEntry): void {
+    // Propagate
+    LegendEventProcessor.propagateLegendToStore(this.getMapId(), resultSetEntry);
   }
 
   /**

@@ -1204,6 +1204,8 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   // #endregion EVENTS
 }
 
+// #region EVENT TYPES
+
 /**
  * Define a delegate for the event handler function signature
  */
@@ -1285,3 +1287,5 @@ export type LayerMessageEvent = {
  * Define a delegate for the event handler function signature
  */
 export type LayerMessageDelegate = EventDelegateBase<AbstractGVLayer, LayerMessageEvent, void>;
+
+// #endregion EVENT TYPES
