@@ -157,7 +157,7 @@ export class LayerApi {
   };
 
   // Keep all callback delegates references
-  #onLayerConfigAddedHandlers: LayerConfigDelegate[] = [];
+  #onLayerConfigAddedHandlers: LayerBuilderDelegate[] = [];
 
   // Keep all callback delegates references
   #onLayerConfigErrorHandlers: LayerConfigErrorDelegate[] = [];
@@ -181,7 +181,7 @@ export class LayerApi {
   #onLayerErrorHandlers: LayerErrorDelegate[] = [];
 
   // Keep all callback delegates references
-  #onLayerAllLoadedHandlers: LayerPathDelegate[] = [];
+  #onLayerAllLoadedHandlers: LayerConfigDelegate[] = [];
 
   // Keep all callback delegates references
   #onLayerStatusChangedHandlers: LayerStatusChangedDelegate[] = [];
@@ -892,6 +892,7 @@ export class LayerApi {
     // If no layer entries at all or there are layer entries and there are geoview layers to check
     let allGood = true;
 
+    // For each layer entry config
     this.getLayerEntryConfigs().forEach((layerConfig) => {
       const layerIsGood = ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo(status, [layerConfig]);
       if (!layerIsGood) {
@@ -1528,16 +1529,19 @@ export class LayerApi {
     // Emit about it
     this.#emitLayerStatusChanged({ config: layerConfig, status: event.layerStatus });
 
-    // Check if all layers are loaded/error right now
-    const [allLoadedOrError] = this.checkLayerStatus('loaded');
+    // If the config is a layer entry (not a group)
+    if (layerConfig instanceof AbstractBaseLayerEntryConfig) {
+      // Check if all layers are loaded/error right now
+      const [allLoadedOrError] = this.checkLayerStatus('loaded');
 
-    // If all loaded/error
-    if (allLoadedOrError) {
-      // Update the store that all layers are loaded at this point
-      LegendEventProcessor.setLayersAreLoading(this.getMapId(), false);
+      // If all loaded/error
+      if (allLoadedOrError) {
+        // Update the store that all layers are loaded at this point
+        LegendEventProcessor.setLayersAreLoading(this.getMapId(), false);
 
-      // Emit about it
-      this.#emitLayerAllLoaded({ layerPath: layerConfig.layerPath });
+        // Emit about it
+        this.#emitLayerAllLoaded({ config: layerConfig });
+      }
     }
   }
 
@@ -1931,28 +1935,28 @@ export class LayerApi {
 
   /**
    * Emits an event to all handlers when a layer config has been flag as error.
-   * @param {LayerConfigEvent} event - The event to emit
+   * @param {LayerBuilderEvent} event - The event to emit
    * @private
    */
-  #emitLayerConfigAdded(event: LayerConfigEvent): void {
+  #emitLayerConfigAdded(event: LayerBuilderEvent): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onLayerConfigAddedHandlers, event);
   }
 
   /**
    * Registers a layer config error event handler.
-   * @param {LayerConfigDelegate} callback - The callback to be executed whenever the event is emitted
+   * @param {LayerBuilderDelegate} callback - The callback to be executed whenever the event is emitted
    */
-  onLayerConfigAdded(callback: LayerConfigDelegate): void {
+  onLayerConfigAdded(callback: LayerBuilderDelegate): void {
     // Register the event handler
     EventHelper.onEvent(this.#onLayerConfigAddedHandlers, callback);
   }
 
   /**
    * Unregisters a layer config error event handler.
-   * @param {LayerConfigDelegate} callback - The callback to stop being called whenever the event is emitted
+   * @param {LayerBuilderDelegate} callback - The callback to stop being called whenever the event is emitted
    */
-  offLayerConfigAdded(callback: LayerConfigDelegate): void {
+  offLayerConfigAdded(callback: LayerBuilderDelegate): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerConfigAddedHandlers, callback);
   }
@@ -2043,28 +2047,28 @@ export class LayerApi {
 
   /**
    * Emits an event to all handlers when all layers have turned into a loaded/error state on the map.
-   * @param {LayerPathEvent} event - The event to emit
+   * @param {LayerConfigEvent} event - The event to emit
    * @private
    */
-  #emitLayerAllLoaded(event: LayerPathEvent): void {
+  #emitLayerAllLoaded(event: LayerConfigEvent): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onLayerAllLoadedHandlers, event);
   }
 
   /**
    * Registers a layer all loaded/error event handler.
-   * @param {LayerPathDelegate} callback - The callback to be executed whenever the event is emitted
+   * @param {LayerConfigDelegate} callback - The callback to be executed whenever the event is emitted
    */
-  onLayerAllLoaded(callback: LayerPathDelegate): void {
+  onLayerAllLoaded(callback: LayerConfigDelegate): void {
     // Register the event handler
     EventHelper.onEvent(this.#onLayerAllLoadedHandlers, callback);
   }
 
   /**
    * Unregisters a layer all loaded/error event handler.
-   * @param {LayerPathDelegate} callback - The callback to stop being called whenever the event is emitted
+   * @param {LayerConfigDelegate} callback - The callback to stop being called whenever the event is emitted
    */
-  offLayerAllLoaded(callback: LayerPathDelegate): void {
+  offLayerAllLoaded(callback: LayerConfigDelegate): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerAllLoadedHandlers, callback);
   }
@@ -2298,14 +2302,17 @@ export class LayerApi {
   // #endregion
 }
 
-export type LayerConfigEvent = {
+/**
+ * Define an event for the delegate
+ */
+export type LayerBuilderEvent = {
   layer: AbstractGeoViewLayer;
 };
 
 /**
  * Define a delegate for the event handler function signature
  */
-export type LayerConfigDelegate = EventDelegateBase<LayerApi, LayerConfigEvent, void>;
+export type LayerBuilderDelegate = EventDelegateBase<LayerApi, LayerBuilderEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -2362,6 +2369,19 @@ export type LayerPathEvent = {
  * Define a delegate for the event handler function signature
  */
 export type LayerPathDelegate = EventDelegateBase<LayerApi, LayerPathEvent, void>;
+
+/**
+ * Define an event for the delegate
+ */
+export type LayerConfigEvent = {
+  // The layer entry config
+  config: ConfigBaseClass;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+export type LayerConfigDelegate = EventDelegateBase<LayerApi, LayerConfigEvent, void>;
 
 /**
  * Define an event for the delegate
