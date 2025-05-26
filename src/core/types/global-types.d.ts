@@ -9,6 +9,7 @@ import { useWhatChanged } from '@/core/utils/useWhatChanged';
 import * as UI from '@/ui';
 import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 import { TypeJsonObject } from '@/api/config/types/config-types';
+import { MapViewer } from '@/geo/map/map-viewer';
 export { getGeoViewStore } from '@/core/stores/stores-managers';
 export type { SelectChangeEvent } from '@mui/material';
 /**
@@ -49,22 +50,21 @@ export interface TypeWindow extends Window {
  * Type used for exporting core.
  */
 export type TypeCGPV = {
-    init: CGPVInitCallback;
-    onMapInit: CGPVCallback;
-    onMapReady: CGPVCallback;
-    onLayersProcessed: CGPVCallback;
-    onLayersLoaded: CGPVCallback;
+    init: () => void;
+    onMapInit: MapViewerCallback;
+    onMapReady: MapViewerCallback;
+    onLayersProcessed: MapViewerCallback;
+    onLayersLoaded: MapViewerCallback;
     api: API;
     react: typeof React;
     createRoot: typeof createRoot;
     ui: TypeCGPVUI;
     logger: typeof logger;
 };
-/**
- * Type used for a callback function.
- */
-export type CGPVInitCallback = (callbackMapsInit?: (mapId: string) => void, callbackMapsLayersLoaded?: (mapId: string) => void) => void;
-export type CGPVCallback = (callback: (mapId: string) => void) => void;
+/** MapViewer delegate */
+export type MapViewerDelegate = (mapViewer: MapViewer) => void;
+/** CGPV MapViewer callback delegate */
+export type MapViewerCallback = (callback: MapViewerDelegate) => void;
 /**
  * Type used for exporting UI
  */

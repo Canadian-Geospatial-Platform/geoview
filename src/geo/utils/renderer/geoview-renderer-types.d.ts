@@ -19,7 +19,6 @@ export type FilterNodeType = {
     nodeType: NodeType;
     nodeValue: null | string | number | boolean | string[] | number[];
 };
-export type FilterNodeArrayType = FilterNodeType[];
 export declare const binaryKeywors: string[];
 export declare const unaryKeywords: string[];
 export declare const groupKeywords: string[];

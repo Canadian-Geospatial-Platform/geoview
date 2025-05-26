@@ -19,5 +19,5 @@ export declare abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer
      * @param {string} geoviewLayerId - The geoview layer id
      * @param {TypeJsonObject} metadata - The metadata to check
      */
-    static throwIfMetatadaHasError(geoviewLayerId: string, metadata: TypeJsonObject): void;
+    static throwIfMetatadaHasError(geoviewLayerId: string, layerName: string | undefined, metadata: TypeJsonObject): void;
 }

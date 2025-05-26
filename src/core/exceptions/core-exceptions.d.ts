@@ -130,6 +130,19 @@ export declare class ResponseEmptyError extends Error {
     constructor(message?: string);
 }
 /**
+ * Custom error class for handling fetch response errors where the response body has an error inside of it.
+ * This is typically used when a fetch request returns a successful status but with error in the content itself.
+ * @extends {Error}
+ */
+export declare class ResponseContentError extends Error {
+    /**
+     * Constructor to initialize the ResponseContentError with an optional message.
+     * The default message is "Response contained an error in its content." to indicate that the response body contained an error.
+     * @param {string} message - The optional error message.
+     */
+    constructor(message?: string);
+}
+/**
  * Error thrown when a response does not match the expected type.
  */
 export declare class ResponseTypeError extends Error {

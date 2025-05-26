@@ -54,10 +54,10 @@ export declare abstract class AbstractBaseLayer {
      */
     getLayerStatus(): TypeLayerStatus;
     /**
-     * Gets the layer name
+     * Gets the layer name or fallsback on the layer name in the layer configuration.
      * @returns The layer name
      */
-    getLayerName(): string | undefined;
+    getLayerName(): string;
     /**
      * Sets the layer name
      * @param {string | undefined} name - The layer name
@@ -170,7 +170,7 @@ export type LayerNameChangedEvent = {
 /**
  * Define a delegate for the event handler function signature.
  */
-type LayerNameChangedDelegate = EventDelegateBase<AbstractBaseLayer, LayerNameChangedEvent, void>;
+export type LayerNameChangedDelegate = EventDelegateBase<AbstractBaseLayer, LayerNameChangedEvent, void>;
 /**
  * Define an event for the delegate
  */

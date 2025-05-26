@@ -61,7 +61,9 @@ export interface IMapState {
         resetBasemap: () => Promise<void>;
         setLegendCollapsed: (layerPath: string, newValue: boolean) => void;
         toggleLegendCollapsed: (layerPath: string) => void;
+        setAllLayersCollapsed: (collapsed: boolean) => void;
         setOrToggleLayerVisibility: (layerPath: string, newValue?: boolean) => boolean;
+        setAllLayersVisibility: (visibility: boolean) => void;
         setMapKeyboardPanInteractions: (panDelta: number) => void;
         setProjection: (projectionCode: TypeValidMapProjectionCodes) => void;
         setZoom: (zoom: number, duration?: number) => void;
@@ -79,7 +81,8 @@ export interface IMapState {
         setOverlayNorthMarkerRef: (htmlRef: HTMLElement) => void;
     };
     setterActions: {
-        setMapChangeSize: (size: [number, number], scale: TypeScaleInfo) => void;
+        setMapSize: (size: [number, number]) => void;
+        setMapScale: (scale: TypeScaleInfo) => void;
         setMapLoaded: (mapLoaded: boolean) => void;
         setMapDisplayed: () => void;
         setAttribution: (attribution: string[]) => void;
@@ -168,6 +171,9 @@ export declare const useMapVisibleRangeLayers: () => string[];
 export declare const useMapZoom: () => number;
 export declare const getMapPointerPosition: (mapId: string) => TypeMapMouseInfo | undefined;
 export declare const useSelectorLayerVisibility: (layerPath: string) => boolean;
+export declare const useAllLayersVisible: () => boolean;
+export declare const useMapHasCollapsibleLayers: () => boolean;
+export declare const useAllLayersCollapsed: () => boolean;
 export declare const useSelectorLayerInVisibleRange: (layerPath: string) => boolean;
 export declare const useSelectorLayerLegendCollapsed: (layerPath: string) => boolean;
 export declare const useMapStoreActions: () => MapActions;

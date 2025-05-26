@@ -66,7 +66,8 @@ export declare abstract class AbstractLayerSet {
     protected onRegisterLayerConfig(layerConfig: ConfigBaseClass): void;
     /**
      * Registers the layer in the layer-set.
-     * @param {AbstractBaseLayer} layer - The layer
+     * If the layer is already registered, the function returns immediately.
+     * @param {AbstractBaseLayer} layer - The layer to register
      */
     registerLayer(layer: AbstractBaseLayer): Promise<void>;
     /**

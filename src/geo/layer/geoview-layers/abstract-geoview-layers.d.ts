@@ -29,7 +29,11 @@ import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
  */
 export declare abstract class AbstractGeoViewLayer {
     #private;
-    static DEFAULT_HIT_TOLERANCE: number;
+    /** The default hit tolerance the query should be using */
+    static readonly DEFAULT_HIT_TOLERANCE: number;
+    /** The default waiting time before showing a warning about the metadata taking a long time to get processed */
+    static readonly DEFAULT_WAIT_PERIOD_METADATA_WARNING: number;
+    /** The default hit tolerance */
     hitTolerance: number;
     /** The type of GeoView layer that is instantiated. */
     type: TypeGeoviewLayerType;
@@ -185,16 +189,6 @@ export declare abstract class AbstractGeoViewLayer {
      */
     allLayerStatusAreGreaterThanOrEqualTo(layerStatus: TypeLayerStatus): boolean;
     /**
-     * Returns a Promise that will be resolved once the given layer is in a processed phase.
-     * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
-     * @param {AbstractGeoViewLayer} geoviewLayerConfig - The layer object
-     * @param {number} timeout - Optionally indicate the timeout after which time to abandon the promise
-     * @param {number} checkFrequency - Optionally indicate the frequency at which to check for the condition on the layerabstract
-     * @returns {Promise<void>} A promise when done waiting
-     * @throws An exception when the layer failed to become in processed phase before the timeout expired
-     */
-    waitForAllLayerStatusAreGreaterThanOrEqualTo(timeout?: number, checkFrequency?: number): Promise<void>;
-    /**
      * Recursively gets all layer entry configs in the GeoView Layer.
      * @returns {ConfigBaseClass[]} The list of layer entry configs
      */
@@ -273,22 +267,12 @@ export declare abstract class AbstractGeoViewLayer {
      */
     offLayerGroupCreated(callback: LayerGroupCreatedDelegate): void;
     /**
-     * Registers an individual layer loaded event handler.
-     * @param {IndividualLayerLoadedDelegate} callback - The callback to be executed whenever the event is emitted
-     */
-    onIndividualLayerLoaded(callback: IndividualLayerLoadedDelegate): void;
-    /**
-     * Unregisters an individual layer loaded event handler.
-     * @param {IndividualLayerLoadedDelegate} callback - The callback to stop being called whenever the event is emitted
-     */
-    offIndividualLayerLoaded(callback: IndividualLayerLoadedDelegate): void;
-    /**
-     * Registers an individual layer message event handler.
+     * Registers a layer message event handler.
      * @param {LayerMessageEventDelegate} callback - The callback to be executed whenever the event is emitted
      */
     onLayerMessage(callback: LayerMessageDelegate): void;
     /**
-     * Unregisters an individual layer message event handler.
+     * Unregisters a layer message event handler.
      * @param {LayerMessageEventDelegate} callback - The callback to stop being called whenever the event is emitted
      */
     offLayerMessage(callback: LayerMessageDelegate): void;
@@ -368,16 +352,6 @@ export interface TypeWmsLegendStyle {
     name: string;
     legend: HTMLCanvasElement | null;
 }
-/**
- * Define a delegate for the event handler function signature
- */
-type IndividualLayerLoadedDelegate = EventDelegateBase<AbstractGeoViewLayer, IndividualLayerLoadedEvent, void>;
-/**
- * Define an event for the delegate
- */
-export type IndividualLayerLoadedEvent = {
-    layerPath: string;
-};
 /**
  * Define a delegate for the event handler function signature
  */

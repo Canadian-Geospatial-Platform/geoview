@@ -17,7 +17,10 @@ import { MapViewer } from '@/geo/map/map-viewer';
  */
 export declare class BasemapApi {
     #private;
-    static REQUEST_DELAY_MAX: number;
+    /** The maximum delay to wait before we warn about the basemap taking a long time */
+    static DEFAULT_WAIT_PERIOD_BASEMAP_WARNING: number;
+    /** Indicates if the basemap has been created successfully */
+    created: boolean;
     mapViewer: MapViewer;
     activeBasemap?: TypeBasemapProps;
     defaultOrigin?: number[];

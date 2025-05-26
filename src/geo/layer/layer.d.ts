@@ -15,7 +15,6 @@ import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { MapViewer } from '@/geo/map/map-viewer';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { TypeLegendItem } from '@/core/components/layers/types';
 export type GeoViewLayerAddedResult = {
     layer: AbstractGeoViewLayer;
@@ -29,7 +28,8 @@ export type GeoViewLayerAddedResult = {
  */
 export declare class LayerApi {
     #private;
-    /** used to reference the map viewer */
+    static DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS: boolean;
+    /** Reference on the map viewer */
     mapViewer: MapViewer;
     geometry: GeometryApi;
     initialLayerOrder: Array<TypeOrderedLayerInfo>;
@@ -38,7 +38,6 @@ export declare class LayerApi {
     hoverFeatureInfoLayerSet: HoverFeatureInfoLayerSet;
     allFeatureInfoLayerSet: AllFeatureInfoLayerSet;
     featureInfoLayerSet: FeatureInfoLayerSet;
-    static DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS: boolean;
     /**
      * Initializes layer types and listen to add/remove layer events from outside
      * @param {MapViewer} mapViewer - A reference to the map viewer
@@ -117,18 +116,6 @@ export declare class LayerApi {
      */
     loadListOfGeoviewLayer(mapConfigLayerEntries: MapConfigLayerEntry[]): Promise<void>;
     /**
-     * Show the errors that happened during layers loading.
-     * If it's an aggregate error, log and show all of them.
-     * If it's a regular error, log and show only that error.
-     * @param error - The error to log and show.
-     * @param geoviewLayerId - The Geoview layer id for which the error happened.
-     */
-    showLayerError(error: unknown, geoviewLayerId: string): void;
-    /**
-     * Refreshes GeoCore Layers
-     */
-    reloadGeocoreLayers(): void;
-    /**
      * Adds a Geoview Layer by GeoCore UUID.
      * @param {string} uuid - The GeoCore UUID to add to the map
      * @param {string} layerEntryConfig - The optional layer configuration
@@ -143,6 +130,10 @@ export declare class LayerApi {
      * The result contains the instanciated GeoViewLayer along with a promise that will resolve when the layer will be officially on the map.
      */
     addGeoviewLayer(geoviewLayerConfig: TypeGeoviewLayerConfig): GeoViewLayerAddedResult;
+    /**
+     * Refreshes GeoCore Layers
+     */
+    reloadGeocoreLayers(): void;
     /**
      * Registers the layer identifier.
      * @param {ConfigBaseClass} layerConfig - The layer entry config to register
@@ -163,11 +154,7 @@ export declare class LayerApi {
     /**
      * Checks if the layer results sets are all greater than or equal to the provided status
      */
-    checkLayerStatus(status: TypeLayerStatus, layerEntriesToCheck: MapConfigLayerEntry[] | undefined, callbackNotGood?: (layerConfig: ConfigBaseClass) => void): [boolean, number];
-    /**
-     * Checks if the layer results sets are all ready using the resultSet from the FeatureInfo LayerSet
-     */
-    checkFeatureInfoLayerResultSetsReady(callbackNotReady?: (layerEntryConfig: AbstractBaseLayerEntryConfig) => void): boolean;
+    checkLayerStatus(status: TypeLayerStatus, callbackNotGood?: (layerConfig: ConfigBaseClass) => void): [boolean, number];
     /**
      * Removes all geoview layers from the map
      */
@@ -268,6 +255,14 @@ export declare class LayerApi {
      */
     recalculateBoundsAll(): void;
     /**
+     * Show the errors that happened during layers loading.
+     * If it's an aggregate error, log and show all of them.
+     * If it's a regular error, log and show only that error.
+     * @param error - The error to log and show.
+     * @param geoviewLayerId - The Geoview layer id for which the error happened.
+     */
+    showLayerError(error: unknown, geoviewLayerId: string): void;
+    /**
      * Registers a layer added event handler.
      * @param {LayerAddedDelegate} callback - The callback to be executed whenever the event is emitted
      */
@@ -278,15 +273,45 @@ export declare class LayerApi {
      */
     offLayerAdded(callback: LayerAddedDelegate): void;
     /**
-     * Registers a layer loaded event handler.
-     * @param {LayerLoadedDelegate} callback - The callback to be executed whenever the event is emitted
+     * Registers a layer first loaded event handler.
+     * @param {LayerLoadDelegate} callback - The callback to be executed whenever the event is emitted
      */
-    onLayerLoaded(callback: LayerLoadedDelegate): void;
+    onLayerFirstLoaded(callback: LayerLoadDelegate): void;
+    /**
+     * Unregisters a layer first loaded event handler.
+     * @param {LayerLoadDelegate} callback - The callback to stop being called whenever the event is emitted
+     */
+    offLayerFirstLoaded(callback: LayerLoadDelegate): void;
+    /**
+     * Registers a layer loading event handler.
+     * @param {LayerLoadDelegate} callback - The callback to be executed whenever the event is emitted
+     */
+    onLayerLoading(callback: LayerLoadDelegate): void;
+    /**
+     * Unregisters a layer loading event handler.
+     * @param {LayerLoadDelegate} callback - The callback to stop being called whenever the event is emitted
+     */
+    offLayerLoading(callback: LayerLoadDelegate): void;
+    /**
+     * Registers a layer loaded event handler.
+     * @param {LayerLoadDelegate} callback - The callback to be executed whenever the event is emitted
+     */
+    onLayerLoaded(callback: LayerLoadDelegate): void;
     /**
      * Unregisters a layer loaded event handler.
-     * @param {LayerLoadedDelegate} callback - The callback to stop being called whenever the event is emitted
+     * @param {LayerLoadDelegate} callback - The callback to stop being called whenever the event is emitted
      */
-    offLayerLoaded(callback: LayerLoadedDelegate): void;
+    offLayerLoaded(callback: LayerLoadDelegate): void;
+    /**
+     * Registers a layer all loaded event handler.
+     * @param {LayerLoadDelegate} callback - The callback to be executed whenever the event is emitted
+     */
+    onLayerAllLoaded(callback: LayerLoadDelegate): void;
+    /**
+     * Unregisters a layer all loaded event handler.
+     * @param {LayerLoadDelegate} callback - The callback to stop being called whenever the event is emitted
+     */
+    offLayerAllLoaded(callback: LayerLoadDelegate): void;
     /**
      * Registers a layer error event handler.
      * @param {LayerErrorDelegate} callback - The callback to be executed whenever the event is emitted
@@ -337,7 +362,7 @@ export declare class LayerApi {
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerAddedDelegate = EventDelegateBase<LayerApi, LayerAddedEvent, void>;
+export type LayerAddedDelegate = EventDelegateBase<LayerApi, LayerAddedEvent, void>;
 /**
  * Define an event for the delegate
  */
@@ -347,18 +372,18 @@ export type LayerAddedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerLoadedDelegate = EventDelegateBase<LayerApi, LayerLoadedEvent, void>;
+export type LayerLoadDelegate = EventDelegateBase<LayerApi, LayerLoadEvent, void>;
 /**
  * Define an event for the delegate
  */
-export type LayerLoadedEvent = {
+export type LayerLoadEvent = {
     layer: AbstractGVLayer;
     layerPath: string;
 };
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerErrorDelegate = EventDelegateBase<LayerApi, LayerErrorEvent, void>;
+export type LayerErrorDelegate = EventDelegateBase<LayerApi, LayerErrorEvent, void>;
 /**
  * Define an event for the delegate
  */
@@ -369,7 +394,7 @@ export type LayerErrorEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerRemovedDelegate = EventDelegateBase<LayerApi, LayerRemovedEvent, void>;
+export type LayerRemovedDelegate = EventDelegateBase<LayerApi, LayerRemovedEvent, void>;
 /**
  * Define an event for the delegate
  */
@@ -379,7 +404,7 @@ export type LayerRemovedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerVisibilityToggledDelegate = EventDelegateBase<LayerApi, LayerVisibilityToggledEvent, void>;
+export type LayerVisibilityToggledDelegate = EventDelegateBase<LayerApi, LayerVisibilityToggledEvent, void>;
 /**
  * Define an event for the delegate
  */
@@ -390,7 +415,7 @@ export type LayerVisibilityToggledEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerItemVisibilityToggledDelegate = EventDelegateBase<LayerApi, LayerItemVisibilityToggledEvent, void>;
+export type LayerItemVisibilityToggledDelegate = EventDelegateBase<LayerApi, LayerItemVisibilityToggledEvent, void>;
 /**
  * Define an event for the delegate
  */
@@ -399,4 +424,3 @@ export type LayerItemVisibilityToggledEvent = {
     itemName: string;
     visibility: boolean;
 };
-export {};

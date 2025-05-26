@@ -6,7 +6,7 @@ import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import { Projection as OLProjection } from 'ol/proj';
 import { Condition } from 'ol/events/condition';
-import { TypeMapFeaturesInstance, TypeViewSettings, TypeInteraction, TypeValidMapProjectionCodes, TypeDisplayLanguage, TypeDisplayTheme, TypeMapViewSettings } from '@/api/config/types/map-schema-types';
+import { TypeMapFeaturesInstance, TypeViewSettings, TypeInteraction, TypeValidMapProjectionCodes, TypeDisplayLanguage, TypeDisplayTheme, TypeMapViewSettings, TypeLayerStatus } from '@/api/config/types/map-schema-types';
 import { BasemapApi } from '@/geo/layer/basemap/basemap';
 import { LayerApi } from '@/geo/layer/layer';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
@@ -77,28 +77,7 @@ export declare class MapViewer {
     /**
      * Initializes map, layer class and geometries
      */
-    initMap(): void;
-    /**
-     * Add a new custom component to the map
-     *
-     * @param {string} mapComponentId - An id to the new component
-     * @param {JSX.Element} component - The component to add
-     */
-    addComponent(mapComponentId: string, component: JSX.Element): void;
-    /**
-     * Remove an existing custom component from the map
-     *
-     * @param mapComponentId - The id of the component to remove
-     */
-    removeComponent(mapComponentId: string): void;
-    /**
-     * Add a localization ressource bundle for a supported language (fr, en). Then the new key added can be
-     * access from the utilies function getLocalizesMessage to reuse in ui from outside the core viewer.
-     *
-     * @param {TypeDisplayLanguage} language - The language to add the ressoruce for (en, fr)
-     * @param {TypeJsonObject} translations - The translation object to add
-     */
-    addLocalizeRessourceBundle(language: TypeDisplayLanguage, translations: TypeJsonObject): void;
+    initMap(): Promise<void>;
     /**
      * Returns the current display language
      * @returns {TypeDisplayLanguage} The display language
@@ -216,6 +195,31 @@ export declare class MapViewer {
      * @param {Extent} extent - New extent to use.
      */
     setMaxExtent(extent: Extent): void;
+    /**
+     * Add a new custom component to the map
+     *
+     * @param {string} mapComponentId - An id to the new component
+     * @param {JSX.Element} component - The component to add
+     */
+    addComponent(mapComponentId: string, component: JSX.Element): void;
+    /**
+     * Remove an existing custom component from the map
+     *
+     * @param mapComponentId - The id of the component to remove
+     */
+    removeComponent(mapComponentId: string): void;
+    /**
+     * Add a localization ressource bundle for a supported language (fr, en). Then the new key added can be
+     * access from the utilies function getLocalizesMessage to reuse in ui from outside the core viewer.
+     *
+     * @param {TypeDisplayLanguage} language - The language to add the ressoruce for (en, fr)
+     * @param {TypeJsonObject} translations - The translation object to add
+     */
+    addLocalizeRessourceBundle(language: TypeDisplayLanguage, translations: TypeJsonObject): void;
+    /**
+     * Emits a map single click event.
+     * @param {MapSingleClickEvent} clickCoordinates - The clicked coordinates to emit.
+     */
     emitMapSingleClick(clickCoordinates: MapSingleClickEvent): void;
     /**
      * Loops through all geoview layers and refresh their respective source.
@@ -233,10 +237,6 @@ export declare class MapViewer {
      * @param {TypeClickMarker} marker - The marker to add
      */
     clickMarkerIconShow(marker: TypeClickMarker): void;
-    /**
-     * Check if geometries needs to be loaded from a URL geoms parameter
-     */
-    loadGeometries(): void;
     /**
      * Remove map
      *
@@ -279,6 +279,13 @@ export declare class MapViewer {
      * @param {TypeLegend} legend - The legend to check.
      */
     updateIconImageCache(legend: TypeLegend): void;
+    /**
+     * Waits until all GeoView layers reach the specified status before resolving the promise.
+     * This function repeatedly checks whether all layers have reached the given `layerStatus`.
+     * @param {TypeLayerStatus} layerStatus - The desired status to wait for (e.g., 'loaded', 'processed').
+     * @returns {Promise<number>} A promise that resolves with the number of layers that have reached the specified status.
+     */
+    waitAllLayersStatus(layerStatus: TypeLayerStatus): Promise<number>;
     /**
      * Initializes selection interactions
      */
@@ -559,19 +566,19 @@ export type TypeMapMouseInfo = {
 /**
  * Define a delegate for the event handler function signature
  */
-type MapInitDelegate = EventDelegateBase<MapViewer, undefined, void>;
+export type MapInitDelegate = EventDelegateBase<MapViewer, undefined, void>;
 /**
  * Define a delegate for the event handler function signature
  */
-type MapReadyDelegate = EventDelegateBase<MapViewer, undefined, void>;
+export type MapReadyDelegate = EventDelegateBase<MapViewer, undefined, void>;
 /**
  * Define a delegate for the event handler function signature
  */
-type MapLayersProcessedDelegate = EventDelegateBase<MapViewer, undefined, void>;
+export type MapLayersProcessedDelegate = EventDelegateBase<MapViewer, undefined, void>;
 /**
  * Define a delegate for the event handler function signature
  */
-type MapLayersLoadedDelegate = EventDelegateBase<MapViewer, undefined, void>;
+export type MapLayersLoadedDelegate = EventDelegateBase<MapViewer, undefined, void>;
 /**
  * Define an event for the delegate
  */
@@ -581,7 +588,7 @@ export type MapMoveEndEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type MapMoveEndDelegate = EventDelegateBase<MapViewer, MapMoveEndEvent, void>;
+export type MapMoveEndDelegate = EventDelegateBase<MapViewer, MapMoveEndEvent, void>;
 /**
  * Define an event for the delegate
  */
@@ -589,7 +596,7 @@ export type MapPointerMoveEvent = TypeMapMouseInfo;
 /**
  * Define a delegate for the event handler function signature
  */
-type MapPointerMoveDelegate = EventDelegateBase<MapViewer, MapPointerMoveEvent, void>;
+export type MapPointerMoveDelegate = EventDelegateBase<MapViewer, MapPointerMoveEvent, void>;
 /**
  * Define an event for the delegate
  */
@@ -597,7 +604,7 @@ export type MapSingleClickEvent = TypeMapMouseInfo;
 /**
  * Define a delegate for the event handler function signature
  */
-type MapSingleClickDelegate = EventDelegateBase<MapViewer, MapSingleClickEvent, void>;
+export type MapSingleClickDelegate = EventDelegateBase<MapViewer, MapSingleClickEvent, void>;
 /**
  * Define an event for the delegate
  */
@@ -607,7 +614,7 @@ export type MapZoomEndEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type MapZoomEndDelegate = EventDelegateBase<MapViewer, MapZoomEndEvent, void>;
+export type MapZoomEndDelegate = EventDelegateBase<MapViewer, MapZoomEndEvent, void>;
 /**
  * Define an event for the delegate
  */
@@ -617,7 +624,7 @@ export type MapRotationEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type MapRotationDelegate = EventDelegateBase<MapViewer, MapRotationEvent, void>;
+export type MapRotationDelegate = EventDelegateBase<MapViewer, MapRotationEvent, void>;
 /**
  * Define an event for the delegate
  */
@@ -627,7 +634,7 @@ export type MapChangeSizeEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type MapChangeSizeDelegate = EventDelegateBase<MapViewer, MapChangeSizeEvent, void>;
+export type MapChangeSizeDelegate = EventDelegateBase<MapViewer, MapChangeSizeEvent, void>;
 /**
  * Define an event for the delegate
  */
@@ -638,7 +645,7 @@ export type MapComponentAddedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type MapComponentAddedDelegate = EventDelegateBase<MapViewer, MapComponentAddedEvent, void>;
+export type MapComponentAddedDelegate = EventDelegateBase<MapViewer, MapComponentAddedEvent, void>;
 /**
  * Define an event for the delegate
  */
@@ -648,7 +655,7 @@ export type MapComponentRemovedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type MapComponentRemovedDelegate = EventDelegateBase<MapViewer, MapComponentRemovedEvent, void>;
+export type MapComponentRemovedDelegate = EventDelegateBase<MapViewer, MapComponentRemovedEvent, void>;
 /**
  * Define an event for the delegate
  */
@@ -658,5 +665,4 @@ export type MapLanguageChangedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type MapLanguageChangedDelegate = EventDelegateBase<MapViewer, MapLanguageChangedEvent, void>;
-export {};
+export type MapLanguageChangedDelegate = EventDelegateBase<MapViewer, MapLanguageChangedEvent, void>;

@@ -6,7 +6,8 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import { API } from '@/api/api';
-import { TypeCGPV } from '@/core/types/global-types';
+import { MapViewerDelegate, TypeCGPV } from '@/core/types/global-types';
+import { MapViewer } from '@/geo/map/map-viewer';
 export * from './core/types/external-types';
 export declare const api: API;
 /**
@@ -23,25 +24,25 @@ export declare function unmountMap(mapId: string, mapContainer: HTMLElement): vo
  * @param {HTMLElement} mapDiv - The basic div to initialise
  * @param {string} mapConfig - The new config passed in from the function call
  */
-export declare function initMapDivFromFunctionCall(mapDiv: HTMLElement, mapConfig: string): Promise<void>;
+export declare function initMapDivFromFunctionCall(mapDiv: HTMLElement, mapConfig: string): Promise<MapViewer>;
 /**
  * Registers a callback when the map has been initialized
- * @param {(mapId: string) => void} callback - The callback to be called
+ * @param {MapViewerDelegate} callback - The callback to be called
  */
-export declare function onMapInit(callback: (mapId: string) => void): void;
+export declare function onMapInit(callback: MapViewerDelegate): void;
 /**
  * Registers a callback when the map has turned ready / layers were registered
- * @param {(mapId: string) => void} callback - The callback to be called
+ * @param {MapViewerDelegate} callback - The callback to be called
  */
-export declare function onMapReady(callback: (mapId: string) => void): void;
+export declare function onMapReady(callback: MapViewerDelegate): void;
 /**
  * Registers a callback when the layers have been processed
- * @param {(mapId: string) => void} callback - The callback to be called
+ * @param {MapViewerDelegate} callback - The callback to be called
  */
-export declare function onLayersProcessed(callback: (mapId: string) => void): void;
+export declare function onLayersProcessed(callback: MapViewerDelegate): void;
 /**
  * Registers a callback when the layers have been loaded
- * @param {(mapId: string) => void} callback - The callback to be called
+ * @param {MapViewerDelegate} callback - The callback to be called
  */
-export declare function onLayersLoaded(callback: (mapId: string) => void): void;
+export declare function onLayersLoaded(callback: MapViewerDelegate): void;
 export declare const cgpv: TypeCGPV;

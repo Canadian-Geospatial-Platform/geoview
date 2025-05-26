@@ -9,6 +9,8 @@ import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/v
  */
 export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     #private;
+    /** The maximum delay to wait before we warn about the features fetch taking a long time */
+    static readonly DEFAULT_WAIT_SLOW_FETCH_WARNING: number;
     /**
      * Creates a VectorSource from a layer config.
      * @param {VectorTilesLayerEntryConfig} layerConfig - Configuration object for the vector tile layer.

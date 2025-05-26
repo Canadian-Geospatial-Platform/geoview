@@ -1,6 +1,7 @@
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { ITimeSliderState, TimeSliderLayerSet, TypeTimeSliderValues } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { TypeLayerEntryConfig } from '@/api/config/types/map-schema-types';
+import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 export declare class TimeSliderEventProcessor extends AbstractEventProcessor {
     #private;
     /**
@@ -35,7 +36,7 @@ export declare class TimeSliderEventProcessor extends AbstractEventProcessor {
      * @param {string} mapId - The map id of the state to act on
      * @param {TypeLayerEntryConfig} layerConfig - The layer path of the layer to add to the state
      */
-    static checkInitTimeSliderLayerAndApplyFilters(mapId: string, layerConfig: TypeLayerEntryConfig): void;
+    static checkInitTimeSliderLayerAndApplyFilters(mapId: string, layer: AbstractGVLayer, layerConfig: TypeLayerEntryConfig): void;
     /**
      * Removes a time slider layer from the state
      * @param {string} mapId - The map id of the state to act on

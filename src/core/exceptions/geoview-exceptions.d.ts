@@ -54,11 +54,11 @@ export declare class GeoViewStoreOnMapNotFoundError extends GeoViewError {
 }
 /**
  * Error thrown when GeoView map on a specific map ID already exist.
- * @extends {GeoViewError}
+ * @extends {Error}
  */
-export declare class GeoViewMapIdAlreadyExist extends GeoViewError {
+export declare class GeoViewMapIdAlreadyExistError extends Error {
     /**
-     * Creates an instance of GeoViewMapIdAlreadyExist.
+     * Creates an instance of GeoViewMapIdAlreadyExistError.
      * @param {string} mapId - The unique identifier of the map.
      */
     constructor(mapId: string);
@@ -109,6 +109,17 @@ export declare class CoreBasemapCreationError extends GeoViewError {
     constructor();
 }
 /**
+ * Error thrown when the basemap creation process takes longer than expected.
+ * This error is typically used to notify that the basemap did not complete its creation
+ * within a predefined timeout period.
+ */
+export declare class BasemapTakingLongTimeError extends GeoViewError {
+    /**
+     * Constructs a BasemapTakingLongTimeError error for the specified map ID.
+     */
+    constructor();
+}
+/**
  * Custom error class representing a failure to retrieve geographic bounds
  * for a specific map layer.
  * @extends {GeoViewError}
@@ -129,7 +140,29 @@ export declare class NoBoundsError extends GeoViewError {
 export declare class NoExtentError extends GeoViewError {
     /**
      * Creates an instance of NoExtentError.
-     * @param {Extent} layerPath - The layer path for which we tried to get an Extent.
+     * @param {string} layerPath - The layer path for which we tried to get an Extent.
      */
     constructor(layerPath: string);
+}
+/**
+ * Error thrown when a map-related function is called at the wrong time or under invalid conditions during initialization.
+ * Typically used to indicate misuse of the initialization sequence.
+ */
+export declare class InitDivNotExistError extends GeoViewError {
+    /**
+     * Creates an instance of InitDivNotExistError.
+     * @param {string} mapId - The map id for which a wront function call was made.
+     */
+    constructor(mapId: string);
+}
+/**
+ * Error thrown when a map-related function is called at the wrong time or under invalid conditions during initialization.
+ * Typically used to indicate misuse of the initialization sequence.
+ */
+export declare class InitMapWrongCallError extends GeoViewError {
+    /**
+     * Creates an instance of InitMapWrongCallError.
+     * @param {string} mapId - The map id for which a wront function call was made.
+     */
+    constructor(mapId: string);
 }

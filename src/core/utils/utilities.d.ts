@@ -136,6 +136,33 @@ export declare function isImage(item: string): boolean;
  */
 export declare function stringify(str: unknown): unknown | string;
 /**
+ * Delay helper function.
+ * @param {number} ms - The number of milliseconds to wait for.
+ * @returns {Promise<void>} Promise which resolves when the delay timeout expires.
+ */
+export declare const delay: (ms: number) => Promise<void>;
+/**
+ * Repeatedly invokes a callback function at a given interval until it returns `true`.
+ * Once the callback returns `true`, the interval is cleared and the polling stops.
+ * @param {() => T} callback - A function that is called every `ms` milliseconds.
+ *                                   If it returns `true`, the interval is cleared.
+ * @param {number} ms - The interval time in milliseconds between callback executions.
+ * @returns {NodeJS.Timeout} The interval timer ID, which can be used to clear the interval manually if needed.
+ */
+export declare const doUntil: <T>(callback: () => T, ms: number) => NodeJS.Timeout;
+/**
+ * Repeatedly invokes a callback function at a specified interval until one of two conditions is met:
+ * - The callback function explicitly returns `true`, indicating the interval should be cleared.
+ * - All provided promises have resolved or rejected.
+ * This is useful for performing a recurring action (e.g., logging or polling) that can end either due to
+ * external completion logic or once all promises are settled.
+ * @param {() => T} callback - A function executed on each interval. If it returns `true`, the interval is cleared.
+ * @param {Promise<unknown>[]} promises - An array of promises whose completion will also stop the interval.
+ * @param {number} ms - The interval duration in milliseconds.
+ * @returns {NodeJS.Timeout} The interval timer, which can be cleared manually if needed.
+ */
+export declare const doUntilPromises: <T>(callback: () => T, promises: Promise<unknown>[], ms: number) => NodeJS.Timeout;
+/**
  * This generic function checks for a validity of something via the checkCallback() until it's found or until the timer runs out.
  * When the check callback returns true (or some found object), the doCallback() function is called with the found information.
  * If checkCallback wasn't found and timer expired, the failCallback() function is called.
@@ -155,17 +182,21 @@ export declare function whenThisThenThat<T>(checkCallback: () => T, doCallback: 
  */
 export declare function whenThisThen<T>(checkCallback: () => T, timeout?: number, checkFrequency?: number): Promise<T>;
 /**
- * Delay helper function.
- * @param {number} ms - The number of milliseconds to wait for.
- * @returns {Promise<void>} Promise which resolves when the delay timeout expires.
- */
-export declare const delay: (ms: number) => Promise<void>;
-/**
  * Escape special characters from string
  * @param {string} text - The text to escape
  * @returns {string} Espaced string
  */
 export declare function escapeRegExp(text: string): string;
+/**
+ * Tries to read an ArrayBuffer into a string by guessing different encodings and returning the best that works to read the content.
+ * @param {ArrayBuffer} buffer - The array buffer to read from.
+ * @param {string[]} encodings - The encodings to try, defaults to ['utf-8', 'windows-1252', 'iso-8859-1'].
+ * @returns { text: string; encoding: string } The best text and the best encoding used for the text
+ */
+export declare function readTextWithBestEncoding(buffer: ArrayBuffer, encodings?: string[]): {
+    text: string;
+    encoding: string;
+};
 /**
  * Create guide object from .md file.
  * @param {string} mapId - ID of map.

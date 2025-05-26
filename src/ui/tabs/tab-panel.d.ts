@@ -10,5 +10,6 @@ export interface TypeTabPanelProps {
     children?: ReactNode;
     containerType?: TypeContainerBox;
     tabId: string;
+    className?: string;
 }
 export declare const TabPanel: import("react").ForwardRefExoticComponent<TypeTabPanelProps & import("react").RefAttributes<HTMLDivElement>>;

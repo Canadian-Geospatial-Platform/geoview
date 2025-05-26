@@ -13,4 +13,4 @@ export declare const getFocusTrapSxClasses: (theme: Theme) => SxStyles;
  * @param {Theme} theme the theme object
  * @returns {Object} the sx classes object
  */
-export declare const getShellSxClasses: (theme: Theme) => SxStyles;
+export declare const getShellSxClasses: (theme: Theme, appHeight: number) => SxStyles;
