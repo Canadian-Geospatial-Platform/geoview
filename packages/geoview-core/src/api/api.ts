@@ -204,14 +204,21 @@ export class API {
    * @param {string} divId - id of the div to create map in
    * @param {string} mapConfig - config passed in from the function call (string or url of a config path)
    * @param {number} divHeight - height of the div to inject the map in (mandatory if the map reloads)
+   * @param {boolean} forceDeleteInApi - force a delete of the MapViewer from the this.#maps array
    */
   // This function is called by the template, and since the template use the instance of the object from cgpv.api, this function has to be on the instance, not static. Refactor this?
-  async createMapFromConfig(divId: string, mapConfig: string, divHeight?: number): Promise<MapViewer> {
+  async createMapFromConfig(divId: string, mapConfig: string, divHeight?: number, forceDeleteInApi: boolean = false): Promise<MapViewer> {
     // Get the map div
     const mapDiv = document.getElementById(divId);
     if (!mapDiv) throw new InitDivNotExistError(divId);
 
     if (divHeight) mapDiv!.style.height = `${divHeight}px`;
+
+    // If pending reference is existing and we are forcing the deletion
+    if (this.hasMapViewer(divId) && forceDeleteInApi) {
+      // Force delete
+      delete this.#maps[divId];
+    }
 
     // Init by function call
     const mapViewer = await initMapDivFromFunctionCall(mapDiv, mapConfig);
