@@ -34,7 +34,7 @@ export interface IDataTableState {
     setSelectedFeature: (feature: TypeFeatureInfoEntry) => void;
     setSelectedLayerPath: (layerPath: string) => void;
     setToolbarRowSelectedMessageEntry: (message: string, layerPath: string) => void;
-    triggerGetAllFeatureInfo: (layerPath: string) => Promise<TypeAllFeatureInfoResultSet | void>;
+    triggerGetAllFeatureInfo: (layerPath: string) => Promise<TypeFeatureInfoEntry[] | void>;
   };
 
   setterActions: {
@@ -126,7 +126,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
         // Redirect to setter
         get().dataTableState.setterActions.setSelectedLayerPath(layerPath);
       },
-      triggerGetAllFeatureInfo(layerPath: string): Promise<TypeAllFeatureInfoResultSet | void> {
+      triggerGetAllFeatureInfo(layerPath: string): Promise<TypeFeatureInfoEntry[] | void> {
         // Redirect to event processor
         return DataTableEventProcessor.triggerGetAllFeatureInfo(get().mapId, layerPath);
       },

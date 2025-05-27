@@ -319,6 +319,13 @@ export class MapViewer {
     // Load the Map itself and the UI controls
     MapEventProcessor.initMapControls(this.mapId);
 
+    // Reset the basemap
+    await MapEventProcessor.resetBasemap(this.mapId);
+
+    // Emit map init
+    this.#mapInit = true;
+    this.#emitMapInit();
+
     // Load the list of geoview layers in the config to add all layers on the map.
     // After this call, all first level layers have been registered.
     // TODO: refactor - remove the cast as MapConfigLayerEntry[] everywhere
@@ -332,13 +339,6 @@ export class MapViewer {
 
     // Prepare the FeatureHighlight now that the map is available
     this.layer.featureHighlight.init();
-
-    // Emit map init
-    this.#mapInit = true;
-    this.#emitMapInit();
-
-    // Reset the basemap
-    await MapEventProcessor.resetBasemap(this.mapId);
 
     // Ready the map
     return this.#readyMap();
@@ -378,6 +378,18 @@ export class MapViewer {
    */
   getView(): View {
     return this.map.getView();
+  }
+
+  /**
+   * Asynchronously gets the map center coordinate to give a chance for the map to
+   * render before returning the value.
+   * @returns the map viewSettings
+   */
+  getCenter(): Promise<Coordinate> {
+    // When the getCenter() function actually returns a coordinate
+    return whenThisThen(() => {
+      return this.getView().getCenter()!;
+    });
   }
 
   /**
@@ -806,7 +818,7 @@ export class MapViewer {
     const mapDiv = await this.remove(false);
 
     // TODO: There is still a problem with bad config schema value and layers loading... should be refactor when config is done
-    api.createMapFromConfig(mapDiv.id, JSON.stringify(config), height).catch((error: unknown) => {
+    api.createMapFromConfig(mapDiv.id, JSON.stringify(config), height, true).catch((error: unknown) => {
       // Log
       logger.logError(`Couldn't reload the map in map-viewer`, error);
     });
@@ -1507,7 +1519,7 @@ export class MapViewer {
     // Load the guide
     AppEventProcessor.setGuide(this.mapId).catch((error: unknown) => {
       // Log
-      logger.logPromiseFailed('in #setGuide in #readyMap', error);
+      logger.logPromiseFailed('in AppEventProcessor.setGuide in #readyMap', error);
     });
 
     // Check how load in milliseconds has it been processing thus far
@@ -1569,8 +1581,8 @@ export class MapViewer {
    * Updates the map controls (the store) based on the current map view state.
    */
   async #updateMapControls(): Promise<void> {
-    // Get the center coordinates
-    const centerCoordinates = this.getView().getCenter()!;
+    // Get the center coordinates (await in case the map isn't fully rendered yet)
+    const centerCoordinates = await this.getCenter();
 
     // Get the projection code
     const projCode = this.getView().getProjection().getCode();

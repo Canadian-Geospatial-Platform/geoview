@@ -189,18 +189,22 @@
         <li>mapViewer.onMapMoveEnd</li>
         <li>mapViewer.onMapZoomEnd</li>
         <li>mapViewer.basemap.onBasemapChanged</li>
-        <li>mapViewer.layer.onLayerAdded</li>
-        <li>mapViewer.layer.onLayerError</li>
-        <li>mapViewer.layer.onLayerRemoved</li>
-        <li>mapViewer.layer.onLayerLoading for each layer loading on map</li>
-        <li>mapViewer.layer.onLayerLoaded for each layer loaded on map</li>
-        <li>mapViewer.layer.onLayerAllLoaded each time all layers are loaded (done loading) on map</li>
+        <li>mapViewer.layer.onLayerConfigAdded when a layer config has been added</li>
+        <li>mapViewer.layer.onLayerConfigRemoved when a layer config has been removed</li>
+        <li>mapViewer.layer.onLayerConfigError when a layer config has an error</li>
+        <li>mapViewer.layer.onLayerCreated when a gv layer has been created</li>
         <li>mapViewer.layer.onLayerFirstLoaded one time per layer on their first load</li>
+        <li>mapViewer.layer.onLayerLoading when a gv layer is loading on the map (this happens on every render)</li>
+        <li>mapViewer.layer.onLayerLoaded when a gv layer is loaded on the map (this can happen on every render)</li>
+        <li>mapViewer.layer.onLayerError when a gv layer has an error on the map (this can happen on every render)</li>
+        <li>mapViewer.layer.onLayerAllLoaded each time all layers are loaded/error (done loading) on the map (this happens on every render)</li>
         <li>mapViewer.layer.onLayerVisibilityToggled</li>
         <li>mapViewer.layer.onLayerItemVisibilityToggled</li>
         <li>mapViewer.stateApi.onLayersReordered</li>
         <li>layerEntryConfig.onLayerStatusChanged for Water Quantity</li>
-        <li>layer.onLayerFirstLoaded one time for Nonmetal mines</li>
+        <li>layer.onLayerFirstLoaded one time for Airborne quality</li>
+        <li>layer.onLayerLoaded each time Airborne quality layer goes in loaded state</li>
+        <li>layer.onLayerError each time Airborne quality layer goes in error state</li>
         <li>layer.onVisibleChanged for Nonmetal mines</li>
         <li>layer.onVisibleChanged for Water Quantity</li>
         <li>layer.onLayerOpacityChanged for Water Quantity</li>
@@ -214,7 +218,8 @@
       const LYR_PATH_UNIQUE = "uniqueValueId/1";
       const LYR_PATH_NON_METAL = "nonmetalmines/5";
       const LYR_PATH_FEATURE = "esriFeatureLYR5/0";
-      const LYR_PATH_GEOCORE = "f4c51eaa-a6ca-48b9-a1fc-b0651da20509";
+      const LYR_PATH_AIRBORNE = "airborne_radioactivity/1";
+      const LYR_PATH_GEOCORE = "f4c51eaa-a6ca-48b9-a1fc-b0651da20509/base-group";
 
       var CNT_GENERIC_STATUS_CHANGE = 0;
       var CNT_SPECIFIC_STATUS_CHANGE = 0;
@@ -222,91 +227,118 @@
       // Register a handler when the map is init
       cgpv.onMapInit((mapViewer) => {
         // !!
-        // GV This callback is executed when map is init. The layers haven't been registered yet at this time.
+        // GV This callback is executed when map is init. The layers have NOT been registered yet at this time.
         // !!
 
         listenToLegendLayerSetChanges('HMap1-state', mapViewer);
 
+        // listen to map added to div event
+        cgpv.api.onMapAddedToDiv((sender, payload) => {
+          mapViewer.notifications.addNotificationSuccess(`API: Map ${payload.mapId} added`);
+        });
+
         // listen to map language changed event
         mapViewer.onMapLanguageChanged((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(`Map language changed to ${payload.language}`);
+          mapViewer.notifications.addNotificationSuccess(`MapViewer: Map language changed to ${payload.language}`);
         });
 
         // listen to basemap changed event
         mapViewer.basemap.onBasemapChanged((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(`Basemap changed to ${payload.basemap.basemapId}`);
+          mapViewer.notifications.addNotificationSuccess(`MapViewer: Basemap changed to ${payload.basemap.basemapId}`);
         });
 
         // listen to layer reordered event
         mapViewer.stateApi.onLayersReordered((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(`Layers reordered to ${payload.orderedLayers.map((layer) => layer.layerPath)}`);
-        });
-
-        // listen to map added to div event
-        cgpv.api.onMapAddedToDiv((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(`Map ${payload.mapId} added`);
+          mapViewer.notifications.addNotificationSuccess(`MapViewer: Layers reordered to ${payload.orderedLayers.map((layer) => layer.layerPath)}`);
         });
 
         // listen to map zoom event
         mapViewer.onMapZoomEnd((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(`Zoomed to level ${payload.zoom}`);
+          mapViewer.notifications.addNotificationSuccess(`MapViewer: Zoomed to level ${payload.zoom}`);
         });
 
         // listen to map move event
         mapViewer.onMapMoveEnd((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(`Map moved to center latitude ${payload.lnglat[1]} and longitude ${payload.lnglat[0]}`);
+          mapViewer.notifications.addNotificationSuccess(`MapViewer: Map moved to center latitude ${payload.lnglat[1]} and longitude ${payload.lnglat[0]}`);
+        });
+
+        // listen to ANY/ALL layer status at ANY time (generic event catcher)
+        mapViewer.layer.onLayerStatusChanged((sender, payload) => {
+          //mapViewer.notifications.addNotificationSuccess(`${payload.layer.layerPath} (generic event) status changed to ${payload.layer.layerStatus}`);
+          console.log(`LayerApi: ${payload.config.layerPath} (generic event ${++CNT_GENERIC_STATUS_CHANGE}) status changed to ${payload.status}`);
         });
 
         // listen to layer added event
-        mapViewer.layer.onLayerAdded((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(payload.layer.geoviewLayerId + ' added');
+        mapViewer.layer.onLayerConfigAdded((sender, payload) => {
+          mapViewer.notifications.addNotificationSuccess('LayerApi: ' + payload.layer.geoviewLayerId + ' added');
+        });
+
+        // listen to layer removed event
+        mapViewer.layer.onLayerConfigRemoved((sender, payload) => {
+          mapViewer.notifications.addNotificationSuccess('LayerApi: ' + payload.layerPath + ' removed');
+        });
+
+        // listen to layer error events
+        mapViewer.layer.onLayerConfigError((sender, payload) => {
+          mapViewer.notifications.addNotificationError('LayerApi: Error ' + payload.error);
+        });
+
+        // listen to layer created event
+        mapViewer.layer.onLayerCreated((sender, payload) => {
+          mapViewer.notifications.addNotificationSuccess('LayerApi: ' + payload.layer.getLayerPath() + ' created');
+
+          // If the Airborne layer, attach even more events
+          if (payload.layer.getLayerPath() === LYR_PATH_AIRBORNE) {
+            // Register custom events on the layer
+            payload.layer.onLayerFirstLoaded((sender, payload) => {
+              mapViewer.notifications.addNotificationSuccess('Layer: Airborne has finished loading for first time');
+            });
+
+            // listen to individual layer loaded event
+            payload.layer.onLayerLoaded((sender, payload) => {
+              mapViewer.notifications.addNotificationSuccess('Layer: Airborne has finished loading for its rendering');
+            });
+
+            // listen to individual layer loaded event
+            payload.layer.onLayerError((sender, payload) => {
+              mapViewer.notifications.addNotificationSuccess('Layer: Airborne has fallen in error while rendering. Error ' + payload.error);
+            });
+          }
         });
 
         // listen to layer loaded events
         mapViewer.layer.onLayerFirstLoaded((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(payload.layerPath + ' first loaded');
+          mapViewer.notifications.addNotificationSuccess('LayerApi: ' + payload.layer.getLayerPath() + ' first loaded');
         });
 
         // listen to layer loaded events
         mapViewer.layer.onLayerLoading((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(payload.layerPath + ' loading...');
+          mapViewer.notifications.addNotificationSuccess('LayerApi: ' + payload.layer.getLayerPath() + ' loading...');
         });
 
         // listen to layer loaded events
         mapViewer.layer.onLayerLoaded((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(payload.layerPath + ' loaded');
-        });
-
-        // listen to layer loaded events
-        mapViewer.layer.onLayerAllLoaded((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess('All layers loaded');
+          mapViewer.notifications.addNotificationSuccess('LayerApi: ' + payload.layer.getLayerPath() + ' loaded');
         });
 
         // listen to layer error events
         mapViewer.layer.onLayerError((sender, payload) => {
-          // NOTE: The event added layer will be trigger first as the layer, even in error, has been added to ui
-          mapViewer.notifications.addNotificationError('Repeat: ' + payload.error);
+          mapViewer.notifications.addNotificationError('LayerApi: Error ' + payload.error);
         });
 
-        // listen to layer removed event
-        mapViewer.layer.onLayerRemoved((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(payload.layerPath + ' removed');
-        });
-
-        // listen to ANY/ALL layer status at ANY time (generic event catcher)
-        mapViewer.layer.legendsLayerSet.onLayerStatusUpdated((sender, payload) => {
-          //mapViewer.notifications.addNotificationSuccess(`${payload.layer.layerPath} (generic event) status changed to ${payload.layer.layerStatus}`);
-          console.log(`${payload.layer.layerPath} (generic event ${++CNT_GENERIC_STATUS_CHANGE}) status changed to ${payload.layer.layerStatus}`);
+        // listen to layer loaded events
+        mapViewer.layer.onLayerAllLoaded((sender, payload) => {
+          mapViewer.notifications.addNotificationSuccess('LayerApi: All layers loaded/error');
         });
 
         // listen to layer item visibility changed event (any layers)
         mapViewer.layer.onLayerVisibilityToggled((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(`layer ${payload.layerPath} visibility set to ${payload.visibility} - global`);
+          mapViewer.notifications.addNotificationSuccess('LayerApi: ' + `layer ${payload.layerPath} visibility set to ${payload.visibility} - global`);
         });
 
         // listen to layer item visibility changed event (any layers)
         mapViewer.layer.onLayerItemVisibilityToggled((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(`${payload.itemName} on layer ${payload.layerPath} visibility set to ${payload.visibility} - global`);
+          mapViewer.notifications.addNotificationSuccess('LayerApi: ' + `${payload.itemName} on layer ${payload.layerPath} visibility set to ${payload.visibility} - global`);
         });
 
         // Add more registrations of listeners when the map has been initialized here...
@@ -324,19 +356,11 @@
         // GV It's possible some layer status have already progressed in time on the particular layer we're registering a status listener at this stage.
         // Check the layer status of the particular layer before registering the hook - to really know at which status the layer is.
         // GV If you really want to make sure to track ALL status changes for ANY particular layer, you can use a hook such as:
-        // `cgpv.api.getMapViewer(mapId).layer.legendsLayerSet.onLayerStatusUpdated()`. See example in cgpv.onMapInit handler above.
+        // `cgpv.api.getMapViewer(mapId).layer.onLayerStatusChanged()`. See example in cgpv.onMapInit handler above.
 
-        mapViewer.layer.getLayerEntryConfig(LYR_PATH_UNIQUE)?.onLayerStatusChanged((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(`${LYR_PATH_UNIQUE} (specific event) status changed to ${payload.layerStatus}`);
-          console.log(`${LYR_PATH_UNIQUE} (specific event ${++CNT_SPECIFIC_STATUS_CHANGE}) status changed to ${payload.layerStatus}`);
-        });
-
-        // listen to individual layer loaded event
-        // TODO: The gv layer does not exist at the time we attach the event. To make this work, we would
-        // TO.DOCONT: need to implement a when-this-then internal approach.
-        mapViewer.layer.getGeoviewLayer(LYR_PATH_NON_METAL)?.onLayerFirstLoaded((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess('Nonmetal mines has finished loading for first time');
-          console.log(sender.getOLLayer().getSource().getFeatures());
+        mapViewer.layer.getLayerEntryConfig(LYR_PATH_AIRBORNE).onLayerStatusChanged((sender, payload) => {
+          mapViewer.notifications.addNotificationSuccess('LayerConfig: ' + `${LYR_PATH_AIRBORNE} (specific event) status changed to ${payload.layerStatus}`);
+          console.log(`${LYR_PATH_AIRBORNE} (specific event ${++CNT_SPECIFIC_STATUS_CHANGE}) status changed to ${payload.layerStatus}`);
         });
 
         // Add more registrations of listeners when the map is ready / layers registered here...
@@ -354,30 +378,34 @@
 
       });
 
-      // Register a handler when all layers are loaded
+      // Register a handler when all layers are loaded, once, upon first load
       cgpv.onLayersLoaded((mapViewer) => {
         // !!
         // GV This callback is executed when ALL layers are loaded.
         // !!
 
-        // listen to layer visibility changed event (individual geoview layer)
-        mapViewer.layer.getGeoviewLayer(LYR_PATH_UNIQUE)?.onVisibleChanged((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(`${LYR_PATH_UNIQUE} visibility set to ${payload.visible} - individual`);
-        });
+        // You can also attach to geoview layer events here, though be mindful that the layer has been created for a while already and
+        // you might have missed some events happening between the layer creation itself and when all layers are indeed loaded here.
+        // To be sure to catch all events, register a hook on mapViewer.layer.onLayerCreated like the example above in this template page.
 
         // listen to layer visibility changed event (individual geoview layer)
-        mapViewer.layer.getGeoviewLayer(LYR_PATH_GEOCORE)?.onVisibleChanged((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(`layer ${payload.layerPath} visibility set to ${payload.visible} - individual`);
+        mapViewer.layer.getGeoviewLayer(LYR_PATH_UNIQUE).onVisibleChanged((sender, payload) => {
+          mapViewer.notifications.addNotificationSuccess(`Layer: ${LYR_PATH_UNIQUE} visibility set to ${payload.visible} - individual`);
         });
 
         // listen to layer opacity changed event
-        mapViewer.layer.getGeoviewLayer(LYR_PATH_UNIQUE)?.onLayerOpacityChanged((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(`${payload.layerPath} opacity changed to ${payload.opacity}`);
+        mapViewer.layer.getGeoviewLayer(LYR_PATH_UNIQUE).onLayerOpacityChanged((sender, payload) => {
+          mapViewer.notifications.addNotificationSuccess(`Layer: ${payload.layerPath} opacity changed to ${payload.opacity}`);
         });
 
         // listen to layer filter applied event
-        mapViewer.layer.getGeoviewLayer(LYR_PATH_UNIQUE)?.onLayerFilterApplied((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(`Filter ${payload.filter} applied to ${payload.layerPath}`);
+        mapViewer.layer.getGeoviewLayer(LYR_PATH_UNIQUE).onLayerFilterApplied((sender, payload) => {
+          mapViewer.notifications.addNotificationSuccess(`Layer: Filter ${payload.filter} applied to ${payload.layerPath}`);
+        });
+
+        // listen to layer visibility changed event (individual geoview layer)
+        mapViewer.layer.getGeoviewLayer(LYR_PATH_GEOCORE).onVisibleChanged((sender, payload) => {
+          mapViewer.notifications.addNotificationSuccess(`Layer: layer ${payload.layerPath} visibility set to ${payload.visible} - individual`);
         });
 
         // Add more registrations of listeners when the layers have been loaded here...
