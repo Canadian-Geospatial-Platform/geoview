@@ -381,6 +381,18 @@ export class MapViewer {
   }
 
   /**
+   * Asynchronously gets the map center coordinate to give a chance for the map to
+   * render before returning the value.
+   * @returns the map viewSettings
+   */
+  getCenter(): Promise<Coordinate> {
+    // When the getCenter() function actually returns a coordinate
+    return whenThisThen(() => {
+      return this.getView().getCenter()!;
+    });
+  }
+
+  /**
    * Gets the map projection
    * @returns the map viewSettings
    */
@@ -1569,8 +1581,8 @@ export class MapViewer {
    * Updates the map controls (the store) based on the current map view state.
    */
   async #updateMapControls(): Promise<void> {
-    // Get the center coordinates
-    const centerCoordinates = this.getView().getCenter()!;
+    // Get the center coordinates (await in case the map isn't fully rendered yet)
+    const centerCoordinates = await this.getCenter();
 
     // Get the projection code
     const projCode = this.getView().getProjection().getCode();
