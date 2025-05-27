@@ -114,7 +114,7 @@
           // listen to map moveend event
           mapViewer.onMapMoveEnd((sender, payload) => {
             mapPosition.innerHTML =
-              mapPosition.innerHTML = `<p>Map ${sender.mapId} with latitude ${payload.lnglat[1]} and longitude ${payload.lnglat[0]}</p>`;
+              mapPosition.innerHTML = `<p>Map ${sender.mapId} with latitude ${payload.lonlat[1]} and longitude ${payload.lonlat[0]}</p>`;
           });
 
           // listen to map rotation event

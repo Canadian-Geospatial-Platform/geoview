@@ -9,7 +9,7 @@ import { TypeJsonObject } from '@/api/config/types/config-types';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 export type TypeClickMarker = {
-  lnglat: Coordinate;
+  lonlat: Coordinate;
   symbology?: TypeJsonObject;
 };
 
@@ -41,7 +41,7 @@ export const ClickMarker = memo(function ClickMarker(): JSX.Element {
     logger.logTraceUseEffect('CLICK-MARKER - clickCoordinates');
 
     if (clickCoordinates) {
-      showClickMarker({ lnglat: clickCoordinates.lnglat });
+      showClickMarker({ lonlat: clickCoordinates.lonlat });
     }
   }, [clickCoordinates, showClickMarker]);
 

@@ -858,7 +858,7 @@ export type TypeLayerStatus = 'newInstance' | 'registered' | 'processing' | 'pro
 
 export type TypeQueryStatus = 'init' | 'processing' | 'processed' | 'error';
 
-export type QueryType = 'at_pixel' | 'at_coordinate' | 'at_long_lat' | 'using_a_bounding_box' | 'using_a_polygon' | 'all';
+export type QueryType = 'at_pixel' | 'at_coordinate' | 'at_lon_lat' | 'using_a_bounding_box' | 'using_a_polygon' | 'all';
 
 export type TypeLocation = null | Pixel | Coordinate | Coordinate[] | string;
 

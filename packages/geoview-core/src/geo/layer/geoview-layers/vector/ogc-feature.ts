@@ -86,7 +86,7 @@ export class OgcFeature extends AbstractGeoViewVector {
         const latlonExtent = Projection.transformExtentFromProj(
           foundCollection.extent.spatial.bbox[0] as number[],
           Projection.getProjectionFromString(foundCollection.extent.spatial.crs as string),
-          Projection.getProjectionLngLat()
+          Projection.getProjectionLonLat()
         );
         // eslint-disable-next-line no-param-reassign
         layerConfig.initialSettings.bounds = latlonExtent;

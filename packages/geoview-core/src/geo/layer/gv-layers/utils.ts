@@ -118,7 +118,7 @@ export async function esriQueryRecordsByUrl(
   geometryType?: TypeStyleGeometry,
   parseFeatureInfoEntries: boolean = true
 ): Promise<TypeFeatureInfoEntryPartial[]> {
-  // TODO: Performance - Refactor - Suggestion to rework this function and the one in EsriDynamic.getFeatureInfoAtLongLat(), making
+  // TODO: Performance - Refactor - Suggestion to rework this function and the one in EsriDynamic.getFeatureInfoAtLonLat(), making
   // TO.DO.CONT: the latter redirect to this one here and merge some logic between the 2 functions ideally making this
   // TO.DO.CONT: one here return a TypeFeatureInfoEntry[] with options to have returnGeometry=true or false and such.
   // Query the data

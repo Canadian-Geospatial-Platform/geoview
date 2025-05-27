@@ -45,8 +45,8 @@ export function AoiPanel(props: AoiPanelProps): JSX.Element {
             tabIndex={0}
             className="aoiCardThumbnail"
             onClick={() =>
-              myMap.zoomToLngLatExtentOrCoordinate(aoiItem.extent, { maxZoom: 14 }).then(() => {
-                highlightBBox(myMap.convertExtentLngLatToMapProj(aoiItem.extent), false);
+              myMap.zoomToLonLatExtentOrCoordinate(aoiItem.extent, { maxZoom: 14 }).then(() => {
+                highlightBBox(myMap.convertExtentLonLatToMapProj(aoiItem.extent), false);
               })
             }
             // eslint-disable-next-line react/no-array-index-key
