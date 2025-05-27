@@ -92,7 +92,7 @@ export abstract class AbstractBaseEsriLayerEntryConfig extends AbstractBaseLayer
       metadataExtent = Projection.transformExtentFromObj(
         metadataExtent,
         layerMetadata.extent.spatialReference,
-        Projection.getProjectionLngLat()
+        Projection.getProjectionLonLat()
       );
       this.initialSettings.extent = validateExtentWhenDefined(metadataExtent);
     }

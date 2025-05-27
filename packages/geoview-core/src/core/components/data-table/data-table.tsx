@@ -334,7 +334,7 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
             await delay(150);
 
             // Add (back?) a click marker, a bbox extent who will disapear and remove/add higlight the zoomed feature
-            showClickMarker({ lnglat: newCenter });
+            showClickMarker({ lonlat: newCenter });
             highlightBBox(extent!, false);
             removeHighlightedFeature('all');
             addHighlightedFeature(feature);

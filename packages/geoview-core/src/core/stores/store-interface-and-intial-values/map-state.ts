@@ -1002,7 +1002,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
        */
       setClickMarker: (coord: number[] | undefined): void => {
         set({
-          mapState: { ...get().mapState, clickMarker: coord ? { lnglat: coord } : undefined },
+          mapState: { ...get().mapState, clickMarker: coord ? { lonlat: coord } : undefined },
         });
       },
 

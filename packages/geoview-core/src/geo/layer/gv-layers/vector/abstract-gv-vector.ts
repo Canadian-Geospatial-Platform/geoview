@@ -167,22 +167,22 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Overrides the return of feature information at the provided long lat coordinate.
-   * @param {OLMap} map - The Map where to get Feature Info At LongLat from.
-   * @param {Coordinate} lnglat - The coordinate that will be used by the query.
+   * @param {OLMap} map - The Map where to get Feature Info At LonLat from.
+   * @param {Coordinate} lonlat - The coordinate that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} abortController - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
-  protected override getFeatureInfoAtLongLat(
+  protected override getFeatureInfoAtLonLat(
     map: OLMap,
-    lnglat: Coordinate,
+    lonlat: Coordinate,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     queryGeometry: boolean = true,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoEntry[]> {
-    // Convert Coordinates LngLat to map projection
-    const projCoordinate = Projection.transformFromLonLat(lnglat, map.getView().getProjection());
+    // Convert Coordinates LonLat to map projection
+    const projCoordinate = Projection.transformFromLonLat(lonlat, map.getView().getProjection());
 
     // Redirect to getFeatureInfoAtPixel
     return this.getFeatureInfoAtPixel(map, map.getPixelFromCoordinate(projCoordinate));

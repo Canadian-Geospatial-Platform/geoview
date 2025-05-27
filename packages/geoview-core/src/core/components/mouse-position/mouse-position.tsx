@@ -56,12 +56,12 @@ const CoordinateDisplay = memo(function CoordinateDisplay({
 /**
  * Format the coordinates output in lat long
  */
-const formatCoordinates = (lnglat: Coordinate, DMS: boolean, t: (key: string) => string): FormattedCoordinates => {
-  const labelX = lnglat[0] < 0 ? t('mapctrl.mouseposition.west') : t('mapctrl.mouseposition.east');
-  const labelY = lnglat[1] < 0 ? t('mapctrl.mouseposition.south') : t('mapctrl.mouseposition.north');
+const formatCoordinates = (lonlat: Coordinate, DMS: boolean, t: (key: string) => string): FormattedCoordinates => {
+  const labelX = lonlat[0] < 0 ? t('mapctrl.mouseposition.west') : t('mapctrl.mouseposition.east');
+  const labelY = lonlat[1] < 0 ? t('mapctrl.mouseposition.south') : t('mapctrl.mouseposition.north');
 
-  const lng = `${DMS ? coordFormatDMS(lnglat[0]) : Math.abs(lnglat[0]).toFixed(4)} ${labelX}`;
-  const lat = `${DMS ? coordFormatDMS(lnglat[1]) : Math.abs(lnglat[1]).toFixed(4)} ${labelY}`;
+  const lng = `${DMS ? coordFormatDMS(lonlat[0]) : Math.abs(lonlat[0]).toFixed(4)} ${labelX}`;
+  const lat = `${DMS ? coordFormatDMS(lonlat[1]) : Math.abs(lonlat[1]).toFixed(4)} ${labelY}`;
 
   return { lng, lat };
 };
@@ -93,9 +93,9 @@ export const MousePosition = memo(function MousePosition({ expanded }: MousePosi
     // Log too annoying
     // logger.logTraceUseMemo('MOUSE-POSITION - pointerPosition', pointerPosition);
 
-    const { lnglat, projected } = pointerPosition;
-    const DMS = formatCoordinates(lnglat, true, t);
-    const DD = formatCoordinates(lnglat, false, t);
+    const { lonlat, projected } = pointerPosition;
+    const DMS = formatCoordinates(lonlat, true, t);
+    const DD = formatCoordinates(lonlat, false, t);
 
     return [`${DMS.lng} | ${DMS.lat}`, `${DD.lng} | ${DD.lat}`, `${projected[0].toFixed(4)}m E | ${projected[1].toFixed(4)}m N`];
   }, [pointerPosition, t]);

@@ -52,7 +52,7 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
       // Use store getter, we do not subcribe to modification
       const currentPointerPosition = getMapPointerPosition(mapId);
       if (currentPointerPosition) {
-        logger.logTraceUseCallback('CROSSHAIR - simulateClick', currentPointerPosition.lnglat);
+        logger.logTraceUseCallback('CROSSHAIR - simulateClick', currentPointerPosition.lonlat);
         setClickCoordinates(currentPointerPosition);
       }
     },
