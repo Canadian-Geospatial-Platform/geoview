@@ -189,6 +189,7 @@ const config = {
         { from: './public/markers', to: 'markers' },
         { from: './public/datasets/geojson', to: 'datasets/geojson' },
         { from: './public/datasets/csv-files', to: 'datasets/csv-files' },
+        { from: './public/datasets/shapefiles', to: 'datasets/shapefiles' },
         { from: './public/datasets/geopackages', to: 'datasets/geopackages' },
         { from: './public/plugins', to: 'plugins', noErrorOnMissing: true },
         { from: './public/favicon.ico' },

@@ -186,7 +186,8 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
    * @protected @override
    */
   protected override createLayerTreeFromServiceMetadata(): EntryConfigBaseClass[] {
-    const listOfLayerEntryConfig: TypeJsonObject[] | undefined = this.getServiceMetadata()?.listOfLayerEntryConfig as TypeJsonObject[];
+    const listOfLayerEntryConfig: TypeJsonObject[] | undefined =
+      (this.getServiceMetadata()?.listOfLayerEntryConfig as TypeJsonObject[]) || this.listOfLayerEntryConfig;
     if (!listOfLayerEntryConfig) return [];
 
     const layerTree: EntryConfigBaseClass[] = [];

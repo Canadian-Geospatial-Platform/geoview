@@ -446,6 +446,12 @@
                 "enum": [
                   "geoCore"
                 ]
+              },
+              {
+                "type": "string",
+                "enum": [
+                  "shapefile"
+                ]
               }
             ]
           }
@@ -1065,7 +1071,7 @@
       ]
     },
     "OgcFeatureLayerConfig": {
-      "description": "Structure used by the viewer to describe the configuration of a CSV layer.",
+      "description": "Structure used by the viewer to describe the configuration of a OGC Feature layer.",
       "type": "object",
       "allOf": [
         {
@@ -1310,7 +1316,7 @@
           "type": "object",
           "properties": {
             "source": {
-              "$ref": "#/definitions/TypeSourceTileInitialConfig"
+              "$ref": "#/definitions/TypeBaseVectorSourceInitialConfig"
             },
             "layerStyle": {
               "$ref": "#/definitions/TypeLayerStyleConfig"

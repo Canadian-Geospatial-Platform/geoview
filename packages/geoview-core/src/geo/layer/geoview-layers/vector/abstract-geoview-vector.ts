@@ -16,6 +16,7 @@ import {
 } from '@/api/config/types/map-schema-types';
 
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeSourceGeoJSONInitialConfig } from '@/geo/layer/geoview-layers/vector/geojson';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
@@ -101,8 +102,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         // Resolve the url
         const url = AbstractGeoViewVector.#resolveUrl(layerConfig, vectorSource, extent, resolution, projection);
 
-        // Fetch the data
-        const responseText = await AbstractGeoViewVector.#fetchData(url, sourceConfig);
+        // Fetch the data, or use passed geoJSON if present
+        const responseText =
+          layerConfig.schemaTag === CONST_LAYER_TYPES.GEOJSON && (layerConfig.source as TypeSourceGeoJSONInitialConfig)?.geojson
+            ? ((layerConfig.source as TypeSourceGeoJSONInitialConfig).geojson as string)
+            : await AbstractGeoViewVector.#fetchData(url, sourceConfig);
 
         // If Esri Feature
         if (layerConfig.schemaTag === CONST_LAYER_TYPES.ESRI_FEATURE) {

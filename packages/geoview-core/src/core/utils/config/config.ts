@@ -10,6 +10,7 @@ import {
   TypeDisplayLanguage,
   CONST_LAYER_TYPES,
   TypeGeoviewLayerType,
+  mapConfigLayerEntryIsShapefile,
 } from '@/api/config/types/map-schema-types';
 import { logger } from '@/core/utils/logger';
 
@@ -59,7 +60,7 @@ export class Config {
           geoviewLayerEntry.geoviewLayerId = `${geoviewLayerEntry.geoviewLayerId}:${generateId(8)}`;
         }
 
-        if (mapConfigLayerEntryIsGeoCore(geoviewLayerEntry)) {
+        if (mapConfigLayerEntryIsGeoCore(geoviewLayerEntry) || mapConfigLayerEntryIsShapefile(geoviewLayerEntry)) {
           //  Skip it, because we don't validate the GeoCore configuration anymore. Not the same way as typical GeoView Layer Types at least.
           // TODO Why not do GeoCore request here? Then could easily replace listOfLayerEntries and validate / process along with other layers
         } else if (Object.values(CONST_LAYER_TYPES).includes((geoviewLayerEntry as TypeGeoviewLayerConfig).geoviewLayerType)) {
