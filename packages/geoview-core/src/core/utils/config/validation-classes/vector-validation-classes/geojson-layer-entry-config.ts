@@ -41,6 +41,6 @@ export class GeoJSONLayerEntryConfig extends VectorLayerEntryConfig {
         : `${this.source.dataAccessPath!}/${this.layerId}`;
     }
 
-    if (!this.source.dataProjection) this.source.dataProjection = Projection.PROJECTION_NAMES.LNGLAT;
+    if (!this.source.dataProjection) this.source.dataProjection = Projection.PROJECTION_NAMES.LONLAT;
   }
 }

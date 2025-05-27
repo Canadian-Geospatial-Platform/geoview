@@ -358,21 +358,21 @@ export class GVEsriDynamic extends AbstractGVRaster {
     // Transform coordinate from map projection to lntlat
     const projCoordinate = Projection.transformToLonLat(location, map.getView().getProjection());
 
-    // Redirect to getFeatureInfoAtLongLat
-    return this.getFeatureInfoAtLongLat(map, projCoordinate, queryGeometry, abortController);
+    // Redirect to getFeatureInfoAtLonLat
+    return this.getFeatureInfoAtLonLat(map, projCoordinate, queryGeometry, abortController);
   }
 
   /**
    * Overrides the return of feature information at the provided long lat coordinate.
-   * @param {OLMap} map - The Map where to get Feature Info At LongLat from.
-   * @param {Coordinate} lnglat - The coordinate that will be used by the query.
+   * @param {OLMap} map - The Map where to get Feature Info At LonLat from.
+   * @param {Coordinate} lonlat - The coordinate that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} abortController - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
-  protected override async getFeatureInfoAtLongLat(
+  protected override async getFeatureInfoAtLonLat(
     map: OLMap,
-    lnglat: Coordinate,
+    lonlat: Coordinate,
     queryGeometry: boolean = true,
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoEntry[]> {
@@ -407,7 +407,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       `&imageDisplay=${size[0]},${size[1]},96` +
       `&layers=visible:${layerConfig.layerId}` +
       `&layerDefs=${encodeURI(layerDefs)}` +
-      `&geometryType=esriGeometryPoint&geometry=${lnglat[0]},${lnglat[1]}` +
+      `&geometryType=esriGeometryPoint&geometry=${lonlat[0]},${lonlat[1]}` +
       `&returnGeometry=false&sr=4326&returnFieldName=true`;
 
     // If it takes more then 10 seconds it means the server is unresponsive and we should not continue. This will throw an error...
@@ -426,7 +426,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
     // Get meters per pixel to set the maxAllowableOffset to simplify return geometry
     const maxAllowableOffset = queryGeometry
-      ? getMetersPerPixel(mapProjNumber as TypeValidMapProjectionCodes, map.getView().getResolution() || 7000, lnglat[1])
+      ? getMetersPerPixel(mapProjNumber as TypeValidMapProjectionCodes, map.getView().getResolution() || 7000, lonlat[1])
       : 0;
 
     // TODO: Performance - We need to separate the query attribute from geometry. We can use the attributes returned by identify to show details panel
@@ -464,11 +464,11 @@ export class GVEsriDynamic extends AbstractGVRaster {
     // If geometry is needed, use web worker to query and assign geometry later
     if (queryGeometry)
       // TODO: REFACTOR - Here, we're launching another async task to query the geometries, but the original promise will resolve first, by design.
-      // TO.DOCONT: We should carry this extra promise with the first response so that the caller of 'getFeatureInfoAtLongLat' can know
+      // TO.DOCONT: We should carry this extra promise with the first response so that the caller of 'getFeatureInfoAtLonLat' can know
       // TO.DOCONT: when the geometries will be done fetching on the features that they've already received as 'resolved'. Carrying the promise
       // TO.DOCONT: would also allow us to more gracefully handle when the fetching of the geometries has failed, because without a
-      // TO.DOCONT: handle on the promise, the caller of 'getFeatureInfoAtLongLat' have no idea of the 'fetchFeatureInfoGeometryWithWorker.catch()' here.
-      // TO.DOCONT: However, this would mean change the 'getFeatureInfoAtLongLat' function signature with regards to its return type (and affect ALL other sibling classes)
+      // TO.DOCONT: handle on the promise, the caller of 'getFeatureInfoAtLonLat' have no idea of the 'fetchFeatureInfoGeometryWithWorker.catch()' here.
+      // TO.DOCONT: However, this would mean change the 'getFeatureInfoAtLonLat' function signature with regards to its return type (and affect ALL other sibling classes)
 
       // TODO: Performance - We may need to use chunk and process 50 geom at a time. When we query 500 features (points) we have CORS issue with
       // TO.DOCONT: the esri query (was working with identify). But identify was failing on huge geometry...

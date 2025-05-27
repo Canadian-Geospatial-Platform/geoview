@@ -73,7 +73,7 @@ cgpv.api.event.on(
   "map/moveend",
   function (payload) {
     // before the validation, the type of payload is PayloadBaseClass
-    console.log(payload.lnglat);
+    console.log(payload.lonlat);
   },
   "mapOne"
 );
@@ -105,7 +105,6 @@ To emit an event you need to call the `cgpv.api.event.emit()` function. The func
 
 #### The emit parameter
 
-
 #### The handler name parameters
 
 Just like the `.on()` function, the `.emit()` function gives the user the option to provide a list of handler names. If you add handler names, you can use a slash
@@ -132,16 +131,14 @@ The use of a list of names separated by forward slashes is not mandatory. The im
 You can create your own event emitter in the same way as above except you will want to pass an object directly in the first parameter of the emit function instead of using a function that will create the object for you. Here is an example to emit the same function above to open a snackbar without using a converter function.
 
 ```js
-cgpv.api.event.emit(
-  {
-    event: "snackbar/open",
-    handlerName: "mapOne/panelOne",
-    message: {
-      type: "string",
-      value: "Hello, World!",
-    },
-  }
-);
+cgpv.api.event.emit({
+  event: "snackbar/open",
+  handlerName: "mapOne/panelOne",
+  message: {
+    type: "string",
+    value: "Hello, World!",
+  },
+});
 ```
 
 ## Turning off an event listener

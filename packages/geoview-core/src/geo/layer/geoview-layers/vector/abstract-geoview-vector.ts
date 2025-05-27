@@ -392,7 +392,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     // GV: This function and the below private static ones used to be in the CSV class directly, but something wasn't working with a 'Private element not accessible' error.
     // GV: After moving the code to the mother class, it worked. It'll remain here for now until the config refactoring can take care of it in its re-writing
 
-    const inProjection: string = layerConfig.source!.dataProjection || Projection.PROJECTION_NAMES.LNGLAT;
+    const inProjection: string = layerConfig.source!.dataProjection || Projection.PROJECTION_NAMES.LONLAT;
     const inProjectionConv: OLProjection = Projection.getProjectionFromString(inProjection);
 
     const features: Feature[] = [];

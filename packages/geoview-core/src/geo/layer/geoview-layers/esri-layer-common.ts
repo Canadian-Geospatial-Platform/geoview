@@ -359,7 +359,7 @@ export function commonProcessInitialSettings(
       const latlonExtent = Projection.transformExtentFromObj(
         layerExtent,
         layerMetadata.extent.spatialReference,
-        Projection.getProjectionLngLat()
+        Projection.getProjectionLonLat()
       );
       // eslint-disable-next-line no-param-reassign
       layerConfig.initialSettings!.bounds = latlonExtent;

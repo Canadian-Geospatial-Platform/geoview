@@ -99,13 +99,13 @@
           cgpv.api.getMapViewer('map1').layer.setLayerName('uniqueValueId/1', 'Water Quantity')
         </li>
         <li><button id="Place-marker">Place a marker on map</button><br />
-          cgpv.api.getMapViewer('map1').clickMarkerIconShow({lnglat: [-90, 60]})
+          cgpv.api.getMapViewer('map1').clickMarkerIconShow({lonlat: [-90, 60]})
         </li>
         <li><button id="Zoom-extent">Zoom to an extent</button><br />
-          cgpv.api.getMapViewer('map1').zoomToLngLatExtentOrCoordinate([-87.77486341686723, 51.62285357468582, -84.57727128084842, 53.833354975551075])
+          cgpv.api.getMapViewer('map1').zoomToLonLatExtentOrCoordinate([-87.77486341686723, 51.62285357468582, -84.57727128084842, 53.833354975551075])
         </li>
         <li><button id="Zoom-coordinate">Zoom to a coordinate</button><br />
-          cgpv.api.getMapViewer('map1').zoomToLngLatExtentOrCoordinate([-90, 60])
+          cgpv.api.getMapViewer('map1').zoomToLonLatExtentOrCoordinate([-90, 60])
         </li>
         <li><button id="Extent-to-polygon">Convert an extent to a polygon (result in console)</button><br />
           cgpv.api.utilities.geo.extentToPolygon([-87.77486341686723, 51.62285357468582, -84.57727128084842, 53.83335497555107])
@@ -254,7 +254,7 @@
 
         // listen to map move event
         mapViewer.onMapMoveEnd((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(`Map moved to center latitude ${payload.lnglat[1]} and longitude ${payload.lnglat[0]}`);
+          mapViewer.notifications.addNotificationSuccess(`Map moved to center latitude ${payload.lonlat[1]} and longitude ${payload.lonlat[0]}`);
         });
 
         // listen to layer added event
@@ -487,7 +487,7 @@
 
       // add an event listener when a button is clicked
       placeMarkerButton.addEventListener('click', async () => {
-        cgpv.api.getMapViewer('map1').clickMarkerIconShow({lnglat: [-90, 60]});
+        cgpv.api.getMapViewer('map1').clickMarkerIconShow({lonlat: [-90, 60]});
       });
 
       // Zoom to Extent Button========================================================================================================
@@ -496,7 +496,7 @@
 
       // add an event listener when a button is clicked
       zoomExtentButton.addEventListener('click', async () => {
-        cgpv.api.getMapViewer('map1').zoomToLngLatExtentOrCoordinate([-87.77486341686723, 51.62285357468582, -84.57727128084842, 53.833354975551075]);
+        cgpv.api.getMapViewer('map1').zoomToLonLatExtentOrCoordinate([-87.77486341686723, 51.62285357468582, -84.57727128084842, 53.833354975551075]);
       });
 
       // Zoom to Coordinate Button========================================================================================================
@@ -505,7 +505,7 @@
 
       // add an event listener when a button is clicked
       zoomCoordinateButton.addEventListener('click', async () => {
-        cgpv.api.getMapViewer('map1').zoomToLngLatExtentOrCoordinate([-90, 60]);
+        cgpv.api.getMapViewer('map1').zoomToLonLatExtentOrCoordinate([-90, 60]);
       });
 
       // Extent to Polygon Button========================================================================================================

@@ -40,7 +40,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     // Register a handler on the map click
     this.layerApi.mapViewer.onMapSingleClick((mapViewer, payload) => {
       // Query all layers which can be queried
-      this.queryLayers(payload.lnglat).catch((error: unknown) => {
+      this.queryLayers(payload.lonlat).catch((error: unknown) => {
         // Log
         logger.logPromiseFailed('queryLayers in onMapSingleClick in FeatureInfoLayerSet', error);
       });
@@ -105,10 +105,10 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Queries the features at the provided coordinate for all the registered layers.
-   * @param {Coordinate} longLatCoordinate - The longitude/latitude coordinate where to query the features
+   * @param {Coordinate} lonLatCoordinate - The longitude/latitude coordinate where to query the features
    * @returns {Promise<TypeFeatureInfoResultSet>} A promise which will hold the result of the query
    */
-  async queryLayers(longLatCoordinate: Coordinate): Promise<TypeFeatureInfoResultSet> {
+  async queryLayers(lonLatCoordinate: Coordinate): Promise<TypeFeatureInfoResultSet> {
     // FIXME: Watch out for code reentrancy between queries!
     // FIX.MECONT: Consider using a LIFO pattern, per layer path, as the race condition resolution
     // GV Each query should be distinct as far as the resultSet goes! The 'reinitialization' below isn't sufficient.
@@ -155,7 +155,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
           this.layerApi.mapViewer.map,
           layer,
           queryType,
-          longLatCoordinate,
+          lonLatCoordinate,
           true,
           this.#abortControllers[layerPath]
         );
@@ -220,7 +220,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     await Promise.allSettled(allPromises);
 
     // Emit the query layers has ended
-    this.#emitQueryEnded({ coordinate: longLatCoordinate, resultSet: this.resultSet, eventType: 'click' });
+    this.#emitQueryEnded({ coordinate: lonLatCoordinate, resultSet: this.resultSet, eventType: 'click' });
 
     // Return the results
     return this.resultSet;

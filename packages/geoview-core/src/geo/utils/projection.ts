@@ -41,7 +41,7 @@ export abstract class Projection {
     WM: 'EPSG:3857',
     3857: 'EPSG:3857',
     4269: 'EPSG:4269',
-    LNGLAT: 'EPSG:4326',
+    LONLAT: 'EPSG:4326',
     CRS84: 'CRS:84', // Supporting CRS:84 which is equivalent to 4326 except it's long-lat, whereas the 4326 standard is lat-long.
     CSRS: 'EPSG:4617',
     CSRS98: 'EPSG:4140',
@@ -167,7 +167,7 @@ export abstract class Projection {
     // This is included for certain outliers.
     // TODO Refactor: invalid extents should be handled before this point, test and remove - 5a65ad7c-561a-466a-8375-8d876624df9d
     if (typeof extent[0] !== 'number')
-      return olTransformExtent([-180, 90, 180, 90], Projection.PROJECTION_NAMES.LNGLAT, destination, stops);
+      return olTransformExtent([-180, 90, 180, 90], Projection.PROJECTION_NAMES.LONLAT, destination, stops);
 
     // If different projections
     if (source.getCode() !== destination.getCode()) {
@@ -333,12 +333,12 @@ export abstract class Projection {
   }
 
   /**
-   * Gets the projection representing a LngLat projection.
-   * @return {OLProjection} Projection object representing LngLat.
+   * Gets the projection representing a LonLat projection.
+   * @return {OLProjection} Projection object representing LonLat.
    */
-  static getProjectionLngLat(): OLProjection {
+  static getProjectionLonLat(): OLProjection {
     // Redirect
-    return Projection.getProjectionFromString(Projection.PROJECTION_NAMES.LNGLAT);
+    return Projection.getProjectionFromString(Projection.PROJECTION_NAMES.LONLAT);
   }
 
   /**
@@ -427,10 +427,10 @@ function initCRS84Projection(): void {
  * Initializes the 4326 Projection
  */
 function init4326Projection(): void {
-  proj4.defs(Projection.PROJECTION_NAMES.LNGLAT, '+proj=longlat +datum=WGS84 +no_defs +type=crs');
+  proj4.defs(Projection.PROJECTION_NAMES.LONLAT, '+proj=longlat +datum=WGS84 +no_defs +type=crs');
   register(proj4);
 
-  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES.LNGLAT);
+  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES.LONLAT);
   Projection.PROJECTIONS['4326'] = projection;
 }
 
