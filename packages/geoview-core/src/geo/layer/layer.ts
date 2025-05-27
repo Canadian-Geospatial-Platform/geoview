@@ -1934,7 +1934,7 @@ export class LayerApi {
   }
 
   /**
-   * Emits an event to all handlers when a layer config has been flag as error.
+   * Emits an event to all handlers when a layer config has been added.
    * @param {LayerBuilderEvent} event - The event to emit
    * @private
    */
@@ -1944,7 +1944,7 @@ export class LayerApi {
   }
 
   /**
-   * Registers a layer config error event handler.
+   * Registers a layer config added event handler.
    * @param {LayerBuilderDelegate} callback - The callback to be executed whenever the event is emitted
    */
   onLayerConfigAdded(callback: LayerBuilderDelegate): void {
@@ -1953,7 +1953,7 @@ export class LayerApi {
   }
 
   /**
-   * Unregisters a layer config error event handler.
+   * Unregisters a layer config added event handler.
    * @param {LayerBuilderDelegate} callback - The callback to stop being called whenever the event is emitted
    */
   offLayerConfigAdded(callback: LayerBuilderDelegate): void {
