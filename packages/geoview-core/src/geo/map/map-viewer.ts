@@ -383,13 +383,43 @@ export class MapViewer {
   /**
    * Asynchronously gets the map center coordinate to give a chance for the map to
    * render before returning the value.
-   * @returns the map viewSettings
+   * @returns {Promise<Coordinate>} the map center
    */
   getCenter(): Promise<Coordinate> {
     // When the getCenter() function actually returns a coordinate
     return whenThisThen(() => {
       return this.getView().getCenter()!;
     });
+  }
+
+  /**
+   * Asynchronously gets the map size to give a chance for the map to
+   * render before returning the value.
+   * @returns {Promise<[number, number]>} the map size
+   */
+  getMapSize(): Promise<[number, number]> {
+    // When the getSize() function actually returns a coordinate
+    return whenThisThen(() => {
+      const size = this.map.getSize()!;
+      return [size[0], size[1]] as [number, number];
+    });
+  }
+
+  /**
+   * Asynchronously gets the map coordinate from pixel to give a chance for the map to
+   * render before returning the value.
+   * @param {[number, number]} pointXY - The pixel coordinate to convert
+   * @returns {Promise<[number, number]>} the map size
+   */
+  getCoordinateFromPixel(pointXY: [number, number]): Promise<[number, number]> {
+    // When the getSize() function actually returns a coordinate
+    // TODO: refactor UI - If we do not put a high timeout, ui start but the function return null and
+    // TD.CONT: component fails. To patch, we add an higher time out for promise. This solves for now the issue
+    // TD.CONT: where the page start to load and user switch to another page and came back.
+    return whenThisThen(() => {
+      const size = this.map.getCoordinateFromPixel(pointXY)! || this.map.getCoordinateFromPixel(pointXY) !== null;
+      return [size[0], size[1]] as [number, number];
+    }, 9900000);
   }
 
   /**
@@ -1054,14 +1084,17 @@ export class MapViewer {
   /**
    * Gets if north is visible. This is not a perfect solution and is more a work around
    *
-   * @returns {boolean} true if visible, false otherwise
+   * @returns {Promise<boolean>} true if visible, false otherwise
    */
-  getNorthVisibility(): boolean {
+  async getNorthVisibility(): Promise<boolean> {
     // Check the container value for top middle of the screen
     // Convert this value to a lat long coordinate
-    const pointXY = [this.map.getSize()![0] / 2, 1];
-    // logger.logDebug('error', pointXY, this.map.getCoordinateFromPixel(pointXY), this.getView().getProjection())
-    const pt = Projection.transformToLonLat(this.map.getCoordinateFromPixel(pointXY), this.getView().getProjection());
+    const size = await this.getMapSize();
+    const pointXY: [number, number] = [size[0] / 2, 1];
+
+    // GV: Sometime, the getCoordinateFromPixel return null... use aeait
+    const pixel = await this.getCoordinateFromPixel(pointXY);
+    const pt = Projection.transformToLonLat(pixel, this.getView().getProjection());
 
     // If user is pass north, long value will start to be positive (other side of the earth).
     // This will work only for LCC Canada.
@@ -1600,7 +1633,7 @@ export class MapViewer {
     const degreeRotation = this.getNorthArrowAngle();
 
     // Get the north visibility
-    const isNorthVisible = this.getNorthVisibility();
+    const isNorthVisible = await this.getNorthVisibility();
 
     // Get the map Extent
     const extent = this.getView().calculateExtent();
