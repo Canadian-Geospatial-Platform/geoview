@@ -83,6 +83,11 @@ const config = {
       dependOn: 'cgpv-main',
       filename: 'corePackages/[name].js',
     },
+    'geoview-drawer': {
+      import: '../geoview-drawer/src/index.tsx',
+      dependOn: 'cgpv-main',
+      filename: 'corePackages/[name].js',
+    },
   },
   output: {
     globalObject: 'self',
