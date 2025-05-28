@@ -131,8 +131,14 @@ export class VectorTileLayerConfig extends AbstractGeoviewLayerConfig {
           this.setServiceMetadata(jsonMetadata);
 
           // Add projection definition if not already included
-          if (jsonMetadata?.tileInfo?.spatialReference && !Projection.getProjectionFromObj(jsonMetadata.tileInfo.spatialReference))
-            await Projection.addProjection(jsonMetadata.tileInfo.spatialReference);
+          if (jsonMetadata?.tileInfo?.spatialReference) {
+            try {
+              Projection.getProjectionFromObj(jsonMetadata.tileInfo.spatialReference);
+            } catch (error) {
+              logger.logError('Unsupported projection, attempting to add projection now.', error);
+              await Projection.addProjection(jsonMetadata.tileInfo.spatialReference);
+            }
+          }
 
           this.listOfLayerEntryConfig = this.processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
           await this.fetchListOfLayerMetadata();

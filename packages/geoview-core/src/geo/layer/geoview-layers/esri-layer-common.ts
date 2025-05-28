@@ -408,8 +408,14 @@ export async function commonProcessLayerMetadata<
     }
   }
 
-  if (responseJson.spatialReference && !Projection.getProjectionFromObj(responseJson.spatialReference)) {
-    await Projection.addProjection(responseJson.spatialReference);
+  // Add projection definition if not already included
+  if (responseJson.spatialReference) {
+    try {
+      Projection.getProjectionFromObj(responseJson.spatialReference);
+    } catch (error) {
+      logger.logError('Unsupported projection, attempting to add projection now.', error);
+      await Projection.addProjection(responseJson.spatialReference);
+    }
   }
 
   commonProcessFeatureInfoConfig(layerConfig);

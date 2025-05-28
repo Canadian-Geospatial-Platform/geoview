@@ -80,8 +80,15 @@ export class VectorTiles extends AbstractGeoViewRaster {
       // eslint-disable-next-line no-param-reassign
       layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
 
-      if (fullExtent.spatialReference && !Projection.getProjectionFromObj(fullExtent.spatialReference))
-        await Projection.addProjection(fullExtent.spatialReference);
+      // Add projection definition if not already included
+      if (fullExtent.spatialReference) {
+        try {
+          Projection.getProjectionFromObj(fullExtent.spatialReference);
+        } catch (error) {
+          logger.logError('Unsupported projection, attempting to add projection now.', error);
+          await Projection.addProjection(fullExtent.spatialReference);
+        }
+      }
 
       // Set zoom levels. Vector tiles may be unique as they can have both scale and zoom level properties
       // First set the min/max scales based on the service / config

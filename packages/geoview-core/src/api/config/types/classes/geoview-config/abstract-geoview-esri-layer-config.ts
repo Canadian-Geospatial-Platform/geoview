@@ -79,8 +79,15 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
         } else {
           this.setServiceMetadata(jsonMetadata);
 
-          if (jsonMetadata?.spatialReference && !Projection.getProjectionFromObj(jsonMetadata.spatialReference))
-            await Projection.addProjection(jsonMetadata.data.spatialReference);
+          // Add projection definition if not already included
+          if (jsonMetadata?.spatialReference) {
+            try {
+              Projection.getProjectionFromObj(jsonMetadata.spatialReference);
+            } catch (error) {
+              logger.logError('Unsupported projection, attempting to add projection now.', error);
+              await Projection.addProjection(jsonMetadata.spatialReference);
+            }
+          }
 
           this.listOfLayerEntryConfig = this.processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
           await this.fetchListOfLayerMetadata();
