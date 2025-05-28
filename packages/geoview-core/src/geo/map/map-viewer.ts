@@ -59,7 +59,7 @@ import { Translate } from '@/geo/interaction/translate';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { ModalApi } from '@/ui';
 import { delay, generateId, getLocalizedMessage, whenThisThen } from '@/core/utils/utilities';
-import { createEmptyBasemap, getPointerPositionFromMapEvent, isExtentLngLat } from '@/geo/utils/utilities';
+import { createEmptyBasemap, getPointerPositionFromMapEvent, isExtentLonLat } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { NORTH_POLE_POSITION } from '@/core/utils/constant';
 import { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
@@ -273,7 +273,7 @@ export class MapViewer {
 
     let extentProjected: Extent | undefined;
     if (mapViewSettings.maxExtent)
-      extentProjected = Projection.transformExtentFromProj(mapViewSettings.maxExtent, Projection.getProjectionLngLat(), projection);
+      extentProjected = Projection.transformExtentFromProj(mapViewSettings.maxExtent, Projection.getProjectionLonLat(), projection);
 
     const initialMap = new OLMap({
       target: mapElement,
@@ -593,7 +593,7 @@ export class MapViewer {
     if (mapView.maxExtent)
       viewOptions.extent = Projection.transformExtentFromProj(
         mapView.maxExtent,
-        Projection.getProjectionLngLat(),
+        Projection.getProjectionLonLat(),
         Projection.getProjectionFromString(`EPSG:${mapView.projection}`)
       );
 
@@ -665,12 +665,12 @@ export class MapViewer {
       initialView: {
         zoomAndCenter: [
           currentView.getZoom() as number,
-          this.convertCoordinateLngLatToMapProj(currentView.getCenter()!) as [number, number],
+          this.convertCoordinateLonLatToMapProj(currentView.getCenter()!) as [number, number],
         ],
       },
       minZoom: currentView.getMinZoom(),
       maxZoom: currentView.getMaxZoom(),
-      maxExtent: Projection.transformExtentFromProj(extent, Projection.getProjectionLngLat(), currentView.getProjection()),
+      maxExtent: Projection.transformExtentFromProj(extent, Projection.getProjectionLonLat(), currentView.getProjection()),
       projection: currentView.getProjection().getCode().split(':')[1] as unknown as TypeValidMapProjectionCodes,
     };
 
@@ -861,14 +861,14 @@ export class MapViewer {
   }
 
   /**
-   * Zoom to specified extent or coordinate provided in lnglat.
+   * Zoom to specified extent or coordinate provided in lonlat.
    *
    * @param {Extent | Coordinate} extent - The extent or coordinate to zoom to.
    * @param {FitOptions} options - The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 }).
    */
-  zoomToLngLatExtentOrCoordinate(extent: Extent | Coordinate, options?: FitOptions): Promise<void> {
+  zoomToLonLatExtentOrCoordinate(extent: Extent | Coordinate, options?: FitOptions): Promise<void> {
     const fullExtent = extent.length === 2 ? [extent[0], extent[1], extent[0], extent[1]] : extent;
-    const projectedExtent = Projection.transformExtentFromProj(fullExtent, Projection.getProjectionLngLat(), this.getProjection());
+    const projectedExtent = Projection.transformExtentFromProj(fullExtent, Projection.getProjectionLonLat(), this.getProjection());
     return MapEventProcessor.zoomToExtent(this.mapId, projectedExtent, options);
   }
 
@@ -1102,44 +1102,44 @@ export class MapViewer {
   }
 
   /**
-   * Transforms coordinate from LngLat to the current projection of the map.
-   * @param {Coordinate} coordinate - The LngLat coordinate
+   * Transforms coordinate from LonLat to the current projection of the map.
+   * @param {Coordinate} coordinate - The LonLat coordinate
    * @returns {Coordinate} The coordinate in the map projection
    */
-  convertCoordinateLngLatToMapProj(coordinate: Coordinate): Coordinate {
+  convertCoordinateLonLatToMapProj(coordinate: Coordinate): Coordinate {
     // Redirect
-    return this.convertCoordinateFromProjToMapProj(coordinate, Projection.getProjectionLngLat());
+    return this.convertCoordinateFromProjToMapProj(coordinate, Projection.getProjectionLonLat());
   }
 
   /**
-   * Transforms coordinate from current projection of the map to LngLat.
+   * Transforms coordinate from current projection of the map to LonLat.
    * @param {Coordinate} coordinate - The coordinate in map projection
-   * @returns {Coordinate} The coordinate in LngLat
+   * @returns {Coordinate} The coordinate in LonLat
    */
-  convertCoordinateMapProjToLngLat(coordinate: Coordinate): Coordinate {
+  convertCoordinateMapProjToLonLat(coordinate: Coordinate): Coordinate {
     // Redirect
-    return this.convertCoordinateFromMapProjToProj(coordinate, Projection.getProjectionLngLat());
+    return this.convertCoordinateFromMapProjToProj(coordinate, Projection.getProjectionLonLat());
   }
 
   /**
-   * Transforms extent from LngLat to the current projection of the map.
-   * @param {Extent} extent - The LngLat extent
+   * Transforms extent from LonLat to the current projection of the map.
+   * @param {Extent} extent - The LonLat extent
    * @param {number} stops - The number of stops to perform densification on the extent
    * @returns {Extent} The extent in the map projection
    */
-  convertExtentLngLatToMapProj(extent: Extent, stops: number = MapViewer.DEFAULT_STOPS): Extent {
+  convertExtentLonLatToMapProj(extent: Extent, stops: number = MapViewer.DEFAULT_STOPS): Extent {
     // Redirect
-    return this.convertExtentFromProjToMapProj(extent, Projection.getProjectionLngLat(), stops);
+    return this.convertExtentFromProjToMapProj(extent, Projection.getProjectionLonLat(), stops);
   }
 
   /**
-   * Transforms extent from current projection of the map to LngLat.
+   * Transforms extent from current projection of the map to LonLat.
    * @param {Extent} extent - The extent in map projection
-   * @returns {Extent} The extent in LngLat
+   * @returns {Extent} The extent in LonLat
    */
-  convertExtentMapProjToLngLat(extent: Extent): Extent {
+  convertExtentMapProjToLonLat(extent: Extent): Extent {
     // Redirect
-    return this.convertExtentFromMapProjToProj(extent, Projection.getProjectionLngLat());
+    return this.convertExtentFromMapProjToProj(extent, Projection.getProjectionLonLat());
   }
 
   /**
@@ -1291,7 +1291,7 @@ export class MapViewer {
       await this.#updateMapControls();
 
       // Emit to the outside
-      this.#emitMapMoveEnd({ lnglat: this.getView().getCenter()! });
+      this.#emitMapMoveEnd({ lonlat: this.getView().getCenter()! });
     } catch (error: unknown) {
       // Log
       logger.logError('Failed in MapViewer.#handleMapMoveEnd', error);
@@ -1591,7 +1591,7 @@ export class MapViewer {
     const pointerPosition = {
       projected: centerCoordinates,
       pixel: this.map.getPixelFromCoordinate(centerCoordinates),
-      lnglat: Projection.transformPoints([centerCoordinates], projCode, Projection.PROJECTION_NAMES.LNGLAT)[0],
+      lonlat: Projection.transformPoints([centerCoordinates], projCode, Projection.PROJECTION_NAMES.LONLAT)[0],
       dragging: false,
     };
 
@@ -1622,8 +1622,8 @@ export class MapViewer {
     if (this.mapFeaturesConfig.map.viewSettings.initialView?.extent) {
       // Not zooming on layers, but we have an extent to zoom to instead
       // If extent is not lon/lat, we assume it is in the map projection and use it as is.
-      const extent = isExtentLngLat(this.mapFeaturesConfig.map.viewSettings.initialView!.extent)
-        ? this.convertExtentLngLatToMapProj(this.mapFeaturesConfig.map.viewSettings.initialView!.extent as Extent)
+      const extent = isExtentLonLat(this.mapFeaturesConfig.map.viewSettings.initialView!.extent)
+        ? this.convertExtentLonLatToMapProj(this.mapFeaturesConfig.map.viewSettings.initialView!.extent as Extent)
         : this.mapFeaturesConfig.map.viewSettings.initialView!.extent;
 
       // Zoom to extent
@@ -1656,7 +1656,7 @@ export class MapViewer {
 
       // If extents have infinity, use default instead
       if (layerExtents.includes(Infinity))
-        layerExtents = this.convertExtentLngLatToMapProj(CV_MAP_EXTENTS[this.mapFeaturesConfig.map.viewSettings.projection]);
+        layerExtents = this.convertExtentLonLatToMapProj(CV_MAP_EXTENTS[this.mapFeaturesConfig.map.viewSettings.projection]);
 
       // Zoom to calculated extent
       if (layerExtents.length) {
@@ -2103,7 +2103,7 @@ export type TypeMapState = {
  * Type used to define the map mouse information
  * */
 export type TypeMapMouseInfo = {
-  lnglat: Coordinate;
+  lonlat: Coordinate;
   pixel: Coordinate;
   projected: Coordinate;
   dragging: boolean;
@@ -2133,7 +2133,7 @@ export type MapLayersLoadedDelegate = EventDelegateBase<MapViewer, undefined, vo
  * Define an event for the delegate
  */
 export type MapMoveEndEvent = {
-  lnglat: Coordinate;
+  lonlat: Coordinate;
 };
 
 /**

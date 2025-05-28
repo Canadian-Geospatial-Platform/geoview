@@ -43,7 +43,7 @@ export class GVGeoJSON extends AbstractGVVector {
     const geojsonObject = typeof geojson === 'string' ? JSON.parse(geojson) : geojson;
 
     // Create features from geoJSON
-    const dataProjection = geojsonObject.crs?.properties?.name || Projection.PROJECTION_NAMES.LNGLAT;
+    const dataProjection = geojsonObject.crs?.properties?.name || Projection.PROJECTION_NAMES.LONLAT;
     const features = new FormatGeoJSON().readFeatures(geojsonObject, {
       dataProjection,
       featureProjection: projection,

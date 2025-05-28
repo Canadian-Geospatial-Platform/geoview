@@ -32,7 +32,7 @@ import { LayerApi } from '@/geo/layer/layer';
 import { MapViewer, TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 import { Projection } from '@/geo/utils/projection';
-import { isPointInExtent, isExtentLngLat } from '@/geo/utils/utilities';
+import { isPointInExtent, isExtentLonLat } from '@/geo/utils/utilities';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { NORTH_POLE_POSITION, OL_ZOOM_DURATION, OL_ZOOM_MAXZOOM, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
@@ -289,8 +289,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
   static clickMarkerIconShow(mapId: string, marker: TypeClickMarker): void {
     // Project coords
     const projectedCoords = Projection.transformPoints(
-      [marker.lnglat],
-      Projection.PROJECTION_NAMES.LNGLAT,
+      [marker.lonlat],
+      Projection.PROJECTION_NAMES.LONLAT,
       `EPSG:${this.getMapStateProtected(mapId).currentProjection}`
     );
 
@@ -334,13 +334,13 @@ export class MapEventProcessor extends AbstractEventProcessor {
       mapCenterCoordinates: mapState.centerCoordinates,
       pointerPosition: mapState.pointerPosition || {
         pixel: [],
-        lnglat: [],
+        lonlat: [],
         projected: [],
         dragging: false,
       },
       singleClickedPosition: mapState.clickCoordinates || {
         pixel: [],
-        lnglat: [],
+        lonlat: [],
         projected: [],
         dragging: false,
       },
@@ -456,7 +456,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       const currentView = this.getMapViewer(mapId).map.getView();
       const currentCenter = currentView.getCenter();
       const currentProjection = currentView.getProjection().getCode();
-      const centerLatLng = Projection.transformPoints([currentCenter!], currentProjection, Projection.PROJECTION_NAMES.LNGLAT)[0] as [
+      const centerLatLng = Projection.transformPoints([currentCenter!], currentProjection, Projection.PROJECTION_NAMES.LONLAT)[0] as [
         number,
         number,
       ];
@@ -1003,7 +1003,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       // GV There were issues with fromLonLat in rare cases in LCC projections, transformExtentFromProj seems to solve them.
       // GV fromLonLat and transformExtentFromProj give differing results in many cases, fromLonLat had issues with the first
       // GV three results from a geolocator search for "vancouver river"
-      const convertedExtent = Projection.transformExtentFromProj(bbox, Projection.getProjectionLngLat(), projectionConfig);
+      const convertedExtent = Projection.transformExtentFromProj(bbox, Projection.getProjectionLonLat(), projectionConfig);
 
       // Highlight
       this.getMapViewerLayerAPI(mapId).featureHighlight.highlightGeolocatorBBox(convertedExtent);
@@ -1016,14 +1016,14 @@ export class MapEventProcessor extends AbstractEventProcessor {
       });
 
       // Now show the click marker icon
-      this.clickMarkerIconShow(mapId, { lnglat: coords });
+      this.clickMarkerIconShow(mapId, { lonlat: coords });
       for (let i = 0; i < indicatorBox.length; i++) {
         (indicatorBox[i] as HTMLElement).style.display = '';
       }
     } else {
       const projectedCoords = Projection.transformPoints(
         [coords],
-        Projection.PROJECTION_NAMES.LNGLAT,
+        Projection.PROJECTION_NAMES.LONLAT,
         `EPSG:${this.getMapStateProtected(mapId).currentProjection}`
       );
 
@@ -1034,7 +1034,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       await this.zoomToExtent(mapId, extent, options);
 
       // Now show the click marker icon
-      this.clickMarkerIconShow(mapId, { lnglat: coords });
+      this.clickMarkerIconShow(mapId, { lonlat: coords });
       for (let i = 0; i < indicatorBox.length; i++) {
         (indicatorBox[i] as HTMLElement).style.display = '';
       }
@@ -1058,22 +1058,22 @@ export class MapEventProcessor extends AbstractEventProcessor {
       [options.maxZoom] = homeView!.zoomAndCenter!;
 
       const center = homeView!.zoomAndCenter![1];
-      const projectedCoords = Projection.transformPoints([center], Projection.PROJECTION_NAMES.LNGLAT, `EPSG:${currProjection}`);
+      const projectedCoords = Projection.transformPoints([center], Projection.PROJECTION_NAMES.LONLAT, `EPSG:${currProjection}`);
 
       extent = [...projectedCoords[0], ...projectedCoords[0]];
     }
 
     // If extent is in config, use it
     if (homeView!.extent) {
-      const lnglatExtent = homeView!.extent as Extent;
+      const lonlatExtent = homeView!.extent as Extent;
       // If extent is not lon/lat, we assume it is in the map projection and use it as is.
-      extent = isExtentLngLat(lnglatExtent)
+      extent = isExtentLonLat(lonlatExtent)
         ? Projection.transformExtentFromProj(
-            lnglatExtent,
-            Projection.getProjectionLngLat(),
+            lonlatExtent,
+            Projection.getProjectionLonLat(),
             Projection.getProjectionFromString(`EPSG:${currProjection}`)
           )
-        : lnglatExtent;
+        : lonlatExtent;
 
       options.padding = [0, 0, 0, 0];
     }
@@ -1085,7 +1085,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     if (extent.length !== 4 || extent.includes(Infinity))
       extent = Projection.transformExtentFromProj(
         CV_MAP_EXTENTS[currProjection],
-        Projection.getProjectionLngLat(),
+        Projection.getProjectionLonLat(),
         Projection.getProjectionFromString(`EPSG:${currProjection}`)
       );
 
@@ -1103,7 +1103,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const coord: Coordinate = [position.coords.longitude, position.coords.latitude];
     const projectedCoords = Projection.transformPoints(
       [coord],
-      Projection.PROJECTION_NAMES.LNGLAT,
+      Projection.PROJECTION_NAMES.LONLAT,
       `EPSG:${this.getMapStateProtected(mapId).currentProjection}`
     );
 
@@ -1452,7 +1452,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       const currentView = this.getMapViewer(mapId).map.getView();
       const currentCenter = currentView.getCenter();
       const currentProjection = currentView.getProjection().getCode();
-      const centerLatLng = Projection.transformPoints([currentCenter!], currentProjection, Projection.PROJECTION_NAMES.LNGLAT)[0] as [
+      const centerLatLng = Projection.transformPoints([currentCenter!], currentProjection, Projection.PROJECTION_NAMES.LONLAT)[0] as [
         number,
         number,
       ];

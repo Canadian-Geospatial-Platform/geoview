@@ -40,7 +40,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     // Register a handler on the map click
     this.layerApi.mapViewer.onMapSingleClick((mapViewer, payload) => {
       // Query all layers which can be queried
-      this.queryLayers(payload.lnglat).catch((error: unknown) => {
+      this.queryLayers(payload.lonlat).catch((error: unknown) => {
         // Log
         logger.logPromiseFailed('queryLayers in onMapSingleClick in FeatureInfoLayerSet', error);
       });
@@ -92,10 +92,10 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Queries the features at the provided coordinate for all the registered layers.
-   * @param {Coordinate} longLatCoordinate - The longitude/latitude coordinate where to query the features
+   * @param {Coordinate} lonLatCoordinate - The longitude/latitude coordinate where to query the features
    * @returns {Promise<TypeFeatureInfoResultSet>} A promise which will hold the result of the query
    */
-  async queryLayers(longLatCoordinate: Coordinate): Promise<TypeFeatureInfoResultSet> {
+  async queryLayers(lonLatCoordinate: Coordinate): Promise<TypeFeatureInfoResultSet> {
     // FIXME: Watch out for code reentrancy between queries!
     // FIX.MECONT: The AbortController helps a lot, but there could be some minor timing issues left
     // FIX.MECONT: with the mutating this.resultSet.
@@ -105,7 +105,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     const allPromises: Promise<TypeFeatureInfoEntry[]>[] = [];
 
     // Query and event types of what we're doing
-    const queryType = 'at_long_lat';
+    const queryType = 'at_lon_lat';
 
     // Reinitialize the resultSet
     // Loop on each layer path in the resultSet
@@ -142,7 +142,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
           this.layerApi.mapViewer.map,
           layer,
           queryType,
-          longLatCoordinate,
+          lonLatCoordinate,
           true,
           this.#abortControllers[layerPath]
         );
@@ -207,7 +207,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     await Promise.allSettled(allPromises);
 
     // Emit the query layers has ended
-    this.#emitQueryEnded({ coordinate: longLatCoordinate, resultSet: this.resultSet, eventType: 'click' });
+    this.#emitQueryEnded({ coordinate: lonLatCoordinate, resultSet: this.resultSet, eventType: 'click' });
 
     // Return the results
     return this.resultSet;

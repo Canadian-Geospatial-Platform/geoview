@@ -419,7 +419,7 @@ export function validateExtent(extent: Extent, code: string = 'EPSG:4326'): Exte
  * @param {Extent} extent - The extent to check.
  * @returns {boolean} Whether or not the extent is long/lat
  */
-export function isExtentLngLat(extent: Extent): boolean {
+export function isExtentLonLat(extent: Extent): boolean {
   if (
     extent.length === 4 &&
     extent[0] >= -180 &&
@@ -573,7 +573,7 @@ export const getPointerPositionFromMapEvent = (mapEvent: MapBrowserEvent, projCo
   return {
     projected: mapEvent.coordinate,
     pixel: mapEvent.pixel,
-    lnglat: Projection.transformPoints([mapEvent.coordinate], projCode, Projection.PROJECTION_NAMES.LNGLAT)[0],
+    lonlat: Projection.transformPoints([mapEvent.coordinate], projCode, Projection.PROJECTION_NAMES.LONLAT)[0],
     dragging: mapEvent.dragging,
   };
 };

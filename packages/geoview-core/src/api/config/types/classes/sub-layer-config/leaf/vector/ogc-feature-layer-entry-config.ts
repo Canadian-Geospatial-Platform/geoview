@@ -50,7 +50,7 @@ export class OgcFeatureLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     // We assign the metadataAccessPath of the GeoView layer to dataAccessPath.
     if (!this.source.dataAccessPath) this.source.dataAccessPath = geoviewLayerConfig.metadataAccessPath;
 
-    if (!this.source.dataProjection) this.source.dataProjection = Projection.PROJECTION_NAMES.LNGLAT;
+    if (!this.source.dataProjection) this.source.dataProjection = Projection.PROJECTION_NAMES.LONLAT;
   }
 
   // ===============

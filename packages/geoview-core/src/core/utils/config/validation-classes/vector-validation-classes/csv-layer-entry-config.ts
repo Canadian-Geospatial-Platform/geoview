@@ -40,6 +40,6 @@ export class CsvLayerEntryConfig extends VectorLayerEntryConfig {
       if (!this.source.dataAccessPath!.toUpperCase().endsWith('.CSV')) this.source.dataAccessPath = `${this.source.dataAccessPath!}.csv`;
     }
 
-    if (!this.source.dataProjection) this.source.dataProjection = Projection.PROJECTION_NAMES.LNGLAT;
+    if (!this.source.dataProjection) this.source.dataProjection = Projection.PROJECTION_NAMES.LONLAT;
   }
 }

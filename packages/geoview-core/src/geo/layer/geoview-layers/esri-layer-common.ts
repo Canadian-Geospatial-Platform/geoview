@@ -356,13 +356,13 @@ export function commonProcessInitialSettings(
 
     // Transform to latlon extent
     if (layerExtent) {
-      const latlonExtent = Projection.transformExtentFromObj(
+      const lonlatExtent = Projection.transformExtentFromObj(
         layerExtent,
         layerMetadata.extent.spatialReference,
-        Projection.getProjectionLngLat()
+        Projection.getProjectionLonLat()
       );
       // eslint-disable-next-line no-param-reassign
-      layerConfig.initialSettings!.bounds = latlonExtent;
+      layerConfig.initialSettings!.bounds = lonlatExtent;
     }
   }
   // eslint-disable-next-line no-param-reassign
