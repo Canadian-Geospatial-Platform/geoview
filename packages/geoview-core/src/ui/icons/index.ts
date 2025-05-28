@@ -32,6 +32,7 @@ export {
   Download as DownloadIcon,
   Downloading as DownloadingIcon,
   DragHandle as HandleIcon,
+  Draw as DrawIcon,
   EmojiPeople as EmojiPeopleIcon,
   Error as ErrorIcon,
   Expand as ExpandIcon,
