@@ -1060,6 +1060,7 @@ export class MapViewer {
     // Check the container value for top middle of the screen
     // Convert this value to a lat long coordinate
     const pointXY = [this.map.getSize()![0] / 2, 1];
+    // logger.logDebug('error', pointXY, this.map.getCoordinateFromPixel(pointXY), this.getView().getProjection())
     const pt = Projection.transformToLonLat(this.map.getCoordinateFromPixel(pointXY), this.getView().getProjection());
 
     // If user is pass north, long value will start to be positive (other side of the earth).
@@ -1245,7 +1246,7 @@ export class MapViewer {
     // If map isn't static
     if (this.mapFeaturesConfig.map.interaction !== 'static') {
       // Register handlers on pointer move and map single click
-      map.on('pointermove', debounce(this.#handleMapPointerMove.bind(this), 250, { leading: true }).bind(this));
+      map.on('pointermove', this.#handleMapPointerMove.bind(this));
       map.on('pointermove', debounce(this.#handleMapPointerStopped.bind(this), 750, { leading: false }).bind(this));
       map.on('singleclick', debounce(this.#handleMapSingleClick.bind(this), 1000, { leading: true }).bind(this));
     }

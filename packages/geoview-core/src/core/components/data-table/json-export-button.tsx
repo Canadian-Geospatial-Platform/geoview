@@ -210,7 +210,7 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
       const chunks = [];
       let i = 0;
 
-      addMessage('info', 'dataTable.downloadAsGeoJSON', [`${t('general.started')}...`]);
+      addMessage('info', 'dataTable.downloadAsGeoJSONMessage', [`${t('general.started')}...`]);
       for await (const chunk of jsonGenerator) {
         chunks.push(chunk);
         i++;
@@ -224,7 +224,7 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
       const blob = new Blob([fullJson], { type: 'application/json' });
       exportBlob(blob, `table-${getLayer(layerPath)?.layerName.replaceAll(' ', '-')}.json`);
     } catch (error: unknown) {
-      addMessage('error', 'dataTable.downloadAsGeoJSON', [t('general.failed')]);
+      addMessage('error', 'dataTable.downloadAsGeoJSONMessage', [t('general.failed')]);
       logger.logError('Download GeoJSON failed:', error);
     } finally {
       setIsExporting(false);
@@ -235,7 +235,7 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
   return (
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     <MenuItem onClick={handleExportData} disabled={isExporting}>
-      {t('dataTable.downloadAsGeoJSON')}
+      {t('dataTable.downloadAsGeoJSON', ['...'])}
     </MenuItem>
   );
 }

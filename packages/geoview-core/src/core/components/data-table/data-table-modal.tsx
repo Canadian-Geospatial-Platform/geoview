@@ -1,6 +1,10 @@
 import { isValidElement, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
+
+import { MRT_Localization_FR as MRTLocalizationFR } from 'material-react-table/locales/fr';
+import { MRT_Localization_EN as MRTLocalizationEN } from 'material-react-table/locales/en';
+
 import {
   Button,
   Dialog,
@@ -19,6 +23,7 @@ import { logger } from '@/core/utils/logger';
 import { useDataTableAllFeaturesDataArray } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useFeatureFieldInfos } from './hooks';
 import { TypeFieldEntry } from '@/api/config/types/map-schema-types';
+import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 
 interface ColumnsType {
   [key: string]: TypeFieldEntry;
@@ -43,8 +48,10 @@ export default function DataTableModal(): JSX.Element {
   const { disableFocusTrap } = useUIStoreActions();
   const activeModalId = useUIActiveFocusItem().activeElementId;
   const selectedLayer = useLayerSelectedLayerPath();
-
   const layersData = useDataTableAllFeaturesDataArray();
+  const language = useAppDisplayLanguage();
+
+  const dataTableLocalization = language === 'fr' ? MRTLocalizationFR : MRTLocalizationEN;
 
   // Create columns for data table.
   const mappedLayerData = useFeatureFieldInfos(layersData);
@@ -178,6 +185,7 @@ export default function DataTableModal(): JSX.Element {
             enableStickyHeader
             enableSorting
             positionToolbarAlertBanner="none" // hide existing row count
+            localization={dataTableLocalization}
             enableGlobalFilter={false}
             enableColumnFilters={false}
             enableDensityToggle={false}
