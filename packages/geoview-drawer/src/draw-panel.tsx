@@ -15,12 +15,14 @@ type DrawerProps = {
 };
 
 type ConfigProps = {
-  style: {
-    fillColor: string;
-    strokeColor: string;
-    strokeWidth: number;
-  };
+  style: StyleProps;
   geomTypes: string[];
+};
+
+type StyleProps = {
+  fillColor: string;
+  strokeColor: string;
+  strokeWidth: number;
 };
 
 export function DrawPanel(props: DrawerProps): JSX.Element {
@@ -42,7 +44,7 @@ export function DrawPanel(props: DrawerProps): JSX.Element {
   const drawRef = useRef<Draw>();
 
   const startDrawing = useCallback(
-    (geomTypeInput: string | undefined = undefined): void => {
+    (geomTypeInput: string | undefined = undefined, styleInput: StyleProps | undefined = undefined): void => {
       let draw;
       if (geomTypeInput) {
         draw = viewer.initDrawInteractions(`draw-${geomTypeInput}`, geomTypeInput, style);
@@ -60,24 +62,24 @@ export function DrawPanel(props: DrawerProps): JSX.Element {
           // For points, we need to use a circle style
           featureStyle = new Style({
             image: new Circle({
-              radius: style.strokeWidth * 2 || 6,
+              radius: styleInput ? styleInput.strokeWidth : style.strokeWidth * 3 || 6,
               fill: new Fill({
-                color: style.fillColor,
+                color: styleInput ? styleInput.fillColor : style.fillColor,
               }),
               stroke: new Stroke({
-                color: style.strokeColor,
-                width: style.strokeWidth || 1.3,
+                color: styleInput ? styleInput.strokeColor : style.strokeColor,
+                width: styleInput ? styleInput.strokeWidth : style.strokeWidth || 1.3,
               }),
             }),
           });
         } else {
           featureStyle = new Style({
             stroke: new Stroke({
-              color: style.strokeColor,
-              width: style.strokeWidth || 1.3,
+              color: styleInput ? styleInput.strokeColor : style.strokeColor,
+              width: styleInput ? styleInput.strokeWidth : style.strokeWidth || 1.3,
             }),
             fill: new Fill({
-              color: style.fillColor,
+              color: styleInput ? styleInput.fillColor : style.fillColor,
             }),
           });
         }
@@ -116,6 +118,32 @@ export function DrawPanel(props: DrawerProps): JSX.Element {
     [startDrawing]
   );
 
+  const handleStyleChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>, styleKey: 'fillColor' | 'strokeColor' | 'strokeWidth'): void => {
+      // eslint-disable-next-line prefer-destructuring
+      let value: string | number = event.target.value;
+
+      // Convert to number for strokeWidth
+      if (styleKey === 'strokeWidth') {
+        const width = parseInt(value as string, 10);
+        // Escape if the width is NaN
+        if (Number.isNaN(width)) return;
+        value = width;
+      }
+
+      const newStyle = { ...style, [styleKey]: value };
+      setStyle(newStyle);
+
+      // If currently drawing, restart the drawing interaction
+      if (drawRef.current) {
+        drawRef.current.stopInteraction();
+        drawRef.current = undefined;
+        startDrawing(undefined, newStyle);
+      }
+    },
+    [startDrawing, style]
+  );
+
   const handleClearGeometries = useCallback((): void => {
     config.geomTypes.forEach((type) => {
       const groupKey = `draw-${type}`;
@@ -133,8 +161,9 @@ export function DrawPanel(props: DrawerProps): JSX.Element {
     });
   }, [Button, config.geomTypes, geomType, handleGeometryTypeChange]);
 
-  // TODO Add EDIT, SNAPPING, TRANSLATION, SCALING? (See MAP INTERACTIONS region in map-viewer)
+  // TODO Add EDIT, SNAPPING, TRANSLATION, SCALING? (See MAP INTERACTIONS region in map-viewer for most)
   // TO.DO MEASUREMENTS https://openlayers.org/en/latest/examples/measure.html
+  // TODO Handle transparency / opacity
   // Could use npm package mui-color-input
   return (
     <Box sx={sxClasses.drawer}>
@@ -143,36 +172,13 @@ export function DrawPanel(props: DrawerProps): JSX.Element {
       </ButtonGroup>
       <Box>
         <Typography>Fill Colour</Typography>
-        <input
-          type="color"
-          value={style.fillColor}
-          onChange={(e) => {
-            setStyle({ ...style, fillColor: e.target.value });
-          }}
-        />
+        <input type="color" value={style.fillColor} onChange={(e) => handleStyleChange(e, 'fillColor')} />
       </Box>
       <Box>
         <Typography>Stroke Colour</Typography>
-        <input
-          type="color"
-          value={style.strokeColor}
-          onChange={(e) => {
-            setStyle({ ...style, strokeColor: e.target.value });
-          }}
-        />
+        <input type="color" value={style.strokeColor} onChange={(e) => handleStyleChange(e, 'strokeColor')} />
         <Typography>Stroke Width</Typography>
-        <input
-          type="number"
-          value={style.strokeWidth}
-          min="0"
-          max="10"
-          onChange={(e) => {
-            const width = parseInt(e.target.value, 10);
-            if (!Number.isNaN(width)) {
-              setStyle({ ...style, strokeWidth: parseInt(e.target.value, 10) });
-            }
-          }}
-        />
+        <input type="number" value={style.strokeWidth} min="0" max="10" onChange={(e) => handleStyleChange(e, 'strokeWidth')} />
       </Box>
       <Box>
         <Button
