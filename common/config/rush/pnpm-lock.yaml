@@ -444,7 +444,38 @@ importers:
         version: 18.3.23
       '@types/react-dom':
         specifier: ^18.3.1
-        version: 18.3.7(@types/react@18.3.23)
+        version: 18.3.7(@types/react@18.3.22)
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: ^18.3.1
+        version: 18.3.1(react@18.3.1)
+      typescript:
+        specifier: ^5.6.3
+        version: 5.8.3
+
+  ../../packages/geoview-drawer:
+    dependencies:
+      geoview-core:
+        specifier: workspace:~1.0.0
+        version: link:../geoview-core
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+      ol:
+        specifier: 10.5.0
+        version: 10.5.0
+    devDependencies:
+      '@babel/core':
+        specifier: ^7.25.8
+        version: 7.27.1
+      '@babel/runtime':
+        specifier: ^7.25.7
+        version: 7.27.1
+      '@types/lodash':
+        specifier: ^4.17.10
+        version: 4.17.17
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -2560,7 +2591,6 @@ packages:
   /@mui/base@5.0.0-beta.58(@types/react@18.3.23)(react-dom@18.3.1)(react@18.3.1):
     resolution: {integrity: sha512-P0E7ZrxOuyYqBvVv9w8k7wm+Xzx/KRu+BGgFcR2htTsGCpJNQJCSUXNUZ50MUmSU9hzqhwbQWNXhV1MBTl6F7A==}
     engines: {node: '>=14.0.0'}
-    deprecated: This package has been replaced by @base-ui-components/react
     peerDependencies:
       '@types/react': ^17.0.0 || ^18.0.0
       react: ^17.0.0 || ^18.0.0

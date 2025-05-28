@@ -11,6 +11,7 @@ import { IDataTableState, initialDataTableState } from '@/core/stores/store-inte
 import { ITimeSliderState, initializeTimeSliderState } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { IGeochartState, initializeGeochartState } from '@/core/stores/store-interface-and-intial-values/geochart-state';
 import { ISwiperState, initializeSwiperState } from '@/core/stores/store-interface-and-intial-values/swiper-state';
+import { IDrawerState, initializeDrawerState } from './store-interface-and-intial-values/drawer-state';
 import { IUIState, initializeUIState } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
@@ -40,6 +41,7 @@ export interface IGeoviewState {
   geochartState: IGeochartState;
   timeSliderState: ITimeSliderState;
   swiperState: ISwiperState;
+  drawerState: IDrawerState;
 }
 
 export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore): IGeoviewState => {
@@ -84,6 +86,9 @@ export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore): IG
       if (config.footerBar?.tabs.core.includes('geochart')) set({ geochartState: initializeGeochartState(set, get) });
 
       if (config.corePackages?.includes('swiper')) set({ swiperState: initializeSwiperState(set, get) });
+      if (config.footerBar?.tabs.core.includes('drawer')) {
+        set({ drawerState: initializeDrawerState(set, get) });
+      }
     },
 
     // core states
