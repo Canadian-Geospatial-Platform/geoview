@@ -223,15 +223,15 @@ export class MapEventProcessor extends AbstractEventProcessor {
    */
   static async getScaleInfoFromDomElement(mapId: string): Promise<TypeScaleInfo> {
     // Check if the scaleControl exists and is showing information, wait for it
-    // TODO: refactor UI - If we do not put a hig timeout, ui start but the dcale is not there and the
-    // TD.CONT: component fails. To pathch we add an hisgher time out for promise. This solves for now the issue
+    // TODO: refactor UI - If we do not put a high timeout, ui start but the scale is not there and the
+    // TD.CONT: component fails. To patch, we add an higher time out for promise. This solves for now the issue
     // TD.CONT: where the page start to load and user switch to another page and came back. The scale AND north arrow are not
     // TD.CONT: ready so it fails
     await whenThisThen(
       () =>
         document.getElementById(`${mapId}-scaleControlBarMetric`)?.querySelector('.ol-scale-text') &&
         document.getElementById(`${mapId}-scaleControlBarImperial`)?.querySelector('.ol-scale-text'),
-      100000
+      9900000
     );
 
     // Get metric values
