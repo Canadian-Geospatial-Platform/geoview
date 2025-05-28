@@ -280,18 +280,18 @@ export function AddNewLayer(): JSX.Element {
 
   // List of layer types and labels (Step 2)
   const layerOptions = [
-    [CSV, 'CSV'],
-    [SHAPEFILE, 'Shapefile'],
-    [ESRI_DYNAMIC, 'ESRI Dynamic Service'],
-    [ESRI_FEATURE, 'ESRI Feature Service'],
-    [ESRI_IMAGE, 'ESRI Image Service'],
-    [GEOJSON, 'GeoJSON'],
-    [WMS, 'OGC Web Map Service (WMS)'],
-    [WFS, 'OGC Web Feature Service (WFS)'],
-    [OGC_FEATURE, 'OGC API Features'],
-    [XYZ_TILES, 'XYZ Raster Tiles'],
-    [VECTOR_TILES, 'Vector Tile Service'],
-    [GEOCORE, 'GeoCore'],
+    [CSV, getLocalizedMessage(language, 'layers.serviceCSV')],
+    [SHAPEFILE, getLocalizedMessage(language, 'layers.serviceEsriShapefile')],
+    [ESRI_DYNAMIC, getLocalizedMessage(language, 'layers.serviceEsriDynamic')],
+    [ESRI_FEATURE, getLocalizedMessage(language, 'layers.serviceEsriFeature')],
+    [ESRI_IMAGE, getLocalizedMessage(language, 'layers.serviceEsriImage')],
+    [GEOJSON, getLocalizedMessage(language, 'layers.serviceGeoJSON')],
+    [WMS, getLocalizedMessage(language, 'layers.serviceOgcWMS')],
+    [WFS, getLocalizedMessage(language, 'layers.serviceOgcWFS')],
+    [OGC_FEATURE, getLocalizedMessage(language, 'layers.serviceOgcFeature')],
+    [XYZ_TILES, getLocalizedMessage(language, 'layers.serviceRasterTile')],
+    [VECTOR_TILES, getLocalizedMessage(language, 'layers.serviceVectorTile')],
+    [GEOCORE, getLocalizedMessage(language, 'layers.serviceGeoCore')],
   ];
 
   // #region ERRORS
