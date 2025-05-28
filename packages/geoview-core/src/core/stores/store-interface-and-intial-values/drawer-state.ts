@@ -1,7 +1,7 @@
 import { useStore } from 'zustand';
 
 import { useGeoViewStore } from '@/core/stores/stores-managers';
-import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
+// import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 // import { DrawerEventProcessor } from '@/api/event-processors/event-processor-children/drawer-event-processor';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with DrawerEventProcessor vs DrawerState
@@ -24,7 +24,8 @@ export interface IDrawerState {
  * @param {TypeSetStore} get - The store get callback function
  * @returns {IDrawerState} - The Drawer state object
  */
-export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDrawerState {
+// export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDrawerState {
+export function initializeDrawerState(): IDrawerState {
   const init = {
     // #region ACTIONS
 
