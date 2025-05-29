@@ -960,7 +960,7 @@ export const layerEntryIsImageStatic = (verifyIfLayer: TypeLayerEntryConfig): ve
  * @param {MapConfigLayerEntry} layerConfigEntryOption The layer entry config to check
  * @returns {boolean} True if the layer type if GeoCore
  */
-export const mapConfigLayerEntryIsGeoCore = (layerConfigEntryOption: MapConfigLayerEntry): boolean => {
+export const mapConfigLayerEntryIsGeoCore = (layerConfigEntryOption: MapConfigLayerEntry): layerConfigEntryOption is GeoCoreLayerConfig => {
   return layerConfigEntryOption.geoviewLayerType === CONST_LAYER_ENTRY_TYPES.GEOCORE;
 };
 
@@ -969,7 +969,9 @@ export const mapConfigLayerEntryIsGeoCore = (layerConfigEntryOption: MapConfigLa
  * @param {MapConfigLayerEntry} layerConfigEntryOption The layer entry config to check
  * @returns {boolean} True if the layer type if GeoCore
  */
-export const mapConfigLayerEntryIsShapefile = (layerConfigEntryOption: MapConfigLayerEntry): boolean => {
+export const mapConfigLayerEntryIsShapefile = (
+  layerConfigEntryOption: MapConfigLayerEntry
+): layerConfigEntryOption is ShapefileLayerConfig => {
   return layerConfigEntryOption.geoviewLayerType === CONST_LAYER_ENTRY_TYPES.SHAPEFILE;
 };
 

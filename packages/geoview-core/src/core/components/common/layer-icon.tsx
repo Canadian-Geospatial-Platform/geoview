@@ -141,15 +141,14 @@ export const LayerIcon = memo(function LayerIcon({ layerPath }: LayerIconProps):
   // If there is an error in layer or query status, flag it and show icon error
   const isError = layerStatus === 'error' || (layerQueryStatus && layerQueryStatus === 'error');
 
-  // We show the is loading spinner only for first load, once loaded/loading we show icon.
-  // We show a progress bar to notify flip between loading and loaded
-  const isLoading = layerStatus !== 'loaded' && layerStatus !== 'loading' && layerQueryStatus !== 'queried';
+  // If the layer isn't 'loaded' and isn't 'loading', or the legend is still being queried, the icon should show the spinner
+  const showSpinner = (layerStatus !== 'loaded' && layerStatus !== 'loading') || layerQueryStatus === 'querying';
 
   const hasChildren = layerChildren && layerChildren.length;
 
   if (isError) return <ErrorIcon color="error" />;
 
-  if (isLoading) {
+  if (showSpinner) {
     return (
       <Box sx={LOADING_BOX_STYLES}>
         <CircularProgressBase size={20} />
