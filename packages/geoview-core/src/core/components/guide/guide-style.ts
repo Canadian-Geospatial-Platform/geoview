@@ -22,6 +22,17 @@ export const getSxClasses = (theme: Theme): SxStyles =>
             verticalAlign: 'bottom',
           },
         },
+        '& h3': {
+          marginBottom: '5px',
+          marginTop: '20px',
+        },
+        '& h3 P': {
+          marginBottom: 'auto',
+          marginTop: 'auto',
+        },
+        '& h1': {
+          marginBottom: '5px',
+        },
         '& h3 img': {
           height: '25px',
         },

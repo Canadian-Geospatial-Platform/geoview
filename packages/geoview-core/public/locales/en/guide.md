@@ -1,6 +1,44 @@
-=1!navigationControls=
+=1!loadingStatus=
+# Map Interaction & Loading Status
+<div style="border-bottom: 2px solid #2a2f39; margin-bottom: 15px;"></div>
 
+These visual cues and navigation behaviors help ensure a smooth and intuitive map experience.
+
+### First Load
+<div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
+
+When the map viewer is first initialized, a loading spinner will appear over the map area. This indicates that the minimum required components are being loaded. Once these components are successfully initialized, the spinner will disappear, revealing the map.
+
+While the map layers are loading for the first time, a progress bar will be displayed at the bottom of the map. During this initial loading phase, some map functionalities —such as exporting the map— may not behave as expected until all layers have fully loaded. We recommend avoiding intensive actions until the loading is complete.
+
+In the **Legend** or **Layers** panel, each layer displays a spinner icon on the left (in place of the standard layer icon) while it is loading. Once a layer is fully processed and rendered for the first time, the spinner will be replaced with the layer’s corresponding icon.
+
+### Layers reloading 
+<div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
+
+Any time the map is **panned** or **zoomed**, certain layers may re-enter a loading state. When this occurs:
+- A progress bar will appear at the bottom of each layer's box that is loading, indicating activity, regardless of which tab is currently active.
+- An additional progress bar will also be shown at the bottom of the map area, just above the Map Information Bar, as long as at least one layer is still loading.
+
+### User Notifications and Map Status Feedback
+<div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
+
+At any time, the viewer provides feedback about ongoing activity by:
+
+Displaying a message at the bottom of the map, and/or
+
+Adding a notification accessible through the Notification panel in the sidebar. When a new notification is added, a red counter appears and increments to indicate an update.
+
+### Switching Focus Between Map and Footer
+<div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
+
+If your map includes a Footer Bar, you can switch focus between the map and the footer:
+- Clicking the black Map Information Bar will bring the map into view.
+- Clicking the Footer Bar will focus the footer content.
+
+=1!navigationControls=
 # Navigation Controls
+<div style="border-bottom: 2px solid #2a2f39; margin-bottom: 15px;"></div>
 
 Navigation controls provide adjustments to the viewing extent, projection, or basemap of the map.
 
@@ -25,10 +63,9 @@ To reset the map orientation, click the **Reset Map Rotation** arrow located at 
 
 _Note: The map must be focused for key binding to work._
 
-<br>
 =2!overviewMap=
-
 ### Overview Map
+<div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
 Depending on the viewer configuration, the map may provide an overview map, a generic representation of the main map at a reduced size. It is located in the upper-right corner of the map.
 
@@ -36,10 +73,9 @@ Depending on the viewer configuration, the map may provide an overview map, a ge
 
 Click-hold on the box in the overview map and drag it to change the extent of the main map. Clicking on the toggle icon in the top right corner of the overview map will expand or contract it.
 
-<br>
 =2!keyboardNavigation=
-
 ### Keyboard Navigation
+<div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
 Keyboard functionality is provided as an alternative for users who are unable to use a mouse. Use the **Tab** key to navigate forward to links and controls on the page. Press **Shift** and **Tab** keys to go back one step. Use the **Enter** or **Spacebar** keys to activate links and controls.
 
@@ -62,8 +98,8 @@ _Note: The map must be focused for key binding to work. The map has focus when t
 This map is not fully WCAG 2.0 AA compliant.
 
 =1!mapInformationBar=
-
 # Map Information Bar
+<div style="border-bottom: 2px solid #2a2f39; margin-bottom: 15px;"></div>
 
 Click the up chevron icon ![]({{assetsURL}}/img/guide/navigation/chevron_up.svg) on the left to expand/collapse the bar.
 
@@ -80,8 +116,8 @@ The following navigation details and functionalities are accessible in the Map I
 | | Fix North | On or Off. Set to On to keep map oriented with North to the top. Only available with some projections (eg. LCC). _Note: Reset map rotation will not work when **Fix North** is On._ |
 
 =1!sidebar=
-
 # Side Bar
+<div style="border-bottom: 2px solid #2a2f39; margin-bottom: 15px;"></div>
 
 The Side Bar, located on the left side of the map, provides access to the available tools and features.
 
@@ -101,17 +137,16 @@ _Note: Some tools in the Side Bar are also available as tabs in the Footer Bar, 
 | <img src="{{assetsURL}}/img/guide/sidebar/notifications.svg" width="30"/> | Notifications | Display messages and notifications for the map. |
 | <img src="{{assetsURL}}/img/guide/sidebar/about.svg" width="30"/> | About Geoview | Display information about Geoview viewer. |
 
-<br>
 =2!geolocator=
 <a id="geolocatorSection">
 ### <img src="{{assetsURL}}/img/guide/geosearch/geolocator.svg" width="30"/> Geolocator
+<div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
 The geolocator component functions to allow users to search for places in Canada. When the geolocator icon ![]({{assetsURL}}/img/guide/geosearch/geolocator.svg) in the Side Bar is clicked, an input field for search keywords will appear on the map:
 
 <img src="{{assetsURL}}/img/guide/geosearch/searchbar_en.png" style="width: 90%;"/>
 
 =3!supportedSearchTypes=
-
 #### Supported Search Types
 
 **Keyword search**: Type any keyword into geolocator search bar to display a list of results that contains the keyword (minimum 3 characters).
@@ -140,15 +175,14 @@ The geolocator component functions to allow users to search for places in Canada
 **Street address**: Search using direct street addresses should return results
 
 =3!geosearchFiltering=
-
 #### Geosearch Filtering
 
 When searching for a location, a results panel will appear below the search box. This results panel contains two dropdown boxes that allow you to filter the search results by their **province** and by their **category** (lake, town, river, etc.). To the right of these two boxes is a **Clear Filters** ![]({{assetsURL}}/img/guide/geosearch/clear.svg) button, which when clicked clears the selected filter options.
 
-<br>
 =2!export=
 <a id="exportSection">
 ### ![]({{assetsURL}}/img/guide/sidebar/export_30.svg) Download
+<div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
 You can download an image of the map and its visible layers along with a legend, title, north arrow, scalebar, and a timestamp.
 
@@ -157,8 +191,8 @@ Once **Download** button is clicked, a dialog will appear with an image of the m
 Click on the **Download** button at the bottom to get the final generated map image.
 
 =1!footerPanel=
-
 # Footer Bar
+<div style="border-bottom: 2px solid #2a2f39; margin-bottom: 15px;"></div>
 <a id="footerSection"></a>
 The _Footer Bar_ appears below the map. The _Footer Bar_ can be expanded or collapsed by clicking on a tab in the _Footer Bar_ menu bar. To collapse the panel, simply click again on the active tab.
 
@@ -178,10 +212,10 @@ The _Footer Bar_ menu bar has the following tabs:
 
 _Note: Some tabs in the Footer Bar are also available as tools in the Side Bar, such as **Legend**, **Layers**, **Data Table** or **Details**. **Legend** and **Details** opened from the Side Bar is displayed on the map, in a condensed 'mobile' view (single column). The same tab opened in the Footer Bar is displayed below the map in a fully expanded view._
 
-<br>
 =2!legend=
 <a id="legendSection"></a>
 <h3><img src="{{assetsURL}}/img/guide/sidebar/legend.svg" width="30"> Legend <a href="#footerSection">Top</a></h3>
+<div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
 The **Legend** tab displays the symbology associated with the layers displayed on the map.
 
@@ -198,11 +232,10 @@ The symbology for the layer can be toggled open and closed which is expanded ben
 | <img src="{{assetsURL}}/img/guide/layers/highlight_60.svg" width="30"/> | Highlight | Brings layer to the top, decreases opacity of other layers and displays layer boundary. |
 | <img src="{{assetsURL}}/img/guide/layers/zoom_60.svg" width="30"/> | Zoom to layer boundary | Pans and zooms the map so that the layer boundary is in view. |
 
-
-<br>
 =2!layers=
 <a id="layersSection"></a>
 ### ![]({{assetsURL}}/img/guide/footer/layers_30.svg) Layers [Top](#footerSection)
+<div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
 The **Layers** tab has the following submenu options:
 
@@ -212,7 +245,6 @@ The **Layers** tab has the following submenu options:
 - Remove
 
 =3!view=
-
 #### ![]({{assetsURL}}/img/guide/footer/view_25.svg) View
 
 _**Note: Click on a layer to display its Layer information in the right section.**_
@@ -256,7 +288,6 @@ Layers can either be in raster format or vector format. The following layer type
 _Note: If a layer fails to load correctly it will be identified by an error notice in the notifications tool on the Side Bar. Instead of the standard layer actions you can select to either reload the layer (this is particularly helpful if there is a temporary network connectivity issue) or remove the layer. If a layer is removed it will be taken out of the layer selector completely._
 
 =3!layerSettings=
-
 #### Layer Settings
 
 Click a layer in the left section of the layers view tab, and the layer settings are displayed in right section.
@@ -278,7 +309,6 @@ Classes for the layer are listed in the layer settings if available. Select the 
 The number of classes visible is displayed under the layer name.
 
 =3!add=
-
 #### ![]({{assetsURL}}/img/guide/layers/add_25.svg) Add
 
 Additional layers can be added to the map viewer through the _Add_ submenu in the **Layers** tab.
@@ -296,21 +326,19 @@ Usage:
 The viewer will automatically switch to the view function.
 
 =3!sort=
-
 #### ![]({{assetsURL}}/img/guide/layers/sort_25.svg) Sort
 
 To sort the layers you can simply click the up or down arrows on each layer panel.
 
 =3!remove=
-
 #### ![]({{assetsURL}}/img/guide/layers/remove_25.svg) Remove
 
 To remove a layer, click on the delete icon ![]({{assetsURL}}/img/guide/layers/remove_25.svg) to the right of the layer after selecting the 'Remove' submenu.
 
-<br>
 =2!details=
 <a id="detailsSection"></a>
 ### ![]({{assetsURL}}/img/guide/sidebar/details_30.svg) Details [Top](#footerSection)
+<div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
 _**Note: A feature on the map must be selected to enable the layer in the list. Otherwise layers are disabled (greyed out).**_
 
@@ -326,10 +354,10 @@ The zoom icon ![]({{assetsURL}}/img/guide/datatable/zoom.svg) will zoom the map 
 
 Check the highlight box ![]({{assetsURL}}/img/guide/layers/check.png) to keep the feature highlighted on the map.
 
-<br>
 =2!dataTable=
 <a id="dataTableSection"></a>
 ### ![]({{assetsURL}}/img/guide/footer/data_table.svg) Data Table [Top](#footerSection)
+<div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
 _**Note: Click on a layer to display its Data Table information in the right section.**_
 
@@ -373,7 +401,6 @@ Click the action icon ![]({{assetsURL}}/img/guide/datatable/column_action.svg) b
 Click on a layer and the number of available features is displayed below the layer title.
 
 =3!sortingAndReordering=
-
 #### Sorting and Reordering
 
 For each column in the data table, there may be a set of arrows associated with that column which represents how it can be sorted and reordered.
@@ -387,7 +414,6 @@ For each column in the data table, there may be a set of arrows associated with 
 Columns can be sorted in ascending/descending order (for numerical data) and alphabetical order (for text data).
 
 =3!filterData=
-
 #### Filter Data
 
 Data can be filtered by column. To show filters, click on the open filters icon ![]({{assetsURL}}/img/guide/datatable/filter_toggle_25.svg). A column is filterable if there is an input field under the title of the header:
@@ -403,7 +429,6 @@ There are 3 types of filters:
 Additional filters (varying by column data type) may be found by clicking the action icon ![]({{assetsURL}}/img/guide/datatable/column_action.svg) beside the column heading, and clicking on **Filter by ...**
 
 =3!keyboardNavigation=
-
 #### Keyboard Navigation
 
 Use **Tab** to go through each of the table controls, and to navigate between the three major table groups:
@@ -416,10 +441,10 @@ Once any major group is focused on, you can use the arrow keys to navigate throu
 
 To access the buttons and/or input fields within a cell, make sure the cell is highlighted (by using arrow keys as above) and use **Tab** to navigate between its children.
 
-<br>
 =2!timeSlider=
 <a id="timeSliderSection"></a>
 ### ![]({{assetsURL}}/img/guide/footer/time_slider_30.svg) Time Slider [Top](#footerSection)
+<div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
 _**Note: Click on a layer to display its Time Slider information in the right section.**_
 
@@ -441,10 +466,10 @@ Click the time delay dropdown to choose the slider animation time delay. Some la
 
 The field being filtered on is displayed in the lower left of the Time Slider section. Custom descriptions may also be displayed in this area.
 
-<br>
 =2!chart=
 <a id="chartSection"></a>
 ### ![]({{assetsURL}}/img/guide/footer/chart_30.svg) Chart [Top](#footerSection)
+<div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
 _**Note: A feature on the map must be selected to enable the layer in the list. Otherwise layers are disabled (greyed out).**_
 
@@ -459,7 +484,6 @@ The visibility of data displayed on the chart can be toggled by clicking the che
 Select from the Download dropdown (upper right of chart section) to download chart data in JSON format. Select Download All for all data and Download Visible for only data currently visible on the chart.
 
 =3!chartTypes=
-
 #### Available Chart Types:
 
 - Line Chart
@@ -471,8 +495,8 @@ Points on line charts can be changed to steps, by selecting from the Steps dropd
 Click hold and drag the handles on the the line chart slider bars to change the X or Y axis values displayed for the chart.
 
 =1!issues=
-
 # Load Times / Unanticipated Behaviour
+<div style="border-bottom: 2px solid #2a2f39; margin-bottom: 15px;"></div>
 
 Load times may vary based on:
 

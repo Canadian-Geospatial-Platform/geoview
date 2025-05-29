@@ -35,7 +35,7 @@ export const Guide = memo(function GuidePanel({ fullWidth = false, containerType
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // State
-  const [selectedLayerPath, setSelectedLayerPath] = useState<string>('navigationControls');
+  const [selectedLayerPath, setSelectedLayerPath] = useState<string>('loadingStatus');
   const [guideItemIndex, setGuideItemIndex] = useState<number>(0);
 
   // Store

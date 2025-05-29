@@ -18,26 +18,50 @@ import { LegendContainer } from '@/core/components/export/export-legend-utils';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { getSxClasses } from './export-modal-style';
 
+interface TypeScale {
+  scaleId: string;
+  label: string;
+  borderBottom: boolean;
+}
+
+const SCALE_MODES = {
+  METRIC: 0,
+  IMPERIAL: 1,
+  NUMERIC: 2,
+} as const;
+
 /**
  * Export modal window component to export the viewer information in a PNG file
  *
  * @returns {JSX.Element} the export modal component
  */
 export default function ExportModal(): JSX.Element {
+  // Log
+  logger.logTraceRender('components/export/export-modal');
+
+  // Hooks
   const { t } = useTranslation();
+  const theme = useTheme();
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+
+  // Store
   const mapId = useGeoViewMapId();
-  const fileExportDefaultPrefixName = t('exportModal.fileExportDefaultPrefixName');
   const mapElement = useAppGeoviewHTMLElement();
   const mapViewport = mapElement.getElementsByClassName('ol-viewport')[0];
-  const footerbarLegendContainer = mapElement.querySelector(`[id^="${mapId}-footerBar-legendContainer"]`);
-  const appBarLegendContainer = mapElement.querySelector(`[id^="${mapId}-appBar-legendContainer"]`);
-  const legendId = `${mapId}AppbarPanelButtonLegend`;
-  const theme = useTheme();
+  const northArrow = useMapNorthArrow();
+  const scale = useMapScale();
+  const mapAttributions = useMapAttribution();
+  const { rotationAngle } = useManageArrow();
+  const { disableFocusTrap, setActiveAppBarTab } = useUIStoreActions();
+  const activeModalId = useUIActiveFocusItem().activeElementId;
+  const { isOpen } = useUIActiveAppBarTab();
+
+  // State & refs
   const [isMapLoading, setIsMapLoading] = useState(true);
   const [isLegendLoading, setIsLegendLoading] = useState(true);
   const [isMapExporting, setIsMapExporting] = useState(false);
-  // export template variables
   const [exportTitle, setExportTitle] = useState<string>('');
+  const [legendLayers, setLegendLayers] = useState<TypeLegendLayer[]>([]);
   const exportContainerRef = useRef(null) as RefObject<HTMLDivElement>;
   const mapImageRef = useRef(null) as RefObject<HTMLDivElement>;
   const dialogRef = useRef(null) as RefObject<HTMLDivElement>;
@@ -45,17 +69,10 @@ export default function ExportModal(): JSX.Element {
   const textFieldRef = useRef(null) as RefObject<HTMLInputElement>;
   const exportTitleRef = useRef(null) as RefObject<HTMLDivElement>;
 
-  const northArrow = useMapNorthArrow();
-  const scale = useMapScale();
-  const mapAttributions = useMapAttribution();
-
-  const { rotationAngle } = useManageArrow();
-
-  // get store function
-  const { disableFocusTrap, setActiveAppBarTab } = useUIStoreActions();
-  const activeModalId = useUIActiveFocusItem().activeElementId;
-  const { isOpen } = useUIActiveAppBarTab();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const legendId = `${mapId}AppbarPanelButtonLegend`;
+  const fileExportDefaultPrefixName = t('exportModal.fileExportDefaultPrefixName');
+  const footerbarLegendContainer = mapElement.querySelector(`[id^="${mapId}-footerBar-legendContainer"]`);
+  const appBarLegendContainer = mapElement.querySelector(`[id^="${mapId}-appBar-legendContainer"]`);
 
   // Get layers from the store
   const layersList = useLayerLegendLayers()
@@ -66,21 +83,6 @@ export default function ExportModal(): JSX.Element {
       return layer.layerStatus === 'loaded';
     })
     .map((layer) => ({ ...layer, items: layer.items.filter((item) => item.isVisible === true) }));
-
-  // Set the legend layers
-  const [legendLayers, setLegendLayers] = useState<TypeLegendLayer[]>([]);
-
-  interface TypeScale {
-    scaleId: string;
-    label: string;
-    borderBottom: boolean;
-  }
-
-  const SCALE_MODES = {
-    METRIC: 0,
-    IMPERIAL: 1,
-    NUMERIC: 2,
-  } as const;
 
   // Memoize values
   const scaleValues: TypeScale[] = useMemo(
@@ -145,6 +147,12 @@ export default function ExportModal(): JSX.Element {
 
     return dialogBox.clientWidth - paddingLeft - paddingRight;
   };
+
+  /**
+   * Export the map as an image.
+   * This function hides the text field, updates the title, and captures the map and legend as an image.
+   * It then resizes the image and triggers the download.
+   */
   const exportMap = ((): void => {
     if (exportContainerRef?.current && textFieldRef.current && exportTitleRef.current) {
       // Hide the text field
@@ -224,7 +232,7 @@ export default function ExportModal(): JSX.Element {
           return 'none';
       }
     },
-    [scale.lineWidthMetric, scale.lineWidthImperial, SCALE_MODES.METRIC, SCALE_MODES.IMPERIAL]
+    [scale.lineWidthMetric, scale.lineWidthImperial]
   );
 
   useEffect(() => {
