@@ -74,7 +74,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   #isTimeAware: boolean = true;
 
   // Keep all callback delegates references
-  #onLayerStyleChangedHandlers: LayerStyleChangedDelegate[] = [];
+  #onLayerStyleChangedHandlers: StyleChangedDelegate[] = [];
 
   // Keep all callback delegate references
   #onLegendQueryingHandlers: LegendQueryingDelegate[] = [];
@@ -1039,27 +1039,27 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /**
    * Emits an event to all handlers.
-   * @param {LayerStyleChangedEvent} event - The event to emit
+   * @param {StyleChangedEvent} event - The event to emit
    */
-  #emitLayerStyleChanged(event: LayerStyleChangedEvent): void {
+  #emitLayerStyleChanged(event: StyleChangedEvent): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onLayerStyleChangedHandlers, event);
   }
 
   /**
    * Registers a layer style changed event handler.
-   * @param {LayerStyleChangedDelegate} callback - The callback to be executed whenever the event is emitted
+   * @param {StyleChangedDelegate} callback - The callback to be executed whenever the event is emitted
    */
-  onLayerStyleChanged(callback: LayerStyleChangedDelegate): void {
+  onLayerStyleChanged(callback: StyleChangedDelegate): void {
     // Register the event handler
     EventHelper.onEvent(this.#onLayerStyleChangedHandlers, callback);
   }
 
   /**
    * Unregisters a layer style changed event handler.
-   * @param {LayerStyleChangedDelegate} callback - The callback to stop being called whenever the event is emitted
+   * @param {StyleChangedDelegate} callback - The callback to stop being called whenever the event is emitted
    */
-  offLayerStyleChanged(callback: LayerStyleChangedDelegate): void {
+  offLayerStyleChanged(callback: StyleChangedDelegate): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerStyleChangedHandlers, callback);
   }
@@ -1207,17 +1207,17 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 // #region EVENT TYPES
 
 /**
- * Define a delegate for the event handler function signature
- */
-export type LayerStyleChangedDelegate = EventDelegateBase<AbstractGVLayer, LayerStyleChangedEvent, void>;
-
-/**
  * Define an event for the delegate
  */
-export type LayerStyleChangedEvent = {
+export type StyleChangedEvent = {
   // The style
   style: TypeLayerStyleConfig;
 };
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+export type StyleChangedDelegate = EventDelegateBase<AbstractGVLayer, StyleChangedEvent, void>;
 
 /**
  * Define an event for the delegate

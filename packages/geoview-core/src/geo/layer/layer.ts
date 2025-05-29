@@ -1172,8 +1172,8 @@ export class LayerApi {
         this.refreshBaseLayer(baseLayerEntry);
       });
     } else {
-      const layerSource: Source = baseLayer.get('source');
-      layerSource.refresh();
+      const layerSource: Source | undefined = baseLayer.get('source');
+      layerSource?.refresh();
     }
   }
 
