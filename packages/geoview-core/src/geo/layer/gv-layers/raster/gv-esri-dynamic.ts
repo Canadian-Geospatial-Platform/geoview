@@ -1019,8 +1019,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
     styleSettings: TypeLayerStyleSettings,
     sourceFeatureInfo: TypeFeatureInfoLayerConfig
   ): string {
-    // GV The below commented code was previously causing the classes to be reversed by adding a 'not' to the query
-    // GV Need to confirm that the 'not' is no longer needed
+    // TODO The below commented code was previously causing the classes to be reversed by adding a 'not' to the query
+    // TO.DO Need to confirm that the 'not' is no longer needed
+    // TO.DO Changed on 2025-05-29 in PR 2916
     // let queryString = styleSettings.info[styleSettings.info.length - 1].visible !== false && !level ? 'not (' : '(';
     let queryString = '(';
     for (let i = 0; i < queryTree.length; i++) {
