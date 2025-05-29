@@ -681,8 +681,8 @@ export class MapViewer {
    *
    * @param {Extent} extent - New extent to zoom to.
    */
-  async setExtent(extent: Extent): Promise<void> {
-    await MapEventProcessor.zoomToExtent(this.mapId, extent);
+  setExtent(extent: Extent): Promise<void> {
+    return MapEventProcessor.zoomToExtent(this.mapId, extent);
   }
 
   /**

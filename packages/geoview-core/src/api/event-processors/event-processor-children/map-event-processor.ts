@@ -203,16 +203,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @returns {TypeRecordOfPlugin} The map plugins record
    */
   static async getMapViewerPlugins(mapId: string): Promise<TypeRecordOfPlugin> {
-    try {
-      // Check if the plugins exist
-      // TODO: if you run the code fast enough (only happened to me in the TimeSliderEventProcessor),
-      // TO.DOCONT: the getMapViewer should be async, because it can be unset as well ( so not just getMapViewerPlugins() ).
-      await whenThisThen(() => api && api.hasMapViewer(mapId) && api.getMapViewer(mapId).plugins);
-    } catch (error: unknown) {
-      // Log
-      logger.logError(`Couldn't retrieve the plugins instance on Map Viewer`, error);
-    }
-
+    await whenThisThen(() => api && api.hasMapViewer(mapId) && api.getMapViewer(mapId).plugins);
     return api.getMapViewer(mapId).plugins;
   }
 
