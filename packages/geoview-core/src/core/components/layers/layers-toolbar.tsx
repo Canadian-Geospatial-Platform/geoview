@@ -12,6 +12,10 @@ import { TypeLayersViewDisplayState } from './types';
 import { logger } from '@/core/utils/logger';
 
 export function LayersToolbar(): JSX.Element {
+  // Log
+  logger.logTraceRender('components/layers/layers-toolbar');
+
+  // Hooks
   const theme = useTheme();
   const { t } = useTranslation<string>();
   const addButtonRef = useRef<HTMLButtonElement>(null);
