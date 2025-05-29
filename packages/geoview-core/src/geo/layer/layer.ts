@@ -34,7 +34,6 @@ import {
   layerEntryIsGroupLayer,
   TypeLayerStatus,
   GeoCoreLayerConfig,
-  CONST_LAYER_TYPES,
   ShapefileLayerConfig,
 } from '@/api/config/types/map-schema-types';
 import { GeoJSON, layerConfigIsGeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
@@ -1208,10 +1207,8 @@ export class LayerApi {
         if (toggledStyleInfo) toggledStyleInfo.visible = visibility;
       });
 
-      // Force a re-render of the layer source for ESRI Feature to make visibility changes take effect
-      if (this.#layerEntryConfigs[layerPath].schemaTag === CONST_LAYER_TYPES.ESRI_FEATURE) {
-        layer.getOLLayer().changed();
-      }
+      // Force a re-render of the layer source (this is required if there are classes)
+      layer.getOLLayer().changed();
     }
 
     // Update the legend layers if necessary

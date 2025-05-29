@@ -21,6 +21,80 @@
         "geoviewLayerType": "shapefile",
         "geoviewLayerName": "Sunchild Aquafier",
         "metadataAccessPath": "./datasets/shapefiles/DIG_2012_0028.zip"
+      },
+      {
+        "geoviewLayerId": "shpLYR3",
+        "geoviewLayerName": "Wildfire HotSpots - Symbology Test",
+        "metadataAccessPath": "https://cwfis.cfs.nrcan.gc.ca/downloads/hotspots/hotspots.shp",
+        "geoviewLayerType": "shapefile",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "map1-layers-shpLYR3/undefined",
+            "layerStyle": {
+              "Point": {
+                "type": "uniqueValue",
+                "fields": ["SOURCE"],
+                "hasDefault": true,
+                "info": [
+                  {
+                    "label": "NASA3",
+                    "visible": true,
+                    "values": ["NASA3"],
+                    "settings": {
+                      "type": "simpleSymbol",
+                      "rotation": 0,
+                      "color": "rgba(255,130,0,0.851)",
+                      "stroke": {
+                        "color": "rgba(255,255,255,0.502)",
+                        "lineStyle": "solid",
+                        "width": 0.998
+                      },
+                      "size": 4.002000000000001,
+                      "symbol": "circle",
+                      "offset": [0, 0]
+                    }
+                  },
+                  {
+                    "label": "NASA_Can",
+                    "visible": true,
+                    "values": ["NASA_Can"],
+                    "settings": {
+                      "type": "simpleSymbol",
+                      "rotation": 0,
+                      "color": "rgba(130,130,0,0.851)",
+                      "stroke": {
+                        "color": "rgba(255,255,255,0.502)",
+                        "lineStyle": "solid",
+                        "width": 0.998
+                      },
+                      "size": 4.002000000000001,
+                      "symbol": "circle",
+                      "offset": [0, 0]
+                    }
+                  },
+                  {
+                    "label": "Other",
+                    "visible": true,
+                    "values": [],
+                    "settings": {
+                      "type": "simpleSymbol",
+                      "rotation": 0,
+                      "color": "rgba(130,130,0,0.851)",
+                      "stroke": {
+                        "color": "rgba(255,255,255,0.502)",
+                        "lineStyle": "solid",
+                        "width": 0.998
+                      },
+                      "size": 4.002000000000001,
+                      "symbol": "circle",
+                      "offset": [0, 0]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
       }
     ]
   },
