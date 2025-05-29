@@ -20,9 +20,230 @@
         "metadataAccessPath": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/",
         "geoviewLayerType": "esriFeature",
         "listOfLayerEntryConfig": [
-            {
-                "layerId": "1"
+          {
+            "layerId": "1"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "wfsLYR1",
+        "geoviewLayerName": "US States",
+        "metadataAccessPath": "https://ahocevar.com/geoserver/wfs?REQUEST=GetCapabilities&VERSION=2.0.0&SERVICE=WFS",
+        "geoviewLayerType": "ogcWfs",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "usa:states",
+            "layerName": "US States",
+            "layerStyle": {
+              "Polygon": {
+                "type": "uniqueValue",
+                "fields": ["STATE_NAME"],
+                "hasDefault": true,
+                "info": [
+                  {
+                    "label": "Alabama",
+                    "visible": true,
+                    "values": ["Alabama"],
+                    "settings": {
+                      "type": "filledPolygon",
+                      "color": "rgba(237,81,81,1)",
+                      "stroke": {
+                        "color": "rgba(153,153,153,0.251)",
+                        "lineStyle": "solid",
+                        "width": 0.75
+                      },
+                      "fillStyle": "solid"
+                    }
+                  },
+                  {
+                    "label": "California",
+                    "visible": true,
+                    "values": ["California"],
+                    "settings": {
+                      "type": "filledPolygon",
+                      "color": "rgba(252,146,31,1)",
+                      "stroke": {
+                        "color": "rgba(153,153,153,0.251)",
+                        "lineStyle": "solid",
+                        "width": 0.75
+                      },
+                      "fillStyle": "solid"
+                    }
+                  },
+                  {
+                    "label": "Other",
+                    "visible": true,
+                    "values": [],
+                    "settings": {
+                      "type": "filledPolygon",
+                      "color": "rgba(170,170,170,1)",
+                      "stroke": {
+                        "color": "rgba(153,153,153,0.251)",
+                        "lineStyle": "solid",
+                        "width": 0.75
+                      },
+                      "fillStyle": "solid"
+                    }
+                  }
+                ]
+              }
             }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "geojsonLYR1",
+        "geoviewLayerName": "GeoJSON Sample",
+        "metadataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata.meta",
+        "geoviewLayerType": "GeoJSON",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "polygons.json",
+            "layerName": "Polygons"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "csvLYR1",
+        "geoviewLayerName": "NPRI",
+        "metadataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/csv-files/",
+        "geoviewLayerType": "CSV",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "NPRI-INRP_WaterEau_MediaGroupMilieu_2022",
+            "layerName": "NPRI Water Media Group 2022",
+            "source": {
+              "separator": ","
+            },
+            "layerStyle": {
+              "Point": {
+                "type": "uniqueValue",
+                "fields": ["Province | Province"],
+                "hasDefault": true,
+                "info": [
+                  {
+                    "label": "NL",
+                    "visible": true,
+                    "values": ["NL"],
+                    "settings": {
+                      "type": "simpleSymbol",
+                      "rotation": 0,
+                      "color": "rgba(255,130,0,0.851)",
+                      "stroke": {
+                        "color": "rgba(255,255,255,0.502)",
+                        "lineStyle": "solid",
+                        "width": 0.998
+                      },
+                      "size": 4.002000000000001,
+                      "symbol": "circle",
+                      "offset": [0, 0]
+                    }
+                  },
+                  {
+                    "label": "NB",
+                    "visible": true,
+                    "values": ["NB"],
+                    "settings": {
+                      "type": "simpleSymbol",
+                      "rotation": 0,
+                      "color": "rgba(130,130,0,0.851)",
+                      "stroke": {
+                        "color": "rgba(255,255,255,0.502)",
+                        "lineStyle": "solid",
+                        "width": 0.998
+                      },
+                      "size": 4.002000000000001,
+                      "symbol": "circle",
+                      "offset": [0, 0]
+                    }
+                  },
+                  {
+                    "label": "Other",
+                    "visible": true,
+                    "values": [],
+                    "settings": {
+                      "type": "simpleSymbol",
+                      "rotation": 0,
+                      "color": "rgba(130,130,0,0.851)",
+                      "stroke": {
+                        "color": "rgba(255,255,255,0.502)",
+                        "lineStyle": "solid",
+                        "width": 0.998
+                      },
+                      "size": 4.002000000000001,
+                      "symbol": "circle",
+                      "offset": [0, 0]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "ogcFeatureLYR1",
+        "geoviewLayerName": "Large Lakes",
+        "metadataAccessPath": "https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev",
+        "geoviewLayerType": "ogcFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "lakes",
+            "layerStyle": {
+              "Polygon": {
+                "type": "uniqueValue",
+                "fields": ["name"],
+                "hasDefault": true,
+                "info": [
+                  {
+                    "label": "Lake Superior",
+                    "visible": true,
+                    "values": ["Lake Superior"],
+                    "settings": {
+                      "type": "filledPolygon",
+                      "color": "rgba(237,81,81,1)",
+                      "stroke": {
+                        "color": "rgba(153,153,153,0.251)",
+                        "lineStyle": "solid",
+                        "width": 0.75
+                      },
+                      "fillStyle": "solid"
+                    }
+                  },
+                  {
+                    "label": "L. Ontario",
+                    "visible": true,
+                    "values": ["L. Ontario"],
+                    "settings": {
+                      "type": "filledPolygon",
+                      "color": "rgba(252,146,31,1)",
+                      "stroke": {
+                        "color": "rgba(153,153,153,0.251)",
+                        "lineStyle": "solid",
+                        "width": 0.75
+                      },
+                      "fillStyle": "solid"
+                    }
+                  },
+                  {
+                    "label": "Other",
+                    "visible": true,
+                    "values": [],
+                    "settings": {
+                      "type": "filledPolygon",
+                      "color": "rgba(170,170,170,1)",
+                      "stroke": {
+                        "color": "rgba(153,153,153,0.251)",
+                        "lineStyle": "solid",
+                        "width": 0.75
+                      },
+                      "fillStyle": "solid"
+                    }
+                  }
+                ]
+              }
+            }
+          }
         ]
       }
     ]
