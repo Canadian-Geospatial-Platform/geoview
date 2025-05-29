@@ -72,7 +72,7 @@
                   },
                   {
                     "label": "Other",
-                    "visible": true,
+                    "visible": false,
                     "values": [],
                     "settings": {
                       "type": "filledPolygon",
@@ -159,7 +159,7 @@
                   },
                   {
                     "label": "Other",
-                    "visible": true,
+                    "visible": false,
                     "values": [],
                     "settings": {
                       "type": "simpleSymbol",
@@ -227,7 +227,7 @@
                   },
                   {
                     "label": "Other",
-                    "visible": true,
+                    "visible": false,
                     "values": [],
                     "settings": {
                       "type": "filledPolygon",

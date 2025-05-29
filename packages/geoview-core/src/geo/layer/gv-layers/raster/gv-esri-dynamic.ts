@@ -1019,7 +1019,10 @@ export class GVEsriDynamic extends AbstractGVRaster {
     styleSettings: TypeLayerStyleSettings,
     sourceFeatureInfo: TypeFeatureInfoLayerConfig
   ): string {
-    let queryString = styleSettings.info[styleSettings.info.length - 1].visible !== false && !level ? 'not (' : '(';
+    // GV The below commented code was previously causing the classes to be reversed by adding a 'not' to the query
+    // GV Need to confirm that the 'not' is no longer needed
+    // let queryString = styleSettings.info[styleSettings.info.length - 1].visible !== false && !level ? 'not (' : '(';
+    let queryString = '(';
     for (let i = 0; i < queryTree.length; i++) {
       const value = GVEsriDynamic.#formatFieldValue(styleSettings.fields[fieldOrder[level]], queryTree[i].fieldValue, sourceFeatureInfo);
       // The nextField array is not empty, then it is is not the last field
