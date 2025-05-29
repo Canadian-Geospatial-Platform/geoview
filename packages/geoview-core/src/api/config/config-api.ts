@@ -108,7 +108,7 @@ export class ConfigApi {
 
     if (/.CSV(?:$|\?)/i.test(url)) return CV_CONST_LAYER_TYPES.CSV;
 
-    if (/.ZIP(?:$|\?)/i.test(url)) return CV_CONFIG_SHAPEFILE_TYPE;
+    if (/.(ZIP|SHP)(?:$|\?)/i.test(url)) return CV_CONFIG_SHAPEFILE_TYPE;
 
     if (upperUrl.includes('COLLECTIONS')) return CV_CONST_LAYER_TYPES.OGC_FEATURE;
 
@@ -394,6 +394,7 @@ export class ConfigApi {
     const shapefileConfigs = listOfGeoviewLayerConfig.filter(
       (geoviewLayerConfig) => geoviewLayerConfig.geoviewLayerType === CV_CONFIG_SHAPEFILE_TYPE
     );
+
     if (shapefileConfigs) {
       const convertedShapefileConfigs = await ShapefileReader.getGVConfigsFromShapefiles(shapefileConfigs);
       let newListOfGeoviewLayerConfig = listOfGeoviewLayerConfig.map((layerConfig) => {
@@ -414,7 +415,7 @@ export class ConfigApi {
       // Remove any remaining shapefile entries
       newListOfGeoviewLayerConfig = newListOfGeoviewLayerConfig.filter((layerConfig) => {
         if (layerConfig.geoviewLayerType === CV_CONFIG_SHAPEFILE_TYPE) {
-          logger.logError(`Unable to convert GeoCore layer (Id=${layerConfig.geoviewLayerId}).`);
+          logger.logError(`Unable to convert shapefile layer (Id=${layerConfig.geoviewLayerId}).`);
           return false;
         }
         return true;
@@ -503,9 +504,10 @@ export class ConfigApi {
         providedMapFeatureConfig.map.listOfGeoviewLayerConfig as TypeJsonArray,
         providedMapFeatureConfig?.serviceUrls?.geocoreUrl as string
       )) as TypeJsonObject;
-      providedMapFeatureConfig.map.listOfGeoviewLayerConfig = (await ConfigApi.convertShapefileToGeojson(
-        providedMapFeatureConfig.map.listOfGeoviewLayerConfig
-      )) as TypeJsonObject;
+      // TODO: Reinstate this once TODO's in app.tsx 102 and 115 are removed
+      // providedMapFeatureConfig.map.listOfGeoviewLayerConfig = (await ConfigApi.convertShapefileToGeojson(
+      //   providedMapFeatureConfig.map.listOfGeoviewLayerConfig
+      // )) as TypeJsonObject;
 
       const errorDetected = inputLength !== providedMapFeatureConfig.map.listOfGeoviewLayerConfig.length;
 
@@ -562,12 +564,19 @@ export class ConfigApi {
         return undefined;
       }
     } else if (layerType === CV_CONFIG_SHAPEFILE_TYPE) {
-      const layerConfig = {
-        geoviewLayerId: generateId(),
-        geoviewLayerType: 'shapefile',
-        metadataAccessPath: serviceAccessString,
-      } as unknown as TypeJsonObject;
-      [geoviewLayerConfig] = await ShapefileReader.getGVConfigsFromShapefiles([layerConfig]);
+      try {
+        const layerConfig = {
+          geoviewLayerId: generateId(),
+          geoviewLayerType: 'shapefile',
+          metadataAccessPath: serviceAccessString,
+        } as unknown as TypeJsonObject;
+        [geoviewLayerConfig] = await ShapefileReader.getGVConfigsFromShapefiles([layerConfig]);
+        if (!geoviewLayerConfig) return undefined;
+      } catch (error: unknown) {
+        // Log error
+        logger.logError(`Unable to convert Shapefile layer (Id=${serviceAccessString}).`, error);
+        return undefined;
+      }
     } else {
       // Create a GeoView Json configuration object.
       geoviewLayerConfig = toJsonObject({

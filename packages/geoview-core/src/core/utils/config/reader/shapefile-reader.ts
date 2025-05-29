@@ -3,6 +3,7 @@ import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES, ShapefileLayerConfig } from
 import { TypeGeoJSONLayerConfig } from '@/geo/layer/geoview-layers/vector/geojson';
 import { GeoJSONLayerEntryConfig } from '../validation-classes/vector-validation-classes/geojson-layer-entry-config';
 import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
+import { generateId } from '@/core/utils/utilities';
 
 /**
  * A class to generate a GeoView layer config from a shapefile.
@@ -18,9 +19,12 @@ export class ShapefileReader {
   static async convertShapefileConfigToGeoJson(layerConfig: ShapefileLayerConfig): Promise<TypeGeoJSONLayerConfig[]> {
     // shp expects either a url, path to a .zip, or an array buffer, so file url must be converted
     let shapefileURL: ArrayBuffer | string = layerConfig.metadataAccessPath;
+    let filename: string | undefined;
     if (shapefileURL.startsWith('blob')) {
       const response = await fetch(shapefileURL);
       shapefileURL = await response.arrayBuffer();
+    } else {
+      filename = shapefileURL.split('/').pop()?.split('.')[0];
     }
 
     // Get geojson from shapefile(s)
@@ -36,26 +40,40 @@ export class ShapefileReader {
 
     // .zip may have multiple shapefiles inside, if so we need a layer entry for each
     if (geojson && Array.isArray(geojson)) {
-      const newLayerEntryConfigs = geojson.map((layerGeojson) => {
-        return new GeoJSONLayerEntryConfig({
-          geoviewLayerConfig,
-          layerId: layerGeojson.fileName,
-          layerName: layerGeojson.fileName,
-          schemaTag: CONST_LAYER_TYPES.GEOJSON,
-          entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
-          source: {
-            format: 'GeoJSON',
-            geojson: JSON.stringify(layerGeojson),
-          },
-        } as GeoJSONLayerEntryConfig);
-      });
+      const newLayerEntryConfigs = geojson
+        .map((layerGeojson) => {
+          const matchingLayerEntryConfig = layerConfig.listOfLayerEntryConfig?.find(
+            (layerEntryConfig) => layerEntryConfig.layerId === layerGeojson.fileName
+          ) as unknown as GeoJSONLayerEntryConfig;
+          if (!layerConfig.listOfLayerEntryConfig || matchingLayerEntryConfig)
+            return new GeoJSONLayerEntryConfig({
+              geoviewLayerConfig,
+              layerId: layerGeojson.fileName,
+              layerName: layerGeojson.fileName,
+              layerStyle: matchingLayerEntryConfig?.layerStyle ? matchingLayerEntryConfig.layerStyle : undefined,
+              initialSettings: matchingLayerEntryConfig?.initialSettings ? matchingLayerEntryConfig.initialSettings : undefined,
+              schemaTag: CONST_LAYER_TYPES.GEOJSON,
+              entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
+              source: {
+                format: 'GeoJSON',
+                geojson: JSON.stringify(layerGeojson),
+              },
+            } as GeoJSONLayerEntryConfig);
+          return undefined;
+        })
+        .filter((layerEntryConfig) => layerEntryConfig !== undefined);
 
-      geoviewLayerConfig.listOfLayerEntryConfig = newLayerEntryConfigs;
+      if (newLayerEntryConfigs) geoviewLayerConfig.listOfLayerEntryConfig = newLayerEntryConfigs;
     } else if (geojson) {
+      const passedLayerEntryConfig = layerConfig.listOfLayerEntryConfig
+        ? (layerConfig.listOfLayerEntryConfig[0] as unknown as GeoJSONLayerEntryConfig)
+        : undefined;
       const layerEntryConfig = new GeoJSONLayerEntryConfig({
         geoviewLayerConfig,
-        layerId: geojson.fileName,
+        layerId: geojson.fileName || filename || generateId(),
         layerName: layerConfig.geoviewLayerName || geojson.fileName,
+        layerStyle: passedLayerEntryConfig?.layerStyle,
+        initialSettings: passedLayerEntryConfig?.initialSettings,
         schemaTag: CONST_LAYER_TYPES.GEOJSON,
         entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
         source: {
@@ -79,9 +97,12 @@ export class ShapefileReader {
     const promises = layerConfigs.map(async (layerConfig) => {
       // shp expects either a url, path to a .zip, or an array buffer, so file url must be converted
       let shapefileURL: string | ArrayBuffer = layerConfig.metadataAccessPath as string;
+      let filename: string | undefined;
       if (shapefileURL.startsWith('blob')) {
         const response = await fetch(shapefileURL);
         shapefileURL = await response.arrayBuffer();
+      } else {
+        filename = shapefileURL.split('/').pop()?.split('.')[0];
       }
 
       // Get geojson from shapefile(s)
@@ -96,26 +117,40 @@ export class ShapefileReader {
         listOfLayerEntryConfig: [] as Array<object>,
       };
 
+      const passedLayerEntryConfigs = layerConfig.listOfLayerEntryConfig as Array<TypeJsonObject>;
       // .zip may have multiple shapefiles inside, if so we need a layer entry for each
       if (geojson && Array.isArray(geojson)) {
-        const newLayerEntryConfigs = geojson.map((layerGeojson) => {
-          return {
-            layerId: layerGeojson.fileName,
-            layerName: layerGeojson.fileName,
-            schemaTag: CONST_LAYER_TYPES.GEOJSON,
-            entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
-            source: {
-              format: 'GeoJSON',
-              geojson: JSON.stringify(layerGeojson),
-            },
-          };
-        });
+        const newLayerEntryConfigs = geojson
+          .map((layerGeojson) => {
+            const matchingLayerEntryConfig = passedLayerEntryConfigs
+              ? (passedLayerEntryConfigs.find(
+                  (layerEntryConfig) => layerEntryConfig.layerId === layerGeojson.fileName
+                ) as unknown as GeoJSONLayerEntryConfig)
+              : undefined;
+            if (!layerConfig.listOfLayerEntryConfig || matchingLayerEntryConfig)
+              return {
+                layerId: layerGeojson.fileName,
+                layerName: layerGeojson.fileName,
+                layerStyle: matchingLayerEntryConfig?.layerStyle ? matchingLayerEntryConfig.layerStyle : undefined,
+                initialSettings: matchingLayerEntryConfig?.initialSettings ? matchingLayerEntryConfig.initialSettings : undefined,
+                schemaTag: CONST_LAYER_TYPES.GEOJSON,
+                entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
+                source: {
+                  format: 'GeoJSON',
+                  geojson: JSON.stringify(layerGeojson),
+                },
+              };
+            return undefined;
+          })
+          .filter((layerEntryConfig) => layerEntryConfig !== undefined);
 
         geoviewLayerConfig.listOfLayerEntryConfig = newLayerEntryConfigs;
       } else if (geojson) {
         const layerEntryConfig = {
-          layerId: geojson.fileName,
+          layerId: geojson.fileName || filename || generateId(),
           layerName: layerConfig.geoviewLayerName || geojson.fileName,
+          layerStyle: passedLayerEntryConfigs ? passedLayerEntryConfigs[0].layerStyle : undefined,
+          initialSettings: passedLayerEntryConfigs ? passedLayerEntryConfigs[0]?.initialSettings : undefined,
           schemaTag: CONST_LAYER_TYPES.GEOJSON,
           entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
           source: {

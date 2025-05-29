@@ -465,6 +465,8 @@ export function AddNewLayer(): JSX.Element {
 
     let promise;
     if (layerType === SHAPEFILE) {
+      const filename = layerURL.split('/').pop()?.split('.')[0];
+      if (filename) setLayerName(filename);
       promise = Promise.resolve(true);
     } else if (
       layerType === WMS ||
