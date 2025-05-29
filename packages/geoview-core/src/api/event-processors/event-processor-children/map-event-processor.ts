@@ -203,6 +203,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @returns {TypeRecordOfPlugin} The map plugins record
    */
   static async getMapViewerPlugins(mapId: string): Promise<TypeRecordOfPlugin> {
+    // TODO: Check - Remove the try/catch here to force explicit case-by-case handling instead of via shared function.
     try {
       // Check if the plugins exist
       // TODO: if you run the code fast enough (only happened to me in the TimeSliderEventProcessor),

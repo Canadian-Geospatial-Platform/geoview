@@ -956,20 +956,22 @@ export const layerEntryIsImageStatic = (verifyIfLayer: TypeLayerEntryConfig): ve
 };
 
 /**
- * Returns true if the layer entry from the map configuration represents a GeoCore layer type.
- * @param {MapConfigLayerEntry} layerConfigEntryOption The layer entry config to check
- * @returns {boolean} True if the layer type if GeoCore
+ * Type guard that checks if a given map layer configuration entry is of type GeoCore.
+ * @param {MapConfigLayerEntry} layerConfigEntryOption - The layer entry config to check
+ * @returns {layerConfigEntryOption is GeoCoreLayerConfig} True if the layer is a GeoCore layer, narrowing the type to GeoCoreLayerConfig.
  */
-export const mapConfigLayerEntryIsGeoCore = (layerConfigEntryOption: MapConfigLayerEntry): boolean => {
+export const mapConfigLayerEntryIsGeoCore = (layerConfigEntryOption: MapConfigLayerEntry): layerConfigEntryOption is GeoCoreLayerConfig => {
   return layerConfigEntryOption.geoviewLayerType === CONST_LAYER_ENTRY_TYPES.GEOCORE;
 };
 
 /**
- * Returns true if the layer entry from the map configuration represents a shapefile layer type.
+ * Type guard that checks if a given map layer configuration entry is of type Shapefile.
  * @param {MapConfigLayerEntry} layerConfigEntryOption The layer entry config to check
- * @returns {boolean} True if the layer type if GeoCore
+ * @returns {layerConfigEntryOption is ShapefileLayerConfig} True if the layer is a Shapefile layer, narrowing the type to ShapefileLayerConfig.
  */
-export const mapConfigLayerEntryIsShapefile = (layerConfigEntryOption: MapConfigLayerEntry): boolean => {
+export const mapConfigLayerEntryIsShapefile = (
+  layerConfigEntryOption: MapConfigLayerEntry
+): layerConfigEntryOption is ShapefileLayerConfig => {
   return layerConfigEntryOption.geoviewLayerType === CONST_LAYER_ENTRY_TYPES.SHAPEFILE;
 };
 
