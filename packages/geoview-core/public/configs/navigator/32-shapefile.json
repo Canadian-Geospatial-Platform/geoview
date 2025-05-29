@@ -20,26 +20,40 @@
         "geoviewLayerId": "shpLYR2",
         "geoviewLayerType": "shapefile",
         "geoviewLayerName": "Sunchild Aquafier",
-        "metadataAccessPath": "./datasets/shapefiles/DIG_2012_0028.zip"
+        "metadataAccessPath": "./datasets/shapefiles/DIG_2012_0028.zip",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "sunchild_aquifer_py_tm",
+            "initialSettings": {
+              "states": {
+                "visible": false
+              }
+            }
+          }
+        ]
       },
       {
         "geoviewLayerId": "shpLYR3",
-        "geoviewLayerName": "Wildfire HotSpots - Symbology Test",
+        "geoviewLayerName": "Wildfire HotSpots",
         "metadataAccessPath": "https://cwfis.cfs.nrcan.gc.ca/downloads/hotspots/hotspots.shp",
         "geoviewLayerType": "shapefile",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "map1-layers-shpLYR3/undefined",
+            "layerId": "hotspots",
             "layerStyle": {
               "Point": {
                 "type": "uniqueValue",
-                "fields": ["SOURCE"],
+                "fields": [
+                  "SOURCE"
+                ],
                 "hasDefault": true,
                 "info": [
                   {
                     "label": "NASA3",
                     "visible": true,
-                    "values": ["NASA3"],
+                    "values": [
+                      "NASA3"
+                    ],
                     "settings": {
                       "type": "simpleSymbol",
                       "rotation": 0,
@@ -51,13 +65,18 @@
                       },
                       "size": 4.002000000000001,
                       "symbol": "circle",
-                      "offset": [0, 0]
+                      "offset": [
+                        0,
+                        0
+                      ]
                     }
                   },
                   {
                     "label": "NASA_Can",
                     "visible": true,
-                    "values": ["NASA_Can"],
+                    "values": [
+                      "NASA_Can"
+                    ],
                     "settings": {
                       "type": "simpleSymbol",
                       "rotation": 0,
@@ -69,7 +88,10 @@
                       },
                       "size": 4.002000000000001,
                       "symbol": "circle",
-                      "offset": [0, 0]
+                      "offset": [
+                        0,
+                        0
+                      ]
                     }
                   },
                   {
@@ -79,7 +101,7 @@
                     "settings": {
                       "type": "simpleSymbol",
                       "rotation": 0,
-                      "color": "rgba(130,130,0,0.851)",
+                      "color": "rgba(0,130,100,0.851)",
                       "stroke": {
                         "color": "rgba(255,255,255,0.502)",
                         "lineStyle": "solid",
@@ -87,7 +109,10 @@
                       },
                       "size": 4.002000000000001,
                       "symbol": "circle",
-                      "offset": [0, 0]
+                      "offset": [
+                        0,
+                        0
+                      ]
                     }
                   }
                 ]
