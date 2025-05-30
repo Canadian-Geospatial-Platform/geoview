@@ -155,7 +155,7 @@ export declare function validateExtent(extent: Extent, code?: string): Extent;
  * @param {Extent} extent - The extent to check.
  * @returns {boolean} Whether or not the extent is long/lat
  */
-export declare function isExtentLngLat(extent: Extent): boolean;
+export declare function isExtentLonLat(extent: Extent): boolean;
 /**
  * Validates lat long, LCC, or Web Mercator extent if it is defined.
  * @param {Extent} extent - The extent to validate.

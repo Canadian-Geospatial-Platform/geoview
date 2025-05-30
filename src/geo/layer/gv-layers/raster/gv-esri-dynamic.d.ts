@@ -99,13 +99,13 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
     protected getFeatureInfoAtCoordinate(map: OLMap, location: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overrides the return of feature information at the provided long lat coordinate.
-     * @param {OLMap} map - The Map where to get Feature Info At LongLat from.
-     * @param {Coordinate} lnglat - The coordinate that will be used by the query.
+     * @param {OLMap} map - The Map where to get Feature Info At LonLat from.
+     * @param {Coordinate} lonlat - The coordinate that will be used by the query.
      * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
      * @param {AbortController?} abortController - The optional abort controller.
      * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getFeatureInfoAtLongLat(map: OLMap, lnglat: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
+    protected getFeatureInfoAtLonLat(map: OLMap, lonlat: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Applies a view filter to an Esri Dynamic layer's source by updating the `layerDefs` parameter.
      * @param {string | undefined} filter - The raw filter string input (defaults to an empty string if not provided).

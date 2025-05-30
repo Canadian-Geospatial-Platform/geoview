@@ -73,8 +73,9 @@ export declare class API {
      * @param {string} divId - id of the div to create map in
      * @param {string} mapConfig - config passed in from the function call (string or url of a config path)
      * @param {number} divHeight - height of the div to inject the map in (mandatory if the map reloads)
+     * @param {boolean} forceDeleteInApi - force a delete of the MapViewer from the this.#maps array
      */
-    createMapFromConfig(divId: string, mapConfig: string, divHeight?: number): Promise<MapViewer>;
+    createMapFromConfig(divId: string, mapConfig: string, divHeight?: number, forceDeleteInApi?: boolean): Promise<MapViewer>;
     /**
      * Registers a map viewer ready event callback.
      * @param {MapViewerReadyDelegate} callback - The callback to be executed whenever the event is emitted

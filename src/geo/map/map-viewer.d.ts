@@ -99,6 +99,12 @@ export declare class MapViewer {
      */
     getView(): View;
     /**
+     * Asynchronously gets the map center coordinate to give a chance for the map to
+     * render before returning the value.
+     * @returns the map viewSettings
+     */
+    getCenter(): Promise<Coordinate>;
+    /**
      * Gets the map projection
      * @returns the map viewSettings
      */
@@ -268,12 +274,12 @@ export declare class MapViewer {
      */
     setHomeButtonView(view: TypeMapViewSettings): void;
     /**
-     * Zoom to specified extent or coordinate provided in lnglat.
+     * Zoom to specified extent or coordinate provided in lonlat.
      *
      * @param {Extent | Coordinate} extent - The extent or coordinate to zoom to.
      * @param {FitOptions} options - The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 }).
      */
-    zoomToLngLatExtentOrCoordinate(extent: Extent | Coordinate, options?: FitOptions): Promise<void>;
+    zoomToLonLatExtentOrCoordinate(extent: Extent | Coordinate, options?: FitOptions): Promise<void>;
     /**
      * Update the size of the icon image list based on styles.
      * @param {TypeLegend} legend - The legend to check.
@@ -334,30 +340,30 @@ export declare class MapViewer {
      */
     getNorthArrowAngle(): string;
     /**
-     * Transforms coordinate from LngLat to the current projection of the map.
-     * @param {Coordinate} coordinate - The LngLat coordinate
+     * Transforms coordinate from LonLat to the current projection of the map.
+     * @param {Coordinate} coordinate - The LonLat coordinate
      * @returns {Coordinate} The coordinate in the map projection
      */
-    convertCoordinateLngLatToMapProj(coordinate: Coordinate): Coordinate;
+    convertCoordinateLonLatToMapProj(coordinate: Coordinate): Coordinate;
     /**
-     * Transforms coordinate from current projection of the map to LngLat.
+     * Transforms coordinate from current projection of the map to LonLat.
      * @param {Coordinate} coordinate - The coordinate in map projection
-     * @returns {Coordinate} The coordinate in LngLat
+     * @returns {Coordinate} The coordinate in LonLat
      */
-    convertCoordinateMapProjToLngLat(coordinate: Coordinate): Coordinate;
+    convertCoordinateMapProjToLonLat(coordinate: Coordinate): Coordinate;
     /**
-     * Transforms extent from LngLat to the current projection of the map.
-     * @param {Extent} extent - The LngLat extent
+     * Transforms extent from LonLat to the current projection of the map.
+     * @param {Extent} extent - The LonLat extent
      * @param {number} stops - The number of stops to perform densification on the extent
      * @returns {Extent} The extent in the map projection
      */
-    convertExtentLngLatToMapProj(extent: Extent, stops?: number): Extent;
+    convertExtentLonLatToMapProj(extent: Extent, stops?: number): Extent;
     /**
-     * Transforms extent from current projection of the map to LngLat.
+     * Transforms extent from current projection of the map to LonLat.
      * @param {Extent} extent - The extent in map projection
-     * @returns {Extent} The extent in LngLat
+     * @returns {Extent} The extent in LonLat
      */
-    convertExtentMapProjToLngLat(extent: Extent): Extent;
+    convertExtentMapProjToLonLat(extent: Extent): Extent;
     /**
      * Transforms coordinate from given projection to the current projection of the map.
      * @param {Coordinate} coordinate - The given coordinate
@@ -558,7 +564,7 @@ export type TypeMapState = {
  * Type used to define the map mouse information
  * */
 export type TypeMapMouseInfo = {
-    lnglat: Coordinate;
+    lonlat: Coordinate;
     pixel: Coordinate;
     projected: Coordinate;
     dragging: boolean;
@@ -583,7 +589,7 @@ export type MapLayersLoadedDelegate = EventDelegateBase<MapViewer, undefined, vo
  * Define an event for the delegate
  */
 export type MapMoveEndEvent = {
-    lnglat: Coordinate;
+    lonlat: Coordinate;
 };
 /**
  * Define a delegate for the event handler function signature

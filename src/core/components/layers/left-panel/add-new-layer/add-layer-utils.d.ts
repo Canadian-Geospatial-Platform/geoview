@@ -1,4 +1,4 @@
-import { GroupLayerEntryConfig, TypeGeoviewLayerConfig } from '@/api/config/types/map-schema-types';
+import { GroupLayerEntryConfig, MapConfigLayerEntry } from '@/api/config/types/map-schema-types';
 type BuildGeoViewLayerInput = {
     layerIdsToAdd: string[];
     layerName: string;
@@ -25,5 +25,5 @@ export declare const getLayerNameById: (layersList: GroupLayerEntryConfig[], lay
  * @param {BuildGeoViewLayerInput} inputProps - The layer information
  * @returns {TypeGeoviewLayerConfig} The geoview layer config
  */
-export declare const buildGeoLayerToAdd: (inputProps: BuildGeoViewLayerInput) => TypeGeoviewLayerConfig;
+export declare const buildGeoLayerToAdd: (inputProps: BuildGeoViewLayerInput) => MapConfigLayerEntry;
 export {};

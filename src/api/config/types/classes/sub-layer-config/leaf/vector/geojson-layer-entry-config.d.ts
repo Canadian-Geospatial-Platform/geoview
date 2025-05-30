@@ -1,4 +1,5 @@
-import { TypeLayerStyleConfig, TypeLayerEntryType, TypeBaseVectorSourceInitialConfig } from '@/api/config/types/map-schema-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
+import { TypeLayerStyleConfig, TypeLayerEntryType, TypeGeojsonSourceInitialConfig, AbstractGeoviewLayerConfig, EntryConfigBaseClass } from '@/api/config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/abstract-base-layer-entry-config';
 import { GeoJsonLayerConfig } from '@/api/config/types/classes/geoview-config/vector-config/geojson-config';
 /**
@@ -6,9 +7,10 @@ import { GeoJsonLayerConfig } from '@/api/config/types/classes/geoview-config/ve
  */
 export declare class GeoJsonLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     /** Source settings to apply to the GeoView image layer source at creation time. */
-    source: TypeBaseVectorSourceInitialConfig;
+    source: TypeGeojsonSourceInitialConfig;
     /** Style to apply to the raster layer. */
     layerStyle?: TypeLayerStyleConfig;
+    constructor(layerConfig: TypeJsonObject, geoviewLayerConfig: AbstractGeoviewLayerConfig, parentNode?: EntryConfigBaseClass);
     /**
      * The getter method that returns the schemaPath property. Each geoview sublayer type knows what section of the schema must be
      * used to do its validation.

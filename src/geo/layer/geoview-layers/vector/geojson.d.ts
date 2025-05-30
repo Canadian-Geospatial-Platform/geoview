@@ -10,6 +10,7 @@ import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/v
 import { GVGeoJSON } from '@/geo/layer/gv-layers/vector/gv-geojson';
 export interface TypeSourceGeoJSONInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
     format: 'GeoJSON';
+    geojson?: string;
 }
 export interface TypeGeoJSONLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: typeof CONST_LAYER_TYPES.GEOJSON;

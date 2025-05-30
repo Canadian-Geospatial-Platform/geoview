@@ -51,13 +51,13 @@ export declare class GVWMS extends AbstractGVRaster {
     protected getFeatureInfoAtCoordinate(map: OLMap, location: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overrides the return of feature information at the provided long lat coordinate.
-     * @param {OLMap} map - The Map where to get Feature Info At LongLat from.
-     * @param {Coordinate} lnglat - The coordinate that will be used by the query.
+     * @param {OLMap} map - The Map where to get Feature Info At LonLat from.
+     * @param {Coordinate} lonlat - The coordinate that will be used by the query.
      * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
      * @param {AbortController?} abortController - The optional abort controller.
      * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getFeatureInfoAtLongLat(map: OLMap, lnglat: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
+    protected getFeatureInfoAtLonLat(map: OLMap, lonlat: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overrides the fetching of the legend for a WMS layer.
      * @returns {Promise<TypeLegend | null>} The legend of the layer or null.

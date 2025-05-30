@@ -166,16 +166,6 @@ export declare abstract class AbstractLayerSet {
      * @param {LayerSetUpdatedDelegate} callback - The callback function to unregister
      */
     offLayerSetUpdated(callback: LayerSetUpdatedDelegate): void;
-    /**
-     * Registers a callback to be executed whenever the layer status is updated.
-     * @param {LayerStatusUpdatedDelegate} callback - The callback function
-     */
-    onLayerStatusUpdated(callback: LayerStatusUpdatedDelegate): void;
-    /**
-     * Unregisters a callback from being called whenever the layer status is updated.
-     * @param {LayerStatusUpdatedDelegate} callback - The callback function to unregister
-     */
-    offLayerStatusUpdated(callback: LayerStatusUpdatedDelegate): void;
 }
 export type EventType = 'click' | 'hover' | 'all-features' | 'name';
 export type PropagationType = 'config-registration' | 'layer-registration' | 'layerStatus' | 'layerName';
@@ -189,15 +179,5 @@ type LayerSetUpdatedDelegate = EventDelegateBase<AbstractLayerSet, LayerSetUpdat
 export type LayerSetUpdatedEvent = {
     layerPath: string;
     resultSet: TypeResultSet;
-};
-/**
- * Define a delegate for the event handler function signature
- */
-type LayerStatusUpdatedDelegate = EventDelegateBase<AbstractLayerSet, LayerStatusUpdatedEvent, void>;
-/**
- * Define an event for the delegate
- */
-export type LayerStatusUpdatedEvent = {
-    layer: ConfigBaseClass;
 };
 export {};
