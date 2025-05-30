@@ -7,6 +7,7 @@ import {
   layerEntryIsGroupLayer,
   CONST_LAYER_TYPES,
   TypeGeoviewLayerType,
+  TypeTemporalDimension,
 } from '@/api/config/types/map-schema-types';
 import { TypeLegendLayer, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import { TypeWmsLegend, isImageStaticLegend, isVectorLegend, isWmsLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -16,6 +17,7 @@ import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-pr
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { LayerNotFoundError } from '@/core/exceptions/layer-exceptions';
+import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -201,6 +203,22 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
     // Get extent from features calling the GV Layer method
     return layer.getExtentFromFeatures(objectIds, layerApi.mapViewer.getProjection(), outfield);
+  }
+
+  static getLayerTemporalDimension(mapId: string, layerPath: string): TypeTemporalDimension | undefined {
+    // Get the layer api
+    const layerApi = MapEventProcessor.getMapViewerLayerAPI(mapId);
+
+    // Get the layer
+    const layer = layerApi.getGeoviewLayer(layerPath);
+    if (!layer) throw new LayerNotFoundError(layerPath);
+
+    // Get the temporal dimension calling the GV Layer method, check if getTemporalDimension exists and is a function
+    if (typeof (layer as AbstractGVLayer).getTemporalDimension === 'function') {
+      return (layer as AbstractGVLayer).getTemporalDimension();
+    }
+
+    return undefined;
   }
 
   static getLayerIconImage(layerLegend: TypeLegend | null): TypeLegendLayerItem[] | undefined {

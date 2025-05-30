@@ -381,6 +381,39 @@ export class MapViewer {
   }
 
   /**
+   * Set the map viewSettings (coordinate values in lat/long)
+   *
+   * @param {TypeViewSettings} mapView - Map viewSettings object
+   */
+  setView(mapView: TypeViewSettings): void {
+    const currentView = this.getView();
+    const viewOptions: ViewOptions = {};
+    viewOptions.projection = `EPSG:${mapView.projection}`;
+    viewOptions.zoom = mapView.initialView?.zoomAndCenter ? mapView.initialView?.zoomAndCenter[0] : currentView.getZoom();
+    viewOptions.center = mapView.initialView?.zoomAndCenter
+      ? Projection.transformFromLonLat(mapView.initialView?.zoomAndCenter[1], Projection.getProjectionFromString(viewOptions.projection))
+      : Projection.transformFromLonLat(
+          Projection.transformToLonLat(currentView.getCenter()!, currentView.getProjection()),
+          Projection.getProjectionFromString(viewOptions.projection)
+        );
+    viewOptions.minZoom = mapView.minZoom ? mapView.minZoom : currentView.getMinZoom();
+    viewOptions.maxZoom = mapView.maxZoom ? mapView.maxZoom : currentView.getMaxZoom();
+    viewOptions.rotation = mapView.rotation ? mapView.rotation : currentView.getRotation();
+    if (mapView.maxExtent)
+      viewOptions.extent = Projection.transformExtentFromProj(
+        mapView.maxExtent,
+        Projection.getProjectionLonLat(),
+        Projection.getProjectionFromString(`EPSG:${mapView.projection}`)
+      );
+
+    const newView = new View(viewOptions);
+    this.map.setView(newView);
+
+    // Because the view has changed we must re-register the view handlers
+    this.#registerViewHandlers(newView);
+  }
+
+  /**
    * Asynchronously gets the map center coordinate to give a chance for the map to
    * render before returning the value.
    * @returns {Promise<Coordinate>} the map center
@@ -390,6 +423,18 @@ export class MapViewer {
     return whenThisThen(() => {
       return this.getView().getCenter()!;
     });
+  }
+
+  /**
+   * Set the map center.
+   *
+   * @param {Coordinate} center - New center to use
+   */
+  setCenter(center: Coordinate): void {
+    const currentView = this.getView();
+    const transformedCenter = Projection.transformFromLonLat(center, currentView.getProjection());
+
+    currentView.setCenter(transformedCenter);
   }
 
   /**
@@ -599,51 +644,6 @@ export class MapViewer {
     if (VALID_DISPLAY_THEME.includes(displayTheme)) {
       AppEventProcessor.setDisplayTheme(this.mapId, displayTheme);
     } else this.notifications.addNotificationError(getLocalizedMessage(this.getDisplayLanguage(), 'validation.changeDisplayTheme'));
-  }
-
-  /**
-   * Set the map viewSettings (coordinate values in lat/long)
-   *
-   * @param {TypeViewSettings} mapView - Map viewSettings object
-   */
-  setView(mapView: TypeViewSettings): void {
-    const currentView = this.getView();
-    const viewOptions: ViewOptions = {};
-    viewOptions.projection = `EPSG:${mapView.projection}`;
-    viewOptions.zoom = mapView.initialView?.zoomAndCenter ? mapView.initialView?.zoomAndCenter[0] : currentView.getZoom();
-    viewOptions.center = mapView.initialView?.zoomAndCenter
-      ? Projection.transformFromLonLat(mapView.initialView?.zoomAndCenter[1], Projection.getProjectionFromString(viewOptions.projection))
-      : Projection.transformFromLonLat(
-          Projection.transformToLonLat(currentView.getCenter()!, currentView.getProjection()),
-          Projection.getProjectionFromString(viewOptions.projection)
-        );
-    viewOptions.minZoom = mapView.minZoom ? mapView.minZoom : currentView.getMinZoom();
-    viewOptions.maxZoom = mapView.maxZoom ? mapView.maxZoom : currentView.getMaxZoom();
-    viewOptions.rotation = mapView.rotation ? mapView.rotation : currentView.getRotation();
-    if (mapView.maxExtent)
-      viewOptions.extent = Projection.transformExtentFromProj(
-        mapView.maxExtent,
-        Projection.getProjectionLonLat(),
-        Projection.getProjectionFromString(`EPSG:${mapView.projection}`)
-      );
-
-    const newView = new View(viewOptions);
-    this.map.setView(newView);
-
-    // Because the view has changed we must re-register the view handlers
-    this.#registerViewHandlers(newView);
-  }
-
-  /**
-   * Set the map center.
-   *
-   * @param {Coordinate} center - New center to use
-   */
-  setCenter(center: Coordinate): void {
-    const currentView = this.getView();
-    const transformedCenter = Projection.transformFromLonLat(center, currentView.getProjection());
-
-    currentView.setCenter(transformedCenter);
   }
 
   /**

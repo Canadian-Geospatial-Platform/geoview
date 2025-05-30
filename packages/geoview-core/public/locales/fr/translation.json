@@ -157,6 +157,8 @@
     "layerResource": "Ressource : ",
     "layerMetadata": "Métadonnées : ",
     "layerDefaultFilter": "Filtre par défault : ",
+    "layerTemporalDimension": "Dimension temporelle: ",
+    "layerTemporalDimensionField": "champ",
     "layerServiceProjection": "Projection du service : ",
     "layerHoverable": "Info au passage de la souris",
     "layerQueryable": "Info au click de la souris"

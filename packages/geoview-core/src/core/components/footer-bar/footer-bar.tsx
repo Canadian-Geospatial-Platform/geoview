@@ -210,6 +210,9 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     // Log
     logger.logTraceUseEffect('FOOTER-TABS - arrayOfLayerDataBatch', arrayOfLayerDataBatch, selectedTab, isCollapsed);
 
+    // If the details tab is not in the footer bar tabs config, return
+    if (footerBarTabsConfig && !footerBarTabsConfig.tabs.core.includes('details')) return;
+
     // If we're on the details panel and the footer is collapsed
     if (selectedTab === `details` && isCollapsed) {
       // Uncollapse it

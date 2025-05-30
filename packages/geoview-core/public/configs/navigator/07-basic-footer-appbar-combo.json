@@ -251,12 +251,13 @@
   "theme": "geo.ca",
   "footerBar": {
     "tabs": {
-      "core": ["layers", "details", "data-table"]
-    }
+      "core": ["layers", "data-table"]
+    },
+    "collapsed": true
   },
   "appBar": {
     "tabs": {
-      "core": ["legend"]
+      "core": ["legend", "details"]
     },
     "selectedTab": "legend"
   },
