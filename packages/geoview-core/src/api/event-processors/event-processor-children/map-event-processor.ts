@@ -201,16 +201,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    */
   static async getMapViewerPlugins(mapId: string): Promise<PluginsContainer> {
     // TODO: Check - Remove the try/catch here to force explicit case-by-case handling instead of via shared function.
-    try {
-      // Check if the plugins exist
-      // TODO: if you run the code fast enough (only happened to me in the TimeSliderEventProcessor),
-      // TO.DOCONT: the getMapViewer should be async, because it can be unset as well ( so not just getMapViewerPlugins() ).
-      await whenThisThen(() => api && api.hasMapViewer(mapId) && api.getMapViewer(mapId).plugins);
-    } catch (error: unknown) {
-      // Log
-      logger.logError(`Couldn't retrieve the plugins instance on Map Viewer`, error);
-    }
-
+    await whenThisThen(() => api && api.hasMapViewer(mapId));
     return api.getMapViewer(mapId).plugins;
   }
 
