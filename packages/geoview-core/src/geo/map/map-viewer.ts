@@ -461,13 +461,12 @@ export class MapViewer {
    * render before returning the value.
    * @param {[number, number]} pointXY - The pixel coordinate to convert
    * @param {number} timeoutMs - The maximum time in milliseconds to wait for the getCoordinateFromPixel to return a value.
-   * @returns {Promise<[number, number]>} the map size
+   * @returns {Promise<Coordinate>} the map size
    */
-  getCoordinateFromPixel(pointXY: [number, number], timeoutMs: number): Promise<[number, number]> {
+  getCoordinateFromPixel(pointXY: [number, number], timeoutMs: number): Promise<Coordinate> {
     // When the getCoordinateFromPixel() function actually returns a coordinate
     return whenThisThen(() => {
-      const coordinate = this.map.getCoordinateFromPixel(pointXY)! || this.map.getCoordinateFromPixel(pointXY) !== null;
-      return [coordinate[0], coordinate[1]] as [number, number];
+      return this.map.getCoordinateFromPixel(pointXY)!;
     }, timeoutMs);
   }
 
