@@ -1,7 +1,7 @@
 import { Coordinate } from 'ol/coordinate';
 import { TypeJsonObject } from '@/api/config/types/config-types';
 export type TypeClickMarker = {
-    lnglat: Coordinate;
+    lonlat: Coordinate;
     symbology?: TypeJsonObject;
 };
 /**

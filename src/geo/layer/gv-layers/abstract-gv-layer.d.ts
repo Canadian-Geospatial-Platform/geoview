@@ -191,13 +191,13 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
     protected getFeatureInfoAtCoordinate(map: OLMap, location: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overridable function to return of feature information at the provided long lat coordinate.
-     * @param {OLMap} map - The Map where to get Feature Info At LongLat from.
-     * @param {Coordinate} lnglat - The coordinate that will be used by the query.
+     * @param {OLMap} map - The Map where to get Feature Info At LonLat from.
+     * @param {Coordinate} lonlat - The coordinate that will be used by the query.
      * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
      * @param {AbortController?} abortController - The optional abort controller.
      * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getFeatureInfoAtLongLat(map: OLMap, lnglat: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
+    protected getFeatureInfoAtLonLat(map: OLMap, lonlat: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overridable function to return of feature information at the provided bounding box.
      * @param {OLMap} map - The Map where to get Feature using BBox from.
@@ -322,34 +322,44 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
     offLayerStyleChanged(callback: LayerStyleChangedDelegate): void;
     /**
      * Registers when a layer have been first loaded on the map event handler.
-     * @param {LayerLoadDelegate} callback - The callback to be executed whenever the event is emitted
+     * @param {LayerDelegate} callback - The callback to be executed whenever the event is emitted
      */
-    onLayerFirstLoaded(callback: LayerLoadDelegate): void;
+    onLayerFirstLoaded(callback: LayerDelegate): void;
     /**
      * Unregisters when a layer have been first loaded on the map event handler.
-     * @param {LayerLoadDelegate} callback - The callback to stop being called whenever the event is emitted
+     * @param {LayerDelegate} callback - The callback to stop being called whenever the event is emitted
      */
-    offLayerFirstLoaded(callback: LayerLoadDelegate): void;
+    offLayerFirstLoaded(callback: LayerDelegate): void;
     /**
      * Registers when a layer is turning into a loading stage event handler.
-     * @param {LayerLoadDelegate} callback - The callback to be executed whenever the event is emitted
+     * @param {LayerDelegate} callback - The callback to be executed whenever the event is emitted
      */
-    onLayerLoading(callback: LayerLoadDelegate): void;
+    onLayerLoading(callback: LayerDelegate): void;
     /**
      * Unregisters when a layer is turning into a loading stage event handler.
-     * @param {LayerLoadDelegate} callback - The callback to stop being called whenever the event is emitted
+     * @param {LayerDelegate} callback - The callback to stop being called whenever the event is emitted
      */
-    offLayerLoading(callback: LayerLoadDelegate): void;
+    offLayerLoading(callback: LayerDelegate): void;
     /**
      * Registers when a layer is turning into a loaded stage event handler.
-     * @param {LayerLoadDelegate} callback - The callback to be executed whenever the event is emitted
+     * @param {LayerDelegate} callback - The callback to be executed whenever the event is emitted
      */
-    onLayerLoaded(callback: LayerLoadDelegate): void;
+    onLayerLoaded(callback: LayerDelegate): void;
     /**
      * Unregisters when a layer is turning into a loaded stage event handler.
-     * @param {LayerLoadDelegate} callback - The callback to stop being called whenever the event is emitted
+     * @param {LayerDelegate} callback - The callback to stop being called whenever the event is emitted
      */
-    offLayerLoaded(callback: LayerLoadDelegate): void;
+    offLayerLoaded(callback: LayerDelegate): void;
+    /**
+     * Registers when a layer is turning into a error stage event handler.
+     * @param {LayerDelegate} callback - The callback to be executed whenever the event is emitted
+     */
+    onLayerError(callback: LayerErrorDelegate): void;
+    /**
+     * Unregisters when a layer is turning into a error stage event handler.
+     * @param {LayerDelegate} callback - The callback to stop being called whenever the event is emitted
+     */
+    offLayerError(callback: LayerErrorDelegate): void;
     /**
      * Registers a layer message event handler.
      * @param {LayerMessageEventDelegate} callback - The callback to be executed whenever the event is emitted
@@ -390,10 +400,6 @@ export type LegendQueriedEvent = {
  */
 export type LegendQueriedDelegate = EventDelegateBase<AbstractGVLayer, LegendQueriedEvent, void>;
 /**
- * Define a delegate for the event handler function signature
- */
-export type LayerFilterAppliedDelegate = EventDelegateBase<AbstractGVLayer, LayerFilterAppliedEvent, void>;
-/**
  * Define an event for the delegate
  */
 export type LayerFilterAppliedEvent = {
@@ -402,17 +408,21 @@ export type LayerFilterAppliedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-export type LayerLoadDelegate = EventDelegateBase<AbstractGVLayer, LayerLoadEvent, void>;
+export type LayerFilterAppliedDelegate = EventDelegateBase<AbstractGVLayer, LayerFilterAppliedEvent, void>;
+/**
+ * Define a delegate for the event handler function signature
+ */
+export type LayerDelegate = EventDelegateBase<AbstractGVLayer, undefined, void>;
 /**
  * Define an event for the delegate
  */
-export type LayerLoadEvent = {
-    layerPath: string;
+export type LayerErrorEvent = {
+    error: unknown;
 };
 /**
  * Define a delegate for the event handler function signature
  */
-export type LayerMessageDelegate = EventDelegateBase<AbstractGVLayer, LayerMessageEvent, void>;
+export type LayerErrorDelegate = EventDelegateBase<AbstractGVLayer, LayerErrorEvent, void>;
 /**
  * Define an event for the delegate
  */
@@ -422,3 +432,7 @@ export type LayerMessageEvent = {
     messageType: SnackbarType;
     notification: boolean;
 };
+/**
+ * Define a delegate for the event handler function signature
+ */
+export type LayerMessageDelegate = EventDelegateBase<AbstractGVLayer, LayerMessageEvent, void>;

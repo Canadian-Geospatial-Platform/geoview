@@ -1,7 +1,6 @@
-import { CV_CONFIG_GEOCORE_TYPE } from '@/api/config/types/config-constants';
 import { TypeJsonObject, TypeJsonArray } from '@/api/config/types/config-types';
 import { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config';
-import { AbstractGeoviewLayerConfig, EntryConfigBaseClass, TypeDisplayLanguage, TypeGeoviewLayerType, TypeLayerStyleConfig } from '@/api/config/types/map-schema-types';
+import { AbstractGeoviewLayerConfig, EntryConfigBaseClass, TypeDisplayLanguage, TypeGeoviewLayerType, TypeInitialGeoviewLayerType, TypeLayerStyleConfig } from '@/api/config/types/map-schema-types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 /**
  * The API class that create configuration object. It is used to validate and read the service and layer metadata.
@@ -62,6 +61,13 @@ export declare class ConfigApi {
      */
     static convertGeocoreToGeoview(language: TypeDisplayLanguage, config: TypeJsonArray | TypeJsonObject, geocoreUrl?: string, filterUndefinedValues?: boolean): Promise<TypeJsonArray | TypeJsonObject | undefined>;
     /**
+     * Processes listOfGeoviewLayers and converts any shapefile entries to geojson.
+     * @param {TypeJsonArray | TypeJsonObject} listOfGeoviewLayers Layers to process.
+     * @returns {Promise<TypeJsonArray>} The resulting configurations or undefined if there is an error.
+     * @static @private
+     */
+    static convertShapefileToGeojson(listOfGeoviewLayers: TypeJsonArray | TypeJsonObject): Promise<TypeJsonArray | TypeJsonObject | undefined>;
+    /**
      * This method validates the configuration of map elements using the json string or json object supplied by the user.
      * The returned value is a configuration object initialized only from the configuration passed as a parameter.
      * Validation of the configuration based on metadata and application of default values is not performed here,
@@ -99,7 +105,7 @@ export declare class ConfigApi {
      * @returns {AbstractGeoviewLayerConfig | undefined} The layer configuration or undefined if there is an error.
      * @static
      */
-    static createLayerConfig(serviceAccessString: string, layerType: TypeGeoviewLayerType | typeof CV_CONFIG_GEOCORE_TYPE, listOfLayerId?: TypeJsonArray, language?: TypeDisplayLanguage): Promise<AbstractGeoviewLayerConfig | undefined>;
+    static createLayerConfig(serviceAccessString: string, layerType: TypeInitialGeoviewLayerType, listOfLayerId?: TypeJsonArray, language?: TypeDisplayLanguage): Promise<AbstractGeoviewLayerConfig | undefined>;
     /**
      * Create the layer tree from the service metadata. If an error is detected, throw an error.
      * When listOfLayerId is [], then the entire metadata layer tree is returned.

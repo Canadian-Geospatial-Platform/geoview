@@ -133,10 +133,10 @@ export declare abstract class Projection {
      */
     static getProjectionFromString(projection: string | ProjectionLike): OLProjection;
     /**
-     * Gets the projection representing a LngLat projection.
-     * @return {OLProjection} Projection object representing LngLat.
+     * Gets the projection representing a LonLat projection.
+     * @return {OLProjection} Projection object representing LonLat.
      */
-    static getProjectionLngLat(): OLProjection;
+    static getProjectionLonLat(): OLProjection;
     /**
      * Get map point resolution
      * @param {string} projection - The projection code

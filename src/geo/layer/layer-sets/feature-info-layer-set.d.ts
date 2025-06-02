@@ -43,10 +43,10 @@ export declare class FeatureInfoLayerSet extends AbstractLayerSet {
     protected onDeleteFromStore(layerPath: string): void;
     /**
      * Queries the features at the provided coordinate for all the registered layers.
-     * @param {Coordinate} longLatCoordinate - The longitude/latitude coordinate where to query the features
+     * @param {Coordinate} lonLatCoordinate - The longitude/latitude coordinate where to query the features
      * @returns {Promise<TypeFeatureInfoResultSet>} A promise which will hold the result of the query
      */
-    queryLayers(longLatCoordinate: Coordinate): Promise<TypeFeatureInfoResultSet>;
+    queryLayers(lonLatCoordinate: Coordinate): Promise<TypeFeatureInfoResultSet>;
     /**
      * Function used to enable listening of click events. When a layer path is not provided,
      * click events listening is enabled for all layers

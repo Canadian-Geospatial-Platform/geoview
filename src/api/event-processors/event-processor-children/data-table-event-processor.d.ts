@@ -1,5 +1,5 @@
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
-import { IDataTableState, IDataTableSettings, TypeAllFeatureInfoResultSet, TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { IDataTableState, IDataTableSettings, TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { TypeFeatureInfoEntry, TypeLayerData } from '@/api/config/types/map-schema-types';
 export declare class DataTableEventProcessor extends AbstractEventProcessor {
     #private;
@@ -48,9 +48,9 @@ export declare class DataTableEventProcessor extends AbstractEventProcessor {
      * Shortcut to get the DataTable state for a given map id
      * @param {string} mapId - Id of the map.
      * @param {string} layerPath - Layer path to apply filter.
-     * @returns {Promise<TypeAllFeatureInfoResultSet | void>}
+     * @returns {Promise<TypeFeatureInfoEntry[] | void>}
      */
-    static triggerGetAllFeatureInfo(mapId: string, layerPath: string): Promise<TypeAllFeatureInfoResultSet | void>;
+    static triggerGetAllFeatureInfo(mapId: string, layerPath: string): Promise<TypeFeatureInfoEntry[] | void>;
     /**
      * Propagates feature info layer sets to the store.
      * The propagation actually happens only if it wasn't already there. Otherwise, no update is propagated.

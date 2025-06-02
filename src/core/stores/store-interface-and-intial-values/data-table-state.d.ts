@@ -23,7 +23,7 @@ export interface IDataTableState {
         setSelectedFeature: (feature: TypeFeatureInfoEntry) => void;
         setSelectedLayerPath: (layerPath: string) => void;
         setToolbarRowSelectedMessageEntry: (message: string, layerPath: string) => void;
-        triggerGetAllFeatureInfo: (layerPath: string) => Promise<TypeAllFeatureInfoResultSet | void>;
+        triggerGetAllFeatureInfo: (layerPath: string) => Promise<TypeFeatureInfoEntry[] | void>;
     };
     setterActions: {
         setActiveLayersData: (layers: TypeLayerData[]) => void;
