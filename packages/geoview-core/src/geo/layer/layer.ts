@@ -101,6 +101,8 @@ import { ConfigApi } from '@/api/config/config-api';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { LayerGeoCoreError } from '@/core/exceptions/geocore-exceptions';
 import { ShapefileReader } from '@/core/utils/config/reader/shapefile-reader';
+import { TemporaryLayerEntryConfig } from '@/core/utils/config/validation-classes/temporary-entry-config';
+// import { LayerMockup } from '@/geo/layer/layer-mockup';
 
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
@@ -378,26 +380,60 @@ export class LayerApi {
         // Create a promise to fetch from UUID
         const promise = geoCore.createLayersFromUUID(geoviewLayerConfig.geoviewLayerId, geoviewLayerConfig);
 
+        // While the promise is running add a temporary config entry
+        const tempo = new TemporaryLayerEntryConfig(geoviewLayerConfig);
+        this.registerLayerConfigInit(tempo);
+
         // Catch failed promises here. The filled promises will be taken care of with the others below.
-        promise.catch((error: unknown) => {
-          // Show the error(s)
-          this.showLayerError(error, geoviewLayerConfig.geoviewLayerId);
-        });
+        promise
+          .then((gvLayerConfigs) => {
+            // Remove the temporary config entry
+            this.removeLayerUsingPath(tempo.layerPath);
+
+            // Add them
+            gvLayerConfigs.forEach((gvLayerConfig) => {
+              // Add it
+              this.addGeoviewLayer(gvLayerConfig);
+            });
+          })
+          .catch((error: unknown) => {
+            // Show the error(s)
+            this.showLayerError(error, geoviewLayerConfig.geoviewLayerId);
+          });
 
         // Add the promise to the array
         promisesOfGeoCoreGeoviewLayers.push(promise);
       } else if (mapConfigLayerEntryIsShapefile(geoviewLayerConfig)) {
+        // Create a promise to fetch Shapefile
         const promise = ShapefileReader.convertShapefileConfigToGeoJson(geoviewLayerConfig);
 
+        // While the promise is running add a temporary config entry
+        const tempo = new TemporaryLayerEntryConfig(geoviewLayerConfig);
+        this.registerLayerConfigInit(tempo);
+
         // Catch failed promises here. The filled promises will be taken care of with the others below.
-        promise.catch((error: unknown) => {
-          // Show the error(s)
-          this.showLayerError(error, geoviewLayerConfig.geoviewLayerId);
-        });
+        promise
+          .then((gvLayerConfigs) => {
+            // Remove the temporary config entry
+            this.removeLayerUsingPath(tempo.layerPath);
+
+            // Add them
+            gvLayerConfigs.forEach((gvLayerConfig) => {
+              // Add it
+              this.addGeoviewLayer(gvLayerConfig);
+            });
+          })
+          .catch((error: unknown) => {
+            // Show the error(s)
+            this.showLayerError(error, geoviewLayerConfig.geoviewLayerId);
+          });
 
         // Add the promise to the array
         promisesOfGeoCoreGeoviewLayers.push(promise);
       } else {
+        // Add it
+        this.addGeoviewLayer(geoviewLayerConfig);
+
         // Add a resolved promise for a regular Geoview Layer Config
         promisesOfGeoCoreGeoviewLayers.push(Promise.resolve([geoviewLayerConfig]));
       }
@@ -427,9 +463,6 @@ export class LayerApi {
             // Generate array of layer order information
             const layerInfos = LayerApi.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
             orderedLayerInfos.push(...layerInfos);
-
-            // Add it
-            this.addGeoviewLayer(geoviewLayerConfig);
           } catch (error: unknown) {
             // An error happening here likely means a particular, trivial, config error.
             // The majority of typicaly errors happen in the addGeoviewLayer promise catcher, not here.
