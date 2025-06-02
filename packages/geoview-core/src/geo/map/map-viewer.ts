@@ -678,11 +678,11 @@ export class MapViewer {
 
   /**
    * Set map extent.
-   *
    * @param {Extent} extent - New extent to zoom to.
+   * @returns {Promise<void>} A promise that resolves when the zoom operation completes.
    */
-  async setExtent(extent: Extent): Promise<void> {
-    await MapEventProcessor.zoomToExtent(this.mapId, extent);
+  setExtent(extent: Extent): Promise<void> {
+    return MapEventProcessor.zoomToExtent(this.mapId, extent);
   }
 
   /**
@@ -875,6 +875,7 @@ export class MapViewer {
    *
    * @param {Extent} extent - The extent to zoom to.
    * @param {FitOptions} options - The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 }).
+   * @returns {Promise<void>} A promise that resolves when the zoom operation completes.
    */
   zoomToExtent(extent: Extent, options?: FitOptions): Promise<void> {
     // TODO: Discussion - Where is the line between a function using MapEventProcessor in MapViewer vs in MapState action?
@@ -898,6 +899,7 @@ export class MapViewer {
    *
    * @param {Extent | Coordinate} extent - The extent or coordinate to zoom to.
    * @param {FitOptions} options - The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 }).
+   * @returns {Promise<void>} A promise that resolves when the zoom operation completes.
    */
   zoomToLonLatExtentOrCoordinate(extent: Extent | Coordinate, options?: FitOptions): Promise<void> {
     const fullExtent = extent.length === 2 ? [extent[0], extent[1], extent[0], extent[1]] : extent;

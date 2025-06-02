@@ -34,7 +34,6 @@ import {
   layerEntryIsGroupLayer,
   TypeLayerStatus,
   GeoCoreLayerConfig,
-  ShapefileLayerConfig,
 } from '@/api/config/types/map-schema-types';
 import { GeoJSON, layerConfigIsGeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
 import { GeoPackage, layerConfigIsGeoPackage } from '@/geo/layer/geoview-layers/vector/geopackage';
@@ -364,7 +363,7 @@ export class LayerApi {
         const geoCore = new GeoCore(this.getMapId(), this.mapViewer.getDisplayLanguage());
 
         // Create a promise to fetch from UUID
-        const promise = geoCore.createLayersFromUUID(geoviewLayerConfig.geoviewLayerId, geoviewLayerConfig as GeoCoreLayerConfig);
+        const promise = geoCore.createLayersFromUUID(geoviewLayerConfig.geoviewLayerId, geoviewLayerConfig);
 
         // Catch failed promises here. The filled promises will be taken care of with the others below.
         promise.catch((error: unknown) => {
@@ -375,9 +374,7 @@ export class LayerApi {
         // Add the promise to the array
         promisesOfGeoCoreGeoviewLayers.push(promise);
       } else if (mapConfigLayerEntryIsShapefile(geoviewLayerConfig)) {
-        const promise = ShapefileReader.convertShapefileConfigToGeoJson(geoviewLayerConfig as ShapefileLayerConfig) as Promise<
-          TypeGeoviewLayerConfig[]
-        >;
+        const promise = ShapefileReader.convertShapefileConfigToGeoJson(geoviewLayerConfig);
 
         // Catch failed promises here. The filled promises will be taken care of with the others below.
         promise.catch((error: unknown) => {
@@ -389,7 +386,7 @@ export class LayerApi {
         promisesOfGeoCoreGeoviewLayers.push(promise);
       } else {
         // Add a resolved promise for a regular Geoview Layer Config
-        promisesOfGeoCoreGeoviewLayers.push(Promise.resolve([geoviewLayerConfig as TypeGeoviewLayerConfig]));
+        promisesOfGeoCoreGeoviewLayers.push(Promise.resolve([geoviewLayerConfig]));
       }
     }
 
