@@ -388,7 +388,7 @@ export class MapViewer {
   }
 
   /**
-   * Set the map viewSettings (coordinate values in lat/long)
+   * Set the map viewSettings (coordinate values in lon/lat)
    *
    * @param {TypeViewSettings} mapView - Map viewSettings object
    */

@@ -512,7 +512,7 @@ export type TypeBaseSourceInitialConfig = {
    */
   dataAccessPath?: string;
   /**
-   * Spatial Reference EPSG code supported (https://epsg.io/). We support lat/long, Web Mercator and Lambert Conical Conform Canada.
+   * Spatial Reference EPSG code supported (https://epsg.io/). We support lon/lat, Web Mercator and Lambert Conical Conform Canada.
    * Default = 3978.
    */
   projection?: TypeValidSourceProjectionCodes; // TODO: refactor - remove ?
