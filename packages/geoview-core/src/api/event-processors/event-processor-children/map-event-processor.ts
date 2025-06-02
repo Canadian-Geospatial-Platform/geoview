@@ -146,7 +146,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     store.getState().mapState.setterActions.setMapSize(size);
 
     // Get the scale information
-    this.getScaleInfoFromDomElement(mapId)
+    this.getScaleInfoFromDomElement(mapId, MapViewer.INIT_TIMEOUT_PROMISE)
       .then((scale) => {
         // Set the map scale
         MapEventProcessor.setMapScale(mapId, scale);
@@ -217,16 +217,24 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Asynchronously retrieves the scale information as read from the Dom element for the given map id
-   * @param {string} mapId The mapId
-   * @returns {Promise<TypeScaleInfo>} A Promise to receive scale information when the dom has it
+   * Asynchronously retrieves the scale information from the DOM elements for the given map ID.
+   *
+   * @param {string} mapId - The unique identifier of the map.
+   * @param {number} timeoutMs - The maximum time in milliseconds to wait for the DOM elements to be available.
+   * @returns {Promise<TypeScaleInfo>} A promise that resolves to the scale information object when available.
+   *
+   * @description
+   * This method waits for the scale control DOM elements (both metric and imperial) to be present and populated.
+   * It then extracts the scale bar widths and labels, as well as the numeric scale value, and returns them in a TypeScaleInfo object.
+   * If the elements are not available within the specified timeout, the promise will reject.
    */
-  static async getScaleInfoFromDomElement(mapId: string): Promise<TypeScaleInfo> {
+  static async getScaleInfoFromDomElement(mapId: string, timeoutMs: number): Promise<TypeScaleInfo> {
     // Check if the scaleControl exists and is showing information, wait for it
     await whenThisThen(
       () =>
         document.getElementById(`${mapId}-scaleControlBarMetric`)?.querySelector('.ol-scale-text') &&
-        document.getElementById(`${mapId}-scaleControlBarImperial`)?.querySelector('.ol-scale-text')
+        document.getElementById(`${mapId}-scaleControlBarImperial`)?.querySelector('.ol-scale-text'),
+      timeoutMs
     );
 
     // Get metric values

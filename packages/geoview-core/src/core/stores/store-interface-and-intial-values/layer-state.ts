@@ -17,6 +17,7 @@ import {
   TypeResultSetEntry,
   TypeLayerControls,
   TypeGeoviewLayerType,
+  TypeTemporalDimension,
 } from '@/api/config/types/map-schema-types';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
@@ -52,6 +53,7 @@ export interface ILayerState {
     getLayerDefaultFilter: (layerPath: string) => string | undefined;
     getLayerDeleteInProgress: () => boolean;
     getLayerServiceProjection: (layerPath: string) => string | undefined;
+    getLayerTemporalDimension: (layerPath: string) => TypeTemporalDimension | undefined;
     refreshLayer: (layerPath: string) => void;
     setAllItemsVisibility: (layerPath: string, visibility: boolean) => void;
     setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => void;
@@ -209,6 +211,10 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       getLayerServiceProjection: (layerPath: string): string | undefined => {
         // Redirect to processor
         return LegendEventProcessor.getLayerServiceProjection(get().mapId, layerPath);
+      },
+
+      getLayerTemporalDimension: (layerPath: string): TypeTemporalDimension | undefined => {
+        return LegendEventProcessor.getLayerTemporalDimension(get().mapId, layerPath);
       },
 
       /**

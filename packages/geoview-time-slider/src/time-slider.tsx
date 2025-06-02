@@ -76,8 +76,6 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     step,
     range,
     minAndMax,
-    field,
-    fieldAlias,
     filtering,
     singleHandle,
     values,
@@ -372,7 +370,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
   return (
     <Grid>
-      <Box sx={{ padding: '0px 10px' }}>
+      <Box sx={{ padding: '10px 10px' }}>
         <Grid container sx={{ ...sxClasses.rightPanelBtnHolder, flexWrap: 'nowrap' }}>
           <Grid item xs={9}>
             <Typography component="div" sx={{ ...sxClasses.panelHeaders, paddingLeft: '20px', paddingTop: '10px' }}>
@@ -522,13 +520,6 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
           <Grid item xs={12}>
             <Typography component="div" sx={{ px: '20px', py: '5px' }}>
               {description}
-            </Typography>
-          </Grid>
-        )}
-        {fieldAlias && (
-          <Grid item xs={12}>
-            <Typography component="div" sx={{ px: '20px', py: '5px' }}>
-              {`${getLocalizedMessage(displayLanguage, 'timeSlider.slider.temporalField')}${fieldAlias !== field ? `${fieldAlias}(${field})` : fieldAlias}`}
             </Typography>
           </Grid>
         )}

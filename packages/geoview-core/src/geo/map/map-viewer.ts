@@ -12,6 +12,7 @@ import { Extent } from 'ol/extent';
 import { Projection as OLProjection } from 'ol/proj';
 import { Condition } from 'ol/events/condition';
 import { shared as iconImageCache } from 'ol/style/IconImageCache';
+import { Size } from 'ol/size';
 
 import queryString from 'query-string';
 import {
@@ -95,6 +96,12 @@ export class MapViewer {
 
   // The default densification number when forming layer extents, to make ture to compensate for earth curvature
   static DEFAULT_STOPS: number = 25;
+
+  // TODO: refactor UI - If we do not put a high timeout, ui start but the function getMapCoordinateFromPixel
+  // TD.CONT: AND scale component return null and fails. To patch, we add an higher time out for promise.
+  // TD.CONT: This solves for now the issue where the page start to load and user switch to another page and came back.
+  // Timeout value when map init to avoid when use the map is not ready, the UI will not start
+  static INIT_TIMEOUT_PROMISE: number = 9900000;
 
   // map config properties
   mapFeaturesConfig: TypeMapFeaturesConfig;
@@ -381,15 +388,86 @@ export class MapViewer {
   }
 
   /**
+   * Set the map viewSettings (coordinate values in lon/lat)
+   *
+   * @param {TypeViewSettings} mapView - Map viewSettings object
+   */
+  setView(mapView: TypeViewSettings): void {
+    const currentView = this.getView();
+    const viewOptions: ViewOptions = {};
+    viewOptions.projection = `EPSG:${mapView.projection}`;
+    viewOptions.zoom = mapView.initialView?.zoomAndCenter ? mapView.initialView?.zoomAndCenter[0] : currentView.getZoom();
+    viewOptions.center = mapView.initialView?.zoomAndCenter
+      ? Projection.transformFromLonLat(mapView.initialView?.zoomAndCenter[1], Projection.getProjectionFromString(viewOptions.projection))
+      : Projection.transformFromLonLat(
+          Projection.transformToLonLat(currentView.getCenter()!, currentView.getProjection()),
+          Projection.getProjectionFromString(viewOptions.projection)
+        );
+    viewOptions.minZoom = mapView.minZoom ? mapView.minZoom : currentView.getMinZoom();
+    viewOptions.maxZoom = mapView.maxZoom ? mapView.maxZoom : currentView.getMaxZoom();
+    viewOptions.rotation = mapView.rotation ? mapView.rotation : currentView.getRotation();
+    if (mapView.maxExtent)
+      viewOptions.extent = Projection.transformExtentFromProj(
+        mapView.maxExtent,
+        Projection.getProjectionLonLat(),
+        Projection.getProjectionFromString(`EPSG:${mapView.projection}`)
+      );
+
+    const newView = new View(viewOptions);
+    this.map.setView(newView);
+
+    // Because the view has changed we must re-register the view handlers
+    this.#registerViewHandlers(newView);
+  }
+
+  /**
    * Asynchronously gets the map center coordinate to give a chance for the map to
    * render before returning the value.
-   * @returns the map viewSettings
+   * @returns {Promise<Coordinate>} the map center
    */
   getCenter(): Promise<Coordinate> {
     // When the getCenter() function actually returns a coordinate
     return whenThisThen(() => {
       return this.getView().getCenter()!;
     });
+  }
+
+  /**
+   * Set the map center.
+   *
+   * @param {Coordinate} center - New center to use
+   */
+  setCenter(center: Coordinate): void {
+    const currentView = this.getView();
+    const transformedCenter = Projection.transformFromLonLat(center, currentView.getProjection());
+
+    currentView.setCenter(transformedCenter);
+  }
+
+  /**
+   * Asynchronously gets the map size to give a chance for the map to
+   * render before returning the value.
+   * @returns {Promise<Size>} the map size
+   */
+  getMapSize(): Promise<Size> {
+    // When the getSize() function actually returns a coordinate
+    return whenThisThen(() => {
+      return this.map.getSize()!;
+    });
+  }
+
+  /**
+   * Asynchronously gets the map coordinate from pixel to give a chance for the map to
+   * render before returning the value.
+   * @param {[number, number]} pointXY - The pixel coordinate to convert
+   * @param {number} timeoutMs - The maximum time in milliseconds to wait for the getCoordinateFromPixel to return a value.
+   * @returns {Promise<Coordinate>} the map size
+   */
+  getCoordinateFromPixel(pointXY: [number, number], timeoutMs: number): Promise<Coordinate> {
+    // When the getCoordinateFromPixel() function actually returns a coordinate
+    return whenThisThen(() => {
+      return this.map.getCoordinateFromPixel(pointXY)!;
+    }, timeoutMs);
   }
 
   /**
@@ -569,51 +647,6 @@ export class MapViewer {
     if (VALID_DISPLAY_THEME.includes(displayTheme)) {
       AppEventProcessor.setDisplayTheme(this.mapId, displayTheme);
     } else this.notifications.addNotificationError(getLocalizedMessage(this.getDisplayLanguage(), 'validation.changeDisplayTheme'));
-  }
-
-  /**
-   * Set the map viewSettings (coordinate values in lat/long)
-   *
-   * @param {TypeViewSettings} mapView - Map viewSettings object
-   */
-  setView(mapView: TypeViewSettings): void {
-    const currentView = this.getView();
-    const viewOptions: ViewOptions = {};
-    viewOptions.projection = `EPSG:${mapView.projection}`;
-    viewOptions.zoom = mapView.initialView?.zoomAndCenter ? mapView.initialView?.zoomAndCenter[0] : currentView.getZoom();
-    viewOptions.center = mapView.initialView?.zoomAndCenter
-      ? Projection.transformFromLonLat(mapView.initialView?.zoomAndCenter[1], Projection.getProjectionFromString(viewOptions.projection))
-      : Projection.transformFromLonLat(
-          Projection.transformToLonLat(currentView.getCenter()!, currentView.getProjection()),
-          Projection.getProjectionFromString(viewOptions.projection)
-        );
-    viewOptions.minZoom = mapView.minZoom ? mapView.minZoom : currentView.getMinZoom();
-    viewOptions.maxZoom = mapView.maxZoom ? mapView.maxZoom : currentView.getMaxZoom();
-    viewOptions.rotation = mapView.rotation ? mapView.rotation : currentView.getRotation();
-    if (mapView.maxExtent)
-      viewOptions.extent = Projection.transformExtentFromProj(
-        mapView.maxExtent,
-        Projection.getProjectionLonLat(),
-        Projection.getProjectionFromString(`EPSG:${mapView.projection}`)
-      );
-
-    const newView = new View(viewOptions);
-    this.map.setView(newView);
-
-    // Because the view has changed we must re-register the view handlers
-    this.#registerViewHandlers(newView);
-  }
-
-  /**
-   * Set the map center.
-   *
-   * @param {Coordinate} center - New center to use
-   */
-  setCenter(center: Coordinate): void {
-    const currentView = this.getView();
-    const transformedCenter = Projection.transformFromLonLat(center, currentView.getProjection());
-
-    currentView.setCenter(transformedCenter);
   }
 
   /**
@@ -1054,13 +1087,17 @@ export class MapViewer {
   /**
    * Gets if north is visible. This is not a perfect solution and is more a work around
    *
-   * @returns {boolean} true if visible, false otherwise
+   * @returns {Promise<boolean>} true if visible, false otherwise
    */
-  getNorthVisibility(): boolean {
+  async getNorthVisibility(): Promise<boolean> {
     // Check the container value for top middle of the screen
     // Convert this value to a lat long coordinate
-    const pointXY = [this.map.getSize()![0] / 2, 1];
-    const pt = Projection.transformToLonLat(this.map.getCoordinateFromPixel(pointXY), this.getView().getProjection());
+    const size = await this.getMapSize();
+    const pointXY: [number, number] = [size[0] / 2, 1];
+
+    // GV: Sometime, the getCoordinateFromPixel return null... use await
+    const pixel = await this.getCoordinateFromPixel(pointXY, MapViewer.INIT_TIMEOUT_PROMISE);
+    const pt = Projection.transformToLonLat(pixel, this.getView().getProjection());
 
     // If user is pass north, long value will start to be positive (other side of the earth).
     // This will work only for LCC Canada.
@@ -1245,7 +1282,7 @@ export class MapViewer {
     // If map isn't static
     if (this.mapFeaturesConfig.map.interaction !== 'static') {
       // Register handlers on pointer move and map single click
-      map.on('pointermove', debounce(this.#handleMapPointerMove.bind(this), 250, { leading: true }).bind(this));
+      map.on('pointermove', this.#handleMapPointerMove.bind(this));
       map.on('pointermove', debounce(this.#handleMapPointerStopped.bind(this), 750, { leading: false }).bind(this));
       map.on('singleclick', debounce(this.#handleMapSingleClick.bind(this), 1000, { leading: true }).bind(this));
     }
@@ -1454,7 +1491,7 @@ export class MapViewer {
   async #handleMapChangeSize(event: ObjectEvent): Promise<void> {
     try {
       // Get the scale information
-      const scale = await MapEventProcessor.getScaleInfoFromDomElement(this.mapId);
+      const scale = await MapEventProcessor.getScaleInfoFromDomElement(this.mapId, 1000);
 
       // Get the size as [number, number]
       const size = this.map.getSize() as unknown as [number, number];
@@ -1599,13 +1636,13 @@ export class MapViewer {
     const degreeRotation = this.getNorthArrowAngle();
 
     // Get the north visibility
-    const isNorthVisible = this.getNorthVisibility();
+    const isNorthVisible = await this.getNorthVisibility();
 
     // Get the map Extent
     const extent = this.getView().calculateExtent();
 
     // Get the scale information
-    const scale = await MapEventProcessor.getScaleInfoFromDomElement(this.mapId);
+    const scale = await MapEventProcessor.getScaleInfoFromDomElement(this.mapId, MapViewer.INIT_TIMEOUT_PROMISE);
 
     // Save in the store
     MapEventProcessor.setMapMoveEnd(this.mapId, centerCoordinates, pointerPosition, degreeRotation, isNorthVisible, extent, scale);

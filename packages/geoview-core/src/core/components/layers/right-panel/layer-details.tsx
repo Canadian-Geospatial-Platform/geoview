@@ -71,6 +71,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     getLayerBounds,
     getLayerDefaultFilter,
     getLayerServiceProjection,
+    getLayerTemporalDimension,
     setLayerHoverable,
     setLayerQueryable,
   } = useLayerStoreActions();
@@ -81,6 +82,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const metadataUrl = useAppMetadataServiceURL();
   const selectedLayer = layersData.find((_layer) => _layer.layerPath === layerDetails?.layerPath);
   const layerFilter = getLayerDefaultFilter(layerDetails.layerPath);
+  const layerTemporalDimension = getLayerTemporalDimension(layerDetails.layerPath);
   const layerNativeProjection = getLayerServiceProjection(layerDetails.layerPath);
 
   // Is highlight button disabled?
@@ -395,6 +397,9 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           <Box>{`${t('layers.layerType')}${layerDetails.type}`}</Box>
           {layerNativeProjection && <Box>{`${t('layers.layerServiceProjection')}${layerNativeProjection}`}</Box>}
           {layerFilter && <Box>{`${t('layers.layerDefaultFilter')}${layerFilter}`}</Box>}
+          {layerTemporalDimension && (
+            <Box>{`${t('layers.layerTemporalDimension')}${t('layers.layerTemporalDimensionField')} - ${layerTemporalDimension.field} -, min - ${layerTemporalDimension.range.range[0]} / max - ${layerTemporalDimension.range.range[1]}`}</Box>
+          )}
           {resources !== '' && (
             <Box className="info-container">
               {`${t('layers.layerResource')}`}

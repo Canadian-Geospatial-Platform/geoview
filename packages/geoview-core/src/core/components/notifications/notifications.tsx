@@ -188,6 +188,14 @@ export default memo(function Notifications(): JSX.Element {
 
   // Effects
   useEffect(() => {
+    if (open) {
+      // When panel open, remove the notification count on the popover. On new notification, it will continue to
+      // increment notification from those inside teh popover
+      setNotificationsCount(0);
+    }
+  }, [open]);
+
+  useEffect(() => {
     logger.logTraceUseEffect('Notifications - notifications list changed', notificationsCount, notifications);
 
     const curNotificationCount = _.sumBy(notifications, (n) => n.count);

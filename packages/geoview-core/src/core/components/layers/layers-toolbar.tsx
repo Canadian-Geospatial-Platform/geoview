@@ -12,32 +12,85 @@ import { TypeLayersViewDisplayState } from './types';
 import { logger } from '@/core/utils/logger';
 
 export function LayersToolbar(): JSX.Element {
+  // Log
+  logger.logTraceRender('components/layers/layers-toolbar');
+
+  // Hooks
   const theme = useTheme();
   const { t } = useTranslation<string>();
   const addButtonRef = useRef<HTMLButtonElement>(null);
+  const userClickedAdd = useRef(false);
 
   const layerToolbarStyle = {
     padding: '8px 18px 4px 8px',
     '& .MuiButton-startIcon': { [theme.breakpoints.down('md')]: { margin: 0, padding: '0 0.25rem' } },
   };
 
-  // access store
+  // Store
   const displayState = useLayerDisplayState();
   const legendLayers = useLayerLegendLayers();
   const { setDisplayState } = useLayerStoreActions();
 
-  const handleSetDisplayState = useCallback(
-    (dispState: TypeLayersViewDisplayState): void => {
-      logger.logTraceUseCallback('LAYER TOOLBAR - handleSetDisplayState', dispState);
+  // State
+  const lastDisplayState = useRef<TypeLayersViewDisplayState | null>(null);
 
-      setDisplayState(dispState);
+  /**
+   * Handles toolbar button clicks and sets the appropriate display state.
+   * For the Add button, it sets a flag to prevent auto-switching back to view mode.
+   */
+  const handleSetDisplayState = useCallback(
+    (displayStateParam: TypeLayersViewDisplayState): void => {
+      logger.logTraceUseCallback('LAYER TOOLBAR - handleSetDisplayState', displayStateParam);
+
+      // If user clicks Add, set the flag
+      if (displayStateParam === 'add') {
+        userClickedAdd.current = true;
+      } else {
+        userClickedAdd.current = false;
+      }
+
+      setDisplayState(displayStateParam);
     },
     [setDisplayState]
   );
 
-  useEffect((): void => {
-    if (displayState !== 'add' && legendLayers.length === 0) setDisplayState('add');
+  /**
+   * Primary effect for handling display state logic.
+   * - Forces 'add' state when no layers exist
+   * - Tracks display state changes
+   * - Resets flags when transitioning away from 'add' state
+   */
+  useEffect(() => {
+    // Always show 'add' panel when there are no layers
+    if (legendLayers.length === 0 && displayState !== 'add') {
+      setDisplayState('add');
+    }
+
+    // Track display state changes to handle transitions
+    if (lastDisplayState.current !== displayState) {
+      lastDisplayState.current = displayState;
+
+      // Reset the userClickedAdd flag when leaving 'add' state
+      if (displayState !== 'add') {
+        userClickedAdd.current = false;
+      }
+    }
   }, [displayState, legendLayers.length, setDisplayState]);
+
+  /**
+   * Secondary effect specifically for auto-switching to view mode.
+   * Only runs when the layer count changes to avoid race conditions.
+   * Auto-switches from 'add' to 'view' only when:
+   * 1. Layers exist
+   * 2. Current state is 'add'
+   * 3. User didn't explicitly click the Add button
+   */
+  useEffect(() => {
+    if (legendLayers.length > 0 && displayState === 'add' && !userClickedAdd.current) {
+      setDisplayState('view');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [legendLayers.length]); // Only depend on legendLayers.length
 
   return (
     <Box id="layers-toolbar" sx={layerToolbarStyle}>
