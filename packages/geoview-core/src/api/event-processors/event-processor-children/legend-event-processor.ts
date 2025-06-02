@@ -205,6 +205,20 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     return layer.getExtentFromFeatures(objectIds, layerApi.mapViewer.getProjection(), outfield);
   }
 
+  /**
+   * Retrieves the temporal dimension information for a specific layer.
+   *
+   * @param {string} mapId - The unique identifier of the map instance.
+   * @param {string} layerPath - The path to the layer.
+   * @returns {TypeTemporalDimension | undefined} - The temporal dimension information of the layer, or `undefined` if not available.
+   *
+   * @description
+   * This method fetches the Geoview layer for the specified layer path and checks if it has a `getTemporalDimension` method.
+   * If the method exists, it retrieves the temporal dimension information for the layer.
+   * If the layer doesn't support temporal dimensions, the method returns `undefined`.
+   *
+   * @throws {LayerNotFoundError} - If the specified layer cannot be found.
+   */
   static getLayerTemporalDimension(mapId: string, layerPath: string): TypeTemporalDimension | undefined {
     // Get the layer api
     const layerApi = MapEventProcessor.getMapViewerLayerAPI(mapId);
@@ -214,10 +228,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     if (!layer) throw new LayerNotFoundError(layerPath);
 
     // Get the temporal dimension calling the GV Layer method, check if getTemporalDimension exists and is a function
-    if (typeof (layer as AbstractGVLayer).getTemporalDimension === 'function') {
-      return (layer as AbstractGVLayer).getTemporalDimension();
-    }
-
+    if (layer instanceof AbstractGVLayer) return layer.getTemporalDimension();
     return undefined;
   }
 

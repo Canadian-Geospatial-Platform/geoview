@@ -12,6 +12,7 @@ import { Extent } from 'ol/extent';
 import { Projection as OLProjection } from 'ol/proj';
 import { Condition } from 'ol/events/condition';
 import { shared as iconImageCache } from 'ol/style/IconImageCache';
+import { Size } from 'ol/size';
 
 import queryString from 'query-string';
 import {
@@ -95,6 +96,12 @@ export class MapViewer {
 
   // The default densification number when forming layer extents, to make ture to compensate for earth curvature
   static DEFAULT_STOPS: number = 25;
+
+  // TODO: refactor UI - If we do not put a high timeout, ui start but the function getMapCoordinateFromPixel
+  // TD.CONT: AND scale component return null and fails. To patch, we add an higher time out for promise.
+  // TD.CONT: This solves for now the issue where the page start to load and user switch to another page and came back.
+  // Timeout value when map init to avoid when use the map is not ready, the UI will not start
+  static INIT_TIMEOUT_PROMISE: number = 9900000;
 
   // map config properties
   mapFeaturesConfig: TypeMapFeaturesConfig;
@@ -440,13 +447,12 @@ export class MapViewer {
   /**
    * Asynchronously gets the map size to give a chance for the map to
    * render before returning the value.
-   * @returns {Promise<[number, number]>} the map size
+   * @returns {Promise<Size>} the map size
    */
-  getMapSize(): Promise<[number, number]> {
+  getMapSize(): Promise<Size> {
     // When the getSize() function actually returns a coordinate
     return whenThisThen(() => {
-      const size = this.map.getSize()!;
-      return [size[0], size[1]] as [number, number];
+      return this.map.getSize()!;
     });
   }
 
@@ -454,17 +460,15 @@ export class MapViewer {
    * Asynchronously gets the map coordinate from pixel to give a chance for the map to
    * render before returning the value.
    * @param {[number, number]} pointXY - The pixel coordinate to convert
+   * @param {number} timeoutMs - The maximum time in milliseconds to wait for the getCoordinateFromPixel to return a value.
    * @returns {Promise<[number, number]>} the map size
    */
-  getCoordinateFromPixel(pointXY: [number, number]): Promise<[number, number]> {
-    // When the getSize() function actually returns a coordinate
-    // TODO: refactor UI - If we do not put a high timeout, ui start but the function return null and
-    // TD.CONT: component fails. To patch, we add an higher time out for promise. This solves for now the issue
-    // TD.CONT: where the page start to load and user switch to another page and came back.
+  getCoordinateFromPixel(pointXY: [number, number], timeoutMs: number): Promise<[number, number]> {
+    // When the getCoordinateFromPixel() function actually returns a coordinate
     return whenThisThen(() => {
-      const size = this.map.getCoordinateFromPixel(pointXY)! || this.map.getCoordinateFromPixel(pointXY) !== null;
-      return [size[0], size[1]] as [number, number];
-    }, 9900000);
+      const coordinate = this.map.getCoordinateFromPixel(pointXY)! || this.map.getCoordinateFromPixel(pointXY) !== null;
+      return [coordinate[0], coordinate[1]] as [number, number];
+    }, timeoutMs);
   }
 
   /**
@@ -1092,8 +1096,8 @@ export class MapViewer {
     const size = await this.getMapSize();
     const pointXY: [number, number] = [size[0] / 2, 1];
 
-    // GV: Sometime, the getCoordinateFromPixel return null... use aeait
-    const pixel = await this.getCoordinateFromPixel(pointXY);
+    // GV: Sometime, the getCoordinateFromPixel return null... use await
+    const pixel = await this.getCoordinateFromPixel(pointXY, MapViewer.INIT_TIMEOUT_PROMISE);
     const pt = Projection.transformToLonLat(pixel, this.getView().getProjection());
 
     // If user is pass north, long value will start to be positive (other side of the earth).
@@ -1488,7 +1492,7 @@ export class MapViewer {
   async #handleMapChangeSize(event: ObjectEvent): Promise<void> {
     try {
       // Get the scale information
-      const scale = await MapEventProcessor.getScaleInfoFromDomElement(this.mapId);
+      const scale = await MapEventProcessor.getScaleInfoFromDomElement(this.mapId, 1000);
 
       // Get the size as [number, number]
       const size = this.map.getSize() as unknown as [number, number];
@@ -1639,7 +1643,7 @@ export class MapViewer {
     const extent = this.getView().calculateExtent();
 
     // Get the scale information
-    const scale = await MapEventProcessor.getScaleInfoFromDomElement(this.mapId);
+    const scale = await MapEventProcessor.getScaleInfoFromDomElement(this.mapId, MapViewer.INIT_TIMEOUT_PROMISE);
 
     // Save in the store
     MapEventProcessor.setMapMoveEnd(this.mapId, centerCoordinates, pointerPosition, degreeRotation, isNorthVisible, extent, scale);
