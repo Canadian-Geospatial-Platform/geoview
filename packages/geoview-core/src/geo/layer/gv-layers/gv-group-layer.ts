@@ -58,4 +58,6 @@ export class GVGroupLayer extends AbstractBaseLayer {
     // Return the total attributions
     return totalAttributions;
   }
+
+  // TODO: Refactor - Add a 'addLayer' accepting a GVLayer object so that the GVGroupLayer object can work with GVLayer objects instead of simply OL Layers via getOlLayer().getLayers().
 }
