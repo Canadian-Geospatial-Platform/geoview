@@ -519,8 +519,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
       // reload the basemap from new projection
       await this.resetBasemap(mapId);
 
-      // refresh layers so new projection is render properly and await on it
-      await this.getMapViewer(mapId).refreshLayers();
+      // refresh layers so new projection is render properly
+      // TODO: Clean - Commented out to test it out, seems fine without it? 2025-06-03
+      // this.getMapViewer(mapId).refreshLayers();
 
       // When the map projection is changed, all layer bounds must be recalculated
       this.getMapViewer(mapId).layer.recalculateBoundsAll();
