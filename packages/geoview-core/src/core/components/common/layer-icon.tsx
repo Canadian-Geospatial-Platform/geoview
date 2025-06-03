@@ -138,6 +138,7 @@ export const LayerIcon = memo(function LayerIcon({ layerPath }: LayerIconProps):
   const legendQueryStatus = useSelectorLayerLegendQueryStatus(layerPath);
   const layerChildren = useSelectorLayerChildren(layerPath);
 
+  // If has children (is a group layer)
   const hasChildren = layerChildren && layerChildren.length;
 
   // If there is an error in layer or query status, flag it and show icon error
@@ -156,7 +157,6 @@ export const LayerIcon = memo(function LayerIcon({ layerPath }: LayerIconProps):
     );
   }
 
-  const hasChildren = layerChildren && layerChildren.length;
   if (hasChildren) return <GroupWorkOutlinedIcon color="primary" />;
 
   return <IconStack layerPath={layerPath} />;
