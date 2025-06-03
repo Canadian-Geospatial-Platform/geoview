@@ -3,14 +3,14 @@
 Below is an alphabetical list of all map viewer events available in GeoView. These events can be used to respond to various map interactions and state changes.
 
 ## Best Practices
-Register events after initialization: Always register your event handlers inside the onMapInit or onMapReady callbacks.
-Error handling: Include error handling in your event callbacks to prevent uncaught exceptions.
-Performance: Be mindful of performance when handling events that fire frequently (like onMapMoveEnd or onMapZoomEnd).
-Event cleanup: If your application dynamically creates and destroys maps, make sure to remove event listeners when they're no longer needed.
+- Register events after initialization: Always register your event handlers inside the onMapInit or onMapReady callbacks.
+- Error handling: Include error handling in your event callbacks to prevent uncaught exceptions.
+- Performance: Be mindful of performance when handling events that fire frequently (like onMapMoveEnd or onMapZoomEnd).
+- Event cleanup: If your application dynamically creates and destroys maps, make sure to remove event listeners when they're no longer needed.
 
 ## How to Use Map Viewer Events
 
-```javascript
+```ts
 // After initializing the map with cgpv.init()
 cgpv.onMapInit((mapViewer) => {
   // Register event handlers on the map viewer instance
@@ -45,7 +45,7 @@ cgpv.onMapInit((mapViewer) => {
 <a id="onbasemapchanged"></a>
 
 #### onBasemapChanged
-```javascript
+```ts
 /**
  * Triggered when the map's basemap is changed.
  *
@@ -64,7 +64,7 @@ mapViewer.onBasemapChanged((sender, payload) => {
 <a id="oncrosshairmoved"></a>
 
 #### onCrosshairMoved
-```javascript
+```ts
 /**
  * Triggered when the map's crosshair is moved (keyboard navigation).
  *
@@ -81,7 +81,7 @@ mapViewer.onCrosshairMoved((sender, payload) => {
 <a id="onfeaturehighlight"></a>
 
 #### onFeatureHighlight
-```javascript
+```ts
 /**
  * Triggered when a feature is highlighted on the map.
  *
@@ -99,7 +99,7 @@ mapViewer.onFeatureHighlight((sender, payload) => {
 <a id="onfeatureselect"></a>
 
 #### onFeatureSelect
-```javascript
+```ts
 /**
  * Triggered when a feature is selected on the map.
  *
@@ -118,7 +118,7 @@ mapViewer.onFeatureSelect((sender, payload) => {
 <a id="onfeatureunhighlight"></a>
 
 #### onFeatureUnhighlight
-```javascript
+```ts
 /**
  * Triggered when a feature is no longer highlighted.
  *
@@ -135,7 +135,7 @@ mapViewer.onFeatureUnhighlight((sender, payload) => {
 <a id="onfeatureunselect"></a>
 
 #### onFeatureUnselect
-```javascript
+```ts
 /**
  * Triggered when a feature is unselected.
  *
@@ -152,7 +152,7 @@ mapViewer.onFeatureUnselect((sender, payload) => {
 <a id="onkeyboardnavigationactivated"></a>
 
 #### onKeyboardNavigationActivated
-```javascript
+```ts
 /**
  * Triggered when keyboard navigation is activated or deactivated.
  *
@@ -168,7 +168,7 @@ mapViewer.onKeyboardNavigationActivated((sender, payload) => {
 <a id="onmapclick"></a>
 
 ####  onMapClick
-```javascript
+```ts
 /**
  * Triggered when the map is clicked.
  *
@@ -186,7 +186,7 @@ mapViewer.onMapClick((sender, payload) => {
 <a id="onmaplanguagechanged"></a>
 
 #### onMapLanguageChanged
-```javascript
+```ts
 /**
  * Triggered when the map's display language is changed.
  *
@@ -203,7 +203,7 @@ mapViewer.onMapLanguageChanged((sender, payload) => {
 <a id="onmapmoveend"></a>
 
 #### onMapMoveEnd
-```javascript
+```ts
 /**
  * Triggered when the map stops moving (pan/drag).
  *
@@ -220,7 +220,7 @@ mapViewer.onMapMoveEnd((sender, payload) => {
 <a id="onmapmovestart"></a>
 
 #### onMapMoveStart
-```javascript
+```ts
 /**
  * Triggered when the map starts moving.
  *
@@ -237,7 +237,7 @@ mapViewer.onMapMoveStart((sender, payload) => {
 <a id="onmapprojectionchanged"></a>
 
 #### onMapProjectionChanged
-```javascript
+```ts
 /**
  * Triggered when the map's projection is changed.
  *
@@ -254,7 +254,7 @@ mapViewer.onMapProjectionChanged((sender, payload) => {
 <a id="onmapresize"></a>
 
 #### onMapResize
-```javascript
+```ts
 /**
  * Triggered when the map is resized.
  *
@@ -271,7 +271,7 @@ mapViewer.onMapResize((sender, payload) => {
 <a id="onmaprotationchanged"></a>
 
 #### onMapRotationChanged
-```javascript
+```ts
 /**
  * Triggered when the map's rotation is changed.
  *
@@ -288,7 +288,7 @@ mapViewer.onMapRotationChanged((sender, payload) => {
 <a id="onmapthemechanged"></a>
 
 #### onMapThemeChanged
-```javascript
+```ts
 /**
  * Triggered when the map's display theme is changed.
  *
@@ -305,7 +305,7 @@ mapViewer.onMapThemeChanged((sender, payload) => {
 <a id="onmapzoomend"></a>
 
 #### onMapZoomEnd
-```javascript
+```ts
 /**
  * Triggered when a zoom operation ends.
  *
@@ -323,7 +323,7 @@ mapViewer.onMapZoomEnd((sender, payload) => {
 <a id="onmapzoomstart"></a>
 
 #### onMapZoomStart
-```javascript
+```ts
 /**
  * Triggered when a zoom operation starts.
  *
@@ -340,7 +340,7 @@ mapViewer.onMapZoomStart((sender, payload) => {
 <a id="onoverviewmaptoggle"></a>
 
 #### onOverviewMapToggle
-```javascript
+```ts
 /**
  * Triggered when the overview map is toggled.
  *
@@ -356,7 +356,7 @@ mapViewer.onOverviewMapToggle((sender, payload) => {
 <a id="onpanelcontentchanged"></a>
 
 #### onPanelContentChanged
-```javascript
+```ts
 /**
  * Triggered when the content of a panel changes.
  *
@@ -373,7 +373,7 @@ mapViewer.onPanelContentChanged((sender, payload) => {
 <a id="onpanelvisibilitychanged"></a>
 
 #### onPanelVisibilityChanged
-```javascript
+```ts
 /**
  * Triggered when a panel's visibility changes.
  *
@@ -390,7 +390,7 @@ mapViewer.onPanelVisibilityChanged((sender, payload) => {
 <a id="onscalechanged"></a>
 
 #### onScaleChanged
-```javascript
+```ts
 /**
  * Triggered when the map's scale changes.
  *
