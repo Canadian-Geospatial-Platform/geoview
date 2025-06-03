@@ -445,7 +445,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
  * Define an event for the delegate
  */
 export type StyleAppliedEvent = {
-  // The error
+  // The style applied indicator
   styleApplied: boolean;
 };
 
