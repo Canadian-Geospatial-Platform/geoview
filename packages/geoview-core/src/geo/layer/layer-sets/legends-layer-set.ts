@@ -4,12 +4,14 @@ import { logger } from '@/core/utils/logger';
 import { TypeLayerStatus } from '@/api/config/types/map-schema-types';
 import { AbstractLayerSet, PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { TypeLegend, TypeLegendResultSet, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { AbstractGVLayer, LayerStyleChangedDelegate, LayerStyleChangedEvent } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import { AbstractGVLayer, StyleChangedDelegate, StyleChangedEvent } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import { AbstractGVVector, StyleAppliedDelegate, StyleAppliedEvent } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { LayerApi } from '@/geo/layer/layer';
+import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 
 /**
  * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
@@ -22,7 +24,10 @@ export class LegendsLayerSet extends AbstractLayerSet {
   declare resultSet: TypeLegendResultSet;
 
   // Keep a bounded reference to the handle layer status changed
-  #boundedHandleLayerStyleChanged: LayerStyleChangedDelegate;
+  #boundedHandleLayerStyleChanged: StyleChangedDelegate;
+
+  // Keep a bounded reference to the handle layer style applied
+  #boundedHandleLayerStyleApplied: StyleAppliedDelegate;
 
   /**
    * Constructs a Legends LayerSet to manage layers legends.
@@ -31,6 +36,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
   constructor(layerApi: LayerApi) {
     super(layerApi);
     this.#boundedHandleLayerStyleChanged = this.#handleLayerStyleChanged.bind(this);
+    this.#boundedHandleLayerStyleApplied = this.#handleStyleApplied.bind(this);
   }
 
   /**
@@ -66,9 +72,6 @@ export class LegendsLayerSet extends AbstractLayerSet {
 
     // Keep track if the legend has been queried
     this.resultSet[layerConfig.layerPath].legendQueryStatus = 'init';
-
-    // Check if ready to query legend
-    this.#checkQueryLegend(layerConfig.layerPath, false);
   }
 
   /**
@@ -81,6 +84,12 @@ export class LegendsLayerSet extends AbstractLayerSet {
 
     // If regular layer
     if (layer instanceof AbstractGVLayer) {
+      // If Vector layer
+      if (layer instanceof AbstractGVVector) {
+        // Register handler when the style has been applied
+        layer.onStyleApplied(this.#boundedHandleLayerStyleApplied);
+      }
+
       // Register handler on layer style change
       layer.onLayerStyleChanged(this.#boundedHandleLayerStyleChanged);
     }
@@ -96,7 +105,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
     super.onProcessLayerStatusChanged(layerConfig, layerStatus);
 
     // Check if ready to query legend
-    this.#checkQueryLegend(layerConfig.layerPath, false);
+    this.#checkQueryLegend(layerConfig, false);
   }
 
   /**
@@ -113,7 +122,6 @@ export class LegendsLayerSet extends AbstractLayerSet {
    * Overrides the behavior to apply when deleting from the store
    * @param {string} layerPath - The layer path to delete form the store
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override onDeleteFromStore(layerPath: string): void {
     // Delete from store
     LegendEventProcessor.deleteLayerFromLegendLayers(this.getMapId(), layerPath);
@@ -121,17 +129,17 @@ export class LegendsLayerSet extends AbstractLayerSet {
 
   /**
    * Checks if the layer config has reached the 'processed' status or greater and if so queries the legend.
-   * @param {string} layerPath - The layer path
+   * @param {ConfigBaseClass} layerConfig - The layer config
    * @param {boolean} forced - Indicates if the legend query should be forced to happen (example when refreshing the legend)
    */
-  #checkQueryLegend(layerPath: string, forced: boolean): void {
+  #checkQueryLegend(layerConfig: ConfigBaseClass, forced: boolean): void {
+    // Get the layer path
+    const { layerPath } = layerConfig;
+
     // Get the layer, skip when not found
     const layer = this.layerApi.getGeoviewLayer(layerPath);
     if (!layer) return; // Skip when no layer found
     // TODO: Check - Is this check necessary or are we always supposed to have a layer
-
-    // Get the config
-    const layerConfig = layer.getLayerConfig();
 
     // If the layer legend should be queried (and not already querying).
     // GV Gotta make sure that we're not already querying, because EsriImage layers, for example, adjust the
@@ -141,7 +149,8 @@ export class LegendsLayerSet extends AbstractLayerSet {
       return;
     }
 
-    if (layer instanceof AbstractGVLayer && (this.#legendShouldBeQueried(layerConfig) || forced)) {
+    // If the legend should be queried
+    if (this.#legendShouldBeQueried(layer, layerConfig, forced)) {
       // Flag
       this.resultSet[layerPath].legendQueryStatus = 'querying';
 
@@ -190,22 +199,62 @@ export class LegendsLayerSet extends AbstractLayerSet {
   }
 
   /**
-   * Checks if the legend should be queried as part of the regular layer status progression and legend fetching
+   * Checks if the legend should be queried as part of the regular layer status progression and legend fetching.
+   * Also performs a Type guard on the 'layer' parameter that must be AbstractGVLayer.
+   * @param {AbstractBaseLayer} layer - The layer
    * @param {ConfigBaseClass} layerConfig - The layer config
+   * @param {boolean} forced - Flag to force a query to happen, even if the legendQueryStatus isn't 'init' or style isn't applied.
    */
-  #legendShouldBeQueried(layerConfig: ConfigBaseClass): boolean {
-    // A legend is ready to be queried if its status is > processed and legendQueryStatus is 'init' (not already queried)
-    return !!layerConfig?.isGreaterThanOrEqualTo('processed') && this.resultSet[layerConfig.layerPath].legendQueryStatus === 'init';
+  #legendShouldBeQueried(layer: AbstractBaseLayer, layerConfig: ConfigBaseClass, forced: boolean): layer is AbstractGVLayer {
+    // A legend is ready to be queried if its status is > processed
+    let shouldQueryLegend = layer instanceof AbstractGVLayer && !!layerConfig?.isGreaterThanOrEqualTo('processed');
+
+    // If should query thus far
+    if (shouldQueryLegend) {
+      // If forced
+      if (forced) return true;
+
+      // If legend never queried so far
+      shouldQueryLegend = this.resultSet[layerConfig.layerPath].legendQueryStatus === 'init';
+
+      // If should query thus far
+      if (shouldQueryLegend) {
+        // If an AbstractGVVector
+        if (layer instanceof AbstractGVVector && layerConfig instanceof VectorLayerEntryConfig) {
+          // If there's no determined layer style in the layer config
+          if (!layerConfig.layerStyle) {
+            // If the layer visible state is invisible upon load or the style has been applied, we should query legend
+            shouldQueryLegend = !layerConfig.initialSettings?.states?.visible || layer.styleApplied;
+          }
+        }
+      }
+    }
+
+    // Return if legend should be queried
+    return shouldQueryLegend;
   }
 
   /**
    * Handles when a layer style changes on a registered layer
    * @param {AbstractGVLayer} layer - The layer which changed its styles
-   * @param {LayerStyleChangedEvent} event - The layer style changed event
+   * @param {StyleChangedEvent} event - The layer style changed event
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  #handleLayerStyleChanged(layer: AbstractGVLayer, event: LayerStyleChangedEvent): void {
+  #handleLayerStyleChanged(layer: AbstractGVLayer, event: StyleChangedEvent): void {
     // Force query the legend as we have a new style
-    this.#checkQueryLegend(layer.getLayerPath(), true);
+    this.#checkQueryLegend(layer.getLayerConfig(), true);
+  }
+
+  /**
+   * Handles when a layer style has been applied on a registered AbstractGVVector layer
+   * @param {AbstractGVVector} layer - The layer which got its style applied
+   * @param {StyleAppliedEvent} event - The StyleAppliedEvent
+   */
+  #handleStyleApplied(layer: AbstractGVVector, event: StyleAppliedEvent): void {
+    // If the style has been applied
+    if (event.styleApplied) {
+      // Force query the legend as we have a new style
+      this.#checkQueryLegend(layer.getLayerConfig(), true);
+    }
   }
 }

@@ -762,20 +762,10 @@ export class MapViewer {
   /**
    * Loops through all geoview layers and refresh their respective source.
    * Use this function on projection change or other viewer modification who may affect rendering.
-   *
-   * @returns A Promise which resolves when the rendering is completed after the source(s) were changed.
    */
-  refreshLayers(): Promise<void> {
+  refreshLayers(): void {
     // Redirect
     this.layer.refreshLayers();
-
-    // Return a promise for when rendering will complete
-    return new Promise<void>((resolve) => {
-      this.map.once('rendercomplete', () => {
-        // Done
-        resolve();
-      });
-    });
   }
 
   /**

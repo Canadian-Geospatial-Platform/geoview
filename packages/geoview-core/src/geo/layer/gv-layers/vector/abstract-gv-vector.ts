@@ -12,6 +12,7 @@ import { Pixel } from 'ol/pixel';
 import { Projection as OLProjection } from 'ol/proj';
 import isEqual from 'lodash/isEqual';
 
+import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { FilterNodeType, NodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
@@ -30,6 +31,12 @@ import { TypeDateFragments } from '@/core/utils/date-mgt';
  * Abstract Geoview Layer managing an OpenLayer vector type layer.
  */
 export abstract class AbstractGVVector extends AbstractGVLayer {
+  /** Indicates if the style has been applied on the layer yet */
+  styleApplied: boolean = false;
+
+  // Keep all callback delegate references
+  #onStyleAppliedHandlers: StyleAppliedDelegate[] = [];
+
   /**
    * Constructs a GeoView Vector layer to manage an OpenLayer layer.
    * @param {VectorSource<Feature<Geometry>>} olSource - The OpenLayer source.
@@ -46,13 +53,20 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       properties: { layerConfig },
       source: olSource,
       style: (feature) => {
-        return AbstractGVVector.calculateStyleForFeature(
+        // Calculate the style for the feature
+        const style = AbstractGVVector.calculateStyleForFeature(
           this as AbstractGVLayer,
           feature as FeatureLike,
           label,
           layerConfig.filterEquation,
           layerConfig.legendFilterIsOff
         );
+
+        // Set the style applied, throwing a style applied event in the process
+        this.setStyleApplied(true);
+
+        // Return the style
+        return style;
       },
     };
 
@@ -274,6 +288,48 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   }
 
   /**
+   * Sets the style applied flag indicating when a style has been applied for the AbstractGVVector via the style callback function.
+   * @param {boolean} styleApplied - Indicates if the style has been applied on the AbstractGVVector.
+   */
+  setStyleApplied(styleApplied: boolean): void {
+    const changed = this.styleApplied !== styleApplied;
+    this.styleApplied = styleApplied;
+    if (changed) this.#emitStyleApplied({ styleApplied });
+  }
+
+  // #region EVENTS
+
+  /**
+   * Emits an event to all handlers.
+   * @param {StyleAppliedEvent} event The event to emit
+   * @private
+   */
+  #emitStyleApplied(event: StyleAppliedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onStyleAppliedHandlers, event);
+  }
+
+  /**
+   * Registers a style applied event handler.
+   * @param {StyleAppliedDelegate} callback The callback to be executed whenever the event is emitted
+   */
+  onStyleApplied(callback: StyleAppliedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onStyleAppliedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a style applied event handler.
+   * @param {StyleAppliedDelegate} callback The callback to stop being called whenever the event is emitted
+   */
+  offStyleApplied(callback: StyleAppliedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onStyleAppliedHandlers, callback);
+  }
+
+  // #endregion EVENTS
+
+  /**
    * Calculates a style for the given feature, based on the layer current style and options.
    * @param {AbstractGVLayer} layer - The layer on which to work for the style.
    * @param {FeatureLike} feature - Feature that need its style to be defined.
@@ -384,3 +440,16 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     }
   }
 }
+
+/**
+ * Define an event for the delegate
+ */
+export type StyleAppliedEvent = {
+  // The style applied indicator
+  styleApplied: boolean;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+export type StyleAppliedDelegate = EventDelegateBase<AbstractGVVector, StyleAppliedEvent, void>;

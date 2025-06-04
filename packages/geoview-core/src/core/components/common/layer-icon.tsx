@@ -135,17 +135,21 @@ export const LayerIcon = memo(function LayerIcon({ layerPath }: LayerIconProps):
 
   // Hooks
   const layerStatus = useSelectorLayerStatus(layerPath);
-  const layerQueryStatus = useSelectorLayerLegendQueryStatus(layerPath);
+  const legendQueryStatus = useSelectorLayerLegendQueryStatus(layerPath);
   const layerChildren = useSelectorLayerChildren(layerPath);
 
+  // If has children (is a group layer)
+  const hasChildren = layerChildren && layerChildren.length;
+
   // If there is an error in layer or query status, flag it and show icon error
-  const isError = layerStatus === 'error' || (layerQueryStatus && layerQueryStatus === 'error');
+  const isError = layerStatus === 'error' || (legendQueryStatus && legendQueryStatus === 'error');
   if (isError) return <ErrorIcon color="error" />;
 
-  // If the layer isn't 'loaded' and isn't 'loading', or the legend is still being queried, the icon should show the spinner
-  const showSpinner = (layerStatus !== 'loaded' && layerStatus !== 'loading') || layerQueryStatus === 'querying';
+  // If the layer is loaded or loading or legend query status is queried, the icon is available
+  const iconAvailable =
+    legendQueryStatus === 'queried' || (hasChildren && layerStatus === 'loaded') || (hasChildren && layerStatus === 'loading');
 
-  if (showSpinner) {
+  if (!iconAvailable) {
     return (
       <Box sx={LOADING_BOX_STYLES}>
         <CircularProgressBase size={20} />
@@ -153,7 +157,6 @@ export const LayerIcon = memo(function LayerIcon({ layerPath }: LayerIconProps):
     );
   }
 
-  const hasChildren = layerChildren && layerChildren.length;
   if (hasChildren) return <GroupWorkOutlinedIcon color="primary" />;
 
   return <IconStack layerPath={layerPath} />;
