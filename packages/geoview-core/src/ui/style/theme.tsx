@@ -25,9 +25,7 @@ function getThemeOptions(mode: TypeDisplayTheme): ThemeOptions {
 }
 
 export const getTheme = (mode: TypeDisplayTheme): Theme => {
-  const optionClone = getThemeOptions(mode);
-
-  return createTheme(optionClone);
+  return createTheme(getThemeOptions(mode));
 };
 
-export const cgpvTheme = createTheme(getThemeOptions('geo.ca'));
+export const cgpvTheme = getTheme('geo.ca');

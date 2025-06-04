@@ -319,6 +319,7 @@
     },
     "map": {
       "mapIdNotFound": "Map with ID '__param__' not found.",
+      "mapIdAlreadyExists": "Map with ID '__param__' already exists.",
       "geoviewStoreNotFound": "GeoView Store on Map '__param__' not found.",
       "mapDivNotExists": "Div with id ${divId} does not exist",
       "mapWrongCall": "Div with id __param__ has a class 'geoview-map' and should be initialized via a 'cgpv.init()' call."
