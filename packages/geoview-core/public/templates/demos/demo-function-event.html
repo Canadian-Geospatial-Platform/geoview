@@ -166,7 +166,7 @@
           cgpv.api.getMapViewer('map1').createMapConfigFromMapState()
         </li>
         <li><button id="Reload-map">Reload map with current state</button><br />
-          cgpv.api.getMapViewer('map1').reloadWithCurrentState()
+          cgpv.api.reloadWithCurrentState('map1')
         </li>
         <li><button id="Add-marker">Add markers to map</button><button id="Remove-marker">Remove markers from map</button><br />
           cgpv.api.getMapViewer('map1').layer.featureHighlight.pointMarkers.addPointMarkers('group1', markers)<br />
@@ -739,7 +739,7 @@
 
       // add an event listener when a button is clicked
       reloadMapButton.addEventListener('click', () => {
-        cgpv.api.getMapViewer('map1').reloadWithCurrentState();
+        cgpv.api.reloadWithCurrentState('map1');
       });
 
       // Add-marker Button================================================================================================

@@ -221,9 +221,11 @@
       const createMapButton = document.getElementById('createMap');
 
       // add an event listener when a button is clicked
-      createMapButton.addEventListener('click', function (e) {
-        // delete old map
-        cgpv.api.deleteMapViewer('map1', true);
+      createMapButton.addEventListener('click', async function (e) {
+        // Delete previous map if existing
+        if (cgpv.api.hasMapViewer('map1')) {
+          await cgpv.api.deleteMapViewer('map1', true);
+        }
 
         // create new map in a new dom node
         const newDiv = document.createElement('div');
@@ -241,20 +243,16 @@
 
         document.getElementById('mapSection').appendChild(newDiv);
 
+        // Regex expression to cature all single quotes (') except those preceded by a backslash (\)
+        const regexExp = /(?<!\\)'/g
+
         // create map
-        // TODO: the delete has a timeout so we need to wait before trying to recreate the map...
-        // TO.DOCONT: this should be cleaner
-        setTimeout(() => {
-          // Regex expression to cature all single quotes (') except those preceded by a backslash (\)
-          const regexExp = /(?<!\\)'/g
-          cgpv.api.createMapFromConfig('map1', document.getElementById('configGeoview').value.replaceAll(regexExp, '"'))
-            .then((mapViewer) => {
-              listenToLegendLayerSetChanges('sandboxMap-state', mapViewer);
-            })
-            .catch((error) => {
-              console.error('Failed to create map from config', error);
-            });
-        }, 1500);
+        try {
+          const mapViewer = await cgpv.api.createMapFromConfig('map1', document.getElementById('configGeoview').value.replaceAll(regexExp, '"'));
+          listenToLegendLayerSetChanges('sandboxMap-state', mapViewer);
+        } catch (error) {
+          console.error('Failed to create map from config', error);
+        }
       });
 
       // Map Size=====================Start==================================
@@ -425,14 +423,14 @@
         console.error('Failed to create map from config', error);
       });
 
-      // initialize cgpv
-      cgpv.init();
+      // // initialize cgpv
+      // cgpv.init();
 
-      // create snippets
-      window.addEventListener('load', () => {
-        createCodeSnippet();
-        createConfigSnippet();
-      });
+      // // create snippets
+      // window.addEventListener('load', () => {
+      //   createCodeSnippet();
+      //   createConfigSnippet();
+      // });
     </script>
   </body>
 </html>
