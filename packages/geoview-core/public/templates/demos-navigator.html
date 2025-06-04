@@ -241,65 +241,59 @@
       const remove = document.getElementById('Remove-Button');
       const urlParams = new URLSearchParams(window.location.search);
       const config = urlParams.get('config');
+      const mapId = 'map1';
 
       // ------------------ CONFIG SELECTOR SECTION START -----------------------------------------
-      configLoader.addEventListener('change', (e) => {
-        // delete old map
-        cgpv.api.deleteMapViewer('map1', true);
-
-        // wait until map is removed before recreating it
-        setTimeout(() => {
-          // create new map in a new dom node
-          let mapDiv = document.getElementById('map1');
-          if (mapDiv === null) {
-            mapDiv = document.createElement('div');
-            // const style = document.createAttribute('style'); // Commented this, because it wasn't doing anything
-            mapDiv.setAttribute('id', 'map1');
-            document.getElementById('mapSection').appendChild(mapDiv);
-          }
-
-          // Set the language to the switchLang value, always
-          mapDiv.setAttribute('data-lang', switchLang.value);
-
-          // create map
-          cgpv.api.createMapFromConfig('map1', e.target.value, 800)
-            .then((mapViewer) => {
-              listenToLegendLayerSetChanges('sandboxMap-state', mapViewer);
-            })
-            .catch((error) => {
-              console.error('Failed to create map from config', error);
-            });
-        }, 1500);
-
-        // fetch JSON config file to show in the text are section
-        function fetchJSONData() {
-          fetch(e.target.value)
-            .then((res) => {
-              if (!res.ok) {
-                throw new Error(`HTTP error! Status: ${res.status}`);
-              }
-              return res.json();
-            })
-            .then((data) => {
-              document.getElementById('configGeoview').textContent = JSON.stringify(data, null, 4);
-
-              // set default number of lines
-              const textarea = document.querySelector('textarea');
-              const lineNumbers = document.querySelector('.line-numbers');
-              const numberOfLines = textarea.value.split('\n').length;
-              lineNumbers.innerHTML = Array(numberOfLines).fill('<span></span>').join('');
-
-              // pre-select theme and projection from config file
-              document.getElementById('switchTheme').value = data.theme;
-              document.getElementById('switchProjection').value = data.map.viewSettings.projection;
-
-              // update url to include selected file
-              const element = document.getElementById('configLoader');
-              window.history.replaceState(null, null, `?config=${element.value}`);
-            })
-            .catch((error) => console.error('Unable to fetch data:', error));
+      configLoader.addEventListener('change', async (e) => {
+        // create new map in a new dom node
+        let mapDiv = document.getElementById(mapId);
+        if (mapDiv === null) {
+          mapDiv = document.createElement('div');
+          // const style = document.createAttribute('style'); // Commented this, because it wasn't doing anything
+          mapDiv.setAttribute('id', mapId);
+          document.getElementById('mapSection').appendChild(mapDiv);
         }
-        fetchJSONData();
+
+        // Set the language to the switchLang value, always
+        mapDiv.setAttribute('data-lang', switchLang.value);
+
+        // Delete previous map if existing
+        if (cgpv.api.hasMapViewer(mapId)) {
+          await cgpv.api.deleteMapViewer(mapId);
+        }
+
+        // create map
+        try {
+          const mapViewer = await cgpv.api.createMapFromConfig(mapId, e.target.value, 800);
+          listenToLegendLayerSetChanges('sandboxMap-state', mapViewer);
+        } catch (error) {
+          console.error('Failed to create map from config', error);
+        }
+
+        try {
+          // Fetch the data
+          const res = await fetch(e.target.value);
+          const data = await res.json();
+
+          // fetch JSON config file to show in the text are section
+          document.getElementById('configGeoview').textContent = JSON.stringify(data, null, 4);
+
+          // set default number of lines
+          const textarea = document.querySelector('textarea');
+          const lineNumbers = document.querySelector('.line-numbers');
+          const numberOfLines = textarea.value.split('\n').length;
+          lineNumbers.innerHTML = Array(numberOfLines).fill('<span></span>').join('');
+
+          // pre-select theme and projection from config file
+          document.getElementById('switchTheme').value = data.theme;
+          document.getElementById('switchProjection').value = data.map.viewSettings.projection;
+
+          // update url to include selected file
+          const element = document.getElementById('configLoader');
+          window.history.replaceState(null, null, `?config=${element.value}`);
+        } catch (error) {
+          console.error('Unable to fetch data:', error)
+        }
       });
       // ------------------ CONFIG SELECTOR SECTION END -----------------------------------------
 
@@ -311,24 +305,24 @@
 
       // ------------------ SWITCHER SECTION START -----------------------------------------
       switchLang.addEventListener('change', (e) => {
-        cgpv.api.getMapViewer('map1').setLanguage(e.target.value, resetLayer.checked);
+        cgpv.api.getMapViewer(mapId).setLanguage(e.target.value, resetLayer.checked);
       });
 
       switchThemeElem.addEventListener('change', (e) => {
-        cgpv.api.getMapViewer('map1').setTheme(e.target.value);
+        cgpv.api.getMapViewer(mapId).setTheme(e.target.value);
       });
 
       switchProjectioneElem.addEventListener('change', (e) => {
-        cgpv.api.getMapViewer('map1').setProjection(e.target.value);
+        cgpv.api.getMapViewer(mapId).setProjection(e.target.value);
       });
       // ------------------ SWITCHER SECTION END -----------------------------------------
 
       reload.addEventListener('click', (e) => {
-        cgpv.api.getMapViewer('map1').reload();
+        cgpv.api.reload(mapId);
       });
 
       remove.addEventListener('click', (e) => {
-        cgpv.api.deleteMapViewer('map1', true);
+        cgpv.api.deleteMapViewer(mapId, true);
       });
 
       // create snippets

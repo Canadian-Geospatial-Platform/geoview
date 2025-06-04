@@ -35,16 +35,14 @@ import {
   TypeStyleGeometry,
   TypeLayerStatus,
 } from '@/api/config/types/map-schema-types';
-import { removeGeoviewStore } from '@/core/stores/stores-managers';
 
 import { BasemapApi } from '@/geo/layer/basemap/basemap';
 import { LayerApi } from '@/geo/layer/layer';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { Projection } from '@/geo/utils/projection';
 
-import { api, unmountMap } from '@/app';
 import { Plugin } from '@/api/plugin/plugin';
-import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
+import { TypePluginStructure, TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 
 import { AppBarApi } from '@/core/components/app-bar/app-bar-api';
 import { NavBarApi } from '@/core/components/nav-bar/nav-bar-api';
@@ -352,6 +350,17 @@ export class MapViewer {
   }
 
   // #region MAP STATES
+
+  /**
+   * Asynchronously attempts to get a plugin by its id.
+   * @param {string} pluginId - The plugin id
+   * @returns {TypePluginStructure} The plugin structure
+   */
+  getPlugin(pluginId: string): Promise<TypePluginStructure> {
+    return whenThisThen(() => {
+      return this.plugins[pluginId];
+    });
+  }
 
   /**
    * Returns the current display language
@@ -786,78 +795,25 @@ export class MapViewer {
   }
 
   /**
-   * Remove map
-   *
-   * @param {boolean} deleteContainer - True if we want to delete div from the page
-   * @returns {Promise<HTMLElement>} The Promise containing the HTML element
+   * Deletes the MapViewer, including its plugins, layers, etc.
+   * This function does not unmount the MapViewer. To completely delete a MapViewer, use
+   * cgpv.api.deleteMapViewer() which will delete the MapViewer and unmount it - for React.
    */
-  async remove(deleteContainer: boolean): Promise<HTMLElement> {
-    // Get the map container to unmount
-    // Remove geoview-class if we need to reuse the div
-    const mapContainer = document.getElementById(this.mapId)!;
-    mapContainer.classList.remove('geoview-map');
-
-    // GV If this is done after plugin removal, it triggers a rerender, and the plugins can cause an error, depending on state
-    // Remove the dom element (remove rendered map and overview map)
-    if (this.overviewRoot) this.overviewRoot.unmount();
-    unmountMap(this.mapId, mapContainer);
-
-    // Unload all loaded plugins on the map
-    await Plugin.removePlugins(this.mapId);
-
-    // Remove all layers
+  async delete(): Promise<void> {
     try {
+      // Remove all layers
       this.layer.removeAllGeoviewLayers();
     } catch (error: unknown) {
       // Failed to remove layers, eat the exception and continue to remove the map
       logger.logError('Failed to remove layers', error);
     }
 
-    // Delete store and event processor
-    removeGeoviewStore(this.mapId);
+    // GV If this is done after plugin removal, it triggers a rerender, and the plugins can cause an error, depending on state
+    // Remove the dom element (remove rendered map and overview map)
+    if (this.overviewRoot) this.overviewRoot.unmount();
 
-    // If deleteContainer, delete the HTML div
-    if (deleteContainer) mapContainer.remove();
-
-    // Return the map container to be remove
-    return mapContainer;
-  }
-
-  /**
-   * Reload a map from a config object stored in store, or provided. It first removes then recreates the map.
-   * @param {TypeMapFeaturesConfig | TypeMapFeaturesInstance} mapConfig - Optional map config to use for reload.
-   */
-  async reload(mapConfig?: TypeMapFeaturesConfig | TypeMapFeaturesInstance): Promise<void> {
-    // If no config is provided, get the original from the store
-    const config = mapConfig || MapEventProcessor.getGeoViewMapConfig(this.mapId);
-
-    // Get map height
-    // GV: This is important because on reload, the mapHeight is set to 0px then reset to a bad value.
-    // GV.CONT: This fix maintain the height on reload for the createMapFromConfig function. On first past the optional
-    // GV.CONT: does not have to be provided because the div exist and map will take its height.
-    const height = this.map.getSize() !== undefined ? this.map.getSize()![1] : 800;
-
-    // Remove the map
-    const mapDiv = await this.remove(false);
-
-    // TODO: There is still a problem with bad config schema value and layers loading... should be refactor when config is done
-    api.createMapFromConfig(mapDiv.id, JSON.stringify(config), height, true).catch((error: unknown) => {
-      // Log
-      logger.logError(`Couldn't reload the map in map-viewer`, error);
-    });
-  }
-
-  /**
-   * Reload a map from a config object created using current map state. It first removes then recreates the map.
-   * @param {boolean} maintainGeocoreLayerNames - Indicates if geocore layer names should be kept as is or returned to defaults.
-   *                                              Set to false after a language change to update the layer names with the new language.
-   */
-  reloadWithCurrentState(maintainGeocoreLayerNames: boolean = true): void {
-    const currentMapConfig = this.createMapConfigFromMapState(maintainGeocoreLayerNames);
-    this.reload(currentMapConfig).catch((error: unknown) => {
-      // Log
-      logger.logError(`Couldn't reload the map in map-viewer`, error);
-    });
+    // Unload all plugins
+    await Plugin.removePlugins(this.mapId);
   }
 
   /**

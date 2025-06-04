@@ -166,7 +166,7 @@
           cgpv.api.getMapViewer('map1').createMapConfigFromMapState()
         </li>
         <li><button id="Reload-map">Reload map with current state</button><br />
-          cgpv.api.getMapViewer('map1').reloadWithCurrentState()
+          cgpv.api.reloadWithCurrentState('map1')
         </li>
         <li><button id="Add-marker">Add markers to map</button><button id="Remove-marker">Remove markers from map</button><br />
           cgpv.api.getMapViewer('map1').layer.featureHighlight.pointMarkers.addPointMarkers('group1', markers)<br />
@@ -184,7 +184,6 @@
       </ul>
       <h3>Events that will generate notifications:</h3>
       <ul>
-        <li>cgpv.api.onMapAddedToDiv</li>
         <li>mapViewer.onMapLanguageChanged</li>
         <li>mapViewer.onMapMoveEnd</li>
         <li>mapViewer.onMapZoomEnd</li>
@@ -231,11 +230,6 @@
         // !!
 
         listenToLegendLayerSetChanges('HMap1-state', mapViewer);
-
-        // listen to map added to div event
-        cgpv.api.onMapAddedToDiv((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(`API: Map ${payload.mapId} added`);
-        });
 
         // listen to map language changed event
         mapViewer.onMapLanguageChanged((sender, payload) => {
@@ -739,7 +733,7 @@
 
       // add an event listener when a button is clicked
       reloadMapButton.addEventListener('click', () => {
-        cgpv.api.getMapViewer('map1').reloadWithCurrentState();
+        cgpv.api.reloadWithCurrentState('map1');
       });
 
       // Add-marker Button================================================================================================

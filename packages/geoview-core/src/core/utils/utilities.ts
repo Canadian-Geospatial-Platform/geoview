@@ -8,6 +8,9 @@ import i18n from '@/core/translation/i18n';
 import { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { Fetch } from '@/core/utils/fetch-helper';
 
+/** The observers to monitor element removals from the DOM tree */
+const observers: Record<string, MutationObserver> = {};
+
 /**
  * Take string like "My string is __param__" and replace parameters (__param__) from array of values
  *
@@ -259,6 +262,49 @@ export function addUiComponent(targetDivId: string, component: React.ReactElemen
  */
 export function sanitizeHtmlContent(contentHtml: string): string {
   return sanitizeHtml(contentHtml);
+}
+
+/**
+ * Sets up a MutationObserver to monitor when a specific DOM element (e.g., a div container)
+ * is removed from the document. When the element is removed, it triggers a cleanup callback
+ * and disconnects the observer to prevent memory leaks.
+ * @param {string} key - A unique identifier for the element, used to manage observer references.
+ * @param {Element} element - The DOM element to monitor for removal from the DOM tree.
+ * @param {(key: string) => void} onHtmlElementRemoved - The callback executed once the given DOM element gets removed from the DOM tree.
+ */
+export function watchHtmlElementRemoval(key: string, element: HTMLElement, onHTMLElementRemoved: (key: string) => void): void {
+  if (!element || !element.parentNode) return;
+
+  // Get the parent to set the MutationObserver on
+  const parent = element.parentNode;
+
+  // Disconnect prior observer if it exists
+  if (observers[key]) {
+    // Disconnect the observer, we're replacing it
+    observers[key].disconnect();
+    delete observers[key];
+  }
+
+  // Create the MutationObserver
+  const observer = new MutationObserver((mutations: MutationRecord[]) => {
+    for (const mutation of mutations) {
+      for (const node of Array.from(mutation.removedNodes)) {
+        if (node === element || (node instanceof HTMLElement && node.contains(element))) {
+          // Callback
+          onHTMLElementRemoved(key);
+
+          // Disconnect the observer, we're done
+          observer.disconnect();
+          delete observers[key];
+          return;
+        }
+      }
+    }
+  });
+
+  // Store and activate the observer
+  observers[key] = observer;
+  observer.observe(parent, { childList: true });
 }
 
 /**

@@ -319,6 +319,7 @@
     },
     "map": {
       "mapIdNotFound": "La carte avec l'identifiant '__param__' est introuvable.",
+      "mapIdAlreadyExists": "La carte avec l'identifiant '__param__' existe déjà.",
       "geoviewStoreNotFound": "Le 'React Store' sur la carte '__param__' est introuvable.",
       "mapDivNotExists": "Div avec identifiant __param__ does not exist.",
       "mapWrongCall": "Div avec identifiant __param__ a une classe 'geoview-map' et devrait être initialisé via un appel à 'cgpv.init()'."

@@ -18,12 +18,13 @@ import * as UI from '@/ui';
 
 import AppStart from '@/core/app-start';
 import { API } from '@/api/api';
+import { createI18nInstance } from '@/core/translation/i18n';
 import { MapViewerDelegate, TypeCGPV, TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { Config } from '@/core/utils/config/config';
 import { useWhatChanged } from '@/core/utils/useWhatChanged';
 import { addGeoViewStore } from '@/core/stores/stores-managers';
 import { logger } from '@/core/utils/logger';
-import { getLocalizedMessage, removeCommentsFromJSON } from '@/core/utils/utilities';
+import { getLocalizedMessage, removeCommentsFromJSON, watchHtmlElementRemoval } from '@/core/utils/utilities';
 import { InitMapWrongCallError } from '@/core/exceptions/geoview-exceptions';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { TypeJsonObject } from '@/api/config/types/config-types';
@@ -34,7 +35,7 @@ export * from './core/types/external-types';
 
 export const api = new API();
 
-const reactRoot: Record<string, Root> = {};
+const reactRoots: Record<string, Root> = {};
 
 let cgpvCallbackMapInit: MapViewerDelegate;
 let cgpvCallbackMapReady: MapViewerDelegate;
@@ -48,27 +49,26 @@ let cgpvCallbackLayersLoaded: MapViewerDelegate;
  * @returns {boolean} True if the root exists and is mounted
  */
 const isRootMounted = (mapId: string): boolean => {
-  return !!reactRoot[mapId];
+  return !!reactRoots[mapId];
 };
 
 /**
  * Safely unmounts a map and cleans up its resources
- *
  * @param {string} mapId - The map id to unmount
+ * @param {HTMLElement?} mapContainer - Optional, the html element where the map was mounted
  */
-export function unmountMap(mapId: string, mapContainer: HTMLElement): void {
+export function unmountMap(mapId: string, mapContainer?: HTMLElement): void {
   if (isRootMounted(mapId)) {
     try {
-      reactRoot[mapId].unmount();
+      reactRoots[mapId].unmount();
       logger.logInfo(`Map ${mapId} is unmounted...`);
     } catch (error: unknown) {
       logger.logError(`Error unmounting map ${mapId}:`, error);
     } finally {
       // Remove React-specific attributes
-      mapContainer.removeAttribute('data-react-root');
-      mapContainer.removeAttribute('data-zustand-devtools');
-
-      delete reactRoot[mapId];
+      mapContainer?.removeAttribute('data-react-root');
+      mapContainer?.removeAttribute('data-zustand-devtools');
+      delete reactRoots[mapId];
     }
   }
 }
@@ -150,6 +150,21 @@ async function getMapConfig(mapElement: Element): Promise<TypeMapFeaturesConfig>
 }
 
 /**
+ * Handles when the div containing the MapViewer disappears from the DOM, likely by a dev manipulation.
+ * @param {string} mapId - The MapId of the MapViewer which had its div disappear from the DOM.
+ */
+function handleMapViewerDivRemoved(mapId: string): void {
+  // If the MapViewer is still present
+  if (api.hasMapViewer(mapId)) {
+    // Delete the MapViewer to clean up, sending 'false', because the div is already gone.
+    api.deleteMapViewer(mapId, false).catch((error: unknown) => {
+      // Log
+      logger.logPromiseFailed('in deleteMapViewer in handleMapDivRemoved', error);
+    });
+  }
+}
+
+/**
  * Function to render the map for inline map and map create from a function call
  *
  * @param {Element} mapElement - The html element div who will contain the map
@@ -192,16 +207,27 @@ async function renderMap(mapElement: Element): Promise<MapViewer> {
   );
   configuration.map.listOfGeoviewLayerConfig = configObj!;
 
+  // Create i18n istance for the map
+  const i18n = await createI18nInstance(lang);
+
   // render the map with the config
-  reactRoot[mapId] = createRoot(mapElement!);
+  reactRoots[mapId] = createRoot(mapElement);
 
   // add config to store
   addGeoViewStore(configuration);
 
+  // create a new map viewer instance and add it to the api
+  const mapViewer = new MapViewer(configuration, i18n);
+  api.setMapViewer(mapId, mapViewer);
+
   // Create a promise to be resolved when the MapViewer is initialized via the AppStart component
-  return new Promise<MapViewer>((resolve) => {
-    reactRoot[mapId].render(<AppStart mapFeaturesConfig={configuration} lang={lang} onMapViewerInit={resolve} />);
-  });
+  reactRoots[mapId].render(<AppStart mapFeaturesConfig={configuration} i18nLang={i18n} />);
+
+  // Set up MutationObserver to watch for removal of the map div where our MapViewer is mounted
+  watchHtmlElementRemoval(mapId, mapElement as HTMLElement, handleMapViewerDivRemoved);
+
+  // Return the map viewer
+  return mapViewer;
 }
 
 /**

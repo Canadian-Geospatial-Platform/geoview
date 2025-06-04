@@ -29,7 +29,7 @@ interface GeoChartPanelProps {
 /**
  * Geo Chart Panel with Layers on the left and Charts on the right
  *
- * @param {TypeTimeSliderProps} props The properties passed to geo chart
+ * @param {GeoChartPanelProps} props The properties passed to geo chart
  * @returns {JSX.Element} Geo Chart tab
  */
 export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
@@ -261,12 +261,11 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
         >
           {selectedLayerPath && (
             <Box sx={{ '& .MuiButtonGroup-groupedHorizontal.MuiButton-textSizeMedium': { fontSize: '0.9rem' } }}>
-              {Object.entries(configObj).map(([layerPath, layerChartConfig], index) => {
+              {Object.entries(configObj).map(([layerPath, layerChartConfig]) => {
                 if (layerPath === selectedLayerPath) {
-                  return renderChart(layerChartConfig as GeoViewGeoChartConfig<ChartType>, {}, index.toString());
+                  return renderChart(layerChartConfig as GeoViewGeoChartConfig<ChartType>, {}, layerPath);
                 }
-                // eslint-disable-next-line react/jsx-no-useless-fragment
-                return <></>;
+                return <Box key={layerPath} />;
               })}
             </Box>
           )}
