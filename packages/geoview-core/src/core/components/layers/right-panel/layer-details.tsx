@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import _ from 'lodash';
@@ -39,8 +39,9 @@ import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
 import { Collapse } from '@/ui/collapse/collapse';
 import { Button } from '@/ui/button/button';
 import { KeyboardArrowDownIcon, KeyboardArrowUpIcon } from '@/ui/icons';
-import { useAppMetadataServiceURL } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useAppDisplayLanguage, useAppMetadataServiceURL } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { Switch } from '@/ui/switch/switch';
+import { getLocalizeLayerType } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
 
 interface LayerDetailsProps {
   layerDetails: TypeLegendLayer;
@@ -79,6 +80,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const { triggerGetAllFeatureInfo } = useDataTableStoreActions();
   const datatableSettings = useDataTableLayerSettings();
   const layersData = useDataTableAllFeaturesDataArray();
+  const language = useAppDisplayLanguage();
   const metadataUrl = useAppMetadataServiceURL();
   const selectedLayer = layersData.find((_layer) => _layer.layerPath === layerDetails?.layerPath);
   const layerFilter = getLayerDefaultFilter(layerDetails.layerPath);
@@ -94,6 +96,9 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   // Is layer hoverable or queryable
   const isLayerHoverable = layerDetails.controls?.hover;
   const isLayerQueryable = layerDetails.controls?.query;
+
+  // Get the localized layer type
+  const memoLocalizedLayerType = useMemo(() => getLocalizeLayerType(language, true), [language]);
 
   useEffect(() => {
     // Log
@@ -385,6 +390,10 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     const id = layerDetails.layerPath.split('/')[0].split(':')[0];
     const validId = isValidUUID(id) && metadataUrl !== '';
 
+    // Find the localized name for the current layer type
+    const localizedTypeEntry = memoLocalizedLayerType.find(([memoType]) => memoType === layerDetails.type);
+    const localizedTypeName = localizedTypeEntry ? localizedTypeEntry[1] : '';
+
     return (
       <Box>
         <Button type="text" sx={{ fontSize: theme.palette.geoViewFontSize.sm }} onClick={() => setIsInfoCollapse(!isInfoCollapse)}>
@@ -394,7 +403,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           </IconButton>
         </Button>
         <Collapse in={isInfoCollapse} sx={sxClasses.layerInfo}>
-          <Box>{`${t('layers.layerType')}${layerDetails.type}`}</Box>
+          <Box>{`${t('layers.layerType')}${localizedTypeName}`}</Box>
           {layerNativeProjection && <Box>{`${t('layers.layerServiceProjection')}${layerNativeProjection}`}</Box>}
           {layerFilter && <Box>{`${t('layers.layerDefaultFilter')}${layerFilter}`}</Box>}
           {layerTemporalDimension && (

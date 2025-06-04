@@ -35,7 +35,11 @@ import {
 } from '@/api/config/types/map-schema-types';
 
 import { ConfigApi } from '@/api/config/config-api';
-import { buildGeoLayerToAdd, getLayerNameById } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
+import {
+  buildGeoLayerToAdd,
+  getLayerNameById,
+  getLocalizeLayerType,
+} from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
 import { GeoviewLayerConfigError } from '@/api/config/types/classes/config-exceptions';
 import { AddLayerTree } from '@/core/components/layers/left-panel/add-new-layer/add-layer-tree';
 import { ShapefileReader } from '@/core/utils/config/reader/shapefile-reader';
@@ -279,20 +283,7 @@ export function AddNewLayer(): JSX.Element {
   const isMultiple = (): boolean => layerList.length > 1 || (layerList[0] && layerList[0].listOfLayerEntryConfig?.length > 1);
 
   // List of layer types and labels (Step 2)
-  const layerOptions = [
-    [CSV, getLocalizedMessage(language, 'layers.serviceCSV')],
-    [SHAPEFILE, getLocalizedMessage(language, 'layers.serviceEsriShapefile')],
-    [ESRI_DYNAMIC, getLocalizedMessage(language, 'layers.serviceEsriDynamic')],
-    [ESRI_FEATURE, getLocalizedMessage(language, 'layers.serviceEsriFeature')],
-    [ESRI_IMAGE, getLocalizedMessage(language, 'layers.serviceEsriImage')],
-    [GEOJSON, getLocalizedMessage(language, 'layers.serviceGeoJSON')],
-    [WMS, getLocalizedMessage(language, 'layers.serviceOgcWMS')],
-    [WFS, getLocalizedMessage(language, 'layers.serviceOgcWFS')],
-    [OGC_FEATURE, getLocalizedMessage(language, 'layers.serviceOgcFeature')],
-    [XYZ_TILES, getLocalizedMessage(language, 'layers.serviceRasterTile')],
-    [VECTOR_TILES, getLocalizedMessage(language, 'layers.serviceVectorTile')],
-    [GEOCORE, getLocalizedMessage(language, 'layers.serviceGeoCore')],
-  ];
+  const layerOptions = getLocalizeLayerType(language, false);
 
   // #region ERRORS
 
