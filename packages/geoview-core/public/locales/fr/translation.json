@@ -120,6 +120,7 @@
     "serviceGeoJSON": "GeoJSON",
     "serviceCSV": "Valeurs séparées par des virgules (CSV)",
     "serviceRasterTile": "Tuiles 'raster' XYZ",
+    "serviceImageStatic": "Image statique",
     "name": "Nom",
     "layerSelect": "Sélectionner couche(s)",
     "errorDisabled": "Le type de couche « __param__ » est désactivé dans cette carte.",

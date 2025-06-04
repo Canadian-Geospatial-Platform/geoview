@@ -120,6 +120,7 @@
     "serviceGeoJSON": "GeoJSON",
     "serviceCSV": "Comma Separated Values (CSV)",
     "serviceRasterTile": "XYZ Raster Tiles",
+    "serviceImageStatic": "Static Image",
     "name": "Name",
     "layerSelect": "Select layer(s)",
     "errorDisabled": "The layer type '__param__' is disabled in this map.",
