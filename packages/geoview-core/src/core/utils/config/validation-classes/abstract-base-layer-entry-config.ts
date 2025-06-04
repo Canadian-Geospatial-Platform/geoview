@@ -23,9 +23,6 @@ import { TimeDimension } from '@/app';
  * Base type used to define a GeoView layer to display on the map.
  */
 export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
-  /** The ending element of the layer configuration path. */
-  override layerIdExtension?: string | undefined = undefined;
-
   /** The metadata associated with the service */
   #serviceMetadata?: TypeJsonObject;
 

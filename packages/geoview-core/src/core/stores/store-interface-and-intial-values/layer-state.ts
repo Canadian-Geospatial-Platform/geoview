@@ -39,7 +39,7 @@ export interface ILayerState {
   selectedLayerPath: string | undefined | null;
   legendLayers: TypeLegendLayer[];
   displayState: TypeLayersViewDisplayState;
-  layerDeleteInProgress: boolean;
+  layerDeleteInProgress: string;
   selectedLayerSortingArrowId: string;
   layersAreLoading: boolean;
   setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
@@ -51,14 +51,14 @@ export interface ILayerState {
     getLayer: (layerPath: string) => TypeLegendLayer | undefined;
     getLayerBounds: (layerPath: string) => number[] | undefined;
     getLayerDefaultFilter: (layerPath: string) => string | undefined;
-    getLayerDeleteInProgress: () => boolean;
+    getLayerDeleteInProgress: () => string;
     getLayerServiceProjection: (layerPath: string) => string | undefined;
     getLayerTemporalDimension: (layerPath: string) => TypeTemporalDimension | undefined;
     refreshLayer: (layerPath: string) => void;
     setAllItemsVisibility: (layerPath: string, visibility: boolean) => void;
     setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => void;
     setHighlightLayer: (layerPath: string) => void;
-    setLayerDeleteInProgress: (newVal: boolean) => void;
+    setLayerDeleteInProgress: (newVal: string) => void;
     setLayerOpacity: (layerPath: string, opacity: number) => void;
     setLayerHoverable: (layerPath: string, enable: boolean) => void;
     setLayerQueryable: (layerPath: string, enable: boolean) => void;
@@ -72,7 +72,7 @@ export interface ILayerState {
   setterActions: {
     setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => void;
     setHighlightLayer: (layerPath: string) => void;
-    setLayerDeleteInProgress: (newVal: boolean) => void;
+    setLayerDeleteInProgress: (newVal: string) => void;
     setLegendLayers: (legendLayers: TypeLegendLayer[]) => void;
     setSelectedLayerPath: (layerPath: string) => void;
     setSelectedLayerSortingArrowId: (arrowId: string) => void;
@@ -92,7 +92,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
     legendLayers: [] as TypeLegendLayer[],
     selectedLayerPath: null,
     displayState: 'view',
-    layerDeleteInProgress: false,
+    layerDeleteInProgress: '',
     selectedLayerSortingArrowId: '',
 
     // Initialize default
@@ -113,7 +113,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
        */
       deleteLayer: (layerPath: string): void => {
         LegendEventProcessor.deleteLayer(get().mapId, layerPath);
-        get().layerState.setterActions.setLayerDeleteInProgress(false);
+        get().layerState.setterActions.setLayerDeleteInProgress('');
       },
 
       /**
@@ -256,9 +256,9 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
 
       /**
        * Sets the layer delete in progress state.
-       * @param {boolean} newVal - The new value.
+       * @param {string} newVal - The new value (the layerPath waiting to be deleted or '').
        */
-      setLayerDeleteInProgress: (newVal: boolean): void => {
+      setLayerDeleteInProgress: (newVal: string): void => {
         // Redirect to setter
         get().layerState.setterActions.setLayerDeleteInProgress(newVal);
       },
@@ -375,9 +375,9 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
 
       /**
        * Sets the layer delete in progress state.
-       * @param {boolean} newVal - The new value.
+       * @param {string} newVal - The new value (the layerPath waiting to be deleted or '').
        */
-      setLayerDeleteInProgress: (newVal: boolean): void => {
+      setLayerDeleteInProgress: (newVal: string): void => {
         set({
           layerState: {
             ...get().layerState,
@@ -468,6 +468,7 @@ export const useLayerSelectedLayer = (): TypeLegendLayer => useStore(useGeoViewS
 export const useLayerSelectedLayerPath = (): string | null | undefined =>
   useStore(useGeoViewStore(), (state) => state.layerState.selectedLayerPath);
 export const useLayerDisplayState = (): TypeLayersViewDisplayState => useStore(useGeoViewStore(), (state) => state.layerState.displayState);
+export const useLayerDeleteInProgress = (): string => useStore(useGeoViewStore(), (state) => state.layerState.layerDeleteInProgress);
 export const useSelectedLayerSortingArrowId = (): string =>
   useStore(useGeoViewStore(), (state) => state.layerState.selectedLayerSortingArrowId);
 export const useLayersAreLoading = (): boolean => useStore(useGeoViewStore(), (state) => state.layerState.layersAreLoading);

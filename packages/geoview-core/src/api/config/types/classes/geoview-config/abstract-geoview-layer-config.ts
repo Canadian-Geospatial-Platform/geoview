@@ -404,8 +404,6 @@ export abstract class AbstractGeoviewLayerConfig {
    * The resulting config will then be overwritten by the values provided in the user config.
    */
   applyDefaultValues(): void {
-    this.serviceDateFormat = this.serviceDateFormat || 'DD/MM/YYYY HH:MM:SSZ';
-    this.externalDateFormat = this.externalDateFormat || 'DD/MM/YYYY HH:MM:SSZ';
     this.isTimeAware = this.isTimeAware !== undefined ? this.isTimeAware : true;
   }
 
