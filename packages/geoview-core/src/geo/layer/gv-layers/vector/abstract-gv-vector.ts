@@ -76,6 +76,14 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     // Apply the layer filter right away if any
     AbstractGVVector.applyViewFilterOnConfig(layerConfig, layerConfig.getExternalFragmentsOrder(), undefined, layerConfig.layerFilter);
 
+    // If the layer is initially not visible, make it visible until the style is set so we have a style for the legend
+    this.onLayerFirstLoaded(() => {
+      if (!this.getStyle() && !this.getVisible()) {
+        this.onLayerStyleChanged(() => this.setVisible(false));
+        this.setVisible(true);
+      }
+    });
+
     // Create and set the OpenLayer layer
     this.olLayer = new VectorLayer<VectorSource<Feature<Geometry>>>(layerOptions);
   }
