@@ -24,7 +24,11 @@ import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-cla
 import { Projection } from '@/geo/utils/projection';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { TypeJsonObject } from '@/api/config/types/config-types';
-import { LayerDataAccessPathMandatoryError, LayerNoGeographicDataInCSVError } from '@/core/exceptions/layer-exceptions';
+import {
+  LayerDataAccessPathMandatoryError,
+  LayerNoGeographicDataInCSVError,
+  LayerTooManyEsriFeatures,
+} from '@/core/exceptions/layer-exceptions';
 import { LayerEntryConfigVectorSourceURLNotDefinedError } from '@/core/exceptions/layer-entry-config-exceptions';
 import { doUntilPromises } from '@/core/utils/utilities';
 
@@ -113,6 +117,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
           // Check and throw exception if the content actually contains an embedded error
           // (EsriFeature type of response might return an embedded error inside a 200 HTTP OK)
           Fetch.throwIfResponseHasEmbeddedError(responseText);
+          // Check if feature count is too large
+          if (JSON.parse(responseText).count > 200000) throw new LayerTooManyEsriFeatures(layerConfig.layerId, layerConfig.getLayerName());
         }
 
         // Parse the result of the fetch to read the features

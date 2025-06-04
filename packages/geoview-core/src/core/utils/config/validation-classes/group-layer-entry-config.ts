@@ -12,9 +12,6 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
   /** Layer entry data type. */
   override entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
 
-  /** The ending element of the layer configuration path is not used on groups. */
-  declare layerIdExtension: never;
-
   /** Source settings to apply to the GeoView layer source at creation time is not used by groups. */
   declare source: never;
 

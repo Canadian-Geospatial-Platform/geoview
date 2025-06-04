@@ -223,6 +223,7 @@
       "emptyLayerGroup": "Groupe de couches vide pour la couche '__param__'.",
       "unableToCreateGroupLayer": "Impossible de créer le groupe de couches '__param__'.",
       "vectorSourceUrlNotDefined": "L'URL de la source vectorielle n'est pas définie pour la couche '__param__'.",
+      "tooManyEsriFeatures": "La couche '__param__' a trop de caractéristiques pour fonctionner correctement. Envisager le chargement en tant que ESRI Dynamic si possible",
       "vectorTileLayerProjectionMismatch": "La projection de la couche vectorielle tuilée '__param__' ne correspond pas à celle de la carte.",
       "extentParameterNotDefined": "Le paramètre extent n'est pas défini dans l'élément source pour la couche '__param__'.",
       "projectionParameterNotDefined": "Le paramètre projection n'est pas défini dans l'élément source pour la couche '__param__'."

@@ -223,6 +223,7 @@
       "emptyLayerGroup": "Empty layer group for layer '__param__'.",
       "unableToCreateGroupLayer": "Unable to create group layer '__param__'.",
       "vectorSourceUrlNotDefined": "Vector source URL is not defined for layer '__param__'.",
+      "tooManyEsriFeatures": "Layer '__param__' has too many features to function properly. Consider loading as ESRI Dynamic if possible",
       "vectorTileLayerProjectionMismatch": "Vector tile layer '__param__' projection does not match the map projection.",
       "extentParameterNotDefined": "Parameter extent is not defined in source element for layer '__param__'.",
       "projectionParameterNotDefined": "Parameter projection is not defined in source element for layer '__param__'."
