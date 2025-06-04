@@ -6,7 +6,7 @@ import { Box, Tabs, TypeTabs } from '@/ui';
 import { Plugin } from '@/api/plugin/plugin';
 import { getSxClasses } from './footer-bar-style';
 import { ResizeFooterPanel } from '@/core/components/footer-bar/hooks/resize-footer-panel';
-import { useAppFullscreenActive, useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useAppFullscreenActive, useAppGeoviewHTMLElement, useAppHeight } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useDetailsLayerDataArrayBatch } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import {
   useUIActiveFooterBarTabId,
@@ -14,7 +14,9 @@ import {
   useUIStoreActions,
   useUIActiveTrapGeoView,
   useUIFooterBarIsCollapsed,
+  useUIHiddenTabs,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { FooterBarApi, FooterTabCreatedEvent, FooterTabRemovedEvent } from '@/core/components';
 
 import { toJsonObject, TypeJsonObject, TypeJsonValue } from '@/api/config/types/config-types';
@@ -75,6 +77,9 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   const geoviewElement = useAppGeoviewHTMLElement();
   const shellContainer = geoviewElement.querySelector(`[id^="shell-${mapId}"]`) as HTMLElement;
   const { setActiveFooterBarTab, enableFocusTrap, disableFocusTrap, setFooterBarIsCollapsed } = useUIStoreActions();
+  const mapSize: [number, number] = useMapSize();
+  const appHeight: number = useAppHeight();
+  const hiddenTabs: string[] = useUIHiddenTabs();
 
   // get store config for footer bar tabs to add (similar logic as in app-bar)
   const footerBarTabsConfig = useGeoViewConfig()?.footerBar;
@@ -149,7 +154,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
 
     // TODO: Use the indexValue coming from the tab to order so custom tab can be place anywhere
     // inject guide tab at last position of tabs.
-    return Object.keys({ ...tabsList, ...{ guide: {} } }).map((tab, index) => {
+    return Object.keys(allTabs).map((tab, index) => {
       return {
         id: `${tab}`,
         value: index,
@@ -214,7 +219,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     if (footerBarTabsConfig && !footerBarTabsConfig.tabs.core.includes('details')) return;
 
     // If we're on the details panel and the footer is collapsed
-    if (selectedTab === `details` && isCollapsed) {
+    if (selectedTab === 'details' && isCollapsed) {
       // Uncollapse it
       setFooterBarIsCollapsed(false);
     }
@@ -428,6 +433,10 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
         TabContentVisibilty={!isCollapsed ? 'visible' : 'hidden'}
         containerType={CONTAINER_TYPE.FOOTER_BAR}
         rightButtons={!isCollapsed && isMapFullScreen && <ResizeFooterPanel />}
+        sideAppSize={mapSize}
+        appHeight={appHeight}
+        hiddenTabs={hiddenTabs}
+        isFullScreen={isMapFullScreen}
       />
     </Box>
   ) : null;
