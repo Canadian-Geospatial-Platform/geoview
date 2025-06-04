@@ -50,7 +50,7 @@
     <div style="display: flex">
       <h3>Changes to map div:</h3>
       <div>
-        <button id="deleteMap" style="margin: 10px;margin-left: 30px;" title="Deletes map div if it exists, leaving the map object in cgpv.maps - Simulates moving away from map tab.">Delete map div</button>
+        <button id="deleteMap" style="margin: 10px;margin-left: 30px;" title="Deletes map div if it exists (deleting and unmounting the MapViewer in the process).">Delete map div</button>
         <details style="margin-left: 30px;">
           <summary>Code</summary>
           <pre>document.getElementById('Map1').remove();</pre>
@@ -130,7 +130,7 @@ function addLayers(layers) {
               <option value="landCover">Land Cover 2010</option>
             </select>
           </div>
-  
+
           <div style="display: grid">
             <input id="layerUuidCustom" style="margin-top: 10px; margin-bottom: 10px; width: 300px" />
             <textarea id="layerUuidCustomEntries" cols="80" rows="25"></textarea>
@@ -154,31 +154,23 @@ function addLayers(layers) {
         <details style="margin-left: 30px;">
           <summary>Code</summary>
           <pre>
-return new Promise (resolve => {
-  removeMap('Map1')
-    .then(() => {
-      cgpv.api.createMapFromConfig('Map1', JSON.stringify(mapConfig), 800)
-        .then(() => {
-            resolve();
-        })
-        .catch((error) => {
-          console.error('Failed to create map from config', error);
-        });
-    });
-  });
+            async function refreshMap() {
+              try {
+                // Remove the map
+                await removeMap('Map1');
 
-  function removeMap(map) {
-    return new Promise(resolve => {
-      if (cgpv.api.hasMapViewer(map)) {
-        cgpv.api.deleteMapViewer(map, false);
-          .then(() => {
-            resolve();
-          });
-      } else {
-        resolve();
-      }
-    });
-  }
+                // Create map from config
+                await cgpv.api.createMapFromConfig('Map1', JSON.stringify(mapConfig), 800);
+              } catch (error) {
+                console.error('Failed to create map from config', error);
+              }
+            }
+
+            async function removeMap(mapId) {
+              if (cgpv.api.hasMapViewer(mapId)) {
+                  await cgpv.api.deleteMapViewer(mapId, false);
+              }
+            }
           </pre>
         </details>
       </div>
@@ -314,16 +306,27 @@ cgpv.api.getMapViewer('Map1').replaceMapConfigLayerNames(pairs, mapConfig, true)
        * @param map The map id.
        * @returns Promise<void>
        */
-      function removeMap(mapId) {
-        return new Promise((resolve) => {
-          if (cgpv.api.hasMapViewer(mapId)) {
-            cgpv.api.deleteMapViewer(mapId, false).then(() => {
-              resolve();
-            });
-          } else {
-            resolve();
-          }
-        });
+      async function removeMap(mapId) {
+        if (cgpv.api.hasMapViewer(mapId)) {
+            await cgpv.api.deleteMapViewer(mapId, false);
+        }
+      }
+
+      /** OSDP function
+       * Refresh the map.
+       *
+       * @param layers Array of layers.
+       */
+      async function refreshMap() {
+        try {
+          // Remove the map
+          await removeMap('Map1');
+
+          // Create map from config
+          await cgpv.api.createMapFromConfig('Map1', JSON.stringify(mapConfig), 800);
+        } catch (error) {
+          console.error('Failed to create map from config', error);
+        }
       }
 
       /** OSDP function
@@ -337,25 +340,6 @@ cgpv.api.getMapViewer('Map1').replaceMapConfigLayerNames(pairs, mapConfig, true)
             layer = `${layer}:${crypto.randomUUID()}`;
           }
           cgpv.api.getMapViewer('Map1').layer.addGeoviewLayerByGeoCoreUUID(layer);
-        });
-      }
-
-      /** OSDP function
-       * Refresh the map.
-       *
-       * @param layers Array of layers.
-       */
-      function refreshMap() {
-        return new Promise((resolve) => {
-          removeMap('Map1').then(() => {
-            cgpv.api.createMapFromConfig('Map1', JSON.stringify(mapConfig), 800)
-            .then(() => {
-              resolve();
-            })
-            .catch((error) => {
-              console.error('Failed to create map from config', error);
-            });
-          });
         });
       }
 

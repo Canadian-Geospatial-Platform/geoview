@@ -46,10 +46,12 @@ export abstract class Plugin {
         script.id = pluginId;
         document.body.appendChild(script);
         script.onload = () => {
-          resolve(window.geoviewPlugins[pluginId]);
+          // Resolve when ready
+          Plugin.#resolveWhenReady(pluginId, resolve, reject);
         };
         script.onerror = () => {
-          resolve(null);
+          // Reject
+          reject(new Error(`Failed to load plugin ${pluginId}`));
         };
       } else {
         // Resolve only once the script is indeed loaded.
@@ -58,16 +60,27 @@ export abstract class Plugin {
         // Therefore, any subsequent call to loadScript has to actually wait for the script.onload to
         // be calledback. Otherwise, even if 'existingScript' says that it's been loaded,
         // it's not 'yet' true, because the js file might still be being downloaded and window.geoviewPlugins[pluginId] still undefined.
-        whenThisThen(() => window.geoviewPlugins?.[pluginId])
-          .then(() => {
-            resolve(window.geoviewPlugins[pluginId]);
-          })
-          .catch((error: unknown) => {
-            // Reject
-            reject(formatError(error));
-          });
+        Plugin.#resolveWhenReady(pluginId, resolve, reject);
       }
     });
+  }
+
+  /**
+   * Utility function to call a promise callback resolve function once a plugin is actually available in window.geoviewPlugins property.
+   * @param {string} pluginId - The plugin id to look for.
+   * @param {Function} resolve  - The resolve function to callback on.
+   * @param {Function} reject - The reject function to callback on in case of failure.
+   */
+  static #resolveWhenReady(pluginId: string, resolve: (plugin: unknown) => void, reject: (reason: Error) => void): void {
+    whenThisThen(() => window.geoviewPlugins?.[pluginId])
+      .then(() => {
+        // Resolve
+        resolve(window.geoviewPlugins[pluginId]);
+      })
+      .catch((error: unknown) => {
+        // Reject
+        reject(formatError(error));
+      });
   }
 
   /**

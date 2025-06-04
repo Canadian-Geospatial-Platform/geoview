@@ -271,8 +271,8 @@ export abstract class AbstractGeoViewLayer {
         // All so that the try/catch works nicely here.
         await this.onFetchAndSetServiceMetadata();
       } else {
-        // TODO: Check - Is this else really happening? Do we need the if (this.metadataAccessPath) at all?
-        logger.logDebug(`WOW IT HAPPENED! '${this.geoviewLayerId}' HAD NO METADATA ACCESS PATH!`);
+        // GV It's possible there is no metadataAccessPath, e.g.: CSV (csvLYR2), we keep the if condition here
+        // Skip
       }
     } catch (error: unknown) {
       // Set the layer status to all layer entries to error (that logic was as-is in this refactor, leaving as-is for now)

@@ -1,4 +1,4 @@
-import { createRoot } from 'react-dom/client';
+import { createRoot, Root } from 'react-dom/client';
 import { AbstractPlugin } from './abstract-plugin';
 import { MapContext } from '@/core/app-start';
 
@@ -6,6 +6,9 @@ import { MapContext } from '@/core/app-start';
  * Map Plugin abstract class.
  */
 export abstract class MapPlugin extends AbstractPlugin {
+  /** The root for the mounted Map Plugin */
+  reactRoot?: Root;
+
   /**
    * Overridable function to create map plugin actual content
    * @returns JSX.Element The map plugin actual content
@@ -29,14 +32,17 @@ export abstract class MapPlugin extends AbstractPlugin {
 
     // create the swiper component and render
     const node = this.onCreateContent();
-    const root = createRoot(el);
-    root.render(<MapContext.Provider value={{ mapId: this.pluginProps.mapId }}>{node}</MapContext.Provider>);
+    this.reactRoot = createRoot(el);
+    this.reactRoot.render(<MapContext.Provider value={{ mapId: this.pluginProps.mapId }}>{node}</MapContext.Provider>);
   }
 
   /**
    * Called when a map plugin is being removed
    */
   onRemove(): void {
+    // Unmount the Map Plugin
+    this.reactRoot?.unmount();
+
     // If cgpv exists
     if (this.api) {
       // TODO: Enable swiper removal, make it work with React 18+ new root and unmount
