@@ -18,6 +18,7 @@ import * as UI from '@/ui';
 
 import AppStart from '@/core/app-start';
 import { API } from '@/api/api';
+import { createI18nInstance } from '@/core/translation/i18n';
 import { MapViewerDelegate, TypeCGPV, TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { Config } from '@/core/utils/config/config';
 import { useWhatChanged } from '@/core/utils/useWhatChanged';
@@ -192,16 +193,24 @@ async function renderMap(mapElement: Element): Promise<MapViewer> {
   );
   configuration.map.listOfGeoviewLayerConfig = configObj!;
 
+  // Create i18n istance for the map
+  const i18n = await createI18nInstance(lang);
+
   // render the map with the config
   reactRoot[mapId] = createRoot(mapElement!);
 
   // add config to store
   addGeoViewStore(configuration);
 
+  // create a new map viewer instance and add it to the api
+  const mapViewer = new MapViewer(configuration, i18n);
+  api.setMapViewer(mapId, mapViewer);
+
   // Create a promise to be resolved when the MapViewer is initialized via the AppStart component
-  return new Promise<MapViewer>((resolve) => {
-    reactRoot[mapId].render(<AppStart mapFeaturesConfig={configuration} lang={lang} onMapViewerInit={resolve} />);
-  });
+  reactRoot[mapId].render(<AppStart mapFeaturesConfig={configuration} i18nLang={i18n} />);
+
+  // Return the map viewer
+  return mapViewer;
 }
 
 /**

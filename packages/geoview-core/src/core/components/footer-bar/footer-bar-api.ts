@@ -114,8 +114,7 @@ export class FooterBarApi {
   }
 
   /**
-   * Removes a tab by id
-   *
+   * Removes a tab by id.
    * @param {string} id - The id of the tab to be removed
    */
   removeTab(id: string): void {
@@ -132,8 +131,15 @@ export class FooterBarApi {
   }
 
   /**
+   * Shows a tab by id.
+   * @param {string} id - The id of the tab to be shown
+   */
+  showTab(id: string): void {
+    UIEventProcessor.showTab(this.mapId, id);
+  }
+
+  /**
    * Selects a tab by id, if the id is not a tab, the footer bar will close
-   *
    * @param {string} id - The id of the tab to be selected
    */
   selectTab(id: string): void {

@@ -3,6 +3,7 @@ import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processo
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { UIEventProcessor } from './event-processor-children/ui-event-processor';
 import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
 import { GeochartEventProcessor } from '@/api/event-processors/event-processor-children/geochart-event-processor';
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
@@ -13,6 +14,7 @@ const appEventProcessor = new AppEventProcessor();
 const featureInfoEventProcessor = new FeatureInfoEventProcessor();
 const legendEventProcessor = new LegendEventProcessor();
 const mapEventProcessor = new MapEventProcessor();
+const uiEventProcessor = new UIEventProcessor();
 const dataTableEventProcessor = new DataTableEventProcessor();
 
 // packages
@@ -26,6 +28,7 @@ export function initializeEventProcessors(store: GeoviewStoreType): void {
   featureInfoEventProcessor.initialize(store);
   legendEventProcessor.initialize(store);
   mapEventProcessor.initialize(store);
+  uiEventProcessor.initialize(store);
   dataTableEventProcessor.initialize(store);
 
   // package stores, only create if needed
@@ -41,6 +44,7 @@ export function destroyEventProcessors(store: GeoviewStoreType): void {
   featureInfoEventProcessor.destroy();
   legendEventProcessor.destroy();
   mapEventProcessor.destroy();
+  uiEventProcessor.destroy();
   dataTableEventProcessor.destroy();
 
   // package stores, only destroy if created

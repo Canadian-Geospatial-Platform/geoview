@@ -44,7 +44,7 @@ import { Projection } from '@/geo/utils/projection';
 
 import { api, unmountMap } from '@/app';
 import { Plugin } from '@/api/plugin/plugin';
-import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
+import { TypePluginStructure, TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 
 import { AppBarApi } from '@/core/components/app-bar/app-bar-api';
 import { NavBarApi } from '@/core/components/nav-bar/nav-bar-api';
@@ -352,6 +352,17 @@ export class MapViewer {
   }
 
   // #region MAP STATES
+
+  /**
+   * Asynchronously attempts to get a plugin by its id.
+   * @param {string} pluginId - The plugin id
+   * @returns {TypePluginStructure} The plugin structure
+   */
+  getPlugin(pluginId: string): Promise<TypePluginStructure> {
+    return whenThisThen(() => {
+      return this.plugins[pluginId];
+    });
+  }
 
   /**
    * Returns the current display language
