@@ -46,9 +46,9 @@ export declare class GeometryApi {
      */
     offGeometryAdded(callback: GeometryAddedDelegate): void;
     /**
-     * Create a polyline using an array of lng/lat points
+     * Create a polyline using an array of lon/lat points
      *
-     * @param {Coordinate} points points of lng/lat to draw a polyline
+     * @param {Coordinate} points points of lon/lat to draw a polyline
      * @param options polyline options including styling
      * @param {string} id an optional id to be used to manage this geometry
      * @param {string} groupId an optional group id in witch we want to add the geometry

@@ -47,11 +47,18 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      */
     static getMapViewerPlugins(mapId: string): Promise<TypeRecordOfPlugin>;
     /**
-     * Asynchronously retrieves the scale information as read from the Dom element for the given map id
-     * @param {string} mapId The mapId
-     * @returns {Promise<TypeScaleInfo>} A Promise to receive scale information when the dom has it
+     * Asynchronously retrieves the scale information from the DOM elements for the given map ID.
+     *
+     * @param {string} mapId - The unique identifier of the map.
+     * @param {number} timeoutMs - The maximum time in milliseconds to wait for the DOM elements to be available.
+     * @returns {Promise<TypeScaleInfo>} A promise that resolves to the scale information object when available.
+     *
+     * @description
+     * This method waits for the scale control DOM elements (both metric and imperial) to be present and populated.
+     * It then extracts the scale bar widths and labels, as well as the numeric scale value, and returns them in a TypeScaleInfo object.
+     * If the elements are not available within the specified timeout, the promise will reject.
      */
-    static getScaleInfoFromDomElement(mapId: string): Promise<TypeScaleInfo>;
+    static getScaleInfoFromDomElement(mapId: string, timeoutMs: number): Promise<TypeScaleInfo>;
     /**
      * Shortcut to get the Map config for a given map id
      * @param {string} mapId the map id to retrieve the config for

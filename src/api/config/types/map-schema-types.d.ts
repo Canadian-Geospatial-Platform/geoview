@@ -376,7 +376,7 @@ export type TypeBaseSourceInitialConfig = {
      */
     dataAccessPath?: string;
     /**
-     * Spatial Reference EPSG code supported (https://epsg.io/). We support lat/long, Web Mercator and Lambert Conical Conform Canada.
+     * Spatial Reference EPSG code supported (https://epsg.io/). We support lon/lat, Web Mercator and Lambert Conical Conform Canada.
      * Default = 3978.
      */
     projection?: TypeValidSourceProjectionCodes;
@@ -699,17 +699,17 @@ export declare const layerEntryIsEsriDynamic: (verifyIfLayer: TypeLayerEntryConf
 export declare const layerEntryIsEsriimage: (verifyIfLayer: TypeLayerEntryConfig) => verifyIfLayer is EsriImageLayerEntryConfig;
 export declare const layerEntryIsImageStatic: (verifyIfLayer: TypeLayerEntryConfig) => verifyIfLayer is ImageStaticLayerEntryConfig;
 /**
- * Returns true if the layer entry from the map configuration represents a GeoCore layer type.
- * @param {MapConfigLayerEntry} layerConfigEntryOption The layer entry config to check
- * @returns {boolean} True if the layer type if GeoCore
+ * Type guard that checks if a given map layer configuration entry is of type GeoCore.
+ * @param {MapConfigLayerEntry} layerConfigEntryOption - The layer entry config to check
+ * @returns {layerConfigEntryOption is GeoCoreLayerConfig} True if the layer is a GeoCore layer, narrowing the type to GeoCoreLayerConfig.
  */
-export declare const mapConfigLayerEntryIsGeoCore: (layerConfigEntryOption: MapConfigLayerEntry) => boolean;
+export declare const mapConfigLayerEntryIsGeoCore: (layerConfigEntryOption: MapConfigLayerEntry) => layerConfigEntryOption is GeoCoreLayerConfig;
 /**
- * Returns true if the layer entry from the map configuration represents a shapefile layer type.
- * @param {MapConfigLayerEntry} layerConfigEntryOption The layer entry config to check
- * @returns {boolean} True if the layer type if GeoCore
+ * Type guard that checks if a given map layer configuration entry is of type Shapefile.
+ * @param {MapConfigLayerEntry} layerConfigEntryOption - The layer entry config to check
+ * @returns {layerConfigEntryOption is ShapefileLayerConfig} True if the layer is a Shapefile layer, narrowing the type to ShapefileLayerConfig.
  */
-export declare const mapConfigLayerEntryIsShapefile: (layerConfigEntryOption: MapConfigLayerEntry) => boolean;
+export declare const mapConfigLayerEntryIsShapefile: (layerConfigEntryOption: MapConfigLayerEntry) => layerConfigEntryOption is ShapefileLayerConfig;
 export type MapConfigLayerEntry = TypeGeoviewLayerConfig | GeoCoreLayerConfig | ShapefileLayerConfig;
 export type TypeGeoviewLayerConfig = {
     /** The GeoView layer identifier. */

@@ -6,6 +6,7 @@ import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import { Projection as OLProjection } from 'ol/proj';
 import { Condition } from 'ol/events/condition';
+import { Size } from 'ol/size';
 import { TypeMapFeaturesInstance, TypeViewSettings, TypeInteraction, TypeValidMapProjectionCodes, TypeDisplayLanguage, TypeDisplayTheme, TypeMapViewSettings, TypeLayerStatus } from '@/api/config/types/map-schema-types';
 import { BasemapApi } from '@/geo/layer/basemap/basemap';
 import { LayerApi } from '@/geo/layer/layer';
@@ -38,6 +39,7 @@ import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/laye
 export declare class MapViewer {
     #private;
     static DEFAULT_STOPS: number;
+    static INIT_TIMEOUT_PROMISE: number;
     mapFeaturesConfig: TypeMapFeaturesConfig;
     mapId: string;
     map: OLMap;
@@ -99,11 +101,37 @@ export declare class MapViewer {
      */
     getView(): View;
     /**
+     * Set the map viewSettings (coordinate values in lon/lat)
+     *
+     * @param {TypeViewSettings} mapView - Map viewSettings object
+     */
+    setView(mapView: TypeViewSettings): void;
+    /**
      * Asynchronously gets the map center coordinate to give a chance for the map to
      * render before returning the value.
-     * @returns the map viewSettings
+     * @returns {Promise<Coordinate>} the map center
      */
     getCenter(): Promise<Coordinate>;
+    /**
+     * Set the map center.
+     *
+     * @param {Coordinate} center - New center to use
+     */
+    setCenter(center: Coordinate): void;
+    /**
+     * Asynchronously gets the map size to give a chance for the map to
+     * render before returning the value.
+     * @returns {Promise<Size>} the map size
+     */
+    getMapSize(): Promise<Size>;
+    /**
+     * Asynchronously gets the map coordinate from pixel to give a chance for the map to
+     * render before returning the value.
+     * @param {[number, number]} pointXY - The pixel coordinate to convert
+     * @param {number} timeoutMs - The maximum time in milliseconds to wait for the getCoordinateFromPixel to return a value.
+     * @returns {Promise<Coordinate>} the map size
+     */
+    getCoordinateFromPixel(pointXY: [number, number], timeoutMs: number): Promise<Coordinate>;
     /**
      * Gets the map projection
      * @returns the map viewSettings
@@ -160,18 +188,6 @@ export declare class MapViewer {
      */
     setTheme(displayTheme: TypeDisplayTheme): void;
     /**
-     * Set the map viewSettings (coordinate values in lat/long)
-     *
-     * @param {TypeViewSettings} mapView - Map viewSettings object
-     */
-    setView(mapView: TypeViewSettings): void;
-    /**
-     * Set the map center.
-     *
-     * @param {Coordinate} center - New center to use
-     */
-    setCenter(center: Coordinate): void;
-    /**
      * Set the map zoom level.
      *
      * @param {number} zoom - New zoom level
@@ -191,8 +207,8 @@ export declare class MapViewer {
     setMaxZoomLevel(zoom: number): void;
     /**
      * Set map extent.
-     *
      * @param {Extent} extent - New extent to zoom to.
+     * @returns {Promise<void>} A promise that resolves when the zoom operation completes.
      */
     setExtent(extent: Extent): Promise<void>;
     /**
@@ -230,10 +246,8 @@ export declare class MapViewer {
     /**
      * Loops through all geoview layers and refresh their respective source.
      * Use this function on projection change or other viewer modification who may affect rendering.
-     *
-     * @returns A Promise which resolves when the rendering is completed after the source(s) were changed.
      */
-    refreshLayers(): Promise<void>;
+    refreshLayers(): void;
     /**
      * Hide a click marker from the map
      */
@@ -266,6 +280,7 @@ export declare class MapViewer {
      *
      * @param {Extent} extent - The extent to zoom to.
      * @param {FitOptions} options - The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 }).
+     * @returns {Promise<void>} A promise that resolves when the zoom operation completes.
      */
     zoomToExtent(extent: Extent, options?: FitOptions): Promise<void>;
     /**
@@ -278,6 +293,7 @@ export declare class MapViewer {
      *
      * @param {Extent | Coordinate} extent - The extent or coordinate to zoom to.
      * @param {FitOptions} options - The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 }).
+     * @returns {Promise<void>} A promise that resolves when the zoom operation completes.
      */
     zoomToLonLatExtentOrCoordinate(extent: Extent | Coordinate, options?: FitOptions): Promise<void>;
     /**
@@ -329,9 +345,9 @@ export declare class MapViewer {
     /**
      * Gets if north is visible. This is not a perfect solution and is more a work around
      *
-     * @returns {boolean} true if visible, false otherwise
+     * @returns {Promise<boolean>} true if visible, false otherwise
      */
-    getNorthVisibility(): boolean;
+    getNorthVisibility(): Promise<boolean>;
     /**
      * Get north arrow bearing. Angle use to rotate north arrow for non Web Mercator projection
      * https://www.movable-type.co.uk/scripts/latlong.html

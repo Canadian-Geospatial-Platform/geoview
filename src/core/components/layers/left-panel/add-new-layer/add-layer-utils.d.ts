@@ -1,4 +1,4 @@
-import { GroupLayerEntryConfig, MapConfigLayerEntry } from '@/api/config/types/map-schema-types';
+import { GroupLayerEntryConfig, MapConfigLayerEntry, TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
 type BuildGeoViewLayerInput = {
     layerIdsToAdd: string[];
     layerName: string;
@@ -6,6 +6,14 @@ type BuildGeoViewLayerInput = {
     layerURL: string;
     layerList: GroupLayerEntryConfig[];
 };
+/**
+ * Returns an array of tuples representing available GeoView layer types and their localized display names.
+ *
+ * @param {TypeDisplayLanguage} language - The display language to use for localization.
+ * @param {boolean} includeStatic - True if we need to include static image layers, false otherwise.
+ * @returns {Array<[string, string]>} An array where each item is a tuple: [layerType, localizedName].
+ */
+export declare const getLocalizeLayerType: (language: TypeDisplayLanguage, includeStatic: boolean) => Array<[string, string]>;
 /**
  * Finds a layer entry config from an array with the given ID.
  * @param {GroupLayerEntryConfig[]} layerList - The array of layerEntryConfigs.
