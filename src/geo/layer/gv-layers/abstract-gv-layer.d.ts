@@ -312,14 +312,14 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
     offLayerFilterApplied(callback: LayerFilterAppliedDelegate): void;
     /**
      * Registers a layer style changed event handler.
-     * @param {LayerStyleChangedDelegate} callback - The callback to be executed whenever the event is emitted
+     * @param {StyleChangedDelegate} callback - The callback to be executed whenever the event is emitted
      */
-    onLayerStyleChanged(callback: LayerStyleChangedDelegate): void;
+    onLayerStyleChanged(callback: StyleChangedDelegate): void;
     /**
      * Unregisters a layer style changed event handler.
-     * @param {LayerStyleChangedDelegate} callback - The callback to stop being called whenever the event is emitted
+     * @param {StyleChangedDelegate} callback - The callback to stop being called whenever the event is emitted
      */
-    offLayerStyleChanged(callback: LayerStyleChangedDelegate): void;
+    offLayerStyleChanged(callback: StyleChangedDelegate): void;
     /**
      * Registers when a layer have been first loaded on the map event handler.
      * @param {LayerDelegate} callback - The callback to be executed whenever the event is emitted
@@ -372,15 +372,15 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
     offLayerMessage(callback: LayerMessageDelegate): void;
 }
 /**
- * Define a delegate for the event handler function signature
- */
-export type LayerStyleChangedDelegate = EventDelegateBase<AbstractGVLayer, LayerStyleChangedEvent, void>;
-/**
  * Define an event for the delegate
  */
-export type LayerStyleChangedEvent = {
+export type StyleChangedEvent = {
     style: TypeLayerStyleConfig;
 };
+/**
+ * Define a delegate for the event handler function signature
+ */
+export type StyleChangedDelegate = EventDelegateBase<AbstractGVLayer, StyleChangedEvent, void>;
 /**
  * Define an event for the delegate
  */

@@ -10,6 +10,7 @@ import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vecto
  * @class GVGeoJSON
  */
 export declare class GVGeoJSON extends AbstractGVVector {
+    #private;
     /**
      * Constructs a GVGeoJSON layer to manage an OpenLayer layer.
      * @param {VectorSource} olSource - The OpenLayer source.
@@ -22,10 +23,14 @@ export declare class GVGeoJSON extends AbstractGVVector {
      */
     getLayerConfig(): GeoJSONLayerEntryConfig;
     /**
-     * Overrides the features of a geojson layer with new geojson.
-     *
-     * @param {GeoJSONObject | string} geojson - The new geoJSON.
+     * Loads a Geojson object as the layer source features, overriding the current features if any.
+     * @param {GeoJSONObject | string} geojson - The geoJSON object.
      * @param {OLProjection} projection - The output projection.
      */
     setGeojsonSource(geojson: GeoJSONObject | string, projection: OLProjection): void;
+    /**
+     * Updates the Geojson object, if any, to reproject the features into the new provided projection.
+     * @param {OLProjection} projection - The projection to project the geojson source features into.
+     */
+    updateGeojsonSource(projection: OLProjection): void;
 }
