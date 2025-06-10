@@ -13,7 +13,7 @@ import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 export class Notifications {
   mapId;
 
-  // Keep all callback delegate references
+  /** Keep all callback delegate references */
   #onSnackbarOpendHandlers: SnackBarOpenDelegate[] = [];
 
   /**

@@ -31,7 +31,7 @@ export class GVVectorTiles extends AbstractGVVectorTile {
 
     // Create and set the OpenLayer layer
     const declutter = true;
-    this.olLayer = new VectorTileLayer({ ...tileLayerOptions, declutter });
+    this.setOLLayer(new VectorTileLayer({ ...tileLayerOptions, declutter }));
   }
 
   /**
@@ -55,21 +55,18 @@ export class GVVectorTiles extends AbstractGVVectorTile {
 
   /**
    * Used to change the style of the vector tile layer.
-   * @private
    * @param styleUrl The style URL to apply to the layer
    * @returns Promise<void>
    */
   changeStyle(styleUrl: string): Promise<void> {
     if (styleUrl) {
-      const olLayer = this.olLayer as VectorTileLayer;
-      const source = olLayer?.getSource();
-      if (olLayer && source) {
-        const tileGrid = source.getTileGrid();
-        if (tileGrid) {
-          return applyStyle(olLayer, styleUrl, {
-            resolutions: tileGrid.getResolutions(),
-          });
-        }
+      const olLayer = this.getOLLayer();
+      const source = this.getOLSource();
+      const tileGrid = source.getTileGrid();
+      if (tileGrid) {
+        return applyStyle(olLayer, styleUrl, {
+          resolutions: tileGrid.getResolutions(),
+        });
       }
     }
 

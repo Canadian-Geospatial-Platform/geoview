@@ -24,10 +24,10 @@ export class Translate extends Interaction {
   // The embedded OpenLayers Translate component
   #ol_translate: OLTranslate;
 
-  // Keep all callback delegates references for translate start event
+  /** Keep all callback delegates references */
   #onTranslateStartedHandlers: TranslateDelegate[] = [];
 
-  // Keep all callback delegates references for translate end event
+  /** Keep all callback delegates references */
   #onTranslateEndedHandlers: TranslateDelegate[] = [];
 
   /**

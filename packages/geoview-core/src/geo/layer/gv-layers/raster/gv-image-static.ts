@@ -36,7 +36,7 @@ export class GVImageStatic extends AbstractGVRaster {
     AbstractGVRaster.initOptionsWithInitialSettings(staticImageOptions, layerConfig);
 
     // Create and set the OpenLayer layer
-    this.olLayer = new ImageLayer(staticImageOptions);
+    this.setOLLayer(new ImageLayer(staticImageOptions));
   }
 
   /**

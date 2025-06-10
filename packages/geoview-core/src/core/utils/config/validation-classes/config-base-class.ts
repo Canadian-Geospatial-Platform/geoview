@@ -64,7 +64,7 @@ export abstract class ConfigBaseClass {
   /** It is used to link the layer entry config to the parent's layer config. */
   parentLayerConfig?: GroupLayerEntryConfig;
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onLayerStatusChangedHandlers: LayerStatusChangedDelegate[] = [];
 
   // The layer status weigths

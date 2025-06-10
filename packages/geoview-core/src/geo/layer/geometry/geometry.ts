@@ -52,7 +52,7 @@ export class GeometryApi {
   /** Reference on the map viewer */
   mapViewer: MapViewer;
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onGeometryAddedHandlers: GeometryAddedDelegate[] = [];
 
   /**
