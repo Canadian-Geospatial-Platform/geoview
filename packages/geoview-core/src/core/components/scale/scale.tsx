@@ -141,7 +141,7 @@ export const Scale = memo(function Scale({ expanded }: ScaleProps): JSX.Element 
   );
 
   return (
-    <Tooltip title={t('mapnav.scale')!} placement="top">
+    <Tooltip title={t('mapnav.scale')} placement="top">
       <Box sx={BOX_STYLES}>
         <Box id={`${mapId}-scaleControlBarMetric`} sx={sxClasses.scaleControl} />
         <Box id={`${mapId}-scaleControlBarImperial`} sx={sxClasses.scaleControl} />

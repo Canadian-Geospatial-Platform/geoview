@@ -140,7 +140,7 @@ export class GeoJSON extends AbstractGeoViewVector {
           const metadataAccessPathRootPlusLayerId = `${metadataAccessPathRoot}/${layerConfig.layerId}`;
           if (metadataAccessPathRootPlusLayerId === layerConfig.source?.dataAccessPath && layerMetadataFound.source?.dataAccessPath) {
             // eslint-disable-next-line no-param-reassign
-            layerConfig.source!.dataAccessPath = layerMetadataFound.source!.dataAccessPath;
+            layerConfig.source.dataAccessPath = layerMetadataFound.source.dataAccessPath;
           }
         }
       }

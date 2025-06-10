@@ -339,7 +339,7 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
               ref={tabPanelRef}
               className="tab-panel"
             >
-              {typeof tab?.content === 'string' ? <UseHtmlToReact htmlContent={(tab?.content as string) ?? ''} /> : tab.content}
+              {typeof tab?.content === 'string' ? <UseHtmlToReact htmlContent={tab?.content ?? ''} /> : tab.content}
             </TabPanel>
           ) : (
             ''

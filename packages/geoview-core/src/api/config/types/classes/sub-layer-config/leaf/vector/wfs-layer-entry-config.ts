@@ -146,13 +146,13 @@ export class WfsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
       ).split(' ');
       const bounds = [Number(lowerCorner[0]), Number(lowerCorner[1]), Number(upperCorner[0]), Number(upperCorner[1])] as Extent;
 
-      this.initialSettings!.extent = validateExtentWhenDefined(bounds);
+      this.initialSettings.extent = validateExtentWhenDefined(bounds);
       if (this.initialSettings?.extent?.find?.((value, i) => value !== bounds[i]))
         logger.logWarning(
           `The extent specified in the metadata for the layer path “${this.getLayerPath()}” is considered invalid and has been corrected.`
         );
 
-      this.bounds = this.initialSettings!.extent;
+      this.bounds = this.initialSettings.extent;
 
       // Overwrite user provided value if service doesn't allow that scale
       if (layerMetadata.maxScaleDenominator) {
@@ -210,7 +210,7 @@ export class WfsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     // format URL for the DescribeFeatureType request.
     const describeFeatureUrl = `${this.getGeoviewLayerConfig().processUrlParameters(
       'DescribeFeatureType'
-    )}&outputFormat=${encodeURIComponent(supportedOutputFormat as string)}&typeName=${this.layerId}`;
+    )}&outputFormat=${encodeURIComponent(supportedOutputFormat)}&typeName=${this.layerId}`;
 
     // Execute the request using a JSON output format.
     if (supportedOutputFormat === 'application/json') {

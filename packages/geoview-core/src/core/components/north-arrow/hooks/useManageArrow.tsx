@@ -104,7 +104,7 @@ export const useManageArrow = (): ArrowReturn => {
         const diff = Math.abs(mapRotation - rotationValue);
 
         // Calculate longitude factor
-        const deviationFromCenter = (mapCenterLongitude as number) - CENTRAL_MERIDIAN;
+        const deviationFromCenter = mapCenterLongitude - CENTRAL_MERIDIAN;
 
         if (Math.abs(deviationFromCenter) <= 3) {
           setRotation(0);

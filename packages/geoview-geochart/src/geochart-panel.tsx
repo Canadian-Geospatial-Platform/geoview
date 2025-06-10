@@ -43,9 +43,9 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
 
   // Get states and actions from store
   const configObj = useGeochartConfigs();
-  const visibleLayers = useMapVisibleLayers() as string[];
+  const visibleLayers = useMapVisibleLayers();
   const storeArrayOfLayerData = useGeochartLayerDataArrayBatch();
-  const selectedLayerPath = useGeochartSelectedLayerPath() as string;
+  const selectedLayerPath = useGeochartSelectedLayerPath();
   const { setSelectedLayerPath, setLayerDataArrayBatchLayerPathBypass } = useGeochartStoreActions();
   const displayLanguage = useAppDisplayLanguage();
   const mapClickCoordinates = useMapClickCoordinates();
@@ -150,22 +150,24 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
     logger.logTraceUseMemo('GEOCHART-PANEL - memoLayersList', storeArrayOfLayerData);
 
     // Set the layers list
-    return visibleLayers
-      .map((layerPath) => storeArrayOfLayerData.find((layerData) => layerData.layerPath === layerPath))
-      .filter((layer) => layer && configObj[layer.layerPath])
-      .map(
-        (layer) =>
-          ({
-            layerName: layer!.layerName ?? '',
-            layerPath: layer!.layerPath,
-            layerStatus: layer!.layerStatus,
-            queryStatus: layer!.queryStatus,
-            numOffeatures: layer!.features?.length ?? 0,
-            layerFeatures: getNumFeaturesLabel(layer!),
-            tooltip: `${layer!.layerName}, ${getNumFeaturesLabel(layer!)}`,
-            layerUniqueId: `${mapId}-${TABS.GEO_CHART}-${layer!.layerPath}`,
-          }) as LayerListEntry
-      );
+    return visibleLayers.reduce<LayerListEntry[]>((acc, layerPath) => {
+      const layer = storeArrayOfLayerData.find((layerData) => layerData.layerPath === layerPath);
+
+      if (layer && configObj[layer.layerPath]) {
+        acc.push({
+          layerName: layer.layerName ?? '',
+          layerPath: layer.layerPath,
+          layerStatus: layer.layerStatus,
+          queryStatus: layer.queryStatus,
+          numOffeatures: layer.features?.length ?? 0,
+          layerFeatures: getNumFeaturesLabel(layer),
+          tooltip: `${layer.layerName}, ${getNumFeaturesLabel(layer)}`,
+          layerUniqueId: `${mapId}-${TABS.GEO_CHART}-${layer.layerPath}`,
+        });
+      }
+
+      return acc;
+    }, []);
   }, [visibleLayers, storeArrayOfLayerData, configObj, getNumFeaturesLabel, mapId]);
 
   /**
@@ -263,7 +265,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
             <Box sx={{ '& .MuiButtonGroup-groupedHorizontal.MuiButton-textSizeMedium': { fontSize: '0.9rem' } }}>
               {Object.entries(configObj).map(([layerPath, layerChartConfig]) => {
                 if (layerPath === selectedLayerPath) {
-                  return renderChart(layerChartConfig as unknown as GeoViewGeoChartConfig<ChartType>, {}, layerPath);
+                  return renderChart(layerChartConfig as GeoViewGeoChartConfig<ChartType>, {}, layerPath);
                 }
                 return <Box key={layerPath} />;
               })}

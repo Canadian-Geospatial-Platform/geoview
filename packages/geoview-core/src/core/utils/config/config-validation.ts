@@ -151,7 +151,7 @@ export class ConfigValidation {
         layerEntryIsGroupLayer(listOfLayerEntryConfig[i]) &&
         !this.#isValidTypeListOfLayerEntryConfig(
           geoviewLayerType,
-          listOfLayerEntryConfig[i].listOfLayerEntryConfig!,
+          listOfLayerEntryConfig[i].listOfLayerEntryConfig,
           validator,
           onErrorCallback
         )
@@ -227,7 +227,7 @@ export class ConfigValidation {
         } else {
           try {
             // The default value for geoviewLayerConfig.initialSettings.visible is true.
-            const geoviewLayerConfigCasted = geoviewLayerConfig as TypeGeoviewLayerConfig;
+            const geoviewLayerConfigCasted = geoviewLayerConfig;
             if (!geoviewLayerConfigCasted.initialSettings) geoviewLayerConfigCasted.initialSettings = { states: { visible: true } };
 
             // Validate the geoview layer id
@@ -344,7 +344,7 @@ export class ConfigValidation {
       if (layerEntryIsGroupLayer(layerConfig)) {
         // We must set the parents of all elements in the group.
         ConfigValidation.#recursivelySetChildParent(geoviewLayerConfig, [layerConfig], parentLayerConfig);
-        const parent = new GroupLayerEntryConfig(layerConfig as GroupLayerEntryConfig);
+        const parent = new GroupLayerEntryConfig(layerConfig);
         listOfLayerEntryConfig[i] = parent;
         ConfigValidation.#processLayerEntryConfig(geoviewLayerConfig, parent.listOfLayerEntryConfig, parent);
       } else if (geoviewEntryIsWMS(layerConfig)) {
@@ -395,11 +395,7 @@ export class ConfigValidation {
       layerConfig.parentLayerConfig = parentLayerConfig;
       layerConfig.geoviewLayerConfig = geoviewLayerConfig;
       if (layerEntryIsGroupLayer(layerConfig))
-        ConfigValidation.#recursivelySetChildParent(
-          geoviewLayerConfig,
-          layerConfig.listOfLayerEntryConfig!,
-          layerConfig as GroupLayerEntryConfig
-        );
+        ConfigValidation.#recursivelySetChildParent(geoviewLayerConfig, layerConfig.listOfLayerEntryConfig, layerConfig);
     });
   }
 }

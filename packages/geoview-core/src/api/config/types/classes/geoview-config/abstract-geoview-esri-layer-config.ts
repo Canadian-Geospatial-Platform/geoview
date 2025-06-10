@@ -166,7 +166,7 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
         this.createLeafNode(
           toJsonObject({
             layerId: generateId(8),
-            layerName: serviceMetadata.name!,
+            layerName: serviceMetadata.name,
           }),
           this
         )!,
@@ -183,7 +183,7 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
         const leafNode = this.createLeafNode(
           toJsonObject({
             layerId: layer.id.toString(),
-            layerName: layer.name!,
+            layerName: layer.name,
             geometryType: AbstractGeoviewEsriLayerConfig.convertEsriGeometryTypeToOLGeometryType(layer.geometryType as string),
           }),
           this

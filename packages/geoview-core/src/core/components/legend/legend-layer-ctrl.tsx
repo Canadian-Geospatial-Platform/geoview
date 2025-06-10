@@ -130,7 +130,7 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
       <Box sx={sxClasses.subtitle}>
         <IconButton
           edge="end"
-          tooltip={t('layers.zoomVisibleScale') as string}
+          tooltip={t('layers.zoomVisibleScale') || ''}
           className={`buttonOutline ${isZoomToVisibleScaleCapable ? '' : 'outOfRangeButton'}`}
           onClick={controls.handleZoomToLayerVisibleScale}
         >
@@ -139,7 +139,7 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
         {isLayerVisibleCapable && (
           <IconButton
             edge={isInVisibleRange ? false : 'end'}
-            tooltip={t('layers.toggleVisibility') as string}
+            tooltip={t('layers.toggleVisibility') || ''}
             className="buttonOutline"
             onClick={controls.handleToggleVisibility}
             disabled={!isInVisibleRange}
@@ -149,7 +149,7 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
         )}
         {isLayerHighlightCapable && (
           <IconButton
-            tooltip={t('legend.highlightLayer') as string}
+            tooltip={t('legend.highlightLayer') || ''}
             sx={styles.btnMargin}
             className="buttonOutline"
             onClick={controls.handleHighlightLayer}
@@ -158,7 +158,7 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
           </IconButton>
         )}
         {isLayerZoomToExtentCapable && (
-          <IconButton tooltip={t('legend.zoomTo') as string} className="buttonOutline" onClick={controls.handleZoomTo}>
+          <IconButton tooltip={t('legend.zoomTo') || ''} className="buttonOutline" onClick={controls.handleZoomTo}>
             <ZoomInSearchIcon />
           </IconButton>
         )}

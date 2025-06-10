@@ -4,7 +4,7 @@ import { AppBarPlugin } from 'geoview-core/src/api/plugin/appbar-plugin';
 import { LegendIcon } from 'geoview-core/src/ui/icons';
 import { IconButtonPropsExtend } from 'geoview-core/src/ui/icon-button/icon-button';
 import { TypePanelProps } from 'geoview-core/src/ui/panel/panel-types';
-import { CustomLegendPanel } from './custom-legend';
+import { CustomLegendPanel, TypeLegendProps } from './custom-legend';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-custom-legend.json';
 
@@ -68,7 +68,7 @@ class CustomLegendPanelPlugin extends AppBarPlugin {
   }
 
   override onCreateContent = (): JSX.Element => {
-    return <CustomLegendPanel config={this.configObj || {}} />;
+    return <CustomLegendPanel config={this.configObj as unknown as TypeLegendProps} />;
   };
 
   /**

@@ -106,7 +106,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
         return {
           layerPath,
           layer: LegendEventProcessor.findLayerByPath(legendLayers, layerPath),
-          timeSliderLayerInfo: timeSliderLayers[layerPath!],
+          timeSliderLayerInfo: timeSliderLayers[layerPath],
         };
       })
       .filter((layer) => layer.layer && layer.timeSliderLayerInfo)

@@ -223,7 +223,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
     if (source.tileGrid) {
       const tileGridOptions: TileGridOptions = {
         origin: source.tileGrid.origin,
-        resolutions: source.tileGrid.resolutions as number[],
+        resolutions: source.tileGrid.resolutions,
         tileSize: source.tileGrid.tileSize,
         extent: source.tileGrid.extent,
       };

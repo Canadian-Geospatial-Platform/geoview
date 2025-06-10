@@ -475,7 +475,7 @@ export class MapViewer {
   getCoordinateFromPixel(pointXY: [number, number], timeoutMs: number): Promise<Coordinate> {
     // When the getCoordinateFromPixel() function actually returns a coordinate
     return whenThisThen(() => {
-      return this.map.getCoordinateFromPixel(pointXY)!;
+      return this.map.getCoordinateFromPixel(pointXY);
     }, timeoutMs);
   }
 
@@ -535,7 +535,7 @@ export class MapViewer {
     if (!status) {
       // Store the extent before any size changes occur
       const currentExtent = this.getView().calculateExtent();
-      const currentZoom = this.getMapState().currentZoom!;
+      const { currentZoom } = this.getMapState();
       let sizeChangeHandled = false; // Add flag to track if we've handled the size change
 
       // Store the extent and other relevant information
@@ -1607,9 +1607,9 @@ export class MapViewer {
     if (this.mapFeaturesConfig.map.viewSettings.initialView?.extent) {
       // Not zooming on layers, but we have an extent to zoom to instead
       // If extent is not lon/lat, we assume it is in the map projection and use it as is.
-      const extent = isExtentLonLat(this.mapFeaturesConfig.map.viewSettings.initialView!.extent)
-        ? this.convertExtentLonLatToMapProj(this.mapFeaturesConfig.map.viewSettings.initialView!.extent as Extent)
-        : this.mapFeaturesConfig.map.viewSettings.initialView!.extent;
+      const extent = isExtentLonLat(this.mapFeaturesConfig.map.viewSettings.initialView.extent)
+        ? this.convertExtentLonLatToMapProj(this.mapFeaturesConfig.map.viewSettings.initialView.extent as Extent)
+        : this.mapFeaturesConfig.map.viewSettings.initialView.extent;
 
       // Zoom to extent
       return this.zoomToExtent(extent, {

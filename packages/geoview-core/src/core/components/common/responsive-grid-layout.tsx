@@ -69,10 +69,7 @@ const ResponsiveGridLayout = forwardRef(
     const [isFullScreen, setIsFullScreen] = useState(false);
 
     // sxClasses
-    const sxClasses = useMemo(
-      () => getSxClasses(theme, containerType!),
-      [theme, containerType]
-    );
+    const sxClasses = useMemo(() => getSxClasses(theme, containerType!), [theme, containerType]);
 
     // Expose imperative methods to parent component
     useImperativeHandle(ref, function handleRef() {
@@ -203,7 +200,7 @@ const ResponsiveGridLayout = forwardRef(
             ...(fullWidth ? sxClasses.appBarEnlargeButton : sxClasses.footerBarEnlargeButton),
           }}
           onClick={() => setIsRightPanelVisible(false)}
-          tooltip={t('dataTable.close') as string}
+          tooltip={t('dataTable.close') || ''}
         >
           {t('dataTable.close')}
         </Button>
@@ -360,11 +357,13 @@ const ResponsiveGridLayout = forwardRef(
             </Box>
           </ResponsiveGrid.Right>
         </ResponsiveGrid.Root>
-        <ResponsiveGrid.Root className="responsive-layout-main-row"
+        <ResponsiveGrid.Root
+          className="responsive-layout-main-row"
           sx={{
             flexGrow: 1,
             overflow: 'hidden',
-          }}>
+          }}
+        >
           <ResponsiveGrid.Left
             isEnlarged={isEnlarged}
             isRightPanelVisible={isRightPanelVisible}

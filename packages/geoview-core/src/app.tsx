@@ -182,7 +182,7 @@ async function renderMap(mapElement: Element): Promise<MapViewer> {
   const config = new Config(lang);
   const configObj = config.initializeMapConfig(
     mapId,
-    configuration!.map!.listOfGeoviewLayerConfig! as MapConfigLayerEntry[], // TODO: refactor - remove cast after
+    configuration.map.listOfGeoviewLayerConfig as MapConfigLayerEntry[], // TODO: refactor - remove cast after
     (errorKey: string, params: string[]) => {
       // Wait for the map viewer to get loaded in the api
       api
@@ -270,7 +270,7 @@ function init(): void {
 
   // loop through map elements on the page
   for (let i = 0; i < mapElements.length; i += 1) {
-    const mapElement = mapElements[i] as Element;
+    const mapElement = mapElements[i];
     if (!mapElement.classList.contains('geoview-map-func-call')) {
       // Render the map
       const promiseMapViewer = renderMap(mapElement);

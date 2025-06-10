@@ -37,10 +37,10 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     // to the same value of the corresponding metadataAccessPath.
     // TODO: remove this wrapper replace when datacube updates the URLs
     this.geoviewLayerConfig.metadataAccessPath = this.geoviewLayerConfig.metadataAccessPath!.replace('wrapper/ramp/ogc', 'ows');
-    if (this.geoviewLayerConfig.metadataAccessPath!.slice(-4).toLowerCase() !== '.xml')
+    if (this.geoviewLayerConfig.metadataAccessPath.slice(-4).toLowerCase() !== '.xml')
       this.source.dataAccessPath = this.geoviewLayerConfig.metadataAccessPath;
 
-    this.source.dataAccessPath = this.source.dataAccessPath!.replace('wrapper/ramp/ogc', 'ows');
+    this.source.dataAccessPath = this.source.dataAccessPath.replace('wrapper/ramp/ogc', 'ows');
 
     // Default value for layerConfig.source.serverType is 'mapserver'.
     if (!this.source.serverType) this.source.serverType = 'mapserver';

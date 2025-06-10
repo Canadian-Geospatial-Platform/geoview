@@ -199,7 +199,7 @@ export class OgcFeature extends AbstractGeoViewVector {
       });
     }
 
-    layerConfig.source.featureInfo!.outfields.forEach((outfield) => {
+    layerConfig.source.featureInfo.outfields.forEach((outfield) => {
       // eslint-disable-next-line no-param-reassign
       if (!outfield.alias) outfield.alias = outfield.name;
     });
@@ -207,7 +207,7 @@ export class OgcFeature extends AbstractGeoViewVector {
     // Set name field to first value
     if (!layerConfig.source.featureInfo.nameField) {
       // eslint-disable-next-line no-param-reassign
-      layerConfig.source.featureInfo.nameField = layerConfig.source.featureInfo!.outfields[0].name;
+      layerConfig.source.featureInfo.nameField = layerConfig.source.featureInfo.outfields[0].name;
     }
   }
 

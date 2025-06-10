@@ -39,7 +39,7 @@ export function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element | 
 
   // Hook
   const { t } = useTranslation<string>();
-  const tooltipAndAria = t('mapctrl.overviewmap.toggle')!;
+  const tooltipAndAria = t('mapctrl.overviewmap.toggle');
   const sxClasses = useMemo(() => getSxClasses(), []);
 
   // State
