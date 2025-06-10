@@ -11,6 +11,9 @@
     "strictPropertyInitialization": true,
     "sourceMap": true,
     "skipLibCheck": true,
+    // "declaration": true,
+    // "declarationMap": true,
+    // "emitDeclarationOnly": true,
     "jsx": "preserve",
     "allowJs": true,
     // "noEmit": true, I needed to comment this out and put `composite: true` to be able to build the plugins referencing geoview-core

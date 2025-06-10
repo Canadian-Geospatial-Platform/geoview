@@ -488,26 +488,26 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
               {reversed ? <SwitchRightIcon /> : <SwitchLeftIcon />}
             </IconButton>
 
-            <Box component="span" sx={{ paddingLeft: '10px' }}>
-              <FormControl sx={{ width: '100px' }}>
-                <InputLabel variant="standard">{getLocalizedMessage(displayLanguage, 'timeSlider.slider.timeDelay')}</InputLabel>
-                <NativeSelect
-                  defaultValue={delay}
-                  inputProps={{
-                    name: 'timeDelay',
-                    onChange: handleTimeChange,
-                  }}
-                >
-                  <option value={500}>0.5s</option>
-                  <option value={750}>0.75s</option>
-                  <option value={1000}>1.0s</option>
-                  <option value={1500}>1.5s</option>
-                  <option value={2000}>2.0s</option>
-                  <option value={3000}>3.0s</option>
-                  <option value={5000}>5.0s</option>
-                </NativeSelect>
-              </FormControl>
-            </Box>
+            {singleHandle && discreteValues && (
+              <Box component="span" sx={{ paddingLeft: '10px' }}>
+                <FormControl sx={{ width: '100px' }}>
+                  <InputLabel variant="standard">{getLocalizedMessage(displayLanguage, 'timeSlider.slider.stepValue')}</InputLabel>
+                  <NativeSelect
+                    defaultValue={step}
+                    inputProps={{
+                      name: 'timeDelay',
+                      onChange: handleTimeChange,
+                    }}
+                  >
+                    <option value={3600000}>{getLocalizedMessage(displayLanguage, 'timeSlider.slider.hour')}</option>
+                    <option value={86400000}>{getLocalizedMessage(displayLanguage, 'timeSlider.slider.day')}</option>
+                    <option value={604800000}>{getLocalizedMessage(displayLanguage, 'timeSlider.slider.week')}</option>
+                    <option value={2592000000}>{getLocalizedMessage(displayLanguage, 'timeSlider.slider.month')}</option>
+                    <option value={31536000000}>{getLocalizedMessage(displayLanguage, 'timeSlider.slider.year')}</option>
+                  </NativeSelect>
+                </FormControl>
+              </Box>
+            )}
 
             {singleHandle && discreteValues && (
               <Box component="span" sx={{ paddingLeft: '10px' }}>
