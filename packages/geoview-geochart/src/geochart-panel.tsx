@@ -265,7 +265,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
             <Box sx={{ '& .MuiButtonGroup-groupedHorizontal.MuiButton-textSizeMedium': { fontSize: '0.9rem' } }}>
               {Object.entries(configObj).map(([layerPath, layerChartConfig]) => {
                 if (layerPath === selectedLayerPath) {
-                  return renderChart(layerChartConfig as GeoViewGeoChartConfig<ChartType>, {}, layerPath);
+                  return renderChart(layerChartConfig as unknown as GeoViewGeoChartConfig<ChartType>, {}, layerPath);
                 }
                 return <Box key={layerPath} />;
               })}
