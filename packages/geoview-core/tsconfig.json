@@ -11,12 +11,12 @@
     "strictPropertyInitialization": true,
     "sourceMap": true,
     "skipLibCheck": true,
+    "jsx": "preserve",
+    "allowJs": true,
+    "composite": true,
     // "declaration": true,
     // "declarationMap": true,
     // "emitDeclarationOnly": true,
-    "composite": true,
-    "jsx": "preserve",
-    "allowJs": true,
     // "noEmit": true,
     "noUnusedLocals": true,
     "noImplicitReturns": true,
@@ -31,6 +31,6 @@
       "@public/*": ["./public/*"]
     }
   },
-  "include": ["src"],
+  "include": ["src", "src/**/*.json", "public/locales/**/*.json", "schema.json"],
   "exclude": ["node_modules"]
 }
