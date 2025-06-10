@@ -62,8 +62,6 @@ export type TypeCGPV = {
   init: () => void;
   onMapInit: MapViewerCallback;
   onMapReady: MapViewerCallback;
-  onLayersProcessed: MapViewerCallback;
-  onLayersLoaded: MapViewerCallback;
   api: API;
   react: typeof React;
   createRoot: typeof createRoot;
