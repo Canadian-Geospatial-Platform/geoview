@@ -1,4 +1,3 @@
-import { useTheme } from '@mui/material/styles';
 import { FormControl, InputLabel, NativeSelect } from '@mui/material';
 import { Box } from 'geoview-core/src/ui';
 import {
@@ -33,6 +32,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   const { cgpv } = window;
   const { config, layerPath } = props;
   const { react, ui } = cgpv;
+  const { useTheme } = ui;
   const { useState, useRef, useEffect, useCallback } = react;
   const {
     Grid,
