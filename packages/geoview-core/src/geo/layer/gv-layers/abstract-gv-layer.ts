@@ -57,7 +57,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * This useful to know when the put the layer loaded status back correctly with parallel processing happening */
   loadingMarker: number = 0;
 
-  // The OpenLayer source
+  /** The OpenLayer source */
   #olSource: Source;
 
   /** Style to apply to the vector layer. */
@@ -72,31 +72,31 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   /** Boolean indicating if the layer should be included in time awareness functions such as the Time Slider. True by default. */
   #isTimeAware: boolean = true;
 
-  // Keep all callback delegates references
+  /** Keep all callback delegate references */
   #onLayerStyleChangedHandlers: StyleChangedDelegate[] = [];
 
-  // Keep all callback delegate references
+  /** Keep all callback delegate references */
   #onLegendQueryingHandlers: LegendQueryingDelegate[] = [];
 
-  // Keep all callback delegate references
+  /** Keep all callback delegate references */
   #onLegendQueriedHandlers: LegendQueriedDelegate[] = [];
 
-  // Keep all callback delegate references
+  /** Keep all callback delegate references */
   #onLayerFilterAppliedHandlers: LayerFilterAppliedDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegate references */
   #onLayerFirstLoadedHandlers: LayerDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegate references */
   #onLayerLoadingHandlers: LayerDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegate references */
   #onLayerLoadedHandlers: LayerDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegate references */
   #onLayerErrorHandlers: LayerErrorDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegate references */
   #onLayerMessageHandlers: LayerMessageDelegate[] = [];
 
   /**
@@ -128,6 +128,59 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * @returns {Extent} The layer bounding box.
    */
   abstract onGetBounds(projection: OLProjection, stops: number): Extent | undefined;
+
+  /**
+   * Overrides the get of the OpenLayers Layer
+   * @returns {Layer} The OpenLayers Layer
+   */
+  override getOLLayer(): Layer {
+    // Call parent and cast
+    return super.getOLLayer() as Layer;
+  }
+
+  /**
+   * Gets the layer configuration associated with the layer.
+   * @returns {AbstractBaseLayerEntryConfig} The layer configuration
+   */
+  override getLayerConfig(): AbstractBaseLayerEntryConfig {
+    return super.getLayerConfig() as AbstractBaseLayerEntryConfig;
+  }
+
+  /**
+   * Overrides the way the attributions are retrieved.
+   * @returns {string[]} The layer attributions
+   */
+  override onGetAttributions(): string[] {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const attributionsAsRead = this.getOLSource().getAttributions()?.({} as any); // This looks very weird, but it's as documented in OpenLayers..
+
+    // Depending on the internal formatting
+    if (!attributionsAsRead) return [];
+    if (typeof attributionsAsRead === 'string') return [attributionsAsRead];
+    return attributionsAsRead;
+  }
+
+  /**
+   * Overrides the refresh function to refresh the layer source.
+   * @param {OLProjection | undefined} projection - Optional, the projection to refresh to.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  override onRefresh(projection: OLProjection | undefined): void {
+    // Refresh the layer source
+    this.getOLSource().refresh();
+  }
+
+  /**
+   * Overridable function that gets the extent of an array of features.
+   * @param {string[]} objectIds - The IDs of the features to calculate the extent from.
+   * @param {OLProjection} outProjection - The output projection for the extent.
+   * @param {string} outfield - ID field to return for services that require a value in outfields.
+   * @returns {Promise<Extent>} The extent of the features, if available
+   */
+  protected onGetExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
+    // Not implemented
+    throw new NotImplementedError(`Feature geometry for ${objectIds}-${outfield} is unavailable from ${this.getLayerPath()}`);
+  }
 
   /**
    * Initializes the GVLayer. This function checks if the source is ready and if so it calls onLoaded() to pursue initialization of the layer.
@@ -320,28 +373,11 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   /**
-   * Overrides the get of the OpenLayers Layer
-   * @returns {Layer} The OpenLayers Layer
-   */
-  override getOLLayer(): Layer {
-    // Call parent and cast
-    return super.getOLLayer() as Layer;
-  }
-
-  /**
    * Gets the OpenLayers Layer Source
    * @returns The OpenLayers Layer Source
    */
   getOLSource(): Source {
     return this.#olSource;
-  }
-
-  /**
-   * Gets the layer configuration associated with the layer.
-   * @returns {AbstractBaseLayerEntryConfig} The layer configuration
-   */
-  override getLayerConfig(): AbstractBaseLayerEntryConfig {
-    return super.getLayerConfig() as AbstractBaseLayerEntryConfig;
   }
 
   /**
@@ -382,20 +418,6 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   /**
-   * Gets the layer attributions
-   * @returns {string[]} The layer attributions
-   */
-  override getAttributions(): string[] {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const attributionsAsRead = this.getOLSource().getAttributions()?.({} as any); // This looks very weird, but it's as documented in OpenLayers..
-
-    // Depending on the internal formatting
-    if (!attributionsAsRead) return [];
-    if (typeof attributionsAsRead === 'string') return [attributionsAsRead];
-    return attributionsAsRead;
-  }
-
-  /**
    * Gets the temporal dimension that is associated to the layer.
    * @returns {TimeDimension | undefined} The temporal dimension associated to the layer or undefined.
    */
@@ -430,31 +452,15 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   /**
-   * Emits a layer-specific message event with localization support
-   * @protected
-   * @param {string} messageKey - The key used to lookup the localized message OR message
-   * @param {string[]} messageParams - Array of parameters to be interpolated into the localized message
-   * @param {SnackbarType} messageType - The message type
-   * @param {boolean} [notification=false] - Whether to show this as a notification. Defaults to false
-   * @returns {void}
-   *
-   * @example
-   * this.emitMessage(
-   *   'layers.fetchProgress',
-   *   ['50', '100'],
-   *   messageType: 'error',
-   *   true
-   * );
-   *
-   * @fires LayerMessageEvent
+   * Gets the extent of an array of features.
+   * @param {string[]} objectIds - The IDs of the features to calculate the extent from.
+   * @param {OLProjection} outProjection - The output projection for the extent.
+   * @param {string} outfield - ID field to return for services that require a value in outfields.
+   * @returns {Promise<Extent>} The extent of the features, if available
    */
-  protected emitMessage(
-    messageKey: string,
-    messageParams: string[],
-    messageType: SnackbarType = 'info',
-    notification: boolean = false
-  ): void {
-    this.#emitLayerMessage({ messageKey, messageParams, messageType, notification });
+  getExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
+    // Redirect
+    return this.onGetExtentFromFeatures(objectIds, outProjection, outfield);
   }
 
   /**
@@ -906,6 +912,34 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     // Redirect
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (this.getLayerConfig() as any)?.layerFilter;
+  }
+
+  /**
+   * Emits a layer-specific message event with localization support
+   * @protected
+   * @param {string} messageKey - The key used to lookup the localized message OR message
+   * @param {string[]} messageParams - Array of parameters to be interpolated into the localized message
+   * @param {SnackbarType} messageType - The message type
+   * @param {boolean} [notification=false] - Whether to show this as a notification. Defaults to false
+   * @returns {void}
+   *
+   * @example
+   * this.emitMessage(
+   *   'layers.fetchProgress',
+   *   ['50', '100'],
+   *   messageType: 'error',
+   *   true
+   * );
+   *
+   * @fires LayerMessageEvent
+   */
+  protected emitMessage(
+    messageKey: string,
+    messageParams: string[],
+    messageType: SnackbarType = 'info',
+    notification: boolean = false
+  ): void {
+    this.#emitLayerMessage({ messageKey, messageParams, messageType, notification });
   }
 
   /**

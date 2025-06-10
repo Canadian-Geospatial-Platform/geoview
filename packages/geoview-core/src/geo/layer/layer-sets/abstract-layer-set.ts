@@ -45,7 +45,7 @@ export abstract class AbstractLayerSet {
   // The registered layers
   #registeredLayers: AbstractBaseLayer[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onLayerSetUpdatedHandlers: LayerSetUpdatedDelegate[] = [];
 
   // Keep a bounded reference to the handle layer status changed

@@ -94,7 +94,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     AbstractGVRaster.initOptionsWithInitialSettings(imageLayerOptions, layerConfig);
 
     // Create and set the OpenLayer layer
-    this.olLayer = new ImageLayer(imageLayerOptions);
+    this.setOLLayer(new ImageLayer(imageLayerOptions));
   }
 
   /**
@@ -210,7 +210,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {string?} outfield - ID field to return for services that require a value in outfields.
    * @returns {Promise<Extent>} The extent of the features, if available.
    */
-  override async getExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
+  override async onGetExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
     // Get url for service from layer entry config
     const layerEntryConfig = this.getLayerConfig();
     let baseUrl = layerEntryConfig.source.dataAccessPath;

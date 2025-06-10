@@ -113,7 +113,7 @@ export class GeoPackage extends AbstractGeoViewVector {
                   // Set the layer status to processed
                   layerConfig.setLayerStatusProcessed();
 
-                  if (layerGroup) layerGroup.getOLLayer().getLayers().push(baseLayer.getOLLayer());
+                  if (layerGroup) layerGroup.addLayer(baseLayer);
                   resolve(layerGroup || baseLayer);
                 } else {
                   // Throw error
@@ -147,7 +147,7 @@ export class GeoPackage extends AbstractGeoViewVector {
                     .then((baseLayer) => {
                       if (baseLayer) {
                         (layerConfig as unknown as GroupLayerEntryConfig).listOfLayerEntryConfig.push(newLayerEntryConfig);
-                        newLayerGroup.getOLLayer().getLayers().push(baseLayer.getOLLayer());
+                        newLayerGroup.addLayer(baseLayer);
 
                         // Set the layer status to processed
                         layerConfig.setLayerStatusProcessed();

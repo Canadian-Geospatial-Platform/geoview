@@ -161,46 +161,46 @@ export class MapViewer {
   // Indicate if the map has all its layers loaded upon launch
   #mapLayersLoaded = false;
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onMapInitHandlers: MapInitDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onMapReadyHandlers: MapReadyDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onMapLayersProcessedHandlers: MapLayersProcessedDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onMapLayersLoadedHandlers: MapLayersLoadedDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onMapMoveEndHandlers: MapMoveEndDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onMapPointerMoveHandlers: MapPointerMoveDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onMapPointerStopHandlers: MapPointerMoveDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onMapSingleClickHandlers: MapSingleClickDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onMapZoomEndHandlers: MapZoomEndDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onMapRotationHandlers: MapRotationDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onMapChangeSizeHandlers: MapChangeSizeDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onMapComponentAddedHandlers: MapComponentAddedDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onMapComponentRemovedHandlers: MapComponentRemovedDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onMapLanguageChangedHandlers: MapLanguageChangedDelegate[] = [];
 
   // The starting time of the timer for the map ready
@@ -479,8 +479,7 @@ export class MapViewer {
   }
 
   /**
-   * Set the map center.
-   *
+   * Sets the map center.
    * @param {Coordinate} center - New center to use
    */
   setCenter(center: Coordinate): void {
@@ -493,7 +492,7 @@ export class MapViewer {
   /**
    * Asynchronously gets the map size to give a chance for the map to
    * render before returning the value.
-   * @returns {Promise<Size>} the map size
+   * @returns {Promise<Size>} The map size
    */
   getMapSize(): Promise<Size> {
     // When the getSize() function actually returns a coordinate
@@ -507,7 +506,7 @@ export class MapViewer {
    * render before returning the value.
    * @param {[number, number]} pointXY - The pixel coordinate to convert
    * @param {number} timeoutMs - The maximum time in milliseconds to wait for the getCoordinateFromPixel to return a value.
-   * @returns {Promise<Coordinate>} the map size
+   * @returns {Promise<Coordinate>} The map coordinate at the given pixel location
    */
   getCoordinateFromPixel(pointXY: [number, number], timeoutMs: number): Promise<Coordinate> {
     // When the getCoordinateFromPixel() function actually returns a coordinate
@@ -518,7 +517,7 @@ export class MapViewer {
 
   /**
    * Gets the map projection
-   * @returns the map viewSettings
+   * @returns {OLProjection} The map projection
    */
   getProjection(): OLProjection {
     return this.getView().getProjection();
@@ -807,7 +806,7 @@ export class MapViewer {
 
   /**
    * Loops through all geoview layers and refresh their respective source.
-   * Use this function on projection change or other viewer modification who may affect rendering.
+   * Use this function on projection change or other viewer modification which may affect rendering.
    */
   refreshLayers(): void {
     // Redirect

@@ -20,7 +20,7 @@ export type SnapOptions = InteractionOptions & {
  * @exports
  */
 export class Snap extends Interaction {
-  // The embedded OpenLayers Snap component
+  /** The embedded OpenLayers Snap component */
   #ol_snap: OLSnap;
 
   /**
