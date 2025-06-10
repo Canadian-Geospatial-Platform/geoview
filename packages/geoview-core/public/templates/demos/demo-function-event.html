@@ -335,6 +335,39 @@
           mapViewer.notifications.addNotificationSuccess('LayerApi: ' + `${payload.itemName} on layer ${payload.layerPath} visibility set to ${payload.visibility} - global`);
         });
 
+        // Register a handler when all layers are loaded, once, upon first load
+        mapViewer.onMapLayersLoaded(() => {
+          // !!
+          // GV This callback is executed when ALL layers are loaded.
+          // !!
+
+          // You can also attach to geoview layer events here, though be mindful that the layer has been created for a while already and
+          // you might have missed some events happening between the layer creation itself and when all layers are indeed loaded here.
+          // To be sure to catch all events, register a hook on mapViewer.layer.onLayerCreated like the example above in this template page.
+
+          // listen to layer visibility changed event (individual geoview layer)
+          mapViewer.layer.getGeoviewLayer(LYR_PATH_UNIQUE).onVisibleChanged((sender, payload) => {
+            mapViewer.notifications.addNotificationSuccess(`Layer: ${LYR_PATH_UNIQUE} visibility set to ${payload.visible} - individual`);
+          });
+
+          // listen to layer opacity changed event
+          mapViewer.layer.getGeoviewLayer(LYR_PATH_UNIQUE).onLayerOpacityChanged((sender, payload) => {
+            mapViewer.notifications.addNotificationSuccess(`Layer: ${payload.layerPath} opacity changed to ${payload.opacity}`);
+          });
+
+          // listen to layer filter applied event
+          mapViewer.layer.getGeoviewLayer(LYR_PATH_UNIQUE).onLayerFilterApplied((sender, payload) => {
+            mapViewer.notifications.addNotificationSuccess(`Layer: Filter ${payload.filter} applied to ${payload.layerPath}`);
+          });
+
+          // listen to layer visibility changed event (individual geoview layer)
+          mapViewer.layer.getGeoviewLayer(LYR_PATH_GEOCORE).onVisibleChanged((sender, payload) => {
+            mapViewer.notifications.addNotificationSuccess(`Layer: layer ${payload.layerPath} visibility set to ${payload.visible} - individual`);
+          });
+
+          // Add more registrations of listeners when the layers have been loaded here...
+        });
+
         // Add more registrations of listeners when the map has been initialized here...
 
       });
@@ -359,50 +392,6 @@
 
         // Add more registrations of listeners when the map is ready / layers registered here...
 
-      });
-
-      // Register a handler when ALL layers have been processed
-      cgpv.onLayersProcessed((mapViewer) => {
-        // !!
-        // GV This callback is executed when ALL layers have at least been processed.
-        // NOTE: some layers can be further along in their individual status at the time this event is triggered(!).
-        // !!
-
-        // Add more registrations of listeners when all layers have been processed here...
-
-      });
-
-      // Register a handler when all layers are loaded, once, upon first load
-      cgpv.onLayersLoaded((mapViewer) => {
-        // !!
-        // GV This callback is executed when ALL layers are loaded.
-        // !!
-
-        // You can also attach to geoview layer events here, though be mindful that the layer has been created for a while already and
-        // you might have missed some events happening between the layer creation itself and when all layers are indeed loaded here.
-        // To be sure to catch all events, register a hook on mapViewer.layer.onLayerCreated like the example above in this template page.
-
-        // listen to layer visibility changed event (individual geoview layer)
-        mapViewer.layer.getGeoviewLayer(LYR_PATH_UNIQUE).onVisibleChanged((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(`Layer: ${LYR_PATH_UNIQUE} visibility set to ${payload.visible} - individual`);
-        });
-
-        // listen to layer opacity changed event
-        mapViewer.layer.getGeoviewLayer(LYR_PATH_UNIQUE).onLayerOpacityChanged((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(`Layer: ${payload.layerPath} opacity changed to ${payload.opacity}`);
-        });
-
-        // listen to layer filter applied event
-        mapViewer.layer.getGeoviewLayer(LYR_PATH_UNIQUE).onLayerFilterApplied((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(`Layer: Filter ${payload.filter} applied to ${payload.layerPath}`);
-        });
-
-        // listen to layer visibility changed event (individual geoview layer)
-        mapViewer.layer.getGeoviewLayer(LYR_PATH_GEOCORE).onVisibleChanged((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(`Layer: layer ${payload.layerPath} visibility set to ${payload.visible} - individual`);
-        });
-
-        // Add more registrations of listeners when the layers have been loaded here...
       });
 
       // Initialize cgpv

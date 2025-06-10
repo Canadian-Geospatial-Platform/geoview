@@ -39,8 +39,6 @@ const reactRoots: Record<string, Root> = {};
 
 let cgpvCallbackMapInit: MapViewerDelegate;
 let cgpvCallbackMapReady: MapViewerDelegate;
-let cgpvCallbackLayersProcessed: MapViewerDelegate;
-let cgpvCallbackLayersLoaded: MapViewerDelegate;
 
 /**
  * Checks if a root is mounted for a given map ID
@@ -283,12 +281,6 @@ function init(): void {
       // The callback for the map ready when the promiseMapInit will resolve
       const theCallbackMapReady = cgpvCallbackMapReady;
 
-      // The callback for the layers processed when the promiseMapInit will resolve
-      const theCallbackLayersProcessed = cgpvCallbackLayersProcessed;
-
-      // The callback for the layers loaded when the promiseMapInit will resolve
-      const theCallbackLayersLoaded = cgpvCallbackLayersLoaded;
-
       // When the map init is done
       promiseMapViewer
         .then((theMapViewer) => {
@@ -310,22 +302,6 @@ function init(): void {
 
             // Callback for that particular map
             theCallbackMapReady?.(mapViewer);
-          });
-
-          // Register when the map viewer will have processed layers
-          theMapViewer.onMapLayersProcessed((mapViewer) => {
-            logger.logInfo('Map layers processed', mapViewer.mapId);
-
-            // Callback for that particular map
-            theCallbackLayersProcessed?.(mapViewer);
-          });
-
-          // Register when the map viewer will have loaded layers
-          theMapViewer.onMapLayersLoaded((mapViewer) => {
-            logger.logInfo('Map layers loaded', mapViewer.mapId);
-
-            // Callback for that particular map
-            theCallbackLayersLoaded?.(mapViewer);
           });
         })
         .catch((error: unknown) => {
@@ -354,31 +330,11 @@ export function onMapReady(callback: MapViewerDelegate): void {
   cgpvCallbackMapReady = callback;
 }
 
-/**
- * Registers a callback when the layers have been processed
- * @param {MapViewerDelegate} callback - The callback to be called
- */
-export function onLayersProcessed(callback: MapViewerDelegate): void {
-  // Keep the callback
-  cgpvCallbackLayersProcessed = callback;
-}
-
-/**
- * Registers a callback when the layers have been loaded
- * @param {MapViewerDelegate} callback - The callback to be called
- */
-export function onLayersLoaded(callback: MapViewerDelegate): void {
-  // Keep the callback
-  cgpvCallbackLayersLoaded = callback;
-}
-
 // cgpv object to be exported with the api for outside use
 export const cgpv: TypeCGPV = {
   init,
   onMapInit,
   onMapReady,
-  onLayersProcessed,
-  onLayersLoaded,
   api,
   react: React,
   createRoot,
