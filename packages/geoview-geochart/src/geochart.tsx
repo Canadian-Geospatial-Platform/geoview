@@ -29,8 +29,7 @@ interface GeoChartProps {
  */
 export function GeoChart(props: GeoChartProps): JSX.Element {
   // Fetch cgpv
-  const w = window as TypeWindow;
-  const { cgpv } = w;
+  const { cgpv } = window as TypeWindow;
   const { useTheme } = cgpv.ui;
   const { useState, useCallback, useMemo } = cgpv.react;
 
