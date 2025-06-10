@@ -221,7 +221,6 @@ export class API {
    *                                              Set to false after a language change to update the layer names with the new language.
    * @returns {Promise<MapViewer>} A Promise containing the MapViewer which will be created once reloaded.
    */
-  // TODO: Cleanup - Remove the param 'maintainGeocoreLayerNames', just always use 'true', as it doesn't seem to be used anywhere.
   reloadWithCurrentState(mapId: string, maintainGeocoreLayerNames: boolean = true): Promise<MapViewer> {
     // Get the map viewer
     const mapViewer = this.getMapViewer(mapId);
