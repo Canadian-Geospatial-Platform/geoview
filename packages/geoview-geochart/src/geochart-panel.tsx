@@ -44,7 +44,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   // Get states and actions from store
   const configObj = useGeochartConfigs();
   const visibleLayers = useMapVisibleLayers() as string[];
-  const storeArrayOfLayerData = useGeochartLayerDataArrayBatch() as TypeGeochartResultSetEntry[];
+  const storeArrayOfLayerData = useGeochartLayerDataArrayBatch();
   const selectedLayerPath = useGeochartSelectedLayerPath() as string;
   const { setSelectedLayerPath, setLayerDataArrayBatchLayerPathBypass } = useGeochartStoreActions();
   const displayLanguage = useAppDisplayLanguage();
@@ -163,7 +163,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
             numOffeatures: layer!.features?.length ?? 0,
             layerFeatures: getNumFeaturesLabel(layer!),
             tooltip: `${layer!.layerName}, ${getNumFeaturesLabel(layer!)}`,
-            layerUniqueId: `${mapId}-${TABS.GEO_CHART}-${layer.layerPath}`,
+            layerUniqueId: `${mapId}-${TABS.GEO_CHART}-${layer!.layerPath}`,
           }) as LayerListEntry
       );
   }, [visibleLayers, storeArrayOfLayerData, configObj, getNumFeaturesLabel, mapId]);
@@ -226,7 +226,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
 
   /**
    * Renders a single GeoChart component
-   * @param {PluginGeoChartConfig<ChartType>} chartConfig - The Chart Config to assign the the GeoChart
+   * @param {GeoViewGeoChartConfig<ChartType>} chartConfig - The Chart Config to assign the the GeoChart
    * @param {CSSProperties} sx - Styling to apply (basically if the GeoChart should be visible or not depending on the selected layer)
    * @returns {JSX.Element}
    */
@@ -263,7 +263,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
             <Box sx={{ '& .MuiButtonGroup-groupedHorizontal.MuiButton-textSizeMedium': { fontSize: '0.9rem' } }}>
               {Object.entries(configObj).map(([layerPath, layerChartConfig]) => {
                 if (layerPath === selectedLayerPath) {
-                  return renderChart(layerChartConfig as GeoViewGeoChartConfig<ChartType>, {}, layerPath);
+                  return renderChart(layerChartConfig as unknown as GeoViewGeoChartConfig<ChartType>, {}, layerPath);
                 }
                 return <Box key={layerPath} />;
               })}

@@ -1,5 +1,5 @@
 import { useState, useEffect, CSSProperties, useLayoutEffect, ReactNode, useCallback, useRef, useMemo } from 'react';
-import { useTheme } from '@mui/material/styles';
+import { SxProps, Theme, useTheme } from '@mui/material/styles';
 import { Slider as MaterialSlider } from '@mui/material';
 import { Mark } from '@mui/base';
 import { logger } from '@/core/utils/logger';
@@ -20,6 +20,7 @@ type SliderProps = {
   // custom slider classes and styles
   className?: string;
   style?: CSSProperties;
+  sx?: SxProps<Theme>;
 
   // custom onChange callback
   onChange?: (value: number | number[], activeThumb: number) => void;

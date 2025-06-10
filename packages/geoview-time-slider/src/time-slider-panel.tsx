@@ -103,18 +103,19 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
     // Return the layers
     return visibleLayers
       .map((layerPath) => {
-        return { layerPath, timeSliderLayerInfo: timeSliderLayers[layerPath!] };
+        return {
+          layerPath,
+          layer: LegendEventProcessor.findLayerByPath(legendLayers, layerPath),
+          timeSliderLayerInfo: timeSliderLayers[layerPath!],
+        };
       })
-      .filter((layer) => layer && layer.timeSliderLayerInfo)
+      .filter((layer) => layer.layer && layer.timeSliderLayerInfo)
       .map((layer) => {
         return {
-          layerName: LegendEventProcessor.findLayerByPath(legendLayers, layer.layerPath).layerName,
+          layerName: layer.layer!.layerName,
           layerPath: layer.layerPath,
           layerFeatures: getFilterInfo(layer.timeSliderLayerInfo),
-          tooltip: getLayerTooltip(
-            layer.timeSliderLayerInfo,
-            LegendEventProcessor.findLayerByPath(legendLayers, layer.layerPath).layerName
-          ),
+          tooltip: getLayerTooltip(layer.timeSliderLayerInfo, layer.layer!.layerName),
           layerStatus: 'loaded',
           queryStatus: 'processed',
           layerUniqueId: `${mapId}-${TABS.TIME_SLIDER}-${layer.layerPath}`,

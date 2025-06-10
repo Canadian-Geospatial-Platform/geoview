@@ -22,7 +22,7 @@ type SwiperProps = {
   config: ConfigProps;
 };
 
-type ConfigProps = {
+export type ConfigProps = {
   layers: string[];
   orientation: string;
 };
@@ -188,7 +188,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
         }
       } catch (error: unknown) {
         // Log
-        logger.logError('SWIPER - Failed to attach layer events', viewer.layer?.geoviewLayers, layerPath, error);
+        logger.logError('SWIPER - Failed to attach layer events', viewer.layer?.getGeoviewLayerIds(), layerPath, error);
       }
     },
     [viewer, prerender]

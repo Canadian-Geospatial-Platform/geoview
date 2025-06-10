@@ -26,5 +26,8 @@
       "@/*": ["./src/*"]
     }
   },
+  "references": [
+    { "path": "../geoview-core" }
+  ],
   "include": ["src"]
 }
