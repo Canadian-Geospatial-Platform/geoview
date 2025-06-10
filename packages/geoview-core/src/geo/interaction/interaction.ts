@@ -18,7 +18,7 @@ export type InteractionOptions = {
  * @exports
  */
 export abstract class Interaction {
-  // Reference the MapViewer associated with this interaction
+  /** Reference the MapViewer associated with this interaction */
   public mapViewer: MapViewer;
 
   /**

@@ -110,22 +110,22 @@ export abstract class AbstractGeoViewLayer {
   /** Date format object used to translate server to ISO format and ISO to server format */
   serverDateFragmentsOrder?: TypeDateFragments;
 
-  // Keep all callback delegate references
+  /** Keep all callback delegate references */
   #onLayerEntryRegisterInitHandlers: LayerEntryRegisterInitDelegate[] = [];
 
-  // Keep all callback delegate references
+  /** Keep all callback delegate references */
   #onLayerEntryProcessedHandlers: LayerEntryProcessedDelegate[] = [];
 
-  // Keep all callback delegate references
+  /** Keep all callback delegate references */
   #onLayerConfigCreatedHandlers: LayerConfigCreatedDelegate[] = [];
 
-  // Keep all callback delegate references
+  /** Keep all callback delegate references */
   #onLayerGroupCreatedHandlers: LayerGroupCreatedDelegate[] = [];
 
-  // Keep all callback delegate references
+  /** Keep all callback delegate references */
   #onLayerGVCreatedHandlers: LayerGVCreatedDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onLayerMessageHandlers: LayerMessageDelegate[] = [];
 
   /**
@@ -545,7 +545,7 @@ export abstract class AbstractGeoViewLayer {
           const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.initialSettings);
           const groupReturned = await this.#processListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig, newLayerGroup);
           if (groupReturned) {
-            if (layerGroup) layerGroup.getOLLayer().getLayers().push(groupReturned.getOLLayer());
+            if (layerGroup) layerGroup.addLayer(groupReturned);
             return groupReturned;
           }
 
@@ -557,7 +557,7 @@ export abstract class AbstractGeoViewLayer {
         try {
           // Process entry and catch possible error
           const baseLayer = await this.#processOneLayerEntry(layerConfig);
-          if (layerGroup) layerGroup.getOLLayer().getLayers().push(baseLayer.getOLLayer());
+          if (layerGroup) layerGroup.addLayer(baseLayer);
           return layerGroup || baseLayer;
         } catch (error: unknown) {
           // Add a layer load error
@@ -603,7 +603,7 @@ export abstract class AbstractGeoViewLayer {
       listOfLayerCreated
         .filter((layer) => !!layer)
         .forEach((layer) => {
-          layerGroup!.getOLLayer().getLayers().push(layer.getOLLayer());
+          layerGroup!.addLayer(layer);
         });
 
       return layerGroup;

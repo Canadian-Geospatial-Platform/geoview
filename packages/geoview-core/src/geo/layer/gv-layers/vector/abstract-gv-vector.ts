@@ -34,7 +34,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   /** Indicates if the style has been applied on the layer yet */
   styleApplied: boolean = false;
 
-  // Keep all callback delegate references
+  /** Keep all callback delegate references */
   #onStyleAppliedHandlers: StyleAppliedDelegate[] = [];
 
   /**
@@ -85,7 +85,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     });
 
     // Create and set the OpenLayer layer
-    this.olLayer = new VectorLayer<VectorSource<Feature<Geometry>>>(layerOptions);
+    this.setOLLayer(new VectorLayer<VectorSource<Feature<Geometry>>>(layerOptions));
   }
 
   /**
@@ -265,12 +265,12 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @returns {Promise<Extent>} The extent of the features, if available.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  override getExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
+  override onGetExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
     // Get the feature source
-    const source = this.getOLLayer().getSource();
+    const source = this.getOLSource();
 
     // Get array of features and only keep the ones we could find by id
-    const requestedFeatures = objectIds.map((id) => source?.getFeatureById(id)).filter((feature) => !!feature);
+    const requestedFeatures = objectIds.map((id) => source.getFeatureById(id)).filter((feature) => !!feature);
 
     // Determine max extent from features
     let calculatedExtent: Extent | undefined;
@@ -279,12 +279,16 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       const geom = feature.getGeometry();
       if (geom) {
         // Get the extent
-        const extent = geom.getExtent();
-        if (extent) {
-          // If calculatedExtent has not been defined, set it to extent
-          if (!calculatedExtent) calculatedExtent = extent;
-          else getExtentUnion(calculatedExtent, extent);
+        let extent = geom.getExtent();
+        const srcProjection = source.getProjection();
+        if (srcProjection) {
+          // Make sure to project the extent in the wanted projection
+          extent = Projection.transformExtentFromProj(extent, srcProjection, outProjection);
         }
+
+        // If calculatedExtent has not been defined, set it to extent
+        if (!calculatedExtent) calculatedExtent = extent;
+        else getExtentUnion(calculatedExtent, extent);
       }
     });
 

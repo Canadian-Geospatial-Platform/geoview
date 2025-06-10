@@ -26,7 +26,7 @@ export type SelectOptions = InteractionOptions & {
  * @exports
  */
 export class Select extends Interaction {
-  // The embedded OpenLayers Select component
+  /** The embedded OpenLayers Select component */
   #ol_select: OLSelect;
 
   /** Callback handlers for the selectchanged event. */

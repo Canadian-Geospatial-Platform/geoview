@@ -579,21 +579,18 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} layerPath - The layer path of the layer to refresh.
    */
   static refreshLayer(mapId: string, layerPath: string): void {
-    // Get base layer through layer API
-    const baseLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getOLLayer(layerPath);
+    // Get the layer through layer API
+    const layer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
 
-    // Refresh layer through layer API
-    if (baseLayer) MapEventProcessor.getMapViewerLayerAPI(mapId).refreshBaseLayer(baseLayer);
+    // Refresh the layer
+    layer?.refresh(MapEventProcessor.getMapViewer(mapId).getProjection());
 
     // TODO Update after refactor, layerEntryConfig will not know initial settings
     const layerEntryConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath);
 
     // Set the layer status to loading
-    layerEntryConfig?.setLayerStatusLoading();
-
-    // If layer is group, refresh child layers
-    if (layerEntryConfig && layerEntryIsGroupLayer(layerEntryConfig))
-      layerEntryConfig.listOfLayerEntryConfig.forEach((entryConfig) => this.refreshLayer(mapId, entryConfig.layerPath));
+    // TODO: Cleanup - Don't do this anymore, the loading status is handled automatically via the enhanced onLoading/onLoaded functions (2025-06-17)
+    // layerEntryConfig?.setLayerStatusLoading();
 
     // Reset layer states to original values
     const opacity = layerEntryConfig?.initialSettings.states?.opacity || 1;

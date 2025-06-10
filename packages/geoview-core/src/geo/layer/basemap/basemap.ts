@@ -146,10 +146,10 @@ export class BasemapApi {
     },
   });
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onBasemapChangedHandlers: BasemapChangedDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onBasemapErrorHandlers: BasemapErrorDelegate[] = [];
 
   // #region OVERVIEW MAP

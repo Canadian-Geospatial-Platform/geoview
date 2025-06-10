@@ -24,7 +24,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
   /** The resultSet object as existing in the base class, retyped here as a TypeFeatureInfoResultSet */
   declare resultSet: TypeFeatureInfoResultSet;
 
-  // Keep all callback delegate references
+  /** Keep all callback delegate references */
   #onQueryEndedHandlers: QueryEndedDelegate[] = [];
 
   // Keep all abort controllers per layer path
