@@ -154,6 +154,12 @@ export class API {
       // Remove geoview-class if we need to reuse the div
       divContainer.classList.remove('geoview-map');
 
+      // If we have a data-config-url and a data-config attribute
+      if (divContainer.getAttribute('data-config-url') && divContainer.getAttribute('data-config')) {
+        // Delete the data-config property, because it'll clash with the data-config-url if we try to reload a map in the current div
+        divContainer.removeAttribute('data-config');
+      }
+
       // If deleteContainer, delete the HTML div
       if (deleteContainer) divContainer.remove();
     }
