@@ -5,7 +5,6 @@ import { TimeSliderIcon } from 'geoview-core/ui';
 import { FooterPlugin } from 'geoview-core/api/plugin/footer-plugin';
 import { TimeSliderEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/time-slider-event-processor';
 import { LayerWrongTypeError } from 'geoview-core/core/exceptions/layer-exceptions';
-import { LayerWrongTypeError } from 'geoview-core/src/core/exceptions/layer-exceptions';
 
 import { TimeSliderPanel } from './time-slider-panel';
 import schema from '../schema.json';
@@ -220,7 +219,7 @@ class TimeSliderPlugin extends FooterPlugin {
 
           // Check and add time slider layer when needed
           TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.pluginProps.mapId, layer, layerConfig);
-        } else throw new LayerWrongTypeError(layerPath, layer?.getLayerName());
+        }
       });
     }
   }
