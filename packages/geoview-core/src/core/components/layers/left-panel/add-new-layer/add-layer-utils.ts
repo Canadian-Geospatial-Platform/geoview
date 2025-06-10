@@ -68,7 +68,7 @@ export const getLocalizeLayerType = (language: TypeDisplayLanguage, includeStati
  */
 export const getLayerById = (layerList: GroupLayerEntryConfig[], layerId: string): GroupLayerEntryConfig | null => {
   const layer = layerList.find((childLayer) => childLayer.layerId.split('/').pop() === layerId.split('/').pop());
-  if (layer) return layer as GroupLayerEntryConfig;
+  if (layer) return layer;
 
   let foundLayer: GroupLayerEntryConfig | null = null;
   for (let i = 0; i < layerList.length; i++) {

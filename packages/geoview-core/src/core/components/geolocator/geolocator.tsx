@@ -8,7 +8,6 @@ import { getSxClasses } from '@/core/components/geolocator/geolocator-style';
 import { CV_DEFAULT_APPBAR_CORE } from '@/api/config/types/config-constants';
 import { FocusTrapContainer } from '@/core/components/common';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
-// import { handleEscapeKey } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { useGeolocator } from '@/core/components/geolocator/hooks/use-geolocator';
 import { GeolocatorBar } from '@/core/components/geolocator/geolocator-bar';

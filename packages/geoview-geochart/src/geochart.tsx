@@ -75,7 +75,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
     // If some data is specified
     if (newInputs) {
       // Set data
-      setInputs(newInputs!);
+      setInputs(newInputs);
     }
 
     // Force a redraw
@@ -118,7 +118,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
     let chartConfig;
     if (foundData && foundLayerEntry) {
       // Check and attach datasources to the Chart config
-      chartConfig = loadDatasources(foundConfigChart!, foundConfigChartLyr!, foundData!);
+      chartConfig = loadDatasources(foundConfigChart!, foundConfigChartLyr!, foundData);
 
       // Set the title
       chartConfig.title = foundLayerEntry.layerName;

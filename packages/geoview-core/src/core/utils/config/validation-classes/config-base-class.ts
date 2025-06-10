@@ -346,10 +346,7 @@ export abstract class ConfigBaseClass {
     let pathEnding = layerPath;
     if (pathEnding === undefined) pathEnding = layerConfig.layerId;
     if (!layerConfig.parentLayerConfig) return `${layerConfig.geoviewLayerConfig.geoviewLayerId}/${pathEnding}`;
-    return this.#evaluateLayerPath(
-      layerConfig.parentLayerConfig as GroupLayerEntryConfig,
-      `${(layerConfig.parentLayerConfig as GroupLayerEntryConfig).layerId}/${pathEnding}`
-    );
+    return this.#evaluateLayerPath(layerConfig.parentLayerConfig, `${layerConfig.parentLayerConfig.layerId}/${pathEnding}`);
   }
 
   /**

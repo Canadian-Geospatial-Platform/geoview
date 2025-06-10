@@ -338,7 +338,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
           <IconButton
             edge="end"
             size="small"
-            tooltip={t('layers.visibilityIsAlways') as string}
+            tooltip={t('layers.visibilityIsAlways') || ''}
             className="buttonOutline"
             disabled={!inVisibleRange}
           >
@@ -357,7 +357,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
         <IconButton
           edge="end"
           size="small"
-          tooltip={t('layers.zoomVisibleScale') as string}
+          tooltip={t('layers.zoomVisibleScale') || ''}
           sx={{ display: isZoomToVisibleScaleCapable ? 'block' : 'none' }}
           onClick={handleZoomToLayerVisibleScale}
         >
@@ -368,7 +368,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
             edge={inVisibleRange ? false : 'end'}
             size="small"
             onClick={handleToggleVisibility}
-            tooltip={t('layers.toggleVisibility') as string}
+            tooltip={t('layers.toggleVisibility') || ''}
             className="buttonOutline"
             disabled={!inVisibleRange}
           >
@@ -405,7 +405,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
           edge="end"
           size="small"
           onClick={handleExpandGroupClick}
-          tooltip={t('layers.toggleCollapse') as string}
+          tooltip={t('layers.toggleCollapse') || ''}
           className="buttonOutline"
         >
           {legendExpanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}

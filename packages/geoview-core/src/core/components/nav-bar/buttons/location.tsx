@@ -51,7 +51,7 @@ export default function Location(): JSX.Element {
   return (
     <IconButton
       id="location"
-      tooltip={t('mapnav.location') as string}
+      tooltip={t('mapnav.location') || ''}
       tooltipPlacement="left"
       onClick={handleZoomToMe}
       sx={sxClasses.navButton}

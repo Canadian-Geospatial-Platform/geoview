@@ -125,10 +125,10 @@ export class GVWMS extends AbstractGVRaster {
 
     // TODO: Check - Why are we checking if bounds are properly set in this getFeatureInfoAtLonLat override? Seems late or out of order?
     // Check if bounds are properly set
-    if (!layerConfig.initialSettings!.bounds) {
+    if (!layerConfig.initialSettings.bounds) {
       const newBounds = this.getBounds(map.getView().getProjection(), MapViewer.DEFAULT_STOPS);
       if (newBounds)
-        layerConfig.initialSettings!.bounds = Projection.transformExtentFromProj(
+        layerConfig.initialSettings.bounds = Projection.transformExtentFromProj(
           newBounds,
           map.getView().getProjection(),
           Projection.getProjectionLonLat()
@@ -139,10 +139,10 @@ export class GVWMS extends AbstractGVRaster {
     // Project the lonlat to map projection
     const clickCoordinate = Projection.transformFromLonLat(lonlat, map.getView().getProjection());
     if (
-      lonlat[0] < layerConfig.initialSettings!.bounds![0] ||
-      layerConfig.initialSettings!.bounds![2] < lonlat[0] ||
-      lonlat[1] < layerConfig.initialSettings!.bounds![1] ||
-      layerConfig.initialSettings!.bounds![3] < lonlat[1]
+      lonlat[0] < layerConfig.initialSettings.bounds[0] ||
+      layerConfig.initialSettings.bounds[2] < lonlat[0] ||
+      lonlat[1] < layerConfig.initialSettings.bounds[1] ||
+      layerConfig.initialSettings.bounds[3] < lonlat[1]
     )
       return [];
 
@@ -226,7 +226,7 @@ export class GVWMS extends AbstractGVRaster {
     try {
       // Get the layer config in a loaded phase
       const layerConfig = this.getLayerConfig();
-      const legendImage = await GVWMS.#getLegendImage(layerConfig!);
+      const legendImage = await GVWMS.#getLegendImage(layerConfig);
       const styleLegends: TypeWmsLegendStyle[] = [];
 
       if (legendImage) {
@@ -419,7 +419,7 @@ export class GVWMS extends AbstractGVRaster {
     // If found any
     if (boundingBoxes) {
       // Find the one with the right projection
-      for (let i = 0; i < (boundingBoxes.length as number); i++) {
+      for (let i = 0; i < boundingBoxes.length; i++) {
         // Read the extent info from the GetCap
         const { crs, extent } = boundingBoxes[i] as unknown as { crs: string; extent: Extent };
 
@@ -455,13 +455,13 @@ export class GVWMS extends AbstractGVRaster {
     if (Array.isArray(layerCapabilities?.Style)) {
       // check if WMS as a default legend style
       let isDefaultStyle = false;
-      layerCapabilities!.Style.forEach((style) => {
+      layerCapabilities.Style.forEach((style) => {
         if (style.Name === 'default') isDefaultStyle = true;
       });
 
       let legendStyle;
       if (chosenStyle) {
-        [legendStyle] = layerCapabilities!.Style.filter((style) => {
+        [legendStyle] = layerCapabilities.Style.filter((style) => {
           return style.Name === chosenStyle;
         });
       } else {
@@ -475,7 +475,7 @@ export class GVWMS extends AbstractGVRaster {
       }
 
       if (Array.isArray(legendStyle?.LegendURL)) {
-        const legendUrl = legendStyle!.LegendURL.find((urlEntry) => {
+        const legendUrl = legendStyle.LegendURL.find((urlEntry) => {
           if (urlEntry.Format === 'image/png') return true;
           return false;
         });

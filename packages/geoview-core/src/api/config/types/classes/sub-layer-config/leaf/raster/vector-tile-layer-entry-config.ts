@@ -41,8 +41,8 @@ export class VectorTileLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
     if (!this.source) this.source = {};
     if (!this.source.dataAccessPath) this.source.dataAccessPath = geoviewConfig.metadataAccessPath;
-    if (!this.source.dataAccessPath!.toLowerCase().endsWith('.pbf')) {
-      this.source.dataAccessPath = this.source.dataAccessPath!.endsWith('/')
+    if (!this.source.dataAccessPath.toLowerCase().endsWith('.pbf')) {
+      this.source.dataAccessPath = this.source.dataAccessPath.endsWith('/')
         ? `${this.source.dataAccessPath}tile/{z}/{y}/{x}.pbf`
         : `${this.source.dataAccessPath}/tile/{z}/{y}/{x}.pbf`;
     }

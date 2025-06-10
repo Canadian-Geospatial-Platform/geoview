@@ -451,7 +451,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     // TO.DOCONT: Splitting the query will help avoid layer details error when geometry is big anf let ui not frezze. The Web worker
     // TO.DOCONT: geometry assignement must not be in an async function.
     // Transform the features in an OL feature - at this point, there is no geometry associated with the feature
-    const features = new EsriJSON().readFeatures({ features: identifyJsonResponse.results }) as Feature<Geometry>[];
+    const features = new EsriJSON().readFeatures({ features: identifyJsonResponse.results });
     const arrayOfFeatureInfoEntries = this.formatFeatureInfoResult(features, layerConfig);
 
     // If cancelled
@@ -507,7 +507,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
             // TODO: Performance - We will need a trigger to refresh the higight and details panel (for zoom button) when extent and
             // TO.DOCONT: is applied. Sometimes the delay is too big so we need to change tab or layer in layer list to trigger the refresh
             // We assume order of arrayOfFeatureInfoEntries is the same as featuresJSON.features as they are processed in the same order
-            const entry = arrayOfFeatureInfoEntries![index];
+            const entry = arrayOfFeatureInfoEntries[index];
             if (newGeom !== null && entry.geometry && entry.geometry instanceof Feature) {
               entry.extent = newGeom.getExtent();
               entry.geometry.setGeometry(newGeom);
@@ -769,7 +769,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
                 filterArray.push(
                   `${styleSettings.fields[0]} >= ${GVEsriDynamic.#formatFieldValue(
                     styleSettings.fields[0],
-                    styleSettings.info[0].values[0]!,
+                    styleSettings.info[0].values[0],
                     layerConfig.source.featureInfo!
                   )}`
                 );

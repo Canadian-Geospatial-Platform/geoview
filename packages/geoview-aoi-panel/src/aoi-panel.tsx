@@ -25,7 +25,7 @@ export type TypeAoiProps = {
 
 export function AoiPanel(props: AoiPanelProps): JSX.Element {
   const { mapId, config } = props;
-  const aoiList = config.aoiList as AoiListItems;
+  const { aoiList } = config;
 
   const { cgpv } = window as TypeWindow;
   const { api, ui } = cgpv;

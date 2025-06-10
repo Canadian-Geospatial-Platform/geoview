@@ -93,7 +93,7 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
   };
 
   const renderTreeItems = (): JSX.Element[] => {
-    return layersData.map((layer) => renderTreeItem(layer as GroupLayerEntryConfig));
+    return layersData.map((layer) => renderTreeItem(layer));
   };
 
   return (

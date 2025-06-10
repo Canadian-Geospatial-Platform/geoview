@@ -8,7 +8,6 @@ import { Options as StrokeOptions } from 'ol/style/Stroke';
 import { Options as FillOptions } from 'ol/style/Fill';
 import Feature, { FeatureLike } from 'ol/Feature';
 import { toContext } from 'ol/render';
-import { Size } from 'ol/size';
 
 import { setAlphaColor } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
@@ -170,7 +169,7 @@ async function createIconCanvas(pointStyle?: Style): Promise<HTMLCanvasElement |
     const iconStyle = pointStyle?.getImage() as Icon;
     const image = await loadImage(iconStyle.getSrc()!);
     if (image) {
-      const size = iconStyle.getSize() as Size;
+      const size = iconStyle.getSize();
       const width = Array.isArray(size) ? size[0] : image.width || LEGEND_CANVAS_WIDTH;
       const height = Array.isArray(size) ? size[1] : image.height || LEGEND_CANVAS_HEIGHT;
       const drawingCanvas = document.createElement('canvas');
@@ -197,7 +196,7 @@ async function createIconCanvas(pointStyle?: Style): Promise<HTMLCanvasElement |
  * @returns {Promise<HTMLCanvasElement>} A promise that the canvas is created.
  */
 function createPointCanvas(pointStyle?: Style): HTMLCanvasElement {
-  const size = pointStyle!.getImage()!.getSize() as Size;
+  const size = pointStyle!.getImage()!.getSize();
   const [width, height] = Array.isArray(size) ? size : [LEGEND_CANVAS_WIDTH, LEGEND_CANVAS_HEIGHT];
   const drawingCanvas = document.createElement('canvas');
   drawingCanvas.width = width + 4;
@@ -425,8 +424,7 @@ function executeOperator(operator: FilterNodeType, dataStack: FilterNodeType[]):
               ? ([operand1.nodeValue].concat(operand2.nodeValue) as string[] | number[])
               : ([operand1.nodeValue, operand2.nodeValue] as string[] | number[]),
           };
-          if (typeof (valueToPush.nodeValue as string[] | number[])[0] !== typeof (valueToPush.nodeValue as string[] | number[])[1])
-            throw new Error(`IN clause can't mix types`);
+          if (typeof valueToPush.nodeValue[0] !== typeof valueToPush.nodeValue[1]) throw new Error(`IN clause can't mix types`);
           dataStack.push(valueToPush);
           break;
         case 'in':
@@ -771,7 +769,7 @@ function processSimplePoint(
   filterEquation?: FilterNodeType[]
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
-    if (featureIsNotVisible(feature, filterEquation!)) return undefined;
+    if (featureIsNotVisible(feature, filterEquation)) return undefined;
 
   const settings = (styleSettings.type === 'simple' ? styleSettings.info[0].settings : styleSettings) as TypeKindOfVectorSettings;
   if (isSimpleSymbolVectorConfig(settings)) {
@@ -797,7 +795,7 @@ function processSimpleLineString(
   filterEquation?: FilterNodeType[]
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
-    if (featureIsNotVisible(feature, filterEquation!)) return undefined;
+    if (featureIsNotVisible(feature, filterEquation)) return undefined;
 
   const settings = (styleSettings.type === 'simple' ? styleSettings.info[0].settings : styleSettings) as TypeKindOfVectorSettings;
   let geometry;
@@ -988,7 +986,7 @@ function processSimplePolygon(
   filterEquation?: FilterNodeType[]
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
-    if (featureIsNotVisible(feature, filterEquation!)) return undefined;
+    if (featureIsNotVisible(feature, filterEquation)) return undefined;
 
   const settings = (styleSettings.type === 'simple' ? styleSettings.info[0].settings : styleSettings) as TypeKindOfVectorSettings;
   let geometry;
@@ -996,11 +994,11 @@ function processSimplePolygon(
     geometry = feature.getGeometry() as Geometry;
   }
   if (isFilledPolygonVectorConfig(settings)) {
-    const { fillStyle } = settings as TypePolygonVectorConfig; // TODO: refactor - introduce by moving to config map schema type
+    const { fillStyle } = settings; // TODO: refactor - introduce by moving to config map schema type
     if (geometry !== undefined) {
-      return processFillStyle[fillStyle].call('', settings as TypePolygonVectorConfig, geometry);
+      return processFillStyle[fillStyle].call('', settings, geometry);
     }
-    return processFillStyle[fillStyle].call('', settings as TypePolygonVectorConfig);
+    return processFillStyle[fillStyle].call('', settings);
   }
   return undefined;
 }
@@ -1318,7 +1316,7 @@ function processUniqueValuePoint(
   aliasLookup?: TypeAliasLookup
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
-    if (featureIsNotVisible(feature, filterEquation!)) return undefined;
+    if (featureIsNotVisible(feature, filterEquation)) return undefined;
 
   if (styleSettings.type === 'uniqueValue') {
     const { hasDefault, fields, info } = styleSettings;
@@ -1356,7 +1354,7 @@ function processUniqueLineString(
   aliasLookup?: TypeAliasLookup
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
-    if (featureIsNotVisible(feature, filterEquation!)) return undefined;
+    if (featureIsNotVisible(feature, filterEquation)) return undefined;
 
   if (styleSettings.type === 'uniqueValue') {
     const { hasDefault, fields, info } = styleSettings;
@@ -1391,7 +1389,7 @@ function processUniquePolygon(
   aliasLookup?: TypeAliasLookup
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
-    if (featureIsNotVisible(feature, filterEquation!)) return undefined;
+    if (featureIsNotVisible(feature, filterEquation)) return undefined;
 
   if (styleSettings.type === 'uniqueValue') {
     const { hasDefault, fields, info } = styleSettings;
@@ -1423,7 +1421,7 @@ function searchClassBreakEntry(
 ): number | undefined {
   // For obscure reasons, it seems that sometimes the field names in the feature do not have the same case as those in the
   // class break definition.
-  const featureKey = (feature as Feature).getKeys().filter((key) => {
+  const featureKey = feature.getKeys().filter((key) => {
     return key.toLowerCase() === field.toLowerCase();
   });
 
@@ -1466,7 +1464,7 @@ function processClassBreaksPoint(
   aliasLookup?: TypeAliasLookup
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
-    if (featureIsNotVisible(feature, filterEquation!)) return undefined;
+    if (featureIsNotVisible(feature, filterEquation)) return undefined;
 
   if (styleSettings.type === 'classBreaks') {
     const { hasDefault, fields, info } = styleSettings;
@@ -1498,7 +1496,7 @@ function processClassBreaksLineString(
   aliasLookup?: TypeAliasLookup
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
-    if (featureIsNotVisible(feature, filterEquation!)) return undefined;
+    if (featureIsNotVisible(feature, filterEquation)) return undefined;
 
   if (styleSettings.type === 'classBreaks') {
     const { hasDefault, fields, info } = styleSettings;
@@ -1530,7 +1528,7 @@ function processClassBreaksPolygon(
   aliasLookup?: TypeAliasLookup
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
-    if (featureIsNotVisible(feature, filterEquation!)) return undefined;
+    if (featureIsNotVisible(feature, filterEquation)) return undefined;
 
   if (styleSettings.type === 'classBreaks') {
     const { hasDefault, fields, info } = styleSettings;
@@ -1611,8 +1609,8 @@ export function getAndCreateFeatureStyle(
   }
 
   // Get the style according to its type and geometry.
-  if (styleWorkOn![geometryType]) {
-    const styleSettings = style![geometryType]!;
+  if (styleWorkOn[geometryType]) {
+    const styleSettings = style[geometryType]!;
     const { type } = styleSettings;
     // TODO: Refactor - Rewrite this to use explicit function calls instead, for clarity and references finding
     const featureStyle = processStyle[type][geometryType].call(
@@ -1660,7 +1658,7 @@ export function getFeatureImageSource(
 
     // Get the style accordingly to its type and geometry.
     if (style[geometryType]) {
-      const styleSettings = style[geometryType]!;
+      const styleSettings = style[geometryType];
       const { type } = styleSettings;
 
       // TODO: Performance #2688 - Wrap the style processing in a Promise to prevent blocking, Use requestAnimationFrame to process style during next frame

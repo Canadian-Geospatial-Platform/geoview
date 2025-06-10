@@ -67,7 +67,7 @@ export default function Fullscreen(): JSX.Element {
   return (
     <IconButton
       id="fullscreen"
-      tooltip={t('mapnav.fullscreen') as string}
+      tooltip={t('mapnav.fullscreen') || ''}
       tooltipPlacement="left"
       onClick={() => setFullscreen()}
       sx={sxClasses.navButton}

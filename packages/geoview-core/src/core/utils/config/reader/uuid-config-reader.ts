@@ -269,7 +269,7 @@ export class UUIDmapConfigReader {
     if (!resultData || !resultData.response || !resultData.response.gcs || !Array.isArray(resultData.response.gcs)) return {};
 
     // Find custom layer entry configuration
-    const foundConfigs = resultData.response.gcs.map((gcs) => gcs?.[lang]?.layers as TypeJsonObject);
+    const foundConfigs = resultData.response.gcs.map((gcs) => gcs?.[lang]?.layers);
 
     return foundConfigs[0] || {};
   }

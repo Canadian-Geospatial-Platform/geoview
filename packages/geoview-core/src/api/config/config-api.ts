@@ -188,7 +188,7 @@ export class ConfigApi {
    */
   static #convertStringToJson(stringMapFeatureConfig: string): TypeJsonObject | undefined {
     // Erase comments in the config file.
-    let newStringMapFeatureConfig = removeCommentsFromJSON(stringMapFeatureConfig as string);
+    let newStringMapFeatureConfig = removeCommentsFromJSON(stringMapFeatureConfig);
 
     // If you want to use quotes in your JSON string, write \&quot or escape it using a backslash;
     // First, replace apostrophes not preceded by a backslash with quotes
@@ -228,7 +228,7 @@ export class ConfigApi {
       if (urlParams.c) center = (urlParams.c as string).split(',');
       if (center.length !== 2)
         center = [
-          CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.initialView!.zoomAndCenter![1][0]!.toString(),
+          CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.initialView!.zoomAndCenter![1][0].toString(),
           CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.initialView!.zoomAndCenter![1][1].toString(),
         ];
 
@@ -237,7 +237,7 @@ export class ConfigApi {
       if (urlParams.z) zoom = urlParams.z as string;
 
       jsonConfig.map = {
-        interaction: urlParams.i as TypeJsonObject,
+        interaction: urlParams.i,
         viewSettings: {
           initialView: {
             zoomAndCenter: [parseInt(zoom, 10), [parseInt(center[0], 10), parseInt(center[1], 10)]] as TypeJsonObject,
@@ -284,7 +284,7 @@ export class ConfigApi {
       }
 
       // update the version if provided from the map configuration.
-      jsonConfig.schemaVersionUsed = urlParams.v as TypeJsonObject;
+      jsonConfig.schemaVersionUsed = urlParams.v;
     }
 
     // Trace the detail config read from url
@@ -456,7 +456,7 @@ export class ConfigApi {
 
       // Instanciate the mapFeatureConfig. If an error is detected, a workaround procedure
       // will be executed to try to correct the problem in the best possible way.
-      ConfigApi.lastMapConfigCreated = new MapFeatureConfig(providedMapFeatureConfig!);
+      ConfigApi.lastMapConfigCreated = new MapFeatureConfig(providedMapFeatureConfig);
     } catch (error: unknown) {
       // If we get here, it is because the user provided a string config that cannot be translated to a json object,
       // or the config doesn't have the mandatory map property or the listOfGeoviewLayerConfig is defined but is not
@@ -513,7 +513,7 @@ export class ConfigApi {
 
       // Instanciate the mapFeatureConfig. If an error is detected, a workaround procedure
       // will be executed to try to correct the problem in the best possible way.
-      ConfigApi.lastMapConfigCreated = new MapFeatureConfig(providedMapFeatureConfig!);
+      ConfigApi.lastMapConfigCreated = new MapFeatureConfig(providedMapFeatureConfig);
       if (errorDetected) ConfigApi.lastMapConfigCreated.setErrorDetectedFlag();
     } catch (error: unknown) {
       // If we get here, it is because the user provided a string config that cannot be translated to a json object,

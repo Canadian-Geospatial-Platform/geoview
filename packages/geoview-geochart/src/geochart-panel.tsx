@@ -43,9 +43,9 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
 
   // Get states and actions from store
   const configObj = useGeochartConfigs();
-  const visibleLayers = useMapVisibleLayers() as string[];
+  const visibleLayers = useMapVisibleLayers();
   const storeArrayOfLayerData = useGeochartLayerDataArrayBatch();
-  const selectedLayerPath = useGeochartSelectedLayerPath() as string;
+  const selectedLayerPath = useGeochartSelectedLayerPath();
   const { setSelectedLayerPath, setLayerDataArrayBatchLayerPathBypass } = useGeochartStoreActions();
   const displayLanguage = useAppDisplayLanguage();
   const mapClickCoordinates = useMapClickCoordinates();
@@ -265,7 +265,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
             <Box sx={{ '& .MuiButtonGroup-groupedHorizontal.MuiButton-textSizeMedium': { fontSize: '0.9rem' } }}>
               {Object.entries(configObj).map(([layerPath, layerChartConfig]) => {
                 if (layerPath === selectedLayerPath) {
-                  return renderChart(layerChartConfig as unknown as GeoViewGeoChartConfig<ChartType>, {}, layerPath);
+                  return renderChart(layerChartConfig as GeoViewGeoChartConfig<ChartType>, {}, layerPath);
                 }
                 return <Box key={layerPath} />;
               })}
