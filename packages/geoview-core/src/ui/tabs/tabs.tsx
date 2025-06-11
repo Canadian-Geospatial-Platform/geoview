@@ -1,5 +1,6 @@
 import { SyntheticEvent, ReactNode, useState, useEffect, useMemo, MouseEvent, useCallback, useRef, memo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Size } from 'ol/size';
 
 import {
   Grid2 as Grid,
@@ -62,7 +63,7 @@ export interface TypeTabsProps {
   onOpenKeyboard?: (uiFocus: FocusItemProps) => void;
   onCloseKeyboard?: () => void;
   containerType?: TypeContainerBox;
-  sideAppSize: [number, number];
+  sideAppSize: Size;
   appHeight: number;
   hiddenTabs: string[];
   isFullScreen: boolean;

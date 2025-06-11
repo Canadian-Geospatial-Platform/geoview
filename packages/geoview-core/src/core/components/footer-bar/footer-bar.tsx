@@ -77,7 +77,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   const geoviewElement = useAppGeoviewHTMLElement();
   const shellContainer = geoviewElement.querySelector(`[id^="shell-${mapId}"]`) as HTMLElement;
   const { setActiveFooterBarTab, enableFocusTrap, disableFocusTrap, setFooterBarIsCollapsed } = useUIStoreActions();
-  const mapSize: [number, number] = useMapSize();
+  const mapSize = useMapSize() || [200, 200]; // Default in case the map isn't rendered yet and the Footer tries to render
   const appHeight: number = useAppHeight();
   const hiddenTabs: string[] = useUIHiddenTabs();
 

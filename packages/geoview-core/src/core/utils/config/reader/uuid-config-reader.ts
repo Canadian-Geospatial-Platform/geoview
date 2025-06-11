@@ -88,7 +88,13 @@ export class UUIDmapConfigReader {
    */
   static #getLayerConfigFromResponse(uuids: string[], resultData: TypeJsonObject, lang: string): TypeGeoviewLayerConfig[] {
     // If invalid response
-    if (!resultData || !resultData.response || !resultData.response.rcs || !resultData.response.rcs[lang]) {
+    if (
+      !resultData ||
+      !resultData.response ||
+      !resultData.response.rcs ||
+      !resultData.response.rcs[lang] ||
+      resultData.response.rcs[lang].length === 0
+    ) {
       const errorMessage = resultData?.errorMessage || '<no error description>';
       throw new LayerGeoCoreInvalidResponseError(uuids, errorMessage);
     }

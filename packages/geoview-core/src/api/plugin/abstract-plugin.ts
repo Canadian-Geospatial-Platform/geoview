@@ -1,7 +1,8 @@
-import React from 'react';
-import i18next from 'react-i18next';
+import React from 'react'; // For typing ONLY
+import { createRoot } from 'react-dom/client'; // For typing ONLY
+import i18next from 'react-i18next'; // For typing ONLY
+import { useTheme } from '@mui/material/styles'; // For typing ONLY
 
-import { useTheme } from '@mui/material/styles';
 import { API } from '@/api/api';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { TypeWindow } from '@/core/types/global-types';
@@ -39,6 +40,9 @@ export abstract class AbstractPlugin {
 
   // Plugin react object. The '!' is used, because it's not set by the constructor, it's set by the note above.
   react!: typeof React;
+
+  // Plugin createRoot object. The '!' is used, because it's not set by the constructor, it's set by the note above.
+  createRoot!: typeof createRoot;
 
   // Plugin translate object
   // TODO: Refactor - Plugin - Maybe translate is not necessary here.. This might get removed eventually. Don't forget to remove in plugin class too in 'Object.defineProperties'(!)

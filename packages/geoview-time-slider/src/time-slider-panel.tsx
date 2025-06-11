@@ -13,7 +13,6 @@ import { Box } from 'geoview-core/src/ui';
 import { logger } from 'geoview-core/src/core/utils/logger';
 import { TABS } from 'geoview-core/src/core/utils/constant';
 
-import { ReactNode } from 'react';
 import { DateMgt } from 'geoview-core/src/core/utils/date-mgt';
 import { TimeSlider } from './time-slider';
 import { ConfigProps } from './time-slider-types';
@@ -91,7 +90,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
      * @param {string} name Time slider layer name.
      * @returns
      */
-    const getLayerTooltip = (timeSliderLayerInfo: TypeTimeSliderValues, name: string): ReactNode => {
+    const getLayerTooltip = (timeSliderLayerInfo: TypeTimeSliderValues, name: string): JSX.Element => {
       return (
         <Box sx={{ display: 'flex', alignContent: 'center', '& svg ': { width: '0.75em', height: '0.75em' } }}>
           {name}

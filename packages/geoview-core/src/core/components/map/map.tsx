@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, MutableRefObject, useMemo, useState } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 
 import { Box, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
@@ -15,10 +15,8 @@ import { MapViewer } from '@/geo/map/map-viewer';
 
 import { getSxClasses } from './map-style';
 import { useMapLoaded, useMapNorthArrow, useMapOverviewMap } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
-import { Plugin } from '@/api/plugin/plugin';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
-import { toJsonObject } from '@/api/config/types/config-types';
 import { useLayersAreLoading } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 type MapProps = {
@@ -49,73 +47,30 @@ export function Map(props: MapProps): JSX.Element {
   const overviewMap = useMapOverviewMap();
   const northArrow = useMapNorthArrow();
   const mapLoaded = useMapLoaded();
-  const mapStoreConfig = useGeoViewConfig();
   const layersAreLoading = useLayersAreLoading();
 
   // flag to check if map is initialized. we added to prevent double rendering in StrictMode
-  const isMapInitialized = useRef<boolean>(false);
-  const [isMapReady, setIsMapReady] = useState(false);
-
-  const hasRun = useRef(false);
-
-  const initCGPVMap = useCallback((): void => {
-    // Log
-    logger.logTraceUseCallback('map.initCGPVMap');
-
-    // Load the core packages which are the ones who load on map (not footer plugin, not app-bar plugin)
-    mapStoreConfig?.corePackages?.forEach((corePackage: string): void => {
-      Plugin.loadScript(corePackage)
-        .then((constructor) => {
-          // add the plugin by passing in the loaded constructor from the script tag
-          Plugin.addPlugin(
-            corePackage,
-            mapId,
-            constructor,
-            toJsonObject({
-              mapId,
-              viewer,
-            })
-          ).catch((error: unknown) => {
-            // Log
-            logger.logPromiseFailed('api.plugin.addPlugin in useCallback in map', error);
-          });
-        })
-        .catch((error: unknown) => {
-          // Log
-          logger.logPromiseFailed('api.plugin.addPlugin in useCallback in map', error);
-        });
-    });
-  }, [mapId, mapStoreConfig?.corePackages, viewer]);
+  const hasRun = useRef<boolean>(false);
 
   useEffect(() => {
-    logger.logTraceUseEffect('MAP - initCGPVMap');
+    logger.logTraceUseEffect('MAP - viewer');
 
     // FIXME: Here, we're preventing a double run, because at this level it's not only impacting a rendering thing, it's impacting the core
     // FIX.MECONT: and raising double mapReady events which doesn't make sense.
     // FIX.MECONT: The core of the issue is that the map creation shouldn't be happening inside a 'useEffect' hook, which is a UI thing.
     // Prevent double run, due to React's StrictMode in dev.
-    if (hasRun.current) return;
-    hasRun.current = true;
+    if (!hasRun.current && mapElement.current) {
+      hasRun.current = true;
 
-    if (mapElement.current && !isMapReady && !isMapInitialized.current) {
       // Create map
       viewer.createMap(mapElement.current);
-
-      // Listen for map ready event which includes proper extent
-      viewer.onMapReady(() => {
-        // Map is fully initialized with proper extent
-        setIsMapReady(true);
-      });
-
-      initCGPVMap();
-      isMapInitialized.current = true;
     }
-  }, [viewer, initCGPVMap, isMapReady]);
+  }, [viewer]);
 
   return (
     // ? the map is focusable and needs to be tabbable for keyboard navigation
     /* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex */
-    <Box id={`mapTargetElement-${mapId}`} ref={mapElement as MutableRefObject<HTMLDivElement>} sx={sxClasses.mapContainer} tabIndex={0}>
+    <Box id={`mapTargetElement-${mapId}`} ref={mapElement} sx={sxClasses.mapContainer} tabIndex={0}>
       {mapLoaded && (
         <>
           {northArrow && <NorthArrow />}

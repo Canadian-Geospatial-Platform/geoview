@@ -4,7 +4,6 @@
   "description": "A area of interest panel for the geoview project",
   "main": "src/index.tsx",
   "keywords": [
-    "react",
     "aoi-panel"
   ],
   "author": "Guillaume Choquette",
@@ -23,5 +22,10 @@
   },
   "resolutions": {
     "@types/react": "^18.2.0"
+  },
+  "externals": {
+    "react": "React",
+    "react-dom": "ReactDOM",
+    "@mui/material": "MaterialUI"
   }
 }
