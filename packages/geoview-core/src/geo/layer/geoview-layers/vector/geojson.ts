@@ -82,10 +82,7 @@ export class GeoJSON extends AbstractGeoViewVector {
    */
   protected override onValidateLayerEntryConfig(layerConfig: TypeLayerEntryConfig): void {
     if (Array.isArray(this.metadata?.listOfLayerEntryConfig)) {
-      const foundEntry = this.#recursiveSearch(
-        `${layerConfig.layerId}${layerConfig.layerIdExtension ? `.${layerConfig.layerIdExtension}` : ''}`,
-        Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig)
-      );
+      const foundEntry = this.#recursiveSearch(layerConfig.layerId, Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig));
       if (!foundEntry) {
         // Add a layer load error
         this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(layerConfig), layerConfig);
@@ -107,7 +104,7 @@ export class GeoJSON extends AbstractGeoViewVector {
     if (this.metadata) {
       // Search for the layer metadata
       const layerMetadataFound = this.#recursiveSearch(
-        `${layerConfig.layerId}${layerConfig.layerIdExtension ? `.${layerConfig.layerIdExtension}` : ''}`,
+        layerConfig.layerId,
         Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig)
       ) as VectorLayerEntryConfig;
 
@@ -204,8 +201,7 @@ export class GeoJSON extends AbstractGeoViewVector {
    */
   #recursiveSearch(searchKey: string, metadataLayerList: TypeLayerEntryConfig[]): TypeLayerEntryConfig | undefined {
     for (const layerMetadata of metadataLayerList) {
-      if (searchKey === `${layerMetadata.layerId}${layerMetadata.layerIdExtension ? `.${layerMetadata.layerIdExtension}` : ''}`)
-        return layerMetadata;
+      if (searchKey === layerMetadata.layerId) return layerMetadata;
       if ('isLayerGroup' in layerMetadata && (layerMetadata.isLayerGroup as boolean)) {
         const foundLayer = this.#recursiveSearch(searchKey, layerMetadata.listOfLayerEntryConfig);
         if (foundLayer) return foundLayer;

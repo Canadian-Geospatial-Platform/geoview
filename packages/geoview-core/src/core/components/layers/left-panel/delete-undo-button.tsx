@@ -64,13 +64,13 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
     if (isVisible) setOrToggleLayerVisibility(layerPath);
     removeLayerHighlights(layerPath);
     setInUndoState(true);
-    setLayerDeleteInProgress(true);
+    setLayerDeleteInProgress(layerPath);
   };
 
   const handleUndoClick = (): void => {
     setOrToggleLayerVisibility(layerPath);
     setInUndoState(false);
-    setLayerDeleteInProgress(false);
+    setLayerDeleteInProgress('');
   };
 
   const handleDeleteKeyDown = (event: KeyboardEvent): void => {
@@ -94,7 +94,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
   useEffect(() => {
     return () => {
       setInUndoState(false);
-      setLayerDeleteInProgress(false);
+      setLayerDeleteInProgress('');
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

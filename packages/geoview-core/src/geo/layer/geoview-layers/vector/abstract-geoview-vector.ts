@@ -24,7 +24,11 @@ import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-cla
 import { Projection } from '@/geo/utils/projection';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { TypeJsonObject } from '@/api/config/types/config-types';
-import { LayerDataAccessPathMandatoryError, LayerNoGeographicDataInCSVError } from '@/core/exceptions/layer-exceptions';
+import {
+  LayerDataAccessPathMandatoryError,
+  LayerNoGeographicDataInCSVError,
+  LayerTooManyEsriFeatures,
+} from '@/core/exceptions/layer-exceptions';
 import { LayerEntryConfigVectorSourceURLNotDefinedError } from '@/core/exceptions/layer-entry-config-exceptions';
 import { doUntilPromises } from '@/core/utils/utilities';
 
@@ -35,6 +39,7 @@ const EXCLUDED_HEADERS_GEN = ['geometry', 'geom'];
 const EXCLUDED_HEADERS = EXCLUDED_HEADERS_LAT.concat(EXCLUDED_HEADERS_LNG).concat(EXCLUDED_HEADERS_GEN);
 // GV Order of these keywords matter, preference will be given in this order
 const NAME_FIELD_KEYWORDS = ['^name$', '^title$', '^label$'];
+const MAX_ESRI_FEATURES = 200000;
 
 /**
  * The AbstractGeoViewVector class.
@@ -113,6 +118,16 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
           // Check and throw exception if the content actually contains an embedded error
           // (EsriFeature type of response might return an embedded error inside a 200 HTTP OK)
           Fetch.throwIfResponseHasEmbeddedError(responseText);
+          // Check if feature count is too large
+          if (JSON.parse(responseText).count > MAX_ESRI_FEATURES) {
+            this.emitMessage(
+              'validation.layer.tooManyEsriFeatures',
+              [layerConfig.getLayerName(), JSON.parse(responseText).count],
+              'error',
+              true
+            );
+            throw new LayerTooManyEsriFeatures(layerConfig.layerId, layerConfig.getLayerName(), JSON.parse(responseText).count);
+          }
         }
 
         // Parse the result of the fetch to read the features

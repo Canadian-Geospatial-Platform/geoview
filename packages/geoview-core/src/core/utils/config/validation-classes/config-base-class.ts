@@ -33,9 +33,6 @@ export abstract class ConfigBaseClass {
   // eslint-disable-next-line no-restricted-syntax
   private _layerStatus: TypeLayerStatus = 'newInstance';
 
-  /** The ending extension (element) of the layer identifier. This element is part of the schema. */
-  layerIdExtension?: string;
-
   /** The display name of the layer (English/French). */
   layerName?: string;
 
@@ -347,9 +344,7 @@ export abstract class ConfigBaseClass {
    */
   static #evaluateLayerPath(layerConfig: ConfigBaseClass, layerPath?: string): string {
     let pathEnding = layerPath;
-    if (pathEnding === undefined)
-      pathEnding =
-        layerConfig.layerIdExtension === undefined ? layerConfig.layerId : `${layerConfig.layerId}.${layerConfig.layerIdExtension}`;
+    if (pathEnding === undefined) pathEnding = layerConfig.layerId;
     if (!layerConfig.parentLayerConfig) return `${layerConfig.geoviewLayerConfig.geoviewLayerId}/${pathEnding}`;
     return this.#evaluateLayerPath(
       layerConfig.parentLayerConfig as GroupLayerEntryConfig,
@@ -386,7 +381,6 @@ export abstract class ConfigBaseClass {
     return {
       layerName: this.layerName,
       layerId: this.layerId,
-      layerIdExtension: this.layerIdExtension,
       schemaTag: this.schemaTag,
       entryType: this.entryType,
       layerStatus: this.layerStatus,
