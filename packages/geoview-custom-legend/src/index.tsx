@@ -1,4 +1,3 @@
-import { JSX } from 'react';
 import { TypeJsonObject, toJsonObject, AnySchemaObject, Cast } from 'geoview-core/src/api/config/types/config-types';
 import { AppBarPlugin } from 'geoview-core/src/api/plugin/appbar-plugin';
 import { LegendIcon } from 'geoview-core/src/ui/icons';

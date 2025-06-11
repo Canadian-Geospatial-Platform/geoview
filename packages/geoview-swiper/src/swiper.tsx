@@ -278,7 +278,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
   }, [viewer.mapId, updateSwiper]);
 
   // If any layer paths
-  if (layerPaths.length > 0) {
+  if (layerPaths && layerPaths.length > 0) {
     // Use a swiper
     return (
       <Box sx={sxClasses.layerSwipe}>

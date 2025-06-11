@@ -1,5 +1,5 @@
 // src/store/index.ts
-import { useContext } from 'react';
+import React, { useContext } from 'react';
 import { create, createStore } from 'zustand';
 import { mountStoreDevtool } from 'simple-zustand-devtools';
 
@@ -14,6 +14,9 @@ import { getItemAsNumber } from '@/core//utils/localStorage';
 export interface StoresManagerState {
   stores: Record<string, GeoviewStoreType>;
 }
+
+// Log
+logger.logInfo('Loading stores-manager file.');
 
 export const useStoresManager = createStore<StoresManagerState>(() => ({
   stores: {},
@@ -63,7 +66,7 @@ export const addGeoViewStore = (config: TypeMapFeaturesConfig): void => {
   useStoresManager.setState((state) => ({
     stores: {
       ...state.stores,
-      [config.mapId ?? 'unknown']: geoviewStore,
+      [config.mapId]: geoviewStore,
     },
   }));
 
@@ -88,7 +91,20 @@ export const removeGeoviewStore = (id: string): void => {
 };
 
 export const useGeoViewStore = (): GeoviewStoreType => {
-  const { mapId } = useContext(MapContext);
+  const toto = React;
+  logger.logDebug(toto);
 
-  return useStoresManager.getState().stores[mapId ?? 'unknown'];
+  let mapId = '';
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    mapId = useContext(MapContext).mapId;
+    return useStoresManager.getState().stores[mapId];
+  } catch (error: unknown) {
+    logger.logError(error);
+
+    // eslint-disable-next-line prefer-const
+    let throww = true;
+    if (throww) throw error;
+    return useStoresManager.getState().stores[mapId];
+  }
 };

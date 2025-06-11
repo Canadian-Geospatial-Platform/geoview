@@ -331,7 +331,7 @@ export function onMapReady(callback: MapViewerDelegate): void {
 }
 
 // cgpv object to be exported with the api for outside use
-export const cgpv: TypeCGPV = {
+export const cgpv = {
   init,
   onMapInit,
   onMapReady,
@@ -345,7 +345,7 @@ export const cgpv: TypeCGPV = {
     elements: UI,
   },
   logger,
-};
+} satisfies TypeCGPV;
 
 // freeze variable name so a variable with same name can't be defined from outside
 Object.freeze(cgpv);

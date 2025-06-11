@@ -6,28 +6,32 @@
   "keywords": [
     "custom-legend"
   ],
-  "author": "Ahmed-yacin Farah ",
+  "author": "Ahmed-yacin Farah",
   "license": "MIT",
   "dependencies": {
-    "geoview-core": "workspace:~1.0.0",
+    "geoview-core": "workspace:~1.0.0"
+  },
+  "peerDependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "@mui/material": "^6.1.3",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.8",
     "@babel/runtime": "^7.25.7",
-    "@types/react": "^18.3.11",
+    "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "typescript": "^5.6.3"
   },
-  "resolutions": {
-    "@types/react": "^18.2.0"
-  },
   "externals": {
     "react": "React",
     "react-dom": "ReactDOM",
-    "@mui/material": "MaterialUI"
+    "@mui/material": "MaterialUI",
+    "@emotion/react": "emotionReact",
+    "@emotion/styled": "emotionStyled"
   }
 }

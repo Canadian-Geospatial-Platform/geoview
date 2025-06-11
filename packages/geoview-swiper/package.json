@@ -4,16 +4,19 @@
   "description": "A Swiper control for the geoview project",
   "main": "src/index.tsx",
   "keywords": [
-    "react",
     "swiper"
   ],
   "author": "Saleh Yassin",
   "license": "MIT",
   "dependencies": {
+    "react-draggable": "^4.4.6",
     "geoview-core": "workspace:~1.0.0",
     "lodash": "^4.17.21",
-    "ol": "10.5.0",
-    "react-draggable": "^4.4.6"
+    "ol": "10.5.0"
+  },
+  "peerDependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@babel/core": "^7.25.8",
@@ -23,7 +26,11 @@
     "react-dom": "^18.3.1",
     "typescript": "^5.6.3"
   },
-  "resolutions": {
-    "@types/react": "^18.2.0"
+  "externals": {
+    "react": "React",
+    "react-dom": "ReactDOM",
+    "@mui/material": "MaterialUI",
+    "@emotion/react": "emotionReact",
+    "@emotion/styled": "emotionStyled"
   }
 }
