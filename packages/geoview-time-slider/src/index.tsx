@@ -211,8 +211,7 @@ class TimeSliderPlugin extends FooterPlugin {
   /**
    * Filters an array of legend layers to get usable time slider layer paths
    *
-   * @param {string} mapId The id of the map
-   * @param {TypeLegendLayer[]} legendLayers Array of legend layers to filter
+   * @param {string[]} layerPaths - Array of layer paths to filter
    * @returns {string[]} A list of usable layer paths
    * @private
    */

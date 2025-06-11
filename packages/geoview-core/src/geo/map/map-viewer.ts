@@ -62,7 +62,7 @@ import { createEmptyBasemap, getPointerPositionFromMapEvent, isExtentLonLat } fr
 import { logger } from '@/core/utils/logger';
 import { NORTH_POLE_POSITION } from '@/core/utils/constant';
 import { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
-import { TypeJsonObject } from '@/api/config/types/config-types';
+import { toJsonObject, TypeJsonObject } from '@/api/config/types/config-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
@@ -72,6 +72,8 @@ import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-v
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 import { Fetch } from '@/core/utils/fetch-helper';
+import { formatError } from '@/core/exceptions/core-exceptions';
+import { SwiperEventProcessor } from '@/api/event-processors/event-processor-children/swiper-event-processor';
 
 interface TypeDocument extends Document {
   webkitExitFullscreen: () => void;
@@ -99,7 +101,8 @@ export class MapViewer {
   // TD.CONT: AND scale component return null and fails. To patch, we add an higher time out for promise.
   // TD.CONT: This solves for now the issue where the page start to load and user switch to another page and came back.
   // Timeout value when map init to avoid when use the map is not ready, the UI will not start
-  static INIT_TIMEOUT_PROMISE: number = 9900000;
+  // static INIT_TIMEOUT_PROMISE: number = 1000;
+  static INIT_TIMEOUT_NORTH_VISIBILITY: number = 1000;
 
   // map config properties
   mapFeaturesConfig: TypeMapFeaturesConfig;
@@ -265,7 +268,8 @@ export class MapViewer {
   }
 
   /**
-   * Create an Open Layer map from configuration attached to the class
+   * Create an Open Layer map from configuration attached to the class.
+   * This function is called from a useEffect and should be running synchronously.
    * @param {HTMLElement} mapElement - HTML element to create the map within
    * @returns {OLMap} The OpenLayer map
    */
@@ -304,10 +308,20 @@ export class MapViewer {
     // Set the map
     this.map = initialMap;
 
-    // Start map initialization
-    this.initMap().catch((error: unknown) => {
+    // GV Register a handler when the map will postrender before pursuing map initialization
+    // That means:
+    //   - The map has been sized based on the container div
+    //   - The view (center, zoom, resolution) is applied
+    //   - The scale and extent-dependent widgets (like scale bars) can now be safely positioned and calculated
+    this.map.once('postrender', () => {
       // Log
-      logger.logPromiseFailed('initMap in createMap in MapViewer', error);
+      logger.logInfo('OpenLayers Map has been rendered once');
+
+      // Initiliaze it for GeoView
+      this.initMap().catch((error: unknown) => {
+        // Log
+        logger.logPromiseFailed('initMap in createMap in MapViewer', error);
+      });
     });
 
     // Return the OLMap that is still being initialized..
@@ -315,14 +329,18 @@ export class MapViewer {
   }
 
   /**
-   * Initializes map, layer class and geometries
+   * Initializes map, layer class and geometries.
+   * This function must be called once the Map is rendered
    */
   async initMap(): Promise<void> {
     // Note the time
     this.#checkMapReadyStartTime = Date.now();
 
     // Load the Map itself and the UI controls
-    MapEventProcessor.initMapControls(this.mapId);
+    await MapEventProcessor.initMapControls(this.mapId);
+
+    // Load the core packages plugins
+    await this.#loadCorePackages();
 
     // Reset the basemap
     await MapEventProcessor.resetBasemap(this.mapId);
@@ -331,6 +349,12 @@ export class MapViewer {
     this.#mapInit = true;
     this.#emitMapInit();
 
+    // Check if geometries are provided from url and load them
+    this.#loadGeometries();
+
+    // Prepare the FeatureHighlight now that the map is available
+    this.layer.featureHighlight.init();
+
     // Load the list of geoview layers in the config to add all layers on the map.
     // After this call, all first level layers have been registered.
     // TODO: refactor - remove the cast as MapConfigLayerEntry[] everywhere
@@ -338,12 +362,6 @@ export class MapViewer {
 
     // Here, all base-level "this.mapFeaturesConfig.map.listOfGeoviewLayerConfig" have been registered (layerStatus === 'registered').
     // However, careful, the layers are still processing and some sub-layer-entries can get registered on-the-fly (notably: EsriDynamic, WMS).
-
-    // Check if geometries are provided from url and load them
-    this.#loadGeometries();
-
-    // Prepare the FeatureHighlight now that the map is available
-    this.layer.featureHighlight.init();
 
     // Ready the map
     return this.#readyMap();
@@ -360,6 +378,20 @@ export class MapViewer {
     return whenThisThen(() => {
       return this.plugins[pluginId];
     });
+  }
+
+  getCorePackageConfig(pluginId: string): TypeJsonObject | undefined {
+    // If no corePackagesConfig
+    if (!this.mapFeaturesConfig.corePackagesConfig) return undefined;
+
+    // Find first object in array that has the 'plugin' key
+    const configObj = this.mapFeaturesConfig.corePackagesConfig.find((config) => pluginId in config);
+
+    // If not found
+    if (!configObj) return undefined;
+
+    // Return it
+    return configObj;
   }
 
   /**
@@ -800,6 +832,9 @@ export class MapViewer {
    * cgpv.api.deleteMapViewer() which will delete the MapViewer and unmount it - for React.
    */
   async delete(): Promise<void> {
+    // Remove the dom element (remove rendered map and overview map)
+    if (this.overviewRoot) this.overviewRoot.unmount();
+
     try {
       // Remove all layers
       this.layer.removeAllGeoviewLayers();
@@ -808,12 +843,17 @@ export class MapViewer {
       logger.logError('Failed to remove layers', error);
     }
 
-    // GV If this is done after plugin removal, it triggers a rerender, and the plugins can cause an error, depending on state
-    // Remove the dom element (remove rendered map and overview map)
-    if (this.overviewRoot) this.overviewRoot.unmount();
-
     // Unload all plugins
     await Plugin.removePlugins(this.mapId);
+
+    // Remove all controls
+    this.map.getControls().clear();
+
+    // Remove all interactions
+    this.map.getInteractions().clear();
+
+    // Unset the map target to remove the DOM link
+    this.map.setTarget(undefined);
   }
 
   /**
@@ -885,7 +925,7 @@ export class MapViewer {
    */
   async waitAllLayersStatus(layerStatus: TypeLayerStatus): Promise<number> {
     // Log
-    logger.logDebug(`Waiting on layers to become ${layerStatus}`);
+    logger.logInfo(`Waiting on layers to become ${layerStatus}`);
 
     // Wait for the layers to get the layerStatus required
     let layersCount = 0;
@@ -1044,7 +1084,7 @@ export class MapViewer {
     const pointXY: [number, number] = [size[0] / 2, 1];
 
     // GV: Sometime, the getCoordinateFromPixel return null... use await
-    const pixel = await this.getCoordinateFromPixel(pointXY, MapViewer.INIT_TIMEOUT_PROMISE);
+    const pixel = await this.getCoordinateFromPixel(pointXY, MapViewer.INIT_TIMEOUT_NORTH_VISIBILITY);
     const pt = Projection.transformToLonLat(pixel, this.getView().getProjection());
 
     // If user is pass north, long value will start to be positive (other side of the earth).
@@ -1439,10 +1479,10 @@ export class MapViewer {
   async #handleMapChangeSize(event: ObjectEvent): Promise<void> {
     try {
       // Get the scale information
-      const scale = await MapEventProcessor.getScaleInfoFromDomElement(this.mapId, 1000);
+      const scale = MapEventProcessor.getScaleInfoFromDomElement(this.mapId);
 
-      // Get the size as [number, number]
-      const size = this.map.getSize() as unknown as [number, number];
+      // Get the size
+      const size = await this.getMapSize();
 
       // Save in the store
       MapEventProcessor.setMapSize(this.mapId, size);
@@ -1496,7 +1536,7 @@ export class MapViewer {
    */
   async #readyMap(): Promise<void> {
     // Log
-    logger.logInfo(`Map is ready. Layers are still being processed...`, this.mapId);
+    logger.logInfo(`Map is ready. Layers are still being processed... 1`, this.mapId);
 
     // Log Marker Start
     logger.logMarkerStart(`readyMap-${this.mapId}`);
@@ -1507,25 +1547,37 @@ export class MapViewer {
       logger.logPromiseFailed('in AppEventProcessor.setGuide in #readyMap', error);
     });
 
+    logger.logInfo(`Map is ready. Layers are still being processed... 2`, this.mapId);
+
     // Check how load in milliseconds has it been processing thus far
     const elapsedMilliseconds = Date.now() - this.#checkMapReadyStartTime!;
 
     // Wait at least the minimum delay before officializing the map as loaded for the UI
     await delay(MapViewer.#MIN_DELAY_LOADING - elapsedMilliseconds); // Negative value will simply resolve immediately
 
+    logger.logInfo(`Map is ready. Layers are still being processed... 3`, this.mapId);
+
     // Save in the store that the map is loaded
     // GV This removes the spinning circle overlay and starts showing the map correctly in the html dom
     MapEventProcessor.setMapLoaded(this.mapId, true);
 
+    logger.logInfo(`Map is ready. Layers are still being processed... 4`, this.mapId);
+
     // Save in the store that the map is properly being displayed now
     MapEventProcessor.setMapDisplayed(this.mapId);
+
+    logger.logInfo(`Map is ready. Layers are still being processed... 4.5`, this.mapId);
 
     // Update the map controls based on the original map state (equivalent of initMapControls, just later in the process)
     await this.#updateMapControls();
 
+    logger.logInfo(`Map is ready. Layers are still being processed... 5`, this.mapId);
+
     // Is ready
     this.#mapReady = true;
     this.#emitMapReady();
+
+    logger.logInfo(`Map is ready. Layers are still being processed... 6`, this.mapId);
 
     // Register the map handlers
     this.#registerMapHandlers(this.map);
@@ -1533,8 +1585,12 @@ export class MapViewer {
     // Register the view handlers
     this.#registerViewHandlers(this.getView());
 
+    logger.logInfo(`Map is ready. Layers are still being processed... 7`, this.mapId);
+
     // Await for all layers to be 'processed'
     await this.#checkMapLayersProcessed();
+
+    logger.logInfo(`Map is ready. Layers are still being processed... 8`, this.mapId);
 
     // Zoom to extent if necessary, but don't wait for it
     this.#zoomOnExtentMaybe().catch((error: unknown) => {
@@ -1546,6 +1602,8 @@ export class MapViewer {
     const selectedLayerPath =
       this.mapFeaturesConfig.footerBar?.selectedLayersLayerPath || this.mapFeaturesConfig.appBar?.selectedLayersLayerPath;
     if (selectedLayerPath) LegendEventProcessor.setSelectedLayersTabLayer(this.mapId, selectedLayerPath);
+
+    logger.logInfo(`Map is ready. Layers are still being processed... 9`, this.mapId);
 
     // Await for all layers to be 'loaded'
     await this.#checkMapLayersLoaded();
@@ -1560,6 +1618,61 @@ export class MapViewer {
     // inVisibleRange array when layers are loaded.
     // This is to trigger a 'this.#handleMapZoomEnd' once layers are loaded
     this.getView().dispatchEvent(new ObjectEvent('change:resolution', 'visibleRange', null));
+  }
+
+  /**
+   * Load the core packages plugins
+   * @returns Promise when all core packages plugins will be loaded
+   */
+  #loadCorePackages(): Promise<void[]> {
+    // Load the core packages which are the ones who load on map (not footer plugin, not app-bar plugin)
+    const promises: Promise<void>[] = [];
+    this.mapFeaturesConfig?.corePackages?.forEach((corePackage: string): void => {
+      // Create promise
+      const promise = new Promise<void>((resolve, reject) => {
+        Plugin.loadScript(corePackage)
+          .then((constructor) => {
+            // add the plugin by passing in the loaded constructor from the script tag
+            Plugin.addPlugin(
+              corePackage,
+              this.mapId,
+              constructor,
+              toJsonObject({
+                mapId: this.mapId,
+                viewer: this,
+              })
+            )
+              .then(() => {
+                // TODO: REDO THIS
+                if (corePackage === 'swiper') {
+                  // Get the config
+                  const config = this.getCorePackageConfig('swiper');
+                  if (config) {
+                    // Initialize the store with swiper provided configuration
+                    SwiperEventProcessor.setLayerPaths(this.mapId, config.layers as string[]);
+                  }
+                }
+
+                // Plugin added
+                resolve();
+              })
+              .catch((error: unknown) => {
+                // Reject
+                reject(formatError(error));
+              });
+          })
+          .catch((error: unknown) => {
+            // Reject
+            reject(formatError(error));
+          });
+      });
+
+      // Compile
+      promises.push(promise);
+    });
+
+    // Await all
+    return Promise.all(promises);
   }
 
   /**
@@ -1590,7 +1703,7 @@ export class MapViewer {
     const extent = this.getView().calculateExtent();
 
     // Get the scale information
-    const scale = await MapEventProcessor.getScaleInfoFromDomElement(this.mapId, MapViewer.INIT_TIMEOUT_PROMISE);
+    const scale = MapEventProcessor.getScaleInfoFromDomElement(this.mapId);
 
     // Save in the store
     MapEventProcessor.setMapMoveEnd(this.mapId, centerCoordinates, pointerPosition, degreeRotation, isNorthVisible, extent, scale);
@@ -2174,7 +2287,7 @@ export type MapRotationDelegate = EventDelegateBase<MapViewer, MapRotationEvent,
  * Define an event for the delegate
  */
 export type MapChangeSizeEvent = {
-  size: [number, number];
+  size: Size;
 };
 
 /**

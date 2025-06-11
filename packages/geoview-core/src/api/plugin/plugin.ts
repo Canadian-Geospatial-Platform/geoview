@@ -1,4 +1,5 @@
 import React from 'react';
+import { createRoot } from 'react-dom/client';
 import i18next from 'i18next';
 import * as translate from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
@@ -138,18 +139,9 @@ export abstract class Plugin {
            */
           const configUrl = document.getElementById(mapId)?.getAttribute('data-config-url');
 
-          // Function to check if there is an inline config
-          const getInlineConfig = (configs: Array<{ [key: string]: TypeJsonObject }>): TypeJsonObject | undefined => {
-            // Find first object in array that has the 'plugin' key
-            const configObj = configs.find((config) => pluginId in config);
-            return configObj?.[pluginId];
-          };
-
           // Check if there is a corePackageConfig for the plugin
           const viewer = MapEventProcessor.getMapViewer(mapId);
-          const configObj = viewer.mapFeaturesConfig.corePackagesConfig
-            ? getInlineConfig(viewer.mapFeaturesConfig.corePackagesConfig as Array<{ [key: string]: TypeJsonObject }>)
-            : undefined;
+          const configObj = viewer.getCorePackageConfig(pluginId);
 
           // If there is an inline config use it, if not try to read the file config associated with map config
           if (configObj) {
@@ -204,6 +196,7 @@ export abstract class Plugin {
           pluginId: { value: pluginId },
           api: { value: api },
           react: { value: React },
+          createRoot: { value: createRoot },
           translate: { value: translate },
           useTheme: { value: useTheme },
           configObj: { value: pluginConfigObj },

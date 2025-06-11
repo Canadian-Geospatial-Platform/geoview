@@ -1,4 +1,4 @@
-import { createRoot, Root } from 'react-dom/client';
+import { Root } from 'react-dom/client'; // For typing ONLY
 import { AbstractPlugin } from './abstract-plugin';
 import { MapContext } from '@/core/app-start';
 
@@ -32,7 +32,7 @@ export abstract class MapPlugin extends AbstractPlugin {
 
     // create the swiper component and render
     const node = this.onCreateContent();
-    this.reactRoot = createRoot(el);
+    this.reactRoot = this.createRoot(el);
     this.reactRoot.render(<MapContext.Provider value={{ mapId: this.pluginProps.mapId }}>{node}</MapContext.Provider>);
   }
 

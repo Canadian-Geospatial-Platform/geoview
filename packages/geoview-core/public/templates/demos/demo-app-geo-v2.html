@@ -94,7 +94,7 @@
         },
         theme: 'geo.ca',
         components: ['north-arrow', 'overview-map'],
-        corePackages: [],
+        corePackages: ['swiper'],
         appBar: {
           tabs: {
             core: ['geolocator', 'legend']
@@ -106,7 +106,16 @@
           },
           collapsed: true,
           selectedTab: 'time-slider'
-        }
+        },
+        corePackagesConfig: [
+          {
+            swiper: {
+              orientation: "horizontal",
+              keyboardOffset: 10,
+              layers: [id]
+            }
+          }
+        ]
       };
 
       // As string

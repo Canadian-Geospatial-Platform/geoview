@@ -5,6 +5,7 @@ import { Extent } from 'ol/extent';
 import { FitOptions } from 'ol/View';
 import { KeyboardPan } from 'ol/interaction';
 import { Coordinate } from 'ol/coordinate';
+import { Size } from 'ol/size';
 
 import { CV_MAP_EXTENTS } from '@/api/config/types/config-constants';
 import {
@@ -81,15 +82,16 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * Initializes the map controls
    * @param {string} mapId - The map id being initialized
    */
-  static initMapControls(mapId: string): void {
+  static async initMapControls(mapId: string): Promise<void> {
     // Log
     logger.logTraceCore('MAP EVENT PROCESSOR - initMapControls', mapId);
 
     // use api to access map because this function will set map element in store
-    const { map } = this.getMapViewer(mapId);
+    const mapViewer = this.getMapViewer(mapId);
+    const { map } = mapViewer;
     const store = getGeoViewStore(mapId);
 
-    // add map controls (scale)
+    // Add map controls (scale)
     const scaleBarMetric = new ScaleLine({
       units: 'metric',
       target: document.getElementById(`${mapId}-scaleControlBarMetric`) as HTMLElement,
@@ -140,22 +142,17 @@ export class MapEventProcessor extends AbstractEventProcessor {
     store.getState().mapState.setterActions.setOverlayNorthMarker(northPoleMarker);
     store.getState().mapState.setterActions.setOverlayClickMarker(clickMarkerOverlay);
 
-    // Get the size as [number, number]
-    const size = map.getSize() as unknown as [number, number];
+    // Get the size
+    const size = await mapViewer.getMapSize();
 
     // Set map size
-    store.getState().mapState.setterActions.setMapSize(size);
+    MapEventProcessor.setMapSize(mapId, size);
 
     // Get the scale information
-    this.getScaleInfoFromDomElement(mapId, MapViewer.INIT_TIMEOUT_PROMISE)
-      .then((scale) => {
-        // Set the map scale
-        MapEventProcessor.setMapScale(mapId, scale);
-      })
-      .catch((error: unknown) => {
-        // Log error
-        logger.logPromiseFailed('in getScaleInfoFromDomElement in initMapControls', error);
-      });
+    const scale = this.getScaleInfoFromDomElement(mapId);
+
+    // Set the map scale
+    MapEventProcessor.setMapScale(mapId, scale);
 
     // set map interaction
     this.setInteraction(mapId, store.getState().mapState.interaction);
@@ -230,15 +227,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * It then extracts the scale bar widths and labels, as well as the numeric scale value, and returns them in a TypeScaleInfo object.
    * If the elements are not available within the specified timeout, the promise will reject.
    */
-  static async getScaleInfoFromDomElement(mapId: string, timeoutMs: number): Promise<TypeScaleInfo> {
-    // Check if the scaleControl exists and is showing information, wait for it
-    await whenThisThen(
-      () =>
-        document.getElementById(`${mapId}-scaleControlBarMetric`)?.querySelector('.ol-scale-text') &&
-        document.getElementById(`${mapId}-scaleControlBarImperial`)?.querySelector('.ol-scale-text'),
-      timeoutMs
-    );
-
+  static getScaleInfoFromDomElement(mapId: string): TypeScaleInfo {
     // Get metric values
     const scaleControlBarMetric = document.getElementById(`${mapId}-scaleControlBarMetric`);
     const lineWidthMetric = (scaleControlBarMetric?.querySelector('.ol-scale-bar-inner') as HTMLElement)?.style.width;
@@ -417,7 +406,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     this.getMapStateProtected(mapId).setterActions.setRotation(rotation);
   }
 
-  static setMapSize(mapId: string, size: [number, number]): void {
+  static setMapSize(mapId: string, size: Size): void {
     // Save in store
     this.getMapStateProtected(mapId).setterActions.setMapSize(size);
   }

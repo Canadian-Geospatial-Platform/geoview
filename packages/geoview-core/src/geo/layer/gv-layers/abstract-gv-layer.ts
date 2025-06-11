@@ -242,7 +242,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       // Emit about the error
       this.emitMessage('layers.errorNotLoaded', [this.getLayerName()], 'error', true);
     } else {
-      // We've already emitted an error to the user about the layer being in error, skip
+      // We've already emitted an error to the user about the layer being in error, skip so that we don't spam
     }
 
     // Emit event for all layer error events

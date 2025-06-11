@@ -52,7 +52,7 @@ export const addGeoViewStore = (config: TypeMapFeaturesConfig): void => {
   }
 
   // Log
-  logger.logTraceCore(`Creating the store for map ${config.mapId}`);
+  logger.logInfo(`Creating the store for map ${config.mapId}`);
 
   // Create the store
   const geoviewStore = create<IGeoviewState>()(geoviewStoreDefinitionWithSubscribeSelector);
@@ -68,14 +68,16 @@ export const addGeoViewStore = (config: TypeMapFeaturesConfig): void => {
   }));
 
   mountZustandDevTools(`getViewStore-${config.mapId}`, geoviewStore, geoviewStore.getState().appState.geoviewHTMLElement);
+
+  logger.logInfo(`Store created for map ${config.mapId}`);
 };
 
-export const getGeoViewStore = (id: string | undefined): GeoviewStoreType => {
-  return useStoresManager.getState().stores[id ?? 'unknown'];
+export const getGeoViewStore = (id: string): GeoviewStoreType => {
+  return useStoresManager.getState().stores[id];
 };
 
 // async version to use when we need to access store and it may not be created yet
-export const getGeoViewStoreAsync = (id: string | undefined): Promise<GeoviewStoreType> => {
+export const getGeoViewStoreAsync = (id: string): Promise<GeoviewStoreType> => {
   return whenThisThen(() => getGeoViewStore(id));
 };
 

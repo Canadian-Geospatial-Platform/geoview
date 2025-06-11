@@ -252,7 +252,7 @@ export function Shell(props: ShellProps): JSX.Element {
           ))}
           {/* modal section start */}
           <FocusTrapDialog mapId={mapViewer.mapId} focusTrapId={mapViewer.mapId} />
-          <ExportModal />
+          {mapLoaded && <ExportModal />}
           {focusItem.activeElementId === 'layerDataTable' && <DataTableModal />}
           {/* Show Feature Detail Modal when detail icon is clicked in datatable each row */}
           {focusItem.activeElementId === 'featureDetailDataTable' && <FeatureDetailModal />}
