@@ -15,22 +15,25 @@
     "geoview-core": "workspace:~1.0.0",
     "geochart": "Canadian-Geospatial-Platform/geochart#develop"
   },
+  "peerDependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
   "devDependencies": {
     "@babel/core": "^7.25.8",
     "@babel/runtime": "^7.25.7",
-    "@types/react": "^18.3.11",
+    "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
     "markdown-to-jsx": "~7.5.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "typescript": "^5.6.3"
   },
-  "resolutions": {
-    "@types/react": "^18.2.0"
-  },
   "externals": {
     "react": "React",
     "react-dom": "ReactDOM",
-    "@mui/material": "MaterialUI"
+    "@mui/material": "MaterialUI",
+    "@emotion/react": "emotionReact",
+    "@emotion/styled": "emotionStyled"
   }
 }

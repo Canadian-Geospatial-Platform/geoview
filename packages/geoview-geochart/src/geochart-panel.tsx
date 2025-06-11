@@ -61,7 +61,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
    */
   const redrawGeoCharts = (): void => {
     // We need to redraw when the canvas isn't 'showing' in the DOM and when the user resizes the canvas placeholder.
-    Object.entries(redrawGeochart.current).forEach(([, callback]) => {
+    Object.values(redrawGeochart.current!).forEach((callback) => {
       // Redraw
       callback();
     });
@@ -107,7 +107,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
    */
   const handleProvideCallbackRedraw = (key: string, theCallbackRedraw: () => void): void => {
     // Keep the callback
-    redrawGeochart.current[key] = theCallbackRedraw;
+    redrawGeochart.current![key] = theCallbackRedraw;
   };
 
   // #region HOOKS

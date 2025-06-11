@@ -391,7 +391,7 @@ export class MapViewer {
     if (!configObj) return undefined;
 
     // Return it
-    return configObj;
+    return configObj[pluginId];
   }
 
   /**
