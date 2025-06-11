@@ -266,6 +266,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
     theSwiper?.addEventListener('focusin', handleFocusIn);
     theSwiper?.addEventListener('focusout', handleFocusOut);
 
+    // Cleanup on unmount
     return () => {
       // Log
       logger.logTraceUseEffectUnmount('GEOVIEW-SWIPER - unmount', viewer.mapId);

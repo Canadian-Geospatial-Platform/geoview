@@ -165,9 +165,9 @@ function handleMapViewerDivRemoved(mapId: string): void {
 /**
  * Function to render the map for inline map and map create from a function call
  *
- * @param {Element} mapElement - The html element div who will contain the map
+ * @param {HTMLElement} mapElement - The html element div who will contain the map
  */
-async function renderMap(mapElement: Element): Promise<MapViewer> {
+async function renderMap(mapElement: HTMLElement): Promise<MapViewer> {
   // if a config is provided from either inline div, url params or json file, validate it with against the schema
   // otherwise return the default config
   const configuration = await getMapConfig(mapElement);
@@ -270,7 +270,7 @@ function init(): void {
 
   // loop through map elements on the page
   for (let i = 0; i < mapElements.length; i += 1) {
-    const mapElement = mapElements[i] as Element;
+    const mapElement = mapElements[i] as HTMLElement;
     if (!mapElement.classList.contains('geoview-map-func-call')) {
       // Render the map
       const promiseMapViewer = renderMap(mapElement);
