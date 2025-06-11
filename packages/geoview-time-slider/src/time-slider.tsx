@@ -1,4 +1,3 @@
-import { FormControl, InputLabel, NativeSelect } from '@mui/material';
 import { Box } from 'geoview-core/src/ui';
 import {
   useTimeSliderLayers,
@@ -49,6 +48,9 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     ArrowRightIcon,
     SwitchRightIcon,
     SwitchLeftIcon,
+    FormControl,
+    InputLabel,
+    NativeSelect,
   } = ui.elements;
 
   const theme = useTheme();
@@ -306,13 +308,19 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     }
   }
 
-  function handleTimeChange(event: React.ChangeEvent<HTMLSelectElement>): void {
-    setDelay(layerPath, event.target.value as unknown as number);
-  }
+  const handleTimeChange = useCallback(
+    (event: React.ChangeEvent<HTMLSelectElement>): void => {
+      setDelay(layerPath, event.target.value as unknown as number);
+    },
+    [layerPath, setDelay]
+  );
 
-  function handleStepChange(event: React.ChangeEvent<HTMLSelectElement>): void {
-    setStep(layerPath, Number(event.target.value));
-  }
+  const handleStepChange = useCallback(
+    (event: React.ChangeEvent<HTMLSelectElement>): void => {
+      setStep(layerPath, Number(event.target.value));
+    },
+    [layerPath, setStep]
+  );
 
   function handleCheckbox(newValue: boolean): void {
     setFiltering(layerPath, newValue);
@@ -481,7 +489,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
                   defaultValue={delay}
                   inputProps={{
                     name: 'timeDelay',
-                    onChange: (event) => handleTimeChange(event),
+                    onChange: handleTimeChange,
                   }}
                 >
                   <option value={500}>0.5s</option>
@@ -502,7 +510,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
                     defaultValue={step}
                     inputProps={{
                       name: 'timeStep',
-                      onChange: (event) => handleStepChange(event),
+                      onChange: handleStepChange,
                     }}
                   >
                     <option value={3600000}>{getLocalizedMessage(displayLanguage, 'timeSlider.slider.hour')}</option>
