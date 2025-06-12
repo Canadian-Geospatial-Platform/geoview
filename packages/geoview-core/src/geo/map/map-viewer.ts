@@ -42,8 +42,6 @@ import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { Projection } from '@/geo/utils/projection';
 
 import { Plugin } from '@/api/plugin/plugin';
-import { TypePluginStructure, TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
-
 import { AppBarApi } from '@/core/components/app-bar/app-bar-api';
 import { NavBarApi } from '@/core/components/nav-bar/nav-bar-api';
 import { FooterBarApi } from '@/core/components/footer-bar/footer-bar-api';
@@ -74,6 +72,8 @@ import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import { SwiperEventProcessor } from '@/api/event-processors/event-processor-children/swiper-event-processor';
+import { PluginsContainer } from '@/api/plugin/plugin-types';
+import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 
 interface TypeDocument extends Document {
   webkitExitFullscreen: () => void;
@@ -115,7 +115,7 @@ export class MapViewer {
   map!: OLMap;
 
   // plugins attach to the map
-  plugins: TypeRecordOfPlugin = {};
+  plugins: PluginsContainer = {};
 
   // the overview map reat root
   overviewRoot: Root | undefined;
@@ -372,9 +372,9 @@ export class MapViewer {
   /**
    * Asynchronously attempts to get a plugin by its id.
    * @param {string} pluginId - The plugin id
-   * @returns {TypePluginStructure} The plugin structure
+   * @returns {AbstractPlugin} The plugin
    */
-  getPlugin(pluginId: string): Promise<TypePluginStructure> {
+  getPlugin(pluginId: string): Promise<AbstractPlugin> {
     return whenThisThen(() => {
       return this.plugins[pluginId];
     });

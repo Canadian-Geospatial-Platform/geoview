@@ -49,66 +49,69 @@ class TimeSliderPlugin extends FooterPlugin {
   }
 
   /**
-   * Translations object to inject to the viewer translations
+   * Overrides the default translations for the Plugin.
+   * @returns {TypeJsonObject} - The translations object for the particular Plugin.
    */
-  translations = toJsonObject({
-    en: {
-      timeSlider: {
-        title: 'Time Slider',
-        panel: {
-          noLayers: 'No layers with temporal data',
-        },
-        slider: {
-          unlockRight: 'Unlock right handle',
-          unlockLeft: 'Unlock left handle',
-          lockRight: 'Lock right handle',
-          lockLeft: 'Lock left handle',
-          disableFilter: 'Disable Time Filtering',
-          enableFilter: 'Enable Time Filtering',
-          pauseAnimation: 'Pause animation',
-          playAnimation: 'Play animation',
-          back: 'Back',
-          forward: 'Forward',
-          changeDirection: 'Change animation direction',
-          timeDelay: 'Animation delay',
-          stepValue: 'Step value',
-          hour: 'Hour',
-          day: 'Day',
-          week: 'Week',
-          month: 'Month',
-          year: 'Year',
-        },
-      },
-    },
-    fr: {
-      timeSlider: {
-        title: 'Curseur Temporel',
-        panel: {
-          noLayers: 'Pas de couches avec des données temporelles',
-        },
-        slider: {
-          unlockRight: 'Déverrouiller la poignée droite',
-          unlockLeft: 'Déverrouiller la poignée gauche',
-          lockRight: 'Verrouiller la poignée droite',
-          lockLeft: 'Verrouiller la poignée gauche',
-          disableFilter: 'Désactiver le filtrage temporel',
-          enableFilter: 'Activer le filtrage temporel',
-          pauseAnimation: `Pause de l'animation`,
-          playAnimation: `Jouer l'animation`,
-          back: 'Retour',
-          forward: 'En avant',
-          changeDirection: `Changer la direction de l'animation`,
-          timeDelay: `Délai d'animation`,
-          stepValue: 'Valeur du saut',
-          hour: 'Heure',
-          day: 'Jour',
-          week: 'Semaine',
-          month: 'Mois',
-          year: 'Année',
+  override defaultTranslations(): TypeJsonObject {
+    return {
+      en: {
+        timeSlider: {
+          title: 'Time Slider',
+          panel: {
+            noLayers: 'No layers with temporal data',
+          },
+          slider: {
+            unlockRight: 'Unlock right handle',
+            unlockLeft: 'Unlock left handle',
+            lockRight: 'Lock right handle',
+            lockLeft: 'Lock left handle',
+            disableFilter: 'Disable Time Filtering',
+            enableFilter: 'Enable Time Filtering',
+            pauseAnimation: 'Pause animation',
+            playAnimation: 'Play animation',
+            back: 'Back',
+            forward: 'Forward',
+            changeDirection: 'Change animation direction',
+            timeDelay: 'Animation delay',
+            stepValue: 'Step value',
+            hour: 'Hour',
+            day: 'Day',
+            week: 'Week',
+            month: 'Month',
+            year: 'Year',
+          },
         },
       },
-    },
-  });
+      fr: {
+        timeSlider: {
+          title: 'Curseur Temporel',
+          panel: {
+            noLayers: 'Pas de couches avec des données temporelles',
+          },
+          slider: {
+            unlockRight: 'Déverrouiller la poignée droite',
+            unlockLeft: 'Déverrouiller la poignée gauche',
+            lockRight: 'Verrouiller la poignée droite',
+            lockLeft: 'Verrouiller la poignée gauche',
+            disableFilter: 'Désactiver le filtrage temporel',
+            enableFilter: 'Activer le filtrage temporel',
+            pauseAnimation: `Pause de l'animation`,
+            playAnimation: `Jouer l'animation`,
+            back: 'Retour',
+            forward: 'En avant',
+            changeDirection: `Changer la direction de l'animation`,
+            timeDelay: `Délai d'animation`,
+            stepValue: 'Valeur du saut',
+            hour: 'Heure',
+            day: 'Jour',
+            week: 'Semaine',
+            month: 'Mois',
+            year: 'Année',
+          },
+        },
+      },
+    } as unknown as TypeJsonObject;
+  }
 
   /**
    * Overrides the creation of the content properties of this TimeSlider Footer Plugin.

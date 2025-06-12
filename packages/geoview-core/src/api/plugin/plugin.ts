@@ -8,7 +8,6 @@ import { TypeJsonObject } from '@/api/config/types/config-types';
 import { logger } from '@/core/utils/logger';
 
 import { AbstractPlugin } from './abstract-plugin';
-import { TypePluginStructure } from './plugin-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { formatError } from '@/core/exceptions/core-exceptions';
 
@@ -88,118 +87,112 @@ export abstract class Plugin {
    * @param {Object} props the plugin properties
    */
   static async addPlugin(pluginId: string, mapId: string, constructor: typeof AbstractPlugin, props?: TypeJsonObject): Promise<void> {
-    const plugins = await MapEventProcessor.getMapViewerPlugins(mapId);
-    if (!plugins[pluginId]) {
-      // TODO: Refactor - Get rid of the TypePluginStructure and use AbstractPlugin directly, taking advantage of the the mother class abstract methods.
-      let plugin: TypePluginStructure | null = null;
+    // Get the MapViewer
+    const viewer = MapEventProcessor.getMapViewer(mapId);
 
-      if (constructor) {
-        // create new instance of the plugin. Here we must type the constructor variable to any
-        // in order to cancel the "'new' expression, whose target lacks a construct signature" error message
-        // ? unknown type cannot be use, need to escape
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        plugin = new (constructor as any)(pluginId, props);
-      }
+    // If the plugin is already loaded, skip
+    if (viewer.plugins[pluginId]) return;
 
-      if (plugin) {
-        // a config object used to store package config
-        let pluginConfigObj: TypeJsonObject = {};
+    // TODO: Refactor - Get rid of the TypePluginStructure and use AbstractPlugin directly, taking advantage of the the mother class abstract methods.
+    let plugin: AbstractPlugin | undefined;
+    if (constructor) {
+      // create new instance of the plugin. Here we must type the constructor variable to any
+      // in order to cancel the "'new' expression, whose target lacks a construct signature" error message
+      // ? unknown type cannot be use, need to escape
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      plugin = new (constructor as any)(
+        pluginId,
+        props,
+        api,
+        window.cgpv.react,
+        window.cgpv.createRoot,
+        window.cgpv.ui.useTheme,
+        window.cgpv.translate
+      );
+    }
 
-        // if a schema is defined then look for a config for this plugin
-        if (plugin.schema && plugin.defaultConfig) {
-          const schema = plugin.schema();
-          const defaultConfig = plugin.defaultConfig();
+    if (plugin) {
+      // a config object used to store package config
+      let pluginConfigObj: TypeJsonObject = {};
 
-          // create a validator object
-          const validator = new Ajv({
-            strict: false,
-            allErrors: true,
-          });
+      // if a schema is defined then look for a config for this plugin
+      if (plugin.schema && plugin.defaultConfig) {
+        const schema = plugin.schema();
+        const defaultConfig = plugin.defaultConfig();
 
-          // initialize validator with schema file
-          const validate = validator.compile(schema);
-
-          // if no config is provided then use default
-          pluginConfigObj = defaultConfig;
-
-          /**
-           * If a user is using map config from a file then attempt to look
-           * for custom config for loaded core packages on the same path of the map config.
-           * If none exists then load the default config
-           */
-          const configUrl = document.getElementById(mapId)?.getAttribute('data-config-url');
-
-          // Check if there is a corePackageConfig for the plugin
-          const viewer = MapEventProcessor.getMapViewer(mapId);
-          const configObj = viewer.getCorePackageConfig(pluginId);
-
-          // If there is an inline config use it, if not try to read the file config associated with map config
-          if (configObj) {
-            logger.logTraceCore('Plugin - addPlugin inline config', configObj);
-            pluginConfigObj = configObj;
-          } else if (configUrl) {
-            const configPath = `${configUrl.split('.json')[0]}-${pluginId}.json`;
-
-            try {
-              // Try to find the custom config from the config path
-              const result = await Fetch.fetchJsonAsObject(configPath);
-
-              if (result) {
-                logger.logTraceCore('Plugin - addPlugin file config', result);
-                pluginConfigObj = result;
-              }
-            } catch (error: unknown) {
-              // Log warning
-              logger.logWarning(`Config not found.`, error);
-            }
-          }
-
-          // validate configuration
-          const valid = validate(pluginConfigObj);
-
-          if (!valid && validate.errors && validate.errors.length) {
-            for (let j = 0; j < validate.errors.length; j += 1) {
-              const error = validate.errors[j];
-              const errorMessage = `Plugin ${pluginId}: ${error.instancePath} ${error.message} - ${JSON.stringify(error.params)}`;
-
-              // Log
-              logger.logError(errorMessage);
-              // Don't show error message as it can contain non-translated elements via Ajv error messages, only log for now
-              // api.getMapViewer(mapId).notifications.showError(errorMessage);
-            }
-          }
-        }
-
-        // add translations if provided
-        if (typeof plugin.translations === 'object') {
-          const { translations } = plugin;
-
-          Object.keys(translations).forEach((languageKey: string) => {
-            const translation = translations[languageKey];
-
-            i18next.addResourceBundle(languageKey, 'translation', translation, true, false);
-          });
-        }
-
-        // assign the plugin default values to be accessible from the plugin
-        Object.defineProperties(plugin, {
-          pluginId: { value: pluginId },
-          api: { value: api },
-          react: { value: window.cgpv.react },
-          createRoot: { value: window.cgpv.createRoot },
-          translate: { value: window.cgpv.translate },
-          useTheme: { value: window.cgpv.ui.useTheme },
-          configObj: { value: pluginConfigObj },
+        // create a validator object
+        const validator = new Ajv({
+          strict: false,
+          allErrors: true,
         });
 
-        // attach to the map plugins object
-        plugins[pluginId] = plugin;
+        // initialize validator with schema file
+        const validate = validator.compile(schema);
 
-        // call plugin added method if available
-        if (typeof plugin.added === 'function') {
-          plugin.added();
+        // if no config is provided then use default
+        pluginConfigObj = defaultConfig;
+
+        /**
+         * If a user is using map config from a file then attempt to look
+         * for custom config for loaded core packages on the same path of the map config.
+         * If none exists then load the default config
+         */
+        const configUrl = document.getElementById(mapId)?.getAttribute('data-config-url');
+
+        // Check if there is a corePackageConfig for the plugin
+        const configObj = viewer.getCorePackageConfig(pluginId);
+
+        // If there is an inline config use it, if not try to read the file config associated with map config
+        if (configObj) {
+          logger.logTraceCore('Plugin - addPlugin inline config', configObj);
+          pluginConfigObj = configObj;
+        } else if (configUrl) {
+          const configPath = `${configUrl.split('.json')[0]}-${pluginId}.json`;
+
+          try {
+            // Try to find the custom config from the config path
+            const result = await Fetch.fetchJsonAsObject(configPath);
+
+            if (result) {
+              logger.logTraceCore('Plugin - addPlugin file config', result);
+              pluginConfigObj = result;
+            }
+          } catch (error: unknown) {
+            // Log warning
+            logger.logWarning(`Config not found.`, error);
+          }
+        }
+
+        // validate configuration
+        const valid = validate(pluginConfigObj);
+
+        if (!valid && validate.errors && validate.errors.length) {
+          for (let j = 0; j < validate.errors.length; j += 1) {
+            const error = validate.errors[j];
+            const errorMessage = `Plugin ${pluginId}: ${error.instancePath} ${error.message} - ${JSON.stringify(error.params)}`;
+
+            // Log
+            logger.logError(errorMessage);
+            // Don't show error message as it can contain non-translated elements via Ajv error messages, only log for now
+            // api.getMapViewer(mapId).notifications.showError(errorMessage);
+          }
         }
       }
+
+      // Set the config
+      plugin.setConfig(pluginConfigObj);
+
+      // add translations if provided
+      Object.entries(plugin.defaultTranslations()).forEach(([languageKey, value]) => {
+        // Add the resource bundle to support the plugin language
+        i18next.addResourceBundle(languageKey, 'translation', value, true, false);
+      });
+
+      // Attach to the map plugins object
+      viewer.plugins[pluginId] = plugin;
+
+      // Call plugin add method
+      plugin.add();
     }
   }
 
@@ -212,7 +205,7 @@ export abstract class Plugin {
   static async removePlugin(pluginId: string, mapId: string): Promise<void> {
     // Get the plugin and remove it
     const plugins = await MapEventProcessor.getMapViewerPlugins(mapId);
-    plugins[pluginId]?.removed?.();
+    plugins[pluginId]?.remove?.();
     delete plugins[pluginId];
   }
 

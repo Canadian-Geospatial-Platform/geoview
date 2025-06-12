@@ -20,7 +20,7 @@ export abstract class AppBarPlugin extends AbstractPlugin {
    * Overridable function to create app bar button props content
    * @returns IconButtonPropsExtend The app bar button props content
    */
-  onCreateButtonProps(): IconButtonPropsExtend {
+  protected onCreateButtonProps(): IconButtonPropsExtend {
     // Override this to create the button props..
 
     // Fetch cgpv
@@ -41,7 +41,7 @@ export abstract class AppBarPlugin extends AbstractPlugin {
    * Overridable function to create app bar props content
    * @returns TypePanelProps The app bar props content
    */
-  onCreateContentProps(): TypePanelProps {
+  protected onCreateContentProps(): TypePanelProps {
     // Override this to create the panel props..
 
     // Panel props
@@ -57,7 +57,7 @@ export abstract class AppBarPlugin extends AbstractPlugin {
    * Overridable function to create app bar actual content
    * @returns JSX.Element The app bar actual content
    */
-  onCreateContent(): JSX.Element {
+  protected onCreateContent(): JSX.Element {
     // Override this to create panel..
 
     // Return dummy content
@@ -67,7 +67,7 @@ export abstract class AppBarPlugin extends AbstractPlugin {
   /**
    * Called when an app bar plugin is being added
    */
-  onAdd(): void {
+  protected onAdd(): void {
     // Create button props
     this.buttonProps = this.onCreateButtonProps();
 
@@ -84,9 +84,9 @@ export abstract class AppBarPlugin extends AbstractPlugin {
   /**
    * Called when an app bar plugin is being removed
    */
-  onRemove(): void {
+  protected onRemove(): void {
     // If cgpv exists
-    if (this.api && this.buttonPanel) {
+    if (this.buttonPanel) {
       // Remove the app bar panel
       this.mapViewer().appBarApi.removeAppbarPanel(this.buttonPanel.buttonPanelId, this.buttonProps!.id!);
     }

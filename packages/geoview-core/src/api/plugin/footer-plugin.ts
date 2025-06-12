@@ -16,7 +16,7 @@ export abstract class FooterPlugin extends AbstractPlugin {
    * Overridable function to create footer props content
    * @returns TypeTabs The footer props content
    */
-  onCreateContentProps(): TypeTabs {
+  protected onCreateContentProps(): TypeTabs {
     // Override this to create the footer props..
 
     // Return dummy content
@@ -31,7 +31,7 @@ export abstract class FooterPlugin extends AbstractPlugin {
   /**
    * Called when a footer plugin is being added
    */
-  onAdd(): void {
+  protected onAdd(): void {
     // Log
     // No need to log, parent class does it well already via added() function.
 
@@ -48,20 +48,28 @@ export abstract class FooterPlugin extends AbstractPlugin {
   /**
    * Called when a footer plugin is being removed
    */
-  onRemove(): void {
+  protected onRemove(): void {
     // Log
-    // No need to log, parent class does it well already via removed() function.
+    // No need to log, parent class does it well already via remove() function.
 
     // Remove the footer tab
     if (this.value && this.mapViewer()?.footerBarApi) this.mapViewer().footerBarApi.removeTab(this.footerProps!.id);
   }
 
   /**
-   * Called when a footer plugin has been selected in the tabs
+   * Selects the Plugin.
+   */
+  select(): void {
+    // Redirect
+    this.onSelect();
+  }
+
+  /**
+   * Overridable function called when the Plugin is being selected.
    */
   // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  onSelected(): void {
+  protected onSelect(): void {
     // Log
     logger.logTraceCore('FOOTER-PLUGIN - onSelected');
 
