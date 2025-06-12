@@ -78,7 +78,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    */
   protected override onPropagateToStore(resultSetEntry: TypeFeatureInfoResultSetEntry, type: PropagationType): void {
     // Redirect - Add layer to the list after registration
-    this.#propagateToStore(resultSetEntry, type === 'layer-registration' ? 'name' : 'click');
+    this.#propagateToStore(resultSetEntry, type !== 'layerStatus' ? 'name' : 'click');
   }
 
   /**
