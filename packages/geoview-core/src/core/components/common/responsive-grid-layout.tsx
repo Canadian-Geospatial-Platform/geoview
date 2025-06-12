@@ -1,4 +1,4 @@
-import React, { useState, ReactNode, useCallback, forwardRef, useImperativeHandle, Ref, useEffect, useRef, useMemo } from 'react';
+import { useState, ReactNode, useCallback, forwardRef, useImperativeHandle, Ref, useEffect, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SxProps, useTheme } from '@mui/material/styles';
 import Markdown from 'markdown-to-jsx';
@@ -69,10 +69,7 @@ const ResponsiveGridLayout = forwardRef(
     const [isFullScreen, setIsFullScreen] = useState(false);
 
     // sxClasses
-    const sxClasses = useMemo(
-      () => getSxClasses(theme, containerType!),
-      [theme, containerType]
-    );
+    const sxClasses = useMemo(() => getSxClasses(theme, containerType!), [theme, containerType]);
 
     // Expose imperative methods to parent component
     useImperativeHandle(ref, function handleRef() {
@@ -360,11 +357,13 @@ const ResponsiveGridLayout = forwardRef(
             </Box>
           </ResponsiveGrid.Right>
         </ResponsiveGrid.Root>
-        <ResponsiveGrid.Root className="responsive-layout-main-row"
+        <ResponsiveGrid.Root
+          className="responsive-layout-main-row"
           sx={{
             flexGrow: 1,
             overflow: 'hidden',
-          }}>
+          }}
+        >
           <ResponsiveGrid.Left
             isEnlarged={isEnlarged}
             isRightPanelVisible={isRightPanelVisible}

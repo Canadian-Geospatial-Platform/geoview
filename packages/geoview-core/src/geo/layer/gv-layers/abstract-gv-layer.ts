@@ -900,17 +900,13 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     const eventAny = event as any;
 
     if ('image' in eventAny) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return eventAny.image;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ('tile' in eventAny) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-underscore-dangle
       return eventAny.tile;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ('target' in eventAny && 'dispatching_' in eventAny.target) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-underscore-dangle
       return eventAny.target.dispatching_;
