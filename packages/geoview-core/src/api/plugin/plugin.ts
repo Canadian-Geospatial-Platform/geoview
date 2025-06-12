@@ -1,14 +1,10 @@
-import React from 'react'; // TODO: CHECK - This is the actual react instance to be shared to the plugins, hopefully? maybe remove it or force cgpv's below
-import { createRoot } from 'react-dom/client';
 import i18next from 'i18next';
-import * as translate from 'react-i18next';
-import { useTheme } from '@mui/material/styles';
 import Ajv from 'ajv';
 
 import { whenThisThen, getScriptAndAssetURL } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { api } from '@/app';
-import { TypeJsonObject, TypeJsonValue } from '@/api/config/types/config-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 import { logger } from '@/core/utils/logger';
 
 import { AbstractPlugin } from './abstract-plugin';
@@ -33,7 +29,7 @@ export abstract class Plugin {
    */
   // ? unknown type cannot be use, need to escape. Creates problems in footer-bar.tsx
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  static loadScript(pluginId: string): Promise<any> {
+  static loadScript(pluginId: string): Promise<typeof AbstractPlugin> {
     return new Promise((resolve, reject) => {
       const existingScript = document.querySelector(`script#${pluginId}`);
 
@@ -72,11 +68,11 @@ export abstract class Plugin {
    * @param {Function} resolve  - The resolve function to callback on.
    * @param {Function} reject - The reject function to callback on in case of failure.
    */
-  static #resolveWhenReady(pluginId: string, resolve: (plugin: unknown) => void, reject: (reason: Error) => void): void {
+  static #resolveWhenReady(pluginId: string, resolve: (plugin: typeof AbstractPlugin) => void, reject: (reason: Error) => void): void {
     whenThisThen(() => window.geoviewPlugins?.[pluginId])
       .then(() => {
         // Resolve
-        resolve(window.geoviewPlugins[pluginId]);
+        resolve(window.geoviewPlugins![pluginId]);
       })
       .catch((error: unknown) => {
         // Reject
@@ -92,12 +88,7 @@ export abstract class Plugin {
    * @param {Class} constructor the plugin class (React Component)
    * @param {Object} props the plugin properties
    */
-  static async addPlugin(
-    pluginId: string,
-    mapId: string,
-    constructor?: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue),
-    props?: TypeJsonObject
-  ): Promise<void> {
+  static async addPlugin(pluginId: string, mapId: string, constructor: typeof AbstractPlugin, props?: TypeJsonObject): Promise<void> {
     const plugins = await MapEventProcessor.getMapViewerPlugins(mapId);
     if (!plugins[pluginId]) {
       // TODO: Refactor - Get rid of the TypePluginStructure and use AbstractPlugin directly, taking advantage of the the mother class abstract methods.
@@ -195,10 +186,10 @@ export abstract class Plugin {
         Object.defineProperties(plugin, {
           pluginId: { value: pluginId },
           api: { value: api },
-          react: { value: React }, // TODO: CHECK Try to send cgpv.react here on next build host
-          createRoot: { value: createRoot }, // TODO: CHECK Same comment
-          translate: { value: translate },
-          useTheme: { value: useTheme },
+          react: { value: window.cgpv.react },
+          createRoot: { value: window.cgpv.createRoot },
+          translate: { value: window.cgpv.translate },
+          useTheme: { value: window.cgpv.ui.useTheme },
           configObj: { value: pluginConfigObj },
         });
 

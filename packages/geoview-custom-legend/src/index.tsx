@@ -1,4 +1,4 @@
-import { TypeJsonObject, toJsonObject, AnySchemaObject, Cast } from 'geoview-core/src/api/config/types/config-types';
+import { TypeJsonObject, toJsonObject, AnySchemaObject } from 'geoview-core/src/api/config/types/config-types';
 import { AppBarPlugin } from 'geoview-core/src/api/plugin/appbar-plugin';
 import { LegendIcon } from 'geoview-core/src/ui/icons';
 import { IconButtonPropsExtend } from 'geoview-core/src/ui/icon-button/icon-button';
@@ -80,4 +80,4 @@ export default CustomLegendPanelPlugin;
 
 // Keep a reference to the Custom Legend Panel Plugin as part of the geoviewPlugins property stored in the window object
 window.geoviewPlugins = window.geoviewPlugins || {};
-window.geoviewPlugins['custom-legend'] = Cast<CustomLegendPanelPlugin>(CustomLegendPanelPlugin);
+window.geoviewPlugins['custom-legend'] = CustomLegendPanelPlugin;

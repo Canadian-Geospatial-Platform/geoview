@@ -19,8 +19,7 @@ import {
 import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { FooterBarApi, FooterTabCreatedEvent, FooterTabRemovedEvent } from '@/core/components';
 
-import { toJsonObject, TypeJsonObject, TypeJsonValue } from '@/api/config/types/config-types';
-import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
+import { toJsonObject } from '@/api/config/types/config-types';
 import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 
 // default tabs icon and class
@@ -343,11 +342,11 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     if (footerBarTabsConfig && footerBarTabsConfig.tabs.core.includes('time-slider')) {
       // create a new tab by loading the time-slider plugin
       Plugin.loadScript('time-slider')
-        .then((constructor: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue)) => {
+        .then((typePlugin) => {
           Plugin.addPlugin(
             'time-slider',
             mapId,
-            constructor,
+            typePlugin,
             toJsonObject({
               mapId,
             })
@@ -365,11 +364,11 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     if (footerBarTabsConfig && footerBarTabsConfig.tabs.core.includes('geochart')) {
       // create a new tab by loading the geo chart plugin
       Plugin.loadScript('geochart')
-        .then((constructor: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue)) => {
+        .then((typePlugin) => {
           Plugin.addPlugin(
             'geochart',
             mapId,
-            constructor,
+            typePlugin,
             toJsonObject({
               mapId,
             })
