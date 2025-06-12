@@ -13,7 +13,7 @@ export abstract class MapPlugin extends AbstractPlugin {
    * Overridable function to create map plugin actual content
    * @returns JSX.Element The map plugin actual content
    */
-  onCreateContent(): JSX.Element {
+  protected onCreateContent(): JSX.Element {
     // Override this to create panel..
 
     // Return dummy content
@@ -23,7 +23,7 @@ export abstract class MapPlugin extends AbstractPlugin {
   /**
    * Called when a map plugin is being added
    */
-  onAdd(): void {
+  protected onAdd(): void {
     // create the swiper container and insert it after top link
     const el = document.createElement('div');
     el.setAttribute('id', `${this.pluginProps.mapId}-${this.pluginId}`);
@@ -39,14 +39,15 @@ export abstract class MapPlugin extends AbstractPlugin {
   /**
    * Called when a map plugin is being removed
    */
-  onRemove(): void {
+  protected onRemove(): void {
     // Unmount the Map Plugin
     this.reactRoot?.unmount();
+    this.reactRoot = undefined;
 
-    // If cgpv exists
-    if (this.api) {
-      // TODO: Enable swiper removal, make it work with React 18+ new root and unmount
-      // cgpv.reactDOM.unmountComponentAtNode(document.getElementById(`${mapId}-swiper`)! as Element);
-    }
+    // // If cgpv exists
+    // if (this.api) {
+    //   // TODO: Enable swiper removal, make it work with React 18+ new root and unmount
+    //   // cgpv.reactDOM.unmountComponentAtNode(document.getElementById(`${mapId}-swiper`)! as Element);
+    // }
   }
 }

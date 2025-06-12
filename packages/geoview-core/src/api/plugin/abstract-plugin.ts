@@ -5,7 +5,6 @@ import type { useTheme } from '@mui/material/styles';
 
 import { API } from '@/api/api';
 import { MapViewer } from '@/geo/map/map-viewer';
-import { TypeWindow } from '@/core/types/global-types';
 import { TypeJsonObject, AnySchemaObject } from '@/api/config/types/config-types';
 import { logger } from '@/core/utils/logger';
 
@@ -27,41 +26,60 @@ export abstract class AbstractPlugin {
   // Plugin properties
   pluginProps: TypePluginOptions;
 
-  // GV NOTE START ****************************************************************************************************
-  // The following attributes are attached, after instantiation, by the plugin loader addPlugin function ref 'Object.defineProperties'(!)
-  // In this refactoring at the time of coding, I'm, simply, explicitely, writing them here so it's clear that this AbstractPlugin class has (and expects) those attributes.
-  // See plugin.addPlugin function for more details.
+  // Plugin config object.
+  configObj: TypeJsonObject = {};
 
-  // Plugin config object. The '!' is used, because it's not set by the constructor, it's set by the note above.
-  configObj!: TypeJsonObject;
+  // Plugin api object.
+  api: API;
 
-  // Plugin api object. The '!' is used, because it's not set by the constructor, it's set by the note above.
-  api!: API;
+  // Plugin react object.
+  react: typeof React;
 
-  // Plugin react object. The '!' is used, because it's not set by the constructor, it's set by the note above.
-  react!: typeof React;
-
-  // Plugin createRoot object. The '!' is used, because it's not set by the constructor, it's set by the note above.
-  createRoot!: typeof createRoot;
-
-  // Plugin translate object
-  // TODO: Refactor - Plugin - Maybe translate is not necessary here.. This might get removed eventually. Don't forget to remove in plugin class too in 'Object.defineProperties'(!)
-  translate?: typeof i18next;
+  // Plugin createRoot object.
+  createRoot: typeof createRoot;
 
   // Plugin useTheme object
-  // TODO: Refactor - Plugin - Maybe useTheme is not necessary here.. This might get removed eventually. Don't forget to remove in plugin class too in 'Object.defineProperties'(!)
-  useTheme?: typeof useTheme;
+  useTheme: typeof useTheme;
 
-  // GV NOTE END *****************************************************************************************************
+  // Plugin translate object
+  translate?: typeof i18next;
 
   /**
-   * Constructs a Plugin
-   * @param pluginId string The plugin id
-   * @param props TypePluginOptions The plugin configuration options
+   * Creates an instance of the plugin.
+   * @param {string} pluginId - Unique identifier for the plugin instance.
+   * @param {TypePluginOptions} props - The plugin options and properties.
+   * @param {TypeJsonObject} config - Configuration object for the plugin.
+   * @param {API} api - API object providing access to core functionality.
+   * @param {typeof React} react - React instance to be used by the plugin.
+   * @param {typeof createRoot} createRoot_ - React 18 createRoot function for rendering.
+   * @param {typeof useTheme} useTheme_ - Hook to access theming utilities.
+   * @param {typeof i18next?} i18next_ - Optional, i18next instance for translations.
    */
-  constructor(pluginId: string, props: TypePluginOptions) {
+  // GV Do not edit the constructor params without editing the plugin.ts dynamic constructor call looking like 'new (constructor as any)'
+  constructor(
+    pluginId: string,
+    props: TypePluginOptions,
+    api: API,
+    react: typeof React,
+    createRoot_: typeof createRoot,
+    useTheme_: typeof useTheme,
+    i18next_?: typeof i18next
+  ) {
     this.pluginId = pluginId;
     this.pluginProps = props;
+    this.api = api;
+    this.react = react;
+    this.createRoot = createRoot_;
+    this.translate = i18next_;
+    this.useTheme = useTheme_;
+  }
+
+  /**
+   * Sets the config (which happens post creation)
+   * @param {TypeJsonObject} config - The config
+   */
+  setConfig(config: TypeJsonObject): void {
+    this.configObj = config;
   }
 
   /**
@@ -91,68 +109,65 @@ export abstract class AbstractPlugin {
   abstract defaultConfig(): TypeJsonObject;
 
   /**
+   * Overridable function to get the translations object for the Plugin.
+   * @returns {TypeJsonObject} The translations object
+   */
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  defaultTranslations(): TypeJsonObject {
+    return {}; // Default empty
+  }
+
+  /**
    * Override this to do the actual adding
    */
-  abstract onAdd(): void;
+  protected abstract onAdd(): void;
 
   /**
    * Optionally override this to do something when done adding
    */
-  onAdded?(): void;
+  protected onAdded?(): void;
 
   /**
    * Override this to do the actual removal
    */
-  abstract onRemove(): void;
+  protected abstract onRemove(): void;
 
   /**
    * Optionally override this to do something when done being removed
    */
-  onRemoved?(): void;
+  protected onRemoved?(): void;
 
   /**
    * This function is called when the plugin is added, used for finalizing initialization. See plugin.addPlugin for details.
    */
-  added(): void {
-    // Fetch cgpv
-    const { cgpv } = window as TypeWindow;
+  add(): void {
+    // Log
+    logger.logInfo(`Plugin ${this.pluginId} loaded, adding it on map ${this.pluginProps.mapId}`);
 
-    // If cgpv
-    if (cgpv) {
-      // Log
-      logger.logInfo(`Plugin ${this.pluginId} loaded, adding it on map ${this.pluginProps.mapId}`);
+    // Add
+    this.onAdd();
 
-      // Add
-      this.onAdd();
+    // Added
+    this.onAdded?.();
 
-      // Added
-      this.onAdded?.();
-
-      // Log
-      logger.logInfo(`Plugin ${this.pluginId} loaded, and added to map ${this.pluginProps.mapId}`);
-    }
+    // Log
+    logger.logInfo(`Plugin ${this.pluginId} loaded, and added to map ${this.pluginProps.mapId}`);
   }
 
   /**
    * This function is called when the plugin is removed, used for clean up. See plugin.addPlugin for details.
    */
-  removed(): void {
-    // Fetch cgpv
-    const { cgpv } = window as TypeWindow;
+  remove(): void {
+    // Log
+    logger.logInfo(`Plugin ${this.pluginId} being removed from map ${this.pluginProps.mapId}`);
 
-    // If cgpv
-    if (cgpv) {
-      // Log
-      logger.logInfo(`Plugin ${this.pluginId} being removed from map ${this.pluginProps.mapId}`);
+    // Remove
+    this.onRemove();
 
-      // Remove
-      this.onRemove();
+    // Removed
+    this.onRemoved?.();
 
-      // Removed
-      this.onRemoved?.();
-
-      // Log
-      logger.logInfo(`Plugin ${this.pluginId} removed from map ${this.pluginProps.mapId}`);
-    }
+    // Log
+    logger.logInfo(`Plugin ${this.pluginId} removed from map ${this.pluginProps.mapId}`);
   }
 }

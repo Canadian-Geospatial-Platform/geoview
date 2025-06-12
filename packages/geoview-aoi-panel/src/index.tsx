@@ -30,20 +30,23 @@ class AoiPanelPlugin extends AppBarPlugin {
   }
 
   /**
-   * translations object to inject to the viewer translations
+   * Overrides the default translations for the Plugin.
+   * @returns {unknown} - The translations object for the particular Plugin.
    */
-  translations = toJsonObject({
-    en: {
-      AoiPanel: {
-        title: 'Area of Interest',
+  override defaultTranslations(): unknown {
+    return {
+      en: {
+        AoiPanel: {
+          title: 'Area of Interest',
+        },
       },
-    },
-    fr: {
-      AoiPanel: {
-        title: "Région d'intérêt",
+      fr: {
+        AoiPanel: {
+          title: "Région d'intérêt",
+        },
       },
-    },
-  });
+    };
+  }
 
   override onCreateButtonProps(): IconButtonPropsExtend {
     // Button props

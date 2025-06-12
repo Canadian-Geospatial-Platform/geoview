@@ -30,20 +30,23 @@ export class GeoChartAppBarPlugin extends AppBarPlugin {
   }
 
   /**
-   * Translations object to inject to the viewer translations
+   * Overrides the default translations for the Plugin.
+   * @returns {TypeJsonObject} - The translations object for the particular Plugin.
    */
-  translations = toJsonObject({
-    en: {
-      chartPanel: {
-        title: 'Chart',
+  override defaultTranslations(): TypeJsonObject {
+    return {
+      en: {
+        chartPanel: {
+          title: 'Chart',
+        },
       },
-    },
-    fr: {
-      chartPanel: {
-        title: 'Graphique',
+      fr: {
+        chartPanel: {
+          title: 'Graphique',
+        },
       },
-    },
-  });
+    } as unknown as TypeJsonObject;
+  }
 
   override onCreateButtonProps(): IconButtonPropsExtend {
     // Button props

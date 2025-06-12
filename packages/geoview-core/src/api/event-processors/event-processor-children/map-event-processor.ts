@@ -31,7 +31,7 @@ import {
 import { api } from '@/app';
 import { LayerApi } from '@/geo/layer/layer';
 import { MapViewer, TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer';
-import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
+import { PluginsContainer } from '@/api/plugin/plugin-types';
 import { Projection } from '@/geo/utils/projection';
 import { isPointInExtent, isExtentLonLat } from '@/geo/utils/utilities';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
@@ -198,9 +198,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * Shortcut to get the Map Viewer plugins instance for a given map id
    * This is use to reduce the use of api.getMapViewer(mapId).plugins and be more explicit
    * @param {string} mapId - map Id
-   * @returns {TypeRecordOfPlugin} The map plugins record
+   * @returns {PluginsContainer} The map plugins container
    */
-  static async getMapViewerPlugins(mapId: string): Promise<TypeRecordOfPlugin> {
+  static async getMapViewerPlugins(mapId: string): Promise<PluginsContainer> {
     // TODO: Check - Remove the try/catch here to force explicit case-by-case handling instead of via shared function.
     try {
       // Check if the plugins exist

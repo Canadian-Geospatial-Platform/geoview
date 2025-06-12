@@ -1,4 +1,4 @@
-import { TypeJsonObject, toJsonObject, Cast, AnySchemaObject } from 'geoview-core/src/api/config/types/config-types';
+import { TypeJsonObject, toJsonObject, AnySchemaObject } from 'geoview-core/src/api/config/types/config-types';
 import { MapPlugin } from 'geoview-core/src/api/plugin/map-plugin';
 import { SwiperEventProcessor } from 'geoview-core/src/api/event-processors/event-processor-children/swiper-event-processor';
 import { LayerNotFoundError } from 'geoview-core/src/core/exceptions/layer-exceptions';
@@ -31,32 +31,35 @@ class SwiperPlugin extends MapPlugin {
   }
 
   /**
-   * Translations object to inject to the viewer translations
+   * Overrides the default translations for the Plugin.
+   * @returns {TypeJsonObject} - The translations object for the particular Plugin.
    */
-  translations = toJsonObject({
-    en: {
-      swiper: {
-        tooltip: 'Drag to see underlying layer',
-        menu: 'Swiper',
+  override defaultTranslations(): TypeJsonObject {
+    return {
+      en: {
+        swiper: {
+          tooltip: 'Drag to see underlying layer',
+          menu: 'Swiper',
+        },
       },
-    },
-    fr: {
-      swiper: {
-        tooltip: 'Faites glisser pour voir les couches sous-jacentes',
-        menu: 'Balayage',
+      fr: {
+        swiper: {
+          tooltip: 'Faites glisser pour voir les couches sous-jacentes',
+          menu: 'Balayage',
+        },
       },
-    },
-  });
+    } as unknown as TypeJsonObject;
+  }
 
   /**
    * Overrides the addition of the Swiper Map Plugin to make sure to set the layer paths from the config into the store.
    */
   override onAdd(): void {
-    // Initialize the store with swiper provided configuration
-    SwiperEventProcessor.setLayerPaths(this.pluginProps.mapId, this.configObj.layers);
-
     // Call parent
     super.onAdd();
+
+    // Initialize the store with swiper provided configuration
+    SwiperEventProcessor.setLayerPaths(this.pluginProps.mapId, this.configObj.layers);
   }
 
   /**
@@ -107,4 +110,4 @@ export default SwiperPlugin;
 
 // Keep a reference to the Swiper Plugin as part of the geoviewPlugins property stored in the window object
 window.geoviewPlugins = window.geoviewPlugins || {};
-window.geoviewPlugins.swiper = Cast<SwiperPlugin>(SwiperPlugin);
+window.geoviewPlugins.swiper = SwiperPlugin;

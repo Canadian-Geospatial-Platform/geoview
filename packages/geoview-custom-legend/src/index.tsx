@@ -30,20 +30,23 @@ class CustomLegendPanelPlugin extends AppBarPlugin {
   }
 
   /**
-   * translations object to inject to the viewer translations
+   * Overrides the default translations for the Plugin.
+   * @returns {TypeJsonObject} - The translations object for the particular Plugin.
    */
-  translations = toJsonObject({
-    en: {
-      CustomLegend: {
-        title: 'Custom Legend',
+  override defaultTranslations(): TypeJsonObject {
+    return {
+      en: {
+        CustomLegend: {
+          title: 'Custom Legend',
+        },
       },
-    },
-    fr: {
-      CustomLegend: {
-        title: 'Légende personnalisée',
+      fr: {
+        CustomLegend: {
+          title: 'Légende personnalisée',
+        },
       },
-    },
-  });
+    } as unknown as TypeJsonObject;
+  }
 
   override onCreateButtonProps(): IconButtonPropsExtend {
     // Button props

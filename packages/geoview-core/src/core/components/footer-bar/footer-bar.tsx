@@ -32,7 +32,7 @@ import { Datapanel } from '@/core/components/data-table/data-panel';
 import { logger } from '@/core/utils/logger';
 import { Guide } from '@/core/components/guide/guide';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
+import { FooterPlugin } from '@/api/plugin/footer-plugin';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { isElementInViewport } from '@/core/utils/utilities';
 
@@ -291,13 +291,13 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     // If clicked on a tab with a plugin
     MapEventProcessor.getMapViewerPlugins(mapId)
       .then((plugins) => {
-        if (plugins[selectedTab as keyof TypeRecordOfPlugin]) {
+        if (plugins[selectedTab]) {
           // Get the plugin
           const theSelectedPlugin = plugins[selectedTab];
 
-          // A bit hacky, but not much other choice for now...
-          if (typeof theSelectedPlugin.onSelected === 'function') {
-            theSelectedPlugin.onSelected();
+          // If the Plugin is a FooterPlugin
+          if (theSelectedPlugin instanceof FooterPlugin) {
+            theSelectedPlugin.select();
           }
         }
       })
