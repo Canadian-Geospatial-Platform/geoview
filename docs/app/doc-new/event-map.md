@@ -3,6 +3,7 @@
 Below is an alphabetical list of all map viewer events available in GeoView. These events can be used to respond to various map interactions and state changes.
 
 ## Best Practices
+
 - Register events after initialization: Always register your event handlers inside the onMapInit or onMapReady callbacks.
 - Error handling: Include error handling in your event callbacks to prevent uncaught exceptions.
 - Performance: Be mindful of performance when handling events that fire frequently (like onMapMoveEnd or onMapZoomEnd).
@@ -10,7 +11,7 @@ Below is an alphabetical list of all map viewer events available in GeoView. The
 
 ## How to Use Map Viewer Events
 
-```ts
+```typescript
 // After initializing the map with cgpv.init()
 cgpv.onMapInit((mapViewer) => {
   // Register event handlers on the map viewer instance
@@ -19,13 +20,15 @@ cgpv.onMapInit((mapViewer) => {
   });
 });
 ```
+
 ## Event Quick Links
+
 - [onBasemapChanged](#onbasemapchanged)
 - [onCrosshairMoved](#oncrosshairmoved)
 - [onFeatureHighlight](#onfeaturehighlight)
 - [onFeatureSelect](#onfeatureselect)
 - [onFeatureUnhighlight](#onfeatureunhighlight)
-- [onFeatureUnselect](#onfeatureunselect)
+- [onFeatureUnselect](#onfeatureunselect)F
 - [onKeyboardNavigationActivated](#onkeyboardnavigationactivated)
 - [onMapClick](#onmapclick)
 - [onMapLanguageChanged](#onmaplanguagechanged)
@@ -45,7 +48,8 @@ cgpv.onMapInit((mapViewer) => {
 <a id="onbasemapchanged"></a>
 
 #### onBasemapChanged
-```ts
+
+```typescript
 /**
  * Triggered when the map's basemap is changed.
  *
@@ -64,7 +68,8 @@ mapViewer.onBasemapChanged((sender, payload) => {
 <a id="oncrosshairmoved"></a>
 
 #### onCrosshairMoved
-```ts
+
+```typescript
 /**
  * Triggered when the map's crosshair is moved (keyboard navigation).
  *
@@ -81,7 +86,8 @@ mapViewer.onCrosshairMoved((sender, payload) => {
 <a id="onfeaturehighlight"></a>
 
 #### onFeatureHighlight
-```ts
+
+```typescript
 /**
  * Triggered when a feature is highlighted on the map.
  *
@@ -99,7 +105,8 @@ mapViewer.onFeatureHighlight((sender, payload) => {
 <a id="onfeatureselect"></a>
 
 #### onFeatureSelect
-```ts
+
+```typescript
 /**
  * Triggered when a feature is selected on the map.
  *
@@ -118,7 +125,8 @@ mapViewer.onFeatureSelect((sender, payload) => {
 <a id="onfeatureunhighlight"></a>
 
 #### onFeatureUnhighlight
-```ts
+
+```typescript
 /**
  * Triggered when a feature is no longer highlighted.
  *
@@ -135,7 +143,8 @@ mapViewer.onFeatureUnhighlight((sender, payload) => {
 <a id="onfeatureunselect"></a>
 
 #### onFeatureUnselect
-```ts
+
+```typescript
 /**
  * Triggered when a feature is unselected.
  *
@@ -152,7 +161,8 @@ mapViewer.onFeatureUnselect((sender, payload) => {
 <a id="onkeyboardnavigationactivated"></a>
 
 #### onKeyboardNavigationActivated
-```ts
+
+```typescript
 /**
  * Triggered when keyboard navigation is activated or deactivated.
  *
@@ -167,8 +177,9 @@ mapViewer.onKeyboardNavigationActivated((sender, payload) => {
 
 <a id="onmapclick"></a>
 
-####  onMapClick
-```ts
+#### onMapClick
+
+```typescript
 /**
  * Triggered when the map is clicked.
  *
@@ -186,7 +197,8 @@ mapViewer.onMapClick((sender, payload) => {
 <a id="onmaplanguagechanged"></a>
 
 #### onMapLanguageChanged
-```ts
+
+```typescript
 /**
  * Triggered when the map's display language is changed.
  *
@@ -203,7 +215,8 @@ mapViewer.onMapLanguageChanged((sender, payload) => {
 <a id="onmapmoveend"></a>
 
 #### onMapMoveEnd
-```ts
+
+```typescript
 /**
  * Triggered when the map stops moving (pan/drag).
  *
@@ -220,7 +233,8 @@ mapViewer.onMapMoveEnd((sender, payload) => {
 <a id="onmapmovestart"></a>
 
 #### onMapMoveStart
-```ts
+
+```typescript
 /**
  * Triggered when the map starts moving.
  *
@@ -237,7 +251,8 @@ mapViewer.onMapMoveStart((sender, payload) => {
 <a id="onmapprojectionchanged"></a>
 
 #### onMapProjectionChanged
-```ts
+
+```typescript
 /**
  * Triggered when the map's projection is changed.
  *
@@ -254,7 +269,8 @@ mapViewer.onMapProjectionChanged((sender, payload) => {
 <a id="onmapresize"></a>
 
 #### onMapResize
-```ts
+
+```typescript
 /**
  * Triggered when the map is resized.
  *
@@ -271,7 +287,8 @@ mapViewer.onMapResize((sender, payload) => {
 <a id="onmaprotationchanged"></a>
 
 #### onMapRotationChanged
-```ts
+
+```typescript
 /**
  * Triggered when the map's rotation is changed.
  *
@@ -288,7 +305,8 @@ mapViewer.onMapRotationChanged((sender, payload) => {
 <a id="onmapthemechanged"></a>
 
 #### onMapThemeChanged
-```ts
+
+```typescript
 /**
  * Triggered when the map's display theme is changed.
  *
@@ -305,7 +323,8 @@ mapViewer.onMapThemeChanged((sender, payload) => {
 <a id="onmapzoomend"></a>
 
 #### onMapZoomEnd
-```ts
+
+```typescript
 /**
  * Triggered when a zoom operation ends.
  *
@@ -323,7 +342,8 @@ mapViewer.onMapZoomEnd((sender, payload) => {
 <a id="onmapzoomstart"></a>
 
 #### onMapZoomStart
-```ts
+
+```typescript
 /**
  * Triggered when a zoom operation starts.
  *
@@ -340,7 +360,8 @@ mapViewer.onMapZoomStart((sender, payload) => {
 <a id="onoverviewmaptoggle"></a>
 
 #### onOverviewMapToggle
-```ts
+
+```typescript
 /**
  * Triggered when the overview map is toggled.
  *
@@ -356,7 +377,8 @@ mapViewer.onOverviewMapToggle((sender, payload) => {
 <a id="onpanelcontentchanged"></a>
 
 #### onPanelContentChanged
-```ts
+
+```typescript
 /**
  * Triggered when the content of a panel changes.
  *
@@ -373,7 +395,8 @@ mapViewer.onPanelContentChanged((sender, payload) => {
 <a id="onpanelvisibilitychanged"></a>
 
 #### onPanelVisibilityChanged
-```ts
+
+```typescript
 /**
  * Triggered when a panel's visibility changes.
  *
@@ -383,14 +406,17 @@ mapViewer.onPanelContentChanged((sender, payload) => {
  * @param {boolean} payload.visible - Whether the panel is visible
  */
 mapViewer.onPanelVisibilityChanged((sender, payload) => {
-  console.log(`Panel ${payload.panelId} visibility changed to: ${payload.visible}`);
+  console.log(
+    `Panel ${payload.panelId} visibility changed to: ${payload.visible}`
+  );
 });
 ```
 
 <a id="onscalechanged"></a>
 
 #### onScaleChanged
-```ts
+
+```typescript
 /**
  * Triggered when the map's scale changes.
  *
