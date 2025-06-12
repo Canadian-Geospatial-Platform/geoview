@@ -71,7 +71,6 @@ import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/laye
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { formatError } from '@/core/exceptions/core-exceptions';
-import { SwiperEventProcessor } from '@/api/event-processors/event-processor-children/swiper-event-processor';
 import { PluginsContainer } from '@/api/plugin/plugin-types';
 import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 
@@ -1643,16 +1642,6 @@ export class MapViewer {
               })
             )
               .then(() => {
-                // TODO: REDO THIS
-                if (corePackage === 'swiper') {
-                  // Get the config
-                  const config = this.getCorePackageConfig('swiper');
-                  if (config) {
-                    // Initialize the store with swiper provided configuration
-                    SwiperEventProcessor.setLayerPaths(this.mapId, config.layers as string[]);
-                  }
-                }
-
                 // Plugin added
                 resolve();
               })

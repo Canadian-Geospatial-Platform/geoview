@@ -192,6 +192,7 @@ function ModalUI(props: DialogPropsExtend): JSX.Element {
 
   // Hooks
   // TODO: remove coupling with translation, pass as props
+  // TODO: refactor - language values should be pass as props
   const { t } = useTranslation();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
