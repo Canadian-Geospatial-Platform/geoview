@@ -1,4 +1,4 @@
-import { Cast, TypeJsonObject, toJsonObject, AnySchemaObject } from 'geoview-core/src/api/config/types/config-types';
+import { TypeJsonObject, toJsonObject, AnySchemaObject } from 'geoview-core/src/api/config/types/config-types';
 import { AppBarPlugin } from 'geoview-core/src/api/plugin/appbar-plugin';
 import { AoiIcon } from 'geoview-core/src/ui/icons';
 import { IconButtonPropsExtend } from 'geoview-core/src/ui/icon-button/icon-button';
@@ -80,4 +80,4 @@ export default AoiPanelPlugin;
 
 // Keep a reference to the AOI Panel Plugin as part of the geoviewPlugins property stored in the window object
 window.geoviewPlugins = window.geoviewPlugins || {};
-window.geoviewPlugins['aoi-panel'] = Cast<AoiPanelPlugin>(AoiPanelPlugin);
+window.geoviewPlugins['aoi-panel'] = AoiPanelPlugin;

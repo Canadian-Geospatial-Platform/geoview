@@ -37,8 +37,7 @@ import Notifications from '@/core/components/notifications/notifications';
 import Version from './buttons/version';
 import { getSxClasses } from './app-bar-style';
 import { enforceArrayOrder, helpClosePanelById, helpOpenPanelById } from './app-bar-helper';
-import { TypeJsonObject, TypeJsonValue, toJsonObject } from '@/api/config/types/config-types';
-import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
+import { toJsonObject } from '@/api/config/types/config-types';
 import { CV_DEFAULT_APPBAR_CORE, CV_DEFAULT_APPBAR_TABS_ORDER } from '@/api/config/types/config-constants';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { TypeValidAppBarCoreProps } from '@/api/config/types/map-schema-types';
@@ -268,13 +267,12 @@ export function AppBar(props: AppBarProps): JSX.Element {
     const processPlugin = (pluginName: TypeValidAppBarCoreProps): void => {
       // Packages tab
       if (appBarConfig && appBarConfig.tabs.core.includes(pluginName)) {
-        // create a new tab by loading the plugin
         Plugin.loadScript(pluginName)
-          .then((constructor: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue)) => {
+          .then((typePlugin) => {
             Plugin.addPlugin(
               pluginName,
               mapId,
-              constructor,
+              typePlugin,
               toJsonObject({
                 mapId,
               })

@@ -1631,12 +1631,12 @@ export class MapViewer {
       // Create promise
       const promise = new Promise<void>((resolve, reject) => {
         Plugin.loadScript(corePackage)
-          .then((constructor) => {
+          .then((typePlugin) => {
             // add the plugin by passing in the loaded constructor from the script tag
             Plugin.addPlugin(
               corePackage,
               this.mapId,
-              constructor,
+              typePlugin,
               toJsonObject({
                 mapId: this.mapId,
                 viewer: this,

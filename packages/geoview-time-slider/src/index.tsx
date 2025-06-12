@@ -1,4 +1,4 @@
-import { TypeJsonObject, toJsonObject, Cast, AnySchemaObject } from 'geoview-core/src/api/config/types/config-types';
+import { TypeJsonObject, toJsonObject, AnySchemaObject } from 'geoview-core/src/api/config/types/config-types';
 import { TimeDimension, DateMgt } from 'geoview-core/src/core/utils/date-mgt';
 import { TypeTabs } from 'geoview-core/src/ui/tabs/tabs';
 import { AbstractGVLayer } from 'geoview-core/src/geo/layer/gv-layers/abstract-gv-layer';
@@ -237,4 +237,4 @@ export default TimeSliderPlugin;
 
 // Keep a reference to the Time Slider Plugin as part of the geoviewPlugins property stored in the window object
 window.geoviewPlugins = window.geoviewPlugins || {};
-window.geoviewPlugins['time-slider'] = Cast<TimeSliderPlugin>(TimeSliderPlugin);
+window.geoviewPlugins['time-slider'] = TimeSliderPlugin;

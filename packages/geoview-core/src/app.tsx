@@ -1,5 +1,6 @@
-import React from 'react';
-import { Root, createRoot } from 'react-dom/client';
+import React from 'react'; // This is the real React that's exported
+import { Root, createRoot } from 'react-dom/client'; // This is the real React-DOM that's exported
+import * as translate from 'react-i18next'; // This is the real translate that's exported
 
 import { useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
@@ -338,6 +339,7 @@ export const cgpv = {
   api,
   react: React,
   createRoot,
+  translate,
   ui: {
     useTheme,
     useMediaQuery,
