@@ -1,4 +1,4 @@
-import React, { createElement, ReactNode, useState } from 'react';
+import { createElement, ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMapBasemapOptions, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';

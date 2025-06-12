@@ -1,5 +1,5 @@
 // src/store/index.ts
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 import { create, createStore } from 'zustand';
 import { mountStoreDevtool } from 'simple-zustand-devtools';
 
@@ -91,9 +91,6 @@ export const removeGeoviewStore = (id: string): void => {
 };
 
 export const useGeoViewStore = (): GeoviewStoreType => {
-  const toto = React;
-  logger.logDebug(toto);
-
   let mapId = '';
   try {
     // eslint-disable-next-line react-hooks/rules-of-hooks

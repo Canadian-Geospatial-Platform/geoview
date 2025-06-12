@@ -28,7 +28,6 @@ export abstract class Plugin {
    * @param {string} pluginId the package id to load
    */
   // ? unknown type cannot be use, need to escape. Creates problems in footer-bar.tsx
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static loadScript(pluginId: string): Promise<typeof AbstractPlugin> {
     return new Promise((resolve, reject) => {
       const existingScript = document.querySelector(`script#${pluginId}`);

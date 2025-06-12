@@ -1,4 +1,4 @@
-import React, { forwardRef, Ref } from 'react';
+import { forwardRef, Ref } from 'react';
 import { ListItem as MaterialListItem, ListItemProps } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
