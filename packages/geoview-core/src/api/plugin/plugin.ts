@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'; // TODO: CHECK - This is the actual react instance to be shared to the plugins, hopefully? maybe remove it or force cgpv's below
 import { createRoot } from 'react-dom/client';
 import i18next from 'i18next';
 import * as translate from 'react-i18next';
@@ -195,8 +195,8 @@ export abstract class Plugin {
         Object.defineProperties(plugin, {
           pluginId: { value: pluginId },
           api: { value: api },
-          react: { value: React },
-          createRoot: { value: createRoot },
+          react: { value: React }, // TODO: CHECK Try to send cgpv.react here on next build host
+          createRoot: { value: createRoot }, // TODO: CHECK Same comment
           translate: { value: translate },
           useTheme: { value: useTheme },
           configObj: { value: pluginConfigObj },
