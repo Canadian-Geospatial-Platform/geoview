@@ -1,6 +1,11 @@
 import { useStore } from 'zustand';
 import { capitalize } from 'lodash';
-import { TypeMapCorePackages, TypeNavBarProps, TypeValidAppBarCoreProps } from '@/api/config/types/map-schema-types';
+import {
+  TypeMapCorePackages,
+  TypeNavBarProps,
+  TypeValidAppBarCoreProps,
+  TypeValidFooterBarTabsCoreProps,
+} from '@/api/config/types/map-schema-types';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
@@ -24,6 +29,7 @@ export interface IUIState {
   activeTrapGeoView: boolean;
   activeAppBarTab: ActiveAppBarTabType;
   appBarComponents: TypeValidAppBarCoreProps[];
+  footerBarComponents: TypeValidFooterBarTabsCoreProps[];
   corePackagesComponents: TypeMapCorePackages;
   focusItem: FocusItemProps;
   hiddenTabs: string[];
@@ -77,6 +83,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
     focusItem: { activeElementId: false, callbackElementId: false },
     hiddenTabs: ['time-slider', 'geochart'],
     navBarComponents: [],
+    footerBarComponents: [],
     footerPanelResizeValue: 35,
     footerBarIsCollapsed: false,
     selectedFooterLayerListItemId: '',
@@ -96,6 +103,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
             isOpen: geoviewConfig.appBar?.collapsed !== undefined ? !geoviewConfig.appBar.collapsed : true,
             isFocusTrapped: false,
           },
+          footerBarComponents: geoviewConfig.footerBar?.tabs.core || [],
           activeFooterBarTabId: geoviewConfig.footerBar?.selectedTab || '',
           corePackagesComponents: geoviewConfig.corePackages || [],
           navBarComponents: geoviewConfig.navBar || [],
@@ -261,6 +269,8 @@ export const useUIActiveAppBarTab = (): ActiveAppBarTabType => useStore(useGeoVi
 export const useUIActiveTrapGeoView = (): boolean => useStore(useGeoViewStore(), (state) => state.uiState.activeTrapGeoView);
 export const useUIAppbarComponents = (): TypeValidAppBarCoreProps[] =>
   useStore(useGeoViewStore(), (state) => state.uiState.appBarComponents);
+export const useUIFooterBarComponents = (): TypeValidFooterBarTabsCoreProps[] =>
+  useStore(useGeoViewStore(), (state) => state.uiState.footerBarComponents);
 export const useUICorePackagesComponents = (): TypeMapCorePackages =>
   useStore(useGeoViewStore(), (state) => state.uiState.corePackagesComponents);
 export const useUIFooterPanelResizeValue = (): number => useStore(useGeoViewStore(), (state) => state.uiState.footerPanelResizeValue);

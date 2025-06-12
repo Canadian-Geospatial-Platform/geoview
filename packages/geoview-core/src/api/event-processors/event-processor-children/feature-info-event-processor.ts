@@ -180,7 +180,10 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
     if (eventType === 'click') {
       // Show details panel as soon as there is a click on the map
       // If the current tab is not 'details' nor 'geochart', switch to details
-      if (!['details', 'geochart'].includes(UIEventProcessor.getActiveFooterBarTab(mapId))) {
+      if (
+        !['details', 'geochart'].includes(UIEventProcessor.getActiveFooterBarTab(mapId)) &&
+        UIEventProcessor.getFooterBarComponents(mapId).includes('details')
+      ) {
         UIEventProcessor.setActiveFooterBarTab(mapId, 'details');
       }
       // Open details appbar tab when user clicked on map layer.
