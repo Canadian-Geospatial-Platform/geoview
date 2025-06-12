@@ -1,7 +1,7 @@
 /**
  * This component improves Mui's TreeView component to be able to process Layers data.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useState, SyntheticEvent } from 'react';
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
 import _ from 'lodash';
@@ -78,7 +78,7 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
     return _.uniq(result).sort();
   };
 
-  const handleItemSelectionToggle = (event: React.SyntheticEvent, itemId: string, isSelected: boolean): void => {
+  const handleItemSelectionToggle = (event: SyntheticEvent, itemId: string, isSelected: boolean): void => {
     const layerChildren = getLayerChildren(itemId);
     const toAddOrRemove = [itemId, ...layerChildren];
     const splitId = itemId.split('/');
@@ -102,7 +102,7 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
       multiSelect
       checkboxSelection
       selectedItems={selectedItems}
-      onItemSelectionToggle={(event: React.SyntheticEvent, itemId: string, isSelected: boolean) =>
+      onItemSelectionToggle={(event: SyntheticEvent, itemId: string, isSelected: boolean) =>
         handleItemSelectionToggle(event, itemId, isSelected)
       }
     >

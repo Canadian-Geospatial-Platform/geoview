@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useRef, useState, KeyboardEvent } from 'react';
+import { ChangeEvent, useEffect, useRef, useState, KeyboardEvent, DragEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SelectChangeEvent } from '@mui/material';
 import {
@@ -145,10 +145,10 @@ function FileUploadSection({ onFileSelected, onUrlChanged, displayURL, disabledL
   /**
    * Handle file drop events in the dropzone
    *
-   * @param {React.DragEvent<HTMLDivElement>} event - The drag event containing dropped files
+   * @param {DragEvent<HTMLDivElement>} event - The drag event containing dropped files
    * @returns {void}
    */
-  const handleDrop = (event: React.DragEvent<HTMLDivElement>): void => {
+  const handleDrop = (event: DragEvent<HTMLDivElement>): void => {
     event.preventDefault();
     event.stopPropagation();
     setDrag(false);

@@ -1,8 +1,8 @@
-import { Coordinate } from 'ol/coordinate'; // only for typing
-import Overlay from 'ol/Overlay';
-import { Extent } from 'ol/extent'; // only for Typing
-import { FitOptions } from 'ol/View'; // only for typing
-import { Size } from 'ol/size';
+import type { Coordinate } from 'ol/coordinate';
+import type Overlay from 'ol/Overlay';
+import type { Extent } from 'ol/extent';
+import type { FitOptions } from 'ol/View';
+import type { Size } from 'ol/size';
 import { useStore } from 'zustand';
 
 import {
