@@ -44,7 +44,40 @@
     </div>
 
     <div id="mapSection">
-      <div id="Map1" class="geoview-map" data-lang="fr" data-config-url="./configs/OSDP/osdp-empty.json"></div>
+      <div id="Map1" class="geoview-map" data-lang="fr" data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'projection': 3857,
+            'homeView': {
+              'zoomAndCenter': [8, [-71.26, 46.8]]
+            }
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': false,
+            'labeled': true
+          },
+          'listOfGeoviewLayerConfig': []
+        },
+        'components': ['overview-map'],
+        'navBar': ['zoom', 'fullscreen', 'home', 'location', 'basemap-select'],
+        'appBar': {
+          'tabs': {
+            'core': ['legend', 'details', 'geolocator', 'export']
+          }
+        },
+        'footerBar': {
+          'tabs': {
+            'core': ['layers', 'data-table', 'time-slider', 'geochart']
+          }
+        },
+        'corePackages': [],
+        'serviceUrls': {
+          'metadataUrl': 'https://osdp-psdo.canada.ca/dp/en/search/metadata/NRCAN-FGP-1-'
+        },
+        'theme': 'geo.ca'
+      }"></div>
     </div>
 
     <div style="display: flex">
@@ -266,12 +299,12 @@ cgpv.api.getMapViewer('Map1').replaceMapConfigLayerNames(pairs, mapConfig, true)
         navBar: ['zoom', 'fullscreen', 'home', 'location', 'basemap-select'],
         appBar: {
           tabs: {
-            core: ['geolocator', 'export'],
+            core: ['legend', 'details', 'geolocator', 'export'],
           },
         },
         footerBar: {
           tabs: {
-            core: ['legend', 'layers', 'details', 'data-table', 'time-slider', 'geochart'],
+            core: ['layers', 'data-table', 'time-slider', 'geochart'],
           },
         },
         corePackages: [],
