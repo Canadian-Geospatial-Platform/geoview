@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 import { TypeJsonObject, TypeJsonValue, AnySchemaObject } from '@/api/config/types/config-types';
 import { API } from '@/api';
 

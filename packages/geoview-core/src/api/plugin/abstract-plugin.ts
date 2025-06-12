@@ -1,7 +1,7 @@
-import React from 'react'; // For typing ONLY
-import { createRoot } from 'react-dom/client'; // For typing ONLY
-import i18next from 'react-i18next'; // For typing ONLY
-import { useTheme } from '@mui/material/styles'; // For typing ONLY
+import type * as React from 'react';
+import type { createRoot } from 'react-dom/client';
+import type i18next from 'react-i18next';
+import type { useTheme } from '@mui/material/styles';
 
 import { API } from '@/api/api';
 import { MapViewer } from '@/geo/map/map-viewer';

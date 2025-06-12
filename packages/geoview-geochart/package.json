@@ -17,7 +17,8 @@
   },
   "peerDependencies": {
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "zustand": "~5.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.8",
@@ -34,6 +35,7 @@
     "react-dom": "ReactDOM",
     "@mui/material": "MaterialUI",
     "@emotion/react": "emotionReact",
-    "@emotion/styled": "emotionStyled"
+    "@emotion/styled": "emotionStyled",
+    "zustand": "zustand"
   }
 }

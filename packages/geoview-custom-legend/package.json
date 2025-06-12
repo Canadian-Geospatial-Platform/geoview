@@ -16,7 +16,8 @@
     "react-dom": "^18.3.1",
     "@mui/material": "^6.1.3",
     "@emotion/react": "^11.13.3",
-    "@emotion/styled": "^11.13.0"
+    "@emotion/styled": "^11.13.0",
+    "zustand": "~5.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.8",
@@ -32,6 +33,7 @@
     "react-dom": "ReactDOM",
     "@mui/material": "MaterialUI",
     "@emotion/react": "emotionReact",
-    "@emotion/styled": "emotionStyled"
+    "@emotion/styled": "emotionStyled",
+    "zustand": "zustand"
   }
 }

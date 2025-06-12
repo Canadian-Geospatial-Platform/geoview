@@ -1,6 +1,6 @@
-import { Root } from 'react-dom/client'; // For typing ONLY
-import { AbstractPlugin } from './abstract-plugin';
+import type { Root } from 'react-dom/client';
 import { MapContext } from '@/core/app-start';
+import { AbstractPlugin } from './abstract-plugin';
 
 /**
  * Map Plugin abstract class.
