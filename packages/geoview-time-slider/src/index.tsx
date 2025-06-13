@@ -127,7 +127,7 @@ class TimeSliderPlugin extends FooterPlugin {
    * @returns {TypeTabs} The TypeTabs for the TimeSlider Footer Plugin
    */
   override onCreateContentProps(): TypeTabs {
-    // TODO: Cleanup - This code doesn't seem to be valid anymore, commeted on 2025-06-13
+    // TODO: Cleanup - This code doesn't seem to be valid anymore, commented on 2025-06-13
     // // Set custom time dimension if applicable
     // this.getConfig().sliders.forEach((obj: SliderProps) => {
     //   if (obj.temporalDimension) {

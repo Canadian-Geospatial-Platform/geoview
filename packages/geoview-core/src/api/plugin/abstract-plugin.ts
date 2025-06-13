@@ -48,7 +48,6 @@ export abstract class AbstractPlugin {
    * Creates an instance of the plugin.
    * @param {string} pluginId - Unique identifier for the plugin instance.
    * @param {TypePluginOptions} props - The plugin options and properties.
-   * @param {TypeJsonObject} config - Configuration object for the plugin.
    * @param {API} api - API object providing access to core functionality.
    */
   // GV Do not edit the constructor params without editing the plugin.ts dynamic constructor call looking like 'new (constructor as any)'
