@@ -1,4 +1,3 @@
-import React from 'react'; // TODO: CLEAN REACT IMPORT - Remove it, just for a test
 import i18next from 'i18next';
 import Ajv from 'ajv';
 
@@ -96,14 +95,6 @@ export abstract class Plugin {
     // Construct the Plugin class
     let plugin: AbstractPlugin | undefined;
     if (constructor) {
-      // Check if we're on the right react
-      if (React === window.cgpv.react) {
-        // TODO: CLEAN - Remove these logs and the if, after another host test
-        logger.logInfo(`Plugin ${pluginId} loaded on the right react`);
-      } else {
-        logger.logInfo(`Plugin ${pluginId} loaded on the wrong react!?!?!?`);
-      }
-
       // create new instance of the plugin. Here we must type the constructor variable to any
       // in order to cancel the "'new' expression, whose target lacks a construct signature" error message
       // ? unknown type cannot be use, need to escape
