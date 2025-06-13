@@ -106,4 +106,7 @@ export const useGeoViewStore = (): GeoviewStoreType => {
     if (throww) throw error;
     return useStoresManager.getState().stores[mapId];
   }
+
+  // Return first store as a fallback
+  return Object.values(useStoresManager.getState().stores)[0];
 };

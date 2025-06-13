@@ -48,6 +48,18 @@ export interface TypeWindow extends Window {
   geoviewPlugins: Record<string, typeof AbstractPlugin> | undefined;
 }
 
+export interface TypeReacUtilities {
+  useState: typeof React.useState;
+  useEffect: typeof React.useEffect;
+  useRef: typeof React.useRef;
+  useMemo: typeof React.useMemo;
+  useCallback: typeof React.useCallback;
+  useContext: typeof React.useContext;
+  createContext: typeof React.createContext;
+  createElement: typeof React.createElement;
+  createRoot: typeof createRoot;
+}
+
 /**
  * Type used for exporting core.
  */
@@ -56,9 +68,8 @@ export type TypeCGPV = {
   onMapInit: MapViewerCallback;
   onMapReady: MapViewerCallback;
   api: API;
-  react: typeof React;
-  createRoot: typeof createRoot;
   translate: typeof translate;
+  reactUtilities: TypeReacUtilities;
   ui: TypeCGPVUI;
   logger: typeof logger;
 };

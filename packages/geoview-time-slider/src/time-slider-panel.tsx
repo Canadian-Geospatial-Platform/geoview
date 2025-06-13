@@ -31,8 +31,8 @@ interface TypeTimeSliderProps {
 export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const { mapId, configObj } = props;
   const { cgpv } = window as TypeWindow;
-  const { react } = cgpv;
-  const { useCallback, useMemo, useEffect } = react;
+  const { reactUtilities } = cgpv;
+  const { useCallback, useMemo, useEffect } = reactUtilities;
 
   // get values from store
   const visibleLayers = useMapVisibleLayers();

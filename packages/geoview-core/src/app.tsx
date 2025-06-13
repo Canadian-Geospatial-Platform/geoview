@@ -1,4 +1,4 @@
-import React from 'react'; // This is the real React that's exported
+import { useState, useEffect, useRef, useMemo, useCallback, useContext, createContext, createElement } from 'react'; // This is the real React that's exported
 import { Root, createRoot } from 'react-dom/client'; // This is the real React-DOM that's exported
 import * as translate from 'react-i18next'; // This is the real translate that's exported
 
@@ -337,9 +337,18 @@ export const cgpv = {
   onMapInit,
   onMapReady,
   api,
-  react: React,
-  createRoot,
   translate,
+  reactUtilities: {
+    useState,
+    useEffect,
+    useRef,
+    useMemo,
+    useCallback,
+    useContext,
+    createContext,
+    createElement,
+    createRoot,
+  },
   ui: {
     useTheme,
     useMediaQuery,

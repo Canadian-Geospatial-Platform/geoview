@@ -38,8 +38,8 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
 
   const { cgpv } = window as TypeWindow;
   const { mapId, provideCallbackRedraw } = props;
-  const { react } = cgpv;
-  const { useState, useCallback, useMemo, useEffect, useRef } = react;
+  const { reactUtilities } = cgpv;
+  const { useState, useCallback, useMemo, useEffect, useRef } = reactUtilities;
 
   // Get states and actions from store
   const configObj = useGeochartConfigs();

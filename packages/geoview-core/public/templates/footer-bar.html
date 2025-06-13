@@ -59,10 +59,10 @@
     cgpv.onMapInit((mapViewer) => {
       if (mapViewer.mapId === 'map1') {
         // import react and api from the core
-        const { react, api, ui } = cgpv;
+        const { reactUtilities, api, ui } = cgpv;
 
         // import the createElement function from React to create UI components, define it as h for short
-        const { createElement: h, useState, useEffect, useCallback } = react;
+        const { createElement: h, useState, useEffect, useCallback } = reactUtilities;
 
         // !! Keep for reference
         // // create a component that will be used as content for a footer tab
