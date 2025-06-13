@@ -6,17 +6,13 @@ import { mountStoreDevtool } from 'simple-zustand-devtools';
 import { destroyEventProcessors, initializeEventProcessors } from '@/api/event-processors';
 import { IGeoviewState, GeoviewStoreType, geoviewStoreDefinitionWithSubscribeSelector } from './geoview-store';
 import { MapContext } from '@/core/app-start';
-import { logger } from '@/core/utils/logger';
 import { whenThisThen } from '@/core/utils/utilities';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { getItemAsNumber } from '@/core//utils/localStorage';
+import { getItemAsNumber } from '@/core/utils/localStorage';
 
 export interface StoresManagerState {
   stores: Record<string, GeoviewStoreType>;
 }
-
-// TODO: CLEAN - Remove these temporary logs
-logger.logInfo('Loading stores-manager file.');
 
 export const useStoresManager = createStore<StoresManagerState>(() => ({
   stores: {},
@@ -54,9 +50,6 @@ export const addGeoViewStore = (config: TypeMapFeaturesConfig): void => {
     return;
   }
 
-  // TODO: CLEAN - Remove these temporary logs
-  logger.logInfo(`Creating the store for map ${config.mapId}`);
-
   // Create the store
   const geoviewStore = create<IGeoviewState>()(geoviewStoreDefinitionWithSubscribeSelector);
   geoviewStore.getState().setMapConfig(config);
@@ -71,9 +64,6 @@ export const addGeoViewStore = (config: TypeMapFeaturesConfig): void => {
   }));
 
   mountZustandDevTools(`getViewStore-${config.mapId}`, geoviewStore, geoviewStore.getState().appState.geoviewHTMLElement);
-
-  // TODO: CLEAN - Remove these temporary logs
-  logger.logInfo(`Store created for map ${config.mapId}`);
 };
 
 export const getGeoViewStore = (id: string): GeoviewStoreType => {
@@ -92,18 +82,6 @@ export const removeGeoviewStore = (id: string): void => {
 };
 
 export const useGeoViewStore = (): GeoviewStoreType => {
-  let mapId = '';
-  try {
-    // TODO: CLEANUP TEST - Remove this try catch and stuff
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    mapId = useContext(MapContext).mapId;
-    return useStoresManager.getState().stores[mapId];
-  } catch (error: unknown) {
-    logger.logError(error);
-
-    // eslint-disable-next-line prefer-const
-    let throww = true;
-    if (throww) throw error;
-    return useStoresManager.getState().stores[mapId];
-  }
+  const { mapId } = useContext(MapContext);
+  return useStoresManager.getState().stores[mapId];
 };

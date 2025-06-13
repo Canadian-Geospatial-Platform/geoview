@@ -21,7 +21,7 @@ import { MapConfigError } from '@/api/config/types/classes/config-exceptions';
 
 import { generateId, isJsonString, removeCommentsFromJSON } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { logger } from '@/core//utils/logger';
+import { logger } from '@/core/utils/logger';
 import { createStyleUsingEsriRenderer, EsriBaseRenderer } from '@/api/config/esri-renderer-parser';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { OgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';

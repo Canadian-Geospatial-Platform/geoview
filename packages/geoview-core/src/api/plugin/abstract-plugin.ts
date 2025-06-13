@@ -137,7 +137,7 @@ export abstract class AbstractPlugin {
    */
   add(): void {
     // Log
-    logger.logInfo(`Plugin ${this.pluginId} loaded, adding it on map ${this.pluginProps.mapId}`);
+    logger.logInfo(`Plugin '${this.pluginId}' loaded, adding it on map ${this.pluginProps.mapId}`);
 
     // Add
     this.onAdd();
@@ -146,7 +146,7 @@ export abstract class AbstractPlugin {
     this.onAdded?.();
 
     // Log
-    logger.logInfo(`Plugin ${this.pluginId} loaded, and added to map ${this.pluginProps.mapId}`);
+    logger.logInfo(`Plugin '${this.pluginId}' loaded, and added to map ${this.pluginProps.mapId}`);
   }
 
   /**
@@ -154,7 +154,7 @@ export abstract class AbstractPlugin {
    */
   remove(): void {
     // Log
-    logger.logInfo(`Plugin ${this.pluginId} being removed from map ${this.pluginProps.mapId}`);
+    logger.logInfo(`Plugin '${this.pluginId}' being removed from map ${this.pluginProps.mapId}`);
 
     // Remove
     this.onRemove();
@@ -163,6 +163,6 @@ export abstract class AbstractPlugin {
     this.onRemoved?.();
 
     // Log
-    logger.logInfo(`Plugin ${this.pluginId} removed from map ${this.pluginProps.mapId}`);
+    logger.logInfo(`Plugin '${this.pluginId}' removed from map ${this.pluginProps.mapId}`);
   }
 }

@@ -12,18 +12,12 @@ import { logger } from '@/core/utils/logger';
 import { useAppDisplayThemeById } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { api } from '@/app';
 
-// TODO: CLEAN - Remove these temporary logs
-logger.logInfo('CREATING CONTEXT');
-
 // create a state that will hold map config information
 // TODO: use store, only keep map id on context for store manager to gather right store on hooks
 export const MapContext = createContext<TypeMapContext>({
   mapId: '',
   mapFeaturesConfig: undefined,
 });
-
-// TODO: CLEAN - Remove these temporary logs
-logger.logInfo('CONTEXT CREATED');
 
 /**
  * Type used for the map context
