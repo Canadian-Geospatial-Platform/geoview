@@ -3,10 +3,8 @@ import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interf
 import { useDrawerActions } from 'geoview-core/src/core/stores/store-interface-and-intial-values/drawer-state';
 import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
 
-import { IconButton, List, ListItem } from 'geoview-core/src/ui';
+import { Button, List, ListItem } from 'geoview-core/src/ui';
 // import { logger } from 'geoview-core/src/core/utils/logger';
-
-import { useCallback } from 'react';
 
 export interface GeometryPickerPanelProps {
   geomTypes: string[];
@@ -20,7 +18,8 @@ export interface GeometryPickerPanelProps {
 export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Element {
   const { geomTypes } = props;
   const { cgpv } = window as TypeWindow;
-  const { RadioButtonUncheckedIcon, LinearScaleIcon, PolygonIcon, CircleIcon, QuestionMarkIcon } = cgpv.ui.elements;
+  const { useCallback } = cgpv.react;
+  // const { RadioButtonUncheckedIcon, LinearScaleIcon, PolygonIcon, CircleIcon } = cgpv.ui.elements;
 
   // Get store values
   const displayLanguage = useAppDisplayLanguage();
@@ -38,36 +37,52 @@ export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JS
     [setGeomType]
   );
 
-  const getIconForGeometryType = (geomType: string): React.ReactNode => {
-    switch (geomType) {
-      case 'Point':
-        return <RadioButtonUncheckedIcon />;
-      case 'LineString':
-        return <LinearScaleIcon />;
-      case 'Polygon':
-        return <PolygonIcon />;
-      case 'Circle':
-        return <CircleIcon />;
-      default:
-        return <QuestionMarkIcon />; // Default icon
-    }
-  };
-
   return (
     <List>
-      {geomTypes.map((geomType) => (
-        <ListItem key={`draw-${geomType}`}>
-          <IconButton
-            id={`draw-${geomType}`}
-            size="small"
-            tooltip={getLocalizedMessage(displayLanguage, `drawer.${geomType.toLowerCase()}`)}
-            tooltipPlacement="left"
-            onClick={() => handleGeometrySelect(geomType)}
-          >
-            {getIconForGeometryType(geomType)}
-          </IconButton>
-        </ListItem>
-      ))}
+      <ListItem>
+        <Button
+          id="button-point"
+          tooltip={getLocalizedMessage(displayLanguage, 'drawer.point')}
+          tooltipPlacement="left"
+          size="small"
+          onClick={() => handleGeometrySelect('Point')}
+        >
+          {getLocalizedMessage(displayLanguage, 'drawer.point')}
+        </Button>
+      </ListItem>
+      <ListItem>
+        <Button
+          id="button-linestring"
+          tooltip={getLocalizedMessage(displayLanguage, 'drawer.linestring')}
+          tooltipPlacement="left"
+          size="small"
+          onClick={() => handleGeometrySelect('LineString')}
+        >
+          {getLocalizedMessage(displayLanguage, 'drawer.linestring')}
+        </Button>
+      </ListItem>
+      <ListItem>
+        <Button
+          id="button-polygon"
+          tooltip={getLocalizedMessage(displayLanguage, 'drawer.polygon')}
+          tooltipPlacement="left"
+          size="small"
+          onClick={() => handleGeometrySelect('Polygon')}
+        >
+          {getLocalizedMessage(displayLanguage, 'drawer.polygon')}
+        </Button>
+      </ListItem>
+      <ListItem>
+        <Button
+          id="button-circle"
+          tooltip={getLocalizedMessage(displayLanguage, 'drawer.circle')}
+          tooltipPlacement="left"
+          size="small"
+          onClick={() => handleGeometrySelect('Circle')}
+        >
+          {getLocalizedMessage(displayLanguage, 'drawer.circle')}
+        </Button>
+      </ListItem>
     </List>
   );
 }
