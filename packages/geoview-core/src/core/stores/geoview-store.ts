@@ -86,9 +86,9 @@ export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore): IG
       if (config.footerBar?.tabs.core.includes('geochart')) set({ geochartState: initializeGeochartState(set, get) });
 
       if (config.corePackages?.includes('swiper')) set({ swiperState: initializeSwiperState(set, get) });
-      if (config.footerBar?.tabs.core.includes('drawer')) {
-        // set({ drawerState: initializeDrawerState(set, get) });
-        set({ drawerState: initializeDrawerState() });
+      if (config.navBar?.includes('drawer')) {
+        set({ drawerState: initializeDrawerState(set, get) });
+        get().drawerState.setDefaultConfigValues(config);
       }
     },
 

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, Fragment, useMemo } from 'react';
+import { useCallback, useEffect, useRef, useState, Fragment, useMemo, isValidElement } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -96,25 +96,22 @@ export function NavBar(props: NavBarProps): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navBarComponents]);
 
-  const handleNavApiAddButtonPanel = useCallback(
-    (sender: NavBarApi, event: NavBarCreatedEvent) => {
-      // Log
-      logger.logTraceUseCallback('NAV-BAR - addButtonPanel');
+  const handleNavApiAddButtonPanel = useCallback((sender: NavBarApi, event: NavBarCreatedEvent) => {
+    // Log
+    logger.logTraceUseCallback('NAV-BAR - addButtonPanel');
 
-      const newGroupDetails = {
+    setButtonPanelGroups((prevState) => {
+      const existingGroup = prevState[event.group] || {};
+
+      return {
+        ...prevState,
         [event.group]: {
+          ...existingGroup, // Spread existing buttons first
           [event.buttonPanelId]: event.buttonPanel,
-          ...buttonPanelGroups[event.group],
         },
       };
-
-      setButtonPanelGroups({
-        ...buttonPanelGroups,
-        ...newGroupDetails,
-      });
-    },
-    [buttonPanelGroups]
-  );
+    });
+  }, []);
 
   const handleNavApiRemoveButtonPanel = useCallback(
     (sender: NavBarApi, event: NavBarRemovedEvent) => {
@@ -154,6 +151,13 @@ export function NavBar(props: NavBarProps): JSX.Element {
     if (!buttonPanel.button.visible) {
       return null;
     }
+
+    // GV This is specific for NavBar Plugins
+    // Check if children is a React component that returns a button and return that
+    if (isValidElement(buttonPanel.button.children) && !buttonPanel.panel) {
+      return <Fragment key={`${key}-component`}>{buttonPanel.button.children}</Fragment>;
+    }
+
     return (
       <Fragment key={`${key}-component`}>
         {!buttonPanel.panel ? (
