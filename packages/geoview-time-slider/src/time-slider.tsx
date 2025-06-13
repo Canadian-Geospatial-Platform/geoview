@@ -466,7 +466,6 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
             >
               {!isPlaying ? <PlayArrowIcon /> : <PauseIcon />}
             </IconButton>
-
             <IconButton
               className="buttonOutline"
               aria-label={getLocalizedMessage(displayLanguage, 'timeSlider.slider.forward')}
