@@ -102,7 +102,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
     // Return the layers
     return visibleLayers
       .map((layerPath) => {
-        return { layerPath, timeSliderLayerInfo: timeSliderLayers[layerPath!] };
+        return { layerPath, timeSliderLayerInfo: timeSliderLayers[layerPath] };
       })
       .filter((layer) => layer && layer.timeSliderLayerInfo)
       .map((layer) => {
