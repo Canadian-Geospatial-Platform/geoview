@@ -76,7 +76,7 @@ class SwiperPlugin extends MapPlugin {
    * @returns {JSX.Element} The JSX.Element representing the Swiper Plugin
    */
   override onCreateContent(): JSX.Element {
-    return <Swiper viewer={this.pluginProps.viewer!} config={this.getConfig()} />;
+    return <Swiper viewer={this.pluginProps.viewer} config={this.getConfig()} />;
   }
 
   /**

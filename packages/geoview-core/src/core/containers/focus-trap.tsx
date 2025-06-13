@@ -227,8 +227,8 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
       container={document.getElementById(focusTrapId)!}
       modalId={focusTrapId}
       open={open}
-      aria-labelledby={t('keyboardnav.focusdialog.title') || ''}
-      aria-describedby={t('keyboardnav.focusdialog.title') || ''}
+      aria-labelledby={t('keyboardnav.focusdialog.title')!}
+      aria-describedby={t('keyboardnav.focusdialog.title')!}
       fullScreen={fullScreen}
       sx={sxClasses.trap}
       titleId="wcag-dialog-title"

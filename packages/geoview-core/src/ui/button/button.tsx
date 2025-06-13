@@ -123,7 +123,7 @@ function ButtonUI(props: ButtonProps, ref: Ref<HTMLButtonElement>): JSX.Element 
   }
 
   return (
-    <Tooltip title={tooltip || ''} placement={tooltipPlacement}>
+    <Tooltip title={tooltip} placement={tooltipPlacement}>
       {createButtonUI()}
     </Tooltip>
   );

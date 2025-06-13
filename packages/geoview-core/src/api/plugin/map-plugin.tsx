@@ -43,11 +43,5 @@ export abstract class MapPlugin extends AbstractPlugin {
     // Unmount the Map Plugin
     this.reactRoot?.unmount();
     this.reactRoot = undefined;
-
-    // // If cgpv exists
-    // if (this.api) {
-    //   Enable swiper removal, make it work with React 18+ new root and unmount
-    //   // cgpv.reactDOM.unmountComponentAtNode(document.getElementById(`${mapId}-swiper`)! as Element);
-    // }
   }
 }

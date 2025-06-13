@@ -93,11 +93,12 @@ export abstract class Plugin {
     // If the plugin is already loaded, skip
     if (viewer.plugins[pluginId]) return;
 
-    // TODO: Refactor - Get rid of the TypePluginStructure and use AbstractPlugin directly, taking advantage of the the mother class abstract methods.
+    // Construct the Plugin class
     let plugin: AbstractPlugin | undefined;
     if (constructor) {
       // Check if we're on the right react
       if (React === window.cgpv.react) {
+        // TODO: CLEAN - Remove these logs and the if, after another host test
         logger.logInfo(`Plugin ${pluginId} loaded on the right react`);
       } else {
         logger.logInfo(`Plugin ${pluginId} loaded on the wrong react!?!?!?`);

@@ -409,7 +409,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         let theLayerPath: string | null = layerPath;
         if (layerPath && layerPath.length === 0) theLayerPath = null;
         const curLayers = get().layerState.legendLayers;
-        const layer = LegendEventProcessor.findLayerByPath(curLayers, layerPath || '');
+        const layer = LegendEventProcessor.findLayerByPath(curLayers, layerPath!);
         set({
           layerState: {
             ...get().layerState,

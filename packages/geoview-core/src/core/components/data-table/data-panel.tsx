@@ -304,7 +304,7 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
   return (
     <Layout
       containerType={containerType}
-      selectedLayerPath={selectedLayerPath || ''}
+      selectedLayerPath={selectedLayerPath}
       layerList={memoLayerList}
       onLayerListClicked={handleLayerChange}
       fullWidth={fullWidth}
