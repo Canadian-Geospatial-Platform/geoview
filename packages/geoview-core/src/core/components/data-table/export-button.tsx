@@ -110,7 +110,7 @@ function ExportButton({ layerPath, rows, columns, children }: ExportButtonProps)
 
   return (
     <>
-      <IconButton onClick={handleClick} tooltip={t('dataTable.exportBtn') || ''} className="buttonOutline">
+      <IconButton onClick={handleClick} tooltip={t('dataTable.exportBtn')!} className="buttonOutline">
         <DownloadIcon />
       </IconButton>
       <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>

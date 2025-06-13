@@ -47,7 +47,7 @@ export function Layout({
   // Hooks
   const responsiveLayoutRef = useRef<ResponsiveGridLayoutExposedMethods>(null);
   const theme = useTheme();
-  const layerName: string | undefined = useSelectorLayerName(selectedLayerPath || '');
+  const layerName: string | undefined = useSelectorLayerName(selectedLayerPath!);
 
   // Store
   const { setSelectedFooterLayerListItemId } = useUIStoreActions();

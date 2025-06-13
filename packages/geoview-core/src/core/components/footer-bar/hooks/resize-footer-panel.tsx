@@ -72,7 +72,7 @@ export const ResizeFooterPanel = memo(function ResizeFooterPanel(): JSX.Element 
   const open = Boolean(anchorEl);
   return (
     <>
-      <IconButton onClick={(e) => handleClick(e)} tooltip={t('footerBar.resizeTooltip') || ''}>
+      <IconButton onClick={(e) => handleClick(e)} tooltip={t('footerBar.resizeTooltip')!}>
         <HeightIcon />
       </IconButton>
       <Popover
