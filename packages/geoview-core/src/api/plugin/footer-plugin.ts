@@ -17,7 +17,7 @@ export abstract class FooterPlugin extends AbstractPlugin {
    * @returns {unknown} The config
    */
   override getConfig(): unknown {
-    return super.getConfig() as unknown;
+    return super.getConfig();
   }
 
   /**

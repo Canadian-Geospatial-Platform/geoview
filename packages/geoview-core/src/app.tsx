@@ -223,7 +223,7 @@ async function renderMap(mapElement: HTMLElement): Promise<MapViewer> {
   reactRoots[mapId].render(<AppStart mapFeaturesConfig={configuration} i18nLang={i18n} />);
 
   // Set up MutationObserver to watch for removal of the map div where our MapViewer is mounted
-  watchHtmlElementRemoval(mapId, mapElement as HTMLElement, handleMapViewerDivRemoved);
+  watchHtmlElementRemoval(mapId, mapElement, handleMapViewerDivRemoved);
 
   // Return the map viewer
   return mapViewer;

@@ -194,14 +194,14 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
         if (leftHandle < sliderValueRef.current! && rightHandle === sliderValueRef.current) leftHandle = sliderValueRef.current;
         else leftHandle += delta;
         if (leftHandle >= minAndMax[1]) [leftHandle] = minAndMax;
-        rightHandle = leftHandle + sliderDeltaRef.current!;
+        rightHandle = leftHandle + sliderDeltaRef.current;
         if (rightHandle > minAndMax[1]) [, rightHandle] = minAndMax;
         if (rightHandle > sliderValueRef.current! && leftHandle < sliderValueRef.current!) rightHandle = sliderValueRef.current as number;
       } else {
         if (rightHandle > sliderValueRef.current! && leftHandle === sliderValueRef.current) rightHandle = sliderValueRef.current;
         else rightHandle += delta;
         if (rightHandle <= minAndMax[0]) [, rightHandle] = minAndMax;
-        leftHandle = rightHandle - sliderDeltaRef.current!;
+        leftHandle = rightHandle - sliderDeltaRef.current;
         if (leftHandle < minAndMax[0]) [leftHandle] = minAndMax;
         if (leftHandle < sliderValueRef.current! && rightHandle > sliderValueRef.current!) leftHandle = sliderValueRef.current as number;
       }
@@ -439,8 +439,8 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
             <IconButton
               className="buttonOutline"
-              aria-label={getLocalizedMessage(displayLanguage, 'timeSlider.slider.back') as string}
-              tooltip={getLocalizedMessage(displayLanguage, 'timeSlider.slider.back') as string}
+              aria-label={getLocalizedMessage(displayLanguage, 'timeSlider.slider.back')}
+              tooltip={getLocalizedMessage(displayLanguage, 'timeSlider.slider.back')}
               tooltipPlacement="top"
               disabled={isPlaying || !filtering}
               onClick={handleBack}
@@ -452,13 +452,13 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
               className="buttonOutline"
               aria-label={
                 isPlaying
-                  ? (getLocalizedMessage(displayLanguage, 'timeSlider.slider.pauseAnimation') as string)
-                  : (getLocalizedMessage(displayLanguage, 'timeSlider.slider.playAnimation') as string)
+                  ? getLocalizedMessage(displayLanguage, 'timeSlider.slider.pauseAnimation')
+                  : getLocalizedMessage(displayLanguage, 'timeSlider.slider.playAnimation')
               }
               tooltip={
                 isPlaying
-                  ? (getLocalizedMessage(displayLanguage, 'timeSlider.slider.pauseAnimation') as string)
-                  : (getLocalizedMessage(displayLanguage, 'timeSlider.slider.playAnimation') as string)
+                  ? getLocalizedMessage(displayLanguage, 'timeSlider.slider.pauseAnimation')
+                  : getLocalizedMessage(displayLanguage, 'timeSlider.slider.playAnimation')
               }
               tooltipPlacement="top"
               disabled={!filtering}
@@ -469,8 +469,8 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
             <IconButton
               className="buttonOutline"
-              aria-label={getLocalizedMessage(displayLanguage, 'timeSlider.slider.forward') as string}
-              tooltip={getLocalizedMessage(displayLanguage, 'timeSlider.slider.forward') as string}
+              aria-label={getLocalizedMessage(displayLanguage, 'timeSlider.slider.forward')}
+              tooltip={getLocalizedMessage(displayLanguage, 'timeSlider.slider.forward')}
               tooltipPlacement="top"
               disabled={isPlaying || !filtering}
               onClick={handleForward}
@@ -480,8 +480,8 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
             <IconButton
               className="buttonOutline"
-              aria-label={getLocalizedMessage(displayLanguage, 'timeSlider.slider.changeDirection') as string}
-              tooltip={getLocalizedMessage(displayLanguage, 'timeSlider.slider.changeDirection') as string}
+              aria-label={getLocalizedMessage(displayLanguage, 'timeSlider.slider.changeDirection')}
+              tooltip={getLocalizedMessage(displayLanguage, 'timeSlider.slider.changeDirection')}
               tooltipPlacement="top"
               onClick={handleReverse}
             >
@@ -508,6 +508,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
                 </NativeSelect>
               </FormControl>
             </Box>
+
             {singleHandle && discreteValues && (
               <Box component="span" sx={{ paddingLeft: '10px' }}>
                 <FormControl sx={{ width: '100px' }}>
