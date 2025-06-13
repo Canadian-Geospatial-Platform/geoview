@@ -44,4 +44,4 @@ jobs:
           key: dist-${{ inputs.cache_sha }}
 
       - name: Rush Build
-        run: node common/scripts/install-run-rush.js build:core
+        run: node common/scripts/install-run-rush.js build

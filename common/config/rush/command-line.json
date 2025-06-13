@@ -14,12 +14,6 @@
       "shellCommand": "npm run --prefix packages/geoview-core deploy"
     },
     {
-      "commandKind": "global",
-      "name": "build:core",
-      "summary": "Build the packages and move them to the dist directory",
-      "shellCommand": "npm run --prefix packages/geoview-core build"
-    },
-    {
       "commandKind": "bulk",
       "name": "build",
       "summary": "Build the packages and move them to the dist directory",

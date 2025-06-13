@@ -1,5 +1,3 @@
-import type * as React from 'react';
-import type { createRoot } from 'react-dom/client';
 import type i18next from 'react-i18next';
 import type { useTheme } from '@mui/material/styles';
 
@@ -7,6 +5,7 @@ import { API } from '@/api/api';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { TypeJsonObject, AnySchemaObject } from '@/api/config/types/config-types';
 import { logger } from '@/core/utils/logger';
+import type { TypeReactUtilities } from '@/core/types/global-types';
 
 /**
  * interface used by all plugins to define their options.
@@ -32,11 +31,8 @@ export abstract class AbstractPlugin {
   // Plugin api object.
   api: API;
 
-  // Plugin react object.
-  react: typeof React;
-
-  // Plugin createRoot object.
-  createRoot: typeof createRoot;
+  // Plugin react utilities.
+  reactUtilities: TypeReactUtilities;
 
   // Plugin useTheme object
   useTheme: typeof useTheme;
@@ -55,8 +51,7 @@ export abstract class AbstractPlugin {
     this.pluginId = pluginId;
     this.pluginProps = props;
     this.api = api;
-    this.react = window.cgpv.react;
-    this.createRoot = window.cgpv.createRoot;
+    this.reactUtilities = window.cgpv.reactUtilities;
     this.translate = window.cgpv.translate;
     this.useTheme = window.cgpv.ui.useTheme;
   }

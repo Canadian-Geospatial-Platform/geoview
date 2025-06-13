@@ -40,7 +40,7 @@ export abstract class AppBarPlugin extends AbstractPlugin {
       id: 'somePluginButton',
       tooltip: 'Some tooltip',
       tooltipPlacement: 'right',
-      children: this.react.createElement(MapIcon),
+      children: this.reactUtilities.createElement(MapIcon),
       visible: true,
     };
   }
@@ -69,7 +69,11 @@ export abstract class AppBarPlugin extends AbstractPlugin {
     // Override this to create panel..
 
     // Return dummy content
-    return this.react.createElement('div', undefined, `Content for AppBar Plugin on map id ${this.pluginProps.mapId} goes here...`);
+    return this.reactUtilities.createElement(
+      'div',
+      undefined,
+      `Content for AppBar Plugin on map id ${this.pluginProps.mapId} goes here...`
+    );
   }
 
   /**

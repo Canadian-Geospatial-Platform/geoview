@@ -48,7 +48,7 @@ export interface TypeWindow extends Window {
   geoviewPlugins: Record<string, typeof AbstractPlugin> | undefined;
 }
 
-export interface TypeReacUtilities {
+export interface TypeReactUtilities {
   useState: typeof React.useState;
   useEffect: typeof React.useEffect;
   useRef: typeof React.useRef;
@@ -69,7 +69,7 @@ export type TypeCGPV = {
   onMapReady: MapViewerCallback;
   api: API;
   translate: typeof translate;
-  reactUtilities: TypeReacUtilities;
+  reactUtilities: TypeReactUtilities;
   ui: TypeCGPVUI;
   logger: typeof logger;
 };

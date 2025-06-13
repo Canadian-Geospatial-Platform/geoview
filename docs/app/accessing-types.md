@@ -11,7 +11,7 @@ GeoView provides the types used in the project for developers to use in their ow
 The types needs to be rebuild from time to time. To do this, follow this procedure
 
 ```
-rush build:core
+rush build
 ```
 This will create a branch called ```types``` in your origin remote
 

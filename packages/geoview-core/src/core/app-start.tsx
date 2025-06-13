@@ -129,7 +129,6 @@ class ErrorBoundary extends Component<{ children: ReactNode; language: TypeDispl
     if (hasError) {
       return (
         <div style={{ padding: '10px', border: '1px solid red' }}>
-          <h3>{language === 'fr' ? 'Un problème est survenu' : 'Something went wrong'}</h3>
           {AUTO_RETRY_ERRORS ? (
             <p>
               {language === 'fr'
@@ -137,7 +136,11 @@ class ErrorBoundary extends Component<{ children: ReactNode; language: TypeDispl
                 : `Automatically retrying... (Attempt ${retryCount}/3)`}
             </p>
           ) : (
-            <p>{language === 'fr' ? "Une erreur est survenue dans l'application." : 'An error occurred in the application.'}</p>
+            <p>
+              {language === 'fr'
+                ? "Une erreur est survenue dans l'application. Veuillez rafraîchir votre page/onglet pour résoudre le problème."
+                : 'An error occurred in the application. Please refresh your tab/page browser to fix the issue.'}
+            </p>
           )}
         </div>
       );
@@ -198,7 +201,7 @@ function AppStart(props: AppStartProps): JSX.Element {
               <Suspense fallback="">
                 <I18nextProvider i18n={i18nLang}>
                   <StrictMode>
-                    <Shell mapViewer={api.getMapViewer(mapId)} />
+                    <Shell key={renderKey} mapViewer={api.getMapViewer(mapId)} />
                   </StrictMode>
                 </I18nextProvider>
               </Suspense>
