@@ -11,7 +11,7 @@ export interface ILayerState {
     selectedLayerPath: string | undefined | null;
     legendLayers: TypeLegendLayer[];
     displayState: TypeLayersViewDisplayState;
-    layerDeleteInProgress: boolean;
+    layerDeleteInProgress: string;
     selectedLayerSortingArrowId: string;
     layersAreLoading: boolean;
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
@@ -22,14 +22,14 @@ export interface ILayerState {
         getLayer: (layerPath: string) => TypeLegendLayer | undefined;
         getLayerBounds: (layerPath: string) => number[] | undefined;
         getLayerDefaultFilter: (layerPath: string) => string | undefined;
-        getLayerDeleteInProgress: () => boolean;
+        getLayerDeleteInProgress: () => string;
         getLayerServiceProjection: (layerPath: string) => string | undefined;
         getLayerTemporalDimension: (layerPath: string) => TypeTemporalDimension | undefined;
         refreshLayer: (layerPath: string) => void;
         setAllItemsVisibility: (layerPath: string, visibility: boolean) => void;
         setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => void;
         setHighlightLayer: (layerPath: string) => void;
-        setLayerDeleteInProgress: (newVal: boolean) => void;
+        setLayerDeleteInProgress: (newVal: string) => void;
         setLayerOpacity: (layerPath: string, opacity: number) => void;
         setLayerHoverable: (layerPath: string, enable: boolean) => void;
         setLayerQueryable: (layerPath: string, enable: boolean) => void;
@@ -42,7 +42,7 @@ export interface ILayerState {
     setterActions: {
         setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => void;
         setHighlightLayer: (layerPath: string) => void;
-        setLayerDeleteInProgress: (newVal: boolean) => void;
+        setLayerDeleteInProgress: (newVal: string) => void;
         setLegendLayers: (legendLayers: TypeLegendLayer[]) => void;
         setSelectedLayerPath: (layerPath: string) => void;
         setSelectedLayerSortingArrowId: (arrowId: string) => void;
@@ -73,6 +73,7 @@ export declare const useLayerLegendLayers: () => TypeLegendLayer[];
 export declare const useLayerSelectedLayer: () => TypeLegendLayer;
 export declare const useLayerSelectedLayerPath: () => string | null | undefined;
 export declare const useLayerDisplayState: () => TypeLayersViewDisplayState;
+export declare const useLayerDeleteInProgress: () => string;
 export declare const useSelectedLayerSortingArrowId: () => string;
 export declare const useLayersAreLoading: () => boolean;
 export declare const useLayerStoreActions: () => LayerActions;

@@ -119,6 +119,19 @@ export declare class LayerEntryConfigLayerIdEsriMustBeNumberError extends LayerE
     constructor(geoviewLayerId: string, badNumber: string, layerName: string | undefined);
 }
 /**
+ * Custom error class thrown when the ESRI feature layer has too many features.
+ * @extends {LayerError}
+ */
+export declare class LayerTooManyEsriFeatures extends LayerError {
+    /**
+     * Constructor to initialize the LayerTooManyEsriFeatures.
+     * This error is thrown when the ESRI feature layer has more than 200 000 features.
+     * @param {string} geoviewLayerId - The ID of the GeoView layer with invalid layer type.
+     * @param {string | undefined} layerName - The layer name.
+     */
+    constructor(geoviewLayerId: string, layerName: string | undefined, featureCount: number);
+}
+/**
  * Custom error class thrown when the MetadataAccessPath is missing for a layer configuration.
  * @extends {LayerError}
  */
