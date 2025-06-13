@@ -35,7 +35,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const { useCallback, useMemo, useEffect } = react;
 
   // get values from store
-  const visibleLayers = useMapVisibleLayers() as string[];
+  const visibleLayers = useMapVisibleLayers();
   const timeSliderLayers = useTimeSliderLayers();
   const selectedLayerPath = useTimeSliderSelectedLayerPath();
   const { setSelectedLayerPath } = useTimeSliderStoreActions();

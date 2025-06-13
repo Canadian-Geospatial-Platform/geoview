@@ -155,7 +155,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
       styleValues[1] = styleValues[1] <= 10 ? 10 : styleValues[1] >= mapSize.current[1] - 10 ? mapSize.current[1] - 10 : styleValues[1];
 
       // apply new style to the bar
-      swiperRef!.current!.style.transform =
+      swiperRef.current!.style.transform =
         orientation === 'vertical' ? `translate(${styleValues[0] + move}px, 0px)` : `translate(0px, ${styleValues[1] + move}px)`;
 
       // send the onStop event to update layers
