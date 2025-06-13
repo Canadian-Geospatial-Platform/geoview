@@ -150,7 +150,7 @@ export const MousePosition = memo(function MousePosition({ expanded }: MousePosi
       type="text"
       onClick={switchPositionMode}
       sx={sxClasses.mousePosition}
-      tooltip={t('mapnav.coordinates') as string}
+      tooltip={t('mapnav.coordinates') || ''}
       tooltipPlacement="top"
       disableRipple
     >

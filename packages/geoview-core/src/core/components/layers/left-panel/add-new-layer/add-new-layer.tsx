@@ -555,7 +555,7 @@ export function AddNewLayer(): JSX.Element {
 
     if (configObj?.length) {
       // XYZ tile uses dataAccessPath which has been set, so remove metdataAccessPath
-      if (configObj[0].geoviewLayerType === CONST_LAYER_TYPES.XYZ_TILES) delete (configObj[0] as TypeGeoviewLayerConfig).metadataAccessPath;
+      if (configObj[0].geoviewLayerType === CONST_LAYER_TYPES.XYZ_TILES) delete configObj[0].metadataAccessPath;
 
       logger.logDebug('newGeoViewLayer to add', configObj[0]);
       // Add the layer using the proper function

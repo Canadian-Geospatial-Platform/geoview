@@ -21,7 +21,7 @@ export type TypeLegendProps = {
 
 export function CustomLegendPanel(props: CustomLegendPanelProps): JSX.Element {
   const { config } = props;
-  const legendList = config.legendList as LegendListItems;
+  const { legendList } = config;
 
   const { cgpv } = window as TypeWindow;
   const { ui } = cgpv;

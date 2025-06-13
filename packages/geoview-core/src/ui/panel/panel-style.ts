@@ -16,7 +16,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     [theme.breakpoints.down('sm')]: {
       width: '100%',
       minWidth: '100%',
-    }!,
+    },
     '& .MuiCardHeader-root': {
       backgroundColor: theme.palette.geoViewColor?.bgColor.dark[50],
       borderBottomColor: theme.palette.geoViewColor?.bgColor.dark[100],

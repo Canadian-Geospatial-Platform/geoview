@@ -784,13 +784,13 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     // Get the style
     const layerStyle = layerConfig.layerStyle?.[geometryType];
     let filteredFeatures = features;
-    if (layerStyle !== undefined && layerStyle!.type === 'uniqueValue') {
+    if (layerStyle !== undefined && layerStyle.type === 'uniqueValue') {
       filteredFeatures = this.#processClassVisibilityUniqueValue(layerStyle, features);
-    } else if (layerStyle !== undefined && layerStyle!.type === 'classBreaks') {
+    } else if (layerStyle !== undefined && layerStyle.type === 'classBreaks') {
       filteredFeatures = this.#processClassVisibilityClassBreak(layerStyle, features);
     }
 
-    return filteredFeatures!;
+    return filteredFeatures;
   }
 
   /**
@@ -880,7 +880,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       (brk): ClassBreakPoint => ({
         minValue: brk.values[0] as number,
         maxValue: brk.values[1] as number,
-        visible: brk.visible as boolean,
+        visible: brk.visible,
       })
     );
 
@@ -896,7 +896,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         const breakPoint = breakPoints[mid];
 
         // Check if value falls within current break point's range
-        if (value >= breakPoint!.minValue && value <= breakPoint!.maxValue) {
+        if (value >= breakPoint.minValue && value <= breakPoint.maxValue) {
           // Found matching break point, return it
           return breakPoint;
         }

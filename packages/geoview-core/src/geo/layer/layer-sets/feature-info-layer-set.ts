@@ -272,7 +272,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
       layerEntryConfig.source.featureInfo = { queryable: true };
     }
 
-    const sourceFeatureInfo = layerEntryConfig.source!.featureInfo as TypeFeatureInfoLayerConfig;
+    const sourceFeatureInfo = layerEntryConfig.source.featureInfo as TypeFeatureInfoLayerConfig;
     if (!sourceFeatureInfo.outfields) {
       sourceFeatureInfo.outfields = [];
 

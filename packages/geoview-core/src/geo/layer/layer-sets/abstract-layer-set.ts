@@ -468,7 +468,7 @@ export abstract class AbstractLayerSet {
   protected static alignRecordsWithOutFields(layerEntryConfig: TypeLayerEntryConfig, arrayOfRecords: TypeFeatureInfoEntry[]): void {
     // If source featureInfo is provided, continue
     if (layerEntryConfig.source && layerEntryConfig.source.featureInfo) {
-      const sourceFeatureInfo = layerEntryConfig.source!.featureInfo as TypeFeatureInfoLayerConfig;
+      const sourceFeatureInfo = layerEntryConfig.source.featureInfo as TypeFeatureInfoLayerConfig;
 
       // If outFields is provided, compare record fields with outFields to remove unwanted one
       // If there is no outFields, this will be created in the next function patchMissingMetadataIfNecessary
@@ -485,8 +485,8 @@ export abstract class AbstractLayerSet {
             if (outFields.find((outfield) => outfield.name === fieldName)) {
               const fieldIndex = outFields.findIndex((outfield) => outfield.name === fieldName);
               record.fieldInfo[fieldName]!.fieldKey = fieldKeyCounter++;
-              record.fieldInfo[fieldName]!.alias = outFields![fieldIndex].alias;
-              record.fieldInfo[fieldName]!.dataType = outFields![fieldIndex].type;
+              record.fieldInfo[fieldName]!.alias = outFields[fieldIndex].alias;
+              record.fieldInfo[fieldName]!.dataType = outFields[fieldIndex].type;
               return false; // keep this entry
             }
 

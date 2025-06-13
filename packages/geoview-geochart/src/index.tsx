@@ -6,6 +6,7 @@ import { ChartIcon } from 'geoview-core/ui/icons';
 import { GeochartEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/geochart-event-processor';
 import { isObjectEmpty } from 'geoview-core/core/utils/utilities';
 import { GeoChartConfig } from 'geoview-core/core/utils/config/reader/uuid-config-reader';
+import { GeoChartConfig } from 'geoview-core/src/core/utils/config/reader/uuid-config-reader';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-geochart.json';
 import { GeoChartPanel } from './geochart-panel';

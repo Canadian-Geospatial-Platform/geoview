@@ -169,7 +169,7 @@ export class VectorTileLayerConfig extends AbstractGeoviewLayerConfig {
   protected override createLayerEntryNode(layerId: string, parentNode: EntryConfigBaseClass | undefined): EntryConfigBaseClass {
     // GV: To determine if service metadata exists, we must verify that the object is not empty.
     if (Object.keys(this.getServiceMetadata()).length === 0)
-      return this.createLeafNode(toJsonObject({ layerId, layerName: layerId }), this, parentNode)!;
+      return this.createLeafNode(toJsonObject({ layerId, layerName: layerId }), this, parentNode);
 
     // If we cannot find the layerId in the layer definitions, throw an error.
     const layerFound = this.findLayerMetadataEntry(layerId);
@@ -184,7 +184,7 @@ export class VectorTileLayerConfig extends AbstractGeoviewLayerConfig {
 
     if (layerEntryIsGroupLayer(layerFound)) return this.createGroupNode(layerConfig, this, parentNode);
 
-    return this.createLeafNode(layerConfig, this, parentNode)!;
+    return this.createLeafNode(layerConfig, this, parentNode);
   }
 
   /**

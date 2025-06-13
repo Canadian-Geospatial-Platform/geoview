@@ -42,11 +42,11 @@ export class WmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     // When the dataAccessPath is undefined and the metadataAccessPath does not end with ".xml", the dataAccessPath is set
     // to the same value of the corresponding metadataAccessPath.
     // TODO: remove this wrapper replace when datacube updates the URLs
-    this.getGeoviewLayerConfig().metadataAccessPath = this.getGeoviewLayerConfig().metadataAccessPath!.replace('wrapper/ramp/ogc', 'ows');
-    if (this.getGeoviewLayerConfig().metadataAccessPath!.slice(-4).toLowerCase() !== '.xml')
+    this.getGeoviewLayerConfig().metadataAccessPath = this.getGeoviewLayerConfig().metadataAccessPath.replace('wrapper/ramp/ogc', 'ows');
+    if (this.getGeoviewLayerConfig().metadataAccessPath.slice(-4).toLowerCase() !== '.xml')
       this.source.dataAccessPath = this.getGeoviewLayerConfig().metadataAccessPath;
 
-    this.source.dataAccessPath = this.source.dataAccessPath!.replace('wrapper/ramp/ogc', 'ows');
+    this.source.dataAccessPath = this.source.dataAccessPath.replace('wrapper/ramp/ogc', 'ows');
 
     // Default value for layerConfig.source.serverType is 'mapserver'.
     if (!this.source.serverType) this.source.serverType = 'mapserver';

@@ -53,7 +53,7 @@ export const MapInfoExpandButton = memo(function MapInfoExpandButton({ onExpand,
 
   return (
     <Box sx={BOX_STYLES}>
-      <IconButton aria-label={t(TOOLTIP_KEY) as string} tooltip={t(TOOLTIP_KEY) as string} onClick={handleClick} sx={buttonStyles}>
+      <IconButton aria-label={t(TOOLTIP_KEY) || ''} tooltip={t(TOOLTIP_KEY) || ''} onClick={handleClick} sx={buttonStyles}>
         <ExpandIcon expanded={expanded} />
       </IconButton>
     </Box>

@@ -25,7 +25,7 @@ export default function ZoomOut(): JSX.Element {
   return (
     <IconButton
       id="zoomOut"
-      tooltip={t('mapnav.zoomOut') as string}
+      tooltip={t('mapnav.zoomOut') || ''}
       tooltipPlacement="left"
       onClick={() => setZoom(zoom - 0.5)}
       sx={sxClasses.navButton}

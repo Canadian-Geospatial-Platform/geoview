@@ -4,6 +4,7 @@ import { ChartType, GeoChartDatasource } from 'geochart';
 import { LayerApi } from 'geoview-core/geo/layer/layer';
 import { TypeGeochartResultSetEntry } from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
 import { ConfigBaseClass } from 'geoview-core/core/utils/config/validation-classes/config-base-class';
+import { ConfigBaseClass } from 'geoview-core/src/core/utils/config/validation-classes/config-base-class';
 import { PluginGeoChartConfig, GeoViewGeoChartConfig, GeoViewGeoChartConfigLayer } from './geochart-types';
 
 /**

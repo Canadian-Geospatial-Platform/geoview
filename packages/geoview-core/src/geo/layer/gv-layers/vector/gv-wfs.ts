@@ -38,7 +38,7 @@ export class GVWFS extends AbstractGVVector {
     const fieldDefinitions = this.getLayerConfig().getLayerMetadata() as TypeJsonArray;
     const fieldDefinition = fieldDefinitions.find((metadataEntry) => metadataEntry.name === fieldName);
     if (!fieldDefinition) return 'string';
-    const fieldEntryType = (fieldDefinition.type as string).split(':').slice(-1)[0] as string;
+    const fieldEntryType = (fieldDefinition.type as string).split(':').slice(-1)[0];
     if (fieldEntryType === 'date') return 'date';
     if (['int', 'number'].includes(fieldEntryType)) return 'number';
     return 'string';

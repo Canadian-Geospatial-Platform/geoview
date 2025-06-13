@@ -183,7 +183,7 @@ async function renderMap(mapElement: HTMLElement): Promise<MapViewer> {
   const config = new Config(lang);
   const configObj = config.initializeMapConfig(
     mapId,
-    configuration!.map!.listOfGeoviewLayerConfig! as MapConfigLayerEntry[], // TODO: refactor - remove cast after
+    configuration.map.listOfGeoviewLayerConfig as MapConfigLayerEntry[], // TODO: refactor - remove cast after
     (errorKey: string, params: string[]) => {
       // Wait for the map viewer to get loaded in the api
       api

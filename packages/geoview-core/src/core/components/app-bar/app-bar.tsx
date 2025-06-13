@@ -366,8 +366,8 @@ export function AppBar(props: AppBarProps): JSX.Element {
                     <ListItem>
                       <IconButton
                         id={buttonPanel.button.id}
-                        aria-label={t(buttonPanel.button.tooltip!) as string}
-                        tooltip={t(buttonPanel.button.tooltip!) as string}
+                        aria-label={t(buttonPanel.button.tooltip!) || ''}
+                        tooltip={t(buttonPanel.button.tooltip!) || ''}
                         tooltipPlacement="right"
                         className={`buttonFilled ${tabId === buttonPanel.button.id && isOpen ? 'active' : ''}`}
                         size="small"

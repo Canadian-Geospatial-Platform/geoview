@@ -162,7 +162,7 @@ export class WfsLayerConfig extends AbstractGeoviewLayerConfig {
       layerId,
       layerName: layerFound.Title['#text'],
     });
-    return this.createLeafNode(layerConfig, this, parentNode)!;
+    return this.createLeafNode(layerConfig, this, parentNode);
   }
 
   // #endregion OVERRIDE

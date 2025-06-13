@@ -1712,7 +1712,7 @@ export class LayerApi {
     }
 
     const zoom = mapView.getZoom() as number;
-    const inVisibleRange = gvLayer.inVisibleRange(zoom) as boolean;
+    const inVisibleRange = gvLayer.inVisibleRange(zoom);
     MapEventProcessor.setLayerInVisibleRange(this.getMapId(), gvLayer.getLayerPath(), inVisibleRange);
   }
 
@@ -1775,7 +1775,7 @@ export class LayerApi {
         } else {
           // If we get here, something went wrong and we have a sub layer being registered before the parent
           logger.logError(`Sub layer ${layerConfig.layerPath} registered in layer order before parent layer`);
-          MapEventProcessor.addOrderedLayerInfoByConfig(this.getMapId(), layerConfig.parentLayerConfig!);
+          MapEventProcessor.addOrderedLayerInfoByConfig(this.getMapId(), layerConfig.parentLayerConfig);
         }
       } else {
         // Add the orderedLayerInfo for layer that hasn't been set and has no parent layer or geocore placeholder

@@ -87,7 +87,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
    */
   function postcompose(event: Event | BaseEvent): void {
     const evt = event as RenderEvent;
-    const ctx: CanvasRenderingContext2D | WebGLRenderingContext = evt.context! as CanvasRenderingContext2D | WebGLRenderingContext;
+    const ctx: CanvasRenderingContext2D | WebGLRenderingContext = evt.context!;
     if (ctx instanceof WebGLRenderingContext) {
       if (evt.type === 'postrender') {
         ctx.disable(ctx.SCISSOR_TEST);
@@ -108,7 +108,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
    * @returns {Number[]} the array of value for x and y position fot the swiper bar
    */
   const getSwiperStyle = (): number[] => {
-    const style = window.getComputedStyle(swiperRef.current!);
+    const style = window.getComputedStyle(swiperRef.current as HTMLElement);
     const matrix = new DOMMatrixReadOnly(style.transform);
     return [matrix.m41, matrix.m42];
   };

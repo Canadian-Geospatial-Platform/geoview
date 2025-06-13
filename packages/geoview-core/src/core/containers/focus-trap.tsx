@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, MutableRefObject, useMemo, useCallback } from 'react';
+import { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -49,7 +49,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
   // State
   const [open, setOpen] = useState(false);
-  const navigationLinkRef = useRef() as MutableRefObject<string | undefined>;
+  const navigationLinkRef = useRef('');
 
   // Store
   // tracks if the last action was done through a keyboard (map navigation) or mouse (mouse movement)
@@ -120,8 +120,8 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
         setCrosshairActive(false);
       },
       handleKeyDown: (evt: KeyboardEvent) => {
-        if (!ARROW_KEY_CODES.includes(evt.code as string)) {
-          mapElementStore!.style.border = 'unset';
+        if (!ARROW_KEY_CODES.includes(evt.code)) {
+          mapElementStore.style.border = 'unset';
         }
 
         if (evt.code === 'KeyQ' && evt.ctrlKey) {
@@ -171,7 +171,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     setOpen(false);
 
     // The setTimeout is used to ensure the DOM has been updated and the element is ready to receive focus
-    setTimeout(() => document.getElementById(navigationLinkRef.current!)?.focus(), FOCUS_DELAY);
+    setTimeout(() => document.getElementById(navigationLinkRef.current)?.focus(), FOCUS_DELAY);
   }, []);
 
   /**
@@ -227,8 +227,8 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
       container={document.getElementById(focusTrapId)!}
       modalId={focusTrapId}
       open={open}
-      aria-labelledby={t('keyboardnav.focusdialog.title') as string}
-      aria-describedby={t('keyboardnav.focusdialog.title') as string}
+      aria-labelledby={t('keyboardnav.focusdialog.title') || ''}
+      aria-describedby={t('keyboardnav.focusdialog.title') || ''}
       fullScreen={fullScreen}
       sx={sxClasses.trap}
       titleId="wcag-dialog-title"

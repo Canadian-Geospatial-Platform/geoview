@@ -321,7 +321,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
   static getMapState(mapId: string): TypeMapState {
     const mapState = this.getMapStateProtected(mapId);
     return {
-      currentProjection: mapState.currentProjection as TypeValidMapProjectionCodes,
+      currentProjection: mapState.currentProjection,
       currentZoom: mapState.zoom,
       mapCenterCoordinates: mapState.centerCoordinates,
       pointerPosition: mapState.pointerPosition || {
@@ -452,7 +452,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
         number,
         number,
       ];
-      const newProjection = projectionCode as TypeValidMapProjectionCodes;
+      const newProjection = projectionCode;
       const newProjectionOL = Projection.getProjectionFromString(`EPSG:${newProjection}`);
 
       // If maxExtent was provided and native projection, apply
@@ -939,12 +939,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const mapElement = this.getMapViewer(mapId).map;
 
     // replace the KeyboardPan interraction by a new one
-    mapElement!.getInteractions().forEach((interactionItem) => {
+    mapElement.getInteractions().forEach((interactionItem) => {
       if (interactionItem instanceof KeyboardPan) {
-        mapElement!.removeInteraction(interactionItem);
+        mapElement.removeInteraction(interactionItem);
       }
     });
-    mapElement!.addInteraction(new KeyboardPan({ pixelDelta: panDelta }));
+    mapElement.addInteraction(new KeyboardPan({ pixelDelta: panDelta }));
   }
 
   /**
@@ -996,7 +996,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   static async zoomToGeoLocatorLocation(mapId: string, coords: Coordinate, bbox?: Extent): Promise<void> {
-    const indicatorBox = document.getElementsByClassName('ol-overviewmap-box') as HTMLCollectionOf<Element>;
+    const indicatorBox = document.getElementsByClassName('ol-overviewmap-box');
     for (let i = 0; i < indicatorBox.length; i++) {
       (indicatorBox[i] as HTMLElement).style.display = 'none';
     }
@@ -1057,18 +1057,18 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const homeView = this.getMapStateProtected(mapId).homeView || this.getMapStateProtected(mapId).initialView;
 
     // Transform center coordinates and update options if zoomAndCenter are in config
-    if (homeView!.zoomAndCenter) {
-      [options.maxZoom] = homeView!.zoomAndCenter!;
+    if (homeView.zoomAndCenter) {
+      [options.maxZoom] = homeView.zoomAndCenter!;
 
-      const center = homeView!.zoomAndCenter![1];
+      const center = homeView.zoomAndCenter[1];
       const projectedCoords = Projection.transformPoints([center], Projection.PROJECTION_NAMES.LONLAT, `EPSG:${currProjection}`);
 
       extent = [...projectedCoords[0], ...projectedCoords[0]];
     }
 
     // If extent is in config, use it
-    if (homeView!.extent) {
-      const lonlatExtent = homeView!.extent as Extent;
+    if (homeView.extent) {
+      const lonlatExtent = homeView.extent as Extent;
       // If extent is not lon/lat, we assume it is in the map projection and use it as is.
       extent = isExtentLonLat(lonlatExtent)
         ? Projection.transformExtentFromProj(
@@ -1082,7 +1082,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     }
 
     // If layer IDs are in the config, use them
-    if (homeView!.layerIds) extent = this.getMapViewerLayerAPI(mapId).getExtentOfMultipleLayers(homeView!.layerIds);
+    if (homeView.layerIds) extent = this.getMapViewerLayerAPI(mapId).getExtentOfMultipleLayers(homeView.layerIds);
 
     // If extent is not valid, take the default one for the current projection
     if (extent.length !== 4 || extent.includes(Infinity))
@@ -1402,7 +1402,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     else listOfLayerEntryConfig.push(this.#createLayerEntryConfig(mapId, layerPath, isGeocore, overrideGeocoreServiceNames));
 
     // Get initial settings
-    const initialSettings = this.#getInitialSettings(layerEntryConfig!, orderedLayerInfo!, legendLayerInfo!);
+    const initialSettings = this.#getInitialSettings(layerEntryConfig, orderedLayerInfo!, legendLayerInfo!);
 
     // Construct geoview layer config
     const newGeoviewLayerConfig: MapConfigLayerEntry = isGeocore
@@ -1451,7 +1451,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
         .filter((mapLayerEntry) => !!mapLayerEntry);
 
       // Get info for view
-      const projection = this.getMapStateProtected(mapId).currentProjection as TypeValidMapProjectionCodes;
+      const projection = this.getMapStateProtected(mapId).currentProjection;
       const currentView = this.getMapViewer(mapId).map.getView();
       const currentCenter = currentView.getCenter();
       const currentProjection = currentView.getProjection().getCode();
@@ -1520,7 +1520,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
         const selectedLayerLayerPath = LegendEventProcessor.getLayerPanelState(mapId, 'selectedLayerPath');
         if (selectedLayerLayerPath) newMapConfig.footerBar.selectedLayersLayerPath = selectedLayerLayerPath as string;
         const selectedTimeSliderLayerPath = TimeSliderEventProcessor.getTimeSliderSelectedLayer(mapId);
-        if (selectedTimeSliderLayerPath) newMapConfig.footerBar.selectedTimeSliderLayerPath = selectedTimeSliderLayerPath as string;
+        if (selectedTimeSliderLayerPath) newMapConfig.footerBar.selectedTimeSliderLayerPath = selectedTimeSliderLayerPath;
       }
 
       return newMapConfig;

@@ -571,7 +571,7 @@ export abstract class AbstractGeoViewLayer {
       if (!layerGroup) {
         // All children of this level in the tree have the same parent, so we use the first element of the array to retrieve the parent node.
         // eslint-disable-next-line no-param-reassign
-        layerGroup = this.createLayerGroup(listOfLayerEntryConfig[0].parentLayerConfig!, listOfLayerEntryConfig[0].initialSettings!);
+        layerGroup = this.createLayerGroup(listOfLayerEntryConfig[0].parentLayerConfig!, listOfLayerEntryConfig[0].initialSettings);
       }
 
       // TODO: Refactor - Rework this Promise to be "Promise<AbstractBaseLayer>"
@@ -585,7 +585,7 @@ export abstract class AbstractGeoViewLayer {
           // promiseOfLayerCreated.push(Promise.resolve(undefined)); commented unnecessary code
         } else {
           // Create promise and catch possible error
-          const promise = this.#processOneLayerEntry(layerConfig as AbstractBaseLayerEntryConfig).catch((error: unknown) => {
+          const promise = this.#processOneLayerEntry(layerConfig).catch((error: unknown) => {
             // Add a layer load error
             this.addLayerLoadError(formatError(error), layerConfig);
             return undefined;
