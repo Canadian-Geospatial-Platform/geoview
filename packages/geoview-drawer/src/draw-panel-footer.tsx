@@ -161,9 +161,7 @@ export function DrawPanel(props: DrawerProps): JSX.Element {
     });
   }, [Button, config.geomTypes, geomType, handleGeometryTypeChange]);
 
-  // TODO Add EDIT, SNAPPING, TRANSLATION, SCALING? (See MAP INTERACTIONS region in map-viewer for most)
   // TO.DO MEASUREMENTS https://openlayers.org/en/latest/examples/measure.html
-  // TODO Handle transparency / opacity
   // Could use npm package mui-color-input
   return (
     <Box sx={sxClasses.drawer}>
