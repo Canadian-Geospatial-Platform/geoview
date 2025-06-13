@@ -15,7 +15,7 @@ export interface StoresManagerState {
   stores: Record<string, GeoviewStoreType>;
 }
 
-// Log
+// TODO: CLEAN - Remove these temporary logs
 logger.logInfo('Loading stores-manager file.');
 
 export const useStoresManager = createStore<StoresManagerState>(() => ({
@@ -54,7 +54,7 @@ export const addGeoViewStore = (config: TypeMapFeaturesConfig): void => {
     return;
   }
 
-  // Log
+  // TODO: CLEAN - Remove these temporary logs
   logger.logInfo(`Creating the store for map ${config.mapId}`);
 
   // Create the store
@@ -72,6 +72,7 @@ export const addGeoViewStore = (config: TypeMapFeaturesConfig): void => {
 
   mountZustandDevTools(`getViewStore-${config.mapId}`, geoviewStore, geoviewStore.getState().appState.geoviewHTMLElement);
 
+  // TODO: CLEAN - Remove these temporary logs
   logger.logInfo(`Store created for map ${config.mapId}`);
 };
 
