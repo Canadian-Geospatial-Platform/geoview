@@ -1,19 +1,21 @@
 import { TypeJsonObject, toJsonObject, Cast, AnySchemaObject } from 'geoview-core/src/api/config/types/config-types';
-import { FooterPlugin } from 'geoview-core/src/api/plugin/footer-plugin';
-import { TypeTabs } from 'geoview-core/src/ui/tabs/tabs';
-import { DrawIcon } from 'geoview-core/src/ui/icons';
+import { NavBarPlugin, TypeNavBarButtonConfig } from 'geoview-core/src/api/plugin/navbar-plugin';
 
-// import { DrawerEventProcessor } from 'geoview-core/src/api/event-processors/event-processor-children/drawer-event-processor';
-// import { logger } from 'geoview-core/src/core/utils/logger';
+import { logger } from 'geoview-core/src/core/utils/logger';
 
 import schema from '../schema.json';
 import defaultConfig from '../default-config-drawer.json';
-import { DrawPanel } from './draw-panel';
+import { createDrawerButtons } from './draw-navbar';
+
+// TODO Measure Option
+// TODO install package - MUI Colour Picker
+// TODO Add support for RGBA instead of just Hex codes for Opacity/Transparency
+// TODO Add ability to edit drawing
 
 /**
  * Create a class for the plugin instance
  */
-class DrawerPlugin extends FooterPlugin {
+class DrawerPlugin extends NavBarPlugin {
   /**
    * Returns the package schema
    *
@@ -44,10 +46,18 @@ class DrawerPlugin extends FooterPlugin {
         title: 'Draw',
         stopDrawing: 'Stop',
         stopDrawingTooltip: 'Stop Drawing',
-        startDrawing: 'Start',
-        startDrawingTooltip: 'Start Drawing',
+        toggleDrawing: 'Toggle Drawing',
         clear: 'Clear',
         clearTooltip: 'Clear the drawings',
+        fillColour: 'Fill Colour',
+        strokeColour: 'Stroke Colour',
+        strokeWidth: 'Stroke Width',
+        geometryPicker: 'Change geometry type',
+        geometryPickerPanel: 'Select a geometry',
+        point: 'Point',
+        linestring: 'Line',
+        polygon: 'Polygon',
+        circle: 'Circle',
       },
     },
     fr: {
@@ -55,39 +65,34 @@ class DrawerPlugin extends FooterPlugin {
         title: 'Dessiner',
         stopDrawing: 'Arrêter',
         stopDrawingTooltip: 'Arrêter le dessin',
-        startDrawing: 'Commencer',
-        startDrawingTooltip: 'Commencer à dessiner',
+        toggleDrawing: 'Basculer',
         clear: 'Effacer',
         clearTooltip: 'Effacer les dessins',
+        fillColour: 'Couleur de remplissage',
+        strokeColour: 'Couleur du contour',
+        strokeWidth: 'Largeur du contour',
+        geometryPicker: 'Changer le type de géométrie',
+        geometryPickerPanel: 'Sélectionnez une géométrie',
+        point: 'Pointer',
+        linestring: 'Ligne',
+        polygon: 'Polygone',
+        circle: 'Cercle',
       },
     },
   });
 
   /**
-   * Overrides the addition of the Drawer Map Plugin to make sure to set the layer paths from the config into the store.
+   * Overrides the creation of the buttons components to create a record of Buttons with their optional panels.
    */
-  override onAdd(): void {
-    // Initialize the store with drawer provided configuration
-    // DrawerEventProcessor.setLayerPaths(this.pluginProps.mapId, this.configObj.layers);
-
-    // Call parent
-    super.onAdd();
+  override onCreateButtonConfigs(): Record<string, TypeNavBarButtonConfig> {
+    // Create all drawer buttons
+    logger.logInfo('Drawer Plugin - onAdd');
+    return createDrawerButtons(this.configObj);
   }
 
-  /**
-   * Overrides the creation of the content properties of this Drawer Map Plugin.
-   * @returns {TypeTabs} The TypeTabs for the Drawer Plugin
-   */
-  override onCreateContentProps(): TypeTabs {
-    const content = <DrawPanel viewer={this.pluginProps.viewer} config={this.configObj} />;
-
-    return {
-      id: 'drawer',
-      value: this.value!,
-      label: 'drawer.title',
-      icon: <DrawIcon />,
-      content,
-    };
+  override onAdd(): void {
+    // Call parent
+    super.onAdd();
   }
 
   /**

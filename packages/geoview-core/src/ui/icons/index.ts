@@ -77,6 +77,7 @@ export {
   MultipleStop as ProjectionIcon,
   Opacity as OpacityIcon,
   OpenInBrowser as OpenInBrowserIcon,
+  Palette as PaletteIcon,
   Pause as PauseIcon,
   PlayArrow as PlayArrowIcon,
   Public as PublicIcon,

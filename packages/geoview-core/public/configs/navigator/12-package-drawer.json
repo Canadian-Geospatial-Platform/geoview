@@ -22,12 +22,11 @@
   "footerBar": {
     "tabs": {
       "core": [
-        "legend",
-        "drawer"
+        "legend"
       ]
-    },
-    "selectedTab": "drawer"
+    }
   },
+  "navBar": ["drawer"],
   "corePackages": ["drawer"],
   "externalPackages": [],
   "corePackagesConfig": [{
