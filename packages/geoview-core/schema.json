@@ -1980,7 +1980,8 @@
           "home",
           "location",
           "projection",
-          "basemap-select"
+          "basemap-select",
+          "drawer"
         ]
       },
       "default": [

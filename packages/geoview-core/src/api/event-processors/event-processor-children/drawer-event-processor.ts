@@ -1,7 +1,10 @@
-import { IDrawerState } from '@/core/stores/store-interface-and-intial-values/drawer-state';
+import { Style, Stroke, Fill, Circle } from 'ol/style';
+import { DrawEvent } from 'ol/interaction/Draw';
+import { IDrawerState, StyleProps } from '@/core/stores/store-interface-and-intial-values/drawer-state';
 // import { logger } from '@/core/utils/logger';
 
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
+import { MapEventProcessor } from './map-event-processor';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -26,6 +29,128 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   protected static getDrawerState(mapId: string): IDrawerState | undefined {
     // Return the drawer state when it exists
     return super.getState(mapId).drawerState;
+  }
+
+  /**
+   * Starts a drawing operation with the specified geometry type
+   * @param {string} mapId The map ID
+   * @param {string} geomType The geometry type to draw (optional, uses current state if not provided)
+   * @param {StyleProps} styleInput Optional style properties to use
+   */
+  public static startDrawing(mapId: string, geomType?: string, styleInput?: StyleProps): void {
+    const state = this.getDrawerState(mapId);
+    if (!state) return;
+
+    // Get the map viewer instance
+    const viewer = MapEventProcessor.getMapViewer(mapId);
+    if (!viewer) return;
+
+    // Get current state values if not provided
+    const currentGeomType = geomType || state.geomType;
+    const currentStyle = styleInput || state.style;
+
+    // If drawing already, stop and restart as it's likely a style change
+    if (this.getDrawerState(mapId)?.drawInstance) {
+      this.stopDrawing(mapId);
+    }
+
+    // Initialize drawing interaction
+    const draw = viewer.initDrawInteractions(`draw-${currentGeomType}`, currentGeomType, currentStyle);
+
+    // Set up draw end event handler
+    draw.onDrawEnd((_sender: unknown, event: DrawEvent): void => {
+      const { feature } = event;
+
+      // Create a style based on current color settings
+      let featureStyle;
+
+      if (currentGeomType === 'Point') {
+        // For points, use a circle style
+        featureStyle = new Style({
+          image: new Circle({
+            radius: currentStyle.strokeWidth * 3 || 6,
+            fill: new Fill({
+              color: currentStyle.fillColor,
+            }),
+            stroke: new Stroke({
+              color: currentStyle.strokeColor,
+              width: currentStyle.strokeWidth || 1.3,
+            }),
+          }),
+        });
+      } else {
+        // For other geometry types
+        featureStyle = new Style({
+          stroke: new Stroke({
+            color: currentStyle.strokeColor,
+            width: currentStyle.strokeWidth || 1.3,
+          }),
+          fill: new Fill({
+            color: currentStyle.fillColor,
+          }),
+        });
+      }
+
+      // Apply the style to the feature
+      feature.setStyle(featureStyle);
+    });
+
+    // Update state
+    state.actions.setDrawInstance(draw);
+    if (geomType) {
+      state.actions.setGeomType(geomType);
+    }
+  }
+
+  /**
+   * Stops the current drawing operation
+   * @param {string} mapId The map ID
+   */
+  public static stopDrawing(mapId: string): void {
+    const state = this.getDrawerState(mapId);
+    if (!state) return;
+
+    // Update state
+    state.drawInstance?.stopInteraction();
+    state.actions.removeDrawInstance();
+  }
+
+  /**
+   * Toggles the drawing state
+   * @param {string} mapId The map ID
+   */
+  public static toggleDrawing(mapId: string): void {
+    const state = this.getDrawerState(mapId);
+    if (!state) return;
+
+    if (state.actions.getIsDrawing()) {
+      this.stopDrawing(mapId);
+    } else {
+      this.startDrawing(mapId);
+    }
+  }
+
+  /**
+   * Clears all drawings from the map
+   * @param {string} mapId The map ID
+   * @param {string[]} geomTypes Array of geometry types to clear
+   */
+  public static clearDrawings(mapId: string, geomTypes?: string[]): void {
+    const state = this.getDrawerState(mapId);
+    if (!state) return;
+
+    // Get the map viewer instance
+    const viewer = MapEventProcessor.getMapViewer(mapId);
+    if (!viewer) return;
+
+    const typesToClear = geomTypes || ['Point', 'LineString', 'Polygon', 'Circle'];
+
+    // TODO Need to only clear groups that exist
+    // Clear geometries for each type
+    typesToClear.forEach((type) => {
+      const groupKey = `draw-${type}`;
+      viewer.layer.geometry.deleteGeometriesFromGroup(groupKey);
+    });
   }
 
   // #endregion
