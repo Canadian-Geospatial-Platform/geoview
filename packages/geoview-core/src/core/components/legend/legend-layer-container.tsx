@@ -82,7 +82,7 @@ export const CollapsibleContent = memo(function CollapsibleContent({
   if (isWMSWithLegend) {
     return (
       <WMSLegendImage
-        imgSrc={layerIcons[0].iconImage || ''}
+        imgSrc={layerIcons[0].iconImage!}
         initLightBox={initLightBox}
         legendExpanded={!isCollapsed}
         sxClasses={sxClasses}

@@ -264,7 +264,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
     logger.logTraceUseMemo('SINGLE-LAYER - memoEditModeButtons', layerPath);
 
     if (displayState === 'remove') {
-      return <DeleteUndoButton layerPath={layerPath} layerId={layerId || ''} layerRemovable={layerControls?.remove !== false} />;
+      return <DeleteUndoButton layerPath={layerPath} layerId={layerId!} layerRemovable={layerControls?.remove !== false} />;
     }
     if (displayState === 'order') {
       return (
@@ -329,7 +329,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
       return null;
     }
     if (layerStatus === 'error') {
-      return <DeleteUndoButton layerPath={layerPath} layerId={layerId || ''} layerRemovable={layerControls?.remove !== false} />;
+      return <DeleteUndoButton layerPath={layerPath} layerId={layerId!} layerRemovable={layerControls?.remove !== false} />;
     }
 
     if (isLayerAlwaysVisible) {
@@ -338,7 +338,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
           <IconButton
             edge="end"
             size="small"
-            tooltip={t('layers.visibilityIsAlways') || ''}
+            tooltip={t('layers.visibilityIsAlways')!}
             className="buttonOutline"
             disabled={!inVisibleRange}
           >
@@ -357,7 +357,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
         <IconButton
           edge="end"
           size="small"
-          tooltip={t('layers.zoomVisibleScale') || ''}
+          tooltip={t('layers.zoomVisibleScale')!}
           sx={{ display: isZoomToVisibleScaleCapable ? 'block' : 'none' }}
           onClick={handleZoomToLayerVisibleScale}
         >
@@ -368,7 +368,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
             edge={inVisibleRange ? false : 'end'}
             size="small"
             onClick={handleToggleVisibility}
-            tooltip={t('layers.toggleVisibility') || ''}
+            tooltip={t('layers.toggleVisibility')!}
             className="buttonOutline"
             disabled={!inVisibleRange}
           >
@@ -405,7 +405,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
           edge="end"
           size="small"
           onClick={handleExpandGroupClick}
-          tooltip={t('layers.toggleCollapse') || ''}
+          tooltip={t('layers.toggleCollapse')!}
           className="buttonOutline"
         >
           {legendExpanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
