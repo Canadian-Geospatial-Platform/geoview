@@ -54,6 +54,7 @@ const multipleHtmlPluginsOutliers = glob.sync('./public/templates/outliers/*.htm
   });
 });
 
+// TODO: I think we can remove config.resolve.alias.@config line
 const config = {
   entry: {
     'cgpv-main': './src/app.tsx',

@@ -83,6 +83,14 @@ export abstract class AbstractPlugin {
   }
 
   /**
+   * Gets the config
+   * @returns {TypeJsonObject} The config
+   */
+  getConfig(): unknown {
+    return this.configObj;
+  }
+
+  /**
    * Returns the MapViewer used by this Plugin
    * @returns MapViewer The MapViewer used by this Plugin
    */

@@ -6,7 +6,7 @@ import { logger } from 'geoview-core/src/core/utils/logger';
 
 import schema from '../schema.json';
 import defaultConfig from '../default-config-swiper.json';
-import { Swiper } from './swiper';
+import { ConfigProps, Swiper } from './swiper';
 
 /**
  * Create a class for the plugin instance
@@ -52,6 +52,15 @@ class SwiperPlugin extends MapPlugin {
   }
 
   /**
+   * Overrides the getConfig in order to return the right type.
+   * @returns {ConfigProps} The Swiper config
+   */
+  override getConfig(): ConfigProps {
+    // Redirect
+    return super.getConfig() as unknown as ConfigProps;
+  }
+
+  /**
    * Overrides the addition of the Swiper Map Plugin to make sure to set the layer paths from the config into the store.
    */
   override onAdd(): void {
@@ -59,7 +68,7 @@ class SwiperPlugin extends MapPlugin {
     super.onAdd();
 
     // Initialize the store with swiper provided configuration
-    SwiperEventProcessor.setLayerPaths(this.pluginProps.mapId, this.configObj.layers);
+    SwiperEventProcessor.setLayerPaths(this.pluginProps.mapId, this.getConfig().layers);
   }
 
   /**
@@ -67,7 +76,7 @@ class SwiperPlugin extends MapPlugin {
    * @returns {JSX.Element} The JSX.Element representing the Swiper Plugin
    */
   override onCreateContent(): JSX.Element {
-    return <Swiper viewer={this.pluginProps.viewer} config={this.configObj} />;
+    return <Swiper viewer={this.pluginProps.viewer!} config={this.getConfig()} />;
   }
 
   /**
