@@ -102,6 +102,7 @@ const config = {
     },
     alias: {
       '@': path.resolve(__dirname, 'src'),
+      'geoview-core': path.resolve(__dirname, 'src'),
       '@public': path.resolve(__dirname, 'public'),
       '@config': path.resolve(__dirname, 'src/api/config'),
     },

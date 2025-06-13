@@ -379,6 +379,12 @@ export class MapViewer {
     });
   }
 
+  /**
+   * Retrieves the configuration object for a specific core plugin from the map's features configuration.
+   *
+   * @param {string} pluginId - The ID of the core plugin to look up.
+   * @returns {TypeJsonObject | undefined} The configuration object for the specified plugin, or `undefined` if not found.
+   */
   getCorePackageConfig(pluginId: string): TypeJsonObject | undefined {
     // If no corePackagesConfig
     if (!this.mapFeaturesConfig.corePackagesConfig) return undefined;
@@ -1546,37 +1552,25 @@ export class MapViewer {
       logger.logPromiseFailed('in AppEventProcessor.setGuide in #readyMap', error);
     });
 
-    logger.logInfo(`Map is ready. Layers are still being processed... 2`, this.mapId);
-
     // Check how load in milliseconds has it been processing thus far
     const elapsedMilliseconds = Date.now() - this.#checkMapReadyStartTime!;
 
     // Wait at least the minimum delay before officializing the map as loaded for the UI
     await delay(MapViewer.#MIN_DELAY_LOADING - elapsedMilliseconds); // Negative value will simply resolve immediately
 
-    logger.logInfo(`Map is ready. Layers are still being processed... 3`, this.mapId);
-
     // Save in the store that the map is loaded
     // GV This removes the spinning circle overlay and starts showing the map correctly in the html dom
     MapEventProcessor.setMapLoaded(this.mapId, true);
 
-    logger.logInfo(`Map is ready. Layers are still being processed... 4`, this.mapId);
-
     // Save in the store that the map is properly being displayed now
     MapEventProcessor.setMapDisplayed(this.mapId);
-
-    logger.logInfo(`Map is ready. Layers are still being processed... 4.5`, this.mapId);
 
     // Update the map controls based on the original map state (equivalent of initMapControls, just later in the process)
     await this.#updateMapControls();
 
-    logger.logInfo(`Map is ready. Layers are still being processed... 5`, this.mapId);
-
     // Is ready
     this.#mapReady = true;
     this.#emitMapReady();
-
-    logger.logInfo(`Map is ready. Layers are still being processed... 6`, this.mapId);
 
     // Register the map handlers
     this.#registerMapHandlers(this.map);
@@ -1584,12 +1578,8 @@ export class MapViewer {
     // Register the view handlers
     this.#registerViewHandlers(this.getView());
 
-    logger.logInfo(`Map is ready. Layers are still being processed... 7`, this.mapId);
-
     // Await for all layers to be 'processed'
     await this.#checkMapLayersProcessed();
-
-    logger.logInfo(`Map is ready. Layers are still being processed... 8`, this.mapId);
 
     // Zoom to extent if necessary, but don't wait for it
     this.#zoomOnExtentMaybe().catch((error: unknown) => {
@@ -1601,8 +1591,6 @@ export class MapViewer {
     const selectedLayerPath =
       this.mapFeaturesConfig.footerBar?.selectedLayersLayerPath || this.mapFeaturesConfig.appBar?.selectedLayersLayerPath;
     if (selectedLayerPath) LegendEventProcessor.setSelectedLayersTabLayer(this.mapId, selectedLayerPath);
-
-    logger.logInfo(`Map is ready. Layers are still being processed... 9`, this.mapId);
 
     // Await for all layers to be 'loaded'
     await this.#checkMapLayersLoaded();

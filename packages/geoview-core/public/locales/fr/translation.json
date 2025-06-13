@@ -310,6 +310,7 @@
     "generic": "Une erreur est survenue, contactez nous ou regardez dans la console pour plus de détails.",
     "layer": {
       "layerNotFound": "La couche à l'emplacement '__param__' est introuvable.",
+      "wrongType": "La couche '__param__' n'est pas du type attendu.",
       "notAGeoJsonLayer": "Ce n'est pas une couche GeoJSON pour la couche '__param__'.",
       "notAnEsriDynamicLayer": "Ce n'est pas une couche dynamique Esri pour la couche '__param__'.",
       "notAFeatureLayer": "L'identifiant de couche n'est pas une couche d'entités '__param__'.",

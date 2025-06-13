@@ -6,9 +6,11 @@
   "keywords": [
     "custom-legend"
   ],
+  "scripts": {
+    "build": "tsc --build"
+  },
   "author": "Ahmed-yacin Farah",
   "license": "MIT",
-  "dependencies": {},
   "peerDependencies": {
     "geoview-core": "workspace:~1.0.0",
     "react": "^18.3.1",
@@ -24,8 +26,6 @@
     "@babel/runtime": "^7.25.7",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
     "typescript": "^5.6.3"
   },
   "externals": {

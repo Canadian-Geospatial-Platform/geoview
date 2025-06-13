@@ -1,10 +1,11 @@
-import { AnySchemaObject, TypeJsonObject, toJsonObject } from 'geoview-core/src/api/config/types/config-types';
-import { FooterPlugin } from 'geoview-core/src/api/plugin/footer-plugin';
-import { TypeTabs } from 'geoview-core/src/ui/tabs/tabs';
-import { ChartIcon } from 'geoview-core/src/ui/icons';
+import { AnySchemaObject, TypeJsonObject, toJsonObject } from 'geoview-core/api/config/types/config-types';
+import { FooterPlugin } from 'geoview-core/api/plugin/footer-plugin';
+import { TypeTabs } from 'geoview-core/ui/tabs/tabs';
+import { ChartIcon } from 'geoview-core/ui/icons';
 
-import { GeochartEventProcessor } from 'geoview-core/src/api/event-processors/event-processor-children/geochart-event-processor';
-import { isObjectEmpty } from 'geoview-core/src/core/utils/utilities';
+import { GeochartEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/geochart-event-processor';
+import { isObjectEmpty } from 'geoview-core/core/utils/utilities';
+import { GeoChartConfig } from 'geoview-core/core/utils/config/reader/uuid-config-reader';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-geochart.json';
 import { GeoChartPanel } from './geochart-panel';
@@ -62,6 +63,15 @@ class GeoChartFooterPlugin extends FooterPlugin {
   }
 
   /**
+   * Overrides the getConfig in order to return the right type.
+   * @returns {GeoChartConfig} The Geochart config
+   */
+  override getConfig(): GeoChartConfig {
+    // Redirect
+    return super.getConfig() as GeoChartConfig;
+  }
+
+  /**
    * Overrides the addition of the GeoChart Footer Plugin to make sure to set the chart configs into the store.
    */
   override onAdd(): void {
@@ -69,7 +79,8 @@ class GeoChartFooterPlugin extends FooterPlugin {
     super.onAdd();
 
     // Initialize the store with geochart provided configuration if there is one
-    if (!isObjectEmpty(this.configObj.charts)) GeochartEventProcessor.setGeochartCharts(this.pluginProps.mapId, this.configObj.charts);
+    if (!isObjectEmpty(this.getConfig().charts))
+      GeochartEventProcessor.setGeochartCharts(this.pluginProps.mapId, this.getConfig().charts as unknown as GeoChartConfig[]);
   }
 
   /**

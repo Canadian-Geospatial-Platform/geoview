@@ -24,7 +24,7 @@ export class SwiperEventProcessor extends AbstractEventProcessor {
    *                                       This helps the developers making sure the existence is checked.
    */
   // TODO: Cleanup - No more "| undefined" shenanigans, remove it and remove comment, it's too risky for race conditions to have it 'maybe' there..
-  // TO.DOCONT: Also clear the thing for geochart-event-processor
+  // TO.DOCONT: Do the same thing for geochart-event-processor
   protected static getSwiperState(mapId: string): ISwiperState | undefined {
     // Return the swiper state when it exists
     return super.getState(mapId).swiperState;
