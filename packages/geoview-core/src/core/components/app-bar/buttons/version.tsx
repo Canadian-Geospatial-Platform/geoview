@@ -98,8 +98,8 @@ export default function Version(): JSX.Element {
       <Box>
         <IconButton
           id="version-button"
-          tooltip={t('appbar.version') || ''}
-          aria-label={t('appbar.version') || ''}
+          tooltip={t('appbar.version')!}
+          aria-label={t('appbar.version')!}
           tooltipPlacement="bottom-end"
           onClick={handleOpenPopover}
           className={`${interaction === 'dynamic' ? 'buttonFilled' : 'style4'} ${open ? 'active' : ''}`}

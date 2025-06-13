@@ -166,7 +166,7 @@ export const Guide = memo(function GuidePanel({ fullWidth = false, containerType
     <Box sx={sxClasses.guideContainer}>
       <Layout
         containerType={containerType}
-        selectedLayerPath={selectedLayerPath || ''}
+        selectedLayerPath={selectedLayerPath}
         layerList={layersList}
         onLayerListClicked={handleGuideItemClick}
         fullWidth={fullWidth}
