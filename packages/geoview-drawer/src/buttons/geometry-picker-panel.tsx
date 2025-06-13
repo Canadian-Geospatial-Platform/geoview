@@ -3,7 +3,6 @@ import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interf
 import { useDrawerActions } from 'geoview-core/src/core/stores/store-interface-and-intial-values/drawer-state';
 import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
 
-import { Button, List, ListItem } from 'geoview-core/src/ui';
 // import { logger } from 'geoview-core/src/core/utils/logger';
 
 export interface GeometryPickerPanelProps {
@@ -19,6 +18,7 @@ export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JS
   const { geomTypes } = props;
   const { cgpv } = window as TypeWindow;
   const { useCallback } = cgpv.react;
+  const { Button, List, ListItem } = cgpv.ui.elements;
   // const { RadioButtonUncheckedIcon, LinearScaleIcon, PolygonIcon, CircleIcon } = cgpv.ui.elements;
 
   // Get store values

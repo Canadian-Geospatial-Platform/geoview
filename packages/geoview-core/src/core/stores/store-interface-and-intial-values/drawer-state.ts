@@ -154,6 +154,9 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
             geomType,
           },
         });
+        if (get().drawerState.drawInstance !== undefined) {
+          DrawerEventProcessor.startDrawing(get().mapId);
+        }
       },
 
       setStyle: (style: StyleProps) => {
@@ -175,7 +178,9 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
             },
           },
         });
-        DrawerEventProcessor.startDrawing(get().mapId);
+        if (get().drawerState.drawInstance !== undefined) {
+          DrawerEventProcessor.startDrawing(get().mapId);
+        }
       },
 
       setStrokeColor: (strokeColor: string) => {
@@ -188,7 +193,9 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
             },
           },
         });
-        DrawerEventProcessor.startDrawing(get().mapId);
+        if (get().drawerState.drawInstance !== undefined) {
+          DrawerEventProcessor.startDrawing(get().mapId);
+        }
       },
 
       setStrokeWidth: (strokeWidth: number) => {
@@ -201,7 +208,9 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
             },
           },
         });
-        DrawerEventProcessor.startDrawing(get().mapId);
+        if (get().drawerState.drawInstance !== undefined) {
+          DrawerEventProcessor.startDrawing(get().mapId);
+        }
       },
 
       setDrawInstance: (drawInstance: Draw) => {

@@ -6,6 +6,7 @@ import { logger } from 'geoview-core/src/core/utils/logger';
 import Draw from './buttons/draw';
 import GeometryPicker from './buttons/geometry-picker';
 import GeometryPickerPanel from './buttons/geometry-picker-panel';
+import { StyleButton, StylePanel } from './buttons/style';
 // import GeometryPickerButton from './buttons/geometry-picker-button';
 import Clear from './buttons/clear';
 
@@ -13,10 +14,19 @@ type ConfigProps = {
   geomTypes: string[];
 };
 
+export function CloseButton(): JSX.Element {
+  const { CloseIcon, IconButton } = (window as TypeWindow).cgpv.ui.elements;
+  return (
+    <IconButton>
+      <CloseIcon />
+    </IconButton>
+  );
+}
+
 export function createDrawerButtons(config: ConfigProps): Record<string, TypeNavBarButtonConfig> {
   const { cgpv } = window as TypeWindow;
   const { geomTypes } = config;
-  const { CloseIcon } = cgpv.ui.elements;
+  // const { CloseIcon } = cgpv.ui.elements;
   const buttonConfigs: Record<string, TypeNavBarButtonConfig> = {};
 
   logger.logInfo('Drawer Plugin - Creating draw button ...');
@@ -44,8 +54,25 @@ export function createDrawerButtons(config: ConfigProps): Record<string, TypeNav
     groupName: 'drawer',
     panelProps: {
       title: 'drawer.geometryPicker',
-      icon: cgpv.react.createElement(CloseIcon),
+      icon: cgpv.react.createElement(CloseButton),
       content: cgpv.react.createElement(GeometryPickerPanel, { geomTypes }),
+      visible: false,
+    },
+  };
+
+  buttonConfigs.style = {
+    buttonProps: {
+      id: 'drawer-style',
+      tooltip: 'drawer.style',
+      tooltipPlacement: 'left',
+      children: cgpv.react.createElement(StyleButton),
+      visible: true,
+    },
+    groupName: 'drawer',
+    panelProps: {
+      title: 'drawer.style',
+      icon: cgpv.react.createElement(CloseButton),
+      content: cgpv.react.createElement(StylePanel, { geomTypes }),
       visible: false,
     },
   };

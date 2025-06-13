@@ -1,7 +1,6 @@
 import { TypeWindow } from 'geoview-core';
 import { useDrawerGeomType } from 'geoview-core/src/core/stores/store-interface-and-intial-values/drawer-state';
 
-import { IconButton, Button } from 'geoview-core/src/ui';
 // import { logger } from 'geoview-core/src/core/utils/logger';
 
 /**
@@ -11,6 +10,7 @@ import { IconButton, Button } from 'geoview-core/src/ui';
  */
 export default function GeometryPicker(): JSX.Element {
   const { cgpv } = window as TypeWindow;
+  const { IconButton, Button } = cgpv.ui.elements;
   // const { RadioButtonUncheckedIcon, LinearScaleIcon, PolygonIcon, CircleIcon } = cgpv.ui.elements;
 
   // Get store values

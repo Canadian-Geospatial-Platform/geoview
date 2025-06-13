@@ -145,11 +145,12 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
     const typesToClear = geomTypes || ['Point', 'LineString', 'Polygon', 'Circle'];
 
-    // TODO Need to only clear groups that exist
     // Clear geometries for each type
     typesToClear.forEach((type) => {
       const groupKey = `draw-${type}`;
-      viewer.layer.geometry.deleteGeometriesFromGroup(groupKey);
+      if (viewer.layer.geometry.geometryGroups.find((group) => group.geometryGroupId === groupKey) !== undefined) {
+        viewer.layer.geometry.deleteGeometriesFromGroup(groupKey);
+      }
     });
   }
 
