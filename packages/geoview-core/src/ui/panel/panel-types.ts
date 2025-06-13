@@ -29,7 +29,7 @@ export type TypePanelProps = {
   /** Width of the panel. */
   width: string | number;
   /** Panel header icon. */
-  icon?: ReactNode;
+  icon: ReactNode;
   /** Panel header title. */
   title: string | TypeJsonValue;
   /** Panel body content. */
