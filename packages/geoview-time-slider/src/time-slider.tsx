@@ -261,8 +261,8 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
     // If slider cycle is active, pause before advancing to next increment
     if (isPlaying) {
-      if (reversed) playIntervalRef.current = window.setTimeout(() => moveBack(), delay);
-      else playIntervalRef.current = window.setTimeout(() => moveForward(), delay);
+      if (reversed) playIntervalRef.current = window.setTimeout(moveBack, delay);
+      else playIntervalRef.current = window.setTimeout(moveForward, delay);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [values, filtering, reversed, locked]);
@@ -383,153 +383,161 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   }
 
   return (
-    <Grid container spacing={2} sx={{ padding: '10px' }}>
-      {/* Header with title and checkbox */}
-      <Grid size={{ xs: 9 }}>
-        <Typography component="div" sx={{ ...sxClasses.panelHeaders, paddingLeft: '20px', paddingTop: '10px' }}>
-          {`${title || name}`}
-          {displayPattern[0] === undefined && ` (${DateMgt.formatDate(defaultValue, 'YYYY-MM-DD')})`}
-        </Typography>
-      </Grid>
-      <Grid size={{ xs: 3 }} sx={{ textAlign: 'right', marginRight: '25px' }}>
-        <Tooltip
-          title={
-            filtering
-              ? getLocalizedMessage(displayLanguage, 'timeSlider.slider.disableFilter')
-              : getLocalizedMessage(displayLanguage, 'timeSlider.slider.enableFilter')
-          }
-          placement="top"
-          enterDelay={1000}
-        >
-          <Checkbox checked={filtering} onChange={handleCheckbox} />
-        </Tooltip>
-      </Grid>
-
-      {/* Slider */}
-      <Grid size={{ xs: 12 }}>
-        <Box sx={{ textAlign: 'center', paddingTop: '20px' }}>
-          <Slider
-            key={values[1] ? values[1] + values[0] : values[0]}
-            sx={{ width: '80%', color: 'primary.main' }}
-            min={minAndMax[0]}
-            max={minAndMax[1]}
-            value={values}
-            marks={sliderMarks}
-            step={discreteValues ? step || 0.1 : null}
-            onChangeCommitted={handleSliderChange}
-            valueLabelFormat={handleLabelFormat}
-          />
-        </Box>
-      </Grid>
-
-      {/* Control buttons */}
-      <Grid size={{ xs: 12 }}>
-        <Box sx={{ textAlign: 'center', paddingTop: '20px' }}>
-          {!singleHandle && (
-            <IconButton className="buttonOutline" aria-label={returnLockTooltip()} title={returnLockTooltip()} onClick={handleLock}>
-              {locked ? <LockIcon /> : <LockOpenIcon />}
-            </IconButton>
-          )}
-
-          <IconButton
-            className="buttonOutline"
-            aria-label={getLocalizedMessage(displayLanguage, 'timeSlider.slider.back') as string}
-            title={getLocalizedMessage(displayLanguage, 'timeSlider.slider.back') as string}
-            disabled={isPlaying || !filtering}
-            onClick={handleBack}
-          >
-            <ArrowLeftIcon />
-          </IconButton>
-
-          <IconButton
-            className="buttonOutline"
-            aria-label={
-              isPlaying
-                ? (getLocalizedMessage(displayLanguage, 'timeSlider.slider.pauseAnimation') as string)
-                : (getLocalizedMessage(displayLanguage, 'timeSlider.slider.playAnimation') as string)
-            }
-            title={
-              isPlaying
-                ? (getLocalizedMessage(displayLanguage, 'timeSlider.slider.pauseAnimation') as string)
-                : (getLocalizedMessage(displayLanguage, 'timeSlider.slider.playAnimation') as string)
-            }
-            disabled={!filtering}
-            onClick={handlePlay}
-          >
-            {!isPlaying ? <PlayArrowIcon /> : <PauseIcon />}
-          </IconButton>
-
-          <IconButton
-            className="buttonOutline"
-            aria-label={getLocalizedMessage(displayLanguage, 'timeSlider.slider.forward') as string}
-            title={getLocalizedMessage(displayLanguage, 'timeSlider.slider.forward') as string}
-            disabled={isPlaying || !filtering}
-            onClick={handleForward}
-          >
-            <ArrowRightIcon />
-          </IconButton>
-
-          <IconButton
-            className="buttonOutline"
-            aria-label={getLocalizedMessage(displayLanguage, 'timeSlider.slider.changeDirection') as string}
-            title={getLocalizedMessage(displayLanguage, 'timeSlider.slider.changeDirection') as string}
-            onClick={handleReverse}
-          >
-            {reversed ? <SwitchRightIcon /> : <SwitchLeftIcon />}
-          </IconButton>
-
-          <Box component="span" sx={{ paddingLeft: '10px' }}>
-            <FormControl sx={{ width: '100px' }}>
-              <InputLabel variant="standard">{getLocalizedMessage(displayLanguage, 'timeSlider.slider.timeDelay')}</InputLabel>
-              <NativeSelect
-                defaultValue={delay}
-                inputProps={{
-                  name: 'timeDelay',
-                  onChange: handleTimeChange,
-                }}
+    <Grid>
+      <Box sx={{ padding: '10px 10px' }}>
+        <Grid container sx={{ ...sxClasses.rightPanelBtnHolder, flexWrap: 'nowrap' }}>
+          <Grid size={{ xs: 9 }}>
+            <Typography component="div" sx={{ ...sxClasses.panelHeaders, paddingLeft: '20px', paddingTop: '10px' }}>
+              {`${title || name}`}
+              {displayPattern[0] === undefined && ` (${DateMgt.formatDate(defaultValue, 'YYYY-MM-DD')})`}
+            </Typography>
+          </Grid>
+          <Grid size={{ xs: 3 }}>
+            <Box sx={{ textAlign: 'right', marginRight: '25px' }}>
+              <Tooltip
+                title={
+                  filtering
+                    ? getLocalizedMessage(displayLanguage, 'timeSlider.slider.disableFilter')
+                    : getLocalizedMessage(displayLanguage, 'timeSlider.slider.enableFilter')
+                }
+                placement="top"
+                enterDelay={1000}
               >
-                <option value={500}>0.5s</option>
-                <option value={750}>0.75s</option>
-                <option value={1000}>1.0s</option>
-                <option value={1500}>1.5s</option>
-                <option value={2000}>2.0s</option>
-                <option value={3000}>3.0s</option>
-                <option value={5000}>5.0s</option>
-              </NativeSelect>
-            </FormControl>
+                <Checkbox checked={filtering} onChange={handleCheckbox} />
+              </Tooltip>
+            </Box>
+          </Grid>
+        </Grid>
+        <Grid size={{ xs: 12 }}>
+          <Box sx={{ textAlign: 'center', paddingTop: '20px' }}>
+            <Slider
+              key={values[1] ? values[1] + values[0] : values[0]}
+              style={{ width: '80%', color: 'primary' }}
+              min={minAndMax[0]}
+              max={minAndMax[1]}
+              value={values}
+              marks={sliderMarks}
+              step={discreteValues ? step || 0.1 : null}
+              onChangeCommitted={handleSliderChange}
+              onValueLabelFormat={handleLabelFormat}
+            />
           </Box>
+        </Grid>
+        <Grid size={{ xs: 12 }}>
+          <Box sx={{ textAlign: 'center', paddingTop: '20px' }}>
+            {!singleHandle && (
+              <IconButton
+                className="buttonOutline"
+                aria-label={returnLockTooltip()}
+                tooltip={returnLockTooltip()}
+                tooltipPlacement="top"
+                onClick={handleLock}
+              >
+                {locked ? <LockIcon /> : <LockOpenIcon />}
+              </IconButton>
+            )}
 
-          {singleHandle && discreteValues && (
+            <IconButton
+              className="buttonOutline"
+              aria-label={getLocalizedMessage(displayLanguage, 'timeSlider.slider.back') as string}
+              tooltip={getLocalizedMessage(displayLanguage, 'timeSlider.slider.back') as string}
+              tooltipPlacement="top"
+              disabled={isPlaying || !filtering}
+              onClick={handleBack}
+            >
+              <ArrowLeftIcon />
+            </IconButton>
+
+            <IconButton
+              className="buttonOutline"
+              aria-label={
+                isPlaying
+                  ? (getLocalizedMessage(displayLanguage, 'timeSlider.slider.pauseAnimation') as string)
+                  : (getLocalizedMessage(displayLanguage, 'timeSlider.slider.playAnimation') as string)
+              }
+              tooltip={
+                isPlaying
+                  ? (getLocalizedMessage(displayLanguage, 'timeSlider.slider.pauseAnimation') as string)
+                  : (getLocalizedMessage(displayLanguage, 'timeSlider.slider.playAnimation') as string)
+              }
+              tooltipPlacement="top"
+              disabled={!filtering}
+              onClick={handlePlay}
+            >
+              {!isPlaying ? <PlayArrowIcon /> : <PauseIcon />}
+            </IconButton>
+
+            <IconButton
+              className="buttonOutline"
+              aria-label={getLocalizedMessage(displayLanguage, 'timeSlider.slider.forward') as string}
+              tooltip={getLocalizedMessage(displayLanguage, 'timeSlider.slider.forward') as string}
+              tooltipPlacement="top"
+              disabled={isPlaying || !filtering}
+              onClick={handleForward}
+            >
+              <ArrowRightIcon />
+            </IconButton>
+
+            <IconButton
+              className="buttonOutline"
+              aria-label={getLocalizedMessage(displayLanguage, 'timeSlider.slider.changeDirection') as string}
+              tooltip={getLocalizedMessage(displayLanguage, 'timeSlider.slider.changeDirection') as string}
+              tooltipPlacement="top"
+              onClick={handleReverse}
+            >
+              {reversed ? <SwitchRightIcon /> : <SwitchLeftIcon />}
+            </IconButton>
+
             <Box component="span" sx={{ paddingLeft: '10px' }}>
               <FormControl sx={{ width: '100px' }}>
-                <InputLabel variant="standard">{getLocalizedMessage(displayLanguage, 'timeSlider.slider.stepValue')}</InputLabel>
+                <InputLabel variant="standard">{getLocalizedMessage(displayLanguage, 'timeSlider.slider.timeDelay')}</InputLabel>
                 <NativeSelect
-                  defaultValue={step}
+                  defaultValue={delay}
                   inputProps={{
-                    name: 'timeStep',
-                    onChange: handleStepChange,
+                    name: 'timeDelay',
+                    onChange: handleTimeChange,
                   }}
                 >
-                  <option value={3600000}>{getLocalizedMessage(displayLanguage, 'timeSlider.slider.hour')}</option>
-                  <option value={86400000}>{getLocalizedMessage(displayLanguage, 'timeSlider.slider.day')}</option>
-                  <option value={604800000}>{getLocalizedMessage(displayLanguage, 'timeSlider.slider.week')}</option>
-                  <option value={2592000000}>{getLocalizedMessage(displayLanguage, 'timeSlider.slider.month')}</option>
-                  <option value={31536000000}>{getLocalizedMessage(displayLanguage, 'timeSlider.slider.year')}</option>
+                  <option value={500}>0.5s</option>
+                  <option value={750}>0.75s</option>
+                  <option value={1000}>1.0s</option>
+                  <option value={1500}>1.5s</option>
+                  <option value={2000}>2.0s</option>
+                  <option value={3000}>3.0s</option>
+                  <option value={5000}>5.0s</option>
                 </NativeSelect>
               </FormControl>
             </Box>
-          )}
-        </Box>
-      </Grid>
-
-      {/* Optional description */}
-      {description && (
-        <Grid size={{ xs: 12 }}>
-          <Typography component="div" sx={{ px: '20px', py: '5px' }}>
-            {description}
-          </Typography>
+            {singleHandle && discreteValues && (
+              <Box component="span" sx={{ paddingLeft: '10px' }}>
+                <FormControl sx={{ width: '100px' }}>
+                  <InputLabel variant="standard">{getLocalizedMessage(displayLanguage, 'timeSlider.slider.stepValue')}</InputLabel>
+                  <NativeSelect
+                    defaultValue={step}
+                    inputProps={{
+                      name: 'timeStep',
+                      onChange: handleStepChange,
+                    }}
+                  >
+                    <option value={3600000}>{getLocalizedMessage(displayLanguage, 'timeSlider.slider.hour')}</option>
+                    <option value={86400000}>{getLocalizedMessage(displayLanguage, 'timeSlider.slider.day')}</option>
+                    <option value={604800000}>{getLocalizedMessage(displayLanguage, 'timeSlider.slider.week')}</option>
+                    <option value={2592000000}>{getLocalizedMessage(displayLanguage, 'timeSlider.slider.month')}</option>
+                    <option value={31536000000}>{getLocalizedMessage(displayLanguage, 'timeSlider.slider.year')}</option>
+                  </NativeSelect>
+                </FormControl>
+              </Box>
+            )}
+          </Box>
         </Grid>
-      )}
+        {description && (
+          <Grid size={{ xs: 12 }}>
+            <Typography component="div" sx={{ px: '20px', py: '5px' }}>
+              {description}
+            </Typography>
+          </Grid>
+        )}
+      </Box>
     </Grid>
   );
 }
