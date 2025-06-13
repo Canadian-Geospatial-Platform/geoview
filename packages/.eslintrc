@@ -6,6 +6,7 @@
     "eslint:recommended",
     "plugin:react/recommended",
     "plugin:@typescript-eslint/recommended",
+    // "plugin:@typescript-eslint/recommended-requiring-type-checking", TODO: Enhancement - Uncomment this extend to improve eslinting catches
     "plugin:prettier/recommended"
   ],
   "parser": "@typescript-eslint/parser",

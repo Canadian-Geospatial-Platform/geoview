@@ -75,6 +75,7 @@ build/Release
 common/autoinstallers/*/.npmrc
 common/config/rush/pnpm-lock.yaml
 **/.rush/temp/
+*.tsbuildinfo
 
 # Common toolchain intermediate files
 **/lib

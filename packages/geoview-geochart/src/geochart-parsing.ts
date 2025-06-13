@@ -1,12 +1,9 @@
-import { TypeJsonObject } from 'geoview-core/src/api/config/types/config-types';
-import {
-  TypeFeatureInfoEntry,
-  TypeFeatureInfoEntryPartial,
-  TypeLayerEntryConfig,
-} from 'geoview-core/src/api/config/types/map-schema-types';
+import { TypeJsonObject } from 'geoview-core/api/config/types/config-types';
+import { TypeFeatureInfoEntry, TypeFeatureInfoEntryPartial } from 'geoview-core/api/config/types/map-schema-types';
 import { ChartType, GeoChartDatasource } from 'geochart';
-import { LayerApi } from 'geoview-core/src/geo/layer/layer';
-import { TypeGeochartResultSetEntry } from 'geoview-core/src/core/stores/store-interface-and-intial-values/geochart-state';
+import { LayerApi } from 'geoview-core/geo/layer/layer';
+import { TypeGeochartResultSetEntry } from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
+import { ConfigBaseClass } from 'geoview-core/core/utils/config/validation-classes/config-base-class';
 import { PluginGeoChartConfig, GeoViewGeoChartConfig, GeoViewGeoChartConfigLayer } from './geochart-types';
 
 /**
@@ -86,13 +83,13 @@ export const findLayerDataAndConfigFromQueryResults = (
 ): [
   GeoViewGeoChartConfig<ChartType> | undefined,
   GeoViewGeoChartConfigLayer | undefined,
-  TypeLayerEntryConfig | undefined,
+  ConfigBaseClass | undefined,
   TypeFeatureInfoEntry[] | undefined,
 ] => {
   // Loop on the results set
   let foundConfigChart: GeoViewGeoChartConfig<ChartType> | undefined;
   let foundConfigChartLyr: GeoViewGeoChartConfigLayer | undefined;
-  let foundLayerEntry: TypeLayerEntryConfig | undefined;
+  let foundLayerEntry: ConfigBaseClass | undefined;
   let foundData: TypeFeatureInfoEntry[] | undefined;
   layerDataArray.forEach((layerData) => {
     // If still not found data corresponding to a layer config

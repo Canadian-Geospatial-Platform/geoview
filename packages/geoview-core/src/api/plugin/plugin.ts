@@ -1,15 +1,15 @@
+import React from 'react'; // TODO: CLEAN REACT IMPORT - Remove it, just for a test
 import i18next from 'i18next';
 import Ajv from 'ajv';
 
-import { whenThisThen, getScriptAndAssetURL } from '@/core/utils/utilities';
-import { Fetch } from '@/core/utils/fetch-helper';
-import { api } from '@/app';
-import { TypeJsonObject } from '@/api/config/types/config-types';
-import { logger } from '@/core/utils/logger';
-
-import { AbstractPlugin } from './abstract-plugin';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { formatError } from '@/core/exceptions/core-exceptions';
+import { whenThisThen, getScriptAndAssetURL } from '@/core/utils/utilities';
+import { Fetch } from '@/core/utils/fetch-helper';
+import { TypeJsonObject } from '@/api/config/types/config-types';
+import { logger } from '@/core/utils/logger';
+import { api } from '@/app';
+import { AbstractPlugin } from './abstract-plugin';
 
 /**
  * Class to manage plugins
@@ -96,19 +96,18 @@ export abstract class Plugin {
     // TODO: Refactor - Get rid of the TypePluginStructure and use AbstractPlugin directly, taking advantage of the the mother class abstract methods.
     let plugin: AbstractPlugin | undefined;
     if (constructor) {
+      // Check if we're on the right react
+      if (React === window.cgpv.react) {
+        logger.logInfo(`Plugin ${pluginId} loaded on the right react`);
+      } else {
+        logger.logInfo(`Plugin ${pluginId} loaded on the wrong react!?!?!?`);
+      }
+
       // create new instance of the plugin. Here we must type the constructor variable to any
       // in order to cancel the "'new' expression, whose target lacks a construct signature" error message
       // ? unknown type cannot be use, need to escape
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      plugin = new (constructor as any)(
-        pluginId,
-        props,
-        api,
-        window.cgpv.react,
-        window.cgpv.createRoot,
-        window.cgpv.ui.useTheme,
-        window.cgpv.translate
-      );
+      plugin = new (constructor as any)(pluginId, props, api);
     }
 
     if (plugin) {

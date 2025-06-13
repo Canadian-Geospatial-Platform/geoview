@@ -93,6 +93,7 @@ export const removeGeoviewStore = (id: string): void => {
 export const useGeoViewStore = (): GeoviewStoreType => {
   let mapId = '';
   try {
+    // TODO: CLEANUP TEST - Remove this try catch and stuff
     // eslint-disable-next-line react-hooks/rules-of-hooks
     mapId = useContext(MapContext).mapId;
     return useStoresManager.getState().stores[mapId];

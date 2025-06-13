@@ -27,7 +27,7 @@ export abstract class AbstractPlugin {
   pluginProps: TypePluginOptions;
 
   // Plugin config object.
-  configObj: TypeJsonObject = {};
+  #configObj: TypeJsonObject = {};
 
   // Plugin api object.
   api: API;
@@ -50,28 +50,16 @@ export abstract class AbstractPlugin {
    * @param {TypePluginOptions} props - The plugin options and properties.
    * @param {TypeJsonObject} config - Configuration object for the plugin.
    * @param {API} api - API object providing access to core functionality.
-   * @param {typeof React} react - React instance to be used by the plugin.
-   * @param {typeof createRoot} createRoot_ - React 18 createRoot function for rendering.
-   * @param {typeof useTheme} useTheme_ - Hook to access theming utilities.
-   * @param {typeof i18next?} i18next_ - Optional, i18next instance for translations.
    */
   // GV Do not edit the constructor params without editing the plugin.ts dynamic constructor call looking like 'new (constructor as any)'
-  constructor(
-    pluginId: string,
-    props: TypePluginOptions,
-    api: API,
-    react: typeof React,
-    createRoot_: typeof createRoot,
-    useTheme_: typeof useTheme,
-    i18next_?: typeof i18next
-  ) {
+  constructor(pluginId: string, props: TypePluginOptions, api: API) {
     this.pluginId = pluginId;
     this.pluginProps = props;
     this.api = api;
-    this.react = react;
-    this.createRoot = createRoot_;
-    this.translate = i18next_;
-    this.useTheme = useTheme_;
+    this.react = window.cgpv.react;
+    this.createRoot = window.cgpv.createRoot;
+    this.translate = window.cgpv.translate;
+    this.useTheme = window.cgpv.ui.useTheme;
   }
 
   /**
@@ -79,15 +67,15 @@ export abstract class AbstractPlugin {
    * @param {TypeJsonObject} config - The config
    */
   setConfig(config: TypeJsonObject): void {
-    this.configObj = config;
+    this.#configObj = config;
   }
 
   /**
    * Gets the config
-   * @returns {TypeJsonObject} The config
+   * @returns {unknown} The config
    */
   getConfig(): unknown {
-    return this.configObj;
+    return this.#configObj;
   }
 
   /**

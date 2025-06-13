@@ -1,9 +1,9 @@
-import { TypeJsonObject, toJsonObject, AnySchemaObject } from 'geoview-core/src/api/config/types/config-types';
-import { AppBarPlugin } from 'geoview-core/src/api/plugin/appbar-plugin';
-import { AoiIcon } from 'geoview-core/src/ui/icons';
-import { IconButtonPropsExtend } from 'geoview-core/src/ui/icon-button/icon-button';
-import { TypePanelProps } from 'geoview-core/src/ui/panel/panel-types';
-import { AoiPanel } from './aoi-panel';
+import { TypeJsonObject, toJsonObject, AnySchemaObject } from 'geoview-core/api/config/types/config-types';
+import { AppBarPlugin } from 'geoview-core/api/plugin/appbar-plugin';
+import { AoiIcon } from 'geoview-core/ui/icons';
+import { IconButtonPropsExtend } from 'geoview-core/ui/icon-button/icon-button';
+import { TypePanelProps } from 'geoview-core/ui/panel/panel-types';
+import { AoiPanel, TypeAoiProps } from './aoi-panel';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-aoi-panel.json';
 
@@ -31,9 +31,9 @@ class AoiPanelPlugin extends AppBarPlugin {
 
   /**
    * Overrides the default translations for the Plugin.
-   * @returns {unknown} - The translations object for the particular Plugin.
+   * @returns {TypeJsonObject} - The translations object for the particular Plugin.
    */
-  override defaultTranslations(): unknown {
+  override defaultTranslations(): TypeJsonObject {
     return {
       en: {
         AoiPanel: {
@@ -45,7 +45,16 @@ class AoiPanelPlugin extends AppBarPlugin {
           title: "Région d'intérêt",
         },
       },
-    };
+    } as unknown as TypeJsonObject;
+  }
+
+  /**
+   * Overrides the getConfig in order to return the right type.
+   * @returns {TypeAoiProps} The AOI Propos
+   */
+  override getConfig(): TypeAoiProps {
+    // Redirect
+    return super.getConfig() as TypeAoiProps;
   }
 
   override onCreateButtonProps(): IconButtonPropsExtend {
@@ -65,12 +74,12 @@ class AoiPanelPlugin extends AppBarPlugin {
       title: 'AoiPanel.title',
       icon: <AoiIcon />,
       width: 350,
-      status: this.configObj?.isOpen as boolean,
+      status: this.getConfig().isOpen as boolean,
     };
   }
 
   override onCreateContent = (): JSX.Element => {
-    return <AoiPanel mapId={this.pluginProps.mapId} config={this.configObj || {}} />;
+    return <AoiPanel mapId={this.pluginProps.mapId} config={this.getConfig()} />;
   };
 
   /**

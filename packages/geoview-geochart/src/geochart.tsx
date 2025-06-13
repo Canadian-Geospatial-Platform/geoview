@@ -1,10 +1,11 @@
 import { GeoChart as GeoChartComponent, GeoChartConfig, ChartType, GeoChartDefaultColors, SchemaValidator, GeoChartAction } from 'geochart';
-import { useAppDisplayLanguageById, useAppStoreActions } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
-import { TypeGeochartResultSetEntry } from 'geoview-core/src/core/stores/store-interface-and-intial-values/geochart-state';
-import { MapEventProcessor } from 'geoview-core/src/api/event-processors/event-processor-children/map-event-processor';
-import { TypeWindow } from 'geoview-core/src/core/types/global-types';
-import { TypeFeatureInfoEntry, TypeLayerEntryConfig } from 'geoview-core/src/api/config/types/map-schema-types';
-import { logger } from 'geoview-core/src/core/utils/logger';
+import { useAppDisplayLanguageById, useAppStoreActions } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { TypeGeochartResultSetEntry } from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
+import { MapEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/map-event-processor';
+import { TypeWindow } from 'geoview-core/core/types/global-types';
+import { TypeFeatureInfoEntry } from 'geoview-core/api/config/types/map-schema-types';
+import { logger } from 'geoview-core/core/utils/logger';
+import { ConfigBaseClass } from 'geoview-core/core/utils/config/validation-classes/config-base-class';
 import { findLayerDataAndConfigFromQueryResults, loadDatasources } from './geochart-parsing';
 import { PluginGeoChartConfig, GeoViewGeoChartConfig, GeoViewGeoChartConfigLayer } from './geochart-types';
 
@@ -109,23 +110,23 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
     const [foundConfigChart, foundConfigChartLyr, foundLayerEntry, foundData]: [
       GeoViewGeoChartConfig<ChartType> | undefined,
       GeoViewGeoChartConfigLayer | undefined,
-      TypeLayerEntryConfig | undefined,
+      ConfigBaseClass | undefined,
       TypeFeatureInfoEntry[] | undefined,
     ] = findLayerDataAndConfigFromQueryResults(config, MapEventProcessor.getMapViewerLayerAPI(mapId), layers);
 
     // If found a chart for the layer
     let chartConfig;
-    if (foundData) {
+    if (foundData && foundLayerEntry) {
       // Check and attach datasources to the Chart config
       chartConfig = loadDatasources(foundConfigChart!, foundConfigChartLyr!, foundData!);
 
       // Set the title
-      chartConfig.title = foundLayerEntry.layerName![displayLanguage];
+      chartConfig.title = foundLayerEntry.layerName;
     }
 
     // Return all info
     return { foundConfigChart, foundConfigChartLyr, foundLayerEntry, foundData, chartConfig };
-  }, [config, displayLanguage, mapId, layers]);
+  }, [config, mapId, layers]);
 
   // #endregion
 
@@ -141,6 +142,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
 
   return (
     <GeoChartComponent
+      chart="line"
       schemaValidator={schemaValidator}
       sx={{ ...sx, ...{ backgroundColor: defaultColors.backgroundColor } }}
       inputs={inputs}

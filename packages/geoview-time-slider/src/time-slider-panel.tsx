@@ -1,19 +1,19 @@
-import { TypeWindow } from 'geoview-core/src/core/types/global-types';
-import { LayerListEntry, Layout } from 'geoview-core/src/core/components/common';
+import { TypeWindow } from 'geoview-core/core/types/global-types';
+import { LayerListEntry, Layout } from 'geoview-core/core/components/common';
 import {
   TypeTimeSliderValues,
   useTimeSliderLayers,
   useTimeSliderSelectedLayerPath,
   useTimeSliderStoreActions,
-} from 'geoview-core/src/core/stores/store-interface-and-intial-values/time-slider-state';
-import { useMapVisibleLayers } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
-import { useLayerLegendLayers } from 'geoview-core/src/core/stores/store-interface-and-intial-values/layer-state';
-import { LegendEventProcessor } from 'geoview-core/src/api/event-processors/event-processor-children/legend-event-processor';
-import { Box } from 'geoview-core/src/ui';
-import { logger } from 'geoview-core/src/core/utils/logger';
-import { TABS } from 'geoview-core/src/core/utils/constant';
+} from 'geoview-core/core/stores/store-interface-and-intial-values/time-slider-state';
+import { useMapVisibleLayers } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
+import { useLayerLegendLayers } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
+import { LegendEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/legend-event-processor';
+import { Box } from 'geoview-core/ui';
+import { logger } from 'geoview-core/core/utils/logger';
+import { TABS } from 'geoview-core/core/utils/constant';
 
-import { DateMgt } from 'geoview-core/src/core/utils/date-mgt';
+import { DateMgt } from 'geoview-core/core/utils/date-mgt';
 import { TimeSlider } from './time-slider';
 import { ConfigProps } from './time-slider-types';
 
@@ -107,12 +107,12 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
       .filter((layer) => layer && layer.timeSliderLayerInfo)
       .map((layer) => {
         return {
-          layerName: LegendEventProcessor.findLayerByPath(legendLayers, layer.layerPath).layerName,
+          layerName: LegendEventProcessor.findLayerByPath(legendLayers, layer.layerPath)?.layerName,
           layerPath: layer.layerPath,
           layerFeatures: getFilterInfo(layer.timeSliderLayerInfo),
           tooltip: getLayerTooltip(
             layer.timeSliderLayerInfo,
-            LegendEventProcessor.findLayerByPath(legendLayers, layer.layerPath).layerName
+            LegendEventProcessor.findLayerByPath(legendLayers, layer.layerPath)?.layerName || ''
           ),
           layerStatus: 'loaded',
           queryStatus: 'processed',

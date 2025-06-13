@@ -55,6 +55,24 @@ export class LayerNotFoundError extends LayerError {
 }
 
 /**
+ * Error thrown when a layer is expected to be a certain type but is not.
+ * @extends {LayerError}
+ */
+export class LayerWrongTypeError extends LayerError {
+  /**
+   * Constructor to initialize the LayerWrongTypeError with the layer path
+   * @param {string} layerPath - The path of the layer.
+   * @param {string | undefined} layerName - The layer name.
+   */
+  constructor(layerPath: string, layerName: string | undefined) {
+    super(layerPath, 'error.layer.wrongType', [layerName || layerPath]);
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, LayerWrongTypeError.prototype);
+  }
+}
+
+/**
  * Error thrown when a layer is expected to be a GeoJson layer but is not.
  * @extends {LayerError}
  */

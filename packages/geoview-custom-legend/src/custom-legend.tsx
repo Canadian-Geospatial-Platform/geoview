@@ -1,4 +1,4 @@
-import { TypeWindow } from 'geoview-core/src/core/types/global-types';
+import { TypeWindow } from 'geoview-core/core/types/global-types';
 import { getSxClasses } from './custom-legend-style';
 
 interface CustomLegendPanelProps {
@@ -13,7 +13,7 @@ interface LegendItem {
 
 type LegendListItems = LegendItem[];
 
-type TypeLegendProps = {
+export type TypeLegendProps = {
   isOpen: boolean;
   legendList: LegendListItems;
   version: string;

@@ -70,7 +70,7 @@
         if (mapViewer.mapId === 'map1') {
           // Hook when the layers will be loaded
           mapViewer.onMapLayersLoaded(() => {
-            // TODO: Check - Why delay it here?
+            // TODO: Check - Why delay it here? Safe to remove?
             window.setInterval(() => {
               const displayField1 = document.getElementById('HUC3-state');
               const featureInfoLayerSet = mapViewer.layer.featureInfoLayerSet.resultSet;

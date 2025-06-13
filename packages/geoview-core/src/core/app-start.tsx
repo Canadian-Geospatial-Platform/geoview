@@ -62,19 +62,19 @@ function AppStart(props: AppStartProps): JSX.Element {
 
   return (
     <StyledEngineProvider injectFirst>
-      <ThemeProvider theme={getTheme(theme)}>
-        <ScopedCssBaseline>
-          <Suspense fallback="">
-            <I18nextProvider i18n={i18nLang}>
-              <MapContext.Provider value={mapContextValue}>
+      <MapContext.Provider value={mapContextValue}>
+        <ThemeProvider theme={getTheme(theme)}>
+          <ScopedCssBaseline>
+            <Suspense fallback="">
+              <I18nextProvider i18n={i18nLang}>
                 <StrictMode>
                   <Shell mapViewer={api.getMapViewer(mapId)} />
                 </StrictMode>
-              </MapContext.Provider>
-            </I18nextProvider>
-          </Suspense>
-        </ScopedCssBaseline>
-      </ThemeProvider>
+              </I18nextProvider>
+            </Suspense>
+          </ScopedCssBaseline>
+        </ThemeProvider>
+      </MapContext.Provider>
     </StyledEngineProvider>
   );
 }

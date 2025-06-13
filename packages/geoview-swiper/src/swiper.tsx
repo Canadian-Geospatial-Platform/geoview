@@ -9,12 +9,12 @@ import BaseEvent from 'ol/events/Event';
 import debounce from 'lodash/debounce';
 
 import { RefObject } from 'geoview-core';
-import { useSwiperLayerPaths } from 'geoview-core/src/core/stores/store-interface-and-intial-values/swiper-state';
-import { logger } from 'geoview-core/src/core/utils/logger';
-import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
-import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
-import { useMapVisibleLayers } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
-import { MapViewer } from 'geoview-core/src/geo/map/map-viewer';
+import { useSwiperLayerPaths } from 'geoview-core/core/stores/store-interface-and-intial-values/swiper-state';
+import { logger } from 'geoview-core/core/utils/logger';
+import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
+import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { useMapVisibleLayers } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
+import { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import { sxClasses } from './swiper-style';
 
 type SwiperProps = {

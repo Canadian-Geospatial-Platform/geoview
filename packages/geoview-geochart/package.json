@@ -6,11 +6,11 @@
   "keywords": [
     "chart"
   ],
-  "scripts": {
-    "lint": "eslint ../geoview-**/src/**/*.{ts,tsx,js}"
-  },
   "author": "Alexandre Roy",
   "license": "MIT",
+  "scripts": {
+    "build": "tsc --build"
+  },
   "dependencies": {
     "geochart": "Canadian-Geospatial-Platform/geochart#develop"
   },
@@ -28,7 +28,6 @@
     "@types/react-dom": "^18.3.1",
     "markdown-to-jsx": "~7.5.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1",
     "typescript": "^5.6.3"
   },
   "externals": {

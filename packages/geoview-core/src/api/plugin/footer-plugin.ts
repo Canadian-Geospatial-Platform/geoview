@@ -1,6 +1,6 @@
 import { TypeTabs } from '@/ui/tabs/tabs';
-import { AbstractPlugin } from './abstract-plugin';
 import { logger } from '@/core/utils/logger';
+import { AbstractPlugin } from './abstract-plugin';
 
 /**
  * Footer Plugin abstract class.
@@ -11,6 +11,14 @@ export abstract class FooterPlugin extends AbstractPlugin {
 
   // Store the footer props
   footerProps?: TypeTabs;
+
+  /**
+   * Overrides the get config
+   * @returns {unknown} The config
+   */
+  override getConfig(): unknown {
+    return super.getConfig() as unknown;
+  }
 
   /**
    * Overridable function to create footer props content

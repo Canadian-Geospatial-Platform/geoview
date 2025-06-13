@@ -1,5 +1,5 @@
-import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import { TypeWindow } from '@/core/types/global-types';
+import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import { AbstractPlugin } from './abstract-plugin';
 
@@ -15,6 +15,14 @@ export abstract class AppBarPlugin extends AbstractPlugin {
 
   // Store the panel props
   panelProps?: TypePanelProps;
+
+  /**
+   * Overrides the get config
+   * @returns {AppBarPluginConfig} The config
+   */
+  override getConfig(): AppBarPluginConfig {
+    return super.getConfig() as AppBarPluginConfig;
+  }
 
   /**
    * Overridable function to create app bar button props content
@@ -49,7 +57,7 @@ export abstract class AppBarPlugin extends AbstractPlugin {
       title: 'Some title',
       icon: '<i class="material-icons">map</i>',
       width: '80vw',
-      status: this.configObj?.isOpen as boolean,
+      status: this.getConfig().isOpen,
     };
   }
 
@@ -92,3 +100,7 @@ export abstract class AppBarPlugin extends AbstractPlugin {
     }
   }
 }
+
+export type AppBarPluginConfig = {
+  isOpen: boolean;
+};

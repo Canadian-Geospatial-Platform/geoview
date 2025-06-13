@@ -1,8 +1,8 @@
-import { Cast, AnySchemaObject, toJsonObject, TypeJsonObject } from 'geoview-core/src/api/config/types/config-types';
-import { IconButtonPropsExtend } from 'geoview-core/src/ui/icon-button/icon-button';
-import { TypePanelProps } from 'geoview-core/src/ui/panel/panel-types';
-import { AppBarPlugin } from 'geoview-core/src/api/plugin/appbar-plugin';
-import { ChartIcon } from 'geoview-core/src/ui/icons';
+import { AnySchemaObject, toJsonObject, TypeJsonObject } from 'geoview-core/api/config/types/config-types';
+import { IconButtonPropsExtend } from 'geoview-core/ui/icon-button/icon-button';
+import { TypePanelProps } from 'geoview-core/ui/panel/panel-types';
+import { AppBarPlugin } from 'geoview-core/api/plugin/appbar-plugin';
+import { ChartIcon } from 'geoview-core/ui/icons';
 
 import schema from '../schema.json';
 import defaultConfig from '../default-config-geochart.json';
@@ -90,4 +90,4 @@ export default GeoChartAppBarPlugin;
 
 // Keep a reference to the GeoChartPlugin as part of the geoviewPlugins property stored in the window object
 window.geoviewPlugins = window.geoviewPlugins || {};
-window.geoviewPlugins.geochart = Cast<GeoChartAppBarPlugin>(GeoChartAppBarPlugin);
+window.geoviewPlugins.geochart = GeoChartAppBarPlugin;

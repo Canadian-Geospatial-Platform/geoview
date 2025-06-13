@@ -8,6 +8,9 @@
   ],
   "author": "Saleh Yassin",
   "license": "MIT",
+  "scripts": {
+    "build": "tsc --build"
+  },
   "dependencies": {
     "react-draggable": "^4.4.6",
     "lodash": "^4.17.21",

@@ -23,8 +23,11 @@
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "geoview-core": ["../geoview-core/src"],
+      "geoview-core/*": ["../geoview-core/src/*"]
     }
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", "build"],
+  "references": [{"path": "../geoview-core"}]
 }

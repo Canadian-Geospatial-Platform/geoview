@@ -1,8 +1,8 @@
-import { TypeJsonObject, toJsonObject, AnySchemaObject } from 'geoview-core/src/api/config/types/config-types';
-import { MapPlugin } from 'geoview-core/src/api/plugin/map-plugin';
-import { SwiperEventProcessor } from 'geoview-core/src/api/event-processors/event-processor-children/swiper-event-processor';
-import { LayerNotFoundError } from 'geoview-core/src/core/exceptions/layer-exceptions';
-import { logger } from 'geoview-core/src/core/utils/logger';
+import { TypeJsonObject, toJsonObject, AnySchemaObject } from 'geoview-core/api/config/types/config-types';
+import { MapPlugin } from 'geoview-core/api/plugin/map-plugin';
+import { SwiperEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/swiper-event-processor';
+import { LayerNotFoundError } from 'geoview-core/core/exceptions/layer-exceptions';
+import { logger } from 'geoview-core/core/utils/logger';
 
 import schema from '../schema.json';
 import defaultConfig from '../default-config-swiper.json';
@@ -57,7 +57,7 @@ class SwiperPlugin extends MapPlugin {
    */
   override getConfig(): ConfigProps {
     // Redirect
-    return super.getConfig() as unknown as ConfigProps;
+    return super.getConfig() as ConfigProps;
   }
 
   /**
