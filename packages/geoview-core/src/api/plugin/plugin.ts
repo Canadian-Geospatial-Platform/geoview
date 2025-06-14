@@ -17,15 +17,10 @@ import { AbstractPlugin } from './abstract-plugin';
  * @class
  */
 export abstract class Plugin {
-  // used to indicate that all initial plugins finished loading
-  pluginsLoaded = false;
-
   /**
    * Load a package script on runtime
-   *
    * @param {string} pluginId the package id to load
    */
-  // ? unknown type cannot be use, need to escape. Creates problems in footer-bar.tsx
   static loadScript(pluginId: string): Promise<typeof AbstractPlugin> {
     return new Promise((resolve, reject) => {
       const existingScript = document.querySelector(`script#${pluginId}`);
@@ -103,6 +98,9 @@ export abstract class Plugin {
     }
 
     if (plugin) {
+      // Attach to the map plugins object
+      viewer.plugins[pluginId] = plugin;
+
       // a config object used to store package config
       let pluginConfigObj: TypeJsonObject = {};
 
@@ -178,9 +176,6 @@ export abstract class Plugin {
         // Add the resource bundle to support the plugin language
         i18next.addResourceBundle(languageKey, 'translation', value, true, false);
       });
-
-      // Attach to the map plugins object
-      viewer.plugins[pluginId] = plugin;
 
       // Call plugin add method
       plugin.add();

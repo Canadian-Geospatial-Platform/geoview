@@ -1,3 +1,4 @@
+import React from 'react'; // GV This import is to validate that we're on the right React at the end of the file
 import { TypeJsonObject, toJsonObject, AnySchemaObject } from 'geoview-core/api/config/types/config-types';
 import { AppBarPlugin } from 'geoview-core/api/plugin/appbar-plugin';
 import { AoiIcon } from 'geoview-core/ui/icons';
@@ -90,6 +91,11 @@ class AoiPanelPlugin extends AppBarPlugin {
 
 export default AoiPanelPlugin;
 
-// Keep a reference to the AOI Panel Plugin as part of the geoviewPlugins property stored in the window object
-window.geoviewPlugins = window.geoviewPlugins || {};
-window.geoviewPlugins['aoi-panel'] = AoiPanelPlugin;
+// GV This if condition took over 3 days to investigate. It was giving errors on the app.geo.ca website with
+// GV some conflicting reacts being loaded on the page for some obscure reason.
+// Check if we're on the right react
+if (React === window.cgpv.react) {
+  // Keep a reference to the AoiPanelPlugin Plugin as part of the geoviewPlugins property stored in the window object
+  window.geoviewPlugins = window.geoviewPlugins || {};
+  window.geoviewPlugins['aoi-panel'] = AoiPanelPlugin;
+} // Else ignore, don't keep it on the window, wait for the right react load

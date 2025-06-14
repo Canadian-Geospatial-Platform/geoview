@@ -1,3 +1,4 @@
+import React from 'react'; // GV This import is to validate that we're on the right React at the end of the file
 import { AnySchemaObject, TypeJsonObject, toJsonObject } from 'geoview-core/api/config/types/config-types';
 import { FooterPlugin } from 'geoview-core/api/plugin/footer-plugin';
 import { TypeTabs } from 'geoview-core/ui/tabs/tabs';
@@ -136,6 +137,11 @@ class GeoChartFooterPlugin extends FooterPlugin {
 // Exports the GeoChartFooterPlugin
 export default GeoChartFooterPlugin;
 
-// Keep a reference to the GeoChartPlugin as part of the geoviewPlugins property stored in the window object
-window.geoviewPlugins = window.geoviewPlugins || {};
-window.geoviewPlugins.geochart = GeoChartFooterPlugin;
+// GV This if condition took over 3 days to investigate. It was giving errors on the app.geo.ca website with
+// GV some conflicting reacts being loaded on the page for some obscure reason.
+// Check if we're on the right react
+if (React === window.cgpv.react) {
+  // Keep a reference to the GeoChartPlugin as part of the geoviewPlugins property stored in the window object
+  window.geoviewPlugins = window.geoviewPlugins || {};
+  window.geoviewPlugins.geochart = GeoChartFooterPlugin;
+} // Else ignore, don't keep it on the window, wait for the right react load

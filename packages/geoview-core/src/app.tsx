@@ -349,6 +349,10 @@ export const cgpv = {
   logger,
 } satisfies TypeCGPV;
 
+// Tag the React with the cgpv flag to indicate it's Geoview's
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(cgpv.react as any).geoview = "this is geoview's react";
+
 // freeze variable name so a variable with same name can't be defined from outside
 Object.freeze(cgpv);
 
