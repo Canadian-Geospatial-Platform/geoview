@@ -21,7 +21,7 @@ export default function Clear(): JSX.Element {
   const { clearDrawings } = useDrawerActions();
 
   /**
-   * Handles a click on the draw button
+   * Handles a click on the clear button
    */
   const handleClear = (): void => {
     clearDrawings();

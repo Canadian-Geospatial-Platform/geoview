@@ -1,4 +1,6 @@
-import { useDrawerActions } from 'geoview-core/src/core/stores/store-interface-and-intial-values/drawer-state';
+import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
+import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
+import { useDrawerActions, useDrawerIsDrawing } from 'geoview-core/src/core/stores/store-interface-and-intial-values/drawer-state';
 
 import { IconButton, DrawIcon } from 'geoview-core/src/ui';
 import { logger } from 'geoview-core/src/core/utils/logger';
@@ -12,6 +14,10 @@ export default function Draw(): JSX.Element {
   // Log
   logger.logTraceRender('geoview-drawer/src/buttons/draw');
 
+  // Get store values
+  const displayLanguage = useAppDisplayLanguage();
+  const isDrawing = useDrawerIsDrawing();
+
   // Store actions
   const { toggleDrawing } = useDrawerActions();
 
@@ -23,7 +29,13 @@ export default function Draw(): JSX.Element {
   };
 
   return (
-    <IconButton id="draw" onClick={handleDraw}>
+    <IconButton
+      id="draw"
+      tooltip={getLocalizedMessage(displayLanguage, 'drawer.toggleDrawing')}
+      tooltipPlacement="left"
+      sx={isDrawing ? { border: '2px solid #1976d2' } : undefined}
+      onClick={handleDraw}
+    >
       <DrawIcon />
     </IconButton>
   );
