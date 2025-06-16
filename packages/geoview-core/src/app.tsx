@@ -282,23 +282,26 @@ function init(): void {
       // The callback for the map ready when the promiseMapInit will resolve
       const theCallbackMapReady = cgpvCallbackMapReady;
 
-      // When the map init is done
+      // When the map viewer is created
       promiseMapViewer
         .then((theMapViewer) => {
-          // Log
-          const mapId = mapElement.getAttribute('id')!;
-          logger.logInfo('Map initialized', mapId);
+          // Register when the map will be init
+          theMapViewer.onMapInit((mapViewer) => {
+            try {
+              // Log
+              logger.logInfo('Map initialized', mapViewer.mapId);
 
-          try {
-            // Callback about it
-            theCallbackMapInit?.(theMapViewer);
-          } catch (error: unknown) {
-            // Log
-            logger.logError('An error happened in the initialization callback.', error);
-          }
+              // Callback about it
+              theCallbackMapInit?.(theMapViewer);
+            } catch (error: unknown) {
+              // Log
+              logger.logError('An error happened in the initialization callback.', error);
+            }
+          });
 
           // Register when the map viewer will have a map ready
           theMapViewer.onMapReady((mapViewer) => {
+            // Log
             logger.logInfo('Map ready / layers registered', mapViewer.mapId);
 
             // Callback for that particular map
