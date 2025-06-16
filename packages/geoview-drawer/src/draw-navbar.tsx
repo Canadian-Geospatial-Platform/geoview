@@ -9,6 +9,7 @@ import GeometryPickerPanel from './buttons/geometry-picker-panel';
 import { StyleButton, StylePanel } from './buttons/style';
 // import GeometryPickerButton from './buttons/geometry-picker-button';
 import Clear from './buttons/clear';
+import Edit from './buttons/edit';
 
 type ConfigProps = {
   geomTypes: string[];
@@ -58,6 +59,17 @@ export function createDrawerButtons(config: ConfigProps): Record<string, TypeNav
       content: cgpv.react.createElement(GeometryPickerPanel, { geomTypes }),
       visible: false,
     },
+  };
+
+  buttonConfigs.edit = {
+    buttonProps: {
+      id: 'drawer-edit',
+      tooltip: 'drawer.edit',
+      tooltipPlacement: 'left',
+      children: cgpv.react.createElement(Edit),
+      visible: true,
+    },
+    groupName: 'drawer',
   };
 
   buttonConfigs.style = {
