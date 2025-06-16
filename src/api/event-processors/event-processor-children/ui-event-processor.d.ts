@@ -1,4 +1,4 @@
-import { TypeMapCorePackages, TypeValidAppBarCoreProps } from '@/api/config/types/map-schema-types';
+import { TypeMapCorePackages, TypeValidAppBarCoreProps, TypeValidFooterBarTabsCoreProps } from '@/api/config/types/map-schema-types';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { IUIState, ActiveAppBarTabType } from '@/core/stores/store-interface-and-intial-values/ui-state';
 export declare class UIEventProcessor extends AbstractEventProcessor {
@@ -9,6 +9,7 @@ export declare class UIEventProcessor extends AbstractEventProcessor {
      */
     protected static getUIStateProtected(mapId: string): IUIState;
     static getActiveFooterBarTab(mapId: string): string;
+    static getFooterBarComponents(mapId: string): TypeValidFooterBarTabsCoreProps[];
     static getAppBarComponents(mapId: string): TypeValidAppBarCoreProps[];
     static getCorePackageComponents(mapId: string): TypeMapCorePackages;
     static getFooterBarIsCollapsed(mapId: string): boolean;

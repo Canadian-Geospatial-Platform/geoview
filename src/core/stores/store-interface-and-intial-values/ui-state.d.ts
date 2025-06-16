@@ -1,4 +1,4 @@
-import { TypeMapCorePackages, TypeNavBarProps, TypeValidAppBarCoreProps } from '@/api/config/types/map-schema-types';
+import { TypeMapCorePackages, TypeNavBarProps, TypeValidAppBarCoreProps, TypeValidFooterBarTabsCoreProps } from '@/api/config/types/map-schema-types';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 type UIActions = IUIState['actions'];
@@ -13,6 +13,7 @@ export interface IUIState {
     activeTrapGeoView: boolean;
     activeAppBarTab: ActiveAppBarTabType;
     appBarComponents: TypeValidAppBarCoreProps[];
+    footerBarComponents: TypeValidFooterBarTabsCoreProps[];
     corePackagesComponents: TypeMapCorePackages;
     focusItem: FocusItemProps;
     hiddenTabs: string[];
@@ -61,6 +62,7 @@ export declare const useUIActiveFooterBarTabId: () => string;
 export declare const useUIActiveAppBarTab: () => ActiveAppBarTabType;
 export declare const useUIActiveTrapGeoView: () => boolean;
 export declare const useUIAppbarComponents: () => TypeValidAppBarCoreProps[];
+export declare const useUIFooterBarComponents: () => TypeValidFooterBarTabsCoreProps[];
 export declare const useUICorePackagesComponents: () => TypeMapCorePackages;
 export declare const useUIFooterPanelResizeValue: () => number;
 export declare const useUIHiddenTabs: () => string[];

@@ -8,8 +8,6 @@ import { TimeDimension } from '@/app';
  */
 export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
     #private;
-    /** The ending element of the layer configuration path. */
-    layerIdExtension?: string | undefined;
     /** The calculated filter equation */
     filterEquation?: FilterNodeType[];
     /** Indicates if filter is on/off */

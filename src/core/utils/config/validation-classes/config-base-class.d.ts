@@ -14,8 +14,6 @@ export declare abstract class ConfigBaseClass {
     private _layerPath;
     /** It is used to identified unprocessed layers and shows the final layer state */
     private _layerStatus;
-    /** The ending extension (element) of the layer identifier. This element is part of the schema. */
-    layerIdExtension?: string;
     /** The display name of the layer (English/French). */
     layerName?: string;
     /** Tag used to link the entry to a specific schema. This element is part of the schema. */

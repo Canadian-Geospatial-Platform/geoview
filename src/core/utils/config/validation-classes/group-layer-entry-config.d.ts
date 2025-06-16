@@ -9,8 +9,6 @@ export declare class GroupLayerEntryConfig extends ConfigBaseClass {
     schemaTag: never;
     /** Layer entry data type. */
     entryType: import("@/api/config/types/map-schema-types").TypeLayerEntryType;
-    /** The ending element of the layer configuration path is not used on groups. */
-    layerIdExtension: never;
     /** Source settings to apply to the GeoView layer source at creation time is not used by groups. */
     source: never;
     /** The list of layer entry configurations to use from the GeoView layer group. */
