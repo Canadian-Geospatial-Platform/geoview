@@ -1,6 +1,7 @@
 import { useStore } from 'zustand';
 
 import { Draw } from '@/geo/interaction/draw';
+import { Modify } from '@/geo/interaction/modify';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
@@ -12,7 +13,6 @@ import { DrawerEventProcessor } from '@/api/event-processors/event-processor-chi
 
 type DrawerActions = IDrawerState['actions'];
 
-// TODO Currently duplicated, need to move to centralized location
 export type StyleProps = {
   fillColor: string;
   strokeColor: string;
@@ -26,17 +26,25 @@ export type TypeDrawerConfig = {
   };
 };
 
+export type TypeEditInstance = {
+  [groupKey: string]: Modify | undefined;
+};
+
 // Need Geometry Types array, but can get from config
 export interface IDrawerState {
   geomType: string;
   style: StyleProps;
   drawInstance: Draw | undefined;
+  isEditing: boolean;
+  editInstances: TypeEditInstance;
 
   setDefaultConfigValues: (config: TypeMapFeaturesConfig) => void;
 
   actions: {
     getIsDrawing: () => boolean;
+    getIsEditing: () => boolean;
     toggleDrawing: () => void;
+    toggleEditing: () => void;
     clearDrawings: () => void;
     setGeomType(geomType: string): void;
     setStyle(style: StyleProps): void;
@@ -45,10 +53,14 @@ export interface IDrawerState {
     setStrokeWidth(strokeWidth: number): void;
     setDrawInstance(drawInstance: Draw): void;
     removeDrawInstance(): void;
+    setIsEditing: (isEditing: boolean) => void;
+    setEditInstance(groupKey: string, editInstance: Modify | undefined): void;
+    removeEditInstance(groupKey: string): void;
   };
 
   setterActions: {
     toggleDrawing: () => void;
+    toggleEditing: () => void;
     clearDrawings: () => void;
     setGeomType: (geomType: string) => void;
     setStyle: (style: StyleProps) => void;
@@ -57,6 +69,9 @@ export interface IDrawerState {
     setStrokeWidth: (strokeWidth: number) => void;
     setDrawInstance: (drawInstance: Draw) => void;
     removeDrawInstance: () => void;
+    setIsEditing: (isEditing: boolean) => void;
+    setEditInstance: (groupKey: string, editInstance: Modify | undefined) => void;
+    removeEditInstance: (groupKey: string) => void;
   };
 }
 
@@ -71,7 +86,14 @@ export interface IDrawerState {
 // export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDrawerState {
 export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDrawerState {
   const init = {
+    geomType: 'Point',
+    style: {
+      fillColor: '#FFFFFF',
+      strokeColor: '#000000',
+      strokeWidth: 2,
+    },
     drawInstance: undefined,
+    editInstances: {},
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
       const drawerConfig = geoviewConfig.corePackagesConfig?.find((config) => Object.keys(config).includes('drawer')) as
         | TypeDrawerConfig
@@ -83,9 +105,9 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
             geomType:
               drawerConfig.drawer.geomTypes !== undefined && drawerConfig.drawer.geomTypes.length > 0
                 ? drawerConfig.drawer?.geomTypes[0]
-                : 'point',
+                : 'Point',
             style: drawerConfig.drawer.style || {
-              fillColor: '#',
+              fillColor: '#FFFFFF',
               strokeColor: '#000000',
               strokeWidth: 2,
             },
@@ -100,9 +122,16 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
       getIsDrawing: () => {
         return get().drawerState.drawInstance !== undefined;
       },
+      getIsEditing: () => {
+        return get().drawerState.isEditing;
+      },
       toggleDrawing: () => {
         // Redirect to setter
         get().drawerState.setterActions.toggleDrawing();
+      },
+      toggleEditing: () => {
+        // Redirect to setter
+        get().drawerState.setterActions.toggleEditing();
       },
       clearDrawings: () => {
         // Redirect to setter
@@ -136,11 +165,27 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         // Redirect to setter
         get().drawerState.setterActions.removeDrawInstance();
       },
+      setIsEditing: (isEditing: boolean) => {
+        // Redirect to setter
+        get().drawerState.setterActions.setIsEditing(isEditing);
+      },
+      setEditInstance: (groupKey: string, editInstance: Modify) => {
+        // Redirect to setter
+        get().drawerState.setterActions.setEditInstance(groupKey, editInstance);
+      },
+      removeEditInstance: (groupKey: string) => {
+        // Redirect to setter
+        get().drawerState.setterActions.removeEditInstance(groupKey);
+      },
     },
 
     setterActions: {
       toggleDrawing: () => {
         DrawerEventProcessor.toggleDrawing(get().mapId);
+      },
+
+      toggleEditing: () => {
+        DrawerEventProcessor.toggleEditing(get().mapId);
       },
 
       clearDrawings: () => {
@@ -154,9 +199,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
             geomType,
           },
         });
-        if (get().drawerState.drawInstance !== undefined) {
-          DrawerEventProcessor.startDrawing(get().mapId);
-        }
+        DrawerEventProcessor.changeGeomType(get().mapId);
       },
 
       setStyle: (style: StyleProps) => {
@@ -230,6 +273,38 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
           },
         });
       },
+
+      setIsEditing: (isEditing: boolean) => {
+        set({
+          drawerState: {
+            ...get().drawerState,
+            isEditing,
+          },
+        });
+      },
+
+      setEditInstance: (groupKey: string, editInstance: Modify) => {
+        set({
+          drawerState: {
+            ...get().drawerState,
+            editInstances: {
+              ...get().drawerState.editInstances,
+              [groupKey]: editInstance,
+            },
+          },
+        });
+      },
+
+      removeEditInstance: (groupKey: string) => {
+        const editInstances = { ...get().drawerState.editInstances };
+        editInstances[groupKey] = undefined;
+        set({
+          drawerState: {
+            ...get().drawerState,
+            editInstances,
+          },
+        });
+      },
     },
 
     // #endregion ACTIONS
@@ -244,7 +319,9 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
 
 export const useDrawerStoreActions = (): DrawerActions => useStore(useGeoViewStore(), (state) => state.drawerState.actions);
 
-export const useDrawerIsDrawing = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.drawInstance !== undefined);
+export const useDrawerIsDrawing = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.actions.getIsDrawing());
+
+export const useDrawerIsEditing = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.actions.getIsEditing());
 
 export const useDrawerGeomType = (): string => useStore(useGeoViewStore(), (state) => state.drawerState.geomType);
 
