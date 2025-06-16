@@ -100,6 +100,13 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     if (geomType) {
       state.actions.setGeomType(geomType);
     }
+
+    // If editing already, but the edit group doesn't exist, create it
+    const groupKey = `draw-${geomType}`;
+    if (state.isEditing && !(groupKey in state.editInstances)) {
+      const editInstance = viewer.initModifyInteractions(groupKey);
+      state.actions.setEditInstance(groupKey, editInstance);
+    }
   }
 
   /**
@@ -131,6 +138,88 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   }
 
   /**
+   * Initiates editing interactions
+   * @param mapId The map ID
+   * @param geomTypes Array of geometry types to start editing
+   */
+  public static startEditing(mapId: string, geomTypes?: string[]): void {
+    const state = this.getDrawerState(mapId);
+    if (!state) return;
+
+    // Get the map viewer instance
+    const viewer = MapEventProcessor.getMapViewer(mapId);
+    if (!viewer) return;
+
+    const typesToEdit = geomTypes || ['Point', 'LineString', 'Polygon', 'Circle'];
+
+    // If editing already, stop and restart as it's likely a style change
+    if (Object.keys(state.editInstances).length > 0) {
+      Object.keys(state.editInstances).forEach((type) => {
+        state.editInstances[type]?.stopInteraction();
+        state.actions.setEditInstance(type, undefined);
+      });
+    }
+
+    typesToEdit.forEach((type) => {
+      const groupKey = `draw-${type}`;
+      // Only start editing if the drawing group exists
+      if (viewer.layer.geometry.geometryGroups.find((group) => group.geometryGroupId === groupKey) !== undefined) {
+        const editInstance = viewer.initModifyInteractions(groupKey);
+        state.actions.setEditInstance(groupKey, editInstance);
+      }
+    });
+
+    // If we have an active drawing instance, make sure it stay active
+    // when editing is enabled
+    if (state.drawInstance) {
+      state.drawInstance.startInteraction();
+    }
+  }
+
+  /**
+   * Stops the editing interatction for all groups
+   * @param mapId The map ID
+   * @param geomTypes Array of geometry types to stop editing
+   */
+  public static stopEditing(mapId: string, geomTypes?: string[]): void {
+    const state = this.getDrawerState(mapId);
+    if (!state) return;
+
+    // Get the map viewer instance
+    const viewer = MapEventProcessor.getMapViewer(mapId);
+    if (!viewer) return;
+
+    const typesToEdit = geomTypes || ['Point', 'LineString', 'Polygon', 'Circle'];
+
+    // Edit geometries for each type
+    typesToEdit.forEach((type) => {
+      const groupKey = `draw-${type}`;
+
+      if (!(groupKey in state.editInstances) || state.editInstances[groupKey] === undefined) return;
+      state.editInstances[groupKey].stopInteraction();
+      state.actions.removeEditInstance(groupKey);
+    });
+  }
+
+  /**
+   * Function to toggle editing state
+   * @param mapId The map ID
+   * @param geomTypes Array of geometry types to toggle editing
+   */
+  public static toggleEditing(mapId: string, geomTypes?: string[]): void {
+    const state = this.getDrawerState(mapId);
+    if (!state) return;
+
+    const isEditing = state.actions.getIsEditing();
+    if (isEditing) {
+      this.stopEditing(mapId, geomTypes);
+    } else {
+      this.startEditing(mapId, geomTypes);
+    }
+    state.actions.setIsEditing(!isEditing);
+  }
+
+  /**
    * Clears all drawings from the map
    * @param {string} mapId The map ID
    * @param {string[]} geomTypes Array of geometry types to clear
@@ -152,6 +241,23 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
         viewer.layer.geometry.deleteGeometriesFromGroup(groupKey);
       }
     });
+  }
+
+  public static changeGeomType(mapId: string): void {
+    const state = this.getDrawerState(mapId);
+    if (!state) return;
+
+    // If drawing, restart drawing to set the style
+    if (state.actions.getIsDrawing()) {
+      this.startDrawing(mapId);
+    }
+
+    // If editing, restart editing
+    // Do this after the start drawing so the group is created if missing
+    if (state.isEditing) {
+      this.stopEditing(mapId);
+      this.startEditing(mapId);
+    }
   }
 
   // #endregion
