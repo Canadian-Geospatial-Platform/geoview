@@ -34,6 +34,7 @@ export interface TypeMapFeaturesConfig extends TypeMapFeaturesInstance {
 declare global {
   interface Window {
     cgpv: TypeCGPV;
+    cgpvs: TypeCGPV[];
     geoviewPlugins?: Record<string, typeof AbstractPlugin>;
   }
 }

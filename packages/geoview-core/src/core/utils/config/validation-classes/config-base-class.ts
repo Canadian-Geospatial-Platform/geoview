@@ -253,22 +253,6 @@ export abstract class ConfigBaseClass {
         `The layer status for ${this.layerPath} was already '${this.layerStatus}' and the system wanted to set ${newLayerStatus}`
       );
     }
-
-    // TODO: Cleanup - Commenting this and leaving it here for now.. It turns out that the parentLayerConfig property can't be trusted
-    // GV due to a bug with different instances of entryconfigs stored in the objects and depending how you navigate the objects, you get
-    // GV different instances. Example below (where 'parentLayerConfig.listOfLayerEntryConfig[0]' is indeed going back to 'uniqueValueId/uniqueValueId/4')
-    // GV This: cgpv.api.getMapViewer('sandboxMap').layer.getLayerEntryConfig('uniqueValueId/uniqueValueId/4').layerStatus
-    // GV Isn't the same as this: cgpv.api.getMapViewer('sandboxMap').layer.getLayerEntryConfig('uniqueValueId/uniqueValueId/4').parentLayerConfig.listOfLayerEntryConfig[0].layerStatus
-    // Commenting this out until a fix is found..
-
-    // // eslint-disable-next-line no-underscore-dangle
-    // if (this._layerStatus === 'loaded' && this.parentLayerConfig) {
-    //   // If all children of the parent are loaded, set the parent as loaded
-    //   if (ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo('loaded', this.parentLayerConfig.listOfLayerEntryConfig)) {
-    //     // Set the parent as loaded
-    //     this.parentLayerConfig.setLayerStatusLoaded();
-    //   }
-    // }
   }
 
   /**

@@ -96,7 +96,8 @@ export function Shell(props: ShellProps): JSX.Element {
     appHeight,
   });
 
-  // #region Handlers
+  // #region HANDLERS
+
   /**
    * Handles when a component is being added to the map
    * @param {MapComponentPayload} payload The map component being added
@@ -184,7 +185,7 @@ export function Shell(props: ShellProps): JSX.Element {
     setSnackbarOpen(false);
   }, []);
 
-  // #endregion Handlers
+  // #endregion HANDLERS
 
   // Mount component
   useEffect(() => {
