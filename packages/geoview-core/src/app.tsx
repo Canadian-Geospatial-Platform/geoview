@@ -25,7 +25,7 @@ import { Config } from '@/core/utils/config/config';
 import { useWhatChanged } from '@/core/utils/useWhatChanged';
 import { addGeoViewStore } from '@/core/stores/stores-managers';
 import { logger } from '@/core/utils/logger';
-import { getLocalizedMessage, removeCommentsFromJSON, watchHtmlElementRemoval } from '@/core/utils/utilities';
+import { generateId, getLocalizedMessage, removeCommentsFromJSON, watchHtmlElementRemoval } from '@/core/utils/utilities';
 import { InitMapWrongCallError } from '@/core/exceptions/geoview-exceptions';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { TypeJsonObject } from '@/api/config/types/config-types';
@@ -351,7 +351,13 @@ export const cgpv = {
 
 // Tag the React with the cgpv flag to indicate it's Geoview's
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-(cgpv.react as any).geoview = "this is geoview's react";
+(cgpv.react as any).geoview = `this is geoview's react ${generateId()}`;
+
+// GV For debugging purposes iwth integration on various websites, we're keeping an array of cgpvs for now
+window.cgpvs = window.cgpvs || [];
+window.cgpvs.push(cgpv);
+// If more than 1, log an error
+if (window.cgpvs.length > 1) logger.logError('Multiple instances of cgpv loaded. Make sure you only inject cgpv-main.js once.');
 
 // freeze variable name so a variable with same name can't be defined from outside
 Object.freeze(cgpv);

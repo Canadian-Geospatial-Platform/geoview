@@ -337,6 +337,12 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('FOOTER-BAR - footerBarTabsConfig');
+
+    // TODO: Refactor Footer-bar - This loadScript shouldn't be part of a useEffect, because those happen everytime their depedencies change.
+    // TO.DOCONT: In development with StrictMode this is triggered twice to prevent developers from doing stuff like that here.
+    // TO.DOCONT: Also, important, the dependencies of this useEffect (and the code herein) isn't meant to be part of a useEffect in the first place.
+    // TO.DOCONT: Looking at the other useEffects, it's clear there's a lot of refactoring that should be done in the Footer-bar in general.
+
     // Packages tab
     if (footerBarTabsConfig && footerBarTabsConfig.tabs.core.includes('time-slider')) {
       // create a new tab by loading the time-slider plugin
