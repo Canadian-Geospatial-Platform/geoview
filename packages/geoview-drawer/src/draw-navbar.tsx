@@ -10,6 +10,7 @@ import { StyleButton, StylePanel } from './buttons/style';
 // import GeometryPickerButton from './buttons/geometry-picker-button';
 import Clear from './buttons/clear';
 import Edit from './buttons/edit';
+import Measurements from './buttons/measurements';
 
 type ConfigProps = {
   geomTypes: string[];
@@ -35,8 +36,8 @@ export function createDrawerButtons(config: ConfigProps): Record<string, TypeNav
   buttonConfigs.draw = {
     buttonProps: {
       id: 'drawer-draw',
-      tooltip: 'drawer.toggleDrawing',
-      tooltipPlacement: 'left',
+      // tooltip: 'drawer.toggleDrawing',
+      // tooltipPlacement: 'left',
       children: cgpv.react.createElement(Draw),
       visible: true,
     },
@@ -47,8 +48,8 @@ export function createDrawerButtons(config: ConfigProps): Record<string, TypeNav
   buttonConfigs.geometryPicker = {
     buttonProps: {
       id: 'drawer-geometry-picker',
-      tooltip: 'drawer.geometryPicker',
-      tooltipPlacement: 'left',
+      // tooltip: 'drawer.geometryPicker',
+      // tooltipPlacement: 'left',
       children: cgpv.react.createElement(GeometryPicker, { geomTypes }),
       visible: true,
     },
@@ -64,8 +65,8 @@ export function createDrawerButtons(config: ConfigProps): Record<string, TypeNav
   buttonConfigs.edit = {
     buttonProps: {
       id: 'drawer-edit',
-      tooltip: 'drawer.edit',
-      tooltipPlacement: 'left',
+      // tooltip: 'drawer.edit',
+      // tooltipPlacement: 'left',
       children: cgpv.react.createElement(Edit),
       visible: true,
     },
@@ -75,8 +76,8 @@ export function createDrawerButtons(config: ConfigProps): Record<string, TypeNav
   buttonConfigs.style = {
     buttonProps: {
       id: 'drawer-style',
-      tooltip: 'drawer.style',
-      tooltipPlacement: 'left',
+      // tooltip: 'drawer.style',
+      // tooltipPlacement: 'left',
       children: cgpv.react.createElement(StyleButton),
       visible: true,
     },
@@ -89,12 +90,24 @@ export function createDrawerButtons(config: ConfigProps): Record<string, TypeNav
     },
   };
 
+  // Create show measure button
+  buttonConfigs.measure = {
+    buttonProps: {
+      id: 'drawer-measure',
+      // tooltip: 'drawer.toggleMeasurement',
+      // tooltipPlacement: 'left',
+      children: cgpv.react.createElement(Measurements),
+      visible: true,
+    },
+    groupName: 'drawer',
+  };
+
   // Create clear button
   buttonConfigs.clear = {
     buttonProps: {
       id: 'drawer-clear',
-      tooltip: 'drawer.clear',
-      tooltipPlacement: 'left',
+      // tooltip: 'drawer.clear',
+      // tooltipPlacement: 'left',
       children: cgpv.react.createElement(Clear),
       visible: true,
     },

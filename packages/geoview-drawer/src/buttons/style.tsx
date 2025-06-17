@@ -7,8 +7,10 @@ import { logger } from 'geoview-core/src/core/utils/logger';
 
 export function StyleButton(): JSX.Element {
   const { PaletteIcon, IconButton } = (window as TypeWindow).cgpv.ui.elements;
+  const displayLanguage = useAppDisplayLanguage();
+
   return (
-    <IconButton id="clear">
+    <IconButton id="clear" tooltip={getLocalizedMessage(displayLanguage, 'drawer.style')} tooltipPlacement="left">
       <PaletteIcon />
     </IconButton>
   );
