@@ -1,5 +1,6 @@
 import { useStore } from 'zustand';
 
+import { Overlay } from 'ol';
 import { Draw } from '@/geo/interaction/draw';
 import { Modify } from '@/geo/interaction/modify';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
@@ -37,14 +38,19 @@ export interface IDrawerState {
   drawInstance: Draw | undefined;
   isEditing: boolean;
   editInstances: TypeEditInstance;
+  measureOverlays: Overlay[];
+  hideMeasurements: boolean;
 
   setDefaultConfigValues: (config: TypeMapFeaturesConfig) => void;
 
   actions: {
     getIsDrawing: () => boolean;
     getIsEditing: () => boolean;
+    getMeasureOverlays: () => Overlay[];
+    getHideMeasurements: () => boolean;
     toggleDrawing: () => void;
     toggleEditing: () => void;
+    toggleHideMeasurements: () => void;
     clearDrawings: () => void;
     setGeomType(geomType: string): void;
     setStyle(style: StyleProps): void;
@@ -56,11 +62,16 @@ export interface IDrawerState {
     setIsEditing: (isEditing: boolean) => void;
     setEditInstance(groupKey: string, editInstance: Modify | undefined): void;
     removeEditInstance(groupKey: string): void;
+    setHideMeasurements(hideMeasurements: boolean): void;
+    setMeasureOverlays(measureOverlays: Overlay[]): void;
+    addMeasureOverlay(measureOverlay: Overlay): void;
+    removeMeasureOverlay(measureOverlay: Overlay): void;
   };
 
   setterActions: {
     toggleDrawing: () => void;
     toggleEditing: () => void;
+    toggleHideMeasurements: () => void;
     clearDrawings: () => void;
     setGeomType: (geomType: string) => void;
     setStyle: (style: StyleProps) => void;
@@ -72,6 +83,10 @@ export interface IDrawerState {
     setIsEditing: (isEditing: boolean) => void;
     setEditInstance: (groupKey: string, editInstance: Modify | undefined) => void;
     removeEditInstance: (groupKey: string) => void;
+    setHideMeasurements: (hideMeasurements: boolean) => void;
+    setMeasureOverlays(measureOverlays: Overlay[]): void;
+    addMeasureOverlay(measureOverlay: Overlay): void;
+    removeMeasureOverlay(measureOverlay: Overlay): void;
   };
 }
 
@@ -93,7 +108,10 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
       strokeWidth: 2,
     },
     drawInstance: undefined,
+    isEditing: false,
     editInstances: {},
+    measureOverlays: [],
+    hideMeasurements: false,
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
       const drawerConfig = geoviewConfig.corePackagesConfig?.find((config) => Object.keys(config).includes('drawer')) as
         | TypeDrawerConfig
@@ -125,6 +143,12 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
       getIsEditing: () => {
         return get().drawerState.isEditing;
       },
+      getMeasureOverlays: () => {
+        return get().drawerState.measureOverlays;
+      },
+      getHideMeasurements: () => {
+        return get().drawerState.hideMeasurements;
+      },
       toggleDrawing: () => {
         // Redirect to setter
         get().drawerState.setterActions.toggleDrawing();
@@ -132,6 +156,10 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
       toggleEditing: () => {
         // Redirect to setter
         get().drawerState.setterActions.toggleEditing();
+      },
+      toggleHideMeasurements: () => {
+        // Redirect to setter
+        get().drawerState.setterActions.toggleHideMeasurements();
       },
       clearDrawings: () => {
         // Redirect to setter
@@ -177,6 +205,20 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         // Redirect to setter
         get().drawerState.setterActions.removeEditInstance(groupKey);
       },
+      setHideMeasurements: (hideMeasurements: boolean) => {
+        // Redirect to setter
+        get().drawerState.setterActions.setHideMeasurements(hideMeasurements);
+      },
+      setMeasureOverlays: (measureOverlays: Overlay[]) => {
+        // Redirect to setter
+        get().drawerState.setterActions.setMeasureOverlays(measureOverlays);
+      },
+      addMeasureOverlay: (measureOverlay: Overlay) => {
+        get().drawerState.setterActions.addMeasureOverlay(measureOverlay);
+      },
+      removeMeasureOverlay: (measureOverlay: Overlay) => {
+        get().drawerState.setterActions.removeMeasureOverlay(measureOverlay);
+      },
     },
 
     setterActions: {
@@ -186,6 +228,10 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
 
       toggleEditing: () => {
         DrawerEventProcessor.toggleEditing(get().mapId);
+      },
+
+      toggleHideMeasurements: () => {
+        DrawerEventProcessor.toggleHideMeasurements(get().mapId);
       },
 
       clearDrawings: () => {
@@ -305,6 +351,41 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
           },
         });
       },
+
+      setHideMeasurements: (hideMeasurements: boolean) => {
+        set({
+          drawerState: {
+            ...get().drawerState,
+            hideMeasurements,
+          },
+        });
+      },
+
+      setMeasureOverlays: (measureOverlays: Overlay[]) => {
+        set({
+          drawerState: {
+            ...get().drawerState,
+            measureOverlays,
+          },
+        });
+      },
+
+      addMeasureOverlay: (measureOverlay: Overlay) => {
+        set({
+          drawerState: {
+            ...get().drawerState,
+            measureOverlays: [...get().drawerState.measureOverlays, measureOverlay],
+          },
+        });
+      },
+      removeMeasureOverlay: (measureOverlay: Overlay) => {
+        set({
+          drawerState: {
+            ...get().drawerState,
+            measureOverlays: get().drawerState.measureOverlays.filter((overlay) => overlay !== measureOverlay),
+          },
+        });
+      },
     },
 
     // #endregion ACTIONS
@@ -328,6 +409,9 @@ export const useDrawerGeomType = (): string => useStore(useGeoViewStore(), (stat
 export const useDrawerStyle = (): StyleProps => useStore(useGeoViewStore(), (state) => state.drawerState.style);
 
 export const useDrawerDrawInstance = (): Draw | undefined => useStore(useGeoViewStore(), (state) => state.drawerState.drawInstance);
+
+export const useDrawerHideMeasurements = (): boolean =>
+  useStore(useGeoViewStore(), (state) => state.drawerState.actions.getHideMeasurements());
 
 // Store Actions
 export const useDrawerActions = (): DrawerActions => useStore(useGeoViewStore(), (state) => state.drawerState.actions);

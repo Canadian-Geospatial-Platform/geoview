@@ -7,10 +7,11 @@ import schema from '../schema.json';
 import defaultConfig from '../default-config-drawer.json';
 import { createDrawerButtons } from './draw-navbar';
 
-// TODO Measure Option
+// Import css styles
+import './measurement-styles.css';
+
 // TODO install package - MUI Colour Picker
 // TODO Add support for RGBA instead of just Hex codes for Opacity/Transparency
-// TODO Add ability to edit drawing
 
 /**
  * Create a class for the plugin instance
@@ -59,6 +60,8 @@ class DrawerPlugin extends NavBarPlugin {
         linestring: 'Line',
         polygon: 'Polygon',
         circle: 'Circle',
+        style: 'Change Style',
+        toggleMeasurements: 'Toggle measurements',
       },
     },
     fr: {
@@ -79,6 +82,8 @@ class DrawerPlugin extends NavBarPlugin {
         linestring: 'Ligne',
         polygon: 'Polygone',
         circle: 'Cercle',
+        style: 'Changer de style',
+        toggleMeasurements: 'Basculer les mesures',
       },
     },
   });
