@@ -1,4 +1,7 @@
+import { Feature, Overlay } from 'ol';
+import { LineString, Polygon, Point, Circle as CircleGeom, Geometry } from 'ol/geom';
 import { Style, Stroke, Fill, Circle } from 'ol/style';
+import { getArea, getLength } from 'ol/sphere';
 import { DrawEvent } from 'ol/interaction/Draw';
 import { IDrawerState, StyleProps } from '@/core/stores/store-interface-and-intial-values/drawer-state';
 // import { logger } from '@/core/utils/logger';
@@ -31,6 +34,77 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     return super.getState(mapId).drawerState;
   }
 
+  static #createMeasureTooltip(feature: Feature<Geometry>, hideMeasurements: boolean): Overlay | undefined {
+    // Get the measureTooltip for the feature if one alrady exists
+    let measureTooltip = (feature.get('measureTooltip') as Overlay) || undefined;
+    if (measureTooltip) {
+      measureTooltip.getElement()?.remove();
+    }
+    const geom = feature.getGeometry();
+
+    let output: string | undefined;
+    let tooltipCoord: number[] | undefined;
+
+    // Add measurement element (display: None)
+    if (geom instanceof LineString) {
+      const length = getLength(geom);
+      if (length > 100) {
+        output = `${Math.round((length / 1000) * 100) / 100} km`;
+      } else {
+        output = `${Math.round(length * 100) / 100} m`;
+      }
+
+      tooltipCoord = (geom as LineString).getLastCoordinate();
+    }
+
+    if (geom instanceof Polygon) {
+      const area = getArea(geom);
+      if (area > 10000) {
+        output = `${Math.round((area / 1000000) * 100) / 100} km<sup>2</sup>`;
+      } else {
+        output = `${Math.round(area * 100) / 100} m<sup>2</sup>`;
+      }
+
+      tooltipCoord = (geom as Polygon).getInteriorPoint().getCoordinates();
+      tooltipCoord.pop();
+    }
+
+    if (geom instanceof CircleGeom) {
+      // For Circle geometries, calculate area using π*r²
+      const radius = geom.getRadius();
+      const area = Math.PI * radius * radius;
+      if (area > 10000) {
+        output = `${Math.round((area / 1000000) * 100) / 100} km<sup>2</sup>`;
+      } else {
+        output = `${Math.round(area * 100) / 100} m<sup>2</sup>`;
+      }
+      tooltipCoord = geom.getCenter();
+    }
+    if (!output || !tooltipCoord) return undefined;
+
+    const measureTooltipElement = document.createElement('div');
+    measureTooltipElement.className = 'ol-tooltip ol-tooltip-measure';
+
+    measureTooltipElement.innerHTML = output;
+    measureTooltipElement.hidden = hideMeasurements;
+
+    // If no measure tooltip, create a new one
+    if (!measureTooltip) {
+      measureTooltip = new Overlay({
+        offset: [0, -15],
+        positioning: 'bottom-center',
+        stopEvent: false,
+        insertFirst: false,
+      });
+    }
+    measureTooltip.setElement(measureTooltipElement);
+    measureTooltip.setPosition(tooltipCoord);
+
+    // Set the tooltip on the feature so it can be replaced later if modified
+    feature.set('measureTooltip', measureTooltip);
+    return measureTooltip;
+  }
+
   /**
    * Starts a drawing operation with the specified geometry type
    * @param {string} mapId The map ID
@@ -48,6 +122,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     // Get current state values if not provided
     const currentGeomType = geomType || state.geomType;
     const currentStyle = styleInput || state.style;
+    const { hideMeasurements } = state;
 
     // If drawing already, stop and restart as it's likely a style change
     if (this.getDrawerState(mapId)?.drawInstance) {
@@ -93,6 +168,16 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
       // Apply the style to the feature
       feature.setStyle(featureStyle);
+
+      const geom = feature.getGeometry();
+      if (!geom) return;
+      if (geom instanceof Point) return;
+
+      const newOverlay = this.#createMeasureTooltip(feature, hideMeasurements);
+      if (newOverlay) {
+        state.actions.addMeasureOverlay(newOverlay);
+        viewer.map.addOverlay(newOverlay);
+      }
     });
 
     // Update state
@@ -151,6 +236,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     if (!viewer) return;
 
     const typesToEdit = geomTypes || ['Point', 'LineString', 'Polygon', 'Circle'];
+    const { hideMeasurements } = state;
 
     // If editing already, stop and restart as it's likely a style change
     if (Object.keys(state.editInstances).length > 0) {
@@ -165,6 +251,19 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       // Only start editing if the drawing group exists
       if (viewer.layer.geometry.geometryGroups.find((group) => group.geometryGroupId === groupKey) !== undefined) {
         const editInstance = viewer.initModifyInteractions(groupKey);
+
+        // Event handler for updating measrement tool
+        editInstance.onModifyEnded((_sender, event) => {
+          const feature = event.features.item(0);
+          if (!feature) return;
+
+          const geom = feature.getGeometry();
+          if (!geom) return;
+          if (geom instanceof Point) return;
+
+          this.#createMeasureTooltip(feature, hideMeasurements);
+        });
+
         state.actions.setEditInstance(groupKey, editInstance);
       }
     });
@@ -237,12 +336,24 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     // Clear geometries for each type
     typesToClear.forEach((type) => {
       const groupKey = `draw-${type}`;
-      if (viewer.layer.geometry.geometryGroups.find((group) => group.geometryGroupId === groupKey) !== undefined) {
+      const geometryGroup = viewer.layer.geometry.geometryGroups.find((group) => group.geometryGroupId === groupKey);
+      if (geometryGroup !== undefined) {
+        // Clear measurements
+        geometryGroup.vectorSource.getFeatures().forEach((feature) => {
+          const tooltip = feature.get('measureTooltip');
+          tooltip?.getElement()?.remove();
+        });
+
+        // Clear Geometries
         viewer.layer.geometry.deleteGeometriesFromGroup(groupKey);
       }
     });
   }
 
+  /**
+   * Changes the geometry type of the drawing tool
+   * @param mapId The map ID
+   */
   public static changeGeomType(mapId: string): void {
     const state = this.getDrawerState(mapId);
     if (!state) return;
@@ -258,6 +369,28 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       this.stopEditing(mapId);
       this.startEditing(mapId);
     }
+  }
+
+  /**
+   * Toggles the measurement overlays on the map
+   * @param mapId The map ID
+   */
+  public static toggleHideMeasurements(mapId: string): void {
+    const state = this.getDrawerState(mapId);
+    if (!state) return;
+
+    // Get the map viewer instance
+    const viewer = MapEventProcessor.getMapViewer(mapId);
+    if (!viewer) return;
+
+    const { hideMeasurements, measureOverlays } = state;
+
+    // Toggle the visibility of the measure tooltips
+    measureOverlays.forEach((overlay) => {
+      const elem = overlay.getElement();
+      if (elem) elem.hidden = !hideMeasurements;
+    });
+    state.actions.setHideMeasurements(!hideMeasurements);
   }
 
   // #endregion

@@ -97,6 +97,7 @@ export {
   Send as SendIcon,
   Signpost as SignpostIcon,
   Storage as StorageIcon,
+  Straighten as StraightenIcon,
   SwitchRight as SwitchRightIcon,
   SwitchLeft as SwitchLeftIcon,
   TableView as TableViewIcon,

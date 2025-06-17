@@ -33,7 +33,7 @@ export default function Draw(): JSX.Element {
       id="draw"
       tooltip={getLocalizedMessage(displayLanguage, 'drawer.toggleDrawing')}
       tooltipPlacement="left"
-      sx={isDrawing ? { border: '2px solid #1976d2' } : undefined}
+      sx={isDrawing ? { border: '1px solid #1976d2' } : undefined}
       onClick={handleDraw}
     >
       <DrawIcon />
