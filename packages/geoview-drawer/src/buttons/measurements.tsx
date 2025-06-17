@@ -30,7 +30,7 @@ export default function Measurements(): JSX.Element {
 
   return (
     <IconButton
-      id="clear"
+      id="measure"
       tooltip={getLocalizedMessage(displayLanguage, 'drawer.toggleMeasurements')}
       tooltipPlacement="left"
       onClick={handleToggleMeasurements}
