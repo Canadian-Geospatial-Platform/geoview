@@ -56,7 +56,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
         // Calculate the style for the feature
         const style = AbstractGVVector.calculateStyleForFeature(
           this as AbstractGVLayer,
-          feature as FeatureLike,
+          feature,
           label,
           layerConfig.filterEquation,
           layerConfig.legendFilterIsOff

@@ -4,26 +4,28 @@
   "description": "A time slider for the geoview project",
   "main": "src/index.tsx",
   "keywords": [
-    "react",
     "time slider"
   ],
   "author": "Damon Ulmi",
   "license": "MIT",
-  "dependencies": {
+  "scripts": {
+    "build": "tsc --build"
+  },
+  "peerDependencies": {
     "geoview-core": "workspace:~1.0.0",
-    "@mui/material": "^6.1.3"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zustand": "~5.0.0"
   },
   "devDependencies": {
+    "geoview-core": "workspace:~1.0.0",
     "@babel/core": "^7.25.8",
     "@babel/runtime": "^7.25.7",
-    "@types/react": "^18.3.11",
+    "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
     "markdown-to-jsx": "~7.5.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "typescript": "^5.6.3"
-  },
-  "resolutions": {
-    "@types/react": "^18.2.0"
   }
 }

@@ -271,8 +271,8 @@ export abstract class AbstractGeoViewLayer {
         // All so that the try/catch works nicely here.
         await this.onFetchAndSetServiceMetadata();
       } else {
-        // TODO: Check - Is this else really happening? Do we need the if (this.metadataAccessPath) at all?
-        logger.logDebug(`WOW IT HAPPENED! '${this.geoviewLayerId}' HAD NO METADATA ACCESS PATH!`);
+        // GV It's possible there is no metadataAccessPath, e.g.: CSV (csvLYR2), we keep the if condition here
+        // Skip
       }
     } catch (error: unknown) {
       // Set the layer status to all layer entries to error (that logic was as-is in this refactor, leaving as-is for now)
@@ -571,7 +571,7 @@ export abstract class AbstractGeoViewLayer {
       if (!layerGroup) {
         // All children of this level in the tree have the same parent, so we use the first element of the array to retrieve the parent node.
         // eslint-disable-next-line no-param-reassign
-        layerGroup = this.createLayerGroup(listOfLayerEntryConfig[0].parentLayerConfig!, listOfLayerEntryConfig[0].initialSettings!);
+        layerGroup = this.createLayerGroup(listOfLayerEntryConfig[0].parentLayerConfig!, listOfLayerEntryConfig[0].initialSettings);
       }
 
       // TODO: Refactor - Rework this Promise to be "Promise<AbstractBaseLayer>"
@@ -585,7 +585,7 @@ export abstract class AbstractGeoViewLayer {
           // promiseOfLayerCreated.push(Promise.resolve(undefined)); commented unnecessary code
         } else {
           // Create promise and catch possible error
-          const promise = this.#processOneLayerEntry(layerConfig as AbstractBaseLayerEntryConfig).catch((error: unknown) => {
+          const promise = this.#processOneLayerEntry(layerConfig).catch((error: unknown) => {
             // Add a layer load error
             this.addLayerLoadError(formatError(error), layerConfig);
             return undefined;

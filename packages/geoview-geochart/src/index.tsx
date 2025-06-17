@@ -1,10 +1,12 @@
-import { Cast, AnySchemaObject, TypeJsonObject, toJsonObject } from 'geoview-core/src/api/config/types/config-types';
-import { FooterPlugin } from 'geoview-core/src/api/plugin/footer-plugin';
-import { TypeTabs } from 'geoview-core/src/ui/tabs/tabs';
-import { ChartIcon } from 'geoview-core/src/ui/icons';
+import React from 'react'; // GV This import is to validate that we're on the right React at the end of the file
+import { AnySchemaObject, TypeJsonObject, toJsonObject } from 'geoview-core/api/config/types/config-types';
+import { FooterPlugin } from 'geoview-core/api/plugin/footer-plugin';
+import { TypeTabs } from 'geoview-core/ui/tabs/tabs';
+import { ChartIcon } from 'geoview-core/ui/icons';
 
-import { GeochartEventProcessor } from 'geoview-core/src/api/event-processors/event-processor-children/geochart-event-processor';
-import { isObjectEmpty } from 'geoview-core/src/core/utils/utilities';
+import { GeochartEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/geochart-event-processor';
+import { isObjectEmpty } from 'geoview-core/core/utils/utilities';
+import { GeoChartConfig } from 'geoview-core/core/utils/config/reader/uuid-config-reader';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-geochart.json';
 import { GeoChartPanel } from './geochart-panel';
@@ -35,38 +37,51 @@ class GeoChartFooterPlugin extends FooterPlugin {
   callbackRedraw?: () => void;
 
   /**
-   * Translations object to inject to the viewer translations
+   * Overrides the default translations for the Plugin.
+   * @returns {TypeJsonObject} - The translations object for the particular Plugin.
    */
-  translations = toJsonObject({
-    en: {
-      geochart: {
-        title: 'Chart',
-        panel: {
-          chart: 'chart',
-          loadingUI: 'Loading the Chart panel',
+  override defaultTranslations(): TypeJsonObject {
+    return {
+      en: {
+        geochart: {
+          title: 'Chart',
+          panel: {
+            chart: 'chart',
+            loadingUI: 'Loading the Chart panel',
+          },
         },
       },
-    },
-    fr: {
-      geochart: {
-        title: 'Graphique',
-        panel: {
-          chart: 'graphique',
-          loadingUI: "Chargement de l'interface pour graphique",
+      fr: {
+        geochart: {
+          title: 'Graphique',
+          panel: {
+            chart: 'graphique',
+            loadingUI: "Chargement de l'interface pour graphique",
+          },
         },
       },
-    },
-  });
+    } as unknown as TypeJsonObject;
+  }
+
+  /**
+   * Overrides the getConfig in order to return the right type.
+   * @returns {GeoChartConfig} The Geochart config
+   */
+  override getConfig(): GeoChartConfig {
+    // Redirect
+    return super.getConfig() as GeoChartConfig;
+  }
 
   /**
    * Overrides the addition of the GeoChart Footer Plugin to make sure to set the chart configs into the store.
    */
   override onAdd(): void {
-    // Initialize the store with geochart provided configuration if there is one
-    if (!isObjectEmpty(this.configObj.charts)) GeochartEventProcessor.setGeochartCharts(this.pluginProps.mapId, this.configObj.charts);
-
     // Call parent
     super.onAdd();
+
+    // Initialize the store with geochart provided configuration if there is one
+    if (!isObjectEmpty(this.getConfig().charts))
+      GeochartEventProcessor.setGeochartCharts(this.pluginProps.mapId, this.getConfig().charts as unknown as GeoChartConfig[]);
   }
 
   /**
@@ -101,11 +116,10 @@ class GeoChartFooterPlugin extends FooterPlugin {
 
   /**
    * Overrides when the plugin is selected in the Footer Bar.
-   * @returns {TypeTabs} The TypeTabs for the GeoChart Footer Plugin
    */
-  override onSelected(): void {
+  override onSelect(): void {
     // Call parent
-    super.onSelected();
+    super.onSelect();
 
     // When the GeoChart Plugin in the Footer is selected, we redraw the GeoChart, in case
     this.redrawChart();
@@ -123,6 +137,11 @@ class GeoChartFooterPlugin extends FooterPlugin {
 // Exports the GeoChartFooterPlugin
 export default GeoChartFooterPlugin;
 
-// Keep a reference to the GeoChartPlugin as part of the geoviewPlugins property stored in the window object
-window.geoviewPlugins = window.geoviewPlugins || {};
-window.geoviewPlugins.geochart = Cast<GeoChartFooterPlugin>(GeoChartFooterPlugin);
+// GV This if condition took over 3 days to investigate. It was giving errors on the app.geo.ca website with
+// GV some conflicting reacts being loaded on the page for some obscure reason.
+// Check if we're on the right react
+if (React === window.cgpv.react) {
+  // Keep a reference to the GeoChartPlugin as part of the geoviewPlugins property stored in the window object
+  window.geoviewPlugins = window.geoviewPlugins || {};
+  window.geoviewPlugins.geochart = GeoChartFooterPlugin;
+} // Else ignore, don't keep it on the window, wait for the right react load

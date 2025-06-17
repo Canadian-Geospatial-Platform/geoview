@@ -130,7 +130,7 @@ export class Fetch {
     this.throwIfResponseHasEmbeddedError(result);
 
     // Return the validated TypeJsonObject
-    return result as TypeJsonObject;
+    return result;
   }
 
   /**
@@ -310,8 +310,7 @@ export class Fetch {
     const responseJson = xmlToJson(xmlDOMCapabilities);
 
     // Check if the response is not an empty object
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((responseJson as any).constructor === Object && Object.keys(responseJson as any).length > 0) {
+    if (responseJson.constructor === Object && Object.keys(responseJson).length > 0) {
       // Return the value
       return responseJson;
     }

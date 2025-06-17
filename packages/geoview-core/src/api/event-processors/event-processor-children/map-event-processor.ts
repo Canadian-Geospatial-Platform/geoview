@@ -5,6 +5,7 @@ import { Extent } from 'ol/extent';
 import { FitOptions } from 'ol/View';
 import { KeyboardPan } from 'ol/interaction';
 import { Coordinate } from 'ol/coordinate';
+import { Size } from 'ol/size';
 
 import { CV_MAP_EXTENTS } from '@/api/config/types/config-constants';
 import {
@@ -30,7 +31,7 @@ import {
 import { api } from '@/app';
 import { LayerApi } from '@/geo/layer/layer';
 import { MapViewer, TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer';
-import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
+import { PluginsContainer } from '@/api/plugin/plugin-types';
 import { Projection } from '@/geo/utils/projection';
 import { isPointInExtent, isExtentLonLat } from '@/geo/utils/utilities';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
@@ -81,15 +82,16 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * Initializes the map controls
    * @param {string} mapId - The map id being initialized
    */
-  static initMapControls(mapId: string): void {
+  static async initMapControls(mapId: string): Promise<void> {
     // Log
     logger.logTraceCore('MAP EVENT PROCESSOR - initMapControls', mapId);
 
     // use api to access map because this function will set map element in store
-    const { map } = this.getMapViewer(mapId);
+    const mapViewer = this.getMapViewer(mapId);
+    const { map } = mapViewer;
     const store = getGeoViewStore(mapId);
 
-    // add map controls (scale)
+    // Add map controls (scale)
     const scaleBarMetric = new ScaleLine({
       units: 'metric',
       target: document.getElementById(`${mapId}-scaleControlBarMetric`) as HTMLElement,
@@ -140,22 +142,17 @@ export class MapEventProcessor extends AbstractEventProcessor {
     store.getState().mapState.setterActions.setOverlayNorthMarker(northPoleMarker);
     store.getState().mapState.setterActions.setOverlayClickMarker(clickMarkerOverlay);
 
-    // Get the size as [number, number]
-    const size = map.getSize() as unknown as [number, number];
+    // Get the size
+    const size = await mapViewer.getMapSize();
 
     // Set map size
-    store.getState().mapState.setterActions.setMapSize(size);
+    MapEventProcessor.setMapSize(mapId, size);
 
     // Get the scale information
-    this.getScaleInfoFromDomElement(mapId, MapViewer.INIT_TIMEOUT_PROMISE)
-      .then((scale) => {
-        // Set the map scale
-        MapEventProcessor.setMapScale(mapId, scale);
-      })
-      .catch((error: unknown) => {
-        // Log error
-        logger.logPromiseFailed('in getScaleInfoFromDomElement in initMapControls', error);
-      });
+    const scale = this.getScaleInfoFromDomElement(mapId);
+
+    // Set the map scale
+    MapEventProcessor.setMapScale(mapId, scale);
 
     // set map interaction
     this.setInteraction(mapId, store.getState().mapState.interaction);
@@ -201,9 +198,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * Shortcut to get the Map Viewer plugins instance for a given map id
    * This is use to reduce the use of api.getMapViewer(mapId).plugins and be more explicit
    * @param {string} mapId - map Id
-   * @returns {TypeRecordOfPlugin} The map plugins record
+   * @returns {PluginsContainer} The map plugins container
    */
-  static async getMapViewerPlugins(mapId: string): Promise<TypeRecordOfPlugin> {
+  static async getMapViewerPlugins(mapId: string): Promise<PluginsContainer> {
     // TODO: Check - Remove the try/catch here to force explicit case-by-case handling instead of via shared function.
     try {
       // Check if the plugins exist
@@ -219,26 +216,11 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Asynchronously retrieves the scale information from the DOM elements for the given map ID.
-   *
+   * Retrieves the scale information from the DOM elements for the given map ID.
    * @param {string} mapId - The unique identifier of the map.
-   * @param {number} timeoutMs - The maximum time in milliseconds to wait for the DOM elements to be available.
-   * @returns {Promise<TypeScaleInfo>} A promise that resolves to the scale information object when available.
-   *
-   * @description
-   * This method waits for the scale control DOM elements (both metric and imperial) to be present and populated.
-   * It then extracts the scale bar widths and labels, as well as the numeric scale value, and returns them in a TypeScaleInfo object.
-   * If the elements are not available within the specified timeout, the promise will reject.
+   * @returns {TypeScaleInfo} The scale information object
    */
-  static async getScaleInfoFromDomElement(mapId: string, timeoutMs: number): Promise<TypeScaleInfo> {
-    // Check if the scaleControl exists and is showing information, wait for it
-    await whenThisThen(
-      () =>
-        document.getElementById(`${mapId}-scaleControlBarMetric`)?.querySelector('.ol-scale-text') &&
-        document.getElementById(`${mapId}-scaleControlBarImperial`)?.querySelector('.ol-scale-text'),
-      timeoutMs
-    );
-
+  static getScaleInfoFromDomElement(mapId: string): TypeScaleInfo {
     // Get metric values
     const scaleControlBarMetric = document.getElementById(`${mapId}-scaleControlBarMetric`);
     const lineWidthMetric = (scaleControlBarMetric?.querySelector('.ol-scale-bar-inner') as HTMLElement)?.style.width;
@@ -339,7 +321,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
   static getMapState(mapId: string): TypeMapState {
     const mapState = this.getMapStateProtected(mapId);
     return {
-      currentProjection: mapState.currentProjection as TypeValidMapProjectionCodes,
+      currentProjection: mapState.currentProjection,
       currentZoom: mapState.zoom,
       mapCenterCoordinates: mapState.centerCoordinates,
       pointerPosition: mapState.pointerPosition || {
@@ -417,7 +399,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     this.getMapStateProtected(mapId).setterActions.setRotation(rotation);
   }
 
-  static setMapSize(mapId: string, size: [number, number]): void {
+  static setMapSize(mapId: string, size: Size): void {
     // Save in store
     this.getMapStateProtected(mapId).setterActions.setMapSize(size);
   }
@@ -470,7 +452,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
         number,
         number,
       ];
-      const newProjection = projectionCode as TypeValidMapProjectionCodes;
+      const newProjection = projectionCode;
       const newProjectionOL = Projection.getProjectionFromString(`EPSG:${newProjection}`);
 
       // If maxExtent was provided and native projection, apply
@@ -957,12 +939,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const mapElement = this.getMapViewer(mapId).map;
 
     // replace the KeyboardPan interraction by a new one
-    mapElement!.getInteractions().forEach((interactionItem) => {
+    mapElement.getInteractions().forEach((interactionItem) => {
       if (interactionItem instanceof KeyboardPan) {
-        mapElement!.removeInteraction(interactionItem);
+        mapElement.removeInteraction(interactionItem);
       }
     });
-    mapElement!.addInteraction(new KeyboardPan({ pixelDelta: panDelta }));
+    mapElement.addInteraction(new KeyboardPan({ pixelDelta: panDelta }));
   }
 
   /**
@@ -1014,7 +996,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   static async zoomToGeoLocatorLocation(mapId: string, coords: Coordinate, bbox?: Extent): Promise<void> {
-    const indicatorBox = document.getElementsByClassName('ol-overviewmap-box') as HTMLCollectionOf<Element>;
+    const indicatorBox = document.getElementsByClassName('ol-overviewmap-box');
     for (let i = 0; i < indicatorBox.length; i++) {
       (indicatorBox[i] as HTMLElement).style.display = 'none';
     }
@@ -1075,18 +1057,18 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const homeView = this.getMapStateProtected(mapId).homeView || this.getMapStateProtected(mapId).initialView;
 
     // Transform center coordinates and update options if zoomAndCenter are in config
-    if (homeView!.zoomAndCenter) {
-      [options.maxZoom] = homeView!.zoomAndCenter!;
+    if (homeView.zoomAndCenter) {
+      [options.maxZoom] = homeView.zoomAndCenter!;
 
-      const center = homeView!.zoomAndCenter![1];
+      const center = homeView.zoomAndCenter[1];
       const projectedCoords = Projection.transformPoints([center], Projection.PROJECTION_NAMES.LONLAT, `EPSG:${currProjection}`);
 
       extent = [...projectedCoords[0], ...projectedCoords[0]];
     }
 
     // If extent is in config, use it
-    if (homeView!.extent) {
-      const lonlatExtent = homeView!.extent as Extent;
+    if (homeView.extent) {
+      const lonlatExtent = homeView.extent as Extent;
       // If extent is not lon/lat, we assume it is in the map projection and use it as is.
       extent = isExtentLonLat(lonlatExtent)
         ? Projection.transformExtentFromProj(
@@ -1100,7 +1082,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     }
 
     // If layer IDs are in the config, use them
-    if (homeView!.layerIds) extent = this.getMapViewerLayerAPI(mapId).getExtentOfMultipleLayers(homeView!.layerIds);
+    if (homeView.layerIds) extent = this.getMapViewerLayerAPI(mapId).getExtentOfMultipleLayers(homeView.layerIds);
 
     // If extent is not valid, take the default one for the current projection
     if (extent.length !== 4 || extent.includes(Infinity))
@@ -1420,7 +1402,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     else listOfLayerEntryConfig.push(this.#createLayerEntryConfig(mapId, layerPath, isGeocore, overrideGeocoreServiceNames));
 
     // Get initial settings
-    const initialSettings = this.#getInitialSettings(layerEntryConfig!, orderedLayerInfo!, legendLayerInfo!);
+    const initialSettings = this.#getInitialSettings(layerEntryConfig, orderedLayerInfo!, legendLayerInfo!);
 
     // Construct geoview layer config
     const newGeoviewLayerConfig: MapConfigLayerEntry = isGeocore
@@ -1469,7 +1451,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
         .filter((mapLayerEntry) => !!mapLayerEntry);
 
       // Get info for view
-      const projection = this.getMapStateProtected(mapId).currentProjection as TypeValidMapProjectionCodes;
+      const projection = this.getMapStateProtected(mapId).currentProjection;
       const currentView = this.getMapViewer(mapId).map.getView();
       const currentCenter = currentView.getCenter();
       const currentProjection = currentView.getProjection().getCode();
@@ -1538,7 +1520,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
         const selectedLayerLayerPath = LegendEventProcessor.getLayerPanelState(mapId, 'selectedLayerPath');
         if (selectedLayerLayerPath) newMapConfig.footerBar.selectedLayersLayerPath = selectedLayerLayerPath as string;
         const selectedTimeSliderLayerPath = TimeSliderEventProcessor.getTimeSliderSelectedLayer(mapId);
-        if (selectedTimeSliderLayerPath) newMapConfig.footerBar.selectedTimeSliderLayerPath = selectedTimeSliderLayerPath as string;
+        if (selectedTimeSliderLayerPath) newMapConfig.footerBar.selectedTimeSliderLayerPath = selectedTimeSliderLayerPath;
       }
 
       return newMapConfig;

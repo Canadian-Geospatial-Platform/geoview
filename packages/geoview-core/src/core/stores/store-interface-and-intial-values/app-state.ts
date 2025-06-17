@@ -96,7 +96,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
           displayTheme: geoviewConfig.theme || 'geo.ca',
           geolocatorServiceURL: geoviewConfig.serviceUrls?.geolocatorUrl,
           metadataServiceURL: geoviewConfig.serviceUrls?.metadataUrl,
-          geoviewHTMLElement: geoviewHTMLElement!,
+          geoviewHTMLElement,
           height: geoviewHTMLElement?.clientHeight || 600,
           showUnsymbolizedFeatures: geoviewConfig.globalSettings?.showUnsymbolizedFeatures || false,
         },

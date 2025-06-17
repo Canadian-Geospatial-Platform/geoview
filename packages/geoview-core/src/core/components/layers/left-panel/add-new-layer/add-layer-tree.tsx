@@ -1,7 +1,7 @@
 /**
  * This component improves Mui's TreeView component to be able to process Layers data.
  */
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
 import _ from 'lodash';
@@ -93,7 +93,7 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
   };
 
   const renderTreeItems = (): JSX.Element[] => {
-    return layersData.map((layer) => renderTreeItem(layer as GroupLayerEntryConfig));
+    return layersData.map((layer) => renderTreeItem(layer));
   };
 
   return (

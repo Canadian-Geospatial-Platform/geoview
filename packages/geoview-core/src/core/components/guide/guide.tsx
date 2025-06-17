@@ -3,7 +3,7 @@ import Markdown from 'markdown-to-jsx';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { Box } from '@/ui';
-import { TypeGuideObject, useAppGuide } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useAppGuide } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from '@/core/utils/logger';
 import { getSxClasses } from './guide-style';
 import { LayerListEntry, Layout } from '@/core/components/common';
@@ -61,7 +61,7 @@ export const Guide = memo(function GuidePanel({ fullWidth = false, containerType
 
       // Appends the subsection content to the section content
       if (guide[item].children) {
-        Object.entries(guide[item].children as TypeGuideObject).forEach(([, child]) => {
+        Object.entries(guide[item].children).forEach(([, child]) => {
           content += `\n${child.content}`;
 
           // Appends sub subsection content
@@ -166,7 +166,7 @@ export const Guide = memo(function GuidePanel({ fullWidth = false, containerType
     <Box sx={sxClasses.guideContainer}>
       <Layout
         containerType={containerType}
-        selectedLayerPath={selectedLayerPath || ''}
+        selectedLayerPath={selectedLayerPath}
         layerList={layersList}
         onLayerListClicked={handleGuideItemClick}
         fullWidth={fullWidth}

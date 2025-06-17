@@ -66,9 +66,11 @@
     <script>
 
       // Register handler when map has been initialized
-      cgpv.onLayersLoaded((mapViewer) => {
+      cgpv.onMapInit((mapViewer) => {
         if (mapViewer.mapId === 'map1') {
-            // TODO: Check - Why delay it here?
+          // Hook when the layers will be loaded
+          mapViewer.onMapLayersLoaded(() => {
+            // TODO: Check - Why delay it here? Safe to remove?
             window.setInterval(() => {
               const displayField1 = document.getElementById('HUC3-state');
               const featureInfoLayerSet = mapViewer.layer.featureInfoLayerSet.resultSet;
@@ -80,7 +82,8 @@
                 displayField1.textContent = output && output !== '(' ? `${output.slice(0, -2)})` : '(undefined)';
               } else displayField1.textContent = '(undefined)';
             }, 250);
-          }
+          });
+        }
       });
 
       // initialize cgpv

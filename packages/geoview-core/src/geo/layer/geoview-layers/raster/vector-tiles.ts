@@ -75,7 +75,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
         tileSize: [tileInfo.rows as number, tileInfo.cols as number],
       };
       // eslint-disable-next-line no-param-reassign
-      layerConfig.source!.tileGrid = newTileGrid;
+      layerConfig.source.tileGrid = newTileGrid;
 
       // eslint-disable-next-line no-param-reassign
       layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
@@ -250,7 +250,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     if (source.tileGrid) {
       const tileGridOptions: TileGridOptions = {
         origin: source.tileGrid.origin,
-        resolutions: source.tileGrid.resolutions as number[],
+        resolutions: source.tileGrid.resolutions,
         tileSize: source.tileGrid.tileSize,
         extent: source.tileGrid.extent,
       };

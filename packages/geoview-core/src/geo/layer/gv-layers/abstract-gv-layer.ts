@@ -25,7 +25,6 @@ import {
   TypeLocation,
   QueryType,
   TypeStyleGeometry,
-  TypeGeoviewLayerType,
   TypeOutfieldsType,
 } from '@/api/config/types/map-schema-types';
 import { getLegendStyles, getFeatureImageSource, processStyle } from '@/geo/utils/renderer/geoview-renderer';
@@ -242,7 +241,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       // Emit about the error
       this.emitMessage('layers.errorNotLoaded', [this.getLayerName()], 'error', true);
     } else {
-      // We've already emitted an error to the user about the layer being in error, skip
+      // We've already emitted an error to the user about the layer being in error, skip so that we don't spam
     }
 
     // Emit event for all layer error events
@@ -658,7 +657,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   async onFetchLegend(): Promise<TypeLegend | null> {
     try {
       const legend: TypeLegend = {
-        type: this.getLayerConfig().geoviewLayerConfig.geoviewLayerType as TypeGeoviewLayerType,
+        type: this.getLayerConfig().geoviewLayerConfig.geoviewLayerType,
         styleConfig: this.getStyle(),
         legend: await getLegendStyles(this.getStyle()),
       };
@@ -748,7 +747,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
         let imageSource;
         if (layerStyle[geometryType]) {
-          const styleSettings = layerStyle[geometryType]!;
+          const styleSettings = layerStyle[geometryType];
           const { type } = styleSettings;
 
           // Calculate the feature style
@@ -793,7 +792,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
         const featureInfoEntry: TypeFeatureInfoEntry = {
           // feature key for building the data-grid
           featureKey: featureKeyCounter++,
-          geoviewLayerType: this.getLayerConfig().geoviewLayerConfig.geoviewLayerType as TypeGeoviewLayerType,
+          geoviewLayerType: this.getLayerConfig().geoviewLayerConfig.geoviewLayerType,
           extent,
           geometry: feature,
           featureIcon: imageSource,
@@ -829,10 +828,10 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
                 fieldKey: fieldKeyCounter++,
                 value:
                   // If fieldName is the alias for the entry, we will not get a value, so we try the fieldEntry name.
-                  this.getFieldValue(feature, fieldName, fieldEntry!.type as 'string' | 'number' | 'date') ||
-                  this.getFieldValue(feature, fieldEntry.name, fieldEntry!.type as 'string' | 'number' | 'date'),
-                dataType: fieldEntry!.type,
-                alias: fieldEntry!.alias,
+                  this.getFieldValue(feature, fieldName, fieldEntry.type as 'string' | 'number' | 'date') ||
+                  this.getFieldValue(feature, fieldEntry.name, fieldEntry.type as 'string' | 'number' | 'date'),
+                dataType: fieldEntry.type,
+                alias: fieldEntry.alias,
                 domain: fieldDomain,
               };
             } else if (!outfields) {
@@ -900,17 +899,13 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     const eventAny = event as any;
 
     if ('image' in eventAny) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return eventAny.image;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ('tile' in eventAny) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-underscore-dangle
       return eventAny.tile;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ('target' in eventAny && 'dispatching_' in eventAny.target) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-underscore-dangle
       return eventAny.target.dispatching_;

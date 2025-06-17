@@ -97,7 +97,7 @@ export abstract class AbstractBaseLayer {
    */
   getLayerStatus(): TypeLayerStatus {
     // Take the layer status from the config
-    return this.getLayerConfig()!.layerStatus;
+    return this.getLayerConfig().layerStatus;
   }
 
   /**

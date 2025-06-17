@@ -129,31 +129,6 @@ export abstract class AbstractLayerSet {
         if (layerConfig.layerStatus === 'loaded') {
           // The layer has become loaded
 
-          // TODO: Cleanup - Commenting this for now (2025-05-16) to see how things behave.
-          // TO.DOCONT: I don't think it's necessary anymore with the dynamic onLoading, onLoaded now changing the status on-the-fly more
-          // // GV Take this opportunity to verify if the layer had a parent (this code used to be inside ConfigBaseClass,
-          // // GV but it turns out parentLayerConfig couldn't be trusted when navigating the object hierarchy - see note over there)
-          // // GV cgpv.api.getMapViewer('sandboxMap').layer.getLayerEntryConfig('uniqueValueId/uniqueValueId/4').layerStatus
-          // // GV vs cgpv.api.getMapVierwer('sandboxMap').layer.getLayerEntryConfig('uniqueValueId/uniqueValueId/4').parentLayerConfig.listOfLayerEntryConfig[0].layerStatus
-
-          // // If the config has a parent
-          // if (layerConfig.parentLayerConfig) {
-          //   // Get all the siblings reusing the LayerApi which is more trustable than the parent hierarchy on the config themselves
-          //   const layerConfigSiblings = layerConfig.parentLayerConfig.listOfLayerEntryConfig
-          //     .map((layerConf) => {
-          //       return this.layerApi.getLayerEntryConfig(layerConf.layerPath);
-          //     })
-          //     .filter((layerConf) => layerConf) as ConfigBaseClass[];
-
-          //   // If all siblings of the layer config are loaded
-          //   if (ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo('loaded', layerConfigSiblings)) {
-          //     // Get the parent, again using the LayerApi, can't trust the 'parentLayerConfig'
-          //     const parentConfig = this.layerApi.getLayerEntryConfig(layerConfig.parentLayerConfig.layerPath);
-          //     // If found, this parent can be flagged as loaded
-          //     if (parentConfig) parentConfig.setLayerStatusLoaded();
-          //   }
-          // }
-
           // Get the layer
           const layer = this.layerApi.getGeoviewLayer(layerConfig.layerPath);
 
@@ -468,7 +443,7 @@ export abstract class AbstractLayerSet {
   protected static alignRecordsWithOutFields(layerEntryConfig: TypeLayerEntryConfig, arrayOfRecords: TypeFeatureInfoEntry[]): void {
     // If source featureInfo is provided, continue
     if (layerEntryConfig.source && layerEntryConfig.source.featureInfo) {
-      const sourceFeatureInfo = layerEntryConfig.source!.featureInfo as TypeFeatureInfoLayerConfig;
+      const sourceFeatureInfo = layerEntryConfig.source.featureInfo as TypeFeatureInfoLayerConfig;
 
       // If outFields is provided, compare record fields with outFields to remove unwanted one
       // If there is no outFields, this will be created in the next function patchMissingMetadataIfNecessary
@@ -485,8 +460,8 @@ export abstract class AbstractLayerSet {
             if (outFields.find((outfield) => outfield.name === fieldName)) {
               const fieldIndex = outFields.findIndex((outfield) => outfield.name === fieldName);
               record.fieldInfo[fieldName]!.fieldKey = fieldKeyCounter++;
-              record.fieldInfo[fieldName]!.alias = outFields![fieldIndex].alias;
-              record.fieldInfo[fieldName]!.dataType = outFields![fieldIndex].type;
+              record.fieldInfo[fieldName]!.alias = outFields[fieldIndex].alias;
+              record.fieldInfo[fieldName]!.dataType = outFields[fieldIndex].type;
               return false; // keep this entry
             }
 

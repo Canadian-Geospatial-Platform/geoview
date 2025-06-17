@@ -312,6 +312,7 @@
     "generic": "An error happened, contact us or view console for details.",
     "layer": {
       "layerNotFound": "Layer at layer path '__param__' not found.",
+      "wrongType": "Layer '__param__' isn't of the expected type.",
       "notAGeoJsonLayer": "Not a GeoJson layer for layer '__param__'.",
       "notAnEsriDynamicLayer": "Not an Esri Dynamic layer for layer '__param__'.",
       "notAFeatureLayer": "Layer id not a feature layer '__param__'.",
@@ -320,6 +321,7 @@
     },
     "map": {
       "mapIdNotFound": "Map with ID '__param__' not found.",
+      "mapIdAlreadyExists": "Map with ID '__param__' already exists.",
       "geoviewStoreNotFound": "GeoView Store on Map '__param__' not found.",
       "mapDivNotExists": "Div with id ${divId} does not exist",
       "mapWrongCall": "Div with id __param__ has a class 'geoview-map' and should be initialized via a 'cgpv.init()' call."

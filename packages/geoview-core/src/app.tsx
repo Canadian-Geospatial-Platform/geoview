@@ -1,5 +1,6 @@
-import React from 'react';
-import { Root, createRoot } from 'react-dom/client';
+import React from 'react'; // This is the real React that's exported
+import { Root, createRoot } from 'react-dom/client'; // This is the real React-DOM that's exported
+import * as translate from 'react-i18next'; // This is the real translate that's exported
 
 import { useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
@@ -18,12 +19,13 @@ import * as UI from '@/ui';
 
 import AppStart from '@/core/app-start';
 import { API } from '@/api/api';
+import { createI18nInstance } from '@/core/translation/i18n';
 import { MapViewerDelegate, TypeCGPV, TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { Config } from '@/core/utils/config/config';
 import { useWhatChanged } from '@/core/utils/useWhatChanged';
 import { addGeoViewStore } from '@/core/stores/stores-managers';
 import { logger } from '@/core/utils/logger';
-import { getLocalizedMessage, removeCommentsFromJSON } from '@/core/utils/utilities';
+import { generateId, getLocalizedMessage, removeCommentsFromJSON, watchHtmlElementRemoval } from '@/core/utils/utilities';
 import { InitMapWrongCallError } from '@/core/exceptions/geoview-exceptions';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { TypeJsonObject } from '@/api/config/types/config-types';
@@ -34,12 +36,10 @@ export * from './core/types/external-types';
 
 export const api = new API();
 
-const reactRoot: Record<string, Root> = {};
+const reactRoots: Record<string, Root> = {};
 
 let cgpvCallbackMapInit: MapViewerDelegate;
 let cgpvCallbackMapReady: MapViewerDelegate;
-let cgpvCallbackLayersProcessed: MapViewerDelegate;
-let cgpvCallbackLayersLoaded: MapViewerDelegate;
 
 /**
  * Checks if a root is mounted for a given map ID
@@ -48,27 +48,26 @@ let cgpvCallbackLayersLoaded: MapViewerDelegate;
  * @returns {boolean} True if the root exists and is mounted
  */
 const isRootMounted = (mapId: string): boolean => {
-  return !!reactRoot[mapId];
+  return !!reactRoots[mapId];
 };
 
 /**
  * Safely unmounts a map and cleans up its resources
- *
  * @param {string} mapId - The map id to unmount
+ * @param {HTMLElement?} mapContainer - Optional, the html element where the map was mounted
  */
-export function unmountMap(mapId: string, mapContainer: HTMLElement): void {
+export function unmountMap(mapId: string, mapContainer?: HTMLElement): void {
   if (isRootMounted(mapId)) {
     try {
-      reactRoot[mapId].unmount();
+      reactRoots[mapId].unmount();
       logger.logInfo(`Map ${mapId} is unmounted...`);
     } catch (error: unknown) {
       logger.logError(`Error unmounting map ${mapId}:`, error);
     } finally {
       // Remove React-specific attributes
-      mapContainer.removeAttribute('data-react-root');
-      mapContainer.removeAttribute('data-zustand-devtools');
-
-      delete reactRoot[mapId];
+      mapContainer?.removeAttribute('data-react-root');
+      mapContainer?.removeAttribute('data-zustand-devtools');
+      delete reactRoots[mapId];
     }
   }
 }
@@ -150,11 +149,26 @@ async function getMapConfig(mapElement: Element): Promise<TypeMapFeaturesConfig>
 }
 
 /**
+ * Handles when the div containing the MapViewer disappears from the DOM, likely by a dev manipulation.
+ * @param {string} mapId - The MapId of the MapViewer which had its div disappear from the DOM.
+ */
+function handleMapViewerDivRemoved(mapId: string): void {
+  // If the MapViewer is still present
+  if (api.hasMapViewer(mapId)) {
+    // Delete the MapViewer to clean up, sending 'false', because the div is already gone.
+    api.deleteMapViewer(mapId, false).catch((error: unknown) => {
+      // Log
+      logger.logPromiseFailed('in deleteMapViewer in handleMapDivRemoved', error);
+    });
+  }
+}
+
+/**
  * Function to render the map for inline map and map create from a function call
  *
- * @param {Element} mapElement - The html element div who will contain the map
+ * @param {HTMLElement} mapElement - The html element div who will contain the map
  */
-async function renderMap(mapElement: Element): Promise<MapViewer> {
+async function renderMap(mapElement: HTMLElement): Promise<MapViewer> {
   // if a config is provided from either inline div, url params or json file, validate it with against the schema
   // otherwise return the default config
   const configuration = await getMapConfig(mapElement);
@@ -169,7 +183,7 @@ async function renderMap(mapElement: Element): Promise<MapViewer> {
   const config = new Config(lang);
   const configObj = config.initializeMapConfig(
     mapId,
-    configuration!.map!.listOfGeoviewLayerConfig! as MapConfigLayerEntry[], // TODO: refactor - remove cast after
+    configuration.map.listOfGeoviewLayerConfig as MapConfigLayerEntry[], // TODO: refactor - remove cast after
     (errorKey: string, params: string[]) => {
       // Wait for the map viewer to get loaded in the api
       api
@@ -192,16 +206,27 @@ async function renderMap(mapElement: Element): Promise<MapViewer> {
   );
   configuration.map.listOfGeoviewLayerConfig = configObj!;
 
+  // Create i18n istance for the map
+  const i18n = await createI18nInstance(lang);
+
   // render the map with the config
-  reactRoot[mapId] = createRoot(mapElement!);
+  reactRoots[mapId] = createRoot(mapElement);
 
   // add config to store
   addGeoViewStore(configuration);
 
+  // create a new map viewer instance and add it to the api
+  const mapViewer = new MapViewer(configuration, i18n);
+  api.setMapViewer(mapId, mapViewer);
+
   // Create a promise to be resolved when the MapViewer is initialized via the AppStart component
-  return new Promise<MapViewer>((resolve) => {
-    reactRoot[mapId].render(<AppStart mapFeaturesConfig={configuration} lang={lang} onMapViewerInit={resolve} />);
-  });
+  reactRoots[mapId].render(<AppStart mapFeaturesConfig={configuration} i18nLang={i18n} />);
+
+  // Set up MutationObserver to watch for removal of the map div where our MapViewer is mounted
+  watchHtmlElementRemoval(mapId, mapElement, handleMapViewerDivRemoved);
+
+  // Return the map viewer
+  return mapViewer;
 }
 
 /**
@@ -246,7 +271,7 @@ function init(): void {
 
   // loop through map elements on the page
   for (let i = 0; i < mapElements.length; i += 1) {
-    const mapElement = mapElements[i] as Element;
+    const mapElement = mapElements[i] as HTMLElement;
     if (!mapElement.classList.contains('geoview-map-func-call')) {
       // Render the map
       const promiseMapViewer = renderMap(mapElement);
@@ -257,49 +282,30 @@ function init(): void {
       // The callback for the map ready when the promiseMapInit will resolve
       const theCallbackMapReady = cgpvCallbackMapReady;
 
-      // The callback for the layers processed when the promiseMapInit will resolve
-      const theCallbackLayersProcessed = cgpvCallbackLayersProcessed;
-
-      // The callback for the layers loaded when the promiseMapInit will resolve
-      const theCallbackLayersLoaded = cgpvCallbackLayersLoaded;
-
-      // When the map init is done
+      // When the map viewer is created
       promiseMapViewer
         .then((theMapViewer) => {
-          // Log
-          const mapId = mapElement.getAttribute('id')!;
-          logger.logInfo('Map initialized', mapId);
+          // Register when the map will be init
+          theMapViewer.onMapInit((mapViewer) => {
+            try {
+              // Log
+              logger.logInfo('Map initialized', mapViewer.mapId);
 
-          try {
-            // Callback about it
-            theCallbackMapInit?.(theMapViewer);
-          } catch (error: unknown) {
-            // Log
-            logger.logError('An error happened in the initialization callback.', error);
-          }
+              // Callback about it
+              theCallbackMapInit?.(theMapViewer);
+            } catch (error: unknown) {
+              // Log
+              logger.logError('An error happened in the initialization callback.', error);
+            }
+          });
 
           // Register when the map viewer will have a map ready
           theMapViewer.onMapReady((mapViewer) => {
+            // Log
             logger.logInfo('Map ready / layers registered', mapViewer.mapId);
 
             // Callback for that particular map
             theCallbackMapReady?.(mapViewer);
-          });
-
-          // Register when the map viewer will have processed layers
-          theMapViewer.onMapLayersProcessed((mapViewer) => {
-            logger.logInfo('Map layers processed', mapViewer.mapId);
-
-            // Callback for that particular map
-            theCallbackLayersProcessed?.(mapViewer);
-          });
-
-          // Register when the map viewer will have loaded layers
-          theMapViewer.onMapLayersLoaded((mapViewer) => {
-            logger.logInfo('Map layers loaded', mapViewer.mapId);
-
-            // Callback for that particular map
-            theCallbackLayersLoaded?.(mapViewer);
           });
         })
         .catch((error: unknown) => {
@@ -328,34 +334,15 @@ export function onMapReady(callback: MapViewerDelegate): void {
   cgpvCallbackMapReady = callback;
 }
 
-/**
- * Registers a callback when the layers have been processed
- * @param {MapViewerDelegate} callback - The callback to be called
- */
-export function onLayersProcessed(callback: MapViewerDelegate): void {
-  // Keep the callback
-  cgpvCallbackLayersProcessed = callback;
-}
-
-/**
- * Registers a callback when the layers have been loaded
- * @param {MapViewerDelegate} callback - The callback to be called
- */
-export function onLayersLoaded(callback: MapViewerDelegate): void {
-  // Keep the callback
-  cgpvCallbackLayersLoaded = callback;
-}
-
 // cgpv object to be exported with the api for outside use
-export const cgpv: TypeCGPV = {
+export const cgpv = {
   init,
   onMapInit,
   onMapReady,
-  onLayersProcessed,
-  onLayersLoaded,
   api,
   react: React,
   createRoot,
+  translate,
   ui: {
     useTheme,
     useMediaQuery,
@@ -363,7 +350,17 @@ export const cgpv: TypeCGPV = {
     elements: UI,
   },
   logger,
-};
+} satisfies TypeCGPV;
+
+// Tag the React with the cgpv flag to indicate it's Geoview's
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(cgpv.react as any).geoview = `this is geoview's react ${generateId()}`;
+
+// GV For debugging purposes with integration on various websites, we're keeping an array of cgpvs for now
+window.cgpvs = window.cgpvs || [];
+window.cgpvs.push(cgpv);
+// If more than 1, log an error
+if (window.cgpvs.length > 1) logger.logError('Multiple instances of cgpv loaded. Make sure you only inject cgpv-main.js once.');
 
 // freeze variable name so a variable with same name can't be defined from outside
 Object.freeze(cgpv);

@@ -231,8 +231,8 @@ export function parseDateTimeValuesVector(filter: string, externalFragmentsOrder
     // If the date has a time zone, keep it as is, otherwise reverse its time zone by changing its sign
     const reverseTimeZone = ![20, 25].includes(dateFound[0].length);
     const reformattedDate = DateMgt.applyInputDateFormat(dateFound[0], externalFragmentsOrder, reverseTimeZone);
-    filterValueToUse = `${filterValueToUse!.slice(0, dateFound.index)}${reformattedDate}${filterValueToUse!.slice(
-      dateFound.index! + dateFound[0].length
+    filterValueToUse = `${filterValueToUse.slice(0, dateFound.index)}${reformattedDate}${filterValueToUse.slice(
+      dateFound.index + dateFound[0].length
     )}`;
   });
 
@@ -270,8 +270,8 @@ export function parseDateTimeValuesEsriDynamic(filter: string, externalFragments
     // GV normally placed between the date and the time must be replaced by a space.
     reformattedDate = reformattedDate.slice(0, reformattedDate.length === 20 ? -1 : -6); // drop time zone.
     reformattedDate = reformattedDate.replace('T', ' ');
-    filterValueToUse = `${filterValueToUse!.slice(0, dateFound.index)}${reformattedDate}${filterValueToUse!.slice(
-      dateFound.index! + dateFound[0].length
+    filterValueToUse = `${filterValueToUse.slice(0, dateFound.index)}${reformattedDate}${filterValueToUse.slice(
+      dateFound.index + dateFound[0].length
     )}`;
   });
 
@@ -298,8 +298,8 @@ export function parseDateTimeValuesEsriImageOrWMS(filter: string, externalFragme
     // If the date has a time zone, keep it as is, otherwise reverse its time zone by changing its sign
     const reverseTimeZone = ![20, 25].includes(dateFound[0].length);
     const reformattedDate = DateMgt.applyInputDateFormat(dateFound[0], externalFragmentsOrder, reverseTimeZone);
-    filterValueToUse = `${filterValueToUse!.slice(0, dateFound.index! - 6)}${reformattedDate}${filterValueToUse!.slice(
-      dateFound.index! + dateFound[0].length + 2
+    filterValueToUse = `${filterValueToUse.slice(0, dateFound.index - 6)}${reformattedDate}${filterValueToUse.slice(
+      dateFound.index + dateFound[0].length + 2
     )}`;
   });
 

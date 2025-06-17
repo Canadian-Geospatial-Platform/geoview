@@ -148,7 +148,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
 
   function renderButtonPanel(buttonPanel: TypeButtonPanel | DefaultNavbar, key: string): JSX.Element | null {
     if (typeof buttonPanel === 'string') {
-      return <Fragment key={`${key}-component`}>{defaultNavbar[buttonPanel as DefaultNavbar]}</Fragment>;
+      return <Fragment key={`${key}-component`}>{defaultNavbar[buttonPanel]}</Fragment>;
     }
 
     if (!buttonPanel.button.visible) {
@@ -160,7 +160,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
           <IconButton
             key={buttonPanel.button.id}
             id={buttonPanel.button.id}
-            tooltip={t(buttonPanel.button.tooltip!) as string}
+            tooltip={t(buttonPanel.button.tooltip!)!}
             tooltipPlacement={buttonPanel.button.tooltipPlacement}
             sx={sxClasses.navButton}
             onClick={buttonPanel.button.onClick}

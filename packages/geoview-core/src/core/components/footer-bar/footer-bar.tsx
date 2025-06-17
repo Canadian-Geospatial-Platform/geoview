@@ -6,7 +6,7 @@ import { Box, Tabs, TypeTabs } from '@/ui';
 import { Plugin } from '@/api/plugin/plugin';
 import { getSxClasses } from './footer-bar-style';
 import { ResizeFooterPanel } from '@/core/components/footer-bar/hooks/resize-footer-panel';
-import { useAppFullscreenActive, useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useAppFullscreenActive, useAppGeoviewHTMLElement, useAppHeight } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useDetailsLayerDataArrayBatch } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import {
   useUIActiveFooterBarTabId,
@@ -14,15 +14,17 @@ import {
   useUIStoreActions,
   useUIActiveTrapGeoView,
   useUIFooterBarIsCollapsed,
+  useUIHiddenTabs,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { FooterBarApi, FooterTabCreatedEvent, FooterTabRemovedEvent } from '@/core/components';
 
-import { toJsonObject, TypeJsonObject, TypeJsonValue } from '@/api/config/types/config-types';
-import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
+import { toJsonObject } from '@/api/config/types/config-types';
 import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 
 // default tabs icon and class
 import { LegendIcon, InfoOutlinedIcon, LayersOutlinedIcon, StorageIcon, QuestionMarkIcon } from '@/ui/icons';
+import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { Legend } from '@/core/components/legend/legend';
 import { LayersPanel } from '@/core/components/layers/layers-panel';
 import { DetailsPanel } from '@/core/components/details/details-panel';
@@ -30,10 +32,9 @@ import { Datapanel } from '@/core/components/data-table/data-panel';
 import { logger } from '@/core/utils/logger';
 import { Guide } from '@/core/components/guide/guide';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
+import { FooterPlugin } from '@/api/plugin/footer-plugin';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { isElementInViewport } from '@/core/utils/utilities';
-import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 
 interface Tab {
   icon: ReactNode;
@@ -75,6 +76,9 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   const geoviewElement = useAppGeoviewHTMLElement();
   const shellContainer = geoviewElement.querySelector(`[id^="shell-${mapId}"]`) as HTMLElement;
   const { setActiveFooterBarTab, enableFocusTrap, disableFocusTrap, setFooterBarIsCollapsed } = useUIStoreActions();
+  const mapSize = useMapSize() || [200, 200]; // Default in case the map isn't rendered yet and the Footer tries to render
+  const appHeight: number = useAppHeight();
+  const hiddenTabs: string[] = useUIHiddenTabs();
 
   // get store config for footer bar tabs to add (similar logic as in app-bar)
   const footerBarTabsConfig = useGeoViewConfig()?.footerBar;
@@ -147,11 +151,11 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
 
     const allTabs = { ...tabsList, ...memoTabs };
 
-    // TODO: Use the indexValue coming from the tab to order so custom tab can be place anywhere
+    // TODO: Use the indexValue coming from the tab to order so custom tab can be placed anywhere
     // inject guide tab at last position of tabs.
     return Object.keys({ ...tabsList, ...{ guide: {} } }).map((tab, index) => {
       return {
-        id: `${tab}`,
+        id: tab,
         value: index,
         label: allTabs[tab].label ? allTabs[tab].label : `${camelCase(tab)}.title`,
         icon: allTabs[tab]?.icon ?? '',
@@ -170,8 +174,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
       [event.tab.id]: {
         icon: event.tab.icon || <InfoOutlinedIcon />,
         label: event.tab.label,
-        content:
-          typeof event.tab.content === 'string' ? <UseHtmlToReact htmlContent={(event.tab.content as string) ?? ''} /> : event.tab.content,
+        content: typeof event.tab.content === 'string' ? <UseHtmlToReact htmlContent={event.tab.content ?? ''} /> : event.tab.content,
       },
     } as Record<string, Tab>;
 
@@ -214,7 +217,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     if (footerBarTabsConfig && !footerBarTabsConfig.tabs.core.includes('details')) return;
 
     // If we're on the details panel and the footer is collapsed
-    if (selectedTab === `details` && isCollapsed) {
+    if (selectedTab === 'details' && isCollapsed) {
       // Uncollapse it
       setFooterBarIsCollapsed(false);
     }
@@ -287,13 +290,13 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     // If clicked on a tab with a plugin
     MapEventProcessor.getMapViewerPlugins(mapId)
       .then((plugins) => {
-        if (plugins[selectedTab as keyof TypeRecordOfPlugin]) {
+        if (plugins[selectedTab]) {
           // Get the plugin
           const theSelectedPlugin = plugins[selectedTab];
 
-          // A bit hacky, but not much other choice for now...
-          if (typeof theSelectedPlugin.onSelected === 'function') {
-            theSelectedPlugin.onSelected();
+          // If the Plugin is a FooterPlugin
+          if (theSelectedPlugin instanceof FooterPlugin) {
+            theSelectedPlugin.select();
           }
         }
       })
@@ -334,15 +337,21 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('FOOTER-BAR - footerBarTabsConfig');
+
+    // TODO: Refactor Footer-bar - This loadScript shouldn't be part of a useEffect, because those happen everytime their depedencies change.
+    // TO.DOCONT: In development with StrictMode this is triggered twice to prevent developers from doing stuff like that here.
+    // TO.DOCONT: Also, important, the dependencies of this useEffect (and the code herein) isn't meant to be part of a useEffect in the first place.
+    // TO.DOCONT: Looking at the other useEffects, it's clear there's a lot of refactoring that should be done in the Footer-bar in general.
+
     // Packages tab
     if (footerBarTabsConfig && footerBarTabsConfig.tabs.core.includes('time-slider')) {
       // create a new tab by loading the time-slider plugin
       Plugin.loadScript('time-slider')
-        .then((constructor: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue)) => {
+        .then((typePlugin) => {
           Plugin.addPlugin(
             'time-slider',
             mapId,
-            constructor,
+            typePlugin,
             toJsonObject({
               mapId,
             })
@@ -360,11 +369,11 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     if (footerBarTabsConfig && footerBarTabsConfig.tabs.core.includes('geochart')) {
       // create a new tab by loading the geo chart plugin
       Plugin.loadScript('geochart')
-        .then((constructor: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue)) => {
+        .then((typePlugin) => {
           Plugin.addPlugin(
             'geochart',
             mapId,
-            constructor,
+            typePlugin,
             toJsonObject({
               mapId,
             })
@@ -428,6 +437,10 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
         TabContentVisibilty={!isCollapsed ? 'visible' : 'hidden'}
         containerType={CONTAINER_TYPE.FOOTER_BAR}
         rightButtons={!isCollapsed && isMapFullScreen && <ResizeFooterPanel />}
+        sideAppSize={mapSize}
+        appHeight={appHeight}
+        hiddenTabs={hiddenTabs}
+        isFullScreen={isMapFullScreen}
       />
     </Box>
   ) : null;

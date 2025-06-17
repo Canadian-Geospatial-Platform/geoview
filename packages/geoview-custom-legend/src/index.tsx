@@ -1,10 +1,10 @@
-import { JSX } from 'react';
-import { TypeJsonObject, toJsonObject, AnySchemaObject, Cast } from 'geoview-core/src/api/config/types/config-types';
-import { AppBarPlugin } from 'geoview-core/src/api/plugin/appbar-plugin';
-import { LegendIcon } from 'geoview-core/src/ui/icons';
-import { IconButtonPropsExtend } from 'geoview-core/src/ui/icon-button/icon-button';
-import { TypePanelProps } from 'geoview-core/src/ui/panel/panel-types';
-import { CustomLegendPanel } from './custom-legend';
+import React from 'react'; // GV This import is to validate that we're on the right React at the end of the file
+import { TypeJsonObject, toJsonObject, AnySchemaObject } from 'geoview-core/api/config/types/config-types';
+import { AppBarPlugin } from 'geoview-core/api/plugin/appbar-plugin';
+import { LegendIcon } from 'geoview-core/ui/icons';
+import { IconButtonPropsExtend } from 'geoview-core/ui/icon-button/icon-button';
+import { TypePanelProps } from 'geoview-core/ui/panel/panel-types';
+import { CustomLegendPanel, TypeLegendProps } from './custom-legend';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-custom-legend.json';
 
@@ -31,20 +31,32 @@ class CustomLegendPanelPlugin extends AppBarPlugin {
   }
 
   /**
-   * translations object to inject to the viewer translations
+   * Overrides the default translations for the Plugin.
+   * @returns {TypeJsonObject} - The translations object for the particular Plugin.
    */
-  translations = toJsonObject({
-    en: {
-      CustomLegend: {
-        title: 'Custom Legend',
+  override defaultTranslations(): TypeJsonObject {
+    return {
+      en: {
+        CustomLegend: {
+          title: 'Custom Legend',
+        },
       },
-    },
-    fr: {
-      CustomLegend: {
-        title: 'Légende personnalisée',
+      fr: {
+        CustomLegend: {
+          title: 'Légende personnalisée',
+        },
       },
-    },
-  });
+    } as unknown as TypeJsonObject;
+  }
+
+  /**
+   * Overrides the getConfig in order to return the right type.
+   * @returns {TypeLegendProps} The Geochart config
+   */
+  override getConfig(): TypeLegendProps {
+    // Redirect
+    return super.getConfig() as TypeLegendProps;
+  }
 
   override onCreateButtonProps(): IconButtonPropsExtend {
     // Button props
@@ -63,12 +75,12 @@ class CustomLegendPanelPlugin extends AppBarPlugin {
       title: 'CustomLegend.title',
       icon: <LegendIcon />,
       width: 350,
-      status: this.configObj?.isOpen as boolean,
+      status: this.getConfig().isOpen,
     };
   }
 
   override onCreateContent = (): JSX.Element => {
-    return <CustomLegendPanel config={this.configObj || {}} />;
+    return <CustomLegendPanel config={this.getConfig()} />;
   };
 
   /**
@@ -79,6 +91,11 @@ class CustomLegendPanelPlugin extends AppBarPlugin {
 
 export default CustomLegendPanelPlugin;
 
-// Keep a reference to the Custom Legend Panel Plugin as part of the geoviewPlugins property stored in the window object
-window.geoviewPlugins = window.geoviewPlugins || {};
-window.geoviewPlugins['custom-legend'] = Cast<CustomLegendPanelPlugin>(CustomLegendPanelPlugin);
+// GV This if condition took over 3 days to investigate. It was giving errors on the app.geo.ca website with
+// GV some conflicting reacts being loaded on the page for some obscure reason.
+// Check if we're on the right react
+if (React === window.cgpv.react) {
+  // Keep a reference to the Custom Legend Panel Plugin as part of the geoviewPlugins property stored in the window object
+  window.geoviewPlugins = window.geoviewPlugins || {};
+  window.geoviewPlugins['custom-legend'] = CustomLegendPanelPlugin;
+} // Else ignore, don't keep it on the window, wait for the right react load

@@ -50,7 +50,7 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
     | Record<string, string>
     | undefined
     | null {
-    if (this.getDataTableState(mapId)) return this.getDataTableState(mapId)![state];
+    if (this.getDataTableState(mapId)) return this.getDataTableState(mapId)[state];
     return undefined;
   }
 

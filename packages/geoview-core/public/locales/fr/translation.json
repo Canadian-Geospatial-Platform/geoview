@@ -311,6 +311,7 @@
     "generic": "Une erreur est survenue, contactez nous ou regardez dans la console pour plus de détails.",
     "layer": {
       "layerNotFound": "La couche à l'emplacement '__param__' est introuvable.",
+      "wrongType": "La couche '__param__' n'est pas du type attendu.",
       "notAGeoJsonLayer": "Ce n'est pas une couche GeoJSON pour la couche '__param__'.",
       "notAnEsriDynamicLayer": "Ce n'est pas une couche dynamique Esri pour la couche '__param__'.",
       "notAFeatureLayer": "L'identifiant de couche n'est pas une couche d'entités '__param__'.",
@@ -319,6 +320,7 @@
     },
     "map": {
       "mapIdNotFound": "La carte avec l'identifiant '__param__' est introuvable.",
+      "mapIdAlreadyExists": "La carte avec l'identifiant '__param__' existe déjà.",
       "geoviewStoreNotFound": "Le 'React Store' sur la carte '__param__' est introuvable.",
       "mapDivNotExists": "Div avec identifiant __param__ does not exist.",
       "mapWrongCall": "Div avec identifiant __param__ a une classe 'geoview-map' et devrait être initialisé via un appel à 'cgpv.init()'."

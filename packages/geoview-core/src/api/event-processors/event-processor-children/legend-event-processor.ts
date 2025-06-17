@@ -16,7 +16,7 @@ import { ILayerState, TypeLegend, TypeLegendResultSetEntry } from '@/core/stores
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { LayerNotFoundError } from '@/core/exceptions/layer-exceptions';
+import { LayerNotFoundError, LayerWrongTypeError } from '@/core/exceptions/layer-exceptions';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
@@ -200,6 +200,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     // Get the layer
     const layer = layerApi.getGeoviewLayer(layerPath);
     if (!layer) throw new LayerNotFoundError(layerPath);
+
+    // If not a GVLayer
+    if (!(layer instanceof AbstractGVLayer)) throw new LayerWrongTypeError(layerPath, layer.getLayerName());
 
     // Get extent from features calling the GV Layer method
     return layer.getExtentFromFeatures(objectIds, layerApi.mapViewer.getProjection(), outfield);
@@ -781,13 +784,13 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     // Get the style
     const layerStyle = layerConfig.layerStyle?.[geometryType];
     let filteredFeatures = features;
-    if (layerStyle !== undefined && layerStyle!.type === 'uniqueValue') {
+    if (layerStyle !== undefined && layerStyle.type === 'uniqueValue') {
       filteredFeatures = this.#processClassVisibilityUniqueValue(layerStyle, features);
-    } else if (layerStyle !== undefined && layerStyle!.type === 'classBreaks') {
+    } else if (layerStyle !== undefined && layerStyle.type === 'classBreaks') {
       filteredFeatures = this.#processClassVisibilityClassBreak(layerStyle, features);
     }
 
-    return filteredFeatures!;
+    return filteredFeatures;
   }
 
   /**
@@ -877,7 +880,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       (brk): ClassBreakPoint => ({
         minValue: brk.values[0] as number,
         maxValue: brk.values[1] as number,
-        visible: brk.visible as boolean,
+        visible: brk.visible,
       })
     );
 
@@ -893,7 +896,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         const breakPoint = breakPoints[mid];
 
         // Check if value falls within current break point's range
-        if (value >= breakPoint!.minValue && value <= breakPoint!.maxValue) {
+        if (value >= breakPoint.minValue && value <= breakPoint.maxValue) {
           // Found matching break point, return it
           return breakPoint;
         }

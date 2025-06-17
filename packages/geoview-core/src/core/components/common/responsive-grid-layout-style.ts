@@ -10,10 +10,7 @@ import { CONTAINER_TYPE } from '@/core/utils/constant';
  * @param {string} containerType - The type of container ('app-bar' or 'footer-bar')
  * @returns {SxStyles} An object containing MUI SX styling properties
  */
-export const getSxClasses = (
-  theme: Theme,
-  containerType: string
-): SxStyles => ({
+export const getSxClasses = (theme: Theme, containerType: string): SxStyles => ({
   container: {
     display: 'flex',
     flexDirection: 'column',
@@ -78,15 +75,15 @@ export const getSxClasses = (
         color: theme.palette.geoViewColor.primary.main,
         '&:hover': {
           color: theme.palette.geoViewColor.primary.dark[300],
-        }
-      }
-    }
+        },
+      },
+    },
   },
   gridRightMain: {
     display: 'flex',
     flexDirection: 'column',
     overflow: 'hidden',
-    height: '100%'
+    height: '100%',
   },
   gridLeftMain: {
     height: '100%',

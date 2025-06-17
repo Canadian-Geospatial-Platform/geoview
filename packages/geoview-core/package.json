@@ -5,9 +5,6 @@
   "private": true,
   "main": "src/app.tsx",
   "license": "MIT",
-  "workspaces": [
-    "../packages/*"
-  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/Canadian-Geospatial-Platform/geoview"
@@ -123,7 +120,7 @@
     "@types/lodash": "^4.17.10",
     "@types/lodash-webpack-plugin": "^0.11.9",
     "@types/proj4": "^2.5.5",
-    "@types/react": "^18.3.11",
+    "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
     "@types/react-router-dom": "^5.3.3",
     "@types/sanitize-html": "^2.13.0",
@@ -146,12 +143,10 @@
     "lodash-webpack-plugin": "^0.11.6",
     "markdown-loader": "~8.0.0",
     "prop-types": "^15.8.1",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
     "simple-zustand-devtools": "^1.1.0",
     "style-loader": "^4.0.0",
     "terser-webpack-plugin": "^5.3.10",
-    "typedoc": "^0.26.9",
+    "typedoc": "^0.27.9",
     "typescript": "^5.6.3",
     "webpack": "^5.95.0",
     "webpack-bundle-analyzer": "^4.10.2",
@@ -162,10 +157,8 @@
     "worker-loader": "^3.0.8",
     "zustand": "~5.0.0"
   },
-  "resolutions": {
-    "@types/react": "^18.2.0",
-    "@types/react-dom": "^18.2.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+  "overrides": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   }
 }

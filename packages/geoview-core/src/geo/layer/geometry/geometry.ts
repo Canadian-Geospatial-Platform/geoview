@@ -514,7 +514,7 @@ export class GeometryApi {
     for (let i = 0; i < this.geometryGroups.length; i++) {
       const geometries = this.geometryGroups[i].vectorLayer.getSource()?.getFeatures() || [];
       for (let j = 0; j < geometries.length; j++) {
-        const geometry = geometries[j] as Feature;
+        const geometry = geometries[j];
 
         if (geometry.get('featureId') === featureId) returnValue.push(this.geometryGroups[i]);
       }
@@ -749,7 +749,7 @@ export class GeometryApi {
         // If it's actually a MultiPoint
         if (GeometryApi.isArrayOfCoordinates(coordinates)) {
           // Create a MultiLine geometry
-          return new MultiPoint(coordinates as Coordinate[]);
+          return new MultiPoint(coordinates);
         }
         // Create a Point geometry
         return new Point(coordinates as Coordinate);

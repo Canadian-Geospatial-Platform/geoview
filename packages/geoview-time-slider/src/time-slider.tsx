@@ -1,17 +1,15 @@
-import { useTheme } from '@mui/material/styles';
-import { FormControl, InputLabel, NativeSelect } from '@mui/material';
-import { Box } from 'geoview-core/src/ui';
+import { Box } from 'geoview-core/ui';
 import {
   useTimeSliderLayers,
   useTimeSliderStoreActions,
-} from 'geoview-core/src/core/stores/store-interface-and-intial-values/time-slider-state';
-import { useLayerLegendLayers } from 'geoview-core/src/core/stores/store-interface-and-intial-values/layer-state';
-import { LegendEventProcessor } from 'geoview-core/src/api/event-processors/event-processor-children/legend-event-processor';
-import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
-import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
-import { logger } from 'geoview-core/src/core/utils/logger';
+} from 'geoview-core/core/stores/store-interface-and-intial-values/time-slider-state';
+import { useLayerLegendLayers } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
+import { LegendEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/legend-event-processor';
+import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
+import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { logger } from 'geoview-core/core/utils/logger';
 
-import { DateMgt } from 'geoview-core/src/core/utils/date-mgt';
+import { DateMgt } from 'geoview-core/core/utils/date-mgt';
 import { getSxClasses } from './time-slider-style';
 import { ConfigProps } from './time-slider-types';
 
@@ -33,6 +31,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   const { cgpv } = window;
   const { config, layerPath } = props;
   const { react, ui } = cgpv;
+  const { useTheme } = ui;
   const { useState, useRef, useEffect, useCallback } = react;
   const {
     Grid,
@@ -49,6 +48,9 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     ArrowRightIcon,
     SwitchRightIcon,
     SwitchLeftIcon,
+    FormControl,
+    InputLabel,
+    NativeSelect,
   } = ui.elements;
 
   const theme = useTheme();
@@ -87,7 +89,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
   // Get name from legend layers
   const legendLayers = useLayerLegendLayers();
-  const name = LegendEventProcessor.findLayerByPath(legendLayers, layerPath).layerName;
+  const name = LegendEventProcessor.findLayerByPath(legendLayers, layerPath)?.layerName;
 
   const timeStampRange = range.map((entry: string | number | Date) =>
     typeof entry !== 'number' ? DateMgt.convertToMilliseconds(entry) : entry
@@ -124,95 +126,98 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
    * Moves the slider handles based on the specified direction.
    * @param direction - The direction to move the slider ('back' or 'forward').
    */
-  function moveSlider(direction: 'back' | 'forward'): void {
-    const isForward = direction === 'forward';
-    const stepMove = isForward ? 1 : -1;
+  const moveSlider = useCallback(
+    (direction: 'back' | 'forward'): void => {
+      const isForward = direction === 'forward';
+      const stepMove = isForward ? 1 : -1;
 
-    // Handle single handle case with no discrete values
-    if (singleHandle && !discreteValues) {
-      const currentIndex = timeStampRange.indexOf(values[0]);
-      const newIndex =
-        // eslint-disable-next-line no-nested-ternary
-        currentIndex === (isForward ? timeStampRange.length - 1 : 0)
-          ? isForward
-            ? 0
-            : timeStampRange.length - 1
-          : currentIndex + stepMove;
-      setValues(layerPath, [timeStampRange[newIndex]]);
-      return;
-    }
-
-    // Handle single handle case with discrete values
-    if (singleHandle) {
-      const interval = step || (minAndMax[1] - minAndMax[0]) / 20;
-      const newPosition = values[0] + interval * stepMove;
-      // eslint-disable-next-line no-nested-ternary
-      setValues(layerPath, [newPosition > minAndMax[1] ? minAndMax[0] : newPosition < minAndMax[0] ? minAndMax[1] : newPosition]);
-      return;
-    }
-
-    // Handle multi-handle case
-    let [leftHandle, rightHandle] = values;
-
-    // If handles are at the extremes, reset the delta
-    if (rightHandle - leftHandle === minAndMax[1] - minAndMax[0]) {
-      sliderDeltaRef.current = (minAndMax[1] - minAndMax[0]) / 10;
-      setValues(
-        layerPath,
-        isForward ? [leftHandle, leftHandle + sliderDeltaRef.current] : [rightHandle - sliderDeltaRef.current, rightHandle]
-      );
-      return;
-    }
-
-    // Calculate the delta if not already set
-    if (!sliderDeltaRef.current) {
-      sliderDeltaRef.current = rightHandle - leftHandle;
-    }
-
-    const delta = sliderDeltaRef.current * stepMove;
-
-    // Handle locked and reversed case
-    if (locked && reversed) {
-      leftHandle += delta;
-      if ((isForward && leftHandle >= rightHandle) || (!isForward && leftHandle < minAndMax[0])) {
-        [leftHandle] = minAndMax;
+      // Handle single handle case with no discrete values
+      if (singleHandle && !discreteValues) {
+        const currentIndex = timeStampRange.indexOf(values[0]);
+        const newIndex =
+          // eslint-disable-next-line no-nested-ternary
+          currentIndex === (isForward ? timeStampRange.length - 1 : 0)
+            ? isForward
+              ? 0
+              : timeStampRange.length - 1
+            : currentIndex + stepMove;
+        setValues(layerPath, [timeStampRange[newIndex]]);
+        return;
       }
-    }
-    // Handle locked case
-    else if (locked) {
-      if (isForward && rightHandle === minAndMax[1]) rightHandle = leftHandle;
-      rightHandle += delta;
-      if (rightHandle > minAndMax[1]) [, rightHandle] = minAndMax;
-      else if (!isForward && rightHandle < leftHandle) rightHandle = leftHandle;
-      if (!isForward && rightHandle === leftHandle) [, rightHandle] = minAndMax;
-    }
-    // Handle unlocked case
-    else if (isForward) {
-      if (leftHandle < sliderValueRef.current! && rightHandle === sliderValueRef.current) leftHandle = sliderValueRef.current;
-      else leftHandle += delta;
-      if (leftHandle >= minAndMax[1]) [leftHandle] = minAndMax;
-      rightHandle = leftHandle + sliderDeltaRef.current!;
-      if (rightHandle > minAndMax[1]) [, rightHandle] = minAndMax;
-      if (rightHandle > sliderValueRef.current! && leftHandle < sliderValueRef.current!) rightHandle = sliderValueRef.current as number;
-    } else {
-      if (rightHandle > sliderValueRef.current! && leftHandle === sliderValueRef.current) rightHandle = sliderValueRef.current;
-      else rightHandle += delta;
-      if (rightHandle <= minAndMax[0]) [, rightHandle] = minAndMax;
-      leftHandle = rightHandle - sliderDeltaRef.current!;
-      if (leftHandle < minAndMax[0]) [leftHandle] = minAndMax;
-      if (leftHandle < sliderValueRef.current! && rightHandle > sliderValueRef.current!) leftHandle = sliderValueRef.current as number;
-    }
 
-    setValues(layerPath, [leftHandle, rightHandle]);
-  }
+      // Handle single handle case with discrete values
+      if (singleHandle) {
+        const interval = step || (minAndMax[1] - minAndMax[0]) / 20;
+        const newPosition = values[0] + interval * stepMove;
+        // eslint-disable-next-line no-nested-ternary
+        setValues(layerPath, [newPosition > minAndMax[1] ? minAndMax[0] : newPosition < minAndMax[0] ? minAndMax[1] : newPosition]);
+        return;
+      }
 
-  function moveBack(): void {
+      // Handle multi-handle case
+      let [leftHandle, rightHandle] = values;
+
+      // If handles are at the extremes, reset the delta
+      if (rightHandle - leftHandle === minAndMax[1] - minAndMax[0]) {
+        sliderDeltaRef.current = (minAndMax[1] - minAndMax[0]) / 10;
+        setValues(
+          layerPath,
+          isForward ? [leftHandle, leftHandle + sliderDeltaRef.current] : [rightHandle - sliderDeltaRef.current, rightHandle]
+        );
+        return;
+      }
+
+      // Calculate the delta if not already set
+      if (!sliderDeltaRef.current) {
+        sliderDeltaRef.current = rightHandle - leftHandle;
+      }
+
+      const delta = sliderDeltaRef.current * stepMove;
+
+      // Handle locked and reversed case
+      if (locked && reversed) {
+        leftHandle += delta;
+        if ((isForward && leftHandle >= rightHandle) || (!isForward && leftHandle < minAndMax[0])) {
+          [leftHandle] = minAndMax;
+        }
+      }
+      // Handle locked case
+      else if (locked) {
+        if (isForward && rightHandle === minAndMax[1]) rightHandle = leftHandle;
+        rightHandle += delta;
+        if (rightHandle > minAndMax[1]) [, rightHandle] = minAndMax;
+        else if (!isForward && rightHandle < leftHandle) rightHandle = leftHandle;
+        if (!isForward && rightHandle === leftHandle) [, rightHandle] = minAndMax;
+      }
+      // Handle unlocked case
+      else if (isForward) {
+        if (leftHandle < sliderValueRef.current! && rightHandle === sliderValueRef.current) leftHandle = sliderValueRef.current;
+        else leftHandle += delta;
+        if (leftHandle >= minAndMax[1]) [leftHandle] = minAndMax;
+        rightHandle = leftHandle + sliderDeltaRef.current;
+        if (rightHandle > minAndMax[1]) [, rightHandle] = minAndMax;
+        if (rightHandle > sliderValueRef.current! && leftHandle < sliderValueRef.current!) rightHandle = sliderValueRef.current as number;
+      } else {
+        if (rightHandle > sliderValueRef.current! && leftHandle === sliderValueRef.current) rightHandle = sliderValueRef.current;
+        else rightHandle += delta;
+        if (rightHandle <= minAndMax[0]) [, rightHandle] = minAndMax;
+        leftHandle = rightHandle - sliderDeltaRef.current;
+        if (leftHandle < minAndMax[0]) [leftHandle] = minAndMax;
+        if (leftHandle < sliderValueRef.current! && rightHandle > sliderValueRef.current!) leftHandle = sliderValueRef.current as number;
+      }
+
+      setValues(layerPath, [leftHandle, rightHandle]);
+    },
+    [discreteValues, layerPath, locked, minAndMax, reversed, setValues, singleHandle, step, timeStampRange, values]
+  );
+
+  const moveBack = useCallback((): void => {
     moveSlider('back');
-  }
+  }, [moveSlider]);
 
-  function moveForward(): void {
+  const moveForward = useCallback((): void => {
     moveSlider('forward');
-  }
+  }, [moveSlider]);
 
   // #region USE EFFECT
   useEffect(() => {
@@ -256,8 +261,8 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
     // If slider cycle is active, pause before advancing to next increment
     if (isPlaying) {
-      if (reversed) playIntervalRef.current = window.setTimeout(() => moveBack(), delay);
-      else playIntervalRef.current = window.setTimeout(() => moveForward(), delay);
+      if (reversed) playIntervalRef.current = window.setTimeout(moveBack, delay);
+      else playIntervalRef.current = window.setTimeout(moveForward, delay);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [values, filtering, reversed, locked]);
@@ -276,51 +281,60 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   // #endregion
 
   // #region HANDLE FUNCTIONS
-  function handleBack(): void {
+  const handleBack = useCallback((): void => {
     sliderValueRef.current = reversed ? values[1] : values[0];
     moveBack();
-  }
+  }, [moveBack, reversed, values]);
 
-  function handleForward(): void {
+  const handleForward = useCallback((): void => {
     [sliderValueRef.current] = values;
     moveForward();
-  }
+  }, [moveForward, values]);
 
-  function handleLock(): void {
+  const handleLock = useCallback((): void => {
     clearTimeout(playIntervalRef.current);
     setLocked(layerPath, !locked);
-  }
+  }, [layerPath, locked, setLocked]);
 
-  function handlePlay(): void {
+  const handlePlay = useCallback((): void => {
     clearTimeout(playIntervalRef.current);
     sliderValueRef.current = reversed ? values[1] : values[0];
     setIsPlaying(!isPlaying);
-  }
+  }, [isPlaying, reversed, values]);
 
-  function handleReverse(): void {
+  const handleReverse = useCallback((): void => {
     clearTimeout(playIntervalRef.current);
     setReversed(layerPath, !reversed);
     if (isPlaying) {
       if (reversed) moveBack();
       else moveForward();
     }
-  }
+  }, [isPlaying, layerPath, moveBack, moveForward, reversed, setReversed]);
 
-  function handleTimeChange(event: React.ChangeEvent<HTMLSelectElement>): void {
-    setDelay(layerPath, event.target.value as unknown as number);
-  }
+  const handleTimeChange = useCallback(
+    (event: React.ChangeEvent<HTMLSelectElement>): void => {
+      setDelay(layerPath, event.target.value as unknown as number);
+    },
+    [layerPath, setDelay]
+  );
 
-  function handleStepChange(event: React.ChangeEvent<HTMLSelectElement>): void {
-    setStep(layerPath, Number(event.target.value));
-  }
+  const handleStepChange = useCallback(
+    (event: React.ChangeEvent<HTMLSelectElement>): void => {
+      setStep(layerPath, Number(event.target.value));
+    },
+    [layerPath, setStep]
+  );
 
-  function handleCheckbox(newValue: boolean): void {
-    setFiltering(layerPath, newValue);
-    if (!newValue) {
-      clearInterval(playIntervalRef.current);
-      setIsPlaying(false);
-    }
-  }
+  const handleCheckbox = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>, newValue: boolean): void => {
+      setFiltering(layerPath, newValue);
+      if (!newValue) {
+        clearInterval(playIntervalRef.current);
+        setIsPlaying(false);
+      }
+    },
+    [layerPath, setFiltering]
+  );
 
   const handleSliderChange = useCallback(
     (newValues: number | number[]): void => {
@@ -372,13 +386,13 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     <Grid>
       <Box sx={{ padding: '10px 10px' }}>
         <Grid container sx={{ ...sxClasses.rightPanelBtnHolder, flexWrap: 'nowrap' }}>
-          <Grid item xs={9}>
+          <Grid size={{ xs: 9 }}>
             <Typography component="div" sx={{ ...sxClasses.panelHeaders, paddingLeft: '20px', paddingTop: '10px' }}>
               {`${title || name}`}
               {displayPattern[0] === undefined && ` (${DateMgt.formatDate(defaultValue, 'YYYY-MM-DD')})`}
             </Typography>
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <Box sx={{ textAlign: 'right', marginRight: '25px' }}>
               <Tooltip
                 title={
@@ -389,12 +403,12 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
                 placement="top"
                 enterDelay={1000}
               >
-                <Checkbox checked={filtering} onChange={(event: never, child: boolean): void => handleCheckbox(child)} />
+                <Checkbox checked={filtering} onChange={handleCheckbox} />
               </Tooltip>
             </Box>
           </Grid>
         </Grid>
-        <Grid item xs={12}>
+        <Grid size={{ xs: 12 }}>
           <Box sx={{ textAlign: 'center', paddingTop: '20px' }}>
             <Slider
               key={values[1] ? values[1] + values[0] : values[0]}
@@ -409,7 +423,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
             />
           </Box>
         </Grid>
-        <Grid item xs={12}>
+        <Grid size={{ xs: 12 }}>
           <Box sx={{ textAlign: 'center', paddingTop: '20px' }}>
             {!singleHandle && (
               <IconButton
@@ -417,7 +431,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
                 aria-label={returnLockTooltip()}
                 tooltip={returnLockTooltip()}
                 tooltipPlacement="top"
-                onClick={() => handleLock()}
+                onClick={handleLock}
               >
                 {locked ? <LockIcon /> : <LockOpenIcon />}
               </IconButton>
@@ -425,11 +439,11 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
             <IconButton
               className="buttonOutline"
-              aria-label={getLocalizedMessage(displayLanguage, 'timeSlider.slider.back') as string}
-              tooltip={getLocalizedMessage(displayLanguage, 'timeSlider.slider.back') as string}
+              aria-label={getLocalizedMessage(displayLanguage, 'timeSlider.slider.back')}
+              tooltip={getLocalizedMessage(displayLanguage, 'timeSlider.slider.back')}
               tooltipPlacement="top"
               disabled={isPlaying || !filtering}
-              onClick={() => handleBack()}
+              onClick={handleBack}
             >
               <ArrowLeftIcon />
             </IconButton>
@@ -438,38 +452,38 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
               className="buttonOutline"
               aria-label={
                 isPlaying
-                  ? (getLocalizedMessage(displayLanguage, 'timeSlider.slider.pauseAnimation') as string)
-                  : (getLocalizedMessage(displayLanguage, 'timeSlider.slider.playAnimation') as string)
+                  ? getLocalizedMessage(displayLanguage, 'timeSlider.slider.pauseAnimation')
+                  : getLocalizedMessage(displayLanguage, 'timeSlider.slider.playAnimation')
               }
               tooltip={
                 isPlaying
-                  ? (getLocalizedMessage(displayLanguage, 'timeSlider.slider.pauseAnimation') as string)
-                  : (getLocalizedMessage(displayLanguage, 'timeSlider.slider.playAnimation') as string)
+                  ? getLocalizedMessage(displayLanguage, 'timeSlider.slider.pauseAnimation')
+                  : getLocalizedMessage(displayLanguage, 'timeSlider.slider.playAnimation')
               }
               tooltipPlacement="top"
               disabled={!filtering}
-              onClick={() => handlePlay()}
+              onClick={handlePlay}
             >
               {!isPlaying ? <PlayArrowIcon /> : <PauseIcon />}
             </IconButton>
 
             <IconButton
               className="buttonOutline"
-              aria-label={getLocalizedMessage(displayLanguage, 'timeSlider.slider.forward') as string}
-              tooltip={getLocalizedMessage(displayLanguage, 'timeSlider.slider.forward') as string}
+              aria-label={getLocalizedMessage(displayLanguage, 'timeSlider.slider.forward')}
+              tooltip={getLocalizedMessage(displayLanguage, 'timeSlider.slider.forward')}
               tooltipPlacement="top"
               disabled={isPlaying || !filtering}
-              onClick={() => handleForward()}
+              onClick={handleForward}
             >
               <ArrowRightIcon />
             </IconButton>
 
             <IconButton
               className="buttonOutline"
-              aria-label={getLocalizedMessage(displayLanguage, 'timeSlider.slider.changeDirection') as string}
-              tooltip={getLocalizedMessage(displayLanguage, 'timeSlider.slider.changeDirection') as string}
+              aria-label={getLocalizedMessage(displayLanguage, 'timeSlider.slider.changeDirection')}
+              tooltip={getLocalizedMessage(displayLanguage, 'timeSlider.slider.changeDirection')}
               tooltipPlacement="top"
-              onClick={() => handleReverse()}
+              onClick={handleReverse}
             >
               {reversed ? <SwitchRightIcon /> : <SwitchLeftIcon />}
             </IconButton>
@@ -481,7 +495,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
                   defaultValue={delay}
                   inputProps={{
                     name: 'timeDelay',
-                    onChange: (event) => handleTimeChange(event),
+                    onChange: handleTimeChange,
                   }}
                 >
                   <option value={500}>0.5s</option>
@@ -494,6 +508,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
                 </NativeSelect>
               </FormControl>
             </Box>
+
             {singleHandle && discreteValues && (
               <Box component="span" sx={{ paddingLeft: '10px' }}>
                 <FormControl sx={{ width: '100px' }}>
@@ -502,7 +517,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
                     defaultValue={step}
                     inputProps={{
                       name: 'timeStep',
-                      onChange: (event) => handleStepChange(event),
+                      onChange: handleStepChange,
                     }}
                   >
                     <option value={3600000}>{getLocalizedMessage(displayLanguage, 'timeSlider.slider.hour')}</option>
@@ -517,7 +532,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
           </Box>
         </Grid>
         {description && (
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <Typography component="div" sx={{ px: '20px', py: '5px' }}>
               {description}
             </Typography>

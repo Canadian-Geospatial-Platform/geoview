@@ -345,7 +345,7 @@ export class UUIDmapConfigReader {
     // TODO: Once refactor done rename to layers
     // TODO: Before moving to the new api, layers will need to link to ids inside the gsc response so we can customize group, or specific id
     // Find custom layer entry configuration
-    const foundConfigs = resultData.response.gcs.map((gcs) => gcs?.[lang]?.layersNew as TypeJsonObject);
+    const foundConfigs = resultData.response.gcs.map((gcs) => gcs?.[lang]?.layersNew);
 
     return foundConfigs[0] || {};
   }

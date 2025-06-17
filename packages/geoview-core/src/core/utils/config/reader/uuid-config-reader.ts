@@ -88,7 +88,13 @@ export class UUIDmapConfigReader {
    */
   static #getLayerConfigFromResponse(uuids: string[], resultData: TypeJsonObject, lang: string): TypeGeoviewLayerConfig[] {
     // If invalid response
-    if (!resultData || !resultData.response || !resultData.response.rcs || !resultData.response.rcs[lang]) {
+    if (
+      !resultData ||
+      !resultData.response ||
+      !resultData.response.rcs ||
+      !resultData.response.rcs[lang] ||
+      resultData.response.rcs[lang].length === 0
+    ) {
       const errorMessage = resultData?.errorMessage || '<no error description>';
       throw new LayerGeoCoreInvalidResponseError(uuids, errorMessage);
     }
@@ -263,7 +269,7 @@ export class UUIDmapConfigReader {
     if (!resultData || !resultData.response || !resultData.response.gcs || !Array.isArray(resultData.response.gcs)) return {};
 
     // Find custom layer entry configuration
-    const foundConfigs = resultData.response.gcs.map((gcs) => gcs?.[lang]?.layers as TypeJsonObject);
+    const foundConfigs = resultData.response.gcs.map((gcs) => gcs?.[lang]?.layers);
 
     return foundConfigs[0] || {};
   }

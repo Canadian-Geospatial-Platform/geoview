@@ -1,6 +1,7 @@
-import React from 'react';
+import type React from 'react';
 import { TypeJsonObject, TypeJsonValue, AnySchemaObject } from '@/api/config/types/config-types';
 import { API } from '@/api';
+import { AbstractPlugin } from './abstract-plugin';
 
 /**
  * interface used when creating the actual plugin.
@@ -17,12 +18,12 @@ export type TypePluginStructure = {
   configObj: TypeJsonObject;
   schema?: () => AnySchemaObject;
   defaultConfig?: () => TypeJsonObject;
-  added?: () => void;
-  removed?: () => void;
-  onSelected?: () => void;
+  add?: () => void;
+  remove?: () => void;
+  select?: () => void;
 };
 
 /**
  * Record of plugins.
  */
-export type TypeRecordOfPlugin = { [pluginId: string]: TypePluginStructure };
+export type PluginsContainer = { [pluginId: string]: AbstractPlugin };

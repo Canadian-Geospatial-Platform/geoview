@@ -216,13 +216,12 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         const esriData = await this.#getEsriFeatures(url, count, maxRecords as number | undefined);
 
         // Convert each ESRI response chunk to features and flatten the result
-        return esriData.flatMap(
-          (json) =>
-            source.getFormat()!.readFeatures(json, {
-              ...readOptions,
-              featureProjection: projection,
-              extent,
-            }) as Feature[]
+        return esriData.flatMap((json) =>
+          source.getFormat()!.readFeatures(json, {
+            ...readOptions,
+            featureProjection: projection,
+            extent,
+          })
         );
       }
 
@@ -232,7 +231,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
           ...readOptions,
           featureProjection: projection,
           extent,
-        }) as Feature[];
+        });
     }
   }
 
@@ -542,7 +541,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       });
     }
 
-    layerConfig.source.featureInfo!.outfields.forEach((outfield) => {
+    layerConfig.source.featureInfo.outfields.forEach((outfield) => {
       // eslint-disable-next-line no-param-reassign
       if (!outfield.alias) outfield.alias = outfield.name;
     });
@@ -558,7 +557,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       }, undefined);
 
       // eslint-disable-next-line no-param-reassign
-      layerConfig.source.featureInfo.nameField = nameField ? nameField.name : layerConfig.source.featureInfo!.outfields[0].name;
+      layerConfig.source.featureInfo.nameField = nameField ? nameField.name : layerConfig.source.featureInfo.outfields[0].name;
     }
   }
 

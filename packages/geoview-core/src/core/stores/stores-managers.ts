@@ -6,10 +6,9 @@ import { mountStoreDevtool } from 'simple-zustand-devtools';
 import { destroyEventProcessors, initializeEventProcessors } from '@/api/event-processors';
 import { IGeoviewState, GeoviewStoreType, geoviewStoreDefinitionWithSubscribeSelector } from './geoview-store';
 import { MapContext } from '@/core/app-start';
-import { logger } from '@/core/utils/logger';
 import { whenThisThen } from '@/core/utils/utilities';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { getItemAsNumber } from '@/core//utils/localStorage';
+import { getItemAsNumber } from '@/core/utils/localStorage';
 
 export interface StoresManagerState {
   stores: Record<string, GeoviewStoreType>;
@@ -51,9 +50,6 @@ export const addGeoViewStore = (config: TypeMapFeaturesConfig): void => {
     return;
   }
 
-  // Log
-  logger.logTraceCore(`Creating the store for map ${config.mapId}`);
-
   // Create the store
   const geoviewStore = create<IGeoviewState>()(geoviewStoreDefinitionWithSubscribeSelector);
   geoviewStore.getState().setMapConfig(config);
@@ -63,19 +59,19 @@ export const addGeoViewStore = (config: TypeMapFeaturesConfig): void => {
   useStoresManager.setState((state) => ({
     stores: {
       ...state.stores,
-      [config.mapId ?? 'unknown']: geoviewStore,
+      [config.mapId]: geoviewStore,
     },
   }));
 
   mountZustandDevTools(`getViewStore-${config.mapId}`, geoviewStore, geoviewStore.getState().appState.geoviewHTMLElement);
 };
 
-export const getGeoViewStore = (id: string | undefined): GeoviewStoreType => {
-  return useStoresManager.getState().stores[id ?? 'unknown'];
+export const getGeoViewStore = (id: string): GeoviewStoreType => {
+  return useStoresManager.getState().stores[id];
 };
 
 // async version to use when we need to access store and it may not be created yet
-export const getGeoViewStoreAsync = (id: string | undefined): Promise<GeoviewStoreType> => {
+export const getGeoViewStoreAsync = (id: string): Promise<GeoviewStoreType> => {
   return whenThisThen(() => getGeoViewStore(id));
 };
 
@@ -87,6 +83,5 @@ export const removeGeoviewStore = (id: string): void => {
 
 export const useGeoViewStore = (): GeoviewStoreType => {
   const { mapId } = useContext(MapContext);
-
-  return useStoresManager.getState().stores[mapId ?? 'unknown'];
+  return useStoresManager.getState().stores[mapId];
 };

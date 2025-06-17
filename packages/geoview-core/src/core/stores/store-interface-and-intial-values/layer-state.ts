@@ -409,7 +409,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         let theLayerPath: string | null = layerPath;
         if (layerPath && layerPath.length === 0) theLayerPath = null;
         const curLayers = get().layerState.legendLayers;
-        const layer = LegendEventProcessor.findLayerByPath(curLayers, layerPath || '');
+        const layer = LegendEventProcessor.findLayerByPath(curLayers, layerPath!);
         set({
           layerState: {
             ...get().layerState,
@@ -488,7 +488,7 @@ export const useIconLayerSet = (layerPath: string): string[] => {
   const layers = useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
   const layer = LegendEventProcessor.findLayerByPath(layers, layerPath);
   if (layer && layer.type !== CV_CONST_LAYER_TYPES.WMS) {
-    return layer.items.map((item) => item.icon).filter((d) => d !== null) as string[];
+    return layer.items.map((item) => item.icon).filter((d) => d !== null);
   }
   if (layer && layer.type === CV_CONST_LAYER_TYPES.WMS) {
     return layer.icons.map((item) => item.iconImage).filter((d) => d !== null) as string[];

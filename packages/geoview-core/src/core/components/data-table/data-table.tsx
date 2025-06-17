@@ -335,7 +335,7 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
 
             // Add (back?) a click marker, a bbox extent who will disapear and remove/add higlight the zoomed feature
             showClickMarker({ lonlat: newCenter });
-            highlightBBox(extent!, false);
+            highlightBBox(extent, false);
             removeHighlightedFeature('all');
             addHighlightedFeature(feature);
           })
@@ -534,7 +534,7 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
     logger.logTraceUseEffect('DATA-TABLE - sorting', sorting);
 
     // update scroll index when there are some rows in the table.
-    const rowsCount = useTable!.getRowCount();
+    const rowsCount = useTable.getRowCount();
     // scroll to the top of the table when the sorting changes
     try {
       if (rowsCount > 0) {
@@ -555,7 +555,7 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
     // Log
     logger.logTraceUseEffect('DATA-TABLE - buildFilterList');
 
-    const tableState = useTable!.getState();
+    const tableState = useTable.getState();
 
     if (!columnFilter.length) return [''];
     return columnFilter.map((filter) => {
@@ -588,14 +588,14 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
       // Check filter value is of type date,
       if (typeof filterValue === 'object' && filterValue) {
         const dateOpr = tableState?.columnFilterFns[filterId] || 'equals';
-        const dateFilter = DATE_FILTER[dateOpr] as string;
+        const dateFilter = DATE_FILTER[dateOpr];
         const date = DateMgt.applyInputDateFormat(`${(filterValue as Date).toISOString().slice(0, -5)}Z`);
         const formattedDate = date.slice(0, -1);
         return `${filterId} ${dateFilter.replace('value', formattedDate)}`;
       }
 
       const operator = tableState?.columnFilterFns[filterId] ?? 'contains';
-      const strFilter = STRING_FILTER[operator] as string;
+      const strFilter = STRING_FILTER[operator];
 
       return `${strFilter.replace('filterId', filterId).replace('value', filterValue as string)}`;
     });

@@ -54,6 +54,7 @@ const multipleHtmlPluginsOutliers = glob.sync('./public/templates/outliers/*.htm
   });
 });
 
+// TODO: I think we can remove config.resolve.alias.@config line
 const config = {
   entry: {
     'cgpv-main': './src/app.tsx',
@@ -101,6 +102,7 @@ const config = {
     },
     alias: {
       '@': path.resolve(__dirname, 'src'),
+      'geoview-core': path.resolve(__dirname, 'src'),
       '@public': path.resolve(__dirname, 'public'),
       '@config': path.resolve(__dirname, 'src/api/config'),
     },

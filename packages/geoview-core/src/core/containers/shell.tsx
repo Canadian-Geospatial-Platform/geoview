@@ -96,7 +96,8 @@ export function Shell(props: ShellProps): JSX.Element {
     appHeight,
   });
 
-  // #region Handlers
+  // #region HANDLERS
+
   /**
    * Handles when a component is being added to the map
    * @param {MapComponentPayload} payload The map component being added
@@ -184,7 +185,7 @@ export function Shell(props: ShellProps): JSX.Element {
     setSnackbarOpen(false);
   }, []);
 
-  // #endregion Handlers
+  // #endregion HANDLERS
 
   // Mount component
   useEffect(() => {
@@ -240,7 +241,7 @@ export function Shell(props: ShellProps): JSX.Element {
               onClose={handleSnackBarClose}
             />
           </Box>
-          {geoviewConfig!.footerBar !== undefined && <FooterBar api={mapViewer.footerBarApi} />}
+          {geoviewConfig?.footerBar && <FooterBar api={mapViewer.footerBarApi} />}
           {Object.keys(mapViewer.modal.modals).map((modalId) => (
             <Modal
               key={modalId}
@@ -252,7 +253,7 @@ export function Shell(props: ShellProps): JSX.Element {
           ))}
           {/* modal section start */}
           <FocusTrapDialog mapId={mapViewer.mapId} focusTrapId={mapViewer.mapId} />
-          <ExportModal />
+          {mapLoaded && <ExportModal />}
           {focusItem.activeElementId === 'layerDataTable' && <DataTableModal />}
           {/* Show Feature Detail Modal when detail icon is clicked in datatable each row */}
           {focusItem.activeElementId === 'featureDetailDataTable' && <FeatureDetailModal />}

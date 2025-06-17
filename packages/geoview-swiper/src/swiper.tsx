@@ -9,12 +9,12 @@ import BaseEvent from 'ol/events/Event';
 import debounce from 'lodash/debounce';
 
 import { RefObject } from 'geoview-core';
-import { useSwiperLayerPaths } from 'geoview-core/src/core/stores/store-interface-and-intial-values/swiper-state';
-import { logger } from 'geoview-core/src/core/utils/logger';
-import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
-import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
-import { useMapVisibleLayers } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
-import { MapViewer } from 'geoview-core/src/geo/map/map-viewer';
+import { useSwiperLayerPaths } from 'geoview-core/core/stores/store-interface-and-intial-values/swiper-state';
+import { logger } from 'geoview-core/core/utils/logger';
+import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
+import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { useMapVisibleLayers } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
+import { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import { sxClasses } from './swiper-style';
 
 type SwiperProps = {
@@ -22,7 +22,7 @@ type SwiperProps = {
   config: ConfigProps;
 };
 
-type ConfigProps = {
+export type ConfigProps = {
   layers: string[];
   orientation: string;
 };
@@ -87,7 +87,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
    */
   function postcompose(event: Event | BaseEvent): void {
     const evt = event as RenderEvent;
-    const ctx: CanvasRenderingContext2D | WebGLRenderingContext = evt.context! as CanvasRenderingContext2D | WebGLRenderingContext;
+    const ctx: CanvasRenderingContext2D | WebGLRenderingContext = evt.context!;
     if (ctx instanceof WebGLRenderingContext) {
       if (evt.type === 'postrender') {
         ctx.disable(ctx.SCISSOR_TEST);
@@ -108,7 +108,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
    * @returns {Number[]} the array of value for x and y position fot the swiper bar
    */
   const getSwiperStyle = (): number[] => {
-    const style = window.getComputedStyle(swiperRef.current!);
+    const style = window.getComputedStyle(swiperRef.current as HTMLElement);
     const matrix = new DOMMatrixReadOnly(style.transform);
     return [matrix.m41, matrix.m42];
   };
@@ -155,7 +155,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
       styleValues[1] = styleValues[1] <= 10 ? 10 : styleValues[1] >= mapSize.current[1] - 10 ? mapSize.current[1] - 10 : styleValues[1];
 
       // apply new style to the bar
-      swiperRef!.current!.style.transform =
+      swiperRef.current!.style.transform =
         orientation === 'vertical' ? `translate(${styleValues[0] + move}px, 0px)` : `translate(0px, ${styleValues[1] + move}px)`;
 
       // send the onStop event to update layers
@@ -188,7 +188,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
         }
       } catch (error: unknown) {
         // Log
-        logger.logError('SWIPER - Failed to attach layer events', viewer.layer?.geoviewLayers, layerPath, error);
+        logger.logError('SWIPER - Failed to attach layer events', viewer.layer?.getGeoviewLayerIds(), layerPath, error);
       }
     },
     [viewer, prerender]
@@ -266,6 +266,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
     theSwiper?.addEventListener('focusin', handleFocusIn);
     theSwiper?.addEventListener('focusout', handleFocusOut);
 
+    // Cleanup on unmount
     return () => {
       // Log
       logger.logTraceUseEffectUnmount('GEOVIEW-SWIPER - unmount', viewer.mapId);
@@ -277,7 +278,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
   }, [viewer.mapId, updateSwiper]);
 
   // If any layer paths
-  if (layerPaths.length > 0) {
+  if (layerPaths && layerPaths.length > 0) {
     // Use a swiper
     return (
       <Box sx={sxClasses.layerSwipe}>
