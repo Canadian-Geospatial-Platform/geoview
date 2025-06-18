@@ -77,7 +77,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
   // internal component state
   const [buttonPanelGroups, setButtonPanelGroups] = useState<ButtonPanelGroupType>({});
-  const appBar = useRef<HTMLDivElement>(null);
+  const appBarRef = useRef<HTMLDivElement>(null);
 
   // get store values and action
   const activeModalId = useUIActiveFocusItem().activeElementId;
@@ -291,6 +291,31 @@ export function AppBar(props: AppBarProps): JSX.Element {
     processPlugin('custom-legend');
   }, [appBarConfig, mapId]);
 
+  // Scroll the map into view on mouse click in the flex area
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('APP BAR - scrollIntoViewListener');
+
+    if (!appBarRef?.current) return () => {};
+
+    const appBarDiv = appBarRef.current;
+    const handleClick = (): void => {
+      const behaviorScroll = (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth') as ScrollBehavior;
+
+      document.getElementById(`shell-${mapId}`)?.scrollIntoView({
+        behavior: behaviorScroll,
+        block: 'start',
+      });
+    };
+
+    appBarDiv.addEventListener('click', handleClick);
+
+    // Cleanup function to remove event listener
+    return () => {
+      appBarDiv.removeEventListener('click', handleClick);
+    };
+  }, [appBarRef, mapId]);
+
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('APP-BAR - create group of AppBar buttons');
@@ -387,7 +412,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
   };
 
   return (
-    <Box sx={sxClasses.appBar} className={`interaction-${interaction}`} ref={appBar}>
+    <Box sx={sxClasses.appBar} className={`interaction-${interaction}`} ref={appBarRef} id={`${mapId}-appBar`}>
       <Box sx={sxClasses.appBarButtons}>
         {renderButtonGroup(topGroupNames)}
         <Box sx={sxClasses.versionButtonDiv}>

@@ -33,6 +33,12 @@ Si votre carte comprend une barre de pied de page, vous pouvez alterner le focus
 - Cliquer sur la barre noire d’information de la carte recentre l'affichage sur la carte.
 - Cliquer sur la barre de pied de page fait apparaître le contenu associé.
 
+### Amener le focus sur la carte
+<div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
+
+Pour amener le focus sur la carte:
+- Cliquer la  barre latérale recentre l'affichage sur la carte.
+
 =1!navigationControls=
 # Commandes de navigation
 <div style="border-bottom: 2px solid #2a2f39; margin-bottom: 15px;"></div>

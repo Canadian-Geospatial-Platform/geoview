@@ -273,7 +273,10 @@ export default function ExportModal(): JSX.Element {
       }, 100);
     }
     return () => {
-      if (overviewMap) overviewMap.style.visibility = 'visible';
+      // Set back overview map visibility to true. Use a timeout so the html-to-image library can finish its work.
+      setTimeout(() => {
+        if (overviewMap) overviewMap.style.visibility = 'visible';
+      }, 1000);
 
       if (timer) clearTimeout(timer);
       setIsMapLoading(true);
@@ -297,7 +300,7 @@ export default function ExportModal(): JSX.Element {
             />
           </Box>
           <Box ref={exportTitleRef} />
-          <Box ref={mapImageRef}>
+          <Box ref={mapImageRef} sx={{ ...sxClasses.mapContainer }}>
             {isMapLoading && <Skeleton variant="rounded" width="100%" height={500} sx={{ bgcolor: theme.palette.grey[500] }} />}
           </Box>
           <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ padding: '1rem', paddingBottom: 0 }}>

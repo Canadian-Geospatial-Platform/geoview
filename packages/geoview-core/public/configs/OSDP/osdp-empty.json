@@ -19,14 +19,22 @@
   },
   "components": ["north-arrow", "overview-map"],
   "navBar": ["zoom", "fullscreen", "home", "location", "basemap-select"],
-        "appBar": {
-          "tabs": {
-            "core": ["geolocator", "export"]
-          }
-        },
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
   "footerBar": {
     "tabs": {
-      "core": ["legend", "layers", "details", "data-table", "time-slider", "geochart"]
+      "core": [
+        "layers",
+        "data-table"
+      ]
     }
   },
   "corePackages": [],

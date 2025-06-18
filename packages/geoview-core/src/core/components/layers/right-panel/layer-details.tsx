@@ -392,7 +392,12 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
     // Find the localized name for the current layer type
     const localizedTypeEntry = memoLocalizedLayerType.find(([memoType]) => memoType === layerDetails.type);
-    const localizedTypeName = localizedTypeEntry ? localizedTypeEntry[1] : '';
+    let localizedTypeName = localizedTypeEntry ? localizedTypeEntry[1] : t('layers.serviceGroup');
+
+    // Special case if type is GeoJSON and url end by zip or shp. It is a GeoJSON format derived from a shapefile
+    if (localizedTypeName === CV_CONST_LAYER_TYPES.GEOJSON && (layerDetails.url?.includes('.zip') || layerDetails.url?.includes('.shp'))) {
+      localizedTypeName = `${localizedTypeName} - ${t('layers.serviceEsriShapefile')}`;
+    }
 
     return (
       <Box>

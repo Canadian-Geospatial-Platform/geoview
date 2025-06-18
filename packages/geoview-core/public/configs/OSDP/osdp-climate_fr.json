@@ -60,6 +60,9 @@
     "tabs": {
       "core": [
         "geolocator",
+        "legend",
+        "details",
+        "time-slider",
         "export"
       ]
     }
@@ -67,11 +70,8 @@
   "footerBar": {
     "tabs": {
       "core": [
-        "legend",
         "layers",
-        "details",
-        "data-table",
-        "time-slider"
+        "data-table"
       ]
     }
   },

@@ -31,8 +31,8 @@ export function Swiper(props: SwiperProps): JSX.Element {
   const { viewer, config } = props;
 
   const { cgpv } = window;
-  const { ui, react } = cgpv;
-  const { useEffect, useState, useRef, useCallback } = react;
+  const { ui, reactUtilities } = cgpv;
+  const { useEffect, useState, useRef, useCallback } = reactUtilities.react;
   const { Box, Tooltip, HandleIcon } = ui.elements;
   const { orientation } = config;
 

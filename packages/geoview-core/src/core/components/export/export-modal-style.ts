@@ -8,6 +8,11 @@ import { Theme } from '@mui/material/styles';
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getSxClasses = (theme: Theme): any => ({
+  mapContainer: {
+    '& img': {
+      border: `${theme.palette.grey[500]} 1px solid`,
+    },
+  },
   legendContainer: {
     padding: '1rem',
     margin: '1rem',
