@@ -1,10 +1,11 @@
-import { TypeJsonObject, toJsonObject, AnySchemaObject } from 'geoview-core/src/api/config/types/config-types';
-import { FooterPlugin } from 'geoview-core/src/api/plugin/footer-plugin';
-import { TypeTabs } from 'geoview-core/src/ui/tabs/tabs';
-import { DrawIcon } from 'geoview-core/src/ui/icons';
+import { TypeJsonObject, toJsonObject, AnySchemaObject } from 'geoview-core/api/config/types/config-types';
+import { FooterPlugin } from 'geoview-core/api/plugin/footer-plugin';
+import { TypeDrawerConfig } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
+import { TypeTabs } from 'geoview-core/ui/tabs/tabs';
+import { DrawIcon } from 'geoview-core/ui/icons';
 
-// import { DrawerEventProcessor } from 'geoview-core/src/api/event-processors/event-processor-children/drawer-event-processor';
-// import { logger } from 'geoview-core/src/core/utils/logger';
+// import { DrawerEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/drawer-event-processor';
+// import { logger } from 'geoview-core/core/utils/logger';
 
 import schema from '../schema.json';
 import defaultConfig from '../default-config-drawer.json';
@@ -36,32 +37,44 @@ class DrawerPlugin extends FooterPlugin {
   callbackRedraw?: () => void;
 
   /**
-   * Translations object to inject to the viewer translations
+   * Overrides the default translations for the Plugin.
+   * @returns {TypeJsonObject} - The translations object for the particular Plugin.
    */
-  translations = toJsonObject({
-    en: {
-      drawer: {
-        title: 'Draw',
-        stopDrawing: 'Stop',
-        stopDrawingTooltip: 'Stop Drawing',
-        startDrawing: 'Start',
-        startDrawingTooltip: 'Start Drawing',
-        clear: 'Clear',
-        clearTooltip: 'Clear the drawings',
+  override defaultTranslations(): TypeJsonObject {
+    return {
+      en: {
+        drawer: {
+          title: 'Draw',
+          stopDrawing: 'Stop',
+          stopDrawingTooltip: 'Stop Drawing',
+          startDrawing: 'Start',
+          startDrawingTooltip: 'Start Drawing',
+          clear: 'Clear',
+          clearTooltip: 'Clear the drawings',
+        },
       },
-    },
-    fr: {
-      drawer: {
-        title: 'Dessiner',
-        stopDrawing: 'Arrêter',
-        stopDrawingTooltip: 'Arrêter le dessin',
-        startDrawing: 'Commencer',
-        startDrawingTooltip: 'Commencer à dessiner',
-        clear: 'Effacer',
-        clearTooltip: 'Effacer les dessins',
+      fr: {
+        drawer: {
+          title: 'Dessiner',
+          stopDrawing: 'Arrêter',
+          stopDrawingTooltip: 'Arrêter le dessin',
+          startDrawing: 'Commencer',
+          startDrawingTooltip: 'Commencer à dessiner',
+          clear: 'Effacer',
+          clearTooltip: 'Effacer les dessins',
+        },
       },
-    },
-  });
+    } as unknown as TypeJsonObject;
+  }
+
+  /**
+   * Overrides the getConfig in order to return the right type.
+   * @returns {ConfigProps} The Swiper config
+   */
+  override getConfig(): TypeDrawerConfig {
+    // Redirect
+    return super.getConfig() as TypeDrawerConfig;
+  }
 
   /**
    * Overrides the addition of the Drawer Map Plugin to make sure to set the layer paths from the config into the store.
@@ -79,7 +92,8 @@ class DrawerPlugin extends FooterPlugin {
    * @returns {TypeTabs} The TypeTabs for the Drawer Plugin
    */
   override onCreateContentProps(): TypeTabs {
-    const content = <DrawPanel viewer={this.pluginProps.viewer} config={this.configObj} />;
+    // const content = <DrawPanel viewer={this.pluginProps.viewer} config={tempConfig} />;
+    const content = <DrawPanel viewer={this.pluginProps.viewer} />;
 
     return {
       id: 'drawer',
