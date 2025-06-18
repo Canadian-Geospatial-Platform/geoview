@@ -1,7 +1,9 @@
-import { TypeJsonObject, toJsonObject, Cast, AnySchemaObject } from 'geoview-core/src/api/config/types/config-types';
-import { NavBarPlugin, TypeNavBarButtonConfig } from 'geoview-core/src/api/plugin/navbar-plugin';
+import React from 'react';
+import { TypeJsonObject, toJsonObject, AnySchemaObject } from 'geoview-core/api/config/types/config-types';
+import { TypeDrawerConfig } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
+import { NavBarPlugin, TypeNavBarButtonConfig } from 'geoview-core/api/plugin/navbar-plugin';
 
-import { logger } from 'geoview-core/src/core/utils/logger';
+import { logger } from 'geoview-core/core/utils/logger';
 
 import schema from '../schema.json';
 import defaultConfig from '../default-config-drawer.json';
@@ -10,8 +12,12 @@ import { createDrawerButtons } from './draw-navbar';
 // Import css styles
 import './measurement-styles.css';
 
-// TODO install package - MUI Colour Picker
-// TODO Add support for RGBA instead of just Hex codes for Opacity/Transparency
+// TODO Optional: Install package - MUI Colour Picker
+// TODO Add support for RGBA instead of just Hex to handle transparency
+// TODO Confirm / Finalize config in the geoview config
+// TODO Use Config properly
+// TODO Fix button colours for buttons with panels
+// TODO Export drawings
 
 /**
  * Create a class for the plugin instance
@@ -39,54 +45,66 @@ class DrawerPlugin extends NavBarPlugin {
   callbackRedraw?: () => void;
 
   /**
-   * Translations object to inject to the viewer translations
+   * Overrides the default translations for the Plugin.
+   * @returns {TypeJsonObject} - The translations object for the particular Plugin.
    */
-  translations = toJsonObject({
-    en: {
-      drawer: {
-        title: 'Draw',
-        stopDrawing: 'Stop',
-        stopDrawingTooltip: 'Stop Drawing',
-        toggleDrawing: 'Toggle Drawing',
-        clear: 'Clear',
-        clearTooltip: 'Clear the drawings',
-        edit: 'Toggle editing',
-        fillColour: 'Fill Colour',
-        strokeColour: 'Stroke Colour',
-        strokeWidth: 'Stroke Width',
-        geometryPicker: 'Change geometry type',
-        geometryPickerPanel: 'Select a geometry',
-        point: 'Point',
-        linestring: 'Line',
-        polygon: 'Polygon',
-        circle: 'Circle',
-        style: 'Change Style',
-        toggleMeasurements: 'Toggle measurements',
+  override defaultTranslations(): TypeJsonObject {
+    return {
+      en: {
+        drawer: {
+          title: 'Draw',
+          stopDrawing: 'Stop',
+          stopDrawingTooltip: 'Stop Drawing',
+          toggleDrawing: 'Toggle Drawing',
+          clear: 'Clear',
+          clearTooltip: 'Clear the drawings',
+          edit: 'Toggle editing',
+          fillColour: 'Fill Colour',
+          strokeColour: 'Stroke Colour',
+          strokeWidth: 'Stroke Width',
+          geometryPicker: 'Change geometry type',
+          geometryPickerPanel: 'Select a geometry',
+          point: 'Point',
+          linestring: 'Line',
+          polygon: 'Polygon',
+          circle: 'Circle',
+          style: 'Change Style',
+          toggleMeasurements: 'Toggle measurements',
+        },
       },
-    },
-    fr: {
-      drawer: {
-        title: 'Dessiner',
-        stopDrawing: 'Arrêter',
-        stopDrawingTooltip: 'Arrêter le dessin',
-        toggleDrawing: 'Basculer',
-        clear: 'Effacer',
-        clearTooltip: 'Effacer les dessins',
-        edit: "Basculer l'édition",
-        fillColour: 'Couleur de remplissage',
-        strokeColour: 'Couleur du contour',
-        strokeWidth: 'Largeur du contour',
-        geometryPicker: 'Changer le type de géométrie',
-        geometryPickerPanel: 'Sélectionnez une géométrie',
-        point: 'Pointer',
-        linestring: 'Ligne',
-        polygon: 'Polygone',
-        circle: 'Cercle',
-        style: 'Changer de style',
-        toggleMeasurements: 'Basculer les mesures',
+      fr: {
+        drawer: {
+          title: 'Dessiner',
+          stopDrawing: 'Arrêter',
+          stopDrawingTooltip: 'Arrêter le dessin',
+          toggleDrawing: 'Basculer',
+          clear: 'Effacer',
+          clearTooltip: 'Effacer les dessins',
+          edit: "Basculer l'édition",
+          fillColour: 'Couleur de remplissage',
+          strokeColour: 'Couleur du contour',
+          strokeWidth: 'Largeur du contour',
+          geometryPicker: 'Changer le type de géométrie',
+          geometryPickerPanel: 'Sélectionnez une géométrie',
+          point: 'Pointer',
+          linestring: 'Ligne',
+          polygon: 'Polygone',
+          circle: 'Cercle',
+          style: 'Changer de style',
+          toggleMeasurements: 'Basculer les mesures',
+        },
       },
-    },
-  });
+    } as unknown as TypeJsonObject;
+  }
+
+  /**
+   * Overrides the getConfig in order to return the right type.
+   * @returns {ConfigProps} The Swiper config
+   */
+  override getConfig(): TypeDrawerConfig {
+    // Redirect
+    return super.getConfig() as TypeDrawerConfig;
+  }
 
   /**
    * Overrides the creation of the buttons components to create a record of Buttons with their optional panels.
@@ -94,7 +112,8 @@ class DrawerPlugin extends NavBarPlugin {
   override onCreateButtonConfigs(): Record<string, TypeNavBarButtonConfig> {
     // Create all drawer buttons
     logger.logInfo('Drawer Plugin - onAdd');
-    return createDrawerButtons(this.configObj);
+    // return createDrawerButtons(this.getConfig().drawer);
+    return createDrawerButtons();
   }
 
   override onAdd(): void {
@@ -113,6 +132,11 @@ class DrawerPlugin extends NavBarPlugin {
 
 export default DrawerPlugin;
 
-// Keep a reference to the Drawer Plugin as part of the geoviewPlugins property stored in the window object
-window.geoviewPlugins = window.geoviewPlugins || {};
-window.geoviewPlugins.drawer = Cast<DrawerPlugin>(DrawerPlugin);
+// GV This if condition took over 3 days to investigate. It was giving errors on the app.geo.ca website with
+// GV some conflicting reacts being loaded on the page for some obscure reason.
+// Check if we're on the right react
+if (React === window.cgpv.react) {
+  // Keep a reference to the Drawer Plugin as part of the geoviewPlugins property stored in the window object
+  window.geoviewPlugins = window.geoviewPlugins || {};
+  window.geoviewPlugins.drawer = DrawerPlugin;
+}
