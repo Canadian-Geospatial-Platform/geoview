@@ -1,4 +1,4 @@
-import { Options, BaseLayer } from 'ol/layer/Base';
+import BaseLayer, { Options } from 'ol/layer/Base';
 import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
 import { Extent } from 'ol/extent';
@@ -156,9 +156,12 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * @param {BaseLayer} layer - The OpenLayers layer to patch
    */
   static #addRenderErrorHandling(layer: BaseLayer): void {
-    if (!layer || !layer.getRenderer) return;
+    // Use type assertion to access internal getRenderer method
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const layerWithRenderer = layer as BaseLayer & { getRenderer?: () => any };
+    if (!layerWithRenderer || typeof layerWithRenderer.getRenderer !== 'function') return;
 
-    const renderer = layer.getRenderer();
+    const renderer = layerWithRenderer.getRenderer();
     if (!renderer || typeof renderer.renderDeferredInternal !== 'function') return;
 
     const originalRenderFunction = renderer.renderDeferredInternal;
