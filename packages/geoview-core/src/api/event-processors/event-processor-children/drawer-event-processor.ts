@@ -340,8 +340,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       if (geometryGroup !== undefined) {
         // Clear measurements
         geometryGroup.vectorSource.getFeatures().forEach((feature) => {
-          const tooltip = feature.get('measureTooltip');
-          tooltip?.getElement()?.remove();
+          const measureTooltip = feature.get('measureTooltip');
+          measureTooltip?.getElement()?.remove();
+          state.actions.removeMeasureOverlay(measureTooltip);
         });
 
         // Clear Geometries
