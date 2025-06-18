@@ -1,3 +1,4 @@
+import { Root } from 'react-dom/client';
 import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import { AbstractPlugin } from './abstract-plugin';
 import { TypeWindow } from '@/core/types/global-types';
@@ -15,13 +16,15 @@ export type TypeNavBarButtonConfig = {
  */
 export abstract class NavBarPlugin extends AbstractPlugin {
   // Store the created button panel object
+  reactRoot?: Root;
+
   buttonPanels: Record<string, TypeButtonPanel> = {};
 
   /**
    * Overridable function to create nav bar button props content
    * @returns IconButtonPropsExtend The nav bar button props content
    */
-  onCreateButtonConfigs(): Record<string, TypeNavBarButtonConfig> {
+  protected onCreateButtonConfigs(): Record<string, TypeNavBarButtonConfig> {
     logger.logInfo('NavBar Plugin - Default onCreateButtonProps');
     // Override this to create the button props..
     // Fetch cgpv
@@ -42,7 +45,7 @@ export abstract class NavBarPlugin extends AbstractPlugin {
           title: 'Some Title',
           icon: '<i class="material-icons">map</i>',
           width: 300,
-          status: this.configObj?.isOpen as boolean,
+          status: false,
         },
         groupName: 'default',
       },
@@ -52,7 +55,7 @@ export abstract class NavBarPlugin extends AbstractPlugin {
   /**
    * Called when a nav bar plugin is being added
    */
-  onAdd(): void {
+  protected onAdd(): void {
     // Create button props
     logger.logInfo('NavBar Plugin - Default onAdd');
     const buttonConfigs = this.onCreateButtonConfigs();
@@ -77,7 +80,7 @@ export abstract class NavBarPlugin extends AbstractPlugin {
   /**
    * Called when a nav bar plugin is being removed
    */
-  onRemove(): void {
+  protected onRemove(): void {
     // Remove the button or button panel from the navbar
     if (Object.keys(this.buttonPanels).length > 0 && this.mapViewer()?.navBarApi) {
       Object.values(this.buttonPanels).forEach((buttonPanel: TypeButtonPanel) => {

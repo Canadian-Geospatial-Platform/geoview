@@ -1,9 +1,9 @@
-import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
-import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
-import { useDrawerActions, useDrawerHideMeasurements } from 'geoview-core/src/core/stores/store-interface-and-intial-values/drawer-state';
+import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
+import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { useDrawerActions, useDrawerHideMeasurements } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
 
-import { IconButton, StraightenIcon } from 'geoview-core/src/ui';
-import { logger } from 'geoview-core/src/core/utils/logger';
+import { IconButton, StraightenIcon } from 'geoview-core/ui';
+import { logger } from 'geoview-core/core/utils/logger';
 
 /**
  * Create a measure button to toggle measurement overlays on drawings
@@ -34,7 +34,7 @@ export default function Measurements(): JSX.Element {
       tooltip={getLocalizedMessage(displayLanguage, 'drawer.toggleMeasurements')}
       tooltipPlacement="left"
       onClick={handleToggleMeasurements}
-      sx={hideMeasurements ? undefined : { border: '1px solid #1976d2' }}
+      className={!hideMeasurements ? 'highlighted active' : ''}
     >
       <StraightenIcon />
     </IconButton>
