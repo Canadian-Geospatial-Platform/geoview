@@ -1,4 +1,4 @@
-import { Options } from 'ol/layer/Base';
+import { Options, BaseLayer } from 'ol/layer/Base';
 import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
 import { Extent } from 'ol/extent';
@@ -143,6 +143,42 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     (this.#olSource as any).on(['featuresloaderror', 'tileloaderror'], this.onError.bind(this));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (this.#olSource as any).on(['imageloaderror'], this.onImageLoadError.bind(this));
+
+    // Apply render error handling to prevent "Cannot read properties of null (reading 'globalAlpha')" errors
+    AbstractGVLayer.#addRenderErrorHandling(this.getOLLayer());
+  }
+
+  /**
+   * Adds error handling to a layer's render function to prevent globalAlpha errors
+   * that can occur during layer rendering, especially when highlighting layers while others are still loading.
+   * This patches the OpenLayers renderer to safely handle cases where the canvas context is not yet available.
+   *
+   * @param {BaseLayer} layer - The OpenLayers layer to patch
+   */
+  static #addRenderErrorHandling(layer: BaseLayer): void {
+    if (!layer || !layer.getRenderer) return;
+
+    const renderer = layer.getRenderer();
+    if (!renderer || typeof renderer.renderDeferredInternal !== 'function') return;
+
+    const originalRenderFunction = renderer.renderDeferredInternal;
+
+    renderer.renderDeferredInternal = function renderDeferredInternalPatched(...args: unknown[]) {
+      try {
+        // Check if context exists before rendering
+        if (this.context && this.context.canvas) {
+          return originalRenderFunction.apply(this, args);
+        }
+        // If context doesn't exist yet, try to call the original function anyway
+        // as it might initialize the context
+        return originalRenderFunction.apply(this, args);
+      } catch (error) {
+        logger.logError('Vector layer rendering error:', error);
+        // Attempt recovery by requesting a new frame
+        requestAnimationFrame(() => this.changed());
+        return false; // Return false instead of undefined
+      }
+    };
   }
 
   /**
