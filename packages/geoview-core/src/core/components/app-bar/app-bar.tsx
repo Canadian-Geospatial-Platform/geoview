@@ -291,7 +291,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
     processPlugin('custom-legend');
   }, [appBarConfig, mapId]);
 
-  // Scroll the map into view on mouse click in the flex area
+  // Scroll the map into view on mouse click in the app bar area
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('APP BAR - scrollIntoViewListener');

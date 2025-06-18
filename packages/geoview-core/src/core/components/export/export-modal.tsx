@@ -268,16 +268,18 @@ export default function ExportModal(): JSX.Element {
           })
           .catch((error) => {
             logger.logError('Error occured while converting map to image', error);
+          })
+          .finally(() => {
+            // Set back overview map visibility to true. Use a timeout so the html-to-image library can finish its work.
+            // Just put the code in then does not work all the time
+            setTimeout(() => {
+              if (overviewMap) overviewMap.style.visibility = 'visible';
+            }, 1000);
           });
         setIsLegendLoading(false);
       }, 100);
     }
     return () => {
-      // Set back overview map visibility to true. Use a timeout so the html-to-image library can finish its work.
-      setTimeout(() => {
-        if (overviewMap) overviewMap.style.visibility = 'visible';
-      }, 1000);
-
       if (timer) clearTimeout(timer);
       setIsMapLoading(true);
       setIsLegendLoading(true);

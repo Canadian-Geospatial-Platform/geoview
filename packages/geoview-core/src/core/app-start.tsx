@@ -82,7 +82,7 @@ class ErrorBoundary extends Component<{ children: ReactNode; language: TypeDispl
     }
   }
 
-  override render(): ReactNode {
+  override render(): JSX.Element {
     const { hasError } = this.state;
     const { children, language } = this.props;
 
@@ -98,7 +98,8 @@ class ErrorBoundary extends Component<{ children: ReactNode; language: TypeDispl
       );
     }
 
-    return children;
+    // Return the single child directly
+    return children as JSX.Element;
   }
 }
 

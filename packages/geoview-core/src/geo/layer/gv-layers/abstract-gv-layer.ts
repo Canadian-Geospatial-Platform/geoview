@@ -168,15 +168,17 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
     renderer.renderDeferredInternal = function renderDeferredInternalPatched(...args: unknown[]) {
       try {
-        // Check if context exists before rendering
-        if (this.context && this.context.canvas) {
-          return originalRenderFunction.apply(this, args);
+        // If the renderer is not ready yet, skip rendering
+        if (!this.context || !this.context.canvas) {
+          // Skip rendering but don't throw an error
+          return false;
         }
-        // If context doesn't exist yet, try to call the original function anyway
-        // as it might initialize the context
+
+        // Context exists, proceed with original rendering
         return originalRenderFunction.apply(this, args);
       } catch (error) {
         logger.logError('Vector layer rendering error:', error);
+
         // Attempt recovery by requesting a new frame
         requestAnimationFrame(() => this.changed());
         return false; // Return false instead of undefined
