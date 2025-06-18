@@ -11,13 +11,13 @@ import { sxClasses } from './drawer-style';
 
 type DrawerProps = {
   viewer: MapViewer;
-  config: ConfigProps;
+  // config: ConfigProps;
 };
 
-type ConfigProps = {
-  style: StyleProps;
-  geomTypes: string[];
-};
+// type ConfigProps = {
+//   style: StyleProps;
+//   geomTypes: string[];
+// };
 
 type StyleProps = {
   fillColor: string;
@@ -26,7 +26,16 @@ type StyleProps = {
 };
 
 export function DrawPanel(props: DrawerProps): JSX.Element {
-  const { viewer, config } = props;
+  // const { viewer, config } = props;
+  const { viewer } = props;
+  const config = {
+    style: {
+      fillColor: '#ffcc33',
+      strokeColor: '#000000',
+      strokeWidth: 1.25,
+    },
+    geomTypes: ['Point', 'LineString', 'Polygon', 'Circle'],
+  };
 
   const { cgpv } = window as TypeWindow;
   // const { useTheme } = cgpv.ui;
@@ -125,7 +134,7 @@ export function DrawPanel(props: DrawerProps): JSX.Element {
 
       // Convert to number for strokeWidth
       if (styleKey === 'strokeWidth') {
-        const width = parseInt(value as string, 10);
+        const width = parseInt(value, 10);
         // Escape if the width is NaN
         if (Number.isNaN(width)) return;
         value = width;
@@ -154,7 +163,12 @@ export function DrawPanel(props: DrawerProps): JSX.Element {
   const buttonArray = useMemo(() => {
     return config.geomTypes.map((type) => {
       return (
-        <Button key={`draw-${type}`} variant={geomType === type ? 'contained' : 'outlined'} onClick={() => handleGeometryTypeChange(type)}>
+        <Button
+          type="text"
+          key={`draw-${type}`}
+          variant={geomType === type ? 'contained' : 'outlined'}
+          onClick={() => handleGeometryTypeChange(type)}
+        >
           {type}
         </Button>
       );
@@ -180,6 +194,7 @@ export function DrawPanel(props: DrawerProps): JSX.Element {
       </Box>
       <Box>
         <Button
+          type="text"
           sx={isDrawing ? sxClasses.drawingActive : sxClasses.drawingInactive}
           variant="contained"
           tooltip={
@@ -193,7 +208,12 @@ export function DrawPanel(props: DrawerProps): JSX.Element {
             ? getLocalizedMessage(displayLanguage, 'drawer.stopDrawing')
             : getLocalizedMessage(displayLanguage, 'drawer.startDrawing')}
         </Button>
-        <Button tooltip={getLocalizedMessage(displayLanguage, 'drawer.clearTooltip')} variant="outlined" onClick={handleClearGeometries}>
+        <Button
+          type="text"
+          tooltip={getLocalizedMessage(displayLanguage, 'drawer.clearTooltip')}
+          variant="outlined"
+          onClick={handleClearGeometries}
+        >
           {getLocalizedMessage(displayLanguage, 'drawer.clear')}
         </Button>
       </Box>

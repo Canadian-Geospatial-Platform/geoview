@@ -8,7 +8,7 @@ import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { DrawerEventProcessor } from '@/api/event-processors/event-processor-children/drawer-event-processor';
 
-// GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with DrawerEventProcessor vs DrawerState
+// GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with DrawerEve ntProcessor vs DrawerState
 
 // #region INTERFACES & TYPES
 

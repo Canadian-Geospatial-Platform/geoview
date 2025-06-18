@@ -54,7 +54,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
         output = `${Math.round(length * 100) / 100} m`;
       }
 
-      tooltipCoord = (geom as LineString).getLastCoordinate();
+      tooltipCoord = geom.getLastCoordinate();
     }
 
     if (geom instanceof Polygon) {
@@ -65,7 +65,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
         output = `${Math.round(area * 100) / 100} m<sup>2</sup>`;
       }
 
-      tooltipCoord = (geom as Polygon).getInteriorPoint().getCoordinates();
+      tooltipCoord = geom.getInteriorPoint().getCoordinates();
       tooltipCoord.pop();
     }
 

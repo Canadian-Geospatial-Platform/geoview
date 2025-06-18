@@ -1,9 +1,9 @@
-import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
-import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
-import { useDrawerActions, useDrawerIsDrawing } from 'geoview-core/src/core/stores/store-interface-and-intial-values/drawer-state';
+import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
+import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { useDrawerActions, useDrawerIsDrawing } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
 
-import { IconButton, DrawIcon } from 'geoview-core/src/ui';
-import { logger } from 'geoview-core/src/core/utils/logger';
+import { IconButton, DrawIcon } from 'geoview-core/ui';
+import { logger } from 'geoview-core/core/utils/logger';
 
 /**
  * Create a draw button to return the user to toggle drawing capabilities
@@ -33,7 +33,7 @@ export default function Draw(): JSX.Element {
       id="draw"
       tooltip={getLocalizedMessage(displayLanguage, 'drawer.toggleDrawing')}
       tooltipPlacement="left"
-      sx={isDrawing ? { border: '1px solid #1976d2' } : undefined}
+      className={isDrawing ? 'highlighted active' : ''}
       onClick={handleDraw}
     >
       <DrawIcon />

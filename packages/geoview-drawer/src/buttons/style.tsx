@@ -1,19 +1,14 @@
 import { TypeWindow } from 'geoview-core';
 import { ChangeEvent } from 'react';
-import { useDrawerStyle, useDrawerActions } from 'geoview-core/src/core/stores/store-interface-and-intial-values/drawer-state';
-import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
-import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
-import { logger } from 'geoview-core/src/core/utils/logger';
+import { useDrawerStyle, useDrawerActions } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
+import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
+import { logger } from 'geoview-core/core/utils/logger';
 
 export function StyleButton(): JSX.Element {
-  const { PaletteIcon, IconButton } = (window as TypeWindow).cgpv.ui.elements;
-  const displayLanguage = useAppDisplayLanguage();
+  const { PaletteIcon } = (window as TypeWindow).cgpv.ui.elements;
 
-  return (
-    <IconButton id="clear" tooltip={getLocalizedMessage(displayLanguage, 'drawer.style')} tooltipPlacement="left">
-      <PaletteIcon />
-    </IconButton>
-  );
+  return <PaletteIcon />;
 }
 
 /**
@@ -54,7 +49,7 @@ export function StylePanel(): JSX.Element {
 
   const handleStrokeWidthChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>): void => {
-      const width = parseInt(event.target.value as string, 10);
+      const width = parseInt(event.target.value, 10);
       if (Number.isNaN(width)) return;
       setStrokeWidth(width);
     },

@@ -1,9 +1,9 @@
-import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
-import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
-import { useDrawerActions, useDrawerIsEditing } from 'geoview-core/src/core/stores/store-interface-and-intial-values/drawer-state';
+import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
+import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { useDrawerActions, useDrawerIsEditing } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
 
-import { IconButton, EditIcon, EditOffIcon } from 'geoview-core/src/ui';
-import { logger } from 'geoview-core/src/core/utils/logger';
+import { IconButton, EditIcon, EditOffIcon } from 'geoview-core/ui';
+import { logger } from 'geoview-core/core/utils/logger';
 
 /**
  * Create an edit button to toggle editing capabilities
@@ -33,6 +33,7 @@ export default function Edit(): JSX.Element {
       id="clear"
       tooltip={getLocalizedMessage(displayLanguage, 'drawer.edit')}
       tooltipPlacement="left"
+      className={isEditing ? 'highlighted active' : ''}
       onClick={handleToggleEditing}
     >
       {isEditing ? <EditOffIcon /> : <EditIcon />}
