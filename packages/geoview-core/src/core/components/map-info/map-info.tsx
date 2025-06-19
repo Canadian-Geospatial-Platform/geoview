@@ -1,4 +1,4 @@
-import { memo, MutableRefObject, useCallback, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { Box } from '@/ui';
 
@@ -27,7 +27,7 @@ const MAP_INFO_BASE_STYLES = {
 const FLEX_STYLE = { flexGrow: 1, height: '100%' };
 
 interface MapInfoProps {
-  scrollShellIntoView: () => void;
+  onScrollShellInfoView: () => void;
 }
 
 /**
@@ -36,12 +36,11 @@ interface MapInfoProps {
  * @returns {JSX.Element} the map information element
  */
 // Memoizes entire component, preventing re-renders if props haven't changed
-export const MapInfo = memo(function MapInfo({ scrollShellIntoView }: MapInfoProps): JSX.Element {
+export const MapInfo = memo(function MapInfo({ onScrollShellInfoView }: MapInfoProps): JSX.Element {
   logger.logTraceRender('components/map-info/map-info');
 
   // Hooks
   const theme = useTheme();
-  const mapInfoRef = useRef<HTMLDivElement>();
 
   // Store
   const interaction = useMapInteraction(); // Static map, do not display mouse position or rotation controls
@@ -68,7 +67,7 @@ export const MapInfo = memo(function MapInfo({ scrollShellIntoView }: MapInfoPro
   }, []);
 
   return (
-    <Box ref={mapInfoRef as MutableRefObject<HTMLDivElement>} id={`${mapId}-mapInfo`} sx={containerStyles} onClick={scrollShellIntoView}>
+    <Box id={`${mapId}-mapInfo`} sx={containerStyles} onClick={onScrollShellInfoView}>
       {interaction === 'dynamic' && <MapInfoExpandButton onExpand={handleExpand} expanded={expanded} />}
       <Attribution />
       {interaction === 'dynamic' && (
