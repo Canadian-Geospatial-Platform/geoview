@@ -1,4 +1,4 @@
-import { memo, MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { Box } from '@/ui';
 
@@ -26,18 +26,21 @@ const MAP_INFO_BASE_STYLES = {
 
 const FLEX_STYLE = { flexGrow: 1, height: '100%' };
 
+interface MapInfoProps {
+  onScrollShellIntoView: () => void;
+}
+
 /**
  * Create a map information element that contains attribtuion, mouse position and scale
  *
  * @returns {JSX.Element} the map information element
  */
 // Memoizes entire component, preventing re-renders if props haven't changed
-export const MapInfo = memo(function MapInfo(): JSX.Element {
+export const MapInfo = memo(function MapInfo({ onScrollShellIntoView }: MapInfoProps): JSX.Element {
   logger.logTraceRender('components/map-info/map-info');
 
   // Hooks
   const theme = useTheme();
-  const mapInfoRef = useRef<HTMLDivElement>();
 
   // Store
   const interaction = useMapInteraction(); // Static map, do not display mouse position or rotation controls
@@ -58,38 +61,13 @@ export const MapInfo = memo(function MapInfo(): JSX.Element {
     [expanded, theme.palette.geoViewColor.bgColor, interaction]
   );
 
-  // Scroll the map into view on mouse click in the flex area
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('MAP INFO - scrollIntoViewListener');
-
-    if (!mapInfoRef?.current) return () => {};
-
-    const handleClick = (): void => {
-      const behaviorScroll = (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth') as ScrollBehavior;
-
-      document.getElementById(`shell-${mapId}`)?.scrollIntoView({
-        behavior: behaviorScroll,
-        block: 'start',
-      });
-    };
-
-    const flexBoxes = mapInfoRef.current.querySelectorAll(`.${mapId}-mapInfo-flex`);
-    flexBoxes.forEach((item) => item.addEventListener('click', handleClick));
-
-    // Cleanup function to remove event listener
-    return () => {
-      flexBoxes.forEach((item) => item.removeEventListener('click', handleClick));
-    };
-  }, [mapInfoRef, mapId]);
-
   const handleExpand = useCallback((value: boolean) => {
     logger.logTraceUseCallback('MAP INFO - expand', value);
     setExpanded(value);
   }, []);
 
   return (
-    <Box ref={mapInfoRef as MutableRefObject<HTMLDivElement>} id={`${mapId}-mapInfo`} sx={containerStyles}>
+    <Box id={`${mapId}-mapInfo`} sx={containerStyles} onClick={onScrollShellIntoView}>
       {interaction === 'dynamic' && <MapInfoExpandButton onExpand={handleExpand} expanded={expanded} />}
       <Attribution />
       {interaction === 'dynamic' && (

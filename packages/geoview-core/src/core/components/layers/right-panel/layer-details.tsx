@@ -392,7 +392,12 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
     // Find the localized name for the current layer type
     const localizedTypeEntry = memoLocalizedLayerType.find(([memoType]) => memoType === layerDetails.type);
-    const localizedTypeName = localizedTypeEntry ? localizedTypeEntry[1] : '';
+    let localizedTypeName = localizedTypeEntry ? localizedTypeEntry[1] : t('layers.serviceGroup');
+
+    // Special case if type is GeoJSON and url end by zip or shp. It is a GeoJSON format derived from a shapefile
+    if (localizedTypeName === CV_CONST_LAYER_TYPES.GEOJSON && (layerDetails.url?.includes('.zip') || layerDetails.url?.includes('.shp'))) {
+      localizedTypeName = `${localizedTypeName} - ${t('layers.serviceEsriShapefile')}`;
+    }
 
     return (
       <Box>
@@ -407,7 +412,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           {layerNativeProjection && <Box>{`${t('layers.layerServiceProjection')}${layerNativeProjection}`}</Box>}
           {layerFilter && <Box>{`${t('layers.layerDefaultFilter')}${layerFilter}`}</Box>}
           {layerTemporalDimension && (
-            <Box>{`${t('layers.layerTemporalDimension')}${t('layers.layerTemporalDimensionField')} - ${layerTemporalDimension.field} -, min - ${layerTemporalDimension.range.range[0]} / max - ${layerTemporalDimension.range.range[1]}`}</Box>
+            <Box>{`${t('layers.layerTemporalDimension')}${t('layers.layerTemporalDimensionField')} - ${layerTemporalDimension.field} -, min - ${layerTemporalDimension.range.range[0]} / max - ${layerTemporalDimension.range.range[layerTemporalDimension.range.range.length - 1]}`}</Box>
           )}
           {resources !== '' && (
             <Box className="info-container">

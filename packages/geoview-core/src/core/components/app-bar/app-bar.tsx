@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { useState, useRef, useEffect, useCallback, Fragment, useMemo, ReactNode, KeyboardEvent } from 'react';
+import { useState, useEffect, useCallback, Fragment, useMemo, ReactNode, KeyboardEvent } from 'react';
 import { capitalize, camelCase } from 'lodash';
 import { useTheme } from '@mui/material/styles';
 import {
@@ -50,6 +50,7 @@ interface GroupPanelType {
 
 type AppBarProps = {
   api: AppBarApi;
+  onScrollShellIntoView: () => void;
 };
 
 export interface ButtonPanelType {
@@ -66,7 +67,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
   // Log
   logger.logTraceRender('components/app-bar/app-bar');
 
-  const { api: appBarApi } = props;
+  const { api: appBarApi, onScrollShellIntoView } = props;
 
   const mapId = useGeoViewMapId();
 
@@ -77,7 +78,6 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
   // internal component state
   const [buttonPanelGroups, setButtonPanelGroups] = useState<ButtonPanelGroupType>({});
-  const appBar = useRef<HTMLDivElement>(null);
 
   // get store values and action
   const activeModalId = useUIActiveFocusItem().activeElementId;
@@ -387,7 +387,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
   };
 
   return (
-    <Box sx={sxClasses.appBar} className={`interaction-${interaction}`} ref={appBar}>
+    <Box sx={sxClasses.appBar} className={`interaction-${interaction}`} id={`${mapId}-appBar`} onClick={onScrollShellIntoView}>
       <Box sx={sxClasses.appBarButtons}>
         {renderButtonGroup(topGroupNames)}
         <Box sx={sxClasses.versionButtonDiv}>

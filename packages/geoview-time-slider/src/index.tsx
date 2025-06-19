@@ -254,7 +254,7 @@ export default TimeSliderPlugin;
 // GV This if condition took over 3 days to investigate. It was giving errors on the app.geo.ca website with
 // GV some conflicting reacts being loaded on the page for some obscure reason.
 // Check if we're on the right react
-if (React === window.cgpv.react) {
+if (React === window.cgpv.reactUtilities.react) {
   // Keep a reference to the Time Slider Plugin as part of the geoviewPlugins property stored in the window object
   window.geoviewPlugins = window.geoviewPlugins || {};
   window.geoviewPlugins['time-slider'] = TimeSliderPlugin;

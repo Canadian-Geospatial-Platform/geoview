@@ -121,9 +121,23 @@
   },
   "theme": "geo.ca",
   "components": [],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
   "footerBar": {
     "tabs": {
-      "core": ["legend", "layers", "details", "data-table"]
+      "core": [
+        "layers",
+        "details",
+        "data-table"
+      ]
     }
   },
   "corePackages": ["swiper"]

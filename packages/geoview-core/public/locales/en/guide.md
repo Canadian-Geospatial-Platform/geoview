@@ -36,6 +36,12 @@ If your map includes a Footer Bar, you can switch focus between the map and the 
 - Clicking the black Map Information Bar will bring the map into view.
 - Clicking the Footer Bar will focus the footer content.
 
+### Bring Focus to Map
+<div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
+
+If you want to focus the map:
+- Clicking the Side Bar will bring the map into view.
+
 =1!navigationControls=
 # Navigation Controls
 <div style="border-bottom: 2px solid #2a2f39; margin-bottom: 15px;"></div>

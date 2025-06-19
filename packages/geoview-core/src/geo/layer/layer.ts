@@ -662,11 +662,11 @@ export class LayerApi {
 
       // If is an AbstractBaseLayerEntryConfig
       if (event.config instanceof AbstractBaseLayerEntryConfig) {
-        // Set the map layer queryable
+        // Set the map layer queryable - default to queryable as this will be overridden if not queryable
         MapEventProcessor.setMapLayerQueryable(
           this.getMapId(),
           event.config.layerPath,
-          event.config.source?.featureInfo?.queryable || false
+          event.config.source?.featureInfo?.queryable !== undefined ? event.config.source.featureInfo.queryable : true
         );
       }
     });

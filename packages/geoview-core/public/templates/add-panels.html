@@ -94,7 +94,7 @@
               id: 'AppbarPanelButtonId',
               tooltip: 'Test',
               tooltipPlacement: 'right',
-              children: cgpv.react.createElement(cgpv.ui.elements.AppsIcon),
+              children: cgpv.reactUtilities.react.createElement(cgpv.ui.elements.AppsIcon),
             };
 
             const panel = {
@@ -122,7 +122,7 @@
             }
             const button = {
               tooltip: 'Test',
-              children: cgpv.react.createElement(cgpv.ui.elements.AppsIcon),
+              children: cgpv.reactUtilities.react.createElement(cgpv.ui.elements.AppsIcon),
               tooltipPlacement: 'left',
             };
 
@@ -152,7 +152,7 @@
 
             const button = {
               tooltip: `Test (${groupName})`,
-              children: cgpv.react.createElement(cgpv.ui.elements.OpenInBrowserIcon),
+              children: cgpv.reactUtilities.react.createElement(cgpv.ui.elements.OpenInBrowserIcon),
               tooltipPlacement: 'left',
               onClick: function () {
                 alert('You clicked on a navbar test button');

@@ -121,6 +121,7 @@
     "serviceCSV": "Valeurs séparées par des virgules (CSV)",
     "serviceRasterTile": "Tuiles 'raster' XYZ",
     "serviceImageStatic": "Image statique",
+    "serviceGroup": "Groupe de couches",
     "name": "Nom",
     "layerSelect": "Sélectionner couche(s)",
     "errorDisabled": "Le type de couche « __param__ » est désactivé dans cette carte.",

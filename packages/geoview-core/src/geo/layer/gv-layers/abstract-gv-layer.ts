@@ -1,4 +1,4 @@
-import { Options } from 'ol/layer/Base';
+import BaseLayer, { Options } from 'ol/layer/Base';
 import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
 import { Extent } from 'ol/extent';
@@ -143,6 +143,47 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     (this.#olSource as any).on(['featuresloaderror', 'tileloaderror'], this.onError.bind(this));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (this.#olSource as any).on(['imageloaderror'], this.onImageLoadError.bind(this));
+
+    // Apply render error handling to prevent "Cannot read properties of null (reading 'globalAlpha')" errors
+    AbstractGVLayer.#addRenderErrorHandling(this.getOLLayer());
+  }
+
+  /**
+   * Adds error handling to a layer's render function to prevent globalAlpha errors
+   * that can occur during layer rendering, especially when highlighting layers while others are still loading.
+   * This patches the OpenLayers renderer to safely handle cases where the canvas context is not yet available.
+   *
+   * @param {BaseLayer} layer - The OpenLayers layer to patch
+   */
+  static #addRenderErrorHandling(layer: BaseLayer): void {
+    // Use type assertion to access internal getRenderer method
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const layerWithRenderer = layer as BaseLayer & { getRenderer?: () => any };
+    if (!layerWithRenderer || typeof layerWithRenderer.getRenderer !== 'function') return;
+
+    const renderer = layerWithRenderer.getRenderer();
+    if (!renderer || typeof renderer.renderDeferredInternal !== 'function') return;
+
+    const originalRenderFunction = renderer.renderDeferredInternal;
+
+    renderer.renderDeferredInternal = function renderDeferredInternalPatched(...args: unknown[]) {
+      try {
+        // If the renderer is not ready yet, skip rendering
+        if (!this.context || !this.context.canvas) {
+          // Skip rendering but don't throw an error
+          return false;
+        }
+
+        // Context exists, proceed with original rendering
+        return originalRenderFunction.apply(this, args);
+      } catch (error) {
+        logger.logError('Vector layer rendering error:', error);
+
+        // Attempt recovery by requesting a new frame
+        requestAnimationFrame(() => this.changed());
+        return false; // Return false instead of undefined
+      }
+    };
   }
 
   /**

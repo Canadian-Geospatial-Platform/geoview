@@ -21,6 +21,10 @@ export const getSxClasses = (): SxStyles => ({
       width: '100%',
     },
 
+    '& .ol-viewport:active': {
+      cursor: 'grabbing',
+    },
+
     '& .ol-overviewmap.ol-custom-overviewmap': {
       bottom: 'auto',
       left: 'auto',

@@ -32,7 +32,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
   // Fetch cgpv
   const { cgpv } = window as TypeWindow;
   const { useTheme } = cgpv.ui;
-  const { useState, useCallback, useMemo } = cgpv.react;
+  const { useState, useCallback, useMemo } = cgpv.reactUtilities.react;
 
   // Read props
   const { mapId, config, layers, schemaValidator, sx, provideCallbackRedraw } = props;

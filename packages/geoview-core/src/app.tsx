@@ -340,8 +340,10 @@ export const cgpv = {
   onMapInit,
   onMapReady,
   api,
-  react: React,
-  createRoot,
+  reactUtilities: {
+    react: React,
+    createRoot,
+  },
   translate,
   ui: {
     useTheme,
@@ -354,7 +356,7 @@ export const cgpv = {
 
 // Tag the React with the cgpv flag to indicate it's Geoview's
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-(cgpv.react as any).geoview = `this is geoview's react ${generateId()}`;
+(cgpv.reactUtilities.react as any).geoview = `this is geoview's react ${generateId()}`;
 
 // GV For debugging purposes with integration on various websites, we're keeping an array of cgpvs for now
 window.cgpvs = window.cgpvs || [];

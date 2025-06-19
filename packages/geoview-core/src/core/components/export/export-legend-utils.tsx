@@ -59,12 +59,15 @@ function LegendContainerComponent({ layers }: LegendContainerProps): JSX.Element
         {/* Items for this layer */}
         {layer.items && layer.items.length > 0 && (
           <div style={sxClasses.toLine}>
-            {layer.items.map((item) => (
-              <div key={item.name} style={sxClasses.legendItem}>
-                {item.icon && renderLayerItemIcon(item.icon, item.name)}
-                <span>{item.name}</span>
-              </div>
-            ))}
+            {layer.items.map(
+              (item) =>
+                item.isVisible && (
+                  <div key={item.name} style={sxClasses.legendItem}>
+                    {item.icon && renderLayerItemIcon(item.icon, item.name)}
+                    <span>{item.name}</span>
+                  </div>
+                )
+            )}
           </div>
         )}
       </div>

@@ -30,9 +30,9 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
   const { cgpv } = window;
   const { config, layerPath } = props;
-  const { react, ui } = cgpv;
+  const { reactUtilities, ui } = cgpv;
   const { useTheme } = ui;
-  const { useState, useRef, useEffect, useCallback } = react;
+  const { useState, useRef, useEffect, useCallback } = reactUtilities.react;
   const {
     Grid,
     Slider,

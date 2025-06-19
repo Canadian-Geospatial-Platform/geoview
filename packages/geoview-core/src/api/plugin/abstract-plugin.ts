@@ -55,8 +55,8 @@ export abstract class AbstractPlugin {
     this.pluginId = pluginId;
     this.pluginProps = props;
     this.api = api;
-    this.react = window.cgpv.react;
-    this.createRoot = window.cgpv.createRoot;
+    this.react = window.cgpv.reactUtilities.react;
+    this.createRoot = window.cgpv.reactUtilities.createRoot;
     this.translate = window.cgpv.translate;
     this.useTheme = window.cgpv.ui.useTheme;
   }
