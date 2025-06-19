@@ -3,7 +3,7 @@ import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
 import { deepMergeObjects } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { logger } from '@/core/utils/logger';
-import { LayerGeoCoreInvalidResponseError, LayerGeoCoreNoLayersError } from '@/core/exceptions/geocore-exceptions';
+import { LayerGeoCoreInvalidResponseError } from '@/core/exceptions/geocore-exceptions';
 
 // // The GeoChart Json object coming out of the GeoCore response
 // export type GeoChartGeoCoreConfig = TypeJsonObject & {
@@ -65,7 +65,8 @@ export class UUIDmapConfigReader {
       const errorMessage = resultData?.errorMessage || '<no error description>';
       throw new LayerGeoCoreInvalidResponseError(uuids, errorMessage);
     }
-    if (resultData.response.rcs[lang].length === 0) throw new LayerGeoCoreNoLayersError(uuids);
+    // TODO: refactor - This whole file should be deleted in favor of the one in core. Commented this line to avoid bad config reading when error is thrown
+    // if (resultData.response.rcs[lang].length === 0) throw new LayerGeoCoreNoLayersError(uuids);
 
     const listOfGeoviewLayerConfig: TypeJsonObject[] = [];
     for (let i = 0; i < (resultData.response.rcs[lang] as TypeJsonArray).length; i++) {
