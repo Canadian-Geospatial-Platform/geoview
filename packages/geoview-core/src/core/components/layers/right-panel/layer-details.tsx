@@ -412,7 +412,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           {layerNativeProjection && <Box>{`${t('layers.layerServiceProjection')}${layerNativeProjection}`}</Box>}
           {layerFilter && <Box>{`${t('layers.layerDefaultFilter')}${layerFilter}`}</Box>}
           {layerTemporalDimension && (
-            <Box>{`${t('layers.layerTemporalDimension')}${t('layers.layerTemporalDimensionField')} - ${layerTemporalDimension.field} -, min - ${layerTemporalDimension.range.range[0]} / max - ${layerTemporalDimension.range.range[1]}`}</Box>
+            <Box>{`${t('layers.layerTemporalDimension')}${t('layers.layerTemporalDimensionField')} - ${layerTemporalDimension.field} -, min - ${layerTemporalDimension.range.range[0]} / max - ${layerTemporalDimension.range.range[layerTemporalDimension.range.range.length - 1]}`}</Box>
           )}
           {resources !== '' && (
             <Box className="info-container">
