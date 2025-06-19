@@ -242,8 +242,8 @@ export function Shell(props: ShellProps): JSX.Element {
           <Box id={`map-${mapViewer.mapId}`} sx={sxClasses.mapShellContainer} className="mapContainer" ref={mapShellContainerRef}>
             <CircularProgress isLoaded={mapLoaded} />
             <CircularProgress isLoaded={!circularProgressActive} />
-            <AppBar api={mapViewer.appBarApi} onScrollShellInfoView={handleScrollShellIntoView} />
-            <MapInfo onScrollShellInfoView={handleScrollShellIntoView} />
+            <AppBar api={mapViewer.appBarApi} onScrollShellIntoView={handleScrollShellIntoView} />
+            <MapInfo onScrollShellIntoView={handleScrollShellIntoView} />
             <Box sx={sxClasses.mapContainer}>
               <Map viewer={mapViewer} />
             </Box>

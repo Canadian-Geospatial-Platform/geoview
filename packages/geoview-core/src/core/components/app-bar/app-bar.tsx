@@ -50,7 +50,7 @@ interface GroupPanelType {
 
 type AppBarProps = {
   api: AppBarApi;
-  onScrollShellInfoView: () => void;
+  onScrollShellIntoView: () => void;
 };
 
 export interface ButtonPanelType {
@@ -67,7 +67,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
   // Log
   logger.logTraceRender('components/app-bar/app-bar');
 
-  const { api: appBarApi, onScrollShellInfoView } = props;
+  const { api: appBarApi, onScrollShellIntoView } = props;
 
   const mapId = useGeoViewMapId();
 
@@ -387,7 +387,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
   };
 
   return (
-    <Box sx={sxClasses.appBar} className={`interaction-${interaction}`} id={`${mapId}-appBar`} onClick={onScrollShellInfoView}>
+    <Box sx={sxClasses.appBar} className={`interaction-${interaction}`} id={`${mapId}-appBar`} onClick={onScrollShellIntoView}>
       <Box sx={sxClasses.appBarButtons}>
         {renderButtonGroup(topGroupNames)}
         <Box sx={sxClasses.versionButtonDiv}>

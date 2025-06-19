@@ -27,7 +27,7 @@ const MAP_INFO_BASE_STYLES = {
 const FLEX_STYLE = { flexGrow: 1, height: '100%' };
 
 interface MapInfoProps {
-  onScrollShellInfoView: () => void;
+  onScrollShellIntoView: () => void;
 }
 
 /**
@@ -36,7 +36,7 @@ interface MapInfoProps {
  * @returns {JSX.Element} the map information element
  */
 // Memoizes entire component, preventing re-renders if props haven't changed
-export const MapInfo = memo(function MapInfo({ onScrollShellInfoView }: MapInfoProps): JSX.Element {
+export const MapInfo = memo(function MapInfo({ onScrollShellIntoView }: MapInfoProps): JSX.Element {
   logger.logTraceRender('components/map-info/map-info');
 
   // Hooks
@@ -67,7 +67,7 @@ export const MapInfo = memo(function MapInfo({ onScrollShellInfoView }: MapInfoP
   }, []);
 
   return (
-    <Box id={`${mapId}-mapInfo`} sx={containerStyles} onClick={onScrollShellInfoView}>
+    <Box id={`${mapId}-mapInfo`} sx={containerStyles} onClick={onScrollShellIntoView}>
       {interaction === 'dynamic' && <MapInfoExpandButton onExpand={handleExpand} expanded={expanded} />}
       <Attribution />
       {interaction === 'dynamic' && (
