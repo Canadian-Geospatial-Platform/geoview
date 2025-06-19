@@ -50,6 +50,7 @@ interface GroupPanelType {
 
 type AppBarProps = {
   api: AppBarApi;
+  scrollShellIntoView: () => void;
 };
 
 export interface ButtonPanelType {
@@ -66,7 +67,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
   // Log
   logger.logTraceRender('components/app-bar/app-bar');
 
-  const { api: appBarApi } = props;
+  const { api: appBarApi, scrollShellIntoView } = props;
 
   const mapId = useGeoViewMapId();
 
@@ -291,31 +292,6 @@ export function AppBar(props: AppBarProps): JSX.Element {
     processPlugin('custom-legend');
   }, [appBarConfig, mapId]);
 
-  // Scroll the map into view on mouse click in the app bar area
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('APP BAR - scrollIntoViewListener');
-
-    if (!appBarRef?.current) return () => {};
-
-    const appBarDiv = appBarRef.current;
-    const handleClick = (): void => {
-      const behaviorScroll = (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth') as ScrollBehavior;
-
-      document.getElementById(`shell-${mapId}`)?.scrollIntoView({
-        behavior: behaviorScroll,
-        block: 'start',
-      });
-    };
-
-    appBarDiv.addEventListener('click', handleClick);
-
-    // Cleanup function to remove event listener
-    return () => {
-      appBarDiv.removeEventListener('click', handleClick);
-    };
-  }, [appBarRef, mapId]);
-
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('APP-BAR - create group of AppBar buttons');
@@ -412,7 +388,13 @@ export function AppBar(props: AppBarProps): JSX.Element {
   };
 
   return (
-    <Box sx={sxClasses.appBar} className={`interaction-${interaction}`} ref={appBarRef} id={`${mapId}-appBar`}>
+    <Box
+      sx={sxClasses.appBar}
+      className={`interaction-${interaction}`}
+      ref={appBarRef}
+      id={`${mapId}-appBar`}
+      onClick={scrollShellIntoView}
+    >
       <Box sx={sxClasses.appBarButtons}>
         {renderButtonGroup(topGroupNames)}
         <Box sx={sxClasses.versionButtonDiv}>

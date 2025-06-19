@@ -187,6 +187,20 @@ export function Shell(props: ShellProps): JSX.Element {
 
   // #endregion HANDLERS
 
+  /**
+   * Scrolls the map into view when clicking on the map info area
+   * Uses smooth scrolling when available, or instant scrolling for users who prefer reduced motion
+   * This improves accessibility by allowing users to easily return focus to the map
+   */
+  const scrollShellIntoView = useCallback((): void => {
+    const behaviorScroll = (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth') as ScrollBehavior;
+
+    document.getElementById(`shell-${mapId}`)?.scrollIntoView({
+      behavior: behaviorScroll,
+      block: 'start',
+    });
+  }, [mapId]);
+
   // Mount component
   useEffect(() => {
     // Log
@@ -226,8 +240,8 @@ export function Shell(props: ShellProps): JSX.Element {
           <Box id={`map-${mapViewer.mapId}`} sx={sxClasses.mapShellContainer} className="mapContainer" ref={mapShellContainerRef}>
             <CircularProgress isLoaded={mapLoaded} />
             <CircularProgress isLoaded={!circularProgressActive} />
-            <AppBar api={mapViewer.appBarApi} />
-            <MapInfo />
+            <AppBar api={mapViewer.appBarApi} scrollShellIntoView={scrollShellIntoView} />
+            <MapInfo scrollShellIntoView={scrollShellIntoView} />
             <Box sx={sxClasses.mapContainer}>
               <Map viewer={mapViewer} />
             </Box>
