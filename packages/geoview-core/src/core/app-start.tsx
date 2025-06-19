@@ -1,4 +1,4 @@
-import { createContext, StrictMode, Suspense, useMemo, Component, ReactNode, ErrorInfo } from 'react';
+import { createContext, StrictMode, Suspense, useMemo, Component, ErrorInfo } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import { i18n } from 'i18next';
 
@@ -56,10 +56,10 @@ interface AppStartProps {
  * @property errorInfo - The component stack trace or error details.
  * @property retryCount - The number of retry attempts made.
  */
-class ErrorBoundary extends Component<{ children: ReactNode; language: TypeDisplayLanguage }, { hasError: boolean }> {
+class ErrorBoundary extends Component<{ children: JSX.Element; language: TypeDisplayLanguage }, { hasError: boolean }> {
   #retryTimeoutId: number | null = null;
 
-  constructor(props: { children: ReactNode; language: TypeDisplayLanguage }) {
+  constructor(props: { children: JSX.Element; language: TypeDisplayLanguage }) {
     super(props);
     this.state = { hasError: false };
   }
@@ -99,7 +99,7 @@ class ErrorBoundary extends Component<{ children: ReactNode; language: TypeDispl
     }
 
     // Return the single child directly
-    return children as JSX.Element;
+    return children;
   }
 }
 
