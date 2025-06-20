@@ -20,8 +20,8 @@ export function StylePanel(): JSX.Element {
   logger.logTraceRender('geoview-drawer/src/buttons/style');
 
   const { cgpv } = window as TypeWindow;
-  const { ui, react } = cgpv;
-  const { useCallback } = react;
+  const { ui, reactUtilities } = cgpv;
+  const { useCallback } = reactUtilities.react;
 
   // Components
   const { List, ListItem, Typography } = ui.elements;
