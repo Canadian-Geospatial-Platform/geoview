@@ -152,7 +152,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
       return null;
     }
 
-    // GV This is specific for NavBar Plugins
+    // GV This is specific for NavBar Button Plugins
     // Check if children is a React component that returns a button and return that
     if (isValidElement(buttonPanel.button.children) && !buttonPanel.panel) {
       return <Fragment key={`${key}-component`}>{buttonPanel.button.children}</Fragment>;

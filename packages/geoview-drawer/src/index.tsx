@@ -13,11 +13,11 @@ import { createDrawerButtons } from './draw-navbar';
 import './measurement-styles.css';
 
 // TODO Optional: Install package - MUI Colour Picker
-// TODO Add support for RGBA instead of just Hex to handle transparency
-// TODO Confirm / Finalize config in the geoview config
-// TODO Use Config properly
-// TODO Fix button colours for buttons with panels
-// TODO Export drawings
+// TO.DO Add support for RGBA instead of just Hex to handle transparency
+// TO.DO Confirm / Finalize config in the geoview config
+// TO.DO Use Config properly
+// TO.DO Export drawings
+// TO.DO Other interactions: Snap, Translate, Scale / Rotate (not actually a built in interaction)
 
 /**
  * Create a class for the plugin instance
