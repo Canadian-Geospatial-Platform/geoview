@@ -11,13 +11,7 @@ import { footerSxClasses } from './drawer-style';
 
 type DrawerProps = {
   viewer: MapViewer;
-  // config: ConfigProps;
 };
-
-// type ConfigProps = {
-//   style: StyleProps;
-//   geomTypes: string[];
-// };
 
 type StyleProps = {
   fillColor: string;

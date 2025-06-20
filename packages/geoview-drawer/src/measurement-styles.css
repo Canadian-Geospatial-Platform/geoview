@@ -1,5 +1,5 @@
 /* Measurement tooltip styles */
-.ol-tooltip {
+.drawer-tooltip {
   position: relative;
   background: rgba(0, 0, 0, 0.5);
   border-radius: 4px;
@@ -12,12 +12,12 @@
   user-select: none;
 }
 
-.ol-tooltip-measure {
+.drawer-tooltip-measure {
   opacity: 1;
   font-weight: bold;
 }
 
-.ol-tooltip-measure:before {
+.drawer-tooltip-measure:before {
   border-top: 6px solid rgba(0, 0, 0, 0.5);
   border-right: 6px solid transparent;
   border-left: 6px solid transparent;

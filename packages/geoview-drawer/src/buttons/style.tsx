@@ -64,17 +64,17 @@ export function StylePanel(): JSX.Element {
     <List sx={{ p: 2 }}>
       <ListItem sx={{ mb: 2 }}>
         <Typography variant="subtitle2">{getLocalizedMessage(displayLanguage, 'drawer.fillColour')}</Typography>
-        <input type="color" value={style.fillColor} onChange={(e) => handleFillColorChange(e)} />
+        <input type="color" value={style.fillColor} onChange={handleFillColorChange} />
       </ListItem>
 
       <ListItem sx={{ mb: 2 }}>
         <Typography variant="subtitle2">{getLocalizedMessage(displayLanguage, 'drawer.strokeColour')}</Typography>
-        <input type="color" value={style.strokeColor} onChange={(e) => handleStrokeColorChange(e)} />
+        <input type="color" value={style.strokeColor} onChange={handleStrokeColorChange} />
       </ListItem>
 
       <ListItem>
         <Typography variant="subtitle2">{getLocalizedMessage(displayLanguage, 'drawer.strokeWidth')}</Typography>
-        <input type="number" value={style.strokeWidth} min="0" max="10" onChange={(e) => handleStrokeWidthChange(e)} />
+        <input type="number" value={style.strokeWidth} min="0" max="10" onChange={handleStrokeWidthChange} />
       </ListItem>
     </List>
   );

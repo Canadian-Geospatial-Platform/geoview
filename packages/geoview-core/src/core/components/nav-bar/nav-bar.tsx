@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
 
+import { Plugin } from '@/api/plugin/plugin';
+
 import BasemapSelect from './buttons/basemap-select';
 import ZoomIn from './buttons/zoom-in';
 import ZoomOut from './buttons/zoom-out';
@@ -16,8 +18,13 @@ import { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { getSxClasses } from './nav-bar-style';
 import { NavBarApi, NavBarCreatedEvent, NavBarRemovedEvent } from '@/core/components';
 import { useUINavbarComponents } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from './nav-bar-panel-button';
+
+import { toJsonObject } from '@/api/config/types/config-types';
+import { TypeValidNavBarProps } from '@/api/config/types/map-schema-types';
+import { api } from '@/app';
 
 type NavBarProps = {
   api: NavBarApi;
@@ -50,6 +57,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
   const { api: navBarApi } = props;
 
   // Hooks
+  const mapId = useGeoViewMapId();
   const { t } = useTranslation();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
@@ -127,6 +135,40 @@ export function NavBar(props: NavBarProps): JSX.Element {
     },
     [setButtonPanelGroups]
   );
+
+  // Add navbar plugins
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('NAV-BAR - navBarComponents');
+
+    const processPlugin = (pluginName: TypeValidNavBarProps): void => {
+      // Check if the plugin is in navBarComponents but not in corePackages
+      if (navBarComponents.includes(pluginName)) {
+        Plugin.loadScript(pluginName)
+          .then((typePlugin) => {
+            Plugin.addPlugin(
+              pluginName,
+              mapId,
+              typePlugin,
+              toJsonObject({
+                mapId,
+                viewer: api.getMapViewer(mapId),
+              })
+            ).catch((error: unknown) => {
+              // Log
+              logger.logPromiseFailed(`api.plugin.addPlugin in useEffect in nav-bar for ${pluginName}`, error);
+            });
+          })
+          .catch((error: unknown) => {
+            // Log
+            logger.logPromiseFailed('api.plugin.loadScript in useEffect in nav-bar', error);
+          });
+      }
+    };
+
+    // Process drawer plugin if it's in the navBar
+    processPlugin('drawer');
+  }, [navBarComponents, mapId]);
 
   useEffect(() => {
     // Log

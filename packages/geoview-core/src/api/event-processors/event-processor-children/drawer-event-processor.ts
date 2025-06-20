@@ -8,6 +8,7 @@ import { IDrawerState, StyleProps } from '@/core/stores/store-interface-and-inti
 
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { MapEventProcessor } from './map-event-processor';
+import { MapViewerNotFoundError } from '@/core/exceptions/geoview-exceptions';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -83,7 +84,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     if (!output || !tooltipCoord) return undefined;
 
     const measureTooltipElement = document.createElement('div');
-    measureTooltipElement.className = 'ol-tooltip ol-tooltip-measure';
+    measureTooltipElement.className = 'drawer-tooltip drawer-tooltip-measure';
 
     measureTooltipElement.innerHTML = output;
     measureTooltipElement.hidden = hideMeasurements;
@@ -117,7 +118,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
     // Get the map viewer instance
     const viewer = MapEventProcessor.getMapViewer(mapId);
-    if (!viewer) return;
+    if (!viewer) throw new MapViewerNotFoundError(mapId);
 
     // Get current state values if not provided
     const currentGeomType = geomType || state.geomType;
@@ -233,7 +234,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
     // Get the map viewer instance
     const viewer = MapEventProcessor.getMapViewer(mapId);
-    if (!viewer) return;
+    if (!viewer) throw new MapViewerNotFoundError(mapId);
 
     const typesToEdit = geomTypes || ['Point', 'LineString', 'Polygon', 'Circle'];
     const { hideMeasurements } = state;
@@ -286,7 +287,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
     // Get the map viewer instance
     const viewer = MapEventProcessor.getMapViewer(mapId);
-    if (!viewer) return;
+    if (!viewer) throw new MapViewerNotFoundError(mapId);
 
     const typesToEdit = geomTypes || ['Point', 'LineString', 'Polygon', 'Circle'];
 
@@ -329,7 +330,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
     // Get the map viewer instance
     const viewer = MapEventProcessor.getMapViewer(mapId);
-    if (!viewer) return;
+    if (!viewer) throw new MapViewerNotFoundError(mapId);
 
     const typesToClear = geomTypes || ['Point', 'LineString', 'Polygon', 'Circle'];
 
@@ -382,7 +383,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
     // Get the map viewer instance
     const viewer = MapEventProcessor.getMapViewer(mapId);
-    if (!viewer) return;
+    if (!viewer) throw new MapViewerNotFoundError(mapId);
 
     const { hideMeasurements, measureOverlays } = state;
 

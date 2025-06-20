@@ -27,7 +27,7 @@
     }
   },
   "navBar": ["drawer", "basemap-select"],
-  "corePackages": ["drawer"],
+  "corePackages": [],
   "externalPackages": [],
   "corePackagesConfig": [{
     "drawer": {
