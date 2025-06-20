@@ -9,6 +9,16 @@
       "strokeColor": "string",
       "strokeWidth": "number"
     },
+    "geomType": {
+      "description": "The initial set geometry type.",
+      "type": "string",
+      "enum": [
+        "Point",
+        "LineString",
+        "Polygon",
+        "Circle"
+      ]
+    },
     "geomTypes": {
       "description": "The list of geometry types to be drawn.",
       "type": "array",
