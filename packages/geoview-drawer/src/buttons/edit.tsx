@@ -1,3 +1,5 @@
+import { TypeWindow } from 'geoview-core';
+import { getSxClasses } from 'geoview-core/core/components/nav-bar/nav-bar-style';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import { useDrawerActions, useDrawerIsEditing } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
@@ -14,7 +16,13 @@ export default function Edit(): JSX.Element {
   // Log
   logger.logTraceRender('geoview-drawer/src/buttons/edit');
 
+  const { cgpv } = window as TypeWindow;
+  const { useTheme } = cgpv.ui;
+  const { useMemo } = cgpv.react;
+
   // Get store values
+  const theme = useTheme();
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const displayLanguage = useAppDisplayLanguage();
   const isEditing = useDrawerIsEditing();
 
@@ -35,6 +43,7 @@ export default function Edit(): JSX.Element {
       tooltipPlacement="left"
       className={isEditing ? 'highlighted active' : ''}
       onClick={handleToggleEditing}
+      sx={sxClasses.navButton}
     >
       {isEditing ? <EditOffIcon /> : <EditIcon />}
     </IconButton>
