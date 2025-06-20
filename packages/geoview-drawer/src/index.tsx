@@ -19,6 +19,7 @@ import './measurement-styles.css';
 // TO.DO Export drawings
 // TO.DO Other interactions: Snap, Translate, Scale / Rotate (not actually a built in interaction)
 // TO.DO Optional: Make the geometry icon in the geometry picker match the style colours (Fill / Outline)
+// TO.DO Better Styling in panels ( change geometry and style button panels )
 
 /**
  * Create a class for the plugin instance
