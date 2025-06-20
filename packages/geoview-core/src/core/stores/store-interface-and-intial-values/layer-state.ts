@@ -55,6 +55,7 @@ export interface ILayerState {
     getLayerServiceProjection: (layerPath: string) => string | undefined;
     getLayerTemporalDimension: (layerPath: string) => TypeTemporalDimension | undefined;
     refreshLayer: (layerPath: string) => void;
+    reloadLayer: (layerPath: string) => void;
     setAllItemsVisibility: (layerPath: string, visibility: boolean) => void;
     setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => void;
     setHighlightLayer: (layerPath: string) => void;
@@ -224,6 +225,15 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       refreshLayer: (layerPath: string): void => {
         // Redirect to processor.
         LegendEventProcessor.refreshLayer(get().mapId, layerPath);
+      },
+
+      /**
+       * Reload layer and set states to original values.
+       * @param {string} layerPath - The layer path of the layer to reload.
+       */
+      reloadLayer: (layerPath: string): void => {
+        // Redirect to processor.
+        LegendEventProcessor.reloadLayer(get().mapId, layerPath);
       },
 
       /**

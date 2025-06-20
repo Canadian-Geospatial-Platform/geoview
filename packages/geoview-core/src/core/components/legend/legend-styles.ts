@@ -144,4 +144,7 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
       },
     },
   },
+  toggleableItem: {
+    cursor: 'pointer',
+  },
 });
