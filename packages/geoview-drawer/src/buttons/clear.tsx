@@ -1,3 +1,5 @@
+import { TypeWindow } from 'geoview-core';
+import { getSxClasses } from 'geoview-core/core/components/nav-bar/nav-bar-style';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import { useDrawerActions } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
@@ -14,7 +16,12 @@ export default function Clear(): JSX.Element {
   // Log
   logger.logTraceRender('geoview-drawer/src/buttons/clear');
 
+  const { cgpv } = window as TypeWindow;
+  const { useTheme } = cgpv.ui;
+  const { useMemo } = cgpv.react;
   // Get store values
+  const theme = useTheme();
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const displayLanguage = useAppDisplayLanguage();
 
   // Store actions
@@ -33,6 +40,7 @@ export default function Clear(): JSX.Element {
       tooltip={getLocalizedMessage(displayLanguage, 'drawer.clearTooltip')}
       tooltipPlacement="left"
       onClick={handleClear}
+      sx={sxClasses.navButton}
     >
       <DeleteIcon />
     </IconButton>

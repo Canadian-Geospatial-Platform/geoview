@@ -7,7 +7,7 @@ import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interf
 import { MapViewer } from 'geoview-core/src/geo/map/map-viewer';
 import { TypeWindow } from 'geoview-core/src/core/types/global-types';
 import { Draw } from 'geoview-core/src/geo/interaction/draw';
-import { sxClasses } from './drawer-style';
+import { footerSxClasses } from './drawer-style';
 
 type DrawerProps = {
   viewer: MapViewer;
@@ -178,8 +178,8 @@ export function DrawPanel(props: DrawerProps): JSX.Element {
   // TO.DO MEASUREMENTS https://openlayers.org/en/latest/examples/measure.html
   // Could use npm package mui-color-input
   return (
-    <Box sx={sxClasses.drawer}>
-      <ButtonGroup sx={sxClasses.buttonGroup} variant="outlined">
+    <Box sx={footerSxClasses.drawer}>
+      <ButtonGroup sx={footerSxClasses.buttonGroup} variant="outlined">
         {buttonArray}
       </ButtonGroup>
       <Box>
@@ -195,7 +195,7 @@ export function DrawPanel(props: DrawerProps): JSX.Element {
       <Box>
         <Button
           type="text"
-          sx={isDrawing ? sxClasses.drawingActive : sxClasses.drawingInactive}
+          sx={isDrawing ? footerSxClasses.drawingActive : footerSxClasses.drawingInactive}
           variant="contained"
           tooltip={
             isDrawing

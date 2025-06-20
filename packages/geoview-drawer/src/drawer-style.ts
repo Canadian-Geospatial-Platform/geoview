@@ -1,4 +1,4 @@
-export const sxClasses = {
+export const footerSxClasses = {
   drawer: {
     display: 'flex',
     flexDirection: 'column',
