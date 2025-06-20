@@ -81,15 +81,7 @@ export type TypeValidNavBarProps = 'zoom' | 'fullscreen' | 'home' | 'location' |
 export type TypeNavBarProps = TypeValidNavBarProps[];
 
 /** Supported footer bar tabs */
-export type TypeValidFooterBarTabsCoreProps =
-  | 'legend'
-  | 'layers'
-  | 'details'
-  | 'data-table'
-  | 'time-slider'
-  | 'geochart'
-  | 'guide'
-  | 'drawer';
+export type TypeValidFooterBarTabsCoreProps = 'legend' | 'layers' | 'details' | 'data-table' | 'time-slider' | 'geochart' | 'guide';
 
 /** Footer bar tabs custom definition. */
 export type TypeFooterBarTabsCustomProps = {
@@ -145,7 +137,7 @@ export type TypeValidMapComponentProps = 'overview-map' | 'north-arrow';
 export type TypeMapComponents = TypeValidMapComponentProps[];
 
 /** Supported map component values. */
-export type TypeValidMapCorePackageProps = 'swiper' | 'drawer';
+export type TypeValidMapCorePackageProps = 'swiper';
 
 /**
  * Core packages to initialize on viewer load. The schema for those are on their own package. NOTE: config from packages are in

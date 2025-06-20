@@ -144,8 +144,7 @@
         "details",
         "data-table",
         "time-slider",
-        "geochart",
-        "drawer"
+        "geochart"
       ]
     },
     "TypeFooterBarTabsCustomProps": {
@@ -213,8 +212,7 @@
             "details",
             "data-table",
             "time-slider",
-            "geochart",
-            "drawer"
+            "geochart"
           ],
           "description": "Footer tab to be selected at map load"
         },
@@ -345,8 +343,7 @@
       "description": "Valid values for the map core package array.",
       "additionalProperties": false,
       "enum": [
-        "swiper",
-        "drawer"
+        "swiper"
       ]
     },
     "TypeMapCorePackages": {

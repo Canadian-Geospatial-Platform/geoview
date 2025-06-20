@@ -2010,8 +2010,7 @@
                   "details",
                   "data-table",
                   "time-slider",
-                  "geochart",
-                  "drawer"
+                  "geochart"
                 ]
               },
               "minItems": 1,
@@ -2062,7 +2061,6 @@
             "data-table",
             "time-slider",
             "geochart",
-            "drawer",
             ""
           ],
           "description": "Footer tab to be selected at map load"
