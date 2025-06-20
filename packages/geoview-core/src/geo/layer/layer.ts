@@ -532,7 +532,7 @@ export class LayerApi {
   addGeoviewLayer(geoviewLayerConfig: TypeGeoviewLayerConfig): GeoViewLayerAddedResult {
     // TODO: Refactor - This should be dealt with the config classes and this line commented out
     // eslint-disable-next-line no-param-reassign
-    geoviewLayerConfig.geoviewLayerId ||= generateId();
+    geoviewLayerConfig.geoviewLayerId ||= generateId(18);
 
     // TODO: Refactor - This should be dealt with the config classes and this line commented out
     ConfigValidation.validateListOfGeoviewLayerConfig([geoviewLayerConfig]);
@@ -796,6 +796,38 @@ export class LayerApi {
         });
       })
       .catch((err) => logger.logError(err));
+  }
+
+  /**
+   * Attempt to reload a layer.
+   * @param {string} layerPath - The path to the layer to reload
+   */
+  reloadLayer(layerPath: string): void {
+    const layerEntryConfig = this.getLayerEntryConfig(layerPath) as AbstractBaseLayerEntryConfig;
+    const geoviewLayer = this.#geoviewLayers[layerEntryConfig.geoviewLayerConfig.geoviewLayerId];
+
+    if (layerEntryConfig && geoviewLayer) {
+      this.getLayerEntryConfigIds().forEach((registeredLayerPath) => {
+        if (registeredLayerPath.startsWith(`${layerPath}/`) || registeredLayerPath === layerPath) {
+          // Remove actual OL layer from the map
+          if (this.getOLLayer(registeredLayerPath)) this.mapViewer.map.removeLayer(this.getOLLayer(registeredLayerPath) as BaseLayer);
+
+          // Unregister the events on the layer
+          if (this.#gvLayers[registeredLayerPath] instanceof AbstractGVLayer)
+            this.#unregisterLayerHandlers(this.#gvLayers[registeredLayerPath]);
+
+          // Remove from registered layers
+          delete this.#gvLayers[registeredLayerPath];
+          delete this.#olLayers[registeredLayerPath];
+        }
+      });
+
+      // Create and register new layer
+      const layer = geoviewLayer.createGVLayer(layerEntryConfig);
+      this.#gvLayers[layerPath] = layer;
+      this.#olLayers[layerPath] = layer.getOLLayer();
+      this.mapViewer.map.addLayer(layer.getOLLayer());
+    }
   }
 
   /**
