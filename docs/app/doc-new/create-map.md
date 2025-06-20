@@ -5,6 +5,10 @@ There are two main approaches to create maps in GeoView:
 1. **Declarative approach**: Using HTML div elements with special attributes
 2. **Programmatic approach**: Using the `createMapFromConfig` API method
 
+**IMPORTANT NOTE**
+If you are using a framework to inject the cgpv-main.js script dynamically, you may end up with multiples version of cgpv window object and React version. If this happen you will have a console log that says **'Multiple instances of cgpv loaded. Make sure you only inject cgpv-main.js once.'**
+If this happens, try to resolve the issue by injection cgpv script only one or unmount it properly betweeen the calls.
+
 #### Declarative Approach (Using HTML)
 
 When you call `cgpv.init()`, it scans the DOM for elements that are intended to host GeoView maps. It initializes all GeoView maps found in the DOM. Call this after registering your event handlers.

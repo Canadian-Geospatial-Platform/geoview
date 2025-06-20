@@ -49,7 +49,7 @@ Below is a comprehensive list of all public functions available on a MapViewer i
 - `refreshLayers()` - Refreshes all geoview layers
 - `clickMarkerIconHide()` - Hides a click marker from the map
 - `clickMarkerIconShow(marker)` - Shows a marker on the map
-- `remove(deleteContainer)` - Removes the map
+- `delete()` - Deletes the map
 - `reload(mapConfig)` - Reloads a map from a config object
 - `reloadWithCurrentState(maintainGeocoreLayerNames)` - Reloads a map from current state
 - `zoomToExtent(extent, options)` - Zooms to the specified extent
