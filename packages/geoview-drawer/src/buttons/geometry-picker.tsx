@@ -30,7 +30,7 @@ export function GeometryPickerButton(): JSX.Element {
 export default function GeometryPickerPanel(): JSX.Element {
   // const { geomTypes } = props;
   const { cgpv } = window as TypeWindow;
-  const { useCallback } = cgpv.react;
+  const { useCallback } = cgpv.reactUtilities.react;
   const { IconButton, List, ListItem } = cgpv.ui.elements;
   const { PlaceIcon, ShowChartIcon, RectangleIcon, CircleIcon } = cgpv.ui.elements;
 

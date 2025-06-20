@@ -18,7 +18,7 @@ export default function Clear(): JSX.Element {
 
   const { cgpv } = window as TypeWindow;
   const { useTheme } = cgpv.ui;
-  const { useMemo } = cgpv.react;
+  const { useMemo } = cgpv.reactUtilities.react;
   // Get store values
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
