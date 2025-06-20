@@ -32,6 +32,7 @@ import {
   layerEntryIsGroupLayer,
   TypeLayerStatus,
   GeoCoreLayerConfig,
+  GroupLayerEntryConfig,
 } from '@/api/config/types/map-schema-types';
 import { GeoJSON, layerConfigIsGeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
 import { GeoPackage, layerConfigIsGeoPackage } from '@/geo/layer/geoview-layers/vector/geopackage';
@@ -532,7 +533,7 @@ export class LayerApi {
   addGeoviewLayer(geoviewLayerConfig: TypeGeoviewLayerConfig): GeoViewLayerAddedResult {
     // TODO: Refactor - This should be dealt with the config classes and this line commented out
     // eslint-disable-next-line no-param-reassign
-    geoviewLayerConfig.geoviewLayerId ||= generateId();
+    geoviewLayerConfig.geoviewLayerId ||= generateId(18);
 
     // TODO: Refactor - This should be dealt with the config classes and this line commented out
     ConfigValidation.validateListOfGeoviewLayerConfig([geoviewLayerConfig]);
@@ -796,6 +797,46 @@ export class LayerApi {
         });
       })
       .catch((err) => logger.logError(err));
+  }
+
+  /**
+   * Attempt to reload a layer.
+   * @param {string} layerPath - The path to the layer to reload
+   */
+  reloadLayer(layerPath: string): void {
+    const layerEntryConfig = this.getLayerEntryConfig(layerPath);
+    const geoviewLayer = layerEntryConfig ? this.#geoviewLayers[layerEntryConfig.geoviewLayerConfig.geoviewLayerId] : undefined;
+
+    if (layerEntryConfig && geoviewLayer) {
+      if (layerEntryConfig.entryType === 'group') {
+        (layerEntryConfig as unknown as GroupLayerEntryConfig).listOfLayerEntryConfig.forEach((sublayerEntryConfig) => {
+          if ((sublayerEntryConfig as unknown as AbstractBaseLayerEntryConfig).layerStatus === 'error')
+            this.reloadLayer((sublayerEntryConfig as unknown as AbstractBaseLayerEntryConfig).layerPath);
+        });
+      } else {
+        this.getLayerEntryConfigIds().forEach((registeredLayerPath) => {
+          if (registeredLayerPath.startsWith(`${layerPath}/`) || registeredLayerPath === layerPath) {
+            // Remove actual OL layer from the map
+            if (this.getOLLayer(registeredLayerPath)) this.mapViewer.map.removeLayer(this.getOLLayer(registeredLayerPath) as BaseLayer);
+
+            // Unregister the events on the layer
+            if (this.#gvLayers[registeredLayerPath] instanceof AbstractGVLayer)
+              this.#unregisterLayerHandlers(this.#gvLayers[registeredLayerPath]);
+
+            // Remove from registered layers
+            delete this.#gvLayers[registeredLayerPath];
+            delete this.#olLayers[registeredLayerPath];
+          }
+        });
+
+        // Create and register new layer
+        const layer = geoviewLayer.createGVLayer(layerEntryConfig as AbstractBaseLayerEntryConfig);
+
+        this.#gvLayers[layerPath] = layer;
+        this.#olLayers[layerPath] = layer.getOLLayer();
+        this.mapViewer.map.addLayer(layer.getOLLayer());
+      }
+    }
   }
 
   /**

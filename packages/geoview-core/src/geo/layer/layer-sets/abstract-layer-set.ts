@@ -344,7 +344,7 @@ export abstract class AbstractLayerSet {
       }
     } catch (error: unknown) {
       // Log
-      logger.logError('CAUGHT in handleLayerStatusChanged', layerPath, error);
+      logger.logError('CAUGHT in handleLayerNameChanged', layerPath, error);
     }
   }
 

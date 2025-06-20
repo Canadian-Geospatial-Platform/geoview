@@ -118,7 +118,7 @@ export const buildGeoLayerToAdd = (inputProps: BuildGeoViewLayerInput): MapConfi
   if (layerType === 'shapefile') {
     return {
       geoviewLayerName: layerName,
-      geoviewLayerId: generateId(),
+      geoviewLayerId: generateId(18),
       geoviewLayerType: 'shapefile',
       metadataAccessPath: layerURL,
     } as ShapefileLayerConfig;
@@ -196,7 +196,7 @@ export const buildGeoLayerToAdd = (inputProps: BuildGeoViewLayerInput): MapConfi
 
   const geoviewLayerConfig = MapFeatureConfig.nodeFactory(
     toJsonObject({
-      geoviewLayerId: generateId(),
+      geoviewLayerId: generateId(18),
       geoviewLayerName: layerName,
       geoviewLayerType: layerType as TypeGeoviewLayerType,
       metadataAccessPath: layerURL,

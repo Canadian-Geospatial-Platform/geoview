@@ -135,7 +135,7 @@ export abstract class AbstractGeoViewLayer {
    */
   constructor(type: TypeGeoviewLayerType, geoviewLayerConfig: TypeGeoviewLayerConfig) {
     this.type = type;
-    this.geoviewLayerId = geoviewLayerConfig.geoviewLayerId || generateId();
+    this.geoviewLayerId = geoviewLayerConfig.geoviewLayerId || generateId(18);
     this.geoviewLayerName = geoviewLayerConfig?.geoviewLayerName ? geoviewLayerConfig.geoviewLayerName : DEFAULT_LAYER_NAMES[type];
     this.metadataAccessPath = geoviewLayerConfig.metadataAccessPath?.trim() || '';
     this.serverDateFragmentsOrder = geoviewLayerConfig.serviceDateFormat
@@ -646,7 +646,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    * @returns {AbstractGVLayer} The GV Layer that has been created.
    */
-  protected createGVLayer(layerConfig: AbstractBaseLayerEntryConfig): AbstractGVLayer {
+  createGVLayer(layerConfig: AbstractBaseLayerEntryConfig): AbstractGVLayer {
     // Redirect
     const layer = this.onCreateGVLayer(layerConfig);
 
