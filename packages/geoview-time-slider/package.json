@@ -1,6 +1,6 @@
 {
   "name": "geoview-time-slider",
-  "version": "1.0.0",
+  "version": "2.0.1",
   "description": "A time slider for the geoview project",
   "main": "src/index.tsx",
   "keywords": [
@@ -12,13 +12,13 @@
     "build": "tsc --build"
   },
   "peerDependencies": {
-    "geoview-core": "workspace:~1.0.0",
+    "geoview-core": "workspace:^2.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "zustand": "~5.0.0"
   },
   "devDependencies": {
-    "geoview-core": "workspace:~1.0.0",
+    "geoview-core": "workspace:^2.0.0",
     "@babel/core": "^7.25.8",
     "@babel/runtime": "^7.25.7",
     "@types/react": "^18.3.1",
