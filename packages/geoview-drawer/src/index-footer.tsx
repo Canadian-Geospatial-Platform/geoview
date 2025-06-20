@@ -33,9 +33,6 @@ class DrawerPlugin extends FooterPlugin {
     return toJsonObject(defaultConfig);
   }
 
-  // The callback used to redraw the GeoCharts in the GeoChartPanel
-  callbackRedraw?: () => void;
-
   /**
    * Overrides the default translations for the Plugin.
    * @returns {TypeJsonObject} - The translations object for the particular Plugin.
@@ -77,17 +74,6 @@ class DrawerPlugin extends FooterPlugin {
   }
 
   /**
-   * Overrides the addition of the Drawer Map Plugin to make sure to set the layer paths from the config into the store.
-   */
-  override onAdd(): void {
-    // Initialize the store with drawer provided configuration
-    // DrawerEventProcessor.setLayerPaths(this.pluginProps.mapId, this.configObj.layers);
-
-    // Call parent
-    super.onAdd();
-  }
-
-  /**
    * Overrides the creation of the content properties of this Drawer Map Plugin.
    * @returns {TypeTabs} The TypeTabs for the Drawer Plugin
    */
@@ -102,14 +88,6 @@ class DrawerPlugin extends FooterPlugin {
       icon: <DrawIcon />,
       content,
     };
-  }
-
-  /**
-   * Handles when a redraw callback has been provided by GeoChartPanel
-   */
-  handleProvideCallbackRedraw(callbackRedraw: () => void): void {
-    // Keep it
-    this.callbackRedraw = callbackRedraw;
   }
 }
 

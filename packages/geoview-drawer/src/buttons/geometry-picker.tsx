@@ -43,14 +43,32 @@ export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JS
   const { setGeomType } = useDrawerActions();
 
   /**
-   * Handles a click on the draw button
+   * Sets the current geometry type to Point
    */
-  const handleGeometrySelect = useCallback(
-    (geomType: string): void => {
-      setGeomType(geomType);
-    },
-    [setGeomType]
-  );
+  const handleGeometrySelectPoint = useCallback((): void => {
+    setGeomType('Point');
+  }, [setGeomType]);
+
+  /**
+   * Sets the current geometry type to LineString
+   */
+  const handleGeometrySelectLineString = useCallback((): void => {
+    setGeomType('LineString');
+  }, [setGeomType]);
+
+  /**
+   * Sets the current geometry type to Polygon
+   */
+  const handleGeometrySelectPolygon = useCallback((): void => {
+    setGeomType('Polygon');
+  }, [setGeomType]);
+
+  /**
+   * Sets the current geometry type to Circle
+   */
+  const handleGeometrySelectCircle = useCallback((): void => {
+    setGeomType('Circle');
+  }, [setGeomType]);
 
   return (
     <List>
@@ -61,7 +79,7 @@ export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JS
             tooltip={getLocalizedMessage(displayLanguage, 'drawer.point')}
             tooltipPlacement="left"
             size="small"
-            onClick={() => handleGeometrySelect('Point')}
+            onClick={handleGeometrySelectPoint}
           >
             <PlaceIcon />
             {getLocalizedMessage(displayLanguage, 'drawer.point')}
@@ -75,7 +93,7 @@ export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JS
             tooltip={getLocalizedMessage(displayLanguage, 'drawer.linestring')}
             tooltipPlacement="left"
             size="small"
-            onClick={() => handleGeometrySelect('LineString')}
+            onClick={handleGeometrySelectLineString}
           >
             <ShowChartIcon />
             {getLocalizedMessage(displayLanguage, 'drawer.linestring')}
@@ -89,7 +107,7 @@ export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JS
             tooltip={getLocalizedMessage(displayLanguage, 'drawer.polygon')}
             tooltipPlacement="left"
             size="small"
-            onClick={() => handleGeometrySelect('Polygon')}
+            onClick={handleGeometrySelectPolygon}
           >
             <RectangleIcon />
             {getLocalizedMessage(displayLanguage, 'drawer.polygon')}
@@ -103,7 +121,7 @@ export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JS
             tooltip={getLocalizedMessage(displayLanguage, 'drawer.circle')}
             tooltipPlacement="left"
             size="small"
-            onClick={() => handleGeometrySelect('Circle')}
+            onClick={handleGeometrySelectCircle}
           >
             <CircleIcon />
             {getLocalizedMessage(displayLanguage, 'drawer.circle')}

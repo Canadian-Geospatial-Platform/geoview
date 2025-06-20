@@ -43,9 +43,6 @@ class DrawerPlugin extends NavBarPlugin {
     return toJsonObject(defaultConfig);
   }
 
-  // The callback used to redraw the GeoCharts in the GeoChartPanel
-  callbackRedraw?: () => void;
-
   /**
    * Overrides the default translations for the Plugin.
    * @returns {TypeJsonObject} - The translations object for the particular Plugin.
@@ -115,19 +112,6 @@ class DrawerPlugin extends NavBarPlugin {
     // Create all drawer buttons
     logger.logInfo('Drawer Plugin - onAdd');
     return createDrawerButtons(this.getConfig());
-  }
-
-  override onAdd(): void {
-    // Call parent
-    super.onAdd();
-  }
-
-  /**
-   * Handles when a redraw callback has been provided by GeoChartPanel
-   */
-  handleProvideCallbackRedraw(callbackRedraw: () => void): void {
-    // Keep it
-    this.callbackRedraw = callbackRedraw;
   }
 }
 

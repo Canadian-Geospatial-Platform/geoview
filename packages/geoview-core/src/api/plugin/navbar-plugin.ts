@@ -1,4 +1,3 @@
-import { Root } from 'react-dom/client';
 import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import { AbstractPlugin } from './abstract-plugin';
 import { TypeWindow } from '@/core/types/global-types';
@@ -15,9 +14,7 @@ export type TypeNavBarButtonConfig = {
  * NavBar Plugin abstract class.
  */
 export abstract class NavBarPlugin extends AbstractPlugin {
-  // Store the created button panel object
-  reactRoot?: Root;
-
+  // The buttons with or without panels, to be rendered in the NavBar
   buttonPanels: Record<string, TypeButtonPanel> = {};
 
   /**
