@@ -1,4 +1,5 @@
 import { TypeNavBarButtonConfig } from 'geoview-core/api/plugin/navbar-plugin';
+import { TypeDrawerConfig } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
 import { TypeWindow } from 'geoview-core/core/types/global-types';
 
 import { logger } from 'geoview-core/core/utils/logger';
@@ -10,15 +11,11 @@ import Clear from './buttons/clear';
 import Edit from './buttons/edit';
 import Measurements from './buttons/measurements';
 
-// type ConfigProps = {
-//   geomTypes?: string[];
-// };
-
-export function createDrawerButtons(): Record<string, TypeNavBarButtonConfig> {
+export function createDrawerButtons(config: TypeDrawerConfig): Record<string, TypeNavBarButtonConfig> {
   const { cgpv } = window as TypeWindow;
   const { createElement } = cgpv.reactUtilities.react;
 
-  // const geomTypes = config?.geomTypes || ['Point', 'LineString', 'Polygon', 'Circle'];
+  const geomTypes = config?.geomTypes || ['Point', 'LineString', 'Polygon', 'Circle'];
   const { CloseIcon } = cgpv.ui.elements;
   const buttonConfigs: Record<string, TypeNavBarButtonConfig> = {};
 
@@ -27,8 +24,6 @@ export function createDrawerButtons(): Record<string, TypeNavBarButtonConfig> {
   buttonConfigs.draw = {
     buttonProps: {
       id: 'drawer-draw',
-      // tooltip: 'drawer.toggleDrawing',
-      // tooltipPlacement: 'left',
       children: createElement(Draw),
       visible: true,
     },
@@ -48,8 +43,7 @@ export function createDrawerButtons(): Record<string, TypeNavBarButtonConfig> {
     panelProps: {
       title: 'drawer.geometryPicker',
       icon: createElement(CloseIcon),
-      // content: cgpv.react.createElement(GeometryPickerPanel, { geomTypes }),
-      content: createElement(GeometryPickerPanel),
+      content: createElement(GeometryPickerPanel, { geomTypes }),
       width: 'flex',
       status: false,
     },
@@ -58,8 +52,6 @@ export function createDrawerButtons(): Record<string, TypeNavBarButtonConfig> {
   buttonConfigs.edit = {
     buttonProps: {
       id: 'drawer-edit',
-      // tooltip: 'drawer.edit',
-      // tooltipPlacement: 'left',
       children: createElement(Edit),
       visible: true,
     },
@@ -88,8 +80,6 @@ export function createDrawerButtons(): Record<string, TypeNavBarButtonConfig> {
   buttonConfigs.measure = {
     buttonProps: {
       id: 'drawer-measure',
-      // tooltip: 'drawer.toggleMeasurement',
-      // tooltipPlacement: 'left',
       children: createElement(Measurements),
       visible: true,
     },
@@ -100,8 +90,6 @@ export function createDrawerButtons(): Record<string, TypeNavBarButtonConfig> {
   buttonConfigs.clear = {
     buttonProps: {
       id: 'drawer-clear',
-      // tooltip: 'drawer.clear',
-      // tooltipPlacement: 'left',
       children: createElement(Clear),
       visible: true,
     },

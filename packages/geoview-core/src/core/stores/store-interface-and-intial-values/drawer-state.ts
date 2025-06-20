@@ -21,10 +21,13 @@ export type StyleProps = {
 };
 
 export type TypeDrawerConfig = {
-  drawer: {
-    geomTypes?: string[];
-    style?: StyleProps;
-  };
+  geomType?: string;
+  geomTypes?: string[];
+  style?: StyleProps;
+};
+
+type TypeCorePackagesConfig = {
+  drawer?: TypeDrawerConfig;
 };
 
 export type TypeEditInstance = {
@@ -113,18 +116,24 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
     measureOverlays: [],
     hideMeasurements: false,
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
-      const drawerConfig = geoviewConfig.corePackagesConfig?.find((config) => Object.keys(config).includes('drawer')) as
-        | TypeDrawerConfig
-        | undefined;
-      if (drawerConfig?.drawer) {
+      const configObj = geoviewConfig.corePackagesConfig?.find((config) =>
+        Object.keys(config).includes('drawer')
+      ) as unknown as TypeCorePackagesConfig;
+      if (configObj) {
+        const drawerConfig = configObj.drawer as TypeDrawerConfig;
+        let initialGeomType = 'Point';
+
+        if (drawerConfig.geomType) {
+          initialGeomType = drawerConfig.geomType;
+        } else if (drawerConfig.geomTypes && drawerConfig.geomTypes.length > 0) {
+          [initialGeomType] = drawerConfig.geomTypes;
+        }
+
         set({
           drawerState: {
             ...get().drawerState,
-            geomType:
-              drawerConfig.drawer.geomTypes !== undefined && drawerConfig.drawer.geomTypes.length > 0
-                ? drawerConfig.drawer?.geomTypes[0]
-                : 'Point',
-            style: drawerConfig.drawer.style || {
+            geomType: initialGeomType,
+            style: drawerConfig.style || {
               fillColor: '#FFFFFF',
               strokeColor: '#000000',
               strokeWidth: 2,
