@@ -14,13 +14,12 @@ import './measurement-styles.css';
 
 // TODO Optional: Install package - MUI Colour Picker
 // TO.DO Add support for RGBA instead of just Hex to handle transparency
-// TO.DO Confirm / Finalize config in the geoview config
-// TO.DO Use Config properly
+// TO.DO Draw mouse icon lags behind cursor
 // TO.DO Export drawings
 // TO.DO Other interactions: Snap, Translate, Scale / Rotate (not actually a built in interaction)
 // TO.DO Optional: Make the geometry icon in the geometry picker match the style colours (Fill / Outline)
 // TO.DO Better Styling in panels ( change geometry and style button panels )
-// TO.DO Measurements for lines between segments too
+// TO.DO Measurements between segments too (for lines, maybe polygons?)
 
 /**
  * Create a class for the plugin instance
@@ -115,8 +114,7 @@ class DrawerPlugin extends NavBarPlugin {
   override onCreateButtonConfigs(): Record<string, TypeNavBarButtonConfig> {
     // Create all drawer buttons
     logger.logInfo('Drawer Plugin - onAdd');
-    // return createDrawerButtons(this.getConfig().drawer);
-    return createDrawerButtons();
+    return createDrawerButtons(this.getConfig());
   }
 
   override onAdd(): void {

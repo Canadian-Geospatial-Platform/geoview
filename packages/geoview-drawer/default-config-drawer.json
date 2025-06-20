@@ -4,5 +4,6 @@
     "strokeColor": "#000000",
     "strokeWidth": 1.3
   },
+  "geomType": "Point",
   "geomTypes": ["Point", "LineString", "Polygon", "Circle"]
 }
