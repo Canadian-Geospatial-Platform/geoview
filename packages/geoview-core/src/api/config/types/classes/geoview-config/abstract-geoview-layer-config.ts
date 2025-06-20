@@ -100,7 +100,7 @@ export abstract class AbstractGeoviewLayerConfig {
     // GV: However, whe have the isGeocore flag to keep track of geocore layers that were converted to geoview layers.
     this.isGeocore = (userGeoviewLayerConfig.isGeocore as boolean) || false;
     this.geoviewLayerName = userGeoviewLayerConfig.geoviewLayerName ? (userGeoviewLayerConfig.geoviewLayerName as string) : '';
-    this.geoviewLayerId = (userGeoviewLayerConfig.geoviewLayerId || generateId()) as string;
+    this.geoviewLayerId = (userGeoviewLayerConfig.geoviewLayerId || generateId(18)) as string;
     this.metadataAccessPath = userGeoviewLayerConfig.metadataAccessPath as string;
 
     // Validate the structure of the sublayer list and correct it if needed.

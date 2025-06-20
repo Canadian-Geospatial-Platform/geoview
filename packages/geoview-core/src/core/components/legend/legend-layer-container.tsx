@@ -94,7 +94,7 @@ export const CollapsibleContent = memo(function CollapsibleContent({
   return (
     <Collapse in={!isCollapsed} sx={sxClasses.collapsibleContainer} timeout="auto" unmountOnExit>
       <List>{layerChildren && layerChildren.map((item) => <LegendLayerComponent layerPath={item.layerPath} key={item.layerPath} />)}</List>
-      <ItemsList items={layerItems || []} />
+      <ItemsList items={layerItems || []} layerPath={layerPath} />
     </Collapse>
   );
 });
