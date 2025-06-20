@@ -6,7 +6,7 @@ Below is a categorized list of all functions available on a MapViewer instance o
 - Access after initialization: Always access MapViewer methods after the map has been initialized.
 - Error handling: Include error handling when using methods that may throw exceptions.
 - Performance: Be mindful of performance when calling methods that trigger redraws.
-- Cleanup: If your application dynamically creates and destroys maps, make sure to call `remove()` to clean up resources.
+- Cleanup: If your application dynamically creates and destroys maps, make sure to call `cgpv.api.deleteMapViewer(mapId)` to clean up resources.
 
 ## How to Use MapViewer API
 
@@ -244,7 +244,7 @@ Functions for performing actions on the map.
 - [addComponent](#addcomponent)
 - [removeComponent](#removecomponent)
 - [refreshLayers](#refreshlayers)
-- [remove](#remove)
+- [delete](#delete)
 - [reload](#reload)
 - [zoomToExtent](#zoomtoextent)
 - [zoomToLonLatExtentOrCoordinate](#zoomtolonlatextentorcoordinate)
@@ -290,18 +290,15 @@ mapViewer.refreshLayers().then(() => {
 });
 ```
 
-<a id="remove"></a>
+<a id="delete"></a>
 
-#### remove
+#### delete
 ```typescript
 /**
- * Removes the map and cleans up resources.
- * 
- * @param {boolean} deleteContainer - True if we want to delete div from the page
- * @returns {Promise<HTMLElement>} The Promise containing the HTML element
+ * Deletes the map and cleans up resources.
  */
-mapViewer.remove(false).then(container => {
-  console.log('Map removed, container:', container);
+mapViewer.delete(false).then(() => {
+  console.log('Map deleted');
 });
 ```
 
