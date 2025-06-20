@@ -16,6 +16,7 @@ import Measurements from './buttons/measurements';
 
 export function createDrawerButtons(): Record<string, TypeNavBarButtonConfig> {
   const { cgpv } = window as TypeWindow;
+  const { createElement } = cgpv.reactUtilities.react;
 
   // const geomTypes = config?.geomTypes || ['Point', 'LineString', 'Polygon', 'Circle'];
   const { CloseIcon } = cgpv.ui.elements;
@@ -28,7 +29,7 @@ export function createDrawerButtons(): Record<string, TypeNavBarButtonConfig> {
       id: 'drawer-draw',
       // tooltip: 'drawer.toggleDrawing',
       // tooltipPlacement: 'left',
-      children: cgpv.react.createElement(Draw),
+      children: createElement(Draw),
       visible: true,
     },
     groupName: 'drawer',
@@ -40,15 +41,15 @@ export function createDrawerButtons(): Record<string, TypeNavBarButtonConfig> {
       id: 'drawer-geometry-picker',
       tooltip: 'drawer.geometryPicker',
       tooltipPlacement: 'left',
-      children: cgpv.react.createElement(GeometryPickerButton),
+      children: createElement(GeometryPickerButton),
       visible: true,
     },
     groupName: 'drawer',
     panelProps: {
       title: 'drawer.geometryPicker',
-      icon: cgpv.react.createElement(CloseIcon),
+      icon: createElement(CloseIcon),
       // content: cgpv.react.createElement(GeometryPickerPanel, { geomTypes }),
-      content: cgpv.react.createElement(GeometryPickerPanel),
+      content: createElement(GeometryPickerPanel),
       width: 'flex',
       status: false,
     },
@@ -59,7 +60,7 @@ export function createDrawerButtons(): Record<string, TypeNavBarButtonConfig> {
       id: 'drawer-edit',
       // tooltip: 'drawer.edit',
       // tooltipPlacement: 'left',
-      children: cgpv.react.createElement(Edit),
+      children: createElement(Edit),
       visible: true,
     },
     groupName: 'drawer',
@@ -70,14 +71,14 @@ export function createDrawerButtons(): Record<string, TypeNavBarButtonConfig> {
       id: 'drawer-style',
       tooltip: 'drawer.style',
       tooltipPlacement: 'left',
-      children: cgpv.react.createElement(StyleButton),
+      children: createElement(StyleButton),
       visible: true,
     },
     groupName: 'drawer',
     panelProps: {
       title: 'drawer.style',
-      icon: cgpv.react.createElement(CloseIcon),
-      content: cgpv.react.createElement(StylePanel),
+      icon: createElement(CloseIcon),
+      content: createElement(StylePanel),
       width: 'flex',
       status: false,
     },
@@ -89,7 +90,7 @@ export function createDrawerButtons(): Record<string, TypeNavBarButtonConfig> {
       id: 'drawer-measure',
       // tooltip: 'drawer.toggleMeasurement',
       // tooltipPlacement: 'left',
-      children: cgpv.react.createElement(Measurements),
+      children: createElement(Measurements),
       visible: true,
     },
     groupName: 'drawer',
@@ -101,7 +102,7 @@ export function createDrawerButtons(): Record<string, TypeNavBarButtonConfig> {
       id: 'drawer-clear',
       // tooltip: 'drawer.clear',
       // tooltipPlacement: 'left',
-      children: cgpv.react.createElement(Clear),
+      children: createElement(Clear),
       visible: true,
     },
     groupName: 'drawer',

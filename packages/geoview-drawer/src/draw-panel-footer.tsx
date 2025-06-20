@@ -39,7 +39,7 @@ export function DrawPanel(props: DrawerProps): JSX.Element {
 
   const { cgpv } = window as TypeWindow;
   // const { useTheme } = cgpv.ui;
-  const { useState, useCallback, useMemo, useRef } = cgpv.react;
+  const { useState, useCallback, useMemo, useRef } = cgpv.reactUtilities.react;
   const { Box, Button, ButtonGroup, Typography } = cgpv.ui.elements;
 
   // Get store values

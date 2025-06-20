@@ -18,6 +18,7 @@ import './measurement-styles.css';
 // TO.DO Use Config properly
 // TO.DO Export drawings
 // TO.DO Other interactions: Snap, Translate, Scale / Rotate (not actually a built in interaction)
+// TO.DO Optional: Make the geometry icon in the geometry picker match the style colours (Fill / Outline)
 
 /**
  * Create a class for the plugin instance
@@ -135,7 +136,7 @@ export default DrawerPlugin;
 // GV This if condition took over 3 days to investigate. It was giving errors on the app.geo.ca website with
 // GV some conflicting reacts being loaded on the page for some obscure reason.
 // Check if we're on the right react
-if (React === window.cgpv.react) {
+if (React === window.cgpv.reactUtilities.react) {
   // Keep a reference to the Drawer Plugin as part of the geoviewPlugins property stored in the window object
   window.geoviewPlugins = window.geoviewPlugins || {};
   window.geoviewPlugins.drawer = DrawerPlugin;
