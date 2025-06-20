@@ -566,7 +566,7 @@ export class ConfigApi {
     } else if (layerType === CV_CONFIG_SHAPEFILE_TYPE) {
       try {
         const layerConfig = {
-          geoviewLayerId: generateId(),
+          geoviewLayerId: generateId(18),
           geoviewLayerType: 'shapefile',
           metadataAccessPath: serviceAccessString,
         } as unknown as TypeJsonObject;
@@ -580,7 +580,7 @@ export class ConfigApi {
     } else {
       // Create a GeoView Json configuration object.
       geoviewLayerConfig = toJsonObject({
-        geoviewLayerId: generateId(),
+        geoviewLayerId: generateId(18),
         geoviewLayerName: language === 'en' ? 'unknown' : 'inconnue',
         geoviewLayerType: layerType,
         metadataAccessPath: serviceAccessString,

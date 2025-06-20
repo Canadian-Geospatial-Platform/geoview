@@ -46,7 +46,7 @@ import { LayersList } from './layers-list';
 import { LayerIcon } from '@/core/components/common/layer-icon';
 import { logger } from '@/core/utils/logger';
 import { useDataTableLayerSettings, useDataTableStoreActions } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { ArrowDownwardIcon, ArrowUpIcon, CenterFocusScaleIcon, TableViewIcon } from '@/ui/icons';
+import { ArrowDownwardIcon, ArrowUpIcon, CenterFocusScaleIcon, LoopIcon, TableViewIcon } from '@/ui/icons';
 import { Divider } from '@/ui/divider/divider';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useUISelectedFooterLayerListItemId } from '@/core/stores/store-interface-and-intial-values/ui-state';
@@ -71,7 +71,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Get store states
-  const { setSelectedLayerPath, setSelectedLayerSortingArrowId, zoomToLayerVisibleScale } = useLayerStoreActions();
+  const { reloadLayer, setSelectedLayerPath, setSelectedLayerSortingArrowId, zoomToLayerVisibleScale } = useLayerStoreActions();
   const { setOrToggleLayerVisibility, toggleLegendCollapsed, reorderLayer } = useMapStoreActions();
 
   const mapId = useGeoViewMapId();
@@ -225,6 +225,13 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
     zoomToLayerVisibleScale(layerPath);
   }, [layerPath, zoomToLayerVisibleScale]);
 
+  const handleReload = useCallback((): void => {
+    // Log
+    logger.logTraceUseCallback('SINGLE-LAYER - handleReload');
+
+    reloadLayer(layerPath);
+  }, [layerPath, reloadLayer]);
+
   // Get layer description
   const memoLayerDescription = useMemo((): JSX.Element | string | null => {
     // Log
@@ -329,7 +336,14 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
       return null;
     }
     if (layerStatus === 'error') {
-      return <DeleteUndoButton layerPath={layerPath} layerId={layerId!} layerRemovable={layerControls?.remove !== false} />;
+      return (
+        <>
+          <IconButton edge="end" size="small" tooltip={t('layers.reloadLayer')!} className="buttonOutline" onClick={handleReload}>
+            <LoopIcon />
+          </IconButton>
+          <DeleteUndoButton layerPath={layerPath} layerId={layerId!} layerRemovable={layerControls?.remove !== false} />
+        </>
+      );
     }
 
     if (isLayerAlwaysVisible) {
@@ -378,19 +392,20 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
       </Box>
     );
   }, [
-    inVisibleRange,
-    handleZoomToLayerVisibleScale,
-    layerType,
-    displayState,
-    handleToggleVisibility,
-    isLayerAlwaysVisible,
-    isLayerVisibleCapable,
-    isVisible,
-    layerControls?.remove,
-    layerId,
     layerPath,
     layerStatus,
+    displayState,
+    isLayerAlwaysVisible,
+    layerType,
+    inVisibleRange,
     t,
+    handleZoomToLayerVisibleScale,
+    isLayerVisibleCapable,
+    handleToggleVisibility,
+    isVisible,
+    layerId,
+    layerControls?.remove,
+    handleReload,
   ]);
 
   // Memoize the arrow buttons component section
