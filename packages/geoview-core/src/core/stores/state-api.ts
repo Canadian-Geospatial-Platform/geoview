@@ -14,15 +14,16 @@ import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
  * API to manage states.
  */
 export class StateApi {
+  /** The map id this StateApi belongs to */
   mapId: string;
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onLayersReorderedHandlers: LayersReorderedDelegate[] = [];
 
   /**
    * Instantiates an StateApi class.
    *
-   * @param {string} mapId - The map id this AppBarApi belongs to
+   * @param {string} mapId - The map id this StateApi belongs to
    */
   constructor(mapId: string) {
     this.mapId = mapId;
@@ -136,6 +137,8 @@ export class StateApi {
     this.#emitLayersReordered({ orderedLayers });
   }
 
+  // #region EVENTS
+
   /**
    * Emits layers reordered event.
    * @param {LayersReorderedEvent} event - The event to emit
@@ -163,7 +166,11 @@ export class StateApi {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayersReorderedHandlers, callback);
   }
+
+  // #endregion EVENTS
 }
+
+// #region EVENTS & DELEGATES
 
 /**
  * Define a delegate for the event handler function signature
@@ -177,3 +184,5 @@ export type LayersReorderedEvent = {
   // The layer path of the affected layer
   orderedLayers: TypeOrderedLayerInfo[];
 };
+
+// #endregion EVENTS & DELEGATES

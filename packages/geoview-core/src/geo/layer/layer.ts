@@ -1,7 +1,5 @@
 import BaseLayer from 'ol/layer/Base';
 import { Extent } from 'ol/extent';
-import Collection from 'ol/Collection';
-import { Source } from 'ol/source';
 import { GeoJSONObject } from 'ol/format/GeoJSON';
 
 import { GeoCore } from '@/geo/layer/other/geocore';
@@ -90,121 +88,115 @@ import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { LayerGeoCoreError } from '@/core/exceptions/geocore-exceptions';
 import { ShapefileReader } from '@/core/utils/config/reader/shapefile-reader';
 
-export type GeoViewLayerAddedResult = {
-  layer: AbstractGeoViewLayer;
-  promiseLayer: Promise<void>;
-};
-
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
- *
  * @exports
  * @class LayerApi
  */
 export class LayerApi {
-  // Maximum time duration to wait when registering a layer for the time slider
-  static #MAX_WAIT_TIME_SLIDER_REGISTRATION = 20000;
+  /** Maximum time duration to wait when registering a layer for the time slider */
+  static readonly #MAX_WAIT_TIME_SLIDER_REGISTRATION = 20000;
 
-  // Temporary debugging flag indicating if we want the WMS group layers to have their sub layers fully blown up
-  static DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS = false;
+  /** Temporary debugging flag indicating if we want the WMS group layers to have their sub layers fully blown up */
+  static readonly DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS = false;
 
   /** Reference on the map viewer */
   mapViewer: MapViewer;
 
-  // used to access geometry API to create and manage geometries
+  /** Used to access geometry API to create and manage geometries */
   geometry: GeometryApi;
 
-  // order to load layers
+  /** Order to load layers */
   initialLayerOrder: Array<TypeOrderedLayerInfo> = [];
 
-  // used to access feature and bounding box highlighting
+  /** Used to access feature and bounding box highlighting */
   featureHighlight: FeatureHighlight;
 
-  // Legends layer set associated to the map
+  /** Legends layer set associated to the map */
   legendsLayerSet: LegendsLayerSet;
 
-  // Hover feature info layer set associated to the map
+  /** Hover feature info layer set associated to the map */
   hoverFeatureInfoLayerSet: HoverFeatureInfoLayerSet;
 
-  // All feature info layer set associated to the map
+  /** All feature info layer set associated to the map */
   allFeatureInfoLayerSet: AllFeatureInfoLayerSet;
 
-  // Feature info layer set associated to the map
+  /** Feature info layer set associated to the map */
   featureInfoLayerSet: FeatureInfoLayerSet;
 
-  // All the layer sets
+  /** All the layer sets */
   #allLayerSets: AbstractLayerSet[];
 
   /** Layers with valid configuration for this map. */
   #layerEntryConfigs: { [layerPath: string]: ConfigBaseClass } = {};
 
-  // Dictionary holding all the old geoview layers
+  /** Dictionary holding all the old geoview layers */
   #geoviewLayers: { [geoviewLayerId: string]: AbstractGeoViewLayer } = {};
 
-  // Dictionary holding all the OpenLayers layers
+  /** Dictionary holding all the OpenLayers layers */
   #olLayers: { [layerPath: string]: BaseLayer } = {};
 
-  // Dictionary holding all the new GVLayers
+  /** Dictionary holding all the new GVLayers */
   #gvLayers: { [layerPath: string]: AbstractBaseLayer } = {};
 
-  /** used to keep a reference of highlighted layer */
+  /** Used to keep a reference of highlighted layer */
   #highlightedLayer: { layerPath?: string; originalOpacity?: number } = {
     layerPath: undefined,
     originalOpacity: undefined,
   };
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onLayerConfigAddedHandlers: LayerBuilderDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onLayerConfigErrorHandlers: LayerConfigErrorDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onLayerConfigRemovedHandlers: LayerPathDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onLayerCreatedHandlers: LayerDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onLayerLoadedFirstHandlers: LayerDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onLayerLoadingHandlers: LayerDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onLayerLoadedHandlers: LayerDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onLayerErrorHandlers: LayerErrorDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onLayerAllLoadedHandlers: LayerConfigDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onLayerStatusChangedHandlers: LayerStatusChangedDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onLayerVisibilityToggledHandlers: LayerVisibilityToggledDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onLayerItemVisibilityToggledHandlers: LayerItemVisibilityToggledDelegate[] = [];
 
-  // Keep a bounded reference to the handle layer status changed
+  /** Keep a bounded reference to the handle layer status changed */
   #boundedHandleLayerStatusChanged: ConfigLayerStatusChangedDelegate;
 
-  // Keep a bounded reference to the handle layer message
+  /** Keep a bounded reference to the handle layer message */
   #boundedHandleLayerMessage: LayerMessageDelegate;
 
-  // Keep a bounded reference to the handle layer first load
+  /** Keep a bounded reference to the handle layer first load */
   #boundedHandleLayerFirstLoaded: GVLayerDelegate;
 
-  // Keep a bounded reference to the handle layer loading
+  /** Keep a bounded reference to the handle layer loading */
   #boundedHandleLayerLoading: GVLayerDelegate;
 
-  // Keep a bounded reference to the handle layer loaded
+  /** Keep a bounded reference to the handle layer loaded */
   #boundedHandleLayerLoaded: GVLayerDelegate;
 
-  // Keep a bounded reference to the handle layer error
+  /** Keep a bounded reference to the handle layer error */
   #boundedHandleLayerError: GVLayerErrorDelegate;
 
   /**
@@ -222,7 +214,7 @@ export class LayerApi {
     this.geometry = new GeometryApi(this.mapViewer);
     this.featureHighlight = new FeatureHighlight(this.mapViewer);
 
-    // Keep a bounded reference to the handle
+    // Keep bounded references to the handles
     this.#boundedHandleLayerStatusChanged = this.#handleLayerStatusChanged.bind(this);
     this.#boundedHandleLayerMessage = this.#handleLayerMessage.bind(this);
     this.#boundedHandleLayerFirstLoaded = this.#handleLayerFirstLoaded.bind(this);
@@ -1153,27 +1145,9 @@ export class LayerApi {
   refreshLayers(): void {
     // For each geoview layer
     this.getGeoviewLayers().forEach((geoviewLayer) => {
-      if (geoviewLayer) this.refreshBaseLayer(geoviewLayer.getOLLayer());
+      // Call the layer refresh function
+      geoviewLayer.refresh(this.mapViewer.getProjection());
     });
-  }
-
-  /**
-   * Refresh geoview layer source.
-   * @param {BaseLayer} baseLayer - The layer to refresh.
-   */
-  refreshBaseLayer(baseLayer: BaseLayer): void {
-    // Check if the passed layer is a group
-    const layerGroup: Array<BaseLayer> | Collection<BaseLayer> | undefined = baseLayer.get('layers');
-
-    // Update all layers in group, or update source of layer
-    if (layerGroup) {
-      layerGroup.forEach((baseLayerEntry) => {
-        this.refreshBaseLayer(baseLayerEntry);
-      });
-    } else {
-      const layerSource: Source | undefined = baseLayer.get('source');
-      layerSource?.refresh();
-    }
   }
 
   /**
@@ -2295,6 +2269,13 @@ export class LayerApi {
   // #endregion
 }
 
+export type GeoViewLayerAddedResult = {
+  layer: AbstractGeoViewLayer;
+  promiseLayer: Promise<void>;
+};
+
+// #region EVENTS & DELEGATES
+
 /**
  * Define an event for the delegate
  */
@@ -2422,3 +2403,5 @@ export type LayerItemVisibilityToggledEvent = {
  * Define a delegate for the event handler function signature
  */
 export type LayerItemVisibilityToggledDelegate = EventDelegateBase<LayerApi, LayerItemVisibilityToggledEvent, void>;
+
+// #endregion EVENTS

@@ -12,10 +12,10 @@ import { TypeModalProps } from '@/ui/modal/modal';
 export class ModalApi {
   modals: Record<string, TypeModalProps> = {};
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onModalOpenedHandlers: ModalOpenedDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onModalClosedHandlers: ModalClosedDelegate[] = [];
 
   /**

@@ -56,7 +56,6 @@ import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/v
 
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
-import { GVGeoJSON } from '@/geo/layer/gv-layers/vector/gv-geojson';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
@@ -453,7 +452,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
         number,
       ];
       const newProjection = projectionCode;
-      const newProjectionOL = Projection.getProjectionFromString(`EPSG:${newProjection}`);
 
       // If maxExtent was provided and native projection, apply
       // GV The extent is different between LCC and WM and switching from one to the other may introduce weird constraint.
@@ -505,16 +503,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
       // refresh layers so new projection is render properly
       this.getMapViewer(mapId).refreshLayers();
-
-      // Reload/reproject any custom geojson layer features if any
-      // TODO: Refactor move this logic inside the GVGeoJSON class by adding a 'refresh' function on the GVLayers.
-      // TO.DOCONT: That way, each GVLayer knows what to do when comes the time to 'refresh'.
-      this.getMapViewerLayerAPI(mapId)
-        .getGeoviewLayers()
-        .filter((layer) => layer instanceof GVGeoJSON)
-        .forEach((layer) => {
-          layer.updateGeojsonSource(newProjectionOL);
-        });
 
       // When the map projection is changed, all layer bounds must be recalculated
       this.getMapViewer(mapId).layer.recalculateBoundsAll();

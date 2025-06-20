@@ -4,28 +4,27 @@ import { Projection as OLProjection } from 'ol/proj';
 import { Extent, TypeLayerStatus } from '@/api/config/types/map-schema-types';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
-import { NotImplementedError } from '@/core/exceptions/core-exceptions';
 
 /**
  * Abstract Base Layer managing an OpenLayer layer, including a layer group.
  */
 export abstract class AbstractBaseLayer {
-  // The layer configuration
+  /** The OpenLayer layer // '!' is used here, because the children constructors are supposed to create the olLayer. */
+  #olLayer!: BaseLayer;
+
+  /** The layer configuration */
   #layerConfig: ConfigBaseClass;
 
-  // The OpenLayer layer // '!' is used here, because the children constructors are supposed to create the olLayer.
-  protected olLayer!: BaseLayer;
-
-  // The layer name
+  /** The layer name */
   #layerName: string | undefined;
 
-  // Keep all callback delegates references
+  /** Keep all callback delegate references */
   #onLayerNameChangedHandlers: LayerNameChangedDelegate[] = [];
 
-  // Keep all callback delegate references
+  /** Keep all callback delegate references */
   #onVisibleChangedHandlers: VisibleChangedDelegate[] = [];
 
-  // Keep all callback delegate references
+  /** Keep all callback delegate references */
   #onLayerOpacityChangedHandlers: LayerOpacityChangedDelegate[] = [];
 
   /**
@@ -41,12 +40,40 @@ export abstract class AbstractBaseLayer {
    * Must override method to get the layer attributions
    * @returns {string[]} The layer attributions
    */
-  abstract getAttributions(): string[];
+  protected abstract onGetAttributions(): string[];
+
+  /**
+   * Must override method to refresh a layer
+   * @param {OLProjection | undefined} projection - Optional, the projection to refresh to.
+   */
+  protected abstract onRefresh(projection: OLProjection | undefined): void;
+
+  /**
+   * Gets the attributions for the layer by calling the overridable function 'onGetAttributions'.
+   * When the layer is a GVLayer, its layer attributions are returned.
+   * When the layer is a GVGroup, all layers attributions in the group are returned.
+   * @returns {string[]} The layer attributions.
+   */
+  getAttributions(): string[] {
+    // Redirect
+    return this.onGetAttributions();
+  }
+
+  /**
+   * Refreshes the layer by calling the overridable function 'onRefresh'.
+   * When the layer is a GVLayer its layer source is refreshed.
+   * When the layer is a GVGroup, all layers in the group are refreshed.
+   * @param {OLProjection | undefined} projection - Optional, the projection to refresh to.
+   */
+  refresh(projection: OLProjection | undefined): void {
+    // Redirect
+    this.onRefresh(projection);
+  }
 
   /**
    * A quick getter to help identify which layer class the current instance is coming from.
    */
-  public getClassName(): string {
+  getClassName(): string {
     // Return the name of the class
     return this.constructor.name;
   }
@@ -60,11 +87,19 @@ export abstract class AbstractBaseLayer {
   }
 
   /**
+   * Sets the OpenLayers Layer
+   * @param {BaseLayer} layer - The OpenLayers Layer
+   */
+  protected setOLLayer(layer: BaseLayer): void {
+    this.#olLayer = layer;
+  }
+
+  /**
    * Gets the OpenLayers Layer
    * @returns The OpenLayers Layer
    */
   getOLLayer(): BaseLayer {
-    return this.olLayer;
+    return this.#olLayer;
   }
 
   /**
@@ -134,18 +169,6 @@ export abstract class AbstractBaseLayer {
    */
   setExtent(layerExtent: Extent): void {
     this.getOLLayer().setExtent(layerExtent);
-  }
-
-  /**
-   * Overridable function that gets the extent of an array of features.
-   * @param {string[]} objectIds - The IDs of the features to calculate the extent from.
-   * @param {OLProjection} outProjection - The output projection for the extent.
-   * @param {string} outfield - ID field to return for services that require a value in outfields.
-   * @returns {Promise<Extent>} The extent of the features, if available
-   */
-  getExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
-    // Not implemented
-    throw new NotImplementedError(`Feature geometry for ${objectIds}-${outfield} is unavailable from ${this.getLayerPath()}`);
   }
 
   /**
