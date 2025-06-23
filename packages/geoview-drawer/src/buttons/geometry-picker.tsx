@@ -1,6 +1,6 @@
 import { TypeWindow } from 'geoview-core';
 import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
-import { useDrawerActions, useDrawerGeomType } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
+import { useDrawerActions, useDrawerActiveGeom } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 
 // import { logger } from 'geoview-core/core/utils/logger';
@@ -13,7 +13,7 @@ export function GeometryPickerButton(): JSX.Element {
   const { cgpv } = window as TypeWindow;
   const { ShapeLineIcon, PlaceIcon, ShowChartIcon, RectangleIcon, CircleIcon } = cgpv.ui.elements;
 
-  const geomType = useDrawerGeomType();
+  const geomType = useDrawerActiveGeom();
 
   if (geomType === 'Point') return <PlaceIcon />;
   if (geomType === 'LineString') return <ShowChartIcon />;
@@ -40,35 +40,35 @@ export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JS
   const displayLanguage = useAppDisplayLanguage();
 
   // Store actions
-  const { setGeomType } = useDrawerActions();
+  const { setActiveGeom } = useDrawerActions();
 
   /**
    * Sets the current geometry type to Point
    */
   const handleGeometrySelectPoint = useCallback((): void => {
-    setGeomType('Point');
-  }, [setGeomType]);
+    setActiveGeom('Point');
+  }, [setActiveGeom]);
 
   /**
    * Sets the current geometry type to LineString
    */
   const handleGeometrySelectLineString = useCallback((): void => {
-    setGeomType('LineString');
-  }, [setGeomType]);
+    setActiveGeom('LineString');
+  }, [setActiveGeom]);
 
   /**
    * Sets the current geometry type to Polygon
    */
   const handleGeometrySelectPolygon = useCallback((): void => {
-    setGeomType('Polygon');
-  }, [setGeomType]);
+    setActiveGeom('Polygon');
+  }, [setActiveGeom]);
 
   /**
    * Sets the current geometry type to Circle
    */
   const handleGeometrySelectCircle = useCallback((): void => {
-    setGeomType('Circle');
-  }, [setGeomType]);
+    setActiveGeom('Circle');
+  }, [setActiveGeom]);
 
   return (
     <List>

@@ -121,8 +121,8 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     if (!viewer) throw new MapViewerNotFoundError(mapId);
 
     // Get current state values if not provided
-    const currentGeomType = geomType || state.geomType;
-    const currentStyle = styleInput || state.style;
+    const currentGeomType = geomType || state.actions.getActiveGeom();
+    const currentStyle = styleInput || state.actions.getStyle();
     const { hideMeasurements } = state;
 
     // If drawing already, stop and restart as it's likely a style change
@@ -144,13 +144,13 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
         // For points, use a circle style
         featureStyle = new Style({
           image: new Circle({
-            radius: currentStyle.strokeWidth * 3 || 6,
+            radius: currentStyle.strokeWidth * 3,
             fill: new Fill({
               color: currentStyle.fillColor,
             }),
             stroke: new Stroke({
               color: currentStyle.strokeColor,
-              width: currentStyle.strokeWidth || 1.3,
+              width: currentStyle.strokeWidth,
             }),
           }),
         });
@@ -159,7 +159,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
         featureStyle = new Style({
           stroke: new Stroke({
             color: currentStyle.strokeColor,
-            width: currentStyle.strokeWidth || 1.3,
+            width: currentStyle.strokeWidth,
           }),
           fill: new Fill({
             color: currentStyle.fillColor,
@@ -184,12 +184,12 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     // Update state
     state.actions.setDrawInstance(draw);
     if (geomType) {
-      state.actions.setGeomType(geomType);
+      state.actions.setActiveGeom(geomType);
     }
 
     // If editing already, but the edit group doesn't exist, create it
     const groupKey = `draw-${geomType}`;
-    if (state.isEditing && !(groupKey in state.editInstances)) {
+    if (state.actions.getIsEditing() && !(groupKey in state.actions.getEditInstances())) {
       const editInstance = viewer.initModifyInteractions(groupKey);
       state.actions.setEditInstance(groupKey, editInstance);
     }
@@ -204,7 +204,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     if (!state) return;
 
     // Update state
-    state.drawInstance?.stopInteraction();
+    state.actions.getDrawInstance()?.stopInteraction();
     state.actions.removeDrawInstance();
   }
 
@@ -236,13 +236,15 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     const viewer = MapEventProcessor.getMapViewer(mapId);
     if (!viewer) throw new MapViewerNotFoundError(mapId);
 
-    const typesToEdit = geomTypes || ['Point', 'LineString', 'Polygon', 'Circle'];
+    const typesToEdit = geomTypes || state.actions.getGeomTypes();
     const { hideMeasurements } = state;
 
+    const editInstances = state.actions.getEditInstances();
+
     // If editing already, stop and restart as it's likely a style change
-    if (Object.keys(state.editInstances).length > 0) {
-      Object.keys(state.editInstances).forEach((type) => {
-        state.editInstances[type]?.stopInteraction();
+    if (Object.keys(editInstances).length > 0) {
+      Object.keys(editInstances).forEach((type) => {
+        editInstances[type]?.stopInteraction();
         state.actions.setEditInstance(type, undefined);
       });
     }
@@ -271,8 +273,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
     // If we have an active drawing instance, make sure it stay active
     // when editing is enabled
-    if (state.drawInstance) {
-      state.drawInstance.startInteraction();
+    const drawInstance = state.actions.getDrawInstance();
+    if (drawInstance) {
+      drawInstance.startInteraction();
     }
   }
 
@@ -289,14 +292,15 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     const viewer = MapEventProcessor.getMapViewer(mapId);
     if (!viewer) throw new MapViewerNotFoundError(mapId);
 
-    const typesToEdit = geomTypes || ['Point', 'LineString', 'Polygon', 'Circle'];
+    const typesToEdit = geomTypes || state.actions.getGeomTypes();
 
     // Edit geometries for each type
     typesToEdit.forEach((type) => {
       const groupKey = `draw-${type}`;
+      const editInstances = state.actions.getEditInstances();
 
-      if (!(groupKey in state.editInstances) || state.editInstances[groupKey] === undefined) return;
-      state.editInstances[groupKey].stopInteraction();
+      if (editInstances === undefined || !(groupKey in editInstances) || editInstances[groupKey] === undefined) return;
+      editInstances[groupKey].stopInteraction();
       state.actions.removeEditInstance(groupKey);
     });
   }
@@ -332,7 +336,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     const viewer = MapEventProcessor.getMapViewer(mapId);
     if (!viewer) throw new MapViewerNotFoundError(mapId);
 
-    const typesToClear = geomTypes || ['Point', 'LineString', 'Polygon', 'Circle'];
+    const typesToClear = geomTypes || state.actions.getGeomTypes();
 
     // Clear geometries for each type
     typesToClear.forEach((type) => {
@@ -353,10 +357,10 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Changes the geometry type of the drawing tool
+   * Refreshes the interaction instances
    * @param mapId The map ID
    */
-  public static changeGeomType(mapId: string): void {
+  public static refreshInteractionInstances(mapId: string): void {
     const state = this.getDrawerState(mapId);
     if (!state) return;
 
@@ -367,7 +371,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
     // If editing, restart editing
     // Do this after the start drawing so the group is created if missing
-    if (state.isEditing) {
+    if (state.actions.getIsEditing()) {
       this.stopEditing(mapId);
       this.startEditing(mapId);
     }

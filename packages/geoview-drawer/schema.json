@@ -9,8 +9,8 @@
       "strokeColor": "string",
       "strokeWidth": "number"
     },
-    "geomType": {
-      "description": "The initial set geometry type.",
+    "activeGeom": {
+      "description": "The currently active geometry type.",
       "type": "string",
       "enum": [
         "Point",
@@ -20,7 +20,7 @@
       ]
     },
     "geomTypes": {
-      "description": "The list of geometry types to be drawn.",
+      "description": "The list of geometry types that can be drawn.",
       "type": "array",
       "items": {
         "type": "string",

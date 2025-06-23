@@ -21,12 +21,12 @@ export type StyleProps = {
 };
 
 export type TypeDrawerConfig = {
-  geomType?: string;
+  activeGeom?: string;
   geomTypes?: string[];
   style?: StyleProps;
 };
 
-type TypeCorePackagesConfig = {
+type TypeNavBarPackageConfig = {
   drawer?: TypeDrawerConfig;
 };
 
@@ -36,7 +36,8 @@ export type TypeEditInstance = {
 
 // Need Geometry Types array, but can get from config
 export interface IDrawerState {
-  geomType: string;
+  activeGeom: string;
+  geomTypes: string[];
   style: StyleProps;
   drawInstance: Draw | undefined;
   isEditing: boolean;
@@ -47,15 +48,20 @@ export interface IDrawerState {
   setDefaultConfigValues: (config: TypeMapFeaturesConfig) => void;
 
   actions: {
+    getActiveGeom: () => string;
+    getGeomTypes: () => string[];
+    getStyle: () => StyleProps;
     getIsDrawing: () => boolean;
+    getDrawInstance: () => Draw | undefined;
     getIsEditing: () => boolean;
+    getEditInstances: () => TypeEditInstance;
     getMeasureOverlays: () => Overlay[];
     getHideMeasurements: () => boolean;
     toggleDrawing: () => void;
     toggleEditing: () => void;
     toggleHideMeasurements: () => void;
     clearDrawings: () => void;
-    setGeomType(geomType: string): void;
+    setActiveGeom(geomType: string): void;
     setStyle(style: StyleProps): void;
     setFillColor(fillColor: string): void;
     setStrokeColor(strokeColor: string): void;
@@ -76,7 +82,7 @@ export interface IDrawerState {
     toggleEditing: () => void;
     toggleHideMeasurements: () => void;
     clearDrawings: () => void;
-    setGeomType: (geomType: string) => void;
+    setActiveGeom: (geomType: string) => void;
     setStyle: (style: StyleProps) => void;
     setFillColor: (fillColor: string) => void;
     setStrokeColor: (strokeColor: string) => void;
@@ -104,7 +110,8 @@ export interface IDrawerState {
 // export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDrawerState {
 export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDrawerState {
   const init = {
-    geomType: 'Point',
+    activeGeom: 'Point',
+    geomTypes: ['Point', 'LineString', 'Polygon', 'Circle'],
     style: {
       fillColor: '#FFFFFF',
       strokeColor: '#000000',
@@ -118,13 +125,13 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
       const configObj = geoviewConfig.corePackagesConfig?.find((config) =>
         Object.keys(config).includes('drawer')
-      ) as unknown as TypeCorePackagesConfig;
+      ) as unknown as TypeNavBarPackageConfig;
       if (configObj) {
         const drawerConfig = configObj.drawer as TypeDrawerConfig;
         let initialGeomType = 'Point';
 
-        if (drawerConfig.geomType) {
-          initialGeomType = drawerConfig.geomType;
+        if (drawerConfig.activeGeom) {
+          initialGeomType = drawerConfig.activeGeom;
         } else if (drawerConfig.geomTypes && drawerConfig.geomTypes.length > 0) {
           [initialGeomType] = drawerConfig.geomTypes;
         }
@@ -132,11 +139,11 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         set({
           drawerState: {
             ...get().drawerState,
-            geomType: initialGeomType,
-            style: drawerConfig.style || {
-              fillColor: '#FFFFFF',
-              strokeColor: '#000000',
-              strokeWidth: 2,
+            activeGeom: initialGeomType,
+            geomTypes: drawerConfig.geomTypes || init.geomTypes,
+            style: {
+              ...init.style,
+              ...(drawerConfig.style || {}),
             },
           },
         });
@@ -146,11 +153,26 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
     // #region ACTIONS
 
     actions: {
+      getActiveGeom: () => {
+        return get().drawerState.activeGeom;
+      },
+      getGeomTypes: () => {
+        return get().drawerState.geomTypes;
+      },
+      getStyle: () => {
+        return get().drawerState.style;
+      },
       getIsDrawing: () => {
         return get().drawerState.drawInstance !== undefined;
       },
+      getDrawInstance: () => {
+        return get().drawerState.drawInstance;
+      },
       getIsEditing: () => {
         return get().drawerState.isEditing;
+      },
+      getEditInstances: () => {
+        return get().drawerState.editInstances;
       },
       getMeasureOverlays: () => {
         return get().drawerState.measureOverlays;
@@ -174,9 +196,9 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         // Redirect to setter
         get().drawerState.setterActions.clearDrawings();
       },
-      setGeomType: (geomType: string) => {
+      setActiveGeom: (geomType: string) => {
         // Redirect to setter
-        get().drawerState.setterActions.setGeomType(geomType);
+        get().drawerState.setterActions.setActiveGeom(geomType);
       },
       setStyle: (style: StyleProps) => {
         // Redirect to setter
@@ -247,14 +269,14 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         DrawerEventProcessor.clearDrawings(get().mapId);
       },
 
-      setGeomType: (geomType: string) => {
+      setActiveGeom: (geomType: string) => {
         set({
           drawerState: {
             ...get().drawerState,
-            geomType,
+            activeGeom: geomType,
           },
         });
-        DrawerEventProcessor.changeGeomType(get().mapId);
+        DrawerEventProcessor.refreshInteractionInstances(get().mapId);
       },
 
       setStyle: (style: StyleProps) => {
@@ -413,7 +435,7 @@ export const useDrawerIsDrawing = (): boolean => useStore(useGeoViewStore(), (st
 
 export const useDrawerIsEditing = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.actions.getIsEditing());
 
-export const useDrawerGeomType = (): string => useStore(useGeoViewStore(), (state) => state.drawerState.geomType);
+export const useDrawerActiveGeom = (): string => useStore(useGeoViewStore(), (state) => state.drawerState.activeGeom);
 
 export const useDrawerStyle = (): StyleProps => useStore(useGeoViewStore(), (state) => state.drawerState.style);
 
