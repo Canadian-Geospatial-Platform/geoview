@@ -115,7 +115,8 @@
         "home",
         "location",
         "basemap-select",
-        "projection"
+        "projection",
+        "drawer"
       ]
     },
     "TypeNavBarProps": {

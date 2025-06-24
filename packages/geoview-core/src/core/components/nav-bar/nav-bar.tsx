@@ -1,8 +1,10 @@
-import { useCallback, useEffect, useRef, useState, Fragment, useMemo } from 'react';
+import { useCallback, useEffect, useRef, useState, Fragment, useMemo, isValidElement } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
+
+import { Plugin } from '@/api/plugin/plugin';
 
 import BasemapSelect from './buttons/basemap-select';
 import ZoomIn from './buttons/zoom-in';
@@ -16,8 +18,13 @@ import { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { getSxClasses } from './nav-bar-style';
 import { NavBarApi, NavBarCreatedEvent, NavBarRemovedEvent } from '@/core/components';
 import { useUINavbarComponents } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from './nav-bar-panel-button';
+
+import { toJsonObject } from '@/api/config/types/config-types';
+import { TypeValidNavBarProps } from '@/api/config/types/map-schema-types';
+import { api } from '@/app';
 
 type NavBarProps = {
   api: NavBarApi;
@@ -50,6 +57,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
   const { api: navBarApi } = props;
 
   // Hooks
+  const mapId = useGeoViewMapId();
   const { t } = useTranslation();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
@@ -96,25 +104,22 @@ export function NavBar(props: NavBarProps): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navBarComponents]);
 
-  const handleNavApiAddButtonPanel = useCallback(
-    (sender: NavBarApi, event: NavBarCreatedEvent) => {
-      // Log
-      logger.logTraceUseCallback('NAV-BAR - addButtonPanel');
+  const handleNavApiAddButtonPanel = useCallback((sender: NavBarApi, event: NavBarCreatedEvent) => {
+    // Log
+    logger.logTraceUseCallback('NAV-BAR - addButtonPanel');
 
-      const newGroupDetails = {
+    setButtonPanelGroups((prevState) => {
+      const existingGroup = prevState[event.group] || {};
+
+      return {
+        ...prevState,
         [event.group]: {
+          ...existingGroup, // Spread existing buttons first
           [event.buttonPanelId]: event.buttonPanel,
-          ...buttonPanelGroups[event.group],
         },
       };
-
-      setButtonPanelGroups({
-        ...buttonPanelGroups,
-        ...newGroupDetails,
-      });
-    },
-    [buttonPanelGroups]
-  );
+    });
+  }, []);
 
   const handleNavApiRemoveButtonPanel = useCallback(
     (sender: NavBarApi, event: NavBarRemovedEvent) => {
@@ -130,6 +135,40 @@ export function NavBar(props: NavBarProps): JSX.Element {
     },
     [setButtonPanelGroups]
   );
+
+  // Add navbar plugins
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('NAV-BAR - navBarComponents');
+
+    const processPlugin = (pluginName: TypeValidNavBarProps): void => {
+      // Check if the plugin is in navBarComponents but not in corePackages
+      if (navBarComponents.includes(pluginName)) {
+        Plugin.loadScript(pluginName)
+          .then((typePlugin) => {
+            Plugin.addPlugin(
+              pluginName,
+              mapId,
+              typePlugin,
+              toJsonObject({
+                mapId,
+                viewer: api.getMapViewer(mapId),
+              })
+            ).catch((error: unknown) => {
+              // Log
+              logger.logPromiseFailed(`api.plugin.addPlugin in useEffect in nav-bar for ${pluginName}`, error);
+            });
+          })
+          .catch((error: unknown) => {
+            // Log
+            logger.logPromiseFailed('api.plugin.loadScript in useEffect in nav-bar', error);
+          });
+      }
+    };
+
+    // Process drawer plugin if it's in the navBar
+    processPlugin('drawer');
+  }, [navBarComponents, mapId]);
 
   useEffect(() => {
     // Log
@@ -154,6 +193,13 @@ export function NavBar(props: NavBarProps): JSX.Element {
     if (!buttonPanel.button.visible) {
       return null;
     }
+
+    // GV This is specific for NavBar Button Plugins
+    // Check if children is a React component that returns a button and return that
+    if (isValidElement(buttonPanel.button.children) && !buttonPanel.panel) {
+      return <Fragment key={`${key}-component`}>{buttonPanel.button.children}</Fragment>;
+    }
+
     return (
       <Fragment key={`${key}-component`}>
         {!buttonPanel.panel ? (

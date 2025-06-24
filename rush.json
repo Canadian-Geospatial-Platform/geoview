@@ -43,6 +43,10 @@
       "projectFolder": "packages/geoview-time-slider"
     },
     {
+      "packageName": "geoview-drawer",
+      "projectFolder": "packages/geoview-drawer"
+    },
+    {
       "packageName": "eslint-and-prettier-config",
       "projectFolder": "packages"
     }
