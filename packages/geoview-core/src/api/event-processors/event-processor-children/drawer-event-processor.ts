@@ -1,14 +1,15 @@
 import { Feature, Overlay } from 'ol';
-import { LineString, Polygon, Point, Circle as CircleGeom, Geometry } from 'ol/geom';
+import { LineString, Polygon, Point, Circle as CircleGeom, Geometry, SimpleGeometry } from 'ol/geom';
 import { Style, Stroke, Fill, Circle } from 'ol/style';
 import { getArea, getLength } from 'ol/sphere';
-import { DrawEvent } from 'ol/interaction/Draw';
+import { DrawEvent, GeometryFunction, SketchCoordType, createBox } from 'ol/interaction/Draw';
 import { IDrawerState, StyleProps } from '@/core/stores/store-interface-and-intial-values/drawer-state';
 // import { logger } from '@/core/utils/logger';
 
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { MapEventProcessor } from './map-event-processor';
 import { MapViewerNotFoundError } from '@/core/exceptions/geoview-exceptions';
+import { Draw } from '@/app';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -35,6 +36,20 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     return super.getState(mapId).drawerState;
   }
 
+  static #getLengthText(length: number): string {
+    if (length > 100) {
+      return `${Math.round((length / 1000) * 100) / 100} km`;
+    }
+    return `${Math.round(length * 100) / 100} m`;
+  }
+
+  static #getAreaText(area: number): string {
+    if (area > 10000) {
+      return `${Math.round((area / 1000000) * 100) / 100} km<sup>2</sup>`;
+    }
+    return `${Math.round(area * 100) / 100} m<sup>2</sup>`;
+  }
+
   static #createMeasureTooltip(feature: Feature<Geometry>, hideMeasurements: boolean): Overlay | undefined {
     // Get the measureTooltip for the feature if one alrady exists
     let measureTooltip = (feature.get('measureTooltip') as Overlay) || undefined;
@@ -49,22 +64,17 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     // Add measurement element (display: None)
     if (geom instanceof LineString) {
       const length = getLength(geom);
-      if (length > 100) {
-        output = `${Math.round((length / 1000) * 100) / 100} km`;
-      } else {
-        output = `${Math.round(length * 100) / 100} m`;
-      }
+      output = this.#getLengthText(length);
 
       tooltipCoord = geom.getLastCoordinate();
     }
 
     if (geom instanceof Polygon) {
+      const length = getLength(geom);
+      output = this.#getLengthText(length);
+
       const area = getArea(geom);
-      if (area > 10000) {
-        output = `${Math.round((area / 1000000) * 100) / 100} km<sup>2</sup>`;
-      } else {
-        output = `${Math.round(area * 100) / 100} m<sup>2</sup>`;
-      }
+      output += `<br>${this.#getAreaText(area)}`;
 
       tooltipCoord = geom.getInteriorPoint().getCoordinates();
       tooltipCoord.pop();
@@ -73,18 +83,19 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     if (geom instanceof CircleGeom) {
       // For Circle geometries, calculate area using π*r²
       const radius = geom.getRadius();
+      const length = 2 * Math.PI * radius;
+      output = this.#getLengthText(length);
+
       const area = Math.PI * radius * radius;
-      if (area > 10000) {
-        output = `${Math.round((area / 1000000) * 100) / 100} km<sup>2</sup>`;
-      } else {
-        output = `${Math.round(area * 100) / 100} m<sup>2</sup>`;
-      }
+      output += `<br>${this.#getAreaText(area)}`;
+
       tooltipCoord = geom.getCenter();
     }
     if (!output || !tooltipCoord) return undefined;
 
     const measureTooltipElement = document.createElement('div');
     measureTooltipElement.className = 'drawer-tooltip drawer-tooltip-measure';
+    measureTooltipElement.style.textAlign = 'center';
 
     measureTooltipElement.innerHTML = output;
     measureTooltipElement.hidden = hideMeasurements;
@@ -105,6 +116,38 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     feature.set('measureTooltip', measureTooltip);
     return measureTooltip;
   }
+
+  // Utility to convert SVG path to coordinates
+  static #svgPathToCoordinates = (pathData: string, center: number[], scale: number = 1): number[][] => {
+    const commands = pathData.match(/[MmLlHhVvCcSsQqTtAaZz][^MmLlHhVvCcSsQqTtAaZz]*/g) || [];
+    const coords: number[][] = [];
+    let currentPoint = [0, 0];
+
+    commands.forEach((cmd) => {
+      const type = cmd[0];
+      const values = cmd
+        .slice(1)
+        .trim()
+        .split(/[\s,]+/)
+        .map(Number)
+        .filter((n) => !Number.isNaN(n));
+
+      if (type === 'M' || type === 'L') {
+        for (let i = 0; i < values.length; i += 2) {
+          currentPoint = [values[i] * scale + center[0], values[i + 1] * scale + center[1]];
+          coords.push([...currentPoint]);
+        }
+      }
+    });
+
+    return coords;
+  };
+
+  // Create geometry from SVG
+  static #createSvgShape = (svgPath: string, center: number[], scale: number): number[][] => {
+    const coordinates = this.#svgPathToCoordinates(svgPath, center, scale);
+    return coordinates;
+  };
 
   /**
    * Starts a drawing operation with the specified geometry type
@@ -130,8 +173,44 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       this.stopDrawing(mapId);
     }
 
+    // Record of GeometryFunctions for creating custom geometries
+    const customGeometries: Record<string, GeometryFunction> = {
+      Star: (coordinates: SketchCoordType, geometry: SimpleGeometry): Polygon => {
+        const svgPath = 'M0,-20 L5.9,-6.2 L19.1,-6.2 L9.5,2.4 L15.4,16.2 L0,7.6 L-15.4,16.2 L-9.5,2.4 L-19.1,-6.2 L-5.9,-6.2 Z';
+        const center = coordinates[0] as number[];
+        const last = coordinates[1] as number[];
+        const radius = Math.sqrt((last[0] - center[0]) ** 2 + (last[1] - center[1]) ** 2);
+        const angle = Math.atan2(last[1] - center[1], last[0] - center[0]);
+        const baseCoords = this.#createSvgShape(svgPath, [0, 0], radius / 20);
+
+        // Apply rotation and translation
+        const rotatedCoords = baseCoords.map((point) => {
+          // Rotate point
+          const x = point[0] * Math.cos(angle) - point[1] * Math.sin(angle);
+          const y = point[0] * Math.sin(angle) + point[1] * Math.cos(angle);
+
+          // Translate to center
+          return [x + center[0], y + center[1]];
+        });
+
+        if (!geometry) {
+          // eslint-disable-next-line no-param-reassign
+          geometry = new Polygon([rotatedCoords]);
+        } else {
+          geometry.setCoordinates([rotatedCoords]);
+        }
+        return geometry as Polygon;
+      },
+      Rectangle: createBox(),
+    };
+
     // Initialize drawing interaction
-    const draw = viewer.initDrawInteractions(`draw-${currentGeomType}`, currentGeomType, currentStyle);
+    let draw: Draw;
+    if (currentGeomType in customGeometries) {
+      draw = viewer.initDrawInteractions(`draw-${currentGeomType}`, 'Circle', currentStyle, customGeometries[currentGeomType]);
+    } else {
+      draw = viewer.initDrawInteractions(`draw-${currentGeomType}`, currentGeomType, currentStyle);
+    }
 
     // Set up draw end event handler
     draw.onDrawEnd((_sender: unknown, event: DrawEvent): void => {

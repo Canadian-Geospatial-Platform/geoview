@@ -16,7 +16,7 @@ export interface GeometryPickerPanelProps {
 export function GeometryPickerButton(): JSX.Element {
   const { cgpv } = window as TypeWindow;
   const { useMemo } = cgpv.reactUtilities.react;
-  const { ShapeLineIcon, PlaceIcon, ShowChartIcon, RectangleIcon, CircleIcon } = cgpv.ui.elements;
+  const { ShapeLineIcon, PlaceIcon, ShowChartIcon, RectangleIcon, CircleIcon, StarIcon } = cgpv.ui.elements;
 
   const geomType = useDrawerActiveGeom();
   const style = useDrawerStyle();
@@ -31,7 +31,9 @@ export function GeometryPickerButton(): JSX.Element {
   if (geomType === 'Point') return <PlaceIcon sx={{ color: iconStyle.color }} stroke={iconStyle.stroke} />;
   if (geomType === 'LineString') return <ShowChartIcon sx={{ color: iconStyle.stroke }} />;
   if (geomType === 'Polygon') return <RectangleIcon sx={{ color: iconStyle.color }} stroke={iconStyle.stroke} />;
+  if (geomType === 'Rectangle') return <RectangleIcon sx={{ color: iconStyle.color }} stroke={iconStyle.stroke} />;
   if (geomType === 'Circle') return <CircleIcon sx={{ color: iconStyle.color }} stroke={iconStyle.stroke} />;
+  if (geomType === 'Star') return <StarIcon sx={{ color: iconStyle.color }} stroke={iconStyle.stroke} />;
   return <ShapeLineIcon sx={{ color: iconStyle.color }} stroke={iconStyle.stroke} />;
 }
 
@@ -45,7 +47,7 @@ export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JS
   const { cgpv } = window as TypeWindow;
   const { useCallback, useMemo } = cgpv.reactUtilities.react;
   const { IconButton, List, ListItem } = cgpv.ui.elements;
-  const { PlaceIcon, ShowChartIcon, RectangleIcon, CircleIcon } = cgpv.ui.elements;
+  const { PlaceIcon, ShowChartIcon, RectangleIcon, CircleIcon, StarIcon } = cgpv.ui.elements;
 
   const { geomTypes } = props;
 
@@ -104,10 +106,24 @@ export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JS
   }, [setActiveGeom]);
 
   /**
+   * Sets the current geometry type to Rectangle
+   */
+  const handleGeometrySelectRectangle = useCallback((): void => {
+    setActiveGeom('Rectangle');
+  }, [setActiveGeom]);
+
+  /**
    * Sets the current geometry type to Circle
    */
   const handleGeometrySelectCircle = useCallback((): void => {
     setActiveGeom('Circle');
+  }, [setActiveGeom]);
+
+  /**
+   * Sets the current geometry type to Star
+   */
+  const handleGeometrySelectStar = useCallback((): void => {
+    setActiveGeom('Star');
   }, [setActiveGeom]);
 
   return (
@@ -157,6 +173,21 @@ export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JS
           </IconButton>
         </ListItem>
       )}
+      {geomTypes?.includes('Rectangle') && (
+        <ListItem sx={sxClasses.listItem}>
+          <IconButton
+            id="button-rectangle"
+            tooltip={getLocalizedMessage(displayLanguage, 'drawer.rectangle')}
+            tooltipPlacement="left"
+            size="small"
+            onClick={handleGeometrySelectRectangle}
+            sx={sxClasses.iconButton}
+          >
+            <RectangleIcon sx={{ color: iconStyle.color }} stroke={iconStyle.stroke} />
+            {getLocalizedMessage(displayLanguage, 'drawer.rectangle')}
+          </IconButton>
+        </ListItem>
+      )}
       {geomTypes?.includes('Circle') && (
         <ListItem sx={sxClasses.listItem}>
           <IconButton
@@ -169,6 +200,21 @@ export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JS
           >
             <CircleIcon sx={{ color: iconStyle.color }} stroke={iconStyle.stroke} />
             {getLocalizedMessage(displayLanguage, 'drawer.circle')}
+          </IconButton>
+        </ListItem>
+      )}
+      {geomTypes?.includes('Star') && (
+        <ListItem sx={sxClasses.listItem}>
+          <IconButton
+            id="button-star"
+            tooltip={getLocalizedMessage(displayLanguage, 'drawer.star')}
+            tooltipPlacement="left"
+            size="small"
+            onClick={handleGeometrySelectStar}
+            sx={sxClasses.iconButton}
+          >
+            <StarIcon sx={{ color: iconStyle.color }} stroke={iconStyle.stroke} />
+            {getLocalizedMessage(displayLanguage, 'drawer.star')}
           </IconButton>
         </ListItem>
       )}
