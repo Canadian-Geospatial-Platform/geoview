@@ -113,9 +113,9 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
     activeGeom: 'Point',
     geomTypes: ['Point', 'LineString', 'Polygon', 'Circle'],
     style: {
-      fillColor: '#FFFFFF',
+      fillColor: 'rgba(252, 241, 0, 0.3)',
       strokeColor: '#000000',
-      strokeWidth: 2,
+      strokeWidth: 1.3,
     },
     drawInstance: undefined,
     isEditing: false,
