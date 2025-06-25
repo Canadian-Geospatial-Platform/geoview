@@ -574,6 +574,16 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
+   * Reload layer.
+   * @param {string} mapId - The ID of the map.
+   * @param {string} layerPath - The layer path of the layer to reload.
+   */
+  static reloadLayer(mapId: string, layerPath: string): void {
+    // Delete layer through layer API
+    MapEventProcessor.getMapViewerLayerAPI(mapId).reloadLayer(layerPath);
+  }
+
+  /**
    * Refresh layer and reset states.
    * @param {string} mapId - The ID of the map.
    * @param {string} layerPath - The layer path of the layer to refresh.

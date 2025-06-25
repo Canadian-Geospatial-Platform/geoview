@@ -288,14 +288,14 @@ export abstract class ConfigBaseClass {
 
     // If at least one layer is loading
     if (siblingsInLoading.length > 0) {
-      // Set the parent layer status as loaded
+      // Set the parent layer status as loading
       currentConfig.parentLayerConfig.setLayerStatusLoading();
       // Continue with the parent
       ConfigBaseClass.#updateLayerStatusParentRec(currentConfig.parentLayerConfig);
       return;
     }
 
-    // Get all siblings which are in loaded
+    // Get all siblings which are loaded
     const siblingsInLoaded = siblings.filter((lyrConfig) => lyrConfig.layerStatus === 'loaded');
 
     // If all siblings are loaded
@@ -307,10 +307,10 @@ export abstract class ConfigBaseClass {
       return;
     }
 
-    // Get all siblings which are in error
-    const siblingsInError = siblings.filter((lyrConfig) => lyrConfig.layerStatus === 'error');
+    // Get all siblings which are in error or loaded
+    const siblingsInError = siblings.filter((lyrConfig) => lyrConfig.layerStatus === 'error' || lyrConfig.layerStatus === 'loaded');
 
-    // If all siblings are in fact in error
+    // If all siblings are in fact in error or loaded
     if (siblings.length === siblingsInError.length) {
       // Set the parent layer status as error
       currentConfig.parentLayerConfig.setLayerStatusError();
