@@ -1,6 +1,10 @@
 import { TypeWindow } from 'geoview-core';
 import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
-import { useDrawerActions, useDrawerActiveGeom } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
+import {
+  useDrawerActions,
+  useDrawerActiveGeom,
+  useDrawerStyle,
+} from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 
 // import { logger } from 'geoview-core/core/utils/logger';
@@ -11,15 +15,24 @@ export interface GeometryPickerPanelProps {
 
 export function GeometryPickerButton(): JSX.Element {
   const { cgpv } = window as TypeWindow;
+  const { useMemo } = cgpv.reactUtilities.react;
   const { ShapeLineIcon, PlaceIcon, ShowChartIcon, RectangleIcon, CircleIcon } = cgpv.ui.elements;
 
   const geomType = useDrawerActiveGeom();
+  const style = useDrawerStyle();
+  const iconStyle = useMemo(
+    () => ({
+      color: style.fillColor,
+      stroke: style.strokeColor,
+    }),
+    [style]
+  );
 
-  if (geomType === 'Point') return <PlaceIcon />;
-  if (geomType === 'LineString') return <ShowChartIcon />;
-  if (geomType === 'Polygon') return <RectangleIcon />;
-  if (geomType === 'Circle') return <CircleIcon />;
-  return <ShapeLineIcon />;
+  if (geomType === 'Point') return <PlaceIcon sx={{ color: iconStyle.color }} stroke={iconStyle.stroke} />;
+  if (geomType === 'LineString') return <ShowChartIcon sx={{ color: iconStyle.stroke }} />;
+  if (geomType === 'Polygon') return <RectangleIcon sx={{ color: iconStyle.color }} stroke={iconStyle.stroke} />;
+  if (geomType === 'Circle') return <CircleIcon sx={{ color: iconStyle.color }} stroke={iconStyle.stroke} />;
+  return <ShapeLineIcon sx={{ color: iconStyle.color }} stroke={iconStyle.stroke} />;
 }
 
 /**
@@ -30,7 +43,7 @@ export function GeometryPickerButton(): JSX.Element {
 export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Element {
   // const { geomTypes } = props;
   const { cgpv } = window as TypeWindow;
-  const { useCallback } = cgpv.reactUtilities.react;
+  const { useCallback, useMemo } = cgpv.reactUtilities.react;
   const { IconButton, List, ListItem } = cgpv.ui.elements;
   const { PlaceIcon, ShowChartIcon, RectangleIcon, CircleIcon } = cgpv.ui.elements;
 
@@ -41,6 +54,33 @@ export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JS
 
   // Store actions
   const { setActiveGeom } = useDrawerActions();
+  const style = useDrawerStyle();
+
+  const iconStyle = useMemo(
+    () => ({
+      color: style.fillColor,
+      stroke: style.strokeColor,
+    }),
+    [style]
+  );
+
+  // Styles
+  const sxClasses = {
+    list: {
+      p: 1,
+    },
+    listItem: {
+      p: 0.5,
+      justifyContent: 'center',
+    },
+    iconButton: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 0.5,
+      minWidth: '80px',
+      textAlign: 'center',
+    },
+  };
 
   /**
    * Sets the current geometry type to Point
@@ -71,59 +111,63 @@ export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JS
   }, [setActiveGeom]);
 
   return (
-    <List>
+    <List sx={sxClasses.list}>
       {geomTypes?.includes('Point') && (
-        <ListItem>
+        <ListItem sx={sxClasses.listItem}>
           <IconButton
             id="button-point"
             tooltip={getLocalizedMessage(displayLanguage, 'drawer.point')}
             tooltipPlacement="left"
             size="small"
             onClick={handleGeometrySelectPoint}
+            sx={sxClasses.iconButton}
           >
-            <PlaceIcon />
+            <PlaceIcon sx={{ color: iconStyle.color }} stroke={iconStyle.stroke} />
             {getLocalizedMessage(displayLanguage, 'drawer.point')}
           </IconButton>
         </ListItem>
       )}
       {geomTypes?.includes('LineString') && (
-        <ListItem>
+        <ListItem sx={sxClasses.listItem}>
           <IconButton
             id="button-linestring"
             tooltip={getLocalizedMessage(displayLanguage, 'drawer.linestring')}
             tooltipPlacement="left"
             size="small"
             onClick={handleGeometrySelectLineString}
+            sx={sxClasses.iconButton}
           >
-            <ShowChartIcon />
+            <ShowChartIcon sx={{ color: iconStyle.stroke }} />
             {getLocalizedMessage(displayLanguage, 'drawer.linestring')}
           </IconButton>
         </ListItem>
       )}
       {geomTypes?.includes('Polygon') && (
-        <ListItem>
+        <ListItem sx={sxClasses.listItem}>
           <IconButton
             id="button-polygon"
             tooltip={getLocalizedMessage(displayLanguage, 'drawer.polygon')}
             tooltipPlacement="left"
             size="small"
             onClick={handleGeometrySelectPolygon}
+            sx={sxClasses.iconButton}
           >
-            <RectangleIcon />
+            <RectangleIcon sx={{ color: iconStyle.color }} stroke={iconStyle.stroke} />
             {getLocalizedMessage(displayLanguage, 'drawer.polygon')}
           </IconButton>
         </ListItem>
       )}
       {geomTypes?.includes('Circle') && (
-        <ListItem>
+        <ListItem sx={sxClasses.listItem}>
           <IconButton
             id="button-circle"
             tooltip={getLocalizedMessage(displayLanguage, 'drawer.circle')}
             tooltipPlacement="left"
             size="small"
             onClick={handleGeometrySelectCircle}
+            sx={sxClasses.iconButton}
           >
-            <CircleIcon />
+            <CircleIcon sx={{ color: iconStyle.color }} stroke={iconStyle.stroke} />
             {getLocalizedMessage(displayLanguage, 'drawer.circle')}
           </IconButton>
         </ListItem>

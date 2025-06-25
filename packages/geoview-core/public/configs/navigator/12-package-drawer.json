@@ -32,7 +32,7 @@
   "corePackagesConfig": [{
     "drawer": {
       "style": {
-        "fillColor": "#3366ff",
+        "fillColor": "rgba(252, 241, 0, 0.3)",
         "strokeColor": "#000000",
         "strokeWidth": 1.3
       },
