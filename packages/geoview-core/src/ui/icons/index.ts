@@ -101,6 +101,7 @@ export {
   ShapeLine as ShapeLineIcon,
   ShowChart as ShowChartIcon,
   Signpost as SignpostIcon,
+  Star as StarIcon,
   Storage as StorageIcon,
   Straighten as StraightenIcon,
   SwitchRight as SwitchRightIcon,

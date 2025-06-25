@@ -1,6 +1,6 @@
 import { Type as OLGeomType } from 'ol/geom/Geometry';
 import { Draw as OLDraw } from 'ol/interaction';
-import { DrawEvent as OLDrawEvent, Options as OLDrawOptions } from 'ol/interaction/Draw';
+import { GeometryFunction, DrawEvent as OLDrawEvent, Options as OLDrawOptions } from 'ol/interaction/Draw';
 import { FlatStyle } from 'ol/style/flat';
 
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
@@ -17,6 +17,7 @@ export type DrawOptions = InteractionOptions & {
   freehand?: boolean;
   type?: string; // TODO: Refactor - Utiliser un type dans geometry-types comme TypeVectorKeys, en changeant ceux-ci pour s'assoir sur les types OL: https://openlayers.org/en/latest/apidoc/module-ol_geom_Geometry.html#~Type
   style?: TypeFeatureStyle;
+  geometryFunction?: GeometryFunction;
 };
 
 /**
@@ -56,6 +57,8 @@ export class Draw extends Interaction {
       type: (options.type as OLGeomType) || 'Polygon',
       style: convertTypeFeatureStyleToOpenLayersStyle(options.style) as FlatStyle,
       freehand: options.freehand,
+      stopClick: true,
+      geometryFunction: options.geometryFunction,
     };
 
     // Instantiate the OpenLayers Draw interaction

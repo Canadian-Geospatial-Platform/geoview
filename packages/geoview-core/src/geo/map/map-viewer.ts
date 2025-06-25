@@ -13,6 +13,7 @@ import { Projection as OLProjection } from 'ol/proj';
 import { Condition } from 'ol/events/condition';
 import { shared as iconImageCache } from 'ol/style/IconImageCache';
 import { Size } from 'ol/size';
+import { GeometryFunction } from 'ol/interaction/Draw';
 
 import queryString from 'query-string';
 import {
@@ -1024,13 +1025,14 @@ export class MapViewer {
    * @param {string} type - The type of geometry to draw (Polygon, LineString, Circle, etc)
    * @param {TypeFeatureStyle} styles - The styles for the drawing
    */
-  initDrawInteractions(geomGroupKey: string, type: string, style: TypeFeatureStyle): Draw {
+  initDrawInteractions(geomGroupKey: string, type: string, style: TypeFeatureStyle, geometryFunction?: GeometryFunction): Draw {
     // Create the Draw component
     const draw = new Draw({
       mapViewer: this,
       geometryGroupKey: geomGroupKey,
       type,
       style,
+      geometryFunction,
     });
     draw.startInteraction();
     return draw;
