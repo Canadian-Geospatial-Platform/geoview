@@ -24,6 +24,7 @@ export type TypeDrawerConfig = {
   activeGeom?: string;
   geomTypes?: string[];
   style?: StyleProps;
+  hideMeasurements?: boolean;
 };
 
 type TypeNavBarPackageConfig = {
@@ -145,6 +146,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
               ...init.style,
               ...(drawerConfig.style || {}),
             },
+            hideMeasurements: drawerConfig.hideMeasurements || init.hideMeasurements
           },
         });
       }
