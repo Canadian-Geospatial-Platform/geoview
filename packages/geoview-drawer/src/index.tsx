@@ -12,15 +12,6 @@ import { createDrawerButtons } from './draw-navbar';
 // Import css styles
 import './measurement-styles.css';
 
-// TODO Optional: Install package - MUI Colour Picker
-// TO.DO Add support for RGBA instead of just Hex to handle transparency
-// TO.DO Draw mouse icon lags behind cursor
-// TO.DO Export drawings
-// TO.DO Other interactions: Snap, Translate, Scale / Rotate (not actually a built in interaction)
-// TO.DO Optional: Make the geometry icon in the geometry picker match the style colours (Fill / Outline)
-// TO.DO Better Styling in panels ( change geometry and style button panels )
-// TO.DO Measurements between segments too (for lines, maybe polygons?)
-
 /**
  * Create a class for the plugin instance
  */
