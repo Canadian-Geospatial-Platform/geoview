@@ -16,7 +16,9 @@
         "Point",
         "LineString",
         "Polygon",
-        "Circle"
+        "Rectangle",
+        "Circle",
+        "Star"
       ]
     },
     "geomTypes": {
@@ -28,9 +30,15 @@
           "Point",
           "LineString",
           "Polygon",
-          "Circle"
+          "Rectangle",
+          "Circle",
+          "Star"
         ]
       }
+    },
+    "hideMeasurements": {
+      "description": "Whether to hide measurements or not.",
+      "type": "boolean"
     },
     "version": {
       "description": "The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by this version of the viewer.",
