@@ -146,7 +146,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
               ...init.style,
               ...(drawerConfig.style || {}),
             },
-            hideMeasurements: drawerConfig.hideMeasurements || init.hideMeasurements
+            hideMeasurements: drawerConfig.hideMeasurements || init.hideMeasurements,
           },
         });
       }
