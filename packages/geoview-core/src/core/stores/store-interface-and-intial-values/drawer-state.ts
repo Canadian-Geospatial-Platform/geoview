@@ -121,7 +121,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
     isEditing: false,
     editInstances: {},
     measureOverlays: [],
-    hideMeasurements: false,
+    hideMeasurements: true,
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
       const configObj = geoviewConfig.corePackagesConfig?.find((config) =>
         Object.keys(config).includes('drawer')
