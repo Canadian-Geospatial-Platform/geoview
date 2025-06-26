@@ -143,12 +143,6 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     return coords;
   };
 
-  // Create geometry from SVG
-  static #createSvgShape = (svgPath: string, center: number[], scale: number): number[][] => {
-    const coordinates = this.#svgPathToCoordinates(svgPath, center, scale);
-    return coordinates;
-  };
-
   /**
    * Starts a drawing operation with the specified geometry type
    * @param {string} mapId The map ID
@@ -181,7 +175,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
         const last = coordinates[1] as number[];
         const radius = Math.sqrt((last[0] - center[0]) ** 2 + (last[1] - center[1]) ** 2);
         const angle = Math.atan2(last[1] - center[1], last[0] - center[0]);
-        const baseCoords = this.#createSvgShape(svgPath, [0, 0], radius / 20);
+        const baseCoords = this.#svgPathToCoordinates(svgPath, [0, 0], radius / 20);
 
         // Apply rotation and translation
         const rotatedCoords = baseCoords.map((point) => {
