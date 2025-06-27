@@ -132,7 +132,7 @@ export const loadDatasources = (
 ): GeoViewGeoChartConfig<ChartType> => {
   // The new Plugin input to be returned
   // Cloning it in the process to make sure we're detaching ourselves from the configuration plugin object
-  const retConfigChart: GeoViewGeoChartConfig<ChartType> = Object.assign({}, configChart);
+  const retConfigChart: GeoViewGeoChartConfig<ChartType> = { ...configChart };
 
   // If there's no datasources associated with the chart config, figure it out!
   if (!retConfigChart.datasources) {
