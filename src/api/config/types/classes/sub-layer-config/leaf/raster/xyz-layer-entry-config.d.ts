@@ -50,3 +50,4 @@ export declare class XyzLayerEntryConfig extends AbstractBaseLayerEntryConfig {
      */
     protected parseLayerMetadata(): void;
 }
+//# sourceMappingURL=xyz-layer-entry-config.d.ts.map

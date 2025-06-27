@@ -9,3 +9,4 @@ export default i18n;
  * @throws {Error} If initialization fails
  */
 export declare const createI18nInstance: (language: TypeDisplayLanguage) => Promise<typeof i18n>;
+//# sourceMappingURL=i18n.d.ts.map

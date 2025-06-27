@@ -4,3 +4,4 @@
  * @returns {JSX.Element} the created home button
  */
 export default function Home(): JSX.Element;
+//# sourceMappingURL=home.d.ts.map

@@ -36,3 +36,4 @@ import { CircularProgressProps } from '@mui/material';
 declare function CircularProgressBaseUI(props: CircularProgressProps): JSX.Element;
 export declare const CircularProgressBase: typeof CircularProgressBaseUI;
 export {};
+//# sourceMappingURL=circular-progress-base.d.ts.map

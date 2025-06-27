@@ -40,3 +40,4 @@ export interface AutocompletePropsExtend<T, Multiple extends boolean | undefined
 declare function AutocompleteUI<T, Multiple extends boolean | undefined = undefined, DisableClearable extends boolean | undefined = undefined, FreeSolo extends boolean | undefined = undefined>(props: AutocompletePropsExtend<T, Multiple, DisableClearable, FreeSolo>, ref: Ref<HTMLElement>): JSX.Element;
 export declare const Autocomplete: typeof AutocompleteUI;
 export {};
+//# sourceMappingURL=autocomplete.d.ts.map

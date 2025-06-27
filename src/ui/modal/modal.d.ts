@@ -110,3 +110,4 @@ export interface ModalActionsType {
 declare function ModalUI(props: DialogPropsExtend): JSX.Element;
 export declare const Modal: typeof ModalUI;
 export {};
+//# sourceMappingURL=modal.d.ts.map

@@ -47,6 +47,34 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
      */
     abstract onGetBounds(projection: OLProjection, stops: number): Extent | undefined;
     /**
+     * Overrides the get of the OpenLayers Layer
+     * @returns {Layer} The OpenLayers Layer
+     */
+    getOLLayer(): Layer;
+    /**
+     * Gets the layer configuration associated with the layer.
+     * @returns {AbstractBaseLayerEntryConfig} The layer configuration
+     */
+    getLayerConfig(): AbstractBaseLayerEntryConfig;
+    /**
+     * Overrides the way the attributions are retrieved.
+     * @returns {string[]} The layer attributions
+     */
+    onGetAttributions(): string[];
+    /**
+     * Overrides the refresh function to refresh the layer source.
+     * @param {OLProjection | undefined} projection - Optional, the projection to refresh to.
+     */
+    onRefresh(projection: OLProjection | undefined): void;
+    /**
+     * Overridable function that gets the extent of an array of features.
+     * @param {string[]} objectIds - The IDs of the features to calculate the extent from.
+     * @param {OLProjection} outProjection - The output projection for the extent.
+     * @param {string} outfield - ID field to return for services that require a value in outfields.
+     * @returns {Promise<Extent>} The extent of the features, if available
+     */
+    protected onGetExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent>;
+    /**
      * Initializes the GVLayer. This function checks if the source is ready and if so it calls onLoaded() to pursue initialization of the layer.
      * If the source isn't ready, it registers to the source ready event to pursue initialization of the layer once its source is ready.
      */
@@ -73,20 +101,10 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
      */
     protected onImageLoadError(event: unknown): void;
     /**
-     * Overrides the get of the OpenLayers Layer
-     * @returns {Layer} The OpenLayers Layer
-     */
-    getOLLayer(): Layer;
-    /**
      * Gets the OpenLayers Layer Source
      * @returns The OpenLayers Layer Source
      */
     getOLSource(): Source;
-    /**
-     * Gets the layer configuration associated with the layer.
-     * @returns {AbstractBaseLayerEntryConfig} The layer configuration
-     */
-    getLayerConfig(): AbstractBaseLayerEntryConfig;
     /**
      * Gets the hit tolerance associated with the layer.
      * @returns {number} The hit tolerance
@@ -110,11 +128,6 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
      */
     getBounds(projection: OLProjection, stops: number): Extent | undefined;
     /**
-     * Gets the layer attributions
-     * @returns {string[]} The layer attributions
-     */
-    getAttributions(): string[];
-    /**
      * Gets the temporal dimension that is associated to the layer.
      * @returns {TimeDimension | undefined} The temporal dimension associated to the layer or undefined.
      */
@@ -136,25 +149,13 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
      */
     getInVisibleRange(currentZoom: number | undefined): boolean;
     /**
-     * Emits a layer-specific message event with localization support
-     * @protected
-     * @param {string} messageKey - The key used to lookup the localized message OR message
-     * @param {string[]} messageParams - Array of parameters to be interpolated into the localized message
-     * @param {SnackbarType} messageType - The message type
-     * @param {boolean} [notification=false] - Whether to show this as a notification. Defaults to false
-     * @returns {void}
-     *
-     * @example
-     * this.emitMessage(
-     *   'layers.fetchProgress',
-     *   ['50', '100'],
-     *   messageType: 'error',
-     *   true
-     * );
-     *
-     * @fires LayerMessageEvent
+     * Gets the extent of an array of features.
+     * @param {string[]} objectIds - The IDs of the features to calculate the extent from.
+     * @param {OLProjection} outProjection - The output projection for the extent.
+     * @param {string} outfield - ID field to return for services that require a value in outfields.
+     * @returns {Promise<Extent>} The extent of the features, if available
      */
-    protected emitMessage(messageKey: string, messageParams: string[], messageType?: SnackbarType, notification?: boolean): void;
+    getExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent>;
     /**
      * Returns feature information for the layer specified.
      * @param {OLMap} map - The Map to get feature info from.
@@ -268,6 +269,26 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
      * @returns {string | undefined} The filter associated to the layer or undefined.
      */
     getLayerFilter(): string | undefined;
+    /**
+     * Emits a layer-specific message event with localization support
+     * @protected
+     * @param {string} messageKey - The key used to lookup the localized message OR message
+     * @param {string[]} messageParams - Array of parameters to be interpolated into the localized message
+     * @param {SnackbarType} messageType - The message type
+     * @param {boolean} [notification=false] - Whether to show this as a notification. Defaults to false
+     * @returns {void}
+     *
+     * @example
+     * this.emitMessage(
+     *   'layers.fetchProgress',
+     *   ['50', '100'],
+     *   messageType: 'error',
+     *   true
+     * );
+     *
+     * @fires LayerMessageEvent
+     */
+    protected emitMessage(messageKey: string, messageParams: string[], messageType?: SnackbarType, notification?: boolean): void;
     /**
      * Initializes common properties on a layer options.
      * @param {Options} layerOptions - The layer options to initialize
@@ -436,3 +457,4 @@ export type LayerMessageEvent = {
  * Define a delegate for the event handler function signature
  */
 export type LayerMessageDelegate = EventDelegateBase<AbstractGVLayer, LayerMessageEvent, void>;
+//# sourceMappingURL=abstract-gv-layer.d.ts.map

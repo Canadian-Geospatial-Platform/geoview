@@ -37,3 +37,4 @@ export type TypeIconStyle = {
 export interface TypeFeatureCircleStyle extends TypeFeatureStyle {
     radius?: number;
 }
+//# sourceMappingURL=geometry-types.d.ts.map

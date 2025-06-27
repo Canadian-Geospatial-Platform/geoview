@@ -1,5 +1,5 @@
 import { GeoChartConfig } from '@/core/utils/config/reader/uuid-config-reader';
-import { TypeQueryStatus, TypeResultSet, TypeResultSetEntry } from '@/api/config/types/map-schema-types';
+import { TypeFeatureInfoEntry, TypeQueryStatus, TypeResultSet, TypeResultSetEntry } from '@/api/config/types/map-schema-types';
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 type GeochartActions = IGeochartState['actions'];
 export interface IGeochartState {
@@ -32,6 +32,7 @@ export interface IGeochartState {
 export declare function initializeGeochartState(set: TypeSetStore, get: TypeGetStore): IGeochartState;
 export type GeoChartResultInfo = {
     queryStatus: TypeQueryStatus;
+    features: TypeFeatureInfoEntry[] | undefined | null;
 };
 export type GeoChartStoreByLayerPath = {
     [layerPath: string]: GeoChartConfig;
@@ -44,3 +45,4 @@ export declare const useGeochartLayerDataArrayBatch: () => TypeGeochartResultSet
 export declare const useGeochartSelectedLayerPath: () => string;
 export declare const useGeochartStoreActions: () => GeochartActions;
 export {};
+//# sourceMappingURL=geochart-state.d.ts.map

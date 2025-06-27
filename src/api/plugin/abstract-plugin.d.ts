@@ -1,6 +1,7 @@
-import React from 'react';
-import i18next from 'react-i18next';
-import { useTheme } from '@mui/material/styles';
+import type * as React from 'react';
+import type { createRoot } from 'react-dom/client';
+import type i18next from 'react-i18next';
+import type { useTheme } from '@mui/material/styles';
 import { API } from '@/api/api';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { TypeJsonObject, AnySchemaObject } from '@/api/config/types/config-types';
@@ -9,25 +10,37 @@ import { TypeJsonObject, AnySchemaObject } from '@/api/config/types/config-types
  */
 export type TypePluginOptions = {
     mapId: string;
-    viewer?: MapViewer;
+    viewer: MapViewer;
 };
 /**
  * Plugin abstract base class.
  */
 export declare abstract class AbstractPlugin {
+    #private;
     pluginId: string;
     pluginProps: TypePluginOptions;
-    configObj: TypeJsonObject;
     api: API;
     react: typeof React;
+    createRoot: typeof createRoot;
+    useTheme: typeof useTheme;
     translate?: typeof i18next;
-    useTheme?: typeof useTheme;
     /**
-     * Constructs a Plugin
-     * @param pluginId string The plugin id
-     * @param props TypePluginOptions The plugin configuration options
+     * Creates an instance of the plugin.
+     * @param {string} pluginId - Unique identifier for the plugin instance.
+     * @param {TypePluginOptions} props - The plugin options and properties.
+     * @param {API} api - API object providing access to core functionality.
      */
-    constructor(pluginId: string, props: TypePluginOptions);
+    constructor(pluginId: string, props: TypePluginOptions, api: API);
+    /**
+     * Sets the config (which happens post creation)
+     * @param {TypeJsonObject} config - The config
+     */
+    setConfig(config: TypeJsonObject): void;
+    /**
+     * Gets the config
+     * @returns {unknown} The config
+     */
+    getConfig(): unknown;
     /**
      * Returns the MapViewer used by this Plugin
      * @returns MapViewer The MapViewer used by this Plugin
@@ -47,27 +60,33 @@ export declare abstract class AbstractPlugin {
      */
     abstract defaultConfig(): TypeJsonObject;
     /**
+     * Overridable function to get the translations object for the Plugin.
+     * @returns {TypeJsonObject} The translations object
+     */
+    defaultTranslations(): TypeJsonObject;
+    /**
      * Override this to do the actual adding
      */
-    abstract onAdd(): void;
+    protected abstract onAdd(): void;
     /**
      * Optionally override this to do something when done adding
      */
-    onAdded?(): void;
+    protected onAdded?(): void;
     /**
      * Override this to do the actual removal
      */
-    abstract onRemove(): void;
+    protected abstract onRemove(): void;
     /**
      * Optionally override this to do something when done being removed
      */
-    onRemoved?(): void;
+    protected onRemoved?(): void;
     /**
      * This function is called when the plugin is added, used for finalizing initialization. See plugin.addPlugin for details.
      */
-    added(): void;
+    add(): void;
     /**
      * This function is called when the plugin is removed, used for clean up. See plugin.addPlugin for details.
      */
-    removed(): void;
+    remove(): void;
 }
+//# sourceMappingURL=abstract-plugin.d.ts.map

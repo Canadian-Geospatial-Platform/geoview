@@ -7,3 +7,4 @@ interface LayerListProps {
 }
 export declare function LayersList({ layersList, showLayerDetailsPanel, isLayoutEnlarged, depth }: LayerListProps): JSX.Element;
 export {};
+//# sourceMappingURL=layers-list.d.ts.map

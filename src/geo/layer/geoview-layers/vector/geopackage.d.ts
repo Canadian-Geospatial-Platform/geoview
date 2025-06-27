@@ -91,3 +91,4 @@ export declare const layerConfigIsGeoPackage: (verifyIfLayer: TypeGeoviewLayerCo
  * @returns {boolean} true if the type ascention is valid.
  */
 export declare const geoviewEntryIsGeoPackage: (verifyIfGeoViewEntry: TypeLayerEntryConfig) => verifyIfGeoViewEntry is GeoPackageLayerEntryConfig;
+//# sourceMappingURL=geopackage.d.ts.map

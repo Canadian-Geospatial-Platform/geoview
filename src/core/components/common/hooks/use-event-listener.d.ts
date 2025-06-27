@@ -30,3 +30,4 @@
  * }, buttonRef.current);
  */
 export declare function useEventListener<T extends HTMLElement | Window = Window>(eventName: T extends Window ? keyof WindowEventMap : keyof HTMLElementEventMap, handler: T extends Window ? (event: WindowEventMap[keyof WindowEventMap]) => void : (event: HTMLElementEventMap[keyof HTMLElementEventMap]) => void, element?: T | null, enabled?: boolean): void;
+//# sourceMappingURL=use-event-listener.d.ts.map

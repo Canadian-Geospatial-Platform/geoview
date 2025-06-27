@@ -69,3 +69,4 @@ export declare class Draw extends Interaction {
  */
 type DrawDelegate = EventDelegateBase<Draw, OLDrawEvent, void>;
 export {};
+//# sourceMappingURL=draw.d.ts.map

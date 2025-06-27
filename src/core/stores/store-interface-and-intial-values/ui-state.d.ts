@@ -71,3 +71,4 @@ export declare const useUIFooterBarIsCollapsed: () => boolean;
 export declare const useUISelectedFooterLayerListItemId: () => string;
 export declare const useUIStoreActions: () => UIActions;
 export {};
+//# sourceMappingURL=ui-state.d.ts.map

@@ -25,3 +25,4 @@ export declare abstract class AbstractGVVectorTile extends AbstractGVLayer {
      */
     onGetBounds(projection: OLProjection, stops: number): Extent | undefined;
 }
+//# sourceMappingURL=abstract-gv-vector-tile.d.ts.map

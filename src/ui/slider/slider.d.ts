@@ -1,4 +1,5 @@
 import { CSSProperties, ReactNode } from 'react';
+import { SxProps, Theme } from '@mui/material/styles';
 import { Mark } from '@mui/base';
 /**
  * Properties for the Slider
@@ -9,6 +10,7 @@ type SliderProps = {
     value: Array<number> | number;
     className?: string;
     style?: CSSProperties;
+    sx?: SxProps<Theme>;
     onChange?: (value: number | number[], activeThumb: number) => void;
     onChangeCommitted?: (value: number | number[]) => void;
     onValueLabelFormat?: (value: number, index: number) => string;
@@ -32,3 +34,4 @@ type SliderProps = {
 declare function SliderUI(props: SliderProps): JSX.Element;
 export declare const Slider: typeof SliderUI;
 export {};
+//# sourceMappingURL=slider.d.ts.map

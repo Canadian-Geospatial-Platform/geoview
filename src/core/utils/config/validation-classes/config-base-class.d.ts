@@ -180,3 +180,4 @@ export type LayerStatusChangedEvent = {
  * Define a delegate for the event handler function signature.
  */
 export type LayerStatusChangedDelegate = EventDelegateBase<ConfigBaseClass, LayerStatusChangedEvent, void>;
+//# sourceMappingURL=config-base-class.d.ts.map

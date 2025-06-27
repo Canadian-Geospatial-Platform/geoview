@@ -8,3 +8,4 @@ export declare class WfsLayerEntryConfig extends VectorLayerEntryConfig {
      */
     constructor(layerConfig: WfsLayerEntryConfig);
 }
+//# sourceMappingURL=wfs-layer-entry-config.d.ts.map

@@ -54,3 +54,4 @@ declare class WorkerLogger {
  */
 export declare const createWorkerLogger: (prefix?: string) => WorkerLogger;
 export {};
+//# sourceMappingURL=logger-worker.d.ts.map

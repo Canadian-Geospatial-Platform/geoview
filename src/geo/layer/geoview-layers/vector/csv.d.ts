@@ -87,3 +87,4 @@ export declare const layerConfigIsCSV: (verifyIfLayer: TypeGeoviewLayerConfig) =
  * @returns {boolean} true if the type ascention is valid.
  */
 export declare const geoviewEntryIsCSV: (verifyIfGeoViewEntry: TypeLayerEntryConfig) => verifyIfGeoViewEntry is CsvLayerEntryConfig;
+//# sourceMappingURL=csv.d.ts.map

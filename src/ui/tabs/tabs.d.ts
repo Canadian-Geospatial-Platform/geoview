@@ -1,3 +1,4 @@
+import { Size } from 'ol/size';
 import { TabsProps, TabProps, BoxProps } from '@mui/material';
 import { TypeContainerBox } from '@/core/types/global-types';
 /**
@@ -36,6 +37,10 @@ export interface TypeTabsProps {
     onOpenKeyboard?: (uiFocus: FocusItemProps) => void;
     onCloseKeyboard?: () => void;
     containerType?: TypeContainerBox;
+    sideAppSize: Size;
+    appHeight: number;
+    hiddenTabs: string[];
+    isFullScreen: boolean;
 }
 /**
  * Create a tabs ui
@@ -46,3 +51,4 @@ export interface TypeTabsProps {
 declare function TabsUI(props: TypeTabsProps): JSX.Element;
 export declare const Tabs: typeof TabsUI;
 export {};
+//# sourceMappingURL=tabs.d.ts.map

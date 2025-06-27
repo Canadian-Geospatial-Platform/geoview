@@ -9,3 +9,4 @@ import { DataTableProps } from './data-table-types';
 declare function DataTable({ data, layerPath }: DataTableProps): JSX.Element;
 declare const _default: import("react").MemoExoticComponent<typeof DataTable>;
 export default _default;
+//# sourceMappingURL=data-table.d.ts.map

@@ -3,3 +3,4 @@
  * @returns {JSX.Element}
  */
 export declare const DetailsSkeleton: import("react").NamedExoticComponent<object>;
+//# sourceMappingURL=details-skeleton.d.ts.map

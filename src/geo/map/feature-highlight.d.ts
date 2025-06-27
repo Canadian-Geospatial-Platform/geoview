@@ -25,7 +25,7 @@ export declare class FeatureHighlight {
      */
     constructor(mapViewer: MapViewer);
     /**
-     * Initializes the FeatureHightlight with the MapViewer, now that the map is accessible inside the MapViewer.
+     * Initializes the FeatureHighlight with the MapViewer, now that the map is accessible inside the MapViewer.
      */
     init(): void;
     /**
@@ -54,3 +54,4 @@ export declare class FeatureHighlight {
      */
     removeBBoxHighlight(): void;
 }
+//# sourceMappingURL=feature-highlight.d.ts.map

@@ -82,3 +82,4 @@ export declare const layerConfigIsImageStatic: (verifyIfLayer: TypeGeoviewLayerC
  * @returns {boolean} true if the type ascention is valid.
  */
 export declare const geoviewEntryIsImageStatic: (verifyIfGeoViewEntry: TypeLayerEntryConfig) => verifyIfGeoViewEntry is ImageStaticLayerEntryConfig;
+//# sourceMappingURL=image-static.d.ts.map

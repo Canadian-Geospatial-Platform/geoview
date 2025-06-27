@@ -37,3 +37,4 @@ export declare class EsriFeatureLayerEntryConfig extends AbstractBaseEsriLayerEn
      */
     applyDefaultValues(): void;
 }
+//# sourceMappingURL=esri-feature-layer-entry-config.d.ts.map

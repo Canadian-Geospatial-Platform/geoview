@@ -7,3 +7,4 @@ type NavBarProps = {
  */
 export declare function NavBar(props: NavBarProps): JSX.Element;
 export {};
+//# sourceMappingURL=nav-bar.d.ts.map

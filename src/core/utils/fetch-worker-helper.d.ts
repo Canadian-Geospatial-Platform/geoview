@@ -16,3 +16,4 @@
  *   }, 3000);
  */
 export declare const fetchWithTimeout: <T>(url: string, init?: RequestInit, timeoutMs?: number) => Promise<T>;
+//# sourceMappingURL=fetch-worker-helper.d.ts.map

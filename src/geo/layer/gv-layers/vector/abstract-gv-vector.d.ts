@@ -98,7 +98,7 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
      * @param {string?} outfield - ID field to return for services that require a value in outfields.
      * @returns {Promise<Extent>} The extent of the features, if available.
      */
-    getExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent>;
+    onGetExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent>;
     /**
      * Sets the style applied flag indicating when a style has been applied for the AbstractGVVector via the style callback function.
      * @param {boolean} styleApplied - Indicates if the style has been applied on the AbstractGVVector.
@@ -148,3 +148,4 @@ export type StyleAppliedEvent = {
  * Define a delegate for the event handler function signature
  */
 export type StyleAppliedDelegate = EventDelegateBase<AbstractGVVector, StyleAppliedEvent, void>;
+//# sourceMappingURL=abstract-gv-vector.d.ts.map

@@ -6,3 +6,4 @@
  */
 export declare const useWhatChanged: (hookId: string, dependency?: unknown[], dependencyNames?: string[]) => void;
 export declare const usePerformanceMonitor: (componentName: string) => void;
+//# sourceMappingURL=useWhatChanged.d.ts.map

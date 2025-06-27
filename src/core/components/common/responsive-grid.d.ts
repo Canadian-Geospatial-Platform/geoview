@@ -17,3 +17,4 @@ export declare const ResponsiveGrid: {
     Right: import("react").ForwardRefExoticComponent<Omit<ResponsiveGridPanelProps, "ref"> & import("react").RefAttributes<unknown>>;
 };
 export {};
+//# sourceMappingURL=responsive-grid.d.ts.map

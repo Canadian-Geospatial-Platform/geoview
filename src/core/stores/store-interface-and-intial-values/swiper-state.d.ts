@@ -19,3 +19,4 @@ export declare function initializeSwiperState(set: TypeSetStore, get: TypeGetSto
 export declare const useSwiperLayerPaths: () => string[];
 export declare const useSwiperStoreActions: () => SwiperActions;
 export {};
+//# sourceMappingURL=swiper-state.d.ts.map

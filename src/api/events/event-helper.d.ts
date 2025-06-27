@@ -24,3 +24,4 @@ export default class EventHelper {
     static offEvent<T, U, Z>(handlersList: EventDelegateBase<T, U, Z>[], callback: EventDelegateBase<T, U, Z>): void;
 }
 export type EventDelegateBase<T, U, Z> = (sender: T, event: U) => Z;
+//# sourceMappingURL=event-helper.d.ts.map

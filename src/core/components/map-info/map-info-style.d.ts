@@ -5,3 +5,4 @@ import { SxStyles } from '@/ui/style/types';
  * @returns {Object} the sx classes object
  */
 export declare const getSxClasses: () => SxStyles;
+//# sourceMappingURL=map-info-style.d.ts.map

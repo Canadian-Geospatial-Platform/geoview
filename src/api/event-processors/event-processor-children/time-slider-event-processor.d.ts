@@ -85,3 +85,4 @@ export declare class TimeSliderEventProcessor extends AbstractEventProcessor {
      */
     static updateFilters(mapId: string, layerPath: string, defaultValue: string, field: string, filtering: boolean, minAndMax: number[], values: number[]): void;
 }
+//# sourceMappingURL=time-slider-event-processor.d.ts.map

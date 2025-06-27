@@ -53,3 +53,4 @@ export declare class JsonExportWorker extends AbstractWorker<JsonExportWorkerTyp
     process(chunk: TypeWorkerExportChunk[], isFirst: boolean): Promise<string>;
 }
 export {};
+//# sourceMappingURL=json-export-worker.d.ts.map

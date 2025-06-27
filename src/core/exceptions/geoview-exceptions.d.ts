@@ -42,6 +42,17 @@ export declare class MapViewerNotFoundError extends GeoViewError {
     constructor(mapId: string);
 }
 /**
+ * Error thrown when a map viewer with a specified ID already exists.
+ * @extends {GeoViewError}
+ */
+export declare class MapViewerAlreadyExistsError extends GeoViewError {
+    /**
+     * Creates an instance of MapViewerAlreadyExistsError.
+     * @param {string} mapId - The unique identifier of the map that was not found.
+     */
+    constructor(mapId: string);
+}
+/**
  * Error thrown when GeoView Store on a specific map ID is not found.
  * @extends {GeoViewError}
  */
@@ -166,3 +177,4 @@ export declare class InitMapWrongCallError extends GeoViewError {
      */
     constructor(mapId: string);
 }
+//# sourceMappingURL=geoview-exceptions.d.ts.map

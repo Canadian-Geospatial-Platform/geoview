@@ -25,3 +25,4 @@ export declare class WmsGroupLayerConfig extends GroupLayerEntryConfig {
      */
     protected parseLayerMetadata(): void;
 }
+//# sourceMappingURL=wms-group-layer-config.d.ts.map

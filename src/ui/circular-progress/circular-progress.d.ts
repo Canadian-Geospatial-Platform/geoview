@@ -53,3 +53,4 @@ export interface CircularProgressPropsExtend extends CircularProgressProps {
 declare function CircularProgressUI(props: CircularProgressPropsExtend): JSX.Element;
 export declare const CircularProgress: typeof CircularProgressUI;
 export {};
+//# sourceMappingURL=circular-progress.d.ts.map

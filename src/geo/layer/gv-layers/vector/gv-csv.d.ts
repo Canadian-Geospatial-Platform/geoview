@@ -15,3 +15,4 @@ export declare class GVCSV extends AbstractGVVector {
      */
     constructor(olSource: VectorSource, layerConfig: CsvLayerEntryConfig);
 }
+//# sourceMappingURL=gv-csv.d.ts.map

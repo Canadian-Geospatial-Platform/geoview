@@ -6,3 +6,4 @@ import { Theme } from '@mui/material/styles';
  * @returns {Object} the sx classes object
  */
 export declare const getSxClasses: (theme: Theme) => any;
+//# sourceMappingURL=export-modal-style.d.ts.map

@@ -91,3 +91,4 @@ export declare const layerConfigIsEsriDynamic: (verifyIfLayer: TypeGeoviewLayerC
  * @returns {boolean} true if the type ascention is valid.
  */
 export declare const geoviewEntryIsEsriDynamic: (verifyIfGeoViewEntry: TypeLayerEntryConfig) => verifyIfGeoViewEntry is EsriDynamicLayerEntryConfig;
+//# sourceMappingURL=esri-dynamic.d.ts.map

@@ -56,3 +56,4 @@ export declare class Translate extends Interaction {
  */
 type TranslateDelegate = EventDelegateBase<Translate, OLTranslateEvent, void>;
 export {};
+//# sourceMappingURL=translate.d.ts.map

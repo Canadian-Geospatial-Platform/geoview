@@ -17,3 +17,4 @@ export declare const NorthArrowIcon: import("react").NamedExoticComponent<NorthA
  */
 export declare const NorthPoleIcon: import("react").NamedExoticComponent<object>;
 export {};
+//# sourceMappingURL=north-arrow-icon.d.ts.map

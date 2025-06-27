@@ -27,3 +27,4 @@ export interface TypeMenuItemProps {
 }
 export declare const Select: import("react").ForwardRefExoticComponent<TypeSelectProps & import("react").RefAttributes<HTMLDivElement>>;
 export {};
+//# sourceMappingURL=select.d.ts.map

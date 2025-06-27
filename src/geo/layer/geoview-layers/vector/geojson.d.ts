@@ -98,3 +98,4 @@ export declare const layerConfigIsGeoJSON: (verifyIfLayer: TypeGeoviewLayerConfi
  * @returns {boolean} true if the type ascention is valid.
  */
 export declare const geoviewEntryIsGeoJSON: (verifyIfGeoViewEntry: TypeLayerEntryConfig) => verifyIfGeoViewEntry is GeoJSONLayerEntryConfig;
+//# sourceMappingURL=geojson.d.ts.map

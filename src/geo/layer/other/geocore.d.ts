@@ -20,3 +20,4 @@ export declare class GeoCore {
      */
     createLayersFromUUID(uuid: string, layerConfig?: GeoCoreLayerConfig): Promise<TypeGeoviewLayerConfig[]>;
 }
+//# sourceMappingURL=geocore.d.ts.map

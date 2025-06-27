@@ -49,3 +49,4 @@ export declare class FetchEsriWorker extends AbstractWorker<FetchEsriWorkerType>
      */
     process(queryParams: QueryParams): Promise<TypeJsonObject>;
 }
+//# sourceMappingURL=fetch-esri-worker.d.ts.map

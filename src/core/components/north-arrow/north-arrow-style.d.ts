@@ -15,3 +15,4 @@ interface NorthArrowStyles {
  */
 export declare const getSxClasses: (theme: Theme) => NorthArrowStyles;
 export {};
+//# sourceMappingURL=north-arrow-style.d.ts.map

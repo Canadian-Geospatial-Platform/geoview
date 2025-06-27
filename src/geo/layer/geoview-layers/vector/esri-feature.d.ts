@@ -95,3 +95,4 @@ export declare const layerConfigIsEsriFeature: (verifyIfLayer: TypeGeoviewLayerC
  * @returns {boolean} true if the type ascention is valid.
  */
 export declare const geoviewEntryIsEsriFeature: (verifyIfGeoViewEntry: TypeLayerEntryConfig) => verifyIfGeoViewEntry is EsriFeatureLayerEntryConfig;
+//# sourceMappingURL=esri-feature.d.ts.map

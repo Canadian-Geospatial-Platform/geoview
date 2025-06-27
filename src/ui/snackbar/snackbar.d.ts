@@ -52,3 +52,4 @@ interface SnackBarProps {
 declare function SnackbarUI(props: SnackBarProps): JSX.Element;
 export declare const Snackbar: typeof SnackbarUI;
 export {};
+//# sourceMappingURL=snackbar.d.ts.map

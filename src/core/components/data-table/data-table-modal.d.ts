@@ -4,3 +4,4 @@
  * @returns {JSX.Element} the data table modal component
  */
 export default function DataTableModal(): JSX.Element;
+//# sourceMappingURL=data-table-modal.d.ts.map

@@ -6,3 +6,4 @@ import { MappedLayerDataType } from '@/core/components/data-table/data-table-typ
  * @returns {MappedLayerDataType[]} layerData with columns.
  */
 export declare function useFeatureFieldInfos(layerData: TypeAllFeatureInfoResultSetEntry[]): MappedLayerDataType[];
+//# sourceMappingURL=useFeatureFieldInfos.d.ts.map

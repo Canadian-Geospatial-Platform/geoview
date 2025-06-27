@@ -14,3 +14,4 @@ export declare const getFocusTrapSxClasses: (theme: Theme) => SxStyles;
  * @returns {Object} the sx classes object
  */
 export declare const getShellSxClasses: (theme: Theme, appHeight: number) => SxStyles;
+//# sourceMappingURL=containers-style.d.ts.map

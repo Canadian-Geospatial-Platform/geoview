@@ -12,3 +12,4 @@ export declare abstract class AbstractGVTile extends AbstractGVLayer {
      */
     getOLLayer(): BaseTileLayer<TileSource, LayerRenderer<any>>;
 }
+//# sourceMappingURL=abstract-gv-tile.d.ts.map

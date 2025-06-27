@@ -4,3 +4,4 @@ export interface AddLayerTreeProps {
     onSelectedItemsChange(items: string[]): void;
 }
 export declare function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null;
+//# sourceMappingURL=add-layer-tree.d.ts.map

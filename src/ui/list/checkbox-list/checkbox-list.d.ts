@@ -23,3 +23,4 @@ export type CheckboxListItem = {
 declare function CheckboxListUI(props: CheckboxListProps): JSX.Element;
 export declare const CheckboxList: typeof CheckboxListUI;
 export {};
+//# sourceMappingURL=checkbox-list.d.ts.map

@@ -118,3 +118,4 @@ export declare const CONST_PANEL_TYPES: {
     APPBAR: string;
     NAVBAR: string;
 };
+//# sourceMappingURL=panel-types.d.ts.map

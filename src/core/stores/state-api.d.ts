@@ -8,11 +8,12 @@ import { EventDelegateBase } from '@/api/events/event-helper';
  */
 export declare class StateApi {
     #private;
+    /** The map id this StateApi belongs to */
     mapId: string;
     /**
      * Instantiates an StateApi class.
      *
-     * @param {string} mapId - The map id this AppBarApi belongs to
+     * @param {string} mapId - The map id this StateApi belongs to
      */
     constructor(mapId: string);
     /**
@@ -75,3 +76,4 @@ export type LayersReorderedEvent = {
     orderedLayers: TypeOrderedLayerInfo[];
 };
 export {};
+//# sourceMappingURL=state-api.d.ts.map

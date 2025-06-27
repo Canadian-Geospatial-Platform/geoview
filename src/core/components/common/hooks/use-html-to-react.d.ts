@@ -17,3 +17,4 @@ interface HtmlToReactProps {
  */
 export declare function UseHtmlToReact({ htmlContent, className, style, extraOptions, itemOptions }: HtmlToReactProps): JSX.Element;
 export {};
+//# sourceMappingURL=use-html-to-react.d.ts.map

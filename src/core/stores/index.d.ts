@@ -8,3 +8,4 @@ export * from './store-interface-and-intial-values/map-state';
 export * from './store-interface-and-intial-values/time-slider-state';
 export * from './store-interface-and-intial-values/ui-state';
 export { getGeoViewStore } from './stores-managers';
+//# sourceMappingURL=index.d.ts.map

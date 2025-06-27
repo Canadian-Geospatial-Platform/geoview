@@ -38,3 +38,4 @@ export interface TypeLegendLayer {
     opacityFromParent?: number;
     zoom?: number;
 }
+//# sourceMappingURL=types.d.ts.map

@@ -11,3 +11,4 @@ export declare function useGlobalFilter({ layerPath }: UseGlobalFilterProps): {
     globalFilter: string;
     setGlobalFilter: Dispatch<SetStateAction<string>>;
 };
+//# sourceMappingURL=useGlobalFilter.d.ts.map

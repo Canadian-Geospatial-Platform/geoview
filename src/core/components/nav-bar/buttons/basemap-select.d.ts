@@ -3,3 +3,4 @@
  * @returns {JSX.Element} the created basemap select button
  */
 export default function BasemapSelect(): JSX.Element;
+//# sourceMappingURL=basemap-select.d.ts.map

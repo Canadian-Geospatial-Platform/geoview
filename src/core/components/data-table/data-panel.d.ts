@@ -9,3 +9,4 @@ interface DataPanelType {
  */
 export declare function Datapanel({ fullWidth, containerType }: DataPanelType): JSX.Element;
 export {};
+//# sourceMappingURL=data-panel.d.ts.map

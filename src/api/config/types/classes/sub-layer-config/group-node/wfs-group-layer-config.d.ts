@@ -17,3 +17,4 @@ export declare class WfsGroupLayerConfig extends GroupLayerEntryConfig {
      */
     protected parseLayerMetadata(): void;
 }
+//# sourceMappingURL=wfs-group-layer-config.d.ts.map

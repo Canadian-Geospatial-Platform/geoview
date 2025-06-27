@@ -5,3 +5,4 @@ interface DeleteUndoButtonProps {
 }
 export declare function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element;
 export {};
+//# sourceMappingURL=delete-undo-button.d.ts.map

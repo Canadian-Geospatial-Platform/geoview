@@ -9,3 +9,4 @@ interface MapInfoExpandButtonProps {
  */
 export declare const MapInfoExpandButton: import("react").NamedExoticComponent<MapInfoExpandButtonProps>;
 export {};
+//# sourceMappingURL=map-info-expand-button.d.ts.map

@@ -55,3 +55,4 @@ export declare abstract class AbstractWorker<T> {
      */
     terminate(): void;
 }
+//# sourceMappingURL=abstract-worker.d.ts.map

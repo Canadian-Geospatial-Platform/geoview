@@ -9,3 +9,4 @@ export declare class CsvLayerEntryConfig extends VectorLayerEntryConfig {
      */
     constructor(layerConfig: CsvLayerEntryConfig);
 }
+//# sourceMappingURL=csv-layer-entry-config.d.ts.map

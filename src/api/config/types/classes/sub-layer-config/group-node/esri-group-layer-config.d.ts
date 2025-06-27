@@ -17,3 +17,4 @@ export declare class EsriGroupLayerConfig extends GroupLayerEntryConfig {
      */
     protected parseLayerMetadata(): void;
 }
+//# sourceMappingURL=esri-group-layer-config.d.ts.map

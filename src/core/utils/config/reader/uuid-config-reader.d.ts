@@ -30,3 +30,4 @@ export declare class UUIDmapConfigReader {
      */
     static getGVConfigFromUUIDs(baseUrl: string, lang: string, uuids: string[]): Promise<UUIDmapConfigReaderResponse>;
 }
+//# sourceMappingURL=uuid-config-reader.d.ts.map

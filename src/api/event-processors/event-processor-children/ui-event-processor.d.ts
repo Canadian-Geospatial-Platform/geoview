@@ -20,3 +20,4 @@ export declare class UIEventProcessor extends AbstractEventProcessor {
     static getActiveAppBarTab(mapId: string): ActiveAppBarTabType;
     static setFooterBarIsCollapsed(mapId: string, collapsed: boolean): void;
 }
+//# sourceMappingURL=ui-event-processor.d.ts.map

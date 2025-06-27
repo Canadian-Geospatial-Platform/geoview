@@ -12,3 +12,4 @@ interface ExportProps {
  */
 export default function ExportButton({ className, sxDetails }: ExportProps): JSX.Element;
 export {};
+//# sourceMappingURL=export-modal-button.d.ts.map

@@ -8,3 +8,4 @@ export declare class GeoPackageLayerEntryConfig extends VectorLayerEntryConfig {
      */
     constructor(layerConfig: GeoPackageLayerEntryConfig);
 }
+//# sourceMappingURL=geopackage-layer-config-entry.d.ts.map

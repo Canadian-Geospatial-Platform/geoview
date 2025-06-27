@@ -64,3 +64,4 @@ export declare class HoverFeatureInfoLayerSet extends AbstractLayerSet {
      */
     isHoverListenerEnabled(layerPath?: string): boolean | undefined;
 }
+//# sourceMappingURL=hover-feature-info-layer-set.d.ts.map

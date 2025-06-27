@@ -14,3 +14,4 @@ export declare const opacity: {
 };
 export declare const geoViewColors: IGeoViewColors;
 export declare const geoViewFontSizes: IGeoViewFontSizes;
+//# sourceMappingURL=default.d.ts.map

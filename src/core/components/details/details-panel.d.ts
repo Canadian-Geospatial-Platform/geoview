@@ -11,3 +11,4 @@ interface DetailsPanelType {
  */
 export declare function DetailsPanel({ fullWidth, containerType }: DetailsPanelType): JSX.Element;
 export {};
+//# sourceMappingURL=details-panel.d.ts.map

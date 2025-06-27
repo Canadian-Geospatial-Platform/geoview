@@ -46,3 +46,4 @@ export declare class EsriImageLayerConfig extends AbstractGeoviewEsriLayerConfig
      */
     createGroupNode(layerConfig: TypeJsonObject, geoviewConfig: AbstractGeoviewLayerConfig, parentNode?: EntryConfigBaseClass): EntryConfigBaseClass;
 }
+//# sourceMappingURL=esri-image-config.d.ts.map

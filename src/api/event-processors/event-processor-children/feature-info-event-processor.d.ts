@@ -57,3 +57,4 @@ export declare class FeatureInfoEventProcessor extends AbstractEventProcessor {
      */
     static propagateFeatureInfoToStore(mapId: string, eventType: EventType, resultSetEntry: TypeFeatureInfoResultSetEntry): Promise<void>;
 }
+//# sourceMappingURL=feature-info-event-processor.d.ts.map

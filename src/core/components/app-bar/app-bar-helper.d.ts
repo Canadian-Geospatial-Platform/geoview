@@ -7,3 +7,4 @@ export declare const helpOpenPanelById: (buttonPanelGroups: ButtonPanelGroupType
 export declare const helpClosePanelById: (mapId: string, buttonPanelGroups: Record<string, Record<string, TypeButtonPanel>>, buttonId: string, groupName: string | undefined, setterCallback: Dispatch<SetStateAction<Record<string, Record<string, TypeButtonPanel>>>>, focusWhenNoElementCallback?: () => void) => void;
 export declare const helpCloseAll: (buttonPanelGroups: ButtonPanelGroupType, setterCallback: Dispatch<SetStateAction<ButtonPanelGroupType>>) => void;
 export declare const enforceArrayOrder: (sourceArray: string[], enforce: string[]) => string[];
+//# sourceMappingURL=app-bar-helper.d.ts.map

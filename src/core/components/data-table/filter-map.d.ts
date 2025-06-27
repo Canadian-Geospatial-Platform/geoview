@@ -11,3 +11,4 @@ interface FilterMapProps {
  */
 declare function FilterMap({ layerPath, isGlobalFilterOn }: FilterMapProps): JSX.Element;
 export default FilterMap;
+//# sourceMappingURL=filter-map.d.ts.map

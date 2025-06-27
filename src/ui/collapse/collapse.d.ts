@@ -47,3 +47,4 @@ import { CollapseProps } from '@mui/material';
 declare function CollapseUI(props: CollapseProps): JSX.Element;
 export declare const Collapse: typeof CollapseUI;
 export {};
+//# sourceMappingURL=collapse.d.ts.map

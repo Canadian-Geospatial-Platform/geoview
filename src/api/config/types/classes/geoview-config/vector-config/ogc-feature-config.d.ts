@@ -84,3 +84,4 @@ export declare class OgcFeatureLayerConfig extends AbstractGeoviewLayerConfig {
      */
     findLayerMetadataEntry(layerId: string): TypeJsonObject | null;
 }
+//# sourceMappingURL=ogc-feature-config.d.ts.map

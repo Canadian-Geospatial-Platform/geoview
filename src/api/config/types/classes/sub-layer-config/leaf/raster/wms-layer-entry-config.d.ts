@@ -52,3 +52,4 @@ export declare class WmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
      */
     protected parseLayerMetadata(): void;
 }
+//# sourceMappingURL=wms-layer-entry-config.d.ts.map

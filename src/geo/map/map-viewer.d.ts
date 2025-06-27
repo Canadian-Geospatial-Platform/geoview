@@ -11,7 +11,6 @@ import { TypeMapFeaturesInstance, TypeViewSettings, TypeInteraction, TypeValidMa
 import { BasemapApi } from '@/geo/layer/basemap/basemap';
 import { LayerApi } from '@/geo/layer/layer';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
-import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 import { AppBarApi } from '@/core/components/app-bar/app-bar-api';
 import { NavBarApi } from '@/core/components/nav-bar/nav-bar-api';
 import { FooterBarApi } from '@/core/components/footer-bar/footer-bar-api';
@@ -30,6 +29,8 @@ import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { Notifications } from '@/core/utils/notifications';
 import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { PluginsContainer } from '@/api/plugin/plugin-types';
+import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 /**
  * Class used to manage created maps
  *
@@ -39,11 +40,11 @@ import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/laye
 export declare class MapViewer {
     #private;
     static DEFAULT_STOPS: number;
-    static INIT_TIMEOUT_PROMISE: number;
+    static INIT_TIMEOUT_NORTH_VISIBILITY: number;
     mapFeaturesConfig: TypeMapFeaturesConfig;
     mapId: string;
     map: OLMap;
-    plugins: TypeRecordOfPlugin;
+    plugins: PluginsContainer;
     overviewRoot: Root | undefined;
     appBarApi: AppBarApi;
     navBarApi: NavBarApi;
@@ -71,15 +72,30 @@ export declare class MapViewer {
      */
     constructor(mapFeaturesConfig: TypeMapFeaturesConfig, i18instance: i18n);
     /**
-     * Create an Open Layer map from configuration attached to the class
+     * Create an Open Layer map from configuration attached to the class.
+     * This function is called from a useEffect and should be running synchronously.
      * @param {HTMLElement} mapElement - HTML element to create the map within
      * @returns {OLMap} The OpenLayer map
      */
     createMap(mapElement: HTMLElement): OLMap;
     /**
-     * Initializes map, layer class and geometries
+     * Initializes map, layer class and geometries.
+     * This function must be called once the Map is rendered
      */
     initMap(): Promise<void>;
+    /**
+     * Asynchronously attempts to get a plugin by its id.
+     * @param {string} pluginId - The plugin id
+     * @returns {AbstractPlugin} The plugin
+     */
+    getPlugin(pluginId: string): Promise<AbstractPlugin>;
+    /**
+     * Retrieves the configuration object for a specific core plugin from the map's features configuration.
+     *
+     * @param {string} pluginId - The ID of the core plugin to look up.
+     * @returns {TypeJsonObject | undefined} The configuration object for the specified plugin, or `undefined` if not found.
+     */
+    getCorePackageConfig(pluginId: string): TypeJsonObject | undefined;
     /**
      * Returns the current display language
      * @returns {TypeDisplayLanguage} The display language
@@ -113,15 +129,14 @@ export declare class MapViewer {
      */
     getCenter(): Promise<Coordinate>;
     /**
-     * Set the map center.
-     *
+     * Sets the map center.
      * @param {Coordinate} center - New center to use
      */
     setCenter(center: Coordinate): void;
     /**
      * Asynchronously gets the map size to give a chance for the map to
      * render before returning the value.
-     * @returns {Promise<Size>} the map size
+     * @returns {Promise<Size>} The map size
      */
     getMapSize(): Promise<Size>;
     /**
@@ -129,12 +144,12 @@ export declare class MapViewer {
      * render before returning the value.
      * @param {[number, number]} pointXY - The pixel coordinate to convert
      * @param {number} timeoutMs - The maximum time in milliseconds to wait for the getCoordinateFromPixel to return a value.
-     * @returns {Promise<Coordinate>} the map size
+     * @returns {Promise<Coordinate>} The map coordinate at the given pixel location
      */
     getCoordinateFromPixel(pointXY: [number, number], timeoutMs: number): Promise<Coordinate>;
     /**
      * Gets the map projection
-     * @returns the map viewSettings
+     * @returns {OLProjection} The map projection
      */
     getProjection(): OLProjection;
     /**
@@ -245,7 +260,7 @@ export declare class MapViewer {
     emitMapSingleClick(clickCoordinates: MapSingleClickEvent): void;
     /**
      * Loops through all geoview layers and refresh their respective source.
-     * Use this function on projection change or other viewer modification who may affect rendering.
+     * Use this function on projection change or other viewer modification which may affect rendering.
      */
     refreshLayers(): void;
     /**
@@ -258,23 +273,11 @@ export declare class MapViewer {
      */
     clickMarkerIconShow(marker: TypeClickMarker): void;
     /**
-     * Remove map
-     *
-     * @param {boolean} deleteContainer - True if we want to delete div from the page
-     * @returns {Promise<HTMLElement>} The Promise containing the HTML element
+     * Deletes the MapViewer, including its plugins, layers, etc.
+     * This function does not unmount the MapViewer. To completely delete a MapViewer, use
+     * cgpv.api.deleteMapViewer() which will delete the MapViewer and unmount it - for React.
      */
-    remove(deleteContainer: boolean): Promise<HTMLElement>;
-    /**
-     * Reload a map from a config object stored in store, or provided. It first removes then recreates the map.
-     * @param {TypeMapFeaturesConfig | TypeMapFeaturesInstance} mapConfig - Optional map config to use for reload.
-     */
-    reload(mapConfig?: TypeMapFeaturesConfig | TypeMapFeaturesInstance): Promise<void>;
-    /**
-     * Reload a map from a config object created using current map state. It first removes then recreates the map.
-     * @param {boolean} maintainGeocoreLayerNames - Indicates if geocore layer names should be kept as is or returned to defaults.
-     *                                              Set to false after a language change to update the layer names with the new language.
-     */
-    reloadWithCurrentState(maintainGeocoreLayerNames?: boolean): void;
+    delete(): Promise<void>;
     /**
      * Zoom to the specified extent.
      *
@@ -651,7 +654,7 @@ export type MapRotationDelegate = EventDelegateBase<MapViewer, MapRotationEvent,
  * Define an event for the delegate
  */
 export type MapChangeSizeEvent = {
-    size: [number, number];
+    size: Size;
 };
 /**
  * Define a delegate for the event handler function signature
@@ -688,3 +691,4 @@ export type MapLanguageChangedEvent = {
  * Define a delegate for the event handler function signature
  */
 export type MapLanguageChangedDelegate = EventDelegateBase<MapViewer, MapLanguageChangedEvent, void>;
+//# sourceMappingURL=map-viewer.d.ts.map

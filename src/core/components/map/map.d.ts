@@ -10,3 +10,4 @@ type MapProps = {
  */
 export declare function Map(props: MapProps): JSX.Element;
 export {};
+//# sourceMappingURL=map.d.ts.map

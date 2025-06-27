@@ -65,3 +65,4 @@ export declare class DataTableEventProcessor extends AbstractEventProcessor {
      */
     static deleteFeatureAllInfo(mapId: string, layerPath: string): void;
 }
+//# sourceMappingURL=data-table-event-processor.d.ts.map

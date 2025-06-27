@@ -6,3 +6,4 @@ type SxClasses = Record<string, object>;
  */
 export declare const getSxClasses: () => SxClasses;
 export {};
+//# sourceMappingURL=overview-map-toggle-styles.d.ts.map

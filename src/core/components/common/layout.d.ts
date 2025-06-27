@@ -14,3 +14,4 @@ interface LayoutProps {
 }
 export declare function Layout({ children, guideContentIds, layerList, selectedLayerPath, onLayerListClicked, onIsEnlargeClicked, fullWidth, onGuideIsOpen, containerType, }: LayoutProps): JSX.Element;
 export {};
+//# sourceMappingURL=layout.d.ts.map

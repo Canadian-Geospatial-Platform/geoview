@@ -24,3 +24,4 @@ export declare abstract class AbstractBaseLayerEntryConfig extends EntryConfigBa
      */
     protected abstract getEntryType(): TypeLayerEntryType;
 }
+//# sourceMappingURL=abstract-base-layer-entry-config.d.ts.map

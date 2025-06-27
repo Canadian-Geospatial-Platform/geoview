@@ -15,3 +15,4 @@ export declare class UUIDmapConfigReader {
      */
     static getGVConfigFromUUIDs(baseUrl: string, lang: string, uuids: string[]): Promise<TypeJsonObject[]>;
 }
+//# sourceMappingURL=uuid-config-reader.d.ts.map

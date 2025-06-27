@@ -15,3 +15,4 @@ export declare const getSxClasses: (theme: Theme) => SxStyles;
  */
 export declare const getSxClassesList: (theme: Theme) => SxStyles;
 export declare const StyledInputField: typeof Input;
+//# sourceMappingURL=geolocator-style.d.ts.map

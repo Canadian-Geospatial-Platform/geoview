@@ -84,3 +84,4 @@ export declare const layerConfigIsVectorTiles: (verifyIfLayer: TypeGeoviewLayerC
  * @returns {boolean} true if the type ascention is valid.
  */
 export declare const geoviewEntryIsVectorTiles: (verifyIfGeoViewEntry: TypeLayerEntryConfig) => verifyIfGeoViewEntry is VectorTilesLayerEntryConfig;
+//# sourceMappingURL=vector-tiles.d.ts.map

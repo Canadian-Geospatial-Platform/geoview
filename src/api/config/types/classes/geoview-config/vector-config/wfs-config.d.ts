@@ -97,3 +97,4 @@ export declare class WfsLayerConfig extends AbstractGeoviewLayerConfig {
      */
     findLayerMetadataEntry(layerId: string): TypeJsonObject | null;
 }
+//# sourceMappingURL=wfs-config.d.ts.map

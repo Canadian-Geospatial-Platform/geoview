@@ -49,7 +49,7 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
      * @param {string?} outfield - ID field to return for services that require a value in outfields.
      * @returns {Promise<Extent>} The extent of the features, if available.
      */
-    getExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent>;
+    onGetExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent>;
     /**
      * Overrides the get of the OpenLayers Layer
      * @returns {ImageLayer<ImageArcGISRest>} The OpenLayers Layer
@@ -132,3 +132,4 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
      */
     static getViewFilter(layerConfig: EsriDynamicLayerEntryConfig, style: TypeLayerStyleConfig | undefined): string;
 }
+//# sourceMappingURL=gv-esri-dynamic.d.ts.map

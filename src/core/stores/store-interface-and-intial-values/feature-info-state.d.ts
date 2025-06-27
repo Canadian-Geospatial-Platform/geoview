@@ -60,3 +60,4 @@ export declare const useSelectorLayerQueryStatus: (layerPath: string) => TypeQue
 export declare const useSelectorLayerFeatures: (layerPath: string) => TypeFeatureInfoEntry[] | undefined;
 export declare const useSelectorLayerNumOfFeatures: (layerPath: string) => number | undefined;
 export {};
+//# sourceMappingURL=feature-info-state.d.ts.map

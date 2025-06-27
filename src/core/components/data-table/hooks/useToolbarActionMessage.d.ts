@@ -17,3 +17,4 @@ interface UseSelectedRowMessageProps {
  */
 export declare function useToolbarActionMessage({ data, columnFilters, globalFilter, layerPath, tableInstance, showUnsymbolizedFeatures, }: UseSelectedRowMessageProps): void;
 export {};
+//# sourceMappingURL=useToolbarActionMessage.d.ts.map

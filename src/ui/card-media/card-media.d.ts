@@ -63,3 +63,4 @@ export interface CardMediaPropsExtend extends CardMediaProps {
 declare function CardMediaUI(props: CardMediaPropsExtend): JSX.Element;
 export declare const CardMedia: typeof CardMediaUI;
 export {};
+//# sourceMappingURL=card-media.d.ts.map

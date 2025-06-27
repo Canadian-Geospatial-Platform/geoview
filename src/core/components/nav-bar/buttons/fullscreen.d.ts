@@ -4,3 +4,4 @@
  * @returns {JSX.Element} the fullscreen toggle button
  */
 export default function Fullscreen(): JSX.Element;
+//# sourceMappingURL=fullscreen.d.ts.map

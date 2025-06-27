@@ -74,3 +74,4 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
      */
     onSerialize(): TypeJsonObject;
 }
+//# sourceMappingURL=abstract-base-layer-entry-config.d.ts.map

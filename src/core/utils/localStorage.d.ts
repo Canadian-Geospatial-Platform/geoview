@@ -32,3 +32,4 @@ export declare const getItemAsNumberSetValue: (key: string, defaultValue: number
  * @returns The value as number | number[] for the key in the local storage
  */
 export declare const getItemAsNumberOrNumberArraySetValue: (key: string, defaultValue: number | number[]) => number | number[];
+//# sourceMappingURL=localStorage.d.ts.map

@@ -13,3 +13,4 @@ export interface TypeTabPanelProps {
     className?: string;
 }
 export declare const TabPanel: import("react").ForwardRefExoticComponent<TypeTabPanelProps & import("react").RefAttributes<HTMLDivElement>>;
+//# sourceMappingURL=tab-panel.d.ts.map

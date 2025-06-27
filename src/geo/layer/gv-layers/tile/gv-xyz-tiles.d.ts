@@ -47,3 +47,4 @@ export declare class GVXYZTiles extends AbstractGVTile {
      */
     onGetBounds(projection: OLProjection, stops: number): Extent | undefined;
 }
+//# sourceMappingURL=gv-xyz-tiles.d.ts.map

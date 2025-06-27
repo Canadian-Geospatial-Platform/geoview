@@ -9,3 +9,4 @@ declare module '@mui/material/styles/createPalette' {
 }
 export declare const getTheme: (mode: TypeDisplayTheme) => Theme;
 export declare const cgpvTheme: Theme;
+//# sourceMappingURL=theme.d.ts.map

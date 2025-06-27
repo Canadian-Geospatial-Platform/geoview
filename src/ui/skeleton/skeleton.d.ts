@@ -39,3 +39,4 @@ import { SkeletonProps } from '@mui/material';
 declare function SkeletonUI(props: SkeletonProps): JSX.Element;
 export declare const Skeleton: typeof SkeletonUI;
 export {};
+//# sourceMappingURL=skeleton.d.ts.map

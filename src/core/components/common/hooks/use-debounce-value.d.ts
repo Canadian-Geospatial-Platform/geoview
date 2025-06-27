@@ -5,3 +5,4 @@
  * @returns The debounced value
  */
 export declare function useDebounceValue<T>(value: T, delay: number): T;
+//# sourceMappingURL=use-debounce-value.d.ts.map

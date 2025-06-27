@@ -1,6 +1,6 @@
 import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
-import { AbstractPlugin } from './abstract-plugin';
 import { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
+import { AbstractPlugin } from './abstract-plugin';
 /**
  * AppBar Plugin abstract class.
  */
@@ -9,26 +9,35 @@ export declare abstract class AppBarPlugin extends AbstractPlugin {
     buttonProps?: IconButtonPropsExtend;
     panelProps?: TypePanelProps;
     /**
+     * Overrides the get config
+     * @returns {AppBarPluginConfig} The config
+     */
+    getConfig(): AppBarPluginConfig;
+    /**
      * Overridable function to create app bar button props content
      * @returns IconButtonPropsExtend The app bar button props content
      */
-    onCreateButtonProps(): IconButtonPropsExtend;
+    protected onCreateButtonProps(): IconButtonPropsExtend;
     /**
      * Overridable function to create app bar props content
      * @returns TypePanelProps The app bar props content
      */
-    onCreateContentProps(): TypePanelProps;
+    protected onCreateContentProps(): TypePanelProps;
     /**
      * Overridable function to create app bar actual content
      * @returns JSX.Element The app bar actual content
      */
-    onCreateContent(): JSX.Element;
+    protected onCreateContent(): JSX.Element;
     /**
      * Called when an app bar plugin is being added
      */
-    onAdd(): void;
+    protected onAdd(): void;
     /**
      * Called when an app bar plugin is being removed
      */
-    onRemove(): void;
+    protected onRemove(): void;
 }
+export type AppBarPluginConfig = {
+    isOpen: boolean;
+};
+//# sourceMappingURL=appbar-plugin.d.ts.map

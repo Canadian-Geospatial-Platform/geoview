@@ -58,3 +58,4 @@ interface PopperPropsExtend extends PopperProps {
 declare function PopperUI({ open, onClose, handleKeyDown, ...props }: PopperPropsExtend): JSX.Element;
 export declare const Popper: typeof PopperUI;
 export {};
+//# sourceMappingURL=popper.d.ts.map

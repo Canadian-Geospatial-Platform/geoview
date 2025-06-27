@@ -24,3 +24,4 @@ export declare class GeoJsonGroupLayerConfig extends GroupLayerEntryConfig {
      */
     protected parseLayerMetadata(): void;
 }
+//# sourceMappingURL=geojson-group-layer-config.d.ts.map

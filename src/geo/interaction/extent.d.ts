@@ -46,3 +46,4 @@ export declare class Extent extends Interaction {
  */
 type ExtentDelegate = EventDelegateBase<Extent, OLExtentEvent, void>;
 export {};
+//# sourceMappingURL=extent.d.ts.map

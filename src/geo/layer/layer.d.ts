@@ -16,27 +16,30 @@ import { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { TypeLegendItem } from '@/core/components/layers/types';
-export type GeoViewLayerAddedResult = {
-    layer: AbstractGeoViewLayer;
-    promiseLayer: Promise<void>;
-};
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
- *
  * @exports
  * @class LayerApi
  */
 export declare class LayerApi {
     #private;
-    static DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS: boolean;
+    /** Temporary debugging flag indicating if we want the WMS group layers to have their sub layers fully blown up */
+    static readonly DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS = false;
     /** Reference on the map viewer */
     mapViewer: MapViewer;
+    /** Used to access geometry API to create and manage geometries */
     geometry: GeometryApi;
+    /** Order to load layers */
     initialLayerOrder: Array<TypeOrderedLayerInfo>;
+    /** Used to access feature and bounding box highlighting */
     featureHighlight: FeatureHighlight;
+    /** Legends layer set associated to the map */
     legendsLayerSet: LegendsLayerSet;
+    /** Hover feature info layer set associated to the map */
     hoverFeatureInfoLayerSet: HoverFeatureInfoLayerSet;
+    /** All feature info layer set associated to the map */
     allFeatureInfoLayerSet: AllFeatureInfoLayerSet;
+    /** Feature info layer set associated to the map */
     featureInfoLayerSet: FeatureInfoLayerSet;
     /**
      * Initializes layer types and listen to add/remove layer events from outside
@@ -135,6 +138,11 @@ export declare class LayerApi {
      */
     reloadGeocoreLayers(): void;
     /**
+     * Attempt to reload a layer.
+     * @param {string} layerPath - The path to the layer to reload
+     */
+    reloadLayer(layerPath: string): void;
+    /**
      * Registers the layer identifier.
      * @param {ConfigBaseClass} layerConfig - The layer entry config to register
      */
@@ -196,11 +204,6 @@ export declare class LayerApi {
      * Use this function on projection change or other viewer modification who may affect rendering.
      */
     refreshLayers(): void;
-    /**
-     * Refresh geoview layer source.
-     * @param {BaseLayer} baseLayer - The layer to refresh.
-     */
-    refreshBaseLayer(baseLayer: BaseLayer): void;
     /**
      * Toggle visibility of an item.
      * @param {string} layerPath - The layer path of the layer to change.
@@ -389,6 +392,10 @@ export declare class LayerApi {
      */
     static generateArrayOfLayerOrderInfo(geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig): TypeOrderedLayerInfo[];
 }
+export type GeoViewLayerAddedResult = {
+    layer: AbstractGeoViewLayer;
+    promiseLayer: Promise<void>;
+};
 /**
  * Define an event for the delegate
  */
@@ -485,3 +492,4 @@ export type LayerItemVisibilityToggledEvent = {
  * Define a delegate for the event handler function signature
  */
 export type LayerItemVisibilityToggledDelegate = EventDelegateBase<LayerApi, LayerItemVisibilityToggledEvent, void>;
+//# sourceMappingURL=layer.d.ts.map

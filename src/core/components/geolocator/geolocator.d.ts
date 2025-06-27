@@ -8,3 +8,4 @@ export interface GeoListItem {
     category: string;
 }
 export declare function Geolocator(): JSX.Element;
+//# sourceMappingURL=geolocator.d.ts.map

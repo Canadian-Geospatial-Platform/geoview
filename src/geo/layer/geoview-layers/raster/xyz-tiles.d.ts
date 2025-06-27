@@ -79,3 +79,4 @@ export declare const layerConfigIsXYZTiles: (verifyIfLayer: TypeGeoviewLayerConf
  * @returns {boolean} true if the type ascention is valid.
  */
 export declare const geoviewEntryIsXYZTiles: (verifyIfGeoViewEntry: TypeLayerEntryConfig) => verifyIfGeoViewEntry is XYZTilesLayerEntryConfig;
+//# sourceMappingURL=xyz-tiles.d.ts.map

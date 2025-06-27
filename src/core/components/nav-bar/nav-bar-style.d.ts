@@ -7,3 +7,4 @@ import { SxStyles } from '@/ui/style/types';
  * @returns {Object} the sx classes object
  */
 export declare const getSxClasses: (theme: Theme) => SxStyles;
+//# sourceMappingURL=nav-bar-style.d.ts.map

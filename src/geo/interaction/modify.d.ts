@@ -72,3 +72,4 @@ export declare class Modify extends Interaction {
  */
 type ModifyDelegate = EventDelegateBase<Modify, OLModifyEvent, void>;
 export {};
+//# sourceMappingURL=modify.d.ts.map

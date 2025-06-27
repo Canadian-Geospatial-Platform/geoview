@@ -8,3 +8,4 @@ type SxClasses = Record<string, object>;
  */
 export declare const getSxClasses: (theme: Theme) => SxClasses;
 export {};
+//# sourceMappingURL=left-panel-styles.d.ts.map

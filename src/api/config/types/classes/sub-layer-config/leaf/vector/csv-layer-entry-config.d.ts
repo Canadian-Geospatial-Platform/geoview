@@ -50,3 +50,4 @@ export declare class CsvLayerEntryConfig extends AbstractBaseLayerEntryConfig {
      */
     protected parseLayerMetadata(): void;
 }
+//# sourceMappingURL=csv-layer-entry-config.d.ts.map

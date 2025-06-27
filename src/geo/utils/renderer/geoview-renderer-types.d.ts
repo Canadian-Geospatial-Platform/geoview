@@ -26,3 +26,4 @@ export declare const operatorPriority: {
     key: string;
     priority: number;
 }[];
+//# sourceMappingURL=geoview-renderer-types.d.ts.map

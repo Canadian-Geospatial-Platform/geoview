@@ -129,6 +129,12 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
      */
     static deleteLayer(mapId: string, layerPath: string): void;
     /**
+     * Reload layer.
+     * @param {string} mapId - The ID of the map.
+     * @param {string} layerPath - The layer path of the layer to reload.
+     */
+    static reloadLayer(mapId: string, layerPath: string): void;
+    /**
      * Refresh layer and reset states.
      * @param {string} mapId - The ID of the map.
      * @param {string} layerPath - The layer path of the layer to refresh.
@@ -201,3 +207,4 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
      */
     static sortLegendLayersChildren: (mapId: string, legendLayerList: TypeLegendLayer[]) => void;
 }
+//# sourceMappingURL=legend-event-processor.d.ts.map

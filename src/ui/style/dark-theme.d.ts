@@ -4,3 +4,4 @@ import { IGeoViewColors } from '@/ui/style/types';
  * see https://mui.com/material-ui/customization/palette/
  */
 export declare const darkThemeColors: IGeoViewColors;
+//# sourceMappingURL=dark-theme.d.ts.map

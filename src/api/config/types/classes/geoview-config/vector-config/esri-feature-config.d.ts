@@ -46,3 +46,4 @@ export declare class EsriFeatureLayerConfig extends AbstractGeoviewEsriLayerConf
      */
     createGroupNode(layerConfig: TypeJsonObject, geoviewConfig: AbstractGeoviewLayerConfig, parentNode?: EntryConfigBaseClass): EntryConfigBaseClass;
 }
+//# sourceMappingURL=esri-feature-config.d.ts.map

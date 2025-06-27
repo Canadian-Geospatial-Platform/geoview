@@ -44,14 +44,17 @@ export declare class FooterBarApi {
      */
     createTab(tabProps: TypeTabs): void;
     /**
-     * Removes a tab by id
-     *
+     * Removes a tab by id.
      * @param {string} id - The id of the tab to be removed
      */
     removeTab(id: string): void;
     /**
+     * Shows a tab by id.
+     * @param {string} id - The id of the tab to be shown
+     */
+    showTab(id: string): void;
+    /**
      * Selects a tab by id, if the id is not a tab, the footer bar will close
-     *
      * @param {string} id - The id of the tab to be selected
      */
     selectTab(id: string): void;
@@ -77,3 +80,4 @@ export type FooterTabRemovedEvent = {
  */
 type FooterTabRemovedDelegate = EventDelegateBase<FooterBarApi, FooterTabRemovedEvent, void>;
 export {};
+//# sourceMappingURL=footer-bar-api.d.ts.map

@@ -221,3 +221,4 @@ export declare const getMapScale: (view: View) => number | undefined;
  * @returns {TypeMapMouseInfo} An object representing pointer position information
  */
 export declare const getPointerPositionFromMapEvent: (mapEvent: MapBrowserEvent, projCode: string) => TypeMapMouseInfo;
+//# sourceMappingURL=utilities.d.ts.map

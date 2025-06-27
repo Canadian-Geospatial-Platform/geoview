@@ -10,3 +10,4 @@ export declare class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig 
      */
     constructor(layerConfig: EsriFeatureLayerEntryConfig);
 }
+//# sourceMappingURL=esri-feature-layer-entry-config.d.ts.map

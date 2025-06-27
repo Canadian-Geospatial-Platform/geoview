@@ -73,3 +73,4 @@ export declare const useAppDisplayThemeById: (mapId: string) => TypeDisplayTheme
 export declare const getAppCrosshairsActive: (mapId: string) => boolean;
 export declare const useAppStoreActions: () => AppActions;
 export {};
+//# sourceMappingURL=app-state.d.ts.map

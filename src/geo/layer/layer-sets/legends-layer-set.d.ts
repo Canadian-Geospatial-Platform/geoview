@@ -59,3 +59,4 @@ export declare class LegendsLayerSet extends AbstractLayerSet {
      */
     protected onDeleteFromStore(layerPath: string): void;
 }
+//# sourceMappingURL=legends-layer-set.d.ts.map

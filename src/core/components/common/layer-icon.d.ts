@@ -8,3 +8,4 @@ interface LayerIconProps {
 }
 export declare const LayerIcon: import("react").NamedExoticComponent<LayerIconProps>;
 export {};
+//# sourceMappingURL=layer-icon.d.ts.map

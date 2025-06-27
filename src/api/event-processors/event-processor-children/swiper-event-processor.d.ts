@@ -44,3 +44,4 @@ export declare class SwiperEventProcessor extends AbstractEventProcessor {
      */
     static removeAll(mapId: string): void;
 }
+//# sourceMappingURL=swiper-event-processor.d.ts.map
