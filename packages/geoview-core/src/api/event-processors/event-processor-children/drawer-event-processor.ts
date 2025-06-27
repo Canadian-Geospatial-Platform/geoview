@@ -118,8 +118,8 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   }
 
   // Utility to convert SVG path to coordinates
-  static #svgPathToCoordinates = (pathData: string, center: number[], scale: number = 1): number[][] => {
-    const commands = pathData.match(/[MmLlHhVvCcSsQqTtAaZz][^MmLlHhVvCcSsQqTtAaZz]*/g) || [];
+  static #svgPathToCoordinates = (pathData: string, center: number[]): number[][] => {
+      const commands = pathData.match(/[MmLlHhVvCcSsQqTtAaZz][^MmLlHhVvCcSsQqTtAaZz]*/g) || [];
     const coords: number[][] = [];
     let currentPoint = [0, 0];
 
@@ -132,16 +132,104 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
         .map(Number)
         .filter((n) => !Number.isNaN(n));
 
-      if (type === 'M' || type === 'L') {
+      if (type === 'M') {
+        // Absolute move
         for (let i = 0; i < values.length; i += 2) {
-          currentPoint = [values[i] * scale + center[0], values[i + 1] * scale + center[1]];
+          currentPoint = [values[i], values[i + 1]];
           coords.push([...currentPoint]);
+        }
+      } else if (type === 'm') {
+        // Relative move
+        for (let i = 0; i < values.length; i += 2) {
+          currentPoint = [currentPoint[0] + values[i], currentPoint[1] + values[i + 1]];
+          coords.push([...currentPoint]);
+        }
+      } else if (type === 'L') {
+        // Absolute line
+        for (let i = 0; i < values.length; i += 2) {
+          currentPoint = [values[i], values[i + 1]];
+          coords.push([...currentPoint]);
+        }
+      } else if (type === 'l') {
+        // Relative line
+        for (let i = 0; i < values.length; i += 2) {
+          currentPoint = [currentPoint[0] + values[i], currentPoint[1] + values[i + 1]];
+          coords.push([...currentPoint]);
+        }
+      } else if (type === 'Z' || type === 'z') {
+        // Close path - add first point again
+        if (coords.length > 0) {
+          coords.push([...coords[0]]);
         }
       }
     });
 
-    return coords;
+    // Apply center offset after all coordinates are calculated
+    return coords.map(point => [point[0] + center[0], point[1] + center[1]]);
   };
+
+  // Utility to convert SVG path to coordinates with auto-centering
+  static #svgPathToGeometry = (
+    svgPath: string, 
+    coordinates: SketchCoordType, 
+    geometry?: SimpleGeometry
+  ): Polygon => {
+    const center = coordinates[0] as number[];
+    const last = coordinates[1] as number[];
+    const radius = Math.sqrt((last[0] - center[0]) ** 2 + (last[1] - center[1]) ** 2);
+    const angle = Math.atan2(last[1] - center[1], last[0] - center[0]);
+    
+    // Parse the SVG path to get coordinates
+    const coords = this.#svgPathToCoordinates(svgPath, [0, 0]);
+    
+    // Find the bounding box to calculate center
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    coords.forEach(point => {
+      minX = Math.min(minX, point[0]);
+      minY = Math.min(minY, point[1]);
+      maxX = Math.max(maxX, point[0]);
+      maxY = Math.max(maxY, point[1]);
+    });
+    
+    // Calculate center of the SVG path
+    const svgCenterX = (minX + maxX) / 2;
+    const svgCenterY = (minY + maxY) / 2;
+
+    // Calculate the size of the SVG path
+    const svgWidth = maxX - minX;
+    const svgHeight = maxY - minY;
+    const svgSize = Math.max(svgWidth, svgHeight);
+    
+    // Calculate scale factor to fit the shape within the radius
+    const scaleFactor = (radius * 2) / svgSize;
+    
+    // Center, scale, and rotate the coordinates
+    const finalCoords = coords.map(point => {
+      // Center the point
+      const centeredX = point[0] - svgCenterX;
+      const centeredY = point[1] - svgCenterY;
+      
+      // Scale to fit within radius
+      const scaledX = centeredX * scaleFactor;
+      const scaledY = centeredY * scaleFactor;
+      
+      // Rotate point
+      const x = scaledX * Math.cos(angle) - scaledY * Math.sin(angle);
+      const y = scaledX * Math.sin(angle) + scaledY * Math.cos(angle);
+      
+      // Translate to target center
+      return [x + center[0], y + center[1]];
+    });
+    
+    // Create or update geometry
+    if (!geometry) {
+      geometry = new Polygon([finalCoords]);
+    } else {
+      geometry.setCoordinates([finalCoords]);
+    }
+    
+    return geometry as Polygon;
+  }
 
   /**
    * Starts a drawing operation with the specified geometry type
@@ -170,31 +258,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     // Record of GeometryFunctions for creating custom geometries
     const customGeometries: Record<string, GeometryFunction> = {
       Star: (coordinates: SketchCoordType, geometry: SimpleGeometry): Polygon => {
-        const svgPath = 'M0,-20 L5.9,-6.2 L19.1,-6.2 L9.5,2.4 L15.4,16.2 L0,7.6 L-15.4,16.2 L-9.5,2.4 L-19.1,-6.2 L-5.9,-6.2 Z';
-        const center = coordinates[0] as number[];
-        const last = coordinates[1] as number[];
-        const radius = Math.sqrt((last[0] - center[0]) ** 2 + (last[1] - center[1]) ** 2);
-        const angle = Math.atan2(last[1] - center[1], last[0] - center[0]);
-        const baseCoords = this.#svgPathToCoordinates(svgPath, [0, 0], radius / 20);
-
-        // Apply rotation and translation
-        const rotatedCoords = baseCoords.map((point) => {
-          // Rotate point
-          const x = point[0] * Math.cos(angle) - point[1] * Math.sin(angle);
-          const y = point[0] * Math.sin(angle) + point[1] * Math.cos(angle);
-
-          // Translate to center
-          return [x + center[0], y + center[1]];
-        });
-
-        if (!geometry) {
-          // eslint-disable-next-line no-param-reassign
-          geometry = new Polygon([rotatedCoords]);
-        } else {
-          geometry.setCoordinates([rotatedCoords]);
-        }
-        return geometry as Polygon;
-      },
+        const svgPath = 'm 7.61,20.13 8.22,7.04 -2.51,10.53 9.24,-5.64 9.24,5.64 L29.29,27.17 37.51,20.13 26.72,19.27 22.56,9.27 18.4,19.27 Z';
+        return this.#svgPathToGeometry(svgPath, coordinates, geometry as Polygon);
+        },
       Rectangle: createBox(),
     };
 
