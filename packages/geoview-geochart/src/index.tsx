@@ -3,13 +3,13 @@ import { AnySchemaObject, TypeJsonObject, toJsonObject } from 'geoview-core/api/
 import { FooterPlugin } from 'geoview-core/api/plugin/footer-plugin';
 import { TypeTabs } from 'geoview-core/ui/tabs/tabs';
 import { ChartIcon } from 'geoview-core/ui/icons';
+import { ChartType } from 'geochart';
 
 import { GeochartEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/geochart-event-processor';
-import { isObjectEmpty } from 'geoview-core/core/utils/utilities';
-import { GeoChartConfig } from 'geoview-core/core/utils/config/reader/uuid-config-reader';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-geochart.json';
 import { GeoChartPanel } from './geochart-panel';
+import { convertGeoViewGeoChartConfigToCore, PluginGeoChartConfig } from './geochart-types';
 
 /**
  * The Chart Plugin which will be automatically instanciated during GeoView's initialization.
@@ -65,11 +65,11 @@ class GeoChartFooterPlugin extends FooterPlugin {
 
   /**
    * Overrides the getConfig in order to return the right type.
-   * @returns {GeoChartConfig} The Geochart config
+   * @returns {PluginGeoChartConfig<ChartType>} The Geochart config
    */
-  override getConfig(): GeoChartConfig {
+  override getConfig(): PluginGeoChartConfig<ChartType> {
     // Redirect
-    return super.getConfig() as GeoChartConfig;
+    return super.getConfig() as PluginGeoChartConfig<ChartType>;
   }
 
   /**
@@ -80,8 +80,10 @@ class GeoChartFooterPlugin extends FooterPlugin {
     super.onAdd();
 
     // Initialize the store with geochart provided configuration if there is one
-    if (!isObjectEmpty(this.getConfig().charts))
-      GeochartEventProcessor.setGeochartCharts(this.pluginProps.mapId, this.getConfig().charts as unknown as GeoChartConfig[]);
+    if (this.getConfig().charts) {
+      const configs = this.getConfig().charts.map((config) => convertGeoViewGeoChartConfigToCore(config));
+      GeochartEventProcessor.setGeochartCharts(this.pluginProps.mapId, configs);
+    }
   }
 
   /**
