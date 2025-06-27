@@ -1,6 +1,5 @@
 import { useStore } from 'zustand';
 
-import { Overlay } from 'ol';
 import { Draw } from '@/geo/interaction/draw';
 import { Modify } from '@/geo/interaction/modify';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
@@ -43,7 +42,6 @@ export interface IDrawerState {
   drawInstance: Draw | undefined;
   isEditing: boolean;
   editInstances: TypeEditInstance;
-  measureOverlays: Overlay[];
   hideMeasurements: boolean;
 
   setDefaultConfigValues: (config: TypeMapFeaturesConfig) => void;
@@ -56,7 +54,6 @@ export interface IDrawerState {
     getDrawInstance: () => Draw | undefined;
     getIsEditing: () => boolean;
     getEditInstances: () => TypeEditInstance;
-    getMeasureOverlays: () => Overlay[];
     getHideMeasurements: () => boolean;
     toggleDrawing: () => void;
     toggleEditing: () => void;
@@ -73,9 +70,6 @@ export interface IDrawerState {
     setEditInstance(groupKey: string, editInstance: Modify | undefined): void;
     removeEditInstance(groupKey: string): void;
     setHideMeasurements(hideMeasurements: boolean): void;
-    setMeasureOverlays(measureOverlays: Overlay[]): void;
-    addMeasureOverlay(measureOverlay: Overlay): void;
-    removeMeasureOverlay(measureOverlay: Overlay): void;
   };
 
   setterActions: {
@@ -94,9 +88,6 @@ export interface IDrawerState {
     setEditInstance: (groupKey: string, editInstance: Modify | undefined) => void;
     removeEditInstance: (groupKey: string) => void;
     setHideMeasurements: (hideMeasurements: boolean) => void;
-    setMeasureOverlays(measureOverlays: Overlay[]): void;
-    addMeasureOverlay(measureOverlay: Overlay): void;
-    removeMeasureOverlay(measureOverlay: Overlay): void;
   };
 }
 
@@ -121,7 +112,6 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
     drawInstance: undefined,
     isEditing: false,
     editInstances: {},
-    measureOverlays: [],
     hideMeasurements: true,
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
       const configObj = geoviewConfig.corePackagesConfig?.find((config) =>
@@ -129,7 +119,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
       ) as unknown as TypeNavBarPackageConfig;
       if (configObj) {
         const drawerConfig = configObj.drawer as TypeDrawerConfig;
-        let initialGeomType = 'Point';
+        let initialGeomType = init.activeGeom;
 
         if (drawerConfig.activeGeom) {
           initialGeomType = drawerConfig.activeGeom;
@@ -175,9 +165,6 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
       },
       getEditInstances: () => {
         return get().drawerState.editInstances;
-      },
-      getMeasureOverlays: () => {
-        return get().drawerState.measureOverlays;
       },
       getHideMeasurements: () => {
         return get().drawerState.hideMeasurements;
@@ -241,16 +228,6 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
       setHideMeasurements: (hideMeasurements: boolean) => {
         // Redirect to setter
         get().drawerState.setterActions.setHideMeasurements(hideMeasurements);
-      },
-      setMeasureOverlays: (measureOverlays: Overlay[]) => {
-        // Redirect to setter
-        get().drawerState.setterActions.setMeasureOverlays(measureOverlays);
-      },
-      addMeasureOverlay: (measureOverlay: Overlay) => {
-        get().drawerState.setterActions.addMeasureOverlay(measureOverlay);
-      },
-      removeMeasureOverlay: (measureOverlay: Overlay) => {
-        get().drawerState.setterActions.removeMeasureOverlay(measureOverlay);
       },
     },
 
@@ -390,32 +367,6 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
           drawerState: {
             ...get().drawerState,
             hideMeasurements,
-          },
-        });
-      },
-
-      setMeasureOverlays: (measureOverlays: Overlay[]) => {
-        set({
-          drawerState: {
-            ...get().drawerState,
-            measureOverlays,
-          },
-        });
-      },
-
-      addMeasureOverlay: (measureOverlay: Overlay) => {
-        set({
-          drawerState: {
-            ...get().drawerState,
-            measureOverlays: [...get().drawerState.measureOverlays, measureOverlay],
-          },
-        });
-      },
-      removeMeasureOverlay: (measureOverlay: Overlay) => {
-        set({
-          drawerState: {
-            ...get().drawerState,
-            measureOverlays: get().drawerState.measureOverlays.filter((overlay) => overlay !== measureOverlay),
           },
         });
       },
