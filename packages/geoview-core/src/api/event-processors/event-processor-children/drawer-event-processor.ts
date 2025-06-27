@@ -7,9 +7,10 @@ import { IDrawerState, StyleProps } from '@/core/stores/store-interface-and-inti
 // import { logger } from '@/core/utils/logger';
 
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
+import { AppEventProcessor } from './app-event-processor';
 import { MapEventProcessor } from './map-event-processor';
 import { MapViewerNotFoundError } from '@/core/exceptions/geoview-exceptions';
-import { Draw } from '@/app';
+import { Draw, GeoviewStoreType } from '@/app';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -36,45 +37,146 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     return super.getState(mapId).drawerState;
   }
 
-  static #getLengthText(length: number): string {
+  /**
+   * Initializes the event processor and sets up subscriptions
+   * @param {GeoviewStoreType} store The store to initialize with
+   * @returns {Array<() => void>} Array of unsubscribe functions
+   */
+  override onInitialize(store: GeoviewStoreType): Array<() => void> {
+    const { mapId } = store.getState();
+
+    // Subscribe to language changes
+    const unsubscribe = store.subscribe(
+      (state) => state.appState.displayLanguage,
+      () => {
+        // Update all measurement tooltips when language changes
+        DrawerEventProcessor.#updateMeasurementTooltips(mapId);
+      }
+    );
+
+    // Return the unsubscribe function to be added to the subscription array
+    return [unsubscribe];
+  }
+
+  /**
+   * Gets all drawing features for a map
+   * @param {string} mapId The map ID
+   * @param {string[]} geomTypes Optional array of geometry types to filter by
+   * @returns {Object} Object with geometry group keys and arrays of features
+   */
+  static #getGroupedDrawingFeatures(mapId: string, geomTypes?: string[]): { [key: string]: Feature[] } {
+    const state = this.getDrawerState(mapId);
+    if (!state) return {};
+
+    // Get the map viewer instance
+    const viewer = MapEventProcessor.getMapViewer(mapId);
+    if (!viewer) throw new MapViewerNotFoundError(mapId);
+
+    const features: { [key: string]: Feature[] } = {};
+
+    // Clear geometries for each type
+    (geomTypes || state.actions.getGeomTypes()).forEach((type) => {
+      const groupKey = `draw-${type}`;
+      const geometryGroup = viewer.layer.geometry.geometryGroups.find((group) => group.geometryGroupId === groupKey);
+      if (geometryGroup !== undefined) {
+        const newFeatures = geometryGroup.vectorSource.getFeatures();
+        features[groupKey] = newFeatures;
+      }
+    });
+    return features;
+  }
+
+  /**
+   * Updates all measurement tooltips for a map with the current language
+   * @param {string} mapId The map ID
+   */
+  static #updateMeasurementTooltips(mapId: string): void {
+    const displayLanguage = AppEventProcessor.getDisplayLanguage(mapId);
+    const features = this.#getGroupedDrawingFeatures(mapId);
+    const allFeatures: Feature[] = Object.keys(features).reduce((acc: Feature<Geometry>[], curr: string) => {
+      return [...acc, ...features[curr]];
+    }, []);
+
+    allFeatures.forEach((feature) => {
+      const geom = feature.getGeometry();
+      if (!geom) return;
+      const overlay = feature.get('measureTooltip');
+      if (overlay) {
+        const { output, tooltipCoord } = this.#getFeatureMeasurements(geom, displayLanguage);
+        overlay.element.children[0].innerHTML = output;
+        overlay.setPosition(tooltipCoord);
+      }
+    });
+  }
+
+  /**
+   * Formats a numeric value according to the display language
+   * @param {number} value The value to format
+   * @param {string} displayLanguage The display language ('en' or 'fr')
+   * @returns {string} The formatted value
+   */
+  static #formatValue(value: number, displayLanguage: string): string {
+    return displayLanguage === 'fr'
+      ? value.toLocaleString('fr-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      : value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  /**
+   * Takes a length and converts it to a string to be used in the overlays
+   * @param {number} length The length to be converted
+   * @param {string} displayLanguage The display language
+   * @returns {string} The string of text describing the length
+   */
+  static #getLengthText(length: number, displayLanguage: string): string {
     if (length > 100) {
-      return `${Math.round((length / 1000) * 100) / 100} km`;
+      const value = Math.round((length / 1000) * 100) / 100;
+      return `${this.#formatValue(value, displayLanguage)} km`;
     }
-    return `${Math.round(length * 100) / 100} m`;
+    const value = Math.round(length * 100) / 100;
+    return `${this.#formatValue(value, displayLanguage)} m`;
   }
 
-  static #getAreaText(area: number): string {
+  /**
+   * Takes an area and converts it to a string to be used in the overlays
+   * @param {number} area The area to be converted
+   * @param {string} displayLanguage The display language
+   * @returns {string} The string of text describing the area
+   */
+  static #getAreaText(area: number, displayLanguage: string): string {
     if (area > 10000) {
-      return `${Math.round((area / 1000000) * 100) / 100} km<sup>2</sup>`;
+      const value = Math.round((area / 1000000) * 100) / 100;
+      return `${this.#formatValue(value, displayLanguage)} km<sup>2</sup>`;
     }
-    return `${Math.round(area * 100) / 100} m<sup>2</sup>`;
+    const value = Math.round(area * 100) / 100;
+    return `${this.#formatValue(value, displayLanguage)} m<sup>2</sup>`;
   }
 
-  static #createMeasureTooltip(feature: Feature<Geometry>, hideMeasurements: boolean): Overlay | undefined {
-    // Get the measureTooltip for the feature if one alrady exists
-    let measureTooltip = (feature.get('measureTooltip') as Overlay) || undefined;
-    if (measureTooltip) {
-      measureTooltip.getElement()?.remove();
-    }
-    const geom = feature.getGeometry();
-
+  /**
+   * Calculates measurements for a geometry feature
+   * @param {Geometry} geom The geometry to measure
+   * @param {string} displayLanguage The display language
+   * @returns {Object} Object containing the formatted output text and tooltip coordinates
+   */
+  static #getFeatureMeasurements(
+    geom: Geometry,
+    displayLanguage: string
+  ): { output: string | undefined; tooltipCoord: number[] | undefined } {
     let output: string | undefined;
     let tooltipCoord: number[] | undefined;
 
-    // Add measurement element (display: None)
     if (geom instanceof LineString) {
       const length = getLength(geom);
-      output = this.#getLengthText(length);
+      output = this.#getLengthText(length, displayLanguage);
 
       tooltipCoord = geom.getLastCoordinate();
     }
 
     if (geom instanceof Polygon) {
       const length = getLength(geom);
-      output = this.#getLengthText(length);
+      output = this.#getLengthText(length, displayLanguage);
 
       const area = getArea(geom);
-      output += `<br>${this.#getAreaText(area)}`;
+      output += `<br>${this.#getAreaText(area, displayLanguage)}`;
 
       tooltipCoord = geom.getInteriorPoint().getCoordinates();
       tooltipCoord.pop();
@@ -84,13 +186,37 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       // For Circle geometries, calculate area using π*r²
       const radius = geom.getRadius();
       const length = 2 * Math.PI * radius;
-      output = this.#getLengthText(length);
+      output = this.#getLengthText(length, displayLanguage);
 
       const area = Math.PI * radius * radius;
-      output += `<br>${this.#getAreaText(area)}`;
+      output += `<br>${this.#getAreaText(area, displayLanguage)}`;
 
       tooltipCoord = geom.getCenter();
     }
+    return { output, tooltipCoord };
+  }
+
+  /**
+   * Creates or updates a measurement tooltip for a feature
+   * @param {Feature<Geometry>} feature The feature to create a tooltip for
+   * @param {boolean} hideMeasurements Whether to hide the measurement tooltip
+   * @param {string} mapId The map ID
+   * @returns {Overlay | undefined} The created or updated overlay, or undefined if creation failed
+   */
+  static #createMeasureTooltip(feature: Feature<Geometry>, hideMeasurements: boolean, mapId: string): Overlay | undefined {
+    // Get current display language
+    const displayLanguage = AppEventProcessor.getDisplayLanguage(mapId);
+
+    // Get the measureTooltip for the feature if one alrady exists
+    let measureTooltip = (feature.get('measureTooltip') as Overlay) || undefined;
+    if (measureTooltip) {
+      measureTooltip.getElement()?.remove();
+    }
+    const geom = feature.getGeometry();
+    if (geom === undefined) return undefined;
+
+    const { output, tooltipCoord } = this.#getFeatureMeasurements(geom, displayLanguage);
+
     if (!output || !tooltipCoord) return undefined;
 
     const measureTooltipElement = document.createElement('div');
@@ -314,9 +440,8 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       if (!geom) return;
       if (geom instanceof Point) return;
 
-      const newOverlay = this.#createMeasureTooltip(feature, hideMeasurements);
+      const newOverlay = this.#createMeasureTooltip(feature, hideMeasurements, mapId);
       if (newOverlay) {
-        state.actions.addMeasureOverlay(newOverlay);
         viewer.map.addOverlay(newOverlay);
       }
     });
@@ -404,7 +529,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
           if (!geom) return;
           if (geom instanceof Point) return;
 
-          this.#createMeasureTooltip(feature, hideMeasurements);
+          this.#createMeasureTooltip(feature, hideMeasurements, mapId);
         });
 
         state.actions.setEditInstance(groupKey, editInstance);
@@ -478,21 +603,18 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
     const typesToClear = geomTypes || state.actions.getGeomTypes();
 
-    // Clear geometries for each type
-    typesToClear.forEach((type) => {
-      const groupKey = `draw-${type}`;
-      const geometryGroup = viewer.layer.geometry.geometryGroups.find((group) => group.geometryGroupId === groupKey);
-      if (geometryGroup !== undefined) {
-        // Clear measurements
-        geometryGroup.vectorSource.getFeatures().forEach((feature) => {
-          const measureTooltip = feature.get('measureTooltip');
-          measureTooltip?.getElement()?.remove();
-          state.actions.removeMeasureOverlay(measureTooltip);
-        });
+    // Get all geometries for each type
+    const groupedFeatures = this.#getGroupedDrawingFeatures(mapId, typesToClear);
 
-        // Clear Geometries
-        viewer.layer.geometry.deleteGeometriesFromGroup(groupKey);
-      }
+    // Iterate over each feature group
+    Object.keys(groupedFeatures).forEach((groupKey) => {
+      // Remove all overlays
+      groupedFeatures[groupKey].forEach((feature) => {
+        const measureTooltip = feature.get('measureTooltip');
+        measureTooltip?.getElement()?.remove();
+      });
+      // Delete all geometries from the group
+      viewer.layer.geometry.deleteGeometriesFromGroup(groupKey);
     });
   }
 
@@ -529,7 +651,13 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     const viewer = MapEventProcessor.getMapViewer(mapId);
     if (!viewer) throw new MapViewerNotFoundError(mapId);
 
-    const { hideMeasurements, measureOverlays } = state;
+    const { hideMeasurements } = state;
+
+    // Get all overlays
+    const groupedFeatures = this.#getGroupedDrawingFeatures(mapId);
+    const measureOverlays = Object.keys(groupedFeatures).reduce((acc: Overlay[], cur) => {
+      return [...acc, ...groupedFeatures[cur].map((feature) => feature.get('measureTooltip'))];
+    }, []);
 
     // Toggle the visibility of the measure tooltips
     measureOverlays.forEach((overlay) => {
