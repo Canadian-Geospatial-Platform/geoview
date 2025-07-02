@@ -44,3 +44,4 @@ export interface AvatarPropsExtend extends AvatarProps {
 declare function AvatarUI(props: AvatarPropsExtend): JSX.Element;
 export declare const Avatar: typeof AvatarUI;
 export {};
+//# sourceMappingURL=avatar.d.ts.map

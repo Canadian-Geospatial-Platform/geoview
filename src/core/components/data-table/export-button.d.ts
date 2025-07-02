@@ -18,3 +18,4 @@ interface ExportButtonProps {
  */
 declare function ExportButton({ layerPath, rows, columns, children }: ExportButtonProps): JSX.Element;
 export default ExportButton;
+//# sourceMappingURL=export-button.d.ts.map

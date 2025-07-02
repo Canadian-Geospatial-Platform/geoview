@@ -68,3 +68,4 @@ interface TypeStep {
 declare function StepperUI(props: StepperPropsExtend): JSX.Element;
 export declare const Stepper: typeof StepperUI;
 export {};
+//# sourceMappingURL=stepper.d.ts.map

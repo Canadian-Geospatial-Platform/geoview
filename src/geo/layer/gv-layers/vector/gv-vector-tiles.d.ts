@@ -28,9 +28,9 @@ export declare class GVVectorTiles extends AbstractGVVectorTile {
     protected getFieldType(fieldName: string): TypeOutfieldsType;
     /**
      * Used to change the style of the vector tile layer.
-     * @private
      * @param styleUrl The style URL to apply to the layer
      * @returns Promise<void>
      */
     changeStyle(styleUrl: string): Promise<void>;
 }
+//# sourceMappingURL=gv-vector-tiles.d.ts.map

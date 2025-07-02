@@ -24,3 +24,4 @@ export declare abstract class AbstractGVRaster extends AbstractGVLayer {
      */
     getMetadataExtent(): Extent | undefined;
 }
+//# sourceMappingURL=abstract-gv-raster.d.ts.map

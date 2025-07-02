@@ -13,3 +13,4 @@ export type NotificationType = 'success' | 'error' | 'info' | 'warning';
  */
 declare const _default: import("react").NamedExoticComponent<object>;
 export default _default;
+//# sourceMappingURL=notifications.d.ts.map

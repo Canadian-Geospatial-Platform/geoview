@@ -26,3 +26,4 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      */
     protected onCreateVectorSource(layerConfig: VectorLayerEntryConfig, sourceOptions: SourceOptions<Feature>, readOptions: ReadOptions): VectorSource<Feature>;
 }
+//# sourceMappingURL=abstract-geoview-vector.d.ts.map

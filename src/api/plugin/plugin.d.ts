@@ -1,4 +1,4 @@
-import { TypeJsonObject, TypeJsonValue } from '@/api/config/types/config-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 import { AbstractPlugin } from './abstract-plugin';
 /**
  * Class to manage plugins
@@ -7,13 +7,12 @@ import { AbstractPlugin } from './abstract-plugin';
  * @class
  */
 export declare abstract class Plugin {
-    pluginsLoaded: boolean;
+    #private;
     /**
      * Load a package script on runtime
-     *
      * @param {string} pluginId the package id to load
      */
-    static loadScript(pluginId: string): Promise<any>;
+    static loadScript(pluginId: string): Promise<typeof AbstractPlugin>;
     /**
      * Add new plugin
      *
@@ -22,7 +21,7 @@ export declare abstract class Plugin {
      * @param {Class} constructor the plugin class (React Component)
      * @param {Object} props the plugin properties
      */
-    static addPlugin(pluginId: string, mapId: string, constructor?: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue), props?: TypeJsonObject): Promise<void>;
+    static addPlugin(pluginId: string, mapId: string, constructor: typeof AbstractPlugin, props?: TypeJsonObject): Promise<void>;
     /**
      * Delete a specific plugin loaded in a map
      *
@@ -37,3 +36,4 @@ export declare abstract class Plugin {
      */
     static removePlugins(mapId: string): Promise<void>;
 }
+//# sourceMappingURL=plugin.d.ts.map

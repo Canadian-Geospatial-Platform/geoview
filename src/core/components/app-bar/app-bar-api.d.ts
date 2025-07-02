@@ -105,3 +105,4 @@ export type AppBarRemovedEvent = {
  */
 type AppBarRemovedDelegate = EventDelegateBase<AppBarApi, AppBarRemovedEvent, void>;
 export {};
+//# sourceMappingURL=app-bar-api.d.ts.map

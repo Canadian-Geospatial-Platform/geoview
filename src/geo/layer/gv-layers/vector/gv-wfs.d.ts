@@ -27,3 +27,4 @@ export declare class GVWFS extends AbstractGVVector {
      */
     protected getFieldType(fieldName: string): TypeOutfieldsType;
 }
+//# sourceMappingURL=gv-wfs.d.ts.map

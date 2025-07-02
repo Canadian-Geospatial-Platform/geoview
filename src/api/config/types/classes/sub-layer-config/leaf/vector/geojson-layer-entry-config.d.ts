@@ -52,3 +52,4 @@ export declare class GeoJsonLayerEntryConfig extends AbstractBaseLayerEntryConfi
      */
     protected parseLayerMetadata(): void;
 }
+//# sourceMappingURL=geojson-layer-entry-config.d.ts.map

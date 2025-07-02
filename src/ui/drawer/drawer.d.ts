@@ -48,3 +48,4 @@ export interface DrawerPropsExtend extends DrawerProps {
 declare function DrawerUI(props: DrawerPropsExtend): JSX.Element;
 export declare const Drawer: typeof DrawerUI;
 export {};
+//# sourceMappingURL=drawer.d.ts.map

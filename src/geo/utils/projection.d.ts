@@ -163,3 +163,4 @@ export declare abstract class Projection {
      */
     static transformCoordinates(coordinates: Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined, startProjection: string, endProjection: string): Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined;
 }
+//# sourceMappingURL=projection.d.ts.map

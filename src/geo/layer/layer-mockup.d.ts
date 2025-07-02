@@ -31,3 +31,4 @@ export declare abstract class LayerMockup {
     static configMSITemporalDimension(): TimeDimension;
     static configLayerEntry(layerId: string, layerName: string, entryType: TypeLayerEntryType, metadata: unknown, source: unknown, style: unknown): TypeLayerEntryConfig;
 }
+//# sourceMappingURL=layer-mockup.d.ts.map

@@ -55,3 +55,4 @@ export declare class Select extends Interaction {
  */
 type SelectChangedDelegate = EventDelegateBase<Select, OLSelectEvent, void>;
 export {};
+//# sourceMappingURL=select.d.ts.map

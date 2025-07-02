@@ -39,3 +39,4 @@ export type TypeBasemapLayer = {
     extent: Extent;
     copyright?: string;
 };
+//# sourceMappingURL=basemap-types.d.ts.map

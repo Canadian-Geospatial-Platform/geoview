@@ -25,3 +25,4 @@ export declare class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig
      */
     protected onClone(): ConfigBaseClass;
 }
+//# sourceMappingURL=ogc-wms-layer-entry-config.d.ts.map

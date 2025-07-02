@@ -8,3 +8,4 @@ export declare class OgcFeatureLayerEntryConfig extends VectorLayerEntryConfig {
      */
     constructor(layerConfig: OgcFeatureLayerEntryConfig);
 }
+//# sourceMappingURL=ogc-layer-entry-config.d.ts.map

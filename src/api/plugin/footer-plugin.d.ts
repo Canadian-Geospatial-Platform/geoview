@@ -7,20 +7,30 @@ export declare abstract class FooterPlugin extends AbstractPlugin {
     value?: number;
     footerProps?: TypeTabs;
     /**
+     * Overrides the get config
+     * @returns {unknown} The config
+     */
+    getConfig(): unknown;
+    /**
      * Overridable function to create footer props content
      * @returns TypeTabs The footer props content
      */
-    onCreateContentProps(): TypeTabs;
+    protected onCreateContentProps(): TypeTabs;
     /**
      * Called when a footer plugin is being added
      */
-    onAdd(): void;
+    protected onAdd(): void;
     /**
      * Called when a footer plugin is being removed
      */
-    onRemove(): void;
+    protected onRemove(): void;
     /**
-     * Called when a footer plugin has been selected in the tabs
+     * Selects the Plugin.
      */
-    onSelected(): void;
+    select(): void;
+    /**
+     * Overridable function called when the Plugin is being selected.
+     */
+    protected onSelect(): void;
 }
+//# sourceMappingURL=footer-plugin.d.ts.map

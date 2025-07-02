@@ -197,3 +197,4 @@ export declare const isSimpleSymbolVectorConfig: (verifyIfConfig: TypeBaseVector
  * @returns {boolean} true if the type assertion is valid.
  */
 export declare const isIconSymbolVectorConfig: (verifyIfConfig: TypeBaseVectorGeometryConfig) => verifyIfConfig is TypeIconSymbolVectorConfig;
+//# sourceMappingURL=type-guards.d.ts.map

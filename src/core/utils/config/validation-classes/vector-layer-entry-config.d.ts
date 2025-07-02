@@ -16,3 +16,4 @@ export declare abstract class VectorLayerEntryConfig extends AbstractBaseLayerEn
      */
     protected constructor(layerConfig: VectorLayerEntryConfig);
 }
+//# sourceMappingURL=vector-layer-entry-config.d.ts.map

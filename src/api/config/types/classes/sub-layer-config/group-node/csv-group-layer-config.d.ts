@@ -24,3 +24,4 @@ export declare class CsvGroupLayerConfig extends GroupLayerEntryConfig {
      */
     protected parseLayerMetadata(): void;
 }
+//# sourceMappingURL=csv-group-layer-config.d.ts.map

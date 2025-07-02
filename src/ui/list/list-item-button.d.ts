@@ -10,3 +10,4 @@ import { ListItemButtonProps } from '@mui/material';
 declare function ListItemButtonUI(props: ListItemButtonProps): JSX.Element;
 export declare const ListItemButton: typeof ListItemButtonUI;
 export {};
+//# sourceMappingURL=list-item-button.d.ts.map

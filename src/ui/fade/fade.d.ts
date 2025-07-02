@@ -43,3 +43,4 @@ export interface FadePropsExtend extends Omit<FadeProps, 'children'> {
 declare function FadeUI({ children, ...props }: FadePropsExtend): JSX.Element;
 export declare const Fade: typeof FadeUI;
 export {};
+//# sourceMappingURL=fade.d.ts.map

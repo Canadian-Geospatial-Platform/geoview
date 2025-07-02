@@ -92,3 +92,4 @@ export type NavBarRemovedEvent = {
  */
 type NavBarRemovedDelegate = EventDelegateBase<NavBarApi, NavBarRemovedEvent, void>;
 export {};
+//# sourceMappingURL=nav-bar-api.d.ts.map

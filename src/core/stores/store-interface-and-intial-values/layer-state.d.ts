@@ -26,6 +26,7 @@ export interface ILayerState {
         getLayerServiceProjection: (layerPath: string) => string | undefined;
         getLayerTemporalDimension: (layerPath: string) => TypeTemporalDimension | undefined;
         refreshLayer: (layerPath: string) => void;
+        reloadLayer: (layerPath: string) => void;
         setAllItemsVisibility: (layerPath: string, visibility: boolean) => void;
         setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => void;
         setHighlightLayer: (layerPath: string) => void;
@@ -89,3 +90,4 @@ export declare const useSelectorLayerChildren: (layerPath: string) => TypeLegend
 export declare const useSelectorLayerItems: (layerPath: string) => TypeLegendItem[] | undefined;
 export declare const useSelectorLayerIcons: (layerPath: string) => TypeLegendLayerItem[] | undefined;
 export {};
+//# sourceMappingURL=layer-state.d.ts.map

@@ -24,3 +24,4 @@ export declare class GroupLayerEntryConfig extends ConfigBaseClass {
      */
     onSerialize(): TypeJsonObject;
 }
+//# sourceMappingURL=group-layer-entry-config.d.ts.map

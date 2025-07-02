@@ -4,3 +4,4 @@ interface FeatureInfoProps {
 }
 export declare function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null;
 export {};
+//# sourceMappingURL=feature-info.d.ts.map

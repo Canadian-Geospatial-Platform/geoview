@@ -38,3 +38,4 @@ import { AppBarProps } from '@mui/material';
 declare function AppBarUI1(props: AppBarProps): JSX.Element;
 export declare const AppBarUI: typeof AppBarUI1;
 export {};
+//# sourceMappingURL=appbar.d.ts.map

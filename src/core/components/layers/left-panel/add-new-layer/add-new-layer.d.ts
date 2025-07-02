@@ -9,3 +9,4 @@
  * @returns {JSX.Element} The rendered component with a multi-step form for adding layers
  */
 export declare function AddNewLayer(): JSX.Element;
+//# sourceMappingURL=add-new-layer.d.ts.map

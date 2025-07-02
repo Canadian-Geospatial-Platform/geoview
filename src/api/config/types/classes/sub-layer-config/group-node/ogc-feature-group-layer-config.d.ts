@@ -17,3 +17,4 @@ export declare class OgcFeatureGroupLayerConfig extends GroupLayerEntryConfig {
      */
     protected parseLayerMetadata(): void;
 }
+//# sourceMappingURL=ogc-feature-group-layer-config.d.ts.map

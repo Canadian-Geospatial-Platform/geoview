@@ -10,3 +10,4 @@ interface GuideType {
  */
 export declare const Guide: import("react").NamedExoticComponent<GuideType>;
 export {};
+//# sourceMappingURL=guide.d.ts.map

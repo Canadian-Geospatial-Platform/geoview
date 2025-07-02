@@ -53,3 +53,4 @@ export declare class OgcFeatureLayerEntryConfig extends AbstractBaseLayerEntryCo
      */
     protected parseLayerMetadata(): void;
 }
+//# sourceMappingURL=ogc-feature-layer-entry-config.d.ts.map

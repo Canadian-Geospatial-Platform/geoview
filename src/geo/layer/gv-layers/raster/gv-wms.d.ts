@@ -98,3 +98,4 @@ export declare class GVWMS extends AbstractGVRaster {
      */
     static applyViewFilterOnSource(layerConfig: OgcWmsLayerEntryConfig | EsriImageLayerEntryConfig, source: ImageWMS | ImageArcGISRest, externalDateFragments: TypeDateFragments | undefined, layer: GVWMS | GVEsriImage | undefined, filter?: string | undefined, callbackWhenUpdated?: ((filterToUse: string) => void) | undefined): void;
 }
+//# sourceMappingURL=gv-wms.d.ts.map

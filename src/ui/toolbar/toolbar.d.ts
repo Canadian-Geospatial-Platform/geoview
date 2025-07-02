@@ -27,3 +27,4 @@ import { ToolbarProps } from '@mui/material';
 declare function ToolbarUI(props: ToolbarProps): JSX.Element;
 export declare const Toolbar: typeof ToolbarUI;
 export {};
+//# sourceMappingURL=toolbar.d.ts.map

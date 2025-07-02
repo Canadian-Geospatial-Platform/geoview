@@ -41,3 +41,4 @@ import { MRT_TableOptions as MRTTableOptions, type MRT_RowData as MRTRowData } f
 declare function MRTTableUI<TData extends MRTRowData>(props: MRTTableOptions<TData>): JSX.Element;
 export declare const MRTTable: typeof MRTTableUI;
 export * from 'material-react-table';
+//# sourceMappingURL=table.d.ts.map

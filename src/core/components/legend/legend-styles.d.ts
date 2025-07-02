@@ -13,3 +13,4 @@ export declare const getSxClassesMain: () => SxClasses;
  */
 export declare const getSxClasses: (theme: Theme) => SxClasses;
 export {};
+//# sourceMappingURL=legend-styles.d.ts.map

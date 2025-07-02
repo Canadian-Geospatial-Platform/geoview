@@ -8,3 +8,4 @@ import { SxStyles } from '@/ui/style/types';
  * @returns {SxStyles} An object containing MUI SX styling properties
  */
 export declare const getSxClasses: (theme: Theme, containerType: string) => SxStyles;
+//# sourceMappingURL=responsive-grid-layout-style.d.ts.map

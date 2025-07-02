@@ -46,3 +46,4 @@ export declare class EsriDynamicLayerConfig extends AbstractGeoviewEsriLayerConf
      */
     createGroupNode(layerConfig: TypeJsonObject, geoviewConfig: AbstractGeoviewLayerConfig, parentNode?: EntryConfigBaseClass): EntryConfigBaseClass;
 }
+//# sourceMappingURL=esri-dynamic-config.d.ts.map

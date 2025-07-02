@@ -31,3 +31,4 @@ export declare class FetchEsriWorkerPool extends AbstractWorkerPool<FetchEsriWor
      */
     process(params: QueryParams): Promise<TypeJsonObject>;
 }
+//# sourceMappingURL=fetch-esri-worker-pool.d.ts.map

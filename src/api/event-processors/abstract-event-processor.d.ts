@@ -56,3 +56,4 @@ export declare abstract class AbstractEventProcessor {
      */
     protected static helperPropagateArrayStoreBatch<T extends TypeFeatureInfoResultSetEntry | TypeAllFeatureInfoResultSetEntry | TypeHoverResultSetEntry | TypeGeochartResultSetEntry>(mapId: string, layerDataArray: T[], batchPropagationObject: BatchedPropagationLayerDataArrayByMap<T>, timeDelayBetweenPropagations: number, onSetLayerDataArray: (layerDataArray: T[]) => void, traceProcessorIndication?: string, layerPathBypass?: string, onResetBypass?: (layerPath: string) => void): Promise<void>;
 }
+//# sourceMappingURL=abstract-event-processor.d.ts.map

@@ -10,3 +10,4 @@ import { LayerListEntry } from '@/core/components/common';
  * @returns
  */
 export declare function checkSelectedLayerPathList(callbackSetLayerDataArrayBatch: (layerPath: string) => void, callbackSetSelectedLayerPath: (layerPath: string) => void, memoLayerSelectedItem: LayerListEntry | undefined, memoLayersList: LayerListEntry[]): void;
+//# sourceMappingURL=comp-common.d.ts.map

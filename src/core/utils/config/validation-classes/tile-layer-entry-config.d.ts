@@ -14,3 +14,4 @@ export declare class TileLayerEntryConfig extends AbstractBaseLayerEntryConfig {
      */
     constructor(layerConfig: TileLayerEntryConfig);
 }
+//# sourceMappingURL=tile-layer-entry-config.d.ts.map

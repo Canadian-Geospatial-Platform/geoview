@@ -45,3 +45,4 @@ import { MenuProps } from '@mui/material';
 declare function MenuUI(props: MenuProps): JSX.Element;
 export declare const Menu: typeof MenuUI;
 export {};
+//# sourceMappingURL=menu.d.ts.map

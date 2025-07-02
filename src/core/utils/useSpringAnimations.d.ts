@@ -9,3 +9,4 @@ export declare const useSlideIn: (config?: SpringConfig) => SpringValues;
 export declare const useScaleIn: (config?: SpringConfig) => SpringValues;
 export declare const useShake: (config?: SpringConfig) => SpringValues;
 export {};
+//# sourceMappingURL=useSpringAnimations.d.ts.map

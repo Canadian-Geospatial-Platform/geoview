@@ -22,3 +22,4 @@ export interface LightboxProps {
  * @returns {JSX.Element} created lightbox element
  */
 export declare const LightboxImg: import("react").NamedExoticComponent<LightboxProps>;
+//# sourceMappingURL=lightbox.d.ts.map

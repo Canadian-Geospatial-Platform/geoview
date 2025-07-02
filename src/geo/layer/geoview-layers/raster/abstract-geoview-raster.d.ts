@@ -21,3 +21,4 @@ export declare abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer
      */
     static throwIfMetatadaHasError(geoviewLayerId: string, layerName: string | undefined, metadata: TypeJsonObject): void;
 }
+//# sourceMappingURL=abstract-geoview-raster.d.ts.map

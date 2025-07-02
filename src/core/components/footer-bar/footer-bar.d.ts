@@ -9,3 +9,4 @@ type FooterBarProps = {
  */
 export declare function FooterBar(props: FooterBarProps): JSX.Element | null;
 export {};
+//# sourceMappingURL=footer-bar.d.ts.map

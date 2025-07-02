@@ -1,4 +1,3 @@
-import React from 'react';
 import { MRT_TableInstance as MRTTableInstance, MRT_ColumnDef } from 'material-react-table';
 import { ColumnsType } from './data-table-types';
 import { TypeFeatureInfoEntry } from '@/api/config/types/map-schema-types';
@@ -50,5 +49,6 @@ interface TopToolbarProps<TData extends ColumnsType> {
     table: MRTTableInstance<ColumnsType>;
 }
 declare function TopToolbar(props: TopToolbarProps<ColumnsType>): JSX.Element;
-declare const _default: React.MemoExoticComponent<typeof TopToolbar>;
+declare const _default: import("react").MemoExoticComponent<typeof TopToolbar>;
 export default _default;
+//# sourceMappingURL=top-toolbar.d.ts.map

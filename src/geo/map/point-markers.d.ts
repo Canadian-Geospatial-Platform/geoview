@@ -56,3 +56,4 @@ export declare class PointMarkers {
      */
     getExtentFromMarkerIds(ids: string[]): Extent | undefined;
 }
+//# sourceMappingURL=point-markers.d.ts.map

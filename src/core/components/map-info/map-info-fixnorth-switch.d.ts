@@ -8,3 +8,4 @@ interface MapInfoFixNorthSwitchProps {
  */
 export declare const MapInfoFixNorthSwitch: import("react").NamedExoticComponent<MapInfoFixNorthSwitchProps>;
 export {};
+//# sourceMappingURL=map-info-fixnorth-switch.d.ts.map

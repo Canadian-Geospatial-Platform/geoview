@@ -30,3 +30,4 @@ export declare class Config {
      */
     initializeMapConfig(mapId: string, listOfGeoviewLayerConfig: MapConfigLayerEntry[], onErrorCallback: (errorKey: string, params: string[]) => void): MapConfigLayerEntry[] | undefined;
 }
+//# sourceMappingURL=config.d.ts.map

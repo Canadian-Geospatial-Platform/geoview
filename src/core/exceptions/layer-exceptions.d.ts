@@ -30,6 +30,18 @@ export declare class LayerNotFoundError extends LayerError {
     constructor(layerPath: string);
 }
 /**
+ * Error thrown when a layer is expected to be a certain type but is not.
+ * @extends {LayerError}
+ */
+export declare class LayerWrongTypeError extends LayerError {
+    /**
+     * Constructor to initialize the LayerWrongTypeError with the layer path
+     * @param {string} layerPath - The path of the layer.
+     * @param {string | undefined} layerName - The layer name.
+     */
+    constructor(layerPath: string, layerName: string | undefined);
+}
+/**
  * Error thrown when a layer is expected to be a GeoJson layer but is not.
  * @extends {LayerError}
  */
@@ -272,3 +284,4 @@ export declare class LayerNoGeographicDataInCSVError extends LayerError {
      */
     constructor(layerPath: string, layerName: string | undefined);
 }
+//# sourceMappingURL=layer-exceptions.d.ts.map

@@ -27,3 +27,4 @@ export declare class AsyncSemaphore {
      */
     awaitTerminate(): Promise<void>;
 }
+//# sourceMappingURL=async-semaphore.d.ts.map

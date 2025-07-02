@@ -78,3 +78,4 @@ export interface TypeEsriImageLayerLegend {
         }[];
     }[];
 }
+//# sourceMappingURL=gv-esri-image.d.ts.map

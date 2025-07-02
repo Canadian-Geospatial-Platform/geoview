@@ -74,3 +74,4 @@ export type AccordionItem = {
 declare function AccordionUI(props: AccordionProps): ReactNode;
 export declare const Accordion: typeof AccordionUI;
 export {};
+//# sourceMappingURL=accordion.d.ts.map

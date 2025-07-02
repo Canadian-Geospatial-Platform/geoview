@@ -51,3 +51,4 @@ export declare class GeochartEventProcessor extends AbstractEventProcessor {
      */
     static removeGeochartChart(mapId: string, layerPath: string): void;
 }
+//# sourceMappingURL=geochart-event-processor.d.ts.map

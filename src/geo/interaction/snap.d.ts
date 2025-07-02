@@ -30,3 +30,4 @@ export declare class Snap extends Interaction {
      */
     stopInteraction(): void;
 }
+//# sourceMappingURL=snap.d.ts.map

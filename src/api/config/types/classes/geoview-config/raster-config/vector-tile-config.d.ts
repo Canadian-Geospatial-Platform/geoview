@@ -85,3 +85,4 @@ export declare class VectorTileLayerConfig extends AbstractGeoviewLayerConfig {
      */
     findLayerMetadataEntry(layerId: string, metadata?: TypeJsonObject | undefined): TypeJsonObject | null;
 }
+//# sourceMappingURL=vector-tile-config.d.ts.map

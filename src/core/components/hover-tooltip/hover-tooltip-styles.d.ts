@@ -8,3 +8,4 @@ type SxClasses = Record<string, object>;
  */
 export declare const getSxClasses: (theme: Theme) => SxClasses;
 export {};
+//# sourceMappingURL=hover-tooltip-styles.d.ts.map

@@ -11,3 +11,4 @@ type GeoListProps = {
  */
 export declare function GeoList({ geoListItems, searchValue }: GeoListProps): JSX.Element;
 export {};
+//# sourceMappingURL=geo-list.d.ts.map

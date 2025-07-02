@@ -8,7 +8,6 @@ import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-b
  */
 export declare abstract class AbstractBaseLayer {
     #private;
-    protected olLayer: BaseLayer;
     /**
      * Constructs a GeoView base layer to manage an OpenLayer layer, including group layers.
      * @param {ConfigBaseClass} layerConfig - The layer configuration.
@@ -18,7 +17,26 @@ export declare abstract class AbstractBaseLayer {
      * Must override method to get the layer attributions
      * @returns {string[]} The layer attributions
      */
-    abstract getAttributions(): string[];
+    protected abstract onGetAttributions(): string[];
+    /**
+     * Must override method to refresh a layer
+     * @param {OLProjection | undefined} projection - Optional, the projection to refresh to.
+     */
+    protected abstract onRefresh(projection: OLProjection | undefined): void;
+    /**
+     * Gets the attributions for the layer by calling the overridable function 'onGetAttributions'.
+     * When the layer is a GVLayer, its layer attributions are returned.
+     * When the layer is a GVGroup, all layers attributions in the group are returned.
+     * @returns {string[]} The layer attributions.
+     */
+    getAttributions(): string[];
+    /**
+     * Refreshes the layer by calling the overridable function 'onRefresh'.
+     * When the layer is a GVLayer its layer source is refreshed.
+     * When the layer is a GVGroup, all layers in the group are refreshed.
+     * @param {OLProjection | undefined} projection - Optional, the projection to refresh to.
+     */
+    refresh(projection: OLProjection | undefined): void;
     /**
      * A quick getter to help identify which layer class the current instance is coming from.
      */
@@ -28,6 +46,11 @@ export declare abstract class AbstractBaseLayer {
      * @returns {ConfigBaseClass} The layer configuration
      */
     getLayerConfig(): ConfigBaseClass;
+    /**
+     * Sets the OpenLayers Layer
+     * @param {BaseLayer} layer - The OpenLayers Layer
+     */
+    protected setOLLayer(layer: BaseLayer): void;
     /**
      * Gets the OpenLayers Layer
      * @returns The OpenLayers Layer
@@ -76,14 +99,6 @@ export declare abstract class AbstractBaseLayer {
      * @param {Extent} layerExtent The extent to assign to the layer.
      */
     setExtent(layerExtent: Extent): void;
-    /**
-     * Overridable function that gets the extent of an array of features.
-     * @param {string[]} objectIds - The IDs of the features to calculate the extent from.
-     * @param {OLProjection} outProjection - The output projection for the extent.
-     * @param {string} outfield - ID field to return for services that require a value in outfields.
-     * @returns {Promise<Extent>} The extent of the features, if available
-     */
-    getExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent>;
     /**
      * Gets the opacity of the layer (between 0 and 1).
      * @returns {number} The opacity of the layer.
@@ -193,3 +208,4 @@ export type LayerOpacityChangedEvent = {
     opacity: number;
 };
 export {};
+//# sourceMappingURL=abstract-base-layer.d.ts.map

@@ -62,7 +62,7 @@ export { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config'
 /** Supported geoview themes. */
 export type TypeDisplayTheme = 'dark' | 'light' | 'geo.ca';
 /** Valid values for the navBar array. */
-export type TypeValidNavBarProps = 'zoom' | 'fullscreen' | 'home' | 'location' | 'basemap-select' | 'projection';
+export type TypeValidNavBarProps = 'zoom' | 'fullscreen' | 'home' | 'location' | 'basemap-select' | 'projection' | 'drawer';
 /** Controls available on the navigation bar. Default = ['zoom', 'fullscreen', 'home', 'basemap-select]. */
 export type TypeNavBarProps = TypeValidNavBarProps[];
 /** Supported footer bar tabs */
@@ -805,3 +805,4 @@ export declare const isLineStringVectorConfig: (verifyIfConfig: TypeBaseVectorGe
 export declare const isFilledPolygonVectorConfig: (verifyIfConfig: TypeBaseVectorGeometryConfig) => verifyIfConfig is TypePolygonVectorConfig;
 export declare const isSimpleSymbolVectorConfig: (verifyIfConfig: TypeBaseVectorGeometryConfig) => verifyIfConfig is TypeSimpleSymbolVectorConfig;
 export declare const isIconSymbolVectorConfig: (verifyIfConfig: TypeBaseVectorGeometryConfig) => verifyIfConfig is TypeIconSymbolVectorConfig;
+//# sourceMappingURL=map-schema-types.d.ts.map

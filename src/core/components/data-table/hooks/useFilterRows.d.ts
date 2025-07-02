@@ -12,3 +12,4 @@ export declare function useFilterRows({ layerPath }: UseFilterRowsProps): {
     columnFilters: TypeColumnFiltersState;
     setColumnFilters: Dispatch<SetStateAction<TypeColumnFiltersState>>;
 };
+//# sourceMappingURL=useFilterRows.d.ts.map

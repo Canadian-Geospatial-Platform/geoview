@@ -4,3 +4,4 @@
  * @returns {JSX.Element} the created location button
  */
 export default function Location(): JSX.Element;
+//# sourceMappingURL=location.d.ts.map

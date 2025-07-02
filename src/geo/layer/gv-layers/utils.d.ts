@@ -92,3 +92,4 @@ export declare function parseDateTimeValuesEsriDynamic(filter: string, externalF
  */
 export declare function parseDateTimeValuesEsriImageOrWMS(filter: string, externalFragmentsOrder: TypeDateFragments | undefined): string;
 export declare function createAliasLookup(outfields: TypeOutfields[] | undefined): TypeAliasLookup;
+//# sourceMappingURL=utils.d.ts.map

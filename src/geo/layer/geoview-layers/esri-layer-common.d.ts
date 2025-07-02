@@ -107,3 +107,4 @@ export declare function queryRelatedRecordsByUrl(url: string, recordGroupIndex: 
  * @returns {TypeStyleGeometry} The corresponding TypeStyleGeometry
  */
 export declare function convertEsriGeometryTypeToOLGeometryType(esriGeometryType: string): TypeStyleGeometry;
+//# sourceMappingURL=esri-layer-common.d.ts.map

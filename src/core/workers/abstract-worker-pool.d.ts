@@ -43,3 +43,4 @@ export declare abstract class AbstractWorkerPool<T> {
     removeMessageHandler(handler: (event: MessageEvent) => void): void;
     terminate(): void;
 }
+//# sourceMappingURL=abstract-worker-pool.d.ts.map

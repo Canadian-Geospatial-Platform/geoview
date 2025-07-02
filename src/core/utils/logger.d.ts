@@ -181,3 +181,4 @@ type LogTracker = {
 };
 export declare const logger: ConsoleLogger;
 export {};
+//# sourceMappingURL=logger.d.ts.map

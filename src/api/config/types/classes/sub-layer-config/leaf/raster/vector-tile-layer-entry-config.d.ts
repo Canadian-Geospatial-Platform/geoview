@@ -52,3 +52,4 @@ export declare class VectorTileLayerEntryConfig extends AbstractBaseLayerEntryCo
      */
     protected parseLayerMetadata(): void;
 }
+//# sourceMappingURL=vector-tile-layer-entry-config.d.ts.map

@@ -13,3 +13,4 @@ declare const _default: typeof Worker & {
     new (): Worker;
 };
 export default _default;
+//# sourceMappingURL=json-export-worker-script.d.ts.map

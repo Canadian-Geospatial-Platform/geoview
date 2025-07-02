@@ -12,3 +12,4 @@ type TypeUseMapResize = {
 };
 export declare const useMapResize: ({ isMapFullScreen, isFooterBarCollapsed, footerPanelResizeValue, isFooterBar, geoviewElement, footerTabContainer, appHeight, }: UseMapResizeProps) => TypeUseMapResize;
 export {};
+//# sourceMappingURL=use-map-resize.d.ts.map

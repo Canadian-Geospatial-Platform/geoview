@@ -24,3 +24,4 @@ export declare class XyzGroupLayerConfig extends GroupLayerEntryConfig {
      */
     protected parseLayerMetadata(): void;
 }
+//# sourceMappingURL=xyz-group-layer-config.d.ts.map

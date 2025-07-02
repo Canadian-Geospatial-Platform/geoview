@@ -47,3 +47,4 @@ export declare class GVImageStatic extends AbstractGVRaster {
      */
     onGetBounds(projection: OLProjection, stops: number): Extent | undefined;
 }
+//# sourceMappingURL=gv-image-static.d.ts.map

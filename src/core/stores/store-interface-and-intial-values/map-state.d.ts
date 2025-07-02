@@ -2,6 +2,7 @@ import { Coordinate } from 'ol/coordinate';
 import Overlay from 'ol/Overlay';
 import { Extent } from 'ol/extent';
 import { FitOptions } from 'ol/View';
+import { Size } from 'ol/size';
 import { TypeBasemapOptions, TypeHighlightColors, TypeInteraction, TypeMapViewSettings, TypeValidMapProjectionCodes, TypeZoomAndCenter, TypeFeatureInfoEntry, TypePointMarker } from '@/api/config/types/map-schema-types';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
@@ -41,7 +42,7 @@ export interface IMapState {
     pointMarkers: Record<string, TypePointMarker[]>;
     rotation: number;
     scale: TypeScaleInfo;
-    size: [number, number];
+    size: Size;
     visibleLayers: string[];
     visibleRangeLayers: string[];
     zoom: number;
@@ -81,7 +82,7 @@ export interface IMapState {
         setOverlayNorthMarkerRef: (htmlRef: HTMLElement) => void;
     };
     setterActions: {
-        setMapSize: (size: [number, number]) => void;
+        setMapSize: (size: Size) => void;
         setMapScale: (scale: TypeScaleInfo) => void;
         setMapLoaded: (mapLoaded: boolean) => void;
         setMapDisplayed: () => void;
@@ -164,7 +165,7 @@ export declare const useMapPointMarkers: () => Record<string, TypePointMarker[]>
 export declare const useMapProjection: () => TypeValidMapProjectionCodes;
 export declare const useMapRotation: () => number;
 export declare const useMapScale: () => TypeScaleInfo;
-export declare const useMapSize: () => [number, number];
+export declare const useMapSize: () => Size;
 export declare const useMapOrderedLayers: () => string[];
 export declare const useMapVisibleLayers: () => string[];
 export declare const useMapVisibleRangeLayers: () => string[];
@@ -178,3 +179,4 @@ export declare const useSelectorLayerInVisibleRange: (layerPath: string) => bool
 export declare const useSelectorLayerLegendCollapsed: (layerPath: string) => boolean;
 export declare const useMapStoreActions: () => MapActions;
 export {};
+//# sourceMappingURL=map-state.d.ts.map

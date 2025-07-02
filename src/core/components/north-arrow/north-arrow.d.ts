@@ -9,3 +9,4 @@ export declare const NorthArrow: import("react").NamedExoticComponent<object>;
  * @returns {JSX.Element} the north pole marker icon
  */
 export declare const NorthPoleFlag: import("react").NamedExoticComponent<object>;
+//# sourceMappingURL=north-arrow.d.ts.map

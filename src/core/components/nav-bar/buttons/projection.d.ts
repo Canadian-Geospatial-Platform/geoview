@@ -3,3 +3,4 @@
  * @returns {JSX.Element} the created basemap select button
  */
 export default function Projection(): JSX.Element;
+//# sourceMappingURL=projection.d.ts.map

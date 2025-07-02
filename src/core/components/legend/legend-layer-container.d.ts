@@ -6,3 +6,4 @@ interface CollapsibleContentProps {
 }
 export declare const CollapsibleContent: import("react").NamedExoticComponent<CollapsibleContentProps>;
 export {};
+//# sourceMappingURL=legend-layer-container.d.ts.map

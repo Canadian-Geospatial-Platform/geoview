@@ -14,3 +14,4 @@ export interface DataTableProps {
     layerPath: string;
     containerType: TypeContainerBox;
 }
+//# sourceMappingURL=data-table-types.d.ts.map

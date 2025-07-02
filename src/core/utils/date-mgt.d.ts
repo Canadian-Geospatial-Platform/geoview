@@ -185,3 +185,4 @@ export declare abstract class DateMgt {
     static getDayjsDate(date: number | string): Dayjs;
 }
 export {};
+//# sourceMappingURL=date-mgt.d.ts.map

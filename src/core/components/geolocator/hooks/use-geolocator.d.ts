@@ -17,3 +17,4 @@ interface UseGeolocatorReturn {
 }
 export declare const useGeolocator: () => UseGeolocatorReturn;
 export {};
+//# sourceMappingURL=use-geolocator.d.ts.map

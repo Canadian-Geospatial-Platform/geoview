@@ -24,3 +24,4 @@ export declare class VectorTileGroupLayerConfig extends GroupLayerEntryConfig {
      */
     protected parseLayerMetadata(): void;
 }
+//# sourceMappingURL=vector-tile-group-layer-config.d.ts.map

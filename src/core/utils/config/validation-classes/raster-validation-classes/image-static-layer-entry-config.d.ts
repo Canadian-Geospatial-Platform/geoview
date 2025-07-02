@@ -18,3 +18,4 @@ export declare class ImageStaticLayerEntryConfig extends AbstractBaseLayerEntryC
      */
     constructor(layerConfig: ImageStaticLayerEntryConfig);
 }
+//# sourceMappingURL=image-static-layer-entry-config.d.ts.map

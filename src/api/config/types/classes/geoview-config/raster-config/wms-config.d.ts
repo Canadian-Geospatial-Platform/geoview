@@ -88,3 +88,4 @@ export declare class WmsLayerConfig extends AbstractGeoviewLayerConfig {
      */
     findLayerMetadataEntry(layerId: string, layer?: TypeJsonObject | undefined): TypeJsonObject | null;
 }
+//# sourceMappingURL=wms-config.d.ts.map

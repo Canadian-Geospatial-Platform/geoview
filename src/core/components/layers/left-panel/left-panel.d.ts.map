@@ -1,0 +1,1 @@
+{"version":3,"file":"left-panel.d.ts","sourceRoot":"","sources":["../../../../../../src/core/components/layers/left-panel/left-panel.tsx"],"names":[],"mappings":"AAWA,UAAU,cAAc;IACtB,qBAAqB,EAAE,CAAC,OAAO,EAAE,MAAM,KAAK,IAAI,CAAC;IACjD,gBAAgB,EAAE,OAAO,CAAC;CAC3B;AAED,wBAAgB,SAAS,CAAC,EAAE,qBAAqB,EAAE,gBAAgB,EAAE,EAAE,cAAc,GAAG,GAAG,CAAC,OAAO,CAyBlG"}

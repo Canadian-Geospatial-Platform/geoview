@@ -8,3 +8,4 @@ export declare class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
      */
     constructor(layerConfig: XYZTilesLayerEntryConfig);
 }
+//# sourceMappingURL=xyz-layer-entry-config.d.ts.map

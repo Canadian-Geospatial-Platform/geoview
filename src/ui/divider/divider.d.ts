@@ -40,3 +40,4 @@ export interface DividerPropsExtend extends DividerProps {
 declare function DividerUI(props: DividerPropsExtend): JSX.Element;
 export declare const Divider: typeof DividerUI;
 export {};
+//# sourceMappingURL=divider.d.ts.map

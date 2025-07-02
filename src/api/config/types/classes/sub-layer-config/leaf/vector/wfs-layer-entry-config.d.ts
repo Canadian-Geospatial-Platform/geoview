@@ -51,3 +51,4 @@ export declare class WfsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
      */
     protected parseLayerMetadata(): void;
 }
+//# sourceMappingURL=wfs-layer-entry-config.d.ts.map

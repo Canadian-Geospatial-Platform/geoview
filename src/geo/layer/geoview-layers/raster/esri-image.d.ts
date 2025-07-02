@@ -71,3 +71,4 @@ export declare const layerConfigIsEsriImage: (verifyIfLayer: TypeGeoviewLayerCon
  * @returns {boolean} true if the type ascention is valid.
  */
 export declare const geoviewEntryIsEsriImage: (verifyIfGeoViewEntry: TypeLayerEntryConfig) => verifyIfGeoViewEntry is EsriImageLayerEntryConfig;
+//# sourceMappingURL=esri-image.d.ts.map

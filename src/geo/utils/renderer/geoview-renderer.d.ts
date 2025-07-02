@@ -66,3 +66,4 @@ export declare function getFeatureImageSource(feature: Feature, style: TypeLayer
  */
 export declare function analyzeLayerFilter(filterNodeArrayType: FilterNodeType[]): FilterNodeType[];
 export {};
+//# sourceMappingURL=geoview-renderer.d.ts.map

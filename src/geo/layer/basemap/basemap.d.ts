@@ -120,3 +120,4 @@ export type BasemapErrorEvent = {
  */
 type BasemapErrorDelegate = EventDelegateBase<BasemapApi, BasemapErrorEvent, void>;
 export {};
+//# sourceMappingURL=basemap.d.ts.map

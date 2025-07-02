@@ -50,3 +50,4 @@ export interface CardPropsExtend extends CardProps {
 declare function CardUI(props: CardPropsExtend): JSX.Element;
 export declare const Card: typeof CardUI;
 export {};
+//# sourceMappingURL=card.d.ts.map

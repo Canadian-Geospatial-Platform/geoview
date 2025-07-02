@@ -160,3 +160,4 @@ export interface EsriClassBreakRenderer extends EsriBaseRenderer {
     rotationType: 'arithmetic' | 'geographic';
 }
 export {};
+//# sourceMappingURL=esri-renderer.d.ts.map

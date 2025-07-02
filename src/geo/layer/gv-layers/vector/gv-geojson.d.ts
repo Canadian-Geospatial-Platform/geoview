@@ -23,6 +23,11 @@ export declare class GVGeoJSON extends AbstractGVVector {
      */
     getLayerConfig(): GeoJSONLayerEntryConfig;
     /**
+     * Overrides the refresh to reload the Geojson object in the layer source once the refresh completes.
+     * @param {OLProjection | undefined} projection - Optional, the projection to refresh to.
+     */
+    onRefresh(projection: OLProjection | undefined): void;
+    /**
      * Loads a Geojson object as the layer source features, overriding the current features if any.
      * @param {GeoJSONObject | string} geojson - The geoJSON object.
      * @param {OLProjection} projection - The output projection.
@@ -34,3 +39,4 @@ export declare class GVGeoJSON extends AbstractGVVector {
      */
     updateGeojsonSource(projection: OLProjection): void;
 }
+//# sourceMappingURL=gv-geojson.d.ts.map

@@ -9,3 +9,4 @@ type ShellProps = {
  */
 export declare function Shell(props: ShellProps): JSX.Element;
 export {};
+//# sourceMappingURL=shell.d.ts.map

@@ -183,3 +183,4 @@ export declare abstract class AbstractGeoviewLayerConfig {
      */
     serialize(indent?: number): string;
 }
+//# sourceMappingURL=abstract-geoview-layer-config.d.ts.map

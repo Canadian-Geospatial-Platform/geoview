@@ -21,3 +21,4 @@ export type TypePanelAppProps = {
 declare function PanelUI(props: TypePanelAppProps): JSX.Element;
 export declare const Panel: typeof PanelUI;
 export {};
+//# sourceMappingURL=panel.d.ts.map

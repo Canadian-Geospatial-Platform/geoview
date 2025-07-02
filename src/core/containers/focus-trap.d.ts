@@ -12,3 +12,4 @@ interface FocusTrapProps {
  */
 export declare function FocusTrapDialog(props: FocusTrapProps): JSX.Element;
 export {};
+//# sourceMappingURL=focus-trap.d.ts.map

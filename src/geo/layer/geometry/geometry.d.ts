@@ -269,3 +269,4 @@ type GeometryAddedDelegate = EventDelegateBase<GeometryApi, GeometryAddedEvent, 
  */
 export type GeometryAddedEvent<T extends OLGeometry = OLGeometry> = Feature<T>;
 export {};
+//# sourceMappingURL=geometry.d.ts.map

@@ -12,3 +12,4 @@ export type TypeAppVersion = {
     timestamp: string;
 };
 export default function Version(): JSX.Element;
+//# sourceMappingURL=version.d.ts.map

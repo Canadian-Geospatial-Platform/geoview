@@ -35,3 +35,4 @@ import { MenuItemProps } from '@mui/material';
 declare function MenuItemUI(props: MenuItemProps): JSX.Element;
 export declare const MenuItem: typeof MenuItemUI;
 export {};
+//# sourceMappingURL=menu-item.d.ts.map

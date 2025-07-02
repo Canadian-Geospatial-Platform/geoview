@@ -4,3 +4,4 @@ interface UseLightBoxReturnType {
 }
 export declare function useLightBox(): UseLightBoxReturnType;
 export {};
+//# sourceMappingURL=use-light-box.d.ts.map

@@ -4,3 +4,4 @@
  * @returns {JSX.Element} return the new created zoom out button
  */
 export default function ZoomOut(): JSX.Element;
+//# sourceMappingURL=zoom-out.d.ts.map

@@ -14,6 +14,7 @@ export type InteractionOptions = {
  * @exports
  */
 export declare abstract class Interaction {
+    /** Reference the MapViewer associated with this interaction */
     mapViewer: MapViewer;
     /**
      * Constructs an abstract Interaction component
@@ -31,3 +32,4 @@ export declare abstract class Interaction {
      */
     protected stopInteraction(olInteraction: OLInteraction): void;
 }
+//# sourceMappingURL=interaction.d.ts.map

@@ -39,3 +39,4 @@ interface ProgressbarProps {
 declare function ProgressBarUI({ className, variant, value, ...props }: ProgressbarProps): JSX.Element;
 export declare const ProgressBar: typeof ProgressBarUI;
 export {};
+//# sourceMappingURL=linear-progress.d.ts.map

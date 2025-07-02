@@ -8,3 +8,4 @@ type CrosshairProps = {
  */
 export declare const Crosshair: import("react").NamedExoticComponent<CrosshairProps>;
 export {};
+//# sourceMappingURL=crosshair.d.ts.map

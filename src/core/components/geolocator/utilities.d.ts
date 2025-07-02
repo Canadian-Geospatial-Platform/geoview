@@ -43,3 +43,4 @@ export declare const getBoldListTitle: (title: string, searchValue: string) => s
  * @returns {TypeMenuItemProps[]} Array of menu items
  */
 export declare const createMenuItems: (geoLocationData: GeoListItem[], field: "province" | "category", noFilterText: string) => TypeMenuItemProps[];
+//# sourceMappingURL=utilities.d.ts.map

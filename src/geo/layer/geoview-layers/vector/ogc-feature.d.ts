@@ -93,3 +93,4 @@ export declare const layerConfigIsOgcFeature: (verifyIfLayer: TypeGeoviewLayerCo
  * @returns {boolean} true if the type ascention is valid.
  */
 export declare const geoviewEntryIsOgcFeature: (verifyIfGeoViewEntry: TypeLayerEntryConfig) => verifyIfGeoViewEntry is OgcFeatureLayerEntryConfig;
+//# sourceMappingURL=ogc-feature.d.ts.map

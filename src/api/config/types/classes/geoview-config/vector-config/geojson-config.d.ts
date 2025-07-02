@@ -84,3 +84,4 @@ export declare class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
      */
     findLayerMetadataEntry(layerId: string, listOfLayerEntryConfig?: TypeJsonArray): TypeJsonObject | null;
 }
+//# sourceMappingURL=geojson-config.d.ts.map

@@ -20,3 +20,4 @@ export declare class ShapefileReader {
      */
     static getGVConfigsFromShapefiles(layerConfigs: TypeJsonArray): Promise<TypeJsonObject[]>;
 }
+//# sourceMappingURL=shapefile-reader.d.ts.map

@@ -41,3 +41,4 @@ export declare class LayerGeoCoreNoLayersError extends LayerGeoCoreError {
      */
     constructor(uuids: string[]);
 }
+//# sourceMappingURL=geocore-exceptions.d.ts.map

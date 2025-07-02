@@ -20,3 +20,4 @@ export declare class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryCon
      */
     constructor(layerConfig: EsriImageLayerEntryConfig);
 }
+//# sourceMappingURL=esri-image-layer-entry-config.d.ts.map

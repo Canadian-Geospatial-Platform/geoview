@@ -27,3 +27,4 @@ export declare class GVOGCFeature extends AbstractGVVector {
      */
     protected getFieldType(fieldName: string): TypeOutfieldsType;
 }
+//# sourceMappingURL=gv-ogc-feature.d.ts.map

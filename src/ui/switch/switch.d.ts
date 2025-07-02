@@ -41,3 +41,4 @@ interface ExtendedSwitchProps extends SwitchProps {
 declare function SwitchUI(props: ExtendedSwitchProps): JSX.Element;
 export declare const Switch: typeof SwitchUI;
 export {};
+//# sourceMappingURL=switch.d.ts.map

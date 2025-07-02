@@ -11,3 +11,4 @@ export declare class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
      */
     constructor(layerConfig: VectorTilesLayerEntryConfig);
 }
+//# sourceMappingURL=vector-tiles-layer-entry-config.d.ts.map

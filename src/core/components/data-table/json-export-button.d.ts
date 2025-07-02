@@ -13,3 +13,4 @@ interface JSONExportButtonProps {
  */
 declare function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps): JSX.Element;
 export default JSONExportButton;
+//# sourceMappingURL=json-export-button.d.ts.map

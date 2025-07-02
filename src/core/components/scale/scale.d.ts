@@ -8,3 +8,4 @@ interface ScaleProps {
  */
 export declare const Scale: import("react").NamedExoticComponent<ScaleProps>;
 export {};
+//# sourceMappingURL=scale.d.ts.map

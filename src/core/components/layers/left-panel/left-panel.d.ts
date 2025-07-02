@@ -4,3 +4,4 @@ interface LeftPanelProps {
 }
 export declare function LeftPanel({ showLayerDetailsPanel, isLayoutEnlarged }: LeftPanelProps): JSX.Element;
 export {};
+//# sourceMappingURL=left-panel.d.ts.map

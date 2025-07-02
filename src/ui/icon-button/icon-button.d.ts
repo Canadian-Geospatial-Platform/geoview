@@ -56,3 +56,4 @@ export interface IconButtonPropsExtend extends IconButtonProps {
 declare function IconButtonUI(props: IconButtonPropsExtend): JSX.Element;
 export declare const IconButton: typeof IconButtonUI;
 export {};
+//# sourceMappingURL=icon-button.d.ts.map

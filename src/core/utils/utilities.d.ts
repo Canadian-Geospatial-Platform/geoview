@@ -94,6 +94,15 @@ export declare function addUiComponent(targetDivId: string, component: React.Rea
  */
 export declare function sanitizeHtmlContent(contentHtml: string): string;
 /**
+ * Sets up a MutationObserver to monitor when a specific DOM element (e.g., a div container)
+ * is removed from the document. When the element is removed, it triggers a cleanup callback
+ * and disconnects the observer to prevent memory leaks.
+ * @param {string} key - A unique identifier for the element, used to manage observer references.
+ * @param {Element} element - The DOM element to monitor for removal from the DOM tree.
+ * @param {(key: string) => void} onHtmlElementRemoved - The callback executed once the given DOM element gets removed from the DOM tree.
+ */
+export declare function watchHtmlElementRemoval(key: string, element: HTMLElement, onHTMLElementRemoved: (key: string) => void): void;
+/**
  * Removes comments from JSON config
  *
  * @param {string} config Map config to clean
@@ -218,3 +227,4 @@ export declare function handleEscapeKey(key: string, callbackId: string, isFocus
  * @returns {Boolean} true if visible, false otherwise
  */
 export declare function isElementInViewport(el: Element): boolean;
+//# sourceMappingURL=utilities.d.ts.map

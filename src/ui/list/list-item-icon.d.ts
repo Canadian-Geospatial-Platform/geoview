@@ -10,3 +10,4 @@ import { ListItemIconProps } from '@mui/material';
 declare function ListItemIconUI(props: ListItemIconProps): JSX.Element;
 export declare const ListItemIcon: typeof ListItemIconUI;
 export {};
+//# sourceMappingURL=list-item-icon.d.ts.map

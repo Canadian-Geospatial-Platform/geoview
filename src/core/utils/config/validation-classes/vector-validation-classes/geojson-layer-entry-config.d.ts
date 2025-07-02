@@ -8,3 +8,4 @@ export declare class GeoJSONLayerEntryConfig extends VectorLayerEntryConfig {
      */
     constructor(layerConfig: GeoJSONLayerEntryConfig);
 }
+//# sourceMappingURL=geojson-layer-entry-config.d.ts.map

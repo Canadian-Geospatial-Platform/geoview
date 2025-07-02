@@ -154,3 +154,4 @@ export declare abstract class EntryConfigBaseClass {
      */
     getSubLayerConfig(layerPath: string): EntryConfigBaseClass | undefined;
 }
+//# sourceMappingURL=entry-config-base-class.d.ts.map

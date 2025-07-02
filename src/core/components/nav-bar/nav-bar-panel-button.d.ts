@@ -9,3 +9,4 @@ interface NavbarPanelButtonType {
  */
 export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType): JSX.Element;
 export {};
+//# sourceMappingURL=nav-bar-panel-button.d.ts.map

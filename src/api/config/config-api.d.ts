@@ -192,3 +192,4 @@ export declare class ConfigApi {
      */
     static createWFSConfig(): Promise<ConfigBaseClass[]>;
 }
+//# sourceMappingURL=config-api.d.ts.map

@@ -90,3 +90,4 @@ export declare class MapFeatureConfig {
      */
     static nodeFactory(layerConfig: TypeJsonObject): AbstractGeoviewLayerConfig | undefined;
 }
+//# sourceMappingURL=map-feature-config.d.ts.map

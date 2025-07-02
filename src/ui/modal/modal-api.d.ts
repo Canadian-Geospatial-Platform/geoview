@@ -69,3 +69,4 @@ type ModalOpenedDelegate = EventDelegateBase<ModalApi, ModalEvent, void>;
  */
 type ModalClosedDelegate = EventDelegateBase<ModalApi, ModalEvent, void>;
 export {};
+//# sourceMappingURL=modal-api.d.ts.map

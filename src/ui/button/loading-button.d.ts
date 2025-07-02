@@ -50,3 +50,4 @@ export interface LoadingButtonPropsExtend extends LoadingButtonProps {
 declare function LoadingButtonUI({ children, ...rest }: LoadingButtonPropsExtend): JSX.Element;
 export declare const LoadingButton: typeof LoadingButtonUI;
 export {};
+//# sourceMappingURL=loading-button.d.ts.map

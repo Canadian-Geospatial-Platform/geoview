@@ -37,3 +37,4 @@ export declare class EsriDynamicLayerEntryConfig extends AbstractBaseEsriLayerEn
      */
     applyDefaultValues(): void;
 }
+//# sourceMappingURL=esri-dynamic-layer-entry-config.d.ts.map

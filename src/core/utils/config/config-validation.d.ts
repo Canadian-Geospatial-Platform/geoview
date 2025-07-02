@@ -36,3 +36,4 @@ export declare class ConfigValidation {
      */
     static validateListOfGeoviewLayerConfig(listOfGeoviewLayerConfig?: MapConfigLayerEntry[]): void;
 }
+//# sourceMappingURL=config-validation.d.ts.map

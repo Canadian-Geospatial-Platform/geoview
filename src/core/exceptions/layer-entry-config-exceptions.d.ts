@@ -136,3 +136,4 @@ export declare class LayerEntryConfigParameterProjectionNotDefinedInSourceError 
      */
     constructor(layerConfig: TypeLayerEntryConfig);
 }
+//# sourceMappingURL=layer-entry-config-exceptions.d.ts.map

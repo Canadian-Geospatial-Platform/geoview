@@ -84,3 +84,4 @@ export declare class CsvLayerConfig extends AbstractGeoviewLayerConfig {
      */
     findLayerMetadataEntry(layerId: string, listOfLayerEntryConfig?: TypeJsonArray): TypeJsonObject | null;
 }
+//# sourceMappingURL=csv-config.d.ts.map

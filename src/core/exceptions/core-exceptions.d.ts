@@ -152,3 +152,4 @@ export declare class ResponseTypeError extends Error {
     readonly receivedContent: unknown;
     constructor(expectedType: string, receivedContent: unknown, message?: string);
 }
+//# sourceMappingURL=core-exceptions.d.ts.map

@@ -46,3 +46,4 @@ export declare abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeo
      */
     static convertEsriGeometryTypeToOLGeometryType(esriGeometryType: string): TypeStyleGeometry;
 }
+//# sourceMappingURL=abstract-geoview-esri-layer-config.d.ts.map

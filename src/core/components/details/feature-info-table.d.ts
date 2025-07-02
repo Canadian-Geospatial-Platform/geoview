@@ -18,3 +18,4 @@ export declare const FeatureItem: import("react").NamedExoticComponent<FeatureIt
 export declare const FeatureRow: import("react").NamedExoticComponent<FeatureRowProps>;
 export declare const FeatureInfoTable: import("react").NamedExoticComponent<FeatureInfoTableProps>;
 export {};
+//# sourceMappingURL=feature-info-table.d.ts.map

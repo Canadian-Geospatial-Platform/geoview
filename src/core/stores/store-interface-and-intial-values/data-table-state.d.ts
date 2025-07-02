@@ -69,3 +69,4 @@ export declare const useDataTableLayerSettings: () => Record<string, IDataTableS
 export declare const useDataTableSelectedFeature: () => TypeFeatureInfoEntry | null;
 export declare const useDataTableStoreActions: () => DataTableActions;
 export {};
+//# sourceMappingURL=data-table-state.d.ts.map

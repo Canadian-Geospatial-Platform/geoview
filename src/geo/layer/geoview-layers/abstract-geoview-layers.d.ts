@@ -135,7 +135,7 @@ export declare abstract class AbstractGeoViewLayer {
      * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
      * @returns {AbstractGVLayer} The GV Layer that has been created.
      */
-    protected createGVLayer(layerConfig: AbstractBaseLayerEntryConfig): AbstractGVLayer;
+    createGVLayer(layerConfig: AbstractBaseLayerEntryConfig): AbstractGVLayer;
     /**
      * Must override method to create a GV Layer from a layer configuration.
      * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
@@ -412,3 +412,4 @@ export declare const isWmsLegend: (verifyIfLegend: TypeLegend) => verifyIfLegend
  */
 export declare const isImageStaticLegend: (verifyIfLegend: TypeLegend) => verifyIfLegend is TypeImageStaticLegend;
 export {};
+//# sourceMappingURL=abstract-geoview-layers.d.ts.map

@@ -3,10 +3,11 @@ import { OverviewMap as OLOverviewMap } from 'ol/control';
 import { Extent } from 'ol/extent';
 import { FitOptions } from 'ol/View';
 import { Coordinate } from 'ol/coordinate';
+import { Size } from 'ol/size';
 import { TypeBasemapOptions, TypeInteraction, TypeValidMapProjectionCodes, TypePointMarker, TypeHighlightColors, TypeMapViewSettings, TypeFeatureInfoEntry, TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeMapFeaturesInstance } from '@/api/config/types/map-schema-types';
 import { LayerApi } from '@/geo/layer/layer';
 import { MapViewer, TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer';
-import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
+import { PluginsContainer } from '@/api/plugin/plugin-types';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeClickMarker } from '@/core/components';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
@@ -18,7 +19,7 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      * Initializes the map controls
      * @param {string} mapId - The map id being initialized
      */
-    static initMapControls(mapId: string): void;
+    static initMapControls(mapId: string): Promise<void>;
     /**
      * Shortcut to get the Map state for a given map id
      * @param {string} mapId - map Id
@@ -43,22 +44,15 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      * Shortcut to get the Map Viewer plugins instance for a given map id
      * This is use to reduce the use of api.getMapViewer(mapId).plugins and be more explicit
      * @param {string} mapId - map Id
-     * @returns {TypeRecordOfPlugin} The map plugins record
+     * @returns {PluginsContainer} The map plugins container
      */
-    static getMapViewerPlugins(mapId: string): Promise<TypeRecordOfPlugin>;
+    static getMapViewerPlugins(mapId: string): Promise<PluginsContainer>;
     /**
-     * Asynchronously retrieves the scale information from the DOM elements for the given map ID.
-     *
+     * Retrieves the scale information from the DOM elements for the given map ID.
      * @param {string} mapId - The unique identifier of the map.
-     * @param {number} timeoutMs - The maximum time in milliseconds to wait for the DOM elements to be available.
-     * @returns {Promise<TypeScaleInfo>} A promise that resolves to the scale information object when available.
-     *
-     * @description
-     * This method waits for the scale control DOM elements (both metric and imperial) to be present and populated.
-     * It then extracts the scale bar widths and labels, as well as the numeric scale value, and returns them in a TypeScaleInfo object.
-     * If the elements are not available within the specified timeout, the promise will reject.
+     * @returns {TypeScaleInfo} The scale information object
      */
-    static getScaleInfoFromDomElement(mapId: string, timeoutMs: number): Promise<TypeScaleInfo>;
+    static getScaleInfoFromDomElement(mapId: string): TypeScaleInfo;
     /**
      * Shortcut to get the Map config for a given map id
      * @param {string} mapId the map id to retrieve the config for
@@ -102,7 +96,7 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     static setZoom(mapId: string, zoom: number): void;
     static setIsMouseInsideMap(mapId: string, inside: boolean): void;
     static setRotation(mapId: string, rotation: number): void;
-    static setMapSize(mapId: string, size: [number, number]): void;
+    static setMapSize(mapId: string, size: Size): void;
     static setMapScale(mapId: string, scale: TypeScaleInfo): void;
     static setMapMoveEnd(mapId: string, centerCoordinates: Coordinate, pointerPosition: TypeMapMouseInfo, degreeRotation: string, isNorthVisible: boolean, mapExtent: Extent, scale: TypeScaleInfo): void;
     static setInteraction(mapId: string, interaction: TypeInteraction): void;
@@ -292,3 +286,4 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      */
     static replaceMapConfigLayerNames(namePairs: string[][], mapConfig: TypeMapFeaturesInstance, removeUnlisted?: boolean): TypeMapFeaturesInstance;
 }
+//# sourceMappingURL=map-event-processor.d.ts.map

@@ -4,3 +4,4 @@ interface LayerOpacityControlProps {
 }
 export declare function LayerOpacityControl(props: LayerOpacityControlProps): JSX.Element;
 export {};
+//# sourceMappingURL=layer-opacity-control.d.ts.map

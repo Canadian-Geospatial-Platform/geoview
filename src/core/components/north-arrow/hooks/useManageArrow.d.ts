@@ -10,3 +10,4 @@ interface ArrowReturn {
  */
 export declare const useManageArrow: () => ArrowReturn;
 export {};
+//# sourceMappingURL=useManageArrow.d.ts.map

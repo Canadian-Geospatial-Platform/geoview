@@ -4,3 +4,4 @@ interface LayerDetailsProps {
 }
 export declare function LayerDetails(props: LayerDetailsProps): JSX.Element;
 export {};
+//# sourceMappingURL=layer-details.d.ts.map

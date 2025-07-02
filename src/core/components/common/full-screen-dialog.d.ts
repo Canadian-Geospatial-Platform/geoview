@@ -7,3 +7,4 @@ interface FullScreenDialogProps extends DialogProps {
 }
 export declare const FullScreenDialog: import("react").NamedExoticComponent<FullScreenDialogProps>;
 export {};
+//# sourceMappingURL=full-screen-dialog.d.ts.map

@@ -45,3 +45,4 @@ import { BadgeProps } from '@mui/material';
 declare function BadgeUI(props: BadgeProps): JSX.Element;
 export declare const Badge: typeof BadgeUI;
 export {};
+//# sourceMappingURL=badge.d.ts.map

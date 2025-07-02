@@ -30,3 +30,4 @@ declare const _default: typeof Worker & {
     new (): Worker;
 };
 export default _default;
+//# sourceMappingURL=fetch-esri-worker-script.d.ts.map

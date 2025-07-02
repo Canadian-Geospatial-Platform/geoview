@@ -32,3 +32,4 @@ export declare abstract class AbstractBaseEsriLayerEntryConfig extends AbstractB
      */
     protected createFeatureInfoUsingMetadata(): TypeFeatureInfoLayerConfig;
 }
+//# sourceMappingURL=abstract-base-esri-layer-entry-config.d.ts.map

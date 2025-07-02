@@ -97,3 +97,4 @@ export declare const layerConfigIsWFS: (verifyIfLayer: TypeGeoviewLayerConfig) =
  * @returns {boolean} true if the type ascention is valid.
  */
 export declare const geoviewEntryIsWFS: (verifyIfGeoViewEntry: TypeLayerEntryConfig) => verifyIfGeoViewEntry is WfsLayerEntryConfig;
+//# sourceMappingURL=wfs.d.ts.map

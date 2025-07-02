@@ -35,3 +35,4 @@ export declare const getLayerNameById: (layersList: GroupLayerEntryConfig[], lay
  */
 export declare const buildGeoLayerToAdd: (inputProps: BuildGeoViewLayerInput) => MapConfigLayerEntry;
 export {};
+//# sourceMappingURL=add-layer-utils.d.ts.map

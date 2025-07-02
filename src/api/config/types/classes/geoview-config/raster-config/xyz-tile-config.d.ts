@@ -85,3 +85,4 @@ export declare class XyzLayerConfig extends AbstractGeoviewLayerConfig {
      */
     findLayerMetadataEntry(layerId: string, metadata?: TypeJsonObject | undefined): TypeJsonObject | null;
 }
+//# sourceMappingURL=xyz-tile-config.d.ts.map

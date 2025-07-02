@@ -14,3 +14,4 @@ interface FocusTrapContainerProps {
  */
 export declare const FocusTrapContainer: import("react").NamedExoticComponent<FocusTrapContainerProps>;
 export {};
+//# sourceMappingURL=focus-trap-container.d.ts.map

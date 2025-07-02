@@ -11,3 +11,4 @@ declare namespace LegendContainerComponent {
 }
 export declare const LegendContainer: import("react").MemoExoticComponent<typeof LegendContainerComponent>;
 export {};
+//# sourceMappingURL=export-legend-utils.d.ts.map

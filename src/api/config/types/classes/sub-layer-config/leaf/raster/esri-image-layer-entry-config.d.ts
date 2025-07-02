@@ -35,3 +35,4 @@ export declare class EsriImageLayerEntryConfig extends AbstractBaseEsriLayerEntr
      */
     applyDefaultValues(): void;
 }
+//# sourceMappingURL=esri-image-layer-entry-config.d.ts.map

@@ -33,3 +33,4 @@ export declare class GVEsriFeature extends AbstractGVVector {
      */
     protected getFieldDomain(fieldName: string): null | codedValueType | rangeDomainType;
 }
+//# sourceMappingURL=gv-esri-feature.d.ts.map

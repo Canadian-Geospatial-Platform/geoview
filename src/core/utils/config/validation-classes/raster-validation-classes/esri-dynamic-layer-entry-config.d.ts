@@ -20,3 +20,4 @@ export declare class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryC
      */
     constructor(layerConfig: EsriDynamicLayerEntryConfig);
 }
+//# sourceMappingURL=esri-dynamic-layer-entry-config.d.ts.map

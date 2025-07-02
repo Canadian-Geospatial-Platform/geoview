@@ -16,3 +16,4 @@ interface OverviewMapToggleProps {
  */
 export declare function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element | null;
 export {};
+//# sourceMappingURL=overview-map-toggle.d.ts.map

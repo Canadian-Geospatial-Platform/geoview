@@ -57,3 +57,4 @@ export declare class AppEventProcessor extends AbstractEventProcessor {
      */
     static setGuide(mapId: string): Promise<void>;
 }
+//# sourceMappingURL=app-event-processor.d.ts.map

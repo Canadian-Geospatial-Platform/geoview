@@ -8,3 +8,4 @@ interface SingleLayerProps {
 }
 export declare function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, isLast, isLayoutEnlarged }: SingleLayerProps): JSX.Element;
 export {};
+//# sourceMappingURL=single-layer.d.ts.map

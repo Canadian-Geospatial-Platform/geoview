@@ -4,3 +4,4 @@
  * @returns {JSX.Element} the export modal component
  */
 export default function ExportModal(): JSX.Element;
+//# sourceMappingURL=export-modal.d.ts.map

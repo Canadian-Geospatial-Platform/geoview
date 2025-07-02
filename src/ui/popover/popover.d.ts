@@ -51,3 +51,4 @@ import { PopoverProps } from '@mui/material';
 declare function PopoverUI(props: PopoverProps): JSX.Element;
 export declare const Popover: typeof PopoverUI;
 export {};
+//# sourceMappingURL=popover.d.ts.map

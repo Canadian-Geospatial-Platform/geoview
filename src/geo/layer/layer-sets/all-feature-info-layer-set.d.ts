@@ -41,3 +41,4 @@ export declare class AllFeatureInfoLayerSet extends AbstractLayerSet {
      */
     queryLayer(layerPath: string, queryType?: QueryType): Promise<TypeFeatureInfoEntry[] | void>;
 }
+//# sourceMappingURL=all-feature-info-layer-set.d.ts.map

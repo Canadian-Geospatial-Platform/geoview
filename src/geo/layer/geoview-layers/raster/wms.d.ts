@@ -100,3 +100,4 @@ export declare const layerConfigIsWMS: (verifyIfLayer: TypeGeoviewLayerConfig) =
  * @returns {boolean} true if the type ascention is valid.
  */
 export declare const geoviewEntryIsWMS: (verifyIfGeoViewEntry: TypeLayerEntryConfig) => verifyIfGeoViewEntry is OgcWmsLayerEntryConfig;
+//# sourceMappingURL=wms.d.ts.map

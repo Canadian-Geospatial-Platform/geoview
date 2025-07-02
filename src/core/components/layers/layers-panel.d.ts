@@ -4,3 +4,4 @@ interface TypeLayersPanel {
 }
 export declare function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element;
 export {};
+//# sourceMappingURL=layers-panel.d.ts.map

@@ -13,3 +13,4 @@ interface GeolocatorFiltersType {
  */
 export declare function GeolocatorResult({ geoLocationData, searchValue, error }: GeolocatorFiltersType): JSX.Element;
 export {};
+//# sourceMappingURL=geolocator-result.d.ts.map
