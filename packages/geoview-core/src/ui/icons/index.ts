@@ -52,6 +52,7 @@ export {
   GroupWork as GroupWorkIcon,
   GroupWorkOutlined as GroupWorkOutlinedIcon,
   Help as HelpIcon,
+  Hexagon as HexagonIcon,
   HighlightOutlined as HighlightOutlinedIcon,
   Highlight as HighlightIcon,
   Home as HomeIcon,

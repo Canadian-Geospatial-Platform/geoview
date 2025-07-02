@@ -6,6 +6,27 @@ import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 import { logger } from 'geoview-core/core/utils/logger';
 
+// Styles
+const sxClasses = {
+  listItem: {
+    mb: 2,
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+  },
+  label: {
+    mb: 1,
+  },
+  input: {
+    width: '100%',
+  },
+  numberInput: {
+    width: '100%',
+    padding: '8px',
+    border: '1px solid #ccc',
+    borderRadius: '4px',
+  },
+};
+
 export function StyleButton(): JSX.Element {
   const { PaletteIcon } = (window as TypeWindow).cgpv.ui.elements;
 
@@ -26,27 +47,6 @@ export function StylePanel(): JSX.Element {
 
   // Components
   const { List, ListItem, Typography, TextField } = ui.elements;
-
-  // Styles
-  const sxClasses = {
-    listItem: {
-      mb: 2,
-      flexDirection: 'column',
-      alignItems: 'flex-start',
-    },
-    label: {
-      mb: 1,
-    },
-    input: {
-      width: '100%',
-    },
-    numberInput: {
-      width: '100%',
-      padding: '8px',
-      border: '1px solid #ccc',
-      borderRadius: '4px',
-    },
-  };
 
   // Get store values
   const style = useDrawerStyle();

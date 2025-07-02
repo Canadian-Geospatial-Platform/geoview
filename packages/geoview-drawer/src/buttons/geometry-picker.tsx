@@ -6,6 +6,7 @@ import {
   useDrawerStyle,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
+import ReactDOMServer from 'react-dom/server';
 
 // import { logger } from 'geoview-core/core/utils/logger';
 
@@ -13,28 +14,85 @@ export interface GeometryPickerPanelProps {
   geomTypes: string[];
 }
 
+export interface PointIconProps {
+  IconComponent: React.ElementType;
+}
+
+export function PointIcon(props: PointIconProps): JSX.Element {
+  const { cgpv } = window as TypeWindow;
+  const { useEffect } = cgpv.reactUtilities.react;
+  const { IconComponent } = props;
+
+  const { setIconSrc } = useDrawerActions();
+  const { fillColor, strokeColor, strokeWidth } = useDrawerStyle();
+
+  useEffect(() => {
+    // Extract SVG path from the icon
+    const iconString = ReactDOMServer.renderToString(<IconComponent />);
+    const parser = new DOMParser();
+    const svgDoc = parser.parseFromString(iconString, 'image/svg+xml');
+    const svgPath = svgDoc.querySelector('path')?.getAttribute('d');
+
+    if (!svgPath) {
+      throw new Error('SVG path not found');
+    }
+
+    // Create SVG element
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(svgNS, 'svg');
+    svg.setAttribute('width', '24');
+    svg.setAttribute('height', '24');
+    svg.setAttribute('viewBox', '0 0 24 24');
+
+    // Create path element
+    const path = document.createElementNS(svgNS, 'path');
+    path.setAttribute('d', svgPath);
+    path.setAttribute('fill', fillColor);
+    path.setAttribute('stroke', strokeColor);
+    path.setAttribute('stroke-width', strokeWidth.toString());
+
+    // Add path to SVG
+    svg.appendChild(path);
+
+    // Convert SVG to data URL
+    const serializer = new XMLSerializer();
+    const svgStr = serializer.serializeToString(svg);
+    const svgBlob = new Blob([svgStr], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(svgBlob);
+
+    // Store the URL
+    setIconSrc(url);
+
+    // Clean up when component unmounts
+    return () => URL.revokeObjectURL(url);
+  }, [IconComponent, fillColor, setIconSrc, strokeColor, strokeWidth]);
+
+  return <IconComponent sx={{ fill: fillColor, stroke: strokeColor, strokeWidth }} />;
+}
+
 export function GeometryPickerButton(): JSX.Element {
   const { cgpv } = window as TypeWindow;
   const { useMemo } = cgpv.reactUtilities.react;
-  const { ShapeLineIcon, PlaceIcon, ShowChartIcon, RectangleIcon, CircleIcon, StarIcon } = cgpv.ui.elements;
+  const { PlaceIcon, ShapeLineIcon, ShowChartIcon, HexagonIcon, RectangleIcon, CircleIcon, StarIcon } = cgpv.ui.elements;
 
   const geomType = useDrawerActiveGeom();
   const style = useDrawerStyle();
   const iconStyle = useMemo(
     () => ({
-      color: style.fillColor,
-      stroke: style.strokeColor,
+      fillColor: style.fillColor,
+      strokeColor: style.strokeColor,
+      strokeWidth: style.strokeWidth,
     }),
     [style]
   );
 
-  if (geomType === 'Point') return <PlaceIcon sx={{ color: iconStyle.color }} stroke={iconStyle.stroke} />;
-  if (geomType === 'LineString') return <ShowChartIcon sx={{ color: iconStyle.stroke }} />;
-  if (geomType === 'Polygon') return <RectangleIcon sx={{ color: iconStyle.color }} stroke={iconStyle.stroke} />;
-  if (geomType === 'Rectangle') return <RectangleIcon sx={{ color: iconStyle.color }} stroke={iconStyle.stroke} />;
-  if (geomType === 'Circle') return <CircleIcon sx={{ color: iconStyle.color }} stroke={iconStyle.stroke} />;
-  if (geomType === 'Star') return <StarIcon sx={{ color: iconStyle.color }} stroke={iconStyle.stroke} />;
-  return <ShapeLineIcon sx={{ color: iconStyle.color }} stroke={iconStyle.stroke} />;
+  if (geomType === 'Point') return <PointIcon IconComponent={PlaceIcon} />;
+  if (geomType === 'LineString') return <ShowChartIcon sx={{ color: iconStyle.strokeColor }} />;
+  if (geomType === 'Polygon') return <HexagonIcon sx={{ color: iconStyle.fillColor }} stroke={iconStyle.strokeColor} />;
+  if (geomType === 'Rectangle') return <RectangleIcon sx={{ color: iconStyle.fillColor }} stroke={iconStyle.strokeColor} />;
+  if (geomType === 'Circle') return <CircleIcon sx={{ color: iconStyle.fillColor }} stroke={iconStyle.strokeColor} />;
+  if (geomType === 'Star') return <StarIcon sx={{ color: iconStyle.fillColor }} stroke={iconStyle.strokeColor} />;
+  return <ShapeLineIcon sx={{ color: iconStyle.fillColor }} stroke={iconStyle.strokeColor} />;
 }
 
 /**
@@ -47,7 +105,7 @@ export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JS
   const { cgpv } = window as TypeWindow;
   const { useCallback, useMemo } = cgpv.reactUtilities.react;
   const { IconButton, List, ListItem } = cgpv.ui.elements;
-  const { PlaceIcon, ShowChartIcon, RectangleIcon, CircleIcon, StarIcon } = cgpv.ui.elements;
+  const { PlaceIcon, ShowChartIcon, HexagonIcon, RectangleIcon, CircleIcon, StarIcon } = cgpv.ui.elements;
 
   const { geomTypes } = props;
 
@@ -57,6 +115,7 @@ export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JS
   // Store actions
   const { setActiveGeom } = useDrawerActions();
   const style = useDrawerStyle();
+  const activeGeom = useDrawerActiveGeom();
 
   const iconStyle = useMemo(
     () => ({
@@ -81,6 +140,10 @@ export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JS
       gap: 0.5,
       minWidth: '80px',
       textAlign: 'center',
+    },
+    activeButton: {
+      backgroundColor: 'rgba(0, 0, 0, 0.1)',
+      borderRadius: 1,
     },
   };
 
@@ -136,9 +199,9 @@ export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JS
             tooltipPlacement="left"
             size="small"
             onClick={handleGeometrySelectPoint}
-            sx={sxClasses.iconButton}
+            sx={{ ...sxClasses.iconButton, ...(activeGeom === 'Point' && sxClasses.activeButton) }}
           >
-            <PlaceIcon sx={{ color: iconStyle.color }} stroke={iconStyle.stroke} />
+            <PointIcon IconComponent={PlaceIcon} />
             {getLocalizedMessage(displayLanguage, 'drawer.point')}
           </IconButton>
         </ListItem>
@@ -151,7 +214,7 @@ export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JS
             tooltipPlacement="left"
             size="small"
             onClick={handleGeometrySelectLineString}
-            sx={sxClasses.iconButton}
+            sx={{ ...sxClasses.iconButton, ...(activeGeom === 'LineString' && sxClasses.activeButton) }}
           >
             <ShowChartIcon sx={{ color: iconStyle.stroke }} />
             {getLocalizedMessage(displayLanguage, 'drawer.linestring')}
@@ -166,9 +229,9 @@ export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JS
             tooltipPlacement="left"
             size="small"
             onClick={handleGeometrySelectPolygon}
-            sx={sxClasses.iconButton}
+            sx={{ ...sxClasses.iconButton, ...(activeGeom === 'Polygon' && sxClasses.activeButton) }}
           >
-            <RectangleIcon sx={{ color: iconStyle.color }} stroke={iconStyle.stroke} />
+            <HexagonIcon sx={{ color: iconStyle.color }} stroke={iconStyle.stroke} />
             {getLocalizedMessage(displayLanguage, 'drawer.polygon')}
           </IconButton>
         </ListItem>
@@ -181,7 +244,7 @@ export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JS
             tooltipPlacement="left"
             size="small"
             onClick={handleGeometrySelectRectangle}
-            sx={sxClasses.iconButton}
+            sx={{ ...sxClasses.iconButton, ...(activeGeom === 'Rectangle' && sxClasses.activeButton) }}
           >
             <RectangleIcon sx={{ color: iconStyle.color }} stroke={iconStyle.stroke} />
             {getLocalizedMessage(displayLanguage, 'drawer.rectangle')}
@@ -196,7 +259,7 @@ export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JS
             tooltipPlacement="left"
             size="small"
             onClick={handleGeometrySelectCircle}
-            sx={sxClasses.iconButton}
+            sx={{ ...sxClasses.iconButton, ...(activeGeom === 'Circle' && sxClasses.activeButton) }}
           >
             <CircleIcon sx={{ color: iconStyle.color }} stroke={iconStyle.stroke} />
             {getLocalizedMessage(displayLanguage, 'drawer.circle')}
@@ -211,7 +274,7 @@ export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JS
             tooltipPlacement="left"
             size="small"
             onClick={handleGeometrySelectStar}
-            sx={sxClasses.iconButton}
+            sx={{ ...sxClasses.iconButton, ...(activeGeom === 'Star' && sxClasses.activeButton) }}
           >
             <StarIcon sx={{ color: iconStyle.color }} stroke={iconStyle.stroke} />
             {getLocalizedMessage(displayLanguage, 'drawer.star')}
