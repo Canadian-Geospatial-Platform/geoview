@@ -301,6 +301,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     // Start a watcher for a slow fetch happening
     doUntilPromises(
       () => {
+        // Make sure that layer has not been deleted
+        if (!this.getAllLayerEntryConfigs()?.length) return true;
+
         // Emit message about the fetching being slow
         this.emitMessage('warning.layer.slowFetch', [this.geoviewLayerName]);
 
