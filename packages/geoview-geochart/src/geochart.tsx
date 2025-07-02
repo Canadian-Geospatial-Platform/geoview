@@ -14,7 +14,7 @@ import { PluginGeoChartConfig, GeoViewGeoChartConfig, GeoViewGeoChartConfigLayer
  */
 interface GeoChartProps {
   mapId: string;
-  config: PluginGeoChartConfig<ChartType>;
+  config: PluginGeoChartConfig;
   schemaValidator: SchemaValidator;
   layers: TypeGeochartResultSetEntry[];
   // eslint-disable-next-line react/require-default-props
@@ -108,7 +108,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
   const memoAllInfo = useMemo(() => {
     // Find the right config/layer/data for what we want based on the layerDataArray
     const [foundConfigChart, foundConfigChartLyr, foundLayerEntry, foundData]: [
-      GeoViewGeoChartConfig<ChartType> | undefined,
+      GeoViewGeoChartConfig | undefined,
       GeoViewGeoChartConfigLayer | undefined,
       ConfigBaseClass | undefined,
       TypeFeatureInfoEntry[] | undefined,

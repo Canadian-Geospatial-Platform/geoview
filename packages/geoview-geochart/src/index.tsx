@@ -3,7 +3,6 @@ import { AnySchemaObject, TypeJsonObject, toJsonObject } from 'geoview-core/api/
 import { FooterPlugin } from 'geoview-core/api/plugin/footer-plugin';
 import { TypeTabs } from 'geoview-core/ui/tabs/tabs';
 import { ChartIcon } from 'geoview-core/ui/icons';
-import { ChartType } from 'geochart';
 
 import { GeochartEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/geochart-event-processor';
 import schema from '../schema.json';
@@ -65,11 +64,11 @@ class GeoChartFooterPlugin extends FooterPlugin {
 
   /**
    * Overrides the getConfig in order to return the right type.
-   * @returns {PluginGeoChartConfig<ChartType>} The Geochart config
+   * @returns {PluginGeoChartConfig} The Geochart config
    */
-  override getConfig(): PluginGeoChartConfig<ChartType> {
+  override getConfig(): PluginGeoChartConfig {
     // Redirect
-    return super.getConfig() as PluginGeoChartConfig<ChartType>;
+    return super.getConfig() as PluginGeoChartConfig;
   }
 
   /**

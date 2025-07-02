@@ -1,5 +1,5 @@
 import { TypeWindow } from 'geoview-core/core/types/global-types';
-import { ChartType, SchemaValidator } from 'geochart';
+import { SchemaValidator } from 'geochart';
 import { LayerListEntry, Layout } from 'geoview-core/core/components/common';
 import { checkSelectedLayerPathList } from 'geoview-core/core/components/common/comp-common';
 import { Typography } from 'geoview-core/ui/typography/typography';
@@ -236,11 +236,11 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
 
   /**
    * Renders a single GeoChart component
-   * @param {GeoViewGeoChartConfig<ChartType>} chartConfig - The Chart Config to assign the the GeoChart
+   * @param {GeoViewGeoChartConfig} chartConfig - The Chart Config to assign the the GeoChart
    * @param {CSSProperties} sx - Styling to apply (basically if the GeoChart should be visible or not depending on the selected layer)
    * @returns {JSX.Element}
    */
-  const renderChart = (chartConfig: GeoViewGeoChartConfig<ChartType>, sx: React.CSSProperties, key: string): JSX.Element => {
+  const renderChart = (chartConfig: GeoViewGeoChartConfig, sx: React.CSSProperties, key: string): JSX.Element => {
     return (
       <GeoChart
         sx={sx}
