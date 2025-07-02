@@ -181,7 +181,7 @@
     </div>
     <div id="map5A" class="geoview-map" data-lang="en" data-shared="true"></div>
     <p>
-      This map loads it's configurations from the URL parameters by providing a <strong>data-shared</strong> attribute. If a
+      this map loads its configurations from the URL parameters by providing a <strong>data-shared</strong> attribute. If a
       <strong>data-config</strong> attribute was also provided then the later will have its configuration overriden with config from url
       parameters.
     </p>
@@ -217,7 +217,7 @@
       data-geocore-endpoint="https://geocore.api.geo.ca"
     ></div>
     <p>
-      This map loads it's configurations from the div parameters by providing a <strong>data-geocore-keys</strong> and optionally a
+      this map loads its configurations from the div parameters by providing a <strong>data-geocore-keys</strong> and optionally a
       <strong>data-geocore-endpoint</strong>.
     </p>
     <hr />
@@ -227,7 +227,7 @@
       <a class="ref-link" href="#top">Top</a>
     </div>
     <div id="map6" class="geoview-map" data-lang="en" data-config-url="./configs/my-config.json"></div>
-    <p>This map loads it's configurations from a file by providing <strong>data-config-url</strong>, the map is static!</p>
+    <p>this map loads its configurations from a file by providing <strong>data-config-url</strong>, the map is static!</p>
     <hr />
 
     <div class="map-title-holder">
@@ -235,7 +235,7 @@
       <a class="ref-link" href="#top">Top</a>
     </div>
     <div id="map7" class="" data-lang="fr"></div>
-    <p>This map loads it's configurations from a function call (after 10 seconds). Configuration error with double layer id.</p>
+    <p>this map loads its configurations from a function call (after 10 seconds). Configuration error with double layer id.</p>
     <hr />
 
     <button type="button" class="collapsible">Code Snippet</button>
@@ -243,53 +243,55 @@
 
     <script src="codedoc.js"></script>
     <script>
-      cgpv.api.createMapFromConfig(
-        'map7',
-        JSON.stringify({
-          map: {
-            interaction: 'dynamic',
-            viewSettings: {
-              zoom: 10,
-              center: [-110, 70],
-              projection: 3978,
-            },
-            basemapOptions: {
-              basemapId: 'transport',
-              shaded: false,
-              labeled: true,
-            },
-            listOfGeoviewLayerConfig: [
-              {
-                geoviewLayerId: 'wmsLYR1',
-                geoviewLayerName: 'earthquakes',
-                metadataAccessPath: 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/',
-                geoviewLayerType: 'esriDynamic',
-                listOfLayerEntryConfig: [
-                  {
-                    layerId: '0',
-                  },
-                ],
+      cgpv.api
+        .createMapFromConfig(
+          'map7',
+          JSON.stringify({
+            map: {
+              interaction: 'dynamic',
+              viewSettings: {
+                zoom: 10,
+                center: [-110, 70],
+                projection: 3978,
               },
-              {
-                geoviewLayerId: 'wmsLYR1',
-                geoviewLayerName: 'earthquakes',
-                metadataAccessPath: 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/',
-                geoviewLayerType: 'esriDynamic',
-                listOfLayerEntryConfig: [
-                  {
-                    layerId: '0',
-                  },
-                ],
+              basemapOptions: {
+                basemapId: 'transport',
+                shaded: false,
+                labeled: true,
               },
-            ],
-          },
-          components: ['overview-map'],
-          corePackages: [],
-          theme: 'geo.ca',
-        })
-      ).catch((error) => {
-        console.error('Failed to create map from config', error);
-      });
+              listOfGeoviewLayerConfig: [
+                {
+                  geoviewLayerId: 'wmsLYR1',
+                  geoviewLayerName: 'earthquakes',
+                  metadataAccessPath: 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/',
+                  geoviewLayerType: 'esriDynamic',
+                  listOfLayerEntryConfig: [
+                    {
+                      layerId: '0',
+                    },
+                  ],
+                },
+                {
+                  geoviewLayerId: 'wmsLYR1',
+                  geoviewLayerName: 'earthquakes',
+                  metadataAccessPath: 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/',
+                  geoviewLayerType: 'esriDynamic',
+                  listOfLayerEntryConfig: [
+                    {
+                      layerId: '0',
+                    },
+                  ],
+                },
+              ],
+            },
+            components: ['overview-map'],
+            corePackages: [],
+            theme: 'geo.ca',
+          })
+        )
+        .catch((error) => {
+          console.error('Failed to create map from config', error);
+        });
 
       // initialize cgpv
       cgpv.init();

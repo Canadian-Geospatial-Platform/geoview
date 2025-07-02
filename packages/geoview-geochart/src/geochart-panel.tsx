@@ -4,7 +4,11 @@ import { LayerListEntry, Layout } from 'geoview-core/core/components/common';
 import { checkSelectedLayerPathList } from 'geoview-core/core/components/common/comp-common';
 import { Typography } from 'geoview-core/ui/typography/typography';
 import { Box } from 'geoview-core/ui';
-import { useMapClickCoordinates, useMapVisibleLayers } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
+import {
+  useMapClickCoordinates,
+  useMapVisibleLayers,
+  useMapStoreActions,
+} from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
 import {
   useGeochartConfigs,
   useGeochartStoreActions,
@@ -47,6 +51,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   const storeArrayOfLayerData = useGeochartLayerDataArrayBatch();
   const selectedLayerPath = useGeochartSelectedLayerPath();
   const { setSelectedLayerPath, setLayerDataArrayBatchLayerPathBypass } = useGeochartStoreActions();
+  const { isLayerHiddenOnMap } = useMapStoreActions();
   const displayLanguage = useAppDisplayLanguage();
   const mapClickCoordinates = useMapClickCoordinates();
 
@@ -159,7 +164,9 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
 
     // Set the layers list
     return visibleLayers.reduce<LayerListEntry[]>((acc, layerPath) => {
-      const layer = storeArrayOfLayerData.find((layerData) => layerData.layerPath === layerPath);
+      const layer = storeArrayOfLayerData.find(
+        (layerData) => layerData.layerPath === layerPath && !isLayerHiddenOnMap(layerData.layerPath)
+      );
 
       if (layer && memoConfigObj[layer.layerPath]) {
         acc.push({
@@ -176,7 +183,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
 
       return acc;
     }, []);
-  }, [visibleLayers, storeArrayOfLayerData, memoConfigObj, getNumFeaturesLabel, mapId]);
+  }, [visibleLayers, storeArrayOfLayerData, memoConfigObj, getNumFeaturesLabel, mapId, isLayerHiddenOnMap]);
 
   /**
    * Memoizes the selected layer for the LayerList component.

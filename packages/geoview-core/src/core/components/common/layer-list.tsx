@@ -107,7 +107,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
   const AnimatedPaper = animated(Paper);
 
   return (
-    <AnimatedPaper sx={{ marginBottom: '1rem' }} className={containerClass}>
+    <AnimatedPaper className={containerClass}>
       <Tooltip title={layer.tooltip} placement="top" arrow>
         <Box>
           <ListItem

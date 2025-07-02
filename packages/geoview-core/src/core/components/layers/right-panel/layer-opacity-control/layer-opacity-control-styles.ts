@@ -25,4 +25,9 @@ export const getSxClasses = (theme: Theme): any => ({
       color: theme.palette.geoViewColor.textColor.main,
     },
   },
+  controlHidden: {
+    color: theme.palette.grey[600],
+    fontStyle: 'italic',
+    fontWeight: 'bold',
+  },
 });

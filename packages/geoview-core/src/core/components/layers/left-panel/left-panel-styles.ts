@@ -12,18 +12,16 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
   list: {
     color: 'text.primary',
     width: '100%',
-    paddingLeft: '8px',
     paddingRight: '14px !important',
     overflowY: 'auto',
     // layer title
     '& .MuiListItemText-primary': {
       fontWeight: '600',
-      padding: '5px 0px',
       fontSize: `${theme.palette.geoViewFontSize.default} !important`,
-      lineHeight: 1.5,
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      whiteSpace: 'nowrap',
+      display: '-webkit-box',
+      WebkitLineClamp: '3',
+      WebkitBoxOrient: 'vertical',
+      whiteSpace: 'normal',
     },
 
     '& .layer-panel': {
@@ -39,7 +37,7 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
         alignItems: 'center',
 
         '& .MuiIconButton-root': {
-          margin: '0px 5px',
+          margin: '0px 1px',
         },
       },
     },
@@ -63,7 +61,7 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
 
     '& .MuiListItemIcon-root': {
       minWidth: '2.5rem',
-      marginRight: '20px',
+      marginRight: '5px',
     },
     '& .MuiListItemText-root': {
       '> span': {
@@ -80,10 +78,9 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     },
   },
   evenDepthList: {
-    background: theme.palette.geoViewColor.bgColor.main,
-    boxShadow: 2,
+    background: theme.palette.geoViewColor.bgColor.dark[50],
     padding: '0px',
-    margin: '20px',
+    marginLeft: '20px',
     width: 'unset',
     boxSizing: 'border-box',
     '& .layerItemContainer': {
@@ -92,10 +89,9 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     },
   },
   oddDepthList: {
-    background: 'white',
-    boxShadow: 2,
+    background: theme.palette.geoViewColor.bgColor.light[800],
     padding: '0px',
-    margin: '20px',
+    marginLeft: '20px',
     width: 'unset',
     boxSizing: 'border-box',
     '& .layerItemContainer': {

@@ -22,7 +22,13 @@ import {
   useSelectorLayerType,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
-import { useMapStoreActions, useSelectorLayerVisibility, useSelectorLayerInVisibleRange } from '@/core/stores/';
+import {
+  useMapStoreActions,
+  useSelectorLayerVisibility,
+  useSelectorLayerInVisibleRange,
+  useSelectorLayerParentHidden,
+  useSelectorLayerStatus,
+} from '@/core/stores/';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
 
@@ -74,11 +80,16 @@ const useControlActions = (layerPath: string): ControlActions => {
 };
 
 // Create subtitle
-const useSubtitle = (children: TypeLegendLayer[], items: TypeLegendItem[]): string => {
+const useSubtitle = (layerPath: string, children: TypeLegendLayer[], items: TypeLegendItem[]): string => {
   // Hooks
   const { t } = useTranslation();
+  const layerVisible = useSelectorLayerVisibility(layerPath);
+  const parentHidden = useSelectorLayerParentHidden(layerPath);
 
   return useMemo(() => {
+    if (parentHidden) return t('layers.parentHidden');
+    if (!layerVisible) return t('layers.hidden');
+
     if (children.length) {
       return t('legend.subLayersCount').replace('{count}', children.length.toString());
     }
@@ -88,7 +99,7 @@ const useSubtitle = (children: TypeLegendLayer[], items: TypeLegendItem[]): stri
         .replace('{totalCount}', items.length.toString());
     }
     return '';
-  }, [children.length, items, t]);
+  }, [children.length, items, layerVisible, parentHidden, t]);
 };
 
 // SecondaryControls component (no memo to force re render from layers panel modifications)
@@ -104,8 +115,10 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
   const layerChildren = useSelectorLayerChildren(layerPath);
   const layerItems = useSelectorLayerItems(layerPath);
   const layerControls = useSelectorLayerControls(layerPath);
+  const layerStatus = useSelectorLayerStatus(layerPath);
   const isVisible = useSelectorLayerVisibility(layerPath);
   const isInVisibleRange = useSelectorLayerInVisibleRange(layerPath);
+  const parentHidden = useSelectorLayerParentHidden(layerPath);
   const highlightedLayer = useLayerHighlightedLayer();
 
   // Is visibility button disabled?
@@ -122,7 +135,7 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
 
   // Component helper
   const controls = useControlActions(layerPath);
-  const subTitle = useSubtitle(layerChildren || [], layerItems || []);
+  const subTitle = useSubtitle(layerPath, layerChildren || [], layerItems || []);
 
   return (
     <Stack direction="row" alignItems="center" sx={sxClasses.layerStackIcons}>
@@ -142,7 +155,7 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
             tooltip={t('layers.toggleVisibility')!}
             className="buttonOutline"
             onClick={controls.handleToggleVisibility}
-            disabled={!isInVisibleRange}
+            disabled={!isInVisibleRange || parentHidden || layerStatus === 'error'}
           >
             {isVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
           </IconButton>
@@ -153,12 +166,18 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
             sx={styles.btnMargin}
             className="buttonOutline"
             onClick={controls.handleHighlightLayer}
+            disabled={!isInVisibleRange || parentHidden || !isVisible || layerStatus === 'error'}
           >
             {highlightedLayer === layerPath ? <HighlightIcon /> : <HighlightOutlinedIcon />}
           </IconButton>
         )}
         {isLayerZoomToExtentCapable && (
-          <IconButton tooltip={t('legend.zoomTo')!} className="buttonOutline" onClick={controls.handleZoomTo}>
+          <IconButton
+            tooltip={t('legend.zoomTo')!}
+            className="buttonOutline"
+            onClick={controls.handleZoomTo}
+            disabled={!isInVisibleRange || parentHidden || !isVisible || layerStatus === 'error'}
+          >
             <ZoomInSearchIcon />
           </IconButton>
         )}

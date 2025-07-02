@@ -40,6 +40,7 @@ import {
   useSelectorLayerLegendCollapsed,
   useSelectorLayerVisibility,
   useSelectorLayerInVisibleRange,
+  useSelectorLayerParentHidden,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { DeleteUndoButton } from './delete-undo-button';
 import { LayersList } from './layers-list';
@@ -86,6 +87,8 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
   const isVisible = useSelectorLayerVisibility(layerPath);
   const inVisibleRange = useSelectorLayerInVisibleRange(layerPath);
   const legendExpanded = !useSelectorLayerLegendCollapsed(layerPath);
+  const parentHidden = useSelectorLayerParentHidden(layerPath);
+  const layerVisible = useSelectorLayerVisibility(layerPath);
 
   const layerId: string | undefined = useSelectorLayerId(layerPath);
   const layerName: string | undefined = useSelectorLayerName(layerPath);
@@ -241,6 +244,9 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
       return t('legend.layerError');
     }
 
+    if (parentHidden) return t('layers.parentHidden');
+    if (!layerVisible) return t('layers.hidden');
+
     if (layerChildren && layerChildren.length > 0) {
       return t('legend.subLayersCount').replace('{count}', layerChildren.length.toString());
     }
@@ -263,7 +269,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
       );
     }
     return itemsLengthDesc;
-  }, [datatableSettings, layerItems, layerChildren, layerPath, layerStatus, t]);
+  }, [layerPath, layerStatus, parentHidden, t, layerVisible, layerChildren, layerItems, datatableSettings]);
 
   // Memoize the EditModeButtons component section
   const memoEditModeButtons = useMemo((): JSX.Element | null => {
@@ -390,7 +396,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
             onClick={handleToggleVisibility}
             tooltip={t('layers.toggleVisibility')!}
             className="buttonOutline"
-            disabled={!inVisibleRange}
+            disabled={!inVisibleRange || parentHidden}
           >
             {isVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
           </IconButton>
@@ -413,6 +419,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
     handleReload,
     layerId,
     layerControls?.remove,
+    parentHidden,
   ]);
 
   // Memoize the arrow buttons component section
@@ -519,35 +526,39 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
 
   return (
     <AnimatedPaper className={memoContainerClass} data-layer-depth={depth}>
-      <Tooltip title={layerName} placement="top" enterDelay={1000} arrow>
-        <ListItem id={layerId} key={layerName} divider tabIndex={0} onKeyDown={handleListItemKeyDown}>
-          <ListItemButton
-            selected={layerIsSelected || (layerChildIsSelected && !legendExpanded)}
-            tabIndex={-1}
-            sx={{ minHeight: '4.51rem', ...(!inVisibleRange && sxClasses.outOfRange) }}
-            className={!inVisibleRange ? 'out-of-range' : ''}
-          >
-            <LayerIcon layerPath={layerPath} />
+      <ListItem id={layerId} key={layerName} divider tabIndex={0} onKeyDown={handleListItemKeyDown}>
+        <ListItemButton
+          selected={layerIsSelected || (layerChildIsSelected && !legendExpanded)}
+          tabIndex={-1}
+          sx={{
+            minHeight: '4.51rem',
+            ...((!inVisibleRange || parentHidden || !isVisible || layerStatus === 'error') && sxClasses.outOfRange),
+          }}
+          className={!inVisibleRange ? 'out-of-range' : ''}
+        >
+          <LayerIcon layerPath={layerPath} />
+          <Tooltip title={layerName} placement="top" enterDelay={1000} arrow>
             <ListItemText
               primary={layerName !== undefined ? layerName : layerId}
               secondary={memoLayerDescription}
               onClick={handleLayerClick}
             />
-            {!isLayoutEnlarged && (
-              <ListItemIcon className="rightIcons-container">
-                {memoMoreLayerButtons}
-                {memoArrowButtons}
-                {memoEditModeButtons}
-              </ListItemIcon>
-            )}
-          </ListItemButton>
-          {layerStatus === 'loading' && (
-            <Box sx={sxClasses.progressBarSingleLayer}>
-              <ProgressBar />
-            </Box>
+          </Tooltip>
+          {!isLayoutEnlarged && (
+            <ListItemIcon className="rightIcons-container">
+              {memoMoreLayerButtons}
+              {memoArrowButtons}
+              {memoEditModeButtons}
+            </ListItemIcon>
           )}
-        </ListItem>
-      </Tooltip>
+        </ListItemButton>
+        {layerStatus === 'loading' && (
+          <Box sx={sxClasses.progressBarSingleLayer}>
+            <ProgressBar />
+          </Box>
+        )}
+      </ListItem>
+
       {memoCollapse}
     </AnimatedPaper>
   );
