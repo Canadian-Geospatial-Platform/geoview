@@ -60,7 +60,7 @@ export interface ILayerState {
     setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => void;
     setHighlightLayer: (layerPath: string) => void;
     setLayerDeleteInProgress: (newVal: string) => void;
-    setLayerOpacity: (layerPath: string, opacity: number) => void;
+    setLayerOpacity: (layerPath: string, opacity: number, updateLegendLayers?: boolean) => void;
     setLayerHoverable: (layerPath: string, enable: boolean) => void;
     setLayerQueryable: (layerPath: string, enable: boolean) => void;
     setSelectedLayerPath: (layerPath: string) => void;
@@ -277,10 +277,11 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
        * Sets the opacity of the layer.
        * @param {string} layerPath - The layer path of the layer to change.
        * @param {number} opacity - The opacity to set.
+       * @param {boolean} updateLegendLayers - Whether to update the legend layers or not
        */
-      setLayerOpacity: (layerPath: string, opacity: number): void => {
+      setLayerOpacity: (layerPath: string, opacity: number, updateLegendLayers?: boolean): void => {
         // Redirect to event processor
-        LegendEventProcessor.setLayerOpacity(get().mapId, layerPath, opacity);
+        LegendEventProcessor.setLayerOpacity(get().mapId, layerPath, opacity, updateLegendLayers);
       },
 
       /**

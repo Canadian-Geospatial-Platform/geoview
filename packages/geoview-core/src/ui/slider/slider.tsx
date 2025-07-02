@@ -62,6 +62,7 @@ function SliderUI(props: SliderProps): JSX.Element {
     onChangeCommitted,
     onValueLabelFormat,
     onValueDisplayAriaLabel,
+    disabled,
     ...properties
   } = props;
 
@@ -238,7 +239,7 @@ function SliderUI(props: SliderProps): JSX.Element {
     <MaterialSlider
       {...properties}
       id={containerId}
-      sx={sxClasses.slider}
+      sx={disabled ? null : sxClasses.slider}
       className={finalClassName}
       ref={sliderRef}
       orientation={orientation}
@@ -254,6 +255,7 @@ function SliderUI(props: SliderProps): JSX.Element {
       onChange={handleChange}
       onChangeCommitted={handleChangeCommitted}
       onKeyDown={handleKeyDown}
+      disabled={disabled}
     />
   );
 }

@@ -22,7 +22,7 @@ export function LayersToolbar(): JSX.Element {
   const userClickedAdd = useRef(false);
 
   const layerToolbarStyle = {
-    padding: '8px 18px 4px 8px',
+    padding: '0 18px 4px 0',
     '& .MuiButton-startIcon': { [theme.breakpoints.down('md')]: { margin: 0, padding: '0 0.25rem' } },
   };
 

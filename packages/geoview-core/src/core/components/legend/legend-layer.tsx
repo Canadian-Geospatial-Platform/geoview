@@ -12,7 +12,7 @@ import {
 import {
   useMapStoreActions,
   useSelectorLayerLegendCollapsed,
-  useSelectorLayerInVisibleRange,
+  useSelectorIsLayerHiddenOnMap,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useLightBox } from '@/core/components/common';
 import { LayerIcon } from '@/core/components/common/layer-icon';
@@ -33,13 +33,6 @@ interface LegendLayerHeaderProps {
   onExpandClick: (event: React.MouseEvent) => void;
 }
 
-// Constant style outside of render
-const styles = {
-  listItemText: {
-    '&:hover': { cursor: 'pointer' },
-  },
-} as const;
-
 // Extracted Header Component
 const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick }: LegendLayerHeaderProps): JSX.Element => {
   // Hooks
@@ -47,7 +40,7 @@ const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick }: LegendLay
   const layerItems = useSelectorLayerItems(layerPath);
   const layerChildren = useSelectorLayerChildren(layerPath);
   const isCollapsed = useSelectorLayerLegendCollapsed(layerPath);
-  const inVisibleRange = useSelectorLayerInVisibleRange(layerPath);
+  const layerHidden = useSelectorIsLayerHiddenOnMap(layerPath);
   const layerType = useSelectorLayerType(layerPath);
   const layerStatus: TypeLayerStatus | undefined = useSelectorLayerStatus(layerPath);
 
@@ -56,19 +49,20 @@ const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick }: LegendLay
 
   // Return the ui
   return (
-    <ListItem key={layerPath} divider onClick={onExpandClick} className={!inVisibleRange ? 'outOfRange' : ''}>
+    <ListItem key={layerPath} divider className={layerHidden || layerStatus === 'error' ? 'outOfRange' : ''}>
       <LayerIcon layerPath={layerPath} />
-      <Tooltip title={layerName} placement="top">
-        <ListItemText
-          sx={styles.listItemText}
-          primary={layerName}
-          className="layerTitle"
-          disableTypography
-          secondary={<SecondaryControls layerPath={layerPath} />}
-        />
-      </Tooltip>
+      <ListItemText
+        primary={
+          <Tooltip title={layerName} placement="top">
+            <Box>{layerName}</Box>
+          </Tooltip>
+        }
+        className="layerTitle"
+        disableTypography
+        secondary={<SecondaryControls layerPath={layerPath} />}
+      />
       {((layerChildren && layerChildren.length > 0) || (layerItems && layerItems.length > 1) || layerType === CV_CONST_LAYER_TYPES.WMS) && (
-        <IconButton className="buttonOutline" edge="end" size="small" tooltip={tooltip}>
+        <IconButton className="buttonOutline" onClick={onExpandClick} edge="end" size="small" tooltip={tooltip}>
           {!isCollapsed ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
         </IconButton>
       )}
