@@ -243,7 +243,12 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     return measureTooltip;
   }
 
-  // Utility to convert SVG path to coordinates
+  /**
+   * Utility to convert SVG path to coordinates
+   * @param {string} pathData SVG path string
+   * @param {number[]} center Center coordinates
+   * @returns {number[][]} Array of coordinates
+   */
   static #svgPathToCoordinates = (pathData: string, center: number[]): number[][] => {
     const commands = pathData.match(/[MmLlHhVvCcSsQqTtAaZz][^MmLlHhVvCcSsQqTtAaZz]*/g) || [];
     const coords: number[][] = [];
@@ -294,7 +299,13 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     return coords.map((point) => [point[0] + center[0], point[1] + center[1]]);
   };
 
-  // Utility to convert SVG path to coordinates with auto-centering
+  /**
+   * Utility to convert SVG path to coordinates with auto-centering
+   * @param {strgin} svgPath SVG path string
+   * @param {SketchCoordType} coordinates Circle coordinate (center and out edge)
+   * @param {SimpleGeometry} geometry The intermediate geometry for display while expanding
+   * @returns {Polygon} The result polygon
+   */
   static #svgPathToGeometry = (svgPath: string, coordinates: SketchCoordType, geometry?: SimpleGeometry): Polygon => {
     const center = coordinates[0] as number[];
     const last = coordinates[1] as number[];
