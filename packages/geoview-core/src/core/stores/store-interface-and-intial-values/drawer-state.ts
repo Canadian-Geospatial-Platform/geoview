@@ -43,6 +43,7 @@ export interface IDrawerState {
   isEditing: boolean;
   editInstances: TypeEditInstance;
   hideMeasurements: boolean;
+  iconSrc: string;
 
   setDefaultConfigValues: (config: TypeMapFeaturesConfig) => void;
 
@@ -55,6 +56,7 @@ export interface IDrawerState {
     getIsEditing: () => boolean;
     getEditInstances: () => TypeEditInstance;
     getHideMeasurements: () => boolean;
+    getIconSrc: () => string;
     toggleDrawing: () => void;
     toggleEditing: () => void;
     toggleHideMeasurements: () => void;
@@ -70,6 +72,7 @@ export interface IDrawerState {
     setEditInstance(groupKey: string, editInstance: Modify | undefined): void;
     removeEditInstance(groupKey: string): void;
     setHideMeasurements(hideMeasurements: boolean): void;
+    setIconSrc: (iconSrc: string) => void;
   };
 
   setterActions: {
@@ -88,6 +91,7 @@ export interface IDrawerState {
     setEditInstance: (groupKey: string, editInstance: Modify | undefined) => void;
     removeEditInstance: (groupKey: string) => void;
     setHideMeasurements: (hideMeasurements: boolean) => void;
+    setIconSrc: (iconSrc: string) => void;
   };
 }
 
@@ -113,6 +117,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
     isEditing: false,
     editInstances: {},
     hideMeasurements: true,
+    iconSrc: '',
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
       const configObj = geoviewConfig.corePackagesConfig?.find((config) =>
         Object.keys(config).includes('drawer')
@@ -168,6 +173,9 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
       },
       getHideMeasurements: () => {
         return get().drawerState.hideMeasurements;
+      },
+      getIconSrc: () => {
+        return get().drawerState.iconSrc;
       },
       toggleDrawing: () => {
         // Redirect to setter
@@ -228,6 +236,10 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
       setHideMeasurements: (hideMeasurements: boolean) => {
         // Redirect to setter
         get().drawerState.setterActions.setHideMeasurements(hideMeasurements);
+      },
+      setIconSrc: (iconSrc: string) => {
+        // Redirect to setter
+        get().drawerState.setterActions.setIconSrc(iconSrc);
       },
     },
 
@@ -370,6 +382,15 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
           },
         });
       },
+
+      setIconSrc: (iconSrc: string) => {
+        set({
+          drawerState: {
+            ...get().drawerState,
+            iconSrc,
+          },
+        });
+      },
     },
 
     // #endregion ACTIONS
@@ -382,11 +403,9 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
 // Drawer state selectors
 // **********************************************************
 
-export const useDrawerStoreActions = (): DrawerActions => useStore(useGeoViewStore(), (state) => state.drawerState.actions);
-
 export const useDrawerIsDrawing = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.actions.getIsDrawing());
 
-export const useDrawerIsEditing = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.actions.getIsEditing());
+export const useDrawerIsEditing = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.isEditing);
 
 export const useDrawerActiveGeom = (): string => useStore(useGeoViewStore(), (state) => state.drawerState.activeGeom);
 

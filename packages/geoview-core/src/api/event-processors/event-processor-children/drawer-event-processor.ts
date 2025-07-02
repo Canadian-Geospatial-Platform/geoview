@@ -1,6 +1,6 @@
 import { Feature, Overlay } from 'ol';
 import { LineString, Polygon, Point, Circle as CircleGeom, Geometry, SimpleGeometry } from 'ol/geom';
-import { Style, Stroke, Fill, Circle } from 'ol/style';
+import { Style, Stroke, Fill, Icon as OLIcon } from 'ol/style';
 import { getArea, getLength } from 'ol/sphere';
 import { DrawEvent, GeometryFunction, SketchCoordType, createBox } from 'ol/interaction/Draw';
 import { IDrawerState, StyleProps } from '@/core/stores/store-interface-and-intial-values/drawer-state';
@@ -409,15 +409,11 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       if (currentGeomType === 'Point') {
         // For points, use a circle style
         featureStyle = new Style({
-          image: new Circle({
-            radius: currentStyle.strokeWidth * 3,
-            fill: new Fill({
-              color: currentStyle.fillColor,
-            }),
-            stroke: new Stroke({
-              color: currentStyle.strokeColor,
-              width: currentStyle.strokeWidth,
-            }),
+          image: new OLIcon({
+            src: state.actions.getIconSrc(),
+            anchor: [0.5, 1], // 50% of X = Middle, 100% Y = Bottom
+            anchorXUnits: 'fraction',
+            anchorYUnits: 'fraction',
           }),
         });
       } else {
@@ -661,6 +657,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
     // Toggle the visibility of the measure tooltips
     measureOverlays.forEach((overlay) => {
+      if (!overlay) return;
       const elem = overlay.getElement();
       if (elem) elem.hidden = !hideMeasurements;
     });
