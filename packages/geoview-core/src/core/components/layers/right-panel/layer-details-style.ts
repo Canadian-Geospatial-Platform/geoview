@@ -15,6 +15,20 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     overflow: 'hidden',
     textOverflow: 'ellipsis',
   },
+  hiddenCategoryTitle: {
+    textAlign: 'left',
+    fontWeight: '600',
+    fontSize: theme.palette.geoViewFontSize.lg,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    color: theme.palette.grey[600],
+    fontStyle: 'italic',
+  },
+  hiddenSubTitle: {
+    fontSize: theme.palette.geoViewFontSize.sm,
+    color: theme.palette.grey[600],
+    fontStyle: 'italic',
+  },
   layerDetails: {
     padding: '20px',
   },
@@ -74,5 +88,21 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
         minWidth: 0,
       },
     },
+  },
+  itemHidden: {
+    color: theme.palette.grey[600],
+    fontStyle: 'italic',
+    fontSize: theme.palette.geoViewFontSize.default,
+    marginLeft: '20px',
+    alignSelf: 'center',
+  },
+  boxSpanHidden: {
+    color: theme.palette.grey[600],
+    fontStyle: 'italic',
+    fontWeight: 'bold',
+  },
+  hiddenSubLayer: {
+    color: theme.palette.grey[600],
+    fontStyle: 'italic',
   },
 });

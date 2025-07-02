@@ -55,7 +55,13 @@ import { FeatureInfoLayerSet } from '@/geo/layer/layer-sets/feature-info-layer-s
 import { formatError, NotSupportedError } from '@/core/exceptions/core-exceptions';
 import { LayerCreatedTwiceError, LayerNotFoundError, LayerNotGeoJsonError } from '@/core/exceptions/layer-exceptions';
 import { LayerEntryConfigError } from '@/core/exceptions/layer-entry-config-exceptions';
-import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import {
+  AbstractBaseLayer,
+  LayerOpacityChangedEvent,
+  LayerOpacityChangedDelegate,
+  VisibleChangedEvent,
+  VisibleChangedDelegate,
+} from '@/geo/layer/gv-layers/abstract-base-layer';
 import {
   AbstractGVLayer,
   LayerDelegate as GVLayerDelegate,
@@ -200,6 +206,12 @@ export class LayerApi {
   /** Keep a bounded reference to the handle layer error */
   #boundedHandleLayerError: GVLayerErrorDelegate;
 
+  /** Keep a bounded reference to the handle layer loaded */
+  #boundedHandleLayerOpacityChanged: LayerOpacityChangedDelegate;
+
+  /** Keep a bounded reference to the handle layer error */
+  #boundedHandleLayerVisibleChanged: VisibleChangedDelegate;
+
   /**
    * Initializes layer types and listen to add/remove layer events from outside
    * @param {MapViewer} mapViewer - A reference to the map viewer
@@ -222,6 +234,8 @@ export class LayerApi {
     this.#boundedHandleLayerLoading = this.#handleLayerLoading.bind(this);
     this.#boundedHandleLayerLoaded = this.#handleLayerLoaded.bind(this);
     this.#boundedHandleLayerError = this.#handleLayerError.bind(this);
+    this.#boundedHandleLayerOpacityChanged = this.#handleLayerOpacityChanged.bind(this);
+    this.#boundedHandleLayerVisibleChanged = this.#handleLayerVisibleChanged.bind(this);
   }
 
   /**
@@ -681,6 +695,9 @@ export class LayerApi {
       this.#gvLayers[layerConfig.layerPath] = groupLayer;
       this.#olLayers[layerConfig.layerPath] = groupLayer.getOLLayer();
 
+      // Register events handler for the layer
+      this.#registerGroupLayerHandlers(groupLayer);
+
       // TODO: Check - Do we need this line here? And if so, why only for Group Layers?
       // Set in visible range property for all newly added layers
       this.#setLayerInVisibleRange(groupLayer, layerConfig);
@@ -822,6 +839,7 @@ export class LayerApi {
             // Unregister the events on the layer
             if (this.#gvLayers[registeredLayerPath] instanceof AbstractGVLayer)
               this.#unregisterLayerHandlers(this.#gvLayers[registeredLayerPath]);
+            else this.#unregisterGroupLayerHandlers(this.#gvLayers[registeredLayerPath]);
 
             // Remove from registered layers
             delete this.#gvLayers[registeredLayerPath];
@@ -1004,6 +1022,7 @@ export class LayerApi {
         // Unregister the events on the layer
         if (this.#gvLayers[registeredLayerPath] instanceof AbstractGVLayer)
           this.#unregisterLayerHandlers(this.#gvLayers[registeredLayerPath]);
+        else this.#unregisterGroupLayerHandlers(this.#gvLayers[registeredLayerPath]);
 
         // Remove from registered layer configs
         delete this.#layerEntryConfigs[registeredLayerPath];
@@ -1251,62 +1270,16 @@ export class LayerApi {
    */
   setOrToggleLayerVisibility(layerPath: string, newValue?: boolean): boolean {
     // Apply some visibility logic
-    const curOrderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfo(this.getMapId());
     const layerVisibility = MapEventProcessor.getMapVisibilityFromOrderedLayerInfo(this.getMapId(), layerPath);
     // Determine the outcome of the new visibility based on parameters
     const newVisibility = newValue !== undefined ? newValue : !layerVisibility;
-    const layerInfos = MapEventProcessor.findMapLayerAndChildrenFromOrderedInfo(this.getMapId(), layerPath, curOrderedLayerInfo);
 
-    layerInfos.forEach((layerInfo: TypeOrderedLayerInfo) => {
-      if (layerInfo) {
-        // If the new visibility is different than before
-        if (newVisibility !== layerVisibility) {
-          // Go for it
-          // eslint-disable-next-line no-param-reassign
-          layerInfo.visible = newVisibility;
-          this.getGeoviewLayer(layerInfo.layerPath)?.setVisible(layerInfo.visible);
-          // Emit event
-          this.#emitLayerVisibilityToggled({ layerPath: layerInfo.layerPath, visibility: layerInfo.visible });
-        }
-      }
-    });
-
-    // For each parent
-    const parentLayerPathArray = layerPath.split('/');
-    parentLayerPathArray.pop();
-    let parentLayerPath = parentLayerPathArray.join('/');
-    let parentLayerInfo = curOrderedLayerInfo.find((info: TypeOrderedLayerInfo) => info.layerPath === parentLayerPath);
-    while (parentLayerInfo !== undefined) {
-      const parentLayerVisibility = MapEventProcessor.getMapVisibilityFromOrderedLayerInfo(this.getMapId(), parentLayerPath);
-      if ((!layerVisibility || newValue) && parentLayerVisibility === false) {
-        if (parentLayerInfo) {
-          parentLayerInfo.visible = true;
-          this.getGeoviewLayer(parentLayerPath)?.setVisible(true);
-
-          // Emit event
-          this.#emitLayerVisibilityToggled({ layerPath: parentLayerPath, visibility: true });
-        }
-      }
-      const children = curOrderedLayerInfo.filter(
-        // eslint-disable-next-line no-loop-func
-        (info: TypeOrderedLayerInfo) => info.layerPath.startsWith(`${parentLayerPath}/`) && info.layerPath !== parentLayerPath
-      );
-      if (!children.some((child: TypeOrderedLayerInfo) => child.visible === true)) {
-        this.setOrToggleLayerVisibility(parentLayerPath, false);
-
-        // Emit event
-        this.#emitLayerVisibilityToggled({ layerPath, visibility: false });
-      }
-
-      // Prepare for next parent
-      parentLayerPathArray.pop();
-      parentLayerPath = parentLayerPathArray.join('/');
-      // eslint-disable-next-line no-loop-func
-      parentLayerInfo = curOrderedLayerInfo.find((info: TypeOrderedLayerInfo) => info.layerPath === parentLayerPath);
+    if (layerVisibility !== newVisibility) {
+      // Change visibility
+      this.getGeoviewLayer(layerPath)?.setVisible(newVisibility);
+      // Emit event
+      this.#emitLayerVisibilityToggled({ layerPath, visibility: newVisibility });
     }
-
-    // Redirect to processor so we can update the store with setterActions
-    MapEventProcessor.setMapOrderedLayerInfo(this.getMapId(), curOrderedLayerInfo);
 
     return newVisibility;
   }
@@ -1328,6 +1301,17 @@ export class LayerApi {
     } else {
       logger.logError(`Unable to find layer ${layerPath}`);
     }
+  }
+
+  /**
+   * Sets opacity for a layer.
+   *
+   * @param {string} layerPath - The path of the layer.
+   * @param {number} opacity - The new opacity to use.
+   * @param {boolean} emitOpacityChange - Whether to emit the event or not (false to avoid updating the legend layers)
+   */
+  setLayerOpacity(layerPath: string, opacity: number, emitOpacityChange?: boolean): void {
+    this.getGeoviewLayer(layerPath)?.setOpacity(opacity, emitOpacityChange);
   }
 
   /**
@@ -1487,6 +1471,8 @@ export class LayerApi {
    * - Layer first loading completion through onLayerFirstLoaded
    * - All layer loading states through onLayerLoading
    * - All layer loaded states through onLayerLoaded
+   * - Layer opacity changed through onLayerOpacityChanged
+   * - Layer visibility changed through onVisibleChanged
    * @private
    */
   #registerLayerHandlers(gvLayer: AbstractGVLayer): void {
@@ -1504,6 +1490,12 @@ export class LayerApi {
 
     // Register a hook when a layer is going into error state
     gvLayer.onLayerError(this.#boundedHandleLayerError);
+
+    // Register a hook when a layer opacity is changed
+    gvLayer.onLayerOpacityChanged(this.#boundedHandleLayerOpacityChanged);
+
+    // Register a hook when a layer visibility is changed
+    gvLayer.onVisibleChanged(this.#boundedHandleLayerVisibleChanged);
   }
 
   /**
@@ -1526,6 +1518,43 @@ export class LayerApi {
 
     // Unregisters handler on layers error
     gvLayer.offLayerError(this.#boundedHandleLayerError);
+
+    // Unregister handler on layer opacity change
+    gvLayer.offLayerOpacityChanged(this.#boundedHandleLayerOpacityChanged);
+
+    // Unregister handler on layer visibility change
+    gvLayer.offVisibleChanged(this.#boundedHandleLayerVisibleChanged);
+  }
+
+  /**
+   * Attaches event handlers to a group layer
+   * @private
+   * @param {AbstractBaseLayer} baseLayer - The layer instance to attach events to
+   * @description
+   * This method sets up the following event handlers:
+   * - Layer opacity changed through onLayerOpacityChanged
+   * - Layer visibility changed through onVisibleChanged
+   * @private
+   */
+  #registerGroupLayerHandlers(baseLayer: AbstractBaseLayer): void {
+    // Register a hook when a layer opacity is changed
+    baseLayer.onLayerOpacityChanged(this.#boundedHandleLayerOpacityChanged);
+
+    // Register a hook when a layer visibility is changed
+    baseLayer.onVisibleChanged(this.#boundedHandleLayerVisibleChanged);
+  }
+
+  /**
+   * Detaches the events registration on the group layer
+   * @param {AbstractBaseLayer} baseLayer - The layer to detach events registrations from.
+   * @private
+   */
+  #unregisterGroupLayerHandlers(baseLayer: AbstractBaseLayer): void {
+    // Unregister handler on layer opacity change
+    baseLayer.offLayerOpacityChanged(this.#boundedHandleLayerOpacityChanged);
+
+    // Unregister handler on layer visibility change
+    baseLayer.offVisibleChanged(this.#boundedHandleLayerVisibleChanged);
   }
 
   /**
@@ -1635,6 +1664,23 @@ export class LayerApi {
   #handleLayerError(layer: AbstractGVLayer, event: GVLayerErrorEvent): void {
     // Emit about it
     this.#emitLayerError({ layer, error: event.error });
+  }
+
+  /**
+   * Handles when a layer opacity is changed on the map.
+   * @param {LayerOpacityChangedEvent} event - The event containing the opacity change.
+   */
+  #handleLayerOpacityChanged(layer: AbstractBaseLayer, event: LayerOpacityChangedEvent): void {
+    LegendEventProcessor.setOpacityInStore(this.getMapId(), event.layerPath, event.opacity);
+  }
+
+  /**
+   * Handles when a layer visibility is changed on the map.
+   * @param {AbstractGVLayer} layer - The layer that's become changed.
+   * @param {GVLayerErrorEvent} event - The event containing the visibility change.
+   */
+  #handleLayerVisibleChanged(layer: AbstractBaseLayer, event: VisibleChangedEvent): void {
+    MapEventProcessor.setMapLayerVisibilityInStore(this.getMapId(), layer.getLayerPath(), event.visible);
   }
 
   /**

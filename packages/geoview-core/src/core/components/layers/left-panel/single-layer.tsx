@@ -40,6 +40,7 @@ import {
   useSelectorLayerLegendCollapsed,
   useSelectorLayerVisibility,
   useSelectorLayerInVisibleRange,
+  useSelectorLayerParentHidden,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { DeleteUndoButton } from './delete-undo-button';
 import { LayersList } from './layers-list';
@@ -86,6 +87,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
   const isVisible = useSelectorLayerVisibility(layerPath);
   const inVisibleRange = useSelectorLayerInVisibleRange(layerPath);
   const legendExpanded = !useSelectorLayerLegendCollapsed(layerPath);
+  const parentHidden = useSelectorLayerParentHidden(layerPath);
 
   const layerId: string | undefined = useSelectorLayerId(layerPath);
   const layerName: string | undefined = useSelectorLayerName(layerPath);
@@ -390,7 +392,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
             onClick={handleToggleVisibility}
             tooltip={t('layers.toggleVisibility')!}
             className="buttonOutline"
-            disabled={!inVisibleRange}
+            disabled={!inVisibleRange || parentHidden}
           >
             {isVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
           </IconButton>
@@ -413,6 +415,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
     handleReload,
     layerId,
     layerControls?.remove,
+    parentHidden,
   ]);
 
   // Memoize the arrow buttons component section
@@ -524,7 +527,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
           <ListItemButton
             selected={layerIsSelected || (layerChildIsSelected && !legendExpanded)}
             tabIndex={-1}
-            sx={{ minHeight: '4.51rem', ...(!inVisibleRange && sxClasses.outOfRange) }}
+            sx={{ minHeight: '4.51rem', ...((!inVisibleRange || parentHidden || !isVisible) && sxClasses.outOfRange) }}
             className={!inVisibleRange ? 'out-of-range' : ''}
           >
             <LayerIcon layerPath={layerPath} />

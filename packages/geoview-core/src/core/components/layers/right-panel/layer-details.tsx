@@ -42,6 +42,7 @@ import { KeyboardArrowDownIcon, KeyboardArrowUpIcon } from '@/ui/icons';
 import { useAppDisplayLanguage, useAppMetadataServiceURL } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { Switch } from '@/ui/switch/switch';
 import { getLocalizeLayerType } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
+import { useSelectorIsLayerHiddenOnMap } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 interface LayerDetailsProps {
   layerDetails: TypeLegendLayer;
@@ -86,6 +87,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const layerFilter = getLayerDefaultFilter(layerDetails.layerPath);
   const layerTemporalDimension = getLayerTemporalDimension(layerDetails.layerPath);
   const layerNativeProjection = getLayerServiceProjection(layerDetails.layerPath);
+  const layerHidden = useSelectorIsLayerHiddenOnMap(layerDetails.layerPath);
 
   // Is highlight button disabled?
   const isLayerHighlightCapable = layerDetails.controls?.highlight;
@@ -186,7 +188,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     }
 
     return (
-      <IconButton color="primary" onClick={() => toggleItemVisibility(layerDetails.layerPath, item)}>
+      <IconButton color="primary" onClick={() => toggleItemVisibility(layerDetails.layerPath, item)} disabled={layerHidden}>
         {item.isVisible === true ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
       </IconButton>
     );
@@ -202,7 +204,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     }
 
     return (
-      <IconButton color="primary" onClick={() => setAllItemsVisibility(layerDetails.layerPath, !allItemsChecked())}>
+      <IconButton color="primary" onClick={() => setAllItemsVisibility(layerDetails.layerPath, !allItemsChecked())} disabled={layerHidden}>
         {allItemsChecked() ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
       </IconButton>
     );
@@ -227,7 +229,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
               ) : (
                 <BrowserNotSupportedIcon />
               )}
-              <Box component="span" sx={sxClasses.tableIconLabel}>
+              <Box component="span" sx={layerHidden || !item.isVisible ? sxClasses.itemHidden : sxClasses.tableIconLabel}>
                 {item.name}
               </Box>
             </Grid>
@@ -246,7 +248,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
               <ListItemIcon>
                 <LayerIcon layerPath={layer.layerPath} />
               </ListItemIcon>
-              <ListItemText primary={layer.layerName} />
+              <ListItemText primary={layer.layerName} sx={layerHidden ? sxClasses.hiddenSubLayer : null} />
             </ListItem>
             {layer.children.length > 0 && <Box sx={{ paddingLeft: '30px', width: '100%' }}>{renderLayers(layer)}</Box>}
           </Fragment>
@@ -276,6 +278,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           tooltip={t('legend.highlightLayer')!}
           onClick={handleHighlightLayer}
           className={highlightedLayer === layerDetails.layerPath ? 'buttonOutline active' : 'buttonOutline'}
+          disabled={layerHidden}
         >
           <HighlightOutlinedIcon />
         </IconButton>
@@ -290,7 +293,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           tooltip={t('legend.zoomTo')!}
           onClick={handleZoomTo}
           className="buttonOutline"
-          disabled={layerDetails.bounds === undefined}
+          disabled={layerDetails.bounds === undefined || layerHidden}
         >
           <ZoomInSearchIcon />
         </IconButton>
@@ -467,10 +470,15 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
             }}
           >
             <Box sx={{ textAlign: 'left', maxWidth: '70%', [theme.breakpoints.down('md')]: { display: 'none' } }}>
-              <Typography sx={sxClasses.categoryTitle} title={layerDetails.layerName}>
+              <Typography sx={layerHidden ? sxClasses.hiddenCategoryTitle : sxClasses.categoryTitle} title={layerDetails.layerName}>
                 {layerDetails.layerName}
               </Typography>
-              {getSubTitle() && <Typography sx={{ fontSize: theme.palette.geoViewFontSize.sm }}> {getSubTitle()} </Typography>}
+              {getSubTitle() && (
+                <Typography sx={layerHidden ? sxClasses.hiddenSubTitle : { fontSize: theme.palette.geoViewFontSize.sm }}>
+                  {' '}
+                  {getSubTitle()}{' '}
+                </Typography>
+              )}
             </Box>
             {renderLayerButtons()}
           </Box>
@@ -479,7 +487,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
               <Grid container direction="row" alignItems="center" justifyItems="stretch">
                 <Grid size={{ xs: 'auto' }}>{renderHeaderCheckbox()}</Grid>
                 <Grid size={{ xs: 'auto' }}>
-                  <Box component="span" sx={{ fontWeight: 'bold' }}>
+                  <Box component="span" sx={layerHidden ? sxClasses.boxSpanHidden : { fontWeight: 'bold' }}>
                     {t('layers.toggleAllVisibility')}
                   </Box>
                 </Grid>

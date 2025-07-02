@@ -22,7 +22,12 @@ import {
   useSelectorLayerType,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
-import { useMapStoreActions, useSelectorLayerVisibility, useSelectorLayerInVisibleRange } from '@/core/stores/';
+import {
+  useMapStoreActions,
+  useSelectorLayerVisibility,
+  useSelectorLayerInVisibleRange,
+  useSelectorLayerParentHidden,
+} from '@/core/stores/';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
 
@@ -106,6 +111,7 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
   const layerControls = useSelectorLayerControls(layerPath);
   const isVisible = useSelectorLayerVisibility(layerPath);
   const isInVisibleRange = useSelectorLayerInVisibleRange(layerPath);
+  const parentHidden = useSelectorLayerParentHidden(layerPath);
   const highlightedLayer = useLayerHighlightedLayer();
 
   // Is visibility button disabled?
@@ -142,7 +148,7 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
             tooltip={t('layers.toggleVisibility')!}
             className="buttonOutline"
             onClick={controls.handleToggleVisibility}
-            disabled={!isInVisibleRange}
+            disabled={!isInVisibleRange || parentHidden}
           >
             {isVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
           </IconButton>
@@ -153,12 +159,18 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
             sx={styles.btnMargin}
             className="buttonOutline"
             onClick={controls.handleHighlightLayer}
+            disabled={!isInVisibleRange || parentHidden || !isVisible}
           >
             {highlightedLayer === layerPath ? <HighlightIcon /> : <HighlightOutlinedIcon />}
           </IconButton>
         )}
         {isLayerZoomToExtentCapable && (
-          <IconButton tooltip={t('legend.zoomTo')!} className="buttonOutline" onClick={controls.handleZoomTo}>
+          <IconButton
+            tooltip={t('legend.zoomTo')!}
+            className="buttonOutline"
+            onClick={controls.handleZoomTo}
+            disabled={!isInVisibleRange || parentHidden || !isVisible}
+          >
             <ZoomInSearchIcon />
           </IconButton>
         )}

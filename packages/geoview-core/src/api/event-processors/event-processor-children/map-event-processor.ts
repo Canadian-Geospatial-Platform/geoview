@@ -622,6 +622,30 @@ export class MapEventProcessor extends AbstractEventProcessor {
     return this.findMapLayerFromOrderedInfo(mapId, layerPath)?.visible !== false;
   }
 
+  /**
+   * Checks if any parent of a layer is hidden.
+   * @param {string} mapId - The ID of the map.
+   * @param {string} layerPath - The layer path of the layer to check.
+   */
+  static getMapLayerParentHidden(mapId: string, layerPath: string): boolean {
+    const curOrderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfo(mapId);
+    // For each parent
+    const parentLayerPathArray = layerPath.split('/');
+    parentLayerPathArray.pop();
+    let parentLayerPath = parentLayerPathArray.join('/');
+    let parentLayerInfo = curOrderedLayerInfo.find((info: TypeOrderedLayerInfo) => info.layerPath === parentLayerPath);
+    while (parentLayerInfo !== undefined) {
+      if (parentLayerInfo.visible === false) return true;
+      // Prepare for next parent
+      parentLayerPathArray.pop();
+      parentLayerPath = parentLayerPathArray.join('/');
+      // eslint-disable-next-line no-loop-func
+      parentLayerInfo = curOrderedLayerInfo.find((info: TypeOrderedLayerInfo) => info.layerPath === parentLayerPath);
+    }
+
+    return false;
+  }
+
   static getMapInVisibleRangeFromOrderedLayerInfo(mapId: string, layerPath: string): boolean {
     // Get inVisibleRange of a layer
     return this.findMapLayerFromOrderedInfo(mapId, layerPath)?.inVisibleRange !== false;
@@ -788,6 +812,23 @@ export class MapEventProcessor extends AbstractEventProcessor {
   static setOrToggleMapLayerVisibility(mapId: string, layerPath: string, newValue?: boolean): boolean {
     // Redirect to layerAPI
     return this.getMapViewerLayerAPI(mapId).setOrToggleLayerVisibility(layerPath, newValue);
+  }
+
+  /**
+   * Sets the opacity of a layer in the layer legend.
+   * @param {string} mapId - The ID of the map.
+   * @param {string} layerPath - The layer path of the layer to change.
+   * @param {boolean} visibility - The visibility to set.
+   */
+  static setMapLayerVisibilityInStore(mapId: string, layerPath: string, visibility: boolean): void {
+    const curOrderedLayerInfo = this.getMapOrderedLayerInfo(mapId);
+    // Get and update ordered layer info
+    const layerInfo = curOrderedLayerInfo.find((orderedLayerInfo) => orderedLayerInfo.layerPath === layerPath);
+    if (layerInfo && layerInfo.visible !== visibility) {
+      layerInfo.visible = visibility;
+      // Update the store with setterActions
+      this.setMapOrderedLayerInfo(mapId, curOrderedLayerInfo);
+    }
   }
 
   static setAllMapLayerVisibility(mapId: string, newVisibility: boolean): void {
