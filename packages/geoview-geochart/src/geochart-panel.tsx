@@ -1,5 +1,5 @@
 import { TypeWindow } from 'geoview-core/core/types/global-types';
-import { ChartType, SchemaValidator } from 'geochart';
+import { SchemaValidator } from 'geochart';
 import { LayerListEntry, Layout } from 'geoview-core/core/components/common';
 import { checkSelectedLayerPathList } from 'geoview-core/core/components/common/comp-common';
 import { Typography } from 'geoview-core/ui/typography/typography';
@@ -18,7 +18,7 @@ import { logger } from 'geoview-core/core/utils/logger';
 import { TABS } from 'geoview-core/core/utils/constant';
 
 import { GeoChart } from './geochart';
-import { GeoViewGeoChartConfig } from './geochart-types';
+import { convertGeoViewGeoChartConfigFromCore, GeoViewGeoChartConfig } from './geochart-types';
 
 interface GeoChartPanelProps {
   mapId: string;
@@ -144,6 +144,14 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
     [setSelectedLayerPath]
   );
 
+  // Convert the config object from core to geoview-geochart type-equivalent
+  const memoConfigObj = useMemo(() => {
+    // Memoize a better config object using the geoview-geochart type-equivalent instead of the store's
+    return Object.fromEntries(
+      Object.entries(configObj).map(([layerPath, layerChartConfig]) => [layerPath, convertGeoViewGeoChartConfigFromCore(layerChartConfig)])
+    );
+  }, [configObj]);
+
   // Reacts when the array of layer data updates
   const memoLayersList = useMemo(() => {
     // Log
@@ -153,7 +161,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
     return visibleLayers.reduce<LayerListEntry[]>((acc, layerPath) => {
       const layer = storeArrayOfLayerData.find((layerData) => layerData.layerPath === layerPath);
 
-      if (layer && configObj[layer.layerPath]) {
+      if (layer && memoConfigObj[layer.layerPath]) {
         acc.push({
           layerName: layer.layerName ?? '',
           layerPath: layer.layerPath,
@@ -168,7 +176,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
 
       return acc;
     }, []);
-  }, [visibleLayers, storeArrayOfLayerData, configObj, getNumFeaturesLabel, mapId]);
+  }, [visibleLayers, storeArrayOfLayerData, memoConfigObj, getNumFeaturesLabel, mapId]);
 
   /**
    * Memoizes the selected layer for the LayerList component.
@@ -228,11 +236,11 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
 
   /**
    * Renders a single GeoChart component
-   * @param {GeoViewGeoChartConfig<ChartType>} chartConfig - The Chart Config to assign the the GeoChart
+   * @param {GeoViewGeoChartConfig} chartConfig - The Chart Config to assign the the GeoChart
    * @param {CSSProperties} sx - Styling to apply (basically if the GeoChart should be visible or not depending on the selected layer)
    * @returns {JSX.Element}
    */
-  const renderChart = (chartConfig: GeoViewGeoChartConfig<ChartType>, sx: React.CSSProperties, key: string): JSX.Element => {
+  const renderChart = (chartConfig: GeoViewGeoChartConfig, sx: React.CSSProperties, key: string): JSX.Element => {
     return (
       <GeoChart
         sx={sx}
@@ -263,9 +271,9 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
         >
           {selectedLayerPath && (
             <Box sx={{ '& .MuiButtonGroup-groupedHorizontal.MuiButton-textSizeMedium': { fontSize: '0.9rem' } }}>
-              {Object.entries(configObj).map(([layerPath, layerChartConfig]) => {
+              {Object.entries(memoConfigObj).map(([layerPath, layerChartConfig]) => {
                 if (layerPath === selectedLayerPath) {
-                  return renderChart(layerChartConfig as GeoViewGeoChartConfig<ChartType>, {}, layerPath);
+                  return renderChart(layerChartConfig, {}, layerPath);
                 }
                 return <Box key={layerPath} />;
               })}
