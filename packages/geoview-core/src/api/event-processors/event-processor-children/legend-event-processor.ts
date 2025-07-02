@@ -682,7 +682,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Sets the opacity of the layer.
+   * Recursively updates the opacity in provided legend layers of a layer and its children.
    * @param {string} mapId - The ID of the map.
    * @param {TypeLegendLayer[]} curLayers - The current legend layers.
    * @param {string} layerPath - The layer path.
@@ -700,7 +700,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     const layer = LegendEventProcessor.findLayerByPath(curLayers, layerPath);
     if (layer) {
       layer.opacity = opacity;
-      MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath)?.setOpacity(opacity);
       if (isChild) {
         layer.opacityFromParent = opacity;
       }
@@ -713,17 +712,28 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Sets the opacity of the layer.
+   * Sets the opacity of the layer and its children in the store.
    * @param {string} mapId - The ID of the map.
    * @param {string} layerPath - The layer path of the layer to change.
    * @param {number} opacity - The opacity to set.
    */
-  static setLayerOpacity(mapId: string, layerPath: string, opacity: number): void {
+  static setOpacityInStore(mapId: string, layerPath: string, opacity: number): void {
     const curLayers = this.getLayerState(mapId).legendLayers;
     this.#setOpacityInLayerAndChildren(mapId, curLayers, layerPath, opacity);
 
     // Set updated legend layers
     this.getLayerState(mapId).setterActions.setLegendLayers(curLayers);
+  }
+
+  /**
+   * Sets the opacity of a layer.
+   * @param {string} mapId - The ID of the map.
+   * @param {string} layerPath - The layer path of the layer to change.
+   * @param {number} opacity - The opacity to set.
+   * @param {boolean} updateLegendLayers - Whether to update the legend layers or not
+   */
+  static setLayerOpacity(mapId: string, layerPath: string, opacity: number, updateLegendLayers?: boolean): void {
+    MapEventProcessor.getMapViewerLayerAPI(mapId).setLayerOpacity(layerPath, opacity, updateLegendLayers);
   }
 
   /**

@@ -15,7 +15,7 @@ export const getSxClasses = (theme: Theme, containerType: string): SxStyles => (
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
-    padding: containerType === CONTAINER_TYPE.FOOTER_BAR ? '20px' : '0px 10px 10px 10px',
+    padding: containerType === CONTAINER_TYPE.FOOTER_BAR ? '20px 12px 12px 12px' : '20px 10px 10px 10px',
   },
   rightButtonsContainer: {
     display: 'flex',

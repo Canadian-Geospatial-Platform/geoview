@@ -76,23 +76,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       },
     },
   },
-  borderWithIndex: { border: `2px solid ${theme.palette.geoViewColor.primary.main} !important` },
-  borderNone: {
-    border: 'none',
-  },
-  headline: { fontSize: theme.palette.geoViewFontSize.md, fontWeight: 'bold' },
-  layersInstructionsPaper: {
-    padding: '2rem',
-    cursor: 'pointer',
-  },
-  layersInstructionsTitle: {
-    fontSize: theme.palette.geoViewFontSize.md,
-    fontWeight: '600',
-    lineHeight: '1.5em',
-  },
-  layersInstructionsBody: {
-    fontSize: theme.palette.geoViewFontSize.default,
-  },
   outOfRange: {
     '.layer-panel &.MuiListItemButton-root': {
       '& .MuiListItemText-primary': {

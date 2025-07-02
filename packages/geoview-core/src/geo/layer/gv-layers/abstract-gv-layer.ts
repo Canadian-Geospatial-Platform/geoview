@@ -1008,7 +1008,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       if (this.loadingCounter !== loadingCounter) return true;
 
       // If loaded or error, we're done
-      if (layerStatus === 'loaded' || layerStatus === 'error') return true;
+      if (!layerStatus || layerStatus === 'loaded' || layerStatus === 'error') return true;
 
       // If still loading
       if (layerStatus === 'loading') {
