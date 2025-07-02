@@ -1,10 +1,13 @@
 =1!loadingStatus=
+
 # Map Interaction & Loading Status
+
 <div style="border-bottom: 2px solid #2a2f39; margin-bottom: 15px;"></div>
 
 These visual cues and navigation behaviors help ensure a smooth and intuitive map experience.
 
 ### First Load
+
 <div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
 When the map viewer is first initialized, a loading spinner will appear over the map area. This indicates that the minimum required components are being loaded. Once these components are successfully initialized, the spinner will disappear, revealing the map.
@@ -13,14 +16,17 @@ While the map layers are loading for the first time, a progress bar will be disp
 
 In the **Legend** or **Layers** panel, each layer displays a spinner icon on the left (in place of the standard layer icon) while it is loading. Once a layer is fully processed and rendered for the first time, the spinner will be replaced with the layer’s corresponding icon.
 
-### Layers reloading 
+### Layers reloading
+
 <div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
 Any time the map is **panned** or **zoomed**, certain layers may re-enter a loading state. When this occurs:
+
 - A progress bar will appear at the bottom of each layer's box that is loading, indicating activity, regardless of which tab is currently active.
 - An additional progress bar will also be shown at the bottom of the map area, just above the Map Information Bar, as long as at least one layer is still loading.
 
 ### User Notifications and Map Status Feedback
+
 <div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
 At any time, the viewer provides feedback about ongoing activity by:
@@ -30,35 +36,41 @@ Displaying a message at the bottom of the map, and/or
 Adding a notification accessible through the Notification panel in the sidebar. When a new notification is added, a red counter appears and increments to indicate an update.
 
 ### Switching Focus Between Map and Footer
+
 <div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
 If your map includes a Footer Bar, you can switch focus between the map and the footer:
+
 - Clicking the black Map Information Bar will bring the map into view.
 - Clicking the Footer Bar will focus the footer content.
 
 ### Bring Focus to Map
+
 <div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
 If you want to focus the map:
+
 - Clicking the Side Bar will bring the map into view.
 
 =1!navigationControls=
+
 # Navigation Controls
+
 <div style="border-bottom: 2px solid #2a2f39; margin-bottom: 15px;"></div>
 
 Navigation controls provide adjustments to the viewing extent, projection, or basemap of the map.
 
 Depending on the viewer configuration, the map's bottom right corner contains the following navigation controls:
 
-| Symbol | Name | Description |
-|----------|----------|----------|
-| <img src="{{assetsURL}}/img/guide/navigation/fullscreen.svg" width="30"/> | Fullscreen | Full screen presents map content using the entire page. Full screen toggles between the entire page and the initial size of the map. |
-| <img src="{{assetsURL}}/img/guide/navigation/plus.svg" width="30"/> | Zoom in | Zoom in one level on the map to see more detailed content - bound to Plus key (+). |
-| <img src="{{assetsURL}}/img/guide/navigation/minus.svg" width="30"/> | Zoom out | Zoom out one level on the map to see less detailed content - bound to Minus key (-). |
-| <img src="{{assetsURL}}/img/guide/navigation/geolocation.svg" width="30"/> | Geolocation | Zoom and pan to your current geographical location. |
-| <img src="{{assetsURL}}/img/guide/navigation/home.svg" width="30"/> | Initial extent | Zoom and pan map such that initial extent is visible. |
-| <img src="{{assetsURL}}/img/guide/navigation/basemapSelect.svg" width="30"/> | Change Basemap | Change the basemap. |
-| <img src="{{assetsURL}}/img/guide/navigation/projection.svg" width="30"/> | Change Projection | Change the map projection between Web Mercator and LCC. |
+| Symbol                                                                       | Name              | Description                                                                                                                          |
+| ---------------------------------------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| <img src="{{assetsURL}}/img/guide/navigation/fullscreen.svg" width="30"/>    | Fullscreen        | Full screen presents map content using the entire page. Full screen toggles between the entire page and the initial size of the map. |
+| <img src="{{assetsURL}}/img/guide/navigation/plus.svg" width="30"/>          | Zoom in           | Zoom in one level on the map to see more detailed content - bound to Plus key (+).                                                   |
+| <img src="{{assetsURL}}/img/guide/navigation/minus.svg" width="30"/>         | Zoom out          | Zoom out one level on the map to see less detailed content - bound to Minus key (-).                                                 |
+| <img src="{{assetsURL}}/img/guide/navigation/geolocation.svg" width="30"/>   | Geolocation       | Zoom and pan to your current geographical location.                                                                                  |
+| <img src="{{assetsURL}}/img/guide/navigation/home.svg" width="30"/>          | Initial extent    | Zoom and pan map such that initial extent is visible.                                                                                |
+| <img src="{{assetsURL}}/img/guide/navigation/basemapSelect.svg" width="30"/> | Change Basemap    | Change the basemap.                                                                                                                  |
+| <img src="{{assetsURL}}/img/guide/navigation/projection.svg" width="30"/>    | Change Projection | Change the map projection between Web Mercator and LCC.                                                                              |
 
 You can also pan the map by using your left, right, up and down arrow keys, or by click-holding on the map and dragging. Using the mouse scroll wheel while hovering over the map will zoom the map in/out.
 
@@ -70,7 +82,9 @@ To reset the map orientation, click the **Reset Map Rotation** arrow located at 
 _Note: The map must be focused for key binding to work._
 
 =2!overviewMap=
+
 ### Overview Map
+
 <div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
 Depending on the viewer configuration, the map may provide an overview map, a generic representation of the main map at a reduced size. It is located in the upper-right corner of the map.
@@ -80,7 +94,9 @@ Depending on the viewer configuration, the map may provide an overview map, a ge
 Click-hold on the box in the overview map and drag it to change the extent of the main map. Clicking on the toggle icon in the top right corner of the overview map will expand or contract it.
 
 =2!keyboardNavigation=
+
 ### Keyboard Navigation
+
 <div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
 Keyboard functionality is provided as an alternative for users who are unable to use a mouse. Use the **Tab** key to navigate forward to links and controls on the page. Press **Shift** and **Tab** keys to go back one step. Use the **Enter** or **Spacebar** keys to activate links and controls.
@@ -104,7 +120,9 @@ _Note: The map must be focused for key binding to work. The map has focus when t
 This map is not fully WCAG 2.0 AA compliant.
 
 =1!mapInformationBar=
+
 # Map Information Bar
+
 <div style="border-bottom: 2px solid #2a2f39; margin-bottom: 15px;"></div>
 
 Click the up chevron icon ![]({{assetsURL}}/img/guide/navigation/chevron_up.svg) on the left to expand/collapse the bar.
@@ -113,16 +131,18 @@ Click the up chevron icon ![]({{assetsURL}}/img/guide/navigation/chevron_up.svg)
 
 The following navigation details and functionalities are accessible in the Map Information Bar (expansion of the bar is required to view all options):
 
-| Symbol | Name | Description |
-|----------|----------|----------|
-| <img src="{{assetsURL}}/img/guide/navigation/attribute.svg" width="30"/> | Attributes | Copyright and other map attributes. |
-| | Positioning coordinates | Click on the positioning coordinates to toggle between degrees minutes seconds (DMS), decimal degrees or projected coordinates. |
-| | Map scale | Click on the map scale to toggle between scale and resolution. |
-| <img src="{{assetsURL}}/img/guide/navigation/up_arrow.svg" width="30"/>  | Reset map rotation | Click on the arrow to return map to the initial orientation. _Note: Fix North must be Off._ |
-| | Fix North | On or Off. Set to On to keep map oriented with North to the top. Only available with some projections (eg. LCC). _Note: Reset map rotation will not work when **Fix North** is On._ |
+| Symbol                                                                   | Name                    | Description                                                                                                                                                                         |
+| ------------------------------------------------------------------------ | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <img src="{{assetsURL}}/img/guide/navigation/attribute.svg" width="30"/> | Attributes              | Copyright and other map attributes.                                                                                                                                                 |
+|                                                                          | Positioning coordinates | Click on the positioning coordinates to toggle between degrees minutes seconds (DMS), decimal degrees or projected coordinates.                                                     |
+|                                                                          | Map scale               | Click on the map scale to toggle between scale and resolution.                                                                                                                      |
+| <img src="{{assetsURL}}/img/guide/navigation/up_arrow.svg" width="30"/>  | Reset map rotation      | Click on the arrow to return map to the initial orientation. _Note: Fix North must be Off._                                                                                         |
+|                                                                          | Fix North               | On or Off. Set to On to keep map oriented with North to the top. Only available with some projections (eg. LCC). _Note: Reset map rotation will not work when **Fix North** is On._ |
 
 =1!sidebar=
+
 # Side Bar
+
 <div style="border-bottom: 2px solid #2a2f39; margin-bottom: 15px;"></div>
 
 The Side Bar, located on the left side of the map, provides access to the available tools and features.
@@ -131,21 +151,23 @@ _The tools displayed may vary depending on how the map is configured._
 
 _Note: Some tools in the Side Bar are also available as tabs in the Footer Bar, such as **Legend**, **Layers**, **Data Table** or **Details**. **Legend** and **Details** opened from the Side Bar are displayed on the map, in a condensed 'mobile' view (single column). The same tool opened from a tab in the Footer Bar is displayed below the map in a fully expanded view._
 
-| Symbol | Name | Description |
-|----------|----------|----------|
-| <img src="{{assetsURL}}/img/guide/geosearch/geolocator.svg" width="30"/> | [Geolocator](#geolocatorSection) | Click the geolocator icon and an input field for search keywords will appear on the map. |
-| <img src="{{assetsURL}}/img/guide/sidebar/legend.svg" width="30"/> | Legend | Legend of map icons (_see Footer Bar section for help_). |
-| <img src="{{assetsURL}}/img/guide/footer/layers_30.svg" width="30"/> | Layers | Tools to interact with layers (_see Footer Bar section for help_). |
-| <img src="{{assetsURL}}/img/guide/sidebar/details.svg" width="30"/> | Details | Details for selected features (_see Footer Bar section for help_). |
-| <img src="{{assetsURL}}/img/guide/footer/data_table.svg" width="30"/> | Data | Table of all features (_see Footer Bar section for help_). |
-| <img src="{{assetsURL}}/img/guide/sidebar/guide.svg" width="30"/> | Guide | Help guide. |
-| <img src="{{assetsURL}}/img/guide/sidebar/export.svg" width="30"/> | [Download](#exportSection) | Download a PNG file of the map. |
-| <img src="{{assetsURL}}/img/guide/sidebar/notifications.svg" width="30"/> | Notifications | Display messages and notifications for the map. |
-| <img src="{{assetsURL}}/img/guide/sidebar/about.svg" width="30"/> | About Geoview | Display information about Geoview viewer. |
+| Symbol                                                                    | Name                             | Description                                                                              |
+| ------------------------------------------------------------------------- | -------------------------------- | ---------------------------------------------------------------------------------------- |
+| <img src="{{assetsURL}}/img/guide/geosearch/geolocator.svg" width="30"/>  | [Geolocator](#geolocatorSection) | Click the geolocator icon and an input field for search keywords will appear on the map. |
+| <img src="{{assetsURL}}/img/guide/sidebar/legend.svg" width="30"/>        | Legend                           | Legend of map icons (_see Footer Bar section for help_).                                 |
+| <img src="{{assetsURL}}/img/guide/footer/layers_30.svg" width="30"/>      | Layers                           | Tools to interact with layers (_see Footer Bar section for help_).                       |
+| <img src="{{assetsURL}}/img/guide/sidebar/details.svg" width="30"/>       | Details                          | Details for selected features (_see Footer Bar section for help_).                       |
+| <img src="{{assetsURL}}/img/guide/footer/data_table.svg" width="30"/>     | Data                             | Table of all features (_see Footer Bar section for help_).                               |
+| <img src="{{assetsURL}}/img/guide/sidebar/guide.svg" width="30"/>         | Guide                            | Help guide.                                                                              |
+| <img src="{{assetsURL}}/img/guide/sidebar/export.svg" width="30"/>        | [Download](#exportSection)       | Download a PNG file of the map.                                                          |
+| <img src="{{assetsURL}}/img/guide/sidebar/notifications.svg" width="30"/> | Notifications                    | Display messages and notifications for the map.                                          |
+| <img src="{{assetsURL}}/img/guide/sidebar/about.svg" width="30"/>         | About Geoview                    | Display information about Geoview viewer.                                                |
 
 =2!geolocator=
 <a id="geolocatorSection">
+
 ### <img src="{{assetsURL}}/img/guide/geosearch/geolocator.svg" width="30"/> Geolocator
+
 <div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
 The geolocator component functions to allow users to search for places in Canada. When the geolocator icon ![]({{assetsURL}}/img/guide/geosearch/geolocator.svg) in the Side Bar is clicked, an input field for search keywords will appear on the map:
@@ -153,6 +175,7 @@ The geolocator component functions to allow users to search for places in Canada
 <img src="{{assetsURL}}/img/guide/geosearch/searchbar_en.png" style="width: 90%;"/>
 
 =3!supportedSearchTypes=
+
 #### Supported Search Types
 
 **Keyword search**: Type any keyword into geolocator search bar to display a list of results that contains the keyword (minimum 3 characters).
@@ -181,13 +204,16 @@ The geolocator component functions to allow users to search for places in Canada
 **Street address**: Search using direct street addresses should return results
 
 =3!geosearchFiltering=
+
 #### Geosearch Filtering
 
 When searching for a location, a results panel will appear below the search box. This results panel contains two dropdown boxes that allow you to filter the search results by their **province** and by their **category** (lake, town, river, etc.). To the right of these two boxes is a **Clear Filters** ![]({{assetsURL}}/img/guide/geosearch/clear.svg) button, which when clicked clears the selected filter options.
 
 =2!export=
 <a id="exportSection">
+
 ### ![]({{assetsURL}}/img/guide/sidebar/export_30.svg) Download
+
 <div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
 You can download an image of the map and its visible layers along with a legend, title, north arrow, scalebar, and a timestamp.
@@ -197,7 +223,9 @@ Once **Download** button is clicked, a dialog will appear with an image of the m
 Click on the **Download** button at the bottom to get the final generated map image.
 
 =1!footerPanel=
+
 # Footer Bar
+
 <div style="border-bottom: 2px solid #2a2f39; margin-bottom: 15px;"></div>
 <a id="footerSection"></a>
 The _Footer Bar_ appears below the map. The _Footer Bar_ can be expanded or collapsed by clicking on a tab in the _Footer Bar_ menu bar. To collapse the panel, simply click again on the active tab.
@@ -220,6 +248,7 @@ _Note: Some tabs in the Footer Bar are also available as tools in the Side Bar, 
 
 =2!legend=
 <a id="legendSection"></a>
+
 <h3><img src="{{assetsURL}}/img/guide/sidebar/legend.svg" width="30"> Legend <a href="#footerSection">Top</a></h3>
 <div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
@@ -231,16 +260,20 @@ For complex feature layers (i.e. those with multiple symbols used per layer) the
 
 The symbology for the layer can be toggled open and closed which is expanded beneath the layer name. Some layers may optionally have a graphical legend defined, if one is present it will be displayed in the same drop down manner.
 
-| Symbol | Name | Description |
-|----------------------|----------------------|----------------------|
-| <img src="{{assetsURL}}/img/guide/layers/scaleVisible.svg" width="30"/> | Zoom to visibile scale| Zoom to the visible scale of the layer, moving the map may be necessary to locate features. _Note: Only available when layer is out of zoom_. |
-| <img src="{{assetsURL}}/img/guide/footer/view_25.svg" width="30"/> | Toggle visibiity | Toggle the layer visibility. |
-| <img src="{{assetsURL}}/img/guide/layers/highlight_60.svg" width="30"/> | Highlight | Brings layer to the top, decreases opacity of other layers and displays layer boundary. |
-| <img src="{{assetsURL}}/img/guide/layers/zoom_60.svg" width="30"/> | Zoom to layer boundary | Pans and zooms the map so that the layer boundary is in view. |
+| Symbol                                                                  | Name                   | Description                                                                                                                                   |
+| ----------------------------------------------------------------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| <img src="{{assetsURL}}/img/guide/layers/scaleVisible.svg" width="30"/> | Zoom to visibile scale | Zoom to the visible scale of the layer, moving the map may be necessary to locate features. _Note: Only available when layer is out of zoom_. |
+| <img src="{{assetsURL}}/img/guide/footer/view_25.svg" width="30"/>      | Toggle visibiity       | Toggle the layer visibility.                                                                                                                  |
+| <img src="{{assetsURL}}/img/guide/layers/highlight_60.svg" width="30"/> | Highlight              | Brings layer to the top, decreases opacity of other layers and displays layer boundary.                                                       |
+| <img src="{{assetsURL}}/img/guide/layers/zoom_60.svg" width="30"/>      | Zoom to layer boundary | Pans and zooms the map so that the layer boundary is in view.                                                                                 |
+
+_Note: When the layer is hidden, functions affecting the layer on the map will be disabled, and the layer text will be grey and in italics._
 
 =2!layers=
 <a id="layersSection"></a>
+
 ### ![]({{assetsURL}}/img/guide/footer/layers_30.svg) Layers [Top](#footerSection)
+
 <div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
 The **Layers** tab has the following submenu options:
@@ -251,6 +284,7 @@ The **Layers** tab has the following submenu options:
 - Remove
 
 =3!view=
+
 #### ![]({{assetsURL}}/img/guide/footer/view_25.svg) View
 
 _**Note: Click on a layer to display its Layer information in the right section.**_
@@ -276,37 +310,42 @@ The group layer icon ![]({{assetsURL}}/img/guide/layers/group.svg) denotes a gro
 
 Select the eye icon, next to each layer, to toggle visibililty on ![]({{assetsURL}}/img/guide/footer/eye.png) or off ![]({{assetsURL}}/img/guide/footer/eye_not_visible.png).
 
-For layers that are always displayed, the visibility (eye) icon is disabled (greyed out) ![]({{assetsURL}}/img/guide/footer/eye_disabled.png).
+Layers that are not currently displayed on the map will be greyed out and their text will be in italics.
+
+For layers that are always displayed, or for layers whose parent layer is hidden, the visibility (eye) icon is disabled (greyed out) ![]({{assetsURL}}/img/guide/footer/eye_disabled.png).
 
 **Supported Layer Types**
 
 Layers can either be in raster format or vector format. The following layer types are supported.
 
-| Raster Layers | Vector Layers |
-|------------------|---------------------|
-| ESRI Dynamic | ESRI Feature |
-| ESRI Image | GeoJSON |
-| XYZ Tile | OGC Feature API Layer |
-| WMS | CSV |
-| Static Image | WFS |
+| Raster Layers      | Vector Layers         |
+| ------------------ | --------------------- |
+| ESRI Dynamic       | ESRI Feature          |
+| ESRI Image         | GeoJSON               |
+| XYZ Tile           | OGC Feature API Layer |
+| WMS                | CSV                   |
+| Static Image       | WFS                   |
 | Vector tiles layer |
 
 _Note: If a layer fails to load correctly it will be identified by an error notice in the notifications tool on the Side Bar. Instead of the standard layer actions you can select to either reload the layer (this is particularly helpful if there is a temporary network connectivity issue) or remove the layer. If a layer is removed it will be taken out of the layer selector completely._
 
 =3!layerSettings=
+
 #### Layer Settings
 
 Click a layer in the left section of the layers view tab, and the layer settings are displayed in right section.
 
 _Note: Some settings may not be available depending on various factors such as layer type or configuration._
 
-| Symbol | Name | Description |
-|----------------------|----------------------|----------------------|
-| <img src="{{assetsURL}}/img/guide/layers/table_view_60.svg" width="30"/> | Table details | Opens simplified view of Data Table. |
-| <img src="{{assetsURL}}/img/guide/layers/refresh_60.svg" width="30"/> | Reset layer | Reset the layer to its initial state. |
-| <img src="{{assetsURL}}/img/guide/layers/highlight_60.svg" width="30"/> | Highlight layer | Brings layer to the top, decreases opacity of other layers and displays layer boundary. |
-| <img src="{{assetsURL}}/img/guide/layers/zoom_60.svg" width="30"/> | Zoom to layer | Pans and zooms the map so that the layer boundary is in view. |
-| <img src="{{assetsURL}}/img/guide/layers/opacity.png" width="80"/> | Opacity | Slider to increase/decrease layer opacity. |
+| Symbol                                                                   | Name            | Description                                                                             |
+| ------------------------------------------------------------------------ | --------------- | --------------------------------------------------------------------------------------- |
+| <img src="{{assetsURL}}/img/guide/layers/table_view_60.svg" width="30"/> | Table details   | Opens simplified view of Data Table.                                                    |
+| <img src="{{assetsURL}}/img/guide/layers/refresh_60.svg" width="30"/>    | Reset layer     | Reset the layer to its initial state.                                                   |
+| <img src="{{assetsURL}}/img/guide/layers/highlight_60.svg" width="30"/>  | Highlight layer | Brings layer to the top, decreases opacity of other layers and displays layer boundary. |
+| <img src="{{assetsURL}}/img/guide/layers/zoom_60.svg" width="30"/>       | Zoom to layer   | Pans and zooms the map so that the layer boundary is in view.                           |
+| <img src="{{assetsURL}}/img/guide/layers/opacity.png" width="80"/>       | Opacity         | Slider to increase/decrease layer opacity.                                              |
+
+_Note: When the layer is hidden, functions affecting the layer on the map will be disabled._
 
 **Layer Classes**
 
@@ -315,6 +354,7 @@ Classes for the layer are listed in the layer settings if available. Select the 
 The number of classes visible is displayed under the layer name.
 
 =3!add=
+
 #### ![]({{assetsURL}}/img/guide/layers/add_25.svg) Add
 
 Additional layers can be added to the map viewer through the _Add_ submenu in the **Layers** tab.
@@ -332,18 +372,22 @@ Usage:
 The viewer will automatically switch to the view function.
 
 =3!sort=
+
 #### ![]({{assetsURL}}/img/guide/layers/sort_25.svg) Sort
 
 To sort the layers you can simply click the up or down arrows on each layer panel.
 
 =3!remove=
+
 #### ![]({{assetsURL}}/img/guide/layers/remove_25.svg) Remove
 
 To remove a layer, click on the delete icon ![]({{assetsURL}}/img/guide/layers/remove_25.svg) to the right of the layer after selecting the 'Remove' submenu.
 
 =2!details=
 <a id="detailsSection"></a>
+
 ### ![]({{assetsURL}}/img/guide/sidebar/details_30.svg) Details [Top](#footerSection)
+
 <div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
 _**Note: A feature on the map must be selected to enable the layer in the list. Otherwise layers are disabled (greyed out).**_
@@ -362,12 +406,15 @@ Check the highlight box ![]({{assetsURL}}/img/guide/layers/check.png) to keep th
 
 =2!dataTable=
 <a id="dataTableSection"></a>
+
 ### ![]({{assetsURL}}/img/guide/footer/data_table.svg) Data Table [Top](#footerSection)
+
 <div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
 _**Note: Click on a layer to display its Data Table information in the right section.**_
 
 **Important Navigation Information**
+
 - You can request data from one table at a time. While data is being fetched, all _layers_ buttons will be disabled.
 - The selected layer will be highlighted in green, and a progress message will appear at the bottom of the map section.
 - Once the data fetching is complete, all _layers_ buttons will be re-enabled.
@@ -381,14 +428,14 @@ The **Data Table** controls are shown in the upper right section of the layer da
 
 _Note: Some options may not be available or are preselected depending on various factors._
 
-| Symbol | Name | Description |
-|---------------|---------------|---------------|
-| <img src="{{assetsURL}}/img/guide/datatable/filters_clear.svg" width="30"/> | Clear Filters | Clear all data table filters. |
-| <img src="{{assetsURL}}/img/guide/datatable/filter_toggle.svg" width="30"/> | Display Filters | Toggle to show or hide filters. |
-| <img src="{{assetsURL}}/img/guide/datatable/filter.png" width="30"/> | Filter switch | Apply filters to the map. |
-| <img src="{{assetsURL}}/img/guide/datatable/column_show.svg" width="30"/> | Display Columns | Allows you to choose which columns you want visible and to pin columns to the left or right of the table. |
-| <img src="{{assetsURL}}/img/guide/datatable/density.svg" width="30"/> | Density | Toggle the height of the rows in the data table. |
-| <img src="{{assetsURL}}/img/guide/datatable/export.svg" width="30"/> | Download | Download data table as CSV or GeoJSON. May not work as intended on mobile due to limitations with downloading files. |
+| Symbol                                                                      | Name            | Description                                                                                                          |
+| --------------------------------------------------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------- |
+| <img src="{{assetsURL}}/img/guide/datatable/filters_clear.svg" width="30"/> | Clear Filters   | Clear all data table filters.                                                                                        |
+| <img src="{{assetsURL}}/img/guide/datatable/filter_toggle.svg" width="30"/> | Display Filters | Toggle to show or hide filters.                                                                                      |
+| <img src="{{assetsURL}}/img/guide/datatable/filter.png" width="30"/>        | Filter switch   | Apply filters to the map.                                                                                            |
+| <img src="{{assetsURL}}/img/guide/datatable/column_show.svg" width="30"/>   | Display Columns | Allows you to choose which columns you want visible and to pin columns to the left or right of the table.            |
+| <img src="{{assetsURL}}/img/guide/datatable/density.svg" width="30"/>       | Density         | Toggle the height of the rows in the data table.                                                                     |
+| <img src="{{assetsURL}}/img/guide/datatable/export.svg" width="30"/>        | Download        | Download data table as CSV or GeoJSON. May not work as intended on mobile due to limitations with downloading files. |
 
 The first three columns of the data table are Icon, Zoom and Details. The remaining columns vary depending on the layer selected.
 
@@ -407,6 +454,7 @@ Click the action icon ![]({{assetsURL}}/img/guide/datatable/column_action.svg) b
 Click on a layer and the number of available features is displayed below the layer title.
 
 =3!sortingAndReordering=
+
 #### Sorting and Reordering
 
 For each column in the data table, there may be a set of arrows associated with that column which represents how it can be sorted and reordered.
@@ -420,6 +468,7 @@ For each column in the data table, there may be a set of arrows associated with 
 Columns can be sorted in ascending/descending order (for numerical data) and alphabetical order (for text data).
 
 =3!filterData=
+
 #### Filter Data
 
 Data can be filtered by column. To show filters, click on the open filters icon ![]({{assetsURL}}/img/guide/datatable/filter_toggle_25.svg). A column is filterable if there is an input field under the title of the header:
@@ -435,6 +484,7 @@ There are 3 types of filters:
 Additional filters (varying by column data type) may be found by clicking the action icon ![]({{assetsURL}}/img/guide/datatable/column_action.svg) beside the column heading, and clicking on **Filter by ...**
 
 =3!keyboardNavigation=
+
 #### Keyboard Navigation
 
 Use **Tab** to go through each of the table controls, and to navigate between the three major table groups:
@@ -449,7 +499,9 @@ To access the buttons and/or input fields within a cell, make sure the cell is h
 
 =2!timeSlider=
 <a id="timeSliderSection"></a>
+
 ### ![]({{assetsURL}}/img/guide/footer/time_slider_30.svg) Time Slider [Top](#footerSection)
+
 <div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
 _**Note: Click on a layer to display its Time Slider information in the right section.**_
@@ -459,6 +511,7 @@ The **Time Slider** tab on the Footer Bar has two sections. Layers with a time d
 The Time Slider section displays a slider bar with one or two draggable handles. A point in time layer will show one handle. A time period layer will show two handles, to adjust the start and end time of the period.
 
 This checkbox ![]({{assetsURL}}/img/guide/layers/check.png) controls whether the time slider filters the data.
+
 - When checked, only the data matching the selected time is shown.
 - When unchecked, all data from all dates is displayed, regardless of the slider's position.
 
@@ -474,7 +527,9 @@ The field being filtered on is displayed in the lower left of the Time Slider se
 
 =2!chart=
 <a id="chartSection"></a>
+
 ### ![]({{assetsURL}}/img/guide/footer/chart_30.svg) Chart [Top](#footerSection)
+
 <div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
 _**Note: A feature on the map must be selected to enable the layer in the list. Otherwise layers are disabled (greyed out).**_
@@ -490,6 +545,7 @@ The visibility of data displayed on the chart can be toggled by clicking the che
 Select from the Download dropdown (upper right of chart section) to download chart data in JSON format. Select Download All for all data and Download Visible for only data currently visible on the chart.
 
 =3!chartTypes=
+
 #### Available Chart Types:
 
 - Line Chart
@@ -501,7 +557,9 @@ Points on line charts can be changed to steps, by selecting from the Steps dropd
 Click hold and drag the handles on the the line chart slider bars to change the X or Y axis values displayed for the chart.
 
 =1!issues=
+
 # Load Times / Unanticipated Behaviour
+
 <div style="border-bottom: 2px solid #2a2f39; margin-bottom: 15px;"></div>
 
 Load times may vary based on:

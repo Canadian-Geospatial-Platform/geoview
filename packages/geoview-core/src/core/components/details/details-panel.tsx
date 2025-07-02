@@ -9,12 +9,7 @@ import {
   useDetailsSelectedLayerPath,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
-import {
-  useMapStoreActions,
-  useMapVisibleLayers,
-  useMapClickCoordinates,
-  useMapVisibleRangeLayers,
-} from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useMapStoreActions, useMapVisibleLayers, useMapClickCoordinates } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import { TypeFeatureInfoEntry, TypeGeometry, TypeLayerData } from '@/api/config/types/map-schema-types';
 
@@ -51,10 +46,9 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
   const arrayOfLayerDataBatch = useDetailsLayerDataArrayBatch();
   const checkedFeatures = useDetailsCheckedFeatures();
   const visibleLayers = useMapVisibleLayers();
-  const visibleRangeLayers = useMapVisibleRangeLayers();
   const mapClickCoordinates = useMapClickCoordinates();
   const { setSelectedLayerPath, removeCheckedFeature, setLayerDataArrayBatchLayerPathBypass } = useDetailsStoreActions();
-  const { addHighlightedFeature, removeHighlightedFeature } = useMapStoreActions();
+  const { addHighlightedFeature, removeHighlightedFeature, isLayerHiddenOnMap } = useMapStoreActions();
 
   // States
   const [currentFeatureIndex, setCurrentFeatureIndex] = useState<number>(0);
@@ -129,7 +123,7 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
     // Set the layers list (filter: visible - visible in range and isQueryable)
     const layerListEntries = visibleLayers
       .map((layerPath) => arrayOfLayerDataBatch.find((layerData) => layerData.layerPath === layerPath))
-      .filter((layer) => layer && visibleRangeLayers.includes(layer.layerPath))
+      .filter((layer) => layer && !isLayerHiddenOnMap(layer.layerPath))
       .filter((layer) => layer && layer.eventListenerEnabled)
       .map(
         (layer) =>
@@ -153,7 +147,7 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
     const orderedLayerListEntries = [...layersWithFeatures, ...layersWithoutFeatures];
 
     return orderedLayerListEntries;
-  }, [visibleLayers, arrayOfLayerDataBatch, visibleRangeLayers, getNumFeaturesLabel, mapId]);
+  }, [visibleLayers, arrayOfLayerDataBatch, getNumFeaturesLabel, mapId, isLayerHiddenOnMap]);
 
   /**
    * Memoizes the selected layer for the LayerList component.

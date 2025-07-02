@@ -74,6 +74,8 @@ export interface IMapState {
 
   actions: {
     createBasemapFromOptions: (basemapOptions: TypeBasemapOptions) => Promise<void>;
+    getMapLayerParentHidden(layerPath: string): boolean;
+    isLayerHiddenOnMap(layerPath: string): boolean;
     getPixelFromCoordinate: (coord: Coordinate) => [number, number];
     showClickMarker: (marker: TypeClickMarker) => void;
     hideClickMarker: () => void;
@@ -242,6 +244,30 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       createBasemapFromOptions: (basemapOptions: TypeBasemapOptions): Promise<void> => {
         // Redirect to processor
         return MapEventProcessor.setBasemap(get().mapId, basemapOptions);
+      },
+
+      /**
+       * Returns true if any of the layers parents are hidden.
+       * @param {string} layerPath - The layers path
+       * @returns {boolean} - If there is a hidden parent
+       */
+      getMapLayerParentHidden: (layerPath: string): boolean => {
+        // Redirect to processor
+        return MapEventProcessor.getMapLayerParentHidden(get().mapId, layerPath);
+      },
+
+      /**
+       * Returns true if any of the layers parents are hidden.
+       * @param {string} layerPath - The layers path
+       * @returns {boolean} - If the layer is hidden through any means
+       */
+      isLayerHiddenOnMap: (layerPath: string): boolean => {
+        // Redirect to processor
+        return (
+          MapEventProcessor.getMapLayerParentHidden(get().mapId, layerPath) ||
+          !MapEventProcessor.findMapLayerFromOrderedInfo(get().mapId, layerPath, get().mapState.orderedLayerInfo)?.inVisibleRange ||
+          !MapEventProcessor.findMapLayerFromOrderedInfo(get().mapId, layerPath, get().mapState.orderedLayerInfo)?.visible
+        );
       },
 
       /**
@@ -1094,6 +1120,10 @@ export const useSelectorLayerVisibility = (layerPath: string): boolean => {
   );
 };
 
+export const useSelectorLayerParentHidden = (layerPath: string): boolean => {
+  return useStore(useGeoViewStore(), (state) => MapEventProcessor.getMapLayerParentHidden(state.mapId, layerPath));
+};
+
 export const useAllLayersVisible = (): boolean =>
   useStore(useGeoViewStore(), (state) => state.mapState.orderedLayerInfo.every((layer) => layer.visible));
 
@@ -1109,6 +1139,16 @@ export const useSelectorLayerInVisibleRange = (layerPath: string): boolean => {
     useGeoViewStore(),
     (state) =>
       MapEventProcessor.findMapLayerFromOrderedInfo(state.mapId, layerPath, state.mapState.orderedLayerInfo)?.inVisibleRange || false
+  );
+};
+
+export const useSelectorIsLayerHiddenOnMap = (layerPath: string): boolean => {
+  return useStore(
+    useGeoViewStore(),
+    (state) =>
+      MapEventProcessor.getMapLayerParentHidden(state.mapId, layerPath) ||
+      !MapEventProcessor.findMapLayerFromOrderedInfo(state.mapId, layerPath, state.mapState.orderedLayerInfo)?.inVisibleRange ||
+      !MapEventProcessor.findMapLayerFromOrderedInfo(state.mapId, layerPath, state.mapState.orderedLayerInfo)?.visible
   );
 };
 
