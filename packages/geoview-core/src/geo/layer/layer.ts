@@ -681,6 +681,14 @@ export class LayerApi {
       this.#gvLayers[layerConfig.layerPath] = groupLayer;
       this.#olLayers[layerConfig.layerPath] = groupLayer.getOLLayer();
 
+      groupLayer.onLayerOpacityChanged((baseLayer, opacityChangedEvent) => {
+        LegendEventProcessor.setOpacityInStore(this.getMapId(), opacityChangedEvent.layerPath, opacityChangedEvent.opacity);
+      });
+
+      groupLayer.onVisibleChanged((baseLayer, visibleChangedEvent) => {
+        MapEventProcessor.setMapLayerVisibilityInStore(this.getMapId(), baseLayer.getLayerPath(), visibleChangedEvent.visible);
+      });
+
       // TODO: Check - Do we need this line here? And if so, why only for Group Layers?
       // Set in visible range property for all newly added layers
       this.#setLayerInVisibleRange(groupLayer, layerConfig);
@@ -708,6 +716,14 @@ export class LayerApi {
 
       // Emit about its creation so that one can attach events on it right away if necessary
       this.#emitLayerCreated({ layer: gvLayer });
+
+      gvLayer.onLayerOpacityChanged((baseLayer, opacityChangedEvent) => {
+        LegendEventProcessor.setOpacityInStore(this.getMapId(), opacityChangedEvent.layerPath, opacityChangedEvent.opacity);
+      });
+
+      gvLayer.onVisibleChanged((baseLayer, visibleChangedEvent) => {
+        MapEventProcessor.setMapLayerVisibilityInStore(this.getMapId(), baseLayer.getLayerPath(), visibleChangedEvent.visible);
+      });
 
       // Init it
       gvLayer.init();
@@ -1251,62 +1267,16 @@ export class LayerApi {
    */
   setOrToggleLayerVisibility(layerPath: string, newValue?: boolean): boolean {
     // Apply some visibility logic
-    const curOrderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfo(this.getMapId());
     const layerVisibility = MapEventProcessor.getMapVisibilityFromOrderedLayerInfo(this.getMapId(), layerPath);
     // Determine the outcome of the new visibility based on parameters
     const newVisibility = newValue !== undefined ? newValue : !layerVisibility;
-    const layerInfos = MapEventProcessor.findMapLayerAndChildrenFromOrderedInfo(this.getMapId(), layerPath, curOrderedLayerInfo);
 
-    layerInfos.forEach((layerInfo: TypeOrderedLayerInfo) => {
-      if (layerInfo) {
-        // If the new visibility is different than before
-        if (newVisibility !== layerVisibility) {
-          // Go for it
-          // eslint-disable-next-line no-param-reassign
-          layerInfo.visible = newVisibility;
-          this.getGeoviewLayer(layerInfo.layerPath)?.setVisible(layerInfo.visible);
-          // Emit event
-          this.#emitLayerVisibilityToggled({ layerPath: layerInfo.layerPath, visibility: layerInfo.visible });
-        }
-      }
-    });
-
-    // For each parent
-    const parentLayerPathArray = layerPath.split('/');
-    parentLayerPathArray.pop();
-    let parentLayerPath = parentLayerPathArray.join('/');
-    let parentLayerInfo = curOrderedLayerInfo.find((info: TypeOrderedLayerInfo) => info.layerPath === parentLayerPath);
-    while (parentLayerInfo !== undefined) {
-      const parentLayerVisibility = MapEventProcessor.getMapVisibilityFromOrderedLayerInfo(this.getMapId(), parentLayerPath);
-      if ((!layerVisibility || newValue) && parentLayerVisibility === false) {
-        if (parentLayerInfo) {
-          parentLayerInfo.visible = true;
-          this.getGeoviewLayer(parentLayerPath)?.setVisible(true);
-
-          // Emit event
-          this.#emitLayerVisibilityToggled({ layerPath: parentLayerPath, visibility: true });
-        }
-      }
-      const children = curOrderedLayerInfo.filter(
-        // eslint-disable-next-line no-loop-func
-        (info: TypeOrderedLayerInfo) => info.layerPath.startsWith(`${parentLayerPath}/`) && info.layerPath !== parentLayerPath
-      );
-      if (!children.some((child: TypeOrderedLayerInfo) => child.visible === true)) {
-        this.setOrToggleLayerVisibility(parentLayerPath, false);
-
-        // Emit event
-        this.#emitLayerVisibilityToggled({ layerPath, visibility: false });
-      }
-
-      // Prepare for next parent
-      parentLayerPathArray.pop();
-      parentLayerPath = parentLayerPathArray.join('/');
-      // eslint-disable-next-line no-loop-func
-      parentLayerInfo = curOrderedLayerInfo.find((info: TypeOrderedLayerInfo) => info.layerPath === parentLayerPath);
+    if (layerVisibility !== newVisibility) {
+      // Change visibility
+      this.getGeoviewLayer(layerPath)?.setVisible(newVisibility);
+      // Emit event
+      this.#emitLayerVisibilityToggled({ layerPath, visibility: newVisibility });
     }
-
-    // Redirect to processor so we can update the store with setterActions
-    MapEventProcessor.setMapOrderedLayerInfo(this.getMapId(), curOrderedLayerInfo);
 
     return newVisibility;
   }
@@ -1328,6 +1298,17 @@ export class LayerApi {
     } else {
       logger.logError(`Unable to find layer ${layerPath}`);
     }
+  }
+
+  /**
+   * Sets opacity for a layer.
+   *
+   * @param {string} layerPath - The path of the layer.
+   * @param {number} opacity - The new opacity to use.
+   * @param {boolean} emitOpacityChange - Whether to emit the event or not (false to avoid updating the legend layers)
+   */
+  setLayerOpacity(layerPath: string, opacity: number, emitOpacityChange?: boolean): void {
+    this.getGeoviewLayer(layerPath)?.setOpacity(opacity, emitOpacityChange);
   }
 
   /**

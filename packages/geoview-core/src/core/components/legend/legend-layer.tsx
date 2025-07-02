@@ -12,7 +12,7 @@ import {
 import {
   useMapStoreActions,
   useSelectorLayerLegendCollapsed,
-  useSelectorLayerInVisibleRange,
+  useSelectorIsLayerHiddenOnMap,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useLightBox } from '@/core/components/common';
 import { LayerIcon } from '@/core/components/common/layer-icon';
@@ -47,7 +47,7 @@ const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick }: LegendLay
   const layerItems = useSelectorLayerItems(layerPath);
   const layerChildren = useSelectorLayerChildren(layerPath);
   const isCollapsed = useSelectorLayerLegendCollapsed(layerPath);
-  const inVisibleRange = useSelectorLayerInVisibleRange(layerPath);
+  const parentLayer = useSelectorIsLayerHiddenOnMap(layerPath);
   const layerType = useSelectorLayerType(layerPath);
   const layerStatus: TypeLayerStatus | undefined = useSelectorLayerStatus(layerPath);
 
@@ -56,7 +56,7 @@ const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick }: LegendLay
 
   // Return the ui
   return (
-    <ListItem key={layerPath} divider onClick={onExpandClick} className={!inVisibleRange ? 'outOfRange' : ''}>
+    <ListItem key={layerPath} divider onClick={onExpandClick} className={parentLayer ? 'outOfRange' : ''}>
       <LayerIcon layerPath={layerPath} />
       <Tooltip title={layerName} placement="top">
         <ListItemText

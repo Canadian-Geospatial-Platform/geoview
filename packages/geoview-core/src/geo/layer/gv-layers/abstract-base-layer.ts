@@ -136,7 +136,7 @@ export abstract class AbstractBaseLayer {
   }
 
   /**
-   * Gets the layer name or fallsback on the layer name in the layer configuration.
+   * Gets the layer name or falls back on the layer name in the layer configuration.
    * @returns The layer name
    */
   getLayerName(): string {
@@ -182,10 +182,11 @@ export abstract class AbstractBaseLayer {
   /**
    * Sets the opacity of the layer (between 0 and 1).
    * @param {number} layerOpacity The opacity of the layer.
+   * @param {boolean} emitOpacityChange - Whether to emit the event or not (false to avoid updating the legend layers)
    */
-  setOpacity(layerOpacity: number): void {
+  setOpacity(layerOpacity: number, emitOpacityChange: boolean = true): void {
     this.getOLLayer().setOpacity(layerOpacity);
-    this.#emitLayerOpacityChanged({ layerPath: this.getLayerPath(), opacity: layerOpacity });
+    if (emitOpacityChange) this.#emitLayerOpacityChanged({ layerPath: this.getLayerPath(), opacity: layerOpacity });
   }
 
   /**
