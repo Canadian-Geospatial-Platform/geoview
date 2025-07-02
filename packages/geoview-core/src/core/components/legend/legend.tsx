@@ -24,7 +24,7 @@ const styles = {
     margin: '2rem',
     width: '100%',
     textAlign: 'center',
-    heigth: 'fit-content',
+    height: 'fit-content',
   },
   layerBox: {
     paddingRight: '0.65rem',
@@ -174,9 +174,13 @@ export function Legend({ fullWidth, containerType = CONTAINER_TYPE.FOOTER_BAR }:
   if (footerId !== 'legend' && appBarId.tabGroup !== 'legend') return null;
 
   return (
-    <Box sx={sxClassesMain.container} id={`${mapId}-${containerType}-legendContainer`}>
-      <ToggleAll />
-      <Box sx={styles.flexContainer}>{content}</Box>
-    </Box>
+    <>
+      <Box sx={sxClasses.toggleBar}>
+        <ToggleAll />
+      </Box>
+      <Box sx={sxClassesMain.container} id={`${mapId}-${containerType}-legendContainer`}>
+        <Box sx={styles.flexContainer}>{content}</Box>
+      </Box>
+    </>
   );
 }

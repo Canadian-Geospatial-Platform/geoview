@@ -97,7 +97,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
       if (event.key === 'Enter' && !isDisabled) {
         onListItemClick(selectedLayer);
         // NOTE: did this, bcz when enter is clicked, tab component `handleClick` function is fired,
-        // to avoid this we have do prevent default so that it doesn't probagate to the parent elements.
+        // to avoid this we have do prevent default so that it doesn't propagate to the parent elements.
         event.preventDefault();
       }
     },
@@ -107,7 +107,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
   const AnimatedPaper = animated(Paper);
 
   return (
-    <AnimatedPaper sx={{ marginBottom: '1rem' }} className={containerClass}>
+    <AnimatedPaper className={containerClass}>
       <Tooltip title={layer.tooltip} placement="top" arrow>
         <Box>
           <ListItem

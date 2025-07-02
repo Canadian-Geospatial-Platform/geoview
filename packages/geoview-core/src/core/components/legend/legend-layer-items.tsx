@@ -7,6 +7,7 @@ import { useLayerStoreActions, useSelectorLayerControls } from '@/core/stores/st
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
 import { TypeLayerControls } from '@/api/config/types/map-schema-types';
+import { useSelectorIsLayerHiddenOnMap } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 interface ItemsListProps {
   items: TypeLegendItem[];
@@ -15,8 +16,8 @@ interface ItemsListProps {
 
 // Extracted ListItem Component
 const LegendListItem = memo(
-  ({ item: { icon, name, isVisible } }: { item: TypeLegendItem }): JSX.Element => (
-    <ListItem className={!isVisible ? 'unchecked' : 'checked'}>
+  ({ item: { icon, name, isVisible }, layerVisible }: { item: TypeLegendItem; layerVisible: boolean }): JSX.Element => (
+    <ListItem className={!isVisible || !layerVisible ? 'unchecked' : 'checked'}>
       <ListItemIcon>{icon ? <Box component="img" alt={name} src={icon} /> : <BrowserNotSupportedIcon />}</ListItemIcon>
       <ListItemText primary={name} />
     </ListItem>
@@ -35,6 +36,7 @@ export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsList
 
   const { toggleItemVisibility, getLayer } = useLayerStoreActions();
   const layerControls: TypeLayerControls | undefined = useSelectorLayerControls(layerPath);
+  const layerHidden = useSelectorIsLayerHiddenOnMap(layerPath);
   const canToggleItemVisibility = getLayer(layerPath)?.canToggle && layerControls?.visibility !== false;
 
   /**
@@ -58,10 +60,10 @@ export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsList
   return (
     <List sx={sxClasses.subList}>
       {items.map((item) => {
-        if (!canToggleItemVisibility)
+        if (!canToggleItemVisibility || layerHidden)
           return (
             <Tooltip title={item.name} key={`Tooltip-${item.name}-${item.icon}`} placement="top">
-              <LegendListItem item={item} key={`${item.name}-${item.isVisible}-${item.icon}`} />
+              <LegendListItem item={item} layerVisible={!layerHidden} key={`${item.name}-${item.isVisible}-${item.icon}`} />
             </Tooltip>
           );
 
@@ -79,7 +81,7 @@ export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsList
             sx={sxClasses.toggleableItem}
           >
             <Box key={`Box-${item.name}-${item.icon}`} onClick={() => handleToggleItemVisibility(item)}>
-              <LegendListItem item={item} key={`${item.name}-${item.isVisible}-${item.icon}`} />
+              <LegendListItem item={item} layerVisible={!layerHidden} key={`${item.name}-${item.isVisible}-${item.icon}`} />
             </Box>
           </Tooltip>
         );
