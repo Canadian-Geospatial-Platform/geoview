@@ -1,3 +1,4 @@
+import ReactDOMServer from 'react-dom/server';
 import { TypeWindow } from 'geoview-core';
 import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import {
@@ -6,7 +7,6 @@ import {
   useDrawerStyle,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
-import ReactDOMServer from 'react-dom/server';
 
 // import { logger } from 'geoview-core/core/utils/logger';
 
