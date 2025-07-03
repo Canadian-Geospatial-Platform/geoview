@@ -385,7 +385,6 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     // Get current state values if not provided
     const currentGeomType = geomType || state.actions.getActiveGeom();
     const currentStyle = styleInput || state.actions.getStyle();
-    const hideMeasurements = state.actions.getHideMeasurements();
 
     // If drawing already, stop and restart as it's likely a style change
     if (this.getDrawerState(mapId)?.drawInstance) {
@@ -447,6 +446,8 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       if (!geom) return;
       if (geom instanceof Point) return;
 
+      // GV hideMeasurements has to be here, otherwise the value can be stale, unlike style and geomType which restart the interaction
+      const hideMeasurements = state.actions.getHideMeasurements();
       const newOverlay = this.#createMeasureTooltip(feature, hideMeasurements, mapId);
       if (newOverlay) {
         viewer.map.addOverlay(newOverlay);
@@ -509,7 +510,6 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     if (!viewer) throw new MapViewerNotFoundError(mapId);
 
     const typesToEdit = geomTypes || state.actions.getGeomTypes();
-    const { hideMeasurements } = state;
 
     const editInstances = state.actions.getEditInstances();
 
@@ -536,6 +536,8 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
           if (!geom) return;
           if (geom instanceof Point) return;
 
+          // GV hideMeasurements has to be here, otherwise the value can be stale, unlike style and geomType which restart the interaction
+          const hideMeasurements = state.actions.getHideMeasurements();
           this.#createMeasureTooltip(feature, hideMeasurements, mapId);
         });
 
@@ -658,7 +660,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     const viewer = MapEventProcessor.getMapViewer(mapId);
     if (!viewer) throw new MapViewerNotFoundError(mapId);
 
-    const { hideMeasurements } = state;
+    const hideMeasurements = state.actions.getHideMeasurements();
 
     // Get all overlays
     const groupedFeatures = this.#getGroupedDrawingFeatures(mapId);
