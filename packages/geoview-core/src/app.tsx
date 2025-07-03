@@ -111,6 +111,8 @@ async function getMapConfig(mapElement: Element): Promise<TypeMapFeaturesConfig>
     const configUrl = mapElement.getAttribute('data-config-url');
     const configObject = await Fetch.fetchJsonAs<string | TypeJsonObject>(configUrl!);
     mapConfig = await api.config.createMapConfig(configObject, lang);
+    // mapConfig = configObject as unknown as MapFeatureConfig;
+    // debugger;
 
     // TODO: refactor - remove this injection once config is done, remove the casting to unknown
     // TODOCONT: uncomment shapefile layer processing in confg-api.ts 507 once removed
