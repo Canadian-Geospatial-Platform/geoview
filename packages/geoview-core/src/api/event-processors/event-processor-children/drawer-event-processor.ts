@@ -385,7 +385,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     // Get current state values if not provided
     const currentGeomType = geomType || state.actions.getActiveGeom();
     const currentStyle = styleInput || state.actions.getStyle();
-    const { hideMeasurements } = state;
+    const hideMeasurements = state.actions.getHideMeasurements();
 
     // If drawing already, stop and restart as it's likely a style change
     if (this.getDrawerState(mapId)?.drawInstance) {
