@@ -8,6 +8,7 @@ import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor
 import { GeochartEventProcessor } from '@/api/event-processors/event-processor-children/geochart-event-processor';
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
 import { SwiperEventProcessor } from '@/api/event-processors/event-processor-children/swiper-event-processor';
+import { DrawerEventProcessor } from '@/api/event-processors/event-processor-children/drawer-event-processor';
 
 // core
 const appEventProcessor = new AppEventProcessor();
@@ -21,6 +22,7 @@ const dataTableEventProcessor = new DataTableEventProcessor();
 const timeSliderEventProcessor = new TimeSliderEventProcessor();
 const geochartEventProcessor = new GeochartEventProcessor();
 const swiperEventProcessor = new SwiperEventProcessor();
+const drawerEventProcessor = new DrawerEventProcessor();
 
 export function initializeEventProcessors(store: GeoviewStoreType): void {
   // core stores
@@ -36,6 +38,7 @@ export function initializeEventProcessors(store: GeoviewStoreType): void {
   if (store.getState().mapConfig!.footerBar?.tabs.core.includes('time-slider')) timeSliderEventProcessor.initialize(store);
   if (store.getState().mapConfig!.footerBar?.tabs.core.includes('geochart')) geochartEventProcessor.initialize(store);
   if (store.getState().mapConfig!.corePackages?.includes('swiper')) swiperEventProcessor.initialize(store);
+  if (store.getState().mapConfig!.navBar?.includes('drawer')) drawerEventProcessor.initialize(store);
 }
 
 export function destroyEventProcessors(store: GeoviewStoreType): void {
@@ -52,4 +55,5 @@ export function destroyEventProcessors(store: GeoviewStoreType): void {
   if (store.getState().mapConfig!.footerBar?.tabs.core.includes('time-slider')) timeSliderEventProcessor.destroy();
   if (store.getState().mapConfig!.footerBar?.tabs.core.includes('geochart')) geochartEventProcessor.destroy();
   if (store.getState().mapConfig!.corePackages?.includes('swiper')) swiperEventProcessor.destroy();
+  if (store.getState().mapConfig!.navBar?.includes('drawer')) drawerEventProcessor.destroy();
 }

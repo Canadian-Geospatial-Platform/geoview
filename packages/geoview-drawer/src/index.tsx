@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'; // GV This import is to validate that we're on the right React at the end of the file
 import { TypeJsonObject, toJsonObject, AnySchemaObject } from 'geoview-core/api/config/types/config-types';
 import { TypeDrawerConfig } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
 import { NavBarPlugin, TypeNavBarButtonConfig } from 'geoview-core/api/plugin/navbar-plugin';
@@ -11,15 +11,6 @@ import { createDrawerButtons } from './draw-navbar';
 
 // Import css styles
 import './measurement-styles.css';
-
-// TODO Optional: Install package - MUI Colour Picker
-// TO.DO Add support for RGBA instead of just Hex to handle transparency
-// TO.DO Draw mouse icon lags behind cursor
-// TO.DO Export drawings
-// TO.DO Other interactions: Snap, Translate, Scale / Rotate (not actually a built in interaction)
-// TO.DO Optional: Make the geometry icon in the geometry picker match the style colours (Fill / Outline)
-// TO.DO Better Styling in panels ( change geometry and style button panels )
-// TO.DO Measurements between segments too (for lines, maybe polygons?)
 
 /**
  * Create a class for the plugin instance
@@ -66,7 +57,9 @@ class DrawerPlugin extends NavBarPlugin {
           point: 'Point',
           linestring: 'Line',
           polygon: 'Polygon',
+          rectangle: 'Rectangle',
           circle: 'Circle',
+          star: 'Star',
           style: 'Change Style',
           toggleMeasurements: 'Toggle measurements',
         },
@@ -88,7 +81,9 @@ class DrawerPlugin extends NavBarPlugin {
           point: 'Pointer',
           linestring: 'Ligne',
           polygon: 'Polygone',
+          rectangle: 'Rectangle',
           circle: 'Cercle',
+          star: 'Étoile',
           style: 'Changer de style',
           toggleMeasurements: 'Basculer les mesures',
         },
