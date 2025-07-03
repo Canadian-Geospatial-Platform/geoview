@@ -8,14 +8,19 @@ import {
 } from '@/api/config/types/config-constants';
 import { TypeJsonValue, TypeJsonObject, toJsonObject, TypeJsonArray, Cast } from '@/api/config/types/config-types';
 import { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config';
-import { UUIDmapConfigReader } from '@/api/config/uuid-config-reader';
 import {
   AbstractGeoviewLayerConfig,
   EntryConfigBaseClass,
+  MapConfigLayerEntry,
+  TypeBasemapOptions,
   TypeDisplayLanguage,
   TypeGeoviewLayerType,
   TypeInitialGeoviewLayerType,
+  TypeInteraction,
   TypeLayerStyleConfig,
+  TypeMapFeaturesInstance,
+  TypeValidMapProjectionCodes,
+  TypeZoomAndCenter,
 } from '@/api/config/types/map-schema-types';
 import { MapConfigError } from '@/api/config/types/classes/config-exceptions';
 
@@ -43,6 +48,7 @@ import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import { ShapefileReader } from '@/core/utils/config/reader/shapefile-reader';
+import { UUIDmapConfigReader } from '@/core/utils/config/reader/uuid-config-reader';
 
 /**
  * The API class that create configuration object. It is used to validate and read the service and layer metadata.
@@ -215,7 +221,7 @@ export class ConfigApi {
     const urlParams = ConfigApi.#getMapPropsFromUrlParams(urlStringParams);
 
     // if user provided any url parameters update
-    const jsonConfig = {} as TypeJsonObject;
+    const jsonConfig = {} as TypeMapFeaturesInstance;
 
     // update the language if provided from the map configuration.
     const displayLanguage = (urlParams.l as TypeDisplayLanguage) || 'en';
@@ -237,15 +243,15 @@ export class ConfigApi {
       if (urlParams.z) zoom = urlParams.z as string;
 
       jsonConfig.map = {
-        interaction: urlParams.i,
+        interaction: urlParams.i as TypeInteraction,
         viewSettings: {
           initialView: {
-            zoomAndCenter: [parseInt(zoom, 10), [parseInt(center[0], 10), parseInt(center[1], 10)]] as TypeJsonObject,
+            zoomAndCenter: [parseInt(zoom, 10), [parseInt(center[0], 10), parseInt(center[1], 10)]] as TypeZoomAndCenter,
           },
-          projection: parseInt(urlParams.p as string, 10) as TypeJsonObject,
+          projection: parseInt(urlParams.p as string, 10) as TypeValidMapProjectionCodes,
         },
-        basemapOptions: ConfigApi.#parseObjectFromUrl(urlParams.b as string),
-        listOfGeoviewLayerConfig: Cast<TypeJsonObject>([]),
+        basemapOptions: ConfigApi.#parseObjectFromUrl(urlParams.b as string) as unknown as TypeBasemapOptions,
+        listOfGeoviewLayerConfig: [] as AbstractGeoviewLayerConfig[] | MapConfigLayerEntry[],
       };
 
       // get layer information from catalog using their uuid's if any passed from url params
@@ -253,20 +259,23 @@ export class ConfigApi {
       if (urlParams.keys) {
         try {
           // Get the GeoView layer configurations from the GeoCore UUIDs provided (urlParams.keys is a CSV string of UUIDs).
-          const listOfGeoviewLayerConfig = await UUIDmapConfigReader.getGVConfigFromUUIDs(
+          const response = await UUIDmapConfigReader.getGVConfigFromUUIDs(
             CV_DEFAULT_MAP_FEATURE_CONFIG.serviceUrls.geocoreUrl,
             displayLanguage,
             urlParams.keys.toString().split(',')
           );
 
+          // Focus on the layers in the response
+          const listOfGeoviewLayerConfig = response.layers;
+
           // The listOfGeoviewLayerConfig returned by the previous call appended 'rcs.' at the beginning and
           // '.en' or '.fr' at the end of the UUIDs. We want to restore the ids as they were before.
           listOfGeoviewLayerConfig.forEach((layerConfig, i) => {
-            (listOfGeoviewLayerConfig[i].geoviewLayerId as string) = (layerConfig.geoviewLayerId as string).slice(4, -3);
+            listOfGeoviewLayerConfig[i].geoviewLayerId = layerConfig.geoviewLayerId.slice(4, -3);
           });
 
           // Store the new computed listOfGeoviewLayerConfig in the map.
-          (jsonConfig.map.listOfGeoviewLayerConfig as TypeJsonObject[]) = listOfGeoviewLayerConfig;
+          jsonConfig.map.listOfGeoviewLayerConfig = listOfGeoviewLayerConfig;
         } catch (error: unknown) {
           // Log the error. The listOfGeoviewLayerConfig returned will be [].
           logger.logError('Failed to get the GeoView layers from url keys', urlParams.keys, error);
@@ -284,7 +293,7 @@ export class ConfigApi {
       }
 
       // update the version if provided from the map configuration.
-      jsonConfig.schemaVersionUsed = urlParams.v;
+      jsonConfig.schemaVersionUsed = urlParams.v as '1.0' | undefined;
     }
 
     // Trace the detail config read from url
@@ -337,7 +346,10 @@ export class ConfigApi {
     if (geocoreArrayOfKeys.length) {
       try {
         // Get the GeoView configurations using the array of GeoCore identifiers.
-        const arrayOfJsonConfig = await UUIDmapConfigReader.getGVConfigFromUUIDs(geocoreServerUrl, language, geocoreArrayOfKeys);
+        const response = await UUIDmapConfigReader.getGVConfigFromUUIDs(geocoreServerUrl, language, geocoreArrayOfKeys);
+
+        // Focus on the layers in the response
+        const arrayOfJsonConfig = response.layers;
 
         // replace the GeoCore layers by the GeoView layers returned by the server.
         // If a geocore layer cannot be found in the array of layers returned by the server, we leave it as is in
@@ -352,8 +364,8 @@ export class ConfigApi {
             if (jsonConfigFound) {
               // take a clone in case the ID is a duplicate so the config can be re-used
               const newConfig = cloneDeep(jsonConfigFound);
-              newConfig.geoviewLayerId = layerConfig.geoviewLayerId;
-              newConfig.isGeocore = true as TypeJsonObject; // We want to remember that the origin is GeoCore.
+              newConfig.geoviewLayerId = layerConfig.geoviewLayerId as string;
+              newConfig.isGeocore = true; // We want to remember that the origin is GeoCore.
               return newConfig;
             }
           }

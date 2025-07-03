@@ -44,6 +44,7 @@ import {
   TypeServiceUrls,
   TypeValidMapProjectionCodes,
   TypeValidVersions,
+  TypeMapFeaturesInstance,
 } from '@/api/config/types/map-schema-types';
 
 import { logger } from '@/core/utils/logger';
@@ -124,7 +125,7 @@ export class MapFeatureConfig {
    * @param {TypeJsonObject} userMapFeatureConfig The map feature configuration to instantiate.
    * @constructor
    */
-  constructor(userMapFeatureConfig: TypeJsonObject) {
+  constructor(userMapFeatureConfig: TypeMapFeaturesInstance | TypeJsonObject) {
     // Input schema validation.
     this.#errorDetectedFlag = !isvalidComparedToInputSchema(CV_MAP_CONFIG_SCHEMA_PATH, userMapFeatureConfig);
 
@@ -214,7 +215,7 @@ export class MapFeatureConfig {
    * @param {TypeJsonObject} providedMapConfig The map feature configuration to instantiate.
    * @private
    */
-  #makeMapConfigValid(providedMapConfig: TypeJsonObject): void {
+  #makeMapConfigValid(providedMapConfig: TypeMapFeaturesInstance | TypeJsonObject): void {
     // Do validation for all pieces
     this.map.viewSettings.projection =
       this.map.viewSettings.projection && VALID_PROJECTION_CODES.includes(this.map.viewSettings.projection)
@@ -318,7 +319,7 @@ export class MapFeatureConfig {
    * @param {TypeJsonObject} providedMapConfig The map feature configuration to instantiate.
    * @private
    */
-  #logModifs(providedMapConfig: TypeJsonObject): void {
+  #logModifs(providedMapConfig: TypeMapFeaturesInstance | TypeJsonObject): void {
     Object.keys(providedMapConfig).forEach((key) => {
       if (!(key in this)) {
         logger.logWarning(`- Key '${key}' is invalid -`);
