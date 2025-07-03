@@ -995,6 +995,9 @@ export type TypeGeoviewLayerConfig = {
   externalDateFormat?: string;
   /** Flag to exclude layer from time anble function like time slider */
   isTimeAware?: boolean;
+  /** Flag to indicate if the layer is a geocore layer */
+  isGeocore?: boolean;
+
   /**
    * Initial settings to apply to the GeoView layer at creation time.
    * This attribute is allowed only if listOfLayerEntryConfig.length > 1.
