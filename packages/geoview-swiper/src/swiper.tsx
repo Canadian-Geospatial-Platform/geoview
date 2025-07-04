@@ -128,14 +128,6 @@ export function Swiper(props: SwiperProps): JSX.Element {
       if (orientation === 'vertical') setXPosition(position);
       if (orientation === 'vertical') setYPosition(position);
 
-      // if (orientation === 'vertical') {
-      //   setXPosition(position);
-      //   setYPosition(0); // Keep Y at 0 for vertical
-      // } else {
-      //   setXPosition(0); // Keep X at 0 for horizontal
-      //   setYPosition(position);
-      // }
-
       // Force refresh
       olLayers.forEach((layer: BaseLayer) => {
         layer.changed();
@@ -170,10 +162,15 @@ export function Swiper(props: SwiperProps): JSX.Element {
     }
   }, 100);
 
+  /**
+   * Handles orientation change events from the custom event dispatcher.
+   * Resets the swiper position to center when orientation changes and refreshes the layer rendering.
+   * @param {CustomEvent} event - The custom event containing the new orientation details
+   */
   const handleOrientationChange = useCallback(
     (event: CustomEvent): void => {
       // Log
-      logger.logTraceUseEffect('GEOVIEW-SWIPER - orientation changed via event', event.detail.orientation);
+      logger.logTraceUseCallback('GEOVIEW-SWIPER - orientation changed via event', event.detail.orientation);
 
       // Update map size
       mapSize.current = viewer.map.getSize() || [0, 0];
