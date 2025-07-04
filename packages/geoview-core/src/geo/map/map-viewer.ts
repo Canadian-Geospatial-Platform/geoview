@@ -54,6 +54,7 @@ import { Extent as ExtentInteraction } from '@/geo/interaction/extent';
 import { Modify } from '@/geo/interaction/modify';
 import { Snap } from '@/geo/interaction/snap';
 import { Translate } from '@/geo/interaction/translate';
+import { Transform, TransformOptions } from '../interaction/transform';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { ModalApi } from '@/ui';
 import { delay, generateId, getLocalizedMessage, whenThisThen } from '@/core/utils/utilities';
@@ -1072,6 +1073,20 @@ export class MapViewer {
     });
     snap.startInteraction();
     return snap;
+  }
+
+  /**
+   * Initializes transform interactions for feature manipulation
+   * @param {TransformOptions} options - Options for the transform interaction
+   */
+  initTransformInteractions(options?: Partial<TransformOptions>): Transform {
+    // Create transform capabilities
+    const transform = new Transform({
+      mapViewer: this,
+      ...options,
+    });
+    transform.startInteraction();
+    return transform;
   }
 
   // #endregion
