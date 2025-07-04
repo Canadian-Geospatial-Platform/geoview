@@ -52,6 +52,7 @@
     <button onclick="addSwiper()">Add swiper functionality</button>
     <button onclick="removeSwiper()">Remove swiper functionality</button>
     <button onclick="removeSwiperAll()">Remove all swiper functionalities</button>
+    <button onclick="toggleOrinataion()">Toggle orientation</button>
     <ul>
       <li>swipe0/0</li>
       <li>swipe1/msi-94-or-more</li>
@@ -99,6 +100,13 @@
 
       function removeSwiperAll() {
         cgpv.api.getMapViewer('map1').plugins['swiper'].deActivateAll();
+      }
+
+      let orientation = 'vertical';
+      function toggleOrinataion() {
+        const newOrientation = orientation === 'horizontal' ? 'vertical' : 'horizontal';
+        cgpv.api.getMapViewer('map1').plugins['swiper'].setOrientation(newOrientation);
+        orientation = newOrientation;
       }
 
       // create snippets

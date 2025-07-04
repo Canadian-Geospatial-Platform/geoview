@@ -25,7 +25,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
     // Checks for updated layers in layer data array from the details state
     const layerDataArrayUpdate = store.subscribe(
       (state) => state.detailsState.layerDataArray,
-      (cur) => {
+      (cur: TypeGeochartResultSetEntry[]) => {
         // Log
         logger.logTraceCoreStoreSubscription('GEOCHART EVENT PROCESSOR - detailsState.layerDataArray', cur);
 
@@ -37,7 +37,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
     // Checks for updated layers in geochart layer data array and update the batched array consequently
     const layerDataArrayUpdateBatch = store.subscribe(
       (state) => state.geochartState.layerDataArray,
-      (cur) => {
+      (cur: TypeGeochartResultSetEntry[]) => {
         // Log
         logger.logTraceCoreStoreSubscription('GEOCHART EVENT PROCESSOR - geochartState.layerDataArray', cur);
 
