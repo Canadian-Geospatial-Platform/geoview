@@ -9,7 +9,7 @@ import BaseEvent from 'ol/events/Event';
 import debounce from 'lodash/debounce';
 
 import { RefObject } from 'geoview-core';
-import { useSwiperLayerPaths } from 'geoview-core/core/stores/store-interface-and-intial-values/swiper-state';
+import { useSwiperLayerPaths, useSwiperOrientation } from 'geoview-core/core/stores/store-interface-and-intial-values/swiper-state';
 import { logger } from 'geoview-core/core/utils/logger';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
@@ -19,7 +19,6 @@ import { sxClasses } from './swiper-style';
 
 type SwiperProps = {
   viewer: MapViewer;
-  config: ConfigProps;
 };
 
 export type ConfigProps = {
@@ -28,13 +27,12 @@ export type ConfigProps = {
 };
 
 export function Swiper(props: SwiperProps): JSX.Element {
-  const { viewer, config } = props;
+  const { viewer } = props;
 
   const { cgpv } = window;
   const { ui, reactUtilities } = cgpv;
   const { useEffect, useState, useRef, useCallback } = reactUtilities.react;
   const { Box, Tooltip, HandleIcon } = ui.elements;
-  const { orientation } = config;
 
   const mapSize = useRef<number[]>(viewer.map?.getSize() || [0, 0]);
   const swiperValue = useRef(50);
@@ -48,6 +46,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
   const layerPaths = useSwiperLayerPaths();
   const displayLanguage = useAppDisplayLanguage();
   const visibleLayers = useMapVisibleLayers();
+  const orientation = useSwiperOrientation();
 
   /**
    * Pre compose, Pre render event callback
@@ -129,6 +128,14 @@ export function Swiper(props: SwiperProps): JSX.Element {
       if (orientation === 'vertical') setXPosition(position);
       if (orientation === 'vertical') setYPosition(position);
 
+      // if (orientation === 'vertical') {
+      //   setXPosition(position);
+      //   setYPosition(0); // Keep Y at 0 for vertical
+      // } else {
+      //   setXPosition(0); // Keep X at 0 for horizontal
+      //   setYPosition(position);
+      // }
+
       // Force refresh
       olLayers.forEach((layer: BaseLayer) => {
         layer.changed();
@@ -162,6 +169,35 @@ export function Swiper(props: SwiperProps): JSX.Element {
       setTimeout(() => onStop(), 75);
     }
   }, 100);
+
+  const handleOrientationChange = useCallback(
+    (event: CustomEvent): void => {
+      // Log
+      logger.logTraceUseEffect('GEOVIEW-SWIPER - orientation changed via event', event.detail.orientation);
+
+      // Update map size
+      mapSize.current = viewer.map.getSize() || [0, 0];
+
+      // Calculate center position and set state BEFORE calling onStop
+      const centerX = mapSize.current[0] / 2;
+      const centerY = mapSize.current[1] / 2;
+
+      // Reset both positions regardless of orientation
+      setXPosition(orientation === 'vertical' ? centerX : 0);
+      setYPosition(orientation === 'vertical' ? 0 : centerY);
+
+      // Update the swiper value to center
+      swiperValue.current = 50;
+
+      // Force refresh layers after state is set
+      setTimeout(() => {
+        olLayers.forEach((layer: BaseLayer) => {
+          layer.changed();
+        });
+      }, 100);
+    },
+    [orientation, viewer.map, olLayers]
+  );
 
   /**
    * Attaches necessary swiper events to the given layer path layer
@@ -244,6 +280,16 @@ export function Swiper(props: SwiperProps): JSX.Element {
   }, [viewer, layerPaths, attachLayerEventsOnPath, prerender, visibleLayers]);
 
   useEffect(() => {
+    // Listen for the custom event
+    const eventName = `swiper-orientation-changed-${viewer.mapId}`;
+    window.addEventListener(eventName, handleOrientationChange as EventListener);
+
+    return () => {
+      window.removeEventListener(eventName, handleOrientationChange as EventListener);
+    };
+  }, [handleOrientationChange, viewer.mapId]);
+
+  useEffect(() => {
     // Log
     logger.logTraceUseEffect('GEOVIEW-SWIPER - mount', viewer.mapId);
 
@@ -283,6 +329,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
     return (
       <Box sx={sxClasses.layerSwipe}>
         <Draggable
+          key={orientation} // This forces recreation when orientation changes
           axis={orientation === 'vertical' ? 'x' : 'y'}
           bounds="parent"
           defaultPosition={{ x: orientation === 'vertical' ? xPosition : 0, y: orientation === 'vertical' ? 0 : yPosition }}
