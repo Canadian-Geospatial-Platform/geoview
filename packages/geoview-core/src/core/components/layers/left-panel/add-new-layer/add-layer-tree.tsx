@@ -6,7 +6,7 @@ import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
 import _ from 'lodash';
 import { logger } from '@/core/utils/logger';
-import { EntryConfigBaseClass, GroupLayerEntryConfig } from '@/api/config/types/map-schema-types';
+import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { getLayerById } from './add-layer-utils';
 
 export interface AddLayerTreeProps {
@@ -38,9 +38,7 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
     return (
       <TreeItem key={curLayerId} itemId={curLayerId} label={layer.layerName} aria-label={layer.layerName}>
         {layer?.listOfLayerEntryConfig?.length > 0 &&
-          layer.listOfLayerEntryConfig.map((subLayer: EntryConfigBaseClass) =>
-            renderTreeItem(subLayer as GroupLayerEntryConfig, curLayerId)
-          )}
+          layer.listOfLayerEntryConfig.map((subLayer) => renderTreeItem(subLayer as GroupLayerEntryConfig, curLayerId))}
       </TreeItem>
     );
   };
@@ -58,7 +56,7 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
       result.push(viewLayerId);
       const layerDetails = getLayerById(layersData, origLayerId);
 
-      const childLayerIds: string[] | undefined = layerDetails?.listOfLayerEntryConfig?.map((child: EntryConfigBaseClass) => {
+      const childLayerIds: string[] | undefined = layerDetails?.listOfLayerEntryConfig?.map((child) => {
         return child.layerId;
       });
 

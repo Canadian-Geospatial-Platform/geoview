@@ -1,23 +1,11 @@
 import cloneDeep from 'lodash/cloneDeep';
 import defaultsDeep from 'lodash/defaultsDeep';
 
-import { AbstractGeoviewLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-layer-config';
-import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
-import { EsriDynamicLayerConfig } from '@/api/config/types/classes/geoview-config/raster-config/esri-dynamic-config';
-import { EsriFeatureLayerConfig } from '@/api/config/types/classes/geoview-config/vector-config/esri-feature-config';
-import { EsriImageLayerConfig } from '@/api/config/types/classes/geoview-config/raster-config/esri-image-config';
-import { XyzLayerConfig } from '@/api/config/types/classes/geoview-config/raster-config/xyz-tile-config';
-import { WmsLayerConfig } from '@/api/config/types/classes/geoview-config/raster-config/wms-config';
-import { WfsLayerConfig } from '@/api/config/types/classes/geoview-config/vector-config/wfs-config';
-import { GeoJsonLayerConfig } from '@/api/config/types/classes/geoview-config/vector-config/geojson-config';
-import { CsvLayerConfig } from '@/api/config/types/classes/geoview-config/vector-config/csv-config';
-import { VectorTileLayerConfig } from '@/api/config/types/classes/geoview-config/raster-config/vector-tile-config';
-import { OgcFeatureLayerConfig } from '@/api/config/types/classes/geoview-config/vector-config/ogc-feature-config';
+import { Cast, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import {
   CV_BASEMAP_ID,
   CV_BASEMAP_LABEL,
   CV_BASEMAP_SHADED,
-  CV_CONST_LAYER_TYPES,
   CV_DEFAULT_MAP_FEATURE_CONFIG,
   CV_VALID_MAP_CENTER,
   CV_MAP_CONFIG_SCHEMA_PATH,
@@ -42,14 +30,12 @@ import {
   TypeNavBarProps,
   TypeOverviewMapProps,
   TypeServiceUrls,
+  TypeMapFeaturesInstance,
   TypeValidMapProjectionCodes,
   TypeValidVersions,
-  TypeMapFeaturesInstance,
 } from '@/api/config/types/map-schema-types';
-
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { logger } from '@/core/utils/logger';
-import { generateId } from '@/core/utils/utilities';
-import { ConfigApi } from '@/api/config/config-api';
 
 // ========================
 // #region CLASS HEADER
@@ -65,7 +51,7 @@ export class MapFeatureConfig {
   #errorDetectedFlag = false;
 
   /** The registeredLayerPaths property keeps track of all the GeoView layers created and attached to this map */
-  #registeredLayerPaths: Record<string, AbstractGeoviewLayerConfig> = {};
+  #registeredLayerPaths: Record<string, AbstractGeoViewLayer> = {};
 
   // #endregion PRIVATE PROPERTIES
 
@@ -140,22 +126,23 @@ export class MapFeatureConfig {
     if (this.map.viewSettings.initialView?.extent || this.map.viewSettings.initialView?.layerIds)
       delete this.map.viewSettings.initialView.zoomAndCenter;
 
-    this.map.listOfGeoviewLayerConfig = this.map.listOfGeoviewLayerConfig
-      .map((geoviewLayerConfig) => {
-        return MapFeatureConfig.nodeFactory(toJsonObject(geoviewLayerConfig));
-      })
-      // Validate and filter undefined entries (undefined is returned when a GeoView layer cannot be instanciated).
-      .filter((layerConfig) => {
-        if (layerConfig) {
-          if (layerConfig.geoviewLayerId in this.#registeredLayerPaths) {
-            // Add duplicate marker ('geoviewId:uuid') so the ID is unique
-            // eslint-disable-next-line no-param-reassign
-            layerConfig.geoviewLayerId = `${layerConfig.geoviewLayerId}:${generateId(8)}`;
-          }
-          this.#registeredLayerPaths[layerConfig.geoviewLayerId] = layerConfig;
-        }
-        return layerConfig;
-      }) as AbstractGeoviewLayerConfig[];
+    // TODO: Cleanup comments - Remove this commented out code if all good
+    // this.map.listOfGeoviewLayerConfig = this.map.listOfGeoviewLayerConfig
+    //   .map((geoviewLayerConfig) => {
+    //     return MapFeatureConfig.nodeFactory(toJsonObject(geoviewLayerConfig));
+    //   })
+    //   // Validate and filter undefined entries (undefined is returned when a GeoView layer cannot be instanciated).
+    //   .filter((layerConfig) => {
+    //     if (layerConfig) {
+    //       if (layerConfig.geoviewLayerId in this.#registeredLayerPaths) {
+    //         // Add duplicate marker ('geoviewId:uuid') so the ID is unique
+    //         // eslint-disable-next-line no-param-reassign
+    //         layerConfig.geoviewLayerId = `${layerConfig.geoviewLayerId}:${generateId(8)}`;
+    //       }
+    //       this.#registeredLayerPaths[layerConfig.geoviewLayerId] = layerConfig;
+    //     }
+    //     return layerConfig;
+    //   }) as AbstractGeoviewLayerConfig[];
 
     this.serviceUrls = Cast<TypeServiceUrls>(defaultsDeep(userMapFeatureConfig.serviceUrls, CV_DEFAULT_MAP_FEATURE_CONFIG.serviceUrls));
     this.theme = (userMapFeatureConfig.theme || CV_DEFAULT_MAP_FEATURE_CONFIG.theme) as TypeDisplayTheme;
@@ -398,26 +385,26 @@ export class MapFeatureConfig {
    *
    * @returns {AbstractGeoviewLayerConfig | undefined} The GeoView layer object or undefined if it doesn't exist.
    */
-  getGeoviewLayer(geoviewLayerId: string): AbstractGeoviewLayerConfig | undefined {
+  getGeoviewLayer(geoviewLayerId: string): AbstractGeoViewLayer | undefined {
     return this.#registeredLayerPaths?.[geoviewLayerId];
   }
 
-  /**
-   * This method reads the service metadata for all geoview layers in the geoview layer list.
-   */
-  async fetchAllServiceMetadata(): Promise<void> {
-    const promiseLayersProcessed: Promise<void>[] = [];
+  // /**
+  //  * This method reads the service metadata for all geoview layers in the geoview layer list.
+  //  */
+  // async fetchAllServiceMetadata(): Promise<void> {
+  //   const promiseLayersProcessed: Promise<void>[] = [];
 
-    this.map.listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
-      promiseLayersProcessed.push((geoviewLayerConfig as AbstractGeoviewLayerConfig).fetchServiceMetadata()); // TODO: refactor - remove the cast AbstractGeoviewLayerConfig because of MapConfigLayerEntry everywhere
-    });
+  //   this.map.listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
+  //     promiseLayersProcessed.push((geoviewLayerConfig as AbstractGeoViewLayer).fetchServiceMetadata()); // TODO: refactor - remove the cast AbstractGeoviewLayerConfig because of MapConfigLayerEntry everywhere
+  //   });
 
-    const promiseSettledResult = await Promise.allSettled(promiseLayersProcessed);
-    promiseSettledResult.forEach((promise, i) => {
-      if (promise.status === 'rejected') (this.map.listOfGeoviewLayerConfig[i] as AbstractGeoviewLayerConfig).setErrorDetectedFlag();
-    });
-    // TODO: Have a chat with Alex about his comment "We could still set the flag here, for processing reasons, and return the whole Promise.allSettled for convenience."
-  }
+  //   const promiseSettledResult = await Promise.allSettled(promiseLayersProcessed);
+  //   promiseSettledResult.forEach((promise, i) => {
+  //     if (promise.status === 'rejected') (this.map.listOfGeoviewLayerConfig[i] as AbstractGeoviewLayerConfig).setErrorDetectedFlag();
+  //   });
+  //   // TODO: Have a chat with Alex about his comment "We could still set the flag here, for processing reasons, and return the whole Promise.allSettled for convenience."
+  // }
 
   /**
    * This method returns the json string of the map feature's configuration. The output representation is a multi-line indented
@@ -430,65 +417,65 @@ export class MapFeatureConfig {
     return JSON.stringify(this, undefined, indent);
   }
 
-  /**
-   * Apply user configuration over the geoview layer configurations created from the raw metadata.
-   */
-  applyUserConfigToGeoviewLayers(listOfGeoviewLayerConfig?: TypeJsonArray): void {
-    this.map.listOfGeoviewLayerConfig.forEach((geoviewConfig) => {
-      // Use config pass as parameter if defined
-      if (listOfGeoviewLayerConfig?.length) {
-        const geoviewConfigToUse = listOfGeoviewLayerConfig.find(
-          (geoviewLayerConfig) => geoviewLayerConfig.geoviewLayerId === geoviewConfig.geoviewLayerId
-        );
-        // If a GeoView layer config has been found, use it. Otherwise, do nothing
-        if (geoviewConfigToUse) (geoviewConfig as AbstractGeoviewLayerConfig).applyUserConfig(geoviewConfigToUse);
-      } else {
-        // Use config provided at instanciation time.
-        (geoviewConfig as AbstractGeoviewLayerConfig).applyUserConfig();
-      }
-    });
-  }
+  // /**
+  //  * Apply user configuration over the geoview layer configurations created from the raw metadata.
+  //  */
+  // applyUserConfigToGeoviewLayers(listOfGeoviewLayerConfig?: TypeJsonArray): void {
+  //   this.map.listOfGeoviewLayerConfig.forEach((geoviewConfig) => {
+  //     // Use config pass as parameter if defined
+  //     if (listOfGeoviewLayerConfig?.length) {
+  //       const geoviewConfigToUse = listOfGeoviewLayerConfig.find(
+  //         (geoviewLayerConfig) => geoviewLayerConfig.geoviewLayerId === geoviewConfig.geoviewLayerId
+  //       );
+  //       // If a GeoView layer config has been found, use it. Otherwise, do nothing
+  //       if (geoviewConfigToUse) (geoviewConfig).applyUserConfig(geoviewConfigToUse);
+  //     } else {
+  //       // Use config provided at instanciation time.
+  //       geoviewConfig.applyUserConfig();
+  //     }
+  //   });
+  // }
 
-  /**
-   * The method used to implement the class factory model that returns the instance of the class based on the GeoView layer type
-   * needed.
-   *
-   * @param {TypeJsonObject} layerConfig The layer configuration we want to instanciate.
-   *
-   * @returns {AbstractGeoviewLayerConfig | undefined} The GeoView layer instance or undefined if there is an error.
-   * @static
-   */
-  static nodeFactory(layerConfig: TypeJsonObject): AbstractGeoviewLayerConfig | undefined {
-    switch (layerConfig.geoviewLayerType) {
-      case CV_CONST_LAYER_TYPES.ESRI_DYNAMIC:
-        return new EsriDynamicLayerConfig(layerConfig);
-      case CV_CONST_LAYER_TYPES.ESRI_FEATURE:
-        return new EsriFeatureLayerConfig(layerConfig);
-      case CV_CONST_LAYER_TYPES.ESRI_IMAGE:
-        return new EsriImageLayerConfig(layerConfig);
-      case CV_CONST_LAYER_TYPES.WMS:
-        return new WmsLayerConfig(layerConfig);
-      case CV_CONST_LAYER_TYPES.WFS:
-        return new WfsLayerConfig(layerConfig);
-      case CV_CONST_LAYER_TYPES.GEOJSON:
-        return new GeoJsonLayerConfig(layerConfig);
-      case CV_CONST_LAYER_TYPES.CSV:
-        return new CsvLayerConfig(layerConfig);
-      case CV_CONST_LAYER_TYPES.XYZ_TILES:
-        return new XyzLayerConfig(layerConfig);
-      case CV_CONST_LAYER_TYPES.VECTOR_TILES:
-        return new VectorTileLayerConfig(layerConfig);
-      case CV_CONST_LAYER_TYPES.OGC_FEATURE:
-        return new OgcFeatureLayerConfig(layerConfig);
-      // case CV_CONST_LAYER_TYPES.GEOPACKAGE:
-      //   return new GeopackageLayerConfig(layerConfig);
-      default:
-        // TODO: Restore the commented line and remove the next line when we have converted our code to the new framework.
-        // logger.logError(`Invalid GeoView layerType (${layerConfig.geoviewLayerType}).`);
-        if (ConfigApi.devMode) logger.logError(`Invalid GeoView layerType (${layerConfig.geoviewLayerType}).`);
-    }
-    return undefined;
-  }
+  // /**
+  //  * The method used to implement the class factory model that returns the instance of the class based on the GeoView layer type
+  //  * needed.
+  //  *
+  //  * @param {TypeJsonObject} layerConfig The layer configuration we want to instanciate.
+  //  *
+  //  * @returns {AbstractGeoviewLayerConfig | undefined} The GeoView layer instance or undefined if there is an error.
+  //  * @static
+  //  */
+  // static nodeFactory(layerConfig: TypeJsonObject): AbstractGeoViewLayer | undefined {
+  //   switch (layerConfig.geoviewLayerType) {
+  //     case CV_CONST_LAYER_TYPES.ESRI_DYNAMIC:
+  //       return new EsriDynamic(layerConfig as unknown as TypeEsriDynamicLayerConfig);
+  //     case CV_CONST_LAYER_TYPES.ESRI_FEATURE:
+  //       return new EsriFeature(layerConfig as unknown as TypeEsriFeatureLayerConfig);
+  //     case CV_CONST_LAYER_TYPES.ESRI_IMAGE:
+  //       return new EsriImage(layerConfig as unknown as TypeEsriImageLayerConfig);
+  //     case CV_CONST_LAYER_TYPES.WMS:
+  //       return new WMS(layerConfig as unknown as TypeWMSLayerConfig, false);
+  //     case CV_CONST_LAYER_TYPES.WFS:
+  //       return new WFS(layerConfig as unknown as TypeWFSLayerConfig);
+  //     case CV_CONST_LAYER_TYPES.GEOJSON:
+  //       return new GeoJSON(layerConfig as unknown as TypeWFSLayerConfig);
+  //     case CV_CONST_LAYER_TYPES.CSV:
+  //       return new CSV(layerConfig);
+  //     case CV_CONST_LAYER_TYPES.XYZ_TILES:
+  //       return new XYZTiles(layerConfig);
+  //     case CV_CONST_LAYER_TYPES.VECTOR_TILES:
+  //       return new VectorTiles(layerConfig);
+  //     case CV_CONST_LAYER_TYPES.OGC_FEATURE:
+  //       return new OgcFeature(layerConfig);
+  //     // case CV_CONST_LAYER_TYPES.GEOPACKAGE:
+  //     //   return new GeopackageLayerConfig(layerConfig);
+  //     default:
+  //       // TODO: Restore the commented line and remove the next line when we have converted our code to the new framework.
+  //       // logger.logError(`Invalid GeoView layerType (${layerConfig.geoviewLayerType}).`);
+  //       if (ConfigApi.devMode) logger.logError(`Invalid GeoView layerType (${layerConfig.geoviewLayerType}).`);
+  //   }
+  //   return undefined;
+  // }
   // #endregion PUBLIC
   // #endregion METHODS
   // #endregion CLASS HEADER
