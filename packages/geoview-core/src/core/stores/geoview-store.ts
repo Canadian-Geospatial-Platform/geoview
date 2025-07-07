@@ -62,7 +62,7 @@ export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore): IG
       // TO.DOCONT: Configurations should be as losely coupled as possible.
       for (let i = 0; i < (clonedConfig.map?.listOfGeoviewLayerConfig?.length || 0); i++) {
         // Serialize the GeoviewLayerConfig
-        const serialized = serializeTypeGeoviewLayerConfig(clonedConfig.map.listOfGeoviewLayerConfig[i] as MapConfigLayerEntry); // TODO: refactor - remove cast
+        const serialized = serializeTypeGeoviewLayerConfig(clonedConfig.map.listOfGeoviewLayerConfig[i]); // TODO: refactor - remove cast
 
         // Reassign
         clonedConfig.map.listOfGeoviewLayerConfig[i] = serialized as never;

@@ -1579,7 +1579,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       // eslint-disable-next-line no-param-reassign
       else if (removeUnlisted) geoviewLayerConfig.geoviewLayerName = '';
       if (geoviewLayerConfig.listOfLayerEntryConfig?.length)
-        this.#replaceLayerEntryConfigNames(pairsDict, geoviewLayerConfig.listOfLayerEntryConfig as TypeLayerEntryConfig[], removeUnlisted);
+        this.#replaceLayerEntryConfigNames(pairsDict, geoviewLayerConfig.listOfLayerEntryConfig, removeUnlisted);
     });
 
     return mapConfig;

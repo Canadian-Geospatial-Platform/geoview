@@ -28,7 +28,13 @@ import {
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { SnackbarType } from '@/core/utils/notifications';
-import { CancelledError, ResponseEmptyError, PromiseRejectErrorWrapper, formatError } from '@/core/exceptions/core-exceptions';
+import {
+  CancelledError,
+  ResponseEmptyError,
+  PromiseRejectErrorWrapper,
+  formatError,
+  NotImplementedError,
+} from '@/core/exceptions/core-exceptions';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
@@ -191,6 +197,17 @@ export abstract class AbstractGeoViewLayer {
     return this.geoviewLayerId;
   }
 
+  async findLayerEntries(): Promise<TypeLayerEntryConfig[]> {
+    // Log
+    logger.logTraceCore('ABSTRACT-GEOVIEW-LAYERS - findLayerEntries');
+
+    // Fetch and set the service metadata
+    await this.onFetchAndSetServiceMetadata();
+
+    // TODO: Empty
+    throw new NotImplementedError('No metadata to fetch');
+  }
+
   /**
    * This method is used to create the layers specified in the listOfLayerEntryConfig attribute inherited from its parent.
    * Normally, it is the second method called in the life cycle of a GeoView layer, the first one being the constructor.
@@ -209,7 +226,7 @@ export abstract class AbstractGeoViewLayer {
    * to return the descriptive information of all the features in a tolerance radius. This information will be used to populate
    * the details-panel.
    */
-  async createGeoViewLayers(): Promise<void> {
+  async createGeoViewLayers(): Promise<ConfigBaseClass[]> {
     // Log
     logger.logTraceCore('ABSTRACT-GEOVIEW-LAYERS - createGeoViewLayers', this.listOfLayerEntryConfig);
 
@@ -226,6 +243,7 @@ export abstract class AbstractGeoViewLayer {
     logger.logMarkerCheck(logTimingsKey, 'to fetch the service metadata');
 
     // If layers, validate the metadata
+    const configBaseClassCreated: ConfigBaseClass[] = [];
     if (this.listOfLayerEntryConfig.length) {
       // Recursively process the configuration tree of layer entries by removing layers in error and processing valid layers.
       this.validateListOfLayerEntryConfig(this.listOfLayerEntryConfig);
@@ -235,7 +253,13 @@ export abstract class AbstractGeoViewLayer {
       // Use a combination of those flags to determine what to do moving forward (for now).
 
       // Process the layer metadata for each layer entry
-      await this.#processListOfLayerMetadata(this.listOfLayerEntryConfig);
+      await this.#processListOfLayerMetadata(this.listOfLayerEntryConfig, (sender, event) => {
+        // If no errors
+        if (event.errors.length === 0) {
+          // Keep the config
+          configBaseClassCreated.push(event.config);
+        }
+      });
 
       // Log the time it took thus far
       logger.logMarkerCheck(logTimingsKey, `to process the (${this.listOfLayerEntryConfig.length}) layer metadata(s)`);
@@ -249,6 +273,9 @@ export abstract class AbstractGeoViewLayer {
 
     // Log the time it took thus far
     logger.logMarkerCheck(logTimingsKey, 'to create the layers');
+
+    // Return them
+    return configBaseClassCreated;
   }
 
   /**
@@ -397,7 +424,10 @@ export abstract class AbstractGeoViewLayer {
    * @returns {Promise<void>} A promise that the execution is completed.
    * @private
    */
-  async #processListOfLayerMetadata(listOfLayerEntryConfig: ConfigBaseClass[]): Promise<void> {
+  async #processListOfLayerMetadata(
+    listOfLayerEntryConfig: ConfigBaseClass[],
+    callbackLayerConfigCreated: LayerConfigCreatedDelegate
+  ): Promise<void> {
     // Log
     logger.logTraceCore(
       `LAYERS - 4 - Processing list of layer entry metadata, building promises, for: ${this.geoviewLayerId}}`,
@@ -453,8 +483,11 @@ export abstract class AbstractGeoViewLayer {
         this.addLayerLoadError(reason.error, reason.object);
       }
 
+      // Callback
+      callbackLayerConfigCreated?.(this, { config: layerConfig, errors: this.layerLoadError });
+
       // Emit that the layer config has been created
-      this.emitLayerConfigCreated({ config: layerConfig, errors: this.layerLoadError });
+      this.#emitLayerConfigCreated({ config: layerConfig, errors: this.layerLoadError });
     });
   }
 
@@ -651,7 +684,7 @@ export abstract class AbstractGeoViewLayer {
     const layer = this.onCreateGVLayer(layerConfig);
 
     // GV Time to emit about the GV Layer
-    this.emitLayerGVCreated({ layer });
+    this.#emitLayerGVCreated({ layer });
 
     // Return it
     return layer;
@@ -685,7 +718,7 @@ export abstract class AbstractGeoViewLayer {
     const gvGroupLayer = new GVGroupLayer(layerGroup, layerConfig);
 
     // Emit about it
-    this.emitLayerGroupCreated({ layer: gvGroupLayer });
+    this.#emitLayerGroupCreated({ layer: gvGroupLayer });
 
     // Return it
     return gvGroupLayer;
@@ -891,7 +924,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {LayerConfigCreatedEvent} event The event to emit
    * @private
    */
-  protected emitLayerConfigCreated(event: LayerConfigCreatedEvent): void {
+  #emitLayerConfigCreated(event: LayerConfigCreatedEvent): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onLayerConfigCreatedHandlers, event);
   }
@@ -919,7 +952,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {LayerGVCreatedEvent} event The event to emit
    * @private
    */
-  protected emitLayerGVCreated(event: LayerGVCreatedEvent): void {
+  #emitLayerGVCreated(event: LayerGVCreatedEvent): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onLayerGVCreatedHandlers, event);
   }
@@ -947,7 +980,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {LayerGroupCreatedEvent} event The event to emit
    * @private
    */
-  protected emitLayerGroupCreated(event: LayerGroupCreatedEvent): void {
+  #emitLayerGroupCreated(event: LayerGroupCreatedEvent): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onLayerGroupCreatedHandlers, event);
   }
