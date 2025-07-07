@@ -6,47 +6,22 @@ import {
   CV_CONFIG_SHAPEFILE_TYPE,
   CV_CONST_LAYER_TYPES,
 } from '@/api/config/types/config-constants';
-import { TypeJsonValue, TypeJsonObject, toJsonObject, TypeJsonArray, Cast } from '@/api/config/types/config-types';
+import { TypeJsonValue, TypeJsonObject, toJsonObject, TypeJsonArray } from '@/api/config/types/config-types';
 import { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config';
 import {
-  AbstractGeoviewLayerConfig,
-  EntryConfigBaseClass,
   MapConfigLayerEntry,
   TypeBasemapOptions,
   TypeDisplayLanguage,
-  TypeGeoviewLayerType,
-  TypeInitialGeoviewLayerType,
   TypeInteraction,
-  TypeLayerStyleConfig,
   TypeMapFeaturesInstance,
   TypeValidMapProjectionCodes,
   TypeZoomAndCenter,
 } from '@/api/config/types/map-schema-types';
 import { MapConfigError } from '@/api/config/types/classes/config-exceptions';
 
-import { generateId, isJsonString, removeCommentsFromJSON } from '@/core/utils/utilities';
-import { Fetch } from '@/core/utils/fetch-helper';
+import { isJsonString, removeCommentsFromJSON } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
-import { createStyleUsingEsriRenderer, EsriBaseRenderer } from '@/api/config/esri-renderer-parser';
-import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
-import { OgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
-import {
-  AbstractGeoViewLayer,
-  LayerConfigCreatedEvent,
-  LayerGroupCreatedEvent,
-  LayerGVCreatedEvent,
-} from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
-import { GeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
-import { CSV } from '@/geo/layer/geoview-layers/vector/csv';
-import { WFS } from '@/geo/layer/geoview-layers/vector/wfs';
-import { XYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
-import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
-import { VectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
-import { ImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
-import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
-import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
-import { formatError } from '@/core/exceptions/core-exceptions';
+
 import { ShapefileReader } from '@/core/utils/config/reader/shapefile-reader';
 import { UUIDmapConfigReader } from '@/core/utils/config/reader/uuid-config-reader';
 
@@ -56,10 +31,8 @@ import { UUIDmapConfigReader } from '@/core/utils/config/reader/uuid-config-read
  * @class DefaultConfig
  */
 export class ConfigApi {
-  // GV: The two following properties was created only for debugging purpose. They allow developers to inspect the
+  // GV: The following property was created only for debugging purpose. They allow developers to inspect the
   // GV: content or call the methods of the last instance created by the corresponding ConfigApi call.
-  /** Static property that contains the last object instanciated by the ConfigApi.getLayerConfig call */
-  static lastLayerConfigCreated?: AbstractGeoviewLayerConfig;
 
   /** Static property that contains the last object instanciated by the ConfigApi.createMapConfig call */
   static lastMapConfigCreated?: MapFeatureConfig;
@@ -192,7 +165,7 @@ export class ConfigApi {
    * @returns {TypeJsonObject} A JSON map feature configuration object.
    * @private
    */
-  static #convertStringToJson(stringMapFeatureConfig: string): TypeJsonObject | undefined {
+  static convertStringToJson(stringMapFeatureConfig: string): TypeJsonObject | undefined {
     // Erase comments in the config file.
     let newStringMapFeatureConfig = removeCommentsFromJSON(stringMapFeatureConfig);
 
@@ -251,7 +224,7 @@ export class ConfigApi {
           projection: parseInt(urlParams.p as string, 10) as TypeValidMapProjectionCodes,
         },
         basemapOptions: ConfigApi.#parseObjectFromUrl(urlParams.b as string) as unknown as TypeBasemapOptions,
-        listOfGeoviewLayerConfig: [] as AbstractGeoviewLayerConfig[] | MapConfigLayerEntry[],
+        listOfGeoviewLayerConfig: [] as MapConfigLayerEntry[],
       };
 
       // get layer information from catalog using their uuid's if any passed from url params
@@ -454,12 +427,12 @@ export class ConfigApi {
    * @returns {MapFeatureConfig} The validated map feature configuration.
    * @static
    */
-  static validateMapConfig(mapConfig: string | TypeJsonObject): MapFeatureConfig {
+  static validateMapConfig(mapConfig: string | MapFeatureConfig | TypeJsonObject): MapFeatureConfig {
     // If the user provided a string config, translate it to a json object because the MapFeatureConfig constructor
     // doesn't accept string config. Note that convertStringToJson returns undefined if the string config cannot
     // be translated to a json object.
-    const providedMapFeatureConfig: TypeJsonObject | undefined =
-      typeof mapConfig === 'string' ? ConfigApi.#convertStringToJson(mapConfig as string) : (mapConfig as TypeJsonObject);
+    const providedMapFeatureConfig: TypeJsonObject =
+      typeof mapConfig === 'string' ? ConfigApi.convertStringToJson(mapConfig as string)! : (mapConfig as TypeJsonObject);
 
     try {
       // If the user provided a valid string config with the mandatory map property, process geocore layers to translate them to their GeoView layers
@@ -482,533 +455,75 @@ export class ConfigApi {
     return ConfigApi.lastMapConfigCreated;
   }
 
-  /**
-   * Create the map feature configuration instance using the json string or the json object provided by the user.
-   * All GeoCore entries found in the config are translated to their corresponding Geoview configuration.
-   *
-   * @param {string | TypeJsonObject} mapConfig The map feature configuration to instanciate.
-   * @param {TypeDisplayLanguage} language The language of the map feature config we want to produce.
-   *
-   * @returns {Promise<MapFeatureConfig>} The map feature configuration Promise.
-   * @static
-   */
-  // GV: GeoCore layers are processed here, well before the schema validation. The aim is to get rid of these layers in
-  // GV: favor of their GeoView equivalent as soon as possible. Processing is based on the JSON representation of the config,
-  // GV: and requires a minimum of validation to ensure that the configuration of GeoCore layers is valid.
-  static async createMapConfig(mapConfig: string | TypeJsonObject, language: TypeDisplayLanguage): Promise<MapFeatureConfig> {
-    // If the user provided a string config, translate it to a json object because the MapFeatureConfig constructor
-    // doesn't accept string config. Note that convertStringToJson returns undefined if the string config cannot
-    // be translated to a json object.
-    const providedMapFeatureConfig: TypeJsonObject | undefined =
-      // We clone to prevent modifications from leaking back to the user object.
-      typeof mapConfig === 'string' ? ConfigApi.#convertStringToJson(mapConfig as string) : (cloneDeep(mapConfig) as TypeJsonObject);
+  // /**
+  //  * Create the map feature configuration instance using the json string or the json object provided by the user.
+  //  * All GeoCore entries found in the config are translated to their corresponding Geoview configuration.
+  //  *
+  //  * @param {string | TypeJsonObject} mapConfig The map feature configuration to instanciate.
+  //  * @param {TypeDisplayLanguage} language The language of the map feature config we want to produce.
+  //  *
+  //  * @returns {Promise<MapFeatureConfig>} The map feature configuration Promise.
+  //  * @static
+  //  */
+  // // GV: GeoCore layers are processed here, well before the schema validation. The aim is to get rid of these layers in
+  // // GV: favor of their GeoView equivalent as soon as possible. Processing is based on the JSON representation of the config,
+  // // GV: and requires a minimum of validation to ensure that the configuration of GeoCore layers is valid.
+  // static async createMapConfig(mapConfig: string | TypeJsonObject, language: TypeDisplayLanguage): Promise<MapFeatureConfig> {
+  //   // If the user provided a string config, translate it to a json object because the MapFeatureConfig constructor
+  //   // doesn't accept string config. Note that convertStringToJson returns undefined if the string config cannot
+  //   // be translated to a json object.
+  //   const providedMapFeatureConfig: TypeJsonObject | undefined =
+  //     // We clone to prevent modifications from leaking back to the user object.
+  //     typeof mapConfig === 'string' ? ConfigApi.convertStringToJson(mapConfig as string) : (cloneDeep(mapConfig) as TypeJsonObject);
 
-    try {
-      // If the user provided a valid string config with the mandatory map property, process geocore layers to translate them to their GeoView layers
-      if (!providedMapFeatureConfig) throw new MapConfigError('The string configuration provided cannot be translated to a json object');
-      if (!providedMapFeatureConfig.map) throw new MapConfigError('The map property is mandatory');
-      providedMapFeatureConfig.map.listOfGeoviewLayerConfig = (providedMapFeatureConfig.map.listOfGeoviewLayerConfig ||
-        []) as TypeJsonObject;
+  //   try {
+  //     // If the user provided a valid string config with the mandatory map property, process geocore layers to translate them to their GeoView layers
+  //     if (!providedMapFeatureConfig) throw new MapConfigError('The string configuration provided cannot be translated to a json object');
+  //     if (!providedMapFeatureConfig.map) throw new MapConfigError('The map property is mandatory');
+  //     providedMapFeatureConfig.map.listOfGeoviewLayerConfig = (providedMapFeatureConfig.map.listOfGeoviewLayerConfig ||
+  //       []) as TypeJsonObject;
 
-      const inputLength = providedMapFeatureConfig.map.listOfGeoviewLayerConfig.length;
-      providedMapFeatureConfig.map.listOfGeoviewLayerConfig = (await ConfigApi.convertGeocoreToGeoview(
-        language,
-        providedMapFeatureConfig.map.listOfGeoviewLayerConfig as TypeJsonArray,
-        providedMapFeatureConfig?.serviceUrls?.geocoreUrl as string
-      )) as TypeJsonObject;
-      // TODO: Reinstate this once TODO's in app.tsx 102 and 115 are removed
-      // providedMapFeatureConfig.map.listOfGeoviewLayerConfig = (await ConfigApi.convertShapefileToGeojson(
-      //   providedMapFeatureConfig.map.listOfGeoviewLayerConfig
-      // )) as TypeJsonObject;
+  //     const inputLength = providedMapFeatureConfig.map.listOfGeoviewLayerConfig.length;
+  //     providedMapFeatureConfig.map.listOfGeoviewLayerConfig = (await ConfigApi.convertGeocoreToGeoview(
+  //       language,
+  //       providedMapFeatureConfig.map.listOfGeoviewLayerConfig as TypeJsonArray,
+  //       providedMapFeatureConfig?.serviceUrls?.geocoreUrl as string
+  //     )) as TypeJsonObject;
+  //     // TODO: Reinstate this once TODO's in app.tsx 102 and 115 are removed
+  //     // providedMapFeatureConfig.map.listOfGeoviewLayerConfig = (await ConfigApi.convertShapefileToGeojson(
+  //     //   providedMapFeatureConfig.map.listOfGeoviewLayerConfig
+  //     // )) as TypeJsonObject;
 
-      const errorDetected = inputLength !== providedMapFeatureConfig.map.listOfGeoviewLayerConfig.length;
+  //     const errorDetected = inputLength !== providedMapFeatureConfig.map.listOfGeoviewLayerConfig.length;
 
-      // Instanciate the mapFeatureConfig. If an error is detected, a workaround procedure
-      // will be executed to try to correct the problem in the best possible way.
-      ConfigApi.lastMapConfigCreated = new MapFeatureConfig(providedMapFeatureConfig);
-      if (errorDetected) ConfigApi.lastMapConfigCreated.setErrorDetectedFlag();
-    } catch (error: unknown) {
-      // If we get here, it is because the user provided a string config that cannot be translated to a json object,
-      // or the config doesn't have the mandatory map property or the listOfGeoviewLayerConfig is defined but is not
-      // an array.
-      if (error instanceof MapConfigError) logger.logError(error.message);
-      else logger.logError('ConfigApi.createMapConfig - An error occured', error);
-      const defaultMapConfig = ConfigApi.getDefaultMapFeatureConfig();
-      defaultMapConfig.setErrorDetectedFlag();
-      ConfigApi.lastMapConfigCreated = defaultMapConfig;
-    }
+  //     // Instanciate the mapFeatureConfig. If an error is detected, a workaround procedure
+  //     // will be executed to try to correct the problem in the best possible way.
+  //     ConfigApi.lastMapConfigCreated = new MapFeatureConfig(providedMapFeatureConfig);
+  //     if (errorDetected) ConfigApi.lastMapConfigCreated.setErrorDetectedFlag();
+  //   } catch (error: unknown) {
+  //     // If we get here, it is because the user provided a string config that cannot be translated to a json object,
+  //     // or the config doesn't have the mandatory map property or the listOfGeoviewLayerConfig is defined but is not
+  //     // an array.
+  //     if (error instanceof MapConfigError) logger.logError(error.message);
+  //     else logger.logError('ConfigApi.createMapConfig - An error occured', error);
+  //     const defaultMapConfig = ConfigApi.getDefaultMapFeatureConfig();
+  //     defaultMapConfig.setErrorDetectedFlag();
+  //     ConfigApi.lastMapConfigCreated = defaultMapConfig;
+  //   }
 
-    return ConfigApi.lastMapConfigCreated;
-  }
+  //   return ConfigApi.lastMapConfigCreated;
+  // }
 
-  /**
-   * Create the layer configuration instance using the layer access string and layer type provided by the user.
-   *
-   * @param {string} serviceAccessString The service access string (a URL or a layer identifier).
-   * @param {TypeGeoviewLayerType | CV_CONFIG_GEOCORE_TYPE} layerType The GeoView layer type or 'geoCore'.
-   * @param {TypeJsonArray} listOfLayerId Optionnal list of layer ids (default []).
-   * @param {TypeDisplayLanguage} language Optional display language (default: en).
-   *
-   * @returns {AbstractGeoviewLayerConfig | undefined} The layer configuration or undefined if there is an error.
-   * @static
-   */
-  // GV: GeoCore layers are processed here, well before the schema validation. The aim is to get rid of these layers in
-  // GV: favor of their GeoView equivalent as soon as possible.
-  static async createLayerConfig(
-    serviceAccessString: string,
-    layerType: TypeInitialGeoviewLayerType,
-    listOfLayerId: TypeJsonArray = [],
-    language: TypeDisplayLanguage = 'en'
-  ): Promise<AbstractGeoviewLayerConfig | undefined> {
-    let geoviewLayerConfig: TypeJsonObject | undefined;
-
-    // If the layerType is a GeoCore, we translate it to its GeoView configuration.
-    if (layerType === CV_CONFIG_GEOCORE_TYPE) {
-      try {
-        const layerConfig = { geoviewLayerId: serviceAccessString, geoviewLayerType: layerType };
-        geoviewLayerConfig = (await ConfigApi.convertGeocoreToGeoview(language, toJsonObject(layerConfig))) as TypeJsonObject;
-        // if the conversion returned an undefined GeoView configuration or throw an error,
-        // we return undefined to signal that we cannot create the GeoView layer.
-        if (!geoviewLayerConfig) return undefined;
-      } catch (error: unknown) {
-        // Log error
-        logger.logError(`Unable to convert GeoCore layer (Id=${serviceAccessString}).`, error);
-        return undefined;
-      }
-    } else if (layerType === CV_CONFIG_SHAPEFILE_TYPE) {
-      try {
-        const layerConfig = {
-          geoviewLayerId: generateId(18),
-          geoviewLayerType: 'shapefile',
-          metadataAccessPath: serviceAccessString,
-        } as unknown as TypeJsonObject;
-        [geoviewLayerConfig] = await ShapefileReader.getGVConfigsFromShapefiles([layerConfig]);
-        if (!geoviewLayerConfig) return undefined;
-      } catch (error: unknown) {
-        // Log error
-        logger.logError(`Unable to convert Shapefile layer (Id=${serviceAccessString}).`, error);
-        return undefined;
-      }
-    } else {
-      // Create a GeoView Json configuration object.
-      geoviewLayerConfig = toJsonObject({
-        geoviewLayerId: generateId(18),
-        geoviewLayerName: language === 'en' ? 'unknown' : 'inconnue',
-        geoviewLayerType: layerType,
-        metadataAccessPath: serviceAccessString,
-        listOfLayerEntryConfig: listOfLayerId.map((layerId) => {
-          return { layerId };
-        }),
-      });
-    }
-
-    // Create the GeoView layer configuration instance and validate it against the schema.
-    ConfigApi.lastLayerConfigCreated = MapFeatureConfig.nodeFactory(geoviewLayerConfig);
-    return ConfigApi.lastLayerConfigCreated;
-  }
-
-  /**
-   * Create the layer tree from the service metadata. If an error is detected, throw an error.
-   * When listOfLayerId is [], then the entire metadata layer tree is returned.
-   *
-   * @param {string} serviceAccessString The service access string (a URL or a layer identifier).
-   * @param {TypeGeoviewLayerType | CV_CONFIG_GEOCORE_TYPE} layerType The GeoView layer type or 'geoCore'.
-   * @param {TypeJsonArray} listOfLayerId Optionnal list of layer ids (default []).
-   * @param {TypeDisplayLanguage} language Optional display language (default: en).
-   *
-   * @returns {EntryConfigBaseClass[]} The metadata layer tree.
-   * @static
-   */
-  static async createMetadataLayerTree(
-    serviceAccessString: string,
-    layerType: TypeGeoviewLayerType,
-    listOfLayerId: TypeJsonArray = [],
-    language: TypeDisplayLanguage = 'en'
-  ): Promise<EntryConfigBaseClass[]> {
-    // GV: TEMPORARY SECTION TO BE DELETED WHEN ALL LAYER TYPES ARE IMPLEMENTED
-    // GV: THE CODE IN THIS SECTION IS NOT PERMANANT BECAUSE THE CORRESPONDING
-    // GV: GEOVIEW LAYER CLASSES HAVE NOT YET BEEN IMPLEMENTED.
-    // GV: BEGINNING OF TEMPORARY SECTION
-    let jsonData: TypeJsonObject;
-    switch (layerType) {
-      case 'ogcFeature':
-        jsonData = await Fetch.fetchJsonAsObject(`${serviceAccessString}?f=json`);
-        if (jsonData.collections)
-          return (jsonData.collections as TypeJsonArray).map((layer) => {
-            return Cast<EntryConfigBaseClass>({
-              layerId: layer.id,
-              layerName: layer.title,
-            });
-          });
-        if (jsonData.id)
-          return [
-            Cast<EntryConfigBaseClass>({
-              layerId: jsonData.id,
-              layerName: jsonData.title,
-            }),
-          ];
-        return [];
-        break;
-      case 'CSV':
-      case 'xyzTiles':
-      case 'imageStatic':
-      case 'vectorTiles':
-      case 'GeoPackage':
-        return [];
-        break;
-      default:
-        break;
-    }
-
-    // GV: END OF TEMPORARY SECTION
-
-    const geoviewLayerConfig = await ConfigApi.createLayerConfig(serviceAccessString, layerType, [], language);
-
-    if (geoviewLayerConfig && !geoviewLayerConfig.getErrorDetectedFlag()) {
-      // set layer tree creation filter (only the layerIds specified will be retained).
-      // If an empty Array [] is used, the layer tree will be built using the service metadata.
-      geoviewLayerConfig.setMetadataLayerTree(
-        Cast<EntryConfigBaseClass[]>(
-          listOfLayerId.map((layerId) => {
-            return { layerId };
-          })
-        )
-      );
-
-      await geoviewLayerConfig.fetchServiceMetadata();
-      if (!geoviewLayerConfig.getErrorDetectedFlag()) return geoviewLayerConfig.getMetadataLayerTree()!;
-    }
-    throw new MapConfigError('Unable to build metadata layer tree.');
-  }
-
-  /**
-   * Returns the ESRI Renderer as a Style Config
-   * @param {string} input The input renderer to be converted to a GeoView Style
-   * @returns {TypeLayerStyleConfig} The converted style
-   */
-  static getStyleFromESRIRenderer(input: string): TypeLayerStyleConfig | undefined {
-    const renderer = this.#convertStringToJson(input);
-    if (renderer) {
-      return createStyleUsingEsriRenderer(renderer as unknown as EsriBaseRenderer);
-    }
-    return undefined;
-  }
-
-  // #region Experimental
-
-  /**
-   * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
-   * @returns A Promise with the layer configuration
-   * @experimental
-   */
-  // TODO: REFACTOR CONFIG API
-  static createEsriDynamicConfig(): Promise<ConfigBaseClass[]> {
-    // Create the Layer config
-    const layerConfig = EsriDynamic.createEsriDynamicLayerConfig(
-      'gvLayerID',
-      'Some Name',
-      'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer',
-      false,
-      [{ index: '4' }] as unknown as TypeJsonArray,
-      {}
-    );
-
-    // Create the class from geoview-layers package
-    const myLayer = new EsriDynamic(layerConfig);
-
-    // Process it
-    return ConfigApi.#processConfig(myLayer);
-  }
-
-  /**
-   * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
-   * @returns A Promise with the layer configuration
-   * @experimental
-   */
-  // TODO: REFACTOR CONFIG API
-  static createEsriImageConfig(): Promise<ConfigBaseClass[]> {
-    // Create the Layer config
-    const layerConfig = EsriImage.createEsriImageLayerConfig(
-      'gvLayerID',
-      'Some Name',
-      'https://www5.agr.gc.ca/atlas/rest/services/app_agclimate_agclimat/agclimate_tx/ImageServer',
-      false
-    );
-
-    // Create the class from geoview-layers package
-    const myLayer = new EsriImage(layerConfig);
-
-    // Process it
-    return ConfigApi.#processConfig(myLayer);
-  }
-
-  /**
-   * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
-   * @returns A Promise with the layer configuration
-   * @experimental
-   */
-  // TODO: REFACTOR CONFIG API
-  static createImageStaticConfig(): Promise<ConfigBaseClass[]> {
-    // Create the Layer config
-    const layerConfig = ImageStatic.createImageStaticLayerConfig(
-      'gvLayerID',
-      'Some Name',
-      'https://datacube-prod-data-public.s3.ca-central-1.amazonaws.com/store/imagery/aerial/napl/napl-ring-of-fire',
-      false,
-      [{ id: 'napl-ring-of-fire-1954-08-07-60k-thumbnail.png' }] as unknown as TypeJsonArray
-    );
-
-    // Create the class from geoview-layers package
-    const myLayer = new ImageStatic(layerConfig);
-
-    // Process it
-    return ConfigApi.#processConfig(myLayer);
-  }
-
-  /**
-   * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
-   * @returns A Promise with the layer configuration
-   * @experimental
-   */
-  // TODO: REFACTOR CONFIG API
-  static createVectorTilesConfig(): Promise<ConfigBaseClass[]> {
-    // Create the Layer config
-    const layerConfig = VectorTiles.createVectorTilesLayerConfig(
-      'gvLayerID',
-      'Some Name',
-      'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3978_V_OSM/VectorTileServer',
-      false,
-      [{ id: 'CBMT_CBCT_3978_V_OSM' }] as unknown as TypeJsonArray
-    );
-
-    // Create the class from geoview-layers package
-    const myLayer = new VectorTiles(layerConfig, 'EPSG:3978');
-
-    // Process it
-    return ConfigApi.#processConfig(myLayer);
-  }
-
-  /**
-   * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
-   * @returns A Promise with the layer configuration
-   * @experimental
-   */
-  // TODO: REFACTOR CONFIG API
-  static createWMSConfig(): Promise<ConfigBaseClass[]> {
-    // Create the Layer config
-    const layerConfig = WMS.createWMSLayerConfig(
-      'gvLayerID',
-      'Some Name',
-      'https://maps-cartes.services.geo.ca/server_serveur/services/NRCan/CER_Assessments_EN/MapServer/WMSServer',
-      'mapserver',
-      false,
-      [{ id: '0' }] as unknown as TypeJsonArray,
-      {}
-    );
-
-    // Create the class from geoview-layers package
-    const myLayer = new WMS(layerConfig, false);
-
-    // Process it
-    return ConfigApi.#processConfig(myLayer);
-  }
-
-  /**
-   * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
-   * @returns A Promise with the layer configuration
-   * @experimental
-   */
-  // TODO: REFACTOR CONFIG API
-  static createXYZTilesConfig(): Promise<ConfigBaseClass[]> {
-    // Create the Layer config
-    const layerConfig = XYZTiles.createXYZTilesLayerConfig(
-      'gvLayerID',
-      'Some Name',
-      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer',
-      false,
-      [{ id: '0' }] as unknown as TypeJsonArray
-    );
-
-    // Create the class from geoview-layers package
-    const myLayer = new XYZTiles(layerConfig);
-
-    // Process it
-    return ConfigApi.#processConfig(myLayer);
-  }
-
-  /**
-   * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
-   * @returns A Promise with the layer configuration
-   * @experimental
-   */
-  // TODO: REFACTOR CONFIG API
-  static createCSVFeatureConfig(): Promise<ConfigBaseClass[]> {
-    // Create the Layer config
-    const layerConfig = CSV.createCSVLayerConfig(
-      'gvLayerID',
-      'Some Name',
-      'https://canadian-geospatial-platform.github.io/geoview/public/datasets/csv-files',
-      false,
-      [{ id: 'NPRI-INRP_WaterEau_MediaGroupMilieu_2022' }] as unknown as TypeJsonArray
-    );
-
-    // Create the class from geoview-layers package
-    const myLayer = new CSV(layerConfig);
-
-    // Process it
-    return ConfigApi.#processConfig(myLayer);
-  }
-
-  /**
-   * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
-   * @returns A Promise with the layer configuration
-   * @experimental
-   */
-  // TODO: REFACTOR CONFIG API
-  static createEsriFeatureConfig(): Promise<ConfigBaseClass[]> {
-    // Create the Layer config
-    const layerConfig = EsriFeature.createEsriFeatureLayerConfig(
-      'gvLayerID',
-      'Some Name',
-      'https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/Toronto_Neighbourhoods/FeatureServer',
-      false,
-      [{ index: '0' }] as unknown as TypeJsonArray
-    );
-
-    // Create the class from geoview-layers package
-    const myLayer = new EsriFeature(layerConfig);
-
-    // Process it
-    return ConfigApi.#processConfig(myLayer);
-  }
-
-  /**
-   * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
-   * @returns A Promise with the layer configuration
-   * @experimental
-   */
-  // TODO: REFACTOR CONFIG API
-  static createGeoJsonLayerConfig(): Promise<ConfigBaseClass[]> {
-    // Create the Layer config
-    const layerConfig = GeoJSON.createGeoJsonLayerConfig(
-      'gvLayerID',
-      'Some Name',
-      'https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata.meta',
-      false,
-      [{ id: 'polygons.json' }] as unknown as TypeJsonArray
-    );
-
-    // Create the class from geoview-layers package
-    const myLayer = new GeoJSON(layerConfig);
-
-    // Process it
-    return ConfigApi.#processConfig(myLayer);
-  }
-
-  /**
-   * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
-   * @returns A Promise with the layer configuration
-   * @experimental
-   */
-  // TODO: REFACTOR CONFIG API
-  static createOGCFeatureConfig(): Promise<ConfigBaseClass[]> {
-    // Create the Layer config
-    const layerConfig = OgcFeature.createOgcFeatureLayerConfig(
-      'gvLayerID',
-      'Some Name',
-      'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev',
-      false,
-      [{ id: 'lakes' }] as unknown as TypeJsonArray
-    );
-
-    // Create the class from geoview-layers package
-    const myLayer = new OgcFeature(layerConfig);
-
-    // Process it
-    return ConfigApi.#processConfig(myLayer);
-  }
-
-  /**
-   * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
-   * @returns A Promise with the layer configuration
-   * @experimental
-   */
-  // TODO: REFACTOR CONFIG API
-  static createWFSConfig(): Promise<ConfigBaseClass[]> {
-    // Create the Layer config
-    const layerConfig = WFS.createWfsFeatureLayerConfig(
-      'gvLayerID',
-      'Some Name',
-      'https://ahocevar.com/geoserver/wfs?REQUEST=GetCapabilities&VERSION=2.0.0&SERVICE=WFS',
-      false,
-      [{ id: 'usa:states' }] as unknown as TypeJsonArray
-    );
-
-    // Create the class from geoview-layers package
-    const myLayer = new WFS(layerConfig);
-
-    // Process it
-    return ConfigApi.#processConfig(myLayer);
-  }
-
-  /**
-   * Processes a Layer Config by calling 'createGeoViewLayers' on the provided layer.
-   * @param {AbstractGeoViewLayer} layer - The layer to use to process the configuration
-   * @returns {Promise<ConfigBaseClass>} The promise of a generated ConfigBaseClass.
-   * @private
-   */
-  static #processConfig(layer: AbstractGeoViewLayer): Promise<ConfigBaseClass[]> {
-    // Create a promise that the layer config will be created
-    const promise = new Promise<ConfigBaseClass[]>((resolve, reject) => {
-      // Keep the config as they get created
-      const configs: ConfigBaseClass[] = [];
-
-      // Register a handler when the layer config has been created for this config
-      layer.onLayerConfigCreated((geoviewLayer: AbstractGeoViewLayer, event: LayerConfigCreatedEvent) => {
-        // A Layer Config was created
-        logger.logDebug('Config created', event.config);
-
-        // Add the config
-        configs.push(event.config);
-      });
-
-      // (Extra) Register a handler when a Group layer has been created for this config
-      layer.onLayerGroupCreated((geoviewLayer: AbstractGeoViewLayer, event: LayerGroupCreatedEvent) => {
-        // A Group Layer was created
-        logger.logDebug('Group Layer created', event.layer);
-      });
-
-      // (Extra) Register a handler when a GV layer has been created for this config
-      layer.onLayerGVCreated((geoviewLayer: AbstractGeoViewLayer, event: LayerGVCreatedEvent) => {
-        // A GV Layer was created
-        logger.logDebug('GV Layer created', event.layer);
-      });
-
-      // Start the geoview-layers config process
-      layer
-        .createGeoViewLayers()
-        .then(() => {
-          // If no errors
-          if (layer.layerLoadError.length === 0) {
-            // Resolve with the configurations
-            resolve(configs);
-          } else {
-            // Errors happened
-            // If only one, throw as-is
-            if (layer.layerLoadError.length === 1) throw layer.layerLoadError[0];
-            // Throw them all inside an AggregateError
-            layer.throwAggregatedLayerLoadErrors();
-          }
-        })
-        .catch((error: unknown) => {
-          // Reject
-          reject(formatError(error));
-        });
-    });
-
-    // Return the promise
-    return promise;
-  }
-
-  // #endregion Experimental
+  // /**
+  //  * Returns the ESRI Renderer as a Style Config
+  //  * @param {string} input The input renderer to be converted to a GeoView Style
+  //  * @returns {TypeLayerStyleConfig} The converted style
+  //  */
+  // static getStyleFromESRIRenderer(input: string): TypeLayerStyleConfig | undefined {
+  //   const renderer = this.#convertStringToJson(input);
+  //   if (renderer) {
+  //     return createStyleUsingEsriRenderer(renderer as unknown as EsriBaseRenderer);
+  //   }
+  //   return undefined;
+  // }
 }

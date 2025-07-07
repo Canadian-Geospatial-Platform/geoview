@@ -32,7 +32,6 @@ import {
   TypeDisplayLanguage,
   TypeDisplayTheme,
   TypeMapViewSettings,
-  MapConfigLayerEntry,
   TypeStyleGeometry,
   TypeLayerStatus,
 } from '@/api/config/types/map-schema-types';
@@ -358,7 +357,7 @@ export class MapViewer {
     // Load the list of geoview layers in the config to add all layers on the map.
     // After this call, all first level layers have been registered.
     // TODO: refactor - remove the cast as MapConfigLayerEntry[] everywhere
-    await this.layer.loadListOfGeoviewLayer(this.mapFeaturesConfig.map.listOfGeoviewLayerConfig as MapConfigLayerEntry[]);
+    await this.layer.loadListOfGeoviewLayer(this.mapFeaturesConfig.map.listOfGeoviewLayerConfig);
 
     // Here, all base-level "this.mapFeaturesConfig.map.listOfGeoviewLayerConfig" have been registered (layerStatus === 'registered').
     // However, careful, the layers are still processing and some sub-layer-entries can get registered on-the-fly (notably: EsriDynamic, WMS).

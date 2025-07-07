@@ -3,7 +3,6 @@ import Feature from 'ol/Feature';
 import RenderFeature from 'ol/render/Feature';
 import { Pixel } from 'ol/pixel';
 
-import { AbstractGeoviewLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { LayerEntryTypesKey, TypeJsonValue } from '@/api/config/types/config-types';
 
 import { TimeDimension } from '@/core/utils/date-mgt';
@@ -214,7 +213,7 @@ export type TypeMapConfig = {
   /** Type of interaction. */
   interaction: TypeInteraction;
   /** List of GeoView Layers in the order which they should be added to the map. */
-  listOfGeoviewLayerConfig: AbstractGeoviewLayerConfig[] | MapConfigLayerEntry[]; // TODO: refactor - remove mapConfig
+  listOfGeoviewLayerConfig: MapConfigLayerEntry[]; // TODO: refactor - remove mapConfig
   /** View settings. */
   viewSettings: TypeViewSettings;
   /** Highlight color. */
@@ -327,15 +326,6 @@ export type TypePointMarker = {
 };
 
 // #region GEOVIEW LAYERS
-
-/** Parent class of the GeoView layers. */
-export { AbstractGeoviewLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-layer-config';
-
-/** Child classes derived from the AbstractGeoviewLayerConfig. */
-export { EsriDynamicLayerConfig } from '@/api/config/types/classes/geoview-config/raster-config/esri-dynamic-config';
-export { EsriFeatureLayerConfig } from '@/api/config/types/classes/geoview-config/vector-config/esri-feature-config';
-export { WmsLayerConfig } from '@/api/config/types/classes/geoview-config/raster-config/wms-config';
-export { WfsLayerConfig } from '@/api/config/types/classes/geoview-config/vector-config/wfs-config';
 
 /** Definition of the keys used to create the constants of the GeoView layer */
 type LayerTypesKey =
@@ -472,19 +462,6 @@ export type TypeLayerStates = {
 // #endregion GEOVIEW LAYERS
 
 // #region SUB LAYERS
-export { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
-
-export { AbstractBaseLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/abstract-base-layer-entry-config';
-export { GroupLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/group-node/group-layer-entry-config';
-/** Child classes derived from the AbstractBaseLayerEntryConfig. */
-export { EsriDynamicLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/raster/esri-dynamic-layer-entry-config';
-export { EsriFeatureLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/vector/esri-feature-layer-entry-config';
-export { WmsLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/raster/wms-layer-entry-config';
-export { WfsLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/vector/wfs-layer-entry-config';
-export { GeoJsonLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/vector/geojson-layer-entry-config';
-export { CsvLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/vector/csv-layer-entry-config';
-export { XyzLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/raster/xyz-layer-entry-config';
-export { OgcFeatureLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/vector/ogc-feature-layer-entry-config';
 
 /** Valid keys for the geometryType property. */
 export type TypeStyleGeometry = 'Point' | 'MultiPoint' | 'LineString' | 'MultiLineString' | 'Polygon' | 'MultiPolygon';
