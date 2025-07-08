@@ -77,6 +77,22 @@ export class GeoJSON extends AbstractGeoViewVector {
   }
 
   /**
+   * Overrides the way a geoview layer config initializes its layer entries.
+   * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
+   */
+  protected override onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
+    // Get the folder url
+    const idx = this.metadataAccessPath.lastIndexOf('/');
+    const rootUrl = this.metadataAccessPath.substring(0, idx);
+    const id = this.metadataAccessPath.substring(idx + 1);
+
+    // Redirect
+    return Promise.resolve(
+      GeoJSON.createGeoJsonLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, [{ id }] as unknown as TypeJsonArray)
+    );
+  }
+
+  /**
    * Overrides the validation of a layer entry config.
    * @param {TypeLayerEntryConfig} layerConfig - The layer entry config to validate.
    */
@@ -220,6 +236,27 @@ export class GeoJSON extends AbstractGeoViewVector {
   }
 
   /**
+   * Initializes a GeoView layer configuration for a GeoJson layer.
+   * This method creates a basic TypeGeoviewLayerConfig using the provided
+   * ID, name, and metadata access path URL. It then initializes the layer entries by calling
+   * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
+   * @param {string} geoviewLayerId - A unique identifier for the layer.
+   * @param {string} geoviewLayerName - The display name of the layer.
+   * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
+   * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
+   */
+  static initGeoviewLayerConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    metadataAccessPath: string
+  ): Promise<TypeGeoviewLayerConfig> {
+    // Create the Layer config
+    const layerConfig = GeoJSON.createGeoJsonLayerConfig(geoviewLayerId, geoviewLayerName, metadataAccessPath, false, []);
+    const myLayer = new GeoJSON(layerConfig);
+    return myLayer.initGeoViewLayerEntries();
+  }
+
+  /**
    * Creates a configuration object for a GeoJson Feature layer.
    * This function constructs a `TypeGeoJSONLayerConfig` object that describes an GeoJson Feature layer
    * and its associated entry configurations based on the provided parameters.
@@ -241,7 +278,7 @@ export class GeoJSON extends AbstractGeoViewVector {
       geoviewLayerId,
       geoviewLayerName,
       metadataAccessPath,
-      geoviewLayerType: CONST_LAYER_TYPES.OGC_FEATURE,
+      geoviewLayerType: CONST_LAYER_TYPES.GEOJSON,
       isTimeAware,
       listOfLayerEntryConfig: [],
     };
@@ -250,7 +287,8 @@ export class GeoJSON extends AbstractGeoViewVector {
         geoviewLayerConfig,
         schemaTag: CONST_LAYER_TYPES.GEOJSON,
         entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
-        layerId: layerEntry.id as string,
+        layerId: `${layerEntry.id}`,
+        layerName: `${layerEntry.layerName}` || `${layerEntry.id}`,
         source: {
           format: 'GeoJSON',
           dataAccessPath: metadataAccessPath,

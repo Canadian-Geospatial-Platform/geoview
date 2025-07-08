@@ -1,18 +1,16 @@
 import {
-  GroupLayerEntryConfig,
-  MapFeatureConfig,
-  TypeGeoviewLayerType,
-  TypeGeoviewLayerConfig,
   ShapefileLayerConfig,
-  MapConfigLayerEntry,
   CONST_LAYER_ENTRY_TYPES,
   TypeDisplayLanguage,
   CONST_LAYER_TYPES,
+  TypeGeoviewLayerType,
+  TypeLayerEntryConfig,
+  MapConfigLayerEntry,
 } from '@/api/config/types/map-schema-types';
-import { Cast, toJsonObject } from '@/api/config/types/config-types';
 import { generateId, getLocalizedMessage } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
+import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 
 type BuildGeoViewLayerInput = {
   layerIdsToAdd: string[];
@@ -100,16 +98,16 @@ export const getLayerNameById = (layersList: GroupLayerEntryConfig[], layerId: s
  */
 const allSubLayersAreIncluded = (groupLayer: GroupLayerEntryConfig, layerIds: (string | undefined)[]): boolean => {
   return groupLayer.listOfLayerEntryConfig.every((layerEntryConfig) =>
-    !layerEntryConfig.isLayerGroup
+    !(layerEntryConfig instanceof GroupLayerEntryConfig)
       ? layerIds.includes(layerEntryConfig.layerId)
-      : layerIds.includes(layerEntryConfig.layerId) && allSubLayersAreIncluded(layerEntryConfig as GroupLayerEntryConfig, layerIds)
+      : layerIds.includes(layerEntryConfig.layerId) && allSubLayersAreIncluded(layerEntryConfig, layerIds)
   );
 };
 
 /**
  * Builds a geoview layer config from provided layer IDs.
  * @param {BuildGeoViewLayerInput} inputProps - The layer information
- * @returns {TypeGeoviewLayerConfig} The geoview layer config
+ * @returns {MapConfigLayer} The geoview layer config
  */
 export const buildGeoLayerToAdd = (inputProps: BuildGeoViewLayerInput): MapConfigLayerEntry => {
   const { layerIdsToAdd, layerName, layerType, layerURL, layerList } = inputProps;
@@ -160,8 +158,8 @@ export const buildGeoLayerToAdd = (inputProps: BuildGeoViewLayerInput): MapConfi
         layerName: layersToAdd.length === 1 ? layerName : groupLayer?.layerName,
         listOfLayerEntryConfig: groupLayer.listOfLayerEntryConfig
           .map((layerEntryConfig) => {
-            if (layerEntryConfig.isLayerGroup && layerIds.includes(layerEntryConfig.layerId))
-              return createLayerEntryConfigForGroupLayer(layerEntryConfig as GroupLayerEntryConfig);
+            if (layerEntryConfig instanceof GroupLayerEntryConfig && layerIds.includes(layerEntryConfig.layerId))
+              return createLayerEntryConfigForGroupLayer(layerEntryConfig);
             if (layerIds.includes(layerEntryConfig.layerId))
               return {
                 layerId: layerEntryConfig?.layerId,
@@ -177,7 +175,7 @@ export const buildGeoLayerToAdd = (inputProps: BuildGeoViewLayerInput): MapConfi
 
     // Create an entry config shell for each layer if it is not in the removedLayerIds
     layersToAdd.forEach((layerToAdd) => {
-      if (layerToAdd.isLayerGroup && !removedLayerIds.includes(layerToAdd.layerId)) {
+      if (layerToAdd instanceof GroupLayerEntryConfig && !removedLayerIds.includes(layerToAdd.layerId)) {
         listOfLayerEntryConfig.push(createLayerEntryConfigForGroupLayer(layerToAdd));
       } else if (!removedLayerIds.includes(layerToAdd.layerId)) {
         listOfLayerEntryConfig.push({
@@ -194,15 +192,12 @@ export const buildGeoLayerToAdd = (inputProps: BuildGeoViewLayerInput): MapConfi
       layerName,
     });
 
-  const geoviewLayerConfig = MapFeatureConfig.nodeFactory(
-    toJsonObject({
-      geoviewLayerId: generateId(18),
-      geoviewLayerName: layerName,
-      geoviewLayerType: layerType as TypeGeoviewLayerType,
-      metadataAccessPath: layerURL,
-      listOfLayerEntryConfig,
-    })
-  );
-
-  return Cast<TypeGeoviewLayerConfig>(geoviewLayerConfig!);
+  // Return it
+  return {
+    geoviewLayerId: generateId(18),
+    geoviewLayerName: layerName,
+    geoviewLayerType: layerType as TypeGeoviewLayerType,
+    metadataAccessPath: layerURL,
+    listOfLayerEntryConfig: listOfLayerEntryConfig as unknown as TypeLayerEntryConfig[],
+  };
 };

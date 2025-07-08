@@ -33,6 +33,8 @@ import {
   layerEntryIsGroupLayer,
   TypeLayerStatus,
   GeoCoreLayerConfig,
+  TypeDisplayLanguage,
+  TypeInitialGeoviewLayerType,
   TypeOutfieldsType,
 } from '@/api/config/types/map-schema-types';
 import { TypeJsonArray } from '@/api/config/types/config-types';
@@ -367,80 +369,16 @@ export class LayerApi {
   async loadListOfGeoviewLayer(mapConfigLayerEntries: MapConfigLayerEntry[]): Promise<void> {
     const validGeoviewLayerConfigs = this.#deleteDuplicateAndMultipleUuidGeoviewLayerConfig(mapConfigLayerEntries);
 
-    // set order for layers to appear on the map according to config
-    const promisesOfGeoCoreGeoviewLayers: Promise<TypeGeoviewLayerConfig[]>[] = [];
-    for (let i = 0; i < validGeoviewLayerConfigs.length; i++) {
-      const geoviewLayerConfig = validGeoviewLayerConfigs[i];
-
-      // If the layer is GeoCore add it via the core function
-      if (mapConfigLayerEntryIsGeoCore(geoviewLayerConfig)) {
-        // Prep the GeoCore
-        const geoCore = new GeoCore(this.getMapId(), this.mapViewer.getDisplayLanguage());
-
-        // Create a promise to fetch from UUID
-        const promise = geoCore.createLayersFromUUID(geoviewLayerConfig.geoviewLayerId, geoviewLayerConfig);
-
-        // // TODO: CLEANUP BEFORE PUSH, VALIDATE IF tempo IS GOOD...
-        // // While the promise is running add a temporary config entry
-        // const tempo = new TemporaryLayerEntryConfig(geoviewLayerConfig);
-        // this.registerLayerConfigInit(tempo);
-
-        // Catch failed promises here. The filled promises will be taken care of with the others below.
-        promise
-          // .then((gvLayerConfigs) => {
-          //   // Remove the temporary config entry
-          //   this.removeLayerUsingPath(tempo.layerPath);
-
-          //   // Add them
-          //   gvLayerConfigs.forEach(() => {
-          //     // Add it
-          //     // this.addGeoviewLayer(gvLayerConfig);
-          //   });
-          // })
-          .catch((error: unknown) => {
-            // Show the error(s)
-            this.showLayerError(error, geoviewLayerConfig.geoviewLayerId);
-          });
-
-        // Add the promise to the array
-        promisesOfGeoCoreGeoviewLayers.push(promise);
-      } else if (mapConfigLayerEntryIsShapefile(geoviewLayerConfig)) {
-        // Create a promise to fetch Shapefile
-        const promise = ShapefileReader.convertShapefileConfigToGeoJson(geoviewLayerConfig);
-
-        // // While the promise is running add a temporary config entry
-        // const tempo = new TemporaryLayerEntryConfig(geoviewLayerConfig);
-        // this.registerLayerConfigInit(tempo);
-
-        // Catch failed promises here. The filled promises will be taken care of with the others below.
-        promise
-          // .then((gvLayerConfigs) => {
-          //   // Remove the temporary config entry
-          //   this.removeLayerUsingPath(tempo.layerPath);
-
-          //   // Add them
-          //   gvLayerConfigs.forEach(() => {
-          //     // Add it
-          //     // this.addGeoviewLayer(gvLayerConfig);
-          //   });
-          // })
-          .catch((error: unknown) => {
-            // Show the error(s)
-            this.showLayerError(error, geoviewLayerConfig.geoviewLayerId);
-          });
-
-        // Add the promise to the array
-        promisesOfGeoCoreGeoviewLayers.push(promise);
-      } else {
-        // Add it
-        // this.addGeoviewLayer(geoviewLayerConfig);
-
-        // Add a resolved promise for a regular Geoview Layer Config
-        promisesOfGeoCoreGeoviewLayers.push(Promise.resolve([geoviewLayerConfig]));
+    // Make sure to convert all map config layer entry into a GeoviewLayerConfig
+    const promisesOfGeoviewLayers = LayerApi.convertMapConfigToGeoviewLayerConfig(
+      this.getMapId(),
+      this.mapViewer.getDisplayLanguage(),
+      mapConfigLayerEntries,
+      (mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => {
+        // Show the error(s)
+        this.showLayerError(error, mapConfigLayerEntry.geoviewLayerId);
       }
-    }
-
-    // TODO: Refactor - There should be no Geocore layer in layers in the geo folder, can the above be moved in an earlier process?
+    );
 
     // Wait for all promises (GeoCore ones) to process
     // The reason for the Promise.allSettled is because of synch issues with the 'setMapOrderedLayerInfo' which happens below and the
@@ -452,7 +390,7 @@ export class LayerApi {
     const orderedLayerInfos: TypeOrderedLayerInfo[] = MapEventProcessor.getMapOrderedLayerInfo(this.getMapId()).length
       ? MapEventProcessor.getMapOrderedLayerInfo(this.getMapId())
       : [];
-    const promisedLayers = await Promise.allSettled(promisesOfGeoCoreGeoviewLayers);
+    const promisedLayers = await Promise.allSettled(promisesOfGeoviewLayers);
 
     // For each layers in the fulfilled promises only
     promisedLayers.forEach((promise) => {
@@ -2354,6 +2292,52 @@ export class LayerApi {
   // #region STATIC
 
   /**
+   * Converts a list of map configuration layer entries into an array of promises,
+   * each resolving to one or more GeoView layer configuration objects.
+   *
+   * Depending on the type of the layer entry (e.g., GeoCore, Shapefile, or standard GeoView),
+   * this function processes each entry accordingly and wraps the result in a `Promise`.
+   * Errors encountered during asynchronous operations are handled via a provided callback.
+   *
+   * @param {string} mapId - The unique identifier of the map instance this configuration applies to.
+   * @param {TypeDisplayLanguage} language - The language setting used for layer labels and metadata.
+   * @param {MapConfigLayerEntry[]} mapConfigLayerEntries - The array of layer entries to convert.
+   * @param {(mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => void} errorCallback - Callback invoked when an error occurs during layer processing.
+   * @returns {Promise<TypeGeoviewLayerConfig[]>[]} An array of promises, each resolving to an array of `TypeGeoviewLayerConfig` objects.
+   */
+  static convertMapConfigToGeoviewLayerConfig(
+    mapId: string,
+    language: TypeDisplayLanguage,
+    mapConfigLayerEntries: MapConfigLayerEntry[],
+    errorCallback: (mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => void
+  ): Promise<TypeGeoviewLayerConfig[]>[] {
+    // For each layer entry
+    return mapConfigLayerEntries.map((entry) => {
+      // Depending on the map config layer entry type
+      let promise: Promise<TypeGeoviewLayerConfig[]>;
+      if (mapConfigLayerEntryIsGeoCore(entry)) {
+        // Working with a GeoCore layer
+        const geoCore = new GeoCore(mapId, language);
+        promise = geoCore.createLayersFromUUID(entry.geoviewLayerId, entry);
+      } else if (mapConfigLayerEntryIsShapefile(entry)) {
+        // Working with a shapefile layer
+        promise = ShapefileReader.convertShapefileConfigToGeoJson(entry);
+      } else {
+        // Working with a standard GeoView layer
+        promise = Promise.resolve([entry]);
+      }
+
+      // Prepare to catch errors
+      promise.catch((error) => {
+        // Callback
+        errorCallback?.(entry, error);
+      });
+
+      return promise;
+    });
+  }
+
+  /**
    * Generate an array of layer info for the orderedLayerList.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The config to get the info from.
    * @returns {TypeOrderedLayerInfo[]} The array of ordered layer info.
@@ -2409,6 +2393,75 @@ export class LayerApi {
     return newOrderedLayerInfos;
   }
 
+  /**
+   * Creates and initializes a GeoView layer configuration based on the specified layer type.
+   * This method dynamically selects the appropriate layer class (e.g., EsriDynamic, WMS, GeoJSON, etc.)
+   * based on the provided `layerType`, and calls its `initGeoviewLayerConfig` method using the
+   * supplied ID, name, and URL. If the layer type is not supported, an error is thrown.
+   * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
+   * @param {string} geoviewLayerName - The display name of the layer.
+   * @param {TypeInitialGeoviewLayerType} layerType - The type of GeoView layer to initialize (e.g., 'esriDynamic', 'ogcWms', 'GeoJSON', etc.).
+   * @param {string} layerURL - The URL endpoint associated with the layer (e.g., service URL, file path).
+   * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to a fully initialized `TypeGeoviewLayerConfig`.
+   * @throws {NotSupportedError} If the provided layer type is not recognized or supported.
+   */
+  static async createInitConfigFromType(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    layerType: TypeInitialGeoviewLayerType,
+    layerURL: string,
+    mapId: string,
+    language: TypeDisplayLanguage
+  ): Promise<TypeGeoviewLayerConfig> {
+    // Depending on the type
+    switch (layerType) {
+      case 'esriDynamic':
+        return EsriDynamic.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+      case 'esriImage':
+        return EsriImage.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+      case 'imageStatic':
+        return ImageStatic.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+      case 'vectorTiles':
+        return VectorTiles.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+      case 'ogcWms':
+        return WMS.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, false);
+      case 'xyzTiles':
+        return XYZTiles.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+      case 'CSV':
+        return CSV.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+      case 'esriFeature':
+        return EsriFeature.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+      case 'GeoJSON':
+        return GeoJSON.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+      case 'ogcFeature':
+        return OgcFeature.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+      case 'ogcWfs':
+        return WFS.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+      case 'geoCore':
+        // For GeoCore, we guild the Config from the Geocore service
+        // eslint-disable-next-line no-case-declarations
+        const geocore = new GeoCore(mapId, language);
+        // eslint-disable-next-line no-case-declarations
+        const layerConfigs = await geocore.createLayersFromUUID(layerURL);
+        // Return the first one (only one)
+        // eslint-disable-next-line no-case-declarations
+        const layerConfig = layerConfigs[0];
+        // Now, loop back to create the correct config again!
+        return LayerApi.createInitConfigFromType(
+          layerConfig.geoviewLayerId,
+          layerConfig.geoviewLayerName!,
+          layerConfig.geoviewLayerType,
+          layerConfig.metadataAccessPath!,
+          mapId,
+          language
+        );
+      default:
+        // Unsupported
+        throw new NotSupportedError(`Unsupported layer type ${layerType}`);
+    }
+  }
+
+  // TODO: JSDOC
   static createLayerFromConfigType(geoviewLayerConfig: TypeGeoviewLayerConfig, mapProjectionForVectorTiles: string): AbstractGeoViewLayer {
     // TODO: Refactor - Here the function should use the structure created by validation config with the metadata fetch and no need to pass the validation.
     if (layerConfigIsGeoJSON(geoviewLayerConfig)) {
@@ -2563,7 +2616,7 @@ export class LayerApi {
       'mapserver',
       false,
       [{ id: '0' }] as unknown as TypeJsonArray,
-      {}
+      {} // TODO: Check -  Remove this param as it is optional
     );
 
     // Create the class from geoview-layers package

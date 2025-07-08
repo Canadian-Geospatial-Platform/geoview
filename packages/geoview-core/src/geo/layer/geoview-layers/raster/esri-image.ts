@@ -38,6 +38,17 @@ export class EsriImage extends AbstractGeoViewRaster {
   }
 
   /**
+   * Overrides the way a geoview layer config initializes its layer entries.
+   * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
+   */
+  protected override onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
+    // Redirect
+    return Promise.resolve(
+      EsriImage.createEsriImageLayerConfig(this.geoviewLayerId, this.geoviewLayerName, this.metadataAccessPath, false)
+    );
+  }
+
+  /**
    * Overrides the way the layer metadata is processed.
    * @param {EsriImageLayerEntryConfig} layerConfig - The layer entry configuration to process.
    * @returns {Promise<EsriImageLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
@@ -60,6 +71,27 @@ export class EsriImage extends AbstractGeoViewRaster {
 
     // Return it
     return gvLayer;
+  }
+
+  /**
+   * Initializes a GeoView layer configuration for an Esri Image layer.
+   * This method creates a basic TypeGeoviewLayerConfig using the provided
+   * ID, name, and metadata access path URL. It then initializes the layer entries by calling
+   * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
+   * @param {string} geoviewLayerId - A unique identifier for the layer.
+   * @param {string} geoviewLayerName - The display name of the layer.
+   * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
+   * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
+   */
+  static initGeoviewLayerConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    metadataAccessPath: string
+  ): Promise<TypeGeoviewLayerConfig> {
+    // Create the Layer config
+    const layerConfig = EsriImage.createEsriImageLayerConfig(geoviewLayerId, geoviewLayerName, metadataAccessPath, false);
+    const myLayer = new EsriImage(layerConfig);
+    return myLayer.initGeoViewLayerEntries();
   }
 
   /**
@@ -86,12 +118,17 @@ export class EsriImage extends AbstractGeoViewRaster {
       isTimeAware,
       listOfLayerEntryConfig: [],
     };
+
+    // Trim the last '/' if any
+    const trimmedPath = metadataAccessPath.replace(/\/+$/, '');
+
     geoviewLayerConfig.listOfLayerEntryConfig = [
       new EsriImageLayerEntryConfig({
         geoviewLayerConfig,
         schemaTag: CONST_LAYER_TYPES.ESRI_IMAGE,
         entryType: CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE,
-        layerId: metadataAccessPath.split('/').slice(-2, -1)[0],
+        layerId: trimmedPath.split('/').slice(-2, -1)[0],
+        layerName: trimmedPath.split('/').slice(-2, -1)[0],
       } as EsriImageLayerEntryConfig),
     ];
 

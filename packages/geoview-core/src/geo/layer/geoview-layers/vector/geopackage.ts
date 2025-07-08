@@ -83,6 +83,15 @@ export class GeoPackage extends AbstractGeoViewVector {
   }
 
   /**
+   * Overrides the way a geoview layer config initializes its layer entries.
+   * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
+   */
+  protected override onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
+    // Not implemented
+    throw new NotImplementedError('onInitLayerEntries in GeoPackage is not implemented');
+  }
+
+  /**
    * Overrides the way the layer metadata is processed.
    * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration to process.
    * @returns {Promise<VectorLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
@@ -638,7 +647,7 @@ export class GeoPackage extends AbstractGeoViewVector {
         geoviewLayerConfig,
         schemaTag: CONST_LAYER_TYPES.GEOPACKAGE,
         entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
-        layerId: layerEntry.id as string,
+        layerId: `${layerEntry.id}`,
         source: {
           format: 'GeoPackage',
           dataAccessPath: metadataAccessPath,

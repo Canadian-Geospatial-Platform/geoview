@@ -189,6 +189,35 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /**
+   * Overrides the way a geoview layer config initializes its layer entries.
+   * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
+   */
+  protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
+    // Get the metadata
+    await this.onFetchAndSetServiceMetadata();
+
+    // Based on the capabilities
+    const layers = this.metadata!.Capability.Layer.Layer as TypeJsonArray;
+
+    // Now that we have metadata
+    const entries = layers.map((layer) => {
+      return { id: layer.Name, layerId: layer.Name, layerName: layer.Title };
+    });
+
+    // Redirect
+    return Promise.resolve(
+      WMS.createWMSLayerConfig(
+        this.geoviewLayerId,
+        this.geoviewLayerName,
+        this.metadataAccessPath,
+        'mapserver',
+        false,
+        entries as unknown as TypeJsonArray
+      )
+    );
+  }
+
+  /**
    * Overrides the validation of a layer entry config.
    * @param {TypeLayerEntryConfig} layerConfig - The layer entry config to validate.
    */
@@ -655,6 +684,31 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /**
+   * Initializes a GeoView layer configuration for a WMS layer.
+   * This method creates a basic TypeGeoviewLayerConfig using the provided
+   * ID, name, and metadata access path URL. It then initializes the layer entries by calling
+   * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
+   * @param {string} geoviewLayerId - A unique identifier for the layer.
+   * @param {string} geoviewLayerName - The display name of the layer.
+   * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
+   * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
+   */
+  static initGeoviewLayerConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    metadataAccessPath: string,
+    fullSubLayers: boolean
+  ): Promise<TypeGeoviewLayerConfig> {
+    // TODO: Implement - How to determine the type of server for geoserver vs qgis?
+    const serverType: TypeOfServer = metadataAccessPath.toLowerCase().includes('/mapserver') ? 'mapserver' : 'geoserver';
+
+    // Create the Layer config
+    const layerConfig = WMS.createWMSLayerConfig(geoviewLayerId, geoviewLayerName, metadataAccessPath, serverType, false, []);
+    const myLayer = new WMS(layerConfig, fullSubLayers);
+    return myLayer.initGeoViewLayerEntries();
+  }
+
+  /**
    * Creates a configuration object for a WMS layer.
    * This function constructs a `TypeWMSLayerConfig` object that describes an WMS layer
    * and its associated entry configurations based on the provided parameters.
@@ -664,6 +718,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {TypeOfServer} serverType - The server type.
    * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @param {TypeJsonArray} layerEntries - An array of layer entries objects to be included in the configuration.
+   * @param {TypeJsonObject} customGeocoreLayerConfig - An optional layer config from Geocore.
    * @returns {TypeWMSLayerConfig} The constructed configuration object for the WMS layer.
    */
   static createWMSLayerConfig(
@@ -673,7 +728,7 @@ export class WMS extends AbstractGeoViewRaster {
     serverType: TypeOfServer,
     isTimeAware: boolean,
     layerEntries: TypeJsonArray,
-    customGeocoreLayerConfig: TypeJsonObject
+    customGeocoreLayerConfig: TypeJsonObject = {}
   ): TypeWMSLayerConfig {
     const geoviewLayerConfig: TypeWMSLayerConfig = {
       geoviewLayerId,
@@ -688,7 +743,8 @@ export class WMS extends AbstractGeoViewRaster {
         geoviewLayerConfig,
         schemaTag: CONST_LAYER_TYPES.WMS,
         entryType: CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE,
-        layerId: layerEntry.id as string,
+        layerId: `${layerEntry.id}`,
+        layerName: (layerEntry.layerName as string) || (layerEntry.id as string),
         source: {
           serverType: serverType ?? 'mapserver',
           dataAccessPath: metadataAccessPath,

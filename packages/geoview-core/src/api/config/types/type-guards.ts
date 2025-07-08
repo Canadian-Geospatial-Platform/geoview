@@ -1,48 +1,11 @@
 // #region LAYER TREE CONFIG TYPE GUARDS
-
-import { AbstractGeoviewLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-layer-config';
-import { EsriDynamicLayerConfig } from '@/api/config/types/classes/geoview-config/raster-config/esri-dynamic-config';
-import { GroupLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/group-node/group-layer-entry-config';
-import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
-import { TypeJsonObject } from '@/api/config/types/config-types';
 import {
-  AbstractBaseLayerEntryConfig,
   TypeBaseVectorGeometryConfig,
   TypeIconSymbolVectorConfig,
   TypeLineStringVectorConfig,
   TypePolygonVectorConfig,
   TypeSimpleSymbolVectorConfig,
 } from '@/api/config/types/map-schema-types';
-import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
-import { EsriDynamicLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/raster/esri-dynamic-layer-entry-config';
-
-/**
- * Type guard function that redefines a EntryConfigBaseClass as a GroupLayerEntryConfig if the entryType attribute of the verifyIfLayer
- * parameter is CV_CONST_SUB_LAYER_TYPES.GROUP. The type assertion applies only to the true block of the if clause that use this
- * function.
- *
- * @param {EntryConfigBaseClass} verifyIfLayer Polymorphic object to test in order to determine if the type assertion is valid.
- *
- * @returns {boolean} true if the type assertion is valid.
- */
-export const layerEntryIsGroupLayer = (verifyIfLayer: EntryConfigBaseClass | TypeJsonObject): verifyIfLayer is GroupLayerEntryConfig => {
-  return verifyIfLayer?.isLayerGroup as boolean;
-};
-
-/**
- * Type guard function that redefines a EntryConfigBaseClass as an AbstractBaseLayerEntryConfig if the entryType attribute of the verifyIfLayer
- * parameter is not CV_CONST_SUB_LAYER_TYPES.GROUP. The type assertion applies only to the true block of the if clause that use this
- * function.
- *
- * @param {EntryConfigBaseClass} verifyIfLayer Polymorphic object to test in order to determine if the type assertion is valid.
- *
- * @returns {boolean} true if the type assertion is valid.
- */
-export const layerEntryIsAbstractBaseLayerEntryConfig = (
-  verifyIfLayer: EntryConfigBaseClass | TypeJsonObject
-): verifyIfLayer is AbstractBaseLayerEntryConfig => {
-  return (verifyIfLayer?.isLayerGroup as boolean) === false;
-};
 
 /**
  * Type guard function that redefines a EntryConfigBaseClass as a VectorLayerEntryConfig if the entryType attribute of
@@ -95,18 +58,18 @@ export const layerEntryIsOgcWms = (verifyIfLayer: EntryConfigBaseClass): verifyI
   return verifyIfLayer?.entryType === CV_CONST_LAYER_TYPES.WMS;
 };
 
-/**
- * Type guard function that redefines a EntryConfigBaseClass as a EsriDynamicLayerEntryConfig if the entryType attribute of
- * the verifyIfLayer parameter is CV_CONST_LAYER_TYPES.WMS. The type assertion applies only to the true block of the if clause that
- * use this function.
- *
- * @param {EntryConfigBaseClass} verifyIfLayer Polymorphic object to test in order to determine if the type assertion is valid.
- *
- * @returns {boolean} true if the type assertion is valid.
- */
-export const layerEntryIsEsriDynamic = (verifyIfLayer: EntryConfigBaseClass): verifyIfLayer is EsriDynamicLayerEntryConfig => {
-  return verifyIfLayer?.getGeoviewLayerType() === CV_CONST_LAYER_TYPES.ESRI_DYNAMIC;
-};
+// /**
+//  * Type guard function that redefines a EntryConfigBaseClass as a EsriDynamicLayerEntryConfig if the entryType attribute of
+//  * the verifyIfLayer parameter is CV_CONST_LAYER_TYPES.WMS. The type assertion applies only to the true block of the if clause that
+//  * use this function.
+//  *
+//  * @param {EntryConfigBaseClass} verifyIfLayer Polymorphic object to test in order to determine if the type assertion is valid.
+//  *
+//  * @returns {boolean} true if the type assertion is valid.
+//  */
+// export const layerEntryIsEsriDynamic = (verifyIfLayer: EntryConfigBaseClass): verifyIfLayer is EsriDynamicLayerEntryConfig => {
+//   return verifyIfLayer?.getGeoviewLayerType() === CV_CONST_LAYER_TYPES.ESRI_DYNAMIC;
+// };
 
 /**
  * type guard function that redefines a EntryConfigBaseClass as a EsriImageLayerEntryConfig if the entryType attribute of the
@@ -157,18 +120,18 @@ export const mapConfigLayerEntryIsGeoCore = (verifyIfLayer: AbstractGeoviewLayer
   return verifyIfLayer.geoviewLayerType === CV_CONST_LAYER_TYPES.GEOCORE;
 };
 
-/**
- * Type guard function that redefines a TypeGeoviewLayerConfig as a TypeEsriDynamicLayerConfig if the geoviewLayerType attribute
- * of the verifyIfLayer parameter is ESRI_DYNAMIC. The type assertion applies only to the true block of the if clause that use
- * this function.
- *
- * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type assertion is valid.
- *
- * @returns {boolean} true if the type assertion is valid.
- */
-export const geoviewConfigIsEsriDynamic = (verifyIfLayer: AbstractGeoviewLayerConfig): verifyIfLayer is EsriDynamicLayerConfig => {
-  return verifyIfLayer?.geoviewLayerType === CV_CONST_LAYER_TYPES.ESRI_DYNAMIC;
-};
+// /**
+//  * Type guard function that redefines a TypeGeoviewLayerConfig as a TypeEsriDynamicLayerConfig if the geoviewLayerType attribute
+//  * of the verifyIfLayer parameter is ESRI_DYNAMIC. The type assertion applies only to the true block of the if clause that use
+//  * this function.
+//  *
+//  * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type assertion is valid.
+//  *
+//  * @returns {boolean} true if the type assertion is valid.
+//  */
+// export const geoviewConfigIsEsriDynamic = (verifyIfLayer: AbstractGeoviewLayerConfig): verifyIfLayer is EsriDynamicLayerConfig => {
+//   return verifyIfLayer?.geoviewLayerType === CV_CONST_LAYER_TYPES.ESRI_DYNAMIC;
+// };
 
 /**
  * type guard function that redefines a CsvLayerEntryConfig as a TypeCSVLayerConfig if the geoviewLayerType attribute of the
