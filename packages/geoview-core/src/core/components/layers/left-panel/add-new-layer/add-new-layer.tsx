@@ -22,11 +22,10 @@ import { getLocalizedMessage } from '@/core/utils/utilities';
 import { Config } from '@/core/utils/config/config';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { LayerApi } from '@/geo/layer/layer';
 import {
   CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
-  EntryConfigBaseClass,
-  GroupLayerEntryConfig,
   MapConfigLayerEntry,
   ShapefileLayerConfig,
   TypeGeoviewLayerConfig,
@@ -40,7 +39,7 @@ import {
   getLayerNameById,
   getLocalizeLayerType,
 } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
-import { GeoviewLayerConfigError } from '@/api/config/types/classes/config-exceptions';
+import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { AddLayerTree } from '@/core/components/layers/left-panel/add-new-layer/add-layer-tree';
 import { ShapefileReader } from '@/core/utils/config/reader/shapefile-reader';
 
@@ -391,67 +390,36 @@ export function AddNewLayer(): JSX.Element {
 
     const populateLayerList = async (curlayerType: TypeInitialGeoviewLayerType): Promise<boolean> => {
       try {
-        // Create an instance of the GeoView layer. The list of layer entry config is empty, but if the URL specify a sublayer
-        // the instance created will adjust the metadata access path and the list of sublayers accordingly.
-        const geoviewLayerConfig = await api.config.createLayerConfig(layerURL, curlayerType, [], language);
+        // Initialize a temporary GeoviewLayer config depending on the layer type.
+        const geoviewLayerConfig = await LayerApi.createInitConfigFromType('tempoId', 'tempoName', curlayerType, layerURL, mapId, language);
 
-        if (geoviewLayerConfig && !geoviewLayerConfig.getErrorDetectedFlag()) {
-          setLayerType(geoviewLayerConfig.geoviewLayerType);
-          setLayerURL(geoviewLayerConfig.metadataAccessPath);
-          // GV: Here, the list of layer entry config may be empty or it may contain one layer Id specified in the URL.
-          // GV: This list of layer entry config will be used as a filter for the layer tree. Also, when we want to build the layer tree,
-          // GV: we set the metadata layer tree with the layer tree filter and use an empty list of layer entry config. This is how the
-          // GV: GeoView instance differentiate the creation of a layer tree and the creation of a GeoView layer with its list of sublayers.
-          // Set the layer tree filter.
-          geoviewLayerConfig.setMetadataLayerTree(
-            (geoviewLayerConfig.listOfLayerEntryConfig.length
-              ? [{ layerId: geoviewLayerConfig.listOfLayerEntryConfig[0].layerId }]
-              : []) as EntryConfigBaseClass[]
-          );
+        // Set the layer type as it may have changed in the case of GeoCore for example
+        setLayerType(geoviewLayerConfig.geoviewLayerType);
 
-          // Get the name and ID of the first entry before deleting the listOfLayerEntryConfig
-          const idOfFirstLayerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig[0]?.layerId;
-          const nameOfFirstLayerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig[0]?.layerName;
+        // Update UI
+        setLayerURL(geoviewLayerConfig.metadataAccessPath!);
 
-          // GV: The listOfLayerEntryConfig must be empty when we want to build the layer tree.
-          geoviewLayerConfig.listOfLayerEntryConfig = [];
+        // Get the name and ID of the first entry before deleting the listOfLayerEntryConfig
+        const idOfFirstLayerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig[0]?.layerId;
+        const nameOfFirstLayerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig[0]?.layerName;
+        setLayerName(nameOfFirstLayerEntryConfig || idOfFirstLayerEntryConfig);
+        setLayerList(geoviewLayerConfig.listOfLayerEntryConfig as GroupLayerEntryConfig[]);
 
-          // Then, we fetch the service metadata. This will populate the layer tree.
-          await geoviewLayerConfig.fetchServiceMetadata();
-          const metadata = geoviewLayerConfig.getServiceMetadata();
-
-          // Attempt to get a name from metadata
-          if (
-            geoviewLayerConfig.geoviewLayerName === 'unknown' ||
-            (geoviewLayerConfig.geoviewLayerName === 'inconnue' && (metadata.mapName || metadata.Service?.Title || metadata.Service?.Name))
-          )
-            geoviewLayerConfig.geoviewLayerName =
-              (metadata.mapName as string) || (metadata.Service?.Title as string) || (metadata.Service?.Name as string);
-
-          // Generate layer tree
-          const layersTree = geoviewLayerConfig.getMetadataLayerTree()!;
-          logger.logDebug('layersTree', layersTree);
-          setLayerList(layersTree as GroupLayerEntryConfig[]);
-
-          // If there is more than one entry in tree, use the geoview layer name, otherwise use the sublayer name
-          if (layersTree.length > 1 && geoviewLayerConfig.geoviewLayerName) setLayerName(geoviewLayerConfig.geoviewLayerName);
-          else if (layersTree.length === 1) setLayerName(layersTree[0]?.layerName ?? geoviewLayerConfig.geoviewLayerName);
-
-          // If there is either no entries or a single entry that is not a layer, we will bypass tree selection, so set ID and name
-          if (layersTree.length > 0 || (layersTree.length === 1 && !layersTree[0].isLayerGroup)) {
-            setLayerIdsToAdd([layersTree[0]?.layerId ?? idOfFirstLayerEntryConfig]);
-            setLayerName(layersTree[0]?.layerName ?? nameOfFirstLayerEntryConfig ?? geoviewLayerConfig.geoviewLayerName);
-          }
-
-          return true;
+        // TODO: Check - Not sure why we need this here, keeping it..
+        if (geoviewLayerConfig.listOfLayerEntryConfig.length > 0) {
+          setLayerIdsToAdd([geoviewLayerConfig.listOfLayerEntryConfig[0]?.layerId ?? idOfFirstLayerEntryConfig]);
         }
 
-        throw new GeoviewLayerConfigError(`Unable to create ${curlayerType} GeoView layer using "${layerURL} URL.`);
+        // All good
+        return true;
       } catch (err) {
+        // throw new GeoviewLayerConfigError(`Unable to create ${curlayerType} GeoView layer using "${layerURL} URL.`);
         emitErrorServer(curlayerType);
         logger.logError(err);
-        return false;
       }
+
+      // Failed
+      return false;
     };
 
     let promise;
@@ -832,7 +800,7 @@ export function AddNewLayer(): JSX.Element {
             stepContent: {
               children: (
                 <>
-                  {(layerList.length === 0 || (layerList.length === 1 && !layerList[0].isLayerGroup)) && (
+                  {(layerList.length === 0 || (layerList.length === 1 && !(layerList[0] instanceof GroupLayerEntryConfig))) && (
                     <TextField
                       label={t('layers.name')}
                       variant="standard"
