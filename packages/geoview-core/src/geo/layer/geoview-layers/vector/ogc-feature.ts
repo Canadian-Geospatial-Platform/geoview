@@ -62,6 +62,38 @@ export class OgcFeature extends AbstractGeoViewVector {
   }
 
   /**
+   * Overrides the way a geoview layer config initializes its layer entries.
+   * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
+   */
+  protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
+    // Get the folder url
+    const sep = '/collections/';
+    const idx = this.metadataAccessPath.lastIndexOf(sep);
+    let rootUrl = this.metadataAccessPath;
+    let id: string | undefined;
+    let entries: TypeJsonArray = [];
+    if (idx > 0) {
+      rootUrl = this.metadataAccessPath.substring(0, idx);
+      id = this.metadataAccessPath.substring(idx + sep.length);
+      entries = [{ id }] as unknown as TypeJsonArray;
+    }
+
+    // If no id
+    if (!id) {
+      // Fetch the metadata
+      await this.onFetchAndSetServiceMetadata();
+
+      // Now that we have metadata
+      entries = (this.metadata!.collections as TypeJsonArray).map((collection) => {
+        return { id: collection.id, layerId: collection.id, layerName: collection.description };
+      });
+    }
+
+    // Redirect
+    return Promise.resolve(OgcFeature.createOgcFeatureLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, entries));
+  }
+
+  /**
    * Overrides the validation of a layer entry config.
    * @param {TypeLayerEntryConfig} layerConfig - The layer entry config to validate.
    */
@@ -224,6 +256,27 @@ export class OgcFeature extends AbstractGeoViewVector {
   }
 
   /**
+   * Initializes a GeoView layer configuration for an OGC Feature layer.
+   * This method creates a basic TypeGeoviewLayerConfig using the provided
+   * ID, name, and metadata access path URL. It then initializes the layer entries by calling
+   * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
+   * @param {string} geoviewLayerId - A unique identifier for the layer.
+   * @param {string} geoviewLayerName - The display name of the layer.
+   * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
+   * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
+   */
+  static initGeoviewLayerConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    metadataAccessPath: string
+  ): Promise<TypeGeoviewLayerConfig> {
+    // Create the Layer config
+    const layerConfig = OgcFeature.createOgcFeatureLayerConfig(geoviewLayerId, geoviewLayerName, metadataAccessPath, false, []);
+    const myLayer = new OgcFeature(layerConfig);
+    return myLayer.initGeoViewLayerEntries();
+  }
+
+  /**
    * Creates a configuration object for an OGC Feature layer.
    * This function constructs a `TypeOgcFeatureLayerConfig` object that describes an OGC Feature layer
    * and its associated entry configurations based on the provided parameters.
@@ -254,7 +307,8 @@ export class OgcFeature extends AbstractGeoViewVector {
         geoviewLayerConfig,
         schemaTag: CONST_LAYER_TYPES.OGC_FEATURE,
         entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
-        layerId: layerEntry.id as string,
+        layerId: `${layerEntry.id}`,
+        layerName: `${layerEntry.layerName}` || `${layerEntry.id}`,
         source: {
           format: 'featureAPI',
           dataAccessPath: metadataAccessPath,

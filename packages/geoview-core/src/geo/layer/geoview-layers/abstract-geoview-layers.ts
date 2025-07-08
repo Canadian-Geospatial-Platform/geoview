@@ -28,13 +28,7 @@ import {
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { SnackbarType } from '@/core/utils/notifications';
-import {
-  CancelledError,
-  ResponseEmptyError,
-  PromiseRejectErrorWrapper,
-  formatError,
-  NotImplementedError,
-} from '@/core/exceptions/core-exceptions';
+import { CancelledError, ResponseEmptyError, PromiseRejectErrorWrapper, formatError } from '@/core/exceptions/core-exceptions';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
@@ -151,6 +145,32 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
+   * Must override method to read the service metadata from the metadataAccessPath and stores it in the 'metadata' property.
+   * @returns {Promise<void>} A promise resolved once the metadata has been fetched and assigned to the 'metadata' property.
+   */
+  protected abstract onFetchAndSetServiceMetadata(): Promise<void>;
+
+  /**
+   * Must override method to initialize a layer entry based on a GeoView layer config.
+   * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
+   */
+  protected abstract onInitLayerEntries(): Promise<TypeGeoviewLayerConfig>;
+
+  /**
+   * Must override method to process a layer entry and return a Promise of an Open Layer Base Layer object.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - Information needed to create the GeoView layer.
+   * @returns {Promise<AbstractBaseLayerEntryConfig>} The Promise that the config metadata has been processed.
+   */
+  protected abstract onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig>;
+
+  /**
+   * Must override method to create a GV Layer from a layer configuration.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
+   * @returns {AbstractGVLayer} The GV Layer that has been created.
+   */
+  protected abstract onCreateGVLayer(layerConfig: AbstractBaseLayerEntryConfig): AbstractGVLayer;
+
+  /**
    * Set the list of layer entry configuration and initialize the registered layer object and register all layers to layer sets.
    *
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration options.
@@ -197,15 +217,13 @@ export abstract class AbstractGeoViewLayer {
     return this.geoviewLayerId;
   }
 
-  async findLayerEntries(): Promise<TypeLayerEntryConfig[]> {
-    // Log
-    logger.logTraceCore('ABSTRACT-GEOVIEW-LAYERS - findLayerEntries');
-
-    // Fetch and set the service metadata
-    await this.onFetchAndSetServiceMetadata();
-
-    // TODO: Empty
-    throw new NotImplementedError('No metadata to fetch');
+  /**
+   * Initializes the layer entries based on the GeoviewLayerConfig that was initially provided in the constructor.
+   * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
+   */
+  initGeoViewLayerEntries(): Promise<TypeGeoviewLayerConfig> {
+    // Redirect
+    return this.onInitLayerEntries();
   }
 
   /**
@@ -321,12 +339,6 @@ export abstract class AbstractGeoViewLayer {
       throw new LayerServiceMetadataUnableToFetchError(this.geoviewLayerId, this.geoviewLayerName, formatError(error));
     }
   }
-
-  /**
-   * Must override method to read the service metadata from the metadataAccessPath and stores it in the 'metadata' property.
-   * @returns {Promise<void>} A promise resolved once the metadata has been fetched and assigned to the 'metadata' property.
-   */
-  protected abstract onFetchAndSetServiceMetadata(): Promise<void>;
 
   /**
    * Recursively validates the configuration of the layer entries to ensure that each layer is correctly defined.
@@ -542,13 +554,6 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
-   * Must override method to process a layer entry and return a Promise of an Open Layer Base Layer object.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - Information needed to create the GeoView layer.
-   * @returns {Promise<AbstractBaseLayerEntryConfig>} The Promise that the config metadata has been processed.
-   */
-  protected abstract onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig>;
-
-  /**
    * Recursively processes the list of layer Entries to create the layers and the layer groups.
    * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig - The list of layer entries to process.
    * @param {LayerGroup} layerGroup - Optional layer group to use when we have many layers. The very first call to
@@ -689,13 +694,6 @@ export abstract class AbstractGeoViewLayer {
     // Return it
     return layer;
   }
-
-  /**
-   * Must override method to create a GV Layer from a layer configuration.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
-   * @returns {AbstractGVLayer} The GV Layer that has been created.
-   */
-  protected abstract onCreateGVLayer(layerConfig: AbstractBaseLayerEntryConfig): AbstractGVLayer;
 
   /**
    * Creates a layer group.

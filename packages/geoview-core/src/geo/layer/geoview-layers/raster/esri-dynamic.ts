@@ -1,5 +1,6 @@
 import { ImageArcGISRest } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/ImageArcGISRest';
+import { cloneDeep } from 'lodash';
 
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
@@ -20,6 +21,7 @@ import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-excep
 import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { deepMergeObjects } from '@/core/utils/utilities';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
+import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 
 // GV: CONFIG EXTRACTION
 // GV: This section of code was extracted and copied to the geoview config section
@@ -64,6 +66,38 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   protected override onFetchAndSetServiceMetadata(): Promise<void> {
     // Redirect
     return commonFetchAndSetServiceMetadata(this);
+  }
+
+  /**
+   * Overrides the way a geoview layer config initializes its layer entries.
+   * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
+   */
+  protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
+    // Fetch the metadata
+    await this.onFetchAndSetServiceMetadata();
+
+    // Now that we have metadata
+    const layers = this.metadata!.layers as TypeJsonArray;
+
+    // Get all entries
+    const entries = layers.map((layer) => {
+      return { index: layer.id, layerId: layer.id, layerName: layer.name, subLayerIds: layer.subLayerIds, subLayers: [] };
+    }) as unknown as TypeJsonArray;
+
+    // Build a tree of entries
+    const entriesTree = EsriDynamic.buildLayerEntriesTree(entries);
+
+    // The config
+    const theConfig = EsriDynamic.createEsriDynamicLayerConfig(
+      this.geoviewLayerId,
+      this.geoviewLayerName,
+      this.metadataAccessPath,
+      false,
+      entriesTree
+    );
+
+    // Redirect
+    return Promise.resolve(theConfig);
   }
 
   /**
@@ -113,6 +147,27 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   }
 
   /**
+   * Initializes a GeoView layer configuration for an Esri Dynamic layer.
+   * This method creates a basic TypeGeoviewLayerConfig using the provided
+   * ID, name, and metadata access path URL. It then initializes the layer entries by calling
+   * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
+   * @param {string} geoviewLayerId - A unique identifier for the layer.
+   * @param {string} geoviewLayerName - The display name of the layer.
+   * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
+   * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
+   */
+  static initGeoviewLayerConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    metadataAccessPath: string
+  ): Promise<TypeGeoviewLayerConfig> {
+    // Create the Layer config
+    const layerConfig = EsriDynamic.createEsriDynamicLayerConfig(geoviewLayerId, geoviewLayerName, metadataAccessPath, false, []);
+    const myLayer = new EsriDynamic(layerConfig);
+    return myLayer.initGeoViewLayerEntries();
+  }
+
+  /**
    * Creates a configuration object for a Esri Dynamic layer.
    * This function constructs a `TypeEsriDynamicLayerConfig` object that describes an Esri Dynamic layer
    * and its associated entry configurations based on the provided parameters.
@@ -121,6 +176,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {string} metadataAccessPath - The URL or path to access metadata.
    * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @param {TypeJsonArray} layerEntries - An array of layer entries objects to be included in the configuration.
+   * @param {TypeJsonObject} customGeocoreLayerConfig - An optional layer config from Geocore.
    * @returns {TypeEsriDynamicLayerConfig} The constructed configuration object for the Esri Dynamic layer.
    */
   static createEsriDynamicLayerConfig(
@@ -129,7 +185,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     metadataAccessPath: string,
     isTimeAware: boolean,
     layerEntries: TypeJsonArray,
-    customGeocoreLayerConfig: TypeJsonObject
+    customGeocoreLayerConfig: TypeJsonObject = {}
   ): TypeEsriDynamicLayerConfig {
     const geoviewLayerConfig: TypeEsriDynamicLayerConfig = {
       geoviewLayerId,
@@ -139,14 +195,53 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       isTimeAware,
       listOfLayerEntryConfig: [],
     };
-    geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
+
+    // Convert the tree of entries to GeoviewLayerConfigs
+    geoviewLayerConfig.listOfLayerEntryConfig = EsriDynamic.#convertTreeToLayerConfigs(
+      geoviewLayerConfig,
+      layerEntries,
+      customGeocoreLayerConfig
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ) as any;
+
+    // Return it
+    return geoviewLayerConfig;
+  }
+
+  // TODO: JSDOC
+  static #convertTreeToLayerConfigs(
+    geoviewLayerConfig: TypeEsriDynamicLayerConfig,
+    layerEntries: TypeJsonArray,
+    customGeocoreLayerConfig: TypeJsonObject = {}
+  ): (GroupLayerEntryConfig | EsriDynamicLayerEntryConfig)[] {
+    // For each layer entry
+    return layerEntries.map((layerEntry) => {
+      // If is a group layer
+      if (layerEntry.subLayers && (layerEntry.subLayers.length as number) > 0) {
+        // Recursively convert sublayers
+        const subConfigs = EsriDynamic.#convertTreeToLayerConfigs(
+          geoviewLayerConfig,
+          layerEntry.subLayers as TypeJsonArray,
+          customGeocoreLayerConfig
+        );
+
+        return new GroupLayerEntryConfig({
+          geoviewLayerConfig,
+          layerId: `${layerEntry.layerId}`,
+          layerName: `${layerEntry.layerName}`,
+          listOfLayerEntryConfig: subConfigs,
+        } as GroupLayerEntryConfig);
+      }
+
+      // Create entry config
       const layerEntryConfig = {
         geoviewLayerConfig,
         schemaTag: CONST_LAYER_TYPES.ESRI_DYNAMIC,
         entryType: CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE,
-        layerId: layerEntry.index as string,
+        layerId: `${layerEntry.index}`,
+        layerName: `${layerEntry.layerName}` || `${layerEntry.layerId}`,
         source: {
-          dataAccessPath: metadataAccessPath,
+          dataAccessPath: geoviewLayerConfig.metadataAccessPath,
         },
       };
 
@@ -156,9 +251,6 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       // Reconstruct
       return new EsriDynamicLayerEntryConfig(mergedConfig as unknown as EsriDynamicLayerEntryConfig);
     });
-
-    // Return it
-    return geoviewLayerConfig;
   }
 
   /**
@@ -221,6 +313,34 @@ export class EsriDynamic extends AbstractGeoViewRaster {
 
     // Return the source
     return olSource;
+  }
+
+  static buildLayerEntriesTree(entries: TypeJsonArray): TypeJsonArray {
+    // Create a lookup map of all entries by layerId
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const entryMap: Record<string, any> = {};
+    entries.forEach((entry) => {
+      entryMap[entry.layerId as string] = cloneDeep(entry);
+    });
+
+    // Track root entries (those not referenced as sublayers)
+    const referenced = new Set<string>();
+
+    // Assign subLayers
+    entries.forEach((entry) => {
+      if (entry.subLayerIds && (entry.subLayerIds.length as number) > 0) {
+        (entry.subLayerIds as TypeJsonArray).forEach((subId) => {
+          const child = entryMap[subId as string];
+          if (child) {
+            entryMap[entry.layerId as string].subLayers!.push(child);
+            referenced.add(subId as string); // mark as child
+          }
+        });
+      }
+    });
+
+    // Return only root nodes (not referenced as subLayers)
+    return entries.filter((entry) => !referenced.has(entry.layerId as string)).map((entry) => entryMap[entry.layerId as string]);
   }
 }
 

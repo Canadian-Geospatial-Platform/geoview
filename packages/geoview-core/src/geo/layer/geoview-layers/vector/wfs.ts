@@ -78,6 +78,32 @@ export class WFS extends AbstractGeoViewVector {
   }
 
   /**
+   * Overrides the way a geoview layer config initializes its layer entries.
+   * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
+   */
+  protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
+    // Fetch metadata
+    const rootUrl = this.metadataAccessPath;
+    await this.onFetchAndSetServiceMetadata();
+
+    // Now that we have metadata, get the layer ids from it
+    if (!Array.isArray(this.metadata?.FeatureTypeList?.FeatureType))
+      this.metadata!.FeatureTypeList.FeatureType = [this.metadata?.FeatureTypeList?.FeatureType] as TypeJsonObject;
+
+    const metadataLayerList = this.metadata?.FeatureTypeList.FeatureType as TypeJsonArray;
+    const entries = metadataLayerList.map((layerMetadata) => {
+      return {
+        id: layerMetadata.Name && (layerMetadata.Name['#text'] as string),
+        layerId: layerMetadata.Name && (layerMetadata.Name['#text'] as string),
+        layerName: layerMetadata.Title && (layerMetadata.Title['#text'] as string),
+      };
+    }) as unknown as TypeJsonArray;
+
+    // Redirect
+    return Promise.resolve(WFS.createWfsFeatureLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, entries));
+  }
+
+  /**
    * Overrides the validation of a layer entry config.
    * @param {TypeLayerEntryConfig} layerConfig - The layer entry config to validate.
    */
@@ -248,6 +274,27 @@ export class WFS extends AbstractGeoViewVector {
   }
 
   /**
+   * Initializes a GeoView layer configuration for a WFS layer.
+   * This method creates a basic TypeGeoviewLayerConfig using the provided
+   * ID, name, and metadata access path URL. It then initializes the layer entries by calling
+   * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
+   * @param {string} geoviewLayerId - A unique identifier for the layer.
+   * @param {string} geoviewLayerName - The display name of the layer.
+   * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
+   * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
+   */
+  static initGeoviewLayerConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    metadataAccessPath: string
+  ): Promise<TypeGeoviewLayerConfig> {
+    // Create the Layer config
+    const layerConfig = WFS.createWfsFeatureLayerConfig(geoviewLayerId, geoviewLayerName, metadataAccessPath, false, []);
+    const myLayer = new WFS(layerConfig);
+    return myLayer.initGeoViewLayerEntries();
+  }
+
+  /**
    * This method sets the outfields and aliasFields of the source feature info.
    *
    * @param {TypeJsonArray} fields An array of field names and its aliases.
@@ -335,7 +382,8 @@ export class WFS extends AbstractGeoViewVector {
         geoviewLayerConfig,
         schemaTag: CONST_LAYER_TYPES.WFS,
         entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
-        layerId: layerEntry.id as string,
+        layerId: `${layerEntry.id}`,
+        layerName: `${layerEntry.layerName}` || `${layerEntry.id}`,
         source: {
           format: 'WFS',
           strategy: 'all',
