@@ -1,7 +1,6 @@
 import { useStore } from 'zustand';
 
 import { Draw } from '@/geo/interaction/draw';
-import { Modify } from '@/geo/interaction/modify';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
@@ -31,10 +30,6 @@ type TypeNavBarPackageConfig = {
   drawer?: TypeDrawerConfig;
 };
 
-export type TypeEditInstance = {
-  [groupKey: string]: Modify | undefined;
-};
-
 export type TypeTransformInstance = {
   [groupKey: string]: Transform | undefined;
 };
@@ -46,7 +41,6 @@ export interface IDrawerState {
   style: StyleProps;
   drawInstance: Draw | undefined;
   isEditing: boolean;
-  editInstances: TypeEditInstance;
   transformInstances: TypeTransformInstance;
   hideMeasurements: boolean;
   iconSrc: string;
@@ -60,7 +54,6 @@ export interface IDrawerState {
     getIsDrawing: () => boolean;
     getDrawInstance: () => Draw | undefined;
     getIsEditing: () => boolean;
-    getEditInstances: () => TypeEditInstance;
     getTransformInstances: () => TypeTransformInstance;
     getHideMeasurements: () => boolean;
     getIconSrc: () => string;
@@ -76,8 +69,6 @@ export interface IDrawerState {
     setDrawInstance(drawInstance: Draw): void;
     removeDrawInstance(): void;
     setIsEditing: (isEditing: boolean) => void;
-    setEditInstance(groupKey: string, editInstance: Modify | undefined): void;
-    removeEditInstance(groupKey: string): void;
     setTransformInstance(groupKey: string, transformInstance: Transform | undefined): void;
     removeTransformInstance(groupKey: string): void;
     setHideMeasurements(hideMeasurements: boolean): void;
@@ -97,8 +88,6 @@ export interface IDrawerState {
     setDrawInstance: (drawInstance: Draw) => void;
     removeDrawInstance: () => void;
     setIsEditing: (isEditing: boolean) => void;
-    setEditInstance: (groupKey: string, editInstance: Modify | undefined) => void;
-    removeEditInstance: (groupKey: string) => void;
     setTransformInstance: (groupKey: string, transformInstance: Transform | undefined) => void;
     removeTransformInstance: (groupKey: string) => void;
     setHideMeasurements: (hideMeasurements: boolean) => void;
@@ -126,7 +115,6 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
     },
     drawInstance: undefined,
     isEditing: false,
-    editInstances: {},
     transformInstances: {},
     hideMeasurements: true,
     iconSrc: '',
@@ -179,9 +167,6 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
       },
       getIsEditing: () => {
         return get().drawerState.isEditing;
-      },
-      getEditInstances: () => {
-        return get().drawerState.editInstances;
       },
       getTransformInstances: () => {
         return get().drawerState.transformInstances;
@@ -239,14 +224,6 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
       setIsEditing: (isEditing: boolean) => {
         // Redirect to setter
         get().drawerState.setterActions.setIsEditing(isEditing);
-      },
-      setEditInstance: (groupKey: string, editInstance: Modify) => {
-        // Redirect to setter
-        get().drawerState.setterActions.setEditInstance(groupKey, editInstance);
-      },
-      removeEditInstance: (groupKey: string) => {
-        // Redirect to setter
-        get().drawerState.setterActions.removeEditInstance(groupKey);
       },
       setTransformInstance: (groupKey: string, transformInstance: Transform) => {
         // Redirect to setter
@@ -373,29 +350,6 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
           drawerState: {
             ...get().drawerState,
             isEditing,
-          },
-        });
-      },
-
-      setEditInstance: (groupKey: string, editInstance: Modify) => {
-        set({
-          drawerState: {
-            ...get().drawerState,
-            editInstances: {
-              ...get().drawerState.editInstances,
-              [groupKey]: editInstance,
-            },
-          },
-        });
-      },
-
-      removeEditInstance: (groupKey: string) => {
-        const editInstances = { ...get().drawerState.editInstances };
-        editInstances[groupKey] = undefined;
-        set({
-          drawerState: {
-            ...get().drawerState,
-            editInstances,
           },
         });
       },

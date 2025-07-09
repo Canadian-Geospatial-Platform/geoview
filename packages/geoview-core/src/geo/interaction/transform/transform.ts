@@ -104,6 +104,8 @@ export class Transform extends Interaction {
     // Add the handle layer to the map
     if (this.mapViewer) {
       this.mapViewer.map.addLayer(this.#ol_transform.handleLayer);
+      // Prevent context menu on map element
+      this.mapViewer.map.getTargetElement().addEventListener('contextmenu', this.#ol_transform.contextMenuHandler);
     }
 
     // Redirect to super method to start interaction
@@ -117,6 +119,8 @@ export class Transform extends Interaction {
     // Remove the handle layer from the map
     if (this.mapViewer) {
       this.mapViewer.map.removeLayer(this.#ol_transform.handleLayer);
+      // Remove context menu handler
+      this.mapViewer.map.getTargetElement().removeEventListener('contextmenu', this.#ol_transform.contextMenuHandler);
     }
 
     // Clear any selected feature

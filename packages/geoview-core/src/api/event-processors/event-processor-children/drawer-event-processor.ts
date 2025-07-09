@@ -537,40 +537,15 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
     const typesToEdit = geomTypes || state.actions.getGeomTypes();
 
-    const editInstances = state.actions.getEditInstances();
+    const transformInstances = state.actions.getTransformInstances();
 
     // If editing already, stop and restart as it's likely a style change
-    if (Object.keys(editInstances).length > 0) {
-      Object.keys(editInstances).forEach((type) => {
-        editInstances[type]?.stopInteraction();
-        state.actions.setEditInstance(type, undefined);
+    if (Object.keys(transformInstances).length > 0) {
+      Object.keys(transformInstances).forEach((type) => {
+        transformInstances[type]?.stopInteraction();
+        state.actions.setTransformInstance(type, undefined);
       });
     }
-
-    // Modify Interactions
-    typesToEdit.forEach((type) => {
-      const groupKey = `draw-${type}`;
-      // Only start editing if the drawing group exists
-      if (viewer.layer.geometry.geometryGroups.find((group) => group.geometryGroupId === groupKey) !== undefined) {
-        const editInstance = viewer.initModifyInteractions(groupKey);
-
-        // Event handler for updating measurement tool on modify
-        editInstance.onModifyEnded((_sender, event) => {
-          const feature = event.features.item(0);
-          if (!feature) return;
-
-          const geom = feature.getGeometry();
-          if (!geom) return;
-          if (geom instanceof Point) return;
-
-          // GV hideMeasurements has to be here, otherwise the value can be stale, unlike style and geomType which restart the interaction
-          const hideMeasurements = state.actions.getHideMeasurements();
-          this.#createMeasureTooltip(feature, hideMeasurements, mapId);
-        });
-
-        state.actions.setEditInstance(groupKey, editInstance);
-      }
-    });
 
     // Transform Interactions
     typesToEdit.forEach((type) => {
@@ -588,9 +563,8 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
           if (!geom) return;
           if (geom instanceof Point) return;
 
-          // GV hideMeasurements has to be here, otherwise the value can be stale, unlike style and geomType which restart the interaction
-          const hideMeasurements = state.actions.getHideMeasurements();
-          this.#createMeasureTooltip(feature, hideMeasurements, mapId);
+          // GV update the overlay, otherwise the value can be stale, unlike style and geomType which restart the interaction
+          this.#createMeasureTooltip(feature, true, mapId);
         });
 
         transformInstance.onDeleteFeature((_sender, event) => {
@@ -627,16 +601,6 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     if (!viewer) throw new MapViewerNotFoundError(mapId);
 
     const typesToEdit = geomTypes || state.actions.getGeomTypes();
-
-    // Edit geometries for each type
-    typesToEdit.forEach((type) => {
-      const groupKey = `draw-${type}`;
-      const editInstances = state.actions.getEditInstances();
-
-      if (editInstances === undefined || !(groupKey in editInstances) || editInstances[groupKey] === undefined) return;
-      editInstances[groupKey].stopInteraction();
-      state.actions.removeEditInstance(groupKey);
-    });
 
     // Transform geometries for each type
     typesToEdit.forEach((type) => {
@@ -759,6 +723,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       // Delete all geometries from the group
       viewer.layer.geometry.deleteGeometriesFromGroup(groupKey);
     });
+    if (state.actions.getIsEditing()) {
+      this.stopEditing(mapId);
+    }
   }
 
   /**
