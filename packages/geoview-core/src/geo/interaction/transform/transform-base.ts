@@ -2,8 +2,8 @@ import OLMap from 'ol/Map';
 import { Pointer as OLPointer } from 'ol/interaction';
 import Collection from 'ol/Collection';
 import Feature from 'ol/Feature';
-import { Geometry, Point, Polygon, LineString } from 'ol/geom';
-import { Style, Fill, Stroke, Circle as CircleStyle, Text } from 'ol/style';
+import { Geometry, Point, Polygon, LineString, Circle } from 'ol/geom';
+import { Style, Fill, Stroke, Circle as CircleStyle, Text, RegularShape } from 'ol/style';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import { Coordinate } from 'ol/coordinate';
@@ -31,6 +31,8 @@ export enum HandleType {
   SCALE_SW = 'scale-sw',
   SCALE_NW = 'scale-nw',
   DELETE = 'delete',
+  VERTEX = 'vertex',
+  EDGE_MIDPOINT = 'edge-midpoint',
 }
 
 /**
@@ -47,6 +49,12 @@ export interface TransformBaseOptions {
   hitTolerance?: number;
   enableDelete?: boolean;
   mapViewer?: MapViewer; // MapViewer type
+}
+
+export interface CreateHandleProps {
+  vertexIndex?: number;
+  isCircleCenter?: boolean;
+  isCircleEdge?: boolean;
 }
 
 /**
@@ -103,25 +111,26 @@ export class OLTransform extends OLPointer {
   /** The type of transformation being performed */
   #transformType?: HandleType;
 
+  /** Flag to track if a vertex was already added during this drag operation */
+  #vertexAdded = false;
+
   // Define handle styles
   rotateStyle = new Style({
-    image: new CircleStyle({
-      radius: 8,
+    text: new Text({
+      text: '↻',
       fill: new Fill({
-        color: 'rgba(255, 255, 0, 0.8)',
+        color: 'rgba(100, 100, 100, 0.95)',
       }),
-      stroke: new Stroke({
-        color: '#333',
-        width: 1,
-      }),
+      font: 'bold 20px sans-serif',
     }),
   });
 
   deleteStyle = new Style({
-    image: new CircleStyle({
-      radius: 8,
+    image: new RegularShape({
+      points: 50,
+      radius: 10,
       fill: new Fill({
-        color: 'rgba(255, 0, 0, 0.8)',
+        color: 'rgba(244, 67, 54, 0.95)',
       }),
       stroke: new Stroke({
         color: '#333',
@@ -129,20 +138,21 @@ export class OLTransform extends OLPointer {
       }),
     }),
     text: new Text({
-      text: 'X',
+      text: '✕',
       fill: new Fill({
         color: '#fff',
       }),
-      font: 'bold 12px sans-serif',
+      font: 'bold 14px sans-serif',
       offsetY: 1,
     }),
   });
 
   scaleStyle = new Style({
-    image: new CircleStyle({
+    image: new RegularShape({
+      points: 50,
       radius: 8,
       fill: new Fill({
-        color: 'rgba(0, 255, 0, 0.8)',
+        color: 'rgba(160, 160, 160, 0.8)',
       }),
       stroke: new Stroke({
         color: '#333',
@@ -152,10 +162,12 @@ export class OLTransform extends OLPointer {
   });
 
   stretchStyle = new Style({
-    image: new CircleStyle({
+    image: new RegularShape({
+      points: 4,
       radius: 8,
+      angle: Math.PI / 4, // 45 degrees to make it a square
       fill: new Fill({
-        color: 'rgba(0, 0, 255, 0.8)',
+        color: 'rgba(160, 160, 160, 0.8)',
       }),
       stroke: new Stroke({
         color: '#333',
@@ -174,6 +186,41 @@ export class OLTransform extends OLPointer {
         color: '#333',
         width: 1,
       }),
+    }),
+  });
+
+  vertexStyle = new Style({
+    image: new CircleStyle({
+      radius: 6,
+      fill: new Fill({ color: 'rgba(255, 255, 255, 0.9)' }),
+      stroke: new Stroke({ color: '#333', width: 2 }),
+    }),
+  });
+
+  edgeMidpointStyle = new Style({
+    image: new CircleStyle({
+      radius: 4,
+      fill: new Fill({ color: 'rgba(0, 255, 255, 0.7)' }),
+      stroke: new Stroke({ color: '#333', width: 1 }),
+    }),
+  });
+
+  extentBoundaryStyle = new Style({
+    stroke: new Stroke({
+      color: 'rgba(100, 100, 100, 0.5)',
+      width: 1,
+      lineDash: [5, 5],
+    }),
+    fill: new Fill({
+      color: 'rgba(0, 0, 0, 0)', // Transparent fill
+    }),
+  });
+
+  rotateLineStyle = new Style({
+    stroke: new Stroke({
+      color: 'rgba(100, 100, 100, 0.5)',
+      width: 1,
+      lineDash: [5, 5],
     }),
   });
 
@@ -264,6 +311,9 @@ export class OLTransform extends OLPointer {
     // Set the selected feature
     this.selectedFeature = feature;
 
+    // Hide the measurement tooltip while transforming
+    this.#hideMeasureTooltip();
+
     // Create handles for the feature
     this.createHandles();
   }
@@ -297,8 +347,25 @@ export class OLTransform extends OLPointer {
    * Clears the current selection.
    */
   clearSelection(): void {
+    // Show the measurement tooltip again
+    this.#showMeasureTooltip();
+
     this.clearHandles();
     this.selectedFeature = undefined;
+  }
+
+  /**
+   * Gets padding based on map resolution for consistent visual spacing.
+   * @returns {number} Padding in map units.
+   */
+  #getMapBasedPadding(): number {
+    if (!this.mapViewer?.map) return 0; // fallback
+
+    const view = this.mapViewer.map.getView();
+    const resolution = view.getResolution() || 1;
+
+    // 30 pixels converted to map units
+    return resolution * 15;
   }
 
   /**
@@ -310,31 +377,92 @@ export class OLTransform extends OLPointer {
     const geometry = this.selectedFeature.getGeometry();
     if (!geometry) return;
 
+    // Handles for Points
+    if (geometry instanceof Point) {
+      if (this.options.enableDelete) {
+        const coords = geometry.getCoordinates();
+        const offset = this.#getMapBasedPadding();
+        this.createHandle([coords[0] + offset, coords[1] + offset], HandleType.DELETE);
+      }
+      return;
+    }
+
+    // Handles for Circles
+    if (geometry instanceof Circle) {
+      const center = geometry.getCenter();
+      const radius = geometry.getRadius();
+      const edgePoint: Coordinate = [center[0] + radius, center[1]];
+
+      // Create center vertex (for moving)
+      this.createHandle(center, HandleType.VERTEX, { vertexIndex: 0, isCircleCenter: true });
+
+      // Create edge vertex (for resizing)
+      this.createHandle(edgePoint, HandleType.VERTEX, { vertexIndex: 1, isCircleEdge: true });
+
+      // Create delete handle
+      if (this.options.enableDelete) {
+        const offset = this.#getMapBasedPadding();
+        this.createHandle([center[0] + radius + offset, center[1] + offset], HandleType.DELETE);
+      }
+      return;
+    }
+
+    // Handles for other geometries (LineString, Polygon)
     // Get the extent of the feature
     const extent = geometry.getExtent();
+    const padding = this.#getMapBasedPadding();
+    const expandedExtent: Extent = [extent[0] - padding, extent[1] - padding, extent[2] + padding, extent[3] + padding];
     const center = getCenter(extent);
     this.center = center;
 
+    // Create extent boundary
+    this.createExtentBoundary(expandedExtent);
+
     // Create handles based on the options
     if (this.options.scale) {
-      this.createScaleHandles(extent);
+      this.createScaleHandles(expandedExtent);
     }
 
     if (this.options.stretch) {
-      this.createStretchHandles(extent);
+      this.createStretchHandles(expandedExtent);
     }
 
     if (this.options.rotate) {
-      this.createRotateHandle(center, extent);
+      this.createRotateHandle(expandedExtent);
     }
 
     if (this.options.enableDelete) {
-      this.createDeleteHandle(center, extent);
+      this.createDeleteHandle(expandedExtent);
     }
 
-    if (this.options.translateFeature) {
-      this.createHandle(center, HandleType.TRANSLATE_CENTER);
+    if (geometry instanceof LineString || geometry instanceof Polygon) {
+      this.createVertexHandles(geometry);
     }
+  }
+
+  /**
+   * Creates the extent boundary rectangle.
+   * @param {Extent} extent - The expanded extent.
+   */
+  createExtentBoundary(extent: Extent): void {
+    const [minX, minY, maxX, maxY] = extent;
+    const boundaryGeometry = new Polygon([
+      [
+        [minX, minY],
+        [maxX, minY],
+        [maxX, maxY],
+        [minX, maxY],
+        [minX, minY],
+      ],
+    ]);
+
+    const boundary = new Feature({
+      geometry: boundaryGeometry,
+      handleType: 'boundary',
+    });
+
+    boundary.setStyle(this.extentBoundaryStyle);
+    this.handleSource.addFeature(boundary);
   }
 
   /**
@@ -369,26 +497,86 @@ export class OLTransform extends OLPointer {
 
   /**
    * Creates a rotation handle above the feature.
-   * @param {Coordinate} center - The center of the feature.
    * @param {Extent} extent - The extent of the feature.
    */
-  createRotateHandle(center: Coordinate, extent: Extent): void {
-    const [, , , maxY] = extent;
-    const rotateY = maxY + 30; // Position the rotate handle above the feature
+  createRotateHandle(extent: Extent): void {
+    const [minX, , maxX, maxY] = extent;
+    const centerX = (minX + maxX) / 2;
+    const offset = this.#getMapBasedPadding() * 2;
 
-    this.createHandle([center[0], rotateY], HandleType.ROTATE);
+    const lineStart: Coordinate = [centerX, maxY];
+    const lineEnd: Coordinate = [centerX, maxY + offset];
+
+    // Create line from top stretch to rotate handle
+    const line = new Feature({
+      geometry: new LineString([lineStart, lineEnd]),
+      handleType: 'rotate-line',
+    });
+    line.setStyle(this.rotateLineStyle);
+    this.handleSource.addFeature(line);
+
+    // Create rotate handle at end of line
+    this.createHandle(lineEnd, HandleType.ROTATE);
   }
 
   /**
    * Creates a delete handle for the feature.
-   * @param {Coordinate} center - The center of the feature.
    * @param {Extent} extent - The extent of the feature.
    */
-  createDeleteHandle(center: Coordinate, extent: Extent): void {
-    const [, , maxX] = extent;
-    const deleteX = maxX + 30; // Position the delete handle to the right of the feature
+  createDeleteHandle(extent: Extent): void {
+    const [, minY, maxX] = extent;
+    const offset = this.#getMapBasedPadding() * 1.3;
 
-    this.createHandle([deleteX, center[1]], HandleType.DELETE);
+    const deletePos: Coordinate = [maxX + offset, minY - offset];
+    this.createHandle(deletePos, HandleType.DELETE);
+  }
+
+  /**
+   * Creates vertex handles for LineString and Polygon geometries.
+   * @param {LineString | Polygon} geometry - The geometry to create vertex handles for.
+   */
+  createVertexHandles(geometry: LineString | Polygon): void {
+    let coordinates: Coordinate[];
+
+    if (geometry instanceof LineString) {
+      coordinates = geometry.getCoordinates();
+    } else {
+      // For polygons, use the exterior ring
+      [coordinates] = geometry.getCoordinates();
+    }
+
+    // Create vertex handles
+    coordinates.forEach((coord, index) => {
+      // Skip the last coordinate for polygons (it's the same as the first)
+      if (geometry instanceof Polygon && index === coordinates.length - 1) return;
+
+      const vertexHandle = new Feature({
+        geometry: new Point(coord),
+        handleType: HandleType.VERTEX,
+        vertexIndex: index,
+      });
+
+      vertexHandle.set('feature', this.selectedFeature);
+      vertexHandle.setStyle(this.vertexStyle);
+      this.handleSource.addFeature(vertexHandle);
+    });
+
+    // Create edge midpoint handles for adding vertices
+    for (let i = 0; i < coordinates.length - 1; i++) {
+      const start = coordinates[i];
+      const end = coordinates[i + 1];
+      const midpoint: Coordinate = [(start[0] + end[0]) / 2, (start[1] + end[1]) / 2];
+
+      const midpointHandle = new Feature({
+        geometry: new Point(midpoint),
+        handleType: HandleType.EDGE_MIDPOINT,
+        edgeIndex: i,
+      });
+
+      midpointHandle.set('feature', this.selectedFeature);
+      midpointHandle.setStyle(this.edgeMidpointStyle);
+      this.handleSource.addFeature(midpointHandle);
+    }
   }
 
   /**
@@ -396,10 +584,11 @@ export class OLTransform extends OLPointer {
    * @param {Coordinate} coordinate - The coordinate for the handle.
    * @param {HandleType} type - The type of handle.
    */
-  createHandle(coordinate: Coordinate, type: HandleType): void {
+  createHandle(coordinate: Coordinate, type: HandleType, properties?: CreateHandleProps): void {
     const handle = new Feature({
       geometry: new Point(coordinate),
       handleType: type,
+      ...properties,
     });
 
     // Store a reference to the selected feature in the handle
@@ -407,6 +596,9 @@ export class OLTransform extends OLPointer {
 
     // Apply style based on handle type
     switch (type) {
+      case HandleType.VERTEX:
+        handle.setStyle(this.vertexStyle);
+        break;
       case HandleType.ROTATE:
         handle.setStyle(this.rotateStyle);
         break;
@@ -795,14 +987,35 @@ export class OLTransform extends OLPointer {
           return false;
         }
 
+        // Handle right-click on vertex to delete it
+        if (handleType === HandleType.VERTEX && event.originalEvent.button === 2) {
+          this.#deleteVertex(handleFeature);
+          return false;
+        }
+
         // Start transformation
         this.currentHandle = handleFeature;
         this.startCoordinate = coordinate;
         this.#transformType = handleType;
+        this.#vertexAdded = false;
 
         if (this.selectedFeature) {
           this.startGeometry = this.selectedFeature.getGeometry()?.clone();
           this.#isTransforming = true;
+
+          // Clear Handles
+          this.clearHandles();
+
+          // For edge midpoint, add vertex immediately on down event
+          if (handleType === HandleType.EDGE_MIDPOINT) {
+            this.handleAddVertex(coordinate, handleFeature);
+            this.#vertexAdded = true;
+            // Convert to vertex drag after adding
+            this.#transformType = HandleType.VERTEX;
+            // Find the newly created vertex handle
+            const edgeIndex = handleFeature.get('edgeIndex');
+            this.currentHandle.set('vertexIndex', edgeIndex + 1);
+          }
 
           // Dispatch transform start event
           this.onTransformstart?.(new TransformEvent('transformstart', this.selectedFeature));
@@ -817,22 +1030,33 @@ export class OLTransform extends OLPointer {
       if (features && features.length > 0) {
         const feature = features[0] as Feature;
         if (this.features.getArray().includes(feature)) {
-          this.selectFeature(feature);
+          // Only select if it's a different feature
+          if (this.selectedFeature !== feature) {
+            this.selectFeature(feature);
+          } else {
+            this.#hideMeasureTooltip();
+          }
 
-          // // Start translation if enabled
-          // if (this.options.translateFeature) {
-          //   this.startCoordinate = coordinate;
-          //   this.startGeometry = feature.getGeometry()?.clone();
-          //   this.#transformType = HandleType.TRANSLATE;
-          //   this.#isTransforming = true;
+          // Start translation if enabled
+          if (this.options.translateFeature) {
+            this.startCoordinate = coordinate;
+            this.startGeometry = feature.getGeometry()?.clone();
+            this.#transformType = HandleType.TRANSLATE;
+            this.#isTransforming = true;
 
-          //   // Dispatch transform start event
-          //   if (this.selectedFeature) {
-          //     this.onTransformstart?.(new TransformEvent('transformstart', this.selectedFeature));
-          //     return true;
-          //   }
-          // }
+            // Clear Handles
+            this.clearHandles();
+
+            // Dispatch transform start event
+            this.onTransformstart?.(new TransformEvent('transformstart', feature));
+            return true;
+          }
         }
+      }
+
+      // If we get here, we didn't click on a handle or feature and the selection should be cleared
+      if (this.selectedFeature) {
+        this.clearSelection();
       }
 
       return false;
@@ -877,6 +1101,9 @@ export class OLTransform extends OLPointer {
         case HandleType.STRETCH_W:
           this.handleStretch(coordinate, this.#transformType);
           break;
+        case HandleType.VERTEX:
+          this.handleVertexMove(coordinate, this.currentHandle);
+          break;
         default:
           break;
       }
@@ -896,6 +1123,7 @@ export class OLTransform extends OLPointer {
    * @param {MapBrowserEvent} event - The map browser event.
    * @returns {boolean} Whether the event was handled.
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   override handleUpEvent(event: MapBrowserEvent<PointerEvent>): boolean {
     if (this.#inHandleUpEvent) return false;
     this.#inHandleUpEvent = true;
@@ -944,12 +1172,114 @@ export class OLTransform extends OLPointer {
         const cursor = OLTransform.getCursorForHandleType(handleType);
         map.getTargetElement().style.cursor = cursor;
       } else if (!this.#isTransforming) {
+        // Check if we're over a feature
+        const features = map.getFeaturesAtPixel(event.pixel);
+        if (features && features.length > 0) {
+          const feature = features[0] as Feature;
+          if (this.features.getArray().includes(feature) && this.options.translateFeature) {
+            map.getTargetElement().style.cursor = 'move';
+            return;
+          }
+        }
         // Reset cursor when not over a handle and not transforming
         map.getTargetElement().style.cursor = 'default';
       }
     } finally {
       this.#inHandleMoveEvent = false;
     }
+  }
+
+  /**
+   * Handles moving a vertex.
+   * @param {Coordinate} coordinate - The new coordinate.
+   * @param {Feature} vertexHandle - The vertex handle being dragged.
+   */
+  handleVertexMove(coordinate: Coordinate, vertexHandle?: Feature): void {
+    if (!this.selectedFeature || !vertexHandle) return;
+
+    const geometry = this.selectedFeature.getGeometry();
+    if (geometry instanceof Circle) {
+      const isCenter = vertexHandle.get('isCircleCenter');
+      const isEdge = vertexHandle.get('isCircleEdge');
+
+      if (isCenter) {
+        // Move the circle center
+        geometry.setCenter(coordinate);
+      } else if (isEdge) {
+        // Resize the circle
+        const center = geometry.getCenter();
+        const newRadius = Math.sqrt((coordinate[0] - center[0]) ** 2 + (coordinate[1] - center[1]) ** 2);
+        geometry.setRadius(newRadius);
+      }
+      return;
+    }
+
+    const vertexIndex = vertexHandle.get('vertexIndex');
+
+    if (geometry instanceof LineString) {
+      const coords = geometry.getCoordinates();
+      coords[vertexIndex] = coordinate;
+      geometry.setCoordinates(coords);
+    } else if (geometry instanceof Polygon) {
+      const coords = geometry.getCoordinates();
+      coords[0][vertexIndex] = coordinate;
+      geometry.setCoordinates(coords);
+    }
+  }
+
+  /**
+   * Handles adding a new vertex.
+   * @param {Coordinate} coordinate - The coordinate for the new vertex.
+   * @param {Feature} midpointHandle - The midpoint handle being dragged.
+   */
+  handleAddVertex(coordinate: Coordinate, midpointHandle?: Feature): void {
+    if (!this.selectedFeature || !midpointHandle || this.#vertexAdded) return;
+
+    const edgeIndex = midpointHandle.get('edgeIndex');
+    const geometry = this.selectedFeature.getGeometry();
+
+    if (geometry instanceof LineString) {
+      const coords = geometry.getCoordinates();
+      coords.splice(edgeIndex + 1, 0, coordinate);
+      geometry.setCoordinates(coords);
+    } else if (geometry instanceof Polygon) {
+      const coords = geometry.getCoordinates();
+      coords[0].splice(edgeIndex + 1, 0, coordinate);
+      geometry.setCoordinates(coords);
+    }
+
+    this.#vertexAdded = true;
+    // Recreate handles after adding vertex
+    // this.updateHandles();
+    this.clearHandles();
+  }
+
+  /**
+   * Deletes a vertex from the geometry.
+   * @param {Feature} vertexHandle - The vertex handle to delete.
+   */
+  #deleteVertex(vertexHandle: Feature): void {
+    if (!this.selectedFeature) return;
+
+    const vertexIndex = vertexHandle.get('vertexIndex');
+    const geometry = this.selectedFeature.getGeometry();
+
+    if (geometry instanceof LineString) {
+      const coords = geometry.getCoordinates();
+      // Don't allow deletion if it would leave less than 2 points
+      if (coords.length <= 2) return;
+      coords.splice(vertexIndex, 1);
+      geometry.setCoordinates(coords);
+    } else if (geometry instanceof Polygon) {
+      const coords = geometry.getCoordinates();
+      // Don't allow deletion if it would leave less than 4 points (including closing point)
+      if (coords[0].length <= 4) return;
+      coords[0].splice(vertexIndex, 1);
+      geometry.setCoordinates(coords);
+    }
+
+    // Update handles after deletion
+    this.updateHandles();
   }
 
   /**
@@ -969,4 +1299,31 @@ export class OLTransform extends OLPointer {
 
     return features && features.length > 0 ? (features[0] as Feature) : undefined;
   }
+
+  /**
+   * Hides the measurement tooltip for a feature.
+   */
+  #hideMeasureTooltip(): void {
+    const measureTooltip = this.selectedFeature?.get('measureTooltip');
+    if (measureTooltip?.getElement()) {
+      measureTooltip.getElement().hidden = true;
+    }
+  }
+
+  /**
+   * Shows the measurement tooltip for a feature.
+   */
+  #showMeasureTooltip(): void {
+    const measureTooltip = this.selectedFeature?.get('measureTooltip');
+    if (measureTooltip?.getElement()) {
+      measureTooltip.getElement().hidden = false;
+    }
+  }
+
+  /** Context menu event handler */
+  contextMenuHandler = (e: MouseEvent): void => {
+    if (this.selectedFeature) {
+      e.preventDefault();
+    }
+  };
 }
