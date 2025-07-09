@@ -54,7 +54,7 @@ import { Extent as ExtentInteraction } from '@/geo/interaction/extent';
 import { Modify } from '@/geo/interaction/modify';
 import { Snap } from '@/geo/interaction/snap';
 import { Translate } from '@/geo/interaction/translate';
-import { Transform, TransformOptions } from '../interaction/transform';
+import { Transform, TransformOptions } from '@/geo/interaction/transform/transform';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { ModalApi } from '@/ui';
 import { delay, generateId, getLocalizedMessage, whenThisThen } from '@/core/utils/utilities';

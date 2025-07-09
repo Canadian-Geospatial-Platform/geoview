@@ -6,6 +6,7 @@ import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { DrawerEventProcessor } from '@/api/event-processors/event-processor-children/drawer-event-processor';
+import { Transform } from '@/geo/interaction/transform/transform';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with DrawerEventProcessor vs DrawerState
 
@@ -34,6 +35,10 @@ export type TypeEditInstance = {
   [groupKey: string]: Modify | undefined;
 };
 
+export type TypeTransformInstance = {
+  [groupKey: string]: Transform | undefined;
+};
+
 // Need Geometry Types array, but can get from config
 export interface IDrawerState {
   activeGeom: string;
@@ -42,6 +47,7 @@ export interface IDrawerState {
   drawInstance: Draw | undefined;
   isEditing: boolean;
   editInstances: TypeEditInstance;
+  transformInstances: TypeTransformInstance;
   hideMeasurements: boolean;
   iconSrc: string;
 
@@ -55,6 +61,7 @@ export interface IDrawerState {
     getDrawInstance: () => Draw | undefined;
     getIsEditing: () => boolean;
     getEditInstances: () => TypeEditInstance;
+    getTransformInstances: () => TypeTransformInstance;
     getHideMeasurements: () => boolean;
     getIconSrc: () => string;
     toggleDrawing: () => void;
@@ -71,6 +78,8 @@ export interface IDrawerState {
     setIsEditing: (isEditing: boolean) => void;
     setEditInstance(groupKey: string, editInstance: Modify | undefined): void;
     removeEditInstance(groupKey: string): void;
+    setTransformInstance(groupKey: string, transformInstance: Transform | undefined): void;
+    removeTransformInstance(groupKey: string): void;
     setHideMeasurements(hideMeasurements: boolean): void;
     setIconSrc: (iconSrc: string) => void;
   };
@@ -90,6 +99,8 @@ export interface IDrawerState {
     setIsEditing: (isEditing: boolean) => void;
     setEditInstance: (groupKey: string, editInstance: Modify | undefined) => void;
     removeEditInstance: (groupKey: string) => void;
+    setTransformInstance: (groupKey: string, transformInstance: Transform | undefined) => void;
+    removeTransformInstance: (groupKey: string) => void;
     setHideMeasurements: (hideMeasurements: boolean) => void;
     setIconSrc: (iconSrc: string) => void;
   };
@@ -116,6 +127,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
     drawInstance: undefined,
     isEditing: false,
     editInstances: {},
+    transformInstances: {},
     hideMeasurements: true,
     iconSrc: '',
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
@@ -170,6 +182,9 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
       },
       getEditInstances: () => {
         return get().drawerState.editInstances;
+      },
+      getTransformInstances: () => {
+        return get().drawerState.transformInstances;
       },
       getHideMeasurements: () => {
         return get().drawerState.hideMeasurements;
@@ -233,6 +248,14 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         // Redirect to setter
         get().drawerState.setterActions.removeEditInstance(groupKey);
       },
+      setTransformInstance: (groupKey: string, transformInstance: Transform) => {
+        // Redirect to setter
+        get().drawerState.setterActions.setTransformInstance(groupKey, transformInstance);
+      },
+      removeTransformInstance: (groupKey: string) => {
+        // Redirect to setter
+        get().drawerState.setterActions.removeTransformInstance(groupKey);
+      },
       setHideMeasurements: (hideMeasurements: boolean) => {
         // Redirect to setter
         get().drawerState.setterActions.setHideMeasurements(hideMeasurements);
@@ -292,6 +315,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         if (get().drawerState.drawInstance !== undefined) {
           DrawerEventProcessor.startDrawing(get().mapId);
         }
+        DrawerEventProcessor.updateTransformingFeatureStyle(get().mapId, get().drawerState.style);
       },
 
       setStrokeColor: (strokeColor: string) => {
@@ -307,6 +331,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         if (get().drawerState.drawInstance !== undefined) {
           DrawerEventProcessor.startDrawing(get().mapId);
         }
+        DrawerEventProcessor.updateTransformingFeatureStyle(get().mapId, get().drawerState.style);
       },
 
       setStrokeWidth: (strokeWidth: number) => {
@@ -322,6 +347,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         if (get().drawerState.drawInstance !== undefined) {
           DrawerEventProcessor.startDrawing(get().mapId);
         }
+        DrawerEventProcessor.updateTransformingFeatureStyle(get().mapId, get().drawerState.style);
       },
 
       setDrawInstance: (drawInstance: Draw) => {
@@ -370,6 +396,29 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
           drawerState: {
             ...get().drawerState,
             editInstances,
+          },
+        });
+      },
+
+      setTransformInstance: (groupKey: string, transformInstance: Transform) => {
+        set({
+          drawerState: {
+            ...get().drawerState,
+            transformInstances: {
+              ...get().drawerState.transformInstances,
+              [groupKey]: transformInstance,
+            },
+          },
+        });
+      },
+
+      removeTransformInstance: (groupKey: string) => {
+        const transformInstances = { ...get().drawerState.transformInstances };
+        transformInstances[groupKey] = undefined;
+        set({
+          drawerState: {
+            ...get().drawerState,
+            transformInstances,
           },
         });
       },

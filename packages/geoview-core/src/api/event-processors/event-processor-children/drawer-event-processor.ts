@@ -4,6 +4,7 @@ import { Style, Stroke, Fill, Icon as OLIcon } from 'ol/style';
 import { getArea, getLength } from 'ol/sphere';
 import { DrawEvent, GeometryFunction, SketchCoordType, createBox } from 'ol/interaction/Draw';
 import { IDrawerState, StyleProps } from '@/core/stores/store-interface-and-intial-values/drawer-state';
+import { generateId } from '@/core/utils/utilities';
 // import { logger } from '@/core/utils/logger';
 
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
@@ -84,6 +85,23 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       }
     });
     return features;
+  }
+
+  /**
+   * Gets a feature by it's id
+   * @param {string} mapId The map ID
+   * @param {string} featureId Feature ID we are looking for
+   * @returns {Feature | undefined} The found feature
+   */
+  static #getFeatureById(mapId: string, featureId: string): Feature | undefined {
+    const allGroupedFeatures = this.#getGroupedDrawingFeatures(mapId);
+    let feature: Feature | undefined;
+    Object.keys(allGroupedFeatures).forEach((key) => {
+      if (feature) return;
+      const foundFeature = allGroupedFeatures[key].find((ftr) => ftr.getId() === featureId);
+      if (foundFeature) feature = foundFeature;
+    });
+    return feature;
   }
 
   /**
@@ -442,6 +460,13 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       // Apply the style to the feature
       feature.setStyle(featureStyle);
 
+      // Set the id of the feature for future lookups
+      const featureId = generateId();
+      const geometryGroup = `draw-${currentGeomType}`;
+      feature.setId(featureId);
+      feature.set('featureId', featureId);
+      feature.set('geometryGroup', geometryGroup);
+
       const geom = feature.getGeometry();
       if (!geom) return;
       if (geom instanceof Point) return;
@@ -452,6 +477,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       if (newOverlay) {
         viewer.map.addOverlay(newOverlay);
       }
+
+      viewer.layer.geometry.geometries.push(feature);
+      viewer.layer.geometry.addToGeometryGroup(feature, geometryGroup);
     });
 
     // Update state
@@ -460,11 +488,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       state.actions.setActiveGeom(geomType);
     }
 
-    // If editing already, but the edit group doesn't exist, create it
-    const groupKey = `draw-${geomType}`;
-    if (state.actions.getIsEditing() && !(groupKey in state.actions.getEditInstances())) {
-      const editInstance = viewer.initModifyInteractions(groupKey);
-      state.actions.setEditInstance(groupKey, editInstance);
+    // If editing already, stop it
+    if (state.actions.getIsEditing()) {
+      this.stopEditing(mapId);
     }
   }
 
@@ -521,13 +547,14 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       });
     }
 
+    // Modify Interactions
     typesToEdit.forEach((type) => {
       const groupKey = `draw-${type}`;
       // Only start editing if the drawing group exists
       if (viewer.layer.geometry.geometryGroups.find((group) => group.geometryGroupId === groupKey) !== undefined) {
         const editInstance = viewer.initModifyInteractions(groupKey);
 
-        // Event handler for updating measrement tool
+        // Event handler for updating measurement tool on modify
         editInstance.onModifyEnded((_sender, event) => {
           const feature = event.features.item(0);
           if (!feature) return;
@@ -545,11 +572,44 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       }
     });
 
-    // If we have an active drawing instance, make sure it stay active
-    // when editing is enabled
+    // Transform Interactions
+    typesToEdit.forEach((type) => {
+      const groupKey = `draw-${type}`;
+      // Only start editing if the drawing group exists
+      if (viewer.layer.geometry.geometryGroups.find((group) => group.geometryGroupId === groupKey) !== undefined) {
+        const transformInstance = viewer.initTransformInteractions({ geometryGroupKey: groupKey });
+
+        // Event handler for updating measurement tool on transform
+        transformInstance.onTransformEnd((_sender, event) => {
+          const { feature } = event;
+          if (!feature) return;
+
+          const geom = feature.getGeometry();
+          if (!geom) return;
+          if (geom instanceof Point) return;
+
+          // GV hideMeasurements has to be here, otherwise the value can be stale, unlike style and geomType which restart the interaction
+          const hideMeasurements = state.actions.getHideMeasurements();
+          this.#createMeasureTooltip(feature, hideMeasurements, mapId);
+        });
+
+        transformInstance.onDeleteFeature((_sender, event) => {
+          const featureId = event.feature.getId();
+          if (featureId) {
+            this.deleteSingleDrawing(mapId, featureId as string);
+          }
+        });
+
+        state.actions.setTransformInstance(groupKey, transformInstance);
+      }
+    });
+
+    state.actions.setIsEditing(true);
+
+    // If we have an active drawing instance, stop it
     const drawInstance = state.actions.getDrawInstance();
     if (drawInstance) {
-      drawInstance.startInteraction();
+      this.stopDrawing(mapId);
     }
   }
 
@@ -577,6 +637,18 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       editInstances[groupKey].stopInteraction();
       state.actions.removeEditInstance(groupKey);
     });
+
+    // Transform geometries for each type
+    typesToEdit.forEach((type) => {
+      const groupKey = `draw-${type}`;
+      const transformInstances = state.actions.getTransformInstances();
+
+      if (transformInstances === undefined || !(groupKey in transformInstances) || transformInstances[groupKey] === undefined) return;
+      transformInstances[groupKey].stopInteraction();
+      state.actions.removeTransformInstance(groupKey);
+    });
+
+    state.actions.setIsEditing(false);
   }
 
   /**
@@ -594,7 +666,69 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     } else {
       this.startEditing(mapId, geomTypes);
     }
-    state.actions.setIsEditing(!isEditing);
+  }
+
+  /**
+   * Updates the style of any currently transforming features
+   * @param {string} mapId The map ID
+   * @param {StyleProps} newStyle The new style to apply
+   */
+  public static updateTransformingFeatureStyle(mapId: string, newStyle: StyleProps): void {
+    const state = this.getDrawerState(mapId);
+    if (!state) return;
+
+    const transformInstances = state.actions.getTransformInstances();
+
+    Object.values(transformInstances).forEach((transformInstance) => {
+      if (!transformInstance) return;
+      const selectedFeature = transformInstance.getSelectedFeature();
+      if (selectedFeature) {
+        const geomType = selectedFeature.get('geometryGroup')?.replace('draw-', '');
+
+        let featureStyle;
+        if (geomType === 'Point') {
+          featureStyle = new Style({
+            image: new OLIcon({
+              src: state.actions.getIconSrc(),
+              anchor: [0.5, 1],
+              anchorXUnits: 'fraction',
+              anchorYUnits: 'fraction',
+            }),
+          });
+        } else {
+          featureStyle = new Style({
+            stroke: new Stroke({
+              color: newStyle.strokeColor,
+              width: newStyle.strokeWidth,
+            }),
+            fill: new Fill({
+              color: newStyle.fillColor,
+            }),
+          });
+        }
+
+        selectedFeature.setStyle(featureStyle);
+      }
+    });
+  }
+
+  /**
+   * Delete a single drawing feature from the map
+   * @param mapId The map ID
+   * @param featureId The ID of the feature to be deleted
+   */
+  public static deleteSingleDrawing(mapId: string, featureId: string): void {
+    const feature = this.#getFeatureById(mapId, featureId);
+    if (!feature) return;
+
+    const viewer = MapEventProcessor.getMapViewer(mapId);
+    if (!viewer) throw new MapViewerNotFoundError(mapId);
+
+    const measureTooltip = feature.get('measureTooltip');
+    measureTooltip?.getElement()?.remove();
+
+    const geometryGroup = feature.get('geometryGroup');
+    viewer.layer.geometry.deleteGeometryFromGroup(featureId, geometryGroup);
   }
 
   /**
