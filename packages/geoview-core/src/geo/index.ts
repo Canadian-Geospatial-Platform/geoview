@@ -4,6 +4,7 @@ export * from './interaction/interaction';
 export * from './interaction/modify';
 export * from './interaction/snap';
 export * from './interaction/translate';
+export * from './interaction/transform';
 export * from './layer/basemap/basemap-types';
 export * from './layer/basemap/basemap';
 export * from './layer/geoview-layers/raster/abstract-geoview-raster';
