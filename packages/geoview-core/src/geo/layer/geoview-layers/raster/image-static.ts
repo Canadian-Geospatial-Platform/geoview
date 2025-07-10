@@ -1,6 +1,6 @@
 import Static, { Options as SourceOptions } from 'ol/source/ImageStatic';
 
-import { Cast, TypeJsonArray } from '@/api/config/types/config-types';
+import { Cast, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import {
   TypeLayerEntryConfig,
@@ -40,12 +40,13 @@ export class ImageStatic extends AbstractGeoViewRaster {
   }
 
   /**
-   * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
-   * @returns {Promise<void>} A promise that the execution is completed.
+   * Overrides the way the metadata is fetched.
+   * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
+   * @returns {Promise<TypeJsonObject | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
    */
-  protected override onFetchAndSetServiceMetadata(): Promise<void> {
+  protected override onFetchServiceMetadata(): Promise<TypeJsonObject | undefined> {
     // No metadata
-    return Promise.resolve();
+    return Promise.resolve(undefined);
   }
 
   /**

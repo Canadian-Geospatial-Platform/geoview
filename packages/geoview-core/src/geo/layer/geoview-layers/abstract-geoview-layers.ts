@@ -105,7 +105,7 @@ export abstract class AbstractGeoViewLayer {
   olRootLayer?: BaseLayer;
 
   /** The service metadata. */
-  metadata: TypeJsonObject | null = null;
+  metadata?: TypeJsonObject | undefined;
 
   /** Date format object used to translate server to ISO format and ISO to server format */
   serverDateFragmentsOrder?: TypeDateFragments;
@@ -145,10 +145,10 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
-   * Must override method to read the service metadata from the metadataAccessPath and stores it in the 'metadata' property.
-   * @returns {Promise<void>} A promise resolved once the metadata has been fetched and assigned to the 'metadata' property.
+   * Must override method to read the service metadata from the metadataAccessPath.
+   * @returns {Promise<void>} A promise resolved once the metadata has been fetched.
    */
-  protected abstract onFetchAndSetServiceMetadata(): Promise<void>;
+  protected abstract onFetchServiceMetadata(): Promise<TypeJsonObject | undefined>;
 
   /**
    * Must override method to initialize a layer entry based on a GeoView layer config.
@@ -314,7 +314,7 @@ export abstract class AbstractGeoViewLayer {
         // Process and, yes, keep the await here, because we want to make extra sure the onFetchAndSetServiceMetadata is
         // executed asynchronously, even if the implementation of the overriden method is synchronous.
         // All so that the try/catch works nicely here.
-        await this.onFetchAndSetServiceMetadata();
+        this.metadata = await this.onFetchServiceMetadata();
       } else {
         // GV It's possible there is no metadataAccessPath, e.g.: CSV (csvLYR2), we keep the if condition here
         // Skip

@@ -490,11 +490,8 @@ export class LayerApi {
           geoviewLayerName: parsedLayerEntryConfig[0].geoviewLayerName || parsedLayerEntryConfig[0].layerName,
         };
 
-      // Create geocore layer configs and add
-      const geoCoreGeoviewLayerInstance = new GeoCore(this.getMapId(), this.mapViewer.getDisplayLanguage());
-
       // Create the layers from the UUID
-      const layers = await geoCoreGeoviewLayerInstance.createLayersFromUUID(uuid, optionalConfig);
+      const layers = await GeoCore.createLayersFromUUID(uuid, this.getMapId(), this.mapViewer.getDisplayLanguage(), optionalConfig);
       layers.forEach((geoviewLayerConfig) => {
         // Redirect
         this.addGeoviewLayer(geoviewLayerConfig);
@@ -2278,8 +2275,7 @@ export class LayerApi {
       let promise: Promise<TypeGeoviewLayerConfig[]>;
       if (mapConfigLayerEntryIsGeoCore(entry)) {
         // Working with a GeoCore layer
-        const geoCore = new GeoCore(mapId, language);
-        promise = geoCore.createLayersFromUUID(entry.geoviewLayerId, entry);
+        promise = GeoCore.createLayersFromUUID(entry.geoviewLayerId, mapId, language, entry);
       } else if (mapConfigLayerEntryIsShapefile(entry)) {
         // Working with a shapefile layer
         promise = ShapefileReader.convertShapefileConfigToGeoJson(entry);
@@ -2401,13 +2397,11 @@ export class LayerApi {
       case 'geoCore':
         // For GeoCore, we guild the Config from the Geocore service
         // eslint-disable-next-line no-case-declarations
-        const geocore = new GeoCore(mapId, language);
-        // eslint-disable-next-line no-case-declarations
-        const layerConfigs = await geocore.createLayersFromUUID(layerURL);
+        const layerConfigs = await GeoCore.createLayersFromUUID(layerURL, mapId, language);
         // Return the first one (only one)
         // eslint-disable-next-line no-case-declarations
         const layerConfig = layerConfigs[0];
-        // Now, loop back to create the correct config again!
+        // Now, loop back to create the correct config based on the type
         return LayerApi.createInitConfigFromType(
           layerConfig.geoviewLayerId,
           layerConfig.geoviewLayerName!,
@@ -2463,12 +2457,12 @@ export class LayerApi {
     }
 
     // Not implemented
-    throw new NotSupportedError('Unsupported layer class type');
+    throw new NotSupportedError('Unsupported layer class type in createLayerFromConfigType');
   }
 
   // #endregion
 
-  // #region Experimental
+  // #region EXPERIMENTAL
 
   /**
    * Experimental approach to use our Geoview-Layers classes from the ConfigAPI

@@ -14,14 +14,12 @@ import {
   CONST_LAYER_TYPES,
 } from '@/api/config/types/map-schema-types';
 
-import {
-  commonFetchAndSetServiceMetadata,
-  commonProcessLayerMetadata,
-  commonValidateListOfLayerEntryConfig,
-} from '@/geo/layer/geoview-layers/esri-layer-common';
+import { commonProcessLayerMetadata, commonValidateListOfLayerEntryConfig } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { LayerNotFeatureLayerError } from '@/core/exceptions/layer-exceptions';
-import { TypeJsonArray } from '@/api/config/types/config-types';
+import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
+import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
+import { Fetch } from '@/core/utils/fetch-helper';
 
 export interface TypeSourceEsriFeatureInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'EsriJSON';
@@ -48,12 +46,19 @@ export class EsriFeature extends AbstractGeoViewVector {
   }
 
   /**
-   * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
-   * @returns {Promise<void>} A promise that the execution is completed.
+   * Overrides the way the metadata is fetched.
+   * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
+   * @returns {Promise<TypeJsonObject | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
    */
-  protected override onFetchAndSetServiceMetadata(): Promise<void> {
-    // Redirect
-    return commonFetchAndSetServiceMetadata(this);
+  protected override async onFetchServiceMetadata(): Promise<TypeJsonObject | undefined> {
+    // Query
+    const responseJson = await Fetch.fetchJsonAsObject(`${this.metadataAccessPath}?f=json`);
+
+    // Validate the metadata response
+    AbstractGeoViewRaster.throwIfMetatadaHasError(this.geoviewLayerId, this.geoviewLayerName, responseJson);
+
+    // Return it
+    return responseJson;
   }
 
   /**
@@ -75,14 +80,14 @@ export class EsriFeature extends AbstractGeoViewVector {
     }
 
     // Fetch metadata
-    await this.onFetchAndSetServiceMetadata();
+    const metadata = await this.onFetchServiceMetadata();
 
     // Now that we have metadata, get the layer ids from it
     const entries = [
       {
-        index: this.metadata!.id,
-        layerId: this.metadata!.id,
-        layerName: this.metadata!.name,
+        index: metadata!.id,
+        layerId: metadata!.id,
+        layerName: metadata!.name,
       },
     ] as unknown as TypeJsonArray;
 
