@@ -891,7 +891,7 @@ export class OLTransform extends OLPointer {
   static getCursorForHandleType(handleType: HandleType): string {
     switch (handleType) {
       case HandleType.ROTATE:
-        return 'crosshair';
+        return 'grab';
 
       case HandleType.DELETE:
         return 'pointer';
