@@ -44,9 +44,6 @@ export interface TypeWFSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'geovie
  * @class WFS
  */
 export class WFS extends AbstractGeoViewVector {
-  /** private variable holding wfs version. */
-  #version = '2.0.0';
-
   /**
    * Constructs a WFS Layer configuration processor.
    * @param {TypeWFSLayerConfig} layerConfig the layer configuration
@@ -56,25 +53,27 @@ export class WFS extends AbstractGeoViewVector {
   }
 
   /**
-   * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
-   * @returns {Promise<void>} A promise that the execution is completed.
+   * Gets the WFS version
+   * @returns {string | undefined} The WFS service version as read from the metadata attribute.
    */
-  protected override async onFetchAndSetServiceMetadata(): Promise<void> {
+  getVersion(): string | undefined {
+    return this.metadata?.['@attributes'].version as string | undefined;
+  }
+
+  /**
+   * Overrides the way the metadata is fetched.
+   * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
+   * @returns {Promise<TypeJsonObject | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
+   */
+  protected override async onFetchServiceMetadata(): Promise<TypeJsonObject | undefined> {
     // Fetch it
-    const metadataString = await WFS.fetchMetadata(this.metadataAccessPath);
+    const metadata = await WFS.fetchMetadata(this.metadataAccessPath);
 
-    // Parse the WFS_Capabilities
-    const capabilitiesObject = findPropertyNameByRegex(metadataString, /(?:WFS_Capabilities)/);
+    // If not found
+    if (!metadata) throw new LayerNoCapabilitiesError(this.geoviewLayerId, this.geoviewLayerName);
 
-    // If found
-    if (capabilitiesObject) {
-      // Set it
-      this.metadata = capabilitiesObject;
-      this.#version = (capabilitiesObject as TypeJsonObject)['@attributes'].version as string;
-    } else {
-      // Throw error
-      throw new LayerNoCapabilitiesError(this.geoviewLayerId, this.geoviewLayerName);
-    }
+    // Return it
+    return metadata;
   }
 
   /**
@@ -84,7 +83,7 @@ export class WFS extends AbstractGeoViewVector {
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Fetch metadata
     const rootUrl = this.metadataAccessPath;
-    await this.onFetchAndSetServiceMetadata();
+    await this.onFetchServiceMetadata();
 
     // Now that we have metadata, get the layer ids from it
     if (!Array.isArray(this.metadata?.FeatureTypeList?.FeatureType))
@@ -171,9 +170,7 @@ export class WFS extends AbstractGeoViewVector {
       }
     }
 
-    const describeFeatureUrl = `${queryUrl}?service=WFS&request=DescribeFeatureType&version=${
-      this.#version
-    }&outputFormat=${encodeURIComponent(outputFormat)}&typeName=${layerConfig.layerId}`;
+    const describeFeatureUrl = `${queryUrl}?service=WFS&request=DescribeFeatureType&version=${this.getVersion()}&outputFormat=${encodeURIComponent(outputFormat)}&typeName=${layerConfig.layerId}`;
 
     if (describeFeatureUrl && outputFormat === 'application/json') {
       const layerMetadata = await Fetch.fetchJsonAsObject(describeFeatureUrl);
@@ -228,7 +225,7 @@ export class WFS extends AbstractGeoViewVector {
       let sourceUrl = layerConfig.source!.dataAccessPath!;
       sourceUrl = sourceUrl.indexOf('?') > -1 ? sourceUrl.substring(0, sourceUrl.indexOf('?')) : sourceUrl;
       // GV: Use processUrlParameters('GetFeature') method of GeoView layer config to get the sourceUrl and append &typeName= to it.
-      sourceUrl = `${sourceUrl}?service=WFS&request=getFeature&version=${this.#version}`;
+      sourceUrl = `${sourceUrl}?service=WFS&request=getFeature&version=${this.getVersion()}`;
       sourceUrl = `${sourceUrl}&typeName=${layerConfig.layerId}`;
       // if an extent is provided, use it in the url
       if (sourceOptions.strategy === bbox && Number.isFinite(extent[0])) {
@@ -239,7 +236,7 @@ export class WFS extends AbstractGeoViewVector {
 
     // eslint-disable-next-line no-param-reassign
     sourceOptions.format = new FormatWFS({
-      version: this.#version,
+      version: this.getVersion(),
     });
 
     // Call parent
@@ -263,14 +260,18 @@ export class WFS extends AbstractGeoViewVector {
   /**
    * Fetches the metadata for a typical WFS class.
    * @param {string} url - The url to query the metadata from.
+   * @returns {Promise<TypeJsonObject | undefined>} Promise with the metadata when fetched or undefined when capabilities weren't found.
    */
-  static fetchMetadata(url: string): Promise<TypeJsonObject> {
+  static async fetchMetadata(url: string): Promise<TypeJsonObject | undefined> {
     // Check if url contains metadata parameters for the getCapabilities request and reformat the urls
     const getCapabilitiesUrl = url.indexOf('?') > -1 ? url.substring(url.indexOf('?')) : `?service=WFS&request=GetCapabilities`;
     const queryUrl = url.indexOf('?') > -1 ? url.substring(0, url.indexOf('?')) : url;
 
     // Query XML to Json
-    return Fetch.fetchXMLToJson(`${queryUrl}${getCapabilitiesUrl}`);
+    const responseJson = await Fetch.fetchXMLToJson(`${queryUrl}${getCapabilitiesUrl}`);
+
+    // Parse the WFS_Capabilities
+    return findPropertyNameByRegex(responseJson, /(?:WFS_Capabilities)/);
   }
 
   /**

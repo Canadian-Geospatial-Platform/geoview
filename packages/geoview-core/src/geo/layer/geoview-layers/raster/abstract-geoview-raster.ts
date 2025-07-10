@@ -9,30 +9,33 @@ import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geovie
  */
 export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
   /**
-   * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
-   * @returns {Promise<void>} A promise that the execution is completed.
+   * Overrides the way the metadata is fetched.
+   * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
+   * @returns {Promise<TypeJsonObject | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
    */
-  protected override async onFetchAndSetServiceMetadata(): Promise<void> {
+  protected override onFetchServiceMetadata(): Promise<TypeJsonObject | undefined> {
     // Fetch it
-    const responseJson = await AbstractGeoViewRaster.fetchMetadata(this.metadataAccessPath);
-
-    // Validate the metadata response
-    AbstractGeoViewRaster.throwIfMetatadaHasError(this.geoviewLayerId, this.geoviewLayerName, responseJson);
-
-    // Set it
-    this.metadata = responseJson;
+    return AbstractGeoViewRaster.fetchMetadata(this.metadataAccessPath, this.geoviewLayerId, this.geoviewLayerName);
   }
+
+  // #region STATIC
 
   /**
    * Fetches the metadata for a typical AbstractGeoViewRaster class.
    * @param {string} url - The url to query the metadata from.
    */
-  static fetchMetadata(url: string): Promise<TypeJsonObject> {
+  static async fetchMetadata(url: string, geoviewLayerId: string, geoviewLayerName: string): Promise<TypeJsonObject> {
     // The url
     const parsedUrl = url.toLowerCase().endsWith('json') ? url : `${url}?f=json`;
 
     // Query and read
-    return Fetch.fetchJsonAsObject(parsedUrl);
+    const responseJson = await Fetch.fetchJsonAsObject(parsedUrl);
+
+    // Validate the metadata response
+    AbstractGeoViewRaster.throwIfMetatadaHasError(geoviewLayerId, geoviewLayerName, responseJson);
+
+    // Return the response
+    return responseJson;
   }
 
   /**
@@ -47,4 +50,6 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
       throw new LayerServiceMetadataUnableToFetchError(geoviewLayerId, layerName, formatError(metadata.error.message));
     }
   }
+
+  // #endregion
 }

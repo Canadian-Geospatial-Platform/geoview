@@ -364,11 +364,11 @@ export function exportPNG(dataUrl: string, name: string): void {
 
 /**
  * Find an object property by regex values. The find is case insensitive.
- * @param {TypeJsonObject} objectItem - The object item
+ * @param {TypeJsonObject | undefined} objectItem - The object item
  * @param {RegExp | RegExp[]} regex - The regex value or the regex sequence to search
  * @returns {TypeJsonObject | undefined} The object if it exist or undefined
  */
-export const findPropertyNameByRegex = (objectItem: TypeJsonObject, regex: RegExp | RegExp[]): TypeJsonObject | undefined => {
+export const findPropertyNameByRegex = (objectItem: TypeJsonObject | undefined, regex: RegExp | RegExp[]): TypeJsonObject | undefined => {
   const regexArray = Array.isArray(regex) ? regex : [regex];
 
   let valueObject: TypeJsonObject | undefined = objectItem;

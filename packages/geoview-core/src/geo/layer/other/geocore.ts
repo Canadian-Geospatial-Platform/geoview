@@ -10,44 +10,37 @@ import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 /**
  * Class used to add geoCore layer to the map
- *
  * @exports
  * @class GeoCore
  */
-export class GeoCore {
-  #mapId: string;
-
-  #displayLanguage: TypeDisplayLanguage;
-
-  /**
-   * Constructor
-   * @param {string} mapId the id of the map
-   */
-  constructor(mapId: string, displayLanguage: TypeDisplayLanguage) {
-    this.#mapId = mapId;
-    this.#displayLanguage = displayLanguage;
-  }
-
+export abstract class GeoCore {
   /**
    * Gets GeoView layer configurations list from the UUIDs of the list of layer entry configurations.
    * @param {string} uuid - The UUID of the layer
+   * @param {string} mapId - The Map id
+   * @param {TypeDisplayLanguage} language - The language
    * @param {GeoCoreLayerConfig?} layerConfig - The optional layer configuration
    * @returns {Promise<TypeGeoviewLayerConfig[]>} List of layer configurations to add to the map.
    */
-  async createLayersFromUUID(uuid: string, layerConfig?: GeoCoreLayerConfig): Promise<TypeGeoviewLayerConfig[]> {
+  static async createLayersFromUUID(
+    uuid: string,
+    mapId: string,
+    language: TypeDisplayLanguage,
+    layerConfig?: GeoCoreLayerConfig
+  ): Promise<TypeGeoviewLayerConfig[]> {
     // Get the map config
-    const map = MapEventProcessor.getMapViewer(this.#mapId);
+    const map = MapEventProcessor.getMapViewer(mapId);
     if (map.layer.getGeoviewLayerIds().includes(uuid)) {
       // eslint-disable-next-line no-param-reassign
       uuid = `${uuid}:${generateId(8)}`;
     }
-    const mapConfig = MapEventProcessor.getGeoViewMapConfig(this.#mapId);
+    const mapConfig = MapEventProcessor.getGeoViewMapConfig(mapId);
 
-    // Generate the url using metadataAccessPath when specified or using the geocore url
+    // Generate the url using the geocore url
     const url = `${mapConfig!.serviceUrls.geocoreUrl}`;
 
     // Get the GV config from UUID and await
-    const response = await UUIDmapConfigReader.getGVConfigFromUUIDs(url, this.#displayLanguage, [uuid.split(':')[0]]);
+    const response = await UUIDmapConfigReader.getGVConfigFromUUIDs(url, language, [uuid.split(':')[0]]);
 
     // Validate the generated Geoview Layer Config
     ConfigValidation.validateListOfGeoviewLayerConfig(response.layers);
@@ -58,7 +51,7 @@ export class GeoCore {
       const layerPath = geochartConfig.layers[0].layerId;
 
       // Add a GeoChart
-      GeochartEventProcessor.addGeochartChart(this.#mapId, layerPath, geochartConfig);
+      GeochartEventProcessor.addGeochartChart(mapId, layerPath, geochartConfig);
     });
 
     // Use user supplied listOfLayerEntryConfig if provided
@@ -71,7 +64,7 @@ export class GeoCore {
       // Use the name from the first layer if none is provided in the config
       if (!tempLayerConfig.geoviewLayerName) tempLayerConfig.geoviewLayerName = response.layers[0].geoviewLayerName;
 
-      const config = new Config(this.#displayLanguage);
+      const config = new Config(language);
       const newLayerConfig = config.getValidMapConfig([tempLayerConfig], (errorKey: string, params: string[]) => {
         // When an error happens, raise the exception, we handle it higher in this case
         throw new GeoViewError(errorKey, params);

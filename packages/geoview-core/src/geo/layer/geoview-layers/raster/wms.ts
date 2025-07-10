@@ -60,132 +60,65 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /**
-   * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
-   * @returns {Promise<void>} A promise that the execution is completed.
+   * Recursively gets the layer capability for a given layer id.
+   * @param {string} layerId - The layer identifier to get the capabilities for.
+   * @param {TypeJsonObject | undefined} currentLayerEntry - The current layer entry from the capabilities that will be recursively searched.
+   * @returns {TypeJsonObject?} The found layer from the capabilities or undefined if not found.
    */
-  protected override async onFetchAndSetServiceMetadata(): Promise<void> {
-    // If the metadata url ends with .xml
-    // GV Not checking if 'includes' .xml, because an url like 'my_url/metadata.xml?request=GetCapabilities' shouldn't exist.
-    if (this.metadataAccessPath.toLowerCase().endsWith('.xml')) {
-      // XML metadata is a special case that does not use GetCapabilities to get the metadata
-      await this.#fetchXmlServiceMetadata(this.metadataAccessPath, (proxyUsed: string) => {
-        // A Proxy had to be used to fetch the service metadata, update the layer config with it
+  getLayerCapabilities(
+    layerId: string,
+    currentLayerEntry: TypeJsonObject | undefined = this.metadata?.Capability.Layer
+  ): TypeJsonObject | undefined {
+    if (!currentLayerEntry) return undefined;
+    if ('Name' in currentLayerEntry && (currentLayerEntry.Name as string) === layerId) return currentLayerEntry;
+    if ('Layer' in currentLayerEntry) {
+      if (Array.isArray(currentLayerEntry.Layer)) {
+        for (let i = 0; i < currentLayerEntry.Layer.length; i++) {
+          const layerFound = this.getLayerCapabilities(layerId, currentLayerEntry.Layer[i]);
+          if (layerFound) return layerFound;
+        }
+        return undefined;
+      }
+      return this.getLayerCapabilities(layerId, currentLayerEntry.Layer);
+    }
+    return undefined;
+  }
+
+  /**
+   * Fetches and processes service metadata for the WMS layer.
+   * Depending on whether the metadata URL points to an XML document or a standard WMS endpoint,
+   * this method delegates to the appropriate metadata fetching logic.
+   * - If the URL ends in `.xml`, a direct XML metadata fetch is performed.
+   * - Otherwise, the method constructs a WMS GetCapabilities request.
+   *   - If no specific layer configs are provided, a single metadata fetch is made.
+   *   - If layer configs are present (e.g., Geomet use case), individual layer metadata is merged.
+   * @returns {Promise<TypeJsonObject | undefined>} A promise resolving to the parsed metadata object,
+   * or `undefined` if metadata could not be retrieved or no capabilities were found.
+   */
+  protected override onFetchServiceMetadata(): Promise<TypeJsonObject | undefined> {
+    // If metadata is in XML format (not WMS GetCapabilities)
+    const isXml = WMS.#isXmlMetadata(this.metadataAccessPath);
+    if (isXml) {
+      // Fetch the XML
+      return this.#fetchXmlServiceMetadata(this.metadataAccessPath, (proxyUsed) => {
+        // Update the access path to use the proxy if one was required
         this.metadataAccessPath = `${proxyUsed}${this.metadataAccessPath}`;
       });
-    } else {
-      let metadataUrlGetCap = this.metadataAccessPath;
-      if (!this.metadataAccessPath.includes('request=GetCapabilities')) {
-        metadataUrlGetCap = `${this.metadataAccessPath}?service=WMS&version=1.3.0&request=GetCapabilities`;
-      }
-
-      const layerConfigsToQuery = this.#getLayersToQuery();
-      if (layerConfigsToQuery.length === 0) {
-        // Use GetCapabilities to get the metadata
-        const metadata = await WMS.fetchMetadata(metadataUrlGetCap, (proxyUsed: string) => {
-          // A Proxy had to be used to fetch the service metadata, update the layer config with it
-          this.metadataAccessPath = `${proxyUsed}${this.metadataAccessPath}`;
-        });
-
-        // Set the metadata
-        // TODO: Check - without validating if they have Capability property?
-        this.metadata = metadata;
-
-        this.#processMetadataInheritance();
-      } else {
-        // Uses GetCapabilities to get the metadata. However, to allow geomet metadata to be retrieved using the non-standard
-        // "Layers" parameter on the command line, we need to process each layer individually and merge all layer metadata at
-        // the end. Even though the "Layers" parameter is ignored by other WMS servers, the drawback of this method is
-        // sending unnecessary requests while only one GetCapabilities could be used when the server publishes a small set of
-        // metadata. Which is not the case for the Geomet service.
-        const promisedArrayOfMetadata: Promise<MetatadaFetchResult>[] = [];
-        layerConfigsToQuery.forEach((layerConfig: TypeLayerEntryConfig, currentIndex: number) => {
-          // Find the first index where a layer with the same ID appears
-          const firstOccurrenceIndex = layerConfigsToQuery.findIndex((entry) => entry.layerId === layerConfig.layerId);
-
-          // If first time we see this layerId
-          if (firstOccurrenceIndex === currentIndex) {
-            // Create a promise of a metadata fetch
-            const promise = new Promise<MetatadaFetchResult>((resolve, reject) => {
-              const promiseMetadata = WMS.fetchMetadata(`${metadataUrlGetCap}&Layers=${layerConfig.layerId}`, (proxyUsed: string) => {
-                // A proxy was used; update the data access path accordingly
-                // eslint-disable-next-line no-param-reassign
-                layerConfig.source!.dataAccessPath = `${proxyUsed}${this.metadataAccessPath}`;
-              });
-
-              // When done, resolve with information or reject with information
-              promiseMetadata
-                .then((metadata) => {
-                  // If there is indeed a Capability property
-                  if (metadata.Capability) {
-                    // Resolve the metadata GetCap
-                    resolve({ metadata, layerConfig });
-                  } else {
-                    // No Capability property
-                    reject(
-                      new PromiseRejectErrorWrapper(
-                        new LayerNoCapabilitiesError(layerConfig.geoviewLayerConfig.geoviewLayerId, layerConfig.getLayerName()),
-                        layerConfig
-                      )
-                    );
-                  }
-                })
-                .catch((error: unknown) => {
-                  reject(new PromiseRejectErrorWrapper(error, layerConfig));
-                });
-            });
-
-            // Add the promise in the list
-            promisedArrayOfMetadata.push(promise);
-          } else {
-            // This layerId has already been queried; reuse the previous promise
-            promisedArrayOfMetadata.push(promisedArrayOfMetadata[firstOccurrenceIndex]);
-          }
-        });
-
-        // Wait for all promises to resolve
-        const arrayOfMetadata = await Promise.allSettled(promisedArrayOfMetadata);
-
-        // If no layers metadata fetch fulfilled (all failed)
-        if (arrayOfMetadata.filter((promise) => promise.status === 'fulfilled').length === 0) {
-          // Set the parent in error status
-          layerConfigsToQuery[0].parentLayerConfig?.setLayerStatusError();
-        }
-
-        // For each settled promise
-        arrayOfMetadata.forEach((promise) => {
-          // If the promise fulfilled
-          if (promise.status === 'fulfilled') {
-            // GV This section has been rewritten, in this commit, trying to keep the logic intact best I could and
-            // GV keeping the private functions call too (still seems confusing to me though)
-
-            // If the metadata hasn't been set yet
-            if (!this.metadata) this.metadata = promise.value.metadata;
-
-            const { layerId } = promise.value.layerConfig;
-            const alreadyExists = this.getLayerCapabilities(layerId);
-
-            // If not already loaded
-            if (!alreadyExists) {
-              const metadataLayerPathToAdd = this.#getMetadataLayerPath(layerId, promise.value.metadata.Capability.Layer);
-
-              this.#addLayerToMetadataInstance(
-                metadataLayerPathToAdd,
-                this.metadata.Capability.Layer,
-                promise.value.metadata.Capability?.Layer
-              );
-            }
-          } else {
-            // Get the reason
-            const reason = promise.reason as PromiseRejectErrorWrapper<TypeLayerEntryConfig>;
-
-            // Track the error
-            this.addLayerLoadError(reason.error, reason.object);
-          }
-        });
-
-        this.#processMetadataInheritance();
-      }
     }
+
+    // Construct a proper WMS GetCapabilities URL
+    const url = WMS.#buildGetCapabilitiesUrl(this.metadataAccessPath);
+
+    // Get the layer entries we need to query
+    const layerConfigsToQuery = this.#getLayersToQuery();
+
+    if (layerConfigsToQuery.length === 0) {
+      // If no specific layers to query, fetch and process metadata for the entire service
+      return this.#fetchAndProcessSingleWmsMetadata(url);
+    }
+
+    // Fetch and merge metadata for each layer individually
+    return this.#fetchAndMergeMultipleWmsMetadata(url, layerConfigsToQuery);
   }
 
   /**
@@ -194,10 +127,10 @@ export class WMS extends AbstractGeoViewRaster {
    */
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Get the metadata
-    await this.onFetchAndSetServiceMetadata();
+    const metadata = await this.onFetchServiceMetadata();
 
     // Based on the capabilities
-    const layers = this.metadata!.Capability.Layer.Layer as TypeJsonArray;
+    const layers = metadata!.Capability.Layer.Layer as TypeJsonArray;
 
     // Now that we have metadata
     const entries = layers.map((layer) => {
@@ -394,28 +327,131 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /**
-   * Recursively finds gets the layer capability for a given layer id.
-   * @param {string} layerId - The layer identifier to get the capabilities for.
-   * @param {TypeJsonObject | undefined} layer - The current layer entry from the capabilities that will be recursively searched.
-   * @returns {TypeJsonObject?} The found layer from the capabilities or undefined if not found.
+   * Fetches WMS service metadata using a single GetCapabilities request,
+   * and applies metadata inheritance if applicable.
+   *
+   * This method is used when no specific layer filtering is required — typically for standard WMS services.
+   * It updates the metadata access path if a proxy is involved and ensures the metadata hierarchy is processed.
+   *
+   * @param {string} url - The full WMS GetCapabilities URL to fetch metadata from.
+   * @returns {Promise<TypeJsonObject | undefined>} A promise resolving to the parsed metadata object,
+   * or `undefined` if the fetch failed or metadata is invalid.
    */
-  getLayerCapabilities(
-    layerId: string,
-    currentLayerEntry: TypeJsonObject | undefined = this.metadata?.Capability?.Layer
-  ): TypeJsonObject | undefined {
-    if (!currentLayerEntry) return undefined;
-    if ('Name' in currentLayerEntry && (currentLayerEntry.Name as string) === layerId) return currentLayerEntry;
-    if ('Layer' in currentLayerEntry) {
-      if (Array.isArray(currentLayerEntry.Layer)) {
-        for (let i = 0; i < currentLayerEntry.Layer.length; i++) {
-          const layerFound = this.getLayerCapabilities(layerId, currentLayerEntry.Layer[i]);
-          if (layerFound) return layerFound;
-        }
-        return undefined;
-      }
-      return this.getLayerCapabilities(layerId, currentLayerEntry.Layer);
+  async #fetchAndProcessSingleWmsMetadata(url: string): Promise<TypeJsonObject | undefined> {
+    // Fetch the WMS GetCapabilities document from the given URL
+    const metadata = await WMS.fetchMetadataWMS(url, (proxyUsed) => {
+      // If a proxy was used, update the metadata access path accordingly
+      this.metadataAccessPath = `${proxyUsed}${this.metadataAccessPath}`;
+    });
+
+    // Apply metadata inheritance to ensure nested layer structures are properly populated
+    this.#processMetadataInheritance(metadata?.Capability?.Layer);
+    return metadata;
+  }
+
+  /**
+   * Fetches WMS metadata for each unique layer individually and merges them into a single metadata structure.
+   * This method is typically used in cases like GeoMet where individual layer metadata must be requested
+   * separately using the `Layers` parameter in the GetCapabilities URL. It avoids duplicate requests for the
+   * same `layerId`, handles proxy path updates, merges the individual metadata results into a single
+   * base structure, and processes metadata inheritance afterward.
+   * @param {string} url - The base WMS GetCapabilities URL used to fetch metadata.
+   * @param {TypeLayerEntryConfig[]} layers - An array of layer configurations to fetch and merge metadata for.
+   * @returns {Promise<TypeJsonObject | undefined>} A promise resolving to the merged metadata object,
+   * or `undefined` if all requests failed.
+   */
+  async #fetchAndMergeMultipleWmsMetadata(url: string, layers: TypeLayerEntryConfig[]): Promise<TypeJsonObject | undefined> {
+    // Create one metadata fetch promise per unique layerId
+    const metadataPromises = this.#createLayerMetadataPromises(url, layers);
+
+    // Wait for all requests to settle (either fulfilled or rejected)
+    const results = await Promise.allSettled(metadataPromises);
+
+    // If all metadata fetches failed, flag the first layer's parent as errored and abort
+    if (results.every((r) => r.status === 'rejected')) {
+      layers[0].parentLayerConfig?.setLayerStatusError();
+      return undefined;
     }
-    return undefined;
+
+    // Merge metadata results
+    let baseMetadata: TypeJsonObject | undefined;
+    for (const result of results) {
+      if (result.status === 'fulfilled') {
+        const { metadata, layerConfig } = result.value;
+
+        // Use the first successful metadata as the base structure
+        if (!baseMetadata) {
+          baseMetadata = metadata;
+        }
+
+        // Check if this layer's metadata is already included in the base structure
+        const alreadyExists = this.getLayerCapabilities(layerConfig.layerId, baseMetadata?.Capability?.Layer);
+        if (!alreadyExists) {
+          const layerPath = this.#getMetadataLayerPath(layerConfig.layerId, metadata.Capability.Layer);
+
+          // Add the layer's metadata into the base structure
+          this.#addLayerToMetadataInstance(layerPath, baseMetadata.Capability.Layer, metadata.Capability.Layer);
+        }
+      } else {
+        // Log and track metadata fetch failure
+        const reason = result.reason as PromiseRejectErrorWrapper<TypeLayerEntryConfig>;
+        this.addLayerLoadError(reason.error, reason.object);
+      }
+    }
+
+    // Final pass to apply inheritance rules across the merged metadata tree
+    this.#processMetadataInheritance(baseMetadata!.Capability.Layer);
+    return baseMetadata;
+  }
+
+  /**
+   * Creates a list of promises to fetch WMS metadata for a set of layer configurations.
+   * This function ensures that each unique `layerId` results in only one network request,
+   * even if multiple layer configs share the same ID. The resulting promises will either
+   * resolve to a metadata result or reject with a wrapped error.
+   * @param {string} url - The base GetCapabilities URL used to fetch layer-specific metadata.
+   * @param {TypeLayerEntryConfig[]} layers - An array of layer configurations to fetch metadata for.
+   * @returns {Promise<MetatadaFetchResult>[]} An array of metadata fetch promises, one per layer config.
+   */
+  #createLayerMetadataPromises(url: string, layers: TypeLayerEntryConfig[]): Promise<MetatadaFetchResult>[] {
+    const seen = new Map<string, Promise<MetatadaFetchResult>>();
+
+    return layers.map((layerConfig) => {
+      // Avoid duplicate fetches for the same layerId
+      if (!seen.has(layerConfig.layerId)) {
+        const promise = new Promise<MetatadaFetchResult>((resolve, reject) => {
+          // Perform the actual metadata fetch
+          WMS.fetchMetadataWMS(`${url}&Layers=${layerConfig.layerId}`, (proxyUsed) => {
+            // If a proxy was used, update the layer's data access path
+            // eslint-disable-next-line no-param-reassign
+            layerConfig.source!.dataAccessPath = `${proxyUsed}${this.metadataAccessPath}`;
+          })
+            .then((metadata) => {
+              if (metadata.Capability) {
+                resolve({ metadata, layerConfig });
+              } else {
+                // No capabilities found in the response
+                reject(
+                  new PromiseRejectErrorWrapper(
+                    new LayerNoCapabilitiesError(layerConfig.geoviewLayerConfig.geoviewLayerId, layerConfig.getLayerName()),
+                    layerConfig
+                  )
+                );
+              }
+            })
+            .catch((error) => {
+              // Wrap any fetch error with additional layer context
+              reject(new PromiseRejectErrorWrapper(error, layerConfig));
+            });
+        });
+
+        // Store the promise for this layerId to avoid duplicate requests
+        seen.set(layerConfig.layerId, promise);
+      }
+
+      // Return the cached or newly created promise
+      return seen.get(layerConfig.layerId)!;
+    });
   }
 
   /**
@@ -426,18 +462,17 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {Promise<void>} A promise that the execution is completed.
    * @private
    */
-  async #fetchXmlServiceMetadata(metadataUrl: string, callbackNewMetadataUrl?: (proxyUsed: string) => void): Promise<void> {
+  async #fetchXmlServiceMetadata(metadataUrl: string, callbackNewMetadataUrl?: (proxyUsed: string) => void): Promise<TypeJsonObject> {
     // Fetch it
-    const capabilities = await WMS.fetchMetadata(metadataUrl, callbackNewMetadataUrl);
+    const capabilities = await WMS.fetchMetadataWMS(metadataUrl, callbackNewMetadataUrl);
 
-    // Set the metadata
-    // TODO: Check - without validating if they have Capability property?
-    this.metadata = capabilities;
+    this.#processMetadataInheritance(capabilities.Capability.Layer);
+    const metadataAccessPath = capabilities?.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource as string;
 
-    this.#processMetadataInheritance();
-    const metadataAccessPath = this.metadata?.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource as string;
+    // TODO: Remove this setting from this fetch function
     this.metadataAccessPath = metadataAccessPath;
-    const dataAccessPath = this.metadata?.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource as string;
+
+    const dataAccessPath = capabilities?.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource as string;
     const setDataAccessPath = (listOfLayerEntryConfig: TypeLayerEntryConfig[]): void => {
       listOfLayerEntryConfig.forEach((layerConfig) => {
         if (layerEntryIsGroupLayer(layerConfig)) setDataAccessPath(layerConfig.listOfLayerEntryConfig);
@@ -447,7 +482,12 @@ export class WMS extends AbstractGeoViewRaster {
         }
       });
     };
+
+    // TODO: Remove this setting from this fetch function
     setDataAccessPath(this.listOfLayerEntryConfig);
+
+    // Return the metadata
+    return capabilities;
   }
 
   /**
@@ -518,8 +558,7 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /**
-   * This method reads the layer identifiers from the configuration to create an array that will be used in the GetCapabilities.
-   *
+   * Reads the layer identifiers from the configuration to create an array that will be used in the GetCapabilities.
    * @returns {TypeLayerEntryConfig[]} The array of layer configurations.
    * @private
    */
@@ -538,14 +577,13 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /**
-   * This method propagate the WMS metadata inherited values.
-   *
-   * @param {TypeJsonObject} parentLayer The parent layer that contains the inherited values
-   * @param {TypeJsonObject | undefined} layer The layer property from the metadata that will inherit the values
+   * Propagates the WMS metadata inherited values.
+   * @param {TypeJsonObject} layer The layer property from the metadata that will inherit the values
+   * @param {TypeJsonObject | undefined} parentLayer The parent layer that contains the inherited values
    * @private
    */
-  #processMetadataInheritance(parentLayer?: TypeJsonObject, layer: TypeJsonObject | undefined = this.metadata?.Capability?.Layer): void {
-    if (parentLayer && layer) {
+  #processMetadataInheritance(layer: TypeJsonObject, parentLayer?: TypeJsonObject): void {
+    if (layer && parentLayer) {
       // Table 7 — Inheritance of Layer properties specified in the standard with 'replace' behaviour.
       // eslint-disable-next-line no-param-reassign
       if (layer.EX_GeographicBoundingBox === undefined) layer.EX_GeographicBoundingBox = parentLayer.EX_GeographicBoundingBox;
@@ -590,12 +628,11 @@ export class WMS extends AbstractGeoViewRaster {
         });
       }
     }
-    if (layer?.Layer !== undefined) (layer.Layer as TypeJsonArray).forEach((subLayer) => this.#processMetadataInheritance(layer, subLayer));
+    if (layer?.Layer !== undefined) (layer.Layer as TypeJsonArray).forEach((subLayer) => this.#processMetadataInheritance(subLayer, layer));
   }
 
   /**
-   * This method create recursively dynamic group layers from the service metadata.
-   *
+   * Recursively creates dynamic group layers from the service metadata.
    * @param {TypeJsonObject} layer The dynamic group layer metadata.
    * @param {GroupLayerEntryConfig} layerConfig The group layer configuration associated to the dynamic group.
    * @private
@@ -650,13 +687,15 @@ export class WMS extends AbstractGeoViewRaster {
     this.validateListOfLayerEntryConfig(newListOfLayerEntryConfig);
   }
 
+  // #region STATIC
+
   /**
-   * Fetches the metadata for a typical WFS class.
+   * Fetches the metadata for a typical WMS class.
    * @param {string} url - The url to query the metadata from.
    * @param {Function} callbackNewMetadataUrl - Callback executed when a proxy had to be used to fetch the metadata.
    *                                            The parameter sent in the callback is the proxy prefix with the '?' at the end.
    */
-  static override async fetchMetadata(url: string, callbackNewMetadataUrl?: (proxyUsed: string) => void): Promise<TypeJsonObject> {
+  static async fetchMetadataWMS(url: string, callbackNewMetadataUrl?: (proxyUsed: string) => void): Promise<TypeJsonObject> {
     let capabilitiesString;
     try {
       // Fetch the metadata
@@ -761,6 +800,34 @@ export class WMS extends AbstractGeoViewRaster {
     // Return it
     return geoviewLayerConfig;
   }
+
+  /**
+   * Determines whether the provided metadata URL points to a raw XML document.
+   *
+   * This is used to detect non-standard metadata endpoints that don't follow
+   * the WMS GetCapabilities convention.
+   *
+   * @param {string} path - The metadata URL to check.
+   * @returns {boolean} `true` if the URL ends with `.xml`, otherwise `false`.
+   */
+  static #isXmlMetadata(path: string): boolean {
+    // Normalize case and check for '.xml' suffix
+    return path.toLowerCase().endsWith('.xml');
+  }
+
+  /**
+   * Constructs a full WMS GetCapabilities request URL from a base metadata path.
+   * If the input URL already includes a `request=GetCapabilities` parameter,
+   * it is returned as-is. Otherwise, the standard query string is appended.
+   * @param {string} baseUrl - The base URL to convert.
+   * @returns {string} A properly formatted WMS GetCapabilities URL.
+   */
+  static #buildGetCapabilitiesUrl(baseUrl: string): string {
+    // Avoid adding the query string if it's already present
+    return baseUrl.includes('request=GetCapabilities') ? baseUrl : `${baseUrl}?service=WMS&version=1.3.0&request=GetCapabilities`;
+  }
+
+  // #endregion
 }
 
 /**

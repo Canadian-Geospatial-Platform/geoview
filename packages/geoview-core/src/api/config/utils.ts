@@ -6,7 +6,6 @@ import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LAYER_TYPES } from '@/api/config/typ
 import schema from '@/api/config/types/config-validation-schema.json';
 import { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config';
 import { TypeGeoviewLayerType, TypeLayerEntryType } from '@/api/config/types/map-schema-types';
-import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 
 import { logger } from '@/core/utils/logger';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
@@ -84,7 +83,7 @@ export function isvalidComparedToInputSchema(schemaPath: string, targetObject: o
 
   // If the schema is not found, log an error and set the error flag on the target object
   logger.logError(`Cannot find schema ${schemaPath}`);
-  (targetObject as MapFeatureConfig | EntryConfigBaseClass)?.setErrorDetectedFlag?.();
+  (targetObject as MapFeatureConfig)?.setErrorDetectedFlag?.();
   return false;
 }
 

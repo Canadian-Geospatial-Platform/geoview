@@ -11,11 +11,7 @@ import {
   CONST_LAYER_TYPES,
 } from '@/api/config/types/map-schema-types';
 
-import {
-  commonFetchAndSetServiceMetadata,
-  commonProcessLayerMetadata,
-  commonValidateListOfLayerEntryConfig,
-} from '@/geo/layer/geoview-layers/esri-layer-common';
+import { commonProcessLayerMetadata, commonValidateListOfLayerEntryConfig } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { logger } from '@/core/utils/logger';
 import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
@@ -60,24 +56,15 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   }
 
   /**
-   * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
-   * @returns {Promise<void>} A promise that the execution is completed.
-   */
-  protected override onFetchAndSetServiceMetadata(): Promise<void> {
-    // Redirect
-    return commonFetchAndSetServiceMetadata(this);
-  }
-
-  /**
    * Overrides the way a geoview layer config initializes its layer entries.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
    */
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Fetch the metadata
-    await this.onFetchAndSetServiceMetadata();
+    const metadata = await AbstractGeoViewRaster.fetchMetadata(this.metadataAccessPath, this.geoviewLayerId, this.geoviewLayerName);
 
     // Now that we have metadata
-    const layers = this.metadata!.layers as TypeJsonArray;
+    const layers = metadata.layers as TypeJsonArray;
 
     // Get all entries
     const entries = layers.map((layer) => {
