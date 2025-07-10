@@ -41,23 +41,6 @@ import {
 import { logger } from '@/core/utils/logger';
 
 /**
- * Fetches the Esri metadata and sets it for the given layer.
- * @param {EsriDynamic | EsriFeature} layer The ESRI layer instance pointer.
- * @returns {Promise<void>} A promise that the execution is completed.
- */
-export async function commonFetchAndSetServiceMetadata(layer: EsriDynamic | EsriFeature): Promise<void> {
-  // Query
-  const responseJson = await Fetch.fetchJsonAsObject(`${layer.metadataAccessPath}?f=json`);
-
-  // Validate the metadata response
-  AbstractGeoViewRaster.throwIfMetatadaHasError(layer.geoviewLayerId, layer.geoviewLayerName, responseJson);
-
-  // Set it
-  // eslint-disable-next-line no-param-reassign
-  layer.metadata = responseJson;
-}
-
-/**
  * This method validates recursively the configuration of the layer entries to ensure that it is a feature layer identified
  * with a numeric layerId and creates a group entry when a layer is a group.
  *

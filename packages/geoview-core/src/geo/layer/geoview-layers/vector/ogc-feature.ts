@@ -50,15 +50,13 @@ export class OgcFeature extends AbstractGeoViewVector {
   }
 
   /**
-   * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
-   * @returns {Promise<void>} A promise that the execution is completed.
+   * Overrides the way the metadata is fetched.
+   * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
+   * @returns {Promise<TypeJsonObject | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
    */
-  protected override async onFetchAndSetServiceMetadata(): Promise<void> {
+  protected override onFetchServiceMetadata(): Promise<TypeJsonObject | undefined> {
     // Fetch it
-    const responseJson = await OgcFeature.fetchMetadata(this.metadataAccessPath);
-
-    // Set it
-    this.metadata = responseJson;
+    return OgcFeature.fetchMetadata(this.metadataAccessPath);
   }
 
   /**
@@ -81,10 +79,10 @@ export class OgcFeature extends AbstractGeoViewVector {
     // If no id
     if (!id) {
       // Fetch the metadata
-      await this.onFetchAndSetServiceMetadata();
+      const metadata = await OgcFeature.fetchMetadata(this.metadataAccessPath);
 
       // Now that we have metadata
-      entries = (this.metadata!.collections as TypeJsonArray).map((collection) => {
+      entries = (metadata.collections as TypeJsonArray).map((collection) => {
         return { id: collection.id, layerId: collection.id, layerName: collection.description };
       });
     }

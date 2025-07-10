@@ -44,12 +44,13 @@ export class CSV extends AbstractGeoViewVector {
   }
 
   /**
-   * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
-   * @returns {Promise<void>} A promise that the execution is completed.
+   * Overrides the way the metadata is fetched.
+   * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
+   * @returns {Promise<TypeJsonObject | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
    */
-  protected override onFetchAndSetServiceMetadata(): Promise<void> {
+  protected override onFetchServiceMetadata(): Promise<TypeJsonObject | undefined> {
     // None
-    return Promise.resolve();
+    return Promise.resolve(undefined);
   }
 
   /**
