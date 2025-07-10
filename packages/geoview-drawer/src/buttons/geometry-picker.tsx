@@ -4,6 +4,7 @@ import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-
 import {
   useDrawerActions,
   useDrawerActiveGeom,
+  useDrawerIsDrawing,
   useDrawerStyle,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
@@ -113,9 +114,10 @@ export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JS
   const displayLanguage = useAppDisplayLanguage();
 
   // Store actions
-  const { setActiveGeom } = useDrawerActions();
+  const { setActiveGeom, toggleDrawing } = useDrawerActions();
   const style = useDrawerStyle();
   const activeGeom = useDrawerActiveGeom();
+  const isDrawing = useDrawerIsDrawing();
 
   const iconStyle = useMemo(
     () => ({
@@ -148,46 +150,61 @@ export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JS
   };
 
   /**
+   * Checks if isDrawing and starts drawing if not
+   */
+  const safeStartDrawing = useCallback((): void => {
+    if (!isDrawing) {
+      toggleDrawing();
+    }
+  }, [isDrawing, toggleDrawing]);
+
+  /**
    * Sets the current geometry type to Point
    */
   const handleGeometrySelectPoint = useCallback((): void => {
     setActiveGeom('Point');
-  }, [setActiveGeom]);
+    safeStartDrawing();
+  }, [safeStartDrawing, setActiveGeom]);
 
   /**
    * Sets the current geometry type to LineString
    */
   const handleGeometrySelectLineString = useCallback((): void => {
     setActiveGeom('LineString');
-  }, [setActiveGeom]);
+    safeStartDrawing();
+  }, [safeStartDrawing, setActiveGeom]);
 
   /**
    * Sets the current geometry type to Polygon
    */
   const handleGeometrySelectPolygon = useCallback((): void => {
     setActiveGeom('Polygon');
-  }, [setActiveGeom]);
+    safeStartDrawing();
+  }, [safeStartDrawing, setActiveGeom]);
 
   /**
    * Sets the current geometry type to Rectangle
    */
   const handleGeometrySelectRectangle = useCallback((): void => {
     setActiveGeom('Rectangle');
-  }, [setActiveGeom]);
+    safeStartDrawing();
+  }, [safeStartDrawing, setActiveGeom]);
 
   /**
    * Sets the current geometry type to Circle
    */
   const handleGeometrySelectCircle = useCallback((): void => {
     setActiveGeom('Circle');
-  }, [setActiveGeom]);
+    safeStartDrawing();
+  }, [safeStartDrawing, setActiveGeom]);
 
   /**
    * Sets the current geometry type to Star
    */
   const handleGeometrySelectStar = useCallback((): void => {
     setActiveGeom('Star');
-  }, [setActiveGeom]);
+    safeStartDrawing();
+  }, [safeStartDrawing, setActiveGeom]);
 
   return (
     <List sx={sxClasses.list}>
