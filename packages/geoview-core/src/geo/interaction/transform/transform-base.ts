@@ -10,9 +10,10 @@ import { Coordinate } from 'ol/coordinate';
 import { Extent, getCenter } from 'ol/extent';
 import { MapBrowserEvent } from 'ol';
 
-import { TransformEvent } from './transform-event';
-import { DeleteFeatureEvent } from './delete-event';
+import { TransformEvent } from './events/transform-event';
+import { DeleteFeatureEvent } from './events/delete-event';
 import { MapViewer } from '@/app';
+import { SelectionEvent } from './events/select-event';
 
 /**
  * Handle types for the transform interaction
@@ -232,6 +233,8 @@ export class OLTransform extends OLPointer {
 
   onDeletefeature?: (event: DeleteFeatureEvent) => void;
 
+  onSelectionChange?: (event: SelectionEvent) => void;
+
   /**
    * Initializes a OLTransform component.
    * @param {TransformBaseOptions} options - Object to configure the initialization.
@@ -290,14 +293,18 @@ export class OLTransform extends OLPointer {
    * @param {Feature<Geometry>} feature - The feature to select.
    */
   selectFeature(feature: Feature<Geometry>): void {
+    const previousFeature = this.selectedFeature;
+
     // Clear any existing selection
     this.clearHandles();
 
     // Set the selected feature
     this.selectedFeature = feature;
 
-    // Hide the measurement tooltip while transforming
-    this.#hideMeasureTooltip();
+    // Emit selection change event
+    if (this.onSelectionChange) {
+      this.onSelectionChange(new SelectionEvent('selectionchange', previousFeature, feature));
+    }
 
     // Create handles for the feature
     this.createHandles();
@@ -332,8 +339,9 @@ export class OLTransform extends OLPointer {
    * Clears the current selection.
    */
   clearSelection(): void {
-    // Show the measurement tooltip again
-    this.#showMeasureTooltip();
+    if (this.onSelectionChange) {
+      this.onSelectionChange(new SelectionEvent('selectionchange', this.selectedFeature, undefined));
+    }
 
     this.clearHandles();
     this.selectedFeature = undefined;
@@ -1018,8 +1026,6 @@ export class OLTransform extends OLPointer {
           // Only select if it's a different feature
           if (this.selectedFeature !== feature) {
             this.selectFeature(feature);
-          } else {
-            this.#hideMeasureTooltip();
           }
 
           // Start translation if enabled
@@ -1299,25 +1305,25 @@ export class OLTransform extends OLPointer {
     return features && features.length > 0 ? (features[0] as Feature) : undefined;
   }
 
-  /**
-   * Hides the measurement tooltip for a feature.
-   */
-  #hideMeasureTooltip(): void {
-    const measureTooltip = this.selectedFeature?.get('measureTooltip');
-    if (measureTooltip?.getElement()) {
-      measureTooltip.getElement().hidden = true;
-    }
-  }
+  // /**
+  //  * Hides the measurement tooltip for a feature.
+  //  */
+  // #hideMeasureTooltip(): void {
+  //   const measureTooltip = this.selectedFeature?.get('measureTooltip');
+  //   if (measureTooltip?.getElement()) {
+  //     measureTooltip.getElement().hidden = true;
+  //   }
+  // }
 
-  /**
-   * Shows the measurement tooltip for a feature.
-   */
-  #showMeasureTooltip(): void {
-    const measureTooltip = this.selectedFeature?.get('measureTooltip');
-    if (measureTooltip?.getElement()) {
-      measureTooltip.getElement().hidden = false;
-    }
-  }
+  // /**
+  //  * Shows the measurement tooltip for a feature.
+  //  */
+  // #showMeasureTooltip(): void {
+  //   const measureTooltip = this.selectedFeature?.get('measureTooltip');
+  //   if (measureTooltip?.getElement()) {
+  //     measureTooltip.getElement().hidden = false;
+  //   }
+  // }
 
   /** Context menu event handler */
   contextMenuHandler = (e: MouseEvent): void => {

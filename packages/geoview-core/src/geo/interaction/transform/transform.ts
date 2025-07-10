@@ -7,8 +7,9 @@ import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 
 import { Interaction, InteractionOptions } from '../interaction';
 import { OLTransform, HandleType } from './transform-base';
-import { TransformEvent } from './transform-event';
-import { DeleteFeatureEvent } from './delete-event';
+import { TransformEvent } from './events/transform-event';
+import { DeleteFeatureEvent } from './events/delete-event';
+import { SelectionEvent } from './events/select-event';
 
 /**
  * Supported options for transform interactions
@@ -44,6 +45,8 @@ export class Transform extends Interaction {
   #onTransformEndHandlers: TransformEventDelegate[] = [];
 
   #onDeleteFeatureHandlers: DeleteFeatureEventDelegate[] = [];
+
+  #onSelectionChangeHandlers: SelectionEventDelegate[] = [];
 
   /**
    * Initializes a Transform component.
@@ -95,6 +98,7 @@ export class Transform extends Interaction {
     this.#ol_transform.onTransforming = this.#emitTransforming.bind(this);
     this.#ol_transform.onTransformend = this.#emitTransformEnd.bind(this);
     this.#ol_transform.onDeletefeature = this.#emitDeleteFeature.bind(this);
+    this.#ol_transform.onSelectionChange = this.#emitSelectionChange.bind(this);
   }
 
   /**
@@ -307,6 +311,32 @@ export class Transform extends Interaction {
   offDeleteFeature(callback: DeleteFeatureEventDelegate): void {
     EventHelper.offEvent(this.#onDeleteFeatureHandlers, callback);
   }
+
+  // Add these methods:
+  /**
+   * Emits a selection change event to all handlers.
+   * @param {SelectionEvent} event - The event to emit.
+   * @private
+   */
+  #emitSelectionChange(event: SelectionEvent): void {
+    EventHelper.emitEvent(this, this.#onSelectionChangeHandlers, event);
+  }
+
+  /**
+   * Registers a selection change event handler.
+   * @param {SelectionEventDelegate} callback - The callback to be executed whenever the event is emitted.
+   */
+  onSelectionChange(callback: SelectionEventDelegate): void {
+    EventHelper.onEvent(this.#onSelectionChangeHandlers, callback);
+  }
+
+  /**
+   * Unregisters a selection change event handler.
+   * @param {SelectionEventDelegate} callback - The callback to stop being called whenever the event is emitted.
+   */
+  offSelectionChange(callback: SelectionEventDelegate): void {
+    EventHelper.offEvent(this.#onSelectionChangeHandlers, callback);
+  }
 }
 
 /**
@@ -318,6 +348,11 @@ export type TransformEventDelegate = EventDelegateBase<Transform, TransformEvent
  * Define a delegate for the delete feature event handler function signature.
  */
 export type DeleteFeatureEventDelegate = EventDelegateBase<Transform, DeleteFeatureEvent, void>;
+
+/**
+ * Define a delegate for the selection event handler function signature.
+ */
+export type SelectionEventDelegate = EventDelegateBase<Transform, SelectionEvent, void>;
 
 // Re-export types from transform-base
 export { HandleType };
