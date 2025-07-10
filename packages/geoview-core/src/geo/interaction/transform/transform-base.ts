@@ -18,7 +18,9 @@ import { MapViewer } from '@/app';
  * Handle types for the transform interaction
  */
 export enum HandleType {
+  BOUNDARY = 'boundary',
   ROTATE = 'rotate',
+  ROTATE_LINE = 'rotate-line',
   SCALE = 'scale',
   TRANSLATE = 'translate',
   TRANSLATE_CENTER = 'translate-center',
@@ -211,9 +213,6 @@ export class OLTransform extends OLPointer {
       width: 1,
       lineDash: [5, 5],
     }),
-    fill: new Fill({
-      color: 'rgba(0, 0, 0, 0)', // Transparent fill
-    }),
   });
 
   rotateLineStyle = new Style({
@@ -270,21 +269,7 @@ export class OLTransform extends OLPointer {
     });
 
     // Set up feature collection change handlers
-    this.features.on('add', this.onFeatureAdd.bind(this));
     this.features.on('remove', this.onFeatureRemove.bind(this));
-  }
-
-  /**
-   * Handles when a feature is added to the collection.
-   * @param {Event} event - The event.
-   */
-  onFeatureAdd(event: { element: Feature }): void {
-    const feature = event.element;
-
-    // If this is the first feature, select it
-    if (this.features.getLength() === 1 && !this.selectedFeature) {
-      this.selectFeature(feature);
-    }
   }
 
   /**
@@ -446,19 +431,17 @@ export class OLTransform extends OLPointer {
    */
   createExtentBoundary(extent: Extent): void {
     const [minX, minY, maxX, maxY] = extent;
-    const boundaryGeometry = new Polygon([
-      [
-        [minX, minY],
-        [maxX, minY],
-        [maxX, maxY],
-        [minX, maxY],
-        [minX, minY],
-      ],
+    const boundaryGeometry = new LineString([
+      [minX, minY],
+      [maxX, minY],
+      [maxX, maxY],
+      [minX, maxY],
+      [minX, minY],
     ]);
 
     const boundary = new Feature({
       geometry: boundaryGeometry,
-      handleType: 'boundary',
+      handleType: HandleType.BOUNDARY,
     });
 
     boundary.setStyle(this.extentBoundaryStyle);
@@ -510,7 +493,7 @@ export class OLTransform extends OLPointer {
     // Create line from top stretch to rotate handle
     const line = new Feature({
       geometry: new LineString([lineStart, lineEnd]),
-      handleType: 'rotate-line',
+      handleType: HandleType.ROTATE_LINE,
     });
     line.setStyle(this.rotateLineStyle);
     this.handleSource.addFeature(line);
@@ -896,6 +879,9 @@ export class OLTransform extends OLPointer {
       case HandleType.DELETE:
         return 'pointer';
 
+      case HandleType.VERTEX:
+        return 'grab';
+
       case HandleType.SCALE_NE:
         return 'nesw-resize';
 
@@ -960,7 +946,7 @@ export class OLTransform extends OLPointer {
   }
 
   /**
-   * Handle pointer down events.
+   * Handle Click Events
    * @param {MapBrowserEvent} event - The map browser event.
    * @returns {boolean} Whether the event was handled.
    */
@@ -974,10 +960,9 @@ export class OLTransform extends OLPointer {
 
       // Check if we clicked on a handle
       const handleFeature = this.#getHandleAtCoordinate(coordinate, map);
-      if (handleFeature) {
-        const handleType = handleFeature.get('handleType') as HandleType;
-
-        // Handle delete action immediately
+      const handleType = handleFeature?.get('handleType') as HandleType;
+      if (handleFeature && handleType !== HandleType.BOUNDARY && handleType !== HandleType.ROTATE_LINE) {
+        // Handle delete action
         if (handleType === HandleType.DELETE) {
           const feature = handleFeature.get('feature');
           if (feature) {
@@ -1154,7 +1139,8 @@ export class OLTransform extends OLPointer {
   }
 
   /**
-   * Handle pointer move events.
+   * Handle pointer move events. Not to be confused with moving handles.
+   * This overrides the move event from OL Pointer
    * @param {MapBrowserEvent} event - The map browser event.
    */
   override handleMoveEvent(event: MapBrowserEvent<PointerEvent>): void {
@@ -1223,6 +1209,11 @@ export class OLTransform extends OLPointer {
     } else if (geometry instanceof Polygon) {
       const coords = geometry.getCoordinates();
       coords[0][vertexIndex] = coordinate;
+      // move last vertex too if it's the first vertex for a polygon
+      if (vertexIndex === 0) {
+        coords[0][coords[0].length - 1] = coordinate;
+      }
+
       geometry.setCoordinates(coords);
     }
   }
@@ -1275,6 +1266,14 @@ export class OLTransform extends OLPointer {
       // Don't allow deletion if it would leave less than 4 points (including closing point)
       if (coords[0].length <= 4) return;
       coords[0].splice(vertexIndex, 1);
+
+      // If we deleted the first vertex, update the last vertex to be the same as the new first
+      // to properly close the polygon
+      if (vertexIndex === 0) {
+        // eslint-disable-next-line prefer-destructuring
+        coords[0][coords[0].length - 1] = coords[0][0];
+      }
+
       geometry.setCoordinates(coords);
     }
 
