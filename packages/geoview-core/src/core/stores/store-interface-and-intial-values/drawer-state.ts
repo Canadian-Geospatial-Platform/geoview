@@ -1,5 +1,6 @@
 import { useStore } from 'zustand';
 
+import { Feature } from 'ol';
 import { Draw } from '@/geo/interaction/draw';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
@@ -30,10 +31,6 @@ type TypeNavBarPackageConfig = {
   drawer?: TypeDrawerConfig;
 };
 
-export type TypeTransformInstance = {
-  [groupKey: string]: Transform | undefined;
-};
-
 // Need Geometry Types array, but can get from config
 export interface IDrawerState {
   activeGeom: string;
@@ -41,7 +38,8 @@ export interface IDrawerState {
   style: StyleProps;
   drawInstance: Draw | undefined;
   isEditing: boolean;
-  transformInstances: TypeTransformInstance;
+  transformInstance: Transform | undefined;
+  selectedDrawing: Feature | undefined;
   hideMeasurements: boolean;
   iconSrc: string;
 
@@ -54,7 +52,8 @@ export interface IDrawerState {
     getIsDrawing: () => boolean;
     getDrawInstance: () => Draw | undefined;
     getIsEditing: () => boolean;
-    getTransformInstances: () => TypeTransformInstance;
+    getTransformInstance: () => Transform;
+    getSelectedDrawing: () => Feature | undefined;
     getHideMeasurements: () => boolean;
     getIconSrc: () => string;
     toggleDrawing: () => void;
@@ -68,9 +67,9 @@ export interface IDrawerState {
     setStrokeWidth(strokeWidth: number): void;
     setDrawInstance(drawInstance: Draw): void;
     removeDrawInstance(): void;
-    setIsEditing: (isEditing: boolean) => void;
-    setTransformInstance(groupKey: string, transformInstance: Transform | undefined): void;
-    removeTransformInstance(groupKey: string): void;
+    setTransformInstance(transformInstance: Transform): void;
+    removeTransformInstance(): void;
+    setSelectedDrawing(selectedDrawing: Feature | undefined): void;
     setHideMeasurements(hideMeasurements: boolean): void;
     setIconSrc: (iconSrc: string) => void;
   };
@@ -88,8 +87,9 @@ export interface IDrawerState {
     setDrawInstance: (drawInstance: Draw) => void;
     removeDrawInstance: () => void;
     setIsEditing: (isEditing: boolean) => void;
-    setTransformInstance: (groupKey: string, transformInstance: Transform | undefined) => void;
-    removeTransformInstance: (groupKey: string) => void;
+    setTransformInstance: (transformInstance: Transform) => void;
+    removeTransformInstance: () => void;
+    setSelectedDrawing: (selectedDrawing: Feature | undefined) => void;
     setHideMeasurements: (hideMeasurements: boolean) => void;
     setIconSrc: (iconSrc: string) => void;
   };
@@ -115,7 +115,8 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
     },
     drawInstance: undefined,
     isEditing: false,
-    transformInstances: {},
+    transformInstance: undefined,
+    selectedDrawing: undefined,
     hideMeasurements: true,
     iconSrc: '',
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
@@ -166,10 +167,13 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         return get().drawerState.drawInstance;
       },
       getIsEditing: () => {
-        return get().drawerState.isEditing;
+        return get().drawerState.transformInstance !== undefined;
       },
-      getTransformInstances: () => {
-        return get().drawerState.transformInstances;
+      getTransformInstance: () => {
+        return get().drawerState.transformInstance;
+      },
+      getSelectedDrawing: () => {
+        return get().drawerState.selectedDrawing;
       },
       getHideMeasurements: () => {
         return get().drawerState.hideMeasurements;
@@ -221,17 +225,17 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         // Redirect to setter
         get().drawerState.setterActions.removeDrawInstance();
       },
-      setIsEditing: (isEditing: boolean) => {
+      setTransformInstance: (transformInstance: Transform) => {
         // Redirect to setter
-        get().drawerState.setterActions.setIsEditing(isEditing);
+        get().drawerState.setterActions.setTransformInstance(transformInstance);
       },
-      setTransformInstance: (groupKey: string, transformInstance: Transform) => {
+      removeTransformInstance: () => {
         // Redirect to setter
-        get().drawerState.setterActions.setTransformInstance(groupKey, transformInstance);
+        get().drawerState.setterActions.removeTransformInstance();
       },
-      removeTransformInstance: (groupKey: string) => {
+      setSelectedDrawing(selectedFeature: Feature) {
         // Redirect to setter
-        get().drawerState.setterActions.removeTransformInstance(groupKey);
+        get().drawerState.setterActions.setSelectedDrawing(selectedFeature);
       },
       setHideMeasurements: (hideMeasurements: boolean) => {
         // Redirect to setter
@@ -345,34 +349,29 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         });
       },
 
-      setIsEditing: (isEditing: boolean) => {
+      setTransformInstance: (transformInstance: Transform) => {
         set({
           drawerState: {
             ...get().drawerState,
-            isEditing,
+            transformInstance,
           },
         });
       },
 
-      setTransformInstance: (groupKey: string, transformInstance: Transform) => {
+      removeTransformInstance: () => {
         set({
           drawerState: {
             ...get().drawerState,
-            transformInstances: {
-              ...get().drawerState.transformInstances,
-              [groupKey]: transformInstance,
-            },
+            transformInstance: undefined,
           },
         });
       },
 
-      removeTransformInstance: (groupKey: string) => {
-        const transformInstances = { ...get().drawerState.transformInstances };
-        transformInstances[groupKey] = undefined;
+      setSelectedDrawing(selectedDrawing: Feature) {
         set({
           drawerState: {
             ...get().drawerState,
-            transformInstances,
+            selectedDrawing,
           },
         });
       },
@@ -408,7 +407,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
 
 export const useDrawerIsDrawing = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.actions.getIsDrawing());
 
-export const useDrawerIsEditing = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.isEditing);
+export const useDrawerIsEditing = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.actions.getIsEditing());
 
 export const useDrawerActiveGeom = (): string => useStore(useGeoViewStore(), (state) => state.drawerState.activeGeom);
 

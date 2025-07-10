@@ -1,4 +1,4 @@
 export * from './transform';
 export * from './transform-base';
-export * from './transform-event';
-export * from './delete-event';
+export * from './events/transform-event';
+export * from './events/delete-event';
