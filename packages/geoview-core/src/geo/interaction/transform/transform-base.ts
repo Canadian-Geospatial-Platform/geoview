@@ -1305,27 +1305,7 @@ export class OLTransform extends OLPointer {
     return features && features.length > 0 ? (features[0] as Feature) : undefined;
   }
 
-  // /**
-  //  * Hides the measurement tooltip for a feature.
-  //  */
-  // #hideMeasureTooltip(): void {
-  //   const measureTooltip = this.selectedFeature?.get('measureTooltip');
-  //   if (measureTooltip?.getElement()) {
-  //     measureTooltip.getElement().hidden = true;
-  //   }
-  // }
-
-  // /**
-  //  * Shows the measurement tooltip for a feature.
-  //  */
-  // #showMeasureTooltip(): void {
-  //   const measureTooltip = this.selectedFeature?.get('measureTooltip');
-  //   if (measureTooltip?.getElement()) {
-  //     measureTooltip.getElement().hidden = false;
-  //   }
-  // }
-
-  /** Context menu event handler */
+  /** Context menu event handler to prevent context menu when removing vertices */
   contextMenuHandler = (e: MouseEvent): void => {
     if (this.selectedFeature) {
       e.preventDefault();
