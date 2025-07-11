@@ -77,17 +77,18 @@ export const getSxClasses = (theme: Theme): any => ({
     display: 'block',
   },
   scaleText: {
-    fontSize: theme.palette.geoViewFontSize.sm,
-    fontWeight: '500',
-    color: theme.palette.geoViewColor.grey.dark[600],
+    fontSize: theme.palette.geoViewFontSize.default,
+    color: theme.palette.geoViewColor.grey.dark[800],
     whiteSpace: 'nowrap',
-    borderTop: `1px solid ${theme.palette.geoViewColor.primary.light[300]}`,
+    borderBottom: `1px solid ${theme.palette.geoViewColor.primary.light[300]}`,
     textTransform: 'lowercase',
     position: 'relative',
     display: 'inline-block',
 
     '&.interaction-static': {
-      borderTop: '1px solid',
+      fontSize: theme.palette.geoViewFontSize.md,
+      fontWeight: 'bold',
+      borderBottom: '1px solid',
 
       '&.hasScaleLine::before, &.hasScaleLine::after': {
         backgroundColor: `${theme.palette.geoViewColor.grey.dark[800]} !important`,
@@ -98,7 +99,7 @@ export const getSxClasses = (theme: Theme): any => ({
     '&.hasScaleLine::before, &.hasScaleLine::after': {
       content: '""',
       position: 'absolute',
-      top: '-8px',
+      bottom: '-1px',
       width: '1px',
       height: '8px',
       backgroundColor: theme.palette.geoViewColor.grey.dark[800],
@@ -113,19 +114,19 @@ export const getSxClasses = (theme: Theme): any => ({
     },
   },
   disclaimerText: {
-    fontSize: theme.palette.geoViewFontSize.xs,
-    color: theme.palette.geoViewColor.grey.dark[900],
+    fontSize: theme.palette.geoViewFontSize.sm,
+    color: theme.palette.geoViewColor.grey.dark[800],
     margin: 0,
     marginBottom: '20px',
   },
   dateText: {
-    fontSize: theme.palette.geoViewFontSize.xs,
-    color: theme.palette.geoViewColor.grey.dark[900],
+    fontSize: theme.palette.geoViewFontSize.sm,
+    color: theme.palette.geoViewColor.grey.dark[800],
     marginBottom: '1rem',
   },
   AttributionText: {
-    fontSize: theme.palette.geoViewFontSize.xs,
-    color: theme.palette.geoViewColor.grey.dark[900],
+    fontSize: theme.palette.geoViewFontSize.sm,
+    color: theme.palette.geoViewColor.grey.dark[800],
     margin: '1rem',
   },
 });
