@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import * as htmlToImage from 'html-to-image';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, LoadingButton, Skeleton, TextField } from '@/ui';
-import { exportPNG, delay } from '@/core/utils/utilities';
+import { exportPNG } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { useUIActiveAppBarTab, useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
@@ -18,50 +18,26 @@ import { LegendContainer } from '@/core/components/export/export-legend-utils';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { getSxClasses } from './export-modal-style';
 
-interface TypeScale {
-  scaleId: string;
-  label: string;
-  borderBottom: boolean;
-}
-
-const SCALE_MODES = {
-  METRIC: 0,
-  IMPERIAL: 1,
-  NUMERIC: 2,
-} as const;
-
 /**
  * Export modal window component to export the viewer information in a PNG file
  *
  * @returns {JSX.Element} the export modal component
  */
 export default function ExportModal(): JSX.Element {
-  // Log
-  logger.logTraceRender('components/export/export-modal');
-
-  // Hooks
   const { t } = useTranslation();
-  const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
-
-  // Store
   const mapId = useGeoViewMapId();
+  const fileExportDefaultPrefixName = t('exportModal.fileExportDefaultPrefixName');
   const mapElement = useAppGeoviewHTMLElement();
   const mapViewport = mapElement.getElementsByClassName('ol-viewport')[0];
-  const northArrow = useMapNorthArrow();
-  const scale = useMapScale();
-  const mapAttributions = useMapAttribution();
-  const { rotationAngle } = useManageArrow();
-  const { disableFocusTrap, setActiveAppBarTab } = useUIStoreActions();
-  const activeModalId = useUIActiveFocusItem().activeElementId;
-  const { isOpen } = useUIActiveAppBarTab();
-
-  // State & refs
+  const footerbarLegendContainer = mapElement.querySelector(`[id^="${mapId}-footerBar-legendContainer"]`);
+  const appBarLegendContainer = mapElement.querySelector(`[id^="${mapId}-appBar-legendContainer"]`);
+  const legendId = `${mapId}AppbarPanelButtonLegend`;
+  const theme = useTheme();
   const [isMapLoading, setIsMapLoading] = useState(true);
   const [isLegendLoading, setIsLegendLoading] = useState(true);
   const [isMapExporting, setIsMapExporting] = useState(false);
+  // export template variables
   const [exportTitle, setExportTitle] = useState<string>('');
-  const [legendLayers, setLegendLayers] = useState<TypeLegendLayer[]>([]);
   const exportContainerRef = useRef(null) as RefObject<HTMLDivElement>;
   const mapImageRef = useRef(null) as RefObject<HTMLDivElement>;
   const dialogRef = useRef(null) as RefObject<HTMLDivElement>;
@@ -69,10 +45,17 @@ export default function ExportModal(): JSX.Element {
   const textFieldRef = useRef(null) as RefObject<HTMLInputElement>;
   const exportTitleRef = useRef(null) as RefObject<HTMLDivElement>;
 
-  const legendId = `${mapId}AppbarPanelButtonLegend`;
-  const fileExportDefaultPrefixName = t('exportModal.fileExportDefaultPrefixName');
-  const footerbarLegendContainer = mapElement.querySelector(`[id^="${mapId}-footerBar-legendContainer"]`);
-  const appBarLegendContainer = mapElement.querySelector(`[id^="${mapId}-appBar-legendContainer"]`);
+  const northArrow = useMapNorthArrow();
+  const scale = useMapScale();
+  const mapAttributions = useMapAttribution();
+
+  const { rotationAngle } = useManageArrow();
+
+  // get store function
+  const { disableFocusTrap, setActiveAppBarTab } = useUIStoreActions();
+  const activeModalId = useUIActiveFocusItem().activeElementId;
+  const { isOpen } = useUIActiveAppBarTab();
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Get layers from the store
   const layersList = useLayerLegendLayers()
@@ -83,6 +66,21 @@ export default function ExportModal(): JSX.Element {
       return layer.layerStatus === 'loaded';
     })
     .map((layer) => ({ ...layer, items: layer.items.filter((item) => item.isVisible === true) }));
+
+  // Set the legend layers
+  const [legendLayers, setLegendLayers] = useState<TypeLegendLayer[]>([]);
+
+  interface TypeScale {
+    scaleId: string;
+    label: string;
+    borderBottom: boolean;
+  }
+
+  const SCALE_MODES = {
+    METRIC: 0,
+    IMPERIAL: 1,
+    NUMERIC: 2,
+  } as const;
 
   // Memoize values
   const scaleValues: TypeScale[] = useMemo(
@@ -106,34 +104,6 @@ export default function ExportModal(): JSX.Element {
     [scale.labelGraphicMetric, scale.labelGraphicImperial, scale.labelNumeric]
   );
 
-  // resising image from dataurl
-  async function resizeImageData(imageUri: string, inFileName: string): Promise<void> {
-    const img = new Image();
-    const imgCanvas = document.createElement('canvas');
-    const ctx = imgCanvas.getContext('2d');
-
-    img.addEventListener('load', () => {
-      const dx = 0;
-      const dy = 0;
-      const dHeight = img.naturalHeight;
-
-      // IMAGE TO CANVAS
-      imgCanvas.width = img.naturalWidth;
-      imgCanvas.height = dHeight;
-
-      if (ctx) {
-        // Optional: fill background if you want a color behind
-        ctx.fillStyle = theme.palette.common.white; // or any background color
-        ctx.fillRect(0, 0, imgCanvas.width, imgCanvas.height);
-        ctx.drawImage(img, dx, dy); // Draw image to canvas
-        const imgurl = imgCanvas.toDataURL('image/png');
-        // Download png file from dataurl
-        exportPNG(imgurl, inFileName);
-      }
-    });
-    img.src = imageUri; // load image
-    await delay(1500);
-  }
   /**
    * Calculate the width of the canvas based on dialog box container width.
    * @param {HTMLDivElement} dialogBox - Container where canvas will be rendered.
@@ -194,15 +164,9 @@ export default function ExportModal(): JSX.Element {
               setIsMapExporting(false);
               // Clean up
               document.body.removeChild(tempContainer);
-
-              resizeImageData(dataUrl, `${fileExportDefaultPrefixName}-${exportTitle !== '' ? exportTitle.trim() : mapId}`)
-                .then(() => {
-                  setActiveAppBarTab(legendId, 'legend', false, false);
-                  disableFocusTrap();
-                })
-                .catch((error) => {
-                  logger.logError('Error while resizing the image', error);
-                });
+              exportPNG(dataUrl, `${fileExportDefaultPrefixName}-${exportTitle !== '' ? exportTitle.trim() : mapId}`);
+              setActiveAppBarTab(legendId, 'legend', false, false);
+              disableFocusTrap();
             })
             .catch((error) => {
               // Clean up on error too
@@ -232,15 +196,13 @@ export default function ExportModal(): JSX.Element {
           return 'none';
       }
     },
-    [scale.lineWidthMetric, scale.lineWidthImperial]
+    [scale.lineWidthMetric, scale.lineWidthImperial, SCALE_MODES.METRIC, SCALE_MODES.IMPERIAL]
   );
 
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('Export Modal - mount');
     setLegendLayers(layersList);
-
-    const overviewMap = mapElement.getElementsByClassName('ol-overviewmap')[0] as HTMLDivElement;
 
     const overviewMap = mapElement.getElementsByClassName('ol-overviewmap')[0] as HTMLDivElement;
 
@@ -270,18 +232,13 @@ export default function ExportModal(): JSX.Element {
           })
           .catch((error) => {
             logger.logError('Error occured while converting map to image', error);
-          })
-          .finally(() => {
-            // Set back overview map visibility to true. Use a timeout so the html-to-image library can finish its work.
-            // Just put the code in then does not work all the time
-            setTimeout(() => {
-              if (overviewMap) overviewMap.style.visibility = 'visible';
-            }, 1000);
           });
         setIsLegendLoading(false);
       }, 100);
     }
     return () => {
+      if (overviewMap) overviewMap.style.visibility = 'visible';
+
       if (timer) clearTimeout(timer);
       setIsMapLoading(true);
       setIsLegendLoading(true);
@@ -304,7 +261,7 @@ export default function ExportModal(): JSX.Element {
             />
           </Box>
           <Box ref={exportTitleRef} />
-          <Box ref={mapImageRef} sx={{ ...sxClasses.mapContainer }}>
+          <Box ref={mapImageRef}>
             {isMapLoading && <Skeleton variant="rounded" width="100%" height={500} sx={{ bgcolor: theme.palette.grey[500] }} />}
           </Box>
           <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ padding: '1rem', paddingBottom: 0 }}>
@@ -313,6 +270,7 @@ export default function ExportModal(): JSX.Element {
               className="hasScaleLine interaction-static"
               sx={{
                 ...getSxClasses(theme).scaleText,
+                borderBottom: '1px solid',
                 width: `${parseInt(getScaleWidth(0), 10) + 60}px`,
               }}
             >
@@ -338,12 +296,12 @@ export default function ExportModal(): JSX.Element {
           <Box ref={legendContainerRef}>
             {isLegendLoading && <Skeleton variant="rounded" width="100%" height={500} sx={{ bgcolor: theme.palette.grey[500] }} />}
           </Box>
-          <Box textAlign="center" key={t('mapctrl.disclaimer.message')} sx={{ ...sxClasses.disclaimerText }}>
+          <Box textAlign="center" key={t('mapctrl.disclaimer.message')} component="p" sx={{ ...sxClasses.disclaimerText }}>
             {t('mapctrl.disclaimer.message')}
           </Box>
           <Box textAlign="center">
             {mapAttributions.map((mapAttribution) => (
-              <Box key={mapAttribution} sx={{ ...sxClasses.AttributionText }}>
+              <Box key={mapAttribution} component="p" sx={{ ...sxClasses.AttributionText }}>
                 {mapAttribution}
               </Box>
             ))}

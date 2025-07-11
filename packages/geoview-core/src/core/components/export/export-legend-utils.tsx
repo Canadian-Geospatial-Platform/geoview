@@ -3,9 +3,12 @@ import { useTheme } from '@mui/material/styles';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { TypeLegendLayer } from '@/core/components/layers/types';
+import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
+
 import { logger } from '@/core/utils/logger';
 import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
 import { getSxClasses } from './export-modal-style';
+import { DateMgt, TimeDimension } from '@/core/utils/date-mgt';
 
 interface LegendContainerProps {
   layers: TypeLegendLayer[];
@@ -15,6 +18,7 @@ interface LegendContainerProps {
  * LegendContainer component to display a list of layers and their items.
  */
 function LegendContainerComponent({ layers }: LegendContainerProps): JSX.Element {
+  const layerActions = useLayerStoreActions();
   logger.logTraceRender('components/legend/legend-export-utils', layers);
   const theme = useTheme();
   const mapId = useGeoViewMapId();
@@ -39,11 +43,16 @@ function LegendContainerComponent({ layers }: LegendContainerProps): JSX.Element
     if (!imgUrl) return <> </>;
     return <img src={imgUrl} alt={alt} style={sxClasses.legendItemIcon} />;
   };
+
   // Recursive function to render a layer and its children/items
   const renderLayer = (layer: TypeLegendLayer): JSX.Element => {
     const layerVisibility = MapEventProcessor.getMapVisibilityFromOrderedLayerInfo(mapId, layer.layerPath);
 
     if (layerVisibility === false) return <> </>;
+
+    // Get the temporal dimension directly from the layer actions
+    const temporalDimension = layerActions.getLayerTemporalDimension(layer.layerPath) as TimeDimension;
+    const hasTimeRange = Boolean(temporalDimension?.range?.range?.length);
 
     return (
       <div key={layer.layerPath} style={sxClasses.legendSpacing}>
@@ -51,6 +60,21 @@ function LegendContainerComponent({ layers }: LegendContainerProps): JSX.Element
         <div style={sxClasses.legendTitle}>
           <span>{layer.layerName}</span>
         </div>
+        {/* Time range if available */}
+        {hasTimeRange && temporalDimension?.range?.range?.length > 0 && (
+          <div style={sxClasses.toLine}>
+            <span style={{ ...sxClasses.legendItem, fontStyle: 'italic' }}>
+              {temporalDimension.singleHandle ? (
+                DateMgt.formatDate(temporalDimension.range.range[0], 'YYYY-MM-DD')
+              ) : (
+                <>
+                  {DateMgt.formatDate(temporalDimension.range.range[0], 'YYYY-MM-DD')} /{' '}
+                  {DateMgt.formatDate(temporalDimension.default, 'YYYY-MM-DD')}
+                </>
+              )}
+            </span>
+          </div>
+        )}
         <div>
           <span style={sxClasses.toLine}>{renderWMSLayerImage(layer, 'icon')}</span>
         </div>
