@@ -117,6 +117,18 @@ export class OLTransform extends OLPointer {
   /** Flag to track if a vertex was already added during this drag operation */
   #vertexAdded = false;
 
+  /** History stack for undo/redo functionality */
+  #geometryHistory: Geometry[] = [];
+
+  /** Current position in history stack */
+  #historyIndex = -1;
+
+  /** Maximum history size */
+  #maxHistorySize = 50;
+
+  /** Keyboard event handler */
+  #keyboardHandler?: (event: KeyboardEvent) => void;
+
   // Define handle styles
   rotateStyle = new Style({
     text: new Text({
@@ -273,6 +285,9 @@ export class OLTransform extends OLPointer {
 
     // Set up feature collection change handlers
     this.features.on('remove', this.onFeatureRemove.bind(this));
+
+    // Keyboard event handler
+    this.#setupKeyboardHandler();
   }
 
   /**
@@ -295,11 +310,17 @@ export class OLTransform extends OLPointer {
   selectFeature(feature: Feature<Geometry>): void {
     const previousFeature = this.selectedFeature;
 
+    // Clear history when changing selection
+    this.#clearHistory();
+
     // Clear any existing selection
     this.clearHandles();
 
     // Set the selected feature
     this.selectedFeature = feature;
+
+    // Save initial state to history
+    this.#saveToHistory();
 
     // Emit selection change event
     if (this.onSelectionChange) {
@@ -343,6 +364,7 @@ export class OLTransform extends OLPointer {
       this.onSelectionChange(new SelectionEvent('selectionchange', this.selectedFeature, undefined));
     }
 
+    this.#clearHistory();
     this.clearHandles();
     this.selectedFeature = undefined;
   }
@@ -360,6 +382,110 @@ export class OLTransform extends OLPointer {
     // 30 pixels converted to map units
     return resolution * 15;
   }
+
+  // #region Helpers
+
+  /**
+   * Rotates a coordinate around a center point by an angle.
+   * @param {Coordinate} coordinate - The coordinate to rotate.
+   * @param {Coordinate} center - The center point.
+   * @param {number} angle - The angle in radians.
+   * @returns {Coordinate} The rotated coordinate.
+   */
+  static rotateCoordinate(coordinate: Coordinate, center: Coordinate, angle: number): Coordinate {
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+    const dx = coordinate[0] - center[0];
+    const dy = coordinate[1] - center[1];
+
+    return [center[0] + dx * cos - dy * sin, center[1] + dx * sin + dy * cos];
+  }
+
+  /**
+   * Scales a coordinate relative to a center point.
+   * @param {Coordinate} coordinate - The coordinate to scale.
+   * @param {Coordinate} center - The center point.
+   * @param {number} scaleX - The X scale factor.
+   * @param {number} scaleY - The Y scale factor.
+   * @returns {Coordinate} The scaled coordinate.
+   */
+  static scaleCoordinate(coordinate: Coordinate, center: Coordinate, scaleX: number, scaleY: number): Coordinate {
+    const dx = coordinate[0] - center[0];
+    const dy = coordinate[1] - center[1];
+
+    return [center[0] + dx * scaleX, center[1] + dy * scaleY];
+  }
+
+  /**
+   * Deletes a vertex from the geometry.
+   * @param {Feature} vertexHandle - The vertex handle to delete.
+   */
+  #deleteVertex(vertexHandle: Feature): void {
+    if (!this.selectedFeature) return;
+
+    const vertexIndex = vertexHandle.get('vertexIndex');
+    const geometry = this.selectedFeature.getGeometry();
+
+    if (geometry instanceof LineString) {
+      const coords = geometry.getCoordinates();
+      // Don't allow deletion if it would leave less than 2 points
+      if (coords.length <= 2) return;
+      coords.splice(vertexIndex, 1);
+      geometry.setCoordinates(coords);
+    } else if (geometry instanceof Polygon) {
+      const coords = geometry.getCoordinates();
+      // Don't allow deletion if it would leave less than 4 points (including closing point)
+      if (coords[0].length <= 4) return;
+      coords[0].splice(vertexIndex, 1);
+
+      // If we deleted the first vertex, update the last vertex to be the same as the new first
+      // to properly close the polygon
+      if (vertexIndex === 0) {
+        // eslint-disable-next-line prefer-destructuring
+        coords[0][coords[0].length - 1] = coords[0][0];
+      }
+
+      geometry.setCoordinates(coords);
+    }
+
+    // Update handles after deletion
+    this.updateHandles();
+  }
+
+  /**
+   * Gets the handle feature at the specified coordinate.
+   * @param {Coordinate} coordinate - The coordinate to check.
+   * @param {OLMap} map - The map instance.
+   * @returns {Feature | undefined} The handle feature if found.
+   */
+  #getHandleAtCoordinate(coordinate: Coordinate, map: OLMap): Feature | undefined {
+    const pixel = map.getPixelFromCoordinate(coordinate);
+    const hitTolerance = this.options.hitTolerance || 5;
+
+    const features = map.getFeaturesAtPixel(pixel, {
+      layerFilter: (layer) => layer === this.handleLayer,
+      hitTolerance,
+    });
+
+    return features && features.length > 0 ? (features[0] as Feature) : undefined;
+  }
+
+  /** Context menu event handler to prevent context menu when removing vertices */
+  contextMenuHandler = (e: MouseEvent): void => {
+    if (this.selectedFeature) {
+      e.preventDefault();
+    }
+  };
+
+  /**
+   * Cleans up the interaction.
+   */
+  override dispose(): void {
+    this.#removeKeyboardHandler();
+    this.clearSelection();
+  }
+
+  // #region Handle Creation
 
   /**
    * Creates handles for the selected feature.
@@ -431,6 +557,55 @@ export class OLTransform extends OLPointer {
     if (geometry instanceof LineString || geometry instanceof Polygon) {
       this.createVertexHandles(geometry);
     }
+  }
+
+  /**
+   * Creates a handle at the specified coordinate with the given type.
+   * @param {Coordinate} coordinate - The coordinate for the handle.
+   * @param {HandleType} type - The type of handle.
+   */
+  createHandle(coordinate: Coordinate, type: HandleType, properties?: CreateHandleProps): void {
+    const handle = new Feature({
+      geometry: new Point(coordinate),
+      handleType: type,
+      ...properties,
+    });
+
+    // Store a reference to the selected feature in the handle
+    handle.set('feature', this.selectedFeature);
+
+    // Apply style based on handle type
+    switch (type) {
+      case HandleType.VERTEX:
+        handle.setStyle(this.vertexStyle);
+        break;
+      case HandleType.ROTATE:
+        handle.setStyle(this.rotateStyle);
+        break;
+      case HandleType.DELETE:
+        handle.setStyle(this.deleteStyle);
+        break;
+      case HandleType.SCALE_NE:
+      case HandleType.SCALE_SE:
+      case HandleType.SCALE_SW:
+      case HandleType.SCALE_NW:
+        handle.setStyle(this.scaleStyle);
+        break;
+      case HandleType.STRETCH_N:
+      case HandleType.STRETCH_E:
+      case HandleType.STRETCH_S:
+      case HandleType.STRETCH_W:
+        handle.setStyle(this.stretchStyle);
+        break;
+      case HandleType.TRANSLATE_CENTER:
+        handle.setStyle(this.translateStyle);
+        break;
+      default:
+        break;
+    }
+
+    // Add the handle to the source
+    this.handleSource.addFeature(handle);
   }
 
   /**
@@ -571,52 +746,82 @@ export class OLTransform extends OLPointer {
   }
 
   /**
-   * Creates a handle at the specified coordinate with the given type.
-   * @param {Coordinate} coordinate - The coordinate for the handle.
-   * @param {HandleType} type - The type of handle.
+   * Gets the cursor style for a handle type.
+   * @param {HandleType} handleType - The handle type.
+   * @returns {string} The cursor style.
    */
-  createHandle(coordinate: Coordinate, type: HandleType, properties?: CreateHandleProps): void {
-    const handle = new Feature({
-      geometry: new Point(coordinate),
-      handleType: type,
-      ...properties,
-    });
-
-    // Store a reference to the selected feature in the handle
-    handle.set('feature', this.selectedFeature);
-
-    // Apply style based on handle type
-    switch (type) {
-      case HandleType.VERTEX:
-        handle.setStyle(this.vertexStyle);
-        break;
+  static getCursorForHandleType(handleType: HandleType): string {
+    switch (handleType) {
       case HandleType.ROTATE:
-        handle.setStyle(this.rotateStyle);
-        break;
+        return 'grab';
+
       case HandleType.DELETE:
-        handle.setStyle(this.deleteStyle);
-        break;
+        return 'pointer';
+
+      case HandleType.VERTEX:
+        return 'grab';
+
+      case HandleType.SCALE_NE:
+        return 'nesw-resize';
+
+      case HandleType.SCALE_SE:
+        return 'nwse-resize';
+
+      case HandleType.SCALE_SW:
+        return 'nesw-resize';
+
+      case HandleType.SCALE_NW:
+        return 'nwse-resize';
+
+      case HandleType.STRETCH_N:
+        return 'ns-resize';
+
+      case HandleType.STRETCH_E:
+        return 'ew-resize';
+
+      case HandleType.STRETCH_S:
+        return 'ns-resize';
+
+      case HandleType.STRETCH_W:
+        return 'ew-resize';
+
+      case HandleType.TRANSLATE_CENTER:
+        return 'move';
+
+      default:
+        return 'default';
+    }
+  }
+
+  /**
+   * Gets the event type from a handle type.
+   * @param {HandleType} handleType - The handle type.
+   * @param {string} suffix - The event suffix (start, ing, end).
+   * @returns {string} The event type.
+   */
+  static getEventTypeFromHandleType(handleType: HandleType, suffix: string): string {
+    switch (handleType) {
+      case HandleType.ROTATE:
+        return `rotate${suffix}`;
+
       case HandleType.SCALE_NE:
       case HandleType.SCALE_SE:
       case HandleType.SCALE_SW:
       case HandleType.SCALE_NW:
-        handle.setStyle(this.scaleStyle);
-        break;
+        return `scale${suffix}`;
+
       case HandleType.STRETCH_N:
       case HandleType.STRETCH_E:
       case HandleType.STRETCH_S:
       case HandleType.STRETCH_W:
-        handle.setStyle(this.stretchStyle);
-        break;
-      case HandleType.TRANSLATE_CENTER:
-        handle.setStyle(this.translateStyle);
-        break;
-      default:
-        break;
-    }
+        return `stretch${suffix}`;
 
-    // Add the handle to the source
-    this.handleSource.addFeature(handle);
+      case HandleType.TRANSLATE:
+        return `translate${suffix}`;
+
+      default:
+        return `transform${suffix}`;
+    }
   }
 
   /**
@@ -636,6 +841,8 @@ export class OLTransform extends OLPointer {
     // Create new handles
     this.createHandles();
   }
+
+  // #region Handlers
 
   /**
    * Handles translation of a feature.
@@ -705,22 +912,6 @@ export class OLTransform extends OLPointer {
 
     // Update the feature with the new geometry
     this.selectedFeature.setGeometry(geometry);
-  }
-
-  /**
-   * Rotates a coordinate around a center point by an angle.
-   * @param {Coordinate} coordinate - The coordinate to rotate.
-   * @param {Coordinate} center - The center point.
-   * @param {number} angle - The angle in radians.
-   * @returns {Coordinate} The rotated coordinate.
-   */
-  static rotateCoordinate(coordinate: Coordinate, center: Coordinate, angle: number): Coordinate {
-    const cos = Math.cos(angle);
-    const sin = Math.sin(angle);
-    const dx = coordinate[0] - center[0];
-    const dy = coordinate[1] - center[1];
-
-    return [center[0] + dx * cos - dy * sin, center[1] + dx * sin + dy * cos];
   }
 
   /**
@@ -800,21 +991,6 @@ export class OLTransform extends OLPointer {
   }
 
   /**
-   * Scales a coordinate relative to a center point.
-   * @param {Coordinate} coordinate - The coordinate to scale.
-   * @param {Coordinate} center - The center point.
-   * @param {number} scaleX - The X scale factor.
-   * @param {number} scaleY - The Y scale factor.
-   * @returns {Coordinate} The scaled coordinate.
-   */
-  static scaleCoordinate(coordinate: Coordinate, center: Coordinate, scaleX: number, scaleY: number): Coordinate {
-    const dx = coordinate[0] - center[0];
-    const dy = coordinate[1] - center[1];
-
-    return [center[0] + dx * scaleX, center[1] + dy * scaleY];
-  }
-
-  /**
    * Handles stretching of a feature.
    * @param {Coordinate} coordinate - The current coordinate.
    * @param {HandleType} handleType - The type of handle being dragged.
@@ -872,85 +1048,6 @@ export class OLTransform extends OLPointer {
 
     // Update the feature with the new geometry
     this.selectedFeature.setGeometry(geometry);
-  }
-
-  /**
-   * Gets the cursor style for a handle type.
-   * @param {HandleType} handleType - The handle type.
-   * @returns {string} The cursor style.
-   */
-  static getCursorForHandleType(handleType: HandleType): string {
-    switch (handleType) {
-      case HandleType.ROTATE:
-        return 'grab';
-
-      case HandleType.DELETE:
-        return 'pointer';
-
-      case HandleType.VERTEX:
-        return 'grab';
-
-      case HandleType.SCALE_NE:
-        return 'nesw-resize';
-
-      case HandleType.SCALE_SE:
-        return 'nwse-resize';
-
-      case HandleType.SCALE_SW:
-        return 'nesw-resize';
-
-      case HandleType.SCALE_NW:
-        return 'nwse-resize';
-
-      case HandleType.STRETCH_N:
-        return 'ns-resize';
-
-      case HandleType.STRETCH_E:
-        return 'ew-resize';
-
-      case HandleType.STRETCH_S:
-        return 'ns-resize';
-
-      case HandleType.STRETCH_W:
-        return 'ew-resize';
-
-      case HandleType.TRANSLATE_CENTER:
-        return 'move';
-
-      default:
-        return 'default';
-    }
-  }
-
-  /**
-   * Gets the event type from a handle type.
-   * @param {HandleType} handleType - The handle type.
-   * @param {string} suffix - The event suffix (start, ing, end).
-   * @returns {string} The event type.
-   */
-  static getEventTypeFromHandleType(handleType: HandleType, suffix: string): string {
-    switch (handleType) {
-      case HandleType.ROTATE:
-        return `rotate${suffix}`;
-
-      case HandleType.SCALE_NE:
-      case HandleType.SCALE_SE:
-      case HandleType.SCALE_SW:
-      case HandleType.SCALE_NW:
-        return `scale${suffix}`;
-
-      case HandleType.STRETCH_N:
-      case HandleType.STRETCH_E:
-      case HandleType.STRETCH_S:
-      case HandleType.STRETCH_W:
-        return `stretch${suffix}`;
-
-      case HandleType.TRANSLATE:
-        return `translate${suffix}`;
-
-      default:
-        return `transform${suffix}`;
-    }
   }
 
   /**
@@ -1121,6 +1218,9 @@ export class OLTransform extends OLPointer {
 
     try {
       if (this.#isTransforming && this.selectedFeature) {
+        // Save state to history after transformation
+        this.#saveToHistory();
+
         // Update handles to match the new geometry position
         this.updateHandles();
 
@@ -1251,64 +1351,130 @@ export class OLTransform extends OLPointer {
     this.clearHandles();
   }
 
+  // #region Undo / Redo
+
   /**
-   * Deletes a vertex from the geometry.
-   * @param {Feature} vertexHandle - The vertex handle to delete.
+   * Sets up keyboard event handling for undo/redo.
    */
-  #deleteVertex(vertexHandle: Feature): void {
+  #setupKeyboardHandler(): void {
+    this.#keyboardHandler = (event: KeyboardEvent) => {
+      // Only handle if we have a selected feature and not currently transforming
+      if (!this.selectedFeature || this.#isTransforming) return;
+
+      if (event.ctrlKey || event.metaKey) {
+        // Support both Ctrl (Windows/Linux) and Cmd (Mac)
+        switch (event.key.toLowerCase()) {
+          case 'z':
+            if (event.shiftKey) {
+              // Ctrl+Shift+Z = Redo
+              if (this.redo()) {
+                event.preventDefault();
+              }
+            } else if (this.undo()) {
+              // Ctrl+Z = Undo
+              event.preventDefault();
+            }
+            break;
+          case 'y':
+            // Ctrl+Y = Redo (alternative)
+            if (this.redo()) {
+              event.preventDefault();
+            }
+            break;
+
+          default:
+            break;
+        }
+      }
+    };
+
+    document.addEventListener('keydown', this.#keyboardHandler);
+  }
+
+  /**
+   * Removes keyboard event listeners.
+   */
+  #removeKeyboardHandler(): void {
+    if (this.#keyboardHandler) {
+      document.removeEventListener('keydown', this.#keyboardHandler);
+      this.#keyboardHandler = undefined;
+    }
+  }
+
+  /**
+   * Saves the current geometry state to history.
+   */
+  #saveToHistory(): void {
     if (!this.selectedFeature) return;
 
-    const vertexIndex = vertexHandle.get('vertexIndex');
     const geometry = this.selectedFeature.getGeometry();
+    if (!geometry) return;
 
-    if (geometry instanceof LineString) {
-      const coords = geometry.getCoordinates();
-      // Don't allow deletion if it would leave less than 2 points
-      if (coords.length <= 2) return;
-      coords.splice(vertexIndex, 1);
-      geometry.setCoordinates(coords);
-    } else if (geometry instanceof Polygon) {
-      const coords = geometry.getCoordinates();
-      // Don't allow deletion if it would leave less than 4 points (including closing point)
-      if (coords[0].length <= 4) return;
-      coords[0].splice(vertexIndex, 1);
+    // Remove any history after current index (when undoing then making new changes)
+    this.#geometryHistory = this.#geometryHistory.slice(0, this.#historyIndex + 1);
 
-      // If we deleted the first vertex, update the last vertex to be the same as the new first
-      // to properly close the polygon
-      if (vertexIndex === 0) {
-        // eslint-disable-next-line prefer-destructuring
-        coords[0][coords[0].length - 1] = coords[0][0];
-      }
+    // Add current geometry to history
+    this.#geometryHistory.push(geometry.clone());
+    this.#historyIndex++;
 
-      geometry.setCoordinates(coords);
+    // Limit history size
+    if (this.#geometryHistory.length > this.#maxHistorySize) {
+      this.#geometryHistory.shift();
+      this.#historyIndex--;
     }
-
-    // Update handles after deletion
-    this.updateHandles();
   }
 
   /**
-   * Gets the handle feature at the specified coordinate.
-   * @param {Coordinate} coordinate - The coordinate to check.
-   * @param {OLMap} map - The map instance.
-   * @returns {Feature | undefined} The handle feature if found.
+   * Clears the geometry history.
    */
-  #getHandleAtCoordinate(coordinate: Coordinate, map: OLMap): Feature | undefined {
-    const pixel = map.getPixelFromCoordinate(coordinate);
-    const hitTolerance = this.options.hitTolerance || 5;
-
-    const features = map.getFeaturesAtPixel(pixel, {
-      layerFilter: (layer) => layer === this.handleLayer,
-      hitTolerance,
-    });
-
-    return features && features.length > 0 ? (features[0] as Feature) : undefined;
+  #clearHistory(): void {
+    this.#geometryHistory = [];
+    this.#historyIndex = -1;
   }
 
-  /** Context menu event handler to prevent context menu when removing vertices */
-  contextMenuHandler = (e: MouseEvent): void => {
-    if (this.selectedFeature) {
-      e.preventDefault();
-    }
-  };
+  /**
+   * Undoes the last transformation.
+   * @returns {boolean} True if undo was successful.
+   */
+  undo(): boolean {
+    if (!this.selectedFeature || this.#historyIndex <= 0) return false;
+
+    this.#historyIndex--;
+    const previousGeometry = this.#geometryHistory[this.#historyIndex];
+    this.selectedFeature.setGeometry(previousGeometry.clone());
+    this.updateHandles();
+
+    return true;
+  }
+
+  /**
+   * Redoes the next transformation.
+   * @returns {boolean} True if redo was successful.
+   */
+  redo(): boolean {
+    if (!this.selectedFeature || this.#historyIndex >= this.#geometryHistory.length - 1) return false;
+
+    this.#historyIndex++;
+    const nextGeometry = this.#geometryHistory[this.#historyIndex];
+    this.selectedFeature.setGeometry(nextGeometry.clone());
+    this.updateHandles();
+
+    return true;
+  }
+
+  /**
+   * Checks if undo is available.
+   * @returns {boolean} True if undo is available.
+   */
+  canUndo(): boolean {
+    return this.#historyIndex > 0;
+  }
+
+  /**
+   * Checks if redo is available.
+   * @returns {boolean} True if redo is available.
+   */
+  canRedo(): boolean {
+    return this.#historyIndex < this.#geometryHistory.length - 1;
+  }
 }
