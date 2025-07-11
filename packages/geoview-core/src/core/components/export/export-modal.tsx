@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import * as htmlToImage from 'html-to-image';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, LoadingButton, Skeleton, TextField } from '@/ui';
-import { exportPNG, delay } from '@/core/utils/utilities';
+import { exportPNG } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { useUIActiveAppBarTab, useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
@@ -106,34 +106,6 @@ export default function ExportModal(): JSX.Element {
     [scale.labelGraphicMetric, scale.labelGraphicImperial, scale.labelNumeric]
   );
 
-  // resising image from dataurl
-  async function resizeImageData(imageUri: string, inFileName: string): Promise<void> {
-    const img = new Image();
-    const imgCanvas = document.createElement('canvas');
-    const ctx = imgCanvas.getContext('2d');
-
-    img.addEventListener('load', () => {
-      const dx = 0;
-      const dy = 0;
-      const dHeight = img.naturalHeight;
-
-      // IMAGE TO CANVAS
-      imgCanvas.width = img.naturalWidth;
-      imgCanvas.height = dHeight;
-
-      if (ctx) {
-        // Optional: fill background if you want a color behind
-        ctx.fillStyle = theme.palette.common.white; // or any background color
-        ctx.fillRect(0, 0, imgCanvas.width, imgCanvas.height);
-        ctx.drawImage(img, dx, dy); // Draw image to canvas
-        const imgurl = imgCanvas.toDataURL('image/png');
-        // Download png file from dataurl
-        exportPNG(imgurl, inFileName);
-      }
-    });
-    img.src = imageUri; // load image
-    await delay(1500);
-  }
   /**
    * Calculate the width of the canvas based on dialog box container width.
    * @param {HTMLDivElement} dialogBox - Container where canvas will be rendered.
@@ -194,15 +166,9 @@ export default function ExportModal(): JSX.Element {
               setIsMapExporting(false);
               // Clean up
               document.body.removeChild(tempContainer);
-
-              resizeImageData(dataUrl, `${fileExportDefaultPrefixName}-${exportTitle !== '' ? exportTitle.trim() : mapId}`)
-                .then(() => {
-                  setActiveAppBarTab(legendId, 'legend', false, false);
-                  disableFocusTrap();
-                })
-                .catch((error) => {
-                  logger.logError('Error while resizing the image', error);
-                });
+              exportPNG(dataUrl, `${fileExportDefaultPrefixName}-${exportTitle !== '' ? exportTitle.trim() : mapId}`);
+              setActiveAppBarTab(legendId, 'legend', false, false);
+              disableFocusTrap();
             })
             .catch((error) => {
               // Clean up on error too
@@ -239,8 +205,6 @@ export default function ExportModal(): JSX.Element {
     // Log
     logger.logTraceUseEffect('Export Modal - mount');
     setLegendLayers(layersList);
-
-    const overviewMap = mapElement.getElementsByClassName('ol-overviewmap')[0] as HTMLDivElement;
 
     const overviewMap = mapElement.getElementsByClassName('ol-overviewmap')[0] as HTMLDivElement;
 
