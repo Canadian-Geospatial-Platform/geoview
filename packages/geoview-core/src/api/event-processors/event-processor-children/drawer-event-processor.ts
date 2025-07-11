@@ -582,6 +582,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       });
 
       state.actions.setTransformInstance(transformInstance);
+    } else {
+      this.startDrawing(mapId);
+      return;
     }
 
     // If we have an active drawing instance, stop it
