@@ -5,14 +5,14 @@ export type GeoChartGeoCoreConfig = TypeJsonObject & {
         layerId: string;
     };
 };
-export type GeoChartConfig = TypeJsonObject & {
+export type GeoViewGeoChartConfig = TypeJsonObject & {
     layers: {
         layerId: string;
     }[];
 };
 export type UUIDmapConfigReaderResponse = {
     layers: TypeGeoviewLayerConfig[];
-    geocharts?: GeoChartConfig[];
+    geocharts?: GeoViewGeoChartConfig[];
 };
 /**
  * A class to generate GeoView layers config from a URL using a UUID.
