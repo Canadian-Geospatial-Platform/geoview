@@ -1,4 +1,5 @@
 import { useEffect, useState, KeyboardEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Box, CircularProgressBase, DeleteOutlineIcon, IconButton, UndoIcon } from '@/ui';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useMapStoreActions, useSelectorLayerVisibility } from '@/core/stores/store-interface-and-intial-values/map-state';
@@ -51,6 +52,8 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
 
   const { layerPath, layerId, layerRemovable } = props;
 
+  const { t } = useTranslation<string>();
+
   const [progress, setProgress] = useState(10);
   const [inUndoState, setInUndoState] = useState(false);
 
@@ -64,13 +67,13 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
     if (isVisible) setOrToggleLayerVisibility(layerPath);
     removeLayerHighlights(layerPath);
     setInUndoState(true);
-    setLayerDeleteInProgress(true);
+    setLayerDeleteInProgress(layerPath);
   };
 
   const handleUndoClick = (): void => {
     setOrToggleLayerVisibility(layerPath);
     setInUndoState(false);
-    setLayerDeleteInProgress(false);
+    setLayerDeleteInProgress('');
   };
 
   const handleDeleteKeyDown = (event: KeyboardEvent): void => {
@@ -94,7 +97,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
   useEffect(() => {
     return () => {
       setInUndoState(false);
-      setLayerDeleteInProgress(false);
+      setLayerDeleteInProgress('');
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -124,7 +127,13 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
   // Never hide the remove icon, so user can remove forever loading/processing layers.
   if (!inUndoState && layerRemovable && !getLayerDeleteInProgress()) {
     return (
-      <IconButton onClick={handleDeleteClick} edge="end" size="small" onKeyDown={(e) => handleDeleteKeyDown(e)}>
+      <IconButton
+        onClick={handleDeleteClick}
+        edge="end"
+        size="small"
+        onKeyDown={(e) => handleDeleteKeyDown(e)}
+        tooltip={t('layers.deleteLayer')!}
+      >
         <DeleteOutlineIcon color="error" />
       </IconButton>
     );

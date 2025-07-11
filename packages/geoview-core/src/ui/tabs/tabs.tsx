@@ -1,5 +1,6 @@
 import { SyntheticEvent, ReactNode, useState, useEffect, useMemo, MouseEvent, useCallback, useRef, memo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Size } from 'ol/size';
 
 import {
   Grid2 as Grid,
@@ -20,9 +21,6 @@ import { logger } from '@/core/utils/logger';
 import { Select, TypeMenuItemProps } from '@/ui/select/select';
 import { getSxClasses } from '@/ui/tabs/tabs-style';
 import { TabPanel } from '@/ui/tabs/tab-panel';
-import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useUIHiddenTabs } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useAppFullscreenActive, useAppHeight } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { TypeContainerBox } from '@/core/types/global-types';
 import { handleEscapeKey } from '@/core/utils/utilities';
 
@@ -65,6 +63,10 @@ export interface TypeTabsProps {
   onOpenKeyboard?: (uiFocus: FocusItemProps) => void;
   onCloseKeyboard?: () => void;
   containerType?: TypeContainerBox;
+  sideAppSize: Size;
+  appHeight: number;
+  hiddenTabs: string[];
+  isFullScreen: boolean;
 }
 
 // Define scroll button component outside of Tabs
@@ -104,13 +106,16 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
     tabProps = {},
     containerType,
     isCollapsed,
+    sideAppSize,
+    appHeight,
+    hiddenTabs,
+    isFullScreen,
   } = props;
 
   // Hooks
   // TODO: refactor - language values should be pass as props
   const { t } = useTranslation<string>();
   const theme = useTheme();
-  const isMapFullScreen = useAppFullscreenActive();
 
   // State
   // boolean value in state reflects when tabs will be collapsed state, then value needs to false.
@@ -118,16 +123,10 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
   const [tabPanels, setTabPanels] = useState([tabs[0]]);
   const tabPanelRef = useRef<HTMLDivElement | null>(null);
 
-  // TODO: refactor - Should decouple from store and values pass as props
-  // Store
-  const mapSize = useMapSize();
-  const appHeight = useAppHeight();
-  const hiddenTabs = useUIHiddenTabs();
-
-  const sxClasses = useMemo(() => getSxClasses(theme, isMapFullScreen, appHeight), [theme, isMapFullScreen, appHeight]);
+  const sxClasses = useMemo(() => getSxClasses(theme, isFullScreen, appHeight), [theme, isFullScreen, appHeight]);
 
   // show/hide dropdown based on map size
-  const initMobileDropdown = mapSize[0] !== 0 ? mapSize[0] < theme.breakpoints.values.sm : false;
+  const initMobileDropdown = sideAppSize[0] !== 0 ? sideAppSize[0] < theme.breakpoints.values.sm : false;
   const [showMobileDropdown, setShowMobileDropdown] = useState(initMobileDropdown);
 
   /**
@@ -228,15 +227,15 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
   }, [tabs, t]);
 
   useEffect(() => {
-    logger.logTraceUseEffect('UI.TABS - mapSize', mapSize);
+    logger.logTraceUseEffect('UI.TABS - mapSize', sideAppSize);
 
     // show/hide mobile dropdown when screen size change.
-    if (mapSize[0] < theme.breakpoints.values.sm) {
+    if (sideAppSize[0] < theme.breakpoints.values.sm) {
       setShowMobileDropdown(true);
     } else {
       setShowMobileDropdown(false);
     }
-  }, [mapSize, theme.breakpoints.values.sm]);
+  }, [sideAppSize, theme.breakpoints.values.sm]);
 
   useEffect(() => {
     logger.logTraceUseEffect('UI.TABS - isCollapsed', isCollapsed);
@@ -259,7 +258,13 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sxMerged: any = { ...sxClasses.panel, visibility: TabContentVisibilty };
 
+  // Get the visible tabs
   const visibleTabs = useMemo(() => tabs.filter((tab) => !hiddenTabs.includes(tab.id)), [tabs, hiddenTabs]);
+
+  // Make sure the selected tab is among the visible tabs
+  // (it's possible that the store has a selected value set to something that hasn't yet been created as a tab).
+  const validSelectedTab = visibleTabs.find((tab) => tab.value === selectedTab)?.value || 0;
+
   return (
     <Box
       sx={{
@@ -276,14 +281,13 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
               variant="scrollable"
               scrollButtons
               allowScrollButtonsMobile
-              value={Math.max(0, selectedTab)}
+              value={Math.max(0, validSelectedTab)}
               onChange={handleChange}
               aria-label="basic tabs"
               ScrollButtonComponent={CustomScrollButton}
               {...tabsProps}
             >
               {visibleTabs.map((tab) => {
-                const originalIndex = tabs.findIndex((singleTab) => singleTab.id === tab.id);
                 return (
                   <MaterialTab
                     label={t(tab.label)}
@@ -295,7 +299,7 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
                     sx={sxClasses.tab}
                     aria-controls={`${shellContainer?.id ?? ''}-${tab.id}`}
                     tabIndex={0}
-                    value={originalIndex}
+                    value={tab.value}
                     {...tabProps}
                   />
                 );
@@ -336,7 +340,7 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
               ref={tabPanelRef}
               className="tab-panel"
             >
-              {typeof tab?.content === 'string' ? <UseHtmlToReact htmlContent={(tab?.content as string) ?? ''} /> : tab.content}
+              {typeof tab?.content === 'string' ? <UseHtmlToReact htmlContent={tab?.content ?? ''} /> : tab.content}
             </TabPanel>
           ) : (
             ''

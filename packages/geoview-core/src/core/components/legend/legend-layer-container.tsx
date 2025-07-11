@@ -40,7 +40,7 @@ const styles = {
 // Extracted WMS Legend Component
 const WMSLegendImage = memo(
   ({ imgSrc, initLightBox, legendExpanded, sxClasses, title }: WMSLegendImageProps): JSX.Element => (
-    <Collapse in={legendExpanded} sx={sxClasses!.collapsibleContainer} timeout="auto">
+    <Collapse in={legendExpanded} sx={sxClasses.collapsibleContainer} timeout="auto">
       <Box
         component="img"
         tabIndex={0}
@@ -82,11 +82,11 @@ export const CollapsibleContent = memo(function CollapsibleContent({
   if (isWMSWithLegend) {
     return (
       <WMSLegendImage
-        imgSrc={layerIcons[0].iconImage || ''}
+        imgSrc={layerIcons[0].iconImage!}
         initLightBox={initLightBox}
         legendExpanded={!isCollapsed}
         sxClasses={sxClasses}
-        title={t('general.clickEnlarge')!}
+        title={t('general.clickEnlarge')}
       />
     );
   }
@@ -94,7 +94,7 @@ export const CollapsibleContent = memo(function CollapsibleContent({
   return (
     <Collapse in={!isCollapsed} sx={sxClasses.collapsibleContainer} timeout="auto" unmountOnExit>
       <List>{layerChildren && layerChildren.map((item) => <LegendLayerComponent layerPath={item.layerPath} key={item.layerPath} />)}</List>
-      <ItemsList items={layerItems || []} />
+      <ItemsList items={layerItems || []} layerPath={layerPath} />
     </Collapse>
   );
 });

@@ -63,10 +63,10 @@ export class FeatureHighlight {
   }
 
   /**
-   * Initializes the FeatureHightlight with the MapViewer, now that the map is accessible inside the MapViewer.
+   * Initializes the FeatureHighlight with the MapViewer, now that the map is accessible inside the MapViewer.
    */
   init(): void {
-    // Initialize the Feature Hightlight
+    // Initialize the Feature Highlight
     this.overlayLayer = new VectorLayer({ source: this.highlightSource, map: this.mapViewer.map });
     this.pointMarkers = new PointMarkers(this.mapViewer, this);
     if (MapEventProcessor.getFeatureHighlightColor(this.mapViewer.mapId) !== 'black')
@@ -183,7 +183,7 @@ export class FeatureHighlight {
         newFeature.setStyle(radStyle);
       }
     } else if (geometry instanceof MultiPolygon) {
-      const polygons = (geometry as MultiPolygon).getPolygons();
+      const polygons = geometry.getPolygons();
       const featureUid = getUid(feature.geometry);
 
       for (let i = 0; i < polygons.length; i++) {

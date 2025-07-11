@@ -110,22 +110,22 @@ export abstract class AbstractGeoViewLayer {
   /** Date format object used to translate server to ISO format and ISO to server format */
   serverDateFragmentsOrder?: TypeDateFragments;
 
-  // Keep all callback delegate references
+  /** Keep all callback delegate references */
   #onLayerEntryRegisterInitHandlers: LayerEntryRegisterInitDelegate[] = [];
 
-  // Keep all callback delegate references
+  /** Keep all callback delegate references */
   #onLayerEntryProcessedHandlers: LayerEntryProcessedDelegate[] = [];
 
-  // Keep all callback delegate references
+  /** Keep all callback delegate references */
   #onLayerConfigCreatedHandlers: LayerConfigCreatedDelegate[] = [];
 
-  // Keep all callback delegate references
+  /** Keep all callback delegate references */
   #onLayerGroupCreatedHandlers: LayerGroupCreatedDelegate[] = [];
 
-  // Keep all callback delegate references
+  /** Keep all callback delegate references */
   #onLayerGVCreatedHandlers: LayerGVCreatedDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onLayerMessageHandlers: LayerMessageDelegate[] = [];
 
   /**
@@ -135,7 +135,7 @@ export abstract class AbstractGeoViewLayer {
    */
   constructor(type: TypeGeoviewLayerType, geoviewLayerConfig: TypeGeoviewLayerConfig) {
     this.type = type;
-    this.geoviewLayerId = geoviewLayerConfig.geoviewLayerId || generateId();
+    this.geoviewLayerId = geoviewLayerConfig.geoviewLayerId || generateId(18);
     this.geoviewLayerName = geoviewLayerConfig?.geoviewLayerName ? geoviewLayerConfig.geoviewLayerName : DEFAULT_LAYER_NAMES[type];
     this.metadataAccessPath = geoviewLayerConfig.metadataAccessPath?.trim() || '';
     this.serverDateFragmentsOrder = geoviewLayerConfig.serviceDateFormat
@@ -271,8 +271,8 @@ export abstract class AbstractGeoViewLayer {
         // All so that the try/catch works nicely here.
         await this.onFetchAndSetServiceMetadata();
       } else {
-        // TODO: Check - Is this else really happening? Do we need the if (this.metadataAccessPath) at all?
-        logger.logDebug(`WOW IT HAPPENED! '${this.geoviewLayerId}' HAD NO METADATA ACCESS PATH!`);
+        // GV It's possible there is no metadataAccessPath, e.g.: CSV (csvLYR2), we keep the if condition here
+        // Skip
       }
     } catch (error: unknown) {
       // Set the layer status to all layer entries to error (that logic was as-is in this refactor, leaving as-is for now)
@@ -545,7 +545,7 @@ export abstract class AbstractGeoViewLayer {
           const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.initialSettings);
           const groupReturned = await this.#processListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig, newLayerGroup);
           if (groupReturned) {
-            if (layerGroup) layerGroup.getOLLayer().getLayers().push(groupReturned.getOLLayer());
+            if (layerGroup) layerGroup.addLayer(groupReturned);
             return groupReturned;
           }
 
@@ -557,7 +557,7 @@ export abstract class AbstractGeoViewLayer {
         try {
           // Process entry and catch possible error
           const baseLayer = await this.#processOneLayerEntry(layerConfig);
-          if (layerGroup) layerGroup.getOLLayer().getLayers().push(baseLayer.getOLLayer());
+          if (layerGroup) layerGroup.addLayer(baseLayer);
           return layerGroup || baseLayer;
         } catch (error: unknown) {
           // Add a layer load error
@@ -571,7 +571,7 @@ export abstract class AbstractGeoViewLayer {
       if (!layerGroup) {
         // All children of this level in the tree have the same parent, so we use the first element of the array to retrieve the parent node.
         // eslint-disable-next-line no-param-reassign
-        layerGroup = this.createLayerGroup(listOfLayerEntryConfig[0].parentLayerConfig!, listOfLayerEntryConfig[0].initialSettings!);
+        layerGroup = this.createLayerGroup(listOfLayerEntryConfig[0].parentLayerConfig!, listOfLayerEntryConfig[0].initialSettings);
       }
 
       // TODO: Refactor - Rework this Promise to be "Promise<AbstractBaseLayer>"
@@ -585,7 +585,7 @@ export abstract class AbstractGeoViewLayer {
           // promiseOfLayerCreated.push(Promise.resolve(undefined)); commented unnecessary code
         } else {
           // Create promise and catch possible error
-          const promise = this.#processOneLayerEntry(layerConfig as AbstractBaseLayerEntryConfig).catch((error: unknown) => {
+          const promise = this.#processOneLayerEntry(layerConfig).catch((error: unknown) => {
             // Add a layer load error
             this.addLayerLoadError(formatError(error), layerConfig);
             return undefined;
@@ -603,7 +603,7 @@ export abstract class AbstractGeoViewLayer {
       listOfLayerCreated
         .filter((layer) => !!layer)
         .forEach((layer) => {
-          layerGroup!.getOLLayer().getLayers().push(layer.getOLLayer());
+          layerGroup!.addLayer(layer);
         });
 
       return layerGroup;
@@ -646,7 +646,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    * @returns {AbstractGVLayer} The GV Layer that has been created.
    */
-  protected createGVLayer(layerConfig: AbstractBaseLayerEntryConfig): AbstractGVLayer {
+  createGVLayer(layerConfig: AbstractBaseLayerEntryConfig): AbstractGVLayer {
     // Redirect
     const layer = this.onCreateGVLayer(layerConfig);
 

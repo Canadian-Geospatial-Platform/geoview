@@ -33,7 +33,7 @@ export class GVXYZTiles extends AbstractGVTile {
     AbstractGVTile.initOptionsWithInitialSettings(tileLayerOptions, layerConfig);
 
     // Create and set the OpenLayer layer
-    this.olLayer = new TileLayer(tileLayerOptions);
+    this.setOLLayer(new TileLayer(tileLayerOptions));
   }
 
   /**

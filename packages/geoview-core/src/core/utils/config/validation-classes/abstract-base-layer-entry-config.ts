@@ -12,6 +12,7 @@ import {
   TypeLayerStyleSettings,
   TypeVectorSourceInitialConfig,
   TypeVectorTileSourceInitialConfig,
+  TypeGeojsonSourceInitialConfig,
 } from '@/api/config/types/map-schema-types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeJsonObject } from '@/api/config/types/config-types';
@@ -22,9 +23,6 @@ import { TimeDimension } from '@/app';
  * Base type used to define a GeoView layer to display on the map.
  */
 export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
-  /** The ending element of the layer configuration path. */
-  override layerIdExtension?: string | undefined = undefined;
-
   /** The metadata associated with the service */
   #serviceMetadata?: TypeJsonObject;
 
@@ -48,6 +46,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
     | TypeBaseVectorSourceInitialConfig
     | TypeSourceTileInitialConfig
     | TypeVectorSourceInitialConfig
+    | TypeGeojsonSourceInitialConfig
     | TypeVectorTileSourceInitialConfig
     | TypeSourceImageInitialConfig
     | TypeSourceWmsInitialConfig

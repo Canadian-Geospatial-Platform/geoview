@@ -12,6 +12,8 @@ import { Extent } from 'ol/extent';
 import { Projection as OLProjection } from 'ol/proj';
 import { Condition } from 'ol/events/condition';
 import { shared as iconImageCache } from 'ol/style/IconImageCache';
+import { Size } from 'ol/size';
+import { GeometryFunction } from 'ol/interaction/Draw';
 
 import queryString from 'query-string';
 import {
@@ -34,17 +36,13 @@ import {
   TypeStyleGeometry,
   TypeLayerStatus,
 } from '@/api/config/types/map-schema-types';
-import { removeGeoviewStore } from '@/core/stores/stores-managers';
 
 import { BasemapApi } from '@/geo/layer/basemap/basemap';
 import { LayerApi } from '@/geo/layer/layer';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { Projection } from '@/geo/utils/projection';
 
-import { api, unmountMap } from '@/app';
 import { Plugin } from '@/api/plugin/plugin';
-import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
-
 import { AppBarApi } from '@/core/components/app-bar/app-bar-api';
 import { NavBarApi } from '@/core/components/nav-bar/nav-bar-api';
 import { FooterBarApi } from '@/core/components/footer-bar/footer-bar-api';
@@ -59,11 +57,11 @@ import { Translate } from '@/geo/interaction/translate';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { ModalApi } from '@/ui';
 import { delay, generateId, getLocalizedMessage, whenThisThen } from '@/core/utils/utilities';
-import { createEmptyBasemap, getPointerPositionFromMapEvent, isExtentLngLat } from '@/geo/utils/utilities';
+import { createEmptyBasemap, getPointerPositionFromMapEvent, isExtentLonLat } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { NORTH_POLE_POSITION } from '@/core/utils/constant';
 import { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
-import { TypeJsonObject } from '@/api/config/types/config-types';
+import { toJsonObject, TypeJsonObject } from '@/api/config/types/config-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
@@ -73,6 +71,9 @@ import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-v
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 import { Fetch } from '@/core/utils/fetch-helper';
+import { formatError } from '@/core/exceptions/core-exceptions';
+import { PluginsContainer } from '@/api/plugin/plugin-types';
+import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 
 interface TypeDocument extends Document {
   webkitExitFullscreen: () => void;
@@ -96,6 +97,13 @@ export class MapViewer {
   // The default densification number when forming layer extents, to make ture to compensate for earth curvature
   static DEFAULT_STOPS: number = 25;
 
+  // TODO: refactor UI - If we do not put a high timeout, ui start but the function getMapCoordinateFromPixel
+  // TD.CONT: AND scale component return null and fails. To patch, we add an higher time out for promise.
+  // TD.CONT: This solves for now the issue where the page start to load and user switch to another page and came back.
+  // Timeout value when map init to avoid when use the map is not ready, the UI will not start
+  // static INIT_TIMEOUT_PROMISE: number = 1000;
+  static INIT_TIMEOUT_NORTH_VISIBILITY: number = 1000;
+
   // map config properties
   mapFeaturesConfig: TypeMapFeaturesConfig;
 
@@ -107,7 +115,7 @@ export class MapViewer {
   map!: OLMap;
 
   // plugins attach to the map
-  plugins: TypeRecordOfPlugin = {};
+  plugins: PluginsContainer = {};
 
   // the overview map reat root
   overviewRoot: Root | undefined;
@@ -154,46 +162,46 @@ export class MapViewer {
   // Indicate if the map has all its layers loaded upon launch
   #mapLayersLoaded = false;
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onMapInitHandlers: MapInitDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onMapReadyHandlers: MapReadyDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onMapLayersProcessedHandlers: MapLayersProcessedDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onMapLayersLoadedHandlers: MapLayersLoadedDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onMapMoveEndHandlers: MapMoveEndDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onMapPointerMoveHandlers: MapPointerMoveDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onMapPointerStopHandlers: MapPointerMoveDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onMapSingleClickHandlers: MapSingleClickDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onMapZoomEndHandlers: MapZoomEndDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onMapRotationHandlers: MapRotationDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onMapChangeSizeHandlers: MapChangeSizeDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onMapComponentAddedHandlers: MapComponentAddedDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onMapComponentRemovedHandlers: MapComponentRemovedDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onMapLanguageChangedHandlers: MapLanguageChangedDelegate[] = [];
 
   // The starting time of the timer for the map ready
@@ -260,7 +268,8 @@ export class MapViewer {
   }
 
   /**
-   * Create an Open Layer map from configuration attached to the class
+   * Create an Open Layer map from configuration attached to the class.
+   * This function is called from a useEffect and should be running synchronously.
    * @param {HTMLElement} mapElement - HTML element to create the map within
    * @returns {OLMap} The OpenLayer map
    */
@@ -273,7 +282,7 @@ export class MapViewer {
 
     let extentProjected: Extent | undefined;
     if (mapViewSettings.maxExtent)
-      extentProjected = Projection.transformExtentFromProj(mapViewSettings.maxExtent, Projection.getProjectionLngLat(), projection);
+      extentProjected = Projection.transformExtentFromProj(mapViewSettings.maxExtent, Projection.getProjectionLonLat(), projection);
 
     const initialMap = new OLMap({
       target: mapElement,
@@ -299,10 +308,20 @@ export class MapViewer {
     // Set the map
     this.map = initialMap;
 
-    // Start map initialization
-    this.initMap().catch((error: unknown) => {
+    // GV Register a handler when the map will postrender before pursuing map initialization
+    // That means:
+    //   - The map has been sized based on the container div
+    //   - The view (center, zoom, resolution) is applied
+    //   - The scale and extent-dependent widgets (like scale bars) can now be safely positioned and calculated
+    this.map.once('postrender', () => {
       // Log
-      logger.logPromiseFailed('initMap in createMap in MapViewer', error);
+      logger.logInfo('OpenLayers Map has been rendered once');
+
+      // Initiliaze it for GeoView
+      this.initMap().catch((error: unknown) => {
+        // Log
+        logger.logPromiseFailed('initMap in createMap in MapViewer', error);
+      });
     });
 
     // Return the OLMap that is still being initialized..
@@ -310,14 +329,31 @@ export class MapViewer {
   }
 
   /**
-   * Initializes map, layer class and geometries
+   * Initializes map, layer class and geometries.
+   * This function must be called once the Map is rendered
    */
   async initMap(): Promise<void> {
     // Note the time
     this.#checkMapReadyStartTime = Date.now();
 
     // Load the Map itself and the UI controls
-    MapEventProcessor.initMapControls(this.mapId);
+    await MapEventProcessor.initMapControls(this.mapId);
+
+    // Load the core packages plugins
+    await this.#loadCorePackages();
+
+    // Reset the basemap
+    await MapEventProcessor.resetBasemap(this.mapId);
+
+    // Emit map init
+    this.#mapInit = true;
+    this.#emitMapInit();
+
+    // Check if geometries are provided from url and load them
+    this.#loadGeometries();
+
+    // Prepare the FeatureHighlight now that the map is available
+    this.layer.featureHighlight.init();
 
     // Load the list of geoview layers in the config to add all layers on the map.
     // After this call, all first level layers have been registered.
@@ -327,24 +363,42 @@ export class MapViewer {
     // Here, all base-level "this.mapFeaturesConfig.map.listOfGeoviewLayerConfig" have been registered (layerStatus === 'registered').
     // However, careful, the layers are still processing and some sub-layer-entries can get registered on-the-fly (notably: EsriDynamic, WMS).
 
-    // Check if geometries are provided from url and load them
-    this.#loadGeometries();
-
-    // Prepare the FeatureHighlight now that the map is available
-    this.layer.featureHighlight.init();
-
-    // Emit map init
-    this.#mapInit = true;
-    this.#emitMapInit();
-
-    // Reset the basemap
-    await MapEventProcessor.resetBasemap(this.mapId);
-
     // Ready the map
     return this.#readyMap();
   }
 
   // #region MAP STATES
+
+  /**
+   * Asynchronously attempts to get a plugin by its id.
+   * @param {string} pluginId - The plugin id
+   * @returns {AbstractPlugin} The plugin
+   */
+  getPlugin(pluginId: string): Promise<AbstractPlugin> {
+    return whenThisThen(() => {
+      return this.plugins[pluginId];
+    });
+  }
+
+  /**
+   * Retrieves the configuration object for a specific core plugin from the map's features configuration.
+   *
+   * @param {string} pluginId - The ID of the core plugin to look up.
+   * @returns {TypeJsonObject | undefined} The configuration object for the specified plugin, or `undefined` if not found.
+   */
+  getCorePackageConfig(pluginId: string): TypeJsonObject | undefined {
+    // If no corePackagesConfig
+    if (!this.mapFeaturesConfig.corePackagesConfig) return undefined;
+
+    // Find first object in array that has the 'plugin' key
+    const configObj = this.mapFeaturesConfig.corePackagesConfig.find((config) => pluginId in config);
+
+    // If not found
+    if (!configObj) return undefined;
+
+    // Return it
+    return configObj[pluginId];
+  }
 
   /**
    * Returns the current display language
@@ -381,8 +435,90 @@ export class MapViewer {
   }
 
   /**
+   * Set the map viewSettings (coordinate values in lon/lat)
+   *
+   * @param {TypeViewSettings} mapView - Map viewSettings object
+   */
+  setView(mapView: TypeViewSettings): void {
+    const currentView = this.getView();
+    const viewOptions: ViewOptions = {};
+    viewOptions.projection = `EPSG:${mapView.projection}`;
+    viewOptions.zoom = mapView.initialView?.zoomAndCenter ? mapView.initialView?.zoomAndCenter[0] : currentView.getZoom();
+    viewOptions.center = mapView.initialView?.zoomAndCenter
+      ? Projection.transformFromLonLat(mapView.initialView?.zoomAndCenter[1], Projection.getProjectionFromString(viewOptions.projection))
+      : Projection.transformFromLonLat(
+          Projection.transformToLonLat(currentView.getCenter()!, currentView.getProjection()),
+          Projection.getProjectionFromString(viewOptions.projection)
+        );
+    viewOptions.minZoom = mapView.minZoom ? mapView.minZoom : currentView.getMinZoom();
+    viewOptions.maxZoom = mapView.maxZoom ? mapView.maxZoom : currentView.getMaxZoom();
+    viewOptions.rotation = mapView.rotation ? mapView.rotation : currentView.getRotation();
+    if (mapView.maxExtent)
+      viewOptions.extent = Projection.transformExtentFromProj(
+        mapView.maxExtent,
+        Projection.getProjectionLonLat(),
+        Projection.getProjectionFromString(`EPSG:${mapView.projection}`)
+      );
+
+    const newView = new View(viewOptions);
+    this.map.setView(newView);
+
+    // Because the view has changed we must re-register the view handlers
+    this.#registerViewHandlers(newView);
+  }
+
+  /**
+   * Asynchronously gets the map center coordinate to give a chance for the map to
+   * render before returning the value.
+   * @returns {Promise<Coordinate>} the map center
+   */
+  getCenter(): Promise<Coordinate> {
+    // When the getCenter() function actually returns a coordinate
+    return whenThisThen(() => {
+      return this.getView().getCenter()!;
+    });
+  }
+
+  /**
+   * Sets the map center.
+   * @param {Coordinate} center - New center to use
+   */
+  setCenter(center: Coordinate): void {
+    const currentView = this.getView();
+    const transformedCenter = Projection.transformFromLonLat(center, currentView.getProjection());
+
+    currentView.setCenter(transformedCenter);
+  }
+
+  /**
+   * Asynchronously gets the map size to give a chance for the map to
+   * render before returning the value.
+   * @returns {Promise<Size>} The map size
+   */
+  getMapSize(): Promise<Size> {
+    // When the getSize() function actually returns a coordinate
+    return whenThisThen(() => {
+      return this.map.getSize()!;
+    });
+  }
+
+  /**
+   * Asynchronously gets the map coordinate from pixel to give a chance for the map to
+   * render before returning the value.
+   * @param {[number, number]} pointXY - The pixel coordinate to convert
+   * @param {number} timeoutMs - The maximum time in milliseconds to wait for the getCoordinateFromPixel to return a value.
+   * @returns {Promise<Coordinate>} The map coordinate at the given pixel location
+   */
+  getCoordinateFromPixel(pointXY: [number, number], timeoutMs: number): Promise<Coordinate> {
+    // When the getCoordinateFromPixel() function actually returns a coordinate
+    return whenThisThen(() => {
+      return this.map.getCoordinateFromPixel(pointXY);
+    }, timeoutMs);
+  }
+
+  /**
    * Gets the map projection
-   * @returns the map viewSettings
+   * @returns {OLProjection} The map projection
    */
   getProjection(): OLProjection {
     return this.getView().getProjection();
@@ -436,7 +572,7 @@ export class MapViewer {
     if (!status) {
       // Store the extent before any size changes occur
       const currentExtent = this.getView().calculateExtent();
-      const currentZoom = this.getMapState().currentZoom!;
+      const { currentZoom } = this.getMapState();
       let sizeChangeHandled = false; // Add flag to track if we've handled the size change
 
       // Store the extent and other relevant information
@@ -560,51 +696,6 @@ export class MapViewer {
   }
 
   /**
-   * Set the map viewSettings (coordinate values in lat/long)
-   *
-   * @param {TypeViewSettings} mapView - Map viewSettings object
-   */
-  setView(mapView: TypeViewSettings): void {
-    const currentView = this.getView();
-    const viewOptions: ViewOptions = {};
-    viewOptions.projection = `EPSG:${mapView.projection}`;
-    viewOptions.zoom = mapView.initialView?.zoomAndCenter ? mapView.initialView?.zoomAndCenter[0] : currentView.getZoom();
-    viewOptions.center = mapView.initialView?.zoomAndCenter
-      ? Projection.transformFromLonLat(mapView.initialView?.zoomAndCenter[1], Projection.getProjectionFromString(viewOptions.projection))
-      : Projection.transformFromLonLat(
-          Projection.transformToLonLat(currentView.getCenter()!, currentView.getProjection()),
-          Projection.getProjectionFromString(viewOptions.projection)
-        );
-    viewOptions.minZoom = mapView.minZoom ? mapView.minZoom : currentView.getMinZoom();
-    viewOptions.maxZoom = mapView.maxZoom ? mapView.maxZoom : currentView.getMaxZoom();
-    viewOptions.rotation = mapView.rotation ? mapView.rotation : currentView.getRotation();
-    if (mapView.maxExtent)
-      viewOptions.extent = Projection.transformExtentFromProj(
-        mapView.maxExtent,
-        Projection.getProjectionLngLat(),
-        Projection.getProjectionFromString(`EPSG:${mapView.projection}`)
-      );
-
-    const newView = new View(viewOptions);
-    this.map.setView(newView);
-
-    // Because the view has changed we must re-register the view handlers
-    this.#registerViewHandlers(newView);
-  }
-
-  /**
-   * Set the map center.
-   *
-   * @param {Coordinate} center - New center to use
-   */
-  setCenter(center: Coordinate): void {
-    const currentView = this.getView();
-    const transformedCenter = Projection.transformFromLonLat(center, currentView.getProjection());
-
-    currentView.setCenter(transformedCenter);
-  }
-
-  /**
    * Set the map zoom level.
    *
    * @param {number} zoom - New zoom level
@@ -633,11 +724,11 @@ export class MapViewer {
 
   /**
    * Set map extent.
-   *
    * @param {Extent} extent - New extent to zoom to.
+   * @returns {Promise<void>} A promise that resolves when the zoom operation completes.
    */
-  async setExtent(extent: Extent): Promise<void> {
-    await MapEventProcessor.zoomToExtent(this.mapId, extent);
+  setExtent(extent: Extent): Promise<void> {
+    return MapEventProcessor.zoomToExtent(this.mapId, extent);
   }
 
   /**
@@ -653,12 +744,12 @@ export class MapViewer {
       initialView: {
         zoomAndCenter: [
           currentView.getZoom() as number,
-          this.convertCoordinateLngLatToMapProj(currentView.getCenter()!) as [number, number],
+          this.convertCoordinateLonLatToMapProj(currentView.getCenter()!) as [number, number],
         ],
       },
       minZoom: currentView.getMinZoom(),
       maxZoom: currentView.getMaxZoom(),
-      maxExtent: Projection.transformExtentFromProj(extent, Projection.getProjectionLngLat(), currentView.getProjection()),
+      maxExtent: Projection.transformExtentFromProj(extent, Projection.getProjectionLonLat(), currentView.getProjection()),
       projection: currentView.getProjection().getCode().split(':')[1] as unknown as TypeValidMapProjectionCodes,
     };
 
@@ -716,21 +807,11 @@ export class MapViewer {
 
   /**
    * Loops through all geoview layers and refresh their respective source.
-   * Use this function on projection change or other viewer modification who may affect rendering.
-   *
-   * @returns A Promise which resolves when the rendering is completed after the source(s) were changed.
+   * Use this function on projection change or other viewer modification which may affect rendering.
    */
-  refreshLayers(): Promise<void> {
+  refreshLayers(): void {
     // Redirect
     this.layer.refreshLayers();
-
-    // Return a promise for when rendering will complete
-    return new Promise<void>((resolve) => {
-      this.map.once('rendercomplete', () => {
-        // Done
-        resolve();
-      });
-    });
   }
 
   /**
@@ -751,78 +832,33 @@ export class MapViewer {
   }
 
   /**
-   * Remove map
-   *
-   * @param {boolean} deleteContainer - True if we want to delete div from the page
-   * @returns {Promise<HTMLElement>} The Promise containing the HTML element
+   * Deletes the MapViewer, including its plugins, layers, etc.
+   * This function does not unmount the MapViewer. To completely delete a MapViewer, use
+   * cgpv.api.deleteMapViewer() which will delete the MapViewer and unmount it - for React.
    */
-  async remove(deleteContainer: boolean): Promise<HTMLElement> {
-    // Get the map container to unmount
-    // Remove geoview-class if we need to reuse the div
-    const mapContainer = document.getElementById(this.mapId)!;
-    mapContainer.classList.remove('geoview-map');
-
-    // GV If this is done after plugin removal, it triggers a rerender, and the plugins can cause an error, depending on state
+  async delete(): Promise<void> {
     // Remove the dom element (remove rendered map and overview map)
     if (this.overviewRoot) this.overviewRoot.unmount();
-    unmountMap(this.mapId, mapContainer);
 
-    // Unload all loaded plugins on the map
-    await Plugin.removePlugins(this.mapId);
-
-    // Remove all layers
     try {
+      // Remove all layers
       this.layer.removeAllGeoviewLayers();
     } catch (error: unknown) {
       // Failed to remove layers, eat the exception and continue to remove the map
       logger.logError('Failed to remove layers', error);
     }
 
-    // Delete store and event processor
-    removeGeoviewStore(this.mapId);
+    // Unload all plugins
+    await Plugin.removePlugins(this.mapId);
 
-    // If deleteContainer, delete the HTML div
-    if (deleteContainer) mapContainer.remove();
+    // Remove all controls
+    this.map.getControls().clear();
 
-    // Return the map container to be remove
-    return mapContainer;
-  }
+    // Remove all interactions
+    this.map.getInteractions().clear();
 
-  /**
-   * Reload a map from a config object stored in store, or provided. It first removes then recreates the map.
-   * @param {TypeMapFeaturesConfig | TypeMapFeaturesInstance} mapConfig - Optional map config to use for reload.
-   */
-  async reload(mapConfig?: TypeMapFeaturesConfig | TypeMapFeaturesInstance): Promise<void> {
-    // If no config is provided, get the original from the store
-    const config = mapConfig || MapEventProcessor.getGeoViewMapConfig(this.mapId);
-
-    // Get map height
-    // GV: This is important because on reload, the mapHeight is set to 0px then reset to a bad value.
-    // GV.CONT: This fix maintain the height on reload for the createMapFromConfig function. On first past the optional
-    // GV.CONT: does not have to be provided because the div exist and map will take its height.
-    const height = this.map.getSize() !== undefined ? this.map.getSize()![1] : 800;
-
-    // Remove the map
-    const mapDiv = await this.remove(false);
-
-    // TODO: There is still a problem with bad config schema value and layers loading... should be refactor when config is done
-    api.createMapFromConfig(mapDiv.id, JSON.stringify(config), height).catch((error: unknown) => {
-      // Log
-      logger.logError(`Couldn't reload the map in map-viewer`, error);
-    });
-  }
-
-  /**
-   * Reload a map from a config object created using current map state. It first removes then recreates the map.
-   * @param {boolean} maintainGeocoreLayerNames - Indicates if geocore layer names should be kept as is or returned to defaults.
-   *                                              Set to false after a language change to update the layer names with the new language.
-   */
-  reloadWithCurrentState(maintainGeocoreLayerNames: boolean = true): void {
-    const currentMapConfig = this.createMapConfigFromMapState(maintainGeocoreLayerNames);
-    this.reload(currentMapConfig).catch((error: unknown) => {
-      // Log
-      logger.logError(`Couldn't reload the map in map-viewer`, error);
-    });
+    // Unset the map target to remove the DOM link
+    this.map.setTarget(undefined);
   }
 
   /**
@@ -830,6 +866,7 @@ export class MapViewer {
    *
    * @param {Extent} extent - The extent to zoom to.
    * @param {FitOptions} options - The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 }).
+   * @returns {Promise<void>} A promise that resolves when the zoom operation completes.
    */
   zoomToExtent(extent: Extent, options?: FitOptions): Promise<void> {
     // TODO: Discussion - Where is the line between a function using MapEventProcessor in MapViewer vs in MapState action?
@@ -849,14 +886,15 @@ export class MapViewer {
   }
 
   /**
-   * Zoom to specified extent or coordinate provided in lnglat.
+   * Zoom to specified extent or coordinate provided in lonlat.
    *
    * @param {Extent | Coordinate} extent - The extent or coordinate to zoom to.
    * @param {FitOptions} options - The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 }).
+   * @returns {Promise<void>} A promise that resolves when the zoom operation completes.
    */
-  zoomToLngLatExtentOrCoordinate(extent: Extent | Coordinate, options?: FitOptions): Promise<void> {
+  zoomToLonLatExtentOrCoordinate(extent: Extent | Coordinate, options?: FitOptions): Promise<void> {
     const fullExtent = extent.length === 2 ? [extent[0], extent[1], extent[0], extent[1]] : extent;
-    const projectedExtent = Projection.transformExtentFromProj(fullExtent, Projection.getProjectionLngLat(), this.getProjection());
+    const projectedExtent = Projection.transformExtentFromProj(fullExtent, Projection.getProjectionLonLat(), this.getProjection());
     return MapEventProcessor.zoomToExtent(this.mapId, projectedExtent, options);
   }
 
@@ -892,7 +930,7 @@ export class MapViewer {
    */
   async waitAllLayersStatus(layerStatus: TypeLayerStatus): Promise<number> {
     // Log
-    logger.logDebug(`Waiting on layers to become ${layerStatus}`);
+    logger.logInfo(`Waiting on layers to become ${layerStatus}`);
 
     // Wait for the layers to get the layerStatus required
     let layersCount = 0;
@@ -987,13 +1025,14 @@ export class MapViewer {
    * @param {string} type - The type of geometry to draw (Polygon, LineString, Circle, etc)
    * @param {TypeFeatureStyle} styles - The styles for the drawing
    */
-  initDrawInteractions(geomGroupKey: string, type: string, style: TypeFeatureStyle): Draw {
+  initDrawInteractions(geomGroupKey: string, type: string, style: TypeFeatureStyle, geometryFunction?: GeometryFunction): Draw {
     // Create the Draw component
     const draw = new Draw({
       mapViewer: this,
       geometryGroupKey: geomGroupKey,
       type,
       style,
+      geometryFunction,
     });
     draw.startInteraction();
     return draw;
@@ -1042,13 +1081,17 @@ export class MapViewer {
   /**
    * Gets if north is visible. This is not a perfect solution and is more a work around
    *
-   * @returns {boolean} true if visible, false otherwise
+   * @returns {Promise<boolean>} true if visible, false otherwise
    */
-  getNorthVisibility(): boolean {
+  async getNorthVisibility(): Promise<boolean> {
     // Check the container value for top middle of the screen
     // Convert this value to a lat long coordinate
-    const pointXY = [this.map.getSize()![0] / 2, 1];
-    const pt = Projection.transformToLonLat(this.map.getCoordinateFromPixel(pointXY), this.getView().getProjection());
+    const size = await this.getMapSize();
+    const pointXY: [number, number] = [size[0] / 2, 1];
+
+    // GV: Sometime, the getCoordinateFromPixel return null... use await
+    const pixel = await this.getCoordinateFromPixel(pointXY, MapViewer.INIT_TIMEOUT_NORTH_VISIBILITY);
+    const pt = Projection.transformToLonLat(pixel, this.getView().getProjection());
 
     // If user is pass north, long value will start to be positive (other side of the earth).
     // This will work only for LCC Canada.
@@ -1090,44 +1133,44 @@ export class MapViewer {
   }
 
   /**
-   * Transforms coordinate from LngLat to the current projection of the map.
-   * @param {Coordinate} coordinate - The LngLat coordinate
+   * Transforms coordinate from LonLat to the current projection of the map.
+   * @param {Coordinate} coordinate - The LonLat coordinate
    * @returns {Coordinate} The coordinate in the map projection
    */
-  convertCoordinateLngLatToMapProj(coordinate: Coordinate): Coordinate {
+  convertCoordinateLonLatToMapProj(coordinate: Coordinate): Coordinate {
     // Redirect
-    return this.convertCoordinateFromProjToMapProj(coordinate, Projection.getProjectionLngLat());
+    return this.convertCoordinateFromProjToMapProj(coordinate, Projection.getProjectionLonLat());
   }
 
   /**
-   * Transforms coordinate from current projection of the map to LngLat.
+   * Transforms coordinate from current projection of the map to LonLat.
    * @param {Coordinate} coordinate - The coordinate in map projection
-   * @returns {Coordinate} The coordinate in LngLat
+   * @returns {Coordinate} The coordinate in LonLat
    */
-  convertCoordinateMapProjToLngLat(coordinate: Coordinate): Coordinate {
+  convertCoordinateMapProjToLonLat(coordinate: Coordinate): Coordinate {
     // Redirect
-    return this.convertCoordinateFromMapProjToProj(coordinate, Projection.getProjectionLngLat());
+    return this.convertCoordinateFromMapProjToProj(coordinate, Projection.getProjectionLonLat());
   }
 
   /**
-   * Transforms extent from LngLat to the current projection of the map.
-   * @param {Extent} extent - The LngLat extent
+   * Transforms extent from LonLat to the current projection of the map.
+   * @param {Extent} extent - The LonLat extent
    * @param {number} stops - The number of stops to perform densification on the extent
    * @returns {Extent} The extent in the map projection
    */
-  convertExtentLngLatToMapProj(extent: Extent, stops: number = MapViewer.DEFAULT_STOPS): Extent {
+  convertExtentLonLatToMapProj(extent: Extent, stops: number = MapViewer.DEFAULT_STOPS): Extent {
     // Redirect
-    return this.convertExtentFromProjToMapProj(extent, Projection.getProjectionLngLat(), stops);
+    return this.convertExtentFromProjToMapProj(extent, Projection.getProjectionLonLat(), stops);
   }
 
   /**
-   * Transforms extent from current projection of the map to LngLat.
+   * Transforms extent from current projection of the map to LonLat.
    * @param {Extent} extent - The extent in map projection
-   * @returns {Extent} The extent in LngLat
+   * @returns {Extent} The extent in LonLat
    */
-  convertExtentMapProjToLngLat(extent: Extent): Extent {
+  convertExtentMapProjToLonLat(extent: Extent): Extent {
     // Redirect
-    return this.convertExtentFromMapProjToProj(extent, Projection.getProjectionLngLat());
+    return this.convertExtentFromMapProjToProj(extent, Projection.getProjectionLonLat());
   }
 
   /**
@@ -1233,7 +1276,7 @@ export class MapViewer {
     // If map isn't static
     if (this.mapFeaturesConfig.map.interaction !== 'static') {
       // Register handlers on pointer move and map single click
-      map.on('pointermove', debounce(this.#handleMapPointerMove.bind(this), 250, { leading: true }).bind(this));
+      map.on('pointermove', this.#handleMapPointerMove.bind(this));
       map.on('pointermove', debounce(this.#handleMapPointerStopped.bind(this), 750, { leading: false }).bind(this));
       map.on('singleclick', debounce(this.#handleMapSingleClick.bind(this), 1000, { leading: true }).bind(this));
     }
@@ -1279,7 +1322,7 @@ export class MapViewer {
       await this.#updateMapControls();
 
       // Emit to the outside
-      this.#emitMapMoveEnd({ lnglat: this.getView().getCenter()! });
+      this.#emitMapMoveEnd({ lonlat: this.getView().getCenter()! });
     } catch (error: unknown) {
       // Log
       logger.logError('Failed in MapViewer.#handleMapMoveEnd', error);
@@ -1442,10 +1485,10 @@ export class MapViewer {
   async #handleMapChangeSize(event: ObjectEvent): Promise<void> {
     try {
       // Get the scale information
-      const scale = await MapEventProcessor.getScaleInfoFromDomElement(this.mapId);
+      const scale = MapEventProcessor.getScaleInfoFromDomElement(this.mapId);
 
-      // Get the size as [number, number]
-      const size = this.map.getSize() as unknown as [number, number];
+      // Get the size
+      const size = await this.getMapSize();
 
       // Save in the store
       MapEventProcessor.setMapSize(this.mapId, size);
@@ -1499,7 +1542,7 @@ export class MapViewer {
    */
   async #readyMap(): Promise<void> {
     // Log
-    logger.logInfo(`Map is ready. Layers are still being processed...`, this.mapId);
+    logger.logInfo(`Map is ready. Layers are still being processed... 1`, this.mapId);
 
     // Log Marker Start
     logger.logMarkerStart(`readyMap-${this.mapId}`);
@@ -1507,7 +1550,7 @@ export class MapViewer {
     // Load the guide
     AppEventProcessor.setGuide(this.mapId).catch((error: unknown) => {
       // Log
-      logger.logPromiseFailed('in #setGuide in #readyMap', error);
+      logger.logPromiseFailed('in AppEventProcessor.setGuide in #readyMap', error);
     });
 
     // Check how load in milliseconds has it been processing thus far
@@ -1566,11 +1609,56 @@ export class MapViewer {
   }
 
   /**
+   * Load the core packages plugins
+   * @returns Promise when all core packages plugins will be loaded
+   */
+  #loadCorePackages(): Promise<void[]> {
+    // Load the core packages which are the ones who load on map (not footer plugin, not app-bar plugin)
+    const promises: Promise<void>[] = [];
+    this.mapFeaturesConfig?.corePackages?.forEach((corePackage: string): void => {
+      // Create promise
+      const promise = new Promise<void>((resolve, reject) => {
+        Plugin.loadScript(corePackage)
+          .then((typePlugin) => {
+            // add the plugin by passing in the loaded constructor from the script tag
+            Plugin.addPlugin(
+              corePackage,
+              this.mapId,
+              typePlugin,
+              toJsonObject({
+                mapId: this.mapId,
+                viewer: this,
+              })
+            )
+              .then(() => {
+                // Plugin added
+                resolve();
+              })
+              .catch((error: unknown) => {
+                // Reject
+                reject(formatError(error));
+              });
+          })
+          .catch((error: unknown) => {
+            // Reject
+            reject(formatError(error));
+          });
+      });
+
+      // Compile
+      promises.push(promise);
+    });
+
+    // Await all
+    return Promise.all(promises);
+  }
+
+  /**
    * Updates the map controls (the store) based on the current map view state.
    */
   async #updateMapControls(): Promise<void> {
-    // Get the center coordinates
-    const centerCoordinates = this.getView().getCenter()!;
+    // Get the center coordinates (await in case the map isn't fully rendered yet)
+    const centerCoordinates = await this.getCenter();
 
     // Get the projection code
     const projCode = this.getView().getProjection().getCode();
@@ -1579,7 +1667,7 @@ export class MapViewer {
     const pointerPosition = {
       projected: centerCoordinates,
       pixel: this.map.getPixelFromCoordinate(centerCoordinates),
-      lnglat: Projection.transformPoints([centerCoordinates], projCode, Projection.PROJECTION_NAMES.LNGLAT)[0],
+      lonlat: Projection.transformPoints([centerCoordinates], projCode, Projection.PROJECTION_NAMES.LONLAT)[0],
       dragging: false,
     };
 
@@ -1587,13 +1675,13 @@ export class MapViewer {
     const degreeRotation = this.getNorthArrowAngle();
 
     // Get the north visibility
-    const isNorthVisible = this.getNorthVisibility();
+    const isNorthVisible = await this.getNorthVisibility();
 
     // Get the map Extent
     const extent = this.getView().calculateExtent();
 
     // Get the scale information
-    const scale = await MapEventProcessor.getScaleInfoFromDomElement(this.mapId);
+    const scale = MapEventProcessor.getScaleInfoFromDomElement(this.mapId);
 
     // Save in the store
     MapEventProcessor.setMapMoveEnd(this.mapId, centerCoordinates, pointerPosition, degreeRotation, isNorthVisible, extent, scale);
@@ -1610,9 +1698,9 @@ export class MapViewer {
     if (this.mapFeaturesConfig.map.viewSettings.initialView?.extent) {
       // Not zooming on layers, but we have an extent to zoom to instead
       // If extent is not lon/lat, we assume it is in the map projection and use it as is.
-      const extent = isExtentLngLat(this.mapFeaturesConfig.map.viewSettings.initialView!.extent)
-        ? this.convertExtentLngLatToMapProj(this.mapFeaturesConfig.map.viewSettings.initialView!.extent as Extent)
-        : this.mapFeaturesConfig.map.viewSettings.initialView!.extent;
+      const extent = isExtentLonLat(this.mapFeaturesConfig.map.viewSettings.initialView.extent)
+        ? this.convertExtentLonLatToMapProj(this.mapFeaturesConfig.map.viewSettings.initialView.extent as Extent)
+        : this.mapFeaturesConfig.map.viewSettings.initialView.extent;
 
       // Zoom to extent
       return this.zoomToExtent(extent, {
@@ -1644,7 +1732,7 @@ export class MapViewer {
 
       // If extents have infinity, use default instead
       if (layerExtents.includes(Infinity))
-        layerExtents = this.convertExtentLngLatToMapProj(CV_MAP_EXTENTS[this.mapFeaturesConfig.map.viewSettings.projection]);
+        layerExtents = this.convertExtentLonLatToMapProj(CV_MAP_EXTENTS[this.mapFeaturesConfig.map.viewSettings.projection]);
 
       // Zoom to calculated extent
       if (layerExtents.length) {
@@ -2091,7 +2179,7 @@ export type TypeMapState = {
  * Type used to define the map mouse information
  * */
 export type TypeMapMouseInfo = {
-  lnglat: Coordinate;
+  lonlat: Coordinate;
   pixel: Coordinate;
   projected: Coordinate;
   dragging: boolean;
@@ -2121,7 +2209,7 @@ export type MapLayersLoadedDelegate = EventDelegateBase<MapViewer, undefined, vo
  * Define an event for the delegate
  */
 export type MapMoveEndEvent = {
-  lnglat: Coordinate;
+  lonlat: Coordinate;
 };
 
 /**
@@ -2177,7 +2265,7 @@ export type MapRotationDelegate = EventDelegateBase<MapViewer, MapRotationEvent,
  * Define an event for the delegate
  */
 export type MapChangeSizeEvent = {
-  size: [number, number];
+  size: Size;
 };
 
 /**

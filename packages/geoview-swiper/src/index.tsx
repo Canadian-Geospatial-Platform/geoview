@@ -1,12 +1,13 @@
-import { TypeJsonObject, toJsonObject, Cast, AnySchemaObject } from 'geoview-core/src/api/config/types/config-types';
-import { MapPlugin } from 'geoview-core/src/api/plugin/map-plugin';
-import { SwiperEventProcessor } from 'geoview-core/src/api/event-processors/event-processor-children/swiper-event-processor';
-import { LayerNotFoundError } from 'geoview-core/src/core/exceptions/layer-exceptions';
-import { logger } from 'geoview-core/src/core/utils/logger';
+import React from 'react'; // GV This import is to validate that we're on the right React at the end of the file
+import { TypeJsonObject, toJsonObject, AnySchemaObject } from 'geoview-core/api/config/types/config-types';
+import { MapPlugin } from 'geoview-core/api/plugin/map-plugin';
+import { SwiperEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/swiper-event-processor';
+import { LayerNotFoundError } from 'geoview-core/core/exceptions/layer-exceptions';
+import { logger } from 'geoview-core/core/utils/logger';
 
 import schema from '../schema.json';
 import defaultConfig from '../default-config-swiper.json';
-import { Swiper } from './swiper';
+import { ConfigProps, Swiper } from './swiper';
 
 /**
  * Create a class for the plugin instance
@@ -31,32 +32,44 @@ class SwiperPlugin extends MapPlugin {
   }
 
   /**
-   * Translations object to inject to the viewer translations
+   * Overrides the default translations for the Plugin.
+   * @returns {TypeJsonObject} - The translations object for the particular Plugin.
    */
-  translations = toJsonObject({
-    en: {
-      swiper: {
-        tooltip: 'Drag to see underlying layer',
-        menu: 'Swiper',
+  override defaultTranslations(): TypeJsonObject {
+    return {
+      en: {
+        swiper: {
+          tooltip: 'Drag to see underlying layer',
+          menu: 'Swiper',
+        },
       },
-    },
-    fr: {
-      swiper: {
-        tooltip: 'Faites glisser pour voir les couches sous-jacentes',
-        menu: 'Balayage',
+      fr: {
+        swiper: {
+          tooltip: 'Faites glisser pour voir les couches sous-jacentes',
+          menu: 'Balayage',
+        },
       },
-    },
-  });
+    } as unknown as TypeJsonObject;
+  }
+
+  /**
+   * Overrides the getConfig in order to return the right type.
+   * @returns {ConfigProps} The Swiper config
+   */
+  override getConfig(): ConfigProps {
+    // Redirect
+    return super.getConfig() as ConfigProps;
+  }
 
   /**
    * Overrides the addition of the Swiper Map Plugin to make sure to set the layer paths from the config into the store.
    */
   override onAdd(): void {
-    // Initialize the store with swiper provided configuration
-    SwiperEventProcessor.setLayerPaths(this.pluginProps.mapId, this.configObj.layers);
-
     // Call parent
     super.onAdd();
+
+    // Initialize the store with swiper provided configuration
+    SwiperEventProcessor.setLayerPaths(this.pluginProps.mapId, this.getConfig().layers);
   }
 
   /**
@@ -64,7 +77,7 @@ class SwiperPlugin extends MapPlugin {
    * @returns {JSX.Element} The JSX.Element representing the Swiper Plugin
    */
   override onCreateContent(): JSX.Element {
-    return <Swiper viewer={this.pluginProps.viewer} config={this.configObj} />;
+    return <Swiper viewer={this.pluginProps.viewer} config={this.getConfig()} />;
   }
 
   /**
@@ -105,6 +118,11 @@ class SwiperPlugin extends MapPlugin {
 
 export default SwiperPlugin;
 
-// Keep a reference to the Swiper Plugin as part of the geoviewPlugins property stored in the window object
-window.geoviewPlugins = window.geoviewPlugins || {};
-window.geoviewPlugins.swiper = Cast<SwiperPlugin>(SwiperPlugin);
+// GV This if condition took over 3 days to investigate. It was giving errors on the app.geo.ca website with
+// GV some conflicting reacts being loaded on the page for some obscure reason.
+// Check if we're on the right react
+if (React === window.cgpv.reactUtilities.react) {
+  // Keep a reference to the Swiper Plugin as part of the geoviewPlugins property stored in the window object
+  window.geoviewPlugins = window.geoviewPlugins || {};
+  window.geoviewPlugins.swiper = SwiperPlugin;
+} // Else ignore, don't keep it on the window, wait for the right react load

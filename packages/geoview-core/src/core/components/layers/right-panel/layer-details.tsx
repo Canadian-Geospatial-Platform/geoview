@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import _ from 'lodash';
@@ -39,8 +39,9 @@ import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
 import { Collapse } from '@/ui/collapse/collapse';
 import { Button } from '@/ui/button/button';
 import { KeyboardArrowDownIcon, KeyboardArrowUpIcon } from '@/ui/icons';
-import { useAppMetadataServiceURL } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useAppDisplayLanguage, useAppMetadataServiceURL } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { Switch } from '@/ui/switch/switch';
+import { getLocalizeLayerType } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
 
 interface LayerDetailsProps {
   layerDetails: TypeLegendLayer;
@@ -71,6 +72,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     getLayerBounds,
     getLayerDefaultFilter,
     getLayerServiceProjection,
+    getLayerTemporalDimension,
     setLayerHoverable,
     setLayerQueryable,
   } = useLayerStoreActions();
@@ -78,9 +80,11 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const { triggerGetAllFeatureInfo } = useDataTableStoreActions();
   const datatableSettings = useDataTableLayerSettings();
   const layersData = useDataTableAllFeaturesDataArray();
+  const language = useAppDisplayLanguage();
   const metadataUrl = useAppMetadataServiceURL();
   const selectedLayer = layersData.find((_layer) => _layer.layerPath === layerDetails?.layerPath);
   const layerFilter = getLayerDefaultFilter(layerDetails.layerPath);
+  const layerTemporalDimension = getLayerTemporalDimension(layerDetails.layerPath);
   const layerNativeProjection = getLayerServiceProjection(layerDetails.layerPath);
 
   // Is highlight button disabled?
@@ -92,6 +96,9 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   // Is layer hoverable or queryable
   const isLayerHoverable = layerDetails.controls?.hover;
   const isLayerQueryable = layerDetails.controls?.query;
+
+  // Get the localized layer type
+  const memoLocalizedLayerType = useMemo(() => getLocalizeLayerType(language, true), [language]);
 
   useEffect(() => {
     // Log
@@ -118,7 +125,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('LAYER DETAILS - Bounds', layerDetails);
-    if (layerDetails.bounds === undefined || layerDetails.bounds![0] === Infinity) {
+    if (layerDetails.bounds === undefined || layerDetails.bounds[0] === Infinity) {
       const bounds = getLayerBounds(layerDetails.layerPath);
       if (bounds) layerDetails.bounds = bounds;
     }
@@ -172,7 +179,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
     if (!layerDetails.canToggle) {
       return (
-        <IconButton disabled tooltip={t('layers.visibilityIsAlways') as string}>
+        <IconButton disabled tooltip={t('layers.visibilityIsAlways')!}>
           <CheckBoxIcon color="disabled" />
         </IconButton>
       );
@@ -251,7 +258,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   function renderDetailsButton(): JSX.Element {
     if (layerDetails.controls?.table !== false)
       return (
-        <IconButton id="table-details" tooltip={t('legend.tableDetails') as string} className="buttonOutline" onClick={handleOpenTable}>
+        <IconButton id="table-details" tooltip={t('legend.tableDetails')!} className="buttonOutline" onClick={handleOpenTable}>
           <TableViewIcon />
         </IconButton>
       );
@@ -266,7 +273,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     if (isLayerHighlightCapable)
       return (
         <IconButton
-          tooltip={t('legend.highlightLayer') as string}
+          tooltip={t('legend.highlightLayer')!}
           onClick={handleHighlightLayer}
           className={highlightedLayer === layerDetails.layerPath ? 'buttonOutline active' : 'buttonOutline'}
         >
@@ -280,7 +287,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     if (isLayerZoomToExtentCapable)
       return (
         <IconButton
-          tooltip={t('legend.zoomTo') as string}
+          tooltip={t('legend.zoomTo')!}
           onClick={handleZoomTo}
           className="buttonOutline"
           disabled={layerDetails.bounds === undefined}
@@ -295,7 +302,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     return (
       <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px', marginLeft: 'auto' }}>
         {isDataTableVisible && datatableSettings[layerDetails.layerPath] && renderDetailsButton()}
-        <IconButton tooltip={t('legend.refreshLayer') as string} className="buttonOutline" onClick={handleRefreshLayer}>
+        <IconButton tooltip={t('legend.refreshLayer')!} className="buttonOutline" onClick={handleRefreshLayer}>
           <RestartAltIcon />
         </IconButton>
         {renderHighlightButton()}
@@ -383,6 +390,15 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     const id = layerDetails.layerPath.split('/')[0].split(':')[0];
     const validId = isValidUUID(id) && metadataUrl !== '';
 
+    // Find the localized name for the current layer type
+    const localizedTypeEntry = memoLocalizedLayerType.find(([memoType]) => memoType === layerDetails.type);
+    let localizedTypeName = localizedTypeEntry ? localizedTypeEntry[1] : t('layers.serviceGroup');
+
+    // Special case if type is GeoJSON and url end by zip or shp. It is a GeoJSON format derived from a shapefile
+    if (localizedTypeName === CV_CONST_LAYER_TYPES.GEOJSON && (layerDetails.url?.includes('.zip') || layerDetails.url?.includes('.shp'))) {
+      localizedTypeName = `${localizedTypeName} - ${t('layers.serviceEsriShapefile')}`;
+    }
+
     return (
       <Box>
         <Button type="text" sx={{ fontSize: theme.palette.geoViewFontSize.sm }} onClick={() => setIsInfoCollapse(!isInfoCollapse)}>
@@ -392,9 +408,12 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           </IconButton>
         </Button>
         <Collapse in={isInfoCollapse} sx={sxClasses.layerInfo}>
-          <Box>{`${t('layers.layerType')}${layerDetails.type}`}</Box>
+          <Box>{`${t('layers.layerType')}${localizedTypeName}`}</Box>
           {layerNativeProjection && <Box>{`${t('layers.layerServiceProjection')}${layerNativeProjection}`}</Box>}
           {layerFilter && <Box>{`${t('layers.layerDefaultFilter')}${layerFilter}`}</Box>}
+          {layerTemporalDimension && (
+            <Box>{`${t('layers.layerTemporalDimension')}${t('layers.layerTemporalDimensionField')} - ${layerTemporalDimension.field} -, min - ${layerTemporalDimension.range.range[0]} / max - ${layerTemporalDimension.range.range[layerTemporalDimension.range.range.length - 1]}`}</Box>
+          )}
           {resources !== '' && (
             <Box className="info-container">
               {`${t('layers.layerResource')}`}

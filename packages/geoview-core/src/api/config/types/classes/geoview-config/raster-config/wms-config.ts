@@ -74,7 +74,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
           // Rebuild the metadataAccessPath
           this.metadataAccessPath = `${metadataAccessPath}${newParameters ? `?${newParameters}` : ''}`;
           // Create the root node of the listOfLayerEntryConfig using the layerId.
-          this.listOfLayerEntryConfig = [this.createLeafNode(toJsonObject({ layerId }), this)! as TypeWmsLayerNode];
+          this.listOfLayerEntryConfig = [this.createLeafNode(toJsonObject({ layerId }), this) as TypeWmsLayerNode];
         }
       }
     }
@@ -181,7 +181,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
       // Sometime, the Name property is undefined. However, the Title property is mandatory.
       const groupId = (metadataLayer.Name || metadataLayer.Title) as string;
       const jsonConfig = this.#createGroupNodeJsonConfig(groupId, metadataLayer.Layer as TypeJsonArray);
-      return [this.createGroupNode(jsonConfig, this)!];
+      return [this.createGroupNode(jsonConfig, this)];
     }
 
     // Create a single layer using the metadata
@@ -189,7 +189,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
       layerId: metadataLayer.Name,
       layerName: metadataLayer.Name,
     });
-    return [this.createLeafNode(layerConfig, this)!];
+    return [this.createLeafNode(layerConfig, this)];
   }
 
   /**
@@ -212,7 +212,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
     // if the layerFound is a group layer, create a the layer group.
     if ('Layer' in layerFound) {
       const jsonConfig = this.#createGroupNodeJsonConfig(layerId, layerFound.Layer as TypeJsonObject[]);
-      return this.createGroupNode(jsonConfig, this, parentNode)!;
+      return this.createGroupNode(jsonConfig, this, parentNode);
     }
 
     // Create the layer using the metadata
@@ -220,7 +220,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
       layerId,
       layerName: layerFound.Title,
     });
-    return this.createLeafNode(layerConfig, this, parentNode)!;
+    return this.createLeafNode(layerConfig, this, parentNode);
   }
   // #endregion OVERRIDE
 
@@ -407,11 +407,11 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
       this.setServiceMetadata(arrayOfMetadata[0]);
       for (i = 1; i < arrayOfMetadata.length; i++) {
         if (!this.findLayerMetadataEntry(layerConfigsToQuery[i].layerId, this.getServiceMetadata().Capability.Layer)) {
-          const metadataLayerPathToAdd = this.#getMetadataLayerPath(layerConfigsToQuery[i].layerId!, arrayOfMetadata[i]!.Capability.Layer);
+          const metadataLayerPathToAdd = this.#getMetadataLayerPath(layerConfigsToQuery[i].layerId, arrayOfMetadata[i].Capability.Layer);
           this.#addLayerToMetadataInstance(
             metadataLayerPathToAdd,
             this.getServiceMetadata().Capability.Layer,
-            arrayOfMetadata[i]!.Capability.Layer
+            arrayOfMetadata[i].Capability.Layer
           );
         }
       }

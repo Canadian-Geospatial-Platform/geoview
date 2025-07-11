@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { useState, useRef, useEffect, useCallback, Fragment, useMemo, ReactNode, KeyboardEvent } from 'react';
+import { useState, useEffect, useCallback, Fragment, useMemo, ReactNode, KeyboardEvent } from 'react';
 import { capitalize, camelCase } from 'lodash';
 import { useTheme } from '@mui/material/styles';
 import {
@@ -37,8 +37,7 @@ import Notifications from '@/core/components/notifications/notifications';
 import Version from './buttons/version';
 import { getSxClasses } from './app-bar-style';
 import { enforceArrayOrder, helpClosePanelById, helpOpenPanelById } from './app-bar-helper';
-import { TypeJsonObject, TypeJsonValue, toJsonObject } from '@/api/config/types/config-types';
-import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
+import { toJsonObject } from '@/api/config/types/config-types';
 import { CV_DEFAULT_APPBAR_CORE, CV_DEFAULT_APPBAR_TABS_ORDER } from '@/api/config/types/config-constants';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { TypeValidAppBarCoreProps } from '@/api/config/types/map-schema-types';
@@ -51,6 +50,7 @@ interface GroupPanelType {
 
 type AppBarProps = {
   api: AppBarApi;
+  onScrollShellIntoView: () => void;
 };
 
 export interface ButtonPanelType {
@@ -67,7 +67,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
   // Log
   logger.logTraceRender('components/app-bar/app-bar');
 
-  const { api: appBarApi } = props;
+  const { api: appBarApi, onScrollShellIntoView } = props;
 
   const mapId = useGeoViewMapId();
 
@@ -78,7 +78,6 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
   // internal component state
   const [buttonPanelGroups, setButtonPanelGroups] = useState<ButtonPanelGroupType>({});
-  const appBar = useRef<HTMLDivElement>(null);
 
   // get store values and action
   const activeModalId = useUIActiveFocusItem().activeElementId;
@@ -268,13 +267,12 @@ export function AppBar(props: AppBarProps): JSX.Element {
     const processPlugin = (pluginName: TypeValidAppBarCoreProps): void => {
       // Packages tab
       if (appBarConfig && appBarConfig.tabs.core.includes(pluginName)) {
-        // create a new tab by loading the plugin
         Plugin.loadScript(pluginName)
-          .then((constructor: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue)) => {
+          .then((typePlugin) => {
             Plugin.addPlugin(
               pluginName,
               mapId,
-              constructor,
+              typePlugin,
               toJsonObject({
                 mapId,
               })
@@ -317,7 +315,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
           panelId: `Appbar${capitalize(tab)}PanelId`,
           panelGroupName: tab,
           type: CONTAINER_TYPE.APP_BAR,
-          title: capitalize(tab),
+          title: `${camelCase(tab)}.title`,
           icon: memoPanels[tab].icon,
           content: memoPanels[tab].content,
           width: getPanelWidth(tab),
@@ -368,8 +366,8 @@ export function AppBar(props: AppBarProps): JSX.Element {
                     <ListItem>
                       <IconButton
                         id={buttonPanel.button.id}
-                        aria-label={t(buttonPanel.button.tooltip!) as string}
-                        tooltip={t(buttonPanel.button.tooltip!) as string}
+                        aria-label={t(buttonPanel.button.tooltip!)!}
+                        tooltip={t(buttonPanel.button.tooltip!)!}
                         tooltipPlacement="right"
                         className={`buttonFilled ${tabId === buttonPanel.button.id && isOpen ? 'active' : ''}`}
                         size="small"
@@ -389,7 +387,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
   };
 
   return (
-    <Box sx={sxClasses.appBar} className={`interaction-${interaction}`} ref={appBar}>
+    <Box sx={sxClasses.appBar} className={`interaction-${interaction}`} id={`${mapId}-appBar`} onClick={onScrollShellIntoView}>
       <Box sx={sxClasses.appBarButtons}>
         {renderButtonGroup(topGroupNames)}
         <Box sx={sxClasses.versionButtonDiv}>

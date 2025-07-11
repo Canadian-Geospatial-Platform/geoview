@@ -4,7 +4,6 @@
   "pnpmVersion": "8.15.2",
   "nodeSupportedVersionRange": ">=20.11.0",
   "pnpmOptions": {
-    "strictPeerDependencies": false,
     "useWorkspaces": true
   },
   "ensureConsistentVersions": true,
@@ -42,6 +41,10 @@
     {
       "packageName": "geoview-time-slider",
       "projectFolder": "packages/geoview-time-slider"
+    },
+    {
+      "packageName": "geoview-drawer",
+      "projectFolder": "packages/geoview-drawer"
     },
     {
       "packageName": "eslint-and-prettier-config",

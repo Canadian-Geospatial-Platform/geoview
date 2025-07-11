@@ -1,35 +1,32 @@
-import { TypeJsonObject } from 'geoview-core/src/api/config/types/config-types';
-import {
-  TypeFeatureInfoEntry,
-  TypeFeatureInfoEntryPartial,
-  TypeLayerEntryConfig,
-} from 'geoview-core/src/api/config/types/map-schema-types';
-import { ChartType, GeoChartDatasource } from 'geochart';
-import { LayerApi } from 'geoview-core/src/geo/layer/layer';
-import { TypeGeochartResultSetEntry } from 'geoview-core/src/core/stores/store-interface-and-intial-values/geochart-state';
+import { TypeJsonObject } from 'geoview-core/api/config/types/config-types';
+import { TypeFeatureInfoEntry, TypeFeatureInfoEntryPartial } from 'geoview-core/api/config/types/map-schema-types';
+import { GeoChartDatasource } from 'geochart';
+import { LayerApi } from 'geoview-core/geo/layer/layer';
+import { TypeGeochartResultSetEntry } from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
+import { ConfigBaseClass } from 'geoview-core/core/utils/config/validation-classes/config-base-class';
 import { PluginGeoChartConfig, GeoViewGeoChartConfig, GeoViewGeoChartConfigLayer } from './geochart-types';
 
 /**
  * Finds, if any, the layer configuration in the plugin configuration that's associated with the layer id given.
  * When more than one could be found, the first one is returned.
- * @param config PluginGeoChartConfig<ChartType> The complete GeoChart Plugin configuration
- * @param layerId string The layer id to search the layer config for
- * @return [GeoViewGeoChartConfig<ChartType> | undefined, GeoViewGeoChartConfigLayer | undefined]
+ * @param {PluginGeoChartConfig} config - The complete GeoChart Plugin configuration
+ * @param {string} layerId - The layer id to search the layer config for
+ * @return [GeoViewGeoChartConfig | undefined, GeoViewGeoChartConfigLayer | undefined]
  * The GeoViewGeoChartConfig and GeoViewGeoChartConfigLayer configurations
  */
 const findLayerConfig = (
-  config: PluginGeoChartConfig<ChartType>,
+  config: PluginGeoChartConfig,
   layerId: string
-): [GeoViewGeoChartConfig<ChartType> | undefined, GeoViewGeoChartConfigLayer | undefined] => {
+): [GeoViewGeoChartConfig | undefined, GeoViewGeoChartConfigLayer | undefined] => {
   // Find the chart plugin layer config that works with layer that contains found data
   // For each chart plugin config that works with a layer config
-  let foundConfigChart: GeoViewGeoChartConfig<ChartType> | undefined;
+  let foundConfigChart: GeoViewGeoChartConfig | undefined;
   let foundConfigLyr: GeoViewGeoChartConfigLayer | undefined;
   config.charts
-    .filter((x: GeoViewGeoChartConfig<ChartType>) => {
+    .filter((x: GeoViewGeoChartConfig) => {
       return x.layers;
     })
-    .forEach((c: GeoViewGeoChartConfig<ChartType>) => {
+    .forEach((c: GeoViewGeoChartConfig) => {
       // If still not found
       if (!foundConfigLyr) {
         // Find the config that works with the layer (if any)
@@ -51,8 +48,8 @@ const findLayerConfig = (
 
 /**
  * Simplifies the FeatureInfoEntries into more straightforward TypeJsonObjects.
- * @param entries TypeFeatureInfoEntryPartial[] The FeatureInfoEntries to simplify
- * @return TypeJsonObject[] The simplified JsonObject of the attributes
+ * @param {TypeFeatureInfoEntryPartial[]} entries - The FeatureInfoEntries to simplify
+ * @return {TypeJsonObject[]} The simplified JsonObject of the attributes
  */
 const simplifyTypeFeatureInfoEntries = (entries: TypeFeatureInfoEntryPartial[]): TypeJsonObject[] => {
   // Simplify attributes
@@ -69,30 +66,30 @@ const simplifyTypeFeatureInfoEntries = (entries: TypeFeatureInfoEntryPartial[]):
 
 /**
  * Finds complete configuration necessary to build a GeoChart based on a given results set.
- * @param {PluginGeoChartConfig<ChartType>} config - The complete GeoChart Plugin configuration
+ * @param {PluginGeoChartConfig} config - The complete GeoChart Plugin configuration
  * @param {LayerApi} layerApi - The GeoView core layer api
  * @param {TypeLayerData[]} layerDataArray - The Results set of results to search for a chart
  * @return [
-    GeoViewGeoChartConfig<ChartType> | undefined,
+    GeoViewGeoChartConfig | undefined,
     GeoViewGeoChartConfigLayer | undefined,
-    TypeLayerEntryConfig<ChartType> | undefined,
+    TypeLayerEntryConfig | undefined,
     TypeFeatureInfoEntry[] | undefined
   ] An array of information retrieved from the results set to eventually send to the GeoChart component
  */
 export const findLayerDataAndConfigFromQueryResults = (
-  config: PluginGeoChartConfig<ChartType>,
+  config: PluginGeoChartConfig,
   layerApi: LayerApi,
   layerDataArray: TypeGeochartResultSetEntry[]
 ): [
-  GeoViewGeoChartConfig<ChartType> | undefined,
+  GeoViewGeoChartConfig | undefined,
   GeoViewGeoChartConfigLayer | undefined,
-  TypeLayerEntryConfig | undefined,
+  ConfigBaseClass | undefined,
   TypeFeatureInfoEntry[] | undefined,
 ] => {
   // Loop on the results set
-  let foundConfigChart: GeoViewGeoChartConfig<ChartType> | undefined;
+  let foundConfigChart: GeoViewGeoChartConfig | undefined;
   let foundConfigChartLyr: GeoViewGeoChartConfigLayer | undefined;
-  let foundLayerEntry: TypeLayerEntryConfig | undefined;
+  let foundLayerEntry: ConfigBaseClass | undefined;
   let foundData: TypeFeatureInfoEntry[] | undefined;
   layerDataArray.forEach((layerData) => {
     // If still not found data corresponding to a layer config
@@ -122,20 +119,20 @@ export const findLayerDataAndConfigFromQueryResults = (
  * Reads the configChart, configChartLayer and layerData information to determine a course of action to do to build a Datasource.
  * The config might already have a Datasource attached to it, but most cases this function will fetch data from
  * somewhere to build a Datasource and attach it to the configChart.
- * @param configChart GeoViewGeoChartConfig<ChartType> The complete GeoChart Config
- * @param configChartLayer GeoViewGeoChartConfigLayer The layers configuration for the GeoChart Config (if existing)
- * @param layerData TypeFeatureInfoEntryPartial[] The Results set of records to load in the Datasource (when already existing)
- * @return Promise<GeoViewGeoChartConfig<ChartType>> An promise to return a GeoViewGeoChartConfig<ChartType> with the
+ * @param {GeoViewGeoChartConfig} configChart - The complete GeoChart Config
+ * @param {GeoViewGeoChartConfigLayer} configChartLayer - The layers configuration for the GeoChart Config (if existing)
+ * @param {TypeFeatureInfoEntryPartial[]} layerData - The Results set of records to load in the Datasource (when already existing)
+ * @return {GeoViewGeoChartConfig} An promise to return a GeoViewGeoChartConfig with the
  * final Datasource to send to GeoChart.
  */
 export const loadDatasources = (
-  configChart: GeoViewGeoChartConfig<ChartType>,
+  configChart: GeoViewGeoChartConfig,
   configChartLayer: GeoViewGeoChartConfigLayer,
   layerData: TypeFeatureInfoEntryPartial[]
-): GeoViewGeoChartConfig<ChartType> => {
+): GeoViewGeoChartConfig => {
   // The new Plugin input to be returned
   // Cloning it in the process to make sure we're detaching ourselves from the configuration plugin object
-  const retConfigChart: GeoViewGeoChartConfig<ChartType> = { ...configChart };
+  const retConfigChart: GeoViewGeoChartConfig = { ...configChart };
 
   // If there's no datasources associated with the chart config, figure it out!
   if (!retConfigChart.datasources) {

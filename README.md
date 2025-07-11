@@ -6,6 +6,11 @@ The Canadian Geospatial Platform intends to deploy new infrastructure, tools and
 
 ![BigPicture](https://user-images.githubusercontent.com/3472990/233729101-89cc4196-915d-4d6e-a353-4fb70cbb566e.PNG)
 
+
+## Creating and Managing Map Configurations
+
+To assist you in creating or customizing map configurations, we provide a dedicated [Map Configuration Repository on GitHub]:(https://github.com/Canadian-Geospatial-Platform/geoview-demo). This repository contains a collection of sample configurations, documentation, API functions to help you get started quickly.
+
 ## Solution
 
 GeoView mapping capabilities are based on [OpenLayers](https://openlayers.org/) open source viewer. The overall project uses the latest [React](https://reactjs.org/) framework version 17+. With this in mind, here is the list of the main dependencies

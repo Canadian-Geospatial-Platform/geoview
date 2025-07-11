@@ -1,4 +1,4 @@
-import { Options } from 'ol/layer/Base';
+import BaseLayer, { Options } from 'ol/layer/Base';
 import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
 import { Extent } from 'ol/extent';
@@ -25,7 +25,6 @@ import {
   TypeLocation,
   QueryType,
   TypeStyleGeometry,
-  TypeGeoviewLayerType,
   TypeOutfieldsType,
 } from '@/api/config/types/map-schema-types';
 import { getLegendStyles, getFeatureImageSource, processStyle } from '@/geo/utils/renderer/geoview-renderer';
@@ -58,7 +57,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * This useful to know when the put the layer loaded status back correctly with parallel processing happening */
   loadingMarker: number = 0;
 
-  // The OpenLayer source
+  /** The OpenLayer source */
   #olSource: Source;
 
   /** Style to apply to the vector layer. */
@@ -73,28 +72,31 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   /** Boolean indicating if the layer should be included in time awareness functions such as the Time Slider. True by default. */
   #isTimeAware: boolean = true;
 
-  // Keep all callback delegates references
-  #onLayerStyleChangedHandlers: LayerStyleChangedDelegate[] = [];
+  /** Keep all callback delegate references */
+  #onLayerStyleChangedHandlers: StyleChangedDelegate[] = [];
 
-  // Keep all callback delegate references
+  /** Keep all callback delegate references */
   #onLegendQueryingHandlers: LegendQueryingDelegate[] = [];
 
-  // Keep all callback delegate references
+  /** Keep all callback delegate references */
   #onLegendQueriedHandlers: LegendQueriedDelegate[] = [];
 
-  // Keep all callback delegate references
+  /** Keep all callback delegate references */
   #onLayerFilterAppliedHandlers: LayerFilterAppliedDelegate[] = [];
 
-  // Keep all callback delegates references
-  #onLayerFirstLoadedHandlers: LayerLoadDelegate[] = [];
+  /** Keep all callback delegate references */
+  #onLayerFirstLoadedHandlers: LayerDelegate[] = [];
 
-  // Keep all callback delegates references
-  #onLayerLoadingHandlers: LayerLoadDelegate[] = [];
+  /** Keep all callback delegate references */
+  #onLayerLoadingHandlers: LayerDelegate[] = [];
 
-  // Keep all callback delegates references
-  #onLayerLoadedHandlers: LayerLoadDelegate[] = [];
+  /** Keep all callback delegate references */
+  #onLayerLoadedHandlers: LayerDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegate references */
+  #onLayerErrorHandlers: LayerErrorDelegate[] = [];
+
+  /** Keep all callback delegate references */
   #onLayerMessageHandlers: LayerMessageDelegate[] = [];
 
   /**
@@ -128,6 +130,59 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   abstract onGetBounds(projection: OLProjection, stops: number): Extent | undefined;
 
   /**
+   * Overrides the get of the OpenLayers Layer
+   * @returns {Layer} The OpenLayers Layer
+   */
+  override getOLLayer(): Layer {
+    // Call parent and cast
+    return super.getOLLayer() as Layer;
+  }
+
+  /**
+   * Gets the layer configuration associated with the layer.
+   * @returns {AbstractBaseLayerEntryConfig} The layer configuration
+   */
+  override getLayerConfig(): AbstractBaseLayerEntryConfig {
+    return super.getLayerConfig() as AbstractBaseLayerEntryConfig;
+  }
+
+  /**
+   * Overrides the way the attributions are retrieved.
+   * @returns {string[]} The layer attributions
+   */
+  override onGetAttributions(): string[] {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const attributionsAsRead = this.getOLSource().getAttributions()?.({} as any); // This looks very weird, but it's as documented in OpenLayers..
+
+    // Depending on the internal formatting
+    if (!attributionsAsRead) return [];
+    if (typeof attributionsAsRead === 'string') return [attributionsAsRead];
+    return attributionsAsRead;
+  }
+
+  /**
+   * Overrides the refresh function to refresh the layer source.
+   * @param {OLProjection | undefined} projection - Optional, the projection to refresh to.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  override onRefresh(projection: OLProjection | undefined): void {
+    // Refresh the layer source
+    this.getOLSource().refresh();
+  }
+
+  /**
+   * Overridable function that gets the extent of an array of features.
+   * @param {string[]} objectIds - The IDs of the features to calculate the extent from.
+   * @param {OLProjection} outProjection - The output projection for the extent.
+   * @param {string} outfield - ID field to return for services that require a value in outfields.
+   * @returns {Promise<Extent>} The extent of the features, if available
+   */
+  protected onGetExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
+    // Not implemented
+    throw new NotImplementedError(`Feature geometry for ${objectIds}-${outfield} is unavailable from ${this.getLayerPath()}`);
+  }
+
+  /**
    * Initializes the GVLayer. This function checks if the source is ready and if so it calls onLoaded() to pursue initialization of the layer.
    * If the source isn't ready, it registers to the source ready event to pursue initialization of the layer once its source is ready.
    */
@@ -141,6 +196,47 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     (this.#olSource as any).on(['featuresloaderror', 'tileloaderror'], this.onError.bind(this));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (this.#olSource as any).on(['imageloaderror'], this.onImageLoadError.bind(this));
+
+    // Apply render error handling to prevent "Cannot read properties of null (reading 'globalAlpha')" errors
+    AbstractGVLayer.#addRenderErrorHandling(this.getOLLayer());
+  }
+
+  /**
+   * Adds error handling to a layer's render function to prevent globalAlpha errors
+   * that can occur during layer rendering, especially when highlighting layers while others are still loading.
+   * This patches the OpenLayers renderer to safely handle cases where the canvas context is not yet available.
+   *
+   * @param {BaseLayer} layer - The OpenLayers layer to patch
+   */
+  static #addRenderErrorHandling(layer: BaseLayer): void {
+    // Use type assertion to access internal getRenderer method
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const layerWithRenderer = layer as BaseLayer & { getRenderer?: () => any };
+    if (!layerWithRenderer || typeof layerWithRenderer.getRenderer !== 'function') return;
+
+    const renderer = layerWithRenderer.getRenderer();
+    if (!renderer || typeof renderer.renderDeferredInternal !== 'function') return;
+
+    const originalRenderFunction = renderer.renderDeferredInternal;
+
+    renderer.renderDeferredInternal = function renderDeferredInternalPatched(...args: unknown[]) {
+      try {
+        // If the renderer is not ready yet, skip rendering
+        if (!this.context || !this.context.canvas) {
+          // Skip rendering but don't throw an error
+          return false;
+        }
+
+        // Context exists, proceed with original rendering
+        return originalRenderFunction.apply(this, args);
+      } catch (error) {
+        logger.logError('Vector layer rendering error:', error);
+
+        // Attempt recovery by requesting a new frame
+        requestAnimationFrame(() => this.changed());
+        return false; // Return false instead of undefined
+      }
+    };
   }
 
   /**
@@ -172,7 +268,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     this.#startLoadingPeriodWatcher(this.loadingCounter);
 
     // Emit event for all layer load events
-    this.#emitLayerLoading({ layerPath: this.getLayerPath() });
+    this.#emitLayerLoading();
   }
 
   /**
@@ -207,14 +303,14 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       this.setVisible(layerConfig.initialSettings?.states?.visible !== false);
 
       // Emit event for the first time the layer got loaded
-      this.#emitLayerFirstLoaded({ layerPath: this.getLayerPath() });
+      this.#emitLayerFirstLoaded();
     }
 
     // Flag
     this.loadedOnce = true;
 
     // Emit event for all layer load events
-    this.#emitLayerLoaded({ layerPath: this.getLayerPath() });
+    this.#emitLayerLoaded();
   }
 
   /**
@@ -239,8 +335,11 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       // Emit about the error
       this.emitMessage('layers.errorNotLoaded', [this.getLayerName()], 'error', true);
     } else {
-      // We've already emitted an erorr to the user about the layer being in error, skip
+      // We've already emitted an error to the user about the layer being in error, skip so that we don't spam
     }
+
+    // Emit event for all layer error events
+    this.#emitLayerError({ error: event });
   }
 
   /**
@@ -266,17 +365,11 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       // Emit about the error
       this.emitMessage('layers.errorImageLoad', [this.getLayerName()], 'error', true);
     } else {
-      // We've already emitted an erorr to the user about the layer being in error, skip
+      // We've already emitted an error to the user about the layer being in error, skip
     }
-  }
 
-  /**
-   * Overrides the get of the OpenLayers Layer
-   * @returns {Layer} The OpenLayers Layer
-   */
-  override getOLLayer(): Layer {
-    // Call parent and cast
-    return super.getOLLayer() as Layer;
+    // Emit event for all layer error events
+    this.#emitLayerError({ error: event });
   }
 
   /**
@@ -285,14 +378,6 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    */
   getOLSource(): Source {
     return this.#olSource;
-  }
-
-  /**
-   * Gets the layer configuration associated with the layer.
-   * @returns {AbstractBaseLayerEntryConfig} The layer configuration
-   */
-  override getLayerConfig(): AbstractBaseLayerEntryConfig {
-    return super.getLayerConfig() as AbstractBaseLayerEntryConfig;
   }
 
   /**
@@ -333,20 +418,6 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   /**
-   * Gets the layer attributions
-   * @returns {string[]} The layer attributions
-   */
-  override getAttributions(): string[] {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const attributionsAsRead = this.getOLSource().getAttributions()?.({} as any); // This looks very weird, but it's as documented in OpenLayers..
-
-    // Depending on the internal formatting
-    if (!attributionsAsRead) return [];
-    if (typeof attributionsAsRead === 'string') return [attributionsAsRead];
-    return attributionsAsRead;
-  }
-
-  /**
    * Gets the temporal dimension that is associated to the layer.
    * @returns {TimeDimension | undefined} The temporal dimension associated to the layer or undefined.
    */
@@ -381,31 +452,15 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   /**
-   * Emits a layer-specific message event with localization support
-   * @protected
-   * @param {string} messageKey - The key used to lookup the localized message OR message
-   * @param {string[]} messageParams - Array of parameters to be interpolated into the localized message
-   * @param {SnackbarType} messageType - The message type
-   * @param {boolean} [notification=false] - Whether to show this as a notification. Defaults to false
-   * @returns {void}
-   *
-   * @example
-   * this.emitMessage(
-   *   'layers.fetchProgress',
-   *   ['50', '100'],
-   *   messageType: 'error',
-   *   true
-   * );
-   *
-   * @fires LayerMessageEvent
+   * Gets the extent of an array of features.
+   * @param {string[]} objectIds - The IDs of the features to calculate the extent from.
+   * @param {OLProjection} outProjection - The output projection for the extent.
+   * @param {string} outfield - ID field to return for services that require a value in outfields.
+   * @returns {Promise<Extent>} The extent of the features, if available
    */
-  protected emitMessage(
-    messageKey: string,
-    messageParams: string[],
-    messageType: SnackbarType = 'info',
-    notification: boolean = false
-  ): void {
-    this.#emitLayerMessage({ messageKey, messageParams, messageType, notification });
+  getExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
+    // Redirect
+    return this.onGetExtentFromFeatures(objectIds, outProjection, outfield);
   }
 
   /**
@@ -449,8 +504,8 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       case 'at_coordinate':
         promiseGetFeature = this.getFeatureInfoAtCoordinate(map, location as Coordinate, queryGeometry, abortController);
         break;
-      case 'at_long_lat':
-        promiseGetFeature = this.getFeatureInfoAtLongLat(map, location as Coordinate, queryGeometry, abortController);
+      case 'at_lon_lat':
+        promiseGetFeature = this.getFeatureInfoAtLonLat(map, location as Coordinate, queryGeometry, abortController);
         break;
       case 'using_a_bounding_box':
         promiseGetFeature = this.getFeatureInfoUsingBBox(map, location as Coordinate[], queryGeometry, abortController);
@@ -526,22 +581,22 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /**
    * Overridable function to return of feature information at the provided long lat coordinate.
-   * @param {OLMap} map - The Map where to get Feature Info At LongLat from.
-   * @param {Coordinate} lnglat - The coordinate that will be used by the query.
+   * @param {OLMap} map - The Map where to get Feature Info At LonLat from.
+   * @param {Coordinate} lonlat - The coordinate that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} abortController - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
-  protected getFeatureInfoAtLongLat(
+  protected getFeatureInfoAtLonLat(
     map: OLMap,
-    lnglat: Coordinate,
+    lonlat: Coordinate,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     queryGeometry: boolean = true,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoEntry[]> {
     // Crash on purpose
-    throw new NotImplementedError(`getFeatureInfoAtLongLat not implemented on layer path ${this.getLayerPath()}`);
+    throw new NotImplementedError(`getFeatureInfoAtLonLat not implemented on layer path ${this.getLayerPath()}`);
   }
 
   /**
@@ -649,7 +704,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   async onFetchLegend(): Promise<TypeLegend | null> {
     try {
       const legend: TypeLegend = {
-        type: this.getLayerConfig().geoviewLayerConfig.geoviewLayerType as TypeGeoviewLayerType,
+        type: this.getLayerConfig().geoviewLayerConfig.geoviewLayerType,
         styleConfig: this.getStyle(),
         legend: await getLegendStyles(this.getStyle()),
       };
@@ -739,7 +794,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
         let imageSource;
         if (layerStyle[geometryType]) {
-          const styleSettings = layerStyle[geometryType]!;
+          const styleSettings = layerStyle[geometryType];
           const { type } = styleSettings;
 
           // Calculate the feature style
@@ -784,7 +839,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
         const featureInfoEntry: TypeFeatureInfoEntry = {
           // feature key for building the data-grid
           featureKey: featureKeyCounter++,
-          geoviewLayerType: this.getLayerConfig().geoviewLayerConfig.geoviewLayerType as TypeGeoviewLayerType,
+          geoviewLayerType: this.getLayerConfig().geoviewLayerConfig.geoviewLayerType,
           extent,
           geometry: feature,
           featureIcon: imageSource,
@@ -820,10 +875,10 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
                 fieldKey: fieldKeyCounter++,
                 value:
                   // If fieldName is the alias for the entry, we will not get a value, so we try the fieldEntry name.
-                  this.getFieldValue(feature, fieldName, fieldEntry!.type as 'string' | 'number' | 'date') ||
-                  this.getFieldValue(feature, fieldEntry.name, fieldEntry!.type as 'string' | 'number' | 'date'),
-                dataType: fieldEntry!.type,
-                alias: fieldEntry!.alias,
+                  this.getFieldValue(feature, fieldName, fieldEntry.type as 'string' | 'number' | 'date') ||
+                  this.getFieldValue(feature, fieldEntry.name, fieldEntry.type as 'string' | 'number' | 'date'),
+                dataType: fieldEntry.type,
+                alias: fieldEntry.alias,
                 domain: fieldDomain,
               };
             } else if (!outfields) {
@@ -860,6 +915,34 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   /**
+   * Emits a layer-specific message event with localization support
+   * @protected
+   * @param {string} messageKey - The key used to lookup the localized message OR message
+   * @param {string[]} messageParams - Array of parameters to be interpolated into the localized message
+   * @param {SnackbarType} messageType - The message type
+   * @param {boolean} [notification=false] - Whether to show this as a notification. Defaults to false
+   * @returns {void}
+   *
+   * @example
+   * this.emitMessage(
+   *   'layers.fetchProgress',
+   *   ['50', '100'],
+   *   messageType: 'error',
+   *   true
+   * );
+   *
+   * @fires LayerMessageEvent
+   */
+  protected emitMessage(
+    messageKey: string,
+    messageParams: string[],
+    messageType: SnackbarType = 'info',
+    notification: boolean = false
+  ): void {
+    this.#emitLayerMessage({ messageKey, messageParams, messageType, notification });
+  }
+
+  /**
    * Initializes common properties on a layer options.
    * @param {Options} layerOptions - The layer options to initialize
    * @param {AbstractBaseLayerEntryConfig} layerConfig - The config to read the initial settings from
@@ -891,17 +974,13 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     const eventAny = event as any;
 
     if ('image' in eventAny) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return eventAny.image;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ('tile' in eventAny) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-underscore-dangle
       return eventAny.tile;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ('target' in eventAny && 'dispatching_' in eventAny.target) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-underscore-dangle
       return eventAny.target.dispatching_;
@@ -1030,113 +1109,138 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /**
    * Emits an event to all handlers.
-   * @param {LayerStyleChangedEvent} event - The event to emit
+   * @param {StyleChangedEvent} event - The event to emit
    */
-  #emitLayerStyleChanged(event: LayerStyleChangedEvent): void {
+  #emitLayerStyleChanged(event: StyleChangedEvent): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onLayerStyleChangedHandlers, event);
   }
 
   /**
    * Registers a layer style changed event handler.
-   * @param {LayerStyleChangedDelegate} callback - The callback to be executed whenever the event is emitted
+   * @param {StyleChangedDelegate} callback - The callback to be executed whenever the event is emitted
    */
-  onLayerStyleChanged(callback: LayerStyleChangedDelegate): void {
+  onLayerStyleChanged(callback: StyleChangedDelegate): void {
     // Register the event handler
     EventHelper.onEvent(this.#onLayerStyleChangedHandlers, callback);
   }
 
   /**
    * Unregisters a layer style changed event handler.
-   * @param {LayerStyleChangedDelegate} callback - The callback to stop being called whenever the event is emitted
+   * @param {StyleChangedDelegate} callback - The callback to stop being called whenever the event is emitted
    */
-  offLayerStyleChanged(callback: LayerStyleChangedDelegate): void {
+  offLayerStyleChanged(callback: StyleChangedDelegate): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerStyleChangedHandlers, callback);
   }
 
   /**
    * Emits an event to all handlers when a layer have been first loaded on the map.
-   * @param {LayerLoadEvent} event - The event to emit
    * @private
    */
-  #emitLayerFirstLoaded(event: LayerLoadEvent): void {
+  #emitLayerFirstLoaded(): void {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onLayerFirstLoadedHandlers, event);
+    EventHelper.emitEvent(this, this.#onLayerFirstLoadedHandlers, undefined);
   }
 
   /**
    * Registers when a layer have been first loaded on the map event handler.
-   * @param {LayerLoadDelegate} callback - The callback to be executed whenever the event is emitted
+   * @param {LayerDelegate} callback - The callback to be executed whenever the event is emitted
    */
-  onLayerFirstLoaded(callback: LayerLoadDelegate): void {
+  onLayerFirstLoaded(callback: LayerDelegate): void {
     // Register the event handler
     EventHelper.onEvent(this.#onLayerFirstLoadedHandlers, callback);
   }
 
   /**
    * Unregisters when a layer have been first loaded on the map event handler.
-   * @param {LayerLoadDelegate} callback - The callback to stop being called whenever the event is emitted
+   * @param {LayerDelegate} callback - The callback to stop being called whenever the event is emitted
    */
-  offLayerFirstLoaded(callback: LayerLoadDelegate): void {
+  offLayerFirstLoaded(callback: LayerDelegate): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerFirstLoadedHandlers, callback);
   }
 
   /**
    * Emits an event to all handlers when a layer is turning into a loading stage on the map.
-   * @param {LayerLoadEvent} event - The event to emit
    * @private
    */
-  #emitLayerLoading(event: LayerLoadEvent): void {
+  #emitLayerLoading(): void {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onLayerLoadingHandlers, event);
+    EventHelper.emitEvent(this, this.#onLayerLoadingHandlers, undefined);
   }
 
   /**
    * Registers when a layer is turning into a loading stage event handler.
-   * @param {LayerLoadDelegate} callback - The callback to be executed whenever the event is emitted
+   * @param {LayerDelegate} callback - The callback to be executed whenever the event is emitted
    */
-  onLayerLoading(callback: LayerLoadDelegate): void {
+  onLayerLoading(callback: LayerDelegate): void {
     // Register the event handler
     EventHelper.onEvent(this.#onLayerLoadingHandlers, callback);
   }
 
   /**
    * Unregisters when a layer is turning into a loading stage event handler.
-   * @param {LayerLoadDelegate} callback - The callback to stop being called whenever the event is emitted
+   * @param {LayerDelegate} callback - The callback to stop being called whenever the event is emitted
    */
-  offLayerLoading(callback: LayerLoadDelegate): void {
+  offLayerLoading(callback: LayerDelegate): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerLoadingHandlers, callback);
   }
 
   /**
    * Emits an event to all handlers when a layer is turning into a loaded stage on the map.
-   * @param {LayerLoadEvent} event - The event to emit
    * @private
    */
-  #emitLayerLoaded(event: LayerLoadEvent): void {
+  #emitLayerLoaded(): void {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onLayerLoadedHandlers, event);
+    EventHelper.emitEvent(this, this.#onLayerLoadedHandlers, undefined);
   }
 
   /**
    * Registers when a layer is turning into a loaded stage event handler.
-   * @param {LayerLoadDelegate} callback - The callback to be executed whenever the event is emitted
+   * @param {LayerDelegate} callback - The callback to be executed whenever the event is emitted
    */
-  onLayerLoaded(callback: LayerLoadDelegate): void {
+  onLayerLoaded(callback: LayerDelegate): void {
     // Register the event handler
     EventHelper.onEvent(this.#onLayerLoadedHandlers, callback);
   }
 
   /**
    * Unregisters when a layer is turning into a loaded stage event handler.
-   * @param {LayerLoadDelegate} callback - The callback to stop being called whenever the event is emitted
+   * @param {LayerDelegate} callback - The callback to stop being called whenever the event is emitted
    */
-  offLayerLoaded(callback: LayerLoadDelegate): void {
+  offLayerLoaded(callback: LayerDelegate): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerLoadedHandlers, callback);
+  }
+
+  /**
+   * Emits an event to all handlers when a layer is turning into an error stage on the map.
+   * @param {LayerErrorEvent} event - The event to emit
+   * @private
+   */
+  #emitLayerError(event: LayerErrorEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerErrorHandlers, event);
+  }
+
+  /**
+   * Registers when a layer is turning into a error stage event handler.
+   * @param {LayerDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerError(callback: LayerErrorDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerErrorHandlers, callback);
+  }
+
+  /**
+   * Unregisters when a layer is turning into a error stage event handler.
+   * @param {LayerDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerError(callback: LayerErrorDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerErrorHandlers, callback);
   }
 
   /**
@@ -1170,18 +1274,20 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   // #endregion EVENTS
 }
 
-/**
- * Define a delegate for the event handler function signature
- */
-export type LayerStyleChangedDelegate = EventDelegateBase<AbstractGVLayer, LayerStyleChangedEvent, void>;
+// #region EVENT TYPES
 
 /**
  * Define an event for the delegate
  */
-export type LayerStyleChangedEvent = {
+export type StyleChangedEvent = {
   // The style
   style: TypeLayerStyleConfig;
 };
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+export type StyleChangedDelegate = EventDelegateBase<AbstractGVLayer, StyleChangedEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -1206,11 +1312,6 @@ export type LegendQueriedEvent = {
 export type LegendQueriedDelegate = EventDelegateBase<AbstractGVLayer, LegendQueriedEvent, void>;
 
 /**
- * Define a delegate for the event handler function signature
- */
-export type LayerFilterAppliedDelegate = EventDelegateBase<AbstractGVLayer, LayerFilterAppliedEvent, void>;
-
-/**
  * Define an event for the delegate
  */
 export type LayerFilterAppliedEvent = {
@@ -1221,20 +1322,25 @@ export type LayerFilterAppliedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-export type LayerLoadDelegate = EventDelegateBase<AbstractGVLayer, LayerLoadEvent, void>;
+export type LayerFilterAppliedDelegate = EventDelegateBase<AbstractGVLayer, LayerFilterAppliedEvent, void>;
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+export type LayerDelegate = EventDelegateBase<AbstractGVLayer, undefined, void>;
 
 /**
  * Define an event for the delegate
  */
-export type LayerLoadEvent = {
-  // The loaded layer
-  layerPath: string;
+export type LayerErrorEvent = {
+  // The error
+  error: unknown;
 };
 
 /**
  * Define a delegate for the event handler function signature
  */
-export type LayerMessageDelegate = EventDelegateBase<AbstractGVLayer, LayerMessageEvent, void>;
+export type LayerErrorDelegate = EventDelegateBase<AbstractGVLayer, LayerErrorEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -1246,3 +1352,10 @@ export type LayerMessageEvent = {
   messageType: SnackbarType;
   notification: boolean;
 };
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+export type LayerMessageDelegate = EventDelegateBase<AbstractGVLayer, LayerMessageEvent, void>;
+
+// #endregion EVENT TYPES

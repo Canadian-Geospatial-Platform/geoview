@@ -1,6 +1,16 @@
-import { GroupLayerEntryConfig, MapFeatureConfig, TypeGeoviewLayerType, TypeGeoviewLayerConfig } from '@/api/config/types/map-schema-types';
+import {
+  GroupLayerEntryConfig,
+  MapFeatureConfig,
+  TypeGeoviewLayerType,
+  TypeGeoviewLayerConfig,
+  ShapefileLayerConfig,
+  MapConfigLayerEntry,
+  CONST_LAYER_ENTRY_TYPES,
+  TypeDisplayLanguage,
+  CONST_LAYER_TYPES,
+} from '@/api/config/types/map-schema-types';
 import { Cast, toJsonObject } from '@/api/config/types/config-types';
-import { generateId } from '@/core/utils/utilities';
+import { generateId, getLocalizedMessage } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
 
@@ -19,6 +29,38 @@ type LayerEntryConfigShell = {
 };
 
 /**
+ * Returns an array of tuples representing available GeoView layer types and their localized display names.
+ *
+ * @param {TypeDisplayLanguage} language - The display language to use for localization.
+ * @param {boolean} includeStatic - True if we need to include static image layers, false otherwise.
+ * @returns {Array<[string, string]>} An array where each item is a tuple: [layerType, localizedName].
+ */
+export const getLocalizeLayerType = (language: TypeDisplayLanguage, includeStatic: boolean): Array<[string, string]> => {
+  const { CSV, ESRI_DYNAMIC, ESRI_FEATURE, ESRI_IMAGE, GEOJSON, WMS, WFS, OGC_FEATURE, XYZ_TILES, VECTOR_TILES } = CONST_LAYER_TYPES;
+  const { GEOCORE, SHAPEFILE } = CONST_LAYER_ENTRY_TYPES;
+  const layerOptions: [string, string][] = [
+    [CSV, getLocalizedMessage(language, 'layers.serviceCSV')],
+    [SHAPEFILE, getLocalizedMessage(language, 'layers.serviceEsriShapefile')],
+    [ESRI_DYNAMIC, getLocalizedMessage(language, 'layers.serviceEsriDynamic')],
+    [ESRI_FEATURE, getLocalizedMessage(language, 'layers.serviceEsriFeature')],
+    [ESRI_IMAGE, getLocalizedMessage(language, 'layers.serviceEsriImage')],
+    [GEOJSON, getLocalizedMessage(language, 'layers.serviceGeoJSON')],
+    [WMS, getLocalizedMessage(language, 'layers.serviceOgcWMS')],
+    [WFS, getLocalizedMessage(language, 'layers.serviceOgcWFS')],
+    [OGC_FEATURE, getLocalizedMessage(language, 'layers.serviceOgcFeature')],
+    [XYZ_TILES, getLocalizedMessage(language, 'layers.serviceRasterTile')],
+    [VECTOR_TILES, getLocalizedMessage(language, 'layers.serviceVectorTile')],
+    [GEOCORE, getLocalizedMessage(language, 'layers.serviceGeoCore')],
+  ];
+
+  if (includeStatic) {
+    layerOptions.push([CV_CONST_LAYER_TYPES.IMAGE_STATIC, getLocalizedMessage(language, 'layers.serviceImageStatic')]);
+  }
+
+  return layerOptions;
+};
+
+/**
  * Finds a layer entry config from an array with the given ID.
  * @param {GroupLayerEntryConfig[]} layerList - The array of layerEntryConfigs.
  * @param {string} layerId - The ID of the layer to find.
@@ -26,7 +68,7 @@ type LayerEntryConfigShell = {
  */
 export const getLayerById = (layerList: GroupLayerEntryConfig[], layerId: string): GroupLayerEntryConfig | null => {
   const layer = layerList.find((childLayer) => childLayer.layerId.split('/').pop() === layerId.split('/').pop());
-  if (layer) return layer as GroupLayerEntryConfig;
+  if (layer) return layer;
 
   let foundLayer: GroupLayerEntryConfig | null = null;
   for (let i = 0; i < layerList.length; i++) {
@@ -69,9 +111,18 @@ const allSubLayersAreIncluded = (groupLayer: GroupLayerEntryConfig, layerIds: (s
  * @param {BuildGeoViewLayerInput} inputProps - The layer information
  * @returns {TypeGeoviewLayerConfig} The geoview layer config
  */
-export const buildGeoLayerToAdd = (inputProps: BuildGeoViewLayerInput): TypeGeoviewLayerConfig => {
+export const buildGeoLayerToAdd = (inputProps: BuildGeoViewLayerInput): MapConfigLayerEntry => {
   const { layerIdsToAdd, layerName, layerType, layerURL, layerList } = inputProps;
   logger.logDebug(layerList, layerIdsToAdd);
+
+  if (layerType === 'shapefile') {
+    return {
+      geoviewLayerName: layerName,
+      geoviewLayerId: generateId(18),
+      geoviewLayerType: 'shapefile',
+      metadataAccessPath: layerURL,
+    } as ShapefileLayerConfig;
+  }
 
   const listOfLayerEntryConfig: LayerEntryConfigShell[] = [];
   const layersToAdd = layerIdsToAdd.map((layerId) => getLayerById(layerList, layerId)).filter((layerToAdd) => !!layerToAdd);
@@ -145,7 +196,7 @@ export const buildGeoLayerToAdd = (inputProps: BuildGeoViewLayerInput): TypeGeov
 
   const geoviewLayerConfig = MapFeatureConfig.nodeFactory(
     toJsonObject({
-      geoviewLayerId: generateId(),
+      geoviewLayerId: generateId(18),
       geoviewLayerName: layerName,
       geoviewLayerType: layerType as TypeGeoviewLayerType,
       metadataAccessPath: layerURL,

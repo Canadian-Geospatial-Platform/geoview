@@ -47,7 +47,7 @@ export const getDecimalDegreeItem = (searchTerm: string): GeoListItem | null => 
   const buff = 0.015;
   const boundingBox: [number, number, number, number] = [coords[1] - buff, coords[0] - buff, coords[1] + buff, coords[0] + buff];
 
-  // Return the lat/long result that needs to be generated along with name based results
+  // Return the lon/lat result that needs to be generated along with name based results
   return {
     key: 'coordinates',
     name: `${coords[0]},${coords[1]}`,

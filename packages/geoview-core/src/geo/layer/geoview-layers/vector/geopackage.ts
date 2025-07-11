@@ -113,7 +113,7 @@ export class GeoPackage extends AbstractGeoViewVector {
                   // Set the layer status to processed
                   layerConfig.setLayerStatusProcessed();
 
-                  if (layerGroup) layerGroup.getOLLayer().getLayers().push(baseLayer.getOLLayer());
+                  if (layerGroup) layerGroup.addLayer(baseLayer);
                   resolve(layerGroup || baseLayer);
                 } else {
                   // Throw error
@@ -129,7 +129,7 @@ export class GeoPackage extends AbstractGeoViewVector {
             layerConfig.entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
             // eslint-disable-next-line no-param-reassign
             (layerConfig as TypeLayerEntryConfig).listOfLayerEntryConfig = [];
-            const newLayerGroup = this.createLayerGroup(layerConfig as unknown as GroupLayerEntryConfig, layerConfig.initialSettings!);
+            const newLayerGroup = this.createLayerGroup(layerConfig as unknown as GroupLayerEntryConfig, layerConfig.initialSettings);
 
             // For each layer
             const promises: Promise<AbstractGVLayer>[] = [];
@@ -146,8 +146,8 @@ export class GeoPackage extends AbstractGeoViewVector {
                   this.#processOneGeopackageLayer(newLayerEntryConfig, layers[i], slds)
                     .then((baseLayer) => {
                       if (baseLayer) {
-                        (layerConfig as unknown as GroupLayerEntryConfig).listOfLayerEntryConfig!.push(newLayerEntryConfig);
-                        newLayerGroup.getOLLayer().getLayers().push(baseLayer.getOLLayer());
+                        (layerConfig as unknown as GroupLayerEntryConfig).listOfLayerEntryConfig.push(newLayerEntryConfig);
+                        newLayerGroup.addLayer(baseLayer);
 
                         // Set the layer status to processed
                         layerConfig.setLayerStatusProcessed();
@@ -221,7 +221,7 @@ export class GeoPackage extends AbstractGeoViewVector {
 
     if (layerInfo.properties) {
       const { properties } = layerInfo;
-      GeoPackage.#processFeatureInfoConfig(properties as TypeJsonObject, layerConfig as VectorLayerEntryConfig);
+      GeoPackage.#processFeatureInfoConfig(properties as TypeJsonObject, layerConfig);
     }
 
     // Redirect
@@ -268,7 +268,7 @@ export class GeoPackage extends AbstractGeoViewVector {
         locateFile: (file) => `https://sql.js.org/dist/${file}`,
       })
         .then((SQL) => {
-          xhr.open('GET', url as string);
+          xhr.open('GET', url);
           xhr.onload = () => {
             if (xhr.status !== 200) return;
 
@@ -372,12 +372,12 @@ export class GeoPackage extends AbstractGeoViewVector {
     // Extract layer styles if they exist
     const { rules } = SLDReader.Reader(sld).layers[0].styles[0].featuretypestyles[0];
     // eslint-disable-next-line no-param-reassign
-    if ((layerConfig as VectorLayerEntryConfig).layerStyle === undefined) (layerConfig as VectorLayerEntryConfig).layerStyle = {};
+    if (layerConfig.layerStyle === undefined) layerConfig.layerStyle = {};
 
     for (let i = 0; i < rules.length; i++) {
       Object.keys(rules[i]).forEach((key) => {
         // Polygon style
-        if (key.toLowerCase() === 'polygonsymbolizer' && !(layerConfig as VectorLayerEntryConfig).layerStyle!.Polygon) {
+        if (key.toLowerCase() === 'polygonsymbolizer' && !layerConfig.layerStyle!.Polygon) {
           const polyStyles = rules[i].polygonsymbolizer[0];
           let color: string | undefined;
           let graphicSize: number | undefined;
@@ -449,7 +449,7 @@ export class GeoPackage extends AbstractGeoViewVector {
             info: [{ visible: true, label: '', values: [], settings: styles }],
           };
           // LineString style
-        } else if (key.toLowerCase() === 'linesymbolizer' && !(layerConfig as VectorLayerEntryConfig).layerStyle!.LineString) {
+        } else if (key.toLowerCase() === 'linesymbolizer' && !layerConfig.layerStyle!.LineString) {
           const lineStyles = rules[i].linesymbolizer[0];
 
           const stroke: TypeStrokeSymbolConfig = {};
@@ -460,14 +460,14 @@ export class GeoPackage extends AbstractGeoViewVector {
 
           const styles: TypeLineStringVectorConfig = { type: 'lineString', stroke };
           // eslint-disable-next-line no-param-reassign
-          (layerConfig as VectorLayerEntryConfig).layerStyle!.LineString = {
+          layerConfig.layerStyle!.LineString = {
             type: 'simple',
             fields: [],
             hasDefault: false,
             info: [{ visible: true, label: '', values: [], settings: styles }],
           };
           // Point style
-        } else if (key.toLowerCase() === 'pointsymbolizer' && !(layerConfig as VectorLayerEntryConfig).layerStyle!.Point) {
+        } else if (key.toLowerCase() === 'pointsymbolizer' && !layerConfig.layerStyle!.Point) {
           const { graphic } = rules[i].pointsymbolizer[0];
 
           let offset: [number, number] | null = null;
@@ -506,7 +506,7 @@ export class GeoPackage extends AbstractGeoViewVector {
               }
 
               // eslint-disable-next-line no-param-reassign
-              (layerConfig as VectorLayerEntryConfig).layerStyle!.Point = {
+              layerConfig.layerStyle!.Point = {
                 type: 'simple',
                 fields: [],
                 hasDefault: false,
@@ -557,7 +557,7 @@ export class GeoPackage extends AbstractGeoViewVector {
       });
     }
 
-    layerConfig.source.featureInfo!.outfields.forEach((outfield) => {
+    layerConfig.source.featureInfo.outfields.forEach((outfield) => {
       // eslint-disable-next-line no-param-reassign
       if (!outfield.alias) outfield.alias = outfield.name;
     });
@@ -565,7 +565,7 @@ export class GeoPackage extends AbstractGeoViewVector {
     // Set name field to first value
     if (!layerConfig.source.featureInfo.nameField)
       // eslint-disable-next-line no-param-reassign
-      layerConfig.source.featureInfo.nameField = layerConfig.source.featureInfo!.outfields[0].name;
+      layerConfig.source.featureInfo.nameField = layerConfig.source.featureInfo.outfields[0].name;
   }
 
   /**

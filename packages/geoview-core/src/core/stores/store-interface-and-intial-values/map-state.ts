@@ -2,6 +2,7 @@ import { Coordinate } from 'ol/coordinate'; // only for typing
 import Overlay from 'ol/Overlay';
 import { Extent } from 'ol/extent'; // only for Typing
 import { FitOptions } from 'ol/View'; // only for typing
+import { Size } from 'ol/size';
 import { useStore } from 'zustand';
 
 import {
@@ -64,7 +65,7 @@ export interface IMapState {
   pointMarkers: Record<string, TypePointMarker[]>;
   rotation: number;
   scale: TypeScaleInfo;
-  size: [number, number];
+  size: Size;
   visibleLayers: string[];
   visibleRangeLayers: string[];
   zoom: number;
@@ -107,7 +108,7 @@ export interface IMapState {
   };
 
   setterActions: {
-    setMapSize: (size: [number, number]) => void;
+    setMapSize: (size: Size) => void;
     setMapScale: (scale: TypeScaleInfo) => void;
     setMapLoaded: (mapLoaded: boolean) => void;
     setMapDisplayed: () => void;
@@ -194,7 +195,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       labelGraphicImperial: '',
       labelNumeric: '',
     } as TypeScaleInfo,
-    size: [0, 0] as [number, number],
+    size: [0, 0] as Size,
     visibleLayers: [],
     visibleRangeLayers: [],
     zoom: 0,
@@ -552,9 +553,9 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     setterActions: {
       /**
        * Sets the map size.
-       * @param {[number, number]} size - The size of the map.
+       * @param {Size} size - The size of the map.
        */
-      setMapSize: (size: [number, number]): void => {
+      setMapSize: (size: Size): void => {
         set({
           mapState: {
             ...get().mapState,
@@ -1002,7 +1003,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
        */
       setClickMarker: (coord: number[] | undefined): void => {
         set({
-          mapState: { ...get().mapState, clickMarker: coord ? { lnglat: coord } : undefined },
+          mapState: { ...get().mapState, clickMarker: coord ? { lonlat: coord } : undefined },
         });
       },
 
@@ -1075,7 +1076,7 @@ export const useMapPointMarkers = (): Record<string, TypePointMarker[]> =>
 export const useMapProjection = (): TypeValidMapProjectionCodes => useStore(useGeoViewStore(), (state) => state.mapState.currentProjection);
 export const useMapRotation = (): number => useStore(useGeoViewStore(), (state) => state.mapState.rotation);
 export const useMapScale = (): TypeScaleInfo => useStore(useGeoViewStore(), (state) => state.mapState.scale);
-export const useMapSize = (): [number, number] => useStore(useGeoViewStore(), (state) => state.mapState.size);
+export const useMapSize = (): Size => useStore(useGeoViewStore(), (state) => state.mapState.size);
 export const useMapOrderedLayers = (): string[] => useStore(useGeoViewStore(), (state) => state.mapState.orderedLayers);
 export const useMapVisibleLayers = (): string[] => useStore(useGeoViewStore(), (state) => state.mapState.visibleLayers);
 export const useMapVisibleRangeLayers = (): string[] => useStore(useGeoViewStore(), (state) => state.mapState.visibleRangeLayers);

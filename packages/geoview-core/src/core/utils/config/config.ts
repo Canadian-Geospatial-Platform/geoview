@@ -4,12 +4,12 @@ import {
   convertLayerTypeToEntry,
   TypeLayerEntryConfig,
   mapConfigLayerEntryIsGeoCore,
-  TypeGeoviewLayerConfig,
   MapConfigLayerEntry,
   layerEntryIsGroupLayer,
   TypeDisplayLanguage,
   CONST_LAYER_TYPES,
   TypeGeoviewLayerType,
+  mapConfigLayerEntryIsShapefile,
 } from '@/api/config/types/map-schema-types';
 import { logger } from '@/core/utils/logger';
 
@@ -59,12 +59,12 @@ export class Config {
           geoviewLayerEntry.geoviewLayerId = `${geoviewLayerEntry.geoviewLayerId}:${generateId(8)}`;
         }
 
-        if (mapConfigLayerEntryIsGeoCore(geoviewLayerEntry)) {
+        if (mapConfigLayerEntryIsGeoCore(geoviewLayerEntry) || mapConfigLayerEntryIsShapefile(geoviewLayerEntry)) {
           //  Skip it, because we don't validate the GeoCore configuration anymore. Not the same way as typical GeoView Layer Types at least.
           // TODO Why not do GeoCore request here? Then could easily replace listOfLayerEntries and validate / process along with other layers
-        } else if (Object.values(CONST_LAYER_TYPES).includes((geoviewLayerEntry as TypeGeoviewLayerConfig).geoviewLayerType)) {
-          const geoViewLayerEntryCasted = geoviewLayerEntry as TypeGeoviewLayerConfig;
-          this.#setLayerEntryType(geoViewLayerEntryCasted.listOfLayerEntryConfig!, geoViewLayerEntryCasted.geoviewLayerType);
+        } else if (Object.values(CONST_LAYER_TYPES).includes(geoviewLayerEntry.geoviewLayerType)) {
+          const geoViewLayerEntryCasted = geoviewLayerEntry;
+          this.#setLayerEntryType(geoViewLayerEntryCasted.listOfLayerEntryConfig, geoViewLayerEntryCasted.geoviewLayerType);
         } else throw new LayerInvalidGeoviewLayerTypeError(geoviewLayerEntry.geoviewLayerId, geoviewLayerEntry.geoviewLayerType);
       });
     }
@@ -85,7 +85,7 @@ export class Config {
   #setLayerEntryType(listOfLayerEntryConfig: TypeLayerEntryConfig[], geoviewLayerType: TypeGeoviewLayerType): void {
     listOfLayerEntryConfig?.forEach((layerConfig) => {
       if (layerEntryIsGroupLayer(layerConfig as ConfigBaseClass))
-        this.#setLayerEntryType(layerConfig.listOfLayerEntryConfig!, geoviewLayerType);
+        this.#setLayerEntryType(layerConfig.listOfLayerEntryConfig, geoviewLayerType);
       else {
         // eslint-disable-next-line no-param-reassign
         layerConfig.schemaTag = geoviewLayerType;
@@ -110,6 +110,6 @@ export class Config {
       logger.logInfo(`- Map: ${mapId} - Empty JSON configuration object, using default -`);
     }
 
-    return this.getValidMapConfig(listOfGeoviewLayerConfig!, onErrorCallback);
+    return this.getValidMapConfig(listOfGeoviewLayerConfig, onErrorCallback);
   }
 }

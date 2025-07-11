@@ -1,5 +1,5 @@
 import { useState, useEffect, CSSProperties, useLayoutEffect, ReactNode, useCallback, useRef, useMemo } from 'react';
-import { useTheme } from '@mui/material/styles';
+import { SxProps, Theme, useTheme } from '@mui/material/styles';
 import { Slider as MaterialSlider } from '@mui/material';
 import { Mark } from '@mui/base';
 import { logger } from '@/core/utils/logger';
@@ -20,6 +20,7 @@ type SliderProps = {
   // custom slider classes and styles
   className?: string;
   style?: CSSProperties;
+  sx?: SxProps<Theme>;
 
   // custom onChange callback
   onChange?: (value: number | number[], activeThumb: number) => void;
@@ -142,7 +143,7 @@ function SliderUI(props: SliderProps): JSX.Element {
     if (!el1 || !el2) return false;
     const rect1 = el1.getBoundingClientRect();
     const rect2 = el2.getBoundingClientRect();
-    const padding = 50;
+    const padding = 10;
 
     return orientationIn === 'vertical'
       ? !(rect1.bottom + padding < rect2.top || rect1.top > rect2.bottom + padding)
@@ -183,58 +184,31 @@ function SliderUI(props: SliderProps): JSX.Element {
     // Reset all labels
     markerArray.forEach((marker) => marker.classList.remove('MuiSlider-markLabel-overlap'));
 
-    let left = 0;
-    let right = markerArray.length - 1;
-    let lastVisibleLeft = 0;
-    let lastVisibleRight = markerArray.length - 1;
+    // If only one marker early return
+    if (markerArray.length <= 1) return;
 
-    while (left < right) {
-      // Check from left
-      if (left === 0 || !checkOverlap(markerArray[lastVisibleLeft], markerArray[left], orientationIn)) {
-        lastVisibleLeft = left;
+    // Greedy left-to-right pass
+    let lastVisible = 0;
+    const n = markerArray.length;
+
+    // Always show the first label
+    markerArray[0].classList.remove('MuiSlider-markLabel-overlap');
+
+    // Hide all in-between labels if they overlap with the last visible
+    for (let i = 1; i < n - 1; i++) {
+      if (checkOverlap(markerArray[lastVisible], markerArray[i], orientationIn)) {
+        markerArray[i].classList.add('MuiSlider-markLabel-overlap');
       } else {
-        markerArray[left].classList.add('MuiSlider-markLabel-overlap');
-      }
-
-      // Check from right
-      if (right === markerArray.length - 1 || !checkOverlap(markerArray[right], markerArray[lastVisibleRight], orientationIn)) {
-        lastVisibleRight = right;
-      } else {
-        markerArray[right].classList.add('MuiSlider-markLabel-overlap');
-      }
-
-      left++;
-      right--;
-    }
-
-    // Handle middle element if odd number of markers
-    if (left === right) {
-      const middleElement = markerArray[left];
-      const overlapWithLeft = checkOverlap(markerArray[lastVisibleLeft], middleElement, orientationIn);
-      const overlapWithRight = checkOverlap(middleElement, markerArray[lastVisibleRight], orientationIn);
-
-      if (!overlapWithLeft && !overlapWithRight) {
-        lastVisibleLeft = left;
-      } else {
-        middleElement.classList.add('MuiSlider-markLabel-overlap');
+        lastVisible = i;
       }
     }
 
-    // Check if we have an even number of visible markers and handle middle pair overlap
-    const visibleMarkers = markerArray.filter((marker) => !marker.classList.contains('MuiSlider-markLabel-overlap'));
-    if (visibleMarkers.length % 2 === 0) {
-      const middleIndex = visibleMarkers.length / 2;
-      const leftMiddle = visibleMarkers[middleIndex - 1];
-      const rightMiddle = visibleMarkers[middleIndex];
+    // Always show the last label
+    markerArray[n - 1].classList.remove('MuiSlider-markLabel-overlap');
 
-      // Check overlap between the middle pair
-      const hasOverlap = checkOverlap(leftMiddle, rightMiddle, orientationIn);
-
-      if (hasOverlap) {
-        // Hide both middle labels if they overlap
-        leftMiddle.classList.add('MuiSlider-markLabel-overlap');
-        rightMiddle.classList.add('MuiSlider-markLabel-overlap');
-      }
+    // Second pass: If last visible in-between label overlaps with last marker, hide it
+    if (lastVisible !== 0 && lastVisible !== n - 1 && checkOverlap(markerArray[lastVisible], markerArray[n - 1], orientationIn)) {
+      markerArray[lastVisible].classList.add('MuiSlider-markLabel-overlap');
     }
   }, [checkOverlap, containerId]);
   useEventListener<Window>('resize', removeLabelOverlap, window);

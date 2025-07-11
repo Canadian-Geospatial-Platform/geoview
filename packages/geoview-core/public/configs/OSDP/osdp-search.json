@@ -16,14 +16,22 @@
     "hideOnZoom": 6
   },
   "navBar": ["zoom", "fullscreen", "home", "location", "basemap-select"],
-  "appBar": {
+   "appBar": {
     "tabs": {
-      "core": ["geolocator", "export"]
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
     }
   },
   "footerBar": {
     "tabs": {
-      "core": ["legend", "layers", "details", "data-table"]
+      "core": [
+        "layers",
+        "data-table"
+      ]
     }
   },
   "corePackages": [],

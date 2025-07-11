@@ -1,13 +1,10 @@
 {
   "name": "geoview-core",
-  "version": "1.0.0",
+  "version": "2.0.1",
   "description": "Lightweight viewer based on Open Layers and React for the Canadian Geospatial Platform",
   "private": true,
   "main": "src/app.tsx",
   "license": "MIT",
-  "workspaces": [
-    "../packages/*"
-  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/Canadian-Geospatial-Platform/geoview"
@@ -45,13 +42,13 @@
     "@emotion/styled": "^11.13.0",
     "@fontsource/roboto": "^5.1.0",
     "@mui/base": "5.0.0-beta.58",
-    "@mui/lab": "6.0.0-beta.11",
     "@mui/icons-material": "^6.1.3",
+    "@mui/lab": "6.0.0-beta.11",
     "@mui/material": "^6.1.3",
     "@mui/styles": "^6.1.3",
     "@mui/system": "^6.1.3",
-    "@mui/x-tree-view": "^7.17.0",
     "@mui/x-date-pickers": "^7.20.0",
+    "@mui/x-tree-view": "^7.17.0",
     "@nieuwlandgeo/sldreader": "^0.4.3",
     "@react-spring/web": "^9.7.5",
     "ajv": "^8.17.1",
@@ -73,6 +70,7 @@
     "ol": "10.5.0",
     "ol-mapbox-style": "^12.3.5",
     "proj4": "^2.12.1",
+    "geotiff": "^2.1.3",
     "prop-types": "^15.8.1",
     "query-string": "^9.1.1",
     "react": "^18.3.1",
@@ -81,6 +79,7 @@
     "react-i18next": "^12.2.0",
     "react-test-renderer": "^18.3.1",
     "sanitize-html": "^2.13.1",
+    "shpjs": "^6.1.0",
     "sql.js": "^1.11.0",
     "yet-another-react-lightbox": "^3.21.6",
     "zustand": "~5.0.0"
@@ -122,10 +121,11 @@
     "@types/lodash": "^4.17.10",
     "@types/lodash-webpack-plugin": "^0.11.9",
     "@types/proj4": "^2.5.5",
-    "@types/react": "^18.3.11",
+    "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
     "@types/react-router-dom": "^5.3.3",
     "@types/sanitize-html": "^2.13.0",
+    "@types/shpjs": "^3.4.7",
     "@types/sql.js": "^1.4.9",
     "babel-jest": "^29.7.0",
     "babel-loader": "^9.2.1",
@@ -144,12 +144,10 @@
     "lodash-webpack-plugin": "^0.11.6",
     "markdown-loader": "~8.0.0",
     "prop-types": "^15.8.1",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
     "simple-zustand-devtools": "^1.1.0",
     "style-loader": "^4.0.0",
     "terser-webpack-plugin": "^5.3.10",
-    "typedoc": "^0.26.9",
+    "typedoc": "^0.27.9",
     "typescript": "^5.6.3",
     "webpack": "^5.95.0",
     "webpack-bundle-analyzer": "^4.10.2",
@@ -160,10 +158,8 @@
     "worker-loader": "^3.0.8",
     "zustand": "~5.0.0"
   },
-  "resolutions": {
-    "@types/react": "^18.2.0",
-    "@types/react-dom": "^18.2.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+  "overrides": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   }
 }

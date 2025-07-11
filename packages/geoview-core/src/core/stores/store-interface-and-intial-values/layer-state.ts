@@ -17,6 +17,7 @@ import {
   TypeResultSetEntry,
   TypeLayerControls,
   TypeGeoviewLayerType,
+  TypeTemporalDimension,
 } from '@/api/config/types/map-schema-types';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
@@ -38,7 +39,7 @@ export interface ILayerState {
   selectedLayerPath: string | undefined | null;
   legendLayers: TypeLegendLayer[];
   displayState: TypeLayersViewDisplayState;
-  layerDeleteInProgress: boolean;
+  layerDeleteInProgress: string;
   selectedLayerSortingArrowId: string;
   layersAreLoading: boolean;
   setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
@@ -50,13 +51,15 @@ export interface ILayerState {
     getLayer: (layerPath: string) => TypeLegendLayer | undefined;
     getLayerBounds: (layerPath: string) => number[] | undefined;
     getLayerDefaultFilter: (layerPath: string) => string | undefined;
-    getLayerDeleteInProgress: () => boolean;
+    getLayerDeleteInProgress: () => string;
     getLayerServiceProjection: (layerPath: string) => string | undefined;
+    getLayerTemporalDimension: (layerPath: string) => TypeTemporalDimension | undefined;
     refreshLayer: (layerPath: string) => void;
+    reloadLayer: (layerPath: string) => void;
     setAllItemsVisibility: (layerPath: string, visibility: boolean) => void;
     setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => void;
     setHighlightLayer: (layerPath: string) => void;
-    setLayerDeleteInProgress: (newVal: boolean) => void;
+    setLayerDeleteInProgress: (newVal: string) => void;
     setLayerOpacity: (layerPath: string, opacity: number) => void;
     setLayerHoverable: (layerPath: string, enable: boolean) => void;
     setLayerQueryable: (layerPath: string, enable: boolean) => void;
@@ -70,7 +73,7 @@ export interface ILayerState {
   setterActions: {
     setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => void;
     setHighlightLayer: (layerPath: string) => void;
-    setLayerDeleteInProgress: (newVal: boolean) => void;
+    setLayerDeleteInProgress: (newVal: string) => void;
     setLegendLayers: (legendLayers: TypeLegendLayer[]) => void;
     setSelectedLayerPath: (layerPath: string) => void;
     setSelectedLayerSortingArrowId: (arrowId: string) => void;
@@ -90,7 +93,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
     legendLayers: [] as TypeLegendLayer[],
     selectedLayerPath: null,
     displayState: 'view',
-    layerDeleteInProgress: false,
+    layerDeleteInProgress: '',
     selectedLayerSortingArrowId: '',
 
     // Initialize default
@@ -111,7 +114,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
        */
       deleteLayer: (layerPath: string): void => {
         LegendEventProcessor.deleteLayer(get().mapId, layerPath);
-        get().layerState.setterActions.setLayerDeleteInProgress(false);
+        get().layerState.setterActions.setLayerDeleteInProgress('');
       },
 
       /**
@@ -211,6 +214,10 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         return LegendEventProcessor.getLayerServiceProjection(get().mapId, layerPath);
       },
 
+      getLayerTemporalDimension: (layerPath: string): TypeTemporalDimension | undefined => {
+        return LegendEventProcessor.getLayerTemporalDimension(get().mapId, layerPath);
+      },
+
       /**
        * Refresh layer and set states to original values.
        * @param {string} layerPath - The layer path of the layer to change.
@@ -218,6 +225,15 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       refreshLayer: (layerPath: string): void => {
         // Redirect to processor.
         LegendEventProcessor.refreshLayer(get().mapId, layerPath);
+      },
+
+      /**
+       * Reload layer and set states to original values.
+       * @param {string} layerPath - The layer path of the layer to reload.
+       */
+      reloadLayer: (layerPath: string): void => {
+        // Redirect to processor.
+        LegendEventProcessor.reloadLayer(get().mapId, layerPath);
       },
 
       /**
@@ -250,9 +266,9 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
 
       /**
        * Sets the layer delete in progress state.
-       * @param {boolean} newVal - The new value.
+       * @param {string} newVal - The new value (the layerPath waiting to be deleted or '').
        */
-      setLayerDeleteInProgress: (newVal: boolean): void => {
+      setLayerDeleteInProgress: (newVal: string): void => {
         // Redirect to setter
         get().layerState.setterActions.setLayerDeleteInProgress(newVal);
       },
@@ -369,9 +385,9 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
 
       /**
        * Sets the layer delete in progress state.
-       * @param {boolean} newVal - The new value.
+       * @param {string} newVal - The new value (the layerPath waiting to be deleted or '').
        */
-      setLayerDeleteInProgress: (newVal: boolean): void => {
+      setLayerDeleteInProgress: (newVal: string): void => {
         set({
           layerState: {
             ...get().layerState,
@@ -403,7 +419,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         let theLayerPath: string | null = layerPath;
         if (layerPath && layerPath.length === 0) theLayerPath = null;
         const curLayers = get().layerState.legendLayers;
-        const layer = LegendEventProcessor.findLayerByPath(curLayers, layerPath || '');
+        const layer = LegendEventProcessor.findLayerByPath(curLayers, layerPath!);
         set({
           layerState: {
             ...get().layerState,
@@ -462,6 +478,7 @@ export const useLayerSelectedLayer = (): TypeLegendLayer => useStore(useGeoViewS
 export const useLayerSelectedLayerPath = (): string | null | undefined =>
   useStore(useGeoViewStore(), (state) => state.layerState.selectedLayerPath);
 export const useLayerDisplayState = (): TypeLayersViewDisplayState => useStore(useGeoViewStore(), (state) => state.layerState.displayState);
+export const useLayerDeleteInProgress = (): string => useStore(useGeoViewStore(), (state) => state.layerState.layerDeleteInProgress);
 export const useSelectedLayerSortingArrowId = (): string =>
   useStore(useGeoViewStore(), (state) => state.layerState.selectedLayerSortingArrowId);
 export const useLayersAreLoading = (): boolean => useStore(useGeoViewStore(), (state) => state.layerState.layersAreLoading);
@@ -481,7 +498,7 @@ export const useIconLayerSet = (layerPath: string): string[] => {
   const layers = useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
   const layer = LegendEventProcessor.findLayerByPath(layers, layerPath);
   if (layer && layer.type !== CV_CONST_LAYER_TYPES.WMS) {
-    return layer.items.map((item) => item.icon).filter((d) => d !== null) as string[];
+    return layer.items.map((item) => item.icon).filter((d) => d !== null);
   }
   if (layer && layer.type === CV_CONST_LAYER_TYPES.WMS) {
     return layer.icons.map((item) => item.iconImage).filter((d) => d !== null) as string[];

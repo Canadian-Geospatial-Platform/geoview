@@ -161,7 +161,7 @@ export class WMS extends AbstractGeoViewRaster {
             // If the metadata hasn't been set yet
             if (!this.metadata) this.metadata = promise.value.metadata;
 
-            const layerId = promise.value.layerConfig.layerId!;
+            const { layerId } = promise.value.layerConfig;
             const alreadyExists = this.getLayerCapabilities(layerId);
 
             // If not already loaded
@@ -193,7 +193,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {TypeLayerEntryConfig} layerConfig - The layer entry config to validate.
    */
   protected override onValidateLayerEntryConfig(layerConfig: TypeLayerEntryConfig): void {
-    const layerFound = this.getLayerCapabilities(layerConfig.layerId!);
+    const layerFound = this.getLayerCapabilities(layerConfig.layerId);
     if (!layerFound) {
       // Add a layer load error
       this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(layerConfig), layerConfig);
@@ -251,7 +251,7 @@ export class WMS extends AbstractGeoViewRaster {
 
       if (!layerConfig.initialSettings?.bounds && layerCapabilities.EX_GeographicBoundingBox) {
         // eslint-disable-next-line no-param-reassign
-        layerConfig.initialSettings!.bounds = validateExtent(layerCapabilities.EX_GeographicBoundingBox as Extent);
+        layerConfig.initialSettings.bounds = validateExtent(layerCapabilities.EX_GeographicBoundingBox as Extent);
       }
 
       // If there's a dimension

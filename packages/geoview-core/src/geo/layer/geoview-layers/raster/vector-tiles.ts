@@ -75,13 +75,20 @@ export class VectorTiles extends AbstractGeoViewRaster {
         tileSize: [tileInfo.rows as number, tileInfo.cols as number],
       };
       // eslint-disable-next-line no-param-reassign
-      layerConfig.source!.tileGrid = newTileGrid;
+      layerConfig.source.tileGrid = newTileGrid;
 
       // eslint-disable-next-line no-param-reassign
       layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
 
-      if (fullExtent.spatialReference && !Projection.getProjectionFromObj(fullExtent.spatialReference))
-        await Projection.addProjection(fullExtent.spatialReference);
+      // Add projection definition if not already included
+      if (fullExtent.spatialReference) {
+        try {
+          Projection.getProjectionFromObj(fullExtent.spatialReference);
+        } catch (error: unknown) {
+          logger.logWarning('Unsupported projection, attempting to add projection now.', error);
+          await Projection.addProjection(fullExtent.spatialReference);
+        }
+      }
 
       // Set zoom levels. Vector tiles may be unique as they can have both scale and zoom level properties
       // First set the min/max scales based on the service / config
@@ -243,7 +250,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     if (source.tileGrid) {
       const tileGridOptions: TileGridOptions = {
         origin: source.tileGrid.origin,
-        resolutions: source.tileGrid.resolutions as number[],
+        resolutions: source.tileGrid.resolutions,
         tileSize: source.tileGrid.tileSize,
         extent: source.tileGrid.extent,
       };

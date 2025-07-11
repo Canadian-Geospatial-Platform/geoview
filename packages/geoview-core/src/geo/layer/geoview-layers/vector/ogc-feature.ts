@@ -86,7 +86,7 @@ export class OgcFeature extends AbstractGeoViewVector {
         const latlonExtent = Projection.transformExtentFromProj(
           foundCollection.extent.spatial.bbox[0] as number[],
           Projection.getProjectionFromString(foundCollection.extent.spatial.crs as string),
-          Projection.getProjectionLngLat()
+          Projection.getProjectionLonLat()
         );
         // eslint-disable-next-line no-param-reassign
         layerConfig.initialSettings.bounds = latlonExtent;
@@ -199,7 +199,7 @@ export class OgcFeature extends AbstractGeoViewVector {
       });
     }
 
-    layerConfig.source.featureInfo!.outfields.forEach((outfield) => {
+    layerConfig.source.featureInfo.outfields.forEach((outfield) => {
       // eslint-disable-next-line no-param-reassign
       if (!outfield.alias) outfield.alias = outfield.name;
     });
@@ -207,7 +207,7 @@ export class OgcFeature extends AbstractGeoViewVector {
     // Set name field to first value
     if (!layerConfig.source.featureInfo.nameField) {
       // eslint-disable-next-line no-param-reassign
-      layerConfig.source.featureInfo.nameField = layerConfig.source.featureInfo!.outfields[0].name;
+      layerConfig.source.featureInfo.nameField = layerConfig.source.featureInfo.outfields[0].name;
     }
   }
 

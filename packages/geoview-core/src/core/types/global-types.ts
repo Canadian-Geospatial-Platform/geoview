@@ -1,15 +1,16 @@
-import React from 'react';
-import { createRoot } from 'react-dom/client';
+import type React from 'react';
+import type { createRoot } from 'react-dom/client';
+import type * as translate from 'react-i18next';
 
-import { useTheme } from '@mui/material/styles';
-import { useMediaQuery } from '@mui/material';
+import type { useTheme } from '@mui/material/styles';
+import type { useMediaQuery } from '@mui/material';
+
 import { TypeDisplayLanguage, TypeMapFeaturesInstance } from '@/api/config/types/map-schema-types';
 import { API } from '@/api/api';
 import { logger } from '@/core/utils/logger';
 import { useWhatChanged } from '@/core/utils/useWhatChanged';
 import * as UI from '@/ui';
 import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
-import { TypeJsonObject } from '@/api/config/types/config-types';
 import { MapViewer } from '@/geo/map/map-viewer';
 
 export { getGeoViewStore } from '@/core/stores/stores-managers';
@@ -33,7 +34,8 @@ export interface TypeMapFeaturesConfig extends TypeMapFeaturesInstance {
 declare global {
   interface Window {
     cgpv: TypeCGPV;
-    geoviewPlugins: Record<string, unknown>;
+    cgpvs: TypeCGPV[];
+    geoviewPlugins?: Record<string, typeof AbstractPlugin>;
   }
 }
 
@@ -44,15 +46,12 @@ export interface TypeWindow extends Window {
   /** the core */
   cgpv: TypeCGPV;
   /** plugins added to the core */
-  geoviewPlugins: {
-    [pluginId: string]:
-      | ((
-          pluginId: string,
-          props: null | string | number | boolean | TypeJsonObject[] | { [key: string]: TypeJsonObject }
-        ) => null | string | number | boolean | TypeJsonObject[] | { [key: string]: TypeJsonObject }) // GV: We do not import TypeJsonValue because of circular dependencies
-      | AbstractPlugin
-      | undefined;
-  };
+  geoviewPlugins: Record<string, typeof AbstractPlugin> | undefined;
+}
+
+export interface TypeReactUtilities {
+  react: typeof React;
+  createRoot: typeof createRoot;
 }
 
 /**
@@ -62,11 +61,9 @@ export type TypeCGPV = {
   init: () => void;
   onMapInit: MapViewerCallback;
   onMapReady: MapViewerCallback;
-  onLayersProcessed: MapViewerCallback;
-  onLayersLoaded: MapViewerCallback;
   api: API;
-  react: typeof React;
-  createRoot: typeof createRoot;
+  reactUtilities: TypeReactUtilities;
+  translate: typeof translate;
   ui: TypeCGPVUI;
   logger: typeof logger;
 };

@@ -1,4 +1,4 @@
-import React from 'react';
+import { memo } from 'react';
 import { Box, IconButton } from '@mui/material';
 /* eslint-disable camelcase */
 import {
@@ -116,4 +116,4 @@ function TopToolbar(props: TopToolbarProps<ColumnsType>): JSX.Element {
   );
 }
 
-export default React.memo(TopToolbar);
+export default memo(TopToolbar);

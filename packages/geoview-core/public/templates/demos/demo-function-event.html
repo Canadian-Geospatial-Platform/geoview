@@ -99,13 +99,13 @@
           cgpv.api.getMapViewer('map1').layer.setLayerName('uniqueValueId/1', 'Water Quantity')
         </li>
         <li><button id="Place-marker">Place a marker on map</button><br />
-          cgpv.api.getMapViewer('map1').clickMarkerIconShow({lnglat: [-90, 60]})
+          cgpv.api.getMapViewer('map1').clickMarkerIconShow({lonlat: [-90, 60]})
         </li>
         <li><button id="Zoom-extent">Zoom to an extent</button><br />
-          cgpv.api.getMapViewer('map1').zoomToLngLatExtentOrCoordinate([-87.77486341686723, 51.62285357468582, -84.57727128084842, 53.833354975551075])
+          cgpv.api.getMapViewer('map1').zoomToLonLatExtentOrCoordinate([-87.77486341686723, 51.62285357468582, -84.57727128084842, 53.833354975551075])
         </li>
         <li><button id="Zoom-coordinate">Zoom to a coordinate</button><br />
-          cgpv.api.getMapViewer('map1').zoomToLngLatExtentOrCoordinate([-90, 60])
+          cgpv.api.getMapViewer('map1').zoomToLonLatExtentOrCoordinate([-90, 60])
         </li>
         <li><button id="Extent-to-polygon">Convert an extent to a polygon (result in console)</button><br />
           cgpv.api.utilities.geo.extentToPolygon([-87.77486341686723, 51.62285357468582, -84.57727128084842, 53.83335497555107])
@@ -166,7 +166,7 @@
           cgpv.api.getMapViewer('map1').createMapConfigFromMapState()
         </li>
         <li><button id="Reload-map">Reload map with current state</button><br />
-          cgpv.api.getMapViewer('map1').reloadWithCurrentState()
+          cgpv.api.reloadWithCurrentState('map1')
         </li>
         <li><button id="Add-marker">Add markers to map</button><button id="Remove-marker">Remove markers from map</button><br />
           cgpv.api.getMapViewer('map1').layer.featureHighlight.pointMarkers.addPointMarkers('group1', markers)<br />
@@ -184,23 +184,26 @@
       </ul>
       <h3>Events that will generate notifications:</h3>
       <ul>
-        <li>cgpv.api.onMapAddedToDiv</li>
         <li>mapViewer.onMapLanguageChanged</li>
         <li>mapViewer.onMapMoveEnd</li>
         <li>mapViewer.onMapZoomEnd</li>
         <li>mapViewer.basemap.onBasemapChanged</li>
-        <li>mapViewer.layer.onLayerAdded</li>
-        <li>mapViewer.layer.onLayerError</li>
-        <li>mapViewer.layer.onLayerRemoved</li>
-        <li>mapViewer.layer.onLayerLoading for each layer loading on map</li>
-        <li>mapViewer.layer.onLayerLoaded for each layer loaded on map</li>
-        <li>mapViewer.layer.onLayerAllLoaded each time all layers are loaded (done loading) on map</li>
+        <li>mapViewer.layer.onLayerConfigAdded when a layer config has been added</li>
+        <li>mapViewer.layer.onLayerConfigRemoved when a layer config has been removed</li>
+        <li>mapViewer.layer.onLayerConfigError when a layer config has an error</li>
+        <li>mapViewer.layer.onLayerCreated when a gv layer has been created</li>
         <li>mapViewer.layer.onLayerFirstLoaded one time per layer on their first load</li>
+        <li>mapViewer.layer.onLayerLoading when a gv layer is loading on the map (this happens on every render)</li>
+        <li>mapViewer.layer.onLayerLoaded when a gv layer is loaded on the map (this can happen on every render)</li>
+        <li>mapViewer.layer.onLayerError when a gv layer has an error on the map (this can happen on every render)</li>
+        <li>mapViewer.layer.onLayerAllLoaded each time all layers are loaded/error (done loading) on the map (this happens on every render)</li>
         <li>mapViewer.layer.onLayerVisibilityToggled</li>
         <li>mapViewer.layer.onLayerItemVisibilityToggled</li>
         <li>mapViewer.stateApi.onLayersReordered</li>
         <li>layerEntryConfig.onLayerStatusChanged for Water Quantity</li>
-        <li>layer.onLayerFirstLoaded one time for Nonmetal mines</li>
+        <li>layer.onLayerFirstLoaded one time for Airborne quality</li>
+        <li>layer.onLayerLoaded each time Airborne quality layer goes in loaded state</li>
+        <li>layer.onLayerError each time Airborne quality layer goes in error state</li>
         <li>layer.onVisibleChanged for Nonmetal mines</li>
         <li>layer.onVisibleChanged for Water Quantity</li>
         <li>layer.onLayerOpacityChanged for Water Quantity</li>
@@ -211,10 +214,12 @@
 
     <script src="codedoc.js"></script>
     <script>
+      const mapId = 'map1';
       const LYR_PATH_UNIQUE = "uniqueValueId/1";
       const LYR_PATH_NON_METAL = "nonmetalmines/5";
       const LYR_PATH_FEATURE = "esriFeatureLYR5/0";
-      const LYR_PATH_GEOCORE = "f4c51eaa-a6ca-48b9-a1fc-b0651da20509";
+      const LYR_PATH_AIRBORNE = "airborne_radioactivity/1";
+      const LYR_PATH_GEOCORE = "f4c51eaa-a6ca-48b9-a1fc-b0651da20509/base-group";
 
       var CNT_GENERIC_STATUS_CHANGE = 0;
       var CNT_SPECIFIC_STATUS_CHANGE = 0;
@@ -222,91 +227,146 @@
       // Register a handler when the map is init
       cgpv.onMapInit((mapViewer) => {
         // !!
-        // GV This callback is executed when map is init. The layers haven't been registered yet at this time.
+        // GV This callback is executed when map is init. The layers have NOT been registered yet at this time.
         // !!
 
         listenToLegendLayerSetChanges('HMap1-state', mapViewer);
 
         // listen to map language changed event
         mapViewer.onMapLanguageChanged((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(`Map language changed to ${payload.language}`);
+          mapViewer.notifications.addNotificationSuccess(`MapViewer: Map language changed to ${payload.language}`);
         });
 
         // listen to basemap changed event
         mapViewer.basemap.onBasemapChanged((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(`Basemap changed to ${payload.basemap.basemapId}`);
+          mapViewer.notifications.addNotificationSuccess(`MapViewer: Basemap changed to ${payload.basemap.basemapId}`);
         });
 
         // listen to layer reordered event
         mapViewer.stateApi.onLayersReordered((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(`Layers reordered to ${payload.orderedLayers.map((layer) => layer.layerPath)}`);
-        });
-
-        // listen to map added to div event
-        cgpv.api.onMapAddedToDiv((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(`Map ${payload.mapId} added`);
+          mapViewer.notifications.addNotificationSuccess(`MapViewer: Layers reordered to ${payload.orderedLayers.map((layer) => layer.layerPath)}`);
         });
 
         // listen to map zoom event
         mapViewer.onMapZoomEnd((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(`Zoomed to level ${payload.zoom}`);
+          mapViewer.notifications.addNotificationSuccess(`MapViewer: Zoomed to level ${payload.zoom}`);
         });
 
         // listen to map move event
         mapViewer.onMapMoveEnd((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(`Map moved to center latitude ${payload.lnglat[1]} and longitude ${payload.lnglat[0]}`);
+          mapViewer.notifications.addNotificationSuccess(`MapViewer: Map moved to center latitude ${payload.lonlat[1]} and longitude ${payload.lonlat[0]}`);
+        });
+
+        // listen to ANY/ALL layer status at ANY time (generic event catcher)
+        mapViewer.layer.onLayerStatusChanged((sender, payload) => {
+          //mapViewer.notifications.addNotificationSuccess(`${payload.layer.layerPath} (generic event) status changed to ${payload.layer.layerStatus}`);
+          console.log(`LayerApi: ${payload.config.layerPath} (generic event ${++CNT_GENERIC_STATUS_CHANGE}) status changed to ${payload.status}`);
         });
 
         // listen to layer added event
-        mapViewer.layer.onLayerAdded((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(payload.layer.geoviewLayerId + ' added');
+        mapViewer.layer.onLayerConfigAdded((sender, payload) => {
+          mapViewer.notifications.addNotificationSuccess('LayerApi: ' + payload.layer.geoviewLayerId + ' added');
+        });
+
+        // listen to layer removed event
+        mapViewer.layer.onLayerConfigRemoved((sender, payload) => {
+          mapViewer.notifications.addNotificationSuccess('LayerApi: ' + payload.layerPath + ' removed');
+        });
+
+        // listen to layer error events
+        mapViewer.layer.onLayerConfigError((sender, payload) => {
+          mapViewer.notifications.addNotificationError('LayerApi: Error ' + payload.error);
+        });
+
+        // listen to layer created event
+        mapViewer.layer.onLayerCreated((sender, payload) => {
+          mapViewer.notifications.addNotificationSuccess('LayerApi: ' + payload.layer.getLayerPath() + ' created');
+
+          // If the Airborne layer, attach even more events
+          if (payload.layer.getLayerPath() === LYR_PATH_AIRBORNE) {
+            // Register custom events on the layer
+            payload.layer.onLayerFirstLoaded((sender, payload) => {
+              mapViewer.notifications.addNotificationSuccess('Layer: Airborne has finished loading for first time');
+            });
+
+            // listen to individual layer loaded event
+            payload.layer.onLayerLoaded((sender, payload) => {
+              mapViewer.notifications.addNotificationSuccess('Layer: Airborne has finished loading for its rendering');
+            });
+
+            // listen to individual layer loaded event
+            payload.layer.onLayerError((sender, payload) => {
+              mapViewer.notifications.addNotificationSuccess('Layer: Airborne has fallen in error while rendering. Error ' + payload.error);
+            });
+          }
         });
 
         // listen to layer loaded events
         mapViewer.layer.onLayerFirstLoaded((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(payload.layerPath + ' first loaded');
+          mapViewer.notifications.addNotificationSuccess('LayerApi: ' + payload.layer.getLayerPath() + ' first loaded');
         });
 
         // listen to layer loaded events
         mapViewer.layer.onLayerLoading((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(payload.layerPath + ' loading...');
+          mapViewer.notifications.addNotificationSuccess('LayerApi: ' + payload.layer.getLayerPath() + ' loading...');
         });
 
         // listen to layer loaded events
         mapViewer.layer.onLayerLoaded((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(payload.layerPath + ' loaded');
-        });
-
-        // listen to layer loaded events
-        mapViewer.layer.onLayerAllLoaded((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess('All layers loaded');
+          mapViewer.notifications.addNotificationSuccess('LayerApi: ' + payload.layer.getLayerPath() + ' loaded');
         });
 
         // listen to layer error events
         mapViewer.layer.onLayerError((sender, payload) => {
-          // NOTE: The event added layer will be trigger first as the layer, even in error, has been added to ui
-          mapViewer.notifications.addNotificationError('Repeat: ' + payload.error);
+          mapViewer.notifications.addNotificationError('LayerApi: Error ' + payload.error);
         });
 
-        // listen to layer removed event
-        mapViewer.layer.onLayerRemoved((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(payload.layerPath + ' removed');
-        });
-
-        // listen to ANY/ALL layer status at ANY time (generic event catcher)
-        mapViewer.layer.legendsLayerSet.onLayerStatusUpdated((sender, payload) => {
-          //mapViewer.notifications.addNotificationSuccess(`${payload.layer.layerPath} (generic event) status changed to ${payload.layer.layerStatus}`);
-          console.log(`${payload.layer.layerPath} (generic event ${++CNT_GENERIC_STATUS_CHANGE}) status changed to ${payload.layer.layerStatus}`);
+        // listen to layer loaded events
+        mapViewer.layer.onLayerAllLoaded((sender, payload) => {
+          mapViewer.notifications.addNotificationSuccess('LayerApi: All layers loaded/error');
         });
 
         // listen to layer item visibility changed event (any layers)
         mapViewer.layer.onLayerVisibilityToggled((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(`layer ${payload.layerPath} visibility set to ${payload.visibility} - global`);
+          mapViewer.notifications.addNotificationSuccess('LayerApi: ' + `layer ${payload.layerPath} visibility set to ${payload.visibility} - global`);
         });
 
         // listen to layer item visibility changed event (any layers)
         mapViewer.layer.onLayerItemVisibilityToggled((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(`${payload.itemName} on layer ${payload.layerPath} visibility set to ${payload.visibility} - global`);
+          mapViewer.notifications.addNotificationSuccess('LayerApi: ' + `${payload.itemName} on layer ${payload.layerPath} visibility set to ${payload.visibility} - global`);
+        });
+
+        // Register a handler when all layers are loaded, once, upon first load
+        mapViewer.onMapLayersLoaded(() => {
+          // !!
+          // GV This callback is executed when ALL layers are loaded.
+          // !!
+
+          // You can also attach to geoview layer events here, though be mindful that the layer has been created for a while already and
+          // you might have missed some events happening between the layer creation itself and when all layers are indeed loaded here.
+          // To be sure to catch all events, register a hook on mapViewer.layer.onLayerCreated like the example above in this template page.
+
+          // listen to layer visibility changed event (individual geoview layer)
+          mapViewer.layer.getGeoviewLayer(LYR_PATH_UNIQUE).onVisibleChanged((sender, payload) => {
+            mapViewer.notifications.addNotificationSuccess(`Layer: ${LYR_PATH_UNIQUE} visibility set to ${payload.visible} - individual`);
+          });
+
+          // listen to layer opacity changed event
+          mapViewer.layer.getGeoviewLayer(LYR_PATH_UNIQUE).onLayerOpacityChanged((sender, payload) => {
+            mapViewer.notifications.addNotificationSuccess(`Layer: ${payload.layerPath} opacity changed to ${payload.opacity}`);
+          });
+
+          // listen to layer filter applied event
+          mapViewer.layer.getGeoviewLayer(LYR_PATH_UNIQUE).onLayerFilterApplied((sender, payload) => {
+            mapViewer.notifications.addNotificationSuccess(`Layer: Filter ${payload.filter} applied to ${payload.layerPath}`);
+          });
+
+          // listen to layer visibility changed event (individual geoview layer)
+          mapViewer.layer.getGeoviewLayer(LYR_PATH_GEOCORE).onVisibleChanged((sender, payload) => {
+            mapViewer.notifications.addNotificationSuccess(`Layer: layer ${payload.layerPath} visibility set to ${payload.visible} - individual`);
+          });
+
+          // Add more registrations of listeners when the layers have been loaded here...
         });
 
         // Add more registrations of listeners when the map has been initialized here...
@@ -324,63 +384,15 @@
         // GV It's possible some layer status have already progressed in time on the particular layer we're registering a status listener at this stage.
         // Check the layer status of the particular layer before registering the hook - to really know at which status the layer is.
         // GV If you really want to make sure to track ALL status changes for ANY particular layer, you can use a hook such as:
-        // `cgpv.api.getMapViewer(mapId).layer.legendsLayerSet.onLayerStatusUpdated()`. See example in cgpv.onMapInit handler above.
+        // `cgpv.api.getMapViewer(mapId).layer.onLayerStatusChanged()`. See example in cgpv.onMapInit handler above.
 
-        mapViewer.layer.getLayerEntryConfig(LYR_PATH_UNIQUE)?.onLayerStatusChanged((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(`${LYR_PATH_UNIQUE} (specific event) status changed to ${payload.layerStatus}`);
-          console.log(`${LYR_PATH_UNIQUE} (specific event ${++CNT_SPECIFIC_STATUS_CHANGE}) status changed to ${payload.layerStatus}`);
-        });
-
-        // listen to individual layer loaded event
-        // TODO: The gv layer does not exist at the time we attach the event. To make this work, we would
-        // TO.DOCONT: need to implement a when-this-then internal approach.
-        mapViewer.layer.getGeoviewLayer(LYR_PATH_NON_METAL)?.onLayerFirstLoaded((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess('Nonmetal mines has finished loading for first time');
-          console.log(sender.getOLLayer().getSource().getFeatures());
+        mapViewer.layer.getLayerEntryConfig(LYR_PATH_AIRBORNE).onLayerStatusChanged((sender, payload) => {
+          mapViewer.notifications.addNotificationSuccess('LayerConfig: ' + `${LYR_PATH_AIRBORNE} (specific event) status changed to ${payload.layerStatus}`);
+          console.log(`${LYR_PATH_AIRBORNE} (specific event ${++CNT_SPECIFIC_STATUS_CHANGE}) status changed to ${payload.layerStatus}`);
         });
 
         // Add more registrations of listeners when the map is ready / layers registered here...
 
-      });
-
-      // Register a handler when ALL layers have been processed
-      cgpv.onLayersProcessed((mapViewer) => {
-        // !!
-        // GV This callback is executed when ALL layers have at least been processed.
-        // NOTE: some layers can be further along in their individual status at the time this event is triggered(!).
-        // !!
-
-        // Add more registrations of listeners when all layers have been processed here...
-
-      });
-
-      // Register a handler when all layers are loaded
-      cgpv.onLayersLoaded((mapViewer) => {
-        // !!
-        // GV This callback is executed when ALL layers are loaded.
-        // !!
-
-        // listen to layer visibility changed event (individual geoview layer)
-        mapViewer.layer.getGeoviewLayer(LYR_PATH_UNIQUE)?.onVisibleChanged((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(`${LYR_PATH_UNIQUE} visibility set to ${payload.visible} - individual`);
-        });
-
-        // listen to layer visibility changed event (individual geoview layer)
-        mapViewer.layer.getGeoviewLayer(LYR_PATH_GEOCORE)?.onVisibleChanged((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(`layer ${payload.layerPath} visibility set to ${payload.visible} - individual`);
-        });
-
-        // listen to layer opacity changed event
-        mapViewer.layer.getGeoviewLayer(LYR_PATH_UNIQUE)?.onLayerOpacityChanged((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(`${payload.layerPath} opacity changed to ${payload.opacity}`);
-        });
-
-        // listen to layer filter applied event
-        mapViewer.layer.getGeoviewLayer(LYR_PATH_UNIQUE)?.onLayerFilterApplied((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess(`Filter ${payload.filter} applied to ${payload.layerPath}`);
-        });
-
-        // Add more registrations of listeners when the layers have been loaded here...
       });
 
       // Initialize cgpv
@@ -420,8 +432,8 @@
 
       // add an event listener when a button is clicked
       addLayerButton.addEventListener('click', async () => {
-        const wmsLayerAlreadyExists = cgpv.api.getMapViewer('map1').layer.getLayerEntryConfigIds().includes('wmsLYR1-msi/msi-94-or-more');
-        if (!wmsLayerAlreadyExists) cgpv.api.getMapViewer('map1').layer.addGeoviewLayer(config);
+        const wmsLayerAlreadyExists = cgpv.api.getMapViewer(mapId).layer.getLayerEntryConfigIds().includes('wmsLYR1-msi/msi-94-or-more');
+        if (!wmsLayerAlreadyExists) cgpv.api.getMapViewer(mapId).layer.addGeoviewLayer(config);
         else console.log('WMS layer already exists');
       });
 
@@ -431,8 +443,8 @@
 
       // add an event listener when a button is clicked
       removeLayerButton.addEventListener('click', async () => {
-        const geojsonLayerAlreadyExists = cgpv.api.getMapViewer('map1').layer.getLayerEntryConfigIds().includes('geojsonLYR1/base-group');
-        if (geojsonLayerAlreadyExists) cgpv.api.getMapViewer('map1').layer.removeLayerUsingPath('geojsonLYR1/base-group');
+        const geojsonLayerAlreadyExists = cgpv.api.getMapViewer(mapId).layer.getLayerEntryConfigIds().includes('geojsonLYR1/base-group');
+        if (geojsonLayerAlreadyExists) cgpv.api.getMapViewer(mapId).layer.removeLayerUsingPath('geojsonLYR1/base-group');
         else console.log('GeoJSON layer does not exist');
       });
 
@@ -442,7 +454,7 @@
 
       // add an event listener when a button is clicked
       removeAllLayersButton.addEventListener('click', async () => {
-        cgpv.api.getMapViewer('map1').layer.removeAllGeoviewLayers();
+        cgpv.api.getMapViewer(mapId).layer.removeAllGeoviewLayers();
       });
 
       // Toggle Visibility Button===================================================================================================
@@ -451,7 +463,7 @@
 
       // add an event listener when a button is clicked
       toggleVisibilityButton.addEventListener('click', async () => {
-        cgpv.api.getMapViewer('map1').layer.setOrToggleLayerVisibility(LYR_PATH_FEATURE);
+        cgpv.api.getMapViewer(mapId).layer.setOrToggleLayerVisibility(LYR_PATH_FEATURE);
       });
 
       // Set All Visible Button=====================================================================================================
@@ -460,7 +472,7 @@
 
       // add an event listener when a button is clicked
       setAllVisibleButton.addEventListener('click', async () => {
-        cgpv.api.getMapViewer('map1').layer.setAllLayersVisibility(true);
+        cgpv.api.getMapViewer(mapId).layer.setAllLayersVisibility(true);
       });
 
       // Set All Not Visible Button=================================================================================================
@@ -469,7 +481,7 @@
 
       // add an event listener when a button is clicked
       setAllNotVisibleButton.addEventListener('click', async () => {
-        cgpv.api.getMapViewer('map1').layer.setAllLayersVisibility(false);
+        cgpv.api.getMapViewer(mapId).layer.setAllLayersVisibility(false);
       });
 
       // Rename Layer Button========================================================================================================
@@ -478,7 +490,7 @@
 
       // add an event listener when a button is clicked
       renameLayerButton.addEventListener('click', async () => {
-        cgpv.api.getMapViewer('map1').layer.setLayerName(LYR_PATH_UNIQUE, 'Water Quantity')
+        cgpv.api.getMapViewer(mapId).layer.setLayerName(LYR_PATH_UNIQUE, 'Water Quantity')
       });
 
       // Place Marker Button========================================================================================================
@@ -487,7 +499,7 @@
 
       // add an event listener when a button is clicked
       placeMarkerButton.addEventListener('click', async () => {
-        cgpv.api.getMapViewer('map1').clickMarkerIconShow({lnglat: [-90, 60]});
+        cgpv.api.getMapViewer(mapId).clickMarkerIconShow({lonlat: [-90, 60]});
       });
 
       // Zoom to Extent Button========================================================================================================
@@ -496,7 +508,7 @@
 
       // add an event listener when a button is clicked
       zoomExtentButton.addEventListener('click', async () => {
-        cgpv.api.getMapViewer('map1').zoomToLngLatExtentOrCoordinate([-87.77486341686723, 51.62285357468582, -84.57727128084842, 53.833354975551075]);
+        cgpv.api.getMapViewer(mapId).zoomToLonLatExtentOrCoordinate([-87.77486341686723, 51.62285357468582, -84.57727128084842, 53.833354975551075]);
       });
 
       // Zoom to Coordinate Button========================================================================================================
@@ -505,7 +517,7 @@
 
       // add an event listener when a button is clicked
       zoomCoordinateButton.addEventListener('click', async () => {
-        cgpv.api.getMapViewer('map1').zoomToLngLatExtentOrCoordinate([-90, 60]);
+        cgpv.api.getMapViewer(mapId).zoomToLonLatExtentOrCoordinate([-90, 60]);
       });
 
       // Extent to Polygon Button========================================================================================================
@@ -534,7 +546,7 @@
 
       // add an event listener when a button is clicked
       redefineAliasFieldsButton.addEventListener('click', async () => {
-        cgpv.api.getMapViewer('map1').layer.redefineFeatureFields('geojsonLYR1/base-group/polygons.json', 'Location Province,Date Created,Images', 'alias')
+        cgpv.api.getMapViewer(mapId).layer.redefineFeatureFields('geojsonLYR1/base-group/polygons.json', 'Location Province,Date Created,Images', 'alias')
       });
 
       // Open details Button========================================================================================================
@@ -543,7 +555,7 @@
 
       // add an event listener when a button is clicked
       openDetailsButton.addEventListener('click', async () => {
-        cgpv.api.getMapViewer('map1').footerBarApi.selectTab('details')
+        cgpv.api.getMapViewer(mapId).footerBarApi.selectTab('details')
       });
 
       // Open geolocator Button========================================================================================================
@@ -552,7 +564,7 @@
 
       // add an event listener when a button is clicked
       openGeolocatorButton.addEventListener('click', async () => {
-        cgpv.api.getMapViewer('map1').appBarApi.selectAppBarTab('AppbarPanelButtonGeolocator', 'geolocator')
+        cgpv.api.getMapViewer(mapId).appBarApi.selectAppBarTab('AppbarPanelButtonGeolocator', 'geolocator')
       });
 
       // Disable hover Button========================================================================================================
@@ -561,7 +573,7 @@
 
       // add an event listener when a button is clicked
       disableHoverButton.addEventListener('click', async () => {
-        cgpv.api.getMapViewer('map1').layer.hoverFeatureInfoLayerSet.disableHoverListener(LYR_PATH_FEATURE)
+        cgpv.api.getMapViewer(mapId).layer.hoverFeatureInfoLayerSet.disableHoverListener(LYR_PATH_FEATURE)
       });
 
       // Enable hover Button========================================================================================================
@@ -570,7 +582,7 @@
 
       // add an event listener when a button is clicked
       enableHoverButton.addEventListener('click', async () => {
-        cgpv.api.getMapViewer('map1').layer.hoverFeatureInfoLayerSet.enableHoverListener(LYR_PATH_FEATURE)
+        cgpv.api.getMapViewer(mapId).layer.hoverFeatureInfoLayerSet.enableHoverListener(LYR_PATH_FEATURE)
       });
 
       // Disable feature info Button=================================================================================================
@@ -579,7 +591,7 @@
 
       // add an event listener when a button is clicked
       disableFeatureInfoButton.addEventListener('click', async () => {
-        cgpv.api.getMapViewer('map1').layer.featureInfoLayerSet.disableClickListener(LYR_PATH_FEATURE)
+        cgpv.api.getMapViewer(mapId).layer.featureInfoLayerSet.disableClickListener(LYR_PATH_FEATURE)
       });
 
       // Enable feature info Button==================================================================================================
@@ -588,7 +600,7 @@
 
       // add an event listener when a button is clicked
       enableFeatureInfoButton.addEventListener('click', async () => {
-        cgpv.api.getMapViewer('map1').layer.featureInfoLayerSet.enableClickListener(LYR_PATH_FEATURE)
+        cgpv.api.getMapViewer(mapId).layer.featureInfoLayerSet.enableClickListener(LYR_PATH_FEATURE)
       });
 
       // Enable show collapsed state Button==========================================================================================
@@ -597,7 +609,7 @@
 
       // add an event listener when a button is clicked
       showCollapsedStateButton.addEventListener('click', async () => {
-        console.log(cgpv.api.getMapViewer('map1').stateApi.getLegendCollapsedState(LYR_PATH_UNIQUE))
+        console.log(cgpv.api.getMapViewer(mapId).stateApi.getLegendCollapsedState(LYR_PATH_UNIQUE))
       });
 
       // Enable toggle collapse state Button==========================================================================================
@@ -606,7 +618,7 @@
 
       // add an event listener when a button is clicked
       toggleCollapseButton.addEventListener('click', async () => {
-        cgpv.api.getMapViewer('map1').stateApi.setLegendCollapsedState(LYR_PATH_UNIQUE)
+        cgpv.api.getMapViewer(mapId).stateApi.setLegendCollapsedState(LYR_PATH_UNIQUE)
       });
 
       // Enable show layer info Button================================================================================================
@@ -615,7 +627,7 @@
 
       // add an event listener when a button is clicked
       showLayerInfoButton.addEventListener('click', async () => {
-        console.log(cgpv.api.getMapViewer('map1').getMapLayerOrderInfo())
+        console.log(cgpv.api.getMapViewer(mapId).getMapLayerOrderInfo())
       });
 
       // Enable language en Button================================================================================================
@@ -624,7 +636,7 @@
 
       // add an event listener when a button is clicked
       changeLanguageEnglishButton.addEventListener('click', async () => {
-        cgpv.api.getMapViewer('map1').setLanguage('en');
+        cgpv.api.getMapViewer(mapId).setLanguage('en');
       });
 
       // Enable language fr Button================================================================================================
@@ -633,7 +645,7 @@
 
       // add an event listener when a button is clicked
       changeLanguageFrenchButton.addEventListener('click', async () => {
-        cgpv.api.getMapViewer('map1').setLanguage('fr');
+        cgpv.api.getMapViewer(mapId).setLanguage('fr');
       });
 
       // Change basemap Button================================================================================================
@@ -643,9 +655,9 @@
       // add an event listener when a button is clicked
       changeBasemapButton.addEventListener('click', async () => {
         // Create basemap
-        const basemap = await cgpv.api.getMapViewer('map1').basemap.createCoreBasemap(basemapOptions = {basemapId: 'simple'});
+        const basemap = await cgpv.api.getMapViewer(mapId).basemap.createCoreBasemap(basemapOptions = {basemapId: 'simple'});
         // Set on map
-        cgpv.api.getMapViewer('map1').basemap.setBasemap(basemap);
+        cgpv.api.getMapViewer(mapId).basemap.setBasemap(basemap);
       });
 
       // Set layer Button================================================================================================
@@ -654,7 +666,7 @@
 
       // add an event listener when a button is clicked
       setLayerButton.addEventListener('click', async () => {
-        cgpv.api.getMapViewer('map1').stateApi.setSelectedLayersTabLayer(LYR_PATH_NON_METAL);
+        cgpv.api.getMapViewer(mapId).stateApi.setSelectedLayersTabLayer(LYR_PATH_NON_METAL);
       });
 
       // Swiper add Button================================================================================================
@@ -663,7 +675,7 @@
 
       // add an event listener when a button is clicked
       swiperAddButton.addEventListener('click', async () => {
-        cgpv.api.getMapViewer('map1').plugins['swiper'].activateForLayer(LYR_PATH_NON_METAL);
+        cgpv.api.getMapViewer(mapId).plugins['swiper'].activateForLayer(LYR_PATH_NON_METAL);
       });
 
       // Swiper remove Button================================================================================================
@@ -672,7 +684,7 @@
 
       // add an event listener when a button is clicked
       swiperRemoveButton.addEventListener('click', async () => {
-        cgpv.api.getMapViewer('map1').plugins['swiper'].deActivateForLayer(LYR_PATH_NON_METAL);
+        cgpv.api.getMapViewer(mapId).plugins['swiper'].deActivateForLayer(LYR_PATH_NON_METAL);
       });
 
       // Calculate distance Button================================================================================================
@@ -702,7 +714,7 @@
 
       // add an event listener when a button is clicked
       getConfigButton.addEventListener('click', () => {
-        console.log(cgpv.api.getMapViewer('map1').createMapConfigFromMapState());
+        console.log(cgpv.api.getMapViewer(mapId).createMapConfigFromMapState());
       });
 
       // Reload-map Button================================================================================================
@@ -711,7 +723,7 @@
 
       // add an event listener when a button is clicked
       reloadMapButton.addEventListener('click', () => {
-        cgpv.api.getMapViewer('map1').reloadWithCurrentState();
+        cgpv.api.reloadWithCurrentState(mapId);
       });
 
       // Add-marker Button================================================================================================
@@ -739,7 +751,7 @@
 
       // add an event listener when a button is clicked
       addMarkerButton.addEventListener('click', () => {
-        cgpv.api.getMapViewer('map1').layer.featureHighlight.pointMarkers.addPointMarkers('group1', markers);
+        cgpv.api.getMapViewer(mapId).layer.featureHighlight.pointMarkers.addPointMarkers('group1', markers);
       });
 
       // Remove-marker Button================================================================================================
@@ -748,7 +760,7 @@
 
       // add an event listener when a button is clicked
       removeMarkerButton.addEventListener('click', () => {
-        cgpv.api.getMapViewer('map1').layer.featureHighlight.pointMarkers.removePointMarkersOrGroup('group1');
+        cgpv.api.getMapViewer(mapId).layer.featureHighlight.pointMarkers.removePointMarkersOrGroup('group1');
       });
 
       // Zoom-to-markers Button================================================================================================
@@ -757,7 +769,7 @@
 
       // add an event listener when a button is clicked
       zoomToMarkersButton.addEventListener('click', () => {
-        cgpv.api.getMapViewer('map1').layer.featureHighlight.pointMarkers.zoomToPointMarkers('group1', ['1', '3']);
+        cgpv.api.getMapViewer(mapId).layer.featureHighlight.pointMarkers.zoomToPointMarkers('group1', ['1', '3']);
       });
 
       // Zoom-to-marker-group Button================================================================================================
@@ -766,7 +778,7 @@
 
       // add an event listener when a button is clicked
       zoomToMarkerGroupButton.addEventListener('click', () => {
-        cgpv.api.getMapViewer('map1').layer.featureHighlight.pointMarkers.zoomToPointMarkerGroup('group1');
+        cgpv.api.getMapViewer(mapId).layer.featureHighlight.pointMarkers.zoomToPointMarkerGroup('group1');
       });
 
       // Create-footer-tab Button================================================================================================
@@ -775,7 +787,7 @@
 
       // add an event listener when a button is clicked
       createFooterTabButton.addEventListener('click', () => {
-        cgpv.api.getMapViewer('map1').footerBarApi.createTab({id: 'test', label: 'My Custom Tab', content: '<br><div><ul><li>How to export map coordinate data to: GeoJSON, or CSV.</li></ul></div>'});
+        cgpv.api.getMapViewer(mapId).footerBarApi.createTab({id: 'test', label: 'My Custom Tab', content: '<br><div><ul><li>How to export map coordinate data to: GeoJSON, or CSV.</li></ul></div>'});
       });
 
       // create snippets

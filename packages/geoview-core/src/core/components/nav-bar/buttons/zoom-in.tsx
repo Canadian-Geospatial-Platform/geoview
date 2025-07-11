@@ -25,7 +25,7 @@ export default function ZoomIn(): JSX.Element {
   return (
     <IconButton
       id="zoomIn"
-      tooltip={t('mapnav.zoomIn') as string}
+      tooltip={t('mapnav.zoomIn')!}
       tooltipPlacement="left"
       onClick={() => setZoom(zoom + 0.5)}
       sx={sxClasses.navButton}

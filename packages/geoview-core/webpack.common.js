@@ -54,6 +54,7 @@ const multipleHtmlPluginsOutliers = glob.sync('./public/templates/outliers/*.htm
   });
 });
 
+// TODO: I think we can remove config.resolve.alias.@config line
 const config = {
   entry: {
     'cgpv-main': './src/app.tsx',
@@ -82,6 +83,11 @@ const config = {
       dependOn: 'cgpv-main',
       filename: 'corePackages/[name].js',
     },
+    'geoview-drawer': {
+      import: '../geoview-drawer/src/index.tsx',
+      dependOn: 'cgpv-main',
+      filename: 'corePackages/[name].js',
+    },
   },
   output: {
     globalObject: 'self',
@@ -101,6 +107,7 @@ const config = {
     },
     alias: {
       '@': path.resolve(__dirname, 'src'),
+      'geoview-core': path.resolve(__dirname, 'src'),
       '@public': path.resolve(__dirname, 'public'),
       '@config': path.resolve(__dirname, 'src/api/config'),
     },
@@ -189,6 +196,7 @@ const config = {
         { from: './public/markers', to: 'markers' },
         { from: './public/datasets/geojson', to: 'datasets/geojson' },
         { from: './public/datasets/csv-files', to: 'datasets/csv-files' },
+        { from: './public/datasets/shapefiles', to: 'datasets/shapefiles' },
         { from: './public/datasets/geopackages', to: 'datasets/geopackages' },
         { from: './public/plugins', to: 'plugins', noErrorOnMissing: true },
         { from: './public/favicon.ico' },

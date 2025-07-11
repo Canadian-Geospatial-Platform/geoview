@@ -51,7 +51,7 @@ export class GVWMS extends AbstractGVRaster {
     AbstractGVRaster.initOptionsWithInitialSettings(imageLayerOptions, layerConfig);
 
     // Create and set the OpenLayer layer
-    this.olLayer = new ImageLayer(imageLayerOptions);
+    this.setOLLayer(new ImageLayer(imageLayerOptions));
   }
 
   /**
@@ -98,21 +98,21 @@ export class GVWMS extends AbstractGVRaster {
     // Transform coordinate from map projection to lntlat
     const projCoordinate = Projection.transformToLonLat(location, map.getView().getProjection());
 
-    // Redirect to getFeatureInfoAtLongLat
-    return this.getFeatureInfoAtLongLat(map, projCoordinate, queryGeometry, abortController);
+    // Redirect to getFeatureInfoAtLonLat
+    return this.getFeatureInfoAtLonLat(map, projCoordinate, queryGeometry, abortController);
   }
 
   /**
    * Overrides the return of feature information at the provided long lat coordinate.
-   * @param {OLMap} map - The Map where to get Feature Info At LongLat from.
-   * @param {Coordinate} lnglat - The coordinate that will be used by the query.
+   * @param {OLMap} map - The Map where to get Feature Info At LonLat from.
+   * @param {Coordinate} lonlat - The coordinate that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} abortController - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
-  protected override async getFeatureInfoAtLongLat(
+  protected override async getFeatureInfoAtLonLat(
     map: OLMap,
-    lnglat: Coordinate,
+    lonlat: Coordinate,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     queryGeometry: boolean = true,
     abortController: AbortController | undefined = undefined
@@ -123,26 +123,26 @@ export class GVWMS extends AbstractGVRaster {
     // Get the layer config and source
     const layerConfig = this.getLayerConfig();
 
-    // TODO: Check - Why are we checking if bounds are properly set in this getFeatureInfoAtLongLat override? Seems late or out of order?
+    // TODO: Check - Why are we checking if bounds are properly set in this getFeatureInfoAtLonLat override? Seems late or out of order?
     // Check if bounds are properly set
-    if (!layerConfig.initialSettings!.bounds) {
+    if (!layerConfig.initialSettings.bounds) {
       const newBounds = this.getBounds(map.getView().getProjection(), MapViewer.DEFAULT_STOPS);
       if (newBounds)
-        layerConfig.initialSettings!.bounds = Projection.transformExtentFromProj(
+        layerConfig.initialSettings.bounds = Projection.transformExtentFromProj(
           newBounds,
           map.getView().getProjection(),
-          Projection.getProjectionLngLat()
+          Projection.getProjectionLonLat()
         );
       else return [];
     }
 
-    // Project the lnglat to map projection
-    const clickCoordinate = Projection.transformFromLonLat(lnglat, map.getView().getProjection());
+    // Project the lonlat to map projection
+    const clickCoordinate = Projection.transformFromLonLat(lonlat, map.getView().getProjection());
     if (
-      lnglat[0] < layerConfig.initialSettings!.bounds![0] ||
-      layerConfig.initialSettings!.bounds![2] < lnglat[0] ||
-      lnglat[1] < layerConfig.initialSettings!.bounds![1] ||
-      layerConfig.initialSettings!.bounds![3] < lnglat[1]
+      lonlat[0] < layerConfig.initialSettings.bounds[0] ||
+      layerConfig.initialSettings.bounds[2] < lonlat[0] ||
+      lonlat[1] < layerConfig.initialSettings.bounds[1] ||
+      layerConfig.initialSettings.bounds[3] < lonlat[1]
     )
       return [];
 
@@ -226,7 +226,7 @@ export class GVWMS extends AbstractGVRaster {
     try {
       // Get the layer config in a loaded phase
       const layerConfig = this.getLayerConfig();
-      const legendImage = await GVWMS.#getLegendImage(layerConfig!);
+      const legendImage = await GVWMS.#getLegendImage(layerConfig);
       const styleLegends: TypeWmsLegendStyle[] = [];
 
       if (legendImage) {
@@ -275,7 +275,7 @@ export class GVWMS extends AbstractGVRaster {
     // If layer bounds were found, project
     if (layerConfigBounds) {
       // Transform extent to given projection
-      layerConfigBounds = Projection.transformExtentFromProj(layerConfigBounds, Projection.getProjectionLngLat(), projection, stops);
+      layerConfigBounds = Projection.transformExtentFromProj(layerConfigBounds, Projection.getProjectionLonLat(), projection, stops);
     }
 
     // Get the layer bounds from metadata, favoring a bounds in the same projection as the map
@@ -419,7 +419,7 @@ export class GVWMS extends AbstractGVRaster {
     // If found any
     if (boundingBoxes) {
       // Find the one with the right projection
-      for (let i = 0; i < (boundingBoxes.length as number); i++) {
+      for (let i = 0; i < boundingBoxes.length; i++) {
         // Read the extent info from the GetCap
         const { crs, extent } = boundingBoxes[i] as unknown as { crs: string; extent: Extent };
 
@@ -455,13 +455,13 @@ export class GVWMS extends AbstractGVRaster {
     if (Array.isArray(layerCapabilities?.Style)) {
       // check if WMS as a default legend style
       let isDefaultStyle = false;
-      layerCapabilities!.Style.forEach((style) => {
+      layerCapabilities.Style.forEach((style) => {
         if (style.Name === 'default') isDefaultStyle = true;
       });
 
       let legendStyle;
       if (chosenStyle) {
-        [legendStyle] = layerCapabilities!.Style.filter((style) => {
+        [legendStyle] = layerCapabilities.Style.filter((style) => {
           return style.Name === chosenStyle;
         });
       } else {
@@ -475,7 +475,7 @@ export class GVWMS extends AbstractGVRaster {
       }
 
       if (Array.isArray(legendStyle?.LegendURL)) {
-        const legendUrl = legendStyle!.LegendURL.find((urlEntry) => {
+        const legendUrl = legendStyle.LegendURL.find((urlEntry) => {
           if (urlEntry.Format === 'image/png') return true;
           return false;
         });

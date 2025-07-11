@@ -1,4 +1,4 @@
-import { TypeMapCorePackages, TypeValidAppBarCoreProps } from '@/api/config/types/map-schema-types';
+import { TypeMapCorePackages, TypeValidAppBarCoreProps, TypeValidFooterBarTabsCoreProps } from '@/api/config/types/map-schema-types';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { IUIState, ActiveAppBarTabType } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
@@ -25,6 +25,10 @@ export class UIEventProcessor extends AbstractEventProcessor {
   // #region
   static getActiveFooterBarTab(mapId: string): string {
     return this.getUIStateProtected(mapId).activeFooterBarTabId;
+  }
+
+  static getFooterBarComponents(mapId: string): TypeValidFooterBarTabsCoreProps[] {
+    return this.getUIStateProtected(mapId).footerBarComponents;
   }
 
   static getAppBarComponents(mapId: string): TypeValidAppBarCoreProps[] {

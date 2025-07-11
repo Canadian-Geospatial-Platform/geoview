@@ -224,8 +224,8 @@ export class MapFeatureConfig {
     // TODO: add validation for extent and layerIds
     if (this.map.viewSettings.initialView!.zoomAndCenter) {
       this.#validateCenter();
-      const zoom = this.map.viewSettings.initialView!.zoomAndCenter![0];
-      this.map.viewSettings.initialView!.zoomAndCenter![0] =
+      const zoom = this.map.viewSettings.initialView!.zoomAndCenter[0];
+      this.map.viewSettings.initialView!.zoomAndCenter[0] =
         !Number.isNaN(zoom) && zoom >= 0 && zoom <= 28
           ? zoom
           : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.initialView!.zoomAndCenter![0];
@@ -308,7 +308,7 @@ export class MapFeatureConfig {
     const maxX = !Number.isNaN(extentMaxX) && extentMaxX > center[0] ? extentMaxX : CV_VALID_MAP_CENTER[projection].long[1];
     const maxY = !Number.isNaN(extentMaxY) && extentMaxY > center[1] ? extentMaxY : CV_VALID_MAP_CENTER[projection].lat[1];
 
-    this.map.viewSettings.maxExtent! = [minX, minY, maxX, maxY] as Extent;
+    this.map.viewSettings.maxExtent = [minX, minY, maxX, maxY] as Extent;
   }
 
   /**

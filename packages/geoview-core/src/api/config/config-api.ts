@@ -1,6 +1,11 @@
 import cloneDeep from 'lodash/cloneDeep';
 
-import { CV_DEFAULT_MAP_FEATURE_CONFIG, CV_CONFIG_GEOCORE_TYPE, CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
+import {
+  CV_DEFAULT_MAP_FEATURE_CONFIG,
+  CV_CONFIG_GEOCORE_TYPE,
+  CV_CONFIG_SHAPEFILE_TYPE,
+  CV_CONST_LAYER_TYPES,
+} from '@/api/config/types/config-constants';
 import { TypeJsonValue, TypeJsonObject, toJsonObject, TypeJsonArray, Cast } from '@/api/config/types/config-types';
 import { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config';
 import { UUIDmapConfigReader } from '@/api/config/uuid-config-reader';
@@ -9,13 +14,14 @@ import {
   EntryConfigBaseClass,
   TypeDisplayLanguage,
   TypeGeoviewLayerType,
+  TypeInitialGeoviewLayerType,
   TypeLayerStyleConfig,
 } from '@/api/config/types/map-schema-types';
 import { MapConfigError } from '@/api/config/types/classes/config-exceptions';
 
 import { generateId, isJsonString, removeCommentsFromJSON } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { logger } from '@/core//utils/logger';
+import { logger } from '@/core/utils/logger';
 import { createStyleUsingEsriRenderer, EsriBaseRenderer } from '@/api/config/esri-renderer-parser';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { OgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
@@ -36,6 +42,7 @@ import { ImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
 import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { formatError } from '@/core/exceptions/core-exceptions';
+import { ShapefileReader } from '@/core/utils/config/reader/shapefile-reader';
 
 /**
  * The API class that create configuration object. It is used to validate and read the service and layer metadata.
@@ -100,6 +107,8 @@ export class ConfigApi {
     if (/WMS/i.test(url)) return CV_CONST_LAYER_TYPES.WMS;
 
     if (/.CSV(?:$|\?)/i.test(url)) return CV_CONST_LAYER_TYPES.CSV;
+
+    if (/.(ZIP|SHP)(?:$|\?)/i.test(url)) return CV_CONFIG_SHAPEFILE_TYPE;
 
     if (upperUrl.includes('COLLECTIONS')) return CV_CONST_LAYER_TYPES.OGC_FEATURE;
 
@@ -179,7 +188,7 @@ export class ConfigApi {
    */
   static #convertStringToJson(stringMapFeatureConfig: string): TypeJsonObject | undefined {
     // Erase comments in the config file.
-    let newStringMapFeatureConfig = removeCommentsFromJSON(stringMapFeatureConfig as string);
+    let newStringMapFeatureConfig = removeCommentsFromJSON(stringMapFeatureConfig);
 
     // If you want to use quotes in your JSON string, write \&quot or escape it using a backslash;
     // First, replace apostrophes not preceded by a backslash with quotes
@@ -219,7 +228,7 @@ export class ConfigApi {
       if (urlParams.c) center = (urlParams.c as string).split(',');
       if (center.length !== 2)
         center = [
-          CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.initialView!.zoomAndCenter![1][0]!.toString(),
+          CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.initialView!.zoomAndCenter![1][0].toString(),
           CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.initialView!.zoomAndCenter![1][1].toString(),
         ];
 
@@ -228,7 +237,7 @@ export class ConfigApi {
       if (urlParams.z) zoom = urlParams.z as string;
 
       jsonConfig.map = {
-        interaction: urlParams.i as TypeJsonObject,
+        interaction: urlParams.i,
         viewSettings: {
           initialView: {
             zoomAndCenter: [parseInt(zoom, 10), [parseInt(center[0], 10), parseInt(center[1], 10)]] as TypeJsonObject,
@@ -275,7 +284,7 @@ export class ConfigApi {
       }
 
       // update the version if provided from the map configuration.
-      jsonConfig.schemaVersionUsed = urlParams.v as TypeJsonObject;
+      jsonConfig.schemaVersionUsed = urlParams.v;
     }
 
     // Trace the detail config read from url
@@ -320,13 +329,9 @@ export class ConfigApi {
     const geocoreServerUrl = geocoreUrl || CV_DEFAULT_MAP_FEATURE_CONFIG.serviceUrls.geocoreUrl;
 
     // Filter all geocore layers and convert the result into an array of unique geoviewLayerId.
-    const geocoreArrayOfKeys = Array.from(
-      new Set(
-        listOfGeoviewLayerConfig
-          .filter((layerConfig) => layerConfig.geoviewLayerType === CV_CONFIG_GEOCORE_TYPE)
-          .map<string>((geocoreLayer) => geocoreLayer.geoviewLayerId as string)
-      )
-    );
+    const geocoreArrayOfKeys = listOfGeoviewLayerConfig
+      .filter((layerConfig) => layerConfig.geoviewLayerType === CV_CONFIG_GEOCORE_TYPE)
+      .map<string>((geocoreLayer) => geocoreLayer.geoviewLayerId as string);
 
     // If the listOfGeoviewLayerConfig contains GeoCore layers, process them.
     if (geocoreArrayOfKeys.length) {
@@ -376,6 +381,53 @@ export class ConfigApi {
   }
 
   /**
+   * Processes listOfGeoviewLayers and converts any shapefile entries to geojson.
+   * @param {TypeJsonArray | TypeJsonObject} listOfGeoviewLayers Layers to process.
+   * @returns {Promise<TypeJsonArray>} The resulting configurations or undefined if there is an error.
+   * @static @private
+   */
+  static async convertShapefileToGeojson(
+    listOfGeoviewLayers: TypeJsonArray | TypeJsonObject
+  ): Promise<TypeJsonArray | TypeJsonObject | undefined> {
+    // convert the JSON object to a JSON array. We want to process a single type.
+    const listOfGeoviewLayerConfig = Array.isArray(listOfGeoviewLayers) ? listOfGeoviewLayers : [listOfGeoviewLayers];
+    const shapefileConfigs = listOfGeoviewLayerConfig.filter(
+      (geoviewLayerConfig) => geoviewLayerConfig.geoviewLayerType === CV_CONFIG_SHAPEFILE_TYPE
+    );
+
+    if (shapefileConfigs) {
+      const convertedShapefileConfigs = await ShapefileReader.getGVConfigsFromShapefiles(shapefileConfigs);
+      let newListOfGeoviewLayerConfig = listOfGeoviewLayerConfig.map((layerConfig) => {
+        // Replace any shapefile entries with their converted version
+        if (layerConfig.geoviewLayerType === CV_CONFIG_SHAPEFILE_TYPE) {
+          const jsonConfigFound = convertedShapefileConfigs.find((convertedConfig) => {
+            return convertedConfig.geoviewLayerId === layerConfig.geoviewLayerId;
+          });
+          if (jsonConfigFound) {
+            return jsonConfigFound;
+          }
+        }
+
+        // Retuen other configs as they appear
+        return layerConfig;
+      }) as TypeJsonArray;
+
+      // Remove any remaining shapefile entries
+      newListOfGeoviewLayerConfig = newListOfGeoviewLayerConfig.filter((layerConfig) => {
+        if (layerConfig.geoviewLayerType === CV_CONFIG_SHAPEFILE_TYPE) {
+          logger.logError(`Unable to convert shapefile layer (Id=${layerConfig.geoviewLayerId}).`);
+          return false;
+        }
+        return true;
+      });
+
+      return newListOfGeoviewLayerConfig;
+    }
+
+    return listOfGeoviewLayers;
+  }
+
+  /**
    * This method validates the configuration of map elements using the json string or json object supplied by the user.
    * The returned value is a configuration object initialized only from the configuration passed as a parameter.
    * Validation of the configuration based on metadata and application of default values is not performed here,
@@ -404,7 +456,7 @@ export class ConfigApi {
 
       // Instanciate the mapFeatureConfig. If an error is detected, a workaround procedure
       // will be executed to try to correct the problem in the best possible way.
-      ConfigApi.lastMapConfigCreated = new MapFeatureConfig(providedMapFeatureConfig!);
+      ConfigApi.lastMapConfigCreated = new MapFeatureConfig(providedMapFeatureConfig);
     } catch (error: unknown) {
       // If we get here, it is because the user provided a string config that cannot be translated to a json object,
       // or the config doesn't have the mandatory map property or the listOfGeoviewLayerConfig is defined but is not
@@ -452,11 +504,16 @@ export class ConfigApi {
         providedMapFeatureConfig.map.listOfGeoviewLayerConfig as TypeJsonArray,
         providedMapFeatureConfig?.serviceUrls?.geocoreUrl as string
       )) as TypeJsonObject;
+      // TODO: Reinstate this once TODO's in app.tsx 102 and 115 are removed
+      // providedMapFeatureConfig.map.listOfGeoviewLayerConfig = (await ConfigApi.convertShapefileToGeojson(
+      //   providedMapFeatureConfig.map.listOfGeoviewLayerConfig
+      // )) as TypeJsonObject;
+
       const errorDetected = inputLength !== providedMapFeatureConfig.map.listOfGeoviewLayerConfig.length;
 
       // Instanciate the mapFeatureConfig. If an error is detected, a workaround procedure
       // will be executed to try to correct the problem in the best possible way.
-      ConfigApi.lastMapConfigCreated = new MapFeatureConfig(providedMapFeatureConfig!);
+      ConfigApi.lastMapConfigCreated = new MapFeatureConfig(providedMapFeatureConfig);
       if (errorDetected) ConfigApi.lastMapConfigCreated.setErrorDetectedFlag();
     } catch (error: unknown) {
       // If we get here, it is because the user provided a string config that cannot be translated to a json object,
@@ -468,6 +525,7 @@ export class ConfigApi {
       defaultMapConfig.setErrorDetectedFlag();
       ConfigApi.lastMapConfigCreated = defaultMapConfig;
     }
+
     return ConfigApi.lastMapConfigCreated;
   }
 
@@ -486,7 +544,7 @@ export class ConfigApi {
   // GV: favor of their GeoView equivalent as soon as possible.
   static async createLayerConfig(
     serviceAccessString: string,
-    layerType: TypeGeoviewLayerType | typeof CV_CONFIG_GEOCORE_TYPE,
+    layerType: TypeInitialGeoviewLayerType,
     listOfLayerId: TypeJsonArray = [],
     language: TypeDisplayLanguage = 'en'
   ): Promise<AbstractGeoviewLayerConfig | undefined> {
@@ -505,10 +563,24 @@ export class ConfigApi {
         logger.logError(`Unable to convert GeoCore layer (Id=${serviceAccessString}).`, error);
         return undefined;
       }
+    } else if (layerType === CV_CONFIG_SHAPEFILE_TYPE) {
+      try {
+        const layerConfig = {
+          geoviewLayerId: generateId(18),
+          geoviewLayerType: 'shapefile',
+          metadataAccessPath: serviceAccessString,
+        } as unknown as TypeJsonObject;
+        [geoviewLayerConfig] = await ShapefileReader.getGVConfigsFromShapefiles([layerConfig]);
+        if (!geoviewLayerConfig) return undefined;
+      } catch (error: unknown) {
+        // Log error
+        logger.logError(`Unable to convert Shapefile layer (Id=${serviceAccessString}).`, error);
+        return undefined;
+      }
     } else {
       // Create a GeoView Json configuration object.
       geoviewLayerConfig = toJsonObject({
-        geoviewLayerId: generateId(),
+        geoviewLayerId: generateId(18),
         geoviewLayerName: language === 'en' ? 'unknown' : 'inconnue',
         geoviewLayerType: layerType,
         metadataAccessPath: serviceAccessString,

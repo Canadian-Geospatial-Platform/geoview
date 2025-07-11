@@ -11,9 +11,12 @@ import { Projection } from '@/geo/utils/projection';
 import { MapViewer } from '@/geo/map/map-viewer';
 import * as GeoUtilities from '@/geo/utils/utilities';
 
-import { initMapDivFromFunctionCall } from '@/app';
-import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { InitDivNotExistError, MapViewerNotFoundError } from '@/core/exceptions/geoview-exceptions';
+import { initMapDivFromFunctionCall, unmountMap } from '@/app';
+import { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import { removeGeoviewStore } from '@/core/stores/stores-managers';
+import { InitDivNotExistError, MapViewerAlreadyExistsError, MapViewerNotFoundError } from '@/core/exceptions/geoview-exceptions';
+import { TypeMapFeaturesInstance } from '@/api/config/types/map-schema-types';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 /**
  * Class used to handle api calls (events, functions etc...)
@@ -33,12 +36,6 @@ export class API {
 
   // utilities object
   utilities;
-
-  // Keep all callback delegates references
-  #onMapViewerReadyHandlers: MapViewerReadyDelegate[] = [];
-
-  // Keep all callback delegates references
-  #onMapAddedToDivHandlers: MapAddedToDivDelegate[] = [];
 
   /**
    * Initiate the event and projection objects
@@ -67,6 +64,15 @@ export class API {
   }
 
   /**
+   * Returns true if a map id is already registered.
+   * @param {string} mapId - The unique identifier of the map to retrieve
+   * @returns {boolean} True if map exist
+   */
+  hasMapViewer(mapId: string): boolean {
+    return this.getMapViewerIds().includes(mapId);
+  }
+
+  /**
    * Gets a map viewer instance by its ID.
    * @param {string} mapId - The unique identifier of the map to retrieve
    * @returns {MapViewer} The map viewer instance if found
@@ -84,6 +90,19 @@ export class API {
   }
 
   /**
+   * Sets a map viewer in maps.
+   * @param {string} mapId - ID of the map
+   * @param {MapViewer} mapViewer - The viewer to be added
+   */
+  setMapViewer(mapId: string, mapViewer: MapViewer): void {
+    // If alredy existing
+    if (this.hasMapViewer(mapId)) throw new MapViewerAlreadyExistsError(mapId);
+
+    // Set it
+    this.#maps[mapId] = mapViewer;
+  }
+
+  /**
    * Asynchronously gets a map viewer instance by its ID.
    * @param {string} mapId - The unique identifier of the map to retrieve
    * @returns {Promise<MapViewer>} The map viewer instance when/if found.
@@ -98,60 +117,119 @@ export class API {
   }
 
   /**
-   * Deletes a map viewer instance by its ID.
+   * Deletes a map viewer instance by its ID and unmounts it from the DOM - for React.
    * @param {string} mapId - The unique identifier of the map to delete
    * @param {boolean} deleteContainer - True if we want to delete div from the page
-   * @returns {Promise<HTMLElement>} The Promise containing the HTML element
+   * @returns {Promise<void>} Promise when the map viewer is deleted
    */
-  async deleteMapViewer(mapId: string, deleteContainer: boolean): Promise<HTMLElement> {
+  async deleteMapViewer(mapId: string, deleteContainer: boolean): Promise<void> {
     if (!this.hasMapViewer(mapId)) {
-      // TODO: Check - Should probably fail instead of returning an empty div? And catch the error higher?
-
-      // We cannot throw an error because the mapdId may not exist and we do not want to crash the viewer.
-      logger.logWarning(`Cannot delete map. Map with ID ${mapId} not found`);
-
-      // Return an empty div
-      return document.createElement('div');
+      logger.logWarning(`MapViewer ${mapId} couldn't be found.`);
+      return;
     }
 
-    // Only delete from #maps after successful removal
-    const element = await this.getMapViewer(mapId).remove(deleteContainer);
+    // Get the div container
+    const divContainer = document.getElementById(mapId) || undefined;
 
-    // Delete the map instance from the maps array, will delete attached plugins
+    // Delete the map
+    await this.getMapViewer(mapId).delete();
+
+    // Delete the map instance from the maps array
     delete this.#maps[mapId];
-    return element;
-  }
 
-  /**
-   * Returns true if a map id is already registered.
-   * @param {string} mapId - The unique identifier of the map to retrieve
-   * @returns {boolean} True if map exist
-   */
-  hasMapViewer(mapId: string): boolean {
-    return mapId in this.#maps;
-  }
+    // Unmount the map
+    unmountMap(mapId, divContainer);
 
-  /**
-   * Sets a map viewer in maps.
-   * @param {string} mapId - ID of the map
-   * @param {MapViewer} mapViewer - The viewer to be added
-   * @param {(mapViewer: MapViewer) => void} onMapViewerInit - Function to run on map init
-   */
-  setMapViewer(mapId: string, mapViewer: MapViewer, onMapViewerInit?: (mapViewer: MapViewer) => void): void {
-    if (this.hasMapViewer(mapId)) logger.logError(`Cannot add map. Map with ID ${mapId} already exists`);
-    else {
-      this.#maps[mapId] = mapViewer;
-
-      // Register a handler (which will only happen once) for when the map viewer will get initialized.
-      // At the time of writing, this happens later, asynchronously, via the components/map/map.tsx when 'MapViewer.initMap()' is called.
-      // That should be fixed eventually, but that refactoring is out of the scope at the time of writing. So, I'm doing like this for now.
-      this.#maps[mapId].onMapInit((viewer) => {
-        // MapViewer has been created and initialized, callback about it
-        onMapViewerInit?.(viewer);
-        // Emit that viewer is ready
-        this.#emitMapViewerReady({ mapId });
-      });
+    // GV Now that we're unmounted, we can remove the store, best practice
+    try {
+      // Delete store and event processor
+      removeGeoviewStore(mapId);
+    } catch (error: unknown) {
+      // Failed to remove the store, eat the exception and continue
+      logger.logError('Failed to remove the store', error);
     }
+
+    // If the div container was found
+    if (divContainer) {
+      // Remove geoview-class if we need to reuse the div
+      divContainer.classList.remove('geoview-map');
+
+      // If we have a data-config-url and a data-config attribute
+      if (divContainer.getAttribute('data-config-url') && divContainer.getAttribute('data-config')) {
+        // Delete the data-config property, because it'll clash with the data-config-url if we try to reload a map in the current div
+        divContainer.removeAttribute('data-config');
+      }
+
+      // If deleteContainer, delete the HTML div
+      if (deleteContainer) divContainer.remove();
+    }
+  }
+
+  /**
+   * Create a new map in a given div id.
+   * GV The div MUST NOT have a geoview-map class or a warning will be shown when initMapDivFromFunctionCall is called.
+   * If is present, the div will be created with a default config
+   * @param {string} divId - Id of the div to create map in (becomes the mapId)
+   * @param {string} mapConfig - Config passed in from the function call (string or url of a config path)
+   * @param {number?} divHeight - Optional, height of the div to inject the map in (mandatory if the map reloads)
+   * @returns {Promise<MapViewer>} A Promise containing the MapViewer which will be created from the configuration.
+   */
+  // This function is called by the template, and since the template use the instance of the object from cgpv.api, this function has to be on the instance, not static. Refactor this?
+  createMapFromConfig(divId: string, mapConfig: string, divHeight?: number): Promise<MapViewer> {
+    // Get the map div
+    const mapDiv = document.getElementById(divId);
+    if (!mapDiv) throw new InitDivNotExistError(divId);
+
+    // If a map was already created for the divId
+    if (this.hasMapViewer(divId)) throw new MapViewerAlreadyExistsError(divId);
+
+    // Get the height
+    if (divHeight) mapDiv.style.height = `${divHeight}px`;
+
+    // Init by function call
+    return initMapDivFromFunctionCall(mapDiv, mapConfig);
+  }
+
+  /**
+   * Reload a map from a config object stored in store, or provided. It first removes then recreates the map.
+   * @param {TypeMapFeaturesConfig | TypeMapFeaturesInstance} mapConfig - Optional map config to use for reload.
+   * @returns {Promise<MapViewer>} A Promise containing the MapViewer which will be created once reloaded.
+   */
+  async reload(mapId: string, mapConfig?: TypeMapFeaturesConfig | TypeMapFeaturesInstance): Promise<MapViewer> {
+    // If no config is provided, get the original from the store
+    const config = mapConfig || MapEventProcessor.getGeoViewMapConfig(mapId);
+
+    // Get the map viewer
+    const mapViewer = this.getMapViewer(mapId);
+
+    // Get map height
+    // GV: This is important because on reload, the mapHeight is set to 0px then reset to a bad value.
+    // GV.CONT: This fix maintain the height on reload for the createMapFromConfig function. On first past the optional
+    // GV.CONT: does not have to be provided because the div exist and map will take its height.
+    const height = mapViewer.map.getSize() !== undefined ? mapViewer.map.getSize()![1] : 800;
+
+    // Delete the map
+    await this.deleteMapViewer(mapId, false);
+
+    // TODO: There is still a problem with bad config schema value and layers loading... should be refactor when config is done
+    return this.createMapFromConfig(mapId, JSON.stringify(config), height);
+  }
+
+  /**
+   * Reload a map from a config object created using current map state. It first removes then recreates the map.
+   * @param {boolean} maintainGeocoreLayerNames - Indicates if geocore layer names should be kept as is or returned to defaults.
+   *                                              Set to false after a language change to update the layer names with the new language.
+   * @returns {Promise<MapViewer>} A Promise containing the MapViewer which will be created once reloaded.
+   */
+  reloadWithCurrentState(mapId: string, maintainGeocoreLayerNames: boolean = true): Promise<MapViewer> {
+    // Get the map viewer
+    const mapViewer = this.getMapViewer(mapId);
+
+    // Get the current map config
+    const currentMapConfig = mapViewer.createMapConfigFromMapState(maintainGeocoreLayerNames);
+
+    // Redirect
+    return this.reload(mapId, currentMapConfig);
   }
 
   /**
@@ -195,108 +273,4 @@ export class API {
     document.addEventListener('click', removeFocusedClass);
     document.addEventListener('focusout', removeFocusedClass);
   }
-
-  /**
-   * Create a new map in a given div id.
-   * GV The div MUST NOT have a geoview-map class or a warning will be shown when initMapDivFromFunctionCall is called.
-   * If is present, the div will be created with a default config
-   *
-   * @param {string} divId - id of the div to create map in
-   * @param {string} mapConfig - config passed in from the function call (string or url of a config path)
-   * @param {number} divHeight - height of the div to inject the map in (mandatory if the map reloads)
-   */
-  // This function is called by the template, and since the template use the instance of the object from cgpv.api, this function has to be on the instance, not static. Refactor this?
-  async createMapFromConfig(divId: string, mapConfig: string, divHeight?: number): Promise<MapViewer> {
-    // Get the map div
-    const mapDiv = document.getElementById(divId);
-    if (!mapDiv) throw new InitDivNotExistError(divId);
-
-    if (divHeight) mapDiv!.style.height = `${divHeight}px`;
-
-    // Init by function call
-    const mapViewer = await initMapDivFromFunctionCall(mapDiv, mapConfig);
-    this.#emitMapAddedToDiv({ mapId: divId });
-    return mapViewer;
-  }
-
-  /**
-   * Emits a map viewer ready event to all handlers.
-   * @private
-   */
-  #emitMapViewerReady(event: MapViewerReadyEvent): void {
-    // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onMapViewerReadyHandlers, event);
-  }
-
-  /**
-   * Registers a map viewer ready event callback.
-   * @param {MapViewerReadyDelegate} callback - The callback to be executed whenever the event is emitted
-   */
-  onMapViewerReady(callback: MapViewerReadyDelegate): void {
-    // Register the event handler
-    EventHelper.onEvent(this.#onMapViewerReadyHandlers, callback);
-  }
-
-  /**
-   * Unregisters a map viewer ready event callback.
-   * @param {MapViewerReadyDelegate} callback - The callback to stop being called whenever the event is emitted
-   */
-  offMapViewerReady(callback: MapViewerReadyDelegate): void {
-    // Unregister the event handler
-    EventHelper.offEvent(this.#onMapViewerReadyHandlers, callback);
-  }
-
-  /**
-   * Emits an event to all handlers.
-   * @param {MapAddedToDivEvent} event - The event to emit
-   * @private
-   */
-  #emitMapAddedToDiv(event: MapAddedToDivEvent): void {
-    // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onMapAddedToDivHandlers, event);
-  }
-
-  /**
-   * Registers a map added to div event handler.
-   * @param {MapAddedToDivDelegate} callback - The callback to be executed whenever the event is emitted
-   */
-  onMapAddedToDiv(callback: MapAddedToDivDelegate): void {
-    // Register the event handler
-    EventHelper.onEvent(this.#onMapAddedToDivHandlers, callback);
-  }
-
-  /**
-   * Unregisters a map added to div event handler.
-   * @param {MapAddedToDivdDelegate} callback - The callback to stop being called whenever the event is emitted
-   */
-  offMapAddedToDiv(callback: MapAddedToDivDelegate): void {
-    // Unregister the event handler
-    EventHelper.offEvent(this.#onMapAddedToDivHandlers, callback);
-  }
 }
-
-/**
- * Define a delegate for the event handler function signature
- */
-export type MapViewerReadyDelegate = EventDelegateBase<API, MapViewerReadyEvent, void>;
-
-/**
- * Define an event for the delegate
- */
-export type MapViewerReadyEvent = {
-  // The added map
-  mapId: string;
-};
-
-/**
- * Define a delegate for the event handler function signature
- */
-export type MapAddedToDivDelegate = EventDelegateBase<API, MapAddedToDivEvent, void>;
-
-/**
- * Define an event for the delegate
- */
-export type MapAddedToDivEvent = {
-  // The added map
-  mapId: string;
-};

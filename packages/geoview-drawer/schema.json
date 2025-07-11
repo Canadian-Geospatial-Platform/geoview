@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GeoView Drawer Plugin Config Schema",
+  "description": "This Schema validator validates the GeoView Drawer Plugin configuration.",
+  "type": "object",
+  "properties": {
+    "style": {
+      "fillColor": "string",
+      "strokeColor": "string",
+      "strokeWidth": "number"
+    },
+    "activeGeom": {
+      "description": "The currently active geometry type.",
+      "type": "string",
+      "enum": [
+        "Point",
+        "LineString",
+        "Polygon",
+        "Rectangle",
+        "Circle",
+        "Star"
+      ]
+    },
+    "geomTypes": {
+      "description": "The list of geometry types that can be drawn.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "Point",
+          "LineString",
+          "Polygon",
+          "Rectangle",
+          "Circle",
+          "Star"
+        ]
+      }
+    },
+    "hideMeasurements": {
+      "description": "Whether to hide measurements or not.",
+      "type": "boolean"
+    },
+    "version": {
+      "description": "The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by this version of the viewer.",
+      "type": "string",
+      "enum": [
+        "1.0"
+      ]
+    }
+  },
+  "required": []
+}

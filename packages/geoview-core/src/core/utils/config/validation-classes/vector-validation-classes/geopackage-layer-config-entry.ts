@@ -24,19 +24,19 @@ export class GeoPackageLayerEntryConfig extends VectorLayerEntryConfig {
     // If undefined, we assign the metadataAccessPath of the GeoView layer to dataAccessPath.
     if (!this.source.dataAccessPath) {
       let accessPath = this.geoviewLayerConfig.metadataAccessPath!;
-      accessPath = accessPath!.split('/').length > 1 ? accessPath!.split('/').slice(0, -1).join('/') : './';
+      accessPath = accessPath.split('/').length > 1 ? accessPath.split('/').slice(0, -1).join('/') : './';
       this.source.dataAccessPath = accessPath;
     }
 
     if (
-      !(this.source.dataAccessPath!.startsWith('blob') && !this.source.dataAccessPath!.endsWith('/')) &&
-      !this.source.dataAccessPath!.toLowerCase().endsWith('.gpkg')
+      !(this.source.dataAccessPath.startsWith('blob') && !this.source.dataAccessPath.endsWith('/')) &&
+      !this.source.dataAccessPath.toLowerCase().endsWith('.gpkg')
     ) {
-      this.source.dataAccessPath = this.source.dataAccessPath!.endsWith('/')
-        ? `${this.source.dataAccessPath!}${this.layerId}`
-        : `${this.source.dataAccessPath!}/${this.layerId}`;
+      this.source.dataAccessPath = this.source.dataAccessPath.endsWith('/')
+        ? `${this.source.dataAccessPath}${this.layerId}`
+        : `${this.source.dataAccessPath}/${this.layerId}`;
     }
 
-    if (!this?.source?.dataProjection) this.source.dataProjection = Projection.PROJECTION_NAMES.LNGLAT;
+    if (!this?.source?.dataProjection) this.source.dataProjection = Projection.PROJECTION_NAMES.LONLAT;
   }
 }

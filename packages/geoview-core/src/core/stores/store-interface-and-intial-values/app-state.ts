@@ -1,5 +1,5 @@
 import { useStore } from 'zustand';
-import { TypeDisplayLanguage, TypeDisplayTheme, TypeGeoviewLayerTypeWithGeoCore } from '@/api/config/types/map-schema-types';
+import { TypeDisplayLanguage, TypeDisplayTheme, TypeInitialGeoviewLayerType } from '@/api/config/types/map-schema-types';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
@@ -17,7 +17,7 @@ import { SnackbarType } from '@/core/utils/notifications';
 type AppActions = IAppState['actions'];
 
 export interface IAppState {
-  disabledLayerTypes: TypeGeoviewLayerTypeWithGeoCore[];
+  disabledLayerTypes: TypeInitialGeoviewLayerType[];
   displayLanguage: TypeDisplayLanguage;
   displayTheme: TypeDisplayTheme;
   guide: TypeGuideObject | undefined;
@@ -96,7 +96,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
           displayTheme: geoviewConfig.theme || 'geo.ca',
           geolocatorServiceURL: geoviewConfig.serviceUrls?.geolocatorUrl,
           metadataServiceURL: geoviewConfig.serviceUrls?.metadataUrl,
-          geoviewHTMLElement: geoviewHTMLElement!,
+          geoviewHTMLElement,
           height: geoviewHTMLElement?.clientHeight || 600,
           showUnsymbolizedFeatures: geoviewConfig.globalSettings?.showUnsymbolizedFeatures || false,
         },
@@ -299,7 +299,7 @@ export interface TypeGuideObject {
 // **********************************************************
 export const useAppCircularProgressActive = (): boolean => useStore(useGeoViewStore(), (state) => state.appState.isCircularProgressActive);
 export const useAppCrosshairsActive = (): boolean => useStore(useGeoViewStore(), (state) => state.appState.isCrosshairsActive);
-export const useAppDisabledLayerTypes = (): TypeGeoviewLayerTypeWithGeoCore[] =>
+export const useAppDisabledLayerTypes = (): TypeInitialGeoviewLayerType[] =>
   useStore(useGeoViewStore(), (state) => state.appState.disabledLayerTypes);
 export const useAppDisplayLanguage = (): TypeDisplayLanguage => useStore(useGeoViewStore(), (state) => state.appState.displayLanguage);
 export const useAppDisplayTheme = (): TypeDisplayTheme => useStore(useGeoViewStore(), (state) => state.appState.displayTheme);

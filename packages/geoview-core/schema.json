@@ -1279,7 +1279,8 @@
         "vector-tile",
         "raster-tile",
         "raster-image",
-        "geoCore"
+        "geoCore",
+        "shapefile"
       ],
       "description": "Layer entry data type."
     },
@@ -1694,6 +1695,9 @@
           },
           {
             "$ref": "#/definitions/TypeGeoCoreLayerConfig"
+          },
+          {
+            "$ref": "#/definitions/TypeShapefileLayerConfig"
           }
         ]
       }
@@ -1778,6 +1782,37 @@
         "geoviewLayerType"
       ]
     },
+    "TypeShapefileLayerConfig": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "geoviewLayerId": {
+          "type": "string",
+          "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service). The id will have the language extension (id-'lang')."
+        },
+        "geoviewLayerType": {
+          "$ref": "#/definitions/TypeShapefileLayerType",
+          "description": "Type of Shapefile layer."
+        },
+        "metadataAccessPath": {
+          "type": "string",
+          "description": "The path to the shapefile."
+        },
+        "geoviewLayerName": {
+          "type": "string",
+          "description": "The display name of the layer. If it is not present the viewer will make an attempt to scrape this information."
+        },
+        "initialSettings": {
+          "$ref": "#/definitions/TypeLayerInitialSettings",
+          "description": "Initial settings to apply to the GeoView layer at creation time."
+        }
+      },
+      "required": [
+        "geoviewLayerId",
+        "geoviewLayerType",
+        "metadataAccessPath"
+      ]
+    },
     "TypeGeoviewLayerType": {
       "type": "string",
       "items": {
@@ -1806,6 +1841,15 @@
         ]
       },
       "description": "Type of GeoCore layer."
+    },
+    "TypeShapefileLayerType": {
+      "type": "string",
+      "items": {
+        "enum": [
+          "shapefile"
+        ]
+      },
+      "description": "Type of shapefile layer."
     },
     "TypeViewSettings": {
       "additionalProperties": false,
@@ -1936,7 +1980,8 @@
           "home",
           "location",
           "projection",
-          "basemap-select"
+          "basemap-select",
+          "drawer"
         ]
       },
       "default": [
@@ -2248,6 +2293,9 @@
               },
               {
                 "$ref": "#/definitions/TypeGeoCoreLayerType"
+              },
+              {
+                "$ref": "#/definitions/TypeShapefileLayerType"
               }
             ]
           }

@@ -79,9 +79,9 @@ export function commonValidateListOfLayerEntryConfig(
           : '';
       }
 
-      layer.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
+      layer.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig);
 
-      if (!(layerConfig as GroupLayerEntryConfig).listOfLayerEntryConfig.length) {
+      if (!layerConfig.listOfLayerEntryConfig.length) {
         // Add a layer load error
         layer.addLayerLoadError(new LayerEntryConfigEmptyLayerGroupError(layerConfig), layerConfig);
       }
@@ -131,7 +131,7 @@ export function commonValidateListOfLayerEntryConfig(
       switchToGroupLayer.isMetadataLayerGroup = true;
       switchToGroupLayer.listOfLayerEntryConfig = newListOfLayerEntryConfig;
 
-      const groupLayerConfig = new GroupLayerEntryConfig(switchToGroupLayer as GroupLayerEntryConfig);
+      const groupLayerConfig = new GroupLayerEntryConfig(switchToGroupLayer);
       // Replace the old version of the layer with the new layer group
       // eslint-disable-next-line no-param-reassign
       listOfLayerEntryConfig[i] = groupLayerConfig;
@@ -294,7 +294,7 @@ export function commonProcessFeatureInfoConfig(
       });
     }
 
-    layerConfig.source.featureInfo!.outfields.forEach((outfield) => {
+    layerConfig.source.featureInfo.outfields.forEach((outfield) => {
       // eslint-disable-next-line no-param-reassign
       if (!outfield.alias) outfield.alias = outfield.name;
     });
@@ -325,7 +325,7 @@ export function commonProcessInitialSettings(
   const layerMetadata = layerConfig.getLayerMetadata()!; // FIXME: Address the '!' here..
   if (layerConfig.initialSettings?.states?.visible === undefined) {
     // eslint-disable-next-line no-param-reassign
-    layerConfig.initialSettings!.states = { visible: !!layerMetadata.defaultVisibility };
+    layerConfig.initialSettings.states = { visible: !!layerMetadata.defaultVisibility };
   }
 
   // Update Max / Min Scales with value if service doesn't allow the configured value for proper UI functionality
@@ -356,17 +356,17 @@ export function commonProcessInitialSettings(
 
     // Transform to latlon extent
     if (layerExtent) {
-      const latlonExtent = Projection.transformExtentFromObj(
+      const lonlatExtent = Projection.transformExtentFromObj(
         layerExtent,
         layerMetadata.extent.spatialReference,
-        Projection.getProjectionLngLat()
+        Projection.getProjectionLonLat()
       );
       // eslint-disable-next-line no-param-reassign
-      layerConfig.initialSettings!.bounds = latlonExtent;
+      layerConfig.initialSettings.bounds = lonlatExtent;
     }
   }
   // eslint-disable-next-line no-param-reassign
-  layerConfig.initialSettings!.bounds = validateExtent(layerConfig.initialSettings!.bounds || [-180, -90, 180, 90]);
+  layerConfig.initialSettings.bounds = validateExtent(layerConfig.initialSettings.bounds || [-180, -90, 180, 90]);
 }
 
 /**
@@ -408,8 +408,14 @@ export async function commonProcessLayerMetadata<
     }
   }
 
-  if (responseJson.spatialReference && !Projection.getProjectionFromObj(responseJson.spatialReference)) {
-    await Projection.addProjection(responseJson.spatialReference);
+  // Add projection definition if not already included
+  if (responseJson.spatialReference) {
+    try {
+      Projection.getProjectionFromObj(responseJson.spatialReference);
+    } catch (error: unknown) {
+      logger.logWarning('Unsupported projection, attempting to add projection now.', error);
+      await Projection.addProjection(responseJson.spatialReference);
+    }
   }
 
   commonProcessFeatureInfoConfig(layerConfig);

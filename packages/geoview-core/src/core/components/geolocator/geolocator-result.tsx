@@ -129,7 +129,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
               size="small"
               edge="end"
               color="inherit"
-              tooltip={t('geolocator.clearFilters') as string}
+              tooltip={t('geolocator.clearFilters')!}
               onClick={handleClearFilters}
               disabled={!geoLocationData.length}
             >
@@ -139,7 +139,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
         </Box>
       )}
       <Divider />
-      <Box sx={{ maxHeight: mapSize![1] - 240, overflowY: 'auto' }}>
+      <Box sx={{ maxHeight: mapSize[1] - 240, overflowY: 'auto' }}>
         {error && (
           <Typography component="p" sx={{ p: 10, fontSize: theme.palette.geoViewFontSize.md }}>
             {t('error.geolocator.noService')}

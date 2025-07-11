@@ -52,7 +52,7 @@ export class GeometryApi {
   /** Reference on the map viewer */
   mapViewer: MapViewer;
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onGeometryAddedHandlers: GeometryAddedDelegate[] = [];
 
   /**
@@ -93,9 +93,9 @@ export class GeometryApi {
   }
 
   /**
-   * Create a polyline using an array of lng/lat points
+   * Create a polyline using an array of lon/lat points
    *
-   * @param {Coordinate} points points of lng/lat to draw a polyline
+   * @param {Coordinate} points points of lon/lat to draw a polyline
    * @param options polyline options including styling
    * @param {string} id an optional id to be used to manage this geometry
    * @param {string} groupId an optional group id in witch we want to add the geometry
@@ -514,7 +514,7 @@ export class GeometryApi {
     for (let i = 0; i < this.geometryGroups.length; i++) {
       const geometries = this.geometryGroups[i].vectorLayer.getSource()?.getFeatures() || [];
       for (let j = 0; j < geometries.length; j++) {
-        const geometry = geometries[j] as Feature;
+        const geometry = geometries[j];
 
         if (geometry.get('featureId') === featureId) returnValue.push(this.geometryGroups[i]);
       }
@@ -749,7 +749,7 @@ export class GeometryApi {
         // If it's actually a MultiPoint
         if (GeometryApi.isArrayOfCoordinates(coordinates)) {
           // Create a MultiLine geometry
-          return new MultiPoint(coordinates as Coordinate[]);
+          return new MultiPoint(coordinates);
         }
         // Create a Point geometry
         return new Point(coordinates as Coordinate);

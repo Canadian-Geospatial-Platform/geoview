@@ -1,5 +1,10 @@
 # Loading maps
 
+**IMPORTANT NOTE**
+If you are using a framework to inject the cgpv-main.js script dynamically, you may end up with multiples version of cgpv window object and React version. If this happen you will have a console log that says **'Multiple instances of cgpv loaded. Make sure you only inject cgpv-main.js once.'**
+If this happens, try to resolve the issue by injection cgpv script only one or unmount it properly betweeen the calls.
+
+## Overview
 There are multiple ways to load maps on your projects
 
 - [**By providing parameters in the URL**](#by-providing-parameters-in-the-url)

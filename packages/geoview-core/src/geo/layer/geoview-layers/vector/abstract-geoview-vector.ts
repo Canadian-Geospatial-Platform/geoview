@@ -16,6 +16,7 @@ import {
 } from '@/api/config/types/map-schema-types';
 
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeSourceGeoJSONInitialConfig } from '@/geo/layer/geoview-layers/vector/geojson';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
@@ -23,7 +24,11 @@ import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-cla
 import { Projection } from '@/geo/utils/projection';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { TypeJsonObject } from '@/api/config/types/config-types';
-import { LayerDataAccessPathMandatoryError, LayerNoGeographicDataInCSVError } from '@/core/exceptions/layer-exceptions';
+import {
+  LayerDataAccessPathMandatoryError,
+  LayerNoGeographicDataInCSVError,
+  LayerTooManyEsriFeatures,
+} from '@/core/exceptions/layer-exceptions';
 import { LayerEntryConfigVectorSourceURLNotDefinedError } from '@/core/exceptions/layer-entry-config-exceptions';
 import { doUntilPromises } from '@/core/utils/utilities';
 
@@ -34,6 +39,7 @@ const EXCLUDED_HEADERS_GEN = ['geometry', 'geom'];
 const EXCLUDED_HEADERS = EXCLUDED_HEADERS_LAT.concat(EXCLUDED_HEADERS_LNG).concat(EXCLUDED_HEADERS_GEN);
 // GV Order of these keywords matter, preference will be given in this order
 const NAME_FIELD_KEYWORDS = ['^name$', '^title$', '^label$'];
+const MAX_ESRI_FEATURES = 200000;
 
 /**
  * The AbstractGeoViewVector class.
@@ -101,14 +107,27 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         // Resolve the url
         const url = AbstractGeoViewVector.#resolveUrl(layerConfig, vectorSource, extent, resolution, projection);
 
-        // Fetch the data
-        const responseText = await AbstractGeoViewVector.#fetchData(url, sourceConfig);
+        // Fetch the data, or use passed geoJSON if present
+        const responseText =
+          layerConfig.schemaTag === CONST_LAYER_TYPES.GEOJSON && (layerConfig.source as TypeSourceGeoJSONInitialConfig)?.geojson
+            ? ((layerConfig.source as TypeSourceGeoJSONInitialConfig).geojson as string)
+            : await AbstractGeoViewVector.#fetchData(url, sourceConfig);
 
         // If Esri Feature
         if (layerConfig.schemaTag === CONST_LAYER_TYPES.ESRI_FEATURE) {
           // Check and throw exception if the content actually contains an embedded error
           // (EsriFeature type of response might return an embedded error inside a 200 HTTP OK)
           Fetch.throwIfResponseHasEmbeddedError(responseText);
+          // Check if feature count is too large
+          if (JSON.parse(responseText).count > MAX_ESRI_FEATURES) {
+            this.emitMessage(
+              'validation.layer.tooManyEsriFeatures',
+              [layerConfig.getLayerName(), JSON.parse(responseText).count],
+              'error',
+              true
+            );
+            throw new LayerTooManyEsriFeatures(layerConfig.layerId, layerConfig.getLayerName(), JSON.parse(responseText).count);
+          }
         }
 
         // Parse the result of the fetch to read the features
@@ -197,13 +216,12 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         const esriData = await this.#getEsriFeatures(url, count, maxRecords as number | undefined);
 
         // Convert each ESRI response chunk to features and flatten the result
-        return esriData.flatMap(
-          (json) =>
-            source.getFormat()!.readFeatures(json, {
-              ...readOptions,
-              featureProjection: projection,
-              extent,
-            }) as Feature[]
+        return esriData.flatMap((json) =>
+          source.getFormat()!.readFeatures(json, {
+            ...readOptions,
+            featureProjection: projection,
+            extent,
+          })
         );
       }
 
@@ -213,7 +231,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
           ...readOptions,
           featureProjection: projection,
           extent,
-        }) as Feature[];
+        });
     }
   }
 
@@ -388,7 +406,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     // GV: This function and the below private static ones used to be in the CSV class directly, but something wasn't working with a 'Private element not accessible' error.
     // GV: After moving the code to the mother class, it worked. It'll remain here for now until the config refactoring can take care of it in its re-writing
 
-    const inProjection: string = layerConfig.source!.dataProjection || Projection.PROJECTION_NAMES.LNGLAT;
+    const inProjection: string = layerConfig.source!.dataProjection || Projection.PROJECTION_NAMES.LONLAT;
     const inProjectionConv: OLProjection = Projection.getProjectionFromString(inProjection);
 
     const features: Feature[] = [];
@@ -523,7 +541,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       });
     }
 
-    layerConfig.source.featureInfo!.outfields.forEach((outfield) => {
+    layerConfig.source.featureInfo.outfields.forEach((outfield) => {
       // eslint-disable-next-line no-param-reassign
       if (!outfield.alias) outfield.alias = outfield.name;
     });
@@ -539,7 +557,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       }, undefined);
 
       // eslint-disable-next-line no-param-reassign
-      layerConfig.source.featureInfo.nameField = nameField ? nameField.name : layerConfig.source.featureInfo!.outfields[0].name;
+      layerConfig.source.featureInfo.nameField = nameField ? nameField.name : layerConfig.source.featureInfo.outfields[0].name;
     }
   }
 

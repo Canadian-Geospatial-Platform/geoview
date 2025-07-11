@@ -24,22 +24,19 @@ export type GeoChartGeoCoreConfig = TypeJsonObject & {
   layers: {
     layerId: string;
   };
-}; // TypeJsonObject, because the definition is in the external package
-
-// #region GeoChart type
+}; // TypeJsonObject, because the definition is in the external package and so this TypeJsonObject reminds us of that
 
 // The GeoChart Json object expected by GeoView
-export type GeoChartConfig = TypeJsonObject & {
+// GV This type is the core equivalent of the homonym 'GeoViewGeoChartConfig' in geoview-geochart\geochart-types.ts
+export type GeoViewGeoChartConfig = TypeJsonObject & {
   layers: { layerId: string }[];
-}; // TypeJsonObject, because the definition is in the external package
+}; // TypeJsonObject, because the 'GeoChartConfig' definition is in the external package and so this TypeJsonObject reminds us of that
 
-// The returned parsed response
+// The type representing the GeoCore parsed response
 export type UUIDmapConfigReaderResponse = {
   layers: TypeGeoviewLayerConfig[];
-  geocharts?: GeoChartConfig[];
+  geocharts?: GeoViewGeoChartConfig[];
 };
-
-// #endregion
 
 /**
  * A class to generate GeoView layers config from a URL using a UUID.
@@ -88,7 +85,13 @@ export class UUIDmapConfigReader {
    */
   static #getLayerConfigFromResponse(uuids: string[], resultData: TypeJsonObject, lang: string): TypeGeoviewLayerConfig[] {
     // If invalid response
-    if (!resultData || !resultData.response || !resultData.response.rcs || !resultData.response.rcs[lang]) {
+    if (
+      !resultData ||
+      !resultData.response ||
+      !resultData.response.rcs ||
+      !resultData.response.rcs[lang] ||
+      resultData.response.rcs[lang].length === 0
+    ) {
       const errorMessage = resultData?.errorMessage || '<no error description>';
       throw new LayerGeoCoreInvalidResponseError(uuids, errorMessage);
     }
@@ -263,7 +266,7 @@ export class UUIDmapConfigReader {
     if (!resultData || !resultData.response || !resultData.response.gcs || !Array.isArray(resultData.response.gcs)) return {};
 
     // Find custom layer entry configuration
-    const foundConfigs = resultData.response.gcs.map((gcs) => gcs?.[lang]?.layers as TypeJsonObject);
+    const foundConfigs = resultData.response.gcs.map((gcs) => gcs?.[lang]?.layers);
 
     return foundConfigs[0] || {};
   }
@@ -275,7 +278,7 @@ export class UUIDmapConfigReader {
    * @returns {GeoChartConfig[]} the list of GeoChart configs
    * @private
    */
-  static #getGeoChartConfigFromResponse(resultData: GeoChartGeoCoreConfig, lang: string): GeoChartConfig[] {
+  static #getGeoChartConfigFromResponse(resultData: GeoChartGeoCoreConfig, lang: string): GeoViewGeoChartConfig[] {
     // If no geochart information
     if (!resultData || !resultData.response || !resultData.response.gcs || !Array.isArray(resultData.response.gcs)) return [];
 
@@ -285,10 +288,10 @@ export class UUIDmapConfigReader {
       .filter((geochartValue) => !!geochartValue);
 
     // For each found config, parse
-    const parsedConfigs: GeoChartConfig[] = [];
+    const parsedConfigs: GeoViewGeoChartConfig[] = [];
     foundConfigs.forEach((foundConfig) => {
-      // Transform GeoChartGeoCoreConfig to GeoChartConfig
-      parsedConfigs.push({ ...(foundConfig as object), layers: [foundConfig.layers] } as GeoChartConfig);
+      // Transform GeoChartGeoCoreConfig to GeoViewGeoChartConfig
+      parsedConfigs.push({ ...(foundConfig as object), layers: [foundConfig.layers] } as GeoViewGeoChartConfig);
     });
 
     // Return all configs

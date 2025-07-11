@@ -22,6 +22,11 @@
   "overviewMap": {
     "hideOnZoom": 7
   },
+  "appBar": {
+    "tabs": {
+      "core": ["export", "geolocator"]
+    }
+  },
   "footerBar": {
     "tabs": {
       "core": [

@@ -55,6 +55,24 @@ export class LayerNotFoundError extends LayerError {
 }
 
 /**
+ * Error thrown when a layer is expected to be a certain type but is not.
+ * @extends {LayerError}
+ */
+export class LayerWrongTypeError extends LayerError {
+  /**
+   * Constructor to initialize the LayerWrongTypeError with the layer path
+   * @param {string} layerPath - The path of the layer.
+   * @param {string | undefined} layerName - The layer name.
+   */
+  constructor(layerPath: string, layerName: string | undefined) {
+    super(layerPath, 'error.layer.wrongType', [layerName || layerPath]);
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, LayerWrongTypeError.prototype);
+  }
+}
+
+/**
  * Error thrown when a layer is expected to be a GeoJson layer but is not.
  * @extends {LayerError}
  */
@@ -183,6 +201,25 @@ export class LayerEntryConfigLayerIdEsriMustBeNumberError extends LayerError {
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, LayerEntryConfigLayerIdEsriMustBeNumberError.prototype);
+  }
+}
+
+/**
+ * Custom error class thrown when the ESRI feature layer has too many features.
+ * @extends {LayerError}
+ */
+export class LayerTooManyEsriFeatures extends LayerError {
+  /**
+   * Constructor to initialize the LayerTooManyEsriFeatures.
+   * This error is thrown when the ESRI feature layer has more than 200 000 features.
+   * @param {string} geoviewLayerId - The ID of the GeoView layer with invalid layer type.
+   * @param {string | undefined} layerName - The layer name.
+   */
+  constructor(geoviewLayerId: string, layerName: string | undefined, featureCount: number) {
+    super(geoviewLayerId, 'validation.layer.tooManyEsriFeatures', [layerName || geoviewLayerId, featureCount]);
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, LayerTooManyEsriFeatures.prototype);
   }
 }
 

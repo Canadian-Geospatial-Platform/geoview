@@ -1,7 +1,7 @@
-import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
-import { AbstractPlugin } from './abstract-plugin';
 import { TypeWindow } from '@/core/types/global-types';
+import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
+import { AbstractPlugin } from './abstract-plugin';
 
 /**
  * AppBar Plugin abstract class.
@@ -17,10 +17,18 @@ export abstract class AppBarPlugin extends AbstractPlugin {
   panelProps?: TypePanelProps;
 
   /**
+   * Overrides the get config
+   * @returns {AppBarPluginConfig} The config
+   */
+  override getConfig(): AppBarPluginConfig {
+    return super.getConfig() as AppBarPluginConfig;
+  }
+
+  /**
    * Overridable function to create app bar button props content
    * @returns IconButtonPropsExtend The app bar button props content
    */
-  onCreateButtonProps(): IconButtonPropsExtend {
+  protected onCreateButtonProps(): IconButtonPropsExtend {
     // Override this to create the button props..
 
     // Fetch cgpv
@@ -41,7 +49,7 @@ export abstract class AppBarPlugin extends AbstractPlugin {
    * Overridable function to create app bar props content
    * @returns TypePanelProps The app bar props content
    */
-  onCreateContentProps(): TypePanelProps {
+  protected onCreateContentProps(): TypePanelProps {
     // Override this to create the panel props..
 
     // Panel props
@@ -49,7 +57,7 @@ export abstract class AppBarPlugin extends AbstractPlugin {
       title: 'Some title',
       icon: '<i class="material-icons">map</i>',
       width: '80vw',
-      status: this.configObj?.isOpen as boolean,
+      status: this.getConfig().isOpen,
     };
   }
 
@@ -57,7 +65,7 @@ export abstract class AppBarPlugin extends AbstractPlugin {
    * Overridable function to create app bar actual content
    * @returns JSX.Element The app bar actual content
    */
-  onCreateContent(): JSX.Element {
+  protected onCreateContent(): JSX.Element {
     // Override this to create panel..
 
     // Return dummy content
@@ -67,7 +75,7 @@ export abstract class AppBarPlugin extends AbstractPlugin {
   /**
    * Called when an app bar plugin is being added
    */
-  onAdd(): void {
+  protected onAdd(): void {
     // Create button props
     this.buttonProps = this.onCreateButtonProps();
 
@@ -78,17 +86,21 @@ export abstract class AppBarPlugin extends AbstractPlugin {
     this.panelProps.content = this.onCreateContent();
 
     // Create a new button panel on the app-bar
-    this.buttonPanel = this.mapViewer().appBarApi.createAppbarPanel(this.buttonProps!, this.panelProps, this.buttonProps.id) || undefined;
+    this.buttonPanel = this.mapViewer().appBarApi.createAppbarPanel(this.buttonProps, this.panelProps, this.buttonProps.id) || undefined;
   }
 
   /**
    * Called when an app bar plugin is being removed
    */
-  onRemove(): void {
+  protected onRemove(): void {
     // If cgpv exists
-    if (this.api && this.buttonPanel) {
+    if (this.buttonPanel) {
       // Remove the app bar panel
       this.mapViewer().appBarApi.removeAppbarPanel(this.buttonPanel.buttonPanelId, this.buttonProps!.id!);
     }
   }
 }
+
+export type AppBarPluginConfig = {
+  isOpen: boolean;
+};

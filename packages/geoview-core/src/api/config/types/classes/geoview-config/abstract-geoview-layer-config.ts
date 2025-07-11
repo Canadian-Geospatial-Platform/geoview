@@ -100,7 +100,7 @@ export abstract class AbstractGeoviewLayerConfig {
     // GV: However, whe have the isGeocore flag to keep track of geocore layers that were converted to geoview layers.
     this.isGeocore = (userGeoviewLayerConfig.isGeocore as boolean) || false;
     this.geoviewLayerName = userGeoviewLayerConfig.geoviewLayerName ? (userGeoviewLayerConfig.geoviewLayerName as string) : '';
-    this.geoviewLayerId = (userGeoviewLayerConfig.geoviewLayerId || generateId()) as string;
+    this.geoviewLayerId = (userGeoviewLayerConfig.geoviewLayerId || generateId(18)) as string;
     this.metadataAccessPath = userGeoviewLayerConfig.metadataAccessPath as string;
 
     // Validate the structure of the sublayer list and correct it if needed.
@@ -404,8 +404,6 @@ export abstract class AbstractGeoviewLayerConfig {
    * The resulting config will then be overwritten by the values provided in the user config.
    */
   applyDefaultValues(): void {
-    this.serviceDateFormat = this.serviceDateFormat || 'DD/MM/YYYY HH:MM:SSZ';
-    this.externalDateFormat = this.externalDateFormat || 'DD/MM/YYYY HH:MM:SSZ';
     this.isTimeAware = this.isTimeAware !== undefined ? this.isTimeAware : true;
   }
 

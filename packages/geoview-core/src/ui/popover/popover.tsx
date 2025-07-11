@@ -5,7 +5,7 @@ import { logger } from '@/core/utils/logger';
 
 // Disable arrow key so user can't move the page when popover is open
 const handleKeyDown = (event: KeyboardEvent): void => {
-  if (ARROW_KEYS_WITH_SPACE.includes(event.code as string)) {
+  if (ARROW_KEYS_WITH_SPACE.includes(event.code)) {
     // disbale the default behaviour of key down if it's part of 'ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLeft', or 'Space'
     event.preventDefault();
   }

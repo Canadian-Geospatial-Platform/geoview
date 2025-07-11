@@ -33,9 +33,6 @@ export abstract class ConfigBaseClass {
   // eslint-disable-next-line no-restricted-syntax
   private _layerStatus: TypeLayerStatus = 'newInstance';
 
-  /** The ending extension (element) of the layer identifier. This element is part of the schema. */
-  layerIdExtension?: string;
-
   /** The display name of the layer (English/French). */
   layerName?: string;
 
@@ -67,7 +64,7 @@ export abstract class ConfigBaseClass {
   /** It is used to link the layer entry config to the parent's layer config. */
   parentLayerConfig?: GroupLayerEntryConfig;
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onLayerStatusChangedHandlers: LayerStatusChangedDelegate[] = [];
 
   // The layer status weigths
@@ -256,22 +253,6 @@ export abstract class ConfigBaseClass {
         `The layer status for ${this.layerPath} was already '${this.layerStatus}' and the system wanted to set ${newLayerStatus}`
       );
     }
-
-    // TODO: Cleanup - Commenting this and leaving it here for now.. It turns out that the parentLayerConfig property can't be trusted
-    // GV due to a bug with different instances of entryconfigs stored in the objects and depending how you navigate the objects, you get
-    // GV different instances. Example below (where 'parentLayerConfig.listOfLayerEntryConfig[0]' is indeed going back to 'uniqueValueId/uniqueValueId/4')
-    // GV This: cgpv.api.getMapViewer('sandboxMap').layer.getLayerEntryConfig('uniqueValueId/uniqueValueId/4').layerStatus
-    // GV Isn't the same as this: cgpv.api.getMapViewer('sandboxMap').layer.getLayerEntryConfig('uniqueValueId/uniqueValueId/4').parentLayerConfig.listOfLayerEntryConfig[0].layerStatus
-    // Commenting this out until a fix is found..
-
-    // // eslint-disable-next-line no-underscore-dangle
-    // if (this._layerStatus === 'loaded' && this.parentLayerConfig) {
-    //   // If all children of the parent are loaded, set the parent as loaded
-    //   if (ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo('loaded', this.parentLayerConfig.listOfLayerEntryConfig)) {
-    //     // Set the parent as loaded
-    //     this.parentLayerConfig.setLayerStatusLoaded();
-    //   }
-    // }
   }
 
   /**
@@ -307,14 +288,14 @@ export abstract class ConfigBaseClass {
 
     // If at least one layer is loading
     if (siblingsInLoading.length > 0) {
-      // Set the parent layer status as loaded
+      // Set the parent layer status as loading
       currentConfig.parentLayerConfig.setLayerStatusLoading();
       // Continue with the parent
       ConfigBaseClass.#updateLayerStatusParentRec(currentConfig.parentLayerConfig);
       return;
     }
 
-    // Get all siblings which are in loaded
+    // Get all siblings which are loaded
     const siblingsInLoaded = siblings.filter((lyrConfig) => lyrConfig.layerStatus === 'loaded');
 
     // If all siblings are loaded
@@ -326,10 +307,10 @@ export abstract class ConfigBaseClass {
       return;
     }
 
-    // Get all siblings which are in error
-    const siblingsInError = siblings.filter((lyrConfig) => lyrConfig.layerStatus === 'error');
+    // Get all siblings which are in error or loaded
+    const siblingsInError = siblings.filter((lyrConfig) => lyrConfig.layerStatus === 'error' || lyrConfig.layerStatus === 'loaded');
 
-    // If all siblings are in fact in error
+    // If all siblings are in fact in error or loaded
     if (siblings.length === siblingsInError.length) {
       // Set the parent layer status as error
       currentConfig.parentLayerConfig.setLayerStatusError();
@@ -347,14 +328,9 @@ export abstract class ConfigBaseClass {
    */
   static #evaluateLayerPath(layerConfig: ConfigBaseClass, layerPath?: string): string {
     let pathEnding = layerPath;
-    if (pathEnding === undefined)
-      pathEnding =
-        layerConfig.layerIdExtension === undefined ? layerConfig.layerId : `${layerConfig.layerId}.${layerConfig.layerIdExtension}`;
+    if (pathEnding === undefined) pathEnding = layerConfig.layerId;
     if (!layerConfig.parentLayerConfig) return `${layerConfig.geoviewLayerConfig.geoviewLayerId}/${pathEnding}`;
-    return this.#evaluateLayerPath(
-      layerConfig.parentLayerConfig as GroupLayerEntryConfig,
-      `${(layerConfig.parentLayerConfig as GroupLayerEntryConfig).layerId}/${pathEnding}`
-    );
+    return this.#evaluateLayerPath(layerConfig.parentLayerConfig, `${layerConfig.parentLayerConfig.layerId}/${pathEnding}`);
   }
 
   /**
@@ -386,7 +362,6 @@ export abstract class ConfigBaseClass {
     return {
       layerName: this.layerName,
       layerId: this.layerId,
-      layerIdExtension: this.layerIdExtension,
       schemaTag: this.schemaTag,
       entryType: this.entryType,
       layerStatus: this.layerStatus,
@@ -463,14 +438,14 @@ export abstract class ConfigBaseClass {
 }
 
 /**
- * Define a delegate for the event handler function signature.
- */
-export type LayerStatusChangedDelegate = EventDelegateBase<ConfigBaseClass, LayerStatusChangedEvent, void>;
-
-/**
  * Define an event for the delegate.
  */
 export type LayerStatusChangedEvent = {
   // The new layer status.
   layerStatus: TypeLayerStatus;
 };
+
+/**
+ * Define a delegate for the event handler function signature.
+ */
+export type LayerStatusChangedDelegate = EventDelegateBase<ConfigBaseClass, LayerStatusChangedEvent, void>;

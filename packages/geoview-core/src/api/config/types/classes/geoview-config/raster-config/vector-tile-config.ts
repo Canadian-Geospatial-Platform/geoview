@@ -131,8 +131,14 @@ export class VectorTileLayerConfig extends AbstractGeoviewLayerConfig {
           this.setServiceMetadata(jsonMetadata);
 
           // Add projection definition if not already included
-          if (jsonMetadata?.tileInfo?.spatialReference && !Projection.getProjectionFromObj(jsonMetadata.tileInfo.spatialReference))
-            await Projection.addProjection(jsonMetadata.tileInfo.spatialReference);
+          if (jsonMetadata?.tileInfo?.spatialReference) {
+            try {
+              Projection.getProjectionFromObj(jsonMetadata.tileInfo.spatialReference);
+            } catch (error: unknown) {
+              logger.logWarning('Unsupported projection, attempting to add projection now.', error);
+              await Projection.addProjection(jsonMetadata.tileInfo.spatialReference);
+            }
+          }
 
           this.listOfLayerEntryConfig = this.processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
           await this.fetchListOfLayerMetadata();
@@ -163,7 +169,7 @@ export class VectorTileLayerConfig extends AbstractGeoviewLayerConfig {
   protected override createLayerEntryNode(layerId: string, parentNode: EntryConfigBaseClass | undefined): EntryConfigBaseClass {
     // GV: To determine if service metadata exists, we must verify that the object is not empty.
     if (Object.keys(this.getServiceMetadata()).length === 0)
-      return this.createLeafNode(toJsonObject({ layerId, layerName: layerId }), this, parentNode)!;
+      return this.createLeafNode(toJsonObject({ layerId, layerName: layerId }), this, parentNode);
 
     // If we cannot find the layerId in the layer definitions, throw an error.
     const layerFound = this.findLayerMetadataEntry(layerId);
@@ -178,7 +184,7 @@ export class VectorTileLayerConfig extends AbstractGeoviewLayerConfig {
 
     if (layerEntryIsGroupLayer(layerFound)) return this.createGroupNode(layerConfig, this, parentNode);
 
-    return this.createLeafNode(layerConfig, this, parentNode)!;
+    return this.createLeafNode(layerConfig, this, parentNode);
   }
 
   /**

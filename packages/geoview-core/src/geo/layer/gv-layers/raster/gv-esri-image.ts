@@ -47,7 +47,7 @@ export class GVEsriImage extends AbstractGVRaster {
     AbstractGVRaster.initOptionsWithInitialSettings(imageLayerOptions, layerConfig);
 
     // Create and set the OpenLayer layer
-    this.olLayer = new ImageLayer(imageLayerOptions);
+    this.setOLLayer(new ImageLayer(imageLayerOptions));
   }
 
   /**

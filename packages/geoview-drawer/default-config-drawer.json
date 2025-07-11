@@ -1,0 +1,9 @@
+{
+  "style": {
+    "fillColor": "#ffcc33",
+    "strokeColor": "#000000",
+    "strokeWidth": 1.3
+  },
+  "activeGeom": "Point",
+  "geomTypes": ["Point", "LineString", "Polygon", "Circle"]
+}

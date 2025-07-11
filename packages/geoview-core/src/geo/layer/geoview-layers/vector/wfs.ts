@@ -86,13 +86,13 @@ export class WFS extends AbstractGeoViewVector {
     // you can define them in the configuration section.
     // when there is only one layer, it is not an array but an object
     if (!Array.isArray(this.metadata?.FeatureTypeList?.FeatureType))
-      this.metadata!.FeatureTypeList!.FeatureType = [this.metadata?.FeatureTypeList?.FeatureType] as TypeJsonObject;
+      this.metadata!.FeatureTypeList.FeatureType = [this.metadata?.FeatureTypeList?.FeatureType] as TypeJsonObject;
 
     if (Array.isArray(this.metadata?.FeatureTypeList?.FeatureType)) {
       const metadataLayerList = this.metadata?.FeatureTypeList.FeatureType as Array<TypeJsonObject>;
       const foundMetadata = metadataLayerList.find((layerMetadata) => {
         const metadataLayerId = (layerMetadata.Name && layerMetadata.Name['#text']) as string;
-        return metadataLayerId.includes(layerConfig.layerId!);
+        return metadataLayerId.includes(layerConfig.layerId);
       });
 
       if (!foundMetadata) {
@@ -112,11 +112,11 @@ export class WFS extends AbstractGeoViewVector {
         const bounds = [Number(lowerCorner[0]), Number(lowerCorner[1]), Number(upperCorner[0]), Number(upperCorner[1])];
 
         // eslint-disable-next-line no-param-reassign
-        layerConfig.initialSettings!.bounds = bounds;
+        layerConfig.initialSettings.bounds = bounds;
       }
 
       // eslint-disable-next-line no-param-reassign
-      layerConfig.initialSettings!.bounds = validateExtentWhenDefined(layerConfig.initialSettings!.bounds);
+      layerConfig.initialSettings.bounds = validateExtentWhenDefined(layerConfig.initialSettings.bounds);
     }
   }
 
@@ -141,13 +141,13 @@ export class WFS extends AbstractGeoViewVector {
       } else if (describeFeatureParamsValues['ows:Value'] === undefined) {
         outputFormat = describeFeatureParamsValues[0]['#text'] as string;
       } else {
-        outputFormat = (describeFeatureParamsValues as TypeJsonObject)['ows:Value']['#text'] as string;
+        outputFormat = describeFeatureParamsValues['ows:Value']['#text'] as string;
       }
     }
 
     const describeFeatureUrl = `${queryUrl}?service=WFS&request=DescribeFeatureType&version=${
       this.#version
-    }&outputFormat=${encodeURIComponent(outputFormat as string)}&typeName=${layerConfig.layerId}`;
+    }&outputFormat=${encodeURIComponent(outputFormat)}&typeName=${layerConfig.layerId}`;
 
     if (describeFeatureUrl && outputFormat === 'application/json') {
       const layerMetadata = await Fetch.fetchJsonAsObject(describeFeatureUrl);
@@ -200,7 +200,7 @@ export class WFS extends AbstractGeoViewVector {
     sourceOptions.url = (extent: Extent, resolution: number, projection: OLProjection): string => {
       // check if url contains metadata parameters for the getCapabilities request and reformat the urls
       let sourceUrl = layerConfig.source!.dataAccessPath!;
-      sourceUrl = sourceUrl!.indexOf('?') > -1 ? sourceUrl!.substring(0, sourceUrl!.indexOf('?')) : sourceUrl;
+      sourceUrl = sourceUrl.indexOf('?') > -1 ? sourceUrl.substring(0, sourceUrl.indexOf('?')) : sourceUrl;
       // GV: Use processUrlParameters('GetFeature') method of GeoView layer config to get the sourceUrl and append &typeName= to it.
       sourceUrl = `${sourceUrl}?service=WFS&request=getFeature&version=${this.#version}`;
       sourceUrl = `${sourceUrl}&typeName=${layerConfig.layerId}`;
@@ -240,8 +240,8 @@ export class WFS extends AbstractGeoViewVector {
    */
   static fetchMetadata(url: string): Promise<TypeJsonObject> {
     // Check if url contains metadata parameters for the getCapabilities request and reformat the urls
-    const getCapabilitiesUrl = url.indexOf('?') > -1 ? url.substring(url!.indexOf('?')) : `?service=WFS&request=GetCapabilities`;
-    const queryUrl = url!.indexOf('?') > -1 ? url.substring(0, url!.indexOf('?')) : url;
+    const getCapabilitiesUrl = url.indexOf('?') > -1 ? url.substring(url.indexOf('?')) : `?service=WFS&request=GetCapabilities`;
+    const queryUrl = url.indexOf('?') > -1 ? url.substring(0, url.indexOf('?')) : url;
 
     // Query XML to Json
     return Fetch.fetchXMLToJson(`${queryUrl}${getCapabilitiesUrl}`);
@@ -280,7 +280,7 @@ export class WFS extends AbstractGeoViewVector {
       });
     }
 
-    layerConfig.source.featureInfo!.outfields.forEach((outfield) => {
+    layerConfig.source.featureInfo.outfields.forEach((outfield) => {
       // eslint-disable-next-line no-param-reassign
       if (!outfield.alias) outfield.alias = outfield.name;
     });
@@ -288,7 +288,7 @@ export class WFS extends AbstractGeoViewVector {
     // INFO: WFS as geometry for first field, set name field to second value
     if (!layerConfig.source.featureInfo.nameField) {
       // eslint-disable-next-line no-param-reassign
-      layerConfig.source.featureInfo.nameField = layerConfig.source.featureInfo!.outfields[1].name;
+      layerConfig.source.featureInfo.nameField = layerConfig.source.featureInfo.outfields[1].name;
     }
   }
 
@@ -298,7 +298,7 @@ export class WFS extends AbstractGeoViewVector {
     const fieldDefinition =
       fieldDefinitions !== undefined ? fieldDefinitions.find((metadataEntry) => metadataEntry.name === fieldName) : undefined;
     if (!fieldDefinition) return 'string';
-    const fieldEntryType = (fieldDefinition.type as string).split(':').slice(-1)[0] as string;
+    const fieldEntryType = (fieldDefinition.type as string).split(':').slice(-1)[0];
     if (fieldEntryType === 'date') return 'date';
     if (['int', 'number'].includes(fieldEntryType)) return 'number';
     return 'string';

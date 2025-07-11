@@ -13,7 +13,12 @@
     "skipLibCheck": true,
     "jsx": "preserve",
     "allowJs": true,
-    "noEmit": true,
+    // "noEmit": true, I needed to comment this out and put `composite: true` to be able to build the plugins referencing geoview-core
+    "declaration": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "composite": true,
+    "outDir": "lib",
     "noUnusedLocals": true,
     "noImplicitReturns": true,
     "noImplicitOverride": true,
@@ -27,6 +32,6 @@
       "@public/*": ["./public/*"]
     }
   },
-  "include": ["src"],
+  "include": ["src", "public/locales/**/*.json", "schema.json", "src/**/*.json"],
   "exclude": ["node_modules"]
 }

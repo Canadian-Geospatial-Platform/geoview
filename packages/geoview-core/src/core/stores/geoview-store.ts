@@ -11,6 +11,7 @@ import { IDataTableState, initialDataTableState } from '@/core/stores/store-inte
 import { ITimeSliderState, initializeTimeSliderState } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { IGeochartState, initializeGeochartState } from '@/core/stores/store-interface-and-intial-values/geochart-state';
 import { ISwiperState, initializeSwiperState } from '@/core/stores/store-interface-and-intial-values/swiper-state';
+import { IDrawerState, initializeDrawerState } from './store-interface-and-intial-values/drawer-state';
 import { IUIState, initializeUIState } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
@@ -40,6 +41,7 @@ export interface IGeoviewState {
   geochartState: IGeochartState;
   timeSliderState: ITimeSliderState;
   swiperState: ISwiperState;
+  drawerState: IDrawerState;
 }
 
 export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore): IGeoviewState => {
@@ -60,10 +62,10 @@ export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore): IG
       // TO.DOCONT: Configurations should be as losely coupled as possible.
       for (let i = 0; i < (clonedConfig.map?.listOfGeoviewLayerConfig?.length || 0); i++) {
         // Serialize the GeoviewLayerConfig
-        const serialized = serializeTypeGeoviewLayerConfig(clonedConfig.map!.listOfGeoviewLayerConfig![i] as MapConfigLayerEntry); // TODO: refactor - remove cast
+        const serialized = serializeTypeGeoviewLayerConfig(clonedConfig.map.listOfGeoviewLayerConfig[i] as MapConfigLayerEntry); // TODO: refactor - remove cast
 
         // Reassign
-        clonedConfig.map.listOfGeoviewLayerConfig![i] = serialized as never;
+        clonedConfig.map.listOfGeoviewLayerConfig[i] = serialized as never;
       }
 
       set({ mapConfig: clonedConfig, mapId: config.mapId });
@@ -84,6 +86,10 @@ export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore): IG
       if (config.footerBar?.tabs.core.includes('geochart')) set({ geochartState: initializeGeochartState(set, get) });
 
       if (config.corePackages?.includes('swiper')) set({ swiperState: initializeSwiperState(set, get) });
+      if (config.navBar?.includes('drawer')) {
+        set({ drawerState: initializeDrawerState(set, get) });
+        get().drawerState.setDefaultConfigValues(config);
+      }
     },
 
     // core states

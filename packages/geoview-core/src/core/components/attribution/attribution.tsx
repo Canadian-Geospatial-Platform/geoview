@@ -80,8 +80,8 @@ export const Attribution = memo(function Attribution(): JSX.Element {
         onClick={handleOpenPopover}
         className={open ? 'active' : ''}
         tooltipPlacement="top"
-        tooltip={t('mapctrl.attribution.tooltip') as string}
-        aria-label={t('mapctrl.attribution.tooltip') as string}
+        tooltip={t('mapctrl.attribution.tooltip')!}
+        aria-label={t('mapctrl.attribution.tooltip')!}
         sx={buttonStyles}
       >
         <MoreHorizIcon />

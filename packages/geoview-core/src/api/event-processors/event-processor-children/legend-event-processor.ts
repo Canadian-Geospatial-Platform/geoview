@@ -7,6 +7,7 @@ import {
   layerEntryIsGroupLayer,
   CONST_LAYER_TYPES,
   TypeGeoviewLayerType,
+  TypeTemporalDimension,
 } from '@/api/config/types/map-schema-types';
 import { TypeLegendLayer, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import { TypeWmsLegend, isImageStaticLegend, isVectorLegend, isWmsLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -15,7 +16,8 @@ import { ILayerState, TypeLegend, TypeLegendResultSetEntry } from '@/core/stores
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { LayerNotFoundError } from '@/core/exceptions/layer-exceptions';
+import { LayerNotFoundError, LayerWrongTypeError } from '@/core/exceptions/layer-exceptions';
+import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -199,8 +201,38 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     const layer = layerApi.getGeoviewLayer(layerPath);
     if (!layer) throw new LayerNotFoundError(layerPath);
 
+    // If not a GVLayer
+    if (!(layer instanceof AbstractGVLayer)) throw new LayerWrongTypeError(layerPath, layer.getLayerName());
+
     // Get extent from features calling the GV Layer method
     return layer.getExtentFromFeatures(objectIds, layerApi.mapViewer.getProjection(), outfield);
+  }
+
+  /**
+   * Retrieves the temporal dimension information for a specific layer.
+   *
+   * @param {string} mapId - The unique identifier of the map instance.
+   * @param {string} layerPath - The path to the layer.
+   * @returns {TypeTemporalDimension | undefined} - The temporal dimension information of the layer, or `undefined` if not available.
+   *
+   * @description
+   * This method fetches the Geoview layer for the specified layer path and checks if it has a `getTemporalDimension` method.
+   * If the method exists, it retrieves the temporal dimension information for the layer.
+   * If the layer doesn't support temporal dimensions, the method returns `undefined`.
+   *
+   * @throws {LayerNotFoundError} - If the specified layer cannot be found.
+   */
+  static getLayerTemporalDimension(mapId: string, layerPath: string): TypeTemporalDimension | undefined {
+    // Get the layer api
+    const layerApi = MapEventProcessor.getMapViewerLayerAPI(mapId);
+
+    // Get the layer
+    const layer = layerApi.getGeoviewLayer(layerPath);
+    if (!layer) throw new LayerNotFoundError(layerPath);
+
+    // Get the temporal dimension calling the GV Layer method, check if getTemporalDimension exists and is a function
+    if (layer instanceof AbstractGVLayer) return layer.getTemporalDimension();
+    return undefined;
   }
 
   static getLayerIconImage(layerLegend: TypeLegend | null): TypeLegendLayerItem[] | undefined {
@@ -542,26 +574,33 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
+   * Reload layer.
+   * @param {string} mapId - The ID of the map.
+   * @param {string} layerPath - The layer path of the layer to reload.
+   */
+  static reloadLayer(mapId: string, layerPath: string): void {
+    // Delete layer through layer API
+    MapEventProcessor.getMapViewerLayerAPI(mapId).reloadLayer(layerPath);
+  }
+
+  /**
    * Refresh layer and reset states.
    * @param {string} mapId - The ID of the map.
    * @param {string} layerPath - The layer path of the layer to refresh.
    */
   static refreshLayer(mapId: string, layerPath: string): void {
-    // Get base layer through layer API
-    const baseLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getOLLayer(layerPath);
+    // Get the layer through layer API
+    const layer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
 
-    // Refresh layer through layer API
-    if (baseLayer) MapEventProcessor.getMapViewerLayerAPI(mapId).refreshBaseLayer(baseLayer);
+    // Refresh the layer
+    layer?.refresh(MapEventProcessor.getMapViewer(mapId).getProjection());
 
     // TODO Update after refactor, layerEntryConfig will not know initial settings
     const layerEntryConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath);
 
     // Set the layer status to loading
-    layerEntryConfig?.setLayerStatusLoading();
-
-    // If layer is group, refresh child layers
-    if (layerEntryConfig && layerEntryIsGroupLayer(layerEntryConfig))
-      layerEntryConfig.listOfLayerEntryConfig.forEach((entryConfig) => this.refreshLayer(mapId, entryConfig.layerPath));
+    // TODO: Cleanup - Don't do this anymore, the loading status is handled automatically via the enhanced onLoading/onLoaded functions (2025-06-17)
+    // layerEntryConfig?.setLayerStatusLoading();
 
     // Reset layer states to original values
     const opacity = layerEntryConfig?.initialSettings.states?.opacity || 1;
@@ -656,7 +695,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     curLayers: TypeLegendLayer[],
     layerPath: string,
     opacity: number,
-    isChild = false
+    isChild: boolean = false
   ): void {
     const layer = LegendEventProcessor.findLayerByPath(curLayers, layerPath);
     if (layer) {
@@ -752,13 +791,13 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     // Get the style
     const layerStyle = layerConfig.layerStyle?.[geometryType];
     let filteredFeatures = features;
-    if (layerStyle !== undefined && layerStyle!.type === 'uniqueValue') {
+    if (layerStyle !== undefined && layerStyle.type === 'uniqueValue') {
       filteredFeatures = this.#processClassVisibilityUniqueValue(layerStyle, features);
-    } else if (layerStyle !== undefined && layerStyle!.type === 'classBreaks') {
+    } else if (layerStyle !== undefined && layerStyle.type === 'classBreaks') {
       filteredFeatures = this.#processClassVisibilityClassBreak(layerStyle, features);
     }
 
-    return filteredFeatures!;
+    return filteredFeatures;
   }
 
   /**
@@ -848,7 +887,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       (brk): ClassBreakPoint => ({
         minValue: brk.values[0] as number,
         maxValue: brk.values[1] as number,
-        visible: brk.visible as boolean,
+        visible: brk.visible,
       })
     );
 
@@ -864,7 +903,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         const breakPoint = breakPoints[mid];
 
         // Check if value falls within current break point's range
-        if (value >= breakPoint!.minValue && value <= breakPoint!.maxValue) {
+        if (value >= breakPoint.minValue && value <= breakPoint.maxValue) {
           // Found matching break point, return it
           return breakPoint;
         }

@@ -1,9 +1,10 @@
-import { Cast, TypeJsonObject, toJsonObject, AnySchemaObject } from 'geoview-core/src/api/config/types/config-types';
-import { AppBarPlugin } from 'geoview-core/src/api/plugin/appbar-plugin';
-import { AoiIcon } from 'geoview-core/src/ui/icons';
-import { IconButtonPropsExtend } from 'geoview-core/src/ui/icon-button/icon-button';
-import { TypePanelProps } from 'geoview-core/src/ui/panel/panel-types';
-import { AoiPanel } from './aoi-panel';
+import React from 'react'; // GV This import is to validate that we're on the right React at the end of the file
+import { TypeJsonObject, toJsonObject, AnySchemaObject } from 'geoview-core/api/config/types/config-types';
+import { AppBarPlugin } from 'geoview-core/api/plugin/appbar-plugin';
+import { AoiIcon } from 'geoview-core/ui/icons';
+import { IconButtonPropsExtend } from 'geoview-core/ui/icon-button/icon-button';
+import { TypePanelProps } from 'geoview-core/ui/panel/panel-types';
+import { AoiPanel, TypeAoiProps } from './aoi-panel';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-aoi-panel.json';
 
@@ -30,20 +31,32 @@ class AoiPanelPlugin extends AppBarPlugin {
   }
 
   /**
-   * translations object to inject to the viewer translations
+   * Overrides the default translations for the Plugin.
+   * @returns {TypeJsonObject} - The translations object for the particular Plugin.
    */
-  translations = toJsonObject({
-    en: {
-      AoiPanel: {
-        title: 'Area of Interest',
+  override defaultTranslations(): TypeJsonObject {
+    return {
+      en: {
+        AoiPanel: {
+          title: 'Area of Interest',
+        },
       },
-    },
-    fr: {
-      AoiPanel: {
-        title: "Région d'intérêt",
+      fr: {
+        AoiPanel: {
+          title: "Région d'intérêt",
+        },
       },
-    },
-  });
+    } as unknown as TypeJsonObject;
+  }
+
+  /**
+   * Overrides the getConfig in order to return the right type.
+   * @returns {TypeAoiProps} The AOI Propos
+   */
+  override getConfig(): TypeAoiProps {
+    // Redirect
+    return super.getConfig() as TypeAoiProps;
+  }
 
   override onCreateButtonProps(): IconButtonPropsExtend {
     // Button props
@@ -62,12 +75,12 @@ class AoiPanelPlugin extends AppBarPlugin {
       title: 'AoiPanel.title',
       icon: <AoiIcon />,
       width: 350,
-      status: this.configObj?.isOpen as boolean,
+      status: this.getConfig().isOpen,
     };
   }
 
   override onCreateContent = (): JSX.Element => {
-    return <AoiPanel mapId={this.pluginProps.mapId} config={this.configObj || {}} />;
+    return <AoiPanel mapId={this.pluginProps.mapId} config={this.getConfig()} />;
   };
 
   /**
@@ -78,6 +91,11 @@ class AoiPanelPlugin extends AppBarPlugin {
 
 export default AoiPanelPlugin;
 
-// Keep a reference to the AOI Panel Plugin as part of the geoviewPlugins property stored in the window object
-window.geoviewPlugins = window.geoviewPlugins || {};
-window.geoviewPlugins['aoi-panel'] = Cast<AoiPanelPlugin>(AoiPanelPlugin);
+// GV This if condition took over 3 days to investigate. It was giving errors on the app.geo.ca website with
+// GV some conflicting reacts being loaded on the page for some obscure reason.
+// Check if we're on the right react
+if (React === window.cgpv.reactUtilities.react) {
+  // Keep a reference to the AoiPanelPlugin Plugin as part of the geoviewPlugins property stored in the window object
+  window.geoviewPlugins = window.geoviewPlugins || {};
+  window.geoviewPlugins['aoi-panel'] = AoiPanelPlugin;
+} // Else ignore, don't keep it on the window, wait for the right react load

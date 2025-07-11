@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, Fragment, useMemo } from 'react';
+import { useEffect, useState, useCallback, Fragment, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
@@ -56,6 +56,7 @@ export function Shell(props: ShellProps): JSX.Element {
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
+  const shellRef = useRef<HTMLDivElement>();
 
   // State render additional components if added by api
   const [components, setComponents] = useState<Record<string, JSX.Element>>({});
@@ -96,7 +97,8 @@ export function Shell(props: ShellProps): JSX.Element {
     appHeight,
   });
 
-  // #region Handlers
+  // #region HANDLERS
+
   /**
    * Handles when a component is being added to the map
    * @param {MapComponentPayload} payload The map component being added
@@ -184,7 +186,22 @@ export function Shell(props: ShellProps): JSX.Element {
     setSnackbarOpen(false);
   }, []);
 
-  // #endregion Handlers
+  // #endregion HANDLERS
+
+  /**
+   * Scrolls the map into view when clicking on the map info area
+   * Uses smooth scrolling when available, or instant scrolling for users who prefer reduced motion
+   * This improves accessibility by allowing users to easily return focus to the map
+   */
+  const handleScrollShellIntoView = useCallback((): void => {
+    if (!shellRef.current) return;
+
+    const behaviorScroll = (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth') as ScrollBehavior;
+    shellRef.current.scrollIntoView({
+      behavior: behaviorScroll,
+      block: 'start',
+    });
+  }, []);
 
   // Mount component
   useEffect(() => {
@@ -221,12 +238,12 @@ export function Shell(props: ShellProps): JSX.Element {
         {t('keyboardnav.start')}
       </Link>
       <FocusTrap open={activeTrapGeoView}>
-        <Box id={`shell-${mapViewer.mapId}`} sx={sxClasses.shell} className="geoview-shell" tabIndex={-1} aria-hidden="true">
+        <Box ref={shellRef} id={`shell-${mapViewer.mapId}`} sx={sxClasses.shell} className="geoview-shell" tabIndex={-1} aria-hidden="true">
           <Box id={`map-${mapViewer.mapId}`} sx={sxClasses.mapShellContainer} className="mapContainer" ref={mapShellContainerRef}>
             <CircularProgress isLoaded={mapLoaded} />
             <CircularProgress isLoaded={!circularProgressActive} />
-            <AppBar api={mapViewer.appBarApi} />
-            <MapInfo />
+            <AppBar api={mapViewer.appBarApi} onScrollShellIntoView={handleScrollShellIntoView} />
+            <MapInfo onScrollShellIntoView={handleScrollShellIntoView} />
             <Box sx={sxClasses.mapContainer}>
               <Map viewer={mapViewer} />
             </Box>
@@ -240,7 +257,7 @@ export function Shell(props: ShellProps): JSX.Element {
               onClose={handleSnackBarClose}
             />
           </Box>
-          {geoviewConfig!.footerBar !== undefined && <FooterBar api={mapViewer.footerBarApi} />}
+          {geoviewConfig?.footerBar && <FooterBar api={mapViewer.footerBarApi} />}
           {Object.keys(mapViewer.modal.modals).map((modalId) => (
             <Modal
               key={modalId}
@@ -252,7 +269,7 @@ export function Shell(props: ShellProps): JSX.Element {
           ))}
           {/* modal section start */}
           <FocusTrapDialog mapId={mapViewer.mapId} focusTrapId={mapViewer.mapId} />
-          <ExportModal />
+          {mapLoaded && <ExportModal />}
           {focusItem.activeElementId === 'layerDataTable' && <DataTableModal />}
           {/* Show Feature Detail Modal when detail icon is clicked in datatable each row */}
           {focusItem.activeElementId === 'featureDetailDataTable' && <FeatureDetailModal />}

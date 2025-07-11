@@ -1,6 +1,6 @@
 {
   "name": "eslint-and-prettier-config",
-  "version": "1.0.0",
+  "version": "2.0.1",
   "description": "Eslint and prettier configuration file for the geoview project",
   "keywords": [
     "geoview",
@@ -10,8 +10,8 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "scripts": {
     "format": "prettier --write \"geoview-**/src/**/*.{ts,tsx,js}\"",
@@ -33,9 +33,7 @@
     "eslint-plugin-react": "^7.37.1",
     "eslint-plugin-react-hooks": "^4.3.0",
     "typescript": "^5.6.3",
-    "prettier": "^3.3.3"
-  },
-  "resolutions": {
-    "@types/react": "^18.2.0"
+    "prettier": "^3.3.3",
+    "react": "^18.3.1"
   }
 }

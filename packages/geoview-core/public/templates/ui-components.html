@@ -115,7 +115,7 @@
     <script>
       function createAndAddSliderComponent(domId, propsSlider) {
         // Create the react element
-        const compSlider = cgpv.react.createElement(cgpv.ui.elements.Slider, propsSlider);
+        const compSlider = cgpv.reactUtilities.react.createElement(cgpv.ui.elements.Slider, propsSlider);
 
         // Add a slider component and link it to a map with mapId props
         return cgpv.api.utilities.core.addUiComponent(domId, compSlider);
@@ -123,7 +123,7 @@
 
       function createAndUpdateSliderComponent(domId, propsSlider, root) {
         // Create the react element
-        const compSlider = cgpv.react.createElement(cgpv.ui.elements.Slider, propsSlider);
+        const compSlider = cgpv.reactUtilities.react.createElement(cgpv.ui.elements.Slider, propsSlider);
 
         // Update the component
         // GV Ideally, we'd like to reuse the root and just do root.render(), but it is unstable, because react doesn't know if you want to actually change the state inside the Slider component or not.
@@ -156,7 +156,7 @@
           // add a slider component and link it to a map with mapId props
           cgpv.api.utilities.core.addUiComponent(
             'UI1-rangeslider1',
-            cgpv.react.createElement(cgpv.ui.elements.Slider, {
+            cgpv.reactUtilities.createElement(cgpv.ui.elements.Slider, {
               mapId: 'map1',
               id: 'UI1-slider-flood',
               min: 1696,

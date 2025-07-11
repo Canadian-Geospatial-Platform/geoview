@@ -146,10 +146,10 @@ export class BasemapApi {
     },
   });
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onBasemapChangedHandlers: BasemapChangedDelegate[] = [];
 
-  // Keep all callback delegates references
+  /** Keep all callback delegates references */
   #onBasemapErrorHandlers: BasemapErrorDelegate[] = [];
 
   // #region OVERVIEW MAP
@@ -411,23 +411,15 @@ export class BasemapApi {
     this.#startBasemapCreationWatcher();
 
     if (coreBasemapOptions) {
-      // Create shaded layer
-      if (coreBasemapOptions.shaded && this.basemapsList[projectionCode].shaded) {
-        const shadedLayer = await this.#createBasemapLayer('shaded', this.basemapsList[projectionCode].shaded, defaultOpacity, true);
-        if (shadedLayer) {
-          basemapLayers.push(shadedLayer);
-          basemaplayerTypes.push('shaded');
-        }
-      }
-
       // Create transport layer
       if (coreBasemapOptions.basemapId === 'transport' && this.basemapsList[projectionCode].transport) {
         const transportLayer = await this.#createBasemapLayer(
           'transport',
           this.basemapsList[projectionCode].transport,
-          coreBasemapOptions.shaded ? 0.75 : defaultOpacity,
+          defaultOpacity,
           true
         );
+
         if (transportLayer) {
           basemapLayers.push(transportLayer);
           basemaplayerTypes.push('transport');
@@ -438,6 +430,20 @@ export class BasemapApi {
           defaultResolutions = transportLayer.resolutions;
           minZoom = transportLayer.minScale;
           maxZoom = transportLayer.maxScale;
+        }
+      }
+
+      // Create shaded layer
+      if (coreBasemapOptions.shaded && this.basemapsList[projectionCode].shaded) {
+        const shadedLayer = await this.#createBasemapLayer(
+          'shaded',
+          this.basemapsList[projectionCode].shaded,
+          coreBasemapOptions.basemapId === 'transport' ? 0.3 : defaultOpacity,
+          true
+        );
+        if (shadedLayer) {
+          basemapLayers.push(shadedLayer);
+          basemaplayerTypes.push('shaded');
         }
       }
 

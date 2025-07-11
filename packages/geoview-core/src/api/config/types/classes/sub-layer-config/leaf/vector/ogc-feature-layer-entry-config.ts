@@ -50,7 +50,7 @@ export class OgcFeatureLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     // We assign the metadataAccessPath of the GeoView layer to dataAccessPath.
     if (!this.source.dataAccessPath) this.source.dataAccessPath = geoviewLayerConfig.metadataAccessPath;
 
-    if (!this.source.dataProjection) this.source.dataProjection = Projection.PROJECTION_NAMES.LNGLAT;
+    if (!this.source.dataProjection) this.source.dataProjection = Projection.PROJECTION_NAMES.LONLAT;
   }
 
   // ===============
@@ -195,11 +195,11 @@ export class OgcFeatureLayerEntryConfig extends AbstractBaseLayerEntryConfig {
           type: fieldType as 'string' | 'number' | 'date',
           domain: null,
         };
-        this.source!.featureInfo!.outfields!.push(newOutfield);
+        this.source.featureInfo!.outfields!.push(newOutfield);
       });
     }
 
-    this.source.featureInfo!.outfields.forEach((outfield: TypeOutfields) => {
+    this.source.featureInfo.outfields.forEach((outfield: TypeOutfields) => {
       // eslint-disable-next-line no-param-reassign
       if (!outfield.alias) outfield.alias = outfield.name;
     });
@@ -207,7 +207,7 @@ export class OgcFeatureLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     // Set name field to first value
     if (!this.source.featureInfo.nameField) {
       // eslint-disable-next-line no-param-reassign
-      this.source.featureInfo.nameField = this.source.featureInfo!.outfields[0].name;
+      this.source.featureInfo.nameField = this.source.featureInfo.outfields[0].name;
     }
   }
 

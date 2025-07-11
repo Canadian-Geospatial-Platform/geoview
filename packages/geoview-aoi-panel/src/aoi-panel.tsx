@@ -1,6 +1,7 @@
-import { TypeWindow } from 'geoview-core/src/core/types/global-types';
-import { Extent } from 'geoview-core/src/api/config/types/map-schema-types';
-import { useMapStoreActions } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
+import { TypeWindow } from 'geoview-core/core/types/global-types';
+import { Extent } from 'geoview-core/api/config/types/map-schema-types';
+import { logger } from 'geoview-core/core/utils/logger';
+import { useMapStoreActions } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
 import { getSxClasses } from './area-of-interest-style';
 
 interface AoiPanelProps {
@@ -16,7 +17,7 @@ interface AoiItem {
 
 type AoiListItems = AoiItem[];
 
-type TypeAoiProps = {
+export type TypeAoiProps = {
   isOpen: boolean;
   aoiList: AoiListItems;
   version: string;
@@ -24,7 +25,7 @@ type TypeAoiProps = {
 
 export function AoiPanel(props: AoiPanelProps): JSX.Element {
   const { mapId, config } = props;
-  const aoiList = config.aoiList as AoiListItems;
+  const { aoiList } = config;
 
   const { cgpv } = window as TypeWindow;
   const { api, ui } = cgpv;
@@ -44,11 +45,17 @@ export function AoiPanel(props: AoiPanelProps): JSX.Element {
           <Card
             tabIndex={0}
             className="aoiCardThumbnail"
-            onClick={() =>
-              myMap.zoomToLngLatExtentOrCoordinate(aoiItem.extent, { maxZoom: 14 }).then(() => {
-                highlightBBox(myMap.convertExtentLngLatToMapProj(aoiItem.extent), false);
-              })
-            }
+            onClick={() => {
+              myMap
+                .zoomToLonLatExtentOrCoordinate(aoiItem.extent, { maxZoom: 14 })
+                .then(() => {
+                  highlightBBox(myMap.convertExtentLonLatToMapProj(aoiItem.extent), false);
+                })
+                .catch((error: unknown) => {
+                  // Log
+                  logger.logPromiseFailed('in zoomToLonLatExtentOrCoordinate', error);
+                });
+            }}
             // eslint-disable-next-line react/no-array-index-key
             key={index}
             title={aoiItem.aoiTitle}

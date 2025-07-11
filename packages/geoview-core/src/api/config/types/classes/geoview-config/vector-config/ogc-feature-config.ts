@@ -44,7 +44,7 @@ export class OgcFeatureLayerConfig extends AbstractGeoviewLayerConfig {
       [this.metadataAccessPath] = splitMetaDataAccessPath;
       if (splitMetaDataAccessPath[1]?.replaceAll('/', ''))
         this.listOfLayerEntryConfig = [
-          this.createLeafNode(toJsonObject({ layerId: splitMetaDataAccessPath[1].replaceAll('/', '') }), this)!,
+          this.createLeafNode(toJsonObject({ layerId: splitMetaDataAccessPath[1].replaceAll('/', '') }), this),
         ];
     }
   }
@@ -183,7 +183,7 @@ export class OgcFeatureLayerConfig extends AbstractGeoviewLayerConfig {
       layerId,
       layerName: layerFound.description,
     });
-    return this.createLeafNode(layerConfig, this, parentNode)!;
+    return this.createLeafNode(layerConfig, this, parentNode);
   }
 
   // #endregion OVERRIDE

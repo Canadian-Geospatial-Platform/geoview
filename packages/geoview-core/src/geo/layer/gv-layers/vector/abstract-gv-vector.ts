@@ -12,6 +12,7 @@ import { Pixel } from 'ol/pixel';
 import { Projection as OLProjection } from 'ol/proj';
 import isEqual from 'lodash/isEqual';
 
+import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { FilterNodeType, NodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
@@ -30,6 +31,12 @@ import { TypeDateFragments } from '@/core/utils/date-mgt';
  * Abstract Geoview Layer managing an OpenLayer vector type layer.
  */
 export abstract class AbstractGVVector extends AbstractGVLayer {
+  /** Indicates if the style has been applied on the layer yet */
+  styleApplied: boolean = false;
+
+  /** Keep all callback delegate references */
+  #onStyleAppliedHandlers: StyleAppliedDelegate[] = [];
+
   /**
    * Constructs a GeoView Vector layer to manage an OpenLayer layer.
    * @param {VectorSource<Feature<Geometry>>} olSource - The OpenLayer source.
@@ -46,13 +53,20 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       properties: { layerConfig },
       source: olSource,
       style: (feature) => {
-        return AbstractGVVector.calculateStyleForFeature(
+        // Calculate the style for the feature
+        const style = AbstractGVVector.calculateStyleForFeature(
           this as AbstractGVLayer,
-          feature as FeatureLike,
+          feature,
           label,
           layerConfig.filterEquation,
           layerConfig.legendFilterIsOff
         );
+
+        // Set the style applied, throwing a style applied event in the process
+        this.setStyleApplied(true);
+
+        // Return the style
+        return style;
       },
     };
 
@@ -62,8 +76,16 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     // Apply the layer filter right away if any
     AbstractGVVector.applyViewFilterOnConfig(layerConfig, layerConfig.getExternalFragmentsOrder(), undefined, layerConfig.layerFilter);
 
+    // If the layer is initially not visible, make it visible until the style is set so we have a style for the legend
+    this.onLayerFirstLoaded(() => {
+      if (!this.getStyle() && !this.getVisible()) {
+        this.onLayerStyleChanged(() => this.setVisible(false));
+        this.setVisible(true);
+      }
+    });
+
     // Create and set the OpenLayer layer
-    this.olLayer = new VectorLayer<VectorSource<Feature<Geometry>>>(layerOptions);
+    this.setOLLayer(new VectorLayer<VectorSource<Feature<Geometry>>>(layerOptions));
   }
 
   /**
@@ -167,22 +189,22 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Overrides the return of feature information at the provided long lat coordinate.
-   * @param {OLMap} map - The Map where to get Feature Info At LongLat from.
-   * @param {Coordinate} lnglat - The coordinate that will be used by the query.
+   * @param {OLMap} map - The Map where to get Feature Info At LonLat from.
+   * @param {Coordinate} lonlat - The coordinate that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} abortController - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
-  protected override getFeatureInfoAtLongLat(
+  protected override getFeatureInfoAtLonLat(
     map: OLMap,
-    lnglat: Coordinate,
+    lonlat: Coordinate,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     queryGeometry: boolean = true,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoEntry[]> {
-    // Convert Coordinates LngLat to map projection
-    const projCoordinate = Projection.transformFromLonLat(lnglat, map.getView().getProjection());
+    // Convert Coordinates LonLat to map projection
+    const projCoordinate = Projection.transformFromLonLat(lonlat, map.getView().getProjection());
 
     // Redirect to getFeatureInfoAtPixel
     return this.getFeatureInfoAtPixel(map, map.getPixelFromCoordinate(projCoordinate));
@@ -243,12 +265,12 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @returns {Promise<Extent>} The extent of the features, if available.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  override getExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
+  override onGetExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
     // Get the feature source
-    const source = this.getOLLayer().getSource();
+    const source = this.getOLSource();
 
     // Get array of features and only keep the ones we could find by id
-    const requestedFeatures = objectIds.map((id) => source?.getFeatureById(id)).filter((feature) => !!feature);
+    const requestedFeatures = objectIds.map((id) => source.getFeatureById(id)).filter((feature) => !!feature);
 
     // Determine max extent from features
     let calculatedExtent: Extent | undefined;
@@ -257,12 +279,16 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       const geom = feature.getGeometry();
       if (geom) {
         // Get the extent
-        const extent = geom.getExtent();
-        if (extent) {
-          // If calculatedExtent has not been defined, set it to extent
-          if (!calculatedExtent) calculatedExtent = extent;
-          else getExtentUnion(calculatedExtent, extent);
+        let extent = geom.getExtent();
+        const srcProjection = source.getProjection();
+        if (srcProjection) {
+          // Make sure to project the extent in the wanted projection
+          extent = Projection.transformExtentFromProj(extent, srcProjection, outProjection);
         }
+
+        // If calculatedExtent has not been defined, set it to extent
+        if (!calculatedExtent) calculatedExtent = extent;
+        else getExtentUnion(calculatedExtent, extent);
       }
     });
 
@@ -272,6 +298,48 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     // Resolve
     return Promise.resolve(calculatedExtent);
   }
+
+  /**
+   * Sets the style applied flag indicating when a style has been applied for the AbstractGVVector via the style callback function.
+   * @param {boolean} styleApplied - Indicates if the style has been applied on the AbstractGVVector.
+   */
+  setStyleApplied(styleApplied: boolean): void {
+    const changed = this.styleApplied !== styleApplied;
+    this.styleApplied = styleApplied;
+    if (changed) this.#emitStyleApplied({ styleApplied });
+  }
+
+  // #region EVENTS
+
+  /**
+   * Emits an event to all handlers.
+   * @param {StyleAppliedEvent} event The event to emit
+   * @private
+   */
+  #emitStyleApplied(event: StyleAppliedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onStyleAppliedHandlers, event);
+  }
+
+  /**
+   * Registers a style applied event handler.
+   * @param {StyleAppliedDelegate} callback The callback to be executed whenever the event is emitted
+   */
+  onStyleApplied(callback: StyleAppliedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onStyleAppliedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a style applied event handler.
+   * @param {StyleAppliedDelegate} callback The callback to stop being called whenever the event is emitted
+   */
+  offStyleApplied(callback: StyleAppliedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onStyleAppliedHandlers, callback);
+  }
+
+  // #endregion EVENTS
 
   /**
    * Calculates a style for the given feature, based on the layer current style and options.
@@ -384,3 +452,16 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     }
   }
 }
+
+/**
+ * Define an event for the delegate
+ */
+export type StyleAppliedEvent = {
+  // The style applied indicator
+  styleApplied: boolean;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+export type StyleAppliedDelegate = EventDelegateBase<AbstractGVVector, StyleAppliedEvent, void>;

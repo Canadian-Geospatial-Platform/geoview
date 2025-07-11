@@ -86,7 +86,7 @@ const FeatureHeader = memo(function FeatureHeader({ iconSrc, name, hasGeometry, 
         </Tooltip>
         <IconButton
           color="primary"
-          tooltip={t('details.zoomTo') as string}
+          tooltip={t('details.zoomTo')!}
           tooltipPlacement="top"
           disabled={!hasGeometry}
           onClick={onZoomIn}
@@ -178,7 +178,7 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
           await delay(150);
 
           // Add (back?) a click marker, and bbox extent who will disapear
-          showClickMarker({ lnglat: newCenter });
+          showClickMarker({ lonlat: newCenter });
           highlightBBox(featureData.extent!, false);
         })
         .catch((error: unknown) => {
