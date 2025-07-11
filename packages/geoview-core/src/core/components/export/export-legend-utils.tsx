@@ -6,6 +6,8 @@ import { TypeLegendLayer } from '@/core/components/layers/types';
 import { logger } from '@/core/utils/logger';
 import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
 import { getSxClasses } from './export-modal-style';
+import { useTimeSliderLayers } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+import { DateMgt } from '@/core/utils/date-mgt';
 
 interface LegendContainerProps {
   layers: TypeLegendLayer[];
@@ -15,6 +17,9 @@ interface LegendContainerProps {
  * LegendContainer component to display a list of layers and their items.
  */
 function LegendContainerComponent({ layers }: LegendContainerProps): JSX.Element {
+  const timeSliderLayers = useTimeSliderLayers();
+
+  // Log the layers for debugging purposes
   logger.logTraceRender('components/legend/legend-export-utils', layers);
   const theme = useTheme();
   const mapId = useGeoViewMapId();
@@ -39,11 +44,16 @@ function LegendContainerComponent({ layers }: LegendContainerProps): JSX.Element
     if (!imgUrl) return <> </>;
     return <img src={imgUrl} alt={alt} style={sxClasses.legendItemIcon} />;
   };
+
   // Recursive function to render a layer and its children/items
   const renderLayer = (layer: TypeLegendLayer): JSX.Element => {
     const layerVisibility = MapEventProcessor.getMapVisibilityFromOrderedLayerInfo(mapId, layer.layerPath);
 
     if (layerVisibility === false) return <> </>;
+
+    // Default timeSliderInfo to empty object if timeSliderLayers is undefined
+    const timeSliderInfo = timeSliderLayers?.[layer.layerPath] ?? {};
+    const hasTimeRange = timeSliderInfo?.range?.length > 0;
 
     return (
       <div key={layer.layerPath} style={sxClasses.legendSpacing}>
@@ -51,6 +61,15 @@ function LegendContainerComponent({ layers }: LegendContainerProps): JSX.Element
         <div style={sxClasses.legendTitle}>
           <span>{layer.layerName}</span>
         </div>
+        {/* Time range if available */}
+        {hasTimeRange && (
+          <div style={sxClasses.toLine}>
+            <span style={{ ...sxClasses.legendItem, fontStyle: 'italic' }}>
+              {DateMgt.formatDate(timeSliderInfo.range[0], 'YYYY-MM-DD')} /{' '}
+              {DateMgt.formatDate(timeSliderInfo.range[timeSliderInfo.range.length / -1], 'YYYY-MM-DD')}
+            </span>
+          </div>
+        )}
         <div>
           <span style={sxClasses.toLine}>{renderWMSLayerImage(layer, 'icon')}</span>
         </div>

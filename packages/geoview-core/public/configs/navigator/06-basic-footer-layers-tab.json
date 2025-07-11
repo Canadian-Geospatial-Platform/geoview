@@ -140,7 +140,7 @@
   "components": [],
   "footerBar": {
     "tabs": {
-      "core": ["legend", "layers", "details", "data-table"]
+      "core": ["legend", "layers", "details", "data-table", "time-slider"]
     },
     "selectedTab": "layers",
     "selectedLayersLayerPath": "airborne_radioactivity/1"
