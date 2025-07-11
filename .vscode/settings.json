@@ -3,6 +3,8 @@
   "editor.renderWhitespace": "all",
   "editor.tabSize": 2,
   "editor.hover.delay": 1000,
+  "eslint.useESLintClass": true,
+  "eslint.validate": ["typescript", "typescriptreact"],
   "window.title": "${activeEditorMedium}${separator}${rootName}${separator}${profileName}",
   "typescript.preferences.autoImportFileExcludePatterns": [
     "packages/geoview-core/src/core/types/external-types.ts",
@@ -77,3 +79,4 @@
     }
   ],
 }
+
