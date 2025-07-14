@@ -12,8 +12,9 @@ import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
  */
 export abstract class AbstractGVRaster extends AbstractGVLayer {
   /**
-   * Overrides the get of the OpenLayers Layer
-   * @returns The OpenLayers Layer
+   * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
+   * @override
+   * @returns {BaseImageLayer<ImageSource, LayerRenderer>} The strongly-typed OpenLayers type.
    */
   // Disabling 'any', because that's how it is in OpenLayers
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -55,8 +55,9 @@ export class GVWMS extends AbstractGVRaster {
   }
 
   /**
-   * Overrides the get of the OpenLayers Layer
-   * @returns {ImageLayer<ImageWMS>} The OpenLayers Layer
+   * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
+   * @override
+   * @returns {ImageLayer<ImageWMS>} The strongly-typed OpenLayers type.
    */
   override getOLLayer(): ImageLayer<ImageWMS> {
     // Call parent and cast
@@ -64,8 +65,9 @@ export class GVWMS extends AbstractGVRaster {
   }
 
   /**
-   * Overrides the get of the OpenLayers Layer Source
-   * @returns {ImageWMS} The OpenLayers Layer Source
+   * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
+   * @override
+   * @returns {ImageWMS} The ImageWMS source instance associated with this layer.
    */
   override getOLSource(): ImageWMS {
     // Get source from OL
@@ -73,8 +75,9 @@ export class GVWMS extends AbstractGVRaster {
   }
 
   /**
-   * Overrides the get of the layer configuration associated with the layer.
-   * @returns {OgcWmsLayerEntryConfig} The layer configuration or undefined if not found.
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {OgcWmsLayerEntryConfig} The strongly-typed layer configuration specific to this group layer.
    */
   override getLayerConfig(): OgcWmsLayerEntryConfig {
     // Call parent and cast

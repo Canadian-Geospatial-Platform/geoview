@@ -89,8 +89,9 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   }
 
   /**
-   * Overrides the get of the OpenLayers Layer
-   * @returns {VectorLayer<Feature>} The OpenLayers Layer
+   * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
+   * @override
+   * @returns {VectorLayer<VectorSource>} The strongly-typed OpenLayers type.
    */
   override getOLLayer(): VectorLayer<VectorSource> {
     // Call parent and cast
@@ -98,8 +99,9 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   }
 
   /**
-   * Overrides the get of the OpenLayers Layer Source
-   * @returns {VectorSource} The OpenLayers Layer Source
+   * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
+   * @override
+   * @returns {VectorSource} The VectorSource source instance associated with this layer.
    */
   override getOLSource(): VectorSource {
     // Get source from OL
@@ -107,8 +109,9 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   }
 
   /**
-   * Overrides the get of the layer configuration associated with the layer.
-   * @returns {VectorLayerEntryConfig} The layer configuration or undefined if not found.
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {VectorLayerEntryConfig} The strongly-typed layer configuration specific to this group layer.
    */
   override getLayerConfig(): VectorLayerEntryConfig {
     // Call parent and cast
@@ -120,7 +123,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @param {string} fieldName - The field name for which we want to get the type.
    * @returns {TypeOutfieldsType} The type of the field.
    */
-  protected override getFieldType(fieldName: string): TypeOutfieldsType {
+  protected override onGetFieldType(fieldName: string): TypeOutfieldsType {
     // Redirect
     return featureInfoGetFieldType(this.getLayerConfig(), fieldName);
   }
