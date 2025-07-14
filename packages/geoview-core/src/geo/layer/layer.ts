@@ -370,7 +370,7 @@ export class LayerApi {
     const validGeoviewLayerConfigs = this.#deleteDuplicateAndMultipleUuidGeoviewLayerConfig(mapConfigLayerEntries);
 
     // Make sure to convert all map config layer entry into a GeoviewLayerConfig
-    const promisesOfGeoviewLayers = LayerApi.convertMapConfigToGeoviewLayerConfig(
+    const promisesOfGeoviewLayers = LayerApi.convertMapConfigsToGeoviewLayerConfig(
       this.getMapId(),
       this.mapViewer.getDisplayLanguage(),
       mapConfigLayerEntries,
@@ -2289,20 +2289,54 @@ export class LayerApi {
   // #region STATIC
 
   /**
-   * Converts a list of map configuration layer entries into an array of promises,
-   * each resolving to one or more GeoView layer configuration objects.
-   *
+   * Converts a map configuration layer entry into a promise of a GeoView layer configuration.
    * Depending on the type of the layer entry (e.g., GeoCore, Shapefile, or standard GeoView),
    * this function processes each entry accordingly and wraps the result in a `Promise`.
    * Errors encountered during asynchronous operations are handled via a provided callback.
-   *
+   * @param {string} mapId - The unique identifier of the map instance this configuration applies to.
+   * @param {TypeDisplayLanguage} language - The language setting used for layer labels and metadata.
+   * @param {MapConfigLayerEntry} entry - The array of layer entry to convert.
+   * @param {(mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => void} errorCallback - Callback invoked when an error occurs during layer processing.
+   * @returns {Promise<TypeGeoviewLayerConfig[]>} The promise resolving to an array of `TypeGeoviewLayerConfig` objects.
+   */
+  static convertMapConfigToGeoviewLayerConfig(
+    mapId: string,
+    language: TypeDisplayLanguage,
+    entry: MapConfigLayerEntry,
+    errorCallback: (mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => void
+  ): Promise<TypeGeoviewLayerConfig[]> {
+    // Depending on the map config layer entry type
+    let promise: Promise<TypeGeoviewLayerConfig[]>;
+    if (mapConfigLayerEntryIsGeoCore(entry)) {
+      // Working with a GeoCore layer
+      promise = GeoCore.createLayersFromUUID(entry.geoviewLayerId, mapId, language, entry);
+    } else if (mapConfigLayerEntryIsShapefile(entry)) {
+      // Working with a shapefile layer
+      promise = ShapefileReader.convertShapefileConfigToGeoJson(entry);
+    } else {
+      // Working with a standard GeoView layer
+      promise = Promise.resolve([entry]);
+    }
+
+    // Prepare to catch errors
+    promise.catch((error) => {
+      // Callback
+      errorCallback?.(entry, error);
+    });
+
+    return promise;
+  }
+
+  /**
+   * Converts a list of map configuration layer entries into an array of promises,
+   * each resolving to one or more GeoView layer configuration objects.
    * @param {string} mapId - The unique identifier of the map instance this configuration applies to.
    * @param {TypeDisplayLanguage} language - The language setting used for layer labels and metadata.
    * @param {MapConfigLayerEntry[]} mapConfigLayerEntries - The array of layer entries to convert.
    * @param {(mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => void} errorCallback - Callback invoked when an error occurs during layer processing.
    * @returns {Promise<TypeGeoviewLayerConfig[]>[]} An array of promises, each resolving to an array of `TypeGeoviewLayerConfig` objects.
    */
-  static convertMapConfigToGeoviewLayerConfig(
+  static convertMapConfigsToGeoviewLayerConfig(
     mapId: string,
     language: TypeDisplayLanguage,
     mapConfigLayerEntries: MapConfigLayerEntry[],
@@ -2310,26 +2344,8 @@ export class LayerApi {
   ): Promise<TypeGeoviewLayerConfig[]>[] {
     // For each layer entry
     return mapConfigLayerEntries.map((entry) => {
-      // Depending on the map config layer entry type
-      let promise: Promise<TypeGeoviewLayerConfig[]>;
-      if (mapConfigLayerEntryIsGeoCore(entry)) {
-        // Working with a GeoCore layer
-        promise = GeoCore.createLayersFromUUID(entry.geoviewLayerId, mapId, language, entry);
-      } else if (mapConfigLayerEntryIsShapefile(entry)) {
-        // Working with a shapefile layer
-        promise = ShapefileReader.convertShapefileConfigToGeoJson(entry);
-      } else {
-        // Working with a standard GeoView layer
-        promise = Promise.resolve([entry]);
-      }
-
-      // Prepare to catch errors
-      promise.catch((error) => {
-        // Callback
-        errorCallback?.(entry, error);
-      });
-
-      return promise;
+      // Redirect
+      return LayerApi.convertMapConfigToGeoviewLayerConfig(mapId, language, entry, errorCallback);
     });
   }
 
