@@ -219,7 +219,7 @@ export class EsriFeature extends AbstractGeoViewVector {
         schemaTag: CONST_LAYER_TYPES.ESRI_FEATURE,
         entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
         layerId: `${layerEntry.index}`,
-        layerName: `${layerEntry.layerName}` || `${layerEntry.id}`,
+        layerName: `${layerEntry.layerName || layerEntry.id}`,
         source: {
           format: 'EsriJSON',
           dataAccessPath: layerEntry.dataAccessPath || undefined,

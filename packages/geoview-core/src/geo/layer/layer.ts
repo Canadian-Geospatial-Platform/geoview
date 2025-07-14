@@ -9,7 +9,7 @@ import { FeatureHighlight } from '@/geo/map/feature-highlight';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 import { ConfigValidation } from '@/core/utils/config/config-validation';
-import { generateId, whenThisThen } from '@/core/utils/utilities';
+import { generateId, isValidUUID, whenThisThen } from '@/core/utils/utilities';
 import {
   ConfigBaseClass,
   LayerStatusChangedDelegate as ConfigLayerStatusChangedDelegate,
@@ -100,7 +100,6 @@ import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processo
 import { TypeLegendItem } from '@/core/components/layers/types';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
-import { ConfigApi } from '@/api/config/config-api';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { LayerGeoCoreError } from '@/core/exceptions/geocore-exceptions';
 import { ShapefileReader } from '@/core/utils/config/reader/shapefile-reader';
@@ -396,23 +395,23 @@ export class LayerApi {
     promisedLayers.forEach((promise) => {
       // If fullfilled
       if (promise.status === 'fulfilled') {
-        // For each Geoview Layer Config
-        promise.value.forEach((geoviewLayerConfig) => {
-          try {
-            // Generate array of layer order information
-            const layerInfos = LayerApi.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
-            orderedLayerInfos.push(...layerInfos);
+        // Get the geoview layer config
+        const geoviewLayerConfig = promise.value;
 
-            // Add it
-            this.addGeoviewLayer(geoviewLayerConfig);
-          } catch (error: unknown) {
-            // An error happening here likely means a particular, trivial, config error.
-            // The majority of typicaly errors happen in the addGeoviewLayer promise catcher, not here.
+        try {
+          // Generate array of layer order information
+          const layerInfos = LayerApi.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
+          orderedLayerInfos.push(...layerInfos);
 
-            // Show the error(s)
-            this.showLayerError(error, geoviewLayerConfig.geoviewLayerId);
-          }
-        });
+          // Add it
+          this.addGeoviewLayer(geoviewLayerConfig);
+        } catch (error: unknown) {
+          // An error happening here likely means a particular, trivial, config error.
+          // The majority of typicaly errors happen in the addGeoviewLayer promise catcher, not here.
+
+          // Show the error(s)
+          this.showLayerError(error, geoviewLayerConfig.geoviewLayerId);
+        }
       } else {
         // Depending on the error
         let uuids;
@@ -498,11 +497,15 @@ export class LayerApi {
         };
 
       // Create the layers from the UUID
-      const layers = await GeoCore.createLayersFromUUID(uuid, this.getMapId(), this.mapViewer.getDisplayLanguage(), optionalConfig);
-      layers.forEach((geoviewLayerConfig) => {
-        // Redirect
-        this.addGeoviewLayer(geoviewLayerConfig);
-      });
+      const geoviewLayerConfig = await GeoCore.createLayerConfigFromUUID(
+        uuid,
+        this.getMapId(),
+        this.mapViewer.getDisplayLanguage(),
+        optionalConfig
+      );
+
+      // Add the geoview layer
+      this.addGeoviewLayer(geoviewLayerConfig);
     } catch (error: unknown) {
       // An error happening here likely means an issue with the UUID or a trivial config error.
       // The majority of typicaly errors happen in the addGeoviewLayer promise catcher, not here.
@@ -719,7 +722,7 @@ export class LayerApi {
       configs
         .filter((config) => {
           // Filter to just Geocore layers and not child layers
-          if (ConfigApi.isValidUUID(config.geoviewLayerConfig.geoviewLayerId) && config.parentLayerConfig === undefined) {
+          if (isValidUUID(config.geoviewLayerConfig.geoviewLayerId) && config.parentLayerConfig === undefined) {
             return true;
           }
           return false;
@@ -1806,10 +1809,7 @@ export class LayerApi {
 
       // If the map index of a parent layer path has been set and it is a valid UUID, the ordered layer info is a place holder
       // registered while the geocore layer info was fetched
-      if (
-        MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.getMapId(), parentLayerPath) !== -1 &&
-        ConfigApi.isValidUUID(parentLayerPath)
-      ) {
+      if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.getMapId(), parentLayerPath) !== -1 && isValidUUID(parentLayerPath)) {
         // Replace the placeholder ordered layer info
         MapEventProcessor.replaceOrderedLayerInfo(this.getMapId(), layerConfig, parentLayerPath);
       } else if (layerConfig.parentLayerConfig) {
@@ -2297,25 +2297,25 @@ export class LayerApi {
    * @param {TypeDisplayLanguage} language - The language setting used for layer labels and metadata.
    * @param {MapConfigLayerEntry} entry - The array of layer entry to convert.
    * @param {(mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => void} errorCallback - Callback invoked when an error occurs during layer processing.
-   * @returns {Promise<TypeGeoviewLayerConfig[]>} The promise resolving to an array of `TypeGeoviewLayerConfig` objects.
+   * @returns {Promise<TypeGeoviewLayerConfig>} The promise resolving to a `TypeGeoviewLayerConfig` object.
    */
   static convertMapConfigToGeoviewLayerConfig(
     mapId: string,
     language: TypeDisplayLanguage,
     entry: MapConfigLayerEntry,
     errorCallback: (mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => void
-  ): Promise<TypeGeoviewLayerConfig[]> {
+  ): Promise<TypeGeoviewLayerConfig> {
     // Depending on the map config layer entry type
-    let promise: Promise<TypeGeoviewLayerConfig[]>;
+    let promise: Promise<TypeGeoviewLayerConfig>;
     if (mapConfigLayerEntryIsGeoCore(entry)) {
       // Working with a GeoCore layer
-      promise = GeoCore.createLayersFromUUID(entry.geoviewLayerId, mapId, language, entry);
+      promise = GeoCore.createLayerConfigFromUUID(entry.geoviewLayerId, mapId, language, entry);
     } else if (mapConfigLayerEntryIsShapefile(entry)) {
       // Working with a shapefile layer
       promise = ShapefileReader.convertShapefileConfigToGeoJson(entry);
     } else {
       // Working with a standard GeoView layer
-      promise = Promise.resolve([entry]);
+      promise = Promise.resolve(entry);
     }
 
     // Prepare to catch errors
@@ -2341,7 +2341,7 @@ export class LayerApi {
     language: TypeDisplayLanguage,
     mapConfigLayerEntries: MapConfigLayerEntry[],
     errorCallback: (mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => void
-  ): Promise<TypeGeoviewLayerConfig[]>[] {
+  ): Promise<TypeGeoviewLayerConfig>[] {
     // For each layer entry
     return mapConfigLayerEntries.map((entry) => {
       // Redirect
@@ -2452,10 +2452,8 @@ export class LayerApi {
       case 'geoCore':
         // For GeoCore, we guild the Config from the Geocore service
         // eslint-disable-next-line no-case-declarations
-        const layerConfigs = await GeoCore.createLayersFromUUID(layerURL, mapId, language);
-        // Return the first one (only one)
-        // eslint-disable-next-line no-case-declarations
-        const layerConfig = layerConfigs[0];
+        const layerConfig = await GeoCore.createLayerConfigFromUUID(layerURL, mapId, language);
+
         // Now, loop back to create the correct config based on the type
         return LayerApi.createInitConfigFromType(
           layerConfig.geoviewLayerId,

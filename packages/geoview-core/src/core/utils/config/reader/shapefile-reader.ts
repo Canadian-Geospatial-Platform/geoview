@@ -15,7 +15,7 @@ export class ShapefileReader {
    * @param {TypeShapefileLayerConfig} layerConfig - the config to convert
    * @returns {Promise<TypeGeoJSONLayerConfig>} A geojson layer config
    */
-  static async convertShapefileConfigToGeoJson(layerConfig: ShapefileLayerConfig): Promise<TypeGeoJSONLayerConfig[]> {
+  static async convertShapefileConfigToGeoJson(layerConfig: ShapefileLayerConfig): Promise<TypeGeoJSONLayerConfig> {
     // shp expects either a url, path to a .zip, or an array buffer, so file url must be converted
     let shapefileURL: ArrayBuffer | string = layerConfig.metadataAccessPath;
     let filename: string | undefined;
@@ -84,7 +84,7 @@ export class ShapefileReader {
       geoviewLayerConfig.listOfLayerEntryConfig = [layerEntryConfig];
     }
 
-    return [geoviewLayerConfig];
+    return geoviewLayerConfig;
   }
 
   // /**

@@ -226,7 +226,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         schemaTag: CONST_LAYER_TYPES.ESRI_DYNAMIC,
         entryType: CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE,
         layerId: `${layerEntry.index}`,
-        layerName: `${layerEntry.layerName}` || `${layerEntry.layerId}`,
+        layerName: `${layerEntry.layerName || layerEntry.layerId}`,
         source: {
           dataAccessPath: geoviewLayerConfig.metadataAccessPath,
         },
