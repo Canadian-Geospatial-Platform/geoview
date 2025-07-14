@@ -136,7 +136,6 @@ export function Swiper(props: SwiperProps): JSX.Element {
         swiperValueVertical.current = (x / mapSize.current[0]) * 100;
         setXPositionVertical(x);
         setYPositionVertical(0);
-        logger.logDebug('SWIPER - onStop', 'Vertical swiper value', swiperValueVertical.current, 'x position', x);
       } else {
         const [, y] = getSwiperStyle();
         swiperValueHorizontal.current = (y / mapSize.current[1]) * 100;
