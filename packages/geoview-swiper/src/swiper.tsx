@@ -29,6 +29,9 @@ export type ConfigProps = {
   orientation: string;
 };
 
+const CONST_LAYERS_WAIT = 30000; // 30 seconds
+const CONST_LAYERS_RETRY = 1000; // 1 second
+
 export function Swiper(props: SwiperProps): JSX.Element {
   const { viewer } = props;
 
@@ -198,7 +201,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
     async (layerPath: string) => {
       try {
         // Get the layer at the layer path
-        const olLayer = await viewer.layer.getOLLayerAsync(layerPath, 30000, 1000);
+        const olLayer = await viewer.layer.getOLLayerAsync(layerPath, CONST_LAYERS_WAIT, CONST_LAYERS_RETRY);
         if (olLayer) {
           // Set the OL layers
           setOlLayers((prevArray: BaseLayer[]) => [...prevArray, olLayer]);
