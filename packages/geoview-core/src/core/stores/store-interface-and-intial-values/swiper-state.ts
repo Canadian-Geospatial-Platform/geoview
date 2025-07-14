@@ -8,17 +8,23 @@ import { SwiperEventProcessor } from '@/api/event-processors/event-processor-chi
 
 // #region INTERFACES & TYPES
 
+// GV This type is the core equivalent of the homonym in the geoview-swiper package.
+export type SwipeOrientation = 'horizontal' | 'vertical';
+
 type SwiperActions = ISwiperState['actions'];
 
 export interface ISwiperState {
   layerPaths: string[];
+  orientation: SwipeOrientation;
 
   actions: {
     setLayerPaths: (layerPaths: string[]) => void;
+    setOrientation: (orientation: SwipeOrientation) => void;
   };
 
   setterActions: {
     setLayerPaths: (layerPaths: string[]) => void;
+    setOrientation: (orientation: SwipeOrientation) => void;
   };
 }
 
@@ -33,6 +39,7 @@ export interface ISwiperState {
 export function initializeSwiperState(set: TypeSetStore, get: TypeGetStore): ISwiperState {
   const init = {
     layerPaths: [],
+    orientation: 'vertical',
 
     // #region ACTIONS
 
@@ -40,6 +47,10 @@ export function initializeSwiperState(set: TypeSetStore, get: TypeGetStore): ISw
       setLayerPaths(layerPaths: string[]) {
         // Redirect to SwiperEventProcessor
         SwiperEventProcessor.setLayerPaths(get().mapId, layerPaths);
+      },
+      setOrientation(orientation: SwipeOrientation) {
+        // Redirect to SwiperEventProcessor
+        SwiperEventProcessor.setOrientation(get().mapId, orientation);
       },
     },
 
@@ -49,6 +60,14 @@ export function initializeSwiperState(set: TypeSetStore, get: TypeGetStore): ISw
           swiperState: {
             ...get().swiperState,
             layerPaths,
+          },
+        });
+      },
+      setOrientation(orientation: SwipeOrientation) {
+        set({
+          swiperState: {
+            ...get().swiperState,
+            orientation,
           },
         });
       },
@@ -64,5 +83,6 @@ export function initializeSwiperState(set: TypeSetStore, get: TypeGetStore): ISw
 // Swiper state selectors
 // **********************************************************
 export const useSwiperLayerPaths = (): string[] => useStore(useGeoViewStore(), (state) => state.swiperState.layerPaths);
+export const useSwiperOrientation = (): string => useStore(useGeoViewStore(), (state) => state.swiperState.orientation);
 
 export const useSwiperStoreActions = (): SwiperActions => useStore(useGeoViewStore(), (state) => state.swiperState.actions);

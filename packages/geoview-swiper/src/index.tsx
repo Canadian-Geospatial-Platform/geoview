@@ -8,6 +8,7 @@ import { logger } from 'geoview-core/core/utils/logger';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-swiper.json';
 import { ConfigProps, Swiper } from './swiper';
+import { SwipeOrientation } from './swiper-types';
 
 /**
  * Create a class for the plugin instance
@@ -70,6 +71,7 @@ class SwiperPlugin extends MapPlugin {
 
     // Initialize the store with swiper provided configuration
     SwiperEventProcessor.setLayerPaths(this.pluginProps.mapId, this.getConfig().layers);
+    SwiperEventProcessor.setOrientation(this.pluginProps.mapId, this.getConfig().orientation as SwipeOrientation);
   }
 
   /**
@@ -113,6 +115,15 @@ class SwiperPlugin extends MapPlugin {
   deActivateAll(): void {
     // Remove all layers
     SwiperEventProcessor.removeAll(this.pluginProps.mapId);
+  }
+
+  /**
+   * Sets the orientation of the swiper.
+   * @param {SwipeOrientation} orientation The orientation to set
+   */
+  setOrientation(orientation: SwipeOrientation): void {
+    // Set the orientation
+    SwiperEventProcessor.setOrientation(this.pluginProps.mapId, orientation);
   }
 }
 

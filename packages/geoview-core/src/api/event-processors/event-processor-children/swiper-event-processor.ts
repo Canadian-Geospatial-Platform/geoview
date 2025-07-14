@@ -1,4 +1,4 @@
-import { ISwiperState } from '@/core/stores/store-interface-and-intial-values/swiper-state';
+import { ISwiperState, SwipeOrientation } from '@/core/stores/store-interface-and-intial-values/swiper-state';
 import { logger } from '@/core/utils/logger';
 
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
@@ -18,7 +18,7 @@ export class SwiperEventProcessor extends AbstractEventProcessor {
 
   /**
    * Shortcut to get the Swiper state for a given map id
-   * @param {string} mapId The mapId
+   * @param {string} mapId - The mapId
    * @returns {ISwiperState | undefined} The Swiper state. Forcing the return to also be 'undefined', because
    *                                       there will be no swiperState if the Swiper plugin isn't active.
    *                                       This helps the developers making sure the existence is checked.
@@ -33,7 +33,7 @@ export class SwiperEventProcessor extends AbstractEventProcessor {
   /**
    * Sets the layer paths on which the swiper should be activated.
    *
-   * @param {string} mapId -  The map id.
+   * @param {string} mapId - The map id.
    * @returns {}
    */
   static getLayerPaths(mapId: string): string[] | undefined {
@@ -43,8 +43,8 @@ export class SwiperEventProcessor extends AbstractEventProcessor {
   /**
    * Sets the layer paths on which the swiper should be activated.
    *
-   * @param {string} mapId the map id
-   * @param {string[]} layerPaths The array of layer paths
+   * @param {string} mapId - The map id
+   * @param {string[]} layerPaths - The array of layer paths
    */
   static setLayerPaths(mapId: string, layerPaths: string[]): void {
     // set store layer paths
@@ -58,8 +58,8 @@ export class SwiperEventProcessor extends AbstractEventProcessor {
 
   /**
    * Adds a swiper functionality to the specified map id and layer path
-   * @param {string} mapId The map ID
-   * @param {string} layerPath The layer path
+   * @param {string} mapId - The map ID
+   * @param {string} layerPath - The layer path
    */
   static addLayerPath(mapId: string, layerPath: string): void {
     // The processor needs an initialized layer paths store which is only initialized if the Swiper Plugin exists.
@@ -88,8 +88,8 @@ export class SwiperEventProcessor extends AbstractEventProcessor {
 
   /**
    * Removes a swiper functionality for the specified map id and layer path
-   * @param {string} mapId The map ID
-   * @param {string} layerPath The layer path
+   * @param {string} mapId - The map ID
+   * @param {string} layerPath - The layer path
    */
   static removeLayerPath(mapId: string, layerPath: string): void {
     // The processor needs an initialized layer paths store which is only initialized if the Swiper Plugin exists.
@@ -121,7 +121,7 @@ export class SwiperEventProcessor extends AbstractEventProcessor {
 
   /**
    * Removes the swiper functionality for all layer paths
-   * @param {string} mapId The map ID
+   * @param {string} mapId - The map ID
    */
   static removeAll(mapId: string): void {
     // The processor needs an initialized layer paths store which is only initialized if the Swiper Plugin exists.
@@ -139,6 +139,16 @@ export class SwiperEventProcessor extends AbstractEventProcessor {
     logger.logInfo('Removed Swiper functionality for all layer paths', layerPaths);
 
     // TODO: Also update the layer array in other store state to inform the later has a swiper attached to it?
+  }
+
+  /**
+   * Sets the orientation of the swiper.
+   * @param {string} mapId - The map IDh
+   * @param {SwipeOrientation} orientation - The orientation to set
+   */
+  static setOrientation(mapId: string, orientation: SwipeOrientation): void {
+    // set store orientation
+    this.getSwiperState(mapId)?.setterActions.setOrientation(orientation);
   }
 
   // #endregion
