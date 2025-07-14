@@ -37,7 +37,7 @@ import { isPointInExtent, isExtentLonLat } from '@/geo/utils/utilities';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { NORTH_POLE_POSITION, OL_ZOOM_DURATION, OL_ZOOM_MAXZOOM, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
-import { whenThisThen } from '@/core/utils/utilities';
+import { isValidUUID, whenThisThen } from '@/core/utils/utilities';
 
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeClickMarker } from '@/core/components';
@@ -1406,7 +1406,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const legendLayerInfo = LegendEventProcessor.getLegendLayerInfo(mapId, layerPath);
 
     // Check if the layer is a geocore layers
-    const isGeocore = api.config.isValidUUID(layerPath.split('/')[0]);
+    const isGeocore = isValidUUID(layerPath.split('/')[0]);
 
     const layerEntryLayerPaths = geoviewLayerConfig.listOfLayerEntryConfig.map(
       (geoviewLayerEntryConfig) => geoviewLayerEntryConfig.layerPath

@@ -213,7 +213,7 @@ export type TypeMapConfig = {
   /** Type of interaction. */
   interaction: TypeInteraction;
   /** List of GeoView Layers in the order which they should be added to the map. */
-  listOfGeoviewLayerConfig: MapConfigLayerEntry[]; // TODO: refactor - remove mapConfig
+  listOfGeoviewLayerConfig: MapConfigLayerEntry[];
   /** View settings. */
   viewSettings: TypeViewSettings;
   /** Highlight color. */
@@ -972,8 +972,6 @@ export type TypeGeoviewLayerConfig = {
   externalDateFormat?: string;
   /** Flag to exclude layer from time anble function like time slider */
   isTimeAware?: boolean;
-  /** Flag to indicate if the layer is a geocore layer */
-  isGeocore?: boolean;
 
   /**
    * Initial settings to apply to the GeoView layer at creation time.

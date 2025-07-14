@@ -64,11 +64,11 @@ export const getLocalizeLayerType = (language: TypeDisplayLanguage, includeStati
  * @param {string} layerId - The ID of the layer to find.
  * @returns The layer entry config of the found layer or null if none is found.
  */
-export const getLayerById = (layerList: GroupLayerEntryConfig[], layerId: string): GroupLayerEntryConfig | null => {
+export const getLayerById = (layerList: GroupLayerEntryConfig[], layerId: string): GroupLayerEntryConfig | undefined => {
   const layer = layerList.find((childLayer) => childLayer.layerId.split('/').pop() === layerId.split('/').pop());
   if (layer) return layer;
 
-  let foundLayer: GroupLayerEntryConfig | null = null;
+  let foundLayer: GroupLayerEntryConfig | undefined;
   for (let i = 0; i < layerList.length; i++) {
     const branch = layerList[i];
     if (branch.listOfLayerEntryConfig) {
@@ -105,9 +105,69 @@ const allSubLayersAreIncluded = (groupLayer: GroupLayerEntryConfig, layerIds: (s
 };
 
 /**
+ * Creates a layer entry config shell for a group layer.
+ * @param {GroupLayerEntryConfig} groupLayer - The group layer
+ * @returns {LayerEntryConfigShell} The resulting layer entry config shell
+ */
+const createLayerEntryConfigForGroupLayer = (
+  layerName: string,
+  layerType: string,
+  layerIds: string[],
+  layersToAdd: GroupLayerEntryConfig[],
+  layerIdsToAdd: string[],
+  removedLayerIds: string[],
+  groupLayer: GroupLayerEntryConfig
+): LayerEntryConfigShell => {
+  // Add IDs of sublayers to the layerIdsToRemove array so they are not added multiple times
+  const longLayerIdsToRemove = layerIdsToAdd.filter((layerId) => layerId.split('/').includes(groupLayer.layerId));
+  if (longLayerIdsToRemove.length) {
+    const layerIdsToRemove = longLayerIdsToRemove.map((layerId) => layerId.split('/').pop()).filter((id) => id !== undefined);
+    removedLayerIds.push(...layerIdsToRemove);
+  }
+
+  // If all sub layers are included, simply add the layer
+  if (allSubLayersAreIncluded(groupLayer, layerIds) && layerType === CV_CONST_LAYER_TYPES.ESRI_DYNAMIC) {
+    return {
+      layerId: groupLayer?.layerId,
+      layerName: layersToAdd.length === 1 ? layerName : groupLayer?.layerName,
+    };
+  }
+
+  // Not all sublayers are included, so we construct a group layer with the included sublayers
+  const layerToAddEntryConfig = {
+    layerId: `group-${groupLayer?.layerId}`,
+    isLayerGroup: true,
+    entryType: 'group',
+    layerName: layersToAdd.length === 1 ? layerName : groupLayer?.layerName,
+    listOfLayerEntryConfig: groupLayer.listOfLayerEntryConfig
+      .map((layerEntryConfig) => {
+        if (layerEntryConfig instanceof GroupLayerEntryConfig && layerIds.includes(layerEntryConfig.layerId))
+          return createLayerEntryConfigForGroupLayer(
+            layerName,
+            layerType,
+            layerIds,
+            layersToAdd,
+            layerIdsToAdd,
+            removedLayerIds,
+            layerEntryConfig
+          );
+        if (layerIds.includes(layerEntryConfig.layerId))
+          return {
+            layerId: layerEntryConfig?.layerId,
+            layerName: layersToAdd.length === 1 ? layerName : layerEntryConfig?.layerName,
+          };
+        return undefined;
+      })
+      .filter((newEntryConfig) => newEntryConfig !== undefined),
+  };
+
+  return layerToAddEntryConfig;
+};
+
+/**
  * Builds a geoview layer config from provided layer IDs.
  * @param {BuildGeoViewLayerInput} inputProps - The layer information
- * @returns {MapConfigLayer} The geoview layer config
+ * @returns {MapConfigLayerEntry} The geoview layer config
  */
 export const buildGeoLayerToAdd = (inputProps: BuildGeoViewLayerInput): MapConfigLayerEntry => {
   const { layerIdsToAdd, layerName, layerType, layerURL, layerList } = inputProps;
@@ -127,56 +187,14 @@ export const buildGeoLayerToAdd = (inputProps: BuildGeoViewLayerInput): MapConfi
 
   if (layersToAdd.length) {
     const removedLayerIds: string[] = [];
-    const layerIds = layerIdsToAdd.map((layerId) => layerId.split('/').pop());
-
-    /**
-     * Creates a layer entry config shell for a group layer.
-     * @param {GroupLayerEntryConfig} groupLayer - The group layer
-     * @returns {LayerEntryConfigShell} The resulting layer entry config shell
-     */
-    const createLayerEntryConfigForGroupLayer = (groupLayer: GroupLayerEntryConfig): LayerEntryConfigShell => {
-      // Add IDs of sublayers to the layerIdsToRemove array so they are not added multiple times
-      const longLayerIdsToRemove = layerIdsToAdd.filter((layerId) => layerId.split('/').includes(groupLayer.layerId));
-      if (longLayerIdsToRemove.length) {
-        const layerIdsToRemove = longLayerIdsToRemove.map((layerId) => layerId.split('/').pop()).filter((id) => id !== undefined);
-        removedLayerIds.push(...layerIdsToRemove);
-      }
-
-      // If all sub layers are included, simply add the layer
-      if (allSubLayersAreIncluded(groupLayer, layerIds) && layerType === CV_CONST_LAYER_TYPES.ESRI_DYNAMIC) {
-        return {
-          layerId: groupLayer?.layerId,
-          layerName: layersToAdd.length === 1 ? layerName : groupLayer?.layerName,
-        };
-      }
-
-      // Not all sublayers are included, so we construct a group layer with the included sublayers
-      const layerToAddEntryConfig = {
-        layerId: `group-${groupLayer?.layerId}`,
-        isLayerGroup: true,
-        entryType: 'group',
-        layerName: layersToAdd.length === 1 ? layerName : groupLayer?.layerName,
-        listOfLayerEntryConfig: groupLayer.listOfLayerEntryConfig
-          .map((layerEntryConfig) => {
-            if (layerEntryConfig instanceof GroupLayerEntryConfig && layerIds.includes(layerEntryConfig.layerId))
-              return createLayerEntryConfigForGroupLayer(layerEntryConfig);
-            if (layerIds.includes(layerEntryConfig.layerId))
-              return {
-                layerId: layerEntryConfig?.layerId,
-                layerName: layersToAdd.length === 1 ? layerName : layerEntryConfig?.layerName,
-              };
-            return undefined;
-          })
-          .filter((newEntryConfig) => newEntryConfig !== undefined),
-      };
-
-      return layerToAddEntryConfig;
-    };
+    const layerIds = layerIdsToAdd.map((layerId) => layerId.split('/').pop()!);
 
     // Create an entry config shell for each layer if it is not in the removedLayerIds
     layersToAdd.forEach((layerToAdd) => {
       if (layerToAdd instanceof GroupLayerEntryConfig && !removedLayerIds.includes(layerToAdd.layerId)) {
-        listOfLayerEntryConfig.push(createLayerEntryConfigForGroupLayer(layerToAdd));
+        listOfLayerEntryConfig.push(
+          createLayerEntryConfigForGroupLayer(layerName, layerType, layerIds, layersToAdd, layerIdsToAdd, removedLayerIds, layerToAdd)
+        );
       } else if (!removedLayerIds.includes(layerToAdd.layerId)) {
         listOfLayerEntryConfig.push({
           layerId: layerToAdd?.layerId,

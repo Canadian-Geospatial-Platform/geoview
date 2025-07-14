@@ -34,7 +34,6 @@ import {
   TypeValidMapProjectionCodes,
   TypeValidVersions,
 } from '@/api/config/types/map-schema-types';
-import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { logger } from '@/core/utils/logger';
 
 // ========================
@@ -50,8 +49,9 @@ export class MapFeatureConfig {
   /** Flag used to indicate that errors were detected in the config provided. */
   #errorDetectedFlag = false;
 
+  // TODO: Cleanup commented code - Remove this commented code if all good
   /** The registeredLayerPaths property keeps track of all the GeoView layers created and attached to this map */
-  #registeredLayerPaths: Record<string, AbstractGeoViewLayer> = {};
+  // #registeredLayerPaths: Record<string, AbstractGeoViewLayer> = {};
 
   // #endregion PRIVATE PROPERTIES
 
@@ -126,7 +126,7 @@ export class MapFeatureConfig {
     if (this.map.viewSettings.initialView?.extent || this.map.viewSettings.initialView?.layerIds)
       delete this.map.viewSettings.initialView.zoomAndCenter;
 
-    // TODO: Cleanup comments - Remove this commented out code if all good
+    // TODO: Cleanup commented code - Remove this commented out code if all good
     // this.map.listOfGeoviewLayerConfig = this.map.listOfGeoviewLayerConfig
     //   .map((geoviewLayerConfig) => {
     //     return MapFeatureConfig.nodeFactory(toJsonObject(geoviewLayerConfig));
@@ -378,16 +378,17 @@ export class MapFeatureConfig {
     this.#errorDetectedFlag = true;
   }
 
-  /**
-   * Methode used to get a specific GeoView layer configuration.
-   *
-   * @param {string} geoviewLayerId The GeoView layer identifier.
-   *
-   * @returns {AbstractGeoviewLayerConfig | undefined} The GeoView layer object or undefined if it doesn't exist.
-   */
-  getGeoviewLayer(geoviewLayerId: string): AbstractGeoViewLayer | undefined {
-    return this.#registeredLayerPaths?.[geoviewLayerId];
-  }
+  // TODO: Cleanup commented code - Remove all this commented out code if all good
+  // /**
+  //  * Methode used to get a specific GeoView layer configuration.
+  //  *
+  //  * @param {string} geoviewLayerId The GeoView layer identifier.
+  //  *
+  //  * @returns {AbstractGeoviewLayerConfig | undefined} The GeoView layer object or undefined if it doesn't exist.
+  //  */
+  // getGeoviewLayer(geoviewLayerId: string): AbstractGeoViewLayer | undefined {
+  //   return this.#registeredLayerPaths?.[geoviewLayerId];
+  // }
 
   // /**
   //  * This method reads the service metadata for all geoview layers in the geoview layer list.
@@ -396,7 +397,7 @@ export class MapFeatureConfig {
   //   const promiseLayersProcessed: Promise<void>[] = [];
 
   //   this.map.listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
-  //     promiseLayersProcessed.push((geoviewLayerConfig as AbstractGeoViewLayer).fetchServiceMetadata()); // TODO: refactor - remove the cast AbstractGeoviewLayerConfig because of MapConfigLayerEntry everywhere
+  //     promiseLayersProcessed.push((geoviewLayerConfig as AbstractGeoViewLayer).fetchServiceMetadata());
   //   });
 
   //   const promiseSettledResult = await Promise.allSettled(promiseLayersProcessed);
@@ -405,17 +406,6 @@ export class MapFeatureConfig {
   //   });
   //   // TODO: Have a chat with Alex about his comment "We could still set the flag here, for processing reasons, and return the whole Promise.allSettled for convenience."
   // }
-
-  /**
-   * This method returns the json string of the map feature's configuration. The output representation is a multi-line indented
-   * string. Indentation can be controled using the ident parameter. Private variables are not serialized.
-   * @param {number} indent The number of space to indent the output string (default=2).
-   *
-   * @returns {string} The json string corresponding to the map feature configuration.
-   */
-  serialize(indent: number = 2): string {
-    return JSON.stringify(this, undefined, indent);
-  }
 
   // /**
   //  * Apply user configuration over the geoview layer configurations created from the raw metadata.
