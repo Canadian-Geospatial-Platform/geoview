@@ -61,7 +61,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
   const prerender = useCallback(
     (event: Event | BaseEvent) => {
       // Log
-      logger.logTraceUseCallback('GEOVIEW-SWIPER - prerender', event);
+      logger.logTraceUseCallback('SWIPER - prerender', event);
 
       const evt = event as RenderEvent;
       const ctx: CanvasRenderingContext2D = evt.context! as CanvasRenderingContext2D;
@@ -121,7 +121,6 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
   /**
    * On Drag and Drag Stop, calculate the clipping extent
-   * @param {MouseEvent} evt - The mouse event to calculate the clipping
    */
   const onStop = debounce(() => {
     if (layerPaths.length) {
@@ -134,6 +133,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
         swiperValueVertical.current = (x / mapSize.current[0]) * 100;
         setXPositionVertical(x);
         setYPositionVertical(0);
+        logger.logDebug('SWIPER - onStop', 'Vertical swiper value', swiperValueVertical.current, 'x position', x);
       } else {
         const [, y] = getSwiperStyle();
         swiperValueHorizontal.current = (y / mapSize.current[1]) * 100;
@@ -150,32 +150,43 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
   /**
    * Update swiper and layers from keyboard CTRL + Arrow key
-   * @param {KeyboardEvent} evt - The keyboard event to calculate the swiper position
+   * @param {KeyboardEvent} event - The keyboard event to calculate the swiper position
    */
-  const updateSwiper = debounce((evt: KeyboardEvent): void => {
-    // * there is a know issue when stiching from keyboard to mouse swiper but we can live with it as we are not expecting to face this
-    // * offset from mouse method is not working properly anymore
-    if (evt.ctrlKey && 'ArrowLeft ArrowRight ArrowUp ArrowDown'.includes(evt.key) && layerPaths.length) {
-      // Get swiper bar style then set the move
-      const styleValues = getSwiperStyle();
-      const move = evt.key === 'ArrowLeft' || evt.key === 'ArrowUp' ? -10 : 10;
+  const updateSwiper = useCallback(
+    (event: KeyboardEvent): void => {
+      // Log
+      logger.logTraceUseCallback('SWIPER - updateSwiper', event.key);
 
-      // Check if value is outside the window and apply modification
-      // eslint-disable-next-line no-nested-ternary
-      styleValues[0] = styleValues[0] <= 10 ? 10 : styleValues[0] >= mapSize.current[0] - 10 ? mapSize.current[0] - 10 : styleValues[0];
-      // eslint-disable-next-line no-nested-ternary
-      styleValues[1] = styleValues[1] <= 10 ? 10 : styleValues[1] >= mapSize.current[1] - 10 ? mapSize.current[1] - 10 : styleValues[1];
+      // * there is a know issue when stiching from keyboard to mouse swiper but we can live with it as we are not expecting to face this
+      // * offset from mouse method is not working properly anymore
+      if ('ArrowLeft ArrowRight ArrowUp ArrowDown'.includes(event.key) && layerPaths.length) {
+        // Prevent default behavior and stop propagation immediately
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
 
-      // Apply new style to the bar
-      swiperRef.current!.style.transform =
-        orientation === 'vertical' ? `translate(${styleValues[0] + move}px, 0px)` : `translate(0px, ${styleValues[1] + move}px)`;
+        // Get swiper bar style then set the move
+        const styleValues = getSwiperStyle();
+        const move = event.key === 'ArrowLeft' || event.key === 'ArrowUp' ? -10 : 10;
 
-      // Send the onStop event to update layers
-      delay(75)
-        .then(() => onStop())
-        .catch(() => {}); // Wait for the DOM to update
-    }
-  }, 100);
+        // Check if value is outside the window and apply modification
+        // eslint-disable-next-line no-nested-ternary
+        styleValues[0] = styleValues[0] <= 10 ? 10 : styleValues[0] >= mapSize.current[0] - 10 ? mapSize.current[0] - 10 : styleValues[0];
+        // eslint-disable-next-line no-nested-ternary
+        styleValues[1] = styleValues[1] <= 10 ? 10 : styleValues[1] >= mapSize.current[1] - 10 ? mapSize.current[1] - 10 : styleValues[1];
+
+        // Apply new style to the bar
+        swiperRef.current!.style.transform =
+          orientation === 'vertical' ? `translate(${styleValues[0] + move}px, 0px)` : `translate(0px, ${styleValues[1] + move}px)`;
+
+        // Send the onStop event to update layers
+        delay(100)
+          .then(() => onStop())
+          .catch(() => {}); // Wait for the DOM to update
+      }
+    },
+    [layerPaths, orientation, onStop]
+  );
 
   /**
    * Attaches necessary swiper events to the given layer path layer
@@ -185,7 +196,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
     async (layerPath: string) => {
       try {
         // Get the layer at the layer path
-        const olLayer = await viewer.layer.getOLLayerAsync(layerPath);
+        const olLayer = await viewer.layer.getOLLayerAsync(layerPath, 30000, 1000);
         if (olLayer) {
           // Set the OL layers
           setOlLayers((prevArray: BaseLayer[]) => [...prevArray, olLayer]);
@@ -212,7 +223,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
   // This will attach the events to the layers at the layer paths
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('GEOVIEW-SWIPER - layerPaths', layerPaths);
+    logger.logTraceUseEffect('SWIPER - layerPaths', layerPaths);
 
     // Get all associated layerPaths in case provided path is a layer ID or group layer path
     const associatedLayerPaths = layerPaths
@@ -230,7 +241,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
     return () => {
       // Log
-      logger.logTraceUseEffectUnmount('GEOVIEW-SWIPER - layerPaths', layerPaths);
+      logger.logTraceUseEffectUnmount('SWIPER - layerPaths', layerPaths);
 
       // set listener for layers in config array
       associatedLayerPaths.forEach((layerPath: string) => {
@@ -262,14 +273,14 @@ export function Swiper(props: SwiperProps): JSX.Element {
   // UseEffect for WCAG keyboard navigation
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('GEOVIEW-SWIPER - mount', viewer.mapId);
+    logger.logTraceUseEffect('SWIPER - mount', viewer.mapId);
 
     // Grab reference
     const theSwiper = swiperRef?.current;
 
     const handleFocusIn = (): void => {
       // Set listener for the focus in on swiper bar when on WCAG mode
-      if (document.getElementById(viewer.mapId)!.classList.contains('map-focus-trap')) {
+      if (document.getElementById(`shell-${viewer.mapId}`)!.classList.contains('map-focus-trap')) {
         theSwiper?.addEventListener('keydown', updateSwiper);
       }
     };
@@ -286,13 +297,13 @@ export function Swiper(props: SwiperProps): JSX.Element {
     // Cleanup on unmount
     return () => {
       // Log
-      logger.logTraceUseEffectUnmount('GEOVIEW-SWIPER - unmount', viewer.mapId);
+      logger.logTraceUseEffectUnmount('SWIPER - unmount', viewer.mapId);
 
       // Unwire events
       theSwiper?.removeEventListener('focusout', handleFocusOut);
       theSwiper?.removeEventListener('focusin', handleFocusIn);
     };
-  }, [viewer.mapId, updateSwiper]);
+  }, [updateSwiper, viewer.mapId]);
 
   // If any layer paths
   if (layerPaths && layerPaths.length > 0) {
