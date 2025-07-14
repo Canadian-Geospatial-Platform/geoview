@@ -12,8 +12,9 @@ import { Projection } from '@/geo/utils/projection';
  */
 export abstract class AbstractGVVectorTile extends AbstractGVLayer {
   /**
-   * Overrides the get of the OpenLayers Layer
-   * @returns {VectorTileLayer<Feature>} The OpenLayers Layer
+   * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
+   * @override
+   * @returns {VectorTileLayer<VectorTile>} The strongly-typed OpenLayers type.
    */
   override getOLLayer(): VectorTileLayer<VectorTile> {
     // Call parent and cast
@@ -21,8 +22,9 @@ export abstract class AbstractGVVectorTile extends AbstractGVLayer {
   }
 
   /**
-   * Overrides the get of the OpenLayers Layer
-   * @returns {VectorTile} The OpenLayers Layer
+   * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
+   * @override
+   * @returns {VectorTile} The VectorTile source instance associated with this layer.
    */
   override getOLSource(): VectorTile {
     // Get source from OL

@@ -247,8 +247,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
   }
 
   /**
-   * Overrides the get of the OpenLayers Layer
-   * @returns {ImageLayer<ImageArcGISRest>} The OpenLayers Layer
+   * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
+   * @override
+   * @returns {ImageLayer<ImageArcGISRest>} The strongly-typed OpenLayers type.
    */
   override getOLLayer(): ImageLayer<ImageArcGISRest> {
     // Call parent and cast
@@ -256,8 +257,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
   }
 
   /**
-   * Overrides the get of the OpenLayers Layer Source
-   * @returns {ImageArcGISRest} The OpenLayers Layer Source
+   * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
+   * @override
+   * @returns {ImageArcGISRest} The ImageArcGISRest source instance associated with this layer.
    */
   override getOLSource(): ImageArcGISRest {
     // Get source from OL
@@ -265,8 +267,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
   }
 
   /**
-   * Overrides the get of the layer configuration associated with the layer.
-   * @returns {EsriDynamicLayerEntryConfig} The layer configuration or undefined if not found.
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {EsriDynamicLayerEntryConfig} The strongly-typed layer configuration specific to this group layer.
    */
   override getLayerConfig(): EsriDynamicLayerEntryConfig {
     // Call parent and cast
@@ -274,7 +277,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
   }
 
   /**
-   * Overrides the hit tolerance of the layer
+   * Overrides the hit tolerance of the layer.
    * @returns {number} The hit tolerance for a GV Esri Dynamic layer
    */
   override getHitTolerance(): number {
@@ -287,7 +290,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {string} fieldName - The field name for which we want to get the type.
    * @returns {TypeOutfieldsType} The type of the field.
    */
-  protected override getFieldType(fieldName: string): TypeOutfieldsType {
+  protected override onGetFieldType(fieldName: string): TypeOutfieldsType {
     // Redirect
     return esriGetFieldType(this.getLayerConfig(), fieldName);
   }
@@ -297,7 +300,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {string} fieldName - The field name for which we want to get the domain.
    * @returns {null | codedValueType | rangeDomainType} The domain of the field.
    */
-  protected override getFieldDomain(fieldName: string): null | codedValueType | rangeDomainType {
+  protected override onGetFieldDomain(fieldName: string): null | codedValueType | rangeDomainType {
     // Redirect
     return esriGetFieldDomain(this.getLayerConfig(), fieldName);
   }

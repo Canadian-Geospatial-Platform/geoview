@@ -21,8 +21,9 @@ export class GVWFS extends AbstractGVVector {
   }
 
   /**
-   * Overrides the get of the layer configuration associated with the layer.
-   * @returns {WfsLayerEntryConfig} The layer configuration or undefined if not found.
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {WfsLayerEntryConfig} The strongly-typed layer configuration specific to this group layer.
    */
   override getLayerConfig(): WfsLayerEntryConfig {
     // Call parent and cast
@@ -34,7 +35,7 @@ export class GVWFS extends AbstractGVVector {
    * @param {string} fieldName - The field name for which we want to get the type.
    * @returns {TypeOutfieldsType} The type of the field.
    */
-  protected override getFieldType(fieldName: string): TypeOutfieldsType {
+  protected override onGetFieldType(fieldName: string): TypeOutfieldsType {
     const fieldDefinitions = this.getLayerConfig().getLayerMetadata() as TypeJsonArray;
     const fieldDefinition = fieldDefinitions.find((metadataEntry) => metadataEntry.name === fieldName);
     if (!fieldDefinition) return 'string';

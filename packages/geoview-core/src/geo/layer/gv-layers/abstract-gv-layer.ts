@@ -8,7 +8,6 @@ import Source from 'ol/source/Source';
 import { Projection as OLProjection } from 'ol/proj';
 import { Map as OLMap } from 'ol';
 
-import { Style } from 'ol/style';
 import cloneDeep from 'lodash/cloneDeep';
 import { TimeDimension, DateMgt, TypeDateFragments } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
@@ -26,6 +25,7 @@ import {
   QueryType,
   TypeStyleGeometry,
   TypeOutfieldsType,
+  TypeOutfields,
 } from '@/api/config/types/map-schema-types';
 import { getLegendStyles, getFeatureImageSource, processStyle } from '@/geo/utils/renderer/geoview-renderer';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -130,8 +130,9 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   abstract onGetBounds(projection: OLProjection, stops: number): Extent | undefined;
 
   /**
-   * Overrides the get of the OpenLayers Layer
-   * @returns {Layer} The OpenLayers Layer
+   * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
+   * @override
+   * @returns {Layer} The strongly-typed OpenLayers type.
    */
   override getOLLayer(): Layer {
     // Call parent and cast
@@ -139,8 +140,9 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   /**
-   * Gets the layer configuration associated with the layer.
-   * @returns {AbstractBaseLayerEntryConfig} The layer configuration
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {AbstractBaseLayerEntryConfig} The strongly-typed layer configuration specific to this group layer.
    */
   override getLayerConfig(): AbstractBaseLayerEntryConfig {
     return super.getLayerConfig() as AbstractBaseLayerEntryConfig;
@@ -464,6 +466,26 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   /**
+   * Gets the field type for the given field name.
+   * @param {string} fieldName  - The field name
+   * @returns {TypeOutfieldsType} The field type.
+   */
+  getFieldType(fieldName: string): TypeOutfieldsType {
+    // Redirect
+    return this.onGetFieldType(fieldName);
+  }
+
+  /**
+   * Gets the layerFilter that is associated to the layer.
+   * @returns {string | undefined} The filter associated to the layer or undefined.
+   */
+  getLayerFilter(): string | undefined {
+    // Redirect
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (this.getLayerConfig() as any)?.layerFilter;
+  }
+
+  /**
    * Returns feature information for the layer specified.
    * @param {OLMap} map - The Map to get feature info from.
    * @param {QueryType} queryType - The type of query to perform.
@@ -646,7 +668,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * @returns {null | codedValueType | rangeDomainType} The domain of the field.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/class-methods-use-this
-  protected getFieldDomain(fieldName: string): null | codedValueType | rangeDomainType {
+  protected onGetFieldDomain(fieldName: string): null | codedValueType | rangeDomainType {
     // Log - REMOVED as it is trigger for every row of data table, just enable for debuggin purpose
     // logger.logWarning(`getFieldDomain is not implemented for ${fieldName} on layer path ${this.getLayerPath()}`);
     return null;
@@ -655,10 +677,9 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   /**
    * Overridable function to return the type of the specified field from the metadata. If the type can not be found, return 'string'.
    * @param {string} fieldName - The field name for which we want to get the type.
-   *
    * @returns {TypeOutfieldsType} The type of the field.
    */
-  protected getFieldType(fieldName: string): TypeOutfieldsType {
+  protected onGetFieldType(fieldName: string): TypeOutfieldsType {
     // Log
     logger.logWarning(`getFieldType is not implemented for ${fieldName} on layer path ${this.getLayerPath()}`);
     return 'string';
@@ -729,7 +750,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   /**
    * Gets and formats the value of the field with the name passed in parameter. Vector GeoView layers convert dates to milliseconds
    * since the base date. Vector feature dates must be in ISO format.
-   * @param {Feature} features - The features that hold the field values.
+   * @param {Feature} feature - The feature that hold the field values.
    * @param {string} fieldName - The field name.
    * @param {TypeOutfieldsType} fieldType - The field type.
    * @returns {string | number | Date} The formatted value of the field.
@@ -755,10 +776,10 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   /**
-   * Converts the feature information to an array of TypeFeatureInfoEntry[] | undefined | null.
-   * @param {Feature[]} features - The array of features to convert.
-   * @param {OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig} layerConfig - The layer configuration.
-   * @returns {TypeFeatureInfoEntry[]} The Array of feature information.
+   * Formats a list of features into an array of TypeFeatureInfoEntry, including icons, field values, domains, and metadata.
+   * @param {Feature[]} features - Array of features to format.
+   * @param {OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig} layerConfig - Configuration of the associated layer.
+   * @returns {TypeFeatureInfoEntry[]} An array of TypeFeatureInfoEntry objects.
    */
   protected formatFeatureInfoResult(
     features: Feature[],
@@ -769,75 +790,26 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
       const outfields = layerConfig?.source?.featureInfo?.outfields;
       const domainsLookup = layerConfig.getLayerMetadata()?.fields as TypeJsonArray | undefined;
-
-      // Hold a dictionary built on the fly for the field domains
-      const dictFieldDomains: { [fieldName: string]: codedValueType | rangeDomainType | null } = {};
-      // Hold a dictionary build on the fly for the field types
-      const dictFieldTypes: { [fieldName: string]: TypeOutfieldsType } = {};
-      // Create lookup dictionary of names to alias
       const aliasLookup = createAliasLookup(outfields);
+      const dictFieldDomains: Record<string, codedValueType | rangeDomainType | null> = {};
+      const dictFieldTypes: Record<string, TypeOutfieldsType> = {};
 
-      // Loop on the promised feature infos
       let featureKeyCounter = 0;
       let fieldKeyCounter = 0;
       const queryResult: TypeFeatureInfoEntry[] = [];
 
-      // Dict to store created image sources to avoid recreating
-      const imageSourceDict: { [styleAsJsonString: string]: string | undefined } = {};
       const layerStyle = this.getStyle()!;
+      const imageSourceDict: Record<string, string | undefined> = {};
 
-      features.forEach((feature) => {
-        // Check dict for existing image source and create it if it does not exist
-        const geometryType = feature.getGeometry()
-          ? (feature.getGeometry()!.getType() as TypeStyleGeometry)
-          : (Object.keys(layerStyle)[0] as TypeStyleGeometry);
+      for (const feature of features) {
+        // Get the image source for a feature using styling information and cache it
+        const imageSource = AbstractGVLayer.#getImageSource(feature, layerStyle, layerConfig, domainsLookup, aliasLookup, imageSourceDict);
 
-        let imageSource;
-        if (layerStyle[geometryType]) {
-          const styleSettings = layerStyle[geometryType];
-          const { type } = styleSettings;
+        // Get the extent
+        const extent = feature.getGeometry()?.getExtent();
 
-          // Calculate the feature style
-          const featureStyle = processStyle[type][geometryType](
-            styleSettings,
-            feature,
-            layerConfig.filterEquation,
-            true,
-            domainsLookup,
-            aliasLookup
-          );
-
-          // Sometimes data is not well fomrated and some features has no style associated, just throw a warning
-          if (featureStyle === undefined) {
-            logger.logWarning(`Feature style is undefined for ${this.getLayerPath()}`);
-          }
-
-          // Create a string unique to the style, but geometry agnostic
-          const styleClone = cloneDeep(featureStyle) as Style;
-          styleClone?.setGeometry?.('');
-          const styleString = `${geometryType}${JSON.stringify(styleClone)}`;
-
-          // Use string as dict key
-          if (!imageSourceDict[styleString])
-            imageSourceDict[styleString] = getFeatureImageSource(
-              feature,
-              layerStyle,
-              layerConfig.filterEquation,
-              true,
-              domainsLookup,
-              aliasLookup
-            );
-          imageSource = imageSourceDict[styleString];
-        }
-
-        if (!imageSource)
-          imageSource = getFeatureImageSource(feature, layerStyle, layerConfig.filterEquation, true, domainsLookup, aliasLookup);
-
-        let extent;
-        if (feature.getGeometry()) extent = feature.getGeometry()!.getExtent();
-
+        // Get the TypeFeatureInfoEntry object
         const featureInfoEntry: TypeFeatureInfoEntry = {
-          // feature key for building the data-grid
           featureKey: featureKeyCounter++,
           geoviewLayerType: this.getLayerConfig().geoviewLayerConfig.geoviewLayerType,
           extent,
@@ -848,70 +820,98 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
           layerPath: layerConfig.layerPath,
         };
 
-        const featureFields = feature.getKeys();
-        featureFields.forEach((fieldName) => {
-          if (fieldName !== 'geometry') {
-            const fieldValue = feature.get(fieldName);
-            // Skip complex fields
-            if (fieldValue && typeof fieldValue === 'object' && !Array.isArray(fieldValue)) {
-              return;
-            }
-
-            // Calculate the field domain if not already calculated
-            if (!(fieldName in dictFieldDomains)) {
-              // Calculate it
-              dictFieldDomains[fieldName] = this.getFieldDomain(fieldName);
-            }
-            const fieldDomain = dictFieldDomains[fieldName];
-
-            // Calculate the field type if not already calculated
-            if (!(fieldName in dictFieldTypes)) {
-              dictFieldTypes[fieldName] = this.getFieldType(fieldName);
-            }
-            const fieldType = dictFieldTypes[fieldName];
-            const fieldEntry = outfields?.find((outfield) => outfield.name === fieldName || outfield.alias === fieldName);
-            if (fieldEntry) {
-              featureInfoEntry.fieldInfo[fieldEntry.name] = {
-                fieldKey: fieldKeyCounter++,
-                value:
-                  // If fieldName is the alias for the entry, we will not get a value, so we try the fieldEntry name.
-                  this.getFieldValue(feature, fieldName, fieldEntry.type as 'string' | 'number' | 'date') ||
-                  this.getFieldValue(feature, fieldEntry.name, fieldEntry.type as 'string' | 'number' | 'date'),
-                dataType: fieldEntry.type,
-                alias: fieldEntry.alias,
-                domain: fieldDomain,
-              };
-            } else if (!outfields) {
-              featureInfoEntry.fieldInfo[fieldName] = {
-                fieldKey: fieldKeyCounter++,
-                value: this.getFieldValue(feature, fieldName, fieldType),
-                dataType: fieldType,
-                alias: fieldName,
-                domain: fieldDomain,
-              };
-            }
-          }
-        });
-
+        // Process the feature fields
+        fieldKeyCounter = this.#processFeatureFields(
+          feature,
+          outfields,
+          dictFieldDomains,
+          dictFieldTypes,
+          featureInfoEntry,
+          fieldKeyCounter
+        );
         queryResult.push(featureInfoEntry);
-      });
+      }
 
       return queryResult;
     } catch (error: unknown) {
-      // Log
       logger.logError(error);
       return [];
     }
   }
 
   /**
-   * Gets the layerFilter that is associated to the layer.
-   * @returns {string | undefined} The filter associated to the layer or undefined.
+   * Processes the fields of a given feature and populates a feature info entry with relevant data.
+   * It also updates field domain and type dictionaries if needed.
+   * @param {Feature} feature - The feature object whose fields are being processed.
+   * @param {TypeOutfields[] | undefined} outfields - Optional list of fields to extract, with metadata like name, alias, and type.
+   * @param {Record<string, codedValueType | rangeDomainType | null>} dictFieldDomains - A mapping of field names to their domain metadata.
+   * Will be updated in-place if a field domain is not already present.
+   * @param {Record<string, TypeOutfieldsType>} dictFieldTypes - A mapping of field names to their data types.
+   * Will be updated in-place if a field type is not already present.
+   * @param {TypeFeatureInfoEntry} featureInfoEntry - The object where processed field info is stored, grouped by field name.
+   * @param {number} fieldKeyCounterStart - A starting value for the field key counter used to assign unique field keys.
+   * @returns {number} The next field key counter value after processing, for continuation in iterative use.
    */
-  getLayerFilter(): string | undefined {
-    // Redirect
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (this.getLayerConfig() as any)?.layerFilter;
+  #processFeatureFields(
+    feature: Feature,
+    outfields: TypeOutfields[] | undefined,
+    dictFieldDomains: Record<string, codedValueType | rangeDomainType | null>,
+    dictFieldTypes: Record<string, TypeOutfieldsType>,
+    featureInfoEntry: TypeFeatureInfoEntry,
+    fieldKeyCounterStart: number
+  ): number {
+    const featureFields = feature.getKeys();
+    let fieldKeyCounter = fieldKeyCounterStart;
+
+    for (const fieldName of featureFields) {
+      // eslint-disable-next-line no-continue
+      if (fieldName === 'geometry') continue;
+
+      const fieldValue = feature.get(fieldName);
+      // eslint-disable-next-line no-continue
+      if (fieldValue && typeof fieldValue === 'object' && !Array.isArray(fieldValue)) continue;
+
+      if (!(fieldName in dictFieldDomains)) {
+        // eslint-disable-next-line no-param-reassign
+        dictFieldDomains[fieldName] = this.onGetFieldDomain(fieldName);
+      }
+      const fieldDomain = dictFieldDomains[fieldName];
+
+      if (!(fieldName in dictFieldTypes)) {
+        // eslint-disable-next-line no-param-reassign
+        dictFieldTypes[fieldName] = this.onGetFieldType(fieldName);
+      }
+      const fieldType = dictFieldTypes[fieldName];
+
+      const fieldEntry = outfields?.find((outfield) => outfield.name === fieldName || outfield.alias === fieldName);
+
+      if (fieldEntry) {
+        const value =
+          this.getFieldValue(feature, fieldName, fieldEntry.type as 'string' | 'number' | 'date') ??
+          this.getFieldValue(feature, fieldEntry.name, fieldEntry.type as 'string' | 'number' | 'date');
+
+        // eslint-disable-next-line no-param-reassign
+        featureInfoEntry.fieldInfo[fieldEntry.name] = {
+          fieldKey: fieldKeyCounter++,
+          value,
+          dataType: fieldEntry.type,
+          alias: fieldEntry.alias,
+          domain: fieldDomain,
+        };
+      } else if (!outfields) {
+        // eslint-disable-next-line no-param-reassign
+        featureInfoEntry.fieldInfo[fieldName] = {
+          fieldKey: fieldKeyCounter++,
+          value: this.getFieldValue(feature, fieldName, fieldType),
+          dataType: fieldType,
+          alias: fieldName,
+          domain: fieldDomain,
+        };
+      }
+    }
+
+    // Return the counter
+    return fieldKeyCounter;
   }
 
   /**
@@ -1020,6 +1020,66 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       return false;
     }, AbstractGVLayer.DEFAULT_LOADING_PERIOD);
   }
+
+  // #region STATIC
+
+  /**
+   * Retrieves or generates an image source (data URI or path) representing the visual style of a feature.
+   * Caches results in the `imageSourceDict` to avoid redundant processing.
+   * @param {Feature} feature - The feature whose visual representation is to be retrieved.
+   * @param {TypeLayerStyleConfig} layerStyle - Style configuration grouped by geometry type (e.g., Point, LineString, Polygon).
+   * @param {OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig} layerConfig - The configuration for the layer containing the feature.
+   * @param {TypeJsonArray | undefined} domainsLookup - Optional domain information for interpreting coded values.
+   * @param {Record<string, string>} aliasLookup - A mapping of original field names to their aliases.
+   * @param {Record<string, string | undefined>} imageSourceDict - A dictionary used to cache and reuse image sources by style key.
+   * @returns {string | undefined} The image source string representing the feature's style, or `undefined` if generation fails.
+   */
+  static #getImageSource(
+    feature: Feature,
+    layerStyle: TypeLayerStyleConfig,
+    layerConfig: OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig,
+    domainsLookup: TypeJsonArray | undefined,
+    aliasLookup: Record<string, string>,
+    imageSourceDict: Record<string, string | undefined>
+  ): string | undefined {
+    const geometryType = feature.getGeometry()
+      ? (feature.getGeometry()!.getType() as TypeStyleGeometry)
+      : (Object.keys(layerStyle)[0] as TypeStyleGeometry);
+
+    if (!layerStyle[geometryType]) {
+      return getFeatureImageSource(feature, layerStyle, layerConfig.filterEquation, true, domainsLookup, aliasLookup);
+    }
+
+    const styleSettings = layerStyle[geometryType];
+    const { type } = styleSettings;
+
+    const featureStyle = processStyle[type][geometryType](
+      styleSettings,
+      feature,
+      layerConfig.filterEquation,
+      true,
+      domainsLookup,
+      aliasLookup
+    );
+
+    if (!featureStyle) {
+      logger.logWarning(`Feature style is undefined for ${layerConfig.layerPath}`);
+      return getFeatureImageSource(feature, layerStyle, layerConfig.filterEquation, true, domainsLookup, aliasLookup);
+    }
+
+    const styleClone = cloneDeep(featureStyle);
+    styleClone?.setGeometry?.('');
+    const styleKey = `${geometryType}${JSON.stringify(styleClone)}`;
+
+    if (!imageSourceDict[styleKey]) {
+      // eslint-disable-next-line no-param-reassign
+      imageSourceDict[styleKey] = getFeatureImageSource(feature, layerStyle, layerConfig.filterEquation, true, domainsLookup, aliasLookup);
+    }
+
+    return imageSourceDict[styleKey];
+  }
+
+  // #endregion
 
   // #region EVENTS
 
