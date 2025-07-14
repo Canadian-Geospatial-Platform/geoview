@@ -16,7 +16,7 @@ interface ResponsiveGridPanelProps extends GridProps {
 }
 
 // Constants outside component to prevent recreating every render
-const PADDING = '0 12px 12px 12px';
+const PADDING = '0 12px 0 12px';
 const MOBILE_BREAKPOINT = 'md';
 const DEFAULT_PADDING_LEFT = '1rem';
 

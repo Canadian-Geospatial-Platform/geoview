@@ -286,7 +286,7 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
               '&[data-layer-depth="0"], &:not([data-layer-depth])': {
                 background: `${geoViewColors.bgColor.light[600]} 0% 0% no-repeat padding-box`,
                 borderRadius: '5px',
-                marginBottom: '1rem',
+                marginBottom: '10px',
               },
 
               '&[data-layer-depth] &:not([data-layer-depth="0"])': {

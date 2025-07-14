@@ -31,10 +31,7 @@ export function LayersList({ layersList, showLayerDetailsPanel, isLayoutEnlarged
     if (depth === 0) {
       return sxClasses.list;
     }
-    if (depth % 2) {
-      return sxClasses.evenDepthList;
-    }
-    return sxClasses.oddDepthList;
+    return sxClasses.listSubitem;
   }, [depth, sxClasses]);
 
   // Memoize the legend items

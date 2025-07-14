@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useState } from 'react';
+import { Fragment, memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import _ from 'lodash';
@@ -18,8 +18,6 @@ import {
   TableViewIcon,
   BrowserNotSupportedIcon,
   Divider,
-  ListItemText,
-  ListItemIcon,
   ListItem,
   List,
 } from '@/ui';
@@ -42,10 +40,54 @@ import { KeyboardArrowDownIcon, KeyboardArrowUpIcon } from '@/ui/icons';
 import { useAppDisplayLanguage, useAppMetadataServiceURL } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { Switch } from '@/ui/switch/switch';
 import { getLocalizeLayerType } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
+import {
+  useMapVisibleLayers,
+  useSelectorIsLayerHiddenOnMap,
+  useSelectorLayerVisibility,
+  useMapStoreActions,
+  useSelectorLayerParentHidden,
+} from '@/core/stores/store-interface-and-intial-values/map-state';
 
 interface LayerDetailsProps {
   layerDetails: TypeLegendLayer;
 }
+
+interface SubLayerProps {
+  layer: TypeLegendLayer;
+}
+
+// Memoized Sublayer Component
+const Sublayer = memo(({ layer }: SubLayerProps): JSX.Element => {
+  // Log
+  logger.logTraceRender('components/layers/right-panel/Sublayer');
+
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
+
+  // Hooks
+  const layerHidden = useSelectorIsLayerHiddenOnMap(layer.layerPath);
+  const parentHidden = useSelectorLayerParentHidden(layer.layerPath);
+  const layerVisible = useSelectorLayerVisibility(layer.layerPath);
+  const { setOrToggleLayerVisibility } = useMapStoreActions();
+
+  // Return the ui
+  return (
+    <ListItem>
+      <IconButton color="primary" onClick={() => setOrToggleLayerVisibility(layer.layerPath)} disabled={parentHidden}>
+        {layerVisible ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
+      </IconButton>
+      <LayerIcon layerPath={layer.layerPath} />
+      <Box
+        component="span"
+        sx={{ ...sxClasses.tableIconLabel, ...(layerHidden && { color: theme.palette.grey[600], fontStyle: 'italic' }) }}
+      >
+        {layer.layerName}
+      </Box>
+    </ListItem>
+  );
+});
+
+Sublayer.displayName = 'Sublayer';
 
 export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   // Log
@@ -57,9 +99,11 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
+  const hiddenStyle = { color: theme.palette.grey[600], fontStyle: 'italic' };
 
   const [isDataTableVisible, setIsDataTableVisible] = useState(false);
   const [isInfoCollapse, setIsInfoCollapse] = useState(false);
+  const [allSublayersVisible, setAllSublayersVisible] = useState(true);
 
   // get store actions
   const highlightedLayer = useLayerHighlightedLayer();
@@ -76,8 +120,10 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     setLayerHoverable,
     setLayerQueryable,
   } = useLayerStoreActions();
+  const { setOrToggleLayerVisibility } = useMapStoreActions();
   const { enableFocusTrap } = useUIStoreActions();
   const { triggerGetAllFeatureInfo } = useDataTableStoreActions();
+  const visibleLayers = useMapVisibleLayers();
   const datatableSettings = useDataTableLayerSettings();
   const layersData = useDataTableAllFeaturesDataArray();
   const language = useAppDisplayLanguage();
@@ -86,6 +132,9 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const layerFilter = getLayerDefaultFilter(layerDetails.layerPath);
   const layerTemporalDimension = getLayerTemporalDimension(layerDetails.layerPath);
   const layerNativeProjection = getLayerServiceProjection(layerDetails.layerPath);
+  const layerVisible = useSelectorLayerVisibility(layerDetails.layerPath);
+  const parentHidden = useSelectorLayerParentHidden(layerDetails.layerPath);
+  const layerHidden = useSelectorIsLayerHiddenOnMap(layerDetails.layerPath);
 
   // Is highlight button disabled?
   const isLayerHighlightCapable = layerDetails.controls?.highlight;
@@ -125,11 +174,42 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('LAYER DETAILS - Bounds', layerDetails);
+
     if (layerDetails.bounds === undefined || layerDetails.bounds[0] === Infinity) {
       const bounds = getLayerBounds(layerDetails.layerPath);
       if (bounds) layerDetails.bounds = bounds;
     }
   }, [layerDetails, getLayerBounds]);
+
+  /**
+   * Recursively checks if all children of a layer are visible.
+   * @param {TypeLegendLayer} legendLayer - The legend layer to check
+   * @param {string[]} curVisibleLayers - The visible layers array
+   * @returns {boolean} Whether the children are visible
+   */
+  const legendLayersChildrenVisible = useCallback((legendLayer: TypeLegendLayer, curVisibleLayers: string[]): boolean => {
+    // Log
+    logger.logTraceUseCallback('LAYER-DETAILS - legendLayersChildrenVisible');
+
+    // Check if any children are not visible
+    if (legendLayer.children.find((child) => !curVisibleLayers.includes(child.layerPath))) return false;
+
+    // Check if any of the children have a child that is not visible
+    const invisibleChildren = legendLayer.children.find((child) => {
+      return child.children?.length && !legendLayersChildrenVisible(child, curVisibleLayers);
+    });
+
+    if (invisibleChildren) return false;
+    return true;
+  }, []);
+
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('LAYER DETAILS - allChildrenVisible', layerDetails);
+
+    const allChildrenVisible = legendLayersChildrenVisible(layerDetails, visibleLayers);
+    if (allChildrenVisible !== allSublayersVisible) setAllSublayersVisible(allChildrenVisible);
+  }, [allSublayersVisible, layerDetails, layerDetails.children, legendLayersChildrenVisible, visibleLayers]);
 
   const handleRefreshLayer = (): void => {
     refreshLayer(layerDetails.layerPath);
@@ -160,6 +240,33 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     setHighlightLayer(layerDetails.layerPath);
   };
 
+  /**
+   * Recursively sets child layer visibility.
+   * @param {TypeLegendLayer} legendLayer - The legend layer to set the child visibility of
+   * @param {boolean} newVisibility - The new visibility to set
+   */
+  const setVisibilityForAllSublayers = useCallback(
+    (legendLayer: TypeLegendLayer, newVisibility: boolean): void => {
+      // Log
+      logger.logTraceUseCallback('LAYER-DETAILS - setVisibilityForAllSublayers');
+
+      legendLayer.children.forEach((child) => {
+        if (newVisibility) {
+          if (!visibleLayers.includes(child.layerPath)) setOrToggleLayerVisibility(child.layerPath, true);
+        } else if (visibleLayers.includes(child.layerPath)) setOrToggleLayerVisibility(child.layerPath, false);
+        if (child.children.length) setVisibilityForAllSublayers(child, newVisibility);
+      });
+    },
+    [setOrToggleLayerVisibility, visibleLayers]
+  );
+
+  /**
+   * Sets visibility for all children of the layer.
+   */
+  const handleToggleAllVisibility = useCallback((): void => {
+    setVisibilityForAllSublayers(layerDetails, !allSublayersVisible);
+  }, [allSublayersVisible, layerDetails, setVisibilityForAllSublayers]);
+
   const allItemsChecked = (): boolean => {
     return _.every(layerDetails.items, (i) => i.isVisible !== false);
   };
@@ -186,7 +293,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     }
 
     return (
-      <IconButton color="primary" onClick={() => toggleItemVisibility(layerDetails.layerPath, item)}>
+      <IconButton color="primary" onClick={() => toggleItemVisibility(layerDetails.layerPath, item)} disabled={layerHidden}>
         {item.isVisible === true ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
       </IconButton>
     );
@@ -202,7 +309,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     }
 
     return (
-      <IconButton color="primary" onClick={() => setAllItemsVisibility(layerDetails.layerPath, !allItemsChecked())}>
+      <IconButton color="primary" onClick={() => setAllItemsVisibility(layerDetails.layerPath, !allItemsChecked())} disabled={layerHidden}>
         {allItemsChecked() ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
       </IconButton>
     );
@@ -223,11 +330,11 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
             <Grid size={{ xs: 'auto' }}>{renderItemCheckbox(item)}</Grid>
             <Grid size={{ xs: 'auto' }} sx={{ display: 'flex' }}>
               {item.icon ? (
-                <Box component="img" sx={{ alignSelf: 'center' }} alt={item.name} src={item.icon} />
+                <Box component="img" sx={{ alignSelf: 'center', maxHeight: '26px', maxWidth: '26px' }} alt={item.name} src={item.icon} />
               ) : (
                 <BrowserNotSupportedIcon />
               )}
-              <Box component="span" sx={sxClasses.tableIconLabel}>
+              <Box component="span" sx={{ ...sxClasses.tableIconLabel, ...((layerHidden || !item.isVisible) && hiddenStyle) }}>
                 {item.name}
               </Box>
             </Grid>
@@ -237,18 +344,13 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     );
   }
 
-  function renderLayers(startLayer: TypeLegendLayer): JSX.Element {
+  function renderSubLayers(startLayer: TypeLegendLayer): JSX.Element {
     return (
       <List>
         {startLayer.children.map((layer) => (
           <Fragment key={layer.layerId}>
-            <ListItem sx={{ padding: '6px 0px', borderTop: `1px solid ${theme.palette.geoViewColor.bgColor.dark[50]}` }}>
-              <ListItemIcon>
-                <LayerIcon layerPath={layer.layerPath} />
-              </ListItemIcon>
-              <ListItemText primary={layer.layerName} />
-            </ListItem>
-            {layer.children.length > 0 && <Box sx={{ paddingLeft: '30px', width: '100%' }}>{renderLayers(layer)}</Box>}
+            <Sublayer layer={layer} />
+            {layer.children.length > 0 && <Box sx={{ paddingLeft: '30px', width: '100%' }}>{renderSubLayers(layer)}</Box>}
           </Fragment>
         ))}
       </List>
@@ -276,6 +378,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           tooltip={t('legend.highlightLayer')!}
           onClick={handleHighlightLayer}
           className={highlightedLayer === layerDetails.layerPath ? 'buttonOutline active' : 'buttonOutline'}
+          disabled={layerHidden}
         >
           <HighlightOutlinedIcon />
         </IconButton>
@@ -290,7 +393,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           tooltip={t('legend.zoomTo')!}
           onClick={handleZoomTo}
           className="buttonOutline"
-          disabled={layerDetails.bounds === undefined}
+          disabled={layerDetails.bounds === undefined || layerHidden}
         >
           <ZoomInSearchIcon />
         </IconButton>
@@ -312,6 +415,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   }
 
   const getSubTitle = (): string | null => {
+    if (parentHidden) return t('layers.parentHidden');
+    if (!layerVisible) return t('layers.hidden');
     if (layerDetails.children.length > 0) {
       return t('legend.subLayersCount').replace('{count}', layerDetails.children.length.toString());
     }
@@ -467,10 +572,20 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
             }}
           >
             <Box sx={{ textAlign: 'left', maxWidth: '70%', [theme.breakpoints.down('md')]: { display: 'none' } }}>
-              <Typography sx={sxClasses.categoryTitle} title={layerDetails.layerName}>
+              <Typography sx={{ ...sxClasses.categoryTitle, ...(layerHidden && hiddenStyle) }} title={layerDetails.layerName}>
                 {layerDetails.layerName}
               </Typography>
-              {getSubTitle() && <Typography sx={{ fontSize: theme.palette.geoViewFontSize.sm }}> {getSubTitle()} </Typography>}
+              {getSubTitle() && (
+                <Typography
+                  sx={{
+                    fontSize: theme.palette.geoViewFontSize.sm,
+                    ...(layerHidden && hiddenStyle),
+                  }}
+                >
+                  {' '}
+                  {getSubTitle()}{' '}
+                </Typography>
+              )}
             </Box>
             {renderLayerButtons()}
           </Box>
@@ -479,26 +594,35 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
               <Grid container direction="row" alignItems="center" justifyItems="stretch">
                 <Grid size={{ xs: 'auto' }}>{renderHeaderCheckbox()}</Grid>
                 <Grid size={{ xs: 'auto' }}>
-                  <Box component="span" sx={{ fontWeight: 'bold' }}>
-                    {t('layers.toggleAllVisibility')}
+                  <Box component="span" sx={{ fontWeight: 'bold', ...(layerHidden && hiddenStyle) }}>
+                    {t('layers.toggleItemsVisibility')}
+                  </Box>
+                </Grid>
+              </Grid>
+            )}
+            {layerDetails.children.length > 0 && (
+              <Grid container direction="row" alignItems="center" justifyItems="stretch">
+                <Grid size={{ xs: 'auto' }}>
+                  <IconButton color="primary" onClick={handleToggleAllVisibility} disabled={layerHidden}>
+                    {allSublayersVisible ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
+                  </IconButton>
+                </Grid>
+                <Grid size={{ xs: 'auto' }}>
+                  <Box component="span" sx={{ fontWeight: 'bold', ...(layerHidden && hiddenStyle) }}>
+                    {t('layers.toggleSublayersVisibility')}
                   </Box>
                 </Grid>
               </Grid>
             )}
             {layerDetails.controls?.opacity !== false && <LayerOpacityControl layerDetails={layerDetails} />}
           </Box>
-          <Divider sx={{ marginTop: '10px', marginBottom: '20px' }} variant="middle" />
+          <Divider sx={{ marginTop: '10px', marginBottom: '10px' }} variant="middle" />
           {renderWMSImage()}
           <Box>
             {layerDetails.items?.length > 0 && renderItems()}
-            {layerDetails.children.length > 0 && (
-              <>
-                <Typography sx={{ fontWeight: 'bold', textAlign: 'left', margin: '10px 0px' }}>{t('layers.subLayersList')}</Typography>
-                {renderLayers(layerDetails)}
-              </>
-            )}
+            {layerDetails.children.length > 0 && renderSubLayers(layerDetails)}
           </Box>
-          <Divider sx={{ marginTop: '20px', marginBottom: '10px' }} variant="middle" />
+          <Divider sx={{ marginTop: '10px', marginBottom: '10px' }} variant="middle" />
           {renderInfo()}
           {layerDetails.layerAttribution &&
             layerDetails.layerAttribution.map((attribution) => {
