@@ -35,12 +35,15 @@ export function Swiper(props: SwiperProps): JSX.Element {
   const { Box, Tooltip, HandleIcon } = ui.elements;
 
   const mapSize = useRef<number[]>(viewer.map?.getSize() || [0, 0]);
-  const swiperValue = useRef(50);
+  const swiperValueVertical = useRef(50);
+  const swiperValueHorizontal = useRef(50);
   const swiperRef = useRef<HTMLElement>();
 
   const [olLayers, setOlLayers] = useState<BaseLayer[]>([]);
-  const [xPosition, setXPosition] = useState(mapSize.current[0] / 2);
-  const [yPosition, setYPosition] = useState(mapSize.current[1] / 2);
+  const [xPositionVertical, setXPositionVertical] = useState(mapSize.current[0] / 2);
+  const [yPositionVertical, setYPositionVertical] = useState(0);
+  const [xPositionHorizontal, setXPositionHorizontal] = useState(0);
+  const [yPositionHorizontal, setYPositionHorizontal] = useState(mapSize.current[1] / 2);
 
   // Get store values
   const layerPaths = useSwiperLayerPaths();
@@ -59,8 +62,9 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
       const evt = event as RenderEvent;
       const ctx: CanvasRenderingContext2D = evt.context! as CanvasRenderingContext2D;
-      const width = ((mapSize.current[0] + 6) * swiperValue.current) / 100;
-      const height = ((mapSize.current[1] + 6) * swiperValue.current) / 100;
+      const swiperValue = orientation === 'vertical' ? swiperValueVertical.current : swiperValueHorizontal.current;
+      const width = ((mapSize.current[0] + 6) * swiperValue) / 100;
+      const height = ((mapSize.current[1] + 6) * swiperValue) / 100;
 
       const tl = getRenderPixel(evt, [0, 0]);
       const tr = orientation === 'vertical' ? getRenderPixel(evt, [width, 0]) : getRenderPixel(evt, [mapSize.current[0], 0]);
@@ -120,13 +124,19 @@ export function Swiper(props: SwiperProps): JSX.Element {
     if (layerPaths.length) {
       // get map size
       mapSize.current = viewer.map.getSize() || [0, 0];
-      const size = orientation === 'vertical' ? mapSize.current[0] : mapSize.current[1];
-      const position = orientation === 'vertical' ? getSwiperStyle()[0] : getSwiperStyle()[1];
-      swiperValue.current = (position / size) * 100;
 
-      // Update the position
-      if (orientation === 'vertical') setXPosition(position);
-      if (orientation === 'vertical') setYPosition(position);
+      // Update the position and swiper %
+      if (orientation === 'vertical') {
+        const [x] = getSwiperStyle();
+        swiperValueVertical.current = (x / mapSize.current[0]) * 100;
+        setXPositionVertical(x);
+        setYPositionVertical(0);
+      } else {
+        const [, y] = getSwiperStyle();
+        swiperValueHorizontal.current = (y / mapSize.current[1]) * 100;
+        setXPositionHorizontal(0);
+        setYPositionHorizontal(y);
+      }
 
       // Force refresh
       olLayers.forEach((layer: BaseLayer) => {
@@ -140,6 +150,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
    * @param {KeyboardEvent} evt The keyboard event to calculate the swiper position
    */
   const updateSwiper = debounce((evt: KeyboardEvent): void => {
+    logger.logDebug('TEST SWIPER - updateSwiper', evt);
     // * there is a know issue when stiching from keyboard to mouse swiper but we can live with it as we are not expecting to face this
     // * offset from mouse method is not working properly anymore
     if (evt.ctrlKey && 'ArrowLeft ArrowRight ArrowUp ArrowDown'.includes(evt.key) && layerPaths.length) {
@@ -161,40 +172,6 @@ export function Swiper(props: SwiperProps): JSX.Element {
       setTimeout(() => onStop(), 75);
     }
   }, 100);
-
-  /**
-   * Handles orientation change events from the custom event dispatcher.
-   * Resets the swiper position to center when orientation changes and refreshes the layer rendering.
-   * @param {CustomEvent} event - The custom event containing the new orientation details
-   */
-  const handleOrientationChange = useCallback(
-    (event: CustomEvent): void => {
-      // Log
-      logger.logTraceUseCallback('GEOVIEW-SWIPER - orientation changed via event', event.detail.orientation);
-
-      // Update map size
-      mapSize.current = viewer.map.getSize() || [0, 0];
-
-      // Calculate center position and set state BEFORE calling onStop
-      const centerX = mapSize.current[0] / 2;
-      const centerY = mapSize.current[1] / 2;
-
-      // Reset both positions regardless of orientation
-      setXPosition(orientation === 'vertical' ? centerX : 0);
-      setYPosition(orientation === 'vertical' ? 0 : centerY);
-
-      // Update the swiper value to center
-      swiperValue.current = 50;
-
-      // Force refresh layers after state is set
-      setTimeout(() => {
-        olLayers.forEach((layer: BaseLayer) => {
-          layer.changed();
-        });
-      }, 100);
-    },
-    [orientation, viewer.map, olLayers]
-  );
 
   /**
    * Attaches necessary swiper events to the given layer path layer
@@ -277,14 +254,14 @@ export function Swiper(props: SwiperProps): JSX.Element {
   }, [viewer, layerPaths, attachLayerEventsOnPath, prerender, visibleLayers]);
 
   useEffect(() => {
-    // Listen for the custom event
-    const eventName = `swiper-orientation-changed-${viewer.mapId}`;
-    window.addEventListener(eventName, handleOrientationChange as EventListener);
+    // Log
+    logger.logTraceUseEffect('GEOVIEW-SWIPER - orientation changed', orientation);
 
-    return () => {
-      window.removeEventListener(eventName, handleOrientationChange as EventListener);
-    };
-  }, [handleOrientationChange, viewer.mapId]);
+    // Force refresh layers after state is set
+    setTimeout(() => {
+      onStop();
+    }, 100);
+  }, [onStop, orientation]);
 
   useEffect(() => {
     // Log
@@ -329,9 +306,11 @@ export function Swiper(props: SwiperProps): JSX.Element {
           key={orientation} // This forces recreation when orientation changes
           axis={orientation === 'vertical' ? 'x' : 'y'}
           bounds="parent"
-          defaultPosition={{ x: orientation === 'vertical' ? xPosition : 0, y: orientation === 'vertical' ? 0 : yPosition }}
-          onStop={() => onStop()}
-          onDrag={() => onStop()}
+          defaultPosition={
+            orientation === 'vertical' ? { x: xPositionVertical, y: yPositionVertical } : { x: xPositionHorizontal, y: yPositionHorizontal }
+          }
+          onStop={onStop}
+          onDrag={onStop}
           nodeRef={swiperRef as RefObject<HTMLElement>}
         >
           <Box sx={[orientation === 'vertical' ? sxClasses.vertical : sxClasses.horizontal, sxClasses.bar]} tabIndex={0} ref={swiperRef}>

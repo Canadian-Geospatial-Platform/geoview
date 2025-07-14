@@ -124,13 +124,6 @@ class SwiperPlugin extends MapPlugin {
   setOrientation(orientation: SwipeOrientation): void {
     // Set the orientation
     SwiperEventProcessor.setOrientation(this.pluginProps.mapId, orientation);
-
-    // Dispatch custom event to trigger useEffect
-    window.dispatchEvent(
-      new CustomEvent(`swiper-orientation-changed-${this.pluginProps.mapId}`, {
-        detail: { orientation },
-      })
-    );
   }
 }
 
