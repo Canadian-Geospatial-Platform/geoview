@@ -19,6 +19,8 @@ import { sxClasses } from './swiper-style';
 
 type SwiperProps = {
   viewer: MapViewer;
+  // eslint-disable-next-line react/no-unused-prop-types
+  config: ConfigProps;
 };
 
 export type ConfigProps = {
@@ -150,7 +152,6 @@ export function Swiper(props: SwiperProps): JSX.Element {
    * @param {KeyboardEvent} evt The keyboard event to calculate the swiper position
    */
   const updateSwiper = debounce((evt: KeyboardEvent): void => {
-    logger.logDebug('TEST SWIPER - updateSwiper', evt);
     // * there is a know issue when stiching from keyboard to mouse swiper but we can live with it as we are not expecting to face this
     // * offset from mouse method is not working properly anymore
     if (evt.ctrlKey && 'ArrowLeft ArrowRight ArrowUp ArrowDown'.includes(evt.key) && layerPaths.length) {
