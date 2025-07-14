@@ -1,5 +1,3 @@
-import cloneDeep from 'lodash/cloneDeep';
-
 import {
   CV_DEFAULT_MAP_FEATURE_CONFIG,
   CV_CONFIG_GEOCORE_TYPE,
@@ -21,8 +19,6 @@ import { MapConfigError } from '@/api/config/types/classes/config-exceptions';
 
 import { isJsonString, removeCommentsFromJSON } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
-
-import { ShapefileReader } from '@/core/utils/config/reader/shapefile-reader';
 import { UUIDmapConfigReader } from '@/core/utils/config/reader/uuid-config-reader';
 
 /**
@@ -285,132 +281,95 @@ export class ConfigApi {
     return new MapFeatureConfig(toJsonObject(CV_DEFAULT_MAP_FEATURE_CONFIG));
   }
 
-  /**
-   * Convert one layer config or an array of GeoCore layer config to their GeoView equivalents. The method returns undefined
-   * and log an error in the console if a GeoCore layer cannot be converted. When the input/output type is an array, it is
-   * possible to filter out the undefined values.
-   *
-   * @param {TypeDisplayLanguage} language The language language to use for the conversion.
-   * @param {TypeJsonArray | TypeJsonObject} config Configuration to process.
-   * @param {string} geocoreUrl Optional GeoCore server URL.
-   * @param {boolean} filterUndefinedValues Flag indicating that we want to filter undefined values when the return type is an array..
-   *
-   * @returns {Promise<TypeJsonArray>} The resulting configurations or undefined if there is an error.
-   * @static @private
-   */
-  static async convertGeocoreToGeoview(
-    language: TypeDisplayLanguage,
-    config: TypeJsonArray | TypeJsonObject,
-    geocoreUrl?: string,
-    filterUndefinedValues: boolean = true
-  ): Promise<TypeJsonArray | TypeJsonObject | undefined> {
-    // convert the JSON object to a JSON array. We want to process a single type.
-    const listOfGeoviewLayerConfig = Array.isArray(config) ? config : [config];
+  // /**
+  //  * Convert one layer config or an array of GeoCore layer config to their GeoView equivalents. The method returns undefined
+  //  * and log an error in the console if a GeoCore layer cannot be converted. When the input/output type is an array, it is
+  //  * possible to filter out the undefined values.
+  //  *
+  //  * @param {TypeDisplayLanguage} language - The language language to use for the conversion.
+  //  * @param {TypeJsonArray | TypeJsonObject} config - Configuration to process.
+  //  * @returns {Promise<TypeGeoviewLayerConfig>} The resulting configuration.
+  //  * @static
+  //  */
+  // static async convertGeocoreToGeoview(
+  //   mapId: string,
+  //   language: TypeDisplayLanguage,
+  //   config: TypeJsonArray | TypeJsonObject
+  // ): Promise<TypeGeoviewLayerConfig> {
+  //   // convert the JSON object to a JSON array. We want to process a single type.
+  //   const listOfGeoviewLayerConfig = Array.isArray(config) ? config : [config];
 
-    // Get the geocore URL from the config, otherwise use the default URL.
-    const geocoreServerUrl = geocoreUrl || CV_DEFAULT_MAP_FEATURE_CONFIG.serviceUrls.geocoreUrl;
+  //   // Filter all geocore layers
+  //   const geocoreArrayOfKeys = listOfGeoviewLayerConfig
+  //     .filter((layerConfig) => layerConfig.geoviewLayerType === CV_CONFIG_GEOCORE_TYPE)
+  //     .map((geocoreLayer) => geocoreLayer.geoviewLayerId as string);
 
-    // Filter all geocore layers and convert the result into an array of unique geoviewLayerId.
-    const geocoreArrayOfKeys = listOfGeoviewLayerConfig
-      .filter((layerConfig) => layerConfig.geoviewLayerType === CV_CONFIG_GEOCORE_TYPE)
-      .map<string>((geocoreLayer) => geocoreLayer.geoviewLayerId as string);
+  //   // For each uuid
+  //   const promisesOfGeoviewLayerConfigs: Promise<TypeGeoviewLayerConfig[]>[] = [];
+  //   geocoreArrayOfKeys.forEach((uuid) => {
+  //     // Compile
+  //     promisesOfGeoviewLayerConfigs.push(GeoCore.createLayersFromUUID(uuid, mapId, language));
+  //   });
 
-    // If the listOfGeoviewLayerConfig contains GeoCore layers, process them.
-    if (geocoreArrayOfKeys.length) {
-      try {
-        // Get the GeoView configurations using the array of GeoCore identifiers.
-        const response = await UUIDmapConfigReader.getGVConfigFromUUIDs(geocoreServerUrl, language, geocoreArrayOfKeys);
+  //   // Once all promises are settled
+  //   const allPromises = await Promise.allSettled(promisesOfGeoviewLayerConfigs);
 
-        // Focus on the layers in the response
-        const arrayOfJsonConfig = response.layers;
+  //   // For each result
+  //   const results: TypeGeoviewLayerConfig[] = [];
+  //   allPromises.forEach((promise) => {
+  //     // If fulfilled
+  //     if (promise.status === 'fulfilled') {
+  //       // Fulfilled
+  //       results.push(...promise.value);
+  //     } else {
+  //       // Failed
+  //     }
+  //   });
 
-        // replace the GeoCore layers by the GeoView layers returned by the server.
-        // If a geocore layer cannot be found in the array of layers returned by the server, we leave it as is in
-        // the listOfGeoviewLayerConfig.
-        let newListOfGeoviewLayerConfig = listOfGeoviewLayerConfig.map((layerConfig) => {
-          if (layerConfig.geoviewLayerType === CV_CONFIG_GEOCORE_TYPE) {
-            const jsonConfigFound = arrayOfJsonConfig.find((jsonConfig) => {
-              // Remove the duplicate tag from the ID so it will match
-              const geocoreId = (layerConfig.geoviewLayerId as string).split(':')[0];
-              return jsonConfig.geoviewLayerId === `rcs.${geocoreId}.${language}`;
-            });
-            if (jsonConfigFound) {
-              // take a clone in case the ID is a duplicate so the config can be re-used
-              const newConfig = cloneDeep(jsonConfigFound);
-              newConfig.geoviewLayerId = layerConfig.geoviewLayerId as string;
-              newConfig.isGeocore = true; // We want to remember that the origin is GeoCore.
-              return newConfig;
-            }
-          }
-          return layerConfig;
-        }) as TypeJsonArray;
+  //   // Return the final config (this function only expects 1 return actually as per originally implemented...)
+  //   return results[0];
+  // }
 
-        // Print a message to display the layer identifier in error and if the input config is an array and the
-        // filterUndefinedValues flag is true, filter out the erroneous GeoCore layers.
-        newListOfGeoviewLayerConfig = newListOfGeoviewLayerConfig.filter((layerConfig) => {
-          if (layerConfig.geoviewLayerType === CV_CONFIG_GEOCORE_TYPE) {
-            logger.logError(`Unable to convert GeoCore layer (Id=${layerConfig.geoviewLayerId}).`);
-            // if the config input type is an array and the filterUndefinedValues is on
-            return !(filterUndefinedValues || !Array.isArray(config)); // Delete the layer entry
-          }
-          return true; // Keep the layer
-        });
+  // /**
+  //  * Processes listOfGeoviewLayers and converts any shapefile entries to geojson.
+  //  * @param {TypeJsonArray | TypeJsonObject} listOfGeoviewLayers - Layers to process.
+  //  * @returns {Promise<TypeGeoviewLayerConfig[]>} The resulting configurations.
+  //  * @static
+  //  */
+  // static async convertShapefileToGeojson(listOfGeoviewLayers: TypeJsonArray | TypeJsonObject): Promise<TypeGeoviewLayerConfig[]> {
+  //   // convert the JSON object to a JSON array. We want to process a single type.
+  //   const listOfGeoviewLayerConfig = Array.isArray(listOfGeoviewLayers) ? listOfGeoviewLayers : [listOfGeoviewLayers];
 
-        // return the result according to the config type
-        return Array.isArray(config) ? newListOfGeoviewLayerConfig : newListOfGeoviewLayerConfig[0];
-      } catch (error: unknown) {
-        logger.logError('Failed to process the array of GeoCore layers', geocoreArrayOfKeys, geocoreUrl, error);
-      }
-    } else return config;
-    return undefined;
-  }
+  //   // Filter all shapefile layers
+  //   const shapefileConfigs = listOfGeoviewLayerConfig.filter(
+  //     (geoviewLayerConfig) => geoviewLayerConfig.geoviewLayerType === CV_CONFIG_SHAPEFILE_TYPE
+  //   ) as unknown as ShapefileLayerConfig[];
 
-  /**
-   * Processes listOfGeoviewLayers and converts any shapefile entries to geojson.
-   * @param {TypeJsonArray | TypeJsonObject} listOfGeoviewLayers Layers to process.
-   * @returns {Promise<TypeJsonArray>} The resulting configurations or undefined if there is an error.
-   * @static @private
-   */
-  static async convertShapefileToGeojson(
-    listOfGeoviewLayers: TypeJsonArray | TypeJsonObject
-  ): Promise<TypeJsonArray | TypeJsonObject | undefined> {
-    // convert the JSON object to a JSON array. We want to process a single type.
-    const listOfGeoviewLayerConfig = Array.isArray(listOfGeoviewLayers) ? listOfGeoviewLayers : [listOfGeoviewLayers];
-    const shapefileConfigs = listOfGeoviewLayerConfig.filter(
-      (geoviewLayerConfig) => geoviewLayerConfig.geoviewLayerType === CV_CONFIG_SHAPEFILE_TYPE
-    );
+  //   // For each shapefile layer
+  //   const promisesOfShapefileConfigs: Promise<TypeGeoviewLayerConfig[]>[] = [];
+  //   shapefileConfigs.forEach((shapefileConfig) => {
+  //     // Compile
+  //     promisesOfShapefileConfigs.push(ShapefileReader.convertShapefileConfigToGeoJson(shapefileConfig));
+  //   });
 
-    if (shapefileConfigs) {
-      const convertedShapefileConfigs = await ShapefileReader.getGVConfigsFromShapefiles(shapefileConfigs);
-      let newListOfGeoviewLayerConfig = listOfGeoviewLayerConfig.map((layerConfig) => {
-        // Replace any shapefile entries with their converted version
-        if (layerConfig.geoviewLayerType === CV_CONFIG_SHAPEFILE_TYPE) {
-          const jsonConfigFound = convertedShapefileConfigs.find((convertedConfig) => {
-            return convertedConfig.geoviewLayerId === layerConfig.geoviewLayerId;
-          });
-          if (jsonConfigFound) {
-            return jsonConfigFound;
-          }
-        }
+  //   // Once all promises are settled
+  //   const allPromises = await Promise.allSettled(promisesOfShapefileConfigs);
 
-        // Retuen other configs as they appear
-        return layerConfig;
-      }) as TypeJsonArray;
+  //   // For each result
+  //   const results: TypeGeoviewLayerConfig[] = [];
+  //   allPromises.forEach((promise) => {
+  //     // If fulfilled
+  //     if (promise.status === 'fulfilled') {
+  //       // Fulfilled
+  //       results.push(...promise.value);
+  //     } else {
+  //       // Failed
+  //     }
+  //   });
 
-      // Remove any remaining shapefile entries
-      newListOfGeoviewLayerConfig = newListOfGeoviewLayerConfig.filter((layerConfig) => {
-        if (layerConfig.geoviewLayerType === CV_CONFIG_SHAPEFILE_TYPE) {
-          logger.logError(`Unable to convert shapefile layer (Id=${layerConfig.geoviewLayerId}).`);
-          return false;
-        }
-        return true;
-      });
-
-      return newListOfGeoviewLayerConfig;
-    }
-
-    return listOfGeoviewLayers;
-  }
+  //   // Return the final config (this function expects the return to be an array as per originally implemented...)
+  //   return results;
+  // }
 
   /**
    * This method validates the configuration of map elements using the json string or json object supplied by the user.
