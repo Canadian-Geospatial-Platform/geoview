@@ -17,7 +17,7 @@ import {
 } from '@/api/config/types/map-schema-types';
 import { MapConfigError } from '@/api/config/types/classes/config-exceptions';
 
-import { isJsonString, removeCommentsFromJSON } from '@/core/utils/utilities';
+import { isJsonString, isValidUUID, removeCommentsFromJSON } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { UUIDmapConfigReader } from '@/core/utils/config/reader/uuid-config-reader';
 
@@ -29,25 +29,6 @@ import { UUIDmapConfigReader } from '@/core/utils/config/reader/uuid-config-read
 export class ConfigApi {
   // GV: The following property was created only for debugging purpose. They allow developers to inspect the
   // GV: content or call the methods of the last instance created by the corresponding ConfigApi call.
-
-  /** Static property that contains the last object instanciated by the ConfigApi.createMapConfig call */
-  static lastMapConfigCreated?: MapFeatureConfig;
-
-  // TODO: Temporary property that will be deleted when the ConfigApi development is done. Set it to true for normal execution. */
-  static devMode = false;
-
-  /** ***************************************************************************************************************************
-   * Function used to validate the GeoCore UUIDs.
-   *
-   * @param {string} uuid The UUID to validate.
-   *
-   * @returns {boolean} Returns true if the UUID respect the format.
-   * @static
-   */
-  static isValidUUID(uuid: string): boolean {
-    const regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    return regex.test(uuid);
-  }
 
   /** ***************************************************************************************************************************
    * Attempt to determine the layer type based on the URL format.
@@ -77,7 +58,7 @@ export class ConfigApi {
 
     if (upperUrl.includes('VECTORTILESERVER')) return CV_CONST_LAYER_TYPES.VECTOR_TILES;
 
-    if (ConfigApi.isValidUUID(url)) return CV_CONFIG_GEOCORE_TYPE;
+    if (isValidUUID(url)) return CV_CONFIG_GEOCORE_TYPE;
 
     if (/WMS/i.test(url)) return CV_CONST_LAYER_TYPES.WMS;
 
@@ -308,7 +289,7 @@ export class ConfigApi {
   //   const promisesOfGeoviewLayerConfigs: Promise<TypeGeoviewLayerConfig[]>[] = [];
   //   geocoreArrayOfKeys.forEach((uuid) => {
   //     // Compile
-  //     promisesOfGeoviewLayerConfigs.push(GeoCore.createLayersFromUUID(uuid, mapId, language));
+  //     promisesOfGeoviewLayerConfigs.push(GeoCore.createLayerConfigFromUUID(uuid, mapId, language));
   //   });
 
   //   // Once all promises are settled
@@ -400,7 +381,7 @@ export class ConfigApi {
 
       // Instanciate the mapFeatureConfig. If an error is detected, a workaround procedure
       // will be executed to try to correct the problem in the best possible way.
-      ConfigApi.lastMapConfigCreated = new MapFeatureConfig(providedMapFeatureConfig);
+      return new MapFeatureConfig(providedMapFeatureConfig);
     } catch (error: unknown) {
       // If we get here, it is because the user provided a string config that cannot be translated to a json object,
       // or the config doesn't have the mandatory map property or the listOfGeoviewLayerConfig is defined but is not
@@ -409,9 +390,8 @@ export class ConfigApi {
       else logger.logError('ConfigApi.validateMapConfig - An error occured', error);
       const defaultMapConfig = ConfigApi.getDefaultMapFeatureConfig();
       defaultMapConfig.setErrorDetectedFlag();
-      ConfigApi.lastMapConfigCreated = defaultMapConfig;
+      return defaultMapConfig;
     }
-    return ConfigApi.lastMapConfigCreated;
   }
 
   // /**

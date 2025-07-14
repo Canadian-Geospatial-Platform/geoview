@@ -227,7 +227,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
         schemaTag: CONST_LAYER_TYPES.XYZ_TILES,
         entryType: CONST_LAYER_ENTRY_TYPES.RASTER_TILE,
         layerId: `${layerEntry.id}`,
-        layerName: `${layerEntry.name}` || `${layerEntry.id}`,
+        layerName: `${layerEntry.name || layerEntry.id}`,
         source: {
           dataAccessPath: metadataAccessPath,
         },

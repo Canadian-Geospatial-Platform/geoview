@@ -20,14 +20,14 @@ export abstract class GeoCore {
    * @param {string} mapId - The Map id
    * @param {TypeDisplayLanguage} language - The language
    * @param {GeoCoreLayerConfig?} layerConfig - The optional layer configuration
-   * @returns {Promise<TypeGeoviewLayerConfig[]>} List of layer configurations to add to the map.
+   * @returns {Promise<TypeGeoviewLayerConfig>} List of layer configurations to add to the map.
    */
-  static async createLayersFromUUID(
+  static async createLayerConfigFromUUID(
     uuid: string,
     mapId: string,
     language: TypeDisplayLanguage,
     layerConfig?: GeoCoreLayerConfig
-  ): Promise<TypeGeoviewLayerConfig[]> {
+  ): Promise<TypeGeoviewLayerConfig> {
     // Get the map config
     const map = MapEventProcessor.getMapViewer(mapId);
     if (map.layer.getGeoviewLayerIds().includes(uuid)) {
@@ -69,7 +69,8 @@ export abstract class GeoCore {
         // When an error happens, raise the exception, we handle it higher in this case
         throw new GeoViewError(errorKey, params);
       });
-      return newLayerConfig as TypeGeoviewLayerConfig[];
+      // Return the created layer config from the merged config informations
+      return newLayerConfig[0] as TypeGeoviewLayerConfig;
     }
 
     // In case of simplified geocoreConfig being provided, just update geoviewLayerName and the first layer
@@ -85,6 +86,7 @@ export abstract class GeoCore {
       response.layers[0].geoviewLayerId = uuid;
     }
 
-    return response.layers;
+    // Always only first one
+    return response.layers[0];
   }
 }

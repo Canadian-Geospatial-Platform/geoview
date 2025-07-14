@@ -83,13 +83,13 @@ export class WFS extends AbstractGeoViewVector {
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Fetch metadata
     const rootUrl = this.metadataAccessPath;
-    await this.onFetchServiceMetadata();
+    const metadata = await this.onFetchServiceMetadata();
 
     // Now that we have metadata, get the layer ids from it
-    if (!Array.isArray(this.metadata?.FeatureTypeList?.FeatureType))
-      this.metadata!.FeatureTypeList.FeatureType = [this.metadata?.FeatureTypeList?.FeatureType] as TypeJsonObject;
+    if (!Array.isArray(metadata?.FeatureTypeList?.FeatureType))
+      metadata!.FeatureTypeList.FeatureType = [metadata?.FeatureTypeList?.FeatureType] as TypeJsonObject;
 
-    const metadataLayerList = this.metadata?.FeatureTypeList.FeatureType as TypeJsonArray;
+    const metadataLayerList = metadata?.FeatureTypeList.FeatureType as TypeJsonArray;
     const entries = metadataLayerList.map((layerMetadata) => {
       return {
         id: layerMetadata.Name && (layerMetadata.Name['#text'] as string),
@@ -384,7 +384,7 @@ export class WFS extends AbstractGeoViewVector {
         schemaTag: CONST_LAYER_TYPES.WFS,
         entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
         layerId: `${layerEntry.id}`,
-        layerName: `${layerEntry.layerName}` || `${layerEntry.id}`,
+        layerName: `${layerEntry.layerName || layerEntry.id}`,
         source: {
           format: 'WFS',
           strategy: 'all',

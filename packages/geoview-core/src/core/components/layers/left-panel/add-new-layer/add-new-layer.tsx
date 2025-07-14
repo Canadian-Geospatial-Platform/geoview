@@ -18,7 +18,7 @@ import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-v
 import { useAppDisabledLayerTypes, useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
-import { getLocalizedMessage } from '@/core/utils/utilities';
+import { getLocalizedMessage, isValidUUID } from '@/core/utils/utilities';
 import { Config } from '@/core/utils/config/config';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -33,7 +33,6 @@ import {
   TypeInitialGeoviewLayerType,
 } from '@/api/config/types/map-schema-types';
 
-import { ConfigApi } from '@/api/config/config-api';
 import {
   buildGeoLayerToAdd,
   getLayerNameById,
@@ -356,7 +355,7 @@ export function AddNewLayer(): JSX.Element {
     else api.getMapViewer(mapId).notifications.showMessage('layers.layerAddedAndLoading', [layerName]);
   };
 
-  // #region Handler for stepper steps
+  // #region HANDLERS FOR THE STEPS
 
   /**
    * Handle the first step of the layer addition process
@@ -404,10 +403,11 @@ export function AddNewLayer(): JSX.Element {
         const idOfFirstLayerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig[0]?.layerId;
         const nameOfFirstLayerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig[0]?.layerName;
         setLayerName(nameOfFirstLayerEntryConfig || idOfFirstLayerEntryConfig);
-        setLayerList(geoviewLayerConfig.listOfLayerEntryConfig as GroupLayerEntryConfig[]);
+        setLayerList(geoviewLayerConfig.listOfLayerEntryConfig as GroupLayerEntryConfig[]); // TODO: FIX THIS. This is not right, not working for groups like for WMS for example
 
-        // TODO: Check - Not sure why we need this here, keeping it..
+        // If there's any listOfLayerEntryConfig entry
         if (geoviewLayerConfig.listOfLayerEntryConfig.length > 0) {
+          // Immediately assume the user wants the first entry until they chose otherwise
           setLayerIdsToAdd([geoviewLayerConfig.listOfLayerEntryConfig[0]?.layerId ?? idOfFirstLayerEntryConfig]);
         }
 
@@ -507,7 +507,7 @@ export function AddNewLayer(): JSX.Element {
     // Shapefile config must be converted to GeoJSON before we proceed
     if (newGeoViewLayer.geoviewLayerType === SHAPEFILE)
       // eslint-disable-next-line no-param-reassign
-      [newGeoViewLayer] = await ShapefileReader.convertShapefileConfigToGeoJson(newGeoViewLayer as ShapefileLayerConfig);
+      newGeoViewLayer = await ShapefileReader.convertShapefileConfigToGeoJson(newGeoViewLayer as ShapefileLayerConfig);
 
     // Use the config to convert simplified layer config into proper layer config
     const config = new Config(language);
@@ -576,7 +576,7 @@ export function AddNewLayer(): JSX.Element {
 
   // #endregion
 
-  // #region handlers
+  // #region HANDLERS
 
   /**
    * Handle the behavior of the 'Back' button in the Stepper UI
@@ -665,7 +665,7 @@ export function AddNewLayer(): JSX.Element {
       // TODO: create a utilities function to test valid URL before we enable the continue button
       // TO.DOCONT: This function should try to ping the server for an answer...
       // Check if url or geocore is provided
-      setStepButtonEnabled(layerURL.startsWith('https://') || ConfigApi.isValidUUID(layerURL.trim()) || layerURL.startsWith('blob'));
+      setStepButtonEnabled(layerURL.startsWith('https://') || isValidUUID(layerURL.trim()) || layerURL.startsWith('blob'));
     }
     if (activeStep === 2 && layerIdsToAdd.length > 0) setStepButtonEnabled(true);
     if (activeStep === 2 && !layerIdsToAdd.length) setStepButtonEnabled(false);
