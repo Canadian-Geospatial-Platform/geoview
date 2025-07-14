@@ -27,8 +27,9 @@ export class GVGeoJSON extends AbstractGVVector {
   }
 
   /**
-   * Overrides the get of the layer configuration associated with the layer.
-   * @returns {GeoJSONLayerEntryConfig} The layer configuration or undefined if not found.
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {GeoJSONLayerEntryConfig} The strongly-typed layer configuration specific to this group layer.
    */
   override getLayerConfig(): GeoJSONLayerEntryConfig {
     // Call parent and cast

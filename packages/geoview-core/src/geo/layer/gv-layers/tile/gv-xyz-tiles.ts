@@ -37,8 +37,9 @@ export class GVXYZTiles extends AbstractGVTile {
   }
 
   /**
-   * Overrides the get of the OpenLayers Layer
-   * @returns {TileLayer<XYZ>} The OpenLayers Layer
+   * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
+   * @override
+   * @returns {TileLayer<XYZ>} The strongly-typed OpenLayers type.
    */
   override getOLLayer(): TileLayer<XYZ> {
     // Call parent and cast
@@ -46,8 +47,9 @@ export class GVXYZTiles extends AbstractGVTile {
   }
 
   /**
-   * Overrides the get of the OpenLayers Layer Source
-   * @returns {XYZ} The OpenLayers Layer Source
+   * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
+   * @override
+   * @returns {XYZ} The XYZ source instance associated with this layer.
    */
   override getOLSource(): XYZ {
     // Get source from OL
@@ -55,8 +57,9 @@ export class GVXYZTiles extends AbstractGVTile {
   }
 
   /**
-   * Overrides the get of the layer configuration associated with the layer.
-   * @returns {XYZTilesLayerEntryConfig} The layer configuration or undefined if not found.
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {XYZTilesLayerEntryConfig} The strongly-typed layer configuration specific to this group layer.
    */
   override getLayerConfig(): XYZTilesLayerEntryConfig {
     // Call parent and cast
@@ -68,7 +71,7 @@ export class GVXYZTiles extends AbstractGVTile {
    * @param {string} fieldName - The field name for which we want to get the type.
    * @returns {TypeOutfieldsType} The type of the field.
    */
-  protected override getFieldType(fieldName: string): TypeOutfieldsType {
+  protected override onGetFieldType(fieldName: string): TypeOutfieldsType {
     // Redirect
     return featureInfoGetFieldType(this.getLayerConfig(), fieldName);
   }

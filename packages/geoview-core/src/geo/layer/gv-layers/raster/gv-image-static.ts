@@ -40,8 +40,9 @@ export class GVImageStatic extends AbstractGVRaster {
   }
 
   /**
-   * Overrides the get of the OpenLayers Layer
-   * @returns {ImageLayer<Static>} The OpenLayers Layer
+   * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
+   * @override
+   * @returns {ImageLayer<Static>} The strongly-typed OpenLayers type.
    */
   override getOLLayer(): ImageLayer<Static> {
     // Call parent and cast
@@ -49,8 +50,9 @@ export class GVImageStatic extends AbstractGVRaster {
   }
 
   /**
-   * Overrides the get of the OpenLayers Layer Source
-   * @returns {Static} The OpenLayers Layer Source
+   * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
+   * @override
+   * @returns {Static} The Static source instance associated with this layer.
    */
   override getOLSource(): Static {
     // Get source from OL
@@ -58,8 +60,9 @@ export class GVImageStatic extends AbstractGVRaster {
   }
 
   /**
-   * Overrides the get of the layer configuration associated with the layer.
-   * @returns {ImageStaticLayerEntryConfig} The layer configuration or undefined if not found.
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {ImageStaticLayerEntryConfig} The strongly-typed layer configuration specific to this group layer.
    */
   override getLayerConfig(): ImageStaticLayerEntryConfig {
     // Call parent and cast
