@@ -1,4 +1,3 @@
-import { Overlay } from 'ol';
 import { Draw } from '@/geo/interaction/draw';
 import { Modify } from '@/geo/interaction/modify';
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
@@ -13,6 +12,7 @@ export type TypeDrawerConfig = {
     activeGeom?: string;
     geomTypes?: string[];
     style?: StyleProps;
+    hideMeasurements?: boolean;
 };
 export type TypeEditInstance = {
     [groupKey: string]: Modify | undefined;
@@ -24,8 +24,8 @@ export interface IDrawerState {
     drawInstance: Draw | undefined;
     isEditing: boolean;
     editInstances: TypeEditInstance;
-    measureOverlays: Overlay[];
     hideMeasurements: boolean;
+    iconSrc: string;
     setDefaultConfigValues: (config: TypeMapFeaturesConfig) => void;
     actions: {
         getActiveGeom: () => string;
@@ -35,8 +35,8 @@ export interface IDrawerState {
         getDrawInstance: () => Draw | undefined;
         getIsEditing: () => boolean;
         getEditInstances: () => TypeEditInstance;
-        getMeasureOverlays: () => Overlay[];
         getHideMeasurements: () => boolean;
+        getIconSrc: () => string;
         toggleDrawing: () => void;
         toggleEditing: () => void;
         toggleHideMeasurements: () => void;
@@ -52,9 +52,7 @@ export interface IDrawerState {
         setEditInstance(groupKey: string, editInstance: Modify | undefined): void;
         removeEditInstance(groupKey: string): void;
         setHideMeasurements(hideMeasurements: boolean): void;
-        setMeasureOverlays(measureOverlays: Overlay[]): void;
-        addMeasureOverlay(measureOverlay: Overlay): void;
-        removeMeasureOverlay(measureOverlay: Overlay): void;
+        setIconSrc: (iconSrc: string) => void;
     };
     setterActions: {
         toggleDrawing: () => void;
@@ -72,9 +70,7 @@ export interface IDrawerState {
         setEditInstance: (groupKey: string, editInstance: Modify | undefined) => void;
         removeEditInstance: (groupKey: string) => void;
         setHideMeasurements: (hideMeasurements: boolean) => void;
-        setMeasureOverlays(measureOverlays: Overlay[]): void;
-        addMeasureOverlay(measureOverlay: Overlay): void;
-        removeMeasureOverlay(measureOverlay: Overlay): void;
+        setIconSrc: (iconSrc: string) => void;
     };
 }
 /**
@@ -84,7 +80,6 @@ export interface IDrawerState {
  * @returns {IDrawerState} - The Drawer state object
  */
 export declare function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDrawerState;
-export declare const useDrawerStoreActions: () => DrawerActions;
 export declare const useDrawerIsDrawing: () => boolean;
 export declare const useDrawerIsEditing: () => boolean;
 export declare const useDrawerActiveGeom: () => string;

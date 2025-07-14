@@ -1,4 +1,4 @@
-import { GeoChartConfig } from '@/core/utils/config/reader/uuid-config-reader';
+import { GeoViewGeoChartConfig } from '@/core/utils/config/reader/uuid-config-reader';
 import { TypeFeatureInfoEntry, TypeQueryStatus, TypeResultSet, TypeResultSetEntry } from '@/api/config/types/map-schema-types';
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 type GeochartActions = IGeochartState['actions'];
@@ -35,7 +35,7 @@ export type GeoChartResultInfo = {
     features: TypeFeatureInfoEntry[] | undefined | null;
 };
 export type GeoChartStoreByLayerPath = {
-    [layerPath: string]: GeoChartConfig;
+    [layerPath: string]: GeoViewGeoChartConfig;
 };
 export type TypeGeochartResultSetEntry = TypeResultSetEntry & GeoChartResultInfo;
 export type TypeGeochartResultSet = TypeResultSet<TypeGeochartResultSetEntry>;

@@ -1,6 +1,6 @@
 import { GeoviewStoreType } from '@/core/stores';
 import { GeoChartStoreByLayerPath, IGeochartState, TypeGeochartResultSetEntry } from '@/core/stores/store-interface-and-intial-values/geochart-state';
-import { GeoChartConfig } from '@/core/utils/config/reader/uuid-config-reader';
+import { GeoViewGeoChartConfig } from '@/core/utils/config/reader/uuid-config-reader';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 /**
  * Event processor focusing on interacting with the geochart state in the store.
@@ -34,16 +34,16 @@ export declare class GeochartEventProcessor extends AbstractEventProcessor {
      * (to retrieve the configuration per layer faster).
      *
      * @param {string} mapId the map id
-     * @param {GeoChartConfig[]} charts The array of JSON configuration for GeoChart
+     * @param {GeoViewGeoChartConfig[]} charts The array of JSON configuration for GeoChart
      */
-    static setGeochartCharts(mapId: string, charts: GeoChartConfig[]): void;
+    static setGeochartCharts(mapId: string, charts: GeoViewGeoChartConfig[]): void;
     /**
      * Adds a GeoChart Configuration to the specified map id and layer path
      * @param {string} mapId The map ID
      * @param {string} layerPath The layer path
-     * @param {GeoChartConfig} chartConfig The Geochart Configuration
+     * @param {GeoViewGeoChartConfig} chartConfig The Geochart Configuration
      */
-    static addGeochartChart(mapId: string, layerPath: string, chartConfig: GeoChartConfig): void;
+    static addGeochartChart(mapId: string, layerPath: string, chartConfig: GeoViewGeoChartConfig): void;
     /**
      * Removes a GeoChart Configuration at the specified map id and layer path
      * @param {string} mapId The map ID

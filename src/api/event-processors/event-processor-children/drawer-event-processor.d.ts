@@ -1,5 +1,6 @@
 import { IDrawerState, StyleProps } from '@/core/stores/store-interface-and-intial-values/drawer-state';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
+import { GeoviewStoreType } from '@/app';
 /**
  * Event processor focusing on interacting with the drawer state in the store.
  */
@@ -13,6 +14,12 @@ export declare class DrawerEventProcessor extends AbstractEventProcessor {
      *                                       This helps the developers making sure the existence is checked.
      */
     protected static getDrawerState(mapId: string): IDrawerState | undefined;
+    /**
+     * Initializes the event processor and sets up subscriptions
+     * @param {GeoviewStoreType} store The store to initialize with
+     * @returns {Array<() => void>} Array of unsubscribe functions
+     */
+    onInitialize(store: GeoviewStoreType): Array<() => void>;
     /**
      * Starts a drawing operation with the specified geometry type
      * @param {string} mapId The map ID

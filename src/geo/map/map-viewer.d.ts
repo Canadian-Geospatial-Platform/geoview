@@ -7,6 +7,7 @@ import { Extent } from 'ol/extent';
 import { Projection as OLProjection } from 'ol/proj';
 import { Condition } from 'ol/events/condition';
 import { Size } from 'ol/size';
+import { GeometryFunction } from 'ol/interaction/Draw';
 import { TypeMapFeaturesInstance, TypeViewSettings, TypeInteraction, TypeValidMapProjectionCodes, TypeDisplayLanguage, TypeDisplayTheme, TypeMapViewSettings, TypeLayerStatus } from '@/api/config/types/map-schema-types';
 import { BasemapApi } from '@/geo/layer/basemap/basemap';
 import { LayerApi } from '@/geo/layer/layer';
@@ -334,7 +335,7 @@ export declare class MapViewer {
      * @param {string} type - The type of geometry to draw (Polygon, LineString, Circle, etc)
      * @param {TypeFeatureStyle} styles - The styles for the drawing
      */
-    initDrawInteractions(geomGroupKey: string, type: string, style: TypeFeatureStyle): Draw;
+    initDrawInteractions(geomGroupKey: string, type: string, style: TypeFeatureStyle, geometryFunction?: GeometryFunction): Draw;
     /**
      * Initializes modifying interactions on the given vector source
      * @param {string} geomGroupKey - The geometry group key in which to hold the geometries

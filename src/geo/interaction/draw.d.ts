@@ -1,4 +1,4 @@
-import { DrawEvent as OLDrawEvent } from 'ol/interaction/Draw';
+import { GeometryFunction, DrawEvent as OLDrawEvent } from 'ol/interaction/Draw';
 import { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { Interaction, InteractionOptions } from './interaction';
@@ -10,6 +10,7 @@ export type DrawOptions = InteractionOptions & {
     freehand?: boolean;
     type?: string;
     style?: TypeFeatureStyle;
+    geometryFunction?: GeometryFunction;
 };
 /**
  * Class used for drawing features on a map
