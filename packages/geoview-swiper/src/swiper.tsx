@@ -182,7 +182,9 @@ export function Swiper(props: SwiperProps): JSX.Element {
         // Send the onStop event to update layers
         delay(100)
           .then(() => onStop())
-          .catch(() => {}); // Wait for the DOM to update
+          .catch(() => {
+            logger.logPromiseFailed('updateSwiper in Swiper');
+          }); // Wait for the DOM to update
       }
     },
     [layerPaths, orientation, onStop]
