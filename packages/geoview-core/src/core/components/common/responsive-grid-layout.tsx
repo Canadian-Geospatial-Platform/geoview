@@ -271,7 +271,9 @@ const ResponsiveGridLayout = forwardRef(
           return customGet(guide?.footerPanel?.children, `${key}.content`);
         })
         .filter((item) => item !== undefined)
-        .join('\n');
+        .join('\n')
+        // Remove links
+        .replaceAll(/\[Top\]\(#.*?\)/g, '');
 
       if (!content) return null;
 
