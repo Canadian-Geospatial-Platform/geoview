@@ -195,7 +195,18 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     return geoviewLayerConfig;
   }
 
-  // TODO: JSDOC
+  /**
+   * Recursively converts a tree of ESRI dynamic layer entries into a flat array of `GroupLayerEntryConfig` and
+   * `EsriDynamicLayerEntryConfig` instances suitable for use in a GeoView layer.
+   * @remarks
+   * - Group layers with sublayers are processed recursively into `GroupLayerEntryConfig` instances.
+   * - Leaf layers are converted into `EsriDynamicLayerEntryConfig` instances.
+   * - A custom configuration object from GeoCore can override or extend default values via deep merging.
+   * @param {TypeEsriDynamicLayerConfig} geoviewLayerConfig - The top-level ESRI dynamic layer configuration object.
+   * @param {TypeJsonArray} layerEntries - An array representing the tree structure of the layer entries (may include groups or leaves).
+   * @param {TypeJsonObject} [customGeocoreLayerConfig={}] - Optional GeoCore-specific configuration overrides to apply to each entry.
+   * @returns {(GroupLayerEntryConfig | EsriDynamicLayerEntryConfig)[]} An array of fully-formed layer entry configuration instances.
+   */
   static #convertTreeToLayerConfigs(
     geoviewLayerConfig: TypeEsriDynamicLayerConfig,
     layerEntries: TypeJsonArray,
@@ -243,7 +254,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   /**
    * Creates an ImageArcGISRest source from a layer config.
    * @param {EsriDynamicLayerEntryConfig} layerConfig - The configuration for the EsriDynamic layer.
-   * @returns A fully configured ImageArcGISRest source.
+   * @returns {ImageArcGISRest} A fully configured ImageArcGISRest source.
    * @throws If required config fields like dataAccessPath are missing.
    */
   static createEsriDynamicSource(layerConfig: EsriDynamicLayerEntryConfig): ImageArcGISRest {
@@ -302,6 +313,16 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     return olSource;
   }
 
+  /**
+   * Builds a hierarchical tree structure from a flat array of ESRI layer entries by linking parent layers
+   * with their corresponding sublayers based on `subLayerIds`.
+   * @remarks
+   * - Each entry is deep-cloned to avoid mutating the original input.
+   * - Entries that are referenced as sublayers are nested under their parent in the `subLayers` array.
+   * - Only root-level entries (those not referenced as sublayers) are returned at the top level of the tree.
+   * @param {TypeJsonArray} entries - A flat array of layer entry objects, each potentially referencing sublayers by ID.
+   * @returns {TypeJsonArray} A nested array representing the hierarchical layer structure with `subLayers` assigned to parents.
+   */
   static buildLayerEntriesTree(entries: TypeJsonArray): TypeJsonArray {
     // Create a lookup map of all entries by layerId
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

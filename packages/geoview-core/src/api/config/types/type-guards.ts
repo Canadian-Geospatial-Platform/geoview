@@ -7,6 +7,7 @@ import {
   TypeSimpleSymbolVectorConfig,
 } from '@/api/config/types/map-schema-types';
 
+// TODO: Cleanup commented code - Remove this commented out code if all good (maybe all file can be removed)
 /**
  * Type guard function that redefines a EntryConfigBaseClass as a VectorLayerEntryConfig if the entryType attribute of
  * the verifyIfLayer parameter is 'vector'. The type assertion applies only to the true block of the if clause that use this
