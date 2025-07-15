@@ -87,6 +87,7 @@ export class ShapefileReader {
     return geoviewLayerConfig;
   }
 
+  // TODO: Cleanup commented code - Remove this commented code if all good
   // /**
   //  * Generates GeoJson layer configs as TypeJsonObject from shapefiles.
   //  * @param {TypeJsonArray} layerConfigs - the config to convert

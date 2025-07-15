@@ -262,6 +262,7 @@ export class ConfigApi {
     return new MapFeatureConfig(toJsonObject(CV_DEFAULT_MAP_FEATURE_CONFIG));
   }
 
+  // TODO: Cleanup commented code - Remove this commented out code if all good
   // /**
   //  * Convert one layer config or an array of GeoCore layer config to their GeoView equivalents. The method returns undefined
   //  * and log an error in the console if a GeoCore layer cannot be converted. When the input/output type is an array, it is
@@ -394,6 +395,7 @@ export class ConfigApi {
     }
   }
 
+  // TODO: Cleanup commented code - Remove this commented out code if all good
   // /**
   //  * Create the map feature configuration instance using the json string or the json object provided by the user.
   //  * All GeoCore entries found in the config are translated to their corresponding Geoview configuration.
