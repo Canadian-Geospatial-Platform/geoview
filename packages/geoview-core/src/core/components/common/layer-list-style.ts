@@ -20,7 +20,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     '& .MuiListItem-root': {
       height: '100%',
       '& .MuiListItemButton-root': {
-        padding: '0 0 0 16px',
+        padding: '0 2px 0 16px',
         height: '100%',
         backgroundColor: theme.palette.geoViewColor.bgColor.light[500],
       },

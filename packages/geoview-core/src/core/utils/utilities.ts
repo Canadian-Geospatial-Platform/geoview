@@ -747,8 +747,8 @@ export function scrollIfNotVisible(el: HTMLElement, blockValue: ScrollLogicalPos
       }
       window.scrollTo({
         top: scrollTop,
-        behavior: behaviorScroll
+        behavior: behaviorScroll,
       });
     }
   }
-};
+}

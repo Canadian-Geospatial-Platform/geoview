@@ -25,6 +25,9 @@ const LegendListItem = memo(
 );
 LegendListItem.displayName = 'LegendListItem';
 
+// Length at which the tooltip should be shown
+const CONST_NAME_LENGTH_TOOLTIP = 30;
+
 // Item list component (no memo to force re render from layers panel modifications)
 export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsListProps): JSX.Element | null {
   logger.logTraceRender('components/legend/legend-layer-items');
@@ -53,6 +56,24 @@ export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsList
   // Early returns
   if (!items?.length) return null;
 
+  // This is used to determine if the text should be wrapped in a tooltip
+  const shouldShowTooltip = (items?.length ?? 0) > CONST_NAME_LENGTH_TOOLTIP;
+  const hasTooltipContent = (canToggleItemVisibility && !layerHidden) || shouldShowTooltip;
+
+  const tooltipContent = (name: string): JSX.Element => {
+    return (
+      <div>
+        {canToggleItemVisibility && !layerHidden && (
+          <>
+            {t('layers.toggleItemVisibility')}
+            <br />
+          </>
+        )}
+        {shouldShowTooltip && name}
+      </div>
+    );
+  };
+
   // Direct mapping since we only reach this code if items has content
   // GV isVisible is part of key so that it forces a re-render when it changes
   // GV this is specifically because of esriFeature layers
@@ -60,30 +81,23 @@ export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsList
   return (
     <List sx={sxClasses.subList}>
       {items.map((item) => {
-        if (!canToggleItemVisibility || layerHidden)
-          return (
-            <Tooltip title={item.name} key={`Tooltip-${item.name}-${item.icon}`} placement="top">
-              <LegendListItem item={item} layerVisible={!layerHidden} key={`${item.name}-${item.isVisible}-${item.icon}`} />
-            </Tooltip>
-          );
+        const content = (
+          <Box key={`Box-${item.name}-${item.icon}`} onClick={() => handleToggleItemVisibility(item)}>
+            <LegendListItem item={item} layerVisible={!layerHidden} key={`${item.name}-${item.isVisible}-${item.icon}`} />
+          </Box>
+        );
 
-        return (
+        return hasTooltipContent ? (
           <Tooltip
-            title={
-              <div>
-                {t('layers.toggleItemVisibility')}
-                <br />
-                {item.name}
-              </div>
-            }
+            title={tooltipContent(item.name)}
             key={`Tooltip-${item.name}-${item.icon}`}
             placement="top"
             sx={sxClasses.toggleableItem}
           >
-            <Box key={`Box-${item.name}-${item.icon}`} onClick={() => handleToggleItemVisibility(item)}>
-              <LegendListItem item={item} layerVisible={!layerHidden} key={`${item.name}-${item.isVisible}-${item.icon}`} />
-            </Box>
+            {content}
           </Tooltip>
+        ) : (
+          content
         );
       })}
     </List>

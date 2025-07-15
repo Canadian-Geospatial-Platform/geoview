@@ -62,6 +62,9 @@ interface SingleLayerProps {
   isLayoutEnlarged: boolean;
 }
 
+// Length at which the tooltip should be shown
+const CONST_NAME_LENGTH_TOOLTIP = 50;
+
 export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, isLast, isLayoutEnlarged }: SingleLayerProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/left-panel/single-layer', layerPath);
@@ -99,6 +102,9 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
 
   // Is visibility button disabled?
   const isLayerVisibleCapable = layerControls?.visibility;
+
+  // This is used to determine if the text should be wrapped in a tooltip
+  const shouldShowTooltip = (!!layerName && layerName.length > CONST_NAME_LENGTH_TOOLTIP) || isLayoutEnlarged;
 
   // if any of the child layers is selected return true
   const isLayerChildSelected = useCallback(
@@ -144,6 +150,8 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
   );
 
   const isLayerAlwaysVisible = layerHasDisabledVisibility(layerChildren, layerControls);
+
+  //#region HANDLERS
 
   /**
    * Handle expand/shrink of layer groups.
@@ -233,6 +241,8 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
 
     reloadLayer(layerPath);
   }, [layerPath, reloadLayer]);
+
+  //#endregion HANDLERS
 
   // Get layer description
   const memoLayerDescription = useMemo((): JSX.Element | string | null => {
@@ -535,13 +545,21 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
           className={!inVisibleRange ? 'out-of-range' : ''}
         >
           <LayerIcon layerPath={layerPath} />
-          <Tooltip title={layerName} placement="top" enterDelay={1000} arrow>
+          {shouldShowTooltip ? (
+            <Tooltip title={layerName} placement="top" enterDelay={1000} arrow>
+              <ListItemText
+                primary={layerName !== undefined ? layerName : layerId}
+                secondary={memoLayerDescription}
+                onClick={handleLayerClick}
+              />
+            </Tooltip>
+          ) : (
             <ListItemText
               primary={layerName !== undefined ? layerName : layerId}
               secondary={memoLayerDescription}
               onClick={handleLayerClick}
             />
-          </Tooltip>
+          )}
           {!isLayoutEnlarged && (
             <ListItemIcon className="rightIcons-container">
               {memoMoreLayerButtons}

@@ -38,7 +38,7 @@ const ICON_BUTTON_BASE_PROPS = {
  * @param {string} layerPath
  * @returns {JSX.Element} the icon stack item
  */
-const IconStack = ({ layerPath }: TypeIconStackProps): JSX.Element | null => {
+function IconStack({ layerPath }: TypeIconStackProps): JSX.Element | null {
   // Hooks
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
@@ -120,7 +120,7 @@ const IconStack = ({ layerPath }: TypeIconStackProps): JSX.Element | null => {
     return renderNoDataIcon();
   }
   return null;
-};
+}
 
 /**
  * Renders an appropriate icon for a layer based on its status and type.
@@ -129,7 +129,7 @@ const IconStack = ({ layerPath }: TypeIconStackProps): JSX.Element | null => {
  * @param {string} props.layerPath - The path identifier for the layer
  * @returns {JSX.Element} The rendered layer icon component
  */
-export const LayerIcon = ({ layerPath }: LayerIconProps): JSX.Element => {
+export function LayerIcon({ layerPath }: LayerIconProps): JSX.Element {
   // Log
   logger.logTraceRenderDetailed('components/common/layer-icon', layerPath);
 
@@ -160,4 +160,4 @@ export const LayerIcon = ({ layerPath }: LayerIconProps): JSX.Element => {
   if (hasChildren) return <GroupWorkOutlinedIcon color="primary" />;
 
   return <IconStack layerPath={layerPath} />;
-};
+}

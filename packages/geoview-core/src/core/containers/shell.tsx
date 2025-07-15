@@ -195,13 +195,13 @@ export function Shell(props: ShellProps): JSX.Element {
    * This improves accessibility by allowing users to easily return focus to the map
    */
   const handleScrollShellIntoView = useCallback((): void => {
-     // Log
+    // Log
     logger.logTraceUseCallback('SHELL - scrollIntoViewListener');
 
     if (!shellRef.current) return;
 
     // Check if the map is already in view, then scroll if needed
-    scrollIfNotVisible(shellRef.current.children[0] as HTMLElement, 'start')
+    scrollIfNotVisible(shellRef.current.children[0] as HTMLElement, 'start');
   }, []);
 
   // Mount component
