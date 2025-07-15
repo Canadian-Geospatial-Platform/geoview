@@ -69,6 +69,7 @@ export abstract class GeoCore {
         // When an error happens, raise the exception, we handle it higher in this case
         throw new GeoViewError(errorKey, params);
       });
+
       // Return the created layer config from the merged config informations
       return newLayerConfig[0] as TypeGeoviewLayerConfig;
     }

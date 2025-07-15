@@ -12,6 +12,7 @@ import {
 
 import { commonProcessLayerMetadata } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 
@@ -120,7 +121,7 @@ export class EsriImage extends AbstractGeoViewRaster {
     };
 
     // Trim the last '/' if any
-    const trimmedPath = metadataAccessPath.replace(/\/+$/, '');
+    const trimmedPath = metadataAccessPath.replace(AbstractGeoViewLayer.METADATA_PATH_TRIMMER, '');
 
     geoviewLayerConfig.listOfLayerEntryConfig = [
       new EsriImageLayerEntryConfig({

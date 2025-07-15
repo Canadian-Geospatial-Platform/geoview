@@ -73,6 +73,9 @@ export abstract class AbstractGeoViewLayer {
   /** The default waiting time before showing a warning about the metadata taking a long time to get processed */
   static readonly DEFAULT_WAIT_PERIOD_METADATA_WARNING: number = 10 * 1000; // 10 seconds
 
+  /** The regular expression to trim the metadata path */
+  static readonly METADATA_PATH_TRIMMER: RegExp = /\/+$/;
+
   /** The default hit tolerance */
   hitTolerance: number = AbstractGeoViewLayer.DEFAULT_HIT_TOLERANCE;
 
