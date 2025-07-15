@@ -119,8 +119,10 @@ export class EsriImage extends AbstractGeoViewRaster {
       listOfLayerEntryConfig: [],
     };
 
-    // Trim the last '/' if any
-    const trimmedPath = metadataAccessPath.replace(/\/+$/, '');
+    let trimmedPath = metadataAccessPath;
+    while (trimmedPath.endsWith('/')) {
+      trimmedPath = trimmedPath.slice(0, -1);
+    }
 
     geoviewLayerConfig.listOfLayerEntryConfig = [
       new EsriImageLayerEntryConfig({

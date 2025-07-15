@@ -2469,7 +2469,19 @@ export class LayerApi {
     }
   }
 
-  // TODO: JSDOC
+  /**
+   * Creates an instance of a specific `AbstractGeoViewLayer` subclass based on the given GeoView layer configuration.
+   * This function determines the correct layer type from the configuration and instantiates it accordingly.
+   * @remarks
+   * - This method currently supports GeoJSON, GeoPackage, CSV, WMS, Esri Dynamic, Esri Feature, Esri Image,
+   *   ImageStatic, WFS, OGC Feature, XYZ Tiles, and Vector Tiles.
+   * - If the layer type is not supported, an error is thrown.
+   * - TODO: Refactor to use the validated configuration with metadata already fetched.
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The configuration object for the GeoView layer.
+   * @param {string} mapProjectionForVectorTiles - The projection string to be used when creating Vector Tiles layers.
+   * @returns {AbstractGeoViewLayer} An instance of the corresponding `AbstractGeoViewLayer` subclass.
+   * @throws {NotSupportedError} If the configuration does not match any supported layer type.
+   */
   static createLayerFromConfigType(geoviewLayerConfig: TypeGeoviewLayerConfig, mapProjectionForVectorTiles: string): AbstractGeoViewLayer {
     // TODO: Refactor - Here the function should use the structure created by validation config with the metadata fetch and no need to pass the validation.
     if (layerConfigIsGeoJSON(geoviewLayerConfig)) {
