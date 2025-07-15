@@ -135,24 +135,6 @@ export const Guide = memo(function GuidePanel({ fullWidth = false, containerType
       }
     };
 
-    // // Reset scroll position when content changes
-    // if (container) {
-    //   container.scrollTop = 0;
-    // }
-
-    // const handleClick = (e: Event): void => {
-    //   const target = e.target as HTMLAnchorElement;
-    //   if (target.tagName === 'A' && target.hash) {
-    //     e.preventDefault();
-    //     e.stopPropagation();
-
-    //     const element = container?.querySelector(target.hash);
-    //     if (element) {
-    //       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    //     }
-    //   }
-    // };
-
     container?.addEventListener('click', handleClick);
 
     // Cleanup function to remove the event listener

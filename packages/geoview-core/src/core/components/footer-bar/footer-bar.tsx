@@ -34,7 +34,7 @@ import { Guide } from '@/core/components/guide/guide';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { FooterPlugin } from '@/api/plugin/footer-plugin';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
-import { isElementInViewport } from '@/core/utils/utilities';
+import { scrollIfNotVisible } from '@/core/utils/utilities';
 
 interface Tab {
   icon: ReactNode;
@@ -397,13 +397,8 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     if (!tabsContainerRef?.current) return () => {};
 
     const handleClick = (): void => {
-      const behaviorScroll = (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth') as ScrollBehavior;
-
-      if (!isElementInViewport(tabsContainerRef.current!)) {
-        tabsContainerRef.current?.scrollIntoView({
-          behavior: behaviorScroll,
-          block: 'center',
-        });
+      if (tabsContainerRef.current) {
+        scrollIfNotVisible(tabsContainerRef.current, 'end');
       }
     };
 
