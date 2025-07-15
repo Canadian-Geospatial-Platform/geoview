@@ -309,7 +309,7 @@ const ResponsiveGridLayout = forwardRef(
 
     return (
       <Box ref={ref} sx={sxClasses.container} className="responsive-layout-container">
-        <ResponsiveGrid.Root sx={{ pt: 8, pb: 0 }} className="responsive-layout-top-row">
+        <ResponsiveGrid.Root sx={{ pt: 8, pb: 0, paddingTop: '0' }} className="responsive-layout-top-row">
           {!fullWidth && (
             <ResponsiveGrid.Left
               isRightPanelVisible={isRightPanelVisible}
@@ -362,6 +362,7 @@ const ResponsiveGridLayout = forwardRef(
           sx={{
             flexGrow: 1,
             overflow: 'hidden',
+            paddingTop: '0',
           }}
         >
           <ResponsiveGrid.Left

@@ -50,7 +50,7 @@ export const sxClasses = {
   horizontal: {
     width: '100%',
     height: '8px',
-    cursor: 'col-resize',
+    cursor: 'row-resize',
     left: '0px!important',
 
     '& .handleContainer': {

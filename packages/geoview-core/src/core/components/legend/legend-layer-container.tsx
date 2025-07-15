@@ -11,6 +11,7 @@ import {
   useSelectorLayerIcons,
   useSelectorLayerItems,
   useSelectorLayerType,
+  useSelectorLayerStatus,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { logger } from '@/core/utils/logger';
 import { useSelectorLayerLegendCollapsed } from '@/core/stores/store-interface-and-intial-values/map-state';
@@ -69,12 +70,13 @@ export const CollapsibleContent = memo(function CollapsibleContent({
   const layerItems = useSelectorLayerItems(layerPath);
   const layerChildren = useSelectorLayerChildren(layerPath);
   const layerIcons = useSelectorLayerIcons(layerPath);
+  const layerStatus = useSelectorLayerStatus(layerPath);
 
   // Log
   logger.logTraceUseMemo('components/legend/legend-layer-container - CollapsibleContent', layerPath, layerChildren?.length);
 
   // Early returns
-  if (layerChildren?.length === 0 && layerItems?.length === 1) return null;
+  if ((layerChildren?.length === 0 && layerItems?.length === 1) || layerStatus === 'error') return null;
 
   const isWMSWithLegend = layerType === CV_CONST_LAYER_TYPES.WMS && layerIcons?.[0]?.iconImage && layerIcons[0].iconImage !== 'no data';
 

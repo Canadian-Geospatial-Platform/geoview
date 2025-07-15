@@ -21,7 +21,6 @@ const toggleAllStyle = {
   gap: '0px',
   justifyContent: 'flex-start',
   alignItems: 'center',
-  marginLeft: '8px',
   width: 'fit-content',
 };
 

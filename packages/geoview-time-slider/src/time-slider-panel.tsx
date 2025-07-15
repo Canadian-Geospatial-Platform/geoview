@@ -6,7 +6,7 @@ import {
   useTimeSliderSelectedLayerPath,
   useTimeSliderStoreActions,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/time-slider-state';
-import { useMapVisibleLayers } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
+import { useMapVisibleLayers, useMapStoreActions } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
 import { useLayerLegendLayers } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
 import { LegendEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/legend-event-processor';
 import { Box } from 'geoview-core/ui';
@@ -39,6 +39,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const timeSliderLayers = useTimeSliderLayers();
   const selectedLayerPath = useTimeSliderSelectedLayerPath();
   const { setSelectedLayerPath } = useTimeSliderStoreActions();
+  const { isLayerHiddenOnMap } = useMapStoreActions();
   const legendLayers = useLayerLegendLayers();
 
   /**
@@ -104,7 +105,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
       .map((layerPath) => {
         return { layerPath, timeSliderLayerInfo: timeSliderLayers[layerPath] };
       })
-      .filter((layer) => layer && layer.timeSliderLayerInfo)
+      .filter((layer) => layer && layer.timeSliderLayerInfo && !isLayerHiddenOnMap(layer.layerPath))
       .map((layer) => {
         return {
           layerName: LegendEventProcessor.findLayerByPath(legendLayers, layer.layerPath)?.layerName,
@@ -119,7 +120,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
           layerUniqueId: `${mapId}-${TABS.TIME_SLIDER}-${layer.layerPath}`,
         } as LayerListEntry;
       });
-  }, [legendLayers, timeSliderLayers, visibleLayers, mapId]);
+  }, [legendLayers, timeSliderLayers, visibleLayers, mapId, isLayerHiddenOnMap]);
 
   useEffect(() => {
     // Log

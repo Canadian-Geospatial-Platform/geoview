@@ -2,6 +2,8 @@
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getSxClasses = (theme: any): any => ({
   aoiCard: {
+    height: '100%',
+    overflowY: 'auto',
     '& .MuiCard-root': {
       backgroundColor: theme.palette.grey.A700,
       color: theme.palette.primary.light,
