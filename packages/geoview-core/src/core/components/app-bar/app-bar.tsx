@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect, useCallback, Fragment, useMemo, ReactNode, KeyboardEvent } from 'react';
-import { capitalize, camelCase } from 'lodash';
+import { camelCase } from 'lodash';
 import { useTheme } from '@mui/material/styles';
 import {
   Box,
@@ -56,9 +56,6 @@ type AppBarProps = {
 export interface ButtonPanelType {
   [panelType: string]: TypeButtonPanel;
 }
-export interface ButtonPanelGroupType {
-  [panelId: string]: ButtonPanelType;
-}
 
 /**
  * Create an app-bar with buttons that can open a panel
@@ -77,13 +74,13 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const sxClasses = getSxClasses(theme);
 
   // internal component state
-  const [buttonPanelGroups, setButtonPanelGroups] = useState<ButtonPanelGroupType>({});
+  const [buttonPanels, setButtonPanels] = useState<ButtonPanelType>({});
 
   // get store values and action
   const activeModalId = useUIActiveFocusItem().activeElementId;
   const interaction = useMapInteraction();
   const appBarComponents = useUIAppbarComponents();
-  const { tabId, tabGroup, isOpen, isFocusTrapped } = useUIActiveAppBarTab();
+  const { tabId, isOpen, isFocusTrapped } = useUIActiveAppBarTab();
   const { hideClickMarker } = useMapStoreActions();
 
   const isMapFullScreen = useAppFullscreenActive();
@@ -117,7 +114,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
   }, [interaction]);
 
   const closePanelById = useCallback(
-    (buttonId: string, groupName: string | undefined) => {
+    (buttonId: string) => {
       // Log
       logger.logTraceUseCallback('APP-BAR - closePanelById', buttonId);
       // Callback when removing and focus is lost
@@ -132,39 +129,39 @@ export function AppBar(props: AppBarProps): JSX.Element {
       };
 
       // Redirect to helper
-      helpClosePanelById(mapId, buttonPanelGroups, buttonId, groupName, setButtonPanelGroups, focusWhenNoElementCallback);
+      helpClosePanelById(mapId, buttonId, setButtonPanels, focusWhenNoElementCallback);
     },
-    [buttonPanelGroups, geoviewElement, mapId]
+    [geoviewElement, mapId]
   );
 
   const openPanelById = useCallback(
-    (buttonId: string, groupName: string | undefined) => {
+    (buttonId: string) => {
       // Log
       logger.logTraceUseCallback('APP-BAR - openPanelById', buttonId);
       // Redirect to helper
-      helpOpenPanelById(buttonPanelGroups, buttonId, groupName, setButtonPanelGroups, isFocusTrapped);
+      helpOpenPanelById(buttonId, setButtonPanels, isFocusTrapped);
     },
-    [buttonPanelGroups, isFocusTrapped]
+    [isFocusTrapped]
   );
 
   const handleButtonClicked = useCallback(
-    (buttonId: string, groupName: string) => {
+    (buttonId: string) => {
       // Log
       logger.logTraceUseCallback('APP-BAR - handleButtonClicked', buttonId);
 
       // Get the button panel
-      const buttonPanel = buttonPanelGroups[groupName][buttonId];
-      setActiveAppBarTab(buttonId, groupName, !buttonPanel.panel?.status, !buttonPanel.panel?.status);
+      const buttonPanel = buttonPanels[buttonId];
+      setActiveAppBarTab(buttonId, !buttonPanel.panel?.status, !buttonPanel.panel?.status);
     },
-    [buttonPanelGroups, setActiveAppBarTab]
+    [buttonPanels, setActiveAppBarTab]
   );
 
   const handleGeneralCloseClicked = useCallback(
-    (buttonId: string, groupName: string) => {
+    (buttonId: string) => {
       // Log
       logger.logTraceUseCallback('APP-BAR - handleGeneralCloseClicked');
 
-      setActiveAppBarTab(buttonId, groupName, false, false);
+      setActiveAppBarTab(buttonId, false, false);
     },
     [setActiveAppBarTab]
   );
@@ -174,21 +171,18 @@ export function AppBar(props: AppBarProps): JSX.Element {
       // Log
       logger.logTraceUseCallback('APP-BAR - handleAddButtonPanel', event);
 
-      setButtonPanelGroups((prevState) => {
+      setButtonPanels((prevState) => {
         return {
           ...prevState,
-          [event.group]: {
-            ...buttonPanelGroups[event.group],
-            [event.buttonPanelId]: event.buttonPanel,
-          },
+          [event.buttonPanelId]: event.buttonPanel,
         };
       });
 
-      if (isOpen && tabId === event.buttonPanelId) openPanelById(tabId, tabGroup);
+      if (isOpen && tabId === event.buttonPanelId) openPanelById(tabId);
     },
     // Don't want to update every time active tab changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [buttonPanelGroups]
+    [buttonPanels]
   );
 
   const handleRemoveButtonPanel = useCallback(
@@ -196,17 +190,15 @@ export function AppBar(props: AppBarProps): JSX.Element {
       // Log
       logger.logTraceUseCallback('APP-BAR - handleRemoveButtonPanel', event);
 
-      setButtonPanelGroups((prevState) => {
+      setButtonPanels((prevState) => {
         const state = { ...prevState };
 
-        const group = state[event.group];
-
-        delete group[event.buttonPanelId];
+        delete state[event.buttonPanelId];
 
         return state;
       });
     },
-    [setButtonPanelGroups]
+    [setButtonPanels]
   );
 
   /**
@@ -248,14 +240,14 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
     // Open and close of the panel.
     if (isOpen) {
-      openPanelById(tabId, tabGroup);
+      openPanelById(tabId);
     } else {
-      closePanelById(tabId, tabGroup);
+      closePanelById(tabId);
     }
-    // NOTE: Run this effect when isOpen, tabId, tabGroup changes
+    // NOTE: Run this effect when isOpen, tabId changes
     // should not re-render when openPanelById, closePanelById changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, tabId, tabGroup]);
+  }, [isOpen, tabId]);
 
   /**
    * Create default tabs from configuration parameters (similar logic as in footer-bar).
@@ -306,14 +298,13 @@ export function AppBar(props: AppBarProps): JSX.Element {
       .filter((tab) => CV_DEFAULT_APPBAR_TABS_ORDER.includes(tab) && memoPanels[tab])
       .map((tab): [IconButtonPropsExtend, TypePanelProps, string] => {
         const button: IconButtonPropsExtend = {
-          id: `AppbarPanelButton${capitalize(tab)}`,
+          id: tab,
           tooltip: t(`${camelCase(tab)}.title`)!,
           tooltipPlacement: 'bottom',
           children: memoPanels[tab].icon,
         };
         const panel: TypePanelProps = {
-          panelId: `Appbar${capitalize(tab)}PanelId`,
-          panelGroupName: tab,
+          panelId: tab,
           type: CONTAINER_TYPE.APP_BAR,
           title: `${camelCase(tab)}.title`,
           icon: memoPanels[tab].icon,
@@ -325,7 +316,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
         };
         return [button, panel, tab];
       })
-      .forEach((appBarGroup) => appBarApi.createAppbarPanel(appBarGroup[0], appBarGroup[1], appBarGroup[2]));
+      .forEach((appBarTab) => appBarApi.createAppbarPanel(appBarTab[0], appBarTab[1]));
   }, [footerBarConfig?.tabs.core, appBarConfig?.tabs.core, appBarApi, t, memoPanels, geoviewElement, getPanelWidth]);
 
   // #endregion
@@ -333,52 +324,50 @@ export function AppBar(props: AppBarProps): JSX.Element {
   /**
    * Re-order the appbar buttons.
    */
-  const { topGroupNames, bottomGroupNames } = useMemo(() => {
+  const { topPanelNames, bottomPanelNames } = useMemo(() => {
     // Log
     logger.logTraceUseMemo('APP-BAR - panels reorder buttons');
 
-    let buttonPanelGroupNames = Object.keys(buttonPanelGroups);
-    buttonPanelGroupNames = enforceArrayOrder(buttonPanelGroupNames, CV_DEFAULT_APPBAR_TABS_ORDER);
-    const topGroup = buttonPanelGroupNames.filter((groupName) => groupName !== CV_DEFAULT_APPBAR_CORE.GUIDE);
-    const bottomGroup = buttonPanelGroupNames.filter((groupName) => groupName === CV_DEFAULT_APPBAR_CORE.GUIDE);
-    return { topGroupNames: topGroup, bottomGroupNames: bottomGroup };
-  }, [buttonPanelGroups]);
+    let buttonPanelNames = Object.keys(buttonPanels);
+    buttonPanelNames = enforceArrayOrder(buttonPanelNames, CV_DEFAULT_APPBAR_TABS_ORDER);
+    const topPanel = buttonPanelNames.filter((groupName) => groupName !== CV_DEFAULT_APPBAR_CORE.GUIDE);
+    const bottomPanel = buttonPanelNames.filter((groupName) => groupName === CV_DEFAULT_APPBAR_CORE.GUIDE);
+
+    return { topPanelNames: topPanel, bottomPanelNames: bottomPanel };
+  }, [buttonPanels]);
 
   /**
-   * Render Tab groups in appbar.
-   * @param {string[]} groupNames group that will be rendered in appbar.
+   * Render Tabs in appbar.
+   * @param {string[]} panelNames tab that will be rendered in appbar.
    * @returns JSX.Element
    */
-  const renderButtonGroup = (groupNames: string[]): ReactNode => {
+  const renderButtonPanel = (panelNames: string[]): ReactNode => {
     return (
       <>
-        {groupNames.map((groupName: string) => {
+        {panelNames.map((panelName: string) => {
           // get button panels from group
-          const buttonPanels = buttonPanelGroups[groupName];
+          const buttonPanel = buttonPanels[panelName];
 
           // display the button panels in the list
           return (
-            <List key={groupName} sx={sxClasses.appBarList}>
-              {Object.keys(buttonPanels).map((buttonPanelsKey) => {
-                const buttonPanel = buttonPanels[buttonPanelsKey];
-                return buttonPanel?.button.visible !== undefined && buttonPanel?.button.visible ? (
-                  <Fragment key={buttonPanel.button.id}>
-                    <ListItem>
-                      <IconButton
-                        id={buttonPanel.button.id}
-                        aria-label={t(buttonPanel.button.tooltip!)!}
-                        tooltip={t(buttonPanel.button.tooltip!)!}
-                        tooltipPlacement="right"
-                        className={`buttonFilled ${tabId === buttonPanel.button.id && isOpen ? 'active' : ''}`}
-                        size="small"
-                        onClick={() => handleButtonClicked(buttonPanel.button.id!, groupName)}
-                      >
-                        {buttonPanel.button.children}
-                      </IconButton>
-                    </ListItem>
-                  </Fragment>
-                ) : null;
-              })}
+            <List key={panelName} sx={sxClasses.appBarList}>
+              {buttonPanel?.button.visible !== undefined && buttonPanel?.button.visible ? (
+                <Fragment key={buttonPanel.button.id}>
+                  <ListItem>
+                    <IconButton
+                      id={buttonPanel.button.id}
+                      aria-label={t(buttonPanel.button.tooltip!)!}
+                      tooltip={t(buttonPanel.button.tooltip!)!}
+                      tooltipPlacement="right"
+                      className={`buttonFilled ${tabId === buttonPanel.button.id && isOpen ? 'active' : ''}`}
+                      size="small"
+                      onClick={() => handleButtonClicked(buttonPanel.button.id!)}
+                    >
+                      {buttonPanel.button.children}
+                    </IconButton>
+                  </ListItem>
+                </Fragment>
+              ) : null}
             </List>
           );
         })}
@@ -389,7 +378,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
   return (
     <Box sx={sxClasses.appBar} className={`interaction-${interaction}`} id={`${mapId}-appBar`} onClick={onScrollShellIntoView}>
       <Box sx={sxClasses.appBarButtons}>
-        {renderButtonGroup(topGroupNames)}
+        {renderButtonPanel(topPanelNames)}
         <Box sx={sxClasses.versionButtonDiv}>
           {appBarComponents.includes(CV_DEFAULT_APPBAR_CORE.EXPORT) && interaction === 'dynamic' && (
             <List sx={sxClasses.appBarList}>
@@ -398,7 +387,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
               </ListItem>
             </List>
           )}
-          {renderButtonGroup(bottomGroupNames)}
+          {renderButtonPanel(bottomPanelNames)}
           <List sx={sxClasses.appBarList}>
             {interaction === 'dynamic' && <hr />}
             <ListItem>
@@ -410,39 +399,30 @@ export function AppBar(props: AppBarProps): JSX.Element {
           </List>
         </Box>
       </Box>
-      {Object.keys(buttonPanelGroups).map((groupName: string) => {
-        // get button panels from group
-        const buttonPanels = buttonPanelGroups[groupName];
-
-        // display the panels in the list
-        return (
-          <Fragment key={groupName}>
-            {Object.keys(buttonPanels).map((buttonPanelsKey, index) => {
-              let content = null;
-              const buttonPanel = buttonPanels[buttonPanelsKey];
-              if (buttonPanel?.groupName === CV_DEFAULT_APPBAR_CORE.GEOLOCATOR) {
-                content = buttonPanel?.panel?.content ?? '';
-              } else if (buttonPanel?.panel) {
-                content = (
-                  <Panel
-                    key={`panel-${index.toString()}`}
-                    panel={buttonPanel.panel}
-                    button={buttonPanel.button}
-                    onOpen={buttonPanel.onOpen}
-                    onClose={hideClickMarker}
-                    onKeyDown={(event: KeyboardEvent) =>
-                      handleEscapeKey(event.key, tabId, isFocusTrapped, () => {
-                        handleGeneralCloseClicked(buttonPanel.button?.id ?? '', buttonPanel?.groupName ?? '');
-                      })
-                    }
-                    onGeneralClose={() => handleGeneralCloseClicked(buttonPanel.button?.id ?? '', buttonPanel?.groupName ?? '')}
-                  />
-                );
+      {Object.keys(buttonPanels).map((panelName: string) => {
+        // get button panel
+        const buttonPanel = buttonPanels[panelName];
+        let content = null;
+        if (buttonPanel?.buttonPanelId === CV_DEFAULT_APPBAR_CORE.GEOLOCATOR) {
+          content = buttonPanel?.panel?.content ?? '';
+        } else if (buttonPanel?.panel) {
+          content = (
+            <Panel
+              panel={buttonPanel.panel}
+              button={buttonPanel.button}
+              onOpen={buttonPanel.onOpen}
+              onClose={hideClickMarker}
+              onKeyDown={(event: KeyboardEvent) =>
+                handleEscapeKey(event.key, tabId, isFocusTrapped, () => {
+                  handleGeneralCloseClicked(buttonPanel.button?.id ?? '');
+                })
               }
-              return content;
-            })}
-          </Fragment>
-        );
+              onGeneralClose={() => handleGeneralCloseClicked(buttonPanel.button?.id ?? '')}
+            />
+          );
+        }
+        // display the panels in the list
+        return <Fragment key={panelName}>{content}</Fragment>;
       })}
     </Box>
   );

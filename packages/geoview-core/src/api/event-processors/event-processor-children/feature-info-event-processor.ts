@@ -188,7 +188,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
       }
       // Open details appbar tab when user clicked on map layer.
       if (UIEventProcessor.getAppBarComponents(mapId).includes('details')) {
-        UIEventProcessor.setActiveAppBarTab(mapId, `${mapId}AppbarPanelButtonDetails`, 'details', true, true);
+        UIEventProcessor.setActiveAppBarTab(mapId, 'details', true, true);
       }
 
       // Update the layer data array in the store, all the time, for all statuses

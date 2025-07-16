@@ -1,49 +1,27 @@
 import { Dispatch, SetStateAction } from 'react';
 import { TypeButtonPanel } from '@/ui/panel/panel-types';
-import { ButtonPanelGroupType, ButtonPanelType } from './app-bar';
-
-export const helpFindGroupName = (buttonPanelGroups: ButtonPanelGroupType, buttonId: string): string | undefined => {
-  let groupName: string | undefined;
-  Object.entries(buttonPanelGroups).forEach(([buttonPanelGroupName, buttonPanelGroup]) => {
-    if (!groupName) {
-      if (Object.keys(buttonPanelGroup).includes(buttonId)) {
-        // Found it
-        groupName = buttonPanelGroupName;
-      }
-    }
-  });
-  return groupName;
-};
+import { ButtonPanelType } from './app-bar';
 
 export const helpOpenClosePanelByIdState = (
-  buttonPanelGroups: ButtonPanelGroupType,
   buttonId: string,
-  groupName: string | undefined,
-  setterCallback: Dispatch<SetStateAction<ButtonPanelGroupType>>,
+  setterCallback: Dispatch<SetStateAction<ButtonPanelType>>,
   status: boolean,
   isFocusTrapped: boolean = false
 ): void => {
-  // Read the group name
-  const theGroupName = groupName || helpFindGroupName(buttonPanelGroups, buttonId);
-  if (!theGroupName) return;
   // Open or Close it
   setterCallback((prevState) => {
-    const panelGroups = {} as ButtonPanelGroupType;
-    Object.entries(prevState).forEach(([buttonPanelGroupName, buttonPanelGroup]) => {
-      panelGroups[buttonPanelGroupName] = Object.entries(buttonPanelGroup).reduce((acc, [buttonGroupName, buttonGroup]) => {
-        acc[buttonGroupName] = {
-          ...buttonGroup,
-          ...(buttonGroup.panel && {
-            panel: {
-              ...buttonGroup.panel,
-              status: buttonGroupName === buttonId ? status : false,
-              isFocusTrapped: buttonGroupName === buttonId ? isFocusTrapped : false,
-            },
-          }),
-        };
-
-        return acc;
-      }, {} as ButtonPanelType);
+    const panelGroups = {} as ButtonPanelType;
+    Object.entries(prevState).forEach(([buttonPanelName, buttonPanel]) => {
+      panelGroups[buttonPanelName] = {
+        ...buttonPanel,
+        ...(buttonPanel.panel && {
+          panel: {
+            ...buttonPanel.panel,
+            status: buttonPanelName === buttonId ? status : false,
+            isFocusTrapped: buttonPanelName === buttonId ? isFocusTrapped : false,
+          },
+        }),
+      };
     });
 
     return panelGroups;
@@ -51,32 +29,22 @@ export const helpOpenClosePanelByIdState = (
 };
 
 export const helpOpenPanelById = (
-  buttonPanelGroups: ButtonPanelGroupType,
   buttonId: string,
-  groupName: string | undefined,
-  setterCallback: Dispatch<SetStateAction<ButtonPanelGroupType>>,
+  setterCallback: Dispatch<SetStateAction<ButtonPanelType>>,
   isFocusTrapped?: boolean
 ): void => {
-  // Read the group name
-  const theGroupName = groupName || helpFindGroupName(buttonPanelGroups, buttonId);
-
   // Open the panel
-  helpOpenClosePanelByIdState(buttonPanelGroups, buttonId, theGroupName, setterCallback, true, isFocusTrapped);
+  helpOpenClosePanelByIdState(buttonId, setterCallback, true, isFocusTrapped);
 };
 
 export const helpClosePanelById = (
   mapId: string,
-  buttonPanelGroups: Record<string, Record<string, TypeButtonPanel>>,
   buttonId: string,
-  groupName: string | undefined,
-  setterCallback: Dispatch<SetStateAction<Record<string, Record<string, TypeButtonPanel>>>>,
+  setterCallback: Dispatch<SetStateAction<Record<string, TypeButtonPanel>>>,
   focusWhenNoElementCallback?: () => void
 ): void => {
-  // Read the group name
-  const theGroupName = groupName || helpFindGroupName(buttonPanelGroups, buttonId);
-
   // Close the panel
-  helpOpenClosePanelByIdState(buttonPanelGroups, buttonId, theGroupName, setterCallback, false);
+  helpOpenClosePanelByIdState(buttonId, setterCallback, false);
 
   const buttonElement = buttonId && document.getElementById(mapId)?.querySelector(`#${buttonId}`);
   if (buttonElement) {
@@ -88,19 +56,13 @@ export const helpClosePanelById = (
   }
 };
 
-export const helpCloseAll = (
-  buttonPanelGroups: ButtonPanelGroupType,
-  setterCallback: Dispatch<SetStateAction<ButtonPanelGroupType>>
-): void => {
-  const panelGroups = {} as ButtonPanelGroupType;
-  Object.entries(buttonPanelGroups).forEach(([buttonPanelGroupName, buttonPanelGroup]) => {
-    panelGroups[buttonPanelGroupName] = Object.entries(buttonPanelGroup).reduce((acc, [buttonGroupName, buttonGroup]) => {
-      acc[buttonGroupName] = {
-        ...buttonGroup,
-        ...(buttonGroup.panel && { panel: { ...buttonGroup.panel, status: false } }),
-      };
-      return acc;
-    }, {} as ButtonPanelType);
+export const helpCloseAll = (buttonPanels: ButtonPanelType, setterCallback: Dispatch<SetStateAction<ButtonPanelType>>): void => {
+  const panelGroups = {} as ButtonPanelType;
+  Object.entries(buttonPanels).forEach(([buttonPanelName, buttonPanel]) => {
+    panelGroups[buttonPanelName] = {
+      ...buttonPanel,
+      ...(buttonPanel.panel && { panel: { ...buttonPanel.panel, status: false } }),
+    };
   });
 
   setterCallback(panelGroups);

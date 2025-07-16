@@ -86,7 +86,7 @@ export abstract class AppBarPlugin extends AbstractPlugin {
     this.panelProps.content = this.onCreateContent();
 
     // Create a new button panel on the app-bar
-    this.buttonPanel = this.mapViewer().appBarApi.createAppbarPanel(this.buttonProps, this.panelProps, this.buttonProps.id) || undefined;
+    this.buttonPanel = this.mapViewer().appBarApi.createAppbarPanel(this.buttonProps, this.panelProps) || undefined;
   }
 
   /**
@@ -96,7 +96,7 @@ export abstract class AppBarPlugin extends AbstractPlugin {
     // If cgpv exists
     if (this.buttonPanel) {
       // Remove the app bar panel
-      this.mapViewer().appBarApi.removeAppbarPanel(this.buttonPanel.buttonPanelId, this.buttonProps!.id!);
+      this.mapViewer().appBarApi.removeAppbarPanel(this.buttonPanel.buttonPanelId);
     }
   }
 }
