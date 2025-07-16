@@ -120,7 +120,7 @@
           cgpv.api.getMapViewer('map1').footerBarApi.selectTab('details')
         </li>
         <li><button id="Open-geolocator">Open geolocator in app bar</button><br />
-          cgpv.api.getMapViewer('map1').appBarApi.selectAppBarTab('AppbarPanelButtonGeolocator', 'geolocator')
+          cgpv.api.getMapViewer('map1').appBarApi.selectAppBarTab('geolocator')
         </li>
         <li><button id="Disable-hover">Disable hover query for Top 100</button><button id="Enable-hover">Enable hover query for Top 100</button><br />
           cgpv.api.getMapViewer('map1').layer.hoverFeatureInfoLayerSet.disableHoverListener('esriFeatureLYR5/0')<br />
@@ -564,7 +564,7 @@
 
       // add an event listener when a button is clicked
       openGeolocatorButton.addEventListener('click', async () => {
-        cgpv.api.getMapViewer(mapId).appBarApi.selectAppBarTab('AppbarPanelButtonGeolocator', 'geolocator')
+        cgpv.api.getMapViewer(mapId).appBarApi.selectAppBarTab('geolocator')
       });
 
       // Disable hover Button========================================================================================================

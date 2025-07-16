@@ -56,7 +56,7 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
   const { isLayerHiddenOnMap } = useMapStoreActions();
   const selectedTab = useUIActiveFooterBarTabId();
   const visibleLayers = useMapVisibleLayers();
-  const { tabGroup, isOpen } = useUIActiveAppBarTab();
+  const { tabId, isOpen } = useUIActiveAppBarTab();
   const appBarComponents = useUIAppbarComponents();
   const showUnsymbolizedFeatures = useAppShowUnsymbolizedFeatures();
 
@@ -213,10 +213,10 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
    * It will unselect the layer path when component is unmounted.
    */
   useEffect(() => {
-    if ((tabGroup !== CV_DEFAULT_APPBAR_CORE.DATA_TABLE || !isOpen) && appBarComponents.includes(CV_DEFAULT_APPBAR_CORE.DATA_TABLE)) {
+    if ((tabId !== CV_DEFAULT_APPBAR_CORE.DATA_TABLE || !isOpen) && appBarComponents.includes(CV_DEFAULT_APPBAR_CORE.DATA_TABLE)) {
       setSelectedLayerPath('');
     }
-  }, [tabGroup, isOpen, setSelectedLayerPath, appBarComponents]);
+  }, [tabId, isOpen, setSelectedLayerPath, appBarComponents]);
 
   // If has selected layer on load and the data for selectedLayerPath is empty, trigger a query
   // TODO Occasionally, setting the default selected layer can have unexpected behaviours.

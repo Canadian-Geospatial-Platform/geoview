@@ -1428,46 +1428,6 @@ export class LayerApi {
   }
 
   /**
-   * Replace outfield names, aliases and types with any number of new values, provided an identical count of each are supplied.
-   * @param {string} layerPath - The path of the layer.
-   * @param {string} types - The new field types (TypeOutfieldsType) to use, separated by commas.
-   * @param {string} fieldNames - The new field names to use, separated by commas.
-   * @param {string} fieldAliases - The new field aliases to use, separated by commas.
-   */
-  replaceFeatureOutfields(layerPath: string, types: string, fieldNames: string, fieldAliases?: string): void {
-    const layerConfig = this.#layerEntryConfigs[layerPath] as AbstractBaseLayerEntryConfig;
-
-    if (!layerConfig) logger.logError(`Unable to find layer ${layerPath}`);
-    else if (
-      layerConfig.source?.featureInfo &&
-      layerConfig.source.featureInfo.queryable !== false &&
-      layerConfig.source.featureInfo.outfields
-    ) {
-      // Convert the provided strings to an array so we can index
-      const nameArray = fieldNames.split(',');
-      // Field names are used if no aliases are provided
-      const aliasArray = fieldAliases?.split(',') || nameArray;
-      const typesArray = types.split(',');
-
-      // Ensure same number of all items are provided
-      if (nameArray.length === aliasArray.length && nameArray.length === typesArray.length) {
-        // Convert to array of outfields
-        const newOutfields = nameArray.map((name, index) => {
-          return {
-            name,
-            alias: aliasArray[index],
-            type: typesArray[index] as TypeOutfieldsType,
-            domain: null,
-          };
-        });
-
-        // Set new value asfeature info outfields
-        layerConfig.source.featureInfo.outfields = newOutfields;
-      } else logger.logError(`Number of provided items do not match`);
-    } else logger.logError(`${layerPath} is not queryable`);
-  }
-
-  /**
    * Calculates an union of all the layer extents based on the given layerPath and its possible children.
    * @param {string} layerPath - The layer path
    * @returns {Extent | undefined} An extent representing an union of all layer extents associated with the layer path
