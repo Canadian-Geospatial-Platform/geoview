@@ -38,7 +38,6 @@ import {
   getLayerNameById,
   getLocalizeLayerType,
 } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
-import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { AddLayerTree } from '@/core/components/layers/left-panel/add-new-layer/add-layer-tree';
 import { ShapefileReader } from '@/core/utils/config/reader/shapefile-reader';
 
@@ -261,11 +260,13 @@ export function AddNewLayer(): JSX.Element {
   const [layerURL, setLayerURL] = useState('');
   const [displayURL, setDisplayURL] = useState('');
   const [layerType, setLayerType] = useState<TypeInitialGeoviewLayerType | ''>('');
-  const [layerList, setLayerList] = useState<GroupLayerEntryConfig[]>([]);
+  const [layerTree, setLayerTree] = useState<TypeGeoviewLayerConfig | undefined>();
   const [layerName, setLayerName] = useState('');
   const [layerIdsToAdd, setLayerIdsToAdd] = useState<string[]>([]);
+  const [isMultiple, setIsMultiple] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [stepButtonEnabled, setStepButtonEnabled] = useState<boolean>(false);
+  const isSingle = !isMultiple;
 
   // Ref
   const serviceTypeRef = useRef<HTMLDivElement>(null);
@@ -277,9 +278,6 @@ export function AddNewLayer(): JSX.Element {
   const disabledLayerTypes = useAppDisabledLayerTypes();
   const { setDisplayState } = useLayerStoreActions();
   const language = useAppDisplayLanguage();
-
-  // Utility function to know if there is multiple selection
-  const isMultiple = (): boolean => layerList.length > 1 || (layerList[0] && layerList[0].listOfLayerEntryConfig?.length > 1);
 
   // List of layer types and labels (Step 2)
   const layerOptions = getLocalizeLayerType(language, false);
@@ -403,7 +401,10 @@ export function AddNewLayer(): JSX.Element {
         const idOfFirstLayerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig[0]?.layerId;
         const nameOfFirstLayerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig[0]?.layerName;
         setLayerName(nameOfFirstLayerEntryConfig || idOfFirstLayerEntryConfig);
-        setLayerList(geoviewLayerConfig.listOfLayerEntryConfig as GroupLayerEntryConfig[]); // TODO: FIX THIS. This is not right, not working for groups like for WMS for example
+        setLayerTree(geoviewLayerConfig);
+
+        // If there's more than 1 layer entry
+        setIsMultiple(geoviewLayerConfig.listOfLayerEntryConfig.length > 1);
 
         // If there's any listOfLayerEntryConfig entry
         if (geoviewLayerConfig.listOfLayerEntryConfig.length > 0) {
@@ -485,7 +486,7 @@ export function AddNewLayer(): JSX.Element {
 
     if (valid) {
       // If a single layer is added, use its name instead of service name
-      const firstLayerName = getLayerNameById(layerList, layerIdsToAdd[0]);
+      const firstLayerName = getLayerNameById(layerTree, layerIdsToAdd[0]);
       if (layerIdsToAdd.length === 1 && firstLayerName) setLayerName(firstLayerName);
       setActiveStep(3);
     }
@@ -559,7 +560,7 @@ export function AddNewLayer(): JSX.Element {
       layerName,
       layerType,
       layerURL,
-      layerList,
+      layerTree: layerTree!,
     });
 
     if (newGeoViewLayer)
@@ -595,7 +596,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const handleSelectType = (event: SelectChangeEvent<unknown>): void => {
     setLayerType(event.target.value as TypeInitialGeoviewLayerType);
-    setLayerList([]);
+    setLayerTree(undefined);
     setLayerIdsToAdd([]);
 
     setStepButtonEnabled(true);
@@ -636,7 +637,7 @@ export function AddNewLayer(): JSX.Element {
     setDisplayURL(file.name);
     setLayerURL(fileURL);
     setLayerType('');
-    setLayerList([]);
+    setLayerTree(undefined);
     setLayerName(fileName);
     setLayerIdsToAdd([]);
     setStepButtonEnabled(true);
@@ -653,7 +654,7 @@ export function AddNewLayer(): JSX.Element {
     setDisplayURL(url);
     setLayerURL(url);
     setLayerType('');
-    setLayerList([]);
+    setLayerTree(undefined);
     setLayerName('');
     setLayerIdsToAdd([]);
   };
@@ -801,7 +802,8 @@ export function AddNewLayer(): JSX.Element {
             stepContent: {
               children: (
                 <>
-                  {(layerList.length === 0 || (layerList.length === 1 && !(layerList[0] instanceof GroupLayerEntryConfig))) && (
+                  {/* Show TextField if only one or no layer entries */}
+                  {isSingle ? (
                     <TextField
                       label={t('layers.name')}
                       variant="standard"
@@ -809,17 +811,16 @@ export function AddNewLayer(): JSX.Element {
                       onChange={handleNameLayer}
                       ref={isMultipleTextFieldRef}
                     />
-                  )}
-                  {(layerList.length > 1 || (layerList[0]?.entryType && layerList[0].entryType === 'group')) && (
-                    <AddLayerTree layersData={layerList} onSelectedItemsChange={setLayerIdsToAdd} />
+                  ) : (
+                    layerTree && <AddLayerTree layerTree={layerTree} onSelectedItemsChange={setLayerIdsToAdd} />
                   )}
                   <br />
-                  <NavButtons isLast={!isMultiple()} handleNext={isMultiple() ? handleStep3 : handleStepLast} />
+                  <NavButtons isLast={!isMultiple} handleNext={isMultiple ? handleStep3 : handleStepLast} />
                 </>
               ),
             },
           },
-          isMultiple()
+          isMultiple
             ? {
                 stepLabel: {
                   children: t('layers.stepFour'),

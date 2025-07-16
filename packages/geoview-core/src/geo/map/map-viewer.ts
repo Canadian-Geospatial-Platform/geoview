@@ -385,7 +385,6 @@ export class MapViewer {
 
     // Load the list of geoview layers in the config to add all layers on the map.
     // After this call, all first level layers have been registered.
-    // TODO: refactor - remove the cast as MapConfigLayerEntry[] everywhere
     await this.layer.loadListOfGeoviewLayer(this.mapFeaturesConfig.map.listOfGeoviewLayerConfig);
 
     // Here, all base-level "this.mapFeaturesConfig.map.listOfGeoviewLayerConfig" have been registered (layerStatus === 'registered').
