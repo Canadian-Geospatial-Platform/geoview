@@ -545,21 +545,13 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
           className={!inVisibleRange ? 'out-of-range' : ''}
         >
           <LayerIcon layerPath={layerPath} />
-          {shouldShowTooltip ? (
-            <Tooltip title={layerName} placement="top" enterDelay={1000} arrow>
-              <ListItemText
-                primary={layerName !== undefined ? layerName : layerId}
-                secondary={memoLayerDescription}
-                onClick={handleLayerClick}
-              />
-            </Tooltip>
-          ) : (
+          <Tooltip title={layerName} placement="top" enterDelay={1000} arrow disableHoverListener={!shouldShowTooltip}>
             <ListItemText
               primary={layerName !== undefined ? layerName : layerId}
               secondary={memoLayerDescription}
               onClick={handleLayerClick}
             />
-          )}
+          </Tooltip>
           {!isLayoutEnlarged && (
             <ListItemIcon className="rightIcons-container">
               {memoMoreLayerButtons}

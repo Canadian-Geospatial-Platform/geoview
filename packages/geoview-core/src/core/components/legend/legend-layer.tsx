@@ -59,13 +59,9 @@ const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick }: LegendLay
       <LayerIcon layerPath={layerPath} />
       <ListItemText
         primary={
-          shouldShowTooltip ? (
-            <Tooltip title={layerName} placement="top">
-              <Box>{layerName}</Box>
-            </Tooltip>
-          ) : (
+          <Tooltip title={layerName} placement="top" disableHoverListener={!shouldShowTooltip}>
             <Box>{layerName}</Box>
-          )
+          </Tooltip>
         }
         className="layerTitle"
         disableTypography

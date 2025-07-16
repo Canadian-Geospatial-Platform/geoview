@@ -15,6 +15,7 @@ interface ItemsListProps {
 }
 
 // Extracted ListItem Component
+// Apply style to increase left/right tooltip area (padding: '0 18px 0 18px', margin: '0 -18px 0 -18px')
 const LegendListItem = memo(
   ({
     item: { icon, name, isVisible },
@@ -30,7 +31,9 @@ const LegendListItem = memo(
     <ListItem className={!isVisible || !layerVisible ? 'unchecked' : 'checked'}>
       <ListItemIcon>
         <Tooltip title={show ? value : ''} key={`Tooltip-${name}-${icon}1`} placement="left" disableHoverListener={!show}>
-          <Box>{icon ? <Box component="img" alt={name} src={icon} /> : <BrowserNotSupportedIcon />}</Box>
+          <Box sx={{ padding: '0 18px 0 18px', margin: '0 -18px 0 -18px' }}>
+            {icon ? <Box component="img" alt={name} src={icon} /> : <BrowserNotSupportedIcon />}
+          </Box>
         </Tooltip>
       </ListItemIcon>
       <Tooltip title={showNameTooltip ? name : ''} key={`Tooltip-${name}-${icon}2`} placement="top" disableHoverListener={!showNameTooltip}>
