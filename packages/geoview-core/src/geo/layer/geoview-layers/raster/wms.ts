@@ -141,7 +141,7 @@ export class WMS extends AbstractGeoViewRaster {
     return Promise.resolve(
       WMS.createWMSLayerConfig(
         this.geoviewLayerId,
-        this.geoviewLayerName,
+        (metadata!.Capability.Layer.Title as string) || this.geoviewLayerName,
         this.metadataAccessPath,
         'mapserver',
         false,

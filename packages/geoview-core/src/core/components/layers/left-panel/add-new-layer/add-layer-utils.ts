@@ -6,6 +6,7 @@ import {
   TypeGeoviewLayerType,
   TypeLayerEntryConfig,
   MapConfigLayerEntry,
+  TypeGeoviewLayerConfig,
 } from '@/api/config/types/map-schema-types';
 import { generateId, getLocalizedMessage } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
@@ -17,7 +18,7 @@ type BuildGeoViewLayerInput = {
   layerName: string;
   layerType: string;
   layerURL: string;
-  layerList: GroupLayerEntryConfig[];
+  layerTree: TypeGeoviewLayerConfig;
 };
 
 type LayerEntryConfigShell = {
@@ -60,45 +61,60 @@ export const getLocalizeLayerType = (language: TypeDisplayLanguage, includeStati
 
 /**
  * Finds a layer entry config from an array with the given ID.
- * @param {GroupLayerEntryConfig[]} layerList - The array of layerEntryConfigs.
+ * @param {TypeGeoviewLayerConfig | undefined} layerTree - The layer config to start searching from.
  * @param {string} layerId - The ID of the layer to find.
  * @returns The layer entry config of the found layer or null if none is found.
  */
-export const getLayerById = (layerList: GroupLayerEntryConfig[], layerId: string): GroupLayerEntryConfig | undefined => {
-  const layer = layerList.find((childLayer) => childLayer.layerId.split('/').pop() === layerId.split('/').pop());
-  if (layer) return layer;
+export const getLayerById = (
+  layerTree: TypeGeoviewLayerConfig | undefined,
+  layerId: string
+): TypeGeoviewLayerConfig | TypeLayerEntryConfig | undefined => {
+  // If none
+  if (!layerTree) return undefined;
 
-  let foundLayer: GroupLayerEntryConfig | undefined;
-  for (let i = 0; i < layerList.length; i++) {
-    const branch = layerList[i];
-    if (branch.listOfLayerEntryConfig) {
-      foundLayer = getLayerById(branch.listOfLayerEntryConfig as GroupLayerEntryConfig[], layerId);
+  // The target id
+  const targetId = layerId.split('/').pop();
+
+  // If current
+  if (layerTree.geoviewLayerId === targetId) return layerTree;
+
+  // For each layer entries
+  for (const layer of layerTree.listOfLayerEntryConfig) {
+    const currentId = layer.layerId.split('/').pop();
+    if (currentId === targetId) {
+      return layer;
     }
-    if (foundLayer) break;
+
+    if (layer.listOfLayerEntryConfig) {
+      // Go recursive as it's actually a TypeGeoviewLayerConfig, not a TypeLayerEntryConfig
+      const found = getLayerById(layer as unknown as TypeGeoviewLayerConfig, layerId);
+      if (found) return found;
+    }
   }
 
-  return foundLayer;
+  // Not found
+  return undefined;
 };
 
 /**
  * Finds a layer name from an array of layer entry configs with the given ID.
- * @param {GroupLayerEntryConfig[]} layersList - The array of layerEntryConfigs.
+ * @param {TypeGeoviewLayerConfig | undefined} layerTree - The layer config to start searching from.
  * @param {string} layerId - The ID of the layer to find.
  * @returns The name of the layer or undefined if none is found.
  */
-export const getLayerNameById = (layersList: GroupLayerEntryConfig[], layerId: string): string | undefined => {
-  return getLayerById(layersList, layerId)?.layerName;
+export const getLayerNameById = (layerTree: TypeGeoviewLayerConfig | undefined, layerId: string): string | undefined => {
+  return (getLayerById(layerTree, layerId) as TypeLayerEntryConfig)?.layerName;
 };
 
 /**
  * Checks if all of a groups sublayers are to be added to the map.
- * @param {GroupLayerEntryConfig} groupLayer - The group layer to check
+ * @param {TypeGeoviewLayerConfig} layerTree - The group layer to check
  * @param {string[]} layerIds - The la
  * @returns {boolean} Whether or not all of the sublayers are included
  */
-const allSubLayersAreIncluded = (groupLayer: GroupLayerEntryConfig, layerIds: (string | undefined)[]): boolean => {
-  return groupLayer.listOfLayerEntryConfig.every((layerEntryConfig) =>
-    !(layerEntryConfig instanceof GroupLayerEntryConfig)
+const allSubLayersAreIncluded = (layerTree: TypeGeoviewLayerConfig | TypeLayerEntryConfig, layerIds: (string | undefined)[]): boolean => {
+  return layerTree.listOfLayerEntryConfig.every((layerEntryConfig) =>
+    !layerTree.listOfLayerEntryConfig
       ? layerIds.includes(layerEntryConfig.layerId)
       : layerIds.includes(layerEntryConfig.layerId) && allSubLayersAreIncluded(layerEntryConfig, layerIds)
   );
@@ -113,7 +129,7 @@ const createLayerEntryConfigForGroupLayer = (
   layerName: string,
   layerType: string,
   layerIds: string[],
-  layersToAdd: GroupLayerEntryConfig[],
+  layersToAdd: TypeLayerEntryConfig[],
   layerIdsToAdd: string[],
   removedLayerIds: string[],
   groupLayer: GroupLayerEntryConfig
@@ -170,8 +186,8 @@ const createLayerEntryConfigForGroupLayer = (
  * @returns {MapConfigLayerEntry} The geoview layer config
  */
 export const buildGeoLayerToAdd = (inputProps: BuildGeoViewLayerInput): MapConfigLayerEntry => {
-  const { layerIdsToAdd, layerName, layerType, layerURL, layerList } = inputProps;
-  logger.logDebug(layerList, layerIdsToAdd);
+  const { layerIdsToAdd, layerName, layerType, layerURL, layerTree } = inputProps;
+  logger.logDebug(layerTree, layerIdsToAdd);
 
   if (layerType === 'shapefile') {
     return {
@@ -183,7 +199,9 @@ export const buildGeoLayerToAdd = (inputProps: BuildGeoViewLayerInput): MapConfi
   }
 
   const listOfLayerEntryConfig: LayerEntryConfigShell[] = [];
-  const layersToAdd = layerIdsToAdd.map((layerId) => getLayerById(layerList, layerId)).filter((layerToAdd) => !!layerToAdd);
+  const layersToAdd = layerIdsToAdd
+    .map((layerId) => getLayerById(layerTree, layerId) as TypeLayerEntryConfig)
+    .filter((layerToAdd) => !!layerToAdd);
 
   if (layersToAdd.length) {
     const removedLayerIds: string[] = [];
