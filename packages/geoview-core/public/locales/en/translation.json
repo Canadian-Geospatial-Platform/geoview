@@ -318,6 +318,7 @@
   "error": {
     "generic": "An error happened, contact us or view console for details.",
     "layer": {
+      "differingFieldLengths": "Length of provided fields do not match.",
       "layerNotFound": "Layer at layer path '__param__' not found.",
       "wrongType": "Layer '__param__' isn't of the expected type.",
       "notAGeoJsonLayer": "Not a GeoJson layer for layer '__param__'.",
