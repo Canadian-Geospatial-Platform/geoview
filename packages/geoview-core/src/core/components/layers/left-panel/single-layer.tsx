@@ -151,7 +151,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
 
   const isLayerAlwaysVisible = layerHasDisabledVisibility(layerChildren, layerControls);
 
-  //#region HANDLERS
+  // #region HANDLERS
 
   /**
    * Handle expand/shrink of layer groups.
@@ -242,7 +242,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
     reloadLayer(layerPath);
   }, [layerPath, reloadLayer]);
 
-  //#endregion HANDLERS
+  // #endregion HANDLERS
 
   // Get layer description
   const memoLayerDescription = useMemo((): JSX.Element | string | null => {
