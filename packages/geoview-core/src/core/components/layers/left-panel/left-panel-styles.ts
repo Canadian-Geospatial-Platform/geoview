@@ -45,7 +45,7 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     '& .MuiListItem-root': {
       height: '100%',
       '& .MuiListItemButton-root': {
-        padding: '0 0 0 16px',
+        padding: '0 2px 0 16px',
         height: '100%',
       },
       '& .MuiBox-root': {

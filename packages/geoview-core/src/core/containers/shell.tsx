@@ -35,6 +35,7 @@ import { MapViewer, MapComponentAddedEvent, MapComponentRemovedEvent } from '@/g
 import { FocusTrapDialog } from './focus-trap';
 import { Notifications, SnackBarOpenEvent, SnackbarType } from '@/core/utils/notifications';
 import { useMapResize } from './use-map-resize';
+import { scrollIfNotVisible } from '@/core/utils/utilities';
 
 type ShellProps = {
   mapViewer: MapViewer;
@@ -194,13 +195,13 @@ export function Shell(props: ShellProps): JSX.Element {
    * This improves accessibility by allowing users to easily return focus to the map
    */
   const handleScrollShellIntoView = useCallback((): void => {
+    // Log
+    logger.logTraceUseCallback('SHELL - scrollIntoViewListener');
+
     if (!shellRef.current) return;
 
-    const behaviorScroll = (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth') as ScrollBehavior;
-    shellRef.current.scrollIntoView({
-      behavior: behaviorScroll,
-      block: 'start',
-    });
+    // Check if the map is already in view, then scroll if needed
+    scrollIfNotVisible(shellRef.current.children[0] as HTMLElement, 'start');
   }, []);
 
   // Mount component

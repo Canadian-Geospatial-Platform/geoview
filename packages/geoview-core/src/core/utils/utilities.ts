@@ -721,3 +721,34 @@ export function isElementInViewport(el: Element): boolean {
     rect.right <= (window.innerWidth || document.documentElement.clientWidth)
   );
 }
+
+/**
+ * Scrolls an element into view only if it's not already visible in the viewport.
+ * Respects user's motion preferences by using 'instant' scroll for users who prefer reduced motion.
+ * For 'start': adds offset pixels above the element.
+ * For 'end': adds offset pixels below the element.
+ * For 'center' and 'nearest': uses standard scrollIntoView behavior without offset.
+ * @param {HTMLElement} el - The HTML element to scroll into view if not visible
+ * @param {ScrollLogicalPosition} blockValue - The vertical alignment ('start', 'center', 'end', 'nearest')
+ * @param {number} offset - Offset in pixels for 'start' (top gap) and 'end' (bottom gap) positions (default: 100)
+ */
+export function scrollIfNotVisible(el: HTMLElement, blockValue: ScrollLogicalPosition, offset: number = 100): void {
+  const behaviorScroll = (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth') as ScrollBehavior;
+  const rect = el.getBoundingClientRect();
+  if (rect.top < offset || rect.bottom > window.innerHeight) {
+    if (blockValue === 'center' || blockValue === 'nearest') {
+      el.scrollIntoView({ behavior: behaviorScroll, block: blockValue });
+    } else {
+      let scrollTop;
+      if (blockValue === 'end') {
+        scrollTop = window.scrollY + rect.bottom - window.innerHeight + offset;
+      } else {
+        scrollTop = window.scrollY + rect.top - offset;
+      }
+      window.scrollTo({
+        top: scrollTop,
+        behavior: behaviorScroll,
+      });
+    }
+  }
+}
