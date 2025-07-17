@@ -1,6 +1,6 @@
 {
   "name": "eslint-and-prettier-config",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Eslint and prettier configuration file for the geoview project",
   "keywords": [
     "geoview",

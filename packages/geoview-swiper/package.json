@@ -1,6 +1,6 @@
 {
   "name": "geoview-swiper",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "A Swiper control for the geoview project",
   "main": "src/index.tsx",
   "keywords": [
