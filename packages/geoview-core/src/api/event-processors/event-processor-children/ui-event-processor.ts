@@ -67,8 +67,8 @@ export class UIEventProcessor extends AbstractEventProcessor {
     this.getUIStateProtected(mapId).setterActions.setActiveFooterBarTab(id);
   }
 
-  static setActiveAppBarTab(mapId: string, tabId: string, tabGroup: string, isOpen: boolean, isFocusTrapped: boolean): void {
-    this.getUIStateProtected(mapId).setterActions.setActiveAppBarTab(tabId, tabGroup, isOpen, isFocusTrapped);
+  static setActiveAppBarTab(mapId: string, tabId: string, isOpen: boolean, isFocusTrapped: boolean): void {
+    this.getUIStateProtected(mapId).setterActions.setActiveAppBarTab(tabId, isOpen, isFocusTrapped);
   }
 
   static getActiveAppBarTab(mapId: string): ActiveAppBarTabType {

@@ -171,7 +171,7 @@ export function Legend({ fullWidth, containerType = CONTAINER_TYPE.FOOTER_BAR }:
   }, [formattedLegendLayerList, fullWidth, noLayersContent]);
 
   // Early return with empty fragment if not the active tab
-  if (footerId !== 'legend' && appBarId.tabGroup !== 'legend') return null;
+  if (footerId !== 'legend' && appBarId.tabId !== 'legend') return null;
 
   return (
     <>

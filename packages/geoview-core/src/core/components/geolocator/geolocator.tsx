@@ -7,7 +7,6 @@ import { GeolocatorResult } from '@/core/components/geolocator/geolocator-result
 import { getSxClasses } from '@/core/components/geolocator/geolocator-style';
 import { CV_DEFAULT_APPBAR_CORE } from '@/api/config/types/config-constants';
 import { FocusTrapContainer } from '@/core/components/common';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import { useGeolocator } from '@/core/components/geolocator/hooks/use-geolocator';
 import { GeolocatorBar } from '@/core/components/geolocator/geolocator-bar';
@@ -33,9 +32,8 @@ export function Geolocator(): JSX.Element {
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Store
-  const mapId = useGeoViewMapId();
   const { setActiveAppBarTab } = useUIStoreActions();
-  const { tabGroup, isOpen } = useUIActiveAppBarTab();
+  const { tabId, isOpen } = useUIActiveAppBarTab();
   const activeTrapGeoView = useUIActiveTrapGeoView();
 
   // Custom geolocator hook
@@ -60,8 +58,8 @@ export function Geolocator(): JSX.Element {
 
   const handleReset = useCallback(() => {
     setSearchValue('');
-    setActiveAppBarTab(`${mapId}AppbarPanelButtonGeolocator`, CV_DEFAULT_APPBAR_CORE.GEOLOCATOR, false, false);
-  }, [mapId, setActiveAppBarTab, setSearchValue]);
+    setActiveAppBarTab(CV_DEFAULT_APPBAR_CORE.GEOLOCATOR, false, false);
+  }, [setActiveAppBarTab, setSearchValue]);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>): void => {
     const { value } = event.target;
@@ -85,10 +83,10 @@ export function Geolocator(): JSX.Element {
   }, [debouncedRequest]);
 
   return (
-    <FocusTrapContainer open={tabGroup === CV_DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen && activeTrapGeoView} id="geolocator-focus-trap">
+    <FocusTrapContainer open={tabId === CV_DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen && activeTrapGeoView} id="geolocator-focus-trap">
       <Box
         sx={sxClasses.root}
-        visibility={tabGroup === CV_DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen ? 'visible' : 'hidden'}
+        visibility={tabId === CV_DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen ? 'visible' : 'hidden'}
         id="geolocator-search"
       >
         <Box sx={sxClasses.geolocator}>

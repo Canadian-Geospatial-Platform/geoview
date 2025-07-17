@@ -1535,7 +1535,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
       // Set app bar tab settings
       if (newMapConfig.appBar) {
-        newMapConfig.appBar.selectedTab = UIEventProcessor.getActiveAppBarTab(mapId).tabGroup as TypeValidAppBarCoreProps;
+        newMapConfig.appBar.selectedTab = UIEventProcessor.getActiveAppBarTab(mapId).tabId as TypeValidAppBarCoreProps;
         newMapConfig.appBar.collapsed = !UIEventProcessor.getActiveAppBarTab(mapId).isOpen;
 
         const selectedDataTableLayerPath = DataTableEventProcessor.getSingleDataTableState(mapId, 'selectedLayerPath');
