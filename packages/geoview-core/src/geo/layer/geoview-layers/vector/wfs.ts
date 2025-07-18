@@ -99,7 +99,7 @@ export class WFS extends AbstractGeoViewVector {
     }) as unknown as TypeJsonArray;
 
     // Redirect
-    return Promise.resolve(WFS.createWfsFeatureLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, entries));
+    return WFS.createWfsFeatureLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, entries);
   }
 
   /**

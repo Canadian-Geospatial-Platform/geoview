@@ -74,17 +74,14 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     // Build a tree of entries
     const entriesTree = EsriDynamic.buildLayerEntriesTree(entries);
 
-    // The config
-    const theConfig = EsriDynamic.createEsriDynamicLayerConfig(
+    // Redirect
+    return EsriDynamic.createEsriDynamicLayerConfig(
       this.geoviewLayerId,
       this.geoviewLayerName,
       this.metadataAccessPath,
       false,
       entriesTree
     );
-
-    // Redirect
-    return theConfig;
   }
 
   /**

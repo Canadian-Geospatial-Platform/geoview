@@ -88,7 +88,7 @@ export class OgcFeature extends AbstractGeoViewVector {
     }
 
     // Redirect
-    return Promise.resolve(OgcFeature.createOgcFeatureLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, entries));
+    return OgcFeature.createOgcFeatureLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, entries);
   }
 
   /**

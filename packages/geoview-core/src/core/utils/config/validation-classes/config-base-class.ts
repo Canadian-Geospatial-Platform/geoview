@@ -269,6 +269,66 @@ export abstract class ConfigBaseClass {
   }
 
   /**
+   * This method compares the internal layer status of the config with the layer status passed as a parameter and it
+   * returns true if the internal value is greater or equal to the value of the parameter.
+   *
+   * @param {TypeLayerStatus} layerStatus - The layer status to compare with the internal value of the config.
+   *
+   * @returns {boolean} Returns true if the internal value is greater or equal than the value of the parameter.
+   */
+  isGreaterThanOrEqualTo(layerStatus: TypeLayerStatus): boolean {
+    return ConfigBaseClass.#layerStatusWeight[this.layerStatus] >= ConfigBaseClass.#layerStatusWeight[layerStatus];
+  }
+
+  /**
+   * Serializes the ConfigBaseClass class
+   * @returns {TypeJsonObject} The serialized ConfigBaseClass
+   */
+  serialize(): TypeJsonObject {
+    // Redirect
+    return this.onSerialize();
+  }
+
+  /**
+   * Overridable function to serialize a ConfigBaseClass
+   * @returns {TypeJsonObject} The serialized ConfigBaseClass
+   */
+  onSerialize(): TypeJsonObject {
+    return {
+      layerName: this.layerName,
+      layerId: this.layerId,
+      schemaTag: this.schemaTag,
+      entryType: this.entryType,
+      layerStatus: this.layerStatus,
+      isMetadataLayerGroup: this.isMetadataLayerGroup,
+    } as unknown as TypeJsonObject;
+  }
+
+  /**
+   * Clones the configuration class.
+   *
+   * @returns {ConfigBaseClass} The cloned ConfigBaseClass object.
+   */
+  clone(): ConfigBaseClass {
+    // Redirect to clone the object and return it
+    return this.onClone();
+  }
+
+  /**
+   * Overridable function to clone a child of a ConfigBaseClass.
+   *
+   * @returns {ConfigBaseClass} The cloned child object of a ConfigBaseClass.
+   */
+  protected onClone(): ConfigBaseClass {
+    // Crash on purpose.
+    // GV Make sure to implement a 'protected override onClone(): ConfigBaseClass' in the child-class to
+    // GV use this cloning feature. See OgcWMSLayerEntryConfig for example.
+    throw new NotImplementedError(`Not implemented exception onClone on layer path ${this.layerPath}`);
+  }
+
+  // #region STATIC
+
+  /**
    * Recursively updates the status of the parent layer based on the status of its sibling layers.
    * This method checks the statuses of sibling layers (layers sharing the same parent).
    * - If at least one sibling is in a 'loading' state, it sets the parent layer status to 'loading'.
@@ -334,64 +394,6 @@ export abstract class ConfigBaseClass {
   }
 
   /**
-   * This method compares the internal layer status of the config with the layer status passed as a parameter and it
-   * returns true if the internal value is greater or equal to the value of the parameter.
-   *
-   * @param {TypeLayerStatus} layerStatus - The layer status to compare with the internal value of the config.
-   *
-   * @returns {boolean} Returns true if the internal value is greater or equal than the value of the parameter.
-   */
-  isGreaterThanOrEqualTo(layerStatus: TypeLayerStatus): boolean {
-    return ConfigBaseClass.#layerStatusWeight[this.layerStatus] >= ConfigBaseClass.#layerStatusWeight[layerStatus];
-  }
-
-  /**
-   * Serializes the ConfigBaseClass class
-   * @returns {TypeJsonObject} The serialized ConfigBaseClass
-   */
-  serialize(): TypeJsonObject {
-    // Redirect
-    return this.onSerialize();
-  }
-
-  /**
-   * Overridable function to serialize a ConfigBaseClass
-   * @returns {TypeJsonObject} The serialized ConfigBaseClass
-   */
-  onSerialize(): TypeJsonObject {
-    return {
-      layerName: this.layerName,
-      layerId: this.layerId,
-      schemaTag: this.schemaTag,
-      entryType: this.entryType,
-      layerStatus: this.layerStatus,
-      isMetadataLayerGroup: this.isMetadataLayerGroup,
-    } as unknown as TypeJsonObject;
-  }
-
-  /**
-   * Clones the configuration class.
-   *
-   * @returns {ConfigBaseClass} The cloned ConfigBaseClass object.
-   */
-  clone(): ConfigBaseClass {
-    // Redirect to clone the object and return it
-    return this.onClone();
-  }
-
-  /**
-   * Overridable function to clone a child of a ConfigBaseClass.
-   *
-   * @returns {ConfigBaseClass} The cloned child object of a ConfigBaseClass.
-   */
-  protected onClone(): ConfigBaseClass {
-    // Crash on purpose.
-    // GV Make sure to implement a 'protected override onClone(): ConfigBaseClass' in the child-class to
-    // GV use this cloning feature. See OgcWMSLayerEntryConfig for example.
-    throw new NotImplementedError(`Not implemented exception onClone on layer path ${this.layerPath}`);
-  }
-
-  /**
    * Recursively checks the list of layer entries to see if all of them are greater than or equal to the provided layer status.
    *
    * @param {TypeLayerStatus} layerStatus - The layer status to compare with the internal value of the config.
@@ -407,6 +409,10 @@ export abstract class ConfigBaseClass {
       return !layerConfig.isGreaterThanOrEqualTo(layerStatus);
     });
   }
+
+  // #endregion
+
+  // #region EVENTS
 
   /**
    * Emits an event to all handlers.
@@ -435,7 +441,11 @@ export abstract class ConfigBaseClass {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerStatusChangedHandlers, callback);
   }
+
+  // #endregion
 }
+
+// #region EVENT TYPES
 
 /**
  * Define an event for the delegate.
@@ -449,3 +459,5 @@ export type LayerStatusChangedEvent = {
  * Define a delegate for the event handler function signature.
  */
 export type LayerStatusChangedDelegate = EventDelegateBase<ConfigBaseClass, LayerStatusChangedEvent, void>;
+
+// #endregion
