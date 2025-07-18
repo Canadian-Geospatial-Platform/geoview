@@ -178,7 +178,10 @@ export function Legend({ fullWidth, containerType = CONTAINER_TYPE.FOOTER_BAR }:
       <Box sx={sxClasses.toggleBar}>
         <ToggleAll />
       </Box>
-      <Box sx={sxClassesMain.container} id={`${mapId}-${containerType}-legendContainer`}>
+      <Box
+        sx={{ background: theme.palette.geoViewColor.bgColor.main, ...sxClassesMain.container }}
+        id={`${mapId}-${containerType}-legendContainer`}
+      >
         <Box sx={styles.flexContainer}>{content}</Box>
       </Box>
     </>

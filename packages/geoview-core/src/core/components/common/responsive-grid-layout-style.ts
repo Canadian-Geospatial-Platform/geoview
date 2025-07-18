@@ -18,24 +18,41 @@ export const getSxClasses = (theme: Theme, containerType: string): SxStyles => (
     padding: containerType === CONTAINER_TYPE.FOOTER_BAR ? '20px 12px 12px 12px' : '20px 10px 10px 10px',
   },
   rightButtonsContainer: {
+    backgroundColor: theme.palette.geoViewColor.bgColor.light[300],
     display: 'flex',
     flexDirection: 'row',
     gap: '0.6rem',
-    backgroundColor: theme.palette.geoViewColor.primary.lighten(0.5, 0.1),
-    borderTopLeftRadius: '0.75rem',
+    borderTopLeftRadius: '0.5rem',
     borderTopRightRadius: '0.5rem',
-    padding: ' 0.5rem 0.5rem 0.5rem 1rem',
-    borderTop: `0.2rem solid ${theme.palette.geoViewColor.primary.lighten(0.2, 0.4)}`,
-    borderLeft: `0.2rem solid ${theme.palette.geoViewColor.primary.lighten(0.2, 0.4)}`,
+    borderTop: `2px solid ${theme.palette.geoViewColor.primary.main}`,
+    borderLeft: `2px solid ${theme.palette.geoViewColor.primary.main}`,
+    borderRight: `2px solid ${theme.palette.geoViewColor.primary.main}`,
     '& .MuiButton-startIcon': {
       [theme.breakpoints.down('md')]: {
         margin: 0,
       },
     },
+    '& .MuiButtonBase-root': {
+      borderTop: 0,
+      borderBottom: 0,
+      borderBottomLeftRadius: 0,
+      borderBottomRightRadius: 0,
+      '&.active': {
+        backgroundColor: theme.palette.geoViewColor.primary.main,
+        color: theme.palette.geoViewColor.white,
+        boxShadow: 1,
+      },
+    },
+    '& .MuiButtonGroup-firstButton': {
+      borderLeft: 0,
+    },
+    '& .MuiButtonGroup-lastButton': {
+      borderRight: 0,
+    },
   },
   rightMainContent: {
     border: `2px solid ${theme.palette.geoViewColor.primary.main}`,
-    borderRadius: '5px',
+    borderRadius: '5px 0 5px 5px',
     backgroundColor: theme.palette.geoViewColor.bgColor.light[300],
     overflowY: 'auto',
     '&:focus-visible': {

@@ -9,7 +9,7 @@ type SxClasses = Record<string, object>;
 export const getSxClassesMain = (): SxClasses => ({
   container: {
     padding: '20px',
-    paddingBottom: '50px', // For map info bar
+    paddingBottom: '40px', // For map info bar
     display: 'flex',
     flexDirection: 'column',
     height: '100%',

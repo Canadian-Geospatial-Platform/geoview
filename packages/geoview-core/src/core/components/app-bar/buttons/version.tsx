@@ -100,7 +100,7 @@ export default function Version(): JSX.Element {
           id="version-button"
           tooltip={t('appbar.version')!}
           aria-label={t('appbar.version')!}
-          tooltipPlacement="bottom-end"
+          tooltipPlacement="right"
           onClick={handleOpenPopover}
           className={`${interaction === 'dynamic' ? 'buttonFilled' : 'style4'} ${open ? 'active' : ''}`}
         >
