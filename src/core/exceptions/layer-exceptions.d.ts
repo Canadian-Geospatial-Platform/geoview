@@ -284,4 +284,15 @@ export declare class LayerNoGeographicDataInCSVError extends LayerError {
      */
     constructor(layerPath: string, layerName: string | undefined);
 }
+/**
+ * Error thrown when fields provided to update the feature fields are of different lengths.
+ * @extends {LayerError}
+ */
+export declare class LayerDifferingFieldLengths extends LayerError {
+    /**
+     * Constructs a new LayerDifferingFieldLengths instance.
+     * @param {string} layerPath - The path or identifier of the layer.
+     */
+    constructor(layerPath: string);
+}
 //# sourceMappingURL=layer-exceptions.d.ts.map

@@ -77,7 +77,7 @@ export declare abstract class AbstractBaseLayer {
      */
     getLayerStatus(): TypeLayerStatus;
     /**
-     * Gets the layer name or fallsback on the layer name in the layer configuration.
+     * Gets the layer name or falls back on the layer name in the layer configuration.
      * @returns The layer name
      */
     getLayerName(): string;
@@ -107,8 +107,9 @@ export declare abstract class AbstractBaseLayer {
     /**
      * Sets the opacity of the layer (between 0 and 1).
      * @param {number} layerOpacity The opacity of the layer.
+     * @param {boolean} emitOpacityChange - Whether to emit the event or not (false to avoid updating the legend layers)
      */
-    setOpacity(layerOpacity: number): void;
+    setOpacity(layerOpacity: number, emitOpacityChange?: boolean): void;
     /**
      * Gets the visibility of the layer (true or false).
      * @returns {boolean} The visibility of the layer.
@@ -195,11 +196,11 @@ export type VisibleChangedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type VisibleChangedDelegate = EventDelegateBase<AbstractBaseLayer, VisibleChangedEvent, void>;
+export type VisibleChangedDelegate = EventDelegateBase<AbstractBaseLayer, VisibleChangedEvent, void>;
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerOpacityChangedDelegate = EventDelegateBase<AbstractBaseLayer, LayerOpacityChangedEvent, void>;
+export type LayerOpacityChangedDelegate = EventDelegateBase<AbstractBaseLayer, LayerOpacityChangedEvent, void>;
 /**
  * Define an event for the delegate
  */
@@ -207,5 +208,4 @@ export type LayerOpacityChangedEvent = {
     layerPath: string;
     opacity: number;
 };
-export {};
 //# sourceMappingURL=abstract-base-layer.d.ts.map

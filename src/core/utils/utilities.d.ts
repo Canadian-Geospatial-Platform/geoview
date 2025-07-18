@@ -227,4 +227,15 @@ export declare function handleEscapeKey(key: string, callbackId: string, isFocus
  * @returns {Boolean} true if visible, false otherwise
  */
 export declare function isElementInViewport(el: Element): boolean;
+/**
+ * Scrolls an element into view only if it's not already visible in the viewport.
+ * Respects user's motion preferences by using 'instant' scroll for users who prefer reduced motion.
+ * For 'start': adds offset pixels above the element.
+ * For 'end': adds offset pixels below the element.
+ * For 'center' and 'nearest': uses standard scrollIntoView behavior without offset.
+ * @param {HTMLElement} el - The HTML element to scroll into view if not visible
+ * @param {ScrollLogicalPosition} blockValue - The vertical alignment ('start', 'center', 'end', 'nearest')
+ * @param {number} offset - Offset in pixels for 'start' (top gap) and 'end' (bottom gap) positions (default: 100)
+ */
+export declare function scrollIfNotVisible(el: HTMLElement, blockValue: ScrollLogicalPosition, offset?: number): void;
 //# sourceMappingURL=utilities.d.ts.map

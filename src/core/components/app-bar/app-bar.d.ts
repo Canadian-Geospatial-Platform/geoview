@@ -7,9 +7,6 @@ type AppBarProps = {
 export interface ButtonPanelType {
     [panelType: string]: TypeButtonPanel;
 }
-export interface ButtonPanelGroupType {
-    [panelId: string]: ButtonPanelType;
-}
 /**
  * Create an app-bar with buttons that can open a panel
  */

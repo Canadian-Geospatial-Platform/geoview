@@ -49,6 +49,8 @@ export interface IMapState {
     setDefaultConfigValues: (config: TypeMapFeaturesConfig) => void;
     actions: {
         createBasemapFromOptions: (basemapOptions: TypeBasemapOptions) => Promise<void>;
+        getMapLayerParentHidden(layerPath: string): boolean;
+        isLayerHiddenOnMap(layerPath: string): boolean;
         getPixelFromCoordinate: (coord: Coordinate) => [number, number];
         showClickMarker: (marker: TypeClickMarker) => void;
         hideClickMarker: () => void;
@@ -172,10 +174,12 @@ export declare const useMapVisibleRangeLayers: () => string[];
 export declare const useMapZoom: () => number;
 export declare const getMapPointerPosition: (mapId: string) => TypeMapMouseInfo | undefined;
 export declare const useSelectorLayerVisibility: (layerPath: string) => boolean;
+export declare const useSelectorLayerParentHidden: (layerPath: string) => boolean;
 export declare const useAllLayersVisible: () => boolean;
 export declare const useMapHasCollapsibleLayers: () => boolean;
 export declare const useAllLayersCollapsed: () => boolean;
 export declare const useSelectorLayerInVisibleRange: (layerPath: string) => boolean;
+export declare const useSelectorIsLayerHiddenOnMap: (layerPath: string) => boolean;
 export declare const useSelectorLayerLegendCollapsed: (layerPath: string) => boolean;
 export declare const useMapStoreActions: () => MapActions;
 export {};

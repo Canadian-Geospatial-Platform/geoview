@@ -31,7 +31,7 @@ export interface ILayerState {
         setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => void;
         setHighlightLayer: (layerPath: string) => void;
         setLayerDeleteInProgress: (newVal: string) => void;
-        setLayerOpacity: (layerPath: string, opacity: number) => void;
+        setLayerOpacity: (layerPath: string, opacity: number, updateLegendLayers?: boolean) => void;
         setLayerHoverable: (layerPath: string, enable: boolean) => void;
         setLayerQueryable: (layerPath: string, enable: boolean) => void;
         setSelectedLayerPath: (layerPath: string) => void;
