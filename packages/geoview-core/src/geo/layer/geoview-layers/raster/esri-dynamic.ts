@@ -146,8 +146,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     metadataAccessPath: string
   ): Promise<TypeGeoviewLayerConfig> {
     // Create the Layer config
-    const layerConfig = EsriDynamic.createEsriDynamicLayerConfig(geoviewLayerId, geoviewLayerName, metadataAccessPath, false, []);
-    const myLayer = new EsriDynamic(layerConfig);
+    const myLayer = new EsriDynamic({ geoviewLayerId, geoviewLayerName, metadataAccessPath } as TypeEsriDynamicLayerConfig);
     return myLayer.initGeoViewLayerEntries();
   }
 

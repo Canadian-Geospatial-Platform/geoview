@@ -178,6 +178,7 @@ export abstract class AbstractGeoViewLayer {
    * @private
    */
   #setListOfLayerEntryConfig(geoviewLayerConfig: TypeGeoviewLayerConfig, listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
+    if (!listOfLayerEntryConfig) return;
     if (listOfLayerEntryConfig.length === 0) return;
     if (listOfLayerEntryConfig.length === 1) {
       this.listOfLayerEntryConfig = listOfLayerEntryConfig;

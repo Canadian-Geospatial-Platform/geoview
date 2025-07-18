@@ -190,8 +190,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
     metadataAccessPath: string
   ): Promise<TypeGeoviewLayerConfig> {
     // Create the Layer config
-    const layerConfig = XYZTiles.createXYZTilesLayerConfig(geoviewLayerId, geoviewLayerName, metadataAccessPath, false, []);
-    const myLayer = new XYZTiles(layerConfig);
+    const myLayer = new XYZTiles({ geoviewLayerId, geoviewLayerName, metadataAccessPath } as TypeXYZTilesConfig);
     return myLayer.initGeoViewLayerEntries();
   }
 

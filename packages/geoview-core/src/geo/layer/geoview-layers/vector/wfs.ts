@@ -290,8 +290,7 @@ export class WFS extends AbstractGeoViewVector {
     metadataAccessPath: string
   ): Promise<TypeGeoviewLayerConfig> {
     // Create the Layer config
-    const layerConfig = WFS.createWfsFeatureLayerConfig(geoviewLayerId, geoviewLayerName, metadataAccessPath, false, []);
-    const myLayer = new WFS(layerConfig);
+    const myLayer = new WFS({ geoviewLayerId, geoviewLayerName, metadataAccessPath } as TypeWFSLayerConfig);
     return myLayer.initGeoViewLayerEntries();
   }
 

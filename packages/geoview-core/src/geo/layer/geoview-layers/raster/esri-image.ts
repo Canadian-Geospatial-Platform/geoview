@@ -89,8 +89,7 @@ export class EsriImage extends AbstractGeoViewRaster {
     metadataAccessPath: string
   ): Promise<TypeGeoviewLayerConfig> {
     // Create the Layer config
-    const layerConfig = EsriImage.createEsriImageLayerConfig(geoviewLayerId, geoviewLayerName, metadataAccessPath, false);
-    const myLayer = new EsriImage(layerConfig);
+    const myLayer = new EsriImage({ geoviewLayerId, geoviewLayerName, metadataAccessPath } as TypeEsriImageLayerConfig);
     return myLayer.initGeoViewLayerEntries();
   }
 

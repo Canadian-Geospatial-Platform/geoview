@@ -736,12 +736,8 @@ export class WMS extends AbstractGeoViewRaster {
     metadataAccessPath: string,
     fullSubLayers: boolean
   ): Promise<TypeGeoviewLayerConfig> {
-    // TODO: Implement - How to determine the type of server for geoserver vs qgis?
-    const serverType: TypeOfServer = metadataAccessPath.toLowerCase().includes('/mapserver') ? 'mapserver' : 'geoserver';
-
     // Create the Layer config
-    const layerConfig = WMS.createWMSLayerConfig(geoviewLayerId, geoviewLayerName, metadataAccessPath, serverType, false, []);
-    const myLayer = new WMS(layerConfig, fullSubLayers);
+    const myLayer = new WMS({ geoviewLayerId, geoviewLayerName, metadataAccessPath } as TypeWMSLayerConfig, fullSubLayers);
     return myLayer.initGeoViewLayerEntries();
   }
 

@@ -198,8 +198,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     metadataAccessPath: string
   ): Promise<TypeGeoviewLayerConfig> {
     // Create the Layer config
-    const layerConfig = VectorTiles.createVectorTilesLayerConfig(geoviewLayerId, geoviewLayerName, metadataAccessPath, false, []);
-    const myLayer = new VectorTiles(layerConfig, 'EPSG:4326'); // Dummy projection just to be able to initialize it.
+    const myLayer = new VectorTiles({ geoviewLayerId, geoviewLayerName, metadataAccessPath } as TypeVectorTilesConfig, 'EPSG:4326'); // Dummy projection just to be able to initialize it.
     return myLayer.initGeoViewLayerEntries();
   }
 

@@ -129,8 +129,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
     metadataAccessPath: string
   ): Promise<TypeGeoviewLayerConfig> {
     // Create the Layer config
-    const layerConfig = ImageStatic.createImageStaticLayerConfig(geoviewLayerId, geoviewLayerName, metadataAccessPath, false, []);
-    const myLayer = new ImageStatic(layerConfig);
+    const myLayer = new ImageStatic({ geoviewLayerId, geoviewLayerName, metadataAccessPath } as TypeImageStaticLayerConfig);
     return myLayer.initGeoViewLayerEntries();
   }
 

@@ -252,8 +252,7 @@ export class GeoJSON extends AbstractGeoViewVector {
     metadataAccessPath: string
   ): Promise<TypeGeoviewLayerConfig> {
     // Create the Layer config
-    const layerConfig = GeoJSON.createGeoJsonLayerConfig(geoviewLayerId, geoviewLayerName, metadataAccessPath, false, []);
-    const myLayer = new GeoJSON(layerConfig);
+    const myLayer = new GeoJSON({ geoviewLayerId, geoviewLayerName, metadataAccessPath } as TypeGeoJSONLayerConfig);
     return myLayer.initGeoViewLayerEntries();
   }
 

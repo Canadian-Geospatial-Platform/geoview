@@ -135,8 +135,7 @@ export class CSV extends AbstractGeoViewVector {
     metadataAccessPath: string
   ): Promise<TypeGeoviewLayerConfig> {
     // Create the Layer config
-    const layerConfig = CSV.createCSVLayerConfig(geoviewLayerId, geoviewLayerName, metadataAccessPath, false, []);
-    const myLayer = new CSV(layerConfig);
+    const myLayer = new CSV({ geoviewLayerId, geoviewLayerName, metadataAccessPath } as TypeCSVLayerConfig);
     return myLayer.initGeoViewLayerEntries();
   }
 
