@@ -13,15 +13,19 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   tabsContainer: {
     position: 'relative',
-    background: theme.palette.geoViewColor.bgColor.dark[50],
+    background: theme.palette.geoViewColor.bgColor.main,
     boxShadow: 2,
     width: '100%',
     transition: 'height 0.2s ease-out',
-    '&.MuiGrid-container': {
-      background: theme.palette.geoViewColor.bgColor.dark[50],
+    '& .MuiGrid-container': {
+      background: theme.palette.geoViewColor.bgColor.main,
     },
     '& .MuiTab-root': {
-      minHeight: '56px',
+      minHeight: '40px',
+    },
+    '& .MuiTabs-root': {
+      minHeight: '40px',
+      background: theme.palette.geoViewColor.bgColor.main,
     },
     '& .MuiTabs-indicator': {
       display: 'none',
@@ -29,8 +33,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     '& .MuiTab-root.Mui-selected': {
       color: `${theme.palette.geoViewColor.white} !important`,
       background: theme.palette.geoViewColor.primary.main,
-      borderRadius: '0.5rem',
-      margin: '0.5rem',
       minHeight: 0,
     },
   },

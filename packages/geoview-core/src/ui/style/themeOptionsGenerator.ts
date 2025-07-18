@@ -53,9 +53,13 @@ const getButtonStyleOverrides = (geoViewColors: IGeoViewColors): any => ({
     backgroundColor: `transparent`,
     border: `2px solid transparent`,
     color: `${geoViewColors.primary.main}`,
-    '&:hover, &:active, &.active': {
+    '&:hover, &:focus': {
+      backgroundColor: geoViewColors.primary.light[200],
+      color: geoViewColors.white,
+      boxShadow: 1,
+    },
+    '&:active, &.active': {
       backgroundColor: `${geoViewColors.primary.main}`,
-      border: `2px solid ${geoViewColors.primary.light[500]}`,
       color: `${geoViewColors.white}`,
       boxShadow: 1,
     },

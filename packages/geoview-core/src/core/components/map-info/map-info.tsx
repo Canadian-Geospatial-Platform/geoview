@@ -18,7 +18,7 @@ const MAP_INFO_BASE_STYLES = {
   alignItems: 'center',
   position: 'absolute',
   bottom: 0,
-  left: '64px',
+  left: '50px',
   right: 0,
   px: '1rem',
   zIndex: 1000,
@@ -53,10 +53,10 @@ export const MapInfo = memo(function MapInfo({ onScrollShellIntoView }: MapInfoP
   const containerStyles = useMemo(
     () => ({
       ...MAP_INFO_BASE_STYLES,
-      height: expanded ? '6rem' : '3rem',
-      background: theme.palette.geoViewColor.bgColor.dark[800],
+      height: expanded ? '80px' : '40px',
+      background: theme.palette.geoViewColor.bgColor.dark[650],
       color: theme.palette.geoViewColor.bgColor.light[800],
-      width: interaction === 'dynamic' ? 'calc(100% - 60px)' : 'fit-content',
+      width: interaction === 'dynamic' ? 'calc(100% - 50px)' : 'fit-content',
     }),
     [expanded, theme.palette.geoViewColor.bgColor, interaction]
   );

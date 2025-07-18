@@ -24,14 +24,15 @@ export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, appHeight: 
     width: '100%',
     '.tab-panel': {
       height: '100%',
+      backgroundColor: theme.palette.geoViewColor.bgColor.dark[50],
     },
   },
   tab: {
     fontSize: theme.palette.geoViewFontSize.default,
     fontWeight: 'bold',
     minWidth: 'min(4vw, 24px)',
-    padding: '0.5rem 1rem',
-    margin: '0 0.5rem',
+    padding: '0.5rem 1.5rem',
+    margin: 0,
     textTransform: 'capitalize',
     '.MuiTab-iconWrapper': {
       marginRight: '7px',
@@ -40,6 +41,15 @@ export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, appHeight: 
     ':focus-visible': {
       border: `2px solid ${theme.palette.common.black}`,
       outline: 'none',
+    },
+    transition: 'background-color 0.3s ease-in-out',
+    '&:hover': {
+      backgroundColor: theme.palette.geoViewColor.primary.light[200],
+      color: theme.palette.geoViewColor.white,
+    },
+    '&:focus': {
+      backgroundColor: theme.palette.geoViewColor.primary.light[200],
+      color: theme.palette.geoViewColor.white,
     },
   },
   mobileDropdown: {
