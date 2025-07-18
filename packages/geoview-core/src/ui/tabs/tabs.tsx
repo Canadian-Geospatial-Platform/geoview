@@ -274,7 +274,7 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
         width: '100%',
       }}
     >
-      <Grid container id="footerbar-header" sx={{ backgroundColor: theme.palette.geoViewColor.bgColor.dark[100], width: '100%' }}>
+      <Grid container id="footerbar-header" sx={{ width: '100%', paddingLeft: '9px' }}>
         <Grid size={{ xs: 7, sm: 10 }}>
           {!showMobileDropdown ? (
             <MaterialTabs
