@@ -92,7 +92,7 @@ export class EsriFeature extends AbstractGeoViewVector {
     ] as unknown as TypeJsonArray;
 
     // Redirect
-    return Promise.resolve(EsriFeature.createEsriFeatureLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, entries));
+    return EsriFeature.createEsriFeatureLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, entries);
   }
 
   /**

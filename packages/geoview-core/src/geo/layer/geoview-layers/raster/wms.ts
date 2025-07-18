@@ -138,15 +138,13 @@ export class WMS extends AbstractGeoViewRaster {
     });
 
     // Redirect
-    return Promise.resolve(
-      WMS.createWMSLayerConfig(
-        this.geoviewLayerId,
-        (metadata!.Capability.Layer.Title as string) || this.geoviewLayerName,
-        this.metadataAccessPath,
-        'mapserver',
-        false,
-        entries as unknown as TypeJsonArray
-      )
+    return WMS.createWMSLayerConfig(
+      this.geoviewLayerId,
+      (metadata!.Capability.Layer.Title as string) || this.geoviewLayerName,
+      this.metadataAccessPath,
+      'mapserver',
+      false,
+      entries as unknown as TypeJsonArray
     );
   }
 
