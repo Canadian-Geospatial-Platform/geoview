@@ -7,7 +7,6 @@ import { whenThisThen, getScriptAndAssetURL } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { TypeJsonObject } from '@/api/config/types/config-types';
 import { logger } from '@/core/utils/logger';
-import { api } from '@/app';
 import { AbstractPlugin } from './abstract-plugin';
 
 /**
@@ -94,7 +93,7 @@ export abstract class Plugin {
       // in order to cancel the "'new' expression, whose target lacks a construct signature" error message
       // ? unknown type cannot be use, need to escape
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      plugin = new (constructor as any)(pluginId, props, api);
+      plugin = new (constructor as any)(pluginId, props);
     }
 
     if (plugin) {

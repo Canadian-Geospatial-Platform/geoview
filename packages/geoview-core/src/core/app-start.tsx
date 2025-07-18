@@ -10,8 +10,8 @@ import { getTheme } from '@/ui/style/theme';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
 import { useAppDisplayThemeById } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { api } from '@/app';
 import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 // create a state that will hold map config information
 // TODO: use store, only keep map id on context for store manager to gather right store on hooks
@@ -113,6 +113,9 @@ function AppStart(props: AppStartProps): JSX.Element {
   const { mapFeaturesConfig, i18nLang } = props;
   const { mapId, displayLanguage } = mapFeaturesConfig;
 
+  // Get the MapViewer
+  const mapViewer = MapEventProcessor.getMapViewer(mapId);
+
   const mapContextValue = useMemo(() => {
     // Log
     logger.logTraceUseMemo('APP-START - mapContextValue', mapId);
@@ -133,7 +136,7 @@ function AppStart(props: AppStartProps): JSX.Element {
               <Suspense fallback="">
                 <I18nextProvider i18n={i18nLang}>
                   <StrictMode>
-                    <Shell mapViewer={api.getMapViewer(mapId)} />
+                    <Shell mapViewer={mapViewer} />
                   </StrictMode>
                 </I18nextProvider>
               </Suspense>

@@ -1,5 +1,5 @@
 import { TypeJsonObject, TypeJsonArray } from '@/api/config/types/config-types';
-import { CONST_LAYER_TYPES, TypeGeoviewLayerConfig, TypeOfServer } from '@/api/config/types/map-schema-types';
+import { CONST_LAYER_TYPES, TypeGeoviewLayerConfig, TypeGeoviewLayerType, TypeOfServer } from '@/api/config/types/map-schema-types';
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { ImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
@@ -105,133 +105,91 @@ export class UUIDmapConfigReader {
         const layer = data.layers[0];
 
         if (layer) {
-          // Get RCS values
-          const { layerType, layerEntries, name, url, id, serverType, isTimeAware } = layer;
+          // Get RCS values and cast them
+          const layerId = layer.id as string;
+          const layerName = layer.name as string;
+          const layerType = layer.layerType as TypeGeoviewLayerType;
+          const layerUrl = layer.url as string;
+          const serverType = layer.serverType as TypeOfServer | undefined;
+          const layerIsTimeAware = (layer.isTimeAware as boolean) || false;
+          const layerEntries = layer.layerEntries as TypeJsonArray;
 
           // Remove rcs. and .[lang] from geocore response
-          const idClean = `${(id as string).split('.')[1]}`;
+          const idClean = `${layerId.split('.')[1]}`;
 
           // Get Geocore custom config layer entries values
           // TODO: Modification done only for WMS and esriDynamic... If we have esriFeature, esriImage later, we will need to fix
           // TO.DOCONT: These 4 types are the only one stored in RCS
           const customGeocoreLayerConfig = this.#getGeocoreCustomLayerConfig(resultData, lang);
 
-          const isFeature = (url as string).indexOf('FeatureServer') > -1;
+          const isFeature = layerUrl.indexOf('FeatureServer') > -1;
 
           let geoviewLayerConfig: TypeGeoviewLayerConfig;
           if (layerType === CONST_LAYER_TYPES.ESRI_DYNAMIC && !isFeature) {
             // Redirect
             geoviewLayerConfig = EsriDynamic.createEsriDynamicLayerConfig(
               idClean,
-              name as string,
-              url as string,
-              isTimeAware as boolean,
-              layerEntries as TypeJsonArray,
+              layerName,
+              layerUrl,
+              layerIsTimeAware,
+              layerEntries,
               customGeocoreLayerConfig
             );
           } else if (isFeature) {
             // GV: esriFeature layers as they are returned by RCS don't have a layerEntries property. It is undefined.
             // GV: Everything needed to create the geoview layer is in the URL.
             // GV: The geoview layer created contains only one layer entry config in the list.
-            const serviceUrl = (url as string).split('/').slice(0, -1).join('/');
-            const layerIndex = (url as string).split('/').pop() as TypeJsonObject;
+            const serviceUrl = layerUrl.split('/').slice(0, -1).join('/');
+            const layerIndex = layerUrl.split('/').pop() as TypeJsonObject;
 
             // Redirect
-            geoviewLayerConfig = EsriFeature.createEsriFeatureLayerConfig(idClean, name as string, serviceUrl, isTimeAware as boolean, [
+            geoviewLayerConfig = EsriFeature.createEsriFeatureLayerConfig(idClean, layerName, serviceUrl, layerIsTimeAware, [
               {
                 index: layerIndex,
-                dataAccessPath: url,
+                dataAccessPath: layerUrl as TypeJsonObject,
               },
             ]);
           } else if (layerType === CONST_LAYER_TYPES.ESRI_FEATURE) {
             // Redirect
-            geoviewLayerConfig = EsriFeature.createEsriFeatureLayerConfig(
-              idClean,
-              name as string,
-              url as string,
-              isTimeAware as boolean,
-              layerEntries as TypeJsonArray
-            );
+            geoviewLayerConfig = EsriFeature.createEsriFeatureLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
           } else if (layerType === CONST_LAYER_TYPES.WMS) {
             // Redirect
             geoviewLayerConfig = WMS.createWMSLayerConfig(
               idClean,
-              name as string,
-              url as string,
-              serverType as TypeOfServer,
-              isTimeAware as boolean,
-              layerEntries as TypeJsonArray,
+              layerName,
+              layerUrl,
+              serverType!,
+              layerIsTimeAware,
+              layerEntries,
               customGeocoreLayerConfig
             );
           } else if (layerType === CONST_LAYER_TYPES.WFS) {
             // Redirect
-            geoviewLayerConfig = WFS.createWfsFeatureLayerConfig(
-              idClean,
-              name as string,
-              url as string,
-              isTimeAware as boolean,
-              layerEntries as TypeJsonArray
-            );
+            geoviewLayerConfig = WFS.createWfsFeatureLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
           } else if (layerType === CONST_LAYER_TYPES.OGC_FEATURE) {
             // Redirect
-            geoviewLayerConfig = OgcFeature.createOgcFeatureLayerConfig(
-              idClean,
-              name as string,
-              url as string,
-              isTimeAware as boolean,
-              layerEntries as TypeJsonArray
-            );
+            geoviewLayerConfig = OgcFeature.createOgcFeatureLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
           } else if (layerType === CONST_LAYER_TYPES.GEOJSON) {
             // Redirect
-            geoviewLayerConfig = GeoJSON.createGeoJsonLayerConfig(
-              idClean,
-              name as string,
-              url as string,
-              isTimeAware as boolean,
-              layerEntries as TypeJsonArray
-            );
+            geoviewLayerConfig = GeoJSON.createGeoJsonLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
           } else if (layerType === CONST_LAYER_TYPES.XYZ_TILES) {
             // Redirect
-            geoviewLayerConfig = XYZTiles.createXYZTilesLayerConfig(
-              idClean,
-              name as string,
-              url as string,
-              isTimeAware as boolean,
-              layerEntries as TypeJsonArray
-            );
+            geoviewLayerConfig = XYZTiles.createXYZTilesLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
           } else if (layerType === CONST_LAYER_TYPES.VECTOR_TILES) {
             // Redirect
-            geoviewLayerConfig = VectorTiles.createVectorTilesLayerConfig(
-              idClean,
-              name as string,
-              url as string,
-              isTimeAware as boolean,
-              layerEntries as TypeJsonArray
-            );
+            geoviewLayerConfig = VectorTiles.createVectorTilesLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
           } else if (layerType === CONST_LAYER_TYPES.GEOPACKAGE) {
             // Redirect
-            geoviewLayerConfig = GeoPackage.createGeopackageLayerConfig(
-              idClean,
-              name as string,
-              url as string,
-              isTimeAware as boolean,
-              layerEntries as TypeJsonArray
-            );
+            geoviewLayerConfig = GeoPackage.createGeopackageLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
           } else if (layerType === CONST_LAYER_TYPES.IMAGE_STATIC) {
             // Redirect
-            geoviewLayerConfig = ImageStatic.createImageStaticLayerConfig(
-              idClean,
-              name as string,
-              url as string,
-              isTimeAware as boolean,
-              layerEntries as TypeJsonArray
-            );
+            geoviewLayerConfig = ImageStatic.createImageStaticLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
           } else if (layerType === CONST_LAYER_TYPES.ESRI_IMAGE) {
             // GV: ESRI Image layers as they are returned by RCS don't have a layerEntries property. It is undefined.
             // GV: Everything needed to create the geoview layer is in the URL. The layerId of the layerEntryConfig is not used,
             // GV: but we need to create a layerEntryConfig in the list for the layer to be displayed.
             // Redirect
-            geoviewLayerConfig = EsriImage.createEsriImageLayerConfig(idClean, name as string, url as string, isTimeAware as boolean);
+            geoviewLayerConfig = EsriImage.createEsriImageLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware);
           } else {
             // Throw
             throw new NotSupportedError(`Layer type ${layerType} not supported`);
@@ -246,7 +204,7 @@ export class UUIDmapConfigReader {
             !listOfGeoviewLayerConfig[i].listOfLayerEntryConfig[0].listOfLayerEntryConfig &&
             customGeocoreLayerConfig.layerName === undefined
           ) {
-            listOfGeoviewLayerConfig[i].listOfLayerEntryConfig[0].layerName = name as string;
+            listOfGeoviewLayerConfig[i].listOfLayerEntryConfig[0].layerName = layerName;
           }
         }
       }

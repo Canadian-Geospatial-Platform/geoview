@@ -6,19 +6,15 @@ import { getArea, getLength } from 'ol/sphere';
 import { Text, Style, Stroke, Fill, Icon as OLIcon } from 'ol/style';
 import { StyleLike } from 'ol/style/Style';
 import { DrawEvent, GeometryFunction, SketchCoordType, createBox } from 'ol/interaction/Draw';
-import { Projection as OLProjection } from 'ol/proj';
-
-import { MapViewer, MapProjectionChangedEvent } from '@/geo/map/map-viewer';
-import { Projection } from '@/geo/utils/projection';
-import { Draw } from '@/geo/interaction/draw';
-import { TransformDeleteFeatureEvent, TransformEvent, TransformSelectionEvent } from '@/geo/interaction/transform/transform-events';
 
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { TypeJsonObject } from '@/api/config/types/config-types';
-
 import { IDrawerState, StyleProps } from '@/core/stores/store-interface-and-intial-values/drawer-state';
+import { MapViewerNotFoundError } from '@/core/exceptions/geoview-exceptions';
+import { GeoviewStoreType } from '@/core/stores/geoview-store';
+import { Draw } from '@/geo/interaction/draw';
+import { AppEventProcessor } from './app-event-processor';
+import { MapEventProcessor } from './map-event-processor';
+
 import { doUntil, generateId } from '@/core/utils/utilities';
 import { DEFAULT_PROJECTION } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { GeoviewStoreType } from '@/core/stores/geoview-store';

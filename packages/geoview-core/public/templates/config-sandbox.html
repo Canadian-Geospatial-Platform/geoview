@@ -325,7 +325,7 @@
         If the GeoView layer type selected is wrong or unknown, you can force its value to the one you want using the drop-down.<br />
         You can also activate the chekbox to use the drop-down list as a sample URL selector in which case the URL input field is not longer editable.<br />
         <br />
-        When you are ready, click the <b>Create Layer Tree</b> button to call the <b>ConfigApi.createMetadataLayerTree</b> method and displays the resulting layer tree.<br />
+        When you are ready, click the <b>Create Layer Tree</b> button to call the <b>LayerApi.createInitConfigFromType</b> method and displays the resulting layer tree.<br />
         <br />
         <form>
           <label for="sampleUrlTab4">Use drop-down to get a sample URL</label>
@@ -360,7 +360,7 @@
         <button id="createLayerConfigTab4" style="margin-top:10px;">Create Layer Tree</button>
         <p></p>
       </div>
-      <div style="width: 50%; margin: 0 auto; padding: 10px;">
+      <div>
         <span>GeoView Layer configuration:</span>
         <span id="messageTab4" >File not validated...</span><br/>
         <div class="editor">
@@ -397,7 +397,6 @@
 
   <script>
     // Utility functions ========================================================================================================
-
     // Tab selection function. This function is called when you click on a tab to select and display its content.
     function openTab(evt, tabName) {
       var i, tabContent, tabLinks;
@@ -942,21 +941,18 @@
 
       try {
         // Call the ConfigApi to get the Layer Tree
-        const metadataLayerTree = await cgpv.api.config.createMetadataLayerTree(
-          serviceUrlAreaTab4.value.trim(),
+        const metadataLayerTree = await cgpv.api.layer.createInitConfigFromType(
+          'ExampleID', 'Example Name',
           layerTypeTab4,
+          serviceUrlAreaTab4.value.trim(),
           layerListTab4,
           languageTab4
         );
 
         // Output instanciation result
-        metadataLayerTreeString = `${JSON.stringify(metadataLayerTree, (key, value) => {
-          // Only display essential information
-          if (['', 'layerId', 'layerName', 'isLayerGroup', 'listOfLayerEntryConfig'].includes(key)) return value;
-          if (/^\d+$/.test(key)) return value;
-          return undefined;
-        }, 2)}\n`;
-        layerPathErrorFlag = generateLayerPathErrorFlag(metadataLayerTree);
+        metadataLayerTreeString = safeStringify(metadataLayerTree);
+
+        layerPathErrorFlag = generateLayerPathErrorFlag(metadataLayerTree.listOfLayerEntryConfig);
 
         printMessage(messageTab4, 'Layer tree is valid');
       } catch (error) {

@@ -84,7 +84,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     );
 
     // Redirect
-    return Promise.resolve(theConfig);
+    return theConfig;
   }
 
   /**

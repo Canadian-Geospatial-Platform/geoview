@@ -39,7 +39,7 @@ import { Button } from '@/ui/button/button';
 import { KeyboardArrowDownIcon, KeyboardArrowUpIcon } from '@/ui/icons';
 import { useAppDisplayLanguage, useAppMetadataServiceURL } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { Switch } from '@/ui/switch/switch';
-import { getLocalizeLayerType } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
+import { UtilAddLayer } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
 import {
   useMapVisibleLayers,
   useSelectorIsLayerHiddenOnMap,
@@ -147,7 +147,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const isLayerQueryable = layerDetails.controls?.query;
 
   // Get the localized layer type
-  const memoLocalizedLayerType = useMemo(() => getLocalizeLayerType(language, true), [language]);
+  const memoLocalizedLayerType = useMemo(() => UtilAddLayer.getLocalizeLayerType(language, true), [language]);
 
   useEffect(() => {
     // Log

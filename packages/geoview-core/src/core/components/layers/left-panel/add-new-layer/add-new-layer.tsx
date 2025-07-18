@@ -16,9 +16,9 @@ import {
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useAppDisabledLayerTypes, useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { api } from '@/app';
+import { ConfigApi } from '@/api/config/config-api';
 import { logger } from '@/core/utils/logger';
-import { getLocalizedMessage, isValidUUID } from '@/core/utils/utilities';
+import { generateId, getLocalizedMessage, isValidUUID } from '@/core/utils/utilities';
 import { Config } from '@/core/utils/config/config';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -33,11 +33,7 @@ import {
   TypeInitialGeoviewLayerType,
 } from '@/api/config/types/map-schema-types';
 
-import {
-  buildGeoLayerToAdd,
-  getLayerNameById,
-  getLocalizeLayerType,
-} from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
+import { UtilAddLayer } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
 import { AddLayerTree } from '@/core/components/layers/left-panel/add-new-layer/add-layer-tree';
 import { ShapefileReader } from '@/core/utils/config/reader/shapefile-reader';
 
@@ -82,6 +78,9 @@ function FileUploadSection({ onFileSelected, onUrlChanged, displayURL, disabledL
   // Store
   const mapId = useGeoViewMapId();
 
+  // The MapViewer
+  const mapViewer = MapEventProcessor.getMapViewer(mapId);
+
   // Ref
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -111,7 +110,7 @@ function FileUploadSection({ onFileSelected, onUrlChanged, displayURL, disabledL
       onFileSelected(file, fileURL, fileName);
     } else {
       // Handle error
-      api.getMapViewer(mapId).notifications.showError('layers.errorFile', [], false);
+      mapViewer.notifications.showError('layers.errorFile', [], false);
     }
   };
 
@@ -279,8 +278,11 @@ export function AddNewLayer(): JSX.Element {
   const { setDisplayState } = useLayerStoreActions();
   const language = useAppDisplayLanguage();
 
+  // The MapViewer
+  const mapViewer = MapEventProcessor.getMapViewer(mapId);
+
   // List of layer types and labels (Step 2)
-  const layerOptions = getLocalizeLayerType(language, false);
+  const layerOptions = UtilAddLayer.getLocalizeLayerType(language, false);
 
   // #region ERRORS
 
@@ -291,7 +293,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorEmpty = (textField: string): void => {
     setIsLoading(false);
-    api.getMapViewer(mapId).notifications.showError('layers.errorEmpty', [textField], false);
+    mapViewer.notifications.showError('layers.errorEmpty', [textField], false);
   };
 
   /**
@@ -301,7 +303,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorNone = (): void => {
     setIsLoading(false);
-    api.getMapViewer(mapId).notifications.showError('layers.errorNone', [], false);
+    mapViewer.notifications.showError('layers.errorNone', [], false);
   };
 
   /**
@@ -311,7 +313,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorDisabled = (disabledType: string): void => {
     setIsLoading(false);
-    api.getMapViewer(mapId).notifications.showError('layers.errorDisabled', [disabledType], false);
+    mapViewer.notifications.showError('layers.errorDisabled', [disabledType], false);
   };
 
   /**
@@ -321,7 +323,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorServer = (serviceName: string): void => {
     setIsLoading(false);
-    api.getMapViewer(mapId).notifications.showError('layers.errorServer', [serviceName], false);
+    mapViewer.notifications.showError('layers.errorServer', [serviceName], false);
   };
 
   // #endregion
@@ -347,10 +349,10 @@ export function AddNewLayer(): JSX.Element {
 
   const doneAddedShowMessage = (layerBeingAdded: AbstractGeoViewLayer): void => {
     if (layerBeingAdded.allLayerStatusAreGreaterThanOrEqualTo('error'))
-      api.getMapViewer(mapId).notifications.showError('layers.layerAddedWithError', [layerName]);
+      mapViewer.notifications.showError('layers.layerAddedWithError', [layerName]);
     else if (layerBeingAdded?.allLayerStatusAreGreaterThanOrEqualTo('loaded'))
-      api.getMapViewer(mapId).notifications.showMessage('layers.layerAdded', [layerName]);
-    else api.getMapViewer(mapId).notifications.showMessage('layers.layerAddedAndLoading', [layerName]);
+      mapViewer.notifications.showMessage('layers.layerAdded', [layerName]);
+    else mapViewer.notifications.showMessage('layers.layerAddedAndLoading', [layerName]);
   };
 
   // #region HANDLERS FOR THE STEPS
@@ -369,7 +371,7 @@ export function AddNewLayer(): JSX.Element {
       emitErrorNone();
     }
 
-    const guessedLayerType = api.config.guessLayerType(displayURL);
+    const guessedLayerType = ConfigApi.guessLayerType(displayURL);
     const layerTypeIsAllowed = setLayerTypeIfAllowed(guessedLayerType as TypeGeoviewLayerType);
     if (valid && layerTypeIsAllowed) {
       setActiveStep(1);
@@ -389,7 +391,14 @@ export function AddNewLayer(): JSX.Element {
     const populateLayerList = async (curlayerType: TypeInitialGeoviewLayerType): Promise<boolean> => {
       try {
         // Initialize a temporary GeoviewLayer config depending on the layer type.
-        const geoviewLayerConfig = await LayerApi.createInitConfigFromType('tempoId', 'tempoName', curlayerType, layerURL, mapId, language);
+        const geoviewLayerConfig = await LayerApi.createInitConfigFromType(
+          generateId(18),
+          'tempoName',
+          curlayerType,
+          layerURL,
+          mapId,
+          language
+        );
 
         // Set the layer type as it may have changed in the case of GeoCore for example
         setLayerType(geoviewLayerConfig.geoviewLayerType);
@@ -486,7 +495,7 @@ export function AddNewLayer(): JSX.Element {
 
     if (valid) {
       // If a single layer is added, use its name instead of service name
-      const firstLayerName = getLayerNameById(layerTree, layerIdsToAdd[0]);
+      const firstLayerName = UtilAddLayer.getLayerNameById(layerTree, layerIdsToAdd[0]);
       if (layerIdsToAdd.length === 1 && firstLayerName) setLayerName(firstLayerName);
       setActiveStep(3);
     }
@@ -520,7 +529,7 @@ export function AddNewLayer(): JSX.Element {
       logger.logWarning(`- Map ${mapId}: ${message}`);
 
       // Show the error using its key (which will get translated)
-      api.getMapViewer(mapId).notifications.showError(errorKey, params);
+      mapViewer.notifications.showError(errorKey, params);
     });
 
     if (configObj?.length) {
@@ -529,7 +538,7 @@ export function AddNewLayer(): JSX.Element {
 
       logger.logDebug('newGeoViewLayer to add', configObj[0]);
       // Add the layer using the proper function
-      const addedLayer = api.getMapViewer(mapId).layer.addGeoviewLayer(configObj[0] as TypeGeoviewLayerConfig);
+      const addedLayer = mapViewer.layer.addGeoviewLayer(configObj[0] as TypeGeoviewLayerConfig);
       if (addedLayer) {
         // Wait on the promise
         addedLayer.promiseLayer
@@ -555,7 +564,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const handleStepLast = (): void => {
     setIsLoading(true);
-    const newGeoViewLayer = buildGeoLayerToAdd({
+    const newGeoViewLayer = UtilAddLayer.buildGeoLayerToAdd({
       layerIdsToAdd,
       layerName,
       layerType,
@@ -570,7 +579,7 @@ export function AddNewLayer(): JSX.Element {
     else {
       // Remove spinning circle if failed.
       doneAdding();
-      api.getMapViewer(mapId).notifications.showError('layers.errorNotLoaded', [layerName]);
+      mapViewer.notifications.showError('layers.errorNotLoaded', [layerName]);
       logger.logError('Unable to load layer');
     }
   };

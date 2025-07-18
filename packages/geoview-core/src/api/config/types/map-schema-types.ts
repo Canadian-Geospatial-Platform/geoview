@@ -970,7 +970,7 @@ export type TypeGeoviewLayerConfig = {
   serviceDateFormat?: string;
   /** Date format used by the getFeatureInfo to output date variable. */
   externalDateFormat?: string;
-  /** Flag to exclude layer from time anble function like time slider */
+  /** Flag to include layer in time able function like time slider */
   isTimeAware?: boolean;
 
   /**
