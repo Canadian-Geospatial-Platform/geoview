@@ -4,6 +4,7 @@ import type i18next from 'react-i18next';
 import type { useTheme } from '@mui/material/styles';
 
 import { API } from '@/api/api';
+import { api } from '@/app';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { TypeJsonObject, AnySchemaObject } from '@/api/config/types/config-types';
 import { logger } from '@/core/utils/logger';
@@ -30,6 +31,7 @@ export abstract class AbstractPlugin {
   #configObj: TypeJsonObject = {};
 
   // Plugin api object.
+  // TODO: Check - Remove this property and use a MapEventProcessor.getMapViewer() instead?
   api: API;
 
   // Plugin react object.
@@ -48,10 +50,9 @@ export abstract class AbstractPlugin {
    * Creates an instance of the plugin.
    * @param {string} pluginId - Unique identifier for the plugin instance.
    * @param {TypePluginOptions} props - The plugin options and properties.
-   * @param {API} api - API object providing access to core functionality.
    */
   // GV Do not edit the constructor params without editing the plugin.ts dynamic constructor call looking like 'new (constructor as any)'
-  constructor(pluginId: string, props: TypePluginOptions, api: API) {
+  constructor(pluginId: string, props: TypePluginOptions) {
     this.pluginId = pluginId;
     this.pluginProps = props;
     this.api = api;

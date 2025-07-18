@@ -6,7 +6,7 @@ import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
 import _ from 'lodash';
 import { logger } from '@/core/utils/logger';
-import { getLayerById } from './add-layer-utils';
+import { UtilAddLayer } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
 import { TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '@/api/config/types/map-schema-types';
 
 export interface AddLayerTreeProps {
@@ -56,7 +56,7 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
     function populateLayerChildren(origLayerId: string, parentViewId: string | null): void {
       const viewLayerId = `${parentViewId ? `${parentViewId}/` : ''}${origLayerId}`;
       result.push(viewLayerId);
-      const layerDetails = getLayerById(layerTree, origLayerId);
+      const layerDetails = UtilAddLayer.getLayerById(layerTree, origLayerId);
 
       const childLayerIds: string[] | undefined = layerDetails?.listOfLayerEntryConfig?.map((child) => {
         return child.layerId;
