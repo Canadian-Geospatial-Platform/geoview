@@ -2530,6 +2530,28 @@ export class LayerApi {
   // #region EXPERIMENTAL
 
   /**
+   * Serializes a GeoView layer configuration into a pretty-printed JSON string.
+   * This method converts the `geoviewLayerConfig` object to a string,
+   * ensuring each layer entry in `listOfLayerEntryConfig` is serialized
+   * using its own `.serialize()` method.
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The GeoView layer configuration to serialize.
+   * @returns {string} A JSON string representing the serialized layer configuration.
+   */
+  static serializeGeoviewLayerConfig(geoviewLayerConfig: TypeGeoviewLayerConfig): string {
+    // Return the string
+    return JSON.stringify(
+      {
+        ...geoviewLayerConfig,
+        listOfLayerEntryConfig: geoviewLayerConfig.listOfLayerEntryConfig.map((entryConfig) => {
+          return entryConfig.serialize();
+        }),
+      },
+      null,
+      2
+    );
+  }
+
+  /**
    * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
    * @returns A Promise with the layer configuration
    * @experimental

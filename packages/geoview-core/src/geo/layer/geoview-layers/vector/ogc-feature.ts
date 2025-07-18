@@ -269,8 +269,7 @@ export class OgcFeature extends AbstractGeoViewVector {
     metadataAccessPath: string
   ): Promise<TypeGeoviewLayerConfig> {
     // Create the Layer config
-    const layerConfig = OgcFeature.createOgcFeatureLayerConfig(geoviewLayerId, geoviewLayerName, metadataAccessPath, false, []);
-    const myLayer = new OgcFeature(layerConfig);
+    const myLayer = new OgcFeature({ geoviewLayerId, geoviewLayerName, metadataAccessPath } as TypeOgcFeatureLayerConfig);
     return myLayer.initGeoViewLayerEntries();
   }
 

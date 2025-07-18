@@ -182,8 +182,7 @@ export class EsriFeature extends AbstractGeoViewVector {
     metadataAccessPath: string
   ): Promise<TypeGeoviewLayerConfig> {
     // Create the Layer config
-    const layerConfig = EsriFeature.createEsriFeatureLayerConfig(geoviewLayerId, geoviewLayerName, metadataAccessPath, false, []);
-    const myLayer = new EsriFeature(layerConfig);
+    const myLayer = new EsriFeature({ geoviewLayerId, geoviewLayerName, metadataAccessPath } as TypeEsriFeatureLayerConfig);
     return myLayer.initGeoViewLayerEntries();
   }
 
