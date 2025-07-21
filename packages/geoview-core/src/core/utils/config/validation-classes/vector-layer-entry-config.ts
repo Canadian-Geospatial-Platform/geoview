@@ -9,11 +9,11 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
   /** Layer entry data type. */
   override entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
 
-  /** Filter to apply on feature of this layer. */
-  layerFilter?: string;
-
   /** Initial settings to apply to the GeoView vector layer source at creation time. */
   declare source?: TypeVectorSourceInitialConfig;
+
+  /** Filter to apply on feature of this layer. */
+  layerFilter?: string;
 
   /**
    * The class constructor.

@@ -1,8 +1,15 @@
+import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/config/types/map-schema-types';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { TypeSourceWFSVectorInitialConfig } from '@/geo/layer/geoview-layers/vector/wfs';
 import { Projection } from '@/geo/utils/projection';
 
 export class WfsLayerEntryConfig extends VectorLayerEntryConfig {
+  /** Tag used to link the entry to a specific schema. */
+  override schemaTag = CONST_LAYER_TYPES.WFS;
+
+  /** Layer entry data type. */
+  override entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
+
   declare source: TypeSourceWFSVectorInitialConfig;
 
   /**
@@ -14,12 +21,9 @@ export class WfsLayerEntryConfig extends VectorLayerEntryConfig {
     Object.assign(this, layerConfig);
 
     // Value for this.source.format can only be WFS.
-    if (!this.source) this.source = { format: 'WFS' };
-    if (!this.source.format) this.source.format = 'WFS';
-
-    // We assign the metadataAccessPath of the GeoView layer to dataAccessPath.
-    if (!this.source.dataAccessPath) this.source.dataAccessPath = this.geoviewLayerConfig.metadataAccessPath;
-
-    if (!this.source.dataProjection) this.source.dataProjection = Projection.PROJECTION_NAMES.LONLAT;
+    this.source ??= { format: 'WFS' };
+    this.source.format ??= 'WFS';
+    this.source.dataProjection ??= Projection.PROJECTION_NAMES.LONLAT;
+    this.source.dataAccessPath ??= this.geoviewLayerConfig.metadataAccessPath;
   }
 }

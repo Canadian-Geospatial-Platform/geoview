@@ -117,6 +117,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
           // Check and throw exception if the content actually contains an embedded error
           // (EsriFeature type of response might return an embedded error inside a 200 HTTP OK)
           Fetch.throwIfResponseHasEmbeddedError(responseText);
+
           // Check if feature count is too large
           if (JSON.parse(responseText).count > MAX_ESRI_FEATURES) {
             this.emitMessage(
@@ -125,6 +126,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
               'error',
               true
             );
+
+            // Throw
             throw new LayerTooManyEsriFeatures(layerConfig.layerId, layerConfig.getLayerName(), JSON.parse(responseText).count);
           }
         }
