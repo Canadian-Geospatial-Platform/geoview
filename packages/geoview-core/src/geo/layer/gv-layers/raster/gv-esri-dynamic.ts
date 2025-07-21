@@ -75,7 +75,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     this.#fetchWorkerPool
       .init()
       .then(() => logger.logTraceCore('Worker pool for fetch ESRI initialized'))
-      .catch((err) => logger.logError('Worker pool error', err));
+      .catch((error: unknown) => logger.logError('Worker pool error', error));
 
     // Register the worker message handler
     this.#fetchWorkerPool.addMessageHandler(this.#handleWorkerMessage.bind(this));
@@ -517,9 +517,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
             }
           });
         })
-        .catch((err) => {
-          // Log
-          logger.logError('The Worker to get the feature geometries has failed', err);
+        .catch((error: unknown) => {
+          // Log error
+          logger.logError('The Worker to get the feature geometries has failed', error);
         });
 
     return arrayOfFeatureInfoEntries;

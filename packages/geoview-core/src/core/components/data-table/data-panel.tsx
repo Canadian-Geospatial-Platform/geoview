@@ -228,8 +228,9 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
       if (selectedLayerPath && orderedLayerData.find((lyr) => lyr.layerPath === selectedLayerPath)) {
         setIsLoading(true);
         triggerGetAllFeatureInfo(selectedLayerPath)
-          .catch((err) => {
-            logger.logError(`Data panel has failed to get all feature info, error: ${err}`);
+          .catch((error: unknown) => {
+            // Log error
+            logger.logError(`Data panel has failed to get all feature info, error: ${error}`);
           })
           .finally(() => {
             setIsLoading(false);
