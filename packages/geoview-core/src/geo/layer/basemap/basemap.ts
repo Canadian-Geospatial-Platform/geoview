@@ -190,7 +190,7 @@ export class BasemapApi {
         if (tileGrid) {
           applyStyle(tileLayer, layer.styleUrl, {
             resolutions: tileGrid.getResolutions(),
-          }).catch((err) => logger.logError(err));
+          }).catch((error: unknown) => logger.logError(error));
         }
       } else {
         tileLayer = new TileLayer({
@@ -708,7 +708,7 @@ export class BasemapApi {
           if (tileGrid) {
             applyStyle(basemapLayer, layer.styleUrl, {
               resolutions: tileGrid.getResolutions(),
-            }).catch((err) => logger.logError(err));
+            }).catch((error: unknown) => logger.logError(error));
           }
         } else {
           basemapLayer = new TileLayer({

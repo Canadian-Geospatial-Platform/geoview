@@ -31,7 +31,7 @@ export const useGeolocator = (): UseGeolocatorReturn => {
   // States
   const [data, setData] = useState<GeoListItem[] | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<boolean>(false);
+  const [theError, setTheError] = useState<boolean>(false);
   const [searchValue, setSearchValue] = useState<string>('');
 
   // Store
@@ -46,7 +46,7 @@ export const useGeolocator = (): UseGeolocatorReturn => {
   // Reset state helper
   const resetState = useCallback(() => {
     setData(undefined);
-    setError(false);
+    setTheError(false);
     setIsLoading(false);
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -67,7 +67,7 @@ export const useGeolocator = (): UseGeolocatorReturn => {
           abortControllerRef.current.abort();
         }
         setData(undefined);
-        setError(true);
+        setTheError(true);
         setIsLoading(false);
         logger.logError('GEOLOCATOR - search timeout error');
       }, TIMEOUT_DELAY);
@@ -128,17 +128,17 @@ export const useGeolocator = (): UseGeolocatorReturn => {
   // Public function that handles the Promise
   const getGeolocations = useCallback(
     (searchTerm: string): void => {
-      fetchGeolocations(searchTerm).catch((err) => {
+      fetchGeolocations(searchTerm).catch((error: unknown) => {
         // If aborted response
-        if (err instanceof RequestAbortedError) {
+        if (error instanceof RequestAbortedError) {
           // Cancel...
           return;
         }
 
         // Handle or log any errors here if needed
-        setError(true);
+        setTheError(true);
         setData(undefined);
-        logger.logError('GEOLOCATOR - search failed', err);
+        logger.logError('GEOLOCATOR - search failed', error);
       });
     },
     [fetchGeolocations]
@@ -159,7 +159,7 @@ export const useGeolocator = (): UseGeolocatorReturn => {
     data,
     isLoading,
     searchValue,
-    error,
+    error: theError,
     setSearchValue,
     getGeolocations,
     resetState,

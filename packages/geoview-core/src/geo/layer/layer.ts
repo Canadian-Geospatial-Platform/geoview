@@ -570,7 +570,7 @@ export class LayerApi {
    */
   #addGeoviewLayerStep2(geoviewLayerConfig: TypeGeoviewLayerConfig): GeoViewLayerAddedResult {
     // Create the layer for the processing
-    const layerBeingAdded = LayerApi.createLayerFromConfigType(geoviewLayerConfig, this.mapViewer.getProjection().getCode());
+    const layerBeingAdded = LayerApi.createLayerConfigFromType(geoviewLayerConfig, this.mapViewer.getProjection().getCode());
 
     // Add in the geoviewLayers set
     this.#geoviewLayers[layerBeingAdded.geoviewLayerId] = layerBeingAdded;
@@ -765,7 +765,10 @@ export class LayerApi {
           this.onLayerFirstLoaded(setLayerVisibility);
         });
       })
-      .catch((err) => logger.logError(err));
+      .catch((error: unknown) => {
+        // Log
+        logger.logError(error);
+      });
   }
 
   /**
@@ -2480,7 +2483,7 @@ export class LayerApi {
    * @returns {AbstractGeoViewLayer} An instance of the corresponding `AbstractGeoViewLayer` subclass.
    * @throws {NotSupportedError} If the configuration does not match any supported layer type.
    */
-  static createLayerFromConfigType(geoviewLayerConfig: TypeGeoviewLayerConfig, mapProjectionForVectorTiles: string): AbstractGeoViewLayer {
+  static createLayerConfigFromType(geoviewLayerConfig: TypeGeoviewLayerConfig, mapProjectionForVectorTiles: string): AbstractGeoViewLayer {
     // TODO: Refactor - Here the function should use the structure created by validation config with the metadata fetch and no need to pass the validation.
     if (layerConfigIsGeoJSON(geoviewLayerConfig)) {
       return new GeoJSON(geoviewLayerConfig);
@@ -2520,7 +2523,7 @@ export class LayerApi {
     }
 
     // Not implemented
-    throw new NotSupportedError('Unsupported layer class type in createLayerFromConfigType');
+    throw new NotSupportedError('Unsupported layer class type in createLayerConfigFromType');
   }
 
   // #endregion
