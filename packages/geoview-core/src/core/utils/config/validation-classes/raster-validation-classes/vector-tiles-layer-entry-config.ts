@@ -1,8 +1,11 @@
 import { TypeSourceVectorTilesInitialConfig } from '@/geo/layer/geoview-layers/raster/vector-tiles';
-import { TypeTileGrid } from '@/api/config/types/map-schema-types';
+import { CONST_LAYER_TYPES, TypeTileGrid } from '@/api/config/types/map-schema-types';
 import { TileLayerEntryConfig } from '@/core/utils/config/validation-classes/tile-layer-entry-config';
 
 export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
+  /** Tag used to link the entry to a specific schema. */
+  override schemaTag = CONST_LAYER_TYPES.VECTOR_TILES;
+
   declare source: TypeSourceVectorTilesInitialConfig;
 
   tileGrid!: TypeTileGrid;
@@ -17,8 +20,11 @@ export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
     super(layerConfig);
     Object.assign(this, layerConfig);
 
-    if (!this.source) this.source = {};
-    if (!this.source.dataAccessPath) this.source.dataAccessPath = this.geoviewLayerConfig.metadataAccessPath;
+    // Write the default properties when not specified
+    this.source ??= {};
+    this.source.dataAccessPath ??= this.geoviewLayerConfig.metadataAccessPath;
+
+    // Format the dataAccessPath correctly
     if (!this.source.dataAccessPath!.toLowerCase().endsWith('.pbf')) {
       this.source.dataAccessPath = this.source.dataAccessPath!.endsWith('/')
         ? `${this.source.dataAccessPath}tile/{z}/{y}/{x}.pbf`

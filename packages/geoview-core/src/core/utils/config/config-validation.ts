@@ -26,8 +26,8 @@ import {
   mapConfigLayerEntryIsGeoCore,
   mapConfigLayerEntryIsShapefile,
   layerEntryIsGroupLayer,
-  CONST_LAYER_TYPES,
   TypeGeoviewLayerType,
+  CONST_LAYER_TYPES,
   CONST_GEOVIEW_SCHEMA_BY_TYPE,
 } from '@/api/config/types/map-schema-types';
 import { TypeJsonObject } from '@/api/config/types/config-types';

@@ -121,6 +121,15 @@ export abstract class AbstractLayerSet {
     this.#prepareConfigForLayerRegistration(layerConfig);
   }
 
+  /**
+   * Prepares a layer configuration for automatic registration once the layer becomes loaded.
+   * This method sets up a listener on the provided layer configuration that monitors its status.
+   * When the layer's status changes to `loaded`, it attempts to retrieve the corresponding layer
+   * from the layer API and registers it into the system's layer set. If registration fails, errors
+   * are logged appropriately.
+   * @param {ConfigBaseClass} layerConfig - The configuration object for the layer to be monitored.
+   * @private
+   */
   #prepareConfigForLayerRegistration(layerConfig: ConfigBaseClass): void {
     // Listen to the status changes so that when it gets loaded it automatically gets registered as a layer
     layerConfig.onLayerStatusChanged(() => {
