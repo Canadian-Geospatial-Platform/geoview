@@ -281,6 +281,48 @@ export class ConfigApi {
     return new MapFeatureConfig(toJsonObject(CV_DEFAULT_MAP_FEATURE_CONFIG));
   }
 
+  /**
+   * This method validates the configuration of map elements using the json string or json object supplied by the user.
+   * The returned value is a configuration object initialized only from the configuration passed as a parameter.
+   * Validation of the configuration based on metadata and application of default values is not performed here,
+   * but will be done later using another method.
+   *
+   * If the configuration is unreadable or generates a fatal error, the default configuration will be returned with
+   * the error flag raised and an error message logged in the console. When configuration processing is possible, if
+   * errors are detected, the configuration will be corrected to the best of our ability to avoid crashing the viewer,
+   * and all changes made will be logged in the console.
+   *
+   * @param {string | TypeJsonObject} mapConfig The map feature configuration to validate.
+   * @returns {MapFeatureConfig} The validated map feature configuration.
+   * @static
+   */
+  static validateMapConfig(mapConfig: string | MapFeatureConfig | TypeJsonObject): MapFeatureConfig {
+    // If the user provided a string config, translate it to a json object because the MapFeatureConfig constructor
+    // doesn't accept string config. Note that convertStringToJson returns undefined if the string config cannot
+    // be translated to a json object.
+    const providedMapFeatureConfig: TypeJsonObject =
+      typeof mapConfig === 'string' ? ConfigApi.convertStringToJson(mapConfig as string)! : (mapConfig as TypeJsonObject);
+
+    try {
+      // If the user provided a valid string config with the mandatory map property, process geocore layers to translate them to their GeoView layers
+      if (!providedMapFeatureConfig) throw new MapConfigError('The string configuration provided cannot be translated to a json object');
+      if (!providedMapFeatureConfig.map) throw new MapConfigError('The map property is mandatory');
+
+      // Instanciate the mapFeatureConfig. If an error is detected, a workaround procedure
+      // will be executed to try to correct the problem in the best possible way.
+      return new MapFeatureConfig(providedMapFeatureConfig);
+    } catch (error: unknown) {
+      // If we get here, it is because the user provided a string config that cannot be translated to a json object,
+      // or the config doesn't have the mandatory map property or the listOfGeoviewLayerConfig is defined but is not
+      // an array.
+      if (error instanceof MapConfigError) logger.logError(error.message);
+      else logger.logError('ConfigApi.validateMapConfig - An error occured', error);
+      const defaultMapConfig = ConfigApi.getDefaultMapFeatureConfig();
+      defaultMapConfig.setErrorDetectedFlag();
+      return defaultMapConfig;
+    }
+  }
+
   // TODO: Cleanup commented code - Remove this commented out code if all good
   // /**
   //  * Convert one layer config or an array of GeoCore layer config to their GeoView equivalents. The method returns undefined
@@ -371,48 +413,6 @@ export class ConfigApi {
   //   // Return the final config (this function expects the return to be an array as per originally implemented...)
   //   return results;
   // }
-
-  /**
-   * This method validates the configuration of map elements using the json string or json object supplied by the user.
-   * The returned value is a configuration object initialized only from the configuration passed as a parameter.
-   * Validation of the configuration based on metadata and application of default values is not performed here,
-   * but will be done later using another method.
-   *
-   * If the configuration is unreadable or generates a fatal error, the default configuration will be returned with
-   * the error flag raised and an error message logged in the console. When configuration processing is possible, if
-   * errors are detected, the configuration will be corrected to the best of our ability to avoid crashing the viewer,
-   * and all changes made will be logged in the console.
-   *
-   * @param {string | TypeJsonObject} mapConfig The map feature configuration to validate.
-   * @returns {MapFeatureConfig} The validated map feature configuration.
-   * @static
-   */
-  static validateMapConfig(mapConfig: string | MapFeatureConfig | TypeJsonObject): MapFeatureConfig {
-    // If the user provided a string config, translate it to a json object because the MapFeatureConfig constructor
-    // doesn't accept string config. Note that convertStringToJson returns undefined if the string config cannot
-    // be translated to a json object.
-    const providedMapFeatureConfig: TypeJsonObject =
-      typeof mapConfig === 'string' ? ConfigApi.convertStringToJson(mapConfig as string)! : (mapConfig as TypeJsonObject);
-
-    try {
-      // If the user provided a valid string config with the mandatory map property, process geocore layers to translate them to their GeoView layers
-      if (!providedMapFeatureConfig) throw new MapConfigError('The string configuration provided cannot be translated to a json object');
-      if (!providedMapFeatureConfig.map) throw new MapConfigError('The map property is mandatory');
-
-      // Instanciate the mapFeatureConfig. If an error is detected, a workaround procedure
-      // will be executed to try to correct the problem in the best possible way.
-      return new MapFeatureConfig(providedMapFeatureConfig);
-    } catch (error: unknown) {
-      // If we get here, it is because the user provided a string config that cannot be translated to a json object,
-      // or the config doesn't have the mandatory map property or the listOfGeoviewLayerConfig is defined but is not
-      // an array.
-      if (error instanceof MapConfigError) logger.logError(error.message);
-      else logger.logError('ConfigApi.validateMapConfig - An error occured', error);
-      const defaultMapConfig = ConfigApi.getDefaultMapFeatureConfig();
-      defaultMapConfig.setErrorDetectedFlag();
-      return defaultMapConfig;
-    }
-  }
 
   // TODO: Cleanup commented code - Remove this commented out code if all good
   // /**
