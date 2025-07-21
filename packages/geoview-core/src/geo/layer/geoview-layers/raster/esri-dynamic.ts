@@ -26,7 +26,7 @@ import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/gr
 
 export interface TypeEsriDynamicLayerConfig extends TypeGeoviewLayerConfig {
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_DYNAMIC;
-  listOfLayerEntryConfig: EsriDynamicLayerEntryConfig[];
+  listOfLayerEntryConfig: (GroupLayerEntryConfig | EsriDynamicLayerEntryConfig)[];
 }
 
 // GV: ^^^^^
@@ -184,8 +184,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       geoviewLayerConfig,
       layerEntries,
       customGeocoreLayerConfig
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ) as any;
+    );
 
     // Return it
     return geoviewLayerConfig;
