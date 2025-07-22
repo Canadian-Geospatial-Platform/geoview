@@ -61,7 +61,7 @@ import { createEmptyBasemap, getPointerPositionFromMapEvent, isExtentLonLat } fr
 import { logger } from '@/core/utils/logger';
 import { NORTH_POLE_POSITION } from '@/core/utils/constant';
 import { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
-import { toJsonObject, TypeJsonObject } from '@/api/config/types/config-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
@@ -1683,15 +1683,7 @@ export class MapViewer {
         Plugin.loadScript(corePackage)
           .then((typePlugin) => {
             // add the plugin by passing in the loaded constructor from the script tag
-            Plugin.addPlugin(
-              corePackage,
-              this.mapId,
-              typePlugin,
-              toJsonObject({
-                mapId: this.mapId,
-                viewer: this,
-              })
-            )
+            Plugin.addPlugin(corePackage, typePlugin, this)
               .then(() => {
                 // Plugin added
                 resolve();

@@ -29,7 +29,6 @@ import {
   TypeLayerEntryConfig,
   mapConfigLayerEntryIsGeoCore,
   mapConfigLayerEntryIsShapefile,
-  layerEntryIsGroupLayer,
   TypeLayerStatus,
   GeoCoreLayerConfig,
   TypeDisplayLanguage,
@@ -1062,14 +1061,14 @@ export class LayerApi {
     theLayerMain?.setOpacity(1);
 
     // If it is a group layer, highlight sublayers
-    if (layerEntryIsGroupLayer(this.#layerEntryConfigs[layerPath])) {
+    if (this.#layerEntryConfigs[layerPath].getEntryTypeIsGroup()) {
       Object.keys(this.#layerEntryConfigs).forEach((registeredLayerPath) => {
         // Trying to get the layer associated with the layer path, can be undefined because the layer might be in error
         const theLayer = this.getGeoviewLayer(registeredLayerPath);
         if (theLayer) {
           if (
             !(registeredLayerPath.startsWith(`${layerPath}/`) || registeredLayerPath === layerPath) &&
-            !layerEntryIsGroupLayer(this.#layerEntryConfigs[registeredLayerPath])
+            this.#layerEntryConfigs[registeredLayerPath].getEntryTypeIsRegular()
           ) {
             const otherOpacity = theLayer.getOpacity();
             theLayer.setOpacity((otherOpacity || 1) * 0.25);
@@ -1081,7 +1080,7 @@ export class LayerApi {
         // Trying to get the layer associated with the layer path, can be undefined because the layer might be in error
         const theLayer = this.getGeoviewLayer(registeredLayerPath);
         if (theLayer) {
-          if (registeredLayerPath !== layerPath && !layerEntryIsGroupLayer(this.#layerEntryConfigs[registeredLayerPath])) {
+          if (registeredLayerPath !== layerPath && this.#layerEntryConfigs[registeredLayerPath].getEntryTypeIsRegular()) {
             const otherOpacity = theLayer.getOpacity();
             theLayer.setOpacity((otherOpacity || 1) * 0.25);
           }
@@ -1098,14 +1097,14 @@ export class LayerApi {
     this.featureHighlight.removeBBoxHighlight();
     if (this.#highlightedLayer.layerPath !== undefined) {
       const { layerPath, originalOpacity } = this.#highlightedLayer;
-      if (layerEntryIsGroupLayer(this.#layerEntryConfigs[layerPath])) {
+      if (this.#layerEntryConfigs[layerPath].getEntryTypeIsGroup()) {
         Object.keys(this.#layerEntryConfigs).forEach((registeredLayerPath) => {
           // Trying to get the layer associated with the layer path, can be undefined because the layer might be in error
           const theLayer = this.getGeoviewLayer(registeredLayerPath);
           if (theLayer) {
             if (
               !(registeredLayerPath.startsWith(`${layerPath}/`) || registeredLayerPath === layerPath) &&
-              !layerEntryIsGroupLayer(this.#layerEntryConfigs[registeredLayerPath])
+              this.#layerEntryConfigs[registeredLayerPath].getEntryTypeIsRegular()
             ) {
               const otherOpacity = theLayer.getOpacity();
               theLayer.setOpacity(otherOpacity ? otherOpacity * 4 : 1);
@@ -1117,7 +1116,7 @@ export class LayerApi {
           // Trying to get the layer associated with the layer path, can be undefined because the layer might be in error
           const theLayer = this.getGeoviewLayer(registeredLayerPath);
           if (theLayer) {
-            if (registeredLayerPath !== layerPath && !layerEntryIsGroupLayer(this.#layerEntryConfigs[registeredLayerPath])) {
+            if (registeredLayerPath !== layerPath && this.#layerEntryConfigs[registeredLayerPath].getEntryTypeIsRegular()) {
               const otherOpacity = theLayer.getOpacity();
               theLayer.setOpacity(otherOpacity ? otherOpacity * 4 : 1);
             } else theLayer.setOpacity(originalOpacity || 1);
@@ -1908,7 +1907,7 @@ export class LayerApi {
    */
   #gatherAllBoundsRec(layerConfig: ConfigBaseClass, bounds: Extent[]): void {
     // If a leaf
-    if (!layerEntryIsGroupLayer(layerConfig)) {
+    if (layerConfig.getEntryTypeIsRegular()) {
       // Get the layer
       const layer = this.getGeoviewLayer(layerConfig.layerPath) as AbstractGVLayer;
 
@@ -1917,7 +1916,7 @@ export class LayerApi {
         const calculatedBounds = layer.getBounds(this.mapViewer.getProjection(), MapViewer.DEFAULT_STOPS);
         if (calculatedBounds) bounds.push(calculatedBounds);
       }
-    } else {
+    } else if (layerConfig.getEntryTypeIsGroup()) {
       // Is a group
       layerConfig.listOfLayerEntryConfig.forEach((subLayerConfig) => {
         this.#gatherAllBoundsRec(subLayerConfig, bounds);

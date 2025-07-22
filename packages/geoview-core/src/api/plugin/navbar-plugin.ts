@@ -64,10 +64,10 @@ export abstract class NavBarPlugin extends AbstractPlugin {
       if (config.panelProps) {
         // Create a button with panel
         buttonPanel =
-          this.mapViewer().navBarApi.createNavbarButtonPanel(config.buttonProps, config.panelProps, config.groupName) || undefined;
+          this.mapViewer.navBarApi.createNavbarButtonPanel(config.buttonProps, config.panelProps, config.groupName) || undefined;
       } else {
         // Create a simple button
-        buttonPanel = this.mapViewer().navBarApi.createNavbarButton(config.buttonProps, config.groupName) || undefined;
+        buttonPanel = this.mapViewer.navBarApi.createNavbarButton(config.buttonProps, config.groupName) || undefined;
       }
 
       if (buttonPanel) this.buttonPanels[key] = buttonPanel;
@@ -79,9 +79,9 @@ export abstract class NavBarPlugin extends AbstractPlugin {
    */
   protected onRemove(): void {
     // Remove the button or button panel from the navbar
-    if (Object.keys(this.buttonPanels).length > 0 && this.mapViewer()?.navBarApi) {
+    if (Object.keys(this.buttonPanels).length > 0 && this.mapViewer?.navBarApi) {
       Object.values(this.buttonPanels).forEach((buttonPanel: TypeButtonPanel) => {
-        this.mapViewer().navBarApi.removeNavbarButtonPanel(buttonPanel.buttonPanelId);
+        this.mapViewer.navBarApi.removeNavbarButtonPanel(buttonPanel.buttonPanelId);
       });
     }
   }

@@ -4,7 +4,7 @@ import {
   CV_CONFIG_SHAPEFILE_TYPE,
   CV_CONST_LAYER_TYPES,
 } from '@/api/config/types/config-constants';
-import { TypeJsonValue, TypeJsonObject, toJsonObject, TypeJsonArray } from '@/api/config/types/config-types';
+import { TypeJsonValue, TypeJsonObject, TypeJsonArray } from '@/api/config/types/config-types';
 import { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config';
 import {
   MapConfigLayerEntry,
@@ -278,7 +278,7 @@ export class ConfigApi {
    * @static
    */
   static getDefaultMapFeatureConfig(): MapFeatureConfig {
-    return new MapFeatureConfig(toJsonObject(CV_DEFAULT_MAP_FEATURE_CONFIG));
+    return new MapFeatureConfig(CV_DEFAULT_MAP_FEATURE_CONFIG);
   }
 
   /**

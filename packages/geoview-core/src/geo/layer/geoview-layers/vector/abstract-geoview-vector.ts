@@ -16,7 +16,6 @@ import {
 } from '@/api/config/types/map-schema-types';
 
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeSourceGeoJSONInitialConfig } from '@/geo/layer/geoview-layers/vector/geojson';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
@@ -108,12 +107,12 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
         // Fetch the data, or use passed geoJSON if present
         const responseText =
-          layerConfig.schemaTag === CONST_LAYER_TYPES.GEOJSON && (layerConfig.source as TypeSourceGeoJSONInitialConfig)?.geojson
-            ? ((layerConfig.source as TypeSourceGeoJSONInitialConfig).geojson as string)
+          layerConfig.getSchemaTagGeoJSON() && layerConfig.source?.geojson
+            ? layerConfig.source.geojson
             : await AbstractGeoViewVector.#fetchData(url, sourceConfig);
 
         // If Esri Feature
-        if (layerConfig.schemaTag === CONST_LAYER_TYPES.ESRI_FEATURE) {
+        if (layerConfig.getSchemaTagEsriFeature()) {
           // Check and throw exception if the content actually contains an embedded error
           // (EsriFeature type of response might return an embedded error inside a 200 HTTP OK)
           Fetch.throwIfResponseHasEmbeddedError(responseText);
@@ -210,7 +209,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   ): Promise<Feature[] | undefined> {
     // TODO: Refactor - Consider changing the return type to Promise<Feature[]>
 
-    switch (layerConfig.schemaTag) {
+    switch (layerConfig.getSchemaTag()) {
       case CONST_LAYER_TYPES.CSV:
         // Attempt to convert CSV text to OpenLayers features
         return AbstractGeoViewVector.#convertCsv(responseText, layerConfig, Projection.getProjectionFromString(projection));

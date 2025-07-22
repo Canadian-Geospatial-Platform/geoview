@@ -1,7 +1,7 @@
 import cloneDeep from 'lodash/cloneDeep';
 import defaultsDeep from 'lodash/defaultsDeep';
 
-import { Cast, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
+import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import {
   CV_BASEMAP_ID,
   CV_BASEMAP_LABEL,
@@ -117,10 +117,12 @@ export class MapFeatureConfig {
 
     // set map configuration
     const gvMap = cloneDeep(userMapFeatureConfig.map) as TypeJsonObject;
-    this.map = Cast<TypeMapConfig>(
+    this.map =
       // Default map config depends on map projection.
-      defaultsDeep(gvMap, MapFeatureConfig.#getDefaultMapConfig(gvMap?.viewSettings?.projection as TypeValidMapProjectionCodes))
-    );
+      defaultsDeep(
+        gvMap as unknown as TypeMapConfig,
+        MapFeatureConfig.#getDefaultMapConfig(gvMap?.viewSettings?.projection as TypeValidMapProjectionCodes)
+      );
 
     // Above code will add default zoomAndCenter, remove if other initial view is provided
     if (this.map.viewSettings.initialView?.extent || this.map.viewSettings.initialView?.layerIds)
@@ -129,7 +131,7 @@ export class MapFeatureConfig {
     // TODO: Cleanup commented code - Remove this commented out code if all good
     // this.map.listOfGeoviewLayerConfig = this.map.listOfGeoviewLayerConfig
     //   .map((geoviewLayerConfig) => {
-    //     return MapFeatureConfig.nodeFactory(toJsonObject(geoviewLayerConfig));
+    //     return MapFeatureConfig.nodeFactory(geoviewLayerConfig);
     //   })
     //   // Validate and filter undefined entries (undefined is returned when a GeoView layer cannot be instanciated).
     //   .filter((layerConfig) => {
@@ -144,14 +146,12 @@ export class MapFeatureConfig {
     //     return layerConfig;
     //   }) as AbstractGeoviewLayerConfig[];
 
-    this.serviceUrls = Cast<TypeServiceUrls>(defaultsDeep(userMapFeatureConfig.serviceUrls, CV_DEFAULT_MAP_FEATURE_CONFIG.serviceUrls));
+    this.serviceUrls = defaultsDeep(userMapFeatureConfig.serviceUrls as TypeServiceUrls, CV_DEFAULT_MAP_FEATURE_CONFIG.serviceUrls);
     this.theme = (userMapFeatureConfig.theme || CV_DEFAULT_MAP_FEATURE_CONFIG.theme) as TypeDisplayTheme;
     this.navBar = [...((userMapFeatureConfig.navBar || CV_DEFAULT_MAP_FEATURE_CONFIG.navBar) as TypeNavBarProps)];
-    this.appBar = Cast<TypeAppBarProps>(defaultsDeep(userMapFeatureConfig.appBar, CV_DEFAULT_MAP_FEATURE_CONFIG.appBar));
-    this.footerBar = Cast<TypeFooterBarProps>(userMapFeatureConfig.footerBar);
-    this.overviewMap = Cast<TypeOverviewMapProps>(
-      defaultsDeep(userMapFeatureConfig.overviewMap, CV_DEFAULT_MAP_FEATURE_CONFIG.overviewMap)
-    );
+    this.appBar = defaultsDeep(userMapFeatureConfig.appBar as TypeAppBarProps, CV_DEFAULT_MAP_FEATURE_CONFIG.appBar);
+    this.footerBar = userMapFeatureConfig.footerBar as TypeFooterBarProps;
+    this.overviewMap = defaultsDeep(userMapFeatureConfig.overviewMap as TypeOverviewMapProps, CV_DEFAULT_MAP_FEATURE_CONFIG.overviewMap);
     this.components = [...((userMapFeatureConfig.components || CV_DEFAULT_MAP_FEATURE_CONFIG.components) as TypeMapComponents)];
     this.corePackages = [...((userMapFeatureConfig.corePackages || CV_DEFAULT_MAP_FEATURE_CONFIG.corePackages) as TypeMapCorePackages)];
     this.corePackagesConfig = [
@@ -340,7 +340,7 @@ export class MapFeatureConfig {
       (originalZoomAndCenter as TypeJsonArray).length === 2 &&
       Array.isArray(originalZoomAndCenter[1]) &&
       (originalZoomAndCenter[1] as TypeJsonArray).length === 2 &&
-      Cast<[number, number]>(originalZoomAndCenter[1]) !== this.map.viewSettings.initialView!.zoomAndCenter![1]
+      (originalZoomAndCenter[1] as unknown as [number, number]) !== this.map.viewSettings.initialView!.zoomAndCenter![1]
     ) {
       logger.logWarning(
         `- Invalid center ${originalZoomAndCenter[1]}

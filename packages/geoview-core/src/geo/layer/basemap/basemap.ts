@@ -11,7 +11,7 @@ import { OverviewMap as OLOverviewMap } from 'ol/control';
 import { applyStyle } from 'ol-mapbox-style';
 
 import { TypeBasemapOptions, TypeValidMapProjectionCodes, TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
-import { TypeJsonObject, toJsonObject, TypeJsonArray } from '@/api/config/types/config-types';
+import { TypeJsonObject, TypeJsonArray } from '@/api/config/types/config-types';
 import { delay, getLocalizedMessage } from '@/core/utils/utilities';
 import { TypeBasemapProps, TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
 import { Projection } from '@/geo/utils/projection';
@@ -83,7 +83,7 @@ export class BasemapApi {
   /**
    * Basemap list
    */
-  basemapsList: TypeJsonObject = toJsonObject({
+  basemapsList: TypeJsonObject = {
     3978: {
       transport: {
         url: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3978_V_OSM/VectorTileServer',
@@ -144,7 +144,7 @@ export class BasemapApi {
         jsonUrl: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/?f=json',
       },
     },
-  });
+  } as unknown as TypeJsonObject;
 
   /** Keep all callback delegates references */
   #onBasemapChangedHandlers: BasemapChangedDelegate[] = [];
@@ -271,10 +271,10 @@ export class BasemapApi {
       const maxScale = result.maxScale as number;
 
       // Get extent
-      const fullExtent = toJsonObject(result.fullExtent);
+      const { fullExtent } = result;
 
       // Get the tile grid info
-      const tileInfo = toJsonObject(result.tileInfo);
+      const { tileInfo } = result;
 
       const lods: TypeJsonObject = {};
 
@@ -517,11 +517,11 @@ export class BasemapApi {
       if (basemapLayers.length && coreBasemapOptions.labeled) {
         const labelLayer = await this.#createBasemapLayer(
           'label',
-          toJsonObject({
+          {
             url: this.basemapsList[projectionCode].label.url as string,
             jsonUrl: this.basemapsList[projectionCode].label.jsonUrl as string,
             styleUrl: this.basemapsList[projectionCode].label.styleUrl[languageCode] as string,
-          }),
+          } as unknown as TypeJsonObject,
           0.8,
           true
         ).catch(() => this.#emitBasemapError({ error: new BasemapLayerCreationError('labeled') }));

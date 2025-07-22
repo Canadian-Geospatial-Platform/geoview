@@ -109,55 +109,6 @@
     {
       "layers": [
         {
-          "layerId": "shellfish_sites/1",
-          "propertyValue": "OBJECTID",
-          "propertyDisplay": "Site"
-        }
-      ],
-      "chart": "line",
-      "query": {
-        "type": "esriRegular",
-        "url": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/Shellfish_Sites_Samples_Mollusques_Echantillons/MapServer/9",
-        "queryOptions": {
-          "whereClauses": [
-            {
-              "field": "Site",
-              "prefix": "'",
-              "valueFrom": "Site",
-              "suffix": "'"
-            }
-          ],
-          "orderByField": "Date"
-        }
-      },
-      "geochart": {
-        "borderWidth": 1,
-        "useSteps": "after",
-        "tension": 0.2,
-        "xAxis": {
-          "type": "time",
-          "property": "Date"
-        },
-        "yAxis": {
-          "type": "logarithmic",
-          "property": "FC_MPN_CF_NPP_100_mL"
-        }
-      },
-      "ui": {
-        "xSlider": {
-          "display": true
-        },
-        "ySlider": {
-          "display": true
-        },
-        "stepsSwitcher": true,
-        "resetStates": true,
-        "download": true
-      }
-    },
-    {
-      "layers": [
-        {
           "layerId": "ogcFeatureLakes/lakes",
           "propertyValue": "name",
           "propertyDisplay": "name"

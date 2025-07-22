@@ -148,12 +148,12 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
   ): TypeTimeSliderValues | undefined {
     // Get the layer using the map event processor, If no temporal dimension OR layerPath, return undefined
     if (!layerConfig.layerPath) return undefined;
-    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerConfig.layerPath)!;
 
     // If a group
     if (layerEntryIsGroupLayer(layerConfig)) return undefined;
 
     // Cast the layer
+    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerConfig.layerPath)!;
     const geoviewLayerCasted = geoviewLayer as AbstractGVLayer;
 
     // Get the temporal dimension information

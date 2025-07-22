@@ -8,6 +8,7 @@ import { LayerEntryTypesKey, TypeJsonValue } from '@/api/config/types/config-typ
 import { TimeDimension } from '@/core/utils/date-mgt';
 
 // TODO: Deprecated import after refactor
+import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
@@ -17,7 +18,8 @@ import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/r
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
-import { NotSupportedError } from '@/core/exceptions/core-exceptions';
+import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
+import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 
 /**
  *  Definition of the map feature instance according to what is specified in the schema.
@@ -884,7 +886,6 @@ export interface TypeGeometry extends RenderFeature {
   ol_uid: string;
 }
 
-// #region OLD CONFIG
 // TODO: Refactor - This type should be deleted and 'ConfigBaseClass' should be used instead
 export type TypeLayerEntryConfig = AbstractBaseLayerEntryConfig | GroupLayerEntryConfig;
 
@@ -899,7 +900,7 @@ export const CONST_LAYER_ENTRY_TYPES: Record<LayerEntryTypesKey, TypeLayerEntryT
   SHAPEFILE: 'shapefile',
 };
 
-// It seems sometimes this type guard is called with a TypeLayerEntryConfig and sometimes with a ConfigBaseClass, so I'm putting it explicit
+// This type guard is called with a TypeLayerEntryConfig and sometimes with a ConfigBaseClass, so I'm putting it explicit
 export const layerEntryIsGroupLayer = (verifyIfLayer: TypeLayerEntryConfig | ConfigBaseClass): verifyIfLayer is GroupLayerEntryConfig => {
   return verifyIfLayer?.entryType === CONST_LAYER_ENTRY_TYPES.GROUP;
 };
@@ -914,6 +915,18 @@ export const layerEntryIsVectorTile = (verifyIfLayer: TypeLayerEntryConfig): ver
 
 export const layerEntryIsRasterTile = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TileLayerEntryConfig => {
   return verifyIfLayer?.entryType === CONST_LAYER_ENTRY_TYPES.RASTER_TILE;
+};
+
+// This type guard is called with a TypeLayerEntryConfig and sometimes with a ConfigBaseClass, so I'm putting it explicit
+export const layerEntryIsGeoJSON = (verifyIfLayer: TypeLayerEntryConfig | ConfigBaseClass): verifyIfLayer is GeoJSONLayerEntryConfig => {
+  return verifyIfLayer?.schemaTag === CONST_LAYER_TYPES.GEOJSON;
+};
+
+// This type guard is called with a TypeLayerEntryConfig and sometimes with a ConfigBaseClass, so I'm putting it explicit
+export const layerEntryIsEsriFeature = (
+  verifyIfLayer: TypeLayerEntryConfig | ConfigBaseClass
+): verifyIfLayer is EsriFeatureLayerEntryConfig => {
+  return verifyIfLayer?.schemaTag === CONST_LAYER_TYPES.ESRI_FEATURE;
 };
 
 export const layerEntryIsOgcWms = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is OgcWmsLayerEntryConfig => {
@@ -1141,22 +1154,56 @@ export interface TypeSourceImageEsriInitialConfig extends TypeBaseSourceInitialC
   transparent?: boolean;
 }
 
-// TODO: refactor - check to use the typegard in config instead
+/**
+ * Type guard function that redefines a TypeBaseVectorGeometryConfig as a TypeLineStringVectorConfig if the type attribute of the
+ * verifyIfConfig parameter is 'lineString'. The type assertion applies only to the true block of the if clause that use
+ * this function.
+ *
+ * @param {TypeBaseVectorGeometryConfig} verifyIfConfig Polymorphic object to test in order to determine if the type assertion is valid.
+ *
+ * @returns {boolean} true if the type assertion is valid.
+ */
 export const isLineStringVectorConfig = (verifyIfConfig: TypeBaseVectorGeometryConfig): verifyIfConfig is TypeLineStringVectorConfig => {
   return verifyIfConfig?.type === 'lineString';
 };
 
+/**
+ * Type guard function that redefines a TypeBaseVectorGeometryConfig as a TypePolygonVectorConfig if the type attribute of the
+ * verifyIfConfig parameter is 'filledPolygon'. The type assertion applies only to the true block of the if clause that use
+ * this function.
+ *
+ * @param {TypeBaseVectorGeometryConfig} verifyIfConfig Polymorphic object to test in order to determine if the type assertion is valid.
+ *
+ * @returns {boolean} true if the type assertion is valid.
+ */
 export const isFilledPolygonVectorConfig = (verifyIfConfig: TypeBaseVectorGeometryConfig): verifyIfConfig is TypePolygonVectorConfig => {
   return verifyIfConfig?.type === 'filledPolygon';
 };
 
+/**
+ * Type guard function that redefines a TypeBaseVectorGeometryConfig as a TypeSimpleSymbolVectorConfig if the type attribute of the
+ * verifyIfConfig parameter is 'simpleSymbol'. The type assertion applies only to the true block of the if clause that use
+ * this function.
+ *
+ * @param {TypeBaseVectorGeometryConfig} verifyIfConfig Polymorphic object to test in order to determine if the type assertion is valid.
+ *
+ * @returns {boolean} true if the type assertion is valid.
+ */
 export const isSimpleSymbolVectorConfig = (
   verifyIfConfig: TypeBaseVectorGeometryConfig
 ): verifyIfConfig is TypeSimpleSymbolVectorConfig => {
   return verifyIfConfig?.type === 'simpleSymbol';
 };
 
+/**
+ * Type guard function that redefines a TypeBaseVectorGeometryConfig as a TypeIconSymbolVectorConfig if the type attribute of the
+ * verifyIfConfig parameter is 'iconSymbol'. The type assertion applies only to the true block of the if clause that use
+ * this function.
+ *
+ * @param {TypeBaseVectorGeometryConfig} verifyIfConfig Polymorphic object to test in order to determine if the type assertion is valid.
+ *
+ * @returns {boolean} true if the type assertion is valid.
+ */
 export const isIconSymbolVectorConfig = (verifyIfConfig: TypeBaseVectorGeometryConfig): verifyIfConfig is TypeIconSymbolVectorConfig => {
   return verifyIfConfig?.type === 'iconSymbol';
 };
-// #endregion OLD CONFIG

@@ -11,7 +11,7 @@ import {
   CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
 } from '@/api/config/types/map-schema-types';
-import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
+import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import {
@@ -20,6 +20,7 @@ import {
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 import { GVXYZTiles } from '@/geo/layer/gv-layers/tile/gv-xyz-tiles';
+import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 
 // ? Do we keep this TODO ? Dynamic parameters can be placed on the dataAccessPath and initial settings can be used on xyz-tiles.
 // TODO: Implement method to validate XYZ tile service
@@ -71,14 +72,14 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
   /**
    * Overrides the validation of a layer entry config.
-   * @param {TypeLayerEntryConfig} layerConfig - The layer entry config to validate.
+   * @param {ConfigBaseClass} layerConfig - The layer entry config to validate.
    */
-  protected override onValidateLayerEntryConfig(layerConfig: TypeLayerEntryConfig): void {
+  protected override onValidateLayerEntryConfig(layerConfig: ConfigBaseClass): void {
     // TODO: Update to properly use metadata from map server
     // Note that XYZ metadata as we defined it does not contain metadata layer group. If you need geojson layer group,
     // you can define them in the configuration section.
     if (Array.isArray(this.metadata?.listOfLayerEntryConfig)) {
-      const metadataLayerList = Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig);
+      const metadataLayerList = this.metadata?.listOfLayerEntryConfig as unknown as TypeLayerEntryConfig[];
       const foundEntry = metadataLayerList.find((layerMetadata) => layerMetadata.layerId === layerConfig.layerId);
       if (!foundEntry) {
         // Add a layer load error
@@ -115,7 +116,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
     if (this.metadata) {
       let metadataLayerConfigFound: XYZTilesLayerEntryConfig | TypeJsonObject | undefined;
       if (this.metadata?.listOfLayerEntryConfig) {
-        metadataLayerConfigFound = Cast<XYZTilesLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig).find(
+        metadataLayerConfigFound = (this.metadata?.listOfLayerEntryConfig as unknown as XYZTilesLayerEntryConfig[]).find(
           (metadataLayerConfig) => metadataLayerConfig.layerId === layerConfig.layerId
         );
       }
@@ -128,7 +129,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
       }
 
       // metadataLayerConfigFound can not be undefined because we have already validated the config exist
-      layerConfig.setLayerMetadata(toJsonObject(metadataLayerConfigFound));
+      layerConfig.setLayerMetadata(metadataLayerConfigFound as unknown as TypeJsonObject);
       // eslint-disable-next-line no-param-reassign
       layerConfig.source = defaultsDeep(layerConfig.source, metadataLayerConfigFound!.source);
       // eslint-disable-next-line no-param-reassign

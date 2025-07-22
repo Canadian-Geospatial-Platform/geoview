@@ -8,7 +8,7 @@ import { ProjectionLike } from 'ol/proj';
 import initSqlJs, { ParamsObject, SqlValue } from 'sql.js';
 import * as SLDReader from '@nieuwlandgeo/sldreader';
 
-import { Cast, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
+import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
   TypeLayerEntryConfig,
@@ -151,7 +151,7 @@ export class GeoPackage extends AbstractGeoViewVector {
                   newLayerEntryConfig.layerId = layers[i].name;
                   newLayerEntryConfig.layerName = layers[i].name;
                   newLayerEntryConfig.entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
-                  newLayerEntryConfig.parentLayerConfig = Cast<GroupLayerEntryConfig>(layerConfig);
+                  newLayerEntryConfig.parentLayerConfig = layerConfig as unknown as GroupLayerEntryConfig; // TODO: Check this type conversion, maybe recreate the Group object instead?
 
                   this.#processOneGeopackageLayer(newLayerEntryConfig, layers[i], slds)
                     .then((baseLayer) => {

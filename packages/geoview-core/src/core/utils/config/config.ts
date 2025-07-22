@@ -14,7 +14,6 @@ import {
 import { logger } from '@/core/utils/logger';
 
 import { ConfigValidation } from '@/core/utils/config/config-validation';
-import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { generateId } from '@/core/utils/utilities';
 import { LayerInvalidGeoviewLayerTypeError } from '@/core/exceptions/layer-exceptions';
 
@@ -84,8 +83,7 @@ export class Config {
    */
   #setLayerEntryType(listOfLayerEntryConfig: TypeLayerEntryConfig[], geoviewLayerType: TypeGeoviewLayerType): void {
     listOfLayerEntryConfig?.forEach((layerConfig) => {
-      if (layerEntryIsGroupLayer(layerConfig as ConfigBaseClass))
-        this.#setLayerEntryType(layerConfig.listOfLayerEntryConfig, geoviewLayerType);
+      if (layerEntryIsGroupLayer(layerConfig)) this.#setLayerEntryType(layerConfig.listOfLayerEntryConfig, geoviewLayerType);
       else {
         // eslint-disable-next-line no-param-reassign
         layerConfig.schemaTag = geoviewLayerType;

@@ -1,4 +1,4 @@
-import { Cast, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
+import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { DateMgt, TypeDateFragments } from '@/core/utils/date-mgt';
 import {
   TypeStyleGeometry,
@@ -71,7 +71,7 @@ export function esriGetFieldDomain(
 ): codedValueType | rangeDomainType | null {
   const esriFieldDefinitions = layerConfig.getLayerMetadata()?.fields as TypeJsonArray;
   const fieldDefinition = esriFieldDefinitions.find((metadataEntry) => metadataEntry.name === fieldName);
-  return fieldDefinition ? Cast<codedValueType | rangeDomainType>(fieldDefinition.domain) : null;
+  return fieldDefinition ? (fieldDefinition.domain as unknown as codedValueType | rangeDomainType) : null;
 }
 
 /**

@@ -17,7 +17,7 @@ export abstract class MapPlugin extends AbstractPlugin {
     // Override this to create panel..
 
     // Return dummy content
-    return this.react.createElement('div', undefined, `<div>Content for Map Plugin on map id ${this.pluginProps.mapId} goes here...</div>`);
+    return this.react.createElement('div', undefined, `<div>Content for Map Plugin on map id ${this.mapViewer.mapId} goes here...</div>`);
   }
 
   /**
@@ -26,14 +26,14 @@ export abstract class MapPlugin extends AbstractPlugin {
   protected onAdd(): void {
     // create the swiper container and insert it after top link
     const el = document.createElement('div');
-    el.setAttribute('id', `${this.pluginProps.mapId}-${this.pluginId}`);
-    const mapElement = document.getElementById(`mapTargetElement-${this.pluginProps.mapId}`);
+    el.setAttribute('id', `${this.mapViewer.mapId}-${this.pluginId}`);
+    const mapElement = document.getElementById(`mapTargetElement-${this.mapViewer.mapId}`);
     mapElement?.prepend(el);
 
     // create the swiper component and render
     const node = this.onCreateContent();
     this.reactRoot = this.createRoot(el);
-    this.reactRoot.render(<MapContext.Provider value={{ mapId: this.pluginProps.mapId }}>{node}</MapContext.Provider>);
+    this.reactRoot.render(<MapContext.Provider value={{ mapId: this.mapViewer.mapId }}>{node}</MapContext.Provider>);
   }
 
   /**

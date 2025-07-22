@@ -1,5 +1,5 @@
 import React from 'react'; // GV This import is to validate that we're on the right React at the end of the file
-import { AnySchemaObject, toJsonObject, TypeJsonObject } from 'geoview-core/api/config/types/config-types';
+import { AnySchemaObject, TypeJsonObject } from 'geoview-core/api/config/types/config-types';
 import { IconButtonPropsExtend } from 'geoview-core/ui/icon-button/icon-button';
 import { TypePanelProps } from 'geoview-core/ui/panel/panel-types';
 import { AppBarPlugin } from 'geoview-core/api/plugin/appbar-plugin';
@@ -27,7 +27,7 @@ export class GeoChartAppBarPlugin extends AppBarPlugin {
    * @returns {TypeJsonObject} the default config
    */
   override defaultConfig(): TypeJsonObject {
-    return toJsonObject(defaultConfig);
+    return defaultConfig as unknown as TypeJsonObject;
   }
 
   /**
@@ -72,7 +72,7 @@ export class GeoChartAppBarPlugin extends AppBarPlugin {
   override onCreateContent(): JSX.Element {
     // Fetch cgpv
     // TODO: Create a geochart-appbar-panel equivalent to geochart-panel to hold the GeoChart itself and hook on the useGeochartConfigs store the same way geochart-panel does it
-    // return <GeoChartAppBarPanel mapId={this.pluginProps.mapId} schemaValidator={new SchemaValidator()} />;
+    // return <GeoChartAppBarPanel mapId={this.mapViewer.mapId} schemaValidator={new SchemaValidator()} />;
     return <div>Not implemented</div>;
   }
 

@@ -1,5 +1,5 @@
 import React from 'react'; // GV This import is to validate that we're on the right React at the end of the file
-import { TypeJsonObject, toJsonObject, AnySchemaObject } from 'geoview-core/api/config/types/config-types';
+import { TypeJsonObject, AnySchemaObject } from 'geoview-core/api/config/types/config-types';
 import { AppBarPlugin } from 'geoview-core/api/plugin/appbar-plugin';
 import { AoiIcon } from 'geoview-core/ui/icons';
 import { IconButtonPropsExtend } from 'geoview-core/ui/icon-button/icon-button';
@@ -27,7 +27,7 @@ class AoiPanelPlugin extends AppBarPlugin {
    * @returns {TypeJsonObject} the default config
    */
   override defaultConfig(): TypeJsonObject {
-    return toJsonObject(defaultConfig);
+    return defaultConfig as unknown as TypeJsonObject;
   }
 
   /**
@@ -80,7 +80,7 @@ class AoiPanelPlugin extends AppBarPlugin {
   }
 
   override onCreateContent = (): JSX.Element => {
-    return <AoiPanel mapId={this.pluginProps.mapId} config={this.getConfig()} />;
+    return <AoiPanel mapId={this.mapViewer.mapId} config={this.getConfig()} />;
   };
 
   /**
