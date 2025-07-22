@@ -36,11 +36,11 @@ import Notifications from '@/core/components/notifications/notifications';
 import Version from './buttons/version';
 import { getSxClasses } from './app-bar-style';
 import { enforceArrayOrder, helpClosePanelById, helpOpenPanelById } from './app-bar-helper';
-import { toJsonObject } from '@/api/config/types/config-types';
 import { CV_DEFAULT_APPBAR_CORE, CV_DEFAULT_APPBAR_TABS_ORDER } from '@/api/config/types/config-constants';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { TypeValidAppBarCoreProps } from '@/api/config/types/map-schema-types';
 import { handleEscapeKey } from '@/core/utils/utilities';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { Button } from '@/ui/button/button';
 
 interface GroupPanelType {
@@ -261,14 +261,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
       if (appBarConfig && appBarConfig.tabs.core.includes(pluginName)) {
         Plugin.loadScript(pluginName)
           .then((typePlugin) => {
-            Plugin.addPlugin(
-              pluginName,
-              mapId,
-              typePlugin,
-              toJsonObject({
-                mapId,
-              })
-            ).catch((error: unknown) => {
+            Plugin.addPlugin(pluginName, typePlugin, MapEventProcessor.getMapViewer(mapId)).catch((error: unknown) => {
               // Log
               logger.logPromiseFailed(`api.plugin.addPlugin in useEffect in app-bar for ${pluginName}`, error);
             });

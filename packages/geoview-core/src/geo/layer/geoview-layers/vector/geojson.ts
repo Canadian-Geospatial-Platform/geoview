@@ -16,7 +16,7 @@ import {
   CONST_LAYER_TYPES,
 } from '@/api/config/types/map-schema-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
-import { Cast, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
+import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { Fetch } from '@/core/utils/fetch-helper';
@@ -26,6 +26,7 @@ import {
   LayerEntryConfigLayerIdNotFoundError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import { GVGeoJSON } from '@/geo/layer/gv-layers/vector/gv-geojson';
+import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 
 export interface TypeSourceGeoJSONInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'GeoJSON';
@@ -95,11 +96,14 @@ export class GeoJSON extends AbstractGeoViewVector {
 
   /**
    * Overrides the validation of a layer entry config.
-   * @param {TypeLayerEntryConfig} layerConfig - The layer entry config to validate.
+   * @param {ConfigBaseClass} layerConfig - The layer entry config to validate.
    */
-  protected override onValidateLayerEntryConfig(layerConfig: TypeLayerEntryConfig): void {
+  protected override onValidateLayerEntryConfig(layerConfig: ConfigBaseClass): void {
     if (Array.isArray(this.metadata?.listOfLayerEntryConfig)) {
-      const foundEntry = this.#recursiveSearch(layerConfig.layerId, Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig));
+      const foundEntry = this.#recursiveSearch(
+        layerConfig.layerId,
+        this.metadata?.listOfLayerEntryConfig as unknown as TypeLayerEntryConfig[]
+      );
       if (!foundEntry) {
         // Add a layer load error
         this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(layerConfig), layerConfig);
@@ -122,7 +126,7 @@ export class GeoJSON extends AbstractGeoViewVector {
       // Search for the layer metadata
       const layerMetadataFound = this.#recursiveSearch(
         layerConfig.layerId,
-        Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig)
+        this.metadata?.listOfLayerEntryConfig as unknown as TypeLayerEntryConfig[]
       ) as VectorLayerEntryConfig;
 
       // If the layer metadata was found

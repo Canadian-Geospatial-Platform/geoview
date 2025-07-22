@@ -32,7 +32,7 @@ export abstract class FooterPlugin extends AbstractPlugin {
       id: 'some-id',
       value: this.value!,
       label: 'Some label',
-      content: `<div>Content for Footer plugin on map id ${this.pluginProps.mapId} goes here...</div>`,
+      content: `<div>Content for Footer plugin on map id ${this.mapViewer.mapId} goes here...</div>`,
     };
   }
 
@@ -44,13 +44,13 @@ export abstract class FooterPlugin extends AbstractPlugin {
     // No need to log, parent class does it well already via added() function.
 
     // Set value to length of tabs(?)
-    this.value = this.mapViewer().footerBarApi.tabs.length;
+    this.value = this.mapViewer.footerBarApi.tabs.length;
 
     // Create props
     this.footerProps = this.onCreateContentProps();
 
     // Create tab with the props
-    this.mapViewer().footerBarApi.createTab(this.footerProps);
+    this.mapViewer.footerBarApi.createTab(this.footerProps);
   }
 
   /**
@@ -61,7 +61,7 @@ export abstract class FooterPlugin extends AbstractPlugin {
     // No need to log, parent class does it well already via remove() function.
 
     // Remove the footer tab
-    if (this.value && this.mapViewer()?.footerBarApi) this.mapViewer().footerBarApi.removeTab(this.footerProps!.id);
+    if (this.value && this.mapViewer?.footerBarApi) this.mapViewer.footerBarApi.removeTab(this.footerProps!.id);
   }
 
   /**

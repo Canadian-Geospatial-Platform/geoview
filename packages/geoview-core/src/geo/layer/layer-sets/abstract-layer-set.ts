@@ -224,7 +224,7 @@ export abstract class AbstractLayerSet {
   protected onRegisterLayerCheck(layer: AbstractBaseLayer): boolean {
     // Override this function to perform registration condition logic in the inherited classes
     // By default, a layer-set always registers layers except when they are group layers
-    if (layer.getLayerConfig()?.entryType === 'group') {
+    if (layer.getLayerConfig()?.getEntryTypeIsGroup()) {
       // Skip groups
       return false;
     }

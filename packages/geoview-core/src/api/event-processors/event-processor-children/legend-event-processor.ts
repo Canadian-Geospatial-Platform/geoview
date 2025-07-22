@@ -4,7 +4,6 @@ import {
   TypeLayerStyleSettings,
   TypeFeatureInfoEntry,
   TypeStyleGeometry,
-  layerEntryIsGroupLayer,
   CONST_LAYER_TYPES,
   TypeGeoviewLayerType,
   TypeTemporalDimension,
@@ -357,7 +356,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       const layerName = layer?.getLayerName() || layerConfig.getLayerName() || 'no name';
 
       let entryIndex = existingEntries.findIndex((entry) => entry.layerPath === entryLayerPath);
-      if (layerEntryIsGroupLayer(layerConfig)) {
+      if (layerConfig.getEntryTypeIsGroup()) {
         // If all loaded
         let bounds;
         if (ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo('loaded', layerConfig.listOfLayerEntryConfig)) {

@@ -1,5 +1,5 @@
 import React from 'react'; // GV This import is to validate that we're on the right React at the end of the file
-import { AnySchemaObject, TypeJsonObject, toJsonObject } from 'geoview-core/api/config/types/config-types';
+import { AnySchemaObject, TypeJsonObject } from 'geoview-core/api/config/types/config-types';
 import { FooterPlugin } from 'geoview-core/api/plugin/footer-plugin';
 import { TypeTabs } from 'geoview-core/ui/tabs/tabs';
 import { ChartIcon } from 'geoview-core/ui/icons';
@@ -29,7 +29,7 @@ class GeoChartFooterPlugin extends FooterPlugin {
    * @returns {TypeJsonObject} the default config
    */
   override defaultConfig(): TypeJsonObject {
-    return toJsonObject(defaultConfig);
+    return defaultConfig as unknown as TypeJsonObject;
   }
 
   // The callback used to redraw the GeoCharts in the GeoChartPanel
@@ -81,7 +81,7 @@ class GeoChartFooterPlugin extends FooterPlugin {
     // Initialize the store with geochart provided configuration if there is one
     if (this.getConfig().charts) {
       const configs = this.getConfig().charts.map((config) => convertGeoViewGeoChartConfigToCore(config));
-      GeochartEventProcessor.setGeochartCharts(this.pluginProps.mapId, configs);
+      GeochartEventProcessor.setGeochartCharts(this.mapViewer.mapId, configs);
     }
   }
 
@@ -93,7 +93,7 @@ class GeoChartFooterPlugin extends FooterPlugin {
     // Create element
     const content = (
       <GeoChartPanel
-        mapId={this.pluginProps.mapId}
+        mapId={this.mapViewer.mapId}
         provideCallbackRedraw={(theCallbackRedraw) => this.handleProvideCallbackRedraw(theCallbackRedraw)}
       />
     );

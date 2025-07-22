@@ -219,7 +219,7 @@ export class UtilAddLayer {
         const layerToAddAsLayerEntryConfig = layerToAdd as TypeLayerEntryConfig;
 
         // If it's a TypeGeoviewLayerConfig or a entry group
-        if (layerToAddAsGeoviewLayerConfig.geoviewLayerId || layerToAddAsLayerEntryConfig.entryType === 'group') {
+        if (layerToAddAsGeoviewLayerConfig.geoviewLayerId || layerToAddAsLayerEntryConfig.getEntryTypeIsGroup()) {
           // Create a group layer for the layers
           listOfLayerEntryConfig.push(
             UtilAddLayer.createLayerEntryConfigForGroupLayer(

@@ -1334,7 +1334,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     // Create list of sublayer entry configs if it is a group layer
     const listOfLayerEntryConfig: TypeLayerEntryConfig[] = [];
-    if (layerEntryConfig!.entryType === 'group') {
+    if (layerEntryConfig!.getEntryTypeIsGroup()) {
       const sublayerPaths = MapEventProcessor.getMapLayerOrder(mapId).filter(
         (entryLayerPath) =>
           entryLayerPath.startsWith(`${layerPath}/`) && entryLayerPath.split('/').length === layerPath.split('/').length + 1

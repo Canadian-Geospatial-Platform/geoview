@@ -5,6 +5,8 @@ import {
   TypeLayerEntryType,
   TypeLayerInitialSettings,
   TypeLayerStatus,
+  layerEntryIsEsriFeature,
+  layerEntryIsGeoJSON,
   layerEntryIsGroupLayer,
 } from '@/api/config/types/map-schema-types';
 import { logger } from '@/core/utils/logger';
@@ -13,6 +15,9 @@ import { LAYER_STATUS } from '@/core/utils/constant';
 import { GroupLayerEntryConfig } from './group-layer-entry-config';
 import { NotImplementedError } from '@/core/exceptions/core-exceptions';
 import { DateMgt, TypeDateFragments } from '@/core/utils/date-mgt';
+import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config';
+import { GeoJSONLayerEntryConfig } from './vector-validation-classes/geojson-layer-entry-config';
+import { EsriFeatureLayerEntryConfig } from './vector-validation-classes/esri-feature-layer-entry-config';
 
 /**
  * Base type used to define a GeoView layer to display on the map. Unless specified,its properties are not part of the schema.
@@ -37,10 +42,12 @@ export abstract class ConfigBaseClass {
   layerName?: string;
 
   /** Tag used to link the entry to a specific schema. This element is part of the schema. */
-  schemaTag?: TypeGeoviewLayerType;
+  // GV Cannot put it #schemaTag as it breaks things
+  abstract schemaTag: TypeGeoviewLayerType;
 
   /** Layer entry data type. This element is part of the schema. */
-  entryType?: TypeLayerEntryType;
+  // GV Cannot put it #entryType as it breaks things
+  abstract entryType: TypeLayerEntryType;
 
   /** It is used to link the layer entry config to the GeoView layer config. */
   geoviewLayerConfig = {} as TypeGeoviewLayerConfig;
@@ -157,6 +164,54 @@ export abstract class ConfigBaseClass {
   }
 
   /**
+   * Gets the entry type of the layer entry config.
+   * @returns {TypeLayerEntryType} The entry type.
+   */
+  getEntryType(): TypeLayerEntryType {
+    return this.entryType;
+  }
+
+  /**
+   * Type guard that checks if this entry is a group layer entry.
+   * @returns {boolean} True if this is a GroupLayerEntryConfig.
+   */
+  getEntryTypeIsGroup(): this is GroupLayerEntryConfig {
+    return layerEntryIsGroupLayer(this);
+  }
+
+  /**
+   * Type guard that checks if this entry is a regular layer entry (not a group layer entry).
+   * @returns {boolean} True if this is a AbstractBaseLayerEntryConfig.
+   */
+  getEntryTypeIsRegular(): this is AbstractBaseLayerEntryConfig {
+    return !this.getEntryTypeIsGroup();
+  }
+
+  /**
+   * Gets the schema tag of the layer entry config.
+   * @returns {TypeGeoviewLayerType} The schema tag.
+   */
+  getSchemaTag(): TypeGeoviewLayerType {
+    return this.schemaTag;
+  }
+
+  /**
+   * Type guard that checks if this entry is a GeoJSON schema tag layer entry.
+   * @returns {GeoJSONLayerEntryConfig} True if this is a GeoJSONLayerEntryConfig.
+   */
+  getSchemaTagGeoJSON(): this is GeoJSONLayerEntryConfig {
+    return layerEntryIsGeoJSON(this);
+  }
+
+  /**
+   * Type guard that checks if this entry is a GeoJSON schema tag layer entry.
+   * @returns {EsriFeatureLayerEntryConfig} True if this is a GeoJSONLayerEntryConfig.
+   */
+  getSchemaTagEsriFeature(): this is EsriFeatureLayerEntryConfig {
+    return layerEntryIsEsriFeature(this);
+  }
+
+  /**
    * Returns the sibling layer configurations of the current layer.
    * If the current layer has a parent, this method retrieves all layer entry
    * configs under the same parent. It can optionally exclude layers of type 'group'.
@@ -166,7 +221,7 @@ export abstract class ConfigBaseClass {
   getSiblings(includeGroups: boolean = false): ConfigBaseClass[] {
     // If there's a parent
     if (this.parentLayerConfig) {
-      return this.parentLayerConfig.listOfLayerEntryConfig.filter((config) => includeGroups || config.entryType !== 'group');
+      return this.parentLayerConfig.listOfLayerEntryConfig.filter((config) => includeGroups || !config.getEntryTypeIsGroup());
     }
 
     // No siblings
@@ -297,8 +352,8 @@ export abstract class ConfigBaseClass {
     return {
       layerName: this.layerName,
       layerId: this.layerId,
-      schemaTag: this.schemaTag,
-      entryType: this.entryType,
+      schemaTag: this.getSchemaTag(),
+      entryType: this.getEntryType(),
       layerStatus: this.layerStatus,
       isMetadataLayerGroup: this.isMetadataLayerGroup,
     } as unknown as TypeJsonObject;

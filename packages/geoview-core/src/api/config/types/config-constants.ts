@@ -1,7 +1,7 @@
 // TODO: When we are done with the config extraction, do a review of all the constants, types and utilities to
 // TO.DOCONT: remove code duplication.
 
-import { Cast, LayerEntryTypesKey, LayerTypesKey } from '@/api/config/types/config-types';
+import { LayerEntryTypesKey, LayerTypesKey } from '@/api/config/types/config-types';
 import { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config';
 import {
   TypeBasemapId,
@@ -162,7 +162,7 @@ export const CV_VALID_ZOOM_LEVELS: number[] = [0, 20];
 // TODO: Revise default values.
 // GV: The Cast operation doesn't create a real MapFeatureConfig instance because methods are missing.
 // GV: We do that only to create an object that has the default values who can be accessed using the instance property names.
-export const CV_DEFAULT_MAP_FEATURE_CONFIG = Cast<MapFeatureConfig>({
+export const CV_DEFAULT_MAP_FEATURE_CONFIG = {
   map: {
     basemapOptions: {
       basemapId: 'transport',
@@ -215,7 +215,7 @@ export const CV_DEFAULT_MAP_FEATURE_CONFIG = Cast<MapFeatureConfig>({
     showUnsymbolizedFeatures: false,
   },
   schemaVersionUsed: '1.0',
-});
+} as unknown as MapFeatureConfig;
 
 /**
  *  Definition of the initial settings default values.

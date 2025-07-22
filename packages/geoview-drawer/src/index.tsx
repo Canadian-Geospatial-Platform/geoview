@@ -1,5 +1,5 @@
 import React from 'react'; // GV This import is to validate that we're on the right React at the end of the file
-import { TypeJsonObject, toJsonObject, AnySchemaObject } from 'geoview-core/api/config/types/config-types';
+import { TypeJsonObject, AnySchemaObject } from 'geoview-core/api/config/types/config-types';
 import { TypeDrawerConfig } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
 import { NavBarPlugin, TypeNavBarButtonConfig } from 'geoview-core/api/plugin/navbar-plugin';
 
@@ -31,7 +31,7 @@ class DrawerPlugin extends NavBarPlugin {
    * @returns {TypeJsonObject} the default config
    */
   override defaultConfig(): TypeJsonObject {
-    return toJsonObject(defaultConfig);
+    return defaultConfig as unknown as TypeJsonObject;
   }
 
   /**

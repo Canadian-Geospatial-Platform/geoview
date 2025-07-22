@@ -1,5 +1,5 @@
 import React from 'react'; // GV This import is to validate that we're on the right React at the end of the file
-import { TypeJsonObject, toJsonObject, AnySchemaObject } from 'geoview-core/api/config/types/config-types';
+import { TypeJsonObject, AnySchemaObject } from 'geoview-core/api/config/types/config-types';
 import { TypeTabs } from 'geoview-core/ui/tabs/tabs';
 import { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 import { TimeSliderIcon } from 'geoview-core/ui';
@@ -45,7 +45,7 @@ class TimeSliderPlugin extends FooterPlugin {
    * @returns {TypeJsonObject} the default config
    */
   override defaultConfig(): TypeJsonObject {
-    return toJsonObject(defaultConfig);
+    return defaultConfig as unknown as TypeJsonObject;
   }
 
   /**
@@ -132,7 +132,7 @@ class TimeSliderPlugin extends FooterPlugin {
       value: this.value!,
       label: 'timeSlider.title',
       icon: <TimeSliderIcon />,
-      content: <TimeSliderPanel mapId={this.pluginProps.mapId} configObj={this.getConfig()} />,
+      content: <TimeSliderPanel mapId={this.mapViewer.mapId} configObj={this.getConfig()} />,
     };
   }
 
@@ -141,12 +141,12 @@ class TimeSliderPlugin extends FooterPlugin {
    */
   override onAdd(): void {
     // If map layers are all 'loaded' already
-    if (this.mapViewer().mapLayersLoaded) {
+    if (this.mapViewer.mapLayersLoaded) {
       // Layers are already 'loaded', initialize the time slider plugin
       this.initTimeSliderPlugin();
     } else {
       // Wait for the layers to be 'loaded' so that their 'layerTemporalDimension' information is set ('techhnically, it's 'processed', but putting 'loaded' to better support layers migration)
-      this.mapViewer().onMapLayersLoaded(() => {
+      this.mapViewer.onMapLayersLoaded(() => {
         // Initialize the time slider plugin once all layers are 'loaded'
         this.initTimeSliderPlugin();
       });
@@ -161,12 +161,12 @@ class TimeSliderPlugin extends FooterPlugin {
    */
   initTimeSliderPlugin(): void {
     // Now the layerTemporalDimension should be good on the layers
-    const orderedLayerPaths = this.mapViewer().layer.getLayerEntryConfigIds();
+    const orderedLayerPaths = this.mapViewer.layer.getLayerEntryConfigIds();
     const initialTimeSliderLayerPaths = this.#filterTimeSliderLayers(orderedLayerPaths);
     if (initialTimeSliderLayerPaths) {
       initialTimeSliderLayerPaths.forEach((layerPath) => {
         // Get the layer
-        const layer = this.mapViewer().layer.getGeoviewLayer(layerPath);
+        const layer = this.mapViewer.layer.getGeoviewLayer(layerPath);
 
         // Get the time slider config for the layer
         const timesliderConfig = this.getConfig().sliders.find((slider) => slider.layerPaths.includes(layerPath));
@@ -177,7 +177,7 @@ class TimeSliderPlugin extends FooterPlugin {
           const layerConfig = layer.getLayerConfig();
 
           // Check and add time slider layer when needed
-          TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.pluginProps.mapId, layer, layerConfig, timesliderConfig);
+          TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.mapViewer.mapId, layer, layerConfig, timesliderConfig);
         }
       });
     }
@@ -193,7 +193,7 @@ class TimeSliderPlugin extends FooterPlugin {
   #filterTimeSliderLayers(layerPaths: string[]): string[] {
     const filteredLayerPaths = layerPaths.filter((layerPath) => {
       // Get the layer
-      const layer = this.mapViewer().layer.getGeoviewLayer(layerPath);
+      const layer = this.mapViewer.layer.getGeoviewLayer(layerPath);
 
       // If of the right type
       if (layer instanceof AbstractGVLayer) {

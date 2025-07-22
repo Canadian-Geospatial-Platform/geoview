@@ -12,7 +12,7 @@ import { LineString, Polygon } from 'ol/geom';
 import { Coordinate } from 'ol/coordinate';
 import View from 'ol/View';
 
-import { Cast, TypeJsonObject } from '@/api/config/types/config-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { Projection } from '@/geo/utils/projection';
@@ -227,7 +227,7 @@ export function getTranslateValues(element: HTMLElement): {
   y: number;
   z: number;
 } {
-  const style = Cast<TypeCSSStyleDeclaration>(window.getComputedStyle(element));
+  const style = window.getComputedStyle(element) as TypeCSSStyleDeclaration;
   const matrix = style.transform || style.webkitTransform || style.mozTransform;
   const values = { x: 0, y: 0, z: 0 };
 

@@ -10,28 +10,23 @@ import { TypeJsonObject, AnySchemaObject } from '@/api/config/types/config-types
 import { logger } from '@/core/utils/logger';
 
 /**
- * interface used by all plugins to define their options.
- */
-export type TypePluginOptions = {
-  mapId: string;
-  viewer: MapViewer;
-};
-
-/**
  * Plugin abstract base class.
  */
 export abstract class AbstractPlugin {
   // Id of the plugin
   pluginId: string;
 
+  // The map viewer for the plugin
+  mapViewer: MapViewer;
+
   // Plugin properties
-  pluginProps: TypePluginOptions;
+  pluginProps?: TypeJsonObject;
 
   // Plugin config object.
   #configObj: TypeJsonObject = {};
 
   // Plugin api object.
-  // TODO: Check - Remove this property and use a MapEventProcessor.getMapViewer() instead?
+  // TODO: Check - Remove this property and use 'mapViewer' instead?
   api: API;
 
   // Plugin react object.
@@ -49,11 +44,13 @@ export abstract class AbstractPlugin {
   /**
    * Creates an instance of the plugin.
    * @param {string} pluginId - Unique identifier for the plugin instance.
-   * @param {TypePluginOptions} props - The plugin options and properties.
+   * @param {MapViewer} mapViewer - The map viewer
+   * @param {TypeJsonObject | undefined} props - Optional plugin options and properties.
    */
   // GV Do not edit the constructor params without editing the plugin.ts dynamic constructor call looking like 'new (constructor as any)'
-  constructor(pluginId: string, props: TypePluginOptions) {
+  constructor(pluginId: string, mapViewer: MapViewer, props: TypeJsonObject | undefined) {
     this.pluginId = pluginId;
+    this.mapViewer = mapViewer;
     this.pluginProps = props;
     this.api = api;
     this.react = window.cgpv.reactUtilities.react;
@@ -76,14 +73,6 @@ export abstract class AbstractPlugin {
    */
   getConfig(): unknown {
     return this.#configObj;
-  }
-
-  /**
-   * Returns the MapViewer used by this Plugin
-   * @returns MapViewer The MapViewer used by this Plugin
-   */
-  mapViewer(): MapViewer {
-    return this.api.getMapViewer(this.pluginProps.mapId);
   }
 
   /**
@@ -138,7 +127,7 @@ export abstract class AbstractPlugin {
    */
   add(): void {
     // Log
-    logger.logInfo(`Plugin '${this.pluginId}' loaded, adding it on map ${this.pluginProps.mapId}`);
+    logger.logInfo(`Plugin '${this.pluginId}' loaded, adding it on map ${this.mapViewer.mapId}`);
 
     // Add
     this.onAdd();
@@ -147,7 +136,7 @@ export abstract class AbstractPlugin {
     this.onAdded?.();
 
     // Log
-    logger.logInfo(`Plugin '${this.pluginId}' loaded, and added to map ${this.pluginProps.mapId}`);
+    logger.logInfo(`Plugin '${this.pluginId}' loaded, and added to map ${this.mapViewer.mapId}`);
   }
 
   /**
@@ -155,7 +144,7 @@ export abstract class AbstractPlugin {
    */
   remove(): void {
     // Log
-    logger.logInfo(`Plugin '${this.pluginId}' being removed from map ${this.pluginProps.mapId}`);
+    logger.logInfo(`Plugin '${this.pluginId}' being removed from map ${this.mapViewer.mapId}`);
 
     // Remove
     this.onRemove();
@@ -164,6 +153,6 @@ export abstract class AbstractPlugin {
     this.onRemoved?.();
 
     // Log
-    logger.logInfo(`Plugin '${this.pluginId}' removed from map ${this.pluginProps.mapId}`);
+    logger.logInfo(`Plugin '${this.pluginId}' removed from map ${this.mapViewer.mapId}`);
   }
 }

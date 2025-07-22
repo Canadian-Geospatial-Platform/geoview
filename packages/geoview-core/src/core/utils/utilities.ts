@@ -2,7 +2,7 @@ import { Root, createRoot } from 'react-dom/client';
 import sanitizeHtml from 'sanitize-html';
 
 import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
-import { Cast, TypeJsonObject } from '@/api/config/types/config-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 import { logger } from '@/core/utils/logger';
 import i18n from '@/core/translation/i18n';
 import { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
@@ -174,7 +174,7 @@ export function xmlToJson(xml: Document | Node | Element): any {
   // check for node type if it's an element, attribute, text, comment...
   if (xml.nodeType === 1) {
     // if it's an element, check the element's attributes to convert to json
-    const element = Cast<Element>(xml);
+    const element = xml as Element;
     if (element.attributes) {
       if (element.attributes.length > 0) {
         obj['@attributes'] = {};

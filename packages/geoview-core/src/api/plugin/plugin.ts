@@ -8,6 +8,7 @@ import { Fetch } from '@/core/utils/fetch-helper';
 import { TypeJsonObject } from '@/api/config/types/config-types';
 import { logger } from '@/core/utils/logger';
 import { AbstractPlugin } from './abstract-plugin';
+import { MapViewer } from '@/geo/map/map-viewer';
 
 /**
  * Class to manage plugins
@@ -74,17 +75,19 @@ export abstract class Plugin {
   /**
    * Add new plugin
    *
-   * @param {string} pluginId the plugin id
-   * @param {string} mapId id of map to add this plugin to
-   * @param {Class} constructor the plugin class (React Component)
-   * @param {Object} props the plugin properties
+   * @param {string} pluginId - The plugin id
+   * @param {typeof AbstractPlugin} constructor - The plugin class (React Component)
+   * @param {MapViewer} mapViewer - Id of map to add this plugin to
+   * @param {TypeJsonObject} props - The plugin options
    */
-  static async addPlugin(pluginId: string, mapId: string, constructor: typeof AbstractPlugin, props?: TypeJsonObject): Promise<void> {
-    // Get the MapViewer
-    const viewer = MapEventProcessor.getMapViewer(mapId);
-
+  static async addPlugin(
+    pluginId: string,
+    constructor: typeof AbstractPlugin,
+    mapViewer: MapViewer,
+    props?: TypeJsonObject
+  ): Promise<void> {
     // If the plugin is already loaded, skip
-    if (viewer.plugins[pluginId]) return;
+    if (mapViewer.plugins[pluginId]) return;
 
     // Construct the Plugin class
     let plugin: AbstractPlugin | undefined;
@@ -93,12 +96,13 @@ export abstract class Plugin {
       // in order to cancel the "'new' expression, whose target lacks a construct signature" error message
       // ? unknown type cannot be use, need to escape
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      plugin = new (constructor as any)(pluginId, props);
+      plugin = new (constructor as any)(pluginId, mapViewer, props);
     }
 
     if (plugin) {
       // Attach to the map plugins object
-      viewer.plugins[pluginId] = plugin;
+      // eslint-disable-next-line no-param-reassign
+      mapViewer.plugins[pluginId] = plugin;
 
       // a config object used to store package config
       let pluginConfigObj: TypeJsonObject = {};
@@ -125,10 +129,10 @@ export abstract class Plugin {
          * for custom config for loaded core packages on the same path of the map config.
          * If none exists then load the default config
          */
-        const configUrl = document.getElementById(mapId)?.getAttribute('data-config-url');
+        const configUrl = document.getElementById(mapViewer.mapId)?.getAttribute('data-config-url');
 
         // Check if there is a corePackageConfig for the plugin
-        const configObj = viewer.getCorePackageConfig(pluginId);
+        const configObj = mapViewer.getCorePackageConfig(pluginId);
 
         // If there is an inline config use it, if not try to read the file config associated with map config
         if (configObj) {
