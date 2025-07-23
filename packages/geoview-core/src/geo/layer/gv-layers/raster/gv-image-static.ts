@@ -62,7 +62,7 @@ export class GVImageStatic extends AbstractGVRaster {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
-   * @returns {ImageStaticLayerEntryConfig} The strongly-typed layer configuration specific to this group layer.
+   * @returns {ImageStaticLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
    */
   override getLayerConfig(): ImageStaticLayerEntryConfig {
     // Call parent and cast

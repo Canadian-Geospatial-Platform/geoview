@@ -22,7 +22,7 @@ export class GVOGCFeature extends AbstractGVVector {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
-   * @returns {OgcFeatureLayerEntryConfig} The strongly-typed layer configuration specific to this group layer.
+   * @returns {OgcFeatureLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
    */
   override getLayerConfig(): OgcFeatureLayerEntryConfig {
     // Call parent and cast

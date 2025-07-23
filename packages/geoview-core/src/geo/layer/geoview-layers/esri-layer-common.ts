@@ -56,8 +56,8 @@ export function commonValidateListOfLayerEntryConfig(layer: EsriDynamic | EsriFe
       // Use the layer name from the metadata if it exists and there is no existing name.
       if (!layerConfig.layerName) {
         // eslint-disable-next-line no-param-reassign
-        layerConfig.layerName = layer.metadata!.layers[layerConfig.layerId]?.name
-          ? (layer.metadata!.layers[layerConfig.layerId].name as string)
+        layerConfig.layerName = layer.getMetadata()!.layers[layerConfig.layerId]?.name
+          ? (layer.getMetadata()!.layers[layerConfig.layerId].name as string)
           : '';
       }
 
@@ -91,9 +91,8 @@ export function commonValidateListOfLayerEntryConfig(layer: EsriDynamic | EsriFe
         return;
       }
 
-      esriIndex = layer.metadata?.layers
-        ? (layer.metadata.layers as TypeJsonArray).findIndex((layerInfo: TypeJsonObject) => layerInfo.id === esriIndex)
-        : -1;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      esriIndex = layer.getMetadata()?.layers ? layer.getMetadata()!.layers.findIndex((layerInfo: any) => layerInfo.id === esriIndex) : -1;
 
       if (esriIndex === -1) {
         // Add a layer load error
@@ -101,7 +100,7 @@ export function commonValidateListOfLayerEntryConfig(layer: EsriDynamic | EsriFe
         return;
       }
 
-      if (layer.metadata!.layers[esriIndex]?.subLayerIds?.length) {
+      if (layer.getMetadata()!.layers[esriIndex]?.subLayerIds?.length) {
         // We will create dynamically a group layer.
         const newListOfLayerEntryConfig: TypeLayerEntryConfig[] = [];
         // If we cloneDeep the layerConfig, it seems to clone pointer for parentLayerConfig and geoviewLayerConfig to objects
@@ -110,7 +109,7 @@ export function commonValidateListOfLayerEntryConfig(layer: EsriDynamic | EsriFe
         switchToGroupLayer.entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
 
         // Only switch the layer name by the metadata if there were none pre-set (config wins over metadata rule?)
-        if (!switchToGroupLayer.layerName) switchToGroupLayer.layerName = layer.metadata!.layers[esriIndex].name as string;
+        if (!switchToGroupLayer.layerName) switchToGroupLayer.layerName = layer.getMetadata()!.layers[esriIndex].name as string;
 
         switchToGroupLayer.isMetadataLayerGroup = true;
         switchToGroupLayer.listOfLayerEntryConfig = newListOfLayerEntryConfig;
@@ -124,7 +123,7 @@ export function commonValidateListOfLayerEntryConfig(layer: EsriDynamic | EsriFe
         // Alert that we want to register new entry configs
         layer.emitLayerEntryRegisterInit({ config: groupLayerConfig });
 
-        (layer.metadata!.layers[esriIndex].subLayerIds as TypeJsonArray).forEach((layerId) => {
+        (layer.getMetadata()!.layers[esriIndex].subLayerIds as TypeJsonArray).forEach((layerId) => {
           // Make sure to copy the layerConfig source before recycling it in the constructors. This was causing the 'source' value to leak between layer entry configs
           const layerConfigCopy = {
             ...layerConfig,
@@ -143,7 +142,8 @@ export function commonValidateListOfLayerEntryConfig(layer: EsriDynamic | EsriFe
           // TO.DOCONT: with the correct values directly? Especially now that we copy the config to prevent leaking.
           subLayerEntryConfig.parentLayerConfig = groupLayerConfig;
           subLayerEntryConfig.layerId = `${layerId}`;
-          subLayerEntryConfig.layerName = (layer.metadata!.layers as TypeJsonArray).filter((item) => item.id === layerId)[0].name as string;
+          subLayerEntryConfig.layerName = (layer.getMetadata()!.layers as TypeJsonArray).filter((item) => item.id === layerId)[0]
+            .name as string;
           newListOfLayerEntryConfig.push(subLayerEntryConfig);
 
           // TODO: Refactor: Do not do this on the fly here anymore with the new configs (quite unpredictable)... (standardizing this call with the other one above for now)
@@ -162,7 +162,7 @@ export function commonValidateListOfLayerEntryConfig(layer: EsriDynamic | EsriFe
       }
 
       // eslint-disable-next-line no-param-reassign
-      if (!layerConfig.layerName) layerConfig.layerName = layer.metadata!.layers[esriIndex].name as string;
+      if (!layerConfig.layerName) layerConfig.layerName = layer.getMetadata()!.layers[esriIndex].name as string;
     }
   });
 }

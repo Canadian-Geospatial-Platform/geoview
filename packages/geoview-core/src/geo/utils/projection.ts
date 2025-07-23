@@ -242,9 +242,10 @@ export abstract class Projection {
    * Fetches definitions for unsupported projections and adds them.
    * @param {TypeJsonObject} projection - Object containing wkid and possibly latestWkid from service metadata.
    */
-  static async addProjection(projection: TypeJsonObject): Promise<void> {
+  static async addProjection(projection: TypeJsonObject | TypeProjection): Promise<void> {
     // Add latestWkid if provided
-    if (projection.latestWkid && projection.latestWkid !== projection.wkid) await this.addProjection({ wkid: projection.latestWkid });
+    if (projection.latestWkid && projection.latestWkid !== projection.wkid)
+      await this.addProjection({ wkid: projection.latestWkid } as TypeProjection);
 
     const code = projection.wkid as string;
     const projectionName = `EPSG:${code}`;
@@ -266,7 +267,7 @@ export abstract class Projection {
    * @param {TypeJsonObject | undefined} projectionObj - A projection object with properties such as latestWkid, wkid, or wkt.
    * @return {OLProjection | undefined} — Projection object, or undefined if not in list.
    */
-  static getProjectionFromObj(projectionObj: TypeJsonObject | undefined): OLProjection | undefined {
+  static getProjectionFromObj(projectionObj: TypeJsonObject | TypeProjection | undefined): OLProjection | undefined {
     // If wkid
     if (projectionObj) {
       if (projectionObj.latestWkid) {
@@ -410,6 +411,15 @@ export abstract class Projection {
     return projectedCoordinates;
   }
 }
+
+/**
+ * A Type to represent a Projection in JSON.
+ */
+export type TypeProjection = {
+  wkid: number;
+  latestWkid?: number;
+  wkt?: string;
+};
 
 /**
  * Initializes the CRS84 Projection

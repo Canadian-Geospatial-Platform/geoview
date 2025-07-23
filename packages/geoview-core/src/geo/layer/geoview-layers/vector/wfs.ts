@@ -19,9 +19,14 @@ import {
   CONST_LAYER_TYPES,
 } from '@/api/config/types/map-schema-types';
 
-import { findPropertyNameByRegex } from '@/core/utils/utilities';
+import { findPropertyByRegexPath } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { WfsLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
+import {
+  TypeMetadataWFS,
+  TypeMetadataWFSOperationMetadataOperationParameter,
+  TypeMetadataWFSOperationMetadataOperationParameterValue,
+  WfsLayerEntryConfig,
+} from '@/core/utils/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { LayerNoCapabilitiesError } from '@/core/exceptions/layer-exceptions';
@@ -54,19 +59,28 @@ export class WFS extends AbstractGeoViewVector {
   }
 
   /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeMetadataWFS | undefined} The strongly-typed layer configuration specific to this layer.
+   */
+  override getMetadata(): TypeMetadataWFS | undefined {
+    return super.getMetadata() as TypeMetadataWFS | undefined;
+  }
+
+  /**
    * Gets the WFS version
    * @returns {string | undefined} The WFS service version as read from the metadata attribute.
    */
   getVersion(): string | undefined {
-    return this.metadata?.['@attributes'].version as string | undefined;
+    return this.getMetadata()?.['@attributes'].version;
   }
 
   /**
    * Overrides the way the metadata is fetched.
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-   * @returns {Promise<TypeJsonObject | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
+   * @returns {Promise<TypeMetadataWFS | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
    */
-  protected override async onFetchServiceMetadata(): Promise<TypeJsonObject | undefined> {
+  protected override async onFetchServiceMetadata(): Promise<TypeMetadataWFS | undefined> {
     // Fetch it
     const metadata = await WFS.fetchMetadata(this.metadataAccessPath);
 
@@ -111,11 +125,11 @@ export class WFS extends AbstractGeoViewVector {
     // Note that the code assumes wfs feature type list does not contains metadata layer group. If you need layer group,
     // you can define them in the configuration section.
     // when there is only one layer, it is not an array but an object
-    if (!Array.isArray(this.metadata?.FeatureTypeList?.FeatureType))
-      this.metadata!.FeatureTypeList.FeatureType = [this.metadata?.FeatureTypeList?.FeatureType] as TypeJsonObject;
+    if (!Array.isArray(this.getMetadata()?.FeatureTypeList?.FeatureType))
+      this.getMetadata()!.FeatureTypeList.FeatureType = [this.getMetadata()!.FeatureTypeList?.FeatureType] as TypeJsonObject;
 
-    if (Array.isArray(this.metadata?.FeatureTypeList?.FeatureType)) {
-      const metadataLayerList = this.metadata?.FeatureTypeList.FeatureType as Array<TypeJsonObject>;
+    if (Array.isArray(this.getMetadata()?.FeatureTypeList?.FeatureType)) {
+      const metadataLayerList = this.getMetadata()!.FeatureTypeList.FeatureType as Array<TypeJsonObject>;
       const foundMetadata = metadataLayerList.find((layerMetadata) => {
         const metadataLayerId = (layerMetadata.Name && layerMetadata.Name['#text']) as string;
         return metadataLayerId.includes(layerConfig.layerId);
@@ -158,17 +172,18 @@ export class WFS extends AbstractGeoViewVector {
     queryUrl = queryUrl!.indexOf('?') > -1 ? queryUrl!.substring(0, queryUrl!.indexOf('?')) : queryUrl;
 
     // extract DescribeFeatureType operation parameters
-    const describeFeatureParams = this.metadata!['ows:OperationsMetadata']['ows:Operation'][1]['ows:Parameter'];
-    const describeFeatureParamsValues = findPropertyNameByRegex(describeFeatureParams, /(?:Value)/);
+    const describeFeatureParams = this.getMetadata()!['ows:OperationsMetadata']['ows:Operation'][1]['ows:Parameter'];
+    const describeFeatureParamsValues = findPropertyByRegexPath(describeFeatureParams, /(?:Value)/) as
+      | TypeMetadataWFSOperationMetadataOperationParameter
+      | TypeMetadataWFSOperationMetadataOperationParameterValue[];
+
     let outputFormat = '';
-    if (describeFeatureParamsValues !== undefined) {
-      if (Array.isArray(describeFeatureParamsValues['ows:Value'])) {
-        outputFormat = describeFeatureParamsValues['ows:Value'][0]['#text'] as string;
-      } else if (describeFeatureParamsValues['ows:Value'] === undefined) {
-        outputFormat = describeFeatureParamsValues[0]['#text'] as string;
-      } else {
-        outputFormat = describeFeatureParamsValues['ows:Value']['#text'] as string;
+    if (Array.isArray(describeFeatureParamsValues)) {
+      if (describeFeatureParamsValues.length > 0) {
+        outputFormat = describeFeatureParamsValues[0]['#text'];
       }
+    } else if (describeFeatureParamsValues['ows:Value']) {
+      outputFormat = describeFeatureParamsValues['ows:Value'][0]['#text'];
     }
 
     const describeFeatureUrl = `${queryUrl}?service=WFS&request=DescribeFeatureType&version=${this.getVersion()}&outputFormat=${encodeURIComponent(outputFormat)}&typeName=${layerConfig.layerId}`;
@@ -263,7 +278,7 @@ export class WFS extends AbstractGeoViewVector {
    * @param {string} url - The url to query the metadata from.
    * @returns {Promise<TypeJsonObject | undefined>} Promise with the metadata when fetched or undefined when capabilities weren't found.
    */
-  static async fetchMetadata(url: string): Promise<TypeJsonObject | undefined> {
+  static async fetchMetadata(url: string): Promise<TypeMetadataWFS | undefined> {
     // Check if url contains metadata parameters for the getCapabilities request and reformat the urls
     const getCapabilitiesUrl = url.indexOf('?') > -1 ? url.substring(url.indexOf('?')) : `?service=WFS&request=GetCapabilities`;
     const queryUrl = url.indexOf('?') > -1 ? url.substring(0, url.indexOf('?')) : url;
@@ -272,7 +287,7 @@ export class WFS extends AbstractGeoViewVector {
     const responseJson = await Fetch.fetchXMLToJson(`${queryUrl}${getCapabilitiesUrl}`);
 
     // Parse the WFS_Capabilities
-    return findPropertyNameByRegex(responseJson, /(?:WFS_Capabilities)/);
+    return findPropertyByRegexPath(responseJson, /(?:WFS_Capabilities)/) as TypeMetadataWFS;
   }
 
   /**

@@ -30,8 +30,13 @@ export abstract class AbstractGVRaster extends AbstractGVLayer {
    * @returns {OLProjection | undefined} The OpenLayer projection
    */
   getMetadataProjection(): OLProjection | undefined {
+    // Get metadata
+    // GV Can be any object so disable eslint and proceed with caution
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const metadata = this.getLayerConfig().getServiceMetadata() as any;
+
     // Redirect
-    return Projection.getProjectionFromObj(this.getLayerConfig().getServiceMetadata()?.fullExtent?.spatialReference);
+    return Projection.getProjectionFromObj(metadata?.fullExtent?.spatialReference);
   }
 
   /**
@@ -48,7 +53,10 @@ export abstract class AbstractGVRaster extends AbstractGVLayer {
     }
 
     // Here, we couldn't find the layer metadata, so we use the layer parent definition metadata
-    const metadata = this.getLayerConfig().getServiceMetadata();
+    // Get metadata
+    // GV Can be any object so disable eslint and proceed with caution
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const metadata = this.getLayerConfig().getServiceMetadata() as any;
     if (metadata?.fullExtent) {
       return [metadata?.fullExtent.xmin, metadata?.fullExtent.ymin, metadata?.fullExtent.xmax, metadata?.fullExtent.ymax] as Extent;
     }

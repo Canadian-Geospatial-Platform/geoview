@@ -3,7 +3,6 @@ import Collection from 'ol/Collection';
 import LayerGroup, { Options as LayerGroupOptions } from 'ol/layer/Group';
 
 import { delay, generateId } from '@/core/utils/utilities';
-import { TypeJsonObject } from '@/api/config/types/config-types';
 import { TypeDateFragments, DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
@@ -12,7 +11,6 @@ import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import {
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
-  layerEntryIsGroupLayer,
   TypeLayerInitialSettings,
   TypeLayerStatus,
   TypeStyleGeometry,
@@ -105,7 +103,7 @@ export abstract class AbstractGeoViewLayer {
   olRootLayer?: BaseLayer;
 
   /** The service metadata. */
-  metadata?: TypeJsonObject | undefined;
+  #metadata?: TypeMetadata;
 
   /** Date format object used to translate server to ISO format and ISO to server format */
   serverDateFragmentsOrder?: TypeDateFragments;
@@ -145,32 +143,6 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
-   * Must override method to read the service metadata from the metadataAccessPath.
-   * @returns {Promise<void>} A promise resolved once the metadata has been fetched.
-   */
-  protected abstract onFetchServiceMetadata(): Promise<TypeJsonObject | undefined>;
-
-  /**
-   * Must override method to initialize a layer entry based on a GeoView layer config.
-   * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
-   */
-  protected abstract onInitLayerEntries(): Promise<TypeGeoviewLayerConfig>;
-
-  /**
-   * Must override method to process a layer entry and return a Promise of an Open Layer Base Layer object.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - Information needed to create the GeoView layer.
-   * @returns {Promise<AbstractBaseLayerEntryConfig>} The Promise that the config metadata has been processed.
-   */
-  protected abstract onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig>;
-
-  /**
-   * Must override method to create a GV Layer from a layer configuration.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
-   * @returns {AbstractGVLayer} The GV Layer that has been created.
-   */
-  protected abstract onCreateGVLayer(layerConfig: AbstractBaseLayerEntryConfig): AbstractGVLayer;
-
-  /**
    * Set the list of layer entry configuration and initialize the registered layer object and register all layers to layer sets.
    *
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration options.
@@ -203,9 +175,44 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
+   * Must override method to read the service metadata from the metadataAccessPath.
+   * @returns {Promise<void>} A promise resolved once the metadata has been fetched.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  protected abstract onFetchServiceMetadata(): Promise<TypeMetadata | undefined>;
+
+  /**
+   * Must override method to initialize a layer entry based on a GeoView layer config.
+   * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
+   */
+  protected abstract onInitLayerEntries(): Promise<TypeGeoviewLayerConfig>;
+
+  /**
+   * Must override method to process a layer entry and return a Promise of an Open Layer Base Layer object.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - Information needed to create the GeoView layer.
+   * @returns {Promise<AbstractBaseLayerEntryConfig>} The Promise that the config metadata has been processed.
+   */
+  protected abstract onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig>;
+
+  /**
+   * Must override method to create a GV Layer from a layer configuration.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
+   * @returns {AbstractGVLayer} The GV Layer that has been created.
+   */
+  protected abstract onCreateGVLayer(layerConfig: AbstractBaseLayerEntryConfig): AbstractGVLayer;
+
+  /**
+   * Overridable method to get the metadata.
+   * Override this function to return the more precise type (covariant return).
+   */
+  getMetadata(): unknown | undefined {
+    return this.#metadata;
+  }
+
+  /**
    * A quick getter to help identify which layer class the current instance is coming from.
    */
-  public getClassName(): string {
+  getClassName(): string {
     // Return the name of the class
     return this.constructor.name;
   }
@@ -315,7 +322,7 @@ export abstract class AbstractGeoViewLayer {
         // Process and, yes, keep the await here, because we want to make extra sure the onFetchAndSetServiceMetadata is
         // executed asynchronously, even if the implementation of the overriden method is synchronous.
         // All so that the try/catch works nicely here.
-        this.metadata = await this.onFetchServiceMetadata();
+        this.#metadata = await this.onFetchServiceMetadata();
       } else {
         // GV It's possible there is no metadataAccessPath, e.g.: CSV (csvLYR2), we keep the if condition here
         // Skip
@@ -343,24 +350,24 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Recursively validates the configuration of the layer entries to ensure that each layer is correctly defined.
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig - The list of layer entries configuration to validate.
+   * @param {ConfigBaseClass[]} listOfLayerEntryConfig - The list of layer entries configuration to validate.
    */
-  validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
+  validateListOfLayerEntryConfig(listOfLayerEntryConfig: ConfigBaseClass[]): void {
     // Log
     logger.logTraceCore(`LAYERS - 3 - Validating list of layer entry configs for: ${this.geoviewLayerId}`, this.listOfLayerEntryConfig);
 
     // When no metadata is provided, there's no validation to be done.
-    if (!this.metadata) return;
+    if (!this.#metadata) return;
 
     // Copy the service metadata in each layer entry config right away
     listOfLayerEntryConfig.forEach((layerConfig) => {
       // If an AbstractBaseLayerEntryConfig
       if (layerConfig instanceof AbstractBaseLayerEntryConfig) {
         // Copy the service metadata right away
-        layerConfig.setServiceMetadata(this.metadata!);
+        layerConfig.setServiceMetadata(this.#metadata);
 
         // If there's a copyrightText found in the metadata
-        const copyrightText = this.metadata?.copyrightText as string | undefined;
+        const copyrightText = this.#metadata?.copyrightText;
         const attributions = layerConfig.getAttributions();
         if (copyrightText && !attributions.includes(copyrightText)) {
           // Add it
@@ -376,13 +383,13 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Overridable method to validate the configuration of the layer entries to ensure that each layer is correctly defined.
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig - The list of layer entries configuration to validate.
+   * @param {ConfigBaseClass[]} listOfLayerEntryConfig - The list of layer entries configuration to validate.
    */
-  protected onValidateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
+  protected onValidateListOfLayerEntryConfig(listOfLayerEntryConfig: ConfigBaseClass[]): void {
     // Loop on each layer entry config
     listOfLayerEntryConfig.forEach((layerConfig) => {
       // If is a group layer
-      if (layerEntryIsGroupLayer(layerConfig)) {
+      if (layerConfig.getEntryTypeIsGroup()) {
         // Set the layer status to processing
         layerConfig.setLayerStatusProcessing();
 
@@ -413,9 +420,9 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Validates the configuration of the layer entries to ensure that each layer is correctly defined.
-   * @param {TypeLayerEntryConfig} layerConfig - The layer entry config to validate
+   * @param {ConfigBaseClass} layerConfig - The layer entry config to validate
    */
-  validateLayerEntryConfig(layerConfig: TypeLayerEntryConfig): void {
+  validateLayerEntryConfig(layerConfig: ConfigBaseClass): void {
     // Set the layer status to processing
     layerConfig.setLayerStatusProcessing();
 
@@ -427,7 +434,7 @@ export abstract class AbstractGeoViewLayer {
    * Overridable method to validate the configuration of the layer entries to ensure that each layer is correctly defined.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/class-methods-use-this
-  protected onValidateLayerEntryConfig(layerConfig: TypeLayerEntryConfig): void {
+  protected onValidateLayerEntryConfig(layerConfig: ConfigBaseClass): void {
     // Override to perform a validation on the layer entry config
   }
 
@@ -514,7 +521,7 @@ export abstract class AbstractGeoViewLayer {
     // For each layer entry in the config
     listOfLayerEntryConfig.forEach((layerConfig) => {
       // If is a group layer
-      if (layerEntryIsGroupLayer(layerConfig)) {
+      if (layerConfig.getEntryTypeIsGroup()) {
         // Add it
         promisesEntryMetadata.push(Promise.resolve(layerConfig));
 
@@ -580,7 +587,7 @@ export abstract class AbstractGeoViewLayer {
         if (layerConfig.layerStatus === 'error') return undefined;
 
         // If working on a group layer
-        if (layerEntryIsGroupLayer(layerConfig)) {
+        if (layerConfig.getEntryTypeIsGroup()) {
           const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.initialSettings);
           const groupReturned = await this.#processListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig, newLayerGroup);
           if (groupReturned) {
@@ -616,7 +623,7 @@ export abstract class AbstractGeoViewLayer {
       // TODO: Refactor - Rework this Promise to be "Promise<AbstractBaseLayer>"
       const promiseOfLayerCreated: Promise<AbstractBaseLayer | undefined>[] = [];
       listOfLayerEntryConfig.forEach((layerConfig) => {
-        if (layerEntryIsGroupLayer(layerConfig)) {
+        if (layerConfig.getEntryTypeIsGroup()) {
           const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.initialSettings);
           promiseOfLayerCreated.push(this.#processListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig, newLayerGroup));
         } else if (layerConfig.layerStatus === 'error') {
@@ -754,8 +761,10 @@ export abstract class AbstractGeoViewLayer {
   /**
    * Adds a GeoViewLayerLoadedFailedError in the internal list of errors for a layer being loaded.
    * It also sets the layer status to error.
+   * @param {Error} error - The error
+   * @param {ConfigBaseClass | undefined} layerConfig - Optional layer config
    */
-  addLayerLoadError(error: Error, layerConfig: TypeLayerEntryConfig | undefined): void {
+  addLayerLoadError(error: Error, layerConfig: ConfigBaseClass | undefined): void {
     // Add the error to the list
     this.layerLoadError.push(error);
 
@@ -1044,7 +1053,7 @@ export abstract class AbstractGeoViewLayer {
     // For each layer entry config in the list
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       // If the layer entry is a group
-      if (layerEntryIsGroupLayer(layerConfig)) {
+      if (layerConfig.getEntryTypeIsGroup()) {
         // Recursively set the status to the children
         AbstractGeoViewLayer.#logErrorAndSetStatusErrorAll(error, layerConfig.listOfLayerEntryConfig);
         // Log the error and set status error right away
@@ -1064,10 +1073,10 @@ export abstract class AbstractGeoViewLayer {
    * If the error is a `GeoViewError`, its localized message (in English) will be used.
    * If the error has a `cause`, it will be appended to the message.
    * @param {Error} error - The error to log.
-   * @param {TypeLayerEntryConfig | undefined} layerConfig - The layer configuration to update, if provided.
+   * @param {ConfigBaseClass | undefined} layerConfig - The layer configuration to update, if provided.
    * @private
    */
-  static #logErrorAndSetStatusError(error: Error, layerConfig: TypeLayerEntryConfig | undefined): void {
+  static #logErrorAndSetStatusError(error: Error, layerConfig: ConfigBaseClass | undefined): void {
     // Log the error
     GeoViewError.logError(error);
 
@@ -1079,6 +1088,10 @@ export abstract class AbstractGeoViewLayer {
 }
 
 // #region EVENT DEFINITIONS
+
+export type TypeMetadata = {
+  copyrightText?: string;
+};
 
 /**
  * Define an event for the delegate

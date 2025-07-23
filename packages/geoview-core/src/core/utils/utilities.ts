@@ -364,26 +364,26 @@ export function exportPNG(dataUrl: string, name: string): void {
 
 /**
  * Find an object property by regex values. The find is case insensitive.
- * @param {TypeJsonObject | undefined} objectItem - The object item
- * @param {RegExp | RegExp[]} regex - The regex value or the regex sequence to search
- * @returns {TypeJsonObject | undefined} The object if it exist or undefined
+ * @param {unknown | undefined} objectItem - The object to search in.
+ * @param {RegExp | RegExp[]} patterns - A single RegExp or an array of RegExp patterns to match in sequence.
+ * @returns {unknown | undefined} The value found at the end of the matching path, or undefined if not found.
  */
-export const findPropertyNameByRegex = (objectItem: TypeJsonObject | undefined, regex: RegExp | RegExp[]): TypeJsonObject | undefined => {
-  const regexArray = Array.isArray(regex) ? regex : [regex];
+export function findPropertyByRegexPath(objectItem: unknown | undefined, patterns: RegExp | RegExp[]): unknown | undefined {
+  const regexes = Array.isArray(patterns) ? patterns : [patterns];
 
-  let valueObject: TypeJsonObject | undefined = objectItem;
-  regexArray.forEach((regularExpression) => {
-    if (valueObject) {
-      const query = new RegExp(regularExpression, 'i');
-      const valueKey = Object.keys(valueObject).find((q) => {
-        return query.test(q);
-      });
-      valueObject = valueKey !== undefined ? valueObject[valueKey] : undefined;
-    }
-  });
+  let current: unknown = objectItem;
 
-  return valueObject;
-};
+  for (const regex of regexes) {
+    if (typeof current !== 'object' || current === null) return undefined;
+
+    const entries = Object.entries(current as Record<string, unknown>);
+    const match = entries.find(([key]) => new RegExp(regex, 'i').test(key));
+
+    current = match?.[1];
+  }
+
+  return current;
+}
 
 /**
  * Check string to see if it is an image

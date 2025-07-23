@@ -5,7 +5,10 @@ import { ReadOptions } from 'ol/format/Feature';
 import Feature from 'ol/Feature';
 
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
-import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
+import {
+  EsriFeatureLayerEntryConfig,
+  TypeMetadataEsriFeature,
+} from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import {
   TypeLayerEntryConfig,
   TypeVectorSourceInitialConfig,
@@ -16,7 +19,7 @@ import {
 
 import { commonProcessLayerMetadata, commonValidateListOfLayerEntryConfig } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { LayerNotFeatureLayerError } from '@/core/exceptions/layer-exceptions';
-import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
+import { TypeJsonArray } from '@/api/config/types/config-types';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
 import { Fetch } from '@/core/utils/fetch-helper';
@@ -47,11 +50,20 @@ export class EsriFeature extends AbstractGeoViewVector {
   }
 
   /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeMetadataEsriFeature | undefined} The strongly-typed layer configuration specific to this layer.
+   */
+  override getMetadata(): TypeMetadataEsriFeature | undefined {
+    return super.getMetadata() as TypeMetadataEsriFeature | undefined;
+  }
+
+  /**
    * Overrides the way the metadata is fetched.
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
    * @returns {Promise<TypeJsonObject | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
    */
-  protected override async onFetchServiceMetadata(): Promise<TypeJsonObject | undefined> {
+  protected override async onFetchServiceMetadata(): Promise<TypeMetadataEsriFeature | undefined> {
     // Query
     const responseJson = await Fetch.fetchJsonAsObject(`${this.metadataAccessPath}?f=json`);
 
@@ -59,7 +71,7 @@ export class EsriFeature extends AbstractGeoViewVector {
     AbstractGeoViewRaster.throwIfMetatadaHasError(this.geoviewLayerId, this.geoviewLayerName, responseJson);
 
     // Return it
-    return responseJson;
+    return responseJson as unknown as TypeMetadataEsriFeature;
   }
 
   /**
@@ -159,7 +171,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @returns {boolean} true if an error is detected.
    */
   esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig, esriIndex: number): boolean {
-    if (this.metadata!.layers[esriIndex].type !== 'Feature Layer') {
+    if (this.getMetadata()!.layers[esriIndex].type !== 'Feature Layer') {
       // Add a layer load error
       this.addLayerLoadError(new LayerNotFeatureLayerError(layerConfig.layerPath, layerConfig.getLayerName()), layerConfig);
       return true;

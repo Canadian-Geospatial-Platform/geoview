@@ -24,7 +24,7 @@ export class GVEsriFeature extends AbstractGVVector {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
-   * @returns {EsriFeatureLayerEntryConfig} The strongly-typed layer configuration specific to this group layer.
+   * @returns {EsriFeatureLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
    */
   override getLayerConfig(): EsriFeatureLayerEntryConfig {
     // Call parent and cast

@@ -74,16 +74,6 @@ export class GeoPackage extends AbstractGeoViewVector {
   }
 
   /**
-   * Overrides the way the metadata is fetched.
-   * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-   * @returns {Promise<TypeJsonObject | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
-   */
-  protected override onFetchServiceMetadata(): Promise<TypeJsonObject | undefined> {
-    // None
-    return Promise.resolve(undefined);
-  }
-
-  /**
    * Overrides the way a geoview layer config initializes its layer entries.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
    */

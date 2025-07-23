@@ -24,7 +24,7 @@ import { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
  */
 export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /** The metadata associated with the service */
-  #serviceMetadata?: TypeJsonObject;
+  #serviceMetadata?: unknown;
 
   /** The metadata associated with the layer */
   #layerMetadata?: TypeJsonObject;
@@ -61,17 +61,17 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Gets the service metadata that is associated to the service.
-   * @returns {TypeJsonObject} The service metadata.
+   * @returns {unknown | undefined} The service metadata.
    */
-  getServiceMetadata(): TypeJsonObject | undefined {
+  getServiceMetadata(): unknown | undefined {
     return this.#serviceMetadata;
   }
 
   /**
    * Sets the service metadata for the layer.
-   * @param {TypeJsonObject} metadata - The service metadata to set
+   * @param {unknown} metadata - The service metadata to set
    */
-  setServiceMetadata(metadata: TypeJsonObject): void {
+  setServiceMetadata(metadata: unknown): void {
     this.#serviceMetadata = metadata;
   }
 
@@ -150,11 +150,11 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Overrides the serialization of the mother class
-   * @returns {TypeJsonValue} The serialized TypeBaseLayerEntryConfig
+   * @returns {unknown} The serialized TypeBaseLayerEntryConfig
    */
-  override onSerialize(): TypeJsonObject {
+  override onSerialize(): unknown {
     // Call parent
-    // Can be any object so disable eslint
+    // GV Can be any object so disable eslint and proceed with caution
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const serialized = super.onSerialize() as any;
     // Copy values

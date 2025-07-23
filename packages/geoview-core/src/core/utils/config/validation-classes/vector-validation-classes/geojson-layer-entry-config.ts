@@ -1,7 +1,8 @@
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { TypeSourceGeoJSONInitialConfig } from '@/geo/layer/geoview-layers/vector/geojson';
-import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/config/types/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES, TypeLayerEntryConfig } from '@/api/config/types/map-schema-types';
 import { Projection } from '@/geo/utils/projection';
+import { TypeMetadata } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
 export class GeoJSONLayerEntryConfig extends VectorLayerEntryConfig {
   /** Tag used to link the entry to a specific schema. */
@@ -46,4 +47,8 @@ export class GeoJSONLayerEntryConfig extends VectorLayerEntryConfig {
       this.source.dataAccessPath = path.endsWith('/') ? `${path}${this.layerId}` : `${path}/${this.layerId}`;
     }
   }
+}
+
+export interface TypeMetadataGeoJSON extends TypeMetadata {
+  listOfLayerEntryConfig: TypeLayerEntryConfig[];
 }

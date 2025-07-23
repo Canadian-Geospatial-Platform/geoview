@@ -17,7 +17,10 @@ import {
 } from '@/api/config/types/map-schema-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
-import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
+import {
+  GeoJSONLayerEntryConfig,
+  TypeMetadataGeoJSON,
+} from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { logger } from '@/core/utils/logger';
@@ -54,11 +57,20 @@ export class GeoJSON extends AbstractGeoViewVector {
   }
 
   /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeMetadataGeoJSON | undefined} The strongly-typed layer configuration specific to this layer.
+   */
+  override getMetadata(): TypeMetadataGeoJSON | undefined {
+    return super.getMetadata() as TypeMetadataGeoJSON | undefined;
+  }
+
+  /**
    * Overrides the way the metadata is fetched.
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
    * @returns {Promise<TypeJsonObject | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
    */
-  protected override onFetchServiceMetadata(): Promise<TypeJsonObject | undefined> {
+  protected override onFetchServiceMetadata(): Promise<TypeMetadataGeoJSON | undefined> {
     // If metadataAccessPath ends with .meta, .json or .geojson
     if (
       this.metadataAccessPath.toLowerCase().endsWith('.meta') ||
@@ -99,10 +111,10 @@ export class GeoJSON extends AbstractGeoViewVector {
    * @param {ConfigBaseClass} layerConfig - The layer entry config to validate.
    */
   protected override onValidateLayerEntryConfig(layerConfig: ConfigBaseClass): void {
-    if (Array.isArray(this.metadata?.listOfLayerEntryConfig)) {
+    if (Array.isArray(this.getMetadata()?.listOfLayerEntryConfig)) {
       const foundEntry = this.#recursiveSearch(
         layerConfig.layerId,
-        this.metadata?.listOfLayerEntryConfig as unknown as TypeLayerEntryConfig[]
+        this.getMetadata()?.listOfLayerEntryConfig as unknown as TypeLayerEntryConfig[]
       );
       if (!foundEntry) {
         // Add a layer load error
@@ -122,11 +134,11 @@ export class GeoJSON extends AbstractGeoViewVector {
    */
   protected override onProcessLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<VectorLayerEntryConfig> {
     // If metadata was previously found
-    if (this.metadata) {
+    if (this.getMetadata()) {
       // Search for the layer metadata
       const layerMetadataFound = this.#recursiveSearch(
         layerConfig.layerId,
-        this.metadata?.listOfLayerEntryConfig as unknown as TypeLayerEntryConfig[]
+        this.getMetadata()!.listOfLayerEntryConfig as unknown as TypeLayerEntryConfig[]
       ) as VectorLayerEntryConfig;
 
       // If the layer metadata was found
@@ -235,9 +247,9 @@ export class GeoJSON extends AbstractGeoViewVector {
    * Fetches the metadata for a typical GeoJson class.
    * @param {string} url - The url to query the metadata from.
    */
-  static fetchMetadata(url: string): Promise<TypeJsonObject> {
+  static fetchMetadata(url: string): Promise<TypeMetadataGeoJSON> {
     // Return it
-    return Fetch.fetchJsonAsObject(url);
+    return Fetch.fetchJsonAs<TypeMetadataGeoJSON>(url);
   }
 
   /**

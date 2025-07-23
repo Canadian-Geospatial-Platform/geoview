@@ -59,7 +59,7 @@ export class GVXYZTiles extends AbstractGVTile {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
-   * @returns {XYZTilesLayerEntryConfig} The strongly-typed layer configuration specific to this group layer.
+   * @returns {XYZTilesLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
    */
   override getLayerConfig(): XYZTilesLayerEntryConfig {
     // Call parent and cast

@@ -1,5 +1,6 @@
 import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/config/types/map-schema-types';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+import { TypeMetadata } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeSourceWFSVectorInitialConfig } from '@/geo/layer/geoview-layers/vector/wfs';
 import { Projection } from '@/geo/utils/projection';
 
@@ -26,4 +27,34 @@ export class WfsLayerEntryConfig extends VectorLayerEntryConfig {
     this.source.dataProjection ??= Projection.PROJECTION_NAMES.LONLAT;
     this.source.dataAccessPath ??= this.geoviewLayerConfig.metadataAccessPath;
   }
+}
+
+export interface TypeMetadataWFS extends TypeMetadata {
+  FeatureTypeList: TypeMetadataWFSFeatureTypeList;
+  '@attributes': TypeMetadataWFSAttributes;
+  'ows:OperationsMetadata': TypeMetadataWFSOperationMetadata;
+}
+
+export interface TypeMetadataWFSFeatureTypeList {
+  FeatureType: unknown;
+}
+
+export interface TypeMetadataWFSAttributes {
+  version?: string;
+}
+
+export interface TypeMetadataWFSOperationMetadata {
+  'ows:Operation': TypeMetadataWFSOperationMetadataOperation[];
+}
+
+export interface TypeMetadataWFSOperationMetadataOperation {
+  'ows:Parameter': TypeMetadataWFSOperationMetadataOperationParameter | TypeMetadataWFSOperationMetadataOperationParameter[];
+}
+
+export interface TypeMetadataWFSOperationMetadataOperationParameter {
+  'ows:Value': TypeMetadataWFSOperationMetadataOperationParameterValue[];
+}
+
+export interface TypeMetadataWFSOperationMetadataOperationParameterValue {
+  '#text': string;
 }

@@ -1,6 +1,5 @@
 import { CONST_LAYER_ENTRY_TYPES, TypeLayerEntryConfig } from '@/api/config/types/map-schema-types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
-import { TypeJsonObject } from '@/api/config/types/config-types';
 
 /**
  * Type used to define a layer group.
@@ -30,11 +29,11 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Overrides the serialization of the mother class
-   * @returns {TypeJsonValue} The serialized TypeBaseLayerEntryConfig
+   * @returns {unknown} The serialized TypeBaseLayerEntryConfig
    */
-  override onSerialize(): TypeJsonObject {
+  override onSerialize(): unknown {
     // Call parent
-    // Can be any object so disable eslint
+    // GV Can be any object so disable eslint and proceed with caution
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const serialized = super.onSerialize() as any;
 

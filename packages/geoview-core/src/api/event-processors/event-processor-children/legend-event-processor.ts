@@ -781,9 +781,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @static
    * @param {string} mapId - The unique identifier of the map instance
    * @param {string} layerPath - The path to the layer in the map configuration
-   * @param {any[]} features - Array of features to filter
+   * @param {TypeFeatureInfoEntry[]} features - Array of features to filter
    *
-   * @returns {any[]} Filtered array of features based on their visibility settings
+   * @returns {TypeFeatureInfoEntry[]} Filtered array of features based on their visibility settings
    *
    * @description
    * This function processes features based on the layer's unique value style configuration:

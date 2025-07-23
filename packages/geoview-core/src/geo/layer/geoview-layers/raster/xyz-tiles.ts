@@ -13,7 +13,10 @@ import {
 } from '@/api/config/types/map-schema-types';
 import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
-import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
+import {
+  TypeMetadataXYZTiles,
+  XYZTilesLayerEntryConfig,
+} from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import {
   LayerEntryConfigInvalidLayerEntryConfigError,
   LayerEntryConfigLayerIdNotFoundError,
@@ -54,6 +57,15 @@ export class XYZTiles extends AbstractGeoViewRaster {
   }
 
   /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeMetadataXYZTiles | undefined} The strongly-typed layer configuration specific to this layer.
+   */
+  override getMetadata(): TypeMetadataXYZTiles | undefined {
+    return super.getMetadata() as TypeMetadataXYZTiles | undefined;
+  }
+
+  /**
    * Overrides the way a geoview layer config initializes its layer entries.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
    */
@@ -78,8 +90,8 @@ export class XYZTiles extends AbstractGeoViewRaster {
     // TODO: Update to properly use metadata from map server
     // Note that XYZ metadata as we defined it does not contain metadata layer group. If you need geojson layer group,
     // you can define them in the configuration section.
-    if (Array.isArray(this.metadata?.listOfLayerEntryConfig)) {
-      const metadataLayerList = this.metadata?.listOfLayerEntryConfig as unknown as TypeLayerEntryConfig[];
+    if (Array.isArray(this.getMetadata()?.listOfLayerEntryConfig)) {
+      const metadataLayerList = this.getMetadata()!.listOfLayerEntryConfig as unknown as TypeLayerEntryConfig[];
       const foundEntry = metadataLayerList.find((layerMetadata) => layerMetadata.layerId === layerConfig.layerId);
       if (!foundEntry) {
         // Add a layer load error
@@ -89,9 +101,10 @@ export class XYZTiles extends AbstractGeoViewRaster {
     }
 
     // ESRI MapServer Implementation
-    if (Array.isArray(this.metadata?.layers)) {
-      const metadataLayerList = this.metadata.layers;
-      const foundEntry = metadataLayerList.find((layerMetadata: TypeJsonObject) => layerMetadata.id.toString() === layerConfig.layerId);
+    if (Array.isArray(this.getMetadata()?.layers)) {
+      const metadataLayerList = this.getMetadata()!.layers;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const foundEntry = metadataLayerList.find((layerMetadata: any) => layerMetadata.id.toString() === layerConfig.layerId);
       if (!foundEntry) {
         // Add a layer load error
         this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(layerConfig), layerConfig);
@@ -113,18 +126,19 @@ export class XYZTiles extends AbstractGeoViewRaster {
     // GV Possibly caused by a difference between OGC and ESRI XYZ Tiles, but only have ESRI XYZ Tiles as example currently
     // GV Also, might be worth checking out OGCMapTile for this? https://openlayers.org/en/latest/examples/ogc-map-tiles-geographic.html
     // GV Seems like it can deal with less specificity in the url and can handle the x y z internally?
-    if (this.metadata) {
+    if (this.getMetadata()) {
       let metadataLayerConfigFound: XYZTilesLayerEntryConfig | TypeJsonObject | undefined;
-      if (this.metadata?.listOfLayerEntryConfig) {
-        metadataLayerConfigFound = (this.metadata?.listOfLayerEntryConfig as unknown as XYZTilesLayerEntryConfig[]).find(
+      if (this.getMetadata()!.listOfLayerEntryConfig) {
+        metadataLayerConfigFound = (this.getMetadata()?.listOfLayerEntryConfig as unknown as XYZTilesLayerEntryConfig[]).find(
           (metadataLayerConfig) => metadataLayerConfig.layerId === layerConfig.layerId
         );
       }
 
       // For ESRI MapServer XYZ Tiles
-      if (this.metadata?.layers) {
-        metadataLayerConfigFound = (this.metadata?.layers as TypeJsonArray).find(
-          (metadataLayerConfig) => metadataLayerConfig.id.toString() === layerConfig.layerId
+      if (this.getMetadata()?.layers) {
+        metadataLayerConfigFound = this.getMetadata()!.layers.find(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (metadataLayerConfig: any) => metadataLayerConfig.id.toString() === layerConfig.layerId
         );
       }
 

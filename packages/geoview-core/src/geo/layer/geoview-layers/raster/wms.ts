@@ -17,7 +17,10 @@ import { DateMgt } from '@/core/utils/date-mgt';
 import { validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { CV_CONFIG_PROXY_URL } from '@/api/config/types/config-constants';
 import { logger } from '@/core/utils/logger';
-import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import {
+  OgcWmsLayerEntryConfig,
+  TypeMetadataWMS,
+} from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { CancelledError, NetworkError, PromiseRejectErrorWrapper } from '@/core/exceptions/core-exceptions';
@@ -34,9 +37,6 @@ export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOf
   geoviewLayerType: typeof CONST_LAYER_TYPES.WMS;
   listOfLayerEntryConfig: OgcWmsLayerEntryConfig[];
 }
-
-/** Local type to work with a metadata fetch result */
-type MetatadaFetchResult = { layerConfig: TypeLayerEntryConfig; metadata: TypeJsonObject };
 
 /**
  * A class to add wms layer.
@@ -60,6 +60,15 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeMetadataWMS | undefined} The strongly-typed layer configuration specific to this layer.
+   */
+  override getMetadata(): TypeMetadataWMS | undefined {
+    return super.getMetadata() as TypeMetadataWMS | undefined;
+  }
+
+  /**
    * Recursively gets the layer capability for a given layer id.
    * @param {string} layerId - The layer identifier to get the capabilities for.
    * @param {TypeJsonObject | undefined} currentLayerEntry - The current layer entry from the capabilities that will be recursively searched.
@@ -67,7 +76,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   getLayerCapabilities(
     layerId: string,
-    currentLayerEntry: TypeJsonObject | undefined = this.metadata?.Capability.Layer
+    currentLayerEntry: TypeJsonObject | undefined = this.getMetadata()?.Capability.Layer
   ): TypeJsonObject | undefined {
     if (!currentLayerEntry) return undefined;
     if ('Name' in currentLayerEntry && (currentLayerEntry.Name as string) === layerId) return currentLayerEntry;
@@ -92,10 +101,10 @@ export class WMS extends AbstractGeoViewRaster {
    * - Otherwise, the method constructs a WMS GetCapabilities request.
    *   - If no specific layer configs are provided, a single metadata fetch is made.
    *   - If layer configs are present (e.g., Geomet use case), individual layer metadata is merged.
-   * @returns {Promise<TypeJsonObject | undefined>} A promise resolving to the parsed metadata object,
+   * @returns {Promise<TypeMetadataWMS | undefined>} A promise resolving to the parsed metadata object,
    * or `undefined` if metadata could not be retrieved or no capabilities were found.
    */
-  protected override onFetchServiceMetadata(): Promise<TypeJsonObject | undefined> {
+  protected override onFetchServiceMetadata(): Promise<TypeMetadataWMS | undefined> {
     // If metadata is in XML format (not WMS GetCapabilities)
     const isXml = WMS.#isXmlMetadata(this.metadataAccessPath);
     if (isXml) {
@@ -140,7 +149,7 @@ export class WMS extends AbstractGeoViewRaster {
     // Redirect
     return WMS.createWMSLayerConfig(
       this.geoviewLayerId,
-      (metadata!.Capability.Layer.Title as string) || this.geoviewLayerName,
+      metadata?.Capability.Layer.Title || this.geoviewLayerName,
       this.metadataAccessPath,
       'mapserver',
       false,
@@ -150,9 +159,9 @@ export class WMS extends AbstractGeoViewRaster {
 
   /**
    * Overrides the validation of a layer entry config.
-   * @param {TypeLayerEntryConfig} layerConfig - The layer entry config to validate.
+   * @param {ConfigBaseClass} layerConfig - The layer entry config to validate.
    */
-  protected override onValidateLayerEntryConfig(layerConfig: TypeLayerEntryConfig): void {
+  protected override onValidateLayerEntryConfig(layerConfig: ConfigBaseClass): void {
     const layerFound = this.getLayerCapabilities(layerConfig.layerId);
     if (!layerFound) {
       // Add a layer load error
@@ -220,9 +229,7 @@ export class WMS extends AbstractGeoViewRaster {
 
         // TODO: Validate the layerConfig.layerFilter is compatible with the layerCapabilities.Dimension and if not remove it completely like `delete layerConfig.layerFilter`
 
-        const temporalDimension: TypeJsonObject | undefined = (layerCapabilities.Dimension as TypeJsonArray).find(
-          (dimension) => dimension.name === 'time'
-        );
+        const temporalDimension = (layerCapabilities.Dimension as TypeJsonArray).find((dimension) => dimension.name === 'time');
 
         // If a temporal dimension was found
         if (temporalDimension) {
@@ -335,7 +342,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {Promise<TypeJsonObject | undefined>} A promise resolving to the parsed metadata object,
    * or `undefined` if the fetch failed or metadata is invalid.
    */
-  async #fetchAndProcessSingleWmsMetadata(url: string): Promise<TypeJsonObject | undefined> {
+  async #fetchAndProcessSingleWmsMetadata(url: string): Promise<TypeMetadataWMS | undefined> {
     // Fetch the WMS GetCapabilities document from the given URL
     const metadata = await WMS.fetchMetadataWMS(url, (proxyUsed) => {
       // If a proxy was used, update the metadata access path accordingly
@@ -358,7 +365,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {Promise<TypeJsonObject | undefined>} A promise resolving to the merged metadata object,
    * or `undefined` if all requests failed.
    */
-  async #fetchAndMergeMultipleWmsMetadata(url: string, layers: TypeLayerEntryConfig[]): Promise<TypeJsonObject | undefined> {
+  async #fetchAndMergeMultipleWmsMetadata(url: string, layers: TypeLayerEntryConfig[]): Promise<TypeMetadataWMS | undefined> {
     // Create one metadata fetch promise per unique layerId
     const metadataPromises = this.#createLayerMetadataPromises(url, layers);
 
@@ -372,7 +379,7 @@ export class WMS extends AbstractGeoViewRaster {
     }
 
     // Merge metadata results
-    let baseMetadata: TypeJsonObject | undefined;
+    let baseMetadata: TypeMetadataWMS | undefined;
     for (const result of results) {
       if (result.status === 'fulfilled') {
         const { metadata, layerConfig } = result.value;
@@ -460,7 +467,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {Promise<void>} A promise that the execution is completed.
    * @private
    */
-  async #fetchXmlServiceMetadata(metadataUrl: string, callbackNewMetadataUrl?: (proxyUsed: string) => void): Promise<TypeJsonObject> {
+  async #fetchXmlServiceMetadata(metadataUrl: string, callbackNewMetadataUrl?: (proxyUsed: string) => void): Promise<TypeMetadataWMS> {
     // Fetch it
     const capabilities = await WMS.fetchMetadataWMS(metadataUrl, callbackNewMetadataUrl);
 
@@ -693,7 +700,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {Function} callbackNewMetadataUrl - Callback executed when a proxy had to be used to fetch the metadata.
    *                                            The parameter sent in the callback is the proxy prefix with the '?' at the end.
    */
-  static async fetchMetadataWMS(url: string, callbackNewMetadataUrl?: (proxyUsed: string) => void): Promise<TypeJsonObject> {
+  static async fetchMetadataWMS(url: string, callbackNewMetadataUrl?: (proxyUsed: string) => void): Promise<TypeMetadataWMS> {
     let capabilitiesString;
     try {
       // Fetch the metadata
@@ -849,3 +856,6 @@ export const layerConfigIsWMS = (verifyIfLayer: TypeGeoviewLayerConfig): verifyI
 export const geoviewEntryIsWMS = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is OgcWmsLayerEntryConfig => {
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.WMS;
 };
+
+/** Local type to work with a metadata fetch result */
+type MetatadaFetchResult = { layerConfig: TypeLayerEntryConfig; metadata: TypeMetadataWMS };

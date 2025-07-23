@@ -111,7 +111,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
-   * @returns {VectorLayerEntryConfig} The strongly-typed layer configuration specific to this group layer.
+   * @returns {VectorLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
    */
   override getLayerConfig(): VectorLayerEntryConfig {
     // Call parent and cast
