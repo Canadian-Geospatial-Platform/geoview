@@ -15,7 +15,7 @@ import {
   TypeOutfields,
 } from '@/api/config/types/map-schema-types';
 
-import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewLayer, TypeMetadata } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
@@ -60,6 +60,16 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
     // Redirect
     return this.onCreateVectorSource(layerConfig, {}, {});
+  }
+
+  /**
+   * Overrides the way the metadata is fetched.
+   * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
+   * @returns {Promise<TypeMetadata | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
+   */
+  protected override onFetchServiceMetadata(): Promise<TypeMetadata | undefined> {
+    // None
+    return Promise.resolve(undefined);
   }
 
   /**

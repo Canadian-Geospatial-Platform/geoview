@@ -1,6 +1,7 @@
 import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES, TypeSourceImageWmsInitialConfig } from '@/api/config/types/map-schema-types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { TypeMetadata } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
 /**
  * Type used to define a GeoView image layer to display on the map.
@@ -44,10 +45,25 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   }
 
   /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeMetadataWMS | undefined} The strongly-typed layer configuration specific to this layer entry config.
+   */
+  override getServiceMetadata(): TypeMetadataWMS | undefined {
+    return super.getServiceMetadata() as TypeMetadataWMS | undefined;
+  }
+
+  /**
    * Clones an instance of a OgcWmsLayerEntryConfig.
    * @returns {ConfigBaseClass} The cloned OgcWmsLayerEntryConfig instance
    */
   protected override onClone(): ConfigBaseClass {
     return new OgcWmsLayerEntryConfig(this);
   }
+}
+
+export interface TypeMetadataWMS extends TypeMetadata {
+  // TODO: Cleanup - Remove the any by specifying
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Capability: any;
 }

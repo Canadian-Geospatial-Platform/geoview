@@ -1,6 +1,7 @@
 import Static, { Options as SourceOptions } from 'ol/source/ImageStatic';
 
-import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
+import { TypeJsonArray } from '@/api/config/types/config-types';
+import { TypeMetadata } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import {
   TypeLayerEntryConfig,
@@ -11,14 +12,11 @@ import {
 
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import {
-  LayerEntryConfigInvalidLayerEntryConfigError,
-  LayerEntryConfigLayerIdNotFoundError,
   LayerEntryConfigParameterExtentNotDefinedInSourceError,
   LayerEntryConfigParameterProjectionNotDefinedInSourceError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 import { GVImageStatic } from '@/geo/layer/gv-layers/raster/gv-image-static';
-import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 
 export interface TypeImageStaticLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.IMAGE_STATIC;
@@ -43,9 +41,9 @@ export class ImageStatic extends AbstractGeoViewRaster {
   /**
    * Overrides the way the metadata is fetched.
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-   * @returns {Promise<TypeJsonObject | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
+   * @returns {Promise<TypeMetadata | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
    */
-  protected override onFetchServiceMetadata(): Promise<TypeJsonObject | undefined> {
+  protected override onFetchServiceMetadata(): Promise<TypeMetadata | undefined> {
     // No metadata
     return Promise.resolve(undefined);
   }
@@ -65,27 +63,6 @@ export class ImageStatic extends AbstractGeoViewRaster {
         [] as unknown as TypeJsonArray
       )
     );
-  }
-
-  /**
-   * Overrides the validation of a layer entry config.
-   * @param {ConfigBaseClass} layerConfig - The layer entry config to validate.
-   */
-  protected override onValidateLayerEntryConfig(layerConfig: ConfigBaseClass): void {
-    // Note that Image Static metadata as we defined it does not contains metadata layer group. If you need geojson layer group,
-    // you can define them in the configuration section.
-    if (Array.isArray(this.metadata?.listOfLayerEntryConfig)) {
-      const metadataLayerList = this.metadata?.listOfLayerEntryConfig as unknown as TypeLayerEntryConfig[];
-      const foundEntry = metadataLayerList.find((layerMetadata) => layerMetadata.layerId === layerConfig.layerId);
-      if (!foundEntry) {
-        // Add a layer load error
-        this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(layerConfig), layerConfig);
-      }
-      return;
-    }
-
-    // Throw an invalid layer entry config error
-    throw new LayerEntryConfigInvalidLayerEntryConfigError(layerConfig);
   }
 
   /**

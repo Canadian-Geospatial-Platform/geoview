@@ -10,7 +10,6 @@ import {
   layerEntryIsGroupLayer,
 } from '@/api/config/types/map-schema-types';
 import { logger } from '@/core/utils/logger';
-import { TypeJsonObject } from '@/api/config/types/config-types';
 import { LAYER_STATUS } from '@/core/utils/constant';
 import { GroupLayerEntryConfig } from './group-layer-entry-config';
 import { NotImplementedError } from '@/core/exceptions/core-exceptions';
@@ -337,18 +336,18 @@ export abstract class ConfigBaseClass {
 
   /**
    * Serializes the ConfigBaseClass class
-   * @returns {TypeJsonObject} The serialized ConfigBaseClass
+   * @returns {unknown} The serialized ConfigBaseClass
    */
-  serialize(): TypeJsonObject {
+  serialize(): unknown {
     // Redirect
     return this.onSerialize();
   }
 
   /**
    * Overridable function to serialize a ConfigBaseClass
-   * @returns {TypeJsonObject} The serialized ConfigBaseClass
+   * @returns {unknown} The serialized ConfigBaseClass
    */
-  onSerialize(): TypeJsonObject {
+  onSerialize(): unknown {
     return {
       layerName: this.layerName,
       layerId: this.layerId,
@@ -356,7 +355,7 @@ export abstract class ConfigBaseClass {
       entryType: this.getEntryType(),
       layerStatus: this.layerStatus,
       isMetadataLayerGroup: this.isMetadataLayerGroup,
-    } as unknown as TypeJsonObject;
+    };
   }
 
   /**

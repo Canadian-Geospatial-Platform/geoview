@@ -3,7 +3,10 @@ import { Options as SourceOptions } from 'ol/source/ImageArcGISRest';
 import { cloneDeep } from 'lodash';
 
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
+import {
+  EsriDynamicLayerEntryConfig,
+  TypeMetadataEsriDynamic,
+} from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import {
   TypeLayerEntryConfig,
   TypeGeoviewLayerConfig,
@@ -57,18 +60,33 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   }
 
   /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeMetadataEsriDynamic | undefined} The strongly-typed layer configuration specific to this layer.
+   */
+  override getMetadata(): TypeMetadataEsriDynamic | undefined {
+    return super.getMetadata() as TypeMetadataEsriDynamic | undefined;
+  }
+
+  /**
    * Overrides the way a geoview layer config initializes its layer entries.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
    */
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Fetch the metadata
-    const metadata = await AbstractGeoViewRaster.fetchMetadata(this.metadataAccessPath, this.geoviewLayerId, this.geoviewLayerName);
+    const metadata = (await AbstractGeoViewRaster.fetchMetadata(
+      this.metadataAccessPath,
+      this.geoviewLayerId,
+      this.geoviewLayerName
+    )) as TypeMetadataEsriDynamic;
 
     // Now that we have metadata
-    const layers = metadata.layers as TypeJsonArray;
+    const { layers } = metadata;
 
     // Get all entries
-    const entries = layers.map((layer) => {
+    // TODO: Cleanup - Remove the any by specifying
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const entries = layers.map((layer: any) => {
       return { index: layer.id, layerId: layer.id, layerName: layer.name, subLayerIds: layer.subLayerIds, subLayers: [] };
     }) as unknown as TypeJsonArray;
 
@@ -124,7 +142,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @returns {boolean} true if an error is detected.
    */
   esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig): boolean {
-    if (this.metadata?.supportsDynamicLayers === false) {
+    if (!this.getMetadata()?.supportsDynamicLayers) {
       // Log a warning, but continue
       logger.logWarning(`Layer ${layerConfig.layerPath} does not technically support dynamic layers per its metadata.`);
     }

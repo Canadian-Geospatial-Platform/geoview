@@ -73,7 +73,7 @@ export class GVEsriImage extends AbstractGVRaster {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
-   * @returns {EsriImageLayerEntryConfig} The strongly-typed layer configuration specific to this group layer.
+   * @returns {EsriImageLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
    */
   override getLayerConfig(): EsriImageLayerEntryConfig {
     // Call parent and cast

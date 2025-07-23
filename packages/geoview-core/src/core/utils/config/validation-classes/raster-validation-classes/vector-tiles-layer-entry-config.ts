@@ -1,6 +1,8 @@
 import { TypeSourceVectorTilesInitialConfig } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 import { CONST_LAYER_TYPES, TypeTileGrid } from '@/api/config/types/map-schema-types';
 import { TileLayerEntryConfig } from '@/core/utils/config/validation-classes/tile-layer-entry-config';
+import { TypeMetadata } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeProjection } from '@/geo/utils/projection';
 
 export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
   /** Tag used to link the entry to a specific schema. */
@@ -31,4 +33,48 @@ export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
         : `${this.source.dataAccessPath}/tile/{z}/{y}/{x}.pbf`;
     }
   }
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeMetadataVectorTiles | undefined} The strongly-typed layer configuration specific to this layer entry config.
+   */
+  override getServiceMetadata(): TypeMetadataVectorTiles | undefined {
+    return super.getServiceMetadata() as TypeMetadataVectorTiles | undefined;
+  }
+}
+
+export interface TypeMetadataVectorTiles extends TypeMetadata {
+  defaultStyles: string;
+  tileInfo: TypeMetadataVectorTilesTileInfo;
+  fullExtent: TypeMetadataVectorTilesFullExtent;
+  minScale?: number;
+  maxScale?: number;
+  minZoom?: number;
+  maxZoom?: number;
+}
+
+export interface TypeMetadataVectorTilesTileInfo {
+  spatialReference: TypeProjection;
+  origin: TypeMetadataVectorTilesTileInfoOrigin;
+  lods: TypeMetadataVectorTilesTileInfoLods[];
+  rows: number;
+  cols: number;
+}
+
+export interface TypeMetadataVectorTilesTileInfoLods {
+  resolution: number;
+}
+
+export interface TypeMetadataVectorTilesTileInfoOrigin {
+  x: number;
+  y: number;
+}
+
+export interface TypeMetadataVectorTilesFullExtent {
+  spatialReference: TypeProjection;
+  xmin: number;
+  ymin: number;
+  xmax: number;
+  ymax: number;
 }

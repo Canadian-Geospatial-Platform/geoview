@@ -1,5 +1,6 @@
 import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/config/types/map-schema-types';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+import { TypeMetadata } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeSourceEsriFeatureInitialConfig } from '@/geo/layer/geoview-layers/vector/esri-feature';
 
 export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
@@ -41,4 +42,12 @@ export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
       this.source.dataAccessPath = `${splitAccessPath.join('/')}/`;
     }
   }
+}
+
+export interface TypeMetadataEsriFeature extends TypeMetadata {
+  // TODO: Cleanup - Remove the any by specifying
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  layers: any;
+  id: string;
+  name: string;
 }

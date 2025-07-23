@@ -13,10 +13,13 @@ import {
   CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
 } from '@/api/config/types/map-schema-types';
-import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
+import { TypeJsonArray } from '@/api/config/types/config-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
-import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
+import {
+  TypeMetadataVectorTiles,
+  VectorTilesLayerEntryConfig,
+} from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { logger } from '@/core/utils/logger';
 import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 import { LayerEntryConfigVectorTileProjectionNotMatchingMapProjectionError } from '@/core/exceptions/layer-entry-config-exceptions';
@@ -61,6 +64,15 @@ export class VectorTiles extends AbstractGeoViewRaster {
   }
 
   /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeMetadataVectorTiles | undefined} The strongly-typed layer configuration specific to this layer.
+   */
+  override getMetadata(): TypeMetadataVectorTiles | undefined {
+    return super.getMetadata() as TypeMetadataVectorTiles | undefined;
+  }
+
+  /**
    * Overrides the way a geoview layer config initializes its layer entries.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
    */
@@ -83,13 +95,13 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * @returns {Promise<VectorTilesLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
   protected override async onProcessLayerMetadata(layerConfig: VectorTilesLayerEntryConfig): Promise<VectorTilesLayerEntryConfig> {
-    if (this.metadata) {
-      const { tileInfo, fullExtent, minScale, maxScale, minZoom, maxZoom } = this.metadata;
+    if (this.getMetadata()) {
+      const { tileInfo, fullExtent, minScale, maxScale, minZoom, maxZoom } = this.getMetadata()!;
       const newTileGrid: TypeTileGrid = {
-        extent: [fullExtent.xmin as number, fullExtent.ymin as number, fullExtent.xmax as number, fullExtent.ymax as number],
-        origin: [tileInfo.origin.x as number, tileInfo.origin.y as number],
-        resolutions: (tileInfo.lods as Array<TypeJsonObject>).map(({ resolution }) => resolution as number),
-        tileSize: [tileInfo.rows as number, tileInfo.cols as number],
+        extent: [fullExtent.xmin, fullExtent.ymin, fullExtent.xmax, fullExtent.ymax],
+        origin: [tileInfo.origin.x, tileInfo.origin.y],
+        resolutions: tileInfo.lods.map(({ resolution }) => resolution),
+        tileSize: [tileInfo.rows, tileInfo.cols],
       };
       // eslint-disable-next-line no-param-reassign
       layerConfig.source.tileGrid = newTileGrid;
@@ -112,24 +124,24 @@ export class VectorTiles extends AbstractGeoViewRaster {
       // * Infinity and -Infinity are used as extreme zoom level values in case the value is undefined
       if (minScale) {
         // eslint-disable-next-line no-param-reassign
-        layerConfig.minScale = Math.min(layerConfig.minScale ?? Infinity, minScale as number);
+        layerConfig.minScale = Math.min(layerConfig.minScale ?? Infinity, minScale);
       }
 
       if (maxScale) {
         // eslint-disable-next-line no-param-reassign
-        layerConfig.maxScale = Math.max(layerConfig.maxScale ?? -Infinity, maxScale as number);
+        layerConfig.maxScale = Math.max(layerConfig.maxScale ?? -Infinity, maxScale);
       }
 
       // Second, set the min/max zoom levels based on the service / config.
       // GV Vector tiles should always have a minZoom and maxZoom, so -Infinity or Infinity should never be set as a value
       if (minZoom) {
         // eslint-disable-next-line no-param-reassign
-        layerConfig.initialSettings.minZoom = Math.max(layerConfig.initialSettings.minZoom ?? -Infinity, minZoom as number);
+        layerConfig.initialSettings.minZoom = Math.max(layerConfig.initialSettings.minZoom ?? -Infinity, minZoom);
       }
 
       if (maxZoom) {
         // eslint-disable-next-line no-param-reassign
-        layerConfig.initialSettings.maxZoom = Math.min(layerConfig.initialSettings.maxZoom ?? Infinity, maxZoom as number);
+        layerConfig.initialSettings.maxZoom = Math.min(layerConfig.initialSettings.maxZoom ?? Infinity, maxZoom);
       }
     }
 
@@ -149,7 +161,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     // TODO: Refactor - Layers refactoring. What is this doing? See how we can do this in the new layers. Can it be done before?
     const resolutions = layer.getOLSource()?.getTileGrid()?.getResolutions();
 
-    let appliedStyle = layerConfig.styleUrl || (this.metadata?.defaultStyles as string);
+    let appliedStyle = layerConfig.styleUrl || this.getMetadata()?.defaultStyles;
 
     if (appliedStyle) {
       if (!appliedStyle.endsWith('/root.json')) appliedStyle = `${appliedStyle}/root.json`;
@@ -274,7 +286,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     // Validate the spatial reference in the tileInfo (if set) is the same as the source
     if (
       layerConfig.getServiceMetadata()?.tileInfo?.spatialReference?.wkid &&
-      sourceOptions.projection.replace('EPSG:', '') !== layerConfig.getServiceMetadata()?.tileInfo.spatialReference.wkid.toString()
+      sourceOptions.projection.replace('EPSG:', '') !== layerConfig.getServiceMetadata()!.tileInfo.spatialReference.wkid.toString()
     ) {
       // Set the layer status to error
       layerConfig.setLayerStatusError();

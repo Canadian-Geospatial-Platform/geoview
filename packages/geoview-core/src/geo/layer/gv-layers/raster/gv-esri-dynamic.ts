@@ -269,7 +269,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
-   * @returns {EsriDynamicLayerEntryConfig} The strongly-typed layer configuration specific to this group layer.
+   * @returns {EsriDynamicLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
    */
   override getLayerConfig(): EsriDynamicLayerEntryConfig {
     // Call parent and cast

@@ -16,7 +16,10 @@ import {
 } from '@/api/config/types/map-schema-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
-import { OgcFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
+import {
+  OgcFeatureLayerEntryConfig,
+  TypeMetadataOGCFeature,
+} from '@/core/utils/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { Fetch } from '@/core/utils/fetch-helper';
 import {
@@ -51,11 +54,20 @@ export class OgcFeature extends AbstractGeoViewVector {
   }
 
   /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeMetadataOGCFeature | undefined} The strongly-typed layer configuration specific to this layer.
+   */
+  override getMetadata(): TypeMetadataOGCFeature | undefined {
+    return super.getMetadata() as TypeMetadataOGCFeature | undefined;
+  }
+
+  /**
    * Overrides the way the metadata is fetched.
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-   * @returns {Promise<TypeJsonObject | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
+   * @returns {Promise<TypeMetadataOGCFeature | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
    */
-  protected override onFetchServiceMetadata(): Promise<TypeJsonObject | undefined> {
+  protected override onFetchServiceMetadata(): Promise<TypeMetadataOGCFeature | undefined> {
     // Fetch it
     return OgcFeature.fetchMetadata(this.metadataAccessPath);
   }
@@ -70,7 +82,9 @@ export class OgcFeature extends AbstractGeoViewVector {
     const idx = this.metadataAccessPath.lastIndexOf(sep);
     let rootUrl = this.metadataAccessPath;
     let id: string | undefined;
-    let entries: TypeJsonArray = [];
+    // TODO: Cleanup - Remove the any by specifying
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let entries: any = [];
     if (idx > 0) {
       rootUrl = this.metadataAccessPath.substring(0, idx);
       id = this.metadataAccessPath.substring(idx + sep.length);
@@ -83,7 +97,7 @@ export class OgcFeature extends AbstractGeoViewVector {
       const metadata = await OgcFeature.fetchMetadata(this.metadataAccessPath);
 
       // Now that we have metadata
-      entries = (metadata.collections as TypeJsonArray).map((collection) => {
+      entries = metadata.collections.map((collection) => {
         return { id: collection.id, layerId: collection.id, layerName: collection.description };
       });
     }
@@ -99,8 +113,10 @@ export class OgcFeature extends AbstractGeoViewVector {
   protected override onValidateLayerEntryConfig(layerConfig: ConfigBaseClass): void {
     // Note that the code assumes ogc-feature collections does not contains metadata layer group. If you need layer group,
     // you can define them in the configuration section.
-    if (Array.isArray(this.metadata!.collections)) {
-      const foundCollection = this.metadata!.collections.find((layerMetadata) => layerMetadata.id === layerConfig.layerId);
+    if (Array.isArray(this.getMetadata()!.collections)) {
+      // TODO: Cleanup - Remove the any by specifying
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const foundCollection = this.getMetadata()!.collections.find((layerMetadata: any) => layerMetadata.id === layerConfig.layerId);
       if (!foundCollection) {
         // Add a layer load error
         this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(layerConfig), layerConfig);
@@ -108,15 +124,15 @@ export class OgcFeature extends AbstractGeoViewVector {
       }
 
       // eslint-disable-next-line no-param-reassign
-      if (foundCollection.description) layerConfig.layerName = foundCollection.description as string;
+      if (foundCollection.description) layerConfig.layerName = foundCollection.description;
 
       // eslint-disable-next-line no-param-reassign
       layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
 
       if (!layerConfig.initialSettings.bounds && foundCollection.extent?.spatial?.bbox && foundCollection.extent?.spatial?.crs) {
         const latlonExtent = Projection.transformExtentFromProj(
-          foundCollection.extent.spatial.bbox[0] as number[],
-          Projection.getProjectionFromString(foundCollection.extent.spatial.crs as string),
+          foundCollection.extent.spatial.bbox[0],
+          Projection.getProjectionFromString(foundCollection.extent.spatial.crs),
           Projection.getProjectionLonLat()
         );
         // eslint-disable-next-line no-param-reassign
@@ -246,12 +262,12 @@ export class OgcFeature extends AbstractGeoViewVector {
    * Fetches the metadata for a typical OGCFeature class.
    * @param {string} url - The url to query the metadata from.
    */
-  static fetchMetadata(url: string): Promise<TypeJsonObject> {
+  static fetchMetadata(url: string): Promise<TypeMetadataOGCFeature> {
     // The url
     const queryUrl = url.endsWith('/') ? `${url}collections?f=json` : `${url}/collections?f=json`;
 
     // Set it
-    return Fetch.fetchJsonAsObject(queryUrl);
+    return Fetch.fetchJsonAs<TypeMetadataOGCFeature>(queryUrl);
   }
 
   /**

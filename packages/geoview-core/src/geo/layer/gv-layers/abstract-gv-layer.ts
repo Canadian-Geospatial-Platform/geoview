@@ -142,7 +142,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
-   * @returns {AbstractBaseLayerEntryConfig} The strongly-typed layer configuration specific to this group layer.
+   * @returns {AbstractBaseLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
    */
   override getLayerConfig(): AbstractBaseLayerEntryConfig {
     return super.getLayerConfig() as AbstractBaseLayerEntryConfig;

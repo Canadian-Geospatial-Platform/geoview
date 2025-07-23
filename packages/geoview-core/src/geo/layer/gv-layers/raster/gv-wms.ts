@@ -77,7 +77,7 @@ export class GVWMS extends AbstractGVRaster {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
-   * @returns {OgcWmsLayerEntryConfig} The strongly-typed layer configuration specific to this group layer.
+   * @returns {OgcWmsLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
    */
   override getLayerConfig(): OgcWmsLayerEntryConfig {
     // Call parent and cast

@@ -2,7 +2,7 @@ import { TypeJsonObject } from '@/api/config/types/config-types';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import { LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewLayer, TypeMetadata } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
 /**
  * The AbstractGeoViewRaster class.
@@ -13,7 +13,7 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
    * @returns {Promise<TypeJsonObject | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
    */
-  protected override onFetchServiceMetadata(): Promise<TypeJsonObject | undefined> {
+  protected override onFetchServiceMetadata(): Promise<TypeMetadata | undefined> {
     // Fetch it
     return AbstractGeoViewRaster.fetchMetadata(this.metadataAccessPath, this.geoviewLayerId, this.geoviewLayerName);
   }
@@ -24,7 +24,7 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
    * Fetches the metadata for a typical AbstractGeoViewRaster class.
    * @param {string} url - The url to query the metadata from.
    */
-  static async fetchMetadata(url: string, geoviewLayerId: string, geoviewLayerName: string): Promise<TypeJsonObject> {
+  static async fetchMetadata(url: string, geoviewLayerId: string, geoviewLayerName: string): Promise<TypeMetadata> {
     // The url
     const parsedUrl = url.toLowerCase().endsWith('json') ? url : `${url}?f=json`;
 
@@ -35,7 +35,7 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
     AbstractGeoViewRaster.throwIfMetatadaHasError(geoviewLayerId, geoviewLayerName, responseJson);
 
     // Return the response
-    return responseJson;
+    return responseJson as TypeMetadata;
   }
 
   /**
