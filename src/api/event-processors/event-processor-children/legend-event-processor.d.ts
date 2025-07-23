@@ -162,12 +162,20 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
      */
     static setAllItemsVisibility(mapId: string, layerPath: string, visibility: boolean): void;
     /**
-     * Sets the opacity of the layer.
+     * Sets the opacity of the layer and its children in the store.
      * @param {string} mapId - The ID of the map.
      * @param {string} layerPath - The layer path of the layer to change.
      * @param {number} opacity - The opacity to set.
      */
-    static setLayerOpacity(mapId: string, layerPath: string, opacity: number): void;
+    static setOpacityInStore(mapId: string, layerPath: string, opacity: number): void;
+    /**
+     * Sets the opacity of a layer.
+     * @param {string} mapId - The ID of the map.
+     * @param {string} layerPath - The layer path of the layer to change.
+     * @param {number} opacity - The opacity to set.
+     * @param {boolean} updateLegendLayers - Whether to update the legend layers or not
+     */
+    static setLayerOpacity(mapId: string, layerPath: string, opacity: number, updateLegendLayers?: boolean): void;
     /**
      * Sets the layer hoverable capacity.
      * @param {string} mapId - The ID of the map.

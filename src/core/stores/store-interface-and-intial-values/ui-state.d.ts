@@ -4,7 +4,6 @@ import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 type UIActions = IUIState['actions'];
 export type ActiveAppBarTabType = {
     tabId: string;
-    tabGroup: string;
     isOpen: boolean;
     isFocusTrapped?: boolean;
 };
@@ -28,7 +27,7 @@ export interface IUIState {
         disableFocusTrap: (callbackElementId?: string) => void;
         showTab: (tab: string) => void;
         setActiveFooterBarTab: (id: string) => void;
-        setActiveAppBarTab: (tabId: string, tabGroup: string, isOpen: boolean, isFocusTrapped: boolean) => void;
+        setActiveAppBarTab: (tabId: string, isOpen: boolean, isFocusTrapped: boolean) => void;
         setActiveTrapGeoView: (active: boolean) => void;
         setFooterPanelResizeValue: (value: number) => void;
         setFooterBarIsCollapsed: (collapsed: boolean) => void;
@@ -38,7 +37,7 @@ export interface IUIState {
         enableFocusTrap: (uiFocus: FocusItemProps) => void;
         disableFocusTrap: (callbackElementId?: string) => void;
         setActiveFooterBarTab: (id: string) => void;
-        setActiveAppBarTab: (tabId: string, tabGroup: string, isOpen: boolean, isFocusTrapped: boolean) => void;
+        setActiveAppBarTab: (tabId: string, isOpen: boolean, isFocusTrapped: boolean) => void;
         setActiveTrapGeoView: (active: boolean) => void;
         setFooterPanelResizeValue: (value: number) => void;
         setHiddenTabs: (hiddenTabs: string[]) => void;

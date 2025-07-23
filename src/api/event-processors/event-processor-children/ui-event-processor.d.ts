@@ -16,7 +16,7 @@ export declare class UIEventProcessor extends AbstractEventProcessor {
     static hideTab(mapId: string, tab: string): void;
     static showTab(mapId: string, tab: string): void;
     static setActiveFooterBarTab(mapId: string, id: string): void;
-    static setActiveAppBarTab(mapId: string, tabId: string, tabGroup: string, isOpen: boolean, isFocusTrapped: boolean): void;
+    static setActiveAppBarTab(mapId: string, tabId: string, isOpen: boolean, isFocusTrapped: boolean): void;
     static getActiveAppBarTab(mapId: string): ActiveAppBarTabType;
     static setFooterBarIsCollapsed(mapId: string, collapsed: boolean): void;
 }

@@ -11,7 +11,7 @@ import { ActiveAppBarTabType } from '@/core/stores/store-interface-and-intial-va
 export declare class AppBarApi {
     #private;
     mapId: string;
-    buttons: Record<string, Record<string, TypeButtonPanel>>;
+    buttons: Record<string, TypeButtonPanel>;
     /**
      * Instantiates an AppBarApi class.
      *
@@ -43,10 +43,9 @@ export declare class AppBarApi {
      *
      * @param {IconButtonPropsExtend} buttonProps - Button properties (icon, tooltip)
      * @param {TypePanelProps} panelProps - Panel properties (icon, title, content)
-     * @param {string | null | undefined} groupName - Optional value to set this button in a group
      * @returns {TypeButtonPanel | null} The created panel
      */
-    createAppbarPanel(buttonProps: IconButtonPropsExtend, panelProps: TypePanelProps, groupName?: string | null | undefined): TypeButtonPanel | null;
+    createAppbarPanel(buttonProps: IconButtonPropsExtend, panelProps: TypePanelProps): TypeButtonPanel | null;
     /**
      * Gets a button panel from the app-bar by using it's id
      *
@@ -60,33 +59,24 @@ export declare class AppBarApi {
      */
     getActiveAppBarTab(): ActiveAppBarTabType;
     /**
-     * Gets all created buttons panels regardless of group
-     *
-     * @returns {Record<string, TypeButtonPanels>} An object with all the button panels
-     */
-    getAllButtonPanels(): Record<string, TypeButtonPanel>;
-    /**
      * Removes an app-bar panel using an id
      *
      * @param {string} buttonPanelId - The id of the panel to remove
-     * @param {string} group - The button group name to delete from
      */
-    removeAppbarPanel(buttonPanelId: string, group: string): void;
+    removeAppbarPanel(buttonPanelId: string): void;
     /**
-     * Selects a tab by id and tab group
+     * Selects a tab by id
      *
      * @param {string} tabId - The id of the tab to be selected
-     * @param {string} tabGroup - The id of the panel
      * @param {boolean} open - Open (true) or closed (false) panel: default = true
      */
-    selectAppBarTab(tabId: string, tabGroup: string, open?: boolean, isFocusTrapped?: boolean): void;
+    selectTab(tabId: string, open?: boolean, isFocusTrapped?: boolean): void;
 }
 /**
  * Define an event for the delegate
  */
 export type AppBarCreatedEvent = {
     buttonPanelId: string;
-    group: string;
     buttonPanel: TypeButtonPanel;
 };
 /**
@@ -98,7 +88,6 @@ type AppBarCreatedDelegate = EventDelegateBase<AppBarApi, AppBarCreatedEvent, vo
  */
 export type AppBarRemovedEvent = {
     buttonPanelId: string;
-    group: string;
 };
 /**
  * Define a delegate for the event handler function signature

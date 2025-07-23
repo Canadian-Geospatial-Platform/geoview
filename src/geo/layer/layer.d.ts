@@ -5,7 +5,7 @@ import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { FeatureHighlight } from '@/geo/map/feature-highlight';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { MapConfigLayerEntry, TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerStatus } from '@/api/config/types/map-schema-types';
+import { MapConfigLayerEntry, TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerStatus, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 import { HoverFeatureInfoLayerSet } from '@/geo/layer/layer-sets/hover-feature-info-layer-set';
 import { AllFeatureInfoLayerSet } from '@/geo/layer/layer-sets/all-feature-info-layer-set';
 import { LegendsLayerSet } from '@/geo/layer/layer-sets/legends-layer-set';
@@ -233,6 +233,14 @@ export declare class LayerApi {
      */
     setLayerName(layerPath: string, name: string): void;
     /**
+     * Sets opacity for a layer.
+     *
+     * @param {string} layerPath - The path of the layer.
+     * @param {number} opacity - The new opacity to use.
+     * @param {boolean} emitOpacityChange - Whether to emit the event or not (false to avoid updating the legend layers)
+     */
+    setLayerOpacity(layerPath: string, opacity: number, emitOpacityChange?: boolean): void;
+    /**
      * Changes a GeoJson Source of a GeoJSON layer at the given layer path.
      *
      * @param {string} layerPath - The path of the layer.
@@ -241,12 +249,19 @@ export declare class LayerApi {
     setGeojsonSource(layerPath: string, geojson: GeoJSONObject | string): void;
     /**
      * Redefine feature info fields.
-     *
      * @param {string} layerPath - The path of the layer.
-     * @param {string} fieldNames - The new field names to use, separated by commas.
+     * @param {string[]} fieldNames - The new field names to use.
      * @param {'alias' | 'name'} fields - The fields to change.
      */
-    redefineFeatureFields(layerPath: string, fieldNames: string, fields: 'alias' | 'name'): void;
+    redefineFeatureFields(layerPath: string, fieldNames: string[], fields: 'alias' | 'name'): void;
+    /**
+     * Replace outfield names, aliases and types with any number of new values, provided an identical count of each are supplied.
+     * @param {string} layerPath - The path of the layer.
+     * @param {string[]} types - The new field types (TypeOutfieldsType) to use.
+     * @param {string[]} fieldNames - The new field names to use.
+     * @param {string[]} fieldAliases - The new field aliases to use.
+     */
+    replaceFeatureOutfields(layerPath: string, types: TypeOutfieldsType[], fieldNames: string[], fieldAliases?: string[]): void;
     /**
      * Calculates an union of all the layer extents based on the given layerPath and its possible children.
      * @param {string} layerPath - The layer path

@@ -135,6 +135,12 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     static getAllLegendLayersCollapsed(mapId: string): boolean;
     static getMapLegendCollapsedFromOrderedLayerInfo(mapId: string, layerPath: string): boolean;
     static getMapVisibilityFromOrderedLayerInfo(mapId: string, layerPath: string): boolean;
+    /**
+     * Checks if any parent of a layer is hidden.
+     * @param {string} mapId - The ID of the map.
+     * @param {string} layerPath - The layer path of the layer to check.
+     */
+    static getMapLayerParentHidden(mapId: string, layerPath: string): boolean;
     static getMapInVisibleRangeFromOrderedLayerInfo(mapId: string, layerPath: string): boolean;
     static addHighlightedFeature(mapId: string, feature: TypeFeatureInfoEntry): void;
     static removeHighlightedFeature(mapId: string, feature: TypeFeatureInfoEntry | 'all'): void;
@@ -170,6 +176,13 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     static setMapLegendCollapsed(mapId: string, layerPath: string, collapsed: boolean): void;
     static setAllMapLayerCollapsed(mapId: string, newCollapsed: boolean): void;
     static setOrToggleMapLayerVisibility(mapId: string, layerPath: string, newValue?: boolean): boolean;
+    /**
+     * Sets the opacity of a layer in the layer legend.
+     * @param {string} mapId - The ID of the map.
+     * @param {string} layerPath - The layer path of the layer to change.
+     * @param {boolean} visibility - The visibility to set.
+     */
+    static setMapLayerVisibilityInStore(mapId: string, layerPath: string, visibility: boolean): void;
     static setAllMapLayerVisibility(mapId: string, newVisibility: boolean): void;
     static reorderLayer(mapId: string, layerPath: string, move: number): void;
     /**
