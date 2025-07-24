@@ -45,7 +45,9 @@ export abstract class AbstractGVRaster extends AbstractGVLayer {
    */
   getMetadataExtent(): Extent | undefined {
     // Get the layer metadata precisely
-    const extent = this.getLayerConfig().getLayerMetadata()?.extent;
+    // GV Can be any object so disable eslint and proceed with caution
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const extent = (this.getLayerConfig().getLayerMetadata() as any)?.extent;
 
     // If found
     if (extent) {

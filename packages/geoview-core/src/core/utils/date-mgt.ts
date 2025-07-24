@@ -6,7 +6,7 @@ import localizedFormat from 'dayjs/plugin/localizedFormat';
 import 'dayjs/locale/en-ca';
 import 'dayjs/locale/fr-ca';
 import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
-import { TypeJsonObject } from '@/api/config/types/config-types';
+import { TypeMetadataWMSCapabilityLayerDimension } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 
 dayjs.extend(duration);
 
@@ -384,11 +384,11 @@ export abstract class DateMgt {
 
   /**
    * Create the Geoview time dimension from OGC dimension
-   * @param {TypeJsonObject | string} ogcTimeDimension The OGC time dimension object or string
+   * @param {TypeMetadataWMSCapabilityLayerDimension | string} ogcTimeDimension The OGC time dimension object or string
    * @returns {TimeDimension} the Geoview time dimension
    */
-  static createDimensionFromOGC(ogcTimeDimension: TypeJsonObject | string): TimeDimension {
-    const dimensionObject = typeof ogcTimeDimension === 'object' ? ogcTimeDimension : JSON.parse(<string>ogcTimeDimension);
+  static createDimensionFromOGC(ogcTimeDimension: TypeMetadataWMSCapabilityLayerDimension | string): TimeDimension {
+    const dimensionObject = typeof ogcTimeDimension === 'object' ? ogcTimeDimension : JSON.parse(ogcTimeDimension);
     const rangeItems = this.createRangeOGC(dimensionObject.values);
     const timeDimension: TimeDimension = {
       field: dimensionObject.name,

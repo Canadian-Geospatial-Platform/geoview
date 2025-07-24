@@ -211,8 +211,8 @@ export class WFS extends AbstractGeoViewVector {
           featureTypeProperties.push(element['@attributes']);
         });
 
-        layerConfig.setLayerMetadata(featureTypeProperties as TypeJsonObject);
-        WFS.#processFeatureInfoConfig(featureTypeProperties as TypeJsonArray, layerConfig);
+        layerConfig.setLayerMetadata(featureTypeProperties);
+        WFS.#processFeatureInfoConfig(featureTypeProperties, layerConfig);
       }
     }
 
@@ -405,7 +405,7 @@ export class WFS extends AbstractGeoViewVector {
           strategy: 'all',
           dataAccessPath: metadataAccessPath,
         },
-      } as WfsLayerEntryConfig);
+      } as unknown as WfsLayerEntryConfig);
       return layerEntryConfig;
     });
 

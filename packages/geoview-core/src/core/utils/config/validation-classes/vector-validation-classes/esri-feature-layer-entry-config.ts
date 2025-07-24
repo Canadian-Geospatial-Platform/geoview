@@ -1,7 +1,10 @@
+import { TypeJsonArray } from '@/api/config/types/config-types';
 import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/config/types/map-schema-types';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
-import { TypeMetadata } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TimeDimensionESRI } from '@/core/utils/date-mgt';
 import { TypeSourceEsriFeatureInitialConfig } from '@/geo/layer/geoview-layers/vector/esri-feature';
+import { TypeProjection } from '@/geo/utils/projection';
+import { EsriBaseRenderer } from '@/geo/utils/renderer/esri-renderer';
 
 export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
   /** Tag used to link the entry to a specific schema. */
@@ -42,12 +45,58 @@ export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
       this.source.dataAccessPath = `${splitAccessPath.join('/')}/`;
     }
   }
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeLayerMetadataEsri | undefined} The strongly-typed layer metadata specific to this layer entry config.
+   */
+  override getLayerMetadata(): TypeLayerMetadataEsri | undefined {
+    return super.getLayerMetadata() as TypeLayerMetadataEsri | undefined;
+  }
 }
 
-export interface TypeMetadataEsriFeature extends TypeMetadata {
+export interface TypeMetadataEsriFeature {
   // TODO: Cleanup - Remove the any by specifying
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   layers: any;
   id: string;
   name: string;
+}
+
+/**
+ * Represents layer metadata as read from an Esri layer service.
+ */
+export interface TypeLayerMetadataEsri {
+  type: string;
+  capabilities: string;
+  geometryField: TypeLayerMetadataEsriField;
+  displayField: string;
+  defaultVisibility: boolean;
+  minScale: number;
+  maxScale: number;
+  maxRecordCount: number;
+  spatialReference: TypeProjection;
+  sourceSpatialReference: TypeProjection;
+  extent: TypeLayerMetadataEsriExtent;
+  drawingInfo: TypeLayerMetadataEsriDrawingInfo;
+  timeInfo: TimeDimensionESRI;
+  geometryType: unknown;
+  fields: TypeJsonArray;
+}
+
+export interface TypeLayerMetadataEsriDrawingInfo {
+  renderer: EsriBaseRenderer;
+}
+
+export interface TypeLayerMetadataEsriExtent {
+  spatialReference: TypeProjection;
+  xmin: number;
+  xmax: number;
+  ymin: number;
+  ymax: number;
+}
+
+export interface TypeLayerMetadataEsriField {
+  name: unknown;
 }

@@ -1,7 +1,6 @@
 import { TypeSourceVectorTilesInitialConfig } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 import { CONST_LAYER_TYPES, TypeTileGrid } from '@/api/config/types/map-schema-types';
 import { TileLayerEntryConfig } from '@/core/utils/config/validation-classes/tile-layer-entry-config';
-import { TypeMetadata } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeProjection } from '@/geo/utils/projection';
 
 export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
@@ -44,7 +43,7 @@ export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
   }
 }
 
-export interface TypeMetadataVectorTiles extends TypeMetadata {
+export interface TypeMetadataVectorTiles {
   defaultStyles: string;
   tileInfo: TypeMetadataVectorTilesTileInfo;
   fullExtent: TypeMetadataVectorTilesFullExtent;

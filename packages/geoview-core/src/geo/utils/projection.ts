@@ -97,7 +97,7 @@ export abstract class Projection {
    */
   static transformExtentFromObj(
     extent: Extent,
-    projection: TypeJsonObject | undefined,
+    projection: TypeJsonObject | TypeProjection | undefined, // TODO: Remove TypeJsonObject
     destination: OLProjection,
     stops?: number | undefined
   ): Extent {

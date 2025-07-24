@@ -1,8 +1,7 @@
-import { TypeJsonObject } from '@/api/config/types/config-types';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import { LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { AbstractGeoViewLayer, TypeMetadata } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
 /**
  * The AbstractGeoViewRaster class.
@@ -13,7 +12,7 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
    * @returns {Promise<TypeJsonObject | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
    */
-  protected override onFetchServiceMetadata(): Promise<TypeMetadata | undefined> {
+  protected override onFetchServiceMetadata(): Promise<unknown | undefined> {
     // Fetch it
     return AbstractGeoViewRaster.fetchMetadata(this.metadataAccessPath, this.geoviewLayerId, this.geoviewLayerName);
   }
@@ -24,26 +23,29 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
    * Fetches the metadata for a typical AbstractGeoViewRaster class.
    * @param {string} url - The url to query the metadata from.
    */
-  static async fetchMetadata(url: string, geoviewLayerId: string, geoviewLayerName: string): Promise<TypeMetadata> {
+  static async fetchMetadata(url: string, geoviewLayerId: string, geoviewLayerName: string): Promise<unknown> {
     // The url
     const parsedUrl = url.toLowerCase().endsWith('json') ? url : `${url}?f=json`;
 
     // Query and read
-    const responseJson = await Fetch.fetchJsonAsObject(parsedUrl);
+    const responseJson = await Fetch.fetchJsonAs<unknown>(parsedUrl);
 
     // Validate the metadata response
     AbstractGeoViewRaster.throwIfMetatadaHasError(geoviewLayerId, geoviewLayerName, responseJson);
 
     // Return the response
-    return responseJson as TypeMetadata;
+    return responseJson;
   }
 
   /**
    * Throws a LayerServiceMetadataUnableToFetchError if the provided metadata has an error in its content.
    * @param {string} geoviewLayerId - The geoview layer id
-   * @param {TypeJsonObject} metadata - The metadata to check
+   * @param {string | undefined} layerName - The layer name
+   * @param {any} metadata - The metadata to check
    */
-  static throwIfMetatadaHasError(geoviewLayerId: string, layerName: string | undefined, metadata: TypeJsonObject): void {
+  // GV The metadata structure can be anything, we only care to check if there's an error inside of it
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  static throwIfMetatadaHasError(geoviewLayerId: string, layerName: string | undefined, metadata: any): void {
     // If there's an error in the content of the response itself
     if ('error' in metadata && metadata.error.message) {
       // Throw the error as read from the metadata error

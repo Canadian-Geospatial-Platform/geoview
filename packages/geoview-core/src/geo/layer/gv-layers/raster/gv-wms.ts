@@ -6,14 +6,18 @@ import { Extent } from 'ol/extent';
 import { Projection as OLProjection } from 'ol/proj';
 import { Map as OLMap } from 'ol';
 
-import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 import { TypeWmsLegend, TypeWmsLegendStyle } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { xmlToJson } from '@/core/utils/utilities';
 import { getExtentIntersection, validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { parseDateTimeValuesEsriImageOrWMS } from '@/geo/layer/gv-layers/utils';
 import { logger } from '@/core/utils/logger';
-import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import {
+  OgcWmsLayerEntryConfig,
+  TypeLayerMetadataWMSStyle,
+  TypeLayerMetadataWMSStyleLegendUrl,
+} from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { CONST_LAYER_TYPES, TypeFeatureInfoEntry } from '@/api/config/types/map-schema-types';
 import { loadImage } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
@@ -150,11 +154,11 @@ export class GVWMS extends AbstractGVRaster {
       return [];
 
     let infoFormat = '';
-    const featureInfoFormat = this.getLayerConfig().getServiceMetadata()?.Capability?.Request?.GetFeatureInfo?.Format as TypeJsonArray;
+    const featureInfoFormat = this.getLayerConfig().getServiceMetadata()?.Capability?.Request?.GetFeatureInfo?.Format;
     if (featureInfoFormat)
-      if (featureInfoFormat.includes('text/xml' as TypeJsonObject)) infoFormat = 'text/xml';
-      else if (featureInfoFormat.includes('text/html' as TypeJsonObject)) infoFormat = 'text/html';
-      else if (featureInfoFormat.includes('text/plain' as TypeJsonObject)) infoFormat = 'text/plain';
+      if (featureInfoFormat.includes('text/xml')) infoFormat = 'text/xml';
+      else if (featureInfoFormat.includes('text/html')) infoFormat = 'text/html';
+      else if (featureInfoFormat.includes('text/plain')) infoFormat = 'text/plain';
       else {
         // Failed
         throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath, layerConfig.getLayerName());
@@ -417,14 +421,14 @@ export class GVWMS extends AbstractGVRaster {
    */
   static #getBoundsExtentFromMetadata(layerConfig: OgcWmsLayerEntryConfig, projection: string): [string, Extent] | undefined {
     // Get the bounding boxes in the metadata
-    const boundingBoxes = layerConfig.getServiceMetadata()?.Capability.Layer.BoundingBox as TypeJsonArray;
+    const boundingBoxes = layerConfig.getServiceMetadata()?.Capability.Layer.BoundingBox;
 
     // If found any
     if (boundingBoxes) {
       // Find the one with the right projection
       for (let i = 0; i < boundingBoxes.length; i++) {
         // Read the extent info from the GetCap
-        const { crs, extent } = boundingBoxes[i] as unknown as { crs: string; extent: Extent };
+        const { crs, extent } = boundingBoxes[i];
 
         // If it's the crs we want
         if (crs === projection) {
@@ -436,7 +440,7 @@ export class GVWMS extends AbstractGVRaster {
       // At this point, none could be found. If there's any to go with, we try our best...
       if (boundingBoxes.length > 0) {
         // Take the first one and return the bounds and projection
-        const { crs, extent } = boundingBoxes[0] as unknown as { crs: string; extent: Extent };
+        const { crs, extent } = boundingBoxes[0];
         const extentSafe: Extent = Projection.readExtentCarefully(crs, extent);
         return [crs, extentSafe];
       }
@@ -447,45 +451,41 @@ export class GVWMS extends AbstractGVRaster {
   }
 
   /**
-   * Gets the legend image URL of a layer from the capabilities. Return null if it does not exist.
-   * @param {OgcWmsLayerEntryConfig} layerConfig layer configuration.
-   * @param {string} style the style to get the url for
-   * @returns {TypeJsonObject | null} URL of a Legend image in png format or null
+   * Gets the legend image URL of a layer from the capabilities.
+   * @param {OgcWmsLayerEntryConfig} layerConfig - Layer configuration.
+   * @param {string} chosenStyle - The style to get the url for.
+   * @returns {TypeLayerMetadataWMSStyleLegendUrl | undefined} URL of a Legend image in png format or undefined.
    * @private
    */
-  static #getLegendUrlFromCapabilities(layerConfig: OgcWmsLayerEntryConfig, chosenStyle?: string): TypeJsonObject | null {
+  static #getLegendUrlFromCapabilities(
+    layerConfig: OgcWmsLayerEntryConfig,
+    chosenStyle?: string
+  ): TypeLayerMetadataWMSStyleLegendUrl | undefined {
+    // Get the capabilities metadata from the layer config
     const layerCapabilities = layerConfig.getLayerMetadata();
-    if (Array.isArray(layerCapabilities?.Style)) {
-      // check if WMS as a default legend style
-      let isDefaultStyle = false;
-      layerCapabilities.Style.forEach((style) => {
-        if (style.Name === 'default') isDefaultStyle = true;
-      });
+    const styles = layerCapabilities?.Style;
 
-      let legendStyle;
-      if (chosenStyle) {
-        [legendStyle] = layerCapabilities.Style.filter((style) => {
-          return style.Name === chosenStyle;
-        });
-      } else {
-        legendStyle = layerCapabilities?.Style.find((style) => {
-          if (layerConfig?.source?.wmsStyle && !Array.isArray(layerConfig?.source?.wmsStyle))
-            return layerConfig.source.wmsStyle === style.Name;
+    // Return early if there are no styles defined
+    if (!Array.isArray(styles)) return undefined;
 
-          // no style found, if default apply, if not use the available style
-          return isDefaultStyle ? style.Name === 'default' : style.Name;
-        });
-      }
+    // Check whether a style named 'default' exists
+    const hasDefaultStyle = styles.some((style) => style.Name === 'default');
 
-      if (Array.isArray(legendStyle?.LegendURL)) {
-        const legendUrl = legendStyle.LegendURL.find((urlEntry) => {
-          if (urlEntry.Format === 'image/png') return true;
-          return false;
-        });
-        return legendUrl || null;
-      }
+    let selectedStyle: TypeLayerMetadataWMSStyle | undefined;
+
+    if (chosenStyle) {
+      // Use explicitly chosen style if provided
+      selectedStyle = styles.find((style) => style.Name === chosenStyle);
+    } else if (typeof layerConfig.source?.wmsStyle === 'string') {
+      // If source.wmsStyle is defined and not an array, use that
+      selectedStyle = styles.find((style) => style.Name === layerConfig.source.wmsStyle);
+    } else {
+      // No chosen style; prefer 'default' if available, else use the first style
+      selectedStyle = hasDefaultStyle ? styles.find((style) => style.Name === 'default') : styles[0];
     }
-    return null;
+
+    // Look for a legend URL in the selected style, preferring PNG format
+    return selectedStyle?.LegendURL?.find((url) => url.Format === 'image/png');
   }
 
   /**
@@ -507,7 +507,7 @@ export class GVWMS extends AbstractGVRaster {
 
       let queryUrl: string | undefined;
       const legendUrlFromCapabilities = GVWMS.#getLegendUrlFromCapabilities(layerConfig, chosenStyle);
-      if (legendUrlFromCapabilities) queryUrl = legendUrlFromCapabilities.OnlineResource as string;
+      if (legendUrlFromCapabilities) queryUrl = legendUrlFromCapabilities.OnlineResource;
       else if (Object.keys(layerConfig.getServiceMetadata()?.Capability?.Request || {}).includes('GetLegendGraphic'))
         queryUrl = `${layerConfig.geoviewLayerConfig
           .metadataAccessPath!}service=WMS&version=1.3.0&request=GetLegendGraphic&FORMAT=image/png&layer=${layerConfig.layerId}`;

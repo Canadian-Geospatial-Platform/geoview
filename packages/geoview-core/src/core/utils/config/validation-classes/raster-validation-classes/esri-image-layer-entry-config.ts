@@ -1,5 +1,6 @@
 import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES, TypeSourceImageEsriInitialConfig } from '@/api/config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { TypeLayerMetadataEsri } from '../vector-validation-classes/esri-feature-layer-entry-config';
 
 /**
  * Type used to define a GeoView image layer to display on the map.
@@ -34,5 +35,14 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     // Format the dataAccessPath correctly
     this.source.dataAccessPath = this.geoviewLayerConfig.metadataAccessPath;
     if (!this.source.dataAccessPath!.endsWith('/')) this.source.dataAccessPath += '/';
+  }
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeLayerMetadataEsri | undefined} The strongly-typed layer metadata specific to this layer entry config.
+   */
+  override getLayerMetadata(): TypeLayerMetadataEsri | undefined {
+    return super.getLayerMetadata() as TypeLayerMetadataEsri | undefined;
   }
 }

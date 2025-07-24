@@ -1,6 +1,5 @@
 import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/config/types/map-schema-types';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
-import { TypeMetadata } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeSourceWFSVectorInitialConfig } from '@/geo/layer/geoview-layers/vector/wfs';
 import { Projection } from '@/geo/utils/projection';
 
@@ -29,7 +28,7 @@ export class WfsLayerEntryConfig extends VectorLayerEntryConfig {
   }
 }
 
-export interface TypeMetadataWFS extends TypeMetadata {
+export interface TypeMetadataWFS {
   FeatureTypeList: TypeMetadataWFSFeatureTypeList;
   '@attributes': TypeMetadataWFSAttributes;
   'ows:OperationsMetadata': TypeMetadataWFSOperationMetadata;
