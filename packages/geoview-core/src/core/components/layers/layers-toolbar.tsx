@@ -24,6 +24,7 @@ export function LayersToolbar(): JSX.Element {
   const layerToolbarStyle = {
     padding: '0 18px 4px 0',
     '& .MuiButton-startIcon': { [theme.breakpoints.down('md')]: { margin: 0, padding: '0 0.25rem' } },
+    '& .MuiButtonGroup-root': { backgroundColor: theme.palette.geoViewColor.bgColor.light[300] },
   };
 
   // Store

@@ -34,7 +34,7 @@ export default function ExportButton({ className = '', sxDetails }: ExportProps)
       id={`${mapId}-export-btn`}
       tooltip={t('appbar.export')!}
       aria-label={t('appbar.export')!}
-      tooltipPlacement="bottom-end"
+      tooltipPlacement="right"
       onClick={() => enableFocusTrap({ activeElementId: 'export', callbackElementId: `${mapId}-export-btn` })}
       sx={{ [theme.breakpoints.down('md')]: { display: 'none' }, ...sxDetails }}
       className={className}
