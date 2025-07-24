@@ -28,6 +28,7 @@ import { logger } from '@/core/utils/logger';
 // #region TYPE & INTERFACE
 export type EsriRendererTypes = 'uniqueValue' | 'simple' | 'classBreaks';
 
+// TODO: Cleanup - Remove this type which is conflicting with the other type in geo/utils/renderer
 export type EsriBaseRenderer = {
   type: EsriRendererTypes;
 };

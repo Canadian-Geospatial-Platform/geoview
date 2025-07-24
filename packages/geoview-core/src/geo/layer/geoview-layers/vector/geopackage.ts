@@ -643,7 +643,7 @@ export class GeoPackage extends AbstractGeoViewVector {
           format: 'GeoPackage',
           dataAccessPath: metadataAccessPath,
         },
-      } as GeoPackageLayerEntryConfig);
+      } as unknown as GeoPackageLayerEntryConfig);
       return layerEntryConfig;
     });
 

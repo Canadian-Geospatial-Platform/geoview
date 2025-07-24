@@ -1,6 +1,5 @@
 import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/config/types/map-schema-types';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
-import { TypeMetadata } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeSourceOgcFeatureInitialConfig } from '@/geo/layer/geoview-layers/vector/ogc-feature';
 import { Projection } from '@/geo/utils/projection';
 
@@ -29,7 +28,7 @@ export class OgcFeatureLayerEntryConfig extends VectorLayerEntryConfig {
   }
 }
 
-export interface TypeMetadataOGCFeature extends TypeMetadata {
+export interface TypeMetadataOGCFeature {
   collections: TypeMetadataOGCFeatureCollection[];
 }
 
@@ -46,4 +45,16 @@ export interface TypeMetadataOGCFeatureCollectionExtent {
 export interface TypeMetadataOGCFeatureCollectionExtentSpatial {
   crs: string;
   bbox: number[][];
+}
+
+export interface TypeLayerMetadataQueryables {
+  properties: TypeLayerMetadataOGC;
+}
+
+export interface TypeLayerMetadataOGC {
+  [key: string]: TypeLayerMetadataOGCRecord;
+}
+
+export interface TypeLayerMetadataOGCRecord {
+  type: string;
 }

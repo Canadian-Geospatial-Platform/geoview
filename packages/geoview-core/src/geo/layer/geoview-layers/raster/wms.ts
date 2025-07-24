@@ -1,7 +1,6 @@
 import { ImageWMS } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/ImageWMS';
 import WMSCapabilities from 'ol/format/WMSCapabilities';
-import { Extent } from 'ol/extent';
 
 import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
@@ -20,6 +19,7 @@ import { logger } from '@/core/utils/logger';
 import {
   OgcWmsLayerEntryConfig,
   TypeMetadataWMS,
+  TypeMetadataWMSCapabilityLayer,
 } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
@@ -74,22 +74,22 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {TypeJsonObject | undefined} currentLayerEntry - The current layer entry from the capabilities that will be recursively searched.
    * @returns {TypeJsonObject?} The found layer from the capabilities or undefined if not found.
    */
-  getLayerCapabilities(
-    layerId: string,
-    currentLayerEntry: TypeJsonObject | undefined = this.getMetadata()?.Capability.Layer
-  ): TypeJsonObject | undefined {
-    if (!currentLayerEntry) return undefined;
-    if ('Name' in currentLayerEntry && (currentLayerEntry.Name as string) === layerId) return currentLayerEntry;
-    if ('Layer' in currentLayerEntry) {
-      if (Array.isArray(currentLayerEntry.Layer)) {
-        for (let i = 0; i < currentLayerEntry.Layer.length; i++) {
-          const layerFound = this.getLayerCapabilities(layerId, currentLayerEntry.Layer[i]);
-          if (layerFound) return layerFound;
-        }
-        return undefined;
-      }
-      return this.getLayerCapabilities(layerId, currentLayerEntry.Layer);
+  getLayerCapabilities(layerId: string, layer = this.getMetadata()?.Capability.Layer): TypeMetadataWMSCapabilityLayer | undefined {
+    if (!layer) return undefined;
+
+    // Direct match
+    if (layer.Name === layerId) return layer;
+
+    // Recurse into sublayers
+    const subLayers = layer.Layer;
+    if (!subLayers) return undefined;
+
+    // For each sub layer
+    for (const subLayer of subLayers) {
+      const match = this.getLayerCapabilities(layerId, subLayer);
+      if (match) return match;
     }
+
     return undefined;
   }
 
@@ -139,7 +139,7 @@ export class WMS extends AbstractGeoViewRaster {
     const metadata = await this.onFetchServiceMetadata();
 
     // Based on the capabilities
-    const layers = metadata!.Capability.Layer.Layer as TypeJsonArray;
+    const layers = metadata!.Capability.Layer.Layer;
 
     // Now that we have metadata
     const entries = layers.map((layer) => {
@@ -169,13 +169,13 @@ export class WMS extends AbstractGeoViewRaster {
       return;
     }
 
-    if ('Layer' in layerFound) {
-      this.#createGroupLayer(layerFound, layerConfig as unknown as GroupLayerEntryConfig);
+    if (layerFound.Layer) {
+      this.#createGroupLayer(layerFound, layerConfig as GroupLayerEntryConfig);
       return;
     }
 
     // eslint-disable-next-line no-param-reassign
-    if (!layerConfig.layerName) layerConfig.layerName = layerFound.Title as string;
+    if (!layerConfig.layerName) layerConfig.layerName = layerFound.Title;
   }
 
   /**
@@ -193,9 +193,9 @@ export class WMS extends AbstractGeoViewRaster {
     // If found
     if (layerCapabilities) {
       const attributions = layerConfig.getAttributions();
-      if (layerCapabilities.Attribution && !attributions.includes(layerCapabilities.Attribution?.Title as string)) {
+      if (layerCapabilities.Attribution && !attributions.includes(layerCapabilities.Attribution?.Title)) {
         // Add it
-        attributions.push(layerCapabilities.Attribution.Title as string);
+        attributions.push(layerCapabilities.Attribution.Title);
         layerConfig.setAttributions(attributions);
       }
 
@@ -208,11 +208,11 @@ export class WMS extends AbstractGeoViewRaster {
       // GV Note: MinScaleDenominator is actually the maxScale and MaxScaleDenominator is actually the minScale
       if (layerCapabilities.MinScaleDenominator) {
         // eslint-disable-next-line no-param-reassign
-        layerConfig.maxScale = Math.max(layerConfig.maxScale ?? -Infinity, layerCapabilities.MinScaleDenominator as number);
+        layerConfig.maxScale = Math.max(layerConfig.maxScale ?? -Infinity, layerCapabilities.MinScaleDenominator);
       }
       if (layerCapabilities.MaxScaleDenominator) {
         // eslint-disable-next-line no-param-reassign
-        layerConfig.minScale = Math.min(layerConfig.minScale ?? Infinity, layerCapabilities.MaxScaleDenominator as number);
+        layerConfig.minScale = Math.min(layerConfig.minScale ?? Infinity, layerCapabilities.MaxScaleDenominator);
       }
 
       // eslint-disable-next-line no-param-reassign
@@ -220,7 +220,7 @@ export class WMS extends AbstractGeoViewRaster {
 
       if (!layerConfig.initialSettings?.bounds && layerCapabilities.EX_GeographicBoundingBox) {
         // eslint-disable-next-line no-param-reassign
-        layerConfig.initialSettings.bounds = validateExtent(layerCapabilities.EX_GeographicBoundingBox as Extent);
+        layerConfig.initialSettings.bounds = validateExtent(layerCapabilities.EX_GeographicBoundingBox);
       }
 
       // If there's a dimension
@@ -229,7 +229,7 @@ export class WMS extends AbstractGeoViewRaster {
 
         // TODO: Validate the layerConfig.layerFilter is compatible with the layerCapabilities.Dimension and if not remove it completely like `delete layerConfig.layerFilter`
 
-        const temporalDimension = (layerCapabilities.Dimension as TypeJsonArray).find((dimension) => dimension.name === 'time');
+        const temporalDimension = layerCapabilities.Dimension.find((dimension) => dimension.name === 'time');
 
         // If a temporal dimension was found
         if (temporalDimension) {
@@ -285,13 +285,11 @@ export class WMS extends AbstractGeoViewRaster {
     // Update internal style list for UI or info
     if (Array.isArray(layerConfig.source?.wmsStyle)) {
       this.WMSStyles = layerConfig.source.wmsStyle;
-    } else if ((layerCapabilities.Style?.length as number) > 1) {
-      this.WMSStyles = (layerCapabilities.Style as TypeJsonArray).map((style: TypeJsonObject) => style.Name as string);
+    } else if (layerCapabilities.Style?.length > 1) {
+      this.WMSStyles = layerCapabilities.Style.map((style) => style.Name);
     } else {
       const fallbackStyle =
-        layerConfig.source?.wmsStyle ||
-        ((layerCapabilities.Style?.length as number) > 0 && (layerCapabilities.Style?.[0]?.Name as string)) ||
-        '';
+        layerConfig.source?.wmsStyle || (layerCapabilities.Style?.length > 0 && layerCapabilities.Style?.[0]?.Name) || '';
       this.WMSStyles = [fallbackStyle];
     }
 
@@ -301,8 +299,8 @@ export class WMS extends AbstractGeoViewRaster {
       [styleToUse] = source.wmsStyle;
     } else if (typeof source.wmsStyle === 'string') {
       styleToUse = source.wmsStyle;
-    } else if (layerCapabilities?.Style && (layerCapabilities.Style.length as number) > 0) {
-      styleToUse = layerCapabilities.Style[0].Name as string;
+    } else if (layerCapabilities?.Style && layerCapabilities.Style.length > 0) {
+      styleToUse = layerCapabilities.Style[0].Name;
     }
 
     const sourceOptions: SourceOptions = {
@@ -374,8 +372,8 @@ export class WMS extends AbstractGeoViewRaster {
 
     // If all metadata fetches failed, flag the first layer's parent as errored and abort
     if (results.every((r) => r.status === 'rejected')) {
+      // Set the parent in error
       layers[0].parentLayerConfig?.setLayerStatusError();
-      return undefined;
     }
 
     // Merge metadata results
@@ -405,7 +403,7 @@ export class WMS extends AbstractGeoViewRaster {
     }
 
     // Final pass to apply inheritance rules across the merged metadata tree
-    this.#processMetadataInheritance(baseMetadata!.Capability.Layer);
+    this.#processMetadataInheritance(baseMetadata?.Capability.Layer);
     return baseMetadata;
   }
 
@@ -502,13 +500,17 @@ export class WMS extends AbstractGeoViewRaster {
    * an empty array.
    *
    * @param {string} layerName The layer name to be found
-   * @param {TypeJsonObject} layerProperty The layer property from the metadata
+   * @param {TypeMetadataWMSCapabilityLayer | TypeMetadataWMSCapabilityLayer[]} layerProperty The layer property from the metadata
    * @param {number[]} pathToTheParentLayer The path leading to the parent of the layerProperty parameter
    *
    * @returns {number[]} An array containing the path to the layer or [] if not found.
    * @private
    */
-  #getMetadataLayerPath(layerName: string, layerProperty: TypeJsonObject, pathToTheParentLayer: number[] = []): number[] {
+  #getMetadataLayerPath(
+    layerName: string,
+    layerProperty: TypeMetadataWMSCapabilityLayer | TypeMetadataWMSCapabilityLayer[],
+    pathToTheParentLayer: number[] = []
+  ): number[] {
     const newLayerPath = [...pathToTheParentLayer];
     if (Array.isArray(layerProperty)) {
       for (let i = 0; i < layerProperty.length; i++) {
@@ -535,30 +537,38 @@ export class WMS extends AbstractGeoViewRaster {
    * layer property to add. Other values tell us that the Layer property is an array and the value is the index to follow. If at
    * this level in the path the layers have the same name, we move to the next level. Otherwise, the layer can be added.
    *
-   * @param {number[]} metadataLayerPathToAdd The layer name to be found
-   * @param {TypeJsonObject | undefined} metadataLayer The metadata layer that will receive the new layer
-   * @param {TypeJsonObject} layerToAdd The layer property to add
+   * @param {number[]} path - The layer name to be found
+   * @param {TypeJsonObject | undefined} target - The metadata layer that will receive the new layer
+   * @param {TypeJsonObject} source - The layer property to add
    * @private
    */
   #addLayerToMetadataInstance(
-    metadataLayerPathToAdd: number[],
-    metadataLayer: TypeJsonObject | undefined,
-    layerToAdd: TypeJsonObject
+    path: number[],
+    target: TypeMetadataWMSCapabilityLayer | TypeMetadataWMSCapabilityLayer[] | undefined,
+    source: TypeMetadataWMSCapabilityLayer | TypeMetadataWMSCapabilityLayer[]
   ): void {
-    if (metadataLayerPathToAdd.length === 0 || !metadataLayer) return;
-    if (metadataLayerPathToAdd[0] === -1)
-      this.#addLayerToMetadataInstance(metadataLayerPathToAdd.slice(1), metadataLayer.Layer, layerToAdd.Layer);
-    else {
-      const metadataLayerFound = (metadataLayer as TypeJsonArray).find(
-        (layerEntry) => layerEntry.Name === layerToAdd[metadataLayerPathToAdd[0]].Name
-      );
-      if (metadataLayerFound)
-        this.#addLayerToMetadataInstance(
-          metadataLayerPathToAdd.slice(1),
-          metadataLayerFound.Layer,
-          layerToAdd[metadataLayerPathToAdd[0]].Layer
-        );
-      else (metadataLayer as TypeJsonArray).push(layerToAdd[metadataLayerPathToAdd[0]]);
+    if (!target || path.length === 0) return;
+
+    const [currentIndex, ...nextPath] = path;
+
+    if (currentIndex === -1) {
+      // Treat both target and source as single layer objects
+      const targetLayer = target as TypeMetadataWMSCapabilityLayer;
+      const sourceLayer = source as TypeMetadataWMSCapabilityLayer;
+      this.#addLayerToMetadataInstance(nextPath, targetLayer.Layer, sourceLayer.Layer);
+    } else {
+      // Treat both target and source as arrays of layers
+      const targetArray = target as TypeMetadataWMSCapabilityLayer[];
+      const sourceArray = source as TypeMetadataWMSCapabilityLayer[];
+
+      const sourceEntry = sourceArray[currentIndex];
+      const existingEntry = targetArray.find((layer) => layer.Name === sourceEntry.Name);
+
+      if (existingEntry) {
+        this.#addLayerToMetadataInstance(nextPath, existingEntry.Layer, sourceEntry.Layer);
+      } else {
+        targetArray.push(sourceEntry);
+      }
     }
   }
 
@@ -583,11 +593,11 @@ export class WMS extends AbstractGeoViewRaster {
 
   /**
    * Propagates the WMS metadata inherited values.
-   * @param {TypeJsonObject} layer The layer property from the metadata that will inherit the values
-   * @param {TypeJsonObject | undefined} parentLayer The parent layer that contains the inherited values
+   * @param {TypeMetadataWMSCapabilityLayer | undefined} layer - The layer property from the metadata that will inherit the values
+   * @param {TypeMetadataWMSCapabilityLayer | undefined} parentLayer - The parent layer that contains the inherited values
    * @private
    */
-  #processMetadataInheritance(layer: TypeJsonObject, parentLayer?: TypeJsonObject): void {
+  #processMetadataInheritance(layer: TypeMetadataWMSCapabilityLayer | undefined, parentLayer?: TypeMetadataWMSCapabilityLayer): void {
     if (layer && parentLayer) {
       // Table 7 — Inheritance of Layer properties specified in the standard with 'replace' behaviour.
       // eslint-disable-next-line no-param-reassign
@@ -618,10 +628,10 @@ export class WMS extends AbstractGeoViewRaster {
       // AuthorityURL inheritance is not implemented in the following code.
       if (parentLayer.Style) {
         // eslint-disable-next-line no-param-reassign
-        if (!layer.Style as TypeJsonArray) (layer.Style as TypeJsonArray) = [];
-        (parentLayer.Style as TypeJsonArray).forEach((parentStyle) => {
-          const styleFound = (layer.Style as TypeJsonArray).find((styleEntry) => styleEntry.Name === parentStyle.Name);
-          if (!styleFound) (layer.Style as TypeJsonArray).push(parentStyle);
+        if (!layer.Style) layer.Style = [];
+        parentLayer.Style.forEach((parentStyle) => {
+          const styleFound = layer.Style.find((styleEntry) => styleEntry.Name === parentStyle.Name);
+          if (!styleFound) layer.Style.push(parentStyle);
         });
       }
       if (parentLayer.CRS) {
@@ -633,16 +643,16 @@ export class WMS extends AbstractGeoViewRaster {
         });
       }
     }
-    if (layer?.Layer !== undefined) (layer.Layer as TypeJsonArray).forEach((subLayer) => this.#processMetadataInheritance(subLayer, layer));
+    if (layer?.Layer !== undefined) layer.Layer.forEach((subLayer) => this.#processMetadataInheritance(subLayer, layer));
   }
 
   /**
    * Recursively creates dynamic group layers from the service metadata.
-   * @param {TypeJsonObject} layer The dynamic group layer metadata.
+   * @param {TypeMetadataWMSCapabilityLayer} layer The dynamic group layer metadata.
    * @param {GroupLayerEntryConfig} layerConfig The group layer configuration associated to the dynamic group.
    * @private
    */
-  #createGroupLayer(layer: TypeJsonObject, layerConfig: GroupLayerEntryConfig): void {
+  #createGroupLayer(layer: TypeMetadataWMSCapabilityLayer, layerConfig: GroupLayerEntryConfig): void {
     // TODO: Refactor - createGroup is the same thing for all the layers type? group is a geoview structure.
     // TO.DOCONT: Should it be handle upper in abstract class to loop in structure and launch the creation of a leaf?
     // TODO: The answer is no. Even if the final structure is the same, the input structure is different for each geoview layer types.

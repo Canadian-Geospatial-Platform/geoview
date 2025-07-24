@@ -4,7 +4,10 @@ import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { TimeDimensionESRI, DateMgt } from '@/core/utils/date-mgt';
-import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
+import {
+  EsriFeatureLayerEntryConfig,
+  TypeLayerMetadataEsri,
+} from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
@@ -30,7 +33,6 @@ import { EsriDynamic, geoviewEntryIsEsriDynamic } from '@/geo/layer/geoview-laye
 import { EsriFeature, geoviewEntryIsEsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { LayerEntryConfigLayerIdEsriMustBeNumberError } from '@/core/exceptions/layer-exceptions';
 import {
@@ -169,15 +171,15 @@ export function commonValidateListOfLayerEntryConfig(layer: EsriDynamic | EsriFe
 
 /**
  * Extract the domain of the specified field from the metadata. If the type can not be found, return 'string'.
- *
- * @param {EsriDynamic | EsriFeature} layer The ESRI layer instance pointer.
- * @param {string} fieldName field name for which we want to get the domain.
- * @param {AbstractBaseLayerEntryConfig} layerConfig layer configuration.
- *
+ * @param {EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig - Layer configuration.
+ * @param {string} fieldName - Field name for which we want to get the domain.
  * @returns {TypeOutfieldsType} The type of the field.
  */
-export function commonGetFieldType(layerConfig: AbstractBaseLayerEntryConfig, fieldName: string): TypeOutfieldsType {
-  const esriFieldDefinitions = layerConfig.getLayerMetadata()?.fields as TypeJsonArray | undefined;
+export function commonGetFieldType(
+  layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig,
+  fieldName: string
+): TypeOutfieldsType {
+  const esriFieldDefinitions = layerConfig.getLayerMetadata()?.fields;
   const fieldDefinition = esriFieldDefinitions?.find((metadataEntry) => metadataEntry.name === fieldName);
   if (!fieldDefinition) return 'string';
   const esriFieldType = fieldDefinition.type as string;
@@ -202,10 +204,10 @@ export function commonGetFieldType(layerConfig: AbstractBaseLayerEntryConfig, fi
  * @returns {null | codedValueType | rangeDomainType} The domain of the field.
  */
 export function commonGetFieldDomain(
-  layerConfig: AbstractBaseLayerEntryConfig,
+  layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig,
   fieldName: string
 ): null | codedValueType | rangeDomainType {
-  const esriFieldDefinitions = layerConfig.getLayerMetadata()?.fields as TypeJsonArray | undefined;
+  const esriFieldDefinitions = layerConfig.getLayerMetadata()?.fields;
   const fieldDefinition = esriFieldDefinitions?.find((metadataEntry) => metadataEntry.name === fieldName);
   return fieldDefinition ? (fieldDefinition.domain as unknown as codedValueType | rangeDomainType) : null;
 }
@@ -222,28 +224,26 @@ export function commonGetFieldDomain(
 // TO.DOCONT:  https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_fr/MapServer/0
 export function commonProcessTemporalDimension(
   layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig,
-  esriTimeDimension: TypeJsonObject,
+  esriTimeDimension: TimeDimensionESRI,
   singleHandle?: boolean
 ): void {
   if (esriTimeDimension !== undefined && esriTimeDimension.timeExtent) {
-    layerConfig.setTemporalDimension(DateMgt.createDimensionFromESRI(esriTimeDimension as unknown as TimeDimensionESRI, singleHandle));
+    layerConfig.setTemporalDimension(DateMgt.createDimensionFromESRI(esriTimeDimension, singleHandle));
   }
 }
 
 /**
  * This method verifies if the layer is queryable and sets the outfields and aliasFields of the source feature info.
- *
- * @param {EsriDynamic | EsriFeature | EsriImage} layer The ESRI layer instance pointer.
  * @param {EsriFeatureLayerEntryConfig |
  *         EsriDynamicLayerEntryConfig |
- *         EsriImageLayerEntryConfig} layerConfig The layer entry to configure.
+ *         EsriImageLayerEntryConfig} layerConfig - The layer entry to configure.
  */
 export function commonProcessFeatureInfoConfig(
   layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig
 ): void {
   const { layerPath } = layerConfig;
   const layerMetadata = layerConfig.getLayerMetadata()!; // FIXME: Address the '!' marker here..
-  const queryable = (layerMetadata.capabilities as string).includes('Query');
+  const queryable = layerMetadata.capabilities.includes('Query');
   if (layerConfig.source.featureInfo) {
     // if queryable flag is undefined, set it accordingly to what is specified in the metadata
     if (layerConfig.source.featureInfo.queryable === undefined && layerMetadata.fields?.length) {
@@ -291,7 +291,7 @@ export function commonProcessFeatureInfoConfig(
     if (!layerConfig.source.featureInfo.nameField)
       if (layerMetadata.displayField) {
         // eslint-disable-next-line no-param-reassign
-        layerConfig.source.featureInfo.nameField = layerMetadata.displayField as string;
+        layerConfig.source.featureInfo.nameField = layerMetadata.displayField;
       } else {
         // eslint-disable-next-line no-param-reassign
         layerConfig.source.featureInfo.nameField = layerConfig.source.featureInfo.outfields[0]?.name;
@@ -301,8 +301,6 @@ export function commonProcessFeatureInfoConfig(
 
 /**
  * This method set the initial settings based on the service metadata. Priority is given to the layer configuration.
- *
- * @param {EsriDynamic | EsriFeature | EsriImage} layer The ESRI layer instance pointer.
  * @param {EsriFeatureLayerEntryConfig |
  *         EsriDynamicLayerEntryConfig |
  *         EsriImageLayerEntryConfig} layerConfig The layer entry to configure.
@@ -320,17 +318,17 @@ export function commonProcessInitialSettings(
   // Update Max / Min Scales with value if service doesn't allow the configured value for proper UI functionality
   if (layerMetadata.minScale) {
     // eslint-disable-next-line no-param-reassign
-    layerConfig.minScale = Math.min(layerConfig.minScale ?? Infinity, layerMetadata.minScale as number);
+    layerConfig.minScale = Math.min(layerConfig.minScale ?? Infinity, layerMetadata.minScale);
   }
 
   if (layerMetadata.maxScale) {
     // eslint-disable-next-line no-param-reassign
-    layerConfig.maxScale = Math.max(layerConfig.maxScale ?? -Infinity, layerMetadata.maxScale as number);
+    layerConfig.maxScale = Math.max(layerConfig.maxScale ?? -Infinity, layerMetadata.maxScale);
   }
 
   // Set the max record count for querying
   // eslint-disable-next-line no-param-reassign
-  layerConfig.maxRecordCount = (layerMetadata.maxRecordCount || 0) as number;
+  layerConfig.maxRecordCount = layerMetadata.maxRecordCount || 0;
 
   // eslint-disable-next-line no-param-reassign
   layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
@@ -380,7 +378,7 @@ export async function commonProcessLayerMetadata<
     queryUrl = queryUrl.endsWith('/') ? `${queryUrl}${layerConfig.layerId}` : `${queryUrl}/${layerConfig.layerId}`;
 
   // Fetch the layer metadata
-  const responseJson = await Fetch.fetchJsonAsObject(`${queryUrl}?f=json`);
+  const responseJson = await Fetch.fetchJsonAs<TypeLayerMetadataEsri>(`${queryUrl}?f=json`);
 
   // Validate the metadata response
   AbstractGeoViewRaster.throwIfMetatadaHasError(layerConfig.geoviewLayerConfig.geoviewLayerId, layerConfig.getLayerName(), responseJson);

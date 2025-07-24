@@ -65,13 +65,13 @@ export class EsriFeature extends AbstractGeoViewVector {
    */
   protected override async onFetchServiceMetadata(): Promise<TypeMetadataEsriFeature | undefined> {
     // Query
-    const responseJson = await Fetch.fetchJsonAsObject(`${this.metadataAccessPath}?f=json`);
+    const responseJson = await Fetch.fetchJsonAs<TypeMetadataEsriFeature>(`${this.metadataAccessPath}?f=json`);
 
     // Validate the metadata response
     AbstractGeoViewRaster.throwIfMetatadaHasError(this.geoviewLayerId, this.geoviewLayerName, responseJson);
 
     // Return it
-    return responseJson as unknown as TypeMetadataEsriFeature;
+    return responseJson;
   }
 
   /**
@@ -236,7 +236,7 @@ export class EsriFeature extends AbstractGeoViewVector {
           format: 'EsriJSON',
           dataAccessPath: layerEntry.dataAccessPath || undefined,
         },
-      } as EsriFeatureLayerEntryConfig);
+      } as unknown as EsriFeatureLayerEntryConfig);
       return layerEntryConfig;
     });
 

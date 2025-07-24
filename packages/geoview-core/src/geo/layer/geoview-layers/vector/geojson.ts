@@ -16,7 +16,7 @@ import {
   CONST_LAYER_TYPES,
 } from '@/api/config/types/map-schema-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
-import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
+import { TypeJsonArray } from '@/api/config/types/config-types';
 import {
   GeoJSONLayerEntryConfig,
   TypeMetadataGeoJSON,
@@ -180,7 +180,7 @@ export class GeoJSON extends AbstractGeoViewVector {
     }
 
     // Setting the layer metadata now with the updated config values. Setting the layer metadata with the config, directly, like it's done in CSV
-    layerConfig.setLayerMetadata(layerConfig as unknown as TypeJsonObject);
+    layerConfig.setLayerMetadata(layerConfig);
 
     // Return the layer config
     return Promise.resolve(layerConfig);
@@ -309,7 +309,7 @@ export class GeoJSON extends AbstractGeoViewVector {
           format: 'GeoJSON',
           dataAccessPath: metadataAccessPath,
         },
-      } as GeoJSONLayerEntryConfig);
+      } as unknown as GeoJSONLayerEntryConfig);
       return layerEntryConfig;
     });
 

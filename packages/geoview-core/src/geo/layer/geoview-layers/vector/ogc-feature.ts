@@ -4,7 +4,7 @@ import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import Feature from 'ol/Feature';
 
-import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
+import { TypeJsonArray } from '@/api/config/types/config-types';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
   TypeLayerEntryConfig,
@@ -18,6 +18,8 @@ import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import {
   OgcFeatureLayerEntryConfig,
+  TypeLayerMetadataOGC,
+  TypeLayerMetadataQueryables,
   TypeMetadataOGCFeature,
 } from '@/core/utils/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
@@ -159,7 +161,7 @@ export class OgcFeature extends AbstractGeoViewVector {
       const queryUrl = metadataUrl.endsWith('/')
         ? `${metadataUrl}collections/${layerConfig.layerId}/queryables?f=json`
         : `${metadataUrl}/collections/${layerConfig.layerId}/queryables?f=json`;
-      const queryResultData = await Fetch.fetchJsonAsObject(queryUrl);
+      const queryResultData = await Fetch.fetchJsonAs<TypeLayerMetadataQueryables>(queryUrl);
       if (queryResultData.properties) {
         layerConfig.setLayerMetadata(queryResultData.properties);
         OgcFeature.#processFeatureInfoConfig(queryResultData.properties, layerConfig);
@@ -210,11 +212,11 @@ export class OgcFeature extends AbstractGeoViewVector {
   /**
    * This method sets the outfields and aliasFields of the source feature info.
    *
-   * @param {TypeJsonArray} fields An array of field names and its aliases.
+   * @param {TypeLayerMetadataOGC} fields An array of field names and its aliases.
    * @param {VectorLayerEntryConfig} layerConfig The vector layer entry to configure.
    * @private
    */
-  static #processFeatureInfoConfig(fields: TypeJsonObject, layerConfig: VectorLayerEntryConfig): void {
+  static #processFeatureInfoConfig(fields: TypeLayerMetadataOGC, layerConfig: VectorLayerEntryConfig): void {
     // eslint-disable-next-line no-param-reassign
     if (!layerConfig.source) layerConfig.source = {};
     // eslint-disable-next-line no-param-reassign
@@ -327,7 +329,7 @@ export class OgcFeature extends AbstractGeoViewVector {
           format: 'featureAPI',
           dataAccessPath: metadataAccessPath,
         },
-      } as OgcFeatureLayerEntryConfig);
+      } as unknown as OgcFeatureLayerEntryConfig);
       return layerEntryConfig;
     });
 

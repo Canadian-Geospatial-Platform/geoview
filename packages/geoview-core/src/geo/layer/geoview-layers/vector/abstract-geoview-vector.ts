@@ -15,7 +15,7 @@ import {
   TypeOutfields,
 } from '@/api/config/types/map-schema-types';
 
-import { AbstractGeoViewLayer, TypeMetadata } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
@@ -65,9 +65,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   /**
    * Overrides the way the metadata is fetched.
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-   * @returns {Promise<TypeMetadata | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
+   * @returns {Promise<unknown | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
    */
-  protected override onFetchServiceMetadata(): Promise<TypeMetadata | undefined> {
+  protected override onFetchServiceMetadata(): Promise<unknown | undefined> {
     // None
     return Promise.resolve(undefined);
   }
@@ -229,10 +229,10 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         const { count } = JSON.parse(responseText);
 
         // Determine the maximum number of records allowed
-        const maxRecords = layerConfig.getLayerMetadata()?.maxRecordCount;
+        const maxRecords = layerConfig.getLayerMetadataCasted()?.maxRecordCount;
 
         // Retrieve the full ESRI feature data
-        const esriData = await AbstractGeoViewVector.#getEsriFeatures(url, count, maxRecords as number | undefined);
+        const esriData = await AbstractGeoViewVector.#getEsriFeatures(url, count, maxRecords);
 
         // Convert each ESRI response chunk to features and flatten the result
         return esriData.flatMap((json) =>

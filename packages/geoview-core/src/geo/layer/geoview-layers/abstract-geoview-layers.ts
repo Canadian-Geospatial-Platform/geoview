@@ -103,7 +103,7 @@ export abstract class AbstractGeoViewLayer {
   olRootLayer?: BaseLayer;
 
   /** The service metadata. */
-  #metadata?: TypeMetadata;
+  #metadata?: unknown;
 
   /** Date format object used to translate server to ISO format and ISO to server format */
   serverDateFragmentsOrder?: TypeDateFragments;
@@ -179,7 +179,7 @@ export abstract class AbstractGeoViewLayer {
    * @returns {Promise<void>} A promise resolved once the metadata has been fetched.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  protected abstract onFetchServiceMetadata(): Promise<TypeMetadata | undefined>;
+  protected abstract onFetchServiceMetadata(): Promise<unknown | undefined>;
 
   /**
    * Must override method to initialize a layer entry based on a GeoView layer config.
@@ -367,7 +367,9 @@ export abstract class AbstractGeoViewLayer {
         layerConfig.setServiceMetadata(this.#metadata);
 
         // If there's a copyrightText found in the metadata
-        const copyrightText = this.#metadata?.copyrightText;
+        // GV Can be any object so disable eslint and proceed with caution
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { copyrightText } = this.#metadata! as any;
         const attributions = layerConfig.getAttributions();
         if (copyrightText && !attributions.includes(copyrightText)) {
           // Add it
@@ -1088,10 +1090,6 @@ export abstract class AbstractGeoViewLayer {
 }
 
 // #region EVENT DEFINITIONS
-
-export type TypeMetadata = {
-  copyrightText?: string;
-};
 
 /**
  * Define an event for the delegate

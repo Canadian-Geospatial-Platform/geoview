@@ -4,7 +4,7 @@ import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import Feature from 'ol/Feature';
 
-import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
+import { TypeJsonArray } from '@/api/config/types/config-types';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
   TypeVectorSourceInitialConfig,
@@ -66,7 +66,7 @@ export class CSV extends AbstractGeoViewVector {
    */
   protected override onProcessLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<VectorLayerEntryConfig> {
     // process the feature info configuration and attach the config to the instance for access by parent class
-    layerConfig.setLayerMetadata(layerConfig as unknown as TypeJsonObject);
+    layerConfig.setLayerMetadata(layerConfig);
 
     // Return the layer config
     return Promise.resolve(layerConfig);
@@ -165,7 +165,7 @@ export class CSV extends AbstractGeoViewVector {
         source: {
           dataAccessPath: metadataAccessPath,
         },
-      } as CsvLayerEntryConfig);
+      } as unknown as CsvLayerEntryConfig);
       return layerEntryConfig;
     });
 

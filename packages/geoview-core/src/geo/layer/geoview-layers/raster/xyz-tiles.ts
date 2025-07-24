@@ -11,7 +11,7 @@ import {
   CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
 } from '@/api/config/types/map-schema-types';
-import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
+import { TypeJsonArray } from '@/api/config/types/config-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import {
   TypeMetadataXYZTiles,
@@ -127,7 +127,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
     // GV Also, might be worth checking out OGCMapTile for this? https://openlayers.org/en/latest/examples/ogc-map-tiles-geographic.html
     // GV Seems like it can deal with less specificity in the url and can handle the x y z internally?
     if (this.getMetadata()) {
-      let metadataLayerConfigFound: XYZTilesLayerEntryConfig | TypeJsonObject | undefined;
+      let metadataLayerConfigFound: XYZTilesLayerEntryConfig | undefined;
       if (this.getMetadata()!.listOfLayerEntryConfig) {
         metadataLayerConfigFound = (this.getMetadata()?.listOfLayerEntryConfig as unknown as XYZTilesLayerEntryConfig[]).find(
           (metadataLayerConfig) => metadataLayerConfig.layerId === layerConfig.layerId
@@ -142,31 +142,34 @@ export class XYZTiles extends AbstractGeoViewRaster {
         );
       }
 
-      // metadataLayerConfigFound can not be undefined because we have already validated the config exist
-      layerConfig.setLayerMetadata(metadataLayerConfigFound as unknown as TypeJsonObject);
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.source = defaultsDeep(layerConfig.source, metadataLayerConfigFound!.source);
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.initialSettings = defaultsDeep(layerConfig.initialSettings, metadataLayerConfigFound!.initialSettings);
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
+      // If found
+      if (metadataLayerConfigFound) {
+        // metadataLayerConfigFound can not be undefined because we have already validated the config exist
+        layerConfig.setLayerMetadata(metadataLayerConfigFound);
+        // eslint-disable-next-line no-param-reassign
+        layerConfig.source = defaultsDeep(layerConfig.source, metadataLayerConfigFound.source);
+        // eslint-disable-next-line no-param-reassign
+        layerConfig.initialSettings = defaultsDeep(layerConfig.initialSettings, metadataLayerConfigFound.initialSettings);
+        // eslint-disable-next-line no-param-reassign
+        layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
 
-      // Set zoom limits for max / min zooms
-      const maxScale = metadataLayerConfigFound?.maxScale as number;
-      const minScaleDenominator = (metadataLayerConfigFound as TypeJsonObject)?.minScaleDenominator as number;
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.maxScale =
-        !maxScale && !minScaleDenominator
-          ? layerConfig.maxScale
-          : Math.max(maxScale ?? -Infinity, minScaleDenominator ?? -Infinity, layerConfig.maxScale ?? -Infinity);
+        // Set zoom limits for max / min zooms
+        const maxScale = metadataLayerConfigFound?.maxScale as number;
+        const minScaleDenominator = metadataLayerConfigFound?.minScaleDenominator;
+        // eslint-disable-next-line no-param-reassign
+        layerConfig.maxScale =
+          !maxScale && !minScaleDenominator
+            ? layerConfig.maxScale
+            : Math.max(maxScale ?? -Infinity, minScaleDenominator ?? -Infinity, layerConfig.maxScale ?? -Infinity);
 
-      const minScale = metadataLayerConfigFound?.minScale as number;
-      const maxScaleDenominator = (metadataLayerConfigFound as TypeJsonObject)?.maxScaleDenominator as number;
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.minScale =
-        !minScale && !maxScaleDenominator
-          ? layerConfig.minScale
-          : Math.min(minScale ?? Infinity, maxScaleDenominator ?? Infinity, layerConfig.minScale ?? Infinity);
+        const minScale = metadataLayerConfigFound?.minScale as number;
+        const maxScaleDenominator = metadataLayerConfigFound?.maxScaleDenominator;
+        // eslint-disable-next-line no-param-reassign
+        layerConfig.minScale =
+          !minScale && !maxScaleDenominator
+            ? layerConfig.minScale
+            : Math.min(minScale ?? Infinity, maxScaleDenominator ?? Infinity, layerConfig.minScale ?? Infinity);
+      }
     }
 
     // Return the layer config
@@ -245,7 +248,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
         source: {
           dataAccessPath: metadataAccessPath,
         },
-      } as XYZTilesLayerEntryConfig);
+      } as unknown as XYZTilesLayerEntryConfig);
       return layerEntryConfig;
     });
 

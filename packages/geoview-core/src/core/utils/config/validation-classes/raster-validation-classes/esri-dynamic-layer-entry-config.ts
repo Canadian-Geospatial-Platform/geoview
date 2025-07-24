@@ -1,6 +1,7 @@
 import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES, TypeSourceEsriDynamicInitialConfig } from '@/api/config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { TypeMetadata } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeLayerMetadataEsri } from '../vector-validation-classes/esri-feature-layer-entry-config';
+import { TypeJsonArray } from '@/api/config/types/config-types';
 
 /**
  * Type used to define a GeoView image layer to display on the map.
@@ -45,11 +46,23 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   override getServiceMetadata(): TypeMetadataEsriDynamic | undefined {
     return super.getServiceMetadata() as TypeMetadataEsriDynamic | undefined;
   }
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeLayerMetadataEsri | undefined} The strongly-typed layer metadata specific to this layer entry config.
+   */
+  override getLayerMetadata(): TypeLayerMetadataEsri | undefined {
+    return super.getLayerMetadata() as TypeLayerMetadataEsri | undefined;
+  }
 }
 
-export interface TypeMetadataEsriDynamic extends TypeMetadata {
+export interface TypeMetadataEsriDynamic {
   // TODO: Cleanup - Remove the any by specifying
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   layers: any;
   supportsDynamicLayers: boolean;
+  // TODO: Cleanup - Remove the any by specifying
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  fields?: TypeJsonArray;
 }

@@ -12,8 +12,11 @@ import cloneDeep from 'lodash/cloneDeep';
 import { TimeDimension, DateMgt, TypeDateFragments } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+import {
+  OgcWmsLayerEntryConfig,
+  TypeLayerMetadataWMS,
+} from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import { TypeLayerMetadataVector, VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import {
@@ -35,6 +38,7 @@ import { NotImplementedError, NotSupportedError } from '@/core/exceptions/core-e
 import { LayerNotQueryableError } from '@/core/exceptions/layer-exceptions';
 import { createAliasLookup } from '@/geo/layer/gv-layers/utils';
 import { TypeJsonArray } from '@/api/config/types/config-types';
+import { TypeLayerMetadataEsri } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { delay } from '@/core/utils/utilities';
 
 /**
@@ -789,7 +793,11 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       if (!features.length) return [];
 
       const outfields = layerConfig?.source?.featureInfo?.outfields;
-      const domainsLookup = layerConfig.getLayerMetadata()?.fields as TypeJsonArray | undefined;
+
+      // Layer metadata can have different types
+      const domainsLookup = (layerConfig.getLayerMetadata() as TypeLayerMetadataWMS | TypeLayerMetadataEsri | TypeLayerMetadataVector)
+        ?.fields;
+
       const aliasLookup = createAliasLookup(outfields);
       const dictFieldDomains: Record<string, codedValueType | rangeDomainType | null> = {};
       const dictFieldTypes: Record<string, TypeOutfieldsType> = {};

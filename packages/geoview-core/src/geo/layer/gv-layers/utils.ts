@@ -27,7 +27,10 @@ import { NotSupportedError } from '@/core/exceptions/core-exceptions';
  * @returns {TypeOutfieldsType} The type of the field.
  */
 export function featureInfoGetFieldType(layerConfig: AbstractBaseLayerEntryConfig, fieldName: string): TypeOutfieldsType {
-  const fieldDefinitions = layerConfig.getLayerMetadata()?.source.featureInfo as unknown as TypeFeatureInfoLayerConfig;
+  // GV Can be any object so disable eslint and proceed with caution
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const layerMetadata = layerConfig.getLayerMetadata() as any;
+  const fieldDefinitions = layerMetadata?.source.featureInfo as unknown as TypeFeatureInfoLayerConfig;
   const outFieldEntry = fieldDefinitions.outfields?.find((fieldDefinition) => fieldDefinition.name === fieldName);
   return outFieldEntry?.type || 'string';
 }
