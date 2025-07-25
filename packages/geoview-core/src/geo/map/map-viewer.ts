@@ -178,6 +178,9 @@ export class MapViewer {
   /** Keep all callback delegates references */
   #onMapMoveEndHandlers: MapMoveEndDelegate[] = [];
 
+  /** Whether pointer events should be handled */
+  #pointerHandlersEnabled: boolean = true;
+
   /** Keep all callback delegates references */
   #onMapPointerMoveHandlers: MapPointerMoveDelegate[] = [];
 
@@ -207,6 +210,21 @@ export class MapViewer {
 
   // The starting time of the timer for the map ready
   #checkMapReadyStartTime: number | undefined;
+
+  // Keep a bounded reference to the handle map pointer move
+  #boundedHandleMapPointerMove: (event: MapBrowserEvent) => void;
+
+  // Keep a bounded reference to the handle map pointer stopped
+  #boundedHandleMapPointerStopped: (event: MapBrowserEvent) => void;
+
+  // Keep a bounded reference to the handle map single click
+  #boundedHandleMapSingleClick: (event: MapBrowserEvent) => void;
+
+  // Keep a bounded reference to the debounced handle map pointer stopped
+  #boundedHandleMapPointerStoppedDebounced: (event: MapBrowserEvent) => void;
+
+  // Keep a bounded reference to the debounced handle map single click
+  #boundedHandleMapSingleClickDebounced: (event: MapBrowserEvent) => void;
 
   // Getter for map is init
   get mapInit(): boolean {
@@ -266,6 +284,13 @@ export class MapViewer {
       // Show the error
       this.notifications.showErrorFromError(event.error);
     });
+
+    // Mouse bounded handle references
+    this.#boundedHandleMapPointerMove = this.#handleMapPointerMove.bind(this);
+    this.#boundedHandleMapPointerStopped = this.#handleMapPointerStopped.bind(this);
+    this.#boundedHandleMapSingleClick = this.#handleMapSingleClick.bind(this);
+    this.#boundedHandleMapPointerStoppedDebounced = debounce(this.#boundedHandleMapPointerStopped, 750, { leading: false });
+    this.#boundedHandleMapSingleClickDebounced = debounce(this.#boundedHandleMapSingleClick, 1000, { leading: true });
   }
 
   /**
@@ -1289,12 +1314,7 @@ export class MapViewer {
    */
   #registerMapHandlers(map: OLMap): void {
     // If map isn't static
-    if (this.mapFeaturesConfig.map.interaction !== 'static') {
-      // Register handlers on pointer move and map single click
-      map.on('pointermove', this.#handleMapPointerMove.bind(this));
-      map.on('pointermove', debounce(this.#handleMapPointerStopped.bind(this), 750, { leading: false }).bind(this));
-      map.on('singleclick', debounce(this.#handleMapSingleClick.bind(this), 1000, { leading: true }).bind(this));
-    }
+    this.registerMapPointerHandlers(map);
 
     // Register mouse interaction events. On mouse enter or leave, focus or blur the map container
     const mapHTMLElement = map.getTargetElement();
@@ -1312,6 +1332,32 @@ export class MapViewer {
 
     // Register essential map-view handlers
     map.on('moveend', this.#handleMapMoveEnd.bind(this));
+  }
+
+  /**
+   * Register handlers on pointer move and map single click
+   * @param {OLMap} map - Map to register events on
+   */
+  registerMapPointerHandlers(map: OLMap): void {
+    if (this.mapFeaturesConfig.map.interaction !== 'static') {
+      this.#pointerHandlersEnabled = true;
+      map.on('pointermove', this.#boundedHandleMapPointerMove);
+      map.on('pointermove', this.#boundedHandleMapPointerStoppedDebounced);
+      map.on('singleclick', this.#boundedHandleMapSingleClickDebounced);
+    }
+  }
+
+  /**
+   * Unregister handlers on pointer move and map single click
+   * @param {OLMap} map - Map to unregister events on
+   */
+  unregisterMapPointerHandlers(map: OLMap): void {
+    if (this.mapFeaturesConfig.map.interaction !== 'static') {
+      this.#pointerHandlersEnabled = false;
+      map.un('pointermove', this.#boundedHandleMapPointerMove);
+      map.un('pointermove', this.#boundedHandleMapPointerStoppedDebounced);
+      map.un('singleclick', this.#boundedHandleMapSingleClickDebounced);
+    }
   }
 
   /**
@@ -1939,7 +1985,9 @@ export class MapViewer {
    */
   #emitMapPointerMove(event: MapPointerMoveEvent): void {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onMapPointerMoveHandlers, event);
+    if (this.#pointerHandlersEnabled) {
+      EventHelper.emitEvent(this, this.#onMapPointerMoveHandlers, event);
+    }
   }
 
   /**
@@ -1966,7 +2014,9 @@ export class MapViewer {
    */
   #emitMapPointerStop(event: MapPointerMoveEvent): void {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onMapPointerStopHandlers, event);
+    if (this.#pointerHandlersEnabled) {
+      EventHelper.emitEvent(this, this.#onMapPointerStopHandlers, event);
+    }
   }
 
   /**
@@ -1993,7 +2043,9 @@ export class MapViewer {
    */
   #emitMapSingleClick(event: MapSingleClickEvent): void {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onMapSingleClickHandlers, event);
+    if (this.#pointerHandlersEnabled) {
+      EventHelper.emitEvent(this, this.#onMapSingleClickHandlers, event);
+    }
   }
 
   /**
