@@ -98,8 +98,11 @@ export function StylePanel(): JSX.Element {
           value={localFillColor}
           onChange={handleFillColorChange}
           onBlur={handleFillColorClose}
-          PopoverProps={{ onClose: handleFillColorClose }}
           sx={sxClasses.input}
+          PopoverProps={{
+            onClose: handleFillColorClose,
+            disableRestoreFocus: true,
+          }}
         />
       </ListItem>
 

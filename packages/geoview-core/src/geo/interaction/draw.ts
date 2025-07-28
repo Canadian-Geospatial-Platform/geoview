@@ -40,6 +40,9 @@ export class Draw extends Interaction {
   /** Callback handlers for the drawabort event. */
   #onDrawAbortHandlers: DrawDelegate[] = [];
 
+  /** Reference to the keyboard event handler */
+  #keyboardHandler: (event: KeyboardEvent) => void;
+
   /**
    * Initializes a Draw component.
    * @param {DrawOptions} options - Object to configure the initialization of the Draw interaction.
@@ -68,6 +71,16 @@ export class Draw extends Interaction {
     this.#ol_draw.on('drawstart', this.#emitDrawStart.bind(this));
     this.#ol_draw.on('drawend', this.#emitDrawEnd.bind(this));
     this.#ol_draw.on('drawabort', this.#emitDrawAbort.bind(this));
+
+    // Create and store the keyboard handler
+    this.#keyboardHandler = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && this.#ol_draw.getActive()) {
+        this.#ol_draw.abortDrawing();
+      }
+    };
+
+    // Listener for aborting a drawing
+    document.addEventListener('keydown', this.#keyboardHandler);
   }
 
   /**
@@ -82,6 +95,9 @@ export class Draw extends Interaction {
    * Stops the interaction on the map
    */
   override stopInteraction(): void {
+    // Remove the keyboard event listener
+    document.removeEventListener('keydown', this.#keyboardHandler);
+
     // Redirect to super method to stop interaction
     super.stopInteraction(this.#ol_draw);
   }

@@ -10,10 +10,115 @@ import { Coordinate } from 'ol/coordinate';
 import { Extent, getCenter } from 'ol/extent';
 import { MapBrowserEvent } from 'ol';
 
-import { TransformEvent } from './events/transform-event';
-import { DeleteFeatureEvent } from './events/delete-event';
+import { TransformEvent, TransformSelectionEvent, TransformDeleteFeatureEvent } from './transform-events';
 import { MapViewer } from '@/app';
-import { SelectionEvent } from './events/select-event';
+
+// Handle style constants
+const ROTATE_STYLE = new Style({
+  text: new Text({
+    text: '↻',
+    fill: new Fill({
+      color: 'rgba(100, 100, 100, 0.95)',
+    }),
+    font: 'bold 20px sans-serif',
+  }),
+});
+
+const DELETE_STYLE = new Style({
+  image: new RegularShape({
+    points: 50,
+    radius: 10,
+    fill: new Fill({
+      color: 'rgba(244, 67, 54, 0.95)',
+    }),
+    stroke: new Stroke({
+      color: '#333',
+      width: 1,
+    }),
+  }),
+  text: new Text({
+    text: '✕',
+    fill: new Fill({
+      color: '#fff',
+    }),
+    font: 'bold 14px sans-serif',
+    offsetY: 1,
+  }),
+});
+
+const SCALE_STYLE = new Style({
+  image: new RegularShape({
+    points: 50,
+    radius: 8,
+    fill: new Fill({
+      color: 'rgba(160, 160, 160, 0.8)',
+    }),
+    stroke: new Stroke({
+      color: '#333',
+      width: 1,
+    }),
+  }),
+});
+
+const STRETCH_STYLE = new Style({
+  image: new RegularShape({
+    points: 4,
+    radius: 8,
+    angle: Math.PI / 4, // 45 degrees to make it a square
+    fill: new Fill({
+      color: 'rgba(160, 160, 160, 0.8)',
+    }),
+    stroke: new Stroke({
+      color: '#333',
+      width: 1,
+    }),
+  }),
+});
+
+const TRANSLATE_STYLE = new Style({
+  image: new CircleStyle({
+    radius: 8,
+    fill: new Fill({
+      color: 'rgba(0, 0, 0, 0.8)',
+    }),
+    stroke: new Stroke({
+      color: '#333',
+      width: 1,
+    }),
+  }),
+});
+
+const VERTEX_STYLE = new Style({
+  image: new CircleStyle({
+    radius: 6,
+    fill: new Fill({ color: 'rgba(255, 255, 255, 0.9)' }),
+    stroke: new Stroke({ color: '#333', width: 2 }),
+  }),
+});
+
+const EDGE_MIDPOINT_STYLE = new Style({
+  image: new CircleStyle({
+    radius: 4,
+    fill: new Fill({ color: 'rgba(0, 255, 255, 0.7)' }),
+    stroke: new Stroke({ color: '#333', width: 1 }),
+  }),
+});
+
+const EXTENT_BOUNDARY_STYLE = new Style({
+  stroke: new Stroke({
+    color: 'rgba(100, 100, 100, 0.5)',
+    width: 1,
+    lineDash: [5, 5],
+  }),
+});
+
+const ROTATE_LINE_STYLE = new Style({
+  stroke: new Stroke({
+    color: 'rgba(100, 100, 100, 0.5)',
+    width: 1,
+    lineDash: [5, 5],
+  }),
+});
 
 /**
  * Handle types for the transform interaction
@@ -129,113 +234,6 @@ export class OLTransform extends OLPointer {
   /** Keyboard event handler */
   #keyboardHandler?: (event: KeyboardEvent) => void;
 
-  // Define handle styles
-  rotateStyle = new Style({
-    text: new Text({
-      text: '↻',
-      fill: new Fill({
-        color: 'rgba(100, 100, 100, 0.95)',
-      }),
-      font: 'bold 20px sans-serif',
-    }),
-  });
-
-  deleteStyle = new Style({
-    image: new RegularShape({
-      points: 50,
-      radius: 10,
-      fill: new Fill({
-        color: 'rgba(244, 67, 54, 0.95)',
-      }),
-      stroke: new Stroke({
-        color: '#333',
-        width: 1,
-      }),
-    }),
-    text: new Text({
-      text: '✕',
-      fill: new Fill({
-        color: '#fff',
-      }),
-      font: 'bold 14px sans-serif',
-      offsetY: 1,
-    }),
-  });
-
-  scaleStyle = new Style({
-    image: new RegularShape({
-      points: 50,
-      radius: 8,
-      fill: new Fill({
-        color: 'rgba(160, 160, 160, 0.8)',
-      }),
-      stroke: new Stroke({
-        color: '#333',
-        width: 1,
-      }),
-    }),
-  });
-
-  stretchStyle = new Style({
-    image: new RegularShape({
-      points: 4,
-      radius: 8,
-      angle: Math.PI / 4, // 45 degrees to make it a square
-      fill: new Fill({
-        color: 'rgba(160, 160, 160, 0.8)',
-      }),
-      stroke: new Stroke({
-        color: '#333',
-        width: 1,
-      }),
-    }),
-  });
-
-  translateStyle = new Style({
-    image: new CircleStyle({
-      radius: 8,
-      fill: new Fill({
-        color: 'rgba(0, 0, 0, 0.8)',
-      }),
-      stroke: new Stroke({
-        color: '#333',
-        width: 1,
-      }),
-    }),
-  });
-
-  vertexStyle = new Style({
-    image: new CircleStyle({
-      radius: 6,
-      fill: new Fill({ color: 'rgba(255, 255, 255, 0.9)' }),
-      stroke: new Stroke({ color: '#333', width: 2 }),
-    }),
-  });
-
-  edgeMidpointStyle = new Style({
-    image: new CircleStyle({
-      radius: 4,
-      fill: new Fill({ color: 'rgba(0, 255, 255, 0.7)' }),
-      stroke: new Stroke({ color: '#333', width: 1 }),
-    }),
-  });
-
-  extentBoundaryStyle = new Style({
-    stroke: new Stroke({
-      color: 'rgba(100, 100, 100, 0.5)',
-      width: 1,
-      lineDash: [5, 5],
-    }),
-  });
-
-  rotateLineStyle = new Style({
-    stroke: new Stroke({
-      color: 'rgba(100, 100, 100, 0.5)',
-      width: 1,
-      lineDash: [5, 5],
-    }),
-  });
-
   /** Callback functions for events */
   onTransformstart?: (event: TransformEvent) => void;
 
@@ -243,9 +241,9 @@ export class OLTransform extends OLPointer {
 
   onTransformend?: (event: TransformEvent) => void;
 
-  onDeletefeature?: (event: DeleteFeatureEvent) => void;
+  onDeletefeature?: (event: TransformDeleteFeatureEvent) => void;
 
-  onSelectionChange?: (event: SelectionEvent) => void;
+  onSelectionChange?: (event: TransformSelectionEvent) => void;
 
   /**
    * Initializes a OLTransform component.
@@ -324,7 +322,7 @@ export class OLTransform extends OLPointer {
 
     // Emit selection change event
     if (this.onSelectionChange) {
-      this.onSelectionChange(new SelectionEvent('selectionchange', previousFeature, feature));
+      this.onSelectionChange(new TransformSelectionEvent('selectionchange', previousFeature, feature));
     }
 
     // Create handles for the feature
@@ -361,7 +359,7 @@ export class OLTransform extends OLPointer {
    */
   clearSelection(): void {
     if (this.onSelectionChange) {
-      this.onSelectionChange(new SelectionEvent('selectionchange', this.selectedFeature, undefined));
+      this.onSelectionChange(new TransformSelectionEvent('selectionchange', this.selectedFeature, undefined));
     }
 
     this.#clearHistory();
@@ -577,28 +575,28 @@ export class OLTransform extends OLPointer {
     // Apply style based on handle type
     switch (type) {
       case HandleType.VERTEX:
-        handle.setStyle(this.vertexStyle);
+        handle.setStyle(VERTEX_STYLE);
         break;
       case HandleType.ROTATE:
-        handle.setStyle(this.rotateStyle);
+        handle.setStyle(ROTATE_STYLE);
         break;
       case HandleType.DELETE:
-        handle.setStyle(this.deleteStyle);
+        handle.setStyle(DELETE_STYLE);
         break;
       case HandleType.SCALE_NE:
       case HandleType.SCALE_SE:
       case HandleType.SCALE_SW:
       case HandleType.SCALE_NW:
-        handle.setStyle(this.scaleStyle);
+        handle.setStyle(SCALE_STYLE);
         break;
       case HandleType.STRETCH_N:
       case HandleType.STRETCH_E:
       case HandleType.STRETCH_S:
       case HandleType.STRETCH_W:
-        handle.setStyle(this.stretchStyle);
+        handle.setStyle(STRETCH_STYLE);
         break;
       case HandleType.TRANSLATE_CENTER:
-        handle.setStyle(this.translateStyle);
+        handle.setStyle(TRANSLATE_STYLE);
         break;
       default:
         break;
@@ -627,7 +625,7 @@ export class OLTransform extends OLPointer {
       handleType: HandleType.BOUNDARY,
     });
 
-    boundary.setStyle(this.extentBoundaryStyle);
+    boundary.setStyle(EXTENT_BOUNDARY_STYLE);
     this.handleSource.addFeature(boundary);
   }
 
@@ -678,7 +676,7 @@ export class OLTransform extends OLPointer {
       geometry: new LineString([lineStart, lineEnd]),
       handleType: HandleType.ROTATE_LINE,
     });
-    line.setStyle(this.rotateLineStyle);
+    line.setStyle(ROTATE_LINE_STYLE);
     this.handleSource.addFeature(line);
 
     // Create rotate handle at end of line
@@ -723,7 +721,7 @@ export class OLTransform extends OLPointer {
       });
 
       vertexHandle.set('feature', this.selectedFeature);
-      vertexHandle.setStyle(this.vertexStyle);
+      vertexHandle.setStyle(VERTEX_STYLE);
       this.handleSource.addFeature(vertexHandle);
     });
 
@@ -740,7 +738,7 @@ export class OLTransform extends OLPointer {
       });
 
       midpointHandle.set('feature', this.selectedFeature);
-      midpointHandle.setStyle(this.edgeMidpointStyle);
+      midpointHandle.setStyle(EDGE_MIDPOINT_STYLE);
       this.handleSource.addFeature(midpointHandle);
     }
   }
@@ -1071,7 +1069,7 @@ export class OLTransform extends OLPointer {
         if (handleType === HandleType.DELETE) {
           const feature = handleFeature.get('feature');
           if (feature) {
-            this.onDeletefeature?.(new DeleteFeatureEvent(feature as Feature));
+            this.onDeletefeature?.(new TransformDeleteFeatureEvent(feature as Feature));
             this.features.remove(feature);
           }
           return false;

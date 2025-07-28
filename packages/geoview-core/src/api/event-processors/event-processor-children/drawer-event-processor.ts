@@ -10,7 +10,7 @@ import { generateId } from '@/core/utils/utilities';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { AppEventProcessor } from './app-event-processor';
 import { MapEventProcessor } from './map-event-processor';
-import { Coordinate, Draw, GeoviewStoreType } from '@/app';
+import { Coordinate, Draw, GeoviewStoreType, TransformDeleteFeatureEvent, TransformEvent, TransformSelectionEvent } from '@/app';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -488,7 +488,33 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     this.#setupKeyboardHandler(mapId);
 
     // Set up draw end event handler
-    draw.onDrawEnd((_sender: unknown, event: DrawEvent): void => {
+    draw.onDrawEnd(this.#handleDrawEnd(mapId));
+
+    // Update state
+    state.actions.setDrawInstance(draw);
+    if (geomType) {
+      state.actions.setActiveGeom(geomType);
+    }
+
+    // If editing already, stop it
+    if (state.actions.getIsEditing()) {
+      this.stopEditing(mapId);
+    }
+  }
+
+  /**
+   * The handler for Draw End events
+   * @param mapId The map ID
+   */
+  static #handleDrawEnd(mapId: string) {
+    return (_sender: unknown, event: DrawEvent): void => {
+      const state = this.getDrawerState(mapId);
+      if (!state) return;
+
+      const currentGeomType = state.actions.getActiveGeom();
+      const currentStyle = state.actions.getStyle();
+
+      const viewer = MapEventProcessor.getMapViewer(mapId);
       const { feature } = event;
 
       // Create a style based on current color settings
@@ -544,18 +570,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
         type: 'add',
         features: [feature],
       });
-    });
-
-    // Update state
-    state.actions.setDrawInstance(draw);
-    if (geomType) {
-      state.actions.setActiveGeom(geomType);
-    }
-
-    // If editing already, stop it
-    if (state.actions.getIsEditing()) {
-      this.stopEditing(mapId);
-    }
+    };
   }
 
   /**
@@ -618,103 +633,13 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       const transformInstance = viewer.initTransformInteractions({ geometryGroupKey: DRAW_GROUP_KEY });
 
       // Handle Transform Events
-      transformInstance.onTransformEnd((_sender, event) => {
-        const { feature } = event;
-        if (!feature) return;
-
-        const geom = feature.getGeometry();
-        if (!geom) return;
-        if (geom instanceof Point) return;
-
-        // Update the overlay with new values
-        this.#createMeasureTooltip(feature, true, mapId);
-      });
+      transformInstance.onTransformEnd(this.#handleTransformEnd(mapId));
 
       // Handle Delete Events
-      transformInstance.onDeleteFeature((_sender, event) => {
-        const { feature } = event;
-
-        // Save delete action to history before deleting
-        this.#saveToHistory(mapId, {
-          type: 'delete',
-          features: [feature.clone()],
-        });
-
-        const featureId = feature.getId();
-        if (featureId) {
-          this.deleteSingleDrawing(mapId, featureId as string);
-        }
-      });
+      transformInstance.onDeleteFeature(this.#handleTransformDeleteFeature(mapId));
 
       // Handle Selection Events
-      transformInstance.onSelectionChange((_sender, event) => {
-        // GV Get hideMeasurements here so the value is not stale
-        const hideMeasurements = this.getDrawerState(mapId)?.hideMeasurements;
-        const { previousFeature, newFeature } = event;
-
-        // If we had a previous feature selected, check if it was modified
-        if (previousFeature) {
-          const stateKey = `${mapId}-${previousFeature.getId()}`;
-          const savedState = this.#selectedFeatureState.get(stateKey);
-
-          if (savedState) {
-            const currentGeometry = previousFeature.getGeometry();
-
-            // Check if geometry actually changed
-            if (currentGeometry && !this.#geometriesEqual(savedState.originalGeometry, currentGeometry)) {
-              // Save modify action - include style only if it was changed
-              const historyAction: DrawerHistoryAction = {
-                type: 'modify',
-                features: [previousFeature],
-                originalGeometries: [savedState.originalGeometry],
-                modifiedGeometries: [currentGeometry.clone()],
-              };
-
-              // Only include styles if they were modified
-              if (savedState.originalStyleStored && savedState.originalStyle) {
-                historyAction.originalStyles = [savedState.originalStyle];
-                historyAction.modifiedStyles = [previousFeature.getStyle()];
-              }
-
-              this.#saveToHistory(mapId, historyAction);
-            }
-
-            // Clean up the saved state
-            this.#selectedFeatureState.delete(stateKey);
-          }
-        }
-
-        // If we have a new feature selected, save its current state
-        if (newFeature) {
-          const stateKey = `${mapId}-${newFeature.getId()}`;
-          const currentGeometry = newFeature.getGeometry();
-
-          if (currentGeometry) {
-            this.#selectedFeatureState.set(stateKey, {
-              feature: newFeature,
-              originalGeometry: currentGeometry.clone(),
-              originalStyleStored: false,
-            });
-          }
-        }
-
-        // Only show the tooltip again if not hiding measurements
-        if (previousFeature && !hideMeasurements) {
-          const prevTooltip = previousFeature.get('measureTooltip');
-          if (prevTooltip) {
-            prevTooltip.getElement().hidden = false;
-          }
-        }
-
-        if (newFeature) {
-          const newTooltip = newFeature.get('measureTooltip');
-          if (newTooltip) {
-            newTooltip.getElement().hidden = true;
-          }
-        }
-
-        this.getDrawerState(mapId)?.actions.setSelectedDrawing(newFeature);
-      });
+      transformInstance.onSelectionChange(this.#handleTransformSelectionChange(mapId));
 
       state.actions.setTransformInstance(transformInstance);
     } else {
@@ -727,6 +652,128 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     if (drawInstance) {
       this.stopDrawing(mapId);
     }
+  }
+
+  /**
+   * Handler for Transform End events
+   * @param mapId The map ID
+   */
+  static #handleTransformEnd(mapId: string) {
+    return (_sender: unknown, event: TransformEvent): void => {
+      const { feature } = event;
+      if (!feature) return;
+
+      const geom = feature.getGeometry();
+      if (!geom) return;
+      if (geom instanceof Point) return;
+
+      // Update the overlay with new values
+      this.#createMeasureTooltip(feature, true, mapId);
+    };
+  }
+
+  /**
+   * Handler of transform delete feature events
+   * @param mapId The map ID
+   */
+  static #handleTransformDeleteFeature(mapId: string) {
+    return (_sender: unknown, event: TransformDeleteFeatureEvent) => {
+      const { feature } = event;
+
+      // Save delete action to history before deleting
+      this.#saveToHistory(mapId, {
+        type: 'delete',
+        features: [feature.clone()],
+      });
+
+      const featureId = feature.getId();
+      if (featureId) {
+        this.deleteSingleDrawing(mapId, featureId as string);
+      }
+    };
+  }
+
+  /**
+   * The handler for transform selection change events
+   * @param mapId The map Id
+   */
+  static #handleTransformSelectionChange(mapId: string) {
+    return (_sender: unknown, event: TransformSelectionEvent) => {
+      // GV Get hideMeasurements here so the value is not stale
+      const hideMeasurements = this.getDrawerState(mapId)?.hideMeasurements;
+      const { previousFeature, newFeature } = event;
+
+      // If we had a previous feature selected, check if it was modified
+      if (previousFeature) {
+        const stateKey = `${mapId}-${previousFeature.getId()}`;
+        const savedState = this.#selectedFeatureState.get(stateKey);
+
+        if (savedState) {
+          const currentGeometry = previousFeature.getGeometry();
+
+          // Check for changes
+          const geometryChanged = currentGeometry && !this.#geometriesEqual(savedState.originalGeometry, currentGeometry);
+          const styleChanged =
+            savedState.originalStyleStored && savedState.originalStyle && savedState.originalStyle !== previousFeature.getStyle();
+
+          if (geometryChanged || styleChanged) {
+            // Save modify action - include style only if it was changed
+            const historyAction: DrawerHistoryAction = {
+              type: 'modify',
+              features: [previousFeature],
+            };
+
+            // Include geometry changes if they occurred
+            if (geometryChanged) {
+              historyAction.originalGeometries = [savedState.originalGeometry];
+              historyAction.modifiedGeometries = [currentGeometry.clone()];
+            }
+
+            // Include style changes if they occurred
+            if (styleChanged) {
+              historyAction.originalStyles = [savedState.originalStyle];
+              historyAction.modifiedStyles = [previousFeature.getStyle()];
+            }
+
+            this.#saveToHistory(mapId, historyAction);
+          }
+
+          // Clean up the saved state
+          this.#selectedFeatureState.delete(stateKey);
+        }
+      }
+
+      // If we have a new feature selected, save its current state
+      if (newFeature) {
+        const stateKey = `${mapId}-${newFeature.getId()}`;
+        const currentGeometry = newFeature.getGeometry();
+
+        if (currentGeometry) {
+          this.#selectedFeatureState.set(stateKey, {
+            feature: newFeature,
+            originalGeometry: currentGeometry.clone(),
+            originalStyleStored: false,
+          });
+        }
+      }
+
+      // Only show the tooltip again if not hiding measurements
+      if (previousFeature && !hideMeasurements) {
+        const prevTooltip = previousFeature.get('measureTooltip');
+        if (prevTooltip) {
+          prevTooltip.getElement().hidden = false;
+        }
+      }
+
+      if (newFeature) {
+        const newTooltip = newFeature.get('measureTooltip');
+        if (newTooltip) {
+          newTooltip.getElement().hidden = true;
+        }
+      }
+
+      this.getDrawerState(mapId)?.actions.setSelectedDrawing(newFeature);
+    };
   }
 
   /**
@@ -785,12 +832,11 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     const savedState = this.#selectedFeatureState.get(stateKey);
 
     // Store original style if not already stored
-    if (savedState && !savedState.originalStyleStored) {
-      savedState.originalStyle = selectedFeature.getStyle();
-      savedState.originalStyleStored = true;
-
-      // Get current style before changing it
-      const currentStyle = selectedFeature.getStyle();
+    if (savedState) {
+      if (!savedState.originalStyleStored) {
+        savedState.originalStyle = selectedFeature.getStyle();
+        savedState.originalStyleStored = true;
+      }
 
       // Apply the new style
       let featureStyle;
@@ -814,14 +860,6 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
           }),
         });
       }
-
-      // Save style change to history immediately
-      this.#saveToHistory(mapId, {
-        type: 'modify',
-        features: [selectedFeature],
-        originalStyles: [currentStyle],
-        modifiedStyles: [featureStyle],
-      });
 
       selectedFeature.setStyle(featureStyle);
     }

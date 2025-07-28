@@ -1,11 +1,39 @@
+/* eslint-disable max-classes-per-file */
 import BaseEvent from 'ol/events/Event';
 import Feature from 'ol/Feature';
 import { Geometry } from 'ol/geom';
 
 /**
+ * Event for transform operations
+ */
+export class TransformEvent extends BaseEvent {
+  feature: Feature;
+
+  override type: string;
+
+  constructor(type: string, feature: Feature) {
+    super(type);
+    this.feature = feature;
+    this.type = type;
+  }
+}
+
+/**
+ * Event for delete feature operations
+ */
+export class TransformDeleteFeatureEvent extends BaseEvent {
+  feature: Feature;
+
+  constructor(feature: Feature) {
+    super('deletefeature');
+    this.feature = feature;
+  }
+}
+
+/**
  * Selection event class for transform interactions
  */
-export class SelectionEvent extends BaseEvent {
+export class TransformSelectionEvent extends BaseEvent {
   /** The event type */
   override type: string;
 
