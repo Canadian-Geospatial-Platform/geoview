@@ -6,10 +6,12 @@ import { logger } from 'geoview-core/core/utils/logger';
 
 import Draw from './buttons/draw';
 import GeometryPickerPanel, { GeometryPickerButton } from './buttons/geometry-picker';
-import { StyleButton, StylePanel } from './buttons/style';
-import Clear from './buttons/clear';
 import Edit from './buttons/edit';
+import { StyleButton, StylePanel } from './buttons/style';
 import Measurements from './buttons/measurements';
+import Undo from './buttons/undo';
+import Redo from './buttons/redo';
+import Clear from './buttons/clear';
 
 export function createDrawerButtons(config: TypeDrawerConfig): Record<string, TypeNavBarButtonConfig> {
   const { cgpv } = window as TypeWindow;
@@ -81,6 +83,26 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
     buttonProps: {
       id: 'drawer-measure',
       children: createElement(Measurements),
+      visible: true,
+    },
+    groupName: 'drawer',
+  };
+
+  // Create undo button
+  buttonConfigs.undo = {
+    buttonProps: {
+      id: 'drawer-undo',
+      children: createElement(Undo),
+      visible: true,
+    },
+    groupName: 'drawer',
+  };
+
+  // Create undo button
+  buttonConfigs.redo = {
+    buttonProps: {
+      id: 'drawer-redo',
+      children: createElement(Redo),
       visible: true,
     },
     groupName: 'drawer',

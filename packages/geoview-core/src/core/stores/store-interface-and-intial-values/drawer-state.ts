@@ -42,6 +42,8 @@ export interface IDrawerState {
   selectedDrawing: Feature | undefined;
   hideMeasurements: boolean;
   iconSrc: string;
+  undoDisabled: boolean;
+  redoDisabled: boolean;
 
   setDefaultConfigValues: (config: TypeMapFeaturesConfig) => void;
 
@@ -72,6 +74,10 @@ export interface IDrawerState {
     setSelectedDrawing(selectedDrawing: Feature | undefined): void;
     setHideMeasurements(hideMeasurements: boolean): void;
     setIconSrc: (iconSrc: string) => void;
+    undoDrawing: () => void;
+    setUndoDisabled: (undoDisabled: boolean) => void;
+    redoDrawing: () => void;
+    setRedoDisabled: (redoDisabled: boolean) => void;
   };
 
   setterActions: {
@@ -92,6 +98,8 @@ export interface IDrawerState {
     setSelectedDrawing: (selectedDrawing: Feature | undefined) => void;
     setHideMeasurements: (hideMeasurements: boolean) => void;
     setIconSrc: (iconSrc: string) => void;
+    setUndoDisabled: (undoDisabled: boolean) => void;
+    setRedoDisabled: (redoDisabled: boolean) => void;
   };
 }
 
@@ -119,6 +127,8 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
     selectedDrawing: undefined,
     hideMeasurements: true,
     iconSrc: '',
+    undoDisabled: true,
+    redoDisabled: true,
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
       const configObj = geoviewConfig.corePackagesConfig?.find((config) =>
         Object.keys(config).includes('drawer')
@@ -244,6 +254,22 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
       setIconSrc: (iconSrc: string) => {
         // Redirect to setter
         get().drawerState.setterActions.setIconSrc(iconSrc);
+      },
+      undoDrawing: () => {
+        // Undo previous drawing action
+        DrawerEventProcessor.undo(get().mapId);
+      },
+      setUndoDisabled: (undoDisabled: boolean) => {
+        // Redirect to setter
+        get().drawerState.setterActions.setUndoDisabled(undoDisabled);
+      },
+      redoDrawing: () => {
+        // Undo previous drawing action
+        DrawerEventProcessor.redo(get().mapId);
+      },
+      setRedoDisabled(redoDisabled) {
+        // Redirect to setter
+        get().drawerState.setterActions.setRedoDisabled(redoDisabled);
       },
     },
 
@@ -393,6 +419,24 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
           },
         });
       },
+
+      setUndoDisabled: (undoDisabled: boolean) => {
+        set({
+          drawerState: {
+            ...get().drawerState,
+            undoDisabled,
+          },
+        });
+      },
+
+      setRedoDisabled: (redoDisabled: boolean) => {
+        set({
+          drawerState: {
+            ...get().drawerState,
+            redoDisabled,
+          },
+        });
+      },
     },
 
     // #endregion ACTIONS
@@ -417,6 +461,10 @@ export const useDrawerDrawInstance = (): Draw | undefined => useStore(useGeoView
 
 export const useDrawerHideMeasurements = (): boolean =>
   useStore(useGeoViewStore(), (state) => state.drawerState.actions.getHideMeasurements());
+
+export const useDrawerUndoDisabled = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.undoDisabled);
+
+export const useDrawerRedoDisabled = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.redoDisabled);
 
 // Store Actions
 export const useDrawerActions = (): DrawerActions => useStore(useGeoViewStore(), (state) => state.drawerState.actions);

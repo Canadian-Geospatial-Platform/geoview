@@ -504,7 +504,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * The handler for Draw End events
-   * @param mapId The map ID
+   * @param {string} mapId The map ID
    */
   static #handleDrawEnd(mapId: string) {
     return (_sender: unknown, event: DrawEvent): void => {
@@ -656,7 +656,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Handler for Transform End events
-   * @param mapId The map ID
+   * @param {string} mapId The map ID
    */
   static #handleTransformEnd(mapId: string) {
     return (_sender: unknown, event: TransformEvent): void => {
@@ -674,7 +674,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Handler of transform delete feature events
-   * @param mapId The map ID
+   * @param {string} mapId The map ID
    */
   static #handleTransformDeleteFeature(mapId: string) {
     return (_sender: unknown, event: TransformDeleteFeatureEvent) => {
@@ -695,7 +695,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * The handler for transform selection change events
-   * @param mapId The map Id
+   * @param {string} mapId - The map Id
    */
   static #handleTransformSelectionChange(mapId: string) {
     return (_sender: unknown, event: TransformSelectionEvent) => {
@@ -777,8 +777,8 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Stops the editing interatction for all groups
-   * @param {string} mapId The map ID
+   * Stops the editing interaction for all groups
+   * @param {string} mapId - The map ID
    */
   public static stopEditing(mapId: string): void {
     const state = this.getDrawerState(mapId);
@@ -988,6 +988,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     history.push(action);
     this.#historyIndex.set(mapId, history.length - 1);
 
+    // Update undo/redo state
+    this.#updateUndoRedoState(mapId);
+
     // Limit history size
     if (history.length > this.#maxHistorySize) {
       history.shift();
@@ -1070,6 +1073,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     }
 
     this.#historyIndex.set(mapId, currentIndex - 1);
+    this.#updateUndoRedoState(mapId);
     return true;
   }
 
@@ -1112,6 +1116,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     }
 
     this.#historyIndex.set(mapId, nextIndex);
+    this.#updateUndoRedoState(mapId);
     return true;
   }
 
@@ -1211,6 +1216,23 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
         }
       }
     });
+  }
+
+  static #updateUndoRedoState(mapId: string): void {
+    const state = this.getDrawerState(mapId);
+    if (!state) return;
+
+    const history = this.#drawerHistory.get(mapId) || [];
+    const currentIndex = this.#historyIndex.get(mapId) ?? -1;
+
+    // Can't undo if no history or at the beginning
+    const undoDisabled = history.length === 0 || currentIndex < 0;
+
+    // Can't redo if no history or at the end
+    const redoDisabled = history.length === 0 || currentIndex >= history.length - 1;
+
+    state.actions.setUndoDisabled(undoDisabled);
+    state.actions.setRedoDisabled(redoDisabled);
   }
 
   /**

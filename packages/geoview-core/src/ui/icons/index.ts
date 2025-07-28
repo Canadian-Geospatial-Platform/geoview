@@ -92,6 +92,7 @@ export {
   RadioButtonChecked as RadioButtonCheckedIcon,
   RadioButtonUnchecked as RadioButtonUncheckedIcon,
   Rectangle as RectangleIcon,
+  Redo as RedoIcon,
   Remove as ZoomOutIcon,
   RemoveCircleOutline as RemoveCircleOutlineIcon,
   RestartAlt as RestartAltIcon,

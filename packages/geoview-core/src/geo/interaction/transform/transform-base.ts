@@ -13,6 +13,8 @@ import { MapBrowserEvent } from 'ol';
 import { TransformEvent, TransformSelectionEvent, TransformDeleteFeatureEvent } from './transform-events';
 import { MapViewer } from '@/app';
 
+// #region Constants
+
 // Handle style constants
 const ROTATE_STYLE = new Style({
   text: new Text({
@@ -165,6 +167,8 @@ export interface CreateHandleProps {
   isCircleEdge?: boolean;
 }
 
+// #region Class Start
+
 /**
  * OpenLayers Transform interaction
  * @class OLTransform
@@ -245,6 +249,8 @@ export class OLTransform extends OLPointer {
 
   onSelectionChange?: (event: TransformSelectionEvent) => void;
 
+  // #region Constructor
+
   /**
    * Initializes a OLTransform component.
    * @param {TransformBaseOptions} options - Object to configure the initialization.
@@ -287,6 +293,8 @@ export class OLTransform extends OLPointer {
     // Keyboard event handler
     this.#setupKeyboardHandler();
   }
+
+  // #region Methods
 
   /**
    * Handles when a feature is removed from the collection.
@@ -383,6 +391,7 @@ export class OLTransform extends OLPointer {
 
   // #region Helpers
 
+  // ? TODO Could these two coordinate functions be moved to a utility file?
   /**
    * Rotates a coordinate around a center point by an angle.
    * @param {Coordinate} coordinate - The coordinate to rotate.

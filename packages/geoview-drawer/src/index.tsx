@@ -62,6 +62,8 @@ class DrawerPlugin extends NavBarPlugin {
           star: 'Star',
           style: 'Change Style',
           toggleMeasurements: 'Toggle measurements',
+          undoTooltip: 'Undo',
+          redoTooltip: 'Redo',
         },
       },
       fr: {
@@ -86,6 +88,8 @@ class DrawerPlugin extends NavBarPlugin {
           star: 'Étoile',
           style: 'Changer de style',
           toggleMeasurements: 'Basculer les mesures',
+          undoTooltip: 'défaire',
+          redoTooltip: 'refaire',
         },
       },
     } as unknown as TypeJsonObject;
