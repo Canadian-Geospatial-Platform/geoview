@@ -4,7 +4,7 @@ import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import Feature from 'ol/Feature';
 
-import { TypeJsonArray } from '@/api/config/types/config-types';
+import { TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
   TypeVectorSourceInitialConfig,
@@ -54,9 +54,7 @@ export class CSV extends AbstractGeoViewVector {
     const id = this.metadataAccessPath.substring(idx + 1);
 
     // Redirect
-    return Promise.resolve(
-      CSV.createCSVLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, [{ id }] as unknown as TypeJsonArray)
-    );
+    return Promise.resolve(CSV.createCSVLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, [{ id }]));
   }
 
   /**
@@ -137,7 +135,7 @@ export class CSV extends AbstractGeoViewVector {
    * @param {string} geoviewLayerName - The display name of the GeoView layer.
    * @param {string} metadataAccessPath - The URL or path to access metadata or feature data.
    * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
-   * @param {TypeJsonArray} layerEntries - An array of layer entries objects to be included in the configuration.
+   * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns {TypeCSVLayerConfig} The constructed configuration object for the CSV Feature layer.
    */
   static createCSVLayerConfig(
@@ -145,7 +143,7 @@ export class CSV extends AbstractGeoViewVector {
     geoviewLayerName: string,
     metadataAccessPath: string,
     isTimeAware: boolean,
-    layerEntries: TypeJsonArray
+    layerEntries: TypeLayerEntryShell[]
   ): TypeCSVLayerConfig {
     const geoviewLayerConfig: TypeCSVLayerConfig = {
       geoviewLayerId,

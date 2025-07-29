@@ -1,6 +1,6 @@
-import { TypeJsonArray } from '@/api/config/types/config-types';
 import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/config/types/map-schema-types';
-import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+import { TypeLayerMetadataFields, VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+import { TypeMetadataEsriDynamicLayer } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { TimeDimensionESRI } from '@/core/utils/date-mgt';
 import { TypeSourceEsriFeatureInitialConfig } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { TypeProjection } from '@/geo/utils/projection';
@@ -57,9 +57,7 @@ export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
 }
 
 export interface TypeMetadataEsriFeature {
-  // TODO: Cleanup - Remove the any by specifying
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  layers: any;
+  layers: TypeMetadataEsriDynamicLayer[];
   id: string;
   name: string;
 }
@@ -82,7 +80,7 @@ export interface TypeLayerMetadataEsri {
   drawingInfo: TypeLayerMetadataEsriDrawingInfo;
   timeInfo: TimeDimensionESRI;
   geometryType: unknown;
-  fields: TypeJsonArray;
+  fields: TypeLayerMetadataFields[];
 }
 
 export interface TypeLayerMetadataEsriDrawingInfo {

@@ -28,12 +28,11 @@ import {
   TypeIconSymbolVectorConfig,
   CONST_LAYER_TYPES,
 } from '@/api/config/types/map-schema-types';
-import { esriGetFieldType, esriGetFieldDomain, parseDateTimeValuesEsriDynamic } from '@/geo/layer/gv-layers/utils';
+import { esriGetFieldType, esriGetFieldDomain, parseDateTimeValuesEsriDynamic, GeometryJson } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { TypeEsriImageLayerLegend } from '@/geo/layer/gv-layers/raster/gv-esri-image';
-import { TypeJsonObject } from '@/api/config/types/config-types';
 import { FetchEsriWorkerPool } from '@/core/workers/fetch-esri-worker-pool';
 import { QueryParams } from '@/core/workers/fetch-esri-worker-script';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
@@ -41,6 +40,7 @@ import { NoExtentError, NoFeaturesPropertyError } from '@/core/exceptions/geovie
 import { formatError, RequestAbortedError } from '@/core/exceptions/core-exceptions';
 import { LayerDataAccessPathMandatoryError, LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions';
 import { TypeDateFragments } from '@/core/utils/date-mgt';
+import { TypeLayerMetadataEsriExtent } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 
 type TypeFieldOfTheSameValue = { value: string | number | Date; nbOccurence: number };
 type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryTree }[];
@@ -109,7 +109,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     try {
       if (!layerConfig) return null;
       const legendUrl = `${layerConfig.geoviewLayerConfig.metadataAccessPath}/legend?f=json`;
-      const legendJson = await Fetch.fetchJsonAs<TypeEsriImageLayerLegend>(legendUrl);
+      const legendJson = await Fetch.fetchJson<TypeEsriImageLayerLegend>(legendUrl);
 
       let legendInfo;
       if (legendJson.layers && legendJson.layers.length === 1) {
@@ -228,14 +228,14 @@ export class GVEsriDynamic extends AbstractGVRaster {
     const queryUrl = `${baseUrl}${layerEntryConfig.layerId}/query?&f=json&objectIds=${idString}${outfieldQuery}&returnExtentOnly=true`;
 
     // Fetch
-    const responseJson = await Fetch.fetchEsriJsonAsObject(queryUrl);
+    const responseJson = await Fetch.fetchEsriJson<EsriQueryJsonResponse>(queryUrl);
     const { extent } = responseJson;
 
     const projectionExtent: OLProjection | undefined = Projection.getProjectionFromObj(extent.spatialReference);
 
     if (extent && projectionExtent) {
       const projExtent = Projection.transformExtentFromProj(
-        [extent.xmin as number, extent.ymin as number, extent.xmax as number, extent.ymax as number],
+        [extent.xmin, extent.ymin, extent.xmax, extent.ymax],
         projectionExtent,
         outProjection
       );
@@ -328,7 +328,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     if (jsonResponse.features) {
       // Parse the JSON response and create features
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const features = (jsonResponse.features as TypeJsonObject[]).map((featureData: any) => {
+      const features = jsonResponse.features.map((featureData) => {
         // We do not query the geometry anymore (set as undefined). It will query if needed by later
         const properties = featureData.attributes;
         return new Feature({ ...properties, undefined });
@@ -414,7 +414,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       `&returnGeometry=false&sr=4326&returnFieldName=true`;
 
     // If it takes more then 10 seconds it means the server is unresponsive and we should not continue. This will throw an error...
-    const identifyJsonResponse = await Fetch.fetchWithTimeout<TypeJsonObject>(identifyUrl, undefined, 10000);
+    const identifyJsonResponse = await Fetch.fetchWithTimeout<EsriIdentifyJsonResponse>(identifyUrl, undefined, 10000);
 
     // If no features identified return []
     if (identifyJsonResponse.results.length === 0) return [];
@@ -423,9 +423,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     const oidField = layerConfig.source.featureInfo.outfields
       ? layerConfig.source.featureInfo.outfields.filter((field) => field.type === 'oid')[0].name
       : 'OBJECTID';
-    const objectIds = (identifyJsonResponse.results as TypeJsonObject[]).map((result) =>
-      String(result.attributes[oidField]).replace(',', '')
-    );
+    const objectIds = identifyJsonResponse.results.map((result) => String(result.attributes[oidField]).replace(',', ''));
 
     // Get meters per pixel to set the maxAllowableOffset to simplify return geometry
     const maxAllowableOffset = queryGeometry
@@ -477,7 +475,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       // TO.DOCONT: the esri query (was working with identify). But identify was failing on huge geometry...
       this.#fetchFeatureInfoGeometryWithWorker(layerConfig, objectIds.map(Number), true, mapProjNumber, maxAllowableOffset)
         .then((featuresJSON) => {
-          (featuresJSON.features as TypeJsonObject[]).forEach((feat: TypeJsonObject, index: number) => {
+          featuresJSON.features.forEach((feat, index: number) => {
             // If cancelled
             // Explicitely checking the abort condition here, after the fetch in the worker, because we can't send the abortController in a fetch happening inside a worker.
             if (abortController?.signal.aborted) {
@@ -502,19 +500,16 @@ export class GVEsriDynamic extends AbstractGVRaster {
               feat.geometry?.paths ||
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               feat.geometry?.rings || [feat.geometry?.x, feat.geometry?.y]) as any; // MultiPoint or Line or Polygon or Point schema
-            const newGeom: Geometry | null =
-              geomType.length > 0
-                ? (GeometryApi.createGeometryFromType(geomType[0] as TypeStyleGeometry, coordinates) as unknown as Geometry)
-                : null;
+            const newGeom: Geometry | undefined =
+              geomType.length > 0 ? GeometryApi.createGeometryFromType(geomType[0] as TypeStyleGeometry, coordinates) : undefined;
 
             // TODO: Performance - We will need a trigger to refresh the higight and details panel (for zoom button) when extent and
             // TO.DOCONT: is applied. Sometimes the delay is too big so we need to change tab or layer in layer list to trigger the refresh
             // We assume order of arrayOfFeatureInfoEntries is the same as featuresJSON.features as they are processed in the same order
             const entry = arrayOfFeatureInfoEntries[index];
-            if (newGeom !== null && entry.geometry && entry.geometry instanceof Feature) {
-              entry.extent = newGeom.getExtent();
-              entry.geometry.setGeometry(newGeom);
-            }
+            entry.feature?.setGeometry(newGeom);
+            entry.geometry = newGeom;
+            entry.extent = newGeom?.getExtent();
           });
         })
         .catch((error: unknown) => {
@@ -553,9 +548,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
   /**
    * Query all features with a web worker
    * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer config
-   * @returns {TypeJsonObject} A promise of esri response for query.
+   * @returns {Promise<unknown>} A promise of esri response for query.
    */
-  #fetchAllFeatureInfoWithWorker(layerConfig: EsriDynamicLayerEntryConfig): Promise<TypeJsonObject> {
+  #fetchAllFeatureInfoWithWorker(layerConfig: EsriDynamicLayerEntryConfig): Promise<EsriFeaturesJsonResponse> {
     const params: QueryParams = {
       url: layerConfig.source.dataAccessPath + layerConfig.layerId,
       geometryType: 'Point',
@@ -567,7 +562,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     };
 
     // Launch
-    return this.#fetchWorkerPool.process(params);
+    return this.#fetchWorkerPool.process(params) as Promise<EsriFeaturesJsonResponse>;
   }
 
   /**
@@ -577,7 +572,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {boolean} queryGeometry - Whether to include geometry in the query
    * @param {number} projection - The spatial reference ID for the output
    * @param {number} maxAllowableOffset - The maximum allowable offset for geometry simplification
-   * @returns {TypeJsonObject} A promise of esri response for query.
+   * @returns {Promise<EsriFeaturesJsonResponse>} A promise of esri response for query.
    */
   #fetchFeatureInfoGeometryWithWorker(
     layerConfig: EsriDynamicLayerEntryConfig,
@@ -585,7 +580,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     queryGeometry: boolean,
     projection: number,
     maxAllowableOffset: number
-  ): Promise<TypeJsonObject> {
+  ): Promise<EsriFeaturesJsonResponse> {
     const params: QueryParams = {
       url: layerConfig.source.dataAccessPath + layerConfig.layerId,
       geometryType: (layerConfig.getLayerMetadata()!.geometryType as string).replace('esriGeometry', ''),
@@ -597,7 +592,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     };
 
     // Launch
-    return this.#fetchWorkerPool.process(params);
+    return this.#fetchWorkerPool.process(params) as Promise<EsriFeaturesJsonResponse>;
   }
 
   /**
@@ -1073,3 +1068,20 @@ export class GVEsriDynamic extends AbstractGVRaster {
     }
   }
 }
+
+export type EsriQueryJsonResponse = {
+  extent: TypeLayerMetadataEsriExtent;
+};
+
+export type EsriFeaturesJsonResponse = {
+  features: EsriIdentifyJsonResponseAttribute[];
+};
+
+export type EsriIdentifyJsonResponse = {
+  results: EsriIdentifyJsonResponseAttribute[];
+};
+
+export type EsriIdentifyJsonResponseAttribute = {
+  attributes: Record<string, unknown>;
+  geometry: GeometryJson;
+};

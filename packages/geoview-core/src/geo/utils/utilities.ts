@@ -12,7 +12,6 @@ import { LineString, Polygon } from 'ol/geom';
 import { Coordinate } from 'ol/coordinate';
 import View from 'ol/View';
 
-import { TypeJsonObject } from '@/api/config/types/config-types';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { Projection } from '@/geo/utils/projection';
@@ -35,25 +34,24 @@ interface TypeCSSStyleDeclaration extends CSSStyleDeclaration {
 export const layerTypes = CONST_LAYER_TYPES;
 
 // #region FETCH METADATA
+
 /**
- * Fetch the json response from the ESRI map server to get REST endpoint metadata
- * @function getESRIServiceMetadata
- * @param {string} url the url of the ESRI map server
- * @returns {Promise<TypeJsonObject>} a json promise containing the result of the query
+ * Fetch the json response from the ESRI map server to get REST endpoint metadata.
+ * @param {string} url - The url of the ESRI map server.
+ * @returns {Promise<unknown>} A json promise containing the result of the query.
  */
-export function getESRIServiceMetadata(url: string): Promise<TypeJsonObject> {
+export function getESRIServiceMetadata(url: string): Promise<unknown> {
   // fetch the map server returning a json object
-  return Fetch.fetchJsonAsObject(`${url}?f=json`);
+  return Fetch.fetchJson(`${url}?f=json`);
 }
 
 /**
- * Fetch the json response from the XML response of a WMS getCapabilities request
- * @function getWMSServiceMetadata
- * @param {string} url the url the url of the WMS server
- * @param {string} layers the layers to query separate by ,
- * @returns {Promise<TypeJsonObject>} a json promise containing the result of the query
+ * Fetch the json response from the XML response of a WMS getCapabilities request.
+ * @param {string} url - The url the url of the WMS server.
+ * @param {string} layers - The layers to query separate by.
+ * @returns {Promise<unknown>} A json promise containing the result of the query.
  */
-export async function getWMSServiceMetadata(url: string, layers: string): Promise<TypeJsonObject> {
+export async function getWMSServiceMetadata(url: string, layers: string): Promise<unknown> {
   const parser = new WMSCapabilities();
   let capUrl = `${url}?service=WMS&version=1.3.0&request=GetCapabilities`;
   if (layers.length > 0) capUrl = capUrl.concat(`&layers=${layers}`);
@@ -66,13 +64,12 @@ export async function getWMSServiceMetadata(url: string, layers: string): Promis
 }
 
 /**
- * Return the map server url from a layer service
- *
- * @param {string} url the service url for a wms / dynamic or feature layers
- * @param {boolean} rest boolean value to add rest services if not present (default false)
- * @returns the map server url
+ * Return the map server url from a layer service.
+ * @param {string} url - The service url for a wms / dynamic or feature layers.
+ * @param {boolean} rest - Boolean value to add rest services if not present (default false).
+ * @returns The map server url.
  */
-export function getMapServerUrl(url: string, rest = false): string {
+export function getMapServerUrl(url: string, rest: boolean = false): string {
   let mapServerUrl = url;
   if (mapServerUrl.includes('MapServer')) {
     mapServerUrl = mapServerUrl.slice(0, mapServerUrl.indexOf('MapServer') + 'MapServer'.length);
@@ -90,10 +87,9 @@ export function getMapServerUrl(url: string, rest = false): string {
 }
 
 /**
- * Return the root server url from a OGC layer service
- *
- * @param {string} url the service url for an ogc layer
- * @returns the root ogc server url
+ * Return the root server url from a OGC layer service.
+ * @param {string} url - The service url for an ogc layer.
+ * @returns The root ogc server url.
  */
 export function getOGCServerUrl(url: string): string {
   let ogcServerUrl = url;
@@ -102,14 +98,15 @@ export function getOGCServerUrl(url: string): string {
   }
   return ogcServerUrl;
 }
+
 // #endregion FETCH METADATA
 
 // #region GEOMETRY
+
 /**
- * Returns the WKT representation of a given geometry
- * @function geometryToWKT
- * @param {string} geometry the geometry
- * @returns {string | null} the WKT representation of the geometry
+ * Returns the WKT representation of a given geometry.
+ * @param {string} geometry - The geometry
+ * @returns {string | null} The WKT representation of the geometry
  */
 export function geometryToWKT(geometry: Geometry): string | null {
   if (geometry) {
@@ -121,11 +118,10 @@ export function geometryToWKT(geometry: Geometry): string | null {
 }
 
 /**
- * Returns the Geometry representation of a given wkt
- * @function wktToGeometry
- * @param {string} wkt the well known text
- * @param {ReadOptions} readOptions read options to convert the wkt to a geometry
- * @returns {Geometry | null} the Geometry representation of the wkt
+ * Returns the Geometry representation of a given wkt.
+ * @param {string} wkt - The well known text
+ * @param {ReadOptions} readOptions - Read options to convert the wkt to a geometry
+ * @returns {Geometry | null} The Geometry representation of the wkt
  */
 export function wktToGeometry(wkt: string, readOptions: ReadOptions): Geometry | null {
   if (wkt) {
@@ -138,10 +134,9 @@ export function wktToGeometry(wkt: string, readOptions: ReadOptions): Geometry |
 
 /**
  * Returns the Geometry representation of a given geojson
- * @function geojsonToGeometry
- * @param {string} geojson the geojson
- * @param {ReadOptions} readOptions read options to convert the geojson to a geometry
- * @returns {Geometry | null} the Geometry representation of the geojson
+ * @param {string} geojson - The geojson
+ * @param {ReadOptions} readOptions - Read options to convert the geojson to a geometry
+ * @returns {Geometry | null} - The Geometry representation of the geojson
  */
 export function geojsonToGeometry(geojson: string, readOptions: ReadOptions): Geometry | null {
   if (geojson) {
@@ -177,6 +172,7 @@ export function getDefaultDrawingStyle(strokeColor?: Color | string, strokeWidth
     }),
   });
 }
+
 // #endregion GEOMETRY
 
 /**
@@ -206,9 +202,7 @@ export function createEmptyBasemap(): TileLayer<XYZ | OSM | VectorTile> {
 
 /**
  * This method gets the legend styles used by the the layer as specified by the style configuration.
- *
  * @param {TypeLayerStyleConfig} styleConfig - Layer style configuration.
- *
  * @returns {Promise<TypeVectorLayerStyles>} A promise that the layer styles are processed.
  */
 export function getLegendStylesFromConfig(styleConfig: TypeLayerStyleConfig): Promise<TypeVectorLayerStyles> {

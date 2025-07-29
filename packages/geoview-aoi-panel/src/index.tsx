@@ -1,5 +1,5 @@
 import React from 'react'; // GV This import is to validate that we're on the right React at the end of the file
-import { TypeJsonObject, AnySchemaObject } from 'geoview-core/api/config/types/config-types';
+import { AnySchemaObject } from 'geoview-core/api/config/types/config-types';
 import { AppBarPlugin } from 'geoview-core/api/plugin/appbar-plugin';
 import { AoiIcon } from 'geoview-core/ui/icons';
 import { IconButtonPropsExtend } from 'geoview-core/ui/icon-button/icon-button';
@@ -24,17 +24,17 @@ class AoiPanelPlugin extends AppBarPlugin {
   /**
    * Return the default config for this package
    *
-   * @returns {TypeJsonObject} the default config
+   * @returns {unknown} the default config
    */
-  override defaultConfig(): TypeJsonObject {
-    return defaultConfig as unknown as TypeJsonObject;
+  override defaultConfig(): unknown {
+    return defaultConfig;
   }
 
   /**
    * Overrides the default translations for the Plugin.
-   * @returns {TypeJsonObject} - The translations object for the particular Plugin.
+   * @returns {Record<string, unknown>} - The translations object for the particular Plugin.
    */
-  override defaultTranslations(): TypeJsonObject {
+  override defaultTranslations(): Record<string, unknown> {
     return {
       en: {
         AoiPanel: {
@@ -46,7 +46,7 @@ class AoiPanelPlugin extends AppBarPlugin {
           title: "Région d'intérêt",
         },
       },
-    } as unknown as TypeJsonObject;
+    };
   }
 
   /**

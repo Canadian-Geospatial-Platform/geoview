@@ -26,6 +26,15 @@ export class WfsLayerEntryConfig extends VectorLayerEntryConfig {
     this.source.dataProjection ??= Projection.PROJECTION_NAMES.LONLAT;
     this.source.dataAccessPath ??= this.geoviewLayerConfig.metadataAccessPath;
   }
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeLayerMetadataWfs | undefined} The strongly-typed layer metadata specific to this layer entry config.
+   */
+  override getLayerMetadata(): TypeLayerMetadataWfs[] | undefined {
+    return super.getLayerMetadata() as TypeLayerMetadataWfs[] | undefined;
+  }
 }
 
 export interface TypeMetadataWFS {
@@ -35,7 +44,26 @@ export interface TypeMetadataWFS {
 }
 
 export interface TypeMetadataWFSFeatureTypeList {
-  FeatureType: unknown;
+  FeatureType: TypeMetadataWFSFeatureTypeListFeatureType | TypeMetadataWFSFeatureTypeListFeatureType[];
+}
+
+export interface TypeMetadataWFSFeatureTypeListFeatureType {
+  Name: string | TypeMetadataWFSFeatureTypeListFeatureTypeText;
+  Title: string | TypeMetadataWFSFeatureTypeListFeatureTypeText;
+  'ows:WGS84BoundingBox': TypeMetadataWFSFeatureTypeListFeatureTypeBBox;
+}
+
+export interface TypeMetadataWFSFeatureTypeListFeatureTypeBBox {
+  'ows:LowerCorner': TypeMetadataWFSFeatureTypeListFeatureTypeBBoxCorner;
+  'ows:UpperCorner': TypeMetadataWFSFeatureTypeListFeatureTypeBBoxCorner;
+}
+
+export interface TypeMetadataWFSFeatureTypeListFeatureTypeBBoxCorner {
+  '#text': string;
+}
+
+export interface TypeMetadataWFSFeatureTypeListFeatureTypeText {
+  '#text': string;
 }
 
 export interface TypeMetadataWFSAttributes {
@@ -51,9 +79,14 @@ export interface TypeMetadataWFSOperationMetadataOperation {
 }
 
 export interface TypeMetadataWFSOperationMetadataOperationParameter {
-  'ows:Value': TypeMetadataWFSOperationMetadataOperationParameterValue[];
+  'ows:Value': TypeMetadataWFSOperationMetadataOperationParameterValue;
 }
 
 export interface TypeMetadataWFSOperationMetadataOperationParameterValue {
   '#text': string;
+}
+
+export interface TypeLayerMetadataWfs {
+  name: string;
+  type: string;
 }

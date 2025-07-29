@@ -4,7 +4,6 @@ import {
   CV_CONFIG_SHAPEFILE_TYPE,
   CV_CONST_LAYER_TYPES,
 } from '@/api/config/types/config-constants';
-import { TypeJsonValue, TypeJsonObject, TypeJsonArray } from '@/api/config/types/config-types';
 import { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config';
 import {
   MapConfigLayerEntry,
@@ -12,6 +11,8 @@ import {
   TypeDisplayLanguage,
   TypeInteraction,
   TypeMapFeaturesInstance,
+  TypeValidMapComponentProps,
+  TypeValidMapCorePackageProps,
   TypeValidMapProjectionCodes,
   TypeZoomAndCenter,
 } from '@/api/config/types/map-schema-types';
@@ -92,15 +93,15 @@ export class ConfigApi {
 
   /** ***************************************************************************************************************************
    * Parse the parameters obtained from a url.
-   *
    * @param {string} urlParams The parameters found on the url after the ?.
-   *
-   * @returns {TypeJsonObject} Object containing the parsed params.
+   * @returns {any} Object containing the parsed params.
    * @static @private
    */
-  static #getMapPropsFromUrlParams(urlParams: string): TypeJsonObject {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  static #getMapPropsFromUrlParams(urlParams: string): any {
     // Get parameters from path. Ex: x=123&y=456 will get {"x": 123, "z": "456"}
-    const obj: TypeJsonObject = {};
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const obj: any = {};
 
     if (urlParams !== undefined) {
       const params = urlParams.split('&');
@@ -108,9 +109,9 @@ export class ConfigApi {
       for (let i = 0; i < params.length; i += 1) {
         const param = params[i].split('=');
         const key = param[0];
-        const value = param[1] as TypeJsonValue;
+        const value = param[1];
 
-        obj[key] = value as TypeJsonObject;
+        obj[key] = value;
       }
     }
 
@@ -119,14 +120,13 @@ export class ConfigApi {
 
   /**
    * Get url parameters from url param search string.
-   *
    * @param {objStr} objStr the url parameter string.
-   *
-   * @returns {TypeJsonObject} an object containing url parameters.
+   * @returns {unknown} an object containing url parameters.
    * @static @private
    */
-  static #parseObjectFromUrl(objStr: string): TypeJsonObject {
-    const obj: TypeJsonObject = {};
+  static #parseObjectFromUrl(objStr: string): unknown {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const obj: any = {};
 
     if (objStr && objStr.length) {
       // first { is kept with regex, remove
@@ -140,11 +140,11 @@ export class ConfigApi {
             const value: string = prop[1];
 
             if (prop[1] === 'true') {
-              obj[key] = true as TypeJsonObject;
+              obj[key] = true;
             } else if (prop[1] === 'false') {
-              obj[key] = false as TypeJsonObject;
+              obj[key] = false;
             } else {
-              obj[key] = value as TypeJsonObject;
+              obj[key] = value;
             }
           }
         }
@@ -157,11 +157,10 @@ export class ConfigApi {
   /**
    * Convert the stringMapFeatureConfig to a json object. Comments will be removed from the string.
    * @param {string} stringMapFeatureConfig The map configuration string to convert to JSON format.
-   *
-   * @returns {TypeJsonObject} A JSON map feature configuration object.
+   * @returns {MapFeatureConfig | undefined} A JSON map feature configuration object.
    * @private
    */
-  static convertStringToJson(stringMapFeatureConfig: string): TypeJsonObject | undefined {
+  static convertStringToJson(stringMapFeatureConfig: string): MapFeatureConfig | undefined {
     // Erase comments in the config file.
     let newStringMapFeatureConfig = removeCommentsFromJSON(stringMapFeatureConfig);
 
@@ -219,7 +218,7 @@ export class ConfigApi {
           },
           projection: parseInt(urlParams.p as string, 10) as TypeValidMapProjectionCodes,
         },
-        basemapOptions: ConfigApi.#parseObjectFromUrl(urlParams.b as string) as unknown as TypeBasemapOptions,
+        basemapOptions: ConfigApi.#parseObjectFromUrl(urlParams.b as string) as TypeBasemapOptions,
         listOfGeoviewLayerConfig: [] as MapConfigLayerEntry[],
       };
 
@@ -253,12 +252,12 @@ export class ConfigApi {
 
       // get core components
       if (urlParams.cc) {
-        (jsonConfig.components as TypeJsonArray) = (urlParams.cc as string).split(',') as TypeJsonArray;
+        jsonConfig.components = (urlParams.cc as string).split(',') as TypeValidMapComponentProps[];
       }
 
       // get core packages if any
       if (urlParams.cp) {
-        (jsonConfig.corePackages as TypeJsonArray) = (urlParams.cp as string).split(',') as TypeJsonArray;
+        jsonConfig.corePackages = (urlParams.cp as string).split(',') as TypeValidMapCorePackageProps[];
       }
 
       // update the version if provided from the map configuration.
@@ -292,16 +291,15 @@ export class ConfigApi {
    * errors are detected, the configuration will be corrected to the best of our ability to avoid crashing the viewer,
    * and all changes made will be logged in the console.
    *
-   * @param {string | TypeJsonObject} mapConfig The map feature configuration to validate.
+   * @param {string | MapFeatureConfig} mapConfig The map feature configuration to validate.
    * @returns {MapFeatureConfig} The validated map feature configuration.
    * @static
    */
-  static validateMapConfig(mapConfig: string | MapFeatureConfig | TypeJsonObject): MapFeatureConfig {
+  static validateMapConfig(mapConfig: string | MapFeatureConfig): MapFeatureConfig {
     // If the user provided a string config, translate it to a json object because the MapFeatureConfig constructor
     // doesn't accept string config. Note that convertStringToJson returns undefined if the string config cannot
     // be translated to a json object.
-    const providedMapFeatureConfig: TypeJsonObject =
-      typeof mapConfig === 'string' ? ConfigApi.convertStringToJson(mapConfig as string)! : (mapConfig as TypeJsonObject);
+    const providedMapFeatureConfig = typeof mapConfig === 'string' ? ConfigApi.convertStringToJson(mapConfig)! : mapConfig;
 
     try {
       // If the user provided a valid string config with the mandatory map property, process geocore layers to translate them to their GeoView layers
@@ -323,170 +321,6 @@ export class ConfigApi {
     }
   }
 
-  // TODO: Cleanup commented code - Remove this commented out code if all good
-  // /**
-  //  * Convert one layer config or an array of GeoCore layer config to their GeoView equivalents. The method returns undefined
-  //  * and log an error in the console if a GeoCore layer cannot be converted. When the input/output type is an array, it is
-  //  * possible to filter out the undefined values.
-  //  *
-  //  * @param {TypeDisplayLanguage} language - The language language to use for the conversion.
-  //  * @param {TypeJsonArray | TypeJsonObject} config - Configuration to process.
-  //  * @returns {Promise<TypeGeoviewLayerConfig>} The resulting configuration.
-  //  * @static
-  //  */
-  // static async convertGeocoreToGeoview(
-  //   mapId: string,
-  //   language: TypeDisplayLanguage,
-  //   config: TypeJsonArray | TypeJsonObject
-  // ): Promise<TypeGeoviewLayerConfig> {
-  //   // convert the JSON object to a JSON array. We want to process a single type.
-  //   const listOfGeoviewLayerConfig = Array.isArray(config) ? config : [config];
-
-  //   // Filter all geocore layers
-  //   const geocoreArrayOfKeys = listOfGeoviewLayerConfig
-  //     .filter((layerConfig) => layerConfig.geoviewLayerType === CV_CONFIG_GEOCORE_TYPE)
-  //     .map((geocoreLayer) => geocoreLayer.geoviewLayerId as string);
-
-  //   // For each uuid
-  //   const promisesOfGeoviewLayerConfigs: Promise<TypeGeoviewLayerConfig[]>[] = [];
-  //   geocoreArrayOfKeys.forEach((uuid) => {
-  //     // Compile
-  //     promisesOfGeoviewLayerConfigs.push(GeoCore.createLayerConfigFromUUID(uuid, mapId, language));
-  //   });
-
-  //   // Once all promises are settled
-  //   const allPromises = await Promise.allSettled(promisesOfGeoviewLayerConfigs);
-
-  //   // For each result
-  //   const results: TypeGeoviewLayerConfig[] = [];
-  //   allPromises.forEach((promise) => {
-  //     // If fulfilled
-  //     if (promise.status === 'fulfilled') {
-  //       // Fulfilled
-  //       results.push(...promise.value);
-  //     } else {
-  //       // Failed
-  //     }
-  //   });
-
-  //   // Return the final config (this function only expects 1 return actually as per originally implemented...)
-  //   return results[0];
-  // }
-
-  // /**
-  //  * Processes listOfGeoviewLayers and converts any shapefile entries to geojson.
-  //  * @param {TypeJsonArray | TypeJsonObject} listOfGeoviewLayers - Layers to process.
-  //  * @returns {Promise<TypeGeoviewLayerConfig[]>} The resulting configurations.
-  //  * @static
-  //  */
-  // static async convertShapefileToGeojson(listOfGeoviewLayers: TypeJsonArray | TypeJsonObject): Promise<TypeGeoviewLayerConfig[]> {
-  //   // convert the JSON object to a JSON array. We want to process a single type.
-  //   const listOfGeoviewLayerConfig = Array.isArray(listOfGeoviewLayers) ? listOfGeoviewLayers : [listOfGeoviewLayers];
-
-  //   // Filter all shapefile layers
-  //   const shapefileConfigs = listOfGeoviewLayerConfig.filter(
-  //     (geoviewLayerConfig) => geoviewLayerConfig.geoviewLayerType === CV_CONFIG_SHAPEFILE_TYPE
-  //   ) as unknown as ShapefileLayerConfig[];
-
-  //   // For each shapefile layer
-  //   const promisesOfShapefileConfigs: Promise<TypeGeoviewLayerConfig[]>[] = [];
-  //   shapefileConfigs.forEach((shapefileConfig) => {
-  //     // Compile
-  //     promisesOfShapefileConfigs.push(ShapefileReader.convertShapefileConfigToGeoJson(shapefileConfig));
-  //   });
-
-  //   // Once all promises are settled
-  //   const allPromises = await Promise.allSettled(promisesOfShapefileConfigs);
-
-  //   // For each result
-  //   const results: TypeGeoviewLayerConfig[] = [];
-  //   allPromises.forEach((promise) => {
-  //     // If fulfilled
-  //     if (promise.status === 'fulfilled') {
-  //       // Fulfilled
-  //       results.push(...promise.value);
-  //     } else {
-  //       // Failed
-  //     }
-  //   });
-
-  //   // Return the final config (this function expects the return to be an array as per originally implemented...)
-  //   return results;
-  // }
-
-  // TODO: Cleanup commented code - Remove this commented out code if all good
-  // /**
-  //  * Create the map feature configuration instance using the json string or the json object provided by the user.
-  //  * All GeoCore entries found in the config are translated to their corresponding Geoview configuration.
-  //  *
-  //  * @param {string | TypeJsonObject} mapConfig The map feature configuration to instanciate.
-  //  * @param {TypeDisplayLanguage} language The language of the map feature config we want to produce.
-  //  *
-  //  * @returns {Promise<MapFeatureConfig>} The map feature configuration Promise.
-  //  * @static
-  //  */
-  // // GV: GeoCore layers are processed here, well before the schema validation. The aim is to get rid of these layers in
-  // // GV: favor of their GeoView equivalent as soon as possible. Processing is based on the JSON representation of the config,
-  // // GV: and requires a minimum of validation to ensure that the configuration of GeoCore layers is valid.
-  // static async createMapConfig(mapConfig: string | TypeJsonObject, language: TypeDisplayLanguage): Promise<MapFeatureConfig> {
-  //   // If the user provided a string config, translate it to a json object because the MapFeatureConfig constructor
-  //   // doesn't accept string config. Note that convertStringToJson returns undefined if the string config cannot
-  //   // be translated to a json object.
-  //   const providedMapFeatureConfig: TypeJsonObject | undefined =
-  //     // We clone to prevent modifications from leaking back to the user object.
-  //     typeof mapConfig === 'string' ? ConfigApi.convertStringToJson(mapConfig as string) : (cloneDeep(mapConfig) as TypeJsonObject);
-
-  //   try {
-  //     // If the user provided a valid string config with the mandatory map property, process geocore layers to translate them to their GeoView layers
-  //     if (!providedMapFeatureConfig) throw new MapConfigError('The string configuration provided cannot be translated to a json object');
-  //     if (!providedMapFeatureConfig.map) throw new MapConfigError('The map property is mandatory');
-  //     providedMapFeatureConfig.map.listOfGeoviewLayerConfig = (providedMapFeatureConfig.map.listOfGeoviewLayerConfig ||
-  //       []) as TypeJsonObject;
-
-  //     const inputLength = providedMapFeatureConfig.map.listOfGeoviewLayerConfig.length;
-  //     providedMapFeatureConfig.map.listOfGeoviewLayerConfig = (await ConfigApi.convertGeocoreToGeoview(
-  //       language,
-  //       providedMapFeatureConfig.map.listOfGeoviewLayerConfig as TypeJsonArray,
-  //       providedMapFeatureConfig?.serviceUrls?.geocoreUrl as string
-  //     )) as TypeJsonObject;
-  //     // TODO: Reinstate this once TODO's in app.tsx 102 and 115 are removed
-  //     // providedMapFeatureConfig.map.listOfGeoviewLayerConfig = (await ConfigApi.convertShapefileToGeojson(
-  //     //   providedMapFeatureConfig.map.listOfGeoviewLayerConfig
-  //     // )) as TypeJsonObject;
-
-  //     const errorDetected = inputLength !== providedMapFeatureConfig.map.listOfGeoviewLayerConfig.length;
-
-  //     // Instanciate the mapFeatureConfig. If an error is detected, a workaround procedure
-  //     // will be executed to try to correct the problem in the best possible way.
-  //     ConfigApi.lastMapConfigCreated = new MapFeatureConfig(providedMapFeatureConfig);
-  //     if (errorDetected) ConfigApi.lastMapConfigCreated.setErrorDetectedFlag();
-  //   } catch (error: unknown) {
-  //     // If we get here, it is because the user provided a string config that cannot be translated to a json object,
-  //     // or the config doesn't have the mandatory map property or the listOfGeoviewLayerConfig is defined but is not
-  //     // an array.
-  //     if (error instanceof MapConfigError) logger.logError(error.message);
-  //     else logger.logError('ConfigApi.createMapConfig - An error occured', error);
-  //     const defaultMapConfig = ConfigApi.getDefaultMapFeatureConfig();
-  //     defaultMapConfig.setErrorDetectedFlag();
-  //     ConfigApi.lastMapConfigCreated = defaultMapConfig;
-  //   }
-
-  //   return ConfigApi.lastMapConfigCreated;
-  // }
-
-  // /**
-  //  * Returns the ESRI Renderer as a Style Config
-  //  * @param {string} input The input renderer to be converted to a GeoView Style
-  //  * @returns {TypeLayerStyleConfig} The converted style
-  //  */
-  // static getStyleFromESRIRenderer(input: string): TypeLayerStyleConfig | undefined {
-  //   const renderer = this.#convertStringToJson(input);
-  //   if (renderer) {
-  //     return createStyleUsingEsriRenderer(renderer as unknown as EsriBaseRenderer);
-  //   }
-  //   return undefined;
-  // }
-
   // #region EXPERIMENTAL
 
   /**
@@ -502,7 +336,7 @@ export class ConfigApi {
       'Some Name',
       'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer',
       false,
-      [{ index: '4' }] as unknown as TypeJsonArray,
+      [{ id: 4, index: 4 }],
       {}
     );
 
@@ -548,7 +382,7 @@ export class ConfigApi {
       'Some Name',
       'https://datacube-prod-data-public.s3.ca-central-1.amazonaws.com/store/imagery/aerial/napl/napl-ring-of-fire',
       false,
-      [{ id: 'napl-ring-of-fire-1954-08-07-60k-thumbnail.png' }] as unknown as TypeJsonArray
+      [{ id: 'napl-ring-of-fire-1954-08-07-60k-thumbnail.png' }]
     );
 
     // Create the class from geoview-layers package
@@ -571,7 +405,7 @@ export class ConfigApi {
       'Some Name',
       'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3978_V_OSM/VectorTileServer',
       false,
-      [{ id: 'CBMT_CBCT_3978_V_OSM' }] as unknown as TypeJsonArray
+      [{ id: 'CBMT_CBCT_3978_V_OSM' }]
     );
 
     // Create the class from geoview-layers package
@@ -595,8 +429,7 @@ export class ConfigApi {
       'https://maps-cartes.services.geo.ca/server_serveur/services/NRCan/CER_Assessments_EN/MapServer/WMSServer',
       'mapserver',
       false,
-      [{ id: '0' }] as unknown as TypeJsonArray,
-      {} // TODO: Check -  Remove this param as it is optional
+      [{ id: '0' }]
     );
 
     // Create the class from geoview-layers package
@@ -619,7 +452,7 @@ export class ConfigApi {
       'Some Name',
       'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer',
       false,
-      [{ id: '0' }] as unknown as TypeJsonArray
+      [{ id: '0' }]
     );
 
     // Create the class from geoview-layers package
@@ -642,7 +475,7 @@ export class ConfigApi {
       'Some Name',
       'https://canadian-geospatial-platform.github.io/geoview/public/datasets/csv-files',
       false,
-      [{ id: 'NPRI-INRP_WaterEau_MediaGroupMilieu_2022' }] as unknown as TypeJsonArray
+      [{ id: 'NPRI-INRP_WaterEau_MediaGroupMilieu_2022' }]
     );
 
     // Create the class from geoview-layers package
@@ -665,7 +498,7 @@ export class ConfigApi {
       'Some Name',
       'https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/Toronto_Neighbourhoods/FeatureServer',
       false,
-      [{ index: '0' }] as unknown as TypeJsonArray
+      [{ id: 0, index: 0 }]
     );
 
     // Create the class from geoview-layers package
@@ -688,7 +521,7 @@ export class ConfigApi {
       'Some Name',
       'https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata.meta',
       false,
-      [{ id: 'polygons.json' }] as unknown as TypeJsonArray
+      [{ id: 'polygons.json' }]
     );
 
     // Create the class from geoview-layers package
@@ -711,7 +544,7 @@ export class ConfigApi {
       'Some Name',
       'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev',
       false,
-      [{ id: 'lakes' }] as unknown as TypeJsonArray
+      [{ id: 'lakes' }]
     );
 
     // Create the class from geoview-layers package
@@ -734,7 +567,7 @@ export class ConfigApi {
       'Some Name',
       'https://ahocevar.com/geoserver/wfs?REQUEST=GetCapabilities&VERSION=2.0.0&SERVICE=WFS',
       false,
-      [{ id: 'usa:states' }] as unknown as TypeJsonArray
+      [{ id: 'usa:states' }]
     );
 
     // Create the class from geoview-layers package

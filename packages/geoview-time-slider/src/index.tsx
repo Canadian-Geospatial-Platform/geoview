@@ -1,5 +1,5 @@
 import React from 'react'; // GV This import is to validate that we're on the right React at the end of the file
-import { TypeJsonObject, AnySchemaObject } from 'geoview-core/api/config/types/config-types';
+import { AnySchemaObject } from 'geoview-core/api/config/types/config-types';
 import { TypeTabs } from 'geoview-core/ui/tabs/tabs';
 import { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 import { TimeSliderIcon } from 'geoview-core/ui';
@@ -42,17 +42,17 @@ class TimeSliderPlugin extends FooterPlugin {
   /**
    * Return the default config for this package
    *
-   * @returns {TypeJsonObject} the default config
+   * @returns {unknown} the default config
    */
-  override defaultConfig(): TypeJsonObject {
-    return defaultConfig as unknown as TypeJsonObject;
+  override defaultConfig(): unknown {
+    return defaultConfig;
   }
 
   /**
    * Overrides the default translations for the Plugin.
-   * @returns {TypeJsonObject} - The translations object for the particular Plugin.
+   * @returns {Record<string, unknown>} - The translations object for the particular Plugin.
    */
-  override defaultTranslations(): TypeJsonObject {
+  override defaultTranslations(): Record<string, unknown> {
     return {
       en: {
         timeSlider: {
@@ -110,7 +110,7 @@ class TimeSliderPlugin extends FooterPlugin {
           },
         },
       },
-    } as unknown as TypeJsonObject;
+    };
   }
 
   /**

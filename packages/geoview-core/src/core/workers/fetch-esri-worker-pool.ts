@@ -3,8 +3,6 @@ import { FetchEsriWorker, FetchEsriWorkerType } from './fetch-esri-worker';
 import { QueryParams } from './fetch-esri-worker-script';
 import { createWorkerLogger } from './helper/logger-worker';
 
-import { TypeJsonObject } from '@/api/config/types/config-types';
-
 /**
  * Worker pool for managing ESRI fetch operations.
  * Extends AbstractWorkerPool to handle concurrent ESRI service requests.
@@ -44,10 +42,10 @@ export class FetchEsriWorkerPool extends AbstractWorkerPool<FetchEsriWorkerType>
   /**
    * Processes an ESRI query using an available worker from the pool.
    * @param {QueryParams} params - Parameters for the ESRI query
-   * @returns {Promise<TypeJsonObject>} The query results
+   * @returns {Promise<unknown>} The query results
    * @throws {Error} When no workers are available or query processing fails
    */
-  public async process(params: QueryParams): Promise<TypeJsonObject> {
+  public async process(params: QueryParams): Promise<unknown> {
     const availableWorker = this.getAvailableWorker();
     if (!availableWorker) {
       throw new Error('No available workers');
@@ -56,7 +54,7 @@ export class FetchEsriWorkerPool extends AbstractWorkerPool<FetchEsriWorkerType>
     try {
       this.busyWorkers.add(availableWorker);
       const result = await availableWorker.process(params);
-      return result as TypeJsonObject;
+      return result;
     } finally {
       this.busyWorkers.delete(availableWorker);
     }

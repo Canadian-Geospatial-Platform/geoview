@@ -1,7 +1,6 @@
 import cloneDeep from 'lodash/cloneDeep';
 import defaultsDeep from 'lodash/defaultsDeep';
 
-import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import {
   CV_BASEMAP_ID,
   CV_BASEMAP_LABEL,
@@ -23,9 +22,7 @@ import {
   TypeExternalPackages,
   TypeFooterBarProps,
   TypeGlobalSettings,
-  TypeMapComponents,
   TypeMapConfig,
-  TypeMapCorePackages,
   TypeCorePackagesConfig,
   TypeNavBarProps,
   TypeOverviewMapProps,
@@ -33,19 +30,15 @@ import {
   TypeMapFeaturesInstance,
   TypeValidMapProjectionCodes,
   TypeValidVersions,
+  TypeValidMapCorePackageProps,
+  TypeValidMapComponentProps,
 } from '@/api/config/types/map-schema-types';
 import { logger } from '@/core/utils/logger';
-
-// ========================
-// #region CLASS HEADER
 
 /**
  * The map feature configuration class.
  */
 export class MapFeatureConfig {
-  // ==========================
-  // #region PRIVATE PROPERTIES
-
   /** Flag used to indicate that errors were detected in the config provided. */
   #errorDetectedFlag = false;
 
@@ -53,10 +46,6 @@ export class MapFeatureConfig {
   /** The registeredLayerPaths property keeps track of all the GeoView layers created and attached to this map */
   // #registeredLayerPaths: Record<string, AbstractGeoViewLayer> = {};
 
-  // #endregion PRIVATE PROPERTIES
-
-  // =========================
-  // #region PUBLIC PROPERTIES
   /** map configuration. */
   map: TypeMapConfig;
 
@@ -76,10 +65,10 @@ export class MapFeatureConfig {
   overviewMap?: TypeOverviewMapProps;
 
   /** Map components. */
-  components?: TypeMapComponents;
+  components?: TypeValidMapComponentProps[];
 
   /** List of core packages. */
-  corePackages?: TypeMapCorePackages;
+  corePackages?: TypeValidMapCorePackageProps[];
 
   /** List of core packages config. */
   corePackagesConfig?: TypeCorePackagesConfig;
@@ -98,31 +87,25 @@ export class MapFeatureConfig {
    * this version of the viewer.
    */
   schemaVersionUsed?: '1.0';
-  // #endregion PUBLIC PROPERTIES
 
-  // ===================
-  // #region CONSTRUCTOR
   /**
    * The class constructor
    *
    * All properties at this inheritance level have no values provided in the metadata. They are therefore initialized
    * from the configuration passed as a parameter or from the default values.
    *
-   * @param {TypeJsonObject} userMapFeatureConfig The map feature configuration to instantiate.
+   * @param {TypeMapFeaturesInstance} userMapFeatureConfig The map feature configuration to instantiate.
    * @constructor
    */
-  constructor(userMapFeatureConfig: TypeMapFeaturesInstance | TypeJsonObject) {
+  constructor(userMapFeatureConfig: TypeMapFeaturesInstance) {
     // Input schema validation.
     this.#errorDetectedFlag = !isvalidComparedToInputSchema(CV_MAP_CONFIG_SCHEMA_PATH, userMapFeatureConfig);
 
     // set map configuration
-    const gvMap = cloneDeep(userMapFeatureConfig.map) as TypeJsonObject;
+    const gvMap = cloneDeep(userMapFeatureConfig.map);
     this.map =
       // Default map config depends on map projection.
-      defaultsDeep(
-        gvMap as unknown as TypeMapConfig,
-        MapFeatureConfig.#getDefaultMapConfig(gvMap?.viewSettings?.projection as TypeValidMapProjectionCodes)
-      );
+      defaultsDeep(gvMap as unknown as TypeMapConfig, MapFeatureConfig.#getDefaultMapConfig(gvMap?.viewSettings?.projection));
 
     // Above code will add default zoomAndCenter, remove if other initial view is provided
     if (this.map.viewSettings.initialView?.extent || this.map.viewSettings.initialView?.layerIds)
@@ -146,14 +129,14 @@ export class MapFeatureConfig {
     //     return layerConfig;
     //   }) as AbstractGeoviewLayerConfig[];
 
-    this.serviceUrls = defaultsDeep(userMapFeatureConfig.serviceUrls as TypeServiceUrls, CV_DEFAULT_MAP_FEATURE_CONFIG.serviceUrls);
+    this.serviceUrls = defaultsDeep(userMapFeatureConfig.serviceUrls, CV_DEFAULT_MAP_FEATURE_CONFIG.serviceUrls);
     this.theme = (userMapFeatureConfig.theme || CV_DEFAULT_MAP_FEATURE_CONFIG.theme) as TypeDisplayTheme;
     this.navBar = [...((userMapFeatureConfig.navBar || CV_DEFAULT_MAP_FEATURE_CONFIG.navBar) as TypeNavBarProps)];
     this.appBar = defaultsDeep(userMapFeatureConfig.appBar as TypeAppBarProps, CV_DEFAULT_MAP_FEATURE_CONFIG.appBar);
     this.footerBar = userMapFeatureConfig.footerBar as TypeFooterBarProps;
     this.overviewMap = defaultsDeep(userMapFeatureConfig.overviewMap as TypeOverviewMapProps, CV_DEFAULT_MAP_FEATURE_CONFIG.overviewMap);
-    this.components = [...((userMapFeatureConfig.components || CV_DEFAULT_MAP_FEATURE_CONFIG.components) as TypeMapComponents)];
-    this.corePackages = [...((userMapFeatureConfig.corePackages || CV_DEFAULT_MAP_FEATURE_CONFIG.corePackages) as TypeMapCorePackages)];
+    this.components = [...(userMapFeatureConfig.components ?? CV_DEFAULT_MAP_FEATURE_CONFIG.components ?? [])];
+    this.corePackages = [...(userMapFeatureConfig.corePackages ?? CV_DEFAULT_MAP_FEATURE_CONFIG.corePackages ?? [])];
     this.corePackagesConfig = [
       ...((userMapFeatureConfig.corePackagesConfig || CV_DEFAULT_MAP_FEATURE_CONFIG.corePackagesConfig) as TypeCorePackagesConfig),
     ];
@@ -166,15 +149,14 @@ export class MapFeatureConfig {
     if (this.#errorDetectedFlag) this.#makeMapConfigValid(userMapFeatureConfig); // Tries to apply a correction to invalid properties
     if (!isvalidComparedToInternalSchema(CV_MAP_CONFIG_SCHEMA_PATH, this)) this.setErrorDetectedFlag();
   }
-  // #endregion CONSTRUCTOR
 
-  // ===============
   // #region METHODS
   /*
    * Methods are listed in the following order: abstract, override, private, protected and public.
    */
-  // ================
+
   // #region PRIVATE
+
   /**
    * Get the default values for the mapFeatureConfig.map using the projection code.
    * @param {TypeValidMapProjectionCodes} projection The projection code.
@@ -199,10 +181,10 @@ export class MapFeatureConfig {
    * erroneous values with the default values associated with the properties in error. There is a limit to this recovery
    * capability, however, and the resulting configuration may not be viable despite this attempt.
    *
-   * @param {TypeJsonObject} providedMapConfig The map feature configuration to instantiate.
+   * @param {TypeMapFeaturesInstance} providedMapConfig The map feature configuration to instantiate.
    * @private
    */
-  #makeMapConfigValid(providedMapConfig: TypeMapFeaturesInstance | TypeJsonObject): void {
+  #makeMapConfigValid(providedMapConfig: TypeMapFeaturesInstance): void {
     // Do validation for all pieces
     this.map.viewSettings.projection =
       this.map.viewSettings.projection && VALID_PROJECTION_CODES.includes(this.map.viewSettings.projection)
@@ -303,43 +285,40 @@ export class MapFeatureConfig {
    * Log modifications made to configuration by the validator. This method compares the values provided by the user to the
    * final values of the configuration and log all modifications made to the config.
    *
-   * @param {TypeJsonObject} providedMapConfig The map feature configuration to instantiate.
+   * @param {TypeMapFeaturesInstance} providedMapConfig The map feature configuration to instantiate.
    * @private
    */
-  #logModifs(providedMapConfig: TypeMapFeaturesInstance | TypeJsonObject): void {
+  #logModifs(providedMapConfig: TypeMapFeaturesInstance): void {
     Object.keys(providedMapConfig).forEach((key) => {
       if (!(key in this)) {
         logger.logWarning(`- Key '${key}' is invalid -`);
       }
     });
 
-    if ((providedMapConfig?.map as TypeJsonObject)?.viewSettings?.projection !== this.map.viewSettings.projection) {
+    if (providedMapConfig?.map?.viewSettings?.projection !== this.map.viewSettings.projection) {
       logger.logWarning(
-        `- Invalid projection code ${(providedMapConfig?.map as TypeJsonObject)?.viewSettings?.projection} replaced by ${
-          this.map.viewSettings.projection
-        } -`
+        `- Invalid projection code ${providedMapConfig?.map?.viewSettings?.projection} replaced by ${this.map.viewSettings.projection} -`
       );
     }
 
     if (
-      (providedMapConfig?.map as TypeJsonObject)?.viewSettings?.initialView?.zoomAndCenter &&
+      providedMapConfig?.map?.viewSettings?.initialView?.zoomAndCenter &&
       this.map.viewSettings.initialView?.zoomAndCenter &&
-      (providedMapConfig?.map as TypeJsonObject)?.viewSettings?.initialView?.zoomAndCenter[0] !==
-        this.map.viewSettings.initialView?.zoomAndCenter[0]
+      providedMapConfig?.map?.viewSettings?.initialView?.zoomAndCenter[0] !== this.map.viewSettings.initialView?.zoomAndCenter[0]
     ) {
       logger.logWarning(
-        `- Invalid zoom level ${(providedMapConfig?.map as TypeJsonObject)?.viewSettings?.initialView?.zoomAndCenter[0]}
+        `- Invalid zoom level ${providedMapConfig?.map?.viewSettings?.initialView?.zoomAndCenter[0]}
         replaced by ${this.map.viewSettings.initialView?.zoomAndCenter[0]} -`
       );
     }
 
-    const originalZoomAndCenter = (providedMapConfig?.map as TypeJsonObject)?.viewSettings?.initialView?.zoomAndCenter;
+    const originalZoomAndCenter = providedMapConfig?.map?.viewSettings?.initialView?.zoomAndCenter;
     if (
       originalZoomAndCenter &&
       Array.isArray(originalZoomAndCenter) &&
-      (originalZoomAndCenter as TypeJsonArray).length === 2 &&
+      originalZoomAndCenter.length === 2 &&
       Array.isArray(originalZoomAndCenter[1]) &&
-      (originalZoomAndCenter[1] as TypeJsonArray).length === 2 &&
+      originalZoomAndCenter[1].length === 2 &&
       (originalZoomAndCenter[1] as unknown as [number, number]) !== this.map.viewSettings.initialView!.zoomAndCenter![1]
     ) {
       logger.logWarning(
@@ -348,18 +327,18 @@ export class MapFeatureConfig {
       );
     }
 
-    if (JSON.stringify((providedMapConfig?.map as TypeJsonObject)?.basemapOptions) !== JSON.stringify(this.map.basemapOptions)) {
+    if (JSON.stringify(providedMapConfig?.map?.basemapOptions) !== JSON.stringify(this.map.basemapOptions)) {
       logger.logWarning(
         `- Invalid basemap options ${JSON.stringify(
-          (providedMapConfig?.map as TypeJsonObject)?.basemapOptions
+          providedMapConfig?.map?.basemapOptions
         )} replaced by ${JSON.stringify(this.map.basemapOptions)} -`
       );
     }
   }
   // #endregion PRIVATE
 
-  // ==============
   // #region PUBLIC
+
   // GV: The benifit of using a setter/getter with a private #property is that it is invisible to the schema
   // GV: validation and JSON serialization.
   /**
@@ -378,95 +357,7 @@ export class MapFeatureConfig {
     this.#errorDetectedFlag = true;
   }
 
-  // TODO: Cleanup commented code - Remove all this commented out code if all good
-  // /**
-  //  * Methode used to get a specific GeoView layer configuration.
-  //  *
-  //  * @param {string} geoviewLayerId The GeoView layer identifier.
-  //  *
-  //  * @returns {AbstractGeoviewLayerConfig | undefined} The GeoView layer object or undefined if it doesn't exist.
-  //  */
-  // getGeoviewLayer(geoviewLayerId: string): AbstractGeoViewLayer | undefined {
-  //   return this.#registeredLayerPaths?.[geoviewLayerId];
-  // }
-
-  // /**
-  //  * This method reads the service metadata for all geoview layers in the geoview layer list.
-  //  */
-  // async fetchAllServiceMetadata(): Promise<void> {
-  //   const promiseLayersProcessed: Promise<void>[] = [];
-
-  //   this.map.listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
-  //     promiseLayersProcessed.push((geoviewLayerConfig as AbstractGeoViewLayer).fetchServiceMetadata());
-  //   });
-
-  //   const promiseSettledResult = await Promise.allSettled(promiseLayersProcessed);
-  //   promiseSettledResult.forEach((promise, i) => {
-  //     if (promise.status === 'rejected') (this.map.listOfGeoviewLayerConfig[i] as AbstractGeoviewLayerConfig).setErrorDetectedFlag();
-  //   });
-  //   // TODO: Have a chat with Alex about his comment "We could still set the flag here, for processing reasons, and return the whole Promise.allSettled for convenience."
-  // }
-
-  // /**
-  //  * Apply user configuration over the geoview layer configurations created from the raw metadata.
-  //  */
-  // applyUserConfigToGeoviewLayers(listOfGeoviewLayerConfig?: TypeJsonArray): void {
-  //   this.map.listOfGeoviewLayerConfig.forEach((geoviewConfig) => {
-  //     // Use config pass as parameter if defined
-  //     if (listOfGeoviewLayerConfig?.length) {
-  //       const geoviewConfigToUse = listOfGeoviewLayerConfig.find(
-  //         (geoviewLayerConfig) => geoviewLayerConfig.geoviewLayerId === geoviewConfig.geoviewLayerId
-  //       );
-  //       // If a GeoView layer config has been found, use it. Otherwise, do nothing
-  //       if (geoviewConfigToUse) (geoviewConfig).applyUserConfig(geoviewConfigToUse);
-  //     } else {
-  //       // Use config provided at instanciation time.
-  //       geoviewConfig.applyUserConfig();
-  //     }
-  //   });
-  // }
-
-  // /**
-  //  * The method used to implement the class factory model that returns the instance of the class based on the GeoView layer type
-  //  * needed.
-  //  *
-  //  * @param {TypeJsonObject} layerConfig The layer configuration we want to instanciate.
-  //  *
-  //  * @returns {AbstractGeoviewLayerConfig | undefined} The GeoView layer instance or undefined if there is an error.
-  //  * @static
-  //  */
-  // static nodeFactory(layerConfig: TypeJsonObject): AbstractGeoViewLayer | undefined {
-  //   switch (layerConfig.geoviewLayerType) {
-  //     case CV_CONST_LAYER_TYPES.ESRI_DYNAMIC:
-  //       return new EsriDynamic(layerConfig as unknown as TypeEsriDynamicLayerConfig);
-  //     case CV_CONST_LAYER_TYPES.ESRI_FEATURE:
-  //       return new EsriFeature(layerConfig as unknown as TypeEsriFeatureLayerConfig);
-  //     case CV_CONST_LAYER_TYPES.ESRI_IMAGE:
-  //       return new EsriImage(layerConfig as unknown as TypeEsriImageLayerConfig);
-  //     case CV_CONST_LAYER_TYPES.WMS:
-  //       return new WMS(layerConfig as unknown as TypeWMSLayerConfig, false);
-  //     case CV_CONST_LAYER_TYPES.WFS:
-  //       return new WFS(layerConfig as unknown as TypeWFSLayerConfig);
-  //     case CV_CONST_LAYER_TYPES.GEOJSON:
-  //       return new GeoJSON(layerConfig as unknown as TypeWFSLayerConfig);
-  //     case CV_CONST_LAYER_TYPES.CSV:
-  //       return new CSV(layerConfig);
-  //     case CV_CONST_LAYER_TYPES.XYZ_TILES:
-  //       return new XYZTiles(layerConfig);
-  //     case CV_CONST_LAYER_TYPES.VECTOR_TILES:
-  //       return new VectorTiles(layerConfig);
-  //     case CV_CONST_LAYER_TYPES.OGC_FEATURE:
-  //       return new OgcFeature(layerConfig);
-  //     // case CV_CONST_LAYER_TYPES.GEOPACKAGE:
-  //     //   return new GeopackageLayerConfig(layerConfig);
-  //     default:
-  //       // TODO: Restore the commented line and remove the next line when we have converted our code to the new framework.
-  //       // logger.logError(`Invalid GeoView layerType (${layerConfig.geoviewLayerType}).`);
-  //       if (ConfigApi.devMode) logger.logError(`Invalid GeoView layerType (${layerConfig.geoviewLayerType}).`);
-  //   }
-  //   return undefined;
-  // }
   // #endregion PUBLIC
+
   // #endregion METHODS
-  // #endregion CLASS HEADER
 }

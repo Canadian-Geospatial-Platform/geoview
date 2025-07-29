@@ -13,7 +13,7 @@ import {
   CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
 } from '@/api/config/types/map-schema-types';
-import { TypeJsonArray } from '@/api/config/types/config-types';
+import { TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import {
@@ -79,13 +79,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
   protected override onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Redirect
     return Promise.resolve(
-      VectorTiles.createVectorTilesLayerConfig(
-        this.geoviewLayerId,
-        this.geoviewLayerName,
-        this.metadataAccessPath,
-        false,
-        [] as unknown as TypeJsonArray
-      )
+      VectorTiles.createVectorTilesLayerConfig(this.geoviewLayerId, this.geoviewLayerName, this.metadataAccessPath, false, [])
     );
   }
 
@@ -222,7 +216,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * @param {string} geoviewLayerName - The display name of the GeoView layer.
    * @param {string} metadataAccessPath - The URL or path to access metadata.
    * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
-   * @param {TypeJsonArray} layerEntries - An array of layer entries objects to be included in the configuration.
+   * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns {TypeVectorTilesConfig} The constructed configuration object for the XYZTiles layer.
    */
   static createVectorTilesLayerConfig(
@@ -230,7 +224,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     geoviewLayerName: string,
     metadataAccessPath: string,
     isTimeAware: boolean,
-    layerEntries: TypeJsonArray
+    layerEntries: TypeLayerEntryShell[]
   ): TypeVectorTilesConfig {
     const geoviewLayerConfig: TypeVectorTilesConfig = {
       geoviewLayerId,
@@ -246,7 +240,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
         schemaTag: CONST_LAYER_TYPES.VECTOR_TILES,
         entryType: CONST_LAYER_ENTRY_TYPES.RASTER_TILE,
         layerId: `${layerEntry.id}`,
-        tileGrid: layerEntry.tileGrid as unknown as TypeTileGrid,
+        tileGrid: layerEntry.tileGrid,
         source: {
           dataAccessPath: metadataAccessPath,
         },

@@ -8,7 +8,6 @@ import { ProjectionLike } from 'ol/proj';
 import initSqlJs, { ParamsObject, SqlValue } from 'sql.js';
 import * as SLDReader from '@nieuwlandgeo/sldreader';
 
-import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
   TypeLayerEntryConfig,
@@ -24,6 +23,7 @@ import {
   CONST_LAYER_TYPES,
 } from '@/api/config/types/map-schema-types';
 import { GeoPackageLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geopackage-layer-config-entry';
+import { TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { logger } from '@/core/utils/logger';
@@ -220,8 +220,7 @@ export class GeoPackage extends AbstractGeoViewVector {
     }
 
     if (layerInfo.properties) {
-      const { properties } = layerInfo;
-      GeoPackage.#processFeatureInfoConfig(properties as TypeJsonObject, layerConfig);
+      GeoPackage.#processFeatureInfoConfig(layerInfo.properties, layerConfig);
     }
 
     // Redirect
@@ -306,8 +305,7 @@ export class GeoPackage extends AbstractGeoViewVector {
             // Step 3: Process each feature table
             for (const { tableName, srsId, geometryColumnName } of tables) {
               const dataProjection = `EPSG:${srsId}`;
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const rawFeatures: { geom: Uint8Array; properties: any }[] = [];
+              const rawFeatures: { geom: Uint8Array; properties: Record<string, unknown> }[] = [];
 
               stmt = db.prepare(`SELECT * FROM '${tableName}'`);
               while (stmt.step()) {
@@ -522,11 +520,11 @@ export class GeoPackage extends AbstractGeoViewVector {
   /**
    * This method sets the outfields and aliasFields of the source feature info.
    *
-   * @param {TypeJsonArray} fields An array of field names and its aliases.
+   * @param {initSqlJs.ParamsObject} fields An array of field names and its aliases.
    * @param {VectorLayerEntryConfig} layerConfig The vector layer entry to configure.
    * @private
    */
-  static #processFeatureInfoConfig(fields: TypeJsonObject, layerConfig: VectorLayerEntryConfig): void {
+  static #processFeatureInfoConfig(fields: initSqlJs.ParamsObject, layerConfig: VectorLayerEntryConfig): void {
     // eslint-disable-next-line no-param-reassign
     if (!layerConfig.source) layerConfig.source = {};
     // eslint-disable-next-line no-param-reassign
@@ -540,7 +538,8 @@ export class GeoPackage extends AbstractGeoViewVector {
       Object.keys(fields).forEach((fieldEntryKey) => {
         if (!fields[fieldEntryKey]) return;
 
-        const fieldEntry = fields[fieldEntryKey];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const fieldEntry = fields[fieldEntryKey] as any;
         if (fieldEntry.type === 'Geometry') return;
 
         let fieldType = 'string';
@@ -615,7 +614,7 @@ export class GeoPackage extends AbstractGeoViewVector {
    * @param {string} geoviewLayerName - The display name of the GeoView layer.
    * @param {string} metadataAccessPath - The URL or path to access metadata or feature data.
    * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
-   * @param {TypeJsonArray} layerEntries - An array of layer entries objects to be included in the configuration.
+   * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns {TypeGeoPackageLayerConfig} The constructed configuration object for the Geopackage Feature layer.
    */
   static createGeopackageLayerConfig(
@@ -623,7 +622,7 @@ export class GeoPackage extends AbstractGeoViewVector {
     geoviewLayerName: string,
     metadataAccessPath: string,
     isTimeAware: boolean,
-    layerEntries: TypeJsonArray
+    layerEntries: TypeLayerEntryShell[]
   ): TypeGeoPackageLayerConfig {
     const geoviewLayerConfig: TypeGeoPackageLayerConfig = {
       geoviewLayerId,

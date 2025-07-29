@@ -4,7 +4,6 @@ import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import Feature from 'ol/Feature';
 
-import { TypeJsonArray } from '@/api/config/types/config-types';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
   TypeLayerEntryConfig,
@@ -29,7 +28,7 @@ import {
   LayerEntryConfigLayerIdNotFoundError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import { GVOGCFeature } from '@/geo/layer/gv-layers/vector/gv-ogc-feature';
-import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
+import { ConfigBaseClass, TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
 
 export interface TypeSourceOgcFeatureInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'featureAPI';
@@ -84,13 +83,11 @@ export class OgcFeature extends AbstractGeoViewVector {
     const idx = this.metadataAccessPath.lastIndexOf(sep);
     let rootUrl = this.metadataAccessPath;
     let id: string | undefined;
-    // TODO: Cleanup - Remove the any by specifying
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let entries: any = [];
+    let entries: TypeLayerEntryShell[] = [];
     if (idx > 0) {
       rootUrl = this.metadataAccessPath.substring(0, idx);
       id = this.metadataAccessPath.substring(idx + sep.length);
-      entries = [{ id }] as unknown as TypeJsonArray;
+      entries = [{ id }];
     }
 
     // If no id
@@ -116,9 +113,7 @@ export class OgcFeature extends AbstractGeoViewVector {
     // Note that the code assumes ogc-feature collections does not contains metadata layer group. If you need layer group,
     // you can define them in the configuration section.
     if (Array.isArray(this.getMetadata()!.collections)) {
-      // TODO: Cleanup - Remove the any by specifying
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const foundCollection = this.getMetadata()!.collections.find((layerMetadata: any) => layerMetadata.id === layerConfig.layerId);
+      const foundCollection = this.getMetadata()!.collections.find((layerMetadata) => layerMetadata.id === layerConfig.layerId);
       if (!foundCollection) {
         // Add a layer load error
         this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(layerConfig), layerConfig);
@@ -161,7 +156,7 @@ export class OgcFeature extends AbstractGeoViewVector {
       const queryUrl = metadataUrl.endsWith('/')
         ? `${metadataUrl}collections/${layerConfig.layerId}/queryables?f=json`
         : `${metadataUrl}/collections/${layerConfig.layerId}/queryables?f=json`;
-      const queryResultData = await Fetch.fetchJsonAs<TypeLayerMetadataQueryables>(queryUrl);
+      const queryResultData = await Fetch.fetchJson<TypeLayerMetadataQueryables>(queryUrl);
       if (queryResultData.properties) {
         layerConfig.setLayerMetadata(queryResultData.properties);
         OgcFeature.#processFeatureInfoConfig(queryResultData.properties, layerConfig);
@@ -269,7 +264,7 @@ export class OgcFeature extends AbstractGeoViewVector {
     const queryUrl = url.endsWith('/') ? `${url}collections?f=json` : `${url}/collections?f=json`;
 
     // Set it
-    return Fetch.fetchJsonAs<TypeMetadataOGCFeature>(queryUrl);
+    return Fetch.fetchJson<TypeMetadataOGCFeature>(queryUrl);
   }
 
   /**
@@ -300,7 +295,7 @@ export class OgcFeature extends AbstractGeoViewVector {
    * @param {string} geoviewLayerName - The display name of the GeoView layer.
    * @param {string} metadataAccessPath - The URL or path to access metadata or feature data.
    * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
-   * @param {TypeJsonArray} layerEntries - An array of layer entries objects to be included in the configuration.
+   * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns {TypeOgcFeatureLayerConfig} The constructed configuration object for the OGC Feature layer.
    */
   static createOgcFeatureLayerConfig(
@@ -308,7 +303,7 @@ export class OgcFeature extends AbstractGeoViewVector {
     geoviewLayerName: string,
     metadataAccessPath: string,
     isTimeAware: boolean,
-    layerEntries: TypeJsonArray
+    layerEntries: TypeLayerEntryShell[]
   ): TypeOgcFeatureLayerConfig {
     const geoviewLayerConfig: TypeOgcFeatureLayerConfig = {
       geoviewLayerId,

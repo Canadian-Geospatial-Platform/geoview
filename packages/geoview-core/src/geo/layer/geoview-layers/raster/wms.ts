@@ -2,7 +2,6 @@ import { ImageWMS } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/ImageWMS';
 import WMSCapabilities from 'ol/format/WMSCapabilities';
 
-import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import {
   TypeLayerEntryConfig,
@@ -22,7 +21,7 @@ import {
   TypeMetadataWMSCapabilityLayer,
 } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
-import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
+import { ConfigBaseClass, TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
 import { CancelledError, NetworkError, PromiseRejectErrorWrapper } from '@/core/exceptions/core-exceptions';
 import { LayerDataAccessPathMandatoryError, LayerNoCapabilitiesError } from '@/core/exceptions/layer-exceptions';
 import {
@@ -71,8 +70,8 @@ export class WMS extends AbstractGeoViewRaster {
   /**
    * Recursively gets the layer capability for a given layer id.
    * @param {string} layerId - The layer identifier to get the capabilities for.
-   * @param {TypeJsonObject | undefined} currentLayerEntry - The current layer entry from the capabilities that will be recursively searched.
-   * @returns {TypeJsonObject?} The found layer from the capabilities or undefined if not found.
+   * @param {TypeMetadataWMSCapabilityLayer?} layer - The current layer entry from the capabilities that will be recursively searched.
+   * @returns {TypeMetadataWMSCapabilityLayer?} The found layer from the capabilities or undefined if not found.
    */
   getLayerCapabilities(layerId: string, layer = this.getMetadata()?.Capability.Layer): TypeMetadataWMSCapabilityLayer | undefined {
     if (!layer) return undefined;
@@ -153,7 +152,7 @@ export class WMS extends AbstractGeoViewRaster {
       this.metadataAccessPath,
       'mapserver',
       false,
-      entries as unknown as TypeJsonArray
+      entries
     );
   }
 
@@ -337,7 +336,7 @@ export class WMS extends AbstractGeoViewRaster {
    * It updates the metadata access path if a proxy is involved and ensures the metadata hierarchy is processed.
    *
    * @param {string} url - The full WMS GetCapabilities URL to fetch metadata from.
-   * @returns {Promise<TypeJsonObject | undefined>} A promise resolving to the parsed metadata object,
+   * @returns {Promise<TypeMetadataWMS | undefined>} A promise resolving to the parsed metadata object,
    * or `undefined` if the fetch failed or metadata is invalid.
    */
   async #fetchAndProcessSingleWmsMetadata(url: string): Promise<TypeMetadataWMS | undefined> {
@@ -360,7 +359,7 @@ export class WMS extends AbstractGeoViewRaster {
    * base structure, and processes metadata inheritance afterward.
    * @param {string} url - The base WMS GetCapabilities URL used to fetch metadata.
    * @param {TypeLayerEntryConfig[]} layers - An array of layer configurations to fetch and merge metadata for.
-   * @returns {Promise<TypeJsonObject | undefined>} A promise resolving to the merged metadata object,
+   * @returns {Promise<TypeMetadataWMS | undefined>} A promise resolving to the merged metadata object,
    * or `undefined` if all requests failed.
    */
   async #fetchAndMergeMultipleWmsMetadata(url: string, layers: TypeLayerEntryConfig[]): Promise<TypeMetadataWMS | undefined> {
@@ -538,8 +537,8 @@ export class WMS extends AbstractGeoViewRaster {
    * this level in the path the layers have the same name, we move to the next level. Otherwise, the layer can be added.
    *
    * @param {number[]} path - The layer name to be found
-   * @param {TypeJsonObject | undefined} target - The metadata layer that will receive the new layer
-   * @param {TypeJsonObject} source - The layer property to add
+   * @param {TypeMetadataWMSCapabilityLayer | TypeMetadataWMSCapabilityLayer[] | undefined} target - The metadata layer that will receive the new layer
+   * @param {TypeMetadataWMSCapabilityLayer | TypeMetadataWMSCapabilityLayer[]} source - The layer property to add
    * @private
    */
   #addLayerToMetadataInstance(
@@ -636,10 +635,10 @@ export class WMS extends AbstractGeoViewRaster {
       }
       if (parentLayer.CRS) {
         // eslint-disable-next-line no-param-reassign
-        if (!layer.CRS as TypeJsonArray) (layer.CRS as TypeJsonArray) = [];
-        (parentLayer.CRS as TypeJsonArray).forEach((parentCRS) => {
-          const crsFound = (layer.CRS as TypeJsonArray).find((crsEntry) => crsEntry.Name === parentCRS);
-          if (!crsFound) (layer.CRS as TypeJsonArray).push(parentCRS);
+        if (!layer.CRS) layer.CRS = [];
+        parentLayer.CRS.forEach((parentCRS) => {
+          const crsFound = layer.CRS.find((crsEntry) => crsEntry.Name === parentCRS.Name);
+          if (!crsFound) layer.CRS.push(parentCRS);
         });
       }
     }
@@ -657,7 +656,7 @@ export class WMS extends AbstractGeoViewRaster {
     // TO.DOCONT: Should it be handle upper in abstract class to loop in structure and launch the creation of a leaf?
     // TODO: The answer is no. Even if the final structure is the same, the input structure is different for each geoview layer types.
     const newListOfLayerEntryConfig: TypeLayerEntryConfig[] = [];
-    const arrayOfLayerMetadata = Array.isArray(layer.Layer) ? layer.Layer : ([layer.Layer] as TypeJsonArray);
+    const arrayOfLayerMetadata = Array.isArray(layer.Layer) ? layer.Layer : [layer.Layer];
 
     // GV Special WMS group layer case situation...
     // TODO: Bug - There was an issue with the layer configuration for a long time ('Private element not on object') which
@@ -675,8 +674,8 @@ export class WMS extends AbstractGeoViewRaster {
       logger.logTraceCore('WMS - createGroupLayer', 'Cloning the layer config', layerConfig.layerPath);
       const subLayerEntryConfig: ConfigBaseClass = layerConfig.clone();
       subLayerEntryConfig.parentLayerConfig = layerConfig;
-      subLayerEntryConfig.layerId = subLayer.Name as string;
-      subLayerEntryConfig.layerName = subLayer.Title as string;
+      subLayerEntryConfig.layerId = subLayer.Name;
+      subLayerEntryConfig.layerName = subLayer.Title;
       newListOfLayerEntryConfig.push(subLayerEntryConfig as TypeLayerEntryConfig);
 
       // If we don't want all sub layers (simulating the 'Private element not on object' error we had for long time)
@@ -767,8 +766,8 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {string} metadataAccessPath - The URL or path to access metadata.
    * @param {TypeOfServer} serverType - The server type.
    * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
-   * @param {TypeJsonArray} layerEntries - An array of layer entries objects to be included in the configuration.
-   * @param {TypeJsonObject} customGeocoreLayerConfig - An optional layer config from Geocore.
+   * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
+   * @param {unknown} customGeocoreLayerConfig - An optional layer config from Geocore.
    * @returns {TypeWMSLayerConfig} The constructed configuration object for the WMS layer.
    */
   static createWMSLayerConfig(
@@ -777,8 +776,8 @@ export class WMS extends AbstractGeoViewRaster {
     metadataAccessPath: string,
     serverType: TypeOfServer,
     isTimeAware: boolean,
-    layerEntries: TypeJsonArray,
-    customGeocoreLayerConfig: TypeJsonObject = {}
+    layerEntries: TypeLayerEntryShell[],
+    customGeocoreLayerConfig: unknown = {}
   ): TypeWMSLayerConfig {
     const geoviewLayerConfig: TypeWMSLayerConfig = {
       geoviewLayerId,
@@ -802,10 +801,10 @@ export class WMS extends AbstractGeoViewRaster {
       };
 
       // Overwrite default from geocore custom config
-      const mergedConfig = deepMergeObjects(layerEntryConfig as unknown as TypeJsonObject, customGeocoreLayerConfig);
+      const mergedConfig = deepMergeObjects(layerEntryConfig, customGeocoreLayerConfig) as OgcWmsLayerEntryConfig;
 
       // Reconstruct
-      return new OgcWmsLayerEntryConfig(mergedConfig as unknown as OgcWmsLayerEntryConfig);
+      return new OgcWmsLayerEntryConfig(mergedConfig);
     });
 
     // Return it

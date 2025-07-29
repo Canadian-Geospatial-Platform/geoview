@@ -137,7 +137,7 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
           <CardHeader
             sx={panelStyles?.panelCardHeader ? { ...panelStyles.panelCardHeader } : {}}
             ref={panelHeader}
-            title={t(panel.title as string)}
+            title={t(panel.title)}
             titleTypographyProps={{
               component: 'h2',
             }}

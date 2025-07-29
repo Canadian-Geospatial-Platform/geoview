@@ -29,7 +29,6 @@ import { logger } from '@/core/utils/logger';
 import { generateId, getLocalizedMessage, removeCommentsFromJSON, watchHtmlElementRemoval } from '@/core/utils/utilities';
 import { InitMapWrongCallError } from '@/core/exceptions/geoview-exceptions';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { TypeJsonObject } from '@/api/config/types/config-types';
 import { MapViewer } from '@/geo/map/map-viewer';
 
 // The next export allow to import the exernal-types from 'geoview-core' from outside of the geoview-core package.
@@ -100,7 +99,7 @@ async function getMapConfig(mapElement: Element): Promise<TypeMapFeaturesConfig>
   } else if (mapElement.hasAttribute('data-config-url')) {
     // configurations file url is provided, fetch then process
     const configUrl = mapElement.getAttribute('data-config-url');
-    const configObj = await Fetch.fetchJsonAs<TypeJsonObject>(configUrl!);
+    const configObj = await Fetch.fetchJson<MapFeatureConfig>(configUrl!);
     mapConfig = ConfigApi.validateMapConfig(configObj);
   } else if (mapElement.getAttribute('data-shared')) {
     // configurations from the URL parameters is provided, extract then process (replace HTLM characters , && :)

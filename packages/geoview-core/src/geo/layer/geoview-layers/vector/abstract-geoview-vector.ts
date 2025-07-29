@@ -22,7 +22,6 @@ import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/v
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { Projection } from '@/geo/utils/projection';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { TypeJsonObject } from '@/api/config/types/config-types';
 import {
   LayerDataAccessPathMandatoryError,
   LayerNoGeographicDataInCSVError,
@@ -296,18 +295,13 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {number} featureCount - The number of features in the layer.
    * @param {number} maxRecordCount - The max features per query from the service.
    * @param {number} featureLimit - The maximum number of features to fetch per query.
-   * @returns {Promise<TypeJsonObject[]>} An array of the response text for the features.
+   * @returns {Promise<unknown[]>} An array of the response text for the features.
    * @private
    */
   // GV: featureLimit ideal amount varies with the service and with maxAllowableOffset.
   // TODO: Add options for featureLimit to config
   // TODO: Will need to move with onCreateVectorSource
-  static #getEsriFeatures(
-    url: string,
-    featureCount: number,
-    maxRecordCount?: number,
-    featureLimit: number = 1000
-  ): Promise<TypeJsonObject[]> {
+  static #getEsriFeatures(url: string, featureCount: number, maxRecordCount?: number, featureLimit: number = 1000): Promise<unknown[]> {
     // Update url
     const baseUrl = url.replace('&returnCountOnly=true', `&outfields=*&geometryPrecision=1&maxAllowableOffset=5`);
     const featureFetchLimit = maxRecordCount && maxRecordCount < featureLimit ? maxRecordCount : featureLimit;
@@ -320,7 +314,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     }
 
     // Get array of all the promises
-    const promises = urlArray.map((featureUrl) => Fetch.fetchEsriJsonAsObject(featureUrl));
+    const promises = urlArray.map((featureUrl) => Fetch.fetchEsriJson(featureUrl));
 
     // Return the all promise
     return Promise.all(promises);

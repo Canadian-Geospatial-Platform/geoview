@@ -10,7 +10,7 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
   /**
    * Overrides the way the metadata is fetched.
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-   * @returns {Promise<TypeJsonObject | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
+   * @returns {Promise<unknown | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
    */
   protected override onFetchServiceMetadata(): Promise<unknown | undefined> {
     // Fetch it
@@ -28,7 +28,7 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
     const parsedUrl = url.toLowerCase().endsWith('json') ? url : `${url}?f=json`;
 
     // Query and read
-    const responseJson = await Fetch.fetchJsonAs<unknown>(parsedUrl);
+    const responseJson = await Fetch.fetchJson(parsedUrl);
 
     // Validate the metadata response
     AbstractGeoViewRaster.throwIfMetatadaHasError(geoviewLayerId, geoviewLayerName, responseJson);

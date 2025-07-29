@@ -8,7 +8,7 @@ import { useDetailsCheckedFeatures, useDetailsStoreActions } from '@/core/stores
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import { delay } from '@/core/utils/utilities';
-import { TypeFeatureInfoEntry, TypeFieldEntry, TypeGeometry } from '@/api/config/types/map-schema-types';
+import { TypeFeatureInfoEntry, TypeFieldEntry } from '@/api/config/types/map-schema-types';
 import { FeatureInfoTable } from './feature-info-table';
 import { getSxClasses } from './details-style';
 
@@ -119,7 +119,7 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
     if (!feature) return null;
 
     return {
-      uid: feature.geometry ? (feature.geometry as TypeGeometry).ol_uid : null,
+      uid: feature.uid,
       iconSrc: feature.featureIcon,
       name: feature.nameField ? (feature.fieldInfo?.[feature.nameField]?.value as string) || '' : 'No name',
       extent: feature.extent,
@@ -195,7 +195,7 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
 
     if (!featureData?.uid) return;
 
-    setChecked(checkedFeatures.some((checkedFeature) => (checkedFeature.geometry as TypeGeometry)?.ol_uid === featureData.uid));
+    setChecked(checkedFeatures.some((checkedFeature) => checkedFeature?.uid === featureData.uid));
   }, [checkedFeatures, featureData]);
 
   // Early return if no feature

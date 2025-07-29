@@ -1,7 +1,7 @@
 import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES, Extent, TypeSourceImageWmsInitialConfig } from '@/api/config/types/map-schema-types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { TypeJsonArray } from '@/api/config/types/config-types';
+import { TypeLayerMetadataFields } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 
 /**
  * Type used to define a GeoView image layer to display on the map.
@@ -72,8 +72,6 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 }
 
 export interface TypeMetadataWMS {
-  // TODO: Cleanup - Remove the any by specifying
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Capability: TypeMetadataWMSCapability;
 }
 
@@ -102,7 +100,7 @@ export interface TypeMetadataWMSCapabilityLayer {
   MinScaleDenominator: number;
   MaxScaleDenominator: number;
   Style: TypeMetadataWMSCapabilityLayerStyle[];
-  CRS: unknown[];
+  CRS: TypeMetadataWMSCapabilityLayerCRS[];
   Dimension: TypeMetadataWMSCapabilityLayerDimension[];
   EX_GeographicBoundingBox: Extent;
   queryable: boolean;
@@ -111,6 +109,10 @@ export interface TypeMetadataWMSCapabilityLayer {
   fixedWidth: unknown;
   fixedHeight: unknown;
   noSubsets: unknown;
+}
+
+export interface TypeMetadataWMSCapabilityLayerCRS {
+  Name: string;
 }
 
 export interface TypeMetadataWMSCapabilityLayerBBox {
@@ -132,9 +134,7 @@ export interface TypeMetadataWMSCapabilityLayerDimension {
 
 export interface TypeLayerMetadataWMS {
   Style: TypeLayerMetadataWMSStyle[];
-  // TODO: Cleanup - Remove the any by specifying
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fields?: TypeJsonArray;
+  fields?: TypeLayerMetadataFields[];
 }
 
 export interface TypeLayerMetadataWMSStyle {
@@ -145,4 +145,22 @@ export interface TypeLayerMetadataWMSStyle {
 export interface TypeLayerMetadataWMSStyleLegendUrl {
   Format: string;
   OnlineResource: string;
+}
+
+export interface TypeMetadataFeatureInfo {
+  Layer: TypeMetadataFeatureInfoLayer;
+}
+
+export interface TypeMetadataFeatureInfoLayer {
+  Attribute: TypeMetadataFeatureInfoLayerAttributes;
+  '@attributes': TypeMetadataFeatureInfoLayerAttribute;
+}
+
+export interface TypeMetadataFeatureInfoLayerAttributes {
+  '@attributes': TypeMetadataFeatureInfoLayerAttribute;
+}
+
+export interface TypeMetadataFeatureInfoLayerAttribute {
+  name: string;
+  value: unknown;
 }

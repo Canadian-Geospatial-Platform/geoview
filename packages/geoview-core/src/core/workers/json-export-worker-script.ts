@@ -3,8 +3,8 @@ import proj4 from 'proj4';
 import { register } from 'ol/proj/proj4';
 import { Coordinate } from 'ol/coordinate';
 
+import { SerializedGeometry } from '@/api/config/types/map-schema-types';
 import { createWorkerLogger } from '@/core/workers/helper/logger-worker';
-import { TypeJsonObject } from '@/api/config/types/config-types';
 
 /**
  * This worker script is designed to be used with the JsonExportWorker class.
@@ -25,7 +25,7 @@ type TypeWorkerExportGeometry = {
 
 // Type related to the worker
 export type TypeWorkerExportChunk = {
-  geometry: TypeJsonObject;
+  geometry: SerializedGeometry;
   properties: {
     [k: string]: unknown;
   };
@@ -73,12 +73,12 @@ function transformPoints(points: Coordinate[]): Coordinate[] {
 /**
  * Transforms the geometry of a GeoJSON feature.
  * @param {TypeWorkerExportGeometry} geometry - The geometry to transform.
- * @returns {TypeJsonObject} The transformed geometry.
+ * @returns {SerializedGeometry} The transformed geometry.
  */
-function transformGeometry(geometry: TypeWorkerExportGeometry): TypeJsonObject {
+function transformGeometry(geometry: TypeWorkerExportGeometry): SerializedGeometry {
   const { type, coordinates } = geometry;
 
-  let transformedGeometry = {};
+  let transformedGeometry = {} as SerializedGeometry;
   if (type === 'Polygon') {
     // coordinates are in the form of Coordinate[][]
     transformedGeometry = {

@@ -1,6 +1,6 @@
 import Static, { Options as SourceOptions } from 'ol/source/ImageStatic';
 
-import { TypeJsonArray } from '@/api/config/types/config-types';
+import { TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import {
   TypeLayerEntryConfig,
@@ -54,13 +54,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
   protected override onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Redirect
     return Promise.resolve(
-      ImageStatic.createImageStaticLayerConfig(
-        this.geoviewLayerId,
-        this.geoviewLayerName,
-        this.metadataAccessPath,
-        false,
-        [] as unknown as TypeJsonArray
-      )
+      ImageStatic.createImageStaticLayerConfig(this.geoviewLayerId, this.geoviewLayerName, this.metadataAccessPath, false, [])
     );
   }
 
@@ -118,7 +112,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * @param {string} geoviewLayerName - The display name of the GeoView layer.
    * @param {string} metadataAccessPath - The URL or path to access metadata.
    * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
-   * @param {TypeJsonArray} layerEntries - An array of layer entries objects to be included in the configuration.
+   * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns {TypeImageStaticLayerConfig} The constructed configuration object for the Static Image layer.
    */
   static createImageStaticLayerConfig(
@@ -126,7 +120,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
     geoviewLayerName: string,
     metadataAccessPath: string,
     isTimeAware: boolean,
-    layerEntries: TypeJsonArray
+    layerEntries: TypeLayerEntryShell[]
   ): TypeImageStaticLayerConfig {
     const geoviewLayerConfig: TypeImageStaticLayerConfig = {
       geoviewLayerId,
