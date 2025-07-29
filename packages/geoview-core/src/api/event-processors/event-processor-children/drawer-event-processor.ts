@@ -550,7 +550,8 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       } else {
         // Convert Circle to a Polygon because geojson can't handle circles (for download / upload)
         if (currentGeomType === 'Circle') {
-          feature.setGeometry(fromCircle(geom as CircleGeom));
+          // Default sides is 32, doubling makes it smoother
+          feature.setGeometry(fromCircle(geom as CircleGeom, 64));
         }
 
         // Set the styles for lines / polygons
@@ -1053,6 +1054,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * @param {File} file The GeoJSON file
    */
   static uploadDrawings(mapId: string, file: File): void {
+    const state = this.getDrawerState(mapId);
+    if (!state) return;
+
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
@@ -1093,6 +1097,16 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
           // Set feature properties
           feature.setId((geoFeature.properties.id as string) || generateId());
           feature.set('geometryGroup', DRAW_GROUP_KEY);
+
+          // Add overlays to non-point features
+          if (!(olGeometry instanceof Point)) {
+            // GV hideMeasurements has to be here, otherwise the value can be stale, unlike style and geomType which restart the interaction
+            const hideMeasurements = state.actions.getHideMeasurements();
+            const newOverlay = this.#createMeasureTooltip(feature, hideMeasurements, mapId);
+            if (newOverlay) {
+              viewer.map.addOverlay(newOverlay);
+            }
+          }
 
           // Add to map
           viewer.layer.geometry.geometries.push(feature);
