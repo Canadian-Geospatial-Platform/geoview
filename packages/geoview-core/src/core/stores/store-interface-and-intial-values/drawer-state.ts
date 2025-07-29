@@ -78,6 +78,8 @@ export interface IDrawerState {
     setUndoDisabled: (undoDisabled: boolean) => void;
     redoDrawing: () => void;
     setRedoDisabled: (redoDisabled: boolean) => void;
+    downloadDrawings: () => void;
+    uploadDrawings: (file: File) => void;
   };
 
   setterActions: {
@@ -270,6 +272,14 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
       setRedoDisabled(redoDisabled) {
         // Redirect to setter
         get().drawerState.setterActions.setRedoDisabled(redoDisabled);
+      },
+      downloadDrawings() {
+        // Download drawings
+        DrawerEventProcessor.downloadDrawings(get().mapId);
+      },
+      uploadDrawings(file: File) {
+        // Upload drawings
+        DrawerEventProcessor.uploadDrawings(get().mapId, file);
       },
     },
 

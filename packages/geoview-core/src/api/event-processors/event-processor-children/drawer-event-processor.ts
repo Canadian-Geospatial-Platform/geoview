@@ -1,8 +1,10 @@
 import { Feature, Overlay } from 'ol';
+import GeoJSON from 'ol/format/GeoJSON.js';
 import { LineString, Polygon, Point, Circle as CircleGeom, Geometry, SimpleGeometry } from 'ol/geom';
+import { fromCircle } from 'ol/geom/Polygon';
+import { getArea, getLength } from 'ol/sphere';
 import { Style, Stroke, Fill, Icon as OLIcon } from 'ol/style';
 import { StyleLike } from 'ol/style/Style';
-import { getArea, getLength } from 'ol/sphere';
 import { DrawEvent, GeometryFunction, SketchCoordType, createBox } from 'ol/interaction/Draw';
 import { IDrawerState, StyleProps } from '@/core/stores/store-interface-and-intial-values/drawer-state';
 import { generateId } from '@/core/utils/utilities';
@@ -11,6 +13,8 @@ import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-pr
 import { AppEventProcessor } from './app-event-processor';
 import { MapEventProcessor } from './map-event-processor';
 import { Coordinate, Draw, GeoviewStoreType, TransformDeleteFeatureEvent, TransformEvent, TransformSelectionEvent } from '@/app';
+import { TypeJsonObject } from '@/api/config/types/config-types';
+import { logger } from '@/core/utils/logger';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -25,6 +29,13 @@ interface DrawerHistoryAction {
   modifiedGeometries?: Geometry[];
   originalStyles?: (StyleLike | undefined)[];
   modifiedStyles?: (StyleLike | undefined)[];
+}
+
+interface TypeGeoJSONStyleProps {
+  strokeColor?: string;
+  strokeWidth?: number;
+  fillColor?: string;
+  iconSrc?: string;
 }
 
 /**
@@ -517,21 +528,32 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       const viewer = MapEventProcessor.getMapViewer(mapId);
       const { feature } = event;
 
+      const geom = feature.getGeometry();
+      if (!geom) return;
+
       // Create a style based on current color settings
       let featureStyle;
 
       if (currentGeomType === 'Point') {
         // For points, use a circle style
+        const iconSrc = state.actions.getIconSrc();
         featureStyle = new Style({
           image: new OLIcon({
-            src: state.actions.getIconSrc(),
+            src: iconSrc,
             anchor: [0.5, 1], // 50% of X = Middle, 100% Y = Bottom
             anchorXUnits: 'fraction',
             anchorYUnits: 'fraction',
           }),
         });
+        // Set the iconSrc string for geojson styling in the download
+        feature.set('iconSrc', iconSrc);
       } else {
-        // For other geometry types
+        // Convert Circle to a Polygon because geojson can't handle circles (for download / upload)
+        if (currentGeomType === 'Circle') {
+          feature.setGeometry(fromCircle(geom as CircleGeom));
+        }
+
+        // Set the styles for lines / polygons
         featureStyle = new Style({
           stroke: new Stroke({
             color: currentStyle.strokeColor,
@@ -552,15 +574,14 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       feature.set('featureId', featureId);
       feature.set('geometryGroup', DRAW_GROUP_KEY);
 
-      const geom = feature.getGeometry();
-      if (!geom) return;
-      if (geom instanceof Point) return;
-
-      // GV hideMeasurements has to be here, otherwise the value can be stale, unlike style and geomType which restart the interaction
-      const hideMeasurements = state.actions.getHideMeasurements();
-      const newOverlay = this.#createMeasureTooltip(feature, hideMeasurements, mapId);
-      if (newOverlay) {
-        viewer.map.addOverlay(newOverlay);
+      // Add overlays to non-point features
+      if (!(geom instanceof Point)) {
+        // GV hideMeasurements has to be here, otherwise the value can be stale, unlike style and geomType which restart the interaction
+        const hideMeasurements = state.actions.getHideMeasurements();
+        const newOverlay = this.#createMeasureTooltip(feature, hideMeasurements, mapId);
+        if (newOverlay) {
+          viewer.map.addOverlay(newOverlay);
+        }
       }
 
       viewer.layer.geometry.geometries.push(feature);
@@ -963,6 +984,125 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       if (elem) elem.hidden = !hideMeasurements;
     });
     state.actions.setHideMeasurements(!hideMeasurements);
+  }
+
+  // #region Download / Upload
+
+  /**
+   * Downloads drawings as GeoJSON with embedded styles
+   * @param {string} mapId The map ID
+   */
+  static downloadDrawings(mapId: string): void {
+    const features = this.#getDrawingFeatures(mapId);
+    if (features.length === 0) return;
+
+    // Convert to GeoJSON with style properties
+    const geojson = {
+      type: 'FeatureCollection',
+      features: features
+        .map((feature) => {
+          const olStyle = feature.getStyle() as Style;
+          const geometry = feature.getGeometry();
+
+          // Extract style properties
+          let styleProps: TypeGeoJSONStyleProps = {};
+          if (olStyle && geometry) {
+            if (geometry instanceof Point) {
+              // Handle point styles (icon)
+              styleProps.iconSrc = feature.get('iconSrc');
+            } else {
+              // Handle polygon/line styles
+              const stroke = olStyle.getStroke?.();
+              const fill = olStyle.getFill?.();
+              styleProps = {
+                strokeColor: (stroke?.getColor() as string) || '#000000',
+                strokeWidth: (stroke?.getWidth() as number) || 1,
+                fillColor: (fill?.getColor() as string) || '#ffffff',
+              };
+            }
+          }
+
+          if (!geometry) return undefined;
+
+          return {
+            type: 'Feature',
+            geometry: new GeoJSON().writeGeometryObject(geometry),
+            properties: {
+              id: feature.getId(),
+              geometryGroup: feature.get('geometryGroup'),
+              style: styleProps,
+            },
+          };
+        })
+        .filter((ftr) => ftr !== undefined),
+    };
+
+    // Download file
+    const blob = new Blob([JSON.stringify(geojson, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'drawings.geojson';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  /**
+   * Uploads and loads drawings from GeoJSON file
+   * @param {string} mapId The map ID
+   * @param {File} file The GeoJSON file
+   */
+  static uploadDrawings(mapId: string, file: File): void {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const geojson = JSON.parse(e.target?.result as string);
+        const viewer = MapEventProcessor.getMapViewer(mapId);
+
+        geojson.features.forEach((geoFeature: TypeJsonObject) => {
+          const olGeometry = new GeoJSON().readGeometry(geoFeature.geometry);
+          const feature = new Feature({ geometry: olGeometry });
+
+          // Apply style from properties
+          const styleProps = geoFeature.properties.style as unknown as TypeGeoJSONStyleProps;
+          if (styleProps) {
+            let featureStyle;
+            if (olGeometry instanceof Point) {
+              featureStyle = new Style({
+                image: new OLIcon({
+                  src: styleProps.iconSrc,
+                  anchor: [0.5, 1],
+                  anchorXUnits: 'fraction',
+                  anchorYUnits: 'fraction',
+                }),
+              });
+            } else {
+              featureStyle = new Style({
+                stroke: new Stroke({
+                  color: styleProps.strokeColor,
+                  width: styleProps.strokeWidth,
+                }),
+                fill: new Fill({
+                  color: styleProps.fillColor,
+                }),
+              });
+            }
+            feature.setStyle(featureStyle);
+          }
+
+          // Set feature properties
+          feature.setId((geoFeature.properties.id as string) || generateId());
+          feature.set('geometryGroup', DRAW_GROUP_KEY);
+
+          // Add to map
+          viewer.layer.geometry.geometries.push(feature);
+          viewer.layer.geometry.addToGeometryGroup(feature, DRAW_GROUP_KEY);
+        });
+      } catch (error) {
+        logger.logError('Error loading GeoJSON:', error);
+      }
+    };
+    reader.readAsText(file);
   }
 
   // #region History

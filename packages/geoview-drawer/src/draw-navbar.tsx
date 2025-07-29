@@ -11,6 +11,8 @@ import { StyleButton, StylePanel } from './buttons/style';
 import Measurements from './buttons/measurements';
 import Undo from './buttons/undo';
 import Redo from './buttons/redo';
+import Download from './buttons/download';
+import Upload from './buttons/upload';
 import Clear from './buttons/clear';
 
 export function createDrawerButtons(config: TypeDrawerConfig): Record<string, TypeNavBarButtonConfig> {
@@ -98,11 +100,31 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
     groupName: 'drawer',
   };
 
-  // Create undo button
+  // Create redo button
   buttonConfigs.redo = {
     buttonProps: {
       id: 'drawer-redo',
       children: createElement(Redo),
+      visible: true,
+    },
+    groupName: 'drawer',
+  };
+
+  // Create download button
+  buttonConfigs.download = {
+    buttonProps: {
+      id: 'drawer-download',
+      children: createElement(Download),
+      visible: true,
+    },
+    groupName: 'drawer',
+  };
+
+  // Create upload button
+  buttonConfigs.upload = {
+    buttonProps: {
+      id: 'drawer-upload',
+      children: createElement(Upload),
       visible: true,
     },
     groupName: 'drawer',

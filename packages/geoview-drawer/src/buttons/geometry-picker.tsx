@@ -58,14 +58,15 @@ export function PointIcon(props: PointIconProps): JSX.Element {
     // Convert SVG to data URL
     const serializer = new XMLSerializer();
     const svgStr = serializer.serializeToString(svg);
-    const svgBlob = new Blob([svgStr], { type: 'image/svg+xml' });
-    const url = URL.createObjectURL(svgBlob);
+    const dataUrl = `data:image/svg+xml;base64,${btoa(svgStr)}`;
+    // const svgBlob = new Blob([svgStr], { type: 'image/svg+xml' });
+    // const url = URL.createObjectURL(svgBlob);
 
     // Store the URL
-    setIconSrc(url);
+    setIconSrc(dataUrl);
 
     // Clean up when component unmounts
-    return () => URL.revokeObjectURL(url);
+    return () => URL.revokeObjectURL(dataUrl);
   }, [IconComponent, fillColor, setIconSrc, strokeColor, strokeWidth]);
 
   return <IconComponent sx={{ fill: fillColor, stroke: strokeColor, strokeWidth }} />;

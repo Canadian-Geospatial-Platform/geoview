@@ -64,6 +64,8 @@ class DrawerPlugin extends NavBarPlugin {
           toggleMeasurements: 'Toggle measurements',
           undoTooltip: 'Undo',
           redoTooltip: 'Redo',
+          downloadTooltip: 'Download drawings',
+          uploadTooltip: 'Upload drawings',
         },
       },
       fr: {
@@ -90,6 +92,8 @@ class DrawerPlugin extends NavBarPlugin {
           toggleMeasurements: 'Basculer les mesures',
           undoTooltip: 'défaire',
           redoTooltip: 'refaire',
+          downloadTooltip: 'Télécharger les dessins',
+          uploadTooltip: 'Télécharger des dessins',
         },
       },
     } as unknown as TypeJsonObject;
