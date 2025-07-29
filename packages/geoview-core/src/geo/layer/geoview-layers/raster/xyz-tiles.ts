@@ -11,7 +11,6 @@ import {
   CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
 } from '@/api/config/types/map-schema-types';
-import { TypeJsonArray } from '@/api/config/types/config-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import {
   TypeMetadataXYZTiles,
@@ -23,7 +22,7 @@ import {
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 import { GVXYZTiles } from '@/geo/layer/gv-layers/tile/gv-xyz-tiles';
-import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
+import { ConfigBaseClass, TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
 
 // ? Do we keep this TODO ? Dynamic parameters can be placed on the dataAccessPath and initial settings can be used on xyz-tiles.
 // TODO: Implement method to validate XYZ tile service
@@ -72,13 +71,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
   protected override onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Redirect
     return Promise.resolve(
-      XYZTiles.createXYZTilesLayerConfig(
-        this.geoviewLayerId,
-        this.geoviewLayerName,
-        this.metadataAccessPath,
-        false,
-        [] as unknown as TypeJsonArray
-      )
+      XYZTiles.createXYZTilesLayerConfig(this.geoviewLayerId, this.geoviewLayerName, this.metadataAccessPath, false, [])
     );
   }
 
@@ -103,8 +96,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
     // ESRI MapServer Implementation
     if (Array.isArray(this.getMetadata()?.layers)) {
       const metadataLayerList = this.getMetadata()!.layers;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const foundEntry = metadataLayerList.find((layerMetadata: any) => layerMetadata.id.toString() === layerConfig.layerId);
+      const foundEntry = metadataLayerList.find((layerMetadata) => layerMetadata.id.toString() === layerConfig.layerId);
       if (!foundEntry) {
         // Add a layer load error
         this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(layerConfig), layerConfig);
@@ -136,10 +128,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
       // For ESRI MapServer XYZ Tiles
       if (this.getMetadata()?.layers) {
-        metadataLayerConfigFound = this.getMetadata()!.layers.find(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (metadataLayerConfig: any) => metadataLayerConfig.id.toString() === layerConfig.layerId
-        );
+        metadataLayerConfigFound = this.getMetadata()!.layers.find((metadataLayerConfig) => metadataLayerConfig.id === layerConfig.layerId);
       }
 
       // If found
@@ -220,7 +209,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * @param {string} geoviewLayerName - The display name of the GeoView layer.
    * @param {string} metadataAccessPath - The URL or path to access metadata.
    * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
-   * @param {TypeJsonArray} layerEntries - An array of layer entries objects to be included in the configuration.
+   * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns {TypeXYZTilesConfig} The constructed configuration object for the XYZTiles layer.
    */
   static createXYZTilesLayerConfig(
@@ -228,7 +217,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
     geoviewLayerName: string,
     metadataAccessPath: string,
     isTimeAware: boolean,
-    layerEntries: TypeJsonArray
+    layerEntries: TypeLayerEntryShell[]
   ): TypeXYZTilesConfig {
     const geoviewLayerConfig: TypeXYZTilesConfig = {
       geoviewLayerId,

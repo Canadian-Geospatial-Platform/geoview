@@ -19,11 +19,10 @@ import {
 
 import { commonProcessLayerMetadata, commonValidateListOfLayerEntryConfig } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { LayerNotFeatureLayerError } from '@/core/exceptions/layer-exceptions';
-import { TypeJsonArray } from '@/api/config/types/config-types';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
+import { ConfigBaseClass, TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
 
 export interface TypeSourceEsriFeatureInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'EsriJSON';
@@ -61,11 +60,11 @@ export class EsriFeature extends AbstractGeoViewVector {
   /**
    * Overrides the way the metadata is fetched.
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-   * @returns {Promise<TypeJsonObject | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
+   * @returns {Promise<TypeMetadataEsriFeature | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
    */
   protected override async onFetchServiceMetadata(): Promise<TypeMetadataEsriFeature | undefined> {
     // Query
-    const responseJson = await Fetch.fetchJsonAs<TypeMetadataEsriFeature>(`${this.metadataAccessPath}?f=json`);
+    const responseJson = await Fetch.fetchJson<TypeMetadataEsriFeature>(`${this.metadataAccessPath}?f=json`);
 
     // Validate the metadata response
     AbstractGeoViewRaster.throwIfMetatadaHasError(this.geoviewLayerId, this.geoviewLayerName, responseJson);
@@ -98,11 +97,12 @@ export class EsriFeature extends AbstractGeoViewVector {
     // Now that we have metadata, get the layer ids from it
     const entries = [
       {
-        index: metadata!.id,
+        id: Number(metadata!.id),
+        index: Number(metadata!.id),
         layerId: metadata!.id,
         layerName: metadata!.name,
       },
-    ] as unknown as TypeJsonArray;
+    ];
 
     // Redirect
     return EsriFeature.createEsriFeatureLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, entries);
@@ -207,7 +207,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @param {string} geoviewLayerName - The display name of the GeoView layer.
    * @param {string} metadataAccessPath - The URL or path to access metadata or feature data.
    * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
-   * @param {TypeJsonArray} layerEntries - An array of layer entries objects to be included in the configuration.
+   * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns {TypeEsriFeatureLayerConfig} The constructed configuration object for the Esri Feature layer.
    */
   static createEsriFeatureLayerConfig(
@@ -215,7 +215,7 @@ export class EsriFeature extends AbstractGeoViewVector {
     geoviewLayerName: string,
     metadataAccessPath: string,
     isTimeAware: boolean,
-    layerEntries: TypeJsonArray
+    layerEntries: TypeLayerEntryShell[]
   ): TypeEsriFeatureLayerConfig {
     const geoviewLayerConfig: TypeEsriFeatureLayerConfig = {
       geoviewLayerId,

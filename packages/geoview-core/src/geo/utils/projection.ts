@@ -15,7 +15,6 @@ import { Extent } from 'ol/extent';
 
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { logger } from '@/core/utils/logger';
-import { TypeJsonObject } from '@/api/config/types/config-types';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { InvalidProjectionError } from '@/core/exceptions/geoview-exceptions';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
@@ -89,7 +88,7 @@ export abstract class Projection {
    * original).
    *
    * @param {Extent} extent - The extent to transform.
-   * @param {TypeJsonObject | undefined} projection - An object containing a wkid or wkt property.
+   * @param {TypeProjection | undefined} projection - An object containing a wkid or wkt property.
    * @param {OLProjection} destination - Destination projection-like.
    * @param {number?} stops - Optional number of stops per side used for the transform. By default only the corners are used.
    *
@@ -97,7 +96,7 @@ export abstract class Projection {
    */
   static transformExtentFromObj(
     extent: Extent,
-    projection: TypeJsonObject | TypeProjection | undefined, // TODO: Remove TypeJsonObject
+    projection: TypeProjection | undefined,
     destination: OLProjection,
     stops?: number | undefined
   ): Extent {
@@ -240,14 +239,14 @@ export abstract class Projection {
 
   /**
    * Fetches definitions for unsupported projections and adds them.
-   * @param {TypeJsonObject} projection - Object containing wkid and possibly latestWkid from service metadata.
+   * @param {TypeProjection} projection - Object containing wkid and possibly latestWkid from service metadata.
    */
-  static async addProjection(projection: TypeJsonObject | TypeProjection): Promise<void> {
+  static async addProjection(projection: TypeProjection): Promise<void> {
     // Add latestWkid if provided
     if (projection.latestWkid && projection.latestWkid !== projection.wkid)
       await this.addProjection({ wkid: projection.latestWkid } as TypeProjection);
 
-    const code = projection.wkid as string;
+    const code = projection.wkid;
     const projectionName = `EPSG:${code}`;
 
     // Fetch proj4 definition from epsg.io
@@ -264,10 +263,10 @@ export abstract class Projection {
 
   /**
    * Wrapper around OpenLayers get function that fetches a Projection object for the code specified.
-   * @param {TypeJsonObject | undefined} projectionObj - A projection object with properties such as latestWkid, wkid, or wkt.
+   * @param {TypeProjection | undefined} projectionObj - A projection object with properties such as latestWkid, wkid, or wkt.
    * @return {OLProjection | undefined} — Projection object, or undefined if not in list.
    */
-  static getProjectionFromObj(projectionObj: TypeJsonObject | TypeProjection | undefined): OLProjection | undefined {
+  static getProjectionFromObj(projectionObj: TypeProjection | undefined): OLProjection | undefined {
     // If wkid
     if (projectionObj) {
       if (projectionObj.latestWkid) {
@@ -282,7 +281,7 @@ export abstract class Projection {
     // If wkt
     if (projectionObj && projectionObj.wkt) {
       // Redirect
-      return Projection.getProjectionFromWKT(projectionObj.wkt as string);
+      return Projection.getProjectionFromWKT(projectionObj.wkt);
     }
 
     // Not found

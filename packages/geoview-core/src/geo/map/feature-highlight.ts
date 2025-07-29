@@ -1,4 +1,3 @@
-import { getUid } from 'ol';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style';
@@ -153,20 +152,18 @@ export class FeatureHighlight {
    * @param {TypeFeatureInfoEntry} feature - Feature to highlight
    */
   highlightFeature(feature: TypeFeatureInfoEntry): void {
-    const geometry = feature.geometry!.getGeometry();
+    const { geometry } = feature;
     if (geometry instanceof Polygon) {
-      const newPolygon = feature.geometry!.getGeometry();
-      const newFeature = new Feature(newPolygon);
-      const featureUid = getUid(feature.geometry);
+      const newFeature = new Feature(geometry);
+      const featureUid = feature.uid!;
       this.#styleHighlightedFeature(newFeature, featureUid);
     } else if (geometry instanceof LineString || geometry instanceof MultiLineString) {
-      const newLineString = feature.geometry?.getGeometry();
-      const newFeature = new Feature(newLineString);
-      const featureUid = getUid(feature.geometry);
+      const newFeature = new Feature(geometry);
+      const featureUid = feature.uid!;
       this.#styleHighlightedFeature(newFeature, featureUid);
     } else if (geometry instanceof MultiPoint) {
       const coordinates: Coordinate[] = geometry.getCoordinates();
-      const featureUid = getUid(feature.geometry);
+      const featureUid = feature.uid!;
 
       for (let i = 0; i < coordinates.length; i++) {
         const newPoint = new Point(coordinates[i]);
@@ -184,7 +181,7 @@ export class FeatureHighlight {
       }
     } else if (geometry instanceof MultiPolygon) {
       const polygons = geometry.getPolygons();
-      const featureUid = getUid(feature.geometry);
+      const featureUid = feature.uid!;
 
       for (let i = 0; i < polygons.length; i++) {
         const newPolygon = polygons[i];
@@ -196,7 +193,7 @@ export class FeatureHighlight {
       const center = getCenter(feature.extent);
       const newPoint = new Point(center);
       const newFeature = new Feature(newPoint);
-      const featureUid = getUid(feature.geometry);
+      const featureUid = feature.uid!;
       this.#styleHighlightedFeature(newFeature, featureUid);
       const radStyle = new Style({
         image: new CircleStyle({

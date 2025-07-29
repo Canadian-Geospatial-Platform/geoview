@@ -61,7 +61,6 @@ import { createEmptyBasemap, getPointerPositionFromMapEvent, isExtentLonLat } fr
 import { logger } from '@/core/utils/logger';
 import { NORTH_POLE_POSITION } from '@/core/utils/constant';
 import { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
-import { TypeJsonObject } from '@/api/config/types/config-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
@@ -411,9 +410,9 @@ export class MapViewer {
    * Retrieves the configuration object for a specific core plugin from the map's features configuration.
    *
    * @param {string} pluginId - The ID of the core plugin to look up.
-   * @returns {TypeJsonObject | undefined} The configuration object for the specified plugin, or `undefined` if not found.
+   * @returns {unknown | undefined} The configuration object for the specified plugin, or `undefined` if not found.
    */
-  getCorePackageConfig(pluginId: string): TypeJsonObject | undefined {
+  getCorePackageConfig(pluginId: string): unknown | undefined {
     // If no corePackagesConfig
     if (!this.mapFeaturesConfig.corePackagesConfig) return undefined;
 
@@ -817,9 +816,9 @@ export class MapViewer {
    * access from the utilies function getLocalizesMessage to reuse in ui from outside the core viewer.
    *
    * @param {TypeDisplayLanguage} language - The language to add the ressoruce for (en, fr)
-   * @param {TypeJsonObject} translations - The translation object to add
+   * @param {unknown} translations - The translation object to add
    */
-  addLocalizeRessourceBundle(language: TypeDisplayLanguage, translations: TypeJsonObject): void {
+  addLocalizeRessourceBundle(language: TypeDisplayLanguage, translations: unknown): void {
     this.#i18nInstance.addResourceBundle(language, 'translation', translations, true, false);
   }
 
@@ -1582,12 +1581,12 @@ export class MapViewer {
 
       // for the moment, only polygon are supported but if need be, other geometries can easely be use as well
       geoms.forEach((key: string) => {
-        Fetch.fetchJsonAsObject(`${servEndpoint}${key}`)
+        Fetch.fetchJson<GeometryJsonResponse>(`${servEndpoint}${key}`)
           .then((data) => {
             if (data.geometry !== undefined) {
               // add the geometry
               // TODO: use the geometry as GeoJSON and add properties to by queried by the details panel
-              this.layer.geometry.addPolygon(data.geometry.coordinates as number[] | Coordinate[][], undefined, generateId());
+              this.layer.geometry.addPolygon(data.geometry.coordinates, undefined, generateId());
             }
           })
           .catch((error: unknown) => {
@@ -2270,6 +2269,20 @@ export type TypeMapMouseInfo = {
   pixel: Coordinate;
   projected: Coordinate;
   dragging: boolean;
+};
+
+/**
+ * Type used when fetching geometry json
+ */
+export type GeometryJsonResponse = {
+  geometry: GeometryJsonResponseGeometry;
+};
+
+/**
+ * Type used when fetching geometry json with coordinates property
+ */
+export type GeometryJsonResponseGeometry = {
+  coordinates: number[] | Coordinate[][];
 };
 
 /**

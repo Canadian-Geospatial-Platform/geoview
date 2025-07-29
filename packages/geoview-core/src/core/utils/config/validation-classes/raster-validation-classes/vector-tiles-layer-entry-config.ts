@@ -56,13 +56,16 @@ export interface TypeMetadataVectorTiles {
 export interface TypeMetadataVectorTilesTileInfo {
   spatialReference: TypeProjection;
   origin: TypeMetadataVectorTilesTileInfoOrigin;
-  lods: TypeMetadataVectorTilesTileInfoLods[];
+  lods: TypeLod[];
   rows: number;
   cols: number;
 }
 
-export interface TypeMetadataVectorTilesTileInfoLods {
+// TODO: Move this type somewhere more generic than in vector tiles
+export interface TypeLod {
   resolution: number;
+  scale: number;
+  level: number;
 }
 
 export interface TypeMetadataVectorTilesTileInfoOrigin {

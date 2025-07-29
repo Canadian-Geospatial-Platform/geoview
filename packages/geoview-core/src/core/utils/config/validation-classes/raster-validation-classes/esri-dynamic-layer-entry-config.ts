@@ -1,7 +1,7 @@
 import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES, TypeSourceEsriDynamicInitialConfig } from '@/api/config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { TypeLayerMetadataEsri } from '../vector-validation-classes/esri-feature-layer-entry-config';
-import { TypeJsonArray } from '@/api/config/types/config-types';
+import { TypeLayerMetadataEsri } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
+import { TypeLayerMetadataFields } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 
 /**
  * Type used to define a GeoView image layer to display on the map.
@@ -58,11 +58,14 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 }
 
 export interface TypeMetadataEsriDynamic {
-  // TODO: Cleanup - Remove the any by specifying
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  layers: any;
+  layers: TypeMetadataEsriDynamicLayer[];
   supportsDynamicLayers: boolean;
-  // TODO: Cleanup - Remove the any by specifying
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fields?: TypeJsonArray;
+  fields?: TypeLayerMetadataFields[];
+}
+
+export interface TypeMetadataEsriDynamicLayer {
+  id: number;
+  name: string;
+  type: string;
+  subLayerIds: number[];
 }

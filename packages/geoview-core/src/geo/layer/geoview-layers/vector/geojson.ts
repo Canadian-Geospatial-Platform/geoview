@@ -16,7 +16,6 @@ import {
   CONST_LAYER_TYPES,
 } from '@/api/config/types/map-schema-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
-import { TypeJsonArray } from '@/api/config/types/config-types';
 import {
   GeoJSONLayerEntryConfig,
   TypeMetadataGeoJSON,
@@ -29,7 +28,7 @@ import {
   LayerEntryConfigLayerIdNotFoundError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import { GVGeoJSON } from '@/geo/layer/gv-layers/vector/gv-geojson';
-import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
+import { ConfigBaseClass, TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
 
 export interface TypeSourceGeoJSONInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'GeoJSON';
@@ -68,7 +67,7 @@ export class GeoJSON extends AbstractGeoViewVector {
   /**
    * Overrides the way the metadata is fetched.
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-   * @returns {Promise<TypeJsonObject | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
+   * @returns {Promise<TypeMetadataGeoJSON | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
    */
   protected override onFetchServiceMetadata(): Promise<TypeMetadataGeoJSON | undefined> {
     // If metadataAccessPath ends with .meta, .json or .geojson
@@ -101,9 +100,7 @@ export class GeoJSON extends AbstractGeoViewVector {
     const id = this.metadataAccessPath.substring(idx + 1);
 
     // Redirect
-    return Promise.resolve(
-      GeoJSON.createGeoJsonLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, [{ id }] as unknown as TypeJsonArray)
-    );
+    return Promise.resolve(GeoJSON.createGeoJsonLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, [{ id }]));
   }
 
   /**
@@ -249,7 +246,7 @@ export class GeoJSON extends AbstractGeoViewVector {
    */
   static fetchMetadata(url: string): Promise<TypeMetadataGeoJSON> {
     // Return it
-    return Fetch.fetchJsonAs<TypeMetadataGeoJSON>(url);
+    return Fetch.fetchJson<TypeMetadataGeoJSON>(url);
   }
 
   /**
@@ -280,7 +277,7 @@ export class GeoJSON extends AbstractGeoViewVector {
    * @param {string} geoviewLayerName - The display name of the GeoView layer.
    * @param {string} metadataAccessPath - The URL or path to access metadata or feature data.
    * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
-   * @param {TypeJsonArray} layerEntries - An array of layer entries objects to be included in the configuration.
+   * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns {TypeGeoJSONLayerConfig} The constructed configuration object for the GeoJson Feature layer.
    */
   static createGeoJsonLayerConfig(
@@ -288,7 +285,7 @@ export class GeoJSON extends AbstractGeoViewVector {
     geoviewLayerName: string,
     metadataAccessPath: string,
     isTimeAware: boolean,
-    layerEntries: TypeJsonArray
+    layerEntries: TypeLayerEntryShell[]
   ): TypeGeoJSONLayerConfig {
     const geoviewLayerConfig: TypeGeoJSONLayerConfig = {
       geoviewLayerId,

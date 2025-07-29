@@ -30,7 +30,6 @@ import {
   CONST_LAYER_TYPES,
   CONST_GEOVIEW_SCHEMA_BY_TYPE,
 } from '@/api/config/types/map-schema-types';
-import { TypeJsonObject } from '@/api/config/types/config-types';
 import { geoviewEntryIsEsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { logger } from '@/core/utils/logger';
 
@@ -93,17 +92,19 @@ export class ConfigValidation {
   /**
    * Print a trace to help locate schema errors.
    * @param {AnyValidateFunction<unknown>} validate - The Ajv validator.
-   * @param {unknown} objectAffected - Object that was validated.
+   * @param {TypeLayerEntryConfig} objectAffected - Object that was validated.
    * @private
    */
-  #printSchemaError(validate: AnyValidateFunction<unknown>, objectAffected: unknown): void {
+  #printSchemaError(validate: AnyValidateFunction<unknown>, objectAffected: TypeLayerEntryConfig): void {
     for (let i = 0; i < validate.errors!.length; i += 1) {
       const error = validate.errors![i];
       const { instancePath } = error;
       const path = instancePath.split('/');
-      let node = objectAffected as TypeJsonObject;
+      let node = objectAffected;
       for (let j = 1; j < path.length; j += 1) {
-        node = node[path[j]];
+        // Node can be any type, use any and be cautious
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        node = (node as any)[path[j]];
       }
       logger.logWarning(this.mapId, '='.repeat(200), 'Schema error: ', this.mapId, error, 'Object affected: ', this.mapId, node);
     }

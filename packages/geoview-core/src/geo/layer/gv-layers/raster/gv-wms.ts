@@ -6,7 +6,6 @@ import { Extent } from 'ol/extent';
 import { Projection as OLProjection } from 'ol/proj';
 import { Map as OLMap } from 'ol';
 
-import { TypeJsonObject } from '@/api/config/types/config-types';
 import { TypeWmsLegend, TypeWmsLegendStyle } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { xmlToJson } from '@/core/utils/utilities';
@@ -17,6 +16,7 @@ import {
   OgcWmsLayerEntryConfig,
   TypeLayerMetadataWMSStyle,
   TypeLayerMetadataWMSStyleLegendUrl,
+  TypeMetadataFeatureInfo,
 } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { CONST_LAYER_TYPES, TypeFeatureInfoEntry } from '@/api/config/types/map-schema-types';
 import { loadImage } from '@/geo/utils/renderer/geoview-renderer';
@@ -171,7 +171,8 @@ export class GVWMS extends AbstractGVRaster {
     });
 
     if (featureInfoUrl) {
-      let featureMember: TypeJsonObject | undefined;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let featureMember: any;
 
       // Perform query
       const responseData = await Fetch.fetchText(featureInfoUrl, { signal: abortController?.signal });
@@ -191,12 +192,16 @@ export class GVWMS extends AbstractGVRaster {
             if (featureMember) featureMember = GVWMS.#getAttribute(featureMember, '@attributes');
           } else {
             const getFeatureInfoResponse = GVWMS.#getAttribute(jsonResponse, 'GetFeatureInfoResponse');
-            if (getFeatureInfoResponse?.Layer) {
+            // If there's a 'Layer' property
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            if ('Layer' in (getFeatureInfoResponse as any)) {
+              // Cast it
+              const getFeatureInfoResponseCasted = getFeatureInfoResponse as TypeMetadataFeatureInfo;
               featureMember = {};
-              featureMember['Layer name'] = getFeatureInfoResponse?.Layer?.['@attributes']?.name;
-              if (getFeatureInfoResponse?.Layer?.Attribute?.['@attributes']) {
-                const fieldName = getFeatureInfoResponse.Layer.Attribute['@attributes'].name as string;
-                const fieldValue = getFeatureInfoResponse.Layer.Attribute['@attributes'].value;
+              featureMember['Layer name'] = getFeatureInfoResponseCasted?.Layer?.['@attributes']?.name;
+              if (getFeatureInfoResponseCasted?.Layer?.Attribute?.['@attributes']) {
+                const fieldName = getFeatureInfoResponseCasted.Layer.Attribute['@attributes'].name;
+                const fieldValue = getFeatureInfoResponseCasted.Layer.Attribute['@attributes'].value;
                 featureMember[fieldName] = fieldValue;
               }
             }
@@ -204,10 +209,10 @@ export class GVWMS extends AbstractGVRaster {
         }
       } else if (infoFormat === 'text/html') {
         // The response is in html format
-        featureMember = { html: responseData } as unknown as TypeJsonObject;
+        featureMember = { html: responseData };
       } else {
         // The response is in text format
-        featureMember = { plain_text: { '#text': responseData } } as unknown as TypeJsonObject;
+        featureMember = { plain_text: { '#text': responseData } };
       }
 
       // If managed to read data
@@ -216,12 +221,14 @@ export class GVWMS extends AbstractGVRaster {
         return featureInfoResult;
       }
 
-      // Log
+      // Log warning
       logger.logWarning(`Invalid information returned in the getFeatureInfo for layer ${layerConfig.layerPath}`);
+    } else {
+      // Log warning
+      logger.logWarning(`No feature url to get the feature info from for the WMS layer ${layerConfig.layerPath}`);
     }
 
-    // Log
-    logger.logWarning(`No feature url to get the feature info from for the WMS layer ${layerConfig.layerPath}`);
+    // Empty
     return [];
   }
 
@@ -355,16 +362,12 @@ export class GVWMS extends AbstractGVRaster {
   /**
    * Translates the get feature information result set to the TypeFeatureInfoEntry[] used by GeoView.
    * @param {string} layerPath - The layer path.
-   * @param {TypeJsonObject} featureMember - An object formatted using the query syntax.
+   * @param {unknown} featureMember - An object formatted using the query syntax.
    * @param {Coordinate} clickCoordinate - The coordinate where the user has clicked.
    * @returns {TypeFeatureInfoEntry[]} The feature info table.
    * @private
    */
-  static #formatWmsFeatureInfoResult(
-    layerPath: string,
-    featureMember: TypeJsonObject,
-    clickCoordinate: Coordinate
-  ): TypeFeatureInfoEntry[] {
+  static #formatWmsFeatureInfoResult(layerPath: string, featureMember: unknown, clickCoordinate: Coordinate): TypeFeatureInfoEntry[] {
     const queryResult: TypeFeatureInfoEntry[] = [];
 
     let featureKeyCounter = 0;
@@ -374,13 +377,15 @@ export class GVWMS extends AbstractGVRaster {
       featureKey: featureKeyCounter++,
       geoviewLayerType: CONST_LAYER_TYPES.WMS,
       extent: [clickCoordinate[0], clickCoordinate[1], clickCoordinate[0], clickCoordinate[1]],
-      geometry: null,
       featureIcon: document.createElement('canvas').toDataURL(),
       fieldInfo: {},
       nameField: null,
       layerPath,
     };
-    const createFieldEntries = (entry: TypeJsonObject, prefix = ''): void => {
+
+    // GV Can be any object
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const createFieldEntries = (entry: any, prefix = ''): void => {
       const keys = Object.keys(entry);
       keys.forEach((key) => {
         if (!key.endsWith('Geometry') && !key.startsWith('@')) {
@@ -407,6 +412,7 @@ export class GVWMS extends AbstractGVRaster {
         }
       });
     };
+
     createFieldEntries(featureMember);
     queryResult.push(featureInfoEntry);
 
@@ -552,14 +558,18 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Returns the attribute of an object that ends with the specified ending string or null if not found.
-   * @param {TypeJsonObject} jsonObject - The object that is supposed to have the needed attribute.
-   * @param {string} attribute - The attribute searched.
-   * @returns {TypeJsonObject | undefined} The attribute information.
+   * @param {unknown} jsonObject - The object that is supposed to have the needed attribute.
+   * @param {string} attributeEnding - The attribute searched.
+   * @returns {unknown | undefined} The attribute information.
    * @private
    */
-  static #getAttribute(jsonObject: TypeJsonObject, attributeEnding: string): TypeJsonObject | undefined {
-    const keyFound = Object.keys(jsonObject).find((key) => key.endsWith(attributeEnding));
-    return keyFound ? jsonObject[keyFound] : undefined;
+  static #getAttribute(jsonObject: unknown, attributeEnding: string): unknown | undefined {
+    if (typeof jsonObject === 'object' && jsonObject !== null && !Array.isArray(jsonObject)) {
+      const record = jsonObject as Record<string, unknown>;
+      const keyFound = Object.keys(record).find((key) => key.endsWith(attributeEnding));
+      return keyFound ? record[keyFound] : undefined;
+    }
+    return undefined;
   }
 
   /**

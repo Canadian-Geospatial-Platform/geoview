@@ -1,5 +1,5 @@
 import React from 'react'; // GV This import is to validate that we're on the right React at the end of the file
-import { TypeJsonObject, AnySchemaObject } from 'geoview-core/api/config/types/config-types';
+import { AnySchemaObject } from 'geoview-core/api/config/types/config-types';
 import { MapPlugin } from 'geoview-core/api/plugin/map-plugin';
 import { SwiperEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/swiper-event-processor';
 import { LayerNotFoundError } from 'geoview-core/core/exceptions/layer-exceptions';
@@ -26,17 +26,17 @@ class SwiperPlugin extends MapPlugin {
   /**
    * Returns the default config for this package
    *
-   * @returns {TypeJsonObject} the default config
+   * @returns {unknown} the default config
    */
-  override defaultConfig(): TypeJsonObject {
-    return defaultConfig as unknown as TypeJsonObject;
+  override defaultConfig(): unknown {
+    return defaultConfig;
   }
 
   /**
    * Overrides the default translations for the Plugin.
-   * @returns {TypeJsonObject} - The translations object for the particular Plugin.
+   * @returns {Record<string, unknown>} - The translations object for the particular Plugin.
    */
-  override defaultTranslations(): TypeJsonObject {
+  override defaultTranslations(): Record<string, unknown> {
     return {
       en: {
         swiper: {
@@ -50,7 +50,7 @@ class SwiperPlugin extends MapPlugin {
           menu: 'Balayage',
         },
       },
-    } as unknown as TypeJsonObject;
+    };
   }
 
   /**

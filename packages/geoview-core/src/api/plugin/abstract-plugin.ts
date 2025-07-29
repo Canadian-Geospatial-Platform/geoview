@@ -6,7 +6,7 @@ import type { useTheme } from '@mui/material/styles';
 import { API } from '@/api/api';
 import { api } from '@/app';
 import { MapViewer } from '@/geo/map/map-viewer';
-import { TypeJsonObject, AnySchemaObject } from '@/api/config/types/config-types';
+import { AnySchemaObject } from '@/api/config/types/config-types';
 import { logger } from '@/core/utils/logger';
 
 /**
@@ -20,10 +20,10 @@ export abstract class AbstractPlugin {
   mapViewer: MapViewer;
 
   // Plugin properties
-  pluginProps?: TypeJsonObject;
+  pluginProps?: unknown;
 
   // Plugin config object.
-  #configObj: TypeJsonObject = {};
+  #configObj: unknown = {};
 
   // Plugin api object.
   // TODO: Check - Remove this property and use 'mapViewer' instead?
@@ -45,10 +45,10 @@ export abstract class AbstractPlugin {
    * Creates an instance of the plugin.
    * @param {string} pluginId - Unique identifier for the plugin instance.
    * @param {MapViewer} mapViewer - The map viewer
-   * @param {TypeJsonObject | undefined} props - Optional plugin options and properties.
+   * @param {unknown | undefined} props - Optional plugin options and properties.
    */
   // GV Do not edit the constructor params without editing the plugin.ts dynamic constructor call looking like 'new (constructor as any)'
-  constructor(pluginId: string, mapViewer: MapViewer, props: TypeJsonObject | undefined) {
+  constructor(pluginId: string, mapViewer: MapViewer, props: unknown | undefined) {
     this.pluginId = pluginId;
     this.mapViewer = mapViewer;
     this.pluginProps = props;
@@ -61,9 +61,9 @@ export abstract class AbstractPlugin {
 
   /**
    * Sets the config (which happens post creation)
-   * @param {TypeJsonObject} config - The config
+   * @param {unknown} config - The config
    */
-  setConfig(config: TypeJsonObject): void {
+  setConfig(config: unknown): void {
     this.#configObj = config;
   }
 
@@ -91,14 +91,14 @@ export abstract class AbstractPlugin {
   /**
    * Must override function to get the default config
    */
-  abstract defaultConfig(): TypeJsonObject;
+  abstract defaultConfig(): unknown;
 
   /**
    * Overridable function to get the translations object for the Plugin.
-   * @returns {TypeJsonObject} The translations object
+   * @returns {Record<string, unknown>} The translations object
    */
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  defaultTranslations(): TypeJsonObject {
+  defaultTranslations(): Record<string, unknown> {
     return {}; // Default empty
   }
 

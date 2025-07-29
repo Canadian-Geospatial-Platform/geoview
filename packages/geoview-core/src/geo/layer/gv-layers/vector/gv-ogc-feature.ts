@@ -1,9 +1,6 @@
 import VectorSource from 'ol/source/Vector';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
-import {
-  OgcFeatureLayerEntryConfig,
-  TypeLayerMetadataOGC,
-} from '@/core/utils/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
+import { OgcFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
 import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 
 /**
@@ -38,10 +35,10 @@ export class GVOGCFeature extends AbstractGVVector {
    * @returns {TypeOutfieldsType} The type of the field.
    */
   protected override onGetFieldType(fieldName: string): TypeOutfieldsType {
-    const fieldDefinitions = this.getLayerConfig().getLayerMetadata() as TypeLayerMetadataOGC;
-    const fieldEntryType = fieldDefinitions[fieldName].type.split(':').slice(-1)[0];
+    const fieldDefinitions = this.getLayerConfig().getLayerMetadata();
+    const fieldEntryType = fieldDefinitions?.[fieldName].type.split(':').slice(-1)[0];
     if (fieldEntryType === 'date') return 'date';
-    if (['int', 'number'].includes(fieldEntryType)) return 'number';
+    if (['int', 'number'].includes(fieldEntryType!)) return 'number';
     return 'string';
   }
 }

@@ -1,6 +1,10 @@
-import { CONST_LAYER_ENTRY_TYPES, TypeVectorSourceInitialConfig } from '@/api/config/types/map-schema-types';
+import {
+  codedValueType,
+  CONST_LAYER_ENTRY_TYPES,
+  rangeDomainType,
+  TypeVectorSourceInitialConfig,
+} from '@/api/config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config';
-import { TypeJsonArray } from '@/api/config/types/config-types';
 
 /**
  * Type used to define a GeoView vector layer to display on the map.
@@ -36,7 +40,12 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
 
 export interface TypeLayerMetadataVector {
   maxRecordCount: number;
-  // TODO: Cleanup - Remove the any by specifying
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fields?: TypeJsonArray;
+  fields?: TypeLayerMetadataFields[];
+}
+
+export interface TypeLayerMetadataFields {
+  name: string;
+  type: string;
+  alias: string;
+  domain: codedValueType | rangeDomainType;
 }

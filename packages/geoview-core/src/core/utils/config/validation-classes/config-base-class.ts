@@ -5,6 +5,7 @@ import {
   TypeLayerEntryType,
   TypeLayerInitialSettings,
   TypeLayerStatus,
+  TypeTileGrid,
   layerEntryIsEsriFeature,
   layerEntryIsGeoJSON,
   layerEntryIsGroupLayer,
@@ -498,6 +499,21 @@ export abstract class ConfigBaseClass {
 
   // #endregion
 }
+
+// #region TYPES
+
+export type TypeLayerEntryShell = {
+  id: number | string;
+  name?: string;
+  index?: number;
+  layerId?: number | string;
+  layerName?: string;
+  tileGrid?: TypeTileGrid;
+  subLayers?: TypeLayerEntryShell[];
+  dataAccessPath?: string;
+};
+
+// #endregion
 
 // #region EVENT TYPES
 

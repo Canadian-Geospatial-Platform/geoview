@@ -30,6 +30,7 @@ import {
   TypeLayerStyleConfig,
   TypeLayerStyleConfigInfo,
   TypeAliasLookup,
+  codedValueType,
 } from '@/api/config/types/map-schema-types';
 import {
   binaryKeywors,
@@ -45,14 +46,14 @@ import {
 import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { logger } from '@/core/utils/logger';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
-import { TypeJsonArray } from '@/api/config/types/config-types';
+import { TypeLayerMetadataFields } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 
 type TypeStyleProcessor = (
   styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
   filterEquation?: FilterNodeType[],
   legendFilterIsOff?: boolean,
-  domainsLookup?: TypeJsonArray,
+  domainsLookup?: TypeLayerMetadataFields[],
   aliasLookup?: TypeAliasLookup
 ) => Style | undefined;
 
@@ -1221,7 +1222,7 @@ function createDefaultStyle(geometryType: TypeStyleGeometry, label: string): Typ
  * @param {string[]} fields - Fields involved in the unique value definition.
  * @param {TypeLayerStyleConfigInfo[]?} uniqueValueStyleInfo - Unique value configuration.
  * @param {Feature?} feature - Feature used to test the unique value conditions.
- * @param {TypeJsonArray?} domainsLookup - An optional lookup table to handle coded value domains.
+ * @param {TypeLayerMetadataFields[]?} domainsLookup - An optional lookup table to handle coded value domains.
  * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
  * @returns {TypeLayerStyleConfigInfo | undefined} The Style created. Undefined if unable to create it.
  */
@@ -1229,7 +1230,7 @@ function searchUniqueValueEntry(
   fields: string[],
   uniqueValueStyleInfo: TypeLayerStyleConfigInfo[],
   feature?: Feature,
-  domainsLookup?: TypeJsonArray,
+  domainsLookup?: TypeLayerMetadataFields[],
   aliasLookup?: TypeAliasLookup
 ): TypeLayerStyleConfigInfo | undefined {
   // If no feature
@@ -1271,8 +1272,10 @@ function searchUniqueValueEntry(
       // If not matched, check coded domain
       if (!matched) {
         const fieldDomain = domainsLookup?.find((domain) => domain.name === fieldName)?.domain;
-        if (fieldDomain?.codedValues) {
-          const codedValue = (fieldDomain.codedValues as TypeJsonArray).find((dom) => dom.name === actualValue);
+        // Cast as codedvaluetype
+        const fieldDomainCasted = fieldDomain as codedValueType;
+        if (fieldDomainCasted?.codedValues) {
+          const codedValue = fieldDomainCasted.codedValues.find((dom) => dom.name === actualValue);
           if (codedValue) {
             actualValue = codedValue.code;
             // eslint-disable-next-line eqeqeq
@@ -1303,7 +1306,7 @@ function searchUniqueValueEntry(
  * @param {Feature?} feature - Feature used to test the unique value conditions.
  * @param {FilterNodeType[]?} filterEquation - Filter equation associated to the layer.
  * @param {boolean?} legendFilterIsOff - When true, do not apply legend filter.
- * @param {TypeJsonArray?} domainsLookup - An optional lookup table to handle coded value domains.
+ * @param {TypeLayerMetadataFields[]?} domainsLookup - An optional lookup table to handle coded value domains.
  * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
  */
@@ -1312,7 +1315,7 @@ function processUniqueValuePoint(
   feature?: Feature,
   filterEquation?: FilterNodeType[],
   legendFilterIsOff?: boolean,
-  domainsLookup?: TypeJsonArray,
+  domainsLookup?: TypeLayerMetadataFields[],
   aliasLookup?: TypeAliasLookup
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
@@ -1341,7 +1344,7 @@ function processUniqueValuePoint(
  * @param {Feature?} feature - Feature used to test the unique value conditions.
  * @param {FilterNodeType[]?} filterEquation - Filter equation associated to the layer.
  * @param {boolean?} legendFilterIsOff - When true, do not apply legend filter.
- * @param {TypeJsonArray?} domainsLookup - An optional lookup table to handle coded value domains.
+ * @param {TypeLayerMetadataFields[]?} domainsLookup - An optional lookup table to handle coded value domains.
  * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
  */
@@ -1350,7 +1353,7 @@ function processUniqueLineString(
   feature?: Feature,
   filterEquation?: FilterNodeType[],
   legendFilterIsOff?: boolean,
-  domainsLookup?: TypeJsonArray,
+  domainsLookup?: TypeLayerMetadataFields[],
   aliasLookup?: TypeAliasLookup
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
@@ -1376,7 +1379,7 @@ function processUniqueLineString(
  * @param {Feature?} feature - Feature used to test the unique value conditions.
  * @param {FilterNodeType[]?} filterEquation - Filter equation associated to the layer.
  * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
- * @param {TypeJsonArray?} domainsLookup - An optional lookup table to handle coded value domains.
+ * @param {TypeLayerMetadataFields[]?} domainsLookup - An optional lookup table to handle coded value domains.
  * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
  */
@@ -1385,7 +1388,7 @@ function processUniquePolygon(
   feature?: Feature,
   filterEquation?: FilterNodeType[],
   legendFilterIsOff?: boolean,
-  domainsLookup?: TypeJsonArray,
+  domainsLookup?: TypeLayerMetadataFields[],
   aliasLookup?: TypeAliasLookup
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
@@ -1451,7 +1454,7 @@ function searchClassBreakEntry(
  * @param {Feature} feature - Feature used to test the unique value conditions.
  * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
  * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
- * @param {TypeJsonArray?} domainsLookup - An optional lookup table to handle coded value domains.
+ * @param {TypeLayerMetadataFields[]?} domainsLookup - An optional lookup table to handle coded value domains.
  * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
  */
@@ -1460,7 +1463,7 @@ function processClassBreaksPoint(
   feature?: Feature,
   filterEquation?: FilterNodeType[],
   legendFilterIsOff?: boolean,
-  domainsLookup?: TypeJsonArray,
+  domainsLookup?: TypeLayerMetadataFields[],
   aliasLookup?: TypeAliasLookup
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
@@ -1483,7 +1486,7 @@ function processClassBreaksPoint(
  * @param {Feature} feature - Feature used to test the unique value conditions.
  * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
  * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
- * @param {TypeJsonArray?} domainsLookup - An optional lookup table to handle coded value domains.
+ * @param {TypeLayerMetadataFields[]?} domainsLookup - An optional lookup table to handle coded value domains.
  * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
  */
@@ -1492,7 +1495,7 @@ function processClassBreaksLineString(
   feature?: Feature,
   filterEquation?: FilterNodeType[],
   legendFilterIsOff?: boolean,
-  domainsLookup?: TypeJsonArray,
+  domainsLookup?: TypeLayerMetadataFields[],
   aliasLookup?: TypeAliasLookup
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
@@ -1515,7 +1518,7 @@ function processClassBreaksLineString(
  * @param {Feature} feature - Feature used to test the unique value conditions.
  * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
  * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
- * @param {TypeJsonArray?} domainsLookup - An optional lookup table to handle coded value domains.
+ * @param {TypeLayerMetadataFields[]?} domainsLookup - An optional lookup table to handle coded value domains.
  * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
  */
@@ -1524,7 +1527,7 @@ function processClassBreaksPolygon(
   feature?: Feature,
   filterEquation?: FilterNodeType[],
   legendFilterIsOff?: boolean,
-  domainsLookup?: TypeJsonArray,
+  domainsLookup?: TypeLayerMetadataFields[],
   aliasLookup?: TypeAliasLookup
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
@@ -1635,7 +1638,7 @@ export function getAndCreateFeatureStyle(
  * @param {TypeStyleConfig} style - The style to use
  * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
  * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
- * @param {TypeJsonArray?} domainsLookup - An optional lookup table to handle coded value domains.
+ * @param {TypeLayerMetadataFields[]?} domainsLookup - An optional lookup table to handle coded value domains.
  * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
  * @returns {string} The icon associated to the feature or a default empty one.
  */
@@ -1644,7 +1647,7 @@ export function getFeatureImageSource(
   style: TypeLayerStyleConfig,
   filterEquation?: FilterNodeType[],
   legendFilterIsOff?: boolean,
-  domainsLookup?: TypeJsonArray,
+  domainsLookup?: TypeLayerMetadataFields[],
   aliasLookup?: TypeAliasLookup
 ): string | undefined {
   // The image source that will be returned (if calculated successfully)

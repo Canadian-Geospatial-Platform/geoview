@@ -1,9 +1,9 @@
 import { Coordinate } from 'ol/coordinate';
-import Feature from 'ol/Feature';
-import RenderFeature from 'ol/render/Feature';
 import { Pixel } from 'ol/pixel';
+import { Geometry } from 'ol/geom';
+import Feature from 'ol/Feature';
 
-import { LayerEntryTypesKey, TypeJsonValue } from '@/api/config/types/config-types';
+import { LayerEntryTypesKey } from '@/api/config/types/config-types';
 
 import { TimeDimension } from '@/core/utils/date-mgt';
 
@@ -40,9 +40,9 @@ export type TypeMapFeaturesInstance = {
   /** Overview map properies. */
   overviewMap?: TypeOverviewMapProps;
   /** Map components. */
-  components?: TypeMapComponents;
+  components?: TypeValidMapComponentProps[];
   /** List of core packages. */
-  corePackages?: TypeMapCorePackages;
+  corePackages?: TypeValidMapCorePackageProps[];
   /** List of core packages. */
   corePackagesConfig?: TypeCorePackagesConfig;
   /** List of external packages. */
@@ -135,17 +135,8 @@ export type TypeOverviewMapProps = { hideOnZoom: number };
 /** Supported map component values. */
 export type TypeValidMapComponentProps = 'overview-map' | 'north-arrow';
 
-export type TypeMapComponents = TypeValidMapComponentProps[];
-
 /** Supported map component values. */
 export type TypeValidMapCorePackageProps = 'swiper';
-
-/**
- * Core packages to initialize on viewer load. The schema for those are on their own package. NOTE: config from packages are in
- * the same loaction as core config (<<core config name>>-<<package name>>.json).
- * Default = [].
- */
-export type TypeMapCorePackages = TypeValidMapCorePackageProps[];
 
 /**
  * Core packages config to initialize on viewer load. The schema for those are on their own package.
@@ -467,6 +458,11 @@ export type TypeLayerStates = {
 
 /** Valid keys for the geometryType property. */
 export type TypeStyleGeometry = 'Point' | 'MultiPoint' | 'LineString' | 'MultiLineString' | 'Polygon' | 'MultiPolygon';
+
+export type SerializedGeometry = {
+  type: TypeStyleGeometry;
+  coordinates: Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][];
+};
 
 // TODO: refactor remove geoCore
 /** Type of Style to apply to the GeoView vector layer source at creation time. */
@@ -854,9 +850,11 @@ export type TypeResultSet<T extends TypeResultSetEntry = TypeResultSetEntry> = {
 export type TypeFeatureInfoEntry = {
   featureKey: number;
   geoviewLayerType: TypeGeoviewLayerType;
+  uid?: string;
+  feature?: Feature<Geometry>;
+  geometry?: Geometry;
   extent: Extent | undefined;
-  geometry: TypeGeometry | Feature | null;
-  featureIcon: string | undefined;
+  featureIcon?: string;
   fieldInfo: Partial<Record<string, TypeFieldEntry>>;
   nameField: string | null;
   layerPath: string;
@@ -881,10 +879,6 @@ export type TypeLayerData = {
   isDisabled?: boolean;
 };
 // #endregion RESULT SET
-
-export interface TypeGeometry extends RenderFeature {
-  ol_uid: string;
-}
 
 // TODO: Refactor - This type should be deleted and 'ConfigBaseClass' should be used instead
 export type TypeLayerEntryConfig = AbstractBaseLayerEntryConfig | GroupLayerEntryConfig;
@@ -1070,10 +1064,10 @@ export const convertLayerTypeToEntry = (layerType: TypeGeoviewLayerType): TypeLa
 
 /**
  * Temporary? function to serialize a geoview layer configuration to be able to send it to the store
- * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The geoviewlayer config to serialize
- * @returns TypeJsonValue The serialized config as pure JSON
+ * @param {MapConfigLayerEntry} geoviewLayerConfig - The geoviewlayer config to serialize
+ * @returns {MapConfigLayerEntry} The serialized config as pure JSON
  */
-export const serializeTypeGeoviewLayerConfig = (geoviewLayerConfig: MapConfigLayerEntry): TypeJsonValue => {
+export const serializeTypeGeoviewLayerConfig = (geoviewLayerConfig: MapConfigLayerEntry): TypeGeoviewLayerConfig => {
   // TODO: Create a 'serialize()' function inside `TypeGeoviewLayerConfig` when/if it's transformed to a class.
   // TO.DOCONT: and copy this code in deleting this function here. For now, this explicit workaround function is necessary.
 
@@ -1084,7 +1078,7 @@ export const serializeTypeGeoviewLayerConfig = (geoviewLayerConfig: MapConfigLay
       geoviewLayerId: geoviewLayerConfig.geoviewLayerId,
       geoviewLayerName: geoviewLayerConfig.geoviewLayerName,
       geoviewLayerType: geoviewLayerConfig.geoviewLayerType,
-    } as GeoCoreLayerConfig as never;
+    } as unknown as TypeGeoviewLayerConfig;
   }
 
   // Cast
@@ -1100,7 +1094,7 @@ export const serializeTypeGeoviewLayerConfig = (geoviewLayerConfig: MapConfigLay
     externalDateFormat: geoviewLayerConfigCasted.externalDateFormat,
     initialSettings: geoviewLayerConfigCasted.initialSettings,
     isTimeAware: geoviewLayerConfigCasted.isTimeAware,
-    listOfLayerEntryConfig: [],
+    listOfLayerEntryConfig: [] as unknown[],
   } as TypeGeoviewLayerConfig;
 
   // Loop on the LayerEntryConfig to serialize further
@@ -1112,7 +1106,7 @@ export const serializeTypeGeoviewLayerConfig = (geoviewLayerConfig: MapConfigLay
       const serializedLayerEntryConfig = geoviewLayerConfigCasted.listOfLayerEntryConfig[j].serialize();
 
       // Store as serialized
-      serializedGeoviewLayerConfig.listOfLayerEntryConfig.push(serializedLayerEntryConfig as never);
+      serializedGeoviewLayerConfig.listOfLayerEntryConfig.push(serializedLayerEntryConfig as TypeLayerEntryConfig);
     } else {
       // Store as is for now
       serializedGeoviewLayerConfig.listOfLayerEntryConfig.push(geoviewLayerConfigCasted.listOfLayerEntryConfig[j]);
@@ -1120,7 +1114,7 @@ export const serializeTypeGeoviewLayerConfig = (geoviewLayerConfig: MapConfigLay
   }
 
   // Return it
-  return serializedGeoviewLayerConfig as never;
+  return serializedGeoviewLayerConfig;
 };
 
 export type TypeSourceImageInitialConfig =

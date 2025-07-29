@@ -37,8 +37,8 @@ export class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
 }
 
 export interface TypeMetadataXYZTiles {
-  // TODO: Cleanup - Remove the any by specifying
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  layers: any;
+  layers: TypeMetadataXYZTilesLayer[];
   listOfLayerEntryConfig: TypeLayerEntryConfig[];
 }
+
+export type TypeMetadataXYZTilesLayer = XYZTilesLayerEntryConfig & { id: string };

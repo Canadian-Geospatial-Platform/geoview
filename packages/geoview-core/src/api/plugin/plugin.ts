@@ -5,7 +5,6 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import { formatError } from '@/core/exceptions/core-exceptions';
 import { whenThisThen, getScriptAndAssetURL } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { TypeJsonObject } from '@/api/config/types/config-types';
 import { logger } from '@/core/utils/logger';
 import { AbstractPlugin } from './abstract-plugin';
 import { MapViewer } from '@/geo/map/map-viewer';
@@ -78,14 +77,9 @@ export abstract class Plugin {
    * @param {string} pluginId - The plugin id
    * @param {typeof AbstractPlugin} constructor - The plugin class (React Component)
    * @param {MapViewer} mapViewer - Id of map to add this plugin to
-   * @param {TypeJsonObject} props - The plugin options
+   * @param {unknown} props - The plugin options
    */
-  static async addPlugin(
-    pluginId: string,
-    constructor: typeof AbstractPlugin,
-    mapViewer: MapViewer,
-    props?: TypeJsonObject
-  ): Promise<void> {
+  static async addPlugin(pluginId: string, constructor: typeof AbstractPlugin, mapViewer: MapViewer, props?: unknown): Promise<void> {
     // If the plugin is already loaded, skip
     if (mapViewer.plugins[pluginId]) return;
 
@@ -105,7 +99,7 @@ export abstract class Plugin {
       mapViewer.plugins[pluginId] = plugin;
 
       // a config object used to store package config
-      let pluginConfigObj: TypeJsonObject = {};
+      let pluginConfigObj: unknown = {};
 
       // if a schema is defined then look for a config for this plugin
       if (plugin.schema && plugin.defaultConfig) {
@@ -143,7 +137,7 @@ export abstract class Plugin {
 
           try {
             // Try to find the custom config from the config path
-            const result = await Fetch.fetchJsonAsObject(configPath);
+            const result = await Fetch.fetchJson(configPath);
 
             if (result) {
               logger.logTraceCore('Plugin - addPlugin file config', result);

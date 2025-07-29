@@ -2,7 +2,6 @@ import { Root, createRoot } from 'react-dom/client';
 import sanitizeHtml from 'sanitize-html';
 
 import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
-import { TypeJsonObject } from '@/api/config/types/config-types';
 import { logger } from '@/core/utils/logger';
 import i18n from '@/core/translation/i18n';
 import { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
@@ -55,11 +54,10 @@ export function getLocalizedMessage(language: TypeDisplayLanguage, messageKey: s
 /**
  * Deep merge objects togheter. Latest object will overwrite value on previous one
  * if property exist.
- *
- * @param {TypeJsonObject} objects - The objects to deep merge
- * @returns {TypeJsonObject} The merged object
+ * @param {unknown[]} objects - The objects to deep merge.
+ * @returns {unknown} The merged object
  */
-export function deepMergeObjects(...objects: TypeJsonObject[]): TypeJsonObject {
+export function deepMergeObjects(...objects: unknown[]): unknown {
   const deepCopyObjects = objects.map((object) => JSON.parse(JSON.stringify(object)));
   return deepCopyObjects.reduce((merged, current) => ({ ...merged, ...current }), {});
 }

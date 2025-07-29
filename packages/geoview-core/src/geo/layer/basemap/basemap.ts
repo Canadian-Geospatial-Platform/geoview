@@ -11,9 +11,14 @@ import { OverviewMap as OLOverviewMap } from 'ol/control';
 import { applyStyle } from 'ol-mapbox-style';
 
 import { TypeBasemapOptions, TypeValidMapProjectionCodes, TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
-import { TypeJsonObject, TypeJsonArray } from '@/api/config/types/config-types';
 import { delay, getLocalizedMessage } from '@/core/utils/utilities';
-import { TypeBasemapProps, TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
+import {
+  TypeBasemapProps,
+  TypeBasemapLayer,
+  BasemapCreationList,
+  BasemapCreation,
+  BasemapJsonResponse,
+} from '@/geo/layer/basemap/basemap-types';
 import { Projection } from '@/geo/utils/projection';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
@@ -23,6 +28,7 @@ import { BasemapTakingLongTimeError, CoreBasemapCreationError } from '@/core/exc
 import { MapViewer } from '@/geo/map/map-viewer';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { formatError } from '@/core/exceptions/core-exceptions';
+import { TypeLod } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 
 /**
  * A class to get a Basemap for a define projection and language. For the moment, a list maps are available and
@@ -83,7 +89,7 @@ export class BasemapApi {
   /**
    * Basemap list
    */
-  basemapsList: TypeJsonObject = {
+  basemapsList: BasemapCreationList = {
     3978: {
       transport: {
         url: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3978_V_OSM/VectorTileServer',
@@ -144,7 +150,7 @@ export class BasemapApi {
         jsonUrl: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/?f=json',
       },
     },
-  } as unknown as TypeJsonObject;
+  };
 
   /** Keep all callback delegates references */
   #onBasemapChangedHandlers: BasemapChangedDelegate[] = [];
@@ -239,7 +245,7 @@ export class BasemapApi {
   /**
    * Create a basemap layer.
    * @param {string} basemapId - The id of the layer.
-   * @param {TypeJsonObject} basemapLayer - The basemap layer url and json url.
+   * @param {BasemapCreation} basemapLayer - The basemap layer url and json url.
    * @param {number} opacity - The opacity to use for this layer.
    * @param {boolean} rest - Should we do a get request to get the info from the server.
    * @returns {TypeBasemapLayer} The created basemap layer.
@@ -247,7 +253,7 @@ export class BasemapApi {
    */
   async #createBasemapLayer(
     basemapId: string,
-    basemapLayer: TypeJsonObject,
+    basemapLayer: BasemapCreation,
     opacity: number,
     rest: boolean
   ): Promise<null | TypeBasemapLayer> {
@@ -260,28 +266,18 @@ export class BasemapApi {
     let copyright = '';
 
     // Should we do a get request to get the layer information from the server?
-    if (rest && (basemapLayer.jsonUrl as string)) {
+    if (rest && basemapLayer.jsonUrl) {
       // Get info from server
-      const result = await Fetch.fetchJsonAsObject(basemapLayer.jsonUrl as string);
+      const result = await Fetch.fetchJson<BasemapJsonResponse>(basemapLayer.jsonUrl);
 
-      // Get minimum scale
-      const minScale = result.minScale as number;
+      // Read the information
+      const { minScale, maxScale, fullExtent, tileInfo } = result;
 
-      // Get maximum scale
-      const maxScale = result.maxScale as number;
-
-      // Get extent
-      const { fullExtent } = result;
-
-      // Get the tile grid info
-      const { tileInfo } = result;
-
-      const lods: TypeJsonObject = {};
+      const lods: { [key: number]: TypeLod } = {};
 
       // Get resolutions and scale from tile grid info
-      (tileInfo.lods as TypeJsonArray)?.forEach((lod) => {
-        const scale = lod.scale as number;
-        const resolution = lod.resolution as number;
+      tileInfo.lods?.forEach((lod) => {
+        const { scale, resolution } = lod;
 
         resolutions.push(resolution);
 
@@ -289,30 +285,30 @@ export class BasemapApi {
       });
 
       // Set layer origin
-      origin = [tileInfo?.origin?.x || 0, tileInfo?.origin?.y || 0] as number[];
+      origin = [tileInfo?.origin?.x || 0, tileInfo?.origin?.y || 0];
 
       // set minimum zoom for this layer
-      minZoom = lods[minScale] ? (lods[minScale].level as number) : 0;
+      minZoom = lods[minScale] ? lods[minScale].level : 0;
 
       // Set max zoom for this layer
-      maxZoom = lods[maxScale] ? (lods[maxScale].level as number) : 23;
+      maxZoom = lods[maxScale] ? lods[maxScale].level : 23;
 
       // Set extent for this layer
-      extent = [fullExtent.xmin as number, fullExtent.ymin as number, fullExtent.xmax as number, fullExtent.ymax as number];
+      extent = [fullExtent.xmin, fullExtent.ymin, fullExtent.xmax, fullExtent.ymax];
 
       // Set copyright text for this layer
-      copyright = result.copyrightText as string;
+      copyright = result.copyrightText;
 
       // Set the spatial Reference for this layer
-      urlProj = tileInfo.spatialReference.latestWkid as number;
+      urlProj = tileInfo.spatialReference.latestWkid!;
 
       let source;
       if (basemapLayer.styleUrl) {
-        const tileSize = [tileInfo.rows as number, tileInfo.cols as number];
+        const tileSize = [tileInfo.rows, tileInfo.cols];
         source = new VectorTile({
           attributions: getLocalizedMessage(AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId), 'mapctrl.attribution.defaultnrcan'),
           projection: Projection.PROJECTIONS[urlProj],
-          url: basemapLayer.url as string,
+          url: basemapLayer.url,
           format: new MVT(),
           tileGrid: new TileGrid({
             tileSize,
@@ -325,7 +321,7 @@ export class BasemapApi {
         source = new XYZ({
           attributions: getLocalizedMessage(AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId), 'mapctrl.attribution.defaultnrcan'),
           projection: Projection.PROJECTIONS[urlProj],
-          url: basemapLayer.url as string,
+          url: basemapLayer.url,
           crossOrigin: 'Anonymous',
           tileGrid: new TileGrid({
             extent,
@@ -339,9 +335,9 @@ export class BasemapApi {
       return {
         basemapId,
         type: basemapId,
-        url: basemapLayer.url as string,
-        jsonUrl: basemapLayer.jsonUrl as string,
-        styleUrl: basemapLayer.styleUrl as string,
+        url: basemapLayer.url,
+        jsonUrl: basemapLayer.jsonUrl,
+        styleUrl: basemapLayer.styleUrl,
         source,
         opacity,
         origin,
@@ -513,13 +509,21 @@ export class BasemapApi {
       }
 
       if (basemapLayers.length && coreBasemapOptions.labeled) {
+        // Read the style url
+        const { styleUrl } = this.basemapsList[projectionCode].label;
+        let styleUrlReal: string;
+        if (typeof styleUrl === 'object') {
+          styleUrlReal = styleUrl[languageCode];
+        } else {
+          styleUrlReal = styleUrl!;
+        }
         const labelLayer = await this.#createBasemapLayer(
           'label',
           {
-            url: this.basemapsList[projectionCode].label.url as string,
-            jsonUrl: this.basemapsList[projectionCode].label.jsonUrl as string,
-            styleUrl: this.basemapsList[projectionCode].label.styleUrl[languageCode] as string,
-          } as unknown as TypeJsonObject,
+            url: this.basemapsList[projectionCode].label.url!,
+            jsonUrl: this.basemapsList[projectionCode].label.jsonUrl,
+            styleUrl: styleUrlReal,
+          },
           0.8,
           true
         );

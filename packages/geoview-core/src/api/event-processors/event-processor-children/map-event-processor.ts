@@ -21,7 +21,6 @@ import {
   TypeMapViewSettings,
   MapConfigLayerEntry,
   TypeFeatureInfoEntry,
-  TypeGeometry,
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
   TypeMapConfig,
@@ -664,10 +663,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
       if (feature === 'all') {
         MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.removeHighlight(feature);
       } else {
-        MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.removeHighlight((feature.geometry as TypeGeometry).ol_uid);
+        MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.removeHighlight(feature.uid!);
         highlightedFeatures = this.getMapStateProtected(mapId).highlightedFeatures.filter(
-          (featureInfoEntry: TypeFeatureInfoEntry) =>
-            (featureInfoEntry.geometry as TypeGeometry).ol_uid !== (feature.geometry as TypeGeometry).ol_uid
+          (featureInfoEntry: TypeFeatureInfoEntry) => featureInfoEntry.uid !== feature.uid
         );
       }
 

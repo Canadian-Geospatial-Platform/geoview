@@ -6,7 +6,7 @@ import Feature from 'ol/Feature';
 import { Layer } from 'ol/layer';
 import Source from 'ol/source/Source';
 import { Projection as OLProjection } from 'ol/proj';
-import { Map as OLMap } from 'ol';
+import { getUid, Map as OLMap } from 'ol';
 
 import cloneDeep from 'lodash/cloneDeep';
 import { TimeDimension, DateMgt, TypeDateFragments } from '@/core/utils/date-mgt';
@@ -16,7 +16,11 @@ import {
   OgcWmsLayerEntryConfig,
   TypeLayerMetadataWMS,
 } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { TypeLayerMetadataVector, VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+import {
+  TypeLayerMetadataFields,
+  TypeLayerMetadataVector,
+  VectorLayerEntryConfig,
+} from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import {
@@ -37,7 +41,6 @@ import { SnackbarType } from '@/core/utils/notifications';
 import { NotImplementedError, NotSupportedError } from '@/core/exceptions/core-exceptions';
 import { LayerNotQueryableError } from '@/core/exceptions/layer-exceptions';
 import { createAliasLookup } from '@/geo/layer/gv-layers/utils';
-import { TypeJsonArray } from '@/api/config/types/config-types';
 import { TypeLayerMetadataEsri } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { delay } from '@/core/utils/utilities';
 
@@ -818,10 +821,12 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
         // Get the TypeFeatureInfoEntry object
         const featureInfoEntry: TypeFeatureInfoEntry = {
+          uid: getUid(feature),
           featureKey: featureKeyCounter++,
           geoviewLayerType: this.getLayerConfig().geoviewLayerConfig.geoviewLayerType,
+          feature,
+          geometry: feature.getGeometry(),
           extent,
-          geometry: feature,
           featureIcon: imageSource,
           fieldInfo: {},
           nameField: layerConfig?.source?.featureInfo?.nameField || null,
@@ -1038,7 +1043,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * @param {Feature} feature - The feature whose visual representation is to be retrieved.
    * @param {TypeLayerStyleConfig} layerStyle - Style configuration grouped by geometry type (e.g., Point, LineString, Polygon).
    * @param {OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig} layerConfig - The configuration for the layer containing the feature.
-   * @param {TypeJsonArray | undefined} domainsLookup - Optional domain information for interpreting coded values.
+   * @param {TypeLayerMetadataFields[]?} domainsLookup - Optional domain information for interpreting coded values.
    * @param {Record<string, string>} aliasLookup - A mapping of original field names to their aliases.
    * @param {Record<string, string | undefined>} imageSourceDict - A dictionary used to cache and reuse image sources by style key.
    * @returns {string | undefined} The image source string representing the feature's style, or `undefined` if generation fails.
@@ -1047,7 +1052,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     feature: Feature,
     layerStyle: TypeLayerStyleConfig,
     layerConfig: OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig,
-    domainsLookup: TypeJsonArray | undefined,
+    domainsLookup: TypeLayerMetadataFields[] | undefined,
     aliasLookup: Record<string, string>,
     imageSourceDict: Record<string, string | undefined>
   ): string | undefined {

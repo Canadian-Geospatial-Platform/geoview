@@ -1,7 +1,5 @@
 /* eslint-disable max-classes-per-file */
 // We want more than 1 Error class here to save files
-
-import { TypeJsonArray, TypeJsonValue } from '@/api/config/types/config-types';
 import { LayerError } from '@/core/exceptions/layer-exceptions';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 
@@ -21,13 +19,9 @@ export class LayerEntryConfigError extends LayerError {
    * This error is typically thrown when a GeoView layer's configuration fails to load or process correctly.
    * @param {ConfigBaseClass} layerConfig - The configuration object associated with the GeoView layer.
    * @param {string} messageKey - A localization key. Defaults to 'validation.layer.loadfailed'.
-   * @param {TypeJsonValue[] | TypeJsonArray | string[] | undefined} params - Optional parameters to customize the error message.
+   * @param {unknown[]} params - Optional parameters to customize the error message.
    */
-  protected constructor(
-    layerConfig: ConfigBaseClass,
-    messageKey: string | undefined = undefined,
-    params: TypeJsonValue[] | TypeJsonArray | string[] | undefined = []
-  ) {
+  protected constructor(layerConfig: ConfigBaseClass, messageKey: string | undefined = undefined, params: unknown[] = []) {
     super(
       layerConfig.layerPath,
       messageKey || 'validation.layer.loadfailed',

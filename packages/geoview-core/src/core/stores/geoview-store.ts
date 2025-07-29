@@ -65,7 +65,7 @@ export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore): IG
         const serialized = serializeTypeGeoviewLayerConfig(clonedConfig.map.listOfGeoviewLayerConfig[i]); // TODO: refactor - remove cast
 
         // Reassign
-        clonedConfig.map.listOfGeoviewLayerConfig[i] = serialized as never;
+        clonedConfig.map.listOfGeoviewLayerConfig[i] = serialized;
       }
 
       set({ mapConfig: clonedConfig, mapId: config.mapId });
