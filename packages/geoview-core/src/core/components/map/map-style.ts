@@ -97,6 +97,6 @@ export const getSxClasses = (): SxStyles => ({
     width: '100%',
     position: 'absolute',
     bottom: 40,
-    '> span': { height: '6px' },
+    '> span': { height: '4px' },
   },
 });

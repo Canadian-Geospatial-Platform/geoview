@@ -305,7 +305,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         if (!this.olRootLayer) return true;
 
         // Emit message about the fetching being slow
-        this.emitMessage('warning.layer.slowFetch', [this.geoviewLayerName]);
+        this.emitMessage('warning.layer.slowFetch', [this.geoviewLayerName], 'warning');
 
         // Continue watcher
         return false;

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 
 import { Box, MoreHorizIcon, Popover, IconButton, Typography } from '@/ui';
-import { useMapAttribution } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useMapAttribution, useMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
@@ -44,6 +44,7 @@ export const Attribution = memo(function Attribution(): JSX.Element {
   const theme = useTheme();
 
   // State
+  const interaction = useMapInteraction();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const open = Boolean(anchorEl);
 
@@ -55,7 +56,7 @@ export const Attribution = memo(function Attribution(): JSX.Element {
 
   const buttonStyles = {
     ...ICON_BUTTON_BASE_STYLES,
-    color: theme.palette.geoViewColor.bgColor.light[800],
+    color: interaction === 'dynamic' ? theme.palette.geoViewColor.bgColor.light[800] : theme.palette.geoViewColor.grey.dark[500],
   };
 
   // Memoize values

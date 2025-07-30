@@ -35,7 +35,7 @@ import { MapViewer, MapComponentAddedEvent, MapComponentRemovedEvent } from '@/g
 import { FocusTrapDialog } from './focus-trap';
 import { Notifications, SnackBarOpenEvent, SnackbarType } from '@/core/utils/notifications';
 import { useMapResize } from './use-map-resize';
-import { scrollIfNotVisible } from '@/core/utils/utilities';
+import { delay, scrollIfNotVisible } from '@/core/utils/utilities';
 
 type ShellProps = {
   mapViewer: MapViewer;
@@ -155,37 +155,69 @@ export function Shell(props: ShellProps): JSX.Element {
    * Handles when a SnackBar needs to open
    * @param {SnackBarOpenEvent} payload The snackbar information to open
    */
-  const handleSnackBarOpen = useCallback((sender: Notifications, payload: SnackBarOpenEvent): void => {
-    logger.logTraceUseCallback('SHELL - handleSnackBarOpen', payload);
+  const handleSnackBarOpen = useCallback(
+    (sender: Notifications, payload: SnackBarOpenEvent): void => {
+      logger.logTraceUseCallback('SHELL - handleSnackBarOpen', payload);
 
-    // create button
-    const myButton = payload.button?.label ? (
-      <Button type="icon" onClick={payload.button.action}>
-        {payload.button.label}
-      </Button>
-    ) : undefined;
-    setSnackbarButton(myButton);
+      // Create button
+      const myButton = payload.button?.label ? (
+        <Button type="icon" onClick={payload.button.action}>
+          {payload.button.label}
+        </Button>
+      ) : undefined;
+      setSnackbarButton(myButton);
 
-    // set message and type
-    setSnackbarMessage(payload.message);
-    setSnackbarType(payload.snackbarType);
+      // Set message and type
+      setSnackbarMessage(payload.message);
+      setSnackbarType(payload.snackbarType);
 
-    // show the snackbar
-    setSnackbarOpen(true);
-  }, []);
+      // Show the snackbar
+      setSnackbarOpen(true);
+
+      // Close snackbar after delay
+      delay(3000).then(
+        () => {
+          if (snackbarOpen) {
+            setSnackbarOpen(false);
+
+            // Remove displayed message from queue
+            mapViewer.notifications.snackbarMessageQueue.shift();
+
+            // Display next message in queue
+            mapViewer.notifications.displayNextSnackbarMessage();
+          }
+        },
+        () => {
+          logger.logError('Error with delay in snackbar message');
+        }
+      );
+    },
+    [mapViewer.notifications, snackbarOpen]
+  );
 
   /**
    * Handles when a SnackBar needs to close
    * @param {React.SyntheticEvent | Event} event The event associated with the closing of the snackbar
    * @param {string} reason The reason for closing
    */
-  const handleSnackBarClose = useCallback((event?: React.SyntheticEvent | Event, reason?: string) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-    // hide the snackbar
-    setSnackbarOpen(false);
-  }, []);
+  const handleSnackBarClose = useCallback(
+    (event?: React.SyntheticEvent | Event, reason?: string) => {
+      // Remove displayed message from queue
+      mapViewer.notifications.snackbarMessageQueue.shift();
+      if (reason === 'clickaway') {
+        // Display next message in queue
+        mapViewer.notifications.displayNextSnackbarMessage();
+        return;
+      }
+
+      // Hide the snackbar
+      setSnackbarOpen(false);
+
+      // Display next message in queue
+      mapViewer.notifications.displayNextSnackbarMessage();
+    },
+    [mapViewer.notifications]
+  );
 
   // #endregion HANDLERS
 

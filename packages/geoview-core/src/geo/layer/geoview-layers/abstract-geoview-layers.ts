@@ -820,7 +820,7 @@ export abstract class AbstractGeoViewLayer {
       if (ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo('processed', this.listOfLayerEntryConfig)) return true;
 
       // Emit message
-      this.emitMessage('warning.layer.metadataTakingLongTime', [this.geoviewLayerName || this.geoviewLayerId]);
+      this.emitMessage('warning.layer.metadataTakingLongTime', [this.geoviewLayerName || this.geoviewLayerId], 'warning');
 
       // Continue loop
       return false;

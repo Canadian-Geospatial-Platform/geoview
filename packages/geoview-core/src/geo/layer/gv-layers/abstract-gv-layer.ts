@@ -1013,7 +1013,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       // If still loading
       if (layerStatus === 'loading') {
         // Emit about the delay
-        this.emitMessage('warning.layer.slowRender', [this.getLayerName()]);
+        this.emitMessage('warning.layer.slowRender', [this.getLayerName()], 'warning');
       }
 
       // Continue loop

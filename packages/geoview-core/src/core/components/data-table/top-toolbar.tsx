@@ -83,6 +83,8 @@ function TopToolbar(props: TopToolbarProps<ColumnsType>): JSX.Element {
           <MRTGlobalFilterTextField className="buttonOutline" table={table} />
         </Box>
         <Box display="flex" sx={{ justifyContent: 'space-around' }}>
+          <MRTToggleFiltersButton className="buttonOutline" table={table} />
+
           <IconButton
             className="buttonOutline"
             title={t('dataTable.clearFilters')}
@@ -92,7 +94,6 @@ function TopToolbar(props: TopToolbarProps<ColumnsType>): JSX.Element {
             <ClearFiltersIcon />
           </IconButton>
 
-          <MRTToggleFiltersButton className="buttonOutline" table={table} />
           {/* Override column pinning options */}
           <MRTShowHideColumnsButton
             className="buttonOutline"
