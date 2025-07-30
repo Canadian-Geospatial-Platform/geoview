@@ -13,8 +13,11 @@ import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 export class Notifications {
   mapId;
 
+  // Snackbar messages to display
+  snackbarMessageQueue: SnackbarProps[] = [];
+
   /** Keep all callback delegate references */
-  #onSnackbarOpendHandlers: SnackBarOpenDelegate[] = [];
+  #onSnackbarOpenHandlers: SnackBarOpenDelegate[] = [];
 
   /**
    * The class constructor to instanciate a notification class
@@ -119,6 +122,82 @@ export class Notifications {
   }
 
   /**
+   * Adds a snackbar message to the queue and displays it if it is the only one.
+   * @param {SnackbarType} type - The  type of snackbar
+   * @param {string} messageKey - The message or a locale key to retrieve
+   * @param {unknown[] | undefined} params - Array of parameters to replace, i.e. ['short']
+   * @param {boolean} withNotification - Indicates if the message has also been added as a notification
+   * @param {ISnackbarButton} button - Optional snackbar button
+   * @private
+   */
+  #addSnackbarMessage(
+    type: SnackbarType,
+    messageKey: string,
+    params: unknown[],
+    withNotification: boolean,
+    button?: ISnackbarButton
+  ): void {
+    // If the snackbar message queue is already at four, push message to notifications, if it isn't there already
+    if (this.snackbarMessageQueue.length > 4 && !withNotification) {
+      if (type === 'error') this.addNotificationError(messageKey, params);
+      else if (type === 'success') this.addNotificationSuccess(messageKey, params);
+      else if (type === 'warning') this.addNotificationWarning(messageKey, params);
+      else this.addNotificationMessage(messageKey, params);
+    } else {
+      // For multiple slow render warnings, replace individual layer messages with one generic one
+      if (
+        messageKey === 'warning.layer.slowRender' &&
+        this.snackbarMessageQueue.find(
+          (snackbarMessage) =>
+            snackbarMessage.messageKey === 'warning.layer.slowRender' || snackbarMessage.messageKey === 'warning.layer.slowRenders'
+        )
+      ) {
+        // Only replace messages in queue if there are more than one, otherwise the new message will be lost when snackbar closes
+        if (this.snackbarMessageQueue.length > 1 && this.snackbarMessageQueue[0].messageKey !== 'warning.layer.slowRenders')
+          this.snackbarMessageQueue = this.snackbarMessageQueue.filter(
+            (snackbarMessage) => snackbarMessage.messageKey !== messageKey && snackbarMessage.messageKey !== 'warning.layer.slowRenders'
+          );
+        // eslint-disable-next-line no-param-reassign
+        messageKey = 'warning.layer.slowRenders';
+      }
+      // For multiple slow metadata fetch warnings, replace individual layer messages with one generic one
+      if (
+        messageKey === 'warning.layer.metadataTakingLongTime' &&
+        this.snackbarMessageQueue.find(
+          (snackbarMessage) =>
+            snackbarMessage.messageKey === 'warning.layer.metadataTakingLongTime' ||
+            snackbarMessage.messageKey === 'warning.layer.metadatasTakingLongTime'
+        )
+      ) {
+        // Only replace messages in queue if there are more than one, otherwise the new message will be lost when snackbar closes
+        if (this.snackbarMessageQueue.length > 1 && this.snackbarMessageQueue[0].messageKey !== 'warning.layer.metadatasTakingLongTime')
+          this.snackbarMessageQueue = this.snackbarMessageQueue.filter(
+            (snackbarMessage) =>
+              snackbarMessage.messageKey !== messageKey && snackbarMessage.messageKey !== 'warning.layer.metadatasTakingLongTime'
+          );
+        // eslint-disable-next-line no-param-reassign
+        messageKey = 'warning.layer.metadatasTakingLongTime';
+      }
+
+      // Add the message to the queue
+      this.snackbarMessageQueue.push({ type, messageKey, params, button });
+
+      // Display the message if it is the only one
+      if (this.snackbarMessageQueue.length === 1) this.displayNextSnackbarMessage();
+    }
+  }
+
+  /**
+   * Display next message in snackbar message queue, if there is one
+   */
+  displayNextSnackbarMessage(): void {
+    if (this.snackbarMessageQueue.length) {
+      const nextMessage = this.snackbarMessageQueue[0];
+      this.#showSnackbarMessage(nextMessage.type, nextMessage.messageKey, nextMessage.params, nextMessage.button);
+    }
+  }
+
+  /**
    * Displays a message in the snackbar
    * @param {string} messageKey - The message or a locale key to retrieve
    * @param {unknown[] | undefined} params - Optional, array of parameters to replace, i.e. ['short']
@@ -127,7 +206,7 @@ export class Notifications {
    */
   showMessage(messageKey: string, params: unknown[] = [], withNotification: boolean = true, button: ISnackbarButton = {}): void {
     // Redirect
-    this.#showSnackbarMessage('info', messageKey, params, button);
+    this.#addSnackbarMessage('info', messageKey, params, withNotification, button);
     if (withNotification) this.addNotificationMessage(messageKey, params);
   }
 
@@ -140,7 +219,7 @@ export class Notifications {
    */
   showSuccess(messageKey: string, params: unknown[] = [], withNotification: boolean = true, button: ISnackbarButton = {}): void {
     // Redirect
-    this.#showSnackbarMessage('success', messageKey, params, button);
+    this.#addSnackbarMessage('success', messageKey, params, withNotification, button);
     if (withNotification) this.addNotificationSuccess(messageKey, params);
   }
 
@@ -153,7 +232,7 @@ export class Notifications {
    */
   showWarning(messageKey: string, params: unknown[] = [], withNotification: boolean = true, button: ISnackbarButton = {}): void {
     // Redirect
-    this.#showSnackbarMessage('warning', messageKey, params, button);
+    this.#addSnackbarMessage('warning', messageKey, params, withNotification, button);
     if (withNotification) this.addNotificationWarning(messageKey, params);
   }
 
@@ -166,7 +245,7 @@ export class Notifications {
    */
   showError(messageKey: string, params: unknown[] = [], withNotification: boolean = true, button: ISnackbarButton = {}): void {
     // Redirect
-    this.#showSnackbarMessage('error', messageKey, params, button);
+    this.#addSnackbarMessage('error', messageKey, params, withNotification, button);
     if (withNotification) this.addNotificationError(messageKey, params);
   }
 
@@ -203,7 +282,7 @@ export class Notifications {
    */
   showErrorGeneric(withNotification: boolean = true, button: ISnackbarButton = {}): void {
     // Redirect
-    this.#showSnackbarMessage('error', 'error.generic', [], button);
+    this.#addSnackbarMessage('error', 'error.generic', [], withNotification, button);
     if (withNotification) this.addNotificationError('error.generic', []);
   }
 
@@ -218,7 +297,7 @@ export class Notifications {
    */
   #emitSnackbarOpen(event: SnackBarOpenEvent): void {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onSnackbarOpendHandlers, event);
+    EventHelper.emitEvent(this, this.#onSnackbarOpenHandlers, event);
   }
 
   /**
@@ -227,7 +306,7 @@ export class Notifications {
    */
   onSnackbarOpen(callback: SnackBarOpenDelegate): void {
     // Register the event handler
-    EventHelper.onEvent(this.#onSnackbarOpendHandlers, callback);
+    EventHelper.onEvent(this.#onSnackbarOpenHandlers, callback);
   }
 
   /**
@@ -236,7 +315,7 @@ export class Notifications {
    */
   offSnackbarOpen(callback: SnackBarOpenDelegate): void {
     // Unregister the event handler
-    EventHelper.offEvent(this.#onSnackbarOpendHandlers, callback);
+    EventHelper.offEvent(this.#onSnackbarOpenHandlers, callback);
   }
 
   // #endregion EVENTS
@@ -265,3 +344,10 @@ interface ISnackbarButton {
 }
 
 export type SnackbarType = 'success' | 'error' | 'info' | 'warning';
+
+export type SnackbarProps = {
+  type: SnackbarType;
+  messageKey: string;
+  params: unknown[];
+  button?: ISnackbarButton;
+};
