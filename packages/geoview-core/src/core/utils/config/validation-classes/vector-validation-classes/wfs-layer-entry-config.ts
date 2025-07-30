@@ -30,7 +30,7 @@ export class WfsLayerEntryConfig extends VectorLayerEntryConfig {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
-   * @returns {TypeLayerMetadataWfs | undefined} The strongly-typed layer metadata specific to this layer entry config.
+   * @returns {TypeLayerMetadataWfs[] | undefined} The strongly-typed layer metadata specific to this layer entry config.
    */
   override getLayerMetadata(): TypeLayerMetadataWfs[] | undefined {
     return super.getLayerMetadata() as TypeLayerMetadataWfs[] | undefined;

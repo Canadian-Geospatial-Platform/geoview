@@ -1094,7 +1094,7 @@ export const serializeTypeGeoviewLayerConfig = (geoviewLayerConfig: MapConfigLay
     externalDateFormat: geoviewLayerConfigCasted.externalDateFormat,
     initialSettings: geoviewLayerConfigCasted.initialSettings,
     isTimeAware: geoviewLayerConfigCasted.isTimeAware,
-    listOfLayerEntryConfig: [] as unknown[],
+    listOfLayerEntryConfig: [],
   } as TypeGeoviewLayerConfig;
 
   // Loop on the LayerEntryConfig to serialize further

@@ -43,7 +43,7 @@ export class ShapefileReader {
         .map((layerGeojson) => {
           const matchingLayerEntryConfig = layerConfig.listOfLayerEntryConfig?.find(
             (layerEntryConfig) => layerEntryConfig.layerId === layerGeojson.fileName
-          ) as unknown as GeoJSONLayerEntryConfig;
+          ) as GeoJSONLayerEntryConfig;
           if (!layerConfig.listOfLayerEntryConfig || matchingLayerEntryConfig)
             return new GeoJSONLayerEntryConfig({
               geoviewLayerConfig,

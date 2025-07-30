@@ -105,7 +105,7 @@ export class MapFeatureConfig {
     const gvMap = cloneDeep(userMapFeatureConfig.map);
     this.map =
       // Default map config depends on map projection.
-      defaultsDeep(gvMap as unknown as TypeMapConfig, MapFeatureConfig.#getDefaultMapConfig(gvMap?.viewSettings?.projection));
+      defaultsDeep(gvMap, MapFeatureConfig.#getDefaultMapConfig(gvMap?.viewSettings?.projection));
 
     // Above code will add default zoomAndCenter, remove if other initial view is provided
     if (this.map.viewSettings.initialView?.extent || this.map.viewSettings.initialView?.layerIds)
@@ -319,7 +319,7 @@ export class MapFeatureConfig {
       originalZoomAndCenter.length === 2 &&
       Array.isArray(originalZoomAndCenter[1]) &&
       originalZoomAndCenter[1].length === 2 &&
-      (originalZoomAndCenter[1] as unknown as [number, number]) !== this.map.viewSettings.initialView!.zoomAndCenter![1]
+      originalZoomAndCenter[1] !== this.map.viewSettings.initialView!.zoomAndCenter![1]
     ) {
       logger.logWarning(
         `- Invalid center ${originalZoomAndCenter[1]}

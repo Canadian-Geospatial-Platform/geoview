@@ -313,7 +313,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
   const handleTimeChange = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>): void => {
-      setDelay(layerPath, event.target.value as unknown as number);
+      setDelay(layerPath, Number(event.target.value));
     },
     [layerPath, setDelay]
   );
