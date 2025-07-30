@@ -84,7 +84,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
     // Note that XYZ metadata as we defined it does not contain metadata layer group. If you need geojson layer group,
     // you can define them in the configuration section.
     if (Array.isArray(this.getMetadata()?.listOfLayerEntryConfig)) {
-      const metadataLayerList = this.getMetadata()!.listOfLayerEntryConfig as unknown as TypeLayerEntryConfig[];
+      const metadataLayerList = this.getMetadata()!.listOfLayerEntryConfig;
       const foundEntry = metadataLayerList.find((layerMetadata) => layerMetadata.layerId === layerConfig.layerId);
       if (!foundEntry) {
         // Add a layer load error
@@ -121,7 +121,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
     if (this.getMetadata()) {
       let metadataLayerConfigFound: XYZTilesLayerEntryConfig | undefined;
       if (this.getMetadata()!.listOfLayerEntryConfig) {
-        metadataLayerConfigFound = (this.getMetadata()?.listOfLayerEntryConfig as unknown as XYZTilesLayerEntryConfig[]).find(
+        metadataLayerConfigFound = this.getMetadata()?.listOfLayerEntryConfig.find(
           (metadataLayerConfig) => metadataLayerConfig.layerId === layerConfig.layerId
         );
       }

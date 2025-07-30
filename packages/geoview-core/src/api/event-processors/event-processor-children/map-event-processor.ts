@@ -6,6 +6,7 @@ import { FitOptions } from 'ol/View';
 import { KeyboardPan } from 'ol/interaction';
 import { Coordinate } from 'ol/coordinate';
 import { Size } from 'ol/size';
+import { Pixel } from 'ol/pixel';
 
 import { CV_MAP_EXTENTS } from '@/api/config/types/config-constants';
 import {
@@ -1186,8 +1187,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
     });
   };
 
-  static getPixelFromCoordinate = (mapId: string, coord: Coordinate): [number, number] => {
-    return this.getMapViewer(mapId).map.getPixelFromCoordinate(coord) as unknown as [number, number];
+  static getPixelFromCoordinate = (mapId: string, coord: Coordinate): Pixel => {
+    return this.getMapViewer(mapId).map.getPixelFromCoordinate(coord);
   };
 
   static setClickMarkerOnPosition = (mapId: string, position: number[]): void => {

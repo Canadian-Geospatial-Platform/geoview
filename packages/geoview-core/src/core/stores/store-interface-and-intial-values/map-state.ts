@@ -3,6 +3,7 @@ import Overlay from 'ol/Overlay';
 import { Extent } from 'ol/extent'; // only for Typing
 import { FitOptions } from 'ol/View'; // only for typing
 import { Size } from 'ol/size';
+import { Pixel } from 'ol/pixel';
 import { useStore } from 'zustand';
 
 import {
@@ -78,7 +79,7 @@ export interface IMapState {
     createBasemapFromOptions: (basemapOptions: TypeBasemapOptions) => Promise<void>;
     getMapLayerParentHidden(layerPath: string): boolean;
     isLayerHiddenOnMap(layerPath: string): boolean;
-    getPixelFromCoordinate: (coord: Coordinate) => [number, number];
+    getPixelFromCoordinate: (coord: Coordinate) => Pixel;
     showClickMarker: (marker: TypeClickMarker) => void;
     hideClickMarker: () => void;
     highlightBBox: (extent: Extent, isLayerHighlight?: boolean) => void;
@@ -275,9 +276,9 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       /**
        * Retrieves the pixel from a coordinate.
        * @param {Coordinate} coord - The coordinate.
-       * @returns {[number, number]} - The pixel coordinates.
+       * @returns {Pixel} - The pixel coordinates.
        */
-      getPixelFromCoordinate: (coord: Coordinate): [number, number] => {
+      getPixelFromCoordinate: (coord: Coordinate): Pixel => {
         // Redirect to processor and return the result
         return MapEventProcessor.getPixelFromCoordinate(get().mapId, coord);
       },

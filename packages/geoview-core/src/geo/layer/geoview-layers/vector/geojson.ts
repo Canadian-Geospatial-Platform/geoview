@@ -109,10 +109,7 @@ export class GeoJSON extends AbstractGeoViewVector {
    */
   protected override onValidateLayerEntryConfig(layerConfig: ConfigBaseClass): void {
     if (Array.isArray(this.getMetadata()?.listOfLayerEntryConfig)) {
-      const foundEntry = this.#recursiveSearch(
-        layerConfig.layerId,
-        this.getMetadata()?.listOfLayerEntryConfig as unknown as TypeLayerEntryConfig[]
-      );
+      const foundEntry = this.#recursiveSearch(layerConfig.layerId, this.getMetadata()?.listOfLayerEntryConfig || []);
       if (!foundEntry) {
         // Add a layer load error
         this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(layerConfig), layerConfig);
@@ -135,7 +132,7 @@ export class GeoJSON extends AbstractGeoViewVector {
       // Search for the layer metadata
       const layerMetadataFound = this.#recursiveSearch(
         layerConfig.layerId,
-        this.getMetadata()!.listOfLayerEntryConfig as unknown as TypeLayerEntryConfig[]
+        this.getMetadata()!.listOfLayerEntryConfig
       ) as VectorLayerEntryConfig;
 
       // If the layer metadata was found

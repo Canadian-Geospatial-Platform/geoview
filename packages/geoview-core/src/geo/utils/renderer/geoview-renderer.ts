@@ -432,7 +432,7 @@ function executeOperator(operator: FilterNodeType, dataStack: FilterNodeType[]):
           if (Array.isArray(operand2.nodeValue))
             dataStack.push({
               nodeType: NodeType.variable,
-              nodeValue: (operand2.nodeValue as unknown[]).includes(operand1.nodeValue as string),
+              nodeValue: operand2.nodeValue.includes(operand1.nodeValue as never),
             });
           else
             dataStack.push({

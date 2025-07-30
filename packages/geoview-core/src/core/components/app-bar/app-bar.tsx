@@ -110,7 +110,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
       legend: { icon: <LegendIcon />, content: <Legend fullWidth containerType={CONTAINER_TYPE.APP_BAR} /> },
       layers: { icon: <LayersOutlinedIcon />, content: <LayersPanel containerType={CONTAINER_TYPE.APP_BAR} /> },
       'data-table': { icon: <StorageIcon />, content: <Datapanel containerType={CONTAINER_TYPE.APP_BAR} /> },
-    } as unknown as Record<string, GroupPanelType>;
+    } as Record<string, GroupPanelType>;
   }, [interaction]);
 
   const closePanelById = useCallback(

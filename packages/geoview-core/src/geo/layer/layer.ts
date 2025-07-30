@@ -781,8 +781,8 @@ export class LayerApi {
     if (layerEntryConfig && geoviewLayer) {
       if (layerEntryConfig instanceof GroupLayerEntryConfig) {
         layerEntryConfig.listOfLayerEntryConfig.forEach((sublayerEntryConfig) => {
-          if ((sublayerEntryConfig as unknown as AbstractBaseLayerEntryConfig).layerStatus === 'error')
-            this.reloadLayer((sublayerEntryConfig as unknown as AbstractBaseLayerEntryConfig).layerPath);
+          if ((sublayerEntryConfig as AbstractBaseLayerEntryConfig).layerStatus === 'error')
+            this.reloadLayer((sublayerEntryConfig as AbstractBaseLayerEntryConfig).layerPath);
         });
       } else {
         this.getLayerEntryConfigIds().forEach((registeredLayerPath) => {

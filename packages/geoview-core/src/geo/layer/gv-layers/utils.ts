@@ -74,7 +74,7 @@ export function esriGetFieldDomain(
 ): codedValueType | rangeDomainType | null {
   const esriFieldDefinitions = layerConfig.getLayerMetadata()?.fields;
   const fieldDefinition = esriFieldDefinitions?.find((metadataEntry) => metadataEntry.name === fieldName);
-  return fieldDefinition ? (fieldDefinition.domain as unknown as codedValueType | rangeDomainType) : null;
+  return fieldDefinition ? fieldDefinition.domain : null;
 }
 
 /**

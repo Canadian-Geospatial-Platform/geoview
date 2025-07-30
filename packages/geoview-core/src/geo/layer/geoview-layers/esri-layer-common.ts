@@ -28,7 +28,7 @@ import {
   esriQueryRelatedRecordsByUrl,
   EsriRelatedRecordsJsonResponseRelatedRecord,
 } from '@/geo/layer/gv-layers/utils';
-import { EsriBaseRenderer, getStyleFromEsriRenderer } from '@/geo/utils/renderer/esri-renderer';
+import { getStyleFromEsriRenderer } from '@/geo/utils/renderer/esri-renderer';
 import { EsriDynamic, geoviewEntryIsEsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { EsriFeature, geoviewEntryIsEsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
@@ -380,7 +380,7 @@ export async function commonProcessLayerMetadata<
   // The following line allow the type ascention of the type guard functions on the second line below
   if (geoviewEntryIsEsriDynamic(layerConfig) || geoviewEntryIsEsriFeature(layerConfig)) {
     if (!layerConfig.layerStyle) {
-      const renderer = responseJson.drawingInfo?.renderer as unknown as EsriBaseRenderer;
+      const renderer = responseJson.drawingInfo?.renderer;
       // eslint-disable-next-line no-param-reassign
       if (renderer) layerConfig.layerStyle = getStyleFromEsriRenderer(renderer);
     }
