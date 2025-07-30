@@ -47,10 +47,6 @@ export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, appHeight: 
       backgroundColor: theme.palette.geoViewColor.primary.light[200],
       color: theme.palette.geoViewColor.white,
     },
-    '&:focus': {
-      backgroundColor: theme.palette.geoViewColor.primary.light[200],
-      color: theme.palette.geoViewColor.white,
-    },
   },
   mobileDropdown: {
     maxWidth: '200px',

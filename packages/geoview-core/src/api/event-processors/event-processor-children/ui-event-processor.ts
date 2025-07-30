@@ -23,7 +23,7 @@ export class UIEventProcessor extends AbstractEventProcessor {
   }
 
   // #region
-  static getActiveFooterBarTab(mapId: string): string {
+  static getActiveFooterBarTab(mapId: string): string | undefined {
     return this.getUIStateProtected(mapId).activeFooterBarTabId;
   }
 

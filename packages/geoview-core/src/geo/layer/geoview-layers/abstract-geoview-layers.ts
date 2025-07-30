@@ -2,7 +2,7 @@ import BaseLayer from 'ol/layer/Base';
 import Collection from 'ol/Collection';
 import LayerGroup, { Options as LayerGroupOptions } from 'ol/layer/Group';
 
-import { doUntil, generateId } from '@/core/utils/utilities';
+import { generateId } from '@/core/utils/utilities';
 import { TypeJsonObject } from '@/api/config/types/config-types';
 import { TypeDateFragments, DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
@@ -805,7 +805,7 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
-   * Starts a delayed check to monitor the metadata fetch process for this GeoView layer.
+   * Monitors the metadata fetch process for this GeoView layer.
    * After a predefined wait period (`DEFAULT_WAIT_PERIOD_METADATA_WARNING`), it verifies whether all layer configurations
    * have reached at least the 'processed' status. If not, it emits a warning message indicating that metadata loading
    * is taking longer than expected.
@@ -814,15 +814,13 @@ export abstract class AbstractGeoViewLayer {
    * @private
    */
   #startMetadataFetchWatcher(): void {
-    // Do the following thing until we stop it
-    doUntil(() => {
+    setTimeout(() => {
       // Check if the layer configs were all at least processed, we're done
       if (ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo('processed', this.listOfLayerEntryConfig)) return true;
 
       // Emit message
-      this.emitMessage('warning.layer.metadataTakingLongTime', [this.geoviewLayerName || this.geoviewLayerId]);
+      this.emitMessage('warning.layer.metadataTakingLongTime', [this.geoviewLayerName || this.geoviewLayerId], 'warning');
 
-      // Continue loop
       return false;
     }, AbstractGeoViewLayer.DEFAULT_WAIT_PERIOD_METADATA_WARNING);
   }

@@ -34,7 +34,6 @@ import { SnackbarType } from '@/core/utils/notifications';
 import { NotImplementedError, NotSupportedError } from '@/core/exceptions/core-exceptions';
 import { LayerNotQueryableError } from '@/core/exceptions/layer-exceptions';
 import { createAliasLookup } from '@/geo/layer/gv-layers/utils';
-import { doUntil } from '@/core/utils/utilities';
 import { TypeJsonArray } from '@/api/config/types/config-types';
 
 /**
@@ -991,16 +990,15 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   /**
-   * Starts a periodic timer that monitors the loading status of a layer.
-   * Every `DEFAULT_LOADING_PERIOD` milliseconds, it checks whether the layer is still loading. If so, it emits a warning message indicating
+   * Monitors the loading status of a layer.
+   * After `DEFAULT_LOADING_PERIOD` milliseconds, it checks whether the layer is still loading. If so, it emits a warning message indicating
    * that the rendering is taking longer than expected. The interval stops automatically when the layer finishes loading
    * or encounters an error, or if a new loading process supersedes the current one (based on the loading counter).
    * @param {number} loadingCounter - A unique counter representing the loading instance. Only the interval tied to the current
    *                                  loading process will continue monitoring; outdated intervals will self-terminate.
    */
   #startLoadingPeriodWatcher(loadingCounter: number): void {
-    // Do the following thing until we stop it
-    doUntil(() => {
+    setTimeout(() => {
       // This is the right interval that we want to be checking the layer status
       const { layerStatus } = this.getLayerConfig();
 
@@ -1013,10 +1011,9 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       // If still loading
       if (layerStatus === 'loading') {
         // Emit about the delay
-        this.emitMessage('warning.layer.slowRender', [this.getLayerName()]);
+        this.emitMessage('warning.layer.slowRender', [this.getLayerName()], 'warning');
       }
 
-      // Continue loop
       return false;
     }, AbstractGVLayer.DEFAULT_LOADING_PERIOD);
   }

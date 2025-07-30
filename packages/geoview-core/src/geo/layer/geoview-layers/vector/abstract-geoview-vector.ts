@@ -30,7 +30,6 @@ import {
   LayerTooManyEsriFeatures,
 } from '@/core/exceptions/layer-exceptions';
 import { LayerEntryConfigVectorSourceURLNotDefinedError } from '@/core/exceptions/layer-entry-config-exceptions';
-import { doUntilPromises } from '@/core/utils/utilities';
 
 // Some constants
 const EXCLUDED_HEADERS_LAT = ['latitude', 'lat', 'y', 'ycoord', 'latitude|latitude', 'latitude | latitude'];
@@ -131,7 +130,15 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         }
 
         // Parse the result of the fetch to read the features
-        const features = await this.#parseFeatures(url, responseText, layerConfig, vectorSource, projection, extent, readOptions);
+        const features = await AbstractGeoViewVector.#parseFeatures(
+          url,
+          responseText,
+          layerConfig,
+          vectorSource,
+          projection,
+          extent,
+          readOptions
+        );
 
         // If no features read, alright, let's put the layer to loaded right away as it's never going to get loaded otherwise
         if (!features || features.length === 0) {
@@ -189,7 +196,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @returns {Promise<Feature[] | undefined>} A promise resolving to the parsed features or undefined if parsing fails.
    * @private
    */
-  async #parseFeatures(
+  static async #parseFeatures(
     url: string,
     responseText: string,
     layerConfig: VectorLayerEntryConfig,
@@ -213,7 +220,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         const maxRecords = layerConfig.getLayerMetadata()?.maxRecordCount;
 
         // Retrieve the full ESRI feature data
-        const esriData = await this.#getEsriFeatures(url, count, maxRecords as number | undefined);
+        const esriData = await AbstractGeoViewVector.#getEsriFeatures(url, count, maxRecords as number | undefined);
 
         // Convert each ESRI response chunk to features and flatten the result
         return esriData.flatMap((json) =>
@@ -283,7 +290,13 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   // GV: featureLimit ideal amount varies with the service and with maxAllowableOffset.
   // TODO: Add options for featureLimit to config
   // TODO: Will need to move with onCreateVectorSource
-  #getEsriFeatures(url: string, featureCount: number, maxRecordCount?: number, featureLimit: number = 1000): Promise<TypeJsonObject[]> {
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  static #getEsriFeatures(
+    url: string,
+    featureCount: number,
+    maxRecordCount?: number,
+    featureLimit: number = 1000
+  ): Promise<TypeJsonObject[]> {
     // Update url
     const baseUrl = url.replace('&returnCountOnly=true', `&outfields=*&geometryPrecision=1&maxAllowableOffset=5`);
     const featureFetchLimit = maxRecordCount && maxRecordCount < featureLimit ? maxRecordCount : featureLimit;
@@ -297,22 +310,6 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
     // Get array of all the promises
     const promises = urlArray.map((featureUrl) => Fetch.fetchEsriJsonAsObject(featureUrl));
-
-    // Start a watcher for a slow fetch happening
-    doUntilPromises(
-      () => {
-        // Make sure that layer has not been deleted
-        if (!this.olRootLayer) return true;
-
-        // Emit message about the fetching being slow
-        this.emitMessage('warning.layer.slowFetch', [this.geoviewLayerName]);
-
-        // Continue watcher
-        return false;
-      },
-      promises,
-      AbstractGeoViewVector.DEFAULT_WAIT_SLOW_FETCH_WARNING
-    );
 
     // Return the all promise
     return Promise.all(promises);

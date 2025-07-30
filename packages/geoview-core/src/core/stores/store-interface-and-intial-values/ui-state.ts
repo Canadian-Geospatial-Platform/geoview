@@ -23,7 +23,7 @@ export type ActiveAppBarTabType = {
 };
 
 export interface IUIState {
-  activeFooterBarTabId: string;
+  activeFooterBarTabId: string | undefined;
   activeTrapGeoView: boolean;
   activeAppBarTab: ActiveAppBarTabType;
   appBarComponents: TypeValidAppBarCoreProps[];
@@ -42,7 +42,7 @@ export interface IUIState {
     enableFocusTrap: (uiFocus: FocusItemProps) => void;
     disableFocusTrap: (callbackElementId?: string) => void;
     showTab: (tab: string) => void;
-    setActiveFooterBarTab: (id: string) => void;
+    setActiveFooterBarTab: (id: string | undefined) => void;
     setActiveAppBarTab: (tabId: string, isOpen: boolean, isFocusTrapped: boolean) => void;
     setActiveTrapGeoView: (active: boolean) => void;
     setFooterPanelResizeValue: (value: number) => void;
@@ -53,7 +53,7 @@ export interface IUIState {
   setterActions: {
     enableFocusTrap: (uiFocus: FocusItemProps) => void;
     disableFocusTrap: (callbackElementId?: string) => void;
-    setActiveFooterBarTab: (id: string) => void;
+    setActiveFooterBarTab: (id: string | undefined) => void;
     setActiveAppBarTab: (tabId: string, isOpen: boolean, isFocusTrapped: boolean) => void;
     setActiveTrapGeoView: (active: boolean) => void;
     setFooterPanelResizeValue: (value: number) => void;
@@ -130,7 +130,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
         // Redirect to event processor
         UIEventProcessor.showTab(get().mapId, tab);
       },
-      setActiveFooterBarTab: (id: string) => {
+      setActiveFooterBarTab: (id: string | undefined) => {
         // Redirect to setter
         get().uiState.setterActions.setActiveFooterBarTab(id);
       },
@@ -175,7 +175,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
           },
         });
       },
-      setActiveFooterBarTab: (id: string) => {
+      setActiveFooterBarTab: (id: string | undefined) => {
         set({
           uiState: {
             ...get().uiState,
@@ -258,7 +258,8 @@ type FocusItemProps = {
 // UI state selectors
 // **********************************************************
 export const useUIActiveFocusItem = (): FocusItemProps => useStore(useGeoViewStore(), (state) => state.uiState.focusItem);
-export const useUIActiveFooterBarTabId = (): string => useStore(useGeoViewStore(), (state) => state.uiState.activeFooterBarTabId);
+export const useUIActiveFooterBarTabId = (): string | undefined =>
+  useStore(useGeoViewStore(), (state) => state.uiState.activeFooterBarTabId);
 export const useUIActiveAppBarTab = (): ActiveAppBarTabType => useStore(useGeoViewStore(), (state) => state.uiState.activeAppBarTab);
 export const useUIActiveTrapGeoView = (): boolean => useStore(useGeoViewStore(), (state) => state.uiState.activeTrapGeoView);
 export const useUIAppbarComponents = (): TypeValidAppBarCoreProps[] =>

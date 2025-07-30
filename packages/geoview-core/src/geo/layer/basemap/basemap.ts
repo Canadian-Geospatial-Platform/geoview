@@ -12,7 +12,7 @@ import { applyStyle } from 'ol-mapbox-style';
 
 import { TypeBasemapOptions, TypeValidMapProjectionCodes, TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
 import { TypeJsonObject, toJsonObject, TypeJsonArray } from '@/api/config/types/config-types';
-import { doUntil, getLocalizedMessage } from '@/core/utils/utilities';
+import { getLocalizedMessage } from '@/core/utils/utilities';
 import { TypeBasemapProps, TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
 import { Projection } from '@/geo/utils/projection';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -356,22 +356,20 @@ export class BasemapApi {
   }
 
   /**
-   * Starts a delayed check to monitor the basemap creation process.
+   * Checks the basemap creation process.
    * After a predefined maximum wait period (`DEFAULT_WAIT_PERIOD_BASEMAP_WARNING`), it verifies whether the basemap has been created.
    * If not, it emits a `BasemapTakingLongTimeError` to notify the system of a potential delay or failure.
    * This serves as a safeguard against stalled or unresponsive basemap creation.
    * @private
    */
   #startBasemapCreationWatcher(): void {
-    // Do the following thing until we stop it
-    doUntil(() => {
+    setTimeout(() => {
       // If the basemap has been created
       if (this.created) return true;
 
       // Emit about the error
       this.#emitBasemapError({ error: new BasemapTakingLongTimeError() });
 
-      // Continue loop
       return false;
     }, BasemapApi.DEFAULT_WAIT_PERIOD_BASEMAP_WARNING);
   }

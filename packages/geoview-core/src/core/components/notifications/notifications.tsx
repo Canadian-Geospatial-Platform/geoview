@@ -238,7 +238,7 @@ export default memo(function Notifications(): JSX.Element {
 
   return (
     <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
-      <Box>
+      <Box sx={{ padding: interaction === 'dynamic' ? 'none' : '5px' }}>
         <IconButton
           id="notification"
           tooltip={t('appbar.notifications')!}
