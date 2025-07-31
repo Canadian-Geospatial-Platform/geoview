@@ -38,6 +38,9 @@ interface TypeGeoJSONStyleProps {
   iconSrc?: string;
 }
 
+const DEFAULT_ICON_SOURCE =
+  'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBkPSJNMTIgMkM4LjEzIDIgNSA1LjEzIDUgOWMwIDUuMjUgNyAxMyA3IDEzczctNy43NSA3LTEzYzAtMy44Ny0zLjEzLTctNy03bTAgOS41Yy0xLjM4IDAtMi41LTEuMTItMi41LTIuNXMxLjEyLTIuNSAyLjUtMi41IDIuNSAxLjEyIDIuNSAyLjUtMS4xMiAyLjUtMi41IDIuNSIgZmlsbD0icmdiYSgyNTIsIDI0MSwgMCwgMC4zKSIgc3Ryb2tlPSIjMDAwMDAwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjwvc3ZnPg==';
+
 /**
  * Event processor focusing on interacting with the drawer state in the store.
  */
@@ -68,6 +71,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    */
   override onInitialize(store: GeoviewStoreType): Array<() => void> {
     const { mapId } = store.getState();
+
+    // Set up keyboard handlers if needed
+    DrawerEventProcessor.#setupKeyboardHandler(mapId);
 
     // Subscribe to language changes
     const unsubscribe = store.subscribe(
@@ -494,9 +500,6 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     } else {
       draw = viewer.initDrawInteractions(DRAW_GROUP_KEY, currentGeomType, currentStyle);
     }
-
-    // Set up keyboard handler
-    this.#setupKeyboardHandler(mapId);
 
     // Set up draw end event handler
     draw.onDrawEnd(this.#handleDrawEnd(mapId));
@@ -1063,39 +1066,42 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
         const geojson = JSON.parse(e.target?.result as string);
         const viewer = MapEventProcessor.getMapViewer(mapId);
 
+        const newFeatures: Feature[] = [];
         geojson.features.forEach((geoFeature: TypeJsonObject) => {
           const olGeometry = new GeoJSON().readGeometry(geoFeature.geometry);
           const feature = new Feature({ geometry: olGeometry });
 
           // Apply style from properties
-          const styleProps = geoFeature.properties.style as unknown as TypeGeoJSONStyleProps;
-          if (styleProps) {
-            let featureStyle;
-            if (olGeometry instanceof Point) {
-              featureStyle = new Style({
-                image: new OLIcon({
-                  src: styleProps.iconSrc,
-                  anchor: [0.5, 1],
-                  anchorXUnits: 'fraction',
-                  anchorYUnits: 'fraction',
-                }),
-              });
-            } else {
-              featureStyle = new Style({
-                stroke: new Stroke({
-                  color: styleProps.strokeColor,
-                  width: styleProps.strokeWidth,
-                }),
-                fill: new Fill({
-                  color: styleProps.fillColor,
-                }),
-              });
-            }
-            feature.setStyle(featureStyle);
+          const styleProps = (geoFeature.properties.style as unknown as TypeGeoJSONStyleProps) || undefined;
+          let featureStyle;
+          if (olGeometry instanceof Point) {
+            const iconSrc = styleProps?.iconSrc || DEFAULT_ICON_SOURCE;
+            featureStyle = new Style({
+              image: new OLIcon({
+                src: iconSrc,
+                anchor: [0.5, 1],
+                anchorXUnits: 'fraction',
+                anchorYUnits: 'fraction',
+              }),
+            });
+            feature.set('iconSrc', iconSrc);
+          } else {
+            featureStyle = new Style({
+              stroke: new Stroke({
+                color: styleProps?.strokeColor || '#000000',
+                width: styleProps?.strokeWidth || 1.3,
+              }),
+              fill: new Fill({
+                color: styleProps?.fillColor || '#ffffff',
+              }),
+            });
           }
 
           // Set feature properties
-          feature.setId((geoFeature.properties.id as string) || generateId());
+          const featureId = (geoFeature.properties.id as string) || generateId();
+          feature.setStyle(featureStyle);
+          feature.setId(featureId);
+          feature.set('featureId', featureId);
           feature.set('geometryGroup', DRAW_GROUP_KEY);
 
           // Add overlays to non-point features
@@ -1111,12 +1117,22 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
           // Add to map
           viewer.layer.geometry.geometries.push(feature);
           viewer.layer.geometry.addToGeometryGroup(feature, DRAW_GROUP_KEY);
+
+          newFeatures.push(feature);
+        });
+
+        // Save action history
+        this.#saveToHistory(mapId, {
+          type: 'add',
+          features: newFeatures,
         });
       } catch (error) {
         logger.logError('Error loading GeoJSON:', error);
       }
     };
-    reader.readAsText(file);
+    if (file.name.toLowerCase().endsWith('.geojson')) {
+      reader.readAsText(file);
+    }
   }
 
   // #region History
@@ -1284,6 +1300,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     if (!viewer) return;
     // Re-add the features
     action.features.forEach((feature) => {
+      feature.setId(feature.get('featureId'));
       viewer.layer.geometry.geometries.push(feature);
       viewer.layer.geometry.addToGeometryGroup(feature, DRAW_GROUP_KEY);
 
@@ -1302,9 +1319,39 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * @param {DrawerHistoryAction} action The action that will be re-performed
    */
   static #deleteFeaturesAction(mapId: string, action: DrawerHistoryAction): void {
+    const viewer = MapEventProcessor.getMapViewer(mapId);
+
     action.features.forEach((feature) => {
-      const featureId = feature.getId() as string;
-      if (featureId) this.deleteSingleDrawing(mapId, featureId);
+      const featureId = feature.get('featureId');
+
+      // GV Can't just use this.deleteSingleDrawing because between actions it will cause the
+      // GV geometry to no longer be '===', which will prevent it from being removed by the
+      // GV deleteGeometryFromGroup function in core > geo > layer > geometry > geometry.ts
+      // Remove from geometries array
+      const geometryIndex = viewer.layer.geometry.geometries.findIndex((f) => {
+        return f.get('featureId') === featureId && f.get('geometryGroup') === DRAW_GROUP_KEY;
+      });
+      if (geometryIndex !== -1) {
+        viewer.layer.geometry.geometries.splice(geometryIndex, 1);
+      }
+
+      // Remove from vector source directly
+      const geometryGroup = viewer.layer.geometry.getGeometryGroup(DRAW_GROUP_KEY);
+      if (geometryGroup) {
+        const vectorSource = geometryGroup.vectorLayer.getSource();
+        const layerFeatures = vectorSource?.getFeatures() || [];
+
+        layerFeatures.forEach((layerFeature) => {
+          if (layerFeature.get('featureId') === featureId) {
+            const measureTooltip = layerFeature.get('measureTooltip');
+            measureTooltip?.getElement()?.remove();
+
+            vectorSource?.removeFeature(layerFeature);
+          }
+        });
+
+        geometryGroup.vectorLayer.changed();
+      }
     });
   }
 
