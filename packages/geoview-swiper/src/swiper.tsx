@@ -8,7 +8,6 @@ import BaseEvent from 'ol/events/Event';
 
 import debounce from 'lodash/debounce';
 
-import { RefObject } from 'geoview-core';
 import { useSwiperLayerPaths, useSwiperOrientation } from 'geoview-core/core/stores/store-interface-and-intial-values/swiper-state';
 import { logger } from 'geoview-core/core/utils/logger';
 import { getLocalizedMessage, delay } from 'geoview-core/core/utils/utilities';
@@ -56,6 +55,9 @@ export function Swiper(props: SwiperProps): JSX.Element {
   const displayLanguage = useAppDisplayLanguage();
   const visibleLayers = useMapVisibleLayers();
   const orientation = useSwiperOrientation();
+
+  // Grab reference
+  const theSwiper = swiperRef.current;
 
   /**
    * Pre compose, Pre render event callback
@@ -183,9 +185,9 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
         // Send the onStop event to update layers
         delay(100)
-          .then(() => onStop())
-          .catch(() => {
-            logger.logPromiseFailed('updateSwiper in Swiper');
+          .then(onStop)
+          .catch((error: unknown) => {
+            logger.logPromiseFailed('updateSwiper in Swiper', error);
           }); // Wait for the DOM to update
       }
     },
@@ -201,20 +203,16 @@ export function Swiper(props: SwiperProps): JSX.Element {
       try {
         // Get the layer at the layer path
         const olLayer = await viewer.layer.getOLLayerAsync(layerPath, CONST_LAYERS_WAIT, CONST_LAYERS_RETRY);
-        if (olLayer) {
-          // Set the OL layers
-          setOlLayers((prevArray: BaseLayer[]) => [...prevArray, olLayer]);
 
-          // Wire events on the layer
-          olLayer.on(['precompose' as EventTypes, 'prerender' as EventTypes], prerender);
-          olLayer.on(['postcompose' as EventTypes, 'postrender' as EventTypes], postcompose);
+        // Set the OL layers
+        setOlLayers((prevArray) => [...prevArray, olLayer]);
 
-          // Force refresh
-          olLayer.changed();
-        } else {
-          // Log
-          logger.logError('SWIPER - Failed to find layer to attach layer events', layerPath);
-        }
+        // Wire events on the layer
+        olLayer.on(['precompose' as EventTypes, 'prerender' as EventTypes], prerender);
+        olLayer.on(['postcompose' as EventTypes, 'postrender' as EventTypes], postcompose);
+
+        // Force refresh
+        olLayer.changed();
       } catch (error: unknown) {
         // Log
         logger.logError('SWIPER - Failed to attach layer events', viewer.layer?.getGeoviewLayerIds(), layerPath, error);
@@ -279,9 +277,6 @@ export function Swiper(props: SwiperProps): JSX.Element {
     // Log
     logger.logTraceUseEffect('SWIPER - mount', viewer.mapId);
 
-    // Grab reference
-    const theSwiper = swiperRef?.current;
-
     const handleFocusIn = (): void => {
       // Set listener for the focus in on swiper bar when on WCAG mode
       if (document.getElementById(`shell-${viewer.mapId}`)!.classList.contains('map-focus-trap')) {
@@ -307,7 +302,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
       theSwiper?.removeEventListener('focusout', handleFocusOut);
       theSwiper?.removeEventListener('focusin', handleFocusIn);
     };
-  }, [updateSwiper, viewer.mapId]);
+  }, [theSwiper, updateSwiper, viewer.mapId]);
 
   // If any layer paths
   if (layerPaths && layerPaths.length > 0) {
@@ -323,7 +318,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
           }
           onStop={onStop}
           onDrag={onStop}
-          nodeRef={swiperRef as RefObject<HTMLElement>}
+          // nodeRef={swiperRef}
         >
           <Box sx={[orientation === 'vertical' ? sxClasses.vertical : sxClasses.horizontal, sxClasses.bar]} tabIndex={0} ref={swiperRef}>
             <Tooltip title={getLocalizedMessage(displayLanguage, 'swiper.tooltip')}>
