@@ -263,7 +263,7 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
 
   // Make sure the selected tab is among the visible tabs
   // (it's possible that the store has a selected value set to something that hasn't yet been created as a tab).
-  const validSelectedTab = visibleTabs.find((tab) => tab.value === selectedTab)?.value || 0;
+  const validSelectedTab = visibleTabs.find((tab) => tab.value === selectedTab)?.value;
 
   return (
     <Box
@@ -289,7 +289,7 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
               variant="scrollable"
               scrollButtons
               allowScrollButtonsMobile
-              value={Math.max(0, validSelectedTab)}
+              value={validSelectedTab !== undefined ? Math.max(0, validSelectedTab) : false}
               onChange={handleChange}
               aria-label="basic tabs"
               ScrollButtonComponent={CustomScrollButton}
