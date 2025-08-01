@@ -354,7 +354,6 @@ export abstract class ConfigBaseClass {
       layerId: this.layerId,
       schemaTag: this.getSchemaTag(),
       entryType: this.getEntryType(),
-      layerStatus: this.layerStatus,
       isMetadataLayerGroup: this.isMetadataLayerGroup,
     };
   }

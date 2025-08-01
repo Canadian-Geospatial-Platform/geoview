@@ -305,6 +305,15 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
+   * Fetches the metadata by calling onFetchServiceMetadata.
+   * @returns {Promise<unknown | undefined>} Returns a Promise of a metadata
+   */
+  fetchServiceMetadata(): Promise<unknown | undefined> {
+    // Redirect
+    return this.onFetchServiceMetadata();
+  }
+
+  /**
    * This method reads the service metadata from the metadataAccessPath and stores it in the 'metadata' property.
    * @returns {Promise<void>} A promise resolved once the metadata has been fetched and assigned to the 'metadata' property.
    * @private
@@ -322,7 +331,7 @@ export abstract class AbstractGeoViewLayer {
         // Process and, yes, keep the await here, because we want to make extra sure the onFetchAndSetServiceMetadata is
         // executed asynchronously, even if the implementation of the overriden method is synchronous.
         // All so that the try/catch works nicely here.
-        this.#metadata = await this.onFetchServiceMetadata();
+        this.#metadata = await this.fetchServiceMetadata();
       } else {
         // GV It's possible there is no metadataAccessPath, e.g.: CSV (csvLYR2), we keep the if condition here
         // Skip

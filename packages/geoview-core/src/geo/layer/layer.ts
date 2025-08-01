@@ -32,7 +32,6 @@ import {
   TypeLayerStatus,
   GeoCoreLayerConfig,
   TypeDisplayLanguage,
-  TypeInitialGeoviewLayerType,
   TypeOutfieldsType,
 } from '@/api/config/types/map-schema-types';
 import { GeoJSON, layerConfigIsGeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
@@ -496,8 +495,8 @@ export class LayerApi {
       // Create the layers from the UUID
       const geoviewLayerConfig = await GeoCore.createLayerConfigFromUUID(
         uuid,
-        this.getMapId(),
         this.mapViewer.getDisplayLanguage(),
+        this.getMapId(),
         optionalConfig
       );
 
@@ -2309,7 +2308,7 @@ export class LayerApi {
     let promise: Promise<TypeGeoviewLayerConfig>;
     if (mapConfigLayerEntryIsGeoCore(entry)) {
       // Working with a GeoCore layer
-      promise = GeoCore.createLayerConfigFromUUID(entry.geoviewLayerId, mapId, language, entry);
+      promise = GeoCore.createLayerConfigFromUUID(entry.geoviewLayerId, language, mapId, entry);
     } else if (mapConfigLayerEntryIsShapefile(entry)) {
       // Working with a shapefile layer
       promise = ShapefileReader.convertShapefileConfigToGeoJson(entry);
@@ -2403,70 +2402,6 @@ export class LayerApi {
     } else addSubLayerPathToLayerOrder(geoviewLayerConfig as TypeLayerEntryConfig, (geoviewLayerConfig as TypeLayerEntryConfig).layerPath);
 
     return newOrderedLayerInfos;
-  }
-
-  /**
-   * Creates and initializes a GeoView layer configuration based on the specified layer type.
-   * This method dynamically selects the appropriate layer class (e.g., EsriDynamic, WMS, GeoJSON, etc.)
-   * based on the provided `layerType`, and calls its `initGeoviewLayerConfig` method using the
-   * supplied ID, name, and URL. If the layer type is not supported, an error is thrown.
-   * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
-   * @param {string} geoviewLayerName - The display name of the layer.
-   * @param {TypeInitialGeoviewLayerType} layerType - The type of GeoView layer to initialize (e.g., 'esriDynamic', 'ogcWms', 'GeoJSON', etc.).
-   * @param {string} layerURL - The URL endpoint associated with the layer (e.g., service URL, file path).
-   * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to a fully initialized `TypeGeoviewLayerConfig`.
-   * @throws {NotSupportedError} If the provided layer type is not recognized or supported.
-   */
-  static async createInitConfigFromType(
-    geoviewLayerId: string,
-    geoviewLayerName: string,
-    layerType: TypeInitialGeoviewLayerType,
-    layerURL: string,
-    mapId: string,
-    language: TypeDisplayLanguage
-  ): Promise<TypeGeoviewLayerConfig> {
-    // Depending on the type
-    switch (layerType) {
-      case 'esriDynamic':
-        return EsriDynamic.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
-      case 'esriImage':
-        return EsriImage.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
-      case 'imageStatic':
-        return ImageStatic.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
-      case 'vectorTiles':
-        return VectorTiles.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
-      case 'ogcWms':
-        return WMS.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, false);
-      case 'xyzTiles':
-        return XYZTiles.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
-      case 'CSV':
-        return CSV.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
-      case 'esriFeature':
-        return EsriFeature.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
-      case 'GeoJSON':
-        return GeoJSON.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
-      case 'ogcFeature':
-        return OgcFeature.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
-      case 'ogcWfs':
-        return WFS.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
-      case 'geoCore':
-        // For GeoCore, we guild the Config from the Geocore service
-        // eslint-disable-next-line no-case-declarations
-        const layerConfig = await GeoCore.createLayerConfigFromUUID(layerURL, mapId, language);
-
-        // Now, loop back to create the correct config based on the type
-        return LayerApi.createInitConfigFromType(
-          layerConfig.geoviewLayerId,
-          layerConfig.geoviewLayerName!,
-          layerConfig.geoviewLayerType,
-          layerConfig.metadataAccessPath!,
-          mapId,
-          language
-        );
-      default:
-        // Unsupported
-        throw new NotSupportedError(`Unsupported layer type ${layerType}`);
-    }
   }
 
   /**

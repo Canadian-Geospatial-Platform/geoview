@@ -7,6 +7,7 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 
 import { TypeDisplayLanguage, GeoCoreLayerConfig, TypeGeoviewLayerConfig } from '@/api/config/types/map-schema-types';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { CV_DEFAULT_MAP_FEATURE_CONFIG } from '@/api/config/types/config-constants';
 
 /**
  * Class used to add geoCore layer to the map
@@ -17,42 +18,52 @@ export abstract class GeoCore {
   /**
    * Gets GeoView layer configurations list from the UUIDs of the list of layer entry configurations.
    * @param {string} uuid - The UUID of the layer
-   * @param {string} mapId - The Map id
    * @param {TypeDisplayLanguage} language - The language
+   * @param {string} mapId - The optional map id
    * @param {GeoCoreLayerConfig?} layerConfig - The optional layer configuration
    * @returns {Promise<TypeGeoviewLayerConfig>} List of layer configurations to add to the map.
    */
   static async createLayerConfigFromUUID(
     uuid: string,
-    mapId: string,
     language: TypeDisplayLanguage,
+    mapId?: string,
     layerConfig?: GeoCoreLayerConfig
   ): Promise<TypeGeoviewLayerConfig> {
-    // Get the map config
-    const map = MapEventProcessor.getMapViewer(mapId);
-    if (map.layer.getGeoviewLayerIds().includes(uuid)) {
-      // eslint-disable-next-line no-param-reassign
-      uuid = `${uuid}:${generateId(8)}`;
-    }
-    const mapConfig = MapEventProcessor.getGeoViewMapConfig(mapId);
+    // If there's a mapId provided, validate the uuid
+    let { geocoreUrl } = CV_DEFAULT_MAP_FEATURE_CONFIG.serviceUrls;
 
-    // Generate the url using the geocore url
-    const url = `${mapConfig!.serviceUrls.geocoreUrl}`;
+    if (mapId) {
+      // Get the map config
+      const map = MapEventProcessor.getMapViewer(mapId);
+      if (map.layer.getGeoviewLayerIds().includes(uuid)) {
+        // eslint-disable-next-line no-param-reassign
+        uuid = `${uuid}:${generateId(8)}`;
+      }
+
+      // Get the map config
+      const mapConfig = MapEventProcessor.getGeoViewMapConfig(mapId);
+
+      // Generate the url using the geocore url
+      geocoreUrl = `${mapConfig!.serviceUrls.geocoreUrl}`;
+    }
 
     // Get the GV config from UUID and await
-    const response = await UUIDmapConfigReader.getGVConfigFromUUIDs(url, language, [uuid.split(':')[0]]);
+    const response = await UUIDmapConfigReader.getGVConfigFromUUIDs(geocoreUrl, language, [uuid.split(':')[0]]);
 
     // Validate the generated Geoview Layer Config
     ConfigValidation.validateListOfGeoviewLayerConfig(response.layers);
 
-    // For each found geochart associated with the Geocore UUIDs
-    response.geocharts?.forEach((geochartConfig) => {
-      // Get the layerPath from geocore response
-      const layerPath = geochartConfig.layers[0].layerId;
+    // If there's a mapId, check for geochart
+    if (mapId) {
+      // For each found geochart associated with the Geocore UUIDs
+      response.geocharts?.forEach((geochartConfig) => {
+        // Get the layerPath from geocore response
+        const layerPath = geochartConfig.layers[0].layerId;
 
-      // Add a GeoChart
-      GeochartEventProcessor.addGeochartChart(mapId, layerPath, geochartConfig);
-    });
+        // Add a GeoChart
+        GeochartEventProcessor.addGeochartChart(mapId, layerPath, geochartConfig);
+      });
+    }
 
     // Use user supplied listOfLayerEntryConfig if provided
     if (layerConfig?.listOfLayerEntryConfig || layerConfig?.initialSettings) {

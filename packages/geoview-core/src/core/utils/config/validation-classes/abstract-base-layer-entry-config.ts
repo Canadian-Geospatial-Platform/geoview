@@ -156,8 +156,10 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
     // GV Can be any object so disable eslint and proceed with caution
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const serialized = super.onSerialize() as any;
+
     // Copy values
     serialized.initialSettings = this.initialSettings;
+    serialized.attributions = this.getAttributions();
     serialized.source = this.source;
 
     // Return it

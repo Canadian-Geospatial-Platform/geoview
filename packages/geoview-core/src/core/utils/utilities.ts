@@ -262,6 +262,25 @@ export function sanitizeHtmlContent(contentHtml: string): string {
   return sanitizeHtml(contentHtml);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function safeStringify(obj: any, space = 2): string {
+  const seen = new WeakSet();
+
+  return JSON.stringify(
+    obj,
+    (key, value) => {
+      if (typeof value === 'object' && value !== null) {
+        if (seen.has(value)) {
+          return '{Circular JSON}'; // Or return undefined to remove the property
+        }
+        seen.add(value);
+      }
+      return value;
+    },
+    space
+  );
+}
+
 /**
  * Sets up a MutationObserver to monitor when a specific DOM element (e.g., a div container)
  * is removed from the document. When the element is removed, it triggers a cleanup callback
