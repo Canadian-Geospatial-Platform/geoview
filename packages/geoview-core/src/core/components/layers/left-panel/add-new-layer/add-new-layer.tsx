@@ -22,7 +22,6 @@ import { generateId, getLocalizedMessage, isValidUUID } from '@/core/utils/utili
 import { Config } from '@/core/utils/config/config';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { LayerApi } from '@/geo/layer/layer';
 import {
   CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
@@ -391,13 +390,13 @@ export function AddNewLayer(): JSX.Element {
     const populateLayerList = async (curlayerType: TypeInitialGeoviewLayerType): Promise<boolean> => {
       try {
         // Initialize a temporary GeoviewLayer config depending on the layer type.
-        const geoviewLayerConfig = await LayerApi.createInitConfigFromType(
+        const geoviewLayerConfig = await ConfigApi.createInitConfigFromType(
+          curlayerType,
           generateId(18),
           'tempoName',
-          curlayerType,
           layerURL,
-          mapId,
-          language
+          language,
+          mapId
         );
 
         // Set the layer type as it may have changed in the case of GeoCore for example
