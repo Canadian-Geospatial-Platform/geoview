@@ -200,6 +200,9 @@ export class MapViewer {
   #onMapChangeSizeHandlers: MapChangeSizeDelegate[] = [];
 
   /** Keep all callback delegates references */
+  #onMapProjectionChangedHandlers: MapProjectionChangedDelegate[] = [];
+
+  /** Keep all callback delegates references */
   #onMapComponentAddedHandlers: MapComponentAddedDelegate[] = [];
 
   /** Keep all callback delegates references */
@@ -688,8 +691,8 @@ export class MapViewer {
       // Propagate to the store
       const promise = MapEventProcessor.setProjection(this.mapId, projectionCode);
 
-      // TODO: Emit to outside
-      // this.#emitMapInit...
+      // Emit to outside
+      this.#emitMapProjectionChanged({ projection: Projection.PROJECTIONS[projectionCode] });
 
       // Return the promise
       return promise;
@@ -2148,6 +2151,33 @@ export class MapViewer {
   }
 
   /**
+   * Emits a map projection changed event.
+   * @param {object} projection - The projection information.
+   */
+  #emitMapProjectionChanged(event: { projection: OLProjection }): void {
+    // Emit the event
+    EventHelper.emitEvent(this, this.#onMapProjectionChangedHandlers, event);
+  }
+
+  /**
+   * Registers a map projection change event callback.
+   * @param {MapProjectionChangedDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onMapProjectionChanged(callback: MapProjectionChangedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onMapProjectionChangedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a map change size event callback.
+   * @param {MapChangeSizeDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offMapProjectionChanged(callback: MapChangeSizeDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onMapChangeSizeHandlers, callback);
+  }
+
+  /**
    * Emits a component added event to all handlers.
    * @private
    */
@@ -2339,6 +2369,18 @@ export type MapChangeSizeEvent = {
  * Define a delegate for the event handler function signature
  */
 export type MapChangeSizeDelegate = EventDelegateBase<MapViewer, MapChangeSizeEvent, void>;
+
+/**
+ * Define an event for the delegate
+ */
+export type MapProjectionChangedEvent = {
+  projection: OLProjection;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+export type MapProjectionChangedDelegate = EventDelegateBase<MapViewer, MapProjectionChangedEvent, void>;
 
 /**
  * Define an event for the delegate

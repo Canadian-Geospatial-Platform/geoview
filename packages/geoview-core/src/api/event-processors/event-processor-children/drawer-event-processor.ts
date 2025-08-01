@@ -1,4 +1,5 @@
 import { Feature, Overlay } from 'ol';
+import { Coordinate } from 'ol/coordinate';
 import GeoJSON from 'ol/format/GeoJSON.js';
 import { LineString, Polygon, Point, Circle as CircleGeom, Geometry, SimpleGeometry } from 'ol/geom';
 import { fromCircle } from 'ol/geom/Polygon';
@@ -6,14 +7,22 @@ import { getArea, getLength } from 'ol/sphere';
 import { Style, Stroke, Fill, Icon as OLIcon } from 'ol/style';
 import { StyleLike } from 'ol/style/Style';
 import { DrawEvent, GeometryFunction, SketchCoordType, createBox } from 'ol/interaction/Draw';
-import { IDrawerState, StyleProps } from '@/core/stores/store-interface-and-intial-values/drawer-state';
-import { generateId } from '@/core/utils/utilities';
+import { Projection as OLProjection } from 'ol/proj';
+
+import { MapViewer, MapProjectionChangedEvent } from '@/geo/map/map-viewer';
+import { Projection } from '@/geo/utils/projection';
+import { Draw } from '@/geo/interaction/draw';
+import { TransformDeleteFeatureEvent, TransformEvent, TransformSelectionEvent } from '@/geo/interaction/transform/transform-events';
 
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
-import { AppEventProcessor } from './app-event-processor';
-import { MapEventProcessor } from './map-event-processor';
-import { Coordinate, Draw, GeoviewStoreType, TransformDeleteFeatureEvent, TransformEvent, TransformSelectionEvent } from '@/app';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeJsonObject } from '@/api/config/types/config-types';
+
+import { IDrawerState, StyleProps } from '@/core/stores/store-interface-and-intial-values/drawer-state';
+import { doUntil, generateId } from '@/core/utils/utilities';
+import { DEFAULT_PROJECTION } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
@@ -70,10 +79,17 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * @returns {Array<() => void>} Array of unsubscribe functions
    */
   override onInitialize(store: GeoviewStoreType): Array<() => void> {
-    const { mapId } = store.getState();
+    const { mapId, mapConfig } = store.getState();
 
-    // Set up keyboard handlers if needed
+    // Set up keyboard handler
     DrawerEventProcessor.#setupKeyboardHandler(mapId);
+
+    // Set up map projection change handler
+    DrawerEventProcessor.#setupReprojectDrawingsHandler(mapId);
+
+    // Set initial proejction value for the mapId
+    const initialProjection = mapConfig?.map.viewSettings.projection || DEFAULT_PROJECTION;
+    DrawerEventProcessor.#currentProjections.set(mapId, Projection.PROJECTIONS[initialProjection]);
 
     // Subscribe to language changes
     const unsubscribe = store.subscribe(
@@ -111,7 +127,37 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   /** Keyboard event handlers for each map */
   static #keyboardHandlers: Map<string, (event: KeyboardEvent) => void> = new Map();
 
+  /** Current Projeciton per mapId */
+  static #currentProjections: Map<string, OLProjection> = new Map();
+
   // #region Helpers
+
+  static #setupReprojectDrawingsHandler(mapId: string): void {
+    const handler = (sender: MapViewer, event: MapProjectionChangedEvent): void => {
+      const features = this.#getDrawingFeatures(mapId);
+      const currentProjection = this.#currentProjections.get(mapId);
+
+      features.forEach((feature) => {
+        const geometry = feature.getGeometry();
+        if (geometry && currentProjection) {
+          geometry.transform(currentProjection.getCode(), event.projection.getCode());
+        }
+      });
+
+      this.#currentProjections.set(mapId, event.projection);
+    };
+
+    // Subscribe to projection change event
+    doUntil(() => {
+      try {
+        MapEventProcessor.getMapViewer(mapId).onMapProjectionChanged(handler);
+        return true;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error: unknown) {
+        return false;
+      }
+    }, 3000);
+  }
 
   /**
    * Gets all drawing features for a map
@@ -1000,6 +1046,10 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     const features = this.#getDrawingFeatures(mapId);
     if (features.length === 0) return;
 
+    // Get current map projection
+    const mapProjection = Projection.PROJECTIONS[MapEventProcessor.getMapState(mapId).currentProjection];
+    const mapProjectionCode = mapProjection.getCode();
+
     // Convert to GeoJSON with style properties
     const geojson = {
       type: 'FeatureCollection',
@@ -1028,9 +1078,13 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
           if (!geometry) return undefined;
 
+          // Clone geometry and transform to WGS84
+          const clonedGeometry = geometry.clone();
+          clonedGeometry.transform(mapProjectionCode, 'EPSG:4326');
+
           return {
             type: 'Feature',
-            geometry: new GeoJSON().writeGeometryObject(geometry),
+            geometry: new GeoJSON().writeGeometryObject(clonedGeometry),
             properties: {
               id: feature.getId(),
               geometryGroup: feature.get('geometryGroup'),
@@ -1066,9 +1120,15 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
         const geojson = JSON.parse(e.target?.result as string);
         const viewer = MapEventProcessor.getMapViewer(mapId);
 
+        // Get current map projection
+        const mapProjection = Projection.PROJECTIONS[MapEventProcessor.getMapState(mapId).currentProjection];
+        const mapProjectionCode = mapProjection.getCode();
+
         const newFeatures: Feature[] = [];
         geojson.features.forEach((geoFeature: TypeJsonObject) => {
           const olGeometry = new GeoJSON().readGeometry(geoFeature.geometry);
+          olGeometry.transform('EPSG:4326', mapProjectionCode);
+
           const feature = new Feature({ geometry: olGeometry });
 
           // Apply style from properties
