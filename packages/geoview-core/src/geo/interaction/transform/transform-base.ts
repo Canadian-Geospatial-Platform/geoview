@@ -925,9 +925,10 @@ export class OLTransform extends OLPointer {
    * Handles scaling of a feature.
    * @param {Coordinate} coordinate - The current coordinate.
    * @param {HandleType} handleType - The type of handle being dragged.
+   * @param {boolean} ctrlKey - If the ctrlKey is being pressed to maintain the ratio
    */
-  handleScale(coordinate: Coordinate, handleType: HandleType): void {
-    if (!this.selectedFeature || !this.startGeometry || !this.center) return;
+  handleScale(coordinate: Coordinate, handleType: HandleType, ctrlKey: boolean = false): void {
+    if (!this.selectedFeature || !this.startGeometry) return;
 
     // Get the extent of the original geometry
     const extent = this.startGeometry.getExtent();
@@ -938,29 +939,34 @@ export class OLTransform extends OLPointer {
     // Calculate scale factors based on the handle being dragged
     let scaleX = 1;
     let scaleY = 1;
+    let anchorPoint: Coordinate;
 
     switch (handleType) {
       case HandleType.SCALE_NE:
         scaleX = (coordinate[0] - minX) / width;
         scaleY = (coordinate[1] - minY) / height;
+        anchorPoint = [minX, minY]; // SW corner fixed
         break;
 
       case HandleType.SCALE_SE:
         scaleX = (coordinate[0] - minX) / width;
         scaleY = (maxY - coordinate[1]) / height;
+        anchorPoint = [minX, maxY]; // NW corner fixed
         break;
 
       case HandleType.SCALE_SW:
         scaleX = (maxX - coordinate[0]) / width;
         scaleY = (maxY - coordinate[1]) / height;
+        anchorPoint = [maxX, maxY]; // NE corner fixed
         break;
 
       case HandleType.SCALE_NW:
         scaleX = (maxX - coordinate[0]) / width;
         scaleY = (coordinate[1] - minY) / height;
+        anchorPoint = [maxX, minY]; // SE corner fixed
         break;
       default:
-        break;
+        return;
     }
 
     // Ensure positive scale factors
@@ -968,7 +974,7 @@ export class OLTransform extends OLPointer {
     scaleY = Math.max(0.1, scaleY);
 
     // If keeping aspect ratio, use the minimum scale factor for both
-    if (this.options.keepAspectRatio) {
+    if (this.options.keepAspectRatio || ctrlKey) {
       const minScale = Math.min(scaleX, scaleY);
       scaleX = minScale;
       scaleY = minScale;
@@ -978,18 +984,17 @@ export class OLTransform extends OLPointer {
     const geometry = this.startGeometry.clone();
 
     // Scale the geometry
-    const { center } = this;
     if (geometry instanceof Point) {
       const coords = geometry.getCoordinates();
-      const scaledCoords = OLTransform.scaleCoordinate(coords, center, scaleX, scaleY);
+      const scaledCoords = OLTransform.scaleCoordinate(coords, anchorPoint, scaleX, scaleY);
       geometry.setCoordinates(scaledCoords);
     } else if (geometry instanceof LineString) {
       const coords = geometry.getCoordinates();
-      const scaledCoords = coords.map((coord) => OLTransform.scaleCoordinate(coord, center, scaleX, scaleY));
+      const scaledCoords = coords.map((coord) => OLTransform.scaleCoordinate(coord, anchorPoint, scaleX, scaleY));
       geometry.setCoordinates(scaledCoords);
     } else if (geometry instanceof Polygon) {
       const coords = geometry.getCoordinates();
-      const scaledCoords = coords.map((ring) => ring.map((coord) => OLTransform.scaleCoordinate(coord, center, scaleX, scaleY)));
+      const scaledCoords = coords.map((ring) => ring.map((coord) => OLTransform.scaleCoordinate(coord, anchorPoint, scaleX, scaleY)));
       geometry.setCoordinates(scaledCoords);
     }
 
@@ -1012,25 +1017,30 @@ export class OLTransform extends OLPointer {
     // Calculate stratch factors
     let scaleX = 1;
     let scaleY = 1;
+    let anchorPoint: Coordinate;
 
     switch (handleType) {
       case HandleType.STRETCH_N:
         scaleY = (coordinate[1] - minY) / (maxY - minY);
+        anchorPoint = [(minX + maxX) / 2, minY]; // South edge fixed
         break;
 
       case HandleType.STRETCH_E:
         scaleX = (coordinate[0] - minX) / (maxX - minX);
+        anchorPoint = [minX, (minY + maxY) / 2]; // West edge fixed
         break;
 
       case HandleType.STRETCH_S:
         scaleY = (maxY - coordinate[1]) / (maxY - minY);
+        anchorPoint = [(minX + maxX) / 2, maxY]; // North edge fixed
         break;
 
       case HandleType.STRETCH_W:
         scaleX = (maxX - coordinate[0]) / (maxX - minX);
+        anchorPoint = [maxX, (minY + maxY) / 2]; // East edge fixed
         break;
       default:
-        break;
+        return;
     }
 
     // Ensure positive scale factors
@@ -1041,15 +1051,15 @@ export class OLTransform extends OLPointer {
     const geometry = this.startGeometry.clone();
     if (geometry instanceof Point) {
       const coords = geometry.getCoordinates();
-      const scaledCoords = OLTransform.scaleCoordinate(coords, this.center!, scaleX, scaleY);
+      const scaledCoords = OLTransform.scaleCoordinate(coords, anchorPoint, scaleX, scaleY);
       geometry.setCoordinates(scaledCoords);
     } else if (geometry instanceof LineString) {
       const coords = geometry.getCoordinates();
-      const scaledCoords = coords.map((coord) => OLTransform.scaleCoordinate(coord, this.center!, scaleX, scaleY));
+      const scaledCoords = coords.map((coord) => OLTransform.scaleCoordinate(coord, anchorPoint, scaleX, scaleY));
       geometry.setCoordinates(scaledCoords);
     } else if (geometry instanceof Polygon) {
       const coords = geometry.getCoordinates();
-      const scaledCoords = coords.map((ring) => ring.map((coord) => OLTransform.scaleCoordinate(coord, this.center!, scaleX, scaleY)));
+      const scaledCoords = coords.map((ring) => ring.map((coord) => OLTransform.scaleCoordinate(coord, anchorPoint, scaleX, scaleY)));
       geometry.setCoordinates(scaledCoords);
     }
 
@@ -1187,7 +1197,7 @@ export class OLTransform extends OLPointer {
         case HandleType.SCALE_SE:
         case HandleType.SCALE_SW:
         case HandleType.SCALE_NW:
-          this.handleScale(coordinate, this.#transformType);
+          this.handleScale(coordinate, this.#transformType, event.originalEvent.ctrlKey);
           break;
 
         case HandleType.STRETCH_N:
