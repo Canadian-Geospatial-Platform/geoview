@@ -409,18 +409,18 @@ export class OLTransform extends OLPointer {
   }
 
   /**
-   * Scales a coordinate relative to a center point.
+   * Scales a coordinate relative to a fixed point
    * @param {Coordinate} coordinate - The coordinate to scale.
-   * @param {Coordinate} center - The center point.
+   * @param {Coordinate} fixedPoint - The fixed point.
    * @param {number} scaleX - The X scale factor.
    * @param {number} scaleY - The Y scale factor.
    * @returns {Coordinate} The scaled coordinate.
    */
-  static scaleCoordinate(coordinate: Coordinate, center: Coordinate, scaleX: number, scaleY: number): Coordinate {
-    const dx = coordinate[0] - center[0];
-    const dy = coordinate[1] - center[1];
+  static scaleCoordinate(coordinate: Coordinate, fixedPoint: Coordinate, scaleX: number, scaleY: number): Coordinate {
+    const dx = coordinate[0] - fixedPoint[0];
+    const dy = coordinate[1] - fixedPoint[1];
 
-    return [center[0] + dx * scaleX, center[1] + dy * scaleY];
+    return [fixedPoint[0] + dx * scaleX, fixedPoint[1] + dy * scaleY];
   }
 
   /**
