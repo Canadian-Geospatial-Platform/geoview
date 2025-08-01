@@ -7,6 +7,7 @@ import { EventDelegateBase } from '@/api/events/event-helper';
 export declare class Notifications {
     #private;
     mapId: string;
+    snackbarMessageQueue: SnackbarProps[];
     /**
      * The class constructor to instanciate a notification class
      * @param {string} mapId - The map id
@@ -36,6 +37,10 @@ export declare class Notifications {
      * @param {unknown[] | undefined} params - Optional, array of parameters to replace, i.e. ['short']
      */
     addNotificationError(messageKey: string, params?: unknown[]): void;
+    /**
+     * Display next message in snackbar message queue, if there is one
+     */
+    displayNextSnackbarMessage(): void;
     /**
      * Displays a message in the snackbar
      * @param {string} messageKey - The message or a locale key to retrieve
@@ -111,5 +116,11 @@ interface ISnackbarButton {
     action?: () => void;
 }
 export type SnackbarType = 'success' | 'error' | 'info' | 'warning';
+export type SnackbarProps = {
+    type: SnackbarType;
+    messageKey: string;
+    params: unknown[];
+    button?: ISnackbarButton;
+};
 export {};
 //# sourceMappingURL=notifications.d.ts.map

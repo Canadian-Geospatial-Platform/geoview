@@ -8,7 +8,7 @@ export declare class UIEventProcessor extends AbstractEventProcessor {
      * @returns {IUIState} The UI state.
      */
     protected static getUIStateProtected(mapId: string): IUIState;
-    static getActiveFooterBarTab(mapId: string): string;
+    static getActiveFooterBarTab(mapId: string): string | undefined;
     static getFooterBarComponents(mapId: string): TypeValidFooterBarTabsCoreProps[];
     static getAppBarComponents(mapId: string): TypeValidAppBarCoreProps[];
     static getCorePackageComponents(mapId: string): TypeMapCorePackages;
