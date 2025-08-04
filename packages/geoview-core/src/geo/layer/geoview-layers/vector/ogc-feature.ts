@@ -331,6 +331,36 @@ export class OgcFeature extends AbstractGeoViewVector {
     // Return it
     return geoviewLayerConfig;
   }
+
+  /**
+   * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
+   * @returns A Promise with the layer configuration
+   * @experimental
+   */
+  // TODO: REFACTOR CONFIG API
+  static processOGCFeatureConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    url: string,
+    layerIds: string[]
+  ): Promise<ConfigBaseClass[]> {
+    // Create the Layer config
+    const layerConfig = OgcFeature.createOgcFeatureLayerConfig(
+      geoviewLayerId,
+      geoviewLayerName,
+      url,
+      false,
+      layerIds.map((layerId) => {
+        return { id: layerId };
+      })
+    );
+
+    // Create the class from geoview-layers package
+    const myLayer = new OgcFeature(layerConfig);
+
+    // Process it
+    return AbstractGeoViewVector.processConfig(myLayer);
+  }
 }
 
 /**

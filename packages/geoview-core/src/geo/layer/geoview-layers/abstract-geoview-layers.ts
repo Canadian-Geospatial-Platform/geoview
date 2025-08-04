@@ -1095,6 +1095,59 @@ export abstract class AbstractGeoViewLayer {
     layerConfig?.setLayerStatusError();
   }
 
+  /**
+   * Processes a Layer Config by calling 'createGeoViewLayers' on the provided layer.
+   * @param {AbstractGeoViewLayer} layer - The layer to use to process the configuration
+   * @returns {Promise<ConfigBaseClass>} The promise of a generated ConfigBaseClass.
+   * @private
+   */
+  protected static processConfig(layer: AbstractGeoViewLayer): Promise<ConfigBaseClass[]> {
+    // Create a promise that the layer config will be created
+    const promise = new Promise<ConfigBaseClass[]>((resolve, reject) => {
+      // Register a handler when the layer config has been created for this config
+      layer.onLayerConfigCreated((geoviewLayer: AbstractGeoViewLayer, event: LayerConfigCreatedEvent) => {
+        // A Layer Config was created
+        logger.logDebug('Config created', event.config);
+      });
+
+      // (Extra) Register a handler when a Group layer has been created for this config
+      layer.onLayerGroupCreated((geoviewLayer: AbstractGeoViewLayer, event: LayerGroupCreatedEvent) => {
+        // A Group Layer was created
+        logger.logDebug('Group Layer created', event.layer);
+      });
+
+      // (Extra) Register a handler when a GV layer has been created for this config
+      layer.onLayerGVCreated((geoviewLayer: AbstractGeoViewLayer, event: LayerGVCreatedEvent) => {
+        // A GV Layer was created
+        logger.logDebug('GV Layer created', event.layer);
+      });
+
+      // Start the geoview-layers config process
+      layer
+        .createGeoViewLayers()
+        .then((configs) => {
+          // If no errors
+          if (layer.layerLoadError.length === 0) {
+            // Resolve with the configurations
+            resolve(configs);
+          } else {
+            // Errors happened
+            // If only one, throw as-is
+            if (layer.layerLoadError.length === 1) throw layer.layerLoadError[0];
+            // Throw them all inside an AggregateError
+            layer.throwAggregatedLayerLoadErrors();
+          }
+        })
+        .catch((error: unknown) => {
+          // Reject
+          reject(formatError(error));
+        });
+    });
+
+    // Return the promise
+    return promise;
+  }
+
   // #endregion
 }
 

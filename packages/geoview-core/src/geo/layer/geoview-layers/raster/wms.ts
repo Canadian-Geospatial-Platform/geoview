@@ -31,6 +31,7 @@ import {
 import { Fetch } from '@/core/utils/fetch-helper';
 import { deepMergeObjects } from '@/core/utils/utilities';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
+import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.WMS;
@@ -809,6 +810,38 @@ export class WMS extends AbstractGeoViewRaster {
 
     // Return it
     return geoviewLayerConfig;
+  }
+
+  /**
+   * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
+   * @returns A Promise with the layer configuration
+   * @experimental
+   */
+  // TODO: REFACTOR CONFIG API
+  static processWMSConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    url: string,
+    typeOfServer: TypeOfServer,
+    layerIds: number[]
+  ): Promise<ConfigBaseClass[]> {
+    // Create the Layer config
+    const layerConfig = WMS.createWMSLayerConfig(
+      geoviewLayerId,
+      geoviewLayerName,
+      url,
+      typeOfServer,
+      false,
+      layerIds.map((layerId) => {
+        return { id: layerId };
+      })
+    );
+
+    // Create the class from geoview-layers package
+    const myLayer = new WMS(layerConfig, false);
+
+    // Process it
+    return AbstractGeoViewLayer.processConfig(myLayer);
   }
 
   /**
