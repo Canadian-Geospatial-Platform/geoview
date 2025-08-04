@@ -2,6 +2,7 @@ import { ImageArcGISRest } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/ImageArcGISRest';
 
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import {
   TypeLayerEntryConfig,
@@ -14,6 +15,7 @@ import { commonProcessLayerMetadata } from '@/geo/layer/geoview-layers/esri-laye
 import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
+import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 
 export interface TypeEsriImageLayerConfig extends TypeGeoviewLayerConfig {
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_IMAGE;
@@ -135,6 +137,21 @@ export class EsriImage extends AbstractGeoViewRaster {
 
     // Return it
     return geoviewLayerConfig;
+  }
+
+  /**
+   * Processes an Esry Image layer config returning a Promise of an array of ConfigBaseClass layer entry configurations.
+   * @returns A Promise with the layer configurations
+   */
+  static processEsriImageConfig(geoviewLayerId: string, geoviewLayerName: string, url: string): Promise<ConfigBaseClass[]> {
+    // Create the Layer config
+    const layerConfig = EsriImage.createEsriImageLayerConfig(geoviewLayerId, geoviewLayerName, url, false);
+
+    // Create the class from geoview-layers package
+    const myLayer = new EsriImage(layerConfig);
+
+    // Process it
+    return AbstractGeoViewLayer.processConfig(myLayer);
   }
 
   /**

@@ -2,6 +2,7 @@ import { ImageArcGISRest } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/ImageArcGISRest';
 import { cloneDeep } from 'lodash';
 
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import {
   EsriDynamicLayerEntryConfig,
@@ -211,6 +212,35 @@ export class EsriDynamic extends AbstractGeoViewRaster {
 
     // Return it
     return geoviewLayerConfig;
+  }
+
+  /**
+   * Processes an Esry Dynamic layer config returning a Promise of an array of ConfigBaseClass layer entry configurations.
+   * @returns A Promise with the layer configurations.
+   */
+  static processEsriDynamicConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    url: string,
+    layerIds: number[]
+  ): Promise<ConfigBaseClass[]> {
+    // Create the Layer config
+    const layerConfig = EsriDynamic.createEsriDynamicLayerConfig(
+      geoviewLayerId,
+      geoviewLayerName,
+      url,
+      false,
+      layerIds.map((layerId) => {
+        return { id: layerId, index: layerId };
+      }),
+      {}
+    );
+
+    // Create the class from geoview-layers package
+    const myLayer = new EsriDynamic(layerConfig);
+
+    // Process it
+    return AbstractGeoViewLayer.processConfig(myLayer);
   }
 
   /**

@@ -148,14 +148,15 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   }
 
   /**
-   * Overrides the serialization of the mother class
-   * @returns {unknown} The serialized TypeBaseLayerEntryConfig
+   * Overrides the toJson of the mother class
+   * @returns {unknown} The Json representation of the instance.
+   * @protected
    */
-  override onSerialize(): unknown {
+  protected override onToJson(): unknown {
     // Call parent
     // GV Can be any object so disable eslint and proceed with caution
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const serialized = super.onSerialize() as any;
+    const serialized = super.onToJson() as any;
 
     // Copy values
     serialized.initialSettings = this.initialSettings;

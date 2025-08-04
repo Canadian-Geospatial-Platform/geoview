@@ -23,6 +23,7 @@ import {
 import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 import { GVXYZTiles } from '@/geo/layer/gv-layers/tile/gv-xyz-tiles';
 import { ConfigBaseClass, TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
+import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 
 // ? Do we keep this TODO ? Dynamic parameters can be placed on the dataAccessPath and initial settings can be used on xyz-tiles.
 // TODO: Implement method to validate XYZ tile service
@@ -243,6 +244,36 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
     // Return it
     return geoviewLayerConfig;
+  }
+
+  /**
+   * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
+   * @returns A Promise with the layer configuration
+   * @experimental
+   */
+  // TODO: REFACTOR CONFIG API
+  static processXYZTilesConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    url: string,
+    layerIds: string[]
+  ): Promise<ConfigBaseClass[]> {
+    // Create the Layer config
+    const layerConfig = XYZTiles.createXYZTilesLayerConfig(
+      geoviewLayerId,
+      geoviewLayerName,
+      url,
+      false,
+      layerIds.map((layerId) => {
+        return { id: layerId };
+      })
+    );
+
+    // Create the class from geoview-layers package
+    const myLayer = new XYZTiles(layerConfig);
+
+    // Process it
+    return AbstractGeoViewLayer.processConfig(myLayer);
   }
 
   /**

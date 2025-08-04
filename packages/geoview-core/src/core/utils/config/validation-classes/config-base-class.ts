@@ -336,19 +336,20 @@ export abstract class ConfigBaseClass {
   }
 
   /**
-   * Serializes the ConfigBaseClass class
-   * @returns {unknown} The serialized ConfigBaseClass
+   * Writes the instance as Json.
+   * @returns {unknown} The Json representation of the instance.
    */
-  serialize(): unknown {
+  toJson(): unknown {
     // Redirect
-    return this.onSerialize();
+    return this.onToJson();
   }
 
   /**
-   * Overridable function to serialize a ConfigBaseClass
-   * @returns {unknown} The serialized ConfigBaseClass
+   * Overridable function to write the instance as Json.
+   * @returns {unknown} The Json representation of the instance.
+   * @protected
    */
-  onSerialize(): unknown {
+  protected onToJson(): unknown {
     return {
       layerName: this.layerName,
       layerId: this.layerId,

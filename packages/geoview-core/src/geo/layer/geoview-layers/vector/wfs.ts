@@ -426,6 +426,31 @@ export class WFS extends AbstractGeoViewVector {
     // Return it
     return geoviewLayerConfig;
   }
+
+  /**
+   * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
+   * @returns A Promise with the layer configuration
+   * @experimental
+   */
+  // TODO: REFACTOR CONFIG API
+  static processWFSConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerIds: string[]): Promise<ConfigBaseClass[]> {
+    // Create the Layer config
+    const layerConfig = WFS.createWfsFeatureLayerConfig(
+      geoviewLayerId,
+      geoviewLayerName,
+      url,
+      false,
+      layerIds.map((layerId) => {
+        return { id: layerId };
+      })
+    );
+
+    // Create the class from geoview-layers package
+    const myLayer = new WFS(layerConfig);
+
+    // Process it
+    return AbstractGeoViewVector.processConfig(myLayer);
+  }
 }
 
 export type WFSJsonResponse = {

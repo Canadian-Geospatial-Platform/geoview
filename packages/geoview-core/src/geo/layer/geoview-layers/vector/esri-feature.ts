@@ -243,6 +243,36 @@ export class EsriFeature extends AbstractGeoViewVector {
     // Return it
     return geoviewLayerConfig;
   }
+
+  /**
+   * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
+   * @returns A Promise with the layer configuration
+   * @experimental
+   */
+  // TODO: REFACTOR CONFIG API
+  static processEsriFeatureConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    url: string,
+    layerIds: number[]
+  ): Promise<ConfigBaseClass[]> {
+    // Create the Layer config
+    const layerConfig = EsriFeature.createEsriFeatureLayerConfig(
+      geoviewLayerId,
+      geoviewLayerName,
+      url,
+      false,
+      layerIds.map((layerId) => {
+        return { id: layerId, index: layerId };
+      })
+    );
+
+    // Create the class from geoview-layers package
+    const myLayer = new EsriFeature(layerConfig);
+
+    // Process it
+    return AbstractGeoViewRaster.processConfig(myLayer);
+  }
 }
 
 /**

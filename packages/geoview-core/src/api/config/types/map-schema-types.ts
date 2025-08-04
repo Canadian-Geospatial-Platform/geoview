@@ -1068,9 +1068,6 @@ export const convertLayerTypeToEntry = (layerType: TypeGeoviewLayerType): TypeLa
  * @returns {MapConfigLayerEntry} The serialized config as pure JSON
  */
 export const serializeTypeGeoviewLayerConfig = (geoviewLayerConfig: MapConfigLayerEntry): TypeGeoviewLayerConfig => {
-  // TODO: Create a 'serialize()' function inside `TypeGeoviewLayerConfig` when/if it's transformed to a class.
-  // TO.DOCONT: and copy this code in deleting this function here. For now, this explicit workaround function is necessary.
-
   // If GeoCore layer entry
   if (mapConfigLayerEntryIsGeoCore(geoviewLayerConfig)) {
     // Serialize
@@ -1101,9 +1098,9 @@ export const serializeTypeGeoviewLayerConfig = (geoviewLayerConfig: MapConfigLay
   for (let j = 0; j < (geoviewLayerConfigCasted.listOfLayerEntryConfig?.length || 0); j++) {
     // TODO: Check - #1883 why some don't have the serialize funcion in here!? Maybe a Type vs Class thing!?
     // Got to check if serialize exists, because some aren't classes!? Making it as any for now, as we can't trust it
-    if ('serialize' in geoviewLayerConfigCasted.listOfLayerEntryConfig[j]) {
+    if ('toJson' in geoviewLayerConfigCasted.listOfLayerEntryConfig[j]) {
       // Serialize the TypeLayerEntryConfig
-      const serializedLayerEntryConfig = geoviewLayerConfigCasted.listOfLayerEntryConfig[j].serialize();
+      const serializedLayerEntryConfig = geoviewLayerConfigCasted.listOfLayerEntryConfig[j].toJson();
 
       // Store as serialized
       serializedGeoviewLayerConfig.listOfLayerEntryConfig.push(serializedLayerEntryConfig as TypeLayerEntryConfig);
