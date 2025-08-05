@@ -1,5 +1,4 @@
 import { Feature, Overlay } from 'ol';
-import { Coordinate } from 'ol/coordinate';
 import GeoJSON from 'ol/format/GeoJSON';
 import { LineString, Polygon, Point, Circle as CircleGeom, Geometry, SimpleGeometry } from 'ol/geom';
 import { fromCircle } from 'ol/geom/Polygon';
@@ -26,8 +25,6 @@ import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
-
-type CircleCoord = [Coordinate, number];
 
 export const DRAW_GROUP_KEY = 'draw-group';
 
@@ -480,32 +477,33 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   };
 
   /**
-   * Compares two geometries to see if they're equal
-   * @param {Geometry} geom1 The first geometry
-   * @param {Geometry} geom2 The second geometry
-   * @returns {boolean} If the two geometries are equal
+   * Sets up a feature with ID, geometry group, and type-specific properties
+   * @param {Feature} feature The feature to set up
+   * @param {string} geomType The geometry type
+   * @param {StyleProps} style The style properties
+   * @param {string} iconSrc The icon source for point features
+   * @param {string} featureId Optional feature ID (generates one if not provided)
    */
-  static #geometriesEqual(geom1: Geometry, geom2: Geometry): boolean {
-    if (geom1.getType() !== geom2.getType()) return false;
+  static #setFeatureProperties(feature: Feature, geomType: string, style: StyleProps, iconSrc?: string, featureId?: string): void {
+    // Set up basic feature properties
+    if (feature.get('featureId') === undefined) {
+      const id = featureId || generateId();
+      feature.setId(id);
+      feature.set('featureId', id);
+      feature.set('geometryGroup', DRAW_GROUP_KEY);
+    }
 
-    // Simple coordinate comparison - works for most geometry types
-    const coords1 = this.#getGeometryCoordinates(geom1);
-    const coords2 = this.#getGeometryCoordinates(geom2);
-
-    return JSON.stringify(coords1) === JSON.stringify(coords2);
-  }
-
-  /**
-   * Gets coordinates from any geometry type
-   * @param {Geometry} geometry The geometry to be processed
-   * @returns {Coordinate | Coordinate[] | Coordinate[][] | CircleCoord | undefined} The resulting coordinates, array of coordinates, or undefined
-   */
-  static #getGeometryCoordinates(geometry: Geometry): Coordinate | Coordinate[] | Coordinate[][] | CircleCoord | undefined {
-    if (geometry instanceof Point) return geometry.getCoordinates();
-    if (geometry instanceof LineString) return geometry.getCoordinates();
-    if (geometry instanceof Polygon) return geometry.getCoordinates();
-    if (geometry instanceof CircleGeom) return [geometry.getCenter(), geometry.getRadius()];
-    return undefined;
+    // Set type-specific properties
+    if (geomType === 'Point' && iconSrc) {
+      feature.set('iconSrc', iconSrc);
+    } else if (geomType === 'Text') {
+      feature.set('text', style.text);
+      feature.set('textSize', style.textSize);
+      feature.set('textFont', style.textFont);
+      feature.set('textColor', style.textColor);
+      feature.set('textHaloColor', style.textHaloColor);
+      feature.set('textHaloWidth', style.textHaloWidth);
+    }
   }
 
   // #region Drawing Actions
@@ -593,17 +591,14 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
       if (currentGeomType === 'Point') {
         // For points, use a circle style
-        const iconSrc = state.actions.getIconSrc();
         featureStyle = new Style({
           image: new OLIcon({
-            src: iconSrc,
+            src: state.actions.getIconSrc(),
             anchor: [0.5, 1], // 50% of X = Middle, 100% Y = Bottom
             anchorXUnits: 'fraction',
             anchorYUnits: 'fraction',
           }),
         });
-        // Set the iconSrc string for geojson styling in the download
-        feature.set('iconSrc', iconSrc);
       } else if (currentGeomType === 'Text') {
         featureStyle = new Style({
           text: new Text({
@@ -614,13 +609,6 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
             offsetY: -15,
           }),
         });
-
-        feature.set('text', currentStyle.text);
-        feature.set('textSize', currentStyle.textSize);
-        feature.set('textFont', currentStyle.textFont);
-        feature.set('textColor', currentStyle.textColor);
-        feature.set('textHaloColor', currentStyle.textHaloColor);
-        feature.set('textHaloWidth', currentStyle.textHaloWidth);
       } else {
         // Convert Circle to a Polygon because geojson can't handle circles (for download / upload)
         if (currentGeomType === 'Circle') {
@@ -643,11 +631,8 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       // Apply the style to the feature
       feature.setStyle(featureStyle);
 
-      // Set the id of the feature for future lookups
-      const featureId = generateId();
-      feature.setId(featureId);
-      feature.set('featureId', featureId);
-      feature.set('geometryGroup', DRAW_GROUP_KEY);
+      // Set the feature properties for proper download / upload
+      this.#setFeatureProperties(feature, currentGeomType, currentStyle, state.actions.getIconSrc());
 
       // Add overlays to non-point features
       if (!(geom instanceof Point)) {
@@ -700,6 +685,8 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     } else {
       this.startDrawing(mapId);
     }
+
+    this.#updateUndoRedoState(mapId);
   }
 
   /**
@@ -765,6 +752,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
       // Update the overlay with new values
       this.#createMeasureTooltip(feature, true, mapId);
+
+      // Update the undo redo state
+      this.#updateUndoRedoState(mapId);
     };
   }
 
@@ -808,7 +798,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
           const currentGeometry = previousFeature.getGeometry();
 
           // Check for changes
-          const geometryChanged = currentGeometry && !this.#geometriesEqual(savedState.originalGeometry, currentGeometry);
+          const geometryChanged = currentGeometry && savedState.originalGeometry.getRevision() !== currentGeometry.getRevision();
           const styleChanged =
             savedState.originalStyleStored && savedState.originalStyle && savedState.originalStyle !== previousFeature.getStyle();
 
@@ -869,6 +859,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       }
 
       this.getDrawerState(mapId)?.actions.setSelectedDrawing(newFeature);
+
+      // Update the undo redo state
+      this.#updateUndoRedoState(mapId);
     };
   }
 
@@ -906,6 +899,8 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     } else {
       this.startEditing(mapId);
     }
+
+    this.#updateUndoRedoState(mapId);
   }
 
   /**
@@ -936,9 +931,11 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
       // Apply the new style
       let featureStyle;
+      let geomType: string;
       const isTextFeature = selectedFeature.get('text') !== undefined;
 
       if (selectedFeature.getGeometry() instanceof Point && !isTextFeature) {
+        geomType = 'Point';
         featureStyle = new Style({
           image: new OLIcon({
             src: state.actions.getIconSrc(),
@@ -948,13 +945,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
           }),
         });
       } else if (isTextFeature) {
-        selectedFeature.set('text', newStyle.text);
-        selectedFeature.set('textSize', newStyle.textSize);
-        selectedFeature.set('textFont', newStyle.textFont);
-        selectedFeature.set('textColor', newStyle.textColor);
-        selectedFeature.set('textHaloColor', newStyle.textHaloColor);
-        selectedFeature.set('textHaloWidth', newStyle.textHaloWidth);
-
+        geomType = 'Text';
         featureStyle = new Style({
           text: new Text({
             text: newStyle.text,
@@ -965,6 +956,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
           }),
         });
       } else {
+        geomType = 'Other'; // Just something to differentiate from Point & Text. It will be skipped
         featureStyle = new Style({
           stroke: new Stroke({
             color: newStyle.strokeColor,
@@ -976,6 +968,8 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
         });
       }
 
+      // Set the new feature properties and style
+      this.#setFeatureProperties(selectedFeature, geomType, newStyle, state.actions.getIconSrc());
       selectedFeature.setStyle(featureStyle);
     }
   }
@@ -1189,6 +1183,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
           // Apply style from properties
           const styleProps = (geoFeature.properties.style as unknown as TypeGeoJSONStyleProps) || undefined;
+          const iconSrc = styleProps?.iconSrc || DEFAULT_ICON_SOURCE;
           let featureStyle;
           if (olGeometry instanceof Point) {
             if (styleProps?.text !== undefined) {
@@ -1205,17 +1200,8 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
                   offsetY: -15,
                 }),
               });
-
-              // Set text properties on feature
-              feature.set('text', styleProps.text);
-              feature.set('textSize', styleProps.textSize);
-              feature.set('textFont', styleProps.textFont);
-              feature.set('textColor', styleProps.textColor);
-              feature.set('textHaloColor', styleProps.textHaloColor);
-              feature.set('textHaloWidth', styleProps.textHaloWidth);
             } else {
               // Handle points with icons
-              const iconSrc = styleProps?.iconSrc || DEFAULT_ICON_SOURCE;
               featureStyle = new Style({
                 image: new OLIcon({
                   src: iconSrc,
@@ -1224,7 +1210,6 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
                   anchorYUnits: 'fraction',
                 }),
               });
-              feature.set('iconSrc', iconSrc);
             }
           } else {
             // handle lines / polygons
@@ -1242,9 +1227,12 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
           // Set feature properties
           const featureId = (geoFeature.properties.id as string) || generateId();
           feature.setStyle(featureStyle);
-          feature.setId(featureId);
-          feature.set('featureId', featureId);
-          feature.set('geometryGroup', DRAW_GROUP_KEY);
+
+          if (styleProps?.text !== undefined) {
+            this.#setFeatureProperties(feature, 'Text', styleProps as StyleProps, undefined, featureId);
+          } else {
+            this.#setFeatureProperties(feature, 'Point', {} as StyleProps, iconSrc, featureId);
+          }
 
           // Add overlays to non-point features
           if (!(olGeometry instanceof Point)) {
@@ -1318,13 +1306,6 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     if (this.#keyboardHandlers.has(mapId)) return;
 
     const handler = (event: KeyboardEvent): void => {
-      // Don't handle undo/redo if a feature is currently selected for editing
-      const state = this.getDrawerState(mapId);
-      const transformInstance = state?.actions.getTransformInstance();
-      if (transformInstance?.getSelectedFeature()) {
-        return;
-      }
-
       if (event.ctrlKey || event.metaKey) {
         switch (event.key.toLowerCase()) {
           case 'z':
@@ -1353,6 +1334,17 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * @returns {boolean} If the action was successful
    */
   static undo(mapId: string): boolean {
+    const state = this.getDrawerState(mapId);
+    if (!state) return false;
+
+    // If editing, undo the transform instance and not the drawer-event-processor
+    const transformInstance = state.actions.getTransformInstance();
+    if (transformInstance && transformInstance.getSelectedFeature()) {
+      return transformInstance.undo(() => {
+        this.#updateUndoRedoState(mapId);
+      });
+    }
+
     const history = this.#drawerHistory.get(mapId);
     const currentIndex = this.#historyIndex.get(mapId);
 
@@ -1395,6 +1387,17 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * @returns {boolean} If the action was successful
    */
   static redo(mapId: string): boolean {
+    const state = this.getDrawerState(mapId);
+    if (!state) return false;
+
+    // If editing, redo the transform instance and not the drawer-event-processor
+    const transformInstance = state.actions.getTransformInstance();
+    if (transformInstance && transformInstance.getSelectedFeature()) {
+      return transformInstance.redo(() => {
+        this.#updateUndoRedoState(mapId);
+      });
+    }
+
     const history = this.#drawerHistory.get(mapId);
     const currentIndex = this.#historyIndex.get(mapId);
 
@@ -1564,6 +1567,16 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   static #updateUndoRedoState(mapId: string): void {
     const state = this.getDrawerState(mapId);
     if (!state) return;
+
+    const transformInstance = state.actions.getTransformInstance();
+    if (transformInstance && transformInstance.getSelectedFeature()) {
+      const undoDisabled = !transformInstance.canUndo();
+      const redoDisabled = !transformInstance.canRedo();
+
+      state.actions.setUndoDisabled(undoDisabled);
+      state.actions.setRedoDisabled(redoDisabled);
+      return;
+    }
 
     const history = this.#drawerHistory.get(mapId) || [];
     const currentIndex = this.#historyIndex.get(mapId) ?? -1;

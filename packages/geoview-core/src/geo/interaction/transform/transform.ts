@@ -35,15 +35,19 @@ export class Transform extends Interaction {
   /** The embedded OpenLayers Transform component */
   #ol_transform: OLTransform;
 
-  /** Callback handlers for the transform events */
+  /** Callback handlers for when a feature is initially selected or when a handle is clicked on */
   #onTransformStartHandlers: TransformEventDelegate[] = [];
 
+  /** Callback handler for when a feature is being transformed */
   #onTransformingHandlers: TransformEventDelegate[] = [];
 
+  /** Callback handler for mouse up event */
   #onTransformEndHandlers: TransformEventDelegate[] = [];
 
+  /** Callback handler for when a feature is deleted */
   #onDeleteFeatureHandlers: TransformDeleteFeatureEventDelegate[] = [];
 
+  /** Callback handler for when a feature is selected */
   #onSelectionChangeHandlers: TransformSelectionEventDelegate[] = [];
 
   /**
@@ -208,6 +212,34 @@ export class Transform extends Interaction {
    */
   public clearSelection(): void {
     this.#ol_transform.clearSelection();
+  }
+
+  /**
+   * Undo the last action
+   */
+  public undo(callback?: () => void): boolean {
+    return this.#ol_transform.undo(callback);
+  }
+
+  /**
+   * Redo the last action
+   */
+  public redo(callback?: () => void): boolean {
+    return this.#ol_transform.redo(callback);
+  }
+
+  /**
+   * Checks if undo is possible
+   */
+  public canUndo(): boolean {
+    return this.#ol_transform.canUndo();
+  }
+
+  /**
+   * Checks if redo is possible
+   */
+  public canRedo(): boolean {
+    return this.#ol_transform.canRedo();
   }
 
   /**

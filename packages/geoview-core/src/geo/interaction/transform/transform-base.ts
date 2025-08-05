@@ -235,9 +235,6 @@ export class OLTransform extends OLPointer {
   /** Maximum history size */
   #maxHistorySize = 50;
 
-  /** Keyboard event handler */
-  #keyboardHandler?: (event: KeyboardEvent) => void;
-
   /** Callback functions for events */
   onTransformstart?: (event: TransformEvent) => void;
 
@@ -289,9 +286,6 @@ export class OLTransform extends OLPointer {
 
     // Set up feature collection change handlers
     this.features.on('remove', this.onFeatureRemove.bind(this));
-
-    // Keyboard event handler
-    this.#setupKeyboardHandler();
   }
 
   // #region Methods
@@ -324,9 +318,6 @@ export class OLTransform extends OLPointer {
 
     // Set the selected feature
     this.selectedFeature = feature;
-
-    // Save initial state to history
-    this.#saveToHistory();
 
     // Emit selection change event
     if (this.onSelectionChange) {
@@ -488,7 +479,6 @@ export class OLTransform extends OLPointer {
    * Cleans up the interaction.
    */
   override dispose(): void {
-    this.#removeKeyboardHandler();
     this.clearSelection();
   }
 
@@ -1131,7 +1121,7 @@ export class OLTransform extends OLPointer {
         return true;
       }
 
-      // Check if we clicked on a feature to select it
+      // Check if we clicked on a feature to select it and / or move it
       const features = map.getFeaturesAtPixel(event.pixel);
 
       if (features && features.length > 0) {
@@ -1139,10 +1129,10 @@ export class OLTransform extends OLPointer {
         if (this.features.getArray().includes(feature)) {
           // Only select if it's a different feature
           if (this.selectedFeature !== feature) {
-            this.selectFeature(feature);
+            this.selectFeature(feature); // calls this.onSelectionChange()
           }
 
-          // Start translation if enabled
+          // Start translation / moving entire feature
           if (this.options.translateFeature) {
             this.startCoordinate = coordinate;
             this.startGeometry = feature.getGeometry()?.clone();
@@ -1152,7 +1142,7 @@ export class OLTransform extends OLPointer {
             // Clear Handles
             this.clearHandles();
 
-            // Dispatch transform start event
+            // Dispatch transform start event since we have started moving the feature
             this.onTransformstart?.(new TransformEvent('transformstart', feature));
             return true;
           }
@@ -1235,8 +1225,12 @@ export class OLTransform extends OLPointer {
 
     try {
       if (this.#isTransforming && this.selectedFeature) {
-        // Save state to history after transformation
-        this.#saveToHistory();
+        // Save state to history after transformation if the geometry changed
+        const currentGeometry = this.selectedFeature.getGeometry();
+        const geometryChanged = this.startGeometry && currentGeometry && this.startGeometry.getRevision() !== currentGeometry.getRevision();
+        if (geometryChanged) {
+          this.#saveToHistory();
+        }
 
         // Update handles to match the new geometry position
         this.updateHandles();
@@ -1371,54 +1365,6 @@ export class OLTransform extends OLPointer {
   // #region Undo / Redo
 
   /**
-   * Sets up keyboard event handling for undo/redo.
-   */
-  #setupKeyboardHandler(): void {
-    this.#keyboardHandler = (event: KeyboardEvent) => {
-      // Only handle if we have a selected feature and not currently transforming
-      if (!this.selectedFeature || this.#isTransforming) return;
-
-      if (event.ctrlKey || event.metaKey) {
-        // Support both Ctrl (Windows/Linux) and Cmd (Mac)
-        switch (event.key.toLowerCase()) {
-          case 'z':
-            if (event.shiftKey) {
-              // Ctrl+Shift+Z = Redo
-              if (this.redo()) {
-                event.preventDefault();
-              }
-            } else if (this.undo()) {
-              // Ctrl+Z = Undo
-              event.preventDefault();
-            }
-            break;
-          case 'y':
-            // Ctrl+Y = Redo (alternative)
-            if (this.redo()) {
-              event.preventDefault();
-            }
-            break;
-
-          default:
-            break;
-        }
-      }
-    };
-
-    document.addEventListener('keydown', this.#keyboardHandler);
-  }
-
-  /**
-   * Removes keyboard event listeners.
-   */
-  #removeKeyboardHandler(): void {
-    if (this.#keyboardHandler) {
-      document.removeEventListener('keydown', this.#keyboardHandler);
-      this.#keyboardHandler = undefined;
-    }
-  }
-
-  /**
    * Saves the current geometry state to history.
    */
   #saveToHistory(): void {
@@ -1453,13 +1399,16 @@ export class OLTransform extends OLPointer {
    * Undoes the last transformation.
    * @returns {boolean} True if undo was successful.
    */
-  undo(): boolean {
+  undo(callback?: () => void): boolean {
     if (!this.selectedFeature || this.#historyIndex <= 0) return false;
 
     this.#historyIndex--;
     const previousGeometry = this.#geometryHistory[this.#historyIndex];
     this.selectedFeature.setGeometry(previousGeometry.clone());
     this.updateHandles();
+
+    // Execute callback after state is updated
+    if (callback) callback();
 
     return true;
   }
@@ -1468,13 +1417,16 @@ export class OLTransform extends OLPointer {
    * Redoes the next transformation.
    * @returns {boolean} True if redo was successful.
    */
-  redo(): boolean {
+  redo(callback?: () => void): boolean {
     if (!this.selectedFeature || this.#historyIndex >= this.#geometryHistory.length - 1) return false;
 
     this.#historyIndex++;
     const nextGeometry = this.#geometryHistory[this.#historyIndex];
     this.selectedFeature.setGeometry(nextGeometry.clone());
     this.updateHandles();
+
+    // Execute callback after state is updated
+    if (callback) callback();
 
     return true;
   }
@@ -1492,6 +1444,6 @@ export class OLTransform extends OLPointer {
    * @returns {boolean} True if redo is available.
    */
   canRedo(): boolean {
-    return this.#historyIndex < this.#geometryHistory.length - 1;
+    return this.#historyIndex !== -1 && this.#historyIndex < this.#geometryHistory.length - 1;
   }
 }
