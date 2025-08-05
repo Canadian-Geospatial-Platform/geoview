@@ -45,6 +45,12 @@ interface TypeGeoJSONStyleProps {
   strokeWidth?: number;
   fillColor?: string;
   iconSrc?: string;
+  text?: string;
+  textSize?: number;
+  textFont?: string;
+  textColor?: string;
+  textHaloColor?: string;
+  textHaloWidth?: number;
 }
 
 const DEFAULT_ICON_SOURCE =
@@ -1100,16 +1106,28 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
           let styleProps: TypeGeoJSONStyleProps = {};
           if (olStyle && geometry) {
             if (geometry instanceof Point) {
-              // Handle point styles (icon)
-              styleProps.iconSrc = feature.get('iconSrc');
+              const isTextFeature = feature.get('text') !== undefined;
+              if (isTextFeature) {
+                styleProps = {
+                  text: feature.get('text'),
+                  textSize: feature.get('textSize'),
+                  textFont: feature.get('textFont'),
+                  textColor: feature.get('textColor'),
+                  textHaloColor: feature.get('textHaloColor'),
+                  textHaloWidth: feature.get('textHaloWidth'),
+                };
+              } else {
+                // point style icon
+                styleProps.iconSrc = feature.get('iconSrc');
+              }
             } else {
               // Handle polygon/line styles
               const stroke = olStyle.getStroke?.();
               const fill = olStyle.getFill?.();
               styleProps = {
-                strokeColor: (stroke?.getColor() as string) || '#000000',
-                strokeWidth: (stroke?.getWidth() as number) || 1,
-                fillColor: (fill?.getColor() as string) || '#ffffff',
+                strokeColor: stroke?.getColor() as string,
+                strokeWidth: stroke?.getWidth() as number,
+                fillColor: fill?.getColor() as string,
               };
             }
           }
@@ -1173,24 +1191,50 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
           const styleProps = (geoFeature.properties.style as unknown as TypeGeoJSONStyleProps) || undefined;
           let featureStyle;
           if (olGeometry instanceof Point) {
-            const iconSrc = styleProps?.iconSrc || DEFAULT_ICON_SOURCE;
-            featureStyle = new Style({
-              image: new OLIcon({
-                src: iconSrc,
-                anchor: [0.5, 1],
-                anchorXUnits: 'fraction',
-                anchorYUnits: 'fraction',
-              }),
-            });
-            feature.set('iconSrc', iconSrc);
+            if (styleProps?.text !== undefined) {
+              // Handle text styling
+              featureStyle = new Style({
+                text: new Text({
+                  text: styleProps.text,
+                  fill: new Fill({ color: styleProps.textColor }),
+                  stroke: new Stroke({
+                    color: styleProps.textHaloColor,
+                    width: styleProps.textHaloWidth,
+                  }),
+                  font: `${styleProps.textSize}px ${styleProps.textFont}`,
+                  offsetY: -15,
+                }),
+              });
+
+              // Set text properties on feature
+              feature.set('text', styleProps.text);
+              feature.set('textSize', styleProps.textSize);
+              feature.set('textFont', styleProps.textFont);
+              feature.set('textColor', styleProps.textColor);
+              feature.set('textHaloColor', styleProps.textHaloColor);
+              feature.set('textHaloWidth', styleProps.textHaloWidth);
+            } else {
+              // Handle points with icons
+              const iconSrc = styleProps?.iconSrc || DEFAULT_ICON_SOURCE;
+              featureStyle = new Style({
+                image: new OLIcon({
+                  src: iconSrc,
+                  anchor: [0.5, 1],
+                  anchorXUnits: 'fraction',
+                  anchorYUnits: 'fraction',
+                }),
+              });
+              feature.set('iconSrc', iconSrc);
+            }
           } else {
+            // handle lines / polygons
             featureStyle = new Style({
               stroke: new Stroke({
-                color: styleProps?.strokeColor || '#000000',
-                width: styleProps?.strokeWidth || 1.3,
+                color: styleProps?.strokeColor,
+                width: styleProps?.strokeWidth,
               }),
               fill: new Fill({
-                color: styleProps?.fillColor || '#ffffff',
+                color: styleProps?.fillColor,
               }),
             });
           }
