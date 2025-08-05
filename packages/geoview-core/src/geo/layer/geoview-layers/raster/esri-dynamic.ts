@@ -74,11 +74,11 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    */
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Fetch the metadata
-    const metadata = (await AbstractGeoViewRaster.fetchMetadata(
+    const metadata = await AbstractGeoViewRaster.fetchMetadata<TypeMetadataEsriDynamic>(
       this.metadataAccessPath,
       this.geoviewLayerId,
       this.geoviewLayerName
-    )) as TypeMetadataEsriDynamic;
+    );
 
     // Now that we have metadata
     const { layers } = metadata;
@@ -215,7 +215,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   }
 
   /**
-   * Processes an Esry Dynamic layer config returning a Promise of an array of ConfigBaseClass layer entry configurations.
+   * Processes an Esri Dynamic config returning a Promise of an array of ConfigBaseClass layer entry configurations.
    * @returns A Promise with the layer configurations.
    */
   static processEsriDynamicConfig(

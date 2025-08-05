@@ -5,7 +5,7 @@ import { Box, ProgressBar } from '@/ui';
 import { useUIActiveAppBarTab, useUIActiveTrapGeoView, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { GeolocatorResult } from '@/core/components/geolocator/geolocator-result';
 import { getSxClasses } from '@/core/components/geolocator/geolocator-style';
-import { CV_DEFAULT_APPBAR_CORE } from '@/api/config/types/config-constants';
+import { DEFAULT_APPBAR_CORE } from '@/api/config/types/map-schema-types';
 import { FocusTrapContainer } from '@/core/components/common';
 import { logger } from '@/core/utils/logger';
 import { useGeolocator } from '@/core/components/geolocator/hooks/use-geolocator';
@@ -58,7 +58,7 @@ export function Geolocator(): JSX.Element {
 
   const handleReset = useCallback(() => {
     setSearchValue('');
-    setActiveAppBarTab(CV_DEFAULT_APPBAR_CORE.GEOLOCATOR, false, false);
+    setActiveAppBarTab(DEFAULT_APPBAR_CORE.GEOLOCATOR, false, false);
   }, [setActiveAppBarTab, setSearchValue]);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>): void => {
@@ -83,10 +83,10 @@ export function Geolocator(): JSX.Element {
   }, [debouncedRequest]);
 
   return (
-    <FocusTrapContainer open={tabId === CV_DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen && activeTrapGeoView} id="geolocator-focus-trap">
+    <FocusTrapContainer open={tabId === DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen && activeTrapGeoView} id="geolocator-focus-trap">
       <Box
         sx={sxClasses.root}
-        visibility={tabId === CV_DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen ? 'visible' : 'hidden'}
+        visibility={tabId === DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen ? 'visible' : 'hidden'}
         id="geolocator-search"
       >
         <Box sx={sxClasses.geolocator}>

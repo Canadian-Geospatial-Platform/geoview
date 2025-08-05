@@ -6,7 +6,7 @@ import { TypeLegendLayer } from '@/core/components/layers/types';
 import { useTimeSliderLayers } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 
 import { logger } from '@/core/utils/logger';
-import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
+import { CONST_LAYER_TYPES } from '@/api/config/types/map-schema-types';
 import { getSxClasses } from './export-modal-style';
 import { DateMgt } from '@/core/utils/date-mgt';
 
@@ -28,7 +28,7 @@ function LegendContainerComponent({ layers }: LegendContainerProps): JSX.Element
   const renderWMSLayerImage = (layer: TypeLegendLayer, alt: string): JSX.Element => {
     const imgUrl = layer.icons?.[0]?.iconImage;
     const isWMSWithLegend =
-      layer.type === CV_CONST_LAYER_TYPES.WMS &&
+      layer.type === CONST_LAYER_TYPES.WMS &&
       layer.icons?.[0]?.iconImage &&
       layer.icons?.[0]?.iconImage &&
       layer.icons[0].iconImage !== 'no data';

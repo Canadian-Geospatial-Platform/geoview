@@ -55,8 +55,8 @@ export class Fetch {
       // Get the json body of the response
       const responseJson = await response.json();
 
-      // Check if the response is an object with no properties
-      if (responseJson.constructor === Object && Object.keys(responseJson).length === 0) {
+      // Check if the response is an object with no properties (if it's an empty array, then, that's fine for the purposes here)
+      if (responseJson === null || (responseJson.constructor === Object && Object.keys(responseJson).length === 0)) {
         // Throw empty response error
         throw new ResponseEmptyError();
       }
@@ -429,14 +429,13 @@ export class Fetch {
     timeoutSignal: AbortSignal | undefined,
     timeoutMs: number | undefined
   ): void {
-    // If the timeout signal caused the abort (and not the user-provided signal)
-    if (timeoutSignal?.aborted && !originalSignal?.aborted) {
-      throw new RequestTimeoutError(timeoutMs!);
-    }
-
     // If the original signal caused the abort
     if (originalSignal?.aborted) {
       throw new RequestAbortedError(originalSignal);
+    }
+    // If the timeout signal caused the abort
+    if (timeoutSignal?.aborted) {
+      throw new RequestTimeoutError(timeoutMs!);
     }
 
     // If the error is a TypeError, it's likely a network issue

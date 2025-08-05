@@ -140,7 +140,7 @@ export class EsriImage extends AbstractGeoViewRaster {
   }
 
   /**
-   * Processes an Esry Image layer config returning a Promise of an array of ConfigBaseClass layer entry configurations.
+   * Processes an Esri Image config returning a Promise of an array of ConfigBaseClass layer entry configurations.
    * @returns A Promise with the layer configurations
    */
   static processEsriImageConfig(geoviewLayerId: string, geoviewLayerName: string, url: string): Promise<ConfigBaseClass[]> {

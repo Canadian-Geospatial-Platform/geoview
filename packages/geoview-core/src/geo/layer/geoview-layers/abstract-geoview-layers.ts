@@ -176,10 +176,9 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Must override method to read the service metadata from the metadataAccessPath.
-   * @returns {Promise<void>} A promise resolved once the metadata has been fetched.
+   * @returns {Promise<T>} A promise resolved once the metadata has been fetched.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  protected abstract onFetchServiceMetadata(): Promise<unknown | undefined>;
+  protected abstract onFetchServiceMetadata<T>(): Promise<T>;
 
   /**
    * Must override method to initialize a layer entry based on a GeoView layer config.
@@ -306,11 +305,11 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Fetches the metadata by calling onFetchServiceMetadata.
-   * @returns {Promise<unknown | undefined>} Returns a Promise of a metadata
+   * @returns {Promise<T>} Returns a Promise of a metadata
    */
-  fetchServiceMetadata(): Promise<unknown | undefined> {
+  fetchServiceMetadata<T>(): Promise<T> {
     // Redirect
-    return this.onFetchServiceMetadata();
+    return this.onFetchServiceMetadata<T>();
   }
 
   /**

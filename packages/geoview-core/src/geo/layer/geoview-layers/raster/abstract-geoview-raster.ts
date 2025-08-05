@@ -10,25 +10,31 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
   /**
    * Overrides the way the metadata is fetched.
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-   * @returns {Promise<unknown | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
+   * @returns {Promise<T>} A promise with the metadata or undefined when no metadata for the particular layer type.
    */
-  protected override onFetchServiceMetadata(): Promise<unknown | undefined> {
+  protected override onFetchServiceMetadata<T>(): Promise<T> {
     // Fetch it
-    return AbstractGeoViewRaster.fetchMetadata(this.metadataAccessPath, this.geoviewLayerId, this.geoviewLayerName);
+    return AbstractGeoViewRaster.fetchMetadata<T>(this.metadataAccessPath, this.geoviewLayerId, this.geoviewLayerName);
   }
 
   // #region STATIC
 
   /**
-   * Fetches the metadata for a typical AbstractGeoViewRaster class.
-   * @param {string} url - The url to query the metadata from.
+   * Fetches and validates metadata from a given URL for a GeoView raster layer.
+   * If the URL does not end with `.json`, the query string `?f=json` is appended to request JSON format.
+   * The response is parsed and checked for service-level errors. If an error is found, an exception is thrown.
+   * @param {string} url - The base URL to fetch the metadata from (e.g., ArcGIS REST endpoint).
+   * @param {string} geoviewLayerId - The unique identifier for the GeoView layer.
+   * @param {string} geoviewLayerName - The display name of the GeoView layer (used in error messages).
+   * @returns {Promise<T>} A promise resolving to the parsed JSON metadata response.
+   * @throws {ServiceError} If the metadata response contains an error.
    */
-  static async fetchMetadata(url: string, geoviewLayerId: string, geoviewLayerName: string): Promise<unknown> {
+  static async fetchMetadata<T>(url: string, geoviewLayerId: string, geoviewLayerName: string): Promise<T> {
     // The url
     const parsedUrl = url.toLowerCase().endsWith('json') ? url : `${url}?f=json`;
 
     // Query and read
-    const responseJson = await Fetch.fetchJson(parsedUrl);
+    const responseJson = await Fetch.fetchJson<T>(parsedUrl);
 
     // Validate the metadata response
     AbstractGeoViewRaster.throwIfMetatadaHasError(geoviewLayerId, geoviewLayerName, responseJson);

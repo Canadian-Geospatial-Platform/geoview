@@ -2,7 +2,7 @@ import Ajv from 'ajv';
 import addErrors from 'ajv-errors';
 import cloneDeep from 'lodash/cloneDeep';
 
-import schema from '@/api/config/types/config-validation-schema.json';
+import schema from '@/core/../../schema.json';
 import { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config';
 import { logger } from '@/core/utils/logger';
 

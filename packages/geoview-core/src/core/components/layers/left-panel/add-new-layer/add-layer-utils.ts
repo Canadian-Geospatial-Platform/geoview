@@ -1,8 +1,8 @@
 import {
-  ShapefileLayerConfig,
-  CONST_LAYER_ENTRY_TYPES,
-  TypeDisplayLanguage,
   CONST_LAYER_TYPES,
+  CONST_LAYER_ENTRY_TYPES,
+  ShapefileLayerConfig,
+  TypeDisplayLanguage,
   TypeGeoviewLayerType,
   TypeLayerEntryConfig,
   MapConfigLayerEntry,
@@ -10,7 +10,6 @@ import {
 } from '@/api/config/types/map-schema-types';
 import { generateId, getLocalizedMessage } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
-import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
 
 type BuildGeoViewLayerInput = {
   layerIdsToAdd: string[];
@@ -53,7 +52,7 @@ export class UtilAddLayer {
     ];
 
     if (includeStatic) {
-      layerOptions.push([CV_CONST_LAYER_TYPES.IMAGE_STATIC, getLocalizedMessage(language, 'layers.serviceImageStatic')]);
+      layerOptions.push([CONST_LAYER_TYPES.IMAGE_STATIC, getLocalizedMessage(language, 'layers.serviceImageStatic')]);
     }
 
     return layerOptions;
@@ -149,7 +148,7 @@ export class UtilAddLayer {
     }
 
     // If all sub layers are included, simply add the layer
-    if (layerType === CV_CONST_LAYER_TYPES.ESRI_DYNAMIC && UtilAddLayer.allSubLayersAreIncluded(groupLayer, layerIds)) {
+    if (layerType === CONST_LAYER_TYPES.ESRI_DYNAMIC && UtilAddLayer.allSubLayersAreIncluded(groupLayer, layerIds)) {
       return {
         layerId: groupLayerAsLayerEntryConfig?.layerId,
         layerName: layersToAdd.length === 1 ? layerName : groupLayerAsLayerEntryConfig?.layerName,

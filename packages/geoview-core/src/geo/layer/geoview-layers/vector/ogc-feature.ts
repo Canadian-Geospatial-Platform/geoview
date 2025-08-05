@@ -66,11 +66,11 @@ export class OgcFeature extends AbstractGeoViewVector {
   /**
    * Overrides the way the metadata is fetched.
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-   * @returns {Promise<TypeMetadataOGCFeature | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
+   * @returns {Promise<T = TypeMetadataOGCFeature>} A promise with the metadata or undefined when no metadata for the particular layer type.
    */
-  protected override onFetchServiceMetadata(): Promise<TypeMetadataOGCFeature | undefined> {
+  protected override onFetchServiceMetadata<T = TypeMetadataOGCFeature>(): Promise<T> {
     // Fetch it
-    return OgcFeature.fetchMetadata(this.metadataAccessPath);
+    return OgcFeature.fetchMetadata(this.metadataAccessPath) as Promise<T>;
   }
 
   /**
@@ -333,11 +333,9 @@ export class OgcFeature extends AbstractGeoViewVector {
   }
 
   /**
-   * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
-   * @returns A Promise with the layer configuration
-   * @experimental
+   * Processes an OGC Feature config returning a Promise of an array of ConfigBaseClass layer entry configurations.
+   * @returns A Promise with the layer configurations.
    */
-  // TODO: REFACTOR CONFIG API
   static processOGCFeatureConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,

@@ -173,11 +173,9 @@ export class CSV extends AbstractGeoViewVector {
   }
 
   /**
-   * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
-   * @returns A Promise with the layer configuration
-   * @experimental
+   * Processes a CSV config returning a Promise of an array of ConfigBaseClass layer entry configurations.
+   * @returns A Promise with the layer configurations.
    */
-  // TODO: REFACTOR CONFIG API
   static processCSVFeatureConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,

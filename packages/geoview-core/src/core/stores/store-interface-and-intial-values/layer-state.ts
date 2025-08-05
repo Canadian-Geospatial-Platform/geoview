@@ -10,6 +10,7 @@ import { TypeLayersViewDisplayState, TypeLegendItem, TypeLegendLayer, TypeLegend
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import {
+  CONST_LAYER_TYPES,
   TypeFeatureInfoEntryPartial,
   TypeLayerStatus,
   TypeLayerStyleConfig,
@@ -25,7 +26,6 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { esriQueryRecordsByUrlObjectIds } from '@/geo/layer/gv-layers/utils';
-import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
 import { LayerNotEsriDynamicError, LayerNotFoundError } from '@/core/exceptions/layer-exceptions';
 import { NoBoundsError } from '@/core/exceptions/geoview-exceptions';
 
@@ -498,10 +498,10 @@ export const useSelectedLayer = (): TypeLegendLayer | undefined => {
 export const useIconLayerSet = (layerPath: string): string[] => {
   const layers = useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
   const layer = LegendEventProcessor.findLayerByPath(layers, layerPath);
-  if (layer && layer.type !== CV_CONST_LAYER_TYPES.WMS) {
+  if (layer && layer.type !== CONST_LAYER_TYPES.WMS) {
     return layer.items.map((item) => item.icon).filter((d) => d !== null);
   }
-  if (layer && layer.type === CV_CONST_LAYER_TYPES.WMS) {
+  if (layer && layer.type === CONST_LAYER_TYPES.WMS) {
     return layer.icons.map((item) => item.iconImage).filter((d) => d !== null) as string[];
   }
   return [];

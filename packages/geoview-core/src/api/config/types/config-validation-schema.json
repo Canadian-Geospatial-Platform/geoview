@@ -286,8 +286,7 @@
             "guide",
             "data-table",
             "layers",
-            "aoi-panel",
-            ""
+            "aoi-panel"
           ],
           "description": "App bar tab to be selected at map load"
         },

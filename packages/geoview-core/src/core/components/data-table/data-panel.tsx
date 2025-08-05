@@ -23,7 +23,7 @@ import { logger } from '@/core/utils/logger';
 import { useFeatureFieldInfos } from './hooks';
 import { CONTAINER_TYPE, LAYER_STATUS, TABS } from '@/core/utils/constant';
 import { MappedLayerDataType } from './data-table-types';
-import { CV_DEFAULT_APPBAR_CORE } from '@/api/config/types/config-constants';
+import { DEFAULT_APPBAR_CORE } from '@/api/config/types/map-schema-types';
 import { TypeContainerBox } from '@/core/types/global-types';
 import DataSkeleton from './data-skeleton';
 
@@ -213,7 +213,7 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
    * It will unselect the layer path when component is unmounted.
    */
   useEffect(() => {
-    if ((tabId !== CV_DEFAULT_APPBAR_CORE.DATA_TABLE || !isOpen) && appBarComponents.includes(CV_DEFAULT_APPBAR_CORE.DATA_TABLE)) {
+    if ((tabId !== DEFAULT_APPBAR_CORE.DATA_TABLE || !isOpen) && appBarComponents.includes(DEFAULT_APPBAR_CORE.DATA_TABLE)) {
       setSelectedLayerPath('');
     }
   }, [tabId, isOpen, setSelectedLayerPath, appBarComponents]);

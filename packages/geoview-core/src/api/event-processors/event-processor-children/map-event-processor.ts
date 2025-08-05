@@ -8,8 +8,8 @@ import { Coordinate } from 'ol/coordinate';
 import { Size } from 'ol/size';
 import { Pixel } from 'ol/pixel';
 
-import { CV_MAP_EXTENTS } from '@/api/config/types/config-constants';
 import {
+  MAP_EXTENTS,
   TypeBasemapOptions,
   TypeInteraction,
   TypeLayerInitialSettings,
@@ -450,8 +450,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       // GV A wider LCC extent like [-125, 30, -60, 89] (minus -125) will introduce distortion on larger screen...
       // GV It is why we apply the max extent only on native projection
       const viewSettings = this.getGeoViewMapConfig(mapId)?.map.viewSettings;
-      const mapMaxExtent =
-        viewSettings!.maxExtent && newProjection === viewSettings!.projection ? CV_MAP_EXTENTS[newProjection] : undefined;
+      const mapMaxExtent = viewSettings!.maxExtent && newProjection === viewSettings!.projection ? MAP_EXTENTS[newProjection] : undefined;
 
       // create new view settings
       const newView: TypeViewSettings = {
@@ -1076,7 +1075,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    */
   static zoomToInitialExtent(mapId: string): Promise<void> {
     const currProjection = this.getMapStateProtected(mapId).currentProjection;
-    let extent: Extent = CV_MAP_EXTENTS[currProjection];
+    let extent: Extent = MAP_EXTENTS[currProjection];
     const options: FitOptions = { padding: OL_ZOOM_PADDING, duration: OL_ZOOM_DURATION };
     const homeView = this.getMapStateProtected(mapId).homeView || this.getMapStateProtected(mapId).initialView;
 
@@ -1111,7 +1110,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // If extent is not valid, take the default one for the current projection
     if (extent.length !== 4 || extent.includes(Infinity))
       extent = Projection.transformExtentFromProj(
-        CV_MAP_EXTENTS[currProjection],
+        MAP_EXTENTS[currProjection],
         Projection.getProjectionLonLat(),
         Projection.getProjectionFromString(`EPSG:${currProjection}`)
       );
@@ -1492,7 +1491,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
         rotation: this.getMapStateProtected(mapId).rotation,
         minZoom: currentView.getMinZoom(),
         maxZoom: currentView.getMaxZoom(),
-        maxExtent: this.getGeoViewMapConfig(mapId)?.map.viewSettings.maxExtent ? CV_MAP_EXTENTS[projection] : undefined,
+        maxExtent: this.getGeoViewMapConfig(mapId)?.map.viewSettings.maxExtent ? MAP_EXTENTS[projection] : undefined,
         projection,
       };
 

@@ -67,9 +67,9 @@ export class GeoJSON extends AbstractGeoViewVector {
   /**
    * Overrides the way the metadata is fetched.
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-   * @returns {Promise<TypeMetadataGeoJSON | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
+   * @returns {Promise<T = TypeMetadataGeoJSON | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
    */
-  protected override onFetchServiceMetadata(): Promise<TypeMetadataGeoJSON | undefined> {
+  protected override onFetchServiceMetadata<T = TypeMetadataGeoJSON | undefined>(): Promise<T> {
     // If metadataAccessPath ends with .meta, .json or .geojson
     if (
       this.metadataAccessPath.toLowerCase().endsWith('.meta') ||
@@ -77,7 +77,7 @@ export class GeoJSON extends AbstractGeoViewVector {
       this.metadataAccessPath.toLowerCase().endsWith('.geojson')
     ) {
       // Fetch it
-      return GeoJSON.fetchMetadata(this.metadataAccessPath);
+      return GeoJSON.fetchMetadata(this.metadataAccessPath) as Promise<T>;
     }
 
     // The metadataAccessPath didn't seem like it was containing actual metadata, so it was skipped
@@ -86,7 +86,7 @@ export class GeoJSON extends AbstractGeoViewVector {
     );
 
     // None
-    return Promise.resolve(undefined);
+    return Promise.resolve(undefined) as Promise<T>;
   }
 
   /**
@@ -312,11 +312,9 @@ export class GeoJSON extends AbstractGeoViewVector {
   }
 
   /**
-   * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
-   * @returns A Promise with the layer configuration
-   * @experimental
+   * Processes a GeoJSON config returning a Promise of an array of ConfigBaseClass layer entry configurations.
+   * @returns A Promise with the layer configurations.
    */
-  // TODO: REFACTOR CONFIG API
   static processGeoJsonLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,

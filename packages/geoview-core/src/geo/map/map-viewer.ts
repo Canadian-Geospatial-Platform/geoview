@@ -17,14 +17,12 @@ import { GeometryFunction } from 'ol/interaction/Draw';
 
 import queryString from 'query-string';
 import {
-  CV_MAP_CENTER,
-  CV_MAP_EXTENTS,
-  CV_VALID_ZOOM_LEVELS,
+  MAP_CENTER,
+  MAP_EXTENTS,
+  VALID_ZOOM_LEVELS,
   VALID_DISPLAY_LANGUAGE,
   VALID_DISPLAY_THEME,
   VALID_PROJECTION_CODES,
-} from '@/api/config/types/config-constants';
-import {
   TypeMapFeaturesInstance,
   TypeViewSettings,
   TypeInteraction,
@@ -319,13 +317,13 @@ export class MapViewer {
         center: Projection.transformFromLonLat(
           mapViewSettings.initialView?.zoomAndCenter
             ? mapViewSettings.initialView?.zoomAndCenter[1]
-            : CV_MAP_CENTER[mapViewSettings.projection],
+            : MAP_CENTER[mapViewSettings.projection],
           projection
         ),
         zoom: mapViewSettings.initialView?.zoomAndCenter ? mapViewSettings.initialView?.zoomAndCenter[0] : 3.5,
         extent: extentProjected || undefined,
-        minZoom: mapViewSettings.minZoom || CV_VALID_ZOOM_LEVELS[0],
-        maxZoom: mapViewSettings.maxZoom || CV_VALID_ZOOM_LEVELS[1],
+        minZoom: mapViewSettings.minZoom || VALID_ZOOM_LEVELS[0],
+        maxZoom: mapViewSettings.maxZoom || VALID_ZOOM_LEVELS[1],
         rotation: mapViewSettings.rotation || 0,
       }),
       controls: [],
@@ -1785,7 +1783,7 @@ export class MapViewer {
 
       // If extents have infinity, use default instead
       if (layerExtents.includes(Infinity))
-        layerExtents = this.convertExtentLonLatToMapProj(CV_MAP_EXTENTS[this.mapFeaturesConfig.map.viewSettings.projection]);
+        layerExtents = this.convertExtentLonLatToMapProj(MAP_EXTENTS[this.mapFeaturesConfig.map.viewSettings.projection]);
 
       // Zoom to calculated extent
       if (layerExtents.length) {

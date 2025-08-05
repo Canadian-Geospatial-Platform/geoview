@@ -3,8 +3,6 @@ import { Pixel } from 'ol/pixel';
 import { Geometry } from 'ol/geom';
 import Feature from 'ol/Feature';
 
-import { LayerEntryTypesKey } from '@/api/config/types/config-types';
-
 import { TimeDimension } from '@/core/utils/date-mgt';
 
 // TODO: Deprecated import after refactor
@@ -20,6 +18,7 @@ import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classe
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
+import { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config';
 
 /**
  *  Definition of the map feature instance according to what is specified in the schema.
@@ -56,24 +55,25 @@ export type TypeMapFeaturesInstance = {
   globalSettings?: TypeGlobalSettings;
 };
 
-// #region UTILITY TYPES
-
 /** An array of numbers representing an extent: `[minx, miny, maxx, maxy]`. */
 export type Extent = Array<number>;
 
 /** ISO 639-1 language code prefix. */
 export type TypeDisplayLanguage = 'en' | 'fr';
 
+/** Constante mainly use for language validation. */
+export const VALID_DISPLAY_LANGUAGE: TypeDisplayLanguage[] = ['en', 'fr'];
+
 /** Definition of the post settings type needed when the GeoView GeoJSON layers need to use a POST instead of a GET. */
 export type TypePostSettings = { header?: Record<string, string>; data: unknown };
 
 // #region MAP FEATURES
 
-/** Definition of the map configuration settings. */
-export { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config';
-
 /** Supported geoview themes. */
 export type TypeDisplayTheme = 'dark' | 'light' | 'geo.ca';
+
+/** Array of valid geoview themes. */
+export const VALID_DISPLAY_THEME: TypeDisplayTheme[] = ['dark', 'light', 'geo.ca'];
 
 /** Valid values for the navBar array. */
 export type TypeValidNavBarProps = 'zoom' | 'fullscreen' | 'home' | 'location' | 'basemap-select' | 'projection' | 'drawer';
@@ -164,30 +164,33 @@ export type TypeExternalPackages = TypeExternalPackagesProps[];
 export type TypeServiceUrls = {
   /**
    * Service end point to access API for layers specification (loading and plugins parameters). By default it is GeoCore but can
-   * be another endpoint with similar output. Default = CV_CONFIG_GEOCORE_URL ('https://geocore.api.geo.ca'. Used in config-constants).
+   * be another endpoint with similar output. Default = CONFIG_GEOCORE_URL ('https://geocore.api.geo.ca').
    */
   geocoreUrl: string;
   /**
    * An optional proxy to be used for dealing with same-origin issues.  URL must either be a relative path on the same server
    * or an absolute path on a server which sets CORS headers.
-   * Default = CV_CONFIG_PROXY_URL ('https://maps.canada.ca/wmsproxy/ws/wmsproxy/executeFromProxy'. Used in config-constants).
+   * Default = CONFIG_PROXY_URL ('https://maps.canada.ca/wmsproxy/ws/wmsproxy/executeFromProxy').
    */
   proxyUrl?: string;
   /**
    * An optional geolocator service end point url, which will be used to call to get geo location of address.
-   * Default = CV_CONFIG_GEOLOCATOR_URL ('https://geolocator.api.geo.ca?keys=geonames,nominatim,locate'. Used in config-constants).
+   * Default = CONFIG_GEOLOCATOR_URL ('https://geolocator.api.geo.ca?keys=geonames,nominatim,locate').
    */
   geolocatorUrl?: string;
   /**
    * An optional metadata service end point url, which will be used to call to metadata page for uuid layer.
    * Mostly use for currated amp were en and fr config are use.
-   * Default = CV_CONFIG_METADATA_RECORDS_URL (''. Used in config-constants).
+   * Default = CONFIG_METADATA_RECORDS_URL
    */
   metadataUrl?: string;
 };
 
 /** Valid schema version number. */
 export type TypeValidVersions = '1.0';
+
+/** Array of schema versions accepted by the viewer. */
+export const ACCEPTED_SCHEMA_VERSIONS: TypeValidVersions[] = ['1.0'];
 
 /** Service endpoint urls. */
 export type TypeGlobalSettings = {
@@ -232,6 +235,9 @@ export type TypeBasemapId = 'transport' | 'osm' | 'simple' | 'nogeom' | 'shaded'
 
 /** Definition of the valid map interactiom values. If map is dynamic (pan/zoom) or static to act as a thumbnail (no nav bar). */
 export type TypeInteraction = 'static' | 'dynamic';
+
+/** Constante mainly use for interaction validation. */
+export const VALID_INTERACTION: TypeInteraction[] = ['static', 'dynamic'];
 
 /** Definition of the view settings. */
 export type TypeViewSettings = {
@@ -288,6 +294,50 @@ export type TypeMapViewSettings = {
 /** Type used to define valid map projection codes. */
 export type TypeValidMapProjectionCodes = 3978 | 3857;
 
+/** Constant mainly used to test if a TypeValidMapProjectionCodes variable is a valid projection codes. */
+export const VALID_PROJECTION_CODES = [3978, 3857];
+
+/**
+ *  Definition of the basemap options type.
+ */
+export const VALID_BASEMAP_ID: TypeBasemapId[] = ['transport', 'osm', 'simple', 'nogeom', 'shaded', 'imagery'];
+
+/** default configuration if provided configuration is missing or wrong */
+// valid basemap ids
+export const BASEMAP_ID: Record<TypeValidMapProjectionCodes, TypeBasemapId[]> = {
+  3857: VALID_BASEMAP_ID,
+  3978: VALID_BASEMAP_ID,
+};
+
+// valid shaded basemap values for each projection
+export const BASEMAP_SHADED: Record<TypeValidMapProjectionCodes, boolean[]> = {
+  3857: [true, false],
+  3978: [true, false],
+};
+
+// valid labeled basemap values for each projection
+export const BASEMAP_LABEL: Record<TypeValidMapProjectionCodes, boolean[]> = {
+  3857: [true, false],
+  3978: [true, false],
+};
+
+// valid center levels from each projection
+export const VALID_MAP_CENTER: Record<TypeValidMapProjectionCodes, Record<string, number[]>> = {
+  3857: { lat: [-90, 90], long: [-180, 180] },
+  3978: { lat: [40, 90], long: [-140, 40] },
+};
+
+// extents and center for each projection
+export const MAP_EXTENTS: Record<TypeValidMapProjectionCodes, number[]> = {
+  3857: [-180, 0, 80, 84],
+  3978: [-135, 25, -45, 89],
+};
+
+export const MAP_CENTER: Record<TypeValidMapProjectionCodes, number[]> = {
+  3857: [-90, 67],
+  3978: [-90, 60],
+};
+
 /** Type used to define valid source projection codes. */
 export type TypeValidSourceProjectionCodes = 3978 | 3857 | 4326;
 
@@ -317,6 +367,8 @@ export type TypePointMarker = {
   /** Projection code if coordinates are not in lon/lat */
   projectionCode?: number;
 };
+
+// #endregion MAP FEATURES
 
 // #region GEOVIEW LAYERS
 
@@ -371,6 +423,8 @@ export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType> = {
   WMS: 'ogcWms',
 };
 
+export const MAP_CONFIG_SCHEMA_PATH = 'https://cgpv/schema#/definitions/TypeMapFeaturesInstance';
+
 /**
  * Definition of the sub schema to use for each type of Geoview layer
  */
@@ -399,6 +453,124 @@ export const validVectorLayerLegendTypes: TypeGeoviewLayerType[] = [
   CONST_LAYER_TYPES.WFS,
   CONST_LAYER_TYPES.GEOPACKAGE,
 ];
+
+/** The default geocore url */
+export const CONFIG_GEOCORE_URL = 'https://geocore.api.geo.ca';
+
+/** The default geolocator url */
+export const CONFIG_GEOLOCATOR_URL = 'https://geolocator.api.geo.ca?keys=geonames,nominatim,locate';
+
+/** The default proxy url */
+export const CONFIG_PROXY_URL = 'https://maps.canada.ca/wmsproxy/ws/wmsproxy/executeFromProxy';
+
+/** The default metadata recors url for uuid layer (empty because it needs to be set by config en and fr) */
+export const CONFIG_METADATA_RECORDS_URL = '';
+
+export const CONFIG_GEOCORE_TYPE = 'geoCore';
+export const CONFIG_SHAPEFILE_TYPE = 'shapefile';
+
+// valid zoom levels from each projection
+export const VALID_ZOOM_LEVELS: number[] = [0, 20];
+
+/**
+ *  Definition of the MapFeatureConfig default values. All the default values that applies to the map feature configuration are
+ * defined here.
+ */
+// TODO: Move this in better class than here.
+// TODO: Revise default values.
+// GV: The Cast operation doesn't create a real MapFeatureConfig instance because methods are missing.
+// GV: We do that only to create an object that has the default values who can be accessed using the instance property names.
+export const DEFAULT_MAP_FEATURE_CONFIG = {
+  map: {
+    basemapOptions: {
+      basemapId: 'transport',
+      shaded: true,
+      labeled: true,
+    },
+    interaction: 'dynamic',
+    listOfGeoviewLayerConfig: [],
+    highlightColor: 'black',
+    overlayObjects: {
+      pointMarkers: {},
+    },
+    viewSettings: {
+      initialView: {
+        zoomAndCenter: [3.5, MAP_CENTER[3978]],
+      },
+      enableRotation: true,
+      rotation: 0,
+      minZoom: VALID_ZOOM_LEVELS[0],
+      maxZoom: VALID_ZOOM_LEVELS[1],
+      maxExtent: MAP_EXTENTS[3978],
+      projection: 3978,
+    },
+    extraOptions: {},
+  },
+  theme: 'geo.ca',
+  navBar: ['zoom', 'fullscreen', 'home', 'basemap-select'],
+  footerBar: {
+    tabs: {
+      core: ['legend', 'layers', 'details', 'data-table'],
+      custom: [],
+    },
+    collapsed: false,
+  },
+  components: ['north-arrow', 'overview-map'],
+  appBar: { tabs: { core: ['geolocator'] } },
+  corePackages: [],
+  corePackagesConfig: [],
+  overviewMap: { hideOnZoom: 0 },
+  externalPackages: [],
+  serviceUrls: {
+    geocoreUrl: CONFIG_GEOCORE_URL,
+    geolocatorUrl: CONFIG_GEOLOCATOR_URL,
+    proxyUrl: CONFIG_PROXY_URL,
+    metadataUrl: CONFIG_METADATA_RECORDS_URL,
+  },
+  globalSettings: {
+    canRemoveSublayers: true,
+    disabledLayerTypes: [],
+    showUnsymbolizedFeatures: false,
+  },
+  schemaVersionUsed: '1.0',
+} as unknown as MapFeatureConfig;
+
+// /**
+//  *  Definition of the initial settings default values.
+//  */
+// export const DEFAULT_LAYER_INITIAL_SETTINGS = {
+//   controls: {
+//     highlight: true,
+//     hover: true,
+//     opacity: true,
+//     query: true,
+//     remove: true,
+//     table: true,
+//     visibility: true,
+//     zoom: true,
+//   },
+//   states: {
+//     visible: true,
+//     opacity: 1,
+//     hoverable: true,
+//     queryable: true,
+//   },
+// };
+
+/**
+ * Definition of the default order of the tabs inside appbar
+ */
+export const DEFAULT_APPBAR_TABS_ORDER = ['geolocator', 'aoi-panel', 'legend', 'custom-legend', 'layers', 'details', 'data-table', 'guide'];
+
+export const DEFAULT_APPBAR_CORE = {
+  GEOLOCATOR: 'geolocator',
+  EXPORT: 'export',
+  GUIDE: 'guide',
+  DETAILS: 'details',
+  LEGEND: 'legend',
+  DATA_TABLE: 'data-table',
+  LAYERS: 'layers',
+} as const;
 
 /** Initial settings to apply to the GeoView layer at creation time. */
 export type TypeLayerInitialSettings = {
@@ -829,6 +1001,7 @@ export interface TypeIconSymbolVectorConfig extends TypeBaseVectorGeometryConfig
 // #endregion STYLE
 
 // #region RESULT SET
+
 export type TypeLayerStatus = 'newInstance' | 'registered' | 'processing' | 'processed' | 'loading' | 'loaded' | 'error';
 
 export type TypeQueryStatus = 'init' | 'processing' | 'processed' | 'error';
@@ -878,10 +1051,14 @@ export type TypeLayerData = {
   features: TypeFeatureInfoEntry[] | undefined | null;
   isDisabled?: boolean;
 };
+
 // #endregion RESULT SET
 
 // TODO: Refactor - This type should be deleted and 'ConfigBaseClass' should be used instead
 export type TypeLayerEntryConfig = AbstractBaseLayerEntryConfig | GroupLayerEntryConfig;
+
+// Definition of the keys used to create the constants of the GeoView layer
+export type LayerEntryTypesKey = 'VECTOR' | 'VECTOR_TILE' | 'RASTER_TILE' | 'RASTER_IMAGE' | 'GROUP' | 'GEOCORE' | 'SHAPEFILE';
 
 // TODO: After refactor, use the function in type-guard...
 export const CONST_LAYER_ENTRY_TYPES: Record<LayerEntryTypesKey, TypeLayerEntryType> = {
@@ -1095,19 +1272,12 @@ export const serializeTypeGeoviewLayerConfig = (geoviewLayerConfig: MapConfigLay
   } as TypeGeoviewLayerConfig;
 
   // Loop on the LayerEntryConfig to serialize further
-  for (let j = 0; j < (geoviewLayerConfigCasted.listOfLayerEntryConfig?.length || 0); j++) {
-    // TODO: Check - #1883 why some don't have the serialize funcion in here!? Maybe a Type vs Class thing!?
-    // Got to check if serialize exists, because some aren't classes!? Making it as any for now, as we can't trust it
-    if ('toJson' in geoviewLayerConfigCasted.listOfLayerEntryConfig[j]) {
-      // Serialize the TypeLayerEntryConfig
-      const serializedLayerEntryConfig = geoviewLayerConfigCasted.listOfLayerEntryConfig[j].toJson();
+  for (let j = 0; j < (geoviewLayerConfig.listOfLayerEntryConfig?.length || 0); j++) {
+    // Serialize the TypeLayerEntryConfig
+    const serializedLayerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig![j].toJson() as TypeLayerEntryConfig;
 
-      // Store as serialized
-      serializedGeoviewLayerConfig.listOfLayerEntryConfig.push(serializedLayerEntryConfig as TypeLayerEntryConfig);
-    } else {
-      // Store as is for now
-      serializedGeoviewLayerConfig.listOfLayerEntryConfig.push(geoviewLayerConfigCasted.listOfLayerEntryConfig[j]);
-    }
+    // Store as serialized
+    serializedGeoviewLayerConfig.listOfLayerEntryConfig.push(serializedLayerEntryConfig);
   }
 
   // Return it

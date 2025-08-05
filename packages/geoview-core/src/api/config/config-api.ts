@@ -1,12 +1,10 @@
 import { cloneDeep } from 'lodash';
-import {
-  CV_DEFAULT_MAP_FEATURE_CONFIG,
-  CV_CONFIG_GEOCORE_TYPE,
-  CV_CONFIG_SHAPEFILE_TYPE,
-  CV_CONST_LAYER_TYPES,
-} from '@/api/config/types/config-constants';
 import { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config';
 import {
+  DEFAULT_MAP_FEATURE_CONFIG,
+  CONFIG_GEOCORE_TYPE,
+  CONFIG_SHAPEFILE_TYPE,
+  CONST_LAYER_TYPES,
   MapConfigLayerEntry,
   TypeBasemapOptions,
   TypeDisplayLanguage,
@@ -61,31 +59,31 @@ export class ConfigApi {
 
     const [upperUrl] = url.toUpperCase().split('?');
 
-    if (/\{z\}\/{[xy]}\/{[xy]}/i.test(url)) return CV_CONST_LAYER_TYPES.XYZ_TILES;
+    if (/\{z\}\/{[xy]}\/{[xy]}/i.test(url)) return CONST_LAYER_TYPES.XYZ_TILES;
 
-    if (upperUrl.endsWith('MAPSERVER') || upperUrl.endsWith('MAPSERVER/')) return CV_CONST_LAYER_TYPES.ESRI_DYNAMIC;
+    if (upperUrl.endsWith('MAPSERVER') || upperUrl.endsWith('MAPSERVER/')) return CONST_LAYER_TYPES.ESRI_DYNAMIC;
 
-    if (/(?:FEATURESERVER|MAPSERVER(?:\/\d+)+)/i.test(url)) return CV_CONST_LAYER_TYPES.ESRI_FEATURE;
+    if (/(?:FEATURESERVER|MAPSERVER(?:\/\d+)+)/i.test(url)) return CONST_LAYER_TYPES.ESRI_FEATURE;
 
-    if (/IMAGESERVER/i.test(url)) return CV_CONST_LAYER_TYPES.ESRI_IMAGE;
+    if (/IMAGESERVER/i.test(url)) return CONST_LAYER_TYPES.ESRI_IMAGE;
 
-    if (/WFS/i.test(url)) return CV_CONST_LAYER_TYPES.WFS;
+    if (/WFS/i.test(url)) return CONST_LAYER_TYPES.WFS;
 
-    if (/.(?:GEO)?JSON(?:$|\?)/i.test(url)) return CV_CONST_LAYER_TYPES.GEOJSON;
+    if (/.(?:GEO)?JSON(?:$|\?)/i.test(url)) return CONST_LAYER_TYPES.GEOJSON;
 
-    if (upperUrl.endsWith('.GPKG')) return CV_CONST_LAYER_TYPES.GEOPACKAGE;
+    if (upperUrl.endsWith('.GPKG')) return CONST_LAYER_TYPES.GEOPACKAGE;
 
-    if (upperUrl.includes('VECTORTILESERVER')) return CV_CONST_LAYER_TYPES.VECTOR_TILES;
+    if (upperUrl.includes('VECTORTILESERVER')) return CONST_LAYER_TYPES.VECTOR_TILES;
 
-    if (isValidUUID(url)) return CV_CONFIG_GEOCORE_TYPE;
+    if (isValidUUID(url)) return CONFIG_GEOCORE_TYPE;
 
-    if (/WMS/i.test(url)) return CV_CONST_LAYER_TYPES.WMS;
+    if (/WMS/i.test(url)) return CONST_LAYER_TYPES.WMS;
 
-    if (/.CSV(?:$|\?)/i.test(url)) return CV_CONST_LAYER_TYPES.CSV;
+    if (/.CSV(?:$|\?)/i.test(url)) return CONST_LAYER_TYPES.CSV;
 
-    if (/.(ZIP|SHP)(?:$|\?)/i.test(url)) return CV_CONFIG_SHAPEFILE_TYPE;
+    if (/.(ZIP|SHP)(?:$|\?)/i.test(url)) return CONFIG_SHAPEFILE_TYPE;
 
-    if (upperUrl.includes('COLLECTIONS')) return CV_CONST_LAYER_TYPES.OGC_FEATURE;
+    if (upperUrl.includes('COLLECTIONS')) return CONST_LAYER_TYPES.OGC_FEATURE;
 
     return undefined;
   }
@@ -201,12 +199,12 @@ export class ConfigApi {
       if (urlParams.c) center = (urlParams.c as string).split(',');
       if (center.length !== 2)
         center = [
-          CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.initialView!.zoomAndCenter![1][0].toString(),
-          CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.initialView!.zoomAndCenter![1][1].toString(),
+          DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.initialView!.zoomAndCenter![1][0].toString(),
+          DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.initialView!.zoomAndCenter![1][1].toString(),
         ];
 
       // get zoom
-      let zoom = CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.initialView!.zoomAndCenter![0].toString();
+      let zoom = DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.initialView!.zoomAndCenter![0].toString();
       if (urlParams.z) zoom = urlParams.z as string;
 
       jsonConfig.map = {
@@ -227,7 +225,7 @@ export class ConfigApi {
         try {
           // Get the GeoView layer configurations from the GeoCore UUIDs provided (urlParams.keys is a CSV string of UUIDs).
           const response = await UUIDmapConfigReader.getGVConfigFromUUIDs(
-            CV_DEFAULT_MAP_FEATURE_CONFIG.serviceUrls.geocoreUrl,
+            DEFAULT_MAP_FEATURE_CONFIG.serviceUrls.geocoreUrl,
             displayLanguage,
             urlParams.keys.toString().split(',')
           );
@@ -276,7 +274,7 @@ export class ConfigApi {
    * @static
    */
   static getDefaultMapFeatureConfig(): MapFeatureConfig {
-    return new MapFeatureConfig(CV_DEFAULT_MAP_FEATURE_CONFIG);
+    return new MapFeatureConfig(DEFAULT_MAP_FEATURE_CONFIG);
   }
 
   /**

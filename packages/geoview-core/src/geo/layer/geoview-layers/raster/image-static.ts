@@ -41,11 +41,11 @@ export class ImageStatic extends AbstractGeoViewRaster {
   /**
    * Overrides the way the metadata is fetched.
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-   * @returns {Promise<unknown | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
+   * @returns {Promise<T>} A promise with the metadata or undefined when no metadata for the particular layer type.
    */
-  protected override onFetchServiceMetadata(): Promise<unknown | undefined> {
+  protected override onFetchServiceMetadata<T>(): Promise<T> {
     // No metadata
-    return Promise.resolve(undefined);
+    return Promise.resolve(undefined as T);
   }
 
   /**
@@ -149,11 +149,9 @@ export class ImageStatic extends AbstractGeoViewRaster {
   }
 
   /**
-   * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
-   * @returns A Promise with the layer configuration
-   * @experimental
+   * Processes an Image Static config returning a Promise of an array of ConfigBaseClass layer entry configurations.
+   * @returns A Promise with the layer configurations.
    */
-  // TODO: REFACTOR CONFIG API
   static processImageStaticConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
