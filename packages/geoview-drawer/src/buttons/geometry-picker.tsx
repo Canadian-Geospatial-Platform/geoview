@@ -75,7 +75,7 @@ export function PointIcon(props: PointIconProps): JSX.Element {
 export function GeometryPickerButton(): JSX.Element {
   const { cgpv } = window as TypeWindow;
   const { useMemo } = cgpv.reactUtilities.react;
-  const { PlaceIcon, ShapeLineIcon, ShowChartIcon, HexagonIcon, RectangleIcon, CircleIcon, StarIcon } = cgpv.ui.elements;
+  const { PlaceIcon, TextFieldsIcon, ShapeLineIcon, ShowChartIcon, HexagonIcon, RectangleIcon, CircleIcon, StarIcon } = cgpv.ui.elements;
 
   const geomType = useDrawerActiveGeom();
   const style = useDrawerStyle();
@@ -83,12 +83,14 @@ export function GeometryPickerButton(): JSX.Element {
     () => ({
       fillColor: style.fillColor,
       strokeColor: style.strokeColor,
-      strokeWidth: style.strokeWidth,
+      textColor: style.textColor,
+      textHaloColor: style.textHaloColor,
     }),
     [style]
   );
 
   if (geomType === 'Point') return <PointIcon IconComponent={PlaceIcon} />;
+  if (geomType === 'Text') return <TextFieldsIcon sx={{ color: iconStyle.textColor }} stroke={iconStyle.textHaloColor} />;
   if (geomType === 'LineString') return <ShowChartIcon sx={{ color: iconStyle.strokeColor }} />;
   if (geomType === 'Polygon') return <HexagonIcon sx={{ color: iconStyle.fillColor }} stroke={iconStyle.strokeColor} />;
   if (geomType === 'Rectangle') return <RectangleIcon sx={{ color: iconStyle.fillColor }} stroke={iconStyle.strokeColor} />;
@@ -107,7 +109,7 @@ export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JS
   const { cgpv } = window as TypeWindow;
   const { useCallback, useMemo } = cgpv.reactUtilities.react;
   const { IconButton, List, ListItem } = cgpv.ui.elements;
-  const { PlaceIcon, ShowChartIcon, HexagonIcon, RectangleIcon, CircleIcon, StarIcon } = cgpv.ui.elements;
+  const { PlaceIcon, TextFieldsIcon, ShowChartIcon, HexagonIcon, RectangleIcon, CircleIcon, StarIcon } = cgpv.ui.elements;
 
   const { geomTypes } = props;
 
@@ -124,6 +126,8 @@ export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JS
     () => ({
       color: style.fillColor,
       stroke: style.strokeColor,
+      textColor: style.textColor,
+      textHaloColor: style.textHaloColor,
     }),
     [style]
   );
@@ -164,6 +168,14 @@ export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JS
    */
   const handleGeometrySelectPoint = useCallback((): void => {
     setActiveGeom('Point');
+    safeStartDrawing();
+  }, [safeStartDrawing, setActiveGeom]);
+
+  /**
+   * Sets the current geometry type to Text
+   */
+  const handleGeometrySelectText = useCallback((): void => {
+    setActiveGeom('Text');
     safeStartDrawing();
   }, [safeStartDrawing, setActiveGeom]);
 
@@ -221,6 +233,21 @@ export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JS
           >
             <PointIcon IconComponent={PlaceIcon} />
             {getLocalizedMessage(displayLanguage, 'drawer.point')}
+          </IconButton>
+        </ListItem>
+      )}
+      {geomTypes?.includes('Text') && (
+        <ListItem sx={sxClasses.listItem}>
+          <IconButton
+            id="button-text"
+            tooltip={getLocalizedMessage(displayLanguage, 'drawer.text')}
+            tooltipPlacement="left"
+            size="small"
+            onClick={handleGeometrySelectText}
+            sx={{ ...sxClasses.iconButton, ...(activeGeom === 'Text' && sxClasses.activeButton) }}
+          >
+            <TextFieldsIcon sx={{ color: iconStyle.textColor }} stroke={iconStyle.textHaloColor} />
+            {getLocalizedMessage(displayLanguage, 'drawer.text')}
           </IconButton>
         </ListItem>
       )}

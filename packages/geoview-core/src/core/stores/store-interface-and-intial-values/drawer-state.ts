@@ -18,6 +18,12 @@ export type StyleProps = {
   fillColor: string;
   strokeColor: string;
   strokeWidth: number;
+  text?: string;
+  textSize?: number;
+  textFont?: string;
+  textColor?: string;
+  textHaloColor?: string;
+  textHaloWidth?: number;
 };
 
 export type TypeDrawerConfig = {
@@ -117,11 +123,17 @@ export interface IDrawerState {
 export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDrawerState {
   const init = {
     activeGeom: 'Point',
-    geomTypes: ['Point', 'LineString', 'Polygon', 'Circle'],
+    geomTypes: ['Point', 'Text', 'LineString', 'Polygon', 'Circle'],
     style: {
       fillColor: 'rgba(252, 241, 0, 0.3)',
       strokeColor: '#000000',
       strokeWidth: 1.3,
+      text: 'Default Text',
+      textSize: 14,
+      textFont: 'Arial',
+      textColor: '#000000',
+      textHaloColor: 'rgba(255,255,255,0.7)',
+      textHaloWidth: 3,
     },
     drawInstance: undefined,
     isEditing: false,
@@ -317,6 +329,10 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
             style,
           },
         });
+        if (get().drawerState.drawInstance !== undefined) {
+          DrawerEventProcessor.startDrawing(get().mapId);
+        }
+        DrawerEventProcessor.updateTransformingFeatureStyle(get().mapId, get().drawerState.style);
       },
 
       setFillColor: (fillColor: string) => {

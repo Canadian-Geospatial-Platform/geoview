@@ -110,6 +110,7 @@ export {
   SwitchLeft as SwitchLeftIcon,
   TableView as TableViewIcon,
   TableChartOutlined as TableChartOutlinedIcon,
+  TextFields as TextFieldsIcon,
   Undo as UndoIcon,
   Upload as UploadIcon,
   UploadFile as UploadFileIcon,

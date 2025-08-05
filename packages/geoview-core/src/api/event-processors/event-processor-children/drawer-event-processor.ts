@@ -1,10 +1,10 @@
 import { Feature, Overlay } from 'ol';
 import { Coordinate } from 'ol/coordinate';
-import GeoJSON from 'ol/format/GeoJSON.js';
+import GeoJSON from 'ol/format/GeoJSON';
 import { LineString, Polygon, Point, Circle as CircleGeom, Geometry, SimpleGeometry } from 'ol/geom';
 import { fromCircle } from 'ol/geom/Polygon';
 import { getArea, getLength } from 'ol/sphere';
-import { Style, Stroke, Fill, Icon as OLIcon } from 'ol/style';
+import { Text, Style, Stroke, Fill, Icon as OLIcon } from 'ol/style';
 import { StyleLike } from 'ol/style/Style';
 import { DrawEvent, GeometryFunction, SketchCoordType, createBox } from 'ol/interaction/Draw';
 import { Projection as OLProjection } from 'ol/proj';
@@ -541,7 +541,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
     // Initialize drawing interaction
     let draw: Draw;
-    if (currentGeomType in customGeometries) {
+    if (currentGeomType === 'Text') {
+      draw = viewer.initDrawInteractions(DRAW_GROUP_KEY, 'Point', currentStyle);
+    } else if (currentGeomType in customGeometries) {
       draw = viewer.initDrawInteractions(DRAW_GROUP_KEY, 'Circle', currentStyle, customGeometries[currentGeomType]);
     } else {
       draw = viewer.initDrawInteractions(DRAW_GROUP_KEY, currentGeomType, currentStyle);
@@ -596,6 +598,23 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
         });
         // Set the iconSrc string for geojson styling in the download
         feature.set('iconSrc', iconSrc);
+      } else if (currentGeomType === 'Text') {
+        featureStyle = new Style({
+          text: new Text({
+            text: currentStyle.text,
+            fill: new Fill({ color: currentStyle.textColor }),
+            stroke: new Stroke({ color: currentStyle.textHaloColor, width: currentStyle.textHaloWidth }),
+            font: `${currentStyle.textSize}px ${currentStyle.textFont}`,
+            offsetY: -15,
+          }),
+        });
+
+        feature.set('text', currentStyle.text);
+        feature.set('textSize', currentStyle.textSize);
+        feature.set('textFont', currentStyle.textFont);
+        feature.set('textColor', currentStyle.textColor);
+        feature.set('textHaloColor', currentStyle.textHaloColor);
+        feature.set('textHaloWidth', currentStyle.textHaloWidth);
       } else {
         // Convert Circle to a Polygon because geojson can't handle circles (for download / upload)
         if (currentGeomType === 'Circle') {
@@ -911,13 +930,32 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
       // Apply the new style
       let featureStyle;
-      if (selectedFeature.getGeometry() instanceof Point) {
+      const isTextFeature = selectedFeature.get('text') !== undefined;
+
+      if (selectedFeature.getGeometry() instanceof Point && !isTextFeature) {
         featureStyle = new Style({
           image: new OLIcon({
             src: state.actions.getIconSrc(),
             anchor: [0.5, 1],
             anchorXUnits: 'fraction',
             anchorYUnits: 'fraction',
+          }),
+        });
+      } else if (isTextFeature) {
+        selectedFeature.set('text', newStyle.text);
+        selectedFeature.set('textSize', newStyle.textSize);
+        selectedFeature.set('textFont', newStyle.textFont);
+        selectedFeature.set('textColor', newStyle.textColor);
+        selectedFeature.set('textHaloColor', newStyle.textHaloColor);
+        selectedFeature.set('textHaloWidth', newStyle.textHaloWidth);
+
+        featureStyle = new Style({
+          text: new Text({
+            text: newStyle.text,
+            fill: new Fill({ color: newStyle.textColor }),
+            stroke: new Stroke({ color: newStyle.textHaloColor, width: newStyle.textHaloWidth }),
+            font: `${newStyle.textSize}px ${newStyle.textFont}`,
+            offsetY: -15,
           }),
         });
       } else {
