@@ -6,7 +6,6 @@ import type { useTheme } from '@mui/material/styles';
 import { API } from '@/api/api';
 import { api } from '@/app';
 import { MapViewer } from '@/geo/map/map-viewer';
-import { AnySchemaObject } from '@/api/config/types/config-types';
 import { logger } from '@/core/utils/logger';
 
 /**
@@ -86,7 +85,7 @@ export abstract class AbstractPlugin {
   /**
    * Must override function to get the schema validator
    */
-  abstract schema(): AnySchemaObject;
+  abstract schema(): unknown;
 
   /**
    * Must override function to get the default config

@@ -18,12 +18,11 @@ import {
   TypeLayerMetadataWMSStyleLegendUrl,
   TypeMetadataFeatureInfo,
 } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { CONST_LAYER_TYPES, TypeFeatureInfoEntry } from '@/api/config/types/map-schema-types';
+import { CONFIG_PROXY_URL, CONST_LAYER_TYPES, TypeFeatureInfoEntry } from '@/api/config/types/map-schema-types';
 import { loadImage } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { Projection } from '@/geo/utils/projection';
-import { CV_CONFIG_PROXY_URL } from '@/api/config/types/config-constants';
 import { LayerInvalidFeatureInfoFormatWMSError, LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { formatError, NetworkError } from '@/core/exceptions/core-exceptions';
@@ -533,7 +532,7 @@ export class GVWMS extends AbstractGVRaster {
             // If a network error such as CORS
             if (error instanceof NetworkError) {
               // Try appending link with proxy url to avoid CORS issues
-              queryUrl = `${CV_CONFIG_PROXY_URL}?${queryUrl}`;
+              queryUrl = `${CONFIG_PROXY_URL}?${queryUrl}`;
 
               Fetch.fetchBlob(queryUrl)
                 .then((responseBlob) => {

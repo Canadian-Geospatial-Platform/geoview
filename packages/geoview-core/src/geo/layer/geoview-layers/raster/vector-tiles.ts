@@ -254,11 +254,9 @@ export class VectorTiles extends AbstractGeoViewRaster {
   }
 
   /**
-   * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
-   * @returns A Promise with the layer configuration
-   * @experimental
+   * Processes a Vector Tiles config returning a Promise of an array of ConfigBaseClass layer entry configurations.
+   * @returns A Promise with the layer configurations.
    */
-  // TODO: REFACTOR CONFIG API
   static processVectorTilesConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,

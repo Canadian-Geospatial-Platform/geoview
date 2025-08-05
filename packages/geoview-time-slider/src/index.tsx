@@ -1,5 +1,4 @@
 import React from 'react'; // GV This import is to validate that we're on the right React at the end of the file
-import { AnySchemaObject } from 'geoview-core/api/config/types/config-types';
 import { TypeTabs } from 'geoview-core/ui/tabs/tabs';
 import { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 import { TimeSliderIcon } from 'geoview-core/ui';
@@ -33,9 +32,9 @@ class TimeSliderPlugin extends FooterPlugin {
   /**
    * Return the schema that is defined for this package
    *
-   * @returns {AnySchemaObject} returns the schema for this package
+   * @returns {unknown} returns the schema for this package
    */
-  override schema(): AnySchemaObject {
+  override schema(): unknown {
     return schema;
   }
 

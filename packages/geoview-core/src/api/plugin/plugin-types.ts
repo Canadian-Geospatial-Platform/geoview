@@ -1,5 +1,4 @@
 import type React from 'react';
-import { AnySchemaObject } from '@/api/config/types/config-types';
 import { API } from '@/api';
 import { AbstractPlugin } from './abstract-plugin';
 
@@ -16,7 +15,7 @@ export type TypePluginStructure = {
   translate: unknown;
   translations: Record<string, unknown>;
   configObj: unknown;
-  schema?: () => AnySchemaObject;
+  schema?: () => unknown;
   defaultConfig?: () => unknown;
   add?: () => void;
   remove?: () => void;

@@ -1,5 +1,4 @@
 import React from 'react'; // GV This import is to validate that we're on the right React at the end of the file
-import { AnySchemaObject } from 'geoview-core/api/config/types/config-types';
 import { FooterPlugin } from 'geoview-core/api/plugin/footer-plugin';
 import { TypeTabs } from 'geoview-core/ui/tabs/tabs';
 import { ChartIcon } from 'geoview-core/ui/icons';
@@ -17,9 +16,9 @@ class GeoChartFooterPlugin extends FooterPlugin {
   /**
    * Return the package schema
    *
-   * @returns {AnySchemaObject} the package schema
+   * @returns {unknown} the package schema
    */
-  override schema(): AnySchemaObject {
+  override schema(): unknown {
     return schema;
   }
 

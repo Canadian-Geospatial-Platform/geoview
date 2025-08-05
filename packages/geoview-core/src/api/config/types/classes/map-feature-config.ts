@@ -1,21 +1,19 @@
 import cloneDeep from 'lodash/cloneDeep';
 import defaultsDeep from 'lodash/defaultsDeep';
 
-import {
-  CV_BASEMAP_ID,
-  CV_BASEMAP_LABEL,
-  CV_BASEMAP_SHADED,
-  CV_DEFAULT_MAP_FEATURE_CONFIG,
-  CV_VALID_MAP_CENTER,
-  CV_MAP_CONFIG_SCHEMA_PATH,
-  CV_MAP_EXTENTS,
-  ACCEPTED_SCHEMA_VERSIONS,
-  VALID_PROJECTION_CODES,
-  CV_MAP_CENTER,
-  CV_VALID_ZOOM_LEVELS,
-} from '@/api/config/types/config-constants';
 import { isvalidComparedToInputSchema, isvalidComparedToInternalSchema } from '@/api/config/utils';
 import {
+  BASEMAP_ID,
+  BASEMAP_LABEL,
+  BASEMAP_SHADED,
+  DEFAULT_MAP_FEATURE_CONFIG,
+  VALID_MAP_CENTER,
+  MAP_CONFIG_SCHEMA_PATH,
+  MAP_EXTENTS,
+  ACCEPTED_SCHEMA_VERSIONS,
+  VALID_PROJECTION_CODES,
+  MAP_CENTER,
+  VALID_ZOOM_LEVELS,
   Extent,
   TypeAppBarProps,
   TypeDisplayTheme,
@@ -99,7 +97,7 @@ export class MapFeatureConfig {
    */
   constructor(userMapFeatureConfig: TypeMapFeaturesInstance) {
     // Input schema validation.
-    this.#errorDetectedFlag = !isvalidComparedToInputSchema(CV_MAP_CONFIG_SCHEMA_PATH, userMapFeatureConfig);
+    this.#errorDetectedFlag = !isvalidComparedToInputSchema(MAP_CONFIG_SCHEMA_PATH, userMapFeatureConfig);
 
     // set map configuration
     const gvMap = cloneDeep(userMapFeatureConfig.map);
@@ -129,25 +127,24 @@ export class MapFeatureConfig {
     //     return layerConfig;
     //   }) as AbstractGeoviewLayerConfig[];
 
-    this.serviceUrls = defaultsDeep(userMapFeatureConfig.serviceUrls, CV_DEFAULT_MAP_FEATURE_CONFIG.serviceUrls);
-    this.theme = (userMapFeatureConfig.theme || CV_DEFAULT_MAP_FEATURE_CONFIG.theme) as TypeDisplayTheme;
-    this.navBar = [...((userMapFeatureConfig.navBar || CV_DEFAULT_MAP_FEATURE_CONFIG.navBar) as TypeNavBarProps)];
-    this.appBar = defaultsDeep(userMapFeatureConfig.appBar as TypeAppBarProps, CV_DEFAULT_MAP_FEATURE_CONFIG.appBar);
+    this.serviceUrls = defaultsDeep(userMapFeatureConfig.serviceUrls, DEFAULT_MAP_FEATURE_CONFIG.serviceUrls);
+    this.theme = (userMapFeatureConfig.theme || DEFAULT_MAP_FEATURE_CONFIG.theme) as TypeDisplayTheme;
+    this.navBar = [...((userMapFeatureConfig.navBar || DEFAULT_MAP_FEATURE_CONFIG.navBar) as TypeNavBarProps)];
+    this.appBar = defaultsDeep(userMapFeatureConfig.appBar as TypeAppBarProps, DEFAULT_MAP_FEATURE_CONFIG.appBar);
     this.footerBar = userMapFeatureConfig.footerBar as TypeFooterBarProps;
-    this.overviewMap = defaultsDeep(userMapFeatureConfig.overviewMap as TypeOverviewMapProps, CV_DEFAULT_MAP_FEATURE_CONFIG.overviewMap);
-    this.components = [...(userMapFeatureConfig.components ?? CV_DEFAULT_MAP_FEATURE_CONFIG.components ?? [])];
-    this.corePackages = [...(userMapFeatureConfig.corePackages ?? CV_DEFAULT_MAP_FEATURE_CONFIG.corePackages ?? [])];
+    this.overviewMap = defaultsDeep(userMapFeatureConfig.overviewMap as TypeOverviewMapProps, DEFAULT_MAP_FEATURE_CONFIG.overviewMap);
+    this.components = [...(userMapFeatureConfig.components ?? DEFAULT_MAP_FEATURE_CONFIG.components ?? [])];
+    this.corePackages = [...(userMapFeatureConfig.corePackages ?? DEFAULT_MAP_FEATURE_CONFIG.corePackages ?? [])];
     this.corePackagesConfig = [
-      ...((userMapFeatureConfig.corePackagesConfig || CV_DEFAULT_MAP_FEATURE_CONFIG.corePackagesConfig) as TypeCorePackagesConfig),
+      ...((userMapFeatureConfig.corePackagesConfig || DEFAULT_MAP_FEATURE_CONFIG.corePackagesConfig) as TypeCorePackagesConfig),
     ];
     this.externalPackages = [
-      ...((userMapFeatureConfig.externalPackages || CV_DEFAULT_MAP_FEATURE_CONFIG.externalPackages) as TypeExternalPackages),
+      ...((userMapFeatureConfig.externalPackages || DEFAULT_MAP_FEATURE_CONFIG.externalPackages) as TypeExternalPackages),
     ];
-    this.globalSettings = userMapFeatureConfig.globalSettings || CV_DEFAULT_MAP_FEATURE_CONFIG.globalSettings;
-    this.schemaVersionUsed =
-      (userMapFeatureConfig.schemaVersionUsed as TypeValidVersions) || CV_DEFAULT_MAP_FEATURE_CONFIG.schemaVersionUsed;
+    this.globalSettings = userMapFeatureConfig.globalSettings || DEFAULT_MAP_FEATURE_CONFIG.globalSettings;
+    this.schemaVersionUsed = (userMapFeatureConfig.schemaVersionUsed as TypeValidVersions) || DEFAULT_MAP_FEATURE_CONFIG.schemaVersionUsed;
     if (this.#errorDetectedFlag) this.#makeMapConfigValid(userMapFeatureConfig); // Tries to apply a correction to invalid properties
-    if (!isvalidComparedToInternalSchema(CV_MAP_CONFIG_SCHEMA_PATH, this)) this.setErrorDetectedFlag();
+    if (!isvalidComparedToInternalSchema(MAP_CONFIG_SCHEMA_PATH, this)) this.setErrorDetectedFlag();
   }
 
   // #region METHODS
@@ -166,12 +163,12 @@ export class MapFeatureConfig {
    */
   static #getDefaultMapConfig(projection?: TypeValidMapProjectionCodes): TypeMapConfig {
     const proj =
-      projection && VALID_PROJECTION_CODES.includes(projection) ? projection : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.projection;
-    const mapConfig = cloneDeep(CV_DEFAULT_MAP_FEATURE_CONFIG.map);
+      projection && VALID_PROJECTION_CODES.includes(projection) ? projection : DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.projection;
+    const mapConfig = cloneDeep(DEFAULT_MAP_FEATURE_CONFIG.map);
 
     // Set values specific to projection
-    mapConfig.viewSettings.maxExtent = [...CV_MAP_EXTENTS[proj]];
-    mapConfig.viewSettings.initialView = { zoomAndCenter: [3.5, CV_MAP_CENTER[proj] as [number, number]] };
+    mapConfig.viewSettings.maxExtent = [...MAP_EXTENTS[proj]];
+    mapConfig.viewSettings.initialView = { zoomAndCenter: [3.5, MAP_CENTER[proj] as [number, number]] };
 
     return mapConfig;
   }
@@ -189,34 +186,32 @@ export class MapFeatureConfig {
     this.map.viewSettings.projection =
       this.map.viewSettings.projection && VALID_PROJECTION_CODES.includes(this.map.viewSettings.projection)
         ? this.map.viewSettings.projection
-        : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.projection;
+        : DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.projection;
 
     // TODO: add validation for extent and layerIds
     if (this.map.viewSettings.initialView!.zoomAndCenter) {
       this.#validateCenter();
       const zoom = this.map.viewSettings.initialView!.zoomAndCenter[0];
       this.map.viewSettings.initialView!.zoomAndCenter[0] =
-        !Number.isNaN(zoom) && zoom >= 0 && zoom <= 28
-          ? zoom
-          : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.initialView!.zoomAndCenter![0];
+        !Number.isNaN(zoom) && zoom >= 0 && zoom <= 28 ? zoom : DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.initialView!.zoomAndCenter![0];
     }
 
     this.#validateBasemap();
 
     this.schemaVersionUsed = ACCEPTED_SCHEMA_VERSIONS.includes(this.schemaVersionUsed!)
       ? this.schemaVersionUsed
-      : CV_DEFAULT_MAP_FEATURE_CONFIG.schemaVersionUsed!;
+      : DEFAULT_MAP_FEATURE_CONFIG.schemaVersionUsed!;
     const minZoom = this.map.viewSettings.minZoom!;
     this.map.viewSettings.minZoom =
-      !Number.isNaN(minZoom) && minZoom >= CV_VALID_ZOOM_LEVELS[0] && minZoom <= CV_VALID_ZOOM_LEVELS[1]
+      !Number.isNaN(minZoom) && minZoom >= VALID_ZOOM_LEVELS[0] && minZoom <= VALID_ZOOM_LEVELS[1]
         ? minZoom
-        : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.minZoom;
+        : DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.minZoom;
 
     const maxZoom = this.map.viewSettings.maxZoom!;
     this.map.viewSettings.maxZoom =
-      !Number.isNaN(maxZoom) && maxZoom >= CV_VALID_ZOOM_LEVELS[0] && maxZoom <= CV_VALID_ZOOM_LEVELS[1]
+      !Number.isNaN(maxZoom) && maxZoom >= VALID_ZOOM_LEVELS[0] && maxZoom <= VALID_ZOOM_LEVELS[1]
         ? maxZoom
-        : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.maxZoom;
+        : DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.maxZoom;
 
     if (this.map.viewSettings.initialView!.zoomAndCenter) this.#validateMaxExtent();
     this.#logModifs(providedMapConfig);
@@ -234,13 +229,13 @@ export class MapFeatureConfig {
     const { projection } = this.map.viewSettings;
 
     this.map.viewSettings.initialView!.zoomAndCenter![1][0] =
-      !Number.isNaN(xVal) && xVal > CV_VALID_MAP_CENTER[projection].long[0] && xVal < CV_VALID_MAP_CENTER[projection].long[1]
+      !Number.isNaN(xVal) && xVal > VALID_MAP_CENTER[projection].long[0] && xVal < VALID_MAP_CENTER[projection].long[1]
         ? xVal
-        : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.initialView!.zoomAndCenter![1][0];
+        : DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.initialView!.zoomAndCenter![1][0];
     this.map.viewSettings.initialView!.zoomAndCenter![1][1] =
-      !Number.isNaN(yVal) && yVal > CV_VALID_MAP_CENTER[projection].lat[0] && yVal < CV_VALID_MAP_CENTER[projection].lat[1]
+      !Number.isNaN(yVal) && yVal > VALID_MAP_CENTER[projection].lat[0] && yVal < VALID_MAP_CENTER[projection].lat[1]
         ? yVal
-        : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.initialView!.zoomAndCenter![1][1];
+        : DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.initialView!.zoomAndCenter![1][1];
   }
 
   /**
@@ -252,15 +247,15 @@ export class MapFeatureConfig {
     const { projection } = this.map.viewSettings;
     const { basemapOptions } = this.map;
 
-    this.map.basemapOptions.basemapId = CV_BASEMAP_ID[projection].includes(basemapOptions.basemapId)
+    this.map.basemapOptions.basemapId = BASEMAP_ID[projection].includes(basemapOptions.basemapId)
       ? basemapOptions.basemapId
-      : CV_DEFAULT_MAP_FEATURE_CONFIG.map.basemapOptions.basemapId;
-    this.map.basemapOptions.shaded = CV_BASEMAP_SHADED[projection].includes(basemapOptions.shaded)
+      : DEFAULT_MAP_FEATURE_CONFIG.map.basemapOptions.basemapId;
+    this.map.basemapOptions.shaded = BASEMAP_SHADED[projection].includes(basemapOptions.shaded)
       ? basemapOptions.shaded
-      : CV_DEFAULT_MAP_FEATURE_CONFIG.map.basemapOptions.shaded;
-    this.map.basemapOptions.labeled = CV_BASEMAP_LABEL[projection].includes(basemapOptions.labeled)
+      : DEFAULT_MAP_FEATURE_CONFIG.map.basemapOptions.shaded;
+    this.map.basemapOptions.labeled = BASEMAP_LABEL[projection].includes(basemapOptions.labeled)
       ? basemapOptions.labeled
-      : CV_DEFAULT_MAP_FEATURE_CONFIG.map.basemapOptions.labeled;
+      : DEFAULT_MAP_FEATURE_CONFIG.map.basemapOptions.labeled;
   }
 
   /**
@@ -273,10 +268,10 @@ export class MapFeatureConfig {
     const maxExtent = this.map.viewSettings.maxExtent!;
     const [extentMinX, extentMinY, extentMaxX, extentMaxY] = maxExtent;
 
-    const minX = !Number.isNaN(extentMinX) && extentMinX < center[0] ? extentMinX : CV_VALID_MAP_CENTER[projection].long[0];
-    const minY = !Number.isNaN(extentMinY) && extentMinY < center[1] ? extentMinY : CV_VALID_MAP_CENTER[projection].lat[0];
-    const maxX = !Number.isNaN(extentMaxX) && extentMaxX > center[0] ? extentMaxX : CV_VALID_MAP_CENTER[projection].long[1];
-    const maxY = !Number.isNaN(extentMaxY) && extentMaxY > center[1] ? extentMaxY : CV_VALID_MAP_CENTER[projection].lat[1];
+    const minX = !Number.isNaN(extentMinX) && extentMinX < center[0] ? extentMinX : VALID_MAP_CENTER[projection].long[0];
+    const minY = !Number.isNaN(extentMinY) && extentMinY < center[1] ? extentMinY : VALID_MAP_CENTER[projection].lat[0];
+    const maxX = !Number.isNaN(extentMaxX) && extentMaxX > center[0] ? extentMaxX : VALID_MAP_CENTER[projection].long[1];
+    const maxY = !Number.isNaN(extentMaxY) && extentMaxY > center[1] ? extentMaxY : VALID_MAP_CENTER[projection].lat[1];
 
     this.map.viewSettings.maxExtent = [minX, minY, maxX, maxY] as Extent;
   }

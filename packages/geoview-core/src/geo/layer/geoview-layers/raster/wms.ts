@@ -4,6 +4,7 @@ import WMSCapabilities from 'ol/format/WMSCapabilities';
 
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import {
+  CONFIG_PROXY_URL,
   TypeLayerEntryConfig,
   TypeGeoviewLayerConfig,
   CONST_LAYER_ENTRY_TYPES,
@@ -13,7 +14,6 @@ import {
 } from '@/api/config/types/map-schema-types';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
-import { CV_CONFIG_PROXY_URL } from '@/api/config/types/config-constants';
 import { logger } from '@/core/utils/logger';
 import {
   OgcWmsLayerEntryConfig,
@@ -74,7 +74,10 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {TypeMetadataWMSCapabilityLayer?} layer - The current layer entry from the capabilities that will be recursively searched.
    * @returns {TypeMetadataWMSCapabilityLayer?} The found layer from the capabilities or undefined if not found.
    */
-  getLayerCapabilities(layerId: string, layer = this.getMetadata()?.Capability.Layer): TypeMetadataWMSCapabilityLayer | undefined {
+  getLayerCapabilities(
+    layerId: string,
+    layer: TypeMetadataWMSCapabilityLayer | undefined = this.getMetadata()?.Capability.Layer
+  ): TypeMetadataWMSCapabilityLayer | undefined {
     if (!layer) return undefined;
 
     // Direct match
@@ -101,10 +104,10 @@ export class WMS extends AbstractGeoViewRaster {
    * - Otherwise, the method constructs a WMS GetCapabilities request.
    *   - If no specific layer configs are provided, a single metadata fetch is made.
    *   - If layer configs are present (e.g., Geomet use case), individual layer metadata is merged.
-   * @returns {Promise<TypeMetadataWMS | undefined>} A promise resolving to the parsed metadata object,
+   * @returns {Promise<T = TypeMetadataWMS | undefined>} A promise resolving to the parsed metadata object,
    * or `undefined` if metadata could not be retrieved or no capabilities were found.
    */
-  protected override onFetchServiceMetadata(): Promise<TypeMetadataWMS | undefined> {
+  protected override onFetchServiceMetadata<T = TypeMetadataWMS | undefined>(): Promise<T> {
     // If metadata is in XML format (not WMS GetCapabilities)
     const isXml = WMS.#isXmlMetadata(this.metadataAccessPath);
     if (isXml) {
@@ -112,7 +115,7 @@ export class WMS extends AbstractGeoViewRaster {
       return this.#fetchXmlServiceMetadata(this.metadataAccessPath, (proxyUsed) => {
         // Update the access path to use the proxy if one was required
         this.metadataAccessPath = `${proxyUsed}${this.metadataAccessPath}`;
-      });
+      }) as Promise<T>;
     }
 
     // Construct a proper WMS GetCapabilities URL
@@ -123,11 +126,11 @@ export class WMS extends AbstractGeoViewRaster {
 
     if (layerConfigsToQuery.length === 0) {
       // If no specific layers to query, fetch and process metadata for the entire service
-      return this.#fetchAndProcessSingleWmsMetadata(url);
+      return this.#fetchAndProcessSingleWmsMetadata(url) as Promise<T>;
     }
 
     // Fetch and merge metadata for each layer individually
-    return this.#fetchAndMergeMultipleWmsMetadata(url, layerConfigsToQuery);
+    return this.#fetchAndMergeMultipleWmsMetadata(url, layerConfigsToQuery) as Promise<T>;
   }
 
   /**
@@ -719,13 +722,13 @@ export class WMS extends AbstractGeoViewRaster {
       // If a network error such as CORS
       if (error instanceof NetworkError) {
         // We're going to change the metadata url to use a proxy
-        const newProxiedMetadataUrl = `${CV_CONFIG_PROXY_URL}?${url}`;
+        const newProxiedMetadataUrl = `${CONFIG_PROXY_URL}?${url}`;
 
         // Try again with the proxy this time
         capabilitiesString = await Fetch.fetchText(newProxiedMetadataUrl);
 
         // Callback about it
-        callbackNewMetadataUrl?.(`${CV_CONFIG_PROXY_URL}?`);
+        callbackNewMetadataUrl?.(`${CONFIG_PROXY_URL}?`);
       } else {
         // Unknown error, throw it
         throw error;
@@ -813,11 +816,9 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /**
-   * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
-   * @returns A Promise with the layer configuration
-   * @experimental
+   * Processes an WMS config returning a Promise of an array of ConfigBaseClass layer entry configurations.
+   * @returns A Promise with the layer configurations.
    */
-  // TODO: REFACTOR CONFIG API
   static processWMSConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,

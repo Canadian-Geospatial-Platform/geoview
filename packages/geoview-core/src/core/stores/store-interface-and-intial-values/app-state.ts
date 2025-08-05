@@ -1,5 +1,10 @@
 import { useStore } from 'zustand';
-import { TypeDisplayLanguage, TypeDisplayTheme, TypeInitialGeoviewLayerType } from '@/api/config/types/map-schema-types';
+import {
+  VALID_DISPLAY_LANGUAGE,
+  TypeDisplayLanguage,
+  TypeDisplayTheme,
+  TypeInitialGeoviewLayerType,
+} from '@/api/config/types/map-schema-types';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
@@ -7,7 +12,6 @@ import { NotificationDetailsType } from '@/core/components/notifications/notific
 import { TypeHTMLElement, TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
 import { getScriptAndAssetURL } from '@/core/utils/utilities';
-import { VALID_DISPLAY_LANGUAGE } from '@/api/config/types/config-constants';
 import { SnackbarType } from '@/core/utils/notifications';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with AppEventProcessor vs AppState

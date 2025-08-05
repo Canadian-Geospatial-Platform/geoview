@@ -79,9 +79,9 @@ export class WFS extends AbstractGeoViewVector {
   /**
    * Overrides the way the metadata is fetched.
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-   * @returns {Promise<TypeMetadataWFS | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
+   * @returns {Promise<T = TypeMetadataWFS>} A promise with the metadata or undefined when no metadata for the particular layer type.
    */
-  protected override async onFetchServiceMetadata(): Promise<TypeMetadataWFS | undefined> {
+  protected override async onFetchServiceMetadata<T = TypeMetadataWFS>(): Promise<T> {
     // Fetch it
     const metadata = await WFS.fetchMetadata(this.metadataAccessPath);
 
@@ -89,7 +89,7 @@ export class WFS extends AbstractGeoViewVector {
     if (!metadata) throw new LayerNoCapabilitiesError(this.geoviewLayerId, this.geoviewLayerName);
 
     // Return it
-    return metadata;
+    return metadata as T;
   }
 
   /**
@@ -428,11 +428,9 @@ export class WFS extends AbstractGeoViewVector {
   }
 
   /**
-   * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
-   * @returns A Promise with the layer configuration
-   * @experimental
+   * Processes a WFS config returning a Promise of an array of ConfigBaseClass layer entry configurations.
+   * @returns A Promise with the layer configurations.
    */
-  // TODO: REFACTOR CONFIG API
   static processWFSConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerIds: string[]): Promise<ConfigBaseClass[]> {
     // Create the Layer config
     const layerConfig = WFS.createWfsFeatureLayerConfig(

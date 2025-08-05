@@ -1,5 +1,4 @@
 import React from 'react'; // GV This import is to validate that we're on the right React at the end of the file
-import { AnySchemaObject } from 'geoview-core/api/config/types/config-types';
 import { MapPlugin } from 'geoview-core/api/plugin/map-plugin';
 import { SwiperEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/swiper-event-processor';
 import { LayerNotFoundError } from 'geoview-core/core/exceptions/layer-exceptions';
@@ -17,9 +16,9 @@ class SwiperPlugin extends MapPlugin {
   /**
    * Returns the package schema
    *
-   * @returns {AnySchemaObject} the package schema
+   * @returns {unknown} the package schema
    */
-  override schema(): AnySchemaObject {
+  override schema(): unknown {
     return schema;
   }
 

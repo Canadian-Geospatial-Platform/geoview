@@ -15,6 +15,7 @@ import {
   TypeZoomAndCenter,
   TypeFeatureInfoEntry,
   TypePointMarker,
+  MAP_CENTER,
 } from '@/api/config/types/map-schema-types';
 import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
@@ -25,7 +26,6 @@ import { TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { TypeHoverFeatureInfo } from './feature-info-state';
-import { CV_MAP_CENTER } from '@/api/config/types/config-constants';
 import { logger } from '@/core/utils/logger';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with MapEventProcessor vs MapState
@@ -177,7 +177,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     hoverFeatureInfo: undefined,
     initialFilters: {},
     initialView: {
-      zoomAndCenter: [3.5, CV_MAP_CENTER[3857] as [number, number]],
+      zoomAndCenter: [3.5, MAP_CENTER[3857] as [number, number]],
     },
     interaction: 'static',
     isMouseInsideMap: false,
@@ -215,13 +215,13 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           basemapOptions: geoviewConfig.map.basemapOptions,
           centerCoordinates: geoviewConfig.map.viewSettings.initialView?.zoomAndCenter
             ? (geoviewConfig.map.viewSettings.initialView.zoomAndCenter[1] as Coordinate)
-            : CV_MAP_CENTER[geoviewConfig.map.viewSettings.projection],
+            : MAP_CENTER[geoviewConfig.map.viewSettings.projection],
           currentProjection: geoviewConfig.map.viewSettings.projection,
           currentBasemapOptions: geoviewConfig.map.basemapOptions,
           featureHighlightColor: geoviewConfig.map.highlightColor || 'black',
           homeView: geoviewConfig.map.viewSettings.homeView ||
-            geoviewConfig.map.viewSettings.initialView || { zoomAndCenter: [3.5, CV_MAP_CENTER[3857] as [number, number]] },
-          initialView: geoviewConfig.map.viewSettings.initialView || { zoomAndCenter: [3.5, CV_MAP_CENTER[3857] as [number, number]] },
+            geoviewConfig.map.viewSettings.initialView || { zoomAndCenter: [3.5, MAP_CENTER[3857] as [number, number]] },
+          initialView: geoviewConfig.map.viewSettings.initialView || { zoomAndCenter: [3.5, MAP_CENTER[3857] as [number, number]] },
           interaction: geoviewConfig.map.interaction || 'dynamic',
           mapExtent: geoviewConfig.map.viewSettings.maxExtent,
           northArrow: geoviewConfig.components!.indexOf('north-arrow') > -1 || false,

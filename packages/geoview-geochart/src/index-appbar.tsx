@@ -1,5 +1,4 @@
 import React from 'react'; // GV This import is to validate that we're on the right React at the end of the file
-import { AnySchemaObject } from 'geoview-core/api/config/types/config-types';
 import { IconButtonPropsExtend } from 'geoview-core/ui/icon-button/icon-button';
 import { TypePanelProps } from 'geoview-core/ui/panel/panel-types';
 import { AppBarPlugin } from 'geoview-core/api/plugin/appbar-plugin';
@@ -15,9 +14,9 @@ export class GeoChartAppBarPlugin extends AppBarPlugin {
   /**
    * Return the package schema
    *
-   * @returns {AnySchemaObject} the package schema
+   * @returns {unknown} the package schema
    */
-  override schema(): AnySchemaObject {
+  override schema(): unknown {
     return schema;
   }
 

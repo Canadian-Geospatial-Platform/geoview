@@ -1,6 +1,5 @@
 import i18next from 'i18next';
-import Ajv from 'ajv';
-
+import Ajv, { AnySchema } from 'ajv';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import { whenThisThen, getScriptAndAssetURL } from '@/core/utils/utilities';
@@ -113,7 +112,7 @@ export abstract class Plugin {
         });
 
         // initialize validator with schema file
-        const validate = validator.compile(schema);
+        const validate = validator.compile(schema as AnySchema);
 
         // if no config is provided then use default
         pluginConfigObj = defaultConfig;

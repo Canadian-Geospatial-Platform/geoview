@@ -60,17 +60,17 @@ export class EsriFeature extends AbstractGeoViewVector {
   /**
    * Overrides the way the metadata is fetched.
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-   * @returns {Promise<TypeMetadataEsriFeature | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
+   * @returns {Promise<T = TypeMetadataEsriFeature | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
    */
-  protected override async onFetchServiceMetadata(): Promise<TypeMetadataEsriFeature | undefined> {
+  protected override async onFetchServiceMetadata<T = TypeMetadataEsriFeature | undefined>(): Promise<T> {
     // Query
-    const responseJson = await Fetch.fetchJson<TypeMetadataEsriFeature>(`${this.metadataAccessPath}?f=json`);
+    const responseJson = await Fetch.fetchJson<T>(`${this.metadataAccessPath}?f=json`);
 
     // Validate the metadata response
     AbstractGeoViewRaster.throwIfMetatadaHasError(this.geoviewLayerId, this.geoviewLayerName, responseJson);
 
     // Return it
-    return responseJson;
+    return responseJson as T;
   }
 
   /**
@@ -245,11 +245,9 @@ export class EsriFeature extends AbstractGeoViewVector {
   }
 
   /**
-   * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
-   * @returns A Promise with the layer configuration
-   * @experimental
+   * Processes an Esri Feature config returning a Promise of an array of ConfigBaseClass layer entry configurations.
+   * @returns A Promise with the layer configurations.
    */
-  // TODO: REFACTOR CONFIG API
   static processEsriFeatureConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,

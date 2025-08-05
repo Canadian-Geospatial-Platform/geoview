@@ -5,9 +5,13 @@ import { GeochartEventProcessor } from '@/api/event-processors/event-processor-c
 import { generateId } from '@/core/utils/utilities';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
-import { TypeDisplayLanguage, GeoCoreLayerConfig, TypeGeoviewLayerConfig } from '@/api/config/types/map-schema-types';
+import {
+  DEFAULT_MAP_FEATURE_CONFIG,
+  TypeDisplayLanguage,
+  GeoCoreLayerConfig,
+  TypeGeoviewLayerConfig,
+} from '@/api/config/types/map-schema-types';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
-import { CV_DEFAULT_MAP_FEATURE_CONFIG } from '@/api/config/types/config-constants';
 
 /**
  * Class used to add geoCore layer to the map
@@ -30,7 +34,7 @@ export abstract class GeoCore {
     layerConfig?: GeoCoreLayerConfig
   ): Promise<TypeGeoviewLayerConfig> {
     // If there's a mapId provided, validate the uuid
-    let { geocoreUrl } = CV_DEFAULT_MAP_FEATURE_CONFIG.serviceUrls;
+    let { geocoreUrl } = DEFAULT_MAP_FEATURE_CONFIG.serviceUrls;
 
     if (mapId) {
       // Get the map config
@@ -44,7 +48,7 @@ export abstract class GeoCore {
       const mapConfig = MapEventProcessor.getGeoViewMapConfig(mapId);
 
       // Generate the url using the geocore url
-      geocoreUrl = `${mapConfig!.serviceUrls.geocoreUrl}`;
+      geocoreUrl = mapConfig!.serviceUrls.geocoreUrl;
     }
 
     // Get the GV config from UUID and await

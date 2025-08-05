@@ -919,6 +919,10 @@
         "layerStyle": {
           "$ref": "#/definitions/TypeLayerStyleConfig"
         },
+        "styleUrl": {
+          "description": "An url to a specific style to apply.",
+          "type:": "string"
+        },
         "not": {
           "listOfLayerEntryConfig": {
             "$ref": "#/definitions/TypeListOfLayerEntryConfig",
@@ -1260,6 +1264,10 @@
         "source": {
           "$ref": "#/definitions/TypeSourceTileInitialConfig"
         },
+        "styleUrl": {
+          "description": "An url to a specific style to apply.",
+          "type:": "string"
+        },
         "not": {
           "listOfLayerEntryConfig": {
             "$ref": "#/definitions/TypeListOfLayerEntryConfig",
@@ -1572,6 +1580,16 @@
         "interaction",
         "viewSettings"
       ]
+    },
+    "TypeDisplayTheme": {
+      "description": "Valid values for the theme property.",
+      "additionalProperties": false,
+      "enum": [
+        "dark",
+        "light",
+        "geo.ca"
+      ],
+      "default": "geo.ca"
     },
     "TypeBasemapOptions": {
       "additionalProperties": false,
@@ -1963,55 +1981,83 @@
       "description": "Initial zoom and center coordinates to set map view."
     },
     "TypeValidMapProjectionCodes": {
+      "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada.",
       "enum": [
         3978,
         3857
       ],
-      "default": 3978,
-      "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada."
+      "default": 3978
+    },
+    "TypeValidNavBarProps": {
+      "description": "Valid values for the navBar array.",
+      "additionalProperties": false,
+      "enum": [
+        "zoom",
+        "fullscreen",
+        "home",
+        "location",
+        "basemap-select",
+        "projection",
+        "drawer"
+      ]
     },
     "TypeNavBarProps": {
+      "description": "Controls available on the navigation bar.",
+      "additionalProperties": false,
       "type": "array",
       "uniqueItems": true,
       "items": {
-        "enum": [
-          "zoom",
-          "fullscreen",
-          "home",
-          "location",
-          "projection",
-          "basemap-select",
-          "drawer"
-        ]
+        "$ref": "#/definitions/TypeValidNavBarProps"
       },
       "default": [
         "zoom",
         "fullscreen",
-        "home"
+        "home",
+        "basemap-select"
       ],
-      "description": "Controls available on the navigation bar.",
       "minItems": 0
+    },
+    "TypeValidFooterBarTabsCoreProps": {
+      "description": "Valid values for the footerBar tabs core array.",
+      "additionalProperties": false,
+      "enum": [
+        "legend",
+        "layers",
+        "details",
+        "data-table",
+        "time-slider",
+        "geochart"
+      ]
+    },
+    "TypeFooterBarTabsCustomProps": {
+      "description": "Footer bar tabs custom definition.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "contentHTML": {
+          "type": "string"
+        }
+      }
     },
     "TypeFooterBarProps": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
         "tabs": {
-          "type": "object",
           "description": "Available tabs",
+          "type": "object",
           "properties": {
             "core": {
+              "description": "Default core tabs of footer bar to use. NOTE: config from packages for time-slider and geochart are in the same loaction as core config (<<core config name>>-<<package name>>.json).",
               "type": "array",
               "items": {
-                "type": "string",
-                "enum": [
-                  "legend",
-                  "layers",
-                  "details",
-                  "data-table",
-                  "time-slider",
-                  "geochart"
-                ]
+                "$ref": "#/definitions/TypeValidFooterBarTabsCoreProps"
               },
               "minItems": 1,
               "default": [
@@ -2020,29 +2066,17 @@
                 "details",
                 "data-table"
               ],
-              "uniqueItems": true,
-              "description": "Default core tabs of footer bar to use. NOTE: config from packages for time-slider and geochart are in the same loaction as core config (<<core config name>>-<<package name>>.json)."
+              "uniqueItems": true
             },
             "custom": {
+              "description": "Custom tabs of footer bar to use",
               "type": "array",
               "items": {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "string"
-                  },
-                  "label": {
-                    "type": "string"
-                  },
-                  "contentHTML": {
-                    "type": "string"
-                  }
-                }
+                "$ref": "#/definitions/TypeFooterBarTabsCustomProps"
               },
               "minItems": 0,
               "default": [],
-              "uniqueItems": true,
-              "description": "Custom tabs of footer bar to use"
+              "uniqueItems": true
             }
           },
           "additionalProperties": false
@@ -2060,8 +2094,7 @@
             "details",
             "data-table",
             "time-slider",
-            "geochart",
-            ""
+            "geochart"
           ],
           "description": "Footer tab to be selected at map load"
         },
@@ -2082,6 +2115,21 @@
         "tabs"
       ]
     },
+    "TypeValidAppBarCoreProps": {
+      "description": "Valid values for the app bar tabs core array.",
+      "additionalProperties": false,
+      "enum": [
+        "geolocator",
+        "export",
+        "geochart",
+        "details",
+        "legend",
+        "guide",
+        "data-table",
+        "layers",
+        "aoi-panel"
+      ]
+    },
     "TypeAppBarProps": {
       "type": "object",
       "additionalProperties": false,
@@ -2091,24 +2139,16 @@
           "description": "Available tabs - controls",
           "properties": {
             "core": {
+              "description": "Default core tabs of app-bar to use. NOTE: config from packages like geochart are in the same loaction as core config (<<core config name>>-<<package name>>.json).",
               "type": "array",
               "items": {
-                "type": "string",
-                "enum": [
-                  "geolocator",
-                  "export",
-                  "geochart",
-                  "details",
-                  "legend",
-                  "guide"
-                ]
+                "$ref": "#/definitions/TypeValidAppBarCoreProps"
               },
               "minItems": 0,
               "default": [
                 "geolocator"
               ],
-              "uniqueItems": true,
-              "description": "Default core tabs of app-bar to use. NOTE: config from packages like geochart are in the same loaction as core config (<<core config name>>-<<package name>>.json)."
+              "uniqueItems": true
             }
           },
           "additionalProperties": false
@@ -2318,13 +2358,7 @@
           "$ref": "#/definitions/TypeMapConfig"
         },
         "theme": {
-          "enum": [
-            "dark",
-            "light",
-            "geo.ca"
-          ],
-          "default": "dark",
-          "description": "Theme style the viewer."
+          "$ref": "#/definitions/TypeDisplayTheme"
         },
         "navBar": {
           "$ref": "#/definitions/TypeNavBarProps"
