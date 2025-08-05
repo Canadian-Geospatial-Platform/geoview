@@ -45,9 +45,9 @@ export class TransformSelectionEvent extends BaseEvent {
 
   /**
    * Creates a new SelectionEvent
-   * @param type The event type
-   * @param previousFeature The previously selected feature
-   * @param newFeature The newly selected feature
+   * @param type - The event type
+   * @param previousFeature - The previously selected feature
+   * @param newFeature - The newly selected feature
    */
   constructor(type: string, previousFeature?: Feature<Geometry>, newFeature?: Feature<Geometry>) {
     super(type);

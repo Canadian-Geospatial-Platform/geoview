@@ -59,8 +59,6 @@ export function PointIcon(props: PointIconProps): JSX.Element {
     const serializer = new XMLSerializer();
     const svgStr = serializer.serializeToString(svg);
     const dataUrl = `data:image/svg+xml;base64,${btoa(svgStr)}`;
-    // const svgBlob = new Blob([svgStr], { type: 'image/svg+xml' });
-    // const url = URL.createObjectURL(svgBlob);
 
     // Store the URL
     setIconSrc(dataUrl);
