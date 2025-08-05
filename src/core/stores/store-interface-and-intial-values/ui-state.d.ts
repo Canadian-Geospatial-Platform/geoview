@@ -8,7 +8,7 @@ export type ActiveAppBarTabType = {
     isFocusTrapped?: boolean;
 };
 export interface IUIState {
-    activeFooterBarTabId: string;
+    activeFooterBarTabId: string | undefined;
     activeTrapGeoView: boolean;
     activeAppBarTab: ActiveAppBarTabType;
     appBarComponents: TypeValidAppBarCoreProps[];
@@ -26,7 +26,7 @@ export interface IUIState {
         enableFocusTrap: (uiFocus: FocusItemProps) => void;
         disableFocusTrap: (callbackElementId?: string) => void;
         showTab: (tab: string) => void;
-        setActiveFooterBarTab: (id: string) => void;
+        setActiveFooterBarTab: (id: string | undefined) => void;
         setActiveAppBarTab: (tabId: string, isOpen: boolean, isFocusTrapped: boolean) => void;
         setActiveTrapGeoView: (active: boolean) => void;
         setFooterPanelResizeValue: (value: number) => void;
@@ -36,7 +36,7 @@ export interface IUIState {
     setterActions: {
         enableFocusTrap: (uiFocus: FocusItemProps) => void;
         disableFocusTrap: (callbackElementId?: string) => void;
-        setActiveFooterBarTab: (id: string) => void;
+        setActiveFooterBarTab: (id: string | undefined) => void;
         setActiveAppBarTab: (tabId: string, isOpen: boolean, isFocusTrapped: boolean) => void;
         setActiveTrapGeoView: (active: boolean) => void;
         setFooterPanelResizeValue: (value: number) => void;
@@ -57,7 +57,7 @@ type FocusItemProps = {
     callbackElementId: string | false;
 };
 export declare const useUIActiveFocusItem: () => FocusItemProps;
-export declare const useUIActiveFooterBarTabId: () => string;
+export declare const useUIActiveFooterBarTabId: () => string | undefined;
 export declare const useUIActiveAppBarTab: () => ActiveAppBarTabType;
 export declare const useUIActiveTrapGeoView: () => boolean;
 export declare const useUIAppbarComponents: () => TypeValidAppBarCoreProps[];
