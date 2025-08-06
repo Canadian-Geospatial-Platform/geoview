@@ -123,7 +123,7 @@ export class ConfigValidation {
     geoviewLayerType: TypeGeoviewLayerType,
     listOfLayerEntryConfig: TypeLayerEntryConfig[],
     validator: Ajv,
-    onErrorCallback: (errorKey: string, params: string[]) => void
+    onErrorCallback: ErrorCallbackDelegate
   ): boolean {
     const layerSchemaPath = `https://cgpv/schema#/definitions/${CONST_GEOVIEW_SCHEMA_BY_TYPE[geoviewLayerType]}`;
     const groupSchemaPath = `https://cgpv/schema#/definitions/TypeLayerGroupEntryConfig`;
@@ -168,9 +168,9 @@ export class ConfigValidation {
    *
    * @returns {TypeMapFeaturesConfig} A valid map features configuration.
    */
-  validateMapConfigAgainstSchema(
+  validateLayersConfigAgainstSchema(
     listOfGeoviewLayerConfig: MapConfigLayerEntry[],
-    onErrorCallback: (errorKey: string, params: string[]) => void
+    onErrorCallback: ErrorCallbackDelegate
   ): MapConfigLayerEntry[] {
     // create a validator object
     const validator = new Ajv({
@@ -400,3 +400,5 @@ export class ConfigValidation {
     });
   }
 }
+
+export type ErrorCallbackDelegate = (errorKey: string, params: string[]) => void;

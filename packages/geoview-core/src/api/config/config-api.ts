@@ -1,4 +1,7 @@
 import { cloneDeep } from 'lodash';
+import Ajv from 'ajv';
+import addErrors from 'ajv-errors';
+
 import { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config';
 import {
   DEFAULT_MAP_FEATURE_CONFIG,
@@ -17,6 +20,8 @@ import {
   TypeValidMapCorePackageProps,
   TypeValidMapProjectionCodes,
   TypeZoomAndCenter,
+  MAP_CONFIG_SCHEMA_PATH,
+  TypeValidVersions,
 } from '@/api/config/types/map-schema-types';
 import { MapConfigError } from '@/api/config/types/classes/config-exceptions';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
@@ -37,6 +42,7 @@ import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { GeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
 import { CSV } from '@/geo/layer/geoview-layers/vector/csv';
 import { GeoCore } from '@/geo/layer/other/geocore';
+import schema from '@/core/../../schema.json';
 
 /**
  * The API class that create configuration object. It is used to validate and read the service and layer metadata.
@@ -258,7 +264,7 @@ export class ConfigApi {
       }
 
       // update the version if provided from the map configuration.
-      jsonConfig.schemaVersionUsed = urlParams.v as '1.0' | undefined;
+      jsonConfig.schemaVersionUsed = urlParams.v as TypeValidVersions | undefined;
     }
 
     // Trace the detail config read from url
@@ -298,6 +304,9 @@ export class ConfigApi {
     // be translated to a json object.
     const providedMapFeatureConfig = typeof mapConfig === 'string' ? ConfigApi.convertStringToJson(mapConfig)! : mapConfig;
 
+    // Validate the map config
+    ConfigApi.validateSchema(MAP_CONFIG_SCHEMA_PATH, providedMapFeatureConfig);
+
     try {
       // If the user provided a valid string config with the mandatory map property, process geocore layers to translate them to their GeoView layers
       if (!providedMapFeatureConfig) throw new MapConfigError('The string configuration provided cannot be translated to a json object');
@@ -312,10 +321,58 @@ export class ConfigApi {
       // an array.
       if (error instanceof MapConfigError) logger.logError(error.message);
       else logger.logError('ConfigApi.validateMapConfig - An error occured', error);
-      const defaultMapConfig = ConfigApi.getDefaultMapFeatureConfig();
-      defaultMapConfig.setErrorDetectedFlag();
-      return defaultMapConfig;
     }
+
+    // Return default map config
+    return ConfigApi.getDefaultMapFeatureConfig();
+  }
+
+  /**
+   * Validates an object against a JSON schema using Ajv.
+   * @param {string} schemaPath - The JSON schema path used to retrieve the validator function.
+   * @param {object} targetObject - The object to be validated against the schema.
+   * @returns {boolean} Returns `true` if validation passes, `false` otherwise.
+   */
+  static validateSchema(schemaPath: string, targetObject: object): boolean {
+    // create a validator object
+    const validator = new Ajv({
+      strict: false,
+      allErrors: true,
+    });
+    addErrors(validator);
+
+    // initialize validator with schema file
+    validator.compile(schema);
+
+    const validate = validator.getSchema(schemaPath);
+
+    if (validate) {
+      // validate configuration
+      const valid = validate(targetObject);
+
+      // If an error is detected, print it in the logger
+      if (!valid) {
+        for (let i = 0; i < validate.errors!.length; i += 1) {
+          const error = validate.errors![i];
+          const { instancePath } = error;
+          const path = instancePath.split('/');
+          let node = targetObject as Record<string, unknown>;
+          for (let j = 1; j < path.length; j++) {
+            node = node[path[j]] as Record<string, unknown>;
+          }
+          logger.logWarning('='.repeat(200), `\nSchemaPath: ${schemaPath}`, '\nSchema error: ', error, '\nObject affected: ', node);
+        }
+        return false;
+      }
+
+      // Log
+      logger.logDebug('CONFIG-MAP-VALIDATED', targetObject);
+      return true;
+    }
+
+    // If the schema is not found, log an error and set the error flag on the target object
+    logger.logError(`Cannot find schema ${schemaPath}`);
+    return false;
   }
 
   // #region INITIALIZERS AND PROCESSORS
