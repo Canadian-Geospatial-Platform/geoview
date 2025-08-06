@@ -31,7 +31,7 @@ export type TypeMapFeaturesInstance = {
   /** Display theme, default = geo.ca. */
   theme?: TypeDisplayTheme;
   /** Nav bar properies. */
-  navBar?: TypeNavBarProps;
+  navBar?: TypeValidNavBarProps[];
   /** App bar properies. */
   appBar?: TypeAppBarProps;
   /** Footer bar properies. */
@@ -45,12 +45,12 @@ export type TypeMapFeaturesInstance = {
   /** List of core packages. */
   corePackagesConfig?: TypeCorePackagesConfig;
   /** List of external packages. */
-  externalPackages?: TypeExternalPackages;
+  externalPackages?: TypeExternalPackagesProps[];
   /**
    * The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by
    * this version of the viewer.
    */
-  schemaVersionUsed?: '1.0';
+  schemaVersionUsed?: TypeValidVersions;
   /** Global settings. */
   globalSettings?: TypeGlobalSettings;
 };
@@ -77,9 +77,6 @@ export const VALID_DISPLAY_THEME: TypeDisplayTheme[] = ['dark', 'light', 'geo.ca
 
 /** Valid values for the navBar array. */
 export type TypeValidNavBarProps = 'zoom' | 'fullscreen' | 'home' | 'location' | 'basemap-select' | 'projection' | 'drawer';
-
-/** Controls available on the navigation bar. Default = ['zoom', 'fullscreen', 'home', 'basemap-select]. */
-export type TypeNavBarProps = TypeValidNavBarProps[];
 
 /** Supported footer bar tabs */
 export type TypeValidFooterBarTabsCoreProps = 'legend' | 'layers' | 'details' | 'data-table' | 'time-slider' | 'geochart' | 'guide';
@@ -130,7 +127,9 @@ export type TypeAppBarProps = {
 };
 
 /** Overview map options. Default none. */
-export type TypeOverviewMapProps = { hideOnZoom: number };
+export type TypeOverviewMapProps = {
+  hideOnZoom: number;
+};
 
 /** Supported map component values. */
 export type TypeValidMapComponentProps = 'overview-map' | 'north-arrow';
@@ -144,7 +143,7 @@ export type TypeValidMapCorePackageProps = 'swiper';
  * OR inline with this parameter
  * Default = [].
  */
-export type TypeCorePackagesConfig = [];
+export type TypeCorePackagesConfig = Record<string, unknown>[];
 
 /** External package objexct definition. */
 export type TypeExternalPackagesProps = {
@@ -156,9 +155,6 @@ export type TypeExternalPackagesProps = {
    */
   configUrl?: string;
 };
-
-/** List of external packages to initialize on viewer load. Default = []. */
-export type TypeExternalPackages = TypeExternalPackagesProps[];
 
 /** Service endpoint urls. */
 export type TypeServiceUrls = {
@@ -283,10 +279,12 @@ export type TypeMapViewSettings = {
    * Zoom and center of the map defined as [zoom, [longitude, latitude]]. Longitude domain = [-160..160],
    * Latitude domain = [-80..80]. */
   zoomAndCenter?: TypeZoomAndCenter;
+
   /**
    * Option to set initial view by extent.
    * Called with [minX, minY, maxX, maxY] extent coordinates. */
   extent?: Extent;
+
   /** Geoview layer ID(s) or layer path(s) of layer(s) to use as initial map focus. If empty, will use all layers. */
   layerIds?: string[];
 };
@@ -333,7 +331,7 @@ export const MAP_EXTENTS: Record<TypeValidMapProjectionCodes, number[]> = {
   3978: [-135, 25, -45, 89],
 };
 
-export const MAP_CENTER: Record<TypeValidMapProjectionCodes, number[]> = {
+export const MAP_CENTER: Record<TypeValidMapProjectionCodes, [number, number]> = {
   3857: [-90, 67],
   3978: [-90, 60],
 };
@@ -794,7 +792,7 @@ export type TypeEsriFormatParameter = 'png' | 'jpg' | 'gif' | 'svg';
 
 /** Type used to configure the feature info for a layer. */
 export type TypeFeatureInfoLayerConfig = {
-  /** Allow querying. Default = false. */
+  /** Allow querying. */
   queryable: boolean;
   /**
    * The display field of the layer. If it is not present the viewer will make an attempt to find the first valid
@@ -1255,8 +1253,18 @@ export const serializeTypeGeoviewLayerConfig = (geoviewLayerConfig: MapConfigLay
     } as unknown as TypeGeoviewLayerConfig;
   }
 
+  // If Shapefile layer entry
+  if (mapConfigLayerEntryIsShapefile(geoviewLayerConfig)) {
+    // Serialize
+    return {
+      geoviewLayerId: geoviewLayerConfig.geoviewLayerId,
+      geoviewLayerName: geoviewLayerConfig.geoviewLayerName,
+      geoviewLayerType: geoviewLayerConfig.geoviewLayerType,
+    } as unknown as TypeGeoviewLayerConfig;
+  }
+
   // Cast
-  const geoviewLayerConfigCasted = geoviewLayerConfig as TypeGeoviewLayerConfig;
+  const geoviewLayerConfigCasted = geoviewLayerConfig;
 
   // Serialize
   const serializedGeoviewLayerConfig = {
@@ -1274,7 +1282,7 @@ export const serializeTypeGeoviewLayerConfig = (geoviewLayerConfig: MapConfigLay
   // Loop on the LayerEntryConfig to serialize further
   for (let j = 0; j < (geoviewLayerConfig.listOfLayerEntryConfig?.length || 0); j++) {
     // Serialize the TypeLayerEntryConfig
-    const serializedLayerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig![j].toJson() as TypeLayerEntryConfig;
+    const serializedLayerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig[j].toJson() as TypeLayerEntryConfig;
 
     // Store as serialized
     serializedGeoviewLayerConfig.listOfLayerEntryConfig.push(serializedLayerEntryConfig);

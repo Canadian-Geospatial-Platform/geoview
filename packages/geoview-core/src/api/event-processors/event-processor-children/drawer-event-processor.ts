@@ -1,4 +1,5 @@
 import { Feature, Overlay } from 'ol';
+import { Projection as OLProjection } from 'ol/proj';
 import GeoJSON from 'ol/format/GeoJSON';
 import { LineString, Polygon, Point, Circle as CircleGeom, Geometry, SimpleGeometry } from 'ol/geom';
 import { fromCircle } from 'ol/geom/Polygon';
@@ -9,8 +10,6 @@ import { DrawEvent, GeometryFunction, SketchCoordType, createBox } from 'ol/inte
 
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { IDrawerState, StyleProps } from '@/core/stores/store-interface-and-intial-values/drawer-state';
-import { MapViewerNotFoundError } from '@/core/exceptions/geoview-exceptions';
-import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { Draw } from '@/geo/interaction/draw';
 import { AppEventProcessor } from './app-event-processor';
 import { MapEventProcessor } from './map-event-processor';
@@ -18,6 +17,9 @@ import { MapEventProcessor } from './map-event-processor';
 import { doUntil, generateId } from '@/core/utils/utilities';
 import { DEFAULT_PROJECTION } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
+import { Projection } from '@/geo/utils/projection';
+import { TransformDeleteFeatureEvent, TransformEvent, TransformSelectionEvent } from '@/geo/interaction/transform/transform-events';
+import { MapProjectionChangedEvent, MapViewer } from '@/geo/map/map-viewer';
 import { logger } from '@/core/utils/logger';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
@@ -1169,7 +1171,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
         const mapProjection = Projection.PROJECTIONS[MapEventProcessor.getMapState(mapId).currentProjection];
 
         const newFeatures: Feature[] = [];
-        geojson.features.forEach((geoFeature: TypeJsonObject) => {
+        geojson.features.forEach((geoFeature: GeoJsonFeature) => {
           const olGeometry = new GeoJSON().readGeometry(geoFeature.geometry);
           olGeometry.transform('EPSG:4326', mapProjection);
 
@@ -1219,7 +1221,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
           }
 
           // Set feature properties
-          const featureId = (geoFeature.properties.id as string) || generateId();
+          const featureId = geoFeature.properties.id || generateId();
           feature.setStyle(featureStyle);
 
           if (styleProps?.text !== undefined) {
@@ -1618,3 +1620,13 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   // GV NEVER add a store action who does set state AND map action at a same time.
   // GV Review the action in store state to make sure
 }
+
+type GeoJsonFeature = {
+  geometry: unknown;
+  properties: GeoJsonFeatureProps;
+};
+
+type GeoJsonFeatureProps = {
+  id: string;
+  style: TypeGeoJSONStyleProps;
+};

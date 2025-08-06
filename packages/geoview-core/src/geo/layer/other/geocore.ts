@@ -80,7 +80,7 @@ export abstract class GeoCore {
       if (!tempLayerConfig.geoviewLayerName) tempLayerConfig.geoviewLayerName = response.layers[0].geoviewLayerName;
 
       const config = new Config(language);
-      const newLayerConfig = config.getValidMapConfig([tempLayerConfig], (errorKey: string, params: string[]) => {
+      const newLayerConfig = config.prevalidateGeoviewLayersConfig([tempLayerConfig], (errorKey: string, params: string[]) => {
         // When an error happens, raise the exception, we handle it higher in this case
         throw new GeoViewError(errorKey, params);
       });

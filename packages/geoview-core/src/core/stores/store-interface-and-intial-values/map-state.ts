@@ -177,7 +177,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     hoverFeatureInfo: undefined,
     initialFilters: {},
     initialView: {
-      zoomAndCenter: [3.5, MAP_CENTER[3857] as [number, number]],
+      zoomAndCenter: [3.5, MAP_CENTER[3857]],
     },
     interaction: 'static',
     isMouseInsideMap: false,
@@ -220,8 +220,8 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           currentBasemapOptions: geoviewConfig.map.basemapOptions,
           featureHighlightColor: geoviewConfig.map.highlightColor || 'black',
           homeView: geoviewConfig.map.viewSettings.homeView ||
-            geoviewConfig.map.viewSettings.initialView || { zoomAndCenter: [3.5, MAP_CENTER[3857] as [number, number]] },
-          initialView: geoviewConfig.map.viewSettings.initialView || { zoomAndCenter: [3.5, MAP_CENTER[3857] as [number, number]] },
+            geoviewConfig.map.viewSettings.initialView || { zoomAndCenter: [3.5, MAP_CENTER[3857]] },
+          initialView: geoviewConfig.map.viewSettings.initialView || { zoomAndCenter: [3.5, MAP_CENTER[3857]] },
           interaction: geoviewConfig.map.interaction || 'dynamic',
           mapExtent: geoviewConfig.map.viewSettings.maxExtent,
           northArrow: geoviewConfig.components!.indexOf('north-arrow') > -1 || false,
