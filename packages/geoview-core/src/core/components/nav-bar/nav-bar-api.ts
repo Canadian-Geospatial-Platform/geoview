@@ -1,4 +1,4 @@
-import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
+import { TypeButtonGroupConfig, TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
@@ -15,6 +15,9 @@ export class NavBarApi {
 
   // group of array to hold all buttons, button panels created on the nav-bar
   buttons: Record<string, Record<string, TypeButtonPanel>> = {};
+
+  // group configurations
+  groupConfigs: Record<string, TypeButtonGroupConfig> = {};
 
   /** Callback handlers for the NavBar created event. */
   #onNavBarCreatedHandlers: NavBarCreatedDelegate[] = [];
@@ -211,6 +214,30 @@ export class NavBarApi {
       // trigger an event that a button or panel has been removed to update the state and re-render
       this.#emitNavbarRemoved({ buttonPanelId, group: groupName });
     });
+  }
+
+  /**
+   * Sets configuration for a button group
+   *
+   * @param {string} groupName - The group name
+   * @param {TypeButtonGroupConfig} config - The group configuration
+   */
+  setGroupConfig(groupName: string, config: Partial<TypeButtonGroupConfig>): void {
+    this.groupConfigs[groupName] = {
+      groupName,
+      accordionThreshold: 10, // default will likely show all buttons
+      ...config,
+    };
+  }
+
+  /**
+   * Gets configuration for a button group
+   *
+   * @param {string} groupName - The group name
+   * @returns {TypeButtonGroupConfig} The group configuration
+   */
+  getGroupConfig(groupName: string): TypeButtonGroupConfig {
+    return this.groupConfigs[groupName] || { groupName, accordionThreshold: 4 };
   }
 }
 

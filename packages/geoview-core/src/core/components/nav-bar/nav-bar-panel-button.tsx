@@ -1,9 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, cloneElement, isValidElement } from 'react';
 import { ClickAwayListener } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { getSxClasses } from './nav-bar-style';
 import { Popper, IconButton, DialogTitle, DialogContent, Paper, Box } from '@/ui';
+import { CloseIcon } from '@/ui/icons';
 import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { TypeButtonPanel } from '@/ui/panel/panel-types';
@@ -39,11 +40,16 @@ export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType
 
   const shellContainer = geoviewElement.querySelector(`[id^="shell-${mapId}"]`) as HTMLElement;
 
+  // Close function to pass to panel content
+  const closePanel = (): void => {
+    setOpen(false);
+    setAnchorEl(null);
+  };
+
   // Handlers
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>): void => {
     if (open) {
-      setOpen(false);
-      setAnchorEl(null);
+      closePanel();
     } else {
       setAnchorEl(event.currentTarget);
       setOpen(true);
@@ -52,9 +58,21 @@ export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType
 
   const handleClickAway = (): void => {
     if (open) {
-      setOpen(false);
-      setAnchorEl(null);
+      closePanel();
     }
+  };
+
+  // Clone panel content and inject close function if it's a React element
+  const renderPanelContent = (): JSX.Element => {
+    if (buttonPanel.panel?.convertHtmlContent) {
+      return <UseHtmlToReact htmlContent={buttonPanel.panel?.content as string} />;
+    }
+
+    if (isValidElement(buttonPanel.panel?.content)) {
+      return cloneElement(buttonPanel.panel.content as React.ReactElement, { closePanel });
+    }
+
+    return buttonPanel.panel?.content as JSX.Element;
   };
 
   return (
@@ -82,14 +100,15 @@ export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType
           handleKeyDown={(key, callBackFn) => handleEscapeKey(key, '', false, callBackFn)}
         >
           <Paper sx={{ width: `${buttonPanel.panel?.width ?? 300}px`, maxHeight: '500px' }}>
-            <DialogTitle sx={sxClasses.popoverTitle}>{t(buttonPanel.panel?.title as string) ?? ''}</DialogTitle>
-            <DialogContent>
-              {buttonPanel.panel?.convertHtmlContent ? (
-                <UseHtmlToReact htmlContent={buttonPanel.panel?.content as string} />
-              ) : (
-                buttonPanel.panel?.content
-              )}
-            </DialogContent>
+            <DialogTitle sx={sxClasses.popoverTitle}>
+              <span style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                {t(buttonPanel.panel?.title as string) ?? ''}
+                <IconButton size="small" onClick={closePanel} sx={{ padding: 0.5, color: 'inherit' }}>
+                  <CloseIcon fontSize="small" />
+                </IconButton>
+              </span>
+            </DialogTitle>
+            <DialogContent>{renderPanelContent()}</DialogContent>
           </Paper>
         </Popper>
       </Box>
