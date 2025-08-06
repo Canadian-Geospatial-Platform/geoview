@@ -13,6 +13,7 @@ import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 
 export interface GeometryPickerPanelProps {
   geomTypes: string[];
+  closePanel?: () => void;
 }
 
 export interface PointIconProps {
@@ -102,14 +103,14 @@ export function GeometryPickerButton(): JSX.Element {
  *
  * @returns {JSX.Element} the created geometry picker panel
  */
-export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Element {
+export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Element {
   // const { geomTypes } = props;
   const { cgpv } = window as TypeWindow;
   const { useCallback, useMemo } = cgpv.reactUtilities.react;
   const { IconButton, List, ListItem } = cgpv.ui.elements;
   const { PlaceIcon, TextFieldsIcon, ShowChartIcon, HexagonIcon, RectangleIcon, CircleIcon, StarIcon } = cgpv.ui.elements;
 
-  const { geomTypes } = props;
+  const { geomTypes, closePanel } = props;
 
   // Get store values
   const displayLanguage = useAppDisplayLanguage();
@@ -167,7 +168,8 @@ export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JS
   const handleGeometrySelectPoint = useCallback((): void => {
     setActiveGeom('Point');
     safeStartDrawing();
-  }, [safeStartDrawing, setActiveGeom]);
+    closePanel?.();
+  }, [closePanel, safeStartDrawing, setActiveGeom]);
 
   /**
    * Sets the current geometry type to Text
@@ -175,7 +177,8 @@ export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JS
   const handleGeometrySelectText = useCallback((): void => {
     setActiveGeom('Text');
     safeStartDrawing();
-  }, [safeStartDrawing, setActiveGeom]);
+    closePanel?.();
+  }, [closePanel, safeStartDrawing, setActiveGeom]);
 
   /**
    * Sets the current geometry type to LineString
@@ -183,7 +186,8 @@ export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JS
   const handleGeometrySelectLineString = useCallback((): void => {
     setActiveGeom('LineString');
     safeStartDrawing();
-  }, [safeStartDrawing, setActiveGeom]);
+    closePanel?.();
+  }, [closePanel, safeStartDrawing, setActiveGeom]);
 
   /**
    * Sets the current geometry type to Polygon
@@ -191,7 +195,8 @@ export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JS
   const handleGeometrySelectPolygon = useCallback((): void => {
     setActiveGeom('Polygon');
     safeStartDrawing();
-  }, [safeStartDrawing, setActiveGeom]);
+    closePanel?.();
+  }, [closePanel, safeStartDrawing, setActiveGeom]);
 
   /**
    * Sets the current geometry type to Rectangle
@@ -199,7 +204,8 @@ export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JS
   const handleGeometrySelectRectangle = useCallback((): void => {
     setActiveGeom('Rectangle');
     safeStartDrawing();
-  }, [safeStartDrawing, setActiveGeom]);
+    closePanel?.();
+  }, [closePanel, safeStartDrawing, setActiveGeom]);
 
   /**
    * Sets the current geometry type to Circle
@@ -207,7 +213,8 @@ export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JS
   const handleGeometrySelectCircle = useCallback((): void => {
     setActiveGeom('Circle');
     safeStartDrawing();
-  }, [safeStartDrawing, setActiveGeom]);
+    closePanel?.();
+  }, [closePanel, safeStartDrawing, setActiveGeom]);
 
   /**
    * Sets the current geometry type to Star
@@ -215,7 +222,8 @@ export default function GeometryPickerPanel(props: GeometryPickerPanelProps): JS
   const handleGeometrySelectStar = useCallback((): void => {
     setActiveGeom('Star');
     safeStartDrawing();
-  }, [safeStartDrawing, setActiveGeom]);
+    closePanel?.();
+  }, [closePanel, safeStartDrawing, setActiveGeom]);
 
   return (
     <List sx={sxClasses.list}>

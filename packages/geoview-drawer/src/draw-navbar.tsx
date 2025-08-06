@@ -5,7 +5,7 @@ import { TypeWindow } from 'geoview-core/core/types/global-types';
 import { logger } from 'geoview-core/core/utils/logger';
 
 import Draw from './buttons/draw';
-import GeometryPickerPanel, { GeometryPickerButton } from './buttons/geometry-picker';
+import { GeometryPickerButton, GeometryPickerPanel } from './buttons/geometry-picker';
 import Edit from './buttons/edit';
 import { StyleButton, StylePanel } from './buttons/style';
 import Measurements from './buttons/measurements';
@@ -23,7 +23,7 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
   const { CloseIcon } = cgpv.ui.elements;
   const buttonConfigs: Record<string, TypeNavBarButtonConfig> = {};
 
-  logger.logInfo('Drawer Plugin - Creating draw button ...');
+  logger.logInfo('Drawer Plugin - Creating draw buttons ...');
   // Create draw button
   buttonConfigs.draw = {
     buttonProps: {
@@ -32,6 +32,8 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
       visible: true,
     },
     groupName: 'drawer',
+    // Only need to set the accordionThreshold once and the first in the list will take priority
+    groupConfig: { accordionThreshold: 4 },
   };
 
   // Create geometry picker button / panel
@@ -53,15 +55,7 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
     },
   };
 
-  buttonConfigs.edit = {
-    buttonProps: {
-      id: 'drawer-edit',
-      children: createElement(Edit),
-      visible: true,
-    },
-    groupName: 'drawer',
-  };
-
+  // Create style button
   buttonConfigs.style = {
     buttonProps: {
       id: 'drawer-style',
@@ -78,6 +72,16 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
       width: 'flex',
       status: false,
     },
+  };
+
+  // Create edit button
+  buttonConfigs.edit = {
+    buttonProps: {
+      id: 'drawer-edit',
+      children: createElement(Edit),
+      visible: true,
+    },
+    groupName: 'drawer',
   };
 
   // Create show measure button
