@@ -1,7 +1,11 @@
 import { TypeWindow } from 'geoview-core';
 import { MuiColorInput } from 'mui-color-input';
 import { ChangeEvent, useState } from 'react';
-import { useDrawerStyle, useDrawerActions } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
+import {
+  useDrawerStyle,
+  useDrawerActiveGeom,
+  useDrawerActions,
+} from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
 import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 import { logger } from 'geoview-core/core/utils/logger';
@@ -50,14 +54,40 @@ export function StylePanel(): JSX.Element {
 
   // Get store values
   const style = useDrawerStyle();
+  const activeGeom = useDrawerActiveGeom();
   const displayLanguage = useAppDisplayLanguage();
 
   // Local state for color inputs
   const [localFillColor, setLocalFillColor] = useState(style.fillColor);
   const [localStrokeColor, setLocalStrokeColor] = useState(style.strokeColor);
+  const [localTextColor, setLocalTextColor] = useState(style.textColor || '#000000');
+  const [localTextHaloColor, setLocalTextHaloColor] = useState(style.textHaloColor || 'rgba(255,255,255,0.8)');
 
   // Store actions
-  const { setFillColor, setStrokeColor, setStrokeWidth } = useDrawerActions();
+  const { setFillColor, setStrokeColor, setStrokeWidth, setStyle } = useDrawerActions();
+
+  const handleTextChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      setStyle({ ...style, text: event.target.value });
+    },
+    [setStyle, style]
+  );
+
+  const handleTextSizeChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>): void => {
+      const size = parseInt(event.target.value, 10);
+      if (!Number.isNaN(size)) setStyle({ ...style, textSize: size });
+    },
+    [setStyle, style]
+  );
+
+  const handleTextHaloWidthChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>): void => {
+      const size = parseInt(event.target.value, 10);
+      if (!Number.isNaN(size)) setStyle({ ...style, textHaloWidth: size });
+    },
+    [setStyle, style]
+  );
 
   const handleFillColorChange = useCallback((newFillColor: string): void => {
     setLocalFillColor(newFillColor);
@@ -75,6 +105,22 @@ export function StylePanel(): JSX.Element {
     setStrokeColor(localStrokeColor);
   }, [setStrokeColor, localStrokeColor]);
 
+  const handleTextColorChange = useCallback((newColor: string): void => {
+    setLocalTextColor(newColor);
+  }, []);
+
+  const handleTextColorClose = useCallback((): void => {
+    setStyle({ ...style, textColor: localTextColor });
+  }, [setStyle, style, localTextColor]);
+
+  const handleTextHaloColorChange = useCallback((newColor: string): void => {
+    setLocalTextHaloColor(newColor);
+  }, []);
+
+  const handleTextHaloColorClose = useCallback((): void => {
+    setStyle({ ...style, textHaloColor: localTextHaloColor });
+  }, [setStyle, style, localTextHaloColor]);
+
   const handleStrokeWidthChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>): void => {
       const width = parseFloat(event.target.value);
@@ -90,48 +136,114 @@ export function StylePanel(): JSX.Element {
    */
   return (
     <List sx={{ p: 2 }}>
-      <ListItem sx={sxClasses.listItem}>
-        <Typography variant="subtitle2" sx={sxClasses.label}>
-          {getLocalizedMessage(displayLanguage, 'drawer.fillColour')}
-        </Typography>
-        <MuiColorInput
-          value={localFillColor}
-          onChange={handleFillColorChange}
-          onBlur={handleFillColorClose}
-          PopoverProps={{ onClose: handleFillColorClose }}
-          sx={sxClasses.input}
-        />
-      </ListItem>
+      {/* Text-specific controls */}
+      {activeGeom === 'Text' && (
+        <>
+          <ListItem sx={sxClasses.listItem}>
+            <Typography variant="subtitle2" sx={sxClasses.label}>
+              {getLocalizedMessage(displayLanguage, 'drawer.text')}
+            </Typography>
+            <TextField value={style.text || ''} onChange={handleTextChange} sx={sxClasses.input} placeholder="Enter text" />
+          </ListItem>
 
-      <ListItem sx={sxClasses.listItem}>
-        <Typography variant="subtitle2" sx={sxClasses.label}>
-          {getLocalizedMessage(displayLanguage, 'drawer.strokeColour')}
-        </Typography>
-        <MuiColorInput
-          value={localStrokeColor}
-          onChange={handleStrokeColorChange}
-          onBlur={handleStrokeColorClose}
-          PopoverProps={{ onClose: handleStrokeColorClose }}
-          sx={sxClasses.input}
-        />
-      </ListItem>
+          <ListItem sx={sxClasses.listItem}>
+            <Typography variant="subtitle2" sx={sxClasses.label}>
+              {getLocalizedMessage(displayLanguage, 'drawer.textColor')}
+            </Typography>
+            <MuiColorInput value={localTextColor} onChange={handleTextColorChange} onBlur={handleTextColorClose} sx={sxClasses.input} />
+          </ListItem>
 
-      <ListItem sx={sxClasses.listItem}>
-        <Typography variant="subtitle2" sx={sxClasses.label}>
-          {getLocalizedMessage(displayLanguage, 'drawer.strokeWidth')}
-        </Typography>
-        <TextField
-          value={style.strokeWidth}
-          onChange={handleStrokeWidthChange}
-          sx={sxClasses.input}
-          slotProps={{
-            input: {
-              type: 'number',
-              inputProps: { min: 0, max: 10, step: 0.1 },
-            },
-          }}
-        />
-      </ListItem>
+          <ListItem sx={sxClasses.listItem}>
+            <Typography variant="subtitle2" sx={sxClasses.label}>
+              {getLocalizedMessage(displayLanguage, 'drawer.textSize')}
+            </Typography>
+            <TextField
+              value={style.textSize || 14}
+              onChange={handleTextSizeChange}
+              sx={sxClasses.input}
+              slotProps={{
+                input: {
+                  type: 'number',
+                  inputProps: { min: 4, max: 100, step: 1 },
+                },
+              }}
+            />
+          </ListItem>
+
+          <ListItem sx={sxClasses.listItem}>
+            <Typography variant="subtitle2" sx={sxClasses.label}>
+              {getLocalizedMessage(displayLanguage, 'drawer.textHaloColor')}
+            </Typography>
+            <MuiColorInput
+              value={localTextHaloColor}
+              onChange={handleTextHaloColorChange}
+              onBlur={handleTextHaloColorClose}
+              sx={sxClasses.input}
+            />
+          </ListItem>
+
+          <ListItem sx={sxClasses.listItem}>
+            <Typography variant="subtitle2" sx={sxClasses.label}>
+              {getLocalizedMessage(displayLanguage, 'drawer.textHaloWidth')}
+            </Typography>
+            <TextField
+              value={style.textHaloWidth}
+              onChange={handleTextHaloWidthChange}
+              sx={sxClasses.input}
+              slotProps={{
+                input: {
+                  type: 'number',
+                  inputProps: { min: 0, max: 100, step: 1 },
+                },
+              }}
+            />
+          </ListItem>
+        </>
+      )}
+
+      {/* Fill color - hide for LineString and Text */}
+      {activeGeom !== 'LineString' && activeGeom !== 'Text' && (
+        <ListItem sx={sxClasses.listItem}>
+          <Typography variant="subtitle2" sx={sxClasses.label}>
+            {getLocalizedMessage(displayLanguage, 'drawer.fillColour')}
+          </Typography>
+          <MuiColorInput value={localFillColor} onChange={handleFillColorChange} onBlur={handleFillColorClose} sx={sxClasses.input} />
+        </ListItem>
+      )}
+
+      {/* Stroke controls - show for all except Text */}
+      {activeGeom !== 'Text' && (
+        <>
+          <ListItem sx={sxClasses.listItem}>
+            <Typography variant="subtitle2" sx={sxClasses.label}>
+              {getLocalizedMessage(displayLanguage, 'drawer.strokeColour')}
+            </Typography>
+            <MuiColorInput
+              value={localStrokeColor}
+              onChange={handleStrokeColorChange}
+              onBlur={handleStrokeColorClose}
+              sx={sxClasses.input}
+            />
+          </ListItem>
+
+          <ListItem sx={sxClasses.listItem}>
+            <Typography variant="subtitle2" sx={sxClasses.label}>
+              {getLocalizedMessage(displayLanguage, 'drawer.strokeWidth')}
+            </Typography>
+            <TextField
+              value={style.strokeWidth}
+              onChange={handleStrokeWidthChange}
+              sx={sxClasses.input}
+              slotProps={{
+                input: {
+                  type: 'number',
+                  inputProps: { min: 0, max: 10, step: 0.1 },
+                },
+              }}
+            />
+          </ListItem>
+        </>
+      )}
     </List>
   );
 }

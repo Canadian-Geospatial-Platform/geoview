@@ -31,6 +31,8 @@ import { logger } from '@/core/utils/logger';
 
 // #region INTERFACES & TYPES
 
+export const DEFAULT_PROJECTION = 3857 as TypeValidMapProjectionCodes;
+
 type MapActions = IMapState['actions'];
 
 export interface IMapState {
@@ -166,7 +168,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     centerCoordinates: [0, 0] as Coordinate,
     clickMarker: undefined,
     currentBasemapOptions: { basemapId: 'transport', shaded: true, labeled: true },
-    currentProjection: 3857 as TypeValidMapProjectionCodes,
+    currentProjection: DEFAULT_PROJECTION,
     featureHighlightColor: 'black',
     fixNorth: false,
     highlightedFeatures: [],
