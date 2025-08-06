@@ -2506,7 +2506,7 @@ export abstract class LayerMockup {
       field: 'time_slider_date',
       default: '2023-01-01T05:00:00Z',
       unitSymbol: '',
-      range: {
+      rangeItems: {
         type: 'discrete',
         range: [
           '1696-01-01T05:00:00Z',
@@ -3380,7 +3380,7 @@ export abstract class LayerMockup {
       field: 'time',
       default: '2024-05-23T22:54:00Z',
       unitSymbol: '',
-      range: {
+      rangeItems: {
         type: 'discrete',
         range: [
           '2024-05-23T19:54:00Z',
@@ -3616,7 +3616,7 @@ export abstract class LayerMockup {
       field: 'time',
       default: '2000-08-15T00:00:00Z',
       unitSymbol: '',
-      range: {
+      rangeItems: {
         type: 'discrete',
         range: [
           '2000-08-15T00:00:00Z',

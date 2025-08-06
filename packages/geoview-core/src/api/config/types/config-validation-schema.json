@@ -1973,7 +1973,7 @@
             "timePrecision": "#/definitions/TypeTimePrecision"
           }
         },
-        "range": {
+        "rangeItems": {
           "$ref": "#/definitions/TypeRangeItems"
         },
         "nearestValues": {
