@@ -3,6 +3,7 @@ import {
   ITimeSliderState,
   TimeSliderLayerSet,
   TypeTimeSliderValues,
+  TypeTimeSliderProps,
 } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
 import { TypeFeatureInfoLayerConfig, TypeLayerEntryConfig, layerEntryIsGroupLayer } from '@/api/config/types/map-schema-types';
@@ -71,7 +72,12 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map id of the state to act on
    * @param {TypeLayerEntryConfig} layerConfig - The layer path of the layer to add to the state
    */
-  static checkInitTimeSliderLayerAndApplyFilters(mapId: string, layer: AbstractGVLayer, layerConfig: TypeLayerEntryConfig): void {
+  static checkInitTimeSliderLayerAndApplyFilters(
+    mapId: string,
+    layer: AbstractGVLayer,
+    layerConfig: TypeLayerEntryConfig,
+    timesliderConfig?: TypeTimeSliderProps
+  ): void {
     // If there is no TimeSlider
     if (!this.getTimesliderState(mapId)) return;
 
@@ -82,7 +88,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     if (!tempDimension || !tempDimension.isValid) return; // Skip
 
     // Get the time slider values
-    const timeSliderValues = this.getInitialTimeSliderValues(mapId, layerConfig);
+    const timeSliderValues = this.getInitialTimeSliderValues(mapId, layerConfig, timesliderConfig);
 
     // If any
     if (timeSliderValues) {
@@ -135,7 +141,11 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    * @param {TypeLayerEntryConfig} layerConfig - The layer path of the layer to add to the state
    * @returns {TimeSliderLayer | undefined}
    */
-  static getInitialTimeSliderValues(mapId: string, layerConfig: TypeLayerEntryConfig): TypeTimeSliderValues | undefined {
+  static getInitialTimeSliderValues(
+    mapId: string,
+    layerConfig: TypeLayerEntryConfig,
+    timesliderConfig?: TypeTimeSliderProps
+  ): TypeTimeSliderValues | undefined {
     // Get the layer using the map event processor, If no temporal dimension OR layerPath, return undefined
     if (!layerConfig.layerPath) return undefined;
     const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerConfig.layerPath)!;
@@ -149,15 +159,25 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     // Get the temporal dimension information
     const temporalDimensionInfo = geoviewLayerCasted.getTemporalDimension();
 
+    // Get temporal dimension info from config, if there is any
+    const configTemporalDimension = timesliderConfig?.temporalDimension;
+
     // If no temporal dimension information
-    if (!temporalDimensionInfo || !temporalDimensionInfo.range) return undefined;
+    if ((!temporalDimensionInfo || !temporalDimensionInfo.rangeItems) && (!configTemporalDimension || !configTemporalDimension.rangeItems))
+      return undefined;
 
     // Set defaults values from temporal dimension
-    const { range } = temporalDimensionInfo.range;
-    const defaultValueIsArray = Array.isArray(temporalDimensionInfo.default);
-    const defaultValue = defaultValueIsArray ? temporalDimensionInfo.default[0] : temporalDimensionInfo.default;
+    const { range } = timesliderConfig?.temporalDimension?.rangeItems || temporalDimensionInfo!.rangeItems;
+
+    const defaultToUse = configTemporalDimension?.default || temporalDimensionInfo!.default;
+    const defaultValueIsArray = Array.isArray(defaultToUse);
+    const defaultValue = timesliderConfig?.defaultValue || (defaultValueIsArray ? defaultToUse[0] : defaultToUse);
+
     const minAndMax: number[] = [DateMgt.convertToMilliseconds(range[0]), DateMgt.convertToMilliseconds(range[range.length - 1])];
-    const { field, singleHandle, nearestValues, displayPattern } = temporalDimensionInfo;
+    const field = configTemporalDimension?.field || temporalDimensionInfo!.field;
+    const singleHandle = configTemporalDimension?.singleHandle || temporalDimensionInfo!.singleHandle;
+    const nearestValues = configTemporalDimension?.nearestValues || temporalDimensionInfo!.nearestValues;
+    const displayPattern = configTemporalDimension?.displayPattern || temporalDimensionInfo!.displayPattern;
 
     // If the field type has an alias, use that as a label
     let fieldAlias = field;
@@ -170,9 +190,9 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
 
     // eslint-disable-next-line no-nested-ternary
     const values = singleHandle
-      ? [DateMgt.convertToMilliseconds(temporalDimensionInfo.default)]
+      ? [DateMgt.convertToMilliseconds(defaultValue)]
       : defaultValueIsArray
-        ? [DateMgt.convertToMilliseconds(temporalDimensionInfo.default[0]), DateMgt.convertToMilliseconds(temporalDimensionInfo.default[1])]
+        ? [DateMgt.convertToMilliseconds(defaultValue), DateMgt.convertToMilliseconds(defaultToUse[1])]
         : [...minAndMax];
 
     // If using discrete axis
