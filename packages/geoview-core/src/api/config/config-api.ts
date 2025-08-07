@@ -22,6 +22,7 @@ import {
   TypeZoomAndCenter,
   MAP_CONFIG_SCHEMA_PATH,
   TypeValidVersions,
+  TypeLayerStyleConfig,
 } from '@/api/config/types/map-schema-types';
 import { MapConfigError } from '@/api/config/types/classes/config-exceptions';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
@@ -43,6 +44,7 @@ import { GeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
 import { CSV } from '@/geo/layer/geoview-layers/vector/csv';
 import { GeoCore } from '@/geo/layer/other/geocore';
 import schema from '@/core/../../schema.json';
+import { getStyleFromEsriRenderer } from '@/geo/utils/renderer/esri-renderer';
 
 /**
  * The API class that create configuration object. It is used to validate and read the service and layer metadata.
@@ -376,6 +378,16 @@ export class ConfigApi {
   }
 
   // #region INITIALIZERS AND PROCESSORS
+
+  /**
+   * Converts an ESRI renderer (in stringified JSON format) into a GeoView-compatible layer style configuration.
+   * @param {string} rendererAsString - A stringified JSON representation of the ESRI renderer.
+   * @returns {TypeLayerStyleConfig | undefined} The corresponding layer style configuration, or `undefined` if parsing or conversion fails.
+   */
+  static getStyleFromESRIRenderer(rendererAsString: string): TypeLayerStyleConfig | undefined {
+    // Redirect
+    return getStyleFromEsriRenderer(JSON.parse(rendererAsString));
+  }
 
   /**
    * Creates and initializes a GeoView layer configuration based on the specified layer type.

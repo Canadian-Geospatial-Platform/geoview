@@ -1,9 +1,9 @@
 import { useStore } from 'zustand';
 import {
-  TypeNavBarProps,
   TypeValidAppBarCoreProps,
   TypeValidFooterBarTabsCoreProps,
   TypeValidMapCorePackageProps,
+  TypeValidNavBarProps,
 } from '@/api/config/types/map-schema-types';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
@@ -31,7 +31,7 @@ export interface IUIState {
   corePackagesComponents: TypeValidMapCorePackageProps[];
   focusItem: FocusItemProps;
   hiddenTabs: string[];
-  navBarComponents: TypeNavBarProps;
+  navBarComponents: TypeValidNavBarProps[];
   footerPanelResizeValue: number;
   footerBarIsCollapsed: boolean;
   selectedFooterLayerListItemId: string;
@@ -270,7 +270,7 @@ export const useUICorePackagesComponents = (): TypeValidMapCorePackageProps[] =>
   useStore(useGeoViewStore(), (state) => state.uiState.corePackagesComponents);
 export const useUIFooterPanelResizeValue = (): number => useStore(useGeoViewStore(), (state) => state.uiState.footerPanelResizeValue);
 export const useUIHiddenTabs = (): string[] => useStore(useGeoViewStore(), (state) => state.uiState.hiddenTabs);
-export const useUINavbarComponents = (): TypeNavBarProps => useStore(useGeoViewStore(), (state) => state.uiState.navBarComponents);
+export const useUINavbarComponents = (): TypeValidNavBarProps[] => useStore(useGeoViewStore(), (state) => state.uiState.navBarComponents);
 export const useUIFooterBarIsCollapsed = (): boolean => useStore(useGeoViewStore(), (state) => state.uiState.footerBarIsCollapsed);
 export const useUISelectedFooterLayerListItemId = (): string =>
   useStore(useGeoViewStore(), (state) => state.uiState.selectedFooterLayerListItemId);
