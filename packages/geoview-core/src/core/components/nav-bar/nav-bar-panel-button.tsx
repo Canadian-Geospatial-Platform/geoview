@@ -103,7 +103,7 @@ export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType
             <DialogTitle sx={sxClasses.popoverTitle}>
               <span style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
                 {t(buttonPanel.panel?.title as string) ?? ''}
-                <IconButton size="small" onClick={closePanel} sx={{ padding: 0.5, color: 'inherit' }}>
+                <IconButton size="small" onClick={closePanel} sx={{ padding: 0.5, color: 'inherit', position: 'relative', left: '16px' }}>
                   <CloseIcon fontSize="small" />
                 </IconButton>
               </span>
