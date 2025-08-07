@@ -231,7 +231,8 @@ export function NavBar(props: NavBarProps): JSX.Element {
     const buttonKeys = Object.keys(buttonPanelGroup);
     const groupConfig = navBarApi.getGroupConfig(groupName);
     const threshold = groupConfig.accordionThreshold;
-    const needsExpansion = buttonKeys.length > threshold!;
+    // GV Add one because there's no point showing an expand button if there's only one button left to show
+    const needsExpansion = buttonKeys.length > threshold! + 1;
 
     // State for tracking expanded groups
     const isExpanded = expandedGroups.has(groupName);
@@ -248,7 +249,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
       });
     };
 
-    const visibleKeys = buttonKeys.slice(0, threshold);
+    const visibleKeys = needsExpansion ? buttonKeys.slice(0, threshold) : buttonKeys;
     const hiddenKeys = buttonKeys.slice(threshold);
 
     return (

@@ -47,7 +47,7 @@ export function StylePanel(): JSX.Element {
 
   const { cgpv } = window as TypeWindow;
   const { ui, reactUtilities } = cgpv;
-  const { useCallback } = reactUtilities.react;
+  const { useCallback, useEffect } = reactUtilities.react;
 
   // Components
   const { List, ListItem, Typography, TextField } = ui.elements;
@@ -130,6 +130,76 @@ export function StylePanel(): JSX.Element {
     [setStrokeWidth]
   );
 
+  // Add close button to MUIColorInputs
+  useEffect(() => {
+    const addCloseButtons = (): void => {
+      // Find all color picker popovers
+      const popovers = document.querySelectorAll('.MuiColorInput-PopoverBody');
+
+      popovers.forEach((popover) => {
+        // Check if we already added a close button
+        if (popover.parentElement?.querySelector('.color-picker-close-btn')) return;
+
+        // Create header div
+        const header = document.createElement('div');
+        header.style.cssText = `
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0px 0px 8px 8px;
+        font-size: 14px;
+        font-weight: 500;
+      `;
+        header.textContent = getLocalizedMessage(displayLanguage, 'drawer.colourPicker');
+
+        // Create close button
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'color-picker-close-btn';
+        closeBtn.innerHTML = '✕';
+        closeBtn.style.cssText = `
+        background: none;
+        border: none;
+        font-size: 16px;
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      `;
+
+        closeBtn.onclick = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          // Find the specific popover and close it by clicking outside
+          const popoverRoot = popover.closest('.MuiPopover-root');
+          if (popoverRoot) {
+            const backdrop = popoverRoot.querySelector('.MuiBackdrop-root');
+            if (backdrop) {
+              (backdrop as HTMLElement).click();
+            }
+          }
+        };
+
+        header.appendChild(closeBtn);
+
+        // Insert header before the popover body
+        if (popover.parentElement) {
+          popover.parentElement.insertBefore(header, popover);
+        }
+      });
+    };
+
+    // Use MutationObserver to detect when popovers are added
+    const observer = new MutationObserver(addCloseButtons);
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    return () => observer.disconnect();
+  }, [displayLanguage]);
+
   /**
    * Render style controls in navbar panel
    * @returns ReactNode
@@ -148,7 +218,7 @@ export function StylePanel(): JSX.Element {
 
           <ListItem sx={sxClasses.listItem}>
             <Typography variant="subtitle2" sx={sxClasses.label}>
-              {getLocalizedMessage(displayLanguage, 'drawer.textColor')}
+              {getLocalizedMessage(displayLanguage, 'drawer.textColour')}
             </Typography>
             <MuiColorInput value={localTextColor} onChange={handleTextColorChange} onBlur={handleTextColorClose} sx={sxClasses.input} />
           </ListItem>
@@ -172,7 +242,7 @@ export function StylePanel(): JSX.Element {
 
           <ListItem sx={sxClasses.listItem}>
             <Typography variant="subtitle2" sx={sxClasses.label}>
-              {getLocalizedMessage(displayLanguage, 'drawer.textHaloColor')}
+              {getLocalizedMessage(displayLanguage, 'drawer.textHaloColour')}
             </Typography>
             <MuiColorInput
               value={localTextHaloColor}

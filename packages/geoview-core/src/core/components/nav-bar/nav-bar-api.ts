@@ -237,7 +237,7 @@ export class NavBarApi {
    * @returns {TypeButtonGroupConfig} The group configuration
    */
   getGroupConfig(groupName: string): TypeButtonGroupConfig {
-    return this.groupConfigs[groupName] || { groupName, accordionThreshold: 4 };
+    return this.groupConfigs[groupName] || { groupName, accordionThreshold: 10 };
   }
 }
 
