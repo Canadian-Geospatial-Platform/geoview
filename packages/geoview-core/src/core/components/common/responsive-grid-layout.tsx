@@ -2,7 +2,7 @@ import { useState, ReactNode, useCallback, forwardRef, useImperativeHandle, Ref,
 import { useTranslation } from 'react-i18next';
 import { SxProps, useTheme } from '@mui/material/styles';
 import Markdown from 'markdown-to-jsx';
-import { Box, FullscreenIcon, ButtonGroup, Button } from '@/ui';
+import { Box, FullscreenIcon, ButtonGroup, Button, Typography } from '@/ui';
 import { ResponsiveGrid } from './responsive-grid';
 import { getSxClasses } from './responsive-grid-layout-style';
 import { FullScreenDialog } from './full-screen-dialog';
@@ -147,11 +147,11 @@ const ResponsiveGridLayout = forwardRef(
     );
 
     const handleOpenGuide = useCallback((): void => {
-      if (guideContentIds) {
+      if (guideContentIds && !isGuideOpen) {
         setIsGuideOpen(true);
         rightMainRef.current?.focus();
-      }
-    }, [setIsGuideOpen, guideContentIds]);
+      } else if (isGuideOpen) setIsGuideOpen(false);
+    }, [guideContentIds, isGuideOpen]);
 
     // If we're on mobile
     if (theme.breakpoints.down('md')) {
@@ -194,13 +194,9 @@ const ResponsiveGridLayout = forwardRef(
           size="small"
           variant="outlined"
           color="primary"
-          className="buttonFilledOutline"
           startIcon={<CloseIcon fontSize={theme.palette.geoViewFontSize.sm} />}
-          sx={{
-            ...(fullWidth ? sxClasses.appBarEnlargeButton : sxClasses.footerBarEnlargeButton),
-          }}
           onClick={() => setIsRightPanelVisible(false)}
-          tooltip={t('dataTable.close')!}
+          tooltip={t('details.closeSelection')!}
         >
           {t('dataTable.close')}
         </Button>
@@ -303,7 +299,7 @@ const ResponsiveGridLayout = forwardRef(
             tabIndex={-1}
             className={isGuideOpen ? 'responsive-layout-right-main-content guide-container' : 'responsive-layout-right-main-content'}
           >
-            {content}
+            {content || <Typography className="noSelection">{t('layers.noSelection')}</Typography>}
           </Box>
         </>
       );
