@@ -13,7 +13,6 @@ import {
   TypeBaseVectorSourceInitialConfig,
   CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
-  TypeLayerEntryConfig2,
 } from '@/api/config/types/map-schema-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import {
@@ -128,7 +127,7 @@ export class GeoJSON extends AbstractGeoViewVector {
       const layerMetadataFound = this.#recursiveSearch(
         layerConfig.layerId,
         this.getMetadata()!.listOfLayerEntryConfig
-      ) as TypeLayerEntryConfig2;
+      ) as VectorLayerEntryConfig;
 
       // If the layer metadata was found
       if (layerMetadataFound) {
@@ -139,7 +138,7 @@ export class GeoJSON extends AbstractGeoViewVector {
         // eslint-disable-next-line no-param-reassign
         layerConfig.initialSettings = defaultsDeep(layerConfig.initialSettings, layerMetadataFound.initialSettings);
         // eslint-disable-next-line no-param-reassign
-        layerConfig.setLayerStyle(defaultsDeep(layerConfig.getLayerStyle(), layerMetadataFound.layerStyle));
+        layerConfig.layerStyle = defaultsDeep(layerConfig.layerStyle, layerMetadataFound.layerStyle);
         if (layerMetadataFound.maxScale) {
           // eslint-disable-next-line no-param-reassign
           layerConfig.maxScale = Math.min(layerConfig.maxScale || Infinity, layerMetadataFound.maxScale);
@@ -221,7 +220,7 @@ export class GeoJSON extends AbstractGeoViewVector {
    * @returns {TypeLayerEntryConfig | undefined} The found layer or undefined if not found.
    * @private
    */
-  #recursiveSearch(searchKey: string, metadataLayerList: TypeLayerEntryConfig[]): TypeLayerEntryConfig2 | undefined {
+  #recursiveSearch(searchKey: string, metadataLayerList: TypeLayerEntryConfig[]): TypeLayerEntryConfig | undefined {
     for (const layerMetadata of metadataLayerList) {
       if (searchKey === layerMetadata.layerId) return layerMetadata;
       if ('isLayerGroup' in layerMetadata && (layerMetadata.isLayerGroup as boolean)) {
