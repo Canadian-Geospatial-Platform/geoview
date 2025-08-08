@@ -22,6 +22,7 @@ import { Extent as ExtentInteraction } from '@/geo/interaction/extent';
 import { Modify } from '@/geo/interaction/modify';
 import { Snap } from '@/geo/interaction/snap';
 import { Translate } from '@/geo/interaction/translate';
+import { Transform, TransformOptions } from '@/geo/interaction/transform/transform';
 import { EventDelegateBase } from '@/api/events/event-helper';
 import { ModalApi } from '@/ui';
 import { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
@@ -347,6 +348,11 @@ export declare class MapViewer {
      */
     initSnapInteractions(geomGroupKey: string): Snap;
     /**
+     * Initializes transform interactions for feature manipulation
+     * @param {TransformOptions} options - Options for the transform interaction
+     */
+    initTransformInteractions(options?: Partial<TransformOptions>): Transform;
+    /**
      * Gets if north is visible. This is not a perfect solution and is more a work around
      *
      * @returns {Promise<boolean>} true if visible, false otherwise
@@ -429,6 +435,16 @@ export declare class MapViewer {
      * @returns {TypeMapFeaturesInstance} Map config with updated names.
      */
     replaceMapConfigLayerNames(namePairs: string[][], mapConfig?: TypeMapFeaturesConfig, removeUnlisted?: boolean): TypeMapFeaturesInstance | undefined;
+    /**
+     * Register handlers on pointer move and map single click
+     * @param {OLMap} map - Map to register events on
+     */
+    registerMapPointerHandlers(map: OLMap): void;
+    /**
+     * Unregister handlers on pointer move and map single click
+     * @param {OLMap} map - Map to unregister events on
+     */
+    unregisterMapPointerHandlers(map: OLMap): void;
     /**
      * Registers a map init event callback.
      * @param {MapInitDelegate} callback - The callback to be executed whenever the event is emitted
@@ -539,6 +555,16 @@ export declare class MapViewer {
      * @param {MapChangeSizeDelegate} callback - The callback to stop being called whenever the event is emitted
      */
     offMapChangeSize(callback: MapChangeSizeDelegate): void;
+    /**
+     * Registers a map projection change event callback.
+     * @param {MapProjectionChangedDelegate} callback - The callback to be executed whenever the event is emitted
+     */
+    onMapProjectionChanged(callback: MapProjectionChangedDelegate): void;
+    /**
+     * Unregisters a map change size event callback.
+     * @param {MapChangeSizeDelegate} callback - The callback to stop being called whenever the event is emitted
+     */
+    offMapProjectionChanged(callback: MapChangeSizeDelegate): void;
     /**
      * Registers a component added event callback.
      * @param {MapComponentAddedDelegate} callback - The callback to be executed whenever the event is emitted
@@ -661,6 +687,16 @@ export type MapChangeSizeEvent = {
  * Define a delegate for the event handler function signature
  */
 export type MapChangeSizeDelegate = EventDelegateBase<MapViewer, MapChangeSizeEvent, void>;
+/**
+ * Define an event for the delegate
+ */
+export type MapProjectionChangedEvent = {
+    projection: OLProjection;
+};
+/**
+ * Define a delegate for the event handler function signature
+ */
+export type MapProjectionChangedDelegate = EventDelegateBase<MapViewer, MapProjectionChangedEvent, void>;
 /**
  * Define an event for the delegate
  */

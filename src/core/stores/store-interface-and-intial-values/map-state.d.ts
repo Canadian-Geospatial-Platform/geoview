@@ -9,6 +9,7 @@ import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { TypeHoverFeatureInfo } from './feature-info-state';
+export declare const DEFAULT_PROJECTION: TypeValidMapProjectionCodes;
 type MapActions = IMapState['actions'];
 export interface IMapState {
     attribution: string[];
