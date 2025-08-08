@@ -716,6 +716,10 @@ export interface TypeVectorSourceInitialConfig extends TypeBaseVectorSourceIniti
   /** The feature format used by the XHR feature loader when url is set. */
   format?: TypeVectorSourceFormats; // TODO: refactor - from geo map schema type
 }
+export interface TypeSourceGeoJSONInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
+  format: 'GeoJSON';
+  geojson?: string;
+}
 
 /** Initial settings to apply to the GeoView vector layer source at creation time. */
 export interface TypeGeojsonSourceInitialConfig extends TypeBaseVectorSourceInitialConfig {
@@ -1055,14 +1059,15 @@ export type TypeLayerData = {
 // TODO: Refactor - This type should be deleted and 'ConfigBaseClass' should be used instead
 export type TypeLayerEntryConfig = AbstractBaseLayerEntryConfig | GroupLayerEntryConfig;
 
-export type TypeLayerEntryConfig2 = {
+// #region ATTEMPT TO REPLACE TypeLayerEntryConfig
+
+export interface TypeLayerEntryConfig2 {
   geoviewLayerConfig: TypeGeoviewLayerConfig;
-  parentLayerConfig: TypeLayerEntryConfig2;
   layerId: string;
   layerName: string;
   schemaTag: TypeGeoviewLayerType;
   entryType: TypeLayerEntryType;
-  initialSettings: TypeLayerInitialSettings;
+  initialSettings?: TypeLayerInitialSettings;
   source?: TypeBaseSourceInitialConfig;
   layerStyle?: TypeLayerStyleConfig;
   minScale?: number;
@@ -1070,8 +1075,52 @@ export type TypeLayerEntryConfig2 = {
 
   // TODO: REFACTOR THESE EXTRA PROPS
   geoviewLayerType?: TypeGeoviewLayerType;
+  parentLayerConfig?: GroupLayerEntryConfig;
   listOfLayerEntryConfig?: TypeLayerEntryConfig2[];
-};
+}
+
+export interface TypeLayerEntryConfigVectorTiles extends Omit<TypeLayerEntryConfig2, 'source'> {
+  source: TypeSourceVectorTilesInitialConfig;
+  tileGrid?: TypeTileGrid;
+  styleUrl?: string;
+}
+
+export type TypeSourceVectorTilesInitialConfig = TypeSourceTileInitialConfig;
+
+export interface TypeLayerEntryConfigGeoJSON extends Omit<TypeLayerEntryConfig2, 'source'> {
+  source: TypeSourceGeoJSONInitialConfig;
+}
+
+export interface TypeLayerEntryConfigWfs extends Omit<TypeLayerEntryConfig2, 'source'> {
+  source: TypeSourceWFSVectorInitialConfig;
+}
+
+export interface TypeLayerEntryConfigEsriDynamic extends Omit<TypeLayerEntryConfig2, 'source' | 'listOfLayerEntryConfig'> {
+  source: TypeSourceEsriDynamicInitialConfig;
+  listOfLayerEntryConfig: (GroupLayerEntryConfig | EsriDynamicLayerEntryConfig)[];
+}
+
+export interface TypeLayerEntryConfigOgcFeature extends Omit<TypeLayerEntryConfig2, 'source'> {
+  source: TypeSourceOgcFeatureInitialConfig;
+}
+
+export interface TypeSourceOgcFeatureInitialConfig extends TypeVectorSourceInitialConfig {
+  format: 'featureAPI';
+}
+
+export interface TypeLayerEntryConfigWms extends Omit<TypeLayerEntryConfig2, 'source'> {
+  source: TypeSourceImageWmsInitialConfig;
+}
+
+export interface TypeLayerEntryConfigGroup extends Omit<TypeLayerEntryConfig2, 'source'> {
+  source: never;
+}
+
+export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitialConfig {
+  format: 'WFS';
+}
+
+// endregion ATTEMPT TO REPLACE TypeLayerEntryConfig
 
 // Definition of the keys used to create the constants of the GeoView layer
 export type LayerEntryTypesKey = 'VECTOR' | 'VECTOR_TILE' | 'RASTER_TILE' | 'RASTER_IMAGE' | 'GROUP' | 'GEOCORE' | 'SHAPEFILE';

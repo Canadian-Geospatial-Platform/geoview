@@ -9,7 +9,6 @@ import defaultsDeep from 'lodash/defaultsDeep';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
   TypeLayerEntryConfig,
-  TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
   TypeBaseVectorSourceInitialConfig,
   CONST_LAYER_ENTRY_TYPES,
@@ -30,11 +29,6 @@ import {
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import { GVGeoJSON } from '@/geo/layer/gv-layers/vector/gv-geojson';
 import { ConfigBaseClass, TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
-
-export interface TypeSourceGeoJSONInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
-  format: 'GeoJSON';
-  geojson?: string;
-}
 
 export interface TypeGeoJSONLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.GEOJSON;
@@ -227,7 +221,7 @@ export class GeoJSON extends AbstractGeoViewVector {
    * @returns {TypeLayerEntryConfig | undefined} The found layer or undefined if not found.
    * @private
    */
-  #recursiveSearch(searchKey: string, metadataLayerList: TypeLayerEntryConfig[]): TypeLayerEntryConfig | undefined {
+  #recursiveSearch(searchKey: string, metadataLayerList: TypeLayerEntryConfig[]): TypeLayerEntryConfig2 | undefined {
     for (const layerMetadata of metadataLayerList) {
       if (searchKey === layerMetadata.layerId) return layerMetadata;
       if ('isLayerGroup' in layerMetadata && (layerMetadata.isLayerGroup as boolean)) {

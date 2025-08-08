@@ -4,8 +4,8 @@ import {
   TypeLayerStyleConfig,
   TypeStyleGeometry,
   TypeLayerStyleSettings,
-  TypeLayerEntryConfig2,
   TypeBaseSourceInitialConfig,
+  TypeLayerEntryConfig2,
 } from '@/api/config/types/map-schema-types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TimeDimension } from '@/core/utils/date-mgt';
@@ -34,11 +34,13 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   // TODO: Cleanup - Get rid of this attribute as it doesn't seem to be used (always false)
   #legendFilterIsOff: boolean = false;
 
-  /** Source settings to apply to the GeoView layer source at creation time. */
-  source?: TypeBaseSourceInitialConfig;
-
   /** Style to apply to the vector layer. */
   #layerStyle?: TypeLayerStyleConfig = undefined;
+
+  /** Source settings to apply to the GeoView layer source at creation time. */
+  // TODO: This source attribute is responsible for problems. Change to a getSource() and setSource().
+  // TO.DOCONT: However, to do so, we must fix the other major issue with TypeGeoviewLayerConfig and TypeLayerEntryConfig and the classes being created with 'fake classes' in their constructors.
+  source?: TypeBaseSourceInitialConfig;
 
   /** The listOfLayerEntryConfig attribute is not used by child of AbstractBaseLayerEntryConfig. */
   declare listOfLayerEntryConfig: never;

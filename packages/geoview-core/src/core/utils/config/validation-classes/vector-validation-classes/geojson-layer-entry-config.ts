@@ -1,6 +1,10 @@
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
-import { TypeSourceGeoJSONInitialConfig } from '@/geo/layer/geoview-layers/vector/geojson';
-import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES, TypeLayerEntryConfig } from '@/api/config/types/map-schema-types';
+import {
+  CONST_LAYER_ENTRY_TYPES,
+  CONST_LAYER_TYPES,
+  TypeLayerEntryConfig,
+  TypeSourceGeoJSONInitialConfig,
+} from '@/api/config/types/map-schema-types';
 import { Projection } from '@/geo/utils/projection';
 
 export class GeoJSONLayerEntryConfig extends VectorLayerEntryConfig {

@@ -13,7 +13,6 @@ import {
   TypeGeoviewLayerConfig,
   CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
-  TypeLayerEntryConfig2,
 } from '@/api/config/types/map-schema-types';
 
 import { commonProcessLayerMetadata, commonValidateListOfLayerEntryConfig } from '@/geo/layer/geoview-layers/esri-layer-common';
@@ -286,7 +285,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         source: {
           dataAccessPath: geoviewLayerConfig.metadataAccessPath,
         },
-      } as TypeLayerEntryConfig2;
+      };
 
       // Overwrite default from geocore custom config
       const mergedConfig = deepMergeObjects(layerEntryConfig, customGeocoreLayerConfig) as EsriDynamicLayerEntryConfig;

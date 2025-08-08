@@ -1,5 +1,4 @@
-import { TypeSourceVectorTilesInitialConfig } from '@/geo/layer/geoview-layers/raster/vector-tiles';
-import { CONST_LAYER_TYPES, TypeTileGrid } from '@/api/config/types/map-schema-types';
+import { CONST_LAYER_TYPES, TypeSourceVectorTilesInitialConfig, TypeTileGrid } from '@/api/config/types/map-schema-types';
 import { TileLayerEntryConfig } from '@/core/utils/config/validation-classes/tile-layer-entry-config';
 import { TypeProjection } from '@/geo/utils/projection';
 
@@ -9,7 +8,7 @@ export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
 
   declare source: TypeSourceVectorTilesInitialConfig;
 
-  tileGrid!: TypeTileGrid;
+  tileGrid: TypeTileGrid;
 
   styleUrl?: string;
 
@@ -31,6 +30,9 @@ export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
         ? `${this.source.dataAccessPath}tile/{z}/{y}/{x}.pbf`
         : `${this.source.dataAccessPath}/tile/{z}/{y}/{x}.pbf`;
     }
+
+    this.tileGrid = layerConfig.tileGrid;
+    this.styleUrl = layerConfig.styleUrl;
   }
 
   /**

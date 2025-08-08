@@ -1,6 +1,5 @@
-import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/config/types/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES, TypeSourceWFSVectorInitialConfig } from '@/api/config/types/map-schema-types';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
-import { TypeSourceWFSVectorInitialConfig } from '@/geo/layer/geoview-layers/vector/wfs';
 import { Projection } from '@/geo/utils/projection';
 
 export class WfsLayerEntryConfig extends VectorLayerEntryConfig {

@@ -7,7 +7,6 @@ import Feature from 'ol/Feature';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
   TypeLayerEntryConfig,
-  TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
   TypeOutfields,
   CONST_LAYER_ENTRY_TYPES,
@@ -29,10 +28,6 @@ import {
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import { GVOGCFeature } from '@/geo/layer/gv-layers/vector/gv-ogc-feature';
 import { ConfigBaseClass, TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
-
-export interface TypeSourceOgcFeatureInitialConfig extends TypeVectorSourceInitialConfig {
-  format: 'featureAPI';
-}
 
 export interface TypeOgcFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.OGC_FEATURE;
