@@ -35,6 +35,7 @@ import {
 import { UtilAddLayer } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
 import { AddLayerTree } from '@/core/components/layers/left-panel/add-new-layer/add-layer-tree';
 import { ShapefileReader } from '@/core/utils/config/reader/shapefile-reader';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
 const sxClasses = {
   buttonGroup: {
@@ -508,10 +509,13 @@ export function AddNewLayer(): JSX.Element {
   const addGeoviewLayer = async (newGeoViewLayer: MapConfigLayerEntry): Promise<void> => {
     // Remove unwanted items from sources before proceeding
     if (newGeoViewLayer.listOfLayerEntryConfig?.length)
-      newGeoViewLayer.listOfLayerEntryConfig.forEach((layerEntryConfig) => {
-        // eslint-disable-next-line no-param-reassign
-        if (layerEntryConfig.source) layerEntryConfig.source = { dataAccessPath: layerEntryConfig.source.dataAccessPath };
-      });
+      newGeoViewLayer.listOfLayerEntryConfig
+        .filter((layerConfig) => layerConfig instanceof AbstractBaseLayerEntryConfig)
+        .forEach((layerEntryConfig) => {
+          const layerSource = layerEntryConfig.source;
+          // eslint-disable-next-line no-param-reassign
+          if (layerSource) layerEntryConfig.source = { dataAccessPath: layerSource.dataAccessPath };
+        });
 
     // Shapefile config must be converted to GeoJSON before we proceed
     if (newGeoViewLayer.geoviewLayerType === SHAPEFILE)

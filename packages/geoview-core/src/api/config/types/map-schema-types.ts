@@ -1055,6 +1055,24 @@ export type TypeLayerData = {
 // TODO: Refactor - This type should be deleted and 'ConfigBaseClass' should be used instead
 export type TypeLayerEntryConfig = AbstractBaseLayerEntryConfig | GroupLayerEntryConfig;
 
+export type TypeLayerEntryConfig2 = {
+  geoviewLayerConfig: TypeGeoviewLayerConfig;
+  parentLayerConfig: TypeLayerEntryConfig2;
+  layerId: string;
+  layerName: string;
+  schemaTag: TypeGeoviewLayerType;
+  entryType: TypeLayerEntryType;
+  initialSettings: TypeLayerInitialSettings;
+  source?: TypeBaseSourceInitialConfig;
+  layerStyle?: TypeLayerStyleConfig;
+  minScale?: number;
+  maxScale?: number;
+
+  // TODO: REFACTOR THESE EXTRA PROPS
+  geoviewLayerType?: TypeGeoviewLayerType;
+  listOfLayerEntryConfig?: TypeLayerEntryConfig2[];
+};
+
 // Definition of the keys used to create the constants of the GeoView layer
 export type LayerEntryTypesKey = 'VECTOR' | 'VECTOR_TILE' | 'RASTER_TILE' | 'RASTER_IMAGE' | 'GROUP' | 'GEOCORE' | 'SHAPEFILE';
 

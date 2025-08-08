@@ -2,6 +2,7 @@ import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import {
   TypeGeoviewLayerConfig,
   TypeGeoviewLayerType,
+  TypeLayerEntryConfig2,
   TypeLayerEntryType,
   TypeLayerInitialSettings,
   TypeLayerStatus,
@@ -23,6 +24,10 @@ import { EsriFeatureLayerEntryConfig } from './vector-validation-classes/esri-fe
  * Base type used to define a GeoView layer to display on the map. Unless specified,its properties are not part of the schema.
  */
 export abstract class ConfigBaseClass {
+  /** The original config type used to create the Config class */
+  // TODO: MAKE THIS PRIVATE/PROTECTED
+  originalConfig: TypeLayerEntryConfig2;
+
   /** The identifier of the layer to display on the map. This element is part of the schema. */
   // GV Cannot put it #layerId as it breaks things
   // eslint-disable-next-line no-restricted-syntax
@@ -96,11 +101,16 @@ export abstract class ConfigBaseClass {
     // TO.DOCONT: Because of this, we have to jump around between class instance and objects here...
 
     // Keep the layer status
+    // TODO: CLEAR THIS
     const { layerStatus } = layerConfig;
 
     // Delete the layer status from the property so that it can go through the Object.assign without failing..
+    // TODO: REMOVE THIS
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-param-reassign
     delete (layerConfig as any).layerStatus;
+
+    // Keep a copy of the original config
+    this.originalConfig = layerConfig as unknown as TypeLayerEntryConfig2;
 
     // Transfert the properties from the object to the class ( bad practice :( )
     Object.assign(this, layerConfig);

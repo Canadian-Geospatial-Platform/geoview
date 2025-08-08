@@ -14,6 +14,7 @@ import {
   TypeBaseVectorSourceInitialConfig,
   CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
+  TypeLayerEntryConfig2,
 } from '@/api/config/types/map-schema-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import {
@@ -133,7 +134,7 @@ export class GeoJSON extends AbstractGeoViewVector {
       const layerMetadataFound = this.#recursiveSearch(
         layerConfig.layerId,
         this.getMetadata()!.listOfLayerEntryConfig
-      ) as VectorLayerEntryConfig;
+      ) as TypeLayerEntryConfig2;
 
       // If the layer metadata was found
       if (layerMetadataFound) {
@@ -144,7 +145,7 @@ export class GeoJSON extends AbstractGeoViewVector {
         // eslint-disable-next-line no-param-reassign
         layerConfig.initialSettings = defaultsDeep(layerConfig.initialSettings, layerMetadataFound.initialSettings);
         // eslint-disable-next-line no-param-reassign
-        layerConfig.layerStyle = defaultsDeep(layerConfig.layerStyle, layerMetadataFound.layerStyle);
+        layerConfig.setLayerStyle(defaultsDeep(layerConfig.getLayerStyle(), layerMetadataFound.layerStyle));
         if (layerMetadataFound.maxScale) {
           // eslint-disable-next-line no-param-reassign
           layerConfig.maxScale = Math.min(layerConfig.maxScale || Infinity, layerMetadataFound.maxScale);

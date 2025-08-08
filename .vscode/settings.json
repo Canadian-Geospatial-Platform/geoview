@@ -1,6 +1,6 @@
 {
   "editor.detectIndentation": false,
-  "editor.renderWhitespace": "none",
+  "editor.renderWhitespace": "selection",
   "editor.tabSize": 2,
   "editor.hover.delay": 1000,
   "eslint.useESLintClass": true,

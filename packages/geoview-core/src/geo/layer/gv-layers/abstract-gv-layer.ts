@@ -125,7 +125,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     this.#isTimeAware = layerConfig.geoviewLayerConfig.isTimeAware === undefined ? true : layerConfig.geoviewLayerConfig.isTimeAware;
 
     // If there is a layer style in the config, set it in the layer
-    if (layerConfig.layerStyle) this.setStyle(layerConfig.layerStyle);
+    if (layerConfig.getLayerStyle()) this.setStyle(layerConfig.getLayerStyle()!);
   }
 
   /**
@@ -408,7 +408,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /**
    * Sets the layer style
-   * @param {TypeStyleConfig | undefined} style - The layer style
+   * @param {TypeStyleConfig} style - The layer style
    */
   setStyle(style: TypeLayerStyleConfig): void {
     this.#layerStyle = style;
@@ -1061,7 +1061,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       : (Object.keys(layerStyle)[0] as TypeStyleGeometry);
 
     if (!layerStyle[geometryType]) {
-      return getFeatureImageSource(feature, layerStyle, layerConfig.filterEquation, true, domainsLookup, aliasLookup);
+      return getFeatureImageSource(feature, layerStyle, layerConfig.getFilterEquation(), true, domainsLookup, aliasLookup);
     }
 
     const styleSettings = layerStyle[geometryType];
@@ -1070,7 +1070,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     const featureStyle = processStyle[type][geometryType](
       styleSettings,
       feature,
-      layerConfig.filterEquation,
+      layerConfig.getFilterEquation(),
       true,
       domainsLookup,
       aliasLookup
@@ -1078,7 +1078,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
     if (!featureStyle) {
       logger.logWarning(`Feature style is undefined for ${layerConfig.layerPath}`);
-      return getFeatureImageSource(feature, layerStyle, layerConfig.filterEquation, true, domainsLookup, aliasLookup);
+      return getFeatureImageSource(feature, layerStyle, layerConfig.getFilterEquation(), true, domainsLookup, aliasLookup);
     }
 
     const styleClone = cloneDeep(featureStyle);
@@ -1087,7 +1087,14 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
     if (!imageSourceDict[styleKey]) {
       // eslint-disable-next-line no-param-reassign
-      imageSourceDict[styleKey] = getFeatureImageSource(feature, layerStyle, layerConfig.filterEquation, true, domainsLookup, aliasLookup);
+      imageSourceDict[styleKey] = getFeatureImageSource(
+        feature,
+        layerStyle,
+        layerConfig.getFilterEquation(),
+        true,
+        domainsLookup,
+        aliasLookup
+      );
     }
 
     return imageSourceDict[styleKey];

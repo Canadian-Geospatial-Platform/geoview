@@ -493,7 +493,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
             // }) as Feature<Geometry>;
 
             // TODO: Performance - Relying on style to get geometry is not good. We should extract it from metadata and keep it in dedicated attribute
-            const geomType = Object.keys(layerConfig?.layerStyle || []);
+            const geomType = Object.keys(layerConfig?.getLayerStyle() || {});
 
             // Get coordinates in right format and create geometry
             const coordinates = (feat.geometry?.points ||
@@ -664,8 +664,6 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
     try {
       // Update the layer config information (not ideal to do this here...)
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.legendFilterIsOff = false;
       // eslint-disable-next-line no-param-reassign
       layerConfig.layerFilter = filterValueToUse;
       filterValueToUse = GVEsriDynamic.getViewFilter(layerConfig, style);
