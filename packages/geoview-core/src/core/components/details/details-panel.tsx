@@ -361,20 +361,6 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
   }
 
   /**
-   * Callback function to update the store state for clearing the details selected layer from left panel.
-   */
-  const handleGuideIsOpen = useCallback(
-    (guideIsOpenVal: boolean): void => {
-      // Log
-      logger.logTraceUseCallback('DETAILS-PANEL - handleGuideIsOpen');
-      if (guideIsOpenVal) {
-        setSelectedLayerPath('');
-      }
-    },
-    [setSelectedLayerPath]
-  );
-
-  /**
    * Select a layer after a map click happened on the map.
    */
   useEffect(() => {
@@ -487,7 +473,6 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
       layerList={memoLayersList}
       onLayerListClicked={(layerEntry) => handleLayerChange(layerEntry)}
       fullWidth={fullWidth}
-      onGuideIsOpen={handleGuideIsOpen}
       guideContentIds={['details']}
     >
       {renderContent()}
