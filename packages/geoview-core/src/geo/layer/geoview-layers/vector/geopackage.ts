@@ -369,13 +369,15 @@ export class GeoPackage extends AbstractGeoViewVector {
   protected static processGeopackageStyle(layerConfig: VectorLayerEntryConfig, sld: string | number | Uint8Array): void {
     // Extract layer styles if they exist
     const { rules } = SLDReader.Reader(sld).layers[0].styles[0].featuretypestyles[0];
-    // eslint-disable-next-line no-param-reassign
-    if (layerConfig.layerStyle === undefined) layerConfig.layerStyle = {};
+    if (!layerConfig.getLayerStyle()) layerConfig.setLayerStyle({});
 
     for (let i = 0; i < rules.length; i++) {
+      // Get the layer style
+      const layerStyle = layerConfig.getLayerStyle()!;
+
       Object.keys(rules[i]).forEach((key) => {
         // Polygon style
-        if (key.toLowerCase() === 'polygonsymbolizer' && !layerConfig.layerStyle!.Polygon) {
+        if (key.toLowerCase() === 'polygonsymbolizer' && !layerStyle.Polygon) {
           const polyStyles = rules[i].polygonsymbolizer[0];
           let color: string | undefined;
           let graphicSize: number | undefined;
@@ -439,15 +441,14 @@ export class GeoPackage extends AbstractGeoViewVector {
             paternWidth: patternWidth || 1,
             fillStyle: fillStyle || 'solid',
           };
-          // eslint-disable-next-line no-param-reassign
-          layerConfig.layerStyle!.Polygon = {
+          layerStyle.Polygon = {
             type: 'simple',
             fields: [],
             hasDefault: false,
             info: [{ visible: true, label: '', values: [], settings: styles }],
           };
           // LineString style
-        } else if (key.toLowerCase() === 'linesymbolizer' && !layerConfig.layerStyle!.LineString) {
+        } else if (key.toLowerCase() === 'linesymbolizer' && !layerStyle.LineString) {
           const lineStyles = rules[i].linesymbolizer[0];
 
           const stroke: TypeStrokeSymbolConfig = {};
@@ -458,14 +459,14 @@ export class GeoPackage extends AbstractGeoViewVector {
 
           const styles: TypeLineStringVectorConfig = { type: 'lineString', stroke };
           // eslint-disable-next-line no-param-reassign
-          layerConfig.layerStyle!.LineString = {
+          layerStyle.LineString = {
             type: 'simple',
             fields: [],
             hasDefault: false,
             info: [{ visible: true, label: '', values: [], settings: styles }],
           };
           // Point style
-        } else if (key.toLowerCase() === 'pointsymbolizer' && !layerConfig.layerStyle!.Point) {
+        } else if (key.toLowerCase() === 'pointsymbolizer' && !layerStyle.Point) {
           const { graphic } = rules[i].pointsymbolizer[0];
 
           let offset: [number, number] | null = null;
@@ -504,7 +505,7 @@ export class GeoPackage extends AbstractGeoViewVector {
               }
 
               // eslint-disable-next-line no-param-reassign
-              layerConfig.layerStyle!.Point = {
+              layerStyle.Point = {
                 type: 'simple',
                 fields: [],
                 hasDefault: false,

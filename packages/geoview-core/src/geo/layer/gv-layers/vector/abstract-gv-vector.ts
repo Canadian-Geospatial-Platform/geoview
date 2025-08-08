@@ -58,8 +58,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
           this as AbstractGVLayer,
           feature,
           label,
-          layerConfig.filterEquation,
-          layerConfig.legendFilterIsOff
+          layerConfig.getFilterEquation(),
+          layerConfig.getLegendFilterIsOff()
         );
 
         // Set the style applied, throwing a style applied event in the process
@@ -400,12 +400,10 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   ): void {
     // Update the layer config on the fly (maybe not ideal to do this?)
     // eslint-disable-next-line no-param-reassign
-    layerConfig.legendFilterIsOff = false;
-    // eslint-disable-next-line no-param-reassign
     layerConfig.layerFilter = filter;
 
     // Get the current filter
-    const currentFilter = layerConfig.filterEquation;
+    const currentFilter = layerConfig.getFilterEquation();
 
     // Parse the filter value to use
     let filterValueToUse: string = filter.replaceAll(/\s{2,}/g, ' ').trim();
@@ -424,7 +422,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       const isNewFilterEffectivelyNoop = isDefaultFilter && !currentFilter;
 
       // Check whether the current filter is different from the new one
-      const filterChanged = !isEqual(layerConfig.filterEquation, filterEquation);
+      const filterChanged = !isEqual(currentFilter, filterEquation);
 
       // Determine if we should apply or reset filter
       const shouldUpdateFilter = (filterChanged && !isNewFilterEffectivelyNoop) || (!!currentFilter && isDefaultFilter);
@@ -432,8 +430,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       // If should update the filtering
       if (shouldUpdateFilter) {
         // Update the filter equation
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.filterEquation = filterEquation;
+        layerConfig.setFilterEquation(filterEquation);
 
         // Flag about the change.
         // GV This will force a callback on the source style callback, which for us is the 'calculateStyleForFeature' function and

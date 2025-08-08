@@ -1636,8 +1636,8 @@ export function getAndCreateFeatureStyle(
  * This method gets the image source from the style of the feature using the layer entry config.
  * @param {Feature} feature - The feature that need its icon to be defined.
  * @param {TypeStyleConfig} style - The style to use
- * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
- * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
+ * @param {FilterNodeType[]?} filterEquation - Filter equation associated to the layer.
+ * @param {boolean?} legendFilterIsOff - When true, do not apply legend filter.
  * @param {TypeLayerMetadataFields[]?} domainsLookup - An optional lookup table to handle coded value domains.
  * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
  * @returns {string} The icon associated to the feature or a default empty one.

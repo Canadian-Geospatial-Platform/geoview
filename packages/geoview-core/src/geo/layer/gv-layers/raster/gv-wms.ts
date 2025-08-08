@@ -597,8 +597,6 @@ export class GVWMS extends AbstractGVRaster {
     try {
       // Update the layer config on the fly (maybe not ideal to do this?)
       // eslint-disable-next-line no-param-reassign
-      layerConfig.legendFilterIsOff = false;
-      // eslint-disable-next-line no-param-reassign
       layerConfig.layerFilter = filter;
 
       const queryElements = filterValueToUse.split(/(?<=\b)\s*=/);

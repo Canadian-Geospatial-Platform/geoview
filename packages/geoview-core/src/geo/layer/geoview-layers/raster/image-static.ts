@@ -140,7 +140,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
         source: {
           dataAccessPath: metadataAccessPath,
         },
-      } as ImageStaticLayerEntryConfig);
+      } as unknown as ImageStaticLayerEntryConfig);
       return layerEntryConfig;
     });
 

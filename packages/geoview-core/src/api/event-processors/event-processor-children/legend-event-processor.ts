@@ -798,11 +798,11 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     const [geometryType] = layerConfig.getTypeGeometries();
 
     // Get the style
-    const layerStyle = layerConfig.layerStyle?.[geometryType];
+    const layerStyle = layerConfig.getLayerStyle()?.[geometryType];
     let filteredFeatures = features;
-    if (layerStyle !== undefined && layerStyle.type === 'uniqueValue') {
+    if (layerStyle && layerStyle.type === 'uniqueValue') {
       filteredFeatures = this.#processClassVisibilityUniqueValue(layerStyle, features);
-    } else if (layerStyle !== undefined && layerStyle.type === 'classBreaks') {
+    } else if (layerStyle && layerStyle.type === 'classBreaks') {
       filteredFeatures = this.#processClassVisibilityClassBreak(layerStyle, features);
     }
 
