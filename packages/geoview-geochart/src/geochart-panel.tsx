@@ -79,20 +79,6 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   });
 
   /**
-   * Handles a click on the guide opening button click.
-   */
-  const handleGuideIsOpen = useCallback(
-    (guideIsOpenVal: boolean): void => {
-      // Log
-      logger.logTraceUseCallback('GEOCHART PANEL - handleGuideIsOpen', guideIsOpenVal);
-      if (guideIsOpenVal) {
-        setSelectedLayerPath('');
-      }
-    },
-    [setSelectedLayerPath]
-  );
-
-  /**
    * Handles click on enlarge button in the layout component.
    *
    * @param {boolean} isEnlarge Indicates if is enlarged
@@ -273,7 +259,6 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
           layerList={memoLayersList}
           onLayerListClicked={handleLayerChange}
           onIsEnlargeClicked={handleIsEnlargeClicked}
-          onGuideIsOpen={handleGuideIsOpen}
           guideContentIds={['chart', 'chart.children.chartTypes']}
         >
           {selectedLayerPath && (
