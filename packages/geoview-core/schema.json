@@ -410,10 +410,7 @@
           "description": "Service end point to access metadata of layers.",
           "default": "https://open.canada.ca/data/en/dataset/"
         }
-      },
-      "required": [
-        "geocoreUrl"
-      ]
+      }
     },
     "TypeValidVersions": {
       "enum": [
