@@ -85,7 +85,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     locked,
     reversed,
     displayPattern,
-  } = useTimeSliderLayers()[layerPath];
+  } = useTimeSliderLayers()![layerPath]; // timeSliderLayers will always have a value here, ! to ignore possibility of undefined
 
   // Get name from legend layers
   const legendLayers = useLayerLegendLayers();

@@ -274,18 +274,6 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
     return null;
   };
 
-  /**
-   * Callback function to update the store state for clearing the selecting layer from left panel.
-   */
-  const handleGuideIsOpen = useCallback(
-    (guideIsOpen: boolean): void => {
-      if (guideIsOpen) {
-        setSelectedLayerPath('');
-      }
-    },
-    [setSelectedLayerPath]
-  );
-
   const memoLayerList = useMemo(() => {
     // Log
     logger.logTraceUseMemo('DATA-PANEL - memoLayersList', orderedLayerData);
@@ -309,7 +297,6 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
       layerList={memoLayerList}
       onLayerListClicked={handleLayerChange}
       fullWidth={fullWidth}
-      onGuideIsOpen={handleGuideIsOpen}
       guideContentIds={[
         'dataTable',
         'dataTable.children.filterData',

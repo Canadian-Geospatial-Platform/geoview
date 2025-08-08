@@ -28,6 +28,7 @@ import { esriQueryRecordsByUrlObjectIds } from '@/geo/layer/gv-layers/utils';
 import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
 import { LayerNotEsriDynamicError, LayerNotFoundError } from '@/core/exceptions/layer-exceptions';
 import { NoBoundsError } from '@/core/exceptions/geoview-exceptions';
+import { logger } from '@/core/utils/logger';
 
 // #region INTERFACES & TYPES
 
@@ -215,7 +216,12 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       },
 
       getLayerTemporalDimension: (layerPath: string): TypeTemporalDimension | undefined => {
-        return LegendEventProcessor.getLayerTemporalDimension(get().mapId, layerPath);
+        try {
+          return LegendEventProcessor.getLayerTemporalDimension(get().mapId, layerPath);
+        } catch (error: unknown) {
+          logger.logError(`Error getting temporal dimension for layer ${layerPath}`, error);
+        }
+        return undefined;
       },
 
       /**
