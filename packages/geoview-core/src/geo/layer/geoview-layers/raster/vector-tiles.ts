@@ -8,7 +8,6 @@ import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geovie
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import {
   TypeLayerEntryConfig,
-  TypeSourceTileInitialConfig,
   TypeGeoviewLayerConfig,
   TypeTileGrid,
   CONST_LAYER_ENTRY_TYPES,
@@ -33,8 +32,6 @@ import { GVVectorTiles } from '@/geo/layer/gv-layers/vector/gv-vector-tiles';
 // GV: This section of code must be deleted because we already have another type guard that does the same thing
 // GV: |||||
 // GV: vvvvv
-
-export type TypeSourceVectorTilesInitialConfig = TypeSourceTileInitialConfig;
 
 export interface TypeVectorTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.VECTOR_TILES;

@@ -1,6 +1,5 @@
-import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/config/types/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES, TypeSourceOgcFeatureInitialConfig } from '@/api/config/types/map-schema-types';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
-import { TypeSourceOgcFeatureInitialConfig } from '@/geo/layer/geoview-layers/vector/ogc-feature';
 import { Projection } from '@/geo/utils/projection';
 
 export class OgcFeatureLayerEntryConfig extends VectorLayerEntryConfig {

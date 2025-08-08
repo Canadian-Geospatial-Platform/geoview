@@ -9,7 +9,6 @@ import { Projection as OLProjection } from 'ol/proj';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
   TypeLayerEntryConfig,
-  TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
   TypeOutfields,
   TypeOutfieldsType,
@@ -34,10 +33,6 @@ import { LayerNoCapabilitiesError } from '@/core/exceptions/layer-exceptions';
 import { LayerEntryConfigLayerIdNotFoundError } from '@/core/exceptions/layer-entry-config-exceptions';
 import { GVWFS } from '@/geo/layer/gv-layers/vector/gv-wfs';
 import { ConfigBaseClass, TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
-
-export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitialConfig {
-  format: 'WFS';
-}
 
 export interface TypeWFSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'geoviewLayerType'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.WFS;
