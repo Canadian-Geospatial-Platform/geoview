@@ -373,7 +373,7 @@ export class GeoPackage extends AbstractGeoViewVector {
 
     for (let i = 0; i < rules.length; i++) {
       // Get the layer style
-      const layerStyle = layerConfig.getLayerStyle()!;
+      const layerStyle = layerConfig.layerStyle!;
 
       Object.keys(rules[i]).forEach((key) => {
         // Polygon style

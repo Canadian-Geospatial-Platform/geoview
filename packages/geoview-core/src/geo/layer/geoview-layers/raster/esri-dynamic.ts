@@ -347,7 +347,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     GVEsriDynamic.applyViewFilterOnSource(
       layerConfig,
       olSource,
-      layerConfig.getLayerStyle(),
+      layerConfig.layerStyle,
       layerConfig.getExternalFragmentsOrder(),
       undefined,
       layerConfig.layerFilter

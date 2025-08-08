@@ -8,7 +8,7 @@ export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
 
   declare source: TypeSourceVectorTilesInitialConfig;
 
-  tileGrid: TypeTileGrid;
+  tileGrid!: TypeTileGrid;
 
   styleUrl?: string;
 
@@ -30,9 +30,6 @@ export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
         ? `${this.source.dataAccessPath}tile/{z}/{y}/{x}.pbf`
         : `${this.source.dataAccessPath}/tile/{z}/{y}/{x}.pbf`;
     }
-
-    this.tileGrid = layerConfig.tileGrid;
-    this.styleUrl = layerConfig.styleUrl;
   }
 
   /**

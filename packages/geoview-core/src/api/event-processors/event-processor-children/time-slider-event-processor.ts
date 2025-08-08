@@ -6,7 +6,7 @@ import {
   TypeTimeSliderProps,
 } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
-import { TypeLayerEntryConfig, layerEntryIsGroupLayer } from '@/api/config/types/map-schema-types';
+import { TypeFeatureInfoLayerConfig, TypeLayerEntryConfig, layerEntryIsGroupLayer } from '@/api/config/types/map-schema-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { UIEventProcessor } from '@/api/event-processors/event-processor-children/ui-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
@@ -181,9 +181,9 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
 
     // If the field type has an alias, use that as a label
     let fieldAlias = field;
-    const featureInfo = layerConfig.source?.featureInfo;
+    const { featureInfo } = layerConfig.source!;
     if (featureInfo) {
-      const { outfields } = featureInfo;
+      const { outfields } = featureInfo as TypeFeatureInfoLayerConfig;
       const timeOutfield = outfields ? outfields.find((outfield) => outfield.name === field) : undefined;
       if (timeOutfield) fieldAlias = timeOutfield.alias;
     }

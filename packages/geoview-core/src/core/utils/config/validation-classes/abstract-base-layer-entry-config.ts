@@ -5,7 +5,6 @@ import {
   TypeStyleGeometry,
   TypeLayerStyleSettings,
   TypeBaseSourceInitialConfig,
-  TypeLayerEntryConfig2,
 } from '@/api/config/types/map-schema-types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TimeDimension } from '@/core/utils/date-mgt';
@@ -35,7 +34,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   #legendFilterIsOff: boolean = false;
 
   /** Style to apply to the vector layer. */
-  #layerStyle?: TypeLayerStyleConfig = undefined;
+  layerStyle?: TypeLayerStyleConfig;
 
   /** Source settings to apply to the GeoView layer source at creation time. */
   // TODO: This source attribute is responsible for problems. Change to a getSource() and setSource().
@@ -44,19 +43,6 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /** The listOfLayerEntryConfig attribute is not used by child of AbstractBaseLayerEntryConfig. */
   declare listOfLayerEntryConfig: never;
-
-  /**
-   * Constructs a Layer Entry Config
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer config to use to construct the object.
-   */
-  constructor(layerConfig: AbstractBaseLayerEntryConfig) {
-    super(layerConfig);
-
-    // Assign attributes
-    const layerConfigAsType = layerConfig as unknown as TypeLayerEntryConfig2;
-    this.#layerStyle = layerConfigAsType.layerStyle;
-    this.source = layerConfigAsType.source;
-  }
 
   /**
    * Gets the service metadata that is associated to the service.
@@ -155,27 +141,11 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   }
 
   /**
-   * Gets the layer style
-   * @returns {TypeLayerStyleConfig?} The layer style
-   */
-  getLayerStyle(): TypeLayerStyleConfig | undefined {
-    return this.#layerStyle;
-  }
-
-  /**
-   * Sets the layer style
-   * @param {TypeLayerStyleConfig?} layerStyle - The layer style
-   */
-  setLayerStyle(layerStyle: TypeLayerStyleConfig | undefined): void {
-    this.#layerStyle = layerStyle;
-  }
-
-  /**
    * The TypeStyleGeometries associated with the style as could be read from the layer config metadata.
    * @returns {TypeStyleGeometry[]} The array of TypeStyleGeometry
    */
   getTypeGeometries(): TypeStyleGeometry[] {
-    return Object.keys(this.getLayerStyle() || {}) as TypeStyleGeometry[];
+    return Object.keys(this.layerStyle || {}) as TypeStyleGeometry[];
   }
 
   /**
@@ -188,7 +158,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
     // If at least one, get the first one
     if (styles.length > 0) {
-      return this.getLayerStyle()?.[styles[0]];
+      return this.layerStyle![styles[0]];
     }
 
     // None

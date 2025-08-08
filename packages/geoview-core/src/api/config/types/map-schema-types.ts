@@ -716,6 +716,7 @@ export interface TypeVectorSourceInitialConfig extends TypeBaseVectorSourceIniti
   /** The feature format used by the XHR feature loader when url is set. */
   format?: TypeVectorSourceFormats; // TODO: refactor - from geo map schema type
 }
+
 export interface TypeSourceGeoJSONInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'GeoJSON';
   geojson?: string;

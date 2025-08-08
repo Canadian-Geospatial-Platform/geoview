@@ -493,7 +493,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
             // }) as Feature<Geometry>;
 
             // TODO: Performance - Relying on style to get geometry is not good. We should extract it from metadata and keep it in dedicated attribute
-            const geomType = Object.keys(layerConfig?.getLayerStyle() || {});
+            const geomType = Object.keys(layerConfig?.layerStyle || []);
 
             // Get coordinates in right format and create geometry
             const coordinates = (feat.geometry?.points ||

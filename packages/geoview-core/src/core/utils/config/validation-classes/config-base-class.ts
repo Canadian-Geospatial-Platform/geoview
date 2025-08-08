@@ -2,7 +2,6 @@ import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import {
   TypeGeoviewLayerConfig,
   TypeGeoviewLayerType,
-  TypeLayerEntryConfig2,
   TypeLayerEntryType,
   TypeLayerInitialSettings,
   TypeLayerStatus,
@@ -24,10 +23,6 @@ import { EsriFeatureLayerEntryConfig } from './vector-validation-classes/esri-fe
  * Base type used to define a GeoView layer to display on the map. Unless specified,its properties are not part of the schema.
  */
 export abstract class ConfigBaseClass {
-  /** The original config type used to create the Config class */
-  // TODO: MAKE THIS PRIVATE/PROTECTED
-  originalConfig: TypeLayerEntryConfig2;
-
   /** The identifier of the layer to display on the map. This element is part of the schema. */
   // GV Cannot put it #layerId as it breaks things
   // eslint-disable-next-line no-restricted-syntax
@@ -44,16 +39,18 @@ export abstract class ConfigBaseClass {
   private _layerStatus: TypeLayerStatus = 'newInstance';
 
   /** The display name of the layer (English/French). */
-  layerName: string;
+  layerName?: string;
 
   /** Tag used to link the entry to a specific schema. This element is part of the schema. */
-  schemaTag: TypeGeoviewLayerType;
+  // GV Cannot put it #schemaTag as it breaks things
+  abstract schemaTag: TypeGeoviewLayerType;
 
   /** Layer entry data type. This element is part of the schema. */
-  entryType: TypeLayerEntryType;
+  // GV Cannot put it #entryType as it breaks things
+  abstract entryType: TypeLayerEntryType;
 
   /** It is used to link the layer entry config to the GeoView layer config. */
-  geoviewLayerConfig: TypeGeoviewLayerConfig;
+  geoviewLayerConfig = {} as TypeGeoviewLayerConfig;
 
   /** The min scale that can be reach by the layer. */
   minScale?: number;
@@ -89,21 +86,33 @@ export abstract class ConfigBaseClass {
 
   /**
    * The class constructor.
-   * @param {TypeLayerEntryConfig2} layerConfig - The layer configuration we want to instanciate.
+   * @param {ConfigBaseClass} layerConfig - The layer configuration we want to instanciate.
    */
-  protected constructor(layerConfig: TypeLayerEntryConfig2) {
-    // Keep a copy of the original config
-    this.originalConfig = layerConfig;
+  protected constructor(layerConfig: ConfigBaseClass) {
+    // TODO: Refactor - Get rid of this Object.assign pattern here and work with the actual objects that
+    // TO.DOCONT: are being sent in the constructor (it's not ConfigBaseClass objects that are in reality being
+    // TO.DOCONT: sent in the constructor here, they are regular 'json' objects..).
+    // TO.DOCONT: Because of this, we have to jump around between class instance and objects here...
+
+    // Keep the layer status
+    const { layerStatus } = layerConfig;
+
+    // Delete the layer status from the property so that it can go through the Object.assign without failing..
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-param-reassign
+    delete (layerConfig as any).layerStatus;
 
     // Transfert the properties from the object to the class ( bad practice :( )
     // Object.assign(this, layerConfig);
     this.layerName = layerConfig.layerName;
-    this.schemaTag = layerConfig.schemaTag;
-    this.entryType = layerConfig.entryType;
+    // this.schemaTag = layerConfig.schemaTag;
+    // this.entryType = layerConfig.entryType;
     this.geoviewLayerConfig = layerConfig.geoviewLayerConfig;
     this.minScale = layerConfig.minScale;
     this.maxScale = layerConfig.maxScale;
     this.initialSettings = layerConfig.initialSettings ?? {};
+
+    // Set back the layer status as it was
+    if (layerStatus) this.setLayerStatus(layerStatus);
 
     // eslint-disable-next-line no-underscore-dangle
     if (this.geoviewLayerConfig) this._layerPath = ConfigBaseClass.#evaluateLayerPath(layerConfig);
@@ -127,7 +136,7 @@ export abstract class ConfigBaseClass {
     // eslint-disable-next-line no-underscore-dangle
     this._layerId = newLayerId;
     // eslint-disable-next-line no-underscore-dangle
-    this._layerPath = ConfigBaseClass.#evaluateLayerPath(this.originalConfig);
+    this._layerPath = ConfigBaseClass.#evaluateLayerPath(this);
   }
 
   /**
@@ -136,7 +145,7 @@ export abstract class ConfigBaseClass {
    */
   get layerPath(): string {
     // eslint-disable-next-line no-underscore-dangle
-    this._layerPath = ConfigBaseClass.#evaluateLayerPath(this.originalConfig);
+    this._layerPath = ConfigBaseClass.#evaluateLayerPath(this);
     // eslint-disable-next-line no-underscore-dangle
     return this._layerPath;
   }
@@ -433,12 +442,12 @@ export abstract class ConfigBaseClass {
 
   /**
    * Getter for the layer Path of the layer configuration parameter.
-   * @param {TypeLayerEntryConfig2} layerConfig - The layer configuration for which we want to get the layer path.
+   * @param {ConfigBaseClass} layerConfig - The layer configuration for which we want to get the layer path.
    * @param {string} layerPath - Internal parameter used to build the layer path (should not be used by the user).
    *
    * @returns {string} Returns the layer path.
    */
-  static #evaluateLayerPath(layerConfig: TypeLayerEntryConfig2 | GroupLayerEntryConfig, layerPath?: string): string {
+  static #evaluateLayerPath(layerConfig: ConfigBaseClass, layerPath?: string): string {
     let pathEnding = layerPath;
     if (pathEnding === undefined) pathEnding = layerConfig.layerId;
     if (!layerConfig.parentLayerConfig) return `${layerConfig.geoviewLayerConfig.geoviewLayerId}/${pathEnding}`;

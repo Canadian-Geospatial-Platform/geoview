@@ -379,10 +379,10 @@ export async function commonProcessLayerMetadata<
 
   // The following line allow the type ascention of the type guard functions on the second line below
   if (geoviewEntryIsEsriDynamic(layerConfig) || geoviewEntryIsEsriFeature(layerConfig)) {
-    // If no layer style
-    if (!layerConfig.getLayerStyle()) {
-      // Set the layer style
-      layerConfig.setLayerStyle(getStyleFromEsriRenderer(responseJson.drawingInfo?.renderer));
+    if (!layerConfig.layerStyle) {
+      const renderer = responseJson.drawingInfo?.renderer;
+      // eslint-disable-next-line no-param-reassign
+      if (renderer) layerConfig.layerStyle = getStyleFromEsriRenderer(renderer);
     }
   }
 
