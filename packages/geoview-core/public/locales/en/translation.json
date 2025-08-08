@@ -109,6 +109,7 @@
     "stepTwo": "Select format",
     "stepThree": "Configure layer",
     "stepFour": "Enter name",
+    "fileTypes": "Upload a CSV, shapefile, or GeoJSON file",
     "service": "Service type",
     "serviceEsriShapefile": "Shapefile",
     "serviceEsriFeature": "ESRI Feature Service",
@@ -169,12 +170,14 @@
     "layerTemporalDimensionField": "field",
     "layerServiceProjection": "Service projection: ",
     "layerHoverable": "Info on mouse over",
-    "layerQueryable": "Info on mouse click"
+    "layerQueryable": "Info on mouse click",
+    "noSelection": "No selection"
   },
   "details": {
     "title": "Details",
     "zoomTo": "Zoom to feature",
     "select": "Highlight feature on map",
+    "closeSelection": "Close selection",
     "externalLink": "External Link",
     "feature": "feature",
     "clickOnMap": "Click on map",

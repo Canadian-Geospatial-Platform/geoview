@@ -218,6 +218,7 @@ function FileUploadSection({ onFileSelected, onUrlChanged, displayURL, disabledL
           }
         }}
         className="buttonOutlineFilled"
+        tooltip={t('layers.fileTypes')!}
       >
         <FileUploadIcon />
         <Box component="span">{t('layers.upload')}</Box>

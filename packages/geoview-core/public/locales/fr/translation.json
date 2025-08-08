@@ -109,6 +109,7 @@
     "stepTwo": "Sélectionner le format",
     "stepThree": "Configurer la couche",
     "stepFour": "Entrer le nom",
+    "fileTypes": "Télécharger un fichier CSV, shapefile ou GeoJSON",
     "service": "Type de service",
     "serviceEsriShapefile": "Shapefile",
     "serviceEsriFeature": "Service d'éléments ESRI",
@@ -169,12 +170,14 @@
     "layerTemporalDimensionField": "champ",
     "layerServiceProjection": "Projection du service : ",
     "layerHoverable": "Info au passage de la souris",
-    "layerQueryable": "Info au click de la souris"
+    "layerQueryable": "Info au click de la souris",
+    "noSelection": "Aucune sélection"
   },
   "details": {
     "title": "Détails",
     "zoomTo": "Zoom à l'élément",
     "select": "Sélectionner l'élément sur la carte",
+    "closeSelection": "Fermer la sélection",
     "externalLink": "Lien externe",
     "feature": "élément",
     "clickOnMap": "Cliquer sur la carte",
