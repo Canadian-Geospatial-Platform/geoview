@@ -1,12 +1,19 @@
+import { Feature } from 'ol';
 import { Draw } from '@/geo/interaction/draw';
-import { Modify } from '@/geo/interaction/modify';
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import { Transform } from '@/geo/interaction/transform/transform';
 type DrawerActions = IDrawerState['actions'];
 export type StyleProps = {
     fillColor: string;
     strokeColor: string;
     strokeWidth: number;
+    text?: string;
+    textSize?: number;
+    textFont?: string;
+    textColor?: string;
+    textHaloColor?: string;
+    textHaloWidth?: number;
 };
 export type TypeDrawerConfig = {
     activeGeom?: string;
@@ -14,18 +21,18 @@ export type TypeDrawerConfig = {
     style?: StyleProps;
     hideMeasurements?: boolean;
 };
-export type TypeEditInstance = {
-    [groupKey: string]: Modify | undefined;
-};
 export interface IDrawerState {
     activeGeom: string;
     geomTypes: string[];
     style: StyleProps;
     drawInstance: Draw | undefined;
     isEditing: boolean;
-    editInstances: TypeEditInstance;
+    transformInstance: Transform | undefined;
+    selectedDrawing: Feature | undefined;
     hideMeasurements: boolean;
     iconSrc: string;
+    undoDisabled: boolean;
+    redoDisabled: boolean;
     setDefaultConfigValues: (config: TypeMapFeaturesConfig) => void;
     actions: {
         getActiveGeom: () => string;
@@ -34,7 +41,8 @@ export interface IDrawerState {
         getIsDrawing: () => boolean;
         getDrawInstance: () => Draw | undefined;
         getIsEditing: () => boolean;
-        getEditInstances: () => TypeEditInstance;
+        getTransformInstance: () => Transform;
+        getSelectedDrawing: () => Feature | undefined;
         getHideMeasurements: () => boolean;
         getIconSrc: () => string;
         toggleDrawing: () => void;
@@ -48,11 +56,17 @@ export interface IDrawerState {
         setStrokeWidth(strokeWidth: number): void;
         setDrawInstance(drawInstance: Draw): void;
         removeDrawInstance(): void;
-        setIsEditing: (isEditing: boolean) => void;
-        setEditInstance(groupKey: string, editInstance: Modify | undefined): void;
-        removeEditInstance(groupKey: string): void;
+        setTransformInstance(transformInstance: Transform): void;
+        removeTransformInstance(): void;
+        setSelectedDrawing(selectedDrawing: Feature | undefined): void;
         setHideMeasurements(hideMeasurements: boolean): void;
         setIconSrc: (iconSrc: string) => void;
+        undoDrawing: () => void;
+        setUndoDisabled: (undoDisabled: boolean) => void;
+        redoDrawing: () => void;
+        setRedoDisabled: (redoDisabled: boolean) => void;
+        downloadDrawings: () => void;
+        uploadDrawings: (file: File) => void;
     };
     setterActions: {
         toggleDrawing: () => void;
@@ -67,10 +81,13 @@ export interface IDrawerState {
         setDrawInstance: (drawInstance: Draw) => void;
         removeDrawInstance: () => void;
         setIsEditing: (isEditing: boolean) => void;
-        setEditInstance: (groupKey: string, editInstance: Modify | undefined) => void;
-        removeEditInstance: (groupKey: string) => void;
+        setTransformInstance: (transformInstance: Transform) => void;
+        removeTransformInstance: () => void;
+        setSelectedDrawing: (selectedDrawing: Feature | undefined) => void;
         setHideMeasurements: (hideMeasurements: boolean) => void;
         setIconSrc: (iconSrc: string) => void;
+        setUndoDisabled: (undoDisabled: boolean) => void;
+        setRedoDisabled: (redoDisabled: boolean) => void;
     };
 }
 /**
@@ -86,6 +103,8 @@ export declare const useDrawerActiveGeom: () => string;
 export declare const useDrawerStyle: () => StyleProps;
 export declare const useDrawerDrawInstance: () => Draw | undefined;
 export declare const useDrawerHideMeasurements: () => boolean;
+export declare const useDrawerUndoDisabled: () => boolean;
+export declare const useDrawerRedoDisabled: () => boolean;
 export declare const useDrawerActions: () => DrawerActions;
 export {};
 //# sourceMappingURL=drawer-state.d.ts.map
