@@ -30,7 +30,7 @@
             },
             "attributions": [],
             "temporalDimension": {
-              "range": {
+              "rangeItems": {
                 "range": [
                   "2020-01-01T00:00:00Z",
                   "2020-03-01T00:00:00Z",
@@ -92,10 +92,17 @@
       }
     ]
   },
-  "components": ["overview-map"],
+  "components": [
+    "overview-map"
+  ],
   "footerBar": {
     "tabs": {
-      "core": ["legend", "layers", "details", "data-table"]
+      "core": [
+        "legend",
+        "layers",
+        "details",
+        "data-table"
+      ]
     }
   },
   "corePackages": [],

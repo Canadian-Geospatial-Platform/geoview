@@ -84,7 +84,7 @@ export type TimeDimension = {
   field: string;
   default: string;
   unitSymbol?: string;
-  range: RangeItems;
+  rangeItems: RangeItems;
   nearestValues: 'discrete' | 'absolute';
   singleHandle: boolean;
   displayPattern: [DatePrecision | undefined, TimePrecision | undefined];
@@ -366,17 +366,17 @@ export abstract class DateMgt {
     const dimensionValues = `${this.convertMilisecondsToDate(timeExtent[0])}Z/${this.convertMilisecondsToDate(
       timeExtent[1]
     )}Z${calcDuration()}`;
-    const rangeItem = this.createRangeOGC(dimensionValues);
+    const rangeItems = this.createRangeOGC(dimensionValues);
 
     const timeDimension: TimeDimension = {
       field: startTimeField,
-      default: rangeItem.range[rangeItem.range.length - 1],
+      default: rangeItems.range[rangeItems.range.length - 1],
       unitSymbol: '',
-      range: rangeItem,
+      rangeItems,
       nearestValues: startTimeField === '' ? 'absolute' : 'discrete',
       singleHandle,
-      displayPattern: DateMgt.guessDisplayPattern(rangeItem.range),
-      isValid: rangeItem.range.length >= 1 && rangeItem.range[0] !== rangeItem.range[rangeItem.range.length - 1],
+      displayPattern: DateMgt.guessDisplayPattern(rangeItems.range),
+      isValid: rangeItems.range.length >= 1 && rangeItems.range[0] !== rangeItems.range[rangeItems.range.length - 1],
     };
 
     return timeDimension;
@@ -389,16 +389,16 @@ export abstract class DateMgt {
    */
   static createDimensionFromOGC(ogcTimeDimension: TypeJsonObject | string): TimeDimension {
     const dimensionObject = typeof ogcTimeDimension === 'object' ? ogcTimeDimension : JSON.parse(<string>ogcTimeDimension);
-    const rangeItem = this.createRangeOGC(dimensionObject.values);
+    const rangeItems = this.createRangeOGC(dimensionObject.values);
     const timeDimension: TimeDimension = {
       field: dimensionObject.name,
-      default: dimensionObject.default || rangeItem.range[0],
+      default: dimensionObject.default || rangeItems.range[0],
       unitSymbol: dimensionObject.unitSymbol || '',
-      range: rangeItem,
+      rangeItems,
       nearestValues: dimensionObject.nearestValues !== false ? 'absolute' : 'discrete',
       singleHandle: true,
-      displayPattern: DateMgt.guessDisplayPattern(rangeItem.range),
-      isValid: rangeItem.range.length >= 1 && rangeItem.range[0] !== rangeItem.range[rangeItem.range.length - 1],
+      displayPattern: DateMgt.guessDisplayPattern(rangeItems.range),
+      isValid: rangeItems.range.length >= 1 && rangeItems.range[0] !== rangeItems.range[rangeItems.range.length - 1],
     };
 
     return timeDimension;

@@ -66,7 +66,7 @@
         "field":"time_slider_date",
         "default":"2023-01-01T05:00:00Z",
         "unitSymbol":"",
-        "range":{
+        "rangeItems":{
           "type":"discrete",
           "range":["1696-01-01T05:00:00Z","1697-01-01T05:00:00Z","2023-01-01T04:42:28Z","2024-01-01T04:42:28Z","2023-01-01T05:00:00Z"]
         },
