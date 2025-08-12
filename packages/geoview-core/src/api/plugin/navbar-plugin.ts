@@ -60,8 +60,7 @@ export abstract class NavBarPlugin extends AbstractPlugin {
 
     // Set group configurations first
     const processedGroups = new Set<string>();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    Object.entries(buttonConfigs).forEach(([key, config]) => {
+    Object.values(buttonConfigs).forEach((config) => {
       if (config.groupConfig && !processedGroups.has(config.groupName)) {
         this.mapViewer().navBarApi.setGroupConfig(config.groupName, config.groupConfig);
         processedGroups.add(config.groupName);
