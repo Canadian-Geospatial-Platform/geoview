@@ -173,10 +173,20 @@ export class CSV extends AbstractGeoViewVector {
   }
 
   /**
-   * Processes a CSV config returning a Promise of an array of ConfigBaseClass layer entry configurations.
-   * @returns A Promise with the layer configurations.
+   * Processes a CSV GeoviewLayerConfig and returns a promise
+   * that resolves to an array of `ConfigBaseClass` layer entry configurations.
+   *
+   * This method:
+   * 1. Creates a Geoview layer configuration using the provided parameters.
+   * 2. Instantiates a layer with that configuration.
+   * 3. Processes the layer configuration and returns the result.
+   * @param {string} geoviewLayerId - The unique identifier for the GeoView layer.
+   * @param {string} geoviewLayerName - The display name for the GeoView layer.
+   * @param {string} url - The URL of the service endpoint.
+   * @param {string[]} layerIds - An array of layer IDs to include in the configuration.
+   * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
    */
-  static processCSVFeatureConfig(
+  static processGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
     url: string,

@@ -92,7 +92,7 @@ export class GeoJSON extends AbstractGeoViewVector {
     const id = this.metadataAccessPath.substring(idx + 1);
 
     // Redirect
-    return Promise.resolve(GeoJSON.createGeoJsonLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, [{ id }]));
+    return Promise.resolve(GeoJSON.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, [{ id }]));
   }
 
   /**
@@ -269,7 +269,7 @@ export class GeoJSON extends AbstractGeoViewVector {
    * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns {TypeGeoJSONLayerConfig} The constructed configuration object for the GeoJson Feature layer.
    */
-  static createGeoJsonLayerConfig(
+  static createGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
     metadataAccessPath: string,
@@ -293,7 +293,7 @@ export class GeoJSON extends AbstractGeoViewVector {
         layerName: `${layerEntry.layerName || layerEntry.id}`,
         source: {
           format: 'GeoJSON',
-          dataAccessPath: metadataAccessPath,
+          dataAccessPath: `${metadataAccessPath}/${layerEntry.id}`,
         },
       } as unknown as GeoJSONLayerEntryConfig);
       return layerEntryConfig;
@@ -304,17 +304,27 @@ export class GeoJSON extends AbstractGeoViewVector {
   }
 
   /**
-   * Processes a GeoJSON config returning a Promise of an array of ConfigBaseClass layer entry configurations.
-   * @returns A Promise with the layer configurations.
+   * Processes a GeoJSON GeoviewLayerConfig and returns a promise
+   * that resolves to an array of `ConfigBaseClass` layer entry configurations.
+   *
+   * This method:
+   * 1. Creates a Geoview layer configuration using the provided parameters.
+   * 2. Instantiates a layer with that configuration.
+   * 3. Processes the layer configuration and returns the result.
+   * @param {string} geoviewLayerId - The unique identifier for the GeoView layer.
+   * @param {string} geoviewLayerName - The display name for the GeoView layer.
+   * @param {string} url - The URL of the service endpoint.
+   * @param {string[]} layerIds - An array of layer IDs to include in the configuration.
+   * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
    */
-  static processGeoJsonLayerConfig(
+  static processGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
     url: string,
     layerIds: string[]
   ): Promise<ConfigBaseClass[]> {
     // Create the Layer config
-    const layerConfig = GeoJSON.createGeoJsonLayerConfig(
+    const layerConfig = GeoJSON.createGeoviewLayerConfig(
       geoviewLayerId,
       geoviewLayerName,
       url,

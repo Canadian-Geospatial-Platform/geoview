@@ -55,7 +55,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
   protected override onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Redirect
     return Promise.resolve(
-      ImageStatic.createImageStaticLayerConfig(this.geoviewLayerId, this.geoviewLayerName, this.metadataAccessPath, false, [])
+      ImageStatic.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, this.metadataAccessPath, false, [])
     );
   }
 
@@ -116,7 +116,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns {TypeImageStaticLayerConfig} The constructed configuration object for the Static Image layer.
    */
-  static createImageStaticLayerConfig(
+  static createGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
     metadataAccessPath: string,
@@ -149,17 +149,27 @@ export class ImageStatic extends AbstractGeoViewRaster {
   }
 
   /**
-   * Processes an Image Static config returning a Promise of an array of ConfigBaseClass layer entry configurations.
-   * @returns A Promise with the layer configurations.
+   * Processes an ImageStatic GeoviewLayerConfig and returns a promise
+   * that resolves to an array of `ConfigBaseClass` layer entry configurations.
+   *
+   * This method:
+   * 1. Creates a Geoview layer configuration using the provided parameters.
+   * 2. Instantiates a layer with that configuration.
+   * 3. Processes the layer configuration and returns the result.
+   * @param {string} geoviewLayerId - The unique identifier for the GeoView layer.
+   * @param {string} geoviewLayerName - The display name for the GeoView layer.
+   * @param {string} url - The URL of the service endpoint.
+   * @param {string[]} layerIds - An array of layer IDs to include in the configuration.
+   * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
    */
-  static processImageStaticConfig(
+  static processGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
     url: string,
     layerIds: string[]
   ): Promise<ConfigBaseClass[]> {
     // Create the Layer config
-    const layerConfig = ImageStatic.createImageStaticLayerConfig(
+    const layerConfig = ImageStatic.createGeoviewLayerConfig(
       geoviewLayerId,
       geoviewLayerName,
       url,
