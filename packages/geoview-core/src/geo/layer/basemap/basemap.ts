@@ -10,7 +10,7 @@ import { OverviewMap as OLOverviewMap } from 'ol/control';
 
 import { applyStyle } from 'ol-mapbox-style';
 
-import { TypeBasemapOptions, TypeValidMapProjectionCodes, TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
+import { TypeBasemapOptions, TypeValidMapProjectionCodes, TypeDisplayLanguage, TypeLod } from '@/api/config/types/map-schema-types';
 import { delay, getLocalizedMessage } from '@/core/utils/utilities';
 import {
   TypeBasemapProps,
@@ -28,7 +28,6 @@ import { BasemapTakingLongTimeError, BasemapLayerCreationError, CoreBasemapCreat
 import { MapViewer } from '@/geo/map/map-viewer';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { formatError } from '@/core/exceptions/core-exceptions';
-import { TypeLod } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 
 /**
  * A class to get a Basemap for a define projection and language. For the moment, a list maps are available and

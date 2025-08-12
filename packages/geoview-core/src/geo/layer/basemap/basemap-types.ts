@@ -1,8 +1,7 @@
 import { OSM, VectorTile, XYZ } from 'ol/source';
 import { Extent } from 'ol/extent';
-import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
+import { TypeDisplayLanguage, TypeLod } from '@/api/config/types/map-schema-types';
 import { TypeProjection } from '@/geo/utils/projection';
-import { TypeLod } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 
 /**
  * interface used to define a new basemap.
