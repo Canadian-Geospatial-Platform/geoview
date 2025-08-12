@@ -59,6 +59,7 @@ import {
   LayerNotFoundError,
   LayerNotGeoJsonError,
   LayerNotQueryableError,
+  LayerWrongTypeError,
 } from '@/core/exceptions/layer-exceptions';
 import { LayerEntryConfigError } from '@/core/exceptions/layer-entry-config-exceptions';
 import {
@@ -594,7 +595,7 @@ export class LayerApi {
       );
 
       // If already existing
-      const alreadyExisting = this.#layerEntryConfigs[event.config.layerPath];
+      const alreadyExisting = this.getLayerEntryConfig(event.config.layerPath);
       if (alreadyExisting) {
         // Unregister the old one
         this.unregisterLayerConfig(alreadyExisting, false);
@@ -956,13 +957,14 @@ export class LayerApi {
     // A layer path is a slash seperated string made of the GeoView layer Id followed by the layer Ids
     const layerPathNodes = layerPath.split('/');
 
+    // Get the layer entry config to remove
+    const layerEntryConfig = this.getLayerEntryConfig(layerPath);
+
     // initialize these two constant now because we will delete the information used to get their values.
-    const indexToDelete = this.#layerEntryConfigs[layerPath]
-      ? this.#layerEntryConfigs[layerPath].parentLayerConfig?.listOfLayerEntryConfig.findIndex(
-          (layerConfig) => layerConfig === this.#layerEntryConfigs[layerPath]
-        )
+    const indexToDelete = layerEntryConfig
+      ? layerEntryConfig.parentLayerConfig?.listOfLayerEntryConfig.findIndex((layerConfig) => layerConfig === layerEntryConfig)
       : undefined;
-    const listOfLayerEntryConfigAffected = this.#layerEntryConfigs[layerPath]?.parentLayerConfig?.listOfLayerEntryConfig;
+    const listOfLayerEntryConfigAffected = this.getLayerEntryConfig(layerPath)?.parentLayerConfig?.listOfLayerEntryConfig;
 
     // Remove layer info from registered layers
     this.getLayerEntryConfigIds().forEach((registeredLayerPath) => {
@@ -1020,18 +1022,18 @@ export class LayerApi {
         geoviewLayer.listOfLayerEntryConfig = updatedListOfLayerEntryConfig;
       } else {
         // For layer paths more than two deep, drill down through listOfLayerEntryConfigs to layer entry config to remove
-        let layerEntryConfig = geoviewLayer.listOfLayerEntryConfig.find((entryConfig) => entryConfig.layerId === layerPathNodes[1]);
+        let layerEntryConfig2 = geoviewLayer.listOfLayerEntryConfig.find((entryConfig) => entryConfig.layerId === layerPathNodes[1]);
 
         for (let i = 1; i < layerPathNodes.length; i++) {
-          if (i === layerPathNodes.length - 1 && layerEntryConfig) {
+          if (i === layerPathNodes.length - 1 && layerEntryConfig2) {
             // When we get to the top level, remove the layer entry config
-            const updatedListOfLayerEntryConfig = layerEntryConfig.listOfLayerEntryConfig.filter(
+            const updatedListOfLayerEntryConfig = layerEntryConfig2.listOfLayerEntryConfig.filter(
               (entryConfig) => entryConfig.layerId !== layerPathNodes[i]
             );
             geoviewLayer.listOfLayerEntryConfig = updatedListOfLayerEntryConfig;
-          } else if (layerEntryConfig) {
+          } else if (layerEntryConfig2) {
             // Not on the top level, so update to the latest
-            layerEntryConfig = layerEntryConfig.listOfLayerEntryConfig.find((entryConfig) => entryConfig.layerId === layerPathNodes[i]);
+            layerEntryConfig2 = layerEntryConfig2.listOfLayerEntryConfig.find((entryConfig) => entryConfig.layerId === layerPathNodes[i]);
           }
         }
       }
@@ -1060,14 +1062,17 @@ export class LayerApi {
     theLayerMain?.setOpacity(1);
 
     // If it is a group layer, highlight sublayers
-    if (this.#layerEntryConfigs[layerPath].getEntryTypeIsGroup()) {
-      Object.keys(this.#layerEntryConfigs).forEach((registeredLayerPath) => {
+    const layer = this.getLayerEntryConfig(layerPath);
+
+    // If found
+    if (layer && layer.getEntryTypeIsGroup()) {
+      this.getLayerEntryConfigIds().forEach((registeredLayerPath) => {
         // Trying to get the layer associated with the layer path, can be undefined because the layer might be in error
         const theLayer = this.getGeoviewLayer(registeredLayerPath);
         if (theLayer) {
           if (
             !(registeredLayerPath.startsWith(`${layerPath}/`) || registeredLayerPath === layerPath) &&
-            this.#layerEntryConfigs[registeredLayerPath].getEntryTypeIsRegular()
+            theLayer.getLayerConfig().getEntryTypeIsRegular()
           ) {
             const otherOpacity = theLayer.getOpacity();
             theLayer.setOpacity((otherOpacity || 1) * 0.25);
@@ -1075,11 +1080,11 @@ export class LayerApi {
         }
       });
     } else {
-      Object.keys(this.#layerEntryConfigs).forEach((registeredLayerPath) => {
+      this.getLayerEntryConfigIds().forEach((registeredLayerPath) => {
         // Trying to get the layer associated with the layer path, can be undefined because the layer might be in error
         const theLayer = this.getGeoviewLayer(registeredLayerPath);
         if (theLayer) {
-          if (registeredLayerPath !== layerPath && this.#layerEntryConfigs[registeredLayerPath].getEntryTypeIsRegular()) {
+          if (registeredLayerPath !== layerPath && theLayer.getLayerConfig()?.getEntryTypeIsRegular()) {
             const otherOpacity = theLayer.getOpacity();
             theLayer.setOpacity((otherOpacity || 1) * 0.25);
           }
@@ -1096,14 +1101,19 @@ export class LayerApi {
     this.featureHighlight.removeBBoxHighlight();
     if (this.#highlightedLayer.layerPath !== undefined) {
       const { layerPath, originalOpacity } = this.#highlightedLayer;
-      if (this.#layerEntryConfigs[layerPath].getEntryTypeIsGroup()) {
-        Object.keys(this.#layerEntryConfigs).forEach((registeredLayerPath) => {
+
+      // Get the layer config
+      const layerConfig = this.getLayerEntryConfig(layerPath);
+
+      // IF found and a group
+      if (layerConfig?.getEntryTypeIsGroup()) {
+        this.getLayerEntryConfigIds().forEach((registeredLayerPath) => {
           // Trying to get the layer associated with the layer path, can be undefined because the layer might be in error
           const theLayer = this.getGeoviewLayer(registeredLayerPath);
           if (theLayer) {
             if (
               !(registeredLayerPath.startsWith(`${layerPath}/`) || registeredLayerPath === layerPath) &&
-              this.#layerEntryConfigs[registeredLayerPath].getEntryTypeIsRegular()
+              theLayer.getLayerConfig().getEntryTypeIsRegular()
             ) {
               const otherOpacity = theLayer.getOpacity();
               theLayer.setOpacity(otherOpacity ? otherOpacity * 4 : 1);
@@ -1111,11 +1121,11 @@ export class LayerApi {
           }
         });
       } else {
-        Object.keys(this.#layerEntryConfigs).forEach((registeredLayerPath) => {
+        this.getLayerEntryConfigIds().forEach((registeredLayerPath) => {
           // Trying to get the layer associated with the layer path, can be undefined because the layer might be in error
           const theLayer = this.getGeoviewLayer(registeredLayerPath);
           if (theLayer) {
-            if (registeredLayerPath !== layerPath && this.#layerEntryConfigs[registeredLayerPath].getEntryTypeIsRegular()) {
+            if (registeredLayerPath !== layerPath && theLayer.getLayerConfig().getEntryTypeIsRegular()) {
               const otherOpacity = theLayer.getOpacity();
               theLayer.setOpacity(otherOpacity ? otherOpacity * 4 : 1);
             } else theLayer.setOpacity(originalOpacity || 1);
@@ -1134,12 +1144,12 @@ export class LayerApi {
    * @param {string[]} layerIds - IDs or layerPaths of layers to get max extents from.
    * @returns {Extent} The overall extent.
    */
-  getExtentOfMultipleLayers(layerIds: string[] = Object.keys(this.#layerEntryConfigs)): Extent {
+  getExtentOfMultipleLayers(layerIds: string[] = this.getLayerEntryConfigIds()): Extent {
     let bounds: Extent = [];
 
     layerIds.forEach((layerId) => {
       // Get sublayerpaths and layerpaths from layer IDs.
-      const subLayerPaths = Object.keys(this.#layerEntryConfigs).filter(
+      const subLayerPaths = this.getLayerEntryConfigIds().filter(
         (layerPath) => layerPath.startsWith(`${layerId}/`) || layerPath === layerId
       );
 
@@ -1320,23 +1330,29 @@ export class LayerApi {
    * @param {'alias' | 'name'} fields - The fields to change.
    */
   redefineFeatureFields(layerPath: string, fieldNames: string[], fields: 'alias' | 'name'): void {
-    const layerConfig = this.#layerEntryConfigs[layerPath] as AbstractBaseLayerEntryConfig;
+    // Get the layer config
+    const layerConfig = this.getLayerEntryConfig(layerPath);
 
     if (!layerConfig) throw new LayerNotFoundError(layerPath);
-    else if (
-      layerConfig.source?.featureInfo &&
-      layerConfig.source.featureInfo.queryable !== false &&
-      layerConfig.source.featureInfo.outfields
+    if (layerConfig instanceof GroupLayerEntryConfig) throw new LayerWrongTypeError(layerPath, layerConfig.layerName);
+
+    // Cast it
+    const layerConfigCasted = layerConfig as AbstractBaseLayerEntryConfig;
+
+    if (
+      layerConfigCasted.source?.featureInfo &&
+      layerConfigCasted.source.featureInfo.queryable !== false &&
+      layerConfigCasted.source.featureInfo.outfields
     ) {
       // Convert the provided field names to an array so we can index
-      if (layerConfig.source.featureInfo.outfields.length === fieldNames.length)
+      if (layerConfigCasted.source.featureInfo.outfields.length === fieldNames.length)
         // Override existing values in each outfield with provided field name
-        layerConfig.source.featureInfo.outfields?.forEach((outfield, index) => {
+        layerConfigCasted.source.featureInfo.outfields?.forEach((outfield, index) => {
           // eslint-disable-next-line no-param-reassign
           outfield[fields] = fieldNames[index];
         });
       else throw new LayerDifferingFieldLengths(layerPath);
-    } else throw new LayerNotQueryableError(layerConfig.layerPath, layerConfig.getLayerName());
+    } else throw new LayerNotQueryableError(layerConfigCasted.layerPath, layerConfigCasted.getLayerName());
   }
 
   /**
@@ -1347,13 +1363,18 @@ export class LayerApi {
    * @param {string[]} fieldAliases - The new field aliases to use.
    */
   replaceFeatureOutfields(layerPath: string, types: TypeOutfieldsType[], fieldNames: string[], fieldAliases?: string[]): void {
-    const layerConfig = this.#layerEntryConfigs[layerPath] as AbstractBaseLayerEntryConfig;
+    const layerConfig = this.getLayerEntryConfig(layerPath);
 
     if (!layerConfig) throw new LayerNotFoundError(layerPath);
-    else if (
-      layerConfig.source?.featureInfo &&
-      layerConfig.source.featureInfo.queryable !== false &&
-      layerConfig.source.featureInfo.outfields
+    if (layerConfig instanceof GroupLayerEntryConfig) throw new LayerWrongTypeError(layerPath, layerConfig.layerName);
+
+    // Cast it
+    const layerConfigCasted = layerConfig as AbstractBaseLayerEntryConfig;
+
+    if (
+      layerConfigCasted.source?.featureInfo &&
+      layerConfigCasted.source.featureInfo.queryable !== false &&
+      layerConfigCasted.source.featureInfo.outfields
     ) {
       // Ensure same number of all items are provided
       if (fieldNames.length === types.length) {
@@ -1368,9 +1389,9 @@ export class LayerApi {
         });
 
         // Set new value asfeature info outfields
-        layerConfig.source.featureInfo.outfields = newOutfields;
+        layerConfigCasted.source.featureInfo.outfields = newOutfields;
       } else throw new LayerDifferingFieldLengths(layerPath);
-    } else throw new LayerNotQueryableError(layerConfig.layerPath, layerConfig.getLayerName());
+    } else throw new LayerNotQueryableError(layerConfigCasted.layerPath, layerConfigCasted.getLayerName());
   }
 
   /**
