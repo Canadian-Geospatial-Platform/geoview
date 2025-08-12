@@ -126,7 +126,7 @@ export class UUIDmapConfigReader {
             const layerIndex = Number(layerUrl.split('/').pop());
 
             // Redirect
-            geoviewLayerConfig = EsriFeature.createEsriFeatureLayerConfig(idClean, layerName, serviceUrl, layerIsTimeAware, [
+            geoviewLayerConfig = EsriFeature.createGeoviewLayerConfig(idClean, layerName, serviceUrl, layerIsTimeAware, [
               {
                 id: layerIndex,
                 index: layerIndex,
@@ -135,37 +135,37 @@ export class UUIDmapConfigReader {
             ]);
           } else if (layerType === CONST_LAYER_TYPES.ESRI_FEATURE) {
             // Redirect
-            geoviewLayerConfig = EsriFeature.createEsriFeatureLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
+            geoviewLayerConfig = EsriFeature.createGeoviewLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
           } else if (layerType === CONST_LAYER_TYPES.WMS) {
             // Redirect
-            geoviewLayerConfig = WMS.createWMSLayerConfig(idClean, layerName, layerUrl, serverType!, layerIsTimeAware, layerEntries);
+            geoviewLayerConfig = WMS.createGeoviewLayerConfig(idClean, layerName, layerUrl, serverType!, layerIsTimeAware, layerEntries);
           } else if (layerType === CONST_LAYER_TYPES.WFS) {
             // Redirect
-            geoviewLayerConfig = WFS.createWfsFeatureLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
+            geoviewLayerConfig = WFS.createGeoviewLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
           } else if (layerType === CONST_LAYER_TYPES.OGC_FEATURE) {
             // Redirect
-            geoviewLayerConfig = OgcFeature.createOgcFeatureLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
+            geoviewLayerConfig = OgcFeature.createGeoviewLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
           } else if (layerType === CONST_LAYER_TYPES.GEOJSON) {
             // Redirect
-            geoviewLayerConfig = GeoJSON.createGeoJsonLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
+            geoviewLayerConfig = GeoJSON.createGeoviewLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
           } else if (layerType === CONST_LAYER_TYPES.XYZ_TILES) {
             // Redirect
-            geoviewLayerConfig = XYZTiles.createXYZTilesLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
+            geoviewLayerConfig = XYZTiles.createGeoviewLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
           } else if (layerType === CONST_LAYER_TYPES.VECTOR_TILES) {
             // Redirect
-            geoviewLayerConfig = VectorTiles.createVectorTilesLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
+            geoviewLayerConfig = VectorTiles.createGeoviewLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
           } else if (layerType === CONST_LAYER_TYPES.GEOPACKAGE) {
             // Redirect
-            geoviewLayerConfig = GeoPackage.createGeopackageLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
+            geoviewLayerConfig = GeoPackage.createGeoviewLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
           } else if (layerType === CONST_LAYER_TYPES.IMAGE_STATIC) {
             // Redirect
-            geoviewLayerConfig = ImageStatic.createImageStaticLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
+            geoviewLayerConfig = ImageStatic.createGeoviewLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
           } else if (layerType === CONST_LAYER_TYPES.ESRI_IMAGE) {
             // GV: ESRI Image layers as they are returned by RCS don't have a layerEntries property. It is undefined.
             // GV: Everything needed to create the geoview layer is in the URL. The layerId of the layerEntryConfig is not used,
             // GV: but we need to create a layerEntryConfig in the list for the layer to be displayed.
             // Redirect
-            geoviewLayerConfig = EsriImage.createEsriImageLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware);
+            geoviewLayerConfig = EsriImage.createGeoviewLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware);
           } else {
             // Throw
             throw new NotSupportedError(`Layer type ${layerType} not supported`);

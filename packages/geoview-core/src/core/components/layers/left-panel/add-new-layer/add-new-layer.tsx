@@ -399,10 +399,10 @@ export function AddNewLayer(): JSX.Element {
         );
 
         // Set the layer type as it may have changed in the case of GeoCore for example
-        setLayerType(geoviewLayerConfig.geoviewLayerType);
+        setLayerType(curlayerType);
 
         // Update UI
-        setLayerURL(geoviewLayerConfig.metadataAccessPath!);
+        setLayerURL(layerURL);
 
         // Get the name and ID of the first entry before deleting the listOfLayerEntryConfig
         const idOfFirstLayerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig[0]?.layerId;

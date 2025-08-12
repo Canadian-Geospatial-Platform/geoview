@@ -116,7 +116,7 @@ export class WFS extends AbstractGeoViewVector {
     });
 
     // Redirect
-    return WFS.createWfsFeatureLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, entries);
+    return WFS.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, entries);
   }
 
   /**
@@ -394,7 +394,7 @@ export class WFS extends AbstractGeoViewVector {
    * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns {TypeWFSLayerConfig} The constructed configuration object for the WFS Feature layer.
    */
-  static createWfsFeatureLayerConfig(
+  static createGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
     metadataAccessPath: string,
@@ -430,12 +430,27 @@ export class WFS extends AbstractGeoViewVector {
   }
 
   /**
-   * Processes a WFS config returning a Promise of an array of ConfigBaseClass layer entry configurations.
-   * @returns A Promise with the layer configurations.
+   * Processes a WFS (Web Feature Service) GeoviewLayerConfig and returns a promise
+   * that resolves to an array of `ConfigBaseClass` layer entry configurations.
+   *
+   * This method:
+   * 1. Creates a Geoview layer configuration using the provided parameters.
+   * 2. Instantiates a layer with that configuration.
+   * 3. Processes the layer configuration and returns the result.
+   * @param {string} geoviewLayerId - The unique identifier for the GeoView layer.
+   * @param {string} geoviewLayerName - The display name for the GeoView layer.
+   * @param {string} url - The URL of the service endpoint.
+   * @param {string[]} layerIds - An array of layer IDs to include in the configuration.
+   * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
    */
-  static processWFSConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerIds: string[]): Promise<ConfigBaseClass[]> {
+  static processGeoviewLayerConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    url: string,
+    layerIds: string[]
+  ): Promise<ConfigBaseClass[]> {
     // Create the Layer config
-    const layerConfig = WFS.createWfsFeatureLayerConfig(
+    const layerConfig = WFS.createGeoviewLayerConfig(
       geoviewLayerId,
       geoviewLayerName,
       url,

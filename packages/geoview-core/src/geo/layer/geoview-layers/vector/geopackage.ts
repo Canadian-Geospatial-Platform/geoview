@@ -619,7 +619,7 @@ export class GeoPackage extends AbstractGeoViewVector {
    * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns {TypeGeoPackageLayerConfig} The constructed configuration object for the Geopackage Feature layer.
    */
-  static createGeopackageLayerConfig(
+  static createGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
     metadataAccessPath: string,

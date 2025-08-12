@@ -45,9 +45,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    */
   protected override onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Redirect
-    return Promise.resolve(
-      EsriImage.createEsriImageLayerConfig(this.geoviewLayerId, this.geoviewLayerName, this.metadataAccessPath, false)
-    );
+    return Promise.resolve(EsriImage.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, this.metadataAccessPath, false));
   }
 
   /**
@@ -105,7 +103,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @returns {TypeEsriImageLayerConfig} The constructed configuration object for the Esri Image layer.
    */
-  static createEsriImageLayerConfig(
+  static createGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
     metadataAccessPath: string,
@@ -140,12 +138,22 @@ export class EsriImage extends AbstractGeoViewRaster {
   }
 
   /**
-   * Processes an Esri Image config returning a Promise of an array of ConfigBaseClass layer entry configurations.
-   * @returns A Promise with the layer configurations
+   * Processes an Esri Image GeoviewLayerConfig and returns a promise
+   * that resolves to an array of `ConfigBaseClass` layer entry configurations.
+   *
+   * This method:
+   * 1. Creates a Geoview layer configuration using the provided parameters.
+   * 2. Instantiates a layer with that configuration.
+   * 3. Processes the layer configuration and returns the result.
+   * @param {string} geoviewLayerId - The unique identifier for the GeoView layer.
+   * @param {string} geoviewLayerName - The display name for the GeoView layer.
+   * @param {string} url - The URL of the service endpoint.
+   * @param {string[]} layerIds - An array of layer IDs to include in the configuration.
+   * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
    */
-  static processEsriImageConfig(geoviewLayerId: string, geoviewLayerName: string, url: string): Promise<ConfigBaseClass[]> {
+  static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string): Promise<ConfigBaseClass[]> {
     // Create the Layer config
-    const layerConfig = EsriImage.createEsriImageLayerConfig(geoviewLayerId, geoviewLayerName, url, false);
+    const layerConfig = EsriImage.createGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, url, false);
 
     // Create the class from geoview-layers package
     const myLayer = new EsriImage(layerConfig);

@@ -472,27 +472,27 @@ export class ConfigApi {
     // Depending on the type
     switch (layerType) {
       case 'esriDynamic':
-        return EsriDynamic.processEsriDynamicConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as number[]);
+        return EsriDynamic.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as number[]);
       case 'esriImage':
-        return EsriImage.processEsriImageConfig(geoviewLayerId, geoviewLayerName, layerURL);
+        return EsriImage.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
       case 'imageStatic':
-        return ImageStatic.processImageStaticConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[]);
+        return ImageStatic.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[]);
       case 'vectorTiles':
-        return VectorTiles.processVectorTilesConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[]);
+        return VectorTiles.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[]);
       case 'ogcWms':
-        return WMS.processWMSConfig(geoviewLayerId, geoviewLayerName, layerURL, 'mapserver', layerIds as number[]);
+        return WMS.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, 'mapserver', layerIds as number[]);
       case 'xyzTiles':
-        return XYZTiles.processXYZTilesConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[]);
+        return XYZTiles.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[]);
       case 'CSV':
-        return CSV.processCSVFeatureConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[]);
+        return CSV.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[]);
       case 'esriFeature':
-        return EsriFeature.processEsriFeatureConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as number[]);
+        return EsriFeature.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as number[]);
       case 'GeoJSON':
-        return GeoJSON.processGeoJsonLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[]);
+        return GeoJSON.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[]);
       case 'ogcFeature':
-        return OgcFeature.processOGCFeatureConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[]);
+        return OgcFeature.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[]);
       case 'ogcWfs':
-        return WFS.processWFSConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[]);
+        return WFS.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[]);
       default:
         // Unsupported
         throw new NotSupportedError(`Unsupported layer type ${layerType}`);

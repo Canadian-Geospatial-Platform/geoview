@@ -145,7 +145,7 @@ export class WMS extends AbstractGeoViewRaster {
     });
 
     // Redirect
-    return WMS.createWMSLayerConfig(
+    return WMS.createGeoviewLayerConfig(
       this.geoviewLayerId,
       metadata?.Capability.Layer.Title || this.geoviewLayerName,
       this.metadataAccessPath,
@@ -763,7 +763,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {unknown} customGeocoreLayerConfig - An optional layer config from Geocore.
    * @returns {TypeWMSLayerConfig} The constructed configuration object for the WMS layer.
    */
-  static createWMSLayerConfig(
+  static createGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
     metadataAccessPath: string,
@@ -805,10 +805,20 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /**
-   * Processes an WMS config returning a Promise of an array of ConfigBaseClass layer entry configurations.
-   * @returns A Promise with the layer configurations.
+   * Processes a WMS GeoviewLayerConfig and returns a promise
+   * that resolves to an array of `ConfigBaseClass` layer entry configurations.
+   *
+   * This method:
+   * 1. Creates a Geoview layer configuration using the provided parameters.
+   * 2. Instantiates a layer with that configuration.
+   * 3. Processes the layer configuration and returns the result.
+   * @param {string} geoviewLayerId - The unique identifier for the GeoView layer.
+   * @param {string} geoviewLayerName - The display name for the GeoView layer.
+   * @param {string} url - The URL of the service endpoint.
+   * @param {string[]} layerIds - An array of layer IDs to include in the configuration.
+   * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
    */
-  static processWMSConfig(
+  static processGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
     url: string,
@@ -816,7 +826,7 @@ export class WMS extends AbstractGeoViewRaster {
     layerIds: number[]
   ): Promise<ConfigBaseClass[]> {
     // Create the Layer config
-    const layerConfig = WMS.createWMSLayerConfig(
+    const layerConfig = WMS.createGeoviewLayerConfig(
       geoviewLayerId,
       geoviewLayerName,
       url,

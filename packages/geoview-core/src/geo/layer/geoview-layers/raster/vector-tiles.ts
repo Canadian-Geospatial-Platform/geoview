@@ -75,7 +75,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
   protected override onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Redirect
     return Promise.resolve(
-      VectorTiles.createVectorTilesLayerConfig(this.geoviewLayerId, this.geoviewLayerName, this.metadataAccessPath, false, [])
+      VectorTiles.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, this.metadataAccessPath, false, [])
     );
   }
 
@@ -215,7 +215,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns {TypeVectorTilesConfig} The constructed configuration object for the XYZTiles layer.
    */
-  static createVectorTilesLayerConfig(
+  static createGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
     metadataAccessPath: string,
@@ -249,17 +249,27 @@ export class VectorTiles extends AbstractGeoViewRaster {
   }
 
   /**
-   * Processes a Vector Tiles config returning a Promise of an array of ConfigBaseClass layer entry configurations.
-   * @returns A Promise with the layer configurations.
+   * Processes a VectorTiles GeoviewLayerConfig and returns a promise
+   * that resolves to an array of `ConfigBaseClass` layer entry configurations.
+   *
+   * This method:
+   * 1. Creates a Geoview layer configuration using the provided parameters.
+   * 2. Instantiates a layer with that configuration.
+   * 3. Processes the layer configuration and returns the result.
+   * @param {string} geoviewLayerId - The unique identifier for the GeoView layer.
+   * @param {string} geoviewLayerName - The display name for the GeoView layer.
+   * @param {string} url - The URL of the service endpoint.
+   * @param {string[]} layerIds - An array of layer IDs to include in the configuration.
+   * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
    */
-  static processVectorTilesConfig(
+  static processGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
     url: string,
     layerIds: string[]
   ): Promise<ConfigBaseClass[]> {
     // Create the Layer config
-    const layerConfig = VectorTiles.createVectorTilesLayerConfig(
+    const layerConfig = VectorTiles.createGeoviewLayerConfig(
       geoviewLayerId,
       geoviewLayerName,
       url,
