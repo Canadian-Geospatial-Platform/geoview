@@ -12,15 +12,8 @@ import cloneDeep from 'lodash/cloneDeep';
 import { TimeDimension, DateMgt, TypeDateFragments } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import {
-  OgcWmsLayerEntryConfig,
-  TypeLayerMetadataWMS,
-} from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import {
-  TypeLayerMetadataFields,
-  TypeLayerMetadataVector,
-  VectorLayerEntryConfig,
-} from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import {
@@ -33,6 +26,10 @@ import {
   TypeStyleGeometry,
   TypeOutfieldsType,
   TypeOutfields,
+  TypeLayerMetadataWMS,
+  TypeLayerMetadataFields,
+  TypeLayerMetadataEsri,
+  TypeLayerMetadataVector,
 } from '@/api/config/types/map-schema-types';
 import { getLegendStyles, getFeatureImageSource, processStyle } from '@/geo/utils/renderer/geoview-renderer';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -41,7 +38,6 @@ import { SnackbarType } from '@/core/utils/notifications';
 import { NotImplementedError, NotSupportedError } from '@/core/exceptions/core-exceptions';
 import { LayerNotQueryableError } from '@/core/exceptions/layer-exceptions';
 import { createAliasLookup } from '@/geo/layer/gv-layers/utils';
-import { TypeLayerMetadataEsri } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { delay } from '@/core/utils/utilities';
 
 /**
@@ -157,6 +153,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /**
    * Overrides the way the attributions are retrieved.
+   * @override
    * @returns {string[]} The layer attributions
    */
   override onGetAttributions(): string[] {
@@ -172,6 +169,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   /**
    * Overrides the refresh function to refresh the layer source.
    * @param {OLProjection | undefined} projection - Optional, the projection to refresh to.
+   * @override
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   override onRefresh(projection: OLProjection | undefined): void {

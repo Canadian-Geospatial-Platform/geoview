@@ -332,9 +332,7 @@ export abstract class ConfigBaseClass {
   /**
    * This method compares the internal layer status of the config with the layer status passed as a parameter and it
    * returns true if the internal value is greater or equal to the value of the parameter.
-   *
    * @param {TypeLayerStatus} layerStatus - The layer status to compare with the internal value of the config.
-   *
    * @returns {boolean} Returns true if the internal value is greater or equal than the value of the parameter.
    */
   isGreaterThanOrEqualTo(layerStatus: TypeLayerStatus): boolean {
@@ -367,7 +365,6 @@ export abstract class ConfigBaseClass {
 
   /**
    * Clones the configuration class.
-   *
    * @returns {ConfigBaseClass} The cloned ConfigBaseClass object.
    */
   clone(): ConfigBaseClass {
@@ -377,7 +374,6 @@ export abstract class ConfigBaseClass {
 
   /**
    * Overridable function to clone a child of a ConfigBaseClass.
-   *
    * @returns {ConfigBaseClass} The cloned child object of a ConfigBaseClass.
    */
   protected onClone(): ConfigBaseClass {

@@ -31,6 +31,7 @@ import {
   TypeLayerStyleConfigInfo,
   TypeAliasLookup,
   codedValueType,
+  TypeLayerMetadataFields,
 } from '@/api/config/types/map-schema-types';
 import {
   binaryKeywors,
@@ -46,7 +47,6 @@ import {
 import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { logger } from '@/core/utils/logger';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
-import { TypeLayerMetadataFields } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 
 type TypeStyleProcessor = (
   styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,

@@ -4,7 +4,6 @@ import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import {
   QueryType,
   TypeFeatureInfoEntry,
-  TypeFeatureInfoLayerConfig,
   TypeLayerEntryConfig,
   TypeLayerStatus,
   TypeLocation,
@@ -452,7 +451,7 @@ export abstract class AbstractLayerSet {
   protected static alignRecordsWithOutFields(layerEntryConfig: TypeLayerEntryConfig, arrayOfRecords: TypeFeatureInfoEntry[]): void {
     // If source featureInfo is provided, continue
     if (layerEntryConfig.source && layerEntryConfig.source.featureInfo) {
-      const sourceFeatureInfo = layerEntryConfig.source.featureInfo as TypeFeatureInfoLayerConfig;
+      const sourceFeatureInfo = layerEntryConfig.source.featureInfo;
 
       // If outFields is provided, compare record fields with outFields to remove unwanted one
       // If there is no outFields, this will be created in the next function patchMissingMetadataIfNecessary

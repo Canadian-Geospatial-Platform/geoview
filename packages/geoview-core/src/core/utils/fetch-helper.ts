@@ -245,13 +245,13 @@ export class Fetch {
    * @param {string} url - The url to fetch.
    * @param {RequestInit?} init - The optional initialization parameters for the fetch.
    * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
-   * @returns {Promise<T>} The fetched json response.
+   * @returns {Promise<T = Record<string, unknown>>} The fetched json response.
    * @throws {ResponseError} If the response is not OK (non-2xx).
    * @throws {ResponseEmptyError} If the JSON response is empty.
    * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
    * @throws {Error} For any other unexpected failures.
    */
-  static async fetchXMLToJson<T>(url: string, init?: RequestInit, timeoutMs?: number): Promise<T> {
+  static async fetchXMLToJson<T = Record<string, unknown>>(url: string, init?: RequestInit, timeoutMs?: number): Promise<T> {
     // Fetch the text
     const text = await Fetch.fetchText(url, init, timeoutMs);
 

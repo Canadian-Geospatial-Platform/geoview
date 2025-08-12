@@ -1,9 +1,4 @@
-import {
-  codedValueType,
-  CONST_LAYER_ENTRY_TYPES,
-  rangeDomainType,
-  TypeVectorSourceInitialConfig,
-} from '@/api/config/types/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, TypeLayerMetadataVector, TypeVectorSourceInitialConfig } from '@/api/config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config';
 
 /**
@@ -36,16 +31,4 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
   getLayerMetadataCasted(): TypeLayerMetadataVector | undefined {
     return super.getLayerMetadata() as TypeLayerMetadataVector | undefined;
   }
-}
-
-export interface TypeLayerMetadataVector {
-  maxRecordCount: number;
-  fields?: TypeLayerMetadataFields[];
-}
-
-export interface TypeLayerMetadataFields {
-  name: string;
-  type: string;
-  alias: string;
-  domain: codedValueType | rangeDomainType;
 }

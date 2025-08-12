@@ -1,10 +1,5 @@
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
-import {
-  CONST_LAYER_ENTRY_TYPES,
-  CONST_LAYER_TYPES,
-  TypeLayerEntryConfig,
-  TypeSourceGeoJSONInitialConfig,
-} from '@/api/config/types/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES, TypeSourceGeoJSONInitialConfig } from '@/api/config/types/map-schema-types';
 import { Projection } from '@/geo/utils/projection';
 
 export class GeoJSONLayerEntryConfig extends VectorLayerEntryConfig {
@@ -50,8 +45,4 @@ export class GeoJSONLayerEntryConfig extends VectorLayerEntryConfig {
       this.source.dataAccessPath = path.endsWith('/') ? `${path}${this.layerId}` : `${path}/${this.layerId}`;
     }
   }
-}
-
-export interface TypeMetadataGeoJSON {
-  listOfLayerEntryConfig: TypeLayerEntryConfig[];
 }

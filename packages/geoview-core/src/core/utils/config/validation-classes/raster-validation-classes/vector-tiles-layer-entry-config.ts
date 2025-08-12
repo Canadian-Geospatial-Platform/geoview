@@ -1,6 +1,10 @@
-import { CONST_LAYER_TYPES, TypeSourceVectorTilesInitialConfig, TypeTileGrid } from '@/api/config/types/map-schema-types';
+import {
+  CONST_LAYER_TYPES,
+  TypeMetadataVectorTiles,
+  TypeSourceVectorTilesInitialConfig,
+  TypeTileGrid,
+} from '@/api/config/types/map-schema-types';
 import { TileLayerEntryConfig } from '@/core/utils/config/validation-classes/tile-layer-entry-config';
-import { TypeProjection } from '@/geo/utils/projection';
 
 export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
   /** Tag used to link the entry to a specific schema. */
@@ -40,42 +44,4 @@ export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
   override getServiceMetadata(): TypeMetadataVectorTiles | undefined {
     return super.getServiceMetadata() as TypeMetadataVectorTiles | undefined;
   }
-}
-
-export interface TypeMetadataVectorTiles {
-  defaultStyles: string;
-  tileInfo: TypeMetadataVectorTilesTileInfo;
-  fullExtent: TypeMetadataVectorTilesFullExtent;
-  minScale?: number;
-  maxScale?: number;
-  minZoom?: number;
-  maxZoom?: number;
-}
-
-export interface TypeMetadataVectorTilesTileInfo {
-  spatialReference: TypeProjection;
-  origin: TypeMetadataVectorTilesTileInfoOrigin;
-  lods: TypeLod[];
-  rows: number;
-  cols: number;
-}
-
-// TODO: Move this type somewhere more generic than in vector tiles
-export interface TypeLod {
-  resolution: number;
-  scale: number;
-  level: number;
-}
-
-export interface TypeMetadataVectorTilesTileInfoOrigin {
-  x: number;
-  y: number;
-}
-
-export interface TypeMetadataVectorTilesFullExtent {
-  spatialReference: TypeProjection;
-  xmin: number;
-  ymin: number;
-  xmax: number;
-  ymax: number;
 }

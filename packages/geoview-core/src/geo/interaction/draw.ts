@@ -85,6 +85,7 @@ export class Draw extends Interaction {
 
   /**
    * Starts the interaction on the map
+   * @override
    */
   override startInteraction(): void {
     // Redirect to super method to start interaction
@@ -93,6 +94,7 @@ export class Draw extends Interaction {
 
   /**
    * Stops the interaction on the map
+   * @override
    */
   override stopInteraction(): void {
     // Remove the keyboard event listener

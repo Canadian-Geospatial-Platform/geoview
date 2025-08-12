@@ -18,6 +18,7 @@ export abstract class AppBarPlugin extends AbstractPlugin {
 
   /**
    * Overrides the get config
+   * @override
    * @returns {AppBarPluginConfig} The config
    */
   override getConfig(): AppBarPluginConfig {

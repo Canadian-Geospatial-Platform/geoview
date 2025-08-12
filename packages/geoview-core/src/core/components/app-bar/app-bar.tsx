@@ -39,7 +39,6 @@ import { enforceArrayOrder, helpClosePanelById, helpOpenPanelById } from './app-
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { DEFAULT_APPBAR_CORE, DEFAULT_APPBAR_TABS_ORDER, TypeValidAppBarCoreProps } from '@/api/config/types/map-schema-types';
 import { handleEscapeKey } from '@/core/utils/utilities';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { Button } from '@/ui/button/button';
 
 interface GroupPanelType {
@@ -260,7 +259,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
       if (appBarConfig && appBarConfig.tabs.core.includes(pluginName)) {
         Plugin.loadScript(pluginName)
           .then((typePlugin) => {
-            Plugin.addPlugin(pluginName, typePlugin, MapEventProcessor.getMapViewer(mapId)).catch((error: unknown) => {
+            Plugin.addPlugin(pluginName, typePlugin, mapId).catch((error: unknown) => {
               // Log
               logger.logPromiseFailed(`api.plugin.addPlugin in useEffect in app-bar for ${pluginName}`, error);
             });

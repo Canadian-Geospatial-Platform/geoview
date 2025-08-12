@@ -122,21 +122,6 @@ function addLog(logId, msg) {
   logs.scrollTop = logs.scrollHeight;
 }
 
-// Stringifies a JSON making sure to not fall in a circular reference
-function safeStringify(obj, space = 2) {
-  const seen = new WeakSet();
-
-  return JSON.stringify(obj, function (key, value) {
-    if (typeof value === 'object' && value !== null) {
-      if (seen.has(value)) {
-        return '{Circular JSON}'; // Or return undefined to remove the property
-      }
-      seen.add(value);
-    }
-    return value;
-  }, space);
-}
-
 function addDefaultShapes(map, groupKey) {
   // Set active geometry group
   map.layer.geometry.setActiveGeometryGroup(groupKey);

@@ -3,6 +3,7 @@ import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Collapse, List } from '@/ui';
 import { getSxClasses } from './legend-styles';
+import { CONST_LAYER_TYPES } from '@/api/config/types/map-schema-types';
 import { ItemsList } from './legend-layer-items';
 import { LegendLayer } from './legend-layer';
 import {
@@ -12,7 +13,6 @@ import {
   useSelectorLayerType,
   useSelectorLayerStatus,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { CONST_LAYER_TYPES } from '@/api/config/types/map-schema-types';
 import { logger } from '@/core/utils/logger';
 import { useSelectorLayerLegendCollapsed } from '@/core/stores/store-interface-and-intial-values/map-state';
 

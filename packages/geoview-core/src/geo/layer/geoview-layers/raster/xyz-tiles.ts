@@ -23,7 +23,7 @@ import {
 import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 import { GVXYZTiles } from '@/geo/layer/gv-layers/tile/gv-xyz-tiles';
 import { ConfigBaseClass, TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
-import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
 // ? Do we keep this TODO ? Dynamic parameters can be placed on the dataAccessPath and initial settings can be used on xyz-tiles.
 // TODO: Implement method to validate XYZ tile service
@@ -84,8 +84,12 @@ export class XYZTiles extends AbstractGeoViewRaster {
     // TODO: Update to properly use metadata from map server
     // Note that XYZ metadata as we defined it does not contain metadata layer group. If you need geojson layer group,
     // you can define them in the configuration section.
-    if (Array.isArray(this.getMetadata()?.listOfLayerEntryConfig)) {
-      const metadataLayerList = this.getMetadata()!.listOfLayerEntryConfig;
+
+    // Get the metadata
+    const metadata = this.getMetadata();
+
+    if (Array.isArray(metadata?.listOfLayerEntryConfig)) {
+      const metadataLayerList = metadata.listOfLayerEntryConfig;
       const foundEntry = metadataLayerList.find((layerMetadata) => layerMetadata.layerId === layerConfig.layerId);
       if (!foundEntry) {
         // Add a layer load error
@@ -95,8 +99,8 @@ export class XYZTiles extends AbstractGeoViewRaster {
     }
 
     // ESRI MapServer Implementation
-    if (Array.isArray(this.getMetadata()?.layers)) {
-      const metadataLayerList = this.getMetadata()!.layers;
+    if (Array.isArray(metadata?.layers)) {
+      const metadataLayerList = metadata.layers;
       const foundEntry = metadataLayerList.find((layerMetadata) => layerMetadata.id.toString() === layerConfig.layerId);
       if (!foundEntry) {
         // Add a layer load error
@@ -119,17 +123,21 @@ export class XYZTiles extends AbstractGeoViewRaster {
     // GV Possibly caused by a difference between OGC and ESRI XYZ Tiles, but only have ESRI XYZ Tiles as example currently
     // GV Also, might be worth checking out OGCMapTile for this? https://openlayers.org/en/latest/examples/ogc-map-tiles-geographic.html
     // GV Seems like it can deal with less specificity in the url and can handle the x y z internally?
-    if (this.getMetadata()) {
+
+    // Get the metadata
+    const metadata = this.getMetadata();
+
+    if (metadata) {
       let metadataLayerConfigFound: XYZTilesLayerEntryConfig | undefined;
-      if (this.getMetadata()!.listOfLayerEntryConfig) {
-        metadataLayerConfigFound = this.getMetadata()?.listOfLayerEntryConfig.find(
+      if (metadata.listOfLayerEntryConfig) {
+        metadataLayerConfigFound = metadata.listOfLayerEntryConfig.find(
           (metadataLayerConfig) => metadataLayerConfig.layerId === layerConfig.layerId
         );
       }
 
       // For ESRI MapServer XYZ Tiles
-      if (this.getMetadata()?.layers) {
-        metadataLayerConfigFound = this.getMetadata()!.layers.find((metadataLayerConfig) => metadataLayerConfig.id === layerConfig.layerId);
+      if (metadata.layers) {
+        metadataLayerConfigFound = metadata.layers.find((metadataLayerConfig) => metadataLayerConfig.id === layerConfig.layerId);
       }
 
       // If found

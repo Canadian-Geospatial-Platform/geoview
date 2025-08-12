@@ -22,8 +22,8 @@ import { getSxClasses } from './data-table-style';
 import { logger } from '@/core/utils/logger';
 import { useDataTableAllFeaturesDataArray } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useFeatureFieldInfos } from './hooks';
-import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { TypeFieldEntry } from '@/api/config/types/map-schema-types';
+import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 
 /**
  * Open lighweight version (no function) of data table in a modal window

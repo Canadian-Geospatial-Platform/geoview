@@ -243,8 +243,7 @@ export abstract class Projection {
    */
   static async addProjection(projection: TypeProjection): Promise<void> {
     // Add latestWkid if provided
-    if (projection.latestWkid && projection.latestWkid !== projection.wkid)
-      await this.addProjection({ wkid: projection.latestWkid } as TypeProjection);
+    if (projection.latestWkid && projection.latestWkid !== projection.wkid) await this.addProjection({ wkid: projection.latestWkid });
 
     const code = projection.wkid;
     const projectionName = `EPSG:${code}`;

@@ -11,15 +11,13 @@ import {
   TypeOutfields,
   CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
+  TypeMetadataOGCFeature,
+  TypeLayerMetadataQueryables,
+  TypeLayerMetadataOGC,
 } from '@/api/config/types/map-schema-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
-import {
-  OgcFeatureLayerEntryConfig,
-  TypeLayerMetadataOGC,
-  TypeLayerMetadataQueryables,
-  TypeMetadataOGCFeature,
-} from '@/core/utils/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
+import { OgcFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { Fetch } from '@/core/utils/fetch-helper';
 import {
@@ -107,8 +105,12 @@ export class OgcFeature extends AbstractGeoViewVector {
   protected override onValidateLayerEntryConfig(layerConfig: ConfigBaseClass): void {
     // Note that the code assumes ogc-feature collections does not contains metadata layer group. If you need layer group,
     // you can define them in the configuration section.
-    if (Array.isArray(this.getMetadata()!.collections)) {
-      const foundCollection = this.getMetadata()!.collections.find((layerMetadata) => layerMetadata.id === layerConfig.layerId);
+
+    // Get the metadata
+    const metadata = this.getMetadata();
+
+    if (Array.isArray(metadata?.collections)) {
+      const foundCollection = metadata.collections.find((layerMetadata) => layerMetadata.id === layerConfig.layerId);
       if (!foundCollection) {
         // Add a layer load error
         this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(layerConfig), layerConfig);

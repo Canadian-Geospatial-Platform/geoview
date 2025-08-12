@@ -1,4 +1,9 @@
-import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES, TypeSourceOgcFeatureInitialConfig } from '@/api/config/types/map-schema-types';
+import {
+  CONST_LAYER_ENTRY_TYPES,
+  CONST_LAYER_TYPES,
+  TypeLayerMetadataOGC,
+  TypeSourceOgcFeatureInitialConfig,
+} from '@/api/config/types/map-schema-types';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { Projection } from '@/geo/utils/projection';
 
@@ -34,35 +39,4 @@ export class OgcFeatureLayerEntryConfig extends VectorLayerEntryConfig {
   override getLayerMetadata(): TypeLayerMetadataOGC | undefined {
     return super.getLayerMetadata() as TypeLayerMetadataOGC | undefined;
   }
-}
-
-export interface TypeMetadataOGCFeature {
-  collections: TypeMetadataOGCFeatureCollection[];
-}
-
-export interface TypeMetadataOGCFeatureCollection {
-  id: string;
-  description: string;
-  extent: TypeMetadataOGCFeatureCollectionExtent;
-}
-
-export interface TypeMetadataOGCFeatureCollectionExtent {
-  spatial: TypeMetadataOGCFeatureCollectionExtentSpatial;
-}
-
-export interface TypeMetadataOGCFeatureCollectionExtentSpatial {
-  crs: string;
-  bbox: number[][];
-}
-
-export interface TypeLayerMetadataQueryables {
-  properties: TypeLayerMetadataOGC;
-}
-
-export interface TypeLayerMetadataOGC {
-  [key: string]: TypeLayerMetadataOGCRecord;
-}
-
-export interface TypeLayerMetadataOGCRecord {
-  type: string;
 }

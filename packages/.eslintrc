@@ -71,9 +71,9 @@
     "no-shadow": "off",
     "@typescript-eslint/no-shadow": "error",
     "@typescript-eslint/no-explicit-any": "error",
-    "@typescript-eslint/no-unsafe-assignment": "off",
-    "@typescript-eslint/no-unsafe-member-access": "off",
-    "@typescript-eslint/no-unsafe-call": "off",
+    "@typescript-eslint/no-unsafe-assignment": "off", // Think about turning this on eventually
+    "@typescript-eslint/no-unsafe-member-access": "off", // Think about turning this on eventually
+    "@typescript-eslint/no-unsafe-call": "off", // Think about turning this on eventually
     "react-hooks/rules-of-hooks": "error", // Checks rules of Hooks
     "react-hooks/exhaustive-deps": "warn", // Checks effect dependencies
     "react/jsx-props-no-spreading": "off",

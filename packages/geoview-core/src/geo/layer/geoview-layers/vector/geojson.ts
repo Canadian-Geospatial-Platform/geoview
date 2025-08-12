@@ -13,12 +13,10 @@ import {
   TypeBaseVectorSourceInitialConfig,
   CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
+  TypeMetadataGeoJSON,
 } from '@/api/config/types/map-schema-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
-import {
-  GeoJSONLayerEntryConfig,
-  TypeMetadataGeoJSON,
-} from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
+import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { logger } from '@/core/utils/logger';
@@ -121,13 +119,13 @@ export class GeoJSON extends AbstractGeoViewVector {
    * @returns {Promise<VectorLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
   protected override onProcessLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<VectorLayerEntryConfig> {
+    // Get the metadata
+    const metadata = this.getMetadata();
+
     // If metadata was previously found
-    if (this.getMetadata()) {
+    if (metadata) {
       // Search for the layer metadata
-      const layerMetadataFound = this.#recursiveSearch(
-        layerConfig.layerId,
-        this.getMetadata()!.listOfLayerEntryConfig
-      ) as VectorLayerEntryConfig;
+      const layerMetadataFound = this.#recursiveSearch(layerConfig.layerId, metadata.listOfLayerEntryConfig) as VectorLayerEntryConfig;
 
       // If the layer metadata was found
       if (layerMetadataFound) {

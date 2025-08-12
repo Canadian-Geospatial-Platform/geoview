@@ -1,10 +1,6 @@
-import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/config/types/map-schema-types';
-import { TypeLayerMetadataFields, VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
-import { TypeMetadataEsriDynamicLayer } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import { TimeDimensionESRI } from '@/core/utils/date-mgt';
+import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES, TypeLayerMetadataEsri } from '@/api/config/types/map-schema-types';
+import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { TypeSourceEsriFeatureInitialConfig } from '@/geo/layer/geoview-layers/vector/esri-feature';
-import { TypeProjection } from '@/geo/utils/projection';
-import { EsriBaseRenderer } from '@/geo/utils/renderer/esri-renderer';
 
 export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
   /** Tag used to link the entry to a specific schema. */
@@ -54,47 +50,4 @@ export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
   override getLayerMetadata(): TypeLayerMetadataEsri | undefined {
     return super.getLayerMetadata() as TypeLayerMetadataEsri | undefined;
   }
-}
-
-export interface TypeMetadataEsriFeature {
-  layers: TypeMetadataEsriDynamicLayer[];
-  id: string;
-  name: string;
-}
-
-/**
- * Represents layer metadata as read from an Esri layer service.
- */
-export interface TypeLayerMetadataEsri {
-  type: string;
-  capabilities: string;
-  geometryField: TypeLayerMetadataEsriField;
-  displayField: string;
-  defaultVisibility: boolean;
-  minScale: number;
-  maxScale: number;
-  maxRecordCount: number;
-  spatialReference: TypeProjection;
-  sourceSpatialReference: TypeProjection;
-  extent: TypeLayerMetadataEsriExtent;
-  drawingInfo: TypeLayerMetadataEsriDrawingInfo;
-  timeInfo: TimeDimensionESRI;
-  geometryType: unknown;
-  fields: TypeLayerMetadataFields[];
-}
-
-export interface TypeLayerMetadataEsriDrawingInfo {
-  renderer: EsriBaseRenderer;
-}
-
-export interface TypeLayerMetadataEsriExtent {
-  spatialReference: TypeProjection;
-  xmin: number;
-  xmax: number;
-  ymin: number;
-  ymax: number;
-}
-
-export interface TypeLayerMetadataEsriField {
-  name: unknown;
 }

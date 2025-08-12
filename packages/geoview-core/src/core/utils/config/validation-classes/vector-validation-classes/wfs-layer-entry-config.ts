@@ -1,4 +1,9 @@
-import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES, TypeSourceWFSVectorInitialConfig } from '@/api/config/types/map-schema-types';
+import {
+  CONST_LAYER_ENTRY_TYPES,
+  CONST_LAYER_TYPES,
+  TypeLayerMetadataWfs,
+  TypeSourceWFSVectorInitialConfig,
+} from '@/api/config/types/map-schema-types';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { Projection } from '@/geo/utils/projection';
 
@@ -34,58 +39,4 @@ export class WfsLayerEntryConfig extends VectorLayerEntryConfig {
   override getLayerMetadata(): TypeLayerMetadataWfs[] | undefined {
     return super.getLayerMetadata() as TypeLayerMetadataWfs[] | undefined;
   }
-}
-
-export interface TypeMetadataWFS {
-  FeatureTypeList: TypeMetadataWFSFeatureTypeList;
-  '@attributes': TypeMetadataWFSAttributes;
-  'ows:OperationsMetadata': TypeMetadataWFSOperationMetadata;
-}
-
-export interface TypeMetadataWFSFeatureTypeList {
-  FeatureType: TypeMetadataWFSFeatureTypeListFeatureType | TypeMetadataWFSFeatureTypeListFeatureType[];
-}
-
-export interface TypeMetadataWFSFeatureTypeListFeatureType {
-  Name: string | TypeMetadataWFSFeatureTypeListFeatureTypeText;
-  Title: string | TypeMetadataWFSFeatureTypeListFeatureTypeText;
-  'ows:WGS84BoundingBox': TypeMetadataWFSFeatureTypeListFeatureTypeBBox;
-}
-
-export interface TypeMetadataWFSFeatureTypeListFeatureTypeBBox {
-  'ows:LowerCorner': TypeMetadataWFSFeatureTypeListFeatureTypeBBoxCorner;
-  'ows:UpperCorner': TypeMetadataWFSFeatureTypeListFeatureTypeBBoxCorner;
-}
-
-export interface TypeMetadataWFSFeatureTypeListFeatureTypeBBoxCorner {
-  '#text': string;
-}
-
-export interface TypeMetadataWFSFeatureTypeListFeatureTypeText {
-  '#text': string;
-}
-
-export interface TypeMetadataWFSAttributes {
-  version?: string;
-}
-
-export interface TypeMetadataWFSOperationMetadata {
-  'ows:Operation': TypeMetadataWFSOperationMetadataOperation[];
-}
-
-export interface TypeMetadataWFSOperationMetadataOperation {
-  'ows:Parameter': TypeMetadataWFSOperationMetadataOperationParameter | TypeMetadataWFSOperationMetadataOperationParameter[];
-}
-
-export interface TypeMetadataWFSOperationMetadataOperationParameter {
-  'ows:Value': TypeMetadataWFSOperationMetadataOperationParameterValue;
-}
-
-export interface TypeMetadataWFSOperationMetadataOperationParameterValue {
-  '#text': string;
-}
-
-export interface TypeLayerMetadataWfs {
-  name: string;
-  type: string;
 }

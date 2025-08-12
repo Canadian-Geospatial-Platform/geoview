@@ -148,7 +148,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
       if (navBarComponents.includes(pluginName)) {
         Plugin.loadScript(pluginName)
           .then((typePlugin) => {
-            Plugin.addPlugin(pluginName, typePlugin, MapEventProcessor.getMapViewer(mapId)).catch((error: unknown) => {
+            Plugin.addPlugin(pluginName, typePlugin, mapId).catch((error: unknown) => {
               // Log
               logger.logPromiseFailed(`api.plugin.addPlugin in useEffect in nav-bar for ${pluginName}`, error);
             });

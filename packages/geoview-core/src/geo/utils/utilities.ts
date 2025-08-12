@@ -18,10 +18,17 @@ import { Projection } from '@/geo/utils/projection';
 
 import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
-import { CONST_LAYER_TYPES, TypeLayerStyleConfig, TypeValidMapProjectionCodes } from '@/api/config/types/map-schema-types';
+import {
+  CONFIG_PROXY_URL,
+  CONST_LAYER_TYPES,
+  TypeLayerStyleConfig,
+  TypeMetadataWMS,
+  TypeValidMapProjectionCodes,
+} from '@/api/config/types/map-schema-types';
 
 import { TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
 import { TypeMapMouseInfo } from '@/geo/map/map-viewer';
+import { NetworkError } from '@/core/exceptions/core-exceptions';
 
 /**
  * Interface used for css style declarations
@@ -34,6 +41,9 @@ interface TypeCSSStyleDeclaration extends CSSStyleDeclaration {
 export const layerTypes = CONST_LAYER_TYPES;
 
 // #region FETCH METADATA
+
+/** The type for the function callback for getWMSServiceMetadata() */
+export type CallbackNewMetadataDelegate = (proxyUsed: string) => void;
 
 /**
  * Fetch the json response from the ESRI map server to get REST endpoint metadata.
@@ -49,18 +59,41 @@ export function getESRIServiceMetadata(url: string): Promise<unknown> {
  * Fetch the json response from the XML response of a WMS getCapabilities request.
  * @param {string} url - The url the url of the WMS server.
  * @param {string} layers - The layers to query separate by.
- * @returns {Promise<unknown>} A json promise containing the result of the query.
+ * @returns {Promise<TypeMetadataWMS>} A json promise containing the result of the query.
  */
-export async function getWMSServiceMetadata(url: string, layers: string): Promise<unknown> {
+export async function getWMSServiceMetadata(
+  url: string,
+  layers?: string,
+  callbackNewMetadataUrl?: CallbackNewMetadataDelegate
+): Promise<TypeMetadataWMS> {
+  let capUrl = url.includes('request=GetCapabilities') ? url : `${url}?service=WMS&version=1.3.0&request=GetCapabilities`;
+  let capabilitiesString;
+  try {
+    // If any layers
+    if (layers) capUrl = `${capUrl}&Layers=${layers}`;
+
+    // Fetch the metadata
+    capabilitiesString = await Fetch.fetchText(capUrl);
+  } catch (error: unknown) {
+    // If a network error such as CORS
+    if (error instanceof NetworkError) {
+      // We're going to change the metadata url to use a proxy
+      const newProxiedMetadataUrl = `${CONFIG_PROXY_URL}?${capUrl}`;
+
+      // Try again with the proxy this time
+      capabilitiesString = await Fetch.fetchText(newProxiedMetadataUrl);
+
+      // Callback about it
+      callbackNewMetadataUrl?.(`${CONFIG_PROXY_URL}?`);
+    } else {
+      // Unknown error, throw it
+      throw error;
+    }
+  }
+
+  // Continue reading the metadata to return it
   const parser = new WMSCapabilities();
-  let capUrl = `${url}?service=WMS&version=1.3.0&request=GetCapabilities`;
-  if (layers.length > 0) capUrl = capUrl.concat(`&layers=${layers}`);
-
-  // Fetch the GetCap
-  const responseText = await Fetch.fetchText(capUrl);
-
-  // Parse it and return
-  return parser.read(responseText);
+  return parser.read(capabilitiesString);
 }
 
 /**

@@ -6,7 +6,6 @@ import { whenThisThen, getScriptAndAssetURL } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { logger } from '@/core/utils/logger';
 import { AbstractPlugin } from './abstract-plugin';
-import { MapViewer } from '@/geo/map/map-viewer';
 
 /**
  * Class to manage plugins
@@ -75,10 +74,13 @@ export abstract class Plugin {
    *
    * @param {string} pluginId - The plugin id
    * @param {typeof AbstractPlugin} constructor - The plugin class (React Component)
-   * @param {MapViewer} mapViewer - Id of map to add this plugin to
+   * @param {string} mapId - Id of map to add this plugin to
    * @param {unknown} props - The plugin options
    */
-  static async addPlugin(pluginId: string, constructor: typeof AbstractPlugin, mapViewer: MapViewer, props?: unknown): Promise<void> {
+  static async addPlugin(pluginId: string, constructor: typeof AbstractPlugin, mapId: string, props?: unknown): Promise<void> {
+    // Get the MapViewer
+    const mapViewer = MapEventProcessor.getMapViewer(mapId);
+
     // If the plugin is already loaded, skip
     if (mapViewer.plugins[pluginId]) return;
 

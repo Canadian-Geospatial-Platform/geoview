@@ -383,23 +383,25 @@ export function exportPNG(dataUrl: string, name: string): void {
  * Find an object property by regex values. The find is case insensitive.
  * @param {unknown | undefined} objectItem - The object to search in.
  * @param {RegExp | RegExp[]} patterns - A single RegExp or an array of RegExp patterns to match in sequence.
- * @returns {unknown | undefined} The value found at the end of the matching path, or undefined if not found.
+ * @returns {T = Record<string, unknown> | undefined} The value found at the end of the matching path, or undefined if not found.
  */
-export function findPropertyByRegexPath(objectItem: unknown | undefined, patterns: RegExp | RegExp[]): unknown | undefined {
+export function findPropertyByRegexPath<T = Record<string, unknown>>(
+  objectItem: unknown | undefined,
+  patterns: RegExp | RegExp[]
+): T | undefined {
   const regexes = Array.isArray(patterns) ? patterns : [patterns];
 
-  let current: unknown = objectItem;
+  let current = objectItem;
 
   for (const regex of regexes) {
     if (typeof current !== 'object' || current === null) return undefined;
 
-    const entries = Object.entries(current as Record<string, unknown>);
+    const entries = Object.entries(current);
     const match = entries.find(([key]) => new RegExp(regex, 'i').test(key));
-
-    current = match?.[1];
+    current = match?.[1] as Record<string, unknown>;
   }
 
-  return current;
+  return current as T;
 }
 
 /**

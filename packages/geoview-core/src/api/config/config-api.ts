@@ -1,4 +1,4 @@
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 import Ajv from 'ajv';
 import addErrors from 'ajv-errors';
 
@@ -52,11 +52,8 @@ import { getStyleFromEsriRenderer } from '@/geo/utils/renderer/esri-renderer';
  * @class DefaultConfig
  */
 export class ConfigApi {
-  // GV: The following property was created only for debugging purpose. They allow developers to inspect the
-  // GV: content or call the methods of the last instance created by the corresponding ConfigApi call.
-
-  /** ***************************************************************************************************************************
-   * Attempt to determine the layer type based on the URL format.
+  /**
+   * Attempts to determine the layer type based on the URL format.
    *
    * @param {string} url The URL of the service for which we want to guess the GeoView layer type.
    *
@@ -97,7 +94,7 @@ export class ConfigApi {
   }
 
   /** ***************************************************************************************************************************
-   * Parse the parameters obtained from a url.
+   * Parses the parameters obtained from a url.
    * @param {string} urlParams The parameters found on the url after the ?.
    * @returns {any} Object containing the parsed params.
    * @static @private
@@ -124,7 +121,7 @@ export class ConfigApi {
   }
 
   /**
-   * Get url parameters from url param search string.
+   * Gets url parameters from url param search string.
    * @param {objStr} objStr the url parameter string.
    * @returns {unknown} an object containing url parameters.
    * @static @private
@@ -160,7 +157,7 @@ export class ConfigApi {
   }
 
   /**
-   * Convert the stringMapFeatureConfig to a json object. Comments will be removed from the string.
+   * Converts the stringMapFeatureConfig to a json object. Comments will be removed from the string.
    * @param {string} stringMapFeatureConfig The map configuration string to convert to JSON format.
    * @returns {MapFeatureConfig | undefined} A JSON map feature configuration object.
    * @private
@@ -183,7 +180,7 @@ export class ConfigApi {
   }
 
   /**
-   * Get a map feature config from url parameters.
+   * Gets a map feature config from url parameters.
    * @param {string} urlStringParams The url parameters.
    *
    * @returns {Promise<MapFeatureConfig>} A map feature configuration object generated from url parameters.
@@ -276,7 +273,7 @@ export class ConfigApi {
   }
 
   /**
-   * Get the default values that are applied to the map feature configuration when the user doesn't provide a value for a field
+   * Gets the default values that are applied to the map feature configuration when the user doesn't provide a value for a field
    * that is covered by a default value.
    * @returns {MapFeatureConfig} The map feature configuration default values.
    * @static
@@ -461,7 +458,7 @@ export class ConfigApi {
    * @param {string} geoviewLayerId - The geoview layer id
    * @param {string} geoviewLayerName - The geoview layer name
    * @param {string} layerURL - The layer url
-   * @param {unknown[]} layerIds - The layer ids for each layer entry config.
+   * @param {number[] | string[]} layerIds - The layer ids for each layer entry config.
    * @returns {Promise<ConfigBaseClass[]>} A Promise of a list of ConfigBaseClass objects.
    * @throws {NotSupportedError} If the provided layer type is not recognized or supported.
    */
@@ -470,7 +467,7 @@ export class ConfigApi {
     geoviewLayerId: string,
     geoviewLayerName: string,
     layerURL: string,
-    layerIds: unknown[]
+    layerIds: number[] | string[]
   ): Promise<ConfigBaseClass[]> {
     // Depending on the type
     switch (layerType) {

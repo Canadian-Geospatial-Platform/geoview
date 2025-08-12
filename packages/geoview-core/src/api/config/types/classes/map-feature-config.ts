@@ -27,10 +27,6 @@ import {
  * The map feature configuration class.
  */
 export class MapFeatureConfig {
-  // TODO: Cleanup commented code - Remove this commented code if all good
-  /** The registeredLayerPaths property keeps track of all the GeoView layers created and attached to this map */
-  // #registeredLayerPaths: Record<string, AbstractGeoViewLayer> = {};
-
   /** map configuration. */
   map: TypeMapConfig;
 
@@ -79,17 +75,17 @@ export class MapFeatureConfig {
    * All properties at this inheritance level have no values provided in the metadata. They are therefore initialized
    * from the configuration passed as a parameter or from the default values.
    *
-   * @param {TypeMapFeaturesInstance} userMapFeatureConfig The map feature configuration to instantiate.
+   * @param {TypeMapFeaturesInstance} userMapFeatureConfig - The map feature configuration to instantiate.
    * @constructor
    */
   constructor(userMapFeatureConfig: TypeMapFeaturesInstance) {
     // Clone the map config as received by the user
     const gvMapFromUser = cloneDeep(userMapFeatureConfig.map);
 
-    // Get a cloned copy of a default map config
+    // Get a cloned copy of a default map config for a given projection
     const gvMapDefault = MapFeatureConfig.#getDefaultMapConfig(gvMapFromUser?.viewSettings?.projection);
 
-    // Default map config depends on map projection.
+    // Combine the default values.
     this.map = defaultsDeep(gvMapFromUser, gvMapDefault);
 
     // Above code will add default zoomAndCenter, remove if other initial view is provided

@@ -27,6 +27,7 @@ import {
   TypeValidMapProjectionCodes,
   TypeIconSymbolVectorConfig,
   CONST_LAYER_TYPES,
+  TypeLayerMetadataEsriExtent,
 } from '@/api/config/types/map-schema-types';
 import { esriGetFieldType, esriGetFieldDomain, parseDateTimeValuesEsriDynamic, GeometryJson } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
@@ -40,7 +41,6 @@ import { NoExtentError, NoFeaturesPropertyError } from '@/core/exceptions/geovie
 import { formatError, RequestAbortedError } from '@/core/exceptions/core-exceptions';
 import { LayerDataAccessPathMandatoryError, LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions';
 import { TypeDateFragments } from '@/core/utils/date-mgt';
-import { TypeLayerMetadataEsriExtent } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 
 type TypeFieldOfTheSameValue = { value: string | number | Date; nbOccurence: number };
 type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryTree }[];
@@ -99,6 +99,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Overrides the fetching of the legend for an Esri Dynamic layer.
+   * @override
    * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
    */
   override async onFetchLegend(): Promise<TypeLegend | null> {
@@ -172,7 +173,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Overrides when the style should be set by the fetched legend.
-   * @param legend
+   * @param {TypeLegend} legend - The legend type
+   * @override
    */
   override onSetStyleAccordingToLegend(legend: TypeLegend): void {
     // Set the style
@@ -183,6 +185,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * Overrides the way to get the bounds for this layer type.
    * @param {OLProjection} projection - The projection to get the bounds into.
    * @param {number} stops - The number of stops to use to generate the extent.
+   * @override
    * @returns {Extent | undefined} The layer bounding box.
    */
   override onGetBounds(projection: OLProjection, stops: number): Extent | undefined {
@@ -208,6 +211,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {string[]} objectIds - The IDs of the features to calculate the extent from.
    * @param {OLProjection} outProjection - The output projection for the extent.
    * @param {string?} outfield - ID field to return for services that require a value in outfields.
+   * @override
    * @returns {Promise<Extent>} The extent of the features, if available.
    */
   override async onGetExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
@@ -278,6 +282,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Overrides the hit tolerance of the layer.
+   * @override
    * @returns {number} The hit tolerance for a GV Esri Dynamic layer
    */
   override getHitTolerance(): number {
