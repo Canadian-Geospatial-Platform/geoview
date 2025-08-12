@@ -5,6 +5,7 @@ import {
   useDrawerStyle,
   useDrawerActiveGeom,
   useDrawerActions,
+  useDrawerSelectedDrawingType,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
 import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
@@ -47,7 +48,7 @@ export function StylePanel(): JSX.Element {
 
   const { cgpv } = window as TypeWindow;
   const { ui, reactUtilities } = cgpv;
-  const { useCallback, useEffect } = reactUtilities.react;
+  const { useCallback, useEffect, useMemo } = reactUtilities.react;
 
   // Components
   const { Box, List, ListItem, Typography, TextField, IconButton, FormatBoldIcon, FormatItalicIcon } = ui.elements;
@@ -55,7 +56,12 @@ export function StylePanel(): JSX.Element {
   // Get store values
   const style = useDrawerStyle();
   const activeGeom = useDrawerActiveGeom();
+  const selectedDrawingType = useDrawerSelectedDrawingType();
   const displayLanguage = useAppDisplayLanguage();
+
+  const currentGeomType = useMemo(() => {
+    return selectedDrawingType ?? activeGeom;
+  }, [activeGeom, selectedDrawingType]);
 
   // Local state for color inputs
   const [localFillColor, setLocalFillColor] = useState(style.fillColor);
@@ -227,7 +233,7 @@ export function StylePanel(): JSX.Element {
   return (
     <List sx={{ p: 2 }}>
       {/* Text-specific controls */}
-      {activeGeom === 'Text' && (
+      {currentGeomType === 'Text' && (
         <>
           <ListItem sx={sxClasses.listItem}>
             <Typography variant="subtitle2" sx={sxClasses.label}>
@@ -330,7 +336,7 @@ export function StylePanel(): JSX.Element {
       )}
 
       {/* Fill color - hide for LineString and Text */}
-      {activeGeom !== 'LineString' && activeGeom !== 'Text' && (
+      {currentGeomType !== 'LineString' && currentGeomType !== 'Text' && (
         <ListItem sx={sxClasses.listItem}>
           <Typography variant="subtitle2" sx={sxClasses.label}>
             {getLocalizedMessage(displayLanguage, 'drawer.fillColour')}
@@ -340,7 +346,7 @@ export function StylePanel(): JSX.Element {
       )}
 
       {/* Stroke controls - show for all except Text */}
-      {activeGeom !== 'Text' && (
+      {currentGeomType !== 'Text' && (
         <>
           <ListItem sx={sxClasses.listItem}>
             <Typography variant="subtitle2" sx={sxClasses.label}>

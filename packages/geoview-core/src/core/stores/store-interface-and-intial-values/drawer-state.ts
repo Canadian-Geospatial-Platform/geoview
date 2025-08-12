@@ -64,6 +64,7 @@ export interface IDrawerState {
     getIsEditing: () => boolean;
     getTransformInstance: () => Transform;
     getSelectedDrawing: () => Feature | undefined;
+    getSelectedDrawingType: () => string;
     getHideMeasurements: () => boolean;
     getIconSrc: () => string;
     toggleDrawing: () => void;
@@ -219,6 +220,14 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
       },
       getSelectedDrawing: () => {
         return get().drawerState.selectedDrawing;
+      },
+      getSelectedDrawingType: () => {
+        const feature = get().drawerState.selectedDrawing;
+        if (!feature) return undefined;
+        if (feature.get('text')) return 'Text';
+        // Only Point and LineString matter. Everything else treated as polygon
+        const geometry = feature.getGeometry();
+        return geometry?.getType();
       },
       getHideMeasurements: () => {
         return get().drawerState.hideMeasurements;
@@ -642,6 +651,9 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
 export const useDrawerIsDrawing = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.actions.getIsDrawing());
 
 export const useDrawerIsEditing = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.actions.getIsEditing());
+
+export const useDrawerSelectedDrawingType = (): string | undefined =>
+  useStore(useGeoViewStore(), (state) => state.drawerState.actions.getSelectedDrawingType());
 
 export const useDrawerActiveGeom = (): string => useStore(useGeoViewStore(), (state) => state.drawerState.activeGeom);
 
