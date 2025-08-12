@@ -113,19 +113,19 @@ export const getSxClasses = (theme: Theme): any => ({
     },
   },
   disclaimerText: {
-    fontSize: theme.palette.geoViewFontSize.xs,
-    color: theme.palette.geoViewColor.grey.dark[900],
+    fontSize: theme.palette.geoViewFontSize.sm,
+    color: theme.palette.geoViewColor.grey.dark[800],
     margin: 0,
     marginBottom: '20px',
   },
   dateText: {
-    fontSize: theme.palette.geoViewFontSize.xs,
-    color: theme.palette.geoViewColor.grey.dark[900],
+    fontSize: theme.palette.geoViewFontSize.sm,
+    color: theme.palette.geoViewColor.grey.dark[800],
     marginBottom: '1rem',
   },
   AttributionText: {
-    fontSize: theme.palette.geoViewFontSize.xs,
-    color: theme.palette.geoViewColor.grey.dark[900],
+    fontSize: theme.palette.geoViewFontSize.sm,
+    color: theme.palette.geoViewColor.grey.dark[800],
     margin: '1rem',
   },
 });
