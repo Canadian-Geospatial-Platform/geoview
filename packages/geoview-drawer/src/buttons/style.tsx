@@ -50,7 +50,7 @@ export function StylePanel(): JSX.Element {
   const { useCallback, useEffect } = reactUtilities.react;
 
   // Components
-  const { List, ListItem, Typography, TextField } = ui.elements;
+  const { Box, List, ListItem, Typography, TextField, IconButton, FormatBoldIcon, FormatItalicIcon } = ui.elements;
 
   // Get store values
   const style = useDrawerStyle();
@@ -64,29 +64,41 @@ export function StylePanel(): JSX.Element {
   const [localTextHaloColor, setLocalTextHaloColor] = useState(style.textHaloColor || 'rgba(255,255,255,0.8)');
 
   // Store actions
-  const { setFillColor, setStrokeColor, setStrokeWidth, setStyle } = useDrawerActions();
+  const {
+    setFillColor,
+    setStrokeColor,
+    setStrokeWidth,
+    setTextValue,
+    setTextSize,
+    setTextHaloColor,
+    setTextHaloWidth,
+    setTextColor,
+    setTextBold,
+    setTextItalic,
+    // TODO Allow changing Font familiy with setTextFont
+  } = useDrawerActions();
 
   const handleTextChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
-      setStyle({ ...style, text: event.target.value });
+      setTextValue(event.target.value);
     },
-    [setStyle, style]
+    [setTextValue]
   );
 
   const handleTextSizeChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>): void => {
       const size = parseInt(event.target.value, 10);
-      if (!Number.isNaN(size)) setStyle({ ...style, textSize: size });
+      if (!Number.isNaN(size)) setTextSize(size);
     },
-    [setStyle, style]
+    [setTextSize]
   );
 
   const handleTextHaloWidthChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>): void => {
       const size = parseInt(event.target.value, 10);
-      if (!Number.isNaN(size)) setStyle({ ...style, textHaloWidth: size });
+      if (!Number.isNaN(size)) setTextHaloWidth(size);
     },
-    [setStyle, style]
+    [setTextHaloWidth]
   );
 
   const handleFillColorChange = useCallback((newFillColor: string): void => {
@@ -110,16 +122,16 @@ export function StylePanel(): JSX.Element {
   }, []);
 
   const handleTextColorClose = useCallback((): void => {
-    setStyle({ ...style, textColor: localTextColor });
-  }, [setStyle, style, localTextColor]);
+    setTextColor(localTextColor);
+  }, [setTextColor, localTextColor]);
 
   const handleTextHaloColorChange = useCallback((newColor: string): void => {
     setLocalTextHaloColor(newColor);
   }, []);
 
   const handleTextHaloColorClose = useCallback((): void => {
-    setStyle({ ...style, textHaloColor: localTextHaloColor });
-  }, [setStyle, style, localTextHaloColor]);
+    setTextHaloColor(localTextHaloColor);
+  }, [setTextHaloColor, localTextHaloColor]);
 
   const handleStrokeWidthChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>): void => {
@@ -129,6 +141,14 @@ export function StylePanel(): JSX.Element {
     },
     [setStrokeWidth]
   );
+
+  const handleToggleBold = useCallback((): void => {
+    setTextBold(!style.textBold);
+  }, [setTextBold, style.textBold]);
+
+  const handleToggleItalic = useCallback((): void => {
+    setTextItalic(!style.textItalic);
+  }, [setTextItalic, style.textItalic]);
 
   // Add close button to MUIColorInputs
   useEffect(() => {
@@ -216,57 +236,95 @@ export function StylePanel(): JSX.Element {
             <TextField value={style.text || ''} onChange={handleTextChange} sx={sxClasses.input} placeholder="Enter text" />
           </ListItem>
 
+          {/* Text Color and Size in one row */}
           <ListItem sx={sxClasses.listItem}>
-            <Typography variant="subtitle2" sx={sxClasses.label}>
-              {getLocalizedMessage(displayLanguage, 'drawer.textColour')}
-            </Typography>
-            <MuiColorInput value={localTextColor} onChange={handleTextColorChange} onBlur={handleTextColorClose} sx={sxClasses.input} />
+            <Box sx={{ display: 'flex', gap: 3, width: '100%' }}>
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="subtitle2" sx={sxClasses.label}>
+                  {getLocalizedMessage(displayLanguage, 'drawer.textColour')}
+                </Typography>
+                <MuiColorInput
+                  value={localTextColor}
+                  onChange={handleTextColorChange}
+                  onBlur={handleTextColorClose}
+                  sx={{ width: '100%' }}
+                />
+              </Box>
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="subtitle2" sx={sxClasses.label}>
+                  {getLocalizedMessage(displayLanguage, 'drawer.textSize')}
+                </Typography>
+                <TextField
+                  value={style.textSize || 14}
+                  onChange={handleTextSizeChange}
+                  sx={{ width: '100%' }}
+                  slotProps={{
+                    input: {
+                      type: 'number',
+                      inputProps: { min: 4, max: 100, step: 1 },
+                    },
+                  }}
+                />
+              </Box>
+            </Box>
           </ListItem>
 
+          {/* Halo Color and Size in one row */}
           <ListItem sx={sxClasses.listItem}>
-            <Typography variant="subtitle2" sx={sxClasses.label}>
-              {getLocalizedMessage(displayLanguage, 'drawer.textSize')}
-            </Typography>
-            <TextField
-              value={style.textSize || 14}
-              onChange={handleTextSizeChange}
-              sx={sxClasses.input}
-              slotProps={{
-                input: {
-                  type: 'number',
-                  inputProps: { min: 4, max: 100, step: 1 },
-                },
-              }}
-            />
+            <Box sx={{ display: 'flex', gap: 3, width: '100%' }}>
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="subtitle2" sx={sxClasses.label}>
+                  {getLocalizedMessage(displayLanguage, 'drawer.textHaloColour')}
+                </Typography>
+                <MuiColorInput
+                  value={localTextHaloColor}
+                  onChange={handleTextHaloColorChange}
+                  onBlur={handleTextHaloColorClose}
+                  sx={sxClasses.input}
+                />
+              </Box>
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="subtitle2" sx={sxClasses.label}>
+                  {getLocalizedMessage(displayLanguage, 'drawer.textHaloWidth')}
+                </Typography>
+                <TextField
+                  value={style.textHaloWidth}
+                  onChange={handleTextHaloWidthChange}
+                  sx={sxClasses.input}
+                  slotProps={{
+                    input: {
+                      type: 'number',
+                      inputProps: { min: 0, max: 100, step: 1 },
+                    },
+                  }}
+                />
+              </Box>
+            </Box>
           </ListItem>
-
           <ListItem sx={sxClasses.listItem}>
             <Typography variant="subtitle2" sx={sxClasses.label}>
-              {getLocalizedMessage(displayLanguage, 'drawer.textHaloColour')}
+              {getLocalizedMessage(displayLanguage, 'drawer.textFormatting')}
             </Typography>
-            <MuiColorInput
-              value={localTextHaloColor}
-              onChange={handleTextHaloColorChange}
-              onBlur={handleTextHaloColorClose}
-              sx={sxClasses.input}
-            />
-          </ListItem>
-
-          <ListItem sx={sxClasses.listItem}>
-            <Typography variant="subtitle2" sx={sxClasses.label}>
-              {getLocalizedMessage(displayLanguage, 'drawer.textHaloWidth')}
-            </Typography>
-            <TextField
-              value={style.textHaloWidth}
-              onChange={handleTextHaloWidthChange}
-              sx={sxClasses.input}
-              slotProps={{
-                input: {
-                  type: 'number',
-                  inputProps: { min: 0, max: 100, step: 1 },
-                },
-              }}
-            />
+            <Box sx={{ display: 'flex', gap: 1, width: '100%' }}>
+              <IconButton
+                tooltip={getLocalizedMessage(displayLanguage, 'drawer.textBold')}
+                tooltipPlacement="bottom"
+                onClick={handleToggleBold}
+                className={style.textBold ? 'highlighted active' : ''}
+                sx={{ width: 40, height: 40, borderRadius: '10%' }}
+              >
+                <FormatBoldIcon />
+              </IconButton>
+              <IconButton
+                tooltip={getLocalizedMessage(displayLanguage, 'drawer.textItalic')}
+                tooltipPlacement="bottom"
+                onClick={handleToggleItalic}
+                className={style.textItalic ? 'highlighted active' : ''}
+                sx={{ width: 40, height: 40, borderRadius: '10%' }}
+              >
+                <FormatItalicIcon />
+              </IconButton>
+            </Box>
           </ListItem>
         </>
       )}
@@ -307,7 +365,7 @@ export function StylePanel(): JSX.Element {
               slotProps={{
                 input: {
                   type: 'number',
-                  inputProps: { min: 0, max: 10, step: 0.1 },
+                  inputProps: { min: 0, max: 100, step: 0.1 },
                 },
               }}
             />
