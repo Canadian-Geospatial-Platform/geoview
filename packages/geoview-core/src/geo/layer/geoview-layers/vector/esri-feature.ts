@@ -5,16 +5,14 @@ import { ReadOptions } from 'ol/format/Feature';
 import Feature from 'ol/Feature';
 
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
-import {
-  EsriFeatureLayerEntryConfig,
-  TypeMetadataEsriFeature,
-} from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
+import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import {
   TypeLayerEntryConfig,
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
   CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
+  TypeMetadataEsriFeature,
 } from '@/api/config/types/map-schema-types';
 
 import { commonProcessLayerMetadata, commonValidateListOfLayerEntryConfig } from '@/geo/layer/geoview-layers/esri-layer-common';
@@ -95,14 +93,15 @@ export class EsriFeature extends AbstractGeoViewVector {
     const metadata = await this.onFetchServiceMetadata();
 
     // Now that we have metadata, get the layer ids from it
-    const entries = [
-      {
-        id: Number(metadata!.id),
-        index: Number(metadata!.id),
-        layerId: metadata!.id,
-        layerName: metadata!.name,
-      },
-    ];
+    const entries = [];
+    if (metadata) {
+      entries.push({
+        id: Number(metadata.id),
+        index: Number(metadata.id),
+        layerId: metadata.id,
+        layerName: metadata.name,
+      });
+    }
 
     // Redirect
     return EsriFeature.createEsriFeatureLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, entries);

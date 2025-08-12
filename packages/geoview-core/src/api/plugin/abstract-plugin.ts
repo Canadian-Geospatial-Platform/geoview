@@ -3,8 +3,6 @@ import type { createRoot } from 'react-dom/client';
 import type i18next from 'react-i18next';
 import type { useTheme } from '@mui/material/styles';
 
-import { API } from '@/api/api';
-import { api } from '@/app';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { logger } from '@/core/utils/logger';
 
@@ -23,10 +21,6 @@ export abstract class AbstractPlugin {
 
   // Plugin config object.
   #configObj: unknown = {};
-
-  // Plugin api object.
-  // TODO: Check - Remove this property and use 'mapViewer' instead?
-  api: API;
 
   // Plugin react object.
   react: typeof React;
@@ -51,7 +45,6 @@ export abstract class AbstractPlugin {
     this.pluginId = pluginId;
     this.mapViewer = mapViewer;
     this.pluginProps = props;
-    this.api = api;
     this.react = window.cgpv.reactUtilities.react;
     this.createRoot = window.cgpv.reactUtilities.createRoot;
     this.translate = window.cgpv.translate;

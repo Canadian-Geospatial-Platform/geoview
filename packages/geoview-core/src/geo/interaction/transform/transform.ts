@@ -105,6 +105,7 @@ export class Transform extends Interaction {
 
   /**
    * Starts the interaction on the map.
+   * @override
    */
   override startInteraction(): void {
     // Add the handle layer to the map
@@ -120,6 +121,7 @@ export class Transform extends Interaction {
 
   /**
    * Stops the interaction on the map.
+   * @override
    */
   override stopInteraction(): void {
     // Remove the handle layer from the map

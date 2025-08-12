@@ -1,7 +1,11 @@
-import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES, TypeSourceEsriDynamicInitialConfig } from '@/api/config/types/map-schema-types';
+import {
+  CONST_LAYER_ENTRY_TYPES,
+  CONST_LAYER_TYPES,
+  TypeLayerMetadataEsri,
+  TypeMetadataEsriDynamic,
+  TypeSourceEsriDynamicInitialConfig,
+} from '@/api/config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { TypeLayerMetadataEsri } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
-import { TypeLayerMetadataFields } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 
 /**
  * Type used to define a GeoView image layer to display on the map.
@@ -55,17 +59,4 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   override getLayerMetadata(): TypeLayerMetadataEsri | undefined {
     return super.getLayerMetadata() as TypeLayerMetadataEsri | undefined;
   }
-}
-
-export interface TypeMetadataEsriDynamic {
-  layers: TypeMetadataEsriDynamicLayer[];
-  supportsDynamicLayers: boolean;
-  fields?: TypeLayerMetadataFields[];
-}
-
-export interface TypeMetadataEsriDynamicLayer {
-  id: number;
-  name: string;
-  type: string;
-  subLayerIds: number[];
 }

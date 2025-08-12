@@ -15,18 +15,17 @@ import {
   TypeSourceWfsInitialConfig,
   CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
+  WFSJsonResponseFeatureTypeFields,
+  WFSJsonResponse,
+  TypeMetadataWFSFeatureTypeListFeatureTypeText,
+  TypeMetadataWFS,
+  TypeMetadataWFSOperationMetadataOperationParameter,
+  TypeMetadataWFSOperationMetadataOperationParameterValue,
 } from '@/api/config/types/map-schema-types';
 
 import { findPropertyByRegexPath } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
-import {
-  TypeMetadataWFS,
-  TypeMetadataWFSFeatureTypeListFeatureType,
-  TypeMetadataWFSFeatureTypeListFeatureTypeText,
-  TypeMetadataWFSOperationMetadataOperationParameter,
-  TypeMetadataWFSOperationMetadataOperationParameterValue,
-  WfsLayerEntryConfig,
-} from '@/core/utils/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
+import { WfsLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { LayerNoCapabilitiesError } from '@/core/exceptions/layer-exceptions';
@@ -97,10 +96,10 @@ export class WFS extends AbstractGeoViewVector {
     const metadata = await this.onFetchServiceMetadata();
 
     // Now that we have metadata, get the layer ids from it
-    if (metadata && !Array.isArray(metadata?.FeatureTypeList?.FeatureType))
+    if (!Array.isArray(metadata.FeatureTypeList?.FeatureType))
       metadata.FeatureTypeList.FeatureType = [metadata.FeatureTypeList?.FeatureType];
 
-    const metadataLayerList = metadata?.FeatureTypeList.FeatureType as TypeMetadataWFSFeatureTypeListFeatureType[];
+    const metadataLayerList = metadata?.FeatureTypeList.FeatureType;
     const entries = metadataLayerList.map((layerMetadata) => {
       let id = layerMetadata.Name as string;
       if ('#text' in (layerMetadata.Name as TypeMetadataWFSFeatureTypeListFeatureTypeText))
@@ -128,13 +127,17 @@ export class WFS extends AbstractGeoViewVector {
     // Note that the code assumes wfs feature type list does not contains metadata layer group. If you need layer group,
     // you can define them in the configuration section.
     // when there is only one layer, it is not an array but an object
-    if (!Array.isArray(this.getMetadata()?.FeatureTypeList?.FeatureType))
-      this.getMetadata()!.FeatureTypeList.FeatureType = [
-        this.getMetadata()!.FeatureTypeList?.FeatureType as TypeMetadataWFSFeatureTypeListFeatureType,
-      ];
 
-    if (Array.isArray(this.getMetadata()?.FeatureTypeList?.FeatureType)) {
-      const metadataLayerList = this.getMetadata()!.FeatureTypeList.FeatureType as TypeMetadataWFSFeatureTypeListFeatureType[];
+    // Get the metadata
+    const metadata = this.getMetadata();
+
+    // If metadata FeatureType isn't an array
+    if (metadata && !Array.isArray(metadata?.FeatureTypeList?.FeatureType))
+      metadata.FeatureTypeList.FeatureType = [metadata.FeatureTypeList?.FeatureType];
+
+    // If metadata FeatureType is an array
+    if (Array.isArray(metadata?.FeatureTypeList?.FeatureType)) {
+      const metadataLayerList = metadata.FeatureTypeList.FeatureType;
       const foundMetadata = metadataLayerList.find((layerMetadata) => {
         let id = layerMetadata.Name as string;
         if ('#text' in (layerMetadata.Name as TypeMetadataWFSFeatureTypeListFeatureTypeText))
@@ -205,14 +208,17 @@ export class WFS extends AbstractGeoViewVector {
       }
     } else if (describeFeatureUrl && outputFormat.toUpperCase().includes('XML')) {
       // Fetch the XML and read the content as Json
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const xmlJsonDescribe = (await Fetch.fetchXMLToJson(describeFeatureUrl)) as any;
+      const xmlJsonDescribe = await Fetch.fetchXMLToJson(describeFeatureUrl);
       const prefix = Object.keys(xmlJsonDescribe)[0].includes('xsd:') ? 'xsd:' : '';
-      const xmlJsonSchema = xmlJsonDescribe[`${prefix}schema`];
-      const xmlJsonDescribeElement =
-        xmlJsonSchema[`${prefix}complexType`] !== undefined
-          ? xmlJsonSchema[`${prefix}complexType`][`${prefix}complexContent`][`${prefix}extension`][`${prefix}sequence`][`${prefix}element`]
-          : [];
+      const xmlJsonSchema = xmlJsonDescribe[`${prefix}schema`] as Record<string, unknown>;
+      const xmlJsonSchemaComplexType = xmlJsonSchema[`${prefix}complexType`] as Record<string, unknown>;
+      let xmlJsonDescribeElement = [];
+      if (xmlJsonSchemaComplexType) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        xmlJsonDescribeElement = (xmlJsonSchemaComplexType as any)[`${prefix}complexContent`][`${prefix}extension`][`${prefix}sequence`][
+          `${prefix}element`
+        ];
+      }
 
       if (Array.isArray(xmlJsonDescribeElement)) {
         // recreate the array of properties as if it was json
@@ -297,6 +303,7 @@ export class WFS extends AbstractGeoViewVector {
     const responseJson = await Fetch.fetchXMLToJson(`${queryUrl}${getCapabilitiesUrl}`);
 
     // Parse the WFS_Capabilities
+    // TODO: Check - Maybe we want to return the root here, not just the WFS_Capabilities node information and adjust the return type?
     return findPropertyByRegexPath(responseJson, /(?:WFS_Capabilities)/) as TypeMetadataWFS;
   }
 
@@ -445,19 +452,6 @@ export class WFS extends AbstractGeoViewVector {
     return AbstractGeoViewVector.processConfig(myLayer);
   }
 }
-
-export type WFSJsonResponse = {
-  featureTypes: WFSJsonResponseFeatureType[];
-};
-
-export type WFSJsonResponseFeatureType = {
-  properties: WFSJsonResponseFeatureTypeFields[];
-};
-
-export type WFSJsonResponseFeatureTypeFields = {
-  type: string;
-  name: string;
-};
 
 /**
  * type guard function that redefines a TypeGeoviewLayerConfig as a TypeWFSLayerConfig if the geoviewLayerType attribute of the

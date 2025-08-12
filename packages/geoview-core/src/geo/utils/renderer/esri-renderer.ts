@@ -487,6 +487,21 @@ export function getStyleFromEsriRenderer(renderer: EsriBaseRenderer): TypeLayerS
   return undefined;
 }
 
+/** *****************************************************************************************************************************
+ * Parse the GeoView style using the Esri renderer.
+ *
+ * @param {EsriBaseRenderer} renderer - ESRI renderer to convert.
+ *
+ * @returns {TypeLayerStyleSettings | undefined} The Geoview style or undefined if it can not be created.
+ */
+export function createStyleUsingEsriRenderer(renderer: EsriBaseRenderer): TypeLayerStyleConfig | undefined {
+  if (esriRendererIsUniqueValue(renderer)) return processUniqueValueRenderer(renderer);
+  if (esriRendererIsSimple(renderer)) return processSimpleRenderer(renderer);
+  if (esriRendererIsClassBreaks(renderer)) return processClassBreakRenderer(renderer);
+  logger.logWarning(`Handling of ESRI renderer '${renderer.type}' is not coded, default GeoView settings will be used instead.`);
+  return undefined;
+}
+
 // #region TYPE & INTERFACE
 export type EsriRendererTypes = 'uniqueValue' | 'simple' | 'classBreaks';
 

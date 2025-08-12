@@ -349,7 +349,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
       // create a new tab by loading the time-slider plugin
       Plugin.loadScript('time-slider')
         .then((typePlugin) => {
-          Plugin.addPlugin('time-slider', typePlugin, MapEventProcessor.getMapViewer(mapId)).catch((error: unknown) => {
+          Plugin.addPlugin('time-slider', typePlugin, mapId).catch((error: unknown) => {
             // Log
             logger.logPromiseFailed('api.plugin.addPlugin(time-slider) in useEffect in FooterBar', error);
           });
@@ -364,7 +364,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
       // create a new tab by loading the geo chart plugin
       Plugin.loadScript('geochart')
         .then((typePlugin) => {
-          Plugin.addPlugin('geochart', typePlugin, MapEventProcessor.getMapViewer(mapId)).catch((error: unknown) => {
+          Plugin.addPlugin('geochart', typePlugin, mapId).catch((error: unknown) => {
             // Log
             logger.logPromiseFailed('api.plugin.addPlugin(geochart) in useEffect in FooterBar', error);
           });

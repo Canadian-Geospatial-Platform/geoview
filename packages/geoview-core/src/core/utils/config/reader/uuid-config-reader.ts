@@ -229,7 +229,7 @@ export class UUIDmapConfigReader {
     // For each found config, parse
     const parsedConfigs: GeoViewGeoChartConfig[] = [];
     foundConfigs.forEach((foundConfig) => {
-      // Clean the GeoCore response (it happened in past some attribute names weren't trimmed(!))
+      // Clean the GeoCore response (it happened in past some attribute names needed to be trimmed(!))
       const cleaned = foundConfig.layers;
       cleaned.propertyDisplay = cleaned.propertyDisplay.trim();
       cleaned.propertyValue = cleaned.propertyValue.trim();

@@ -7,7 +7,6 @@ import { AnyValidateFunction } from 'ajv/dist/types';
 
 import defaultsDeep from 'lodash/defaultsDeep';
 
-import schema from '@/core/../../schema.json';
 import { geoviewEntryIsWMS } from '@/geo/layer/geoview-layers/raster/wms';
 import { geoviewEntryIsImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
 import { geoviewEntryIsXYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
@@ -35,6 +34,7 @@ import { geoviewEntryIsEsriImage } from '@/geo/layer/geoview-layers/raster/esri-
 import { logger } from '@/core/utils/logger';
 
 import { generateId } from '@/core/utils/utilities';
+import schema from '@/core/../../schema.json';
 import { WfsLayerEntryConfig } from './validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import { OgcFeatureLayerEntryConfig } from './validation-classes/vector-validation-classes/ogc-layer-entry-config';
 import { CsvLayerEntryConfig } from './validation-classes/vector-validation-classes/csv-layer-entry-config';

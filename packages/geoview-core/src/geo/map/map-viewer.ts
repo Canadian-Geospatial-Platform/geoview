@@ -814,9 +814,9 @@ export class MapViewer {
    * access from the utilies function getLocalizesMessage to reuse in ui from outside the core viewer.
    *
    * @param {TypeDisplayLanguage} language - The language to add the ressoruce for (en, fr)
-   * @param {unknown} translations - The translation object to add
+   * @param {Record<string, unknown>} translations - The translation object to add
    */
-  addLocalizeRessourceBundle(language: TypeDisplayLanguage, translations: unknown): void {
+  addLocalizeRessourceBundle(language: TypeDisplayLanguage, translations: Record<string, unknown>): void {
     this.#i18nInstance.addResourceBundle(language, 'translation', translations, true, false);
   }
 
@@ -1680,7 +1680,7 @@ export class MapViewer {
         Plugin.loadScript(corePackage)
           .then((typePlugin) => {
             // add the plugin by passing in the loaded constructor from the script tag
-            Plugin.addPlugin(corePackage, typePlugin, this)
+            Plugin.addPlugin(corePackage, typePlugin, this.mapId)
               .then(() => {
                 // Plugin added
                 resolve();

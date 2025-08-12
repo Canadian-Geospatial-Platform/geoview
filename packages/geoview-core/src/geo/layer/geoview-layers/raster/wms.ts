@@ -1,37 +1,32 @@
 import { ImageWMS } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/ImageWMS';
-import WMSCapabilities from 'ol/format/WMSCapabilities';
 
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import {
-  CONFIG_PROXY_URL,
   TypeLayerEntryConfig,
   TypeGeoviewLayerConfig,
   CONST_LAYER_ENTRY_TYPES,
   layerEntryIsGroupLayer,
   TypeOfServer,
   CONST_LAYER_TYPES,
+  TypeMetadataWMSCapabilityLayer,
+  TypeMetadataWMS,
 } from '@/api/config/types/map-schema-types';
 import { DateMgt } from '@/core/utils/date-mgt';
-import { validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
+import { CallbackNewMetadataDelegate, getWMSServiceMetadata, validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
-import {
-  OgcWmsLayerEntryConfig,
-  TypeMetadataWMS,
-  TypeMetadataWMSCapabilityLayer,
-} from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { ConfigBaseClass, TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
-import { CancelledError, NetworkError, PromiseRejectErrorWrapper } from '@/core/exceptions/core-exceptions';
+import { CancelledError, PromiseRejectErrorWrapper } from '@/core/exceptions/core-exceptions';
 import { LayerDataAccessPathMandatoryError, LayerNoCapabilitiesError } from '@/core/exceptions/layer-exceptions';
 import {
   LayerEntryConfigLayerIdNotFoundError,
   LayerEntryConfigWMSSubLayerNotFoundError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
-import { Fetch } from '@/core/utils/fetch-helper';
 import { deepMergeObjects } from '@/core/utils/utilities';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
-import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.WMS;
@@ -119,7 +114,7 @@ export class WMS extends AbstractGeoViewRaster {
     }
 
     // Construct a proper WMS GetCapabilities URL
-    const url = WMS.#buildGetCapabilitiesUrl(this.metadataAccessPath);
+    const url = this.metadataAccessPath;
 
     // Get the layer entries we need to query
     const layerConfigsToQuery = this.#getLayersToQuery();
@@ -146,7 +141,7 @@ export class WMS extends AbstractGeoViewRaster {
 
     // Now that we have metadata
     const entries = layers.map((layer) => {
-      return { id: layer.Name, layerId: layer.Name, layerName: layer.Title };
+      return { id: layer.Name!, layerId: layer.Name, layerName: layer.Title };
     });
 
     // Redirect
@@ -156,7 +151,7 @@ export class WMS extends AbstractGeoViewRaster {
       this.metadataAccessPath,
       'mapserver',
       false,
-      entries
+      entries || []
     );
   }
 
@@ -427,7 +422,7 @@ export class WMS extends AbstractGeoViewRaster {
       if (!seen.has(layerConfig.layerId)) {
         const promise = new Promise<MetatadaFetchResult>((resolve, reject) => {
           // Perform the actual metadata fetch
-          WMS.fetchMetadataWMS(`${url}&Layers=${layerConfig.layerId}`, (proxyUsed) => {
+          WMS.fetchMetadataWMSForLayer(url, layerConfig.layerId, (proxyUsed) => {
             // If a proxy was used, update the layer's data access path
             // eslint-disable-next-line no-param-reassign
             layerConfig.source!.dataAccessPath = `${proxyUsed}${this.metadataAccessPath}`;
@@ -473,12 +468,12 @@ export class WMS extends AbstractGeoViewRaster {
     const capabilities = await WMS.fetchMetadataWMS(metadataUrl, callbackNewMetadataUrl);
 
     this.#processMetadataInheritance(capabilities.Capability.Layer);
-    const metadataAccessPath = capabilities?.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource as string;
+    const metadataAccessPath = capabilities?.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource;
 
     // TODO: Remove this setting from this fetch function
     this.metadataAccessPath = metadataAccessPath;
 
-    const dataAccessPath = capabilities?.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource as string;
+    const dataAccessPath = capabilities?.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource;
     const setDataAccessPath = (listOfLayerEntryConfig: TypeLayerEntryConfig[]): void => {
       listOfLayerEntryConfig.forEach((layerConfig) => {
         if (layerEntryIsGroupLayer(layerConfig)) setDataAccessPath(layerConfig.listOfLayerEntryConfig);
@@ -678,7 +673,7 @@ export class WMS extends AbstractGeoViewRaster {
       logger.logTraceCore('WMS - createGroupLayer', 'Cloning the layer config', layerConfig.layerPath);
       const subLayerEntryConfig: ConfigBaseClass = layerConfig.clone();
       subLayerEntryConfig.parentLayerConfig = layerConfig;
-      subLayerEntryConfig.layerId = subLayer.Name;
+      subLayerEntryConfig.layerId = subLayer.Name!;
       subLayerEntryConfig.layerName = subLayer.Title;
       newListOfLayerEntryConfig.push(subLayerEntryConfig as TypeLayerEntryConfig);
 
@@ -708,36 +703,30 @@ export class WMS extends AbstractGeoViewRaster {
   // #region STATIC
 
   /**
-   * Fetches the metadata for a typical WMS class.
+   * Fetches the metadata for WMS Capabilities.
    * @param {string} url - The url to query the metadata from.
-   * @param {Function} callbackNewMetadataUrl - Callback executed when a proxy had to be used to fetch the metadata.
-   *                                            The parameter sent in the callback is the proxy prefix with the '?' at the end.
+   * @param {CallbackNewMetadataDelegate} callbackNewMetadataUrl - Callback executed when a proxy had to be used to fetch the metadata.
+   * The parameter sent in the callback is the proxy prefix with the '?' at the end.
    */
-  static async fetchMetadataWMS(url: string, callbackNewMetadataUrl?: (proxyUsed: string) => void): Promise<TypeMetadataWMS> {
-    let capabilitiesString;
-    try {
-      // Fetch the metadata
-      capabilitiesString = await Fetch.fetchText(url);
-    } catch (error: unknown) {
-      // If a network error such as CORS
-      if (error instanceof NetworkError) {
-        // We're going to change the metadata url to use a proxy
-        const newProxiedMetadataUrl = `${CONFIG_PROXY_URL}?${url}`;
+  static fetchMetadataWMS(url: string, callbackNewMetadataUrl?: CallbackNewMetadataDelegate): Promise<TypeMetadataWMS> {
+    // Redirect
+    return getWMSServiceMetadata(url, undefined, callbackNewMetadataUrl);
+  }
 
-        // Try again with the proxy this time
-        capabilitiesString = await Fetch.fetchText(newProxiedMetadataUrl);
-
-        // Callback about it
-        callbackNewMetadataUrl?.(`${CONFIG_PROXY_URL}?`);
-      } else {
-        // Unknown error, throw it
-        throw error;
-      }
-    }
-
-    // Continue reading the metadata to return it
-    const parser = new WMSCapabilities();
-    return parser.read(capabilitiesString);
+  /**
+   * Fetches the metadata for WMS Capabilities for particular layer(s).
+   * @param {string} url - The url to query the metadata from.
+   * @param {string} layers - The layers to get the capabilities for.
+   * @param {CallbackNewMetadataDelegate} callbackNewMetadataUrl - Callback executed when a proxy had to be used to fetch the metadata.
+   * The parameter sent in the callback is the proxy prefix with the '?' at the end.
+   */
+  static fetchMetadataWMSForLayer(
+    url: string,
+    layers: string,
+    callbackNewMetadataUrl?: (proxyUsed: string) => void
+  ): Promise<TypeMetadataWMS> {
+    // Redirect
+    return getWMSServiceMetadata(url, layers, callbackNewMetadataUrl);
   }
 
   /**
@@ -857,18 +846,6 @@ export class WMS extends AbstractGeoViewRaster {
   static #isXmlMetadata(path: string): boolean {
     // Normalize case and check for '.xml' suffix
     return path.toLowerCase().endsWith('.xml');
-  }
-
-  /**
-   * Constructs a full WMS GetCapabilities request URL from a base metadata path.
-   * If the input URL already includes a `request=GetCapabilities` parameter,
-   * it is returned as-is. Otherwise, the standard query string is appended.
-   * @param {string} baseUrl - The base URL to convert.
-   * @returns {string} A properly formatted WMS GetCapabilities URL.
-   */
-  static #buildGetCapabilitiesUrl(baseUrl: string): string {
-    // Avoid adding the query string if it's already present
-    return baseUrl.includes('request=GetCapabilities') ? baseUrl : `${baseUrl}?service=WMS&version=1.3.0&request=GetCapabilities`;
   }
 
   // #endregion

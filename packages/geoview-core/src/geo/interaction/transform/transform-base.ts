@@ -477,6 +477,7 @@ export class OLTransform extends OLPointer {
 
   /**
    * Cleans up the interaction.
+   * @override
    */
   override dispose(): void {
     this.clearSelection();
@@ -1060,8 +1061,10 @@ export class OLTransform extends OLPointer {
   /**
    * Handle Click Events
    * @param {MapBrowserEvent} event - The map browser event.
+   * @override
    * @returns {boolean} Whether the event was handled.
    */
+  // TODO: Rewrite the function name, if this function overrides a mother function, it probably shouldn't be prefixed with 'handle'.
   override handleDownEvent(event: MapBrowserEvent<PointerEvent>): boolean {
     if (this.#inHandleDownEvent) return false;
     this.#inHandleDownEvent = true;
@@ -1163,7 +1166,9 @@ export class OLTransform extends OLPointer {
   /**
    * Handle pointer drag events.
    * @param {MapBrowserEvent} event - The map browser event.
+   * @override
    */
+  // TODO: Rewrite the function name, if this function overrides a mother function, it probably shouldn't be prefixed with 'handle'.
   override handleDragEvent(event: MapBrowserEvent<PointerEvent>): void {
     if (this.#inHandleDragEvent || !this.#isTransforming || !this.selectedFeature || !this.startCoordinate) return;
     this.#inHandleDragEvent = true;
@@ -1216,8 +1221,10 @@ export class OLTransform extends OLPointer {
   /**
    * Handle pointer up events.
    * @param {MapBrowserEvent} event - The map browser event.
+   * @override
    * @returns {boolean} Whether the event was handled.
    */
+  // TODO: Rewrite the function name, if this function overrides a mother function, it probably shouldn't be prefixed with 'handle'.
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   override handleUpEvent(event: MapBrowserEvent<PointerEvent>): boolean {
     if (this.#inHandleUpEvent) return false;
@@ -1259,7 +1266,9 @@ export class OLTransform extends OLPointer {
    * Handle pointer move events. Not to be confused with moving handles.
    * This overrides the move event from OL Pointer
    * @param {MapBrowserEvent} event - The map browser event.
+   * @override
    */
+  // TODO: Rewrite the function name, if this function overrides a mother function, it probably shouldn't be prefixed with 'handle'.
   override handleMoveEvent(event: MapBrowserEvent<PointerEvent>): void {
     if (this.#inHandleMoveEvent) return;
     this.#inHandleMoveEvent = true;

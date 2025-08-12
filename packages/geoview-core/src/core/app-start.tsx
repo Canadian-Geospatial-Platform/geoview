@@ -10,8 +10,8 @@ import { getTheme } from '@/ui/style/theme';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
 import { useAppDisplayThemeById } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
 
 // create a state that will hold map config information
 // TODO: use store, only keep map id on context for store manager to gather right store on hooks

@@ -1,7 +1,12 @@
-import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES, Extent, TypeSourceImageWmsInitialConfig } from '@/api/config/types/map-schema-types';
+import {
+  CONST_LAYER_ENTRY_TYPES,
+  CONST_LAYER_TYPES,
+  TypeLayerMetadataWMS,
+  TypeMetadataWMS,
+  TypeSourceImageWmsInitialConfig,
+} from '@/api/config/types/map-schema-types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { TypeLayerMetadataFields } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 
 /**
  * Type used to define a GeoView image layer to display on the map.
@@ -69,98 +74,4 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   protected override onClone(): ConfigBaseClass {
     return new OgcWmsLayerEntryConfig(this);
   }
-}
-
-export interface TypeMetadataWMS {
-  Capability: TypeMetadataWMSCapability;
-}
-
-export interface TypeMetadataWMSCapability {
-  Request: TypeMetadataWMSCapabilityRequest;
-  Layer: TypeMetadataWMSCapabilityLayer;
-}
-
-export interface TypeMetadataWMSCapabilityRequest {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  GetMap: any;
-  GetFeatureInfo: TypeMetadataWMSCapabilityRequestFeatureInfo;
-}
-
-export interface TypeMetadataWMSCapabilityRequestFeatureInfo {
-  Format: string[];
-}
-
-export interface TypeMetadataWMSCapabilityLayer {
-  Name: string;
-  Title: string;
-  Abstract: string;
-  BoundingBox: TypeMetadataWMSCapabilityLayerBBox[];
-  Layer: TypeMetadataWMSCapabilityLayer[];
-  Attribution: TypeMetadataWMSCapabilityLayerAttribution;
-  MinScaleDenominator: number;
-  MaxScaleDenominator: number;
-  Style: TypeMetadataWMSCapabilityLayerStyle[];
-  CRS: TypeMetadataWMSCapabilityLayerCRS[];
-  Dimension: TypeMetadataWMSCapabilityLayerDimension[];
-  EX_GeographicBoundingBox: Extent;
-  queryable: boolean;
-  cascaded: unknown;
-  opaque: unknown;
-  fixedWidth: unknown;
-  fixedHeight: unknown;
-  noSubsets: unknown;
-}
-
-export interface TypeMetadataWMSCapabilityLayerCRS {
-  Name: string;
-}
-
-export interface TypeMetadataWMSCapabilityLayerBBox {
-  crs: string;
-  extent: number[];
-}
-
-export interface TypeMetadataWMSCapabilityLayerStyle {
-  Name: string;
-}
-
-export interface TypeMetadataWMSCapabilityLayerAttribution {
-  Title: string;
-}
-
-export interface TypeMetadataWMSCapabilityLayerDimension {
-  name: string;
-}
-
-export interface TypeLayerMetadataWMS {
-  Style: TypeLayerMetadataWMSStyle[];
-  fields?: TypeLayerMetadataFields[];
-}
-
-export interface TypeLayerMetadataWMSStyle {
-  Name: string;
-  LegendURL: TypeLayerMetadataWMSStyleLegendUrl[];
-}
-
-export interface TypeLayerMetadataWMSStyleLegendUrl {
-  Format: string;
-  OnlineResource: string;
-}
-
-export interface TypeMetadataFeatureInfo {
-  Layer: TypeMetadataFeatureInfoLayer;
-}
-
-export interface TypeMetadataFeatureInfoLayer {
-  Attribute: TypeMetadataFeatureInfoLayerAttributes;
-  '@attributes': TypeMetadataFeatureInfoLayerAttribute;
-}
-
-export interface TypeMetadataFeatureInfoLayerAttributes {
-  '@attributes': TypeMetadataFeatureInfoLayerAttribute;
-}
-
-export interface TypeMetadataFeatureInfoLayerAttribute {
-  name: string;
-  value: unknown;
 }

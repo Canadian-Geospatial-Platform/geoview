@@ -3,10 +3,7 @@ import { Extent } from 'ol/extent';
 import { validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { TimeDimensionESRI, DateMgt } from '@/core/utils/date-mgt';
-import {
-  EsriFeatureLayerEntryConfig,
-  TypeLayerMetadataEsri,
-} from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
+import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
@@ -20,6 +17,7 @@ import {
   TypeOutfields,
   TypeOutfieldsType,
   CONST_LAYER_TYPES,
+  TypeLayerMetadataEsri,
 } from '@/api/config/types/map-schema-types';
 import {
   esriConvertEsriGeometryTypeToOLGeometryType,

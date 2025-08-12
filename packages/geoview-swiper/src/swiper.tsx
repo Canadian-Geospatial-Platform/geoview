@@ -318,7 +318,6 @@ export function Swiper(props: SwiperProps): JSX.Element {
           }
           onStop={onStop}
           onDrag={onStop}
-          // nodeRef={swiperRef}
         >
           <Box sx={[orientation === 'vertical' ? sxClasses.vertical : sxClasses.horizontal, sxClasses.bar]} tabIndex={0} ref={swiperRef}>
             <Tooltip title={getLocalizedMessage(displayLanguage, 'swiper.tooltip')}>

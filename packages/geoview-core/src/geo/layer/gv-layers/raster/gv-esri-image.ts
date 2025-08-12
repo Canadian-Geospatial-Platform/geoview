@@ -81,6 +81,7 @@ export class GVEsriImage extends AbstractGVRaster {
 
   /**
    * Overrides the fetching of the legend for an Esri image layer.
+   * @override
    * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
    */
   override async onFetchLegend(): Promise<TypeLegend | null> {
@@ -146,7 +147,8 @@ export class GVEsriImage extends AbstractGVRaster {
 
   /**
    * Overrides when the style should be set by the fetched legend.
-   * @param legend
+   * @param {TypeLegend} legend - The legend type
+   * @override
    */
   override onSetStyleAccordingToLegend(legend: TypeLegend): void {
     // Set the style
@@ -184,6 +186,7 @@ export class GVEsriImage extends AbstractGVRaster {
    * Overrides the way to get the bounds for this layer type.
    * @param {OLProjection} projection - The projection to get the bounds into.
    * @param {number} stops - The number of stops to use to generate the extent.
+   * @override
    * @returns {Extent | undefined} The layer bounding box.
    */
   override onGetBounds(projection: OLProjection, stops: number): Extent | undefined {

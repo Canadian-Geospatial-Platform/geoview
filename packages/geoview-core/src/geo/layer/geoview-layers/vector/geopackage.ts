@@ -369,11 +369,12 @@ export class GeoPackage extends AbstractGeoViewVector {
   protected static processGeopackageStyle(layerConfig: VectorLayerEntryConfig, sld: string | number | Uint8Array): void {
     // Extract layer styles if they exist
     const { rules } = SLDReader.Reader(sld).layers[0].styles[0].featuretypestyles[0];
-    if (!layerConfig.getLayerStyle()) layerConfig.setLayerStyle({});
+    // eslint-disable-next-line no-param-reassign
+    if (!layerConfig.layerStyle) layerConfig.layerStyle = {};
 
     for (let i = 0; i < rules.length; i++) {
       // Get the layer style
-      const layerStyle = layerConfig.layerStyle!;
+      const { layerStyle } = layerConfig;
 
       Object.keys(rules[i]).forEach((key) => {
         // Polygon style
