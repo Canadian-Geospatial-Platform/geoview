@@ -61,6 +61,10 @@
           <button id="Add-points3">Place points set 3</button><br />
           cgpv.api.getMapViewer('map1').layer.setGeojsonSource('geojsonLYR1/blank.json', points3);
         </li>
+        <li>
+          <button id="Replace-outfields">Replace feature outfields</button><br />
+          cgpv.api.getMapViewer('map1').layer.replaceFeatureOutfields('geojsonLYR1/blank.json', ['string', 'string', 'string'], ['program', 'title_en', 'project_id'], ['Program', 'Title', 'ID']);
+        </li>
       </ul>
     </div>
 
@@ -202,6 +206,14 @@
       // add an event listener when a button is clicked
       addPoints3Button.addEventListener('click', () => {
         cgpv.api.getMapViewer('map1').layer.setGeojsonSource('geojsonLYR1/blank.json', points3);
+      });
+      // Add replace fields button ====================================================================================
+      // find the button element by ID
+      var replaceFieldsButton = document.getElementById('Replace-outfields');
+
+      // add an event listener when a button is clicked
+      replaceFieldsButton.addEventListener('click', () => {
+        cgpv.api.getMapViewer('map1').layer.replaceFeatureOutfields('geojsonLYR1/blank.json', ['string', 'string', 'string'], ['program', 'title_en', 'project_id'], ['Program', 'Title', 'ID']);
       });
     </script>
   </body>

@@ -33,6 +33,7 @@ import {
   TypeLayerStatus,
   GeoCoreLayerConfig,
   GroupLayerEntryConfig,
+  TypeOutfieldsType,
 } from '@/api/config/types/map-schema-types';
 import { GeoJSON, layerConfigIsGeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
 import { GeoPackage, layerConfigIsGeoPackage } from '@/geo/layer/geoview-layers/vector/geopackage';
@@ -53,7 +54,13 @@ import { AllFeatureInfoLayerSet } from '@/geo/layer/layer-sets/all-feature-info-
 import { LegendsLayerSet } from '@/geo/layer/layer-sets/legends-layer-set';
 import { FeatureInfoLayerSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
 import { formatError, NotSupportedError } from '@/core/exceptions/core-exceptions';
-import { LayerCreatedTwiceError, LayerNotFoundError, LayerNotGeoJsonError } from '@/core/exceptions/layer-exceptions';
+import {
+  LayerCreatedTwiceError,
+  LayerDifferingFieldLengths,
+  LayerNotFoundError,
+  LayerNotGeoJsonError,
+  LayerNotQueryableError,
+} from '@/core/exceptions/layer-exceptions';
 import { LayerEntryConfigError } from '@/core/exceptions/layer-entry-config-exceptions';
 import {
   AbstractBaseLayer,
@@ -1362,30 +1369,62 @@ export class LayerApi {
 
   /**
    * Redefine feature info fields.
-   *
    * @param {string} layerPath - The path of the layer.
-   * @param {string} fieldNames - The new field names to use, separated by commas.
+   * @param {string[]} fieldNames - The new field names to use.
    * @param {'alias' | 'name'} fields - The fields to change.
    */
-  redefineFeatureFields(layerPath: string, fieldNames: string, fields: 'alias' | 'name'): void {
+  redefineFeatureFields(layerPath: string, fieldNames: string[], fields: 'alias' | 'name'): void {
     const layerConfig = this.#layerEntryConfigs[layerPath] as AbstractBaseLayerEntryConfig;
 
-    if (!layerConfig) logger.logError(`Unable to find layer ${layerPath}`);
+    if (!layerConfig) throw new LayerNotFoundError(layerPath);
     else if (
       layerConfig.source?.featureInfo &&
       layerConfig.source.featureInfo.queryable !== false &&
       layerConfig.source.featureInfo.outfields
     ) {
       // Convert the provided field names to an array so we can index
-      const fieldValues = fieldNames.split(',');
-      if (layerConfig.source.featureInfo.outfields.length === fieldValues.length)
+      if (layerConfig.source.featureInfo.outfields.length === fieldNames.length)
         // Override existing values in each outfield with provided field name
         layerConfig.source.featureInfo.outfields?.forEach((outfield, index) => {
           // eslint-disable-next-line no-param-reassign
-          outfield[fields] = fieldValues[index];
+          outfield[fields] = fieldNames[index];
         });
-      else logger.logError(`Number of provided names for layer ${layerPath} does not match number of fields`);
-    } else logger.logError(`${layerPath} is not queryable`);
+      else throw new LayerDifferingFieldLengths(layerPath);
+    } else throw new LayerNotQueryableError(layerConfig.layerPath, layerConfig.getLayerName());
+  }
+
+  /**
+   * Replace outfield names, aliases and types with any number of new values, provided an identical count of each are supplied.
+   * @param {string} layerPath - The path of the layer.
+   * @param {string[]} types - The new field types (TypeOutfieldsType) to use.
+   * @param {string[]} fieldNames - The new field names to use.
+   * @param {string[]} fieldAliases - The new field aliases to use.
+   */
+  replaceFeatureOutfields(layerPath: string, types: TypeOutfieldsType[], fieldNames: string[], fieldAliases?: string[]): void {
+    const layerConfig = this.#layerEntryConfigs[layerPath] as AbstractBaseLayerEntryConfig;
+
+    if (!layerConfig) throw new LayerNotFoundError(layerPath);
+    else if (
+      layerConfig.source?.featureInfo &&
+      layerConfig.source.featureInfo.queryable !== false &&
+      layerConfig.source.featureInfo.outfields
+    ) {
+      // Ensure same number of all items are provided
+      if (fieldNames.length === types.length) {
+        // Convert to array of outfields
+        const newOutfields = fieldNames.map((name, index) => {
+          return {
+            name,
+            alias: fieldAliases ? fieldAliases[index] : name,
+            type: types[index],
+            domain: null,
+          };
+        });
+
+        // Set new value asfeature info outfields
+        layerConfig.source.featureInfo.outfields = newOutfields;
+      } else throw new LayerDifferingFieldLengths(layerPath);
+    } else throw new LayerNotQueryableError(layerConfig.layerPath, layerConfig.getLayerName());
   }
 
   /**

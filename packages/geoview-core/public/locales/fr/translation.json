@@ -151,7 +151,7 @@
     "toggleVisibility": "Basculer la visibilité",
     "toggleItemsVisibility": "Basculer la visibilité des classes",
     "toggleSublayersVisibility": "Basculer la visibilité des sous-couches",
-    "toggleItemVisibility": "Cliquer pour afficher/masquer l'élément:",
+    "toggleItemVisibility": "Cliquer pour afficher/masquer l'élément",
     "toggleCollapse": "Basculer la fermeture",
     "zoomVisibleScale": "Zoom à l'échelle visible",
     "querying": "Requête en cours",
@@ -307,16 +307,18 @@
   },
   "warning": {
     "layer": {
-      "slowFetch": "Le téléchargement de '__param__' prend plus de temps que prévu.",
       "slowRender": "La couche '__param__' est lente à se dessiner sur la carte, svp patientez...",
+      "slowRenders": "Certaines couches sont lentes à s'afficher sur la carte, svp patientez...",
       "basemapTakingLongTime": "La couche de base prend plus de temps que prévu à répondre...",
       "metadataTakingLongTime": "Les métadonnées pour la couche '__param__' prennent plus de temps que prévu à récupérer...",
+      "metadatasTakingLongTime": "Le téléchargement des métadonnées de certaines couches prend plus de temps que...",
       "vectorTileRemoved": "La tuile vectorielle '__param__' a dû être retirée en raison d'un conflit de projection."
     }
   },
   "error": {
     "generic": "Une erreur est survenue, contactez nous ou regardez dans la console pour plus de détails.",
     "layer": {
+      "differingFieldLengths": "La longueur des champs fournis ne correspond pas.",
       "layerNotFound": "La couche à l'emplacement '__param__' est introuvable.",
       "wrongType": "La couche '__param__' n'est pas du type attendu.",
       "notAGeoJsonLayer": "Ce n'est pas une couche GeoJSON pour la couche '__param__'.",

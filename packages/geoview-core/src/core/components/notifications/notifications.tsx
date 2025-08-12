@@ -190,7 +190,7 @@ export default memo(function Notifications(): JSX.Element {
   useEffect(() => {
     if (open) {
       // When panel open, remove the notification count on the popover. On new notification, it will continue to
-      // increment notification from those inside teh popover
+      // increment notification from those inside the popover
       setNotificationsCount(0);
     }
   }, [open]);
@@ -238,23 +238,22 @@ export default memo(function Notifications(): JSX.Element {
 
   return (
     <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
-      <Box>
-        <Badge badgeContent={notificationsCount > 99 ? '99+' : notificationsCount} color="error">
-          <IconButton
-            id="notification"
-            tooltip={t('appbar.notifications')!}
-            aria-label={t('appbar.notifications')!}
-            tooltipPlacement="bottom-end"
-            onClick={handleOpenPopover}
-            className={`${interaction === 'dynamic' ? 'buttonFilled' : 'style4'} ${open ? 'active' : ''}`}
-            color="primary"
-            sx={{ width: '2.375rem', height: '2.375rem' }}
-          >
+      <Box sx={{ padding: interaction === 'dynamic' ? 'none' : '5px' }}>
+        <IconButton
+          id="notification"
+          tooltip={t('appbar.notifications')!}
+          aria-label={t('appbar.notifications')!}
+          tooltipPlacement="right"
+          onClick={handleOpenPopover}
+          className={`${interaction === 'dynamic' ? 'buttonFilled' : 'style4'} ${open ? 'active' : ''}`}
+          color="primary"
+        >
+          <Badge badgeContent={notificationsCount > 99 ? '99+' : notificationsCount} color="error">
             <AnimatedBox sx={{ display: 'inline-flex', alignItems: 'center' }} style={hasNewNotification ? shakeAnimation : undefined}>
               {hasNewNotification ? <NotificationsActiveIcon /> : <NotificationsIcon />}
             </AnimatedBox>
-          </IconButton>
-        </Badge>
+          </Badge>
+        </IconButton>
 
         <Popper
           open={open}

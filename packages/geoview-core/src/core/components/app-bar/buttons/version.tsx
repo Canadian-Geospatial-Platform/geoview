@@ -95,12 +95,12 @@ export default function Version(): JSX.Element {
 
   return (
     <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
-      <Box>
+      <Box sx={{ padding: interaction === 'dynamic' ? 'none' : '5px' }}>
         <IconButton
           id="version-button"
           tooltip={t('appbar.version')!}
           aria-label={t('appbar.version')!}
-          tooltipPlacement="bottom-end"
+          tooltipPlacement="right"
           onClick={handleOpenPopover}
           className={`${interaction === 'dynamic' ? 'buttonFilled' : 'style4'} ${open ? 'active' : ''}`}
         >

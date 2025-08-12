@@ -10,8 +10,8 @@ import { SxStyles } from '@/ui/style/types';
 export const getSxClasses = (theme: Theme): SxStyles => ({
   root: {
     position: 'absolute',
-    top: 12,
-    left: 80,
+    top: 17,
+    left: 68,
     maxWidth: 350,
     width: 350,
   },

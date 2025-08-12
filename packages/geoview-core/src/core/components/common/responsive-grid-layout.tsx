@@ -216,12 +216,12 @@ const ResponsiveGridLayout = forwardRef(
         <Button
           makeResponsive
           type="text"
-          disabled={isGuideOpen}
           variant="outlined"
           size="small"
           onClick={() => handleOpenGuide()}
           tooltip={t('general.openGuide')!}
           startIcon={<QuestionMarkIcon />}
+          className={`'guideButton' ${isGuideOpen ? 'active' : ''}`}
         >
           {t('general.guide')}
         </Button>
@@ -271,7 +271,9 @@ const ResponsiveGridLayout = forwardRef(
           return customGet(guide?.footerPanel?.children, `${key}.content`);
         })
         .filter((item) => item !== undefined)
-        .join('\n');
+        .join('\n')
+        // Remove links
+        .replaceAll(/\[Top\]\(#.*?\)/g, '');
 
       if (!content) return null;
 

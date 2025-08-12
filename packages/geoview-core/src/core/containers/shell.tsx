@@ -35,10 +35,17 @@ import { MapViewer, MapComponentAddedEvent, MapComponentRemovedEvent } from '@/g
 import { FocusTrapDialog } from './focus-trap';
 import { Notifications, SnackBarOpenEvent, SnackbarType } from '@/core/utils/notifications';
 import { useMapResize } from './use-map-resize';
+import { delay, scrollIfNotVisible } from '@/core/utils/utilities';
 
 type ShellProps = {
   mapViewer: MapViewer;
 };
+
+/** The length of time to display the snackbar message before closing it */
+const DEFAULT_SNACKBAR_DISPLAY_TIME = 5 * 1000; // 5 seconds
+
+/** The length of time to display the snackbar message if there are more messages in the queue */
+const QUEUED_SNACKBAR_DISPLAY_TIME = 3 * 1000; // 3 seconds
 
 /**
  * Create a shell component to wrap the map and other components not inside the map
@@ -154,37 +161,69 @@ export function Shell(props: ShellProps): JSX.Element {
    * Handles when a SnackBar needs to open
    * @param {SnackBarOpenEvent} payload The snackbar information to open
    */
-  const handleSnackBarOpen = useCallback((sender: Notifications, payload: SnackBarOpenEvent): void => {
-    logger.logTraceUseCallback('SHELL - handleSnackBarOpen', payload);
+  const handleSnackBarOpen = useCallback(
+    (sender: Notifications, payload: SnackBarOpenEvent): void => {
+      logger.logTraceUseCallback('SHELL - handleSnackBarOpen', payload);
 
-    // create button
-    const myButton = payload.button?.label ? (
-      <Button type="icon" onClick={payload.button.action}>
-        {payload.button.label}
-      </Button>
-    ) : undefined;
-    setSnackbarButton(myButton);
+      // Create button
+      const myButton = payload.button?.label ? (
+        <Button type="icon" onClick={payload.button.action}>
+          {payload.button.label}
+        </Button>
+      ) : undefined;
+      setSnackbarButton(myButton);
 
-    // set message and type
-    setSnackbarMessage(payload.message);
-    setSnackbarType(payload.snackbarType);
+      // Set message and type
+      setSnackbarMessage(payload.message);
+      setSnackbarType(payload.snackbarType);
 
-    // show the snackbar
-    setSnackbarOpen(true);
-  }, []);
+      // Show the snackbar
+      setSnackbarOpen(true);
+
+      // Close snackbar after delay
+      delay(mapViewer.notifications.snackbarMessageQueue.length > 1 ? QUEUED_SNACKBAR_DISPLAY_TIME : DEFAULT_SNACKBAR_DISPLAY_TIME).then(
+        () => {
+          if (snackbarOpen) {
+            setSnackbarOpen(false);
+
+            // Remove displayed message from queue
+            mapViewer.notifications.snackbarMessageQueue.shift();
+
+            // Display next message in queue
+            mapViewer.notifications.displayNextSnackbarMessage();
+          }
+        },
+        (error: unknown) => {
+          logger.logPromiseFailed('Error with delay in snackbar message', error);
+        }
+      );
+    },
+    [mapViewer.notifications, snackbarOpen]
+  );
 
   /**
    * Handles when a SnackBar needs to close
    * @param {React.SyntheticEvent | Event} event The event associated with the closing of the snackbar
    * @param {string} reason The reason for closing
    */
-  const handleSnackBarClose = useCallback((event?: React.SyntheticEvent | Event, reason?: string) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-    // hide the snackbar
-    setSnackbarOpen(false);
-  }, []);
+  const handleSnackBarClose = useCallback(
+    (event?: React.SyntheticEvent | Event, reason?: string) => {
+      // Remove displayed message from queue
+      mapViewer.notifications.snackbarMessageQueue.shift();
+      if (reason === 'clickaway') {
+        // Display next message in queue
+        mapViewer.notifications.displayNextSnackbarMessage();
+        return;
+      }
+
+      // Hide the snackbar
+      setSnackbarOpen(false);
+
+      // Display next message in queue
+      mapViewer.notifications.displayNextSnackbarMessage();
+    },
+    [mapViewer.notifications]
+  );
 
   // #endregion HANDLERS
 
@@ -194,13 +233,13 @@ export function Shell(props: ShellProps): JSX.Element {
    * This improves accessibility by allowing users to easily return focus to the map
    */
   const handleScrollShellIntoView = useCallback((): void => {
+    // Log
+    logger.logTraceUseCallback('SHELL - scrollIntoViewListener');
+
     if (!shellRef.current) return;
 
-    const behaviorScroll = (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth') as ScrollBehavior;
-    shellRef.current.scrollIntoView({
-      behavior: behaviorScroll,
-      block: 'start',
-    });
+    // Check if the map is already in view, then scroll if needed
+    scrollIfNotVisible(shellRef.current.children[0] as HTMLElement, 'start');
   }, []);
 
   // Mount component

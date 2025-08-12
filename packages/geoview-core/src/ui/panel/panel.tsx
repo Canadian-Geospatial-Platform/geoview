@@ -69,15 +69,15 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
   const panelContainerStyles = {
     ...(panelStyles?.panelContainer && { ...panelStyles.panelContainer }),
     width: open ? panelWidth : 0,
-    height: `calc(100%  - 3rem)`,
+    height: `calc(100%  - 40px)`,
     maxWidth: panel?.width ?? 400,
     [theme.breakpoints.down('sm')]: {
-      width: 'calc(100% - 64px)',
-      maxWidth: 'calc(100% - 64px)',
+      width: 'calc(100% - 50px)',
+      maxWidth: 'calc(100% - 50px)',
     },
     transition: `${theme.transitions.duration.standard}ms ease`,
     position: 'absolute',
-    left: '64px',
+    left: '50px',
   };
 
   useEffect(() => {

@@ -69,7 +69,6 @@ export default function ExportModal(): JSX.Element {
   const textFieldRef = useRef(null) as RefObject<HTMLInputElement>;
   const exportTitleRef = useRef(null) as RefObject<HTMLDivElement>;
 
-  const legendId = `${mapId}AppbarPanelButtonLegend`;
   const fileExportDefaultPrefixName = t('exportModal.fileExportDefaultPrefixName');
   const footerbarLegendContainer = mapElement.querySelector(`[id^="${mapId}-footerBar-legendContainer"]`);
   const appBarLegendContainer = mapElement.querySelector(`[id^="${mapId}-appBar-legendContainer"]`);
@@ -197,7 +196,7 @@ export default function ExportModal(): JSX.Element {
 
               resizeImageData(dataUrl, `${fileExportDefaultPrefixName}-${exportTitle !== '' ? exportTitle.trim() : mapId}`)
                 .then(() => {
-                  setActiveAppBarTab(legendId, 'legend', false, false);
+                  setActiveAppBarTab('legend', false, false);
                   disableFocusTrap();
                 })
                 .catch((error) => {
@@ -216,7 +215,7 @@ export default function ExportModal(): JSX.Element {
   }) as MouseEventHandler<HTMLButtonElement>;
 
   const handleCloseModal = (): void => {
-    setActiveAppBarTab(legendId, 'legend', false, false);
+    setActiveAppBarTab('legend', false, false);
     disableFocusTrap();
   };
 
@@ -253,7 +252,7 @@ export default function ExportModal(): JSX.Element {
 
       // open legend in appbar when only appbar exists
       if (appBarLegendContainer && !footerbarLegendContainer) {
-        setActiveAppBarTab(legendId, 'legend', true, false);
+        setActiveAppBarTab('legend', true, false);
       }
       // Reason for timer, so that content of the export modal will be loaded
       // after modal is fully opened.

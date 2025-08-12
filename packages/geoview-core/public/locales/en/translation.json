@@ -151,7 +151,7 @@
     "toggleVisibility": "Toggle visibility",
     "toggleItemsVisibility": "Toggle classes visibility",
     "toggleSublayersVisibility": "Toggle sublayers visibility",
-    "toggleItemVisibility": "Click to show/hide item:",
+    "toggleItemVisibility": "Click to show/hide item",
     "toggleCollapse": "Toggle collapse",
     "zoomVisibleScale": "Zoom to visible scale",
     "querying": "Querying",
@@ -308,16 +308,18 @@
   },
   "warning": {
     "layer": {
-      "slowFetch": "Downloading '__param__' is taking longer then expected...",
       "slowRender": "The layer '__param__' is slow to render on the map, please be patient...",
+      "slowRenders": "Some layers are slow to render on the map, please be patient...",
       "basemapTakingLongTime": "The basemap is taking a long time to respond...",
       "metadataTakingLongTime": "The metadata for the layer '__param__' is taking longer than expected to fetch...",
+      "metadatasTakingLongTime": "The metadata for some layers is taking longer than expected to fetch...",
       "vectorTileRemoved": "The vector tile __param__ had to be removed due to a projection conflict."
     }
   },
   "error": {
     "generic": "An error happened, contact us or view console for details.",
     "layer": {
+      "differingFieldLengths": "Length of provided fields do not match.",
       "layerNotFound": "Layer at layer path '__param__' not found.",
       "wrongType": "Layer '__param__' isn't of the expected type.",
       "notAGeoJsonLayer": "Not a GeoJson layer for layer '__param__'.",

@@ -53,9 +53,13 @@ const getButtonStyleOverrides = (geoViewColors: IGeoViewColors): any => ({
     backgroundColor: `transparent`,
     border: `2px solid transparent`,
     color: `${geoViewColors.primary.main}`,
-    '&:hover, &:active, &.active': {
+    '&:hover, &:focus': {
+      backgroundColor: geoViewColors.primary.light[200],
+      color: geoViewColors.white,
+      boxShadow: 1,
+    },
+    '&:active, &.active': {
       backgroundColor: `${geoViewColors.primary.main}`,
-      border: `2px solid ${geoViewColors.primary.light[500]}`,
       color: `${geoViewColors.white}`,
       boxShadow: 1,
     },
@@ -65,10 +69,10 @@ const getButtonStyleOverrides = (geoViewColors: IGeoViewColors): any => ({
   },
   '&.style4': {
     // used for app-bar buttons
-    backgroundColor: `${geoViewColors.bgColor.dark[100]}`,
-    border: `2px solid ${geoViewColors.primary.light[500]}`,
-    color: `${geoViewColors.primary.dark[100]}`,
     boxShadow: 1,
+    borderRadius: 25,
+    height: 40,
+    width: 40,
     '&:hover, &:active, &.active': {
       backgroundColor: `${geoViewColors.primary.main}`,
       border: `2px solid ${geoViewColors.primary.light[500]}`,

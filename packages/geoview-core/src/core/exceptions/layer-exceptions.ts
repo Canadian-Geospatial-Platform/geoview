@@ -424,3 +424,20 @@ export class LayerNoGeographicDataInCSVError extends LayerError {
     Object.setPrototypeOf(this, LayerNoGeographicDataInCSVError.prototype);
   }
 }
+
+/**
+ * Error thrown when fields provided to update the feature fields are of different lengths.
+ * @extends {LayerError}
+ */
+export class LayerDifferingFieldLengths extends LayerError {
+  /**
+   * Constructs a new LayerDifferingFieldLengths instance.
+   * @param {string} layerPath - The path or identifier of the layer.
+   */
+  constructor(layerPath: string) {
+    super(layerPath, 'error.layer.differingFieldLengths', [layerPath]);
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, LayerDifferingFieldLengths.prototype);
+  }
+}

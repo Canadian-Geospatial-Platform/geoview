@@ -17,7 +17,7 @@ export class AppBarApi {
   mapId: string;
 
   // groups of array of button panels to hold all buttons created on the app-bar
-  buttons: Record<string, Record<string, TypeButtonPanel>> = {};
+  buttons: Record<string, TypeButtonPanel> = {};
 
   /** Callback handlers for the AppBar created event. */
   #onAppBarCreatedHandlers: AppBarCreatedDelegate[] = [];
@@ -32,8 +32,6 @@ export class AppBarApi {
    */
   constructor(mapId: string) {
     this.mapId = mapId;
-
-    this.#createDefaultButtonPanels();
   }
 
   /**
@@ -93,28 +91,15 @@ export class AppBarApi {
   }
 
   /**
-   * Function used to create default buttons, button panels
-   */
-  #createDefaultButtonPanels(): void {
-    // create default group for app-bar button panels
-    this.buttons.default = {};
-  }
-
-  /**
    * Creates a button on the app-bar that will open a panel
    *
    * @param {IconButtonPropsExtend} buttonProps - Button properties (icon, tooltip)
    * @param {TypePanelProps} panelProps - Panel properties (icon, title, content)
-   * @param {string | null | undefined} groupName - Optional value to set this button in a group
    * @returns {TypeButtonPanel | null} The created panel
    */
-  createAppbarPanel(
-    buttonProps: IconButtonPropsExtend,
-    panelProps: TypePanelProps,
-    groupName?: string | null | undefined
-  ): TypeButtonPanel | null {
+  createAppbarPanel(buttonProps: IconButtonPropsExtend, panelProps: TypePanelProps): TypeButtonPanel | null {
     if (buttonProps && panelProps) {
-      const buttonPanelId = `${this.mapId}${buttonProps.id || generateId(18)}`;
+      const buttonPanelId = buttonProps.id || generateId(18);
 
       const button: IconButtonPropsExtend = {
         ...buttonProps,
@@ -127,26 +112,17 @@ export class AppBarApi {
         type: CONST_PANEL_TYPES.APPBAR,
       };
 
-      // if group was not specified then add button panels to the default group
-      const group = groupName || 'default';
-
-      // if group does not exist then create it
-      if (!this.buttons[group]) {
-        this.buttons[group] = {};
-      }
-
       const buttonPanel: TypeButtonPanel = {
         buttonPanelId,
         panel: thePanelProps,
         button,
-        groupName: group,
       };
 
-      // add the new button panel to the correct group
-      if (group !== '__proto__' && buttonPanelId !== '__proto__') this.buttons[group][buttonPanelId] = buttonPanel;
+      // add the new button panel
+      if (buttonPanelId !== '__proto__') this.buttons[buttonPanelId] = buttonPanel;
 
       // trigger an event that a new button panel has been created to update the state and re-render
-      this.#emitAppBarCreated({ buttonPanelId, group, buttonPanel });
+      this.#emitAppBarCreated({ buttonPanelId, buttonPanel });
 
       return buttonPanel;
     }
@@ -163,14 +139,10 @@ export class AppBarApi {
   getAppBarButtonPanelById(buttonPanelId: string): TypeButtonPanel | null {
     // loop through groups of app-bar button panels
     for (let i = 0; i < Object.keys(this.buttons).length; i++) {
-      const group = this.buttons[Object.keys(this.buttons)[i]];
+      const buttonPanel: TypeButtonPanel = this.buttons[i];
 
-      for (let j = 0; j < Object.keys(group).length; j++) {
-        const buttonPanel: TypeButtonPanel = group[Object.keys(group)[j]];
-
-        if (buttonPanel.buttonPanelId === buttonPanelId) {
-          return buttonPanel;
-        }
+      if (buttonPanel.buttonPanelId === buttonPanelId) {
+        return buttonPanel;
       }
     }
 
@@ -186,54 +158,31 @@ export class AppBarApi {
   }
 
   /**
-   * Gets all created buttons panels regardless of group
-   *
-   * @returns {Record<string, TypeButtonPanels>} An object with all the button panels
-   */
-  getAllButtonPanels(): Record<string, TypeButtonPanel> {
-    const buttonPanels: Record<string, TypeButtonPanel> = {};
-
-    for (let i = 0; i < Object.keys(this.buttons).length; i += 1) {
-      const group = this.buttons[Object.keys(this.buttons)[i]];
-
-      for (let j = 0; j < Object.keys(group).length; j++) {
-        const buttonPanel: TypeButtonPanel = group[Object.keys(group)[j]];
-
-        buttonPanels[buttonPanel.buttonPanelId] = buttonPanel;
-      }
-    }
-
-    return buttonPanels;
-  }
-
-  /**
    * Removes an app-bar panel using an id
    *
    * @param {string} buttonPanelId - The id of the panel to remove
-   * @param {string} group - The button group name to delete from
    */
-  removeAppbarPanel(buttonPanelId: string, group: string): void {
+  removeAppbarPanel(buttonPanelId: string): void {
     try {
       // delete the panel from the group
-      delete this.buttons[group][buttonPanelId];
+      delete this.buttons[buttonPanelId];
 
       // trigger an event that a panel has been removed to update the state and re-render
-      this.#emitAppBarRemoved({ buttonPanelId, group });
+      this.#emitAppBarRemoved({ buttonPanelId });
     } catch (error: unknown) {
       // Log
-      logger.logError(`Failed to get app bar panel button ${group}/${buttonPanelId}`, error);
+      logger.logError(`Failed to get app bar panel button ${buttonPanelId}`, error);
     }
   }
 
   /**
-   * Selects a tab by id and tab group
+   * Selects a tab by id
    *
    * @param {string} tabId - The id of the tab to be selected
-   * @param {string} tabGroup - The id of the panel
    * @param {boolean} open - Open (true) or closed (false) panel: default = true
    */
-  selectAppBarTab(tabId: string, tabGroup: string, open: boolean = true, isFocusTrapped: boolean = true): void {
-    UIEventProcessor.setActiveAppBarTab(this.mapId, tabId, tabGroup, open, isFocusTrapped);
+  selectTab(tabId: string, open: boolean = true, isFocusTrapped: boolean = true): void {
+    UIEventProcessor.setActiveAppBarTab(this.mapId, tabId, open, isFocusTrapped);
   }
 }
 
@@ -242,7 +191,6 @@ export class AppBarApi {
  */
 export type AppBarCreatedEvent = {
   buttonPanelId: string;
-  group: string;
   buttonPanel: TypeButtonPanel;
 };
 
@@ -256,7 +204,6 @@ type AppBarCreatedDelegate = EventDelegateBase<AppBarApi, AppBarCreatedEvent, vo
  */
 export type AppBarRemovedEvent = {
   buttonPanelId: string;
-  group: string;
 };
 
 /**

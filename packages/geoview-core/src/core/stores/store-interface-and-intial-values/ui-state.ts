@@ -1,5 +1,4 @@
 import { useStore } from 'zustand';
-import { capitalize } from 'lodash';
 import {
   TypeMapCorePackages,
   TypeNavBarProps,
@@ -19,13 +18,12 @@ type UIActions = IUIState['actions'];
 
 export type ActiveAppBarTabType = {
   tabId: string;
-  tabGroup: string;
   isOpen: boolean;
   isFocusTrapped?: boolean;
 };
 
 export interface IUIState {
-  activeFooterBarTabId: string;
+  activeFooterBarTabId: string | undefined;
   activeTrapGeoView: boolean;
   activeAppBarTab: ActiveAppBarTabType;
   appBarComponents: TypeValidAppBarCoreProps[];
@@ -44,8 +42,8 @@ export interface IUIState {
     enableFocusTrap: (uiFocus: FocusItemProps) => void;
     disableFocusTrap: (callbackElementId?: string) => void;
     showTab: (tab: string) => void;
-    setActiveFooterBarTab: (id: string) => void;
-    setActiveAppBarTab: (tabId: string, tabGroup: string, isOpen: boolean, isFocusTrapped: boolean) => void;
+    setActiveFooterBarTab: (id: string | undefined) => void;
+    setActiveAppBarTab: (tabId: string, isOpen: boolean, isFocusTrapped: boolean) => void;
     setActiveTrapGeoView: (active: boolean) => void;
     setFooterPanelResizeValue: (value: number) => void;
     setFooterBarIsCollapsed: (collapsed: boolean) => void;
@@ -55,8 +53,8 @@ export interface IUIState {
   setterActions: {
     enableFocusTrap: (uiFocus: FocusItemProps) => void;
     disableFocusTrap: (callbackElementId?: string) => void;
-    setActiveFooterBarTab: (id: string) => void;
-    setActiveAppBarTab: (tabId: string, tabGroup: string, isOpen: boolean, isFocusTrapped: boolean) => void;
+    setActiveFooterBarTab: (id: string | undefined) => void;
+    setActiveAppBarTab: (tabId: string, isOpen: boolean, isFocusTrapped: boolean) => void;
     setActiveTrapGeoView: (active: boolean) => void;
     setFooterPanelResizeValue: (value: number) => void;
     setHiddenTabs: (hiddenTabs: string[]) => void;
@@ -77,7 +75,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
   const init = {
     appBarComponents: ['geolocator'],
     activeFooterBarTabId: '',
-    activeAppBarTab: { tabId: '', tabGroup: '', isOpen: false, isFocusTrapped: false },
+    activeAppBarTab: { tabId: '', isOpen: false, isFocusTrapped: false },
     activeTrapGeoView: false,
     corePackagesComponents: [],
     focusItem: { activeElementId: false, callbackElementId: false },
@@ -96,10 +94,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
           ...get().uiState,
           appBarComponents: geoviewConfig.appBar?.tabs.core || [],
           activeAppBarTab: {
-            tabId: geoviewConfig.appBar?.selectedTab
-              ? `${get().mapId}AppbarPanelButton${capitalize(geoviewConfig.appBar.selectedTab)}`
-              : '',
-            tabGroup: geoviewConfig.appBar?.selectedTab || '',
+            tabId: geoviewConfig.appBar?.selectedTab || '',
             isOpen: geoviewConfig.appBar?.collapsed !== undefined ? !geoviewConfig.appBar.collapsed : true,
             isFocusTrapped: false,
           },
@@ -135,7 +130,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
         // Redirect to event processor
         UIEventProcessor.showTab(get().mapId, tab);
       },
-      setActiveFooterBarTab: (id: string) => {
+      setActiveFooterBarTab: (id: string | undefined) => {
         // Redirect to setter
         get().uiState.setterActions.setActiveFooterBarTab(id);
       },
@@ -151,9 +146,9 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
         // Redirect to setter
         get().uiState.setterActions.setFooterBarIsCollapsed(collapsed);
       },
-      setActiveAppBarTab: (tabId: string, tabGroup: string, isOpen: boolean, isFocusTrapped: boolean) => {
+      setActiveAppBarTab: (tabId: string, isOpen: boolean, isFocusTrapped: boolean) => {
         // Redirect to setter
-        get().uiState.setterActions.setActiveAppBarTab(tabId, tabGroup, isOpen, isFocusTrapped);
+        get().uiState.setterActions.setActiveAppBarTab(tabId, isOpen, isFocusTrapped);
       },
       setSelectedFooterLayerListItemId: (layerListItemId: string) => {
         // Redirect to setter
@@ -180,7 +175,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
           },
         });
       },
-      setActiveFooterBarTab: (id: string) => {
+      setActiveFooterBarTab: (id: string | undefined) => {
         set({
           uiState: {
             ...get().uiState,
@@ -220,9 +215,9 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
           },
         });
       },
-      setActiveAppBarTab: (tabId: string, tabGroup: string, isOpen: boolean, isFocusTrapped: boolean = false) => {
+      setActiveAppBarTab: (tabId: string, isOpen: boolean, isFocusTrapped: boolean = false) => {
         // Gv Side effect with focus trap and side panel app bar open
-        // We need to check if the viewer is in keyboard navigation mode. If not, we do nt apply the focus trap.
+        // We need to check if the viewer is in keyboard navigation mode. If not, we don't apply the focus trap.
         // Focus trap has side effect when a app bar panel is open. It does not let user use their mouse
         // to pan the map. Even scroll is difficult, user needs to click outside the brower then come back for
         // the mouse wheel to work
@@ -232,7 +227,6 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
             ...get().uiState,
             activeAppBarTab: {
               tabId,
-              tabGroup,
               isOpen,
               isFocusTrapped: isFocusTrappedAndKeyboardNavigation,
             },
@@ -264,7 +258,8 @@ type FocusItemProps = {
 // UI state selectors
 // **********************************************************
 export const useUIActiveFocusItem = (): FocusItemProps => useStore(useGeoViewStore(), (state) => state.uiState.focusItem);
-export const useUIActiveFooterBarTabId = (): string => useStore(useGeoViewStore(), (state) => state.uiState.activeFooterBarTabId);
+export const useUIActiveFooterBarTabId = (): string | undefined =>
+  useStore(useGeoViewStore(), (state) => state.uiState.activeFooterBarTabId);
 export const useUIActiveAppBarTab = (): ActiveAppBarTabType => useStore(useGeoViewStore(), (state) => state.uiState.activeAppBarTab);
 export const useUIActiveTrapGeoView = (): boolean => useStore(useGeoViewStore(), (state) => state.uiState.activeTrapGeoView);
 export const useUIAppbarComponents = (): TypeValidAppBarCoreProps[] =>

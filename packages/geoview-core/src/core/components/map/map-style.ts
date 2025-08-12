@@ -96,7 +96,7 @@ export const getSxClasses = (): SxStyles => ({
   progressBar: {
     width: '100%',
     position: 'absolute',
-    bottom: 45,
-    '> span': { height: '6px' },
+    bottom: 40,
+    '> span': { height: '4px' },
   },
 });

@@ -181,14 +181,15 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
       // Show details panel as soon as there is a click on the map
       // If the current tab is not 'details' nor 'geochart', switch to details
       if (
-        !['details', 'geochart'].includes(UIEventProcessor.getActiveFooterBarTab(mapId)) &&
-        UIEventProcessor.getFooterBarComponents(mapId).includes('details')
+        UIEventProcessor.getActiveFooterBarTab(mapId) === undefined ||
+        (!['details', 'geochart'].includes(UIEventProcessor.getActiveFooterBarTab(mapId)!) &&
+          UIEventProcessor.getFooterBarComponents(mapId).includes('details'))
       ) {
         UIEventProcessor.setActiveFooterBarTab(mapId, 'details');
       }
       // Open details appbar tab when user clicked on map layer.
       if (UIEventProcessor.getAppBarComponents(mapId).includes('details')) {
-        UIEventProcessor.setActiveAppBarTab(mapId, `${mapId}AppbarPanelButtonDetails`, 'details', true, true);
+        UIEventProcessor.setActiveAppBarTab(mapId, 'details', true, true);
       }
 
       // Update the layer data array in the store, all the time, for all statuses

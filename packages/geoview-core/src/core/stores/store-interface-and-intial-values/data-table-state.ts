@@ -160,7 +160,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
       setInitiallayerDataTableSetting: (layerPath: string) => {
         const layerSettings = {
           columnFiltersRecord: [],
-          columnsFiltersVisibility: true,
+          columnsFiltersVisibility: false,
           mapFilteredRecord: true,
           rowsFilteredRecord: 0,
           toolbarRowSelectedMessageRecord: '',

@@ -33,8 +33,14 @@ interface LegendLayerHeaderProps {
   onExpandClick: (event: React.MouseEvent) => void;
 }
 
+// Length at which the tooltip should be shown
+const CONST_NAME_LENGTH_TOOLTIP = 50;
+
 // Extracted Header Component
 const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick }: LegendLayerHeaderProps): JSX.Element => {
+  // Log
+  logger.logTraceUseMemo('components/legend/legend-layer - LegendLayerHeader', layerPath);
+
   // Hooks
   const layerName = useSelectorLayerName(layerPath);
   const layerItems = useSelectorLayerItems(layerPath);
@@ -44,8 +50,8 @@ const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick }: LegendLay
   const layerType = useSelectorLayerType(layerPath);
   const layerStatus: TypeLayerStatus | undefined = useSelectorLayerStatus(layerPath);
 
-  // Log
-  logger.logTraceUseMemo('components/legend/legend-layer - LegendLayerHeader', layerPath, isCollapsed);
+  // This is used to determine if the text should be wrapped in a tooltip
+  const shouldShowTooltip = !!layerName && layerName.length > CONST_NAME_LENGTH_TOOLTIP;
 
   // Return the ui
   return (
@@ -53,7 +59,7 @@ const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick }: LegendLay
       <LayerIcon layerPath={layerPath} />
       <ListItemText
         primary={
-          <Tooltip title={layerName} placement="top">
+          <Tooltip title={layerName} placement="top" disableHoverListener={!shouldShowTooltip}>
             <Box>{layerName}</Box>
           </Tooltip>
         }

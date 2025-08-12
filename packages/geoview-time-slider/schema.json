@@ -35,10 +35,60 @@
             "type": "string",
             "default": false,
             "description": "Initial value on slider"
+          },
+          "temporalDimension": {
+            "additionalProperties": false,
+            "type": "object",
+            "description": "OGC time dimension definition.",
+            "properties": {
+              "field": {
+                "type": "string"
+              },
+              "default": {
+                "type": "string"
+              },
+              "displayPattern": {
+                "type": "array",
+                "items": {
+                  "datePrecision": "#/definitions/TypeDatePrecision",
+                  "timePrecision": "#/definitions/TypeTimePrecision"
+                }
+              },
+              "rangeItems": {
+                "description": "Definition of the range object in the OGC time dimension.",
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string"
+                  },
+                  "range": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "nearestValues": {
+                "enum": [
+                  "discrete",
+                  "absolute"
+                ]
+              },
+              "singleHandle": {
+                "type": "boolean"
+              },
+              "unitSymbol": {
+                "type": "string"
+              }
+            }
           }
         }
       }
     }
   },
-  "required": ["sliders"]
+  "required": [
+    "sliders"
+  ]
 }

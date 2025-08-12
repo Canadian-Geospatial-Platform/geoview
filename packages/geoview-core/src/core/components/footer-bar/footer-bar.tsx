@@ -34,7 +34,7 @@ import { Guide } from '@/core/components/guide/guide';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { FooterPlugin } from '@/api/plugin/footer-plugin';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
-import { isElementInViewport } from '@/core/utils/utilities';
+import { delay, scrollIfNotVisible } from '@/core/utils/utilities';
 
 interface Tab {
   icon: ReactNode;
@@ -238,8 +238,9 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
       const lastChild = tabsContainer.firstElementChild?.lastElementChild as HTMLElement | null;
       if (lastChild) {
         lastChild.style.overflow = isCollapsed ? 'unset' : '';
-        lastChild.style.maxHeight = isCollapsed ? '0px' : '';
+        lastChild.style.height = isCollapsed ? '0px' : '';
       }
+      tabsContainerRef.current = tabsContainer;
     }
   }, [isCollapsed, setActiveFooterBarTab]);
 
@@ -247,6 +248,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
    * Handle a collapse, expand event for the tabs component
    */
   const handleToggleCollapse = (): void => {
+    if (!isCollapsed) setActiveFooterBarTab(undefined);
     setFooterBarIsCollapsed(!isCollapsed);
   };
 
@@ -290,7 +292,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     // If clicked on a tab with a plugin
     MapEventProcessor.getMapViewerPlugins(mapId)
       .then((plugins) => {
-        if (plugins[selectedTab]) {
+        if (selectedTab && plugins[selectedTab]) {
           // Get the plugin
           const theSelectedPlugin = plugins[selectedTab];
 
@@ -397,13 +399,12 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     if (!tabsContainerRef?.current) return () => {};
 
     const handleClick = (): void => {
-      const behaviorScroll = (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth') as ScrollBehavior;
-
-      if (!isElementInViewport(tabsContainerRef.current!)) {
-        tabsContainerRef.current?.scrollIntoView({
-          behavior: behaviorScroll,
-          block: 'center',
-        });
+      if (tabsContainerRef.current) {
+        // Need delay to allow tabs container to resize on expand/collapse
+        delay(25).then(
+          () => scrollIfNotVisible(tabsContainerRef.current!, 'end'),
+          (error: unknown) => logger.logPromiseFailed('Delay failed', error)
+        );
       }
     };
 

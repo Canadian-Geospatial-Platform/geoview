@@ -18,9 +18,12 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   iconPreviewHoverable: {
     width: 24,
     height: 24,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     position: 'absolute',
     left: -3,
-    top: -2,
+    top: -3,
     padding: 0,
     borderRadius: 0,
     boxShadow: 2,
@@ -32,6 +35,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   iconPreviewStacked: {
     width: 24,
     height: 24,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     padding: 0,
     borderRadius: 0,
     border: '1px solid',
@@ -65,6 +71,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
   },
   iconPreview: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 0,
     borderRadius: 0,
     boxShadow: 2,

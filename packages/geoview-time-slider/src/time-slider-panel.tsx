@@ -25,8 +25,8 @@ interface TypeTimeSliderProps {
 /**
  * Time slider tab
  *
- * @param {TypeTimeSliderProps} props The properties passed to slider
- * @returns {JSX.Element} the time slider tab
+ * @param {TypeTimeSliderProps} props - The properties passed to slider
+ * @returns {JSX.Element} The time slider tab
  */
 export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const { mapId, configObj } = props;
@@ -43,8 +43,8 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const legendLayers = useLayerLegendLayers();
 
   /**
-   * handle Layer list when clicked on each layer.
-   * @param {LayerListEntry} layer layer clicked by the user.
+   * Handles Layer list when clicked on each layer.
+   * @param {LayerListEntry} layer - layer clicked by the user.
    */
   const handleClickLayerList = useCallback(
     (layer: LayerListEntry) => {
@@ -58,7 +58,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   );
 
   /**
-   * Get dates for current filters
+   * Gets dates for current filters
    * @param {TypeTimeSliderValues} timeSliderLayerInfo - Time slider layer info.
    */
   const getFilterInfo = (timeSliderLayerInfo: TypeTimeSliderValues): string | null => {
@@ -143,7 +143,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   );
 
   /**
-   * Render the right panel content based on selected Layer path of time slider.
+   * Renders the right panel content based on selected Layer path of time slider.
    * NOTE: Here we return null, so that in responsive grid layout, it can be used as flag to render the guide for time slider.
    * @returns {JSX.Element | null} JSX.Element | null
    */

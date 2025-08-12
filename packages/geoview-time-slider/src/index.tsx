@@ -127,50 +127,6 @@ class TimeSliderPlugin extends FooterPlugin {
    * @returns {TypeTabs} The TypeTabs for the TimeSlider Footer Plugin
    */
   override onCreateContentProps(): TypeTabs {
-    // TODO: Cleanup - This code doesn't seem to be valid anymore, commented on 2025-06-13
-    // // Set custom time dimension if applicable
-    // this.getConfig().sliders.forEach((obj: SliderProps) => {
-    //   if (obj.temporalDimension) {
-    //     const timeDimension: TimeDimension = {
-    //       field: obj.temporalDimension.field,
-    //       default: obj.temporalDimension.default,
-    //       unitSymbol: obj.temporalDimension.unitSymbol,
-    //       nearestValues: obj.temporalDimension.nearestValues,
-    //       range: DateMgt.createRangeOGC(obj.temporalDimension.range as unknown as string),
-    //       singleHandle: obj.temporalDimension.singleHandle,
-    //       displayPattern: obj.temporalDimension.displayPattern,
-    //       isValid: obj.temporalDimension.isValid,
-    //     };
-
-    //     // TODO: Check concurrency between plugin creation and setting temporal dimensions
-    //     // TO.DOCONT: I doubt that this (and few lines below) is a good place to set the temporal dimension on layers that might be
-    //     // TO.DOCONT: loading their metadata (and setting their own temporal dimension) at the same time as the plugin gets created.
-    //     // TO.DOCONT: Whichever call comes last will be overriding the setTemporalDimension set by the other concurrent task.
-    //     // TO.DOCONT: Fortunately, the time-slider plugin gets initialized 'late' as it's currently part of a footer, so they, most of the time,
-    //     // TO.DOCONT: always overwrite the config from the layer metadata which is probably what we want here.
-    //     // TP.DOCONT: It's risky, because if the Plugin gets created before the layer metadata is fully fetched and read,
-    //     // TO.DOCONT: the later will override the plugin settings (can be tested by adding fake delays).
-    //     // TO.DOCONT: If this Plugin has temporal dimension settings, for various layers, those should be set in synch with the layers
-    //     // TO.DOCONT: using event listeners, not at Plugin creation.
-    //     this.mapViewer().layer.getGeoviewLayer(obj.layerPaths[0])?.setTemporalDimension(timeDimension);
-    //   }
-
-    //   // Set override default value under time dimension if applicable
-    //   if (obj.defaultValue) {
-    //     const layerPath = obj.layerPaths[0];
-    //     const timeDimension = this.mapViewer().layer.getGeoviewLayer(layerPath)?.getTemporalDimension();
-
-    //     if (timeDimension) {
-    //       this.mapViewer()
-    //         .layer.getGeoviewLayer(layerPath)
-    //         ?.setTemporalDimension({
-    //           ...timeDimension,
-    //           default: obj.defaultValue,
-    //         });
-    //     }
-    //   }
-    // });
-
     return {
       id: 'time-slider',
       value: this.value!,
@@ -212,13 +168,16 @@ class TimeSliderPlugin extends FooterPlugin {
         // Get the layer
         const layer = this.mapViewer().layer.getGeoviewLayer(layerPath);
 
+        // Get the time slider config for the layer
+        const timesliderConfig = this.getConfig().sliders.find((slider) => slider.layerPaths.includes(layerPath));
+
         // If the layer was found and of right type
         if (layer instanceof AbstractGVLayer) {
           // Get the config
           const layerConfig = layer.getLayerConfig();
 
           // Check and add time slider layer when needed
-          TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.pluginProps.mapId, layer, layerConfig);
+          TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.pluginProps.mapId, layer, layerConfig, timesliderConfig);
         }
       });
     }

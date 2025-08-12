@@ -15,15 +15,37 @@ interface ItemsListProps {
 }
 
 // Extracted ListItem Component
+// Apply style to increase left/right tooltip area (padding: '0 18px 0 18px', margin: '0 -18px 0 -18px')
 const LegendListItem = memo(
-  ({ item: { icon, name, isVisible }, layerVisible }: { item: TypeLegendItem; layerVisible: boolean }): JSX.Element => (
+  ({
+    item: { icon, name, isVisible },
+    layerVisible,
+    showVisibilityTooltip: { show, value },
+    showNameTooltip,
+  }: {
+    item: TypeLegendItem;
+    layerVisible: boolean;
+    showVisibilityTooltip: { show: boolean; value: string };
+    showNameTooltip: boolean;
+  }): JSX.Element => (
     <ListItem className={!isVisible || !layerVisible ? 'unchecked' : 'checked'}>
-      <ListItemIcon>{icon ? <Box component="img" alt={name} src={icon} /> : <BrowserNotSupportedIcon />}</ListItemIcon>
-      <ListItemText primary={name} />
+      <ListItemIcon>
+        <Tooltip title={show ? value : ''} key={`Tooltip-${name}-${icon}1`} placement="left" disableHoverListener={!show}>
+          <Box sx={{ padding: '0 18px 0 18px', margin: '0 -18px 0 -18px' }}>
+            {icon ? <Box component="img" alt={name} src={icon} /> : <BrowserNotSupportedIcon />}
+          </Box>
+        </Tooltip>
+      </ListItemIcon>
+      <Tooltip title={showNameTooltip ? name : ''} key={`Tooltip-${name}-${icon}2`} placement="top" disableHoverListener={!showNameTooltip}>
+        <ListItemText primary={name} />
+      </Tooltip>
     </ListItem>
   )
 );
 LegendListItem.displayName = 'LegendListItem';
+
+// Length at which the tooltip should be shown
+const CONST_NAME_LENGTH_TOOLTIP = 30;
 
 // Item list component (no memo to force re render from layers panel modifications)
 export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsListProps): JSX.Element | null {
@@ -60,30 +82,26 @@ export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsList
   return (
     <List sx={sxClasses.subList}>
       {items.map((item) => {
-        if (!canToggleItemVisibility || layerHidden)
-          return (
-            <Tooltip title={item.name} key={`Tooltip-${item.name}-${item.icon}`} placement="top">
-              <LegendListItem item={item} layerVisible={!layerHidden} key={`${item.name}-${item.isVisible}-${item.icon}`} />
-            </Tooltip>
-          );
+        // Common properties for the legend list item
+        const commonProps = {
+          item,
+          layerVisible: !layerHidden,
+          showVisibilityTooltip: {
+            show: Boolean(canToggleItemVisibility && !layerHidden),
+            value: t('layers.toggleItemVisibility'),
+          },
+          showNameTooltip: item.name.length > CONST_NAME_LENGTH_TOOLTIP,
+          key: `${item.name}-${item.isVisible}-${item.icon}`,
+        };
 
-        return (
-          <Tooltip
-            title={
-              <div>
-                {t('layers.toggleItemVisibility')}
-                <br />
-                {item.name}
-              </div>
-            }
-            key={`Tooltip-${item.name}-${item.icon}`}
-            placement="top"
-            sx={sxClasses.toggleableItem}
-          >
-            <Box key={`Box-${item.name}-${item.icon}`} onClick={() => handleToggleItemVisibility(item)}>
-              <LegendListItem item={item} layerVisible={!layerHidden} key={`${item.name}-${item.isVisible}-${item.icon}`} />
-            </Box>
-          </Tooltip>
+        // If classes can be toggled, wrap the component in a Box to handle click events
+        const listItem = <LegendListItem {...commonProps} />;
+        return canToggleItemVisibility && !layerHidden ? (
+          <Box key={`Box-${item.name}-${item.icon}`} onClick={() => handleToggleItemVisibility(item)} sx={sxClasses.toggleableItem}>
+            {listItem}
+          </Box>
+        ) : (
+          listItem
         );
       })}
     </List>
