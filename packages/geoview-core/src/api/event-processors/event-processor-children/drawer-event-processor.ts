@@ -48,6 +48,8 @@ interface TypeGeoJSONStyleProps {
   textColor?: string;
   textHaloColor?: string;
   textHaloWidth?: number;
+  textBold?: boolean;
+  textItalic?: boolean;
 }
 
 const DEFAULT_ICON_SOURCE =
@@ -503,7 +505,49 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       feature.set('textColor', style.textColor);
       feature.set('textHaloColor', style.textHaloColor);
       feature.set('textHaloWidth', style.textHaloWidth);
+      feature.set('textBold', style.textBold);
+      feature.set('textItalic', style.textItalic);
     }
+  }
+
+  /**
+   * Extracts style properties from a feature
+   * @param {Feature} feature - The feature to extract properties from
+   * @param {StyleProps} currentStyle - The current style properties to update
+   * @returns {StyleProps} The extracted style properties
+   */
+  static #getFeatureProperties(feature: Feature, currentStyle: StyleProps): StyleProps {
+    const style: StyleProps = currentStyle;
+
+    // Extract text properties if they exist
+    if (feature.get('text') !== undefined) {
+      style.text = feature.get('text');
+      style.textSize = feature.get('textSize');
+      style.textFont = feature.get('textFont');
+      style.textColor = feature.get('textColor');
+      style.textHaloColor = feature.get('textHaloColor');
+      style.textHaloWidth = feature.get('textHaloWidth');
+      style.textBold = feature.get('textBold');
+      style.textItalic = feature.get('textItalic');
+    }
+
+    // Extract stroke/fill properties from the feature's style
+    const featureStyle = feature.getStyle();
+    if (featureStyle instanceof Style) {
+      const stroke = featureStyle.getStroke();
+      const fill = featureStyle.getFill();
+
+      if (stroke) {
+        style.strokeColor = stroke.getColor() as string;
+        style.strokeWidth = stroke.getWidth() || 1.3;
+      }
+
+      if (fill) {
+        style.fillColor = fill.getColor() as string;
+      }
+    }
+
+    return style;
   }
 
   // #region Drawing Actions
@@ -605,8 +649,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
             text: currentStyle.text,
             fill: new Fill({ color: currentStyle.textColor }),
             stroke: new Stroke({ color: currentStyle.textHaloColor, width: currentStyle.textHaloWidth }),
-            font: `${currentStyle.textSize}px ${currentStyle.textFont}`,
-            offsetY: -15,
+            font: `${currentStyle.textItalic ? 'italic ' : ''}${currentStyle.textBold ? 'bold ' : ''}${currentStyle.textSize}px ${'Arial'}`,
           }),
         });
       } else {
@@ -746,6 +789,22 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       const { feature } = event;
       if (!feature) return;
 
+      const isTextFeature = feature.get('text') !== undefined;
+      // Update Text Styles
+      if (isTextFeature) {
+        const textValue = feature.get('text');
+        const finalSize = feature.get('textSize') as number;
+        const isBold = feature.get('textBold') as boolean;
+        const isItalic = feature.get('textItalic') as boolean;
+
+        const state = this.getDrawerState(mapId);
+        if (!state) return;
+        state.actions.setTextValue(textValue);
+        state.actions.setTextSize(finalSize);
+        state.actions.setTextBold(isBold);
+        state.actions.setTextItalic(isItalic);
+      }
+
       const geom = feature.getGeometry();
       if (!geom) return;
       if (geom instanceof Point) return;
@@ -856,6 +915,11 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
         if (newTooltip) {
           newTooltip.getElement().hidden = true;
         }
+        const state = this.getDrawerState(mapId);
+        if (!state) return;
+
+        const featureProperties = this.#getFeatureProperties(newFeature, state.actions.getStyle());
+        state.actions.updateStateStyle(featureProperties);
       }
 
       this.getDrawerState(mapId)?.actions.setSelectedDrawing(newFeature);
@@ -951,8 +1015,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
             text: newStyle.text,
             fill: new Fill({ color: newStyle.textColor }),
             stroke: new Stroke({ color: newStyle.textHaloColor, width: newStyle.textHaloWidth }),
-            font: `${newStyle.textSize}px ${newStyle.textFont}`,
-            offsetY: -15,
+            font: `${newStyle.textItalic ? 'italic ' : ''}${newStyle.textBold ? 'bold ' : ''}${newStyle.textSize}px ${'Arial'}`,
           }),
         });
       } else {
@@ -1108,6 +1171,8 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
                   textColor: feature.get('textColor'),
                   textHaloColor: feature.get('textHaloColor'),
                   textHaloWidth: feature.get('textHaloWidth'),
+                  textBold: feature.get('textBold'),
+                  textItalic: feature.get('textItalic'),
                 };
               } else {
                 // point style icon
@@ -1194,8 +1259,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
                     color: styleProps.textHaloColor,
                     width: styleProps.textHaloWidth,
                   }),
-                  font: `${styleProps.textSize}px ${styleProps.textFont}`,
-                  offsetY: -15,
+                  font: `${styleProps.textItalic ? 'italic ' : ''}${styleProps.textBold ? 'bold ' : ''}${styleProps.textSize}px ${'Arial'}`,
                 }),
               });
             } else {

@@ -45,6 +45,8 @@ export {
   FileUpload as FileUploadIcon,
   FilterAlt as FilterAltIcon,
   FilterAltOff as FilterAltOffIcon,
+  FormatBold as FormatBoldIcon,
+  FormatItalic as FormatItalicIcon,
   Fullscreen as FullscreenIcon,
   FullscreenExit as FullscreenExitIcon,
   GitHub as GitHubIcon,

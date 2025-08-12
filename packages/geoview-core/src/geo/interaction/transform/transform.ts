@@ -15,7 +15,7 @@ import { TransformEvent, TransformSelectionEvent, TransformDeleteFeatureEvent } 
 export type TransformOptions = InteractionOptions & {
   features?: Collection<Feature>;
   geometryGroupKey?: string;
-  translateFeature?: boolean;
+  translate?: boolean;
   scale?: boolean;
   rotate?: boolean;
   stretch?: boolean;
@@ -59,7 +59,7 @@ export class Transform extends Interaction {
 
     // Set default options with all features enabled
     const defaultOptions = {
-      translateFeature: true,
+      translate: true,
       scale: true,
       rotate: true,
       stretch: true,
@@ -70,7 +70,7 @@ export class Transform extends Interaction {
     // Create the OLTransform options
     const olOptions: TransformOptions = {
       mapViewer: this.mapViewer,
-      translateFeature: defaultOptions.translateFeature,
+      translate: defaultOptions.translate,
       scale: defaultOptions.scale,
       rotate: defaultOptions.rotate,
       stretch: defaultOptions.stretch,
