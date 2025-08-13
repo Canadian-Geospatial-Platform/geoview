@@ -1750,7 +1750,7 @@ export class OLTransform extends OLPointer {
   #applyTextChanges(): void {
     if (!this.#textEditorElement || !this.selectedFeature) return;
 
-    const finalText = this.#textEditorElement.textContent || 'Text';
+    const finalText = this.#textEditorElement.innerHTML.replace(/<br\s*\/?>/gi, '\n') || 'Text';
     const isBold = this.selectedFeature.get('textBold') || false;
     const isItalic = this.selectedFeature.get('textItalic') || false;
     const currentSize = this.selectedFeature.get('textSize') || 14;
