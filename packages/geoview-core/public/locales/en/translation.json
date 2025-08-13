@@ -109,6 +109,7 @@
     "stepTwo": "Select format",
     "stepThree": "Configure layer",
     "stepFour": "Enter name",
+    "fileTypes": "Upload a CSV, shapefile, or GeoJSON file",
     "service": "Service type",
     "serviceEsriShapefile": "Shapefile",
     "serviceEsriFeature": "ESRI Feature Service",
@@ -169,12 +170,14 @@
     "layerTemporalDimensionField": "field",
     "layerServiceProjection": "Service projection: ",
     "layerHoverable": "Info on mouse over",
-    "layerQueryable": "Info on mouse click"
+    "layerQueryable": "Info on mouse click",
+    "noSelection": "No selection"
   },
   "details": {
     "title": "Details",
     "zoomTo": "Zoom to feature",
     "select": "Highlight feature on map",
+    "closeSelection": "Close selection",
     "externalLink": "External Link",
     "feature": "feature",
     "clickOnMap": "Click on map",
@@ -275,7 +278,7 @@
     "downloadAsGeoJSON": "Download GeoJSON",
     "downloadAsCSV": "Download CSV",
     "filterMap": "Filter map",
-    "stopFilterMap": "Stop filter map",
+    "stopFilterMap": "Stop filtering map",
     "clearFilters": "Clear filters",
     "rowsSelected": "{rowsSelected} of {totalRows} row(s) selected",
     "rowsFiltered": "{rowsFiltered} of {totalRows} row(s) filtered",
@@ -313,7 +316,8 @@
       "basemapTakingLongTime": "The basemap is taking a long time to respond...",
       "metadataTakingLongTime": "The metadata for the layer '__param__' is taking longer than expected to fetch...",
       "metadatasTakingLongTime": "The metadata for some layers is taking longer than expected to fetch...",
-      "vectorTileRemoved": "The vector tile __param__ had to be removed due to a projection conflict."
+      "vectorTileRemoved": "The vector tile __param__ had to be removed due to a projection conflict.",
+      "basemapLayerCreationError": "Error creating __param__ basemap."
     }
   },
   "error": {

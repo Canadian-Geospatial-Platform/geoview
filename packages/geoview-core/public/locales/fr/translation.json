@@ -109,6 +109,7 @@
     "stepTwo": "Sélectionner le format",
     "stepThree": "Configurer la couche",
     "stepFour": "Entrer le nom",
+    "fileTypes": "Téléverser un fichier CSV, shapefile ou GeoJSON",
     "service": "Type de service",
     "serviceEsriShapefile": "Shapefile",
     "serviceEsriFeature": "Service d'éléments ESRI",
@@ -169,12 +170,14 @@
     "layerTemporalDimensionField": "champ",
     "layerServiceProjection": "Projection du service : ",
     "layerHoverable": "Info au passage de la souris",
-    "layerQueryable": "Info au click de la souris"
+    "layerQueryable": "Info au click de la souris",
+    "noSelection": "Aucune sélection"
   },
   "details": {
     "title": "Détails",
     "zoomTo": "Zoom à l'élément",
     "select": "Sélectionner l'élément sur la carte",
+    "closeSelection": "Fermer la sélection",
     "externalLink": "Lien externe",
     "feature": "élément",
     "clickOnMap": "Cliquer sur la carte",
@@ -275,6 +278,7 @@
     "downloadAsGeoJSON": "Télécharger GeoJSON",
     "downloadAsCSV": "Télécharger CSV",
     "filterMap": "Filtrer la carte",
+    "stopFilterMap": "Arrêter le filtrage de la carte",
     "clearFilters": "Effacer les filtres",
     "rowsSelected": "{rowsSelected} sur {totalRows} ligne(s) sélectionnée(s)",
     "rowsFiltered": "{rowsFiltered} sur {totalRows} ligne(s) filtrée(s)",
@@ -312,7 +316,8 @@
       "basemapTakingLongTime": "La couche de base prend plus de temps que prévu à répondre...",
       "metadataTakingLongTime": "Les métadonnées pour la couche '__param__' prennent plus de temps que prévu à récupérer...",
       "metadatasTakingLongTime": "Le téléchargement des métadonnées de certaines couches prend plus de temps que...",
-      "vectorTileRemoved": "La tuile vectorielle '__param__' a dû être retirée en raison d'un conflit de projection."
+      "vectorTileRemoved": "La tuile vectorielle '__param__' a dû être retirée en raison d'un conflit de projection.",
+      "basemapLayerCreationError": "Erreur lors de la création de la couche de base __param__."
     }
   },
   "error": {

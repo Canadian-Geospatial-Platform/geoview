@@ -1,7 +1,7 @@
 import { useRef, useCallback, useState } from 'react';
 import { useTheme } from '@mui/material';
 import { Box } from '@/ui';
-import { useLayerDisplayState, useLayerStoreActions, useSelectedLayer } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerDisplayState, useSelectedLayer } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { LayersToolbar } from './layers-toolbar';
 import { LayerDetails } from './right-panel/layer-details';
 import { LeftPanel } from './left-panel/left-panel';
@@ -24,7 +24,6 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
   const displayState = useLayerDisplayState();
   const [isLayoutEnlarged, setIsLayoutEnlarged] = useState<boolean>(false);
 
-  const { setSelectedLayerPath } = useLayerStoreActions();
   const { setSelectedFooterLayerListItemId } = useUIStoreActions();
 
   const responsiveLayoutRef = useRef<ResponsiveGridLayoutExposedMethods>(null);
@@ -93,15 +92,6 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
     );
   };
 
-  const handleGuideIsOpen = useCallback(
-    (guideIsOpen: boolean): void => {
-      if (guideIsOpen) {
-        setSelectedLayerPath('');
-      }
-    },
-    [setSelectedLayerPath]
-  );
-
   const handleIsEnlargeClicked = useCallback(
     (isEnlarged: boolean): void => {
       setIsLayoutEnlarged(isEnlarged);
@@ -118,7 +108,6 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
       rightMain={rightPanel()}
       guideContentIds={guideContent()}
       fullWidth={false}
-      onGuideIsOpen={handleGuideIsOpen}
       hideEnlargeBtn={displayState !== 'view'}
       containerType={containerType}
       onIsEnlargeClicked={handleIsEnlargeClicked}

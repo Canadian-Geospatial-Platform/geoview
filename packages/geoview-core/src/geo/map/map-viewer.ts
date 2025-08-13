@@ -371,8 +371,8 @@ export class MapViewer {
     // Load the core packages plugins
     await this.#loadCorePackages();
 
-    // Reset the basemap
-    await MapEventProcessor.resetBasemap(this.mapId);
+    // Reset the basemap - not awaited as we proceed with empty basemap while it loads
+    MapEventProcessor.resetBasemap(this.mapId).catch((error: unknown) => logger.logError('Basemap creation failed', error));
 
     // Emit map init
     this.#mapInit = true;

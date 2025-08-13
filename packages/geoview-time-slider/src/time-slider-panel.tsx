@@ -36,7 +36,8 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
 
   // get values from store
   const visibleLayers = useMapVisibleLayers();
-  const timeSliderLayers = useTimeSliderLayers();
+  // timeSliderLayers will always be present here, ! used to ignore possibility of it being undefined
+  const timeSliderLayers = useTimeSliderLayers()!;
   const selectedLayerPath = useTimeSliderSelectedLayerPath();
   const { setSelectedLayerPath } = useTimeSliderStoreActions();
   const { isLayerHiddenOnMap } = useMapStoreActions();
@@ -133,15 +134,6 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
     }
   }, [memoLayersList, selectedLayerPath, setSelectedLayerPath]);
 
-  const handleGuideIsOpen = useCallback(
-    (guideIsOpen: boolean): void => {
-      if (guideIsOpen) {
-        setSelectedLayerPath('');
-      }
-    },
-    [setSelectedLayerPath]
-  );
-
   /**
    * Renders the right panel content based on selected Layer path of time slider.
    * NOTE: Here we return null, so that in responsive grid layout, it can be used as flag to render the guide for time slider.
@@ -160,7 +152,6 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
       selectedLayerPath={selectedLayerPath}
       onLayerListClicked={handleClickLayerList}
       layerList={memoLayersList}
-      onGuideIsOpen={handleGuideIsOpen}
       guideContentIds={['timeSlider']}
     >
       {renderContent()}

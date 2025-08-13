@@ -19,7 +19,7 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { logger } from '@/core/utils/logger';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { BasemapTakingLongTimeError, CoreBasemapCreationError } from '@/core/exceptions/geoview-exceptions';
+import { BasemapTakingLongTimeError, BasemapLayerCreationError, CoreBasemapCreationError } from '@/core/exceptions/geoview-exceptions';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { formatError } from '@/core/exceptions/core-exceptions';
@@ -419,7 +419,7 @@ export class BasemapApi {
           this.basemapsList[projectionCode].transport,
           defaultOpacity,
           true
-        );
+        ).catch(() => this.#emitBasemapError({ error: new BasemapLayerCreationError('transport') }));
 
         if (transportLayer) {
           basemapLayers.push(transportLayer);
@@ -441,7 +441,8 @@ export class BasemapApi {
           this.basemapsList[projectionCode].shaded,
           coreBasemapOptions.basemapId === 'transport' ? 0.3 : defaultOpacity,
           true
-        );
+        ).catch(() => this.#emitBasemapError({ error: new BasemapLayerCreationError('shaded') }));
+
         if (shadedLayer) {
           basemapLayers.push(shadedLayer);
           basemaplayerTypes.push('shaded');
@@ -455,7 +456,7 @@ export class BasemapApi {
           this.basemapsList[projectionCode].simple,
           coreBasemapOptions.shaded ? 0.75 : defaultOpacity,
           true
-        );
+        ).catch(() => this.#emitBasemapError({ error: new BasemapLayerCreationError('simple') }));
 
         if (simpleLayer) {
           basemapLayers.push(simpleLayer);
@@ -498,7 +499,8 @@ export class BasemapApi {
           this.basemapsList[projectionCode].imagery,
           coreBasemapOptions.shaded ? 0.75 : defaultOpacity,
           true
-        );
+        ).catch(() => this.#emitBasemapError({ error: new BasemapLayerCreationError('imagery') }));
+
         if (imageryLayer) {
           basemapLayers.push(imageryLayer);
           basemaplayerTypes.push('imagery');
@@ -522,7 +524,8 @@ export class BasemapApi {
           }),
           0.8,
           true
-        );
+        ).catch(() => this.#emitBasemapError({ error: new BasemapLayerCreationError('labeled') }));
+
         if (labelLayer) {
           basemapLayers.push(labelLayer);
           basemaplayerTypes.push('label');
