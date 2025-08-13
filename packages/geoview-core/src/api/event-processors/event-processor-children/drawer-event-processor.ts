@@ -42,6 +42,7 @@ interface TypeGeoJSONStyleProps {
   strokeWidth?: number;
   fillColor?: string;
   iconSrc?: string;
+  iconSize?: number;
   text?: string;
   textSize?: number;
   textFont?: string;
@@ -498,6 +499,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     // Set type-specific properties
     if (geomType === 'Point' && iconSrc) {
       feature.set('iconSrc', iconSrc);
+      feature.set('iconSize', style.iconSize);
     } else if (geomType === 'Text') {
       feature.set('text', style.text);
       feature.set('textSize', style.textSize);
@@ -641,6 +643,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
             anchor: [0.5, 1], // 50% of X = Middle, 100% Y = Bottom
             anchorXUnits: 'fraction',
             anchorYUnits: 'fraction',
+            scale: (currentStyle.iconSize || 24) / 24,
           }),
         });
       } else if (currentGeomType === 'Text') {
@@ -1006,6 +1009,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
             anchor: [0.5, 1],
             anchorXUnits: 'fraction',
             anchorYUnits: 'fraction',
+            scale: (newStyle.iconSize || 24) / 24,
           }),
         });
       } else if (isTextFeature) {
@@ -1270,6 +1274,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
                   anchor: [0.5, 1],
                   anchorXUnits: 'fraction',
                   anchorYUnits: 'fraction',
+                  scale: (styleProps.iconSize || 24) / 24,
                 }),
               });
             }

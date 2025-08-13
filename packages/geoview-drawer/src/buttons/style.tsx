@@ -74,6 +74,7 @@ export function StylePanel(): JSX.Element {
     setFillColor,
     setStrokeColor,
     setStrokeWidth,
+    setIconSize,
     setTextValue,
     setTextSize,
     setTextHaloColor,
@@ -122,6 +123,14 @@ export function StylePanel(): JSX.Element {
   const handleStrokeColorClose = useCallback((): void => {
     setStrokeColor(localStrokeColor);
   }, [setStrokeColor, localStrokeColor]);
+
+  const handleIconSizeChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>): void => {
+      const size = parseInt(event.target.value, 10);
+      if (!Number.isNaN(size)) setIconSize(size);
+    },
+    [setIconSize]
+  );
 
   const handleTextColorChange = useCallback((newColor: string): void => {
     setLocalTextColor(newColor);
@@ -342,6 +351,26 @@ export function StylePanel(): JSX.Element {
             {getLocalizedMessage(displayLanguage, 'drawer.fillColour')}
           </Typography>
           <MuiColorInput value={localFillColor} onChange={handleFillColorChange} onBlur={handleFillColorClose} sx={sxClasses.input} />
+        </ListItem>
+      )}
+
+      {/* Point-specific controls */}
+      {currentGeomType === 'Point' && (
+        <ListItem sx={sxClasses.listItem}>
+          <Typography variant="subtitle2" sx={sxClasses.label}>
+            {getLocalizedMessage(displayLanguage, 'drawer.iconSize')}
+          </Typography>
+          <TextField
+            value={style.iconSize || 24}
+            onChange={handleIconSizeChange}
+            sx={sxClasses.input}
+            slotProps={{
+              input: {
+                type: 'number',
+                inputProps: { min: 8, max: 100, step: 1 },
+              },
+            }}
+          />
         </ListItem>
       )}
 
