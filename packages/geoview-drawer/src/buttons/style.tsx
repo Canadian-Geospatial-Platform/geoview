@@ -239,7 +239,7 @@ export function StylePanel(): JSX.Element {
             <Typography variant="subtitle2" sx={sxClasses.label}>
               {getLocalizedMessage(displayLanguage, 'drawer.text')}
             </Typography>
-            <TextField value={style.text || ''} onChange={handleTextChange} sx={sxClasses.input} placeholder="Enter text" />
+            <TextField value={style.text || ''} onChange={handleTextChange} sx={sxClasses.input} placeholder="Enter text" multiline />
           </ListItem>
 
           {/* Text Color and Size in one row */}
