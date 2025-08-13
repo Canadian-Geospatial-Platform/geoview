@@ -18,6 +18,7 @@ export type StyleProps = {
   fillColor: string;
   strokeColor: string;
   strokeWidth: number;
+  iconSize?: number;
   text?: string;
   textSize?: number;
   textFont?: string;
@@ -76,6 +77,7 @@ export interface IDrawerState {
     setFillColor(fillColor: string): void;
     setStrokeColor(strokeColor: string): void;
     setStrokeWidth(strokeWidth: number): void;
+    setIconSize: (iconSize: number) => void;
     setTextValue: (text: string) => void;
     setTextSize: (textSize: number) => void;
     setTextFont: (textFont: string) => void;
@@ -111,6 +113,7 @@ export interface IDrawerState {
     setFillColor: (fillColor: string) => void;
     setStrokeColor: (strokeColor: string) => void;
     setStrokeWidth: (strokeWidth: number) => void;
+    setIconSize: (iconSize: number) => void;
     setTextValue: (text: string) => void;
     setTextSize: (textSize: number) => void;
     setTextFont: (textFont: string) => void;
@@ -150,6 +153,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
       fillColor: 'rgba(252, 241, 0, 0.3)',
       strokeColor: '#000000',
       strokeWidth: 1.3,
+      iconSize: 24,
       text: 'Default Text',
       textSize: 14,
       textFont: 'Arial',
@@ -270,6 +274,10 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
       setStrokeWidth: (strokeWidth: number) => {
         // Redirect to setter
         get().drawerState.setterActions.setStrokeWidth(strokeWidth);
+      },
+      setIconSize: (iconSize: number) => {
+        // Redirect to setter
+        get().drawerState.setterActions.setIconSize(iconSize);
       },
       setTextValue: (text: string) => {
         // Redirect to setter
@@ -437,6 +445,19 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
             style: {
               ...get().drawerState.style,
               strokeWidth,
+            },
+          },
+        });
+        get().drawerState.actions.updateFeatureStyle();
+      },
+
+      setIconSize: (iconSize: number) => {
+        set({
+          drawerState: {
+            ...get().drawerState,
+            style: {
+              ...get().drawerState.style,
+              iconSize,
             },
           },
         });
