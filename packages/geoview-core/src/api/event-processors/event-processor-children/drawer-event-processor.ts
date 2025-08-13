@@ -652,7 +652,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
             text: currentStyle.text,
             fill: new Fill({ color: currentStyle.textColor }),
             stroke: new Stroke({ color: currentStyle.textHaloColor, width: currentStyle.textHaloWidth }),
-            font: `${currentStyle.textItalic ? 'italic ' : ''}${currentStyle.textBold ? 'bold ' : ''}${currentStyle.textSize}px ${'Arial'}`,
+            font: `${currentStyle.textItalic ? 'italic ' : ''}${currentStyle.textBold ? 'bold ' : ''}${currentStyle.textSize}px ${currentStyle.textFont}`,
           }),
         });
       } else {
@@ -1019,7 +1019,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
             text: newStyle.text,
             fill: new Fill({ color: newStyle.textColor }),
             stroke: new Stroke({ color: newStyle.textHaloColor, width: newStyle.textHaloWidth }),
-            font: `${newStyle.textItalic ? 'italic ' : ''}${newStyle.textBold ? 'bold ' : ''}${newStyle.textSize}px ${'Arial'}`,
+            font: `${newStyle.textItalic ? 'italic ' : ''}${newStyle.textBold ? 'bold ' : ''}${newStyle.textSize}px ${newStyle.textFont}`,
           }),
         });
       } else {
@@ -1263,7 +1263,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
                     color: styleProps.textHaloColor,
                     width: styleProps.textHaloWidth,
                   }),
-                  font: `${styleProps.textItalic ? 'italic ' : ''}${styleProps.textBold ? 'bold ' : ''}${styleProps.textSize}px ${'Arial'}`,
+                  font: `${styleProps.textItalic ? 'italic ' : ''}${styleProps.textBold ? 'bold ' : ''}${styleProps.textSize}px ${styleProps.textFont}`,
                 }),
               });
             } else {

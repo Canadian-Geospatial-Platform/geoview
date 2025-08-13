@@ -11,6 +11,8 @@ import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 import { logger } from 'geoview-core/core/utils/logger';
 
+import { FONT_OPTIONS, DEFAULT_FONT, loadGoogleFont } from '../utils/fonts';
+
 // Styles
 const sxClasses = {
   listItem: {
@@ -82,7 +84,7 @@ export function StylePanel(): JSX.Element {
     setTextColor,
     setTextBold,
     setTextItalic,
-    // TODO Allow changing Font familiy with setTextFont
+    setTextFont,
   } = useDrawerActions();
 
   const handleTextChange = useCallback(
@@ -90,6 +92,21 @@ export function StylePanel(): JSX.Element {
       setTextValue(event.target.value);
     },
     [setTextValue]
+  );
+
+  const handleFontChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>): void => {
+      const selectedFont = event.target.value;
+      const fontOption = FONT_OPTIONS.find((f) => f.value === selectedFont);
+
+      // Load Google Font if needed
+      if (fontOption?.isGoogleFont) {
+        loadGoogleFont(fontOption.name);
+      }
+
+      setTextFont(selectedFont);
+    },
+    [setTextFont]
   );
 
   const handleTextSizeChange = useCallback(
@@ -249,6 +266,29 @@ export function StylePanel(): JSX.Element {
               {getLocalizedMessage(displayLanguage, 'drawer.text')}
             </Typography>
             <TextField value={style.text || ''} onChange={handleTextChange} sx={sxClasses.input} placeholder="Enter text" multiline />
+          </ListItem>
+
+          <ListItem sx={sxClasses.listItem}>
+            <Typography variant="subtitle2" sx={sxClasses.label}>
+              {getLocalizedMessage(displayLanguage, 'drawer.textFont')}
+            </Typography>
+            <TextField
+              select
+              value={style.textFont || DEFAULT_FONT}
+              onChange={handleFontChange}
+              sx={sxClasses.input}
+              slotProps={{
+                select: {
+                  native: true,
+                },
+              }}
+            >
+              {FONT_OPTIONS.map((font) => (
+                <option key={font.value} value={font.value}>
+                  {font.name}
+                </option>
+              ))}
+            </TextField>
           </ListItem>
 
           {/* Text Color and Size in one row */}
