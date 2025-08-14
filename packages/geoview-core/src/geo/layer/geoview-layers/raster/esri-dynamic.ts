@@ -97,13 +97,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     const entriesTree = EsriDynamic.buildLayerEntriesTree(entries);
 
     // Redirect
-    return EsriDynamic.createEsriDynamicLayerConfig(
-      this.geoviewLayerId,
-      this.geoviewLayerName,
-      this.metadataAccessPath,
-      false,
-      entriesTree
-    );
+    // TODO: Check - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
+    return EsriDynamic.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, this.metadataAccessPath, false, entriesTree);
   }
 
   /**
@@ -184,7 +179,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {unknown} customGeocoreLayerConfig - An optional layer config from Geocore.
    * @returns {TypeEsriDynamicLayerConfig} The constructed configuration object for the Esri Dynamic layer.
    */
-  static createEsriDynamicLayerConfig(
+  static createGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
     metadataAccessPath: string,
@@ -224,20 +219,22 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {string} geoviewLayerName - The display name for the GeoView layer.
    * @param {string} url - The URL of the service endpoint.
    * @param {string[]} layerIds - An array of layer IDs to include in the configuration.
+   * @param {boolean} isTimeAware - Indicates if the layer is time aware.
    * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
    */
   static processGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
     url: string,
-    layerIds: number[]
+    layerIds: number[],
+    isTimeAware: boolean
   ): Promise<ConfigBaseClass[]> {
     // Create the Layer config
-    const layerConfig = EsriDynamic.createEsriDynamicLayerConfig(
+    const layerConfig = EsriDynamic.createGeoviewLayerConfig(
       geoviewLayerId,
       geoviewLayerName,
       url,
-      false,
+      isTimeAware,
       layerIds.map((layerId) => {
         return { id: layerId, index: layerId };
       }),

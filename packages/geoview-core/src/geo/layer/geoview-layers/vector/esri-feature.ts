@@ -104,6 +104,7 @@ export class EsriFeature extends AbstractGeoViewVector {
     }
 
     // Redirect
+    // TODO: Check - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
     return EsriFeature.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, entries);
   }
 
@@ -233,7 +234,7 @@ export class EsriFeature extends AbstractGeoViewVector {
         layerName: `${layerEntry.layerName || layerEntry.id}`,
         source: {
           format: 'EsriJSON',
-          dataAccessPath: layerEntry.dataAccessPath || undefined,
+          dataAccessPath: layerEntry.source?.dataAccessPath || undefined,
         },
       } as unknown as EsriFeatureLayerEntryConfig);
       return layerEntryConfig;
@@ -255,20 +256,22 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @param {string} geoviewLayerName - The display name for the GeoView layer.
    * @param {string} url - The URL of the service endpoint.
    * @param {string[]} layerIds - An array of layer IDs to include in the configuration.
+   * @param {boolean} isTimeAware - Indicates if the layer is time aware.
    * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
    */
   static processGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
     url: string,
-    layerIds: number[]
+    layerIds: number[],
+    isTimeAware: boolean
   ): Promise<ConfigBaseClass[]> {
     // Create the Layer config
     const layerConfig = EsriFeature.createGeoviewLayerConfig(
       geoviewLayerId,
       geoviewLayerName,
       url,
-      false,
+      isTimeAware,
       layerIds.map((layerId) => {
         return { id: layerId, index: layerId };
       })

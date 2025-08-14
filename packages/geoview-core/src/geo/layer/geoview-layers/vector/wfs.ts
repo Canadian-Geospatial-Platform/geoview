@@ -21,6 +21,7 @@ import {
   TypeMetadataWFS,
   TypeMetadataWFSOperationMetadataOperationParameter,
   TypeMetadataWFSOperationMetadataOperationParameterValue,
+  VectorStrategy,
 } from '@/api/config/types/map-schema-types';
 
 import { findPropertyByRegexPath } from '@/core/utils/utilities';
@@ -116,7 +117,9 @@ export class WFS extends AbstractGeoViewVector {
     });
 
     // Redirect
-    return WFS.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, entries);
+    // TODO: Check - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
+    // TODO: Check - Check if there's a way to better determine the vector strategy flag, defaults to 'all', how is it used here?
+    return WFS.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, 'all', entries);
   }
 
   /**
@@ -391,6 +394,7 @@ export class WFS extends AbstractGeoViewVector {
    * @param {string} geoviewLayerName - The display name of the GeoView layer.
    * @param {string} metadataAccessPath - The URL or path to access metadata or feature data.
    * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
+   * @param {VectorStrategy} strategy - Indicates the strategy to use to fetch vector data.
    * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns {TypeWFSLayerConfig} The constructed configuration object for the WFS Feature layer.
    */
@@ -399,6 +403,7 @@ export class WFS extends AbstractGeoViewVector {
     geoviewLayerName: string,
     metadataAccessPath: string,
     isTimeAware: boolean,
+    strategy: VectorStrategy,
     layerEntries: TypeLayerEntryShell[]
   ): TypeWFSLayerConfig {
     const geoviewLayerConfig: TypeWFSLayerConfig = {
@@ -418,7 +423,7 @@ export class WFS extends AbstractGeoViewVector {
         layerName: `${layerEntry.layerName || layerEntry.id}`,
         source: {
           format: 'WFS',
-          strategy: 'all',
+          strategy,
           dataAccessPath: metadataAccessPath,
         },
       } as unknown as WfsLayerEntryConfig);
@@ -441,20 +446,24 @@ export class WFS extends AbstractGeoViewVector {
    * @param {string} geoviewLayerName - The display name for the GeoView layer.
    * @param {string} url - The URL of the service endpoint.
    * @param {string[]} layerIds - An array of layer IDs to include in the configuration.
+   * @param {boolean} isTimeAware - Indicates if the layer is time aware.
    * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
    */
   static processGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
     url: string,
-    layerIds: string[]
+    layerIds: string[],
+    isTimeAware: boolean,
+    vectorStrategy: VectorStrategy
   ): Promise<ConfigBaseClass[]> {
     // Create the Layer config
     const layerConfig = WFS.createGeoviewLayerConfig(
       geoviewLayerId,
       geoviewLayerName,
       url,
-      false,
+      isTimeAware,
+      vectorStrategy,
       layerIds.map((layerId) => {
         return { id: layerId };
       })

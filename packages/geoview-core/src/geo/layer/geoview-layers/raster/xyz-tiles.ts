@@ -72,6 +72,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
   protected override onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Redirect
     return Promise.resolve(
+      // TODO: Check - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
       XYZTiles.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, this.metadataAccessPath, false, [])
     );
   }
@@ -266,20 +267,22 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * @param {string} geoviewLayerName - The display name for the GeoView layer.
    * @param {string} url - The URL of the service endpoint.
    * @param {string[]} layerIds - An array of layer IDs to include in the configuration.
+   * @param {boolean} isTimeAware - Indicates if the layer is time aware.
    * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
    */
   static processGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
     url: string,
-    layerIds: string[]
+    layerIds: string[],
+    isTimeAware: boolean
   ): Promise<ConfigBaseClass[]> {
     // Create the Layer config
     const layerConfig = XYZTiles.createGeoviewLayerConfig(
       geoviewLayerId,
       geoviewLayerName,
       url,
-      false,
+      isTimeAware,
       layerIds.map((layerId) => {
         return { id: layerId };
       })

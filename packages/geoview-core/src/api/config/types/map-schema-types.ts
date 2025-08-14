@@ -229,7 +229,7 @@ export type TypeBasemapOptions = {
 };
 
 /** Definition of the basemap options type. */
-export type TypeBasemapId = 'transport' | 'osm' | 'simple' | 'nogeom' | 'shaded' | 'imagery';
+export type TypeBasemapId = 'transport' | 'osm' | 'simple' | 'nogeom' | 'shaded' | 'imagery' | 'labeled';
 
 /** Definition of the valid map interactiom values. If map is dynamic (pan/zoom) or static to act as a thumbnail (no nav bar). */
 export type TypeInteraction = 'static' | 'dynamic';
@@ -300,7 +300,7 @@ export const VALID_PROJECTION_CODES = [3978, 3857];
 /**
  *  Definition of the basemap options type.
  */
-export const VALID_BASEMAP_ID: TypeBasemapId[] = ['transport', 'osm', 'simple', 'nogeom', 'shaded', 'imagery'];
+export const VALID_BASEMAP_ID: TypeBasemapId[] = ['transport', 'osm', 'simple', 'nogeom', 'shaded', 'imagery', 'labeled'];
 
 /** default configuration if provided configuration is missing or wrong */
 // valid basemap ids
@@ -701,12 +701,15 @@ export interface TypeBaseVectorSourceInitialConfig extends TypeBaseSourceInitial
   /** Definition of the feature information structure that will be used by the getFeatureInfo method. */
   featureInfo?: TypeFeatureInfoLayerConfig;
   /** Loading strategy to use (all or bbox). */
-  strategy?: 'all' | 'bbox';
+  strategy?: VectorStrategy;
   /** The projection code of the source. Default value is EPSG:4326. */
   dataProjection?: string; // TODO: refactor - from geo map schema types
   /** Settings to use when loading a GeoJSON layer using a POST instead of a GET */
   postSettings?: TypePostSettings; // TODO: refactor - from geo map schema types
 }
+
+/** The possible strategies when working with vector layers data */
+export type VectorStrategy = 'all' | 'bbox';
 
 /** Type from which we derive the source properties for all the Wfs leaf nodes in the layer tree. */
 export type TypeSourceWfsInitialConfig = TypeBaseVectorSourceInitialConfig;
