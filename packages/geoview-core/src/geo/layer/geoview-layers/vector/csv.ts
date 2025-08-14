@@ -55,7 +55,7 @@ export class CSV extends AbstractGeoViewVector {
     const id = this.metadataAccessPath.substring(idx + 1);
 
     // Redirect
-    return Promise.resolve(CSV.createCSVLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, [{ id }]));
+    return Promise.resolve(CSV.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, [{ id }]));
   }
 
   /**
@@ -139,7 +139,7 @@ export class CSV extends AbstractGeoViewVector {
    * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns {TypeCSVLayerConfig} The constructed configuration object for the CSV Feature layer.
    */
-  static createCSVLayerConfig(
+  static createGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
     metadataAccessPath: string,
@@ -190,14 +190,15 @@ export class CSV extends AbstractGeoViewVector {
     geoviewLayerId: string,
     geoviewLayerName: string,
     url: string,
-    layerIds: string[]
+    layerIds: string[],
+    isTimeAware: boolean
   ): Promise<ConfigBaseClass[]> {
     // Create the Layer config
-    const layerConfig = CSV.createCSVLayerConfig(
+    const layerConfig = CSV.createGeoviewLayerConfig(
       geoviewLayerId,
       geoviewLayerName,
       url,
-      false,
+      isTimeAware,
       layerIds.map((layerId) => {
         return { id: layerId };
       })

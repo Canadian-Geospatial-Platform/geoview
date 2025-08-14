@@ -92,6 +92,7 @@ export class GeoJSON extends AbstractGeoViewVector {
     const id = this.metadataAccessPath.substring(idx + 1);
 
     // Redirect
+    // TODO: Check - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
     return Promise.resolve(GeoJSON.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, [{ id }]));
   }
 
@@ -321,14 +322,15 @@ export class GeoJSON extends AbstractGeoViewVector {
     geoviewLayerId: string,
     geoviewLayerName: string,
     url: string,
-    layerIds: string[]
+    layerIds: string[],
+    isTimeAware: boolean
   ): Promise<ConfigBaseClass[]> {
     // Create the Layer config
     const layerConfig = GeoJSON.createGeoviewLayerConfig(
       geoviewLayerId,
       geoviewLayerName,
       url,
-      false,
+      isTimeAware,
       layerIds.map((layerId) => {
         return { id: layerId };
       })

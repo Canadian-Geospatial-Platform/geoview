@@ -229,7 +229,7 @@ export type TypeBasemapOptions = {
 };
 
 /** Definition of the basemap options type. */
-export type TypeBasemapId = 'transport' | 'osm' | 'simple' | 'nogeom' | 'shaded' | 'imagery';
+export type TypeBasemapId = 'transport' | 'osm' | 'simple' | 'nogeom' | 'shaded' | 'imagery' | 'labeled';
 
 /** Definition of the valid map interactiom values. If map is dynamic (pan/zoom) or static to act as a thumbnail (no nav bar). */
 export type TypeInteraction = 'static' | 'dynamic';
@@ -300,7 +300,7 @@ export const VALID_PROJECTION_CODES = [3978, 3857];
 /**
  *  Definition of the basemap options type.
  */
-export const VALID_BASEMAP_ID: TypeBasemapId[] = ['transport', 'osm', 'simple', 'nogeom', 'shaded', 'imagery'];
+export const VALID_BASEMAP_ID: TypeBasemapId[] = ['transport', 'osm', 'simple', 'nogeom', 'shaded', 'imagery', 'labeled'];
 
 /** default configuration if provided configuration is missing or wrong */
 // valid basemap ids

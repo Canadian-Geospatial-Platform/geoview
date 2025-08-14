@@ -470,29 +470,32 @@ export class ConfigApi {
     layerIds: number[] | string[]
   ): Promise<ConfigBaseClass[]> {
     // Depending on the type
+    // TODO: Check - Check, for ALL layers here, if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
     switch (layerType) {
       case 'esriDynamic':
-        return EsriDynamic.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as number[]);
+        return EsriDynamic.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as number[], false);
       case 'esriImage':
-        return EsriImage.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+        return EsriImage.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, false);
       case 'imageStatic':
-        return ImageStatic.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[]);
+        return ImageStatic.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], false);
       case 'vectorTiles':
-        return VectorTiles.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[]);
+        // TODO: Check - Check if there's a way to better determine the projection to send, defaults to 'EPSG:3978'
+        return VectorTiles.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], false, 'EPSG:3978');
       case 'ogcWms':
-        return WMS.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, 'mapserver', layerIds as number[]);
+        // TODO: Check - Check if there's a way to better determine the typeOfServer to send, defaults to 'mapserver'
+        return WMS.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as number[], false, 'mapserver');
       case 'xyzTiles':
-        return XYZTiles.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[]);
+        return XYZTiles.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], false);
       case 'CSV':
-        return CSV.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[]);
+        return CSV.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], false);
       case 'esriFeature':
-        return EsriFeature.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as number[]);
+        return EsriFeature.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as number[], false);
       case 'GeoJSON':
-        return GeoJSON.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[]);
+        return GeoJSON.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], false);
       case 'ogcFeature':
-        return OgcFeature.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[]);
+        return OgcFeature.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], false);
       case 'ogcWfs':
-        return WFS.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[]);
+        return WFS.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], false);
       default:
         // Unsupported
         throw new NotSupportedError(`Unsupported layer type ${layerType}`);

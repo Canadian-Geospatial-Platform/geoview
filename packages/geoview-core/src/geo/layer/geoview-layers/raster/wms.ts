@@ -145,6 +145,8 @@ export class WMS extends AbstractGeoViewRaster {
     });
 
     // Redirect
+    // TODO: Check - Check if there's a way to better determine the typeOfServer flag, defaults to mapserver, how is it used here?
+    // TODO: Check - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
     return WMS.createGeoviewLayerConfig(
       this.geoviewLayerId,
       metadata?.Capability.Layer.Title || this.geoviewLayerName,
@@ -822,8 +824,9 @@ export class WMS extends AbstractGeoViewRaster {
     geoviewLayerId: string,
     geoviewLayerName: string,
     url: string,
-    typeOfServer: TypeOfServer,
-    layerIds: number[]
+    layerIds: number[],
+    isTimeAware: boolean,
+    typeOfServer: TypeOfServer
   ): Promise<ConfigBaseClass[]> {
     // Create the Layer config
     const layerConfig = WMS.createGeoviewLayerConfig(
@@ -831,7 +834,7 @@ export class WMS extends AbstractGeoViewRaster {
       geoviewLayerName,
       url,
       typeOfServer,
-      false,
+      isTimeAware,
       layerIds.map((layerId) => {
         return { id: layerId };
       })

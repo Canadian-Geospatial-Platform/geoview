@@ -117,7 +117,7 @@ export class UUIDmapConfigReader {
           let geoviewLayerConfig: TypeGeoviewLayerConfig;
           if (layerType === CONST_LAYER_TYPES.ESRI_DYNAMIC && !isFeature) {
             // Redirect
-            geoviewLayerConfig = EsriDynamic.createEsriDynamicLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
+            geoviewLayerConfig = EsriDynamic.createGeoviewLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
           } else if (isFeature) {
             // GV: esriFeature layers as they are returned by RCS don't have a layerEntries property. It is undefined.
             // GV: Everything needed to create the geoview layer is in the URL.

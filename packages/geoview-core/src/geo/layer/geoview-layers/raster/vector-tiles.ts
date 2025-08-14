@@ -1,5 +1,6 @@
 import VectorTileSource, { Options as SourceOptions } from 'ol/source/VectorTile';
 import TileGrid, { Options as TileGridOptions } from 'ol/tilegrid/TileGrid';
+import { ProjectionLike } from 'ol/proj';
 
 import { applyStyle } from 'ol-mapbox-style';
 
@@ -48,13 +49,13 @@ export interface TypeVectorTilesConfig extends Omit<TypeGeoviewLayerConfig, 'lis
 export class VectorTiles extends AbstractGeoViewRaster {
   // TODO: Refactor - Review the purpose of this property
   /** Fallback projection (the map projection) */
-  fallbackProjection: string;
+  fallbackProjection: ProjectionLike;
 
   /**
    * Constructs a VectorTiles Layer configuration processor.
    * @param {TypeVectorTilesConfig} layerConfig the layer configuration
    */
-  constructor(layerConfig: TypeVectorTilesConfig, fallbackProjection: string) {
+  constructor(layerConfig: TypeVectorTilesConfig, fallbackProjection: ProjectionLike) {
     super(CONST_LAYER_TYPES.VECTOR_TILES, layerConfig);
     this.fallbackProjection = fallbackProjection;
   }
@@ -75,6 +76,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
   protected override onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Redirect
     return Promise.resolve(
+      // TODO: Check - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
       VectorTiles.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, this.metadataAccessPath, false, [])
     );
   }
@@ -266,21 +268,23 @@ export class VectorTiles extends AbstractGeoViewRaster {
     geoviewLayerId: string,
     geoviewLayerName: string,
     url: string,
-    layerIds: string[]
+    layerIds: string[],
+    isTimeAware: boolean,
+    fallbackProjection: ProjectionLike
   ): Promise<ConfigBaseClass[]> {
     // Create the Layer config
     const layerConfig = VectorTiles.createGeoviewLayerConfig(
       geoviewLayerId,
       geoviewLayerName,
       url,
-      false,
+      isTimeAware,
       layerIds.map((layerId) => {
         return { id: layerId };
       })
     );
 
     // Create the class from geoview-layers package
-    const myLayer = new VectorTiles(layerConfig, 'EPSG:3978');
+    const myLayer = new VectorTiles(layerConfig, fallbackProjection);
 
     // Process it
     return AbstractGeoViewLayer.processConfig(myLayer);
@@ -290,11 +294,11 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * Creates a VectorTileSource from a layer config.
    * This encapsulates projection, tileGrid, and format setup.
    * @param {VectorTilesLayerEntryConfig} layerConfig - Configuration object for the vector tile layer.
-   * @param {string} fallbackProjection - Fallback projection if none is provided in the config.
+   * @param {ProjectionLike} fallbackProjection - Fallback projection if none is provided in the config.
    * @returns An initialized VectorTileSource ready for use in a layer.
    * @throws If required config fields like dataAccessPath are missing.
    */
-  static createVectorTileSource(layerConfig: VectorTilesLayerEntryConfig, fallbackProjection: string): VectorTileSource {
+  static createVectorTileSource(layerConfig: VectorTilesLayerEntryConfig, fallbackProjection: ProjectionLike): VectorTileSource {
     const { source } = layerConfig;
 
     // Ensure the dataAccessPath is defined; required for fetching tiles
@@ -309,7 +313,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     };
 
     // Assign projection from config if present, otherwise use fallback (e.g., map's current projection)
-    sourceOptions.projection = source.projection ? `EPSG:${source.projection}` : fallbackProjection;
+    sourceOptions.projection = source.projection ? `EPSG:${source.projection}` : `${fallbackProjection}`;
 
     // Validate the spatial reference in the tileInfo (if set) is the same as the source
     if (
