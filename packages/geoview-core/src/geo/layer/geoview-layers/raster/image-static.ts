@@ -8,6 +8,7 @@ import {
   TypeGeoviewLayerConfig,
   CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
+  Extent,
 } from '@/api/config/types/map-schema-types';
 
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
@@ -55,6 +56,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
   protected override onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Redirect
     return Promise.resolve(
+      // TODO: Check - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
       ImageStatic.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, this.metadataAccessPath, false, [])
     );
   }
@@ -139,6 +141,8 @@ export class ImageStatic extends AbstractGeoViewRaster {
         layerId: `${layerEntry.id}`,
         source: {
           dataAccessPath: metadataAccessPath,
+          extent: layerEntry.source?.extent,
+          projection: layerEntry.source?.projection,
         },
       } as unknown as ImageStaticLayerEntryConfig);
       return layerEntryConfig;
@@ -160,22 +164,28 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * @param {string} geoviewLayerName - The display name for the GeoView layer.
    * @param {string} url - The URL of the service endpoint.
    * @param {string[]} layerIds - An array of layer IDs to include in the configuration.
+   * @param {boolean} isTimeAware - Indicates if the layer is time aware.
+   * @param {Extent} sourceExtent - Indicates the extent where the static image should be.
+   * @param {number} sourceProjection - Indicates the projection used for the sourceExtent.
    * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
    */
   static processGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
     url: string,
-    layerIds: string[]
+    layerIds: string[],
+    isTimeAware: boolean,
+    sourceExtent: Extent,
+    sourceProjection: number
   ): Promise<ConfigBaseClass[]> {
     // Create the Layer config
     const layerConfig = ImageStatic.createGeoviewLayerConfig(
       geoviewLayerId,
       geoviewLayerName,
       url,
-      false,
+      isTimeAware,
       layerIds.map((layerId) => {
-        return { id: layerId };
+        return { id: layerId, source: { extent: sourceExtent, projection: sourceProjection } };
       })
     );
 

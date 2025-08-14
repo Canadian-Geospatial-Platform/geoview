@@ -71,11 +71,6 @@
     <div>This page is used to test the ConfigApi.</div>
     <div>
       <div class="section">
-        <span>Layer type:
-          <select id="urls" class="select"></select>
-        </span>
-      </div>
-      <div class="section">
         <span>Language:
           <select id="language" class="select">
             <option value="en">en</option>
@@ -84,7 +79,15 @@
         </span>
       </div>
       <div class="section">
+        <span>Layer type:
+          <select id="urls" class="select"></select>
+        </span>
+      </div>
+      <div class="section">
         <span>URL:<input id="txtUrl" type="text" class="text-input" /></span>
+      </div>
+      <div id="section-layer-id" class="section" style="display: none;">
+        <span>Layer id:<input id="txtLayerId" type="text" class="text-input" /></span>
       </div>
       <div class="section">
         <input id="btnInitialize" type="button" value="Initialize" />
@@ -110,6 +113,130 @@
   <script src="codedoc.js"></script>
 
   <script>
+    // Definition of the samples that will be returned when you click on the 'Get a Sample URL' button.
+    const URLS = {
+      'Esri Dynamic': {
+        type: 'esriDynamic',
+        url: 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer',
+        layerIds: [2,3]
+      },
+      'Esri Feature - Flood Map': {
+        type: 'esriFeature',
+        url: 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/canada_flood_map_inventory_en/MapServer',
+        layerIds: [0]
+      },
+      'Esri Feature - Toronto': {
+        type: 'esriFeature',
+        url: 'https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/Toronto_Neighbourhoods/FeatureServer',
+        layerIds: [0]
+      },
+      'Esri Image - USA Cities (Actually an Esri Dynamic service)': {
+        type: 'esriImage',
+        url: 'https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/USA/MapServer',
+        layerIds: ['0']
+      },
+      'Esri Image - Annual Crop': {
+        type: 'esriImage',
+        url: 'https://www5.agr.gc.ca/atlas/rest/services/imageservices/annual_crop_inventory_2022/ImageServer',
+        layerIds: ['annual_crop_inventory_2022']
+      },
+      'WMS': {
+        type: 'ogcWms',
+        url: 'https://geo.weather.gc.ca/geomet',
+        layerIds: ['RADAR_1KM_RSNO']
+      },
+      'WMS - CER Assessments': {
+        type: 'ogcWms',
+        url: 'https://maps-cartes.services.geo.ca/server_serveur/services/NRCan/CER_Assessments_EN/MapServer/WMSServer', // TODO: Check - This URL seems weird!?
+        layerIds: [0]
+      },
+      'GeoJSON - Nor working, how should it work?': {
+        type: 'GeoJSON',
+        url: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata-new.meta'
+      },
+      'GeoJSON - Polygons': {
+        type: 'GeoJSON',
+        url: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson',
+        layerIds: ['polygons.json']
+      },
+      'CSV': {
+        type: 'CSV',
+        url: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/csv-files/Station_List_Minus_HQ-MELCC.csv'
+      },
+      'CSV - WaterMedia': {
+        type: 'CSV',
+        url: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/csv-files',
+        layerIds: ['NPRI-INRP_WaterEau_MediaGroupMilieu_2022']
+      },
+      'OGC Feature - Lakes': {
+        type: 'ogcFeature',
+        url: 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev',
+        layerIds: ['lakes']
+      },
+      'WFS - Current Conditions': {
+        type: 'ogcWfs',
+        url: 'https://geo.weather.gc.ca/geomet',
+        layerIds: ['ec-msc:CURRENT_CONDITIONS']
+      },
+      'WFS - States': {
+        type: 'ogcWfs',
+        url: 'https://ahocevar.com/geoserver/wfs?REQUEST=GetCapabilities&VERSION=2.0.0&SERVICE=WFS',
+        layerIds: ['usa:states']
+      },
+      'XYZ Tiles - World_Topo_Map': {
+        type: 'xyzTiles',
+        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer'
+      },
+      'XYZ Tiles - World_Topo_Map with xyz': {
+        type: 'xyzTiles',
+        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'
+      },
+      'Vector Tiles - CBMT_CBCT_3978_V_OSM': {
+        type: 'vectorTiles',
+        url: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3978_V_OSM/VectorTileServer',
+        layerIds: ['CBMT_CBCT_3978_V_OSM']
+      },
+      'Vector Tiles - CBMT3978_v11 with xyz': {
+        type: 'vectorTiles',
+        url: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT3978_v11/VectorTileServer/tile/{z}/{y}/{x}.pbf'
+      },
+      'Image Static - Napl Ring Of Fire': {
+        type: 'imageStatic',
+        url: 'https://datacube-prod-data-public.s3.ca-central-1.amazonaws.com/store/imagery/aerial/napl/napl-ring-of-fire',
+        layerIds: ['napl-ring-of-fire-1954-08-07-60k-thumbnail.png']
+      },
+      'Geocore - Airborne': {
+        type: 'geoCore',
+        url: '21b821cf-0f1c-40ee-8925-eab12d357668',
+        // layerIds: ['napl-ring-of-fire-1954-08-07-60k-thumbnail.png']
+      }
+    };
+
+    const selectLayerTypes = document.getElementById('urls');
+    const selectLang = document.getElementById('language');
+    const txtUrl = document.getElementById('txtUrl');
+    const sectionLayerId = document.getElementById('section-layer-id');
+    const txtLayerId = document.getElementById("txtLayerId");
+    const txtError = document.getElementById('txtError');
+    const txtLayers = document.getElementById('txtLayers');
+    const btnInitialize = document.getElementById('btnInitialize');
+    const btnProcess = document.getElementById('btnProcess');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+
+    function updateUI(valueInput) {
+      // Update the url txt
+      const value = JSON.parse(valueInput);
+
+      // Hide the layer id option
+      sectionLayerId.style.display = "none";
+      if (value.type === 'esriFeature') {
+        // Show it
+        sectionLayerId.style.display = "block";
+        // Load the layer id there, by default, as an Esri Feature layer url needs a layer id
+        txtLayerId.value = value.layerIds[0];
+      }
+    }
+
     /* Updates the url input based on the user selection in the selector */
     function updateUrlInput(valueInput) {
       // Update the url txt
@@ -129,11 +256,11 @@
         const option = document.createElement('option');
         option.value = JSON.stringify(value);
         option.textContent = label;
-        selectUrls.appendChild(option);
+        selectLayerTypes.appendChild(option);
       });
 
       // Update url input based on the selected option
-      updateUrlInput(selectUrls.value);
+      updateUrlInput(selectLayerTypes.value);
     }
 
     function cleanUI() {
@@ -193,97 +320,6 @@
       }
     }
 
-    // Definition of the samples that will be returned when you click on the 'Get a Sample URL' button.
-    const URLS = {
-      'Esri Dynamic': {
-        type: 'esriDynamic',
-        url: 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer',
-        layerIds: [2,3]
-      },
-      'Esri Feature - Flood Map': {
-        type: 'esriFeature',
-        url: 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/canada_flood_map_inventory_en/MapServer',
-        layerIds: [0]
-      },
-      'Esri Feature - Toronto': {
-        type: 'esriFeature',
-        url: 'https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/Toronto_Neighbourhoods/FeatureServer',
-        layerIds: [0]
-      },
-      'Esri Image': {
-        type: 'esriImage',
-        url: 'https://www5.agr.gc.ca/atlas/rest/services/imageservices/annual_crop_inventory_2022/ImageServer'
-      },
-      'WMS': {
-        type: 'ogcWms',
-        url: 'https://geo.weather.gc.ca/geomet',
-      },
-      'WMS - CER Assessments': {
-        type: 'ogcWms',
-        url: 'https://maps-cartes.services.geo.ca/server_serveur/services/NRCan/CER_Assessments_EN/MapServer/WMSServer',
-        layerIds: [0]
-      },
-      'GeoJSON': {
-        type: 'GeoJSON',
-        url: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata-new.meta'
-      },
-      'GeoJSON - Polygons': {
-        type: 'GeoJSON',
-        url: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson',
-        layerIds: ['polygons.json']
-      },
-      'CSV': {
-        type: 'CSV',
-        url: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/csv-files/Station_List_Minus_HQ-MELCC.csv'
-      },
-      'CSV - WaterMedia': {
-        type: 'CSV',
-        url: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/csv-files',
-        layerIds: ['NPRI-INRP_WaterEau_MediaGroupMilieu_2022']
-      },
-      'OGC Feature': {
-        type: 'ogcFeature',
-        url: 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev',
-        layerIds: ['lakes']
-      },
-      'WFS': {
-        type: 'ogcWfs',
-        url: 'https://ahocevar.com/geoserver/wfs?REQUEST=GetCapabilities&VERSION=2.0.0&SERVICE=WFS',
-        layerIds: ['usa:states']
-      },
-      'XYZ Tiles': {
-        type: 'xyzTiles',
-        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer'
-      },
-      'XYZ Tiles - with xyz': {
-        type: 'xyzTiles',
-        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'
-      },
-      'Vector Tiles': {
-        type: 'vectorTiles',
-        url: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT3978_v11/VectorTileServer/tile/{z}/{y}/{x}.pbf'
-      }, //   https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3978_V_OSM/VectorTileServer      CBMT_CBCT_3978_V_OSM
-      'Image Static': {
-        type: 'imageStatic',
-        url: 'https://datacube-prod-data-public.s3.ca-central-1.amazonaws.com/store/imagery/aerial/napl/napl-ring-of-fire',
-        layerIds: ['napl-ring-of-fire-1954-08-07-60k-thumbnail.png']
-      },
-      'Geocore - Airborne': {
-        type: 'geoCore',
-        url: '21b821cf-0f1c-40ee-8925-eab12d357668',
-        // layerIds: ['napl-ring-of-fire-1954-08-07-60k-thumbnail.png']
-      }
-    };
-
-    const selectUrls = document.getElementById('urls');
-    const selectLang = document.getElementById('language');
-    const txtUrl = document.getElementById('txtUrl');
-    const txtError = document.getElementById('txtError');
-    const txtLayers = document.getElementById('txtLayers');
-    const btnInitialize = document.getElementById('btnInitialize');
-    const btnProcess = document.getElementById('btnProcess');
-    const loadingOverlay = document.getElementById('loadingOverlay');
-
     // Transform the text area into a code text area using CodeMirror
     const editorResultInit = CodeMirror.fromTextArea(document.getElementById('textResultInit'), {
         lineNumbers: true,
@@ -295,7 +331,10 @@
     loadUI();
 
     // Handles a change of the url selection
-    selectUrls.addEventListener('change', function (e) {
+    selectLayerTypes.addEventListener('change', function (e) {
+      // Update UI based on the selected option
+      updateUI(e.target.value);
+
       // Update url input based on the selected option
       updateUrlInput(e.target.value);
     });
@@ -304,10 +343,16 @@
     btnInitialize.addEventListener('click', async function (e) {
       try {
         // Get the selected value
-        const value = JSON.parse(selectUrls.value);
+        const value = JSON.parse(selectLayerTypes.value);
+
+        // If an EsriFeature, suffix the url with the layer id
+        let url = txtUrl.value;
+        if (value.type === 'esriFeature') {
+          url = (url + '/' + txtLayerId.value).replace("//", "/");
+        }
 
         // Go
-        await initializeLayer(value.type, txtUrl.value, selectLang.value);
+        await initializeLayer(value.type, url, selectLang.value);
       } catch (error) {
         // Log
         cgpv.logger.logError(error);
@@ -319,7 +364,7 @@
     btnProcess.addEventListener('click', async function (e) {
       try {
         // Get the selected value
-        const value = JSON.parse(selectUrls.value);
+        const value = JSON.parse(selectLayerTypes.value);
 
         // Get the layer ids
         let layerIds = [];

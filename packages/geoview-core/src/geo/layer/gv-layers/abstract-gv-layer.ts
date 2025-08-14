@@ -73,7 +73,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   #externalFragmentsOrder?: TypeDateFragments;
 
   /** Boolean indicating if the layer should be included in time awareness functions such as the Time Slider. True by default. */
-  #isTimeAware: boolean = true;
+  #isTimeAware: boolean;
 
   /** Keep all callback delegate references */
   #onLayerStyleChangedHandlers: StyleChangedDelegate[] = [];

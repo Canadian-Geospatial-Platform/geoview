@@ -117,7 +117,7 @@ export class UUIDmapConfigReader {
           let geoviewLayerConfig: TypeGeoviewLayerConfig;
           if (layerType === CONST_LAYER_TYPES.ESRI_DYNAMIC && !isFeature) {
             // Redirect
-            geoviewLayerConfig = EsriDynamic.createEsriDynamicLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
+            geoviewLayerConfig = EsriDynamic.createGeoviewLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
           } else if (isFeature) {
             // GV: esriFeature layers as they are returned by RCS don't have a layerEntries property. It is undefined.
             // GV: Everything needed to create the geoview layer is in the URL.
@@ -130,7 +130,9 @@ export class UUIDmapConfigReader {
               {
                 id: layerIndex,
                 index: layerIndex,
-                dataAccessPath: layerUrl,
+                source: {
+                  dataAccessPath: layerUrl,
+                },
               },
             ]);
           } else if (layerType === CONST_LAYER_TYPES.ESRI_FEATURE) {
@@ -141,7 +143,8 @@ export class UUIDmapConfigReader {
             geoviewLayerConfig = WMS.createGeoviewLayerConfig(idClean, layerName, layerUrl, serverType!, layerIsTimeAware, layerEntries);
           } else if (layerType === CONST_LAYER_TYPES.WFS) {
             // Redirect
-            geoviewLayerConfig = WFS.createGeoviewLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
+            // TODO: Check - Check if there's a way to better determine the vector strategy to send, defaults to 'all'
+            geoviewLayerConfig = WFS.createGeoviewLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, 'all', layerEntries);
           } else if (layerType === CONST_LAYER_TYPES.OGC_FEATURE) {
             // Redirect
             geoviewLayerConfig = OgcFeature.createGeoviewLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);

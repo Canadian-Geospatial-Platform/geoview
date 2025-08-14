@@ -1,5 +1,6 @@
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import {
+  Extent,
   TypeGeoviewLayerConfig,
   TypeGeoviewLayerType,
   TypeLayerEntryType,
@@ -512,7 +513,13 @@ export type TypeLayerEntryShell = {
   layerName?: string;
   tileGrid?: TypeTileGrid;
   subLayers?: TypeLayerEntryShell[];
+  source?: TypeLayerEntryShellSource;
+};
+
+export type TypeLayerEntryShellSource = {
   dataAccessPath?: string;
+  extent?: Extent;
+  projection?: number;
 };
 
 // #endregion
