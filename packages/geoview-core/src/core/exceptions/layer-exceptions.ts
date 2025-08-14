@@ -177,10 +177,42 @@ export class LayerMissingGeoviewLayerIdError extends LayerError {
    * @param {TypeGeoviewLayerType} geoviewLayerType - The Geoview layer type
    */
   constructor(geoviewLayerType: TypeGeoviewLayerType) {
-    super('unknown', 'validation.layer.geoviewLayerIdMandatoryForLayerType', [geoviewLayerType]);
+    super('unknown', 'validation.layer.missingGeoviewLayerIdForLayerType', [geoviewLayerType]);
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, LayerMissingGeoviewLayerIdError.prototype);
+  }
+}
+
+/**
+ * Error thrown when a GeoView layer is missing a required `source.extent`.
+ * This typically indicates a configuration issue for a specific layer type.
+ */
+export class LayerMissingSourceExtentError extends LayerError {
+  /**
+   * Constructs a new LayerMissingSourceExtentError instance.
+   */
+  constructor() {
+    super('unknown', 'validation.layer.missingSourceExtent');
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, LayerMissingSourceExtentError.prototype);
+  }
+}
+
+/**
+ * Error thrown when a GeoView layer is missing a required `source.projection`.
+ * This typically indicates a configuration issue for a specific layer type.
+ */
+export class LayerMissingSourceProjectionError extends LayerError {
+  /**
+   * Constructs a new LayerMissingSourceProjectionError instance.
+   */
+  constructor() {
+    super('unknown', 'validation.layer.missingSourceProjection');
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, LayerMissingSourceProjectionError.prototype);
   }
 }
 

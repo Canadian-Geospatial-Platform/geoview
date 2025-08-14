@@ -13,6 +13,7 @@ import {
   TypeBaseVectorSourceInitialConfig,
   TypeFeatureInfoLayerConfig,
   TypeOutfields,
+  TypePostSettings,
 } from '@/api/config/types/map-schema-types';
 
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -89,17 +90,13 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       sourceOptions.attributions = layerConfig.getAttributions();
     }
 
-    // Read strategy
-    const sourceConfig = layerConfig.source as TypeBaseVectorSourceInitialConfig;
-    const strategy = sourceConfig.strategy === 'bbox' ? bbox : all;
-
     // Prepare the sourceOptions
     // eslint-disable-next-line prefer-const
     let vectorSource: VectorSource<Feature>;
 
     // Set loading strategy option
     // eslint-disable-next-line no-param-reassign
-    sourceOptions.strategy = strategy;
+    sourceOptions.strategy = layerConfig.source?.strategy === 'bbox' ? bbox : all;
 
     // ESlint override about misused-promises, because we're using async in the loader callback instead of returning void, no worries in the end.
     // eslint-disable-next-line no-param-reassign, @typescript-eslint/no-misused-promises
@@ -360,19 +357,19 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * Fetches text data from the given URL using settings defined in the vector source configuration.
    * Supports both GET and POST requests depending on the presence of `postSettings`.
    * @param {string} url - The URL to fetch data from.
-   * @param {TypeBaseVectorSourceInitialConfig} config - The vector source configuration that may define custom POST settings.
+   * @param {TypePostSettings} config - The possible POST settings from the layer config.
    * @returns {Promise<string>} A promise that resolves to the fetched text response.
    * @private
    */
-  static #fetchData(url: string, config: TypeBaseVectorSourceInitialConfig): Promise<string> {
+  static #fetchData(url: string, postSettings?: TypePostSettings): Promise<string> {
     // Default to a GET request
     const fetchOptions: RequestInit = { method: 'GET' };
 
     // If postSettings are defined, switch to POST and include headers and body
-    if (config.postSettings) {
+    if (postSettings) {
       fetchOptions.method = 'POST';
-      fetchOptions.headers = config.postSettings.header;
-      fetchOptions.body = JSON.stringify(config.postSettings.data);
+      fetchOptions.headers = postSettings.header;
+      fetchOptions.body = JSON.stringify(postSettings.data);
     }
 
     // Execute the fetch using the provided options and return the response text

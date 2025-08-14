@@ -13,7 +13,6 @@ import {
   TypeBaseVectorSourceInitialConfig,
   TypeLayerEntryConfig,
   CONST_LAYER_TYPES,
-  CONST_LAYER_ENTRY_TYPES,
 } from '@/api/config/types/map-schema-types';
 import { CsvLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
@@ -157,14 +156,9 @@ export class CSV extends AbstractGeoViewVector {
     geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
       const layerEntryConfig = new CsvLayerEntryConfig({
         geoviewLayerConfig,
-        schemaTag: CONST_LAYER_TYPES.CSV,
-        entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
         layerId: `${layerEntry.id}`,
         layerName: layerEntry.layerName || `${layerEntry.id}`,
-        source: {
-          dataAccessPath: metadataAccessPath,
-        },
-      } as unknown as CsvLayerEntryConfig);
+      });
       return layerEntryConfig;
     });
 

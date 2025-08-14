@@ -8,7 +8,6 @@ import {
   TypeLayerEntryConfig,
   TypeSourceTileInitialConfig,
   TypeGeoviewLayerConfig,
-  CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
 } from '@/api/config/types/map-schema-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
@@ -240,14 +239,12 @@ export class XYZTiles extends AbstractGeoViewRaster {
     geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
       const layerEntryConfig = new XYZTilesLayerEntryConfig({
         geoviewLayerConfig,
-        schemaTag: CONST_LAYER_TYPES.XYZ_TILES,
-        entryType: CONST_LAYER_ENTRY_TYPES.RASTER_TILE,
         layerId: `${layerEntry.id}`,
         layerName: `${layerEntry.name || layerEntry.id}`,
         source: {
           dataAccessPath: metadataAccessPath,
         },
-      } as unknown as XYZTilesLayerEntryConfig);
+      });
       return layerEntryConfig;
     });
 

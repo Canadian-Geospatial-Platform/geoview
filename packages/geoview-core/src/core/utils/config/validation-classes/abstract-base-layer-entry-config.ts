@@ -4,14 +4,39 @@ import {
   TypeLayerStyleSettings,
   TypeBaseSourceInitialConfig,
 } from '@/api/config/types/map-schema-types';
-import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
+import { ConfigBaseClass, ConfigBaseClassProps } from '@/core/utils/config/validation-classes/config-base-class';
 import { TimeDimension } from '@/core/utils/date-mgt';
 import { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
+
+export interface AbstractBaseLayerEntryConfigProps extends ConfigBaseClassProps {
+  /** Source settings to apply to the GeoView layer source at creation time. */
+  source?: TypeBaseSourceInitialConfig;
+  /** Filter to apply on feature of this layer. */
+  layerFilter?: string;
+  /** Style to apply to the vector layer. */
+  layerStyle?: TypeLayerStyleConfig;
+}
 
 /**
  * Base type used to define a GeoView layer to display on the map.
  */
 export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
+  // TODO: This source attribute is responsible for problems. Change to a getSource() and setSource().
+  // TO.DOCONT: However, to do so, we must fix the other major issue with TypeGeoviewLayerConfig and TypeLayerEntryConfig and the classes being created with 'fake classes' in their constructors.
+  /** Source settings to apply to the GeoView layer source at creation time. */
+  source?: TypeBaseSourceInitialConfig;
+
+  /** Filter to apply on feature of this layer. */
+  layerFilter?: string;
+
+  /** Style to apply to the vector layer. */
+  // TODO: This source attribute is responsible for problems. Change to a getLayerStyle() and setLayerStyle().
+  layerStyle?: TypeLayerStyleConfig;
+
+  /** The listOfLayerEntryConfig attribute is not used by child of AbstractBaseLayerEntryConfig. */
+  // TODO: Refactor - This attribute should be removed and logic applied using OO pattern once the constructor is cleaned up.
+  declare listOfLayerEntryConfig: never;
+
   /** The metadata associated with the service */
   #serviceMetadata?: unknown;
 
@@ -31,16 +56,16 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   // TODO: Cleanup - Get rid of this attribute as it doesn't seem to be used (always false)
   #legendFilterIsOff: boolean = false;
 
-  /** Style to apply to the vector layer. */
-  layerStyle?: TypeLayerStyleConfig;
-
-  /** Source settings to apply to the GeoView layer source at creation time. */
-  // TODO: This source attribute is responsible for problems. Change to a getSource() and setSource().
-  // TO.DOCONT: However, to do so, we must fix the other major issue with TypeGeoviewLayerConfig and TypeLayerEntryConfig and the classes being created with 'fake classes' in their constructors.
-  source?: TypeBaseSourceInitialConfig;
-
-  /** The listOfLayerEntryConfig attribute is not used by child of AbstractBaseLayerEntryConfig. */
-  declare listOfLayerEntryConfig: never;
+  /**
+   * The class constructor.
+   * @param {AbstractBaseLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
+   */
+  protected constructor(layerConfig: AbstractBaseLayerEntryConfigProps) {
+    super(layerConfig);
+    this.source = layerConfig.source;
+    this.layerFilter = layerConfig.layerFilter;
+    this.layerStyle = layerConfig.layerStyle;
+  }
 
   /**
    * Gets the service metadata that is associated to the service.

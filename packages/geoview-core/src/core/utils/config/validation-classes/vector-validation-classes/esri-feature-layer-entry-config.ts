@@ -1,6 +1,11 @@
 import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES, TypeLayerMetadataEsri } from '@/api/config/types/map-schema-types';
-import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+import { VectorLayerEntryConfig, VectorLayerEntryConfigProps } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { TypeSourceEsriFeatureInitialConfig } from '@/geo/layer/geoview-layers/vector/esri-feature';
+
+export interface EsriFeatureLayerEntryConfigProps extends VectorLayerEntryConfigProps {
+  /** Source settings to apply to the GeoView layer source at creation time. */
+  source?: TypeSourceEsriFeatureInitialConfig;
+}
 
 export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
   /** Tag used to link the entry to a specific schema. */
@@ -9,23 +14,22 @@ export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
   /** Layer entry data type. */
   override entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
 
-  declare source: TypeSourceEsriFeatureInitialConfig;
+  declare layerEntryProps: EsriFeatureLayerEntryConfigProps;
 
-  /** Max number of records for query */
-  maxRecordCount?: number;
+  declare source: TypeSourceEsriFeatureInitialConfig;
 
   /**
    * The class constructor.
-   * @param {EsriFeatureLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
+   * @param {EsriFeatureLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
    */
-  constructor(layerConfig: EsriFeatureLayerEntryConfig) {
+  constructor(layerConfig: EsriFeatureLayerEntryConfigProps) {
     super(layerConfig);
-    Object.assign(this, layerConfig);
+    this.maxRecordCount = layerConfig.maxRecordCount;
 
     // Write the default properties when not specified
     this.source ??= { format: 'EsriJSON' };
     this.source.format ??= 'EsriJSON';
-    this.source.dataAccessPath ??= this.geoviewLayerConfig.metadataAccessPath;
+    this.source.dataAccessPath ??= layerConfig.source?.dataAccessPath ?? this.geoviewLayerConfig.metadataAccessPath;
 
     // Format the dataAccessPath correctly
     if (!this.source.dataAccessPath!.endsWith('/')) this.source.dataAccessPath += '/';

@@ -1070,61 +1070,10 @@ export type TypeLayerData = {
 // TODO: Refactor - This type should be deleted and 'ConfigBaseClass' should be used instead
 export type TypeLayerEntryConfig = AbstractBaseLayerEntryConfig | GroupLayerEntryConfig;
 
-// #region ATTEMPT TO REPLACE TypeLayerEntryConfig
-
-export interface TypeLayerEntryConfig2 {
-  geoviewLayerConfig: TypeGeoviewLayerConfig;
-  layerId: string;
-  layerName: string;
-  schemaTag: TypeGeoviewLayerType;
-  entryType: TypeLayerEntryType;
-  initialSettings?: TypeLayerInitialSettings;
-  source?: TypeBaseSourceInitialConfig;
-  layerStyle?: TypeLayerStyleConfig;
-  minScale?: number;
-  maxScale?: number;
-
-  // TODO: REFACTOR THESE EXTRA PROPS
-  geoviewLayerType?: TypeGeoviewLayerType;
-  parentLayerConfig?: GroupLayerEntryConfig;
-  listOfLayerEntryConfig?: TypeLayerEntryConfig2[];
-}
-
-export interface TypeLayerEntryConfigVectorTiles extends Omit<TypeLayerEntryConfig2, 'source'> {
-  source: TypeSourceVectorTilesInitialConfig;
-  tileGrid?: TypeTileGrid;
-  styleUrl?: string;
-}
-
 export type TypeSourceVectorTilesInitialConfig = TypeSourceTileInitialConfig;
-
-export interface TypeLayerEntryConfigGeoJSON extends Omit<TypeLayerEntryConfig2, 'source'> {
-  source: TypeSourceGeoJSONInitialConfig;
-}
-
-export interface TypeLayerEntryConfigWfs extends Omit<TypeLayerEntryConfig2, 'source'> {
-  source: TypeSourceWFSVectorInitialConfig;
-}
-
-export interface TypeLayerEntryConfigEsriDynamic extends Omit<TypeLayerEntryConfig2, 'source' | 'listOfLayerEntryConfig'> {
-  source: TypeSourceEsriDynamicInitialConfig;
-  listOfLayerEntryConfig: (GroupLayerEntryConfig | EsriDynamicLayerEntryConfig)[];
-}
-
-export interface TypeLayerEntryConfigOgcFeature extends Omit<TypeLayerEntryConfig2, 'source'> {
-  source: TypeSourceOgcFeatureInitialConfig;
-}
 
 export interface TypeSourceOgcFeatureInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'featureAPI';
-}
-
-export interface TypeLayerEntryConfigWms extends Omit<TypeLayerEntryConfig2, 'source'> {
-  source: TypeSourceImageWmsInitialConfig;
-}
-
-export interface TypeLayerEntryConfigGroup extends Omit<TypeLayerEntryConfig2, 'source'> {
-  source: never;
 }
 
 export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitialConfig {

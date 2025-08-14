@@ -13,7 +13,6 @@ import {
   TypeOutfields,
   TypeOutfieldsType,
   TypeSourceWfsInitialConfig,
-  CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
   WFSJsonResponseFeatureTypeFields,
   WFSJsonResponse,
@@ -417,16 +416,13 @@ export class WFS extends AbstractGeoViewVector {
     geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
       const layerEntryConfig = new WfsLayerEntryConfig({
         geoviewLayerConfig,
-        schemaTag: CONST_LAYER_TYPES.WFS,
-        entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
         layerId: `${layerEntry.id}`,
         layerName: layerEntry.layerName || `${layerEntry.id}`,
         source: {
           format: 'WFS',
           strategy,
-          dataAccessPath: metadataAccessPath,
         },
-      } as unknown as WfsLayerEntryConfig);
+      });
       return layerEntryConfig;
     });
 

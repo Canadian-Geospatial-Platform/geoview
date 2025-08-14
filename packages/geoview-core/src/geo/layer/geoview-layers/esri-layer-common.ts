@@ -8,7 +8,6 @@ import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-clas
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import {
-  CONST_LAYER_ENTRY_TYPES,
   TypeFeatureInfoEntryPartial,
   TypeLayerEntryConfig,
   TypeStyleGeometry,
@@ -19,6 +18,8 @@ import {
   CONST_LAYER_TYPES,
   TypeLayerMetadataEsri,
 } from '@/api/config/types/map-schema-types';
+import { Fetch } from '@/core/utils/fetch-helper';
+import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import {
   esriConvertEsriGeometryTypeToOLGeometryType,
   esriParseFeatureInfoEntries,
@@ -31,14 +32,12 @@ import { EsriDynamic, geoviewEntryIsEsriDynamic } from '@/geo/layer/geoview-laye
 import { EsriFeature, geoviewEntryIsEsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
-import { Fetch } from '@/core/utils/fetch-helper';
 import { LayerEntryConfigLayerIdEsriMustBeNumberError } from '@/core/exceptions/layer-exceptions';
 import {
   LayerEntryConfigEmptyLayerGroupError,
   LayerEntryConfigLayerIdNotFoundError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import { logger } from '@/core/utils/logger';
-import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 
 /**
  * This method validates recursively the configuration of the layer entries to ensure that it is a feature layer identified
@@ -48,7 +47,7 @@ import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-b
  * @param {ConfigBaseClass[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
  */
 export function commonValidateListOfLayerEntryConfig(layer: EsriDynamic | EsriFeature, listOfLayerEntryConfig: ConfigBaseClass[]): void {
-  listOfLayerEntryConfig.forEach((layerConfig: ConfigBaseClass, i) => {
+  listOfLayerEntryConfig.forEach((layerConfig, i) => {
     if (layerConfig.layerStatus === 'error') return;
 
     // If is a group layer
@@ -99,17 +98,21 @@ export function commonValidateListOfLayerEntryConfig(layer: EsriDynamic | EsriFe
         return;
       }
 
-      if (layer.getMetadata()!.layers[esriIndex]?.subLayerIds?.length) {
+      // Get the metadata
+      const metadata = layer.getMetadata();
+
+      if (metadata?.layers[esriIndex]?.subLayerIds?.length) {
         // We will create dynamically a group layer.
         const newListOfLayerEntryConfig: TypeLayerEntryConfig[] = [];
         // If we cloneDeep the layerConfig, it seems to clone pointer for parentLayerConfig and geoviewLayerConfig to objects
         // GV: previously used cloneDeep (before refactor began), not sure why, has been fine this way through testing
+        // TODO: Refactor - Use `layerConfig.cloneLayerProps() as GroupLayerEntryConfigProps` here instead?
         const switchToGroupLayer = { ...layerConfig } as unknown as GroupLayerEntryConfig;
-        switchToGroupLayer.entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
 
         // Only switch the layer name by the metadata if there were none pre-set (config wins over metadata rule?)
-        if (!switchToGroupLayer.layerName) switchToGroupLayer.layerName = layer.getMetadata()!.layers[esriIndex].name;
+        if (!switchToGroupLayer.layerName) switchToGroupLayer.layerName = metadata.layers[esriIndex].name;
 
+        switchToGroupLayer.layerId = layerConfig.layerId;
         switchToGroupLayer.isMetadataLayerGroup = true;
         switchToGroupLayer.listOfLayerEntryConfig = newListOfLayerEntryConfig;
 
@@ -122,26 +125,19 @@ export function commonValidateListOfLayerEntryConfig(layer: EsriDynamic | EsriFe
         // Alert that we want to register new entry configs
         layer.emitLayerEntryRegisterInit({ config: groupLayerConfig });
 
-        layer.getMetadata()!.layers[esriIndex].subLayerIds.forEach((layerId) => {
-          // Make sure to copy the layerConfig source before recycling it in the constructors. This was causing the 'source' value to leak between layer entry configs
-          const layerConfigCopy = {
-            ...layerConfig,
-            source: { ...layerConfig.source },
-            initialSettings: { ...layerConfig.initialSettings },
-          };
-
+        metadata.layers[esriIndex].subLayerIds.forEach((layerId) => {
           let subLayerEntryConfig;
           if (geoviewEntryIsEsriDynamic(layerConfig)) {
-            subLayerEntryConfig = new EsriDynamicLayerEntryConfig(layerConfigCopy as EsriDynamicLayerEntryConfig);
+            subLayerEntryConfig = new EsriDynamicLayerEntryConfig(layerConfig.cloneLayerProps());
           } else {
-            subLayerEntryConfig = new EsriFeatureLayerEntryConfig(layerConfigCopy as EsriFeatureLayerEntryConfig);
+            subLayerEntryConfig = new EsriFeatureLayerEntryConfig(layerConfig.cloneLayerProps());
           }
 
           // TODO: Check - Instead of rewriting the attributes right after creating the instance, maybe create the instance
           // TO.DOCONT: with the correct values directly? Especially now that we copy the config to prevent leaking.
           subLayerEntryConfig.parentLayerConfig = groupLayerConfig;
           subLayerEntryConfig.layerId = `${layerId}`;
-          subLayerEntryConfig.layerName = layer.getMetadata()!.layers.filter((item) => item.id === layerId)[0].name;
+          subLayerEntryConfig.layerName = metadata.layers.filter((item) => item.id === layerId)[0].name;
           newListOfLayerEntryConfig.push(subLayerEntryConfig);
 
           // TODO: Refactor: Do not do this on the fly here anymore with the new configs (quite unpredictable)... (standardizing this call with the other one above for now)
@@ -160,7 +156,7 @@ export function commonValidateListOfLayerEntryConfig(layer: EsriDynamic | EsriFe
       }
 
       // eslint-disable-next-line no-param-reassign
-      if (!layerConfig.layerName) layerConfig.layerName = layer.getMetadata()!.layers[esriIndex].name;
+      if (metadata && !layerConfig.layerName) layerConfig.layerName = metadata?.layers[esriIndex].name;
     }
   });
 }

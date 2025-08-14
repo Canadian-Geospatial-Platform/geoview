@@ -1,3 +1,5 @@
+import { cloneDeep } from 'lodash';
+
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import {
   Extent,
@@ -7,6 +9,7 @@ import {
   TypeLayerInitialSettings,
   TypeLayerStatus,
   TypeTileGrid,
+  TypeValidSourceProjectionCodes,
   layerEntryIsEsriFeature,
   layerEntryIsGeoJSON,
   layerEntryIsGroupLayer,
@@ -20,19 +23,29 @@ import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config
 import { GeoJSONLayerEntryConfig } from './vector-validation-classes/geojson-layer-entry-config';
 import { EsriFeatureLayerEntryConfig } from './vector-validation-classes/esri-feature-layer-entry-config';
 
+export interface ConfigBaseClassProps {
+  /** The display name of the layer (English/French). */
+  layerId: string;
+  geoviewLayerConfig: TypeGeoviewLayerConfig;
+  layerName?: string;
+  initialSettings?: TypeLayerInitialSettings;
+  minScale?: number;
+  maxScale?: number;
+  isMetadataLayerGroup?: boolean;
+  parentLayerConfig?: GroupLayerEntryConfig;
+}
+
 /**
  * Base type used to define a GeoView layer to display on the map. Unless specified,its properties are not part of the schema.
  */
 export abstract class ConfigBaseClass {
+  /** The layer entry properties used to create the layer entry config */
+  layerEntryProps: ConfigBaseClassProps;
+
   /** The identifier of the layer to display on the map. This element is part of the schema. */
   // GV Cannot put it #layerId as it breaks things
   // eslint-disable-next-line no-restricted-syntax
   private _layerId = '';
-
-  /** The layer path to this instance. */
-  // GV Cannot put it #layerPath as it breaks things
-  // eslint-disable-next-line no-restricted-syntax
-  private _layerPath = '';
 
   /** It is used to identified unprocessed layers and shows the final layer state */
   // GV Cannot put it #layerStatus as it breaks things
@@ -53,11 +66,8 @@ export abstract class ConfigBaseClass {
   /** It is used to link the layer entry config to the GeoView layer config. */
   geoviewLayerConfig = {} as TypeGeoviewLayerConfig;
 
-  /** The min scale that can be reach by the layer. */
-  minScale?: number;
-
-  /** The max scale that can be reach by the layer. */
-  maxScale?: number;
+  /** It is used to link the layer entry config to the parent's layer config. */
+  parentLayerConfig: GroupLayerEntryConfig | undefined;
 
   /**
    * Initial settings to apply to the GeoView layer entry at creation time. Initial settings are inherited from the parent in the
@@ -65,11 +75,14 @@ export abstract class ConfigBaseClass {
    */
   initialSettings: TypeLayerInitialSettings;
 
-  /** It is used internally to distinguish layer groups derived from the metadata. */
-  isMetadataLayerGroup?: boolean;
+  /** The min scale that can be reach by the layer. */
+  minScale?: number;
 
-  /** It is used to link the layer entry config to the parent's layer config. */
-  parentLayerConfig?: GroupLayerEntryConfig;
+  /** The max scale that can be reach by the layer. */
+  maxScale?: number;
+
+  /** It is used internally to distinguish layer groups derived from the metadata. */
+  isMetadataLayerGroup: boolean;
 
   /** Keep all callback delegates references */
   #onLayerStatusChangedHandlers: LayerStatusChangedDelegate[] = [];
@@ -87,37 +100,28 @@ export abstract class ConfigBaseClass {
 
   /**
    * The class constructor.
-   * @param {ConfigBaseClass} layerConfig - The layer configuration we want to instanciate.
+   * @param {ConfigBaseClassProps} layerConfig - The layer configuration we want to instanciate.
    */
-  protected constructor(layerConfig: ConfigBaseClass) {
-    // TODO: Refactor - Get rid of this Object.assign pattern here and work with the actual objects that
-    // TO.DOCONT: are being sent in the constructor (it's not ConfigBaseClass objects that are in reality being
-    // TO.DOCONT: sent in the constructor here, they are regular 'json' objects..).
-    // TO.DOCONT: Because of this, we have to jump around between class instance and objects here...
+  // TODO: Refactor - There is an oddity inside LayerApi.addGeoviewLayer to the effect that it's calling validateListOfGeoviewLayerConfig even if it was already called in config-validation.
+  // TO.DOCONT: Until this is fixed, this constructor supports sending a ConfigBaseClass in its typing, for now (ConfigBaseClassProps | ConfigBaseClass)... though it should only be a ConfigBaseClassProps eventually.
+  protected constructor(layerConfig: ConfigBaseClassProps | ConfigBaseClass) {
+    // Keep attribute properties
+    this.layerEntryProps = layerConfig;
 
-    // Keep the layer status
-    const { layerStatus } = layerConfig;
+    // Temporary, until refactor is done, support when a ConfigBaseClass is sent here..
+    if (layerConfig instanceof ConfigBaseClass) this.layerEntryProps = layerConfig.layerEntryProps;
 
-    // Delete the layer status from the property so that it can go through the Object.assign without failing..
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-param-reassign
-    delete (layerConfig as any).layerStatus;
-
-    // Transfert the properties from the object to the class ( bad practice :( )
-    // Object.assign(this, layerConfig);
+    // Transfert the properties from the object to the class (without using Object.assign anymore)
+    this.layerId = layerConfig.layerId;
     this.layerName = layerConfig.layerName;
     // this.schemaTag = layerConfig.schemaTag;
     // this.entryType = layerConfig.entryType;
     this.geoviewLayerConfig = layerConfig.geoviewLayerConfig;
+    this.parentLayerConfig = layerConfig.parentLayerConfig;
     this.minScale = layerConfig.minScale;
     this.maxScale = layerConfig.maxScale;
     this.initialSettings = layerConfig.initialSettings ?? {};
-
-    // Set back the layer status as it was
-    if (layerStatus) this.setLayerStatus(layerStatus);
-
-    // eslint-disable-next-line no-underscore-dangle
-    if (this.geoviewLayerConfig) this._layerPath = ConfigBaseClass.#evaluateLayerPath(layerConfig);
-    else logger.logError("Couldn't calculate layerPath because geoviewLayerConfig has an invalid value");
+    this.isMetadataLayerGroup = layerConfig.isMetadataLayerGroup ?? false;
   }
 
   /**
@@ -136,8 +140,6 @@ export abstract class ConfigBaseClass {
   set layerId(newLayerId: string) {
     // eslint-disable-next-line no-underscore-dangle
     this._layerId = newLayerId;
-    // eslint-disable-next-line no-underscore-dangle
-    this._layerPath = ConfigBaseClass.#evaluateLayerPath(this);
   }
 
   /**
@@ -146,9 +148,7 @@ export abstract class ConfigBaseClass {
    */
   get layerPath(): string {
     // eslint-disable-next-line no-underscore-dangle
-    this._layerPath = ConfigBaseClass.#evaluateLayerPath(this);
-    // eslint-disable-next-line no-underscore-dangle
-    return this._layerPath;
+    return ConfigBaseClass.#evaluateLayerPath(this);
   }
 
   /**
@@ -341,6 +341,18 @@ export abstract class ConfigBaseClass {
   }
 
   /**
+   * Creates and returns a deep clone of the layer entry configuration properties.
+   * This method returns a cloned copy of the original properties (`layerEntryProps`)
+   * that were used to create this layer entry configuration. Modifying the returned
+   * object will not affect the internal state of the layer.
+   * @returns {ConfigBaseClassProps} A deep-cloned copy of the layer entry properties.
+   */
+  cloneLayerProps(): ConfigBaseClassProps {
+    // Return a cloned copy of the layer entry props that were used to create this layer entry config
+    return cloneDeep(this.layerEntryProps);
+  }
+
+  /**
    * Writes the instance as Json.
    * @returns {unknown} The Json representation of the instance.
    */
@@ -519,7 +531,7 @@ export type TypeLayerEntryShell = {
 export type TypeLayerEntryShellSource = {
   dataAccessPath?: string;
   extent?: Extent;
-  projection?: number;
+  projection?: TypeValidSourceProjectionCodes;
 };
 
 // #endregion

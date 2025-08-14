@@ -15,7 +15,10 @@ import {
 import { DateMgt } from '@/core/utils/date-mgt';
 import { CallbackNewMetadataDelegate, getWMSServiceMetadata, validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
-import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import {
+  OgcWmsLayerEntryConfig,
+  OgcWmsLayerEntryConfigProps,
+} from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { ConfigBaseClass, TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
 import { CancelledError, PromiseRejectErrorWrapper } from '@/core/exceptions/core-exceptions';
@@ -783,20 +786,17 @@ export class WMS extends AbstractGeoViewRaster {
       listOfLayerEntryConfig: [],
     };
     geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
-      const layerEntryConfig = {
+      const layerEntryConfig: OgcWmsLayerEntryConfigProps = {
         geoviewLayerConfig,
-        schemaTag: CONST_LAYER_TYPES.WMS,
-        entryType: CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE,
         layerId: `${layerEntry.id}`,
         layerName: layerEntry.layerName || (layerEntry.id as string),
         source: {
-          serverType: serverType ?? 'mapserver',
-          dataAccessPath: metadataAccessPath,
+          serverType,
         },
       };
 
       // Overwrite default from geocore custom config
-      const mergedConfig = deepMergeObjects(layerEntryConfig, customGeocoreLayerConfig) as OgcWmsLayerEntryConfig;
+      const mergedConfig = deepMergeObjects<OgcWmsLayerEntryConfigProps>(layerEntryConfig, customGeocoreLayerConfig);
 
       // Reconstruct
       return new OgcWmsLayerEntryConfig(mergedConfig);

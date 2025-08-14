@@ -17,14 +17,14 @@ export class GeoPackageLayerEntryConfig extends VectorLayerEntryConfig {
    * @param {GeoPackageLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
    */
   constructor(layerConfig: GeoPackageLayerEntryConfig) {
+    // FIXME: A constructor should never receive an object of itself. Should fix this programming error.
     super(layerConfig);
-    Object.assign(this, layerConfig);
 
     // Write the default properties when not specified
     this.source ??= { format: 'GeoPackage' };
     this.source.format ??= 'GeoPackage';
     this.source.dataProjection ??= Projection.PROJECTION_NAMES.LONLAT;
-    this.source.dataAccessPath ??= this.geoviewLayerConfig.metadataAccessPath;
+    this.source.dataAccessPath ??= layerConfig.source.dataAccessPath ?? this.geoviewLayerConfig.metadataAccessPath;
 
     // Assign metadataAccessPath if dataAccessPath is undefined
     if (this.source.dataAccessPath) {

@@ -667,6 +667,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     const currentFilter = source.getParams().layerDefs;
 
     try {
+      // TODO: Check - Is this assignation necessary? What's the intent?
       // Update the layer config information (not ideal to do this here...)
       // eslint-disable-next-line no-param-reassign
       layerConfig.layerFilter = filterValueToUse;

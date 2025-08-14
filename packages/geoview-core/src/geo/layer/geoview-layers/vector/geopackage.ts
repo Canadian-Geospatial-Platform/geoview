@@ -142,7 +142,9 @@ export class GeoPackage extends AbstractGeoViewVector {
                   newLayerEntryConfig.layerId = layers[i].name;
                   newLayerEntryConfig.layerName = layers[i].name;
                   newLayerEntryConfig.entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
-                  newLayerEntryConfig.parentLayerConfig = layerConfig as unknown as GroupLayerEntryConfig; // TODO: Check this type conversion, maybe recreate the Group object instead?
+
+                  // TODO: Refactor - Check this type conversion, maybe recreate the Group object instead?
+                  newLayerEntryConfig.parentLayerConfig = layerConfig as unknown as GroupLayerEntryConfig;
 
                   this.#processOneGeopackageLayer(newLayerEntryConfig, layers[i], slds)
                     .then((baseLayer) => {

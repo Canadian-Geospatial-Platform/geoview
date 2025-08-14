@@ -169,9 +169,8 @@ export class ConfigValidation {
 
   /**
    * Validate the map features configuration.
-   * @param {TypeMapFeaturesConfig} mapFeaturesConfigToValidate - The map features configuration to validate.
-   *
-   * @returns {TypeMapFeaturesConfig} A valid map features configuration.
+   * @param {MapConfigLayerEntry[]} listOfGeoviewLayerConfig - The map features configuration to validate.
+   * @returns {MapConfigLayerEntry[]} A valid map features configuration.
    */
   validateLayersConfigAgainstSchema(
     listOfGeoviewLayerConfig: MapConfigLayerEntry[],

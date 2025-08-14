@@ -4,11 +4,13 @@ import { cloneDeep } from 'lodash';
 
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
+import {
+  EsriDynamicLayerEntryConfig,
+  EsriDynamicLayerEntryConfigProps,
+} from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import {
   TypeLayerEntryConfig,
   TypeGeoviewLayerConfig,
-  CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
   TypeMetadataEsriDynamic,
 } from '@/api/config/types/map-schema-types';
@@ -132,7 +134,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @returns {boolean} true if an error is detected.
    */
   esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig): boolean {
-    if (!this.getMetadata()?.supportsDynamicLayers) {
+    if (this.getMetadata()?.supportsDynamicLayers === false) {
       // Log a warning, but continue
       logger.logWarning(`Layer ${layerConfig.layerPath} does not technically support dynamic layers per its metadata.`);
     }
@@ -269,23 +271,18 @@ export class EsriDynamic extends AbstractGeoViewRaster {
           layerId: `${layerEntry.layerId}`,
           layerName: layerEntry.layerName,
           listOfLayerEntryConfig: subConfigs,
-        } as GroupLayerEntryConfig);
+        });
       }
 
       // Create entry config
-      const layerEntryConfig = {
+      const layerEntryConfig: EsriDynamicLayerEntryConfigProps = {
         geoviewLayerConfig,
-        schemaTag: CONST_LAYER_TYPES.ESRI_DYNAMIC,
-        entryType: CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE,
         layerId: `${layerEntry.index}`,
         layerName: layerEntry.layerName,
-        source: {
-          dataAccessPath: geoviewLayerConfig.metadataAccessPath,
-        },
       };
 
       // Overwrite default from geocore custom config
-      const mergedConfig = deepMergeObjects(layerEntryConfig, customGeocoreLayerConfig) as EsriDynamicLayerEntryConfig;
+      const mergedConfig = deepMergeObjects<EsriDynamicLayerEntryConfigProps>(layerEntryConfig, customGeocoreLayerConfig);
 
       // Reconstruct
       return new EsriDynamicLayerEntryConfig(mergedConfig);

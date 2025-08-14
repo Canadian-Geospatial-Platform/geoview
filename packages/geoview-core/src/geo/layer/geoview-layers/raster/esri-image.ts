@@ -4,12 +4,7 @@ import { Options as SourceOptions } from 'ol/source/ImageArcGISRest';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import {
-  TypeLayerEntryConfig,
-  TypeGeoviewLayerConfig,
-  CONST_LAYER_ENTRY_TYPES,
-  CONST_LAYER_TYPES,
-} from '@/api/config/types/map-schema-types';
+import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, CONST_LAYER_TYPES } from '@/api/config/types/map-schema-types';
 
 import { commonProcessLayerMetadata } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
@@ -127,11 +122,9 @@ export class EsriImage extends AbstractGeoViewRaster {
     geoviewLayerConfig.listOfLayerEntryConfig = [
       new EsriImageLayerEntryConfig({
         geoviewLayerConfig,
-        schemaTag: CONST_LAYER_TYPES.ESRI_IMAGE,
-        entryType: CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE,
         layerId: trimmedPath.split('/').slice(-2, -1)[0],
         layerName: trimmedPath.split('/').slice(-2, -1)[0],
-      } as EsriImageLayerEntryConfig),
+      }),
     ];
 
     // Return it

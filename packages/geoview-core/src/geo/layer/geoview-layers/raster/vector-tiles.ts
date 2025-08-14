@@ -11,7 +11,6 @@ import {
   TypeLayerEntryConfig,
   TypeGeoviewLayerConfig,
   TypeTileGrid,
-  CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
   TypeMetadataVectorTiles,
 } from '@/api/config/types/map-schema-types';
@@ -226,14 +225,9 @@ export class VectorTiles extends AbstractGeoViewRaster {
     geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
       const layerEntryConfig = new VectorTilesLayerEntryConfig({
         geoviewLayerConfig,
-        schemaTag: CONST_LAYER_TYPES.VECTOR_TILES,
-        entryType: CONST_LAYER_ENTRY_TYPES.RASTER_TILE,
         layerId: `${layerEntry.id}`,
         tileGrid: layerEntry.tileGrid,
-        source: {
-          dataAccessPath: metadataAccessPath,
-        },
-      } as unknown as VectorTilesLayerEntryConfig);
+      });
       return layerEntryConfig;
     });
 

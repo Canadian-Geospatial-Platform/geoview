@@ -10,7 +10,6 @@ import {
   TypeLayerEntryConfig,
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
-  CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
   TypeMetadataEsriFeature,
 } from '@/api/config/types/map-schema-types';
@@ -166,11 +165,11 @@ export class EsriFeature extends AbstractGeoViewVector {
 
   /**
    * Performs specific validation that can only be done by the child of the AbstractGeoViewEsriLayer class.
-   * @param {TypeLayerEntryConfig} layerConfig - The layer config to check.
+   * @param {ConfigBaseClass} layerConfig - The layer config to check.
    * @param {esriIndex} esriIndex - The esri layer index config to check.
    * @returns {boolean} true if an error is detected.
    */
-  esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig, esriIndex: number): boolean {
+  esriChildHasDetectedAnError(layerConfig: ConfigBaseClass, esriIndex: number): boolean {
     if (this.getMetadata()!.layers[esriIndex].type !== 'Feature Layer') {
       // Add a layer load error
       this.addLayerLoadError(new LayerNotFeatureLayerError(layerConfig.layerPath, layerConfig.getLayerName()), layerConfig);
@@ -228,15 +227,9 @@ export class EsriFeature extends AbstractGeoViewVector {
     geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
       const layerEntryConfig = new EsriFeatureLayerEntryConfig({
         geoviewLayerConfig,
-        schemaTag: CONST_LAYER_TYPES.ESRI_FEATURE,
-        entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
         layerId: `${layerEntry.index}`,
         layerName: layerEntry.layerName || `${layerEntry.id}`,
-        source: {
-          format: 'EsriJSON',
-          dataAccessPath: layerEntry.source?.dataAccessPath || undefined,
-        },
-      } as unknown as EsriFeatureLayerEntryConfig);
+      });
       return layerEntryConfig;
     });
 

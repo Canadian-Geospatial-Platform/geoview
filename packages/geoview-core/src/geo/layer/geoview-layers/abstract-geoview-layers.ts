@@ -157,13 +157,13 @@ export abstract class AbstractGeoViewLayer {
       this.listOfLayerEntryConfig = listOfLayerEntryConfig;
     } else {
       const layerGroup = new GroupLayerEntryConfig({
-        geoviewLayerConfig: listOfLayerEntryConfig[0].geoviewLayerConfig,
+        geoviewLayerConfig,
         layerId: 'base-group',
         layerName: this.geoviewLayerName,
         isMetadataLayerGroup: false,
         initialSettings: geoviewLayerConfig.initialSettings,
         listOfLayerEntryConfig,
-      } as GroupLayerEntryConfig);
+      });
 
       this.listOfLayerEntryConfig = [layerGroup];
       layerGroup.listOfLayerEntryConfig.forEach((layerConfig) => {
@@ -171,8 +171,6 @@ export abstract class AbstractGeoViewLayer {
         layerConfig.parentLayerConfig = layerGroup;
       });
     }
-
-    this.listOfLayerEntryConfig[0].geoviewLayerConfig.listOfLayerEntryConfig = listOfLayerEntryConfig;
   }
 
   /**

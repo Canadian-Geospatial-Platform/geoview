@@ -6,9 +6,9 @@ import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstrac
 import {
   TypeLayerEntryConfig,
   TypeGeoviewLayerConfig,
-  CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
   Extent,
+  TypeValidSourceProjectionCodes,
 } from '@/api/config/types/map-schema-types';
 
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
@@ -16,7 +16,11 @@ import {
   LayerEntryConfigParameterExtentNotDefinedInSourceError,
   LayerEntryConfigParameterProjectionNotDefinedInSourceError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
-import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
+import {
+  LayerDataAccessPathMandatoryError,
+  LayerMissingSourceExtentError,
+  LayerMissingSourceProjectionError,
+} from '@/core/exceptions/layer-exceptions';
 import { GVImageStatic } from '@/geo/layer/gv-layers/raster/gv-image-static';
 
 export interface TypeImageStaticLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
@@ -134,17 +138,19 @@ export class ImageStatic extends AbstractGeoViewRaster {
       listOfLayerEntryConfig: [],
     };
     geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
+      // Validate input
+      if (!layerEntry.source || !layerEntry.source.extent) throw new LayerMissingSourceExtentError();
+      if (!layerEntry.source.projection) throw new LayerMissingSourceProjectionError();
+
+      // Create the entry
       const layerEntryConfig = new ImageStaticLayerEntryConfig({
         geoviewLayerConfig,
-        schemaTag: CONST_LAYER_TYPES.IMAGE_STATIC,
-        entryType: CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE,
         layerId: `${layerEntry.id}`,
         source: {
-          dataAccessPath: metadataAccessPath,
-          extent: layerEntry.source?.extent,
-          projection: layerEntry.source?.projection,
+          extent: layerEntry.source.extent,
+          projection: layerEntry.source.projection,
         },
-      } as unknown as ImageStaticLayerEntryConfig);
+      });
       return layerEntryConfig;
     });
 
@@ -176,7 +182,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
     layerIds: string[],
     isTimeAware: boolean,
     sourceExtent: Extent,
-    sourceProjection: number
+    sourceProjection: TypeValidSourceProjectionCodes
   ): Promise<ConfigBaseClass[]> {
     // Create the Layer config
     const layerConfig = ImageStatic.createGeoviewLayerConfig(

@@ -1,5 +1,5 @@
 import shp from 'shpjs';
-import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES, ShapefileLayerConfig } from '@/api/config/types/map-schema-types';
+import { CONST_LAYER_TYPES, ShapefileLayerConfig } from '@/api/config/types/map-schema-types';
 import { TypeGeoJSONLayerConfig } from '@/geo/layer/geoview-layers/vector/geojson';
 import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
 import { generateId } from '@/core/utils/utilities';
@@ -47,17 +47,15 @@ export class ShapefileReader {
           if (!layerConfig.listOfLayerEntryConfig || matchingLayerEntryConfig)
             return new GeoJSONLayerEntryConfig({
               geoviewLayerConfig,
-              layerId: layerGeojson.fileName,
+              layerId: layerGeojson.fileName || generateId(),
               layerName: layerGeojson.fileName,
               layerStyle: matchingLayerEntryConfig?.layerStyle ? matchingLayerEntryConfig.layerStyle : undefined,
               initialSettings: matchingLayerEntryConfig?.initialSettings ? matchingLayerEntryConfig.initialSettings : undefined,
-              schemaTag: CONST_LAYER_TYPES.GEOJSON,
-              entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
               source: {
                 format: 'GeoJSON',
                 geojson: JSON.stringify(layerGeojson),
               },
-            } as unknown as GeoJSONLayerEntryConfig);
+            });
           return undefined;
         })
         .filter((layerEntryConfig) => layerEntryConfig !== undefined);
@@ -73,13 +71,11 @@ export class ShapefileReader {
         layerName: layerConfig.geoviewLayerName || geojson.fileName,
         layerStyle: passedLayerEntryConfig?.layerStyle,
         initialSettings: passedLayerEntryConfig?.initialSettings,
-        schemaTag: CONST_LAYER_TYPES.GEOJSON,
-        entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
         source: {
           format: 'GeoJSON',
           geojson: JSON.stringify(geojson),
         },
-      } as unknown as GeoJSONLayerEntryConfig);
+      });
 
       geoviewLayerConfig.listOfLayerEntryConfig = [layerEntryConfig];
     }

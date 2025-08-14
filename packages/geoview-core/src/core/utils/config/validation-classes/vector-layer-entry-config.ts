@@ -1,5 +1,15 @@
 import { CONST_LAYER_ENTRY_TYPES, TypeLayerMetadataVector, TypeVectorSourceInitialConfig } from '@/api/config/types/map-schema-types';
-import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config';
+import {
+  AbstractBaseLayerEntryConfig,
+  AbstractBaseLayerEntryConfigProps,
+} from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+
+export interface VectorLayerEntryConfigProps extends AbstractBaseLayerEntryConfigProps {
+  /** Source settings to apply to the GeoView layer source at creation time. */
+  source?: TypeVectorSourceInitialConfig;
+  /** Max number of records for query */
+  maxRecordCount?: number;
+}
 
 /**
  * Type used to define a GeoView vector layer to display on the map.
@@ -9,19 +19,21 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
   /** Layer entry data type. */
   override entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
 
+  declare layerEntryProps: VectorLayerEntryConfigProps;
+
   /** Initial settings to apply to the GeoView vector layer source at creation time. */
   declare source?: TypeVectorSourceInitialConfig;
 
-  /** Filter to apply on feature of this layer. */
-  layerFilter?: string;
+  /** Max number of records for query */
+  maxRecordCount?: number;
 
   /**
    * The class constructor.
-   * @param {VectorLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
+   * @param {VectorLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
    */
-  protected constructor(layerConfig: VectorLayerEntryConfig) {
+  protected constructor(layerConfig: VectorLayerEntryConfigProps) {
     super(layerConfig);
-    Object.assign(this, layerConfig);
+    this.maxRecordCount = layerConfig.maxRecordCount;
   }
 
   /**
@@ -29,6 +41,10 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
    * @returns {TypeLayerMetadataVector | undefined} The casted layer metadata in the right type.
    */
   getLayerMetadataCasted(): TypeLayerMetadataVector | undefined {
+    // TODO: Refactor - Remove this function in favor of a generic to be used by the class signature itself:
+    // TO.DOCONT: `class AbstractBaseLayerEntryConfig<TLayerMetadata = unknown>`
+    // TO.DOCONT: `class VectorLayerEntryConfig<TLayerMetadata = TypeLayerMetadataVector> extends AbstractBaseLayerEntryConfig<TypeLayerMetadataVector>`
+    // TO.DOCONT: `class WfsLayerEntryConfig extends VectorLayerEntryConfig<TypeLayerMetadataWfs[]>`
     return super.getLayerMetadata() as TypeLayerMetadataVector | undefined;
   }
 }

@@ -1,7 +1,16 @@
-import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+import { VectorLayerEntryConfig, VectorLayerEntryConfigProps } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { TypeSourceCSVInitialConfig } from '@/geo/layer/geoview-layers/vector/csv';
 import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/config/types/map-schema-types';
 import { Projection } from '@/geo/utils/projection';
+
+export interface CsvLayerEntryConfigProps extends VectorLayerEntryConfigProps {
+  // TODO: Think of using a TypeSourceCSVInitialConfigProps, because it can be different properties than the resulting 'source' object stored.
+  // TO.DOCONT: e.g.: this.source.format, format isn't necessary to provide as input props here.
+  /** Source settings to apply to the GeoView layer source at creation time. */
+  source?: TypeSourceCSVInitialConfig;
+  /** Character separating values in csv file */
+  valueSeparator?: string;
+}
 
 export class CsvLayerEntryConfig extends VectorLayerEntryConfig {
   /** Tag used to link the entry to a specific schema. */
@@ -10,25 +19,28 @@ export class CsvLayerEntryConfig extends VectorLayerEntryConfig {
   /** Layer entry data type. */
   override entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
 
+  declare layerEntryProps: CsvLayerEntryConfigProps;
+
+  /** Source settings to apply to the GeoView layer source at creation time. */
   declare source: TypeSourceCSVInitialConfig;
 
-  // character separating values in csv file
-  valueSeparator? = ',';
+  /** Character separating values in csv file */
+  valueSeparator?: string;
 
   /**
    * The class constructor.
-   * @param {CsvLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
+   * @param {CsvLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
    */
-  constructor(layerConfig: CsvLayerEntryConfig) {
+  constructor(layerConfig: CsvLayerEntryConfigProps) {
     super(layerConfig);
-    Object.assign(this, layerConfig);
+    this.valueSeparator = layerConfig.valueSeparator;
 
     // Write the default properties when not specified
     this.source ??= { format: 'CSV', separator: ',' };
     this.source.format ??= 'CSV';
     this.source.separator ??= ',';
     this.source.dataProjection ??= Projection.PROJECTION_NAMES.LONLAT;
-    this.source.dataAccessPath ??= this.geoviewLayerConfig.metadataAccessPath;
+    this.source.dataAccessPath ??= layerConfig.source?.dataAccessPath ?? this.geoviewLayerConfig.metadataAccessPath;
 
     // Normalize dataAccessPath if needed
     const path = this.source.dataAccessPath!;

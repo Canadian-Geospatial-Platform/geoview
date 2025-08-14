@@ -9,5 +9,5 @@ export abstract class TileLayerEntryConfig extends AbstractBaseLayerEntryConfig 
   override entryType = CONST_LAYER_ENTRY_TYPES.RASTER_TILE;
 
   /** Initial settings to apply to the GeoView image layer source at creation time. */
-  declare source?: TypeSourceTileInitialConfig;
+  declare source: TypeSourceTileInitialConfig;
 }

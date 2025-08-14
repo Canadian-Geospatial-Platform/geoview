@@ -11,7 +11,6 @@ import {
   TypeLayerEntryConfig,
   TypeGeoviewLayerConfig,
   TypeBaseVectorSourceInitialConfig,
-  CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
   TypeMetadataGeoJSON,
 } from '@/api/config/types/map-schema-types';
@@ -288,15 +287,9 @@ export class GeoJSON extends AbstractGeoViewVector {
     geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
       const layerEntryConfig = new GeoJSONLayerEntryConfig({
         geoviewLayerConfig,
-        schemaTag: CONST_LAYER_TYPES.GEOJSON,
-        entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
         layerId: `${layerEntry.id}`,
         layerName: layerEntry.layerName || `${layerEntry.id}`,
-        source: {
-          format: 'GeoJSON',
-          dataAccessPath: `${metadataAccessPath}/${layerEntry.id}`,
-        },
-      } as unknown as GeoJSONLayerEntryConfig);
+      });
       return layerEntryConfig;
     });
 

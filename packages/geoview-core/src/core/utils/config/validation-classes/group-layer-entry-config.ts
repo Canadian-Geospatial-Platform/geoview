@@ -1,5 +1,9 @@
 import { CONST_LAYER_ENTRY_TYPES, TypeLayerEntryConfig } from '@/api/config/types/map-schema-types';
-import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
+import { ConfigBaseClass, ConfigBaseClassProps } from '@/core/utils/config/validation-classes/config-base-class';
+
+export interface GroupLayerEntryConfigProps extends ConfigBaseClassProps {
+  listOfLayerEntryConfig: TypeLayerEntryConfig[];
+}
 
 /**
  * Type used to define a layer group.
@@ -11,6 +15,8 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
   /** Layer entry data type. */
   override entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
 
+  declare layerEntryProps: GroupLayerEntryConfigProps;
+
   /** Source settings to apply to the GeoView layer source at creation time is not used by groups. */
   declare source: never;
 
@@ -20,11 +26,11 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * The class constructor.
-   * @param {GroupLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
+   * @param {GroupLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
    */
-  constructor(layerConfig: GroupLayerEntryConfig) {
+  constructor(layerConfig: GroupLayerEntryConfigProps) {
     super(layerConfig);
-    Object.assign(this, layerConfig);
+    this.listOfLayerEntryConfig = layerConfig.listOfLayerEntryConfig;
   }
 
   /**

@@ -9,7 +9,6 @@ import {
   TypeLayerEntryConfig,
   TypeGeoviewLayerConfig,
   TypeOutfields,
-  CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
   TypeMetadataOGCFeature,
   TypeLayerMetadataQueryables,
@@ -314,15 +313,9 @@ export class OgcFeature extends AbstractGeoViewVector {
     geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
       const layerEntryConfig = new OgcFeatureLayerEntryConfig({
         geoviewLayerConfig,
-        schemaTag: CONST_LAYER_TYPES.OGC_FEATURE,
-        entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
         layerId: `${layerEntry.id}`,
         layerName: layerEntry.layerName || `${layerEntry.id}`,
-        source: {
-          format: 'featureAPI',
-          dataAccessPath: metadataAccessPath,
-        },
-      } as unknown as OgcFeatureLayerEntryConfig);
+      });
       return layerEntryConfig;
     });
 

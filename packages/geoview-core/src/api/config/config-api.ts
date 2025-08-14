@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import cloneDeep from 'lodash/cloneDeep';
 import Ajv from 'ajv';
 import addErrors from 'ajv-errors';
@@ -14,7 +15,6 @@ import {
   TypeGeoviewLayerConfig,
   TypeInitialGeoviewLayerType,
   TypeInteraction,
-  TypeLayerEntryConfig,
   TypeMapFeaturesInstance,
   TypeValidMapComponentProps,
   TypeValidMapCorePackageProps,
@@ -524,7 +524,7 @@ export class ConfigApi {
     const cloneConfig = cloneDeep(geoviewLayerConfig);
 
     // For each entry
-    cloneConfig.listOfLayerEntryConfig = ConfigApi.#configClassesToLayerEntryConfigs(geoviewLayerConfig.listOfLayerEntryConfig);
+    cloneConfig.listOfLayerEntryConfig = ConfigApi.#configClassesToLayerEntryConfigs(geoviewLayerConfig.listOfLayerEntryConfig) as any;
 
     // Serialize it
     return JSON.stringify(cloneConfig, undefined, 2);
@@ -544,13 +544,13 @@ export class ConfigApi {
   }
 
   /**
-   * Utility function to convert an array of ConfigBaseClass objects to a simpler array of TypeLayerEntryConfig.
-   * @param {ConfigBaseClass[]} layerConfigs - The array of ConfigBaseClass objects to convert to simpler array of TypeLayerEntryConfig.
-   * @returns {string} The serialized array of ConfigBaseClass.
+   * Utility function to convert an array of ConfigBaseClass objects to a simpler array of JSON objects.
+   * @param {ConfigBaseClass[]} layerConfigs - The array of ConfigBaseClass objects to convert to simpler array of JSON objects.
+   * @returns {unknown[]} An array of JSON objects.
    */
-  static #configClassesToLayerEntryConfigs(layerConfigs: ConfigBaseClass[]): TypeLayerEntryConfig[] {
+  static #configClassesToLayerEntryConfigs(layerConfigs: ConfigBaseClass[]): unknown[] {
     // Serialize
-    return layerConfigs.map((layerEntry) => layerEntry.toJson() as TypeLayerEntryConfig);
+    return layerConfigs.map((layerEntry) => layerEntry.toJson());
   }
 
   // #endregion INITIALIZERS AND PROCESSORS
