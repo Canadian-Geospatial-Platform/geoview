@@ -26,7 +26,7 @@ export type TimeDimension = {
     field: string;
     default: string;
     unitSymbol?: string;
-    range: RangeItems;
+    rangeItems: RangeItems;
     nearestValues: 'discrete' | 'absolute';
     singleHandle: boolean;
     displayPattern: [DatePrecision | undefined, TimePrecision | undefined];
