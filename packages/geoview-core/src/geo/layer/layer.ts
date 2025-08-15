@@ -23,6 +23,7 @@ import {
   LayerEntryRegisterInitEvent,
   LayerGVCreatedEvent,
 } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeDisplayLanguage, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 import {
   MapConfigLayerEntry,
   TypeGeoviewLayerConfig,
@@ -31,23 +32,31 @@ import {
   mapConfigLayerEntryIsShapefile,
   TypeLayerStatus,
   GeoCoreLayerConfig,
-  TypeDisplayLanguage,
-  TypeOutfieldsType,
-} from '@/api/config/types/map-schema-types';
-
-import { CSV, layerConfigIsCSV } from '@/geo/layer/geoview-layers/vector/csv';
-import { EsriDynamic, layerConfigIsEsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
-import { EsriFeature, layerConfigIsEsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
-import { EsriImage, layerConfigIsEsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
-import { GeoJSON, layerConfigIsGeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
-import { GeoPackage, layerConfigIsGeoPackage } from '@/geo/layer/geoview-layers/vector/geopackage';
-import { ImageStatic, layerConfigIsImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
-import { OgcFeature, layerConfigIsOgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
-import { VectorTiles, layerConfigIsVectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
-import { WFS, layerConfigIsWFS } from '@/geo/layer/geoview-layers/vector/wfs';
-import { WKB, layerConfigIsWkb } from '@/geo/layer/geoview-layers/vector/wkb';
-import { WMS, layerConfigIsWMS } from '@/geo/layer/geoview-layers/raster/wms';
-import { XYZTiles, layerConfigIsXYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
+  layerConfigIsEsriDynamicFromType,
+  layerConfigIsEsriImageFromType,
+  layerConfigIsImageStaticFromType,
+  layerConfigIsVectorTilesFromType,
+  layerConfigIsOgcWmsFromType,
+  layerConfigIsXYZTilesFromType,
+  layerConfigIsCSVFromType,
+  layerConfigIsEsriFeatureFromType,
+  layerConfigIsGeoJSONFromType,
+  layerConfigIsGeoPackageFromType,
+  layerConfigIsOgcFeatureFromType,
+  layerConfigIsWFSFromType,
+} from '@/api/config/types/layer-schema-types';
+import { GeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
+import { GeoPackage } from '@/geo/layer/geoview-layers/vector/geopackage';
+import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
+import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
+import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
+import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
+import { ImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
+import { WFS } from '@/geo/layer/geoview-layers/vector/wfs';
+import { OgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
+import { XYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
+import { VectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
+import { CSV } from '@/geo/layer/geoview-layers/vector/csv';
 
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { HoverFeatureInfoLayerSet } from '@/geo/layer/layer-sets/hover-feature-info-layer-set';
@@ -2438,16 +2447,16 @@ export class LayerApi {
    */
   static createLayerConfigFromType(geoviewLayerConfig: TypeGeoviewLayerConfig, mapProjectionForVectorTiles: string): AbstractGeoViewLayer {
     // TODO: Refactor - Here the function should use the structure created by validation config with the metadata fetch and no need to pass the validation.
-    if (layerConfigIsCSV(geoviewLayerConfig)) {
+    if (layerConfigIsCSVFromType(geoviewLayerConfig)) {
       return new CSV(geoviewLayerConfig);
     }
-    if (layerConfigIsEsriDynamic(geoviewLayerConfig)) {
+    if (layerConfigIsEsriDynamicFromType(geoviewLayerConfig)) {
       return new EsriDynamic(geoviewLayerConfig);
     }
-    if (layerConfigIsEsriFeature(geoviewLayerConfig)) {
+    if (layerConfigIsEsriFeatureFromType(geoviewLayerConfig)) {
       return new EsriFeature(geoviewLayerConfig);
     }
-    if (layerConfigIsEsriImage(geoviewLayerConfig)) {
+    if (layerConfigIsEsriImageFromType(geoviewLayerConfig)) {
       return new EsriImage(geoviewLayerConfig);
     }
     if (layerConfigIsGeoJSON(geoviewLayerConfig)) {

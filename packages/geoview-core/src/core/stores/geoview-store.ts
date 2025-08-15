@@ -16,7 +16,7 @@ import { IUIState, initializeUIState } from '@/core/stores/store-interface-and-i
 
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
-import { serializeTypeGeoviewLayerConfig } from '@/api/config/types/map-schema-types';
+import { serializeTypeGeoviewLayerConfig } from '@/api/config/types/layer-schema-types';
 
 export type TypeSetStore = (
   partial: IGeoviewState | Partial<IGeoviewState> | ((state: IGeoviewState) => IGeoviewState | Partial<IGeoviewState>),

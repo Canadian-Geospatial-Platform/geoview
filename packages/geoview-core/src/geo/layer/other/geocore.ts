@@ -5,12 +5,8 @@ import { GeochartEventProcessor } from '@/api/event-processors/event-processor-c
 import { generateId } from '@/core/utils/utilities';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
-import {
-  DEFAULT_MAP_FEATURE_CONFIG,
-  TypeDisplayLanguage,
-  GeoCoreLayerConfig,
-  TypeGeoviewLayerConfig,
-} from '@/api/config/types/map-schema-types';
+import { DEFAULT_MAP_FEATURE_CONFIG, TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
+import { GeoCoreLayerConfig, TypeGeoviewLayerConfig } from '@/api/config/types/layer-schema-types';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 /**

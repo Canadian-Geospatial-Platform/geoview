@@ -3,7 +3,7 @@ import {
   CONST_LAYER_TYPES,
   TypeLayerMetadataEsri,
   TypeSourceImageEsriInitialConfig,
-} from '@/api/config/types/map-schema-types';
+} from '@/api/config/types/layer-schema-types';
 import {
   AbstractBaseLayerEntryConfig,
   AbstractBaseLayerEntryConfigProps,

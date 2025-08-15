@@ -8,12 +8,8 @@ import {
   DEFAULT_MAP_FEATURE_CONFIG,
   CONFIG_GEOCORE_TYPE,
   CONFIG_SHAPEFILE_TYPE,
-  CONST_LAYER_TYPES,
-  MapConfigLayerEntry,
   TypeBasemapOptions,
   TypeDisplayLanguage,
-  TypeGeoviewLayerConfig,
-  TypeInitialGeoviewLayerType,
   TypeInteraction,
   TypeMapFeaturesInstance,
   TypeValidMapComponentProps,
@@ -24,6 +20,12 @@ import {
   TypeValidVersions,
   TypeLayerStyleConfig,
 } from '@/api/config/types/map-schema-types';
+import {
+  CONST_LAYER_TYPES,
+  MapConfigLayerEntry,
+  TypeGeoviewLayerConfig,
+  TypeInitialGeoviewLayerType,
+} from '@/api/config/types/layer-schema-types';
 import { MapConfigError } from '@/api/config/types/classes/config-exceptions';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 

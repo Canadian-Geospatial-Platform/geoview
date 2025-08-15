@@ -16,7 +16,6 @@ import { Fetch } from '@/core/utils/fetch-helper';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import {
   TypeLayerStyleSettings,
-  TypeFeatureInfoLayerConfig,
   TypeFeatureInfoEntry,
   rangeDomainType,
   codedValueType,
@@ -26,9 +25,8 @@ import {
   TypeStyleGeometry,
   TypeValidMapProjectionCodes,
   TypeIconSymbolVectorConfig,
-  CONST_LAYER_TYPES,
-  TypeLayerMetadataEsriExtent,
 } from '@/api/config/types/map-schema-types';
+import { CONST_LAYER_TYPES, TypeFeatureInfoLayerConfig, TypeLayerMetadataEsriExtent } from '@/api/config/types/layer-schema-types';
 import { esriGetFieldType, esriGetFieldDomain, parseDateTimeValuesEsriDynamic, GeometryJson } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';

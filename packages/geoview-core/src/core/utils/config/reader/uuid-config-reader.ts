@@ -1,10 +1,5 @@
-import {
-  CONST_LAYER_TYPES,
-  TypeDisplayLanguage,
-  TypeGeoviewLayerConfig,
-  TypeGeoviewLayerType,
-  TypeOfServer,
-} from '@/api/config/types/map-schema-types';
+import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
+import { CONST_LAYER_TYPES, TypeGeoviewLayerConfig, TypeGeoviewLayerType, TypeOfServer } from '@/api/config/types/layer-schema-types';
 
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';

@@ -4,7 +4,7 @@ import {
   TypeLayerMetadataWMS,
   TypeMetadataWMS,
   TypeSourceImageWmsInitialConfig,
-} from '@/api/config/types/map-schema-types';
+} from '@/api/config/types/layer-schema-types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import {
   AbstractBaseLayerEntryConfig,

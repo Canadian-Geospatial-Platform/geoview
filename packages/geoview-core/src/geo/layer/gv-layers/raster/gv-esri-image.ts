@@ -7,12 +7,12 @@ import { Projection as OLProjection } from 'ol/proj';
 import { logger } from '@/core/utils/logger';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import {
-  CONST_LAYER_TYPES,
   TypeIconSymbolVectorConfig,
   TypeLayerStyleConfig,
   TypeLayerStyleConfigInfo,
   TypeLayerStyleSettings,
 } from '@/api/config/types/map-schema-types';
+import { CONST_LAYER_TYPES } from '@/api/config/types/layer-schema-types';
 import { validateExtent } from '@/geo/utils/utilities';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';

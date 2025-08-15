@@ -9,15 +9,19 @@ import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classe
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import {
   TypeFeatureInfoEntryPartial,
-  TypeLayerEntryConfig,
   TypeStyleGeometry,
   codedValueType,
   rangeDomainType,
   TypeOutfields,
   TypeOutfieldsType,
-  CONST_LAYER_TYPES,
-  TypeLayerMetadataEsri,
 } from '@/api/config/types/map-schema-types';
+import {
+  CONST_LAYER_TYPES,
+  TypeLayerEntryConfig,
+  TypeLayerMetadataEsri,
+  layerEntryIsEsriFeatureFromConfig,
+  layerEntryIsEsriDynamicFromConfig,
+} from '@/api/config/types/layer-schema-types';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import {
@@ -28,8 +32,8 @@ import {
   EsriRelatedRecordsJsonResponseRelatedRecord,
 } from '@/geo/layer/gv-layers/utils';
 import { getStyleFromEsriRenderer } from '@/geo/utils/renderer/esri-renderer';
-import { EsriDynamic, geoviewEntryIsEsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
-import { EsriFeature, geoviewEntryIsEsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
+import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
+import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { LayerEntryConfigLayerIdEsriMustBeNumberError } from '@/core/exceptions/layer-exceptions';
@@ -127,7 +131,7 @@ export function commonValidateListOfLayerEntryConfig(layer: EsriDynamic | EsriFe
 
         metadata.layers[esriIndex].subLayerIds.forEach((layerId) => {
           let subLayerEntryConfig;
-          if (geoviewEntryIsEsriDynamic(layerConfig)) {
+          if (layerEntryIsEsriDynamicFromConfig(layerConfig)) {
             subLayerEntryConfig = new EsriDynamicLayerEntryConfig(layerConfig.cloneLayerProps());
           } else {
             subLayerEntryConfig = new EsriFeatureLayerEntryConfig(layerConfig.cloneLayerProps());
@@ -372,7 +376,7 @@ export async function commonProcessLayerMetadata<
   layerConfig.setLayerMetadata(responseJson);
 
   // The following line allow the type ascention of the type guard functions on the second line below
-  if (geoviewEntryIsEsriDynamic(layerConfig) || geoviewEntryIsEsriFeature(layerConfig)) {
+  if (layerEntryIsEsriDynamicFromConfig(layerConfig) || layerEntryIsEsriFeatureFromConfig(layerConfig)) {
     if (!layerConfig.layerStyle) {
       const renderer = responseJson.drawingInfo?.renderer;
       // eslint-disable-next-line no-param-reassign

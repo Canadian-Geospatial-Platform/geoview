@@ -26,11 +26,13 @@ import {
   TypeStyleGeometry,
   TypeOutfieldsType,
   TypeOutfields,
+} from '@/api/config/types/map-schema-types';
+import {
   TypeLayerMetadataWMS,
   TypeLayerMetadataFields,
   TypeLayerMetadataEsri,
   TypeLayerMetadataVector,
-} from '@/api/config/types/map-schema-types';
+} from '@/api/config/types/layer-schema-types';
 import { getLegendStyles, getFeatureImageSource, processStyle } from '@/geo/utils/renderer/geoview-renderer';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';

@@ -3,7 +3,7 @@ import {
   CONST_LAYER_TYPES,
   TypeLayerMetadataOGC,
   TypeSourceOgcFeatureInitialConfig,
-} from '@/api/config/types/map-schema-types';
+} from '@/api/config/types/layer-schema-types';
 import { VectorLayerEntryConfig, VectorLayerEntryConfigProps } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { Projection } from '@/geo/utils/projection';
 

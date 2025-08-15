@@ -3,15 +3,15 @@ import { Options as SourceOptions } from 'ol/source/ImageWMS';
 
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import {
+  CONST_LAYER_TYPES,
+  CONST_LAYER_ENTRY_TYPES,
   TypeLayerEntryConfig,
   TypeGeoviewLayerConfig,
-  CONST_LAYER_ENTRY_TYPES,
   layerEntryIsGroupLayer,
   TypeOfServer,
-  CONST_LAYER_TYPES,
-  TypeMetadataWMSCapabilityLayer,
   TypeMetadataWMS,
-} from '@/api/config/types/map-schema-types';
+  TypeMetadataWMSCapabilityLayer,
+} from '@/api/config/types/layer-schema-types';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { CallbackNewMetadataDelegate, getWMSServiceMetadata, validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
@@ -473,24 +473,15 @@ export class WMS extends AbstractGeoViewRaster {
     const capabilities = await WMS.fetchMetadataWMS(metadataUrl, callbackNewMetadataUrl);
 
     this.#processMetadataInheritance(capabilities.Capability.Layer);
-    const metadataAccessPath = capabilities?.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource;
 
-    // TODO: Remove this setting from this fetch function
-    this.metadataAccessPath = metadataAccessPath;
+    // Set the metadata access path
+    this.metadataAccessPath = capabilities?.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource;
 
-    const dataAccessPath = capabilities?.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource;
-    const setDataAccessPath = (listOfLayerEntryConfig: TypeLayerEntryConfig[]): void => {
-      listOfLayerEntryConfig.forEach((layerConfig) => {
-        if (layerEntryIsGroupLayer(layerConfig)) setDataAccessPath(layerConfig.listOfLayerEntryConfig);
-        else {
-          // eslint-disable-next-line no-param-reassign
-          layerConfig.source!.dataAccessPath = dataAccessPath;
-        }
-      });
-    };
-
-    // TODO: Remove this setting from this fetch function
-    setDataAccessPath(this.listOfLayerEntryConfig);
+    // Propagate the metadata access path to all data access path of the layers underneath
+    this.listOfLayerEntryConfig.forEach((layerEntry) => {
+      // Set the data access path, when a layer entry is a group, this goes recursive
+      layerEntry.setDataAccessPath(this.metadataAccessPath);
+    });
 
     // Return the metadata
     return capabilities;
@@ -865,32 +856,6 @@ export class WMS extends AbstractGeoViewRaster {
 
   // #endregion
 }
-
-/**
- * type guard function that redefines a TypeGeoviewLayerConfig as a TypeWMSLayerConfig if the geoviewLayerType attribute of the
- * verifyIfLayer parameter is WMS. The type ascention applies only to the true block of the if clause that use this function.
- *
- * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerConfigIsWMS = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeWMSLayerConfig => {
-  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.WMS;
-};
-
-/**
- * type guard function that redefines a TypeLayerEntryConfig as a OgcWmsLayerEntryConfig if the geoviewLayerType attribute of the
- * verifyIfGeoViewEntry.geoviewLayerConfig attribute is WMS. The type ascention applies only to the true block of
- * the if clause that use this function.
- *
- * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
- * valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewEntryIsWMS = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is OgcWmsLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.WMS;
-};
 
 /** Local type to work with a metadata fetch result */
 type MetatadaFetchResult = { layerConfig: TypeLayerEntryConfig; metadata: TypeMetadataWMS };

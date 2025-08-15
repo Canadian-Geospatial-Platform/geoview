@@ -1,11 +1,11 @@
-import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/config/types/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/config/types/layer-schema-types';
 import { TypeSourceImageXYZTilesInitialConfig } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
 import { AbstractBaseLayerEntryConfigProps } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { TileLayerEntryConfig } from '@/core/utils/config/validation-classes/tile-layer-entry-config';
 
 export interface XYZTilesLayerEntryConfigProps extends AbstractBaseLayerEntryConfigProps {
   /** Source settings to apply to the GeoView layer source at creation time. */
-  source: TypeSourceImageXYZTilesInitialConfig;
+  source?: TypeSourceImageXYZTilesInitialConfig;
   /** The minimum scale denominator as read from metadata */
   minScaleDenominator?: number;
   /** The maximum scale denominator as read from metadata */
@@ -39,7 +39,7 @@ export class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
     this.maxScaleDenominator = layerConfig.maxScaleDenominator || 0;
 
     this.source ??= {};
-    this.source.dataAccessPath ??= layerConfig.source.dataAccessPath ?? this.geoviewLayerConfig.metadataAccessPath;
+    this.source.dataAccessPath ??= layerConfig.source?.dataAccessPath ?? this.geoviewLayerConfig.metadataAccessPath;
 
     // Format the dataAccessPath correctly
     if (!this.source.dataAccessPath!.includes('{z}/{y}/{x}'))

@@ -1,7 +1,8 @@
 import BaseLayer from 'ol/layer/Base';
 import { Projection as OLProjection } from 'ol/proj';
 
-import { Extent, TypeLayerStatus } from '@/api/config/types/map-schema-types';
+import { Extent } from '@/api/config/types/map-schema-types';
+import { TypeLayerStatus } from '@/api/config/types/layer-schema-types';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 

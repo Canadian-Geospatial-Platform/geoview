@@ -1,15 +1,8 @@
 import { Map as OLMap } from 'ol';
 
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import {
-  QueryType,
-  TypeFeatureInfoEntry,
-  TypeLayerEntryConfig,
-  TypeLayerStatus,
-  TypeLocation,
-  TypeResultSet,
-  TypeResultSetEntry,
-} from '@/api/config/types/map-schema-types';
+import { QueryType, TypeFeatureInfoEntry, TypeLocation, TypeResultSet, TypeResultSetEntry } from '@/api/config/types/map-schema-types';
+import { TypeLayerEntryConfig, TypeLayerStatus } from '@/api/config/types/layer-schema-types';
 import { generateId, whenThisThen } from '@/core/utils/utilities';
 import {
   ConfigBaseClass,

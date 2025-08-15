@@ -1,4 +1,4 @@
-import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES, TypeSourceImageStaticInitialConfig } from '@/api/config/types/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES, TypeSourceImageStaticInitialConfig } from '@/api/config/types/layer-schema-types';
 import {
   AbstractBaseLayerEntryConfig,
   AbstractBaseLayerEntryConfigProps,

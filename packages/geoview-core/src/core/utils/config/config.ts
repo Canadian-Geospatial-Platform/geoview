@@ -1,14 +1,14 @@
+import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
 import {
   convertLayerTypeToEntry,
   TypeLayerEntryConfig,
   mapConfigLayerEntryIsGeoCore,
   MapConfigLayerEntry,
   layerEntryIsGroupLayer,
-  TypeDisplayLanguage,
   CONST_LAYER_TYPES,
   TypeGeoviewLayerType,
   mapConfigLayerEntryIsShapefile,
-} from '@/api/config/types/map-schema-types';
+} from '@/api/config/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
 
 import { ConfigValidation, ErrorCallbackDelegate } from '@/core/utils/config/config-validation';

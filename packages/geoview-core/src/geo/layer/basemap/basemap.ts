@@ -10,7 +10,8 @@ import { OverviewMap as OLOverviewMap } from 'ol/control';
 
 import { applyStyle } from 'ol-mapbox-style';
 
-import { TypeBasemapOptions, TypeValidMapProjectionCodes, TypeDisplayLanguage, TypeLod } from '@/api/config/types/map-schema-types';
+import { TypeBasemapOptions, TypeValidMapProjectionCodes, TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
+import { TypeLod } from '@/api/config/types/layer-schema-types';
 import { delay, getLocalizedMessage } from '@/core/utils/utilities';
 import {
   TypeBasemapProps,

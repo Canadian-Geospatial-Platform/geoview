@@ -4,12 +4,7 @@ import TileGrid, { Options as TileGridOptions } from 'ol/tilegrid/TileGrid';
 import defaultsDeep from 'lodash/defaultsDeep';
 
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import {
-  TypeLayerEntryConfig,
-  TypeSourceTileInitialConfig,
-  TypeGeoviewLayerConfig,
-  CONST_LAYER_TYPES,
-} from '@/api/config/types/map-schema-types';
+import { TypeSourceTileInitialConfig, TypeGeoviewLayerConfig, CONST_LAYER_TYPES } from '@/api/config/types/layer-schema-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import {
   TypeMetadataXYZTiles,
@@ -326,30 +321,3 @@ export class XYZTiles extends AbstractGeoViewRaster {
     return new XYZ(sourceOptions);
   }
 }
-
-/**
- * type guard function that redefines a TypeGeoviewLayerConfig as a TypeXYZTilesConfig if the geoviewLayerType attribute of the
- * verifyIfLayer parameter is XYZ_TILES. The type ascention applies only to the true block of the if clause that use this
- * function.
- *
- * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerConfigIsXYZTiles = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeXYZTilesConfig => {
-  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.XYZ_TILES;
-};
-
-/**
- * type guard function that redefines a TypeLayerEntryConfig as a XYZTilesLayerEntryConfig if the geoviewLayerType attribute
- * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is XYZ_TILES. The type ascention applies only to the true block of
- * the if clause that use this function.
- *
- * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
- * valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewEntryIsXYZTiles = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is XYZTilesLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.XYZ_TILES;
-};

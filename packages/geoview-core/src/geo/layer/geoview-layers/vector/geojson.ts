@@ -13,7 +13,7 @@ import {
   TypeBaseVectorSourceInitialConfig,
   CONST_LAYER_TYPES,
   TypeMetadataGeoJSON,
-} from '@/api/config/types/map-schema-types';
+} from '@/api/config/types/layer-schema-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
@@ -100,8 +100,11 @@ export class GeoJSON extends AbstractGeoViewVector {
    * @param {ConfigBaseClass} layerConfig - The layer entry config to validate.
    */
   protected override onValidateLayerEntryConfig(layerConfig: ConfigBaseClass): void {
-    if (Array.isArray(this.getMetadata()?.listOfLayerEntryConfig)) {
-      const foundEntry = this.#recursiveSearch(layerConfig.layerId, this.getMetadata()?.listOfLayerEntryConfig || []);
+    // Get the metadata
+    const metadata = this.getMetadata();
+
+    if (Array.isArray(metadata?.listOfLayerEntryConfig)) {
+      const foundEntry = this.#recursiveSearch(layerConfig.layerId, metadata.listOfLayerEntryConfig || []);
       if (!foundEntry) {
         // Add a layer load error
         this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(layerConfig), layerConfig);
@@ -337,30 +340,3 @@ export class GeoJSON extends AbstractGeoViewVector {
     return AbstractGeoViewVector.processConfig(myLayer);
   }
 }
-
-/**
- * type guard function that redefines a TypeGeoviewLayerConfig as a TypeGeoJSONLayerConfig if the geoviewLayerType attribute of the
- * verifyIfLayer parameter is GEOJSON. The type ascention applies only to the true block of the if clause that use this
- * function.
- *
- * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerConfigIsGeoJSON = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeGeoJSONLayerConfig => {
-  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.GEOJSON;
-};
-
-/**
- * type guard function that redefines a TypeLayerEntryConfig as a GeoJSONLayerEntryConfig if the geoviewLayerType attribute of
- * the verifyIfGeoViewEntry.geoviewLayerConfig attribute is GEOJSON. The type ascention applies only to the true block of the if
- * clause that use this function.
- *
- * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
- * valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewEntryIsGeoJSON = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is GeoJSONLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.GEOJSON;
-};

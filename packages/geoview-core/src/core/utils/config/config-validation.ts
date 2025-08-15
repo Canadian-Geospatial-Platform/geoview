@@ -7,11 +7,7 @@ import { AnyValidateFunction } from 'ajv/dist/types';
 
 import defaultsDeep from 'lodash/defaultsDeep';
 
-import { geoviewEntryIsCSV } from '@/geo/layer/geoview-layers/vector/csv';
-import { geoviewEntryIsEsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
-import { geoviewEntryIsEsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
-import { geoviewEntryIsGeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
-import { geoviewEntryIsGeoPackage } from '@/geo/layer/geoview-layers/vector/geopackage';
+import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
 import { geoviewEntryIsImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
 import { geoviewEntryIsOgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
 import { geoviewEntryIsVectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
@@ -21,7 +17,8 @@ import { geoviewEntryIsWMS } from '@/geo/layer/geoview-layers/raster/wms';
 import { geoviewEntryIsXYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
 
 import {
-  TypeDisplayLanguage,
+  CONST_LAYER_TYPES,
+  CONST_GEOVIEW_SCHEMA_BY_TYPE,
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
   MapConfigLayerEntry,
@@ -29,10 +26,19 @@ import {
   mapConfigLayerEntryIsShapefile,
   layerEntryIsGroupLayer,
   TypeGeoviewLayerType,
-  CONST_LAYER_TYPES,
-  CONST_GEOVIEW_SCHEMA_BY_TYPE,
-} from '@/api/config/types/map-schema-types';
-import { geoviewEntryIsEsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
+  layerEntryIsEsriFeatureFromConfig,
+  layerEntryIsEsriDynamicFromConfig,
+  layerEntryIsEsriImageFromConfig,
+  layerEntryIsImageStaticFromConfig,
+  layerEntryIsVectorTileFromConfig,
+  layerEntryIsOgcWmsFromConfig,
+  layerEntryIsXYZTilesFromConfig,
+  layerEntryIsCSVFromConfig,
+  layerEntryIsGeoJSONFromConfig,
+  layerEntryIsGeoPackageFromConfig,
+  layerEntryIsOgcFeatureFromConfig,
+  layerEntryIsWFSFromConfig,
+} from '@/api/config/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
 
 import { generateId } from '@/core/utils/utilities';
@@ -357,29 +363,29 @@ export class ConfigValidation {
         const parent = new GroupLayerEntryConfig(layerConfig);
         listOfLayerEntryConfig[i] = parent;
         ConfigValidation.#processLayerEntryConfig(geoviewLayerConfig, parent.listOfLayerEntryConfig, parent);
-      } else if (geoviewEntryIsWMS(layerConfig)) {
+      } else if (layerEntryIsOgcWmsFromConfig(layerConfig)) {
         listOfLayerEntryConfig[i] = new OgcWmsLayerEntryConfig(layerConfig);
-      } else if (geoviewEntryIsImageStatic(layerConfig)) {
+      } else if (layerEntryIsImageStaticFromConfig(layerConfig)) {
         listOfLayerEntryConfig[i] = new ImageStaticLayerEntryConfig(layerConfig);
-      } else if (geoviewEntryIsXYZTiles(layerConfig)) {
+      } else if (layerEntryIsXYZTilesFromConfig(layerConfig)) {
         listOfLayerEntryConfig[i] = new XYZTilesLayerEntryConfig(layerConfig);
-      } else if (geoviewEntryIsVectorTiles(layerConfig)) {
+      } else if (layerEntryIsVectorTileFromConfig(layerConfig)) {
         listOfLayerEntryConfig[i] = new VectorTilesLayerEntryConfig(layerConfig);
-      } else if (geoviewEntryIsEsriDynamic(layerConfig)) {
+      } else if (layerEntryIsEsriDynamicFromConfig(layerConfig)) {
         listOfLayerEntryConfig[i] = new EsriDynamicLayerEntryConfig(layerConfig);
-      } else if (geoviewEntryIsEsriFeature(layerConfig)) {
+      } else if (layerEntryIsEsriFeatureFromConfig(layerConfig)) {
         listOfLayerEntryConfig[i] = new EsriFeatureLayerEntryConfig(layerConfig);
-      } else if (geoviewEntryIsEsriImage(layerConfig)) {
+      } else if (layerEntryIsEsriImageFromConfig(layerConfig)) {
         listOfLayerEntryConfig[i] = new EsriImageLayerEntryConfig(layerConfig);
-      } else if (geoviewEntryIsWFS(layerConfig)) {
+      } else if (layerEntryIsWFSFromConfig(layerConfig)) {
         listOfLayerEntryConfig[i] = new WfsLayerEntryConfig(layerConfig);
-      } else if (geoviewEntryIsOgcFeature(layerConfig)) {
+      } else if (layerEntryIsOgcFeatureFromConfig(layerConfig)) {
         listOfLayerEntryConfig[i] = new OgcFeatureLayerEntryConfig(layerConfig);
-      } else if (geoviewEntryIsGeoPackage(layerConfig)) {
+      } else if (layerEntryIsGeoPackageFromConfig(layerConfig)) {
         listOfLayerEntryConfig[i] = new GeoPackageLayerEntryConfig(layerConfig);
-      } else if (geoviewEntryIsGeoJSON(layerConfig)) {
+      } else if (layerEntryIsGeoJSONFromConfig(layerConfig)) {
         listOfLayerEntryConfig[i] = new GeoJSONLayerEntryConfig(layerConfig);
-      } else if (geoviewEntryIsCSV(layerConfig)) {
+      } else if (layerEntryIsCSVFromConfig(layerConfig)) {
         listOfLayerEntryConfig[i] = new CsvLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsWKB(layerConfig)) {
         listOfLayerEntryConfig[i] = new WkbLayerEntryConfig(layerConfig);

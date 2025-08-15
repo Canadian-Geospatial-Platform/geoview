@@ -5,7 +5,8 @@ import localizedFormat from 'dayjs/plugin/localizedFormat';
 
 import 'dayjs/locale/en-ca';
 import 'dayjs/locale/fr-ca';
-import { TypeDisplayLanguage, TypeMetadataWMSCapabilityLayerDimension } from '@/api/config/types/map-schema-types';
+import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
+import { TypeMetadataWMSCapabilityLayerDimension } from '@/api/config/types/layer-schema-types';
 
 dayjs.extend(duration);
 

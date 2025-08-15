@@ -12,7 +12,6 @@ import {
   MAP_EXTENTS,
   TypeBasemapOptions,
   TypeInteraction,
-  TypeLayerInitialSettings,
   TypeValidAppBarCoreProps,
   TypeValidFooterBarTabsCoreProps,
   TypeValidMapProjectionCodes,
@@ -20,14 +19,17 @@ import {
   TypePointMarker,
   TypeHighlightColors,
   TypeMapViewSettings,
-  MapConfigLayerEntry,
   TypeFeatureInfoEntry,
-  TypeGeoviewLayerConfig,
-  TypeLayerEntryConfig,
   TypeMapConfig,
   TypeMapFeaturesInstance,
-  CONST_LAYER_TYPES,
 } from '@/api/config/types/map-schema-types';
+import {
+  CONST_LAYER_TYPES,
+  MapConfigLayerEntry,
+  TypeLayerInitialSettings,
+  TypeGeoviewLayerConfig,
+  TypeLayerEntryConfig,
+} from '@/api/config/types/layer-schema-types';
 import { api } from '@/app';
 import { LayerApi } from '@/geo/layer/layer';
 import { MapViewer, TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer';

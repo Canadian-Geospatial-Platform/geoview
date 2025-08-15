@@ -7,12 +7,11 @@ import Feature from 'ol/Feature';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import {
-  TypeLayerEntryConfig,
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
   CONST_LAYER_TYPES,
   TypeMetadataEsriFeature,
-} from '@/api/config/types/map-schema-types';
+} from '@/api/config/types/layer-schema-types';
 
 import { commonProcessLayerMetadata, commonValidateListOfLayerEntryConfig } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { LayerNotFeatureLayerError } from '@/core/exceptions/layer-exceptions';
@@ -277,28 +276,3 @@ export class EsriFeature extends AbstractGeoViewVector {
     return AbstractGeoViewRaster.processConfig(myLayer);
   }
 }
-
-/**
- * type guard function that redefines a TypeGeoviewLayerConfig as a TypeEsriFeatureLayerConfig if the geoviewLayerType attribute
- * of the verifyIfLayer parameter is ESRI_FEATURE. The type ascention applies only to the true block of the if clause that use
- * this function.
- * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerConfigIsEsriFeature = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeEsriFeatureLayerConfig => {
-  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_FEATURE;
-};
-
-/**
- * type guard function that redefines a TypeLayerEntryConfig as a EsriFeatureLayerEntryConfig if the geoviewLayerType
- * attribute of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is ESRI_FEATURE. The type ascention applies only to the true
- * block of the if clause that use this function.
- * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention
- * is valid
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewEntryIsEsriFeature = (
-  verifyIfGeoViewEntry: TypeLayerEntryConfig
-): verifyIfGeoViewEntry is EsriFeatureLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_FEATURE;
-};

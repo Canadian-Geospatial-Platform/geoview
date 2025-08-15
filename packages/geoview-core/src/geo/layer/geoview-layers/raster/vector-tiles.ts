@@ -7,13 +7,7 @@ import { applyStyle } from 'ol-mapbox-style';
 import { MVT } from 'ol/format';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import {
-  TypeLayerEntryConfig,
-  TypeGeoviewLayerConfig,
-  TypeTileGrid,
-  CONST_LAYER_TYPES,
-  TypeMetadataVectorTiles,
-} from '@/api/config/types/map-schema-types';
+import { TypeGeoviewLayerConfig, TypeTileGrid, CONST_LAYER_TYPES, TypeMetadataVectorTiles } from '@/api/config/types/layer-schema-types';
 import { ConfigBaseClass, TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
@@ -25,6 +19,7 @@ import { GVVectorTiles } from '@/geo/layer/gv-layers/vector/gv-vector-tiles';
 
 // TODO: Implement method to validate Vector Tiles service
 // TODO: Add more customization (minZoom, maxZoom, TMS)
+
 export interface TypeVectorTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.VECTOR_TILES;
   listOfLayerEntryConfig: VectorTilesLayerEntryConfig[];
@@ -329,32 +324,3 @@ export class VectorTiles extends AbstractGeoViewRaster {
     return new VectorTileSource(sourceOptions);
   }
 }
-
-/**
- * type guard function that redefines a TypeGeoviewLayerConfig as a TypeVectorTilesConfig if the geoviewLayerType attribute of the
- * verifyIfLayer parameter is VECTOR_TILES. The type ascention applies only to the true block of the if clause that use this
- * function.
- *
- * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerConfigIsVectorTiles = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeVectorTilesConfig => {
-  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.VECTOR_TILES;
-};
-
-/**
- * type guard function that redefines a TypeLayerEntryConfig as a VectorTilesLayerEntryConfig if the geoviewLayerType attribute
- * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is VECTOR_TILES. The type ascention applies only to the true block of
- * the if clause that use this function.
- *
- * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
- * valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewEntryIsVectorTiles = (
-  verifyIfGeoViewEntry: TypeLayerEntryConfig
-): verifyIfGeoViewEntry is VectorTilesLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.VECTOR_TILES;
-};

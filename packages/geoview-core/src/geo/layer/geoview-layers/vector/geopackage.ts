@@ -10,18 +10,20 @@ import * as SLDReader from '@nieuwlandgeo/sldreader';
 
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
-  TypeLayerEntryConfig,
-  TypeVectorSourceInitialConfig,
-  TypeGeoviewLayerConfig,
   TypeSimpleSymbolVectorConfig,
   TypeStrokeSymbolConfig,
   TypeLineStringVectorConfig,
   TypePolygonVectorConfig,
   TypeFillStyle,
-  CONST_LAYER_ENTRY_TYPES,
   TypeOutfields,
-  CONST_LAYER_TYPES,
 } from '@/api/config/types/map-schema-types';
+import {
+  CONST_LAYER_ENTRY_TYPES,
+  CONST_LAYER_TYPES,
+  TypeLayerEntryConfig,
+  TypeVectorSourceInitialConfig,
+  TypeGeoviewLayerConfig,
+} from '@/api/config/types/layer-schema-types';
 import { GeoPackageLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geopackage-layer-config-entry';
 import { TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
@@ -656,32 +658,3 @@ export class GeoPackage extends AbstractGeoViewVector {
     return geoviewLayerConfig;
   }
 }
-
-/**
- * type guard function that redefines a TypeGeoviewLayerConfig as a TypeGeoPackageFeatureLayerConfig if the geoviewLayerType attribute of
- * the verifyIfLayer parameter is GEOPACKAGE. The type ascention applies only to the true block of the if clause that use this
- * function.
- *
- * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerConfigIsGeoPackage = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeGeoPackageLayerConfig => {
-  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.GEOPACKAGE;
-};
-
-/**
- * type guard function that redefines a TypeLayerEntryConfig as a GeoPackageLayerEntryConfig if the geoviewLayerType attribute
- * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is GEOPACKAGE. The type ascention applies only to the true block of
- * the if clause that use this function.
- *
- * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
- * valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewEntryIsGeoPackage = (
-  verifyIfGeoViewEntry: TypeLayerEntryConfig
-): verifyIfGeoViewEntry is GeoPackageLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.GEOPACKAGE;
-};

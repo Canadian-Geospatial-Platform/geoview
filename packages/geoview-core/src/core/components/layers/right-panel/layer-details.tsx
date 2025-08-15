@@ -33,7 +33,7 @@ import { LayerIcon } from '@/core/components/common/layer-icon';
 import { LayerOpacityControl } from './layer-opacity-control/layer-opacity-control';
 import { logger } from '@/core/utils/logger';
 import { LAYER_STATUS } from '@/core/utils/constant';
-import { CONST_LAYER_TYPES } from '@/api/config/types/map-schema-types';
+import { CONST_LAYER_TYPES } from '@/api/config/types/layer-schema-types';
 import { Collapse } from '@/ui/collapse/collapse';
 import { Button } from '@/ui/button/button';
 import { KeyboardArrowDownIcon, KeyboardArrowUpIcon } from '@/ui/icons';

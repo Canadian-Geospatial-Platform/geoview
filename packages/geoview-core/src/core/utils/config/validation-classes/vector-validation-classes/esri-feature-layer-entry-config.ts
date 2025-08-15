@@ -1,4 +1,4 @@
-import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES, TypeLayerMetadataEsri } from '@/api/config/types/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES, TypeLayerMetadataEsri } from '@/api/config/types/layer-schema-types';
 import { VectorLayerEntryConfig, VectorLayerEntryConfigProps } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { TypeSourceEsriFeatureInitialConfig } from '@/geo/layer/geoview-layers/vector/esri-feature';
 

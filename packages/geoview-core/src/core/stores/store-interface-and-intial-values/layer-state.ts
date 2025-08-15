@@ -8,16 +8,13 @@ import { TypeLayersViewDisplayState, TypeLegendItem, TypeLegendLayer, TypeLegend
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import {
-  CONST_LAYER_TYPES,
   TypeFeatureInfoEntryPartial,
-  TypeLayerStatus,
   TypeLayerStyleConfig,
   TypeResultSet,
   TypeResultSetEntry,
-  TypeLayerControls,
-  TypeGeoviewLayerType,
   TypeTemporalDimension,
 } from '@/api/config/types/map-schema-types';
+import { CONST_LAYER_TYPES, TypeLayerStatus, TypeLayerControls, TypeGeoviewLayerType } from '@/api/config/types/layer-schema-types';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';

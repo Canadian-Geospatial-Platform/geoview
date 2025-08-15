@@ -1,11 +1,10 @@
+import { TypeBaseVectorGeometryConfig, TypeLayerStyleConfig } from '@/api/config/types/map-schema-types';
 import {
-  TypeBaseVectorGeometryConfig,
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
   TypeLayerEntryType,
-  TypeLayerStyleConfig,
   TypeVectorSourceFormats,
-} from '@/api/config/types/map-schema-types';
+} from '@/api/config/types/layer-schema-types';
 import { TimeDimension } from '@/core/utils/date-mgt';
 
 export abstract class LayerMockup {

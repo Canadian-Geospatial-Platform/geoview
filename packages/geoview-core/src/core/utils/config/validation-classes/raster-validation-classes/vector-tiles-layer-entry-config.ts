@@ -3,7 +3,7 @@ import {
   TypeMetadataVectorTiles,
   TypeSourceVectorTilesInitialConfig,
   TypeTileGrid,
-} from '@/api/config/types/map-schema-types';
+} from '@/api/config/types/layer-schema-types';
 import { AbstractBaseLayerEntryConfigProps } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { TileLayerEntryConfig } from '@/core/utils/config/validation-classes/tile-layer-entry-config';
 

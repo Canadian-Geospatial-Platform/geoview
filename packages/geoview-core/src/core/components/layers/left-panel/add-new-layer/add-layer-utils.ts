@@ -1,13 +1,13 @@
+import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
 import {
   CONST_LAYER_TYPES,
   CONST_LAYER_ENTRY_TYPES,
   ShapefileLayerConfig,
-  TypeDisplayLanguage,
   TypeGeoviewLayerType,
   TypeLayerEntryConfig,
   MapConfigLayerEntry,
   TypeGeoviewLayerConfig,
-} from '@/api/config/types/map-schema-types';
+} from '@/api/config/types/layer-schema-types';
 import { generateId, getLocalizedMessage } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 

@@ -1,8 +1,8 @@
 import { cloneDeep } from 'lodash';
 
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
+import { Extent } from '@/api/config/types/map-schema-types';
 import {
-  Extent,
   TypeGeoviewLayerConfig,
   TypeGeoviewLayerType,
   TypeLayerEntryType,
@@ -10,18 +10,14 @@ import {
   TypeLayerStatus,
   TypeTileGrid,
   TypeValidSourceProjectionCodes,
-  layerEntryIsEsriFeature,
-  layerEntryIsGeoJSON,
   layerEntryIsGroupLayer,
-} from '@/api/config/types/map-schema-types';
+} from '@/api/config/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
 import { LAYER_STATUS } from '@/core/utils/constant';
 import { GroupLayerEntryConfig } from './group-layer-entry-config';
 import { NotImplementedError } from '@/core/exceptions/core-exceptions';
 import { DateMgt, TypeDateFragments } from '@/core/utils/date-mgt';
 import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config';
-import { GeoJSONLayerEntryConfig } from './vector-validation-classes/geojson-layer-entry-config';
-import { EsriFeatureLayerEntryConfig } from './vector-validation-classes/esri-feature-layer-entry-config';
 
 export interface ConfigBaseClassProps {
   /** The display name of the layer (English/French). */
@@ -203,22 +199,6 @@ export abstract class ConfigBaseClass {
   }
 
   /**
-   * Type guard that checks if this entry is a GeoJSON schema tag layer entry.
-   * @returns {GeoJSONLayerEntryConfig} True if this is a GeoJSONLayerEntryConfig.
-   */
-  getSchemaTagGeoJSON(): this is GeoJSONLayerEntryConfig {
-    return layerEntryIsGeoJSON(this);
-  }
-
-  /**
-   * Type guard that checks if this entry is a GeoJSON schema tag layer entry.
-   * @returns {EsriFeatureLayerEntryConfig} True if this is a GeoJSONLayerEntryConfig.
-   */
-  getSchemaTagEsriFeature(): this is EsriFeatureLayerEntryConfig {
-    return layerEntryIsEsriFeature(this);
-  }
-
-  /**
    * Returns the sibling layer configurations of the current layer.
    * If the current layer has a parent, this method retrieves all layer entry
    * configs under the same parent. It can optionally exclude layers of type 'group'.
@@ -242,6 +222,29 @@ export abstract class ConfigBaseClass {
   getExternalFragmentsOrder(): TypeDateFragments {
     return DateMgt.getDateFragmentsOrder(this.geoviewLayerConfig.externalDateFormat);
   }
+
+  /**
+   * Sets the data access path for this layer entry.
+   * This is the public entry point for updating the data access path.
+   * Internally, it delegates the behavior to the `onSetDataAccessPath` method,
+   * which can be overridden by subclasses to implement custom logic.
+   * @param {string} dataAccessPath - The new path to be used for accessing data.
+   */
+  setDataAccessPath(dataAccessPath: string): void {
+    // Redirect
+    this.onSetDataAccessPath(dataAccessPath);
+  }
+
+  /**
+   * Overridable method to apply the data access path to this layer entry and its children.
+   * Subclasses should override this method to implement the logic needed
+   * to update the data access path on the current layer entry, including
+   * any recursive behavior for child entries or associated sources.
+   * @param {string} dataAccessPath - The data access path to set.
+   * @protected
+   * @abstract
+   */
+  protected abstract onSetDataAccessPath(dataAccessPath: string): void;
 
   /**
    * Sets the layer status to registered.

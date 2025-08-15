@@ -5,15 +5,14 @@ import { Vector as VectorSource } from 'ol/source';
 import Feature from 'ol/Feature';
 
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
+import { TypeOutfields } from '@/api/config/types/map-schema-types';
 import {
-  TypeLayerEntryConfig,
   TypeGeoviewLayerConfig,
-  TypeOutfields,
   CONST_LAYER_TYPES,
   TypeMetadataOGCFeature,
   TypeLayerMetadataQueryables,
   TypeLayerMetadataOGC,
-} from '@/api/config/types/map-schema-types';
+} from '@/api/config/types/layer-schema-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { OgcFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
@@ -363,28 +362,3 @@ export class OgcFeature extends AbstractGeoViewVector {
     return AbstractGeoViewVector.processConfig(myLayer);
   }
 }
-
-/**
- * type guard function that redefines a TypeGeoviewLayerConfig as a TypeOgcFeatureLayerConfig if the geoviewLayerType attribute of
- * the verifyIfLayer parameter is OGC_FEATURE. The type ascention applies only to the true block of the if clause that use this
- * function.
- * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerConfigIsOgcFeature = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeOgcFeatureLayerConfig => {
-  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.OGC_FEATURE;
-};
-
-/**
- * type guard function that redefines a TypeLayerEntryConfig as a OgcFeatureLayerEntryConfig if the geoviewLayerType attribute
- * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is OGC_FEATURE. The type ascention applies only to the true block of
- * the if clause that use this function.
- * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
- * valid.
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewEntryIsOgcFeature = (
-  verifyIfGeoViewEntry: TypeLayerEntryConfig
-): verifyIfGeoViewEntry is OgcFeatureLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.OGC_FEATURE;
-};

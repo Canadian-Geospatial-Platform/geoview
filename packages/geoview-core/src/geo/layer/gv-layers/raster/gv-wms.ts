@@ -13,14 +13,13 @@ import { getExtentIntersection, validateExtentWhenDefined } from '@/geo/utils/ut
 import { parseDateTimeValuesEsriImageOrWMS } from '@/geo/layer/gv-layers/utils';
 import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import { CONFIG_PROXY_URL, TypeFeatureInfoEntry } from '@/api/config/types/map-schema-types';
 import {
-  CONFIG_PROXY_URL,
   CONST_LAYER_TYPES,
-  TypeFeatureInfoEntry,
   TypeLayerMetadataWMSStyle,
   TypeLayerMetadataWMSStyleLegendUrl,
   TypeMetadataFeatureInfo,
-} from '@/api/config/types/map-schema-types';
+} from '@/api/config/types/layer-schema-types';
 import { loadImage } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';

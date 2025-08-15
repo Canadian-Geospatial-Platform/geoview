@@ -1,7 +1,7 @@
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { logger } from '@/core/utils/logger';
-import { TypeLayerStatus } from '@/api/config/types/map-schema-types';
+import { TypeLayerStatus } from '@/api/config/types/layer-schema-types';
 import { AbstractLayerSet, PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { TypeLegend, TypeLegendResultSet, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractGVLayer, StyleChangedDelegate, StyleChangedEvent } from '@/geo/layer/gv-layers/abstract-gv-layer';

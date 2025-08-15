@@ -1,9 +1,5 @@
-import {
-  TypeLayerStyleConfig,
-  TypeStyleGeometry,
-  TypeLayerStyleSettings,
-  TypeBaseSourceInitialConfig,
-} from '@/api/config/types/map-schema-types';
+import { TypeLayerStyleConfig, TypeStyleGeometry, TypeLayerStyleSettings } from '@/api/config/types/map-schema-types';
+import { TypeBaseSourceInitialConfig } from '@/api/config/types/layer-schema-types';
 import { ConfigBaseClass, ConfigBaseClassProps } from '@/core/utils/config/validation-classes/config-base-class';
 import { TimeDimension } from '@/core/utils/date-mgt';
 import { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
@@ -186,6 +182,18 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
     // None
     return undefined;
+  }
+
+  /**
+   * Sets the data access path for the source object.
+   * This method is called when the data access path is being set.
+   * If the `source` object is undefined or null, it initializes it as an empty object.
+   * Then it assigns the provided `dataAccessPath` to `source.dataAccessPath`.
+   * @param {string} dataAccessPath - The path string used to access data.
+   */
+  protected override onSetDataAccessPath(dataAccessPath: string): void {
+    this.source ??= {};
+    this.source.dataAccessPath = dataAccessPath;
   }
 
   /**

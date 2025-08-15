@@ -1,13 +1,11 @@
 import {
   Extent,
-  TypeLayerControls,
   TypeLayerStyleSettings,
   TypeFeatureInfoEntry,
   TypeStyleGeometry,
-  CONST_LAYER_TYPES,
-  TypeGeoviewLayerType,
   TypeTemporalDimension,
 } from '@/api/config/types/map-schema-types';
+import { CONST_LAYER_TYPES, TypeGeoviewLayerType, TypeLayerControls } from '@/api/config/types/layer-schema-types';
 import { TypeLegendLayer, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import { TypeWmsLegend, isImageStaticLegend, isVectorLegend, isWmsLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';

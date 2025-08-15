@@ -1,5 +1,5 @@
 import shp from 'shpjs';
-import { CONST_LAYER_TYPES, ShapefileLayerConfig } from '@/api/config/types/map-schema-types';
+import { CONST_LAYER_TYPES, ShapefileLayerConfig } from '@/api/config/types/layer-schema-types';
 import { TypeGeoJSONLayerConfig } from '@/geo/layer/geoview-layers/vector/geojson';
 import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
 import { generateId } from '@/core/utils/utilities';

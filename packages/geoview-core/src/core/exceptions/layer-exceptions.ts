@@ -3,7 +3,7 @@
 
 // Classes in this file mostly inherit LayerError errors.
 
-import { TypeGeoviewLayerType, TypeLayerEntryType } from '@/api/config/types/map-schema-types';
+import { TypeGeoviewLayerType, TypeLayerEntryType } from '@/api/config/types/layer-schema-types';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 /**

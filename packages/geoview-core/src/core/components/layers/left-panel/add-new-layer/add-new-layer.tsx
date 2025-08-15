@@ -30,7 +30,7 @@ import {
   TypeGeoviewLayerConfig,
   TypeGeoviewLayerType,
   TypeInitialGeoviewLayerType,
-} from '@/api/config/types/map-schema-types';
+} from '@/api/config/types/layer-schema-types';
 
 import { UtilAddLayer } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
 import { AddLayerTree } from '@/core/components/layers/left-panel/add-new-layer/add-layer-tree';

@@ -4,7 +4,7 @@ import {
   TypeLayerMetadataEsri,
   TypeMetadataEsriDynamic,
   TypeSourceEsriDynamicInitialConfig,
-} from '@/api/config/types/map-schema-types';
+} from '@/api/config/types/layer-schema-types';
 import {
   AbstractBaseLayerEntryConfig,
   AbstractBaseLayerEntryConfigProps,

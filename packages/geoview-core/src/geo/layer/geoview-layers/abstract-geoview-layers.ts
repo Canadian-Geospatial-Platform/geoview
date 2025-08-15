@@ -8,16 +8,16 @@ import { logger } from '@/core/utils/logger';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
+import { TypeStyleGeometry } from '@/api/config/types/map-schema-types';
 import {
+  CONST_LAYER_TYPES,
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
   TypeLayerInitialSettings,
   TypeLayerStatus,
-  TypeStyleGeometry,
   TypeGeoviewLayerType,
-  CONST_LAYER_TYPES,
   validVectorLayerLegendTypes,
-} from '@/api/config/types/map-schema-types';
+} from '@/api/config/types/layer-schema-types';
 import { LayerServiceMetadataEmptyError, LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
 import {
   LayerEntryConfigEmptyLayerGroupError,

@@ -1,4 +1,4 @@
-import { CONST_LAYER_ENTRY_TYPES, TypeLayerEntryConfig } from '@/api/config/types/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, TypeLayerEntryConfig } from '@/api/config/types/layer-schema-types';
 import { ConfigBaseClass, ConfigBaseClassProps } from '@/core/utils/config/validation-classes/config-base-class';
 
 export interface GroupLayerEntryConfigProps extends ConfigBaseClassProps {
@@ -31,6 +31,21 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
   constructor(layerConfig: GroupLayerEntryConfigProps) {
     super(layerConfig);
     this.listOfLayerEntryConfig = layerConfig.listOfLayerEntryConfig;
+  }
+
+  /**
+   * Updates the data access path for all layer entries in the configuration.
+   * This method overrides a base implementation to recursively apply the provided
+   * `dataAccessPath` to each entry in `listOfLayerEntryConfig`. It ensures that
+   * all nested or child layer entries also receive the updated data access path.
+   * @param {string} dataAccessPath - The new path to be used for accessing data.
+   */
+  protected override onSetDataAccessPath(dataAccessPath: string): void {
+    // Recursively change the data access path for each layer entries
+    this.listOfLayerEntryConfig.forEach((layerEntry) => {
+      // Go recursive
+      layerEntry.setDataAccessPath(dataAccessPath);
+    });
   }
 
   /**

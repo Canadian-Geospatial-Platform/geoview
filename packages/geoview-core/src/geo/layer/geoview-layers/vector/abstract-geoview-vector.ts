@@ -8,19 +8,21 @@ import { Point } from 'ol/geom';
 import { Extent } from 'ol/extent';
 import { getUid } from 'ol/util';
 
+import { TypeOutfields } from '@/api/config/types/map-schema-types';
 import {
   CONST_LAYER_TYPES,
   TypeBaseVectorSourceInitialConfig,
   TypeFeatureInfoLayerConfig,
-  TypeOutfields,
   TypePostSettings,
-} from '@/api/config/types/map-schema-types';
+} from '@/api/config/types/layer-schema-types';
 
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
+import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { Projection } from '@/geo/utils/projection';
 import { Fetch } from '@/core/utils/fetch-helper';
 import {
@@ -123,7 +125,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         } else responseText = layerConfig.source!.dataAccessPath as string;
 
         // If Esri Feature
-        if (layerConfig.getSchemaTagEsriFeature()) {
+        if (layerConfig instanceof EsriFeatureLayerEntryConfig) {
           // Check and throw exception if the content actually contains an embedded error
           // (EsriFeature type of response might return an embedded error inside a 200 HTTP OK)
           Fetch.throwIfResponseHasEmbeddedError(responseText);
@@ -171,10 +173,6 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         // Call the success callback with the features. This will trigger the onLoaded callback on the layer object (though it
         // seems not to call it everytime, OL issue? if issue persists, maybe we want to setLayerStatus to loaded here?)
         successCallback?.(features);
-
-        // TODO: Check - Commenting this out, check if it still works
-        // Refresh the OL layer
-        // this.getOLLayer(layerConfig.layerPath)?.changed();
       } catch (error: unknown) {
         // Log the failure to fetch the vector features
         logger.logError(error);
