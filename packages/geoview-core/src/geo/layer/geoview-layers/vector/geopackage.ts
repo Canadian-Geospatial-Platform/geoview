@@ -71,8 +71,10 @@ export class GeoPackage extends AbstractGeoViewVector {
    * Constructs a GeoPackage Layer configuration processor.
    * @param {TypeGeoPackageFeatureLayerConfig} layerConfig the layer configuration
    */
+  // The constructor is not useless, it narrows down the accepted parameter type.
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(layerConfig: TypeGeoPackageLayerConfig) {
-    super(CONST_LAYER_TYPES.GEOPACKAGE, layerConfig);
+    super(layerConfig);
   }
 
   /**
@@ -643,14 +645,12 @@ export class GeoPackage extends AbstractGeoViewVector {
     geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
       const layerEntryConfig = new GeoPackageLayerEntryConfig({
         geoviewLayerConfig,
-        schemaTag: CONST_LAYER_TYPES.GEOPACKAGE,
-        entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
         layerId: `${layerEntry.id}`,
         source: {
           format: 'GeoPackage',
           dataAccessPath: metadataAccessPath,
         },
-      } as unknown as GeoPackageLayerEntryConfig);
+      });
       return layerEntryConfig;
     });
 

@@ -14,6 +14,7 @@ export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
   /** Layer entry data type. */
   override entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
 
+  /** The layer entry props that were used in the constructor. */
   declare layerEntryProps: EsriFeatureLayerEntryConfigProps;
 
   declare source: TypeSourceEsriFeatureInitialConfig;

@@ -21,6 +21,7 @@ import {
   TypeLayerMetadataEsri,
   layerEntryIsEsriFeatureFromConfig,
   layerEntryIsEsriDynamicFromConfig,
+  layerEntryIsEsriImageFromConfig,
 } from '@/api/config/types/layer-schema-types';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
@@ -398,7 +399,7 @@ export async function commonProcessLayerMetadata<
 
   commonProcessInitialSettings(layerConfig);
 
-  commonProcessTemporalDimension(layerConfig, responseJson.timeInfo, layer.type === CONST_LAYER_TYPES.ESRI_IMAGE);
+  commonProcessTemporalDimension(layerConfig, responseJson.timeInfo, layerEntryIsEsriImageFromConfig(layerConfig));
 
   return layerConfig;
 }

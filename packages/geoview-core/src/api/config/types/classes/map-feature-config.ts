@@ -106,15 +106,9 @@ export class MapFeatureConfig {
     this.schemaVersionUsed = userMapFeatureConfig.schemaVersionUsed || DEFAULT_MAP_FEATURE_CONFIG.schemaVersionUsed;
   }
 
-  // #region METHODS
-  /*
-   * Methods are listed in the following order: abstract, override, private, protected and public.
-   */
-
   /**
    * Get the default values for the mapFeatureConfig.map using the projection code.
-   * @param {TypeValidMapProjectionCodes} projection The projection code.
-   *
+   * @param {TypeValidMapProjectionCodes?} projection The projection code.
    * @returns {TypeMapConfig} The default map configuration associated to the projection.
    * @static @private
    */
@@ -133,6 +127,4 @@ export class MapFeatureConfig {
     // Return it
     return mapConfig;
   }
-
-  // #endregion METHODS
 }

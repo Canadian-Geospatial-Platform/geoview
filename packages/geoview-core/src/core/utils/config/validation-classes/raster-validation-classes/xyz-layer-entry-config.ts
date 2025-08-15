@@ -19,6 +19,7 @@ export class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
   /** Layer entry data type. */
   override entryType = CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE;
 
+  /** The layer entry props that were used in the constructor. */
   declare layerEntryProps: XYZTilesLayerEntryConfigProps;
 
   declare source: TypeSourceImageXYZTilesInitialConfig;

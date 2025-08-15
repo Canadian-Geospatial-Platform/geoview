@@ -31,7 +31,7 @@ export class EsriImage extends AbstractGeoViewRaster {
   constructor(layerConfig: TypeEsriImageLayerConfig) {
     // eslint-disable-next-line no-param-reassign
     if (!layerConfig.serviceDateFormat) layerConfig.serviceDateFormat = 'DD/MM/YYYY HH:MM:SSZ';
-    super(CONST_LAYER_TYPES.ESRI_IMAGE, layerConfig);
+    super(layerConfig);
   }
 
   /**

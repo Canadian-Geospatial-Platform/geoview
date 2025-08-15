@@ -1,7 +1,7 @@
 import { codedValueType, Extent, rangeDomainType, TypeEsriFormatParameter, TypeOutfields } from '@/api/config/types/map-schema-types';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { ConfigBaseClass, ConfigBaseClassProps } from '@/core/utils/config/validation-classes/config-base-class';
+import { ConfigBaseClass, ConfigBaseClassProps, TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
@@ -576,9 +576,9 @@ export const layerConfigIsEsriDynamicFromType = (verifyIfLayer: TypeGeoviewLayer
 };
 
 export const layerEntryIsEsriDynamicFromConfig = (
-  verifyIfGeoViewEntry: ConfigBaseClass | ConfigBaseClassProps
-): verifyIfGeoViewEntry is EsriDynamicLayerEntryConfig => {
-  return layerConfigIsEsriDynamicFromType(verifyIfGeoViewEntry?.geoviewLayerConfig);
+  verifyIfLayer: ConfigBaseClass | ConfigBaseClassProps
+): verifyIfLayer is EsriDynamicLayerEntryConfig => {
+  return layerConfigIsEsriDynamicFromType(verifyIfLayer?.geoviewLayerConfig);
 };
 
 export const layerConfigIsEsriImageFromType = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeEsriImageLayerConfig => {
@@ -586,9 +586,9 @@ export const layerConfigIsEsriImageFromType = (verifyIfLayer: TypeGeoviewLayerCo
 };
 
 export const layerEntryIsEsriImageFromConfig = (
-  verifyIfGeoViewEntry: ConfigBaseClass | ConfigBaseClassProps
-): verifyIfGeoViewEntry is EsriImageLayerEntryConfig => {
-  return layerConfigIsEsriImageFromType(verifyIfGeoViewEntry?.geoviewLayerConfig);
+  verifyIfLayer: ConfigBaseClass | ConfigBaseClassProps
+): verifyIfLayer is EsriImageLayerEntryConfig => {
+  return layerConfigIsEsriImageFromType(verifyIfLayer?.geoviewLayerConfig);
 };
 
 export const layerConfigIsImageStaticFromType = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeImageStaticLayerConfig => {
@@ -596,9 +596,9 @@ export const layerConfigIsImageStaticFromType = (verifyIfLayer: TypeGeoviewLayer
 };
 
 export const layerEntryIsImageStaticFromConfig = (
-  verifyIfGeoViewEntry: ConfigBaseClass | ConfigBaseClassProps
-): verifyIfGeoViewEntry is ImageStaticLayerEntryConfig => {
-  return layerConfigIsImageStaticFromType(verifyIfGeoViewEntry?.geoviewLayerConfig);
+  verifyIfLayer: ConfigBaseClass | ConfigBaseClassProps
+): verifyIfLayer is ImageStaticLayerEntryConfig => {
+  return layerConfigIsImageStaticFromType(verifyIfLayer?.geoviewLayerConfig);
 };
 
 export const layerConfigIsVectorTilesFromType = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeVectorTilesConfig => {
@@ -606,9 +606,9 @@ export const layerConfigIsVectorTilesFromType = (verifyIfLayer: TypeGeoviewLayer
 };
 
 export const layerEntryIsVectorTileFromConfig = (
-  verifyIfGeoViewEntry: ConfigBaseClass | ConfigBaseClassProps
-): verifyIfGeoViewEntry is VectorTilesLayerEntryConfig => {
-  return layerConfigIsVectorTilesFromType(verifyIfGeoViewEntry?.geoviewLayerConfig);
+  verifyIfLayer: ConfigBaseClass | ConfigBaseClassProps
+): verifyIfLayer is VectorTilesLayerEntryConfig => {
+  return layerConfigIsVectorTilesFromType(verifyIfLayer?.geoviewLayerConfig);
 };
 
 export const layerConfigIsOgcWmsFromType = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeWMSLayerConfig => {
@@ -616,9 +616,9 @@ export const layerConfigIsOgcWmsFromType = (verifyIfLayer: TypeGeoviewLayerConfi
 };
 
 export const layerEntryIsOgcWmsFromConfig = (
-  verifyIfGeoViewEntry: ConfigBaseClass | ConfigBaseClassProps
-): verifyIfGeoViewEntry is OgcWmsLayerEntryConfig => {
-  return layerConfigIsOgcWmsFromType(verifyIfGeoViewEntry?.geoviewLayerConfig);
+  verifyIfLayer: ConfigBaseClass | ConfigBaseClassProps
+): verifyIfLayer is OgcWmsLayerEntryConfig => {
+  return layerConfigIsOgcWmsFromType(verifyIfLayer?.geoviewLayerConfig);
 };
 
 export const layerConfigIsXYZTilesFromType = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeXYZTilesConfig => {
@@ -626,19 +626,17 @@ export const layerConfigIsXYZTilesFromType = (verifyIfLayer: TypeGeoviewLayerCon
 };
 
 export const layerEntryIsXYZTilesFromConfig = (
-  verifyIfGeoViewEntry: ConfigBaseClass | ConfigBaseClassProps
-): verifyIfGeoViewEntry is XYZTilesLayerEntryConfig => {
-  return layerConfigIsXYZTilesFromType(verifyIfGeoViewEntry?.geoviewLayerConfig);
+  verifyIfLayer: ConfigBaseClass | ConfigBaseClassProps
+): verifyIfLayer is XYZTilesLayerEntryConfig => {
+  return layerConfigIsXYZTilesFromType(verifyIfLayer?.geoviewLayerConfig);
 };
 
 export const layerConfigIsCSVFromType = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeCSVLayerConfig => {
   return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.CSV;
 };
 
-export const layerEntryIsCSVFromConfig = (
-  verifyIfGeoViewEntry: ConfigBaseClass | ConfigBaseClassProps
-): verifyIfGeoViewEntry is CsvLayerEntryConfig => {
-  return layerConfigIsCSVFromType(verifyIfGeoViewEntry?.geoviewLayerConfig);
+export const layerEntryIsCSVFromConfig = (verifyIfLayer: ConfigBaseClass | ConfigBaseClassProps): verifyIfLayer is CsvLayerEntryConfig => {
+  return layerConfigIsCSVFromType(verifyIfLayer?.geoviewLayerConfig);
 };
 
 export const layerConfigIsEsriFeatureFromType = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeEsriFeatureLayerConfig => {
@@ -646,9 +644,9 @@ export const layerConfigIsEsriFeatureFromType = (verifyIfLayer: TypeGeoviewLayer
 };
 
 export const layerEntryIsEsriFeatureFromConfig = (
-  verifyIfGeoViewEntry: ConfigBaseClass | ConfigBaseClassProps
-): verifyIfGeoViewEntry is EsriFeatureLayerEntryConfig => {
-  return layerConfigIsEsriFeatureFromType(verifyIfGeoViewEntry?.geoviewLayerConfig);
+  verifyIfLayer: ConfigBaseClass | ConfigBaseClassProps
+): verifyIfLayer is EsriFeatureLayerEntryConfig => {
+  return layerConfigIsEsriFeatureFromType(verifyIfLayer?.geoviewLayerConfig);
 };
 
 export const layerConfigIsGeoJSONFromType = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeGeoJSONLayerConfig => {
@@ -656,9 +654,9 @@ export const layerConfigIsGeoJSONFromType = (verifyIfLayer: TypeGeoviewLayerConf
 };
 
 export const layerEntryIsGeoJSONFromConfig = (
-  verifyIfGeoViewEntry: ConfigBaseClass | ConfigBaseClassProps
-): verifyIfGeoViewEntry is GeoJSONLayerEntryConfig => {
-  return layerConfigIsGeoJSONFromType(verifyIfGeoViewEntry?.geoviewLayerConfig);
+  verifyIfLayer: ConfigBaseClass | ConfigBaseClassProps
+): verifyIfLayer is GeoJSONLayerEntryConfig => {
+  return layerConfigIsGeoJSONFromType(verifyIfLayer?.geoviewLayerConfig);
 };
 
 export const layerConfigIsGeoPackageFromType = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeGeoPackageLayerConfig => {
@@ -666,9 +664,9 @@ export const layerConfigIsGeoPackageFromType = (verifyIfLayer: TypeGeoviewLayerC
 };
 
 export const layerEntryIsGeoPackageFromConfig = (
-  verifyIfGeoViewEntry: ConfigBaseClass | ConfigBaseClassProps
-): verifyIfGeoViewEntry is GeoPackageLayerEntryConfig => {
-  return layerConfigIsGeoPackageFromType(verifyIfGeoViewEntry?.geoviewLayerConfig);
+  verifyIfLayer: ConfigBaseClass | ConfigBaseClassProps
+): verifyIfLayer is GeoPackageLayerEntryConfig => {
+  return layerConfigIsGeoPackageFromType(verifyIfLayer?.geoviewLayerConfig);
 };
 
 export const layerConfigIsOgcFeatureFromType = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeOgcFeatureLayerConfig => {
@@ -676,19 +674,17 @@ export const layerConfigIsOgcFeatureFromType = (verifyIfLayer: TypeGeoviewLayerC
 };
 
 export const layerEntryIsOgcFeatureFromConfig = (
-  verifyIfGeoViewEntry: ConfigBaseClass | ConfigBaseClassProps
-): verifyIfGeoViewEntry is OgcFeatureLayerEntryConfig => {
-  return layerConfigIsOgcFeatureFromType(verifyIfGeoViewEntry?.geoviewLayerConfig);
+  verifyIfLayer: ConfigBaseClass | ConfigBaseClassProps
+): verifyIfLayer is OgcFeatureLayerEntryConfig => {
+  return layerConfigIsOgcFeatureFromType(verifyIfLayer?.geoviewLayerConfig);
 };
 
 export const layerConfigIsWFSFromType = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeWFSLayerConfig => {
   return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.WFS;
 };
 
-export const layerEntryIsWFSFromConfig = (
-  verifyIfGeoViewEntry: ConfigBaseClass | ConfigBaseClassProps
-): verifyIfGeoViewEntry is WfsLayerEntryConfig => {
-  return layerConfigIsWFSFromType(verifyIfGeoViewEntry?.geoviewLayerConfig);
+export const layerEntryIsWFSFromConfig = (verifyIfLayer: ConfigBaseClass | ConfigBaseClassProps): verifyIfLayer is WfsLayerEntryConfig => {
+  return layerConfigIsWFSFromType(verifyIfLayer?.geoviewLayerConfig);
 };
 
 export interface TypeMetadataWMS {
@@ -977,7 +973,7 @@ export interface TypeLayerMetadataWfs {
 }
 
 export interface TypeMetadataGeoJSON {
-  listOfLayerEntryConfig: TypeLayerEntryConfig[];
+  listOfLayerEntryConfig: TypeLayerEntryShell[];
 }
 
 export interface TypeMetadataVectorTiles {

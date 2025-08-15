@@ -41,7 +41,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * @param {TypeVectorTilesConfig} layerConfig the layer configuration
    */
   constructor(layerConfig: TypeVectorTilesConfig, fallbackProjection: ProjectionLike) {
-    super(CONST_LAYER_TYPES.VECTOR_TILES, layerConfig);
+    super(layerConfig);
     this.fallbackProjection = fallbackProjection;
   }
 

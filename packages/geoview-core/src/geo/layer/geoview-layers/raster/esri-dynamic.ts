@@ -48,7 +48,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   constructor(layerConfig: TypeEsriDynamicLayerConfig) {
     // eslint-disable-next-line no-param-reassign
     if (!layerConfig.serviceDateFormat) layerConfig.serviceDateFormat = 'DD/MM/YYYY HH:MM:SSZ';
-    super(CONST_LAYER_TYPES.ESRI_DYNAMIC, layerConfig);
+    super(layerConfig);
   }
 
   /**

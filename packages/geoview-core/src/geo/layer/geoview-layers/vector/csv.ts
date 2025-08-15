@@ -38,8 +38,10 @@ export class CSV extends AbstractGeoViewVector {
    * Constructs a CSV Layer configuration processor.
    * @param {TypeCSVLayerConfig} layerConfig the layer configuration
    */
+  // The constructor is not useless, it narrows down the accepted parameter type.
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(layerConfig: TypeCSVLayerConfig) {
-    super(CONST_LAYER_TYPES.CSV, layerConfig);
+    super(layerConfig);
   }
 
   /**

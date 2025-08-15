@@ -19,6 +19,7 @@ export class CsvLayerEntryConfig extends VectorLayerEntryConfig {
   /** Layer entry data type. */
   override entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
 
+  /** The layer entry props that were used in the constructor. */
   declare layerEntryProps: CsvLayerEntryConfigProps;
 
   /** Source settings to apply to the GeoView layer source at creation time. */

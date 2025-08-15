@@ -75,9 +75,6 @@ export abstract class AbstractGeoViewLayer {
   /** The default hit tolerance */
   hitTolerance: number = AbstractGeoViewLayer.DEFAULT_HIT_TOLERANCE;
 
-  /** The type of GeoView layer that is instantiated. */
-  type: TypeGeoviewLayerType;
-
   /** The unique identifier for the GeoView layer. The value of this attribute is extracted from the mapLayerConfig parameter.
    * If its value is undefined, a unique value is generated.
    */
@@ -129,13 +126,13 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Constructor
-   * @param {TypeGeoviewLayerType} type - The type of GeoView layer that is instantiated.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The GeoView layer configuration options.
    */
-  constructor(type: TypeGeoviewLayerType, geoviewLayerConfig: TypeGeoviewLayerConfig) {
-    this.type = type;
+  constructor(geoviewLayerConfig: TypeGeoviewLayerConfig) {
     this.geoviewLayerId = geoviewLayerConfig.geoviewLayerId || generateId(18);
-    this.geoviewLayerName = geoviewLayerConfig?.geoviewLayerName ? geoviewLayerConfig.geoviewLayerName : DEFAULT_LAYER_NAMES[type];
+    this.geoviewLayerName = geoviewLayerConfig?.geoviewLayerName
+      ? geoviewLayerConfig.geoviewLayerName
+      : DEFAULT_LAYER_NAMES[geoviewLayerConfig.geoviewLayerType];
     this.metadataAccessPath = geoviewLayerConfig.metadataAccessPath?.trim() || '';
     this.serverDateFragmentsOrder = geoviewLayerConfig.serviceDateFormat
       ? DateMgt.getDateFragmentsOrder(geoviewLayerConfig.serviceDateFormat)
@@ -503,7 +500,7 @@ export abstract class AbstractGeoViewLayer {
         }
       } else {
         // The promise failed. Unwrap the reason.
-        const reason = promise.reason as PromiseRejectErrorWrapper<TypeLayerEntryConfig>;
+        const reason = promise.reason as PromiseRejectErrorWrapper<AbstractBaseLayerEntryConfig>;
 
         // The layer config
         layerConfig = reason.object;

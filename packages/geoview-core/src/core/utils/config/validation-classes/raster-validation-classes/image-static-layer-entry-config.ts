@@ -19,6 +19,7 @@ export class ImageStaticLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /** Layer entry data type. */
   override entryType = CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE;
 
+  /** The layer entry props that were used in the constructor. */
   declare layerEntryProps: ImageStaticLayerEntryConfigProps;
 
   /** Source settings to apply to the GeoView image layer source at creation time. */

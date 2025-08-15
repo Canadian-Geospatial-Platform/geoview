@@ -39,14 +39,13 @@ export abstract class ConfigBaseClass {
   layerEntryProps: ConfigBaseClassProps;
 
   /** The identifier of the layer to display on the map. This element is part of the schema. */
-  // GV Cannot put it #layerId as it breaks things
-  // eslint-disable-next-line no-restricted-syntax
-  private _layerId = '';
+  // TODO: This should be #layerId. We should use getLayerId() and setLayerId() instead and fix the issues that come up when doing so. Same with other attributes.
+  layerId: string;
 
   /** It is used to identified unprocessed layers and shows the final layer state */
   // GV Cannot put it #layerStatus as it breaks things
   // eslint-disable-next-line no-restricted-syntax
-  private _layerStatus: TypeLayerStatus = 'newInstance';
+  #layerStatus: TypeLayerStatus = 'newInstance';
 
   /** The display name of the layer (English/French). */
   layerName?: string;
@@ -102,10 +101,13 @@ export abstract class ConfigBaseClass {
   // TO.DOCONT: Until this is fixed, this constructor supports sending a ConfigBaseClass in its typing, for now (ConfigBaseClassProps | ConfigBaseClass)... though it should only be a ConfigBaseClassProps eventually.
   protected constructor(layerConfig: ConfigBaseClassProps | ConfigBaseClass) {
     // Keep attribute properties
-    this.layerEntryProps = layerConfig;
-
-    // Temporary, until refactor is done, support when a ConfigBaseClass is sent here..
-    if (layerConfig instanceof ConfigBaseClass) this.layerEntryProps = layerConfig.layerEntryProps;
+    // Temporary if condition, until refactor is done, support when a ConfigBaseClass is sent here..
+    if (layerConfig instanceof ConfigBaseClass) {
+      this.layerEntryProps = layerConfig.layerEntryProps;
+    } else {
+      // Regular
+      this.layerEntryProps = layerConfig;
+    }
 
     // Transfert the properties from the object to the class (without using Object.assign anymore)
     this.layerId = layerConfig.layerId;
@@ -118,24 +120,6 @@ export abstract class ConfigBaseClass {
     this.maxScale = layerConfig.maxScale;
     this.initialSettings = layerConfig.initialSettings ?? {};
     this.isMetadataLayerGroup = layerConfig.isMetadataLayerGroup ?? false;
-  }
-
-  /**
-   * The layerId getter method for the ConfigBaseClass class and its descendant classes.
-   * @retuns {string} The layer id
-   */
-  get layerId(): string {
-    // eslint-disable-next-line no-underscore-dangle
-    return this._layerId;
-  }
-
-  /**
-   * The layerId setter method for the ConfigBaseClass class and its descendant classes.
-   * @param {string} newLayerId - The new layerId value.
-   */
-  set layerId(newLayerId: string) {
-    // eslint-disable-next-line no-underscore-dangle
-    this._layerId = newLayerId;
   }
 
   /**
@@ -153,7 +137,7 @@ export abstract class ConfigBaseClass {
    */
   get layerStatus(): TypeLayerStatus {
     // eslint-disable-next-line no-underscore-dangle
-    return this._layerStatus;
+    return this.#layerStatus;
   }
 
   /**
@@ -307,8 +291,7 @@ export abstract class ConfigBaseClass {
 
     // Check if we're not accidentally trying to set a status less than the current one (or setting loading, it's allowed to jump between loading and loaded)
     if (!this.isGreaterThanOrEqualTo(newLayerStatus) || newLayerStatus === 'loading') {
-      // eslint-disable-next-line no-underscore-dangle
-      this._layerStatus = newLayerStatus;
+      this.#layerStatus = newLayerStatus;
 
       // Emit about it
       this.#emitLayerStatusChanged({ layerStatus: newLayerStatus });
@@ -529,6 +512,8 @@ export type TypeLayerEntryShell = {
   tileGrid?: TypeTileGrid;
   subLayers?: TypeLayerEntryShell[];
   source?: TypeLayerEntryShellSource;
+  geoviewLayerConfig?: TypeGeoviewLayerConfig;
+  listOfLayerEntryConfig?: TypeLayerEntryShell[]; // For the groups
 };
 
 export type TypeLayerEntryShellSource = {

@@ -34,8 +34,10 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * Constructs a ImageStatic Layer configuration processor.
    * @param {TypeImageStaticLayerConfig} layerConfig the layer configuration
    */
+  // The constructor is not useless, it narrows down the accepted parameter type.
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(layerConfig: TypeImageStaticLayerConfig) {
-    super(CONST_LAYER_TYPES.IMAGE_STATIC, layerConfig);
+    super(layerConfig);
   }
 
   /**

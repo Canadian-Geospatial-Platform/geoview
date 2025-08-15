@@ -9,15 +9,18 @@ export interface GroupLayerEntryConfigProps extends ConfigBaseClassProps {
  * Type used to define a layer group.
  */
 export class GroupLayerEntryConfig extends ConfigBaseClass {
-  /** Tag used to link the entry to a specific schema is not used by groups. */
-  declare schemaTag: never;
-
   /** Layer entry data type. */
   override entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
 
+  /** The layer entry props that were used in the constructor. */
   declare layerEntryProps: GroupLayerEntryConfigProps;
 
+  /** Tag used to link the entry to a specific schema is not used by groups. */
+  // TODO: Refactor - This attribute should be removed and logic applied using OO pattern once the constructor is cleaned up.
+  declare schemaTag: never;
+
   /** Source settings to apply to the GeoView layer source at creation time is not used by groups. */
+  // TODO: Refactor - This attribute should be removed and logic applied using OO pattern once the constructor is cleaned up.
   declare source: never;
 
   /** The list of layer entry configurations to use from the GeoView layer group. */

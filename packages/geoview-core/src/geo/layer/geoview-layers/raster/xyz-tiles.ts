@@ -46,8 +46,10 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * Constructs a XYZTiles Layer configuration processor.
    * @param {TypeXYZTilesConfig} layerConfig the layer configuration
    */
+  // The constructor is not useless, it narrows down the accepted parameter type.
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(layerConfig: TypeXYZTilesConfig) {
-    super(CONST_LAYER_TYPES.XYZ_TILES, layerConfig);
+    super(layerConfig);
   }
 
   /**

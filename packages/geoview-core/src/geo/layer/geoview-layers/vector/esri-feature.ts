@@ -40,8 +40,10 @@ export class EsriFeature extends AbstractGeoViewVector {
    * Constructs an EsriFeature Layer configuration processor.
    * @param {TypeEsriFeatureLayerConfig} layerConfig The layer configuration.
    */
+  // The constructor is not useless, it narrows down the accepted parameter type.
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(layerConfig: TypeEsriFeatureLayerConfig) {
-    super(CONST_LAYER_TYPES.ESRI_FEATURE, layerConfig);
+    super(layerConfig);
   }
 
   /**

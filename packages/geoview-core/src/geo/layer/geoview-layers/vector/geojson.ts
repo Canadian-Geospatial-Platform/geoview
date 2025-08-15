@@ -8,7 +8,6 @@ import defaultsDeep from 'lodash/defaultsDeep';
 
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
-  TypeLayerEntryConfig,
   TypeGeoviewLayerConfig,
   TypeBaseVectorSourceInitialConfig,
   CONST_LAYER_TYPES,
@@ -16,7 +15,7 @@ import {
 } from '@/api/config/types/layer-schema-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
-import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+import { VectorLayerEntryConfig, VectorLayerEntryConfigProps } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { logger } from '@/core/utils/logger';
 import {
@@ -42,8 +41,10 @@ export class GeoJSON extends AbstractGeoViewVector {
    * Constructs a GeoJSON Layer configuration processor.
    * @param {TypeGeoJSONLayerConfig} layerConfig the layer configuration
    */
+  // The constructor is not useless, it narrows down the accepted parameter type.
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(layerConfig: TypeGeoJSONLayerConfig) {
-    super(CONST_LAYER_TYPES.GEOJSON, layerConfig);
+    super(layerConfig);
   }
 
   /**
@@ -128,7 +129,7 @@ export class GeoJSON extends AbstractGeoViewVector {
     // If metadata was previously found
     if (metadata) {
       // Search for the layer metadata
-      const layerMetadataFound = this.#recursiveSearch(layerConfig.layerId, metadata.listOfLayerEntryConfig) as VectorLayerEntryConfig;
+      const layerMetadataFound = this.#recursiveSearch(layerConfig.layerId, metadata.listOfLayerEntryConfig) as VectorLayerEntryConfigProps;
 
       // If the layer metadata was found
       if (layerMetadataFound) {
@@ -216,15 +217,15 @@ export class GeoJSON extends AbstractGeoViewVector {
    * This method is used to do a recursive search in the array of layer entry config.
    *
    * @param {string} searchKey The layer list to search.
-   * @param {TypeLayerEntryConfig[]} metadataLayerList The layer list to search.
+   * @param {TypeLayerEntryShell[]} metadataLayerList The layer list to search.
    *
-   * @returns {TypeLayerEntryConfig | undefined} The found layer or undefined if not found.
+   * @returns {TypeLayerEntryShell | undefined} The found layer or undefined if not found.
    * @private
    */
-  #recursiveSearch(searchKey: string, metadataLayerList: TypeLayerEntryConfig[]): TypeLayerEntryConfig | undefined {
+  #recursiveSearch(searchKey: string, metadataLayerList: TypeLayerEntryShell[]): TypeLayerEntryShell | undefined {
     for (const layerMetadata of metadataLayerList) {
       if (searchKey === layerMetadata.layerId) return layerMetadata;
-      if ('isLayerGroup' in layerMetadata && (layerMetadata.isLayerGroup as boolean)) {
+      if ('isLayerGroup' in layerMetadata && (layerMetadata.isLayerGroup as boolean) && layerMetadata.listOfLayerEntryConfig) {
         const foundLayer = this.#recursiveSearch(searchKey, layerMetadata.listOfLayerEntryConfig);
         if (foundLayer) return foundLayer;
       }

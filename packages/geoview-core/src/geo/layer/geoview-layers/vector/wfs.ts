@@ -46,8 +46,10 @@ export class WFS extends AbstractGeoViewVector {
    * Constructs a WFS Layer configuration processor.
    * @param {TypeWFSLayerConfig} layerConfig the layer configuration
    */
+  // The constructor is not useless, it narrows down the accepted parameter type.
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(layerConfig: TypeWFSLayerConfig) {
-    super(CONST_LAYER_TYPES.WFS, layerConfig);
+    super(layerConfig);
   }
 
   /**

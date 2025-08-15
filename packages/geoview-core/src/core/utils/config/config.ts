@@ -1,6 +1,5 @@
 import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
 import {
-  convertLayerTypeToEntry,
   TypeLayerEntryConfig,
   mapConfigLayerEntryIsGeoCore,
   MapConfigLayerEntry,
@@ -8,12 +7,15 @@ import {
   CONST_LAYER_TYPES,
   TypeGeoviewLayerType,
   mapConfigLayerEntryIsShapefile,
+  TypeLayerEntryType,
+  CONST_LAYER_ENTRY_TYPES,
 } from '@/api/config/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
 
 import { ConfigValidation, ErrorCallbackDelegate } from '@/core/utils/config/config-validation';
 import { generateId } from '@/core/utils/utilities';
 import { LayerInvalidGeoviewLayerTypeError } from '@/core/exceptions/layer-exceptions';
+import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 
 /**
  * Class to read and validate the GeoView map features configuration. Will validate every item for structure and valid values.
@@ -90,7 +92,7 @@ export class Config {
         // eslint-disable-next-line no-param-reassign
         layerConfig.schemaTag = geoviewLayerType;
         // eslint-disable-next-line no-param-reassign
-        layerConfig.entryType = convertLayerTypeToEntry(geoviewLayerType);
+        layerConfig.entryType = Config.getLayerEntryTypeFromLayerType(geoviewLayerType);
       }
     });
   }
@@ -113,5 +115,38 @@ export class Config {
     }
 
     return this.prevalidateGeoviewLayersConfig(listOfGeoviewLayerConfig, onErrorCallback);
+  }
+
+  /**
+   * Returns the corresponding layer entry type for a given GeoView layer type.
+   * This method maps a `TypeGeoviewLayerType` (e.g., CSV, WMS, XYZ_TILES)
+   * to its associated `TypeLayerEntryType` (e.g., VECTOR, RASTER_IMAGE, RASTER_TILE).
+   * Useful for determining how a layer should be handled/rendered internally.
+   * @param {TypeGeoviewLayerType} layerType - The GeoView layer type to convert.
+   * @returns The corresponding layer entry type.
+   * @throws {NotSupportedError} If the provided `layerType` is not supported for conversion.
+   */
+  static getLayerEntryTypeFromLayerType(layerType: TypeGeoviewLayerType): TypeLayerEntryType {
+    switch (layerType) {
+      case CONST_LAYER_TYPES.CSV:
+      case CONST_LAYER_TYPES.GEOJSON:
+      case CONST_LAYER_TYPES.GEOPACKAGE:
+      case CONST_LAYER_TYPES.OGC_FEATURE:
+      case CONST_LAYER_TYPES.WFS:
+      case CONST_LAYER_TYPES.ESRI_FEATURE:
+        return CONST_LAYER_ENTRY_TYPES.VECTOR;
+
+      case CONST_LAYER_TYPES.IMAGE_STATIC:
+      case CONST_LAYER_TYPES.ESRI_DYNAMIC:
+      case CONST_LAYER_TYPES.ESRI_IMAGE:
+      case CONST_LAYER_TYPES.WMS:
+        return CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE;
+      case CONST_LAYER_TYPES.XYZ_TILES:
+      case CONST_LAYER_TYPES.VECTOR_TILES:
+        return CONST_LAYER_ENTRY_TYPES.RASTER_TILE;
+      default:
+        // Throw unsupported error
+        throw new NotSupportedError(`Unsupported layer type ${layerType} to convert to layer entry`);
+    }
   }
 }

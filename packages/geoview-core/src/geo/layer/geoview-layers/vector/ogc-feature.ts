@@ -41,8 +41,10 @@ export class OgcFeature extends AbstractGeoViewVector {
    * Constructs a OgcFeature Layer configuration processor.
    * @param {TypeOgcFeatureLayerConfig} layerConfig the layer configuration
    */
+  // The constructor is not useless, it narrows down the accepted parameter type.
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(layerConfig: TypeOgcFeatureLayerConfig) {
-    super(CONST_LAYER_TYPES.OGC_FEATURE, layerConfig);
+    super(layerConfig);
   }
 
   /**

@@ -30,6 +30,7 @@ import {
 import { deepMergeObjects } from '@/core/utils/utilities';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.WMS;
@@ -52,7 +53,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {TypeWMSLayerConfig} layerConfig the layer configuration
    */
   constructor(layerConfig: TypeWMSLayerConfig, fullSubLayers: boolean) {
-    super(CONST_LAYER_TYPES.WMS, layerConfig);
+    super(layerConfig);
     this.WMSStyles = [];
     this.fullSubLayers = fullSubLayers;
   }
@@ -362,11 +363,11 @@ export class WMS extends AbstractGeoViewRaster {
    * same `layerId`, handles proxy path updates, merges the individual metadata results into a single
    * base structure, and processes metadata inheritance afterward.
    * @param {string} url - The base WMS GetCapabilities URL used to fetch metadata.
-   * @param {TypeLayerEntryConfig[]} layers - An array of layer configurations to fetch and merge metadata for.
+   * @param {AbstractBaseLayerEntryConfig[]} layers - An array of layer configurations to fetch and merge metadata for.
    * @returns {Promise<TypeMetadataWMS | undefined>} A promise resolving to the merged metadata object,
    * or `undefined` if all requests failed.
    */
-  async #fetchAndMergeMultipleWmsMetadata(url: string, layers: TypeLayerEntryConfig[]): Promise<TypeMetadataWMS | undefined> {
+  async #fetchAndMergeMultipleWmsMetadata(url: string, layers: AbstractBaseLayerEntryConfig[]): Promise<TypeMetadataWMS | undefined> {
     // Create one metadata fetch promise per unique layerId
     const metadataPromises = this.#createLayerMetadataPromises(url, layers);
 
@@ -400,7 +401,7 @@ export class WMS extends AbstractGeoViewRaster {
         }
       } else {
         // Log and track metadata fetch failure
-        const reason = result.reason as PromiseRejectErrorWrapper<TypeLayerEntryConfig>;
+        const reason = result.reason as PromiseRejectErrorWrapper<AbstractBaseLayerEntryConfig>;
         this.addLayerLoadError(reason.error, reason.object);
       }
     }
@@ -416,10 +417,10 @@ export class WMS extends AbstractGeoViewRaster {
    * even if multiple layer configs share the same ID. The resulting promises will either
    * resolve to a metadata result or reject with a wrapped error.
    * @param {string} url - The base GetCapabilities URL used to fetch layer-specific metadata.
-   * @param {TypeLayerEntryConfig[]} layers - An array of layer configurations to fetch metadata for.
+   * @param {AbstractBaseLayerEntryConfig[]} layers - An array of layer configurations to fetch metadata for.
    * @returns {Promise<MetatadaFetchResult>[]} An array of metadata fetch promises, one per layer config.
    */
-  #createLayerMetadataPromises(url: string, layers: TypeLayerEntryConfig[]): Promise<MetatadaFetchResult>[] {
+  #createLayerMetadataPromises(url: string, layers: AbstractBaseLayerEntryConfig[]): Promise<MetatadaFetchResult>[] {
     const seen = new Map<string, Promise<MetatadaFetchResult>>();
 
     return layers.map((layerConfig) => {
@@ -571,8 +572,8 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {TypeLayerEntryConfig[]} The array of layer configurations.
    * @private
    */
-  #getLayersToQuery(): TypeLayerEntryConfig[] {
-    const arrayOfLayerIds: TypeLayerEntryConfig[] = [];
+  #getLayersToQuery(): AbstractBaseLayerEntryConfig[] {
+    const arrayOfLayerIds: AbstractBaseLayerEntryConfig[] = [];
     const gatherLayerIds = (listOfLayerEntryConfig = this.listOfLayerEntryConfig): void => {
       if (listOfLayerEntryConfig.length) {
         listOfLayerEntryConfig.forEach((layerConfig) => {

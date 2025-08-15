@@ -19,6 +19,7 @@ export class WfsLayerEntryConfig extends VectorLayerEntryConfig {
   /** Layer entry data type. */
   override entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
 
+  /** The layer entry props that were used in the constructor. */
   declare layerEntryProps: WfsLayerEntryConfigProps;
 
   declare source: TypeSourceWFSVectorInitialConfig;
