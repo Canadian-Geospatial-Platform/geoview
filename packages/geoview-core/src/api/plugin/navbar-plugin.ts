@@ -62,7 +62,7 @@ export abstract class NavBarPlugin extends AbstractPlugin {
     const processedGroups = new Set<string>();
     Object.values(buttonConfigs).forEach((config) => {
       if (config.groupConfig && !processedGroups.has(config.groupName)) {
-        this.mapViewer().navBarApi.setGroupConfig(config.groupName, config.groupConfig);
+        this.mapViewer.navBarApi.setGroupConfig(config.groupName, config.groupConfig);
         processedGroups.add(config.groupName);
       }
     });
