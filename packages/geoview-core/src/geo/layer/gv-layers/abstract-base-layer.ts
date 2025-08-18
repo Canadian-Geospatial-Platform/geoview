@@ -9,6 +9,9 @@ import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-b
  * Abstract Base Layer managing an OpenLayer layer, including a layer group.
  */
 export abstract class AbstractBaseLayer {
+  /** Indicates if the layer has become in loaded status at least once already */
+  loadedOnce: boolean = false;
+
   /** The OpenLayer layer // '!' is used here, because the children constructors are supposed to create the olLayer. */
   #olLayer!: BaseLayer;
 

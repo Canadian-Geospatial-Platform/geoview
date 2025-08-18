@@ -23,6 +23,14 @@ export class GVGroupLayer extends AbstractBaseLayer {
   public constructor(olLayerGroup: LayerGroup, layerConfig: GroupLayerEntryConfig) {
     super(layerConfig);
     this.setOLLayer(olLayerGroup);
+
+    // Once all child layers are loaded, set the layer visibility
+    layerConfig.onLayerStatusChanged((config) => {
+      if (config.layerStatus === 'loaded' && !this.loadedOnce) {
+        this.loadedOnce = true;
+        this.setVisible(layerConfig.initialSettings?.states?.visible !== false);
+      }
+    });
   }
 
   /**
