@@ -8,7 +8,6 @@ import { useTheme } from '@mui/material/styles';
 import { Box, Dialog, DialogActions, DialogContent, DialogProps, DialogTitle } from '@mui/material';
 
 import { animated } from '@react-spring/web';
-import { TypeJsonObject } from '@/api/config/types/config-types';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 
 import { IconButton } from '@/ui/icon-button/icon-button';
@@ -237,10 +236,7 @@ function ModalUI(props: DialogPropsExtend): JSX.Element {
                   if (typeof action.content === 'string') {
                     return (
                       <Fragment key={action.actionId}>
-                        <UseHtmlToReact
-                          extraOptions={{ id: action.actionId as TypeJsonObject } as TypeJsonObject}
-                          htmlContent={action.content}
-                        />
+                        <UseHtmlToReact extraOptions={{ id: action.actionId }} htmlContent={action.content} />
                       </Fragment>
                     );
                   }
@@ -275,10 +271,7 @@ function ModalUI(props: DialogPropsExtend): JSX.Element {
               if (typeof action.content === 'string') {
                 return (
                   <Fragment key={action.actionId}>
-                    <UseHtmlToReact
-                      extraOptions={{ id: action.actionId as TypeJsonObject } as TypeJsonObject}
-                      htmlContent={action.content}
-                    />
+                    <UseHtmlToReact extraOptions={{ id: action.actionId }} htmlContent={action.content} />
                   </Fragment>
                 );
               }

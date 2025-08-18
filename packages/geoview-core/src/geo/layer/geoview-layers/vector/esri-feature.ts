@@ -12,16 +12,15 @@ import {
   TypeGeoviewLayerConfig,
   CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
+  TypeMetadataEsriFeature,
 } from '@/api/config/types/map-schema-types';
 
-import {
-  commonFetchAndSetServiceMetadata,
-  commonProcessLayerMetadata,
-  commonValidateListOfLayerEntryConfig,
-} from '@/geo/layer/geoview-layers/esri-layer-common';
+import { commonProcessLayerMetadata, commonValidateListOfLayerEntryConfig } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { LayerNotFeatureLayerError } from '@/core/exceptions/layer-exceptions';
-import { TypeJsonArray } from '@/api/config/types/config-types';
+import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
+import { Fetch } from '@/core/utils/fetch-helper';
+import { ConfigBaseClass, TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
 
 export interface TypeSourceEsriFeatureInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'EsriJSON';
@@ -48,21 +47,74 @@ export class EsriFeature extends AbstractGeoViewVector {
   }
 
   /**
-   * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
-   * @returns {Promise<void>} A promise that the execution is completed.
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeMetadataEsriFeature | undefined} The strongly-typed layer configuration specific to this layer.
    */
-  protected override onFetchAndSetServiceMetadata(): Promise<void> {
+  override getMetadata(): TypeMetadataEsriFeature | undefined {
+    return super.getMetadata() as TypeMetadataEsriFeature | undefined;
+  }
+
+  /**
+   * Overrides the way the metadata is fetched.
+   * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
+   * @returns {Promise<T = TypeMetadataEsriFeature | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
+   */
+  protected override async onFetchServiceMetadata<T = TypeMetadataEsriFeature | undefined>(): Promise<T> {
+    // Query
+    const responseJson = await Fetch.fetchJson<T>(`${this.metadataAccessPath}?f=json`);
+
+    // Validate the metadata response
+    AbstractGeoViewRaster.throwIfMetatadaHasError(this.geoviewLayerId, this.geoviewLayerName, responseJson);
+
+    // Return it
+    return responseJson as T;
+  }
+
+  /**
+   * Overrides the way a geoview layer config initializes its layer entries.
+   * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
+   */
+  protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
+    // Fetch metadata
+    let sep = '/MapServer/';
+    let idx = this.metadataAccessPath.lastIndexOf(sep);
+    let rootUrl = this.metadataAccessPath;
+    if (idx > 0) {
+      rootUrl = this.metadataAccessPath.substring(0, idx + sep.length);
+    }
+    sep = '/FeatureServer/';
+    idx = this.metadataAccessPath.lastIndexOf(sep);
+    if (idx > 0) {
+      rootUrl = this.metadataAccessPath.substring(0, idx + sep.length);
+    }
+
+    // Fetch metadata
+    const metadata = await this.onFetchServiceMetadata();
+
+    // Now that we have metadata, get the layer ids from it
+    const entries = [];
+    if (metadata) {
+      entries.push({
+        id: Number(metadata.id),
+        index: Number(metadata.id),
+        layerId: metadata.id,
+        layerName: metadata.name,
+      });
+    }
+
     // Redirect
-    return commonFetchAndSetServiceMetadata(this);
+    // TODO: Check - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
+    return EsriFeature.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, entries);
   }
 
   /**
    * This method validates recursively the configuration of the layer entries to ensure that it is a feature layer identified
    * with a numeric layerId and creates a group entry when a layer is a group.
    *
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
+   * @param {ConfigBaseClass[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
-  protected override onValidateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
+  protected override onValidateListOfLayerEntryConfig(listOfLayerEntryConfig: ConfigBaseClass[]): void {
     commonValidateListOfLayerEntryConfig(this, listOfLayerEntryConfig);
   }
 
@@ -119,12 +171,32 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @returns {boolean} true if an error is detected.
    */
   esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig, esriIndex: number): boolean {
-    if (this.metadata!.layers[esriIndex].type !== 'Feature Layer') {
+    if (this.getMetadata()!.layers[esriIndex].type !== 'Feature Layer') {
       // Add a layer load error
       this.addLayerLoadError(new LayerNotFeatureLayerError(layerConfig.layerPath, layerConfig.getLayerName()), layerConfig);
       return true;
     }
     return false;
+  }
+
+  /**
+   * Initializes a GeoView layer configuration for a Esri Feature layer.
+   * This method creates a basic TypeGeoviewLayerConfig using the provided
+   * ID, name, and metadata access path URL. It then initializes the layer entries by calling
+   * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
+   * @param {string} geoviewLayerId - A unique identifier for the layer.
+   * @param {string} geoviewLayerName - The display name of the layer.
+   * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
+   * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
+   */
+  static initGeoviewLayerConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    metadataAccessPath: string
+  ): Promise<TypeGeoviewLayerConfig> {
+    // Create the Layer config
+    const myLayer = new EsriFeature({ geoviewLayerId, geoviewLayerName, metadataAccessPath } as TypeEsriFeatureLayerConfig);
+    return myLayer.initGeoViewLayerEntries();
   }
 
   /**
@@ -135,15 +207,15 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @param {string} geoviewLayerName - The display name of the GeoView layer.
    * @param {string} metadataAccessPath - The URL or path to access metadata or feature data.
    * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
-   * @param {TypeJsonArray} layerEntries - An array of layer entries objects to be included in the configuration.
+   * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns {TypeEsriFeatureLayerConfig} The constructed configuration object for the Esri Feature layer.
    */
-  static createEsriFeatureLayerConfig(
+  static createGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
     metadataAccessPath: string,
     isTimeAware: boolean,
-    layerEntries: TypeJsonArray
+    layerEntries: TypeLayerEntryShell[]
   ): TypeEsriFeatureLayerConfig {
     const geoviewLayerConfig: TypeEsriFeatureLayerConfig = {
       geoviewLayerId,
@@ -158,17 +230,58 @@ export class EsriFeature extends AbstractGeoViewVector {
         geoviewLayerConfig,
         schemaTag: CONST_LAYER_TYPES.ESRI_FEATURE,
         entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
-        layerId: layerEntry.index as string,
+        layerId: `${layerEntry.index}`,
+        layerName: `${layerEntry.layerName || layerEntry.id}`,
         source: {
           format: 'EsriJSON',
-          dataAccessPath: layerEntry.dataAccessPath || undefined,
+          dataAccessPath: layerEntry.source?.dataAccessPath || undefined,
         },
-      } as EsriFeatureLayerEntryConfig);
+      } as unknown as EsriFeatureLayerEntryConfig);
       return layerEntryConfig;
     });
 
     // Return it
     return geoviewLayerConfig;
+  }
+
+  /**
+   * Processes an Esri Feature GeoviewLayerConfig and returns a promise
+   * that resolves to an array of `ConfigBaseClass` layer entry configurations.
+   *
+   * This method:
+   * 1. Creates a Geoview layer configuration using the provided parameters.
+   * 2. Instantiates a layer with that configuration.
+   * 3. Processes the layer configuration and returns the result.
+   * @param {string} geoviewLayerId - The unique identifier for the GeoView layer.
+   * @param {string} geoviewLayerName - The display name for the GeoView layer.
+   * @param {string} url - The URL of the service endpoint.
+   * @param {string[]} layerIds - An array of layer IDs to include in the configuration.
+   * @param {boolean} isTimeAware - Indicates if the layer is time aware.
+   * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
+   */
+  static processGeoviewLayerConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    url: string,
+    layerIds: number[],
+    isTimeAware: boolean
+  ): Promise<ConfigBaseClass[]> {
+    // Create the Layer config
+    const layerConfig = EsriFeature.createGeoviewLayerConfig(
+      geoviewLayerId,
+      geoviewLayerName,
+      url,
+      isTimeAware,
+      layerIds.map((layerId) => {
+        return { id: layerId, index: layerId };
+      })
+    );
+
+    // Create the class from geoview-layers package
+    const myLayer = new EsriFeature(layerConfig);
+
+    // Process it
+    return AbstractGeoViewRaster.processConfig(myLayer);
   }
 }
 

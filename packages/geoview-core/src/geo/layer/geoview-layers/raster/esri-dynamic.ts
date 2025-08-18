@@ -1,6 +1,8 @@
 import { ImageArcGISRest } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/ImageArcGISRest';
+import { cloneDeep } from 'lodash';
 
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import {
@@ -8,18 +10,16 @@ import {
   TypeGeoviewLayerConfig,
   CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
+  TypeMetadataEsriDynamic,
 } from '@/api/config/types/map-schema-types';
 
-import {
-  commonFetchAndSetServiceMetadata,
-  commonProcessLayerMetadata,
-  commonValidateListOfLayerEntryConfig,
-} from '@/geo/layer/geoview-layers/esri-layer-common';
+import { commonProcessLayerMetadata, commonValidateListOfLayerEntryConfig } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { logger } from '@/core/utils/logger';
 import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
-import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { deepMergeObjects } from '@/core/utils/utilities';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
+import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
+import { ConfigBaseClass, TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
 
 // GV: CONFIG EXTRACTION
 // GV: This section of code was extracted and copied to the geoview config section
@@ -28,7 +28,7 @@ import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 
 export interface TypeEsriDynamicLayerConfig extends TypeGeoviewLayerConfig {
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_DYNAMIC;
-  listOfLayerEntryConfig: EsriDynamicLayerEntryConfig[];
+  listOfLayerEntryConfig: (GroupLayerEntryConfig | EsriDynamicLayerEntryConfig)[];
 }
 
 // GV: ^^^^^
@@ -58,19 +58,54 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   }
 
   /**
-   * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
-   * @returns {Promise<void>} A promise that the execution is completed.
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeMetadataEsriDynamic | undefined} The strongly-typed layer configuration specific to this layer.
    */
-  protected override onFetchAndSetServiceMetadata(): Promise<void> {
+  override getMetadata(): TypeMetadataEsriDynamic | undefined {
+    return super.getMetadata() as TypeMetadataEsriDynamic | undefined;
+  }
+
+  /**
+   * Overrides the way a geoview layer config initializes its layer entries.
+   * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
+   */
+  protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
+    // Fetch the metadata
+    const metadata = await AbstractGeoViewRaster.fetchMetadata<TypeMetadataEsriDynamic>(
+      this.metadataAccessPath,
+      this.geoviewLayerId,
+      this.geoviewLayerName
+    );
+
+    // Now that we have metadata
+    const { layers } = metadata;
+
+    // Get all entries
+    const entries = layers.map((layer) => {
+      return {
+        id: layer.id,
+        index: layer.id,
+        layerId: layer.id,
+        layerName: layer.name,
+        subLayerIds: layer.subLayerIds,
+        subLayers: [],
+      };
+    });
+
+    // Build a tree of entries
+    const entriesTree = EsriDynamic.buildLayerEntriesTree(entries);
+
     // Redirect
-    return commonFetchAndSetServiceMetadata(this);
+    // TODO: Check - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
+    return EsriDynamic.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, this.metadataAccessPath, false, entriesTree);
   }
 
   /**
    * Overrides the way the validation of the list of layer entry config happens.
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
+   * @param {ConfigBaseClass[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
-  protected override onValidateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
+  protected override onValidateListOfLayerEntryConfig(listOfLayerEntryConfig: ConfigBaseClass[]): void {
     commonValidateListOfLayerEntryConfig(this, listOfLayerEntryConfig);
   }
 
@@ -105,11 +140,31 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @returns {boolean} true if an error is detected.
    */
   esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig): boolean {
-    if (this.metadata?.supportsDynamicLayers === false) {
+    if (!this.getMetadata()?.supportsDynamicLayers) {
       // Log a warning, but continue
       logger.logWarning(`Layer ${layerConfig.layerPath} does not technically support dynamic layers per its metadata.`);
     }
     return false;
+  }
+
+  /**
+   * Initializes a GeoView layer configuration for an Esri Dynamic layer.
+   * This method creates a basic TypeGeoviewLayerConfig using the provided
+   * ID, name, and metadata access path URL. It then initializes the layer entries by calling
+   * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
+   * @param {string} geoviewLayerId - A unique identifier for the layer.
+   * @param {string} geoviewLayerName - The display name of the layer.
+   * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
+   * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
+   */
+  static initGeoviewLayerConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    metadataAccessPath: string
+  ): Promise<TypeGeoviewLayerConfig> {
+    // Create the Layer config
+    const myLayer = new EsriDynamic({ geoviewLayerId, geoviewLayerName, metadataAccessPath } as TypeEsriDynamicLayerConfig);
+    return myLayer.initGeoViewLayerEntries();
   }
 
   /**
@@ -120,16 +175,17 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {string} geoviewLayerName - The display name of the GeoView layer.
    * @param {string} metadataAccessPath - The URL or path to access metadata.
    * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
-   * @param {TypeJsonArray} layerEntries - An array of layer entries objects to be included in the configuration.
+   * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
+   * @param {unknown} customGeocoreLayerConfig - An optional layer config from Geocore.
    * @returns {TypeEsriDynamicLayerConfig} The constructed configuration object for the Esri Dynamic layer.
    */
-  static createEsriDynamicLayerConfig(
+  static createGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
     metadataAccessPath: string,
     isTimeAware: boolean,
-    layerEntries: TypeJsonArray,
-    customGeocoreLayerConfig: TypeJsonObject
+    layerEntries: TypeLayerEntryShell[],
+    customGeocoreLayerConfig: unknown = {}
   ): TypeEsriDynamicLayerConfig {
     const geoviewLayerConfig: TypeEsriDynamicLayerConfig = {
       geoviewLayerId,
@@ -139,32 +195,115 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       isTimeAware,
       listOfLayerEntryConfig: [],
     };
-    geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
-      const layerEntryConfig = {
-        geoviewLayerConfig,
-        schemaTag: CONST_LAYER_TYPES.ESRI_DYNAMIC,
-        entryType: CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE,
-        layerId: layerEntry.index as string,
-        source: {
-          dataAccessPath: metadataAccessPath,
-        },
-      };
 
-      // Overwrite default from geocore custom config
-      const mergedConfig = deepMergeObjects(layerEntryConfig as unknown as TypeJsonObject, customGeocoreLayerConfig);
-
-      // Reconstruct
-      return new EsriDynamicLayerEntryConfig(mergedConfig as unknown as EsriDynamicLayerEntryConfig);
-    });
+    // Convert the tree of entries to GeoviewLayerConfigs
+    geoviewLayerConfig.listOfLayerEntryConfig = EsriDynamic.#convertTreeToLayerConfigs(
+      geoviewLayerConfig,
+      layerEntries,
+      customGeocoreLayerConfig
+    );
 
     // Return it
     return geoviewLayerConfig;
   }
 
   /**
+   * Processes an Esri Dynamic GeoviewLayerConfig and returns a promise
+   * that resolves to an array of `ConfigBaseClass` layer entry configurations.
+   *
+   * This method:
+   * 1. Creates a Geoview layer configuration using the provided parameters.
+   * 2. Instantiates a layer with that configuration.
+   * 3. Processes the layer configuration and returns the result.
+   * @param {string} geoviewLayerId - The unique identifier for the GeoView layer.
+   * @param {string} geoviewLayerName - The display name for the GeoView layer.
+   * @param {string} url - The URL of the service endpoint.
+   * @param {string[]} layerIds - An array of layer IDs to include in the configuration.
+   * @param {boolean} isTimeAware - Indicates if the layer is time aware.
+   * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
+   */
+  static processGeoviewLayerConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    url: string,
+    layerIds: number[],
+    isTimeAware: boolean
+  ): Promise<ConfigBaseClass[]> {
+    // Create the Layer config
+    const layerConfig = EsriDynamic.createGeoviewLayerConfig(
+      geoviewLayerId,
+      geoviewLayerName,
+      url,
+      isTimeAware,
+      layerIds.map((layerId) => {
+        return { id: layerId, index: layerId };
+      }),
+      {}
+    );
+
+    // Create the class from geoview-layers package
+    const myLayer = new EsriDynamic(layerConfig);
+
+    // Process it
+    return AbstractGeoViewLayer.processConfig(myLayer);
+  }
+
+  /**
+   * Recursively converts a tree of ESRI dynamic layer entries into a flat array of `GroupLayerEntryConfig` and
+   * `EsriDynamicLayerEntryConfig` instances suitable for use in a GeoView layer.
+   * @remarks
+   * - Group layers with sublayers are processed recursively into `GroupLayerEntryConfig` instances.
+   * - Leaf layers are converted into `EsriDynamicLayerEntryConfig` instances.
+   * - A custom configuration object from GeoCore can override or extend default values via deep merging.
+   * @param {TypeEsriDynamicLayerConfig} geoviewLayerConfig - The top-level ESRI dynamic layer configuration object.
+   * @param {TypeLayerEntryShell[]} layerEntries - An array representing the tree structure of the layer entries (may include groups or leaves).
+   * @param {unknown} [customGeocoreLayerConfig={}] - Optional GeoCore-specific configuration overrides to apply to each entry.
+   * @returns {(GroupLayerEntryConfig | EsriDynamicLayerEntryConfig)[]} An array of fully-formed layer entry configuration instances.
+   */
+  static #convertTreeToLayerConfigs(
+    geoviewLayerConfig: TypeEsriDynamicLayerConfig,
+    layerEntries: TypeLayerEntryShell[],
+    customGeocoreLayerConfig: unknown = {}
+  ): (GroupLayerEntryConfig | EsriDynamicLayerEntryConfig)[] {
+    // For each layer entry
+    return layerEntries.map((layerEntry) => {
+      // If is a group layer
+      if (layerEntry.subLayers && layerEntry.subLayers.length > 0) {
+        // Recursively convert sublayers
+        const subConfigs = EsriDynamic.#convertTreeToLayerConfigs(geoviewLayerConfig, layerEntry.subLayers, customGeocoreLayerConfig);
+
+        return new GroupLayerEntryConfig({
+          geoviewLayerConfig,
+          layerId: `${layerEntry.layerId}`,
+          layerName: `${layerEntry.layerName}`,
+          listOfLayerEntryConfig: subConfigs,
+        } as GroupLayerEntryConfig);
+      }
+
+      // Create entry config
+      const layerEntryConfig = {
+        geoviewLayerConfig,
+        schemaTag: CONST_LAYER_TYPES.ESRI_DYNAMIC,
+        entryType: CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE,
+        layerId: `${layerEntry.index}`,
+        layerName: `${layerEntry.layerName || layerEntry.layerId}`,
+        source: {
+          dataAccessPath: geoviewLayerConfig.metadataAccessPath,
+        },
+      };
+
+      // Overwrite default from geocore custom config
+      const mergedConfig = deepMergeObjects(layerEntryConfig, customGeocoreLayerConfig) as EsriDynamicLayerEntryConfig;
+
+      // Reconstruct
+      return new EsriDynamicLayerEntryConfig(mergedConfig);
+    });
+  }
+
+  /**
    * Creates an ImageArcGISRest source from a layer config.
    * @param {EsriDynamicLayerEntryConfig} layerConfig - The configuration for the EsriDynamic layer.
-   * @returns A fully configured ImageArcGISRest source.
+   * @returns {ImageArcGISRest} A fully configured ImageArcGISRest source.
    * @throws If required config fields like dataAccessPath are missing.
    */
   static createEsriDynamicSource(layerConfig: EsriDynamicLayerEntryConfig): ImageArcGISRest {
@@ -221,6 +360,44 @@ export class EsriDynamic extends AbstractGeoViewRaster {
 
     // Return the source
     return olSource;
+  }
+
+  /**
+   * Builds a hierarchical tree structure from a flat array of ESRI layer entries by linking parent layers
+   * with their corresponding sublayers based on `subLayerIds`.
+   * @remarks
+   * - Each entry is deep-cloned to avoid mutating the original input.
+   * - Entries that are referenced as sublayers are nested under their parent in the `subLayers` array.
+   * - Only root-level entries (those not referenced as sublayers) are returned at the top level of the tree.
+   * @param {{ layerId: number; subLayerIds: number[] }[]} entries - A flat array of layer entry objects, each potentially referencing sublayers by ID.
+   * @returns {TypeLayerEntryShell[]} A nested array representing the hierarchical layer structure with `subLayers` assigned to parents.
+   */
+  static buildLayerEntriesTree(entries: { layerId: number; subLayerIds: number[] }[]): TypeLayerEntryShell[] {
+    // Create a lookup map of all entries by layerId
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const entryMap: Record<number, any> = {};
+    entries.forEach((entry) => {
+      entryMap[entry.layerId] = cloneDeep(entry);
+    });
+
+    // Track root entries (those not referenced as sublayers)
+    const referenced = new Set<number>();
+
+    // Assign subLayers
+    entries.forEach((entry) => {
+      if (entry.subLayerIds && entry.subLayerIds.length > 0) {
+        entry.subLayerIds.forEach((subId) => {
+          const child = entryMap[subId];
+          if (child) {
+            entryMap[entry.layerId].subLayers!.push(child);
+            referenced.add(subId); // mark as child
+          }
+        });
+      }
+    });
+
+    // Return only root nodes (not referenced as subLayers)
+    return entries.filter((entry) => !referenced.has(entry.layerId)).map((entry) => entryMap[entry.layerId]);
   }
 }
 

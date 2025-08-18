@@ -4,15 +4,16 @@ import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import Feature from 'ol/Feature';
 
-import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
   TypeLayerEntryConfig,
-  TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
   TypeOutfields,
   CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
+  TypeMetadataOGCFeature,
+  TypeLayerMetadataQueryables,
+  TypeLayerMetadataOGC,
 } from '@/api/config/types/map-schema-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
@@ -24,10 +25,7 @@ import {
   LayerEntryConfigLayerIdNotFoundError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import { GVOGCFeature } from '@/geo/layer/gv-layers/vector/gv-ogc-feature';
-
-export interface TypeSourceOgcFeatureInitialConfig extends TypeVectorSourceInitialConfig {
-  format: 'featureAPI';
-}
+import { ConfigBaseClass, TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
 
 export interface TypeOgcFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.OGC_FEATURE;
@@ -50,26 +48,70 @@ export class OgcFeature extends AbstractGeoViewVector {
   }
 
   /**
-   * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
-   * @returns {Promise<void>} A promise that the execution is completed.
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeMetadataOGCFeature | undefined} The strongly-typed layer configuration specific to this layer.
    */
-  protected override async onFetchAndSetServiceMetadata(): Promise<void> {
-    // Fetch it
-    const responseJson = await OgcFeature.fetchMetadata(this.metadataAccessPath);
+  override getMetadata(): TypeMetadataOGCFeature | undefined {
+    return super.getMetadata() as TypeMetadataOGCFeature | undefined;
+  }
 
-    // Set it
-    this.metadata = responseJson;
+  /**
+   * Overrides the way the metadata is fetched.
+   * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
+   * @returns {Promise<T = TypeMetadataOGCFeature>} A promise with the metadata or undefined when no metadata for the particular layer type.
+   */
+  protected override onFetchServiceMetadata<T = TypeMetadataOGCFeature>(): Promise<T> {
+    // Fetch it
+    return OgcFeature.fetchMetadata(this.metadataAccessPath) as Promise<T>;
+  }
+
+  /**
+   * Overrides the way a geoview layer config initializes its layer entries.
+   * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
+   */
+  protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
+    // Get the folder url
+    const sep = '/collections/';
+    const idx = this.metadataAccessPath.lastIndexOf(sep);
+    let rootUrl = this.metadataAccessPath;
+    let id: string | undefined;
+    let entries: TypeLayerEntryShell[] = [];
+    if (idx > 0) {
+      rootUrl = this.metadataAccessPath.substring(0, idx);
+      id = this.metadataAccessPath.substring(idx + sep.length);
+      entries = [{ id }];
+    }
+
+    // If no id
+    if (!id) {
+      // Fetch the metadata
+      const metadata = await OgcFeature.fetchMetadata(this.metadataAccessPath);
+
+      // Now that we have metadata
+      entries = metadata.collections.map((collection) => {
+        return { id: collection.id, layerId: collection.id, layerName: collection.description };
+      });
+    }
+
+    // Redirect
+    // TODO: Check - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
+    return OgcFeature.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, entries);
   }
 
   /**
    * Overrides the validation of a layer entry config.
-   * @param {TypeLayerEntryConfig} layerConfig - The layer entry config to validate.
+   * @param {ConfigBaseClass} layerConfig - The layer entry config to validate.
    */
-  protected override onValidateLayerEntryConfig(layerConfig: TypeLayerEntryConfig): void {
+  protected override onValidateLayerEntryConfig(layerConfig: ConfigBaseClass): void {
     // Note that the code assumes ogc-feature collections does not contains metadata layer group. If you need layer group,
     // you can define them in the configuration section.
-    if (Array.isArray(this.metadata!.collections)) {
-      const foundCollection = this.metadata!.collections.find((layerMetadata) => layerMetadata.id === layerConfig.layerId);
+
+    // Get the metadata
+    const metadata = this.getMetadata();
+
+    if (Array.isArray(metadata?.collections)) {
+      const foundCollection = metadata.collections.find((layerMetadata) => layerMetadata.id === layerConfig.layerId);
       if (!foundCollection) {
         // Add a layer load error
         this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(layerConfig), layerConfig);
@@ -77,15 +119,15 @@ export class OgcFeature extends AbstractGeoViewVector {
       }
 
       // eslint-disable-next-line no-param-reassign
-      if (foundCollection.description) layerConfig.layerName = foundCollection.description as string;
+      if (foundCollection.description) layerConfig.layerName = foundCollection.description;
 
       // eslint-disable-next-line no-param-reassign
       layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
 
       if (!layerConfig.initialSettings.bounds && foundCollection.extent?.spatial?.bbox && foundCollection.extent?.spatial?.crs) {
         const latlonExtent = Projection.transformExtentFromProj(
-          foundCollection.extent.spatial.bbox[0] as number[],
-          Projection.getProjectionFromString(foundCollection.extent.spatial.crs as string),
+          foundCollection.extent.spatial.bbox[0],
+          Projection.getProjectionFromString(foundCollection.extent.spatial.crs),
           Projection.getProjectionLonLat()
         );
         // eslint-disable-next-line no-param-reassign
@@ -112,7 +154,7 @@ export class OgcFeature extends AbstractGeoViewVector {
       const queryUrl = metadataUrl.endsWith('/')
         ? `${metadataUrl}collections/${layerConfig.layerId}/queryables?f=json`
         : `${metadataUrl}/collections/${layerConfig.layerId}/queryables?f=json`;
-      const queryResultData = await Fetch.fetchJsonAsObject(queryUrl);
+      const queryResultData = await Fetch.fetchJson<TypeLayerMetadataQueryables>(queryUrl);
       if (queryResultData.properties) {
         layerConfig.setLayerMetadata(queryResultData.properties);
         OgcFeature.#processFeatureInfoConfig(queryResultData.properties, layerConfig);
@@ -163,11 +205,11 @@ export class OgcFeature extends AbstractGeoViewVector {
   /**
    * This method sets the outfields and aliasFields of the source feature info.
    *
-   * @param {TypeJsonArray} fields An array of field names and its aliases.
+   * @param {TypeLayerMetadataOGC} fields An array of field names and its aliases.
    * @param {VectorLayerEntryConfig} layerConfig The vector layer entry to configure.
    * @private
    */
-  static #processFeatureInfoConfig(fields: TypeJsonObject, layerConfig: VectorLayerEntryConfig): void {
+  static #processFeatureInfoConfig(fields: TypeLayerMetadataOGC, layerConfig: VectorLayerEntryConfig): void {
     // eslint-disable-next-line no-param-reassign
     if (!layerConfig.source) layerConfig.source = {};
     // eslint-disable-next-line no-param-reassign
@@ -215,12 +257,32 @@ export class OgcFeature extends AbstractGeoViewVector {
    * Fetches the metadata for a typical OGCFeature class.
    * @param {string} url - The url to query the metadata from.
    */
-  static fetchMetadata(url: string): Promise<TypeJsonObject> {
+  static fetchMetadata(url: string): Promise<TypeMetadataOGCFeature> {
     // The url
     const queryUrl = url.endsWith('/') ? `${url}collections?f=json` : `${url}/collections?f=json`;
 
     // Set it
-    return Fetch.fetchJsonAsObject(queryUrl);
+    return Fetch.fetchJson<TypeMetadataOGCFeature>(queryUrl);
+  }
+
+  /**
+   * Initializes a GeoView layer configuration for an OGC Feature layer.
+   * This method creates a basic TypeGeoviewLayerConfig using the provided
+   * ID, name, and metadata access path URL. It then initializes the layer entries by calling
+   * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
+   * @param {string} geoviewLayerId - A unique identifier for the layer.
+   * @param {string} geoviewLayerName - The display name of the layer.
+   * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
+   * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
+   */
+  static initGeoviewLayerConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    metadataAccessPath: string
+  ): Promise<TypeGeoviewLayerConfig> {
+    // Create the Layer config
+    const myLayer = new OgcFeature({ geoviewLayerId, geoviewLayerName, metadataAccessPath } as TypeOgcFeatureLayerConfig);
+    return myLayer.initGeoViewLayerEntries();
   }
 
   /**
@@ -231,15 +293,15 @@ export class OgcFeature extends AbstractGeoViewVector {
    * @param {string} geoviewLayerName - The display name of the GeoView layer.
    * @param {string} metadataAccessPath - The URL or path to access metadata or feature data.
    * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
-   * @param {TypeJsonArray} layerEntries - An array of layer entries objects to be included in the configuration.
+   * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns {TypeOgcFeatureLayerConfig} The constructed configuration object for the OGC Feature layer.
    */
-  static createOgcFeatureLayerConfig(
+  static createGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
     metadataAccessPath: string,
     isTimeAware: boolean,
-    layerEntries: TypeJsonArray
+    layerEntries: TypeLayerEntryShell[]
   ): TypeOgcFeatureLayerConfig {
     const geoviewLayerConfig: TypeOgcFeatureLayerConfig = {
       geoviewLayerId,
@@ -254,17 +316,58 @@ export class OgcFeature extends AbstractGeoViewVector {
         geoviewLayerConfig,
         schemaTag: CONST_LAYER_TYPES.OGC_FEATURE,
         entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
-        layerId: layerEntry.id as string,
+        layerId: `${layerEntry.id}`,
+        layerName: `${layerEntry.layerName || layerEntry.id}`,
         source: {
           format: 'featureAPI',
           dataAccessPath: metadataAccessPath,
         },
-      } as OgcFeatureLayerEntryConfig);
+      } as unknown as OgcFeatureLayerEntryConfig);
       return layerEntryConfig;
     });
 
     // Return it
     return geoviewLayerConfig;
+  }
+
+  /**
+   * Processes an OGC Feature GeoviewLayerConfig and returns a promise
+   * that resolves to an array of `ConfigBaseClass` layer entry configurations.
+   *
+   * This method:
+   * 1. Creates a Geoview layer configuration using the provided parameters.
+   * 2. Instantiates a layer with that configuration.
+   * 3. Processes the layer configuration and returns the result.
+   * @param {string} geoviewLayerId - The unique identifier for the GeoView layer.
+   * @param {string} geoviewLayerName - The display name for the GeoView layer.
+   * @param {string} url - The URL of the service endpoint.
+   * @param {string[]} layerIds - An array of layer IDs to include in the configuration.
+   * @param {boolean} isTimeAware - Indicates if the layer is time aware.
+   * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
+   */
+  static processGeoviewLayerConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    url: string,
+    layerIds: string[],
+    isTimeAware: boolean
+  ): Promise<ConfigBaseClass[]> {
+    // Create the Layer config
+    const layerConfig = OgcFeature.createGeoviewLayerConfig(
+      geoviewLayerId,
+      geoviewLayerName,
+      url,
+      isTimeAware,
+      layerIds.map((layerId) => {
+        return { id: layerId };
+      })
+    );
+
+    // Create the class from geoview-layers package
+    const myLayer = new OgcFeature(layerConfig);
+
+    // Process it
+    return AbstractGeoViewVector.processConfig(myLayer);
   }
 }
 

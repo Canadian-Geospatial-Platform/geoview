@@ -10,10 +10,15 @@ import { OverviewMap as OLOverviewMap } from 'ol/control';
 
 import { applyStyle } from 'ol-mapbox-style';
 
-import { TypeBasemapOptions, TypeValidMapProjectionCodes, TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
-import { TypeJsonObject, toJsonObject, TypeJsonArray } from '@/api/config/types/config-types';
+import { TypeBasemapOptions, TypeValidMapProjectionCodes, TypeDisplayLanguage, TypeLod } from '@/api/config/types/map-schema-types';
 import { delay, getLocalizedMessage } from '@/core/utils/utilities';
-import { TypeBasemapProps, TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
+import {
+  TypeBasemapProps,
+  TypeBasemapLayer,
+  BasemapCreationList,
+  BasemapCreation,
+  BasemapJsonResponse,
+} from '@/geo/layer/basemap/basemap-types';
 import { Projection } from '@/geo/utils/projection';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
@@ -83,7 +88,7 @@ export class BasemapApi {
   /**
    * Basemap list
    */
-  basemapsList: TypeJsonObject = toJsonObject({
+  basemapsList: BasemapCreationList = {
     3978: {
       transport: {
         url: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3978_V_OSM/VectorTileServer',
@@ -144,7 +149,7 @@ export class BasemapApi {
         jsonUrl: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/?f=json',
       },
     },
-  });
+  };
 
   /** Keep all callback delegates references */
   #onBasemapChangedHandlers: BasemapChangedDelegate[] = [];
@@ -190,7 +195,7 @@ export class BasemapApi {
         if (tileGrid) {
           applyStyle(tileLayer, layer.styleUrl, {
             resolutions: tileGrid.getResolutions(),
-          }).catch((err) => logger.logError(err));
+          }).catch((error: unknown) => logger.logError(error));
         }
       } else {
         tileLayer = new TileLayer({
@@ -239,7 +244,7 @@ export class BasemapApi {
   /**
    * Create a basemap layer.
    * @param {string} basemapId - The id of the layer.
-   * @param {TypeJsonObject} basemapLayer - The basemap layer url and json url.
+   * @param {BasemapCreation} basemapLayer - The basemap layer url and json url.
    * @param {number} opacity - The opacity to use for this layer.
    * @param {boolean} rest - Should we do a get request to get the info from the server.
    * @returns {TypeBasemapLayer} The created basemap layer.
@@ -247,7 +252,7 @@ export class BasemapApi {
    */
   async #createBasemapLayer(
     basemapId: string,
-    basemapLayer: TypeJsonObject,
+    basemapLayer: BasemapCreation,
     opacity: number,
     rest: boolean
   ): Promise<null | TypeBasemapLayer> {
@@ -260,28 +265,18 @@ export class BasemapApi {
     let copyright = '';
 
     // Should we do a get request to get the layer information from the server?
-    if (rest && (basemapLayer.jsonUrl as string)) {
+    if (rest && basemapLayer.jsonUrl) {
       // Get info from server
-      const result = await Fetch.fetchJsonAsObject(basemapLayer.jsonUrl as string);
+      const result = await Fetch.fetchJson<BasemapJsonResponse>(basemapLayer.jsonUrl);
 
-      // Get minimum scale
-      const minScale = result.minScale as number;
+      // Read the information
+      const { minScale, maxScale, fullExtent, tileInfo } = result;
 
-      // Get maximum scale
-      const maxScale = result.maxScale as number;
-
-      // Get extent
-      const fullExtent = toJsonObject(result.fullExtent);
-
-      // Get the tile grid info
-      const tileInfo = toJsonObject(result.tileInfo);
-
-      const lods: TypeJsonObject = {};
+      const lods: { [key: number]: TypeLod } = {};
 
       // Get resolutions and scale from tile grid info
-      (tileInfo.lods as TypeJsonArray)?.forEach((lod) => {
-        const scale = lod.scale as number;
-        const resolution = lod.resolution as number;
+      tileInfo.lods?.forEach((lod) => {
+        const { scale, resolution } = lod;
 
         resolutions.push(resolution);
 
@@ -289,30 +284,30 @@ export class BasemapApi {
       });
 
       // Set layer origin
-      origin = [tileInfo?.origin?.x || 0, tileInfo?.origin?.y || 0] as number[];
+      origin = [tileInfo?.origin?.x || 0, tileInfo?.origin?.y || 0];
 
       // set minimum zoom for this layer
-      minZoom = lods[minScale] ? (lods[minScale].level as number) : 0;
+      minZoom = lods[minScale] ? lods[minScale].level : 0;
 
       // Set max zoom for this layer
-      maxZoom = lods[maxScale] ? (lods[maxScale].level as number) : 23;
+      maxZoom = lods[maxScale] ? lods[maxScale].level : 23;
 
       // Set extent for this layer
-      extent = [fullExtent.xmin as number, fullExtent.ymin as number, fullExtent.xmax as number, fullExtent.ymax as number];
+      extent = [fullExtent.xmin, fullExtent.ymin, fullExtent.xmax, fullExtent.ymax];
 
       // Set copyright text for this layer
-      copyright = result.copyrightText as string;
+      copyright = result.copyrightText;
 
       // Set the spatial Reference for this layer
-      urlProj = tileInfo.spatialReference.latestWkid as number;
+      urlProj = tileInfo.spatialReference.latestWkid!;
 
       let source;
       if (basemapLayer.styleUrl) {
-        const tileSize = [tileInfo.rows as number, tileInfo.cols as number];
+        const tileSize = [tileInfo.rows, tileInfo.cols];
         source = new VectorTile({
           attributions: getLocalizedMessage(AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId), 'mapctrl.attribution.defaultnrcan'),
           projection: Projection.PROJECTIONS[urlProj],
-          url: basemapLayer.url as string,
+          url: basemapLayer.url,
           format: new MVT(),
           tileGrid: new TileGrid({
             tileSize,
@@ -325,7 +320,7 @@ export class BasemapApi {
         source = new XYZ({
           attributions: getLocalizedMessage(AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId), 'mapctrl.attribution.defaultnrcan'),
           projection: Projection.PROJECTIONS[urlProj],
-          url: basemapLayer.url as string,
+          url: basemapLayer.url,
           crossOrigin: 'Anonymous',
           tileGrid: new TileGrid({
             extent,
@@ -339,9 +334,9 @@ export class BasemapApi {
       return {
         basemapId,
         type: basemapId,
-        url: basemapLayer.url as string,
-        jsonUrl: basemapLayer.jsonUrl as string,
-        styleUrl: basemapLayer.styleUrl as string,
+        url: basemapLayer.url,
+        jsonUrl: basemapLayer.jsonUrl,
+        styleUrl: basemapLayer.styleUrl,
         source,
         opacity,
         origin,
@@ -515,13 +510,21 @@ export class BasemapApi {
       }
 
       if (basemapLayers.length && coreBasemapOptions.labeled) {
+        // Read the style url
+        const { styleUrl } = this.basemapsList[projectionCode].label;
+        let styleUrlReal: string;
+        if (typeof styleUrl === 'object') {
+          styleUrlReal = styleUrl[languageCode];
+        } else {
+          styleUrlReal = styleUrl!;
+        }
         const labelLayer = await this.#createBasemapLayer(
           'label',
-          toJsonObject({
-            url: this.basemapsList[projectionCode].label.url as string,
-            jsonUrl: this.basemapsList[projectionCode].label.jsonUrl as string,
-            styleUrl: this.basemapsList[projectionCode].label.styleUrl[languageCode] as string,
-          }),
+          {
+            url: this.basemapsList[projectionCode].label.url!,
+            jsonUrl: this.basemapsList[projectionCode].label.jsonUrl,
+            styleUrl: styleUrlReal,
+          },
           0.8,
           true
         ).catch(() => this.#emitBasemapError({ error: new BasemapLayerCreationError('labeled') }));
@@ -575,61 +578,63 @@ export class BasemapApi {
     throw new CoreBasemapCreationError();
   }
 
-  /**
-   * Create a custom basemap.
-   * @param {TypeBasemapProps} basemapProps - Basemap properties.
-   * @param {TypeValidMapProjectionCodes} projection - Projection code.
-   * @param {TypeDisplayLanguage} language - Optional language.
-   * @returns {TypeBasemapProps} The created custom basemap.
-   */
-  createCustomBasemap(
-    basemapProps: TypeBasemapProps,
-    projection: TypeValidMapProjectionCodes,
-    language?: TypeDisplayLanguage
-  ): TypeBasemapProps {
-    interface bilingual {
-      en: string;
-      fr: string;
-    }
+  // TODO: Cleanup - Not used anymore? (Code doesn't seem very good anyways with the bilingual things? Commenting out for now 2025-07-30)
+  // /**
+  //  * Create a custom basemap.
+  //  * @param {TypeBasemapProps} basemapProps - Basemap properties.
+  //  * @param {TypeValidMapProjectionCodes} projection - Projection code.
+  //  * @param {TypeDisplayLanguage} language - Optional language.
+  //  * @returns {TypeBasemapProps} The created custom basemap.
+  //  */
+  // createCustomBasemap(
+  //   basemapProps: TypeBasemapProps,
+  //   projection: TypeValidMapProjectionCodes,
+  //   language?: TypeDisplayLanguage
+  // ): TypeBasemapProps {
+  //   interface bilingual {
+  //     en: string;
+  //     fr: string;
+  //   }
 
-    // Extract bilangual sections
-    const name: bilingual = basemapProps.name as unknown as bilingual;
-    const description: bilingual = basemapProps.description as unknown as bilingual;
-    const thumbnailUrl: bilingual = basemapProps.thumbnailUrl as unknown as bilingual;
-    const attribution: bilingual = basemapProps.attribution as unknown as bilingual;
+  //   // Extract bilangual sections
+  //   const name: bilingual = basemapProps.name as unknown as bilingual;
+  //   const description: bilingual = basemapProps.description as unknown as bilingual;
+  //   const thumbnailUrl: bilingual = basemapProps.thumbnailUrl as unknown as bilingual;
+  //   const attribution: bilingual = basemapProps.attribution as unknown as bilingual;
 
-    // Check if language is provided for the basemap creation
-    const languageCode = language === undefined ? AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId) : language;
+  //   // Check if language is provided for the basemap creation
+  //   const languageCode = language === undefined ? AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId) : language;
 
-    // Create the basemap properties
-    const formatProps: TypeBasemapProps = { ...basemapProps };
-    formatProps.name = languageCode === 'en' ? name.en : name.fr;
-    formatProps.layers = basemapProps.layers.map((layer) => {
-      return {
-        ...layer,
-        url: languageCode === 'en' ? (layer.url as unknown as bilingual).en : (layer.url as unknown as bilingual).fr,
-        // TODO: Handle custom vector tile basemaps too
-        source: new XYZ({
-          attributions: attribution[languageCode],
-          projection: Projection.PROJECTIONS[projection],
-          url: languageCode === 'en' ? (layer.url as unknown as bilingual).en : (layer.url as unknown as bilingual).fr,
-          crossOrigin: 'Anonymous',
-          tileGrid: new TileGrid({
-            extent: this.defaultExtent,
-            origin: this.defaultOrigin,
-            resolutions: this.defaultResolutions!,
-          }),
-        }),
-      };
-    });
-    formatProps.type = 'test';
-    formatProps.description = languageCode === 'en' ? description.en : description.fr;
-    formatProps.altText = languageCode === 'en' ? description.en : description.fr;
-    formatProps.thumbnailUrl = languageCode === 'en' ? thumbnailUrl.en : thumbnailUrl.fr;
-    formatProps.attribution = languageCode === 'en' ? [attribution.en] : [attribution.fr];
+  //   // Create the basemap properties
+  //   const formatProps: TypeBasemapProps = { ...basemapProps };
+  //   formatProps.name = languageCode === 'en' ? name.en : name.fr;
+  //   formatProps.layers = basemapProps.layers.map((layer) => {
+  //     return {
+  //       ...layer,
+  //       url: languageCode === 'en' ? (layer.url as unknown as bilingual).en : (layer.url as unknown as bilingual).fr,
+  //       // TODO: Handle custom vector tile basemaps too
+  //       source: new XYZ({
+  //         attributions: attribution[languageCode],
+  //         projection: Projection.PROJECTIONS[projection],
+  //         url: languageCode === 'en' ? (layer.url as unknown as bilingual).en : (layer.url as unknown as bilingual).fr,
+  //         crossOrigin: 'Anonymous',
+  //         tileGrid: new TileGrid({
+  //           extent: this.defaultExtent,
+  //           origin: this.defaultOrigin,
+  //           resolutions: this.defaultResolutions!,
+  //         }),
+  //       }),
+  //     };
+  //   });
+  //   formatProps.type = 'test';
+  //   formatProps.description = languageCode === 'en' ? description.en : description.fr;
+  //   formatProps.altText = languageCode === 'en' ? description.en : description.fr;
+  //   formatProps.thumbnailUrl = languageCode === 'en' ? thumbnailUrl.en : thumbnailUrl.fr;
+  //   formatProps.attribution = languageCode === 'en' ? [attribution.en] : [attribution.fr];
 
-    return formatProps;
-  }
+  //   return formatProps;
+  // }
+
   // #endregion
 
   /**
@@ -708,7 +713,7 @@ export class BasemapApi {
           if (tileGrid) {
             applyStyle(basemapLayer, layer.styleUrl, {
               resolutions: tileGrid.getResolutions(),
-            }).catch((err) => logger.logError(err));
+            }).catch((error: unknown) => logger.logError(error));
           }
         } else {
           basemapLayer = new TileLayer({

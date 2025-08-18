@@ -5,9 +5,8 @@ import { MenuItem } from '@/ui';
 
 import { logger } from '@/core/utils/logger';
 import { JsonExportWorker } from '@/core/workers/json-export-worker';
-import { TypeFeatureInfoEntry } from '@/api/config/types/map-schema-types';
+import { SerializedGeometry, TypeFeatureInfoEntry } from '@/api/config/types/map-schema-types';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { TypeJsonObject } from '@/api/config/types/config-types';
 import { useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useMapProjection } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
@@ -40,10 +39,10 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
    * Helper function to serialize a json geometry to pass to the worker
    *
    * @param {Geometry} geometry - The geometry
-   * @returns {TypeJsonObject} The serialized geometry json
+   * @returns {SerializedGeometry} The serialized geometry json
    */
-  const serializeGeometry = (geometry: Geometry): TypeJsonObject => {
-    let builtGeometry = {};
+  const serializeGeometry = (geometry: Geometry): SerializedGeometry => {
+    let builtGeometry = {} as SerializedGeometry;
 
     if (geometry instanceof Polygon) {
       builtGeometry = { type: 'Polygon', coordinates: geometry.getCoordinates() };
@@ -79,7 +78,7 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
 
           // Get the ids
           const objectids = chunk.map((record) => {
-            return record.geometry?.get(oidField) as number;
+            return record.fieldInfo[oidField]?.value as number;
           });
 
           // Query
@@ -88,13 +87,13 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
               // For each result
               results.forEach((result) => {
                 // Filter
-                const recFound = chunk.filter((record) => record.geometry?.get(oidField) === result.fieldInfo[oidField]?.value);
+                const recFound = chunk.filter((record) => record.feature?.get(oidField) === result.fieldInfo[oidField]?.value);
 
                 // If found it
                 if (recFound && recFound.length === 1) {
                   // Officially attribute the geometry to that particular record
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  (recFound[0].geometry as any).setGeometry(result.geometry);
+                  recFound[0].feature?.setGeometry(result.geometry);
+                  recFound[0].geometry = result.geometry;
                 }
               });
 
@@ -156,7 +155,7 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
           const serializedChunk = chunk
             .filter((feature) => rowsIDSet.has(feature.fieldInfo.geoviewID?.value))
             .map((feature) => ({
-              geometry: serializeGeometry(feature.geometry?.getGeometry()?.clone() as Geometry),
+              geometry: serializeGeometry(feature.geometry!),
               properties: Object.fromEntries(
                 Object.entries(feature.fieldInfo)
                   .filter(([key]) => key !== 'geoviewID')

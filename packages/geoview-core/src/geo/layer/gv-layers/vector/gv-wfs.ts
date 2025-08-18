@@ -1,5 +1,4 @@
 import { Vector as VectorSource } from 'ol/source';
-import { TypeJsonArray } from '@/api/config/types/config-types';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import { WfsLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
@@ -21,8 +20,9 @@ export class GVWFS extends AbstractGVVector {
   }
 
   /**
-   * Overrides the get of the layer configuration associated with the layer.
-   * @returns {WfsLayerEntryConfig} The layer configuration or undefined if not found.
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {WfsLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
    */
   override getLayerConfig(): WfsLayerEntryConfig {
     // Call parent and cast
@@ -34,11 +34,11 @@ export class GVWFS extends AbstractGVVector {
    * @param {string} fieldName - The field name for which we want to get the type.
    * @returns {TypeOutfieldsType} The type of the field.
    */
-  protected override getFieldType(fieldName: string): TypeOutfieldsType {
-    const fieldDefinitions = this.getLayerConfig().getLayerMetadata() as TypeJsonArray;
-    const fieldDefinition = fieldDefinitions.find((metadataEntry) => metadataEntry.name === fieldName);
+  protected override onGetFieldType(fieldName: string): TypeOutfieldsType {
+    const fieldDefinitions = this.getLayerConfig().getLayerMetadata();
+    const fieldDefinition = fieldDefinitions?.find((metadataEntry) => metadataEntry.name === fieldName);
     if (!fieldDefinition) return 'string';
-    const fieldEntryType = (fieldDefinition.type as string).split(':').slice(-1)[0];
+    const fieldEntryType = fieldDefinition.type.split(':').slice(-1)[0];
     if (fieldEntryType === 'date') return 'date';
     if (['int', 'number'].includes(fieldEntryType)) return 'number';
     return 'string';

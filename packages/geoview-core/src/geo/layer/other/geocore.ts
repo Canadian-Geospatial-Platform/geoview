@@ -5,61 +5,69 @@ import { GeochartEventProcessor } from '@/api/event-processors/event-processor-c
 import { generateId } from '@/core/utils/utilities';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
-import { TypeDisplayLanguage, GeoCoreLayerConfig, TypeGeoviewLayerConfig } from '@/api/config/types/map-schema-types';
+import {
+  DEFAULT_MAP_FEATURE_CONFIG,
+  TypeDisplayLanguage,
+  GeoCoreLayerConfig,
+  TypeGeoviewLayerConfig,
+} from '@/api/config/types/map-schema-types';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 /**
  * Class used to add geoCore layer to the map
- *
  * @exports
  * @class GeoCore
  */
-export class GeoCore {
-  #mapId: string;
-
-  #displayLanguage: TypeDisplayLanguage;
-
-  /**
-   * Constructor
-   * @param {string} mapId the id of the map
-   */
-  constructor(mapId: string, displayLanguage: TypeDisplayLanguage) {
-    this.#mapId = mapId;
-    this.#displayLanguage = displayLanguage;
-  }
-
+export abstract class GeoCore {
   /**
    * Gets GeoView layer configurations list from the UUIDs of the list of layer entry configurations.
    * @param {string} uuid - The UUID of the layer
+   * @param {TypeDisplayLanguage} language - The language
+   * @param {string} mapId - The optional map id
    * @param {GeoCoreLayerConfig?} layerConfig - The optional layer configuration
-   * @returns {Promise<TypeGeoviewLayerConfig[]>} List of layer configurations to add to the map.
+   * @returns {Promise<TypeGeoviewLayerConfig>} List of layer configurations to add to the map.
    */
-  async createLayersFromUUID(uuid: string, layerConfig?: GeoCoreLayerConfig): Promise<TypeGeoviewLayerConfig[]> {
-    // Get the map config
-    const map = MapEventProcessor.getMapViewer(this.#mapId);
-    if (map.layer.getGeoviewLayerIds().includes(uuid)) {
-      // eslint-disable-next-line no-param-reassign
-      uuid = `${uuid}:${generateId(8)}`;
-    }
-    const mapConfig = MapEventProcessor.getGeoViewMapConfig(this.#mapId);
+  static async createLayerConfigFromUUID(
+    uuid: string,
+    language: TypeDisplayLanguage,
+    mapId?: string,
+    layerConfig?: GeoCoreLayerConfig
+  ): Promise<TypeGeoviewLayerConfig> {
+    // If there's a mapId provided, validate the uuid
+    let { geocoreUrl } = DEFAULT_MAP_FEATURE_CONFIG.serviceUrls;
 
-    // Generate the url using metadataAccessPath when specified or using the geocore url
-    const url = `${mapConfig!.serviceUrls.geocoreUrl}`;
+    if (mapId) {
+      // Get the map config
+      const map = MapEventProcessor.getMapViewer(mapId);
+      if (map.layer.getGeoviewLayerIds().includes(uuid)) {
+        // eslint-disable-next-line no-param-reassign
+        uuid = `${uuid}:${generateId(8)}`;
+      }
+
+      // Get the map config
+      const mapConfig = MapEventProcessor.getGeoViewMapConfig(mapId);
+
+      // Generate the url using the geocore url
+      geocoreUrl = mapConfig!.serviceUrls.geocoreUrl;
+    }
 
     // Get the GV config from UUID and await
-    const response = await UUIDmapConfigReader.getGVConfigFromUUIDs(url, this.#displayLanguage, [uuid.split(':')[0]]);
+    const response = await UUIDmapConfigReader.getGVConfigFromUUIDs(geocoreUrl, language, [uuid.split(':')[0]]);
 
     // Validate the generated Geoview Layer Config
     ConfigValidation.validateListOfGeoviewLayerConfig(response.layers);
 
-    // For each found geochart associated with the Geocore UUIDs
-    response.geocharts?.forEach((geochartConfig) => {
-      // Get the layerPath from geocore response
-      const layerPath = geochartConfig.layers[0].layerId;
+    // If there's a mapId, check for geochart
+    if (mapId) {
+      // For each found geochart associated with the Geocore UUIDs
+      response.geocharts?.forEach((geochartConfig) => {
+        // Get the layerPath from geocore response
+        const layerPath = geochartConfig.layers[0].layerId;
 
-      // Add a GeoChart
-      GeochartEventProcessor.addGeochartChart(this.#mapId, layerPath, geochartConfig);
-    });
+        // Add a GeoChart
+        GeochartEventProcessor.addGeochartChart(mapId, layerPath, geochartConfig);
+      });
+    }
 
     // Use user supplied listOfLayerEntryConfig if provided
     if (layerConfig?.listOfLayerEntryConfig || layerConfig?.initialSettings) {
@@ -71,12 +79,14 @@ export class GeoCore {
       // Use the name from the first layer if none is provided in the config
       if (!tempLayerConfig.geoviewLayerName) tempLayerConfig.geoviewLayerName = response.layers[0].geoviewLayerName;
 
-      const config = new Config(this.#displayLanguage);
-      const newLayerConfig = config.getValidMapConfig([tempLayerConfig], (errorKey: string, params: string[]) => {
+      const config = new Config(language);
+      const newLayerConfig = config.prevalidateGeoviewLayersConfig([tempLayerConfig], (errorKey: string, params: string[]) => {
         // When an error happens, raise the exception, we handle it higher in this case
         throw new GeoViewError(errorKey, params);
       });
-      return newLayerConfig as TypeGeoviewLayerConfig[];
+
+      // Return the created layer config from the merged config informations
+      return newLayerConfig[0] as TypeGeoviewLayerConfig;
     }
 
     // In case of simplified geocoreConfig being provided, just update geoviewLayerName and the first layer
@@ -92,6 +102,7 @@ export class GeoCore {
       response.layers[0].geoviewLayerId = uuid;
     }
 
-    return response.layers;
+    // Always only first one
+    return response.layers[0];
   }
 }

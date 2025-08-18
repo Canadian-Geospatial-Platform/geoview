@@ -25,9 +25,6 @@ import { useFeatureFieldInfos } from './hooks';
 import { TypeFieldEntry } from '@/api/config/types/map-schema-types';
 import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 
-interface ColumnsType {
-  [key: string]: TypeFieldEntry;
-}
 /**
  * Open lighweight version (no function) of data table in a modal window
  *
@@ -99,7 +96,7 @@ export default function DataTableModal(): JSX.Element {
     );
   }, []);
 
-  const columns = useMemo<MRTColumnDef<ColumnsType>[]>(() => {
+  const columns = useMemo<MRTColumnDef<Partial<Record<string, TypeFieldEntry>>>[]>(() => {
     // Log
     logger.logTraceUseMemo('DATA-TABLE-MODAL - columns', layer?.features);
 
@@ -107,7 +104,7 @@ export default function DataTableModal(): JSX.Element {
       return [];
     }
     const entries = Object.entries(layer?.fieldInfos ?? {});
-    const columnList = [] as MRTColumnDef<ColumnsType>[];
+    const columnList = [] as MRTColumnDef<Partial<Record<string, TypeFieldEntry>>>[];
 
     entries.forEach(([key, value]) => {
       // Do not show internal geoviewID field
@@ -139,9 +136,11 @@ export default function DataTableModal(): JSX.Element {
     // Log
     logger.logTraceUseMemo('DATA-TABLE-MODAL - rows', layer?.fieldInfos);
 
-    return (layer?.features?.map((feature) => {
-      return feature.fieldInfo;
-    }) ?? []) as unknown as ColumnsType[];
+    return (
+      layer?.features?.map((feature) => {
+        return feature.fieldInfo;
+      }) ?? []
+    );
   }, [layer?.features, layer?.fieldInfos]);
 
   useEffect(() => {

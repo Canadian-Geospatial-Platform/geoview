@@ -1,4 +1,3 @@
-import { TypeJsonObject } from '@/api/config/types/config-types';
 import {
   TypeBaseVectorGeometryConfig,
   TypeGeoviewLayerConfig,
@@ -147,7 +146,7 @@ export abstract class LayerMockup {
     } as unknown as TypeLayerEntryConfig;
   }
 
-  static configTop100Metadata(): TypeJsonObject {
+  static configTop100Metadata(): unknown {
     return {
       currentVersion: 10.81,
       id: 0,
@@ -318,10 +317,10 @@ export abstract class LayerMockup {
       supportsDatumTransformation: true,
       supportsCoordinatesQuantization: true,
       serviceItemId: 'e6847c6b6a7b41d0bcbe061d304ae034',
-    } as unknown as TypeJsonObject;
+    };
   }
 
-  static configTop100Source(format: TypeVectorSourceFormats | undefined): TypeJsonObject {
+  static configTop100Source(format: TypeVectorSourceFormats | undefined): unknown {
     return {
       format,
       featureInfo: {
@@ -334,7 +333,7 @@ export abstract class LayerMockup {
         ],
         queryable: true,
       },
-    } as unknown as TypeJsonObject;
+    };
   }
 
   static configTop100Style(): TypeLayerStyleConfig {
@@ -362,7 +361,7 @@ export abstract class LayerMockup {
     };
   }
 
-  static configNonMetalMetadata(): TypeJsonObject {
+  static configNonMetalMetadata(): unknown {
     return {
       currentVersion: 10.81,
       id: 5,
@@ -565,10 +564,10 @@ export abstract class LayerMockup {
       supportsDatumTransformation: true,
       supportsCoordinatesQuantization: true,
       serviceItemId: 'e6847c6b6a7b41d0bcbe061d304ae034',
-    } as unknown as TypeJsonObject;
+    };
   }
 
-  static configNonMetalSource(): TypeJsonObject {
+  static configNonMetalSource(): unknown {
     return {
       maxRecordCount: 1000,
       layerFilter: '',
@@ -581,10 +580,10 @@ export abstract class LayerMockup {
         ],
         queryable: true,
       },
-    } as unknown as TypeJsonObject;
+    };
   }
 
-  static configNonMetalStyle(): TypeJsonObject {
+  static configNonMetalStyle(): unknown {
     return {
       type: 'uniqueValue',
       fields: ['commodity_group_en_spelt'],
@@ -619,10 +618,10 @@ export abstract class LayerMockup {
           },
         },
       ],
-    } as unknown as TypeJsonObject;
+    };
   }
 
-  static configAirborneMetadata(): TypeJsonObject {
+  static configAirborneMetadata(): unknown {
     return {
       currentVersion: 10.81,
       id: 1,
@@ -982,10 +981,10 @@ export abstract class LayerMockup {
       supportsDatumTransformation: true,
       supportsCoordinatesQuantization: true,
       serviceItemId: 'a520e5383e2c49a6acddbc759ce28ad2',
-    } as unknown as TypeJsonObject;
+    };
   }
 
-  static configPolygonsMetadata(): TypeJsonObject {
+  static configPolygonsMetadata(): unknown {
     return {
       layerId: 'polygons.json',
       layerName: 'Polygons',
@@ -1072,10 +1071,10 @@ export abstract class LayerMockup {
           ],
         },
       },
-    } as unknown as TypeJsonObject;
+    };
   }
 
-  static configLinesMetadata(): TypeJsonObject {
+  static configLinesMetadata(): unknown {
     return {
       layerId: 'lines.json',
       layerName: 'Lines',
@@ -1125,10 +1124,10 @@ export abstract class LayerMockup {
           ],
         },
       },
-    } as unknown as TypeJsonObject;
+    };
   }
 
-  static configIconPointsMetadata(): TypeJsonObject {
+  static configIconPointsMetadata(): unknown {
     return {
       layerId: 'icon_points.json',
       layerName: 'Icons',
@@ -1178,10 +1177,10 @@ export abstract class LayerMockup {
           ],
         },
       },
-    } as unknown as TypeJsonObject;
+    };
   }
 
-  static configPointsMetadata(): TypeJsonObject {
+  static configPointsMetadata(): unknown {
     return {
       layerId: 'points.json',
       layerName: 'Points',
@@ -1247,10 +1246,10 @@ export abstract class LayerMockup {
           ],
         },
       },
-    } as unknown as TypeJsonObject;
+    };
   }
 
-  static configPoints1Metadata(): TypeJsonObject {
+  static configPoints1Metadata(): unknown {
     return {
       layerId: 'points_1.json',
       layerName: 'Points_1',
@@ -1308,10 +1307,10 @@ export abstract class LayerMockup {
           },
         },
       },
-    } as unknown as TypeJsonObject;
+    };
   }
 
-  static configPoints2Metadata(): TypeJsonObject {
+  static configPoints2Metadata(): unknown {
     return {
       layerId: 'points_2.json',
       layerName: 'Points_1',
@@ -1369,10 +1368,10 @@ export abstract class LayerMockup {
           },
         },
       },
-    } as unknown as TypeJsonObject;
+    };
   }
 
-  static configPoints3Metadata(): TypeJsonObject {
+  static configPoints3Metadata(): unknown {
     return {
       layerId: 'points_3.json',
       layerName: 'Points_1',
@@ -1430,10 +1429,10 @@ export abstract class LayerMockup {
           },
         },
       },
-    } as unknown as TypeJsonObject;
+    };
   }
 
-  static configCESIMetadata(): TypeJsonObject {
+  static configCESIMetadata(): unknown {
     return {
       currentVersion: 10.91,
       cimVersion: '2.9.0',
@@ -1996,10 +1995,10 @@ export abstract class LayerMockup {
       maxImageHeight: 4096,
       maxImageWidth: 4096,
       supportedExtensions: 'WMSServer',
-    } as unknown as TypeJsonObject;
+    };
   }
 
-  static configTemporalTestBedMetadata(): TypeJsonObject {
+  static configTemporalTestBedMetadata(): unknown {
     return {
       currentVersion: 10.81,
       serviceDescription: '',
@@ -2079,15 +2078,10 @@ export abstract class LayerMockup {
       maxImageWidth: 4096,
       supportedExtensions: 'WMSServer',
       serviceItemId: '5ed7f6bedbe240e5aebda65ec0d37203',
-    } as unknown as TypeJsonObject;
+    };
   }
 
-  // static configDEUCSOVolumeMetadata(): TypeJsonObject {
-  //   return
-  //   as unknown as TypeJsonObject
-  // }
-
-  static configHistoricalFloodMetadata(): TypeJsonObject {
+  static configHistoricalFloodMetadata(): unknown {
     return {
       currentVersion: 10.81,
       id: 0,
@@ -2498,7 +2492,7 @@ export abstract class LayerMockup {
       supportsDatumTransformation: true,
       supportsCoordinatesQuantization: true,
       serviceItemId: '7e0ee522f97848569d9436977ca38887',
-    } as unknown as TypeJsonObject;
+    };
   }
 
   static configHistoricalFloodTemporalDimension(): TimeDimension {
@@ -2846,7 +2840,7 @@ export abstract class LayerMockup {
     } as TimeDimension;
   }
 
-  static configRadarMetadata(): TypeJsonObject {
+  static configRadarMetadata(): unknown {
     return {
       version: '1.3.0',
       Service: {
@@ -3372,7 +3366,7 @@ export abstract class LayerMockup {
           ],
         },
       },
-    } as unknown as TypeJsonObject;
+    };
   }
 
   static configRadarTemporalDimension(): TimeDimension {
@@ -3422,7 +3416,7 @@ export abstract class LayerMockup {
     } as TimeDimension;
   }
 
-  static configMSIMetadata(): TypeJsonObject {
+  static configMSIMetadata(): unknown {
     return {
       version: '1.3.0',
       Service: {
@@ -3608,7 +3602,7 @@ export abstract class LayerMockup {
           ],
         },
       },
-    } as unknown as TypeJsonObject;
+    };
   }
 
   static configMSITemporalDimension(): TimeDimension {

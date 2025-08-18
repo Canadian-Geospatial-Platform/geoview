@@ -52,7 +52,7 @@
                         "name": "plain_text",
                         "alias": "Forcast",
                         "type": "string",
-                        "domain": []
+                        "domain": null
                       }
                     ]
                   }
@@ -88,7 +88,7 @@
                     "name": "band-0-pixel-value",
                     "alias": "Pixel value",
                     "type": "number",
-                    "domain": []
+                    "domain": null
                   }
                 ]
               }
@@ -119,6 +119,33 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "0"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "DatacubeXML-NAPL",
+        "geoviewLayerName": "NAPL",
+        "metadataAccessPath": "https://datacube.services.geo.ca/web/napl-ontario-ring-of-fire.xml",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "ontario-ring-of-fire",
+            "layerName": "Ontario ring of fire"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId":"DatacubeXML-Aerial",
+        "geoviewLayerName":"Datacube-Aerial",
+        "metadataAccessPath":"https://datacube.services.geo.ca/web/aerial.xml",
+        "geoviewLayerType":"ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "halifax",
+            "layerName": "Halifax"
+          },
+          {
+            "layerId": "victoria"
           }
         ]
       }

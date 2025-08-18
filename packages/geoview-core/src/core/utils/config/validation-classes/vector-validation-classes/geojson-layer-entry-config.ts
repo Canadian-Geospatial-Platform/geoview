@@ -1,9 +1,14 @@
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
-import { TypeSourceGeoJSONInitialConfig } from '@/geo/layer/geoview-layers/vector/geojson';
-import { CONST_LAYER_ENTRY_TYPES } from '@/api/config/types/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES, TypeSourceGeoJSONInitialConfig } from '@/api/config/types/map-schema-types';
 import { Projection } from '@/geo/utils/projection';
 
 export class GeoJSONLayerEntryConfig extends VectorLayerEntryConfig {
+  /** Tag used to link the entry to a specific schema. */
+  override schemaTag = CONST_LAYER_TYPES.GEOJSON;
+
+  /** Layer entry data type. */
+  override entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
+
   declare source: TypeSourceGeoJSONInitialConfig;
 
   /**
@@ -14,11 +19,10 @@ export class GeoJSONLayerEntryConfig extends VectorLayerEntryConfig {
     super(layerConfig);
     Object.assign(this, layerConfig);
 
-    // Default value for this.entryType is vector
-    if (this.entryType === undefined) this.entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
     // Value for this.source.format can only be GeoJSON.
-    if (!this.source) this.source = { format: 'GeoJSON' };
-    if (!this.source.format) this.source.format = 'GeoJSON';
+    this.source ??= { format: 'GeoJSON' };
+    this.source.format ??= 'GeoJSON';
+    this.source.dataProjection ??= Projection.PROJECTION_NAMES.LONLAT;
     if (layerConfig.source?.geojson) this.source.geojson = layerConfig.source.geojson;
 
     // If undefined, we assign the metadataAccessPath of the GeoView layer to dataAccessPath and place the layerId at the end of it.
@@ -30,17 +34,15 @@ export class GeoJSONLayerEntryConfig extends VectorLayerEntryConfig {
       this.source.dataAccessPath = accessPath;
     }
 
-    if (
-      !(this.source.dataAccessPath.startsWith('blob') && !this.source.dataAccessPath.endsWith('/')) &&
-      !this.source.dataAccessPath.toUpperCase().endsWith('.JSON') &&
-      !this.source.dataAccessPath.toUpperCase().endsWith('.GEOJSON') &&
-      !this.source.dataAccessPath.toUpperCase().endsWith('=JSON')
-    ) {
-      this.source.dataAccessPath = this.source.dataAccessPath.endsWith('/')
-        ? `${this.source.dataAccessPath}${this.layerId}`
-        : `${this.source.dataAccessPath}/${this.layerId}`;
-    }
+    // If dataAccessPath doesn't already point to a file (blob, .json, .geojson, =json), append the layerId
+    const path = this.source.dataAccessPath;
+    const isBlob = path.startsWith('blob') && !path.endsWith('/');
+    const endsWithJson = path.toUpperCase().endsWith('.JSON');
+    const endsWithGeoJson = path.toUpperCase().endsWith('.GEOJSON');
+    const endsWithEqualsJson = path.toUpperCase().endsWith('=JSON');
 
-    if (!this.source.dataProjection) this.source.dataProjection = Projection.PROJECTION_NAMES.LONLAT;
+    if (!isBlob && !endsWithJson && !endsWithGeoJson && !endsWithEqualsJson) {
+      this.source.dataAccessPath = path.endsWith('/') ? `${path}${this.layerId}` : `${path}/${this.layerId}`;
+    }
   }
 }

@@ -1,25 +1,22 @@
 import {
-  GroupLayerEntryConfig,
-  MapFeatureConfig,
-  TypeGeoviewLayerType,
-  TypeGeoviewLayerConfig,
-  ShapefileLayerConfig,
-  MapConfigLayerEntry,
-  CONST_LAYER_ENTRY_TYPES,
-  TypeDisplayLanguage,
   CONST_LAYER_TYPES,
+  CONST_LAYER_ENTRY_TYPES,
+  ShapefileLayerConfig,
+  TypeDisplayLanguage,
+  TypeGeoviewLayerType,
+  TypeLayerEntryConfig,
+  MapConfigLayerEntry,
+  TypeGeoviewLayerConfig,
 } from '@/api/config/types/map-schema-types';
-import { Cast, toJsonObject } from '@/api/config/types/config-types';
 import { generateId, getLocalizedMessage } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
-import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
 
 type BuildGeoViewLayerInput = {
   layerIdsToAdd: string[];
   layerName: string;
   layerType: string;
   layerURL: string;
-  layerList: GroupLayerEntryConfig[];
+  layerTree: TypeGeoviewLayerConfig;
 };
 
 type LayerEntryConfigShell = {
@@ -28,181 +25,235 @@ type LayerEntryConfigShell = {
   listOfLayerEntryConfig?: LayerEntryConfigShell[];
 };
 
-/**
- * Returns an array of tuples representing available GeoView layer types and their localized display names.
- *
- * @param {TypeDisplayLanguage} language - The display language to use for localization.
- * @param {boolean} includeStatic - True if we need to include static image layers, false otherwise.
- * @returns {Array<[string, string]>} An array where each item is a tuple: [layerType, localizedName].
- */
-export const getLocalizeLayerType = (language: TypeDisplayLanguage, includeStatic: boolean): Array<[string, string]> => {
-  const { CSV, ESRI_DYNAMIC, ESRI_FEATURE, ESRI_IMAGE, GEOJSON, WMS, WFS, OGC_FEATURE, XYZ_TILES, VECTOR_TILES } = CONST_LAYER_TYPES;
-  const { GEOCORE, SHAPEFILE } = CONST_LAYER_ENTRY_TYPES;
-  const layerOptions: [string, string][] = [
-    [CSV, getLocalizedMessage(language, 'layers.serviceCSV')],
-    [SHAPEFILE, getLocalizedMessage(language, 'layers.serviceEsriShapefile')],
-    [ESRI_DYNAMIC, getLocalizedMessage(language, 'layers.serviceEsriDynamic')],
-    [ESRI_FEATURE, getLocalizedMessage(language, 'layers.serviceEsriFeature')],
-    [ESRI_IMAGE, getLocalizedMessage(language, 'layers.serviceEsriImage')],
-    [GEOJSON, getLocalizedMessage(language, 'layers.serviceGeoJSON')],
-    [WMS, getLocalizedMessage(language, 'layers.serviceOgcWMS')],
-    [WFS, getLocalizedMessage(language, 'layers.serviceOgcWFS')],
-    [OGC_FEATURE, getLocalizedMessage(language, 'layers.serviceOgcFeature')],
-    [XYZ_TILES, getLocalizedMessage(language, 'layers.serviceRasterTile')],
-    [VECTOR_TILES, getLocalizedMessage(language, 'layers.serviceVectorTile')],
-    [GEOCORE, getLocalizedMessage(language, 'layers.serviceGeoCore')],
-  ];
+export class UtilAddLayer {
+  /**
+   * Returns an array of tuples representing available GeoView layer types and their localized display names.
+   *
+   * @param {TypeDisplayLanguage} language - The display language to use for localization.
+   * @param {boolean} includeStatic - True if we need to include static image layers, false otherwise.
+   * @returns {Array<[string, string]>} An array where each item is a tuple: [layerType, localizedName].
+   */
+  static getLocalizeLayerType(language: TypeDisplayLanguage, includeStatic: boolean): Array<[string, string]> {
+    const { CSV, ESRI_DYNAMIC, ESRI_FEATURE, ESRI_IMAGE, GEOJSON, WMS, WFS, OGC_FEATURE, XYZ_TILES, VECTOR_TILES } = CONST_LAYER_TYPES;
+    const { GEOCORE, SHAPEFILE } = CONST_LAYER_ENTRY_TYPES;
+    const layerOptions: [string, string][] = [
+      [CSV, getLocalizedMessage(language, 'layers.serviceCSV')],
+      [SHAPEFILE, getLocalizedMessage(language, 'layers.serviceEsriShapefile')],
+      [ESRI_DYNAMIC, getLocalizedMessage(language, 'layers.serviceEsriDynamic')],
+      [ESRI_FEATURE, getLocalizedMessage(language, 'layers.serviceEsriFeature')],
+      [ESRI_IMAGE, getLocalizedMessage(language, 'layers.serviceEsriImage')],
+      [GEOJSON, getLocalizedMessage(language, 'layers.serviceGeoJSON')],
+      [WMS, getLocalizedMessage(language, 'layers.serviceOgcWMS')],
+      [WFS, getLocalizedMessage(language, 'layers.serviceOgcWFS')],
+      [OGC_FEATURE, getLocalizedMessage(language, 'layers.serviceOgcFeature')],
+      [XYZ_TILES, getLocalizedMessage(language, 'layers.serviceRasterTile')],
+      [VECTOR_TILES, getLocalizedMessage(language, 'layers.serviceVectorTile')],
+      [GEOCORE, getLocalizedMessage(language, 'layers.serviceGeoCore')],
+    ];
 
-  if (includeStatic) {
-    layerOptions.push([CV_CONST_LAYER_TYPES.IMAGE_STATIC, getLocalizedMessage(language, 'layers.serviceImageStatic')]);
-  }
-
-  return layerOptions;
-};
-
-/**
- * Finds a layer entry config from an array with the given ID.
- * @param {GroupLayerEntryConfig[]} layerList - The array of layerEntryConfigs.
- * @param {string} layerId - The ID of the layer to find.
- * @returns The layer entry config of the found layer or null if none is found.
- */
-export const getLayerById = (layerList: GroupLayerEntryConfig[], layerId: string): GroupLayerEntryConfig | null => {
-  const layer = layerList.find((childLayer) => childLayer.layerId.split('/').pop() === layerId.split('/').pop());
-  if (layer) return layer;
-
-  let foundLayer: GroupLayerEntryConfig | null = null;
-  for (let i = 0; i < layerList.length; i++) {
-    const branch = layerList[i];
-    if (branch.listOfLayerEntryConfig) {
-      foundLayer = getLayerById(branch.listOfLayerEntryConfig as GroupLayerEntryConfig[], layerId);
+    if (includeStatic) {
+      layerOptions.push([CONST_LAYER_TYPES.IMAGE_STATIC, getLocalizedMessage(language, 'layers.serviceImageStatic')]);
     }
-    if (foundLayer) break;
+
+    return layerOptions;
   }
 
-  return foundLayer;
-};
+  /**
+   * Finds a layer entry config from an array with the given ID.
+   * @param {TypeGeoviewLayerConfig | undefined} layerTree - The layer config to start searching from.
+   * @param {string} layerId - The ID of the layer to find.
+   * @returns The layer entry config of the found layer or null if none is found.
+   */
+  static getLayerById(
+    layerTree: TypeGeoviewLayerConfig | undefined,
+    layerId: string
+  ): TypeGeoviewLayerConfig | TypeLayerEntryConfig | undefined {
+    // If none
+    if (!layerTree) return undefined;
 
-/**
- * Finds a layer name from an array of layer entry configs with the given ID.
- * @param {GroupLayerEntryConfig[]} layersList - The array of layerEntryConfigs.
- * @param {string} layerId - The ID of the layer to find.
- * @returns The name of the layer or undefined if none is found.
- */
-export const getLayerNameById = (layersList: GroupLayerEntryConfig[], layerId: string): string | undefined => {
-  return getLayerById(layersList, layerId)?.layerName;
-};
+    // The target id
+    const targetId = layerId.split('/').pop();
 
-/**
- * Checks if all of a groups sublayers are to be added to the map.
- * @param {GroupLayerEntryConfig} groupLayer - The group layer to check
- * @param {string[]} layerIds - The la
- * @returns {boolean} Whether or not all of the sublayers are included
- */
-const allSubLayersAreIncluded = (groupLayer: GroupLayerEntryConfig, layerIds: (string | undefined)[]): boolean => {
-  return groupLayer.listOfLayerEntryConfig.every((layerEntryConfig) =>
-    !layerEntryConfig.isLayerGroup
-      ? layerIds.includes(layerEntryConfig.layerId)
-      : layerIds.includes(layerEntryConfig.layerId) && allSubLayersAreIncluded(layerEntryConfig as GroupLayerEntryConfig, layerIds)
-  );
-};
+    // If current
+    if (layerTree.geoviewLayerId === targetId) return layerTree;
 
-/**
- * Builds a geoview layer config from provided layer IDs.
- * @param {BuildGeoViewLayerInput} inputProps - The layer information
- * @returns {TypeGeoviewLayerConfig} The geoview layer config
- */
-export const buildGeoLayerToAdd = (inputProps: BuildGeoViewLayerInput): MapConfigLayerEntry => {
-  const { layerIdsToAdd, layerName, layerType, layerURL, layerList } = inputProps;
-  logger.logDebug(layerList, layerIdsToAdd);
+    // For each layer entries
+    for (const layer of layerTree.listOfLayerEntryConfig) {
+      const currentId = layer.layerId.split('/').pop();
+      if (currentId === targetId) {
+        return layer;
+      }
 
-  if (layerType === 'shapefile') {
-    return {
-      geoviewLayerName: layerName,
-      geoviewLayerId: generateId(18),
-      geoviewLayerType: 'shapefile',
-      metadataAccessPath: layerURL,
-    } as ShapefileLayerConfig;
+      if (layer.listOfLayerEntryConfig) {
+        // Go recursive as it's actually a TypeGeoviewLayerConfig, not a TypeLayerEntryConfig
+        const found = UtilAddLayer.getLayerById(layer as unknown as TypeGeoviewLayerConfig, layerId);
+        if (found) return found;
+      }
+    }
+
+    // Not found
+    return undefined;
   }
 
-  const listOfLayerEntryConfig: LayerEntryConfigShell[] = [];
-  const layersToAdd = layerIdsToAdd.map((layerId) => getLayerById(layerList, layerId)).filter((layerToAdd) => !!layerToAdd);
+  /**
+   * Finds a layer name from an array of layer entry configs with the given ID.
+   * @param {TypeGeoviewLayerConfig | undefined} layerTree - The layer config to start searching from.
+   * @param {string} layerId - The ID of the layer to find.
+   * @returns The name of the layer or undefined if none is found.
+   */
+  static getLayerNameById(layerTree: TypeGeoviewLayerConfig | undefined, layerId: string): string | undefined {
+    return (UtilAddLayer.getLayerById(layerTree, layerId) as TypeLayerEntryConfig)?.layerName;
+  }
 
-  if (layersToAdd.length) {
-    const removedLayerIds: string[] = [];
-    const layerIds = layerIdsToAdd.map((layerId) => layerId.split('/').pop());
+  /**
+   * Checks if all of a groups sublayers are to be added to the map.
+   * @param {TypeGeoviewLayerConfig} layerTree - The group layer to check
+   * @param {string[]} layerIds - The la
+   * @returns {boolean} Whether or not all of the sublayers are included
+   */
+  static allSubLayersAreIncluded(layerTree: TypeGeoviewLayerConfig | TypeLayerEntryConfig, layerIds: (string | undefined)[]): boolean {
+    return layerTree.listOfLayerEntryConfig?.every((layerEntryConfig) =>
+      !layerTree.listOfLayerEntryConfig
+        ? layerIds.includes(layerEntryConfig.layerId)
+        : layerIds.includes(layerEntryConfig.layerId) && UtilAddLayer.allSubLayersAreIncluded(layerEntryConfig, layerIds)
+    );
+  }
 
-    /**
-     * Creates a layer entry config shell for a group layer.
-     * @param {GroupLayerEntryConfig} groupLayer - The group layer
-     * @returns {LayerEntryConfigShell} The resulting layer entry config shell
-     */
-    const createLayerEntryConfigForGroupLayer = (groupLayer: GroupLayerEntryConfig): LayerEntryConfigShell => {
-      // Add IDs of sublayers to the layerIdsToRemove array so they are not added multiple times
-      const longLayerIdsToRemove = layerIdsToAdd.filter((layerId) => layerId.split('/').includes(groupLayer.layerId));
-      if (longLayerIdsToRemove.length) {
-        const layerIdsToRemove = longLayerIdsToRemove.map((layerId) => layerId.split('/').pop()).filter((id) => id !== undefined);
-        removedLayerIds.push(...layerIdsToRemove);
-      }
+  /**
+   * Creates a layer entry config shell for a group layer.
+   * @param {GroupLayerEntryConfig} groupLayer - The group layer
+   * @returns {LayerEntryConfigShell} The resulting layer entry config shell
+   */
+  static createLayerEntryConfigForGroupLayer(
+    layerName: string,
+    layerType: string,
+    layerIds: string[],
+    layersToAdd: (TypeLayerEntryConfig | TypeGeoviewLayerConfig)[],
+    layerIdsToAdd: string[],
+    removedLayerIds: string[],
+    groupLayer: TypeLayerEntryConfig | TypeGeoviewLayerConfig
+  ): LayerEntryConfigShell {
+    // Casts
+    const groupLayerAsGeoviewLayerConfig = groupLayer as TypeGeoviewLayerConfig;
+    const groupLayerAsLayerEntryConfig = groupLayer as TypeLayerEntryConfig;
 
-      // If all sub layers are included, simply add the layer
-      if (allSubLayersAreIncluded(groupLayer, layerIds) && layerType === CV_CONST_LAYER_TYPES.ESRI_DYNAMIC) {
-        return {
-          layerId: groupLayer?.layerId,
-          layerName: layersToAdd.length === 1 ? layerName : groupLayer?.layerName,
-        };
-      }
+    // The ID depending on the config type
+    const groupLayerId = `${groupLayerAsLayerEntryConfig.layerId || groupLayerAsGeoviewLayerConfig.geoviewLayerId}`;
 
-      // Not all sublayers are included, so we construct a group layer with the included sublayers
-      const layerToAddEntryConfig = {
-        layerId: `group-${groupLayer?.layerId}`,
-        isLayerGroup: true,
-        entryType: 'group',
-        layerName: layersToAdd.length === 1 ? layerName : groupLayer?.layerName,
-        listOfLayerEntryConfig: groupLayer.listOfLayerEntryConfig
-          .map((layerEntryConfig) => {
-            if (layerEntryConfig.isLayerGroup && layerIds.includes(layerEntryConfig.layerId))
-              return createLayerEntryConfigForGroupLayer(layerEntryConfig as GroupLayerEntryConfig);
-            if (layerIds.includes(layerEntryConfig.layerId))
-              return {
-                layerId: layerEntryConfig?.layerId,
-                layerName: layersToAdd.length === 1 ? layerName : layerEntryConfig?.layerName,
-              };
-            return undefined;
-          })
-          .filter((newEntryConfig) => newEntryConfig !== undefined),
+    // Add IDs of sublayers to the layerIdsToRemove array so they are not added multiple times
+    const longLayerIdsToRemove = layerIdsToAdd.filter((layerId) => layerId.split('/').includes(groupLayerId));
+    if (longLayerIdsToRemove.length) {
+      const layerIdsToRemove = longLayerIdsToRemove.map((layerId) => layerId.split('/').pop()).filter((id) => id !== undefined);
+      removedLayerIds.push(...layerIdsToRemove);
+    }
+
+    // If all sub layers are included, simply add the layer
+    if (layerType === CONST_LAYER_TYPES.ESRI_DYNAMIC && UtilAddLayer.allSubLayersAreIncluded(groupLayer, layerIds)) {
+      return {
+        layerId: groupLayerAsLayerEntryConfig?.layerId,
+        layerName: layersToAdd.length === 1 ? layerName : groupLayerAsLayerEntryConfig?.layerName,
       };
+    }
 
-      return layerToAddEntryConfig;
+    // Not all sublayers are included, so we construct a group layer with the included sublayers
+    const layerToAddEntryConfig = {
+      layerId: `group-${groupLayerAsLayerEntryConfig?.layerId}`,
+      isLayerGroup: true,
+      entryType: 'group',
+      layerName: layersToAdd.length === 1 ? layerName : groupLayerAsLayerEntryConfig?.layerName,
+      listOfLayerEntryConfig: groupLayer.listOfLayerEntryConfig
+        .map((layerEntryConfig) => {
+          if (layerEntryConfig.listOfLayerEntryConfig?.length && layerIds.includes(layerEntryConfig.layerId))
+            return UtilAddLayer.createLayerEntryConfigForGroupLayer(
+              layerName,
+              layerType,
+              layerIds,
+              layersToAdd,
+              layerIdsToAdd,
+              removedLayerIds,
+              layerEntryConfig
+            );
+          if (layerIds.includes(layerEntryConfig.layerId))
+            return {
+              layerId: layerEntryConfig?.layerId,
+              layerName: layersToAdd.length === 1 ? layerName : layerEntryConfig?.layerName,
+            };
+          return undefined;
+        })
+        .filter((newEntryConfig) => newEntryConfig !== undefined),
     };
 
-    // Create an entry config shell for each layer if it is not in the removedLayerIds
-    layersToAdd.forEach((layerToAdd) => {
-      if (layerToAdd.isLayerGroup && !removedLayerIds.includes(layerToAdd.layerId)) {
-        listOfLayerEntryConfig.push(createLayerEntryConfigForGroupLayer(layerToAdd));
-      } else if (!removedLayerIds.includes(layerToAdd.layerId)) {
-        listOfLayerEntryConfig.push({
-          layerId: layerToAdd?.layerId,
-          layerName: layersToAdd.length === 1 ? layerName : layerToAdd?.layerName,
-        });
-      }
-    });
+    return layerToAddEntryConfig;
   }
 
-  if (!listOfLayerEntryConfig.length)
-    listOfLayerEntryConfig.push({
-      layerId: generateId(8),
-      layerName,
-    });
+  /**
+   * Builds a geoview layer config from provided layer IDs.
+   * @param {BuildGeoViewLayerInput} inputProps - The layer information
+   * @returns {MapConfigLayerEntry} The geoview layer config
+   */
+  static buildGeoLayerToAdd(inputProps: BuildGeoViewLayerInput): MapConfigLayerEntry {
+    const { layerIdsToAdd, layerName, layerType, layerURL, layerTree } = inputProps;
+    logger.logDebug(layerTree, layerIdsToAdd);
 
-  const geoviewLayerConfig = MapFeatureConfig.nodeFactory(
-    toJsonObject({
+    if (layerType === 'shapefile') {
+      return {
+        geoviewLayerName: layerName,
+        geoviewLayerId: generateId(18),
+        geoviewLayerType: 'shapefile',
+        metadataAccessPath: layerURL,
+      } as ShapefileLayerConfig;
+    }
+
+    const listOfLayerEntryConfig: LayerEntryConfigShell[] = [];
+    const layersToAdd = layerIdsToAdd.map((layerId) => UtilAddLayer.getLayerById(layerTree, layerId)).filter((layerToAdd) => !!layerToAdd);
+
+    if (layersToAdd.length) {
+      const removedLayerIds: string[] = [];
+      const layerIds = layerIdsToAdd.map((layerId) => layerId.split('/').pop()!);
+
+      // Create an entry config shell for each layer if it is not in the removedLayerIds
+      layersToAdd.forEach((layerToAdd) => {
+        // Casts
+        const layerToAddAsGeoviewLayerConfig = layerToAdd as TypeGeoviewLayerConfig;
+        const layerToAddAsLayerEntryConfig = layerToAdd as TypeLayerEntryConfig;
+
+        // If it's a TypeGeoviewLayerConfig or a entry group
+        if (layerToAddAsGeoviewLayerConfig.geoviewLayerId || layerToAddAsLayerEntryConfig.getEntryTypeIsGroup()) {
+          // Create a group layer for the layers
+          listOfLayerEntryConfig.push(
+            UtilAddLayer.createLayerEntryConfigForGroupLayer(
+              layerName,
+              layerType,
+              layerIds,
+              layersToAdd,
+              layerIdsToAdd,
+              removedLayerIds,
+              layerToAddAsGeoviewLayerConfig
+            )
+          );
+        } else if (!removedLayerIds.includes(layerToAddAsLayerEntryConfig.layerId)) {
+          listOfLayerEntryConfig.push({
+            layerId: layerToAddAsLayerEntryConfig?.layerId,
+            layerName: layersToAdd.length === 1 ? layerName : layerToAddAsLayerEntryConfig?.layerName,
+          });
+        }
+      });
+    }
+
+    // If none, create one
+    if (!listOfLayerEntryConfig.length)
+      listOfLayerEntryConfig.push({
+        layerId: generateId(8),
+        layerName,
+      });
+
+    // Return it
+    return {
       geoviewLayerId: generateId(18),
       geoviewLayerName: layerName,
       geoviewLayerType: layerType as TypeGeoviewLayerType,
       metadataAccessPath: layerURL,
-      listOfLayerEntryConfig,
-    })
-  );
-
-  return Cast<TypeGeoviewLayerConfig>(geoviewLayerConfig!);
-};
+      listOfLayerEntryConfig: listOfLayerEntryConfig as unknown as TypeLayerEntryConfig[],
+    };
+  }
+}

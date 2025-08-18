@@ -1,4 +1,9 @@
-import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES, TypeSourceImageEsriInitialConfig } from '@/api/config/types/map-schema-types';
+import {
+  CONST_LAYER_ENTRY_TYPES,
+  CONST_LAYER_TYPES,
+  TypeLayerMetadataEsri,
+  TypeSourceImageEsriInitialConfig,
+} from '@/api/config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
 /**
@@ -17,9 +22,6 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /** Source settings to apply to the GeoView image layer source at creation time. */
   declare source: TypeSourceImageEsriInitialConfig;
 
-  /** Max number of records for query - NOT USE FOR IMAGE SERVER */
-  maxRecordCount?: number;
-
   /**
    * The class constructor.
    * @param {EsriImageLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
@@ -28,10 +30,20 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     super(layerConfig);
     Object.assign(this, layerConfig);
 
-    if (!this.source) this.source = {};
+    // Write the default properties when not specified
+    this.source ??= {};
 
-    // If layerConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
-    if (!this.source.dataAccessPath) this.source.dataAccessPath = this.geoviewLayerConfig.metadataAccessPath;
+    // Format the dataAccessPath correctly
+    this.source.dataAccessPath = this.geoviewLayerConfig.metadataAccessPath;
     if (!this.source.dataAccessPath!.endsWith('/')) this.source.dataAccessPath += '/';
+  }
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeLayerMetadataEsri | undefined} The strongly-typed layer metadata specific to this layer entry config.
+   */
+  override getLayerMetadata(): TypeLayerMetadataEsri | undefined {
+    return super.getLayerMetadata() as TypeLayerMetadataEsri | undefined;
   }
 }

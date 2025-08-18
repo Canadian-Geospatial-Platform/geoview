@@ -12,8 +12,9 @@ import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
  */
 export abstract class AbstractGVRaster extends AbstractGVLayer {
   /**
-   * Overrides the get of the OpenLayers Layer
-   * @returns The OpenLayers Layer
+   * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
+   * @override
+   * @returns {BaseImageLayer<ImageSource, LayerRenderer>} The strongly-typed OpenLayers type.
    */
   // Disabling 'any', because that's how it is in OpenLayers
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -29,8 +30,13 @@ export abstract class AbstractGVRaster extends AbstractGVLayer {
    * @returns {OLProjection | undefined} The OpenLayer projection
    */
   getMetadataProjection(): OLProjection | undefined {
+    // Get metadata
+    // GV Can be any object so disable eslint and proceed with caution
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const metadata = this.getLayerConfig().getServiceMetadata() as any;
+
     // Redirect
-    return Projection.getProjectionFromObj(this.getLayerConfig().getServiceMetadata()?.fullExtent?.spatialReference);
+    return Projection.getProjectionFromObj(metadata?.fullExtent?.spatialReference);
   }
 
   /**
@@ -39,7 +45,9 @@ export abstract class AbstractGVRaster extends AbstractGVLayer {
    */
   getMetadataExtent(): Extent | undefined {
     // Get the layer metadata precisely
-    const extent = this.getLayerConfig().getLayerMetadata()?.extent;
+    // GV Can be any object so disable eslint and proceed with caution
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const extent = (this.getLayerConfig().getLayerMetadata() as any)?.extent;
 
     // If found
     if (extent) {
@@ -47,7 +55,10 @@ export abstract class AbstractGVRaster extends AbstractGVLayer {
     }
 
     // Here, we couldn't find the layer metadata, so we use the layer parent definition metadata
-    const metadata = this.getLayerConfig().getServiceMetadata();
+    // Get metadata
+    // GV Can be any object so disable eslint and proceed with caution
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const metadata = this.getLayerConfig().getServiceMetadata() as any;
     if (metadata?.fullExtent) {
       return [metadata?.fullExtent.xmin, metadata?.fullExtent.ymin, metadata?.fullExtent.xmax, metadata?.fullExtent.ymax] as Extent;
     }

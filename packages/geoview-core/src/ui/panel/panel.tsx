@@ -14,7 +14,7 @@ import { CloseIcon } from '@/ui/icons/index';
 import { IconButton, IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import { getSxClasses } from '@/ui/panel/panel-style';
 import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { CV_DEFAULT_APPBAR_CORE } from '@/api/config/types/config-constants';
+import { DEFAULT_APPBAR_CORE } from '@/api/config/types/map-schema-types';
 import { FocusTrapContainer } from '@/core/components/common';
 import { logger } from '@/core/utils/logger';
 
@@ -109,7 +109,7 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
 
     // TODO: style - panel type or even width should be pass as props to remove dependency
     if (
-      (panelGroupName === CV_DEFAULT_APPBAR_CORE.DATA_TABLE || panelGroupName === CV_DEFAULT_APPBAR_CORE.LAYERS) &&
+      (panelGroupName === DEFAULT_APPBAR_CORE.DATA_TABLE || panelGroupName === DEFAULT_APPBAR_CORE.LAYERS) &&
       panelContainerRef.current &&
       open
     ) {
@@ -137,7 +137,7 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
           <CardHeader
             sx={panelStyles?.panelCardHeader ? { ...panelStyles.panelCardHeader } : {}}
             ref={panelHeader}
-            title={t(panel.title as string)}
+            title={t(panel.title)}
             titleTypographyProps={{
               component: 'h2',
             }}

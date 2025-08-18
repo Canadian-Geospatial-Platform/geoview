@@ -1,7 +1,6 @@
 import { ReactNode } from 'react';
 import { TooltipProps, ButtonProps, TextFieldProps } from '@mui/material';
 
-import { TypeJsonValue } from '@/api/config/types/config-types';
 import { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 
 /**
@@ -31,7 +30,7 @@ export type TypePanelProps = {
   /** Panel header icon. */
   icon: ReactNode;
   /** Panel header title. */
-  title: string | TypeJsonValue;
+  title: string;
   /** Panel body content. */
   content?: ReactNode;
   /** Convert panel body content from HTML. */

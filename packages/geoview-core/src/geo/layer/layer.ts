@@ -9,7 +9,7 @@ import { FeatureHighlight } from '@/geo/map/feature-highlight';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 import { ConfigValidation } from '@/core/utils/config/config-validation';
-import { generateId, whenThisThen } from '@/core/utils/utilities';
+import { generateId, isValidUUID, whenThisThen } from '@/core/utils/utilities';
 import {
   ConfigBaseClass,
   LayerStatusChangedDelegate as ConfigLayerStatusChangedDelegate,
@@ -29,10 +29,9 @@ import {
   TypeLayerEntryConfig,
   mapConfigLayerEntryIsGeoCore,
   mapConfigLayerEntryIsShapefile,
-  layerEntryIsGroupLayer,
   TypeLayerStatus,
   GeoCoreLayerConfig,
-  GroupLayerEntryConfig,
+  TypeDisplayLanguage,
   TypeOutfieldsType,
 } from '@/api/config/types/map-schema-types';
 import { GeoJSON, layerConfigIsGeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
@@ -60,6 +59,7 @@ import {
   LayerNotFoundError,
   LayerNotGeoJsonError,
   LayerNotQueryableError,
+  LayerWrongTypeError,
 } from '@/core/exceptions/layer-exceptions';
 import { LayerEntryConfigError } from '@/core/exceptions/layer-entry-config-exceptions';
 import {
@@ -97,7 +97,7 @@ import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processo
 import { TypeLegendItem } from '@/core/components/layers/types';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
-import { ConfigApi } from '@/api/config/config-api';
+import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { LayerGeoCoreError } from '@/core/exceptions/geocore-exceptions';
 import { ShapefileReader } from '@/core/utils/config/reader/shapefile-reader';
@@ -365,45 +365,16 @@ export class LayerApi {
   async loadListOfGeoviewLayer(mapConfigLayerEntries: MapConfigLayerEntry[]): Promise<void> {
     const validGeoviewLayerConfigs = this.#deleteDuplicateAndMultipleUuidGeoviewLayerConfig(mapConfigLayerEntries);
 
-    // set order for layers to appear on the map according to config
-    const promisesOfGeoCoreGeoviewLayers: Promise<TypeGeoviewLayerConfig[]>[] = [];
-    for (let i = 0; i < validGeoviewLayerConfigs.length; i++) {
-      const geoviewLayerConfig = validGeoviewLayerConfigs[i];
-
-      // If the layer is GeoCore add it via the core function
-      if (mapConfigLayerEntryIsGeoCore(geoviewLayerConfig)) {
-        // Prep the GeoCore
-        const geoCore = new GeoCore(this.getMapId(), this.mapViewer.getDisplayLanguage());
-
-        // Create a promise to fetch from UUID
-        const promise = geoCore.createLayersFromUUID(geoviewLayerConfig.geoviewLayerId, geoviewLayerConfig);
-
-        // Catch failed promises here. The filled promises will be taken care of with the others below.
-        promise.catch((error: unknown) => {
-          // Show the error(s)
-          this.showLayerError(error, geoviewLayerConfig.geoviewLayerId);
-        });
-
-        // Add the promise to the array
-        promisesOfGeoCoreGeoviewLayers.push(promise);
-      } else if (mapConfigLayerEntryIsShapefile(geoviewLayerConfig)) {
-        const promise = ShapefileReader.convertShapefileConfigToGeoJson(geoviewLayerConfig);
-
-        // Catch failed promises here. The filled promises will be taken care of with the others below.
-        promise.catch((error: unknown) => {
-          // Show the error(s)
-          this.showLayerError(error, geoviewLayerConfig.geoviewLayerId);
-        });
-
-        // Add the promise to the array
-        promisesOfGeoCoreGeoviewLayers.push(promise);
-      } else {
-        // Add a resolved promise for a regular Geoview Layer Config
-        promisesOfGeoCoreGeoviewLayers.push(Promise.resolve([geoviewLayerConfig]));
+    // Make sure to convert all map config layer entry into a GeoviewLayerConfig
+    const promisesOfGeoviewLayers = LayerApi.convertMapConfigsToGeoviewLayerConfig(
+      this.getMapId(),
+      this.mapViewer.getDisplayLanguage(),
+      mapConfigLayerEntries,
+      (mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => {
+        // Show the error(s)
+        this.showLayerError(error, mapConfigLayerEntry.geoviewLayerId);
       }
-    }
-
-    // TODO: Refactor - There should be no Geocore layer in layers in the geo folder, can the above be moved in an earlier process?
+    );
 
     // Wait for all promises (GeoCore ones) to process
     // The reason for the Promise.allSettled is because of synch issues with the 'setMapOrderedLayerInfo' which happens below and the
@@ -415,29 +386,29 @@ export class LayerApi {
     const orderedLayerInfos: TypeOrderedLayerInfo[] = MapEventProcessor.getMapOrderedLayerInfo(this.getMapId()).length
       ? MapEventProcessor.getMapOrderedLayerInfo(this.getMapId())
       : [];
-    const promisedLayers = await Promise.allSettled(promisesOfGeoCoreGeoviewLayers);
+    const promisedLayers = await Promise.allSettled(promisesOfGeoviewLayers);
 
     // For each layers in the fulfilled promises only
     promisedLayers.forEach((promise) => {
       // If fullfilled
       if (promise.status === 'fulfilled') {
-        // For each Geoview Layer Config
-        promise.value.forEach((geoviewLayerConfig) => {
-          try {
-            // Generate array of layer order information
-            const layerInfos = LayerApi.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
-            orderedLayerInfos.push(...layerInfos);
+        // Get the geoview layer config
+        const geoviewLayerConfig = promise.value;
 
-            // Add it
-            this.addGeoviewLayer(geoviewLayerConfig);
-          } catch (error: unknown) {
-            // An error happening here likely means a particular, trivial, config error.
-            // The majority of typicaly errors happen in the addGeoviewLayer promise catcher, not here.
+        try {
+          // Generate array of layer order information
+          const layerInfos = LayerApi.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
+          orderedLayerInfos.push(...layerInfos);
 
-            // Show the error(s)
-            this.showLayerError(error, geoviewLayerConfig.geoviewLayerId);
-          }
-        });
+          // Add it
+          this.addGeoviewLayer(geoviewLayerConfig);
+        } catch (error: unknown) {
+          // An error happening here likely means a particular, trivial, config error.
+          // The majority of typicaly errors happen in the addGeoviewLayer promise catcher, not here.
+
+          // Show the error(s)
+          this.showLayerError(error, geoviewLayerConfig.geoviewLayerId);
+        }
       } else {
         // Depending on the error
         let uuids;
@@ -522,15 +493,16 @@ export class LayerApi {
           geoviewLayerName: parsedLayerEntryConfig[0].geoviewLayerName || parsedLayerEntryConfig[0].layerName,
         };
 
-      // Create geocore layer configs and add
-      const geoCoreGeoviewLayerInstance = new GeoCore(this.getMapId(), this.mapViewer.getDisplayLanguage());
-
       // Create the layers from the UUID
-      const layers = await geoCoreGeoviewLayerInstance.createLayersFromUUID(uuid, optionalConfig);
-      layers.forEach((geoviewLayerConfig) => {
-        // Redirect
-        this.addGeoviewLayer(geoviewLayerConfig);
-      });
+      const geoviewLayerConfig = await GeoCore.createLayerConfigFromUUID(
+        uuid,
+        this.mapViewer.getDisplayLanguage(),
+        this.getMapId(),
+        optionalConfig
+      );
+
+      // Add the geoview layer
+      this.addGeoviewLayer(geoviewLayerConfig);
     } catch (error: unknown) {
       // An error happening here likely means an issue with the UUID or a trivial config error.
       // The majority of typicaly errors happen in the addGeoviewLayer promise catcher, not here.
@@ -596,36 +568,8 @@ export class LayerApi {
    * @private
    */
   #addGeoviewLayerStep2(geoviewLayerConfig: TypeGeoviewLayerConfig): GeoViewLayerAddedResult {
-    // TODO: Refactor - Here the function should use the structure created by validation config with the metadata fetch and no need to pass the validation.
-    let layerBeingAdded: AbstractGeoViewLayer;
-    if (layerConfigIsGeoJSON(geoviewLayerConfig)) {
-      layerBeingAdded = new GeoJSON(geoviewLayerConfig);
-    } else if (layerConfigIsGeoPackage(geoviewLayerConfig)) {
-      layerBeingAdded = new GeoPackage(geoviewLayerConfig);
-    } else if (layerConfigIsCSV(geoviewLayerConfig)) {
-      layerBeingAdded = new CSV(geoviewLayerConfig);
-    } else if (layerConfigIsWMS(geoviewLayerConfig)) {
-      layerBeingAdded = new WMS(geoviewLayerConfig, LayerApi.DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS);
-    } else if (layerConfigIsEsriDynamic(geoviewLayerConfig)) {
-      layerBeingAdded = new EsriDynamic(geoviewLayerConfig);
-    } else if (layerConfigIsEsriFeature(geoviewLayerConfig)) {
-      layerBeingAdded = new EsriFeature(geoviewLayerConfig);
-    } else if (layerConfigIsEsriImage(geoviewLayerConfig)) {
-      layerBeingAdded = new EsriImage(geoviewLayerConfig);
-    } else if (layerConfigIsImageStatic(geoviewLayerConfig)) {
-      layerBeingAdded = new ImageStatic(geoviewLayerConfig);
-    } else if (layerConfigIsWFS(geoviewLayerConfig)) {
-      layerBeingAdded = new WFS(geoviewLayerConfig);
-    } else if (layerConfigIsOgcFeature(geoviewLayerConfig)) {
-      layerBeingAdded = new OgcFeature(geoviewLayerConfig);
-    } else if (layerConfigIsXYZTiles(geoviewLayerConfig)) {
-      layerBeingAdded = new XYZTiles(geoviewLayerConfig);
-    } else if (layerConfigIsVectorTiles(geoviewLayerConfig)) {
-      layerBeingAdded = new VectorTiles(geoviewLayerConfig, this.mapViewer.getProjection().getCode());
-    } else {
-      // Not implemented
-      throw new NotSupportedError('Unsupported layer class type');
-    }
+    // Create the layer for the processing
+    const layerBeingAdded = LayerApi.createLayerConfigFromType(geoviewLayerConfig, this.mapViewer.getProjection().getCode());
 
     // Add in the geoviewLayers set
     this.#geoviewLayers[layerBeingAdded.geoviewLayerId] = layerBeingAdded;
@@ -651,7 +595,7 @@ export class LayerApi {
       );
 
       // If already existing
-      const alreadyExisting = this.#layerEntryConfigs[event.config.layerPath];
+      const alreadyExisting = this.getLayerEntryConfig(event.config.layerPath);
       if (alreadyExisting) {
         // Unregister the old one
         this.unregisterLayerConfig(alreadyExisting, false);
@@ -775,7 +719,7 @@ export class LayerApi {
       configs
         .filter((config) => {
           // Filter to just Geocore layers and not child layers
-          if (ConfigApi.isValidUUID(config.geoviewLayerConfig.geoviewLayerId) && config.parentLayerConfig === undefined) {
+          if (isValidUUID(config.geoviewLayerConfig.geoviewLayerId) && config.parentLayerConfig === undefined) {
             return true;
           }
           return false;
@@ -820,7 +764,10 @@ export class LayerApi {
           this.onLayerFirstLoaded(setLayerVisibility);
         });
       })
-      .catch((err) => logger.logError(err));
+      .catch((error: unknown) => {
+        // Log
+        logger.logError(error);
+      });
   }
 
   /**
@@ -832,10 +779,10 @@ export class LayerApi {
     const geoviewLayer = layerEntryConfig ? this.#geoviewLayers[layerEntryConfig.geoviewLayerConfig.geoviewLayerId] : undefined;
 
     if (layerEntryConfig && geoviewLayer) {
-      if (layerEntryConfig.entryType === 'group') {
-        (layerEntryConfig as unknown as GroupLayerEntryConfig).listOfLayerEntryConfig.forEach((sublayerEntryConfig) => {
-          if ((sublayerEntryConfig as unknown as AbstractBaseLayerEntryConfig).layerStatus === 'error')
-            this.reloadLayer((sublayerEntryConfig as unknown as AbstractBaseLayerEntryConfig).layerPath);
+      if (layerEntryConfig instanceof GroupLayerEntryConfig) {
+        layerEntryConfig.listOfLayerEntryConfig.forEach((sublayerEntryConfig) => {
+          if ((sublayerEntryConfig as AbstractBaseLayerEntryConfig).layerStatus === 'error')
+            this.reloadLayer((sublayerEntryConfig as AbstractBaseLayerEntryConfig).layerPath);
         });
       } else {
         this.getLayerEntryConfigIds().forEach((registeredLayerPath) => {
@@ -1010,13 +957,14 @@ export class LayerApi {
     // A layer path is a slash seperated string made of the GeoView layer Id followed by the layer Ids
     const layerPathNodes = layerPath.split('/');
 
+    // Get the layer entry config to remove
+    const layerEntryConfig = this.getLayerEntryConfig(layerPath);
+
     // initialize these two constant now because we will delete the information used to get their values.
-    const indexToDelete = this.#layerEntryConfigs[layerPath]
-      ? this.#layerEntryConfigs[layerPath].parentLayerConfig?.listOfLayerEntryConfig.findIndex(
-          (layerConfig) => layerConfig === this.#layerEntryConfigs[layerPath]
-        )
+    const indexToDelete = layerEntryConfig
+      ? layerEntryConfig.parentLayerConfig?.listOfLayerEntryConfig.findIndex((layerConfig) => layerConfig === layerEntryConfig)
       : undefined;
-    const listOfLayerEntryConfigAffected = this.#layerEntryConfigs[layerPath]?.parentLayerConfig?.listOfLayerEntryConfig;
+    const listOfLayerEntryConfigAffected = this.getLayerEntryConfig(layerPath)?.parentLayerConfig?.listOfLayerEntryConfig;
 
     // Remove layer info from registered layers
     this.getLayerEntryConfigIds().forEach((registeredLayerPath) => {
@@ -1064,7 +1012,7 @@ export class LayerApi {
 
         // TODO: refactor - remove cast
         if (mapFeaturesConfig.map.listOfGeoviewLayerConfig)
-          mapFeaturesConfig.map.listOfGeoviewLayerConfig = (mapFeaturesConfig.map.listOfGeoviewLayerConfig as MapConfigLayerEntry[]).filter(
+          mapFeaturesConfig.map.listOfGeoviewLayerConfig = mapFeaturesConfig.map.listOfGeoviewLayerConfig.filter(
             (geoviewLayerConfig) => geoviewLayerConfig.geoviewLayerId !== layerPath
           );
       } else if (layerPathNodes.length === 2) {
@@ -1074,18 +1022,18 @@ export class LayerApi {
         geoviewLayer.listOfLayerEntryConfig = updatedListOfLayerEntryConfig;
       } else {
         // For layer paths more than two deep, drill down through listOfLayerEntryConfigs to layer entry config to remove
-        let layerEntryConfig = geoviewLayer.listOfLayerEntryConfig.find((entryConfig) => entryConfig.layerId === layerPathNodes[1]);
+        let layerEntryConfig2 = geoviewLayer.listOfLayerEntryConfig.find((entryConfig) => entryConfig.layerId === layerPathNodes[1]);
 
         for (let i = 1; i < layerPathNodes.length; i++) {
-          if (i === layerPathNodes.length - 1 && layerEntryConfig) {
+          if (i === layerPathNodes.length - 1 && layerEntryConfig2) {
             // When we get to the top level, remove the layer entry config
-            const updatedListOfLayerEntryConfig = layerEntryConfig.listOfLayerEntryConfig.filter(
+            const updatedListOfLayerEntryConfig = layerEntryConfig2.listOfLayerEntryConfig.filter(
               (entryConfig) => entryConfig.layerId !== layerPathNodes[i]
             );
             geoviewLayer.listOfLayerEntryConfig = updatedListOfLayerEntryConfig;
-          } else if (layerEntryConfig) {
+          } else if (layerEntryConfig2) {
             // Not on the top level, so update to the latest
-            layerEntryConfig = layerEntryConfig.listOfLayerEntryConfig.find((entryConfig) => entryConfig.layerId === layerPathNodes[i]);
+            layerEntryConfig2 = layerEntryConfig2.listOfLayerEntryConfig.find((entryConfig) => entryConfig.layerId === layerPathNodes[i]);
           }
         }
       }
@@ -1114,14 +1062,17 @@ export class LayerApi {
     theLayerMain?.setOpacity(1);
 
     // If it is a group layer, highlight sublayers
-    if (layerEntryIsGroupLayer(this.#layerEntryConfigs[layerPath])) {
-      Object.keys(this.#layerEntryConfigs).forEach((registeredLayerPath) => {
+    const layer = this.getLayerEntryConfig(layerPath);
+
+    // If found
+    if (layer && layer.getEntryTypeIsGroup()) {
+      this.getLayerEntryConfigIds().forEach((registeredLayerPath) => {
         // Trying to get the layer associated with the layer path, can be undefined because the layer might be in error
         const theLayer = this.getGeoviewLayer(registeredLayerPath);
         if (theLayer) {
           if (
             !(registeredLayerPath.startsWith(`${layerPath}/`) || registeredLayerPath === layerPath) &&
-            !layerEntryIsGroupLayer(this.#layerEntryConfigs[registeredLayerPath])
+            theLayer.getLayerConfig().getEntryTypeIsRegular()
           ) {
             const otherOpacity = theLayer.getOpacity();
             theLayer.setOpacity((otherOpacity || 1) * 0.25);
@@ -1129,11 +1080,11 @@ export class LayerApi {
         }
       });
     } else {
-      Object.keys(this.#layerEntryConfigs).forEach((registeredLayerPath) => {
+      this.getLayerEntryConfigIds().forEach((registeredLayerPath) => {
         // Trying to get the layer associated with the layer path, can be undefined because the layer might be in error
         const theLayer = this.getGeoviewLayer(registeredLayerPath);
         if (theLayer) {
-          if (registeredLayerPath !== layerPath && !layerEntryIsGroupLayer(this.#layerEntryConfigs[registeredLayerPath])) {
+          if (registeredLayerPath !== layerPath && theLayer.getLayerConfig()?.getEntryTypeIsRegular()) {
             const otherOpacity = theLayer.getOpacity();
             theLayer.setOpacity((otherOpacity || 1) * 0.25);
           }
@@ -1150,14 +1101,19 @@ export class LayerApi {
     this.featureHighlight.removeBBoxHighlight();
     if (this.#highlightedLayer.layerPath !== undefined) {
       const { layerPath, originalOpacity } = this.#highlightedLayer;
-      if (layerEntryIsGroupLayer(this.#layerEntryConfigs[layerPath])) {
-        Object.keys(this.#layerEntryConfigs).forEach((registeredLayerPath) => {
+
+      // Get the layer config
+      const layerConfig = this.getLayerEntryConfig(layerPath);
+
+      // IF found and a group
+      if (layerConfig?.getEntryTypeIsGroup()) {
+        this.getLayerEntryConfigIds().forEach((registeredLayerPath) => {
           // Trying to get the layer associated with the layer path, can be undefined because the layer might be in error
           const theLayer = this.getGeoviewLayer(registeredLayerPath);
           if (theLayer) {
             if (
               !(registeredLayerPath.startsWith(`${layerPath}/`) || registeredLayerPath === layerPath) &&
-              !layerEntryIsGroupLayer(this.#layerEntryConfigs[registeredLayerPath])
+              theLayer.getLayerConfig().getEntryTypeIsRegular()
             ) {
               const otherOpacity = theLayer.getOpacity();
               theLayer.setOpacity(otherOpacity ? otherOpacity * 4 : 1);
@@ -1165,11 +1121,11 @@ export class LayerApi {
           }
         });
       } else {
-        Object.keys(this.#layerEntryConfigs).forEach((registeredLayerPath) => {
+        this.getLayerEntryConfigIds().forEach((registeredLayerPath) => {
           // Trying to get the layer associated with the layer path, can be undefined because the layer might be in error
           const theLayer = this.getGeoviewLayer(registeredLayerPath);
           if (theLayer) {
-            if (registeredLayerPath !== layerPath && !layerEntryIsGroupLayer(this.#layerEntryConfigs[registeredLayerPath])) {
+            if (registeredLayerPath !== layerPath && theLayer.getLayerConfig().getEntryTypeIsRegular()) {
               const otherOpacity = theLayer.getOpacity();
               theLayer.setOpacity(otherOpacity ? otherOpacity * 4 : 1);
             } else theLayer.setOpacity(originalOpacity || 1);
@@ -1188,12 +1144,12 @@ export class LayerApi {
    * @param {string[]} layerIds - IDs or layerPaths of layers to get max extents from.
    * @returns {Extent} The overall extent.
    */
-  getExtentOfMultipleLayers(layerIds: string[] = Object.keys(this.#layerEntryConfigs)): Extent {
+  getExtentOfMultipleLayers(layerIds: string[] = this.getLayerEntryConfigIds()): Extent {
     let bounds: Extent = [];
 
     layerIds.forEach((layerId) => {
       // Get sublayerpaths and layerpaths from layer IDs.
-      const subLayerPaths = Object.keys(this.#layerEntryConfigs).filter(
+      const subLayerPaths = this.getLayerEntryConfigIds().filter(
         (layerPath) => layerPath.startsWith(`${layerId}/`) || layerPath === layerId
       );
 
@@ -1374,23 +1330,29 @@ export class LayerApi {
    * @param {'alias' | 'name'} fields - The fields to change.
    */
   redefineFeatureFields(layerPath: string, fieldNames: string[], fields: 'alias' | 'name'): void {
-    const layerConfig = this.#layerEntryConfigs[layerPath] as AbstractBaseLayerEntryConfig;
+    // Get the layer config
+    const layerConfig = this.getLayerEntryConfig(layerPath);
 
     if (!layerConfig) throw new LayerNotFoundError(layerPath);
-    else if (
-      layerConfig.source?.featureInfo &&
-      layerConfig.source.featureInfo.queryable !== false &&
-      layerConfig.source.featureInfo.outfields
+    if (layerConfig instanceof GroupLayerEntryConfig) throw new LayerWrongTypeError(layerPath, layerConfig.layerName);
+
+    // Cast it
+    const layerConfigCasted = layerConfig as AbstractBaseLayerEntryConfig;
+
+    if (
+      layerConfigCasted.source?.featureInfo &&
+      layerConfigCasted.source.featureInfo.queryable !== false &&
+      layerConfigCasted.source.featureInfo.outfields
     ) {
       // Convert the provided field names to an array so we can index
-      if (layerConfig.source.featureInfo.outfields.length === fieldNames.length)
+      if (layerConfigCasted.source.featureInfo.outfields.length === fieldNames.length)
         // Override existing values in each outfield with provided field name
-        layerConfig.source.featureInfo.outfields?.forEach((outfield, index) => {
+        layerConfigCasted.source.featureInfo.outfields?.forEach((outfield, index) => {
           // eslint-disable-next-line no-param-reassign
           outfield[fields] = fieldNames[index];
         });
       else throw new LayerDifferingFieldLengths(layerPath);
-    } else throw new LayerNotQueryableError(layerConfig.layerPath, layerConfig.getLayerName());
+    } else throw new LayerNotQueryableError(layerConfigCasted.layerPath, layerConfigCasted.getLayerName());
   }
 
   /**
@@ -1401,13 +1363,18 @@ export class LayerApi {
    * @param {string[]} fieldAliases - The new field aliases to use.
    */
   replaceFeatureOutfields(layerPath: string, types: TypeOutfieldsType[], fieldNames: string[], fieldAliases?: string[]): void {
-    const layerConfig = this.#layerEntryConfigs[layerPath] as AbstractBaseLayerEntryConfig;
+    const layerConfig = this.getLayerEntryConfig(layerPath);
 
     if (!layerConfig) throw new LayerNotFoundError(layerPath);
-    else if (
-      layerConfig.source?.featureInfo &&
-      layerConfig.source.featureInfo.queryable !== false &&
-      layerConfig.source.featureInfo.outfields
+    if (layerConfig instanceof GroupLayerEntryConfig) throw new LayerWrongTypeError(layerPath, layerConfig.layerName);
+
+    // Cast it
+    const layerConfigCasted = layerConfig as AbstractBaseLayerEntryConfig;
+
+    if (
+      layerConfigCasted.source?.featureInfo &&
+      layerConfigCasted.source.featureInfo.queryable !== false &&
+      layerConfigCasted.source.featureInfo.outfields
     ) {
       // Ensure same number of all items are provided
       if (fieldNames.length === types.length) {
@@ -1422,9 +1389,9 @@ export class LayerApi {
         });
 
         // Set new value asfeature info outfields
-        layerConfig.source.featureInfo.outfields = newOutfields;
+        layerConfigCasted.source.featureInfo.outfields = newOutfields;
       } else throw new LayerDifferingFieldLengths(layerPath);
-    } else throw new LayerNotQueryableError(layerConfig.layerPath, layerConfig.getLayerName());
+    } else throw new LayerNotQueryableError(layerConfigCasted.layerPath, layerConfigCasted.getLayerName());
   }
 
   /**
@@ -1862,10 +1829,7 @@ export class LayerApi {
 
       // If the map index of a parent layer path has been set and it is a valid UUID, the ordered layer info is a place holder
       // registered while the geocore layer info was fetched
-      if (
-        MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.getMapId(), parentLayerPath) !== -1 &&
-        ConfigApi.isValidUUID(parentLayerPath)
-      ) {
+      if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.getMapId(), parentLayerPath) !== -1 && isValidUUID(parentLayerPath)) {
         // Replace the placeholder ordered layer info
         MapEventProcessor.replaceOrderedLayerInfo(this.getMapId(), layerConfig, parentLayerPath);
       } else if (layerConfig.parentLayerConfig) {
@@ -1963,7 +1927,7 @@ export class LayerApi {
    */
   #gatherAllBoundsRec(layerConfig: ConfigBaseClass, bounds: Extent[]): void {
     // If a leaf
-    if (!layerEntryIsGroupLayer(layerConfig)) {
+    if (layerConfig.getEntryTypeIsRegular()) {
       // Get the layer
       const layer = this.getGeoviewLayer(layerConfig.layerPath) as AbstractGVLayer;
 
@@ -1972,7 +1936,7 @@ export class LayerApi {
         const calculatedBounds = layer.getBounds(this.mapViewer.getProjection(), MapViewer.DEFAULT_STOPS);
         if (calculatedBounds) bounds.push(calculatedBounds);
       }
-    } else {
+    } else if (layerConfig.getEntryTypeIsGroup()) {
       // Is a group
       layerConfig.listOfLayerEntryConfig.forEach((subLayerConfig) => {
         this.#gatherAllBoundsRec(subLayerConfig, bounds);
@@ -2345,6 +2309,67 @@ export class LayerApi {
   // #region STATIC
 
   /**
+   * Converts a map configuration layer entry into a promise of a GeoView layer configuration.
+   * Depending on the type of the layer entry (e.g., GeoCore, Shapefile, or standard GeoView),
+   * this function processes each entry accordingly and wraps the result in a `Promise`.
+   * Errors encountered during asynchronous operations are handled via a provided callback.
+   * @param {string} mapId - The unique identifier of the map instance this configuration applies to.
+   * @param {TypeDisplayLanguage} language - The language setting used for layer labels and metadata.
+   * @param {MapConfigLayerEntry} entry - The array of layer entry to convert.
+   * @param {(mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => void} errorCallback - Callback invoked when an error occurs during layer processing.
+   * @returns {Promise<TypeGeoviewLayerConfig>} The promise resolving to a `TypeGeoviewLayerConfig` object.
+   */
+  static convertMapConfigToGeoviewLayerConfig(
+    mapId: string,
+    language: TypeDisplayLanguage,
+    entry: MapConfigLayerEntry,
+    errorCallback: (mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => void
+  ): Promise<TypeGeoviewLayerConfig> {
+    // Depending on the map config layer entry type
+    let promise: Promise<TypeGeoviewLayerConfig>;
+    if (mapConfigLayerEntryIsGeoCore(entry)) {
+      // Working with a GeoCore layer
+      promise = GeoCore.createLayerConfigFromUUID(entry.geoviewLayerId, language, mapId, entry);
+    } else if (mapConfigLayerEntryIsShapefile(entry)) {
+      // Working with a shapefile layer
+      promise = ShapefileReader.convertShapefileConfigToGeoJson(entry);
+    } else {
+      // Working with a standard GeoView layer
+      promise = Promise.resolve(entry);
+    }
+
+    // Prepare to catch errors
+    promise.catch((error) => {
+      // Callback
+      errorCallback?.(entry, error);
+    });
+
+    return promise;
+  }
+
+  /**
+   * Converts a list of map configuration layer entries into an array of promises,
+   * each resolving to one or more GeoView layer configuration objects.
+   * @param {string} mapId - The unique identifier of the map instance this configuration applies to.
+   * @param {TypeDisplayLanguage} language - The language setting used for layer labels and metadata.
+   * @param {MapConfigLayerEntry[]} mapConfigLayerEntries - The array of layer entries to convert.
+   * @param {(mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => void} errorCallback - Callback invoked when an error occurs during layer processing.
+   * @returns {Promise<TypeGeoviewLayerConfig[]>[]} An array of promises, each resolving to an array of `TypeGeoviewLayerConfig` objects.
+   */
+  static convertMapConfigsToGeoviewLayerConfig(
+    mapId: string,
+    language: TypeDisplayLanguage,
+    mapConfigLayerEntries: MapConfigLayerEntry[],
+    errorCallback: (mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => void
+  ): Promise<TypeGeoviewLayerConfig>[] {
+    // For each layer entry
+    return mapConfigLayerEntries.map((entry) => {
+      // Redirect
+      return LayerApi.convertMapConfigToGeoviewLayerConfig(mapId, language, entry, errorCallback);
+    });
+  }
+
+  /**
    * Generate an array of layer info for the orderedLayerList.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The config to get the info from.
    * @returns {TypeOrderedLayerInfo[]} The array of ordered layer info.
@@ -2398,6 +2423,62 @@ export class LayerApi {
     } else addSubLayerPathToLayerOrder(geoviewLayerConfig as TypeLayerEntryConfig, (geoviewLayerConfig as TypeLayerEntryConfig).layerPath);
 
     return newOrderedLayerInfos;
+  }
+
+  /**
+   * Creates an instance of a specific `AbstractGeoViewLayer` subclass based on the given GeoView layer configuration.
+   * This function determines the correct layer type from the configuration and instantiates it accordingly.
+   * @remarks
+   * - This method currently supports GeoJSON, GeoPackage, CSV, WMS, Esri Dynamic, Esri Feature, Esri Image,
+   *   ImageStatic, WFS, OGC Feature, XYZ Tiles, and Vector Tiles.
+   * - If the layer type is not supported, an error is thrown.
+   * - TODO: Refactor to use the validated configuration with metadata already fetched.
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The configuration object for the GeoView layer.
+   * @param {string} mapProjectionForVectorTiles - The projection string to be used when creating Vector Tiles layers.
+   * @returns {AbstractGeoViewLayer} An instance of the corresponding `AbstractGeoViewLayer` subclass.
+   * @throws {NotSupportedError} If the configuration does not match any supported layer type.
+   */
+  static createLayerConfigFromType(geoviewLayerConfig: TypeGeoviewLayerConfig, mapProjectionForVectorTiles: string): AbstractGeoViewLayer {
+    // TODO: Refactor - Here the function should use the structure created by validation config with the metadata fetch and no need to pass the validation.
+    if (layerConfigIsGeoJSON(geoviewLayerConfig)) {
+      return new GeoJSON(geoviewLayerConfig);
+    }
+    if (layerConfigIsGeoPackage(geoviewLayerConfig)) {
+      return new GeoPackage(geoviewLayerConfig);
+    }
+    if (layerConfigIsCSV(geoviewLayerConfig)) {
+      return new CSV(geoviewLayerConfig);
+    }
+    if (layerConfigIsWMS(geoviewLayerConfig)) {
+      return new WMS(geoviewLayerConfig, LayerApi.DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS);
+    }
+    if (layerConfigIsEsriDynamic(geoviewLayerConfig)) {
+      return new EsriDynamic(geoviewLayerConfig);
+    }
+    if (layerConfigIsEsriFeature(geoviewLayerConfig)) {
+      return new EsriFeature(geoviewLayerConfig);
+    }
+    if (layerConfigIsEsriImage(geoviewLayerConfig)) {
+      return new EsriImage(geoviewLayerConfig);
+    }
+    if (layerConfigIsImageStatic(geoviewLayerConfig)) {
+      return new ImageStatic(geoviewLayerConfig);
+    }
+    if (layerConfigIsWFS(geoviewLayerConfig)) {
+      return new WFS(geoviewLayerConfig);
+    }
+    if (layerConfigIsOgcFeature(geoviewLayerConfig)) {
+      return new OgcFeature(geoviewLayerConfig);
+    }
+    if (layerConfigIsXYZTiles(geoviewLayerConfig)) {
+      return new XYZTiles(geoviewLayerConfig);
+    }
+    if (layerConfigIsVectorTiles(geoviewLayerConfig)) {
+      return new VectorTiles(geoviewLayerConfig, mapProjectionForVectorTiles);
+    }
+
+    // Not implemented
+    throw new NotSupportedError('Unsupported layer class type in createLayerConfigFromType');
   }
 
   // #endregion

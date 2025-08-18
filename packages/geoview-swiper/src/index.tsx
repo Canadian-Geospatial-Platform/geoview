@@ -1,5 +1,4 @@
 import React from 'react'; // GV This import is to validate that we're on the right React at the end of the file
-import { TypeJsonObject, toJsonObject, AnySchemaObject } from 'geoview-core/api/config/types/config-types';
 import { MapPlugin } from 'geoview-core/api/plugin/map-plugin';
 import { SwiperEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/swiper-event-processor';
 import { LayerNotFoundError } from 'geoview-core/core/exceptions/layer-exceptions';
@@ -17,26 +16,26 @@ class SwiperPlugin extends MapPlugin {
   /**
    * Returns the package schema
    *
-   * @returns {AnySchemaObject} the package schema
+   * @returns {unknown} the package schema
    */
-  override schema(): AnySchemaObject {
+  override schema(): unknown {
     return schema;
   }
 
   /**
    * Returns the default config for this package
    *
-   * @returns {TypeJsonObject} the default config
+   * @returns {unknown} the default config
    */
-  override defaultConfig(): TypeJsonObject {
-    return toJsonObject(defaultConfig);
+  override defaultConfig(): unknown {
+    return defaultConfig;
   }
 
   /**
    * Overrides the default translations for the Plugin.
-   * @returns {TypeJsonObject} - The translations object for the particular Plugin.
+   * @returns {Record<string, unknown>} - The translations object for the particular Plugin.
    */
-  override defaultTranslations(): TypeJsonObject {
+  override defaultTranslations(): Record<string, unknown> {
     return {
       en: {
         swiper: {
@@ -50,7 +49,7 @@ class SwiperPlugin extends MapPlugin {
           menu: 'Balayage',
         },
       },
-    } as unknown as TypeJsonObject;
+    };
   }
 
   /**
@@ -70,8 +69,8 @@ class SwiperPlugin extends MapPlugin {
     super.onAdd();
 
     // Initialize the store with swiper provided configuration
-    SwiperEventProcessor.setLayerPaths(this.pluginProps.mapId, this.getConfig().layers);
-    SwiperEventProcessor.setOrientation(this.pluginProps.mapId, this.getConfig().orientation as SwipeOrientation);
+    SwiperEventProcessor.setLayerPaths(this.mapViewer.mapId, this.getConfig().layers);
+    SwiperEventProcessor.setOrientation(this.mapViewer.mapId, this.getConfig().orientation as SwipeOrientation);
   }
 
   /**
@@ -79,7 +78,7 @@ class SwiperPlugin extends MapPlugin {
    * @returns {JSX.Element} The JSX.Element representing the Swiper Plugin
    */
   override onCreateContent(): JSX.Element {
-    return <Swiper viewer={this.pluginProps.viewer} config={this.getConfig()} />;
+    return <Swiper viewer={this.mapViewer} config={this.getConfig()} />;
   }
 
   /**
@@ -89,11 +88,11 @@ class SwiperPlugin extends MapPlugin {
   activateForLayer(layerPath: string): void {
     try {
       // Check if the layer exists on the map
-      const olLayer = this.mapViewer().layer.getOLLayer(layerPath);
+      const olLayer = this.mapViewer.layer.getOLLayer(layerPath);
       if (!olLayer) throw new LayerNotFoundError(layerPath);
 
       // Add the layer path
-      SwiperEventProcessor.addLayerPath(this.pluginProps.mapId, layerPath);
+      SwiperEventProcessor.addLayerPath(this.mapViewer.mapId, layerPath);
     } catch (error: unknown) {
       // Log
       logger.logError(error);
@@ -106,7 +105,7 @@ class SwiperPlugin extends MapPlugin {
    */
   deActivateForLayer(layerPath: string): void {
     // Remove the layer
-    SwiperEventProcessor.removeLayerPath(this.pluginProps.mapId, layerPath);
+    SwiperEventProcessor.removeLayerPath(this.mapViewer.mapId, layerPath);
   }
 
   /**
@@ -114,7 +113,7 @@ class SwiperPlugin extends MapPlugin {
    */
   deActivateAll(): void {
     // Remove all layers
-    SwiperEventProcessor.removeAll(this.pluginProps.mapId);
+    SwiperEventProcessor.removeAll(this.mapViewer.mapId);
   }
 
   /**
@@ -123,7 +122,7 @@ class SwiperPlugin extends MapPlugin {
    */
   setOrientation(orientation: SwipeOrientation): void {
     // Set the orientation
-    SwiperEventProcessor.setOrientation(this.pluginProps.mapId, orientation);
+    SwiperEventProcessor.setOrientation(this.mapViewer.mapId, orientation);
   }
 }
 

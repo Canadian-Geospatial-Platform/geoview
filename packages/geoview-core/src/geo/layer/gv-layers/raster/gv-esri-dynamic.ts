@@ -27,13 +27,13 @@ import {
   TypeValidMapProjectionCodes,
   TypeIconSymbolVectorConfig,
   CONST_LAYER_TYPES,
+  TypeLayerMetadataEsriExtent,
 } from '@/api/config/types/map-schema-types';
-import { esriGetFieldType, esriGetFieldDomain, parseDateTimeValuesEsriDynamic } from '@/geo/layer/gv-layers/utils';
+import { esriGetFieldType, esriGetFieldDomain, parseDateTimeValuesEsriDynamic, GeometryJson } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { TypeEsriImageLayerLegend } from '@/geo/layer/gv-layers/raster/gv-esri-image';
-import { TypeJsonObject } from '@/api/config/types/config-types';
 import { FetchEsriWorkerPool } from '@/core/workers/fetch-esri-worker-pool';
 import { QueryParams } from '@/core/workers/fetch-esri-worker-script';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
@@ -75,7 +75,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     this.#fetchWorkerPool
       .init()
       .then(() => logger.logTraceCore('Worker pool for fetch ESRI initialized'))
-      .catch((err) => logger.logError('Worker pool error', err));
+      .catch((error: unknown) => logger.logError('Worker pool error', error));
 
     // Register the worker message handler
     this.#fetchWorkerPool.addMessageHandler(this.#handleWorkerMessage.bind(this));
@@ -99,6 +99,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Overrides the fetching of the legend for an Esri Dynamic layer.
+   * @override
    * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
    */
   override async onFetchLegend(): Promise<TypeLegend | null> {
@@ -109,7 +110,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     try {
       if (!layerConfig) return null;
       const legendUrl = `${layerConfig.geoviewLayerConfig.metadataAccessPath}/legend?f=json`;
-      const legendJson = await Fetch.fetchJsonAs<TypeEsriImageLayerLegend>(legendUrl);
+      const legendJson = await Fetch.fetchJson<TypeEsriImageLayerLegend>(legendUrl);
 
       let legendInfo;
       if (legendJson.layers && legendJson.layers.length === 1) {
@@ -172,7 +173,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Overrides when the style should be set by the fetched legend.
-   * @param legend
+   * @param {TypeLegend} legend - The legend type
+   * @override
    */
   override onSetStyleAccordingToLegend(legend: TypeLegend): void {
     // Set the style
@@ -183,6 +185,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * Overrides the way to get the bounds for this layer type.
    * @param {OLProjection} projection - The projection to get the bounds into.
    * @param {number} stops - The number of stops to use to generate the extent.
+   * @override
    * @returns {Extent | undefined} The layer bounding box.
    */
   override onGetBounds(projection: OLProjection, stops: number): Extent | undefined {
@@ -208,6 +211,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {string[]} objectIds - The IDs of the features to calculate the extent from.
    * @param {OLProjection} outProjection - The output projection for the extent.
    * @param {string?} outfield - ID field to return for services that require a value in outfields.
+   * @override
    * @returns {Promise<Extent>} The extent of the features, if available.
    */
   override async onGetExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
@@ -228,14 +232,14 @@ export class GVEsriDynamic extends AbstractGVRaster {
     const queryUrl = `${baseUrl}${layerEntryConfig.layerId}/query?&f=json&objectIds=${idString}${outfieldQuery}&returnExtentOnly=true`;
 
     // Fetch
-    const responseJson = await Fetch.fetchEsriJsonAsObject(queryUrl);
+    const responseJson = await Fetch.fetchEsriJson<EsriQueryJsonResponse>(queryUrl);
     const { extent } = responseJson;
 
     const projectionExtent: OLProjection | undefined = Projection.getProjectionFromObj(extent.spatialReference);
 
     if (extent && projectionExtent) {
       const projExtent = Projection.transformExtentFromProj(
-        [extent.xmin as number, extent.ymin as number, extent.xmax as number, extent.ymax as number],
+        [extent.xmin, extent.ymin, extent.xmax, extent.ymax],
         projectionExtent,
         outProjection
       );
@@ -247,8 +251,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
   }
 
   /**
-   * Overrides the get of the OpenLayers Layer
-   * @returns {ImageLayer<ImageArcGISRest>} The OpenLayers Layer
+   * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
+   * @override
+   * @returns {ImageLayer<ImageArcGISRest>} The strongly-typed OpenLayers type.
    */
   override getOLLayer(): ImageLayer<ImageArcGISRest> {
     // Call parent and cast
@@ -256,8 +261,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
   }
 
   /**
-   * Overrides the get of the OpenLayers Layer Source
-   * @returns {ImageArcGISRest} The OpenLayers Layer Source
+   * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
+   * @override
+   * @returns {ImageArcGISRest} The ImageArcGISRest source instance associated with this layer.
    */
   override getOLSource(): ImageArcGISRest {
     // Get source from OL
@@ -265,8 +271,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
   }
 
   /**
-   * Overrides the get of the layer configuration associated with the layer.
-   * @returns {EsriDynamicLayerEntryConfig} The layer configuration or undefined if not found.
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {EsriDynamicLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
    */
   override getLayerConfig(): EsriDynamicLayerEntryConfig {
     // Call parent and cast
@@ -274,7 +281,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
   }
 
   /**
-   * Overrides the hit tolerance of the layer
+   * Overrides the hit tolerance of the layer.
+   * @override
    * @returns {number} The hit tolerance for a GV Esri Dynamic layer
    */
   override getHitTolerance(): number {
@@ -287,7 +295,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {string} fieldName - The field name for which we want to get the type.
    * @returns {TypeOutfieldsType} The type of the field.
    */
-  protected override getFieldType(fieldName: string): TypeOutfieldsType {
+  protected override onGetFieldType(fieldName: string): TypeOutfieldsType {
     // Redirect
     return esriGetFieldType(this.getLayerConfig(), fieldName);
   }
@@ -297,7 +305,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {string} fieldName - The field name for which we want to get the domain.
    * @returns {null | codedValueType | rangeDomainType} The domain of the field.
    */
-  protected override getFieldDomain(fieldName: string): null | codedValueType | rangeDomainType {
+  protected override onGetFieldDomain(fieldName: string): null | codedValueType | rangeDomainType {
     // Redirect
     return esriGetFieldDomain(this.getLayerConfig(), fieldName);
   }
@@ -325,7 +333,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     if (jsonResponse.features) {
       // Parse the JSON response and create features
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const features = (jsonResponse.features as TypeJsonObject[]).map((featureData: any) => {
+      const features = jsonResponse.features.map((featureData) => {
         // We do not query the geometry anymore (set as undefined). It will query if needed by later
         const properties = featureData.attributes;
         return new Feature({ ...properties, undefined });
@@ -411,7 +419,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       `&returnGeometry=false&sr=4326&returnFieldName=true`;
 
     // If it takes more then 10 seconds it means the server is unresponsive and we should not continue. This will throw an error...
-    const identifyJsonResponse = await Fetch.fetchWithTimeout<TypeJsonObject>(identifyUrl, undefined, 10000);
+    const identifyJsonResponse = await Fetch.fetchWithTimeout<EsriIdentifyJsonResponse>(identifyUrl, undefined, 10000);
 
     // If no features identified return []
     if (identifyJsonResponse.results.length === 0) return [];
@@ -420,9 +428,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     const oidField = layerConfig.source.featureInfo.outfields
       ? layerConfig.source.featureInfo.outfields.filter((field) => field.type === 'oid')[0].name
       : 'OBJECTID';
-    const objectIds = (identifyJsonResponse.results as TypeJsonObject[]).map((result) =>
-      String(result.attributes[oidField]).replace(',', '')
-    );
+    const objectIds = identifyJsonResponse.results.map((result) => String(result.attributes[oidField]).replace(',', ''));
 
     // Get meters per pixel to set the maxAllowableOffset to simplify return geometry
     const maxAllowableOffset = queryGeometry
@@ -474,7 +480,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       // TO.DOCONT: the esri query (was working with identify). But identify was failing on huge geometry...
       this.#fetchFeatureInfoGeometryWithWorker(layerConfig, objectIds.map(Number), true, mapProjNumber, maxAllowableOffset)
         .then((featuresJSON) => {
-          (featuresJSON.features as TypeJsonObject[]).forEach((feat: TypeJsonObject, index: number) => {
+          featuresJSON.features.forEach((feat, index: number) => {
             // If cancelled
             // Explicitely checking the abort condition here, after the fetch in the worker, because we can't send the abortController in a fetch happening inside a worker.
             if (abortController?.signal.aborted) {
@@ -499,24 +505,21 @@ export class GVEsriDynamic extends AbstractGVRaster {
               feat.geometry?.paths ||
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               feat.geometry?.rings || [feat.geometry?.x, feat.geometry?.y]) as any; // MultiPoint or Line or Polygon or Point schema
-            const newGeom: Geometry | null =
-              geomType.length > 0
-                ? (GeometryApi.createGeometryFromType(geomType[0] as TypeStyleGeometry, coordinates) as unknown as Geometry)
-                : null;
+            const newGeom: Geometry | undefined =
+              geomType.length > 0 ? GeometryApi.createGeometryFromType(geomType[0] as TypeStyleGeometry, coordinates) : undefined;
 
             // TODO: Performance - We will need a trigger to refresh the higight and details panel (for zoom button) when extent and
             // TO.DOCONT: is applied. Sometimes the delay is too big so we need to change tab or layer in layer list to trigger the refresh
             // We assume order of arrayOfFeatureInfoEntries is the same as featuresJSON.features as they are processed in the same order
             const entry = arrayOfFeatureInfoEntries[index];
-            if (newGeom !== null && entry.geometry && entry.geometry instanceof Feature) {
-              entry.extent = newGeom.getExtent();
-              entry.geometry.setGeometry(newGeom);
-            }
+            entry.feature?.setGeometry(newGeom);
+            entry.geometry = newGeom;
+            entry.extent = newGeom?.getExtent();
           });
         })
-        .catch((err) => {
-          // Log
-          logger.logError('The Worker to get the feature geometries has failed', err);
+        .catch((error: unknown) => {
+          // Log error
+          logger.logError('The Worker to get the feature geometries has failed', error);
         });
 
     return arrayOfFeatureInfoEntries;
@@ -550,9 +553,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
   /**
    * Query all features with a web worker
    * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer config
-   * @returns {TypeJsonObject} A promise of esri response for query.
+   * @returns {Promise<unknown>} A promise of esri response for query.
    */
-  #fetchAllFeatureInfoWithWorker(layerConfig: EsriDynamicLayerEntryConfig): Promise<TypeJsonObject> {
+  #fetchAllFeatureInfoWithWorker(layerConfig: EsriDynamicLayerEntryConfig): Promise<EsriFeaturesJsonResponse> {
     const params: QueryParams = {
       url: layerConfig.source.dataAccessPath + layerConfig.layerId,
       geometryType: 'Point',
@@ -564,7 +567,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     };
 
     // Launch
-    return this.#fetchWorkerPool.process(params);
+    return this.#fetchWorkerPool.process(params) as Promise<EsriFeaturesJsonResponse>;
   }
 
   /**
@@ -574,7 +577,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {boolean} queryGeometry - Whether to include geometry in the query
    * @param {number} projection - The spatial reference ID for the output
    * @param {number} maxAllowableOffset - The maximum allowable offset for geometry simplification
-   * @returns {TypeJsonObject} A promise of esri response for query.
+   * @returns {Promise<EsriFeaturesJsonResponse>} A promise of esri response for query.
    */
   #fetchFeatureInfoGeometryWithWorker(
     layerConfig: EsriDynamicLayerEntryConfig,
@@ -582,7 +585,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     queryGeometry: boolean,
     projection: number,
     maxAllowableOffset: number
-  ): Promise<TypeJsonObject> {
+  ): Promise<EsriFeaturesJsonResponse> {
     const params: QueryParams = {
       url: layerConfig.source.dataAccessPath + layerConfig.layerId,
       geometryType: (layerConfig.getLayerMetadata()!.geometryType as string).replace('esriGeometry', ''),
@@ -594,7 +597,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     };
 
     // Launch
-    return this.#fetchWorkerPool.process(params);
+    return this.#fetchWorkerPool.process(params) as Promise<EsriFeaturesJsonResponse>;
   }
 
   /**
@@ -666,8 +669,6 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
     try {
       // Update the layer config information (not ideal to do this here...)
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.legendFilterIsOff = false;
       // eslint-disable-next-line no-param-reassign
       layerConfig.layerFilter = filterValueToUse;
       filterValueToUse = GVEsriDynamic.getViewFilter(layerConfig, style);
@@ -1070,3 +1071,20 @@ export class GVEsriDynamic extends AbstractGVRaster {
     }
   }
 }
+
+export type EsriQueryJsonResponse = {
+  extent: TypeLayerMetadataEsriExtent;
+};
+
+export type EsriFeaturesJsonResponse = {
+  features: EsriIdentifyJsonResponseAttribute[];
+};
+
+export type EsriIdentifyJsonResponse = {
+  results: EsriIdentifyJsonResponseAttribute[];
+};
+
+export type EsriIdentifyJsonResponseAttribute = {
+  attributes: Record<string, unknown>;
+  geometry: GeometryJson;
+};

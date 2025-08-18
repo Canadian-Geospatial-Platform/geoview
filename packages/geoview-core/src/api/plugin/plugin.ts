@@ -1,13 +1,10 @@
 import i18next from 'i18next';
-import Ajv from 'ajv';
-
+import Ajv, { AnySchema } from 'ajv';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import { whenThisThen, getScriptAndAssetURL } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { TypeJsonObject } from '@/api/config/types/config-types';
 import { logger } from '@/core/utils/logger';
-import { api } from '@/app';
 import { AbstractPlugin } from './abstract-plugin';
 
 /**
@@ -75,17 +72,17 @@ export abstract class Plugin {
   /**
    * Add new plugin
    *
-   * @param {string} pluginId the plugin id
-   * @param {string} mapId id of map to add this plugin to
-   * @param {Class} constructor the plugin class (React Component)
-   * @param {Object} props the plugin properties
+   * @param {string} pluginId - The plugin id
+   * @param {typeof AbstractPlugin} constructor - The plugin class (React Component)
+   * @param {string} mapId - Id of map to add this plugin to
+   * @param {unknown} props - The plugin options
    */
-  static async addPlugin(pluginId: string, mapId: string, constructor: typeof AbstractPlugin, props?: TypeJsonObject): Promise<void> {
+  static async addPlugin(pluginId: string, constructor: typeof AbstractPlugin, mapId: string, props?: unknown): Promise<void> {
     // Get the MapViewer
-    const viewer = MapEventProcessor.getMapViewer(mapId);
+    const mapViewer = MapEventProcessor.getMapViewer(mapId);
 
     // If the plugin is already loaded, skip
-    if (viewer.plugins[pluginId]) return;
+    if (mapViewer.plugins[pluginId]) return;
 
     // Construct the Plugin class
     let plugin: AbstractPlugin | undefined;
@@ -94,15 +91,16 @@ export abstract class Plugin {
       // in order to cancel the "'new' expression, whose target lacks a construct signature" error message
       // ? unknown type cannot be use, need to escape
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      plugin = new (constructor as any)(pluginId, props, api);
+      plugin = new (constructor as any)(pluginId, mapViewer, props);
     }
 
     if (plugin) {
       // Attach to the map plugins object
-      viewer.plugins[pluginId] = plugin;
+      // eslint-disable-next-line no-param-reassign
+      mapViewer.plugins[pluginId] = plugin;
 
       // a config object used to store package config
-      let pluginConfigObj: TypeJsonObject = {};
+      let pluginConfigObj: unknown = {};
 
       // if a schema is defined then look for a config for this plugin
       if (plugin.schema && plugin.defaultConfig) {
@@ -116,7 +114,7 @@ export abstract class Plugin {
         });
 
         // initialize validator with schema file
-        const validate = validator.compile(schema);
+        const validate = validator.compile(schema as AnySchema);
 
         // if no config is provided then use default
         pluginConfigObj = defaultConfig;
@@ -126,10 +124,10 @@ export abstract class Plugin {
          * for custom config for loaded core packages on the same path of the map config.
          * If none exists then load the default config
          */
-        const configUrl = document.getElementById(mapId)?.getAttribute('data-config-url');
+        const configUrl = document.getElementById(mapViewer.mapId)?.getAttribute('data-config-url');
 
         // Check if there is a corePackageConfig for the plugin
-        const configObj = viewer.getCorePackageConfig(pluginId);
+        const configObj = mapViewer.getCorePackageConfig(pluginId);
 
         // If there is an inline config use it, if not try to read the file config associated with map config
         if (configObj) {
@@ -140,7 +138,7 @@ export abstract class Plugin {
 
           try {
             // Try to find the custom config from the config path
-            const result = await Fetch.fetchJsonAsObject(configPath);
+            const result = await Fetch.fetchJson(configPath);
 
             if (result) {
               logger.logTraceCore('Plugin - addPlugin file config', result);

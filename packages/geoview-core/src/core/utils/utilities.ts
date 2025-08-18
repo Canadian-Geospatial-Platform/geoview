@@ -2,7 +2,6 @@ import { Root, createRoot } from 'react-dom/client';
 import sanitizeHtml from 'sanitize-html';
 
 import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
-import { Cast, TypeJsonObject } from '@/api/config/types/config-types';
 import { logger } from '@/core/utils/logger';
 import i18n from '@/core/translation/i18n';
 import { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
@@ -55,11 +54,10 @@ export function getLocalizedMessage(language: TypeDisplayLanguage, messageKey: s
 /**
  * Deep merge objects togheter. Latest object will overwrite value on previous one
  * if property exist.
- *
- * @param {TypeJsonObject} objects - The objects to deep merge
- * @returns {TypeJsonObject} The merged object
+ * @param {unknown[]} objects - The objects to deep merge.
+ * @returns {unknown} The merged object
  */
-export function deepMergeObjects(...objects: TypeJsonObject[]): TypeJsonObject {
+export function deepMergeObjects(...objects: unknown[]): unknown {
   const deepCopyObjects = objects.map((object) => JSON.parse(JSON.stringify(object)));
   return deepCopyObjects.reduce((merged, current) => ({ ...merged, ...current }), {});
 }
@@ -174,7 +172,7 @@ export function xmlToJson(xml: Document | Node | Element): any {
   // check for node type if it's an element, attribute, text, comment...
   if (xml.nodeType === 1) {
     // if it's an element, check the element's attributes to convert to json
-    const element = Cast<Element>(xml);
+    const element = xml as Element;
     if (element.attributes) {
       if (element.attributes.length > 0) {
         obj['@attributes'] = {};
@@ -262,6 +260,25 @@ export function addUiComponent(targetDivId: string, component: React.ReactElemen
  */
 export function sanitizeHtmlContent(contentHtml: string): string {
   return sanitizeHtml(contentHtml);
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function safeStringify(obj: any, space = 2): string {
+  const seen = new WeakSet();
+
+  return JSON.stringify(
+    obj,
+    (key, value) => {
+      if (typeof value === 'object' && value !== null) {
+        if (seen.has(value)) {
+          return '{Circular JSON}'; // Or return undefined to remove the property
+        }
+        seen.add(value);
+      }
+      return value;
+    },
+    space
+  );
 }
 
 /**
@@ -364,26 +381,28 @@ export function exportPNG(dataUrl: string, name: string): void {
 
 /**
  * Find an object property by regex values. The find is case insensitive.
- * @param {TypeJsonObject} objectItem - The object item
- * @param {RegExp | RegExp[]} regex - The regex value or the regex sequence to search
- * @returns {TypeJsonObject | undefined} The object if it exist or undefined
+ * @param {unknown | undefined} objectItem - The object to search in.
+ * @param {RegExp | RegExp[]} patterns - A single RegExp or an array of RegExp patterns to match in sequence.
+ * @returns {T = Record<string, unknown> | undefined} The value found at the end of the matching path, or undefined if not found.
  */
-export const findPropertyNameByRegex = (objectItem: TypeJsonObject, regex: RegExp | RegExp[]): TypeJsonObject | undefined => {
-  const regexArray = Array.isArray(regex) ? regex : [regex];
+export function findPropertyByRegexPath<T = Record<string, unknown>>(
+  objectItem: unknown | undefined,
+  patterns: RegExp | RegExp[]
+): T | undefined {
+  const regexes = Array.isArray(patterns) ? patterns : [patterns];
 
-  let valueObject: TypeJsonObject | undefined = objectItem;
-  regexArray.forEach((regularExpression) => {
-    if (valueObject) {
-      const query = new RegExp(regularExpression, 'i');
-      const valueKey = Object.keys(valueObject).find((q) => {
-        return query.test(q);
-      });
-      valueObject = valueKey !== undefined ? valueObject[valueKey] : undefined;
-    }
-  });
+  let current = objectItem;
 
-  return valueObject;
-};
+  for (const regex of regexes) {
+    if (typeof current !== 'object' || current === null) return undefined;
+
+    const entries = Object.entries(current);
+    const match = entries.find(([key]) => new RegExp(regex, 'i').test(key));
+    current = match?.[1] as Record<string, unknown>;
+  }
+
+  return current as T;
+}
 
 /**
  * Check string to see if it is an image

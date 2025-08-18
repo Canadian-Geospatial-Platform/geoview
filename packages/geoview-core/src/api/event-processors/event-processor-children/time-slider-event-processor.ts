@@ -6,7 +6,7 @@ import {
   TypeTimeSliderProps,
 } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
-import { TypeFeatureInfoLayerConfig, TypeLayerEntryConfig, layerEntryIsGroupLayer } from '@/api/config/types/map-schema-types';
+import { TypeLayerEntryConfig, layerEntryIsGroupLayer } from '@/api/config/types/map-schema-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { UIEventProcessor } from '@/api/event-processors/event-processor-children/ui-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
@@ -15,6 +15,7 @@ import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
+import { LayerNotFoundError, LayerWrongTypeError } from '@/core/exceptions/layer-exceptions';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -105,7 +106,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    */
   static #addTimeSliderLayerAndApplyFilters(mapId: string, layerPath: string, timeSliderValues: TypeTimeSliderValues): void {
     // If there is no TimeSlider
-    if (!this.getTimesliderState(mapId)) return;
+    if (!this.getTimesliderState(mapId)) return; // Skip
 
     // Create set part (because that's how it works for now)
     const timeSliderLayer = { [layerPath]: timeSliderValues };
@@ -126,12 +127,17 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    * @param {string} layerPath - The layer path of the layer to remove from the state
    */
   static removeTimeSliderLayer(mapId: string, layerPath: string): void {
-    // Redirect
-    this.getTimesliderState(mapId)?.setterActions.removeTimeSliderLayer(layerPath);
+    // Get the timeslider state
+    const timeSliderState = this.getTimesliderState(mapId);
 
-    // If there are no layers with time dimension, hide tab
-    if (!this.getTimesliderState(mapId) || !Object.keys(this.getTimesliderState(mapId)!.timeSliderLayers).length)
+    // Redirect
+    timeSliderState?.setterActions.removeTimeSliderLayer(layerPath);
+
+    // If there are no layers with time dimension
+    if (!timeSliderState || !Object.keys(timeSliderState.timeSliderLayers).length) {
+      // Hide tab
       UIEventProcessor.hideTab(mapId, 'time-slider');
+    }
   }
 
   /**
@@ -148,16 +154,21 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
   ): TypeTimeSliderValues | undefined {
     // Get the layer using the map event processor, If no temporal dimension OR layerPath, return undefined
     if (!layerConfig.layerPath) return undefined;
-    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerConfig.layerPath)!;
 
     // If a group
     if (layerEntryIsGroupLayer(layerConfig)) return undefined;
 
     // Cast the layer
-    const geoviewLayerCasted = geoviewLayer as AbstractGVLayer;
+    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerConfig.layerPath);
+
+    // If not found
+    if (!geoviewLayer) throw new LayerNotFoundError(layerConfig.layerPath);
+
+    // If not of right type
+    if (!(geoviewLayer instanceof AbstractGVLayer)) throw new LayerWrongTypeError(layerConfig.layerPath, layerConfig.layerName);
 
     // Get the temporal dimension information
-    const temporalDimensionInfo = geoviewLayerCasted.getTemporalDimension();
+    const temporalDimensionInfo = geoviewLayer.getTemporalDimension();
 
     // Get temporal dimension info from config, if there is any
     const configTemporalDimension = timesliderConfig?.temporalDimension;
@@ -181,9 +192,9 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
 
     // If the field type has an alias, use that as a label
     let fieldAlias = field;
-    const { featureInfo } = layerConfig.source!;
+    const featureInfo = layerConfig.source?.featureInfo;
     if (featureInfo) {
-      const { outfields } = featureInfo as TypeFeatureInfoLayerConfig;
+      const { outfields } = featureInfo;
       const timeOutfield = outfields ? outfields.find((outfield) => outfield.name === field) : undefined;
       if (timeOutfield) fieldAlias = timeOutfield.alias;
     }
@@ -294,7 +305,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     values: number[]
   ): void {
     // Get the layer using the map event processor
-    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath)!;
+    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
 
     let filter: string;
     if (geoviewLayer instanceof WMS || geoviewLayer instanceof GVWMS) {

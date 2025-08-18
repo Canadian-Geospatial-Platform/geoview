@@ -19,7 +19,6 @@ import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raste
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { Projection } from '@/geo/utils/projection';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { TypeJsonArray } from '@/api/config/types/config-types';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 
 /**
@@ -51,8 +50,9 @@ export class GVEsriImage extends AbstractGVRaster {
   }
 
   /**
-   * Overrides the get of the OpenLayers Layer
-   * @returns {ImageLayer<ImageArcGISRest>} The OpenLayers Layer
+   * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
+   * @override
+   * @returns {ImageLayer<ImageArcGISRest>} The strongly-typed OpenLayers type.
    */
   override getOLLayer(): ImageLayer<ImageArcGISRest> {
     // Call parent and cast
@@ -60,8 +60,9 @@ export class GVEsriImage extends AbstractGVRaster {
   }
 
   /**
-   * Overrides the get of the OpenLayers Layer Source
-   * @returns {ImageArcGISRest} The OpenLayers Layer Source
+   * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
+   * @override
+   * @returns {ImageArcGISRest} The ImageArcGISRest source instance associated with this layer.
    */
   override getOLSource(): ImageArcGISRest {
     // Get source from OL
@@ -69,8 +70,9 @@ export class GVEsriImage extends AbstractGVRaster {
   }
 
   /**
-   * Overrides the get of the layer configuration associated with the layer.
-   * @returns {EsriImageLayerEntryConfig} The layer configuration or undefined if not found.
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {EsriImageLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
    */
   override getLayerConfig(): EsriImageLayerEntryConfig {
     // Call parent and cast
@@ -79,19 +81,22 @@ export class GVEsriImage extends AbstractGVRaster {
 
   /**
    * Overrides the fetching of the legend for an Esri image layer.
+   * @override
    * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
    */
   override async onFetchLegend(): Promise<TypeLegend | null> {
     const layerConfig = this.getLayerConfig();
     try {
       if (!layerConfig) return null;
-      const legendJson = await Fetch.fetchEsriJsonAsObject(`${layerConfig.geoviewLayerConfig.metadataAccessPath}/legend?f=json`);
-      let legendInfo: TypeJsonArray | undefined;
+      const legendJson = await Fetch.fetchEsriJson<TypeEsriImageLayerLegend>(
+        `${layerConfig.geoviewLayerConfig.metadataAccessPath}/legend?f=json`
+      );
+      let legendInfo;
       if (legendJson.layers && legendJson.layers.length === 1) {
-        legendInfo = legendJson.layers[0].legend as TypeJsonArray;
+        legendInfo = legendJson.layers[0].legend;
       } else if (legendJson.layers.length) {
-        const layerInfo = (legendJson.layers as TypeJsonArray).find((layer) => layer.layerId === layerConfig.layerId);
-        if (layerInfo) legendInfo = layerInfo.legend as TypeJsonArray;
+        const layerInfo = legendJson.layers.find((layer) => layer.layerId === layerConfig.layerId);
+        if (layerInfo) legendInfo = layerInfo.legend;
       }
       if (!legendInfo) {
         const legend: TypeLegend = {
@@ -104,9 +109,9 @@ export class GVEsriImage extends AbstractGVRaster {
       const uniqueValueStyleInfo: TypeLayerStyleConfigInfo[] = [];
       legendInfo.forEach((info) => {
         const styleInfo: TypeLayerStyleConfigInfo = {
-          label: info.label as string,
+          label: info.label,
           visible: layerConfig.initialSettings.states?.visible || true,
-          values: (info.label as string).split(','),
+          values: info.label.split(','),
           settings: {
             type: 'iconSymbol',
             mimeType: info.contentType,
@@ -142,7 +147,8 @@ export class GVEsriImage extends AbstractGVRaster {
 
   /**
    * Overrides when the style should be set by the fetched legend.
-   * @param legend
+   * @param {TypeLegend} legend - The legend type
+   * @override
    */
   override onSetStyleAccordingToLegend(legend: TypeLegend): void {
     // Set the style
@@ -180,6 +186,7 @@ export class GVEsriImage extends AbstractGVRaster {
    * Overrides the way to get the bounds for this layer type.
    * @param {OLProjection} projection - The projection to get the bounds into.
    * @param {number} stops - The number of stops to use to generate the extent.
+   * @override
    * @returns {Extent | undefined} The layer bounding box.
    */
   override onGetBounds(projection: OLProjection, stops: number): Extent | undefined {
@@ -202,22 +209,26 @@ export class GVEsriImage extends AbstractGVRaster {
 }
 
 // Exported for use in ESRI Dynamic raster layers
-export interface TypeEsriImageLayerLegend {
-  layers: {
-    layerId: number | string;
-    layerName: string;
-    layerType: string;
-    minScale: number;
-    maxScale: number;
-    legendType: string;
-    legend: {
-      label: string;
-      url: string;
-      imageData: string;
-      contentType: string;
-      height: number;
-      width: number;
-      values: string[];
-    }[];
-  }[];
-}
+export type TypeEsriImageLayerLegend = {
+  layers: TypeEsriImageLayerLegendLayer[];
+};
+
+export type TypeEsriImageLayerLegendLayer = {
+  layerId: number | string;
+  layerName: string;
+  layerType: string;
+  minScale: number;
+  maxScale: number;
+  legendType: string;
+  legend: TypeEsriImageLayerLegendLayerLegend[];
+};
+
+export type TypeEsriImageLayerLegendLayerLegend = {
+  label: string;
+  url: string;
+  imageData: string;
+  contentType: string;
+  height: number;
+  width: number;
+  values: string[];
+};

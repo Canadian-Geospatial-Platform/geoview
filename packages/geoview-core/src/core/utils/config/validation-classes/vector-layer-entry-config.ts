@@ -1,4 +1,4 @@
-import { CONST_LAYER_ENTRY_TYPES, TypeVectorSourceInitialConfig } from '@/api/config/types/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, TypeLayerMetadataVector, TypeVectorSourceInitialConfig } from '@/api/config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config';
 
 /**
@@ -9,11 +9,11 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
   /** Layer entry data type. */
   override entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
 
-  /** Filter to apply on feature of this layer. */
-  layerFilter?: string;
-
   /** Initial settings to apply to the GeoView vector layer source at creation time. */
   declare source?: TypeVectorSourceInitialConfig;
+
+  /** Filter to apply on feature of this layer. */
+  layerFilter?: string;
 
   /**
    * The class constructor.
@@ -22,5 +22,13 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
   protected constructor(layerConfig: VectorLayerEntryConfig) {
     super(layerConfig);
     Object.assign(this, layerConfig);
+  }
+
+  /**
+   * Helper function to get the layer metadata casted as TypeLayerMetadataVector.
+   * @returns {TypeLayerMetadataVector | undefined} The casted layer metadata in the right type.
+   */
+  getLayerMetadataCasted(): TypeLayerMetadataVector | undefined {
+    return super.getLayerMetadata() as TypeLayerMetadataVector | undefined;
   }
 }

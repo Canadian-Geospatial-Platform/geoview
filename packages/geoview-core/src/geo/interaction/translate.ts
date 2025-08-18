@@ -55,6 +55,7 @@ export class Translate extends Interaction {
 
   /**
    * Starts the interaction on the map.
+   * @override
    */
   override startInteraction(): void {
     // Redirect to super method to start interaction
@@ -63,6 +64,7 @@ export class Translate extends Interaction {
 
   /**
    * Stops the interaction on the map.
+   * @override
    */
   override stopInteraction(): void {
     // Redirect to super method to stop interaction

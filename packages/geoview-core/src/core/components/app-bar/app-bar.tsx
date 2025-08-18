@@ -36,10 +36,8 @@ import Notifications from '@/core/components/notifications/notifications';
 import Version from './buttons/version';
 import { getSxClasses } from './app-bar-style';
 import { enforceArrayOrder, helpClosePanelById, helpOpenPanelById } from './app-bar-helper';
-import { toJsonObject } from '@/api/config/types/config-types';
-import { CV_DEFAULT_APPBAR_CORE, CV_DEFAULT_APPBAR_TABS_ORDER } from '@/api/config/types/config-constants';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
-import { TypeValidAppBarCoreProps } from '@/api/config/types/map-schema-types';
+import { DEFAULT_APPBAR_CORE, DEFAULT_APPBAR_TABS_ORDER, TypeValidAppBarCoreProps } from '@/api/config/types/map-schema-types';
 import { handleEscapeKey } from '@/core/utils/utilities';
 import { Button } from '@/ui/button/button';
 
@@ -110,7 +108,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
       legend: { icon: <LegendIcon />, content: <Legend fullWidth containerType={CONTAINER_TYPE.APP_BAR} /> },
       layers: { icon: <LayersOutlinedIcon />, content: <LayersPanel containerType={CONTAINER_TYPE.APP_BAR} /> },
       'data-table': { icon: <StorageIcon />, content: <Datapanel containerType={CONTAINER_TYPE.APP_BAR} /> },
-    } as unknown as Record<string, GroupPanelType>;
+    } as Record<string, GroupPanelType>;
   }, [interaction]);
 
   const closePanelById = useCallback(
@@ -208,10 +206,10 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const getPanelWidth = useCallback(
     (tab: string): number => {
       let width = 400;
-      if ((tab === CV_DEFAULT_APPBAR_CORE.DATA_TABLE || tab === CV_DEFAULT_APPBAR_CORE.LAYERS) && isMapFullScreen) {
+      if ((tab === DEFAULT_APPBAR_CORE.DATA_TABLE || tab === DEFAULT_APPBAR_CORE.LAYERS) && isMapFullScreen) {
         width = window.screen.width - 65;
       }
-      if ((tab === CV_DEFAULT_APPBAR_CORE.DATA_TABLE || tab === CV_DEFAULT_APPBAR_CORE.LAYERS) && !isMapFullScreen) {
+      if ((tab === DEFAULT_APPBAR_CORE.DATA_TABLE || tab === DEFAULT_APPBAR_CORE.LAYERS) && !isMapFullScreen) {
         width = geoviewElement?.clientWidth ?? 0;
       }
       return width;
@@ -261,14 +259,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
       if (appBarConfig && appBarConfig.tabs.core.includes(pluginName)) {
         Plugin.loadScript(pluginName)
           .then((typePlugin) => {
-            Plugin.addPlugin(
-              pluginName,
-              mapId,
-              typePlugin,
-              toJsonObject({
-                mapId,
-              })
-            ).catch((error: unknown) => {
+            Plugin.addPlugin(pluginName, typePlugin, mapId).catch((error: unknown) => {
               // Log
               logger.logPromiseFailed(`api.plugin.addPlugin in useEffect in app-bar for ${pluginName}`, error);
             });
@@ -295,7 +286,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
     }
 
     appBarConfigTabs
-      .filter((tab) => CV_DEFAULT_APPBAR_TABS_ORDER.includes(tab) && memoPanels[tab])
+      .filter((tab) => DEFAULT_APPBAR_TABS_ORDER.includes(tab) && memoPanels[tab])
       .map((tab): [IconButtonPropsExtend, TypePanelProps, string] => {
         const button: IconButtonPropsExtend = {
           id: tab,
@@ -329,9 +320,9 @@ export function AppBar(props: AppBarProps): JSX.Element {
     logger.logTraceUseMemo('APP-BAR - panels reorder buttons');
 
     let buttonPanelNames = Object.keys(buttonPanels);
-    buttonPanelNames = enforceArrayOrder(buttonPanelNames, CV_DEFAULT_APPBAR_TABS_ORDER);
-    const topPanel = buttonPanelNames.filter((groupName) => groupName !== CV_DEFAULT_APPBAR_CORE.GUIDE);
-    const bottomPanel = buttonPanelNames.filter((groupName) => groupName === CV_DEFAULT_APPBAR_CORE.GUIDE);
+    buttonPanelNames = enforceArrayOrder(buttonPanelNames, DEFAULT_APPBAR_TABS_ORDER);
+    const topPanel = buttonPanelNames.filter((groupName) => groupName !== DEFAULT_APPBAR_CORE.GUIDE);
+    const bottomPanel = buttonPanelNames.filter((groupName) => groupName === DEFAULT_APPBAR_CORE.GUIDE);
 
     return { topPanelNames: topPanel, bottomPanelNames: bottomPanel };
   }, [buttonPanels]);
@@ -380,10 +371,10 @@ export function AppBar(props: AppBarProps): JSX.Element {
       <Box sx={sxClasses.appBarButtons}>
         {renderButtonPanel(topPanelNames)}
         <Box sx={sxClasses.versionButtonDiv}>
-          {appBarComponents.includes(CV_DEFAULT_APPBAR_CORE.EXPORT) && interaction === 'dynamic' && (
+          {appBarComponents.includes(DEFAULT_APPBAR_CORE.EXPORT) && interaction === 'dynamic' && (
             <List sx={sxClasses.appBarList}>
               <ListItem>
-                <ExportButton className={` buttonFilled ${activeModalId === CV_DEFAULT_APPBAR_CORE.EXPORT ? 'active' : ''}`} />
+                <ExportButton className={` buttonFilled ${activeModalId === DEFAULT_APPBAR_CORE.EXPORT ? 'active' : ''}`} />
               </ListItem>
             </List>
           )}
@@ -403,7 +394,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
         // get button panel
         const buttonPanel = buttonPanels[panelName];
         let content = null;
-        if (buttonPanel?.buttonPanelId === CV_DEFAULT_APPBAR_CORE.GEOLOCATOR) {
+        if (buttonPanel?.buttonPanelId === DEFAULT_APPBAR_CORE.GEOLOCATOR) {
           content = buttonPanel?.panel?.content ?? '';
         } else if (buttonPanel?.panel) {
           content = (

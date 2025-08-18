@@ -16,14 +16,12 @@ import {
 } from '@/api/config/types/map-schema-types';
 
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeSourceGeoJSONInitialConfig } from '@/geo/layer/geoview-layers/vector/geojson';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { Projection } from '@/geo/utils/projection';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { TypeJsonObject } from '@/api/config/types/config-types';
 import {
   LayerDataAccessPathMandatoryError,
   LayerNoGeographicDataInCSVError,
@@ -61,6 +59,16 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
     // Redirect
     return this.onCreateVectorSource(layerConfig, {}, {});
+  }
+
+  /**
+   * Overrides the way the metadata is fetched.
+   * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
+   * @returns {Promise<T>} A promise with the metadata or undefined when no metadata for the particular layer type.
+   */
+  protected override onFetchServiceMetadata<T>(): Promise<T> {
+    // None
+    return Promise.resolve(undefined as T);
   }
 
   /**
@@ -108,15 +116,16 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
         // Fetch the data, or use passed geoJSON if present
         const responseText =
-          layerConfig.schemaTag === CONST_LAYER_TYPES.GEOJSON && (layerConfig.source as TypeSourceGeoJSONInitialConfig)?.geojson
-            ? ((layerConfig.source as TypeSourceGeoJSONInitialConfig).geojson as string)
+          layerConfig.getSchemaTagGeoJSON() && layerConfig.source?.geojson
+            ? layerConfig.source.geojson
             : await AbstractGeoViewVector.#fetchData(url, sourceConfig);
 
         // If Esri Feature
-        if (layerConfig.schemaTag === CONST_LAYER_TYPES.ESRI_FEATURE) {
+        if (layerConfig.getSchemaTagEsriFeature()) {
           // Check and throw exception if the content actually contains an embedded error
           // (EsriFeature type of response might return an embedded error inside a 200 HTTP OK)
           Fetch.throwIfResponseHasEmbeddedError(responseText);
+
           // Check if feature count is too large
           if (JSON.parse(responseText).count > MAX_ESRI_FEATURES) {
             this.emitMessage(
@@ -125,6 +134,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
               'error',
               true
             );
+
+            // Throw
             throw new LayerTooManyEsriFeatures(layerConfig.layerId, layerConfig.getLayerName(), JSON.parse(responseText).count);
           }
         }
@@ -207,7 +218,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   ): Promise<Feature[] | undefined> {
     // TODO: Refactor - Consider changing the return type to Promise<Feature[]>
 
-    switch (layerConfig.schemaTag) {
+    switch (layerConfig.getSchemaTag()) {
       case CONST_LAYER_TYPES.CSV:
         // Attempt to convert CSV text to OpenLayers features
         return AbstractGeoViewVector.#convertCsv(responseText, layerConfig, Projection.getProjectionFromString(projection));
@@ -217,10 +228,10 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         const { count } = JSON.parse(responseText);
 
         // Determine the maximum number of records allowed
-        const maxRecords = layerConfig.getLayerMetadata()?.maxRecordCount;
+        const maxRecords = layerConfig.getLayerMetadataCasted()?.maxRecordCount;
 
         // Retrieve the full ESRI feature data
-        const esriData = await AbstractGeoViewVector.#getEsriFeatures(url, count, maxRecords as number | undefined);
+        const esriData = await AbstractGeoViewVector.#getEsriFeatures(url, count, maxRecords);
 
         // Convert each ESRI response chunk to features and flatten the result
         return esriData.flatMap((json) =>
@@ -284,18 +295,13 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {number} featureCount - The number of features in the layer.
    * @param {number} maxRecordCount - The max features per query from the service.
    * @param {number} featureLimit - The maximum number of features to fetch per query.
-   * @returns {Promise<TypeJsonObject[]>} An array of the response text for the features.
+   * @returns {Promise<unknown[]>} An array of the response text for the features.
    * @private
    */
   // GV: featureLimit ideal amount varies with the service and with maxAllowableOffset.
   // TODO: Add options for featureLimit to config
   // TODO: Will need to move with onCreateVectorSource
-  static #getEsriFeatures(
-    url: string,
-    featureCount: number,
-    maxRecordCount?: number,
-    featureLimit: number = 1000
-  ): Promise<TypeJsonObject[]> {
+  static #getEsriFeatures(url: string, featureCount: number, maxRecordCount?: number, featureLimit: number = 1000): Promise<unknown[]> {
     // Update url
     const baseUrl = url.replace('&returnCountOnly=true', `&outfields=*&geometryPrecision=1&maxAllowableOffset=5`);
     const featureFetchLimit = maxRecordCount && maxRecordCount < featureLimit ? maxRecordCount : featureLimit;
@@ -308,7 +314,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     }
 
     // Get array of all the promises
-    const promises = urlArray.map((featureUrl) => Fetch.fetchEsriJsonAsObject(featureUrl));
+    const promises = urlArray.map((featureUrl) => Fetch.fetchEsriJson(featureUrl));
 
     // Return the all promise
     return Promise.all(promises);

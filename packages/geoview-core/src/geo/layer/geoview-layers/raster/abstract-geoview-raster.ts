@@ -1,4 +1,3 @@
-import { TypeJsonObject } from '@/api/config/types/config-types';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import { LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
 import { Fetch } from '@/core/utils/fetch-helper';
@@ -9,42 +8,56 @@ import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geovie
  */
 export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
   /**
-   * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
-   * @returns {Promise<void>} A promise that the execution is completed.
+   * Overrides the way the metadata is fetched.
+   * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
+   * @returns {Promise<T>} A promise with the metadata or undefined when no metadata for the particular layer type.
    */
-  protected override async onFetchAndSetServiceMetadata(): Promise<void> {
+  protected override onFetchServiceMetadata<T>(): Promise<T> {
     // Fetch it
-    const responseJson = await AbstractGeoViewRaster.fetchMetadata(this.metadataAccessPath);
-
-    // Validate the metadata response
-    AbstractGeoViewRaster.throwIfMetatadaHasError(this.geoviewLayerId, this.geoviewLayerName, responseJson);
-
-    // Set it
-    this.metadata = responseJson;
+    return AbstractGeoViewRaster.fetchMetadata<T>(this.metadataAccessPath, this.geoviewLayerId, this.geoviewLayerName);
   }
 
+  // #region STATIC
+
   /**
-   * Fetches the metadata for a typical AbstractGeoViewRaster class.
-   * @param {string} url - The url to query the metadata from.
+   * Fetches and validates metadata from a given URL for a GeoView raster layer.
+   * If the URL does not end with `.json`, the query string `?f=json` is appended to request JSON format.
+   * The response is parsed and checked for service-level errors. If an error is found, an exception is thrown.
+   * @param {string} url - The base URL to fetch the metadata from (e.g., ArcGIS REST endpoint).
+   * @param {string} geoviewLayerId - The unique identifier for the GeoView layer.
+   * @param {string} geoviewLayerName - The display name of the GeoView layer (used in error messages).
+   * @returns {Promise<T>} A promise resolving to the parsed JSON metadata response.
+   * @throws {ServiceError} If the metadata response contains an error.
    */
-  static fetchMetadata(url: string): Promise<TypeJsonObject> {
+  static async fetchMetadata<T>(url: string, geoviewLayerId: string, geoviewLayerName: string): Promise<T> {
     // The url
     const parsedUrl = url.toLowerCase().endsWith('json') ? url : `${url}?f=json`;
 
     // Query and read
-    return Fetch.fetchJsonAsObject(parsedUrl);
+    const responseJson = await Fetch.fetchJson<T>(parsedUrl);
+
+    // Validate the metadata response
+    AbstractGeoViewRaster.throwIfMetatadaHasError(geoviewLayerId, geoviewLayerName, responseJson);
+
+    // Return the response
+    return responseJson;
   }
 
   /**
    * Throws a LayerServiceMetadataUnableToFetchError if the provided metadata has an error in its content.
    * @param {string} geoviewLayerId - The geoview layer id
-   * @param {TypeJsonObject} metadata - The metadata to check
+   * @param {string | undefined} layerName - The layer name
+   * @param {any} metadata - The metadata to check
    */
-  static throwIfMetatadaHasError(geoviewLayerId: string, layerName: string | undefined, metadata: TypeJsonObject): void {
+  // GV The metadata structure can be anything, we only care to check if there's an error inside of it
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  static throwIfMetatadaHasError(geoviewLayerId: string, layerName: string | undefined, metadata: any): void {
     // If there's an error in the content of the response itself
     if ('error' in metadata && metadata.error.message) {
       // Throw the error as read from the metadata error
       throw new LayerServiceMetadataUnableToFetchError(geoviewLayerId, layerName, formatError(metadata.error.message));
     }
   }
+
+  // #endregion
 }

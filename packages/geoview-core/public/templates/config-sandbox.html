@@ -325,7 +325,7 @@
         If the GeoView layer type selected is wrong or unknown, you can force its value to the one you want using the drop-down.<br />
         You can also activate the chekbox to use the drop-down list as a sample URL selector in which case the URL input field is not longer editable.<br />
         <br />
-        When you are ready, click the <b>Create Layer Tree</b> button to call the <b>ConfigApi.createMetadataLayerTree</b> method and displays the resulting layer tree.<br />
+        When you are ready, click the <b>Create Layer Tree</b> button to call the <b>ConfigApi.createInitConfigFromType</b> method and displays the resulting layer tree.<br />
         <br />
         <form>
           <label for="sampleUrlTab4">Use drop-down to get a sample URL</label>
@@ -866,14 +866,14 @@
     // Definition of the samples that will be returned when you click on the 'Get a Sample URL' button.
     const serviceUrlChoicesTab4 = {
       unknown: 'unknown',
-      esriDynamic: 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/',
-      esriFeature: 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_en/MapServer/',
+      esriDynamic: 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer',
+      esriFeature: 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/canada_flood_map_inventory_en/MapServer',
       ogcWms: 'https://geo.weather.gc.ca/geomet',
       esriImage: 'https://www5.agr.gc.ca/atlas/rest/services/imageservices/annual_crop_inventory_2022/ImageServer',
       GeoJSON: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata-new.meta',
       CSV: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/csv-files/Station_List_Minus_HQ-MELCC.csv',
-      ogcFeature: 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev/collections',
-      GeoPackage: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/geopackages/rivers.gpkg',
+      ogcFeature: 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev',
+      // GeoPackage: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/geopackages/rivers.gpkg',
       ogcWfs: 'https://ahocevar.com/geoserver/wfs?REQUEST=GetCapabilities&VERSION=2.0.0&SERVICE=WFS',
       xyzTiles: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
       vectorTiles: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT3978_v11/VectorTileServer/tile/{z}/{y}/{x}.pbf',
@@ -923,6 +923,10 @@
 
     // Get the Create Layer Tree button object and attach to it a listener to trigger the service call
     createLayerConfigButtonTab4.addEventListener('click', async function (e) {
+      // Clear
+      metadataLayerTreeString = '';
+      elementSelectorTab4.dispatchEvent(new Event('change'));
+
       // Get the Geoview layer Type value.
       const layerTypeTab4 = document.getElementById('geoviewLayerTypeTab4').value;
       if (layerTypeTab4 === 'unknown') return;
@@ -942,21 +946,19 @@
 
       try {
         // Call the ConfigApi to get the Layer Tree
-        const metadataLayerTree = await cgpv.api.config.createMetadataLayerTree(
-          serviceUrlAreaTab4.value.trim(),
+        const metadataLayerTree = await cgpv.api.config.createInitConfigFromType(
+          'ExampleID',
+          'Example Name',
           layerTypeTab4,
+          serviceUrlAreaTab4.value.trim(),
           layerListTab4,
           languageTab4
         );
 
         // Output instanciation result
-        metadataLayerTreeString = `${JSON.stringify(metadataLayerTree, (key, value) => {
-          // Only display essential information
-          if (['', 'layerId', 'layerName', 'isLayerGroup', 'listOfLayerEntryConfig'].includes(key)) return value;
-          if (/^\d+$/.test(key)) return value;
-          return undefined;
-        }, 2)}\n`;
-        layerPathErrorFlag = generateLayerPathErrorFlag(metadataLayerTree);
+        metadataLayerTreeString = cgpv.api.layer.serializeGeoviewLayerConfig(metadataLayerTree);
+
+        layerPathErrorFlag = generateLayerPathErrorFlag(metadataLayerTree.listOfLayerEntryConfig);
 
         printMessage(messageTab4, 'Layer tree is valid');
       } catch (error) {

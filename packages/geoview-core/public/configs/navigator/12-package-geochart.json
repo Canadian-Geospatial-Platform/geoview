@@ -33,17 +33,6 @@
         ]
       },
       {
-        "geoviewLayerId": "shellfish_sites",
-        "geoviewLayerName": "Shellfish Sites",
-        "metadataAccessPath": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/Shellfish_Sites_Samples_Mollusques_Echantillons/MapServer",
-        "geoviewLayerType": "esriFeature",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "1"
-          }
-        ]
-      },
-      {
         "geoviewLayerId": "ogcFeatureLakes",
         "geoviewLayerName": "Large Lakes",
         "metadataAccessPath": "https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev",

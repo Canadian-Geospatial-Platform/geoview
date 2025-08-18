@@ -169,7 +169,7 @@ export default function ExportModal(): JSX.Element {
               setActiveAppBarTab('legend', false, false);
               disableFocusTrap();
             })
-            .catch((error) => {
+            .catch((error: unknown) => {
               // Clean up on error too
               document.body.removeChild(tempContainer);
               setIsMapExporting(false);

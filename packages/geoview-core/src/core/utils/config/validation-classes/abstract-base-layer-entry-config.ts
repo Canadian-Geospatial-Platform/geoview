@@ -1,33 +1,24 @@
 /* eslint-disable no-underscore-dangle */
 // ? we escape all private attribute in this file
 import {
-  TypeBaseVectorSourceInitialConfig,
-  TypeSourceImageEsriInitialConfig,
-  TypeSourceImageInitialConfig,
-  TypeSourceImageStaticInitialConfig,
-  TypeSourceWmsInitialConfig,
-  TypeSourceTileInitialConfig,
   TypeLayerStyleConfig,
   TypeStyleGeometry,
   TypeLayerStyleSettings,
-  TypeVectorSourceInitialConfig,
-  TypeVectorTileSourceInitialConfig,
-  TypeGeojsonSourceInitialConfig,
+  TypeBaseSourceInitialConfig,
 } from '@/api/config/types/map-schema-types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
-import { TypeJsonObject } from '@/api/config/types/config-types';
+import { TimeDimension } from '@/core/utils/date-mgt';
 import { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
-import { TimeDimension } from '@/app';
 
 /**
  * Base type used to define a GeoView layer to display on the map.
  */
 export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /** The metadata associated with the service */
-  #serviceMetadata?: TypeJsonObject;
+  #serviceMetadata?: unknown;
 
   /** The metadata associated with the layer */
-  #layerMetadata?: TypeJsonObject;
+  #layerMetadata?: unknown;
 
   /** The time dimension information */
   #temporalDimension?: TimeDimension;
@@ -36,58 +27,52 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   #attributions: string[] = [];
 
   /** The calculated filter equation */
-  filterEquation?: FilterNodeType[];
+  #filterEquation?: FilterNodeType[];
 
   /** Indicates if filter is on/off */
-  legendFilterIsOff: boolean = false;
-
-  /** Source settings to apply to the GeoView layer source at creation time. */
-  source?:
-    | TypeBaseVectorSourceInitialConfig
-    | TypeSourceTileInitialConfig
-    | TypeVectorSourceInitialConfig
-    | TypeGeojsonSourceInitialConfig
-    | TypeVectorTileSourceInitialConfig
-    | TypeSourceImageInitialConfig
-    | TypeSourceWmsInitialConfig
-    | TypeSourceImageEsriInitialConfig
-    | TypeSourceImageStaticInitialConfig;
+  // TODO: Cleanup - Get rid of this attribute as it doesn't seem to be used (always false)
+  #legendFilterIsOff: boolean = false;
 
   /** Style to apply to the vector layer. */
-  layerStyle?: TypeLayerStyleConfig = undefined;
+  layerStyle?: TypeLayerStyleConfig;
+
+  /** Source settings to apply to the GeoView layer source at creation time. */
+  // TODO: This source attribute is responsible for problems. Change to a getSource() and setSource().
+  // TO.DOCONT: However, to do so, we must fix the other major issue with TypeGeoviewLayerConfig and TypeLayerEntryConfig and the classes being created with 'fake classes' in their constructors.
+  source?: TypeBaseSourceInitialConfig;
 
   /** The listOfLayerEntryConfig attribute is not used by child of AbstractBaseLayerEntryConfig. */
   declare listOfLayerEntryConfig: never;
 
   /**
    * Gets the service metadata that is associated to the service.
-   * @returns {TypeJsonObject} The service metadata.
+   * @returns {unknown | undefined} The service metadata.
    */
-  getServiceMetadata(): TypeJsonObject | undefined {
+  getServiceMetadata(): unknown | undefined {
     return this.#serviceMetadata;
   }
 
   /**
    * Sets the service metadata for the layer.
-   * @param {TypeJsonObject} metadata - The service metadata to set
+   * @param {unknown} metadata - The service metadata to set
    */
-  setServiceMetadata(metadata: TypeJsonObject): void {
+  setServiceMetadata(metadata: unknown): void {
     this.#serviceMetadata = metadata;
   }
 
   /**
    * Gets the metadata that is associated to the layer.
-   * @returns {TypeJsonObject} The layer metadata.
+   * @returns {unknown} The layer metadata.
    */
-  getLayerMetadata(): TypeJsonObject | undefined {
+  getLayerMetadata(): unknown | undefined {
     return this.#layerMetadata;
   }
 
   /**
    * Sets the layer metadata for the layer.
-   * @param {TypeJsonObject} layerMetadata - The layer metadata to set
+   * @param {unknown} layerMetadata - The layer metadata to set
    */
-  setLayerMetadata(layerMetadata: TypeJsonObject): void {
+  setLayerMetadata(layerMetadata: unknown): void {
     this.#layerMetadata = layerMetadata;
   }
 
@@ -124,6 +109,38 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   }
 
   /**
+   * Gets the layer filter equation
+   * @returns {FilterNodeType[] | undefined} The filter equation if any
+   */
+  getFilterEquation(): FilterNodeType[] | undefined {
+    return this.#filterEquation;
+  }
+
+  /**
+   * Sets the layer filter equation
+   * @param {FilterNodeType[]?} filterEquation - The layer filter equation
+   */
+  setFilterEquation(filterEquation: FilterNodeType[] | undefined): void {
+    this.#filterEquation = filterEquation;
+  }
+
+  /**
+   * Gets the layer legend filter is off flag
+   * @returns {boolean} The legend filter is off flag
+   */
+  getLegendFilterIsOff(): boolean {
+    return this.#legendFilterIsOff || false;
+  }
+
+  /**
+   * Sets the layer legend filter is off flag
+   * @param {boolean} legendFilterIsOff - The legend filter is off flag
+   */
+  setLegendFilterIsOff(legendFilterIsOff: boolean): void {
+    this.#legendFilterIsOff = legendFilterIsOff;
+  }
+
+  /**
    * The TypeStyleGeometries associated with the style as could be read from the layer config metadata.
    * @returns {TypeStyleGeometry[]} The array of TypeStyleGeometry
    */
@@ -149,16 +166,19 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   }
 
   /**
-   * Overrides the serialization of the mother class
-   * @returns {TypeJsonValue} The serialized TypeBaseLayerEntryConfig
+   * Overrides the toJson of the mother class
+   * @returns {unknown} The Json representation of the instance.
+   * @protected
    */
-  override onSerialize(): TypeJsonObject {
+  protected override onToJson(): unknown {
     // Call parent
-    // Can be any object so disable eslint
+    // GV Can be any object so disable eslint and proceed with caution
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const serialized = super.onSerialize() as any;
+    const serialized = super.onToJson() as any;
+
     // Copy values
     serialized.initialSettings = this.initialSettings;
+    serialized.attributions = this.getAttributions();
     serialized.source = this.source;
 
     // Return it

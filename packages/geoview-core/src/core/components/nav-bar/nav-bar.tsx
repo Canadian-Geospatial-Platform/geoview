@@ -22,9 +22,8 @@ import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from './nav-bar-panel-button';
 
-import { toJsonObject } from '@/api/config/types/config-types';
 import { TypeValidNavBarProps } from '@/api/config/types/map-schema-types';
-import { api } from '@/app';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 type NavBarProps = {
   api: NavBarApi;
@@ -67,6 +66,9 @@ export function NavBar(props: NavBarProps): JSX.Element {
 
   // Ref
   const navBarRef = useRef<HTMLDivElement>(null);
+
+  // The MapViewer
+  const mapViewer = MapEventProcessor.getMapViewer(mapId);
 
   // State
   const [buttonPanelGroups, setButtonPanelGroups] = useState<NavButtonGroups>(defaultButtonGroups);
@@ -146,15 +148,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
       if (navBarComponents.includes(pluginName)) {
         Plugin.loadScript(pluginName)
           .then((typePlugin) => {
-            Plugin.addPlugin(
-              pluginName,
-              mapId,
-              typePlugin,
-              toJsonObject({
-                mapId,
-                viewer: api.getMapViewer(mapId),
-              })
-            ).catch((error: unknown) => {
+            Plugin.addPlugin(pluginName, typePlugin, mapId).catch((error: unknown) => {
               // Log
               logger.logPromiseFailed(`api.plugin.addPlugin in useEffect in nav-bar for ${pluginName}`, error);
             });
@@ -168,7 +162,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
 
     // Process drawer plugin if it's in the navBar
     processPlugin('drawer');
-  }, [navBarComponents, mapId]);
+  }, [navBarComponents, mapId, mapViewer]);
 
   useEffect(() => {
     // Log

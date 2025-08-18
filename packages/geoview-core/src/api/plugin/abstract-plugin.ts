@@ -3,18 +3,8 @@ import type { createRoot } from 'react-dom/client';
 import type i18next from 'react-i18next';
 import type { useTheme } from '@mui/material/styles';
 
-import { API } from '@/api/api';
 import { MapViewer } from '@/geo/map/map-viewer';
-import { TypeJsonObject, AnySchemaObject } from '@/api/config/types/config-types';
 import { logger } from '@/core/utils/logger';
-
-/**
- * interface used by all plugins to define their options.
- */
-export type TypePluginOptions = {
-  mapId: string;
-  viewer: MapViewer;
-};
 
 /**
  * Plugin abstract base class.
@@ -23,14 +13,14 @@ export abstract class AbstractPlugin {
   // Id of the plugin
   pluginId: string;
 
+  // The map viewer for the plugin
+  mapViewer: MapViewer;
+
   // Plugin properties
-  pluginProps: TypePluginOptions;
+  pluginProps?: unknown;
 
   // Plugin config object.
-  #configObj: TypeJsonObject = {};
-
-  // Plugin api object.
-  api: API;
+  #configObj: unknown = {};
 
   // Plugin react object.
   react: typeof React;
@@ -47,14 +37,14 @@ export abstract class AbstractPlugin {
   /**
    * Creates an instance of the plugin.
    * @param {string} pluginId - Unique identifier for the plugin instance.
-   * @param {TypePluginOptions} props - The plugin options and properties.
-   * @param {API} api - API object providing access to core functionality.
+   * @param {MapViewer} mapViewer - The map viewer
+   * @param {unknown | undefined} props - Optional plugin options and properties.
    */
   // GV Do not edit the constructor params without editing the plugin.ts dynamic constructor call looking like 'new (constructor as any)'
-  constructor(pluginId: string, props: TypePluginOptions, api: API) {
+  constructor(pluginId: string, mapViewer: MapViewer, props: unknown | undefined) {
     this.pluginId = pluginId;
+    this.mapViewer = mapViewer;
     this.pluginProps = props;
-    this.api = api;
     this.react = window.cgpv.reactUtilities.react;
     this.createRoot = window.cgpv.reactUtilities.createRoot;
     this.translate = window.cgpv.translate;
@@ -63,9 +53,9 @@ export abstract class AbstractPlugin {
 
   /**
    * Sets the config (which happens post creation)
-   * @param {TypeJsonObject} config - The config
+   * @param {unknown} config - The config
    */
-  setConfig(config: TypeJsonObject): void {
+  setConfig(config: unknown): void {
     this.#configObj = config;
   }
 
@@ -75,14 +65,6 @@ export abstract class AbstractPlugin {
    */
   getConfig(): unknown {
     return this.#configObj;
-  }
-
-  /**
-   * Returns the MapViewer used by this Plugin
-   * @returns MapViewer The MapViewer used by this Plugin
-   */
-  mapViewer(): MapViewer {
-    return this.api.getMapViewer(this.pluginProps.mapId);
   }
 
   /**
@@ -96,19 +78,19 @@ export abstract class AbstractPlugin {
   /**
    * Must override function to get the schema validator
    */
-  abstract schema(): AnySchemaObject;
+  abstract schema(): unknown;
 
   /**
    * Must override function to get the default config
    */
-  abstract defaultConfig(): TypeJsonObject;
+  abstract defaultConfig(): unknown;
 
   /**
    * Overridable function to get the translations object for the Plugin.
-   * @returns {TypeJsonObject} The translations object
+   * @returns {Record<string, unknown>} The translations object
    */
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  defaultTranslations(): TypeJsonObject {
+  defaultTranslations(): Record<string, unknown> {
     return {}; // Default empty
   }
 
@@ -137,7 +119,7 @@ export abstract class AbstractPlugin {
    */
   add(): void {
     // Log
-    logger.logInfo(`Plugin '${this.pluginId}' loaded, adding it on map ${this.pluginProps.mapId}`);
+    logger.logInfo(`Plugin '${this.pluginId}' loaded, adding it on map ${this.mapViewer.mapId}`);
 
     // Add
     this.onAdd();
@@ -146,7 +128,7 @@ export abstract class AbstractPlugin {
     this.onAdded?.();
 
     // Log
-    logger.logInfo(`Plugin '${this.pluginId}' loaded, and added to map ${this.pluginProps.mapId}`);
+    logger.logInfo(`Plugin '${this.pluginId}' loaded, and added to map ${this.mapViewer.mapId}`);
   }
 
   /**
@@ -154,7 +136,7 @@ export abstract class AbstractPlugin {
    */
   remove(): void {
     // Log
-    logger.logInfo(`Plugin '${this.pluginId}' being removed from map ${this.pluginProps.mapId}`);
+    logger.logInfo(`Plugin '${this.pluginId}' being removed from map ${this.mapViewer.mapId}`);
 
     // Remove
     this.onRemove();
@@ -163,6 +145,6 @@ export abstract class AbstractPlugin {
     this.onRemoved?.();
 
     // Log
-    logger.logInfo(`Plugin '${this.pluginId}' removed from map ${this.pluginProps.mapId}`);
+    logger.logInfo(`Plugin '${this.pluginId}' removed from map ${this.mapViewer.mapId}`);
   }
 }
