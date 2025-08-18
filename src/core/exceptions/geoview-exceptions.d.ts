@@ -131,6 +131,15 @@ export declare class BasemapTakingLongTimeError extends GeoViewError {
     constructor();
 }
 /**
+ * Error thrown when a basemap layer creation fails.
+ */
+export declare class BasemapLayerCreationError extends GeoViewError {
+    /**
+     * Constructs a BasemapLayerCreationError error for the specified map ID.
+     */
+    constructor(basemapType: string);
+}
+/**
  * Custom error class representing a failure to retrieve geographic bounds
  * for a specific map layer.
  * @extends {GeoViewError}

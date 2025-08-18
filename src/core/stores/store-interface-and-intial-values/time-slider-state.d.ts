@@ -1,6 +1,6 @@
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { DatePrecision, TimePrecision } from '@/core/utils/date-mgt';
+import { DatePrecision, TimeDimension, TimePrecision } from '@/core/utils/date-mgt';
 type TimeSliderActions = ITimeSliderState['actions'];
 export interface ITimeSliderState {
     timeSliderLayers: TimeSliderLayerSet;
@@ -66,7 +66,16 @@ export interface TypeTimeSliderValues {
     values: number[];
     displayPattern: [DatePrecision, TimePrecision];
 }
-export declare const useTimeSliderLayers: () => TimeSliderLayerSet;
+export type TypeTimeSliderProps = {
+    layerPaths: string[];
+    title: string;
+    description: string;
+    locked: boolean;
+    reversed: boolean;
+    defaultValue: string;
+    temporalDimension: TimeDimension;
+};
+export declare const useTimeSliderLayers: () => TimeSliderLayerSet | undefined;
 export declare const useTimeSliderSelectedLayerPath: () => string;
 export declare const useTimeSliderFilters: () => Record<string, string>;
 export declare const useTimeSliderStoreActions: () => TimeSliderActions;
