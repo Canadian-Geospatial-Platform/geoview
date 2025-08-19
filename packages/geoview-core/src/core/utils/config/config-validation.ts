@@ -328,6 +328,11 @@ export class ConfigValidation {
         );
       }
 
+      // Make sure visible is set so it is not overridden by parent layer
+      if (!layerConfig.initialSettings) layerConfig.initialSettings = { states: { visible: true } };
+      if (!layerConfig.initialSettings.states) layerConfig.initialSettings.states = { visible: true };
+      if (layerConfig.initialSettings?.states?.visible !== false) layerConfig.initialSettings.states.visible = true;
+
       if (layerConfig.minScale) {
         layerConfig.minScale = Math.min(layerConfig.minScale, parentLayerConfig?.minScale || Infinity);
       }

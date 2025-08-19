@@ -1192,10 +1192,6 @@ export class LayerApi {
     // Get registered layer config
     const layer = this.getGeoviewLayer(layerPath);
 
-    if (visibility && !MapEventProcessor.getMapVisibilityFromOrderedLayerInfo(this.getMapId(), layerPath)) {
-      MapEventProcessor.setOrToggleMapLayerVisibility(this.getMapId(), layerPath, true);
-    }
-
     // If the layer is a regular layer (not a group)
     if (layer instanceof AbstractGVLayer) {
       // Assign value to registered layer. This is use by applyFilter function to set visibility

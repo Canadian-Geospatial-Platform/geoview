@@ -50,9 +50,6 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   /** The default loading period before we show a message to the user about a layer taking a long time to render on map */
   static readonly DEFAULT_LOADING_PERIOD: number = 8 * 1000; // 8 seconds
 
-  /** Indicates if the layer has become in loaded status at least once already */
-  loadedOnce: boolean = false;
-
   /** Counts the number of times the loading happened. */
   loadingCounter: number = 0;
 
