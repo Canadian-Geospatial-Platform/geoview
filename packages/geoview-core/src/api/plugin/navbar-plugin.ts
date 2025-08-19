@@ -8,6 +8,7 @@ export type TypeNavBarButtonConfig = {
   buttonProps: IconButtonPropsExtend;
   panelProps?: TypePanelProps;
   groupName: string;
+  groupConfig?: { accordionThreshold?: number };
 };
 
 /**
@@ -56,6 +57,15 @@ export abstract class NavBarPlugin extends AbstractPlugin {
     // Create button props
     logger.logInfo('NavBar Plugin - Default onAdd');
     const buttonConfigs = this.onCreateButtonConfigs();
+
+    // Set group configurations first
+    const processedGroups = new Set<string>();
+    Object.values(buttonConfigs).forEach((config) => {
+      if (config.groupConfig && !processedGroups.has(config.groupName)) {
+        this.mapViewer.navBarApi.setGroupConfig(config.groupName, config.groupConfig);
+        processedGroups.add(config.groupName);
+      }
+    });
 
     // Create buttons and panels based on configs
     Object.entries(buttonConfigs).forEach(([key, config]) => {

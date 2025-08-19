@@ -14,6 +14,16 @@ export type TypeButtonPanelProps = {
 };
 
 /**
+ * Configuration for button groups
+ */
+export type TypeButtonGroupConfig = {
+  /** Group name */
+  groupName: string;
+  /** Threshold for accordion expansion (default: 4) */
+  accordionThreshold?: number;
+};
+
+/**
  * type for the panel properties used when creating a new panel.
  */
 export type TypePanelProps = {

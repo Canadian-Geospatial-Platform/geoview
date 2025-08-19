@@ -1,4 +1,5 @@
 import OLMap from 'ol/Map';
+import { Overlay, MapBrowserEvent } from 'ol';
 import { Pointer as OLPointer } from 'ol/interaction';
 import Collection from 'ol/Collection';
 import Feature from 'ol/Feature';
@@ -8,7 +9,6 @@ import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import { Coordinate } from 'ol/coordinate';
 import { Extent, getCenter } from 'ol/extent';
-import { MapBrowserEvent } from 'ol';
 
 import { TransformEvent, TransformSelectionEvent, TransformDeleteFeatureEvent } from './transform-events';
 import { MapViewer } from '@/app';
@@ -151,7 +151,7 @@ export enum HandleType {
 export interface TransformBaseOptions {
   features?: Collection<Feature>;
   source?: VectorSource;
-  translateFeature?: boolean;
+  translate?: boolean;
   scale?: boolean;
   rotate?: boolean;
   stretch?: boolean;
@@ -226,6 +226,24 @@ export class OLTransform extends OLPointer {
   /** Flag to track if a vertex was already added during this drag operation */
   #vertexAdded = false;
 
+  /** Text editing overlay for text features */
+  #textEditOverlay?: Overlay;
+
+  /** Flag to track if text editor is active */
+  #isTextEditing = false;
+
+  /** Text editor element reference */
+  #textEditorElement?: HTMLDivElement;
+
+  /** Original feature style (to restore after editing) */
+  #originalTextStyle?: Style;
+
+  /** Original text extent when scaling starts */
+  #originalTextExtent?: Extent;
+
+  /** Original text size when scaling starts */
+  #originalTextSize?: number;
+
   /** History stack for undo/redo functionality */
   #geometryHistory: Geometry[] = [];
 
@@ -256,7 +274,7 @@ export class OLTransform extends OLPointer {
     super();
 
     this.options = {
-      translateFeature: true,
+      translate: true,
       scale: true,
       rotate: true,
       stretch: true,
@@ -310,6 +328,9 @@ export class OLTransform extends OLPointer {
   selectFeature(feature: Feature<Geometry>): void {
     const previousFeature = this.selectedFeature;
 
+    // Hide any existing text editor
+    this.#hideTextEditor();
+
     // Clear history when changing selection
     this.#clearHistory();
 
@@ -324,7 +345,6 @@ export class OLTransform extends OLPointer {
       this.onSelectionChange(new TransformSelectionEvent('selectionchange', previousFeature, feature));
     }
 
-    // Create handles for the feature
     this.createHandles();
   }
 
@@ -361,6 +381,7 @@ export class OLTransform extends OLPointer {
       this.onSelectionChange(new TransformSelectionEvent('selectionchange', this.selectedFeature, undefined));
     }
 
+    this.#hideTextEditor();
     this.#clearHistory();
     this.clearHandles();
     this.selectedFeature = undefined;
@@ -491,6 +512,12 @@ export class OLTransform extends OLPointer {
   createHandles(): void {
     if (!this.selectedFeature) return;
 
+    // For text features, show text editor instead of handles
+    if (this.#isTextFeature()) {
+      this.#createTextHandles();
+      return;
+    }
+
     const geometry = this.selectedFeature.getGeometry();
     if (!geometry) return;
 
@@ -498,7 +525,7 @@ export class OLTransform extends OLPointer {
     if (geometry instanceof Point) {
       if (this.options.enableDelete) {
         const coords = geometry.getCoordinates();
-        const offset = this.#getMapBasedPadding();
+        const offset = this.#getMapBasedPadding() * 2;
         this.createHandle([coords[0] + offset, coords[1] + offset], HandleType.DELETE);
       }
       return;
@@ -868,6 +895,12 @@ export class OLTransform extends OLPointer {
     // Update the feature with the new geometry
     this.selectedFeature.setGeometry(geometry);
 
+    // Update text editor overlay position if it exists
+    if (this.#textEditOverlay && this.#isTextFeature()) {
+      const newCoords = (geometry as Point).getCoordinates();
+      this.#textEditOverlay.setPosition(newCoords);
+    }
+
     // Update the center
     if (this.center) {
       this.center = [this.center[0] + deltaX, this.center[1] + deltaY];
@@ -920,6 +953,12 @@ export class OLTransform extends OLPointer {
    */
   handleScale(coordinate: Coordinate, handleType: HandleType, ctrlKey: boolean = false): void {
     if (!this.selectedFeature || !this.startGeometry) return;
+
+    // Handle text scaling differently
+    if (this.#isTextFeature()) {
+      this.#handleTextScale(coordinate, handleType);
+      return;
+    }
 
     // Get the extent of the original geometry
     const extent = this.startGeometry.getExtent();
@@ -1059,6 +1098,46 @@ export class OLTransform extends OLPointer {
   }
 
   /**
+   * Handle all events, including double-click
+   * @param {MapBrowserEvent} event - The map browser event.
+   * @returns {boolean} Whether the event was handled.
+   */
+  override handleEvent(event: MapBrowserEvent<PointerEvent>): boolean {
+    if (event.type === 'dblclick') {
+      return this.#handleDoubleClick(event);
+    }
+    return super.handleEvent(event);
+  }
+
+  /**
+   * Handle double-click events for text editing
+   * @param {MapBrowserEvent} event - The map browser event.
+   * @returns {boolean} Whether the event was handled.
+   */
+  #handleDoubleClick(event: MapBrowserEvent<PointerEvent>): boolean {
+    const { map } = event;
+    const features = map.getFeaturesAtPixel(event.pixel);
+
+    if (features && features.length > 0) {
+      const feature = features[0] as Feature;
+      if (this.features.getArray().includes(feature) && this.#isTextFeature(feature)) {
+        // Prevent default zoom behaviour
+        event.preventDefault();
+        event.stopPropagation();
+
+        // Select the feature if not already selected
+        if (this.selectedFeature !== feature) {
+          this.selectFeature(feature);
+        }
+        // Show text editor
+        this.#showTextEditor();
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
    * Handle Click Events
    * @param {MapBrowserEvent} event - The map browser event.
    * @override
@@ -1076,6 +1155,7 @@ export class OLTransform extends OLPointer {
       // Check if we clicked on a handle
       const handleFeature = this.#getHandleAtCoordinate(coordinate, map);
       const handleType = handleFeature?.get('handleType') as HandleType;
+
       if (handleFeature && handleType !== HandleType.BOUNDARY && handleType !== HandleType.ROTATE_LINE) {
         // Handle delete action
         if (handleType === HandleType.DELETE) {
@@ -1110,21 +1190,18 @@ export class OLTransform extends OLPointer {
           if (handleType === HandleType.EDGE_MIDPOINT) {
             this.handleAddVertex(coordinate, handleFeature);
             this.#vertexAdded = true;
-            // Convert to vertex drag after adding
             this.#transformType = HandleType.VERTEX;
-            // Find the newly created vertex handle
             const edgeIndex = handleFeature.get('edgeIndex');
             this.currentHandle.set('vertexIndex', edgeIndex + 1);
           }
 
-          // Dispatch transform start event
           this.onTransformstart?.(new TransformEvent('transformstart', this.selectedFeature));
         }
 
         return true;
       }
 
-      // Check if we clicked on a feature to select it and / or move it
+      // Check if we clicked on a feature to select it
       const features = map.getFeaturesAtPixel(event.pixel);
 
       if (features && features.length > 0) {
@@ -1132,27 +1209,47 @@ export class OLTransform extends OLPointer {
         if (this.features.getArray().includes(feature)) {
           // Only select if it's a different feature
           if (this.selectedFeature !== feature) {
-            this.selectFeature(feature); // calls this.onSelectionChange()
+            this.selectFeature(feature);
           }
 
-          // Start translation / moving entire feature
-          if (this.options.translateFeature) {
+          // Start translation for non-text features or when not text editing
+          if (this.options.translate) {
             this.startCoordinate = coordinate;
             this.startGeometry = feature.getGeometry()?.clone();
             this.#transformType = HandleType.TRANSLATE;
             this.#isTransforming = true;
 
-            // Clear Handles
-            this.clearHandles();
+            if (this.#isTextFeature(this.selectedFeature)) {
+              this.#originalTextExtent = this.#calculateTextExtent()!;
+              this.#originalTextSize = this.selectedFeature?.get('textSize') || 14;
+            }
 
-            // Dispatch transform start event since we have started moving the feature
+            this.clearHandles();
             this.onTransformstart?.(new TransformEvent('transformstart', feature));
             return true;
           }
         }
       }
 
-      // If we get here, we didn't click on a handle or feature and the selection should be cleared
+      // Also check if we're clicking on the currently selected text feature (even if hidden)
+      if (this.selectedFeature && this.#isTextFeature(this.selectedFeature) && this.#isTextEditing) {
+        // Check if click is within text bounds
+        const textExtent = this.#calculateTextExtent();
+        if (textExtent) {
+          const [minX, minY, maxX, maxY] = textExtent;
+          if (coordinate[0] >= minX && coordinate[0] <= maxX && coordinate[1] >= minY && coordinate[1] <= maxY) {
+            // Click is within text bounds, don't clear selection
+            return true;
+          }
+        }
+      }
+
+      // If we get here and text editing is active, apply changes and clear selection
+      if (this.#isTextEditing) {
+        this.#applyTextChanges();
+      }
+
+      // Clear selection if clicking elsewhere
       if (this.selectedFeature) {
         this.clearSelection();
       }
@@ -1239,8 +1336,38 @@ export class OLTransform extends OLPointer {
           this.#saveToHistory();
         }
 
-        // Update handles to match the new geometry position
-        this.updateHandles();
+        // For text features, update handles to match new text size
+        if (this.#isTextFeature()) {
+          // Apply final style update
+          const finalSize = this.selectedFeature.get('textSize') || 14;
+          const isBold = this.selectedFeature.get('textBold') || false;
+          const isItalic = this.selectedFeature.get('textItalic') || false;
+          const currentText = this.selectedFeature.get('text') || 'Text';
+
+          const finalStyle = new Style({
+            text: new Text({
+              text: currentText,
+              fill: new Fill({ color: this.selectedFeature.get('textColor') || '#000000' }),
+              stroke: new Stroke({
+                color: this.selectedFeature.get('textHaloColor') || 'rgba(255,255,255,0.7)',
+                width: this.selectedFeature.get('textHaloWidth') || 3,
+              }),
+              font: `${isItalic ? 'italic ' : ''}${isBold ? 'bold ' : ''}${finalSize}px ${this.selectedFeature.get('textFont') || 'Arial'}`,
+            }),
+          });
+
+          this.selectedFeature.setStyle(finalStyle);
+
+          // Clear cached values
+          this.#originalTextExtent = undefined;
+          this.#originalTextSize = undefined;
+
+          // Update handles
+          this.#createTextHandles();
+        } else {
+          // Update handles to match the new geometry position
+          this.updateHandles();
+        }
 
         // Dispatch transform end event
         this.onTransformend?.(new TransformEvent('transformend', this.selectedFeature));
@@ -1288,7 +1415,7 @@ export class OLTransform extends OLPointer {
         const features = map.getFeaturesAtPixel(event.pixel);
         if (features && features.length > 0) {
           const feature = features[0] as Feature;
-          if (this.features.getArray().includes(feature) && this.options.translateFeature) {
+          if (this.features.getArray().includes(feature) && this.options.translate) {
             map.getTargetElement().style.cursor = 'move';
             return;
           }
@@ -1369,6 +1496,339 @@ export class OLTransform extends OLPointer {
     // Recreate handles after adding vertex
     // this.updateHandles();
     this.clearHandles();
+  }
+
+  // #region Text Editing
+
+  /**
+   * Checks if a feature is a text feature
+   * @returns {boolean} True if it's a text feature
+   */
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  #isTextFeature(feature?: Feature): boolean {
+    return (feature || this.selectedFeature)?.get('text') !== undefined;
+  }
+
+  /**
+   * Creates a simple text editor for text features
+   */
+  #showTextEditor(): void {
+    if (!this.mapViewer?.map || this.#textEditOverlay || !this.selectedFeature) return;
+
+    const geometry = this.selectedFeature.getGeometry();
+    if (!(geometry instanceof Point)) return;
+
+    const position = geometry.getCoordinates();
+    const currentText = this.selectedFeature.get('text') || 'Text';
+    const currentSize = this.selectedFeature.get('textSize') || 14;
+    const currentColor = this.selectedFeature.get('textColor') || '#000000';
+    const currentFont = this.selectedFeature.get('textFont') || 'Arial';
+
+    // Hide the original text on the map by assigning an empty text style
+    this.#originalTextStyle = this.selectedFeature.getStyle() as Style;
+    this.selectedFeature.setStyle(
+      new Style({
+        text: new Text({ text: '' }),
+      })
+    );
+
+    // Create simple text editor element
+    this.#textEditorElement = document.createElement('div');
+    this.#textEditorElement.contentEditable = 'true';
+    this.#textEditorElement.textContent = currentText;
+    this.#textEditorElement.style.cssText = `
+    background: rgba(255, 255, 255, 0.3);
+    border: 2px solid #007cba;
+    border-radius: 3px;
+    border: none;
+    padding: 4px;
+    font-size: ${currentSize}px;
+    font-family: ${currentFont};
+    color: ${currentColor};
+    outline: none;
+    cursor: text;
+    white-space: nowrap;
+    min-width: 50px;
+  `;
+
+    // Create overlay positioned to match map text exactly
+    this.#textEditOverlay = new Overlay({
+      element: this.#textEditorElement,
+      positioning: 'center-center',
+      offset: [0, 0], // Match the original text offsetY
+      stopEvent: false,
+    });
+
+    this.#textEditOverlay.setPosition(position);
+    this.mapViewer.map.addOverlay(this.#textEditOverlay);
+    this.#isTextEditing = true;
+
+    // Add keyboard shortcuts
+    this.#textEditorElement.addEventListener('keydown', (e) => {
+      if (!this.selectedFeature) return;
+      if (e.ctrlKey || e.metaKey) {
+        switch (e.key.toLowerCase()) {
+          case 'b':
+            e.preventDefault();
+            this.#toggleBold();
+            this.onTransformend?.(new TransformEvent('transformend', this.selectedFeature));
+            break;
+          case 'i':
+            e.preventDefault();
+            this.#toggleItalic();
+            this.onTransformend?.(new TransformEvent('transformend', this.selectedFeature));
+            break;
+          default:
+            return;
+        }
+      }
+
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        this.#applyTextChanges();
+        this.onTransformend?.(new TransformEvent('transformend', this.selectedFeature));
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        this.#cancelTextEditing();
+      }
+    });
+
+    // Focus and select text
+    setTimeout(() => {
+      if (this.#textEditorElement) {
+        this.#textEditorElement.focus();
+        const selection = window.getSelection();
+        if (selection) {
+          const range = document.createRange();
+          range.selectNodeContents(this.#textEditorElement);
+          selection.removeAllRanges();
+          selection.addRange(range);
+        }
+      }
+    }, 100);
+  }
+
+  /**
+   * Calculates the visual extent of text based on its properties
+   * @param {Feature} feature - The text feature
+   * @returns {Extent | null} The text extent or null if calculation fails
+   */
+  /**
+   * Calculates the visual extent of text based on its properties
+   * @returns {Extent | null} The text extent or null if calculation fails
+   */
+  #calculateTextExtent(): Extent | null {
+    if (!this.selectedFeature) return null;
+
+    const geometry = this.selectedFeature.getGeometry();
+    if (!(geometry instanceof Point)) return null;
+
+    const coords = geometry.getCoordinates();
+    const text = this.selectedFeature.get('text') || 'Text';
+    const fontSize = this.selectedFeature.get('textSize') || 14;
+
+    const resolution = this.mapViewer?.map?.getView().getResolution() || 1;
+
+    const charWidth = fontSize * 0.6;
+    const textWidth = text.length * charWidth;
+    const textHeight = fontSize * 1.2;
+
+    const mapWidth = textWidth * resolution;
+    const mapHeight = textHeight * resolution;
+
+    // Text is centered horizontally
+    const textCenterY = coords[1];
+    const textLeft = coords[0] - mapWidth / 2.5;
+    const textRight = coords[0] + mapWidth / 2.5;
+    const textBottom = textCenterY - mapHeight / 1.25;
+    const textTop = textCenterY + mapHeight / 1.25;
+
+    return [textLeft, textBottom, textRight, textTop];
+  }
+
+  /**
+   * Handles scaling for text features
+   * @param {Coordinate} coordinate - The current coordinate
+   * @param {HandleType} handleType - The handle type being dragged
+   */
+  #handleTextScale(coordinate: Coordinate, handleType: HandleType): void {
+    if (!this.selectedFeature || !this.startCoordinate) return;
+
+    const textExtent = this.#calculateTextExtent();
+
+    // Use the original text extent from when dragging started (fixed reference)
+    if (!this.#originalTextExtent && textExtent) {
+      this.#originalTextExtent = textExtent;
+      this.#originalTextSize = this.selectedFeature.get('textSize') || 14;
+    }
+
+    if (!this.#originalTextExtent) return;
+
+    const [minX, minY, maxX, maxY] = this.#originalTextExtent;
+
+    const centerX = (minX + maxX) / 2;
+    const centerY = (minY + maxY) / 2;
+
+    // Calculate distance from center to current mouse position
+    const currentDistance = Math.sqrt((coordinate[0] - centerX) ** 2 + (coordinate[1] - centerY) ** 2);
+
+    // Calculate distance from center to the original handle position
+    let originalHandlePos: Coordinate;
+    switch (handleType) {
+      case HandleType.SCALE_SE:
+        originalHandlePos = [maxX, minY];
+        break;
+      case HandleType.SCALE_SW:
+        originalHandlePos = [minX, minY];
+        break;
+      case HandleType.SCALE_NE:
+        originalHandlePos = [maxX, maxY];
+        break;
+      case HandleType.SCALE_NW:
+        originalHandlePos = [minX, maxY];
+        break;
+      default:
+        return;
+    }
+
+    const originalDistance = Math.sqrt((originalHandlePos[0] - centerX) ** 2 + (originalHandlePos[1] - centerY) ** 2);
+
+    // Use a more conservative scaling factor
+    const scaleFactor = Math.max(0.3, currentDistance / originalDistance);
+    const newSize = Math.max(8, Math.round(this.#originalTextSize! * scaleFactor));
+
+    // Only update if size actually changed
+    if (newSize !== this.selectedFeature.get('textSize')) {
+      this.selectedFeature.set('textSize', newSize);
+
+      // Update the actual text style on the feature for real-time feedback
+      const currentText = this.selectedFeature.get('text') || 'Text';
+      const isBold = this.selectedFeature.get('textBold') || false;
+      const isItalic = this.selectedFeature.get('textItalic') || false;
+
+      const updatedStyle = new Style({
+        text: new Text({
+          text: currentText,
+          fill: new Fill({ color: this.selectedFeature.get('textColor') || '#000000' }),
+          stroke: new Stroke({
+            color: this.selectedFeature.get('textHaloColor') || 'rgba(255,255,255,0.7)',
+            width: this.selectedFeature.get('textHaloWidth') || 3,
+          }),
+          font: `${isItalic ? 'italic ' : ''}${isBold ? 'bold ' : ''}${newSize}px ${this.selectedFeature.get('textFont') || 'Arial'}`,
+        }),
+      });
+
+      this.selectedFeature.setStyle(updatedStyle);
+
+      // Update text editor element if exists
+      if (this.#textEditorElement) {
+        this.#textEditorElement.style.fontSize = `${newSize}px`;
+      }
+    }
+  }
+
+  /**
+   * Toggles bold formatting
+   */
+  #toggleBold(): void {
+    if (!this.#textEditorElement || !this.selectedFeature) return;
+
+    const isBold = this.selectedFeature.get('textBold') || false;
+    const newBold = !isBold;
+
+    this.selectedFeature.set('textBold', newBold);
+    this.#textEditorElement.style.fontWeight = newBold ? 'bold' : 'normal';
+  }
+
+  /**
+   * Toggles italic formatting
+   */
+  #toggleItalic(): void {
+    if (!this.#textEditorElement || !this.selectedFeature) return;
+
+    const isItalic = this.selectedFeature.get('textItalic') || false;
+    const newItalic = !isItalic;
+
+    this.selectedFeature.set('textItalic', newItalic);
+    this.#textEditorElement.style.fontStyle = newItalic ? 'italic' : 'normal';
+  }
+
+  /**
+   * Applies text changes and shows final result
+   */
+  #applyTextChanges(): void {
+    if (!this.#textEditorElement || !this.selectedFeature) return;
+
+    const finalText = this.#textEditorElement.innerHTML.replace(/<br\s*\/?>/gi, '\n') || 'Text';
+    const isBold = this.selectedFeature.get('textBold') || false;
+    const isItalic = this.selectedFeature.get('textItalic') || false;
+    const currentSize = this.selectedFeature.get('textSize') || 14;
+
+    this.selectedFeature.set('text', finalText);
+
+    const finalStyle = new Style({
+      text: new Text({
+        text: finalText,
+        fill: new Fill({ color: this.selectedFeature.get('textColor') || '#000000' }),
+        stroke: new Stroke({
+          color: this.selectedFeature.get('textHaloColor') || 'rgba(255,255,255,0.7)',
+          width: this.selectedFeature.get('textHaloWidth') || 3,
+        }),
+        font: `${isItalic ? 'italic ' : ''}${isBold ? 'bold ' : ''}${currentSize}px ${this.selectedFeature.get('textFont') || 'Arial'}`,
+      }),
+    });
+
+    this.selectedFeature.setStyle(finalStyle);
+    this.#hideTextEditor();
+
+    // Create regular handles after text editing is done
+    this.#createTextHandles();
+  }
+
+  /**
+   * Creates handles around the text's visual extent
+   */
+  #createTextHandles(): void {
+    if (!this.selectedFeature) return;
+
+    const textExtent = this.#calculateTextExtent();
+    if (!textExtent) return;
+
+    const [minX, minY, maxX, maxY] = textExtent;
+
+    // Only clear handles if we're not currently text editing
+    if (!this.#isTextEditing) {
+      this.clearHandles();
+    }
+
+    this.createHandle([minX, minY], HandleType.SCALE_SW);
+    this.createHandle([maxX, minY], HandleType.SCALE_SE);
+    this.createHandle([maxX, maxY], HandleType.SCALE_NE);
+    this.createHandle([minX, maxY], HandleType.SCALE_NW);
+  }
+
+  /**
+   * Cancels text editing and restores original
+   */
+  #cancelTextEditing(): void {
+    if (!this.selectedFeature) return;
+    if (this.#originalTextStyle) {
+      this.selectedFeature.setStyle(this.#originalTextStyle);
+    }
+    this.#hideTextEditor();
+  }
+
+  /**
+   * Hides and removes the text editor overlay
+   */
+  #hideTextEditor(): void {
+    if (this.#textEditOverlay && this.mapViewer?.map) {
+      this.mapViewer.map.removeOverlay(this.#textEditOverlay);
+      this.#textEditOverlay = undefined;
+      this.#textEditorElement = undefined;
+      this.#originalTextStyle = undefined;
+      this.#isTextEditing = false;
+    }
   }
 
   // #region Undo / Redo
