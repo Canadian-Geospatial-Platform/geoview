@@ -571,6 +571,15 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       viewer.unregisterMapPointerHandlers(viewer.map);
     }
 
+    // If editing already, stop it
+    // GV Moved the stop editing up so the rotation is set properly for any active text drawing
+    if (state.actions.getIsEditing()) {
+      this.stopEditing(mapId);
+    }
+
+    // Clear the text rotation for new features
+    state.actions.setTextRotation(0);
+
     // Get current state values if not provided
     const currentGeomType = geomType || state.actions.getActiveGeom();
     const currentStyle = styleInput || state.actions.getStyle();
@@ -607,11 +616,6 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     state.actions.setDrawInstance(draw);
     if (geomType) {
       state.actions.setActiveGeom(geomType);
-    }
-
-    // If editing already, stop it
-    if (state.actions.getIsEditing()) {
-      this.stopEditing(mapId);
     }
   }
 

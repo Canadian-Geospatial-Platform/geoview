@@ -1929,6 +1929,16 @@ export class OLTransform extends OLPointer {
       // Create rotate handle at end of rotated line
       this.createHandle(rotatedLineEnd, HandleType.ROTATE);
     }
+
+    // Add delete handle if enabled
+    if (this.options.enableDelete) {
+      const offset = this.#getMapBasedPadding() * 1.3;
+      const deletePos: Coordinate = [maxX + offset, minY - offset];
+
+      // Rotate the delete handle position
+      const rotatedDeletePos = OLTransform.rotateCoordinate(deletePos, this.center, -textRotation);
+      this.createHandle(rotatedDeletePos, HandleType.DELETE);
+    }
   }
 
   /**
