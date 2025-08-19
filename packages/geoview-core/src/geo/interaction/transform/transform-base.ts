@@ -610,7 +610,7 @@ export class OLTransform extends OLPointer {
     handle.set('feature', this.selectedFeature);
 
     // Update Rotate Icon Rotation
-    if (type === HandleType.ROTATE && this.angle !== 0) {
+    if (type === HandleType.ROTATE) {
       const text = ROTATE_STYLE.getText();
       if (text) {
         text.setRotation(this.angle);
