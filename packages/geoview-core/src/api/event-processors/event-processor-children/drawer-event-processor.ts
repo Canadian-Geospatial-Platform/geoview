@@ -49,6 +49,7 @@ interface TypeGeoJSONStyleProps {
   textHaloWidth?: number;
   textBold?: boolean;
   textItalic?: boolean;
+  textRotation?: number;
 }
 
 const DEFAULT_ICON_SOURCE =
@@ -507,6 +508,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       feature.set('textHaloWidth', style.textHaloWidth);
       feature.set('textBold', style.textBold);
       feature.set('textItalic', style.textItalic);
+      feature.set('textRotation', style.textRotation);
     }
   }
 
@@ -529,6 +531,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       style.textHaloWidth = feature.get('textHaloWidth');
       style.textBold = feature.get('textBold');
       style.textItalic = feature.get('textItalic');
+      style.textRotation = feature.get('textRotation');
     }
 
     // Extract stroke/fill properties from the feature's style
@@ -651,6 +654,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
             fill: new Fill({ color: currentStyle.textColor }),
             stroke: new Stroke({ color: currentStyle.textHaloColor, width: currentStyle.textHaloWidth }),
             font: `${currentStyle.textItalic ? 'italic ' : ''}${currentStyle.textBold ? 'bold ' : ''}${currentStyle.textSize}px ${currentStyle.textFont}`,
+            rotation: 0,
           }),
         });
       } else {
@@ -797,6 +801,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
         const finalSize = feature.get('textSize') as number;
         const isBold = feature.get('textBold') as boolean;
         const isItalic = feature.get('textItalic') as boolean;
+        const rotation = feature.get('textRotation') as number;
 
         const state = this.getDrawerState(mapId);
         if (!state) return;
@@ -804,6 +809,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
         state.actions.setTextSize(finalSize);
         state.actions.setTextBold(isBold);
         state.actions.setTextItalic(isItalic);
+        state.actions.setTextRotation(rotation);
       }
 
       const geom = feature.getGeometry();
@@ -1018,6 +1024,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
             fill: new Fill({ color: newStyle.textColor }),
             stroke: new Stroke({ color: newStyle.textHaloColor, width: newStyle.textHaloWidth }),
             font: `${newStyle.textItalic ? 'italic ' : ''}${newStyle.textBold ? 'bold ' : ''}${newStyle.textSize}px ${newStyle.textFont}`,
+            rotation: newStyle.textRotation,
           }),
         });
       } else {
@@ -1175,6 +1182,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
                   textHaloWidth: feature.get('textHaloWidth'),
                   textBold: feature.get('textBold'),
                   textItalic: feature.get('textItalic'),
+                  textRotation: feature.get('textRotation'),
                 };
               } else {
                 // point style icon
@@ -1262,6 +1270,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
                     width: styleProps.textHaloWidth,
                   }),
                   font: `${styleProps.textItalic ? 'italic ' : ''}${styleProps.textBold ? 'bold ' : ''}${styleProps.textSize}px ${styleProps.textFont}`,
+                  rotation: styleProps.textRotation,
                 }),
               });
             } else {

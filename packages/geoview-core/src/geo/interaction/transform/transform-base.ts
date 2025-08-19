@@ -244,6 +244,9 @@ export class OLTransform extends OLPointer {
   /** Original text size when scaling starts */
   #originalTextSize?: number;
 
+  /** Original text rotation when rotation starts */
+  #originalTextRotation?: number;
+
   /** History stack for undo/redo functionality */
   #geometryHistory: Geometry[] = [];
 
@@ -339,6 +342,13 @@ export class OLTransform extends OLPointer {
 
     // Set the selected feature
     this.selectedFeature = feature;
+
+    // Set angle to actual rotation value for text features
+    if (this.#isTextFeature(feature)) {
+      this.angle = feature.get('textRotation') || 0;
+    } else {
+      this.angle = 0;
+    }
 
     // Emit selection change event
     if (this.onSelectionChange) {
@@ -598,6 +608,15 @@ export class OLTransform extends OLPointer {
 
     // Store a reference to the selected feature in the handle
     handle.set('feature', this.selectedFeature);
+
+    // Update Rotate Icon Rotation
+    if (type === HandleType.ROTATE && this.angle !== 0) {
+      const text = ROTATE_STYLE.getText();
+      if (text) {
+        text.setRotation(this.angle);
+        ROTATE_STYLE.setText(text);
+      }
+    }
 
     // Apply style based on handle type
     switch (type) {
@@ -925,6 +944,12 @@ export class OLTransform extends OLPointer {
     // Clone the original geometry
     const geometry = this.startGeometry.clone();
 
+    // For text features, update the text style with rotation
+    if (this.#isTextFeature()) {
+      this.#handleTextRotate(coordinate);
+      return;
+    }
+
     // Rotate the geometry
     const { center } = this;
     if (geometry instanceof Point) {
@@ -1183,6 +1208,11 @@ export class OLTransform extends OLPointer {
           this.startGeometry = this.selectedFeature.getGeometry()?.clone();
           this.#isTransforming = true;
 
+          // Store initial rotation for text features when starting rotation
+          if (handleType === HandleType.ROTATE && this.#isTextFeature()) {
+            this.#originalTextRotation = this.selectedFeature.get('textRotation') || 0;
+          }
+
           // Clear Handles
           this.clearHandles();
 
@@ -1378,7 +1408,11 @@ export class OLTransform extends OLPointer {
         this.startCoordinate = undefined;
         this.startGeometry = undefined;
         this.#transformType = undefined;
-        this.angle = 0;
+
+        // Only reset angle to 0 for non-text features
+        if (!this.#isTextFeature()) {
+          this.angle = 0;
+        }
 
         return true;
       }
@@ -1705,6 +1739,7 @@ export class OLTransform extends OLPointer {
       const currentText = this.selectedFeature.get('text') || 'Text';
       const isBold = this.selectedFeature.get('textBold') || false;
       const isItalic = this.selectedFeature.get('textItalic') || false;
+      const rotation = this.selectedFeature.get('textRotation') || 0;
 
       const updatedStyle = new Style({
         text: new Text({
@@ -1715,6 +1750,7 @@ export class OLTransform extends OLPointer {
             width: this.selectedFeature.get('textHaloWidth') || 3,
           }),
           font: `${isItalic ? 'italic ' : ''}${isBold ? 'bold ' : ''}${newSize}px ${this.selectedFeature.get('textFont') || 'Arial'}`,
+          rotation,
         }),
       });
 
@@ -1725,6 +1761,43 @@ export class OLTransform extends OLPointer {
         this.#textEditorElement.style.fontSize = `${newSize}px`;
       }
     }
+  }
+
+  /**
+   * Handles rotation for text features
+   * @param {Coordinate} coordinate - The current coordinate
+   */
+  #handleTextRotate(coordinate: Coordinate): void {
+    if (!this.selectedFeature || !this.center || !this.startCoordinate) return;
+
+    // Calculate the rotation angle
+    const startAngle = Math.atan2(this.startCoordinate[1] - this.center[1], this.startCoordinate[0] - this.center[0]);
+    const currentAngle = Math.atan2(coordinate[1] - this.center[1], coordinate[0] - this.center[0]);
+    const deltaAngle = -(currentAngle - startAngle);
+
+    this.angle = this.#originalTextRotation! + deltaAngle;
+    this.selectedFeature.set('textRotation', this.angle);
+
+    // Update text style with rotation
+    const currentText = this.selectedFeature.get('text') || 'Text';
+    const currentSize = this.selectedFeature.get('textSize') || 14;
+    const isBold = this.selectedFeature.get('textBold') || false;
+    const isItalic = this.selectedFeature.get('textItalic') || false;
+
+    const rotatedStyle = new Style({
+      text: new Text({
+        text: currentText,
+        fill: new Fill({ color: this.selectedFeature.get('textColor') || '#000000' }),
+        stroke: new Stroke({
+          color: this.selectedFeature.get('textHaloColor') || 'rgba(255,255,255,0.7)',
+          width: this.selectedFeature.get('textHaloWidth') || 3,
+        }),
+        font: `${isItalic ? 'italic ' : ''}${isBold ? 'bold ' : ''}${currentSize}px ${this.selectedFeature.get('textFont') || 'Arial'}`,
+        rotation: this.angle,
+      }),
+    });
+
+    this.selectedFeature.setStyle(rotatedStyle);
   }
 
   /**
@@ -1763,6 +1836,7 @@ export class OLTransform extends OLPointer {
     const isBold = this.selectedFeature.get('textBold') || false;
     const isItalic = this.selectedFeature.get('textItalic') || false;
     const currentSize = this.selectedFeature.get('textSize') || 14;
+    const rotation = this.selectedFeature.get('textRotation') || 0;
 
     this.selectedFeature.set('text', finalText);
 
@@ -1775,6 +1849,7 @@ export class OLTransform extends OLPointer {
           width: this.selectedFeature.get('textHaloWidth') || 3,
         }),
         font: `${isItalic ? 'italic ' : ''}${isBold ? 'bold ' : ''}${currentSize}px ${this.selectedFeature.get('textFont') || 'Arial'}`,
+        rotation,
       }),
     });
 
@@ -1801,10 +1876,59 @@ export class OLTransform extends OLPointer {
       this.clearHandles();
     }
 
-    this.createHandle([minX, minY], HandleType.SCALE_SW);
-    this.createHandle([maxX, minY], HandleType.SCALE_SE);
-    this.createHandle([maxX, maxY], HandleType.SCALE_NE);
-    this.createHandle([minX, maxY], HandleType.SCALE_NW);
+    // Get the center and text rotation
+    this.center = [(minX + maxX) / 2, (minY + maxY) / 2];
+    const textRotation = this.selectedFeature.get('textRotation');
+
+    // Calculate rotated handle positions
+    const corners = [
+      [minX, minY], // SW
+      [maxX, minY], // SE
+      [maxX, maxY], // NE
+      [minX, maxY], // NW
+    ];
+
+    const rotatedCorners = corners.map((corner) => OLTransform.rotateCoordinate(corner as Coordinate, this.center!, -textRotation));
+
+    // Create rotated extent boundary
+    const rotatedBoundary = [rotatedCorners[0], rotatedCorners[1], rotatedCorners[2], rotatedCorners[3], rotatedCorners[0]];
+    const boundaryGeometry = new LineString(rotatedBoundary);
+    const boundary = new Feature({
+      geometry: boundaryGeometry,
+      handleType: HandleType.BOUNDARY,
+    });
+    boundary.setStyle(EXTENT_BOUNDARY_STYLE);
+    this.handleSource.addFeature(boundary);
+
+    // Create rotated scale handles
+    this.createHandle(rotatedCorners[0], HandleType.SCALE_SW);
+    this.createHandle(rotatedCorners[1], HandleType.SCALE_SE);
+    this.createHandle(rotatedCorners[2], HandleType.SCALE_NE);
+    this.createHandle(rotatedCorners[3], HandleType.SCALE_NW);
+
+    // Add rotation handle if rotation is enabled
+    if (this.options.rotate) {
+      const centerX = (minX + maxX) / 2;
+      const offset = this.#getMapBasedPadding() * 2;
+
+      const lineStart: Coordinate = [centerX, maxY];
+      const lineEnd: Coordinate = [centerX, maxY + offset];
+
+      // Rotate the line positions
+      const rotatedLineStart = OLTransform.rotateCoordinate(lineStart, this.center, -textRotation);
+      const rotatedLineEnd = OLTransform.rotateCoordinate(lineEnd, this.center, -textRotation);
+
+      // Create rotated line from top to rotate handle
+      const line = new Feature({
+        geometry: new LineString([rotatedLineStart, rotatedLineEnd]),
+        handleType: HandleType.ROTATE_LINE,
+      });
+      line.setStyle(ROTATE_LINE_STYLE);
+      this.handleSource.addFeature(line);
+
+      // Create rotate handle at end of rotated line
+      this.createHandle(rotatedLineEnd, HandleType.ROTATE);
+    }
   }
 
   /**
