@@ -15,10 +15,10 @@ jobs:
     name: Deploy gh-pages
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
 
       - name: Get dist files
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: packages/geoview-core/dist
           key: dist-${{ inputs.cache_sha }}
@@ -30,35 +30,3 @@ jobs:
           folder: packages/geoview-core/dist
           target-folder: ${{inputs.folder}}
           single-commit: true
-
-      - uses: actions/github-script@v6
-        name: Post link to demo for PR's
-        if: github.event_name == 'pull_request_target' && github.event.action == 'opened' 
-        with:
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `Your demo site is ready! 🚀 Visit it here: https://${{github.repository_owner}}.github.io/geoview/${{inputs.folder}}`
-            })
-
-  cleanup-pages:
-    name: Cleanup gh-pages
-    runs-on: ubuntu-latest
-    steps:
-      ## Delete the PR demo from gh-pages when the PR is closed
-      - uses: actions/checkout@v3
-        with:
-          ref: 'gh-pages'
-
-      - name: Delete the files
-        if: github.event_name == 'pull_request_target' && github.event.action == 'closed'
-        continue-on-error: true
-        shell: bash
-        run: |
-            git config --global user.email "johann.levesque@nrcan-rncan.gc.ca"
-            git config --global user.name "Johann Levesque"
-            git rm -r ${{ github.head_ref }}/*
-            git commit -a -m 'Delete PR demo ${{ github.head_ref }}'
-            git push origin HEAD:gh-pages
