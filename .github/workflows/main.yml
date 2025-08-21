@@ -1,9 +1,7 @@
 name: Deploy process on Pull Request
 
 on:
-  pull_request_target:
-    types: [opened, synchronize, closed, ready_for_review]
-
+  workflow_dispatch:
   push:
     branches:
       - "develop"
@@ -14,55 +12,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  check-member:
-    name: Check if we continue the process
-    runs-on: ubuntu-latest
-    steps:
-      - name: Echo PR info
-        env:
-          ACTOR: ${{ github.actor }}
-          ACTION: ${{ github.event.action }}
-          MERGE: ${{ github.event.pull_request.merged }}
-          HEAD: ${{ github.head_ref }}
-        run: |
-          echo User $ACTOR is about to $ACTION this Pull Request.
-          echo The PR is merged: $MERGE.
-          echo The PR head reference: $HEAD.
-
-      - name: Check if contributor is an org member
-        id: is_organization_member
-        if: github.event_name == 'pull_request_target'
-        uses: JamesSingleton/is-organization-member@1.0.1
-        with:
-          organization: Canadian-Geospatial-Platform
-          username: ${{ github.actor }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Output comment and end build if not org member
-        if: github.event_name == 'pull_request_target'
-        run: |
-          result=${{ steps.is_organization_member.outputs.result }}
-          if [ $result == false ]; then
-            user=${{ github.actor }}
-            echo Either ${user} is not part of the Canadian-Geospatial-Platform organization
-            echo or ${user} has its Organization Visibility set to Private at
-            echo https://github.com/orgs/Canadian-Geospatial-Platform/people?query=${user}
-            exit 1
-          fi
-
   install-build:
     name: Build demo files
-    needs: [check-member]
-    if: github.event.pull_request.merged == false || github.event.pull_request.merged == true && !github.event.pull_request.draft
     uses: ./.github/workflows/build.yml
     with:
-      cache_sha: ${{ github.event.pull_request.head.sha || github.sha }}
+      cache_sha: ${{ github.sha }}
 
   deploy-public:
     name: Deploy public
     needs: [install-build]
-    if: github.event.pull_request.merged == true && github.head_ref != '' && !github.event.pull_request.draft
     uses: ./.github/workflows/deploy.yml
     with:
-      cache_sha: ${{ github.event.pull_request.head.sha || github.sha }}
+      cache_sha: ${{ github.sha }}
       folder: public
