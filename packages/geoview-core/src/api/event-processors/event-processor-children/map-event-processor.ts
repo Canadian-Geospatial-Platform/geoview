@@ -1305,14 +1305,14 @@ export class MapEventProcessor extends AbstractEventProcessor {
     overrideGeocoreServiceNames: boolean | 'hybrid'
   ): TypeLayerEntryConfig {
     // Get needed info
-    const layerEntryConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath);
-    const orderedLayerInfo = MapEventProcessor.findMapLayerFromOrderedInfo(mapId, layerPath);
+    const layerEntryConfig = this.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath);
+    const orderedLayerInfo = this.findMapLayerFromOrderedInfo(mapId, layerPath);
     const legendLayerInfo = LegendEventProcessor.getLegendLayerInfo(mapId, layerPath);
 
     // Get original layerEntryConfig from map config
     const pathArray = layerPath.split('/');
     if (pathArray[0] === pathArray[1]) pathArray.splice(0, 1);
-    const geoviewLayerConfig = MapEventProcessor.getGeoViewMapConfig(mapId)?.map.listOfGeoviewLayerConfig?.find(
+    const geoviewLayerConfig = this.getGeoViewMapConfig(mapId)?.map.listOfGeoviewLayerConfig?.find(
       (layerConfig) => layerConfig.geoviewLayerId === pathArray[0]
     );
 
@@ -1333,12 +1333,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // Create list of sublayer entry configs if it is a group layer
     const listOfLayerEntryConfig: TypeLayerEntryConfig[] = [];
     if (layerEntryConfig!.getEntryTypeIsGroup()) {
-      const sublayerPaths = MapEventProcessor.getMapLayerOrder(mapId).filter(
+      const sublayerPaths = this.getMapLayerOrder(mapId).filter(
         (entryLayerPath) =>
           entryLayerPath.startsWith(`${layerPath}/`) && entryLayerPath.split('/').length === layerPath.split('/').length + 1
       );
       sublayerPaths.forEach((sublayerPath) =>
-        listOfLayerEntryConfig.push(MapEventProcessor.#createLayerEntryConfig(mapId, sublayerPath, isGeocore, overrideGeocoreServiceNames))
+        listOfLayerEntryConfig.push(this.#createLayerEntryConfig(mapId, sublayerPath, isGeocore, overrideGeocoreServiceNames))
       );
     }
 
@@ -1353,12 +1353,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
     if (source?.featureInfo) delete source?.featureInfo;
     if (configLayerEntryConfig?.source?.featureInfo && source) source.featureInfo = configLayerEntryConfig.source.featureInfo;
 
-    if (source?.dataAccessPath && isGeocore) source.dataAccessPath = '';
+    if (source?.dataAccessPath && isGeocore && overrideGeocoreServiceNames !== true) source.dataAccessPath = undefined;
 
     const layerStyle =
-      legendLayerInfo!.styleConfig && (!isGeocore || (isGeocore && overrideGeocoreServiceNames === true))
-        ? legendLayerInfo!.styleConfig
-        : undefined;
+      legendLayerInfo!.styleConfig && (!isGeocore || overrideGeocoreServiceNames === true) ? legendLayerInfo!.styleConfig : undefined;
 
     // Construct layer entry config
     const newLayerEntryConfig = {
@@ -1390,7 +1388,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     overrideGeocoreServiceNames: boolean | 'hybrid'
   ): MapConfigLayerEntry | undefined {
     // Get needed info
-    const layerEntryConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath);
+    const layerEntryConfig = this.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath);
 
     // If not found, log warning and skip
     if (!layerEntryConfig) {
@@ -1400,7 +1398,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     }
 
     const { geoviewLayerConfig } = layerEntryConfig;
-    const orderedLayerInfo = MapEventProcessor.findMapLayerFromOrderedInfo(mapId, layerPath);
+    const orderedLayerInfo = this.findMapLayerFromOrderedInfo(mapId, layerPath);
     const legendLayerInfo = LegendEventProcessor.getLegendLayerInfo(mapId, layerPath);
 
     // Check if the layer is a geocore layers
@@ -1411,7 +1409,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     );
 
     // Check for sublayers
-    const sublayerPaths = MapEventProcessor.getMapLayerOrder(mapId).filter(
+    const sublayerPaths = this.getMapLayerOrder(mapId).filter(
       // We only want the immediate child layers, group sublayers will handle their own sublayers
       (entryLayerPath) => layerEntryLayerPaths.includes(entryLayerPath)
     );
@@ -1420,7 +1418,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const listOfLayerEntryConfig: TypeLayerEntryConfig[] = [];
     if (sublayerPaths.length)
       sublayerPaths.forEach((sublayerPath) =>
-        listOfLayerEntryConfig.push(MapEventProcessor.#createLayerEntryConfig(mapId, sublayerPath, isGeocore, overrideGeocoreServiceNames))
+        listOfLayerEntryConfig.push(this.#createLayerEntryConfig(mapId, sublayerPath, isGeocore, overrideGeocoreServiceNames))
       );
     else listOfLayerEntryConfig.push(this.#createLayerEntryConfig(mapId, layerPath, isGeocore, overrideGeocoreServiceNames));
 
@@ -1428,25 +1426,26 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const initialSettings = this.#getInitialSettings(layerEntryConfig, orderedLayerInfo!, legendLayerInfo!);
 
     // Construct geoview layer config
-    const newGeoviewLayerConfig: MapConfigLayerEntry = isGeocore
-      ? {
-          geoviewLayerId: geoviewLayerConfig.geoviewLayerId,
-          geoviewLayerName: overrideGeocoreServiceNames === false ? undefined : geoviewLayerConfig.geoviewLayerName,
-          geoviewLayerType: 'geoCore',
-          initialSettings,
-          listOfLayerEntryConfig,
-        }
-      : {
-          externalDateFormat: geoviewLayerConfig.externalDateFormat,
-          geoviewLayerId: geoviewLayerConfig.geoviewLayerId,
-          geoviewLayerName: geoviewLayerConfig.geoviewLayerName,
-          geoviewLayerType: geoviewLayerConfig.geoviewLayerType,
-          initialSettings,
-          isTimeAware: geoviewLayerConfig.isTimeAware,
-          listOfLayerEntryConfig,
-          metadataAccessPath: geoviewLayerConfig.metadataAccessPath,
-          serviceDateFormat: geoviewLayerConfig.serviceDateFormat,
-        };
+    const newGeoviewLayerConfig: MapConfigLayerEntry =
+      isGeocore && overrideGeocoreServiceNames !== true
+        ? {
+            geoviewLayerId: geoviewLayerConfig.geoviewLayerId,
+            geoviewLayerName: overrideGeocoreServiceNames === false ? undefined : geoviewLayerConfig.geoviewLayerName,
+            geoviewLayerType: 'geoCore',
+            initialSettings,
+            listOfLayerEntryConfig,
+          }
+        : {
+            externalDateFormat: geoviewLayerConfig.externalDateFormat,
+            geoviewLayerId: geoviewLayerConfig.geoviewLayerId,
+            geoviewLayerName: geoviewLayerConfig.geoviewLayerName,
+            geoviewLayerType: geoviewLayerConfig.geoviewLayerType,
+            initialSettings,
+            isTimeAware: geoviewLayerConfig.isTimeAware,
+            listOfLayerEntryConfig,
+            metadataAccessPath: geoviewLayerConfig.metadataAccessPath,
+            serviceDateFormat: geoviewLayerConfig.serviceDateFormat,
+          };
 
     return newGeoviewLayerConfig;
   }
@@ -1460,12 +1459,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
     mapId: string,
     overrideGeocoreServiceNames: boolean | 'hybrid' = true
   ): TypeMapFeaturesInstance | undefined {
-    const config = MapEventProcessor.getGeoViewMapConfig(mapId);
+    const config = this.getGeoViewMapConfig(mapId);
 
     if (config) {
       // Get paths of top level layers
-      const layerOrder = MapEventProcessor.getMapLayerOrder(mapId).filter(
-        (layerPath) => MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath)?.parentLayerConfig === undefined
+      const layerOrder = this.getMapLayerOrder(mapId).filter(
+        (layerPath) => this.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath)?.parentLayerConfig === undefined
       );
 
       // Build list of geoview layer configs
