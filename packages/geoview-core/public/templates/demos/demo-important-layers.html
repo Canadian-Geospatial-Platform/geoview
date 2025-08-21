@@ -178,7 +178,7 @@
     <script src="codedoc.js"></script>
     <script>
       async function addGeocore(uuid) {
-        const geoviewConfig = await cgpv.api.config.convertGeocoreToGeoview('en', {
+        const geoviewConfig = await cgpv.api.layer.convertMapConfigToGeoviewLayerConfig('map1', 'en', {
           geoviewLayerType: 'geoCore',
           geoviewLayerId: uuid,
         });
@@ -220,7 +220,7 @@
       }
 
       async function addGeocoreNametoSelectOption(uuid, optionElement) {
-        const geoviewConfig = await cgpv.api.config.convertGeocoreToGeoview('en', {
+        const geoviewConfig = await cgpv.api.layer.convertMapConfigToGeoviewLayerConfig('map1', 'en', {
           geoviewLayerType: 'geoCore',
           geoviewLayerId: uuid,
         });

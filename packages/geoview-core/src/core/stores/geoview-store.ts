@@ -16,7 +16,7 @@ import { IUIState, initializeUIState } from '@/core/stores/store-interface-and-i
 
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
-import { serializeTypeGeoviewLayerConfig, MapConfigLayerEntry } from '@/api/config/types/map-schema-types';
+import { serializeTypeGeoviewLayerConfig } from '@/api/config/types/map-schema-types';
 
 export type TypeSetStore = (
   partial: IGeoviewState | Partial<IGeoviewState> | ((state: IGeoviewState) => IGeoviewState | Partial<IGeoviewState>),
@@ -53,19 +53,16 @@ export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore): IG
     mapConfig: undefined,
     setMapConfig: (config: TypeMapFeaturesConfig) => {
       // GV this is a copy of the original map configuration, no modifications is allowed
-      // ? this configuration is use to reload the map
+      // ? this configuration is used to reload the map
       const clonedConfig = cloneDeep(config);
 
       // Serialize the configuration so that it goes in the store without any mutable class instances
-      // TODO: Refactor - Remove class instances for configuration level objects.
-      // TO.DOCONT: Indeed, using classes such as `OLLayer` in a low-level configuration class makes the configuration class hard to scale and port.
-      // TO.DOCONT: Configurations should be as losely coupled as possible.
-      for (let i = 0; i < (clonedConfig.map?.listOfGeoviewLayerConfig?.length || 0); i++) {
+      for (let i = 0; i < (config.map?.listOfGeoviewLayerConfig?.length || 0); i++) {
         // Serialize the GeoviewLayerConfig
-        const serialized = serializeTypeGeoviewLayerConfig(clonedConfig.map.listOfGeoviewLayerConfig[i] as MapConfigLayerEntry); // TODO: refactor - remove cast
+        const serialized = serializeTypeGeoviewLayerConfig(config.map.listOfGeoviewLayerConfig[i]);
 
         // Reassign
-        clonedConfig.map.listOfGeoviewLayerConfig[i] = serialized as never;
+        clonedConfig.map.listOfGeoviewLayerConfig[i] = serialized;
       }
 
       set({ mapConfig: clonedConfig, mapId: config.mapId });

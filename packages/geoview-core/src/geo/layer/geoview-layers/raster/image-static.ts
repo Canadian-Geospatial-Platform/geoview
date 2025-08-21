@@ -1,18 +1,18 @@
 import Static, { Options as SourceOptions } from 'ol/source/ImageStatic';
 
-import { Cast, TypeJsonArray } from '@/api/config/types/config-types';
+import { ConfigBaseClass, TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import {
   TypeLayerEntryConfig,
   TypeGeoviewLayerConfig,
   CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
+  Extent,
 } from '@/api/config/types/map-schema-types';
 
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import {
-  LayerEntryConfigInvalidLayerEntryConfigError,
-  LayerEntryConfigLayerIdNotFoundError,
   LayerEntryConfigParameterExtentNotDefinedInSourceError,
   LayerEntryConfigParameterProjectionNotDefinedInSourceError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
@@ -40,33 +40,25 @@ export class ImageStatic extends AbstractGeoViewRaster {
   }
 
   /**
-   * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
-   * @returns {Promise<void>} A promise that the execution is completed.
+   * Overrides the way the metadata is fetched.
+   * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
+   * @returns {Promise<T>} A promise with the metadata or undefined when no metadata for the particular layer type.
    */
-  protected override onFetchAndSetServiceMetadata(): Promise<void> {
+  protected override onFetchServiceMetadata<T>(): Promise<T> {
     // No metadata
-    return Promise.resolve();
+    return Promise.resolve(undefined as T);
   }
 
   /**
-   * Overrides the validation of a layer entry config.
-   * @param {TypeLayerEntryConfig} layerConfig - The layer entry config to validate.
+   * Overrides the way a geoview layer config initializes its layer entries.
+   * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
    */
-  protected override onValidateLayerEntryConfig(layerConfig: TypeLayerEntryConfig): void {
-    // Note that Image Static metadata as we defined it does not contains metadata layer group. If you need geojson layer group,
-    // you can define them in the configuration section.
-    if (Array.isArray(this.metadata?.listOfLayerEntryConfig)) {
-      const metadataLayerList = Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig);
-      const foundEntry = metadataLayerList.find((layerMetadata) => layerMetadata.layerId === layerConfig.layerId);
-      if (!foundEntry) {
-        // Add a layer load error
-        this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(layerConfig), layerConfig);
-      }
-      return;
-    }
-
-    // Throw an invalid layer entry config error
-    throw new LayerEntryConfigInvalidLayerEntryConfigError(layerConfig);
+  protected override onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
+    // Redirect
+    return Promise.resolve(
+      // TODO: Check - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
+      ImageStatic.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, this.metadataAccessPath, false, [])
+    );
   }
 
   /**
@@ -96,6 +88,26 @@ export class ImageStatic extends AbstractGeoViewRaster {
   }
 
   /**
+   * Initializes a GeoView layer configuration for an Image Static layer.
+   * This method creates a basic TypeGeoviewLayerConfig using the provided
+   * ID, name, and metadata access path URL. It then initializes the layer entries by calling
+   * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
+   * @param {string} geoviewLayerId - A unique identifier for the layer.
+   * @param {string} geoviewLayerName - The display name of the layer.
+   * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
+   * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
+   */
+  static initGeoviewLayerConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    metadataAccessPath: string
+  ): Promise<TypeGeoviewLayerConfig> {
+    // Create the Layer config
+    const myLayer = new ImageStatic({ geoviewLayerId, geoviewLayerName, metadataAccessPath } as TypeImageStaticLayerConfig);
+    return myLayer.initGeoViewLayerEntries();
+  }
+
+  /**
    * Creates a configuration object for a Static Image layer.
    * This function constructs a `TypeImageStaticLayerConfig` object that describes an Static Image layer
    * and its associated entry configurations based on the provided parameters.
@@ -103,15 +115,15 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * @param {string} geoviewLayerName - The display name of the GeoView layer.
    * @param {string} metadataAccessPath - The URL or path to access metadata.
    * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
-   * @param {TypeJsonArray} layerEntries - An array of layer entries objects to be included in the configuration.
+   * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns {TypeImageStaticLayerConfig} The constructed configuration object for the Static Image layer.
    */
-  static createImageStaticLayerConfig(
+  static createGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
     metadataAccessPath: string,
     isTimeAware: boolean,
-    layerEntries: TypeJsonArray
+    layerEntries: TypeLayerEntryShell[]
   ): TypeImageStaticLayerConfig {
     const geoviewLayerConfig: TypeImageStaticLayerConfig = {
       geoviewLayerId,
@@ -126,16 +138,62 @@ export class ImageStatic extends AbstractGeoViewRaster {
         geoviewLayerConfig,
         schemaTag: CONST_LAYER_TYPES.IMAGE_STATIC,
         entryType: CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE,
-        layerId: layerEntry.id as string,
+        layerId: `${layerEntry.id}`,
         source: {
           dataAccessPath: metadataAccessPath,
+          extent: layerEntry.source?.extent,
+          projection: layerEntry.source?.projection,
         },
-      } as ImageStaticLayerEntryConfig);
+      } as unknown as ImageStaticLayerEntryConfig);
       return layerEntryConfig;
     });
 
     // Return it
     return geoviewLayerConfig;
+  }
+
+  /**
+   * Processes an ImageStatic GeoviewLayerConfig and returns a promise
+   * that resolves to an array of `ConfigBaseClass` layer entry configurations.
+   *
+   * This method:
+   * 1. Creates a Geoview layer configuration using the provided parameters.
+   * 2. Instantiates a layer with that configuration.
+   * 3. Processes the layer configuration and returns the result.
+   * @param {string} geoviewLayerId - The unique identifier for the GeoView layer.
+   * @param {string} geoviewLayerName - The display name for the GeoView layer.
+   * @param {string} url - The URL of the service endpoint.
+   * @param {string[]} layerIds - An array of layer IDs to include in the configuration.
+   * @param {boolean} isTimeAware - Indicates if the layer is time aware.
+   * @param {Extent} sourceExtent - Indicates the extent where the static image should be.
+   * @param {number} sourceProjection - Indicates the projection used for the sourceExtent.
+   * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
+   */
+  static processGeoviewLayerConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    url: string,
+    layerIds: string[],
+    isTimeAware: boolean,
+    sourceExtent: Extent,
+    sourceProjection: number
+  ): Promise<ConfigBaseClass[]> {
+    // Create the Layer config
+    const layerConfig = ImageStatic.createGeoviewLayerConfig(
+      geoviewLayerId,
+      geoviewLayerName,
+      url,
+      isTimeAware,
+      layerIds.map((layerId) => {
+        return { id: layerId, source: { extent: sourceExtent, projection: sourceProjection } };
+      })
+    );
+
+    // Create the class from geoview-layers package
+    const myLayer = new ImageStatic(layerConfig);
+
+    // Process it
+    return AbstractGeoViewLayer.processConfig(myLayer);
   }
 
   /**

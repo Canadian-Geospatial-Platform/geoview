@@ -23,19 +23,29 @@ export class GVGroupLayer extends AbstractBaseLayer {
   public constructor(olLayerGroup: LayerGroup, layerConfig: GroupLayerEntryConfig) {
     super(layerConfig);
     this.setOLLayer(olLayerGroup);
+
+    // Once all child layers are loaded, set the layer visibility
+    layerConfig.onLayerStatusChanged((config) => {
+      if (config.layerStatus === 'loaded' && !this.loadedOnce) {
+        this.loadedOnce = true;
+        this.setVisible(layerConfig.initialSettings?.states?.visible !== false);
+      }
+    });
   }
 
   /**
-   * Gets the layer configuration associated with the layer.
-   * @returns {GroupLayerEntryConfig} The layer configuration.
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {GroupLayerEntryConfig} The strongly-typed layer configuration specific to this group layer.
    */
   override getLayerConfig(): GroupLayerEntryConfig {
     return super.getLayerConfig() as GroupLayerEntryConfig;
   }
 
   /**
-   * Overrides the get of the OpenLayers Layer.
-   * @returns {Layer} The OpenLayers Layer.
+   * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
+   * @override
+   * @returns {LayerGroup} The strongly-typed OpenLayers type.
    */
   override getOLLayer(): LayerGroup {
     // Call parent and cast
@@ -44,6 +54,7 @@ export class GVGroupLayer extends AbstractBaseLayer {
 
   /**
    * Overrides the way the attributions are retrieved.
+   * @override
    * @returns {string[]} The layer attributions.
    */
   override onGetAttributions(): string[] {
@@ -61,6 +72,7 @@ export class GVGroupLayer extends AbstractBaseLayer {
   /**
    * Overrides the refresh function to refresh each layer in the group.
    * @param {OLProjection | undefined} projection - Optional, the projection to refresh to.
+   * @override
    */
   override onRefresh(projection: OLProjection | undefined): void {
     // Loops on each layer in the group

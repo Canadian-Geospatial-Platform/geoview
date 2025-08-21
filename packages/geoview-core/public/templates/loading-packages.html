@@ -108,9 +108,7 @@
 
         // add event handler to the load aoi panel button
         loadAoiPanelBtn.addEventListener('click', function (e) {
-          cgpv.api.plugin.addPlugin('aoi-panel', mapViewer.mapId, window.geoviewPlugins['aoi-panel'], {
-            mapId: mapViewer.mapId,
-          });
+          cgpv.api.plugin.addPlugin('aoi-panel', window.geoviewPlugins['aoi-panel'], mapViewer.mapId);
         });
 
         // get unload aoi panel button element
@@ -127,9 +125,7 @@
         // add event handler to the load custom legend button
         loadCustomLegendBtn.addEventListener('click', function (e) {
           if (!window?.geoviewPlugins) window.geoviewPlugins = {};
-          cgpv.api.plugin.addPlugin('custom-legend', mapViewer.mapId, window.geoviewPlugins['custom-legend'], {
-            mapId: mapViewer.mapId,
-          });
+          cgpv.api.plugin.addPlugin('custom-legend', window.geoviewPlugins['custom-legend'], mapViewer.mapId);
         });
 
         // get unload custom legend button element

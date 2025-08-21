@@ -101,9 +101,9 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
     const { resultSet } = MapEventProcessor.getMapViewerLayerAPI(mapId).featureInfoLayerSet;
     if (resultSet[layerPath]) {
       resultSet[layerPath].features = [];
-      this.propagateFeatureInfoToStore(mapId, eventType, resultSet[layerPath]).catch((err) =>
-        // Log
-        logger.logPromiseFailed('Not able to reset resultSet', err, layerPath)
+      this.propagateFeatureInfoToStore(mapId, eventType, resultSet[layerPath]).catch((error: unknown) =>
+        // Log error
+        logger.logPromiseFailed('Not able to reset resultSet', error, layerPath)
       );
     }
 

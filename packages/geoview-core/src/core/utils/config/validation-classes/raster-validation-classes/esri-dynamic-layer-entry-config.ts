@@ -1,4 +1,10 @@
-import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES, TypeSourceEsriDynamicInitialConfig } from '@/api/config/types/map-schema-types';
+import {
+  CONST_LAYER_ENTRY_TYPES,
+  CONST_LAYER_TYPES,
+  TypeLayerMetadataEsri,
+  TypeMetadataEsriDynamic,
+  TypeSourceEsriDynamicInitialConfig,
+} from '@/api/config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
 /**
@@ -28,9 +34,29 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     super(layerConfig);
     Object.assign(this, layerConfig);
 
-    // If layerConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
-    if (!this.source) this.source = {};
-    if (!this.source.dataAccessPath) this.source.dataAccessPath = this.geoviewLayerConfig.metadataAccessPath;
+    // Write the default properties when not specified
+    this.source ??= {};
+    this.source.dataAccessPath ??= this.geoviewLayerConfig.metadataAccessPath;
+
+    // Format the dataAccessPath correctly
     if (!this.source.dataAccessPath!.endsWith('/')) this.source.dataAccessPath += '/';
+  }
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeMetadataEsriDynamic | undefined} The strongly-typed layer configuration specific to this layer entry config.
+   */
+  override getServiceMetadata(): TypeMetadataEsriDynamic | undefined {
+    return super.getServiceMetadata() as TypeMetadataEsriDynamic | undefined;
+  }
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeLayerMetadataEsri | undefined} The strongly-typed layer metadata specific to this layer entry config.
+   */
+  override getLayerMetadata(): TypeLayerMetadataEsri | undefined {
+    return super.getLayerMetadata() as TypeLayerMetadataEsri | undefined;
   }
 }

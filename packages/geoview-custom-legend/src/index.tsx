@@ -1,5 +1,4 @@
 import React from 'react'; // GV This import is to validate that we're on the right React at the end of the file
-import { TypeJsonObject, toJsonObject, AnySchemaObject } from 'geoview-core/api/config/types/config-types';
 import { AppBarPlugin } from 'geoview-core/api/plugin/appbar-plugin';
 import { LegendIcon } from 'geoview-core/ui/icons';
 import { IconButtonPropsExtend } from 'geoview-core/ui/icon-button/icon-button';
@@ -15,26 +14,26 @@ class CustomLegendPanelPlugin extends AppBarPlugin {
   /**
    * Return the package schema
    *
-   * @returns {AnySchemaObject} the package schema
+   * @returns {unknown} the package schema
    */
-  override schema(): AnySchemaObject {
+  override schema(): unknown {
     return schema;
   }
 
   /**
    * Return the default config for this package
    *
-   * @returns {TypeJsonObject} the default config
+   * @returns {unknown} the default config
    */
-  override defaultConfig(): TypeJsonObject {
-    return toJsonObject(defaultConfig);
+  override defaultConfig(): unknown {
+    return defaultConfig;
   }
 
   /**
    * Overrides the default translations for the Plugin.
-   * @returns {TypeJsonObject} - The translations object for the particular Plugin.
+   * @returns {Record<string, unknown>} - The translations object for the particular Plugin.
    */
-  override defaultTranslations(): TypeJsonObject {
+  override defaultTranslations(): Record<string, unknown> {
     return {
       en: {
         CustomLegend: {
@@ -46,7 +45,7 @@ class CustomLegendPanelPlugin extends AppBarPlugin {
           title: 'Légende personnalisée',
         },
       },
-    } as unknown as TypeJsonObject;
+    };
   }
 
   /**

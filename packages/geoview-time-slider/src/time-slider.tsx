@@ -85,7 +85,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     locked,
     reversed,
     displayPattern,
-  } = useTimeSliderLayers()[layerPath];
+  } = useTimeSliderLayers()![layerPath]; // timeSliderLayers will always have a value here, ! to ignore possibility of undefined
 
   // Get name from legend layers
   const legendLayers = useLayerLegendLayers();
@@ -313,7 +313,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
   const handleTimeChange = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>): void => {
-      setDelay(layerPath, event.target.value as unknown as number);
+      setDelay(layerPath, Number(event.target.value));
     },
     [layerPath, setDelay]
   );

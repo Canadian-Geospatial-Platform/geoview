@@ -6,9 +6,10 @@ import { FitOptions } from 'ol/View';
 import { KeyboardPan } from 'ol/interaction';
 import { Coordinate } from 'ol/coordinate';
 import { Size } from 'ol/size';
+import { Pixel } from 'ol/pixel';
 
-import { CV_MAP_EXTENTS } from '@/api/config/types/config-constants';
 import {
+  MAP_EXTENTS,
   TypeBasemapOptions,
   TypeInteraction,
   TypeLayerInitialSettings,
@@ -21,7 +22,6 @@ import {
   TypeMapViewSettings,
   MapConfigLayerEntry,
   TypeFeatureInfoEntry,
-  TypeGeometry,
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
   TypeMapConfig,
@@ -37,7 +37,7 @@ import { isPointInExtent, isExtentLonLat } from '@/geo/utils/utilities';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { NORTH_POLE_POSITION, OL_ZOOM_DURATION, OL_ZOOM_MAXZOOM, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
-import { whenThisThen } from '@/core/utils/utilities';
+import { isValidUUID, whenThisThen } from '@/core/utils/utilities';
 
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeClickMarker } from '@/core/components';
@@ -201,16 +201,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    */
   static async getMapViewerPlugins(mapId: string): Promise<PluginsContainer> {
     // TODO: Check - Remove the try/catch here to force explicit case-by-case handling instead of via shared function.
-    try {
-      // Check if the plugins exist
-      // TODO: if you run the code fast enough (only happened to me in the TimeSliderEventProcessor),
-      // TO.DOCONT: the getMapViewer should be async, because it can be unset as well ( so not just getMapViewerPlugins() ).
-      await whenThisThen(() => api && api.hasMapViewer(mapId) && api.getMapViewer(mapId).plugins);
-    } catch (error: unknown) {
-      // Log
-      logger.logError(`Couldn't retrieve the plugins instance on Map Viewer`, error);
-    }
-
+    await whenThisThen(() => api && api.hasMapViewer(mapId));
     return api.getMapViewer(mapId).plugins;
   }
 
@@ -459,8 +450,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       // GV A wider LCC extent like [-125, 30, -60, 89] (minus -125) will introduce distortion on larger screen...
       // GV It is why we apply the max extent only on native projection
       const viewSettings = this.getGeoViewMapConfig(mapId)?.map.viewSettings;
-      const mapMaxExtent =
-        viewSettings!.maxExtent && newProjection === viewSettings!.projection ? CV_MAP_EXTENTS[newProjection] : undefined;
+      const mapMaxExtent = viewSettings!.maxExtent && newProjection === viewSettings!.projection ? MAP_EXTENTS[newProjection] : undefined;
 
       // create new view settings
       const newView: TypeViewSettings = {
@@ -673,10 +663,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
       if (feature === 'all') {
         MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.removeHighlight(feature);
       } else {
-        MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.removeHighlight((feature.geometry as TypeGeometry).ol_uid);
+        MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.removeHighlight(feature.uid!);
         highlightedFeatures = this.getMapStateProtected(mapId).highlightedFeatures.filter(
-          (featureInfoEntry: TypeFeatureInfoEntry) =>
-            (featureInfoEntry.geometry as TypeGeometry).ol_uid !== (feature.geometry as TypeGeometry).ol_uid
+          (featureInfoEntry: TypeFeatureInfoEntry) => featureInfoEntry.uid !== feature.uid
         );
       }
 
@@ -1086,7 +1075,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    */
   static zoomToInitialExtent(mapId: string): Promise<void> {
     const currProjection = this.getMapStateProtected(mapId).currentProjection;
-    let extent: Extent = CV_MAP_EXTENTS[currProjection];
+    let extent: Extent = MAP_EXTENTS[currProjection];
     const options: FitOptions = { padding: OL_ZOOM_PADDING, duration: OL_ZOOM_DURATION };
     const homeView = this.getMapStateProtected(mapId).homeView || this.getMapStateProtected(mapId).initialView;
 
@@ -1121,7 +1110,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // If extent is not valid, take the default one for the current projection
     if (extent.length !== 4 || extent.includes(Infinity))
       extent = Projection.transformExtentFromProj(
-        CV_MAP_EXTENTS[currProjection],
+        MAP_EXTENTS[currProjection],
         Projection.getProjectionLonLat(),
         Projection.getProjectionFromString(`EPSG:${currProjection}`)
       );
@@ -1197,8 +1186,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
     });
   };
 
-  static getPixelFromCoordinate = (mapId: string, coord: Coordinate): [number, number] => {
-    return this.getMapViewer(mapId).map.getPixelFromCoordinate(coord) as unknown as [number, number];
+  static getPixelFromCoordinate = (mapId: string, coord: Coordinate): Pixel => {
+    return this.getMapViewer(mapId).map.getPixelFromCoordinate(coord);
   };
 
   static setClickMarkerOnPosition = (mapId: string, position: number[]): void => {
@@ -1343,7 +1332,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     // Create list of sublayer entry configs if it is a group layer
     const listOfLayerEntryConfig: TypeLayerEntryConfig[] = [];
-    if (layerEntryConfig!.entryType === 'group') {
+    if (layerEntryConfig!.getEntryTypeIsGroup()) {
       const sublayerPaths = MapEventProcessor.getMapLayerOrder(mapId).filter(
         (entryLayerPath) =>
           entryLayerPath.startsWith(`${layerPath}/`) && entryLayerPath.split('/').length === layerPath.split('/').length + 1
@@ -1415,7 +1404,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const legendLayerInfo = LegendEventProcessor.getLegendLayerInfo(mapId, layerPath);
 
     // Check if the layer is a geocore layers
-    const isGeocore = api.config.isValidUUID(layerPath.split('/')[0]);
+    const isGeocore = isValidUUID(layerPath.split('/')[0]);
 
     const layerEntryLayerPaths = geoviewLayerConfig.listOfLayerEntryConfig.map(
       (geoviewLayerEntryConfig) => geoviewLayerEntryConfig.layerPath
@@ -1502,7 +1491,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
         rotation: this.getMapStateProtected(mapId).rotation,
         minZoom: currentView.getMinZoom(),
         maxZoom: currentView.getMaxZoom(),
-        maxExtent: this.getGeoViewMapConfig(mapId)?.map.viewSettings.maxExtent ? CV_MAP_EXTENTS[projection] : undefined,
+        maxExtent: this.getGeoViewMapConfig(mapId)?.map.viewSettings.maxExtent ? MAP_EXTENTS[projection] : undefined,
         projection,
       };
 
@@ -1588,7 +1577,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       // eslint-disable-next-line no-param-reassign
       else if (removeUnlisted) geoviewLayerConfig.geoviewLayerName = '';
       if (geoviewLayerConfig.listOfLayerEntryConfig?.length)
-        this.#replaceLayerEntryConfigNames(pairsDict, geoviewLayerConfig.listOfLayerEntryConfig as TypeLayerEntryConfig[], removeUnlisted);
+        this.#replaceLayerEntryConfigNames(pairsDict, geoviewLayerConfig.listOfLayerEntryConfig, removeUnlisted);
     });
 
     return mapConfig;

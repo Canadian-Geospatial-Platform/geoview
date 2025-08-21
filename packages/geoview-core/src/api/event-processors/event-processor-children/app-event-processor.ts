@@ -7,7 +7,6 @@ import { createGuideObject } from '@/core/utils/utilities';
 import { MapEventProcessor } from './map-event-processor';
 import { SnackbarType } from '@/core/utils/notifications';
 import { logger } from '@/core/utils/logger';
-import { api } from '@/app';
 import { formatError } from '@/core/exceptions/core-exceptions';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
@@ -77,16 +76,16 @@ export class AppEventProcessor extends AbstractEventProcessor {
   static addMessage(mapId: string, type: SnackbarType, messageKey: string, param?: string[], notification: boolean = false): void {
     switch (type) {
       case 'info':
-        api.getMapViewer(mapId).notifications.showMessage(messageKey, param, notification);
+        MapEventProcessor.getMapViewer(mapId).notifications.showMessage(messageKey, param, notification);
         break;
       case 'success':
-        api.getMapViewer(mapId).notifications.showSuccess(messageKey, param, notification);
+        MapEventProcessor.getMapViewer(mapId).notifications.showSuccess(messageKey, param, notification);
         break;
       case 'warning':
-        api.getMapViewer(mapId).notifications.showWarning(messageKey, param, notification);
+        MapEventProcessor.getMapViewer(mapId).notifications.showWarning(messageKey, param, notification);
         break;
       case 'error':
-        api.getMapViewer(mapId).notifications.showError(messageKey, param, notification);
+        MapEventProcessor.getMapViewer(mapId).notifications.showError(messageKey, param, notification);
         break;
       default:
         break;

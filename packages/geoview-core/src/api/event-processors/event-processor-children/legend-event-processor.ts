@@ -4,7 +4,6 @@ import {
   TypeLayerStyleSettings,
   TypeFeatureInfoEntry,
   TypeStyleGeometry,
-  layerEntryIsGroupLayer,
   CONST_LAYER_TYPES,
   TypeGeoviewLayerType,
   TypeTemporalDimension,
@@ -357,7 +356,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       const layerName = layer?.getLayerName() || layerConfig.getLayerName() || 'no name';
 
       let entryIndex = existingEntries.findIndex((entry) => entry.layerPath === entryLayerPath);
-      if (layerEntryIsGroupLayer(layerConfig)) {
+      if (layerConfig.getEntryTypeIsGroup()) {
         // If all loaded
         let bounds;
         if (ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo('loaded', layerConfig.listOfLayerEntryConfig)) {
@@ -782,9 +781,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @static
    * @param {string} mapId - The unique identifier of the map instance
    * @param {string} layerPath - The path to the layer in the map configuration
-   * @param {any[]} features - Array of features to filter
+   * @param {TypeFeatureInfoEntry[]} features - Array of features to filter
    *
-   * @returns {any[]} Filtered array of features based on their visibility settings
+   * @returns {TypeFeatureInfoEntry[]} Filtered array of features based on their visibility settings
    *
    * @description
    * This function processes features based on the layer's unique value style configuration:
@@ -801,9 +800,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     // Get the style
     const layerStyle = layerConfig.layerStyle?.[geometryType];
     let filteredFeatures = features;
-    if (layerStyle !== undefined && layerStyle.type === 'uniqueValue') {
+    if (layerStyle && layerStyle.type === 'uniqueValue') {
       filteredFeatures = this.#processClassVisibilityUniqueValue(layerStyle, features);
-    } else if (layerStyle !== undefined && layerStyle.type === 'classBreaks') {
+    } else if (layerStyle && layerStyle.type === 'classBreaks') {
       filteredFeatures = this.#processClassVisibilityClassBreak(layerStyle, features);
     }
 

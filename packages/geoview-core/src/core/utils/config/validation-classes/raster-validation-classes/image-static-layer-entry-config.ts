@@ -25,7 +25,9 @@ export class ImageStaticLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     super(layerConfig);
     Object.assign(this, layerConfig);
 
-    if (!this.source.dataAccessPath) this.source.dataAccessPath = this.geoviewLayerConfig.metadataAccessPath;
+    // Write the default properties when not specified
+    this.source.dataAccessPath ??= this.geoviewLayerConfig.metadataAccessPath;
+
     if (
       !this.source.dataAccessPath!.toLowerCase().endsWith('.png') &&
       !this.source.dataAccessPath!.toLowerCase().endsWith('.jpg') &&

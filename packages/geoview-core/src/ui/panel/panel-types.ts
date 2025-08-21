@@ -1,7 +1,6 @@
 import { ReactNode } from 'react';
 import { TooltipProps, ButtonProps, TextFieldProps } from '@mui/material';
 
-import { TypeJsonValue } from '@/api/config/types/config-types';
 import { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 
 /**
@@ -12,6 +11,16 @@ export type TypeButtonPanelProps = {
   panel: TypePanelProps;
   /** Button properties. */
   button: TypeButtonProps;
+};
+
+/**
+ * Configuration for button groups
+ */
+export type TypeButtonGroupConfig = {
+  /** Group name */
+  groupName: string;
+  /** Threshold for accordion expansion (default: 4) */
+  accordionThreshold?: number;
 };
 
 /**
@@ -31,7 +40,7 @@ export type TypePanelProps = {
   /** Panel header icon. */
   icon: ReactNode;
   /** Panel header title. */
-  title: string | TypeJsonValue;
+  title: string;
   /** Panel body content. */
   content?: ReactNode;
   /** Convert panel body content from HTML. */

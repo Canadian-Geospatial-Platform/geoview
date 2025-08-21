@@ -33,13 +33,13 @@ import { LayerIcon } from '@/core/components/common/layer-icon';
 import { LayerOpacityControl } from './layer-opacity-control/layer-opacity-control';
 import { logger } from '@/core/utils/logger';
 import { LAYER_STATUS } from '@/core/utils/constant';
-import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
+import { CONST_LAYER_TYPES } from '@/api/config/types/map-schema-types';
 import { Collapse } from '@/ui/collapse/collapse';
 import { Button } from '@/ui/button/button';
 import { KeyboardArrowDownIcon, KeyboardArrowUpIcon } from '@/ui/icons';
 import { useAppDisplayLanguage, useAppMetadataServiceURL } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { Switch } from '@/ui/switch/switch';
-import { getLocalizeLayerType } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
+import { UtilAddLayer } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
 import {
   useMapVisibleLayers,
   useSelectorIsLayerHiddenOnMap,
@@ -147,7 +147,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const isLayerQueryable = layerDetails.controls?.query;
 
   // Get the localized layer type
-  const memoLocalizedLayerType = useMemo(() => getLocalizeLayerType(language, true), [language]);
+  const memoLocalizedLayerType = useMemo(() => UtilAddLayer.getLocalizeLayerType(language, true), [language]);
 
   useEffect(() => {
     // Log
@@ -459,7 +459,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     // Check if we can set the resource url
     if (url) {
       switch (type) {
-        case CV_CONST_LAYER_TYPES.WMS:
+        case CONST_LAYER_TYPES.WMS:
           // Check if URL already includes WMS GetCapabilities parameters
           // eslint-disable-next-line no-nested-ternary
           resources = url.toLowerCase().endsWith('.xml')
@@ -468,22 +468,22 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
               ? url
               : `${url}${wmsParams}&layers=${layerPath.split('/').slice(-1)[0]}`;
           break;
-        case CV_CONST_LAYER_TYPES.ESRI_DYNAMIC:
-        case CV_CONST_LAYER_TYPES.ESRI_FEATURE:
+        case CONST_LAYER_TYPES.ESRI_DYNAMIC:
+        case CONST_LAYER_TYPES.ESRI_FEATURE:
           resources = `${url}${url.endsWith('/') ? '' : '/'}${layerPath.split('/').slice(-1)[0]}`;
           break;
-        case CV_CONST_LAYER_TYPES.XYZ_TILES:
-        case CV_CONST_LAYER_TYPES.ESRI_IMAGE:
+        case CONST_LAYER_TYPES.XYZ_TILES:
+        case CONST_LAYER_TYPES.ESRI_IMAGE:
           resources = `${url}`;
           break;
-        case CV_CONST_LAYER_TYPES.WFS:
+        case CONST_LAYER_TYPES.WFS:
           // Check if URL already includes WFS GetCapabilities parameters
           resources = url.includes('?') ? url : `${url}${wfsParams}`;
           break;
-        case CV_CONST_LAYER_TYPES.OGC_FEATURE:
+        case CONST_LAYER_TYPES.OGC_FEATURE:
           resources = `${url}/collections/${layerPath.split('/').slice(-1)[0]}`;
           break;
-        case CV_CONST_LAYER_TYPES.VECTOR_TILES:
+        case CONST_LAYER_TYPES.VECTOR_TILES:
           resources = `${url}?f=html`;
           break;
         default:
@@ -500,7 +500,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     let localizedTypeName = localizedTypeEntry ? localizedTypeEntry[1] : t('layers.serviceGroup');
 
     // Special case if type is GeoJSON and url end by zip or shp. It is a GeoJSON format derived from a shapefile
-    if (localizedTypeName === CV_CONST_LAYER_TYPES.GEOJSON && (layerDetails.url?.includes('.zip') || layerDetails.url?.includes('.shp'))) {
+    if (localizedTypeName === CONST_LAYER_TYPES.GEOJSON && (layerDetails.url?.includes('.zip') || layerDetails.url?.includes('.shp'))) {
       localizedTypeName = `${localizedTypeName} - ${t('layers.serviceEsriShapefile')}`;
     }
 

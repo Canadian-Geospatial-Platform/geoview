@@ -7,18 +7,705 @@
   "comments": "Configuration for GeoView core packages, each packages manages it own schema. It correspond to the TypeMapFeaturesInstance type.",
   "additionalProperties": false,
   "definitions": {
-    "TypeFeatureInfoLayerConfig": {
+    "TypeMapFeaturesInstance": {
+      "description": "The map features configuration. This type is used by the IsValidTypeMapFeaturesInstance method coded in config-validation.ts file. It does the validation down to the list of layer entry config.",
       "additionalProperties": false,
       "type": "object",
       "properties": {
-        "queryable": {
+        "map": {
+          "$ref": "#/definitions/TypeMapConfig"
+        },
+        "theme": {
+          "$ref": "#/definitions/TypeDisplayTheme"
+        },
+        "navBar": {
+          "$ref": "#/definitions/TypeNavBarProps"
+        },
+        "footerBar": {
+          "$ref": "#/definitions/TypeFooterBarProps"
+        },
+        "appBar": {
+          "$ref": "#/definitions/TypeAppBarProps"
+        },
+        "overviewMap": {
+          "$ref": "#/definitions/TypeOverviewMapProps"
+        },
+        "components": {
+          "$ref": "#/definitions/TypeMapComponents"
+        },
+        "corePackages": {
+          "$ref": "#/definitions/TypeMapCorePackages"
+        },
+        "corePackagesConfig": {
+          "$ref": "#/definitions/TypeCorePackagesConfig"
+        },
+        "externalPackages": {
+          "$ref": "#/definitions/TypeExternalPackages"
+        },
+        "serviceUrls": {
+          "$ref": "#/definitions/TypeServiceUrls"
+        },
+        "schemaVersionUsed": {
+          "$ref": "#/definitions/TypeValidVersions"
+        },
+        "globalSettings": {
+          "$ref": "#/definitions/TypeGlobalSettings"
+        }
+      },
+      "required": [
+        "map"
+      ]
+    },
+    "TypeMapConfig": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "basemapOptions": {
+          "$ref": "#/definitions/TypeBasemapOptions"
+        },
+        "interaction": {
+          "$ref": "#/definitions/TypeInteraction"
+        },
+        "listOfGeoviewLayerConfig": {
+          "description": "List of GeoView Layers in the order which they should be added to the map.",
+          "additionalProperties": false,
+          "$ref": "#/definitions/TypeListOfGeoviewLayerConfig"
+        },
+        "viewSettings": {
+          "$ref": "#/definitions/TypeViewSettings"
+        },
+        "highlightColor": {
+          "$ref": "#/definitions/TypeHighlightColors"
+        },
+        "overlayObjects": {
+          "$ref": "#/definitions/TypeOverlayObjects"
+        },
+        "extraOptions": {
+          "type": "object",
+          "description": "Additional options used for OpenLayers map options"
+        }
+      },
+      "required": [
+        "basemapOptions",
+        "interaction",
+        "viewSettings"
+      ]
+    },
+    "TypeDisplayTheme": {
+      "description": "Valid values for the theme property.",
+      "additionalProperties": false,
+      "enum": [
+        "dark",
+        "light",
+        "geo.ca"
+      ],
+      "default": "geo.ca"
+    },
+    "TypeValidNavBarProps": {
+      "description": "Valid values for the navBar array.",
+      "additionalProperties": false,
+      "enum": [
+        "zoom",
+        "fullscreen",
+        "home",
+        "location",
+        "basemap-select",
+        "projection",
+        "drawer"
+      ]
+    },
+    "TypeNavBarProps": {
+      "description": "Controls available on the navigation bar.",
+      "additionalProperties": false,
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/definitions/TypeValidNavBarProps"
+      },
+      "default": [
+        "zoom",
+        "fullscreen",
+        "home",
+        "basemap-select"
+      ],
+      "minItems": 0
+    },
+    "TypeValidFooterBarTabsCoreProps": {
+      "description": "Valid values for the footerBar tabs core array.",
+      "additionalProperties": false,
+      "enum": [
+        "legend",
+        "layers",
+        "details",
+        "data-table",
+        "time-slider",
+        "geochart"
+      ]
+    },
+    "TypeFooterBarTabsCustomProps": {
+      "description": "Footer bar tabs custom definition.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "contentHTML": {
+          "type": "string"
+        }
+      }
+    },
+    "TypeFooterBarProps": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "tabs": {
+          "description": "Available tabs",
+          "type": "object",
+          "properties": {
+            "core": {
+              "description": "Default core tabs of footer bar to use. NOTE: config from packages for time-slider and geochart are in the same loaction as core config (<<core config name>>-<<package name>>.json).",
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TypeValidFooterBarTabsCoreProps"
+              },
+              "minItems": 1,
+              "default": [
+                "legend",
+                "layers",
+                "details",
+                "data-table"
+              ],
+              "uniqueItems": true
+            },
+            "custom": {
+              "description": "Custom tabs of footer bar to use",
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TypeFooterBarTabsCustomProps"
+              },
+              "minItems": 0,
+              "default": [],
+              "uniqueItems": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "collapsed": {
+          "description": "State of footer bar when map is loaded (expanded or collapsed)",
+          "type": "boolean",
+          "default": false
+        },
+        "selectedTab": {
+          "type": "string",
+          "enum": [
+            "legend",
+            "layers",
+            "details",
+            "data-table",
+            "time-slider",
+            "geochart"
+          ],
+          "description": "Footer tab to be selected at map load"
+        },
+        "selectedDataTableLayerPath": {
+          "type": "string",
+          "description": "Layerpath of data table tab layer to be selected at map load"
+        },
+        "selectedLayersLayerPath": {
+          "type": "string",
+          "description": "Layerpath of layer tab layer to be selected at map load"
+        },
+        "selectedTimeSliderLayerPath": {
+          "type": "string",
+          "description": "Layerpath of time slider tab layer to be selected at map load"
+        }
+      },
+      "required": [
+        "tabs"
+      ]
+    },
+    "TypeValidAppBarCoreProps": {
+      "description": "Valid values for the app bar tabs core array.",
+      "additionalProperties": false,
+      "enum": [
+        "geolocator",
+        "export",
+        "geochart",
+        "details",
+        "legend",
+        "guide",
+        "data-table",
+        "layers",
+        "aoi-panel"
+      ]
+    },
+    "TypeAppBarProps": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "tabs": {
+          "type": "object",
+          "description": "Available tabs - controls",
+          "properties": {
+            "core": {
+              "description": "Default core tabs of app-bar to use. NOTE: config from packages like geochart are in the same loaction as core config (<<core config name>>-<<package name>>.json).",
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TypeValidAppBarCoreProps"
+              },
+              "minItems": 0,
+              "default": [
+                "geolocator"
+              ],
+              "uniqueItems": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "collapsed": {
+          "description": "State of app bar when map is loaded (expanded or collapsed)",
+          "type": "boolean",
+          "default": true
+        },
+        "selectedTab": {
+          "type": "string",
+          "enum": [
+            "geolocator",
+            "geochart",
+            "details",
+            "legend",
+            "guide",
+            "data-table",
+            "layers",
+            "aoi-panel"
+          ],
+          "description": "App bar tab to be selected at map load"
+        },
+        "selectedDataTableLayerPath": {
+          "type": "string",
+          "description": "Layerpath of data table tab layer to be selected at map load"
+        },
+        "selectedLayersLayerPath": {
+          "type": "string",
+          "description": "Layerpath of layer tab layer to be selected at map load"
+        }
+      },
+      "required": [
+        "tabs"
+      ]
+    },
+    "TypeOverviewMapProps": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "hideOnZoom": {
+          "description": "Minimum zoom level to show overview map",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "default": 0
+        }
+      }
+    },
+    "TypeValidMapComponentProps": {
+      "description": "Valid values for the map component array.",
+      "additionalProperties": false,
+      "enum": [
+        "overview-map",
+        "north-arrow"
+      ]
+    },
+    "TypeMapComponents": {
+      "description": "Core components to initialize on viewer load. The schema for those are inside this file.",
+      "additionalProperties": false,
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/definitions/TypeValidMapComponentProps"
+      },
+      "default": [
+        "overview-map",
+        "north-arrow"
+      ],
+      "minItems": 0
+    },
+    "TypeValidMapCorePackageProps": {
+      "description": "Valid values for the map core package array.",
+      "additionalProperties": false,
+      "enum": [
+        "swiper"
+      ]
+    },
+    "TypeMapCorePackages": {
+      "description": "Core map packages to initialize on viewer load. The schema for those are on their own package. NOTE: config from packages are in the same loaction as core config (<<core config name>>-<<package name>>.json).",
+      "additionalProperties": false,
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/definitions/TypeValidMapCorePackageProps"
+      },
+      "default": [],
+      "minItems": 0
+    },
+    "TypeCorePackagesConfig": {
+      "type": "array",
+      "uniqueItems": true,
+      "default": [],
+      "description": "Core packages configuration (optional, can be in another file).",
+      "minItems": 0
+    },
+    "TypeExternalPackagesProps": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "External Package name. The name must be identical to the window external package object to load.",
+          "type": "string"
+        },
+        "configUrl": {
+          "description": "The url to the external package configuration setting. The core package will read the configuration and pass it inside the package.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "TypeExternalPackages": {
+      "description": "List of external packages to initialize on viewer load.",
+      "additionalProperties": false,
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/TypeExternalPackagesProps"
+      },
+      "default": [],
+      "minItems": 0
+    },
+    "TypeServiceUrls": {
+      "additionalProperties": false,
+      "type": "object",
+      "description": "Service endpoint urls",
+      "properties": {
+        "geocoreUrl": {
+          "description": "Service end point to access API for layers specification (loading and plugins parameters). By default it is GeoCore but can be another endpoint with similar output.",
+          "type": "string",
+          "default": "https://geocore.api.geo.ca"
+        },
+        "proxyUrl": {
+          "description": "An optional proxy to be used for dealing with same-origin issues.  URL must either be a relative path on the same server or an absolute path on a server which sets CORS headers.",
+          "type": "string",
+          "default": "https://maps.canada.ca/wmsproxy/ws/wmsproxy/executeFromProxy"
+        },
+        "geolocatorUrl": {
+          "description": "Service end point to access geo location of searched value.",
+          "type": "string",
+          "default": "https://geolocator.api.geo.ca?keys=geonames,nominatim,locate"
+        },
+        "metadataUrl": {
+          "type": "string",
+          "description": "Service end point to access metadata of layers.",
+          "default": "https://open.canada.ca/data/en/dataset/"
+        }
+      }
+    },
+    "TypeValidVersions": {
+      "enum": [
+        "1.0"
+      ],
+      "description": "The schema version that can be used to validate the configuration file. The schema should enumerate the list of versions accepted by this version of the viewer."
+    },
+    "TypeGlobalSettings": {
+      "additionalProperties": false,
+      "type": "object",
+      "description": "Universal map settings",
+      "properties": {
+        "canRemoveSublayers": {
+          "type": "boolean",
+          "description": "Whether or not sublayers can be removed from layer groups."
+        },
+        "disabledLayerTypes": {
+          "description": "List of layer types that are disabled in the viewer.",
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/TypeGeoviewLayerType"
+              },
+              {
+                "$ref": "#/definitions/TypeGeoCoreLayerType"
+              },
+              {
+                "$ref": "#/definitions/TypeShapefileLayerType"
+              }
+            ]
+          }
+        },
+        "showUnsymbolizedFeatures": {
+          "type": "boolean",
+          "description": "Whether or not to show unsymbolized features.",
+          "default": false
+        }
+      }
+    },
+    "TypeBasemapOptions": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "basemapId": {
+          "$ref": "#/definitions/TypeBasemapId"
+        },
+        "shaded": {
           "type": "boolean",
           "default": true,
-          "description": "Allow querying. Default = false."
+          "description": "Enable or disable shaded basemap (if basemap id is set to shaded then this should be false)."
+        },
+        "labeled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable or disable basemap labels"
+        }
+      },
+      "required": [
+        "basemapId",
+        "shaded",
+        "labeled"
+      ]
+    },
+    "TypeBasemapId": {
+      "enum": [
+        "transport",
+        "osm",
+        "simple",
+        "nogeom",
+        "shaded",
+        "imagery"
+      ],
+      "default": "transport",
+      "description": "Id of the basemap to use."
+    },
+    "TypeInteraction": {
+      "enum": [
+        "static",
+        "dynamic"
+      ],
+      "default": "dynamic",
+      "description": "If map is dynamic (pan/zoom) or static to act as a thumbnail (no nav bar)."
+    },
+    "TypeMapViewSettings": {
+      "type": "object",
+      "maxItems": 1,
+      "properties": {
+        "zoomAndCenter": {
+          "$ref": "#/definitions/TypeZoomAndCenter"
+        },
+        "extent": {
+          "description": "The extent for the initial view. Called with [minX, minY, maxX, maxY] extent coordinates.",
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "number"
+          }
+        },
+        "layerIds": {
+          "description": "Geoview layer ID(s) or layer path(s) of layer(s) to use as initial map focus. If empty, will use all layers.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "TypeZoomAndCenter": {
+      "description": "Initial zoom and center coordinates to set map view.",
+      "type": "array",
+      "prefixItems": [
+        {
+          "type": "number",
+          "description": "Initial map zoom level. Zoom level are define by the basemap zoom levels. Levels between whole numbers are supported to fine tune initial view.",
+          "minimum": 0,
+          "maximum": 28,
+          "default": 3.5
+        },
+        [
+          {
+            "type": "number",
+            "description": "Initial longitude value for map center.",
+            "minimum": -160,
+            "maximum": 160,
+            "default": -90
+          },
+          {
+            "type": "number",
+            "description": "Initial latitude value for map center.",
+            "minimum": -80,
+            "maximum": 80,
+            "default": 60
+          }
+        ]
+      ],
+      "default": [
+        4.5,
+        [
+          -90,
+          67
+        ]
+      ]
+    },
+    "TypeDisplayLanguage": {
+      "enum": [
+        "en",
+        "fr"
+      ],
+      "description": "Display languages supported."
+    },
+    "TypeHighlightColors": {
+      "enum": [
+        "black",
+        "white",
+        "red",
+        "green"
+      ],
+      "default": "black",
+      "description": "Color to use for feature highlights."
+    },
+    "TypeOverlayObjects": {
+      "type": "object",
+      "properties": {
+        "pointMarkers": {
+          "$ref": "#/definitions/TypePointMarkers"
+        }
+      }
+    },
+    "TypePointMarkers": {
+      "type": "object",
+      "patternProperties": {
+        "[^]*": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TypePointMarker"
+          }
+        }
+      }
+    },
+    "TypePointMarker": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "ID for point marker. Must be unique in group."
+        },
+        "coordinate": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "number"
+          },
+          "description": "The coordinates of the marker."
+        },
+        "color": {
+          "type": "string",
+          "default": "green",
+          "description": "Marker color."
+        },
+        "opacity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 1
+        },
+        "projection": {
+          "description": "The projection code of the coordinates.",
+          "type": "number",
+          "default": 4326
+        }
+      },
+      "required": [
+        "id",
+        "coordinate"
+      ]
+    },
+    "TypeViewSettings": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "initialView": {
+          "$ref": "#/definitions/TypeMapViewSettings",
+          "description": "Settings for the initial viewing area of the map."
+        },
+        "homeView": {
+          "$ref": "#/definitions/TypeMapViewSettings",
+          "description": "Settings for the home nav bar button."
+        },
+        "enableRotation": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable rotation. If false, a rotation constraint that always sets the rotation to zero is used."
+        },
+        "maxExtent": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "number"
+          },
+          "default": [
+            -125,
+            30,
+            -60,
+            89
+          ],
+          "description": "The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates."
+        },
+        "minZoom": {
+          "type": "integer",
+          "description": "The minimum zoom level used to determine the resolution constraint. If not set, will use default from basemap.",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "maxZoom": {
+          "type": "integer",
+          "description": "The maximum zoom level used to determine the resolution constraint. If not set, will use default from basemap.",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "projection": {
+          "$ref": "#/definitions/TypeValidMapProjectionCodes"
+        },
+        "rotation": {
+          "type": "integer",
+          "minimum": -360,
+          "maximum": 360,
+          "default": 0,
+          "description": "The initial rotation for the view in degree (positive rotation clockwise, 0 means North). Will be converted to radiant by the viewer."
+        }
+      }
+    },
+    "TypeValidMapProjectionCodes": {
+      "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada.",
+      "enum": [
+        3978,
+        3857
+      ],
+      "default": 3978
+    },
+    "TypeFeatureInfoLayerConfig": {
+      "type": "object",
+      "properties": {
+        "queryable": {
+          "description": "Allow querying.",
+          "type": "boolean",
+          "default": true
         },
         "nameField": {
-          "type": "string",
-          "description": "The display field (English/French) of the layer. If it is not present the viewer will make an attempt to find the first valid field."
+          "description": "The display field (English/French) of the layer. If it is not present the viewer will make an attempt to find the first valid field.",
+          "type": "string"
         },
         "outfields": {
           "type": "array",
@@ -47,13 +734,16 @@
           "$ref": "#/definitions/TypeOutfieldsType"
         },
         "domain": {
-          "description": "An array of values that constitute the domain.",
+          "description": "The domain of values.",
           "oneOf": [
             {
               "type": "null"
             },
             {
-              "type": "array"
+              "$ref": "#/definitions/codedValueType"
+            },
+            {
+              "$ref": "#/definitions/rangeDomainType"
             }
           ]
         }
@@ -74,6 +764,75 @@
         "date",
         "url",
         "oid"
+      ]
+    },
+    "codedValueType": {
+      "description": "Coded value definition.",
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "type": {
+          "enum": [
+            "codedValue"
+          ]
+        },
+        "name": {
+          "description": "The domain name.",
+          "type": "string"
+        },
+        "description": {
+          "description": "A description of the domain.",
+          "type": "string"
+        },
+        "codedValues": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/codeValueEntryType"
+          }
+        }
+      },
+      "required": ["type", "codedValues"]
+    },
+    "codeValueEntryType": {
+      "description": "The structure of a code value.",
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "code": {
+          "description": "The code property has an unknown type."
+        }
+      }
+    },
+    "rangeDomainType": {
+      "description": "The structure of a range domain.",
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "type": {
+          "enum": [
+            "range"
+          ]
+        },
+        "name": {
+          "description": "The domain name.",
+          "type": "string"
+        },
+        "range": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "description": "The code property has an unknown type."
+          }
+        }
+      },
+      "required": [
+        "type",
+        "name",
+        "range"
       ]
     },
     "TypeFeatureInfoNotQueryable": {
@@ -919,6 +1678,10 @@
         "layerStyle": {
           "$ref": "#/definitions/TypeLayerStyleConfig"
         },
+        "styleUrl": {
+          "description": "An url to a specific style to apply.",
+          "type:": "string"
+        },
         "not": {
           "listOfLayerEntryConfig": {
             "$ref": "#/definitions/TypeListOfLayerEntryConfig",
@@ -1260,6 +2023,10 @@
         "source": {
           "$ref": "#/definitions/TypeSourceTileInitialConfig"
         },
+        "styleUrl": {
+          "description": "An url to a specific style to apply.",
+          "type:": "string"
+        },
         "not": {
           "listOfLayerEntryConfig": {
             "$ref": "#/definitions/TypeListOfLayerEntryConfig",
@@ -1537,152 +2304,8 @@
       }
     },
     "TypeListOfLayerEntryConfig": {
-      "type": "array",
-      "minItems": 1
-    },
-    "TypeMapConfig": {
-      "additionalProperties": false,
-      "type": "object",
-      "properties": {
-        "basemapOptions": {
-          "$ref": "#/definitions/TypeBasemapOptions"
-        },
-        "interaction": {
-          "$ref": "#/definitions/TypeInteraction"
-        },
-        "listOfGeoviewLayerConfig": {
-          "$ref": "#/definitions/TypeListOfGeoviewLayerConfig"
-        },
-        "viewSettings": {
-          "$ref": "#/definitions/TypeViewSettings"
-        },
-        "highlightColor": {
-          "$ref": "#/definitions/TypeHighlightColors"
-        },
-        "overlayObjects": {
-          "$ref": "#/definitions/TypeOverlayObjects"
-        },
-        "extraOptions": {
-          "type": "object",
-          "description": "Additional options used for OpenLayers map options"
-        }
-      },
-      "required": [
-        "basemapOptions",
-        "interaction",
-        "viewSettings"
-      ]
-    },
-    "TypeBasemapOptions": {
-      "additionalProperties": false,
-      "type": "object",
-      "properties": {
-        "basemapId": {
-          "$ref": "#/definitions/TypeBasemapId"
-        },
-        "shaded": {
-          "type": "boolean",
-          "default": true,
-          "description": "Enable or disable shaded basemap (if basemap id is set to shaded then this should be false)."
-        },
-        "labeled": {
-          "type": "boolean",
-          "default": true,
-          "description": "Enable or disable basemap labels"
-        }
-      },
-      "required": [
-        "basemapId",
-        "shaded",
-        "labeled"
-      ]
-    },
-    "TypeBasemapId": {
-      "enum": [
-        "transport",
-        "osm",
-        "simple",
-        "nogeom",
-        "shaded",
-        "imagery"
-      ],
-      "default": "transport",
-      "description": "Id of the basemap to use."
-    },
-    "TypeInteraction": {
-      "enum": [
-        "static",
-        "dynamic"
-      ],
-      "default": "dynamic",
-      "description": "If map is dynamic (pan/zoom) or static to act as a thumbnail (no nav bar)."
-    },
-    "TypeHighlightColors": {
-      "enum": [
-        "black",
-        "white",
-        "red",
-        "green"
-      ],
-      "default": "black",
-      "description": "Color to use for feature highlights."
-    },
-    "TypeOverlayObjects": {
-      "type": "object",
-      "properties": {
-        "pointMarkers": {
-          "$ref": "#/definitions/TypePointMarkers"
-        }
-      }
-    },
-    "TypePointMarkers": {
-      "type": "object",
-      "patternProperties": {
-        "[^]*": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/TypePointMarker"
-          }
-        }
-      }
-    },
-    "TypePointMarker": {
-      "additionalProperties": false,
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "ID for point marker. Must be unique in group."
-        },
-        "coordinate": {
-          "type": "array",
-          "minItems": 2,
-          "maxItems": 2,
-          "items": {
-            "type": "number"
-          },
-          "description": "The coordinates of the marker."
-        },
-        "color": {
-          "type": "string",
-          "default": "green",
-          "description": "Marker color."
-        },
-        "opacity": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 1,
-          "default": 1
-        },
-        "projection": {
-          "type": "number",
-          "description": "The projection code of the coordinates. Default value is 4326."
-        }
-      },
-      "required": [
-        "id",
-        "coordinate"
-      ]
+      "description": "The list of layer configurations. The AbstractGeoviewLayerConfig validation ends here. The only thing we need to verify for the moment is it must be an array of at least one element.",
+      "type": "array"
     },
     "TypeListOfGeoviewLayerConfig": {
       "description": "List of GeoView Layers in the order which they should be added to the map.",
@@ -1850,519 +2473,6 @@
         ]
       },
       "description": "Type of shapefile layer."
-    },
-    "TypeViewSettings": {
-      "additionalProperties": false,
-      "type": "object",
-      "properties": {
-        "initialView": {
-          "$ref": "#/definitions/TypeInitialViewSettings",
-          "description": "Settings for the initial viewing area of the map."
-        },
-        "homeView": {
-          "$ref": "#/definitions/TypeInitialViewSettings",
-          "description": "Settings for the home nav bar button."
-        },
-        "enableRotation": {
-          "type": "boolean",
-          "default": true,
-          "description": "Enable rotation. If false, a rotation constraint that always sets the rotation to zero is used."
-        },
-        "maxExtent": {
-          "type": "array",
-          "minItems": 4,
-          "maxItems": 4,
-          "items": {
-            "type": "number"
-          },
-          "default": [
-            -125,
-            30,
-            -60,
-            89
-          ],
-          "description": "The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates."
-        },
-        "minZoom": {
-          "type": "integer",
-          "description": "The minimum zoom level used to determine the resolution constraint. If not set, will use default from basemap.",
-          "minimum": 0,
-          "maximum": 20
-        },
-        "maxZoom": {
-          "type": "integer",
-          "description": "The maximum zoom level used to determine the resolution constraint. If not set, will use default from basemap.",
-          "minimum": 0,
-          "maximum": 20
-        },
-        "projection": {
-          "$ref": "#/definitions/TypeValidMapProjectionCodes"
-        },
-        "rotation": {
-          "type": "integer",
-          "minimum": -360,
-          "maximum": 360,
-          "default": 0,
-          "description": "The initial rotation for the view in degree (positive rotation clockwise, 0 means North). Will be converted to radiant by the viewer."
-        }
-      }
-    },
-    "TypeInitialViewSettings": {
-      "additionalProperties": false,
-      "type": "object",
-      "maxItems": 1,
-      "properties": {
-        "zoomAndCenter": {
-          "$ref": "#/definitions/TypeZoomAndCenter"
-        },
-        "extent": {
-          "type": "array",
-          "minItems": 4,
-          "maxItems": 4,
-          "items": {
-            "type": "number"
-          },
-          "description": "The extent for the initial view. Called with [minX, minY, maxX, maxY] extent coordinates."
-        },
-        "layerIds": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "Geoview layer ID(s) or layer path(s) of layer(s) to use as initial map focus. If empty, will use all layers."
-        }
-      }
-    },
-    "TypeZoomAndCenter": {
-      "type": "array",
-      "prefixItems": [
-        {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 28,
-          "default": 3.5,
-          "description": "Initial map zoom level. Zoom level are define by the basemap zoom levels. Levels between whole numbers are supported to fine tune initial view."
-        },
-        [
-          {
-            "type": "number",
-            "minimum": -160,
-            "maximum": 160,
-            "default": -90,
-            "description": "Initial longitude value for map center."
-          },
-          {
-            "type": "number",
-            "minimum": -80,
-            "maximum": 80,
-            "default": 60,
-            "description": "Initial latitude value for map center."
-          }
-        ]
-      ],
-      "description": "Initial zoom and center coordinates to set map view."
-    },
-    "TypeValidMapProjectionCodes": {
-      "enum": [
-        3978,
-        3857
-      ],
-      "default": 3978,
-      "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada."
-    },
-    "TypeNavBarProps": {
-      "type": "array",
-      "uniqueItems": true,
-      "items": {
-        "enum": [
-          "zoom",
-          "fullscreen",
-          "home",
-          "location",
-          "projection",
-          "basemap-select",
-          "drawer"
-        ]
-      },
-      "default": [
-        "zoom",
-        "fullscreen",
-        "home"
-      ],
-      "description": "Controls available on the navigation bar.",
-      "minItems": 0
-    },
-    "TypeFooterBarProps": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "tabs": {
-          "type": "object",
-          "description": "Available tabs",
-          "properties": {
-            "core": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "enum": [
-                  "legend",
-                  "layers",
-                  "details",
-                  "data-table",
-                  "time-slider",
-                  "geochart"
-                ]
-              },
-              "minItems": 1,
-              "default": [
-                "legend",
-                "layers",
-                "details",
-                "data-table"
-              ],
-              "uniqueItems": true,
-              "description": "Default core tabs of footer bar to use. NOTE: config from packages for time-slider and geochart are in the same loaction as core config (<<core config name>>-<<package name>>.json)."
-            },
-            "custom": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "string"
-                  },
-                  "label": {
-                    "type": "string"
-                  },
-                  "contentHTML": {
-                    "type": "string"
-                  }
-                }
-              },
-              "minItems": 0,
-              "default": [],
-              "uniqueItems": true,
-              "description": "Custom tabs of footer bar to use"
-            }
-          },
-          "additionalProperties": false
-        },
-        "collapsed": {
-          "type": "boolean",
-          "default": false,
-          "description": "State of footer bar when map is loaded (expanded or collapsed)"
-        },
-        "selectedTab": {
-          "type": "string",
-          "enum": [
-            "legend",
-            "layers",
-            "details",
-            "data-table",
-            "time-slider",
-            "geochart",
-            ""
-          ],
-          "description": "Footer tab to be selected at map load"
-        },
-        "selectedDataTableLayerPath": {
-          "type": "string",
-          "description": "Layerpath of data table tab layer to be selected at map load"
-        },
-        "selectedLayersLayerPath": {
-          "type": "string",
-          "description": "Layerpath of layer tab layer to be selected at map load"
-        },
-        "selectedTimeSliderLayerPath": {
-          "type": "string",
-          "description": "Layerpath of time slider tab layer to be selected at map load"
-        }
-      },
-      "required": [
-        "tabs"
-      ]
-    },
-    "TypeAppBarProps": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "tabs": {
-          "type": "object",
-          "description": "Available tabs - controls",
-          "properties": {
-            "core": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "enum": [
-                  "geolocator",
-                  "export",
-                  "geochart",
-                  "details",
-                  "legend",
-                  "guide"
-                ]
-              },
-              "minItems": 0,
-              "default": [
-                "geolocator"
-              ],
-              "uniqueItems": true,
-              "description": "Default core tabs of app-bar to use. NOTE: config from packages like geochart are in the same loaction as core config (<<core config name>>-<<package name>>.json)."
-            }
-          },
-          "additionalProperties": false
-        },
-        "collapsed": {
-          "description": "State of app bar when map is loaded (expanded or collapsed)",
-          "type": "boolean",
-          "default": true
-        },
-        "selectedTab": {
-          "type": "string",
-          "enum": [
-            "geolocator",
-            "geochart",
-            "details",
-            "legend",
-            "guide"
-          ],
-          "description": "App bar tab to be selected at map load"
-        },
-        "selectedDataTableLayerPath": {
-          "type": "string",
-          "description": "Layerpath of data table tab layer to be selected at map load"
-        },
-        "selectedLayersLayerPath": {
-          "type": "string",
-          "description": "Layerpath of layer tab layer to be selected at map load"
-        }
-      },
-      "required": [
-        "tabs"
-      ]
-    },
-    "TypeOverviewMapProps": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "hideOnZoom": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 10,
-          "default": 0,
-          "description": "Minimum zoom level to show overview map"
-        }
-      }
-    },
-    "TypeMapComponents": {
-      "type": "array",
-      "uniqueItems": true,
-      "items": {
-        "enum": [
-          "overview-map",
-          "north-arrow"
-        ]
-      },
-      "default": [
-        "overview-map",
-        "north-arrow"
-      ],
-      "description": "Core components to initialize on viewer load. The schema for those are inside this file.",
-      "minItems": 0
-    },
-    "TypeMapCorePackages": {
-      "type": "array",
-      "uniqueItems": true,
-      "items": {
-        "enum": [
-          "swiper"
-        ]
-      },
-      "default": [],
-      "description": "Core map packages to initialize on viewer load. The schema for those are on their own package. NOTE: config from packages are in the same loaction as core config (<<core config name>>-<<package name>>.json).",
-      "minItems": 0
-    },
-    "TypeCorePackagesConfig": {
-      "type": "array",
-      "uniqueItems": true,
-      "default": [],
-      "description": "Core packages configuration (optional, can be in another file).",
-      "minItems": 0
-    },
-    "TypeExternalPackages": {
-      "type": "array",
-      "items": {
-        "additionalProperties": false,
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "External Package name. The name must be identical to the window external package object to load."
-          },
-          "configUrl": {
-            "type": "string",
-            "description": "The url to the external package configuration setting. The core package will read the configuration and pass it inside the package."
-          }
-        },
-        "required": [
-          "name"
-        ]
-      },
-      "default": [],
-      "description": "List of external packages to initialize on viewer load.",
-      "minItems": 0
-    },
-    "TypeServiceUrls": {
-      "additionalProperties": false,
-      "type": "object",
-      "description": "Service endpoint urls",
-      "properties": {
-        "geocoreUrl": {
-          "type": "string",
-          "default": "https://geocore.api.geo.ca",
-          "description": "Service end point to access API for layers specification (loading and plugins parameters). By default it is GeoCore but can be another endpoint with similar output."
-        },
-        "proxyUrl": {
-          "type": "string",
-          "description": "An optional proxy to be used for dealing with same-origin issues.  URL must either be a relative path on the same server or an absolute path on a server which sets CORS headers."
-        },
-        "geolocatorUrl": {
-          "type": "string",
-          "description": "Service end point to access geo location of searched value."
-        },
-        "metadataUrl": {
-          "type": "string",
-          "description": "Service end point to access metadata of layers.",
-          "default": "https://open.canada.ca/data/en/dataset/"
-        }
-      },
-      "required": [
-        "geocoreUrl"
-      ]
-    },
-    "TypeDisplayLanguage": {
-      "enum": [
-        "en",
-        "fr"
-      ],
-      "description": "Display languages supported."
-    },
-    "TypeLocalizedLanguages": {
-      "enum": [
-        "en",
-        "fr"
-      ],
-      "description": "ISO 639-1 code indicating the languages supported by the configuration file."
-    },
-    "TypeListOfLocalizedLanguages": {
-      "type": "array",
-      "uniqueItems": true,
-      "items": {
-        "$ref": "#/definitions/TypeLocalizedLanguages"
-      },
-      "default": [
-        "en",
-        "fr"
-      ],
-      "description": "ISO 639-1 code indicating the languages supported by the configuration file. It will use value(s) provided here to access bilangual configuration nodes. For value(s) provided here, each bilingual configuration node MUST provide a value.",
-      "minItems": 1
-    },
-    "TypeValidVersions": {
-      "enum": [
-        "1.0"
-      ],
-      "description": "The schema version that can be used to validate the configuration file. The schema should enumerate the list of versions accepted by this version of the viewer."
-    },
-    "TypeGlobalSettings": {
-      "additionalProperties": false,
-      "type": "object",
-      "description": "Universal map settings",
-      "properties": {
-        "canRemoveSublayers": {
-          "type": "boolean",
-          "description": "Whether or not sublayers can be removed from layer groups. Default = true."
-        },
-        "disabledLayerTypes": {
-          "description": "Disabled layer types are not allowed in the add layers component",
-          "type": "array",
-          "items": {
-            "anyOf": [
-              {
-                "$ref": "#/definitions/TypeGeoviewLayerType"
-              },
-              {
-                "$ref": "#/definitions/TypeGeoCoreLayerType"
-              },
-              {
-                "$ref": "#/definitions/TypeShapefileLayerType"
-              }
-            ]
-          }
-        },
-        "showUnsymbolizedFeatures": {
-          "type": "boolean",
-          "description": "Whether or not to show unsymbolized features. Default = false."
-        }
-      }
-    },
-    "TypeMapFeaturesInstance": {
-      "description": "The map features configuration. This type is used by the IsValidTypeMapFeaturesInstance method coded in config-validation.ts file. It does the validation down to the list of layer entry config.",
-      "additionalProperties": false,
-      "type": "object",
-      "properties": {
-        "mapId": {
-          "type": "string"
-        },
-        "map": {
-          "$ref": "#/definitions/TypeMapConfig"
-        },
-        "theme": {
-          "enum": [
-            "dark",
-            "light",
-            "geo.ca"
-          ],
-          "default": "dark",
-          "description": "Theme style the viewer."
-        },
-        "navBar": {
-          "$ref": "#/definitions/TypeNavBarProps"
-        },
-        "footerBar": {
-          "$ref": "#/definitions/TypeFooterBarProps"
-        },
-        "appBar": {
-          "$ref": "#/definitions/TypeAppBarProps"
-        },
-        "overviewMap": {
-          "$ref": "#/definitions/TypeOverviewMapProps"
-        },
-        "components": {
-          "$ref": "#/definitions/TypeMapComponents"
-        },
-        "corePackages": {
-          "$ref": "#/definitions/TypeMapCorePackages"
-        },
-        "corePackagesConfig": {
-          "$ref": "#/definitions/TypeCorePackagesConfig"
-        },
-        "externalPackages": {
-          "$ref": "#/definitions/TypeExternalPackages"
-        },
-        "serviceUrls": {
-          "$ref": "#/definitions/TypeServiceUrls"
-        },
-        "schemaVersionUsed": {
-          "$ref": "#/definitions/TypeValidVersions"
-        },
-        "globalSettings": {
-          "$ref": "#/definitions/TypeGlobalSettings"
-        }
-      },
-      "required": [
-        "map"
-      ]
     }
   }
 }

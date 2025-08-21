@@ -18,10 +18,9 @@ import { useLightBox } from '@/core/components/common';
 import { LayerIcon } from '@/core/components/common/layer-icon';
 import { SecondaryControls } from './legend-layer-ctrl';
 import { CollapsibleContent } from './legend-layer-container';
+import { CONST_LAYER_TYPES, TypeLayerStatus } from '@/api/config/types/map-schema-types';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
-import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
-import { TypeLayerStatus } from '@/api/config/types/map-schema-types';
 
 interface LegendLayerProps {
   layerPath: string;
@@ -67,7 +66,7 @@ const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick }: LegendLay
         disableTypography
         secondary={<SecondaryControls layerPath={layerPath} />}
       />
-      {((layerChildren && layerChildren.length > 0) || (layerItems && layerItems.length > 1) || layerType === CV_CONST_LAYER_TYPES.WMS) && (
+      {((layerChildren && layerChildren.length > 0) || (layerItems && layerItems.length > 1) || layerType === CONST_LAYER_TYPES.WMS) && (
         <IconButton className="buttonOutline" onClick={onExpandClick} edge="end" size="small" tooltip={tooltip}>
           {!isCollapsed ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
         </IconButton>

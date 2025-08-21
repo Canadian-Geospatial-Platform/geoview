@@ -8,7 +8,6 @@ import {
   ResponseTypeError,
   NetworkError,
 } from '@/core/exceptions/core-exceptions';
-import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { logger } from '@/core/utils/logger';
 
 export class Fetch {
@@ -18,13 +17,13 @@ export class Fetch {
    * @param {RequestInit?} init - The optional initialization parameters for the fetch.
    * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
    * @param {number?} delayMs - The option delay before performing the actual fetch command (mostly for testing purposes).
-   * @returns {Promise<TypeJsonObject>} The fetched json response.
+   * @returns {Promise<T>} The fetched json response.
    * @throws {ResponseError} If the response is not OK (non-2xx).
    * @throws {ResponseEmptyError} If the JSON response is empty.
    * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
    * @throws {Error} For any other unexpected failures.
    */
-  static async fetchJson(url: string, init?: RequestInit, timeoutMs?: number, delayMs?: number): Promise<TypeJsonObject | TypeJsonArray> {
+  static async fetchJson<T>(url: string, init?: RequestInit, timeoutMs?: number, delayMs?: number): Promise<T> {
     // The original signal if any
     const originalSignal = init?.signal || undefined;
 
@@ -56,20 +55,14 @@ export class Fetch {
       // Get the json body of the response
       const responseJson = await response.json();
 
-      // Check if the response is an object with no properties
-      if (responseJson.constructor === Object && Object.keys(responseJson).length === 0) {
+      // Check if the response is an object with no properties (if it's an empty array, then, that's fine for the purposes here)
+      if (responseJson === null || (responseJson.constructor === Object && Object.keys(responseJson).length === 0)) {
         // Throw empty response error
         throw new ResponseEmptyError();
       }
 
-      // Check if the response is an array
-      if (Array.isArray(responseJson)) {
-        // Return the value as Array
-        return responseJson as TypeJsonArray;
-      }
-
       // Return the value as Object
-      return responseJson as TypeJsonObject;
+      return responseJson;
     } catch (error: unknown) {
       // Throw the exceptions that we know
       Fetch.#throwWhatWeKnow(error, originalSignal, timeoutSignal, timeoutMs);
@@ -80,31 +73,6 @@ export class Fetch {
       // Clear the timeout, if any. We're done
       clearTimeout(timeoutId);
     }
-  }
-
-  /**
-   * Fetches a url for a json response in the form of an object (not an array).
-   * @param {string} url - The url to fetch.
-   * @param {RequestInit?} init - The optional initialization parameters for the fetch.
-   * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
-   * @returns {Promise<T>} The fetched json response.
-   * @throws {ResponseError} If the response is not OK (non-2xx).
-   * @throws {ResponseEmptyError} If the JSON response is empty.
-   * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
-   * @throws {ResponseTypeError} If the response from the service is an array instead of an object.
-   * @throws {Error} For any other unexpected failures.
-   */
-  static async fetchJsonAsObject(url: string, init?: RequestInit, timeoutMs?: number): Promise<TypeJsonObject> {
-    // Redirect
-    const result = await this.fetchJson(url, init, timeoutMs);
-
-    // Validate the result of the fetch is indeed a Json object and not a Json array
-    if (Array.isArray(result)) {
-      throw new ResponseTypeError('object', result);
-    }
-
-    // Return the validated TypeJsonObject
-    return result as TypeJsonObject;
   }
 
   /**
@@ -121,15 +89,15 @@ export class Fetch {
    * @throws {ResponseContentError} If the response actually contains an error within it.
    * @throws {Error} For any other unexpected failures.
    */
-  static async fetchEsriJsonAsObject(url: string, init?: RequestInit, timeoutMs?: number): Promise<TypeJsonObject> {
+  static async fetchEsriJson<T>(url: string, init?: RequestInit, timeoutMs?: number): Promise<T> {
     // Redirect
-    const result = await this.fetchJsonAsObject(url, init, timeoutMs);
+    const result = await this.fetchJson<T>(url, init, timeoutMs);
 
     // Check and throw exception if the content actually contains an embedded error
     // (ArcGIS Server returns 200 even an error happened)
     this.throwIfResponseHasEmbeddedError(result);
 
-    // Return the validated TypeJsonObject
+    // Return the validated object
     return result;
   }
 
@@ -138,40 +106,24 @@ export class Fetch {
    * @param {string} url - The url to fetch.
    * @param {RequestInit?} init - The optional initialization parameters for the fetch.
    * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
-   * @returns {Promise<T>} The fetched json response.
+   * @returns {Promise<T[]>} The fetched json response.
    * @throws {ResponseError} If the response is not OK (non-2xx).
    * @throws {ResponseEmptyError} If the JSON response is empty.
    * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
    * @throws {ResponseTypeError} If the response from the service is an object instead of an array.
    * @throws {Error} For any other unexpected failures.
    */
-  static async fetchJsonAsArray(url: string, init?: RequestInit, timeoutMs?: number): Promise<TypeJsonArray> {
+  static async fetchJsonAsArray<T>(url: string, init?: RequestInit, timeoutMs?: number): Promise<T[]> {
     // Redirect
-    const result = await this.fetchJson(url, init, timeoutMs);
+    const result = await this.fetchJson<T[]>(url, init, timeoutMs);
 
     // Validate the result of the fetch is indeed a Json array and not a Json object
     if (!Array.isArray(result)) {
       throw new ResponseTypeError('array', result);
     }
 
-    // Return the validated TypeJsonArray
-    return result as TypeJsonArray;
-  }
-
-  /**
-   * Fetches a url for a json response and casts the json as 'T'. It doesn't validate the Json structure. It's up to the caller to do so.
-   * @param {string} url - The url to fetch.
-   * @param {RequestInit?} init - The optional initialization parameters for the fetch.
-   * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
-   * @returns {Promise<T>} The fetched json response.
-   * @throws {ResponseError} If the response is not OK (non-2xx).
-   * @throws {ResponseEmptyError} If the JSON response is empty.
-   * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
-   * @throws {Error} For any other unexpected failures.
-   */
-  static fetchJsonAs<T>(url: string, init?: RequestInit, timeoutMs?: number): Promise<T> {
-    // Redirect
-    return Fetch.fetchJson(url, init, timeoutMs) as Promise<T>;
+    // Return the validated array
+    return result;
   }
 
   /**
@@ -179,7 +131,7 @@ export class Fetch {
    * @param {string} url - The url to fetch.
    * @param {RequestInit?} init - The optional initialization parameters for the fetch.
    * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
-   * @returns {Promise<TypeJsonObject>} The fetched text response.
+   * @returns {Promise<string>} The fetched text response.
    * @throws {ResponseError} If the response is not OK (non-2xx).
    * @throws {ResponseEmptyError} If the JSON response is empty.
    * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
@@ -293,13 +245,13 @@ export class Fetch {
    * @param {string} url - The url to fetch.
    * @param {RequestInit?} init - The optional initialization parameters for the fetch.
    * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
-   * @returns {Promise<TypeJsonObject>} The fetched json response.
+   * @returns {Promise<T = Record<string, unknown>>} The fetched json response.
    * @throws {ResponseError} If the response is not OK (non-2xx).
    * @throws {ResponseEmptyError} If the JSON response is empty.
    * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
    * @throws {Error} For any other unexpected failures.
    */
-  static async fetchXMLToJson(url: string, init?: RequestInit, timeoutMs?: number): Promise<TypeJsonObject> {
+  static async fetchXMLToJson<T = Record<string, unknown>>(url: string, init?: RequestInit, timeoutMs?: number): Promise<T> {
     // Fetch the text
     const text = await Fetch.fetchText(url, init, timeoutMs);
 
@@ -340,7 +292,7 @@ export class Fetch {
    */
   static fetchWithTimeout<T>(url: string, init?: RequestInit, timeoutMs: number = 7000): Promise<T> {
     // Redirect
-    return Fetch.fetchJsonAs<T>(url, init, timeoutMs);
+    return Fetch.fetchJson<T>(url, init, timeoutMs);
   }
 
   /**
@@ -477,14 +429,13 @@ export class Fetch {
     timeoutSignal: AbortSignal | undefined,
     timeoutMs: number | undefined
   ): void {
-    // If the timeout signal caused the abort (and not the user-provided signal)
-    if (timeoutSignal?.aborted && !originalSignal?.aborted) {
-      throw new RequestTimeoutError(timeoutMs!);
-    }
-
     // If the original signal caused the abort
     if (originalSignal?.aborted) {
       throw new RequestAbortedError(originalSignal);
+    }
+    // If the timeout signal caused the abort
+    if (timeoutSignal?.aborted) {
+      throw new RequestTimeoutError(timeoutMs!);
     }
 
     // If the error is a TypeError, it's likely a network issue

@@ -2,7 +2,7 @@ import { Coordinate } from 'ol/coordinate';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { TypeFeatureInfoEntry, TypeFeatureInfoLayerConfig, TypeLayerEntryConfig, TypeResultSet } from '@/api/config/types/map-schema-types';
+import { TypeFeatureInfoEntry, TypeLayerEntryConfig, TypeResultSet } from '@/api/config/types/map-schema-types';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { EventType, AbstractLayerSet, PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
@@ -272,7 +272,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
       layerEntryConfig.source.featureInfo = { queryable: true };
     }
 
-    const sourceFeatureInfo = layerEntryConfig.source.featureInfo as TypeFeatureInfoLayerConfig;
+    const sourceFeatureInfo = layerEntryConfig.source.featureInfo;
     if (!sourceFeatureInfo.outfields) {
       sourceFeatureInfo.outfields = [];
 

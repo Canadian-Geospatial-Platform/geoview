@@ -1,9 +1,7 @@
 /* eslint-disable max-classes-per-file */
 // We want more than 1 Error class here to save files
-
-import { TypeJsonArray, TypeJsonValue } from '@/api/config/types/config-types';
-import { TypeLayerEntryConfig } from '@/api/config/types/map-schema-types';
 import { LayerError } from '@/core/exceptions/layer-exceptions';
+import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 
 // Classes in this file mostly inherit LayerEntryConfigError errors.
 
@@ -14,20 +12,16 @@ import { LayerError } from '@/core/exceptions/layer-exceptions';
  */
 export class LayerEntryConfigError extends LayerError {
   /** The configuration associated with the GeoView layer */
-  readonly layerConfig: TypeLayerEntryConfig;
+  readonly layerConfig: ConfigBaseClass;
 
   /**
    * Protected constructor to initialize the LayerEntryConfigError.
    * This error is typically thrown when a GeoView layer's configuration fails to load or process correctly.
-   * @param {TypeLayerEntryConfig} layerConfig - The configuration object associated with the GeoView layer.
+   * @param {ConfigBaseClass} layerConfig - The configuration object associated with the GeoView layer.
    * @param {string} messageKey - A localization key. Defaults to 'validation.layer.loadfailed'.
-   * @param {TypeJsonValue[] | TypeJsonArray | string[] | undefined} params - Optional parameters to customize the error message.
+   * @param {unknown[]} params - Optional parameters to customize the error message.
    */
-  protected constructor(
-    layerConfig: TypeLayerEntryConfig,
-    messageKey: string | undefined = undefined,
-    params: TypeJsonValue[] | TypeJsonArray | string[] | undefined = []
-  ) {
+  protected constructor(layerConfig: ConfigBaseClass, messageKey: string | undefined = undefined, params: unknown[] = []) {
     super(
       layerConfig.layerPath,
       messageKey || 'validation.layer.loadfailed',
@@ -51,9 +45,9 @@ export class LayerEntryConfigLayerIdNotFoundError extends LayerEntryConfigError 
   /**
    * Constructor to initialize the LayerEntryConfigLayerIdNotFoundError.
    * This error is thrown when the layer ID is not found within the layer configuration.
-   * @param {TypeLayerEntryConfig} layerConfig - The configuration object associated with the GeoView layer.
+   * @param {ConfigBaseClass} layerConfig - The configuration object associated with the GeoView layer.
    */
-  constructor(layerConfig: TypeLayerEntryConfig) {
+  constructor(layerConfig: ConfigBaseClass) {
     super(layerConfig, 'validation.layer.layerIdNotFound', [layerConfig.layerId, layerConfig.getLayerName()]);
 
     // Ensure correct inheritance (important for transpilation targets)
@@ -69,9 +63,9 @@ export class LayerEntryConfigInvalidLayerEntryConfigError extends LayerEntryConf
   /**
    * Constructor to initialize the LayerEntryConfigInvalidLayerEntryConfigError.
    * This error is thrown when the metadata with regard to the listOfLayerEntryConfig is preventing to load the layer.
-   * @param {TypeLayerEntryConfig} layerConfig - The configuration object associated with the GeoView layer.
+   * @param {ConfigBaseClass} layerConfig - The configuration object associated with the GeoView layer.
    */
-  constructor(layerConfig: TypeLayerEntryConfig) {
+  constructor(layerConfig: ConfigBaseClass) {
     super(layerConfig, 'validation.layer.invalidMetadata', [layerConfig.getLayerName()]);
 
     // Ensure correct inheritance (important for transpilation targets)
@@ -88,9 +82,9 @@ export class LayerEntryConfigEmptyLayerGroupError extends LayerEntryConfigError 
   /**
    * Constructor to initialize the LayerEntryConfigEmptyLayerGroupError.
    * This error is thrown when a layer group in the configuration is found to be empty.
-   * @param {TypeLayerEntryConfig} layerConfig - The configuration object associated with the GeoView layer.
+   * @param {ConfigBaseClass} layerConfig - The configuration object associated with the GeoView layer.
    */
-  constructor(layerConfig: TypeLayerEntryConfig) {
+  constructor(layerConfig: ConfigBaseClass) {
     super(layerConfig, 'validation.layer.emptyLayerGroup', [layerConfig.getLayerName()]);
 
     // Ensure correct inheritance (important for transpilation targets)
@@ -107,9 +101,9 @@ export class LayerEntryConfigUnableToCreateGroupLayerError extends LayerEntryCon
   /**
    * Constructor to initialize the LayerEntryConfigUnableToCreateGroupLayerError.
    * This error is thrown when the creation of a group layer in the configuration fails.
-   * @param {TypeLayerEntryConfig} layerConfig - The configuration object associated with the GeoView layer.
+   * @param {ConfigBaseClass} layerConfig - The configuration object associated with the GeoView layer.
    */
-  constructor(layerConfig: TypeLayerEntryConfig) {
+  constructor(layerConfig: ConfigBaseClass) {
     super(layerConfig, 'validation.layer.unableToCreateGroupLayer', [layerConfig.getLayerName()]);
 
     // Ensure correct inheritance (important for transpilation targets)
@@ -124,9 +118,9 @@ export class LayerEntryConfigUnableToCreateGroupLayerError extends LayerEntryCon
 export class LayerEntryConfigVectorSourceURLNotDefinedError extends LayerEntryConfigError {
   /**
    * Creates a new LayerEntryConfigVectorSourceURLNotDefinedError.
-   * @param {TypeLayerEntryConfig} layerConfig - The layer configuration that is missing the vector source URL.
+   * @param {ConfigBaseClass} layerConfig - The layer configuration that is missing the vector source URL.
    */
-  constructor(layerConfig: TypeLayerEntryConfig) {
+  constructor(layerConfig: ConfigBaseClass) {
     super(layerConfig, 'validation.layer.vectorSourceUrlNotDefined', [layerConfig.getLayerName()]);
 
     // Ensure correct inheritance (important for transpilation targets)
@@ -144,9 +138,9 @@ export class LayerEntryConfigVectorSourceURLNotDefinedError extends LayerEntryCo
 export class LayerEntryConfigVectorTileProjectionNotMatchingMapProjectionError extends LayerEntryConfigError {
   /**
    * Creates an instance of LayerEntryConfigVectorTileProjectionNotMatchingMapProjectionError.
-   * @param {TypeLayerEntryConfig} layerConfig - The configuration object for the vector tile layer with the invalid projection.
+   * @param {ConfigBaseClass} layerConfig - The configuration object for the vector tile layer with the invalid projection.
    */
-  constructor(layerConfig: TypeLayerEntryConfig) {
+  constructor(layerConfig: ConfigBaseClass) {
     super(layerConfig, 'validation.layer.vectorTileLayerProjectionMismatch', [layerConfig.getLayerName()]);
 
     // Ensure correct inheritance (important for transpilation targets)
@@ -162,10 +156,10 @@ export class LayerEntryConfigVectorTileProjectionNotMatchingMapProjectionError e
 export class LayerEntryConfigWMSSubLayerNotFoundError extends LayerEntryConfigError {
   /**
    * Creates an instance of LayerEntryConfigWMSSubLayerNotFoundError.
-   * @param {TypeLayerEntryConfig} layerConfig - The layer configuration object referencing the missing WMS sub-layer.
+   * @param {ConfigBaseClass} layerConfig - The layer configuration object referencing the missing WMS sub-layer.
    * @param {string} geoviewLayerId - The ID of the GeoView WMS layer that was expected to contain the sub-layer.
    */
-  constructor(layerConfig: TypeLayerEntryConfig, geoviewLayerId: string) {
+  constructor(layerConfig: ConfigBaseClass, geoviewLayerId: string) {
     super(layerConfig, 'validation.layer.wmsSubLayerNotfound', [layerConfig.layerId, geoviewLayerId]);
 
     // Ensure correct inheritance (important for transpilation targets)
@@ -183,9 +177,9 @@ export class LayerEntryConfigWMSSubLayerNotFoundError extends LayerEntryConfigEr
 export class LayerEntryConfigParameterExtentNotDefinedInSourceError extends LayerEntryConfigError {
   /**
    * Constructs a new LayerEntryConfigParameterExtentNotDefinedInSourceError instance.
-   * @param {TypeLayerEntryConfig} layerConfig - The layer configuration that caused the error.
+   * @param {ConfigBaseClass} layerConfig - The layer configuration that caused the error.
    */
-  constructor(layerConfig: TypeLayerEntryConfig) {
+  constructor(layerConfig: ConfigBaseClass) {
     super(layerConfig, 'validation.layer.extentParameterNotDefined', [layerConfig.getLayerName()]);
 
     // Ensure correct inheritance (important for transpilation targets)
@@ -203,9 +197,9 @@ export class LayerEntryConfigParameterExtentNotDefinedInSourceError extends Laye
 export class LayerEntryConfigParameterProjectionNotDefinedInSourceError extends LayerEntryConfigError {
   /**
    * Constructs a new LayerEntryConfigParameterProjectionNotDefinedInSourceError instance.
-   * @param {TypeLayerEntryConfig} layerConfig - The layer configuration object that caused the error.
+   * @param {ConfigBaseClass} layerConfig - The layer configuration object that caused the error.
    */
-  constructor(layerConfig: TypeLayerEntryConfig) {
+  constructor(layerConfig: ConfigBaseClass) {
     super(layerConfig, 'validation.layer.projectionParameterNotDefined', [layerConfig.getLayerName()]);
 
     // Ensure correct inheritance (important for transpilation targets)

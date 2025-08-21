@@ -6,11 +6,11 @@ import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
 import _ from 'lodash';
 import { logger } from '@/core/utils/logger';
-import { EntryConfigBaseClass, GroupLayerEntryConfig } from '@/api/config/types/map-schema-types';
-import { getLayerById } from './add-layer-utils';
+import { TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '@/api/config/types/map-schema-types';
+import { UtilAddLayer } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
 
 export interface AddLayerTreeProps {
-  layersData: GroupLayerEntryConfig[];
+  layerTree: TypeGeoviewLayerConfig;
   onSelectedItemsChange(items: string[]): void;
 }
 
@@ -18,7 +18,7 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
   // Log
   logger.logTraceRender('components/layers/left-panel/add-layer-tree/add-layer-tree');
 
-  const { layersData, onSelectedItemsChange } = props;
+  const { layerTree, onSelectedItemsChange } = props;
   const [selectedItems, setSelectedItems] = useState<string[]>([]); // e.g. ["group1/layer1", "group2/layer2"]
 
   useEffect(() => {
@@ -33,14 +33,14 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
    * @param layer - the layer to render
    * @param parentId - the parent id of the layer
    */
-  const renderTreeItem = (layer: GroupLayerEntryConfig, parentId?: string): JSX.Element => {
-    const curLayerId = `${parentId ? `${parentId}/` : ''}${layer.layerId}`;
+  const renderTreeItem = (layer: TypeGeoviewLayerConfig | TypeLayerEntryConfig, parentId?: string): JSX.Element => {
+    const layerId = (layer as TypeLayerEntryConfig).layerId || (layer as TypeGeoviewLayerConfig).geoviewLayerId;
+    const layerName = (layer as TypeLayerEntryConfig).layerName || (layer as TypeGeoviewLayerConfig).geoviewLayerName;
+
+    const curLayerId = `${parentId ? `${parentId}/` : ''}${layerId}`;
     return (
-      <TreeItem key={curLayerId} itemId={curLayerId} label={layer.layerName} aria-label={layer.layerName}>
-        {layer?.listOfLayerEntryConfig?.length > 0 &&
-          layer.listOfLayerEntryConfig.map((subLayer: EntryConfigBaseClass) =>
-            renderTreeItem(subLayer as GroupLayerEntryConfig, curLayerId)
-          )}
+      <TreeItem key={curLayerId} itemId={curLayerId} label={layerName} aria-label={layerName}>
+        {layer.listOfLayerEntryConfig?.map((subLayer) => renderTreeItem(subLayer, curLayerId))}
       </TreeItem>
     );
   };
@@ -56,9 +56,9 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
     function populateLayerChildren(origLayerId: string, parentViewId: string | null): void {
       const viewLayerId = `${parentViewId ? `${parentViewId}/` : ''}${origLayerId}`;
       result.push(viewLayerId);
-      const layerDetails = getLayerById(layersData, origLayerId);
+      const layerDetails = UtilAddLayer.getLayerById(layerTree, origLayerId);
 
-      const childLayerIds: string[] | undefined = layerDetails?.listOfLayerEntryConfig?.map((child: EntryConfigBaseClass) => {
+      const childLayerIds: string[] | undefined = layerDetails?.listOfLayerEntryConfig?.map((child) => {
         return child.layerId;
       });
 
@@ -93,7 +93,15 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
   };
 
   const renderTreeItems = (): JSX.Element[] => {
-    return layersData.map((layer) => renderTreeItem(layer));
+    // If the layer tree is a TypeGeoviewLayerConfig of type EsriDynamic or WFS
+    if (
+      layerTree.geoviewLayerType === 'esriDynamic' ||
+      layerTree.geoviewLayerType === 'ogcWfs' ||
+      layerTree.geoviewLayerType === 'ogcFeature'
+    ) {
+      return layerTree.listOfLayerEntryConfig.map((layer) => renderTreeItem(layer));
+    }
+    return [renderTreeItem(layerTree)];
   };
 
   return (

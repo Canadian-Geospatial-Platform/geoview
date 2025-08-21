@@ -6,7 +6,6 @@
 import { expose } from 'comlink';
 
 import { createWorkerLogger } from '@/core/workers/helper/logger-worker';
-import { TypeJsonObject } from '@/api/config/types/config-types';
 import { fetchWithTimeout } from '@/core/utils/fetch-worker-helper';
 import { AsyncSemaphore } from '@/core/utils/async-semaphore';
 
@@ -47,10 +46,10 @@ const logger = createWorkerLogger('FetchEsriWorker');
  * Queries features from an ESRI service
  * @async
  * @param {QueryParams} params - The parameters for the ESRI query
- * @returns {Promise<TypeJsonObject>} A promise that resolves to the query results
+ * @returns {Promise<unknown>} A promise that resolves to the query results
  * @throws {Error} When the HTTP request fails
  */
-async function queryEsriFeatures(params: QueryParams): Promise<TypeJsonObject> {
+async function queryEsriFeatures(params: QueryParams): Promise<unknown> {
   // Move the ESRI query function directly into the worker to avoid circular dependencies
   const urlParam = `?objectIds=${params.objectIds}&outFields=*&returnGeometry=${params.queryGeometry}&outSR=${params.projection}&geometryPrecision=1&maxAllowableOffset=${params.maxAllowableOffset}&f=json`;
 
@@ -67,7 +66,7 @@ async function queryEsriFeatures(params: QueryParams): Promise<TypeJsonObject> {
  * @param {number} resultRecordCount - Number of records to request per query
  * @param {number} totalCount - Total number of features to be retrieved
  * @param {number} currentProcessedFeatures - Current count of processed features
- * @returns {Promise<{features: TypeJsonObject[], processedCount: number}>} A promise that resolves to:
+ * @returns {Promise<{features: unknown[], processedCount: number}>} A promise that resolves to:
  *   - features: Array of feature objects from all queries in the batch
  *   - processedCount: Total number of features processed after this batch
  */
@@ -79,7 +78,7 @@ const processBatch = async (
   resultRecordCount: number,
   totalCount: number,
   currentProcessedFeatures: number
-): Promise<{ features: TypeJsonObject[]; processedCount: number }> => {
+): Promise<{ features: unknown[]; processedCount: number }> => {
   let localProcessedFeatures = currentProcessedFeatures;
   const promises = [];
 
@@ -140,12 +139,12 @@ const processBatch = async (
 /**
  * Queries all features from an ESRI REST service by handling querying in batches
  * @param {QueryParams} params - The query parameters
- * @returns {Promise<TypeJsonObject>} A promise that resolves to an object containing:
+ * @returns {Promise<unknown>} A promise that resolves to an object containing:
  *   - features: Array of feature objects
  *   - count: Total number of features
  * @throws {Error} If the query fails
  */
-async function queryAllEsriFeatures(params: QueryParams): Promise<TypeJsonObject> {
+async function queryAllEsriFeatures(params: QueryParams): Promise<unknown> {
   const resultRecordCount = params.maxRecordCount > 10000 ? 10000 : params.maxRecordCount;
   const maxConcurrentRequests = Math.min(10, navigator.hardwareConcurrency * 2);
   const baseUrl = `${params.url}/query?where=1=1&outFields=*&f=json&returnGeometry=${params.queryGeometry}&resultRecordCount=${resultRecordCount}`;
@@ -168,7 +167,7 @@ async function queryAllEsriFeatures(params: QueryParams): Promise<TypeJsonObject
     const numberOfBatches = Math.ceil(totalRequests / maxConcurrentRequests);
 
     // Main processing loop
-    let allFeatures: TypeJsonObject[] = [];
+    let allFeatures: unknown[] = [];
     let totalProcessedFeatures = 0;
 
     for (let batchIndex = 0; batchIndex < numberOfBatches; batchIndex++) {
@@ -194,7 +193,7 @@ async function queryAllEsriFeatures(params: QueryParams): Promise<TypeJsonObject
       count: totalCount,
     };
 
-    return response as unknown as TypeJsonObject;
+    return response;
   } catch (error: unknown) {
     logger.logError('Error in queryAllEsriFeatures', error);
     logger.sendMessage('error');
@@ -220,10 +219,10 @@ const worker = {
   /**
    * Processes an ESRI query request
    * @param {QueryParams} params - The parameters for the ESRI query
-   * @returns {Promise<TypeJsonObject>} A promise that resolves to the query results
+   * @returns {Promise<unknown>} A promise that resolves to the query results
    * @throws {Error} When the query processing fails
    */
-  process(params: QueryParams): Promise<TypeJsonObject> {
+  process(params: QueryParams): Promise<unknown> {
     try {
       logger.logTrace('Starting query processing', JSON.stringify(params));
       const response = params.objectIds === 'all' ? queryAllEsriFeatures(params) : queryEsriFeatures(params);

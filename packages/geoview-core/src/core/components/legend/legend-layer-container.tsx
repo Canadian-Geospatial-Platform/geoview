@@ -3,7 +3,7 @@ import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Collapse, List } from '@/ui';
 import { getSxClasses } from './legend-styles';
-import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
+import { CONST_LAYER_TYPES } from '@/api/config/types/map-schema-types';
 import { ItemsList } from './legend-layer-items';
 import { LegendLayer } from './legend-layer';
 import {
@@ -78,7 +78,7 @@ export const CollapsibleContent = memo(function CollapsibleContent({
   // Early returns
   if ((layerChildren?.length === 0 && layerItems?.length === 1) || layerStatus === 'error') return null;
 
-  const isWMSWithLegend = layerType === CV_CONST_LAYER_TYPES.WMS && layerIcons?.[0]?.iconImage && layerIcons[0].iconImage !== 'no data';
+  const isWMSWithLegend = layerType === CONST_LAYER_TYPES.WMS && layerIcons?.[0]?.iconImage && layerIcons[0].iconImage !== 'no data';
 
   // If it is a WMS legend, create a specific component
   if (isWMSWithLegend) {

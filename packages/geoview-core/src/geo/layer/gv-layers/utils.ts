@@ -1,4 +1,5 @@
-import { Cast, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
+import { Coordinate } from 'ol/coordinate';
+
 import { DateMgt, TypeDateFragments } from '@/core/utils/date-mgt';
 import {
   TypeStyleGeometry,
@@ -7,7 +8,6 @@ import {
   rangeDomainType,
   TypeFieldEntry,
   TypeFeatureInfoLayerConfig,
-  TypeGeometry,
   TypeOutfieldsType,
   TypeAliasLookup,
   TypeOutfields,
@@ -27,8 +27,11 @@ import { NotSupportedError } from '@/core/exceptions/core-exceptions';
  * @returns {TypeOutfieldsType} The type of the field.
  */
 export function featureInfoGetFieldType(layerConfig: AbstractBaseLayerEntryConfig, fieldName: string): TypeOutfieldsType {
-  const fieldDefinitions = layerConfig.getLayerMetadata()?.source.featureInfo as unknown as TypeFeatureInfoLayerConfig;
-  const outFieldEntry = fieldDefinitions.outfields?.find((fieldDefinition) => fieldDefinition.name === fieldName);
+  // GV Can be any object so disable eslint and proceed with caution
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const layerMetadata = layerConfig.getLayerMetadata() as any;
+  const fieldDefinitions = layerMetadata?.source?.featureInfo as TypeFeatureInfoLayerConfig | undefined;
+  const outFieldEntry = fieldDefinitions?.outfields?.find((fieldDefinition) => fieldDefinition.name === fieldName);
   return outFieldEntry?.type || 'string';
 }
 
@@ -42,10 +45,10 @@ export function esriGetFieldType(
   layerConfig: EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig | EsriImageLayerEntryConfig,
   fieldName: string
 ): TypeOutfieldsType {
-  const esriFieldDefinitions = layerConfig.getLayerMetadata()?.fields as TypeJsonArray;
-  const fieldDefinition = esriFieldDefinitions.find((metadataEntry) => metadataEntry.name === fieldName);
+  const esriFieldDefinitions = layerConfig.getLayerMetadata()?.fields;
+  const fieldDefinition = esriFieldDefinitions?.find((metadataEntry) => metadataEntry.name === fieldName);
   if (!fieldDefinition) return 'string';
-  const esriFieldType = fieldDefinition.type as string;
+  const esriFieldType = fieldDefinition.type;
   if (esriFieldType === 'esriFieldTypeDate') return 'date';
   if (esriFieldType === 'esriFieldTypeOID') return 'oid';
   if (
@@ -69,35 +72,36 @@ export function esriGetFieldDomain(
   layerConfig: EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig | EsriImageLayerEntryConfig,
   fieldName: string
 ): codedValueType | rangeDomainType | null {
-  const esriFieldDefinitions = layerConfig.getLayerMetadata()?.fields as TypeJsonArray;
-  const fieldDefinition = esriFieldDefinitions.find((metadataEntry) => metadataEntry.name === fieldName);
-  return fieldDefinition ? Cast<codedValueType | rangeDomainType>(fieldDefinition.domain) : null;
+  const esriFieldDefinitions = layerConfig.getLayerMetadata()?.fields;
+  const fieldDefinition = esriFieldDefinitions?.find((metadataEntry) => metadataEntry.name === fieldName);
+  return fieldDefinition ? fieldDefinition.domain : null;
 }
 
 /**
  * Transforms the query results of an Esri service response - when not querying on the Layers themselves (giving a 'reduced' FeatureInfoEntry).
  * The transformation reads the Esri formatted information and return a list of `TypeFeatureInfoEntryPartial` records.
  * In a similar fashion and response object as the "Query Feature Infos" functionalities done via the Layers.
- *
- * @param results TypeJsonObject The Json Object representing the data from Esri.
- *
- * @returns TypeFeatureInfoEntryPartial[] an array of relared records of type TypeFeatureInfoEntryPartial
+ * @param {EsriRelatedRecordsJsonResponseRelatedRecord[]} records The records representing the data from Esri.
+ * @param {TypeStyleGeometry?} geometryType - Optional, the geometry type.
+ * @returns TypeFeatureInfoEntryPartial[] An array of relared records of type TypeFeatureInfoEntryPartial
  */
-export function esriParseFeatureInfoEntries(records: TypeJsonObject[], geometryType?: TypeStyleGeometry): TypeFeatureInfoEntryPartial[] {
+export function esriParseFeatureInfoEntries(
+  records: EsriRelatedRecordsJsonResponseRelatedRecord[],
+  geometryType?: TypeStyleGeometry
+): TypeFeatureInfoEntryPartial[] {
   // Loop on the Esri results
-  return records.map((rec: TypeJsonObject) => {
+  return records.map((rec) => {
     // The coordinates
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const coordinates = (rec.geometry?.points || rec.geometry?.paths || rec.geometry?.rings || [rec.geometry?.x, rec.geometry?.y]) as any; // MultiPoint or Line or Polygon or Point schema
+    const coordinates = rec.geometry?.points || rec.geometry?.paths || rec.geometry?.rings || [rec.geometry?.x, rec.geometry?.y]; // MultiPoint or Line or Polygon or Point schema
 
     // Prep the TypeFeatureInfoEntryPartial
     const featInfo: TypeFeatureInfoEntryPartial = {
       fieldInfo: {},
-      geometry: geometryType ? (GeometryApi.createGeometryFromType(geometryType, coordinates) as unknown as TypeGeometry) : null,
+      geometry: geometryType ? GeometryApi.createGeometryFromType(geometryType, coordinates) : undefined,
     };
 
     // Loop on the Esri attributes
-    Object.entries(rec.attributes).forEach((tupleAttrValue: [string, unknown]) => {
+    Object.entries(rec.attributes).forEach((tupleAttrValue) => {
       featInfo.fieldInfo[tupleAttrValue[0]] = { value: tupleAttrValue[1] } as TypeFieldEntry;
     });
 
@@ -110,7 +114,7 @@ export function esriParseFeatureInfoEntries(records: TypeJsonObject[], geometryT
  * Asynchronously queries an Esri feature layer given the url and returns an array of `TypeFeatureInfoEntryPartial` records.
  * @param {string} url - An Esri url indicating a feature layer to query
  * @param {TypeStyleGeometry?} geometryType - The geometry type for the geometries in the layer being queried (used when geometries are returned)
- * @param {boolean} parseFeatureInfoEntries - A boolean to indicate if we use the raw esri output or if we parse it
+ * @param {boolean} parseFeatureInfoEntries - A boolean to indicate if we use the raw esri output or if we parse it, defaults to true.
  * @returns {TypeFeatureInfoEntryPartial[] | null} An array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
  */
 export async function esriQueryRecordsByUrl(
@@ -122,11 +126,11 @@ export async function esriQueryRecordsByUrl(
   // TO.DO.CONT: the latter redirect to this one here and merge some logic between the 2 functions ideally making this
   // TO.DO.CONT: one here return a TypeFeatureInfoEntry[] with options to have returnGeometry=true or false and such.
   // Query the data
-  const respJson = await Fetch.fetchEsriJsonAsObject(url);
+  const respJson = await Fetch.fetchEsriJson<EsriRelatedRecordsJsonResponse>(url);
 
   // Return the array of TypeFeatureInfoEntryPartial or the raw response features array
   return parseFeatureInfoEntries
-    ? esriParseFeatureInfoEntries(respJson.features as TypeJsonObject[], geometryType)
+    ? esriParseFeatureInfoEntries(respJson.features, geometryType)
     : (respJson.features as unknown as TypeFeatureInfoEntryPartial[]);
 }
 
@@ -165,18 +169,18 @@ export function esriQueryRecordsByUrlObjectIds(
 
 /**
  * Asynchronously queries an Esri relationship table given the url and returns an array of `TypeFeatureInfoEntryPartial` records.
- * @param {url} string An Esri url indicating a relationship table to query
- * @param {recordGroupIndex} number The group index of the relationship layer on which to read the related records
- * @returns {TypeFeatureInfoEntryPartial[] | null} An array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
+ * @param {string} url - An Esri url indicating a relationship table to query
+ * @param {number} recordGroupIndex - The group index of the relationship layer on which to read the related records
+ * @returns {Promise<TypeFeatureInfoEntryPartial[]>} A promise of an array of relared records of type TypeFeatureInfoEntryPartial.
  */
 export async function esriQueryRelatedRecordsByUrl(url: string, recordGroupIndex: number): Promise<TypeFeatureInfoEntryPartial[]> {
   // Query the data
-  const respJson = await Fetch.fetchJsonAsObject(url);
+  const respJson = await Fetch.fetchJson<EsriRelatedRecordsJsonResponse>(url);
 
   // If any related record groups found
-  if ((respJson.relatedRecordGroups.length as number) > 0)
+  if (respJson.relatedRecordGroups.length > 0)
     // Return the array of TypeFeatureInfoEntryPartial
-    return esriParseFeatureInfoEntries(respJson.relatedRecordGroups[recordGroupIndex].relatedRecords as TypeJsonObject[]);
+    return esriParseFeatureInfoEntries(respJson.relatedRecordGroups[recordGroupIndex].relatedRecords);
   return [];
 }
 
@@ -319,3 +323,25 @@ export function createAliasLookup(outfields: TypeOutfields[] | undefined): TypeA
 
   return aliasLookup;
 }
+
+export type EsriRelatedRecordsJsonResponse = {
+  features: EsriRelatedRecordsJsonResponseRelatedRecord[];
+  relatedRecordGroups: EsriRelatedRecordsJsonResponseRelatedRecordGroup[];
+};
+
+export type EsriRelatedRecordsJsonResponseRelatedRecordGroup = {
+  relatedRecords: EsriRelatedRecordsJsonResponseRelatedRecord[];
+};
+
+export type EsriRelatedRecordsJsonResponseRelatedRecord = {
+  attributes: { [key: string]: unknown };
+  geometry: GeometryJson;
+};
+
+export type GeometryJson = {
+  points: Coordinate[];
+  paths: Coordinate[][];
+  rings: Coordinate[][];
+  x: Coordinate;
+  y: Coordinate;
+};

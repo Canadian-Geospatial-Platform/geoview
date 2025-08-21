@@ -4,7 +4,6 @@ import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import {
   QueryType,
   TypeFeatureInfoEntry,
-  TypeFeatureInfoLayerConfig,
   TypeLayerEntryConfig,
   TypeLayerStatus,
   TypeLocation,
@@ -121,6 +120,15 @@ export abstract class AbstractLayerSet {
     this.#prepareConfigForLayerRegistration(layerConfig);
   }
 
+  /**
+   * Prepares a layer configuration for automatic registration once the layer becomes loaded.
+   * This method sets up a listener on the provided layer configuration that monitors its status.
+   * When the layer's status changes to `loaded`, it attempts to retrieve the corresponding layer
+   * from the layer API and registers it into the system's layer set. If registration fails, errors
+   * are logged appropriately.
+   * @param {ConfigBaseClass} layerConfig - The configuration object for the layer to be monitored.
+   * @private
+   */
   #prepareConfigForLayerRegistration(layerConfig: ConfigBaseClass): void {
     // Listen to the status changes so that when it gets loaded it automatically gets registered as a layer
     layerConfig.onLayerStatusChanged(() => {
@@ -215,7 +223,7 @@ export abstract class AbstractLayerSet {
   protected onRegisterLayerCheck(layer: AbstractBaseLayer): boolean {
     // Override this function to perform registration condition logic in the inherited classes
     // By default, a layer-set always registers layers except when they are group layers
-    if (layer.getLayerConfig()?.entryType === 'group') {
+    if (layer.getLayerConfig()?.getEntryTypeIsGroup()) {
       // Skip groups
       return false;
     }
@@ -443,7 +451,7 @@ export abstract class AbstractLayerSet {
   protected static alignRecordsWithOutFields(layerEntryConfig: TypeLayerEntryConfig, arrayOfRecords: TypeFeatureInfoEntry[]): void {
     // If source featureInfo is provided, continue
     if (layerEntryConfig.source && layerEntryConfig.source.featureInfo) {
-      const sourceFeatureInfo = layerEntryConfig.source.featureInfo as TypeFeatureInfoLayerConfig;
+      const sourceFeatureInfo = layerEntryConfig.source.featureInfo;
 
       // If outFields is provided, compare record fields with outFields to remove unwanted one
       // If there is no outFields, this will be created in the next function patchMissingMetadataIfNecessary

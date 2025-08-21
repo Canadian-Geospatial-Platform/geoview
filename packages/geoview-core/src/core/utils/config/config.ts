@@ -13,8 +13,7 @@ import {
 } from '@/api/config/types/map-schema-types';
 import { logger } from '@/core/utils/logger';
 
-import { ConfigValidation } from '@/core/utils/config/config-validation';
-import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
+import { ConfigValidation, ErrorCallbackDelegate } from '@/core/utils/config/config-validation';
 import { generateId } from '@/core/utils/utilities';
 import { LayerInvalidGeoviewLayerTypeError } from '@/core/exceptions/layer-exceptions';
 
@@ -43,13 +42,14 @@ export class Config {
 
   /**
    * Get a valid map configuration.
-   * @param {MapConfigLayerEntry[]} listOfGeoviewLayerConfig Config object to validate.
+   * @param {MapConfigLayerEntry[]} listOfGeoviewLayerConfig - The list of Geoview layer config to validate.
    * @returns {MapConfigLayerEntry} A valid map config layer entry.
    */
-  getValidMapConfig(
+  prevalidateGeoviewLayersConfig(
     listOfGeoviewLayerConfig: MapConfigLayerEntry[],
-    onErrorCallback: (errorKey: string, params: string[]) => void
+    onErrorCallback: ErrorCallbackDelegate
   ): MapConfigLayerEntry[] {
+    // Validate the layer configs
     if (listOfGeoviewLayerConfig) {
       listOfGeoviewLayerConfig.forEach((geoviewLayerEntry, index, layerArray) => {
         // Add duplicate marker for duplicate IDs
@@ -70,9 +70,12 @@ export class Config {
     }
 
     // TODO: refactor - return only the layers
-    const validLayers = this.configValidation.validateMapConfigAgainstSchema(listOfGeoviewLayerConfig, onErrorCallback);
-    logger.logDebug('CONFIG', validLayers);
+    const validLayers = this.configValidation.validateLayersConfigAgainstSchema(listOfGeoviewLayerConfig, onErrorCallback);
 
+    // Log
+    logger.logDebug('CONFIG-LAYERS-VALIDATED', validLayers);
+
+    // Return the valid layers
     return validLayers;
   }
 
@@ -84,8 +87,7 @@ export class Config {
    */
   #setLayerEntryType(listOfLayerEntryConfig: TypeLayerEntryConfig[], geoviewLayerType: TypeGeoviewLayerType): void {
     listOfLayerEntryConfig?.forEach((layerConfig) => {
-      if (layerEntryIsGroupLayer(layerConfig as ConfigBaseClass))
-        this.#setLayerEntryType(layerConfig.listOfLayerEntryConfig, geoviewLayerType);
+      if (layerEntryIsGroupLayer(layerConfig)) this.#setLayerEntryType(layerConfig.listOfLayerEntryConfig, geoviewLayerType);
       else {
         // eslint-disable-next-line no-param-reassign
         layerConfig.schemaTag = geoviewLayerType;
@@ -96,20 +98,22 @@ export class Config {
   }
 
   /**
-   * Initialize a map config from either inline div, url params, json file.
-   *
-   * @returns {Promise<TypeMapFeaturesConfig | undefined>} The initialized valid map config.
+   * Initializes the map configuration by prevalidating the list of GeoView layer configurations.
+   * @param {string} mapId - The unique identifier for the map instance.
+   * @param {MapConfigLayerEntry[]} listOfGeoviewLayerConfig - The list of layer configurations to validate and initialize.
+   * @param {ErrorCallbackDelegate} onErrorCallback - A callback function invoked when a validation error occurs.
+   * @returns {MapConfigLayerEntry[] | undefined} The validated list of layer configs, or `undefined` if invalid.
    */
   initializeMapConfig(
     mapId: string,
     listOfGeoviewLayerConfig: MapConfigLayerEntry[],
-    onErrorCallback: (errorKey: string, params: string[]) => void
+    onErrorCallback: ErrorCallbackDelegate
   ): MapConfigLayerEntry[] | undefined {
     // NOTE: URL config has precedence on JSON file config that has precedence on inline config
     if (!listOfGeoviewLayerConfig) {
       logger.logInfo(`- Map: ${mapId} - Empty JSON configuration object, using default -`);
     }
 
-    return this.getValidMapConfig(listOfGeoviewLayerConfig, onErrorCallback);
+    return this.prevalidateGeoviewLayersConfig(listOfGeoviewLayerConfig, onErrorCallback);
   }
 }

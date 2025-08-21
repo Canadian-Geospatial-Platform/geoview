@@ -1,18 +1,24 @@
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import {
+  Extent,
   TypeGeoviewLayerConfig,
   TypeGeoviewLayerType,
   TypeLayerEntryType,
   TypeLayerInitialSettings,
   TypeLayerStatus,
+  TypeTileGrid,
+  layerEntryIsEsriFeature,
+  layerEntryIsGeoJSON,
   layerEntryIsGroupLayer,
 } from '@/api/config/types/map-schema-types';
 import { logger } from '@/core/utils/logger';
-import { TypeJsonObject } from '@/api/config/types/config-types';
 import { LAYER_STATUS } from '@/core/utils/constant';
 import { GroupLayerEntryConfig } from './group-layer-entry-config';
 import { NotImplementedError } from '@/core/exceptions/core-exceptions';
 import { DateMgt, TypeDateFragments } from '@/core/utils/date-mgt';
+import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config';
+import { GeoJSONLayerEntryConfig } from './vector-validation-classes/geojson-layer-entry-config';
+import { EsriFeatureLayerEntryConfig } from './vector-validation-classes/esri-feature-layer-entry-config';
 
 /**
  * Base type used to define a GeoView layer to display on the map. Unless specified,its properties are not part of the schema.
@@ -37,10 +43,12 @@ export abstract class ConfigBaseClass {
   layerName?: string;
 
   /** Tag used to link the entry to a specific schema. This element is part of the schema. */
-  schemaTag?: TypeGeoviewLayerType;
+  // GV Cannot put it #schemaTag as it breaks things
+  abstract schemaTag: TypeGeoviewLayerType;
 
   /** Layer entry data type. This element is part of the schema. */
-  entryType?: TypeLayerEntryType;
+  // GV Cannot put it #entryType as it breaks things
+  abstract entryType: TypeLayerEntryType;
 
   /** It is used to link the layer entry config to the GeoView layer config. */
   geoviewLayerConfig = {} as TypeGeoviewLayerConfig;
@@ -55,10 +63,9 @@ export abstract class ConfigBaseClass {
    * Initial settings to apply to the GeoView layer entry at creation time. Initial settings are inherited from the parent in the
    * configuration tree.
    */
-  initialSettings: TypeLayerInitialSettings = {};
+  initialSettings: TypeLayerInitialSettings;
 
-  /** It is used internally to distinguish layer groups derived from the
-   * metadata. */
+  /** It is used internally to distinguish layer groups derived from the metadata. */
   isMetadataLayerGroup?: boolean;
 
   /** It is used to link the layer entry config to the parent's layer config. */
@@ -96,7 +103,14 @@ export abstract class ConfigBaseClass {
     delete (layerConfig as any).layerStatus;
 
     // Transfert the properties from the object to the class ( bad practice :( )
-    Object.assign(this, layerConfig);
+    // Object.assign(this, layerConfig);
+    this.layerName = layerConfig.layerName;
+    // this.schemaTag = layerConfig.schemaTag;
+    // this.entryType = layerConfig.entryType;
+    this.geoviewLayerConfig = layerConfig.geoviewLayerConfig;
+    this.minScale = layerConfig.minScale;
+    this.maxScale = layerConfig.maxScale;
+    this.initialSettings = layerConfig.initialSettings ?? {};
 
     // Set back the layer status as it was
     if (layerStatus) this.setLayerStatus(layerStatus);
@@ -157,6 +171,54 @@ export abstract class ConfigBaseClass {
   }
 
   /**
+   * Gets the entry type of the layer entry config.
+   * @returns {TypeLayerEntryType} The entry type.
+   */
+  getEntryType(): TypeLayerEntryType {
+    return this.entryType;
+  }
+
+  /**
+   * Type guard that checks if this entry is a group layer entry.
+   * @returns {boolean} True if this is a GroupLayerEntryConfig.
+   */
+  getEntryTypeIsGroup(): this is GroupLayerEntryConfig {
+    return layerEntryIsGroupLayer(this);
+  }
+
+  /**
+   * Type guard that checks if this entry is a regular layer entry (not a group layer entry).
+   * @returns {boolean} True if this is a AbstractBaseLayerEntryConfig.
+   */
+  getEntryTypeIsRegular(): this is AbstractBaseLayerEntryConfig {
+    return !this.getEntryTypeIsGroup();
+  }
+
+  /**
+   * Gets the schema tag of the layer entry config.
+   * @returns {TypeGeoviewLayerType} The schema tag.
+   */
+  getSchemaTag(): TypeGeoviewLayerType {
+    return this.schemaTag;
+  }
+
+  /**
+   * Type guard that checks if this entry is a GeoJSON schema tag layer entry.
+   * @returns {GeoJSONLayerEntryConfig} True if this is a GeoJSONLayerEntryConfig.
+   */
+  getSchemaTagGeoJSON(): this is GeoJSONLayerEntryConfig {
+    return layerEntryIsGeoJSON(this);
+  }
+
+  /**
+   * Type guard that checks if this entry is a GeoJSON schema tag layer entry.
+   * @returns {EsriFeatureLayerEntryConfig} True if this is a GeoJSONLayerEntryConfig.
+   */
+  getSchemaTagEsriFeature(): this is EsriFeatureLayerEntryConfig {
+    return layerEntryIsEsriFeature(this);
+  }
+
+  /**
    * Returns the sibling layer configurations of the current layer.
    * If the current layer has a parent, this method retrieves all layer entry
    * configs under the same parent. It can optionally exclude layers of type 'group'.
@@ -166,7 +228,7 @@ export abstract class ConfigBaseClass {
   getSiblings(includeGroups: boolean = false): ConfigBaseClass[] {
     // If there's a parent
     if (this.parentLayerConfig) {
-      return this.parentLayerConfig.listOfLayerEntryConfig.filter((config) => includeGroups || config.entryType !== 'group');
+      return this.parentLayerConfig.listOfLayerEntryConfig.filter((config) => includeGroups || !config.getEntryTypeIsGroup());
     }
 
     // No siblings
@@ -269,6 +331,62 @@ export abstract class ConfigBaseClass {
   }
 
   /**
+   * This method compares the internal layer status of the config with the layer status passed as a parameter and it
+   * returns true if the internal value is greater or equal to the value of the parameter.
+   * @param {TypeLayerStatus} layerStatus - The layer status to compare with the internal value of the config.
+   * @returns {boolean} Returns true if the internal value is greater or equal than the value of the parameter.
+   */
+  isGreaterThanOrEqualTo(layerStatus: TypeLayerStatus): boolean {
+    return ConfigBaseClass.#layerStatusWeight[this.layerStatus] >= ConfigBaseClass.#layerStatusWeight[layerStatus];
+  }
+
+  /**
+   * Writes the instance as Json.
+   * @returns {unknown} The Json representation of the instance.
+   */
+  toJson(): unknown {
+    // Redirect
+    return this.onToJson();
+  }
+
+  /**
+   * Overridable function to write the instance as Json.
+   * @returns {unknown} The Json representation of the instance.
+   * @protected
+   */
+  protected onToJson(): unknown {
+    return {
+      layerName: this.layerName,
+      layerId: this.layerId,
+      schemaTag: this.getSchemaTag(),
+      entryType: this.getEntryType(),
+      isMetadataLayerGroup: this.isMetadataLayerGroup,
+    };
+  }
+
+  /**
+   * Clones the configuration class.
+   * @returns {ConfigBaseClass} The cloned ConfigBaseClass object.
+   */
+  clone(): ConfigBaseClass {
+    // Redirect to clone the object and return it
+    return this.onClone();
+  }
+
+  /**
+   * Overridable function to clone a child of a ConfigBaseClass.
+   * @returns {ConfigBaseClass} The cloned child object of a ConfigBaseClass.
+   */
+  protected onClone(): ConfigBaseClass {
+    // Crash on purpose.
+    // GV Make sure to implement a 'protected override onClone(): ConfigBaseClass' in the child-class to
+    // GV use this cloning feature. See OgcWMSLayerEntryConfig for example.
+    throw new NotImplementedError(`Not implemented exception onClone on layer path ${this.layerPath}`);
+  }
+
+  // #region STATIC
+
+  /**
    * Recursively updates the status of the parent layer based on the status of its sibling layers.
    * This method checks the statuses of sibling layers (layers sharing the same parent).
    * - If at least one sibling is in a 'loading' state, it sets the parent layer status to 'loading'.
@@ -334,64 +452,6 @@ export abstract class ConfigBaseClass {
   }
 
   /**
-   * This method compares the internal layer status of the config with the layer status passed as a parameter and it
-   * returns true if the internal value is greater or equal to the value of the parameter.
-   *
-   * @param {TypeLayerStatus} layerStatus - The layer status to compare with the internal value of the config.
-   *
-   * @returns {boolean} Returns true if the internal value is greater or equal than the value of the parameter.
-   */
-  isGreaterThanOrEqualTo(layerStatus: TypeLayerStatus): boolean {
-    return ConfigBaseClass.#layerStatusWeight[this.layerStatus] >= ConfigBaseClass.#layerStatusWeight[layerStatus];
-  }
-
-  /**
-   * Serializes the ConfigBaseClass class
-   * @returns {TypeJsonObject} The serialized ConfigBaseClass
-   */
-  serialize(): TypeJsonObject {
-    // Redirect
-    return this.onSerialize();
-  }
-
-  /**
-   * Overridable function to serialize a ConfigBaseClass
-   * @returns {TypeJsonObject} The serialized ConfigBaseClass
-   */
-  onSerialize(): TypeJsonObject {
-    return {
-      layerName: this.layerName,
-      layerId: this.layerId,
-      schemaTag: this.schemaTag,
-      entryType: this.entryType,
-      layerStatus: this.layerStatus,
-      isMetadataLayerGroup: this.isMetadataLayerGroup,
-    } as unknown as TypeJsonObject;
-  }
-
-  /**
-   * Clones the configuration class.
-   *
-   * @returns {ConfigBaseClass} The cloned ConfigBaseClass object.
-   */
-  clone(): ConfigBaseClass {
-    // Redirect to clone the object and return it
-    return this.onClone();
-  }
-
-  /**
-   * Overridable function to clone a child of a ConfigBaseClass.
-   *
-   * @returns {ConfigBaseClass} The cloned child object of a ConfigBaseClass.
-   */
-  protected onClone(): ConfigBaseClass {
-    // Crash on purpose.
-    // GV Make sure to implement a 'protected override onClone(): ConfigBaseClass' in the child-class to
-    // GV use this cloning feature. See OgcWMSLayerEntryConfig for example.
-    throw new NotImplementedError(`Not implemented exception onClone on layer path ${this.layerPath}`);
-  }
-
-  /**
    * Recursively checks the list of layer entries to see if all of them are greater than or equal to the provided layer status.
    *
    * @param {TypeLayerStatus} layerStatus - The layer status to compare with the internal value of the config.
@@ -407,6 +467,10 @@ export abstract class ConfigBaseClass {
       return !layerConfig.isGreaterThanOrEqualTo(layerStatus);
     });
   }
+
+  // #endregion
+
+  // #region EVENTS
 
   /**
    * Emits an event to all handlers.
@@ -435,7 +499,32 @@ export abstract class ConfigBaseClass {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerStatusChangedHandlers, callback);
   }
+
+  // #endregion
 }
+
+// #region TYPES
+
+export type TypeLayerEntryShell = {
+  id: number | string;
+  name?: string;
+  index?: number;
+  layerId?: number | string;
+  layerName?: string;
+  tileGrid?: TypeTileGrid;
+  subLayers?: TypeLayerEntryShell[];
+  source?: TypeLayerEntryShellSource;
+};
+
+export type TypeLayerEntryShellSource = {
+  dataAccessPath?: string;
+  extent?: Extent;
+  projection?: number;
+};
+
+// #endregion
+
+// #region EVENT TYPES
 
 /**
  * Define an event for the delegate.
@@ -449,3 +538,5 @@ export type LayerStatusChangedEvent = {
  * Define a delegate for the event handler function signature.
  */
 export type LayerStatusChangedDelegate = EventDelegateBase<ConfigBaseClass, LayerStatusChangedEvent, void>;
+
+// #endregion

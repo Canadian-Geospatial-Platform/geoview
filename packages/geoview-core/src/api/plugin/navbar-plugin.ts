@@ -8,6 +8,7 @@ export type TypeNavBarButtonConfig = {
   buttonProps: IconButtonPropsExtend;
   panelProps?: TypePanelProps;
   groupName: string;
+  groupConfig?: { accordionThreshold?: number };
 };
 
 /**
@@ -57,6 +58,15 @@ export abstract class NavBarPlugin extends AbstractPlugin {
     logger.logInfo('NavBar Plugin - Default onAdd');
     const buttonConfigs = this.onCreateButtonConfigs();
 
+    // Set group configurations first
+    const processedGroups = new Set<string>();
+    Object.values(buttonConfigs).forEach((config) => {
+      if (config.groupConfig && !processedGroups.has(config.groupName)) {
+        this.mapViewer.navBarApi.setGroupConfig(config.groupName, config.groupConfig);
+        processedGroups.add(config.groupName);
+      }
+    });
+
     // Create buttons and panels based on configs
     Object.entries(buttonConfigs).forEach(([key, config]) => {
       let buttonPanel: TypeButtonPanel | undefined;
@@ -64,10 +74,10 @@ export abstract class NavBarPlugin extends AbstractPlugin {
       if (config.panelProps) {
         // Create a button with panel
         buttonPanel =
-          this.mapViewer().navBarApi.createNavbarButtonPanel(config.buttonProps, config.panelProps, config.groupName) || undefined;
+          this.mapViewer.navBarApi.createNavbarButtonPanel(config.buttonProps, config.panelProps, config.groupName) || undefined;
       } else {
         // Create a simple button
-        buttonPanel = this.mapViewer().navBarApi.createNavbarButton(config.buttonProps, config.groupName) || undefined;
+        buttonPanel = this.mapViewer.navBarApi.createNavbarButton(config.buttonProps, config.groupName) || undefined;
       }
 
       if (buttonPanel) this.buttonPanels[key] = buttonPanel;
@@ -79,9 +89,9 @@ export abstract class NavBarPlugin extends AbstractPlugin {
    */
   protected onRemove(): void {
     // Remove the button or button panel from the navbar
-    if (Object.keys(this.buttonPanels).length > 0 && this.mapViewer()?.navBarApi) {
+    if (Object.keys(this.buttonPanels).length > 0 && this.mapViewer?.navBarApi) {
       Object.values(this.buttonPanels).forEach((buttonPanel: TypeButtonPanel) => {
-        this.mapViewer().navBarApi.removeNavbarButtonPanel(buttonPanel.buttonPanelId);
+        this.mapViewer.navBarApi.removeNavbarButtonPanel(buttonPanel.buttonPanelId);
       });
     }
   }

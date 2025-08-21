@@ -1,11 +1,11 @@
 import { useStore } from 'zustand';
+
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import {
   TypeFeatureInfoEntry,
   TypeResultSet,
   TypeResultSetEntry,
-  TypeGeometry,
   TypeQueryStatus,
   TypeFieldEntry,
   TypeGeoviewLayerType,
@@ -105,10 +105,7 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
             checkedFeatures:
               feature === 'all'
                 ? []
-                : get().detailsState.checkedFeatures.filter(
-                    (featureInfoEntry: TypeFeatureInfoEntry) =>
-                      (featureInfoEntry.geometry as TypeGeometry).ol_uid !== (feature.geometry as TypeGeometry).ol_uid
-                  ),
+                : get().detailsState.checkedFeatures.filter((featureInfoEntry) => featureInfoEntry.uid !== feature.uid),
           },
         });
       },

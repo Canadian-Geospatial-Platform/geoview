@@ -8,7 +8,6 @@ import { ProjectionLike } from 'ol/proj';
 import initSqlJs, { ParamsObject, SqlValue } from 'sql.js';
 import * as SLDReader from '@nieuwlandgeo/sldreader';
 
-import { Cast, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
   TypeLayerEntryConfig,
@@ -24,6 +23,7 @@ import {
   CONST_LAYER_TYPES,
 } from '@/api/config/types/map-schema-types';
 import { GeoPackageLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geopackage-layer-config-entry';
+import { TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { logger } from '@/core/utils/logger';
@@ -74,12 +74,12 @@ export class GeoPackage extends AbstractGeoViewVector {
   }
 
   /**
-   * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
-   * @returns {Promise<void>} A promise that the execution is completed.
+   * Overrides the way a geoview layer config initializes its layer entries.
+   * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
    */
-  protected override onFetchAndSetServiceMetadata(): Promise<void> {
-    // None
-    return Promise.resolve();
+  protected override onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
+    // Not implemented
+    throw new NotImplementedError('onInitLayerEntries in GeoPackage is not implemented');
   }
 
   /**
@@ -141,7 +141,7 @@ export class GeoPackage extends AbstractGeoViewVector {
                   newLayerEntryConfig.layerId = layers[i].name;
                   newLayerEntryConfig.layerName = layers[i].name;
                   newLayerEntryConfig.entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
-                  newLayerEntryConfig.parentLayerConfig = Cast<GroupLayerEntryConfig>(layerConfig);
+                  newLayerEntryConfig.parentLayerConfig = layerConfig as unknown as GroupLayerEntryConfig; // TODO: Check this type conversion, maybe recreate the Group object instead?
 
                   this.#processOneGeopackageLayer(newLayerEntryConfig, layers[i], slds)
                     .then((baseLayer) => {
@@ -220,8 +220,7 @@ export class GeoPackage extends AbstractGeoViewVector {
     }
 
     if (layerInfo.properties) {
-      const { properties } = layerInfo;
-      GeoPackage.#processFeatureInfoConfig(properties as TypeJsonObject, layerConfig);
+      GeoPackage.#processFeatureInfoConfig(layerInfo.properties, layerConfig);
     }
 
     // Redirect
@@ -306,8 +305,7 @@ export class GeoPackage extends AbstractGeoViewVector {
             // Step 3: Process each feature table
             for (const { tableName, srsId, geometryColumnName } of tables) {
               const dataProjection = `EPSG:${srsId}`;
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const rawFeatures: { geom: Uint8Array; properties: any }[] = [];
+              const rawFeatures: { geom: Uint8Array; properties: Record<string, unknown> }[] = [];
 
               stmt = db.prepare(`SELECT * FROM '${tableName}'`);
               while (stmt.step()) {
@@ -372,12 +370,15 @@ export class GeoPackage extends AbstractGeoViewVector {
     // Extract layer styles if they exist
     const { rules } = SLDReader.Reader(sld).layers[0].styles[0].featuretypestyles[0];
     // eslint-disable-next-line no-param-reassign
-    if (layerConfig.layerStyle === undefined) layerConfig.layerStyle = {};
+    if (!layerConfig.layerStyle) layerConfig.layerStyle = {};
 
     for (let i = 0; i < rules.length; i++) {
+      // Get the layer style
+      const { layerStyle } = layerConfig;
+
       Object.keys(rules[i]).forEach((key) => {
         // Polygon style
-        if (key.toLowerCase() === 'polygonsymbolizer' && !layerConfig.layerStyle!.Polygon) {
+        if (key.toLowerCase() === 'polygonsymbolizer' && !layerStyle.Polygon) {
           const polyStyles = rules[i].polygonsymbolizer[0];
           let color: string | undefined;
           let graphicSize: number | undefined;
@@ -441,15 +442,14 @@ export class GeoPackage extends AbstractGeoViewVector {
             paternWidth: patternWidth || 1,
             fillStyle: fillStyle || 'solid',
           };
-          // eslint-disable-next-line no-param-reassign
-          layerConfig.layerStyle!.Polygon = {
+          layerStyle.Polygon = {
             type: 'simple',
             fields: [],
             hasDefault: false,
             info: [{ visible: true, label: '', values: [], settings: styles }],
           };
           // LineString style
-        } else if (key.toLowerCase() === 'linesymbolizer' && !layerConfig.layerStyle!.LineString) {
+        } else if (key.toLowerCase() === 'linesymbolizer' && !layerStyle.LineString) {
           const lineStyles = rules[i].linesymbolizer[0];
 
           const stroke: TypeStrokeSymbolConfig = {};
@@ -460,14 +460,14 @@ export class GeoPackage extends AbstractGeoViewVector {
 
           const styles: TypeLineStringVectorConfig = { type: 'lineString', stroke };
           // eslint-disable-next-line no-param-reassign
-          layerConfig.layerStyle!.LineString = {
+          layerStyle.LineString = {
             type: 'simple',
             fields: [],
             hasDefault: false,
             info: [{ visible: true, label: '', values: [], settings: styles }],
           };
           // Point style
-        } else if (key.toLowerCase() === 'pointsymbolizer' && !layerConfig.layerStyle!.Point) {
+        } else if (key.toLowerCase() === 'pointsymbolizer' && !layerStyle.Point) {
           const { graphic } = rules[i].pointsymbolizer[0];
 
           let offset: [number, number] | null = null;
@@ -506,7 +506,7 @@ export class GeoPackage extends AbstractGeoViewVector {
               }
 
               // eslint-disable-next-line no-param-reassign
-              layerConfig.layerStyle!.Point = {
+              layerStyle.Point = {
                 type: 'simple',
                 fields: [],
                 hasDefault: false,
@@ -522,11 +522,11 @@ export class GeoPackage extends AbstractGeoViewVector {
   /**
    * This method sets the outfields and aliasFields of the source feature info.
    *
-   * @param {TypeJsonArray} fields An array of field names and its aliases.
+   * @param {initSqlJs.ParamsObject} fields An array of field names and its aliases.
    * @param {VectorLayerEntryConfig} layerConfig The vector layer entry to configure.
    * @private
    */
-  static #processFeatureInfoConfig(fields: TypeJsonObject, layerConfig: VectorLayerEntryConfig): void {
+  static #processFeatureInfoConfig(fields: initSqlJs.ParamsObject, layerConfig: VectorLayerEntryConfig): void {
     // eslint-disable-next-line no-param-reassign
     if (!layerConfig.source) layerConfig.source = {};
     // eslint-disable-next-line no-param-reassign
@@ -540,7 +540,8 @@ export class GeoPackage extends AbstractGeoViewVector {
       Object.keys(fields).forEach((fieldEntryKey) => {
         if (!fields[fieldEntryKey]) return;
 
-        const fieldEntry = fields[fieldEntryKey];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const fieldEntry = fields[fieldEntryKey] as any;
         if (fieldEntry.type === 'Geometry') return;
 
         let fieldType = 'string';
@@ -615,15 +616,15 @@ export class GeoPackage extends AbstractGeoViewVector {
    * @param {string} geoviewLayerName - The display name of the GeoView layer.
    * @param {string} metadataAccessPath - The URL or path to access metadata or feature data.
    * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
-   * @param {TypeJsonArray} layerEntries - An array of layer entries objects to be included in the configuration.
+   * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns {TypeGeoPackageLayerConfig} The constructed configuration object for the Geopackage Feature layer.
    */
-  static createGeopackageLayerConfig(
+  static createGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
     metadataAccessPath: string,
     isTimeAware: boolean,
-    layerEntries: TypeJsonArray
+    layerEntries: TypeLayerEntryShell[]
   ): TypeGeoPackageLayerConfig {
     const geoviewLayerConfig: TypeGeoPackageLayerConfig = {
       geoviewLayerId,
@@ -638,12 +639,12 @@ export class GeoPackage extends AbstractGeoViewVector {
         geoviewLayerConfig,
         schemaTag: CONST_LAYER_TYPES.GEOPACKAGE,
         entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
-        layerId: layerEntry.id as string,
+        layerId: `${layerEntry.id}`,
         source: {
           format: 'GeoPackage',
           dataAccessPath: metadataAccessPath,
         },
-      } as GeoPackageLayerEntryConfig);
+      } as unknown as GeoPackageLayerEntryConfig);
       return layerEntryConfig;
     });
 

@@ -14,11 +14,12 @@ import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 
 import { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config';
-import { MapConfigLayerEntry, TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
+import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
 import * as UI from '@/ui';
 
 import AppStart from '@/core/app-start';
 import { API } from '@/api/api';
+import { ConfigApi } from '@/api/config/config-api';
 import { createI18nInstance } from '@/core/translation/i18n';
 import { MapViewerDelegate, TypeCGPV, TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { Config } from '@/core/utils/config/config';
@@ -28,7 +29,6 @@ import { logger } from '@/core/utils/logger';
 import { generateId, getLocalizedMessage, removeCommentsFromJSON, watchHtmlElementRemoval } from '@/core/utils/utilities';
 import { InitMapWrongCallError } from '@/core/exceptions/geoview-exceptions';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { TypeJsonObject } from '@/api/config/types/config-types';
 import { MapViewer } from '@/geo/map/map-viewer';
 
 // The next export allow to import the exernal-types from 'geoview-core' from outside of the geoview-core package.
@@ -92,35 +92,20 @@ async function getMapConfig(mapElement: Element): Promise<TypeMapFeaturesConfig>
   // check what type of config is provided (data-config, data-config-url or data-shared)
   if (mapElement.hasAttribute('data-config')) {
     // configurations from inline div is provided
-    const configData = mapElement.getAttribute('data-config');
-
+    let mapConfigStr = mapElement.getAttribute('data-config');
     // Erase comments in the config file then process
-    const configObjStr = removeCommentsFromJSON(configData!);
-    mapConfig = await api.config.createMapConfig(configObjStr, lang);
-
-    // TODO: refactor - remove this injection once config is done, remove the casting to unknown
-    // TODOCONT: uncomment shapefile layer processing in confg-api.ts 507 once removed
-    let tempStr = removeCommentsFromJSON(configData!);
-    tempStr = tempStr.replace(/(?<!\\)'/gm, '"');
-    tempStr = tempStr.replace(/\\'/gm, "'");
-    mapConfig.map.listOfGeoviewLayerConfig = (JSON.parse(tempStr) as unknown as MapFeatureConfig).map.listOfGeoviewLayerConfig
-      ? (JSON.parse(tempStr) as unknown as MapFeatureConfig).map.listOfGeoviewLayerConfig
-      : [];
+    mapConfigStr = removeCommentsFromJSON(mapConfigStr!);
+    mapConfig = ConfigApi.validateMapConfig(mapConfigStr);
   } else if (mapElement.hasAttribute('data-config-url')) {
     // configurations file url is provided, fetch then process
     const configUrl = mapElement.getAttribute('data-config-url');
-    const configObject = await Fetch.fetchJsonAs<string | TypeJsonObject>(configUrl!);
-    mapConfig = await api.config.createMapConfig(configObject, lang);
-
-    // TODO: refactor - remove this injection once config is done, remove the casting to unknown
-    // TODOCONT: uncomment shapefile layer processing in confg-api.ts 507 once removed
-    mapConfig.map.listOfGeoviewLayerConfig = (configObject as unknown as MapFeatureConfig).map.listOfGeoviewLayerConfig
-      ? (configObject as unknown as MapFeatureConfig).map.listOfGeoviewLayerConfig
-      : [];
+    const configObj = await Fetch.fetchJson<MapFeatureConfig>(configUrl!);
+    mapConfig = ConfigApi.validateMapConfig(configObj);
   } else if (mapElement.getAttribute('data-shared')) {
     // configurations from the URL parameters is provided, extract then process (replace HTLM characters , && :)
     const urlParam = new URLSearchParams(window.location.search).toString().replace(/%2C/g, ',').replace(/%3A/g, ':') || '';
     mapConfig = await api.config.getConfigFromUrl(urlParam);
+    mapConfig = ConfigApi.validateMapConfig(mapConfig);
   }
 
   // inject 'data-geocore-keys' inside the config for later processing by the ConfigApi
@@ -181,29 +166,25 @@ async function renderMap(mapElement: HTMLElement): Promise<MapViewer> {
   const lang = mapElement.hasAttribute('data-lang') ? (mapElement.getAttribute('data-lang')! as TypeDisplayLanguage) : 'en';
 
   const config = new Config(lang);
-  const configObj = config.initializeMapConfig(
-    mapId,
-    configuration.map.listOfGeoviewLayerConfig as MapConfigLayerEntry[], // TODO: refactor - remove cast after
-    (errorKey: string, params: string[]) => {
-      // Wait for the map viewer to get loaded in the api
-      api
-        .getMapViewerAsync(mapId)
-        .then(() => {
-          // Get the message for the logger
-          const message = getLocalizedMessage(lang, errorKey, params);
+  const configObj = config.initializeMapConfig(mapId, configuration.map.listOfGeoviewLayerConfig, (errorKey: string, params: string[]) => {
+    // Wait for the map viewer to get loaded in the api
+    api
+      .getMapViewerAsync(mapId)
+      .then(() => {
+        // Get the message for the logger
+        const message = getLocalizedMessage(lang, errorKey, params);
 
-          // Log it
-          logger.logError(`- Map ${mapId}: ${message}`);
+        // Log it
+        logger.logError(`- Map ${mapId}: ${message}`);
 
-          // Show the error using its key (which will get translated)
-          api.getMapViewer(mapId).notifications.showError(errorKey, params);
-        })
-        .catch((error: unknown) => {
-          // Log promise failed
-          logger.logPromiseFailed('Promise failed in getMapViewerAsync in config.initializeMapConfig in app.renderMap', error);
-        });
-    }
-  );
+        // Show the error using its key (which will get translated)
+        api.getMapViewer(mapId).notifications.showError(errorKey, params);
+      })
+      .catch((error: unknown) => {
+        // Log promise failed
+        logger.logPromiseFailed('Promise failed in getMapViewerAsync in config.initializeMapConfig in app.renderMap', error);
+      });
+  });
   configuration.map.listOfGeoviewLayerConfig = configObj!;
 
   // Create i18n istance for the map

@@ -10,6 +10,7 @@ import * as Utilities from '@/core/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { MapViewer } from '@/geo/map/map-viewer';
 import * as GeoUtilities from '@/geo/utils/utilities';
+import { LayerApi } from '@/geo/layer/layer';
 
 import { initMapDivFromFunctionCall, unmountMap } from '@/app';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
@@ -27,6 +28,9 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 export class API {
   // ConfigApi static class
   config = ConfigApi;
+
+  // LayerApi static class
+  layer = LayerApi;
 
   // list of available maps
   #maps: Record<string, MapViewer> = {};

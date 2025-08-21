@@ -1,4 +1,5 @@
 import { Feature, Overlay } from 'ol';
+import { Projection as OLProjection } from 'ol/proj';
 import GeoJSON from 'ol/format/GeoJSON';
 import { LineString, Polygon, Point, Circle as CircleGeom, Geometry, SimpleGeometry } from 'ol/geom';
 import { fromCircle } from 'ol/geom/Polygon';
@@ -6,22 +7,19 @@ import { getArea, getLength } from 'ol/sphere';
 import { Text, Style, Stroke, Fill, Icon as OLIcon } from 'ol/style';
 import { StyleLike } from 'ol/style/Style';
 import { DrawEvent, GeometryFunction, SketchCoordType, createBox } from 'ol/interaction/Draw';
-import { Projection as OLProjection } from 'ol/proj';
-
-import { MapViewer, MapProjectionChangedEvent } from '@/geo/map/map-viewer';
-import { Projection } from '@/geo/utils/projection';
-import { Draw } from '@/geo/interaction/draw';
-import { TransformDeleteFeatureEvent, TransformEvent, TransformSelectionEvent } from '@/geo/interaction/transform/transform-events';
 
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { TypeJsonObject } from '@/api/config/types/config-types';
-
 import { IDrawerState, StyleProps } from '@/core/stores/store-interface-and-intial-values/drawer-state';
+import { Draw } from '@/geo/interaction/draw';
+import { AppEventProcessor } from './app-event-processor';
+import { MapEventProcessor } from './map-event-processor';
+
 import { doUntil, generateId } from '@/core/utils/utilities';
 import { DEFAULT_PROJECTION } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
+import { Projection } from '@/geo/utils/projection';
+import { TransformDeleteFeatureEvent, TransformEvent, TransformSelectionEvent } from '@/geo/interaction/transform/transform-events';
+import { MapProjectionChangedEvent, MapViewer } from '@/geo/map/map-viewer';
 import { logger } from '@/core/utils/logger';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
@@ -42,12 +40,15 @@ interface TypeGeoJSONStyleProps {
   strokeWidth?: number;
   fillColor?: string;
   iconSrc?: string;
+  iconSize?: number;
   text?: string;
   textSize?: number;
   textFont?: string;
   textColor?: string;
   textHaloColor?: string;
   textHaloWidth?: number;
+  textBold?: boolean;
+  textItalic?: boolean;
 }
 
 const DEFAULT_ICON_SOURCE =
@@ -496,6 +497,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     // Set type-specific properties
     if (geomType === 'Point' && iconSrc) {
       feature.set('iconSrc', iconSrc);
+      feature.set('iconSize', style.iconSize);
     } else if (geomType === 'Text') {
       feature.set('text', style.text);
       feature.set('textSize', style.textSize);
@@ -503,7 +505,49 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       feature.set('textColor', style.textColor);
       feature.set('textHaloColor', style.textHaloColor);
       feature.set('textHaloWidth', style.textHaloWidth);
+      feature.set('textBold', style.textBold);
+      feature.set('textItalic', style.textItalic);
     }
+  }
+
+  /**
+   * Extracts style properties from a feature
+   * @param {Feature} feature - The feature to extract properties from
+   * @param {StyleProps} currentStyle - The current style properties to update
+   * @returns {StyleProps} The extracted style properties
+   */
+  static #getFeatureProperties(feature: Feature, currentStyle: StyleProps): StyleProps {
+    const style: StyleProps = currentStyle;
+
+    // Extract text properties if they exist
+    if (feature.get('text') !== undefined) {
+      style.text = feature.get('text');
+      style.textSize = feature.get('textSize');
+      style.textFont = feature.get('textFont');
+      style.textColor = feature.get('textColor');
+      style.textHaloColor = feature.get('textHaloColor');
+      style.textHaloWidth = feature.get('textHaloWidth');
+      style.textBold = feature.get('textBold');
+      style.textItalic = feature.get('textItalic');
+    }
+
+    // Extract stroke/fill properties from the feature's style
+    const featureStyle = feature.getStyle();
+    if (featureStyle instanceof Style) {
+      const stroke = featureStyle.getStroke();
+      const fill = featureStyle.getFill();
+
+      if (stroke) {
+        style.strokeColor = stroke.getColor() as string;
+        style.strokeWidth = stroke.getWidth() || 1.3;
+      }
+
+      if (fill) {
+        style.fillColor = fill.getColor() as string;
+      }
+    }
+
+    return style;
   }
 
   // #region Drawing Actions
@@ -597,6 +641,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
             anchor: [0.5, 1], // 50% of X = Middle, 100% Y = Bottom
             anchorXUnits: 'fraction',
             anchorYUnits: 'fraction',
+            scale: (currentStyle.iconSize || 24) / 24,
           }),
         });
       } else if (currentGeomType === 'Text') {
@@ -605,8 +650,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
             text: currentStyle.text,
             fill: new Fill({ color: currentStyle.textColor }),
             stroke: new Stroke({ color: currentStyle.textHaloColor, width: currentStyle.textHaloWidth }),
-            font: `${currentStyle.textSize}px ${currentStyle.textFont}`,
-            offsetY: -15,
+            font: `${currentStyle.textItalic ? 'italic ' : ''}${currentStyle.textBold ? 'bold ' : ''}${currentStyle.textSize}px ${currentStyle.textFont}`,
           }),
         });
       } else {
@@ -746,6 +790,22 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       const { feature } = event;
       if (!feature) return;
 
+      const isTextFeature = feature.get('text') !== undefined;
+      // Update Text Styles
+      if (isTextFeature) {
+        const textValue = feature.get('text');
+        const finalSize = feature.get('textSize') as number;
+        const isBold = feature.get('textBold') as boolean;
+        const isItalic = feature.get('textItalic') as boolean;
+
+        const state = this.getDrawerState(mapId);
+        if (!state) return;
+        state.actions.setTextValue(textValue);
+        state.actions.setTextSize(finalSize);
+        state.actions.setTextBold(isBold);
+        state.actions.setTextItalic(isItalic);
+      }
+
       const geom = feature.getGeometry();
       if (!geom) return;
       if (geom instanceof Point) return;
@@ -856,6 +916,11 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
         if (newTooltip) {
           newTooltip.getElement().hidden = true;
         }
+        const state = this.getDrawerState(mapId);
+        if (!state) return;
+
+        const featureProperties = this.#getFeatureProperties(newFeature, state.actions.getStyle());
+        state.actions.updateStateStyle(featureProperties);
       }
 
       this.getDrawerState(mapId)?.actions.setSelectedDrawing(newFeature);
@@ -942,6 +1007,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
             anchor: [0.5, 1],
             anchorXUnits: 'fraction',
             anchorYUnits: 'fraction',
+            scale: (newStyle.iconSize || 24) / 24,
           }),
         });
       } else if (isTextFeature) {
@@ -951,8 +1017,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
             text: newStyle.text,
             fill: new Fill({ color: newStyle.textColor }),
             stroke: new Stroke({ color: newStyle.textHaloColor, width: newStyle.textHaloWidth }),
-            font: `${newStyle.textSize}px ${newStyle.textFont}`,
-            offsetY: -15,
+            font: `${newStyle.textItalic ? 'italic ' : ''}${newStyle.textBold ? 'bold ' : ''}${newStyle.textSize}px ${newStyle.textFont}`,
           }),
         });
       } else {
@@ -1108,6 +1173,8 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
                   textColor: feature.get('textColor'),
                   textHaloColor: feature.get('textHaloColor'),
                   textHaloWidth: feature.get('textHaloWidth'),
+                  textBold: feature.get('textBold'),
+                  textItalic: feature.get('textItalic'),
                 };
               } else {
                 // point style icon
@@ -1173,7 +1240,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
         const mapProjection = Projection.PROJECTIONS[MapEventProcessor.getMapState(mapId).currentProjection];
 
         const newFeatures: Feature[] = [];
-        geojson.features.forEach((geoFeature: TypeJsonObject) => {
+        geojson.features.forEach((geoFeature: GeoJsonFeature) => {
           const olGeometry = new GeoJSON().readGeometry(geoFeature.geometry);
           olGeometry.transform('EPSG:4326', mapProjection);
 
@@ -1194,8 +1261,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
                     color: styleProps.textHaloColor,
                     width: styleProps.textHaloWidth,
                   }),
-                  font: `${styleProps.textSize}px ${styleProps.textFont}`,
-                  offsetY: -15,
+                  font: `${styleProps.textItalic ? 'italic ' : ''}${styleProps.textBold ? 'bold ' : ''}${styleProps.textSize}px ${styleProps.textFont}`,
                 }),
               });
             } else {
@@ -1206,6 +1272,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
                   anchor: [0.5, 1],
                   anchorXUnits: 'fraction',
                   anchorYUnits: 'fraction',
+                  scale: (styleProps.iconSize || 24) / 24,
                 }),
               });
             }
@@ -1223,7 +1290,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
           }
 
           // Set feature properties
-          const featureId = (geoFeature.properties.id as string) || generateId();
+          const featureId = geoFeature.properties.id || generateId();
           feature.setStyle(featureStyle);
 
           if (styleProps?.text !== undefined) {
@@ -1622,3 +1689,13 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   // GV NEVER add a store action who does set state AND map action at a same time.
   // GV Review the action in store state to make sure
 }
+
+type GeoJsonFeature = {
+  geometry: unknown;
+  properties: GeoJsonFeatureProps;
+};
+
+type GeoJsonFeatureProps = {
+  id: string;
+  style: TypeGeoJSONStyleProps;
+};

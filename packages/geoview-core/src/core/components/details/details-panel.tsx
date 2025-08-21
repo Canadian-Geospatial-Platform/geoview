@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { useTheme } from '@mui/material/styles';
 import { IconButton, Grid, ArrowForwardIosOutlinedIcon, ArrowBackIosOutlinedIcon, LayersClearOutlinedIcon, Box } from '@/ui';
 import {
@@ -11,7 +12,7 @@ import {
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useMapStoreActions, useMapVisibleLayers, useMapClickCoordinates } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
-import { TypeFeatureInfoEntry, TypeGeometry, TypeLayerData } from '@/api/config/types/map-schema-types';
+import { TypeFeatureInfoEntry, TypeLayerData } from '@/api/config/types/map-schema-types';
 
 import { LayerListEntry, Layout } from '@/core/components/common';
 import { checkSelectedLayerPathList } from '@/core/components/common/comp-common';
@@ -68,13 +69,13 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
    */
   // Create a memoized Set of checked feature IDs
   const checkedFeaturesSet = useMemo(() => {
-    return new Set(checkedFeatures.map((feature) => (feature.geometry as TypeGeometry)?.ol_uid));
+    return new Set(checkedFeatures.map((feature) => feature?.uid));
   }, [checkedFeatures]);
 
   // Modified isFeatureInCheckedFeatures using the Set for O(1) lookup
   const isFeatureInCheckedFeatures = useCallback(
     (feature: TypeFeatureInfoEntry): boolean => {
-      return checkedFeaturesSet.has((feature.geometry as TypeGeometry)?.ol_uid);
+      return checkedFeaturesSet.has(feature?.uid);
     },
     [checkedFeaturesSet]
   );
@@ -89,8 +90,7 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
       logger.logTraceUseCallback('DETAILS-PANEL - clearHighlightsUnchecked');
 
       arrayToClear?.forEach((feature) => {
-        const featureId = (feature.geometry as TypeGeometry)?.ol_uid;
-        if (!checkedFeaturesSet.has(featureId)) {
+        if (!checkedFeaturesSet.has(feature.uid)) {
           removeHighlightedFeature(feature);
         }
       });
@@ -361,20 +361,6 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
   }
 
   /**
-   * Callback function to update the store state for clearing the details selected layer from left panel.
-   */
-  const handleGuideIsOpen = useCallback(
-    (guideIsOpenVal: boolean): void => {
-      // Log
-      logger.logTraceUseCallback('DETAILS-PANEL - handleGuideIsOpen');
-      if (guideIsOpenVal) {
-        setSelectedLayerPath('');
-      }
-    },
-    [setSelectedLayerPath]
-  );
-
-  /**
    * Select a layer after a map click happened on the map.
    */
   useEffect(() => {
@@ -487,7 +473,6 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
       layerList={memoLayersList}
       onLayerListClicked={(layerEntry) => handleLayerChange(layerEntry)}
       fullWidth={fullWidth}
-      onGuideIsOpen={handleGuideIsOpen}
       guideContentIds={['details']}
     >
       {renderContent()}

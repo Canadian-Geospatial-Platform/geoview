@@ -91,11 +91,10 @@ export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsList
             value: t('layers.toggleItemVisibility'),
           },
           showNameTooltip: item.name.length > CONST_NAME_LENGTH_TOOLTIP,
-          key: `${item.name}-${item.isVisible}-${item.icon}`,
         };
 
         // If classes can be toggled, wrap the component in a Box to handle click events
-        const listItem = <LegendListItem {...commonProps} />;
+        const listItem = <LegendListItem key={`${item.name}-${item.isVisible}-${item.icon}`} {...commonProps} />;
         return canToggleItemVisibility && !layerHidden ? (
           <Box key={`Box-${item.name}-${item.icon}`} onClick={() => handleToggleItemVisibility(item)} sx={sxClasses.toggleableItem}>
             {listItem}

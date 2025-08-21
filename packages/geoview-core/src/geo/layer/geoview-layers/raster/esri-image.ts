@@ -2,6 +2,7 @@ import { ImageArcGISRest } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/ImageArcGISRest';
 
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import {
   TypeLayerEntryConfig,
@@ -14,6 +15,7 @@ import { commonProcessLayerMetadata } from '@/geo/layer/geoview-layers/esri-laye
 import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
+import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 
 export interface TypeEsriImageLayerConfig extends TypeGeoviewLayerConfig {
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_IMAGE;
@@ -35,6 +37,16 @@ export class EsriImage extends AbstractGeoViewRaster {
     // eslint-disable-next-line no-param-reassign
     if (!layerConfig.serviceDateFormat) layerConfig.serviceDateFormat = 'DD/MM/YYYY HH:MM:SSZ';
     super(CONST_LAYER_TYPES.ESRI_IMAGE, layerConfig);
+  }
+
+  /**
+   * Overrides the way a geoview layer config initializes its layer entries.
+   * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
+   */
+  protected override onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
+    // Redirect
+    // TODO: Check - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
+    return Promise.resolve(EsriImage.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, this.metadataAccessPath, false));
   }
 
   /**
@@ -63,6 +75,26 @@ export class EsriImage extends AbstractGeoViewRaster {
   }
 
   /**
+   * Initializes a GeoView layer configuration for an Esri Image layer.
+   * This method creates a basic TypeGeoviewLayerConfig using the provided
+   * ID, name, and metadata access path URL. It then initializes the layer entries by calling
+   * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
+   * @param {string} geoviewLayerId - A unique identifier for the layer.
+   * @param {string} geoviewLayerName - The display name of the layer.
+   * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
+   * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
+   */
+  static initGeoviewLayerConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    metadataAccessPath: string
+  ): Promise<TypeGeoviewLayerConfig> {
+    // Create the Layer config
+    const myLayer = new EsriImage({ geoviewLayerId, geoviewLayerName, metadataAccessPath } as TypeEsriImageLayerConfig);
+    return myLayer.initGeoViewLayerEntries();
+  }
+
+  /**
    * Creates a configuration object for a Esri Image layer.
    * This function constructs a `TypeEsriImageLayerConfig` object that describes an Esri Image layer
    * and its associated entry configurations based on the provided parameters.
@@ -72,7 +104,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @returns {TypeEsriImageLayerConfig} The constructed configuration object for the Esri Image layer.
    */
-  static createEsriImageLayerConfig(
+  static createGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
     metadataAccessPath: string,
@@ -86,17 +118,54 @@ export class EsriImage extends AbstractGeoViewRaster {
       isTimeAware,
       listOfLayerEntryConfig: [],
     };
+
+    let trimmedPath = metadataAccessPath;
+    while (trimmedPath.endsWith('/')) {
+      trimmedPath = trimmedPath.slice(0, -1);
+    }
+
     geoviewLayerConfig.listOfLayerEntryConfig = [
       new EsriImageLayerEntryConfig({
         geoviewLayerConfig,
         schemaTag: CONST_LAYER_TYPES.ESRI_IMAGE,
         entryType: CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE,
-        layerId: metadataAccessPath.split('/').slice(-2, -1)[0],
+        layerId: trimmedPath.split('/').slice(-2, -1)[0],
+        layerName: trimmedPath.split('/').slice(-2, -1)[0],
       } as EsriImageLayerEntryConfig),
     ];
 
     // Return it
     return geoviewLayerConfig;
+  }
+
+  /**
+   * Processes an Esri Image GeoviewLayerConfig and returns a promise
+   * that resolves to an array of `ConfigBaseClass` layer entry configurations.
+   *
+   * This method:
+   * 1. Creates a Geoview layer configuration using the provided parameters.
+   * 2. Instantiates a layer with that configuration.
+   * 3. Processes the layer configuration and returns the result.
+   * @param {string} geoviewLayerId - The unique identifier for the GeoView layer.
+   * @param {string} geoviewLayerName - The display name for the GeoView layer.
+   * @param {string} url - The URL of the service endpoint.
+   * @param {boolean} isTimeAware - Indicates if the layer is time aware.
+   * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
+   */
+  static processGeoviewLayerConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    url: string,
+    isTimeAware: boolean
+  ): Promise<ConfigBaseClass[]> {
+    // Create the Layer config
+    const layerConfig = EsriImage.createGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, url, isTimeAware);
+
+    // Create the class from geoview-layers package
+    const myLayer = new EsriImage(layerConfig);
+
+    // Process it
+    return AbstractGeoViewLayer.processConfig(myLayer);
   }
 
   /**

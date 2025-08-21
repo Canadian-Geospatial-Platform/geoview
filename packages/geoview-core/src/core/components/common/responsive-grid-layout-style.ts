@@ -95,6 +95,11 @@ export const getSxClasses = (theme: Theme, containerType: string): SxStyles => (
         },
       },
     },
+    '& .noSelection': {
+      fontSize: theme.palette.geoViewFontSize.md,
+      fontWeight: '500',
+      padding: 10,
+    },
   },
   gridRightMain: {
     display: 'flex',

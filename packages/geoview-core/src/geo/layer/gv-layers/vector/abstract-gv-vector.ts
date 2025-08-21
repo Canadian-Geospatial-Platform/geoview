@@ -58,8 +58,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
           this as AbstractGVLayer,
           feature,
           label,
-          layerConfig.filterEquation,
-          layerConfig.legendFilterIsOff
+          layerConfig.getFilterEquation(),
+          layerConfig.getLegendFilterIsOff()
         );
 
         // Set the style applied, throwing a style applied event in the process
@@ -89,8 +89,9 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   }
 
   /**
-   * Overrides the get of the OpenLayers Layer
-   * @returns {VectorLayer<Feature>} The OpenLayers Layer
+   * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
+   * @override
+   * @returns {VectorLayer<VectorSource>} The strongly-typed OpenLayers type.
    */
   override getOLLayer(): VectorLayer<VectorSource> {
     // Call parent and cast
@@ -98,8 +99,9 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   }
 
   /**
-   * Overrides the get of the OpenLayers Layer Source
-   * @returns {VectorSource} The OpenLayers Layer Source
+   * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
+   * @override
+   * @returns {VectorSource} The VectorSource source instance associated with this layer.
    */
   override getOLSource(): VectorSource {
     // Get source from OL
@@ -107,8 +109,9 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   }
 
   /**
-   * Overrides the get of the layer configuration associated with the layer.
-   * @returns {VectorLayerEntryConfig} The layer configuration or undefined if not found.
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {VectorLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
    */
   override getLayerConfig(): VectorLayerEntryConfig {
     // Call parent and cast
@@ -120,7 +123,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @param {string} fieldName - The field name for which we want to get the type.
    * @returns {TypeOutfieldsType} The type of the field.
    */
-  protected override getFieldType(fieldName: string): TypeOutfieldsType {
+  protected override onGetFieldType(fieldName: string): TypeOutfieldsType {
     // Redirect
     return featureInfoGetFieldType(this.getLayerConfig(), fieldName);
   }
@@ -237,6 +240,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * Overrides the way to get the bounds for this layer type.
    * @param {OLProjection} projection - The projection to get the bounds into.
    * @param {number} stops - The number of stops to use to generate the extent.
+   * @override
    * @returns {Extent | undefined} The layer bounding box.
    */
   override onGetBounds(projection: OLProjection, stops: number): Extent | undefined {
@@ -262,6 +266,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @param {string[]} objectIds - The uids of the features to calculate the extent from.
    * @param {OLProjection} outProjection - The output projection for the extent.
    * @param {string?} outfield - ID field to return for services that require a value in outfields.
+   * @override
    * @returns {Promise<Extent>} The extent of the features, if available.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -397,12 +402,10 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   ): void {
     // Update the layer config on the fly (maybe not ideal to do this?)
     // eslint-disable-next-line no-param-reassign
-    layerConfig.legendFilterIsOff = false;
-    // eslint-disable-next-line no-param-reassign
     layerConfig.layerFilter = filter;
 
     // Get the current filter
-    const currentFilter = layerConfig.filterEquation;
+    const currentFilter = layerConfig.getFilterEquation();
 
     // Parse the filter value to use
     let filterValueToUse: string = filter.replaceAll(/\s{2,}/g, ' ').trim();
@@ -421,7 +424,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       const isNewFilterEffectivelyNoop = isDefaultFilter && !currentFilter;
 
       // Check whether the current filter is different from the new one
-      const filterChanged = !isEqual(layerConfig.filterEquation, filterEquation);
+      const filterChanged = !isEqual(currentFilter, filterEquation);
 
       // Determine if we should apply or reset filter
       const shouldUpdateFilter = (filterChanged && !isNewFilterEffectivelyNoop) || (!!currentFilter && isDefaultFilter);
@@ -429,8 +432,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       // If should update the filtering
       if (shouldUpdateFilter) {
         // Update the filter equation
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.filterEquation = filterEquation;
+        layerConfig.setFilterEquation(filterEquation);
 
         // Flag about the change.
         // GV This will force a callback on the source style callback, which for us is the 'calculateStyleForFeature' function and

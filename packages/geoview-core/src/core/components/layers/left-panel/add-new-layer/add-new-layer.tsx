@@ -16,17 +16,15 @@ import {
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useAppDisabledLayerTypes, useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { api } from '@/app';
+import { ConfigApi } from '@/api/config/config-api';
 import { logger } from '@/core/utils/logger';
-import { getLocalizedMessage } from '@/core/utils/utilities';
+import { generateId, getLocalizedMessage, isValidUUID } from '@/core/utils/utilities';
 import { Config } from '@/core/utils/config/config';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
   CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
-  EntryConfigBaseClass,
-  GroupLayerEntryConfig,
   MapConfigLayerEntry,
   ShapefileLayerConfig,
   TypeGeoviewLayerConfig,
@@ -34,13 +32,7 @@ import {
   TypeInitialGeoviewLayerType,
 } from '@/api/config/types/map-schema-types';
 
-import { ConfigApi } from '@/api/config/config-api';
-import {
-  buildGeoLayerToAdd,
-  getLayerNameById,
-  getLocalizeLayerType,
-} from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
-import { GeoviewLayerConfigError } from '@/api/config/types/classes/config-exceptions';
+import { UtilAddLayer } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
 import { AddLayerTree } from '@/core/components/layers/left-panel/add-new-layer/add-layer-tree';
 import { ShapefileReader } from '@/core/utils/config/reader/shapefile-reader';
 
@@ -85,6 +77,9 @@ function FileUploadSection({ onFileSelected, onUrlChanged, displayURL, disabledL
   // Store
   const mapId = useGeoViewMapId();
 
+  // The MapViewer
+  const mapViewer = MapEventProcessor.getMapViewer(mapId);
+
   // Ref
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -114,7 +109,7 @@ function FileUploadSection({ onFileSelected, onUrlChanged, displayURL, disabledL
       onFileSelected(file, fileURL, fileName);
     } else {
       // Handle error
-      api.getMapViewer(mapId).notifications.showError('layers.errorFile', [], false);
+      mapViewer.notifications.showError('layers.errorFile', [], false);
     }
   };
 
@@ -218,6 +213,7 @@ function FileUploadSection({ onFileSelected, onUrlChanged, displayURL, disabledL
           }
         }}
         className="buttonOutlineFilled"
+        tooltip={t('layers.fileTypes')!}
       >
         <FileUploadIcon />
         <Box component="span">{t('layers.upload')}</Box>
@@ -262,11 +258,13 @@ export function AddNewLayer(): JSX.Element {
   const [layerURL, setLayerURL] = useState('');
   const [displayURL, setDisplayURL] = useState('');
   const [layerType, setLayerType] = useState<TypeInitialGeoviewLayerType | ''>('');
-  const [layerList, setLayerList] = useState<GroupLayerEntryConfig[]>([]);
+  const [layerTree, setLayerTree] = useState<TypeGeoviewLayerConfig | undefined>();
   const [layerName, setLayerName] = useState('');
   const [layerIdsToAdd, setLayerIdsToAdd] = useState<string[]>([]);
+  const [isMultiple, setIsMultiple] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [stepButtonEnabled, setStepButtonEnabled] = useState<boolean>(false);
+  const isSingle = !isMultiple;
 
   // Ref
   const serviceTypeRef = useRef<HTMLDivElement>(null);
@@ -279,11 +277,11 @@ export function AddNewLayer(): JSX.Element {
   const { setDisplayState } = useLayerStoreActions();
   const language = useAppDisplayLanguage();
 
-  // Utility function to know if there is multiple selection
-  const isMultiple = (): boolean => layerList.length > 1 || (layerList[0] && layerList[0].listOfLayerEntryConfig?.length > 1);
+  // The MapViewer
+  const mapViewer = MapEventProcessor.getMapViewer(mapId);
 
   // List of layer types and labels (Step 2)
-  const layerOptions = getLocalizeLayerType(language, false);
+  const layerOptions = UtilAddLayer.getLocalizeLayerType(language, false);
 
   // #region ERRORS
 
@@ -294,7 +292,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorEmpty = (textField: string): void => {
     setIsLoading(false);
-    api.getMapViewer(mapId).notifications.showError('layers.errorEmpty', [textField], false);
+    mapViewer.notifications.showError('layers.errorEmpty', [textField], false);
   };
 
   /**
@@ -304,7 +302,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorNone = (): void => {
     setIsLoading(false);
-    api.getMapViewer(mapId).notifications.showError('layers.errorNone', [], false);
+    mapViewer.notifications.showError('layers.errorNone', [], false);
   };
 
   /**
@@ -314,7 +312,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorDisabled = (disabledType: string): void => {
     setIsLoading(false);
-    api.getMapViewer(mapId).notifications.showError('layers.errorDisabled', [disabledType], false);
+    mapViewer.notifications.showError('layers.errorDisabled', [disabledType], false);
   };
 
   /**
@@ -324,7 +322,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorServer = (serviceName: string): void => {
     setIsLoading(false);
-    api.getMapViewer(mapId).notifications.showError('layers.errorServer', [serviceName], false);
+    mapViewer.notifications.showError('layers.errorServer', [serviceName], false);
   };
 
   // #endregion
@@ -350,13 +348,13 @@ export function AddNewLayer(): JSX.Element {
 
   const doneAddedShowMessage = (layerBeingAdded: AbstractGeoViewLayer): void => {
     if (layerBeingAdded.allLayerStatusAreGreaterThanOrEqualTo('error'))
-      api.getMapViewer(mapId).notifications.showError('layers.layerAddedWithError', [layerName]);
+      mapViewer.notifications.showError('layers.layerAddedWithError', [layerName]);
     else if (layerBeingAdded?.allLayerStatusAreGreaterThanOrEqualTo('loaded'))
-      api.getMapViewer(mapId).notifications.showMessage('layers.layerAdded', [layerName]);
-    else api.getMapViewer(mapId).notifications.showMessage('layers.layerAddedAndLoading', [layerName]);
+      mapViewer.notifications.showMessage('layers.layerAdded', [layerName]);
+    else mapViewer.notifications.showMessage('layers.layerAddedAndLoading', [layerName]);
   };
 
-  // #region Handler for stepper steps
+  // #region HANDLERS FOR THE STEPS
 
   /**
    * Handle the first step of the layer addition process
@@ -372,7 +370,7 @@ export function AddNewLayer(): JSX.Element {
       emitErrorNone();
     }
 
-    const guessedLayerType = api.config.guessLayerType(displayURL);
+    const guessedLayerType = ConfigApi.guessLayerType(displayURL);
     const layerTypeIsAllowed = setLayerTypeIfAllowed(guessedLayerType as TypeGeoviewLayerType);
     if (valid && layerTypeIsAllowed) {
       setActiveStep(1);
@@ -391,67 +389,47 @@ export function AddNewLayer(): JSX.Element {
 
     const populateLayerList = async (curlayerType: TypeInitialGeoviewLayerType): Promise<boolean> => {
       try {
-        // Create an instance of the GeoView layer. The list of layer entry config is empty, but if the URL specify a sublayer
-        // the instance created will adjust the metadata access path and the list of sublayers accordingly.
-        const geoviewLayerConfig = await api.config.createLayerConfig(layerURL, curlayerType, [], language);
+        // Initialize a temporary GeoviewLayer config depending on the layer type.
+        const geoviewLayerConfig = await ConfigApi.createInitConfigFromType(
+          curlayerType,
+          generateId(18),
+          'tempoName',
+          layerURL,
+          language,
+          mapId
+        );
 
-        if (geoviewLayerConfig && !geoviewLayerConfig.getErrorDetectedFlag()) {
-          setLayerType(geoviewLayerConfig.geoviewLayerType);
-          setLayerURL(geoviewLayerConfig.metadataAccessPath);
-          // GV: Here, the list of layer entry config may be empty or it may contain one layer Id specified in the URL.
-          // GV: This list of layer entry config will be used as a filter for the layer tree. Also, when we want to build the layer tree,
-          // GV: we set the metadata layer tree with the layer tree filter and use an empty list of layer entry config. This is how the
-          // GV: GeoView instance differentiate the creation of a layer tree and the creation of a GeoView layer with its list of sublayers.
-          // Set the layer tree filter.
-          geoviewLayerConfig.setMetadataLayerTree(
-            (geoviewLayerConfig.listOfLayerEntryConfig.length
-              ? [{ layerId: geoviewLayerConfig.listOfLayerEntryConfig[0].layerId }]
-              : []) as EntryConfigBaseClass[]
-          );
+        // Set the layer type as it may have changed in the case of GeoCore for example
+        setLayerType(curlayerType);
 
-          // Get the name and ID of the first entry before deleting the listOfLayerEntryConfig
-          const idOfFirstLayerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig[0]?.layerId;
-          const nameOfFirstLayerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig[0]?.layerName;
+        // Update UI
+        setLayerURL(layerURL);
 
-          // GV: The listOfLayerEntryConfig must be empty when we want to build the layer tree.
-          geoviewLayerConfig.listOfLayerEntryConfig = [];
+        // Get the name and ID of the first entry before deleting the listOfLayerEntryConfig
+        const idOfFirstLayerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig[0]?.layerId;
+        const nameOfFirstLayerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig[0]?.layerName;
+        setLayerName(nameOfFirstLayerEntryConfig || idOfFirstLayerEntryConfig);
+        setLayerTree(geoviewLayerConfig);
 
-          // Then, we fetch the service metadata. This will populate the layer tree.
-          await geoviewLayerConfig.fetchServiceMetadata();
-          const metadata = geoviewLayerConfig.getServiceMetadata();
+        // If there's more than 1 layer entry
+        setIsMultiple(geoviewLayerConfig.listOfLayerEntryConfig.length > 1);
 
-          // Attempt to get a name from metadata
-          if (
-            geoviewLayerConfig.geoviewLayerName === 'unknown' ||
-            (geoviewLayerConfig.geoviewLayerName === 'inconnue' && (metadata.mapName || metadata.Service?.Title || metadata.Service?.Name))
-          )
-            geoviewLayerConfig.geoviewLayerName =
-              (metadata.mapName as string) || (metadata.Service?.Title as string) || (metadata.Service?.Name as string);
-
-          // Generate layer tree
-          const layersTree = geoviewLayerConfig.getMetadataLayerTree()!;
-          logger.logDebug('layersTree', layersTree);
-          setLayerList(layersTree as GroupLayerEntryConfig[]);
-
-          // If there is more than one entry in tree, use the geoview layer name, otherwise use the sublayer name
-          if (layersTree.length > 1 && geoviewLayerConfig.geoviewLayerName) setLayerName(geoviewLayerConfig.geoviewLayerName);
-          else if (layersTree.length === 1) setLayerName(layersTree[0]?.layerName ?? geoviewLayerConfig.geoviewLayerName);
-
-          // If there is either no entries or a single entry that is not a layer, we will bypass tree selection, so set ID and name
-          if (layersTree.length > 0 || (layersTree.length === 1 && !layersTree[0].isLayerGroup)) {
-            setLayerIdsToAdd([layersTree[0]?.layerId ?? idOfFirstLayerEntryConfig]);
-            setLayerName(layersTree[0]?.layerName ?? nameOfFirstLayerEntryConfig ?? geoviewLayerConfig.geoviewLayerName);
-          }
-
-          return true;
+        // If there's any listOfLayerEntryConfig entry
+        if (geoviewLayerConfig.listOfLayerEntryConfig.length > 0) {
+          // Immediately assume the user wants the first entry until they chose otherwise
+          setLayerIdsToAdd([geoviewLayerConfig.listOfLayerEntryConfig[0]?.layerId ?? idOfFirstLayerEntryConfig]);
         }
 
-        throw new GeoviewLayerConfigError(`Unable to create ${curlayerType} GeoView layer using "${layerURL} URL.`);
+        // All good
+        return true;
       } catch (err) {
+        // throw new GeoviewLayerConfigError(`Unable to create ${curlayerType} GeoView layer using "${layerURL} URL.`);
         emitErrorServer(curlayerType);
         logger.logError(err);
-        return false;
       }
+
+      // Failed
+      return false;
     };
 
     let promise;
@@ -516,7 +494,7 @@ export function AddNewLayer(): JSX.Element {
 
     if (valid) {
       // If a single layer is added, use its name instead of service name
-      const firstLayerName = getLayerNameById(layerList, layerIdsToAdd[0]);
+      const firstLayerName = UtilAddLayer.getLayerNameById(layerTree, layerIdsToAdd[0]);
       if (layerIdsToAdd.length === 1 && firstLayerName) setLayerName(firstLayerName);
       setActiveStep(3);
     }
@@ -538,7 +516,7 @@ export function AddNewLayer(): JSX.Element {
     // Shapefile config must be converted to GeoJSON before we proceed
     if (newGeoViewLayer.geoviewLayerType === SHAPEFILE)
       // eslint-disable-next-line no-param-reassign
-      [newGeoViewLayer] = await ShapefileReader.convertShapefileConfigToGeoJson(newGeoViewLayer as ShapefileLayerConfig);
+      newGeoViewLayer = await ShapefileReader.convertShapefileConfigToGeoJson(newGeoViewLayer as ShapefileLayerConfig);
 
     // Use the config to convert simplified layer config into proper layer config
     const config = new Config(language);
@@ -550,7 +528,7 @@ export function AddNewLayer(): JSX.Element {
       logger.logWarning(`- Map ${mapId}: ${message}`);
 
       // Show the error using its key (which will get translated)
-      api.getMapViewer(mapId).notifications.showError(errorKey, params);
+      mapViewer.notifications.showError(errorKey, params);
     });
 
     if (configObj?.length) {
@@ -559,7 +537,7 @@ export function AddNewLayer(): JSX.Element {
 
       logger.logDebug('newGeoViewLayer to add', configObj[0]);
       // Add the layer using the proper function
-      const addedLayer = api.getMapViewer(mapId).layer.addGeoviewLayer(configObj[0] as TypeGeoviewLayerConfig);
+      const addedLayer = mapViewer.layer.addGeoviewLayer(configObj[0] as TypeGeoviewLayerConfig);
       if (addedLayer) {
         // Wait on the promise
         addedLayer.promiseLayer
@@ -585,12 +563,12 @@ export function AddNewLayer(): JSX.Element {
    */
   const handleStepLast = (): void => {
     setIsLoading(true);
-    const newGeoViewLayer = buildGeoLayerToAdd({
+    const newGeoViewLayer = UtilAddLayer.buildGeoLayerToAdd({
       layerIdsToAdd,
       layerName,
       layerType,
       layerURL,
-      layerList,
+      layerTree: layerTree!,
     });
 
     if (newGeoViewLayer)
@@ -600,14 +578,14 @@ export function AddNewLayer(): JSX.Element {
     else {
       // Remove spinning circle if failed.
       doneAdding();
-      api.getMapViewer(mapId).notifications.showError('layers.errorNotLoaded', [layerName]);
+      mapViewer.notifications.showError('layers.errorNotLoaded', [layerName]);
       logger.logError('Unable to load layer');
     }
   };
 
   // #endregion
 
-  // #region handlers
+  // #region HANDLERS
 
   /**
    * Handle the behavior of the 'Back' button in the Stepper UI
@@ -626,7 +604,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const handleSelectType = (event: SelectChangeEvent<unknown>): void => {
     setLayerType(event.target.value as TypeInitialGeoviewLayerType);
-    setLayerList([]);
+    setLayerTree(undefined);
     setLayerIdsToAdd([]);
 
     setStepButtonEnabled(true);
@@ -667,7 +645,7 @@ export function AddNewLayer(): JSX.Element {
     setDisplayURL(file.name);
     setLayerURL(fileURL);
     setLayerType('');
-    setLayerList([]);
+    setLayerTree(undefined);
     setLayerName(fileName);
     setLayerIdsToAdd([]);
     setStepButtonEnabled(true);
@@ -684,7 +662,7 @@ export function AddNewLayer(): JSX.Element {
     setDisplayURL(url);
     setLayerURL(url);
     setLayerType('');
-    setLayerList([]);
+    setLayerTree(undefined);
     setLayerName('');
     setLayerIdsToAdd([]);
   };
@@ -696,7 +674,7 @@ export function AddNewLayer(): JSX.Element {
       // TODO: create a utilities function to test valid URL before we enable the continue button
       // TO.DOCONT: This function should try to ping the server for an answer...
       // Check if url or geocore is provided
-      setStepButtonEnabled(layerURL.startsWith('https://') || ConfigApi.isValidUUID(layerURL.trim()) || layerURL.startsWith('blob'));
+      setStepButtonEnabled(layerURL.startsWith('https://') || isValidUUID(layerURL.trim()) || layerURL.startsWith('blob'));
     }
     if (activeStep === 2 && layerIdsToAdd.length > 0) setStepButtonEnabled(true);
     if (activeStep === 2 && !layerIdsToAdd.length) setStepButtonEnabled(false);
@@ -832,7 +810,8 @@ export function AddNewLayer(): JSX.Element {
             stepContent: {
               children: (
                 <>
-                  {(layerList.length === 0 || (layerList.length === 1 && !layerList[0].isLayerGroup)) && (
+                  {/* Show TextField if only one or no layer entries */}
+                  {isSingle ? (
                     <TextField
                       label={t('layers.name')}
                       variant="standard"
@@ -840,17 +819,16 @@ export function AddNewLayer(): JSX.Element {
                       onChange={handleNameLayer}
                       ref={isMultipleTextFieldRef}
                     />
-                  )}
-                  {(layerList.length > 1 || (layerList[0]?.entryType && layerList[0].entryType === 'group')) && (
-                    <AddLayerTree layersData={layerList} onSelectedItemsChange={setLayerIdsToAdd} />
+                  ) : (
+                    layerTree && <AddLayerTree layerTree={layerTree} onSelectedItemsChange={setLayerIdsToAdd} />
                   )}
                   <br />
-                  <NavButtons isLast={!isMultiple()} handleNext={isMultiple() ? handleStep3 : handleStepLast} />
+                  <NavButtons isLast={!isMultiple} handleNext={isMultiple ? handleStep3 : handleStepLast} />
                 </>
               ),
             },
           },
-          isMultiple()
+          isMultiple
             ? {
                 stepLabel: {
                   children: t('layers.stepFour'),

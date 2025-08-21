@@ -18,12 +18,15 @@ export type StyleProps = {
   fillColor: string;
   strokeColor: string;
   strokeWidth: number;
+  iconSize?: number;
   text?: string;
   textSize?: number;
   textFont?: string;
   textColor?: string;
   textHaloColor?: string;
   textHaloWidth?: number;
+  textBold?: boolean;
+  textItalic?: boolean;
 };
 
 export type TypeDrawerConfig = {
@@ -62,6 +65,7 @@ export interface IDrawerState {
     getIsEditing: () => boolean;
     getTransformInstance: () => Transform;
     getSelectedDrawing: () => Feature | undefined;
+    getSelectedDrawingType: () => string;
     getHideMeasurements: () => boolean;
     getIconSrc: () => string;
     toggleDrawing: () => void;
@@ -73,6 +77,15 @@ export interface IDrawerState {
     setFillColor(fillColor: string): void;
     setStrokeColor(strokeColor: string): void;
     setStrokeWidth(strokeWidth: number): void;
+    setIconSize: (iconSize: number) => void;
+    setTextValue: (text: string) => void;
+    setTextSize: (textSize: number) => void;
+    setTextFont: (textFont: string) => void;
+    setTextColor: (textColor: string) => void;
+    setTextHaloColor: (textHaloColor: string) => void;
+    setTextHaloWidth: (textHaloWidth: number) => void;
+    setTextBold: (textBold: boolean) => void;
+    setTextItalic: (textItalic: boolean) => void;
     setDrawInstance(drawInstance: Draw): void;
     removeDrawInstance(): void;
     setTransformInstance(transformInstance: Transform): void;
@@ -86,6 +99,8 @@ export interface IDrawerState {
     setRedoDisabled: (redoDisabled: boolean) => void;
     downloadDrawings: () => void;
     uploadDrawings: (file: File) => void;
+    updateFeatureStyle: () => void;
+    updateStateStyle: (style: StyleProps) => void;
   };
 
   setterActions: {
@@ -98,6 +113,15 @@ export interface IDrawerState {
     setFillColor: (fillColor: string) => void;
     setStrokeColor: (strokeColor: string) => void;
     setStrokeWidth: (strokeWidth: number) => void;
+    setIconSize: (iconSize: number) => void;
+    setTextValue: (text: string) => void;
+    setTextSize: (textSize: number) => void;
+    setTextFont: (textFont: string) => void;
+    setTextColor: (textColor: string) => void;
+    setTextHaloColor: (textHaloColor: string) => void;
+    setTextHaloWidth: (textHaloWidth: number) => void;
+    setTextBold: (textBold: boolean) => void;
+    setTextItalic: (textItalic: boolean) => void;
     setDrawInstance: (drawInstance: Draw) => void;
     removeDrawInstance: () => void;
     setIsEditing: (isEditing: boolean) => void;
@@ -108,6 +132,7 @@ export interface IDrawerState {
     setIconSrc: (iconSrc: string) => void;
     setUndoDisabled: (undoDisabled: boolean) => void;
     setRedoDisabled: (redoDisabled: boolean) => void;
+    updateStateStyle: (style: StyleProps) => void;
   };
 }
 
@@ -128,6 +153,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
       fillColor: 'rgba(252, 241, 0, 0.3)',
       strokeColor: '#000000',
       strokeWidth: 1.3,
+      iconSize: 24,
       text: 'Default Text',
       textSize: 14,
       textFont: 'Arial',
@@ -199,6 +225,14 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
       getSelectedDrawing: () => {
         return get().drawerState.selectedDrawing;
       },
+      getSelectedDrawingType: () => {
+        const feature = get().drawerState.selectedDrawing;
+        if (!feature) return undefined;
+        if (feature.get('text')) return 'Text';
+        // Only Point and LineString matter. Everything else treated as polygon
+        const geometry = feature.getGeometry();
+        return geometry?.getType();
+      },
       getHideMeasurements: () => {
         return get().drawerState.hideMeasurements;
       },
@@ -240,6 +274,42 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
       setStrokeWidth: (strokeWidth: number) => {
         // Redirect to setter
         get().drawerState.setterActions.setStrokeWidth(strokeWidth);
+      },
+      setIconSize: (iconSize: number) => {
+        // Redirect to setter
+        get().drawerState.setterActions.setIconSize(iconSize);
+      },
+      setTextValue: (text: string) => {
+        // Redirect to setter
+        get().drawerState.setterActions.setTextValue(text);
+      },
+      setTextSize: (textSize: number) => {
+        // Redirect to setter
+        get().drawerState.setterActions.setTextSize(textSize);
+      },
+      setTextFont: (textFont: string) => {
+        // Redirect to setter
+        get().drawerState.setterActions.setTextFont(textFont);
+      },
+      setTextColor: (textColor: string) => {
+        // Redirect to setter
+        get().drawerState.setterActions.setTextColor(textColor);
+      },
+      setTextHaloColor: (textHaloColor: string) => {
+        // Redirect to setter
+        get().drawerState.setterActions.setTextHaloColor(textHaloColor);
+      },
+      setTextHaloWidth: (textHaloWidth: number) => {
+        // Redirect to setter
+        get().drawerState.setterActions.setTextHaloWidth(textHaloWidth);
+      },
+      setTextBold: (textBold: boolean) => {
+        // Redirect to setter
+        get().drawerState.setterActions.setTextBold(textBold);
+      },
+      setTextItalic: (textItalic: boolean) => {
+        // Redirect to setter
+        get().drawerState.setterActions.setTextItalic(textItalic);
       },
       setDrawInstance: (drawInstance: Draw) => {
         // Redirect to setter
@@ -293,6 +363,16 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         // Upload drawings
         DrawerEventProcessor.uploadDrawings(get().mapId, file);
       },
+      updateFeatureStyle() {
+        if (get().drawerState.drawInstance !== undefined) {
+          DrawerEventProcessor.startDrawing(get().mapId);
+        }
+        DrawerEventProcessor.updateTransformingFeatureStyle(get().mapId, get().drawerState.style);
+      },
+      updateStateStyle(style: StyleProps) {
+        // Redirect to setter
+        get().drawerState.setterActions.updateStateStyle(style);
+      },
     },
 
     setterActions: {
@@ -329,10 +409,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
             style,
           },
         });
-        if (get().drawerState.drawInstance !== undefined) {
-          DrawerEventProcessor.startDrawing(get().mapId);
-        }
-        DrawerEventProcessor.updateTransformingFeatureStyle(get().mapId, get().drawerState.style);
+        get().drawerState.actions.updateFeatureStyle();
       },
 
       setFillColor: (fillColor: string) => {
@@ -345,10 +422,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
             },
           },
         });
-        if (get().drawerState.drawInstance !== undefined) {
-          DrawerEventProcessor.startDrawing(get().mapId);
-        }
-        DrawerEventProcessor.updateTransformingFeatureStyle(get().mapId, get().drawerState.style);
+        get().drawerState.actions.updateFeatureStyle();
       },
 
       setStrokeColor: (strokeColor: string) => {
@@ -361,10 +435,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
             },
           },
         });
-        if (get().drawerState.drawInstance !== undefined) {
-          DrawerEventProcessor.startDrawing(get().mapId);
-        }
-        DrawerEventProcessor.updateTransformingFeatureStyle(get().mapId, get().drawerState.style);
+        get().drawerState.actions.updateFeatureStyle();
       },
 
       setStrokeWidth: (strokeWidth: number) => {
@@ -377,10 +448,124 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
             },
           },
         });
-        if (get().drawerState.drawInstance !== undefined) {
-          DrawerEventProcessor.startDrawing(get().mapId);
-        }
-        DrawerEventProcessor.updateTransformingFeatureStyle(get().mapId, get().drawerState.style);
+        get().drawerState.actions.updateFeatureStyle();
+      },
+
+      setIconSize: (iconSize: number) => {
+        set({
+          drawerState: {
+            ...get().drawerState,
+            style: {
+              ...get().drawerState.style,
+              iconSize,
+            },
+          },
+        });
+        get().drawerState.actions.updateFeatureStyle();
+      },
+
+      setTextValue: (text: string) => {
+        set({
+          drawerState: {
+            ...get().drawerState,
+            style: {
+              ...get().drawerState.style,
+              text,
+            },
+          },
+        });
+        get().drawerState.actions.updateFeatureStyle();
+      },
+
+      setTextSize: (textSize: number) => {
+        set({
+          drawerState: {
+            ...get().drawerState,
+            style: {
+              ...get().drawerState.style,
+              textSize,
+            },
+          },
+        });
+        get().drawerState.actions.updateFeatureStyle();
+      },
+
+      setTextFont: (textFont: string) => {
+        set({
+          drawerState: {
+            ...get().drawerState,
+            style: {
+              ...get().drawerState.style,
+              textFont,
+            },
+          },
+        });
+        get().drawerState.actions.updateFeatureStyle();
+      },
+
+      setTextColor: (textColor: string) => {
+        set({
+          drawerState: {
+            ...get().drawerState,
+            style: {
+              ...get().drawerState.style,
+              textColor,
+            },
+          },
+        });
+        get().drawerState.actions.updateFeatureStyle();
+      },
+
+      setTextHaloColor: (textHaloColor: string) => {
+        set({
+          drawerState: {
+            ...get().drawerState,
+            style: {
+              ...get().drawerState.style,
+              textHaloColor,
+            },
+          },
+        });
+        get().drawerState.actions.updateFeatureStyle();
+      },
+
+      setTextHaloWidth: (textHaloWidth: number) => {
+        set({
+          drawerState: {
+            ...get().drawerState,
+            style: {
+              ...get().drawerState.style,
+              textHaloWidth,
+            },
+          },
+        });
+        get().drawerState.actions.updateFeatureStyle();
+      },
+
+      setTextBold: (textBold: boolean) => {
+        set({
+          drawerState: {
+            ...get().drawerState,
+            style: {
+              ...get().drawerState.style,
+              textBold,
+            },
+          },
+        });
+        get().drawerState.actions.updateFeatureStyle();
+      },
+
+      setTextItalic: (textItalic: boolean) => {
+        set({
+          drawerState: {
+            ...get().drawerState,
+            style: {
+              ...get().drawerState.style,
+              textItalic,
+            },
+          },
+        });
+        get().drawerState.actions.updateFeatureStyle();
       },
 
       setDrawInstance: (drawInstance: Draw) => {
@@ -463,6 +648,15 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
           },
         });
       },
+
+      updateStateStyle: (style: StyleProps) => {
+        set({
+          drawerState: {
+            ...get().drawerState,
+            style,
+          },
+        });
+      },
     },
 
     // #endregion ACTIONS
@@ -478,6 +672,9 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
 export const useDrawerIsDrawing = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.actions.getIsDrawing());
 
 export const useDrawerIsEditing = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.actions.getIsEditing());
+
+export const useDrawerSelectedDrawingType = (): string | undefined =>
+  useStore(useGeoViewStore(), (state) => state.drawerState.actions.getSelectedDrawingType());
 
 export const useDrawerActiveGeom = (): string => useStore(useGeoViewStore(), (state) => state.drawerState.activeGeom);
 

@@ -1,6 +1,5 @@
-import { TypeJsonObject } from 'geoview-core/api/config/types/config-types';
 import { TypeFeatureInfoEntry, TypeFeatureInfoEntryPartial } from 'geoview-core/api/config/types/map-schema-types';
-import { GeoChartDatasource } from 'geochart';
+import { GeoChartDatasource, TypeJsonObject } from 'geochart';
 import { LayerApi } from 'geoview-core/geo/layer/layer';
 import { TypeGeochartResultSetEntry } from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
 import { ConfigBaseClass } from 'geoview-core/core/utils/config/validation-classes/config-base-class';
@@ -47,18 +46,18 @@ const findLayerConfig = (
 };
 
 /**
- * Simplifies the FeatureInfoEntries into more straightforward TypeJsonObjects.
+ * Simplifies the FeatureInfoEntries into more straightforward array of Record<string, unknown>.
  * @param {TypeFeatureInfoEntryPartial[]} entries - The FeatureInfoEntries to simplify
- * @return {TypeJsonObject[]} The simplified JsonObject of the attributes
+ * @return {Record<string, unknown>[]} The simplified JsonObject of the attributes
  */
-const simplifyTypeFeatureInfoEntries = (entries: TypeFeatureInfoEntryPartial[]): TypeJsonObject[] => {
+const simplifyTypeFeatureInfoEntries = (entries: TypeFeatureInfoEntryPartial[]): Record<string, unknown>[] => {
   // Simplify attributes
   return entries.map((entry: TypeFeatureInfoEntryPartial) => {
     // Return simplified object
-    const obj: TypeJsonObject = {};
+    const obj: Record<string, unknown> = {};
     Object.keys(entry.fieldInfo).forEach((k: string) => {
       // Build
-      obj[k] = entry.fieldInfo[k]?.value as TypeJsonObject;
+      obj[k] = entry.fieldInfo[k]?.value;
     });
     return obj;
   });
@@ -145,7 +144,7 @@ export const loadDatasources = (
     // If there's a query property to indicate how to query the data, we're altering the datasources
     if (configChart?.query) {
       // For each previously found data
-      layerDataSimplified.forEach((lyrDataSimp: TypeJsonObject) => {
+      layerDataSimplified.forEach((lyrDataSimp) => {
         // Read the id and from the found data
         const id = lyrDataSimp[configChartLayer.propertyValue];
         let display: string | undefined;
@@ -155,7 +154,7 @@ export const loadDatasources = (
         const ds: GeoChartDatasource = {
           value: id as string,
           display: display as string,
-          sourceItem: lyrDataSimp,
+          sourceItem: lyrDataSimp as TypeJsonObject,
         };
 
         // Add it to the list
@@ -166,8 +165,8 @@ export const loadDatasources = (
       // Add a datasource
       retConfigChart.datasources.push({
         display: 'Feature',
-        sourceItem: layerDataSimplified[0],
-        items: layerDataSimplified,
+        sourceItem: layerDataSimplified[0] as TypeJsonObject,
+        items: layerDataSimplified as TypeJsonObject[],
       });
     }
   }

@@ -1,5 +1,4 @@
 import React from 'react'; // GV This import is to validate that we're on the right React at the end of the file
-import { TypeJsonObject, toJsonObject, AnySchemaObject } from 'geoview-core/api/config/types/config-types';
 import { TypeDrawerConfig } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
 import { NavBarPlugin, TypeNavBarButtonConfig } from 'geoview-core/api/plugin/navbar-plugin';
 
@@ -19,26 +18,26 @@ class DrawerPlugin extends NavBarPlugin {
   /**
    * Returns the package schema
    *
-   * @returns {AnySchemaObject} the package schema
+   * @returns {unknown} the package schema
    */
-  override schema(): AnySchemaObject {
+  override schema(): unknown {
     return schema;
   }
 
   /**
    * Returns the default config for this package
    *
-   * @returns {TypeJsonObject} the default config
+   * @returns {unknown} the default config
    */
-  override defaultConfig(): TypeJsonObject {
-    return toJsonObject(defaultConfig);
+  override defaultConfig(): unknown {
+    return defaultConfig;
   }
 
   /**
    * Overrides the default translations for the Plugin.
-   * @returns {TypeJsonObject} - The translations object for the particular Plugin.
+   * @returns {Record<string, unknown>} - The translations object for the particular Plugin.
    */
-  override defaultTranslations(): TypeJsonObject {
+  override defaultTranslations(): Record<string, unknown> {
     return {
       en: {
         drawer: {
@@ -52,14 +51,19 @@ class DrawerPlugin extends NavBarPlugin {
           fillColour: 'Fill Colour',
           strokeColour: 'Stroke Colour',
           strokeWidth: 'Stroke Width',
+          iconSize: 'Icon Size',
           geometryPicker: 'Change geometry type',
           geometryPickerPanel: 'Select a geometry',
           point: 'Point',
           text: 'Text',
+          textFont: 'Font',
           textSize: 'Font Size',
-          textColor: 'Text Colour',
-          textHaloColor: 'Halo Colour',
+          textColour: 'Text Colour',
+          textHaloColour: 'Halo Colour',
           textHaloWidth: 'Halo Width',
+          textBold: 'Bold',
+          textItalic: 'Italic',
+          textFormatting: 'Text formatting',
           linestring: 'Line',
           polygon: 'Polygon',
           rectangle: 'Rectangle',
@@ -71,6 +75,7 @@ class DrawerPlugin extends NavBarPlugin {
           redoTooltip: 'Redo',
           downloadTooltip: 'Download drawings',
           uploadTooltip: 'Upload drawings',
+          colourPicker: 'Pick a colour',
         },
       },
       fr: {
@@ -85,14 +90,19 @@ class DrawerPlugin extends NavBarPlugin {
           fillColour: 'Couleur de remplissage',
           strokeColour: 'Couleur du contour',
           strokeWidth: 'Largeur du contour',
+          iconSize: "Taille de l'icône",
           geometryPicker: 'Changer le type de géométrie',
           geometryPickerPanel: 'Sélectionnez une géométrie',
           point: 'Pointer',
           text: 'Texte',
+          textFont: 'Police de caractères',
           textSize: 'Taille de la police',
-          textColor: 'Couleur du texte',
-          textHaloColor: 'Couleur du halo',
+          textColour: 'Couleur du texte',
+          textHaloColour: 'Couleur du halo',
           textHaloWidth: 'Largeur du halo',
+          textBold: 'Gras',
+          textItalic: 'Italique',
+          textFormatting: 'Formatage du texte',
           linestring: 'Ligne',
           polygon: 'Polygone',
           rectangle: 'Rectangle',
@@ -104,14 +114,15 @@ class DrawerPlugin extends NavBarPlugin {
           redoTooltip: 'refaire',
           downloadTooltip: 'Télécharger les dessins',
           uploadTooltip: 'Télécharger des dessins',
+          colourPicker: 'Choisissez une couleur',
         },
       },
-    } as unknown as TypeJsonObject;
+    };
   }
 
   /**
    * Overrides the getConfig in order to return the right type.
-   * @returns {ConfigProps} The Swiper config
+   * @returns {TypeDrawerConfig} The Swiper config
    */
   override getConfig(): TypeDrawerConfig {
     // Redirect
