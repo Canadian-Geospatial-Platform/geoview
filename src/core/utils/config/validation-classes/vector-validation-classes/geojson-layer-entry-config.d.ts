@@ -1,6 +1,10 @@
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
-import { TypeSourceGeoJSONInitialConfig } from '@/geo/layer/geoview-layers/vector/geojson';
+import { TypeSourceGeoJSONInitialConfig } from '@/api/config/types/map-schema-types';
 export declare class GeoJSONLayerEntryConfig extends VectorLayerEntryConfig {
+    /** Tag used to link the entry to a specific schema. */
+    schemaTag: import("@/api/config/types/map-schema-types").TypeGeoviewLayerType;
+    /** Layer entry data type. */
+    entryType: import("@/api/config/types/map-schema-types").TypeLayerEntryType;
     source: TypeSourceGeoJSONInitialConfig;
     /**
      * The class constructor.

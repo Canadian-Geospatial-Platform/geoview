@@ -1,7 +1,6 @@
 import { Coordinate } from 'ol/coordinate';
 import { Projection as OLProjection, ProjectionLike } from 'ol/proj';
 import { Extent } from 'ol/extent';
-import { TypeJsonObject } from '@/api/config/types/config-types';
 /**
  * Class used to handle functions for transforming projections
  *
@@ -37,13 +36,13 @@ export declare abstract class Projection {
      * original).
      *
      * @param {Extent} extent - The extent to transform.
-     * @param {TypeJsonObject | undefined} projection - An object containing a wkid or wkt property.
+     * @param {TypeProjection | undefined} projection - An object containing a wkid or wkt property.
      * @param {OLProjection} destination - Destination projection-like.
      * @param {number?} stops - Optional number of stops per side used for the transform. By default only the corners are used.
      *
      * @returns The new extent transformed in the destination projection.
      */
-    static transformExtentFromObj(extent: Extent, projection: TypeJsonObject | undefined, destination: OLProjection, stops?: number | undefined): Extent;
+    static transformExtentFromObj(extent: Extent, projection: TypeProjection | undefined, destination: OLProjection, stops?: number | undefined): Extent;
     /**
      * Transforms an extent from source projection to destination projection. This returns a new extent (and does not modify the
      * original).
@@ -111,15 +110,15 @@ export declare abstract class Projection {
     static transformToLonLat(coordinate: Coordinate, projection: OLProjection): Coordinate;
     /**
      * Fetches definitions for unsupported projections and adds them.
-     * @param {TypeJsonObject} projection - Object containing wkid and possibly latestWkid from service metadata.
+     * @param {TypeProjection} projection - Object containing wkid and possibly latestWkid from service metadata.
      */
-    static addProjection(projection: TypeJsonObject): Promise<void>;
+    static addProjection(projection: TypeProjection): Promise<void>;
     /**
      * Wrapper around OpenLayers get function that fetches a Projection object for the code specified.
-     * @param {TypeJsonObject | undefined} projectionObj - A projection object with properties such as latestWkid, wkid, or wkt.
+     * @param {TypeProjection | undefined} projectionObj - A projection object with properties such as latestWkid, wkid, or wkt.
      * @return {OLProjection | undefined} — Projection object, or undefined if not in list.
      */
-    static getProjectionFromObj(projectionObj: TypeJsonObject | undefined): OLProjection | undefined;
+    static getProjectionFromObj(projectionObj: TypeProjection | undefined): OLProjection | undefined;
     /**
      * Wrapper around OpenLayers get function that fetches a Projection object for the code specified.
      * @param {string} customWKT - A code string which is a combination of authority and identifier such as "EPSG:4326".
@@ -163,4 +162,12 @@ export declare abstract class Projection {
      */
     static transformCoordinates(coordinates: Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined, startProjection: string, endProjection: string): Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined;
 }
+/**
+ * A Type to represent a Projection in JSON.
+ */
+export type TypeProjection = {
+    wkid: number;
+    latestWkid?: number;
+    wkt?: string;
+};
 //# sourceMappingURL=projection.d.ts.map

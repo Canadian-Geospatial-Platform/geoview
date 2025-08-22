@@ -28,18 +28,21 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
      */
     protected constructor(olSource: VectorSource<Feature<Geometry>>, layerConfig: VectorLayerEntryConfig);
     /**
-     * Overrides the get of the OpenLayers Layer
-     * @returns {VectorLayer<Feature>} The OpenLayers Layer
+     * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
+     * @override
+     * @returns {VectorLayer<VectorSource>} The strongly-typed OpenLayers type.
      */
     getOLLayer(): VectorLayer<VectorSource>;
     /**
-     * Overrides the get of the OpenLayers Layer Source
-     * @returns {VectorSource} The OpenLayers Layer Source
+     * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
+     * @override
+     * @returns {VectorSource} The VectorSource source instance associated with this layer.
      */
     getOLSource(): VectorSource;
     /**
-     * Overrides the get of the layer configuration associated with the layer.
-     * @returns {VectorLayerEntryConfig} The layer configuration or undefined if not found.
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @override
+     * @returns {VectorLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
      */
     getLayerConfig(): VectorLayerEntryConfig;
     /**
@@ -47,7 +50,7 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
      * @param {string} fieldName - The field name for which we want to get the type.
      * @returns {TypeOutfieldsType} The type of the field.
      */
-    protected getFieldType(fieldName: string): TypeOutfieldsType;
+    protected onGetFieldType(fieldName: string): TypeOutfieldsType;
     /**
      * Overrides the get all feature information for all the features stored in the layer.
      * @param {AbortController?} abortController - The optional abort controller.
@@ -88,6 +91,7 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
      * Overrides the way to get the bounds for this layer type.
      * @param {OLProjection} projection - The projection to get the bounds into.
      * @param {number} stops - The number of stops to use to generate the extent.
+     * @override
      * @returns {Extent | undefined} The layer bounding box.
      */
     onGetBounds(projection: OLProjection, stops: number): Extent | undefined;
@@ -96,6 +100,7 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
      * @param {string[]} objectIds - The uids of the features to calculate the extent from.
      * @param {OLProjection} outProjection - The output projection for the extent.
      * @param {string?} outfield - ID field to return for services that require a value in outfields.
+     * @override
      * @returns {Promise<Extent>} The extent of the features, if available.
      */
     onGetExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent>;

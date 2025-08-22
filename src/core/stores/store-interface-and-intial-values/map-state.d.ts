@@ -3,6 +3,7 @@ import Overlay from 'ol/Overlay';
 import { Extent } from 'ol/extent';
 import { FitOptions } from 'ol/View';
 import { Size } from 'ol/size';
+import { Pixel } from 'ol/pixel';
 import { TypeBasemapOptions, TypeHighlightColors, TypeInteraction, TypeMapViewSettings, TypeValidMapProjectionCodes, TypeZoomAndCenter, TypeFeatureInfoEntry, TypePointMarker } from '@/api/config/types/map-schema-types';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
@@ -52,7 +53,7 @@ export interface IMapState {
         createBasemapFromOptions: (basemapOptions: TypeBasemapOptions) => Promise<void>;
         getMapLayerParentHidden(layerPath: string): boolean;
         isLayerHiddenOnMap(layerPath: string): boolean;
-        getPixelFromCoordinate: (coord: Coordinate) => [number, number];
+        getPixelFromCoordinate: (coord: Coordinate) => Pixel;
         showClickMarker: (marker: TypeClickMarker) => void;
         hideClickMarker: () => void;
         highlightBBox: (extent: Extent, isLayerHighlight?: boolean) => void;

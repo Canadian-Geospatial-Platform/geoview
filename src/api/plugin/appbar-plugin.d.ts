@@ -10,6 +10,7 @@ export declare abstract class AppBarPlugin extends AbstractPlugin {
     panelProps?: TypePanelProps;
     /**
      * Overrides the get config
+     * @override
      * @returns {AppBarPluginConfig} The config
      */
     getConfig(): AppBarPluginConfig;

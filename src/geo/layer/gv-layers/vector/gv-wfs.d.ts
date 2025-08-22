@@ -16,8 +16,9 @@ export declare class GVWFS extends AbstractGVVector {
      */
     constructor(olSource: VectorSource, layerConfig: WfsLayerEntryConfig);
     /**
-     * Overrides the get of the layer configuration associated with the layer.
-     * @returns {WfsLayerEntryConfig} The layer configuration or undefined if not found.
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @override
+     * @returns {WfsLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
      */
     getLayerConfig(): WfsLayerEntryConfig;
     /**
@@ -25,6 +26,6 @@ export declare class GVWFS extends AbstractGVVector {
      * @param {string} fieldName - The field name for which we want to get the type.
      * @returns {TypeOutfieldsType} The type of the field.
      */
-    protected getFieldType(fieldName: string): TypeOutfieldsType;
+    protected onGetFieldType(fieldName: string): TypeOutfieldsType;
 }
 //# sourceMappingURL=gv-wfs.d.ts.map

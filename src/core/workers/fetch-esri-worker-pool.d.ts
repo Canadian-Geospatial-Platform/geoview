@@ -1,7 +1,6 @@
 import { AbstractWorkerPool } from './abstract-worker-pool';
 import { FetchEsriWorkerType } from './fetch-esri-worker';
 import { QueryParams } from './fetch-esri-worker-script';
-import { TypeJsonObject } from '@/api/config/types/config-types';
 /**
  * Worker pool for managing ESRI fetch operations.
  * Extends AbstractWorkerPool to handle concurrent ESRI service requests.
@@ -26,9 +25,9 @@ export declare class FetchEsriWorkerPool extends AbstractWorkerPool<FetchEsriWor
     /**
      * Processes an ESRI query using an available worker from the pool.
      * @param {QueryParams} params - Parameters for the ESRI query
-     * @returns {Promise<TypeJsonObject>} The query results
+     * @returns {Promise<unknown>} The query results
      * @throws {Error} When no workers are available or query processing fails
      */
-    process(params: QueryParams): Promise<TypeJsonObject>;
+    process(params: QueryParams): Promise<unknown>;
 }
 //# sourceMappingURL=fetch-esri-worker-pool.d.ts.map

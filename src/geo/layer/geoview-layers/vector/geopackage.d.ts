@@ -1,7 +1,7 @@
-import { TypeJsonArray } from '@/api/config/types/config-types';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { TypeLayerEntryConfig, TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig, CONST_LAYER_TYPES } from '@/api/config/types/map-schema-types';
 import { GeoPackageLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geopackage-layer-config-entry';
+import { TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
@@ -27,10 +27,10 @@ export declare class GeoPackage extends AbstractGeoViewVector {
      */
     constructor(layerConfig: TypeGeoPackageLayerConfig);
     /**
-     * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
-     * @returns {Promise<void>} A promise that the execution is completed.
+     * Overrides the way a geoview layer config initializes its layer entries.
+     * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
      */
-    protected onFetchAndSetServiceMetadata(): Promise<void>;
+    protected onInitLayerEntries(): Promise<TypeGeoviewLayerConfig>;
     /**
      * Overrides the way the layer metadata is processed.
      * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration to process.
@@ -65,10 +65,10 @@ export declare class GeoPackage extends AbstractGeoViewVector {
      * @param {string} geoviewLayerName - The display name of the GeoView layer.
      * @param {string} metadataAccessPath - The URL or path to access metadata or feature data.
      * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
-     * @param {TypeJsonArray} layerEntries - An array of layer entries objects to be included in the configuration.
+     * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
      * @returns {TypeGeoPackageLayerConfig} The constructed configuration object for the Geopackage Feature layer.
      */
-    static createGeopackageLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean, layerEntries: TypeJsonArray): TypeGeoPackageLayerConfig;
+    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean, layerEntries: TypeLayerEntryShell[]): TypeGeoPackageLayerConfig;
 }
 /**
  * type guard function that redefines a TypeGeoviewLayerConfig as a TypeGeoPackageFeatureLayerConfig if the geoviewLayerType attribute of

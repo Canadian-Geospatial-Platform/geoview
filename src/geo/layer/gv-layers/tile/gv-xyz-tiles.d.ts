@@ -19,18 +19,21 @@ export declare class GVXYZTiles extends AbstractGVTile {
      */
     constructor(olSource: XYZ, layerConfig: XYZTilesLayerEntryConfig);
     /**
-     * Overrides the get of the OpenLayers Layer
-     * @returns {TileLayer<XYZ>} The OpenLayers Layer
+     * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
+     * @override
+     * @returns {TileLayer<XYZ>} The strongly-typed OpenLayers type.
      */
     getOLLayer(): TileLayer<XYZ>;
     /**
-     * Overrides the get of the OpenLayers Layer Source
-     * @returns {XYZ} The OpenLayers Layer Source
+     * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
+     * @override
+     * @returns {XYZ} The XYZ source instance associated with this layer.
      */
     getOLSource(): XYZ;
     /**
-     * Overrides the get of the layer configuration associated with the layer.
-     * @returns {XYZTilesLayerEntryConfig} The layer configuration or undefined if not found.
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @override
+     * @returns {XYZTilesLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
      */
     getLayerConfig(): XYZTilesLayerEntryConfig;
     /**
@@ -38,7 +41,7 @@ export declare class GVXYZTiles extends AbstractGVTile {
      * @param {string} fieldName - The field name for which we want to get the type.
      * @returns {TypeOutfieldsType} The type of the field.
      */
-    protected getFieldType(fieldName: string): TypeOutfieldsType;
+    protected onGetFieldType(fieldName: string): TypeOutfieldsType;
     /**
      * Overrides the way to get the bounds for this layer type.
      * @param {OLProjection} projection - The projection to get the bounds into.

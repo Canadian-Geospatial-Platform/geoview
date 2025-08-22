@@ -1,4 +1,4 @@
-import { TypeJsonObject } from '@/api/config/types/config-types';
+import { Coordinate } from 'ol/coordinate';
 import { TypeDateFragments } from '@/core/utils/date-mgt';
 import { TypeStyleGeometry, TypeFeatureInfoEntryPartial, codedValueType, rangeDomainType, TypeOutfieldsType, TypeAliasLookup, TypeOutfields } from '@/api/config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
@@ -30,17 +30,16 @@ export declare function esriGetFieldDomain(layerConfig: EsriDynamicLayerEntryCon
  * Transforms the query results of an Esri service response - when not querying on the Layers themselves (giving a 'reduced' FeatureInfoEntry).
  * The transformation reads the Esri formatted information and return a list of `TypeFeatureInfoEntryPartial` records.
  * In a similar fashion and response object as the "Query Feature Infos" functionalities done via the Layers.
- *
- * @param results TypeJsonObject The Json Object representing the data from Esri.
- *
- * @returns TypeFeatureInfoEntryPartial[] an array of relared records of type TypeFeatureInfoEntryPartial
+ * @param {EsriRelatedRecordsJsonResponseRelatedRecord[]} records The records representing the data from Esri.
+ * @param {TypeStyleGeometry?} geometryType - Optional, the geometry type.
+ * @returns TypeFeatureInfoEntryPartial[] An array of relared records of type TypeFeatureInfoEntryPartial
  */
-export declare function esriParseFeatureInfoEntries(records: TypeJsonObject[], geometryType?: TypeStyleGeometry): TypeFeatureInfoEntryPartial[];
+export declare function esriParseFeatureInfoEntries(records: EsriRelatedRecordsJsonResponseRelatedRecord[], geometryType?: TypeStyleGeometry): TypeFeatureInfoEntryPartial[];
 /**
  * Asynchronously queries an Esri feature layer given the url and returns an array of `TypeFeatureInfoEntryPartial` records.
  * @param {string} url - An Esri url indicating a feature layer to query
  * @param {TypeStyleGeometry?} geometryType - The geometry type for the geometries in the layer being queried (used when geometries are returned)
- * @param {boolean} parseFeatureInfoEntries - A boolean to indicate if we use the raw esri output or if we parse it
+ * @param {boolean} parseFeatureInfoEntries - A boolean to indicate if we use the raw esri output or if we parse it, defaults to true.
  * @returns {TypeFeatureInfoEntryPartial[] | null} An array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
  */
 export declare function esriQueryRecordsByUrl(url: string, geometryType?: TypeStyleGeometry, parseFeatureInfoEntries?: boolean): Promise<TypeFeatureInfoEntryPartial[]>;
@@ -59,9 +58,9 @@ export declare function esriQueryRecordsByUrl(url: string, geometryType?: TypeSt
 export declare function esriQueryRecordsByUrlObjectIds(layerUrl: string, geometryType: TypeStyleGeometry, objectIds: number[], fields: string, geometry: boolean, outSR?: number, maxOffset?: number, parseFeatureInfoEntries?: boolean): Promise<TypeFeatureInfoEntryPartial[]>;
 /**
  * Asynchronously queries an Esri relationship table given the url and returns an array of `TypeFeatureInfoEntryPartial` records.
- * @param {url} string An Esri url indicating a relationship table to query
- * @param {recordGroupIndex} number The group index of the relationship layer on which to read the related records
- * @returns {TypeFeatureInfoEntryPartial[] | null} An array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
+ * @param {string} url - An Esri url indicating a relationship table to query
+ * @param {number} recordGroupIndex - The group index of the relationship layer on which to read the related records
+ * @returns {Promise<TypeFeatureInfoEntryPartial[]>} A promise of an array of relared records of type TypeFeatureInfoEntryPartial.
  */
 export declare function esriQueryRelatedRecordsByUrl(url: string, recordGroupIndex: number): Promise<TypeFeatureInfoEntryPartial[]>;
 /**
@@ -92,4 +91,24 @@ export declare function parseDateTimeValuesEsriDynamic(filter: string, externalF
  */
 export declare function parseDateTimeValuesEsriImageOrWMS(filter: string, externalFragmentsOrder: TypeDateFragments | undefined): string;
 export declare function createAliasLookup(outfields: TypeOutfields[] | undefined): TypeAliasLookup;
+export type EsriRelatedRecordsJsonResponse = {
+    features: EsriRelatedRecordsJsonResponseRelatedRecord[];
+    relatedRecordGroups: EsriRelatedRecordsJsonResponseRelatedRecordGroup[];
+};
+export type EsriRelatedRecordsJsonResponseRelatedRecordGroup = {
+    relatedRecords: EsriRelatedRecordsJsonResponseRelatedRecord[];
+};
+export type EsriRelatedRecordsJsonResponseRelatedRecord = {
+    attributes: {
+        [key: string]: unknown;
+    };
+    geometry: GeometryJson;
+};
+export type GeometryJson = {
+    points: Coordinate[];
+    paths: Coordinate[][];
+    rings: Coordinate[][];
+    x: Coordinate;
+    y: Coordinate;
+};
 //# sourceMappingURL=utils.d.ts.map

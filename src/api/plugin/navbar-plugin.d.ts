@@ -5,6 +5,9 @@ export type TypeNavBarButtonConfig = {
     buttonProps: IconButtonPropsExtend;
     panelProps?: TypePanelProps;
     groupName: string;
+    groupConfig?: {
+        accordionThreshold?: number;
+    };
 };
 /**
  * NavBar Plugin abstract class.

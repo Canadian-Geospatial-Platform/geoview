@@ -5,7 +5,7 @@ import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { FeatureHighlight } from '@/geo/map/feature-highlight';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { MapConfigLayerEntry, TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerStatus, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
+import { MapConfigLayerEntry, TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerStatus, TypeDisplayLanguage, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 import { HoverFeatureInfoLayerSet } from '@/geo/layer/layer-sets/hover-feature-info-layer-set';
 import { AllFeatureInfoLayerSet } from '@/geo/layer/layer-sets/all-feature-info-layer-set';
 import { LegendsLayerSet } from '@/geo/layer/layer-sets/legends-layer-set';
@@ -401,11 +401,47 @@ export declare class LayerApi {
      */
     offLayerItemVisibilityToggled(callback: LayerItemVisibilityToggledDelegate): void;
     /**
+     * Converts a map configuration layer entry into a promise of a GeoView layer configuration.
+     * Depending on the type of the layer entry (e.g., GeoCore, Shapefile, or standard GeoView),
+     * this function processes each entry accordingly and wraps the result in a `Promise`.
+     * Errors encountered during asynchronous operations are handled via a provided callback.
+     * @param {string} mapId - The unique identifier of the map instance this configuration applies to.
+     * @param {TypeDisplayLanguage} language - The language setting used for layer labels and metadata.
+     * @param {MapConfigLayerEntry} entry - The array of layer entry to convert.
+     * @param {(mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => void} errorCallback - Callback invoked when an error occurs during layer processing.
+     * @returns {Promise<TypeGeoviewLayerConfig>} The promise resolving to a `TypeGeoviewLayerConfig` object.
+     */
+    static convertMapConfigToGeoviewLayerConfig(mapId: string, language: TypeDisplayLanguage, entry: MapConfigLayerEntry, errorCallback: (mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => void): Promise<TypeGeoviewLayerConfig>;
+    /**
+     * Converts a list of map configuration layer entries into an array of promises,
+     * each resolving to one or more GeoView layer configuration objects.
+     * @param {string} mapId - The unique identifier of the map instance this configuration applies to.
+     * @param {TypeDisplayLanguage} language - The language setting used for layer labels and metadata.
+     * @param {MapConfigLayerEntry[]} mapConfigLayerEntries - The array of layer entries to convert.
+     * @param {(mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => void} errorCallback - Callback invoked when an error occurs during layer processing.
+     * @returns {Promise<TypeGeoviewLayerConfig[]>[]} An array of promises, each resolving to an array of `TypeGeoviewLayerConfig` objects.
+     */
+    static convertMapConfigsToGeoviewLayerConfig(mapId: string, language: TypeDisplayLanguage, mapConfigLayerEntries: MapConfigLayerEntry[], errorCallback: (mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => void): Promise<TypeGeoviewLayerConfig>[];
+    /**
      * Generate an array of layer info for the orderedLayerList.
      * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The config to get the info from.
      * @returns {TypeOrderedLayerInfo[]} The array of ordered layer info.
      */
     static generateArrayOfLayerOrderInfo(geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig): TypeOrderedLayerInfo[];
+    /**
+     * Creates an instance of a specific `AbstractGeoViewLayer` subclass based on the given GeoView layer configuration.
+     * This function determines the correct layer type from the configuration and instantiates it accordingly.
+     * @remarks
+     * - This method currently supports GeoJSON, GeoPackage, CSV, WMS, Esri Dynamic, Esri Feature, Esri Image,
+     *   ImageStatic, WFS, OGC Feature, XYZ Tiles, and Vector Tiles.
+     * - If the layer type is not supported, an error is thrown.
+     * - TODO: Refactor to use the validated configuration with metadata already fetched.
+     * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The configuration object for the GeoView layer.
+     * @param {string} mapProjectionForVectorTiles - The projection string to be used when creating Vector Tiles layers.
+     * @returns {AbstractGeoViewLayer} An instance of the corresponding `AbstractGeoViewLayer` subclass.
+     * @throws {NotSupportedError} If the configuration does not match any supported layer type.
+     */
+    static createLayerConfigFromType(geoviewLayerConfig: TypeGeoviewLayerConfig, mapProjectionForVectorTiles: string): AbstractGeoViewLayer;
 }
 export type GeoViewLayerAddedResult = {
     layer: AbstractGeoViewLayer;

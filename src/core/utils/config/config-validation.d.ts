@@ -28,7 +28,7 @@ export declare class ConfigValidation {
      *
      * @returns {TypeMapFeaturesConfig} A valid map features configuration.
      */
-    validateMapConfigAgainstSchema(listOfGeoviewLayerConfig: MapConfigLayerEntry[], onErrorCallback: (errorKey: string, params: string[]) => void): MapConfigLayerEntry[];
+    validateLayersConfigAgainstSchema(listOfGeoviewLayerConfig: MapConfigLayerEntry[], onErrorCallback: ErrorCallbackDelegate): MapConfigLayerEntry[];
     /**
      * Validate and adjust the list of GeoView layer configuration.
      * @param {MapConfigLayerEntry[]} listOfGeoviewLayerConfig - The list of GeoView layer configuration to adjust and
@@ -36,4 +36,5 @@ export declare class ConfigValidation {
      */
     static validateListOfGeoviewLayerConfig(listOfGeoviewLayerConfig?: MapConfigLayerEntry[]): void;
 }
+export type ErrorCallbackDelegate = (errorKey: string, params: string[]) => void;
 //# sourceMappingURL=config-validation.d.ts.map

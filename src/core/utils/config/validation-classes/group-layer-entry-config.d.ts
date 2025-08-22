@@ -1,6 +1,5 @@
 import { TypeLayerEntryConfig } from '@/api/config/types/map-schema-types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
-import { TypeJsonObject } from '@/api/config/types/config-types';
 /**
  * Type used to define a layer group.
  */
@@ -19,9 +18,10 @@ export declare class GroupLayerEntryConfig extends ConfigBaseClass {
      */
     constructor(layerConfig: GroupLayerEntryConfig);
     /**
-     * Overrides the serialization of the mother class
-     * @returns {TypeJsonValue} The serialized TypeBaseLayerEntryConfig
+     * Overrides the toJson of the mother class
+     * @returns {unknown} The Json representation of the instance.
+     * @protected
      */
-    onSerialize(): TypeJsonObject;
+    protected onToJson(): unknown;
 }
 //# sourceMappingURL=group-layer-entry-config.d.ts.map

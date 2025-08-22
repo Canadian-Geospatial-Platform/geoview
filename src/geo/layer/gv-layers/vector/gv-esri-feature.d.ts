@@ -16,8 +16,9 @@ export declare class GVEsriFeature extends AbstractGVVector {
      */
     constructor(olSource: VectorSource, layerConfig: EsriFeatureLayerEntryConfig);
     /**
-     * Overrides the get of the layer configuration associated with the layer.
-     * @returns {EsriFeatureLayerEntryConfig} The layer configuration or undefined if not found.
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @override
+     * @returns {EsriFeatureLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
      */
     getLayerConfig(): EsriFeatureLayerEntryConfig;
     /**
@@ -25,12 +26,12 @@ export declare class GVEsriFeature extends AbstractGVVector {
      * @param {string} fieldName - The field name for which we want to get the type.
      * @returns {TypeOutfieldsType} The type of the field.
      */
-    protected getFieldType(fieldName: string): TypeOutfieldsType;
+    protected onGetFieldType(fieldName: string): TypeOutfieldsType;
     /**
      * Overrides the return of the domain of the specified field.
      * @param {string} fieldName - The field name for which we want to get the domain.
      * @returns {null | codedValueType | rangeDomainType} The domain of the field.
      */
-    protected getFieldDomain(fieldName: string): null | codedValueType | rangeDomainType;
+    protected onGetFieldDomain(fieldName: string): null | codedValueType | rangeDomainType;
 }
 //# sourceMappingURL=gv-esri-feature.d.ts.map

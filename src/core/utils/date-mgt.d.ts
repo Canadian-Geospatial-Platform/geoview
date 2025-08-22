@@ -1,8 +1,7 @@
 import { Dayjs } from 'dayjs';
 import 'dayjs/locale/en-ca';
 import 'dayjs/locale/fr-ca';
-import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
-import { TypeJsonObject } from '@/api/config/types/config-types';
+import { TypeDisplayLanguage, TypeMetadataWMSCapabilityLayerDimension } from '@/api/config/types/map-schema-types';
 export type TypeDateFragments = [number[], number[], string[]];
 /**
  * Type used to define the date precision pattern to use.
@@ -122,10 +121,10 @@ export declare abstract class DateMgt {
     static createDimensionFromESRI(timeDimensionESRI: TimeDimensionESRI, singleHandle?: boolean): TimeDimension;
     /**
      * Create the Geoview time dimension from OGC dimension
-     * @param {TypeJsonObject | string} ogcTimeDimension The OGC time dimension object or string
+     * @param {TypeMetadataWMSCapabilityLayerDimension | string} ogcTimeDimension The OGC time dimension object or string
      * @returns {TimeDimension} the Geoview time dimension
      */
-    static createDimensionFromOGC(ogcTimeDimension: TypeJsonObject | string): TimeDimension;
+    static createDimensionFromOGC(ogcTimeDimension: TypeMetadataWMSCapabilityLayerDimension | string): TimeDimension;
     /**
      * Create a range of date object from OGC time dimension following ISO 8601
      * @param {string} ogcTimeDimension OGC time dimension values following

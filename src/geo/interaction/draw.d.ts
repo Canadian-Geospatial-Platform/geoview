@@ -28,10 +28,12 @@ export declare class Draw extends Interaction {
     constructor(options: DrawOptions);
     /**
      * Starts the interaction on the map
+     * @override
      */
     startInteraction(): void;
     /**
      * Stops the interaction on the map
+     * @override
      */
     stopInteraction(): void;
     /**

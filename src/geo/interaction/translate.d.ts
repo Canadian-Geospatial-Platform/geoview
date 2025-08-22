@@ -24,10 +24,12 @@ export declare class Translate extends Interaction {
     constructor(options: TranslateOptions);
     /**
      * Starts the interaction on the map.
+     * @override
      */
     startInteraction(): void;
     /**
      * Stops the interaction on the map.
+     * @override
      */
     stopInteraction(): void;
     /**

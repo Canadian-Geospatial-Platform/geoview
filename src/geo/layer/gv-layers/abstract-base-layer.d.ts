@@ -8,6 +8,8 @@ import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-b
  */
 export declare abstract class AbstractBaseLayer {
     #private;
+    /** Indicates if the layer has become in loaded status at least once already */
+    loadedOnce: boolean;
     /**
      * Constructs a GeoView base layer to manage an OpenLayer layer, including group layers.
      * @param {ConfigBaseClass} layerConfig - The layer configuration.

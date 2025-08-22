@@ -1,4 +1,3 @@
-import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 export declare class Fetch {
     #private;
     /**
@@ -7,26 +6,13 @@ export declare class Fetch {
      * @param {RequestInit?} init - The optional initialization parameters for the fetch.
      * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
      * @param {number?} delayMs - The option delay before performing the actual fetch command (mostly for testing purposes).
-     * @returns {Promise<TypeJsonObject>} The fetched json response.
-     * @throws {ResponseError} If the response is not OK (non-2xx).
-     * @throws {ResponseEmptyError} If the JSON response is empty.
-     * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
-     * @throws {Error} For any other unexpected failures.
-     */
-    static fetchJson(url: string, init?: RequestInit, timeoutMs?: number, delayMs?: number): Promise<TypeJsonObject | TypeJsonArray>;
-    /**
-     * Fetches a url for a json response in the form of an object (not an array).
-     * @param {string} url - The url to fetch.
-     * @param {RequestInit?} init - The optional initialization parameters for the fetch.
-     * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
      * @returns {Promise<T>} The fetched json response.
      * @throws {ResponseError} If the response is not OK (non-2xx).
      * @throws {ResponseEmptyError} If the JSON response is empty.
      * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
-     * @throws {ResponseTypeError} If the response from the service is an array instead of an object.
      * @throws {Error} For any other unexpected failures.
      */
-    static fetchJsonAsObject(url: string, init?: RequestInit, timeoutMs?: number): Promise<TypeJsonObject>;
+    static fetchJson<T>(url: string, init?: RequestInit, timeoutMs?: number, delayMs?: number): Promise<T>;
     /**
      * Fetches a url for a json response in the form of an object (not an array) and validates the response doesn't actually contain an error.
      * This is useful when a service (e.g. ArcGIS Server) returns a 200 with a response error embedded within it.
@@ -41,38 +27,26 @@ export declare class Fetch {
      * @throws {ResponseContentError} If the response actually contains an error within it.
      * @throws {Error} For any other unexpected failures.
      */
-    static fetchEsriJsonAsObject(url: string, init?: RequestInit, timeoutMs?: number): Promise<TypeJsonObject>;
+    static fetchEsriJson<T>(url: string, init?: RequestInit, timeoutMs?: number): Promise<T>;
     /**
      * Fetches a url for a json response in the form of an array (not an object).
      * @param {string} url - The url to fetch.
      * @param {RequestInit?} init - The optional initialization parameters for the fetch.
      * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
-     * @returns {Promise<T>} The fetched json response.
+     * @returns {Promise<T[]>} The fetched json response.
      * @throws {ResponseError} If the response is not OK (non-2xx).
      * @throws {ResponseEmptyError} If the JSON response is empty.
      * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
      * @throws {ResponseTypeError} If the response from the service is an object instead of an array.
      * @throws {Error} For any other unexpected failures.
      */
-    static fetchJsonAsArray(url: string, init?: RequestInit, timeoutMs?: number): Promise<TypeJsonArray>;
-    /**
-     * Fetches a url for a json response and casts the json as 'T'. It doesn't validate the Json structure. It's up to the caller to do so.
-     * @param {string} url - The url to fetch.
-     * @param {RequestInit?} init - The optional initialization parameters for the fetch.
-     * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
-     * @returns {Promise<T>} The fetched json response.
-     * @throws {ResponseError} If the response is not OK (non-2xx).
-     * @throws {ResponseEmptyError} If the JSON response is empty.
-     * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
-     * @throws {Error} For any other unexpected failures.
-     */
-    static fetchJsonAs<T>(url: string, init?: RequestInit, timeoutMs?: number): Promise<T>;
+    static fetchJsonAsArray<T>(url: string, init?: RequestInit, timeoutMs?: number): Promise<T[]>;
     /**
      * Fetches a url for a text response.
      * @param {string} url - The url to fetch.
      * @param {RequestInit?} init - The optional initialization parameters for the fetch.
      * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
-     * @returns {Promise<TypeJsonObject>} The fetched text response.
+     * @returns {Promise<string>} The fetched text response.
      * @throws {ResponseError} If the response is not OK (non-2xx).
      * @throws {ResponseEmptyError} If the JSON response is empty.
      * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
@@ -95,13 +69,13 @@ export declare class Fetch {
      * @param {string} url - The url to fetch.
      * @param {RequestInit?} init - The optional initialization parameters for the fetch.
      * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
-     * @returns {Promise<TypeJsonObject>} The fetched json response.
+     * @returns {Promise<T = Record<string, unknown>>} The fetched json response.
      * @throws {ResponseError} If the response is not OK (non-2xx).
      * @throws {ResponseEmptyError} If the JSON response is empty.
      * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
      * @throws {Error} For any other unexpected failures.
      */
-    static fetchXMLToJson(url: string, init?: RequestInit, timeoutMs?: number): Promise<TypeJsonObject>;
+    static fetchXMLToJson<T = Record<string, unknown>>(url: string, init?: RequestInit, timeoutMs?: number): Promise<T>;
     /**
      * Performs a fetch request with timeout capability
      * @template T - The expected type of the JSON response

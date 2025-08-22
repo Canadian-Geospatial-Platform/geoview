@@ -18,6 +18,12 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      */
     createVectorSource(layerConfig: VectorLayerEntryConfig): VectorSource<Feature>;
     /**
+     * Overrides the way the metadata is fetched.
+     * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
+     * @returns {Promise<T>} A promise with the metadata or undefined when no metadata for the particular layer type.
+     */
+    protected onFetchServiceMetadata<T>(): Promise<T>;
+    /**
      * Overridable function to create a source configuration for the vector layer.
      * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration.
      * @param {SourceOptions} sourceOptions - The source options (default: { strategy: all }).

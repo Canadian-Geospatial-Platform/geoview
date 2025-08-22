@@ -12,7 +12,7 @@ import { TransformEvent, TransformSelectionEvent, TransformDeleteFeatureEvent } 
 export type TransformOptions = InteractionOptions & {
     features?: Collection<Feature>;
     geometryGroupKey?: string;
-    translateFeature?: boolean;
+    translate?: boolean;
     scale?: boolean;
     rotate?: boolean;
     stretch?: boolean;
@@ -36,10 +36,12 @@ export declare class Transform extends Interaction {
     constructor(options: TransformOptions);
     /**
      * Starts the interaction on the map.
+     * @override
      */
     startInteraction(): void;
     /**
      * Stops the interaction on the map.
+     * @override
      */
     stopInteraction(): void;
     /**

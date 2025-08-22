@@ -1,1 +1,1 @@
-{"version":3,"file":"data-table-modal.d.ts","sourceRoot":"","sources":["../../../../../src/core/components/data-table/data-table-modal.tsx"],"names":[],"mappings":"AA8BA;;;;GAIG;AACH,MAAM,CAAC,OAAO,UAAU,cAAc,IAAI,GAAG,CAAC,OAAO,CA0KpD"}
+{"version":3,"file":"data-table-modal.d.ts","sourceRoot":"","sources":["../../../../../src/core/components/data-table/data-table-modal.tsx"],"names":[],"mappings":"AA2BA;;;;GAIG;AACH,MAAM,CAAC,OAAO,UAAU,cAAc,IAAI,GAAG,CAAC,OAAO,CA4KpD"}

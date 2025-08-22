@@ -26,8 +26,6 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
     static readonly DEFAULT_HIT_TOLERANCE: number;
     /** The default loading period before we show a message to the user about a layer taking a long time to render on map */
     static readonly DEFAULT_LOADING_PERIOD: number;
-    /** Indicates if the layer has become in loaded status at least once already */
-    loadedOnce: boolean;
     /** Counts the number of times the loading happened. */
     loadingCounter: number;
     /** Marks the latest loading count for the layer.
@@ -47,23 +45,27 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
      */
     abstract onGetBounds(projection: OLProjection, stops: number): Extent | undefined;
     /**
-     * Overrides the get of the OpenLayers Layer
-     * @returns {Layer} The OpenLayers Layer
+     * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
+     * @override
+     * @returns {Layer} The strongly-typed OpenLayers type.
      */
     getOLLayer(): Layer;
     /**
-     * Gets the layer configuration associated with the layer.
-     * @returns {AbstractBaseLayerEntryConfig} The layer configuration
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @override
+     * @returns {AbstractBaseLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
      */
     getLayerConfig(): AbstractBaseLayerEntryConfig;
     /**
      * Overrides the way the attributions are retrieved.
+     * @override
      * @returns {string[]} The layer attributions
      */
     onGetAttributions(): string[];
     /**
      * Overrides the refresh function to refresh the layer source.
      * @param {OLProjection | undefined} projection - Optional, the projection to refresh to.
+     * @override
      */
     onRefresh(projection: OLProjection | undefined): void;
     /**
@@ -117,7 +119,7 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
     getStyle(): TypeLayerStyleConfig | undefined;
     /**
      * Sets the layer style
-     * @param {TypeStyleConfig | undefined} style - The layer style
+     * @param {TypeStyleConfig} style - The layer style
      */
     setStyle(style: TypeLayerStyleConfig): void;
     /**
@@ -156,6 +158,17 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
      * @returns {Promise<Extent>} The extent of the features, if available
      */
     getExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent>;
+    /**
+     * Gets the field type for the given field name.
+     * @param {string} fieldName  - The field name
+     * @returns {TypeOutfieldsType} The field type.
+     */
+    getFieldType(fieldName: string): TypeOutfieldsType;
+    /**
+     * Gets the layerFilter that is associated to the layer.
+     * @returns {string | undefined} The filter associated to the layer or undefined.
+     */
+    getLayerFilter(): string | undefined;
     /**
      * Returns feature information for the layer specified.
      * @param {OLMap} map - The Map to get feature info from.
@@ -222,14 +235,13 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
      * @param {string} fieldName - The field name for which we want to get the domain.
      * @returns {null | codedValueType | rangeDomainType} The domain of the field.
      */
-    protected getFieldDomain(fieldName: string): null | codedValueType | rangeDomainType;
+    protected onGetFieldDomain(fieldName: string): null | codedValueType | rangeDomainType;
     /**
      * Overridable function to return the type of the specified field from the metadata. If the type can not be found, return 'string'.
      * @param {string} fieldName - The field name for which we want to get the type.
-     *
      * @returns {TypeOutfieldsType} The type of the field.
      */
-    protected getFieldType(fieldName: string): TypeOutfieldsType;
+    protected onGetFieldType(fieldName: string): TypeOutfieldsType;
     /**
      * Queries the legend.
      * This function raises legend querying and queried events. It calls the overridable onFetchLegend() function.
@@ -251,24 +263,19 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
     /**
      * Gets and formats the value of the field with the name passed in parameter. Vector GeoView layers convert dates to milliseconds
      * since the base date. Vector feature dates must be in ISO format.
-     * @param {Feature} features - The features that hold the field values.
+     * @param {Feature} feature - The feature that hold the field values.
      * @param {string} fieldName - The field name.
      * @param {TypeOutfieldsType} fieldType - The field type.
      * @returns {string | number | Date} The formatted value of the field.
      */
     protected getFieldValue(feature: Feature, fieldName: string, fieldType: TypeOutfieldsType): string | number | Date;
     /**
-     * Converts the feature information to an array of TypeFeatureInfoEntry[] | undefined | null.
-     * @param {Feature[]} features - The array of features to convert.
-     * @param {OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig} layerConfig - The layer configuration.
-     * @returns {TypeFeatureInfoEntry[]} The Array of feature information.
+     * Formats a list of features into an array of TypeFeatureInfoEntry, including icons, field values, domains, and metadata.
+     * @param {Feature[]} features - Array of features to format.
+     * @param {OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig} layerConfig - Configuration of the associated layer.
+     * @returns {TypeFeatureInfoEntry[]} An array of TypeFeatureInfoEntry objects.
      */
     protected formatFeatureInfoResult(features: Feature[], layerConfig: OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig): TypeFeatureInfoEntry[];
-    /**
-     * Gets the layerFilter that is associated to the layer.
-     * @returns {string | undefined} The filter associated to the layer or undefined.
-     */
-    getLayerFilter(): string | undefined;
     /**
      * Emits a layer-specific message event with localization support
      * @protected

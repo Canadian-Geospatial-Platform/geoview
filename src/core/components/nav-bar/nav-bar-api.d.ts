@@ -1,4 +1,4 @@
-import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
+import { TypeButtonGroupConfig, TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import { EventDelegateBase } from '@/api/events/event-helper';
 /**
@@ -11,6 +11,7 @@ export declare class NavBarApi {
     #private;
     mapId: string;
     buttons: Record<string, Record<string, TypeButtonPanel>>;
+    groupConfigs: Record<string, TypeButtonGroupConfig>;
     /**
      * Instantiates a NavbarApi class.
      *
@@ -67,6 +68,20 @@ export declare class NavBarApi {
      * @param {string} buttonPanelId - The id of the panel or button to remove
      */
     removeNavbarButtonPanel(buttonPanelId: string): void;
+    /**
+     * Sets configuration for a button group
+     *
+     * @param {string} groupName - The group name
+     * @param {TypeButtonGroupConfig} config - The group configuration
+     */
+    setGroupConfig(groupName: string, config: Partial<TypeButtonGroupConfig>): void;
+    /**
+     * Gets configuration for a button group
+     *
+     * @param {string} groupName - The group name
+     * @returns {TypeButtonGroupConfig} The group configuration
+     */
+    getGroupConfig(groupName: string): TypeButtonGroupConfig;
 }
 /**
  * Define an event for the delegate

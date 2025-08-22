@@ -17,23 +17,27 @@ export declare class GVGroupLayer extends AbstractBaseLayer {
      */
     constructor(olLayerGroup: LayerGroup, layerConfig: GroupLayerEntryConfig);
     /**
-     * Gets the layer configuration associated with the layer.
-     * @returns {GroupLayerEntryConfig} The layer configuration.
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @override
+     * @returns {GroupLayerEntryConfig} The strongly-typed layer configuration specific to this group layer.
      */
     getLayerConfig(): GroupLayerEntryConfig;
     /**
-     * Overrides the get of the OpenLayers Layer.
-     * @returns {Layer} The OpenLayers Layer.
+     * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
+     * @override
+     * @returns {LayerGroup} The strongly-typed OpenLayers type.
      */
     getOLLayer(): LayerGroup;
     /**
      * Overrides the way the attributions are retrieved.
+     * @override
      * @returns {string[]} The layer attributions.
      */
     onGetAttributions(): string[];
     /**
      * Overrides the refresh function to refresh each layer in the group.
      * @param {OLProjection | undefined} projection - Optional, the projection to refresh to.
+     * @override
      */
     onRefresh(projection: OLProjection | undefined): void;
     /**

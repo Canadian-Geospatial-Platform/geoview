@@ -1,3 +1,4 @@
+import { MapBrowserEvent } from 'ol';
 import { Pointer as OLPointer } from 'ol/interaction';
 import Collection from 'ol/Collection';
 import Feature from 'ol/Feature';
@@ -6,7 +7,6 @@ import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
-import { MapBrowserEvent } from 'ol';
 import { TransformEvent, TransformSelectionEvent, TransformDeleteFeatureEvent } from './transform-events';
 import { MapViewer } from '@/app';
 /**
@@ -37,7 +37,7 @@ export declare enum HandleType {
 export interface TransformBaseOptions {
     features?: Collection<Feature>;
     source?: VectorSource;
-    translateFeature?: boolean;
+    translate?: boolean;
     scale?: boolean;
     rotate?: boolean;
     stretch?: boolean;
@@ -144,6 +144,7 @@ export declare class OLTransform extends OLPointer {
     contextMenuHandler: (e: MouseEvent) => void;
     /**
      * Cleans up the interaction.
+     * @override
      */
     dispose(): void;
     /**
@@ -232,19 +233,28 @@ export declare class OLTransform extends OLPointer {
      */
     handleStretch(coordinate: Coordinate, handleType: HandleType): void;
     /**
+     * Handle all events, including double-click
+     * @param {MapBrowserEvent} event - The map browser event.
+     * @returns {boolean} Whether the event was handled.
+     */
+    handleEvent(event: MapBrowserEvent<PointerEvent>): boolean;
+    /**
      * Handle Click Events
      * @param {MapBrowserEvent} event - The map browser event.
+     * @override
      * @returns {boolean} Whether the event was handled.
      */
     handleDownEvent(event: MapBrowserEvent<PointerEvent>): boolean;
     /**
      * Handle pointer drag events.
      * @param {MapBrowserEvent} event - The map browser event.
+     * @override
      */
     handleDragEvent(event: MapBrowserEvent<PointerEvent>): void;
     /**
      * Handle pointer up events.
      * @param {MapBrowserEvent} event - The map browser event.
+     * @override
      * @returns {boolean} Whether the event was handled.
      */
     handleUpEvent(event: MapBrowserEvent<PointerEvent>): boolean;
@@ -252,6 +262,7 @@ export declare class OLTransform extends OLPointer {
      * Handle pointer move events. Not to be confused with moving handles.
      * This overrides the move event from OL Pointer
      * @param {MapBrowserEvent} event - The map browser event.
+     * @override
      */
     handleMoveEvent(event: MapBrowserEvent<PointerEvent>): void;
     /**

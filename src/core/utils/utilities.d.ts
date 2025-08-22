@@ -1,6 +1,5 @@
 import { Root } from 'react-dom/client';
 import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
-import { TypeJsonObject } from '@/api/config/types/config-types';
 import { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
 /**
  * Take string like "My string is __param__" and replace parameters (__param__) from array of values
@@ -22,11 +21,10 @@ export declare function getLocalizedMessage(language: TypeDisplayLanguage, messa
 /**
  * Deep merge objects togheter. Latest object will overwrite value on previous one
  * if property exist.
- *
- * @param {TypeJsonObject} objects - The objects to deep merge
- * @returns {TypeJsonObject} The merged object
+ * @param {unknown[]} objects - The objects to deep merge.
+ * @returns {unknown} The merged object
  */
-export declare function deepMergeObjects(...objects: TypeJsonObject[]): TypeJsonObject;
+export declare function deepMergeObjects(...objects: unknown[]): unknown;
 /**
  * Check if an object is empty
  * @param {object} obj - The object to test
@@ -93,6 +91,7 @@ export declare function addUiComponent(targetDivId: string, component: React.Rea
  * @returns {string} Sanitized HTML or empty string if all dirty
  */
 export declare function sanitizeHtmlContent(contentHtml: string): string;
+export declare function safeStringify(obj: any, space?: number): string;
 /**
  * Sets up a MutationObserver to monitor when a specific DOM element (e.g., a div container)
  * is removed from the document. When the element is removed, it triggers a cleanup callback
@@ -125,11 +124,11 @@ export declare function parseJSONConfig(configObjStr: string): unknown;
 export declare function exportPNG(dataUrl: string, name: string): void;
 /**
  * Find an object property by regex values. The find is case insensitive.
- * @param {TypeJsonObject} objectItem - The object item
- * @param {RegExp | RegExp[]} regex - The regex value or the regex sequence to search
- * @returns {TypeJsonObject | undefined} The object if it exist or undefined
+ * @param {unknown | undefined} objectItem - The object to search in.
+ * @param {RegExp | RegExp[]} patterns - A single RegExp or an array of RegExp patterns to match in sequence.
+ * @returns {T = Record<string, unknown> | undefined} The value found at the end of the matching path, or undefined if not found.
  */
-export declare const findPropertyNameByRegex: (objectItem: TypeJsonObject, regex: RegExp | RegExp[]) => TypeJsonObject | undefined;
+export declare function findPropertyByRegexPath<T = Record<string, unknown>>(objectItem: unknown | undefined, patterns: RegExp | RegExp[]): T | undefined;
 /**
  * Check string to see if it is an image
  *

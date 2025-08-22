@@ -1,4 +1,4 @@
-import { TypeSourceImageEsriInitialConfig } from '@/api/config/types/map-schema-types';
+import { TypeLayerMetadataEsri, TypeSourceImageEsriInitialConfig } from '@/api/config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 /**
  * Type used to define a GeoView image layer to display on the map.
@@ -12,12 +12,16 @@ export declare class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryCon
     layerFilter?: string;
     /** Source settings to apply to the GeoView image layer source at creation time. */
     source: TypeSourceImageEsriInitialConfig;
-    /** Max number of records for query - NOT USE FOR IMAGE SERVER */
-    maxRecordCount?: number;
     /**
      * The class constructor.
      * @param {EsriImageLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
      */
     constructor(layerConfig: EsriImageLayerEntryConfig);
+    /**
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @override
+     * @returns {TypeLayerMetadataEsri | undefined} The strongly-typed layer metadata specific to this layer entry config.
+     */
+    getLayerMetadata(): TypeLayerMetadataEsri | undefined;
 }
 //# sourceMappingURL=esri-image-layer-entry-config.d.ts.map
