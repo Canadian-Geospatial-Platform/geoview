@@ -252,6 +252,15 @@ export function StylePanel(): JSX.Element {
     return () => observer.disconnect();
   }, [displayLanguage]);
 
+  // Preload all Google Fonts
+  useEffect(() => {
+    FONT_OPTIONS.forEach((font) => {
+      if (font.isGoogleFont) {
+        loadGoogleFont(font.name);
+      }
+    });
+  }, []);
+
   /**
    * Render style controls in navbar panel
    * @returns ReactNode
@@ -276,7 +285,12 @@ export function StylePanel(): JSX.Element {
               select
               value={style.textFont || DEFAULT_FONT}
               onChange={handleFontChange}
-              sx={sxClasses.input}
+              sx={{
+                ...sxClasses.input,
+                '& .MuiNativeSelect-select': {
+                  fontFamily: style.textFont || DEFAULT_FONT,
+                },
+              }}
               slotProps={{
                 select: {
                   native: true,
@@ -284,7 +298,7 @@ export function StylePanel(): JSX.Element {
               }}
             >
               {FONT_OPTIONS.map((font) => (
-                <option key={font.value} value={font.value}>
+                <option key={font.value} value={font.value} style={{ fontFamily: font.value }}>
                   {font.name}
                 </option>
               ))}
