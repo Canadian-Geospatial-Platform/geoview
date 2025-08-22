@@ -577,12 +577,13 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       this.stopEditing(mapId);
     }
 
-    // Clear the text rotation for new features
-    state.actions.setTextRotation(0);
-
     // Get current state values if not provided
     const currentGeomType = geomType || state.actions.getActiveGeom();
     const currentStyle = styleInput || state.actions.getStyle();
+
+    // Make new text horizontal, regardless of what the state rotation was
+    // GV If a style input is added for the rotation, then this can be removed
+    currentStyle.textRotation = 0;
 
     // If drawing already, stop and restart as it's likely a style change
     if (this.getDrawerState(mapId)?.drawInstance) {
