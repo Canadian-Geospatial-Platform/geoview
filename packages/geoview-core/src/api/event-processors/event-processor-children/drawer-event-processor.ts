@@ -49,6 +49,7 @@ interface TypeGeoJSONStyleProps {
   textHaloWidth?: number;
   textBold?: boolean;
   textItalic?: boolean;
+  textRotation?: number;
 }
 
 const DEFAULT_ICON_SOURCE =
@@ -507,6 +508,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       feature.set('textHaloWidth', style.textHaloWidth);
       feature.set('textBold', style.textBold);
       feature.set('textItalic', style.textItalic);
+      feature.set('textRotation', style.textRotation);
     }
   }
 
@@ -529,6 +531,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       style.textHaloWidth = feature.get('textHaloWidth');
       style.textBold = feature.get('textBold');
       style.textItalic = feature.get('textItalic');
+      style.textRotation = feature.get('textRotation');
     }
 
     // Extract stroke/fill properties from the feature's style
@@ -568,9 +571,19 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       viewer.unregisterMapPointerHandlers(viewer.map);
     }
 
+    // If editing already, stop it
+    // GV Moved the stop editing up so the rotation is set properly for any active text drawing
+    if (state.actions.getIsEditing()) {
+      this.stopEditing(mapId);
+    }
+
     // Get current state values if not provided
     const currentGeomType = geomType || state.actions.getActiveGeom();
     const currentStyle = styleInput || state.actions.getStyle();
+
+    // Make new text horizontal, regardless of what the state rotation was
+    // GV If a style input is added for the rotation, then this can be removed
+    currentStyle.textRotation = 0;
 
     // If drawing already, stop and restart as it's likely a style change
     if (this.getDrawerState(mapId)?.drawInstance) {
@@ -604,11 +617,6 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     state.actions.setDrawInstance(draw);
     if (geomType) {
       state.actions.setActiveGeom(geomType);
-    }
-
-    // If editing already, stop it
-    if (state.actions.getIsEditing()) {
-      this.stopEditing(mapId);
     }
   }
 
@@ -651,6 +659,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
             fill: new Fill({ color: currentStyle.textColor }),
             stroke: new Stroke({ color: currentStyle.textHaloColor, width: currentStyle.textHaloWidth }),
             font: `${currentStyle.textItalic ? 'italic ' : ''}${currentStyle.textBold ? 'bold ' : ''}${currentStyle.textSize}px ${currentStyle.textFont}`,
+            rotation: 0,
           }),
         });
       } else {
@@ -797,6 +806,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
         const finalSize = feature.get('textSize') as number;
         const isBold = feature.get('textBold') as boolean;
         const isItalic = feature.get('textItalic') as boolean;
+        const rotation = feature.get('textRotation') as number;
 
         const state = this.getDrawerState(mapId);
         if (!state) return;
@@ -804,6 +814,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
         state.actions.setTextSize(finalSize);
         state.actions.setTextBold(isBold);
         state.actions.setTextItalic(isItalic);
+        state.actions.setTextRotation(rotation);
       }
 
       const geom = feature.getGeometry();
@@ -1018,6 +1029,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
             fill: new Fill({ color: newStyle.textColor }),
             stroke: new Stroke({ color: newStyle.textHaloColor, width: newStyle.textHaloWidth }),
             font: `${newStyle.textItalic ? 'italic ' : ''}${newStyle.textBold ? 'bold ' : ''}${newStyle.textSize}px ${newStyle.textFont}`,
+            rotation: newStyle.textRotation,
           }),
         });
       } else {
@@ -1175,6 +1187,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
                   textHaloWidth: feature.get('textHaloWidth'),
                   textBold: feature.get('textBold'),
                   textItalic: feature.get('textItalic'),
+                  textRotation: feature.get('textRotation'),
                 };
               } else {
                 // point style icon
@@ -1262,6 +1275,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
                     width: styleProps.textHaloWidth,
                   }),
                   font: `${styleProps.textItalic ? 'italic ' : ''}${styleProps.textBold ? 'bold ' : ''}${styleProps.textSize}px ${styleProps.textFont}`,
+                  rotation: styleProps.textRotation,
                 }),
               });
             } else {

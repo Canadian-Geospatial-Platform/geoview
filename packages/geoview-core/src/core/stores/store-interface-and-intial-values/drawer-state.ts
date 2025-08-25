@@ -27,6 +27,7 @@ export type StyleProps = {
   textHaloWidth?: number;
   textBold?: boolean;
   textItalic?: boolean;
+  textRotation?: number;
 };
 
 export type TypeDrawerConfig = {
@@ -86,6 +87,7 @@ export interface IDrawerState {
     setTextHaloWidth: (textHaloWidth: number) => void;
     setTextBold: (textBold: boolean) => void;
     setTextItalic: (textItalic: boolean) => void;
+    setTextRotation: (textRotation: number) => void;
     setDrawInstance(drawInstance: Draw): void;
     removeDrawInstance(): void;
     setTransformInstance(transformInstance: Transform): void;
@@ -122,6 +124,7 @@ export interface IDrawerState {
     setTextHaloWidth: (textHaloWidth: number) => void;
     setTextBold: (textBold: boolean) => void;
     setTextItalic: (textItalic: boolean) => void;
+    setTextRotation: (textRotation: number) => void;
     setDrawInstance: (drawInstance: Draw) => void;
     removeDrawInstance: () => void;
     setIsEditing: (isEditing: boolean) => void;
@@ -160,6 +163,9 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
       textColor: '#000000',
       textHaloColor: 'rgba(255,255,255,0.7)',
       textHaloWidth: 3,
+      textBold: false,
+      textItalic: false,
+      textRotation: 0,
     },
     drawInstance: undefined,
     isEditing: false,
@@ -311,6 +317,10 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         // Redirect to setter
         get().drawerState.setterActions.setTextItalic(textItalic);
       },
+      setTextRotation: (textRotation: number) => {
+        // Redirect to setter
+        get().drawerState.setterActions.setTextRotation(textRotation);
+      },
       setDrawInstance: (drawInstance: Draw) => {
         // Redirect to setter
         get().drawerState.setterActions.setDrawInstance(drawInstance);
@@ -364,6 +374,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         DrawerEventProcessor.uploadDrawings(get().mapId, file);
       },
       updateFeatureStyle() {
+        // Refresh the draw instance with the new style
         if (get().drawerState.drawInstance !== undefined) {
           DrawerEventProcessor.startDrawing(get().mapId);
         }
@@ -562,6 +573,19 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
             style: {
               ...get().drawerState.style,
               textItalic,
+            },
+          },
+        });
+        get().drawerState.actions.updateFeatureStyle();
+      },
+
+      setTextRotation: (textRotation: number) => {
+        set({
+          drawerState: {
+            ...get().drawerState,
+            style: {
+              ...get().drawerState.style,
+              textRotation,
             },
           },
         });
