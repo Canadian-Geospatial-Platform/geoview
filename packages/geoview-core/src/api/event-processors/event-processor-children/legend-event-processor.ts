@@ -302,6 +302,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           }
         });
       }
+
       return iconDetails;
     }
     return undefined;

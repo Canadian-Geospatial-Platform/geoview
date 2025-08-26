@@ -291,7 +291,7 @@ export class GeoJSON extends AbstractGeoViewVector {
         schemaTag: CONST_LAYER_TYPES.GEOJSON,
         entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
         layerId: `${layerEntry.id}`,
-        layerName: `${layerEntry.layerName || layerEntry.id}`,
+        layerName: layerEntry.layerName || `${layerEntry.id}`,
         source: {
           format: 'GeoJSON',
           dataAccessPath: `${metadataAccessPath}/${layerEntry.id}`,
