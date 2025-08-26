@@ -1,6 +1,5 @@
 import { AbstractWorker } from './abstract-worker';
 import { QueryParams } from './fetch-esri-worker-script';
-import { TypeJsonObject } from '@/api/config/types/config-types';
 /**
  * How to create a new worker:
  *
@@ -23,9 +22,9 @@ export interface FetchEsriWorkerType {
     /**
      * Processes an ESRI query JSON export.
      * @param {QueryParams} queryParams - The query parameters for the fetch.
-     * @returns {TypeJsonObject} A promise that resolves to the response fetch as JSON string.
+     * @returns {Promise<unknown>} A promise that resolves to the response fetch as JSON string.
      */
-    process: (queryParams: QueryParams) => Promise<TypeJsonObject>;
+    process: (queryParams: QueryParams) => Promise<unknown>;
 }
 /**
  * Class representing a fetch ESRI worker.
@@ -47,6 +46,6 @@ export declare class FetchEsriWorker extends AbstractWorker<FetchEsriWorkerType>
      * @param {QueryParams} queryParams - The query parameters for the fetch.
      * @returns A promise that resolves to the processed JSON string.
      */
-    process(queryParams: QueryParams): Promise<TypeJsonObject>;
+    process(queryParams: QueryParams): Promise<unknown>;
 }
 //# sourceMappingURL=fetch-esri-worker.d.ts.map

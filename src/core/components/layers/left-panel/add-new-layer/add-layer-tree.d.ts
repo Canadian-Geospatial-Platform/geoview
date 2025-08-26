@@ -1,6 +1,6 @@
-import { GroupLayerEntryConfig } from '@/api/config/types/map-schema-types';
+import { TypeGeoviewLayerConfig } from '@/api/config/types/map-schema-types';
 export interface AddLayerTreeProps {
-    layersData: GroupLayerEntryConfig[];
+    layerTree: TypeGeoviewLayerConfig;
     onSelectedItemsChange(items: string[]): void;
 }
 export declare function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null;

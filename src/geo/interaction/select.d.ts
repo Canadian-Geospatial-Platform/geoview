@@ -28,10 +28,12 @@ export declare class Select extends Interaction {
     constructor(options: SelectOptions);
     /**
      * Starts the interaction on the map.
+     * @override
      */
     startInteraction(): void;
     /**
      * Stops the interaction on the map.
+     * @override
      */
     stopInteraction(): void;
     /**

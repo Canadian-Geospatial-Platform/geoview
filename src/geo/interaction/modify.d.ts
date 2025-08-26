@@ -30,10 +30,12 @@ export declare class Modify extends Interaction {
     constructor(options: ModifyOptions);
     /**
      * Starts the interaction on the map.
+     * @override
      */
     startInteraction(): void;
     /**
      * Stops the interaction on the map.
+     * @override
      */
     stopInteraction(): void;
     /**

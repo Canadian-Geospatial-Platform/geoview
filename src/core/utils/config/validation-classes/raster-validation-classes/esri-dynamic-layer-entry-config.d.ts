@@ -1,4 +1,4 @@
-import { TypeSourceEsriDynamicInitialConfig } from '@/api/config/types/map-schema-types';
+import { TypeLayerMetadataEsri, TypeMetadataEsriDynamic, TypeSourceEsriDynamicInitialConfig } from '@/api/config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 /**
  * Type used to define a GeoView image layer to display on the map.
@@ -19,5 +19,17 @@ export declare class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryC
      * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
      */
     constructor(layerConfig: EsriDynamicLayerEntryConfig);
+    /**
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @override
+     * @returns {TypeMetadataEsriDynamic | undefined} The strongly-typed layer configuration specific to this layer entry config.
+     */
+    getServiceMetadata(): TypeMetadataEsriDynamic | undefined;
+    /**
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @override
+     * @returns {TypeLayerMetadataEsri | undefined} The strongly-typed layer metadata specific to this layer entry config.
+     */
+    getLayerMetadata(): TypeLayerMetadataEsri | undefined;
 }
 //# sourceMappingURL=esri-dynamic-layer-entry-config.d.ts.map

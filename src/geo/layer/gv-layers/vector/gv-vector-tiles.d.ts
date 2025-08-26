@@ -16,8 +16,9 @@ export declare class GVVectorTiles extends AbstractGVVectorTile {
      */
     constructor(olSource: VectorTile, layerConfig: VectorTilesLayerEntryConfig);
     /**
-     * Overrides the get of the layer configuration associated with the layer.
-     * @returns {VectorTilesLayerEntryConfig} The layer configuration or undefined if not found.
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @override
+     * @returns {VectorTilesLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
      */
     getLayerConfig(): VectorTilesLayerEntryConfig;
     /**
@@ -25,7 +26,7 @@ export declare class GVVectorTiles extends AbstractGVVectorTile {
      * @param {string} fieldName - The field name for which we want to get the type.
      * @returns {TypeOutfieldsType} The type of the field.
      */
-    protected getFieldType(fieldName: string): TypeOutfieldsType;
+    protected onGetFieldType(fieldName: string): TypeOutfieldsType;
     /**
      * Used to change the style of the vector tile layer.
      * @param styleUrl The style URL to apply to the layer

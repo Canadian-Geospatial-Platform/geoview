@@ -1,71 +1,50 @@
-import { TypeJsonObject } from '@/api/config/types/config-types';
+import { TimeDimensionESRI } from '@/core/utils/date-mgt';
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
-import { TypeFeatureInfoEntryPartial, TypeLayerEntryConfig, TypeStyleGeometry, codedValueType, rangeDomainType, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
+import { TypeFeatureInfoEntryPartial, TypeStyleGeometry, codedValueType, rangeDomainType, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
+import { EsriRelatedRecordsJsonResponseRelatedRecord } from '@/geo/layer/gv-layers/utils';
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-/**
- * Fetches the Esri metadata and sets it for the given layer.
- * @param {EsriDynamic | EsriFeature} layer The ESRI layer instance pointer.
- * @returns {Promise<void>} A promise that the execution is completed.
- */
-export declare function commonFetchAndSetServiceMetadata(layer: EsriDynamic | EsriFeature): Promise<void>;
+import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 /**
  * This method validates recursively the configuration of the layer entries to ensure that it is a feature layer identified
  * with a numeric layerId and creates a group entry when a layer is a group.
  *
  * @param {EsriDynamic | EsriFeature} layer The ESRI layer instance pointer.
- * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
+ * @param {ConfigBaseClass[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
  */
-export declare function commonValidateListOfLayerEntryConfig(layer: EsriDynamic | EsriFeature, listOfLayerEntryConfig: TypeLayerEntryConfig[]): void;
+export declare function commonValidateListOfLayerEntryConfig(layer: EsriDynamic | EsriFeature, listOfLayerEntryConfig: ConfigBaseClass[]): void;
 /**
  * Extract the domain of the specified field from the metadata. If the type can not be found, return 'string'.
- *
- * @param {EsriDynamic | EsriFeature} layer The ESRI layer instance pointer.
- * @param {string} fieldName field name for which we want to get the domain.
- * @param {AbstractBaseLayerEntryConfig} layerConfig layer configuration.
- *
+ * @param {EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig - Layer configuration.
+ * @param {string} fieldName - Field name for which we want to get the domain.
  * @returns {TypeOutfieldsType} The type of the field.
  */
-export declare function commonGetFieldType(layerConfig: AbstractBaseLayerEntryConfig, fieldName: string): TypeOutfieldsType;
+export declare function commonGetFieldType(layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig, fieldName: string): TypeOutfieldsType;
 /**
  * Return the type of the specified field.
- *
- * @param {EsriDynamic | EsriFeature} layer The ESRI layer instance pointer.
+ * @param {EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig layer configuration.
  * @param {string} fieldName field name for which we want to get the type.
- * @param {AbstractBaseLayerEntryConfig} layerConfig layer configuration.
- *
  * @returns {null | codedValueType | rangeDomainType} The domain of the field.
  */
-export declare function commonGetFieldDomain(layerConfig: AbstractBaseLayerEntryConfig, fieldName: string): null | codedValueType | rangeDomainType;
+export declare function commonGetFieldDomain(layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig, fieldName: string): null | codedValueType | rangeDomainType;
 /**
  * This method will create a Geoview temporal dimension if it exist in the service metadata
- *
- * @param {EsriDynamic | EsriFeature} layer The ESRI layer instance pointer.
- * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
- * @param {EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig The layer entry to configure
- * @param {boolean} singleHandle True for ESRI Image
+ * @param {EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig - The layer entry to configure
+ * @param {TimeDimensionESRI} esriTimeDimension - The ESRI time dimension object
+ * @param {boolean} singleHandle - True for ESRI Image
  */
-export declare function commonProcessTemporalDimension(layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig, esriTimeDimension: TypeJsonObject, singleHandle?: boolean): void;
+export declare function commonProcessTemporalDimension(layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig, esriTimeDimension: TimeDimensionESRI, singleHandle?: boolean): void;
 /**
  * This method verifies if the layer is queryable and sets the outfields and aliasFields of the source feature info.
- *
- * @param {EsriDynamic | EsriFeature | EsriImage} layer The ESRI layer instance pointer.
- * @param {EsriFeatureLayerEntryConfig |
- *         EsriDynamicLayerEntryConfig |
- *         EsriImageLayerEntryConfig} layerConfig The layer entry to configure.
+ * @param {EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig - The layer entry to configure.
  */
 export declare function commonProcessFeatureInfoConfig(layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig): void;
 /**
  * This method set the initial settings based on the service metadata. Priority is given to the layer configuration.
- *
- * @param {EsriDynamic | EsriFeature | EsriImage} layer The ESRI layer instance pointer.
- * @param {EsriFeatureLayerEntryConfig |
- *         EsriDynamicLayerEntryConfig |
- *         EsriImageLayerEntryConfig} layerConfig The layer entry to configure.
+ * @param {EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig - The layer entry to configure.
  */
 export declare function commonProcessInitialSettings(layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig): void;
 /**
@@ -82,12 +61,10 @@ export declare function commonProcessLayerMetadata<T extends EsriDynamicLayerEnt
  * Transforms the query results of an Esri service response - when not querying on the Layers themselves (giving a 'reduced' FeatureInfoEntry).
  * The transformation reads the Esri formatted information and return a list of `TypeFeatureInfoEntryPartial` records.
  * In a similar fashion and response object as the "Query Feature Infos" functionalities done via the Layers.
- *
- * @param results TypeJsonObject The Json Object representing the data from Esri.
- *
+ * @param {EsriRelatedRecordsJsonResponseRelatedRecord[]} records - The Json Object representing the data from Esri.
  * @returns TypeFeatureInfoEntryPartial[] an array of relared records of type TypeFeatureInfoEntryPartial
  */
-export declare function parseFeatureInfoEntries(records: TypeJsonObject[]): TypeFeatureInfoEntryPartial[];
+export declare function parseFeatureInfoEntries(records: EsriRelatedRecordsJsonResponseRelatedRecord[]): TypeFeatureInfoEntryPartial[];
 /**
  * Asynchronously queries an Esri feature layer given the url and returns an array of `TypeFeatureInfoEntryPartial` records.
  * @param {string} url An Esri url indicating a feature layer to query

@@ -26,18 +26,21 @@ export declare class GVWMS extends AbstractGVRaster {
      */
     constructor(olSource: ImageWMS, layerConfig: OgcWmsLayerEntryConfig);
     /**
-     * Overrides the get of the OpenLayers Layer
-     * @returns {ImageLayer<ImageWMS>} The OpenLayers Layer
+     * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
+     * @override
+     * @returns {ImageLayer<ImageWMS>} The strongly-typed OpenLayers type.
      */
     getOLLayer(): ImageLayer<ImageWMS>;
     /**
-     * Overrides the get of the OpenLayers Layer Source
-     * @returns {ImageWMS} The OpenLayers Layer Source
+     * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
+     * @override
+     * @returns {ImageWMS} The ImageWMS source instance associated with this layer.
      */
     getOLSource(): ImageWMS;
     /**
-     * Overrides the get of the layer configuration associated with the layer.
-     * @returns {OgcWmsLayerEntryConfig} The layer configuration or undefined if not found.
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @override
+     * @returns {OgcWmsLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
      */
     getLayerConfig(): OgcWmsLayerEntryConfig;
     /**
@@ -60,6 +63,7 @@ export declare class GVWMS extends AbstractGVRaster {
     protected getFeatureInfoAtLonLat(map: OLMap, lonlat: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overrides the fetching of the legend for a WMS layer.
+     * @override
      * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
      */
     onFetchLegend(): Promise<TypeWmsLegend | null>;
@@ -67,6 +71,7 @@ export declare class GVWMS extends AbstractGVRaster {
      * Overrides the way to get the bounds for this layer type.
      * @param {OLProjection} projection - The projection to get the bounds into.
      * @param {number} stops - The number of stops to use to generate the extent.
+     * @override
      * @returns {Extent | undefined} The layer bounding box.
      */
     onGetBounds(projection: OLProjection, stops: number): Extent | undefined;

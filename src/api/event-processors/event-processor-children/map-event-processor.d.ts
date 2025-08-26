@@ -4,6 +4,7 @@ import { Extent } from 'ol/extent';
 import { FitOptions } from 'ol/View';
 import { Coordinate } from 'ol/coordinate';
 import { Size } from 'ol/size';
+import { Pixel } from 'ol/pixel';
 import { TypeBasemapOptions, TypeInteraction, TypeValidMapProjectionCodes, TypePointMarker, TypeHighlightColors, TypeMapViewSettings, TypeFeatureInfoEntry, TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeMapFeaturesInstance } from '@/api/config/types/map-schema-types';
 import { LayerApi } from '@/geo/layer/layer';
 import { MapViewer, TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer';
@@ -267,7 +268,7 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      * @param {string} mapId - Id of map to set layer Z indices
      */
     static setLayerZIndices: (mapId: string) => void;
-    static getPixelFromCoordinate: (mapId: string, coord: Coordinate) => [number, number];
+    static getPixelFromCoordinate: (mapId: string, coord: Coordinate) => Pixel;
     static setClickMarkerOnPosition: (mapId: string, position: number[]) => void;
     /**
      * Get all active filters for layer.

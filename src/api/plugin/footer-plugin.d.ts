@@ -8,6 +8,7 @@ export declare abstract class FooterPlugin extends AbstractPlugin {
     footerProps?: TypeTabs;
     /**
      * Overrides the get config
+     * @override
      * @returns {unknown} The config
      */
     getConfig(): unknown;

@@ -1,8 +1,7 @@
 import { Coordinate } from 'ol/coordinate';
-import { TypeJsonObject } from '@/api/config/types/config-types';
 export type TypeClickMarker = {
     lonlat: Coordinate;
-    symbology?: TypeJsonObject;
+    symbology?: unknown;
 };
 /**
  * Create a react element to display a marker ( at the click location) when a user clicks on

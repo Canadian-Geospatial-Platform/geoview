@@ -26,7 +26,6 @@ import { Transform, TransformOptions } from '@/geo/interaction/transform/transfo
 import { EventDelegateBase } from '@/api/events/event-helper';
 import { ModalApi } from '@/ui';
 import { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
-import { TypeJsonObject } from '@/api/config/types/config-types';
 import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { Notifications } from '@/core/utils/notifications';
 import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
@@ -95,9 +94,9 @@ export declare class MapViewer {
      * Retrieves the configuration object for a specific core plugin from the map's features configuration.
      *
      * @param {string} pluginId - The ID of the core plugin to look up.
-     * @returns {TypeJsonObject | undefined} The configuration object for the specified plugin, or `undefined` if not found.
+     * @returns {unknown | undefined} The configuration object for the specified plugin, or `undefined` if not found.
      */
-    getCorePackageConfig(pluginId: string): TypeJsonObject | undefined;
+    getCorePackageConfig(pluginId: string): unknown | undefined;
     /**
      * Returns the current display language
      * @returns {TypeDisplayLanguage} The display language
@@ -252,9 +251,9 @@ export declare class MapViewer {
      * access from the utilies function getLocalizesMessage to reuse in ui from outside the core viewer.
      *
      * @param {TypeDisplayLanguage} language - The language to add the ressoruce for (en, fr)
-     * @param {TypeJsonObject} translations - The translation object to add
+     * @param {Record<string, unknown>} translations - The translation object to add
      */
-    addLocalizeRessourceBundle(language: TypeDisplayLanguage, translations: TypeJsonObject): void;
+    addLocalizeRessourceBundle(language: TypeDisplayLanguage, translations: Record<string, unknown>): void;
     /**
      * Emits a map single click event.
      * @param {MapSingleClickEvent} clickCoordinates - The clicked coordinates to emit.
@@ -614,6 +613,18 @@ export type TypeMapMouseInfo = {
     pixel: Coordinate;
     projected: Coordinate;
     dragging: boolean;
+};
+/**
+ * Type used when fetching geometry json
+ */
+export type GeometryJsonResponse = {
+    geometry: GeometryJsonResponseGeometry;
+};
+/**
+ * Type used when fetching geometry json with coordinates property
+ */
+export type GeometryJsonResponseGeometry = {
+    coordinates: number[] | Coordinate[][];
 };
 /**
  * Define a delegate for the event handler function signature

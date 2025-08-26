@@ -1,43 +1,38 @@
-import { TypeBaseVectorSourceInitialConfig, TypeSourceImageEsriInitialConfig, TypeSourceImageInitialConfig, TypeSourceImageStaticInitialConfig, TypeSourceWmsInitialConfig, TypeSourceTileInitialConfig, TypeLayerStyleConfig, TypeStyleGeometry, TypeLayerStyleSettings, TypeVectorSourceInitialConfig, TypeVectorTileSourceInitialConfig, TypeGeojsonSourceInitialConfig } from '@/api/config/types/map-schema-types';
+import { TypeLayerStyleConfig, TypeStyleGeometry, TypeLayerStyleSettings, TypeBaseSourceInitialConfig } from '@/api/config/types/map-schema-types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
-import { TypeJsonObject } from '@/api/config/types/config-types';
+import { TimeDimension } from '@/core/utils/date-mgt';
 import { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
-import { TimeDimension } from '@/app';
 /**
  * Base type used to define a GeoView layer to display on the map.
  */
 export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
     #private;
-    /** The calculated filter equation */
-    filterEquation?: FilterNodeType[];
-    /** Indicates if filter is on/off */
-    legendFilterIsOff: boolean;
-    /** Source settings to apply to the GeoView layer source at creation time. */
-    source?: TypeBaseVectorSourceInitialConfig | TypeSourceTileInitialConfig | TypeVectorSourceInitialConfig | TypeGeojsonSourceInitialConfig | TypeVectorTileSourceInitialConfig | TypeSourceImageInitialConfig | TypeSourceWmsInitialConfig | TypeSourceImageEsriInitialConfig | TypeSourceImageStaticInitialConfig;
     /** Style to apply to the vector layer. */
     layerStyle?: TypeLayerStyleConfig;
+    /** Source settings to apply to the GeoView layer source at creation time. */
+    source?: TypeBaseSourceInitialConfig;
     /** The listOfLayerEntryConfig attribute is not used by child of AbstractBaseLayerEntryConfig. */
     listOfLayerEntryConfig: never;
     /**
      * Gets the service metadata that is associated to the service.
-     * @returns {TypeJsonObject} The service metadata.
+     * @returns {unknown | undefined} The service metadata.
      */
-    getServiceMetadata(): TypeJsonObject | undefined;
+    getServiceMetadata(): unknown | undefined;
     /**
      * Sets the service metadata for the layer.
-     * @param {TypeJsonObject} metadata - The service metadata to set
+     * @param {unknown} metadata - The service metadata to set
      */
-    setServiceMetadata(metadata: TypeJsonObject): void;
+    setServiceMetadata(metadata: unknown): void;
     /**
      * Gets the metadata that is associated to the layer.
-     * @returns {TypeJsonObject} The layer metadata.
+     * @returns {unknown} The layer metadata.
      */
-    getLayerMetadata(): TypeJsonObject | undefined;
+    getLayerMetadata(): unknown | undefined;
     /**
      * Sets the layer metadata for the layer.
-     * @param {TypeJsonObject} layerMetadata - The layer metadata to set
+     * @param {unknown} layerMetadata - The layer metadata to set
      */
-    setLayerMetadata(layerMetadata: TypeJsonObject): void;
+    setLayerMetadata(layerMetadata: unknown): void;
     /**
      * Gets the temporal dimension, if any, that is associated to the layer.
      * @returns {TimeDimension | undefined} The temporal dimension.
@@ -59,6 +54,26 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
      */
     setAttributions(attributions: string[]): void;
     /**
+     * Gets the layer filter equation
+     * @returns {FilterNodeType[] | undefined} The filter equation if any
+     */
+    getFilterEquation(): FilterNodeType[] | undefined;
+    /**
+     * Sets the layer filter equation
+     * @param {FilterNodeType[]?} filterEquation - The layer filter equation
+     */
+    setFilterEquation(filterEquation: FilterNodeType[] | undefined): void;
+    /**
+     * Gets the layer legend filter is off flag
+     * @returns {boolean} The legend filter is off flag
+     */
+    getLegendFilterIsOff(): boolean;
+    /**
+     * Sets the layer legend filter is off flag
+     * @param {boolean} legendFilterIsOff - The legend filter is off flag
+     */
+    setLegendFilterIsOff(legendFilterIsOff: boolean): void;
+    /**
      * The TypeStyleGeometries associated with the style as could be read from the layer config metadata.
      * @returns {TypeStyleGeometry[]} The array of TypeStyleGeometry
      */
@@ -69,9 +84,10 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
      */
     getFirstStyleSettings(): TypeLayerStyleSettings | undefined;
     /**
-     * Overrides the serialization of the mother class
-     * @returns {TypeJsonValue} The serialized TypeBaseLayerEntryConfig
+     * Overrides the toJson of the mother class
+     * @returns {unknown} The Json representation of the instance.
+     * @protected
      */
-    onSerialize(): TypeJsonObject;
+    protected onToJson(): unknown;
 }
 //# sourceMappingURL=abstract-base-layer-entry-config.d.ts.map

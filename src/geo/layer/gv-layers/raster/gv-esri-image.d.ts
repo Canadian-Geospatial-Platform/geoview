@@ -19,28 +19,33 @@ export declare class GVEsriImage extends AbstractGVRaster {
      */
     constructor(olSource: ImageArcGISRest, layerConfig: EsriImageLayerEntryConfig);
     /**
-     * Overrides the get of the OpenLayers Layer
-     * @returns {ImageLayer<ImageArcGISRest>} The OpenLayers Layer
+     * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
+     * @override
+     * @returns {ImageLayer<ImageArcGISRest>} The strongly-typed OpenLayers type.
      */
     getOLLayer(): ImageLayer<ImageArcGISRest>;
     /**
-     * Overrides the get of the OpenLayers Layer Source
-     * @returns {ImageArcGISRest} The OpenLayers Layer Source
+     * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
+     * @override
+     * @returns {ImageArcGISRest} The ImageArcGISRest source instance associated with this layer.
      */
     getOLSource(): ImageArcGISRest;
     /**
-     * Overrides the get of the layer configuration associated with the layer.
-     * @returns {EsriImageLayerEntryConfig} The layer configuration or undefined if not found.
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @override
+     * @returns {EsriImageLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
      */
     getLayerConfig(): EsriImageLayerEntryConfig;
     /**
      * Overrides the fetching of the legend for an Esri image layer.
+     * @override
      * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
      */
     onFetchLegend(): Promise<TypeLegend | null>;
     /**
      * Overrides when the style should be set by the fetched legend.
-     * @param legend
+     * @param {TypeLegend} legend - The legend type
+     * @override
      */
     onSetStyleAccordingToLegend(legend: TypeLegend): void;
     /**
@@ -55,27 +60,30 @@ export declare class GVEsriImage extends AbstractGVRaster {
      * Overrides the way to get the bounds for this layer type.
      * @param {OLProjection} projection - The projection to get the bounds into.
      * @param {number} stops - The number of stops to use to generate the extent.
+     * @override
      * @returns {Extent | undefined} The layer bounding box.
      */
     onGetBounds(projection: OLProjection, stops: number): Extent | undefined;
 }
-export interface TypeEsriImageLayerLegend {
-    layers: {
-        layerId: number | string;
-        layerName: string;
-        layerType: string;
-        minScale: number;
-        maxScale: number;
-        legendType: string;
-        legend: {
-            label: string;
-            url: string;
-            imageData: string;
-            contentType: string;
-            height: number;
-            width: number;
-            values: string[];
-        }[];
-    }[];
-}
+export type TypeEsriImageLayerLegend = {
+    layers: TypeEsriImageLayerLegendLayer[];
+};
+export type TypeEsriImageLayerLegendLayer = {
+    layerId: number | string;
+    layerName: string;
+    layerType: string;
+    minScale: number;
+    maxScale: number;
+    legendType: string;
+    legend: TypeEsriImageLayerLegendLayerLegend[];
+};
+export type TypeEsriImageLayerLegendLayerLegend = {
+    label: string;
+    url: string;
+    imageData: string;
+    contentType: string;
+    height: number;
+    width: number;
+    values: string[];
+};
 //# sourceMappingURL=gv-esri-image.d.ts.map

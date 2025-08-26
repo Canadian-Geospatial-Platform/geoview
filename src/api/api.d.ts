@@ -5,6 +5,7 @@ import * as Utilities from '@/core/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { MapViewer } from '@/geo/map/map-viewer';
 import * as GeoUtilities from '@/geo/utils/utilities';
+import { LayerApi } from '@/geo/layer/layer';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeMapFeaturesInstance } from '@/api/config/types/map-schema-types';
 /**
@@ -16,6 +17,7 @@ import { TypeMapFeaturesInstance } from '@/api/config/types/map-schema-types';
 export declare class API {
     #private;
     config: typeof ConfigApi;
+    layer: typeof LayerApi;
     plugin: typeof Plugin;
     utilities: {
         core: typeof Utilities;

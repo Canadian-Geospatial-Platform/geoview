@@ -5,7 +5,8 @@ import { Extent } from 'ol/extent';
 import { Projection as OLProjection } from 'ol/proj';
 import { Map as OLMap } from 'ol';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import { TypeFeatureInfoEntry, rangeDomainType, codedValueType, TypeLayerStyleConfig, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
+import { TypeFeatureInfoEntry, rangeDomainType, codedValueType, TypeLayerStyleConfig, TypeOutfieldsType, TypeLayerMetadataEsriExtent } from '@/api/config/types/map-schema-types';
+import { GeometryJson } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { TypeDateFragments } from '@/core/utils/date-mgt';
@@ -27,18 +28,21 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
     constructor(olSource: ImageArcGISRest, layerConfig: EsriDynamicLayerEntryConfig);
     /**
      * Overrides the fetching of the legend for an Esri Dynamic layer.
+     * @override
      * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
      */
     onFetchLegend(): Promise<TypeLegend | null>;
     /**
      * Overrides when the style should be set by the fetched legend.
-     * @param legend
+     * @param {TypeLegend} legend - The legend type
+     * @override
      */
     onSetStyleAccordingToLegend(legend: TypeLegend): void;
     /**
      * Overrides the way to get the bounds for this layer type.
      * @param {OLProjection} projection - The projection to get the bounds into.
      * @param {number} stops - The number of stops to use to generate the extent.
+     * @override
      * @returns {Extent | undefined} The layer bounding box.
      */
     onGetBounds(projection: OLProjection, stops: number): Extent | undefined;
@@ -47,26 +51,31 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
      * @param {string[]} objectIds - The IDs of the features to calculate the extent from.
      * @param {OLProjection} outProjection - The output projection for the extent.
      * @param {string?} outfield - ID field to return for services that require a value in outfields.
+     * @override
      * @returns {Promise<Extent>} The extent of the features, if available.
      */
     onGetExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent>;
     /**
-     * Overrides the get of the OpenLayers Layer
-     * @returns {ImageLayer<ImageArcGISRest>} The OpenLayers Layer
+     * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
+     * @override
+     * @returns {ImageLayer<ImageArcGISRest>} The strongly-typed OpenLayers type.
      */
     getOLLayer(): ImageLayer<ImageArcGISRest>;
     /**
-     * Overrides the get of the OpenLayers Layer Source
-     * @returns {ImageArcGISRest} The OpenLayers Layer Source
+     * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
+     * @override
+     * @returns {ImageArcGISRest} The ImageArcGISRest source instance associated with this layer.
      */
     getOLSource(): ImageArcGISRest;
     /**
-     * Overrides the get of the layer configuration associated with the layer.
-     * @returns {EsriDynamicLayerEntryConfig} The layer configuration or undefined if not found.
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @override
+     * @returns {EsriDynamicLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
      */
     getLayerConfig(): EsriDynamicLayerEntryConfig;
     /**
-     * Overrides the hit tolerance of the layer
+     * Overrides the hit tolerance of the layer.
+     * @override
      * @returns {number} The hit tolerance for a GV Esri Dynamic layer
      */
     getHitTolerance(): number;
@@ -75,13 +84,13 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
      * @param {string} fieldName - The field name for which we want to get the type.
      * @returns {TypeOutfieldsType} The type of the field.
      */
-    protected getFieldType(fieldName: string): TypeOutfieldsType;
+    protected onGetFieldType(fieldName: string): TypeOutfieldsType;
     /**
      * Overrides the return of the domain of the specified field.
      * @param {string} fieldName - The field name for which we want to get the domain.
      * @returns {null | codedValueType | rangeDomainType} The domain of the field.
      */
-    protected getFieldDomain(fieldName: string): null | codedValueType | rangeDomainType;
+    protected onGetFieldDomain(fieldName: string): null | codedValueType | rangeDomainType;
     /**
      * Overrides the get all feature information for all the features stored in the layer.
      * @param {AbortController?} abortController - The optional abort controller.
@@ -132,4 +141,17 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
      */
     static getViewFilter(layerConfig: EsriDynamicLayerEntryConfig, style: TypeLayerStyleConfig | undefined): string;
 }
+export type EsriQueryJsonResponse = {
+    extent: TypeLayerMetadataEsriExtent;
+};
+export type EsriFeaturesJsonResponse = {
+    features: EsriIdentifyJsonResponseAttribute[];
+};
+export type EsriIdentifyJsonResponse = {
+    results: EsriIdentifyJsonResponseAttribute[];
+};
+export type EsriIdentifyJsonResponseAttribute = {
+    attributes: Record<string, unknown>;
+    geometry: GeometryJson;
+};
 //# sourceMappingURL=gv-esri-dynamic.d.ts.map

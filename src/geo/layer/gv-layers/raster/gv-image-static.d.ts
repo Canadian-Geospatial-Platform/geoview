@@ -20,22 +20,26 @@ export declare class GVImageStatic extends AbstractGVRaster {
      */
     constructor(olSource: Static, layerConfig: ImageStaticLayerEntryConfig);
     /**
-     * Overrides the get of the OpenLayers Layer
-     * @returns {ImageLayer<Static>} The OpenLayers Layer
+     * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
+     * @override
+     * @returns {ImageLayer<Static>} The strongly-typed OpenLayers type.
      */
     getOLLayer(): ImageLayer<Static>;
     /**
-     * Overrides the get of the OpenLayers Layer Source
-     * @returns {Static} The OpenLayers Layer Source
+     * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
+     * @override
+     * @returns {Static} The Static source instance associated with this layer.
      */
     getOLSource(): Static;
     /**
-     * Overrides the get of the layer configuration associated with the layer.
-     * @returns {ImageStaticLayerEntryConfig} The layer configuration or undefined if not found.
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @override
+     * @returns {ImageStaticLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
      */
     getLayerConfig(): ImageStaticLayerEntryConfig;
     /**
      * Overrides the fetching of the legend for an Esri image layer.
+     * @override
      * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
      */
     onFetchLegend(): Promise<TypeLegend | null>;
@@ -43,6 +47,7 @@ export declare class GVImageStatic extends AbstractGVRaster {
      * Overrides the way to get the bounds for this layer type.
      * @param {OLProjection} projection - The projection to get the bounds into.
      * @param {number} stops - The number of stops to use to generate the extent.
+     * @override
      * @returns {Extent | undefined} The layer bounding box.
      */
     onGetBounds(projection: OLProjection, stops: number): Extent | undefined;

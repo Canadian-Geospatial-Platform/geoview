@@ -3,8 +3,7 @@ import BaseLayer from 'ol/layer/Base';
 import OLMap from 'ol/Map';
 import { OverviewMap as OLOverviewMap } from 'ol/control';
 import { TypeBasemapOptions, TypeValidMapProjectionCodes, TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
-import { TypeJsonObject } from '@/api/config/types/config-types';
-import { TypeBasemapProps } from '@/geo/layer/basemap/basemap-types';
+import { TypeBasemapProps, BasemapCreationList } from '@/geo/layer/basemap/basemap-types';
 import { EventDelegateBase } from '@/api/events/event-helper';
 import { MapViewer } from '@/geo/map/map-viewer';
 /**
@@ -38,7 +37,7 @@ export declare class BasemapApi {
     /**
      * Basemap list
      */
-    basemapsList: TypeJsonObject;
+    basemapsList: BasemapCreationList;
     getOverviewMapControl(olMap: OLMap, toggleButton: HTMLDivElement): OLOverviewMap;
     createOverviewMapLayers(): BaseLayer[];
     setOverviewMap(): Promise<void>;
@@ -51,14 +50,6 @@ export declare class BasemapApi {
      * @return {Promise<TypeBasemapProps>} The core basemap.
      */
     createCoreBasemap(basemapOptions: TypeBasemapOptions, projection?: TypeValidMapProjectionCodes, language?: TypeDisplayLanguage): Promise<TypeBasemapProps>;
-    /**
-     * Create a custom basemap.
-     * @param {TypeBasemapProps} basemapProps - Basemap properties.
-     * @param {TypeValidMapProjectionCodes} projection - Projection code.
-     * @param {TypeDisplayLanguage} language - Optional language.
-     * @returns {TypeBasemapProps} The created custom basemap.
-     */
-    createCustomBasemap(basemapProps: TypeBasemapProps, projection: TypeValidMapProjectionCodes, language?: TypeDisplayLanguage): TypeBasemapProps;
     /**
      * Load the default basemap that was passed in the map config.
      * @param {TypeValidMapProjectionCodes} projection - Optional projection code.

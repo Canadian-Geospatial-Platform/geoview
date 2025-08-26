@@ -16,8 +16,9 @@ export declare class GVOGCFeature extends AbstractGVVector {
      */
     constructor(olSource: VectorSource, layerConfig: OgcFeatureLayerEntryConfig);
     /**
-     * Overrides the get of the layer configuration associated with the layer.
-     * @returns {OgcFeatureLayerEntryConfig} The layer configuration or undefined if not found.
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @override
+     * @returns {OgcFeatureLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
      */
     getLayerConfig(): OgcFeatureLayerEntryConfig;
     /**
@@ -25,6 +26,6 @@ export declare class GVOGCFeature extends AbstractGVVector {
      * @param {string} fieldName - The field name for which we want to get the type.
      * @returns {TypeOutfieldsType} The type of the field.
      */
-    protected getFieldType(fieldName: string): TypeOutfieldsType;
+    protected onGetFieldType(fieldName: string): TypeOutfieldsType;
 }
 //# sourceMappingURL=gv-ogc-feature.d.ts.map

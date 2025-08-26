@@ -2,24 +2,15 @@ import type * as React from 'react';
 import type { createRoot } from 'react-dom/client';
 import type i18next from 'react-i18next';
 import type { useTheme } from '@mui/material/styles';
-import { API } from '@/api/api';
 import { MapViewer } from '@/geo/map/map-viewer';
-import { TypeJsonObject, AnySchemaObject } from '@/api/config/types/config-types';
-/**
- * interface used by all plugins to define their options.
- */
-export type TypePluginOptions = {
-    mapId: string;
-    viewer: MapViewer;
-};
 /**
  * Plugin abstract base class.
  */
 export declare abstract class AbstractPlugin {
     #private;
     pluginId: string;
-    pluginProps: TypePluginOptions;
-    api: API;
+    mapViewer: MapViewer;
+    pluginProps?: unknown;
     react: typeof React;
     createRoot: typeof createRoot;
     useTheme: typeof useTheme;
@@ -27,25 +18,20 @@ export declare abstract class AbstractPlugin {
     /**
      * Creates an instance of the plugin.
      * @param {string} pluginId - Unique identifier for the plugin instance.
-     * @param {TypePluginOptions} props - The plugin options and properties.
-     * @param {API} api - API object providing access to core functionality.
+     * @param {MapViewer} mapViewer - The map viewer
+     * @param {unknown | undefined} props - Optional plugin options and properties.
      */
-    constructor(pluginId: string, props: TypePluginOptions, api: API);
+    constructor(pluginId: string, mapViewer: MapViewer, props: unknown | undefined);
     /**
      * Sets the config (which happens post creation)
-     * @param {TypeJsonObject} config - The config
+     * @param {unknown} config - The config
      */
-    setConfig(config: TypeJsonObject): void;
+    setConfig(config: unknown): void;
     /**
      * Gets the config
      * @returns {unknown} The config
      */
     getConfig(): unknown;
-    /**
-     * Returns the MapViewer used by this Plugin
-     * @returns MapViewer The MapViewer used by this Plugin
-     */
-    mapViewer(): MapViewer;
     /**
      * Returns the language currently used by the 'translate' i18next component used by this Plugin
      * @returns string The language, 'en' (English) by default.
@@ -54,16 +40,16 @@ export declare abstract class AbstractPlugin {
     /**
      * Must override function to get the schema validator
      */
-    abstract schema(): AnySchemaObject;
+    abstract schema(): unknown;
     /**
      * Must override function to get the default config
      */
-    abstract defaultConfig(): TypeJsonObject;
+    abstract defaultConfig(): unknown;
     /**
      * Overridable function to get the translations object for the Plugin.
-     * @returns {TypeJsonObject} The translations object
+     * @returns {Record<string, unknown>} The translations object
      */
-    defaultTranslations(): TypeJsonObject;
+    defaultTranslations(): Record<string, unknown>;
     /**
      * Override this to do the actual adding
      */

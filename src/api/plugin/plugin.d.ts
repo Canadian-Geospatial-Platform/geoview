@@ -1,4 +1,3 @@
-import { TypeJsonObject } from '@/api/config/types/config-types';
 import { AbstractPlugin } from './abstract-plugin';
 /**
  * Class to manage plugins
@@ -16,12 +15,12 @@ export declare abstract class Plugin {
     /**
      * Add new plugin
      *
-     * @param {string} pluginId the plugin id
-     * @param {string} mapId id of map to add this plugin to
-     * @param {Class} constructor the plugin class (React Component)
-     * @param {Object} props the plugin properties
+     * @param {string} pluginId - The plugin id
+     * @param {typeof AbstractPlugin} constructor - The plugin class (React Component)
+     * @param {string} mapId - Id of map to add this plugin to
+     * @param {unknown} props - The plugin options
      */
-    static addPlugin(pluginId: string, mapId: string, constructor: typeof AbstractPlugin, props?: TypeJsonObject): Promise<void>;
+    static addPlugin(pluginId: string, constructor: typeof AbstractPlugin, mapId: string, props?: unknown): Promise<void>;
     /**
      * Delete a specific plugin loaded in a map
      *

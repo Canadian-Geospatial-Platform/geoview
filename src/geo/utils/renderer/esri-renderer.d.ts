@@ -72,6 +72,14 @@ export declare const esriRendererIsClassBreaks: (verifyIfRenderer: EsriBaseRende
  * @returns {TypeStyleConfig | undefined} The Geoview style or undefined if it can not be created.
  */
 export declare function getStyleFromEsriRenderer(renderer: EsriBaseRenderer): TypeLayerStyleConfig | undefined;
+/** *****************************************************************************************************************************
+ * Parse the GeoView style using the Esri renderer.
+ *
+ * @param {EsriBaseRenderer} renderer - ESRI renderer to convert.
+ *
+ * @returns {TypeLayerStyleSettings | undefined} The Geoview style or undefined if it can not be created.
+ */
+export declare function createStyleUsingEsriRenderer(renderer: EsriBaseRenderer): TypeLayerStyleConfig | undefined;
 export type EsriRendererTypes = 'uniqueValue' | 'simple' | 'classBreaks';
 export type EsriBaseRenderer = {
     type: EsriRendererTypes;
