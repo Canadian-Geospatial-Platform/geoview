@@ -160,6 +160,7 @@ export default function ExportModal(): JSX.Element {
               fontEmbedCSS: '',
               width: getCanvasWidth(dialogBox),
               height: clonedContent.offsetHeight,
+              pixelRatio: 2, // Add this option to improve DPI
             })
             .then((dataUrl) => {
               setIsMapExporting(false);
@@ -207,8 +208,6 @@ export default function ExportModal(): JSX.Element {
 
     const overviewMap = mapElement.getElementsByClassName('ol-overviewmap')[0] as HTMLDivElement;
 
-    const overviewMap = mapElement.getElementsByClassName('ol-overviewmap')[0] as HTMLDivElement;
-
     let timer: NodeJS.Timeout;
     if (activeModalId === 'export' && mapImageRef.current && dialogRef.current) {
       const mapImage = mapImageRef.current;
@@ -225,7 +224,7 @@ export default function ExportModal(): JSX.Element {
       timer = setTimeout(() => {
         setIsMapLoading(true);
         htmlToImage
-          .toPng(mapViewport as HTMLElement, { fontEmbedCSS: '' })
+          .toPng(mapViewport as HTMLElement, { fontEmbedCSS: '', pixelRatio: 2 })
           .then((dataUrl) => {
             setIsMapLoading(false);
             const img = new Image();
