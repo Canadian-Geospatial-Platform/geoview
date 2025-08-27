@@ -275,7 +275,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         return new GroupLayerEntryConfig({
           geoviewLayerConfig,
           layerId: `${layerEntry.layerId}`,
-          layerName: `${layerEntry.layerName}`,
+          layerName: layerEntry.layerName,
           listOfLayerEntryConfig: subConfigs,
         } as GroupLayerEntryConfig);
       }
@@ -286,7 +286,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         schemaTag: CONST_LAYER_TYPES.ESRI_DYNAMIC,
         entryType: CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE,
         layerId: `${layerEntry.index}`,
-        layerName: `${layerEntry.layerName || layerEntry.layerId}`,
+        layerName: layerEntry.layerName,
         source: {
           dataAccessPath: geoviewLayerConfig.metadataAccessPath,
         },
