@@ -770,13 +770,13 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     if (viewer.layer.geometry.geometryGroups.find((group) => group.geometryGroupId === DRAW_GROUP_KEY) !== undefined) {
       const transformInstance = viewer.initTransformInteractions({ geometryGroupKey: DRAW_GROUP_KEY });
 
-      // Handle Transform Events
+      // Handle Transform Events (A feature was edited, the feature is still being edited)
       transformInstance.onTransformEnd(this.#handleTransformEnd(mapId));
 
       // Handle Delete Events
       transformInstance.onDeleteFeature(this.#handleTransformDeleteFeature(mapId));
 
-      // Handle Selection Events
+      // Handle Selection Events (new selection, removed selection, or both)
       transformInstance.onSelectionChange(this.#handleTransformSelectionChange(mapId));
 
       state.actions.setTransformInstance(transformInstance);
@@ -794,6 +794,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Handler for Transform End events
+   * The current transform action has ended and the new geometry and style are applied to the feature
    * @param {string} mapId - The map ID
    */
   static #handleTransformEnd(mapId: string) {
@@ -1661,7 +1662,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     if (!state) return;
 
     const transformInstance = state.actions.getTransformInstance();
-    if (transformInstance && transformInstance.getSelectedFeature()) {
+    if (transformInstance && state.selectedDrawing) {
       const undoDisabled = !transformInstance.canUndo();
       const redoDisabled = !transformInstance.canRedo();
 
