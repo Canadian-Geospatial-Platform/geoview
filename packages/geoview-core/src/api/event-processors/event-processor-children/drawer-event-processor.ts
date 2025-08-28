@@ -553,6 +553,8 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     return style;
   }
 
+  // #endregion
+
   // #region Drawing Actions
 
   /**
@@ -1151,6 +1153,8 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     state.actions.setHideMeasurements(!hideMeasurements);
   }
 
+  // #endregion
+
   // #region Download / Upload
 
   /**
@@ -1192,6 +1196,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
               } else {
                 // point style icon
                 styleProps.iconSrc = feature.get('iconSrc');
+                styleProps.iconSize = feature.get('iconSize');
               }
             } else {
               // Handle polygon/line styles
@@ -1343,6 +1348,8 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       reader.readAsText(file);
     }
   }
+
+  // #endregion
 
   // #region History
 
@@ -1696,6 +1703,8 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     const keysToDelete = Array.from(this.#selectedFeatureState.keys()).filter((key) => key.startsWith(`${mapId}-`));
     keysToDelete.forEach((key) => this.#selectedFeatureState.delete(key));
   }
+
+  // #endregion
 
   // **********************************************************
   // Static functions for Store Map State to action on API

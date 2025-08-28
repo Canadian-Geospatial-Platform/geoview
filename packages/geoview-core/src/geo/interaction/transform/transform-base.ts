@@ -167,6 +167,8 @@ export interface CreateHandleProps {
   isCircleEdge?: boolean;
 }
 
+// #endregion
+
 // #region Class Start
 
 /**
@@ -267,6 +269,8 @@ export class OLTransform extends OLPointer {
 
   onSelectionChange?: (event: TransformSelectionEvent) => void;
 
+  // #endregion
+
   // #region Constructor
 
   /**
@@ -308,6 +312,8 @@ export class OLTransform extends OLPointer {
     // Set up feature collection change handlers
     this.features.on('remove', this.onFeatureRemove.bind(this));
   }
+
+  // #endregion
 
   // #region Methods
 
@@ -411,6 +417,8 @@ export class OLTransform extends OLPointer {
     return resolution * 15;
   }
 
+  // #endregion
+
   // #region Helpers
 
   // ? TODO Could these two coordinate functions be moved to a utility file?
@@ -513,6 +521,8 @@ export class OLTransform extends OLPointer {
   override dispose(): void {
     this.clearSelection();
   }
+
+  // #endregion
 
   // #region Handle Creation
 
@@ -885,6 +895,8 @@ export class OLTransform extends OLPointer {
     // Create new handles
     this.createHandles();
   }
+
+  // #endregion
 
   // #region Handlers
 
@@ -1532,6 +1544,8 @@ export class OLTransform extends OLPointer {
     this.clearHandles();
   }
 
+  // #endregion
+
   // #region Text Editing
 
   /**
@@ -1965,6 +1979,8 @@ export class OLTransform extends OLPointer {
     }
   }
 
+  // #endregion
+
   // #region Undo / Redo
 
   /**
@@ -2049,4 +2065,6 @@ export class OLTransform extends OLPointer {
   canRedo(): boolean {
     return this.#historyIndex !== -1 && this.#historyIndex < this.#geometryHistory.length - 1;
   }
+
+  // #endregion
 }
