@@ -38,16 +38,19 @@ export class Transform extends Interaction {
   /** Callback handlers for when a feature is initially selected or when a handle is clicked on */
   #onTransformStartHandlers: TransformEventDelegate[] = [];
 
-  /** Callback handler for when a feature is being transformed */
+  /** Callback handler for when a feature is currently being transformed */
   #onTransformingHandlers: TransformEventDelegate[] = [];
 
-  /** Callback handler for mouse up event */
+  /**
+   * Callback handler for mouse up event when a feature has finished transforming
+   * Note: This will fire when initially or just clicking on a feature since a feature can be moved by clicking on it and dragging
+   */
   #onTransformEndHandlers: TransformEventDelegate[] = [];
 
   /** Callback handler for when a feature is deleted */
   #onDeleteFeatureHandlers: TransformDeleteFeatureEventDelegate[] = [];
 
-  /** Callback handler for when a feature is selected */
+  /** Callback handler for when a feature is selected, deselected, or both (one deselected, another selected) */
   #onSelectionChangeHandlers: TransformSelectionEventDelegate[] = [];
 
   /**
