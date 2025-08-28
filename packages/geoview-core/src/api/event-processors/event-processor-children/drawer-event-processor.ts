@@ -1076,7 +1076,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * Clears all drawings from the map
    * @param {string} mapId - The map ID
    */
-  public static clearDrawings(mapId: string): void {
+  public static clearDrawings(mapId: string, saveHistory: boolean = true): void {
     const state = this.getDrawerState(mapId);
     if (!state) return;
 
@@ -1086,7 +1086,8 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     // Get all geometries for each type
     const features = this.#getDrawingFeatures(mapId);
 
-    if (features.length > 0) {
+    // Set the history, only if this isn't from a redo
+    if (saveHistory && features.length > 0) {
       this.#saveToHistory(mapId, {
         type: 'clear',
         features: features.map((ftr) => ftr.clone()),
@@ -1510,7 +1511,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
       case 'clear':
         // Re-clear all features
-        this.clearDrawings(mapId);
+        this.clearDrawings(mapId, false);
         break;
 
       default:
