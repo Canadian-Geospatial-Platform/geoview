@@ -8,6 +8,7 @@ import Draw from './buttons/draw';
 import { GeometryPickerButton, GeometryPickerPanel } from './buttons/geometry-picker';
 import Edit from './buttons/edit';
 import { StyleButton, StylePanel } from './buttons/style';
+import Snapping from './buttons/snap';
 import Measurements from './buttons/measurements';
 import Undo from './buttons/undo';
 import Redo from './buttons/redo';
@@ -79,6 +80,16 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
     buttonProps: {
       id: 'drawer-edit',
       children: createElement(Edit),
+      visible: true,
+    },
+    groupName: 'drawer',
+  };
+
+  // Create snapping button
+  buttonConfigs.snap = {
+    buttonProps: {
+      id: 'drawer-snap',
+      children: createElement(Snapping),
       visible: true,
     },
     groupName: 'drawer',

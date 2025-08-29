@@ -92,7 +92,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     // Set up map projection change handler
     DrawerEventProcessor.#setupReprojectDrawingsHandler(mapId);
 
-    // Set initial proejction value for the mapId
+    // Set initial projection value for the mapId
     const initialProjection = mapConfig?.map.viewSettings.projection || DEFAULT_PROJECTION;
     DrawerEventProcessor.#currentProjections.set(mapId, Projection.PROJECTIONS[initialProjection]);
 
@@ -132,7 +132,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   /** Keyboard event handlers for each map */
   static #keyboardHandlers: Map<string, (event: KeyboardEvent) => void> = new Map();
 
-  /** Current Projeciton per mapId */
+  /** Current Projection per mapId */
   static #currentProjections: Map<string, OLProjection> = new Map();
 
   // #region Helpers
@@ -411,7 +411,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Utility to convert SVG path to coordinates with auto-centering
-   * @param {strgin} svgPath - SVG path string
+   * @param {string} svgPath - SVG path string
    * @param {SketchCoordType} coordinates - Circle coordinate (center and out edge)
    * @param {SimpleGeometry} geometry - The intermediate geometry for display while expanding
    * @returns {Polygon} The result polygon
@@ -620,6 +620,10 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     if (geomType) {
       state.actions.setActiveGeom(geomType);
     }
+
+    if (state.actions.getIsSnapping()) {
+      this.refreshSnappingInstance(mapId);
+    }
   }
 
   /**
@@ -789,6 +793,10 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     const drawInstance = state.actions.getDrawInstance();
     if (drawInstance) {
       this.stopDrawing(mapId);
+    }
+
+    if (state.actions.getIsSnapping()) {
+      this.refreshSnappingInstance(mapId);
     }
   }
 
@@ -977,6 +985,51 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   }
 
   /**
+   * Starts snapping interactions
+   * @param {string} mapId - The map ID
+   */
+  public static startSnapping(mapId: string): void {
+    const state = this.getDrawerState(mapId);
+    if (!state) return;
+
+    const viewer = MapEventProcessor.getMapViewer(mapId);
+    const snapInstance = viewer.initSnapInteractions(DRAW_GROUP_KEY);
+    snapInstance.startInteraction();
+
+    state.actions.setSnapInstance(snapInstance);
+  }
+
+  /**
+   * Stops snapping interactions
+   * @param mapId - The map ID
+   */
+  public static stopSnapping(mapId: string): void {
+    const state = this.getDrawerState(mapId);
+    if (!state) return;
+
+    const snapInstance = state.actions.getSnapInstance();
+    snapInstance?.stopInteraction();
+
+    state.actions.removeSnapInstance();
+  }
+
+  /**
+   * Toggles snapping state
+   * @param {string} mapId - The map ID
+   */
+  public static toggleSnapping(mapId: string): void {
+    const state = this.getDrawerState(mapId);
+    if (!state) return;
+
+    const isSnapping = state.actions.getIsSnapping();
+    if (isSnapping) {
+      this.stopSnapping(mapId);
+    } else {
+      this.startSnapping(mapId);
+    }
+  }
+
+  /**
    * Updates the style of any currently transforming features
    * @param {string} mapId - The map ID
    * @param {StyleProps} newStyle - The new style to apply
@@ -1120,6 +1173,16 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     if (state.actions.getIsEditing()) {
       this.stopEditing(mapId);
       this.startEditing(mapId);
+    }
+  }
+
+  public static refreshSnappingInstance(mapId: string): void {
+    const state = this.getDrawerState(mapId);
+    if (!state) return;
+
+    if (state.actions.getIsSnapping()) {
+      this.stopSnapping(mapId);
+      this.startSnapping(mapId);
     }
   }
 
