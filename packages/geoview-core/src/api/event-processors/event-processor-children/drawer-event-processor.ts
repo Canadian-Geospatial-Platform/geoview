@@ -704,7 +704,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
       this.#saveToHistory(mapId, {
         type: 'add',
-        features: [feature],
+        features: [feature.clone()],
       });
     };
   }
@@ -840,7 +840,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     return (_sender: unknown, event: TransformDeleteFeatureEvent) => {
       const { feature } = event;
 
-      // Save delete action to history before deleting
+      // Save the delete state
       this.#saveToHistory(mapId, {
         type: 'delete',
         features: [feature.clone()],
@@ -850,6 +850,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       if (featureId) {
         this.deleteSingleDrawing(mapId, featureId as string);
       }
+
+      this.getDrawerState(mapId)?.actions.setSelectedDrawing(undefined);
+      this.#updateUndoRedoState(mapId);
     };
   }
 
@@ -877,29 +880,20 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
             savedState.originalStyleStored && savedState.originalStyle && savedState.originalStyle !== previousFeature.getStyle();
 
           if (geometryChanged || styleChanged) {
-            // Save modify action - include style only if it was changed
-            const historyAction: DrawerHistoryAction = {
+            // Save modify action - include geometry and style only if it was changed
+            this.#saveToHistory(mapId, {
               type: 'modify',
               features: [previousFeature],
-            };
-
-            // Include geometry changes if they occurred
-            if (geometryChanged) {
-              historyAction.originalGeometries = [savedState.originalGeometry];
-              historyAction.modifiedGeometries = [currentGeometry.clone()];
-            }
-
-            // Include style changes if they occurred
-            if (styleChanged) {
-              historyAction.originalStyles = [savedState.originalStyle];
-              historyAction.modifiedStyles = [previousFeature.getStyle()];
-            }
-
-            this.#saveToHistory(mapId, historyAction);
+              ...(geometryChanged && {
+                originalGeometries: [savedState.originalGeometry.clone()],
+                modifiedGeometries: [currentGeometry.clone()],
+              }),
+              ...(styleChanged && {
+                originalStyles: [savedState.originalStyle],
+                modifiedStyles: [previousFeature.getStyle()],
+              }),
+            });
           }
-
-          // Clean up the saved state
-          this.#selectedFeatureState.delete(stateKey);
         }
       }
 
@@ -1340,7 +1334,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
         // Save action history
         this.#saveToHistory(mapId, {
           type: 'add',
-          features: newFeatures,
+          features: newFeatures.map((ftr) => ftr.clone()),
         });
       } catch (error) {
         logger.logError('Error loading GeoJSON:', error);
@@ -1532,10 +1526,19 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     const viewer = MapEventProcessor.getMapViewer(mapId);
     if (!viewer) return;
     // Re-add the features
-    action.features.forEach((feature) => {
+    action.features.forEach((historyFeature) => {
+      const feature = historyFeature.clone(); // Clone to prevent modifying the state feature
+
       feature.setId(feature.get('featureId'));
       viewer.layer.geometry.geometries.push(feature);
       viewer.layer.geometry.addToGeometryGroup(feature, DRAW_GROUP_KEY);
+
+      // Add to transform instance if editing is active
+      const state = this.getDrawerState(mapId);
+      const transformInstance = state?.actions.getTransformInstance();
+      if (transformInstance) {
+        transformInstance.addFeature(feature);
+      }
 
       // Recreate measurement overlay
       const geom = feature.getGeometry();
@@ -1554,7 +1557,8 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   static #deleteFeaturesAction(mapId: string, action: DrawerHistoryAction): void {
     const viewer = MapEventProcessor.getMapViewer(mapId);
 
-    action.features.forEach((feature) => {
+    action.features.forEach((historyFeature) => {
+      const feature = historyFeature.clone(); // Clone to prevent modifying the state feature
       const featureId = feature.get('featureId');
 
       // GV Can't just use this.deleteSingleDrawing because between actions it will cause the
@@ -1635,8 +1639,6 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
         if (action.originalGeometries && action.originalGeometries[index]) {
           // Restore geometry
           currentFeature.setGeometry(action.originalGeometries[index].clone());
-
-          // Recreate measurement overlay
           const geom = currentFeature.getGeometry();
           if (geom && !(geom instanceof Point)) {
             const overlay = this.#createMeasureTooltip(currentFeature, false, mapId);
