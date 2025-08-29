@@ -324,7 +324,7 @@ export class OLTransform extends OLPointer {
   onFeatureRemove(event: { element: Feature }): void {
     const feature = event.element;
 
-    // If this was the selected feature, clear the selection
+    // If this was the selected feature, clear the selection, but don't emit the event
     if (this.selectedFeature === feature) {
       this.clearSelection();
     }
@@ -340,8 +340,10 @@ export class OLTransform extends OLPointer {
     // Hide any existing text editor
     this.#hideTextEditor();
 
-    // Clear history when changing selection
-    this.#clearHistory();
+    // Only clear history when changing selection
+    if (previousFeature !== feature) {
+      this.#clearHistory();
+    }
 
     // Clear any existing selection
     this.clearHandles();
@@ -1198,8 +1200,8 @@ export class OLTransform extends OLPointer {
         if (handleType === HandleType.DELETE) {
           const feature = handleFeature.get('feature');
           if (feature) {
-            this.onDeletefeature?.(new TransformDeleteFeatureEvent(feature as Feature));
             this.features.remove(feature);
+            this.onDeletefeature?.(new TransformDeleteFeatureEvent(feature as Feature));
           }
           return false;
         }
