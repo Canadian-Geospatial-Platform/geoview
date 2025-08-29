@@ -1639,6 +1639,8 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
         if (action.originalGeometries && action.originalGeometries[index]) {
           // Restore geometry
           currentFeature.setGeometry(action.originalGeometries[index].clone());
+
+          // Recreate overlay
           const geom = currentFeature.getGeometry();
           if (geom && !(geom instanceof Point)) {
             const overlay = this.#createMeasureTooltip(currentFeature, false, mapId);
