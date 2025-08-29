@@ -324,7 +324,7 @@ export class OLTransform extends OLPointer {
   onFeatureRemove(event: { element: Feature }): void {
     const feature = event.element;
 
-    // If this was the selected feature, clear the selection, but don't emit the event
+    // If this was the selected feature, clear the selection
     if (this.selectedFeature === feature) {
       this.clearSelection();
     }
