@@ -1,3 +1,5 @@
+name: Build Geoview on PR comment lock
+
 on:
   pull_request:
     types: [locked]

@@ -207,3 +207,54 @@ function listenToLegendLayerSetChanges(elementId, mapViewer) {
     displayField.innerHTML = output && output !== outputHeader ? `${output}</table>` : '';
   });
 }
+
+async function onConfigChange(mapId, e) {
+    // create new map in a new dom node
+  let mapDiv = document.getElementById(mapId);
+  if (mapDiv === null) {
+    mapDiv = document.createElement('div');
+    mapDiv.setAttribute('id', mapId);
+    document.getElementById('mapSection').appendChild(mapDiv);
+  }
+
+  // Set the language to the switchLang value, always
+  mapDiv.setAttribute('data-lang', switchLang.value);
+
+  // Delete previous map if existing
+  if (cgpv.api.hasMapViewer(mapId)) {
+    await cgpv.api.deleteMapViewer(mapId);
+  }
+
+  // create map
+  try {
+    const mapViewer = await cgpv.api.createMapFromConfig(mapId, e.target.value, 800);
+    listenToLegendLayerSetChanges('sandboxMap-state', mapViewer);
+  } catch (error) {
+    console.error('Failed to create map from config', error);
+  }
+
+  try {
+    // Fetch the data
+    const res = await fetch(e.target.value);
+    const data = await res.json();
+
+    // fetch JSON config file to show in the text are section
+    document.getElementById('configGeoview').textContent = JSON.stringify(data, null, 4);
+
+    // set default number of lines
+    const textarea = document.querySelector('textarea');
+    const lineNumbers = document.querySelector('.line-numbers');
+    const numberOfLines = textarea.value.split('\n').length;
+    lineNumbers.innerHTML = Array(numberOfLines).fill('<span></span>').join('');
+
+    // pre-select theme and projection from config file
+    document.getElementById('switchTheme').value = data.theme;
+    document.getElementById('switchProjection').value = data.map.viewSettings.projection;
+
+    // update url to include selected file
+    const element = document.getElementById('configLoader');
+    window.history.replaceState(null, null, `?config=${element.value}`);
+  } catch (error) {
+    console.error('Unable to fetch data:', error);
+  }
+}

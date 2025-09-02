@@ -257,7 +257,9 @@
       ]
     }
   },
-  "corePackages": ["swiper"],
+  "corePackages": [
+    "swiper"
+  ],
   "corePackagesConfig": [
     {
       "swiper": {

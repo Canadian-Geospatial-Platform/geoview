@@ -1315,13 +1315,14 @@
     },
     "TypeVectorSourceFormats": {
       "enum": [
-        "GeoJSON",
+        "CSV",
         "EsriJSON",
+        "featureAPI",
+        "GeoJSON",
+        "GeoPackage",
         "KML",
         "WFS",
-        "featureAPI",
-        "GeoPackage",
-        "CSV"
+        "WKB"
       ],
       "description": "The feature format used by the XHR feature loader when access path is set."
     },
@@ -1566,11 +1567,12 @@
         "schemaTag": {
           "enum": [
             "CSV",
-            "GeoJSON",
             "esriFeature",
-            "ogcWfs",
+            "GeoJSON",
+            "GeoPackage",
             "ogcFeature",
-            "GeoPackage"
+            "ogcWfs",
+            "WKB"
           ]
         },
         "entryType": {
@@ -2260,6 +2262,22 @@
         ]
       }
     },
+    "TypeListOfWkbLayerEntryConfig": {
+      "description": "This type is used recursively by the IsValidTypeListOfLayerEntryConfig method coded in config-validation.ts file. It completes the validation of the list of layer entry config.",
+      "type": "array",
+      "minItems": 1,
+      "additionalProperties": false,
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "#/definitions/TypeLayerGroupEntryConfig"
+          },
+          {
+            "$ref": "#/definitions/TypeVectorLayerEntryConfig"
+          }
+        ]
+      }
+    },
     "TypeListOfOgcFeatureLayerEntryConfig": {
       "description": "This type is used recursively by the IsValidTypeListOfLayerEntryConfig method coded in config-validation.ts file. It completes the validation of the list of layer entry config.",
       "type": "array",
@@ -2456,7 +2474,8 @@
           "ogcWfs",
           "ogcWms",
           "imageStatic",
-          "vectorTiles"
+          "vectorTiles",
+          "WKB"
         ]
       },
       "description": "Type of GeoView layer."

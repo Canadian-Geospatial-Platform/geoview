@@ -34,18 +34,20 @@ import {
   TypeDisplayLanguage,
   TypeOutfieldsType,
 } from '@/api/config/types/map-schema-types';
-import { GeoJSON, layerConfigIsGeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
-import { GeoPackage, layerConfigIsGeoPackage } from '@/geo/layer/geoview-layers/vector/geopackage';
-import { layerConfigIsWMS, WMS } from '@/geo/layer/geoview-layers/raster/wms';
+
+import { CSV, layerConfigIsCSV } from '@/geo/layer/geoview-layers/vector/csv';
 import { EsriDynamic, layerConfigIsEsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { EsriFeature, layerConfigIsEsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { EsriImage, layerConfigIsEsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
+import { GeoJSON, layerConfigIsGeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
+import { GeoPackage, layerConfigIsGeoPackage } from '@/geo/layer/geoview-layers/vector/geopackage';
 import { ImageStatic, layerConfigIsImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
-import { layerConfigIsWFS, WFS } from '@/geo/layer/geoview-layers/vector/wfs';
-import { layerConfigIsOgcFeature, OgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
-import { layerConfigIsXYZTiles, XYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
-import { layerConfigIsVectorTiles, VectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
-import { CSV, layerConfigIsCSV } from '@/geo/layer/geoview-layers/vector/csv';
+import { OgcFeature, layerConfigIsOgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
+import { VectorTiles, layerConfigIsVectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
+import { WFS, layerConfigIsWFS } from '@/geo/layer/geoview-layers/vector/wfs';
+import { WKB, layerConfigIsWkb } from '@/geo/layer/geoview-layers/vector/wkb';
+import { WMS, layerConfigIsWMS } from '@/geo/layer/geoview-layers/raster/wms';
+import { XYZTiles, layerConfigIsXYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
 
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { HoverFeatureInfoLayerSet } from '@/geo/layer/layer-sets/hover-feature-info-layer-set';
@@ -2436,17 +2438,8 @@ export class LayerApi {
    */
   static createLayerConfigFromType(geoviewLayerConfig: TypeGeoviewLayerConfig, mapProjectionForVectorTiles: string): AbstractGeoViewLayer {
     // TODO: Refactor - Here the function should use the structure created by validation config with the metadata fetch and no need to pass the validation.
-    if (layerConfigIsGeoJSON(geoviewLayerConfig)) {
-      return new GeoJSON(geoviewLayerConfig);
-    }
-    if (layerConfigIsGeoPackage(geoviewLayerConfig)) {
-      return new GeoPackage(geoviewLayerConfig);
-    }
     if (layerConfigIsCSV(geoviewLayerConfig)) {
       return new CSV(geoviewLayerConfig);
-    }
-    if (layerConfigIsWMS(geoviewLayerConfig)) {
-      return new WMS(geoviewLayerConfig, LayerApi.DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS);
     }
     if (layerConfigIsEsriDynamic(geoviewLayerConfig)) {
       return new EsriDynamic(geoviewLayerConfig);
@@ -2457,20 +2450,32 @@ export class LayerApi {
     if (layerConfigIsEsriImage(geoviewLayerConfig)) {
       return new EsriImage(geoviewLayerConfig);
     }
+    if (layerConfigIsGeoJSON(geoviewLayerConfig)) {
+      return new GeoJSON(geoviewLayerConfig);
+    }
+    if (layerConfigIsGeoPackage(geoviewLayerConfig)) {
+      return new GeoPackage(geoviewLayerConfig);
+    }
     if (layerConfigIsImageStatic(geoviewLayerConfig)) {
       return new ImageStatic(geoviewLayerConfig);
-    }
-    if (layerConfigIsWFS(geoviewLayerConfig)) {
-      return new WFS(geoviewLayerConfig);
     }
     if (layerConfigIsOgcFeature(geoviewLayerConfig)) {
       return new OgcFeature(geoviewLayerConfig);
     }
-    if (layerConfigIsXYZTiles(geoviewLayerConfig)) {
-      return new XYZTiles(geoviewLayerConfig);
-    }
     if (layerConfigIsVectorTiles(geoviewLayerConfig)) {
       return new VectorTiles(geoviewLayerConfig, mapProjectionForVectorTiles);
+    }
+    if (layerConfigIsWFS(geoviewLayerConfig)) {
+      return new WFS(geoviewLayerConfig);
+    }
+    if (layerConfigIsWkb(geoviewLayerConfig)) {
+      return new WKB(geoviewLayerConfig);
+    }
+    if (layerConfigIsWMS(geoviewLayerConfig)) {
+      return new WMS(geoviewLayerConfig, LayerApi.DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS);
+    }
+    if (layerConfigIsXYZTiles(geoviewLayerConfig)) {
+      return new XYZTiles(geoviewLayerConfig);
     }
 
     // Not implemented

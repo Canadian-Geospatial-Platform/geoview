@@ -5,17 +5,19 @@ import {
   TypeGeoviewLayerType,
   TypeOfServer,
 } from '@/api/config/types/map-schema-types';
+
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
-import { ImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
-import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
-import { OgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
-import { WFS } from '@/geo/layer/geoview-layers/vector/wfs';
+import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { GeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
 import { GeoPackage } from '@/geo/layer/geoview-layers/vector/geopackage';
-import { XYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
+import { ImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
+import { OgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
 import { VectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
-import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
+import { WFS } from '@/geo/layer/geoview-layers/vector/wfs';
+import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
+import { XYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
+
 import {
   LayerGeoCoreInvalidResponseError,
   LayerGeoCoreNoLayersError,
