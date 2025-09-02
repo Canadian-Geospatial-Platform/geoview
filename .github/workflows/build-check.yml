@@ -1,0 +1,35 @@
+on:
+  pull_request:
+    types: [locked]
+
+env:
+  NODE_VERSION: "20.17.0"
+  PNPM_VERSION: "8.15.2"
+
+jobs:
+  build:
+    name: build-geoview
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          repository: ${{ github.event.pull_request.head.repo.name }}
+
+      - uses: actions/setup-node@v4
+        name: Install node
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      # Run rush install and build on our code
+      - name: Install Rush
+        run: node common/scripts/install-run-rush.js install
+
+      - name: Rush Build
+        run: node common/scripts/install-run-rush.js build:core
