@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Demos Navigator - Canadian Geospatial Platform Viewer</title>
+    <title>Layers Navigator - Canadian Geospatial Platform Viewer</title>
     <link rel="shortcut icon" href="./favicon.ico" />
     <meta name="msapplication-TileColor" content="#da532c" />
     <meta name="msapplication-config" content="./img/browserconfig.xml" />
@@ -98,7 +98,7 @@
           <tr>
             <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
             <td class="header-title">
-              <h1><strong>Demos Navigator</strong></h1>
+              <h1><strong>Layers Navigator</strong></h1>
             </td>
           </tr>
         </tbody>
@@ -109,7 +109,7 @@
             <td><a href="./index.html">Main</a><br /></td>
           </tr>
           <tr>
-            <td><a href="./layers-navigator.html">Layers Navigator</a><br /></td>
+            <td><a href="./demos-navigator.html">Demos Navigator</a><br /></td>
           </tr>
         </tbody>
       </table>
@@ -121,27 +121,37 @@
       <div class="selector">
         <select name="Config Loader" id="configLoader">
           <option value="">--select--</option>
-          <option value="./configs/navigator/demos/00-basic-footer-appbar-combo.json">Basic map with app bar footer bar combo</option>
-          <option value="./configs/navigator/demos/01-basemap-LCC-TLS.json">Basemap LCC Transport-Labeled-Shaded</option>
-          <option value="./configs/navigator/demos/02-basemap-LCC-SL.json">
-            Basemap LCC Simple-Labeled (overview map hide on zoom 7 and lower)
-          </option>
-          <option value="./configs/navigator/demos/03-projection-WM.json">Basemap WM</option>
-          <option value="./configs/navigator/demos/04-restrict-zoom.json">Restricted zoom [4, 8]</option>
-          <option value="./configs/navigator/demos/05-max-extent-override.json">Unrestricted zoom map extent for WM zoom north</option>
-          <option value="./configs/navigator/demos/06-zoom-layer.json">Zoom on layer extent</option>
-          <option value="./configs/navigator/demos/07-layer-zoom-levels.json">Zoom and Scale Settings</option>
-          <option value="./configs/navigator/demos/08-all-layer-zoom-levels.json">All Layer Type Zoom and Scale</option>
-          <option value="./configs/navigator/demos/09-basic-footer-layers-tab.json">Basic map with footer - Layers Default</option>
-          <option value="./configs/navigator/demos/10-basic-appbar-data-table-tab.json">Basic map with app bar - Data Table Default</option>
-          <option value="./configs/navigator/demos/11-package-time-slider.json">Package time slider</option>
-          <option value="./configs/navigator/demos/12-package-time-slider-custom.json">Package custom time slider</option>
-          <option value="./configs/navigator/demos/13-package-geochart.json">Package geochart</option>
-          <option value="./configs/navigator/demos/14-package-swiper.json">Package swiper</option>
-          <option value="./configs/navigator/demos/15-package-drawer.json">Package drawer - BETA</option>
-          <option value="./configs/navigator/demos/16-package-area-of-interest.json">Package Area of interest</option>
-          <option value="./configs/navigator/demos/17-package-custom-legend.json">Package Custom Legend</option>
-          <option value="./configs/navigator/demos/18-global-settings.json">Global Settings Options</option>
+          <option value="./configs/navigator/layers/01-all-layers.json">All Layer Types</option>
+          <option value="./configs/navigator/layers/02-csv.json">Layer - CSV -</option>
+          <option value="./configs/navigator/layers/03-esri-dynamic.json">Layer - ESRI Dynamic -</option>
+          <option value="./configs/navigator/layers/04-esri-dynamic-projections.json">Layer - ESRI Dynamic - projections</option>
+          <option value="./configs/navigator/layers/05-esri-dynamic-errors.json">Layer - ESRI Dynamic - errors</option>
+          <option value="./configs/navigator/layers/06-esri-feature.json">Layer - ESRI Feature -</option>
+          <option value="./configs/navigator/layers/07-esri-feature-errors.json">Layer - ESRI Feature - errors</option>
+          <option value="./configs/navigator/layers/08-esri-image.json">Layer - ESRI Image -</option>
+          <option value="./configs/navigator/layers/09-esri-image-errors.json">Layer - ESRI Image - errors</option>
+          <option value="./configs/navigator/layers/10-geojson.json">Layer - GeoJSON -</option>
+          <option value="./configs/navigator/layers/11-geojson-multi.json">Layer - GeoJSON MutiPolygon -</option>
+          <option value="./configs/navigator/layers/12-geojson-errors.json">Layer - GeoJSON - errors</option>
+          <option value="./configs/navigator/layers/13-geopackages.json">Layer GeoView - GeoPackages DEPRECATED-</option>
+          <option value="./configs/navigator/layers/14-ogc-feature-api.json">Layer - OGC Feature API -</option>
+          <option value="./configs/navigator/layers/15-ogc-feature-api-errors.json">Layer - OGC Feature API - errors</option>
+          <option value="./configs/navigator/layers/16-shapefile.json">Layer - Shapefile -</option>
+          <option value="./configs/navigator/layers/17-static-image.json">Layer - Static Image -</option>
+          <option value="./configs/navigator/layers/18-static-image-errors.json">Layer - Static Image - errors</option>
+          <option value="./configs/navigator/layers/19-vector-tile.json">Layer - Vector Tile -</option>
+          <option value="./configs/navigator/layers/20-wfs.json">Layer - WFS -</option>
+          <option value="./configs/navigator/layers/21-wfs-errors.json">Layer - WFS - errors</option>
+          <option value="./configs/navigator/layers/22-wkb.json">Layer - WKB -</option>
+          <option value="./configs/navigator/layers/23-wms-layer.json">Layer - WMS -</option>
+          <option value="./configs/navigator/layers/24-wms-layer-errors.json">Layer - WMS - errors</option>
+          <option value="./configs/navigator/layers/25-xyz-tile.json">Layer - XYZ Tile -</option>
+          <option value="./configs/navigator/layers/26-xyz-tile-errors.json">Layer - XYZ Tile - errors</option>
+          <option value="./configs/navigator/layers/27-geocore.json">Layer GeoView - GeoCore -</option>
+          <option value="./configs/navigator/layers/28-geocore-custom.json">Layer GeoView - GeoCore Custom Config -</option>
+          <option value="./configs/navigator/layers/29-geocore-custom-inline-config.json">Layer GeoView - GeoCore Custom Inline Config -</option>
+          <option value="./configs/navigator/layers/30-geocore-duplicates.json">Layer GeoView - Duplicate GeoCore Config -</option>
+          <option value="./configs/navigator/layers/31-geocore-errors.json">Layer GeoView - GeoCore - errors</option>
         </select>
       </div>
     </div>
