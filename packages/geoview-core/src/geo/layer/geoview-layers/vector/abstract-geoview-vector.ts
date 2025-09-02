@@ -104,6 +104,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     // eslint-disable-next-line no-param-reassign, @typescript-eslint/no-misused-promises
     sourceOptions.loader = async (extent: Extent, resolution: number, projection: OLProjection, successCallback, failureCallback) => {
       try {
+        let responseText;
+
         // TODO: Refactor - Here, the url is resolved by eventually grabbing it back from the OpenLayer source object.
         // TO.DOCONT: The url should probably never have been 'set' in the OpenLayer Source in the first place.
         // TO.DOCONT: Refactor this for a cleaner getUrl override per layer type class.
@@ -114,11 +116,13 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         // Resolve the url
         const url = AbstractGeoViewVector.#resolveUrl(layerConfig, vectorSource, extent, resolution, projection);
 
-        // Fetch the data, or use passed geoJSON if present
-        const responseText =
-          layerConfig.getSchemaTagGeoJSON() && layerConfig.source?.geojson
-            ? layerConfig.source.geojson
-            : await AbstractGeoViewVector.#fetchData(url, sourceConfig);
+        if (layerConfig.schemaTag !== 'WKB') {
+          // Fetch the data, or use passed geoJSON if present
+          responseText =
+            layerConfig.getSchemaTagGeoJSON() && layerConfig.source?.geojson
+              ? layerConfig.source.geojson
+              : await AbstractGeoViewVector.#fetchData(url, sourceConfig);
+        } else responseText = layerConfig.source!.dataAccessPath as string;
 
         // If Esri Feature
         if (layerConfig.getSchemaTagEsriFeature()) {
@@ -561,9 +565,13 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         });
       }, undefined);
 
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.source.featureInfo.nameField = nameField ? nameField.name : layerConfig.source.featureInfo.outfields[0].name;
+      if (nameField || layerConfig.source?.featureInfo?.outfields?.length)
+        // eslint-disable-next-line no-param-reassign
+        layerConfig.source.featureInfo.nameField = nameField ? nameField.name : layerConfig.source.featureInfo.outfields[0].name;
     }
+
+    // eslint-disable-next-line no-param-reassign
+    if (!layerConfig.source.featureInfo.outfields.length) layerConfig.source.featureInfo.queryable = false;
   }
 
   /**

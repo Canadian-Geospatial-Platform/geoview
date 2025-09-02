@@ -7,17 +7,19 @@ import { AnyValidateFunction } from 'ajv/dist/types';
 
 import defaultsDeep from 'lodash/defaultsDeep';
 
-import { geoviewEntryIsWMS } from '@/geo/layer/geoview-layers/raster/wms';
-import { geoviewEntryIsImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
-import { geoviewEntryIsXYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
-import { geoviewEntryIsVectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
+import { geoviewEntryIsCSV } from '@/geo/layer/geoview-layers/vector/csv';
 import { geoviewEntryIsEsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { geoviewEntryIsEsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
-import { geoviewEntryIsWFS } from '@/geo/layer/geoview-layers/vector/wfs';
-import { geoviewEntryIsOgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
 import { geoviewEntryIsGeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
-import { geoviewEntryIsCSV } from '@/geo/layer/geoview-layers/vector/csv';
 import { geoviewEntryIsGeoPackage } from '@/geo/layer/geoview-layers/vector/geopackage';
+import { geoviewEntryIsImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
+import { geoviewEntryIsOgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
+import { geoviewEntryIsVectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
+import { geoviewEntryIsWFS } from '@/geo/layer/geoview-layers/vector/wfs';
+import { geoviewEntryIsWKB } from '@/geo/layer/geoview-layers/vector/wkb';
+import { geoviewEntryIsWMS } from '@/geo/layer/geoview-layers/raster/wms';
+import { geoviewEntryIsXYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
+
 import {
   TypeDisplayLanguage,
   TypeGeoviewLayerConfig,
@@ -35,19 +37,22 @@ import { logger } from '@/core/utils/logger';
 
 import { generateId } from '@/core/utils/utilities';
 import schema from '@/core/../../schema.json';
-import { WfsLayerEntryConfig } from './validation-classes/vector-validation-classes/wfs-layer-entry-config';
-import { OgcFeatureLayerEntryConfig } from './validation-classes/vector-validation-classes/ogc-layer-entry-config';
+
 import { CsvLayerEntryConfig } from './validation-classes/vector-validation-classes/csv-layer-entry-config';
-import { VectorTilesLayerEntryConfig } from './validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
-import { GeoJSONLayerEntryConfig } from './validation-classes/vector-validation-classes/geojson-layer-entry-config';
-import { EsriFeatureLayerEntryConfig } from './validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
-import { GeoPackageLayerEntryConfig } from './validation-classes/vector-validation-classes/geopackage-layer-config-entry';
-import { XYZTilesLayerEntryConfig } from './validation-classes/raster-validation-classes/xyz-layer-entry-config';
-import { OgcWmsLayerEntryConfig } from './validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { ImageStaticLayerEntryConfig } from './validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from './validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
+import { EsriFeatureLayerEntryConfig } from './validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { EsriImageLayerEntryConfig } from './validation-classes/raster-validation-classes/esri-image-layer-entry-config';
+import { GeoJSONLayerEntryConfig } from './validation-classes/vector-validation-classes/geojson-layer-entry-config';
+import { GeoPackageLayerEntryConfig } from './validation-classes/vector-validation-classes/geopackage-layer-config-entry';
+import { ImageStaticLayerEntryConfig } from './validation-classes/raster-validation-classes/image-static-layer-entry-config';
+import { OgcFeatureLayerEntryConfig } from './validation-classes/vector-validation-classes/ogc-layer-entry-config';
+import { OgcWmsLayerEntryConfig } from './validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import { VectorTilesLayerEntryConfig } from './validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
+import { WfsLayerEntryConfig } from './validation-classes/vector-validation-classes/wfs-layer-entry-config';
+import { WkbLayerEntryConfig } from './validation-classes/vector-validation-classes/wkb-layer-entry-config';
+import { XYZTilesLayerEntryConfig } from './validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { GroupLayerEntryConfig } from './validation-classes/group-layer-entry-config';
+
 import { LayerMetadataAccessPathMandatoryError, LayerMissingGeoviewLayerIdError } from '@/core/exceptions/layer-exceptions';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
@@ -377,6 +382,8 @@ export class ConfigValidation {
         listOfLayerEntryConfig[i] = new GeoJSONLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsCSV(layerConfig)) {
         listOfLayerEntryConfig[i] = new CsvLayerEntryConfig(layerConfig);
+      } else if (geoviewEntryIsWKB(layerConfig)) {
+        listOfLayerEntryConfig[i] = new WkbLayerEntryConfig(layerConfig);
       } else {
         // Unsupported layer type
         throw new NotSupportedError(`Unsupported layer entry config type '${layerConfig.geoviewLayerConfig?.geoviewLayerType}'`);
