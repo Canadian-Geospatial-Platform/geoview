@@ -15,6 +15,11 @@ import { Transform } from '@/geo/interaction/transform/transform';
 
 type DrawerActions = IDrawerState['actions'];
 
+export const DEFAULT_TEXT_VALUES = {
+  en: 'Default Text',
+  fr: 'Texte par défaut',
+};
+
 export type StyleProps = {
   fillColor: string;
   strokeColor: string;
@@ -167,7 +172,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
       strokeColor: '#000000',
       strokeWidth: 1.3,
       iconSize: 24,
-      text: 'Default Text',
+      text: DEFAULT_TEXT_VALUES[get().appState.displayLanguage],
       textSize: 14,
       textFont: 'Arial',
       textColor: '#000000',

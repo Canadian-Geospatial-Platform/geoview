@@ -115,7 +115,7 @@ class DrawerPlugin extends NavBarPlugin {
           undoTooltip: 'défaire',
           redoTooltip: 'refaire',
           downloadTooltip: 'Télécharger les dessins',
-          uploadTooltip: 'Télécharger des dessins',
+          uploadTooltip: 'Téléverser les dessins',
           colourPicker: 'Choisissez une couleur',
         },
       },

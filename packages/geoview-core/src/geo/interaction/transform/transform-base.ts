@@ -352,6 +352,11 @@ export class OLTransform extends OLPointer {
     // Set the selected feature
     this.selectedFeature = feature;
 
+    // Save initial state to history when selecting a new feature
+    if (previousFeature !== feature) {
+      this.#saveToHistory();
+    }
+
     // Set angle to actual rotation value for text features
     if (this.#isTextFeature(feature)) {
       this.angle = feature.get('textRotation') || 0;
@@ -488,8 +493,14 @@ export class OLTransform extends OLPointer {
       geometry.setCoordinates(coords);
     }
 
+    // Save state before deleting the vertex
+    this.#saveToHistory();
+
     // Update handles after deletion
     this.updateHandles();
+
+    // Fire transform end event to notify drawer event processor to update undo/redo buttons
+    this.onTransformend?.(new TransformEvent('transformend', this.selectedFeature));
   }
 
   /**
@@ -1542,8 +1553,7 @@ export class OLTransform extends OLPointer {
     }
 
     this.#vertexAdded = true;
-    // Recreate handles after adding vertex
-    // this.updateHandles();
+
     this.clearHandles();
   }
 

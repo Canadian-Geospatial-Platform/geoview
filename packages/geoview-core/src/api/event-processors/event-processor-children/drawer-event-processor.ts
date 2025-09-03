@@ -1,5 +1,4 @@
 import { Feature, Overlay } from 'ol';
-import { Projection as OLProjection } from 'ol/proj';
 import GeoJSON from 'ol/format/GeoJSON';
 import { LineString, Polygon, Point, Circle as CircleGeom, Geometry, SimpleGeometry } from 'ol/geom';
 import { fromCircle } from 'ol/geom/Polygon';
@@ -9,19 +8,18 @@ import { StyleLike } from 'ol/style/Style';
 import { DrawEvent, GeometryFunction, SketchCoordType, createBox } from 'ol/interaction/Draw';
 
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
-import { IDrawerState, StyleProps } from '@/core/stores/store-interface-and-intial-values/drawer-state';
+import { DEFAULT_TEXT_VALUES, IDrawerState, StyleProps } from '@/core/stores/store-interface-and-intial-values/drawer-state';
 import { Draw } from '@/geo/interaction/draw';
 import { AppEventProcessor } from './app-event-processor';
 import { MapEventProcessor } from './map-event-processor';
 
-import { doUntil, generateId } from '@/core/utils/utilities';
-import { DEFAULT_PROJECTION } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { generateId } from '@/core/utils/utilities';
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { Projection } from '@/geo/utils/projection';
 import { geometriesAreEqual } from '@/geo/utils/utilities';
 import { TransformDeleteFeatureEvent, TransformEvent, TransformSelectionEvent } from '@/geo/interaction/transform/transform-events';
-import { MapProjectionChangedEvent, MapViewer } from '@/geo/map/map-viewer';
 import { logger } from '@/core/utils/logger';
+import { TypeValidMapProjectionCodes } from '@/api/config/types/map-schema-types';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -85,29 +83,33 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * @returns {Array<() => void>} Array of unsubscribe functions
    */
   override onInitialize(store: GeoviewStoreType): Array<() => void> {
-    const { mapId, mapConfig } = store.getState();
+    const { mapId } = store.getState();
 
     // Set up keyboard handler
     DrawerEventProcessor.#setupKeyboardHandler(mapId);
 
-    // Set up map projection change handler
-    DrawerEventProcessor.#setupReprojectDrawingsHandler(mapId);
-
-    // Set initial projection value for the mapId
-    const initialProjection = mapConfig?.map.viewSettings.projection || DEFAULT_PROJECTION;
-    DrawerEventProcessor.#currentProjections.set(mapId, Projection.PROJECTIONS[initialProjection]);
-
     // Subscribe to language changes
-    const unsubscribe = store.subscribe(
+    const languageUnsubscribe = store.subscribe(
       (state) => state.appState.displayLanguage,
       () => {
         // Update all measurement tooltips when language changes
         DrawerEventProcessor.#updateMeasurementTooltips(mapId);
+
+        // Update Default Text when language changes
+        DrawerEventProcessor.#updateDefaultText(mapId);
+      }
+    );
+
+    // Subscribe to projection changes
+    const projectionUnsubscribe = store.subscribe(
+      (state) => state.mapState.currentProjection,
+      (currentProjection, previousProjection) => {
+        DrawerEventProcessor.#handleMapReprojection(mapId, currentProjection, previousProjection);
       }
     );
 
     // Return the unsubscribe function to be added to the subscription array
-    return [unsubscribe];
+    return [languageUnsubscribe, projectionUnsubscribe];
   }
 
   /** History stack for undo/redo functionality */
@@ -133,36 +135,23 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   /** Keyboard event handlers for each map */
   static #keyboardHandlers: Map<string, (event: KeyboardEvent) => void> = new Map();
 
-  /** Current Projection per mapId */
-  static #currentProjections: Map<string, OLProjection> = new Map();
-
   // #region Helpers
 
-  static #setupReprojectDrawingsHandler(mapId: string): void {
-    const handler = (sender: MapViewer, event: MapProjectionChangedEvent): void => {
+  static #handleMapReprojection(
+    mapId: string,
+    currentProjection: TypeValidMapProjectionCodes,
+    previousProjection: TypeValidMapProjectionCodes
+  ): void {
+    if (previousProjection) {
       const features = this.#getDrawingFeatures(mapId);
-      const currentProjection = this.#currentProjections.get(mapId);
-
       features.forEach((feature) => {
         const geometry = feature.getGeometry();
-        if (geometry && currentProjection) {
-          geometry.transform(currentProjection.getCode(), event.projection.getCode());
-        }
+        if (!geometry) return;
+
+        geometry.transform(Projection.PROJECTIONS[previousProjection], Projection.PROJECTIONS[currentProjection]);
+        DrawerEventProcessor.#updateMeasurementTooltips(mapId);
       });
-
-      this.#currentProjections.set(mapId, event.projection);
-    };
-
-    // Subscribe to projection change event
-    doUntil(() => {
-      try {
-        MapEventProcessor.getMapViewer(mapId).onMapProjectionChanged(handler);
-        return true;
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (error: unknown) {
-        return false;
-      }
-    }, 1000);
+    }
   }
 
   /**
@@ -218,6 +207,18 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
         overlay.setPosition(tooltipCoord);
       }
     });
+  }
+
+  /**
+   * Sets the text value to the default text value of the current language
+   * @param {string} mapId The map ID
+   */
+  static #updateDefaultText(mapId: string): void {
+    const state = this.getDrawerState(mapId);
+    if (!state) return;
+
+    const displayLanguage = AppEventProcessor.getDisplayLanguage(mapId);
+    state.setterActions.setTextValue(DEFAULT_TEXT_VALUES[displayLanguage]);
   }
 
   /**
@@ -560,7 +561,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * @param {string} geomType - The geometry type to draw (optional, uses current state if not provided)
    * @param {StyleProps} styleInput - Optional style properties to use
    */
-  public static startDrawing(mapId: string, geomType?: string, styleInput?: StyleProps): void {
+  static startDrawing(mapId: string, geomType?: string, styleInput?: StyleProps): void {
     const state = this.getDrawerState(mapId);
     if (!state) return;
 
@@ -714,7 +715,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * Stops the current drawing operation
    * @param {string} mapId - The map ID
    */
-  public static stopDrawing(mapId: string): void {
+  static stopDrawing(mapId: string): void {
     const state = this.getDrawerState(mapId);
     if (!state) return;
 
@@ -732,7 +733,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * Toggles the drawing state
    * @param {string} mapId - The map ID
    */
-  public static toggleDrawing(mapId: string): void {
+  static toggleDrawing(mapId: string): void {
     const state = this.getDrawerState(mapId);
     if (!state) return;
 
@@ -749,7 +750,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * Initiates editing interactions
    * @param {string} mapId - The map ID
    */
-  public static startEditing(mapId: string): void {
+  static startEditing(mapId: string): void {
     const state = this.getDrawerState(mapId);
     if (!state) return;
 
@@ -947,7 +948,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * Stops the editing interaction for all groups
    * @param {string} mapId - The map ID
    */
-  public static stopEditing(mapId: string): void {
+  static stopEditing(mapId: string): void {
     const state = this.getDrawerState(mapId);
     if (!state) return;
 
@@ -967,7 +968,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * Function to toggle editing state
    * @param {string} mapId - The map ID
    */
-  public static toggleEditing(mapId: string): void {
+  static toggleEditing(mapId: string): void {
     const state = this.getDrawerState(mapId);
     if (!state) return;
 
@@ -985,7 +986,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * Starts snapping interactions
    * @param {string} mapId - The map ID
    */
-  public static startSnapping(mapId: string): void {
+  static startSnapping(mapId: string): void {
     const state = this.getDrawerState(mapId);
     if (!state) return;
 
@@ -1000,7 +1001,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * Stops snapping interactions
    * @param {string} mapId - The map ID
    */
-  public static stopSnapping(mapId: string): void {
+  static stopSnapping(mapId: string): void {
     const state = this.getDrawerState(mapId);
     if (!state) return;
 
@@ -1014,7 +1015,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * Toggles snapping state
    * @param {string} mapId - The map ID
    */
-  public static toggleSnapping(mapId: string): void {
+  static toggleSnapping(mapId: string): void {
     const state = this.getDrawerState(mapId);
     if (!state) return;
 
@@ -1031,7 +1032,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map ID
    * @param {StyleProps} newStyle - The new style to apply
    */
-  public static updateTransformingFeatureStyle(mapId: string, newStyle: StyleProps): void {
+  static updateTransformingFeatureStyle(mapId: string, newStyle: StyleProps): void {
     const state = this.getDrawerState(mapId);
     if (!state) return;
 
@@ -1103,7 +1104,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map ID
    * @param {string} featureId - The ID of the feature to be deleted
    */
-  public static deleteSingleDrawing(mapId: string, featureId: string): void {
+  static deleteSingleDrawing(mapId: string, featureId: string): void {
     const feature = this.#getFeatureById(mapId, featureId);
     if (!feature) return;
 
@@ -1120,7 +1121,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * Clears all drawings from the map
    * @param {string} mapId - The map ID
    */
-  public static clearDrawings(mapId: string, saveHistory: boolean = true): void {
+  static clearDrawings(mapId: string, saveHistory: boolean = true): void {
     const state = this.getDrawerState(mapId);
     if (!state) return;
 
@@ -1156,7 +1157,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * Refreshes the interaction instances
    * @param {string} mapId - The map ID
    */
-  public static refreshInteractionInstances(mapId: string): void {
+  static refreshInteractionInstances(mapId: string): void {
     const state = this.getDrawerState(mapId);
     if (!state) return;
 
@@ -1173,7 +1174,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     }
   }
 
-  public static refreshSnappingInstance(mapId: string): void {
+  static refreshSnappingInstance(mapId: string): void {
     const state = this.getDrawerState(mapId);
     if (!state) return;
 
@@ -1187,7 +1188,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * Toggles the measurement overlays on the map
    * @param {string} mapId - The map ID
    */
-  public static toggleHideMeasurements(mapId: string): void {
+  static toggleHideMeasurements(mapId: string): void {
     const state = this.getDrawerState(mapId);
     if (!state) return;
 
@@ -1617,7 +1618,6 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     const viewer = MapEventProcessor.getMapViewer(mapId);
 
     action.features.forEach((feature) => {
-      // const feature = historyFeature.clone(); // Clone to prevent modifying the state feature
       const featureId = feature.get('featureId');
 
       // GV Can't just use this.deleteSingleDrawing because between actions it will cause the
