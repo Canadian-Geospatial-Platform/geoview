@@ -31,18 +31,20 @@ import { isJsonString, isValidUUID, removeCommentsFromJSON } from '@/core/utils/
 import { logger } from '@/core/utils/logger';
 import { UUIDmapConfigReader } from '@/core/utils/config/reader/uuid-config-reader';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
-import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
-import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
-import { XYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
-import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
-import { VectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
-import { ImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
-import { WFS } from '@/geo/layer/geoview-layers/vector/wfs';
-import { OgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
-import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
-import { GeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
+
 import { CSV } from '@/geo/layer/geoview-layers/vector/csv';
+import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
+import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
+import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
+import { GeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
 import { GeoCore } from '@/geo/layer/other/geocore';
+import { ImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
+import { OgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
+import { VectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
+import { WFS } from '@/geo/layer/geoview-layers/vector/wfs';
+import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
+import { XYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
+
 import schema from '@/core/../../schema.json';
 import { getStyleFromEsriRenderer } from '@/geo/utils/renderer/esri-renderer';
 
