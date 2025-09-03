@@ -11,7 +11,8 @@ import { Coordinate } from 'ol/coordinate';
 import { Extent, getCenter } from 'ol/extent';
 
 import { TransformEvent, TransformSelectionEvent, TransformDeleteFeatureEvent } from './transform-events';
-import { MapViewer } from '@/app';
+import { geometriesAreEqual } from '@/geo/utils/utilities';
+import { MapViewer } from '@/geo/map/map-viewer';
 
 // #region Constants
 
@@ -1375,7 +1376,7 @@ export class OLTransform extends OLPointer {
       if (this.#isTransforming && this.selectedFeature) {
         // Save state to history after transformation if the geometry changed
         const currentGeometry = this.selectedFeature.getGeometry();
-        const geometryChanged = this.startGeometry && currentGeometry && this.startGeometry.getRevision() !== currentGeometry.getRevision();
+        const geometryChanged = this.startGeometry && currentGeometry && !geometriesAreEqual(this.startGeometry, currentGeometry);
         if (geometryChanged) {
           this.#saveToHistory();
         }
