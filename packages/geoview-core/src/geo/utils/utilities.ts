@@ -8,7 +8,7 @@ import { getArea as getAreaOL, getLength as getLengthOL } from 'ol/sphere';
 import { containsCoordinate, Extent } from 'ol/extent';
 import { XYZ, OSM, VectorTile } from 'ol/source';
 import TileLayer from 'ol/layer/Tile';
-import { LineString, Polygon } from 'ol/geom';
+import { LineString, Point, Polygon } from 'ol/geom';
 import { Coordinate } from 'ol/coordinate';
 import View from 'ol/View';
 
@@ -603,4 +603,22 @@ export const getPointerPositionFromMapEvent = (mapEvent: MapBrowserEvent, projCo
     lonlat: Projection.transformPoints([mapEvent.coordinate], projCode, Projection.PROJECTION_NAMES.LONLAT)[0],
     dragging: mapEvent.dragging,
   };
+};
+
+/**
+ * Function for checking if two geometries have the same coordinates
+ * @param {Geometry} geom1 - The first geometry
+ * @param {Geometry} geom2 - The second geometry
+ * @returns {boolean} Whether the two geometries are equal or not
+ */
+export const geometriesAreEqual = (geom1: Geometry, geom2: Geometry): boolean => {
+  if (geom1.getType() !== geom2.getType()) return false;
+
+  if (geom1 instanceof Point || geom1 instanceof LineString || geom1 instanceof Polygon) {
+    const coords1 = geom1.getCoordinates();
+    const coords2 = (geom2 as Point | LineString | Polygon).getCoordinates();
+    return JSON.stringify(coords1) === JSON.stringify(coords2);
+  }
+
+  return false;
 };

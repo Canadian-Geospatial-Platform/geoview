@@ -18,6 +18,7 @@ import { doUntil, generateId } from '@/core/utils/utilities';
 import { DEFAULT_PROJECTION } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { Projection } from '@/geo/utils/projection';
+import { geometriesAreEqual } from '@/geo/utils/utilities';
 import { TransformDeleteFeatureEvent, TransformEvent, TransformSelectionEvent } from '@/geo/interaction/transform/transform-events';
 import { MapProjectionChangedEvent, MapViewer } from '@/geo/map/map-viewer';
 import { logger } from '@/core/utils/logger';
@@ -161,7 +162,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       } catch (error: unknown) {
         return false;
       }
-    }, 3000);
+    }, 1000);
   }
 
   /**
@@ -279,9 +280,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       output = this.#getLengthText(length, displayLanguage);
 
       tooltipCoord = geom.getLastCoordinate();
-    }
-
-    if (geom instanceof Polygon) {
+    } else if (geom instanceof Polygon) {
       const length = getLength(geom);
       output = this.#getLengthText(length, displayLanguage);
 
@@ -290,9 +289,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
       tooltipCoord = geom.getInteriorPoint().getCoordinates();
       tooltipCoord.pop();
-    }
-
-    if (geom instanceof CircleGeom) {
+    } else if (geom instanceof CircleGeom) {
       // For Circle geometries, calculate area using π*r²
       const radius = geom.getRadius();
       const length = 2 * Math.PI * radius;
@@ -708,7 +705,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
       this.#saveToHistory(mapId, {
         type: 'add',
-        features: [feature.clone()],
+        features: [feature],
       });
     };
   }
@@ -851,7 +848,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       // Save the delete state
       this.#saveToHistory(mapId, {
         type: 'delete',
-        features: [feature.clone()],
+        features: [feature],
       });
 
       const featureId = feature.getId();
@@ -883,7 +880,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
           const currentGeometry = previousFeature.getGeometry();
 
           // Check for changes
-          const geometryChanged = currentGeometry && savedState.originalGeometry.getRevision() !== currentGeometry.getRevision();
+          const geometryChanged = currentGeometry && !geometriesAreEqual(savedState.originalGeometry, currentGeometry);
           const styleChanged =
             savedState.originalStyleStored && savedState.originalStyle && savedState.originalStyle !== previousFeature.getStyle();
 
@@ -1001,7 +998,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Stops snapping interactions
-   * @param mapId - The map ID
+   * @param {string} mapId - The map ID
    */
   public static stopSnapping(mapId: string): void {
     const state = this.getDrawerState(mapId);
@@ -1397,7 +1394,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
         // Save action history
         this.#saveToHistory(mapId, {
           type: 'add',
-          features: newFeatures.map((ftr) => ftr.clone()),
+          features: newFeatures,
         });
       } catch (error) {
         logger.logError('Error loading GeoJSON:', error);
@@ -1588,10 +1585,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   static #addFeaturesAction(mapId: string, action: DrawerHistoryAction): void {
     const viewer = MapEventProcessor.getMapViewer(mapId);
     if (!viewer) return;
-    // Re-add the features
-    action.features.forEach((historyFeature) => {
-      const feature = historyFeature.clone(); // Clone to prevent modifying the state feature
 
+    // Re-add the features
+    action.features.forEach((feature) => {
       feature.setId(feature.get('featureId'));
       viewer.layer.geometry.geometries.push(feature);
       viewer.layer.geometry.addToGeometryGroup(feature, DRAW_GROUP_KEY);
@@ -1620,8 +1616,8 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   static #deleteFeaturesAction(mapId: string, action: DrawerHistoryAction): void {
     const viewer = MapEventProcessor.getMapViewer(mapId);
 
-    action.features.forEach((historyFeature) => {
-      const feature = historyFeature.clone(); // Clone to prevent modifying the state feature
+    action.features.forEach((feature) => {
+      // const feature = historyFeature.clone(); // Clone to prevent modifying the state feature
       const featureId = feature.get('featureId');
 
       // GV Can't just use this.deleteSingleDrawing because between actions it will cause the
