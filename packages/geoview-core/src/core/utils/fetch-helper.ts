@@ -132,12 +132,37 @@ export class Fetch {
    * @param {RequestInit?} init - The optional initialization parameters for the fetch.
    * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
    * @returns {Promise<string>} The fetched text response.
-   * @throws {ResponseError} If the response is not OK (non-2xx).
    * @throws {ResponseEmptyError} If the JSON response is empty.
+   */
+  static async fetchText(url: string, init?: RequestInit, timeoutMs?: number): Promise<string> {
+    // Get the buffer array of the response
+    const buffer = await Fetch.fetchArrayBuffer(url, init, timeoutMs);
+
+    // Guess the best encoding and return the best text we can from the buffer
+    const result = readTextWithBestEncoding(buffer);
+    const responseText = result.text;
+
+    // If data in the response
+    if (responseText.trim() !== '') {
+      // Return the text content
+      return responseText;
+    }
+
+    // Throw empty response error
+    throw new ResponseEmptyError();
+  }
+
+  /**
+   * Fetches a url for an array buffer response.
+   * @param {string} url - The url to fetch.
+   * @param {RequestInit?} init - The optional initialization parameters for the fetch.
+   * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
+   * @returns {Promise<ArrayBuffer>} The fetched array buffer response.
+   * @throws {ResponseError} If the response is not OK (non-2xx).
    * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
    * @throws {Error} For any other unexpected failures.
    */
-  static async fetchText(url: string, init?: RequestInit, timeoutMs?: number): Promise<string> {
+  static async fetchArrayBuffer(url: string, init?: RequestInit, timeoutMs?: number): Promise<ArrayBuffer> {
     // The original signal if any
     const originalSignal = init?.signal || undefined;
 
@@ -163,21 +188,8 @@ export class Fetch {
       // Validate response
       if (!response.ok) throw new ResponseError(response);
 
-      // Get the buffer array of the response
-      const buffer = await response.arrayBuffer();
-
-      // Guess the best encoding and return the best text we can from the buffer
-      const result = readTextWithBestEncoding(buffer);
-      const responseText = result.text;
-
-      // If data in the response
-      if (responseText.trim() !== '') {
-        // Return the text content
-        return responseText;
-      }
-
-      // Throw empty response error
-      throw new ResponseEmptyError();
+      // Get the blob of the response
+      return await response.arrayBuffer();
     } catch (error: unknown) {
       // Throw the exceptions that we know
       Fetch.#throwWhatWeKnow(error, originalSignal, timeoutSignal, timeoutMs);

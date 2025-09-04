@@ -40,7 +40,6 @@ const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
   esriImage: 'Esri Image Layer',
   imageStatic: 'Static Image Layer',
   GeoJSON: 'GeoJson Layer',
-  GeoPackage: 'GeoPackage Layer',
   ogcFeature: 'OGC Feature Layer',
   ogcWfs: 'WFS Layer',
   ogcWms: 'WMS Layer',

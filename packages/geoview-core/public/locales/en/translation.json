@@ -121,6 +121,7 @@
     "serviceGeoCore": "GeoCore Identifier",
     "serviceVectorTile": "Vector Tile Service",
     "serviceGeoJSON": "GeoJSON",
+    "serviceGeoPackage": "GeoPackage",
     "serviceCSV": "Comma Separated Values (CSV)",
     "serviceRasterTile": "XYZ Raster Tiles",
     "serviceImageStatic": "Static Image",

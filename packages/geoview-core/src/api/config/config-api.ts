@@ -6,6 +6,7 @@ import { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config'
 import {
   DEFAULT_MAP_FEATURE_CONFIG,
   CONFIG_GEOCORE_TYPE,
+  CONFIG_GEOPACKAGE_TYPE,
   CONFIG_SHAPEFILE_TYPE,
   TypeBasemapOptions,
   TypeDisplayLanguage,
@@ -81,7 +82,7 @@ export class ConfigApi {
 
     if (/.(?:GEO)?JSON(?:$|\?)/i.test(url)) return CONST_LAYER_TYPES.GEOJSON;
 
-    if (upperUrl.endsWith('.GPKG')) return CONST_LAYER_TYPES.GEOPACKAGE;
+    if (upperUrl.endsWith('.GPKG')) return CONFIG_GEOPACKAGE_TYPE;
 
     if (upperUrl.includes('VECTORTILESERVER')) return CONST_LAYER_TYPES.VECTOR_TILES;
 

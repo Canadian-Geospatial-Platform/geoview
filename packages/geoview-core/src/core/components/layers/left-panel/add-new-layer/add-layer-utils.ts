@@ -37,7 +37,7 @@ export class UtilAddLayer {
    */
   static getLocalizeLayerType(language: TypeDisplayLanguage, includeStatic: boolean): Array<[string, string]> {
     const { CSV, ESRI_DYNAMIC, ESRI_FEATURE, ESRI_IMAGE, GEOJSON, WMS, WFS, OGC_FEATURE, XYZ_TILES, VECTOR_TILES } = CONST_LAYER_TYPES;
-    const { GEOCORE, SHAPEFILE } = CONST_LAYER_ENTRY_TYPES;
+    const { GEOCORE, GEOPACKAGE, SHAPEFILE } = CONST_LAYER_ENTRY_TYPES;
     const layerOptions: [string, string][] = [
       [CSV, getLocalizedMessage(language, 'layers.serviceCSV')],
       [SHAPEFILE, getLocalizedMessage(language, 'layers.serviceEsriShapefile')],
@@ -45,6 +45,7 @@ export class UtilAddLayer {
       [ESRI_FEATURE, getLocalizedMessage(language, 'layers.serviceEsriFeature')],
       [ESRI_IMAGE, getLocalizedMessage(language, 'layers.serviceEsriImage')],
       [GEOJSON, getLocalizedMessage(language, 'layers.serviceGeoJSON')],
+      [GEOPACKAGE, getLocalizedMessage(language, 'layers.serviceGeoPackage')],
       [WMS, getLocalizedMessage(language, 'layers.serviceOgcWMS')],
       [WFS, getLocalizedMessage(language, 'layers.serviceOgcWFS')],
       [OGC_FEATURE, getLocalizedMessage(language, 'layers.serviceOgcFeature')],

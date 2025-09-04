@@ -7,6 +7,7 @@ import {
 } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
 import { generateId } from '@/core/utils/utilities';
 import { AbstractBaseLayerEntryConfig } from '../validation-classes/abstract-base-layer-entry-config';
+import { Fetch } from '@/core/utils/fetch-helper';
 
 /**
  * A class to generate a GeoView layer config from a shapefile.
@@ -24,8 +25,7 @@ export class ShapefileReader {
     let shapefileURL: ArrayBuffer | string = layerConfig.metadataAccessPath;
     let filename: string | undefined;
     if (shapefileURL.startsWith('blob')) {
-      const response = await fetch(shapefileURL);
-      shapefileURL = await response.arrayBuffer();
+      shapefileURL = await Fetch.fetchArrayBuffer(shapefileURL);
     } else {
       filename = shapefileURL.split('/').pop()?.split('.')[0];
     }

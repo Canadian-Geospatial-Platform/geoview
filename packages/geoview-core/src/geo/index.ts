@@ -17,7 +17,6 @@ export * from './layer/geoview-layers/vector/abstract-geoview-vector';
 export * from './layer/geoview-layers/vector/csv';
 export * from './layer/geoview-layers/vector/esri-feature';
 export * from './layer/geoview-layers/vector/geojson';
-export * from './layer/geoview-layers/vector/geopackage';
 export * from './layer/geoview-layers/vector/ogc-feature';
 export * from './layer/geoview-layers/vector/wfs';
 export * from './layer/geoview-layers/vector/wkb';
