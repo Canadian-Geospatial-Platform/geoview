@@ -788,7 +788,7 @@ export class WMS extends AbstractGeoViewRaster {
         schemaTag: CONST_LAYER_TYPES.WMS,
         entryType: CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE,
         layerId: `${layerEntry.id}`,
-        layerName: (layerEntry.layerName as string) || (layerEntry.id as string),
+        layerName: layerEntry.layerName || (layerEntry.id as string),
         source: {
           serverType: serverType ?? 'mapserver',
           dataAccessPath: metadataAccessPath,

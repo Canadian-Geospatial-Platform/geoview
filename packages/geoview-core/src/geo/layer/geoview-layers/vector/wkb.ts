@@ -1,5 +1,5 @@
 import { Options as SourceOptions } from 'ol/source/Vector';
-import { GeoJSON as FormatGeoJSON } from 'ol/format';
+import { WKB as FormatWkb } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import Feature from 'ol/Feature';
@@ -16,7 +16,7 @@ import {
   TypeMetadataGeoJSON,
 } from '@/api/config/types/map-schema-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
-import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
+import { WkbLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { logger } from '@/core/utils/logger';
@@ -24,27 +24,27 @@ import {
   LayerEntryConfigInvalidLayerEntryConfigError,
   LayerEntryConfigLayerIdNotFoundError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
-import { GVGeoJSON } from '@/geo/layer/gv-layers/vector/gv-geojson';
+import { GVWKB } from '@/geo/layer/gv-layers/vector/gv-wkb';
 import { ConfigBaseClass, TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
 
-export interface TypeGeoJSONLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
-  geoviewLayerType: typeof CONST_LAYER_TYPES.GEOJSON;
-  listOfLayerEntryConfig: GeoJSONLayerEntryConfig[];
+export interface TypeWkbLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
+  geoviewLayerType: typeof CONST_LAYER_TYPES.WKB;
+  listOfLayerEntryConfig: WkbLayerEntryConfig[];
 }
 
 /**
- * Class used to add GeoJSON layer to the map
+ * Class used to add WKB layer to the map
  *
  * @exports
- * @class GeoJSON
+ * @class WKB
  */
-export class GeoJSON extends AbstractGeoViewVector {
+export class WKB extends AbstractGeoViewVector {
   /**
-   * Constructs a GeoJSON Layer configuration processor.
-   * @param {TypeGeoJSONLayerConfig} layerConfig the layer configuration
+   * Constructs a WKB Layer configuration processor.
+   * @param {TypeWkbLayerConfig} layerConfig the layer configuration
    */
-  constructor(layerConfig: TypeGeoJSONLayerConfig) {
-    super(CONST_LAYER_TYPES.GEOJSON, layerConfig);
+  constructor(layerConfig: TypeWkbLayerConfig) {
+    super(CONST_LAYER_TYPES.WKB, layerConfig);
   }
 
   /**
@@ -62,14 +62,10 @@ export class GeoJSON extends AbstractGeoViewVector {
    * @returns {Promise<T = TypeMetadataGeoJSON | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
    */
   protected override onFetchServiceMetadata<T = TypeMetadataGeoJSON | undefined>(): Promise<T> {
-    // If metadataAccessPath ends with .meta, .json or .geojson
-    if (
-      this.metadataAccessPath.toLowerCase().endsWith('.meta') ||
-      this.metadataAccessPath.toLowerCase().endsWith('.json') ||
-      this.metadataAccessPath.toLowerCase().endsWith('.geojson')
-    ) {
+    // If metadataAccessPath ends with .meta or .json
+    if (this.metadataAccessPath.toLowerCase().endsWith('.meta') || this.metadataAccessPath.toLowerCase().endsWith('.json')) {
       // Fetch it
-      return GeoJSON.fetchMetadata(this.metadataAccessPath) as Promise<T>;
+      return WKB.fetchMetadata(this.metadataAccessPath) as Promise<T>;
     }
 
     // The metadataAccessPath didn't seem like it was containing actual metadata, so it was skipped
@@ -93,7 +89,7 @@ export class GeoJSON extends AbstractGeoViewVector {
 
     // Redirect
     // TODO: Check - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
-    return Promise.resolve(GeoJSON.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, [{ id }]));
+    return Promise.resolve(WKB.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, [{ id }]));
   }
 
   /**
@@ -146,20 +142,6 @@ export class GeoJSON extends AbstractGeoViewVector {
           // eslint-disable-next-line no-param-reassign
           layerConfig.minScale = Math.max(layerConfig.minScale || 0, layerMetadataFound.minScale);
         }
-        // When the dataAccessPath stored in the layerConfig.source object is equal to the root of the metadataAccessPath with a
-        // layerId ending, chances are that it was set by the config-validation because of an empty dataAcessPath value in the config.
-        // This situation means that we want to use the dataAccessPath found in the metadata if it is set, otherwise we will keep the
-        // config dataAccessPath value.
-        let metadataAccessPathRoot = layerConfig.geoviewLayerConfig?.metadataAccessPath;
-        if (metadataAccessPathRoot) {
-          metadataAccessPathRoot =
-            metadataAccessPathRoot.split('/').length > 1 ? metadataAccessPathRoot.split('/').slice(0, -1).join('/') : './';
-          const metadataAccessPathRootPlusLayerId = `${metadataAccessPathRoot}/${layerConfig.layerId}`;
-          if (metadataAccessPathRootPlusLayerId === layerConfig.source?.dataAccessPath && layerMetadataFound.source?.dataAccessPath) {
-            // eslint-disable-next-line no-param-reassign
-            layerConfig.source.dataAccessPath = layerMetadataFound.source.dataAccessPath;
-          }
-        }
       }
 
       // eslint-disable-next-line no-param-reassign
@@ -190,7 +172,7 @@ export class GeoJSON extends AbstractGeoViewVector {
     // eslint-disable-next-line no-param-reassign
     sourceOptions.url = layerConfig.source!.dataAccessPath!;
     // eslint-disable-next-line no-param-reassign
-    sourceOptions.format = new FormatGeoJSON();
+    sourceOptions.format = new FormatWkb();
 
     // Call parent
     return super.onCreateVectorSource(layerConfig, sourceOptions, readOptions);
@@ -198,14 +180,14 @@ export class GeoJSON extends AbstractGeoViewVector {
 
   /**
    * Overrides the creation of the GV Layer
-   * @param {GeoJSONLayerEntryConfig} layerConfig - The layer entry configuration.
-   * @returns {GVGeoJSON} The GV Layer
+   * @param {WkbLayerEntryConfig} layerConfig - The layer entry configuration.
+   * @returns {GVWKB} The GV Layer
    */
-  protected override onCreateGVLayer(layerConfig: GeoJSONLayerEntryConfig): GVGeoJSON {
+  protected override onCreateGVLayer(layerConfig: WkbLayerEntryConfig): GVWKB {
     // Create the source
     const source = this.createVectorSource(layerConfig);
     // Create the GV Layer
-    const gvLayer = new GVGeoJSON(source, layerConfig);
+    const gvLayer = new GVWKB(source, layerConfig);
     // Return it
     return gvLayer;
   }
@@ -240,7 +222,7 @@ export class GeoJSON extends AbstractGeoViewVector {
   }
 
   /**
-   * Initializes a GeoView layer configuration for a GeoJson layer.
+   * Initializes a GeoView layer configuration for a WKB layer.
    * This method creates a basic TypeGeoviewLayerConfig using the provided
    * ID, name, and metadata access path URL. It then initializes the layer entries by calling
    * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
@@ -255,20 +237,20 @@ export class GeoJSON extends AbstractGeoViewVector {
     metadataAccessPath: string
   ): Promise<TypeGeoviewLayerConfig> {
     // Create the Layer config
-    const myLayer = new GeoJSON({ geoviewLayerId, geoviewLayerName, metadataAccessPath } as TypeGeoJSONLayerConfig);
+    const myLayer = new WKB({ geoviewLayerId, geoviewLayerName, metadataAccessPath } as TypeWkbLayerConfig);
     return myLayer.initGeoViewLayerEntries();
   }
 
   /**
-   * Creates a configuration object for a GeoJson Feature layer.
-   * This function constructs a `TypeGeoJSONLayerConfig` object that describes an GeoJson Feature layer
+   * Creates a configuration object for a WKB Feature layer.
+   * This function constructs a `TypeWkbLayerConfig` object that describes an WKB Feature layer
    * and its associated entry configurations based on the provided parameters.
    * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
    * @param {string} geoviewLayerName - The display name of the GeoView layer.
    * @param {string} metadataAccessPath - The URL or path to access metadata or feature data.
    * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
-   * @returns {TypeGeoJSONLayerConfig} The constructed configuration object for the GeoJson Feature layer.
+   * @returns {TypeWkbLayerConfig} The constructed configuration object for the WKB Feature layer.
    */
   static createGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -276,27 +258,27 @@ export class GeoJSON extends AbstractGeoViewVector {
     metadataAccessPath: string,
     isTimeAware: boolean,
     layerEntries: TypeLayerEntryShell[]
-  ): TypeGeoJSONLayerConfig {
-    const geoviewLayerConfig: TypeGeoJSONLayerConfig = {
+  ): TypeWkbLayerConfig {
+    const geoviewLayerConfig: TypeWkbLayerConfig = {
       geoviewLayerId,
       geoviewLayerName,
       metadataAccessPath,
-      geoviewLayerType: CONST_LAYER_TYPES.GEOJSON,
+      geoviewLayerType: CONST_LAYER_TYPES.WKB,
       isTimeAware,
       listOfLayerEntryConfig: [],
     };
     geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
-      const layerEntryConfig = new GeoJSONLayerEntryConfig({
+      const layerEntryConfig = new WkbLayerEntryConfig({
         geoviewLayerConfig,
-        schemaTag: CONST_LAYER_TYPES.GEOJSON,
+        schemaTag: CONST_LAYER_TYPES.WKB,
         entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
         layerId: `${layerEntry.id}`,
-        layerName: layerEntry.layerName || `${layerEntry.id}`,
+        layerName: `${layerEntry.layerName || layerEntry.id}`,
         source: {
-          format: 'GeoJSON',
-          dataAccessPath: `${metadataAccessPath}/${layerEntry.id}`,
+          format: 'WKB',
+          dataAccessPath: layerEntry.source?.dataAccessPath || metadataAccessPath,
         },
-      } as unknown as GeoJSONLayerEntryConfig);
+      } as unknown as WkbLayerEntryConfig);
       return layerEntryConfig;
     });
 
@@ -305,7 +287,7 @@ export class GeoJSON extends AbstractGeoViewVector {
   }
 
   /**
-   * Processes a GeoJSON GeoviewLayerConfig and returns a promise
+   * Processes a WKB GeoviewLayerConfig and returns a promise
    * that resolves to an array of `ConfigBaseClass` layer entry configurations.
    *
    * This method:
@@ -327,7 +309,7 @@ export class GeoJSON extends AbstractGeoViewVector {
     isTimeAware: boolean
   ): Promise<ConfigBaseClass[]> {
     // Create the Layer config
-    const layerConfig = GeoJSON.createGeoviewLayerConfig(
+    const layerConfig = WKB.createGeoviewLayerConfig(
       geoviewLayerId,
       geoviewLayerName,
       url,
@@ -338,7 +320,7 @@ export class GeoJSON extends AbstractGeoViewVector {
     );
 
     // Create the class from geoview-layers package
-    const myLayer = new GeoJSON(layerConfig);
+    const myLayer = new WKB(layerConfig);
 
     // Process it
     return AbstractGeoViewVector.processConfig(myLayer);
@@ -346,28 +328,23 @@ export class GeoJSON extends AbstractGeoViewVector {
 }
 
 /**
- * type guard function that redefines a TypeGeoviewLayerConfig as a TypeGeoJSONLayerConfig if the geoviewLayerType attribute of the
- * verifyIfLayer parameter is GEOJSON. The type ascention applies only to the true block of the if clause that use this
+ * Type guard function that redefines a TypeGeoviewLayerConfig as a TypeWkbLayerConfig if the geoviewLayerType attribute of the
+ * verifyIfLayer parameter is WKB. The type ascention applies only to the true block of the if clause that use this
  * function.
- *
- * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
+ * @param {TypeGeoviewLayerConfig} verifyIfLayer - Polymorphic object to test in order to determine if the type ascention is valid.
  * @returns {boolean} true if the type ascention is valid.
  */
-export const layerConfigIsGeoJSON = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeGeoJSONLayerConfig => {
-  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.GEOJSON;
+export const layerConfigIsWkb = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeWkbLayerConfig => {
+  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.WKB;
 };
 
 /**
- * type guard function that redefines a TypeLayerEntryConfig as a GeoJSONLayerEntryConfig if the geoviewLayerType attribute of
- * the verifyIfGeoViewEntry.geoviewLayerConfig attribute is GEOJSON. The type ascention applies only to the true block of the if
+ * Type guard function that redefines a TypeLayerEntryConfig as a WkbLayerEntryConfig if the geoviewLayerType attribute of
+ * the verifyIfGeoViewEntry.geoviewLayerConfig attribute is WKB. The type ascention applies only to the true block of the if
  * clause that use this function.
- *
- * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
- * valid.
- *
+ * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry - Polymorphic object to test in order to determine if the type ascention is valid.
  * @returns {boolean} true if the type ascention is valid.
  */
-export const geoviewEntryIsGeoJSON = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is GeoJSONLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.GEOJSON;
+export const geoviewEntryIsWKB = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is WkbLayerEntryConfig => {
+  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.WKB;
 };

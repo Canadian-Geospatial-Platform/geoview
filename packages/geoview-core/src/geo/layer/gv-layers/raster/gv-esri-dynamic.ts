@@ -553,7 +553,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
   /**
    * Query all features with a web worker
    * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer config
-   * @returns {Promise<unknown>} A promise of esri response for query.
+   * @returns {Promise<EsriFeaturesJsonResponse>} A promise of esri response for query.
    */
   #fetchAllFeatureInfoWithWorker(layerConfig: EsriDynamicLayerEntryConfig): Promise<EsriFeaturesJsonResponse> {
     const params: QueryParams = {

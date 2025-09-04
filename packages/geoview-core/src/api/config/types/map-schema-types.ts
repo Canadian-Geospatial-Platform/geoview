@@ -385,6 +385,7 @@ type LayerTypesKey =
   | 'VECTOR_TILES'
   | 'OGC_FEATURE'
   | 'WFS'
+  | 'WKB'
   | 'WMS';
 
 /** Definition of the geoview layer types accepted by the viewer. */
@@ -400,6 +401,7 @@ export type TypeGeoviewLayerType =
   | 'ogcWfs'
   | 'ogcWms'
   | 'vectorTiles'
+  | 'WKB'
   | 'xyzTiles';
 
 /** Definition of the geoview layer types accepted by the viewer. */
@@ -420,6 +422,7 @@ export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType> = {
   VECTOR_TILES: 'vectorTiles',
   OGC_FEATURE: 'ogcFeature',
   WFS: 'ogcWfs',
+  WKB: 'WKB',
   WMS: 'ogcWms',
 };
 
@@ -441,6 +444,7 @@ export const CONST_GEOVIEW_SCHEMA_BY_TYPE: Record<TypeGeoviewLayerType, string> 
   ogcFeature: 'TypeVectorLayerEntryConfig',
   ogcWfs: 'TypeVectorLayerEntryConfig',
   ogcWms: 'TypeOgcWmsLayerEntryConfig',
+  WKB: 'TypeVectorLayerEntryConfig',
 };
 
 export const validVectorLayerLegendTypes: TypeGeoviewLayerType[] = [
@@ -451,6 +455,7 @@ export const validVectorLayerLegendTypes: TypeGeoviewLayerType[] = [
   CONST_LAYER_TYPES.ESRI_IMAGE,
   CONST_LAYER_TYPES.OGC_FEATURE,
   CONST_LAYER_TYPES.WFS,
+  CONST_LAYER_TYPES.WKB,
   CONST_LAYER_TYPES.GEOPACKAGE,
 ];
 
@@ -761,7 +766,7 @@ export type TypeTileGrid = {
 };
 
 /** Type that defines the vector layer source formats. */
-export type TypeVectorSourceFormats = 'GeoJSON' | 'EsriJSON' | 'KML' | 'WFS' | 'featureAPI' | 'GeoPackage' | 'CSV' | 'MVT';
+export type TypeVectorSourceFormats = 'GeoJSON' | 'EsriJSON' | 'KML' | 'WFS' | 'featureAPI' | 'GeoPackage' | 'CSV' | 'MVT' | 'WKB';
 
 /** Type from which we derive the source properties for all the ESRI dynamic leaf nodes in the layer tree. */
 export interface TypeSourceEsriDynamicInitialConfig extends TypeBaseSourceInitialConfig {
@@ -1126,6 +1131,10 @@ export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitia
   format: 'WFS';
 }
 
+export interface TypeSourceWkbVectorInitialConfig extends TypeVectorSourceInitialConfig {
+  format: 'WKB';
+}
+
 // endregion ATTEMPT TO REPLACE TypeLayerEntryConfig
 
 // Definition of the keys used to create the constants of the GeoView layer
@@ -1293,6 +1302,7 @@ export const convertLayerTypeToEntry = (layerType: TypeGeoviewLayerType): TypeLa
     case CONST_LAYER_TYPES.GEOPACKAGE:
     case CONST_LAYER_TYPES.OGC_FEATURE:
     case CONST_LAYER_TYPES.WFS:
+    case CONST_LAYER_TYPES.WKB:
     case CONST_LAYER_TYPES.ESRI_FEATURE:
       return CONST_LAYER_ENTRY_TYPES.VECTOR;
 

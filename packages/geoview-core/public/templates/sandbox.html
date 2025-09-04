@@ -201,7 +201,7 @@
           const regexExp = /(?<!\\)'/g
           const configJSON = JSON.parse(configArea.value.replaceAll(regexExp, `"`).replaceAll('\\', '\\\\'));
 
-          const validConfig = cgpv.api.config.createMapConfig(document.getElementById('configGeoview').value.replaceAll(regexExp, '"'), 'en');
+          const validConfig = cgpv.api.config.validateMapConfig(document.getElementById('configGeoview').value.replaceAll(regexExp, '"'), 'en');
 
           // set class and message
           message.classList.add('config-json-valid');

@@ -41,11 +41,12 @@ const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
   imageStatic: 'Static Image Layer',
   GeoJSON: 'GeoJson Layer',
   GeoPackage: 'GeoPackage Layer',
-  xyzTiles: 'XYZ Tiles',
-  vectorTiles: 'Vector Tiles',
   ogcFeature: 'OGC Feature Layer',
   ogcWfs: 'WFS Layer',
   ogcWms: 'WMS Layer',
+  WKB: 'WKB Layer',
+  vectorTiles: 'Vector Tiles',
+  xyzTiles: 'XYZ Tiles',
 };
 
 /**
