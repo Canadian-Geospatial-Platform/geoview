@@ -1181,7 +1181,7 @@ export class OLTransform extends OLPointer {
           this.selectFeature(feature);
         }
         // Show text editor
-        this.#showTextEditor();
+        this.showTextEditor();
         return true;
       }
     }
@@ -1208,6 +1208,12 @@ export class OLTransform extends OLPointer {
       const handleType = handleFeature?.get('handleType') as HandleType;
 
       if (handleFeature && handleType !== HandleType.BOUNDARY && handleType !== HandleType.ROTATE_LINE) {
+        // If text editor is active, apply changes before starting any other transformation
+        if (this.#isTextEditing) {
+          this.#applyTextChanges();
+          this.#hideTextEditor();
+        }
+
         // Handle delete action
         if (handleType === HandleType.DELETE) {
           const feature = handleFeature.get('feature');
@@ -1270,6 +1276,12 @@ export class OLTransform extends OLPointer {
 
           // Start translation for non-text features or when not text editing
           if (this.options.translate) {
+            // If text editor is active, apply changes before starting any other transformation
+            if (this.#isTextEditing) {
+              this.#applyTextChanges();
+              this.#hideTextEditor();
+            }
+
             this.startCoordinate = coordinate;
             this.startGeometry = feature.getGeometry()?.clone();
             this.#transformType = HandleType.TRANSLATE;
@@ -1573,7 +1585,7 @@ export class OLTransform extends OLPointer {
   /**
    * Creates a simple text editor for text features
    */
-  #showTextEditor(): void {
+  showTextEditor(): void {
     if (!this.mapViewer?.map || this.#textEditOverlay || !this.selectedFeature) return;
 
     const geometry = this.selectedFeature.getGeometry();

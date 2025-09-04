@@ -1,4 +1,4 @@
-import { Feature, Overlay } from 'ol';
+import { Collection, Feature, Overlay } from 'ol';
 import GeoJSON from 'ol/format/GeoJSON';
 import { LineString, Polygon, Point, Circle as CircleGeom, Geometry, SimpleGeometry } from 'ol/geom';
 import { fromCircle } from 'ol/geom/Polygon';
@@ -708,6 +708,38 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
         type: 'add',
         features: [feature],
       });
+
+      // For text features, create a temporary transform for immediate editing
+      if (currentGeomType === 'Text') {
+        const drawInstance = state.actions.getDrawInstance();
+        drawInstance?.stopInteraction();
+
+        const featureCollection = new Collection([feature]); // Only select this specific feature
+        const tempTransform = viewer.initTransformInteractions({
+          geometryGroupKey: DRAW_GROUP_KEY,
+          features: featureCollection,
+        });
+
+        let isDeselected = false;
+        // Handle when the temporary editing is done
+
+        tempTransform.onSelectionChange((_textSender, textEvent) => {
+          if (!textEvent.newFeature && !isDeselected) {
+            isDeselected = true;
+            // User deselected - cleanup the temporary transform
+            tempTransform.stopInteraction();
+
+            // Resume drawing
+            if (drawInstance) {
+              drawInstance.startInteraction();
+            }
+          }
+        });
+
+        // Immediately select the new text feature
+        tempTransform.selectFeature(feature);
+        tempTransform.showTextEditor();
+      }
     };
   }
 

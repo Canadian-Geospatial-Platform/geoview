@@ -220,6 +220,13 @@ export class Transform extends Interaction {
   }
 
   /**
+   * Displays the text editor for the selected feature
+   */
+  public showTextEditor(): void {
+    this.#ol_transform.showTextEditor();
+  }
+
+  /**
    * Undo the last action
    */
   public undo(callback?: () => void): boolean {
