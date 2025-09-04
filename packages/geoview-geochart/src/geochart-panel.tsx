@@ -26,7 +26,6 @@ import { convertGeoViewGeoChartConfigFromCore, GeoViewGeoChartConfig } from './g
 
 interface GeoChartPanelProps {
   mapId: string;
-  // eslint-disable-next-line react/require-default-props
   provideCallbackRedraw?: (callbackRedraw: () => void) => void;
 }
 

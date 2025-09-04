@@ -149,6 +149,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
       if (singleHandle) {
         const interval = step || (minAndMax[1] - minAndMax[0]) / 20;
         const newPosition = values[0] + interval * stepMove;
+
         // eslint-disable-next-line no-nested-ternary
         setValues(layerPath, [newPosition > minAndMax[1] ? minAndMax[0] : newPosition < minAndMax[0] ? minAndMax[1] : newPosition]);
         return;
