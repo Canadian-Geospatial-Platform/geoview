@@ -1,5 +1,5 @@
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
-import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/config/types/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES, TypeSourceWkbInitialConfig } from '@/api/config/types/map-schema-types';
 import { Projection } from '@/geo/utils/projection';
 
 export class WkbLayerEntryConfig extends VectorLayerEntryConfig {
@@ -8,6 +8,9 @@ export class WkbLayerEntryConfig extends VectorLayerEntryConfig {
 
   /** Layer entry data type. */
   override entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
+
+  /** Source to include extracted data from GeoPackages */
+  declare source: TypeSourceWkbInitialConfig;
 
   /**
    * The class constructor.

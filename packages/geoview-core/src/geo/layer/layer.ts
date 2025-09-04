@@ -28,11 +28,13 @@ import {
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
   mapConfigLayerEntryIsGeoCore,
+  mapConfigLayerEntryIsGeoPackage,
   mapConfigLayerEntryIsShapefile,
   TypeLayerStatus,
   GeoCoreLayerConfig,
   TypeDisplayLanguage,
   TypeOutfieldsType,
+  GeoPackageLayerConfig,
 } from '@/api/config/types/map-schema-types';
 
 import { CSV, layerConfigIsCSV } from '@/geo/layer/geoview-layers/vector/csv';
@@ -40,7 +42,6 @@ import { EsriDynamic, layerConfigIsEsriDynamic } from '@/geo/layer/geoview-layer
 import { EsriFeature, layerConfigIsEsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { EsriImage, layerConfigIsEsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { GeoJSON, layerConfigIsGeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
-import { GeoPackage, layerConfigIsGeoPackage } from '@/geo/layer/geoview-layers/vector/geopackage';
 import { ImageStatic, layerConfigIsImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
 import { OgcFeature, layerConfigIsOgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
 import { VectorTiles, layerConfigIsVectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
@@ -103,6 +104,7 @@ import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/gr
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { LayerGeoCoreError } from '@/core/exceptions/geocore-exceptions';
 import { ShapefileReader } from '@/core/utils/config/reader/shapefile-reader';
+import { GeoPackageReader } from '@/core/utils/config/reader/geopackage-reader';
 
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
@@ -2308,7 +2310,7 @@ export class LayerApi {
 
   /**
    * Converts a map configuration layer entry into a promise of a GeoView layer configuration.
-   * Depending on the type of the layer entry (e.g., GeoCore, Shapefile, or standard GeoView),
+   * Depending on the type of the layer entry (e.g., GeoCore, GeoPackage, Shapefile, or standard GeoView),
    * this function processes each entry accordingly and wraps the result in a `Promise`.
    * Errors encountered during asynchronous operations are handled via a provided callback.
    * @param {string} mapId - The unique identifier of the map instance this configuration applies to.
@@ -2328,6 +2330,9 @@ export class LayerApi {
     if (mapConfigLayerEntryIsGeoCore(entry)) {
       // Working with a GeoCore layer
       promise = GeoCore.createLayerConfigFromUUID(entry.geoviewLayerId, language, mapId, entry);
+    } else if (mapConfigLayerEntryIsGeoPackage(entry)) {
+      // Working with a geopackage layer
+      promise = GeoPackageReader.crateLayerConfigFromGeoPackage(entry as GeoPackageLayerConfig);
     } else if (mapConfigLayerEntryIsShapefile(entry)) {
       // Working with a shapefile layer
       promise = ShapefileReader.convertShapefileConfigToGeoJson(entry);
@@ -2427,7 +2432,7 @@ export class LayerApi {
    * Creates an instance of a specific `AbstractGeoViewLayer` subclass based on the given GeoView layer configuration.
    * This function determines the correct layer type from the configuration and instantiates it accordingly.
    * @remarks
-   * - This method currently supports GeoJSON, GeoPackage, CSV, WMS, Esri Dynamic, Esri Feature, Esri Image,
+   * - This method currently supports GeoJSON, CSV, WMS, Esri Dynamic, Esri Feature, Esri Image,
    *   ImageStatic, WFS, OGC Feature, XYZ Tiles, and Vector Tiles.
    * - If the layer type is not supported, an error is thrown.
    * - TODO: Refactor to use the validated configuration with metadata already fetched.
@@ -2452,9 +2457,6 @@ export class LayerApi {
     }
     if (layerConfigIsGeoJSON(geoviewLayerConfig)) {
       return new GeoJSON(geoviewLayerConfig);
-    }
-    if (layerConfigIsGeoPackage(geoviewLayerConfig)) {
-      return new GeoPackage(geoviewLayerConfig);
     }
     if (layerConfigIsImageStatic(geoviewLayerConfig)) {
       return new ImageStatic(geoviewLayerConfig);
