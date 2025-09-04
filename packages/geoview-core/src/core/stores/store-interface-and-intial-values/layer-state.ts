@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-use-before-define */
-// this esLint is used in many places for findLayerByPath function. It is why we keep it global...
 import { useStore } from 'zustand';
 
 import { FitOptions } from 'ol/View';

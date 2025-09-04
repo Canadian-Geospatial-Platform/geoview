@@ -21,6 +21,7 @@ export type SnapOptions = InteractionOptions & {
  */
 export class Snap extends Interaction {
   /** The embedded OpenLayers Snap component */
+  // eslint-disable-next-line camelcase
   #ol_snap: OLSnap;
 
   /**

@@ -95,6 +95,7 @@ function ExportButton({ layerPath, rows, columns, children }: ExportButtonProps)
         (acc, curr) => {
           // Only add the field if it's not a utility column
           if (!COLUMNS_TO_REMOVE.includes(curr)) {
+            // eslint-disable-next-line no-param-reassign
             acc[curr] = row[curr]?.value ?? '';
           }
           return acc;

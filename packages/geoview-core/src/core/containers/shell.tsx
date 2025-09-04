@@ -151,7 +151,6 @@ export function Shell(props: ShellProps): JSX.Element {
   /**
    * Handles when the modal needs to close (only 1 at a time is allowed)
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleModalClose = useCallback((sender: ModalApi, event: ModalEvent): void => {
     logger.logTraceUseCallback('SHELL - handleModalClose', event.modalId);
     setModalOpen(false);

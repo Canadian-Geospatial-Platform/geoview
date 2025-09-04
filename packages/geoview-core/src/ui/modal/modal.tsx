@@ -1,9 +1,6 @@
-/* eslint-disable react/require-default-props */
 import { Fragment, CSSProperties, ReactNode, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { ClassNameMap } from '@mui/styles';
-import withStyles from '@mui/styles/withStyles';
 import { useTheme } from '@mui/material/styles';
 import { Box, Dialog, DialogActions, DialogContent, DialogProps, DialogTitle } from '@mui/material';
 
@@ -205,24 +202,22 @@ function ModalUI(props: DialogPropsExtend): JSX.Element {
    * @returns { JSX.Element } JSX for the newly created / updated modal
    */
   const createdModal = (modal: TypeModalProps): JSX.Element => {
-    const CustomDialog = withStyles({
-      dialogContent: {
-        width: modal.width,
-        height: modal.height,
-        maxWidth: 'none',
-      },
-      // eslint-disable-next-line react/no-unused-prop-types
-    })(({ classes }: { classes: ClassNameMap }) => (
+    // eslint-disable-next-line react/no-unstable-nested-components
+    const CustomDialog = () => (
       <AnimatedDialog
         open={open}
         onClose={modal.close}
         container={container}
         style={fadeInAnimation}
-        sx={sxClasses.dialog}
-        className={`${className && className}`}
-        classes={{
-          paper: classes.dialogContent,
+        sx={{
+          ...sxClasses.dialog,
+          '& .MuiDialog-paper': {
+            width: modal.width,
+            height: modal.height,
+            maxWidth: 'none',
+          },
         }}
+        className={`${className && className}`}
         aria-labelledby={ariaLabeledBy}
         aria-describedby={ariaDescribedBy}
         fullScreen={fullScreen}
@@ -249,7 +244,7 @@ function ModalUI(props: DialogPropsExtend): JSX.Element {
               tooltip={t('close')!}
               tooltipPlacement="right"
               onClick={modal.close}
-              className={classes.headerActionsContainer}
+              className="headerActionsContainer"
             >
               <CloseIcon />
             </IconButton>
@@ -280,7 +275,7 @@ function ModalUI(props: DialogPropsExtend): JSX.Element {
           </DialogActions>
         ) : null}
       </AnimatedDialog>
-    ));
+    );
 
     return <CustomDialog />;
   };

@@ -24,6 +24,7 @@ export type ExtentOptions = InteractionOptions & {
  */
 export class Extent extends Interaction {
   /** The embedded OpenLayers Extent component */
+  // eslint-disable-next-line camelcase
   #ol_extent: OLExtent;
 
   /** Callback handlers for the extentchanged event. */

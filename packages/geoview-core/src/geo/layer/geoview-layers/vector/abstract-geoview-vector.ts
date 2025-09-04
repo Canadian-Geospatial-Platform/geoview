@@ -94,6 +94,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     const strategy = sourceConfig.strategy === 'bbox' ? bbox : all;
 
     // Prepare the sourceOptions
+    // eslint-disable-next-line prefer-const
     let vectorSource: VectorSource<Feature>;
 
     // Set loading strategy option
@@ -475,6 +476,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     const regex = new RegExp(`(\\${separator}|\\r?\\n|\\r|^)(?:"([^"]*(?:""[^"]*)*)"|([^\\${separator}\\r\\n]*))`, 'gi');
     let matches;
     const parsedData: string[][] = [[]];
+
     // eslint-disable-next-line no-cond-assign
     while ((matches = regex.exec(csvData))) {
       if (matches[1].length && matches[1] !== separator) parsedData.push([]);
@@ -519,6 +521,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   ): void {
     // eslint-disable-next-line no-param-reassign
     if (!layerConfig.source) layerConfig.source = {};
+
     // eslint-disable-next-line no-param-reassign
     if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: true };
 

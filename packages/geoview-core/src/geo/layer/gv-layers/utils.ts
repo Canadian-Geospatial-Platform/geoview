@@ -317,6 +317,7 @@ export function createAliasLookup(outfields: TypeOutfields[] | undefined): TypeA
 
   const aliasLookup =
     outfields?.reduce((acc, field) => {
+      // eslint-disable-next-line no-param-reassign
       acc[field.name] = field.alias;
       return acc;
     }, {} as TypeAliasLookup) ?? {};

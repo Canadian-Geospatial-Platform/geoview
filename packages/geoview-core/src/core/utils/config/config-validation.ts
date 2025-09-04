@@ -1,5 +1,5 @@
-/* eslint-disable no-underscore-dangle, no-param-reassign */
-// We have a lot of private function with functions with dangle and many reassigns. We keep it global...
+/* eslint-disable no-param-reassign */
+// We have a lot of reassigns. We keep it global...
 // TODO: refactor - clean the code to minimize esLint warning
 
 import Ajv from 'ajv';

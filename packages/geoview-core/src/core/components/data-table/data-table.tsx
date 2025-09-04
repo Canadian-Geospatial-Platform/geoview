@@ -370,7 +370,6 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
 
     // Filter out unsymbolized features if the showUnsymbolizedFeatures config is false
     if (!showUnsymbolizedFeatures) {
-      // eslint-disable-next-line no-param-reassign
       filterArray = filterArray.filter((record) => record.featureIcon);
     }
 
@@ -613,7 +612,6 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
     applyMapFilters(filterStrings);
   }, 500);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedColumnFilters = useCallback(
     (filters: MRTColumnFiltersState) => filterMap(filters),
     // eslint-disable-next-line react-hooks/exhaustive-deps

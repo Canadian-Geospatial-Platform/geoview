@@ -30,6 +30,7 @@ export type ModifyOptions = InteractionOptions & {
  */
 export class Modify extends Interaction {
   /** The embedded OpenLayers Modify component. */
+  // eslint-disable-next-line camelcase
   #ol_modify: OLModify;
 
   /** Callback handlers for the modifystart event. */

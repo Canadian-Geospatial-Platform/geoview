@@ -22,6 +22,7 @@ export type TranslateOptions = InteractionOptions & {
  */
 export class Translate extends Interaction {
   /** The embedded OpenLayers Translate component */
+  // eslint-disable-next-line camelcase
   #ol_translate: OLTranslate;
 
   /** Keep all callback delegates references */

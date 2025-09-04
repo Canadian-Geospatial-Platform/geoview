@@ -33,6 +33,7 @@ export class Fetch {
     if (timeoutMs) {
       const timeoutController = Fetch.#createTimeoutAbortController(timeoutMs);
       timeoutSignal = timeoutController.controller.signal;
+      // eslint-disable-next-line prefer-destructuring
       timeoutId = timeoutController.timeoutId;
     }
 
@@ -147,6 +148,7 @@ export class Fetch {
     if (timeoutMs) {
       const timeoutController = Fetch.#createTimeoutAbortController(timeoutMs);
       timeoutSignal = timeoutController.controller.signal;
+      // eslint-disable-next-line prefer-destructuring
       timeoutId = timeoutController.timeoutId;
     }
 
@@ -210,6 +212,7 @@ export class Fetch {
     if (timeoutMs) {
       const timeoutController = Fetch.#createTimeoutAbortController(timeoutMs);
       timeoutSignal = timeoutController.controller.signal;
+      // eslint-disable-next-line prefer-destructuring
       timeoutId = timeoutController.timeoutId;
     }
 

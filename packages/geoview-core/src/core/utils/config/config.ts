@@ -1,5 +1,3 @@
-// import { layerEntryIsGroupLayer } from '@/api/config/types/type-guards';
-
 import {
   convertLayerTypeToEntry,
   TypeLayerEntryConfig,

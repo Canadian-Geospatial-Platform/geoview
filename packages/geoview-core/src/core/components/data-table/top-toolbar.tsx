@@ -1,6 +1,7 @@
+/* eslint-disable camelcase */
 import { memo } from 'react';
 import { Box, IconButton } from '@mui/material';
-/* eslint-disable camelcase */
+
 import {
   MRT_GlobalFilterTextField as MRTGlobalFilterTextField,
   MRT_ToggleFiltersButton as MRTToggleFiltersButton,

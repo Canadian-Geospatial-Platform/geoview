@@ -332,7 +332,6 @@ export class GVEsriDynamic extends AbstractGVRaster {
     // If any features
     if (jsonResponse.features) {
       // Parse the JSON response and create features
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const features = jsonResponse.features.map((featureData) => {
         // We do not query the geometry anymore (set as undefined). It will query if needed by later
         const properties = featureData.attributes;

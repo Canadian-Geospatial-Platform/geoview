@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 // ? we escape all private attribute in this file
 import {
   TypeLayerStyleConfig,

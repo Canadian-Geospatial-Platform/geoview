@@ -600,7 +600,7 @@ export class WMS extends AbstractGeoViewRaster {
   #processMetadataInheritance(layer: TypeMetadataWMSCapabilityLayer | undefined, parentLayer?: TypeMetadataWMSCapabilityLayer): void {
     if (layer && parentLayer) {
       // Table 7 — Inheritance of Layer properties specified in the standard with 'replace' behaviour.
-      // eslint-disable-next-line no-param-reassign
+      // eslint-disable-next-line no-param-reassign, camelcase
       if (layer.EX_GeographicBoundingBox === undefined) layer.EX_GeographicBoundingBox = parentLayer.EX_GeographicBoundingBox;
       // eslint-disable-next-line no-param-reassign
       if (layer.queryable === undefined) layer.queryable = parentLayer.queryable;

@@ -133,10 +133,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @param {AbortController?} abortController - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
-  protected override getAllFeatureInfo(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    abortController: AbortController | undefined = undefined
-  ): Promise<TypeFeatureInfoEntry[]> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected override getAllFeatureInfo(abortController: AbortController | undefined = undefined): Promise<TypeFeatureInfoEntry[]> {
     // Get the layer config in a loaded phase
     const layerConfig = this.getLayerConfig();
     const features = this.getOLSource().getFeatures();

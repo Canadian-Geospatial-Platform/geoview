@@ -33,6 +33,7 @@ export type TransformOptions = InteractionOptions & {
  */
 export class Transform extends Interaction {
   /** The embedded OpenLayers Transform component */
+  // eslint-disable-next-line camelcase
   #ol_transform: OLTransform;
 
   /** Callback handlers for when a feature is initially selected or when a handle is clicked on */

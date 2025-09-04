@@ -219,7 +219,7 @@ export abstract class AbstractLayerSet {
    * @returns {boolean} True if the layer should be registered, false otherwise
    */
   // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/class-methods-use-this
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   protected onRegisterLayerCheck(layer: AbstractBaseLayer): boolean {
     // Override this function to perform registration condition logic in the inherited classes
     // By default, a layer-set always registers layers except when they are group layers

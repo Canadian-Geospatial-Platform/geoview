@@ -256,7 +256,6 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     this.#findWrapperBetweenEventHandlers(event)._loadingCounter = this.loadingCounter;
 
     // Log it, leaving the logDebug for dev purposes
-    // eslint-disable-next-line no-underscore-dangle
     // logger.logDebug('PRIOR', this.#findWrapperBetweenEventHandlers(event)._loadingCounter);
 
     // Get the layer config
@@ -281,7 +280,6 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    */
   protected onLoaded(event: unknown): void {
     // Log it, leaving the logDebug for dev purposes
-    // eslint-disable-next-line no-underscore-dangle
     // logger.logDebug('AFTER', this.#findWrapperBetweenEventHandlers(event)._loadingCounter);
 
     // If it's not the 'loaded' that correspond to the last 'loading' (asynchronicity thing)
@@ -289,7 +287,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     if (this.loadingCounter !== this.#findWrapperBetweenEventHandlers(event)._loadingCounter) return;
 
     // Log it, leaving the logDebug for dev purposes
-    // eslint-disable-next-line no-underscore-dangle
+
     // logger.logDebug('AFTER CHECKED', this.#findWrapperBetweenEventHandlers(event)._loadingCounter);
 
     // Get the layer config
@@ -557,10 +555,8 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * @param {AbortController?} abortController - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
-  protected getAllFeatureInfo(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    abortController: AbortController | undefined = undefined
-  ): Promise<TypeFeatureInfoEntry[]> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected getAllFeatureInfo(abortController: AbortController | undefined = undefined): Promise<TypeFeatureInfoEntry[]> {
     // Crash on purpose
     throw new NotImplementedError(`getAllFeatureInfo not implemented on layer path ${this.getLayerPath()}`);
   }
@@ -651,7 +647,6 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * @param {AbortController?} abortController - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected getFeatureInfoUsingPolygon(
     map: OLMap,
     location: Coordinate[],
@@ -669,7 +664,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * @param {string} fieldName - The field name for which we want to get the domain.
    * @returns {null | codedValueType | rangeDomainType} The domain of the field.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/class-methods-use-this
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this, @typescript-eslint/no-unused-vars
   protected onGetFieldDomain(fieldName: string): null | codedValueType | rangeDomainType {
     // Log - REMOVED as it is trigger for every row of data table, just enable for debuggin purpose
     // logger.logWarning(`getFieldDomain is not implemented for ${fieldName} on layer path ${this.getLayerPath()}`);
@@ -990,7 +985,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     }
 
     if ('target' in eventAny && 'dispatching_' in eventAny.target) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-underscore-dangle
+      // eslint-disable-next-line no-underscore-dangle
       return eventAny.target.dispatching_;
     }
 
