@@ -334,15 +334,16 @@ export class OLTransform extends OLPointer {
   /**
    * Selects a feature for transformation.
    * @param {Feature<Geometry>} feature - The feature to select.
+   * @param {boolean} clearHistory - Whether to clear the history.
    */
-  selectFeature(feature: Feature<Geometry>): void {
+  selectFeature(feature: Feature<Geometry>, clearHistory: boolean = true): void {
     const previousFeature = this.selectedFeature;
 
     // Hide any existing text editor
     this.#hideTextEditor();
 
     // Only clear history when changing selection
-    if (previousFeature !== feature) {
+    if (previousFeature !== feature && clearHistory) {
       this.#clearHistory();
     }
 
@@ -353,7 +354,7 @@ export class OLTransform extends OLPointer {
     this.selectedFeature = feature;
 
     // Save initial state to history when selecting a new feature
-    if (previousFeature !== feature) {
+    if (previousFeature !== feature && clearHistory) {
       this.#saveToHistory();
     }
 
@@ -400,15 +401,17 @@ export class OLTransform extends OLPointer {
   /**
    * Clears the current selection.
    */
-  clearSelection(): void {
+  clearSelection(keepHistory: boolean = false): void {
     if (this.onSelectionChange) {
-      this.onSelectionChange(new TransformSelectionEvent('selectionchange', this.selectedFeature, undefined));
+      this.onSelectionChange(new TransformSelectionEvent('selectionchange', this.selectedFeature, undefined, keepHistory));
     }
 
     this.#hideTextEditor();
-    this.#clearHistory();
     this.clearHandles();
     this.selectedFeature = undefined;
+    if (!keepHistory) {
+      this.#clearHistory();
+    }
   }
 
   /**
@@ -2054,7 +2057,12 @@ export class OLTransform extends OLPointer {
    * @returns {boolean} True if undo was successful.
    */
   undo(callback?: () => void): boolean {
-    if (!this.selectedFeature || this.#historyIndex <= 0) return false;
+    if (!this.selectedFeature) return false;
+
+    if (this.#historyIndex <= 0) {
+      this.clearSelection(true); // true to keep the history
+      return false;
+    }
 
     this.#historyIndex--;
     const previousGeometry = this.#geometryHistory[this.#historyIndex];
@@ -2090,7 +2098,7 @@ export class OLTransform extends OLPointer {
    * @returns {boolean} True if undo is available.
    */
   canUndo(): boolean {
-    return this.#historyIndex > 0;
+    return this.#historyIndex >= 0;
   }
 
   /**

@@ -26,7 +26,7 @@ import { TypeValidMapProjectionCodes } from '@/api/config/types/map-schema-types
 export const DRAW_GROUP_KEY = 'draw-group';
 
 interface DrawerHistoryAction {
-  type: 'add' | 'delete' | 'modify' | 'clear';
+  type: 'add' | 'delete' | 'modify' | 'clear' | 'select';
   features: Feature[];
   originalGeometries?: Geometry[];
   modifiedGeometries?: Geometry[];
@@ -902,35 +902,46 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     return (_sender: unknown, event: TransformSelectionEvent) => {
       // GV Get hideMeasurements here so the value is not stale
       const hideMeasurements = this.getDrawerState(mapId)?.hideMeasurements;
-      const { previousFeature, newFeature } = event;
+      const { previousFeature, newFeature, createSelectAction } = event;
 
       // If we had a previous feature selected, check if it was modified
       if (previousFeature) {
-        const stateKey = `${mapId}-${previousFeature.getId()}`;
-        const savedState = this.#selectedFeatureState.get(stateKey);
-
-        if (savedState) {
-          const currentGeometry = previousFeature.getGeometry();
-
-          // Check for changes
-          const geometryChanged = currentGeometry && !geometriesAreEqual(savedState.originalGeometry, currentGeometry);
-          const styleChanged =
-            savedState.originalStyleStored && savedState.originalStyle && savedState.originalStyle !== previousFeature.getStyle();
-
-          if (geometryChanged || styleChanged) {
-            // Save modify action - include geometry and style only if it was changed
-            this.#saveToHistory(mapId, {
-              type: 'modify',
+        if (createSelectAction) {
+          this.#saveToHistory(
+            mapId,
+            {
+              type: 'select',
               features: [previousFeature],
-              ...(geometryChanged && {
-                originalGeometries: [savedState.originalGeometry.clone()],
-                modifiedGeometries: [currentGeometry.clone()],
-              }),
-              ...(styleChanged && {
-                originalStyles: [savedState.originalStyle],
-                modifiedStyles: [previousFeature.getStyle()],
-              }),
-            });
+            },
+            true
+          );
+        } else {
+          const stateKey = `${mapId}-${previousFeature.getId()}`;
+          const savedState = this.#selectedFeatureState.get(stateKey);
+
+          if (savedState) {
+            const currentGeometry = previousFeature.getGeometry();
+
+            // Check for changes
+            const geometryChanged = currentGeometry && !geometriesAreEqual(savedState.originalGeometry, currentGeometry);
+            const styleChanged =
+              savedState.originalStyleStored && savedState.originalStyle && savedState.originalStyle !== previousFeature.getStyle();
+
+            if (geometryChanged || styleChanged) {
+              // Save modify action - include geometry and style only if it was changed
+              this.#saveToHistory(mapId, {
+                type: 'modify',
+                features: [previousFeature],
+                ...(geometryChanged && {
+                  originalGeometries: [savedState.originalGeometry.clone()],
+                  modifiedGeometries: [currentGeometry.clone()],
+                }),
+                ...(styleChanged && {
+                  originalStyles: [savedState.originalStyle],
+                  modifiedStyles: [previousFeature.getStyle()],
+                }),
+              });
+            }
           }
         }
       }
@@ -1446,8 +1457,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * Saves an action to the drawer history.
    * @param {string} mapId - The map ID
    * @param {DrawerHistoryAction} action - The action to save
+   * @param {boolean} insertAtCurrentIndex - Whether to create the action as the next action / as a redo
    */
-  static #saveToHistory(mapId: string, action: DrawerHistoryAction): void {
+  static #saveToHistory(mapId: string, action: DrawerHistoryAction, insertAtCurrentIndex: boolean = false): void {
     if (!this.#drawerHistory.has(mapId)) {
       this.#drawerHistory.set(mapId, []);
       this.#historyIndex.set(mapId, -1);
@@ -1456,12 +1468,18 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     const history = this.#drawerHistory.get(mapId)!;
     const currentIndex = this.#historyIndex.get(mapId)!;
 
-    // Remove any history after current index
-    history.splice(currentIndex + 1);
+    if (insertAtCurrentIndex) {
+      // Insert right after current index for redo capability
+      history.splice(currentIndex + 1, 0, action);
+      // Don't update the index - stay at current position
+    } else {
+      // Remove any history after current index
+      history.splice(currentIndex + 1);
 
-    // Add new action
-    history.push(action);
-    this.#historyIndex.set(mapId, history.length - 1);
+      // Add new action
+      history.push(action);
+      this.#historyIndex.set(mapId, history.length - 1);
+    }
 
     // Update undo/redo state
     this.#updateUndoRedoState(mapId);
@@ -1469,7 +1487,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     // Limit history size
     if (history.length > this.#maxHistorySize) {
       history.shift();
-      this.#historyIndex.set(mapId, this.#historyIndex.get(mapId)! - 1);
+      if (!insertAtCurrentIndex) {
+        this.#historyIndex.set(mapId, this.#historyIndex.get(mapId)! - 1);
+      }
     }
   }
 
@@ -1515,9 +1535,11 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     // If editing, undo the transform instance and not the drawer-event-processor
     const transformInstance = state.actions.getTransformInstance();
     if (transformInstance && transformInstance.getSelectedFeature()) {
-      return transformInstance.undo(() => {
-        this.#updateUndoRedoState(mapId);
-      });
+      if (transformInstance.canUndo()) {
+        return transformInstance.undo(() => {
+          this.#updateUndoRedoState(mapId);
+        });
+      }
     }
 
     const history = this.#drawerHistory.get(mapId);
@@ -1568,9 +1590,11 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     // If editing, redo the transform instance and not the drawer-event-processor
     const transformInstance = state.actions.getTransformInstance();
     if (transformInstance && transformInstance.getSelectedFeature()) {
-      return transformInstance.redo(() => {
-        this.#updateUndoRedoState(mapId);
-      });
+      if (transformInstance.canRedo()) {
+        return transformInstance.redo(() => {
+          this.#updateUndoRedoState(mapId);
+        });
+      }
     }
 
     const history = this.#drawerHistory.get(mapId);
@@ -1601,11 +1625,22 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
         this.clearDrawings(mapId, false);
         break;
 
+      case 'select':
+        // Re-select the features
+        this.#selectFeaturesAction(mapId, action);
+
+        // Remove the select action from history since it's been consumed
+        history.splice(nextIndex, 1);
+        break;
+
       default:
         return false;
     }
 
-    this.#historyIndex.set(mapId, nextIndex);
+    // Don't increase the index for 'select' actions
+    if (action.type !== 'select') {
+      this.#historyIndex.set(mapId, nextIndex);
+    }
     this.#updateUndoRedoState(mapId);
     return true;
   }
@@ -1745,6 +1780,21 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
         }
       }
     });
+  }
+
+  /**
+   * Re-performs a select action. Note: deselect happens inside the transform-base undo
+   * @param {string} mapId - The map ID
+   * @param {DrawerHistoryAction} action - The select action to be applied
+   */
+  static #selectFeaturesAction(mapId: string, action: DrawerHistoryAction): void {
+    const state = this.getDrawerState(mapId);
+    if (!state) return;
+
+    const transformInstance = state.actions.getTransformInstance();
+    if (transformInstance) {
+      transformInstance.selectFeature(action.features[0], false);
+    }
   }
 
   /**

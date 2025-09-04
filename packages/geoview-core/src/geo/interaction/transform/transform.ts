@@ -207,9 +207,10 @@ export class Transform extends Interaction {
   /**
    * Selects a feature for transformation.
    * @param {Feature<Geometry>} feature - The feature to select.
+   * @param {boolean} clearHistory - If true, clears the previous history stack. Default is true.
    */
-  public selectFeature(feature: Feature<Geometry>): void {
-    this.#ol_transform.selectFeature(feature);
+  public selectFeature(feature: Feature<Geometry>, clearHistory: boolean = true): void {
+    this.#ol_transform.selectFeature(feature, clearHistory);
   }
 
   /**
