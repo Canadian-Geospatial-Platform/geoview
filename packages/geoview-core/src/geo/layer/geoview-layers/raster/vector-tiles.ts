@@ -86,9 +86,9 @@ export class VectorTiles extends AbstractGeoViewRaster {
         resolutions: tileInfo.lods.map(({ resolution }) => resolution),
         tileSize: [tileInfo.rows, tileInfo.cols],
       };
+
       // eslint-disable-next-line no-param-reassign
       layerConfig.source.tileGrid = newTileGrid;
-
       // eslint-disable-next-line no-param-reassign
       layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
 

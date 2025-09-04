@@ -36,7 +36,7 @@ class WorkerLogger {
   #log(type: WorkerLogType, level: WorkerLogLevel, ...args: unknown[]): void {
     const message = this.#prefix ? [this.#prefix, ...args] : args;
     // Send the log message to the main thread
-    // eslint-disable-next-line no-restricted-globals
+
     self.postMessage({
       type,
       level,

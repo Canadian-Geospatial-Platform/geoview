@@ -3016,6 +3016,7 @@ export abstract class LayerMockup {
             'EPSG:900913',
             'AUTO2:42003',
           ],
+          // eslint-disable-next-line camelcase
           EX_GeographicBoundingBox: [-180, -90, 180, 90],
           BoundingBox: [
             {
@@ -3048,6 +3049,7 @@ export abstract class LayerMockup {
                       Abstract:
                         'This mosaic is calculated over the North American domain with a horizontal spatial resolution of 1 km. This mosaic therefore includes all the Canadian and American radars available in the network and which can reach a maximum of 180 contributing radars. To better represent precipitation over the different seasons, this mosaic renders in mm/h to represent rain and in cm/h to represent snow. For the two precipitation types (rain and snow), we use two different mathematical relationships to convert the reflectivity by rainfall rates (mm/h rain cm/h for snow). This is a hybrid mosaic composed of different estimation precipitation products : PRECIP-ET product used only for C-Band radars (which are in the process of being replaced with  S-Band radars) and DPQPE (Dual-Pol Quantitative Precipitation Estimation) for S-Band radars. For the US Nexrad radars, ECCC uses the most similar product from the US Meteorological Service (NOAA). This product displays radar reflectivity converted into precipitation rates, using the same formulas as the Canadian radars.',
                       KeywordList: ['Atmospheric conditions', 'Meteorology', 'Weather', 'Radar', 'Remote sensing', 'Weather'],
+                      // eslint-disable-next-line camelcase
                       EX_GeographicBoundingBox: [-170.32, 16.93, -50, 67.19],
                       Dimension: [
                         {
@@ -3345,6 +3347,7 @@ export abstract class LayerMockup {
                 'EPSG:900913',
                 'AUTO2:42003',
               ],
+              // eslint-disable-next-line camelcase
               EX_GeographicBoundingBox: [-180, -90, 180, 90],
               BoundingBox: [
                 {
@@ -3503,6 +3506,7 @@ export abstract class LayerMockup {
           Abstract:
             'Natural Resources Canada OGC Web Map Service (WMS) for Probability of Minimum Snow and Ice (MSI) presence over Canada / Service Web de cartographie (WMS) OGC de Ressources naturelles Canada pour la Probabilité de la présence annuelle minimale de neige et glace (MNG) au Canada',
           CRS: ['EPSG:4326', 'EPSG:3857', 'EPSG:3978', 'EPSG:3979', 'EPSG:4617'],
+          // eslint-disable-next-line camelcase
           EX_GeographicBoundingBox: [-177.2940290558209, 34.300547614578875, -9.977349354950832, 84.45687507184095],
           Dimension: [
             {
@@ -3530,6 +3534,7 @@ export abstract class LayerMockup {
                 'EPSG:3979',
                 'EPSG:4617',
               ],
+              // eslint-disable-next-line camelcase
               EX_GeographicBoundingBox: [-177.2940290558209, 34.300547614578875, -9.977349354950832, 84.45687507184095],
               Dimension: [
                 {
@@ -3572,6 +3577,7 @@ export abstract class LayerMockup {
                 'EPSG:3979',
                 'EPSG:4617',
               ],
+              // eslint-disable-next-line camelcase
               EX_GeographicBoundingBox: [-177.2940290558209, 34.300547614578875, -9.977349354950832, 84.45687507184095],
               Dimension: [
                 {

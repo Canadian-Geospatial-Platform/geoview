@@ -103,7 +103,7 @@ export function LayersToolbar(): JSX.Element {
           size="small"
           tooltip={t('general.view')!}
           variant={displayState === 'view' ? 'contained' : 'outlined'}
-          startIcon={<VisibilityOutlinedIcon fontSize={theme.palette.geoViewFontSize.sm} />}
+          startIcon={<VisibilityOutlinedIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />}
           onClick={() => handleSetDisplayState('view')}
         >
           {t('general.view')}
@@ -115,7 +115,7 @@ export function LayersToolbar(): JSX.Element {
           size="small"
           tooltip={t('legend.addLayer')!}
           variant={displayState === 'add' ? 'contained' : 'outlined'}
-          startIcon={<AddCircleOutlineIcon fontSize={theme.palette.geoViewFontSize.sm} />}
+          startIcon={<AddCircleOutlineIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />}
           onClick={() => handleSetDisplayState('add')}
         >
           {t('general.add')}
@@ -127,7 +127,7 @@ export function LayersToolbar(): JSX.Element {
           size="small"
           tooltip={t('legend.sortLayers')!}
           variant={displayState === 'order' ? 'contained' : 'outlined'}
-          startIcon={<HandleIcon fontSize={theme.palette.geoViewFontSize.sm} />}
+          startIcon={<HandleIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />}
           onClick={() => handleSetDisplayState('order')}
         >
           {t('legend.sort')}
@@ -139,7 +139,7 @@ export function LayersToolbar(): JSX.Element {
           size="small"
           tooltip={t('legend.removeLayer')!}
           variant={displayState === 'remove' ? 'contained' : 'outlined'}
-          startIcon={<DeleteOutlineIcon fontSize={theme.palette.geoViewFontSize.sm} />}
+          startIcon={<DeleteOutlineIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />}
           onClick={() => handleSetDisplayState('remove')}
         >
           {t('general.remove')}

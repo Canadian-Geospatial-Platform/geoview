@@ -37,11 +37,11 @@ export function GeolocatorBar({ searchValue, onChange, onSearch, onReset, isLoad
           <StyledInputField placeholder={t('geolocator.search')!} autoFocus onChange={onChange} value={searchValue} />
           <Box sx={{ display: 'flex', marginLeft: 'auto', alignItems: 'center' }}>
             <IconButton size="small" edge="end" color="inherit" sx={{ mr: 4 }} disabled={!searchValue.length} onClick={onSearch}>
-              <SearchIcon fontSize={theme.palette.geoViewFontSize.sm} />
+              <SearchIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />
             </IconButton>
             <Divider orientation="vertical" variant="middle" flexItem />
             <IconButton size="small" edge="end" color="inherit" sx={{ mr: 2, ml: 4 }} onClick={onReset}>
-              <CloseIcon fontSize={theme.palette.geoViewFontSize.sm} />
+              <CloseIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />
             </IconButton>
           </Box>
         </form>

@@ -29,6 +29,7 @@ export type DrawOptions = InteractionOptions & {
  */
 export class Draw extends Interaction {
   /** The embedded OpenLayers Draw component. */
+  // eslint-disable-next-line camelcase
   #ol_draw: OLDraw;
 
   /** Callback handlers for the drawstart event. */

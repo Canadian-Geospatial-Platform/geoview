@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Size } from 'ol/size';
 
 import {
-  Grid2 as Grid,
+  Grid,
   Tab as MaterialTab,
   Tabs as MaterialTabs,
   TabsProps,
@@ -46,7 +46,7 @@ type FocusItemProps = {
 /**
  * Tabs ui properties
  */
-/* eslint-disable react/require-default-props */
+
 export interface TypeTabsProps {
   shellContainer?: HTMLElement;
   tabs: TypeTabs[];

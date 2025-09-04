@@ -96,7 +96,6 @@ export abstract class Plugin {
 
     if (plugin) {
       // Attach to the map plugins object
-      // eslint-disable-next-line no-param-reassign
       mapViewer.plugins[pluginId] = plugin;
 
       // a config object used to store package config

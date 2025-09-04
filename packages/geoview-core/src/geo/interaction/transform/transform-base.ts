@@ -470,7 +470,6 @@ export class OLTransform extends OLPointer {
       // If we deleted the first vertex, update the last vertex to be the same as the new first
       // to properly close the polygon
       if (vertexIndex === 0) {
-        // eslint-disable-next-line prefer-destructuring
         coords[0][coords[0].length - 1] = coords[0][0];
       }
 
@@ -1538,7 +1537,6 @@ export class OLTransform extends OLPointer {
    * Checks if a feature is a text feature
    * @returns {boolean} True if it's a text feature
    */
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   #isTextFeature(feature?: Feature): boolean {
     return (feature || this.selectedFeature)?.get('text') !== undefined;
   }

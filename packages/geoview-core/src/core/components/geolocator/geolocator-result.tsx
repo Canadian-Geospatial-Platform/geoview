@@ -133,7 +133,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
               onClick={handleClearFilters}
               disabled={!geoLocationData.length}
             >
-              <FilterAltOffIcon fontSize={theme.palette.geoViewFontSize.sm} />
+              <FilterAltOffIcon sx={{ fontSize: theme.palette.geoViewFontSize.md }} />
             </IconButton>
           </Box>
         </Box>

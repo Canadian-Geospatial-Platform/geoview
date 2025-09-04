@@ -64,6 +64,7 @@ export class GeoViewError extends Error {
     let message = error;
 
     // If the error is an actual Error object (great)
+    // eslint-disable-next-line prefer-destructuring
     if (error instanceof Error) message = error.message;
 
     // If the error is GeoView, we have a messageKey that needs to be translated

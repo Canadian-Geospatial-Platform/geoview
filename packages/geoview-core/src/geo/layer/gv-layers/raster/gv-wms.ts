@@ -213,6 +213,7 @@ export class GVWMS extends AbstractGVRaster {
         featureMember = { html: responseData };
       } else {
         // The response is in text format
+        // eslint-disable-next-line camelcase
         featureMember = { plain_text: { '#text': responseData } };
       }
 
@@ -328,7 +329,6 @@ export class GVWMS extends AbstractGVRaster {
    * Sets the style to be used by the wms layer. This methode does nothing if the layer path can't be found.
    * @param {string} wmsStyleId - The style identifier that will be used.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   setWmsStyle(wmsStyleId: string): void {
     // TODO: Verify if we can apply more than one style at the same time since the parameter name is STYLES
     this.getOLSource()?.updateParams({ STYLES: wmsStyleId });

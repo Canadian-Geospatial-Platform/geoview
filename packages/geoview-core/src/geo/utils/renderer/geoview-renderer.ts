@@ -1771,7 +1771,6 @@ function classifyUnprocessedNodes(keywordArray: FilterNodeType[]): FilterNodeTyp
  * @returns {FilterNodeType[]} The new keywords array.
  */
 function extractKeyword(filterNodeArray: FilterNodeType[], keyword: string, regExp?: RegExp): FilterNodeType[] {
-  // eslint-disable-next-line no-nested-ternary
   const getNodeType = (keywordValue: string): NodeType => {
     if (['+', '-'].includes(keywordValue)) return NodeType.unprocessedNode;
     if (binaryKeywors.includes(keywordValue)) return NodeType.binary;

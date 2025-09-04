@@ -195,7 +195,7 @@ const ResponsiveGridLayout = forwardRef(
           size="small"
           variant="outlined"
           color="primary"
-          startIcon={<CloseIcon fontSize={theme.palette.geoViewFontSize.sm} />}
+          startIcon={<CloseIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />}
           onClick={() => setIsRightPanelVisible(false)}
           tooltip={t('details.closeSelection')!}
         >
@@ -308,7 +308,8 @@ const ResponsiveGridLayout = forwardRef(
 
     return (
       <Box ref={ref} sx={sxClasses.container} className="responsive-layout-container">
-        <ResponsiveGrid.Root sx={{ pt: 8, pb: 0, paddingTop: '0' }} className="responsive-layout-top-row">
+        <Box sx={{ pt: 8, pb: 0, paddingTop: '0' }} className="responsive-layout-top-row">
+          <ResponsiveGrid.Root>
           {!fullWidth && (
             <ResponsiveGrid.Left
               isRightPanelVisible={isRightPanelVisible}
@@ -355,15 +356,17 @@ const ResponsiveGridLayout = forwardRef(
               </Box>
             </Box>
           </ResponsiveGrid.Right>
-        </ResponsiveGrid.Root>
-        <ResponsiveGrid.Root
-          className="responsive-layout-main-row"
+          </ResponsiveGrid.Root>
+        </Box>
+        <Box
           sx={{
             flexGrow: 1,
             overflow: 'hidden',
             paddingTop: '0',
           }}
+          className="responsive-layout-main-row"
         >
+          <ResponsiveGrid.Root>
           <ResponsiveGrid.Left
             isEnlarged={isEnlarged}
             isRightPanelVisible={isRightPanelVisible}
@@ -383,7 +386,8 @@ const ResponsiveGridLayout = forwardRef(
           >
             {renderRightContent()}
           </ResponsiveGrid.Right>
-        </ResponsiveGrid.Root>
+          </ResponsiveGrid.Root>
+        </Box>
       </Box>
     );
   }

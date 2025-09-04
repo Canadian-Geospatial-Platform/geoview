@@ -48,6 +48,7 @@ export abstract class GeoCore {
       const mapConfig = MapEventProcessor.getGeoViewMapConfig(mapId);
 
       // Generate the url using the geocore url
+      // eslint-disable-next-line prefer-destructuring
       geocoreUrl = mapConfig!.serviceUrls.geocoreUrl;
     }
 

@@ -157,6 +157,7 @@ export class Notifications {
           this.snackbarMessageQueue = this.snackbarMessageQueue.filter(
             (snackbarMessage) => snackbarMessage.messageKey !== messageKey && snackbarMessage.messageKey !== 'warning.layer.slowRenders'
           );
+
         // eslint-disable-next-line no-param-reassign
         messageKey = 'warning.layer.slowRenders';
       }
@@ -175,6 +176,7 @@ export class Notifications {
             (snackbarMessage) =>
               snackbarMessage.messageKey !== messageKey && snackbarMessage.messageKey !== 'warning.layer.metadatasTakingLongTime'
           );
+
         // eslint-disable-next-line no-param-reassign
         messageKey = 'warning.layer.metadatasTakingLongTime';
       }
@@ -266,6 +268,7 @@ export class Notifications {
     // Here it's either an Error System or unknown. If Error System, read the message.
     let message = error;
     if (error instanceof Error) {
+      // eslint-disable-next-line prefer-destructuring
       message = error.message;
     }
 

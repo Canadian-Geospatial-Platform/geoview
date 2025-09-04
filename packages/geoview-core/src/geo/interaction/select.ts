@@ -27,6 +27,7 @@ export type SelectOptions = InteractionOptions & {
  */
 export class Select extends Interaction {
   /** The embedded OpenLayers Select component */
+  // eslint-disable-next-line camelcase
   #ol_select: OLSelect;
 
   /** Callback handlers for the selectchanged event. */

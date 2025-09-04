@@ -609,7 +609,6 @@ export abstract class DateMgt {
         inputFragments[TIME] = 3;
         outputFragments[TIME] = 3;
         // Get time zone.
-        // eslint-disable-next-line prefer-destructuring
         separators[TIME_ZONE] = timeString.split(/[+-]/)[1];
       }
 
@@ -636,6 +635,7 @@ export abstract class DateMgt {
     if (!date) return date;
     const index = dateFragmentsOrder[0];
     const separators = dateFragmentsOrder[2];
+
     // eslint-disable-next-line prefer-const
     let [dateString, timeString] = date.toUpperCase().replace('Z', '+00:00').replaceAll(' ', 'T').split('T');
     if (!timeString) timeString = '00:00:00';
