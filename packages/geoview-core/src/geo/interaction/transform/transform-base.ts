@@ -511,11 +511,10 @@ export class OLTransform extends OLPointer {
    */
   #getHandleAtCoordinate(coordinate: Coordinate, map: OLMap): Feature | undefined {
     const pixel = map.getPixelFromCoordinate(coordinate);
-    const hitTolerance = this.options.hitTolerance || 5;
 
     const features = map.getFeaturesAtPixel(pixel, {
       layerFilter: (layer) => layer === this.handleLayer,
-      hitTolerance,
+      hitTolerance: this.options.hitTolerance,
     });
 
     return features && features.length > 0 ? (features[0] as Feature) : undefined;
@@ -1167,7 +1166,7 @@ export class OLTransform extends OLPointer {
    */
   #handleDoubleClick(event: MapBrowserEvent<PointerEvent>): boolean {
     const { map } = event;
-    const features = map.getFeaturesAtPixel(event.pixel);
+    const features = map.getFeaturesAtPixel(event.pixel, { hitTolerance: this.options.hitTolerance });
 
     if (features && features.length > 0) {
       const feature = features[0] as Feature;
@@ -1264,7 +1263,15 @@ export class OLTransform extends OLPointer {
       }
 
       // Check if we clicked on a feature to select it
-      const features = map.getFeaturesAtPixel(event.pixel);
+      const features = map.getFeaturesAtPixel(event.pixel, {
+        hitTolerance: this.options.hitTolerance,
+        layerFilter: (layer) => {
+          // Target the geometry layer that contains the drawing feature
+          // GV Layer filter is required for the hitTolerance to work
+          // GV because otherwise it stops at the first/most accurate layer hit (basemap)
+          return layer.getSource() === this.options.source;
+        },
+      });
 
       if (features && features.length > 0) {
         const feature = features[0] as Feature;
@@ -1484,7 +1491,10 @@ export class OLTransform extends OLPointer {
         map.getTargetElement().style.cursor = cursor;
       } else if (!this.#isTransforming) {
         // Check if we're over a feature
-        const features = map.getFeaturesAtPixel(event.pixel);
+        const features = map.getFeaturesAtPixel(event.pixel, {
+          hitTolerance: this.options.hitTolerance,
+          layerFilter: (layer) => layer.getSource() === this.options.source,
+        });
         if (features && features.length > 0) {
           const feature = features[0] as Feature;
           if (this.features.getArray().includes(feature) && this.options.translate) {
