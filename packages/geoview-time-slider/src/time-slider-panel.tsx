@@ -104,9 +104,9 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
     // Return the layers
     return visibleLayers
       .map((layerPath) => {
-        return { layerPath, timeSliderLayerInfo: timeSliderLayers[layerPath] };
+        return { layerPath, timeSliderLayerInfo: timeSliderLayers?.[layerPath] };
       })
-      .filter((layer) => layer && layer.timeSliderLayerInfo && !isLayerHiddenOnMap(layer.layerPath))
+      .filter((layer) => layer?.timeSliderLayerInfo && !isLayerHiddenOnMap(layer.layerPath))
       .map((layer) => {
         return {
           layerName: LegendEventProcessor.findLayerByPath(legendLayers, layer.layerPath)?.layerName,

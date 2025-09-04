@@ -17,9 +17,9 @@ interface GeoChartProps {
   config: PluginGeoChartConfig;
   schemaValidator: SchemaValidator;
   layers: TypeGeochartResultSetEntry[];
-  // eslint-disable-next-line react/require-default-props
+
   sx?: React.CSSProperties;
-  // eslint-disable-next-line react/require-default-props
+
   provideCallbackRedraw?: (callbackRedraw: () => void) => void;
 }
 
