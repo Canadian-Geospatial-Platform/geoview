@@ -306,10 +306,9 @@ const ResponsiveGridLayout = forwardRef(
       );
     };
 
-    return (
+   return (
       <Box ref={ref} sx={sxClasses.container} className="responsive-layout-container">
-        <Box sx={{ pt: 8, pb: 0, paddingTop: '0' }} className="responsive-layout-top-row">
-          <ResponsiveGrid.Root>
+        <ResponsiveGrid.Root sx={{ pt: 8, pb: 0, paddingTop: '0' }} className="responsive-layout-top-row">
           {!fullWidth && (
             <ResponsiveGrid.Left
               isRightPanelVisible={isRightPanelVisible}
@@ -326,7 +325,7 @@ const ResponsiveGridLayout = forwardRef(
             isRightPanelVisible={isRightPanelVisible}
             isEnlarged={isEnlarged}
             fullWidth={fullWidth}
-            sxProps={{ zIndex: isFullScreen ? 'unset' : 100, alignContent: 'flex-end' }}
+            sxProps={{ zIndex: isFullScreen ? 'unset' : 100, alignContent: 'flex-end', }}
             className="responsive-layout-right-top"
           >
             <Box
@@ -356,17 +355,15 @@ const ResponsiveGridLayout = forwardRef(
               </Box>
             </Box>
           </ResponsiveGrid.Right>
-          </ResponsiveGrid.Root>
-        </Box>
-        <Box
+        </ResponsiveGrid.Root>
+        <ResponsiveGrid.Root
+          className="responsive-layout-main-row"
           sx={{
             flexGrow: 1,
             overflow: 'hidden',
             paddingTop: '0',
           }}
-          className="responsive-layout-main-row"
         >
-          <ResponsiveGrid.Root>
           <ResponsiveGrid.Left
             isEnlarged={isEnlarged}
             isRightPanelVisible={isRightPanelVisible}
@@ -386,8 +383,7 @@ const ResponsiveGridLayout = forwardRef(
           >
             {renderRightContent()}
           </ResponsiveGrid.Right>
-          </ResponsiveGrid.Root>
-        </Box>
+        </ResponsiveGrid.Root>
       </Box>
     );
   }

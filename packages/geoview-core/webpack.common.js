@@ -6,7 +6,7 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const LodashWebpackPlugin = require('lodash-webpack-plugin');
-const glob = require('glob');
+const { globSync } = require('glob');
 const childProcess = require('child_process');
 const packageJSON = require('./package.json');
 
@@ -19,10 +19,12 @@ const hash = JSON.stringify(childProcess.execSync('git rev-parse HEAD').toString
 console.log(`Build CGP Viewer: ${major}.${minor}.${patch} - ${date}`);
 
 // inject all sample files
-const multipleHtmlPluginsSamples = glob.sync('./public/templates/*.html').map((name) => {
+const sampleFiles = globSync('./public/templates/*.html');
+const multipleHtmlPluginsSamples = sampleFiles.map((name) => {
+  const filename = path.basename(name);
   return new HtmlWebpackPlugin({
     template: `${name}`,
-    filename: `${name.substring(name.lastIndexOf('/') + 1, name.length)}`,
+    filename: filename,
     title: 'Canadian Geospatial Platform Viewer',
     inject: 'head',
     scriptLoading: 'blocking',
@@ -31,10 +33,12 @@ const multipleHtmlPluginsSamples = glob.sync('./public/templates/*.html').map((n
 });
 
 // inject all demos files
-const multipleHtmlPluginsDemos = glob.sync('./public/templates/demos/*.html').map((name) => {
+const demoFiles = globSync('./public/templates/demos/*.html');
+const multipleHtmlPluginsDemos = demoFiles.map((name) => {
+  const filename = path.basename(name);
   return new HtmlWebpackPlugin({
     template: `${name}`,
-    filename: `${name.substring(name.lastIndexOf('/') + 1, name.length)}`,
+    filename: filename,
     title: 'Canadian Geospatial Platform Viewer',
     inject: 'head',
     scriptLoading: 'blocking',
@@ -43,10 +47,12 @@ const multipleHtmlPluginsDemos = glob.sync('./public/templates/demos/*.html').ma
 });
 
 // inject all outlier files
-const multipleHtmlPluginsOutliers = glob.sync('./public/templates/outliers/*.html').map((name) => {
+const outlierFiles = globSync('./public/templates/outliers/*.html');
+const multipleHtmlPluginsOutliers = outlierFiles.map((name) => {
+  const filename = path.basename(name);
   return new HtmlWebpackPlugin({
     template: `${name}`,
-    filename: `${name.substring(name.lastIndexOf('/') + 1, name.length)}`,
+    filename: filename,
     title: 'Canadian Geospatial Platform Viewer',
     inject: 'head',
     scriptLoading: 'blocking',
