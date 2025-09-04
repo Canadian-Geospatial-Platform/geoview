@@ -116,6 +116,8 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   static #drawerHistory: Map<string, DrawerHistoryAction[]> = new Map();
 
   /** Track features that were selected and their original geometries */
+  // GV The Map was because the transform COULD select multiple features
+  // GV It may not be necessary as I'm not sure we should support that
   static #selectedFeatureState: Map<
     string,
     {

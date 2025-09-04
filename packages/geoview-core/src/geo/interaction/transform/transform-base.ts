@@ -400,6 +400,7 @@ export class OLTransform extends OLPointer {
 
   /**
    * Clears the current selection.
+   * @param {boolean} keepHistory - Whether the history should be kept when clearing the selection
    */
   clearSelection(keepHistory: boolean = false): void {
     if (this.onSelectionChange) {
