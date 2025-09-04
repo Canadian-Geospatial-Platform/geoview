@@ -43,3 +43,11 @@ Hold viewer specific css not inside theme
   contain: paint;
   will-change: transform;
 }
+
+/* override default MUI grid style */
+.MuiGrid-container {
+  background: unset !important;
+}
+.MuiGrid-container:first-of-type:not(#footerbar-header) {
+  border: none !important;
+}
