@@ -21,6 +21,7 @@ import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-clas
 import { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config';
 import { EsriBaseRenderer } from '@/geo/utils/renderer/esri-renderer';
 import { TypeProjection } from '@/geo/utils/projection';
+import { GeoPackageFeature } from '@/core/utils/config/reader/geopackage-reader';
 
 /**
  *  Definition of the map feature instance according to what is specified in the schema.
@@ -380,7 +381,6 @@ type LayerTypesKey =
   | 'ESRI_IMAGE'
   | 'IMAGE_STATIC'
   | 'GEOJSON'
-  | 'GEOPACKAGE'
   | 'XYZ_TILES'
   | 'VECTOR_TILES'
   | 'OGC_FEATURE'
@@ -395,7 +395,6 @@ export type TypeGeoviewLayerType =
   | 'esriFeature'
   | 'esriImage'
   | 'GeoJSON'
-  | 'GeoPackage'
   | 'imageStatic'
   | 'ogcFeature'
   | 'ogcWfs'
@@ -405,7 +404,7 @@ export type TypeGeoviewLayerType =
   | 'xyzTiles';
 
 /** Definition of the geoview layer types accepted by the viewer. */
-export type TypeInitialGeoviewLayerType = TypeGeoviewLayerType | 'geoCore' | 'shapefile';
+export type TypeInitialGeoviewLayerType = TypeGeoviewLayerType | 'geoCore' | 'GeoPackage' | 'shapefile';
 
 /**
  * Definition of the GeoView layer constants
@@ -417,7 +416,6 @@ export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType> = {
   ESRI_IMAGE: 'esriImage',
   IMAGE_STATIC: 'imageStatic',
   GEOJSON: 'GeoJSON',
-  GEOPACKAGE: 'GeoPackage',
   XYZ_TILES: 'xyzTiles',
   VECTOR_TILES: 'vectorTiles',
   OGC_FEATURE: 'ogcFeature',
@@ -438,7 +436,6 @@ export const CONST_GEOVIEW_SCHEMA_BY_TYPE: Record<TypeGeoviewLayerType, string> 
   esriFeature: 'TypeVectorLayerEntryConfig',
   esriImage: 'TypeEsriImageLayerEntryConfig',
   GeoJSON: 'TypeVectorLayerEntryConfig',
-  GeoPackage: 'TypeVectorLayerEntryConfig',
   xyzTiles: 'TypeTileLayerEntryConfig',
   vectorTiles: 'TypeTileLayerEntryConfig',
   ogcFeature: 'TypeVectorLayerEntryConfig',
@@ -456,7 +453,6 @@ export const validVectorLayerLegendTypes: TypeGeoviewLayerType[] = [
   CONST_LAYER_TYPES.OGC_FEATURE,
   CONST_LAYER_TYPES.WFS,
   CONST_LAYER_TYPES.WKB,
-  CONST_LAYER_TYPES.GEOPACKAGE,
 ];
 
 /** The default geocore url */
@@ -472,6 +468,7 @@ export const CONFIG_PROXY_URL = 'https://maps.canada.ca/wmsproxy/ws/wmsproxy/exe
 export const CONFIG_METADATA_RECORDS_URL = '';
 
 export const CONFIG_GEOCORE_TYPE = 'geoCore';
+export const CONFIG_GEOPACKAGE_TYPE = 'GeoPackage';
 export const CONFIG_SHAPEFILE_TYPE = 'shapefile';
 
 // valid zoom levels from each projection
@@ -643,7 +640,15 @@ export type SerializedGeometry = {
 
 // TODO: refactor remove geoCore
 /** Type of Style to apply to the GeoView vector layer source at creation time. */
-export type TypeLayerEntryType = 'vector' | 'vector-tile' | 'raster-tile' | 'raster-image' | 'group' | 'geoCore' | 'shapefile';
+export type TypeLayerEntryType =
+  | 'vector'
+  | 'vector-tile'
+  | 'raster-tile'
+  | 'raster-image'
+  | 'group'
+  | 'geoCore'
+  | 'GeoPackage'
+  | 'shapefile';
 
 /** Temporal dimension associated to the layer. */
 export type TypeTemporalDimension = TimeDimension;
@@ -738,6 +743,17 @@ export interface TypeGeojsonSourceInitialConfig extends TypeBaseVectorSourceInit
   geojson?: string;
 }
 
+export interface TypeSourceWkbInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
+  format: 'WKB';
+  geoPackageFeatures?: GeoPackageFeature[];
+}
+
+/** Initial settings to apply to the GeoView vector layer source at creation time. */
+export interface TypeWkbSourceInitialConfig extends TypeBaseVectorSourceInitialConfig {
+  /** WKB features and properties converted from GeoPackage */
+  geoPackageFeatures?: GeoPackageFeature[];
+}
+
 /** Initial settings to apply to the GeoView vector tile layer source at creation time. */
 export interface TypeVectorTileSourceInitialConfig extends TypeBaseVectorSourceInitialConfig {
   /** Tile grid parameters to use. */
@@ -766,7 +782,7 @@ export type TypeTileGrid = {
 };
 
 /** Type that defines the vector layer source formats. */
-export type TypeVectorSourceFormats = 'GeoJSON' | 'EsriJSON' | 'KML' | 'WFS' | 'featureAPI' | 'GeoPackage' | 'CSV' | 'MVT' | 'WKB';
+export type TypeVectorSourceFormats = 'GeoJSON' | 'EsriJSON' | 'KML' | 'WFS' | 'featureAPI' | 'CSV' | 'MVT' | 'WKB';
 
 /** Type from which we derive the source properties for all the ESRI dynamic leaf nodes in the layer tree. */
 export interface TypeSourceEsriDynamicInitialConfig extends TypeBaseSourceInitialConfig {
@@ -1102,6 +1118,10 @@ export interface TypeLayerEntryConfigGeoJSON extends Omit<TypeLayerEntryConfig2,
   source: TypeSourceGeoJSONInitialConfig;
 }
 
+export interface TypeLayerEntryConfigWkb extends Omit<TypeLayerEntryConfig2, 'source'> {
+  source: TypeSourceWkbInitialConfig;
+}
+
 export interface TypeLayerEntryConfigWfs extends Omit<TypeLayerEntryConfig2, 'source'> {
   source: TypeSourceWFSVectorInitialConfig;
 }
@@ -1138,7 +1158,15 @@ export interface TypeSourceWkbVectorInitialConfig extends TypeVectorSourceInitia
 // endregion ATTEMPT TO REPLACE TypeLayerEntryConfig
 
 // Definition of the keys used to create the constants of the GeoView layer
-export type LayerEntryTypesKey = 'VECTOR' | 'VECTOR_TILE' | 'RASTER_TILE' | 'RASTER_IMAGE' | 'GROUP' | 'GEOCORE' | 'SHAPEFILE';
+export type LayerEntryTypesKey =
+  | 'VECTOR'
+  | 'VECTOR_TILE'
+  | 'RASTER_TILE'
+  | 'RASTER_IMAGE'
+  | 'GROUP'
+  | 'GEOCORE'
+  | 'GEOPACKAGE'
+  | 'SHAPEFILE';
 
 // TODO: After refactor, use the function in type-guard...
 export const CONST_LAYER_ENTRY_TYPES: Record<LayerEntryTypesKey, TypeLayerEntryType> = {
@@ -1148,6 +1176,7 @@ export const CONST_LAYER_ENTRY_TYPES: Record<LayerEntryTypesKey, TypeLayerEntryT
   RASTER_IMAGE: 'raster-image',
   GROUP: 'group',
   GEOCORE: 'geoCore',
+  GEOPACKAGE: 'GeoPackage',
   SHAPEFILE: 'shapefile',
 };
 
@@ -1206,6 +1235,15 @@ export const mapConfigLayerEntryIsGeoCore = (layerConfigEntryOption: MapConfigLa
 };
 
 /**
+ * Type guard that checks if a given map layer configuration entry is of type GeoPackage.
+ * @param {MapConfigLayerEntry} layerConfigEntryOption - The layer entry config to check
+ * @returns {boolean} True if the layer is a GeoPackage layer, narrowing the type to GeoPackageLayerConfig.
+ */
+export const mapConfigLayerEntryIsGeoPackage = (layerConfigEntryOption: MapConfigLayerEntry): boolean => {
+  return layerConfigEntryOption.geoviewLayerType === CONST_LAYER_ENTRY_TYPES.GEOPACKAGE;
+};
+
+/**
  * Type guard that checks if a given map layer configuration entry is of type Shapefile.
  * @param {MapConfigLayerEntry} layerConfigEntryOption - The layer entry config to check
  * @returns {layerConfigEntryOption is ShapefileLayerConfig} True if the layer is a Shapefile layer, narrowing the type to ShapefileLayerConfig.
@@ -1216,7 +1254,7 @@ export const mapConfigLayerEntryIsShapefile = (
   return layerConfigEntryOption.geoviewLayerType === CONST_LAYER_ENTRY_TYPES.SHAPEFILE;
 };
 
-export type MapConfigLayerEntry = TypeGeoviewLayerConfig | GeoCoreLayerConfig | ShapefileLayerConfig;
+export type MapConfigLayerEntry = TypeGeoviewLayerConfig | GeoCoreLayerConfig | GeoPackageLayerConfig | ShapefileLayerConfig;
 
 export type TypeGeoviewLayerConfig = {
   /** The GeoView layer identifier. */
@@ -1275,6 +1313,26 @@ export type GeoCoreLayerConfig = {
   listOfLayerEntryConfig?: TypeLayerEntryConfig[];
 };
 
+export type GeoPackageLayerConfig = {
+  /** Type of GeoView layer. */
+  geoviewLayerType: typeof CONST_LAYER_ENTRY_TYPES.GEOPACKAGE;
+
+  /** The GeoView layer identifier. */
+  geoviewLayerId: string;
+
+  /** The path to the GeoPackage */
+  metadataAccessPath: string;
+
+  /** The display name of the layer. This overrides the default name coming from the GeoCore API. */
+  geoviewLayerName?: string | undefined;
+
+  /** Initial settings to apply to the layer at creation time. */
+  initialSettings?: TypeLayerInitialSettings;
+
+  /** The layer entries to use from the GeoPackage. */
+  listOfLayerEntryConfig?: TypeLayerEntryConfig[];
+};
+
 export type ShapefileLayerConfig = {
   /** Type of GeoView layer. */
   geoviewLayerType: typeof CONST_LAYER_ENTRY_TYPES.SHAPEFILE;
@@ -1299,7 +1357,6 @@ export const convertLayerTypeToEntry = (layerType: TypeGeoviewLayerType): TypeLa
   switch (layerType) {
     case CONST_LAYER_TYPES.CSV:
     case CONST_LAYER_TYPES.GEOJSON:
-    case CONST_LAYER_TYPES.GEOPACKAGE:
     case CONST_LAYER_TYPES.OGC_FEATURE:
     case CONST_LAYER_TYPES.WFS:
     case CONST_LAYER_TYPES.WKB:
@@ -1333,6 +1390,17 @@ export const serializeTypeGeoviewLayerConfig = (geoviewLayerConfig: MapConfigLay
       geoviewLayerId: geoviewLayerConfig.geoviewLayerId,
       geoviewLayerName: geoviewLayerConfig.geoviewLayerName,
       geoviewLayerType: geoviewLayerConfig.geoviewLayerType,
+    } as unknown as TypeGeoviewLayerConfig;
+  }
+
+  // If GeoPackage layer entry
+  if (mapConfigLayerEntryIsGeoPackage(geoviewLayerConfig)) {
+    // Serialize
+    return {
+      geoviewLayerId: geoviewLayerConfig.geoviewLayerId,
+      geoviewLayerName: geoviewLayerConfig.geoviewLayerName,
+      geoviewLayerType: geoviewLayerConfig.geoviewLayerType,
+      metadataAccessPath: geoviewLayerConfig.metadataAccessPath,
     } as unknown as TypeGeoviewLayerConfig;
   }
 

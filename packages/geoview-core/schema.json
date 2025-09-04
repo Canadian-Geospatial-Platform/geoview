@@ -1319,7 +1319,6 @@
         "EsriJSON",
         "featureAPI",
         "GeoJSON",
-        "GeoPackage",
         "KML",
         "WFS",
         "WKB"
@@ -1569,7 +1568,6 @@
             "CSV",
             "esriFeature",
             "GeoJSON",
-            "GeoPackage",
             "ogcFeature",
             "ogcWfs",
             "WKB"
@@ -2428,6 +2426,37 @@
         "geoviewLayerType"
       ]
     },
+    "TypeGeoPackageLayerConfig": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "geoviewLayerId": {
+          "type": "string",
+          "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service). The id will have the language extension (id-'lang')."
+        },
+        "geoviewLayerType": {
+          "$ref": "#/definitions/TypeGeoPackageLayerType",
+          "description": "Type of GeoPackage layer."
+        },
+        "metadataAccessPath": {
+          "type": "string",
+          "description": "The path to the GeoPackage."
+        },
+        "geoviewLayerName": {
+          "type": "string",
+          "description": "The display name of the layer. If it is not present the viewer will make an attempt to scrape this information."
+        },
+        "initialSettings": {
+          "$ref": "#/definitions/TypeLayerInitialSettings",
+          "description": "Initial settings to apply to the GeoView layer at creation time."
+        }
+      },
+      "required": [
+        "geoviewLayerId",
+        "geoviewLayerType",
+        "metadataAccessPath"
+      ]
+    },
     "TypeShapefileLayerConfig": {
       "additionalProperties": false,
       "type": "object",
@@ -2468,7 +2497,6 @@
           "esriFeature",
           "esriImage",
           "GeoJSON",
-          "GeoPackage",
           "xyzTiles",
           "ogcFeature",
           "ogcWfs",
@@ -2488,6 +2516,15 @@
         ]
       },
       "description": "Type of GeoCore layer."
+    },
+    "TypeGeoPackageLayerType": {
+      "type": "string",
+      "items": {
+        "enum": [
+          "GeoPackage"
+        ]
+      },
+      "description": "Type of GeoPackage layer."
     },
     "TypeShapefileLayerType": {
       "type": "string",

@@ -3,6 +3,7 @@ import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES, ShapefileLayerConfig } from
 import { TypeGeoJSONLayerConfig } from '@/geo/layer/geoview-layers/vector/geojson';
 import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
 import { generateId } from '@/core/utils/utilities';
+import { Fetch } from '@/core/utils/fetch-helper';
 
 /**
  * A class to generate a GeoView layer config from a shapefile.
@@ -20,8 +21,7 @@ export class ShapefileReader {
     let shapefileURL: ArrayBuffer | string = layerConfig.metadataAccessPath;
     let filename: string | undefined;
     if (shapefileURL.startsWith('blob')) {
-      const response = await fetch(shapefileURL);
-      shapefileURL = await response.arrayBuffer();
+      shapefileURL = await Fetch.fetchArrayBuffer(shapefileURL);
     } else {
       filename = shapefileURL.split('/').pop()?.split('.')[0];
     }

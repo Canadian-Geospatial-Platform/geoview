@@ -121,6 +121,7 @@
     "serviceGeoCore": "Identifiant GeoCore",
     "serviceVectorTile": "Service de tuiles vectorielles",
     "serviceGeoJSON": "GeoJSON",
+    "serviceGeoPackage": "GeoPackage",
     "serviceCSV": "Valeurs séparées par des virgules (CSV)",
     "serviceRasterTile": "Tuiles 'raster' XYZ",
     "serviceImageStatic": "Image statique",
