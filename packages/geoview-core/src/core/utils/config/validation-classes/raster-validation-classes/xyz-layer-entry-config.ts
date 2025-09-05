@@ -34,7 +34,7 @@ export class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
    * The class constructor.
    * @param {XYZTilesLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
    */
-  constructor(layerConfig: XYZTilesLayerEntryConfigProps) {
+  constructor(layerConfig: XYZTilesLayerEntryConfigProps | XYZTilesLayerEntryConfigProps) {
     super(layerConfig);
     this.minScaleDenominator = layerConfig.minScaleDenominator || 0;
     this.maxScaleDenominator = layerConfig.maxScaleDenominator || 0;

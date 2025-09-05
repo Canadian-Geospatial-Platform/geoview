@@ -38,12 +38,15 @@ import {
   layerEntryIsGeoPackageFromConfig,
   layerEntryIsOgcFeatureFromConfig,
   layerEntryIsWFSFromConfig,
+  ConfigClassOrType,
 } from '@/api/config/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
 
 import { generateId } from '@/core/utils/utilities';
 import schema from '@/core/../../schema.json';
-
+import { ConfigBaseClass } from './validation-classes/config-base-class';
+import { WfsLayerEntryConfig } from './validation-classes/vector-validation-classes/wfs-layer-entry-config';
+import { OgcFeatureLayerEntryConfig } from './validation-classes/vector-validation-classes/ogc-layer-entry-config';
 import { CsvLayerEntryConfig } from './validation-classes/vector-validation-classes/csv-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from './validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriFeatureLayerEntryConfig } from './validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
@@ -306,17 +309,17 @@ export class ConfigValidation {
   /**
    * Process recursively the layer entries to create layers and layer groups.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The GeoView layer configuration to adjust and validate.
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig - The list of layer entry configurations to process.
+   * @param {ConfigClassOrType[]} listOfLayerEntryConfig - The list of layer entry configurations to process.
    * @param {TypeGeoviewLayerConfig | GroupLayerEntryConfig} parentLayerConfig - The parent layer configuration of all the
    * layer entry configurations found in the list of layer entries.
    * @private
    */
   static #processLayerEntryConfig(
     geoviewLayerConfig: TypeGeoviewLayerConfig,
-    listOfLayerEntryConfig: TypeLayerEntryConfig[],
+    listOfLayerEntryConfig: ConfigClassOrType[],
     parentLayerConfig?: GroupLayerEntryConfig
   ): void {
-    listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig, i: number) => {
+    listOfLayerEntryConfig.forEach((layerConfig, i: number) => {
       // links the entry to its GeoView layer config.
       layerConfig.geoviewLayerConfig = geoviewLayerConfig;
       // links the entry to its parent layer configuration.
@@ -343,12 +346,16 @@ export class ConfigValidation {
       if (!layerConfig.initialSettings.states) layerConfig.initialSettings.states = { visible: true };
       if (layerConfig.initialSettings?.states?.visible !== false) layerConfig.initialSettings.states.visible = true;
 
-      if (layerConfig.minScale) {
-        layerConfig.minScale = Math.min(layerConfig.minScale, parentLayerConfig?.minScale || Infinity);
+      const minScale = ConfigBaseClass.getClassOrTypeMinScale(layerConfig);
+      if (minScale) {
+        // Set the min scale
+        ConfigBaseClass.setClassOrTypeMinScale(layerConfig, Math.min(minScale, parentLayerConfig?.getMinScale() || Infinity));
       }
 
-      if (layerConfig.maxScale) {
-        layerConfig.maxScale = Math.max(layerConfig.maxScale, parentLayerConfig?.maxScale || 0);
+      const maxScale = ConfigBaseClass.getClassOrTypeMaxScale(layerConfig);
+      if (maxScale) {
+        // Set the max scale
+        ConfigBaseClass.setClassOrTypeMaxScale(layerConfig, Math.max(maxScale, parentLayerConfig?.getMaxScale() || 0));
       }
 
       // Merge the rest of parent and child settings

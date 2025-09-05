@@ -7,13 +7,8 @@ import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeLayersViewDisplayState, TypeLegendItem, TypeLegendLayer, TypeLegendLayerItem } from '@/core/components/layers/types';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
-import {
-  TypeFeatureInfoEntryPartial,
-  TypeLayerStyleConfig,
-  TypeResultSet,
-  TypeResultSetEntry,
-  TypeTemporalDimension,
-} from '@/api/config/types/map-schema-types';
+import { TypeFeatureInfoEntryPartial, TypeLayerStyleConfig, TypeResultSet, TypeResultSetEntry } from '@/api/config/types/map-schema-types';
+import { TimeDimension } from '@/core/utils/date-mgt';
 import { CONST_LAYER_TYPES, TypeLayerStatus, TypeLayerControls, TypeGeoviewLayerType } from '@/api/config/types/layer-schema-types';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
@@ -49,7 +44,7 @@ export interface ILayerState {
     getLayerDefaultFilter: (layerPath: string) => string | undefined;
     getLayerDeleteInProgress: () => string;
     getLayerServiceProjection: (layerPath: string) => string | undefined;
-    getLayerTemporalDimension: (layerPath: string) => TypeTemporalDimension | undefined;
+    getLayerTemporalDimension: (layerPath: string) => TimeDimension | undefined;
     refreshLayer: (layerPath: string) => void;
     reloadLayer: (layerPath: string) => void;
     setAllItemsVisibility: (layerPath: string, visibility: boolean) => void;
@@ -140,7 +135,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
 
         // If not EsriDynamic
         if (!(layerConfig instanceof EsriDynamicLayerEntryConfig))
-          throw new LayerNotEsriDynamicError(layerPath, layerConfig.getLayerName());
+          throw new LayerNotEsriDynamicError(layerPath, layerConfig.getLayerNameCascade());
 
         // Get the geometry type
         const [geometryType] = layerConfig.getTypeGeometries();
@@ -210,7 +205,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         return LegendEventProcessor.getLayerServiceProjection(get().mapId, layerPath);
       },
 
-      getLayerTemporalDimension: (layerPath: string): TypeTemporalDimension | undefined => {
+      getLayerTemporalDimension: (layerPath: string): TimeDimension | undefined => {
         try {
           return LegendEventProcessor.getLayerTemporalDimension(get().mapId, layerPath);
         } catch (error: unknown) {

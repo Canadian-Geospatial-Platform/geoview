@@ -121,7 +121,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
       chartConfig = loadDatasources(foundConfigChart!, foundConfigChartLyr!, foundData);
 
       // Set the title
-      chartConfig.title = foundLayerEntry.layerName;
+      chartConfig.title = foundLayerEntry.getLayerName();
     }
 
     // Return all info

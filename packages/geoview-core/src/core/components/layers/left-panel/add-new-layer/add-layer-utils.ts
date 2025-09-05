@@ -102,7 +102,7 @@ export class UtilAddLayer {
    * @returns The name of the layer or undefined if none is found.
    */
   static getLayerNameById(layerTree: TypeGeoviewLayerConfig | undefined, layerId: string): string | undefined {
-    return (UtilAddLayer.getLayerById(layerTree, layerId) as TypeLayerEntryConfig)?.layerName;
+    return (UtilAddLayer.getLayerById(layerTree, layerId) as TypeLayerEntryConfig)?.getLayerName();
   }
 
   /**
@@ -151,7 +151,7 @@ export class UtilAddLayer {
     if (layerType === CONST_LAYER_TYPES.ESRI_DYNAMIC && UtilAddLayer.allSubLayersAreIncluded(groupLayer, layerIds)) {
       return {
         layerId: groupLayerAsLayerEntryConfig?.layerId,
-        layerName: layersToAdd.length === 1 ? layerName : groupLayerAsLayerEntryConfig?.layerName,
+        layerName: layersToAdd.length === 1 ? layerName : groupLayerAsLayerEntryConfig?.getLayerName(),
       };
     }
 
@@ -160,7 +160,7 @@ export class UtilAddLayer {
       layerId: `group-${groupLayerAsLayerEntryConfig?.layerId}`,
       isLayerGroup: true,
       entryType: 'group',
-      layerName: layersToAdd.length === 1 ? layerName : groupLayerAsLayerEntryConfig?.layerName,
+      layerName: layersToAdd.length === 1 ? layerName : groupLayerAsLayerEntryConfig?.getLayerName(),
       listOfLayerEntryConfig: groupLayer.listOfLayerEntryConfig
         .map((layerEntryConfig) => {
           if (layerEntryConfig.listOfLayerEntryConfig?.length && layerIds.includes(layerEntryConfig.layerId))
@@ -176,7 +176,7 @@ export class UtilAddLayer {
           if (layerIds.includes(layerEntryConfig.layerId))
             return {
               layerId: layerEntryConfig?.layerId,
-              layerName: layersToAdd.length === 1 ? layerName : layerEntryConfig?.layerName,
+              layerName: layersToAdd.length === 1 ? layerName : layerEntryConfig?.getLayerName(),
             };
           return undefined;
         })
@@ -234,7 +234,7 @@ export class UtilAddLayer {
         } else if (!removedLayerIds.includes(layerToAddAsLayerEntryConfig.layerId)) {
           listOfLayerEntryConfig.push({
             layerId: layerToAddAsLayerEntryConfig?.layerId,
-            layerName: layersToAdd.length === 1 ? layerName : layerToAddAsLayerEntryConfig?.layerName,
+            layerName: layersToAdd.length === 1 ? layerName : layerToAddAsLayerEntryConfig?.getLayerName(),
           });
         }
       });

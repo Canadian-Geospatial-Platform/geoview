@@ -14,6 +14,7 @@ import Home from './buttons/home';
 import Location from './buttons/location';
 import Projection from './buttons/projection';
 import { ButtonGroup, Box, IconButton, Collapse } from '@/ui';
+import { ExpandLessIcon, ExpandMoreIcon } from '@/ui/icons';
 import { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { getSxClasses } from './nav-bar-style';
 import { NavBarApi, NavBarCreatedEvent, NavBarRemovedEvent } from '@/core/components';

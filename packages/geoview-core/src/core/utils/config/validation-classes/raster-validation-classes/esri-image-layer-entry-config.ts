@@ -34,7 +34,7 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * The class constructor.
    * @param {EsriImageLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
    */
-  constructor(layerConfig: EsriImageLayerEntryConfigProps) {
+  constructor(layerConfig: EsriImageLayerEntryConfigProps | EsriImageLayerEntryConfig) {
     super(layerConfig);
 
     // Write the default properties when not specified

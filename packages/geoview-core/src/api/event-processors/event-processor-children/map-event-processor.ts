@@ -1363,7 +1363,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // Construct layer entry config
     const newLayerEntryConfig = {
       layerId: layerEntryConfig!.layerId,
-      layerName: isGeocore && overrideGeocoreServiceNames === false ? undefined : layerEntryConfig!.layerName,
+      layerName: isGeocore && overrideGeocoreServiceNames === false ? undefined : layerEntryConfig!.getLayerName(),
       layerFilter: (configLayerEntryConfig as VectorLayerEntryConfig)?.layerFilter
         ? (configLayerEntryConfig as VectorLayerEntryConfig).layerFilter
         : undefined,
@@ -1597,11 +1597,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
     removeUnlisted: boolean
   ): void {
     listOfLayerEntryConfigs?.forEach((layerEntryConfig) => {
-      if (layerEntryConfig.layerName && pairsDict[layerEntryConfig.layerName])
-        // eslint-disable-next-line no-param-reassign
-        layerEntryConfig.layerName = pairsDict[layerEntryConfig.layerName];
-      // eslint-disable-next-line no-param-reassign
-      else if (removeUnlisted) layerEntryConfig.layerName = '';
+      const layerName = layerEntryConfig.getLayerName();
+      // If there's a name in pairsDict that matches
+      if (layerName && pairsDict[layerName]) layerEntryConfig.setLayerName(pairsDict[layerName]);
+      else if (removeUnlisted) layerEntryConfig.setLayerName('');
       if (layerEntryConfig.listOfLayerEntryConfig?.length)
         this.#replaceLayerEntryConfigNames(pairsDict, layerEntryConfig.listOfLayerEntryConfig, removeUnlisted);
     });

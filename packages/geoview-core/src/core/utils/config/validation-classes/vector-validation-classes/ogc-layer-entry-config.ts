@@ -28,7 +28,7 @@ export class OgcFeatureLayerEntryConfig extends VectorLayerEntryConfig {
    * The class constructor.
    * @param {OgcFeatureLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
    */
-  constructor(layerConfig: OgcFeatureLayerEntryConfigProps) {
+  constructor(layerConfig: OgcFeatureLayerEntryConfigProps | OgcFeatureLayerEntryConfig) {
     super(layerConfig);
 
     // Value for this.source.format can only be featureAPI.

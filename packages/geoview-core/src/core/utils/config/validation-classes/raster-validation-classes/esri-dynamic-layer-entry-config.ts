@@ -40,7 +40,7 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * The class constructor.
    * @param {EsriDynamicLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
    */
-  constructor(layerConfig: EsriDynamicLayerEntryConfigProps) {
+  constructor(layerConfig: EsriDynamicLayerEntryConfigProps | EsriDynamicLayerEntryConfig) {
     super(layerConfig);
     this.maxRecordCount = layerConfig.maxRecordCount;
 

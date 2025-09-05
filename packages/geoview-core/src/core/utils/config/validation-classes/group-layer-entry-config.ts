@@ -1,4 +1,4 @@
-import { CONST_LAYER_ENTRY_TYPES, TypeLayerEntryConfig } from '@/api/config/types/layer-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '@/api/config/types/layer-schema-types';
 import { ConfigBaseClass, ConfigBaseClassProps } from '@/core/utils/config/validation-classes/config-base-class';
 
 export interface GroupLayerEntryConfigProps extends ConfigBaseClassProps {
@@ -31,7 +31,8 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
    * The class constructor.
    * @param {GroupLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
    */
-  constructor(layerConfig: GroupLayerEntryConfigProps) {
+  // TO: Until this is fixed, this constructor supports sending a GroupLayerEntryConfig in its typing, for now (GroupLayerEntryConfigProps | GroupLayerEntryConfig)... though it should only be a GroupLayerEntryConfigProps eventually
+  constructor(layerConfig: GroupLayerEntryConfigProps | GroupLayerEntryConfig) {
     super(layerConfig);
     this.listOfLayerEntryConfig = layerConfig.listOfLayerEntryConfig;
   }
@@ -52,20 +53,34 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
   }
 
   /**
+   * Overrides the creation of the layer props and return a deep clone of the layer entry configuration properties.
+   * This method calls the parent method and then copies the listOfLayerEntryConfig over.
+   * @returns {GroupLayerEntryConfigProps} A deep-cloned copy of the layer entry properties.
+   */
+  protected override onCloneLayerProps(): GroupLayerEntryConfigProps {
+    // Sure
+    const clonedCopy = super.onCloneLayerProps() as GroupLayerEntryConfigProps;
+
+    // Also copy the list of layer entry configs
+    clonedCopy.listOfLayerEntryConfig = this.listOfLayerEntryConfig;
+
+    // Return the cloned copy
+    return clonedCopy;
+  }
+
+  /**
    * Overrides the toJson of the mother class
-   * @returns {unknown} The Json representation of the instance.
+   * @returns {T} The Json representation of the instance.
    * @protected
    */
-  protected override onToJson(): unknown {
+  protected override onToJson<T>(): T {
     // Call parent
-    // GV Can be any object so disable eslint and proceed with caution
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const serialized = super.onToJson() as any;
+    const serialized = super.onToJson<T>() as TypeGeoviewLayerConfig;
 
     // Copy values
     serialized.listOfLayerEntryConfig = this.listOfLayerEntryConfig.map((layerEntryConfig) => layerEntryConfig.toJson());
 
     // Return it
-    return serialized;
+    return serialized as T;
   }
 }

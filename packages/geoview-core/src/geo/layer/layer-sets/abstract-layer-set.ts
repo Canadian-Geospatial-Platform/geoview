@@ -172,7 +172,7 @@ export abstract class AbstractLayerSet {
     this.resultSet[layerConfig.layerPath] = {
       layerPath: layerConfig.layerPath,
       layerStatus: layerConfig.layerStatus,
-      layerName: layerConfig.layerName!,
+      layerName: layerConfig.getLayerNameCascade(),
     };
 
     // Register the layer status changed handler
@@ -360,7 +360,7 @@ export abstract class AbstractLayerSet {
 
     // Update the name with a possibly updated layerName during layer status progression
     // (depending on how this translates in the new layers process, might not need this anymore)
-    this.resultSet[layerConfig.layerPath].layerName = layerConfig.layerName || layerConfig.geoviewLayerConfig.geoviewLayerName!;
+    this.resultSet[layerConfig.layerPath].layerName = layerConfig.getLayerName() || layerConfig.geoviewLayerConfig.geoviewLayerName!;
   }
 
   /**

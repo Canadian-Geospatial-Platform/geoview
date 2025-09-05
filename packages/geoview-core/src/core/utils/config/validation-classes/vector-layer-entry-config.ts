@@ -32,7 +32,7 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
    * The class constructor.
    * @param {VectorLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
    */
-  protected constructor(layerConfig: VectorLayerEntryConfigProps) {
+  protected constructor(layerConfig: VectorLayerEntryConfigProps | VectorLayerEntryConfig) {
     super(layerConfig);
     this.maxRecordCount = layerConfig.maxRecordCount;
   }

@@ -28,7 +28,7 @@ export class WfsLayerEntryConfig extends VectorLayerEntryConfig {
    * The class constructor.
    * @param {WfsLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
    */
-  constructor(layerConfig: WfsLayerEntryConfigProps) {
+  constructor(layerConfig: WfsLayerEntryConfigProps | WfsLayerEntryConfig) {
     super(layerConfig);
 
     // Value for this.source.format can only be WFS.

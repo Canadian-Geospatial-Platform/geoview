@@ -165,7 +165,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     if (!geoviewLayer) throw new LayerNotFoundError(layerConfig.layerPath);
 
     // If not of right type
-    if (!(geoviewLayer instanceof AbstractGVLayer)) throw new LayerWrongTypeError(layerConfig.layerPath, layerConfig.layerName);
+    if (!(geoviewLayer instanceof AbstractGVLayer)) throw new LayerWrongTypeError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
 
     // Get the temporal dimension information
     const temporalDimensionInfo = geoviewLayer.getTemporalDimension();

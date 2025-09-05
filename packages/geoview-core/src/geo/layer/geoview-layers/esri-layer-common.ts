@@ -6,7 +6,6 @@ import { TimeDimensionESRI, DateMgt } from '@/core/utils/date-mgt';
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
-import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import {
   TypeFeatureInfoEntryPartial,
   TypeStyleGeometry,
@@ -17,7 +16,6 @@ import {
 } from '@/api/config/types/map-schema-types';
 import {
   CONST_LAYER_TYPES,
-  TypeLayerEntryConfig,
   TypeLayerMetadataEsri,
   layerEntryIsEsriFeatureFromConfig,
   layerEntryIsEsriDynamicFromConfig,
@@ -25,6 +23,7 @@ import {
 } from '@/api/config/types/layer-schema-types';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
+import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import {
   esriConvertEsriGeometryTypeToOLGeometryType,
   esriParseFeatureInfoEntries,
@@ -58,11 +57,12 @@ export function commonValidateListOfLayerEntryConfig(layer: EsriDynamic | EsriFe
     // If is a group layer
     if (layerConfig.getEntryTypeIsGroup()) {
       // Use the layer name from the metadata if it exists and there is no existing name.
-      if (!layerConfig.layerName) {
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.layerName = layer.getMetadata()!.layers[Number(layerConfig.layerId)]?.name
-          ? layer.getMetadata()!.layers[Number(layerConfig.layerId)].name
-          : '';
+      if (!layerConfig.getLayerName()) {
+        layerConfig.setLayerName(
+          layer.getMetadata()!.layers[Number(layerConfig.layerId)]?.name
+            ? layer.getMetadata()!.layers[Number(layerConfig.layerId)].name
+            : ''
+        );
       }
 
       layer.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig);
@@ -107,21 +107,10 @@ export function commonValidateListOfLayerEntryConfig(layer: EsriDynamic | EsriFe
       const metadata = layer.getMetadata();
 
       if (metadata?.layers[esriIndex]?.subLayerIds?.length) {
-        // We will create dynamically a group layer.
-        const newListOfLayerEntryConfig: TypeLayerEntryConfig[] = [];
-        // If we cloneDeep the layerConfig, it seems to clone pointer for parentLayerConfig and geoviewLayerConfig to objects
-        // GV: previously used cloneDeep (before refactor began), not sure why, has been fine this way through testing
-        // TODO: Refactor - Use `layerConfig.cloneLayerProps() as GroupLayerEntryConfigProps` here instead?
-        const switchToGroupLayer = { ...layerConfig } as unknown as GroupLayerEntryConfig;
+        // Create the group layer entry config instance reusing the props
+        const groupLayerConfigProps = layerConfig.toGroupLayerConfig(layerConfig.getLayerName() || metadata.layers[esriIndex].name);
+        const groupLayerConfig = new GroupLayerEntryConfig(groupLayerConfigProps);
 
-        // Only switch the layer name by the metadata if there were none pre-set (config wins over metadata rule?)
-        if (!switchToGroupLayer.layerName) switchToGroupLayer.layerName = metadata.layers[esriIndex].name;
-
-        switchToGroupLayer.layerId = layerConfig.layerId;
-        switchToGroupLayer.isMetadataLayerGroup = true;
-        switchToGroupLayer.listOfLayerEntryConfig = newListOfLayerEntryConfig;
-
-        const groupLayerConfig = new GroupLayerEntryConfig(switchToGroupLayer);
         // Replace the old version of the layer with the new layer group
         // eslint-disable-next-line no-param-reassign
         listOfLayerEntryConfig[i] = groupLayerConfig;
@@ -142,15 +131,15 @@ export function commonValidateListOfLayerEntryConfig(layer: EsriDynamic | EsriFe
           // TO.DOCONT: with the correct values directly? Especially now that we copy the config to prevent leaking.
           subLayerEntryConfig.parentLayerConfig = groupLayerConfig;
           subLayerEntryConfig.layerId = `${layerId}`;
-          subLayerEntryConfig.layerName = metadata.layers.filter((item) => item.id === layerId)[0].name;
-          newListOfLayerEntryConfig.push(subLayerEntryConfig);
+          subLayerEntryConfig.setLayerName(metadata.layers.filter((item) => item.id === layerId)[0].name);
+          groupLayerConfig.listOfLayerEntryConfig.push(subLayerEntryConfig);
 
           // TODO: Refactor: Do not do this on the fly here anymore with the new configs (quite unpredictable)... (standardizing this call with the other one above for now)
           // Alert that we want to register new entry configs
           layer.emitLayerEntryRegisterInit({ config: subLayerEntryConfig });
         });
 
-        layer.validateListOfLayerEntryConfig(newListOfLayerEntryConfig);
+        layer.validateListOfLayerEntryConfig(groupLayerConfig.listOfLayerEntryConfig);
         return;
       }
 
@@ -160,8 +149,8 @@ export function commonValidateListOfLayerEntryConfig(layer: EsriDynamic | EsriFe
         return;
       }
 
-      // eslint-disable-next-line no-param-reassign
-      if (metadata && !layerConfig.layerName) layerConfig.layerName = metadata?.layers[esriIndex].name;
+      // If no layer name
+      if (!layerConfig.getLayerName()) layerConfig.setLayerName(metadata?.layers[esriIndex].name || 'no name');
     }
   });
 }
@@ -306,12 +295,12 @@ export function commonProcessInitialSettings(
   // Update Max / Min Scales with value if service doesn't allow the configured value for proper UI functionality
   if (layerMetadata?.minScale) {
     // eslint-disable-next-line no-param-reassign
-    layerConfig.minScale = Math.min(layerConfig.minScale ?? Infinity, layerMetadata.minScale);
+    layerConfig.setMinScale(Math.min(layerConfig.getMinScale() ?? Infinity, layerMetadata.minScale));
   }
 
   if (layerMetadata?.maxScale) {
     // eslint-disable-next-line no-param-reassign
-    layerConfig.maxScale = Math.max(layerConfig.maxScale ?? -Infinity, layerMetadata.maxScale);
+    layerConfig.setMaxScale(Math.max(layerConfig.getMaxScale() ?? -Infinity, layerMetadata.maxScale));
   }
 
   // Set the max record count for querying

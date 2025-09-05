@@ -15,13 +15,17 @@ export class GeoPackageLayerEntryConfig extends VectorLayerEntryConfig {
   /** Layer entry data type. */
   override entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
 
+  /** The layer entry props that were used in the constructor. */
+  declare layerEntryProps: GeoPackageLayerEntryConfigProps;
+
+  /** Source settings to apply to the GeoView image layer source at creation time. */
   declare source: TypeSourceGeoPackageInitialConfig;
 
   /**
    * The class constructor.
    * @param {GeoPackageLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
    */
-  constructor(layerConfig: GeoPackageLayerEntryConfigProps) {
+  constructor(layerConfig: GeoPackageLayerEntryConfigProps | GeoPackageLayerEntryConfig) {
     super(layerConfig);
 
     // Write the default properties when not specified

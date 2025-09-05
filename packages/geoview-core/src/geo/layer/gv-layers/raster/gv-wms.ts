@@ -161,7 +161,7 @@ export class GVWMS extends AbstractGVRaster {
       else if (featureInfoFormat.includes('text/plain')) infoFormat = 'text/plain';
       else {
         // Failed
-        throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath, layerConfig.getLayerName());
+        throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
       }
 
     const wmsSource = this.getOLSource();
@@ -643,7 +643,7 @@ export class GVWMS extends AbstractGVRaster {
       // Failed
       throw new LayerInvalidLayerFilterError(
         layerConfig.layerPath,
-        layerConfig.getLayerName(),
+        layerConfig.getLayerNameCascade(),
         filterValueToUse,
         currentFilter,
         formatError(error)

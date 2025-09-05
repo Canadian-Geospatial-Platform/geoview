@@ -180,7 +180,7 @@ export class UUIDmapConfigReader {
             !listOfGeoviewLayerConfig[i].listOfLayerEntryConfig[0].listOfLayerEntryConfig &&
             customGeocoreLayerConfig?.layerName === undefined
           ) {
-            listOfGeoviewLayerConfig[i].listOfLayerEntryConfig[0].layerName = layerName;
+            listOfGeoviewLayerConfig[i].listOfLayerEntryConfig[0].setLayerName(layerName);
           }
         }
       }

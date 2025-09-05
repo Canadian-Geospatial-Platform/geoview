@@ -32,7 +32,7 @@ export class CsvLayerEntryConfig extends VectorLayerEntryConfig {
    * The class constructor.
    * @param {CsvLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
    */
-  constructor(layerConfig: CsvLayerEntryConfigProps) {
+  constructor(layerConfig: CsvLayerEntryConfigProps | CsvLayerEntryConfig) {
     super(layerConfig);
     this.valueSeparator = layerConfig.valueSeparator;
 

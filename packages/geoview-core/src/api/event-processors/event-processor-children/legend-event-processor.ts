@@ -1,10 +1,5 @@
-import {
-  Extent,
-  TypeLayerStyleSettings,
-  TypeFeatureInfoEntry,
-  TypeStyleGeometry,
-  TypeTemporalDimension,
-} from '@/api/config/types/map-schema-types';
+import { Extent, TypeLayerStyleSettings, TypeFeatureInfoEntry, TypeStyleGeometry } from '@/api/config/types/map-schema-types';
+import { TimeDimension } from '@/core/utils/date-mgt';
 import { CONST_LAYER_TYPES, TypeGeoviewLayerType, TypeLayerControls } from '@/api/config/types/layer-schema-types';
 import { TypeLegendLayer, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import { TypeWmsLegend, isImageStaticLegend, isVectorLegend, isWmsLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -210,7 +205,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    *
    * @param {string} mapId - The unique identifier of the map instance.
    * @param {string} layerPath - The path to the layer.
-   * @returns {TypeTemporalDimension | undefined} - The temporal dimension information of the layer, or `undefined` if not available.
+   * @returns {TimeDimension | undefined} - The temporal dimension information of the layer, or `undefined` if not available.
    *
    * @description
    * This method fetches the Geoview layer for the specified layer path and checks if it has a `getTemporalDimension` method.
@@ -219,7 +214,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    *
    * @throws {LayerNotFoundError} - If the specified layer cannot be found.
    */
-  static getLayerTemporalDimension(mapId: string, layerPath: string): TypeTemporalDimension | undefined {
+  static getLayerTemporalDimension(mapId: string, layerPath: string): TimeDimension | undefined {
     // Get the layer api
     const layerApi = MapEventProcessor.getMapViewerLayerAPI(mapId);
 
@@ -352,7 +347,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       const layer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(entryLayerPath);
 
       // Interpret the layer name the best we can
-      const layerName = layer?.getLayerName() || layerConfig.getLayerName() || 'no name';
+      const layerName = layer?.getLayerName() || layerConfig.getLayerNameCascade();
 
       let entryIndex = existingEntries.findIndex((entry) => entry.layerPath === entryLayerPath);
       if (layerConfig.getEntryTypeIsGroup()) {

@@ -121,7 +121,7 @@ export class GeoPackage extends AbstractGeoViewVector {
                   resolve(layerGroup || baseLayer);
                 } else {
                   // Throw error
-                  throw new LayerNotCreatedError(layerConfig.layerPath, layerConfig.getLayerName());
+                  throw new LayerNotCreatedError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
                 }
               })
               .catch((error: unknown) => {
@@ -144,7 +144,7 @@ export class GeoPackage extends AbstractGeoViewVector {
                   // "Clone" the config, patch until that layer type logic is rebuilt
                   const newLayerEntryConfig = layerConfig.clone() as VectorLayerEntryConfig;
                   newLayerEntryConfig.layerId = layers[i].name;
-                  newLayerEntryConfig.layerName = layers[i].name;
+                  newLayerEntryConfig.setLayerName(layers[i].name);
                   newLayerEntryConfig.entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
 
                   // TODO: Refactor - Check this type conversion, maybe recreate the Group object instead?
@@ -162,7 +162,7 @@ export class GeoPackage extends AbstractGeoViewVector {
                         resolve2(baseLayer);
                       } else {
                         // Throw error
-                        throw new LayerNotCreatedError(layerConfig.layerPath, layerConfig.getLayerName());
+                        throw new LayerNotCreatedError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
                       }
                     })
                     .catch((error: unknown) => {

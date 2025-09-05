@@ -56,7 +56,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * The class constructor.
    * @param {AbstractBaseLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
    */
-  protected constructor(layerConfig: AbstractBaseLayerEntryConfigProps) {
+  protected constructor(layerConfig: AbstractBaseLayerEntryConfigProps | AbstractBaseLayerEntryConfig) {
     super(layerConfig);
     this.source = layerConfig.source;
     this.layerFilter = layerConfig.layerFilter;
@@ -201,11 +201,11 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * @returns {unknown} The Json representation of the instance.
    * @protected
    */
-  protected override onToJson(): unknown {
+  protected override onToJson<T>(): T {
     // Call parent
     // GV Can be any object so disable eslint and proceed with caution
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const serialized = super.onToJson() as any;
+    const serialized = super.onToJson<T>() as any;
 
     // Copy values
     serialized.initialSettings = this.initialSettings;

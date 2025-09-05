@@ -178,8 +178,8 @@ export class WMS extends AbstractGeoViewRaster {
       return;
     }
 
-    // eslint-disable-next-line no-param-reassign
-    if (!layerConfig.layerName) layerConfig.layerName = layerFound.Title;
+    // If no name
+    if (!layerConfig.getLayerName()) layerConfig.setLayerName(layerFound.Title);
   }
 
   /**
@@ -211,12 +211,10 @@ export class WMS extends AbstractGeoViewRaster {
       // the service will stop at 100,000 and if you zoom in more, you will get no data anyway.
       // GV Note: MinScaleDenominator is actually the maxScale and MaxScaleDenominator is actually the minScale
       if (layerCapabilities.MinScaleDenominator) {
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.maxScale = Math.max(layerConfig.maxScale ?? -Infinity, layerCapabilities.MinScaleDenominator);
+        layerConfig.setMaxScale(Math.max(layerConfig.getMaxScale() ?? -Infinity, layerCapabilities.MinScaleDenominator));
       }
       if (layerCapabilities.MaxScaleDenominator) {
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.minScale = Math.min(layerConfig.minScale ?? Infinity, layerCapabilities.MaxScaleDenominator);
+        layerConfig.setMinScale(Math.min(layerConfig.getMinScale() ?? Infinity, layerCapabilities.MaxScaleDenominator));
       }
 
       // eslint-disable-next-line no-param-reassign
@@ -273,7 +271,7 @@ export class WMS extends AbstractGeoViewRaster {
 
     // Validate required data access path
     if (!source?.dataAccessPath) {
-      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath, layerConfig.getLayerName());
+      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
     }
 
     const { dataAccessPath } = source;
@@ -440,7 +438,7 @@ export class WMS extends AbstractGeoViewRaster {
                 // No capabilities found in the response
                 reject(
                   new PromiseRejectErrorWrapper(
-                    new LayerNoCapabilitiesError(layerConfig.geoviewLayerConfig.geoviewLayerId, layerConfig.getLayerName()),
+                    new LayerNoCapabilitiesError(layerConfig.geoviewLayerConfig.geoviewLayerId, layerConfig.getLayerNameCascade()),
                     layerConfig
                   )
                 );
@@ -671,7 +669,7 @@ export class WMS extends AbstractGeoViewRaster {
       const subLayerEntryConfig: ConfigBaseClass = layerConfig.clone();
       subLayerEntryConfig.parentLayerConfig = layerConfig;
       subLayerEntryConfig.layerId = subLayer.Name!;
-      subLayerEntryConfig.layerName = subLayer.Title;
+      subLayerEntryConfig.setLayerName(subLayer.Title);
       newListOfLayerEntryConfig.push(subLayerEntryConfig as TypeLayerEntryConfig);
 
       // If we don't want all sub layers (simulating the 'Private element not on object' error we had for long time)

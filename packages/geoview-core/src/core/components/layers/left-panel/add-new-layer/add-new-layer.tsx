@@ -407,7 +407,7 @@ export function AddNewLayer(): JSX.Element {
 
         // Get the name and ID of the first entry before deleting the listOfLayerEntryConfig
         const idOfFirstLayerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig[0]?.layerId;
-        const nameOfFirstLayerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig[0]?.layerName;
+        const nameOfFirstLayerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig[0]?.getLayerName();
         setLayerName(nameOfFirstLayerEntryConfig || idOfFirstLayerEntryConfig);
         setLayerTree(geoviewLayerConfig);
 

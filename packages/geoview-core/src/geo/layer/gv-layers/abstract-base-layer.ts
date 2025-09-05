@@ -37,7 +37,7 @@ export abstract class AbstractBaseLayer {
    */
   protected constructor(layerConfig: ConfigBaseClass) {
     this.#layerConfig = layerConfig;
-    this.#layerName = layerConfig.layerName;
+    this.#layerName = layerConfig.getLayerName();
   }
 
   /**
@@ -140,11 +140,11 @@ export abstract class AbstractBaseLayer {
   }
 
   /**
-   * Gets the layer name or falls back on the layer name in the layer configuration.
+   * Gets the layer name or fallsback on the layer name in the layer configuration.
    * @returns The layer name
    */
   getLayerName(): string {
-    return this.#layerName || this.getLayerConfig().getLayerName();
+    return this.#layerName || this.getLayerConfig().getLayerNameCascade();
   }
 
   /**

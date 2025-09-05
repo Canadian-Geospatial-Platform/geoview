@@ -100,13 +100,11 @@ export class VectorTiles extends AbstractGeoViewRaster {
       // First set the min/max scales based on the service / config
       // * Infinity and -Infinity are used as extreme zoom level values in case the value is undefined
       if (minScale) {
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.minScale = Math.min(layerConfig.minScale ?? Infinity, minScale);
+        layerConfig.setMinScale(Math.min(layerConfig.getMinScale() ?? Infinity, minScale));
       }
 
       if (maxScale) {
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.maxScale = Math.max(layerConfig.maxScale ?? -Infinity, maxScale);
+        layerConfig.setMaxScale(Math.max(layerConfig.getMaxScale() ?? -Infinity, maxScale));
       }
 
       // Second, set the min/max zoom levels based on the service / config.
@@ -285,7 +283,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
 
     // Ensure the dataAccessPath is defined; required for fetching tiles
     if (!source?.dataAccessPath) {
-      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath, layerConfig.getLayerName());
+      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
     }
 
     // Create the source options

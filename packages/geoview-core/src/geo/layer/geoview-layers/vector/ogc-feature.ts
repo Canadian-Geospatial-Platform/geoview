@@ -118,8 +118,8 @@ export class OgcFeature extends AbstractGeoViewVector {
         return;
       }
 
-      // eslint-disable-next-line no-param-reassign
-      if (foundCollection.description) layerConfig.layerName = foundCollection.description;
+      // If found description, replace the name
+      if (foundCollection.description) layerConfig.setLayerName(foundCollection.description);
 
       // eslint-disable-next-line no-param-reassign
       layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);

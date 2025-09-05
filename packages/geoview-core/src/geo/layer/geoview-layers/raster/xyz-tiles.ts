@@ -149,21 +149,23 @@ export class XYZTiles extends AbstractGeoViewRaster {
         layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
 
         // Set zoom limits for max / min zooms
-        const maxScale = metadataLayerConfigFound?.maxScale as number;
+        const maxScale = metadataLayerConfigFound?.getMaxScale();
         const minScaleDenominator = metadataLayerConfigFound?.minScaleDenominator;
         // eslint-disable-next-line no-param-reassign
-        layerConfig.maxScale =
+        layerConfig.setMaxScale(
           !maxScale && !minScaleDenominator
-            ? layerConfig.maxScale
-            : Math.max(maxScale ?? -Infinity, minScaleDenominator ?? -Infinity, layerConfig.maxScale ?? -Infinity);
+            ? layerConfig.getMaxScale()
+            : Math.max(maxScale ?? -Infinity, minScaleDenominator ?? -Infinity, layerConfig.getMaxScale() ?? -Infinity)
+        );
 
-        const minScale = metadataLayerConfigFound?.minScale as number;
+        const minScale = metadataLayerConfigFound?.getMinScale();
         const maxScaleDenominator = metadataLayerConfigFound?.maxScaleDenominator;
         // eslint-disable-next-line no-param-reassign
-        layerConfig.minScale =
+        layerConfig.setMinScale(
           !minScale && !maxScaleDenominator
-            ? layerConfig.minScale
-            : Math.min(minScale ?? Infinity, maxScaleDenominator ?? Infinity, layerConfig.minScale ?? Infinity);
+            ? layerConfig.getMinScale()
+            : Math.min(minScale ?? Infinity, maxScaleDenominator ?? Infinity, layerConfig.getMinScale() ?? Infinity)
+        );
       }
     }
 
@@ -299,7 +301,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
     const { source } = layerConfig;
 
     if (!source?.dataAccessPath) {
-      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath, layerConfig.getLayerName());
+      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
     }
 
     const sourceOptions: SourceOptions = {

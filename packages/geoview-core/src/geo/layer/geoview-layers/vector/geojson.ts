@@ -133,22 +133,28 @@ export class GeoJSON extends AbstractGeoViewVector {
 
       // If the layer metadata was found
       if (layerMetadataFound) {
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.layerName = layerConfig.layerName || layerMetadataFound.layerName;
+        // If no name
+        if (!layerConfig.getLayerName()) layerConfig.setLayerName(layerMetadataFound.layerName || 'no name');
+
         // eslint-disable-next-line no-param-reassign
         layerConfig.source = defaultsDeep(layerConfig.source, layerMetadataFound.source);
+
         // eslint-disable-next-line no-param-reassign
         layerConfig.initialSettings = defaultsDeep(layerConfig.initialSettings, layerMetadataFound.initialSettings);
+
         // eslint-disable-next-line no-param-reassign
         layerConfig.layerStyle = defaultsDeep(layerConfig.layerStyle, layerMetadataFound.layerStyle);
+
+        // If max scale found in metadata
         if (layerMetadataFound.maxScale) {
-          // eslint-disable-next-line no-param-reassign
-          layerConfig.maxScale = Math.min(layerConfig.maxScale || Infinity, layerMetadataFound.maxScale);
+          layerConfig.setMaxScale(Math.min(layerConfig.getMaxScale() || Infinity, layerMetadataFound.maxScale));
         }
+
+        // If min scale found in metadata
         if (layerMetadataFound.minScale) {
-          // eslint-disable-next-line no-param-reassign
-          layerConfig.minScale = Math.max(layerConfig.minScale || 0, layerMetadataFound.minScale);
+          layerConfig.setMinScale(Math.max(layerConfig.getMinScale() || 0, layerMetadataFound.minScale));
         }
+
         // When the dataAccessPath stored in the layerConfig.source object is equal to the root of the metadataAccessPath with a
         // layerId ending, chances are that it was set by the config-validation because of an empty dataAcessPath value in the config.
         // This situation means that we want to use the dataAccessPath found in the metadata if it is set, otherwise we will keep the

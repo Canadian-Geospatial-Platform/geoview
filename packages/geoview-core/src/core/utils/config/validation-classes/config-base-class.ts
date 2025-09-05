@@ -3,6 +3,7 @@ import { cloneDeep } from 'lodash';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { Extent } from '@/api/config/types/map-schema-types';
 import {
+  ConfigClassOrType,
   TypeGeoviewLayerConfig,
   TypeGeoviewLayerType,
   TypeLayerEntryType,
@@ -14,13 +15,15 @@ import {
 } from '@/api/config/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
 import { LAYER_STATUS } from '@/core/utils/constant';
-import { GroupLayerEntryConfig } from './group-layer-entry-config';
+import { GroupLayerEntryConfig, GroupLayerEntryConfigProps } from './group-layer-entry-config';
 import { NotImplementedError } from '@/core/exceptions/core-exceptions';
 import { DateMgt, TypeDateFragments } from '@/core/utils/date-mgt';
 import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config';
 
 export interface ConfigBaseClassProps {
   /** The display name of the layer (English/French). */
+  schemaTag?: TypeGeoviewLayerType; // This property isn't necessary in the config as the class handles them, but we have it explicit here for the ConfigClassOrType thing.
+  entryType?: TypeLayerEntryType; // This property isn't necessary in the config as the class handles them, but we have it explicit here for the ConfigClassOrType thing.
   layerId: string;
   geoviewLayerConfig: TypeGeoviewLayerConfig;
   layerName?: string;
@@ -35,21 +38,6 @@ export interface ConfigBaseClassProps {
  * Base type used to define a GeoView layer to display on the map. Unless specified,its properties are not part of the schema.
  */
 export abstract class ConfigBaseClass {
-  /** The layer entry properties used to create the layer entry config */
-  layerEntryProps: ConfigBaseClassProps;
-
-  /** The identifier of the layer to display on the map. This element is part of the schema. */
-  // TODO: This should be #layerId. We should use getLayerId() and setLayerId() instead and fix the issues that come up when doing so. Same with other attributes.
-  layerId: string;
-
-  /** It is used to identified unprocessed layers and shows the final layer state */
-  // GV Cannot put it #layerStatus as it breaks things
-  // eslint-disable-next-line no-restricted-syntax
-  #layerStatus: TypeLayerStatus = 'newInstance';
-
-  /** The display name of the layer (English/French). */
-  layerName?: string;
-
   /** Tag used to link the entry to a specific schema. This element is part of the schema. */
   // GV Cannot put it #schemaTag as it breaks things
   abstract schemaTag: TypeGeoviewLayerType;
@@ -58,8 +46,16 @@ export abstract class ConfigBaseClass {
   // GV Cannot put it #entryType as it breaks things
   abstract entryType: TypeLayerEntryType;
 
+  /** The layer entry properties used to create the layer entry config */
+  layerEntryProps: ConfigBaseClassProps;
+
+  /** The identifier of the layer to display on the map. This element is part of the schema. */
+  // GV Cannot put it #entryType as it breaks things
+  // TODO: This should be #layerId. We should use getLayerId() and setLayerId() instead and fix the issues that come up when doing so. Same with other attributes.
+  layerId: string;
+
   /** It is used to link the layer entry config to the GeoView layer config. */
-  geoviewLayerConfig = {} as TypeGeoviewLayerConfig;
+  geoviewLayerConfig: TypeGeoviewLayerConfig;
 
   /** It is used to link the layer entry config to the parent's layer config. */
   parentLayerConfig: GroupLayerEntryConfig | undefined;
@@ -70,14 +66,20 @@ export abstract class ConfigBaseClass {
    */
   initialSettings: TypeLayerInitialSettings;
 
-  /** The min scale that can be reach by the layer. */
-  minScale?: number;
-
-  /** The max scale that can be reach by the layer. */
-  maxScale?: number;
-
   /** It is used internally to distinguish layer groups derived from the metadata. */
   isMetadataLayerGroup: boolean;
+
+  /** The display name of the layer. */
+  #layerName?: string;
+
+  /** It is used to identified unprocessed layers and shows the final layer state */
+  #layerStatus: TypeLayerStatus = 'newInstance';
+
+  /** The min scale that can be reach by the layer. */
+  #minScale?: number;
+
+  /** The max scale that can be reach by the layer. */
+  #maxScale?: number;
 
   /** Keep all callback delegates references */
   #onLayerStatusChangedHandlers: LayerStatusChangedDelegate[] = [];
@@ -95,13 +97,12 @@ export abstract class ConfigBaseClass {
 
   /**
    * The class constructor.
-   * @param {ConfigBaseClassProps} layerConfig - The layer configuration we want to instanciate.
+   * @param {ConfigClassOrType} layerConfig - The layer configuration we want to instanciate.
    */
   // TODO: Refactor - There is an oddity inside LayerApi.addGeoviewLayer to the effect that it's calling validateListOfGeoviewLayerConfig even if it was already called in config-validation.
-  // TO.DOCONT: Until this is fixed, this constructor supports sending a ConfigBaseClass in its typing, for now (ConfigBaseClassProps | ConfigBaseClass)... though it should only be a ConfigBaseClassProps eventually.
-  protected constructor(layerConfig: ConfigBaseClassProps | ConfigBaseClass) {
+  // TO.DOCONT: Until this is fixed, this constructor supports sending a ConfigBaseClass in its typing, for now (ConfigClassOrType = ConfigBaseClassProps | ConfigBaseClass)... though it should only be a ConfigBaseClassProps eventually.
+  protected constructor(layerConfig: ConfigClassOrType) {
     // Keep attribute properties
-    // Temporary if condition, until refactor is done, support when a ConfigBaseClass is sent here..
     if (layerConfig instanceof ConfigBaseClass) {
       this.layerEntryProps = layerConfig.layerEntryProps;
     } else {
@@ -111,15 +112,13 @@ export abstract class ConfigBaseClass {
 
     // Transfert the properties from the object to the class (without using Object.assign anymore)
     this.layerId = layerConfig.layerId;
-    this.layerName = layerConfig.layerName;
-    // this.schemaTag = layerConfig.schemaTag;
-    // this.entryType = layerConfig.entryType;
+    this.#layerName = ConfigBaseClass.getClassOrTypeLayerName(layerConfig);
     this.geoviewLayerConfig = layerConfig.geoviewLayerConfig;
     this.parentLayerConfig = layerConfig.parentLayerConfig;
-    this.minScale = layerConfig.minScale;
-    this.maxScale = layerConfig.maxScale;
     this.initialSettings = layerConfig.initialSettings ?? {};
     this.isMetadataLayerGroup = layerConfig.isMetadataLayerGroup ?? false;
+    this.#minScale = ConfigBaseClass.getClassOrTypeMinScale(layerConfig);
+    this.#maxScale = ConfigBaseClass.getClassOrTypeMaxScale(layerConfig);
   }
 
   /**
@@ -127,7 +126,6 @@ export abstract class ConfigBaseClass {
    * @returns {string} The layer path
    */
   get layerPath(): string {
-    // eslint-disable-next-line no-underscore-dangle
     return ConfigBaseClass.#evaluateLayerPath(this);
   }
 
@@ -146,16 +144,23 @@ export abstract class ConfigBaseClass {
    * fallbacks on the geoviewLayerId from the GeoViewLayerConfig or
    * fallsback on the layerPath.
    */
-  getLayerName(): string {
-    return this.layerName || this.geoviewLayerConfig.geoviewLayerName || this.geoviewLayerConfig.geoviewLayerId || this.layerPath;
+  getLayerNameCascade(): string {
+    return this.#layerName || this.geoviewLayerConfig.geoviewLayerName || this.geoviewLayerConfig.geoviewLayerId || this.layerPath;
   }
 
   /**
-   * Gets the entry type of the layer entry config.
-   * @returns {TypeLayerEntryType} The entry type.
+   * Gets the layer name of the entry layer if any.
    */
-  getEntryType(): TypeLayerEntryType {
-    return this.entryType;
+  getLayerName(): string | undefined {
+    return this.#layerName;
+  }
+
+  /**
+   * Sets the layer name of the entry layer.
+   * @param {string} layerName - The layer name.
+   */
+  setLayerName(layerName: string): void {
+    this.#layerName = layerName;
   }
 
   /**
@@ -175,11 +180,35 @@ export abstract class ConfigBaseClass {
   }
 
   /**
-   * Gets the schema tag of the layer entry config.
-   * @returns {TypeGeoviewLayerType} The schema tag.
+   * Gets the layer min scale if any.
+   * @returns {number | undefined} The layer min scale if any.
    */
-  getSchemaTag(): TypeGeoviewLayerType {
-    return this.schemaTag;
+  getMinScale(): number | undefined {
+    return this.#minScale;
+  }
+
+  /**
+   * Sets the layer min scale.
+   * @param {number?} minScale - The layer min scale or undefined.
+   */
+  setMinScale(minScale?: number): void {
+    this.#minScale = minScale;
+  }
+
+  /**
+   * Gets the layer max scale if any.
+   * @returns {number | undefined} The layer max scale if any.
+   */
+  getMaxScale(): number | undefined {
+    return this.#maxScale;
+  }
+
+  /**
+   * Sets the layer max scale.
+   * @param {number?} maxScale - The layer max scale or undefined.
+   */
+  setMaxScale(maxScale?: number): void {
+    this.#maxScale = maxScale;
   }
 
   /**
@@ -334,15 +363,27 @@ export abstract class ConfigBaseClass {
    * @returns {ConfigBaseClassProps} A deep-cloned copy of the layer entry properties.
    */
   cloneLayerProps(): ConfigBaseClassProps {
+    // Redirect
+    return this.onCloneLayerProps();
+  }
+
+  /**
+   * Overridable function to create and return a deep clone of the layer entry configuration properties.
+   * This method returns a cloned copy of the original properties (`layerEntryProps`)
+   * that were used to create this layer entry configuration. Modifying the returned
+   * object will not affect the internal state of the layer.
+   * @returns {ConfigBaseClassProps} A deep-cloned copy of the layer entry properties.
+   */
+  protected onCloneLayerProps(): ConfigBaseClassProps {
     // Return a cloned copy of the layer entry props that were used to create this layer entry config
     return cloneDeep(this.layerEntryProps);
   }
 
   /**
    * Writes the instance as Json.
-   * @returns {unknown} The Json representation of the instance.
+   * @returns {T} The Json representation of the instance.
    */
-  toJson(): unknown {
+  toJson<T>(): T {
     // Redirect
     return this.onToJson();
   }
@@ -352,14 +393,34 @@ export abstract class ConfigBaseClass {
    * @returns {unknown} The Json representation of the instance.
    * @protected
    */
-  protected onToJson(): unknown {
+  protected onToJson<T>(): T {
     return {
-      layerName: this.layerName,
+      schemaTag: this.schemaTag,
+      entryType: this.entryType,
       layerId: this.layerId,
-      schemaTag: this.getSchemaTag(),
-      entryType: this.getEntryType(),
+      layerName: this.getLayerName(),
       isMetadataLayerGroup: this.isMetadataLayerGroup,
-    };
+    } as T;
+  }
+
+  /**
+   * Converts the current layer config instance into a `GroupLayerEntryConfigProps` object.
+   * This method serializes the current layer into a configuration object used
+   * to represent a group layer within a GeoView configuration. It populates
+   * essential properties such as the layer ID, name, configuration references,
+   * and initializes it as a metadata layer group.
+   * @param {string?} name - The layer name. Will use this.getLayerName() when undefined.
+   * @returns {GroupLayerEntryConfigProps} The configuration object representing the group layer.
+   */
+  toGroupLayerConfig(name?: string): GroupLayerEntryConfigProps {
+    const groupLayerProps = this.toJson<GroupLayerEntryConfigProps>();
+    groupLayerProps.layerId = this.layerId;
+    groupLayerProps.layerName = name || this.getLayerName();
+    groupLayerProps.geoviewLayerConfig = this.geoviewLayerConfig;
+    groupLayerProps.parentLayerConfig = this.parentLayerConfig;
+    groupLayerProps.isMetadataLayerGroup = true;
+    groupLayerProps.listOfLayerEntryConfig = [];
+    return groupLayerProps;
   }
 
   /**
@@ -464,6 +525,70 @@ export abstract class ConfigBaseClass {
         return !this.allLayerStatusAreGreaterThanOrEqualTo(layerStatus, layerConfig.listOfLayerEntryConfig);
       return !layerConfig.isGreaterThanOrEqualTo(layerStatus);
     });
+  }
+
+  /**
+   * Helper function to support when a layerConfig is either a class instance or a regular json object.
+   * @param {ConfigClassOrType} layerConfig - The layer config class instance or regular json object.
+   * @returns {string | undefined} The layer name or undefined.
+   */
+  static getClassOrTypeLayerName(layerConfig: ConfigClassOrType): string | undefined {
+    if (layerConfig instanceof ConfigBaseClass) {
+      return layerConfig.getLayerName();
+    }
+    return layerConfig.layerName;
+  }
+
+  /**
+   * Helper function to support when a layerConfig is either a class instance or a regular json object.
+   * @param {ConfigClassOrType} layerConfig - The layer config class instance or regular json object.
+   * @returns {number | undefined} The minimum scale or undefined.
+   */
+  static getClassOrTypeMinScale(layerConfig: ConfigClassOrType): number | undefined {
+    if (layerConfig instanceof ConfigBaseClass) {
+      return layerConfig.getMinScale();
+    }
+    return layerConfig.minScale;
+  }
+
+  /**
+   * Helper function to support when a layerConfig is either a class instance or a regular json object.
+   * @param {ConfigClassOrType} layerConfig - The layer config class instance or regular json object.
+   * @param {number} minScale - The minimum scale to apply.
+   */
+  static setClassOrTypeMinScale(layerConfig: ConfigClassOrType, minScale: number): void {
+    if (layerConfig instanceof ConfigBaseClass) {
+      layerConfig.setMinScale(minScale);
+    } else {
+      // eslint-disable-next-line no-param-reassign
+      layerConfig.minScale = minScale;
+    }
+  }
+
+  /**
+   * Helper function to support when a layerConfig is either a class instance or a regular json object.
+   * @param {ConfigClassOrType} layerConfig - The layer config class instance or regular json object.
+   * @returns {number | undefined} The maximum scale or undefined.
+   */
+  static getClassOrTypeMaxScale(layerConfig: ConfigClassOrType): number | undefined {
+    if (layerConfig instanceof ConfigBaseClass) {
+      return layerConfig.getMaxScale();
+    }
+    return layerConfig.maxScale;
+  }
+
+  /**
+   * Helper function to support when a layerConfig is either a class instance or a regular json object.
+   * @param {ConfigClassOrType} layerConfig - The layer config class instance or regular json object.
+   * @param {number} maxScale - The maximum scale to apply.
+   */
+  static setClassOrTypeMaxScale(layerConfig: ConfigClassOrType, maxScale: number): void {
+    if (layerConfig instanceof ConfigBaseClass) {
+      layerConfig.setMaxScale(maxScale);
+    } else {
+      // eslint-disable-next-line no-param-reassign
+      layerConfig.maxScale = maxScale;
+    }
   }
 
   // #endregion

@@ -352,8 +352,6 @@ export type TypePointMarker = {
 
 // #region GEOVIEW LAYERS
 
-export const MAP_CONFIG_SCHEMA_PATH = 'https://cgpv/schema#/definitions/TypeMapFeaturesInstance';
-
 /** The default geocore url */
 export const CONFIG_GEOCORE_URL = 'https://geocore.api.geo.ca';
 
@@ -461,9 +459,6 @@ export type SerializedGeometry = {
   type: TypeStyleGeometry;
   coordinates: Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][];
 };
-
-/** Temporal dimension associated to the layer. */
-export type TypeTemporalDimension = TimeDimension;
 
 /** Definition of the range object that is part of the temporal dimension. */
 export type TypeRangeItems = {

@@ -95,8 +95,15 @@ export type TypeFeatureInfoLayerConfig = {
   outfields?: TypeOutfields[]; // TODO: refactor - remove ?
 };
 
-// TODO: Refactor - This type should be deleted and 'ConfigBaseClass' should be used instead
+// TODO: Refactor - This type should be deleted and 'ConfigBaseClass' should be used instead where a class instance is used and ConfigBaseClassProps should be used where regular json object is used.
 export type TypeLayerEntryConfig = AbstractBaseLayerEntryConfig | GroupLayerEntryConfig;
+
+/** Explicit type to eventually get rid of clearly pointing out the issue with
+ * the configs being treated as types and class instances simultaneously in the code base. */
+export type ConfigClassOrType = ConfigBaseClass | ConfigBaseClassProps;
+
+/** Explicit type to indicate when we're supporting either a geoview layer config or a layer entry config */
+export type GeoviewLayerOrLayerEntry = TypeGeoviewLayerConfig | ConfigBaseClassProps;
 
 export type TypeSourceVectorTilesInitialConfig = TypeSourceTileInitialConfig;
 
@@ -526,7 +533,7 @@ export const serializeTypeGeoviewLayerConfig = (geoviewLayerConfig: MapConfigLay
   // Loop on the LayerEntryConfig to serialize further
   for (let j = 0; j < (geoviewLayerConfig.listOfLayerEntryConfig?.length || 0); j++) {
     // Serialize the TypeLayerEntryConfig
-    const serializedLayerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig[j].toJson() as TypeLayerEntryConfig;
+    const serializedLayerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig[j].toJson<TypeLayerEntryConfig>();
 
     // Store as serialized
     serializedGeoviewLayerConfig.listOfLayerEntryConfig.push(serializedLayerEntryConfig);
@@ -567,7 +574,7 @@ export interface TypeSourceImageEsriInitialConfig extends TypeBaseSourceInitialC
   transparent?: boolean;
 }
 
-export const layerEntryIsGroupLayer = (verifyIfLayer: ConfigBaseClass): verifyIfLayer is GroupLayerEntryConfig => {
+export const layerEntryIsGroupLayer = (verifyIfLayer: ConfigClassOrType): verifyIfLayer is GroupLayerEntryConfig => {
   return verifyIfLayer?.entryType === CONST_LAYER_ENTRY_TYPES.GROUP;
 };
 

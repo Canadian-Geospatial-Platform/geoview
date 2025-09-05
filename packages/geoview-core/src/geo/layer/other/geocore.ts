@@ -90,7 +90,7 @@ export abstract class GeoCore {
     if (layerConfig?.geoviewLayerName) {
       response.layers[0].geoviewLayerName = layerConfig.geoviewLayerName;
       if (response.layers[0].listOfLayerEntryConfig.length === 1)
-        response.layers[0].listOfLayerEntryConfig[0].layerName = layerConfig.geoviewLayerName;
+        response.layers[0].listOfLayerEntryConfig[0].setLayerName(layerConfig.geoviewLayerName);
     }
 
     // Make sure if it's a duplicate, the response has the duplicates safe ID

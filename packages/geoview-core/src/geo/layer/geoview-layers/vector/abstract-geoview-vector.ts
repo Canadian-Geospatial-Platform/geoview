@@ -57,7 +57,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     // Validate the dataAccessPath exists
     if (!layerConfig.source?.dataAccessPath) {
       // Throw error missing dataAccessPath
-      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath, layerConfig.getLayerName());
+      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
     }
 
     // Redirect
@@ -134,13 +134,13 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
           if (JSON.parse(responseText).count > MAX_ESRI_FEATURES) {
             this.emitMessage(
               'validation.layer.tooManyEsriFeatures',
-              [layerConfig.getLayerName(), JSON.parse(responseText).count],
+              [layerConfig.getLayerNameCascade(), JSON.parse(responseText).count],
               'error',
               true
             );
 
             // Throw
-            throw new LayerTooManyEsriFeatures(layerConfig.layerId, layerConfig.getLayerName(), JSON.parse(responseText).count);
+            throw new LayerTooManyEsriFeatures(layerConfig.layerId, layerConfig.getLayerNameCascade(), JSON.parse(responseText).count);
           }
         }
 
@@ -218,7 +218,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   ): Promise<Feature[] | undefined> {
     // TODO: Refactor - Consider changing the return type to Promise<Feature[]>
 
-    switch (layerConfig.getSchemaTag()) {
+    switch (layerConfig.schemaTag) {
       case CONST_LAYER_TYPES.CSV:
         // Attempt to convert CSV text to OpenLayers features
         return AbstractGeoViewVector.#convertCsv(responseText, layerConfig, Projection.getProjectionFromString(projection));
@@ -426,7 +426,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
     if (latIndex === undefined || lonIndex === undefined) {
       // Failed
-      throw new LayerNoGeographicDataInCSVError(layerConfig.layerPath, layerConfig.getLayerName());
+      throw new LayerNoGeographicDataInCSVError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
     }
 
     AbstractGeoViewVector.#processFeatureInfoConfig(headers, csvRows[1], EXCLUDED_HEADERS, layerConfig);
