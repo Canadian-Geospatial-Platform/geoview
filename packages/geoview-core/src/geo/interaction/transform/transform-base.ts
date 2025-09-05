@@ -18,6 +18,17 @@ import { MapViewer } from '@/geo/map/map-viewer';
 
 // Handle style constants
 const ROTATE_STYLE = new Style({
+  image: new RegularShape({
+    points: 50,
+    radius: 10,
+    fill: new Fill({
+      color: 'rgba(255, 255, 255, 0.5)',
+    }),
+    stroke: new Stroke({
+      color: '#333',
+      width: 1,
+    }),
+  }),
   text: new Text({
     text: '↻',
     fill: new Fill({
@@ -1432,6 +1443,7 @@ export class OLTransform extends OLPointer {
                 width: this.selectedFeature.get('textHaloWidth') || 3,
               }),
               font: `${isItalic ? 'italic ' : ''}${isBold ? 'bold ' : ''}${finalSize}px ${this.selectedFeature.get('textFont') || 'Arial'}`,
+              rotation: this.selectedFeature.get('textRotation') || 0,
             }),
           });
 

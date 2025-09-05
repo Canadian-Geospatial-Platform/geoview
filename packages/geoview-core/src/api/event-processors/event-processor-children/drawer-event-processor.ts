@@ -7,19 +7,20 @@ import { Text, Style, Stroke, Fill, Icon as OLIcon } from 'ol/style';
 import { StyleLike } from 'ol/style/Style';
 import { DrawEvent, GeometryFunction, SketchCoordType, createBox } from 'ol/interaction/Draw';
 
-import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
-import { DEFAULT_TEXT_VALUES, IDrawerState, StyleProps } from '@/core/stores/store-interface-and-intial-values/drawer-state';
-import { Draw } from '@/geo/interaction/draw';
 import { AppEventProcessor } from './app-event-processor';
 import { MapEventProcessor } from './map-event-processor';
+import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
+import { TypeValidMapProjectionCodes } from '@/api/config/types/map-schema-types';
 
-import { generateId } from '@/core/utils/utilities';
-import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { Projection } from '@/geo/utils/projection';
 import { geometriesAreEqual } from '@/geo/utils/utilities';
+import { Draw } from '@/geo/interaction/draw';
+import { Transform } from '@/geo/interaction/transform';
 import { TransformDeleteFeatureEvent, TransformEvent, TransformSelectionEvent } from '@/geo/interaction/transform/transform-events';
+import { DEFAULT_TEXT_VALUES, IDrawerState, StyleProps } from '@/core/stores/store-interface-and-intial-values/drawer-state';
+import { generateId } from '@/core/utils/utilities';
+import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
-import { TypeValidMapProjectionCodes } from '@/api/config/types/map-schema-types';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -137,8 +138,17 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   /** Keyboard event handlers for each map */
   static #keyboardHandlers: Map<string, (event: KeyboardEvent) => void> = new Map();
 
+  /** Keep track of the temporary transform instances for new text drawings */
+  static #tempTransformInstances = new Map<string, Transform>();
+
   // #region Helpers
 
+  /**
+   * Function for handling map projection changes to reproject the drawings
+   * @param {string} mapId - The map ID
+   * @param {TypeValidMapProjectionCodes} currentProjection - The current projection code
+   * @param {TypeValidMapProjectionCodes} previousProjection - The previous projection code
+   */
   static #handleMapReprojection(
     mapId: string,
     currentProjection: TypeValidMapProjectionCodes,
@@ -553,6 +563,19 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     return style;
   }
 
+  /**
+   * Cleans up the temporary text transform interaction
+   * @param {string} mapId - The map ID
+   */
+  static #cleanupTempTransform(mapId: string): void {
+    const tempTransform = this.#tempTransformInstances.get(mapId);
+    if (tempTransform) {
+      tempTransform.clearSelection();
+      tempTransform.stopInteraction();
+      this.#tempTransformInstances.delete(mapId);
+    }
+  }
+
   // #endregion
 
   // #region Drawing Actions
@@ -564,6 +587,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * @param {StyleProps} styleInput - Optional style properties to use
    */
   static startDrawing(mapId: string, geomType?: string, styleInput?: StyleProps): void {
+    // Quickly clean up the temp transform if present
+    this.#cleanupTempTransform(mapId);
+
     const state = this.getDrawerState(mapId);
     if (!state) return;
 
@@ -722,14 +748,34 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
           features: featureCollection,
         });
 
+        // Keep track of this temp transform instance for cleanup
+        this.#tempTransformInstances.set(mapId, tempTransform);
+
         let isDeselected = false;
         // Handle when the temporary editing is done
 
         tempTransform.onSelectionChange((_textSender, textEvent) => {
-          if (!textEvent.newFeature && !isDeselected) {
+          const { previousFeature, newFeature } = textEvent;
+          if (!newFeature && previousFeature && !isDeselected) {
             isDeselected = true;
-            // User deselected - cleanup the temporary transform
-            tempTransform.stopInteraction();
+            // User deselected - Set the style
+            const finalStyle = new Style({
+              text: new Text({
+                text: previousFeature.get('text'),
+                fill: new Fill({ color: previousFeature.get('textColor') || '#000000' }),
+                stroke: new Stroke({
+                  color: previousFeature.get('textHaloColor') || 'rgba(255,255,255,0.7)',
+                  width: previousFeature.get('textHaloWidth') || 3,
+                }),
+                font: `${previousFeature.get('textItalic') ? 'italic ' : ''}${previousFeature.get('textBold') ? 'bold ' : ''}${previousFeature.get('textSize')}px ${previousFeature.get('textFont') || 'Arial'}`,
+                rotation: previousFeature.get('textRotation') || 0, // <-- Make sure this is included
+              }),
+            });
+
+            previousFeature.setStyle(finalStyle);
+
+            // Cleanup the temporary transform
+            this.#cleanupTempTransform(mapId);
 
             // Resume drawing
             if (drawInstance) {
@@ -750,16 +796,21 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map ID
    */
   static stopDrawing(mapId: string): void {
+    // Cleanup temp transforms
+    this.#cleanupTempTransform(mapId);
+
     const state = this.getDrawerState(mapId);
     if (!state) return;
 
+    // Restart Map Pointer handlers that place the details icon when clicking on the map
     if (!state.actions.getIsEditing()) {
       const viewer = MapEventProcessor.getMapViewer(mapId);
       viewer.registerMapPointerHandlers(viewer.map);
     }
 
-    // Update state
     state.actions.getDrawInstance()?.stopInteraction();
+
+    // Update state
     state.actions.removeDrawInstance();
   }
 
@@ -785,6 +836,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map ID
    */
   static startEditing(mapId: string): void {
+    // Quickly clean up the temp transform if present
+    this.#cleanupTempTransform(mapId);
+
     const state = this.getDrawerState(mapId);
     if (!state) return;
 
@@ -1004,7 +1058,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
     const transformInstance = state.actions.getTransformInstance();
 
-    if (transformInstance === undefined) return;
+    if (!transformInstance) return;
     transformInstance.stopInteraction();
     state.actions.removeTransformInstance();
   }
