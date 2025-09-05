@@ -370,7 +370,6 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
 
     // Filter out unsymbolized features if the showUnsymbolizedFeatures config is false
     if (!showUnsymbolizedFeatures) {
-      // eslint-disable-next-line no-param-reassign
       filterArray = filterArray.filter((record) => record.featureIcon);
     }
 
@@ -389,8 +388,9 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
           <IconButton
             color="primary"
             // Function returns void promise instead of void, other work arounds led to more eslint issues
-            // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            onClick={() => handleZoomIn(feature)}
+            onClick={() => {
+              handleZoomIn(feature).catch((error) => logger.logError('Zoom failed:', error));
+            }}
             disabled={!feature.extent && feature.geoviewLayerType !== CONST_LAYER_TYPES.ESRI_DYNAMIC}
           >
             <ZoomInSearchIcon />
@@ -613,7 +613,6 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
     applyMapFilters(filterStrings);
   }, 500);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedColumnFilters = useCallback(
     (filters: MRTColumnFiltersState) => filterMap(filters),
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -1540,6 +1540,7 @@ export class MapViewer {
    * @returns {Promise<void>} Promise when done processing the map change size
    * @private
    */
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async #handleMapChangeSize(event: ObjectEvent): Promise<void> {
     try {
@@ -1570,8 +1571,6 @@ export class MapViewer {
 
     // see if a data geometry endpoint is configured and geoms param is provided then get the param value(s)
     const servEndpoint = this.map.getTargetElement()?.closest('.geoview-map')?.getAttribute('data-geometry-endpoint') || '';
-
-    // eslint-disable-next-line no-restricted-globals
     const parsed = queryString.parse(location.search);
 
     if (parsed.geoms && servEndpoint !== '') {

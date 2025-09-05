@@ -415,7 +415,7 @@ export class LayerApi {
         // Depending on the error
         let uuids;
         if (promise.reason instanceof LayerGeoCoreError) {
-          uuids = promise.reason.uuids;
+          ({ uuids } = promise.reason);
         }
 
         // For each uuid that failed

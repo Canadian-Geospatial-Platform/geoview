@@ -1,6 +1,6 @@
-import { memo } from 'react';
-import { Box, IconButton } from '@mui/material';
 /* eslint-disable camelcase */
+import { memo } from 'react';
+
 import {
   MRT_GlobalFilterTextField as MRTGlobalFilterTextField,
   MRT_ToggleFiltersButton as MRTToggleFiltersButton,
@@ -10,6 +10,8 @@ import {
   MRT_ColumnDef,
 } from 'material-react-table';
 import ClearFiltersIcon from '@mui/icons-material/ClearAll';
+
+import { Box, IconButton } from '@/ui';
 import ExportButton from './export-button';
 import JSONExportButton from './json-export-button';
 import FilterMap from './filter-map';
@@ -87,7 +89,8 @@ function TopToolbar(props: TopToolbarProps<ColumnsType>): JSX.Element {
 
           <IconButton
             className="buttonOutline"
-            title={t('dataTable.clearFilters')}
+            tooltip={t('dataTable.clearFilters')!}
+            aria-label={t('dataTable.clearFilters')!}
             color="primary"
             onClick={() => useTable?.resetColumnFilters()}
           >

@@ -130,8 +130,8 @@ const worker = {
    */
   init(projectionInfo: TypeWorkerExportProjectionInfo) {
     try {
-      sourceCRS = projectionInfo.sourceCRS;
-      targetCRS = projectionInfo.targetCRS;
+      ({ sourceCRS } = projectionInfo);
+      ({ targetCRS } = projectionInfo);
       logger.logTrace('init worker', `Worker initialized with sourceCRS: ${sourceCRS}, targetCRS: ${targetCRS}`);
     } catch (error: unknown) {
       logger.logError('init worker', error);

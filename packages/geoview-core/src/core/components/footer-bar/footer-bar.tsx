@@ -88,6 +88,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
 
     const coreTabs = (footerBarTabsConfig?.tabs?.core ?? []).reduce(
       (acc, curr) => {
+        // eslint-disable-next-line no-param-reassign
         acc[curr] = {} as Tab;
         return acc;
       },
@@ -97,6 +98,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     // Add custom tabs
     const customTabs = (footerBarTabsConfig?.tabs?.custom ?? []).reduce(
       (acc, curr) => {
+        // eslint-disable-next-line no-param-reassign
         acc[curr.id] = {} as Tab;
         return acc;
       },

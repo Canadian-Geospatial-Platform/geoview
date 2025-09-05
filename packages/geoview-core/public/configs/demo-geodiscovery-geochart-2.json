@@ -1,0 +1,188 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "particulate_samples",
+        "geoviewLayerName": "Airborne Radionuclide Concentrations",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/arc_en/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "noble_gas_samples",
+        "geoviewLayerName": "Airborne Radionuclide Concentrations",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/arc_en/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "2"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "Station Location Range",
+        "geoviewLayerName": "Station Location Range",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/arc_en/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "3"
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "overview-map"
+  ],
+  "footerBar": {
+    "tabs": {
+      "core": [        
+        "layers",
+        "details",
+        "data-table",
+        "geochart"
+      ]
+    }
+  },
+  "appBar": {
+        "tabs": {
+            "core": [                
+                "legend"
+            ]
+		  }
+        },
+  "corePackages": [],
+  "corePackagesConfig": [
+    {
+      "geochart": {
+        "charts": [
+          {
+            "layers": [
+              {
+                "layerId": "particulate_samples/1",
+                "propertyValue": "station_name",
+                "propertyDisplay": "station_name"
+              }
+            ],
+            "chart": "line",
+            "query": {
+              "type": "esriRegular",
+              "url": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/arc_en/MapServer/4",
+              "queryOptions": {
+                "whereClauses": [
+                  {
+                    "field": "station_name",
+                    "prefix": "\u0027",
+                    "valueFrom": "station_name",
+                    "suffix": "\u0027"
+                  }
+                ],
+                "orderByField": "start_time"
+              }
+            },
+            "geochart": {
+              "xAxis": {
+                "type": "time",
+                "property": "start_time",
+                "label": "Date"
+              },
+              "yAxis": {
+                "type": "linear",
+                "property": "measure",
+                "label": "Radioactivity Concentration (Bq/m³)",
+                "tooltipSuffix": "Bq/m³"
+              },
+              "borderWidth": 2
+            },
+            "category": {
+              "property": "nuclide",
+              "usePalette": false
+            },
+            "ui": {
+              "xSlider": {
+                "display": true
+              },
+              "ySlider": {
+                "display": true
+              },
+              "stepsSwitcher": true,
+              "resetStates": true,
+              "description": "Airborne Radionuclide Concentrations",
+              "download": true
+            }
+          },
+          {
+            "layers": [
+              {
+                "layerId": "noble_gas_samples/2",
+                "propertyValue": "station_name",
+                "propertyDisplay": "station_name"
+              }
+            ],
+            "chart": "line",
+            "query": {
+              "type": "esriRegular",
+              "url": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/arc_en/MapServer/4",
+              "queryOptions": {
+                "whereClauses": [
+                  {
+                    "field": "station_name",
+                    "prefix": "\u0027",
+                    "valueFrom": "station_name",
+                    "suffix": "\u0027"
+                  }
+                ],
+                "orderByField": "start_time"
+              }
+            },
+            "geochart": {
+              "xAxis": {
+                "type": "time",
+                "property": "start_time",
+                "label": "Date"
+              },
+              "yAxis": {
+                "type": "linear",
+                "property": "measure",
+                "label": "Radioactivity Concentration (Bq/m³)",
+                "tooltipSuffix": "Bq/m³"
+              },
+              "borderWidth": 2
+            },
+            "category": {
+              "property": "nuclide",
+              "usePalette": false
+            },
+            "ui": {
+              "xSlider": {
+                "display": true
+              },
+              "ySlider": {
+                "display": true
+              },
+              "stepsSwitcher": true,
+              "resetStates": true,
+              "description": "Airborne Radionuclide Concentrations",
+              "download": true
+            }
+          }
+        ]
+      }
+    }   
+  ],
+  "theme": "geo.ca"
+}

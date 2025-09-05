@@ -154,11 +154,13 @@ export const useWhatChanged = (hookId: string, dependency?: unknown[], dependenc
             const oldValue = dependencyRef.current[index];
             dependencyRef.current[index] = dep;
 
+            // eslint-disable-next-line no-param-reassign
             acc[`"✅" ${depName}`] = {
               'Old Value': stringifyValue(oldValue),
               'New Value': stringifyValue(dep),
             };
           } else {
+            // eslint-disable-next-line no-param-reassign
             acc[`"⏺" ${depName}`] = {
               'Old Value': stringifyValue(dependencyRef.current?.[index] || dep),
               'New Value': stringifyValue(dep),

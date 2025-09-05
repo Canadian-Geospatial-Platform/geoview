@@ -935,6 +935,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     // Filter features using binary search
     return features.filter((feature) => {
       const val = feature.fieldInfo[String(classBreakStyle.fields[0])]?.value;
+      // eslint-disable-next-line eqeqeq
       const fieldValue = val != null ? parseFloat(String(val)) : 0;
 
       // eslint-disable-next-line no-restricted-globals

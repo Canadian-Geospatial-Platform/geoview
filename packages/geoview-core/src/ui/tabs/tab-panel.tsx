@@ -1,4 +1,3 @@
-/* eslint-disable react/require-default-props */
 import { forwardRef, ReactNode, Ref } from 'react';
 import { Box } from '@/ui';
 import { FocusTrapContainer } from '@/core/components/common';

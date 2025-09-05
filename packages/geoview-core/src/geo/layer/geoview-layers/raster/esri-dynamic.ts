@@ -21,18 +21,10 @@ import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { ConfigBaseClass, TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
 
-// GV: CONFIG EXTRACTION
-// GV: This section of code was extracted and copied to the geoview config section
-// GV: |||||
-// GV: vvvvv
-
 export interface TypeEsriDynamicLayerConfig extends TypeGeoviewLayerConfig {
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_DYNAMIC;
   listOfLayerEntryConfig: (GroupLayerEntryConfig | EsriDynamicLayerEntryConfig)[];
 }
-
-// GV: ^^^^^
-// GV: |||||
 
 /**
  * A class to add an EsriDynamic layer.

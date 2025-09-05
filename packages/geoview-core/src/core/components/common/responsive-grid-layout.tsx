@@ -195,7 +195,7 @@ const ResponsiveGridLayout = forwardRef(
           size="small"
           variant="outlined"
           color="primary"
-          startIcon={<CloseIcon fontSize={theme.palette.geoViewFontSize.sm} />}
+          startIcon={<CloseIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />}
           onClick={() => setIsRightPanelVisible(false)}
           tooltip={t('details.closeSelection')!}
         >
@@ -306,7 +306,7 @@ const ResponsiveGridLayout = forwardRef(
       );
     };
 
-    return (
+   return (
       <Box ref={ref} sx={sxClasses.container} className="responsive-layout-container">
         <ResponsiveGrid.Root sx={{ pt: 8, pb: 0, paddingTop: '0' }} className="responsive-layout-top-row">
           {!fullWidth && (
@@ -325,7 +325,7 @@ const ResponsiveGridLayout = forwardRef(
             isRightPanelVisible={isRightPanelVisible}
             isEnlarged={isEnlarged}
             fullWidth={fullWidth}
-            sxProps={{ zIndex: isFullScreen ? 'unset' : 100, alignContent: 'flex-end' }}
+            sxProps={{ zIndex: isFullScreen ? 'unset' : 100, alignContent: 'flex-end', }}
             className="responsive-layout-right-top"
           >
             <Box

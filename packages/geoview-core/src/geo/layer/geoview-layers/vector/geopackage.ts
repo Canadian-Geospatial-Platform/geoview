@@ -127,6 +127,7 @@ export class GeoPackage extends AbstractGeoViewVector {
           } else {
             // eslint-disable-next-line no-param-reassign
             layerConfig.entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
+
             // eslint-disable-next-line no-param-reassign
             (layerConfig as TypeLayerEntryConfig).listOfLayerEntryConfig = [];
             const newLayerGroup = this.createLayerGroup(layerConfig as unknown as GroupLayerEntryConfig, layerConfig.initialSettings);
@@ -369,6 +370,7 @@ export class GeoPackage extends AbstractGeoViewVector {
   protected static processGeopackageStyle(layerConfig: VectorLayerEntryConfig, sld: string | number | Uint8Array): void {
     // Extract layer styles if they exist
     const { rules } = SLDReader.Reader(sld).layers[0].styles[0].featuretypestyles[0];
+
     // eslint-disable-next-line no-param-reassign
     if (!layerConfig.layerStyle) layerConfig.layerStyle = {};
 
@@ -459,7 +461,7 @@ export class GeoPackage extends AbstractGeoViewVector {
           }
 
           const styles: TypeLineStringVectorConfig = { type: 'lineString', stroke };
-          // eslint-disable-next-line no-param-reassign
+
           layerStyle.LineString = {
             type: 'simple',
             fields: [],
@@ -505,7 +507,6 @@ export class GeoPackage extends AbstractGeoViewVector {
                 if (graphic.mark.stroke.styling?.strokeWidth) stroke.width = graphic.mark.stroke.styling.strokeWidth;
               }
 
-              // eslint-disable-next-line no-param-reassign
               layerStyle.Point = {
                 type: 'simple',
                 fields: [],
@@ -529,6 +530,7 @@ export class GeoPackage extends AbstractGeoViewVector {
   static #processFeatureInfoConfig(fields: initSqlJs.ParamsObject, layerConfig: VectorLayerEntryConfig): void {
     // eslint-disable-next-line no-param-reassign
     if (!layerConfig.source) layerConfig.source = {};
+
     // eslint-disable-next-line no-param-reassign
     if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: true };
 

@@ -100,13 +100,13 @@ const processBatch = async (
     const promise = fetch(queryUrl)
       .then((response) => response.json())
       // We keep the esLint but the value is taken care of by async semaphore
+
       // eslint-disable-next-line no-loop-func
       .then(async (json) => {
         // The current count
         const currentCount = json.features.length as number;
 
         // Use the semaphore to update the shared 'localProcessedFeatures' variable
-        // eslint-disable-next-line no-await-in-loop
         await asyncSemaphore.withLock(() => {
           // Update localProcessedFeatures and log progress safely
           localProcessedFeatures += currentCount;
