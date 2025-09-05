@@ -1,29 +1,8 @@
 {
+  "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "target": "esnext",
-    "module": "esnext",
-    "strict": true,
-    "importHelpers": true,
-    "moduleResolution": "node",
-    "experimentalDecorators": true,
-    "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
-    "strictPropertyInitialization": true,
-    "sourceMap": true,
-    "skipLibCheck": true,
-    "jsx": "preserve",
-    "allowJs": true,
-    "noEmit": true,
-    "noUnusedLocals": true,
-    "noImplicitReturns": true,
-    "noImplicitOverride": true,
-    "noImplicitThis": true,
-    "isolatedModules": true,
-    "esModuleInterop": true,
-    "lib": ["esnext", "dom", "dom.iterable", "scripthost"],
     "baseUrl": ".",
     "paths": {
-      "geoview-core": ["../geoview-core/src"],
       "geoview-core/*": ["../geoview-core/src/*"]
     }
   },

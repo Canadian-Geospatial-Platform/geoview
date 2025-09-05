@@ -1,32 +1,15 @@
 {
+  "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "target": "esnext",
-    "module": "esnext",
-    "strict": true,
-    "importHelpers": true,
-    "moduleResolution": "node",
-    "experimentalDecorators": true,
-    "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
-    "strictPropertyInitialization": true,
-    "sourceMap": true,
-    "skipLibCheck": true,
-    "jsx": "preserve",
-    "allowJs": true,
-    // "noEmit": true, I needed to comment this out and put `composite: true` to be able to build the plugins referencing geoview-core
+    // Override base config for geoview-core specific needs
+    "baseUrl": ".",
+    "noEmit": false,
     "declaration": true,
     "declarationMap": true,
     "emitDeclarationOnly": true,
     "composite": true,
     "outDir": "lib",
-    "noUnusedLocals": true,
-    "noImplicitReturns": true,
-    "noImplicitOverride": true,
-    "noImplicitThis": true,
-    "isolatedModules": true,
-    "esModuleInterop": true,
     "lib": ["esnext", "dom", "dom.iterable", "scripthost", "webworker"],
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
       "@public/*": ["./public/*"]

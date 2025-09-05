@@ -19,8 +19,7 @@ const hash = JSON.stringify(childProcess.execSync('git rev-parse HEAD').toString
 console.log(`Build CGP Viewer: ${major}.${minor}.${patch} - ${date}`);
 
 // inject all sample files
-const sampleFiles = globSync('./public/templates/*.html');
-const multipleHtmlPluginsSamples = sampleFiles.map((name) => {
+const multipleHtmlPluginsSamples = globSync('./public/templates/*.html').map((name) => {
   const filename = path.basename(name);
   return new HtmlWebpackPlugin({
     template: `${name}`,
@@ -33,8 +32,7 @@ const multipleHtmlPluginsSamples = sampleFiles.map((name) => {
 });
 
 // inject all demos files
-const demoFiles = globSync('./public/templates/demos/*.html');
-const multipleHtmlPluginsDemos = demoFiles.map((name) => {
+const multipleHtmlPluginsDemos = globSync('./public/templates/demos/*.html').map((name) => {
   const filename = path.basename(name);
   return new HtmlWebpackPlugin({
     template: `${name}`,
@@ -47,8 +45,7 @@ const multipleHtmlPluginsDemos = demoFiles.map((name) => {
 });
 
 // inject all outlier files
-const outlierFiles = globSync('./public/templates/outliers/*.html');
-const multipleHtmlPluginsOutliers = outlierFiles.map((name) => {
+const multipleHtmlPluginsOutliers = globSync('./public/templates/outliers/*.html').map((name) => {
   const filename = path.basename(name);
   return new HtmlWebpackPlugin({
     template: `${name}`,

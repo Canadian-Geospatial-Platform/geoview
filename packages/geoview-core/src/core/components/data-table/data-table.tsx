@@ -388,8 +388,9 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
           <IconButton
             color="primary"
             // Function returns void promise instead of void, other work arounds led to more eslint issues
-            // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            onClick={() => handleZoomIn(feature)}
+            onClick={() => {
+              handleZoomIn(feature).catch((error) => logger.logError('Zoom failed:', error));
+            }}
             disabled={!feature.extent && feature.geoviewLayerType !== CONST_LAYER_TYPES.ESRI_DYNAMIC}
           >
             <ZoomInSearchIcon />

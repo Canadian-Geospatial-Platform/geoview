@@ -232,8 +232,12 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
   }, [getJson]);
 
   return (
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    <MenuItem onClick={handleExportData} disabled={isExporting}>
+    <MenuItem
+      onClick={() => {
+        handleExportData().catch((error) => logger.logError('Export failed:', error));
+      }}
+      disabled={isExporting}
+    >
       {t('dataTable.downloadAsGeoJSON')}
     </MenuItem>
   );
