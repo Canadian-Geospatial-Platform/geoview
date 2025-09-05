@@ -8,16 +8,15 @@ import defaultsDeep from 'lodash/defaultsDeep';
 
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
-  TypeLayerEntryConfig,
   TypeGeoviewLayerConfig,
   TypeBaseVectorSourceInitialConfig,
   CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
   TypeMetadataGeoJSON,
-} from '@/api/config/types/map-schema-types';
+} from '@/api/config/types/layer-schema-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { WkbLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
-import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+import { VectorLayerEntryConfig, VectorLayerEntryConfigProps } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { logger } from '@/core/utils/logger';
 import {
@@ -43,8 +42,9 @@ export class WKB extends AbstractGeoViewVector {
    * Constructs a WKB Layer configuration processor.
    * @param {TypeWkbLayerConfig} layerConfig the layer configuration
    */
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(layerConfig: TypeWkbLayerConfig) {
-    super(CONST_LAYER_TYPES.WKB, layerConfig);
+    super(layerConfig);
   }
 
   /**
@@ -122,25 +122,27 @@ export class WKB extends AbstractGeoViewVector {
     // If metadata was previously found
     if (metadata) {
       // Search for the layer metadata
-      const layerMetadataFound = this.#recursiveSearch(layerConfig.layerId, metadata.listOfLayerEntryConfig) as VectorLayerEntryConfig;
+      const layerMetadataFound = this.#recursiveSearch(layerConfig.layerId, metadata.listOfLayerEntryConfig) as VectorLayerEntryConfigProps;
 
       // If the layer metadata was found
       if (layerMetadataFound) {
         // eslint-disable-next-line no-param-reassign
-        layerConfig.layerName = layerConfig.layerName || layerMetadataFound.layerName;
+        layerConfig.setLayerName(layerConfig.getLayerName() || layerMetadataFound.layerName || 'no name');
         // eslint-disable-next-line no-param-reassign
         layerConfig.source = defaultsDeep(layerConfig.source, layerMetadataFound.source);
         // eslint-disable-next-line no-param-reassign
         layerConfig.initialSettings = defaultsDeep(layerConfig.initialSettings, layerMetadataFound.initialSettings);
         // eslint-disable-next-line no-param-reassign
         layerConfig.layerStyle = defaultsDeep(layerConfig.layerStyle, layerMetadataFound.layerStyle);
+
+        // If max scale found in metadata
         if (layerMetadataFound.maxScale) {
-          // eslint-disable-next-line no-param-reassign
-          layerConfig.maxScale = Math.min(layerConfig.maxScale || Infinity, layerMetadataFound.maxScale);
+          layerConfig.setMaxScale(Math.min(layerConfig.getMaxScale() || Infinity, layerMetadataFound.maxScale));
         }
+
+        // If min scale found in metadata
         if (layerMetadataFound.minScale) {
-          // eslint-disable-next-line no-param-reassign
-          layerConfig.minScale = Math.max(layerConfig.minScale || 0, layerMetadataFound.minScale);
+          layerConfig.setMinScale(Math.max(layerConfig.getMinScale() || 0, layerMetadataFound.minScale));
         }
       }
 
@@ -196,15 +198,15 @@ export class WKB extends AbstractGeoViewVector {
    * This method is used to do a recursive search in the array of layer entry config.
    *
    * @param {string} searchKey The layer list to search.
-   * @param {TypeLayerEntryConfig[]} metadataLayerList The layer list to search.
+   * @param {TypeLayerEntryShell[]} metadataLayerList The layer list to search.
    *
-   * @returns {TypeLayerEntryConfig | undefined} The found layer or undefined if not found.
+   * @returns {TypeLayerEntryShell | undefined} The found layer or undefined if not found.
    * @private
    */
-  #recursiveSearch(searchKey: string, metadataLayerList: TypeLayerEntryConfig[]): TypeLayerEntryConfig | undefined {
+  #recursiveSearch(searchKey: string, metadataLayerList: TypeLayerEntryShell[]): TypeLayerEntryShell | undefined {
     for (const layerMetadata of metadataLayerList) {
       if (searchKey === layerMetadata.layerId) return layerMetadata;
-      if ('isLayerGroup' in layerMetadata && (layerMetadata.isLayerGroup as boolean)) {
+      if ('isLayerGroup' in layerMetadata && (layerMetadata.isLayerGroup as boolean) && layerMetadata.listOfLayerEntryConfig) {
         const foundLayer = this.#recursiveSearch(searchKey, layerMetadata.listOfLayerEntryConfig);
         if (foundLayer) return foundLayer;
       }
@@ -326,25 +328,3 @@ export class WKB extends AbstractGeoViewVector {
     return AbstractGeoViewVector.processConfig(myLayer);
   }
 }
-
-/**
- * Type guard function that redefines a TypeGeoviewLayerConfig as a TypeWkbLayerConfig if the geoviewLayerType attribute of the
- * verifyIfLayer parameter is WKB. The type ascention applies only to the true block of the if clause that use this
- * function.
- * @param {TypeGeoviewLayerConfig} verifyIfLayer - Polymorphic object to test in order to determine if the type ascention is valid.
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerConfigIsWkb = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeWkbLayerConfig => {
-  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.WKB;
-};
-
-/**
- * Type guard function that redefines a TypeLayerEntryConfig as a WkbLayerEntryConfig if the geoviewLayerType attribute of
- * the verifyIfGeoViewEntry.geoviewLayerConfig attribute is WKB. The type ascention applies only to the true block of the if
- * clause that use this function.
- * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry - Polymorphic object to test in order to determine if the type ascention is valid.
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewEntryIsWKB = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is WkbLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.WKB;
-};

@@ -8,13 +8,6 @@ import { AnyValidateFunction } from 'ajv/dist/types';
 import defaultsDeep from 'lodash/defaultsDeep';
 
 import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
-import { geoviewEntryIsImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
-import { geoviewEntryIsOgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
-import { geoviewEntryIsVectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
-import { geoviewEntryIsWFS } from '@/geo/layer/geoview-layers/vector/wfs';
-import { geoviewEntryIsWKB } from '@/geo/layer/geoview-layers/vector/wkb';
-import { geoviewEntryIsWMS } from '@/geo/layer/geoview-layers/raster/wms';
-import { geoviewEntryIsXYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
 
 import {
   CONST_LAYER_TYPES,
@@ -38,6 +31,7 @@ import {
   layerEntryIsGeoPackageFromConfig,
   layerEntryIsOgcFeatureFromConfig,
   layerEntryIsWFSFromConfig,
+  layerEntryIsWKBFromConfig,
   ConfigClassOrType,
 } from '@/api/config/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
@@ -45,8 +39,6 @@ import { logger } from '@/core/utils/logger';
 import { generateId } from '@/core/utils/utilities';
 import schema from '@/core/../../schema.json';
 import { ConfigBaseClass } from './validation-classes/config-base-class';
-import { WfsLayerEntryConfig } from './validation-classes/vector-validation-classes/wfs-layer-entry-config';
-import { OgcFeatureLayerEntryConfig } from './validation-classes/vector-validation-classes/ogc-layer-entry-config';
 import { CsvLayerEntryConfig } from './validation-classes/vector-validation-classes/csv-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from './validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriFeatureLayerEntryConfig } from './validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
@@ -394,7 +386,7 @@ export class ConfigValidation {
         listOfLayerEntryConfig[i] = new GeoJSONLayerEntryConfig(layerConfig);
       } else if (layerEntryIsCSVFromConfig(layerConfig)) {
         listOfLayerEntryConfig[i] = new CsvLayerEntryConfig(layerConfig);
-      } else if (geoviewEntryIsWKB(layerConfig)) {
+      } else if (layerEntryIsWKBFromConfig(layerConfig)) {
         listOfLayerEntryConfig[i] = new WkbLayerEntryConfig(layerConfig);
       } else {
         // Unsupported layer type

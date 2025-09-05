@@ -1,5 +1,4 @@
 import { codedValueType, Extent, rangeDomainType, TypeEsriFormatParameter, TypeOutfields } from '@/api/config/types/map-schema-types';
-import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { ConfigBaseClass, ConfigBaseClassProps, TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
@@ -14,6 +13,7 @@ import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-clas
 import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
 import { GeoPackageLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geopackage-layer-config-entry';
 import { OgcFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
+import { WkbLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
 import { WfsLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import { TypeEsriDynamicLayerConfig } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { TypeEsriImageLayerConfig } from '@/geo/layer/geoview-layers/raster/esri-image';
@@ -26,6 +26,7 @@ import { TypeEsriFeatureLayerConfig } from '@/geo/layer/geoview-layers/vector/es
 import { TypeGeoJSONLayerConfig } from '@/geo/layer/geoview-layers/vector/geojson';
 import { TypeGeoPackageLayerConfig } from '@/geo/layer/geoview-layers/vector/geopackage';
 import { TypeOgcFeatureLayerConfig } from '@/geo/layer/geoview-layers/vector/ogc-feature';
+import { TypeWkbLayerConfig } from '@/geo/layer/geoview-layers/vector/wkb';
 import { TypeWFSLayerConfig } from '@/geo/layer/geoview-layers/vector/wfs';
 import { TypeProjection } from '@/geo/utils/projection';
 import { TimeDimensionESRI } from '@/core/utils/date-mgt';
@@ -44,6 +45,7 @@ type LayerTypesKey =
   | 'VECTOR_TILES'
   | 'OGC_FEATURE'
   | 'WFS'
+  | 'WKB'
   | 'WMS';
 
 /** Definition of the geoview layer types accepted by the viewer. */
@@ -59,6 +61,7 @@ export type TypeGeoviewLayerType =
   | 'ogcWfs'
   | 'ogcWms'
   | 'vectorTiles'
+  | 'WKB'
   | 'xyzTiles';
 
 /** Definition of the geoview layer types accepted by the viewer. */
@@ -79,6 +82,7 @@ export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType> = {
   VECTOR_TILES: 'vectorTiles',
   OGC_FEATURE: 'ogcFeature',
   WFS: 'ogcWfs',
+  WKB: 'WKB',
   WMS: 'ogcWms',
 };
 
@@ -146,6 +150,7 @@ export const CONST_GEOVIEW_SCHEMA_BY_TYPE: Record<TypeGeoviewLayerType, string> 
   ogcFeature: 'TypeVectorLayerEntryConfig',
   ogcWfs: 'TypeVectorLayerEntryConfig',
   ogcWms: 'TypeOgcWmsLayerEntryConfig',
+  WKB: 'TypeVectorLayerEntryConfig',
 };
 
 export const validVectorLayerLegendTypes: TypeGeoviewLayerType[] = [
@@ -156,6 +161,7 @@ export const validVectorLayerLegendTypes: TypeGeoviewLayerType[] = [
   CONST_LAYER_TYPES.ESRI_IMAGE,
   CONST_LAYER_TYPES.OGC_FEATURE,
   CONST_LAYER_TYPES.WFS,
+  CONST_LAYER_TYPES.WKB,
   CONST_LAYER_TYPES.GEOPACKAGE,
 ];
 
@@ -245,10 +251,8 @@ export interface TypeSourceGeoJSONInitialConfig extends Omit<TypeVectorSourceIni
   geojson?: string;
 }
 
-/** Initial settings to apply to the GeoView vector layer source at creation time. */
-export interface TypeGeojsonSourceInitialConfig extends TypeBaseVectorSourceInitialConfig {
-  /** Geojson converted from shapefile or passed in directly */
-  geojson?: string;
+export interface TypeSourceWkbVectorInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
+  format: 'WKB';
 }
 
 /** Initial settings to apply to the GeoView vector tile layer source at creation time. */
@@ -279,7 +283,7 @@ export type TypeTileGrid = {
 };
 
 /** Type that defines the vector layer source formats. */
-export type TypeVectorSourceFormats = 'GeoJSON' | 'EsriJSON' | 'KML' | 'WFS' | 'featureAPI' | 'GeoPackage' | 'CSV' | 'MVT';
+export type TypeVectorSourceFormats = 'GeoJSON' | 'EsriJSON' | 'KML' | 'WFS' | 'featureAPI' | 'GeoPackage' | 'CSV' | 'MVT' | 'WKB';
 
 /** Type from which we derive the source properties for all the ESRI dynamic leaf nodes in the layer tree. */
 export interface TypeSourceEsriDynamicInitialConfig extends TypeBaseSourceInitialConfig {
@@ -363,30 +367,6 @@ export type TypeLayerStates = {
   hoverable?: boolean;
   /** Is layer queryable initially. Default = false */
   queryable?: boolean;
-};
-
-export const convertLayerTypeToEntry = (layerType: TypeGeoviewLayerType): TypeLayerEntryType => {
-  switch (layerType) {
-    case CONST_LAYER_TYPES.CSV:
-    case CONST_LAYER_TYPES.GEOJSON:
-    case CONST_LAYER_TYPES.GEOPACKAGE:
-    case CONST_LAYER_TYPES.OGC_FEATURE:
-    case CONST_LAYER_TYPES.WFS:
-    case CONST_LAYER_TYPES.ESRI_FEATURE:
-      return CONST_LAYER_ENTRY_TYPES.VECTOR;
-
-    case CONST_LAYER_TYPES.IMAGE_STATIC:
-    case CONST_LAYER_TYPES.ESRI_DYNAMIC:
-    case CONST_LAYER_TYPES.ESRI_IMAGE:
-    case CONST_LAYER_TYPES.WMS:
-      return CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE;
-    case CONST_LAYER_TYPES.XYZ_TILES:
-    case CONST_LAYER_TYPES.VECTOR_TILES:
-      return CONST_LAYER_ENTRY_TYPES.RASTER_TILE;
-    default:
-      // Throw unsupported error
-      throw new NotSupportedError(`Unsupported layer type ${layerType} to convert to layer entry`);
-  }
 };
 
 export type TypeGeoviewLayerConfig = {
@@ -644,6 +624,14 @@ export const layerConfigIsCSVFromType = (verifyIfLayer: TypeGeoviewLayerConfig):
 
 export const layerEntryIsCSVFromConfig = (verifyIfLayer: ConfigBaseClass | ConfigBaseClassProps): verifyIfLayer is CsvLayerEntryConfig => {
   return layerConfigIsCSVFromType(verifyIfLayer?.geoviewLayerConfig);
+};
+
+export const layerConfigIsWKBFromType = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeWkbLayerConfig => {
+  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.WKB;
+};
+
+export const layerEntryIsWKBFromConfig = (verifyIfLayer: ConfigBaseClass | ConfigBaseClassProps): verifyIfLayer is WkbLayerEntryConfig => {
+  return layerConfigIsWKBFromType(verifyIfLayer?.geoviewLayerConfig);
 };
 
 export const layerConfigIsEsriFeatureFromType = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeEsriFeatureLayerConfig => {

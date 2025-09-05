@@ -44,6 +44,7 @@ import {
   layerConfigIsGeoPackageFromType,
   layerConfigIsOgcFeatureFromType,
   layerConfigIsWFSFromType,
+  layerConfigIsWKBFromType,
 } from '@/api/config/types/layer-schema-types';
 import { GeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
 import { GeoPackage } from '@/geo/layer/geoview-layers/vector/geopackage';
@@ -57,6 +58,7 @@ import { OgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
 import { XYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
 import { VectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 import { CSV } from '@/geo/layer/geoview-layers/vector/csv';
+import { WKB } from '@/geo/layer/geoview-layers/vector/wkb';
 
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { HoverFeatureInfoLayerSet } from '@/geo/layer/layer-sets/hover-feature-info-layer-set';
@@ -2459,31 +2461,31 @@ export class LayerApi {
     if (layerConfigIsEsriImageFromType(geoviewLayerConfig)) {
       return new EsriImage(geoviewLayerConfig);
     }
-    if (layerConfigIsGeoJSON(geoviewLayerConfig)) {
+    if (layerConfigIsGeoJSONFromType(geoviewLayerConfig)) {
       return new GeoJSON(geoviewLayerConfig);
     }
-    if (layerConfigIsGeoPackage(geoviewLayerConfig)) {
+    if (layerConfigIsGeoPackageFromType(geoviewLayerConfig)) {
       return new GeoPackage(geoviewLayerConfig);
     }
-    if (layerConfigIsImageStatic(geoviewLayerConfig)) {
+    if (layerConfigIsImageStaticFromType(geoviewLayerConfig)) {
       return new ImageStatic(geoviewLayerConfig);
     }
-    if (layerConfigIsOgcFeature(geoviewLayerConfig)) {
+    if (layerConfigIsOgcFeatureFromType(geoviewLayerConfig)) {
       return new OgcFeature(geoviewLayerConfig);
     }
-    if (layerConfigIsVectorTiles(geoviewLayerConfig)) {
+    if (layerConfigIsVectorTilesFromType(geoviewLayerConfig)) {
       return new VectorTiles(geoviewLayerConfig, mapProjectionForVectorTiles);
     }
-    if (layerConfigIsWFS(geoviewLayerConfig)) {
+    if (layerConfigIsWFSFromType(geoviewLayerConfig)) {
       return new WFS(geoviewLayerConfig);
     }
-    if (layerConfigIsWkb(geoviewLayerConfig)) {
+    if (layerConfigIsWKBFromType(geoviewLayerConfig)) {
       return new WKB(geoviewLayerConfig);
     }
-    if (layerConfigIsWMS(geoviewLayerConfig)) {
+    if (layerConfigIsOgcWmsFromType(geoviewLayerConfig)) {
       return new WMS(geoviewLayerConfig, LayerApi.DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS);
     }
-    if (layerConfigIsXYZTiles(geoviewLayerConfig)) {
+    if (layerConfigIsXYZTilesFromType(geoviewLayerConfig)) {
       return new XYZTiles(geoviewLayerConfig);
     }
 

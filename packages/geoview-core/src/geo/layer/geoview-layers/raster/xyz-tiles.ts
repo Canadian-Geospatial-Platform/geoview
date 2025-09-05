@@ -151,7 +151,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
         // Set zoom limits for max / min zooms
         const maxScale = metadataLayerConfigFound?.getMaxScale();
         const minScaleDenominator = metadataLayerConfigFound?.minScaleDenominator;
-        // eslint-disable-next-line no-param-reassign
+
         layerConfig.setMaxScale(
           !maxScale && !minScaleDenominator
             ? layerConfig.getMaxScale()
@@ -160,7 +160,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
         const minScale = metadataLayerConfigFound?.getMinScale();
         const maxScaleDenominator = metadataLayerConfigFound?.maxScaleDenominator;
-        // eslint-disable-next-line no-param-reassign
+
         layerConfig.setMinScale(
           !minScale && !maxScaleDenominator
             ? layerConfig.getMinScale()

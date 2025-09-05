@@ -3,8 +3,6 @@ import { Pixel } from 'ol/pixel';
 import { Geometry } from 'ol/geom';
 import Feature from 'ol/Feature';
 
-import { TimeDimension } from '@/core/utils/date-mgt';
-
 import { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config';
 import { MapConfigLayerEntry, TypeGeoviewLayerType, TypeLayerStatus } from './layer-schema-types';
 
@@ -351,6 +349,8 @@ export type TypePointMarker = {
 // #endregion MAP FEATURES
 
 // #region GEOVIEW LAYERS
+
+export const MAP_CONFIG_SCHEMA_PATH = 'https://cgpv/schema#/definitions/TypeMapFeaturesInstance';
 
 /** The default geocore url */
 export const CONFIG_GEOCORE_URL = 'https://geocore.api.geo.ca';

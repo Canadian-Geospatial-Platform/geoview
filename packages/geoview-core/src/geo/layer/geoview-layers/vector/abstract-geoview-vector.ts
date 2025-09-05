@@ -11,6 +11,7 @@ import { getUid } from 'ol/util';
 import { TypeOutfields } from '@/api/config/types/map-schema-types';
 import {
   CONST_LAYER_TYPES,
+  layerEntryIsGeoJSONFromConfig,
   TypeBaseVectorSourceInitialConfig,
   TypeFeatureInfoLayerConfig,
   TypePostSettings,
@@ -21,7 +22,6 @@ import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { Projection } from '@/geo/utils/projection';
 import { Fetch } from '@/core/utils/fetch-helper';
@@ -119,9 +119,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         if (layerConfig.schemaTag !== 'WKB') {
           // Fetch the data, or use passed geoJSON if present
           responseText =
-            layerConfig.getSchemaTagGeoJSON() && layerConfig.source?.geojson
+            layerEntryIsGeoJSONFromConfig(layerConfig) && layerConfig.source?.geojson
               ? layerConfig.source.geojson
-              : await AbstractGeoViewVector.#fetchData(url, sourceConfig);
+              : await AbstractGeoViewVector.#fetchData(url, layerConfig.source?.postSettings);
         } else responseText = layerConfig.source!.dataAccessPath as string;
 
         // If Esri Feature
