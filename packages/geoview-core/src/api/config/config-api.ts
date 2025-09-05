@@ -555,5 +555,15 @@ export class ConfigApi {
     return layerConfigs.map((layerEntry) => layerEntry.toJson());
   }
 
+  /**
+   * Utility function to validate a UUID.
+   * @param {string} uuid - The uuid to test.
+   * @returns {boolean} True if the provided uuid is a valid uuid.
+   */
+  static isValidUUID(uuid: string): boolean {
+    // Redirect to the exported fonction in utilities
+    return isValidUUID(uuid);
+  }
+
   // #endregion INITIALIZERS AND PROCESSORS
 }
