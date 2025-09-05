@@ -261,10 +261,6 @@ export function StylePanel(): JSX.Element {
     });
   }, []);
 
-  /**
-   * Render style controls in navbar panel
-   * @returns ReactNode
-   */
   return (
     <List sx={{ p: 2 }}>
       {/* Text-specific controls */}

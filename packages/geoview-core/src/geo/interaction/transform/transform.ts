@@ -38,16 +38,19 @@ export class Transform extends Interaction {
   /** Callback handlers for when a feature is initially selected or when a handle is clicked on */
   #onTransformStartHandlers: TransformEventDelegate[] = [];
 
-  /** Callback handler for when a feature is being transformed */
+  /** Callback handler for when a feature is currently being transformed */
   #onTransformingHandlers: TransformEventDelegate[] = [];
 
-  /** Callback handler for mouse up event */
+  /**
+   * Callback handler for mouse up event when a feature has finished transforming
+   * Note: This will fire when initially or just clicking on a feature since a feature can be moved by clicking on it and dragging
+   */
   #onTransformEndHandlers: TransformEventDelegate[] = [];
 
   /** Callback handler for when a feature is deleted */
   #onDeleteFeatureHandlers: TransformDeleteFeatureEventDelegate[] = [];
 
-  /** Callback handler for when a feature is selected */
+  /** Callback handler for when a feature is selected, deselected, or both (one deselected, another selected) */
   #onSelectionChangeHandlers: TransformSelectionEventDelegate[] = [];
 
   /**
@@ -204,9 +207,10 @@ export class Transform extends Interaction {
   /**
    * Selects a feature for transformation.
    * @param {Feature<Geometry>} feature - The feature to select.
+   * @param {boolean} clearHistory - If true, clears the previous history stack. Default is true.
    */
-  public selectFeature(feature: Feature<Geometry>): void {
-    this.#ol_transform.selectFeature(feature);
+  public selectFeature(feature: Feature<Geometry>, clearHistory: boolean = true): void {
+    this.#ol_transform.selectFeature(feature, clearHistory);
   }
 
   /**
@@ -214,6 +218,13 @@ export class Transform extends Interaction {
    */
   public clearSelection(): void {
     this.#ol_transform.clearSelection();
+  }
+
+  /**
+   * Displays the text editor for the selected feature
+   */
+  public showTextEditor(): void {
+    this.#ol_transform.showTextEditor();
   }
 
   /**

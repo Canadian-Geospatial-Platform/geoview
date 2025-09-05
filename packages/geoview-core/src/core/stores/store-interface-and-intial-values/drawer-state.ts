@@ -2,6 +2,7 @@ import { useStore } from 'zustand';
 
 import { Feature } from 'ol';
 import { Draw } from '@/geo/interaction/draw';
+import { Snap } from '@/geo/interaction/snap';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
@@ -13,6 +14,11 @@ import { Transform } from '@/geo/interaction/transform/transform';
 // #region INTERFACES & TYPES
 
 type DrawerActions = IDrawerState['actions'];
+
+export const DEFAULT_TEXT_VALUES = {
+  en: 'Default Text',
+  fr: 'Texte par défaut',
+};
 
 export type StyleProps = {
   fillColor: string;
@@ -50,6 +56,7 @@ export interface IDrawerState {
   isEditing: boolean;
   transformInstance: Transform | undefined;
   selectedDrawing: Feature | undefined;
+  snapInstance: Snap | undefined;
   hideMeasurements: boolean;
   iconSrc: string;
   undoDisabled: boolean;
@@ -67,10 +74,13 @@ export interface IDrawerState {
     getTransformInstance: () => Transform;
     getSelectedDrawing: () => Feature | undefined;
     getSelectedDrawingType: () => string;
+    getIsSnapping: () => boolean;
+    getSnapInstance: () => Snap | undefined;
     getHideMeasurements: () => boolean;
     getIconSrc: () => string;
     toggleDrawing: () => void;
     toggleEditing: () => void;
+    toggleSnapping: () => void;
     toggleHideMeasurements: () => void;
     clearDrawings: () => void;
     setActiveGeom(geomType: string): void;
@@ -93,6 +103,8 @@ export interface IDrawerState {
     setTransformInstance(transformInstance: Transform): void;
     removeTransformInstance(): void;
     setSelectedDrawing(selectedDrawing: Feature | undefined): void;
+    setSnapInstance(snapInstance: Snap): void;
+    removeSnapInstance(): void;
     setHideMeasurements(hideMeasurements: boolean): void;
     setIconSrc: (iconSrc: string) => void;
     undoDrawing: () => void;
@@ -108,6 +120,7 @@ export interface IDrawerState {
   setterActions: {
     toggleDrawing: () => void;
     toggleEditing: () => void;
+    toggleSnapping: () => void;
     toggleHideMeasurements: () => void;
     clearDrawings: () => void;
     setActiveGeom: (geomType: string) => void;
@@ -130,6 +143,8 @@ export interface IDrawerState {
     setIsEditing: (isEditing: boolean) => void;
     setTransformInstance: (transformInstance: Transform) => void;
     removeTransformInstance: () => void;
+    setSnapInstance: (snapInstance: Snap) => void;
+    removeSnapInstance: () => void;
     setSelectedDrawing: (selectedDrawing: Feature | undefined) => void;
     setHideMeasurements: (hideMeasurements: boolean) => void;
     setIconSrc: (iconSrc: string) => void;
@@ -157,7 +172,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
       strokeColor: '#000000',
       strokeWidth: 1.3,
       iconSize: 24,
-      text: 'Default Text',
+      text: DEFAULT_TEXT_VALUES[get().appState.displayLanguage],
       textSize: 14,
       textFont: 'Arial',
       textColor: '#000000',
@@ -171,6 +186,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
     isEditing: false,
     transformInstance: undefined,
     selectedDrawing: undefined,
+    snapInstance: undefined,
     hideMeasurements: true,
     iconSrc: '',
     undoDisabled: true,
@@ -239,6 +255,12 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         const geometry = feature.getGeometry();
         return geometry?.getType();
       },
+      getSnapInstance: () => {
+        return get().drawerState.snapInstance;
+      },
+      getIsSnapping: () => {
+        return get().drawerState.snapInstance !== undefined;
+      },
       getHideMeasurements: () => {
         return get().drawerState.hideMeasurements;
       },
@@ -252,6 +274,10 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
       toggleEditing: () => {
         // Redirect to setter
         get().drawerState.setterActions.toggleEditing();
+      },
+      toggleSnapping: () => {
+        // Redirect to setter
+        get().drawerState.setterActions.toggleSnapping();
       },
       toggleHideMeasurements: () => {
         // Redirect to setter
@@ -341,6 +367,14 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         // Redirect to setter
         get().drawerState.setterActions.setSelectedDrawing(selectedFeature);
       },
+      setSnapInstance(snapInstance: Snap) {
+        // Redirect to setter
+        get().drawerState.setterActions.setSnapInstance(snapInstance);
+      },
+      removeSnapInstance() {
+        // Redirect to setter
+        get().drawerState.setterActions.removeSnapInstance();
+      },
       setHideMeasurements: (hideMeasurements: boolean) => {
         // Redirect to setter
         get().drawerState.setterActions.setHideMeasurements(hideMeasurements);
@@ -393,6 +427,10 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
 
       toggleEditing: () => {
         DrawerEventProcessor.toggleEditing(get().mapId);
+      },
+
+      toggleSnapping: () => {
+        DrawerEventProcessor.toggleSnapping(get().mapId);
       },
 
       toggleHideMeasurements: () => {
@@ -637,6 +675,24 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         });
       },
 
+      setSnapInstance(snapInstance: Snap) {
+        set({
+          drawerState: {
+            ...get().drawerState,
+            snapInstance,
+          },
+        });
+      },
+
+      removeSnapInstance() {
+        set({
+          drawerState: {
+            ...get().drawerState,
+            snapInstance: undefined,
+          },
+        });
+      },
+
       setHideMeasurements: (hideMeasurements: boolean) => {
         set({
           drawerState: {
@@ -696,6 +752,8 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
 export const useDrawerIsDrawing = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.actions.getIsDrawing());
 
 export const useDrawerIsEditing = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.actions.getIsEditing());
+
+export const useDrawerIsSnapping = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.actions.getIsSnapping());
 
 export const useDrawerSelectedDrawingType = (): string | undefined =>
   useStore(useGeoViewStore(), (state) => state.drawerState.actions.getSelectedDrawingType());

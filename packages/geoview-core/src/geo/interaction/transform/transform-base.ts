@@ -11,12 +11,24 @@ import { Coordinate } from 'ol/coordinate';
 import { Extent, getCenter } from 'ol/extent';
 
 import { TransformEvent, TransformSelectionEvent, TransformDeleteFeatureEvent } from './transform-events';
-import { MapViewer } from '@/app';
+import { geometriesAreEqual } from '@/geo/utils/utilities';
+import { MapViewer } from '@/geo/map/map-viewer';
 
 // #region Constants
 
 // Handle style constants
 const ROTATE_STYLE = new Style({
+  image: new RegularShape({
+    points: 50,
+    radius: 10,
+    fill: new Fill({
+      color: 'rgba(255, 255, 255, 0.5)',
+    }),
+    stroke: new Stroke({
+      color: '#333',
+      width: 1,
+    }),
+  }),
   text: new Text({
     text: '↻',
     fill: new Fill({
@@ -167,6 +179,8 @@ export interface CreateHandleProps {
   isCircleEdge?: boolean;
 }
 
+// #endregion
+
 // #region Class Start
 
 /**
@@ -267,6 +281,8 @@ export class OLTransform extends OLPointer {
 
   onSelectionChange?: (event: TransformSelectionEvent) => void;
 
+  // #endregion
+
   // #region Constructor
 
   /**
@@ -309,6 +325,8 @@ export class OLTransform extends OLPointer {
     this.features.on('remove', this.onFeatureRemove.bind(this));
   }
 
+  // #endregion
+
   // #region Methods
 
   /**
@@ -327,21 +345,29 @@ export class OLTransform extends OLPointer {
   /**
    * Selects a feature for transformation.
    * @param {Feature<Geometry>} feature - The feature to select.
+   * @param {boolean} clearHistory - Whether to clear the history.
    */
-  selectFeature(feature: Feature<Geometry>): void {
+  selectFeature(feature: Feature<Geometry>, clearHistory: boolean = true): void {
     const previousFeature = this.selectedFeature;
 
     // Hide any existing text editor
     this.#hideTextEditor();
 
-    // Clear history when changing selection
-    this.#clearHistory();
+    // Only clear history when changing selection
+    if (previousFeature !== feature && clearHistory) {
+      this.#clearHistory();
+    }
 
     // Clear any existing selection
     this.clearHandles();
 
     // Set the selected feature
     this.selectedFeature = feature;
+
+    // Save initial state to history when selecting a new feature
+    if (previousFeature !== feature && clearHistory) {
+      this.#saveToHistory();
+    }
 
     // Set angle to actual rotation value for text features
     if (this.#isTextFeature(feature)) {
@@ -385,16 +411,19 @@ export class OLTransform extends OLPointer {
 
   /**
    * Clears the current selection.
+   * @param {boolean} keepHistory - Whether the history should be kept when clearing the selection
    */
-  clearSelection(): void {
+  clearSelection(keepHistory: boolean = false): void {
     if (this.onSelectionChange) {
-      this.onSelectionChange(new TransformSelectionEvent('selectionchange', this.selectedFeature, undefined));
+      this.onSelectionChange(new TransformSelectionEvent('selectionchange', this.selectedFeature, undefined, keepHistory));
     }
 
     this.#hideTextEditor();
-    this.#clearHistory();
     this.clearHandles();
     this.selectedFeature = undefined;
+    if (!keepHistory) {
+      this.#clearHistory();
+    }
   }
 
   /**
@@ -410,6 +439,8 @@ export class OLTransform extends OLPointer {
     // 30 pixels converted to map units
     return resolution * 15;
   }
+
+  // #endregion
 
   // #region Helpers
 
@@ -477,8 +508,14 @@ export class OLTransform extends OLPointer {
       geometry.setCoordinates(coords);
     }
 
+    // Save state before deleting the vertex
+    this.#saveToHistory();
+
     // Update handles after deletion
     this.updateHandles();
+
+    // Fire transform end event to notify drawer event processor to update undo/redo buttons
+    this.onTransformend?.(new TransformEvent('transformend', this.selectedFeature));
   }
 
   /**
@@ -489,11 +526,10 @@ export class OLTransform extends OLPointer {
    */
   #getHandleAtCoordinate(coordinate: Coordinate, map: OLMap): Feature | undefined {
     const pixel = map.getPixelFromCoordinate(coordinate);
-    const hitTolerance = this.options.hitTolerance || 5;
 
     const features = map.getFeaturesAtPixel(pixel, {
       layerFilter: (layer) => layer === this.handleLayer,
-      hitTolerance,
+      hitTolerance: this.options.hitTolerance,
     });
 
     return features && features.length > 0 ? (features[0] as Feature) : undefined;
@@ -513,6 +549,8 @@ export class OLTransform extends OLPointer {
   override dispose(): void {
     this.clearSelection();
   }
+
+  // #endregion
 
   // #region Handle Creation
 
@@ -886,6 +924,8 @@ export class OLTransform extends OLPointer {
     this.createHandles();
   }
 
+  // #endregion
+
   // #region Handlers
 
   /**
@@ -1141,7 +1181,7 @@ export class OLTransform extends OLPointer {
    */
   #handleDoubleClick(event: MapBrowserEvent<PointerEvent>): boolean {
     const { map } = event;
-    const features = map.getFeaturesAtPixel(event.pixel);
+    const features = map.getFeaturesAtPixel(event.pixel, { hitTolerance: this.options.hitTolerance });
 
     if (features && features.length > 0) {
       const feature = features[0] as Feature;
@@ -1155,7 +1195,7 @@ export class OLTransform extends OLPointer {
           this.selectFeature(feature);
         }
         // Show text editor
-        this.#showTextEditor();
+        this.showTextEditor();
         return true;
       }
     }
@@ -1182,12 +1222,18 @@ export class OLTransform extends OLPointer {
       const handleType = handleFeature?.get('handleType') as HandleType;
 
       if (handleFeature && handleType !== HandleType.BOUNDARY && handleType !== HandleType.ROTATE_LINE) {
+        // If text editor is active, apply changes before starting any other transformation
+        if (this.#isTextEditing) {
+          this.#applyTextChanges();
+          this.#hideTextEditor();
+        }
+
         // Handle delete action
         if (handleType === HandleType.DELETE) {
           const feature = handleFeature.get('feature');
           if (feature) {
-            this.onDeletefeature?.(new TransformDeleteFeatureEvent(feature as Feature));
             this.features.remove(feature);
+            this.onDeletefeature?.(new TransformDeleteFeatureEvent(feature as Feature));
           }
           return false;
         }
@@ -1232,7 +1278,15 @@ export class OLTransform extends OLPointer {
       }
 
       // Check if we clicked on a feature to select it
-      const features = map.getFeaturesAtPixel(event.pixel);
+      const features = map.getFeaturesAtPixel(event.pixel, {
+        hitTolerance: this.options.hitTolerance,
+        layerFilter: (layer) => {
+          // Target the geometry layer that contains the drawing feature
+          // GV Layer filter is required for the hitTolerance to work
+          // GV because otherwise it stops at the first/most accurate layer hit (basemap)
+          return layer.getSource() === this.options.source;
+        },
+      });
 
       if (features && features.length > 0) {
         const feature = features[0] as Feature;
@@ -1244,6 +1298,12 @@ export class OLTransform extends OLPointer {
 
           // Start translation for non-text features or when not text editing
           if (this.options.translate) {
+            // If text editor is active, apply changes before starting any other transformation
+            if (this.#isTextEditing) {
+              this.#applyTextChanges();
+              this.#hideTextEditor();
+            }
+
             this.startCoordinate = coordinate;
             this.startGeometry = feature.getGeometry()?.clone();
             this.#transformType = HandleType.TRANSLATE;
@@ -1361,7 +1421,7 @@ export class OLTransform extends OLPointer {
       if (this.#isTransforming && this.selectedFeature) {
         // Save state to history after transformation if the geometry changed
         const currentGeometry = this.selectedFeature.getGeometry();
-        const geometryChanged = this.startGeometry && currentGeometry && this.startGeometry.getRevision() !== currentGeometry.getRevision();
+        const geometryChanged = this.startGeometry && currentGeometry && !geometriesAreEqual(this.startGeometry, currentGeometry);
         if (geometryChanged) {
           this.#saveToHistory();
         }
@@ -1383,6 +1443,7 @@ export class OLTransform extends OLPointer {
                 width: this.selectedFeature.get('textHaloWidth') || 3,
               }),
               font: `${isItalic ? 'italic ' : ''}${isBold ? 'bold ' : ''}${finalSize}px ${this.selectedFeature.get('textFont') || 'Arial'}`,
+              rotation: this.selectedFeature.get('textRotation') || 0,
             }),
           });
 
@@ -1446,7 +1507,10 @@ export class OLTransform extends OLPointer {
         map.getTargetElement().style.cursor = cursor;
       } else if (!this.#isTransforming) {
         // Check if we're over a feature
-        const features = map.getFeaturesAtPixel(event.pixel);
+        const features = map.getFeaturesAtPixel(event.pixel, {
+          hitTolerance: this.options.hitTolerance,
+          layerFilter: (layer) => layer.getSource() === this.options.source,
+        });
         if (features && features.length > 0) {
           const feature = features[0] as Feature;
           if (this.features.getArray().includes(feature) && this.options.translate) {
@@ -1527,10 +1591,11 @@ export class OLTransform extends OLPointer {
     }
 
     this.#vertexAdded = true;
-    // Recreate handles after adding vertex
-    // this.updateHandles();
+
     this.clearHandles();
   }
+
+  // #endregion
 
   // #region Text Editing
 
@@ -1546,7 +1611,7 @@ export class OLTransform extends OLPointer {
   /**
    * Creates a simple text editor for text features
    */
-  #showTextEditor(): void {
+  showTextEditor(): void {
     if (!this.mapViewer?.map || this.#textEditOverlay || !this.selectedFeature) return;
 
     const geometry = this.selectedFeature.getGeometry();
@@ -1965,6 +2030,8 @@ export class OLTransform extends OLPointer {
     }
   }
 
+  // #endregion
+
   // #region Undo / Redo
 
   /**
@@ -2003,7 +2070,12 @@ export class OLTransform extends OLPointer {
    * @returns {boolean} True if undo was successful.
    */
   undo(callback?: () => void): boolean {
-    if (!this.selectedFeature || this.#historyIndex <= 0) return false;
+    if (!this.selectedFeature) return false;
+
+    if (this.#historyIndex <= 0) {
+      this.clearSelection(true); // true to keep the history
+      return false;
+    }
 
     this.#historyIndex--;
     const previousGeometry = this.#geometryHistory[this.#historyIndex];
@@ -2039,7 +2111,7 @@ export class OLTransform extends OLPointer {
    * @returns {boolean} True if undo is available.
    */
   canUndo(): boolean {
-    return this.#historyIndex > 0;
+    return this.#historyIndex >= 0;
   }
 
   /**
@@ -2049,4 +2121,6 @@ export class OLTransform extends OLPointer {
   canRedo(): boolean {
     return this.#historyIndex !== -1 && this.#historyIndex < this.#geometryHistory.length - 1;
   }
+
+  // #endregion
 }
