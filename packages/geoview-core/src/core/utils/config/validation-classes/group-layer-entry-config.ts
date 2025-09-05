@@ -25,7 +25,7 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
 
   /** The list of layer entry configurations to use from the GeoView layer group. */
   // TODO: Refactor - Try to type this as ConfigBaseClass[] instead of TypeLayerEntryConfig[]
-  listOfLayerEntryConfig: TypeLayerEntryConfig[] = [];
+  listOfLayerEntryConfig: TypeLayerEntryConfig[];
 
   /**
    * The class constructor.
@@ -34,7 +34,7 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
   // TO: Until this is fixed, this constructor supports sending a GroupLayerEntryConfig in its typing, for now (GroupLayerEntryConfigProps | GroupLayerEntryConfig)... though it should only be a GroupLayerEntryConfigProps eventually
   constructor(layerConfig: GroupLayerEntryConfigProps | GroupLayerEntryConfig) {
     super(layerConfig);
-    this.listOfLayerEntryConfig = layerConfig.listOfLayerEntryConfig;
+    this.listOfLayerEntryConfig = layerConfig.listOfLayerEntryConfig || [];
   }
 
   /**

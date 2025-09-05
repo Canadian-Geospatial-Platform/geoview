@@ -172,11 +172,8 @@ class TimeSliderPlugin extends FooterPlugin {
 
         // If the layer was found and of right type
         if (layer instanceof AbstractGVLayer) {
-          // Get the config
-          const layerConfig = layer.getLayerConfig();
-
           // Check and add time slider layer when needed
-          TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.mapViewer.mapId, layer, layerConfig, timesliderConfig);
+          TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.mapViewer.mapId, layer, timesliderConfig);
         }
       });
     }

@@ -2,7 +2,7 @@ import { Map as OLMap } from 'ol';
 
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { QueryType, TypeFeatureInfoEntry, TypeLocation, TypeResultSet, TypeResultSetEntry } from '@/api/config/types/map-schema-types';
-import { TypeLayerEntryConfig, TypeLayerStatus } from '@/api/config/types/layer-schema-types';
+import { TypeLayerStatus } from '@/api/config/types/layer-schema-types';
 import { generateId, whenThisThen } from '@/core/utils/utilities';
 import {
   ConfigBaseClass,
@@ -436,12 +436,12 @@ export abstract class AbstractLayerSet {
   /**
    * Align records with informatiom provided by OutFields from layer config.
    * This will update fields in and delete unwanted fields from the arrayOfRecords
-   * @param {TypeLayerEntryConfig} layerPath - Path of the layer to get config from.
+   * @param {AbstractBaseLayerEntryConfig} layerEntryConfig - The layer entry config object.
    * @param {TypeFeatureInfoEntry[]} arrayOfRecords - Features to delete fields from.
    * @protected
    * @static
    */
-  protected static alignRecordsWithOutFields(layerEntryConfig: TypeLayerEntryConfig, arrayOfRecords: TypeFeatureInfoEntry[]): void {
+  protected static alignRecordsWithOutFields(layerEntryConfig: AbstractBaseLayerEntryConfig, arrayOfRecords: TypeFeatureInfoEntry[]): void {
     // If source featureInfo is provided, continue
     if (layerEntryConfig.source && layerEntryConfig.source.featureInfo) {
       const sourceFeatureInfo = layerEntryConfig.source.featureInfo;

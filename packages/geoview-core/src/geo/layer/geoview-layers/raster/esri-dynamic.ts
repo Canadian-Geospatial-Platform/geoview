@@ -8,12 +8,7 @@ import {
   EsriDynamicLayerEntryConfig,
   EsriDynamicLayerEntryConfigProps,
 } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import {
-  CONST_LAYER_TYPES,
-  TypeGeoviewLayerConfig,
-  TypeLayerEntryConfig,
-  TypeMetadataEsriDynamic,
-} from '@/api/config/types/layer-schema-types';
+import { CONST_LAYER_TYPES, TypeGeoviewLayerConfig, TypeMetadataEsriDynamic } from '@/api/config/types/layer-schema-types';
 
 import { commonProcessLayerMetadata, commonValidateListOfLayerEntryConfig } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { logger } from '@/core/utils/logger';
@@ -130,10 +125,10 @@ export class EsriDynamic extends AbstractGeoViewRaster {
 
   /**
    * Performs specific validation that can only be done by the child of the AbstractGeoViewEsriLayer class.
-   * @param {TypeLayerEntryConfig} layerConfig - The layer config to check.
+   * @param {ConfigBaseClass} layerConfig - The layer config to check.
    * @returns {boolean} true if an error is detected.
    */
-  esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig): boolean {
+  esriChildHasDetectedAnError(layerConfig: ConfigBaseClass): boolean {
     if (this.getMetadata()?.supportsDynamicLayers === false) {
       // Log a warning, but continue
       logger.logWarning(`Layer ${layerConfig.layerPath} does not technically support dynamic layers per its metadata.`);

@@ -106,9 +106,6 @@ export type TypeLayerEntryConfig = AbstractBaseLayerEntryConfig | GroupLayerEntr
  * the configs being treated as types and class instances simultaneously in the code base. */
 export type ConfigClassOrType = ConfigBaseClass | ConfigBaseClassProps;
 
-/** Explicit type to indicate when we're supporting either a geoview layer config or a layer entry config */
-export type GeoviewLayerOrLayerEntry = TypeGeoviewLayerConfig | ConfigBaseClassProps;
-
 export type TypeSourceVectorTilesInitialConfig = TypeSourceTileInitialConfig;
 
 export interface TypeSourceOgcFeatureInitialConfig extends TypeVectorSourceInitialConfig {
@@ -126,6 +123,7 @@ export type TypePostSettings = { header?: Record<string, string>; data: unknown 
 /** Type of Style to apply to the GeoView vector layer source at creation time. */
 export type TypeLayerEntryType = 'vector' | 'vector-tile' | 'raster-tile' | 'raster-image' | 'group' | 'geoCore' | 'shapefile';
 
+/** The possible layer statuses when processing layer configs */
 export type TypeLayerStatus = 'newInstance' | 'registered' | 'processing' | 'processed' | 'loading' | 'loaded' | 'error';
 
 /** The possible strategies when working with vector layers data */

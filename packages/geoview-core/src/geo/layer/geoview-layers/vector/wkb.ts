@@ -42,6 +42,7 @@ export class WKB extends AbstractGeoViewVector {
    * Constructs a WKB Layer configuration processor.
    * @param {TypeWkbLayerConfig} layerConfig the layer configuration
    */
+  // The constructor is not useless, it narrows down the accepted parameter type.
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(layerConfig: TypeWkbLayerConfig) {
     super(layerConfig);

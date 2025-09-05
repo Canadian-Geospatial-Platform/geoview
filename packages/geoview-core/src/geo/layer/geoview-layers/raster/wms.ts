@@ -567,7 +567,7 @@ export class WMS extends AbstractGeoViewRaster {
 
   /**
    * Reads the layer identifiers from the configuration to create an array that will be used in the GetCapabilities.
-   * @returns {TypeLayerEntryConfig[]} The array of layer configurations.
+   * @returns {AbstractBaseLayerEntryConfig[]} The array of layer configurations.
    * @private
    */
   #getLayersToQuery(): AbstractBaseLayerEntryConfig[] {
@@ -649,7 +649,7 @@ export class WMS extends AbstractGeoViewRaster {
     // TODO: Refactor - createGroup is the same thing for all the layers type? group is a geoview structure.
     // TO.DOCONT: Should it be handle upper in abstract class to loop in structure and launch the creation of a leaf?
     // TODO: The answer is no. Even if the final structure is the same, the input structure is different for each geoview layer types.
-    const newListOfLayerEntryConfig: TypeLayerEntryConfig[] = [];
+    const newListOfLayerEntryConfig: ConfigBaseClass[] = [];
     const arrayOfLayerMetadata = Array.isArray(layer.Layer) ? layer.Layer : [layer.Layer];
 
     // GV Special WMS group layer case situation...
@@ -670,7 +670,7 @@ export class WMS extends AbstractGeoViewRaster {
       subLayerEntryConfig.parentLayerConfig = layerConfig;
       subLayerEntryConfig.layerId = subLayer.Name!;
       subLayerEntryConfig.setLayerName(subLayer.Title);
-      newListOfLayerEntryConfig.push(subLayerEntryConfig as TypeLayerEntryConfig);
+      newListOfLayerEntryConfig.push(subLayerEntryConfig);
 
       // If we don't want all sub layers (simulating the 'Private element not on object' error we had for long time)
       if (!this.fullSubLayers) {
@@ -691,7 +691,7 @@ export class WMS extends AbstractGeoViewRaster {
     // eslint-disable-next-line no-param-reassign
     layerConfig.isMetadataLayerGroup = true;
     // eslint-disable-next-line no-param-reassign
-    layerConfig.listOfLayerEntryConfig = newListOfLayerEntryConfig;
+    layerConfig.listOfLayerEntryConfig = newListOfLayerEntryConfig as TypeLayerEntryConfig[];
     this.validateListOfLayerEntryConfig(newListOfLayerEntryConfig);
   }
 
@@ -857,4 +857,4 @@ export class WMS extends AbstractGeoViewRaster {
 }
 
 /** Local type to work with a metadata fetch result */
-type MetatadaFetchResult = { layerConfig: TypeLayerEntryConfig; metadata: TypeMetadataWMS };
+type MetatadaFetchResult = { layerConfig: AbstractBaseLayerEntryConfig; metadata: TypeMetadataWMS };

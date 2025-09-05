@@ -140,7 +140,7 @@ export abstract class AbstractBaseLayer {
   }
 
   /**
-   * Gets the layer name or fallsback on the layer name in the layer configuration.
+   * Gets the layer name or falls back on the layer name in the layer configuration.
    * @returns The layer name
    */
   getLayerName(): string {

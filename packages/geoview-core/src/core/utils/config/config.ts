@@ -80,7 +80,7 @@ export class Config {
   }
 
   /**
-   * Initialize all layer entry type fields accordingly to the GeoView layer type.
+   * Initializes all layer entry type fields accordingly to the GeoView layer type.
    * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entry configuration to adjust.
    * @param {TypeGeoviewLayerType} geoviewLayerType The GeoView layer type.
    * @private

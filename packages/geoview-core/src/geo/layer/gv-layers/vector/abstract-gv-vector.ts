@@ -399,7 +399,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     callbackWhenUpdated: ((filterToUse: string) => void) | undefined = undefined
   ): void {
     // TODO: Check - Is this assignation necessary? What's the intent?
-    // Update the layer config on the fly (maybe not ideal to do this?)
+    // Update the layer config on the fly (maybe not ideal to do this here at this stage?)
     // eslint-disable-next-line no-param-reassign
     layerConfig.layerFilter = filter;
 

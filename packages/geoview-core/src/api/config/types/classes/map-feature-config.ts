@@ -108,7 +108,7 @@ export class MapFeatureConfig {
 
   /**
    * Get the default values for the mapFeatureConfig.map using the projection code.
-   * @param {TypeValidMapProjectionCodes?} projection The projection code.
+   * @param {TypeValidMapProjectionCodes?} projection - The projection code.
    * @returns {TypeMapConfig} The default map configuration associated to the projection.
    * @static @private
    */

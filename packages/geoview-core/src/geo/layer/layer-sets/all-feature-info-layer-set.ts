@@ -1,6 +1,5 @@
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
 import { QueryType, TypeFeatureInfoEntry } from '@/api/config/types/map-schema-types';
-import { TypeLayerEntryConfig } from '@/api/config/types/layer-schema-types';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
@@ -135,10 +134,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
           .then((arrayOfRecords) => {
             // Use the response to align arrayOfRecords fields with layerConfig fields
             if (arrayOfRecords.length) {
-              AbstractLayerSet.alignRecordsWithOutFields(
-                this.layerApi.getLayerEntryConfig(layerPath) as TypeLayerEntryConfig,
-                arrayOfRecords
-              );
+              AbstractLayerSet.alignRecordsWithOutFields(layer.getLayerConfig(), arrayOfRecords);
             }
 
             // Keep the features retrieved
