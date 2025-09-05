@@ -232,12 +232,7 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
   }, [getJson]);
 
   return (
-    <MenuItem
-      onClick={() => {
-        handleExportData().catch((error) => logger.logError('Export failed:', error));
-      }}
-      disabled={isExporting}
-    >
+    <MenuItem onClick={handleExportData} disabled={isExporting}>
       {t('dataTable.downloadAsGeoJSON')}
     </MenuItem>
   );

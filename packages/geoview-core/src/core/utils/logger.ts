@@ -1,4 +1,3 @@
-// Point of this class is to console.log
 import { isArray } from 'lodash';
 import { getItemAsNumber, getItemAsNumberOrNumberArraySetValue } from './localStorage';
 
