@@ -33,8 +33,7 @@ export class Fetch {
     if (timeoutMs) {
       const timeoutController = Fetch.#createTimeoutAbortController(timeoutMs);
       timeoutSignal = timeoutController.controller.signal;
-      // eslint-disable-next-line prefer-destructuring
-      timeoutId = timeoutController.timeoutId;
+      ({ timeoutId } = timeoutController);
     }
 
     // Merge the abort signals to support the optional original abort controller and the optional timeout one
@@ -148,8 +147,7 @@ export class Fetch {
     if (timeoutMs) {
       const timeoutController = Fetch.#createTimeoutAbortController(timeoutMs);
       timeoutSignal = timeoutController.controller.signal;
-      // eslint-disable-next-line prefer-destructuring
-      timeoutId = timeoutController.timeoutId;
+      ({ timeoutId } = timeoutController);
     }
 
     // Merge the abort signals to support the optional original abort controller and the optional timeout one
@@ -212,8 +210,7 @@ export class Fetch {
     if (timeoutMs) {
       const timeoutController = Fetch.#createTimeoutAbortController(timeoutMs);
       timeoutSignal = timeoutController.controller.signal;
-      // eslint-disable-next-line prefer-destructuring
-      timeoutId = timeoutController.timeoutId;
+      ({ timeoutId } = timeoutController);
     }
 
     // Merge the abort signals to support the optional original abort controller and the optional timeout one

@@ -268,8 +268,7 @@ export class Notifications {
     // Here it's either an Error System or unknown. If Error System, read the message.
     let message = error;
     if (error instanceof Error) {
-      // eslint-disable-next-line prefer-destructuring
-      message = error.message;
+      ({ message } = error);
     }
 
     // Log to the console (for devs)
