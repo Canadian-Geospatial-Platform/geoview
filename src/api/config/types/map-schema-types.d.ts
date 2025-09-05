@@ -285,9 +285,9 @@ export type TypePointMarker = {
     projectionCode?: number;
 };
 /** Definition of the keys used to create the constants of the GeoView layer */
-type LayerTypesKey = 'CSV' | 'ESRI_DYNAMIC' | 'ESRI_FEATURE' | 'ESRI_IMAGE' | 'IMAGE_STATIC' | 'GEOJSON' | 'GEOPACKAGE' | 'XYZ_TILES' | 'VECTOR_TILES' | 'OGC_FEATURE' | 'WFS' | 'WMS';
+type LayerTypesKey = 'CSV' | 'ESRI_DYNAMIC' | 'ESRI_FEATURE' | 'ESRI_IMAGE' | 'IMAGE_STATIC' | 'GEOJSON' | 'GEOPACKAGE' | 'XYZ_TILES' | 'VECTOR_TILES' | 'OGC_FEATURE' | 'WFS' | 'WKB' | 'WMS';
 /** Definition of the geoview layer types accepted by the viewer. */
-export type TypeGeoviewLayerType = 'CSV' | 'esriDynamic' | 'esriFeature' | 'esriImage' | 'GeoJSON' | 'GeoPackage' | 'imageStatic' | 'ogcFeature' | 'ogcWfs' | 'ogcWms' | 'vectorTiles' | 'xyzTiles';
+export type TypeGeoviewLayerType = 'CSV' | 'esriDynamic' | 'esriFeature' | 'esriImage' | 'GeoJSON' | 'GeoPackage' | 'imageStatic' | 'ogcFeature' | 'ogcWfs' | 'ogcWms' | 'vectorTiles' | 'WKB' | 'xyzTiles';
 /** Definition of the geoview layer types accepted by the viewer. */
 export type TypeInitialGeoviewLayerType = TypeGeoviewLayerType | 'geoCore' | 'shapefile';
 /**
@@ -492,7 +492,7 @@ export type TypeTileGrid = {
     tileSize?: [number, number];
 };
 /** Type that defines the vector layer source formats. */
-export type TypeVectorSourceFormats = 'GeoJSON' | 'EsriJSON' | 'KML' | 'WFS' | 'featureAPI' | 'GeoPackage' | 'CSV' | 'MVT';
+export type TypeVectorSourceFormats = 'GeoJSON' | 'EsriJSON' | 'KML' | 'WFS' | 'featureAPI' | 'GeoPackage' | 'CSV' | 'MVT' | 'WKB';
 /** Type from which we derive the source properties for all the ESRI dynamic leaf nodes in the layer tree. */
 export interface TypeSourceEsriDynamicInitialConfig extends TypeBaseSourceInitialConfig {
     /** Maximum number of records to fetch (default: 0). */
@@ -765,6 +765,9 @@ export interface TypeLayerEntryConfigGroup extends Omit<TypeLayerEntryConfig2, '
 }
 export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitialConfig {
     format: 'WFS';
+}
+export interface TypeSourceWkbVectorInitialConfig extends TypeVectorSourceInitialConfig {
+    format: 'WKB';
 }
 export type LayerEntryTypesKey = 'VECTOR' | 'VECTOR_TILE' | 'RASTER_TILE' | 'RASTER_IMAGE' | 'GROUP' | 'GEOCORE' | 'SHAPEFILE';
 export declare const CONST_LAYER_ENTRY_TYPES: Record<LayerEntryTypesKey, TypeLayerEntryType>;

@@ -54,6 +54,21 @@ export declare class DrawerEventProcessor extends AbstractEventProcessor {
      */
     static toggleEditing(mapId: string): void;
     /**
+     * Starts snapping interactions
+     * @param {string} mapId - The map ID
+     */
+    static startSnapping(mapId: string): void;
+    /**
+     * Stops snapping interactions
+     * @param {string} mapId - The map ID
+     */
+    static stopSnapping(mapId: string): void;
+    /**
+     * Toggles snapping state
+     * @param {string} mapId - The map ID
+     */
+    static toggleSnapping(mapId: string): void;
+    /**
      * Updates the style of any currently transforming features
      * @param {string} mapId - The map ID
      * @param {StyleProps} newStyle - The new style to apply
@@ -69,12 +84,13 @@ export declare class DrawerEventProcessor extends AbstractEventProcessor {
      * Clears all drawings from the map
      * @param {string} mapId - The map ID
      */
-    static clearDrawings(mapId: string): void;
+    static clearDrawings(mapId: string, saveHistory?: boolean): void;
     /**
      * Refreshes the interaction instances
      * @param {string} mapId - The map ID
      */
     static refreshInteractionInstances(mapId: string): void;
+    static refreshSnappingInstance(mapId: string): void;
     /**
      * Toggles the measurement overlays on the map
      * @param {string} mapId - The map ID

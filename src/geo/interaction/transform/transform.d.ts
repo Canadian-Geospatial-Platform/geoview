@@ -83,12 +83,17 @@ export declare class Transform extends Interaction {
     /**
      * Selects a feature for transformation.
      * @param {Feature<Geometry>} feature - The feature to select.
+     * @param {boolean} clearHistory - If true, clears the previous history stack. Default is true.
      */
-    selectFeature(feature: Feature<Geometry>): void;
+    selectFeature(feature: Feature<Geometry>, clearHistory?: boolean): void;
     /**
      * Clears the current selection.
      */
     clearSelection(): void;
+    /**
+     * Displays the text editor for the selected feature
+     */
+    showTextEditor(): void;
     /**
      * Undo the last action
      */

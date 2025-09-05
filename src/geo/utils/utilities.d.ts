@@ -13,7 +13,7 @@ import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeLayerStyleConfig, TypeMetadataWMS, TypeValidMapProjectionCodes } from '@/api/config/types/map-schema-types';
 import { TypeMapMouseInfo } from '@/geo/map/map-viewer';
-export declare const layerTypes: Record<"CSV" | "ESRI_DYNAMIC" | "ESRI_FEATURE" | "ESRI_IMAGE" | "IMAGE_STATIC" | "GEOJSON" | "GEOPACKAGE" | "XYZ_TILES" | "VECTOR_TILES" | "OGC_FEATURE" | "WFS" | "WMS", import("@/api/config/types/map-schema-types").TypeGeoviewLayerType>;
+export declare const layerTypes: Record<"CSV" | "WKB" | "ESRI_DYNAMIC" | "ESRI_FEATURE" | "ESRI_IMAGE" | "IMAGE_STATIC" | "GEOJSON" | "GEOPACKAGE" | "XYZ_TILES" | "VECTOR_TILES" | "OGC_FEATURE" | "WFS" | "WMS", import("@/api/config/types/map-schema-types").TypeGeoviewLayerType>;
 /** The type for the function callback for getWMSServiceMetadata() */
 export type CallbackNewMetadataDelegate = (proxyUsed: string) => void;
 /**
@@ -213,4 +213,11 @@ export declare const getMapScale: (view: View) => number | undefined;
  * @returns {TypeMapMouseInfo} An object representing pointer position information
  */
 export declare const getPointerPositionFromMapEvent: (mapEvent: MapBrowserEvent, projCode: string) => TypeMapMouseInfo;
+/**
+ * Function for checking if two geometries have the same coordinates
+ * @param {Geometry} geom1 - The first geometry
+ * @param {Geometry} geom2 - The second geometry
+ * @returns {boolean} Whether the two geometries are equal or not
+ */
+export declare const geometriesAreEqual: (geom1: Geometry, geom2: Geometry) => boolean;
 //# sourceMappingURL=utilities.d.ts.map

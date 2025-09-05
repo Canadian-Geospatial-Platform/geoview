@@ -20,6 +20,7 @@ export * from './layer/geoview-layers/vector/geojson';
 export * from './layer/geoview-layers/vector/geopackage';
 export * from './layer/geoview-layers/vector/ogc-feature';
 export * from './layer/geoview-layers/vector/wfs';
+export * from './layer/geoview-layers/vector/wkb';
 export * from './layer/geoview-layers/abstract-geoview-layers';
 export * from './layer/geoview-layers/esri-layer-common';
 export * from './layer/other/geocore';
