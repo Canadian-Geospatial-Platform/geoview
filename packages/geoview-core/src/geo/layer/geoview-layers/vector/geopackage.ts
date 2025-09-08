@@ -376,13 +376,17 @@ export class GeoPackage extends AbstractGeoViewVector {
     // Extract layer styles if they exist
     const { rules } = SLDReader.Reader(sld).layers[0].styles[0].featuretypestyles[0];
 
-    // eslint-disable-next-line no-param-reassign
-    if (!layerConfig.layerStyle) layerConfig.layerStyle = {};
+    // If no style, define one
+    if (!layerConfig.getLayerStyle()) layerConfig.setLayerStyle({});
 
+    // Get the layer style
+    const layerStyle = layerConfig.getLayerStyle();
+    // If the layer style isn't set, skip
+    if (!layerStyle) return;
+
+    // For each rule
     for (let i = 0; i < rules.length; i++) {
-      // Get the layer style
-      const { layerStyle } = layerConfig;
-
+      // Loop on each keys in the rule
       Object.keys(rules[i]).forEach((key) => {
         // Polygon style
         if (key.toLowerCase() === 'polygonsymbolizer' && !layerStyle.Polygon) {

@@ -120,7 +120,8 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     this.#isTimeAware = layerConfig.geoviewLayerConfig.isTimeAware === undefined ? true : layerConfig.geoviewLayerConfig.isTimeAware;
 
     // If there is a layer style in the config, set it in the layer
-    if (layerConfig.layerStyle) this.setStyle(layerConfig.layerStyle);
+    const style = layerConfig.getLayerStyle();
+    if (style) this.setStyle(style);
   }
 
   /**

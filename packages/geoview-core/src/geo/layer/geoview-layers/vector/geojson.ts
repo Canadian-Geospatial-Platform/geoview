@@ -142,8 +142,8 @@ export class GeoJSON extends AbstractGeoViewVector {
         // eslint-disable-next-line no-param-reassign
         layerConfig.initialSettings = defaultsDeep(layerConfig.initialSettings, layerMetadataFound.initialSettings);
 
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.layerStyle = defaultsDeep(layerConfig.layerStyle, layerMetadataFound.layerStyle);
+        // Set the layer style
+        layerConfig.setLayerStyle(defaultsDeep(layerConfig.getLayerStyle(), layerMetadataFound.layerStyle));
 
         // If max scale found in metadata
         if (layerMetadataFound.maxScale) {

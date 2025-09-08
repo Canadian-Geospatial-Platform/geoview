@@ -1,5 +1,5 @@
 import { TypeLayerStyleConfig, TypeStyleGeometry, TypeLayerStyleSettings } from '@/api/config/types/map-schema-types';
-import { TypeBaseSourceInitialConfig } from '@/api/config/types/layer-schema-types';
+import { ConfigAbstractBaseClassOrType, TypeBaseSourceInitialConfig } from '@/api/config/types/layer-schema-types';
 import { ConfigBaseClass, ConfigBaseClassProps } from '@/core/utils/config/validation-classes/config-base-class';
 import { TimeDimension } from '@/core/utils/date-mgt';
 import { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
@@ -25,10 +25,6 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /** Filter to apply on feature of this layer. */
   layerFilter?: string;
 
-  /** Style to apply to the vector layer. */
-  // TODO: This source attribute is responsible for problems. Change to a getLayerStyle() and setLayerStyle().
-  layerStyle?: TypeLayerStyleConfig;
-
   /** The listOfLayerEntryConfig attribute is not used by child of AbstractBaseLayerEntryConfig. */
   // TODO: Refactor - This attribute should be removed and logic applied using OO pattern once the constructor is cleaned up.
   declare listOfLayerEntryConfig: never;
@@ -38,6 +34,10 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /** The metadata associated with the layer */
   #layerMetadata?: unknown;
+
+  /** Style to apply to the vector layer. */
+  // TODO: This source attribute is responsible for problems. Change to a getLayerStyle() and setLayerStyle().
+  #layerStyle?: TypeLayerStyleConfig;
 
   /** The time dimension information */
   #temporalDimension?: TimeDimension;
@@ -60,12 +60,19 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
     super(layerConfig);
     this.source = layerConfig.source;
     this.layerFilter = layerConfig.layerFilter;
-    this.layerStyle = layerConfig.layerStyle;
+
+    // Keep attribute properties
+    if (layerConfig instanceof ConfigBaseClass) {
+      this.#layerStyle = layerConfig.getLayerStyle();
+    } else {
+      // Regular
+      this.#layerStyle = layerConfig.layerStyle;
+    }
   }
 
   /**
    * Gets the service metadata that is associated to the service.
-   * @returns {unknown | undefined} The service metadata.
+   * @returns {unknown | undefined} The service metadata or undefined.
    */
   getServiceMetadata(): unknown | undefined {
     return this.#serviceMetadata;
@@ -81,7 +88,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Gets the metadata that is associated to the layer.
-   * @returns {unknown} The layer metadata.
+   * @returns {unknown} The layer metadata or undefined.
    */
   getLayerMetadata(): unknown | undefined {
     return this.#layerMetadata;
@@ -96,8 +103,49 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   }
 
   /**
+   * Gets the metadata that is associated to the layer.
+   * @returns {TypeLayerStyleConfig} The layer style or undefined.
+   */
+  getLayerStyle(): TypeLayerStyleConfig | undefined {
+    return this.#layerStyle;
+  }
+
+  /**
+   * Sets the layer metadata for the layer.
+   * @param {TypeLayerStyleConfig} layerStyle - The layer style
+   */
+  setLayerStyle(layerStyle: TypeLayerStyleConfig): void {
+    this.#layerStyle = layerStyle;
+  }
+
+  /**
+   * The TypeStyleGeometries associated with the style as could be read from the layer config metadata.
+   * @returns {TypeStyleGeometry[]} The array of TypeStyleGeometry
+   */
+  getTypeGeometries(): TypeStyleGeometry[] {
+    return Object.keys(this.#layerStyle || {}) as TypeStyleGeometry[];
+  }
+
+  /**
+   * The first TypeStyleSetting associated with the TypeStyleGeometry associated with the style as could be read from the layer config metadata.
+   * @returns {TypeStyleSettings[]} The array of TypeStyleSettings
+   */
+  getFirstStyleSettings(): TypeLayerStyleSettings | undefined {
+    // Get the type geometries
+    const styles = this.getTypeGeometries();
+
+    // If at least one, get the first one
+    if (styles.length > 0) {
+      return this.#layerStyle![styles[0]];
+    }
+
+    // None
+    return undefined;
+  }
+
+  /**
    * Gets the temporal dimension, if any, that is associated to the layer.
-   * @returns {TimeDimension | undefined} The temporal dimension.
+   * @returns {TimeDimension | undefined} The temporal dimension or undefined.
    */
   getTemporalDimension(): TimeDimension | undefined {
     return this.#temporalDimension;
@@ -160,31 +208,6 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   }
 
   /**
-   * The TypeStyleGeometries associated with the style as could be read from the layer config metadata.
-   * @returns {TypeStyleGeometry[]} The array of TypeStyleGeometry
-   */
-  getTypeGeometries(): TypeStyleGeometry[] {
-    return Object.keys(this.layerStyle || {}) as TypeStyleGeometry[];
-  }
-
-  /**
-   * The first TypeStyleSetting associated with the TypeStyleGeometry associated with the style as could be read from the layer config metadata.
-   * @returns {TypeStyleSettings[]} The array of TypeStyleSettings
-   */
-  getFirstStyleSettings(): TypeLayerStyleSettings | undefined {
-    // Get the type geometries
-    const styles = this.getTypeGeometries();
-
-    // If at least one, get the first one
-    if (styles.length > 0) {
-      return this.layerStyle![styles[0]];
-    }
-
-    // None
-    return undefined;
-  }
-
-  /**
    * Sets the data access path for the source object.
    * This method is called when the data access path is being set.
    * If the `source` object is undefined or null, it initializes it as an empty object.
@@ -214,5 +237,17 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
     // Return it
     return serialized;
+  }
+
+  /**
+   * Helper function to support when a layerConfig is either a class instance or a regular json object.
+   * @param {ConfigAbstractBaseClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
+   * @returns {string | undefined} The layer style or undefined.
+   */
+  static getClassOrTypeLayerStyle(layerConfig: ConfigAbstractBaseClassOrType | undefined): TypeLayerStyleConfig | undefined {
+    if (layerConfig instanceof ConfigBaseClass) {
+      return layerConfig.getLayerStyle();
+    }
+    return layerConfig?.layerStyle;
   }
 }

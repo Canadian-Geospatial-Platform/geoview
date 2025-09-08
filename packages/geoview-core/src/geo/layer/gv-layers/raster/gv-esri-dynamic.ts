@@ -22,7 +22,6 @@ import {
   TypeLayerStyleConfig,
   TypeLayerStyleConfigInfo,
   TypeOutfieldsType,
-  TypeStyleGeometry,
   TypeValidMapProjectionCodes,
   TypeIconSymbolVectorConfig,
 } from '@/api/config/types/map-schema-types';
@@ -495,15 +494,17 @@ export class GVEsriDynamic extends AbstractGVRaster {
             // }) as Feature<Geometry>;
 
             // TODO: Performance - Relying on style to get geometry is not good. We should extract it from metadata and keep it in dedicated attribute
-            const geomType = Object.keys(layerConfig?.layerStyle || []);
+            const geomType = layerConfig?.getTypeGeometries() || [];
 
             // Get coordinates in right format and create geometry
             const coordinates = (feat.geometry?.points ||
               feat.geometry?.paths ||
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               feat.geometry?.rings || [feat.geometry?.x, feat.geometry?.y]) as any; // MultiPoint or Line or Polygon or Point schema
+
+            // Create the geometry from the (first?) type
             const newGeom: Geometry | undefined =
-              geomType.length > 0 ? GeometryApi.createGeometryFromType(geomType[0] as TypeStyleGeometry, coordinates) : undefined;
+              geomType.length > 0 ? GeometryApi.createGeometryFromType(geomType[0], coordinates) : undefined;
 
             // TODO: Performance - We will need a trigger to refresh the higight and details panel (for zoom button) when extent and
             // TO.DOCONT: is applied. Sometimes the delay is too big so we need to change tab or layer in layer list to trigger the refresh

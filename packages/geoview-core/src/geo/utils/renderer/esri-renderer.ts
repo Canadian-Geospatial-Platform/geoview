@@ -475,11 +475,12 @@ function processClassBreakRenderer(EsriRenderer: EsriClassBreakRenderer): TypeLa
 /**
  * Get GeoView style from Esri renderer.
  *
- * @param {EsriBaseRenderer} renderer - ESRI renderer to convert.
+ * @param {EsriBaseRenderer | undefined} renderer - ESRI renderer to convert.
  *
  * @returns {TypeStyleConfig | undefined} The Geoview style or undefined if it can not be created.
  */
-export function getStyleFromEsriRenderer(renderer: EsriBaseRenderer): TypeLayerStyleConfig | undefined {
+export function getStyleFromEsriRenderer(renderer: EsriBaseRenderer | undefined): TypeLayerStyleConfig | undefined {
+  if (!renderer) return undefined;
   if (esriRendererIsUniqueValue(renderer)) return processUniqueValueRenderer(renderer);
   if (esriRendererIsSimple(renderer)) return processSimpleRenderer(renderer);
   if (esriRendererIsClassBreaks(renderer)) return processClassBreakRenderer(renderer);

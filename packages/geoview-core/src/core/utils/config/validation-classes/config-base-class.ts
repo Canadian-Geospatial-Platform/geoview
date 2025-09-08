@@ -543,26 +543,26 @@ export abstract class ConfigBaseClass {
 
   /**
    * Helper function to support when a layerConfig is either a class instance or a regular json object.
-   * @param {ConfigClassOrType} layerConfig - The layer config class instance or regular json object.
+   * @param {ConfigClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
    * @returns {string | undefined} The layer name or undefined.
    */
-  static getClassOrTypeLayerName(layerConfig: ConfigClassOrType): string | undefined {
+  static getClassOrTypeLayerName(layerConfig: ConfigClassOrType | undefined): string | undefined {
     if (layerConfig instanceof ConfigBaseClass) {
       return layerConfig.getLayerName();
     }
-    return layerConfig.layerName;
+    return layerConfig?.layerName;
   }
 
   /**
    * Helper function to support when a layerConfig is either a class instance or a regular json object.
-   * @param {ConfigClassOrType} layerConfig - The layer config class instance or regular json object.
+   * @param {ConfigClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
    * @returns {number | undefined} The minimum scale or undefined.
    */
-  static getClassOrTypeMinScale(layerConfig: ConfigClassOrType): number | undefined {
+  static getClassOrTypeMinScale(layerConfig: ConfigClassOrType | undefined): number | undefined {
     if (layerConfig instanceof ConfigBaseClass) {
       return layerConfig.getMinScale();
     }
-    return layerConfig.minScale;
+    return layerConfig?.minScale;
   }
 
   /**
@@ -581,14 +581,14 @@ export abstract class ConfigBaseClass {
 
   /**
    * Helper function to support when a layerConfig is either a class instance or a regular json object.
-   * @param {ConfigClassOrType} layerConfig - The layer config class instance or regular json object.
+   * @param {ConfigClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
    * @returns {number | undefined} The maximum scale or undefined.
    */
-  static getClassOrTypeMaxScale(layerConfig: ConfigClassOrType): number | undefined {
+  static getClassOrTypeMaxScale(layerConfig: ConfigClassOrType | undefined): number | undefined {
     if (layerConfig instanceof ConfigBaseClass) {
       return layerConfig.getMaxScale();
     }
-    return layerConfig.maxScale;
+    return layerConfig?.maxScale;
   }
 
   /**
@@ -607,14 +607,14 @@ export abstract class ConfigBaseClass {
 
   /**
    * Helper function to support when a layerConfig is either a class instance or a regular json object.
-   * @param {ConfigClassOrType} layerConfig - The layer config class instance or regular json object.
+   * @param {ConfigClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
    * @returns {boolean} The indication if the layer config is metadata layer group.
    */
-  static getClassOrTypeIsMetadataLayerGroup(layerConfig: ConfigClassOrType): boolean {
+  static getClassOrTypeIsMetadataLayerGroup(layerConfig: ConfigClassOrType | undefined): boolean {
     if (layerConfig instanceof ConfigBaseClass) {
       return layerConfig.getIsMetadataLayerGroup();
     }
-    return layerConfig.isMetadataLayerGroup || false;
+    return layerConfig?.isMetadataLayerGroup || false;
   }
 
   /**

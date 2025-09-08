@@ -1,5 +1,8 @@
 import { codedValueType, Extent, rangeDomainType, TypeEsriFormatParameter, TypeOutfields } from '@/api/config/types/map-schema-types';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import {
+  AbstractBaseLayerEntryConfig,
+  AbstractBaseLayerEntryConfigProps,
+} from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { ConfigBaseClass, ConfigBaseClassProps, TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
@@ -105,6 +108,10 @@ export type TypeLayerEntryConfig = AbstractBaseLayerEntryConfig | GroupLayerEntr
 /** Explicit type to eventually get rid of clearly pointing out the issue with
  * the configs being treated as types and class instances simultaneously in the code base. */
 export type ConfigClassOrType = ConfigBaseClass | ConfigBaseClassProps;
+
+/** Explicit type to eventually get rid of clearly pointing out the issue with
+ * the configs being treated as types and class instances simultaneously in the code base. */
+export type ConfigAbstractBaseClassOrType = AbstractBaseLayerEntryConfig | AbstractBaseLayerEntryConfigProps;
 
 export type TypeSourceVectorTilesInitialConfig = TypeSourceTileInitialConfig;
 

@@ -1,8 +1,12 @@
 import shp from 'shpjs';
-import { CONST_LAYER_TYPES, ShapefileLayerConfig } from '@/api/config/types/layer-schema-types';
-import { TypeGeoJSONLayerConfig } from '@/geo/layer/geoview-layers/vector/geojson';
-import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
+import { ConfigAbstractBaseClassOrType, ShapefileLayerConfig } from '@/api/config/types/layer-schema-types';
+import { GeoJSON as LayerGeoJSON, TypeGeoJSONLayerConfig } from '@/geo/layer/geoview-layers/vector/geojson';
+import {
+  GeoJSONLayerEntryConfig,
+  GeoJSONLayerEntryConfigProps,
+} from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
 import { generateId } from '@/core/utils/utilities';
+import { AbstractBaseLayerEntryConfig } from '../validation-classes/abstract-base-layer-entry-config';
 
 /**
  * A class to generate a GeoView layer config from a shapefile.
@@ -29,13 +33,14 @@ export class ShapefileReader {
     // Get geojson from shapefile(s)
     const geojson = await shp(shapefileURL);
 
-    const geoviewLayerConfig: TypeGeoJSONLayerConfig = {
-      geoviewLayerId: layerConfig.geoviewLayerId,
-      geoviewLayerName: layerConfig.geoviewLayerName,
-      geoviewLayerType: CONST_LAYER_TYPES.GEOJSON,
-      metadataAccessPath: layerConfig.metadataAccessPath,
-      listOfLayerEntryConfig: [],
-    };
+    // Create a GeoJSON GeoviewLayerConfig
+    const geoviewLayerConfig = LayerGeoJSON.createGeoviewLayerConfig(
+      layerConfig.geoviewLayerId,
+      layerConfig.geoviewLayerName || layerConfig.geoviewLayerId,
+      layerConfig.metadataAccessPath,
+      false,
+      []
+    );
 
     // .zip may have multiple shapefiles inside, if so we need a layer entry for each
     if (geojson && Array.isArray(geojson)) {
@@ -43,19 +48,20 @@ export class ShapefileReader {
         .map((layerGeojson) => {
           const matchingLayerEntryConfig = layerConfig.listOfLayerEntryConfig?.find(
             (layerEntryConfig) => layerEntryConfig.layerId === layerGeojson.fileName
-          ) as GeoJSONLayerEntryConfig;
-          if (!layerConfig.listOfLayerEntryConfig || matchingLayerEntryConfig)
+          ) as GeoJSONLayerEntryConfigProps;
+          if (!layerConfig.listOfLayerEntryConfig || matchingLayerEntryConfig) {
             return new GeoJSONLayerEntryConfig({
               geoviewLayerConfig,
               layerId: layerGeojson.fileName || generateId(),
               layerName: layerGeojson.fileName,
-              layerStyle: matchingLayerEntryConfig?.layerStyle ? matchingLayerEntryConfig.layerStyle : undefined,
-              initialSettings: matchingLayerEntryConfig?.initialSettings ? matchingLayerEntryConfig.initialSettings : undefined,
+              layerStyle: AbstractBaseLayerEntryConfig.getClassOrTypeLayerStyle(matchingLayerEntryConfig),
+              initialSettings: matchingLayerEntryConfig?.initialSettings,
               source: {
                 format: 'GeoJSON',
                 geojson: JSON.stringify(layerGeojson),
               },
             });
+          }
           return undefined;
         })
         .filter((layerEntryConfig) => layerEntryConfig !== undefined);
@@ -63,13 +69,14 @@ export class ShapefileReader {
       if (newLayerEntryConfigs) geoviewLayerConfig.listOfLayerEntryConfig = newLayerEntryConfigs;
     } else if (geojson) {
       const passedLayerEntryConfig = layerConfig.listOfLayerEntryConfig
-        ? (layerConfig.listOfLayerEntryConfig[0] as unknown as GeoJSONLayerEntryConfig)
+        ? (layerConfig.listOfLayerEntryConfig[0] as ConfigAbstractBaseClassOrType)
         : undefined;
+
       const layerEntryConfig = new GeoJSONLayerEntryConfig({
         geoviewLayerConfig,
         layerId: geojson.fileName || filename || generateId(),
         layerName: layerConfig.geoviewLayerName || geojson.fileName,
-        layerStyle: passedLayerEntryConfig?.layerStyle,
+        layerStyle: AbstractBaseLayerEntryConfig.getClassOrTypeLayerStyle(passedLayerEntryConfig),
         initialSettings: passedLayerEntryConfig?.initialSettings,
         source: {
           format: 'GeoJSON',
