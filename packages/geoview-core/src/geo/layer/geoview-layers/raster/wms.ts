@@ -688,8 +688,7 @@ export class WMS extends AbstractGeoViewRaster {
     // TO.DOCONT: 'Processing cancelled' this gets executed as would be expected
     // eslint-disable-next-line no-param-reassign
     layerConfig.entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
-    // eslint-disable-next-line no-param-reassign
-    layerConfig.isMetadataLayerGroup = true;
+    layerConfig.setIsMetadataLayerGroup(true);
     // eslint-disable-next-line no-param-reassign
     layerConfig.listOfLayerEntryConfig = newListOfLayerEntryConfig as TypeLayerEntryConfig[];
     this.validateListOfLayerEntryConfig(newListOfLayerEntryConfig);

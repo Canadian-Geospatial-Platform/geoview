@@ -66,9 +66,6 @@ export abstract class ConfigBaseClass {
    */
   initialSettings: TypeLayerInitialSettings;
 
-  /** It is used internally to distinguish layer groups derived from the metadata. */
-  isMetadataLayerGroup: boolean;
-
   /** The display name of the layer. */
   #layerName?: string;
 
@@ -80,6 +77,9 @@ export abstract class ConfigBaseClass {
 
   /** The max scale that can be reach by the layer. */
   #maxScale?: number;
+
+  /** It is used internally to distinguish layer groups derived from the metadata. */
+  #isMetadataLayerGroup: boolean;
 
   /** Keep all callback delegates references */
   #onLayerStatusChangedHandlers: LayerStatusChangedDelegate[] = [];
@@ -116,9 +116,9 @@ export abstract class ConfigBaseClass {
     this.geoviewLayerConfig = layerConfig.geoviewLayerConfig;
     this.parentLayerConfig = layerConfig.parentLayerConfig;
     this.initialSettings = layerConfig.initialSettings ?? {};
-    this.isMetadataLayerGroup = layerConfig.isMetadataLayerGroup ?? false;
     this.#minScale = ConfigBaseClass.getClassOrTypeMinScale(layerConfig);
     this.#maxScale = ConfigBaseClass.getClassOrTypeMaxScale(layerConfig);
+    this.#isMetadataLayerGroup = ConfigBaseClass.getClassOrTypeIsMetadataLayerGroup(layerConfig);
   }
 
   /**
@@ -168,6 +168,21 @@ export abstract class ConfigBaseClass {
    */
   getEntryTypeIsGroup(): this is GroupLayerEntryConfig {
     return layerEntryIsGroupLayer(this);
+  }
+
+  /**
+   * Gets the layer indication for the metadata layer group.
+   */
+  getIsMetadataLayerGroup(): boolean {
+    return this.#isMetadataLayerGroup;
+  }
+
+  /**
+   * Sets the layer is metadata layer group indication.
+   * @param {boolean} isMetadataLayerGroup - The indication if it's a metadata layer group.
+   */
+  setIsMetadataLayerGroup(isMetadataLayerGroup: boolean): void {
+    this.#isMetadataLayerGroup = isMetadataLayerGroup;
   }
 
   /**
@@ -398,7 +413,7 @@ export abstract class ConfigBaseClass {
       entryType: this.entryType,
       layerId: this.layerId,
       layerName: this.getLayerName(),
-      isMetadataLayerGroup: this.isMetadataLayerGroup,
+      isMetadataLayerGroup: this.getIsMetadataLayerGroup(),
     } as T;
   }
 
@@ -587,6 +602,32 @@ export abstract class ConfigBaseClass {
     } else {
       // eslint-disable-next-line no-param-reassign
       layerConfig.maxScale = maxScale;
+    }
+  }
+
+  /**
+   * Helper function to support when a layerConfig is either a class instance or a regular json object.
+   * @param {ConfigClassOrType} layerConfig - The layer config class instance or regular json object.
+   * @returns {boolean} The indication if the layer config is metadata layer group.
+   */
+  static getClassOrTypeIsMetadataLayerGroup(layerConfig: ConfigClassOrType): boolean {
+    if (layerConfig instanceof ConfigBaseClass) {
+      return layerConfig.getIsMetadataLayerGroup();
+    }
+    return layerConfig.isMetadataLayerGroup || false;
+  }
+
+  /**
+   * Helper function to support when a layerConfig is either a class instance or a regular json object.
+   * @param {ConfigClassOrType} layerConfig - The layer config class instance or regular json object.
+   * @param {boolean} isMetadataLayerGroup - The indication if the layer config is metadata layer group.
+   */
+  static setClassOrTypeIsMetadataLayerGroup(layerConfig: ConfigClassOrType, isMetadataLayerGroup: boolean): void {
+    if (layerConfig instanceof ConfigBaseClass) {
+      layerConfig.setIsMetadataLayerGroup(isMetadataLayerGroup);
+    } else {
+      // eslint-disable-next-line no-param-reassign
+      layerConfig.isMetadataLayerGroup = isMetadataLayerGroup;
     }
   }
 

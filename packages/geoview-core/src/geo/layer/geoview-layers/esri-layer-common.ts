@@ -239,7 +239,7 @@ export function commonProcessFeatureInfoConfig(
   } else {
     // eslint-disable-next-line no-param-reassign
     layerConfig.source.featureInfo =
-      layerConfig.isMetadataLayerGroup || !layerMetadata.fields?.length ? { queryable: false } : { queryable };
+      layerConfig.getIsMetadataLayerGroup() || !layerMetadata.fields?.length ? { queryable: false } : { queryable };
   }
 
   // dynamic group layer doesn't have fields definition
@@ -346,7 +346,7 @@ export async function commonProcessLayerMetadata<
   T extends EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig | EsriImageLayerEntryConfig,
 >(layer: EsriDynamic | EsriFeature | EsriImage, layerConfig: T): Promise<T> {
   // User-defined groups do not have metadata provided by the service endpoint.
-  if (layerConfig.getEntryTypeIsGroup() && !layerConfig.isMetadataLayerGroup) return layerConfig;
+  if (layerConfig.getEntryTypeIsGroup() && !layerConfig.getIsMetadataLayerGroup()) return layerConfig;
 
   // The url
   let queryUrl = layer.metadataAccessPath;

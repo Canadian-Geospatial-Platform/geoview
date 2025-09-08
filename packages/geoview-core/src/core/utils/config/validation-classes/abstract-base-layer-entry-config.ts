@@ -49,7 +49,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   #filterEquation?: FilterNodeType[];
 
   /** Indicates if filter is on/off */
-  // TODO: Cleanup - Get rid of this attribute as it doesn't seem to be used (always false)
+  // TODO: Cleanup - Get rid of this attribute as it doesn't seem to be used (always false as the setLegendFilterIsOff is never called)
   #legendFilterIsOff: boolean = false;
 
   /**
