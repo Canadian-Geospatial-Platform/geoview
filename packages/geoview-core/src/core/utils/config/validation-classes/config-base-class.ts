@@ -134,7 +134,6 @@ export abstract class ConfigBaseClass {
    * @retuns {TypeLayerStatus} The layer status
    */
   get layerStatus(): TypeLayerStatus {
-    // eslint-disable-next-line no-underscore-dangle
     return this.#layerStatus;
   }
 

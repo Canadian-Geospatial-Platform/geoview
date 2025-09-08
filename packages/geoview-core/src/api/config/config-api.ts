@@ -525,6 +525,7 @@ export class ConfigApi {
     const cloneConfig = cloneDeep(geoviewLayerConfig);
 
     // For each entry
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     cloneConfig.listOfLayerEntryConfig = ConfigApi.#configClassesToLayerEntryConfigs(geoviewLayerConfig.listOfLayerEntryConfig) as any;
 
     // Serialize it

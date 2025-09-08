@@ -294,12 +294,10 @@ export function commonProcessInitialSettings(
 
   // Update Max / Min Scales with value if service doesn't allow the configured value for proper UI functionality
   if (layerMetadata?.minScale) {
-    // eslint-disable-next-line no-param-reassign
     layerConfig.setMinScale(Math.min(layerConfig.getMinScale() ?? Infinity, layerMetadata.minScale));
   }
 
   if (layerMetadata?.maxScale) {
-    // eslint-disable-next-line no-param-reassign
     layerConfig.setMaxScale(Math.max(layerConfig.getMaxScale() ?? -Infinity, layerMetadata.maxScale));
   }
 

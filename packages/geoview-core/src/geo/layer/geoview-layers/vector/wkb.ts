@@ -127,7 +127,6 @@ export class WKB extends AbstractGeoViewVector {
 
       // If the layer metadata was found
       if (layerMetadataFound) {
-        // eslint-disable-next-line no-param-reassign
         layerConfig.setLayerName(layerConfig.getLayerName() || layerMetadataFound.layerName || 'no name');
         // eslint-disable-next-line no-param-reassign
         layerConfig.source = defaultsDeep(layerConfig.source, layerMetadataFound.source);
