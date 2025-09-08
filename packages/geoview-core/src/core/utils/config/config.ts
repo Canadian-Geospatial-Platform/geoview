@@ -1,6 +1,5 @@
 import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
 import {
-  TypeLayerEntryConfig,
   mapConfigLayerEntryIsGeoCore,
   MapConfigLayerEntry,
   layerEntryIsGroupLayer,
@@ -9,6 +8,7 @@ import {
   mapConfigLayerEntryIsShapefile,
   TypeLayerEntryType,
   CONST_LAYER_ENTRY_TYPES,
+  TypeLayerEntryConfig,
 } from '@/api/config/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
 
@@ -81,8 +81,8 @@ export class Config {
 
   /**
    * Initializes all layer entry type fields accordingly to the GeoView layer type.
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entry configuration to adjust.
-   * @param {TypeGeoviewLayerType} geoviewLayerType The GeoView layer type.
+   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig - The list of layer entry configuration to adjust.
+   * @param {TypeGeoviewLayerType} geoviewLayerType - The GeoView layer type.
    * @private
    */
   #setLayerEntryType(listOfLayerEntryConfig: TypeLayerEntryConfig[], geoviewLayerType: TypeGeoviewLayerType): void {

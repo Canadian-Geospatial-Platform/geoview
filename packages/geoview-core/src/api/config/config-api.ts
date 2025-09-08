@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import cloneDeep from 'lodash/cloneDeep';
 import Ajv from 'ajv';
 import addErrors from 'ajv-errors';
