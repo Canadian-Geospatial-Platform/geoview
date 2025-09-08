@@ -339,7 +339,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       layerConfig.getLayerStyle(),
       layerConfig.getExternalFragmentsOrder(),
       undefined,
-      layerConfig.layerFilter
+      layerConfig.getLayerFilter()
     );
 
     // Return the source

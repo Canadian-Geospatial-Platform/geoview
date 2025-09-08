@@ -74,7 +74,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     AbstractGVVector.initOptionsWithInitialSettings(layerOptions, layerConfig);
 
     // Apply the layer filter right away if any
-    AbstractGVVector.applyViewFilterOnConfig(layerConfig, layerConfig.getExternalFragmentsOrder(), undefined, layerConfig.layerFilter);
+    AbstractGVVector.applyViewFilterOnConfig(layerConfig, layerConfig.getExternalFragmentsOrder(), undefined, layerConfig.getLayerFilter());
 
     // If the layer is initially not visible, make it visible until the style is set so we have a style for the legend
     this.onLayerFirstLoaded(() => {
@@ -400,8 +400,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   ): void {
     // TODO: Check - Is this assignation necessary? What's the intent?
     // Update the layer config on the fly (maybe not ideal to do this here at this stage?)
-    // eslint-disable-next-line no-param-reassign
-    layerConfig.layerFilter = filter;
+    layerConfig.setLayerFilter(filter);
 
     // Get the current filter
     const currentFilter = layerConfig.getFilterEquation();

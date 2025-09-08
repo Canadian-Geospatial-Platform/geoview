@@ -190,7 +190,7 @@ export class EsriImage extends AbstractGeoViewRaster {
     const olSource = new ImageArcGISRest(sourceOptions);
 
     // Apply the filter on the source right away, before the first load
-    GVWMS.applyViewFilterOnSource(layerConfig, olSource, layerConfig.getExternalFragmentsOrder(), undefined, layerConfig.layerFilter);
+    GVWMS.applyViewFilterOnSource(layerConfig, olSource, layerConfig.getExternalFragmentsOrder(), undefined, layerConfig.getLayerFilter());
 
     // Return the source
     return olSource;

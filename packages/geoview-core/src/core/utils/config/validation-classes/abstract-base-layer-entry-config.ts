@@ -22,9 +22,6 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /** Source settings to apply to the GeoView layer source at creation time. */
   source?: TypeBaseSourceInitialConfig;
 
-  /** Filter to apply on feature of this layer. */
-  layerFilter?: string;
-
   /** The listOfLayerEntryConfig attribute is not used by child of AbstractBaseLayerEntryConfig. */
   // TODO: Refactor - This attribute should be removed and logic applied using OO pattern once the constructor is cleaned up.
   declare listOfLayerEntryConfig: never;
@@ -36,7 +33,6 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   #layerMetadata?: unknown;
 
   /** Style to apply to the vector layer. */
-  // TODO: This source attribute is responsible for problems. Change to a getLayerStyle() and setLayerStyle().
   #layerStyle?: TypeLayerStyleConfig;
 
   /** The time dimension information */
@@ -44,6 +40,9 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /** Attribution used in the OpenLayer source. */
   #attributions: string[] = [];
+
+  /** Filter to apply on feature of this layer. */
+  #layerFilter?: string;
 
   /** The calculated filter equation */
   #filterEquation?: FilterNodeType[];
@@ -58,16 +57,11 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    */
   protected constructor(layerConfig: AbstractBaseLayerEntryConfigProps | AbstractBaseLayerEntryConfig) {
     super(layerConfig);
-    this.source = layerConfig.source;
-    this.layerFilter = layerConfig.layerFilter;
 
     // Keep attribute properties
-    if (layerConfig instanceof ConfigBaseClass) {
-      this.#layerStyle = layerConfig.getLayerStyle();
-    } else {
-      // Regular
-      this.#layerStyle = layerConfig.layerStyle;
-    }
+    this.source = layerConfig.source;
+    this.#layerStyle = AbstractBaseLayerEntryConfig.getClassOrTypeLayerStyle(layerConfig);
+    this.#layerFilter = AbstractBaseLayerEntryConfig.getClassOrTypeLayerFilter(layerConfig);
   }
 
   /**
@@ -176,6 +170,22 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   }
 
   /**
+   * Gets the layer filter that is associated to the layer.
+   * @returns {string} The layer filter or undefined.
+   */
+  getLayerFilter(): string | undefined {
+    return this.#layerFilter;
+  }
+
+  /**
+   * Sets the layer filter for the layer.
+   * @param {string} layerFilter - The layer filter
+   */
+  setLayerFilter(layerFilter: string): void {
+    this.#layerFilter = layerFilter;
+  }
+
+  /**
    * Gets the layer filter equation
    * @returns {FilterNodeType[] | undefined} The filter equation if any
    */
@@ -249,5 +259,17 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
       return layerConfig.getLayerStyle();
     }
     return layerConfig?.layerStyle;
+  }
+
+  /**
+   * Helper function to support when a layerConfig is either a class instance or a regular json object.
+   * @param {ConfigAbstractBaseClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
+   * @returns {string | undefined} The layer style or undefined.
+   */
+  static getClassOrTypeLayerFilter(layerConfig: ConfigAbstractBaseClassOrType | undefined): string | undefined {
+    if (layerConfig instanceof ConfigBaseClass) {
+      return layerConfig.getLayerFilter();
+    }
+    return layerConfig?.layerFilter;
   }
 }

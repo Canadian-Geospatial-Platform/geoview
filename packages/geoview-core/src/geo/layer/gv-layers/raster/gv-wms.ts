@@ -599,8 +599,7 @@ export class GVWMS extends AbstractGVRaster {
     let currentFilter;
     try {
       // Update the layer config on the fly (maybe not ideal to do this?)
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.layerFilter = filter;
+      layerConfig.setLayerFilter(filter);
 
       const queryElements = filterValueToUse.split(/(?<=\b)\s*=/);
       const dimension = queryElements[0].trim();

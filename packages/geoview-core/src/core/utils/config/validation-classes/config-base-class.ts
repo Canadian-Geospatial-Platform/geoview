@@ -110,12 +110,12 @@ export abstract class ConfigBaseClass {
       this.layerEntryProps = layerConfig;
     }
 
-    // Transfert the properties from the object to the class (without using Object.assign anymore)
+    // Transfer the properties from the object to the class (without using Object.assign anymore)
     this.layerId = layerConfig.layerId;
-    this.#layerName = ConfigBaseClass.getClassOrTypeLayerName(layerConfig);
     this.geoviewLayerConfig = layerConfig.geoviewLayerConfig;
     this.parentLayerConfig = layerConfig.parentLayerConfig;
     this.initialSettings = layerConfig.initialSettings ?? {};
+    this.#layerName = ConfigBaseClass.getClassOrTypeLayerName(layerConfig);
     this.#minScale = ConfigBaseClass.getClassOrTypeMinScale(layerConfig);
     this.#maxScale = ConfigBaseClass.getClassOrTypeMaxScale(layerConfig);
     this.#isMetadataLayerGroup = ConfigBaseClass.getClassOrTypeIsMetadataLayerGroup(layerConfig);

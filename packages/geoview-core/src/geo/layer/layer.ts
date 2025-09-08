@@ -97,20 +97,15 @@ import { getExtentUnion, getZoomFromScale } from '@/geo/utils/utilities';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { MapViewer } from '@/geo/map/map-viewer';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
 import { GeochartEventProcessor } from '@/api/event-processors/event-processor-children/geochart-event-processor';
 import { SwiperEventProcessor } from '@/api/event-processors/event-processor-children/swiper-event-processor';
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
-import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import { TypeLegendItem } from '@/core/components/layers/types';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
-import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
-import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { LayerGeoCoreError } from '@/core/exceptions/geocore-exceptions';
 import { ShapefileReader } from '@/core/utils/config/reader/shapefile-reader';
@@ -1958,21 +1953,16 @@ export class LayerApi {
    * @param {ConfigBaseClass} layerConfig - The layer config being processed
    */
   #addInitialFilters(layerConfig: ConfigBaseClass): void {
-    if (
-      (
-        layerConfig as
-          | VectorLayerEntryConfig
-          | EsriDynamicLayerEntryConfig
-          | EsriImageLayerEntryConfig
-          | ImageStaticLayerEntryConfig
-          | OgcWmsLayerEntryConfig
-      ).layerFilter
-    )
-      MapEventProcessor.addInitialFilter(
-        this.getMapId(),
-        layerConfig.layerPath,
-        (layerConfig as VectorLayerEntryConfig).layerFilter as string
-      );
+    // If correct subclass, otherwise skip
+    if (layerConfig instanceof AbstractBaseLayerEntryConfig) {
+      // Get the layer filter
+      const layerFilter = layerConfig.getLayerFilter();
+
+      // If any layer filter
+      if (layerFilter) {
+        MapEventProcessor.addInitialFilter(this.getMapId(), layerConfig.layerPath, layerFilter);
+      }
+    }
   }
 
   // #endregion

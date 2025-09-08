@@ -64,6 +64,7 @@ import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { InvalidExtentError } from '@/core/exceptions/geoview-exceptions';
 import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-vector-tile';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
 // GV The paradigm when working with MapEventProcessor vs MapState goes like this:
 // GV MapState provides: 'state values', 'actions' and 'setterActions'.
@@ -1364,9 +1365,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const newLayerEntryConfig = {
       layerId: layerEntryConfig!.layerId,
       layerName: isGeocore && overrideGeocoreServiceNames === false ? undefined : layerEntryConfig!.getLayerName(),
-      layerFilter: (configLayerEntryConfig as VectorLayerEntryConfig)?.layerFilter
-        ? (configLayerEntryConfig as VectorLayerEntryConfig).layerFilter
-        : undefined,
+      layerFilter: AbstractBaseLayerEntryConfig.getClassOrTypeLayerFilter(configLayerEntryConfig),
       initialSettings,
       layerStyle,
       entryType: listOfLayerEntryConfig.length ? 'group' : undefined,

@@ -668,8 +668,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     try {
       // TODO: Check - Is this assignation necessary? What's the intent?
       // Update the layer config information (not ideal to do this here at this stage...)
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.layerFilter = filterValueToUse;
+      layerConfig.setLayerFilter(filterValueToUse);
       filterValueToUse = GVEsriDynamic.getViewFilter(layerConfig, style);
 
       // Parse the filter value to use
@@ -717,7 +716,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @returns {string} The filter associated to the layer
    */
   static getViewFilter(layerConfig: EsriDynamicLayerEntryConfig, style: TypeLayerStyleConfig | undefined): string {
-    const { layerFilter } = layerConfig;
+    // Get the layer filter
+    const layerFilter = layerConfig.getLayerFilter();
 
     if (style) {
       const setAllUndefinedVisibilityFlagsToYes = (styleConfig: TypeLayerStyleSettings): void => {
