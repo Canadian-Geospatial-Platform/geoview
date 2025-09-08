@@ -26,12 +26,15 @@ export declare class TransformSelectionEvent extends BaseEvent {
     previousFeature?: Feature<Geometry>;
     /** The newly selected feature */
     newFeature?: Feature<Geometry>;
+    /** Create selection action */
+    createSelectAction: boolean;
     /**
      * Creates a new SelectionEvent
      * @param type - The event type
      * @param previousFeature - The previously selected feature
      * @param newFeature - The newly selected feature
+     * @param createSelectAction - Create selection action
      */
-    constructor(type: string, previousFeature?: Feature<Geometry>, newFeature?: Feature<Geometry>);
+    constructor(type: string, previousFeature?: Feature<Geometry>, newFeature?: Feature<Geometry>, createSelectAction?: boolean);
 }
 //# sourceMappingURL=transform-events.d.ts.map

@@ -8,7 +8,7 @@ import VectorSource from 'ol/source/Vector';
 import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import { TransformEvent, TransformSelectionEvent, TransformDeleteFeatureEvent } from './transform-events';
-import { MapViewer } from '@/app';
+import { MapViewer } from '@/geo/map/map-viewer';
 /**
  * Handle types for the transform interaction
  */
@@ -101,8 +101,9 @@ export declare class OLTransform extends OLPointer {
     /**
      * Selects a feature for transformation.
      * @param {Feature<Geometry>} feature - The feature to select.
+     * @param {boolean} clearHistory - Whether to clear the history.
      */
-    selectFeature(feature: Feature<Geometry>): void;
+    selectFeature(feature: Feature<Geometry>, clearHistory?: boolean): void;
     /**
      * Checks if a feature is currently being transformed.
      * @param {Feature} feature - The feature to check.
@@ -121,8 +122,9 @@ export declare class OLTransform extends OLPointer {
     isTransforming(): boolean;
     /**
      * Clears the current selection.
+     * @param {boolean} keepHistory - Whether the history should be kept when clearing the selection
      */
-    clearSelection(): void;
+    clearSelection(keepHistory?: boolean): void;
     /**
      * Rotates a coordinate around a center point by an angle.
      * @param {Coordinate} coordinate - The coordinate to rotate.
@@ -277,6 +279,10 @@ export declare class OLTransform extends OLPointer {
      * @param {Feature} midpointHandle - The midpoint handle being dragged.
      */
     handleAddVertex(coordinate: Coordinate, midpointHandle?: Feature): void;
+    /**
+     * Creates a simple text editor for text features
+     */
+    showTextEditor(): void;
     /**
      * Undoes the last transformation.
      * @returns {boolean} True if undo was successful.

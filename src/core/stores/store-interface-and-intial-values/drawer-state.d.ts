@@ -1,9 +1,14 @@
 import { Feature } from 'ol';
 import { Draw } from '@/geo/interaction/draw';
+import { Snap } from '@/geo/interaction/snap';
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { Transform } from '@/geo/interaction/transform/transform';
 type DrawerActions = IDrawerState['actions'];
+export declare const DEFAULT_TEXT_VALUES: {
+    en: string;
+    fr: string;
+};
 export type StyleProps = {
     fillColor: string;
     strokeColor: string;
@@ -33,6 +38,7 @@ export interface IDrawerState {
     isEditing: boolean;
     transformInstance: Transform | undefined;
     selectedDrawing: Feature | undefined;
+    snapInstance: Snap | undefined;
     hideMeasurements: boolean;
     iconSrc: string;
     undoDisabled: boolean;
@@ -48,10 +54,13 @@ export interface IDrawerState {
         getTransformInstance: () => Transform;
         getSelectedDrawing: () => Feature | undefined;
         getSelectedDrawingType: () => string;
+        getIsSnapping: () => boolean;
+        getSnapInstance: () => Snap | undefined;
         getHideMeasurements: () => boolean;
         getIconSrc: () => string;
         toggleDrawing: () => void;
         toggleEditing: () => void;
+        toggleSnapping: () => void;
         toggleHideMeasurements: () => void;
         clearDrawings: () => void;
         setActiveGeom(geomType: string): void;
@@ -74,6 +83,8 @@ export interface IDrawerState {
         setTransformInstance(transformInstance: Transform): void;
         removeTransformInstance(): void;
         setSelectedDrawing(selectedDrawing: Feature | undefined): void;
+        setSnapInstance(snapInstance: Snap): void;
+        removeSnapInstance(): void;
         setHideMeasurements(hideMeasurements: boolean): void;
         setIconSrc: (iconSrc: string) => void;
         undoDrawing: () => void;
@@ -88,6 +99,7 @@ export interface IDrawerState {
     setterActions: {
         toggleDrawing: () => void;
         toggleEditing: () => void;
+        toggleSnapping: () => void;
         toggleHideMeasurements: () => void;
         clearDrawings: () => void;
         setActiveGeom: (geomType: string) => void;
@@ -110,6 +122,8 @@ export interface IDrawerState {
         setIsEditing: (isEditing: boolean) => void;
         setTransformInstance: (transformInstance: Transform) => void;
         removeTransformInstance: () => void;
+        setSnapInstance: (snapInstance: Snap) => void;
+        removeSnapInstance: () => void;
         setSelectedDrawing: (selectedDrawing: Feature | undefined) => void;
         setHideMeasurements: (hideMeasurements: boolean) => void;
         setIconSrc: (iconSrc: string) => void;
@@ -127,6 +141,7 @@ export interface IDrawerState {
 export declare function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDrawerState;
 export declare const useDrawerIsDrawing: () => boolean;
 export declare const useDrawerIsEditing: () => boolean;
+export declare const useDrawerIsSnapping: () => boolean;
 export declare const useDrawerSelectedDrawingType: () => string | undefined;
 export declare const useDrawerActiveGeom: () => string;
 export declare const useDrawerStyle: () => StyleProps;
