@@ -79,7 +79,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     if (!this.getTimesliderState(mapId)) return;
 
     // Get the temporal dimension, if any
-    const tempDimension = layer.getTemporalDimension();
+    const tempDimension = layer.getTimeDimension();
 
     // If no temporal dimension or invalid
     if (!tempDimension || !tempDimension.isValid) return; // Skip
@@ -161,27 +161,27 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     if (!(geoviewLayer instanceof AbstractGVLayer)) throw new LayerWrongTypeError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
 
     // Get the temporal dimension information
-    const temporalDimensionInfo = geoviewLayer.getTemporalDimension();
+    const timeDimensionInfo = geoviewLayer.getTimeDimension();
 
     // Get temporal dimension info from config, if there is any
-    const configTemporalDimension = timesliderConfig?.temporalDimension;
+    const configTimeDimension = timesliderConfig?.timeDimension;
 
     // If no temporal dimension information
-    if ((!temporalDimensionInfo || !temporalDimensionInfo.rangeItems) && (!configTemporalDimension || !configTemporalDimension.rangeItems))
+    if ((!timeDimensionInfo || !timeDimensionInfo.rangeItems) && (!configTimeDimension || !configTimeDimension.rangeItems))
       return undefined;
 
     // Set defaults values from temporal dimension
-    const { range } = timesliderConfig?.temporalDimension?.rangeItems || temporalDimensionInfo!.rangeItems;
+    const { range } = timesliderConfig?.timeDimension?.rangeItems || timeDimensionInfo!.rangeItems;
 
-    const defaultToUse = configTemporalDimension?.default || temporalDimensionInfo!.default;
+    const defaultToUse = configTimeDimension?.default || timeDimensionInfo!.default;
     const defaultValueIsArray = Array.isArray(defaultToUse);
     const defaultValue = timesliderConfig?.defaultValue || (defaultValueIsArray ? defaultToUse[0] : defaultToUse);
 
     const minAndMax: number[] = [DateMgt.convertToMilliseconds(range[0]), DateMgt.convertToMilliseconds(range[range.length - 1])];
-    const field = configTemporalDimension?.field || temporalDimensionInfo!.field;
-    const singleHandle = configTemporalDimension?.singleHandle || temporalDimensionInfo!.singleHandle;
-    const nearestValues = configTemporalDimension?.nearestValues || temporalDimensionInfo!.nearestValues;
-    const displayPattern = configTemporalDimension?.displayPattern || temporalDimensionInfo!.displayPattern;
+    const field = configTimeDimension?.field || timeDimensionInfo!.field;
+    const singleHandle = configTimeDimension?.singleHandle || timeDimensionInfo!.singleHandle;
+    const nearestValues = configTimeDimension?.nearestValues || timeDimensionInfo!.nearestValues;
+    const displayPattern = configTimeDimension?.displayPattern || timeDimensionInfo!.displayPattern;
 
     // If the field type has an alias, use that as a label
     let fieldAlias = field;

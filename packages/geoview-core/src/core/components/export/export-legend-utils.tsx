@@ -51,8 +51,8 @@ function LegendContainerComponent({ layers }: LegendContainerProps): JSX.Element
     if (layerVisibility === false) return <> </>;
 
     // Get the temporal dimension directly from the layer actions
-    const temporalDimension = timeSliderLayers?.[layer.layerPath];
-    const hasTimeRange = Boolean(temporalDimension?.range?.length);
+    const timeDimension = timeSliderLayers?.[layer.layerPath];
+    const hasTimeRange = Boolean(timeDimension?.range?.length);
 
     return (
       <div key={layer.layerPath} style={sxClasses.legendSpacing}>
@@ -64,23 +64,23 @@ function LegendContainerComponent({ layers }: LegendContainerProps): JSX.Element
         {hasTimeRange && (
           <div style={sxClasses.toLine}>
             <span style={{ ...sxClasses.legendItem, fontStyle: 'italic' }}>
-              {temporalDimension!.singleHandle ? (
+              {timeDimension!.singleHandle ? (
                 <span>
                   {DateMgt.formatDate(
-                    new Date(temporalDimension!.values[0]),
-                    temporalDimension!.displayPattern?.includes('minute') ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
+                    new Date(timeDimension!.values[0]),
+                    timeDimension!.displayPattern?.includes('minute') ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
                   )}
                 </span>
               ) : (
                 <span>
                   {DateMgt.formatDate(
-                    new Date(temporalDimension!.values[0]),
-                    temporalDimension!.displayPattern?.includes('minute') ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
+                    new Date(timeDimension!.values[0]),
+                    timeDimension!.displayPattern?.includes('minute') ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
                   )}{' '}
                   -{' '}
                   {DateMgt.formatDate(
-                    new Date(temporalDimension!.values[1]),
-                    temporalDimension!.displayPattern?.includes('minute') ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
+                    new Date(timeDimension!.values[1]),
+                    timeDimension!.displayPattern?.includes('minute') ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
                   )}
                 </span>
               )}

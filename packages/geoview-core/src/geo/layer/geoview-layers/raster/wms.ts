@@ -231,11 +231,11 @@ export class WMS extends AbstractGeoViewRaster {
 
         // TODO: Validate the layerConfig.layerFilter is compatible with the layerCapabilities.Dimension and if not remove it completely like `delete layerConfig.layerFilter`
 
-        const temporalDimension = layerCapabilities.Dimension.find((dimension) => dimension.name === 'time');
+        const timeDimension = layerCapabilities.Dimension.find((dimension) => dimension.name === 'time');
 
         // If a temporal dimension was found
-        if (temporalDimension) {
-          layerConfig.setTemporalDimension(DateMgt.createDimensionFromOGC(temporalDimension));
+        if (timeDimension) {
+          layerConfig.setTimeDimension(DateMgt.createDimensionFromOGC(timeDimension));
         }
       }
     }

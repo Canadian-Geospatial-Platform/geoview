@@ -44,7 +44,7 @@ export interface ILayerState {
     getLayerDefaultFilter: (layerPath: string) => string | undefined;
     getLayerDeleteInProgress: () => string;
     getLayerServiceProjection: (layerPath: string) => string | undefined;
-    getLayerTemporalDimension: (layerPath: string) => TimeDimension | undefined;
+    getLayerTimeDimension: (layerPath: string) => TimeDimension | undefined;
     refreshLayer: (layerPath: string) => void;
     reloadLayer: (layerPath: string) => void;
     setAllItemsVisibility: (layerPath: string, visibility: boolean) => void;
@@ -205,9 +205,9 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         return LegendEventProcessor.getLayerServiceProjection(get().mapId, layerPath);
       },
 
-      getLayerTemporalDimension: (layerPath: string): TimeDimension | undefined => {
+      getLayerTimeDimension: (layerPath: string): TimeDimension | undefined => {
         try {
-          return LegendEventProcessor.getLayerTemporalDimension(get().mapId, layerPath);
+          return LegendEventProcessor.getLayerTimeDimension(get().mapId, layerPath);
         } catch (error: unknown) {
           logger.logError(`Error getting temporal dimension for layer ${layerPath}`, error);
         }

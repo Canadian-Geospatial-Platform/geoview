@@ -426,8 +426,8 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * Gets the temporal dimension that is associated to the layer.
    * @returns {TimeDimension | undefined} The temporal dimension associated to the layer or undefined.
    */
-  getTemporalDimension(): TimeDimension | undefined {
-    return this.getLayerConfig().getTemporalDimension();
+  getTimeDimension(): TimeDimension | undefined {
+    return this.getLayerConfig().getTimeDimension();
   }
 
   /**

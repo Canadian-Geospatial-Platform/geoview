@@ -7,7 +7,7 @@ export type SliderProps = {
   locked: boolean;
   reversed: boolean;
   defaultValue: string;
-  temporalDimension: TimeDimension;
+  timeDimension: TimeDimension;
 };
 
 export type ConfigProps = {

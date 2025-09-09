@@ -139,7 +139,7 @@ export abstract class LayerMockup {
           queryable: true,
         },
       },
-      temporalDimension: {},
+      timeDimension: {},
       source,
       style,
     } as unknown as TypeLayerEntryConfig;
@@ -2494,7 +2494,7 @@ export abstract class LayerMockup {
     };
   }
 
-  static configHistoricalFloodTemporalDimension(): TimeDimension {
+  static configHistoricalFloodTimeDimension(): TimeDimension {
     return {
       field: 'time_slider_date',
       default: '2023-01-01T05:00:00Z',
@@ -3371,7 +3371,7 @@ export abstract class LayerMockup {
     };
   }
 
-  static configRadarTemporalDimension(): TimeDimension {
+  static configRadarTimeDimension(): TimeDimension {
     return {
       field: 'time',
       default: '2024-05-23T22:54:00Z',
@@ -3610,7 +3610,7 @@ export abstract class LayerMockup {
     };
   }
 
-  static configMSITemporalDimension(): TimeDimension {
+  static configMSITimeDimension(): TimeDimension {
     return {
       field: 'time',
       default: '2000-08-15T00:00:00Z',
@@ -3685,7 +3685,7 @@ export abstract class LayerMockup {
           queryable: true,
         },
       },
-      // temporalDimension: {},
+      // timeDimension: {},
       source,
       style,
     } as unknown as TypeLayerEntryConfig;

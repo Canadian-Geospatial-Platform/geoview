@@ -203,13 +203,13 @@ export function commonGetFieldDomain(
  */
 // TODO: Issue #2139 - There is a bug with the temporal dimension returned by service URL:
 // TO.DOCONT:  https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_fr/MapServer/0
-export function commonProcessTemporalDimension(
+export function commonProcessTimeDimension(
   layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig,
   esriTimeDimension: TimeDimensionESRI,
   singleHandle?: boolean
 ): void {
   if (esriTimeDimension !== undefined && esriTimeDimension.timeExtent) {
-    layerConfig.setTemporalDimension(DateMgt.createDimensionFromESRI(esriTimeDimension, singleHandle));
+    layerConfig.setTimeDimension(DateMgt.createDimensionFromESRI(esriTimeDimension, singleHandle));
   }
 }
 
@@ -385,7 +385,7 @@ export async function commonProcessLayerMetadata<
 
   commonProcessInitialSettings(layerConfig);
 
-  commonProcessTemporalDimension(layerConfig, responseJson.timeInfo, layerEntryIsEsriImageFromConfig(layerConfig));
+  commonProcessTimeDimension(layerConfig, responseJson.timeInfo, layerEntryIsEsriImageFromConfig(layerConfig));
 
   return layerConfig;
 }

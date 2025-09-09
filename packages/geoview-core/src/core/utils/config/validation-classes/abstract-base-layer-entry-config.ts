@@ -36,7 +36,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   #layerStyle?: TypeLayerStyleConfig;
 
   /** The time dimension information */
-  #temporalDimension?: TimeDimension;
+  #timeDimension?: TimeDimension;
 
   /** Attribution used in the OpenLayer source. */
   #attributions: string[] = [];
@@ -141,16 +141,16 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * Gets the temporal dimension, if any, that is associated to the layer.
    * @returns {TimeDimension | undefined} The temporal dimension or undefined.
    */
-  getTemporalDimension(): TimeDimension | undefined {
-    return this.#temporalDimension;
+  getTimeDimension(): TimeDimension | undefined {
+    return this.#timeDimension;
   }
 
   /**
    * Sets the temporal dimension that is associated to the layer.
-   * @param {TimeDimension} temporalDimension - The temporal dimension.
+   * @param {TimeDimension} timeDimension - The temporal dimension.
    */
-  setTemporalDimension(temporalDimension: TimeDimension): void {
-    this.#temporalDimension = temporalDimension;
+  setTimeDimension(timeDimension: TimeDimension): void {
+    this.#timeDimension = timeDimension;
   }
 
   /**

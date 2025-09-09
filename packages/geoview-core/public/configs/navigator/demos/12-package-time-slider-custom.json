@@ -82,7 +82,7 @@
             "description": "Custom inline description",
             "locked": false,
             "reversed": false,
-            "temporalDimension": {
+            "timeDimension": {
               "field": "time_slider_date",
               "default": [
                 "1940-01-01T05:00:00Z",

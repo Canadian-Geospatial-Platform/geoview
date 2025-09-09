@@ -258,3 +258,24 @@ async function onConfigChange(mapId, e) {
     console.error('Unable to fetch data:', error);
   }
 }
+
+function cleanURL(url) {
+    // Split the protocol and the rest
+    const [protocolPart, rest] = url.split("://");
+
+    // Split domain and path
+    const firstSlashIndex = rest.indexOf('/');
+    const domain = firstSlashIndex === -1 ? rest : rest.substring(0, firstSlashIndex);
+    let path = firstSlashIndex === -1 ? '' : rest.substring(firstSlashIndex);
+
+    // Replace multiple slashes with one in path
+    path = path.replace(/\/+/g, '/');
+
+    // Remove trailing slash if it's not the root "/"
+    if (path.length > 1 && path.endsWith('/')) {
+        path = path.slice(0, -1);
+    }
+
+    // Reconstruct the cleaned URL
+    return `${protocolPart}://${domain}${path}`;
+}

@@ -375,7 +375,8 @@
         // If an EsriFeature, suffix the url with the layer id
         let url = txtUrl.value;
         if (value.type === 'esriFeature') {
-          url = (url + '/' + txtLayerId.value).replace("//", "/");
+          url = cleanURL(url);
+          url = url + '/' + txtLayerId.value;
         }
 
         // Go
