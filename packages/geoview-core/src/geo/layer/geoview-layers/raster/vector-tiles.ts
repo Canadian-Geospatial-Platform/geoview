@@ -136,7 +136,8 @@ export class VectorTiles extends AbstractGeoViewRaster {
     // TODO: Refactor - Layers refactoring. What is this doing? See how we can do this in the new layers. Can it be done before?
     const resolutions = layer.getOLSource()?.getTileGrid()?.getResolutions();
 
-    let appliedStyle = layerConfig.styleUrl || this.getMetadata()?.defaultStyles;
+    // Get the style
+    let appliedStyle = layerConfig.getStyleUrl() || this.getMetadata()?.defaultStyles;
 
     if (appliedStyle) {
       if (!appliedStyle.endsWith('/root.json')) appliedStyle = `${appliedStyle}/root.json`;
@@ -219,7 +220,6 @@ export class VectorTiles extends AbstractGeoViewRaster {
       const layerEntryConfig = new VectorTilesLayerEntryConfig({
         geoviewLayerConfig,
         layerId: `${layerEntry.id}`,
-        tileGrid: layerEntry.tileGrid,
       });
       return layerEntryConfig;
     });
