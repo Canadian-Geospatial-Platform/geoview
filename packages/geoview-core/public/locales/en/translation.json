@@ -109,7 +109,7 @@
     "stepTwo": "Select format",
     "stepThree": "Configure layer",
     "stepFour": "Enter name",
-    "fileTypes": "Upload a CSV, shapefile, or GeoJSON file",
+    "fileTypes": "Upload a CSV, shapefile, GeoPackage, or GeoJSON file",
     "service": "Service type",
     "serviceEsriShapefile": "Shapefile",
     "serviceEsriFeature": "ESRI Feature Service",

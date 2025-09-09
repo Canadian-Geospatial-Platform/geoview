@@ -29,7 +29,6 @@ import {
   layerEntryIsXYZTilesFromConfig,
   layerEntryIsCSVFromConfig,
   layerEntryIsGeoJSONFromConfig,
-  layerEntryIsGeoPackageFromConfig,
   layerEntryIsOgcFeatureFromConfig,
   layerEntryIsWFSFromConfig,
   layerEntryIsWKBFromConfig,

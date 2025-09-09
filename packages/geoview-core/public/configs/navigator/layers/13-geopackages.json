@@ -19,7 +19,7 @@
             "layerId": "Test.gpkg",
             "layerName": "Class breaks",
             "source": {
-              "dataAccessPath": ".//public/datasets/geopackages"
+              "dataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/geopackages"
             }
           }
         ]

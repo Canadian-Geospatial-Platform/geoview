@@ -16,6 +16,7 @@ import {
   LayerStatusChangedEvent as ConfigLayerStatusChangedEvent,
 } from '@/core/utils/config/validation-classes/config-base-class';
 import { logger } from '@/core/utils/logger';
+
 import {
   AbstractGeoViewLayer,
   LayerEntryProcessedEvent,
@@ -42,13 +43,13 @@ import {
   layerConfigIsCSVFromType,
   layerConfigIsEsriFeatureFromType,
   layerConfigIsGeoJSONFromType,
-  layerConfigIsGeoPackageFromType,
   layerConfigIsOgcFeatureFromType,
   layerConfigIsWFSFromType,
   layerConfigIsWKBFromType,
+  GeoPackageLayerConfig,
 } from '@/api/config/types/layer-schema-types';
+
 import { GeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
-import { GeoPackage } from '@/geo/layer/geoview-layers/vector/geopackage';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
@@ -579,7 +580,7 @@ export class LayerApi {
    */
   #addGeoviewLayerStep2(geoviewLayerConfig: TypeGeoviewLayerConfig): GeoViewLayerAddedResult {
     // Create the layer for the processing
-    const layerBeingAdded = LayerApi.createLayerConfigFromType(geoviewLayerConfig, this.mapViewer.getProjection().getCode());
+    const layerBeingAdded = this.createLayerConfigFromType(geoviewLayerConfig);
 
     // Add in the geoviewLayers set
     this.#geoviewLayers[layerBeingAdded.geoviewLayerId] = layerBeingAdded;
@@ -2333,7 +2334,7 @@ export class LayerApi {
       promise = GeoCore.createLayerConfigFromUUID(entry.geoviewLayerId, language, mapId, entry);
     } else if (mapConfigLayerEntryIsGeoPackage(entry)) {
       // Working with a geopackage layer
-      promise = GeoPackageReader.crateLayerConfigFromGeoPackage(entry as GeoPackageLayerConfig);
+      promise = GeoPackageReader.createLayerConfigFromGeoPackage(entry as GeoPackageLayerConfig);
     } else if (mapConfigLayerEntryIsShapefile(entry)) {
       // Working with a shapefile layer
       promise = ShapefileReader.convertShapefileConfigToGeoJson(entry);
@@ -2442,7 +2443,7 @@ export class LayerApi {
    * @returns {AbstractGeoViewLayer} An instance of the corresponding `AbstractGeoViewLayer` subclass.
    * @throws {NotSupportedError} If the configuration does not match any supported layer type.
    */
-  static createLayerConfigFromType(geoviewLayerConfig: TypeGeoviewLayerConfig, mapProjectionForVectorTiles: string): AbstractGeoViewLayer {
+  createLayerConfigFromType(geoviewLayerConfig: TypeGeoviewLayerConfig): AbstractGeoViewLayer {
     // TODO: Refactor - Here the function should use the structure created by validation config with the metadata fetch and no need to pass the validation.
     if (layerConfigIsCSVFromType(geoviewLayerConfig)) {
       return new CSV(geoviewLayerConfig);
@@ -2466,7 +2467,7 @@ export class LayerApi {
       return new OgcFeature(geoviewLayerConfig);
     }
     if (layerConfigIsVectorTilesFromType(geoviewLayerConfig)) {
-      return new VectorTiles(geoviewLayerConfig, mapProjectionForVectorTiles);
+      return new VectorTiles(geoviewLayerConfig, this.mapViewer.getProjection());
     }
     if (layerConfigIsWFSFromType(geoviewLayerConfig)) {
       return new WFS(geoviewLayerConfig);

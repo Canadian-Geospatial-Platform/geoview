@@ -27,7 +27,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     width: '100%',
     '& .MuiGrid-container': {
       '&:first-of-type': {
-        fontWeight: 'bold',
         borderTop: `1px solid ${theme.palette.geoViewColor.bgColor.dark[300]}`,
         borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[300]}`,
       },

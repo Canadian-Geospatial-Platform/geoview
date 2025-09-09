@@ -6,6 +6,8 @@ import {
   CONST_LAYER_TYPES,
   GeoPackageLayerConfig,
   TypeFeatureInfoLayerConfig,
+} from '@/api/config/types/layer-schema-types';
+import {
   TypeFillStyle,
   TypeLayerStyleConfig,
   TypeLayerStyleConfigType,
@@ -17,6 +19,7 @@ import {
 } from '@/api/config/types/map-schema-types';
 import { TypeWkbLayerConfig } from '@/geo/layer/geoview-layers/vector/wkb';
 import { WkbLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
+import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 import { Projection } from '@/geo/utils/projection';
@@ -55,7 +58,7 @@ export class GeoPackageReader {
    * @param {GeoPackageLayerConfig} layerConfig - the config to convert
    * @returns {Promise<TypeWkbLayerConfig>} A WKB layer config
    */
-  static async crateLayerConfigFromGeoPackage(layerConfig: GeoPackageLayerConfig): Promise<TypeWkbLayerConfig> {
+  static async createLayerConfigFromGeoPackage(layerConfig: GeoPackageLayerConfig): Promise<TypeWkbLayerConfig> {
     // Set up WKB layer config so it can be used in layer entry configs
     const geoviewLayerConfig: TypeWkbLayerConfig = {
       geoviewLayerId: layerConfig.geoviewLayerId,
@@ -93,7 +96,8 @@ export class GeoPackageReader {
             // Find layer data for the sublayer
             const matchingLayerData = layersData.find((layerData) => layerData.name === sublayerEntryConfig.layerId);
             if (matchingLayerData) {
-              const { layerId, layerName, initialSettings } = sublayerEntryConfig;
+              const { layerId, initialSettings } = sublayerEntryConfig;
+              const layerName = ConfigBaseClass.getClassOrTypeLayerName(sublayerEntryConfig);
               listOfSubLayerEntryConfig.push(
                 new WkbLayerEntryConfig({
                   geoviewLayerConfig,
@@ -122,7 +126,8 @@ export class GeoPackageReader {
         } else {
           // No sub layer entry configs, add all layers from GeoPackage
           layersData.forEach((layerData) => {
-            const { layerId, layerName } = layerEntryConfig;
+            const { layerId } = layerEntryConfig;
+            const layerName = ConfigBaseClass.getClassOrTypeLayerName(layerEntryConfig);
             listOfSubLayerEntryConfig.push(
               new WkbLayerEntryConfig({
                 geoviewLayerConfig,
@@ -148,10 +153,11 @@ export class GeoPackageReader {
 
         // When the GeoPackage contains more than one layer, and we have multiple layer entry configs, we need a group layer
         if (layerConfig.listOfLayerEntryConfig.length > 1 && listOfSubLayerEntryConfig.length > 1) {
+          const layerName = ConfigBaseClass.getClassOrTypeLayerName(layerEntryConfig);
           listOfLayerEntryConfig.push({
             geoviewLayerConfig,
             layerId: layerEntryConfig.layerId,
-            layerName: layerEntryConfig.layerName || layerEntryConfig.layerId,
+            layerName: layerName || layerEntryConfig.layerId,
             entryType: 'group',
             listOfLayerEntryConfig: listOfSubLayerEntryConfig,
           } as unknown as WkbLayerEntryConfig);
@@ -170,6 +176,7 @@ export class GeoPackageReader {
             schemaTag: CONST_LAYER_TYPES.WKB,
             entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
             source: {
+              dataAccessPath: layerConfig.metadataAccessPath,
               dataProjection: layerData.dataProjection || Projection.PROJECTION_NAMES.LONLAT,
               format: 'WKB',
               featureInfo: GeoPackageReader.#processFeatureInfoConfig(layerData.geoPackageFeatures[0].properties),
@@ -379,10 +386,12 @@ export class GeoPackageReader {
           } else if (layerStyle.Polygon.type === 'classBreaks' && styleInfo.filter?.expression2)
             values = [styleInfo.filter.expression2 as number];
 
+          const label = styleInfo.name === 'Single symbol' ? '' : styleInfo.filter?.expression2 || styleInfo.name || '';
+
           // Build out info and push to polygon style
           const info = {
             visible: true,
-            label: styleInfo.filter?.expression2 || styleInfo.name || '',
+            label,
             values,
             settings: styles,
           };
@@ -435,10 +444,12 @@ export class GeoPackageReader {
           } else if (layerStyle.LineString.type === 'classBreaks' && styleInfo.filter?.expression2)
             values = [styleInfo.filter.expression2 as number];
 
+          const label = styleInfo.name === 'Single symbol' ? '' : styleInfo.filter?.expression2 || styleInfo.name || '';
+
           // Build out info and push to polygon style
           const info = {
             visible: true,
-            label: styleInfo.filter?.expression2 || styleInfo.name || '',
+            label,
             values,
             settings: styles,
           };
@@ -518,10 +529,12 @@ export class GeoPackageReader {
               } else if (layerStyle.Point.type === 'classBreaks' && styleInfo.filter?.expression2)
                 values = [styleInfo.filter.expression2 as number];
 
+              const label = styleInfo.name === 'Single symbol' ? '' : styleInfo.filter?.expression2 || styleInfo.name || '';
+
               // Build out info and push to polygon style
               const info = {
                 visible: true,
-                label: styleInfo.filter?.expression2 || styleInfo.name || '',
+                label,
                 values,
                 settings: styles,
               };

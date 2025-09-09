@@ -2,6 +2,7 @@ import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
 import {
   CONST_LAYER_TYPES,
   CONST_LAYER_ENTRY_TYPES,
+  GeoPackageLayerConfig,
   ShapefileLayerConfig,
   TypeGeoviewLayerType,
   TypeLayerEntryConfig,
@@ -210,6 +211,15 @@ export class UtilAddLayer {
         geoviewLayerType: 'shapefile',
         metadataAccessPath: layerURL,
       } as ShapefileLayerConfig;
+    }
+
+    if (layerType === 'GeoPackage') {
+      return {
+        geoviewLayerName: layerName,
+        geoviewLayerId: generateId(18),
+        geoviewLayerType: 'GeoPackage',
+        metadataAccessPath: layerURL,
+      } as GeoPackageLayerConfig;
     }
 
     const listOfLayerEntryConfig: LayerEntryConfigShell[] = [];
