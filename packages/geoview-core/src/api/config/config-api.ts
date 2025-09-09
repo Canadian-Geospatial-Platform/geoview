@@ -569,7 +569,7 @@ export class ConfigApi {
    * @returns {boolean} True if the provided uuid is a valid uuid.
    */
   static isValidUUID(uuid: string): boolean {
-    // Redirect to the exported fonction in utilities
+    // Redirect to the exported function in utilities
     return isValidUUID(uuid);
   }
 

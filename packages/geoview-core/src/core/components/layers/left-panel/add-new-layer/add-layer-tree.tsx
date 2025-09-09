@@ -39,9 +39,7 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
     let layerId: string | undefined;
     let layerName: string | undefined;
     if (layer instanceof ConfigBaseClass) {
-      // Disable the prefer-destructuring, because we're assigning it to a 'let' not a 'const' here.
-      // eslint-disable-next-line prefer-destructuring
-      layerId = layer.layerId;
+      ({ layerId } = layer);
       layerName = layer.getLayerName();
     } else {
       layerId = layer.geoviewLayerId;
