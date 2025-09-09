@@ -379,10 +379,12 @@ export class GeoPackageReader {
           } else if (layerStyle.Polygon.type === 'classBreaks' && styleInfo.filter?.expression2)
             values = [styleInfo.filter.expression2 as number];
 
+          const label = styleInfo.name === 'Single symbol' ? '' : styleInfo.filter?.expression2 || styleInfo.name || '';
+
           // Build out info and push to polygon style
           const info = {
             visible: true,
-            label: styleInfo.filter?.expression2 || styleInfo.name || '',
+            label,
             values,
             settings: styles,
           };
@@ -435,10 +437,12 @@ export class GeoPackageReader {
           } else if (layerStyle.LineString.type === 'classBreaks' && styleInfo.filter?.expression2)
             values = [styleInfo.filter.expression2 as number];
 
+          const label = styleInfo.name === 'Single symbol' ? '' : styleInfo.filter?.expression2 || styleInfo.name || '';
+
           // Build out info and push to polygon style
           const info = {
             visible: true,
-            label: styleInfo.filter?.expression2 || styleInfo.name || '',
+            label,
             values,
             settings: styles,
           };
@@ -518,10 +522,12 @@ export class GeoPackageReader {
               } else if (layerStyle.Point.type === 'classBreaks' && styleInfo.filter?.expression2)
                 values = [styleInfo.filter.expression2 as number];
 
+              const label = styleInfo.name === 'Single symbol' ? '' : styleInfo.filter?.expression2 || styleInfo.name || '';
+
               // Build out info and push to polygon style
               const info = {
                 visible: true,
-                label: styleInfo.filter?.expression2 || styleInfo.name || '',
+                label,
                 values,
                 settings: styles,
               };
