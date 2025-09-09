@@ -32,6 +32,7 @@ import { isJsonString, isValidUUID, removeCommentsFromJSON } from '@/core/utils/
 import { logger } from '@/core/utils/logger';
 import { UUIDmapConfigReader } from '@/core/utils/config/reader/uuid-config-reader';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
+import { ShapefileReader } from '@/core/utils/config/reader/shapefile-reader';
 
 import { CSV } from '@/geo/layer/geoview-layers/vector/csv';
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
@@ -436,19 +437,26 @@ export class ConfigApi {
       case 'ogcWfs':
         return WFS.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
       case 'geoCore':
-        // For GeoCore, we guild the Config from the Geocore service
+        // For GeoCore, we build the Config from the Geocore service
         // eslint-disable-next-line no-case-declarations
-        const layerConfig = await GeoCore.createLayerConfigFromUUID(layerURL, language || 'en', mapId);
+        const layerConfigFromGeocore = await GeoCore.createLayerConfigFromUUID(layerURL, language || 'en', mapId);
 
         // Now, loop back to create the correct config based on the type
         return ConfigApi.createInitConfigFromType(
-          layerConfig.geoviewLayerType,
-          layerConfig.geoviewLayerId,
-          layerConfig.geoviewLayerName!,
-          layerConfig.metadataAccessPath!,
+          layerConfigFromGeocore.geoviewLayerType,
+          layerConfigFromGeocore.geoviewLayerId,
+          layerConfigFromGeocore.geoviewLayerName!,
+          layerConfigFromGeocore.metadataAccessPath!,
           language,
           mapId
         );
+      case 'shapefile':
+        // For Shapefile, we build the Config from GeoJson
+        return await ShapefileReader.convertShapefileConfigToGeoJson({
+          geoviewLayerId,
+          geoviewLayerType: 'shapefile',
+          metadataAccessPath: layerURL,
+        });
       default:
         // Unsupported
         throw new NotSupportedError(`Unsupported layer type ${layerType}`);

@@ -147,16 +147,17 @@
       },
       'WMS - CER Assessments': {
         type: 'ogcWms',
-        url: 'https://maps-cartes.services.geo.ca/server_serveur/services/NRCan/CER_Assessments_EN/MapServer/WMSServer', // TODO: Check - This URL seems weird!?
+        url: 'https://maps-cartes.services.geo.ca/server_serveur/services/NRCan/CER_Assessments_EN/MapServer/WMSServer',
         layerIds: [0]
-      },
-      'GeoJSON - The processing of config is not working, how should it work?': {
-        type: 'GeoJSON',
-        url: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata-new.meta'
       },
       'GeoJSON - Polygons': {
         type: 'GeoJSON',
         url: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson',
+        layerIds: ['polygons.json']
+      },
+      'GeoJSON - .meta file': {
+        type: 'GeoJSON',
+        url: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata.meta',
         layerIds: ['polygons.json']
       },
       'CSV': {
@@ -208,7 +209,17 @@
       'Geocore - Airborne': {
         type: 'geoCore',
         url: '21b821cf-0f1c-40ee-8925-eab12d357668',
-        // layerIds: ['napl-ring-of-fire-1954-08-07-60k-thumbnail.png']
+        layerIds: ['0']
+      },
+      'Shapefile - single': {
+        type: 'shapefile',
+        url: "./datasets/shapefiles/PLAN_CrownHarvestPlans_SHP_UT83.zip",
+        layerIds: ['PLAN_CrownHarvestPlans_UT83']
+      },
+      'Shapefile - 2 layer ids': {
+        type: 'shapefile',
+        url: "./datasets/shapefiles/PLAN_CrownHarvestPlans_SHP_UT83.zip",
+        layerIds: ['PLAN_CrownHarvestPlans_UT83', 'PLAN_CrownHarvestPlansArchived_UT83']
       }
     };
 
@@ -302,6 +313,22 @@
         // Clear
         cleanUI();
         showHideLoading(true);
+
+        // If a geocore or shapefile
+        if (layerType === 'geoCore' || layerType === 'shapefile') {
+          // It's a geocore or shapefile, first initialize it and get the layer tree
+          const initializedLayerConfig = await cgpv.api.config.createInitConfigFromType(
+            layerType,
+            'geoviewLayerId',
+            'geoviewLayerName',
+            layerUrl.trim(),
+            language
+          );
+
+          // Tweak the parameters
+          layerType = initializedLayerConfig.geoviewLayerType;
+          layerUrl = initializedLayerConfig.metadataAccessPath;
+        }
 
         // Call the ConfigApi to process the layers into actual layer config classes
         const configClasses = await cgpv.api.config.processLayerFromType(

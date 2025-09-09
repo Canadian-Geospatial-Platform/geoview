@@ -264,7 +264,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /**
    * Helper function to support when a layerConfig is either a class instance or a regular json object.
    * @param {ConfigAbstractBaseClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
-   * @returns {string | undefined} The layer style or undefined.
+   * @returns {string | undefined} The layer filter or undefined.
    */
   static getClassOrTypeLayerFilter(layerConfig: ConfigAbstractBaseClassOrType | undefined): string | undefined {
     if (layerConfig instanceof ConfigBaseClass) {
