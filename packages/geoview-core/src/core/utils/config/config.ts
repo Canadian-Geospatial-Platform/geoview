@@ -1,10 +1,11 @@
 import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
 import {
-  mapConfigLayerEntryIsGeoCore,
   MapConfigLayerEntry,
   layerEntryIsGroupLayer,
   CONST_LAYER_TYPES,
   TypeGeoviewLayerType,
+  mapConfigLayerEntryIsGeoCore,
+  mapConfigLayerEntryIsGeoPackage,
   mapConfigLayerEntryIsShapefile,
   TypeLayerEntryType,
   CONST_LAYER_ENTRY_TYPES,
@@ -134,7 +135,6 @@ export class Config {
     switch (layerType) {
       case CONST_LAYER_TYPES.CSV:
       case CONST_LAYER_TYPES.GEOJSON:
-      case CONST_LAYER_TYPES.GEOPACKAGE:
       case CONST_LAYER_TYPES.OGC_FEATURE:
       case CONST_LAYER_TYPES.WFS:
       case CONST_LAYER_TYPES.WKB:

@@ -441,6 +441,9 @@
                 "$ref": "#/definitions/TypeGeoCoreLayerType"
               },
               {
+                "$ref": "#/definitions/TypeGeoPackageLayerType"
+              },
+              {
                 "$ref": "#/definitions/TypeShapefileLayerType"
               }
             ]
@@ -2359,6 +2362,9 @@
           },
           {
             "$ref": "#/definitions/TypeGeoCoreLayerConfig"
+          },
+          {
+            "$ref": "#/definitions/TypeGeoPackageLayerConfig"
           },
           {
             "$ref": "#/definitions/TypeShapefileLayerConfig"

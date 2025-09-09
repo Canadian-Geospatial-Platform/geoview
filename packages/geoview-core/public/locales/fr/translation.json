@@ -109,7 +109,7 @@
     "stepTwo": "Sélectionner le format",
     "stepThree": "Configurer la couche",
     "stepFour": "Entrer le nom",
-    "fileTypes": "Téléverser un fichier CSV, shapefile ou GeoJSON",
+    "fileTypes": "Téléverser un fichier CSV, GeoPackage, shapefile ou GeoJSON",
     "service": "Type de service",
     "serviceEsriShapefile": "Shapefile",
     "serviceEsriFeature": "Service d'éléments ESRI",

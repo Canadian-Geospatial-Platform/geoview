@@ -527,7 +527,7 @@ export function AddNewLayer(): JSX.Element {
     // GeoPackage config must be converted to WKB before we proceed
     if (newGeoViewLayer.geoviewLayerType === GEOPACKAGE)
       // eslint-disable-next-line no-param-reassign
-      newGeoViewLayer = await GeoPackageReader.crateLayerConfigFromGeoPackage(newGeoViewLayer as GeoPackageLayerConfig);
+      newGeoViewLayer = await GeoPackageReader.createLayerConfigFromGeoPackage(newGeoViewLayer as GeoPackageLayerConfig);
 
     // Use the config to convert simplified layer config into proper layer config
     const config = new Config(language);
