@@ -203,56 +203,6 @@ export class Fetch {
   }
 
   /**
-   * Fetches a url for an array buffer response.
-   * @param {string} url - The url to fetch.
-   * @param {RequestInit?} init - The optional initialization parameters for the fetch.
-   * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
-   * @returns {Promise<ArrayBuffer>} The fetched array buffer response.
-   * @throws {ResponseError} If the response is not OK (non-2xx).
-   * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
-   * @throws {Error} For any other unexpected failures.
-   */
-  static async fetchArrayBuffer(url: string, init?: RequestInit, timeoutMs?: number): Promise<ArrayBuffer> {
-    // The original signal if any
-    const originalSignal = init?.signal || undefined;
-
-    // If we want to use a timeout controller
-    let timeoutSignal: AbortSignal | undefined;
-    let timeoutId: NodeJS.Timeout | undefined;
-    if (timeoutMs) {
-      const timeoutController = Fetch.#createTimeoutAbortController(timeoutMs);
-      timeoutSignal = timeoutController.controller.signal;
-      timeoutId = timeoutController.timeoutId;
-    }
-
-    // Merge the abort signals to support the optional original abort controller and the optional timeout one
-    const combinedSignal = Fetch.#mergeAbortSignals([originalSignal, timeoutSignal]);
-
-    try {
-      // Query and read
-      const response = await fetch(url, {
-        ...init,
-        signal: combinedSignal,
-      });
-
-      // Validate response
-      if (!response.ok) throw new ResponseError(response);
-
-      // Get the blob of the response
-      return await response.arrayBuffer();
-    } catch (error: unknown) {
-      // Throw the exceptions that we know
-      Fetch.#throwWhatWeKnow(error, originalSignal, timeoutSignal, timeoutMs);
-
-      // Throw anything else
-      throw error;
-    } finally {
-      // Clear the timeout, if any. We're done
-      clearTimeout(timeoutId);
-    }
-  }
-
-  /**
    * Fetches a url for a blob response.
    * @param {string} url - The url to fetch.
    * @param {RequestInit?} init - The optional initialization parameters for the fetch.
