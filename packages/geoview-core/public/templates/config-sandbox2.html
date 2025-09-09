@@ -29,6 +29,10 @@
       width: 90%;
       padding: 2px;
     }
+    .text-info {
+      color: blue;
+      font-size: smaller;
+    }
     .text-error {
       color: red;
     }
@@ -94,18 +98,25 @@
       </div>
       <br />
       <div class="section">
+        <span id="txtProcessInfoVector" class="text-info">When working with a vector layer, some source information is only retrieved when the layer is actually added on a map, as to not download the features twice (once in the config processing and once when the layer is added to a map)</span>
+      </div>
+      <div class="section">
+        <span id="txtError" class="text-error"></span>
+      </div>
+      <div class="section result">
+        <div id="loadingOverlayInit" class="loading-overlay"><img src="https://discuss.wxpython.org/uploads/default/original/2X/6/6d0ec30d8b8f77ab999f765edd8866e8a97d59a3.gif" /></div>
+        <textarea id="textResultInit" name="textResultInit"></textarea>
+      </div>
+      <br />
+      <div class="section">
         <span>Layers:<input id="txtLayers" type="text" class="text-input" /></span>
       </div>
       <div class="section">
         <input id="btnProcess" type="button" value="Process" />
       </div>
-      <br />
-      <div class="section">
-        <span id="txtError" class="text-error"></span>
-      </div>
       <div class="section result">
-        <div id="loadingOverlay" class="loading-overlay"><img src="https://discuss.wxpython.org/uploads/default/original/2X/6/6d0ec30d8b8f77ab999f765edd8866e8a97d59a3.gif" /></div>
-        <textarea id="textResultInit" name="textResultInit"></textarea>
+        <div id="loadingOverlayProcess" class="loading-overlay"><img src="https://discuss.wxpython.org/uploads/default/original/2X/6/6d0ec30d8b8f77ab999f765edd8866e8a97d59a3.gif" /></div>
+        <textarea id="textResultProcess" name="textResultProcess"></textarea>
       </div>
     </div>
   </div>
@@ -123,12 +134,14 @@
       'Esri Feature - Flood Map': {
         type: 'esriFeature',
         url: 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/canada_flood_map_inventory_en/MapServer',
-        layerIds: [0]
+        layerIds: [0],
+        isVector: true
       },
       'Esri Feature - Toronto': {
         type: 'esriFeature',
         url: 'https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/Toronto_Neighbourhoods/FeatureServer',
-        layerIds: [0]
+        layerIds: [0],
+        isVector: true
       },
       'Esri Image - USA Cities (Actually an Esri Dynamic service)': {
         type: 'esriImage',
@@ -153,40 +166,48 @@
       'GeoJSON - Polygons': {
         type: 'GeoJSON',
         url: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson',
-        layerIds: ['polygons.json']
+        layerIds: ['polygons.json'],
+        isVector: true
       },
       'GeoJSON - .meta file': {
         type: 'GeoJSON',
         url: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata.meta',
-        layerIds: ['polygons.json']
+        layerIds: ['polygons.json'],
+        isVector: true
       },
       'CSV': {
         type: 'CSV',
-        url: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/csv-files/Station_List_Minus_HQ-MELCC.csv'
+        url: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/csv-files/Station_List_Minus_HQ-MELCC.csv',
+        isVector: true
       },
       'CSV - WaterMedia': {
         type: 'CSV',
         url: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/csv-files',
-        layerIds: ['NPRI-INRP_WaterEau_MediaGroupMilieu_2022']
+        layerIds: ['NPRI-INRP_WaterEau_MediaGroupMilieu_2022'],
+        isVector: true
       },
       'OGC Feature - Lakes': {
         type: 'ogcFeature',
         url: 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev',
-        layerIds: ['lakes']
+        layerIds: ['lakes'],
+        isVector: true
       },
       'WFS - Current Conditions': {
         type: 'ogcWfs',
         url: 'https://geo.weather.gc.ca/geomet',
-        layerIds: ['ec-msc:CURRENT_CONDITIONS']
+        layerIds: ['ec-msc:CURRENT_CONDITIONS'],
+        isVector: true
       },
       'WFS - States': {
         type: 'ogcWfs',
         url: 'https://ahocevar.com/geoserver/wfs?REQUEST=GetCapabilities&VERSION=2.0.0&SERVICE=WFS',
-        layerIds: ['usa:states']
+        layerIds: ['usa:states'],
+        isVector: true
       },
       'XYZ Tiles - World_Topo_Map': {
         type: 'xyzTiles',
-        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer'
+        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer',
+        layerIds: ['0']
       },
       'XYZ Tiles - World_Topo_Map with xyz': {
         type: 'xyzTiles',
@@ -232,7 +253,8 @@
     const txtLayers = document.getElementById('txtLayers');
     const btnInitialize = document.getElementById('btnInitialize');
     const btnProcess = document.getElementById('btnProcess');
-    const loadingOverlay = document.getElementById('loadingOverlay');
+    const loadingOverlayInit = document.getElementById('loadingOverlayInit');
+    const loadingOverlayProcess = document.getElementById('loadingOverlayProcess');
 
     function updateUI(valueInput) {
       // Update the url txt
@@ -259,6 +281,12 @@
       if (value.layerIds) {
         txtLayers.value = value.layerIds.join(', ');
       }
+
+      // If layer is vector type
+      txtProcessInfoVector.style.display = "none";
+      if (value.isVector) {
+        txtProcessInfoVector.style.display = "block";
+      }
     }
 
     function loadUI() {
@@ -274,22 +302,32 @@
       updateUrlInput(selectLayerTypes.value);
     }
 
-    function cleanUI() {
+    function cleanUIInit() {
       editorResultInit.setValue('');
       txtError.innerHTML = '';
     }
 
-    function showHideLoading(show) {
-      loadingOverlay.style.display = "none";
-      if (show) loadingOverlay.style.display = "block";
+    function cleanUIProcess() {
+      editorResultProcess.setValue('');
+      txtError.innerHTML = '';
+    }
+
+    function showHideLoadingInit(show) {
+      loadingOverlayInit.style.display = "none";
+      if (show) loadingOverlayInit.style.display = "block";
+    }
+
+    function showHideLoadingProcess(show) {
+      loadingOverlayProcess.style.display = "none";
+      if (show) loadingOverlayProcess.style.display = "block";
     }
 
     /* Initializes the Layer and fills the text area with the result */
     async function initializeLayer(layerType, layerUrl, language) {
       try {
         // Clear
-        cleanUI();
-        showHideLoading(true);
+        cleanUIInit();
+        showHideLoadingInit(true);
 
         // Call the ConfigApi to get the Layer Tree
         const initializedLayerConfig = await cgpv.api.config.createInitConfigFromType(
@@ -304,15 +342,15 @@
         editorResultInit.setValue(cgpv.api.config.serializeGeoviewLayerConfig(initializedLayerConfig));
       } finally {
         // Hide loading
-        showHideLoading(false);
+        showHideLoadingInit(false);
       }
     }
 
     async function processLayer(layerType, layerUrl, language, layerIds) {
       try {
         // Clear
-        cleanUI();
-        showHideLoading(true);
+        cleanUIProcess();
+        showHideLoadingProcess(true);
 
         // If a geocore or shapefile
         if (layerType === 'geoCore' || layerType === 'shapefile') {
@@ -340,15 +378,22 @@
         );
 
         // Output instanciation result
-        editorResultInit.setValue(cgpv.api.config.serializeConfigClasses(configClasses));
+        editorResultProcess.setValue(cgpv.api.config.serializeConfigClasses(configClasses));
       } finally {
         // Hide loading
-        showHideLoading(false);
+        showHideLoadingProcess(false);
       }
     }
 
     // Transform the text area into a code text area using CodeMirror
     const editorResultInit = CodeMirror.fromTextArea(document.getElementById('textResultInit'), {
+        lineNumbers: true,
+        mode: 'text/x-perl',
+        theme: 'liquibyte',
+    });
+
+    // Transform the text area into a code text area using CodeMirror
+    const editorResultProcess = CodeMirror.fromTextArea(document.getElementById('textResultProcess'), {
         lineNumbers: true,
         mode: 'text/x-perl',
         theme: 'liquibyte',
