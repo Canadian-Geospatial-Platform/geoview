@@ -52,7 +52,7 @@ export class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
 
 export interface TypeMetadataXYZTiles {
   layers: TypeMetadataXYZTilesLayer[];
-  listOfLayerEntryConfig: XYZTilesLayerEntryConfig[];
+  listOfLayerEntryConfig: XYZTilesLayerEntryConfigProps[];
 }
 
-export type TypeMetadataXYZTilesLayer = XYZTilesLayerEntryConfig & { id: string };
+export type TypeMetadataXYZTilesLayer = XYZTilesLayerEntryConfigProps & { id: string };

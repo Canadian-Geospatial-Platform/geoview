@@ -125,7 +125,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
     const metadata = this.getMetadata();
 
     if (metadata) {
-      let metadataLayerConfigFound: XYZTilesLayerEntryConfig | undefined;
+      let metadataLayerConfigFound;
       if (metadata.listOfLayerEntryConfig) {
         metadataLayerConfigFound = metadata.listOfLayerEntryConfig.find(
           (metadataLayerConfig) => metadataLayerConfig.layerId === layerConfig.layerId
@@ -149,7 +149,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
         layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
 
         // Set zoom limits for max / min zooms
-        const maxScale = metadataLayerConfigFound?.getMaxScale();
+        const maxScale = metadataLayerConfigFound?.maxScale;
         const minScaleDenominator = metadataLayerConfigFound?.minScaleDenominator;
 
         layerConfig.setMaxScale(
@@ -158,7 +158,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
             : Math.max(maxScale ?? -Infinity, minScaleDenominator ?? -Infinity, layerConfig.getMaxScale() ?? -Infinity)
         );
 
-        const minScale = metadataLayerConfigFound?.getMinScale();
+        const minScale = metadataLayerConfigFound?.minScale;
         const maxScaleDenominator = metadataLayerConfigFound?.maxScaleDenominator;
 
         layerConfig.setMinScale(
