@@ -134,7 +134,7 @@ export class GeoJSON extends AbstractGeoViewVector {
       // If the layer metadata was found
       if (layerMetadataFound) {
         // If no name
-        if (!layerConfig.getLayerName()) layerConfig.setLayerName(layerMetadataFound.layerName || 'no name');
+        if (!layerConfig.getLayerName()) layerConfig.setLayerName(layerMetadataFound.layerName || 'No name / Sans nom');
 
         // eslint-disable-next-line no-param-reassign
         layerConfig.source = defaultsDeep(layerConfig.source, layerMetadataFound.source);

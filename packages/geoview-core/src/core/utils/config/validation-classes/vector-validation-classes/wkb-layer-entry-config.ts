@@ -21,7 +21,7 @@ export class WkbLayerEntryConfig extends VectorLayerEntryConfig {
 
   /**
    * The class constructor.
-   * @param {WkbLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
+   * @param {WkbLayerEntryConfigProps | WkbLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
    */
   constructor(layerConfig: WkbLayerEntryConfigProps | WkbLayerEntryConfig) {
     super(layerConfig);

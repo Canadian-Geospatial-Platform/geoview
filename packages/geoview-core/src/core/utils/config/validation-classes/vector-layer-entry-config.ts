@@ -30,7 +30,7 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
 
   /**
    * The class constructor.
-   * @param {VectorLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
+   * @param {VectorLayerEntryConfigProps | VectorLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
    */
   protected constructor(layerConfig: VectorLayerEntryConfigProps | VectorLayerEntryConfig) {
     super(layerConfig);

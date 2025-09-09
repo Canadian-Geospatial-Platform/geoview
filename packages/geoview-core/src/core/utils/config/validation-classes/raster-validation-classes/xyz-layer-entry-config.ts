@@ -32,7 +32,7 @@ export class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
 
   /**
    * The class constructor.
-   * @param {XYZTilesLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
+   * @param {XYZTilesLayerEntryConfigProps | XYZTilesLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
    */
   constructor(layerConfig: XYZTilesLayerEntryConfigProps | XYZTilesLayerEntryConfigProps) {
     super(layerConfig);

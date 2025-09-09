@@ -30,7 +30,7 @@ export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
 
   /**
    * The class constructor.
-   * @param {VectorTilesLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
+   * @param {VectorTilesLayerEntryConfigProps | VectorTilesLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
    */
   constructor(layerConfig: VectorTilesLayerEntryConfigProps | VectorTilesLayerEntryConfig) {
     super(layerConfig);

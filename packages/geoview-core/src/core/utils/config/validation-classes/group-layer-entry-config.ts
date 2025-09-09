@@ -29,7 +29,7 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * The class constructor.
-   * @param {GroupLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
+   * @param {GroupLayerEntryConfigProps | GroupLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
    */
   // TO: Until this is fixed, this constructor supports sending a GroupLayerEntryConfig in its typing, for now (GroupLayerEntryConfigProps | GroupLayerEntryConfig)... though it should only be a GroupLayerEntryConfigProps eventually
   constructor(layerConfig: GroupLayerEntryConfigProps | GroupLayerEntryConfig) {

@@ -150,7 +150,7 @@ export function commonValidateListOfLayerEntryConfig(layer: EsriDynamic | EsriFe
       }
 
       // If no layer name
-      if (!layerConfig.getLayerName()) layerConfig.setLayerName(metadata?.layers[esriIndex].name || 'no name');
+      if (!layerConfig.getLayerName()) layerConfig.setLayerName(metadata?.layers[esriIndex].name || 'No name / Sans nom');
     }
   });
 }
