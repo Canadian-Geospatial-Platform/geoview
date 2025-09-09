@@ -409,6 +409,9 @@ export type TypeGeoviewLayerConfig = {
   maxScale?: number;
 
   /** The layer entries to use from the GeoView layer. */
+  // TODO: Refactor - This array isn't only containing TypeLayerEntryConfig, sometimes it's just an array of strict json objects of
+  // TO.DOCONT: either ConfigBaseClassProps and/or even TypeGeoviewLayerConfig(?). It'd be great to change the type here, but it has lots of impacts throughout the codebase.
+  // TO.DOCONT: Something like: `(ConfigBaseClass | ConfigBaseClassProps | TypeGeoviewLayerConfig)[]`
   listOfLayerEntryConfig: TypeLayerEntryConfig[];
 };
 

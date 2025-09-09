@@ -8,6 +8,8 @@ import {
   MapConfigLayerEntry,
   TypeGeoviewLayerConfig,
 } from '@/api/config/types/layer-schema-types';
+import { ConfigBaseClassProps } from '@/core/utils/config/validation-classes/config-base-class';
+import { GroupLayerEntryConfigProps } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { generateId, getLocalizedMessage } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 
@@ -102,7 +104,9 @@ export class UtilAddLayer {
    * @returns The name of the layer or undefined if none is found.
    */
   static getLayerNameById(layerTree: TypeGeoviewLayerConfig | undefined, layerId: string): string | undefined {
-    return (UtilAddLayer.getLayerById(layerTree, layerId) as TypeLayerEntryConfig)?.getLayerName();
+    const foundLayerEntry = UtilAddLayer.getLayerById(layerTree, layerId);
+    if (foundLayerEntry) return (foundLayerEntry as ConfigBaseClassProps).layerName;
+    return undefined;
   }
 
   /**
@@ -111,7 +115,10 @@ export class UtilAddLayer {
    * @param {string[]} layerIds - The la
    * @returns {boolean} Whether or not all of the sublayers are included
    */
-  static allSubLayersAreIncluded(layerTree: TypeGeoviewLayerConfig | TypeLayerEntryConfig, layerIds: (string | undefined)[]): boolean {
+  static allSubLayersAreIncluded(
+    layerTree: TypeGeoviewLayerConfig | GroupLayerEntryConfigProps,
+    layerIds: (string | undefined)[]
+  ): boolean {
     return layerTree.listOfLayerEntryConfig?.every((layerEntryConfig) =>
       !layerTree.listOfLayerEntryConfig
         ? layerIds.includes(layerEntryConfig.layerId)
@@ -128,14 +135,14 @@ export class UtilAddLayer {
     layerName: string,
     layerType: string,
     layerIds: string[],
-    layersToAdd: (TypeLayerEntryConfig | TypeGeoviewLayerConfig)[],
+    layersToAdd: (TypeGeoviewLayerConfig | ConfigBaseClassProps)[],
     layerIdsToAdd: string[],
     removedLayerIds: string[],
-    groupLayer: TypeLayerEntryConfig | TypeGeoviewLayerConfig
+    groupLayer: TypeGeoviewLayerConfig | GroupLayerEntryConfigProps
   ): LayerEntryConfigShell {
     // Casts
     const groupLayerAsGeoviewLayerConfig = groupLayer as TypeGeoviewLayerConfig;
-    const groupLayerAsLayerEntryConfig = groupLayer as TypeLayerEntryConfig;
+    const groupLayerAsLayerEntryConfig = groupLayer as GroupLayerEntryConfigProps;
 
     // The ID depending on the config type
     const groupLayerId = `${groupLayerAsLayerEntryConfig.layerId || groupLayerAsGeoviewLayerConfig.geoviewLayerId}`;
@@ -151,7 +158,7 @@ export class UtilAddLayer {
     if (layerType === CONST_LAYER_TYPES.ESRI_DYNAMIC && UtilAddLayer.allSubLayersAreIncluded(groupLayer, layerIds)) {
       return {
         layerId: groupLayerAsLayerEntryConfig?.layerId,
-        layerName: layersToAdd.length === 1 ? layerName : groupLayerAsLayerEntryConfig?.getLayerName(),
+        layerName: layersToAdd.length === 1 ? layerName : groupLayerAsLayerEntryConfig?.layerName,
       };
     }
 
@@ -160,7 +167,7 @@ export class UtilAddLayer {
       layerId: `group-${groupLayerAsLayerEntryConfig?.layerId}`,
       isLayerGroup: true,
       entryType: 'group',
-      layerName: layersToAdd.length === 1 ? layerName : groupLayerAsLayerEntryConfig?.getLayerName(),
+      layerName: layersToAdd.length === 1 ? layerName : groupLayerAsLayerEntryConfig?.layerName,
       listOfLayerEntryConfig: groupLayer.listOfLayerEntryConfig
         .map((layerEntryConfig) => {
           if (layerEntryConfig.listOfLayerEntryConfig?.length && layerIds.includes(layerEntryConfig.layerId))
