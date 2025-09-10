@@ -131,18 +131,6 @@
         url: 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer',
         layerIds: [2,3]
       },
-      'Esri Feature - Flood Map': {
-        type: 'esriFeature',
-        url: 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/canada_flood_map_inventory_en/MapServer',
-        layerIds: [0],
-        isVector: true
-      },
-      'Esri Feature - Toronto': {
-        type: 'esriFeature',
-        url: 'https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/Toronto_Neighbourhoods/FeatureServer',
-        layerIds: [0],
-        isVector: true
-      },
       'Esri Image - USA Cities (Actually an Esri Dynamic service)': {
         type: 'esriImage',
         url: 'https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/USA/MapServer',
@@ -153,6 +141,11 @@
         url: 'https://www5.agr.gc.ca/atlas/rest/services/imageservices/annual_crop_inventory_2022/ImageServer',
         layerIds: ['annual_crop_inventory_2022']
       },
+      'Image Static - Napl Ring Of Fire (no process)': {
+        type: 'imageStatic',
+        url: 'https://datacube-prod-data-public.s3.ca-central-1.amazonaws.com/store/imagery/aerial/napl/napl-ring-of-fire',
+        layerIds: ['napl-ring-of-fire-1954-08-07-60k-thumbnail.png']
+      },
       'WMS': {
         type: 'ogcWms',
         url: 'https://geo.weather.gc.ca/geomet',
@@ -161,6 +154,45 @@
       'WMS - CER Assessments': {
         type: 'ogcWms',
         url: 'https://maps-cartes.services.geo.ca/server_serveur/services/NRCan/CER_Assessments_EN/MapServer/WMSServer',
+        layerIds: [0]
+      },
+      'Vector Tiles - CBMT_CBCT_3978_V_OSM': {
+        type: 'vectorTiles',
+        url: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3978_V_OSM/VectorTileServer',
+        layerIds: ['CBMT_CBCT_3978_V_OSM']
+      },
+      'Vector Tiles - CBMT3978_v11 with xyz': {
+        type: 'vectorTiles',
+        url: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT3978_v11/VectorTileServer/tile/{z}/{y}/{x}.pbf'
+      },
+      'XYZ Tiles - World_Topo_Map': {
+        type: 'xyzTiles',
+        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer',
+        layerIds: ['0']
+      },
+      'XYZ Tiles - World_Topo_Map with xyz': {
+        type: 'xyzTiles',
+        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'
+      },
+      'CSV': {
+        type: 'CSV',
+        url: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/csv-files/Station_List_Minus_HQ-MELCC.csv',
+        isVector: true
+      },
+      'CSV - WaterMedia': {
+        type: 'CSV',
+        url: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/csv-files',
+        layerIds: ['NPRI-INRP_WaterEau_MediaGroupMilieu_2022'],
+        isVector: true
+      },
+      'Esri Feature - Flood Map': {
+        type: 'esriFeature',
+        url: 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/canada_flood_map_inventory_en/MapServer',
+        layerIds: [0]
+      },
+      'Esri Feature - Toronto': {
+        type: 'esriFeature',
+        url: 'https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/Toronto_Neighbourhoods/FeatureServer',
         layerIds: [0]
       },
       'GeoJSON - Polygons': {
@@ -175,17 +207,6 @@
         layerIds: ['polygons.json'],
         isVector: true
       },
-      'CSV': {
-        type: 'CSV',
-        url: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/csv-files/Station_List_Minus_HQ-MELCC.csv',
-        isVector: true
-      },
-      'CSV - WaterMedia': {
-        type: 'CSV',
-        url: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/csv-files',
-        layerIds: ['NPRI-INRP_WaterEau_MediaGroupMilieu_2022'],
-        isVector: true
-      },
       'OGC Feature - Lakes': {
         type: 'ogcFeature',
         url: 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev',
@@ -195,37 +216,12 @@
       'WFS - Current Conditions': {
         type: 'ogcWfs',
         url: 'https://geo.weather.gc.ca/geomet',
-        layerIds: ['ec-msc:CURRENT_CONDITIONS'],
-        isVector: true
+        layerIds: ['ec-msc:CURRENT_CONDITIONS']
       },
       'WFS - States': {
         type: 'ogcWfs',
         url: 'https://ahocevar.com/geoserver/wfs?REQUEST=GetCapabilities&VERSION=2.0.0&SERVICE=WFS',
-        layerIds: ['usa:states'],
-        isVector: true
-      },
-      'XYZ Tiles - World_Topo_Map': {
-        type: 'xyzTiles',
-        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer',
-        layerIds: ['0']
-      },
-      'XYZ Tiles - World_Topo_Map with xyz': {
-        type: 'xyzTiles',
-        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'
-      },
-      'Vector Tiles - CBMT_CBCT_3978_V_OSM': {
-        type: 'vectorTiles',
-        url: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3978_V_OSM/VectorTileServer',
-        layerIds: ['CBMT_CBCT_3978_V_OSM']
-      },
-      'Vector Tiles - CBMT3978_v11 with xyz': {
-        type: 'vectorTiles',
-        url: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT3978_v11/VectorTileServer/tile/{z}/{y}/{x}.pbf'
-      },
-      'Image Static - Napl Ring Of Fire': {
-        type: 'imageStatic',
-        url: 'https://datacube-prod-data-public.s3.ca-central-1.amazonaws.com/store/imagery/aerial/napl/napl-ring-of-fire',
-        layerIds: ['napl-ring-of-fire-1954-08-07-60k-thumbnail.png']
+        layerIds: ['usa:states']
       },
       'Geocore - Airborne': {
         type: 'geoCore',

@@ -34,6 +34,8 @@ import { UUIDmapConfigReader } from '@/core/utils/config/reader/uuid-config-read
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { ShapefileReader } from '@/core/utils/config/reader/shapefile-reader';
 
+import { LayerApi } from '@/geo/layer/layer';
+import { getStyleFromEsriRenderer } from '@/geo/utils/renderer/esri-renderer';
 import { CSV } from '@/geo/layer/geoview-layers/vector/csv';
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
@@ -48,7 +50,6 @@ import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
 import { XYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
 
 import schema from '@/core/../../schema.json';
-import { getStyleFromEsriRenderer } from '@/geo/utils/renderer/esri-renderer';
 
 /**
  * The API class that create configuration object. It is used to validate and read the service and layer metadata.
@@ -503,7 +504,15 @@ export class ConfigApi {
         return VectorTiles.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], false, 'EPSG:3978');
       case 'ogcWms':
         // TODO: Check - Check if there's a way to better determine the typeOfServer to send, defaults to 'mapserver'
-        return WMS.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as number[], false, 'mapserver');
+        return WMS.processGeoviewLayerConfig(
+          geoviewLayerId,
+          geoviewLayerName,
+          layerURL,
+          layerIds as number[],
+          false,
+          'mapserver',
+          LayerApi.DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS
+        );
       case 'xyzTiles':
         return XYZTiles.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], false);
       case 'CSV':

@@ -12,6 +12,7 @@ import { VectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 import { WFS } from '@/geo/layer/geoview-layers/vector/wfs';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
 import { XYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
+import { LayerApi } from '@/geo/layer/layer';
 
 import {
   LayerGeoCoreInvalidResponseError,
@@ -137,7 +138,15 @@ export class UUIDmapConfigReader {
             geoviewLayerConfig = EsriFeature.createGeoviewLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
           } else if (layerType === CONST_LAYER_TYPES.WMS) {
             // Redirect
-            geoviewLayerConfig = WMS.createGeoviewLayerConfig(idClean, layerName, layerUrl, serverType!, layerIsTimeAware, layerEntries);
+            geoviewLayerConfig = WMS.createGeoviewLayerConfig(
+              idClean,
+              layerName,
+              layerUrl,
+              serverType!,
+              layerIsTimeAware,
+              layerEntries,
+              LayerApi.DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS
+            );
           } else if (layerType === CONST_LAYER_TYPES.WFS) {
             // Redirect
             // TODO: Check - Check if there's a way to better determine the vector strategy to send, defaults to 'all'

@@ -670,7 +670,6 @@ export abstract class ConfigBaseClass {
 
 export type TypeLayerEntryShell = {
   id: number | string;
-  name?: string;
   index?: number;
   layerId?: number | string;
   layerName?: string;
