@@ -1,5 +1,7 @@
 import { logger } from '@/core/utils/logger';
 import { EventType } from '@/geo/layer/layer-sets/abstract-layer-set';
+import { TypeMapMouseInfo } from '@/geo/map/map-viewer';
+import { Projection } from '@/geo/utils/projection';
 
 import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '@/api/event-processors/abstract-event-processor';
 import { UIEventProcessor } from './ui-event-processor';
@@ -38,7 +40,20 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
       }
     );
 
-    return [layerDataArrayUpdateBatch];
+    const { mapId } = store.getState();
+
+    const clickCoordinates = store.subscribe(
+      (state) => state.mapState.clickCoordinates,
+      (coords) => {
+        if (!coords) return;
+        // Log
+        logger.logTraceCoreStoreSubscription('FEATURE-INFO EVENT PROCESSOR - clickCoordinates', coords);
+
+        FeatureInfoEventProcessor.#updateCoordinateInfo(mapId, coords);
+      }
+    );
+
+    return [layerDataArrayUpdateBatch, clickCoordinates];
   }
 
   // **********************************************************
@@ -70,7 +85,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   /**
    * Get the selectedLayerPath value
    * @param {string} mapId - The map identifier
-   * @returns {string}} the selected layer path
+   * @returns {string} the selected layer path
    */
   static getSelectedLayerPath(mapId: string): string {
     return this.getFeatureInfoState(mapId).selectedLayerPath;
@@ -118,11 +133,20 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * Deletes the specified layer path from the layer sets in the store. The update of the array will also trigger an update in a batched manner.
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path to delete
-   * @returns {Promise<void>}
+   * @returns {void}
    */
   static deleteFeatureInfo(mapId: string, layerPath: string): void {
     // The feature info state
     const featureInfoState = this.getFeatureInfoState(mapId);
+
+    // Clear selected layer path and layer data array patch layer path bypass if they are the current path
+    if (layerPath === featureInfoState.selectedLayerPath) {
+      featureInfoState.setterActions.setSelectedLayerPath('');
+    }
+
+    if (layerPath === featureInfoState.layerDataArrayBatchLayerPathBypass) {
+      featureInfoState.setterActions.setLayerDataArrayBatchLayerPathBypass('');
+    }
 
     // Redirect to helper function
     this.#deleteFromArray(featureInfoState.layerDataArray, layerPath, (layerArrayResult) => {
@@ -139,7 +163,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * @param {T[]} layerArray - The layer array to work with
    * @param {string} layerPath - The layer path to delete
    * @param {(layerArray: T[]) => void} onDeleteCallback - The callback executed when the array is updated
-   * @returns {Promise<void>}
+   * @returns {void}
    * @private
    */
   static #deleteFromArray<T extends TypeResultSetEntry>(
@@ -236,6 +260,112 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
     );
   }
 
+  /**
+   * Queries coordinate information from endpoints
+   * @param {string} mapId - The map ID
+   * @param {[number, number]} coordinates - The lng/lat coordinates
+   * @returns {Promise<TypeCoordinateInfo>} Promise of coordinate information
+   */
+  static #updateCoordinateInfo(mapId: string, coordinates: TypeMapMouseInfo): void {
+    // If the coordinate info is not enabled, clear any existing info
+    const state = this.getFeatureInfoState(mapId);
+    if (!state.coordinateInfoEnabled) {
+      this.deleteFeatureInfo(mapId, 'coordinate-info');
+      return;
+    }
+
+    const [lng, lat] = coordinates.lonlat;
+
+    Promise.allSettled([
+      fetch(`https://geogratis.gc.ca/services/delimitation/en/utmzone?bbox=${lng}%2C${lat}%2C${lng}%2C${lat}`).then((r) =>
+        r.json()
+      ) as Promise<TypeUtmZoneResponse>,
+      fetch(`https://geogratis.gc.ca/services/delimitation/en/nts?bbox=${lng}%2C${lat}%2C${lng}%2C${lat}`).then((r) =>
+        r.json()
+      ) as Promise<TypeNtsResponse>,
+      fetch(`https://geogratis.gc.ca/services/elevation/cdem/altitude?lat=${lat}&lon=${lng}`).then((r) =>
+        r.json()
+      ) as Promise<TypeAltitudeResponse>,
+      // fetch(`https://ngdc.noaa.gov/geomag-web/calculators/calculateDeclination?lat1=${lat}&lon1=${lng}&key=zNEw7&resultFormat=json`, {
+      //   mode: 'cors',
+      // }).then((r) => r.json()) as Promise<TypeDeclinationResponse>,
+    ])
+      .then(([utmResult, ntsResult, elevationResult]) => {
+        const utmData = utmResult.status === 'fulfilled' ? utmResult.value : undefined;
+        const ntsData = ntsResult.status === 'fulfilled' ? ntsResult.value : undefined;
+        const elevationData = elevationResult.status === 'fulfilled' ? elevationResult.value : undefined;
+        // const declinationData = declinationResult.status === 'fulfilled' ? declinationResult.value : undefined;
+
+        const utmIdentifier = utmData?.features[0].properties.identifier;
+        const [easting, northing] = utmIdentifier
+          ? Projection.transformToUTMNorthingEasting(coordinates.lonlat, utmIdentifier)
+          : [undefined, undefined];
+
+        // Create coordinate info layer entry
+        const coordinateInfoLayer = {
+          layerPath: 'coordinate-info',
+          layerName: 'Coordinate Information',
+          eventListenerEnabled: false,
+          queryStatus: 'processed',
+          layerStatus: 'processed',
+          numOffeature: 1,
+          features: [
+            {
+              uid: 'coordinate-info-feature',
+              fieldInfo: {
+                Latitude: { value: lat.toFixed(6), fieldKey: 0, dataType: 'number', alias: 'Latitude', domain: null },
+                Longitude: { value: lng.toFixed(6), fieldKey: 1, dataType: 'number', alias: 'Longitude', domain: null },
+                'UTM Zone': { value: utmIdentifier, fieldKey: 2, dataType: 'string', alias: 'UTM Identifier', domain: null },
+                Easting: { value: easting?.toFixed(2), fieldKey: 3, dataType: 'number', alias: 'Easting', domain: null },
+                Northing: { value: northing?.toFixed(2), fieldKey: 4, dataType: 'number', alias: 'Northing', domain: null },
+                'NTS Mapsheet': {
+                  value: ntsData?.features.map((f) => f.properties.name).join(', '),
+                  fieldKey: 5,
+                  dataType: 'string',
+                  alias: 'NTS Mapsheets',
+                  domain: null,
+                },
+                Elevation: {
+                  value: elevationData ? `${elevationData.altitude} m` : undefined,
+                  fieldKey: 6,
+                  dataType: 'string',
+                  alias: 'Elevation',
+                  domain: null,
+                },
+              },
+              extent: undefined,
+              geometry: undefined,
+              featureKey: 0,
+              nameField: null,
+              geoviewLayerType: 'CSV',
+              layerPath: 'coordinate-info',
+            },
+          ],
+        } as unknown as TypeFeatureInfoResultSetEntry & { numOffeatures: number };
+
+        const featureInfoState = this.getFeatureInfoState(mapId);
+        const currentLayerDataArray = [...featureInfoState.layerDataArray];
+
+        // Remove existing coordinate info layer if it exists
+        const existingIndex = currentLayerDataArray.findIndex((layer) => layer.layerPath === 'coordinate-info');
+        if (existingIndex >= 0) {
+          currentLayerDataArray.splice(existingIndex, 1);
+        }
+
+        // Add the new coordinate info layer
+        currentLayerDataArray.push(coordinateInfoLayer);
+
+        // Update the store directly
+        this.propagateFeatureInfoToStore(mapId, 'click', coordinateInfoLayer).catch((error) => {
+          logger.logError('Failed to propagate coordinate info', error);
+        });
+      })
+      .catch((error: unknown) => {
+        // Log
+        logger.logPromiseFailed('Failed to get coordinate info', error);
+      });
+  }
+
   // #endregion
 
   // **********************************************************
@@ -244,3 +374,80 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   // GV NEVER add a store action who does set state AND map action at a same time.
   // GV Review the action in store state to make sure
 }
+
+// Request Schemas for Coordinate Info requests
+
+// type TypeDeclinationResult = {
+//   date: number;
+//   elevation: number;
+//   declination: number;
+//   alt_info: string;
+//   latitude: number;
+//   declination_sv: number;
+//   declination_uncertainty: number;
+//   longitude: number;
+// };
+
+// type TypeDeclinationUnits = {
+//   elevation: string;
+//   declination: string;
+//   declination_sv: string;
+//   latitude: string;
+//   declination_uncertainty: string;
+//   longitude: string;
+// };
+
+// type TypeDeclinationResponse = {
+//   result: TypeDeclinationResult[];
+//   model: string;
+//   units: TypeDeclinationUnits;
+//   version: string;
+// };
+
+type TypeUtmZoneFeature = {
+  type: 'Feature';
+  properties: {
+    identifier: string;
+    centralMeridian: number;
+  };
+  bbox: [number, number, number, number];
+  geometry: {
+    type: 'Polygon';
+    coordinates: number[][][];
+  };
+};
+
+type TypeUtmZoneResponse = {
+  type: 'FeatureCollection';
+  count: number;
+  features: TypeUtmZoneFeature[];
+};
+
+type TypeNtsFeature = {
+  type: 'Feature';
+  properties: {
+    identifier: string;
+    name: string;
+    scale: number;
+  };
+  bbox: [number, number, number, number];
+  geometry: {
+    type: 'Polygon';
+    coordinates: number[][][];
+  };
+};
+
+type TypeNtsResponse = {
+  type: 'FeatureCollection';
+  count: number;
+  features: TypeNtsFeature[];
+};
+
+type TypeAltitudeResponse = {
+  altitude: number;
+  vertex: boolean;
+  geometry: {
+    type: 'Point';
+    coordinates: [number, number];
+  };
+};

@@ -188,7 +188,22 @@
     "featureDetailsTitle": "Élément {count} sur {total}",
     "featureDetailModalTitle": "Détails de l'élément",
     "notSymbolized": "Non symbolisé",
-    "nullValue": "Nul"
+    "nullValue": "Nul",
+    "toggleCoordinateInfo": "Basculer l'outil d'informations sur les coordonnées",
+    "showCoordinateInfo": "Afficher les informations sur les coordonnées",
+    "noCoordinateInfo": "Aucune information sur les coordonnées",
+    "coordinateInfoTitle": "Informations sur les coordonnées",
+    "geographicCoordinates": "Coordonnée géographique",
+    "degreesDecimal": "Degrés décimaux",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "degreesMinutesSeconds": "Degrés Minutes Secondes (DMS)",
+    "utmCoordinates": "Coordonnées UTM",
+    "zone": "Zone UTM",
+    "easting": "Easting",
+    "northing": "Northing",
+    "ntsMapsheet": "Feuille de carte du SNRC",
+    "elevation": "Élévation"
   },
   "lightbox": {
     "next": "Prochaine",

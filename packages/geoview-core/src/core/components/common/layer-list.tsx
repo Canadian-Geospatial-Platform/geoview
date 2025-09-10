@@ -2,7 +2,7 @@ import { ReactNode, memo, useCallback, useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { animated } from '@react-spring/web';
-import { Box, List, ListItem, ListItemButton, Paper, Tooltip, Typography, ProgressBar } from '@/ui';
+import { Box, List, ListItem, ListItemButton, Paper, Tooltip, Typography, ProgressBar, LocationSearchingIcon } from '@/ui';
 
 import { TypeFeatureInfoEntry, TypeQueryStatus, TypeLayerStatus } from '@/api/config/types/map-schema-types';
 import { getSxClasses } from './layer-list-style';
@@ -124,7 +124,12 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
               disabled={isDisabled || isLoading}
               aria-label={layer.layerName}
             >
-              {layer.layerPath && !layer.content && <LayerIcon layerPath={layer.layerPath} />}
+              {layer.layerPath === 'coordinate-info' ? (
+                // Treat
+                <LocationSearchingIcon />
+              ) : (
+                layer.layerPath && !layer.content && <LayerIcon layerPath={layer.layerPath} />
+              )}
               <Box sx={sxClasses.listPrimaryText}>
                 <Typography component="div" className="layerTitle">
                   {layer.layerName}

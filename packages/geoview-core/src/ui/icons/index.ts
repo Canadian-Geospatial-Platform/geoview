@@ -70,6 +70,7 @@ export {
   Layers as LayersIcon,
   LayersClearOutlined as LayersClearOutlinedIcon,
   LayersOutlined as LayersOutlinedIcon,
+  LocationSearching as LocationSearchingIcon,
   ListAlt as ListAltIcon,
   LiveHelp as TodoIcon,
   Lock as LockIcon,
