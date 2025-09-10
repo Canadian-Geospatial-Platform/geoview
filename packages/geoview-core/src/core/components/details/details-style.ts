@@ -84,4 +84,25 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       },
     },
   },
+  coordinateInfoContainer: {
+    padding: 2,
+  },
+  coordinateInfoTitle: {
+    mb: 2,
+    mt: 2,
+    ml: 10,
+  },
+  coordinateInfoSection: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+  },
+  coordinateInfoSectionTitle: {
+    fontWeight: 'bold',
+  },
+  coordinateInfoContent: {
+    ml: 2,
+  },
+  coordinateInfoSubContent: {
+    ml: 2,
+  },
 });
