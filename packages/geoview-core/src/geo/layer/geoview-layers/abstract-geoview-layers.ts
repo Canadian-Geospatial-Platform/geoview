@@ -213,6 +213,19 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
+   * Gets the first layer entry name if any sub-layers exist or else gets the geoviewLayerName or even the geoviewLayerId.
+   * @returns {string} The layer entry name if any sub-layers exist or the geoviewLayerName or even the geoviewLayerId.
+   */
+  geLayerEntryNameOrGeoviewLayerName(): string {
+    if (this.listOfLayerEntryConfig?.length === 1) {
+      // Get the layer name from the object (instance or type) inside the listOfLayerEntryConfig array
+      const layerEntryName = ConfigBaseClass.getClassOrTypeLayerName(this.listOfLayerEntryConfig[0]);
+      if (layerEntryName) return layerEntryName;
+    }
+    return this.geoviewLayerName || this.geoviewLayerId;
+  }
+
+  /**
    * Gets the Geoview layer id.
    * @returns {string} The geoview layer id
    */
@@ -344,11 +357,11 @@ export abstract class AbstractGeoViewLayer {
       // If ResponseEmptyError error
       if (error instanceof ResponseEmptyError) {
         // Throw higher
-        throw new LayerServiceMetadataEmptyError(this.geoviewLayerId, this.geoviewLayerName);
+        throw new LayerServiceMetadataEmptyError(this.geoviewLayerId, this.geLayerEntryNameOrGeoviewLayerName());
       }
 
       // Throw higher
-      throw new LayerServiceMetadataUnableToFetchError(this.geoviewLayerId, this.geoviewLayerName, formatError(error));
+      throw new LayerServiceMetadataUnableToFetchError(this.geoviewLayerId, this.geLayerEntryNameOrGeoviewLayerName(), formatError(error));
     }
   }
 
@@ -867,7 +880,7 @@ export abstract class AbstractGeoViewLayer {
         if (ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo('processed', this.listOfLayerEntryConfig)) return true;
 
         // Emit message
-        this.emitMessage('warning.layer.metadataTakingLongTime', [this.geoviewLayerName || this.geoviewLayerId], 'warning');
+        this.emitMessage('warning.layer.metadataTakingLongTime', [this.geLayerEntryNameOrGeoviewLayerName()], 'warning');
 
         return false;
       },
