@@ -189,7 +189,22 @@
     "featureDetailsTitle": "Feature {count} of {total}",
     "featureDetailModalTitle": "Feature Detail",
     "notSymbolized": "Not symbolized",
-    "nullValue": "Null"
+    "nullValue": "Null",
+    "toggleCoordinateInfo": "Toggle coordinate info tool",
+    "showCoordinateInfo": "Show coord info",
+    "noCoordinateInfo": "No Coordinate Info",
+    "coordinateInfoTitle": "Coordinate Info",
+    "geographicCoordinates": "Geographic Coordinates",
+    "degreesDecimal": "Decimal Degrees",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "degreesMinutesSeconds": "Degrees Minutes Seconds (DMS)",
+    "utmCoordinates": "UTM Coordinates",
+    "zone": "UTM Zone",
+    "easting": "Easting",
+    "northing": "Northing",
+    "ntsMapsheet": "NTS Mapsheet",
+    "elevation": "Elevation"
   },
   "lightbox": {
     "next": "Next",

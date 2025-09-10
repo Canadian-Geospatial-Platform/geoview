@@ -238,6 +238,32 @@ export abstract class Projection {
   }
 
   /**
+   * Function for converting a coordinate to a UTM Northing / Easting
+   * @param {Coordinate} coordinate - The coordinate to be converted
+   * @param {string} utmZone - The utm zone the return coordinates will be in
+   * @returns {Coordinate} The returned coordinates in UTM Northing / Easting
+   */
+  static transformToUTMNorthingEasting(coordinate: Coordinate, utmZone: string): Coordinate {
+    const lat = coordinate[1];
+
+    // Determine the EPSG Code
+    const utmIdentifier = utmZone;
+    const hemisphere = lat > 0 ? '6' : '7';
+    const utmEpsgCode = `EPSG:23${hemisphere}${utmIdentifier}`;
+
+    // Register the EPSG Code if it doesn't already exist
+    const def = proj4.defs(utmEpsgCode);
+    if (!def) {
+      const defString = `+proj=utm +zone=${utmZone} ${lat < 0 && '+south'} +datum=WGS84 +units=m +no_defs`;
+      proj4.defs(utmEpsgCode, defString);
+      register(proj4);
+    }
+
+    const utmProjection = Projection.getProjectionFromString(utmEpsgCode);
+    return Projection.transform(coordinate, Projection.PROJECTIONS['4326'], utmProjection);
+  }
+
+  /**
    * Fetches definitions for unsupported projections and adds them.
    * @param {TypeProjection} projection - Object containing wkid and possibly latestWkid from service metadata.
    */

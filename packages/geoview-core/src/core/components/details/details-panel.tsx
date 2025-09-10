@@ -8,6 +8,7 @@ import {
   useDetailsCheckedFeatures,
   useDetailsLayerDataArrayBatch,
   useDetailsSelectedLayerPath,
+  useDetailsCoordinateInfoEnabled,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useMapStoreActions, useMapVisibleLayers, useMapClickCoordinates } from '@/core/stores/store-interface-and-intial-values/map-state';
@@ -20,6 +21,7 @@ import { getSxClasses } from './details-style';
 import { FeatureInfo } from './feature-info';
 import { CONTAINER_TYPE, FEATURE_INFO_STATUS, TABS } from '@/core/utils/constant';
 import { DetailsSkeleton } from './details-skeleton';
+import { CoordinateInfo, CoordinateInfoSwitch } from './coordinate-info';
 import { TypeContainerBox } from '@/core/types/global-types';
 
 interface DetailsPanelType {
@@ -46,6 +48,7 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
   const selectedLayerPath = useDetailsSelectedLayerPath();
   const arrayOfLayerDataBatch = useDetailsLayerDataArrayBatch();
   const checkedFeatures = useDetailsCheckedFeatures();
+  const coordinateInfoEnabled = useDetailsCoordinateInfoEnabled();
   const visibleLayers = useMapVisibleLayers();
   const mapClickCoordinates = useMapClickCoordinates();
   const { setSelectedLayerPath, removeCheckedFeature, setLayerDataArrayBatchLayerPathBypass } = useDetailsStoreActions();
@@ -139,15 +142,29 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
           }) as LayerListEntry
       );
 
+    // Add coordinate info layer if it exists in arrayOfLayerDataBatch
+    const coordinateInfoLayer = arrayOfLayerDataBatch.find((layer) => layer.layerPath === 'coordinate-info');
+    if (coordinateInfoLayer && coordinateInfoEnabled) {
+      layerListEntries.unshift({
+        layerName: coordinateInfoLayer.layerName ?? 'Coordinate Information',
+        layerPath: coordinateInfoLayer.layerPath,
+        layerStatus: coordinateInfoLayer.layerStatus,
+        queryStatus: coordinateInfoLayer.queryStatus,
+        numOffeatures: coordinateInfoLayer.features?.length ?? 0,
+        layerFeatures: getNumFeaturesLabel(coordinateInfoLayer),
+        tooltip: `${coordinateInfoLayer.layerName}, ${getNumFeaturesLabel(coordinateInfoLayer)}`,
+        layerUniqueId: `${mapId}-${TABS.DETAILS}-${coordinateInfoLayer.layerPath}`,
+      });
+    }
+
     // Split the layers list into two groups while preserving order
     const layersWithFeatures = layerListEntries.filter((layer) => layer.numOffeatures && layer.numOffeatures > 0);
     const layersWithoutFeatures = layerListEntries.filter((layer) => layer.numOffeatures === 0);
 
     // Combine the lists (features first, then no features)
     const orderedLayerListEntries = [...layersWithFeatures, ...layersWithoutFeatures];
-
     return orderedLayerListEntries;
-  }, [visibleLayers, arrayOfLayerDataBatch, getNumFeaturesLabel, mapId, isLayerHiddenOnMap]);
+  }, [visibleLayers, arrayOfLayerDataBatch, coordinateInfoEnabled, isLayerHiddenOnMap, getNumFeaturesLabel, mapId]);
 
   /**
    * Memoizes the selected layer for the LayerList component.
@@ -396,6 +413,10 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
    * @returns {JSX.Element | null} JSX.Element | null
    */
   const renderContent = (): JSX.Element | null => {
+    if (selectedLayerPath === 'coordinate-info') {
+      return <CoordinateInfo fullWidth={fullWidth} />;
+    }
+
     // If there is no layer, return null for the guide to show
     if ((memoLayersList && memoLayersList.length === 0) || selectedLayerPath === '') {
       return null;
@@ -469,6 +490,7 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
   return (
     <Layout
       containerType={containerType}
+      leftTopChild={<CoordinateInfoSwitch />}
       selectedLayerPath={selectedLayerPath}
       layerList={memoLayersList}
       onLayerListClicked={(layerEntry) => handleLayerChange(layerEntry)}

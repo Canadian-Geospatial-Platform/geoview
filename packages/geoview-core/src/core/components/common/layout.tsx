@@ -11,6 +11,7 @@ import { useSelectorLayerName } from '@/core/stores/store-interface-and-intial-v
 
 interface LayoutProps {
   children?: ReactNode;
+  leftTopChild?: ReactNode;
   guideContentIds?: string[];
   layerList: LayerListEntry[];
   selectedLayerPath: string | undefined;
@@ -33,6 +34,7 @@ const TITLE_STYLES = {
 
 export function Layout({
   children,
+  leftTopChild,
   guideContentIds,
   layerList,
   selectedLayerPath,
@@ -110,7 +112,7 @@ export function Layout({
   return (
     <ResponsiveGridLayout
       ref={responsiveLayoutRef}
-      leftTop={null}
+      leftTop={leftTopChild}
       leftMain={renderLayerList()}
       rightMain={children}
       guideContentIds={guideContentIds}

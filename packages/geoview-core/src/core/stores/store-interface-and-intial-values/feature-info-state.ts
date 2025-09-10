@@ -18,6 +18,7 @@ export interface IFeatureInfoState {
   layerDataArrayBatch: TypeFeatureInfoResultSetEntry[];
   layerDataArrayBatchLayerPathBypass: string;
   selectedLayerPath: string;
+  coordinateInfoEnabled: boolean;
 
   actions: {
     addCheckedFeature: (feature: TypeFeatureInfoEntry) => void;
@@ -26,6 +27,7 @@ export interface IFeatureInfoState {
     setLayerDataArrayBatch: (layerDataArray: TypeFeatureInfoResultSetEntry[]) => void;
     setLayerDataArrayBatchLayerPathBypass: (layerPath: string) => void;
     setSelectedLayerPath: (selectedLayerPath: string) => void;
+    toggleCoordinateInfoEnabled: () => void;
   };
 
   setterActions: {
@@ -35,6 +37,7 @@ export interface IFeatureInfoState {
     setLayerDataArrayBatch: (layerDataArray: TypeFeatureInfoResultSetEntry[]) => void;
     setLayerDataArrayBatchLayerPathBypass: (layerPath: string) => void;
     setSelectedLayerPath: (selectedLayerPath: string) => void;
+    toggleCoordinateInfoEnabled: () => void;
   };
 }
 
@@ -53,6 +56,7 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
     layerDataArrayBatch: [],
     layerDataArrayBatchLayerPathBypass: '',
     selectedLayerPath: '',
+    coordinateInfoEnabled: false,
 
     // #region ACTIONS
 
@@ -80,6 +84,10 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
       setSelectedLayerPath(selectedLayerPath: string) {
         // Redirect to setter
         get().detailsState.setterActions.setSelectedLayerPath(selectedLayerPath);
+      },
+      toggleCoordinateInfoEnabled: (): void => {
+        // Redirect to setter
+        get().detailsState.setterActions.toggleCoordinateInfoEnabled();
       },
     },
 
@@ -135,6 +143,18 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
           },
         });
       },
+      toggleCoordinateInfoEnabled: () => {
+        const { coordinateInfoEnabled } = get().detailsState;
+        set({
+          detailsState: {
+            ...get().detailsState,
+            coordinateInfoEnabled: !coordinateInfoEnabled,
+          },
+        });
+        if (coordinateInfoEnabled) {
+          FeatureInfoEventProcessor.deleteFeatureInfo(get().mapId, 'coordinate-info');
+        }
+      },
     },
 
     // #endregion ACTIONS
@@ -181,6 +201,9 @@ export const useDetailsLayerDataArray = (): TypeFeatureInfoResultSetEntry[] =>
 export const useDetailsLayerDataArrayBatch = (): TypeFeatureInfoResultSetEntry[] =>
   useStore(useGeoViewStore(), (state) => state.detailsState.layerDataArrayBatch);
 export const useDetailsSelectedLayerPath = (): string => useStore(useGeoViewStore(), (state) => state.detailsState.selectedLayerPath);
+
+export const useDetailsCoordinateInfoEnabled = (): boolean =>
+  useStore(useGeoViewStore(), (state) => state.detailsState.coordinateInfoEnabled);
 
 export const useDetailsStoreActions = (): FeatureInfoActions => useStore(useGeoViewStore(), (state) => state.detailsState.actions);
 
