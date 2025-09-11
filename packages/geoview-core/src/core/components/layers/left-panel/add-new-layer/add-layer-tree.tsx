@@ -6,9 +6,9 @@ import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
 import _ from 'lodash';
 import { logger } from '@/core/utils/logger';
-import { TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '@/api/config/types/layer-schema-types';
+import { TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '@/api/types/layer-schema-types';
 import { UtilAddLayer } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
-import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
+import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 
 export interface AddLayerTreeProps {
   layerTree: TypeGeoviewLayerConfig;

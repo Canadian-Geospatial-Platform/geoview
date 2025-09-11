@@ -14,7 +14,7 @@ import { CloseIcon } from '@/ui/icons/index';
 import { IconButton, IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import { getSxClasses } from '@/ui/panel/panel-style';
 import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { DEFAULT_APPBAR_CORE } from '@/api/config/types/map-schema-types';
+import { DEFAULT_APPBAR_CORE } from '@/api/types/map-schema-types';
 import { FocusTrapContainer } from '@/core/components/common';
 import { logger } from '@/core/utils/logger';
 

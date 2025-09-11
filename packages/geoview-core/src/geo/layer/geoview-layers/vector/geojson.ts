@@ -12,10 +12,10 @@ import {
   TypeBaseVectorSourceInitialConfig,
   CONST_LAYER_TYPES,
   TypeMetadataGeoJSON,
-} from '@/api/config/types/layer-schema-types';
+} from '@/api/types/layer-schema-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
-import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
-import { VectorLayerEntryConfig, VectorLayerEntryConfigProps } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+import { GeoJSONLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
+import { VectorLayerEntryConfig, VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { logger } from '@/core/utils/logger';
 import {
@@ -23,7 +23,7 @@ import {
   LayerEntryConfigLayerIdNotFoundError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import { GVGeoJSON } from '@/geo/layer/gv-layers/vector/gv-geojson';
-import { ConfigBaseClass, TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
+import { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 
 export interface TypeGeoJSONLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.GEOJSON;

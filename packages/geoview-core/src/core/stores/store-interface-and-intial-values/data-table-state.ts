@@ -2,7 +2,7 @@ import { useStore } from 'zustand';
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
-import { TypeFeatureInfoEntry, TypeLayerData, TypeResultSet, TypeResultSetEntry } from '@/api/config/types/map-schema-types';
+import { TypeFeatureInfoEntry, TypeLayerData, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 

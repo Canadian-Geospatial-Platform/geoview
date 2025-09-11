@@ -5,7 +5,7 @@ import { TypeLegendLayer, TypeLegendItem } from '@/core/components/layers/types'
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { generateId } from '@/core/utils/utilities';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { CONST_LAYER_TYPES } from '@/api/config/types/layer-schema-types';
+import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 
 // ? I doubt we want to define an explicit type for this helper?
 export function useLegendHelpers(): unknown {

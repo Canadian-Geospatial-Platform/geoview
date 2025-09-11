@@ -5,25 +5,25 @@ import { Vector as VectorSource } from 'ol/source';
 import Feature from 'ol/Feature';
 
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
-import { TypeOutfields } from '@/api/config/types/map-schema-types';
+import { TypeOutfields } from '@/api/types/map-schema-types';
 import {
   TypeGeoviewLayerConfig,
   CONST_LAYER_TYPES,
   TypeMetadataOGCFeature,
   TypeLayerMetadataQueryables,
   TypeLayerMetadataOGC,
-} from '@/api/config/types/layer-schema-types';
+} from '@/api/types/layer-schema-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
-import { OgcFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
-import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+import { OgcFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
+import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { Fetch } from '@/core/utils/fetch-helper';
 import {
   LayerEntryConfigInvalidLayerEntryConfigError,
   LayerEntryConfigLayerIdNotFoundError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import { GVOGCFeature } from '@/geo/layer/gv-layers/vector/gv-ogc-feature';
-import { ConfigBaseClass, TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
+import { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 
 export interface TypeOgcFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.OGC_FEATURE;

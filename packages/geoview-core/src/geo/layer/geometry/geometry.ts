@@ -10,7 +10,7 @@ import { asArray, asString } from 'ol/color';
 import { MapViewer } from '@/geo/map/map-viewer';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { setAlphaColor, getScriptAndAssetURL, generateId } from '@/core/utils/utilities';
-import { TypeStyleGeometry } from '@/api/config/types/map-schema-types';
+import { TypeStyleGeometry } from '@/api/types/map-schema-types';
 import { Projection } from '@/geo/utils/projection';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';

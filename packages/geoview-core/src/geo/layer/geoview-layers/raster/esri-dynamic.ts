@@ -7,16 +7,16 @@ import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstrac
 import {
   EsriDynamicLayerEntryConfig,
   EsriDynamicLayerEntryConfigProps,
-} from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import { CONST_LAYER_TYPES, TypeGeoviewLayerConfig, TypeMetadataEsriDynamic } from '@/api/config/types/layer-schema-types';
+} from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
+import { CONST_LAYER_TYPES, TypeGeoviewLayerConfig, TypeMetadataEsriDynamic } from '@/api/types/layer-schema-types';
 
 import { commonProcessLayerMetadata, commonValidateListOfLayerEntryConfig } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { logger } from '@/core/utils/logger';
 import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 import { deepMergeObjects } from '@/core/utils/utilities';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
-import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
-import { ConfigBaseClass, TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
+import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
+import { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 
 export interface TypeEsriDynamicLayerConfig extends TypeGeoviewLayerConfig {
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_DYNAMIC;

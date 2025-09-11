@@ -2,7 +2,7 @@ import { createElement, ReactNode, useCallback } from 'react';
 import { useMapProjection, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
-import { TypeValidMapProjectionCodes } from '@/api/config/types/map-schema-types';
+import { TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
 import { TypePanelProps } from '@/ui/panel/panel-types';
 import { IconButtonPropsExtend, IconButton } from '@/ui/icon-button/icon-button';
 import { List, ListItem } from '@/ui/list';

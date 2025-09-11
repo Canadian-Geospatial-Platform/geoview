@@ -51,7 +51,7 @@ import { ArrowDownwardIcon, ArrowUpIcon, CenterFocusScaleIcon, LoopIcon, TableVi
 import { Divider } from '@/ui/divider/divider';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useUISelectedFooterLayerListItemId } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { TypeLayerStatus, TypeLayerControls } from '@/api/config/types/layer-schema-types';
+import { TypeLayerStatus, TypeLayerControls } from '@/api/types/layer-schema-types';
 
 interface SingleLayerProps {
   layerPath: string;

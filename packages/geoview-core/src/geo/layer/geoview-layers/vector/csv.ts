@@ -4,7 +4,7 @@ import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import Feature from 'ol/Feature';
 
-import { ConfigBaseClass, TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
+import { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
@@ -12,9 +12,9 @@ import {
   TypeGeoviewLayerConfig,
   TypeBaseVectorSourceInitialConfig,
   CONST_LAYER_TYPES,
-} from '@/api/config/types/layer-schema-types';
-import { CsvLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
-import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+} from '@/api/types/layer-schema-types';
+import { CsvLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
+import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { GVCSV } from '@/geo/layer/gv-layers/vector/gv-csv';
 
 export interface TypeSourceCSVInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {

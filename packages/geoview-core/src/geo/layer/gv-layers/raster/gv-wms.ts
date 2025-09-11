@@ -12,14 +12,14 @@ import { xmlToJson } from '@/core/utils/utilities';
 import { getExtentIntersection, validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { parseDateTimeValuesEsriImageOrWMS } from '@/geo/layer/gv-layers/utils';
 import { logger } from '@/core/utils/logger';
-import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { CONFIG_PROXY_URL, TypeFeatureInfoEntry } from '@/api/config/types/map-schema-types';
+import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import { CONFIG_PROXY_URL, TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import {
   CONST_LAYER_TYPES,
   TypeLayerMetadataWMSStyle,
   TypeLayerMetadataWMSStyleLegendUrl,
   TypeMetadataFeatureInfo,
-} from '@/api/config/types/layer-schema-types';
+} from '@/api/types/layer-schema-types';
 import { loadImage } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
@@ -28,7 +28,7 @@ import { LayerInvalidFeatureInfoFormatWMSError, LayerInvalidLayerFilterError } f
 import { MapViewer } from '@/geo/map/map-viewer';
 import { formatError, NetworkError } from '@/core/exceptions/core-exceptions';
 import { TypeDateFragments } from '@/core/utils/date-mgt';
-import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
+import { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 
 /**
  * Manages a WMS layer.

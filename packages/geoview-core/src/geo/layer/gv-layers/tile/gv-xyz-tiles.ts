@@ -4,11 +4,11 @@ import XYZ from 'ol/source/XYZ';
 import { Extent } from 'ol/extent';
 import { Projection as OLProjection } from 'ol/proj';
 
-import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
+import { XYZTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { AbstractGVTile } from '@/geo/layer/gv-layers/tile/abstract-gv-tile';
 import { featureInfoGetFieldType } from '@/geo/layer/gv-layers/utils';
 import { validateExtent } from '@/geo/utils/utilities';
-import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
+import { TypeOutfieldsType } from '@/api/types/map-schema-types';
 import { Projection } from '@/geo/utils/projection';
 
 /**

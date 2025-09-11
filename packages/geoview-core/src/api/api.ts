@@ -16,7 +16,7 @@ import { initMapDivFromFunctionCall, unmountMap } from '@/app';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { removeGeoviewStore } from '@/core/stores/stores-managers';
 import { InitDivNotExistError, MapViewerAlreadyExistsError, MapViewerNotFoundError } from '@/core/exceptions/geoview-exceptions';
-import { TypeMapFeaturesInstance } from '@/api/config/types/map-schema-types';
+import { TypeMapFeaturesInstance } from '@/api/types/map-schema-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 /**

@@ -4,7 +4,7 @@ import { initReactI18next } from 'react-i18next';
 import translationEn from '@public/locales/en/translation.json';
 import translationFr from '@public/locales/fr/translation.json';
 import { logger } from '@/core/utils/logger';
-import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
+import { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 
 /**
  * Common configuration object for i18n instances

@@ -3,7 +3,7 @@ import { EventType } from '@/geo/layer/layer-sets/abstract-layer-set';
 
 import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '@/api/event-processors/abstract-event-processor';
 import { UIEventProcessor } from './ui-event-processor';
-import { TypeResultSetEntry } from '@/api/config/types/map-schema-types';
+import { TypeResultSetEntry } from '@/api/types/map-schema-types';
 import { IFeatureInfoState, TypeFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { MapEventProcessor } from './map-event-processor';

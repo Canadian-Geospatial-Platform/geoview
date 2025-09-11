@@ -1,7 +1,7 @@
 import LayerGroup from 'ol/layer/Group';
 import { Projection as OLProjection } from 'ol/proj';
 
-import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
+import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import { LayerNotFoundError } from '@/core/exceptions/layer-exceptions';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 

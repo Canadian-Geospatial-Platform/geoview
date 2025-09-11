@@ -13,7 +13,7 @@ import { getMetersPerPixel, validateExtent } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { logger } from '@/core/utils/logger';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
+import { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import {
   TypeLayerStyleSettings,
   TypeFeatureInfoEntry,
@@ -24,8 +24,8 @@ import {
   TypeOutfieldsType,
   TypeValidMapProjectionCodes,
   TypeIconSymbolVectorConfig,
-} from '@/api/config/types/map-schema-types';
-import { CONST_LAYER_TYPES, TypeFeatureInfoLayerConfig, TypeLayerMetadataEsriExtent } from '@/api/config/types/layer-schema-types';
+} from '@/api/types/map-schema-types';
+import { CONST_LAYER_TYPES, TypeFeatureInfoLayerConfig, TypeLayerMetadataEsriExtent } from '@/api/types/layer-schema-types';
 import { esriGetFieldType, esriGetFieldDomain, parseDateTimeValuesEsriDynamic, GeometryJson } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';

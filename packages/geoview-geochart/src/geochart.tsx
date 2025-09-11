@@ -3,9 +3,9 @@ import { useAppDisplayLanguageById, useAppStoreActions } from 'geoview-core/core
 import { TypeGeochartResultSetEntry } from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
 import { MapEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/map-event-processor';
 import { TypeWindow } from 'geoview-core/core/types/global-types';
-import { TypeFeatureInfoEntry } from 'geoview-core/api/config/types/map-schema-types';
+import { TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';
 import { logger } from 'geoview-core/core/utils/logger';
-import { ConfigBaseClass } from 'geoview-core/core/utils/config/validation-classes/config-base-class';
+import { ConfigBaseClass } from 'geoview-core/api/config/validation-classes/config-base-class';
 import { findLayerDataAndConfigFromQueryResults, loadDatasources } from './geochart-parsing';
 import { PluginGeoChartConfig, GeoViewGeoChartConfig, GeoViewGeoChartConfigLayer } from './geochart-types';
 

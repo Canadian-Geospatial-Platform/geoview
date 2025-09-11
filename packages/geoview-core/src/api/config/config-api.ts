@@ -2,7 +2,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import Ajv from 'ajv';
 import addErrors from 'ajv-errors';
 
-import { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config';
+import { MapFeatureConfig } from '@/api/config/map-feature-config';
 import {
   DEFAULT_MAP_FEATURE_CONFIG,
   CONFIG_GEOCORE_TYPE,
@@ -19,22 +19,23 @@ import {
   MAP_CONFIG_SCHEMA_PATH,
   TypeValidVersions,
   TypeLayerStyleConfig,
-} from '@/api/config/types/map-schema-types';
+} from '@/api/types/map-schema-types';
 import {
   CONST_LAYER_TYPES,
   MapConfigLayerEntry,
   TypeGeoviewLayerConfig,
   TypeInitialGeoviewLayerType,
-} from '@/api/config/types/layer-schema-types';
-import { MapConfigError } from '@/api/config/types/classes/config-exceptions';
+} from '@/api/types/layer-schema-types';
+import { MapConfigError } from '@/core/exceptions/config-exceptions';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 
 import { isJsonString, isValidUUID, removeCommentsFromJSON } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
-import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
-import { UUIDmapConfigReader } from '@/core/utils/config/reader/uuid-config-reader';
-import { GeoPackageReader } from '@/core/utils/config/reader/geopackage-reader';
-import { ShapefileReader } from '@/core/utils/config/reader/shapefile-reader';
+import { GeoCore } from '@/api/config/geocore';
+import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import { UUIDmapConfigReader } from '@/api/config/reader/uuid-config-reader';
+import { GeoPackageReader } from '@/api/config/reader/geopackage-reader';
+import { ShapefileReader } from '@/api/config/reader/shapefile-reader';
 
 import { LayerApi } from '@/geo/layer/layer';
 import { getStyleFromEsriRenderer } from '@/geo/utils/renderer/esri-renderer';
@@ -43,7 +44,6 @@ import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { GeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
-import { GeoCore } from '@/geo/layer/other/geocore';
 import { ImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
 import { OgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
 import { VectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
