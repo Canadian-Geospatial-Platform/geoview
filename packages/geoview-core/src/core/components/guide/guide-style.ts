@@ -11,6 +11,8 @@ export const getSxClasses = (theme: Theme): SxStyles =>
   ({
     guideContainer: {
       height: '100%',
+      display: 'flex',
+      flexDirection: 'column',
       '& .responsive-layout-right-main-content': {
         backgroundColor: theme.palette.geoViewColor.white,
         '&:focus-visible': {
@@ -43,6 +45,16 @@ export const getSxClasses = (theme: Theme): SxStyles =>
     },
     rightPanelContainer: {
       color: theme.palette.geoViewColor.textColor.main,
+      '& .search-highlight': {
+        backgroundColor: theme.palette.warning.light,
+        padding: '2px 4px',
+        borderRadius: '2px',
+      },
+      '& .current-match': {
+        backgroundColor: theme.palette.warning.main,
+        color: 'white',
+        fontWeight: 'bold',
+      },
     },
     footerGuideListItemText: {
       '&:hover': {

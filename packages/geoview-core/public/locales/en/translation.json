@@ -315,6 +315,7 @@
   },
   "guide": {
     "title": "Guide",
+    "search": "Search guide...",
     "errorMessage": "Sorry, unable to find the help document!"
   },
   "footerBar": {
