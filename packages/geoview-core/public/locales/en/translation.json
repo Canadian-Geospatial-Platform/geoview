@@ -202,7 +202,7 @@
     "end": "Skip before map element",
     "focusdialog": {
       "title": "Keyboard navigation",
-      "main": "If enable, we will keep focus locked on the viewer.\nTo exit, press <strong>CTRL + Q</strong>",
+      "main": "If enabled, we will keep focus locked on the viewer.\nTo exit, press <strong>CTRL + Q</strong>",
       "button": {
         "enable": "Enable",
         "skip": "Skip"

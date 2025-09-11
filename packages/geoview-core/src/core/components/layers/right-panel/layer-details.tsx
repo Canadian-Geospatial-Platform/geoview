@@ -317,7 +317,15 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
   function renderItems(): JSX.Element {
     return (
-      <Grid container direction="column" spacing={0} sx={sxClasses.itemsGrid} justifyContent="left" justifyItems="stretch">
+      <Grid
+        className="layer-details-panel"
+        container
+        direction="column"
+        spacing={0}
+        sx={sxClasses.itemsGrid}
+        justifyContent="left"
+        justifyItems="stretch"
+      >
         {layerDetails.items.map((item) => (
           <Grid
             container

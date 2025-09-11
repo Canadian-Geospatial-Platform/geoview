@@ -52,6 +52,7 @@ export interface TypeWindow extends Window {
 export interface TypeReactUtilities {
   react: typeof React;
   createRoot: typeof createRoot;
+  createElement: typeof React.createElement;
 }
 
 /**

@@ -45,7 +45,8 @@ Hold viewer specific css not inside theme
 }
 
 /* override default MUI grid style */
-.MuiGrid-container {
+.layer-details-panel.MuiGrid-container,
+.layer-details-panel .MuiGrid-container {
   background: unset !important;
 }
 .MuiGrid-container:first-of-type:not(#footerbar-header) {

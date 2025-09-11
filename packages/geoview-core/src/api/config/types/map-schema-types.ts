@@ -64,6 +64,9 @@ export type TypeValidNavBarProps = 'zoom' | 'fullscreen' | 'home' | 'location' |
 /** Supported footer bar tabs */
 export type TypeValidFooterBarTabsCoreProps = 'legend' | 'layers' | 'details' | 'data-table' | 'time-slider' | 'geochart' | 'guide';
 
+/** Default tabs order */
+export const DEFAULT_FOOTER_TABS_ORDER = ['legend', 'layers', 'details', 'geochart', 'time-slider', 'data-table', 'guide'];
+
 /** Footer bar tabs custom definition. */
 export type TypeFooterBarTabsCustomProps = {
   id: string;

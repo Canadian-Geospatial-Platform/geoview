@@ -24,7 +24,7 @@ export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, appHeight: 
     width: '100%',
     '.tab-panel': {
       height: '100%',
-      backgroundColor: theme.palette.geoViewColor.bgColor.dark[50],
+      // backgroundColor: theme.palette.geoViewColor.bgColor.dark[50],
     },
   },
   tab: {
