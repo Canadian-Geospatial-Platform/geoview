@@ -46,6 +46,7 @@ export interface IMapState {
   currentProjection: TypeValidMapProjectionCodes;
   featureHighlightColor: TypeHighlightColors;
   fixNorth: boolean;
+  hideCoordinateInfoSwitch: boolean;
   highlightedFeatures: TypeFeatureInfoEntry[];
   homeView: TypeMapViewSettings | undefined;
   hoverFeatureInfo: TypeHoverFeatureInfo | undefined | null;
@@ -172,6 +173,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     currentProjection: DEFAULT_PROJECTION,
     featureHighlightColor: 'black',
     fixNorth: false,
+    hideCoordinateInfoSwitch: false,
     highlightedFeatures: [],
     homeView: undefined,
     hoverFeatureInfo: undefined,
@@ -219,6 +221,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           currentProjection: geoviewConfig.map.viewSettings.projection,
           currentBasemapOptions: geoviewConfig.map.basemapOptions,
           featureHighlightColor: geoviewConfig.map.highlightColor || 'black',
+          hideCoordinateInfoSwitch: geoviewConfig.globalSettings?.hideCoordinateInfoSwitch || false,
           homeView: geoviewConfig.map.viewSettings.homeView ||
             geoviewConfig.map.viewSettings.initialView || { zoomAndCenter: [3.5, MAP_CENTER[3857]] },
           initialView: geoviewConfig.map.viewSettings.initialView || { zoomAndCenter: [3.5, MAP_CENTER[3857]] },
@@ -1091,6 +1094,8 @@ export const useMapInitialFilters = (): Record<string, string> => useStore(useGe
 export const useMapInitialView = (): TypeMapViewSettings => useStore(useGeoViewStore(), (state) => state.mapState.initialView);
 export const useMapInteraction = (): TypeInteraction => useStore(useGeoViewStore(), (state) => state.mapState.interaction);
 export const useMapIsMouseInsideMap = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.isMouseInsideMap);
+export const useMapHideCoordinateInfoSwitch = (): boolean =>
+  useStore(useGeoViewStore(), (state) => state.mapState.hideCoordinateInfoSwitch);
 export const useMapHoverFeatureInfo = (): TypeHoverFeatureInfo => useStore(useGeoViewStore(), (state) => state.mapState.hoverFeatureInfo);
 export const useMapLoaded = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.mapLoaded);
 export const useMapDisplayed = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.mapDisplayed);

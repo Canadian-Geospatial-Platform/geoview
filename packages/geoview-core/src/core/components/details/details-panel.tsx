@@ -11,7 +11,12 @@ import {
   useDetailsCoordinateInfoEnabled,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
-import { useMapStoreActions, useMapVisibleLayers, useMapClickCoordinates } from '@/core/stores/store-interface-and-intial-values/map-state';
+import {
+  useMapStoreActions,
+  useMapVisibleLayers,
+  useMapClickCoordinates,
+  useMapHideCoordinateInfoSwitch,
+} from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import { TypeFeatureInfoEntry, TypeLayerData } from '@/api/types/map-schema-types';
 
@@ -49,6 +54,7 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
   const arrayOfLayerDataBatch = useDetailsLayerDataArrayBatch();
   const checkedFeatures = useDetailsCheckedFeatures();
   const coordinateInfoEnabled = useDetailsCoordinateInfoEnabled();
+  const hideCoordinateInfoSwitch = useMapHideCoordinateInfoSwitch();
   const visibleLayers = useMapVisibleLayers();
   const mapClickCoordinates = useMapClickCoordinates();
   const { setSelectedLayerPath, removeCheckedFeature, setLayerDataArrayBatchLayerPathBypass } = useDetailsStoreActions();
@@ -490,7 +496,7 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
   return (
     <Layout
       containerType={containerType}
-      leftTopChild={<CoordinateInfoSwitch />}
+      layoutSwitch={!hideCoordinateInfoSwitch ? <CoordinateInfoSwitch /> : undefined}
       selectedLayerPath={selectedLayerPath}
       layerList={memoLayersList}
       onLayerListClicked={(layerEntry) => handleLayerChange(layerEntry)}

@@ -49,5 +49,9 @@
   "navBar": ["basemap-select", "home", "zoom", "fullscreen"],
   "corePackages": [],
   "externalPackages": [],
-  "corePackagesConfig": []
+  "corePackagesConfig": [],
+  "globalSettings": {
+    "coordinateInfoEnabled": true,
+    "removeCoordinateInfo": false
+  }
 }
