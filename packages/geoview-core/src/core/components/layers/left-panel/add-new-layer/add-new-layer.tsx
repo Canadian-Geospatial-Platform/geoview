@@ -530,8 +530,7 @@ export function AddNewLayer(): JSX.Element {
       newGeoViewLayer = await GeoPackageReader.createLayerConfigFromGeoPackage(newGeoViewLayer as GeoPackageLayerConfig);
 
     // Use the config to convert simplified layer config into proper layer config
-    const config = new Config(language);
-    const configObj = config.initializeMapConfig(mapId, [newGeoViewLayer], (errorKey: string, params: string[]) => {
+    const configObj = Config.initializeMapConfig(mapId, [newGeoViewLayer], (errorKey: string, params: string[]) => {
       // Get the message for the logger
       const message = getLocalizedMessage(language, errorKey, params);
 

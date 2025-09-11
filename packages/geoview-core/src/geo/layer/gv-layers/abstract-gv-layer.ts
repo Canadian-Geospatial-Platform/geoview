@@ -305,7 +305,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     // If first time
     if (!this.loadedOnce) {
       // Now that the layer is loaded, set its visibility correctly (had to be done in the loaded event, not before, per prior note in pre-refactor)
-      this.setVisible(layerConfig.initialSettings?.states?.visible !== false);
+      this.setVisible(layerConfig.getInitialSettings()?.states?.visible ?? true); // default: true
 
       // Emit event for the first time the layer got loaded
       this.#emitLayerFirstLoaded();
@@ -959,12 +959,19 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
     // Set the layer options as read from the initialSettings
     // GV We disable the warnings, because this function purpose is to actually initialize the given parameter
+
+    // If a className is defined in the initial settings, set it in the layer options
     // eslint-disable-next-line no-param-reassign
-    if (layerConfig.initialSettings?.className !== undefined) layerOptions.className = layerConfig.initialSettings.className;
+    if (layerConfig.getInitialSettings()?.className !== undefined) layerOptions.className = layerConfig.getInitialSettings().className;
+
+    // If an extent is defined in the initial settings, set it in the layer options
     // eslint-disable-next-line no-param-reassign
-    if (layerConfig.initialSettings?.extent !== undefined) layerOptions.extent = layerConfig.initialSettings.extent;
-    // eslint-disable-next-line no-param-reassign
-    if (layerConfig.initialSettings?.states?.opacity !== undefined) layerOptions.opacity = layerConfig.initialSettings.states.opacity;
+    if (layerConfig.getInitialSettings()?.extent !== undefined) layerOptions.extent = layerConfig.getInitialSettings().extent;
+
+    // If an opacity is defined in the initial settings, set it in the layer options
+    if (layerConfig.getInitialSettings()?.states?.opacity !== undefined)
+      // eslint-disable-next-line no-param-reassign
+      layerOptions.opacity = layerConfig.getInitialSettings().states!.opacity;
   }
 
   /**

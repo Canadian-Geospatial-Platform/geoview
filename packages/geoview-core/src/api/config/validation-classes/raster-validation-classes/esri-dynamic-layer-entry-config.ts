@@ -21,12 +21,6 @@ export interface EsriDynamicLayerEntryConfigProps extends AbstractBaseLayerEntry
  * Type used to define a GeoView image layer to display on the map.
  */
 export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
-  /** Tag used to link the entry to a specific schema. */
-  override schemaTag = CONST_LAYER_TYPES.ESRI_DYNAMIC;
-
-  /** Layer entry data type. */
-  override entryType = CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE;
-
   /** The layer entry props that were used in the constructor. */
   declare layerEntryProps: EsriDynamicLayerEntryConfigProps;
 
@@ -41,7 +35,7 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * @param {EsriDynamicLayerEntryConfigProps | EsriDynamicLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
    */
   constructor(layerConfig: EsriDynamicLayerEntryConfigProps | EsriDynamicLayerEntryConfig) {
-    super(layerConfig);
+    super(layerConfig, CONST_LAYER_TYPES.ESRI_DYNAMIC, CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE);
     this.maxRecordCount = layerConfig.maxRecordCount;
 
     // Write the default properties when not specified

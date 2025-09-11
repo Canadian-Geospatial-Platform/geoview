@@ -539,7 +539,11 @@ export class LayerApi {
     // eslint-disable-next-line no-param-reassign
     geoviewLayerConfig.geoviewLayerId ||= generateId(18);
 
-    // TODO: Refactor - This should be dealt with the config classes and this line commented out
+    // TODO: Refactor - This should be dealt with the config classes and this line commented out.
+    // TO.DOCONT: Right now, this function is called when the configuration is first read and schema checked and everything and then again here when we're adding a geoviewLayerConfig.
+    // TO.DOCONT: Commenting the function from here would remove an redundancy call and it seems to be working in our templates when the line is commented. However, commenting it would
+    // TO.DOCONT: probably cause issues when this 'addGeoviewLayer' function is called by external?
+    // TO.DOCONT: PS: GeoCore also calls this 'validateListOfGeoviewLayerConfig' function from within 'createLayerConfigFromUUID'.
     ConfigValidation.validateListOfGeoviewLayerConfig([geoviewLayerConfig]);
 
     // TODO: Refactor - This should be dealt with the config classes and this line commented out, therefore, content of addGeoviewLayerStep2 becomes this addGeoviewLayer function.
@@ -879,16 +883,28 @@ export class LayerApi {
    */
   unregisterLayerConfig(layerConfig: ConfigBaseClass, unregisterOrderedLayerInfo: boolean = true): void {
     // Unregister from ordered layer info
-    if (unregisterOrderedLayerInfo) this.#unregisterFromOrderedLayerInfo(layerConfig);
+    if (unregisterOrderedLayerInfo) {
+      // Remove from ordered layer info
+      MapEventProcessor.removeOrderedLayerInfo(this.getMapId(), layerConfig.layerPath);
+    }
 
-    // Unregister from TimeSlider
-    this.#unregisterFromTimeSlider(layerConfig);
+    // If the TimeSlider plugin is initialized
+    if (TimeSliderEventProcessor.isTimeSliderInitialized(this.getMapId())) {
+      // Remove from the TimeSlider
+      TimeSliderEventProcessor.removeTimeSliderLayer(this.getMapId(), layerConfig.layerPath);
+    }
 
-    // Unregister from GeoChart
-    this.#unregisterFromGeoChart(layerConfig);
+    // If the geochart plugin is initialized
+    if (GeochartEventProcessor.isGeochartInitialized(this.getMapId())) {
+      // Remove from the GeoChart Charts
+      GeochartEventProcessor.removeGeochartChart(this.getMapId(), layerConfig.layerPath);
+    }
 
-    // Unregister from Swiper
-    this.#unregisterFromSwiper(layerConfig);
+    // If the swiper plugin is initialized
+    if (SwiperEventProcessor.isSwiperInitialized(this.getMapId())) {
+      // Remove it from the Swiper
+      SwiperEventProcessor.removeLayerPath(this.getMapId(), layerConfig.layerPath);
+    }
 
     // Tell the layer sets about it
     this.#allLayerSets.forEach((layerSet) => {
@@ -983,10 +999,6 @@ export class LayerApi {
         // Remove actual OL layer from the map
         if (this.getOLLayer(registeredLayerPath)) this.mapViewer.map.removeLayer(this.getOLLayer(registeredLayerPath) as BaseLayer);
 
-        // Set the layer status to error to ensure it is no longer loading
-        // TODO: This is to handle instances where the layer is deleted while still loading - this should be probably be handled via cleanup in the layer
-        this.getLayerEntryConfig(registeredLayerPath)?.setLayerStatusError();
-
         // Unregister layer config from the application
         this.unregisterLayerConfig(this.getLayerEntryConfig(registeredLayerPath)!);
 
@@ -1005,6 +1017,9 @@ export class LayerApi {
         delete this.#olLayers[registeredLayerPath];
       }
     });
+
+    // Now that some layers have been removed, check if they are all effectively loaded/error and update store if so
+    this.#checkIfAllLayersLoaded();
 
     // Remove from parents listOfLayerEntryConfig
     if (listOfLayerEntryConfigAffected) listOfLayerEntryConfigAffected.splice(indexToDelete!, 1);
@@ -1590,13 +1605,8 @@ export class LayerApi {
     // If the config is a layer entry (not a group)
     if (layerConfig instanceof AbstractBaseLayerEntryConfig) {
       // Check if all layers are loaded/error right now
-      const [allLoadedOrError] = this.checkLayerStatus('loaded');
-
-      // If all loaded/error
-      if (allLoadedOrError) {
-        // Update the store that all layers are loaded at this point
-        LegendEventProcessor.setLayersAreLoading(this.getMapId(), false);
-
+      const allLoaded = this.#checkIfAllLayersLoaded();
+      if (allLoaded) {
         // Emit about it
         this.#emitLayerAllLoaded({ config: layerConfig });
       }
@@ -1779,17 +1789,17 @@ export class LayerApi {
     // in visible range. Inheritance has already been passed in the config and the group layer visibility will
     // be handled in the map-viewer's handleMapZoomEnd by checking the children visibility
     const mapView = this.mapViewer.getView();
-    if ((layerConfig.initialSettings.maxZoom || layerConfig.getMaxScale()) && !(gvLayer instanceof GVGroupLayer)) {
+    if ((layerConfig.getInitialSettings().maxZoom || layerConfig.getMaxScale()) && !(gvLayer instanceof GVGroupLayer)) {
       let maxScaleZoomLevel = getZoomFromScale(mapView, layerConfig.getMaxScale());
       maxScaleZoomLevel = maxScaleZoomLevel ? Math.ceil(maxScaleZoomLevel * 100) / 100 : undefined;
-      const maxZoom = Math.min(layerConfig.initialSettings.maxZoom ?? Infinity, maxScaleZoomLevel ?? Infinity);
+      const maxZoom = Math.min(layerConfig.getInitialSettings().maxZoom ?? Infinity, maxScaleZoomLevel ?? Infinity);
       gvLayer.setMaxZoom(maxZoom);
     }
 
-    if ((layerConfig.initialSettings.minZoom || layerConfig.getMinScale()) && !(gvLayer instanceof GVGroupLayer)) {
+    if ((layerConfig.getInitialSettings().minZoom || layerConfig.getMinScale()) && !(gvLayer instanceof GVGroupLayer)) {
       let minScaleZoomLevel = getZoomFromScale(mapView, layerConfig.getMinScale());
       minScaleZoomLevel = minScaleZoomLevel ? Math.ceil(minScaleZoomLevel * 100) / 100 : undefined;
-      const minZoom = Math.max(layerConfig.initialSettings.minZoom ?? -Infinity, minScaleZoomLevel ?? -Infinity);
+      const minZoom = Math.max(layerConfig.getInitialSettings().minZoom ?? -Infinity, minScaleZoomLevel ?? -Infinity);
       gvLayer.setMinZoom(minZoom);
     }
 
@@ -1888,46 +1898,6 @@ export class LayerApi {
   }
 
   /**
-   * Unregisters layer information from layer info store.
-   * @param {ConfigBaseClass} layerConfig - The layer configuration to be unregistered.
-   * @private
-   */
-  #unregisterFromOrderedLayerInfo(layerConfig: ConfigBaseClass): void {
-    // Remove from ordered layer info
-    MapEventProcessor.removeOrderedLayerInfo(this.getMapId(), layerConfig.layerPath);
-  }
-
-  /**
-   * Unregisters layer information from TimeSlider.
-   * @param {ConfigBaseClass} layerConfig - The layer configuration to be unregistered.
-   * @private
-   */
-  #unregisterFromTimeSlider(layerConfig: ConfigBaseClass): void {
-    // Remove from the TimeSlider
-    TimeSliderEventProcessor.removeTimeSliderLayer(this.getMapId(), layerConfig.layerPath);
-  }
-
-  /**
-   * Unregisters layer information from GeoChart.
-   * @param {ConfigBaseClass} layerConfig - The layer configuration to be unregistered.
-   * @private
-   */
-  #unregisterFromGeoChart(layerConfig: ConfigBaseClass): void {
-    // Remove from the GeoChart Charts
-    GeochartEventProcessor.removeGeochartChart(this.getMapId(), layerConfig.layerPath);
-  }
-
-  /**
-   * Unregisters layer information from Swiper.
-   * @param {ConfigBaseClass} layerConfig - The layer configuration to be unregistered.
-   * @private
-   */
-  #unregisterFromSwiper(layerConfig: ConfigBaseClass): void {
-    // Remove it from the Swiper
-    SwiperEventProcessor.removeLayerPath(this.getMapId(), layerConfig.layerPath);
-  }
-
-  /**
    * Recursively gathers all bounds on the layers associated with the given layer path and store them in the bounds parameter.
    * @param {ConfigBaseClass} layerConfig - The layer config being processed
    * @param {Extent[]} bounds - The currently gathered bounds during the recursion
@@ -1966,6 +1936,23 @@ export class LayerApi {
         MapEventProcessor.addInitialFilter(this.getMapId(), layerConfig.layerPath, layerFilter);
       }
     }
+  }
+
+  /**
+   * Checks if all layers are loaded or error and update the store when so.
+   */
+  #checkIfAllLayersLoaded(): boolean {
+    // Get if all layers are loaded or error
+    const [allLoadedOrError] = this.checkLayerStatus('loaded');
+
+    // If all loaded/error
+    if (allLoadedOrError) {
+      // Update the store that all layers are loaded at this point
+      LegendEventProcessor.setLayersAreLoading(this.getMapId(), false);
+    }
+
+    // Return result
+    return allLoadedOrError;
   }
 
   // #endregion
@@ -2385,18 +2372,18 @@ export class LayerApi {
     const addSubLayerPathToLayerOrder = (layerEntryConfig: TypeLayerEntryConfig, layerPath: string): void => {
       const subLayerPath = layerPath.endsWith(`/${layerEntryConfig.layerId}`) ? layerPath : `${layerPath}/${layerEntryConfig.layerId}`;
 
+      const settings = ConfigBaseClass.getClassOrTypeInitialSettings(layerEntryConfig);
+      const featureInfo = layerEntryConfig.source?.featureInfo;
+
       const layerInfo: TypeOrderedLayerInfo = {
         layerPath: subLayerPath,
-        visible: layerEntryConfig.initialSettings?.states?.visible !== false,
-        queryable: layerEntryConfig.source?.featureInfo?.queryable !== undefined ? layerEntryConfig.source?.featureInfo?.queryable : true,
-        hoverable:
-          layerEntryConfig.initialSettings?.states?.hoverable !== undefined ? layerEntryConfig.initialSettings?.states?.hoverable : true,
-        legendCollapsed:
-          layerEntryConfig.initialSettings?.states?.legendCollapsed !== undefined
-            ? layerEntryConfig.initialSettings.states.legendCollapsed
-            : false,
+        visible: settings?.states?.visible ?? true, // default: true
+        queryable: featureInfo?.queryable ?? true, // default: true
+        hoverable: settings?.states?.hoverable ?? true, // default: true
+        legendCollapsed: settings?.states?.legendCollapsed ?? false, // default: false
         inVisibleRange: true,
       };
+
       newOrderedLayerInfos.push(layerInfo);
       if (layerEntryConfig.listOfLayerEntryConfig?.length) {
         layerEntryConfig.listOfLayerEntryConfig?.forEach((subLayerEntryConfig) => {
@@ -2408,15 +2395,17 @@ export class LayerApi {
     if ((geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId) {
       if ((geoviewLayerConfig as TypeGeoviewLayerConfig).listOfLayerEntryConfig.length > 1) {
         const layerPath = `${(geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId}/base-group`;
+        // Using as any, because even a TypeGeoviewLayerConfig can have initialSettings? To confirm...
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const settingsGVLC = ConfigBaseClass.getClassOrTypeInitialSettings(geoviewLayerConfig as any)?.states;
+
         const layerInfo: TypeOrderedLayerInfo = {
           layerPath,
-          legendCollapsed:
-            geoviewLayerConfig.initialSettings?.states?.legendCollapsed !== undefined
-              ? geoviewLayerConfig.initialSettings.states.legendCollapsed
-              : false,
-          visible: geoviewLayerConfig.initialSettings?.states?.visible !== false,
+          legendCollapsed: settingsGVLC?.legendCollapsed ?? false, // default: false
+          visible: settingsGVLC?.visible ?? true, // default: true
           inVisibleRange: true,
         };
+
         newOrderedLayerInfos.push(layerInfo);
         (geoviewLayerConfig as TypeGeoviewLayerConfig).listOfLayerEntryConfig.forEach((layerEntryConfig) => {
           addSubLayerPathToLayerOrder(layerEntryConfig, layerPath);

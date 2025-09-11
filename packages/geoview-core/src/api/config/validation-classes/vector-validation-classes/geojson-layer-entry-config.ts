@@ -1,5 +1,5 @@
 import { VectorLayerEntryConfig, VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
-import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES, TypeSourceGeoJSONInitialConfig } from '@/api/types/layer-schema-types';
+import { CONST_LAYER_TYPES, TypeSourceGeoJSONInitialConfig } from '@/api/types/layer-schema-types';
 import { Projection } from '@/geo/utils/projection';
 
 export interface GeoJSONLayerEntryConfigProps extends VectorLayerEntryConfigProps {
@@ -8,12 +8,6 @@ export interface GeoJSONLayerEntryConfigProps extends VectorLayerEntryConfigProp
 }
 
 export class GeoJSONLayerEntryConfig extends VectorLayerEntryConfig {
-  /** Tag used to link the entry to a specific schema. */
-  override schemaTag = CONST_LAYER_TYPES.GEOJSON;
-
-  /** Layer entry data type. */
-  override entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
-
   /** The layer entry props that were used in the constructor. */
   declare layerEntryProps: GeoJSONLayerEntryConfigProps;
 
@@ -24,7 +18,7 @@ export class GeoJSONLayerEntryConfig extends VectorLayerEntryConfig {
    * @param {GeoJSONLayerEntryConfigProps | GeoJSONLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
    */
   constructor(layerConfig: GeoJSONLayerEntryConfigProps | GeoJSONLayerEntryConfig) {
-    super(layerConfig);
+    super(layerConfig, CONST_LAYER_TYPES.GEOJSON);
 
     // Value for this.source.format can only be GeoJSON.
     this.source ??= { format: 'GeoJSON' };

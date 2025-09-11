@@ -110,7 +110,7 @@ export class GVEsriImage extends AbstractGVRaster {
       legendInfo.forEach((info) => {
         const styleInfo: TypeLayerStyleConfigInfo = {
           label: info.label,
-          visible: layerConfig.initialSettings.states?.visible || true,
+          visible: layerConfig.getInitialSettings().states?.visible ?? true, // default: true
           values: info.label.split(','),
           settings: {
             type: 'iconSymbol',

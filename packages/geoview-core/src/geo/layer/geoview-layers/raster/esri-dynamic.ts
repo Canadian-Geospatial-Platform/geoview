@@ -86,7 +86,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     const entriesTree = EsriDynamic.buildLayerEntriesTree(entries);
 
     // Redirect
-    // TODO: Check - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
+    // TODO: Check - Config init - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
     return EsriDynamic.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, this.metadataAccessPath, false, entriesTree);
   }
 

@@ -345,15 +345,13 @@ export function removeCommentsFromJSON(config: string): string {
 }
 
 /**
- * Parses JSON config
- *
- * @param {string} configObjStr - Map config to parse
- * @returns {unknown} Cleaned and parsed config object
+ * Parses JSON config string into a JSON object of type T.
+ * @param {string} configStr - Map config to parse
+ * @returns {T} Cleaned and parsed config object
  */
-// TODO: refactor - yves, move this function to config class
-export function parseJSONConfig(configObjStr: string): unknown {
+export function parseJSONConfig<T>(configStr: string): T {
   // remove CR and LF from the map config
-  let jsonString = configObjStr.replace(/(\r\n|\n|\r)/gm, '');
+  let jsonString = configStr.replace(/(\r\n|\n|\r)/gm, '');
   // replace apostrophes not preceded by a backslash with quotes
   jsonString = jsonString.replace(/(?<!\\)'/gm, '"');
   // replace apostrophes preceded by a backslash with a single apostrophe

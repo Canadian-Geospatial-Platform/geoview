@@ -152,8 +152,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
 
     const allTabs = { ...tabsList, ...memoTabs };
 
-    // TODO: Use the indexValue coming from the tab to order so custom tab can be placed anywhere
-    // inject guide tab at last position of tabs.
+    // Inject guide tab at last position of tabs.
     return Object.keys({ ...tabsList, ...{ guide: {} } }).map((tab, index) => {
       return {
         id: tab,

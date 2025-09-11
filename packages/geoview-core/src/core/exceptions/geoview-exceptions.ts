@@ -330,7 +330,7 @@ export class NoExtentError extends GeoViewError {
 export class InitDivNotExistError extends GeoViewError {
   /**
    * Creates an instance of InitDivNotExistError.
-   * @param {string} mapId - The map id for which a wront function call was made.
+   * @param {string} mapId - The map id for which a wrong function call was made.
    */
   constructor(mapId: string) {
     super('error.map.mapDivNotExists', [mapId]);
@@ -350,7 +350,7 @@ export class InitDivNotExistError extends GeoViewError {
 export class InitMapWrongCallError extends GeoViewError {
   /**
    * Creates an instance of InitMapWrongCallError.
-   * @param {string} mapId - The map id for which a wront function call was made.
+   * @param {string} mapId - The map id for which a wrong function call was made.
    */
   constructor(mapId: string) {
     super('error.map.mapWrongCall', [mapId]);
@@ -360,5 +360,25 @@ export class InitMapWrongCallError extends GeoViewError {
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, InitMapWrongCallError.prototype);
+  }
+}
+
+/**
+ * Error thrown when a plugin state hasn't been initialized and we're trying to access it.
+ */
+export class PluginStateUninitializedError extends GeoViewError {
+  /**
+   * Creates an instance of PluginStateUninitializedError.
+   * @param {string} pluginId - The plugin id for which the state was uninitialized.
+   * @param {string} mapId - The map id
+   */
+  constructor(pluginId: string, mapId: string) {
+    super('error.map.pluginStateUninitialized', [pluginId, mapId]);
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'PluginStateUninitializedError';
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, PluginStateUninitializedError.prototype);
   }
 }

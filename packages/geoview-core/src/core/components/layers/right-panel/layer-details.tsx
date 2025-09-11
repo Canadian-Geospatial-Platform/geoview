@@ -101,7 +101,6 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const sxClasses = getSxClasses(theme);
   const hiddenStyle = { color: theme.palette.grey[600], fontStyle: 'italic' };
 
-  const [isDataTableVisible, setIsDataTableVisible] = useState(false);
   const [isInfoCollapse, setIsInfoCollapse] = useState(false);
   const [allSublayersVisible, setAllSublayersVisible] = useState(true);
 
@@ -128,7 +127,6 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const layersData = useDataTableAllFeaturesDataArray();
   const language = useAppDisplayLanguage();
   const metadataUrl = useAppMetadataServiceURL();
-  const selectedLayer = layersData.find((_layer) => _layer.layerPath === layerDetails?.layerPath);
   const layerFilter = getLayerDefaultFilter(layerDetails.layerPath);
   const layerTimeDimension = getLayerTimeDimension(layerDetails.layerPath);
   const layerNativeProjection = getLayerServiceProjection(layerDetails.layerPath);
@@ -148,27 +146,6 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
   // Get the localized layer type
   const memoLocalizedLayerType = useMemo(() => UtilAddLayer.getLocalizeLayerType(language, true), [language]);
-
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('LAYER DETAILS', selectedLayer, layerDetails);
-    // TODO: refactor - remove timer!
-    // Reason for timer:- when layer detail component is loaded, behind the scene we send query to fetch the features.
-    // After component is rendered and fetching features is done, eventhough store is update, it never re rendered this component
-    // thats why we need to update the state so that layers data is fetched again from store.
-    let timer: NodeJS.Timeout;
-    if (!selectedLayer) {
-      setIsDataTableVisible(true);
-    } else {
-      timer = setTimeout(() => {
-        setIsDataTableVisible(true);
-      }, 100);
-    }
-    return () => {
-      setIsDataTableVisible(false);
-      if (timer) clearTimeout(timer);
-    };
-  }, [layersData, layerDetails, selectedLayer]);
 
   // GV Wrapped in useEffect since it was throwing a warning otherwise
   useEffect(() => {
@@ -404,7 +381,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   function renderLayerButtons(): JSX.Element {
     return (
       <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px', marginLeft: 'auto' }}>
-        {isDataTableVisible && datatableSettings[layerDetails.layerPath] && renderDetailsButton()}
+        {datatableSettings[layerDetails.layerPath] && renderDetailsButton()}
         <IconButton tooltip={t('legend.refreshLayer')!} className="buttonOutline" onClick={handleRefreshLayer}>
           <RestartAltIcon />
         </IconButton>
@@ -431,7 +408,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
   const renderWMSImage = (): JSX.Element | null => {
     if (
-      layerDetails.type === 'ogcWms' &&
+      layerDetails.type === CONST_LAYER_TYPES.WMS &&
       layerDetails.icons.length &&
       layerDetails.icons[0].iconImage &&
       layerDetails.icons[0].iconImage !== 'no data'

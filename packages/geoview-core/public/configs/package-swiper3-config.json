@@ -27,7 +27,7 @@
                     "name": "band-0-pixel-value",
                     "alias": "Pixel value",
                     "type": "number",
-                    "domain": []
+                    "domain": null
                   }
                 ]
               }

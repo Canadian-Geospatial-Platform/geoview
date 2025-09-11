@@ -1,6 +1,6 @@
 import { VectorLayerEntryConfig, VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { TypeSourceCSVInitialConfig } from '@/geo/layer/geoview-layers/vector/csv';
-import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
+import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { Projection } from '@/geo/utils/projection';
 
 export interface CsvLayerEntryConfigProps extends VectorLayerEntryConfigProps {
@@ -13,12 +13,6 @@ export interface CsvLayerEntryConfigProps extends VectorLayerEntryConfigProps {
 }
 
 export class CsvLayerEntryConfig extends VectorLayerEntryConfig {
-  /** Tag used to link the entry to a specific schema. */
-  override schemaTag = CONST_LAYER_TYPES.CSV;
-
-  /** Layer entry data type. */
-  override entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
-
   /** The layer entry props that were used in the constructor. */
   declare layerEntryProps: CsvLayerEntryConfigProps;
 
@@ -33,7 +27,7 @@ export class CsvLayerEntryConfig extends VectorLayerEntryConfig {
    * @param {CsvLayerEntryConfigProps | CsvLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
    */
   constructor(layerConfig: CsvLayerEntryConfigProps | CsvLayerEntryConfig) {
-    super(layerConfig);
+    super(layerConfig, CONST_LAYER_TYPES.CSV);
     this.valueSeparator = layerConfig.valueSeparator;
 
     // Write the default properties when not specified

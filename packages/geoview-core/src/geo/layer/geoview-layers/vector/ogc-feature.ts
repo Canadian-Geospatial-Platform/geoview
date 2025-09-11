@@ -13,7 +13,6 @@ import {
   TypeLayerMetadataQueryables,
   TypeLayerMetadataOGC,
 } from '@/api/types/layer-schema-types';
-import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { OgcFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
@@ -95,7 +94,7 @@ export class OgcFeature extends AbstractGeoViewVector {
     }
 
     // Redirect
-    // TODO: Check - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
+    // TODO: Check - Config init - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
     return OgcFeature.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, entries);
   }
 
@@ -121,21 +120,23 @@ export class OgcFeature extends AbstractGeoViewVector {
       // If found description, replace the name
       if (foundCollection.description) layerConfig.setLayerName(foundCollection.description);
 
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
+      // Validate and update the extent initial settings
+      layerConfig.validateUpdateInitialSettingsExtent();
 
-      if (!layerConfig.initialSettings.bounds && foundCollection.extent?.spatial?.bbox && foundCollection.extent?.spatial?.crs) {
+      // If no bounds defined in the initial settings and an extent is defined in the metadata
+      if (!layerConfig.getInitialSettings().bounds && foundCollection.extent?.spatial?.bbox && foundCollection.extent?.spatial?.crs) {
         const latlonExtent = Projection.transformExtentFromProj(
           foundCollection.extent.spatial.bbox[0],
           Projection.getProjectionFromString(foundCollection.extent.spatial.crs),
           Projection.getProjectionLonLat()
         );
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.initialSettings.bounds = latlonExtent;
+
+        // Update the bounds initial settings
+        layerConfig.updateInitialSettings({ bounds: latlonExtent });
       }
 
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.initialSettings.bounds = validateExtentWhenDefined(layerConfig.initialSettings.bounds);
+      // Validate and update the bounds initial settings
+      layerConfig.validateUpdateInitialSettingsBounds();
       return;
     }
 

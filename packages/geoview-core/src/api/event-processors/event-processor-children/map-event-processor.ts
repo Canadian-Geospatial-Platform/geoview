@@ -1208,7 +1208,13 @@ export class MapEventProcessor extends AbstractEventProcessor {
     if (geoviewLayer) {
       const initialFilter = this.getInitialFilter(mapId, layerPath);
       const tableFilter = DataTableEventProcessor.getTableFilter(mapId, layerPath);
-      const sliderFilter = TimeSliderEventProcessor.getTimeSliderFilter(mapId, layerPath);
+
+      // If the TimeSlider is initialized
+      let sliderFilter;
+      if (TimeSliderEventProcessor.isTimeSliderInitialized(mapId)) {
+        // Assign it for the return
+        sliderFilter = TimeSliderEventProcessor.getTimeSliderFilter(mapId, layerPath);
+      }
       return [initialFilter, tableFilter, sliderFilter].filter((filter) => filter);
     }
     return undefined;
@@ -1234,11 +1240,14 @@ export class MapEventProcessor extends AbstractEventProcessor {
     ) {
       // Depending on the instance
       if (geoviewLayer instanceof GVWMS || geoviewLayer instanceof GVEsriImage) {
-        // Read filter information
-        const filter = TimeSliderEventProcessor.getTimeSliderFilter(mapId, layerPath);
+        // If the Time Slider is initialized
+        if (TimeSliderEventProcessor.isTimeSliderInitialized(mapId)) {
+          // Read filter information
+          const filter = TimeSliderEventProcessor.getTimeSliderFilter(mapId, layerPath);
 
-        // If filter was defined
-        if (filter) geoviewLayer.applyViewFilter(filter);
+          // If filter was defined
+          if (filter) geoviewLayer.applyViewFilter(filter);
+        }
       } else {
         // Read filter information
         const filters = this.getActiveVectorFilters(mapId, layerPath) || [''];
@@ -1285,11 +1294,11 @@ export class MapEventProcessor extends AbstractEventProcessor {
         hoverable: orderedLayerInfo.hoverable,
       },
       controls: legendLayerInfo.controls,
-      bounds: layerEntryConfig.initialSettings.bounds,
-      className: layerEntryConfig.initialSettings.className,
-      extent: layerEntryConfig.initialSettings.extent,
-      minZoom: layerEntryConfig.initialSettings.minZoom,
-      maxZoom: layerEntryConfig.initialSettings.maxZoom,
+      bounds: layerEntryConfig.getInitialSettings().bounds,
+      className: layerEntryConfig.getInitialSettings().className,
+      extent: layerEntryConfig.getInitialSettings().extent,
+      minZoom: layerEntryConfig.getInitialSettings().minZoom,
+      maxZoom: layerEntryConfig.getInitialSettings().maxZoom,
     };
   }
 
@@ -1542,8 +1551,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
         if (selectedDataTableLayerPath) newMapConfig.footerBar.selectedDataTableLayerPath = selectedDataTableLayerPath as string;
         const selectedLayerLayerPath = LegendEventProcessor.getLayerPanelState(mapId, 'selectedLayerPath');
         if (selectedLayerLayerPath) newMapConfig.footerBar.selectedLayersLayerPath = selectedLayerLayerPath as string;
-        const selectedTimeSliderLayerPath = TimeSliderEventProcessor.getTimeSliderSelectedLayer(mapId);
-        if (selectedTimeSliderLayerPath) newMapConfig.footerBar.selectedTimeSliderLayerPath = selectedTimeSliderLayerPath;
+
+        // If the TimeSlider plugin is initialized
+        if (TimeSliderEventProcessor.isTimeSliderInitialized(mapId)) {
+          // Store it
+          newMapConfig.footerBar.selectedTimeSliderLayerPath = TimeSliderEventProcessor.getTimeSliderSelectedLayer(mapId);
+        }
       }
 
       return newMapConfig;

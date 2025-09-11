@@ -117,7 +117,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         // Resolve the url
         const url = AbstractGeoViewVector.#resolveUrl(layerConfig, vectorSource, extent, resolution, projection);
 
-        if (layerConfig.schemaTag !== 'WKB') {
+        if (layerConfig.getSchemaTag() !== CONST_LAYER_TYPES.WKB) {
           // Fetch the data, or use passed geoJSON if present
           responseText =
             layerEntryIsGeoJSONFromConfig(layerConfig) && layerConfig.source?.geojson
@@ -219,7 +219,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   ): Promise<Feature[] | undefined> {
     // TODO: Refactor - Consider changing the return type to Promise<Feature[]>
 
-    switch (layerConfig.schemaTag) {
+    switch (layerConfig.getSchemaTag()) {
       case CONST_LAYER_TYPES.CSV:
         // Attempt to convert CSV text to OpenLayers features
         return AbstractGeoViewVector.#convertCsv(responseText, layerConfig, Projection.getProjectionFromString(projection));
@@ -325,7 +325,6 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    */
   // GV: featureLimit ideal amount varies with the service and with maxAllowableOffset.
   // TODO: Add options for featureLimit to config
-  // TODO: Will need to move with onCreateVectorSource
   static #getEsriFeatures(url: string, featureCount: number, maxRecordCount?: number, featureLimit: number = 1000): Promise<unknown[]> {
     // Update url
     const baseUrl = url.replace('&returnCountOnly=true', `&outfields=*&geometryPrecision=1&maxAllowableOffset=5`);

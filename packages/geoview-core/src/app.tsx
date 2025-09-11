@@ -165,8 +165,7 @@ async function renderMap(mapElement: HTMLElement): Promise<MapViewer> {
   // create a new config for this map element
   const lang = mapElement.hasAttribute('data-lang') ? (mapElement.getAttribute('data-lang')! as TypeDisplayLanguage) : 'en';
 
-  const config = new Config(lang);
-  const configObj = config.initializeMapConfig(mapId, configuration.map.listOfGeoviewLayerConfig, (errorKey: string, params: string[]) => {
+  const configObj = Config.initializeMapConfig(mapId, configuration.map.listOfGeoviewLayerConfig, (errorKey: string, params: string[]) => {
     // Wait for the map viewer to get loaded in the api
     api
       .getMapViewerAsync(mapId)

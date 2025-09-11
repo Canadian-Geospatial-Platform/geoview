@@ -13,12 +13,6 @@ export interface XYZTilesLayerEntryConfigProps extends AbstractBaseLayerEntryCon
 }
 
 export class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
-  /** Tag used to link the entry to a specific schema. */
-  override schemaTag = CONST_LAYER_TYPES.XYZ_TILES;
-
-  /** Layer entry data type. */
-  override entryType = CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE;
-
   /** The layer entry props that were used in the constructor. */
   declare layerEntryProps: XYZTilesLayerEntryConfigProps;
 
@@ -35,7 +29,7 @@ export class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
    * @param {XYZTilesLayerEntryConfigProps | XYZTilesLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
    */
   constructor(layerConfig: XYZTilesLayerEntryConfigProps | XYZTilesLayerEntryConfigProps) {
-    super(layerConfig);
+    super(layerConfig, CONST_LAYER_TYPES.XYZ_TILES, CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE);
     this.minScaleDenominator = layerConfig.minScaleDenominator || 0;
     this.maxScaleDenominator = layerConfig.maxScaleDenominator || 0;
 

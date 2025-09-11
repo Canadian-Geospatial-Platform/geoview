@@ -1,4 +1,9 @@
-import { CONST_LAYER_ENTRY_TYPES, TypeLayerMetadataVector, TypeVectorSourceInitialConfig } from '@/api/types/layer-schema-types';
+import {
+  CONST_LAYER_ENTRY_TYPES,
+  TypeGeoviewLayerType,
+  TypeLayerMetadataVector,
+  TypeVectorSourceInitialConfig,
+} from '@/api/types/layer-schema-types';
 import {
   AbstractBaseLayerEntryConfig,
   AbstractBaseLayerEntryConfigProps,
@@ -16,9 +21,6 @@ export interface VectorLayerEntryConfigProps extends AbstractBaseLayerEntryConfi
  */
 // TODO: Refactor - This class should be named 'AbstractVectorLayerEntryConfig' to align with others
 export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfig {
-  /** Layer entry data type. */
-  override entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
-
   /** The layer entry props that were used in the constructor. */
   declare layerEntryProps: VectorLayerEntryConfigProps;
 
@@ -32,8 +34,8 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
    * The class constructor.
    * @param {VectorLayerEntryConfigProps | VectorLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
    */
-  protected constructor(layerConfig: VectorLayerEntryConfigProps | VectorLayerEntryConfig) {
-    super(layerConfig);
+  protected constructor(layerConfig: VectorLayerEntryConfigProps | VectorLayerEntryConfig, schemaTag: TypeGeoviewLayerType) {
+    super(layerConfig, schemaTag, CONST_LAYER_ENTRY_TYPES.VECTOR);
     this.maxRecordCount = layerConfig.maxRecordCount;
   }
 

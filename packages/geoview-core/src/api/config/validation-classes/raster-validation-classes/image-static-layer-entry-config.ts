@@ -13,12 +13,6 @@ export interface ImageStaticLayerEntryConfigProps extends AbstractBaseLayerEntry
  * Type used to define a GeoView image layer to display on the map.
  */
 export class ImageStaticLayerEntryConfig extends AbstractBaseLayerEntryConfig {
-  /** Tag used to link the entry to a specific schema. */
-  override schemaTag = CONST_LAYER_TYPES.IMAGE_STATIC;
-
-  /** Layer entry data type. */
-  override entryType = CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE;
-
   /** The layer entry props that were used in the constructor. */
   declare layerEntryProps: ImageStaticLayerEntryConfigProps;
 
@@ -30,7 +24,7 @@ export class ImageStaticLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * @param {ImageStaticLayerEntryConfigProps | ImageStaticLayerEntryConfig} layerConfig -  The layer configuration we want to instanciate.
    */
   constructor(layerConfig: ImageStaticLayerEntryConfigProps | ImageStaticLayerEntryConfig) {
-    super(layerConfig);
+    super(layerConfig, CONST_LAYER_TYPES.IMAGE_STATIC, CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE);
 
     // Write the default properties when not specified
     this.source.dataAccessPath ??= layerConfig.source.dataAccessPath ?? this.geoviewLayerConfig.metadataAccessPath;

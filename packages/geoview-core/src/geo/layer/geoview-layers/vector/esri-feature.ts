@@ -104,7 +104,7 @@ export class EsriFeature extends AbstractGeoViewVector {
     }
 
     // Redirect
-    // TODO: Check - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
+    // TODO: Check - Config init -  a way to better determine the isTimeAware flag, defaults to false, how is it used here?
     return EsriFeature.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, entries);
   }
 

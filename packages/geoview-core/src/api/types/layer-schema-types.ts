@@ -622,10 +622,7 @@ export interface TypeSourceImageEsriInitialConfig extends TypeBaseSourceInitialC
   transparent?: boolean;
 }
 
-export const layerEntryIsGroupLayer = (verifyIfLayer: ConfigClassOrType): verifyIfLayer is GroupLayerEntryConfig => {
-  return verifyIfLayer?.entryType === CONST_LAYER_ENTRY_TYPES.GROUP;
-};
-
+// TODO: ALEX - MOVE THOSE OVER TO CONFIGBASECLASS
 export const layerConfigIsEsriDynamicFromType = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeEsriDynamicLayerConfig => {
   return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
 };

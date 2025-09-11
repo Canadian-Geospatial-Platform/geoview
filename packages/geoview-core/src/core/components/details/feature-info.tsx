@@ -121,7 +121,10 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
     return {
       uid: feature.uid,
       iconSrc: feature.featureIcon,
-      name: feature.nameField ? (feature.fieldInfo?.[feature.nameField]?.value as string) || '' : 'No name / Sans nom',
+      name:
+        feature.nameField && feature.fieldInfo?.[feature.nameField]?.value
+          ? (feature.fieldInfo?.[feature.nameField]?.value as string)
+          : 'No name / Sans nom',
       extent: feature.extent,
       geometry: feature.geometry,
       geoviewLayerType: feature.geoviewLayerType,
