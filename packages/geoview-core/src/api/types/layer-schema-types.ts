@@ -1,25 +1,26 @@
-import { codedValueType, Extent, rangeDomainType, TypeEsriFormatParameter, TypeOutfields } from '@/api/config/types/map-schema-types';
+import { codedValueType, Extent, rangeDomainType, TypeEsriFormatParameter, TypeOutfields } from '@/api/types/map-schema-types';
 import {
   AbstractBaseLayerEntryConfig,
   AbstractBaseLayerEntryConfigProps,
-} from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { ConfigBaseClass, ConfigBaseClassProps, TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
-import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
-import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
-import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
-import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
+} from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import { ConfigBaseClass, ConfigBaseClassProps, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
+import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
+import { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
+import { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
+import { ImageStaticLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
+import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import { XYZTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import {
   VectorTilesLayerEntryConfig,
   VectorTilesLayerEntryConfigProps,
-} from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
-import { CsvLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
-import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
-import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
-import { OgcFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
-import { WkbLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
-import { WfsLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
+} from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
+import { CsvLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
+import { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
+import { GeoJSONLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
+import { OgcFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
+import { WkbLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
+import { WfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
+import { GeoPackageFeature } from '@/api/config/reader/geopackage-reader';
 
 import { TypeEsriDynamicLayerConfig } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { TypeEsriImageLayerConfig } from '@/geo/layer/geoview-layers/raster/esri-image';
@@ -37,7 +38,6 @@ import { TypeWFSLayerConfig } from '@/geo/layer/geoview-layers/vector/wfs';
 import { TypeProjection } from '@/geo/utils/projection';
 import { TimeDimensionESRI } from '@/core/utils/date-mgt';
 import { EsriBaseRenderer } from '@/geo/utils/renderer/esri-renderer';
-import { GeoPackageFeature } from '@/core/utils/config/reader/geopackage-reader';
 
 /** Definition of the keys used to create the constants of the GeoView layer */
 type LayerTypesKey =
