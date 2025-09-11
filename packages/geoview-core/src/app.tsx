@@ -1,4 +1,4 @@
-import React from 'react'; // This is the real React that's exported
+import React, { createElement } from 'react'; // This is the real React that's exported
 import { Root, createRoot } from 'react-dom/client'; // This is the real React-DOM that's exported
 import * as translate from 'react-i18next'; // This is the real translate that's exported
 
@@ -324,6 +324,7 @@ export const cgpv = {
   reactUtilities: {
     react: React,
     createRoot,
+    createElement,
   },
   translate,
   ui: {

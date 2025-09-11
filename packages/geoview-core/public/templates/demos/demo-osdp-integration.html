@@ -193,7 +193,12 @@ function addLayers(layers) {
                 await removeMap('Map1');
 
                 // Create map from config
-                await cgpv.api.createMapFromConfig('Map1', JSON.stringify(mapConfig), 800);
+                await cgpv.api.createMapFromConfig('Map1', JSON.stringify(mapConfig), 800).then((mapViewer) => {
+                  if (langSwitch) {
+                      mapViewer.notifications.showWarning('Map language changed', []);
+                      mapViewer.notifications.addNotificationWarning(`MapViewer: Map language changed to ${lang}`);
+                  }
+                });
               } catch (error) {
                 console.error('Failed to create map from config', error);
               }
@@ -307,6 +312,7 @@ cgpv.api.getMapViewer('Map1').replaceMapConfigLayerNames(pairs, mapConfig, true)
       };
 
       let lang = 'fr';
+      let langSwitch = false;
 
       function updateConfigTextArea() {
         const configTextArea = document.getElementById('configTextArea');
@@ -356,7 +362,12 @@ cgpv.api.getMapViewer('Map1').replaceMapConfigLayerNames(pairs, mapConfig, true)
           await removeMap('Map1');
 
           // Create map from config
-          await cgpv.api.createMapFromConfig('Map1', JSON.stringify(mapConfig), 800);
+          await cgpv.api.createMapFromConfig('Map1', JSON.stringify(mapConfig), 800).then((mapViewer) => {
+            if (langSwitch) {
+                mapViewer.notifications.showWarning('Map language changed', []);
+                mapViewer.notifications.addNotificationWarning(`MapViewer: Map language changed to ${lang}`);
+            }
+          });
         } catch (error) {
           console.error('Failed to create map from config', error);
         }
@@ -418,6 +429,7 @@ cgpv.api.getMapViewer('Map1').replaceMapConfigLayerNames(pairs, mapConfig, true)
       // add an event listener when a button is clicked
       changeLanguageButton.addEventListener('click', function () {
         lang = lang === 'fr' ? 'en' : 'fr';
+        langSwitch = true
         document.getElementById('dataLang').innerHTML = lang;
         const mapDiv = document.getElementById('Map1');
         if (mapDiv) mapDiv.setAttribute('data-lang', lang);
@@ -608,6 +620,22 @@ cgpv.api.getMapViewer('Map1').replaceMapConfigLayerNames(pairs, mapConfig, true)
 
         layerUuid.value = uuidConfig[e.target.value.replaceAll(' ', '')];
         layerUuidEntries.value = JSON.stringify(uuidConfig[`${e.target.value.replaceAll(' ', '')}Config`], null, 2);
+      });
+
+      // OSDP event trapping for notification
+      cgpv.onMapInit((mapViewer) => {
+
+        // listen to map language changed event
+        mapViewer.onMapLanguageChanged((sender, payload) => {
+          mapViewer.notifications.addNotificationWarning(`MapViewer: Map language changed to ${payload.language}`);
+          mapViewer.notifications.showWarning('Map language changed', [])
+        });
+
+        // Listen to layer removed event
+        mapViewer.layer.onLayerConfigRemoved((sender, payload) => {
+          mapViewer.notifications.addNotificationSuccess('LayerApi: ' + payload.layerName + ' removed'); // does not show on map
+          mapViewer.notifications.showMessage('Layer '  + payload.layerName + ' removed', [], true); // true will add a notification
+        });
       });
 
       // initialize cgpv

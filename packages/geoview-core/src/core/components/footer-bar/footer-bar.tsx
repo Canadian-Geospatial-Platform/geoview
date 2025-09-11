@@ -18,7 +18,7 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { FooterBarApi, FooterTabCreatedEvent, FooterTabRemovedEvent } from '@/core/components';
-
+import { DEFAULT_FOOTER_TABS_ORDER } from '@/api/config/types/map-schema-types';
 import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 
 // default tabs icon and class
@@ -151,10 +151,14 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     logger.logTraceUseMemo('FOOTER-BAR - memoFooterBarTabs', tabsList, memoTabs);
 
     const allTabs = { ...tabsList, ...memoTabs };
+    const availableTabKeys = Object.keys(allTabs);
 
-    // TODO: Use the indexValue coming from the tab to order so custom tab can be placed anywhere
-    // inject guide tab at last position of tabs.
-    return Object.keys({ ...tabsList, ...{ guide: {} } }).map((tab, index) => {
+    // Custom tabs first, then core tabs in DEFAULT_FOOTER_TABS_ORDER
+    const customTabKeys = availableTabKeys.filter((tabKey) => !DEFAULT_FOOTER_TABS_ORDER.includes(tabKey));
+    const coreTabKeys = DEFAULT_FOOTER_TABS_ORDER.filter((tabKey) => availableTabKeys.includes(tabKey));
+    const orderedTabKeys = customTabKeys.concat(coreTabKeys);
+
+    return orderedTabKeys.map((tab, index) => {
       return {
         id: tab,
         value: index,
