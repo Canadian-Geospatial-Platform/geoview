@@ -5,7 +5,13 @@ import { Projection } from '@/geo/utils/projection';
 
 import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '@/api/event-processors/abstract-event-processor';
 import { UIEventProcessor } from './ui-event-processor';
-import { TypeFeatureInfoEntry, TypeResultSetEntry } from '@/api/config/types/map-schema-types';
+import {
+  TypeFeatureInfoEntry,
+  TypeResultSetEntry,
+  TypeUtmZoneResponse,
+  TypeAltitudeResponse,
+  TypeNtsResponse,
+} from '@/api/config/types/map-schema-types';
 import { IFeatureInfoState, TypeFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { MapEventProcessor } from './map-event-processor';
@@ -296,14 +302,9 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
       features,
     } as unknown as TypeFeatureInfoResultSetEntry & { numOffeatures: number };
 
+    // Get layer array, minus the coordinate-info layer
     const featureInfoState = this.getFeatureInfoState(mapId);
-    const currentLayerDataArray = [...featureInfoState.layerDataArray];
-
-    // Remove existing coordinate info layer if it exists
-    const existingIndex = currentLayerDataArray.findIndex((layer) => layer.layerPath === 'coordinate-info');
-    if (existingIndex >= 0) {
-      currentLayerDataArray.splice(existingIndex, 1);
-    }
+    const currentLayerDataArray = [...featureInfoState.layerDataArray].filter((layer) => layer.layerPath !== 'coordinate-info');
 
     // Add the new coordinate info layer
     currentLayerDataArray.push(coordinateInfoLayer);
@@ -328,19 +329,13 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
 
     const [lng, lat] = coordinates.lonlat;
 
+    const serviceUrls = this.getState(mapId).mapConfig?.serviceUrls;
+    if (!serviceUrls) return;
+    const { utmZoneUrl, ntsSheetUrl, altitudeUrl } = serviceUrls;
     Promise.allSettled([
-      fetch(`https://geogratis.gc.ca/services/delimitation/en/utmzone?bbox=${lng}%2C${lat}%2C${lng}%2C${lat}`).then((r) =>
-        r.json()
-      ) as Promise<TypeUtmZoneResponse>,
-      fetch(`https://geogratis.gc.ca/services/delimitation/en/nts?bbox=${lng}%2C${lat}%2C${lng}%2C${lat}`).then((r) =>
-        r.json()
-      ) as Promise<TypeNtsResponse>,
-      fetch(`https://geogratis.gc.ca/services/elevation/cdem/altitude?lat=${lat}&lon=${lng}`).then((r) =>
-        r.json()
-      ) as Promise<TypeAltitudeResponse>,
-      // fetch(`https://ngdc.noaa.gov/geomag-web/calculators/calculateDeclination?lat1=${lat}&lon1=${lng}&key=zNEw7&resultFormat=json`, {
-      //   mode: 'cors',
-      // }).then((r) => r.json()) as Promise<TypeDeclinationResponse>,
+      fetch(`${utmZoneUrl}?bbox=${lng}%2C${lat}%2C${lng}%2C${lat}`).then((r) => r.json()) as Promise<TypeUtmZoneResponse>,
+      fetch(`${ntsSheetUrl}?bbox=${lng}%2C${lat}%2C${lng}%2C${lat}`).then((r) => r.json()) as Promise<TypeNtsResponse>,
+      fetch(`${altitudeUrl}?lat=${lat}&lon=${lng}`).then((r) => r.json()) as Promise<TypeAltitudeResponse>,
     ])
       .then(([utmResult, ntsResult, elevationResult]) => {
         const utmData = utmResult.status === 'fulfilled' ? utmResult.value : undefined;
@@ -358,19 +353,19 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
           {
             uid: 'coordinate-info-feature',
             fieldInfo: {
-              Latitude: { value: lat.toFixed(6), fieldKey: 0, dataType: 'number', alias: 'Latitude', domain: null },
-              Longitude: { value: lng.toFixed(6), fieldKey: 1, dataType: 'number', alias: 'Longitude', domain: null },
-              'UTM Zone': { value: utmIdentifier, fieldKey: 2, dataType: 'string', alias: 'UTM Identifier', domain: null },
-              Easting: { value: easting?.toFixed(2), fieldKey: 3, dataType: 'number', alias: 'Easting', domain: null },
-              Northing: { value: northing?.toFixed(2), fieldKey: 4, dataType: 'number', alias: 'Northing', domain: null },
-              'NTS Mapsheet': {
+              latitude: { value: lat.toFixed(6), fieldKey: 0, dataType: 'number', alias: 'Latitude', domain: null },
+              longitude: { value: lng.toFixed(6), fieldKey: 1, dataType: 'number', alias: 'Longitude', domain: null },
+              utmZone: { value: utmIdentifier, fieldKey: 2, dataType: 'string', alias: 'UTM Identifier', domain: null },
+              easting: { value: easting?.toFixed(2), fieldKey: 3, dataType: 'number', alias: 'Easting', domain: null },
+              northing: { value: northing?.toFixed(2), fieldKey: 4, dataType: 'number', alias: 'Northing', domain: null },
+              ntsMapsheet: {
                 value: ntsData?.features.map((f) => f.properties.name).join(', '),
                 fieldKey: 5,
                 dataType: 'string',
                 alias: 'NTS Mapsheets',
                 domain: null,
               },
-              Elevation: {
+              elevation: {
                 value: elevationData?.altitude ? `${elevationData.altitude} m` : undefined,
                 fieldKey: 6,
                 dataType: 'string',
@@ -402,80 +397,3 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   // GV NEVER add a store action who does set state AND map action at a same time.
   // GV Review the action in store state to make sure
 }
-
-// Request Schemas for Coordinate Info requests
-
-// type TypeDeclinationResult = {
-//   date: number;
-//   elevation: number;
-//   declination: number;
-//   alt_info: string;
-//   latitude: number;
-//   declination_sv: number;
-//   declination_uncertainty: number;
-//   longitude: number;
-// };
-
-// type TypeDeclinationUnits = {
-//   elevation: string;
-//   declination: string;
-//   declination_sv: string;
-//   latitude: string;
-//   declination_uncertainty: string;
-//   longitude: string;
-// };
-
-// type TypeDeclinationResponse = {
-//   result: TypeDeclinationResult[];
-//   model: string;
-//   units: TypeDeclinationUnits;
-//   version: string;
-// };
-
-type TypeUtmZoneFeature = {
-  type: 'Feature';
-  properties: {
-    identifier: string;
-    centralMeridian: number;
-  };
-  bbox: [number, number, number, number];
-  geometry: {
-    type: 'Polygon';
-    coordinates: number[][][];
-  };
-};
-
-type TypeUtmZoneResponse = {
-  type: 'FeatureCollection';
-  count: number;
-  features: TypeUtmZoneFeature[];
-};
-
-type TypeNtsFeature = {
-  type: 'Feature';
-  properties: {
-    identifier: string;
-    name: string;
-    scale: number;
-  };
-  bbox: [number, number, number, number];
-  geometry: {
-    type: 'Polygon';
-    coordinates: number[][][];
-  };
-};
-
-type TypeNtsResponse = {
-  type: 'FeatureCollection';
-  count: number;
-  features: TypeNtsFeature[];
-};
-
-type TypeAltitudeResponse = {
-  altitude: number;
-  vertex: boolean;
-  geometry: {
-    type: 'Point';
-    coordinates: [number, number];
-  };
-};

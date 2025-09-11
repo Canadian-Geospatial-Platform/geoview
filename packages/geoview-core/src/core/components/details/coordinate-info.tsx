@@ -79,13 +79,13 @@ export function CoordinateInfo({ fullWidth }: TypeCoordinateInfoProps): JSX.Elem
     if (!feature?.fieldInfo) return undefined;
 
     return {
-      lat: parseFloat(feature.fieldInfo.Latitude?.value?.toString() || '0'),
-      lng: parseFloat(feature.fieldInfo.Longitude?.value?.toString() || '0'),
-      utmZone: feature.fieldInfo['UTM Zone']?.value?.toString(),
-      easting: feature.fieldInfo.Easting?.value?.toString(),
-      northing: feature.fieldInfo.Northing?.value?.toString(),
-      ntsMapsheet: feature.fieldInfo['NTS Mapsheet']?.value?.toString(),
-      elevation: feature.fieldInfo.Elevation?.value?.toString(),
+      lat: parseFloat(feature.fieldInfo.latitude?.value?.toString() || '0'),
+      lng: parseFloat(feature.fieldInfo.longitude?.value?.toString() || '0'),
+      utmZone: feature.fieldInfo.utmZone?.value?.toString(),
+      easting: feature.fieldInfo.easting?.value?.toString(),
+      northing: feature.fieldInfo.northing?.value?.toString(),
+      ntsMapsheet: feature.fieldInfo.ntsMapsheet?.value?.toString(),
+      elevation: feature.fieldInfo.elevation?.value?.toString(),
     };
   }, [feature]);
 

@@ -203,7 +203,7 @@
     "zone": "Zone UTM",
     "easting": "Easting",
     "northing": "Northing",
-    "ntsMapsheet": "Feuille de carte du SNRC",
+    "ntsMapsheet": "Carte SNRC",
     "elevation": "Élévation"
   },
   "lightbox": {
