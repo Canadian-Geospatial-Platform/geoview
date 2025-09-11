@@ -6,7 +6,7 @@ import {
   CONST_LAYER_TYPES,
   GeoPackageLayerConfig,
   TypeFeatureInfoLayerConfig,
-} from '@/api/config/types/layer-schema-types';
+} from '@/api/types/layer-schema-types';
 import {
   TypeFillStyle,
   TypeLayerStyleConfig,
@@ -16,7 +16,7 @@ import {
   TypePolygonVectorConfig,
   TypeSimpleSymbolVectorConfig,
   TypeStrokeSymbolConfig,
-} from '@/api/config/types/map-schema-types';
+} from '@/api/types/map-schema-types';
 import { TypeWkbLayerConfig } from '@/geo/layer/geoview-layers/vector/wkb';
 import { WkbLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
