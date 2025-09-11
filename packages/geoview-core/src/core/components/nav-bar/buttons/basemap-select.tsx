@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useMapBasemapOptions, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
-import { TypeBasemapOptions } from '@/api/config/types/map-schema-types';
+import { TypeBasemapOptions } from '@/api/types/map-schema-types';
 import { MapIcon } from '@/ui';
 import { TypePanelProps } from '@/ui/panel/panel-types';
 import { IconButtonPropsExtend, IconButton } from '@/ui/icon-button/icon-button';

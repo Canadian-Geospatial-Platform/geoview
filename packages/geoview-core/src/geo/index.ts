@@ -22,7 +22,6 @@ export * from './layer/geoview-layers/vector/wfs';
 export * from './layer/geoview-layers/vector/wkb';
 export * from './layer/geoview-layers/abstract-geoview-layers';
 export * from './layer/geoview-layers/esri-layer-common';
-export * from './layer/other/geocore';
 export * from './layer/geometry/geometry-types';
 export * from './layer/geometry/geometry';
 export * from './layer/layer-sets/all-feature-info-layer-set';

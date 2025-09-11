@@ -8,21 +8,21 @@ import { Point } from 'ol/geom';
 import { Extent } from 'ol/extent';
 import { getUid } from 'ol/util';
 
-import { TypeOutfields } from '@/api/config/types/map-schema-types';
+import { TypeOutfields } from '@/api/types/map-schema-types';
 import {
   CONST_LAYER_TYPES,
   layerEntryIsGeoJSONFromConfig,
   TypeBaseVectorSourceInitialConfig,
   TypeFeatureInfoLayerConfig,
   TypePostSettings,
-} from '@/api/config/types/layer-schema-types';
+} from '@/api/types/layer-schema-types';
 
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
-import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
+import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { Projection } from '@/geo/utils/projection';
 import { Fetch } from '@/core/utils/fetch-helper';
 import {

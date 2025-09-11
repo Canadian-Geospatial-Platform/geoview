@@ -4,12 +4,12 @@ import {
   TypeLayerMetadataWMS,
   TypeMetadataWMS,
   TypeSourceImageWmsInitialConfig,
-} from '@/api/config/types/layer-schema-types';
-import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
+} from '@/api/types/layer-schema-types';
+import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import {
   AbstractBaseLayerEntryConfig,
   AbstractBaseLayerEntryConfigProps,
-} from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+} from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 
 export interface OgcWmsLayerEntryConfigProps extends AbstractBaseLayerEntryConfigProps {
   /** Source settings to apply to the GeoView layer source at creation time. */

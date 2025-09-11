@@ -1,4 +1,4 @@
-import { CONST_LAYER_ENTRY_TYPES, TypeSourceTileInitialConfig } from '@/api/config/types/layer-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, TypeSourceTileInitialConfig } from '@/api/types/layer-schema-types';
 import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config';
 
 /**

@@ -10,7 +10,7 @@ import { DrawEvent, GeometryFunction, SketchCoordType, createBox } from 'ol/inte
 import { AppEventProcessor } from './app-event-processor';
 import { MapEventProcessor } from './map-event-processor';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
-import { TypeValidMapProjectionCodes } from '@/api/config/types/map-schema-types';
+import { TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
 
 import { Projection } from '@/geo/utils/projection';
 import { geometriesAreEqual } from '@/geo/utils/utilities';

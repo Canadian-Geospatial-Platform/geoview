@@ -5,10 +5,10 @@ import LayerGroup, { Options as LayerGroupOptions } from 'ol/layer/Group';
 import { delay, generateId } from '@/core/utils/utilities';
 import { TypeDateFragments, DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { TypeStyleGeometry } from '@/api/config/types/map-schema-types';
+import { TypeStyleGeometry } from '@/api/types/map-schema-types';
 import {
   CONST_LAYER_TYPES,
   TypeGeoviewLayerConfig,
@@ -17,13 +17,13 @@ import {
   TypeLayerStatus,
   TypeGeoviewLayerType,
   validVectorLayerLegendTypes,
-} from '@/api/config/types/layer-schema-types';
+} from '@/api/types/layer-schema-types';
 import { LayerServiceMetadataEmptyError, LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
 import {
   LayerEntryConfigEmptyLayerGroupError,
   LayerEntryConfigUnableToCreateGroupLayerError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
-import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
+import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { SnackbarType } from '@/core/utils/notifications';
 import { CancelledError, ResponseEmptyError, PromiseRejectErrorWrapper, formatError } from '@/core/exceptions/core-exceptions';

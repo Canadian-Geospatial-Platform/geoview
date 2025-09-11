@@ -3,10 +3,10 @@ import {
   CONST_LAYER_TYPES,
   TypeMetadataVectorTiles,
   TypeSourceTileInitialConfig,
-} from '@/api/config/types/layer-schema-types';
-import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
-import { AbstractBaseLayerEntryConfigProps } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { TileLayerEntryConfig } from '@/core/utils/config/validation-classes/tile-layer-entry-config';
+} from '@/api/types/layer-schema-types';
+import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import { TileLayerEntryConfig } from '@/api/config/validation-classes/tile-layer-entry-config';
 
 export interface VectorTilesLayerEntryConfigProps extends AbstractBaseLayerEntryConfigProps {
   /** Source settings to apply to the GeoView layer source at creation time. */

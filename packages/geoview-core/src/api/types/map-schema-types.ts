@@ -3,7 +3,7 @@ import { Pixel } from 'ol/pixel';
 import { Geometry } from 'ol/geom';
 import Feature from 'ol/Feature';
 
-import { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config';
+import { MapFeatureConfig } from '@/api/config/map-feature-config';
 import { MapConfigLayerEntry, TypeGeoviewLayerType, TypeLayerStatus } from './layer-schema-types';
 
 /**

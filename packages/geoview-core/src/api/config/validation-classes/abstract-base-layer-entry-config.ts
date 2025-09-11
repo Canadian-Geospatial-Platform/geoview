@@ -1,6 +1,6 @@
-import { TypeLayerStyleConfig, TypeStyleGeometry, TypeLayerStyleSettings } from '@/api/config/types/map-schema-types';
-import { ConfigAbstractBaseClassOrType, TypeBaseSourceInitialConfig } from '@/api/config/types/layer-schema-types';
-import { ConfigBaseClass, ConfigBaseClassProps } from '@/core/utils/config/validation-classes/config-base-class';
+import { TypeLayerStyleConfig, TypeStyleGeometry, TypeLayerStyleSettings } from '@/api/types/map-schema-types';
+import { ConfigAbstractBaseClassOrType, TypeBaseSourceInitialConfig } from '@/api/types/layer-schema-types';
+import { ConfigBaseClass, ConfigBaseClassProps } from '@/api/config/validation-classes/config-base-class';
 import { TimeDimension } from '@/core/utils/date-mgt';
 import { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 

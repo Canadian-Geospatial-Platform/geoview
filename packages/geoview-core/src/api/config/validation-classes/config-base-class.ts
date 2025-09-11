@@ -1,7 +1,7 @@
 import { cloneDeep } from 'lodash';
 
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { Extent } from '@/api/config/types/map-schema-types';
+import { Extent } from '@/api/types/map-schema-types';
 import {
   ConfigClassOrType,
   TypeGeoviewLayerConfig,
@@ -12,7 +12,7 @@ import {
   TypeTileGrid,
   TypeValidSourceProjectionCodes,
   layerEntryIsGroupLayer,
-} from '@/api/config/types/layer-schema-types';
+} from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
 import { LAYER_STATUS } from '@/core/utils/constant';
 import { GroupLayerEntryConfig, GroupLayerEntryConfigProps } from './group-layer-entry-config';

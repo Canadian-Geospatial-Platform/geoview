@@ -1,5 +1,5 @@
-import { VectorLayerEntryConfig, VectorLayerEntryConfigProps } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
-import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES, TypeSourceWkbVectorInitialConfig } from '@/api/config/types/layer-schema-types';
+import { VectorLayerEntryConfig, VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
+import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES, TypeSourceWkbVectorInitialConfig } from '@/api/types/layer-schema-types';
 import { Projection } from '@/geo/utils/projection';
 
 export interface WkbLayerEntryConfigProps extends VectorLayerEntryConfigProps {

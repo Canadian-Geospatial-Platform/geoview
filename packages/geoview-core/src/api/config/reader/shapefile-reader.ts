@@ -1,10 +1,10 @@
 import shp from 'shpjs';
-import { ConfigAbstractBaseClassOrType, ShapefileLayerConfig } from '@/api/config/types/layer-schema-types';
+import { ConfigAbstractBaseClassOrType, ShapefileLayerConfig } from '@/api/types/layer-schema-types';
 import { GeoJSON as LayerGeoJSON, TypeGeoJSONLayerConfig } from '@/geo/layer/geoview-layers/vector/geojson';
 import {
   GeoJSONLayerEntryConfig,
   GeoJSONLayerEntryConfigProps,
-} from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
+} from '@/api/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
 import { generateId } from '@/core/utils/utilities';
 import { AbstractBaseLayerEntryConfig } from '../validation-classes/abstract-base-layer-entry-config';
 import { Fetch } from '@/core/utils/fetch-helper';

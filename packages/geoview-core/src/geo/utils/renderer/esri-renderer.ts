@@ -17,7 +17,7 @@ import {
   TypeLayerStyleSettings,
   TypeStyleGeometry,
   TypeSymbol,
-} from '@/api/config/types/map-schema-types';
+} from '@/api/types/map-schema-types';
 
 import { logger } from '@/core/utils/logger';
 

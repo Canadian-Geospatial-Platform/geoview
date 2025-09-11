@@ -7,7 +7,7 @@ import { bbox } from 'ol/loadingstrategy';
 import { Extent } from 'ol/extent';
 import { Projection as OLProjection } from 'ol/proj';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
-import { TypeOutfields, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
+import { TypeOutfields, TypeOutfieldsType } from '@/api/types/map-schema-types';
 import {
   CONST_LAYER_TYPES,
   TypeGeoviewLayerConfig,
@@ -19,16 +19,16 @@ import {
   TypeMetadataWFSOperationMetadataOperationParameter,
   TypeMetadataWFSOperationMetadataOperationParameterValue,
   VectorStrategy,
-} from '@/api/config/types/layer-schema-types';
+} from '@/api/types/layer-schema-types';
 import { findPropertyByRegexPath } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { WfsLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
-import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+import { WfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
+import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { LayerNoCapabilitiesError } from '@/core/exceptions/layer-exceptions';
 import { LayerEntryConfigLayerIdNotFoundError } from '@/core/exceptions/layer-entry-config-exceptions';
 import { GVWFS } from '@/geo/layer/gv-layers/vector/gv-wfs';
-import { ConfigBaseClass, TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
+import { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 
 export interface TypeWFSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'geoviewLayerType'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.WFS;

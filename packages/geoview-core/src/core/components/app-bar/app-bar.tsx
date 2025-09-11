@@ -37,7 +37,7 @@ import Version from './buttons/version';
 import { getSxClasses } from './app-bar-style';
 import { enforceArrayOrder, helpClosePanelById, helpOpenPanelById } from './app-bar-helper';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
-import { DEFAULT_APPBAR_CORE, DEFAULT_APPBAR_TABS_ORDER, TypeValidAppBarCoreProps } from '@/api/config/types/map-schema-types';
+import { DEFAULT_APPBAR_CORE, DEFAULT_APPBAR_TABS_ORDER, TypeValidAppBarCoreProps } from '@/api/types/map-schema-types';
 import { handleEscapeKey } from '@/core/utils/utilities';
 import { Button } from '@/ui/button/button';
 

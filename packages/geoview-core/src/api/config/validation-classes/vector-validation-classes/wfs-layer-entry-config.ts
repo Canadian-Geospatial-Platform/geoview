@@ -3,8 +3,8 @@ import {
   CONST_LAYER_TYPES,
   TypeLayerMetadataWfs,
   TypeSourceWFSVectorInitialConfig,
-} from '@/api/config/types/layer-schema-types';
-import { VectorLayerEntryConfig, VectorLayerEntryConfigProps } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+} from '@/api/types/layer-schema-types';
+import { VectorLayerEntryConfig, VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { Projection } from '@/geo/utils/projection';
 
 export interface WfsLayerEntryConfigProps extends VectorLayerEntryConfigProps {

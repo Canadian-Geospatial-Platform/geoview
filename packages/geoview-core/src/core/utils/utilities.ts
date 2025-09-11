@@ -1,7 +1,7 @@
 import { Root, createRoot } from 'react-dom/client';
 import sanitizeHtml from 'sanitize-html';
 
-import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
+import { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import { logger } from '@/core/utils/logger';
 import i18n from '@/core/translation/i18n';
 import { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';

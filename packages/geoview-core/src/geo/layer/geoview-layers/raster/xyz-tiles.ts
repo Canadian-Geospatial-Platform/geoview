@@ -4,19 +4,19 @@ import TileGrid, { Options as TileGridOptions } from 'ol/tilegrid/TileGrid';
 import defaultsDeep from 'lodash/defaultsDeep';
 
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import { TypeSourceTileInitialConfig, TypeGeoviewLayerConfig, CONST_LAYER_TYPES } from '@/api/config/types/layer-schema-types';
+import { TypeSourceTileInitialConfig, TypeGeoviewLayerConfig, CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import {
   TypeMetadataXYZTiles,
   XYZTilesLayerEntryConfig,
-} from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
+} from '@/api/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import {
   LayerEntryConfigInvalidLayerEntryConfigError,
   LayerEntryConfigLayerIdNotFoundError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 import { GVXYZTiles } from '@/geo/layer/gv-layers/tile/gv-xyz-tiles';
-import { ConfigBaseClass, TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
+import { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
 // ? Do we keep this TODO ? Dynamic parameters can be placed on the dataAccessPath and initial settings can be used on xyz-tiles.

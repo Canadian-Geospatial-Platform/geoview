@@ -13,8 +13,8 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 
-import { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config';
-import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
+import { MapFeatureConfig } from '@/api/config/map-feature-config';
+import { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import * as UI from '@/ui';
 
 import AppStart from '@/core/app-start';
@@ -22,7 +22,7 @@ import { API } from '@/api/api';
 import { ConfigApi } from '@/api/config/config-api';
 import { createI18nInstance } from '@/core/translation/i18n';
 import { MapViewerDelegate, TypeCGPV, TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { Config } from '@/core/utils/config/config';
+import { Config } from '@/api/config/config';
 import { useWhatChanged } from '@/core/utils/useWhatChanged';
 import { addGeoViewStore } from '@/core/stores/stores-managers';
 import { logger } from '@/core/utils/logger';

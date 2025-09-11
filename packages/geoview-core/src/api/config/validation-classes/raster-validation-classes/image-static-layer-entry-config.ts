@@ -1,8 +1,8 @@
-import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES, TypeSourceImageStaticInitialConfig } from '@/api/config/types/layer-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES, TypeSourceImageStaticInitialConfig } from '@/api/types/layer-schema-types';
 import {
   AbstractBaseLayerEntryConfig,
   AbstractBaseLayerEntryConfigProps,
-} from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+} from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 
 export interface ImageStaticLayerEntryConfigProps extends AbstractBaseLayerEntryConfigProps {
   /** Source settings to apply to the GeoView layer source at creation time. */

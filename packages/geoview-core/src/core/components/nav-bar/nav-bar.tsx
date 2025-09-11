@@ -23,7 +23,7 @@ import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from './nav-bar-panel-button';
 
-import { TypeValidNavBarProps } from '@/api/config/types/map-schema-types';
+import { TypeValidNavBarProps } from '@/api/types/map-schema-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 type NavBarProps = {

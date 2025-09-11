@@ -3,11 +3,11 @@ import {
   CONST_LAYER_TYPES,
   TypeLayerMetadataEsri,
   TypeSourceImageEsriInitialConfig,
-} from '@/api/config/types/layer-schema-types';
+} from '@/api/types/layer-schema-types';
 import {
   AbstractBaseLayerEntryConfig,
   AbstractBaseLayerEntryConfigProps,
-} from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+} from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 
 export interface EsriImageLayerEntryConfigProps extends AbstractBaseLayerEntryConfigProps {
   /** Source settings to apply to the GeoView layer source at creation time. */

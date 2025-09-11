@@ -21,7 +21,7 @@ import {
   TypeValidNavBarProps,
   TypeExternalPackagesProps,
   TypeValidVersions,
-} from '@/api/config/types/map-schema-types';
+} from '@/api/types/map-schema-types';
 
 /**
  * The map feature configuration class.

@@ -1,12 +1,12 @@
-import { UUIDmapConfigReader } from '@/core/utils/config/reader/uuid-config-reader';
-import { Config } from '@/core/utils/config/config';
-import { ConfigValidation } from '@/core/utils/config/config-validation';
+import { UUIDmapConfigReader } from '@/api/config/reader/uuid-config-reader';
+import { Config } from '@/api/config/config';
+import { ConfigValidation } from '@/api/config/config-validation';
 import { GeochartEventProcessor } from '@/api/event-processors/event-processor-children/geochart-event-processor';
 import { generateId } from '@/core/utils/utilities';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
-import { DEFAULT_MAP_FEATURE_CONFIG, TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
-import { GeoCoreLayerConfig, TypeGeoviewLayerConfig } from '@/api/config/types/layer-schema-types';
+import { DEFAULT_MAP_FEATURE_CONFIG, TypeDisplayLanguage } from '@/api/types/map-schema-types';
+import { GeoCoreLayerConfig, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 /**

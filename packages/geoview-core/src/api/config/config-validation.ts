@@ -7,7 +7,7 @@ import { AnyValidateFunction } from 'ajv/dist/types';
 
 import defaultsDeep from 'lodash/defaultsDeep';
 
-import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
+import { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 
 import {
   CONST_LAYER_TYPES,
@@ -33,7 +33,7 @@ import {
   layerEntryIsWFSFromConfig,
   layerEntryIsWKBFromConfig,
   ConfigClassOrType,
-} from '@/api/config/types/layer-schema-types';
+} from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
 
 import { generateId } from '@/core/utils/utilities';

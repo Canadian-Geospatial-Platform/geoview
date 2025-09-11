@@ -1,5 +1,5 @@
-import { CONST_LAYER_ENTRY_TYPES, TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '@/api/config/types/layer-schema-types';
-import { ConfigBaseClass, ConfigBaseClassProps } from '@/core/utils/config/validation-classes/config-base-class';
+import { CONST_LAYER_ENTRY_TYPES, TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '@/api/types/layer-schema-types';
+import { ConfigBaseClass, ConfigBaseClassProps } from '@/api/config/validation-classes/config-base-class';
 
 export interface GroupLayerEntryConfigProps extends ConfigBaseClassProps {
   listOfLayerEntryConfig: TypeLayerEntryConfig[];

@@ -1,5 +1,5 @@
-import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
-import { CONST_LAYER_TYPES, TypeGeoviewLayerConfig, TypeGeoviewLayerType, TypeOfServer } from '@/api/config/types/layer-schema-types';
+import { TypeDisplayLanguage } from '@/api/types/map-schema-types';
+import { CONST_LAYER_TYPES, TypeGeoviewLayerConfig, TypeGeoviewLayerType, TypeOfServer } from '@/api/types/layer-schema-types';
 
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
@@ -20,7 +20,7 @@ import {
 } from '@/core/exceptions/geocore-exceptions';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { formatError, NotSupportedError } from '@/core/exceptions/core-exceptions';
-import { TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
+import { TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 
 /**
  * A class to generate GeoView layers config from a URL using a UUID.

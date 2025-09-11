@@ -1,4 +1,4 @@
-import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
+import { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import {
   MapConfigLayerEntry,
   layerEntryIsGroupLayer,
@@ -10,10 +10,10 @@ import {
   TypeLayerEntryType,
   CONST_LAYER_ENTRY_TYPES,
   TypeLayerEntryConfig,
-} from '@/api/config/types/layer-schema-types';
+} from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
 
-import { ConfigValidation, ErrorCallbackDelegate } from '@/core/utils/config/config-validation';
+import { ConfigValidation, ErrorCallbackDelegate } from '@/api/config/config-validation';
 import { generateId } from '@/core/utils/utilities';
 import { LayerInvalidGeoviewLayerTypeError } from '@/core/exceptions/layer-exceptions';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';

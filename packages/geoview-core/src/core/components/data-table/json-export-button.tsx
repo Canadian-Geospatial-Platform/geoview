@@ -5,7 +5,7 @@ import { MenuItem } from '@/ui';
 
 import { logger } from '@/core/utils/logger';
 import { JsonExportWorker } from '@/core/workers/json-export-worker';
-import { SerializedGeometry, TypeFeatureInfoEntry } from '@/api/config/types/map-schema-types';
+import { SerializedGeometry, TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useMapProjection } from '@/core/stores/store-interface-and-intial-values/map-state';

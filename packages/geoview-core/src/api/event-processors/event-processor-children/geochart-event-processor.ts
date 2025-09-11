@@ -4,7 +4,7 @@ import {
   IGeochartState,
   TypeGeochartResultSetEntry,
 } from '@/core/stores/store-interface-and-intial-values/geochart-state';
-import { GeoViewGeoChartConfig } from '@/core/utils/config/reader/uuid-config-reader';
+import { GeoViewGeoChartConfig } from '@/api/config/reader/uuid-config-reader';
 import { logger } from '@/core/utils/logger';
 
 import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '@/api/event-processors/abstract-event-processor';
