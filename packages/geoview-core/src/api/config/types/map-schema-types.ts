@@ -179,6 +179,10 @@ export type TypeGlobalSettings = {
   disabledLayerTypes?: TypeGeoviewLayerType[];
   /** Whether to display unsymbolized features in the datatable and other components */
   showUnsymbolizedFeatures?: boolean;
+  /** Whether the initial state of the coordinate info tool should be enabled */
+  coordinateInfoEnabled?: boolean;
+  /** Whether the coordinate info tool should be removed from the UI */
+  hideCoordinateInfoSwitch?: boolean;
 };
 
 /** Definition of the map configuration settings. */

@@ -72,6 +72,7 @@ export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore): IG
       get().mapState.setDefaultConfigValues(config);
       get().uiState.setDefaultConfigValues(config);
       get().layerState.setDefaultConfigValues(config);
+      get().detailsState.setDefaultConfigValues(config);
       get().dataTableState.setDefaultConfigValues(config);
 
       // packages states, only create if needed
