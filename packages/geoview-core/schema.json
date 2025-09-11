@@ -450,6 +450,16 @@
           "type": "boolean",
           "description": "Whether or not to show unsymbolized features.",
           "default": false
+        },
+        "coordinateInfoEnabled": {
+          "type": "boolean",
+          "description": "Whether or not the coordinate information too should be enabled.",
+          "default": true
+        },
+        "hideCoordinateInfoSwitch": {
+          "type": "boolean",
+          "description": "Whether or not to show the coordinate info switch",
+          "default": false
         }
       }
     },

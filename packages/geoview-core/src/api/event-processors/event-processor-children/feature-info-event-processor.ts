@@ -5,10 +5,11 @@ import { Projection } from '@/geo/utils/projection';
 
 import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '@/api/event-processors/abstract-event-processor';
 import { UIEventProcessor } from './ui-event-processor';
-import { TypeResultSetEntry } from '@/api/config/types/map-schema-types';
+import { TypeFeatureInfoEntry, TypeResultSetEntry } from '@/api/config/types/map-schema-types';
 import { IFeatureInfoState, TypeFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { MapEventProcessor } from './map-event-processor';
+import { doUntil } from '@/app';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -49,11 +50,35 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
         // Log
         logger.logTraceCoreStoreSubscription('FEATURE-INFO EVENT PROCESSOR - clickCoordinates', coords);
 
-        FeatureInfoEventProcessor.#updateCoordinateInfo(mapId, coords);
+        FeatureInfoEventProcessor.#getCoordinateInfo(mapId, coords);
       }
     );
 
-    return [layerDataArrayUpdateBatch, clickCoordinates];
+    const coordinateInfoEnabledSubscription = store.subscribe(
+      (state) => state.detailsState.coordinateInfoEnabled,
+      (enabled) => {
+        if (enabled) {
+          // Create empty coordinate info layer when enabled
+          FeatureInfoEventProcessor.createCoordinateInfoLayer(mapId);
+        } else {
+          // Remove coordinate info layer when disabled
+          FeatureInfoEventProcessor.deleteFeatureInfo(mapId, 'coordinate-info');
+        }
+      }
+    );
+
+    // Check initial state and create coordinate info layer if neeeded
+    if (store.getState().detailsState.coordinateInfoEnabled) {
+      doUntil(() => {
+        if (mapId) {
+          FeatureInfoEventProcessor.createCoordinateInfoLayer(mapId);
+          return true;
+        }
+        return false;
+      }, 1000);
+    }
+
+    return [layerDataArrayUpdateBatch, clickCoordinates, coordinateInfoEnabledSubscription];
   }
 
   // **********************************************************
@@ -260,13 +285,40 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
     );
   }
 
+  static createCoordinateInfoLayer(mapId: string, features: TypeFeatureInfoEntry[] = []): void {
+    const coordinateInfoLayer = {
+      layerPath: 'coordinate-info',
+      layerName: 'Coordinate Information',
+      eventListenerEnabled: false,
+      queryStatus: 'processed',
+      layerStatus: 'processed',
+      numOffeature: 1,
+      features,
+    } as unknown as TypeFeatureInfoResultSetEntry & { numOffeatures: number };
+
+    const featureInfoState = this.getFeatureInfoState(mapId);
+    const currentLayerDataArray = [...featureInfoState.layerDataArray];
+
+    // Remove existing coordinate info layer if it exists
+    const existingIndex = currentLayerDataArray.findIndex((layer) => layer.layerPath === 'coordinate-info');
+    if (existingIndex >= 0) {
+      currentLayerDataArray.splice(existingIndex, 1);
+    }
+
+    // Add the new coordinate info layer
+    currentLayerDataArray.push(coordinateInfoLayer);
+
+    // Update the store directly
+    featureInfoState.setterActions.setLayerDataArray(currentLayerDataArray);
+  }
+
   /**
    * Queries coordinate information from endpoints
    * @param {string} mapId - The map ID
    * @param {[number, number]} coordinates - The lng/lat coordinates
    * @returns {Promise<TypeCoordinateInfo>} Promise of coordinate information
    */
-  static #updateCoordinateInfo(mapId: string, coordinates: TypeMapMouseInfo): void {
+  static #getCoordinateInfo(mapId: string, coordinates: TypeMapMouseInfo): void {
     // If the coordinate info is not enabled, clear any existing info
     const state = this.getFeatureInfoState(mapId);
     if (!state.coordinateInfoEnabled) {
@@ -302,63 +354,39 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
           : [undefined, undefined];
 
         // Create coordinate info layer entry
-        const coordinateInfoLayer = {
-          layerPath: 'coordinate-info',
-          layerName: 'Coordinate Information',
-          eventListenerEnabled: false,
-          queryStatus: 'processed',
-          layerStatus: 'processed',
-          numOffeature: 1,
-          features: [
-            {
-              uid: 'coordinate-info-feature',
-              fieldInfo: {
-                Latitude: { value: lat.toFixed(6), fieldKey: 0, dataType: 'number', alias: 'Latitude', domain: null },
-                Longitude: { value: lng.toFixed(6), fieldKey: 1, dataType: 'number', alias: 'Longitude', domain: null },
-                'UTM Zone': { value: utmIdentifier, fieldKey: 2, dataType: 'string', alias: 'UTM Identifier', domain: null },
-                Easting: { value: easting?.toFixed(2), fieldKey: 3, dataType: 'number', alias: 'Easting', domain: null },
-                Northing: { value: northing?.toFixed(2), fieldKey: 4, dataType: 'number', alias: 'Northing', domain: null },
-                'NTS Mapsheet': {
-                  value: ntsData?.features.map((f) => f.properties.name).join(', '),
-                  fieldKey: 5,
-                  dataType: 'string',
-                  alias: 'NTS Mapsheets',
-                  domain: null,
-                },
-                Elevation: {
-                  value: elevationData ? `${elevationData.altitude} m` : undefined,
-                  fieldKey: 6,
-                  dataType: 'string',
-                  alias: 'Elevation',
-                  domain: null,
-                },
+        const coordinateFeature: TypeFeatureInfoEntry[] = [
+          {
+            uid: 'coordinate-info-feature',
+            fieldInfo: {
+              Latitude: { value: lat.toFixed(6), fieldKey: 0, dataType: 'number', alias: 'Latitude', domain: null },
+              Longitude: { value: lng.toFixed(6), fieldKey: 1, dataType: 'number', alias: 'Longitude', domain: null },
+              'UTM Zone': { value: utmIdentifier, fieldKey: 2, dataType: 'string', alias: 'UTM Identifier', domain: null },
+              Easting: { value: easting?.toFixed(2), fieldKey: 3, dataType: 'number', alias: 'Easting', domain: null },
+              Northing: { value: northing?.toFixed(2), fieldKey: 4, dataType: 'number', alias: 'Northing', domain: null },
+              'NTS Mapsheet': {
+                value: ntsData?.features.map((f) => f.properties.name).join(', '),
+                fieldKey: 5,
+                dataType: 'string',
+                alias: 'NTS Mapsheets',
+                domain: null,
               },
-              extent: undefined,
-              geometry: undefined,
-              featureKey: 0,
-              nameField: null,
-              geoviewLayerType: 'CSV',
-              layerPath: 'coordinate-info',
+              Elevation: {
+                value: elevationData?.altitude ? `${elevationData.altitude} m` : undefined,
+                fieldKey: 6,
+                dataType: 'string',
+                alias: 'Elevation',
+                domain: null,
+              },
             },
-          ],
-        } as unknown as TypeFeatureInfoResultSetEntry & { numOffeatures: number };
-
-        const featureInfoState = this.getFeatureInfoState(mapId);
-        const currentLayerDataArray = [...featureInfoState.layerDataArray];
-
-        // Remove existing coordinate info layer if it exists
-        const existingIndex = currentLayerDataArray.findIndex((layer) => layer.layerPath === 'coordinate-info');
-        if (existingIndex >= 0) {
-          currentLayerDataArray.splice(existingIndex, 1);
-        }
-
-        // Add the new coordinate info layer
-        currentLayerDataArray.push(coordinateInfoLayer);
-
-        // Update the store directly
-        this.propagateFeatureInfoToStore(mapId, 'click', coordinateInfoLayer).catch((error) => {
-          logger.logError('Failed to propagate coordinate info', error);
-        });
+            extent: undefined,
+            geometry: undefined,
+            featureKey: 0,
+            nameField: null,
+            geoviewLayerType: 'CSV',
+            layerPath: 'coordinate-info',
+          },
+        ];
+        this.createCoordinateInfoLayer(mapId, coordinateFeature);
       })
       .catch((error: unknown) => {
         // Log

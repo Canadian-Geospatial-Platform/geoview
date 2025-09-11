@@ -10,6 +10,7 @@ import {
   TypeFieldEntry,
   TypeGeoviewLayerType,
 } from '@/api/config/types/map-schema-types';
+import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with FeatureInfoEventProcessor vs FeatureInfoState
@@ -25,6 +26,7 @@ export interface IFeatureInfoState {
   layerDataArrayBatchLayerPathBypass: string;
   selectedLayerPath: string;
   coordinateInfoEnabled: boolean;
+  setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
 
   actions: {
     addCheckedFeature: (feature: TypeFeatureInfoEntry) => void;
@@ -63,6 +65,17 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
     layerDataArrayBatchLayerPathBypass: '',
     selectedLayerPath: '',
     coordinateInfoEnabled: false,
+
+    // Initialize default
+    setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
+      set({
+        detailsState: {
+          ...get().detailsState,
+          coordinateInfoEnabled:
+            (geoviewConfig.globalSettings?.coordinateInfoEnabled && !geoviewConfig.globalSettings?.hideCoordinateInfoSwitch) || false,
+        },
+      });
+    },
 
     // #region ACTIONS
 
@@ -157,9 +170,6 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
             coordinateInfoEnabled: !coordinateInfoEnabled,
           },
         });
-        if (coordinateInfoEnabled) {
-          FeatureInfoEventProcessor.deleteFeatureInfo(get().mapId, 'coordinate-info');
-        }
       },
     },
 
