@@ -1051,7 +1051,7 @@ export class LayerApi {
     }
 
     // Emit about it
-    this.#emitLayerConfigRemoved({ layerPath, layerName: layerEntryConfig?.layerName || 'No name / Sans nom' });
+    this.#emitLayerConfigRemoved({ layerPath, layerName: layerEntryConfig?.getLayerName() || 'No name / Sans nom' });
 
     // Log
     logger.logInfo(`Layer removed for ${layerPath}`);

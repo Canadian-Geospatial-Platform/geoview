@@ -10,6 +10,7 @@ import { LayerListEntry, Layout } from '@/core/components/common';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { CONTAINER_TYPE, TABS } from '@/core/utils/constant';
 import { TypeContainerBox } from '@/core/types/global-types';
+import { GuideSearch } from './guide-search';
 
 interface GuideListItem extends LayerListEntry {
   content: string | ReactNode;
@@ -37,12 +38,26 @@ export const Guide = memo(function GuidePanel({ fullWidth = false, containerType
   // State
   const [selectedLayerPath, setSelectedLayerPath] = useState<string>('loadingStatus');
   const [guideItemIndex, setGuideItemIndex] = useState<number>(0);
+  const [highlightFunction, setHighlightFunction] = useState<(content: string, sectionIndex: number) => string>(
+    () => (content: string) => content
+  );
 
   // Store
   const guide = useAppGuide();
   const mapId = useGeoViewMapId();
 
-  // Calbacks & Memoize values
+  // Callbacks & Memoize values
+  /**
+   * Handle search state changes from GuideSearch component
+   */
+  const handleSearchStateChange = useCallback(
+    (newSearchTerm: string, newHighlightFunction: (content: string, sectionIndex: number) => string) => {
+      logger.logTraceUseCallback('GUIDE - handleSearchStateChange');
+      setHighlightFunction(() => newHighlightFunction);
+    },
+    []
+  );
+
   /**
    * Creates a markdown component with the given content
    */
@@ -88,6 +103,49 @@ export const Guide = memo(function GuidePanel({ fullWidth = false, containerType
    * Memo version of layer list with markdown content
    */
   const layersList = useMemo(() => getListOfGuides(), [getListOfGuides]);
+
+  /**
+   * Handle section change from GuideSearch component
+   */
+  const handleSectionChange = useCallback(
+    (sectionIndex: number) => {
+      logger.logTraceUseCallback('GUIDE - handleSectionChange');
+
+      if (layersList[sectionIndex]) {
+        setGuideItemIndex(sectionIndex);
+        setSelectedLayerPath(layersList[sectionIndex].layerPath);
+      }
+    },
+    [layersList]
+  );
+
+  /**
+   * Current guide content with search highlighting
+   */
+  const currentGuideContent = useMemo(() => {
+    const currentItem = layersList[guideItemIndex];
+    if (!currentItem || !guide) return null;
+
+    const currentGuideKey = Object.keys(guide)[guideItemIndex];
+    if (!currentGuideKey) return currentItem.content;
+
+    let { content } = guide[currentGuideKey];
+
+    // Append subsection content
+    if (guide[currentGuideKey].children) {
+      Object.entries(guide[currentGuideKey].children).forEach(([, child]) => {
+        content += `\n${child.content}`;
+        if (child.children) {
+          Object.values(child.children).forEach((grandChild) => {
+            content += `\n${grandChild.content}`;
+          });
+        }
+      });
+    }
+
+    const highlightedContent = highlightFunction(content, guideItemIndex);
+    return <Markdown options={{ wrapper: 'article' }}>{highlightedContent}</Markdown>;
+  }, [layersList, guideItemIndex, guide, highlightFunction]);
 
   /**
    * Handle Guide layer list.
@@ -146,18 +204,21 @@ export const Guide = memo(function GuidePanel({ fullWidth = false, containerType
   const ariaLabel = t('guide.title');
   return (
     <Box sx={sxClasses.guideContainer}>
-      <Layout
-        containerType={containerType}
-        selectedLayerPath={selectedLayerPath}
-        layerList={layersList}
-        onLayerListClicked={handleGuideItemClick}
-        fullWidth={fullWidth}
-        aria-label={ariaLabel}
-      >
-        <Box sx={sxClasses.rightPanelContainer} aria-label={ariaLabel} className="guidebox-container">
-          <Box className="guideBox">{layersList[guideItemIndex]?.content}</Box>
-        </Box>
-      </Layout>
+      <GuideSearch guide={guide} onSectionChange={handleSectionChange} onSearchStateChange={handleSearchStateChange} />
+      <Box sx={{ flex: 1, minHeight: 0 }}>
+        <Layout
+          containerType={containerType}
+          selectedLayerPath={selectedLayerPath}
+          layerList={layersList}
+          onLayerListClicked={handleGuideItemClick}
+          fullWidth={fullWidth}
+          aria-label={ariaLabel}
+        >
+          <Box sx={sxClasses.rightPanelContainer} aria-label={ariaLabel} className="guidebox-container">
+            <Box className="guideBox">{currentGuideContent}</Box>
+          </Box>
+        </Layout>
+      </Box>
     </Box>
   );
 });

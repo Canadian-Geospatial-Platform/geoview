@@ -300,6 +300,7 @@
   },
   "guide": {
     "title": "Guide",
+    "search": "Rechercher dans le guide...",
     "errorMessage": "Désolé, impossible de trouver le document d'aide!"
   },
   "footerBar": {
