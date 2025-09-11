@@ -7,14 +7,9 @@ import {
   DEFAULT_MAP_FEATURE_CONFIG,
   CONFIG_GEOCORE_TYPE,
   CONFIG_SHAPEFILE_TYPE,
-  CONST_LAYER_TYPES,
-  MapConfigLayerEntry,
   TypeBasemapOptions,
   TypeDisplayLanguage,
-  TypeGeoviewLayerConfig,
-  TypeInitialGeoviewLayerType,
   TypeInteraction,
-  TypeLayerEntryConfig,
   TypeMapFeaturesInstance,
   TypeValidMapComponentProps,
   TypeValidMapCorePackageProps,
@@ -24,6 +19,12 @@ import {
   TypeValidVersions,
   TypeLayerStyleConfig,
 } from '@/api/config/types/map-schema-types';
+import {
+  CONST_LAYER_TYPES,
+  MapConfigLayerEntry,
+  TypeGeoviewLayerConfig,
+  TypeInitialGeoviewLayerType,
+} from '@/api/config/types/layer-schema-types';
 import { MapConfigError } from '@/api/config/types/classes/config-exceptions';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 
@@ -31,7 +32,10 @@ import { isJsonString, isValidUUID, removeCommentsFromJSON } from '@/core/utils/
 import { logger } from '@/core/utils/logger';
 import { UUIDmapConfigReader } from '@/core/utils/config/reader/uuid-config-reader';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
+import { ShapefileReader } from '@/core/utils/config/reader/shapefile-reader';
 
+import { LayerApi } from '@/geo/layer/layer';
+import { getStyleFromEsriRenderer } from '@/geo/utils/renderer/esri-renderer';
 import { CSV } from '@/geo/layer/geoview-layers/vector/csv';
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
@@ -46,7 +50,6 @@ import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
 import { XYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
 
 import schema from '@/core/../../schema.json';
-import { getStyleFromEsriRenderer } from '@/geo/utils/renderer/esri-renderer';
 
 /**
  * The API class that create configuration object. It is used to validate and read the service and layer metadata.
@@ -435,19 +438,26 @@ export class ConfigApi {
       case 'ogcWfs':
         return WFS.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
       case 'geoCore':
-        // For GeoCore, we guild the Config from the Geocore service
+        // For GeoCore, we build the Config from the Geocore service
         // eslint-disable-next-line no-case-declarations
-        const layerConfig = await GeoCore.createLayerConfigFromUUID(layerURL, language || 'en', mapId);
+        const layerConfigFromGeocore = await GeoCore.createLayerConfigFromUUID(layerURL, language || 'en', mapId);
 
         // Now, loop back to create the correct config based on the type
         return ConfigApi.createInitConfigFromType(
-          layerConfig.geoviewLayerType,
-          layerConfig.geoviewLayerId,
-          layerConfig.geoviewLayerName!,
-          layerConfig.metadataAccessPath!,
+          layerConfigFromGeocore.geoviewLayerType,
+          layerConfigFromGeocore.geoviewLayerId,
+          layerConfigFromGeocore.geoviewLayerName!,
+          layerConfigFromGeocore.metadataAccessPath!,
           language,
           mapId
         );
+      case 'shapefile':
+        // For Shapefile, we build the Config from GeoJson
+        return await ShapefileReader.convertShapefileConfigToGeoJson({
+          geoviewLayerId,
+          geoviewLayerType: 'shapefile',
+          metadataAccessPath: layerURL,
+        });
       default:
         // Unsupported
         throw new NotSupportedError(`Unsupported layer type ${layerType}`);
@@ -494,7 +504,15 @@ export class ConfigApi {
         return VectorTiles.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], false, 'EPSG:3978');
       case 'ogcWms':
         // TODO: Check - Check if there's a way to better determine the typeOfServer to send, defaults to 'mapserver'
-        return WMS.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as number[], false, 'mapserver');
+        return WMS.processGeoviewLayerConfig(
+          geoviewLayerId,
+          geoviewLayerName,
+          layerURL,
+          layerIds as number[],
+          false,
+          'mapserver',
+          LayerApi.DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS
+        );
       case 'xyzTiles':
         return XYZTiles.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], false);
       case 'CSV':
@@ -524,7 +542,8 @@ export class ConfigApi {
     const cloneConfig = cloneDeep(geoviewLayerConfig);
 
     // For each entry
-    cloneConfig.listOfLayerEntryConfig = ConfigApi.#configClassesToLayerEntryConfigs(geoviewLayerConfig.listOfLayerEntryConfig);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    cloneConfig.listOfLayerEntryConfig = ConfigApi.#configClassesToLayerEntryConfigs(geoviewLayerConfig.listOfLayerEntryConfig) as any;
 
     // Serialize it
     return JSON.stringify(cloneConfig, undefined, 2);
@@ -544,13 +563,23 @@ export class ConfigApi {
   }
 
   /**
-   * Utility function to convert an array of ConfigBaseClass objects to a simpler array of TypeLayerEntryConfig.
-   * @param {ConfigBaseClass[]} layerConfigs - The array of ConfigBaseClass objects to convert to simpler array of TypeLayerEntryConfig.
-   * @returns {string} The serialized array of ConfigBaseClass.
+   * Utility function to convert an array of ConfigBaseClass objects to a simpler array of JSON objects.
+   * @param {ConfigBaseClass[]} layerConfigs - The array of ConfigBaseClass objects to convert to simpler array of JSON objects.
+   * @returns {unknown[]} An array of JSON objects.
    */
-  static #configClassesToLayerEntryConfigs(layerConfigs: ConfigBaseClass[]): TypeLayerEntryConfig[] {
+  static #configClassesToLayerEntryConfigs(layerConfigs: ConfigBaseClass[]): unknown[] {
     // Serialize
-    return layerConfigs.map((layerEntry) => layerEntry.toJson() as TypeLayerEntryConfig);
+    return layerConfigs.map((layerEntry) => layerEntry.toJson());
+  }
+
+  /**
+   * Utility function to validate a UUID.
+   * @param {string} uuid - The uuid to test.
+   * @returns {boolean} True if the provided uuid is a valid uuid.
+   */
+  static isValidUUID(uuid: string): boolean {
+    // Redirect to the exported function in utilities
+    return isValidUUID(uuid);
   }
 
   // #endregion INITIALIZERS AND PROCESSORS

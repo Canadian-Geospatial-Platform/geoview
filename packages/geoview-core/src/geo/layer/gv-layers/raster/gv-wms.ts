@@ -13,14 +13,13 @@ import { getExtentIntersection, validateExtentWhenDefined } from '@/geo/utils/ut
 import { parseDateTimeValuesEsriImageOrWMS } from '@/geo/layer/gv-layers/utils';
 import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import { CONFIG_PROXY_URL, TypeFeatureInfoEntry } from '@/api/config/types/map-schema-types';
 import {
-  CONFIG_PROXY_URL,
   CONST_LAYER_TYPES,
-  TypeFeatureInfoEntry,
   TypeLayerMetadataWMSStyle,
   TypeLayerMetadataWMSStyleLegendUrl,
   TypeMetadataFeatureInfo,
-} from '@/api/config/types/map-schema-types';
+} from '@/api/config/types/layer-schema-types';
 import { loadImage } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
@@ -162,7 +161,7 @@ export class GVWMS extends AbstractGVRaster {
       else if (featureInfoFormat.includes('text/plain')) infoFormat = 'text/plain';
       else {
         // Failed
-        throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath, layerConfig.getLayerName());
+        throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
       }
 
     const wmsSource = this.getOLSource();
@@ -600,8 +599,7 @@ export class GVWMS extends AbstractGVRaster {
     let currentFilter;
     try {
       // Update the layer config on the fly (maybe not ideal to do this?)
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.layerFilter = filter;
+      layerConfig.setLayerFilter(filter);
 
       const queryElements = filterValueToUse.split(/(?<=\b)\s*=/);
       const dimension = queryElements[0].trim();
@@ -644,7 +642,7 @@ export class GVWMS extends AbstractGVRaster {
       // Failed
       throw new LayerInvalidLayerFilterError(
         layerConfig.layerPath,
-        layerConfig.getLayerName(),
+        layerConfig.getLayerNameCascade(),
         filterValueToUse,
         currentFilter,
         formatError(error)

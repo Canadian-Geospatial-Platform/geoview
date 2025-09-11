@@ -7,14 +7,11 @@ import { bbox } from 'ol/loadingstrategy';
 import { Extent } from 'ol/extent';
 import { Projection as OLProjection } from 'ol/proj';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
+import { TypeOutfields, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 import {
-  TypeLayerEntryConfig,
-  TypeGeoviewLayerConfig,
-  TypeOutfields,
-  TypeOutfieldsType,
-  TypeSourceWfsInitialConfig,
-  CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
+  TypeGeoviewLayerConfig,
+  TypeSourceWfsInitialConfig,
   WFSJsonResponseFeatureTypeFields,
   WFSJsonResponse,
   TypeMetadataWFSFeatureTypeListFeatureTypeText,
@@ -22,8 +19,7 @@ import {
   TypeMetadataWFSOperationMetadataOperationParameter,
   TypeMetadataWFSOperationMetadataOperationParameterValue,
   VectorStrategy,
-} from '@/api/config/types/map-schema-types';
-
+} from '@/api/config/types/layer-schema-types';
 import { findPropertyByRegexPath } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { WfsLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
@@ -50,8 +46,10 @@ export class WFS extends AbstractGeoViewVector {
    * Constructs a WFS Layer configuration processor.
    * @param {TypeWFSLayerConfig} layerConfig the layer configuration
    */
+  // The constructor is not useless, it narrows down the accepted parameter type.
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(layerConfig: TypeWFSLayerConfig) {
-    super(CONST_LAYER_TYPES.WFS, layerConfig);
+    super(layerConfig);
   }
 
   /**
@@ -417,16 +415,13 @@ export class WFS extends AbstractGeoViewVector {
     geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
       const layerEntryConfig = new WfsLayerEntryConfig({
         geoviewLayerConfig,
-        schemaTag: CONST_LAYER_TYPES.WFS,
-        entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
         layerId: `${layerEntry.id}`,
         layerName: layerEntry.layerName || `${layerEntry.id}`,
         source: {
           format: 'WFS',
           strategy,
-          dataAccessPath: metadataAccessPath,
         },
-      } as unknown as WfsLayerEntryConfig);
+      });
       return layerEntryConfig;
     });
 
@@ -476,29 +471,3 @@ export class WFS extends AbstractGeoViewVector {
     return AbstractGeoViewVector.processConfig(myLayer);
   }
 }
-
-/**
- * type guard function that redefines a TypeGeoviewLayerConfig as a TypeWFSLayerConfig if the geoviewLayerType attribute of the
- * verifyIfLayer parameter is WFS. The type ascention applies only to the true block of the if clause that use this function.
- *
- * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerConfigIsWFS = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeWFSLayerConfig => {
-  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.WFS;
-};
-
-/**
- * type guard function that redefines a TypeLayerEntryConfig as a WfsLayerEntryConfig if the geoviewLayerType attribute of the
- * verifyIfGeoViewEntry.geoviewLayerConfig attribute is WFS. The type ascention applies only to the true block of
- * the if clause that use this function.
- *
- * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
- * valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewEntryIsWFS = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is WfsLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.WFS;
-};

@@ -26,11 +26,13 @@ import {
   TypeStyleGeometry,
   TypeOutfieldsType,
   TypeOutfields,
+} from '@/api/config/types/map-schema-types';
+import {
   TypeLayerMetadataWMS,
   TypeLayerMetadataFields,
   TypeLayerMetadataEsri,
   TypeLayerMetadataVector,
-} from '@/api/config/types/map-schema-types';
+} from '@/api/config/types/layer-schema-types';
 import { getLegendStyles, getFeatureImageSource, processStyle } from '@/geo/utils/renderer/geoview-renderer';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
@@ -118,7 +120,8 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     this.#isTimeAware = layerConfig.geoviewLayerConfig.isTimeAware === undefined ? true : layerConfig.geoviewLayerConfig.isTimeAware;
 
     // If there is a layer style in the config, set it in the layer
-    if (layerConfig.layerStyle) this.setStyle(layerConfig.layerStyle);
+    const style = layerConfig.getLayerStyle();
+    if (style) this.setStyle(style);
   }
 
   /**
@@ -423,8 +426,8 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * Gets the temporal dimension that is associated to the layer.
    * @returns {TimeDimension | undefined} The temporal dimension associated to the layer or undefined.
    */
-  getTemporalDimension(): TimeDimension | undefined {
-    return this.getLayerConfig().getTemporalDimension();
+  getTimeDimension(): TimeDimension | undefined {
+    return this.getLayerConfig().getTimeDimension();
   }
 
   /**
@@ -507,7 +510,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     // If the layer is not queryable
     if (layerConfig.source?.featureInfo?.queryable === false) {
       // Throw error
-      throw new LayerNotQueryableError(layerConfig.layerPath, layerConfig.getLayerName());
+      throw new LayerNotQueryableError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
     }
 
     // Log

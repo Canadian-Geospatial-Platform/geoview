@@ -16,19 +16,16 @@ import { Fetch } from '@/core/utils/fetch-helper';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import {
   TypeLayerStyleSettings,
-  TypeFeatureInfoLayerConfig,
   TypeFeatureInfoEntry,
   rangeDomainType,
   codedValueType,
   TypeLayerStyleConfig,
   TypeLayerStyleConfigInfo,
   TypeOutfieldsType,
-  TypeStyleGeometry,
   TypeValidMapProjectionCodes,
   TypeIconSymbolVectorConfig,
-  CONST_LAYER_TYPES,
-  TypeLayerMetadataEsriExtent,
 } from '@/api/config/types/map-schema-types';
+import { CONST_LAYER_TYPES, TypeFeatureInfoLayerConfig, TypeLayerMetadataEsriExtent } from '@/api/config/types/layer-schema-types';
 import { esriGetFieldType, esriGetFieldDomain, parseDateTimeValuesEsriDynamic, GeometryJson } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
@@ -220,7 +217,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     let baseUrl = layerEntryConfig.source.dataAccessPath;
 
     // If no base url
-    if (!baseUrl) throw new LayerDataAccessPathMandatoryError(layerEntryConfig.layerPath, layerEntryConfig.getLayerName());
+    if (!baseUrl) throw new LayerDataAccessPathMandatoryError(layerEntryConfig.layerPath, layerEntryConfig.getLayerNameCascade());
 
     // Construct query
     if (!baseUrl.endsWith('/')) baseUrl += '/';
@@ -497,15 +494,17 @@ export class GVEsriDynamic extends AbstractGVRaster {
             // }) as Feature<Geometry>;
 
             // TODO: Performance - Relying on style to get geometry is not good. We should extract it from metadata and keep it in dedicated attribute
-            const geomType = Object.keys(layerConfig?.layerStyle || []);
+            const geomType = layerConfig?.getTypeGeometries() || [];
 
             // Get coordinates in right format and create geometry
             const coordinates = (feat.geometry?.points ||
               feat.geometry?.paths ||
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               feat.geometry?.rings || [feat.geometry?.x, feat.geometry?.y]) as any; // MultiPoint or Line or Polygon or Point schema
+
+            // Create the geometry from the (first?) type
             const newGeom: Geometry | undefined =
-              geomType.length > 0 ? GeometryApi.createGeometryFromType(geomType[0] as TypeStyleGeometry, coordinates) : undefined;
+              geomType.length > 0 ? GeometryApi.createGeometryFromType(geomType[0], coordinates) : undefined;
 
             // TODO: Performance - We will need a trigger to refresh the higight and details panel (for zoom button) when extent and
             // TO.DOCONT: is applied. Sometimes the delay is too big so we need to change tab or layer in layer list to trigger the refresh
@@ -667,9 +666,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
     const currentFilter = source.getParams().layerDefs;
 
     try {
-      // Update the layer config information (not ideal to do this here...)
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.layerFilter = filterValueToUse;
+      // TODO: Check - Is this assignation necessary? What's the intent?
+      // Update the layer config information (not ideal to do this here at this stage...)
+      layerConfig.setLayerFilter(filterValueToUse);
       filterValueToUse = GVEsriDynamic.getViewFilter(layerConfig, style);
 
       // Parse the filter value to use
@@ -703,7 +702,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       // Failed
       throw new LayerInvalidLayerFilterError(
         layerConfig.layerPath,
-        layerConfig.getLayerName(),
+        layerConfig.getLayerNameCascade(),
         filterValueToUse,
         currentFilter,
         formatError(error)
@@ -717,7 +716,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @returns {string} The filter associated to the layer
    */
   static getViewFilter(layerConfig: EsriDynamicLayerEntryConfig, style: TypeLayerStyleConfig | undefined): string {
-    const { layerFilter } = layerConfig;
+    // Get the layer filter
+    const layerFilter = layerConfig.getLayerFilter();
 
     if (style) {
       const setAllUndefinedVisibilityFlagsToYes = (styleConfig: TypeLayerStyleSettings): void => {

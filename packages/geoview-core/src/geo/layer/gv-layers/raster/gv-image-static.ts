@@ -12,7 +12,7 @@ import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/laye
 import { Projection } from '@/geo/utils/projection';
 import { validateExtent } from '@/geo/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { CONST_LAYER_TYPES } from '@/api/config/types/map-schema-types';
+import { CONST_LAYER_TYPES } from '@/api/config/types/layer-schema-types';
 
 /**
  * Manages an Image static layer.

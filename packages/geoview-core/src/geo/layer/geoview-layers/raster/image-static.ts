@@ -3,20 +3,19 @@ import Static, { Options as SourceOptions } from 'ol/source/ImageStatic';
 import { ConfigBaseClass, TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import {
-  TypeLayerEntryConfig,
-  TypeGeoviewLayerConfig,
-  CONST_LAYER_ENTRY_TYPES,
-  CONST_LAYER_TYPES,
-  Extent,
-} from '@/api/config/types/map-schema-types';
+import { Extent } from '@/api/config/types/map-schema-types';
+import { TypeGeoviewLayerConfig, CONST_LAYER_TYPES, TypeValidSourceProjectionCodes } from '@/api/config/types/layer-schema-types';
 
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import {
   LayerEntryConfigParameterExtentNotDefinedInSourceError,
   LayerEntryConfigParameterProjectionNotDefinedInSourceError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
-import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
+import {
+  LayerDataAccessPathMandatoryError,
+  LayerMissingSourceExtentError,
+  LayerMissingSourceProjectionError,
+} from '@/core/exceptions/layer-exceptions';
 import { GVImageStatic } from '@/geo/layer/gv-layers/raster/gv-image-static';
 
 export interface TypeImageStaticLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
@@ -35,8 +34,10 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * Constructs a ImageStatic Layer configuration processor.
    * @param {TypeImageStaticLayerConfig} layerConfig the layer configuration
    */
+  // The constructor is not useless, it narrows down the accepted parameter type.
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(layerConfig: TypeImageStaticLayerConfig) {
-    super(CONST_LAYER_TYPES.IMAGE_STATIC, layerConfig);
+    super(layerConfig);
   }
 
   /**
@@ -134,17 +135,19 @@ export class ImageStatic extends AbstractGeoViewRaster {
       listOfLayerEntryConfig: [],
     };
     geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
+      // Validate input
+      if (!layerEntry.source || !layerEntry.source.extent) throw new LayerMissingSourceExtentError();
+      if (!layerEntry.source.projection) throw new LayerMissingSourceProjectionError();
+
+      // Create the entry
       const layerEntryConfig = new ImageStaticLayerEntryConfig({
         geoviewLayerConfig,
-        schemaTag: CONST_LAYER_TYPES.IMAGE_STATIC,
-        entryType: CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE,
         layerId: `${layerEntry.id}`,
         source: {
-          dataAccessPath: metadataAccessPath,
-          extent: layerEntry.source?.extent,
-          projection: layerEntry.source?.projection,
+          extent: layerEntry.source.extent,
+          projection: layerEntry.source.projection,
         },
-      } as unknown as ImageStaticLayerEntryConfig);
+      });
       return layerEntryConfig;
     });
 
@@ -176,7 +179,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
     layerIds: string[],
     isTimeAware: boolean,
     sourceExtent: Extent,
-    sourceProjection: number
+    sourceProjection: TypeValidSourceProjectionCodes
   ): Promise<ConfigBaseClass[]> {
     // Create the Layer config
     const layerConfig = ImageStatic.createGeoviewLayerConfig(
@@ -207,7 +210,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
 
     // Validate required properties
     if (!source?.dataAccessPath) {
-      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath, layerConfig.getLayerName());
+      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
     }
 
     if (!source.extent) {
@@ -229,31 +232,3 @@ export class ImageStatic extends AbstractGeoViewRaster {
     return new Static(sourceOptions);
   }
 }
-
-/**
- * type guard function that redefines a TypeGeoviewLayerConfig as a TypeImageStaticLayerConfig if the geoviewLayerType attribute of the
- * verifyIfLayer parameter is ImageStatic. The type ascention applies only to the true block of the if clause that use this function.
- *
- * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerConfigIsImageStatic = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeImageStaticLayerConfig => {
-  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.IMAGE_STATIC;
-};
-
-/**
- * type guard function that redefines a TypeLayerEntryConfig as a ImageStaticLayerEntryConfig if the geoviewLayerType attribute of the
- * verifyIfGeoViewEntry.geoviewLayerConfig attribute is ImageStatic. The type ascention applies only to the true block of
- * the if clause that use this function.
- *
- * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
- * valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewEntryIsImageStatic = (
-  verifyIfGeoViewEntry: TypeLayerEntryConfig
-): verifyIfGeoViewEntry is ImageStaticLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.IMAGE_STATIC;
-};

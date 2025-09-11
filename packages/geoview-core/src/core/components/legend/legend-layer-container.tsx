@@ -3,7 +3,7 @@ import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Collapse, List } from '@/ui';
 import { getSxClasses } from './legend-styles';
-import { CONST_LAYER_TYPES } from '@/api/config/types/map-schema-types';
+import { CONST_LAYER_TYPES } from '@/api/config/types/layer-schema-types';
 import { ItemsList } from './legend-layer-items';
 import { LegendLayer } from './legend-layer';
 import {

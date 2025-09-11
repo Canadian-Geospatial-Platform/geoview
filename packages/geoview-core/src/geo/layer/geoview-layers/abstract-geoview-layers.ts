@@ -8,16 +8,16 @@ import { logger } from '@/core/utils/logger';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
+import { TypeStyleGeometry } from '@/api/config/types/map-schema-types';
 import {
+  CONST_LAYER_TYPES,
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
   TypeLayerInitialSettings,
   TypeLayerStatus,
-  TypeStyleGeometry,
   TypeGeoviewLayerType,
-  CONST_LAYER_TYPES,
   validVectorLayerLegendTypes,
-} from '@/api/config/types/map-schema-types';
+} from '@/api/config/types/layer-schema-types';
 import { LayerServiceMetadataEmptyError, LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
 import {
   LayerEntryConfigEmptyLayerGroupError,
@@ -75,9 +75,6 @@ export abstract class AbstractGeoViewLayer {
   /** The default hit tolerance */
   hitTolerance: number = AbstractGeoViewLayer.DEFAULT_HIT_TOLERANCE;
 
-  /** The type of GeoView layer that is instantiated. */
-  type: TypeGeoviewLayerType;
-
   /** The unique identifier for the GeoView layer. The value of this attribute is extracted from the mapLayerConfig parameter.
    * If its value is undefined, a unique value is generated.
    */
@@ -129,13 +126,13 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Constructor
-   * @param {TypeGeoviewLayerType} type - The type of GeoView layer that is instantiated.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The GeoView layer configuration options.
    */
-  constructor(type: TypeGeoviewLayerType, geoviewLayerConfig: TypeGeoviewLayerConfig) {
-    this.type = type;
+  constructor(geoviewLayerConfig: TypeGeoviewLayerConfig) {
     this.geoviewLayerId = geoviewLayerConfig.geoviewLayerId || generateId(18);
-    this.geoviewLayerName = geoviewLayerConfig?.geoviewLayerName ? geoviewLayerConfig.geoviewLayerName : DEFAULT_LAYER_NAMES[type];
+    this.geoviewLayerName = geoviewLayerConfig?.geoviewLayerName
+      ? geoviewLayerConfig.geoviewLayerName
+      : DEFAULT_LAYER_NAMES[geoviewLayerConfig.geoviewLayerType];
     this.metadataAccessPath = geoviewLayerConfig.metadataAccessPath?.trim() || '';
     this.serverDateFragmentsOrder = geoviewLayerConfig.serviceDateFormat
       ? DateMgt.getDateFragmentsOrder(geoviewLayerConfig.serviceDateFormat)
@@ -157,13 +154,13 @@ export abstract class AbstractGeoViewLayer {
       this.listOfLayerEntryConfig = listOfLayerEntryConfig;
     } else {
       const layerGroup = new GroupLayerEntryConfig({
-        geoviewLayerConfig: listOfLayerEntryConfig[0].geoviewLayerConfig,
+        geoviewLayerConfig,
         layerId: 'base-group',
         layerName: this.geoviewLayerName,
         isMetadataLayerGroup: false,
         initialSettings: geoviewLayerConfig.initialSettings,
         listOfLayerEntryConfig,
-      } as GroupLayerEntryConfig);
+      });
 
       this.listOfLayerEntryConfig = [layerGroup];
       layerGroup.listOfLayerEntryConfig.forEach((layerConfig) => {
@@ -171,8 +168,6 @@ export abstract class AbstractGeoViewLayer {
         layerConfig.parentLayerConfig = layerGroup;
       });
     }
-
-    this.listOfLayerEntryConfig[0].geoviewLayerConfig.listOfLayerEntryConfig = listOfLayerEntryConfig;
   }
 
   /**
@@ -215,6 +210,19 @@ export abstract class AbstractGeoViewLayer {
   getClassName(): string {
     // Return the name of the class
     return this.constructor.name;
+  }
+
+  /**
+   * Gets the first layer entry name if any sub-layers exist or else gets the geoviewLayerName or even the geoviewLayerId.
+   * @returns {string} The layer entry name if any sub-layers exist or the geoviewLayerName or even the geoviewLayerId.
+   */
+  geLayerEntryNameOrGeoviewLayerName(): string {
+    if (this.listOfLayerEntryConfig?.length === 1) {
+      // Get the layer name from the object (instance or type) inside the listOfLayerEntryConfig array
+      const layerEntryName = ConfigBaseClass.getClassOrTypeLayerName(this.listOfLayerEntryConfig[0]);
+      if (layerEntryName) return layerEntryName;
+    }
+    return this.geoviewLayerName || this.geoviewLayerId;
   }
 
   /**
@@ -349,11 +357,11 @@ export abstract class AbstractGeoViewLayer {
       // If ResponseEmptyError error
       if (error instanceof ResponseEmptyError) {
         // Throw higher
-        throw new LayerServiceMetadataEmptyError(this.geoviewLayerId, this.geoviewLayerName);
+        throw new LayerServiceMetadataEmptyError(this.geoviewLayerId, this.geLayerEntryNameOrGeoviewLayerName());
       }
 
       // Throw higher
-      throw new LayerServiceMetadataUnableToFetchError(this.geoviewLayerId, this.geoviewLayerName, formatError(error));
+      throw new LayerServiceMetadataUnableToFetchError(this.geoviewLayerId, this.geLayerEntryNameOrGeoviewLayerName(), formatError(error));
     }
   }
 
@@ -505,7 +513,7 @@ export abstract class AbstractGeoViewLayer {
         }
       } else {
         // The promise failed. Unwrap the reason.
-        const reason = promise.reason as PromiseRejectErrorWrapper<TypeLayerEntryConfig>;
+        const reason = promise.reason as PromiseRejectErrorWrapper<AbstractBaseLayerEntryConfig>;
 
         // The layer config
         layerConfig = reason.object;
@@ -872,7 +880,7 @@ export abstract class AbstractGeoViewLayer {
         if (ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo('processed', this.listOfLayerEntryConfig)) return true;
 
         // Emit message
-        this.emitMessage('warning.layer.metadataTakingLongTime', [this.geoviewLayerName || this.geoviewLayerId], 'warning');
+        this.emitMessage('warning.layer.metadataTakingLongTime', [this.geLayerEntryNameOrGeoviewLayerName()], 'warning');
 
         return false;
       },

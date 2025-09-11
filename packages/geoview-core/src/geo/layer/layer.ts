@@ -23,6 +23,7 @@ import {
   LayerEntryRegisterInitEvent,
   LayerGVCreatedEvent,
 } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeDisplayLanguage, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 import {
   MapConfigLayerEntry,
   TypeGeoviewLayerConfig,
@@ -31,23 +32,33 @@ import {
   mapConfigLayerEntryIsShapefile,
   TypeLayerStatus,
   GeoCoreLayerConfig,
-  TypeDisplayLanguage,
-  TypeOutfieldsType,
-} from '@/api/config/types/map-schema-types';
-
-import { CSV, layerConfigIsCSV } from '@/geo/layer/geoview-layers/vector/csv';
-import { EsriDynamic, layerConfigIsEsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
-import { EsriFeature, layerConfigIsEsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
-import { EsriImage, layerConfigIsEsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
-import { GeoJSON, layerConfigIsGeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
-import { GeoPackage, layerConfigIsGeoPackage } from '@/geo/layer/geoview-layers/vector/geopackage';
-import { ImageStatic, layerConfigIsImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
-import { OgcFeature, layerConfigIsOgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
-import { VectorTiles, layerConfigIsVectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
-import { WFS, layerConfigIsWFS } from '@/geo/layer/geoview-layers/vector/wfs';
-import { WKB, layerConfigIsWkb } from '@/geo/layer/geoview-layers/vector/wkb';
-import { WMS, layerConfigIsWMS } from '@/geo/layer/geoview-layers/raster/wms';
-import { XYZTiles, layerConfigIsXYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
+  layerConfigIsEsriDynamicFromType,
+  layerConfigIsEsriImageFromType,
+  layerConfigIsImageStaticFromType,
+  layerConfigIsVectorTilesFromType,
+  layerConfigIsOgcWmsFromType,
+  layerConfigIsXYZTilesFromType,
+  layerConfigIsCSVFromType,
+  layerConfigIsEsriFeatureFromType,
+  layerConfigIsGeoJSONFromType,
+  layerConfigIsGeoPackageFromType,
+  layerConfigIsOgcFeatureFromType,
+  layerConfigIsWFSFromType,
+  layerConfigIsWKBFromType,
+} from '@/api/config/types/layer-schema-types';
+import { GeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
+import { GeoPackage } from '@/geo/layer/geoview-layers/vector/geopackage';
+import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
+import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
+import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
+import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
+import { ImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
+import { WFS } from '@/geo/layer/geoview-layers/vector/wfs';
+import { OgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
+import { XYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
+import { VectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
+import { CSV } from '@/geo/layer/geoview-layers/vector/csv';
+import { WKB } from '@/geo/layer/geoview-layers/vector/wkb';
 
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { HoverFeatureInfoLayerSet } from '@/geo/layer/layer-sets/hover-feature-info-layer-set';
@@ -86,20 +97,15 @@ import { getExtentUnion, getZoomFromScale } from '@/geo/utils/utilities';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { MapViewer } from '@/geo/map/map-viewer';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
 import { GeochartEventProcessor } from '@/api/event-processors/event-processor-children/geochart-event-processor';
 import { SwiperEventProcessor } from '@/api/event-processors/event-processor-children/swiper-event-processor';
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
-import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import { TypeLegendItem } from '@/core/components/layers/types';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
-import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
-import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { LayerGeoCoreError } from '@/core/exceptions/geocore-exceptions';
 import { ShapefileReader } from '@/core/utils/config/reader/shapefile-reader';
@@ -1332,7 +1338,7 @@ export class LayerApi {
     const layerConfig = this.getLayerEntryConfig(layerPath);
 
     if (!layerConfig) throw new LayerNotFoundError(layerPath);
-    if (layerConfig instanceof GroupLayerEntryConfig) throw new LayerWrongTypeError(layerPath, layerConfig.layerName);
+    if (layerConfig instanceof GroupLayerEntryConfig) throw new LayerWrongTypeError(layerPath, layerConfig.getLayerNameCascade());
 
     // Cast it
     const layerConfigCasted = layerConfig as AbstractBaseLayerEntryConfig;
@@ -1350,7 +1356,7 @@ export class LayerApi {
           outfield[fields] = fieldNames[index];
         });
       else throw new LayerDifferingFieldLengths(layerPath);
-    } else throw new LayerNotQueryableError(layerConfigCasted.layerPath, layerConfigCasted.getLayerName());
+    } else throw new LayerNotQueryableError(layerConfigCasted.layerPath, layerConfigCasted.getLayerNameCascade());
   }
 
   /**
@@ -1364,7 +1370,7 @@ export class LayerApi {
     const layerConfig = this.getLayerEntryConfig(layerPath);
 
     if (!layerConfig) throw new LayerNotFoundError(layerPath);
-    if (layerConfig instanceof GroupLayerEntryConfig) throw new LayerWrongTypeError(layerPath, layerConfig.layerName);
+    if (layerConfig instanceof GroupLayerEntryConfig) throw new LayerWrongTypeError(layerPath, layerConfig.getLayerNameCascade());
 
     // Cast it
     const layerConfigCasted = layerConfig as AbstractBaseLayerEntryConfig;
@@ -1389,7 +1395,7 @@ export class LayerApi {
         // Set new value asfeature info outfields
         layerConfigCasted.source.featureInfo.outfields = newOutfields;
       } else throw new LayerDifferingFieldLengths(layerPath);
-    } else throw new LayerNotQueryableError(layerConfigCasted.layerPath, layerConfigCasted.getLayerName());
+    } else throw new LayerNotQueryableError(layerConfigCasted.layerPath, layerConfigCasted.getLayerNameCascade());
   }
 
   /**
@@ -1770,15 +1776,15 @@ export class LayerApi {
     // in visible range. Inheritance has already been passed in the config and the group layer visibility will
     // be handled in the map-viewer's handleMapZoomEnd by checking the children visibility
     const mapView = this.mapViewer.getView();
-    if ((layerConfig.initialSettings.maxZoom || layerConfig.maxScale) && !(gvLayer instanceof GVGroupLayer)) {
-      let maxScaleZoomLevel = getZoomFromScale(mapView, layerConfig.maxScale);
+    if ((layerConfig.initialSettings.maxZoom || layerConfig.getMaxScale()) && !(gvLayer instanceof GVGroupLayer)) {
+      let maxScaleZoomLevel = getZoomFromScale(mapView, layerConfig.getMaxScale());
       maxScaleZoomLevel = maxScaleZoomLevel ? Math.ceil(maxScaleZoomLevel * 100) / 100 : undefined;
       const maxZoom = Math.min(layerConfig.initialSettings.maxZoom ?? Infinity, maxScaleZoomLevel ?? Infinity);
       gvLayer.setMaxZoom(maxZoom);
     }
 
-    if ((layerConfig.initialSettings.minZoom || layerConfig.minScale) && !(gvLayer instanceof GVGroupLayer)) {
-      let minScaleZoomLevel = getZoomFromScale(mapView, layerConfig.minScale);
+    if ((layerConfig.initialSettings.minZoom || layerConfig.getMinScale()) && !(gvLayer instanceof GVGroupLayer)) {
+      let minScaleZoomLevel = getZoomFromScale(mapView, layerConfig.getMinScale());
       minScaleZoomLevel = minScaleZoomLevel ? Math.ceil(minScaleZoomLevel * 100) / 100 : undefined;
       const minZoom = Math.max(layerConfig.initialSettings.minZoom ?? -Infinity, minScaleZoomLevel ?? -Infinity);
       gvLayer.setMinZoom(minZoom);
@@ -1866,9 +1872,9 @@ export class LayerApi {
       const geoviewLayer = this.getGeoviewLayer(layerConfig.layerPath);
 
       // If the layer is loaded AND flag is true to use time dimension, continue
-      if (geoviewLayer instanceof AbstractGVLayer && geoviewLayer.getIsTimeAware() && geoviewLayer.getTemporalDimension()) {
+      if (geoviewLayer instanceof AbstractGVLayer && geoviewLayer.getIsTimeAware() && geoviewLayer.getTimeDimension()) {
         // Check (if dimension is valid) and add time slider layer when needed
-        TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.getMapId(), geoviewLayer, layerConfig);
+        TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.getMapId(), geoviewLayer);
       }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error: unknown) {
@@ -1947,21 +1953,16 @@ export class LayerApi {
    * @param {ConfigBaseClass} layerConfig - The layer config being processed
    */
   #addInitialFilters(layerConfig: ConfigBaseClass): void {
-    if (
-      (
-        layerConfig as
-          | VectorLayerEntryConfig
-          | EsriDynamicLayerEntryConfig
-          | EsriImageLayerEntryConfig
-          | ImageStaticLayerEntryConfig
-          | OgcWmsLayerEntryConfig
-      ).layerFilter
-    )
-      MapEventProcessor.addInitialFilter(
-        this.getMapId(),
-        layerConfig.layerPath,
-        (layerConfig as VectorLayerEntryConfig).layerFilter as string
-      );
+    // If correct subclass, otherwise skip
+    if (layerConfig instanceof AbstractBaseLayerEntryConfig) {
+      // Get the layer filter
+      const layerFilter = layerConfig.getLayerFilter();
+
+      // If any layer filter
+      if (layerFilter) {
+        MapEventProcessor.addInitialFilter(this.getMapId(), layerConfig.layerPath, layerFilter);
+      }
+    }
   }
 
   // #endregion
@@ -2438,43 +2439,43 @@ export class LayerApi {
    */
   static createLayerConfigFromType(geoviewLayerConfig: TypeGeoviewLayerConfig, mapProjectionForVectorTiles: string): AbstractGeoViewLayer {
     // TODO: Refactor - Here the function should use the structure created by validation config with the metadata fetch and no need to pass the validation.
-    if (layerConfigIsCSV(geoviewLayerConfig)) {
+    if (layerConfigIsCSVFromType(geoviewLayerConfig)) {
       return new CSV(geoviewLayerConfig);
     }
-    if (layerConfigIsEsriDynamic(geoviewLayerConfig)) {
+    if (layerConfigIsEsriDynamicFromType(geoviewLayerConfig)) {
       return new EsriDynamic(geoviewLayerConfig);
     }
-    if (layerConfigIsEsriFeature(geoviewLayerConfig)) {
+    if (layerConfigIsEsriFeatureFromType(geoviewLayerConfig)) {
       return new EsriFeature(geoviewLayerConfig);
     }
-    if (layerConfigIsEsriImage(geoviewLayerConfig)) {
+    if (layerConfigIsEsriImageFromType(geoviewLayerConfig)) {
       return new EsriImage(geoviewLayerConfig);
     }
-    if (layerConfigIsGeoJSON(geoviewLayerConfig)) {
+    if (layerConfigIsGeoJSONFromType(geoviewLayerConfig)) {
       return new GeoJSON(geoviewLayerConfig);
     }
-    if (layerConfigIsGeoPackage(geoviewLayerConfig)) {
+    if (layerConfigIsGeoPackageFromType(geoviewLayerConfig)) {
       return new GeoPackage(geoviewLayerConfig);
     }
-    if (layerConfigIsImageStatic(geoviewLayerConfig)) {
+    if (layerConfigIsImageStaticFromType(geoviewLayerConfig)) {
       return new ImageStatic(geoviewLayerConfig);
     }
-    if (layerConfigIsOgcFeature(geoviewLayerConfig)) {
+    if (layerConfigIsOgcFeatureFromType(geoviewLayerConfig)) {
       return new OgcFeature(geoviewLayerConfig);
     }
-    if (layerConfigIsVectorTiles(geoviewLayerConfig)) {
+    if (layerConfigIsVectorTilesFromType(geoviewLayerConfig)) {
       return new VectorTiles(geoviewLayerConfig, mapProjectionForVectorTiles);
     }
-    if (layerConfigIsWFS(geoviewLayerConfig)) {
+    if (layerConfigIsWFSFromType(geoviewLayerConfig)) {
       return new WFS(geoviewLayerConfig);
     }
-    if (layerConfigIsWkb(geoviewLayerConfig)) {
+    if (layerConfigIsWKBFromType(geoviewLayerConfig)) {
       return new WKB(geoviewLayerConfig);
     }
-    if (layerConfigIsWMS(geoviewLayerConfig)) {
+    if (layerConfigIsOgcWmsFromType(geoviewLayerConfig)) {
       return new WMS(geoviewLayerConfig, LayerApi.DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS);
     }
-    if (layerConfigIsXYZTiles(geoviewLayerConfig)) {
+    if (layerConfigIsXYZTilesFromType(geoviewLayerConfig)) {
       return new XYZTiles(geoviewLayerConfig);
     }
 

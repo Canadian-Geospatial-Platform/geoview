@@ -144,7 +144,7 @@ class TimeSliderPlugin extends FooterPlugin {
       // Layers are already 'loaded', initialize the time slider plugin
       this.initTimeSliderPlugin();
     } else {
-      // Wait for the layers to be 'loaded' so that their 'layerTemporalDimension' information is set ('techhnically, it's 'processed', but putting 'loaded' to better support layers migration)
+      // Wait for the layers to be 'loaded' so that their 'layerTimeDimension' information is set ('techhnically, it's 'processed', but putting 'loaded' to better support layers migration)
       this.mapViewer.onMapLayersLoaded(() => {
         // Initialize the time slider plugin once all layers are 'loaded'
         this.initTimeSliderPlugin();
@@ -159,7 +159,7 @@ class TimeSliderPlugin extends FooterPlugin {
    * Initializes the Time Slider Plugin once the layers are all 'processed'.
    */
   initTimeSliderPlugin(): void {
-    // Now the layerTemporalDimension should be good on the layers
+    // Now the layerTimeDimension should be good on the layers
     const orderedLayerPaths = this.mapViewer.layer.getLayerEntryConfigIds();
     const initialTimeSliderLayerPaths = this.#filterTimeSliderLayers(orderedLayerPaths);
     if (initialTimeSliderLayerPaths) {
@@ -172,11 +172,8 @@ class TimeSliderPlugin extends FooterPlugin {
 
         // If the layer was found and of right type
         if (layer instanceof AbstractGVLayer) {
-          // Get the config
-          const layerConfig = layer.getLayerConfig();
-
           // Check and add time slider layer when needed
-          TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.mapViewer.mapId, layer, layerConfig, timesliderConfig);
+          TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.mapViewer.mapId, layer, timesliderConfig);
         }
       });
     }
@@ -197,7 +194,7 @@ class TimeSliderPlugin extends FooterPlugin {
       // If of the right type
       if (layer instanceof AbstractGVLayer) {
         // Return the temporal dimension for the layer if any
-        return layer.getTemporalDimension();
+        return layer.getTimeDimension();
       }
 
       // Skip

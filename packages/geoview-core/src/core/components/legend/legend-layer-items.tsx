@@ -6,7 +6,7 @@ import { TypeLegendItem } from '@/core/components/layers/types';
 import { useLayerStoreActions, useSelectorLayerControls } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
-import { TypeLayerControls } from '@/api/config/types/map-schema-types';
+import { TypeLayerControls } from '@/api/config/types/layer-schema-types';
 import { useSelectorIsLayerHiddenOnMap } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 interface ItemsListProps {

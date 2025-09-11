@@ -31,8 +31,8 @@ import {
   TypeLayerStyleConfigInfo,
   TypeAliasLookup,
   codedValueType,
-  TypeLayerMetadataFields,
 } from '@/api/config/types/map-schema-types';
+import { TypeLayerMetadataFields } from '@/api/config/types/layer-schema-types';
 import {
   binaryKeywors,
   defaultColor,

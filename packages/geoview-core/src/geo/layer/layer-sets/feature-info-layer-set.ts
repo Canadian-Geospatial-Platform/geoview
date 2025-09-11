@@ -2,7 +2,9 @@ import { Coordinate } from 'ol/coordinate';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { TypeFeatureInfoEntry, TypeLayerEntryConfig, TypeResultSet } from '@/api/config/types/map-schema-types';
+import { TypeFeatureInfoEntry, TypeResultSet } from '@/api/config/types/map-schema-types';
+import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { EventType, AbstractLayerSet, PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
@@ -155,10 +157,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
           .then((arrayOfRecords) => {
             // Use the response to align arrayOfRecords fields with layerConfig fields
             if (arrayOfRecords.length) {
-              AbstractLayerSet.alignRecordsWithOutFields(
-                this.layerApi.getLayerEntryConfig(layerPath) as TypeLayerEntryConfig,
-                arrayOfRecords
-              );
+              AbstractLayerSet.alignRecordsWithOutFields(layer.getLayerConfig(), arrayOfRecords);
             }
 
             // Use the response to possibly patch the layer config metadata
@@ -264,15 +263,21 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    */
   #patchMissingMetadataIfNecessary(layerPath: string, record: TypeFeatureInfoEntry): void {
     // Set up feature info for layers that did not include it in the metadata
-    const layerEntryConfig = this.layerApi.getLayerEntryConfig(layerPath) as TypeLayerEntryConfig;
+    const layerEntryConfig = this.layerApi.getLayerEntryConfig(layerPath);
 
-    if (!layerEntryConfig.source) layerEntryConfig.source = {};
+    // If a group, skip
+    if (!layerEntryConfig || layerEntryConfig instanceof GroupLayerEntryConfig) return;
 
-    if (!layerEntryConfig.source.featureInfo) {
-      layerEntryConfig.source.featureInfo = { queryable: true };
+    // Cast it as regular layer entry
+    const layerEntryConfigCasted = layerEntryConfig as AbstractBaseLayerEntryConfig;
+
+    if (!layerEntryConfigCasted.source) layerEntryConfigCasted.source = {};
+
+    if (!layerEntryConfigCasted.source.featureInfo) {
+      layerEntryConfigCasted.source.featureInfo = { queryable: true };
     }
 
-    const sourceFeatureInfo = layerEntryConfig.source.featureInfo;
+    const sourceFeatureInfo = layerEntryConfigCasted.source.featureInfo;
     if (!sourceFeatureInfo.outfields) {
       sourceFeatureInfo.outfields = [];
 

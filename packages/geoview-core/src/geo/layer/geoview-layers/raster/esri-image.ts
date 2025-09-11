@@ -4,12 +4,7 @@ import { Options as SourceOptions } from 'ol/source/ImageArcGISRest';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import {
-  TypeLayerEntryConfig,
-  TypeGeoviewLayerConfig,
-  CONST_LAYER_ENTRY_TYPES,
-  CONST_LAYER_TYPES,
-} from '@/api/config/types/map-schema-types';
+import { TypeGeoviewLayerConfig, CONST_LAYER_TYPES } from '@/api/config/types/layer-schema-types';
 
 import { commonProcessLayerMetadata } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
@@ -36,7 +31,7 @@ export class EsriImage extends AbstractGeoViewRaster {
   constructor(layerConfig: TypeEsriImageLayerConfig) {
     // eslint-disable-next-line no-param-reassign
     if (!layerConfig.serviceDateFormat) layerConfig.serviceDateFormat = 'DD/MM/YYYY HH:MM:SSZ';
-    super(CONST_LAYER_TYPES.ESRI_IMAGE, layerConfig);
+    super(layerConfig);
   }
 
   /**
@@ -127,11 +122,9 @@ export class EsriImage extends AbstractGeoViewRaster {
     geoviewLayerConfig.listOfLayerEntryConfig = [
       new EsriImageLayerEntryConfig({
         geoviewLayerConfig,
-        schemaTag: CONST_LAYER_TYPES.ESRI_IMAGE,
-        entryType: CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE,
         layerId: trimmedPath.split('/').slice(-2, -1)[0],
         layerName: trimmedPath.split('/').slice(-2, -1)[0],
-      } as EsriImageLayerEntryConfig),
+      }),
     ];
 
     // Return it
@@ -178,7 +171,7 @@ export class EsriImage extends AbstractGeoViewRaster {
     const { source } = layerConfig;
 
     if (!source?.dataAccessPath) {
-      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath, layerConfig.getLayerName());
+      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
     }
 
     const sourceOptions: SourceOptions = {
@@ -197,36 +190,9 @@ export class EsriImage extends AbstractGeoViewRaster {
     const olSource = new ImageArcGISRest(sourceOptions);
 
     // Apply the filter on the source right away, before the first load
-    GVWMS.applyViewFilterOnSource(layerConfig, olSource, layerConfig.getExternalFragmentsOrder(), undefined, layerConfig.layerFilter);
+    GVWMS.applyViewFilterOnSource(layerConfig, olSource, layerConfig.getExternalFragmentsOrder(), undefined, layerConfig.getLayerFilter());
 
     // Return the source
     return olSource;
   }
 }
-
-/**
- * type guard function that redefines a TypeGeoviewLayerConfig as a TypeEsriImageLayerConfig if the geoviewLayerType attribute of
- * the verifyIfLayer parameter is ESRI_IMAGE. The type ascention applies only to the true block of the if clause that use
- * this function.
- *
- * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerConfigIsEsriImage = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeEsriImageLayerConfig => {
-  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_IMAGE;
-};
-
-/**
- * type guard function that redefines a TypeLayerEntryConfig as a EsriImageLayerEntryConfig if the geoviewLayerType attribute
- * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is ESRI_IMAGE. The type ascention applies only to the true block of
- * the if clause that use this function.
- *
- * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
- * valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewEntryIsEsriImage = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is EsriImageLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_IMAGE;
-};

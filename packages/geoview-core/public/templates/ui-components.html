@@ -172,7 +172,7 @@
               ],
               track: 'normal',
               onChange: (dates) => {
-                const field = mapViewer.layer.getGeoviewLayer('historical-flood/0').getTemporalDimension().field;
+                const field = mapViewer.layer.getGeoviewLayer('historical-flood/0').getTimeDimension().field;
                 mapViewer.layer.getGeoviewLayer('historical-flood/0').applyViewFilter(`${field} >= date '${dates[0]}-01-01' and ${field} <= date '${dates[1]}-12-31'`);
               },
             })

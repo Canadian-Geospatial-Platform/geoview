@@ -1,15 +1,8 @@
 import { Map as OLMap } from 'ol';
 
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import {
-  QueryType,
-  TypeFeatureInfoEntry,
-  TypeLayerEntryConfig,
-  TypeLayerStatus,
-  TypeLocation,
-  TypeResultSet,
-  TypeResultSetEntry,
-} from '@/api/config/types/map-schema-types';
+import { QueryType, TypeFeatureInfoEntry, TypeLocation, TypeResultSet, TypeResultSetEntry } from '@/api/config/types/map-schema-types';
+import { TypeLayerStatus } from '@/api/config/types/layer-schema-types';
 import { generateId, whenThisThen } from '@/core/utils/utilities';
 import {
   ConfigBaseClass,
@@ -179,7 +172,7 @@ export abstract class AbstractLayerSet {
     this.resultSet[layerConfig.layerPath] = {
       layerPath: layerConfig.layerPath,
       layerStatus: layerConfig.layerStatus,
-      layerName: layerConfig.layerName!,
+      layerName: layerConfig.getLayerNameCascade(),
     };
 
     // Register the layer status changed handler
@@ -367,7 +360,7 @@ export abstract class AbstractLayerSet {
 
     // Update the name with a possibly updated layerName during layer status progression
     // (depending on how this translates in the new layers process, might not need this anymore)
-    this.resultSet[layerConfig.layerPath].layerName = layerConfig.layerName || layerConfig.geoviewLayerConfig.geoviewLayerName!;
+    this.resultSet[layerConfig.layerPath].layerName = layerConfig.getLayerName() || layerConfig.geoviewLayerConfig.geoviewLayerName!;
   }
 
   /**
@@ -443,12 +436,12 @@ export abstract class AbstractLayerSet {
   /**
    * Align records with informatiom provided by OutFields from layer config.
    * This will update fields in and delete unwanted fields from the arrayOfRecords
-   * @param {TypeLayerEntryConfig} layerPath - Path of the layer to get config from.
+   * @param {AbstractBaseLayerEntryConfig} layerEntryConfig - The layer entry config object.
    * @param {TypeFeatureInfoEntry[]} arrayOfRecords - Features to delete fields from.
    * @protected
    * @static
    */
-  protected static alignRecordsWithOutFields(layerEntryConfig: TypeLayerEntryConfig, arrayOfRecords: TypeFeatureInfoEntry[]): void {
+  protected static alignRecordsWithOutFields(layerEntryConfig: AbstractBaseLayerEntryConfig, arrayOfRecords: TypeFeatureInfoEntry[]): void {
     // If source featureInfo is provided, continue
     if (layerEntryConfig.source && layerEntryConfig.source.featureInfo) {
       const sourceFeatureInfo = layerEntryConfig.source.featureInfo;

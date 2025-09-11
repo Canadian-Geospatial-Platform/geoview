@@ -6,8 +6,9 @@ import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
 import _ from 'lodash';
 import { logger } from '@/core/utils/logger';
-import { TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '@/api/config/types/map-schema-types';
+import { TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '@/api/config/types/layer-schema-types';
 import { UtilAddLayer } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
+import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 
 export interface AddLayerTreeProps {
   layerTree: TypeGeoviewLayerConfig;
@@ -34,8 +35,16 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
    * @param parentId - the parent id of the layer
    */
   const renderTreeItem = (layer: TypeGeoviewLayerConfig | TypeLayerEntryConfig, parentId?: string): JSX.Element => {
-    const layerId = (layer as TypeLayerEntryConfig).layerId || (layer as TypeGeoviewLayerConfig).geoviewLayerId;
-    const layerName = (layer as TypeLayerEntryConfig).layerName || (layer as TypeGeoviewLayerConfig).geoviewLayerName;
+    // Depending on the instance
+    let layerId: string | undefined;
+    let layerName: string | undefined;
+    if (layer instanceof ConfigBaseClass) {
+      ({ layerId } = layer);
+      layerName = layer.getLayerName();
+    } else {
+      layerId = layer.geoviewLayerId;
+      layerName = layer.geoviewLayerName;
+    }
 
     const curLayerId = `${parentId ? `${parentId}/` : ''}${layerId}`;
     return (

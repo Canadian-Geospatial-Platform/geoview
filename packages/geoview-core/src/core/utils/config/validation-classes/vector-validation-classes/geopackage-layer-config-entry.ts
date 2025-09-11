@@ -1,7 +1,12 @@
-import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+import { VectorLayerEntryConfig, VectorLayerEntryConfigProps } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { TypeSourceGeoPackageInitialConfig } from '@/geo/layer/geoview-layers/vector/geopackage';
-import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/config/types/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/config/types/layer-schema-types';
 import { Projection } from '@/geo/utils/projection';
+
+export interface GeoPackageLayerEntryConfigProps extends VectorLayerEntryConfigProps {
+  /** Source settings to apply to the GeoView layer source at creation time. */
+  source?: TypeSourceGeoPackageInitialConfig;
+}
 
 export class GeoPackageLayerEntryConfig extends VectorLayerEntryConfig {
   /** Tag used to link the entry to a specific schema. */
@@ -10,21 +15,24 @@ export class GeoPackageLayerEntryConfig extends VectorLayerEntryConfig {
   /** Layer entry data type. */
   override entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
 
+  /** The layer entry props that were used in the constructor. */
+  declare layerEntryProps: GeoPackageLayerEntryConfigProps;
+
+  /** Source settings to apply to the GeoView image layer source at creation time. */
   declare source: TypeSourceGeoPackageInitialConfig;
 
   /**
    * The class constructor.
-   * @param {GeoPackageLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
+   * @param {GeoPackageLayerEntryConfigProps | GeoPackageLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
    */
-  constructor(layerConfig: GeoPackageLayerEntryConfig) {
+  constructor(layerConfig: GeoPackageLayerEntryConfigProps | GeoPackageLayerEntryConfig) {
     super(layerConfig);
-    Object.assign(this, layerConfig);
 
     // Write the default properties when not specified
     this.source ??= { format: 'GeoPackage' };
     this.source.format ??= 'GeoPackage';
     this.source.dataProjection ??= Projection.PROJECTION_NAMES.LONLAT;
-    this.source.dataAccessPath ??= this.geoviewLayerConfig.metadataAccessPath;
+    this.source.dataAccessPath ??= layerConfig.source?.dataAccessPath ?? this.geoviewLayerConfig.metadataAccessPath;
 
     // Assign metadataAccessPath if dataAccessPath is undefined
     if (this.source.dataAccessPath) {

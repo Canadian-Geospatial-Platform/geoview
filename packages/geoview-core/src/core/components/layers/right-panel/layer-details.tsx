@@ -33,7 +33,7 @@ import { LayerIcon } from '@/core/components/common/layer-icon';
 import { LayerOpacityControl } from './layer-opacity-control/layer-opacity-control';
 import { logger } from '@/core/utils/logger';
 import { LAYER_STATUS } from '@/core/utils/constant';
-import { CONST_LAYER_TYPES } from '@/api/config/types/map-schema-types';
+import { CONST_LAYER_TYPES } from '@/api/config/types/layer-schema-types';
 import { Collapse } from '@/ui/collapse/collapse';
 import { Button } from '@/ui/button/button';
 import { KeyboardArrowDownIcon, KeyboardArrowUpIcon } from '@/ui/icons';
@@ -116,7 +116,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     getLayerBounds,
     getLayerDefaultFilter,
     getLayerServiceProjection,
-    getLayerTemporalDimension,
+    getLayerTimeDimension,
     setLayerHoverable,
     setLayerQueryable,
   } = useLayerStoreActions();
@@ -130,7 +130,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const metadataUrl = useAppMetadataServiceURL();
   const selectedLayer = layersData.find((_layer) => _layer.layerPath === layerDetails?.layerPath);
   const layerFilter = getLayerDefaultFilter(layerDetails.layerPath);
-  const layerTemporalDimension = getLayerTemporalDimension(layerDetails.layerPath);
+  const layerTimeDimension = getLayerTimeDimension(layerDetails.layerPath);
   const layerNativeProjection = getLayerServiceProjection(layerDetails.layerPath);
   const layerVisible = useSelectorLayerVisibility(layerDetails.layerPath);
   const parentHidden = useSelectorLayerParentHidden(layerDetails.layerPath);
@@ -516,8 +516,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           <Box>{`${t('layers.layerType')}${localizedTypeName}`}</Box>
           {layerNativeProjection && <Box>{`${t('layers.layerServiceProjection')}${layerNativeProjection}`}</Box>}
           {layerFilter && <Box>{`${t('layers.layerDefaultFilter')}${layerFilter}`}</Box>}
-          {layerTemporalDimension && (
-            <Box>{`${t('layers.layerTemporalDimension')}${t('layers.layerTemporalDimensionField')} - ${layerTemporalDimension.field} -, min - ${layerTemporalDimension.rangeItems.range[0]} / max - ${layerTemporalDimension.rangeItems.range[layerTemporalDimension.rangeItems.range.length - 1]}`}</Box>
+          {layerTimeDimension && (
+            <Box>{`${t('layers.layerTimeDimension')}${t('layers.layerTimeDimensionField')} - ${layerTimeDimension.field} -, min - ${layerTimeDimension.rangeItems.range[0]} / max - ${layerTimeDimension.rangeItems.range[layerTimeDimension.rangeItems.range.length - 1]}`}</Box>
           )}
           {resources !== '' && (
             <Box className="info-container">

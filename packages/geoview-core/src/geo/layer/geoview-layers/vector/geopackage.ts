@@ -10,22 +10,23 @@ import * as SLDReader from '@nieuwlandgeo/sldreader';
 
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
-  TypeLayerEntryConfig,
-  TypeVectorSourceInitialConfig,
-  TypeGeoviewLayerConfig,
   TypeSimpleSymbolVectorConfig,
   TypeStrokeSymbolConfig,
   TypeLineStringVectorConfig,
   TypePolygonVectorConfig,
   TypeFillStyle,
-  CONST_LAYER_ENTRY_TYPES,
   TypeOutfields,
-  CONST_LAYER_TYPES,
 } from '@/api/config/types/map-schema-types';
+import {
+  CONST_LAYER_ENTRY_TYPES,
+  CONST_LAYER_TYPES,
+  TypeVectorSourceInitialConfig,
+  TypeGeoviewLayerConfig,
+} from '@/api/config/types/layer-schema-types';
 import { GeoPackageLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geopackage-layer-config-entry';
 import { TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
-import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
+import { GroupLayerEntryConfig, GroupLayerEntryConfigProps } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { logger } from '@/core/utils/logger';
 import { LayerNotCreatedError } from '@/core/exceptions/layer-exceptions';
 import { formatError, NotImplementedError, NotSupportedError } from '@/core/exceptions/core-exceptions';
@@ -69,8 +70,10 @@ export class GeoPackage extends AbstractGeoViewVector {
    * Constructs a GeoPackage Layer configuration processor.
    * @param {TypeGeoPackageFeatureLayerConfig} layerConfig the layer configuration
    */
+  // The constructor is not useless, it narrows down the accepted parameter type.
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(layerConfig: TypeGeoPackageLayerConfig) {
-    super(CONST_LAYER_TYPES.GEOPACKAGE, layerConfig);
+    super(layerConfig);
   }
 
   /**
@@ -117,7 +120,7 @@ export class GeoPackage extends AbstractGeoViewVector {
                   resolve(layerGroup || baseLayer);
                 } else {
                   // Throw error
-                  throw new LayerNotCreatedError(layerConfig.layerPath, layerConfig.getLayerName());
+                  throw new LayerNotCreatedError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
                 }
               })
               .catch((error: unknown) => {
@@ -129,7 +132,7 @@ export class GeoPackage extends AbstractGeoViewVector {
             layerConfig.entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
 
             // eslint-disable-next-line no-param-reassign
-            (layerConfig as TypeLayerEntryConfig).listOfLayerEntryConfig = [];
+            (layerConfig as GroupLayerEntryConfigProps).listOfLayerEntryConfig = [];
             const newLayerGroup = this.createLayerGroup(layerConfig as unknown as GroupLayerEntryConfig, layerConfig.initialSettings);
 
             // For each layer
@@ -140,9 +143,11 @@ export class GeoPackage extends AbstractGeoViewVector {
                   // "Clone" the config, patch until that layer type logic is rebuilt
                   const newLayerEntryConfig = layerConfig.clone() as VectorLayerEntryConfig;
                   newLayerEntryConfig.layerId = layers[i].name;
-                  newLayerEntryConfig.layerName = layers[i].name;
+                  newLayerEntryConfig.setLayerName(layers[i].name);
                   newLayerEntryConfig.entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
-                  newLayerEntryConfig.parentLayerConfig = layerConfig as unknown as GroupLayerEntryConfig; // TODO: Check this type conversion, maybe recreate the Group object instead?
+
+                  // TODO: Refactor - Check this type conversion, maybe recreate the Group object instead?
+                  newLayerEntryConfig.parentLayerConfig = layerConfig as unknown as GroupLayerEntryConfig;
 
                   this.#processOneGeopackageLayer(newLayerEntryConfig, layers[i], slds)
                     .then((baseLayer) => {
@@ -156,7 +161,7 @@ export class GeoPackage extends AbstractGeoViewVector {
                         resolve2(baseLayer);
                       } else {
                         // Throw error
-                        throw new LayerNotCreatedError(layerConfig.layerPath, layerConfig.getLayerName());
+                        throw new LayerNotCreatedError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
                       }
                     })
                     .catch((error: unknown) => {
@@ -371,13 +376,17 @@ export class GeoPackage extends AbstractGeoViewVector {
     // Extract layer styles if they exist
     const { rules } = SLDReader.Reader(sld).layers[0].styles[0].featuretypestyles[0];
 
-    // eslint-disable-next-line no-param-reassign
-    if (!layerConfig.layerStyle) layerConfig.layerStyle = {};
+    // If no style, define one
+    if (!layerConfig.getLayerStyle()) layerConfig.setLayerStyle({});
 
+    // Get the layer style
+    const layerStyle = layerConfig.getLayerStyle();
+    // If the layer style isn't set, skip
+    if (!layerStyle) return;
+
+    // For each rule
     for (let i = 0; i < rules.length; i++) {
-      // Get the layer style
-      const { layerStyle } = layerConfig;
-
+      // Loop on each keys in the rule
       Object.keys(rules[i]).forEach((key) => {
         // Polygon style
         if (key.toLowerCase() === 'polygonsymbolizer' && !layerStyle.Polygon) {
@@ -639,14 +648,12 @@ export class GeoPackage extends AbstractGeoViewVector {
     geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
       const layerEntryConfig = new GeoPackageLayerEntryConfig({
         geoviewLayerConfig,
-        schemaTag: CONST_LAYER_TYPES.GEOPACKAGE,
-        entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
         layerId: `${layerEntry.id}`,
         source: {
           format: 'GeoPackage',
           dataAccessPath: metadataAccessPath,
         },
-      } as unknown as GeoPackageLayerEntryConfig);
+      });
       return layerEntryConfig;
     });
 
@@ -654,32 +661,3 @@ export class GeoPackage extends AbstractGeoViewVector {
     return geoviewLayerConfig;
   }
 }
-
-/**
- * type guard function that redefines a TypeGeoviewLayerConfig as a TypeGeoPackageFeatureLayerConfig if the geoviewLayerType attribute of
- * the verifyIfLayer parameter is GEOPACKAGE. The type ascention applies only to the true block of the if clause that use this
- * function.
- *
- * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerConfigIsGeoPackage = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeGeoPackageLayerConfig => {
-  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.GEOPACKAGE;
-};
-
-/**
- * type guard function that redefines a TypeLayerEntryConfig as a GeoPackageLayerEntryConfig if the geoviewLayerType attribute
- * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is GEOPACKAGE. The type ascention applies only to the true block of
- * the if clause that use this function.
- *
- * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
- * valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewEntryIsGeoPackage = (
-  verifyIfGeoViewEntry: TypeLayerEntryConfig
-): verifyIfGeoViewEntry is GeoPackageLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.GEOPACKAGE;
-};

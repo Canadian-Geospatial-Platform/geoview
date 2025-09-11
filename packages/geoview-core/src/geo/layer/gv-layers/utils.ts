@@ -7,11 +7,11 @@ import {
   codedValueType,
   rangeDomainType,
   TypeFieldEntry,
-  TypeFeatureInfoLayerConfig,
   TypeOutfieldsType,
   TypeAliasLookup,
   TypeOutfields,
 } from '@/api/config/types/map-schema-types';
+import { TypeFeatureInfoLayerConfig } from '@/api/config/types/layer-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';

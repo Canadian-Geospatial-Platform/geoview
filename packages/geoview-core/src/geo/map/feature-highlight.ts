@@ -155,20 +155,16 @@ export class FeatureHighlight {
     const { geometry } = feature;
     if (geometry instanceof Polygon) {
       const newFeature = new Feature(geometry);
-      const featureUid = feature.uid!;
-      this.#styleHighlightedFeature(newFeature, featureUid);
+      this.#styleHighlightedFeature(newFeature, feature.uid!);
     } else if (geometry instanceof LineString || geometry instanceof MultiLineString) {
       const newFeature = new Feature(geometry);
-      const featureUid = feature.uid!;
-      this.#styleHighlightedFeature(newFeature, featureUid);
+      this.#styleHighlightedFeature(newFeature, feature.uid!);
     } else if (geometry instanceof MultiPoint) {
       const coordinates: Coordinate[] = geometry.getCoordinates();
-      const featureUid = feature.uid!;
-
       for (let i = 0; i < coordinates.length; i++) {
         const newPoint = new Point(coordinates[i]);
         const newFeature = new Feature(newPoint);
-        const id = `${featureUid}-${i}`;
+        const id = `${feature.uid!}-${i}`;
         this.#styleHighlightedFeature(newFeature, id);
         const radStyle = new Style({
           image: new CircleStyle({
@@ -181,20 +177,17 @@ export class FeatureHighlight {
       }
     } else if (geometry instanceof MultiPolygon) {
       const polygons = geometry.getPolygons();
-      const featureUid = feature.uid!;
-
       for (let i = 0; i < polygons.length; i++) {
         const newPolygon = polygons[i];
         const newFeature = new Feature(newPolygon);
-        const id = `${featureUid}-${i}`;
+        const id = `${feature.uid!}-${i}`;
         this.#styleHighlightedFeature(newFeature, id);
       }
     } else if (feature.extent) {
       const center = getCenter(feature.extent);
       const newPoint = new Point(center);
       const newFeature = new Feature(newPoint);
-      const featureUid = feature.uid!;
-      this.#styleHighlightedFeature(newFeature, featureUid);
+      this.#styleHighlightedFeature(newFeature, feature.uid!);
       const radStyle = new Style({
         image: new CircleStyle({
           radius: 10,

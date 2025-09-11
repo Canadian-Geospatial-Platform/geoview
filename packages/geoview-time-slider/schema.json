@@ -36,7 +36,7 @@
             "default": false,
             "description": "Initial value on slider"
           },
-          "temporalDimension": {
+          "timeDimension": {
             "additionalProperties": false,
             "type": "object",
             "description": "OGC time dimension definition.",

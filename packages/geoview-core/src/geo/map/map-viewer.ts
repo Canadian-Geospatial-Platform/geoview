@@ -31,8 +31,8 @@ import {
   TypeDisplayTheme,
   TypeMapViewSettings,
   TypeStyleGeometry,
-  TypeLayerStatus,
 } from '@/api/config/types/map-schema-types';
+import { TypeLayerStatus } from '@/api/config/types/layer-schema-types';
 
 import { BasemapApi } from '@/geo/layer/basemap/basemap';
 import { LayerApi } from '@/geo/layer/layer';

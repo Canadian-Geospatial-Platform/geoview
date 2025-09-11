@@ -8,18 +8,21 @@ import { Point } from 'ol/geom';
 import { Extent } from 'ol/extent';
 import { getUid } from 'ol/util';
 
+import { TypeOutfields } from '@/api/config/types/map-schema-types';
 import {
   CONST_LAYER_TYPES,
+  layerEntryIsGeoJSONFromConfig,
   TypeBaseVectorSourceInitialConfig,
   TypeFeatureInfoLayerConfig,
-  TypeOutfields,
-} from '@/api/config/types/map-schema-types';
+  TypePostSettings,
+} from '@/api/config/types/layer-schema-types';
 
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { Projection } from '@/geo/utils/projection';
 import { Fetch } from '@/core/utils/fetch-helper';
 import {
@@ -54,7 +57,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     // Validate the dataAccessPath exists
     if (!layerConfig.source?.dataAccessPath) {
       // Throw error missing dataAccessPath
-      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath, layerConfig.getLayerName());
+      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
     }
 
     // Redirect
@@ -89,17 +92,13 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       sourceOptions.attributions = layerConfig.getAttributions();
     }
 
-    // Read strategy
-    const sourceConfig = layerConfig.source as TypeBaseVectorSourceInitialConfig;
-    const strategy = sourceConfig.strategy === 'bbox' ? bbox : all;
-
     // Prepare the sourceOptions
     // eslint-disable-next-line prefer-const
     let vectorSource: VectorSource<Feature>;
 
     // Set loading strategy option
     // eslint-disable-next-line no-param-reassign
-    sourceOptions.strategy = strategy;
+    sourceOptions.strategy = layerConfig.source?.strategy === 'bbox' ? bbox : all;
 
     // ESlint override about misused-promises, because we're using async in the loader callback instead of returning void, no worries in the end.
     // eslint-disable-next-line no-param-reassign, @typescript-eslint/no-misused-promises
@@ -120,13 +119,13 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         if (layerConfig.schemaTag !== 'WKB') {
           // Fetch the data, or use passed geoJSON if present
           responseText =
-            layerConfig.getSchemaTagGeoJSON() && layerConfig.source?.geojson
+            layerEntryIsGeoJSONFromConfig(layerConfig) && layerConfig.source?.geojson
               ? layerConfig.source.geojson
-              : await AbstractGeoViewVector.#fetchData(url, sourceConfig);
+              : await AbstractGeoViewVector.#fetchData(url, layerConfig.source?.postSettings);
         } else responseText = layerConfig.source!.dataAccessPath as string;
 
         // If Esri Feature
-        if (layerConfig.getSchemaTagEsriFeature()) {
+        if (layerConfig instanceof EsriFeatureLayerEntryConfig) {
           // Check and throw exception if the content actually contains an embedded error
           // (EsriFeature type of response might return an embedded error inside a 200 HTTP OK)
           Fetch.throwIfResponseHasEmbeddedError(responseText);
@@ -135,13 +134,13 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
           if (JSON.parse(responseText).count > MAX_ESRI_FEATURES) {
             this.emitMessage(
               'validation.layer.tooManyEsriFeatures',
-              [layerConfig.getLayerName(), JSON.parse(responseText).count],
+              [layerConfig.getLayerNameCascade(), JSON.parse(responseText).count],
               'error',
               true
             );
 
             // Throw
-            throw new LayerTooManyEsriFeatures(layerConfig.layerId, layerConfig.getLayerName(), JSON.parse(responseText).count);
+            throw new LayerTooManyEsriFeatures(layerConfig.layerId, layerConfig.getLayerNameCascade(), JSON.parse(responseText).count);
           }
         }
 
@@ -174,10 +173,6 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         // Call the success callback with the features. This will trigger the onLoaded callback on the layer object (though it
         // seems not to call it everytime, OL issue? if issue persists, maybe we want to setLayerStatus to loaded here?)
         successCallback?.(features);
-
-        // TODO: Check - Commenting this out, check if it still works
-        // Refresh the OL layer
-        // this.getOLLayer(layerConfig.layerPath)?.changed();
       } catch (error: unknown) {
         // Log the failure to fetch the vector features
         logger.logError(error);
@@ -223,7 +218,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   ): Promise<Feature[] | undefined> {
     // TODO: Refactor - Consider changing the return type to Promise<Feature[]>
 
-    switch (layerConfig.getSchemaTag()) {
+    switch (layerConfig.schemaTag) {
       case CONST_LAYER_TYPES.CSV:
         // Attempt to convert CSV text to OpenLayers features
         return AbstractGeoViewVector.#convertCsv(responseText, layerConfig, Projection.getProjectionFromString(projection));
@@ -360,19 +355,19 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * Fetches text data from the given URL using settings defined in the vector source configuration.
    * Supports both GET and POST requests depending on the presence of `postSettings`.
    * @param {string} url - The URL to fetch data from.
-   * @param {TypeBaseVectorSourceInitialConfig} config - The vector source configuration that may define custom POST settings.
+   * @param {TypePostSettings} config - The possible POST settings from the layer config.
    * @returns {Promise<string>} A promise that resolves to the fetched text response.
    * @private
    */
-  static #fetchData(url: string, config: TypeBaseVectorSourceInitialConfig): Promise<string> {
+  static #fetchData(url: string, postSettings?: TypePostSettings): Promise<string> {
     // Default to a GET request
     const fetchOptions: RequestInit = { method: 'GET' };
 
     // If postSettings are defined, switch to POST and include headers and body
-    if (config.postSettings) {
+    if (postSettings) {
       fetchOptions.method = 'POST';
-      fetchOptions.headers = config.postSettings.header;
-      fetchOptions.body = JSON.stringify(config.postSettings.data);
+      fetchOptions.headers = postSettings.header;
+      fetchOptions.body = JSON.stringify(postSettings.data);
     }
 
     // Execute the fetch using the provided options and return the response text
@@ -431,7 +426,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
     if (latIndex === undefined || lonIndex === undefined) {
       // Failed
-      throw new LayerNoGeographicDataInCSVError(layerConfig.layerPath, layerConfig.getLayerName());
+      throw new LayerNoGeographicDataInCSVError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
     }
 
     AbstractGeoViewVector.#processFeatureInfoConfig(headers, csvRows[1], EXCLUDED_HEADERS, layerConfig);

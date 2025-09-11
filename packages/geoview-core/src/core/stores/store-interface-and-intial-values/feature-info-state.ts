@@ -8,8 +8,8 @@ import {
   TypeResultSetEntry,
   TypeQueryStatus,
   TypeFieldEntry,
-  TypeGeoviewLayerType,
 } from '@/api/config/types/map-schema-types';
+import { TypeGeoviewLayerType } from '@/api/config/types/layer-schema-types';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with FeatureInfoEventProcessor vs FeatureInfoState

@@ -1,13 +1,6 @@
-import {
-  Extent,
-  TypeLayerControls,
-  TypeLayerStyleSettings,
-  TypeFeatureInfoEntry,
-  TypeStyleGeometry,
-  CONST_LAYER_TYPES,
-  TypeGeoviewLayerType,
-  TypeTemporalDimension,
-} from '@/api/config/types/map-schema-types';
+import { Extent, TypeLayerStyleSettings, TypeFeatureInfoEntry, TypeStyleGeometry } from '@/api/config/types/map-schema-types';
+import { TimeDimension } from '@/core/utils/date-mgt';
+import { CONST_LAYER_TYPES, TypeGeoviewLayerType, TypeLayerControls } from '@/api/config/types/layer-schema-types';
 import { TypeLegendLayer, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import { TypeWmsLegend, isImageStaticLegend, isVectorLegend, isWmsLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
@@ -208,20 +201,20 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Retrieves the temporal dimension information for a specific layer.
+   * Retrieves the time dimension information for a specific layer.
    *
    * @param {string} mapId - The unique identifier of the map instance.
    * @param {string} layerPath - The path to the layer.
-   * @returns {TypeTemporalDimension | undefined} - The temporal dimension information of the layer, or `undefined` if not available.
+   * @returns {TimeDimension | undefined} - The temporal dimension information of the layer, or `undefined` if not available.
    *
    * @description
-   * This method fetches the Geoview layer for the specified layer path and checks if it has a `getTemporalDimension` method.
+   * This method fetches the Geoview layer for the specified layer path and checks if it has a `getTimeDimension` method.
    * If the method exists, it retrieves the temporal dimension information for the layer.
    * If the layer doesn't support temporal dimensions, the method returns `undefined`.
    *
    * @throws {LayerNotFoundError} - If the specified layer cannot be found.
    */
-  static getLayerTemporalDimension(mapId: string, layerPath: string): TypeTemporalDimension | undefined {
+  static getLayerTimeDimension(mapId: string, layerPath: string): TimeDimension | undefined {
     // Get the layer api
     const layerApi = MapEventProcessor.getMapViewerLayerAPI(mapId);
 
@@ -229,8 +222,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     const layer = layerApi.getGeoviewLayer(layerPath);
     if (!layer) throw new LayerNotFoundError(layerPath);
 
-    // Get the temporal dimension calling the GV Layer method, check if getTemporalDimension exists and is a function
-    if (layer instanceof AbstractGVLayer) return layer.getTemporalDimension();
+    // Get the temporal dimension calling the GV Layer method, check if getTimeDimension exists and is a function
+    if (layer instanceof AbstractGVLayer) return layer.getTimeDimension();
     return undefined;
   }
 
@@ -354,7 +347,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       const layer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(entryLayerPath);
 
       // Interpret the layer name the best we can
-      const layerName = layer?.getLayerName() || layerConfig.getLayerName() || 'no name';
+      const layerName = layer?.getLayerName() || layerConfig.getLayerNameCascade();
 
       let entryIndex = existingEntries.findIndex((entry) => entry.layerPath === entryLayerPath);
       if (layerConfig.getEntryTypeIsGroup()) {
@@ -799,7 +792,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     const [geometryType] = layerConfig.getTypeGeometries();
 
     // Get the style
-    const layerStyle = layerConfig.layerStyle?.[geometryType];
+    const layerStyle = layerConfig.getLayerStyle()?.[geometryType];
     let filteredFeatures = features;
     if (layerStyle && layerStyle.type === 'uniqueValue') {
       filteredFeatures = this.#processClassVisibilityUniqueValue(layerStyle, features);

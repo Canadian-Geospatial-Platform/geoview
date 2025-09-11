@@ -12,7 +12,6 @@ import {
   MAP_EXTENTS,
   TypeBasemapOptions,
   TypeInteraction,
-  TypeLayerInitialSettings,
   TypeValidAppBarCoreProps,
   TypeValidFooterBarTabsCoreProps,
   TypeValidMapProjectionCodes,
@@ -20,14 +19,17 @@ import {
   TypePointMarker,
   TypeHighlightColors,
   TypeMapViewSettings,
-  MapConfigLayerEntry,
   TypeFeatureInfoEntry,
-  TypeGeoviewLayerConfig,
-  TypeLayerEntryConfig,
   TypeMapConfig,
   TypeMapFeaturesInstance,
-  CONST_LAYER_TYPES,
 } from '@/api/config/types/map-schema-types';
+import {
+  CONST_LAYER_TYPES,
+  MapConfigLayerEntry,
+  TypeLayerInitialSettings,
+  TypeGeoviewLayerConfig,
+  TypeLayerEntryConfig,
+} from '@/api/config/types/layer-schema-types';
 import { api } from '@/app';
 import { LayerApi } from '@/geo/layer/layer';
 import { MapViewer, TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer';
@@ -62,6 +64,7 @@ import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { InvalidExtentError } from '@/core/exceptions/geoview-exceptions';
 import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-vector-tile';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
 // GV The paradigm when working with MapEventProcessor vs MapState goes like this:
 // GV MapState provides: 'state values', 'actions' and 'setterActions'.
@@ -1319,7 +1322,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     let configLayerEntryConfig;
     if (geoviewLayerConfig) {
       configLayerEntryConfig = (geoviewLayerConfig as TypeGeoviewLayerConfig).listOfLayerEntryConfig?.find(
-        (nextEntryConfig: TypeLayerEntryConfig) => nextEntryConfig.layerId === pathArray[1]
+        (nextEntryConfig) => nextEntryConfig.layerId === pathArray[1]
       );
       for (let i = 2; i < pathArray.length; i++) {
         if (configLayerEntryConfig?.listOfLayerEntryConfig)
@@ -1361,10 +1364,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // Construct layer entry config
     const newLayerEntryConfig = {
       layerId: layerEntryConfig!.layerId,
-      layerName: isGeocore && overrideGeocoreServiceNames === false ? undefined : layerEntryConfig!.layerName,
-      layerFilter: (configLayerEntryConfig as VectorLayerEntryConfig)?.layerFilter
-        ? (configLayerEntryConfig as VectorLayerEntryConfig).layerFilter
-        : undefined,
+      layerName: isGeocore && overrideGeocoreServiceNames === false ? undefined : layerEntryConfig!.getLayerName(),
+      layerFilter: AbstractBaseLayerEntryConfig.getClassOrTypeLayerFilter(configLayerEntryConfig),
       initialSettings,
       layerStyle,
       entryType: listOfLayerEntryConfig.length ? 'group' : undefined,
@@ -1595,11 +1596,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
     removeUnlisted: boolean
   ): void {
     listOfLayerEntryConfigs?.forEach((layerEntryConfig) => {
-      if (layerEntryConfig.layerName && pairsDict[layerEntryConfig.layerName])
-        // eslint-disable-next-line no-param-reassign
-        layerEntryConfig.layerName = pairsDict[layerEntryConfig.layerName];
-      // eslint-disable-next-line no-param-reassign
-      else if (removeUnlisted) layerEntryConfig.layerName = '';
+      const layerName = layerEntryConfig.getLayerName();
+      // If there's a name in pairsDict that matches
+      if (layerName && pairsDict[layerName]) layerEntryConfig.setLayerName(pairsDict[layerName]);
+      else if (removeUnlisted) layerEntryConfig.setLayerName('');
       if (layerEntryConfig.listOfLayerEntryConfig?.length)
         this.#replaceLayerEntryConfigNames(pairsDict, layerEntryConfig.listOfLayerEntryConfig, removeUnlisted);
     });

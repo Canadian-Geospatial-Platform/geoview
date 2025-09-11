@@ -308,7 +308,7 @@ export type TypeTimeSliderProps = {
   locked: boolean;
   reversed: boolean;
   defaultValue: string;
-  temporalDimension: TimeDimension;
+  timeDimension: TimeDimension;
 };
 
 // **********************************************************

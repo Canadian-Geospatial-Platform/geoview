@@ -52,12 +52,12 @@ export function getLocalizedMessage(language: TypeDisplayLanguage, messageKey: s
 }
 
 /**
- * Deep merge objects togheter. Latest object will overwrite value on previous one
+ * Deep merge objects together. Latest object will overwrite value on previous one
  * if property exist.
  * @param {unknown[]} objects - The objects to deep merge.
- * @returns {unknown} The merged object
+ * @returns {T} The merged object
  */
-export function deepMergeObjects(...objects: unknown[]): unknown {
+export function deepMergeObjects<T>(...objects: unknown[]): T {
   const deepCopyObjects = objects.map((object) => JSON.parse(JSON.stringify(object)));
   return deepCopyObjects.reduce((merged, current) => ({ ...merged, ...current }), {});
 }

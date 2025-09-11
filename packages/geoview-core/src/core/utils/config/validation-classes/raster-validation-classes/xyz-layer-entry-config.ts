@@ -1,6 +1,16 @@
-import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/config/types/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/config/types/layer-schema-types';
 import { TypeSourceImageXYZTilesInitialConfig } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
+import { AbstractBaseLayerEntryConfigProps } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { TileLayerEntryConfig } from '@/core/utils/config/validation-classes/tile-layer-entry-config';
+
+export interface XYZTilesLayerEntryConfigProps extends AbstractBaseLayerEntryConfigProps {
+  /** Source settings to apply to the GeoView layer source at creation time. */
+  source?: TypeSourceImageXYZTilesInitialConfig;
+  /** The minimum scale denominator as read from metadata */
+  minScaleDenominator?: number;
+  /** The maximum scale denominator as read from metadata */
+  maxScaleDenominator?: number;
+}
 
 export class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
   /** Tag used to link the entry to a specific schema. */
@@ -9,24 +19,28 @@ export class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
   /** Layer entry data type. */
   override entryType = CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE;
 
+  /** The layer entry props that were used in the constructor. */
+  declare layerEntryProps: XYZTilesLayerEntryConfigProps;
+
   declare source: TypeSourceImageXYZTilesInitialConfig;
 
   /** The minimum scale denominator as read from metadata */
-  minScaleDenominator: number = 0;
+  minScaleDenominator: number;
 
   /** The maximum scale denominator as read from metadata */
-  maxScaleDenominator: number = 0;
+  maxScaleDenominator: number;
 
   /**
    * The class constructor.
-   * @param {XYZTilesLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
+   * @param {XYZTilesLayerEntryConfigProps | XYZTilesLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
    */
-  constructor(layerConfig: XYZTilesLayerEntryConfig) {
+  constructor(layerConfig: XYZTilesLayerEntryConfigProps | XYZTilesLayerEntryConfigProps) {
     super(layerConfig);
-    Object.assign(this, layerConfig);
+    this.minScaleDenominator = layerConfig.minScaleDenominator || 0;
+    this.maxScaleDenominator = layerConfig.maxScaleDenominator || 0;
 
     this.source ??= {};
-    this.source.dataAccessPath ??= this.geoviewLayerConfig.metadataAccessPath;
+    this.source.dataAccessPath ??= layerConfig.source?.dataAccessPath ?? this.geoviewLayerConfig.metadataAccessPath;
 
     // Format the dataAccessPath correctly
     if (!this.source.dataAccessPath!.includes('{z}/{y}/{x}'))
@@ -38,7 +52,7 @@ export class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
 
 export interface TypeMetadataXYZTiles {
   layers: TypeMetadataXYZTilesLayer[];
-  listOfLayerEntryConfig: XYZTilesLayerEntryConfig[];
+  listOfLayerEntryConfig: XYZTilesLayerEntryConfigProps[];
 }
 
-export type TypeMetadataXYZTilesLayer = XYZTilesLayerEntryConfig & { id: string };
+export type TypeMetadataXYZTilesLayer = XYZTilesLayerEntryConfigProps & { id: string };

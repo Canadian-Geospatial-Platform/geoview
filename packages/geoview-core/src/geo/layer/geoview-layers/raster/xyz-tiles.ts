@@ -4,13 +4,7 @@ import TileGrid, { Options as TileGridOptions } from 'ol/tilegrid/TileGrid';
 import defaultsDeep from 'lodash/defaultsDeep';
 
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import {
-  TypeLayerEntryConfig,
-  TypeSourceTileInitialConfig,
-  TypeGeoviewLayerConfig,
-  CONST_LAYER_ENTRY_TYPES,
-  CONST_LAYER_TYPES,
-} from '@/api/config/types/map-schema-types';
+import { TypeSourceTileInitialConfig, TypeGeoviewLayerConfig, CONST_LAYER_TYPES } from '@/api/config/types/layer-schema-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import {
   TypeMetadataXYZTiles,
@@ -52,8 +46,10 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * Constructs a XYZTiles Layer configuration processor.
    * @param {TypeXYZTilesConfig} layerConfig the layer configuration
    */
+  // The constructor is not useless, it narrows down the accepted parameter type.
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(layerConfig: TypeXYZTilesConfig) {
-    super(CONST_LAYER_TYPES.XYZ_TILES, layerConfig);
+    super(layerConfig);
   }
 
   /**
@@ -129,7 +125,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
     const metadata = this.getMetadata();
 
     if (metadata) {
-      let metadataLayerConfigFound: XYZTilesLayerEntryConfig | undefined;
+      let metadataLayerConfigFound;
       if (metadata.listOfLayerEntryConfig) {
         metadataLayerConfigFound = metadata.listOfLayerEntryConfig.find(
           (metadataLayerConfig) => metadataLayerConfig.layerId === layerConfig.layerId
@@ -153,21 +149,23 @@ export class XYZTiles extends AbstractGeoViewRaster {
         layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
 
         // Set zoom limits for max / min zooms
-        const maxScale = metadataLayerConfigFound?.maxScale as number;
+        const maxScale = metadataLayerConfigFound?.maxScale;
         const minScaleDenominator = metadataLayerConfigFound?.minScaleDenominator;
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.maxScale =
-          !maxScale && !minScaleDenominator
-            ? layerConfig.maxScale
-            : Math.max(maxScale ?? -Infinity, minScaleDenominator ?? -Infinity, layerConfig.maxScale ?? -Infinity);
 
-        const minScale = metadataLayerConfigFound?.minScale as number;
+        layerConfig.setMaxScale(
+          !maxScale && !minScaleDenominator
+            ? layerConfig.getMaxScale()
+            : Math.max(maxScale ?? -Infinity, minScaleDenominator ?? -Infinity, layerConfig.getMaxScale() ?? -Infinity)
+        );
+
+        const minScale = metadataLayerConfigFound?.minScale;
         const maxScaleDenominator = metadataLayerConfigFound?.maxScaleDenominator;
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.minScale =
+
+        layerConfig.setMinScale(
           !minScale && !maxScaleDenominator
-            ? layerConfig.minScale
-            : Math.min(minScale ?? Infinity, maxScaleDenominator ?? Infinity, layerConfig.minScale ?? Infinity);
+            ? layerConfig.getMinScale()
+            : Math.min(minScale ?? Infinity, maxScaleDenominator ?? Infinity, layerConfig.getMinScale() ?? Infinity)
+        );
       }
     }
 
@@ -240,14 +238,12 @@ export class XYZTiles extends AbstractGeoViewRaster {
     geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
       const layerEntryConfig = new XYZTilesLayerEntryConfig({
         geoviewLayerConfig,
-        schemaTag: CONST_LAYER_TYPES.XYZ_TILES,
-        entryType: CONST_LAYER_ENTRY_TYPES.RASTER_TILE,
         layerId: `${layerEntry.id}`,
-        layerName: `${layerEntry.name || layerEntry.id}`,
+        layerName: `${layerEntry.layerName || layerEntry.id}`,
         source: {
           dataAccessPath: metadataAccessPath,
         },
-      } as unknown as XYZTilesLayerEntryConfig);
+      });
       return layerEntryConfig;
     });
 
@@ -305,7 +301,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
     const { source } = layerConfig;
 
     if (!source?.dataAccessPath) {
-      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath, layerConfig.getLayerName());
+      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
     }
 
     const sourceOptions: SourceOptions = {
@@ -329,30 +325,3 @@ export class XYZTiles extends AbstractGeoViewRaster {
     return new XYZ(sourceOptions);
   }
 }
-
-/**
- * type guard function that redefines a TypeGeoviewLayerConfig as a TypeXYZTilesConfig if the geoviewLayerType attribute of the
- * verifyIfLayer parameter is XYZ_TILES. The type ascention applies only to the true block of the if clause that use this
- * function.
- *
- * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerConfigIsXYZTiles = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeXYZTilesConfig => {
-  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.XYZ_TILES;
-};
-
-/**
- * type guard function that redefines a TypeLayerEntryConfig as a XYZTilesLayerEntryConfig if the geoviewLayerType attribute
- * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is XYZ_TILES. The type ascention applies only to the true block of
- * the if clause that use this function.
- *
- * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
- * valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewEntryIsXYZTiles = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is XYZTilesLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.XYZ_TILES;
-};

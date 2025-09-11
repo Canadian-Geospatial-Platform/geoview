@@ -46,7 +46,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     super(olSource, layerConfig);
 
     // Get the style label in case we need it later
-    const label = layerConfig.layerName || layerConfig.layerId;
+    const label = layerConfig.getLayerName() || layerConfig.layerId;
 
     // Create the vector layer options.
     const layerOptions: VectorLayerOptions<VectorSource<Feature<Geometry>>> = {
@@ -74,7 +74,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     AbstractGVVector.initOptionsWithInitialSettings(layerOptions, layerConfig);
 
     // Apply the layer filter right away if any
-    AbstractGVVector.applyViewFilterOnConfig(layerConfig, layerConfig.getExternalFragmentsOrder(), undefined, layerConfig.layerFilter);
+    AbstractGVVector.applyViewFilterOnConfig(layerConfig, layerConfig.getExternalFragmentsOrder(), undefined, layerConfig.getLayerFilter());
 
     // If the layer is initially not visible, make it visible until the style is set so we have a style for the legend
     this.onLayerFirstLoaded(() => {
@@ -398,9 +398,9 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     filter: string | undefined = '',
     callbackWhenUpdated: ((filterToUse: string) => void) | undefined = undefined
   ): void {
-    // Update the layer config on the fly (maybe not ideal to do this?)
-    // eslint-disable-next-line no-param-reassign
-    layerConfig.layerFilter = filter;
+    // TODO: Check - Is this assignation necessary? What's the intent?
+    // Update the layer config on the fly (maybe not ideal to do this here at this stage?)
+    layerConfig.setLayerFilter(filter);
 
     // Get the current filter
     const currentFilter = layerConfig.getFilterEquation();
@@ -444,7 +444,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       // Failed
       throw new LayerInvalidLayerFilterError(
         layerConfig.layerPath,
-        layerConfig.getLayerName(),
+        layerConfig.getLayerNameCascade(),
         filterValueToUse,
         currentFilter?.join(','),
         formatError(error)

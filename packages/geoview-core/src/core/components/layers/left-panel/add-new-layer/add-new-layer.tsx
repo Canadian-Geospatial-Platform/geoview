@@ -30,7 +30,7 @@ import {
   TypeGeoviewLayerConfig,
   TypeGeoviewLayerType,
   TypeInitialGeoviewLayerType,
-} from '@/api/config/types/map-schema-types';
+} from '@/api/config/types/layer-schema-types';
 
 import { UtilAddLayer } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
 import { AddLayerTree } from '@/core/components/layers/left-panel/add-new-layer/add-layer-tree';
@@ -407,7 +407,7 @@ export function AddNewLayer(): JSX.Element {
 
         // Get the name and ID of the first entry before deleting the listOfLayerEntryConfig
         const idOfFirstLayerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig[0]?.layerId;
-        const nameOfFirstLayerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig[0]?.layerName;
+        const nameOfFirstLayerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig[0]?.getLayerName();
         setLayerName(nameOfFirstLayerEntryConfig || idOfFirstLayerEntryConfig);
         setLayerTree(geoviewLayerConfig);
 

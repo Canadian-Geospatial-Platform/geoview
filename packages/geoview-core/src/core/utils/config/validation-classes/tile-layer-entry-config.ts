@@ -1,4 +1,4 @@
-import { CONST_LAYER_ENTRY_TYPES, TypeSourceTileInitialConfig } from '@/api/config/types/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, TypeSourceTileInitialConfig } from '@/api/config/types/layer-schema-types';
 import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config';
 
 /**
@@ -9,5 +9,5 @@ export abstract class TileLayerEntryConfig extends AbstractBaseLayerEntryConfig 
   override entryType = CONST_LAYER_ENTRY_TYPES.RASTER_TILE;
 
   /** Initial settings to apply to the GeoView image layer source at creation time. */
-  declare source?: TypeSourceTileInitialConfig;
+  declare source: TypeSourceTileInitialConfig;
 }

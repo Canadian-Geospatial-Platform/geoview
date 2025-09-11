@@ -4,14 +4,11 @@ import { cloneDeep } from 'lodash';
 
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import {
-  TypeLayerEntryConfig,
-  TypeGeoviewLayerConfig,
-  CONST_LAYER_ENTRY_TYPES,
-  CONST_LAYER_TYPES,
-  TypeMetadataEsriDynamic,
-} from '@/api/config/types/map-schema-types';
+  EsriDynamicLayerEntryConfig,
+  EsriDynamicLayerEntryConfigProps,
+} from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
+import { CONST_LAYER_TYPES, TypeGeoviewLayerConfig, TypeMetadataEsriDynamic } from '@/api/config/types/layer-schema-types';
 
 import { commonProcessLayerMetadata, commonValidateListOfLayerEntryConfig } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { logger } from '@/core/utils/logger';
@@ -46,7 +43,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   constructor(layerConfig: TypeEsriDynamicLayerConfig) {
     // eslint-disable-next-line no-param-reassign
     if (!layerConfig.serviceDateFormat) layerConfig.serviceDateFormat = 'DD/MM/YYYY HH:MM:SSZ';
-    super(CONST_LAYER_TYPES.ESRI_DYNAMIC, layerConfig);
+    super(layerConfig);
   }
 
   /**
@@ -128,11 +125,11 @@ export class EsriDynamic extends AbstractGeoViewRaster {
 
   /**
    * Performs specific validation that can only be done by the child of the AbstractGeoViewEsriLayer class.
-   * @param {TypeLayerEntryConfig} layerConfig - The layer config to check.
+   * @param {ConfigBaseClass} layerConfig - The layer config to check.
    * @returns {boolean} true if an error is detected.
    */
-  esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig): boolean {
-    if (!this.getMetadata()?.supportsDynamicLayers) {
+  esriChildHasDetectedAnError(layerConfig: ConfigBaseClass): boolean {
+    if (this.getMetadata()?.supportsDynamicLayers === false) {
       // Log a warning, but continue
       logger.logWarning(`Layer ${layerConfig.layerPath} does not technically support dynamic layers per its metadata.`);
     }
@@ -269,23 +266,18 @@ export class EsriDynamic extends AbstractGeoViewRaster {
           layerId: `${layerEntry.layerId}`,
           layerName: layerEntry.layerName,
           listOfLayerEntryConfig: subConfigs,
-        } as GroupLayerEntryConfig);
+        });
       }
 
       // Create entry config
-      const layerEntryConfig = {
+      const layerEntryConfig: EsriDynamicLayerEntryConfigProps = {
         geoviewLayerConfig,
-        schemaTag: CONST_LAYER_TYPES.ESRI_DYNAMIC,
-        entryType: CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE,
         layerId: `${layerEntry.index}`,
         layerName: layerEntry.layerName,
-        source: {
-          dataAccessPath: geoviewLayerConfig.metadataAccessPath,
-        },
       };
 
       // Overwrite default from geocore custom config
-      const mergedConfig = deepMergeObjects(layerEntryConfig, customGeocoreLayerConfig) as EsriDynamicLayerEntryConfig;
+      const mergedConfig = deepMergeObjects<EsriDynamicLayerEntryConfigProps>(layerEntryConfig, customGeocoreLayerConfig);
 
       // Reconstruct
       return new EsriDynamicLayerEntryConfig(mergedConfig);
@@ -302,7 +294,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     const { source } = layerConfig;
 
     if (!source?.dataAccessPath) {
-      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath, layerConfig.getLayerName());
+      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
     }
 
     const sourceOptions: SourceOptions = {
@@ -344,10 +336,10 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     GVEsriDynamic.applyViewFilterOnSource(
       layerConfig,
       olSource,
-      layerConfig.layerStyle,
+      layerConfig.getLayerStyle(),
       layerConfig.getExternalFragmentsOrder(),
       undefined,
-      layerConfig.layerFilter
+      layerConfig.getLayerFilter()
     );
 
     // Return the source
@@ -392,32 +384,3 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     return entries.filter((entry) => !referenced.has(entry.layerId)).map((entry) => entryMap[entry.layerId]);
   }
 }
-
-/**
- * type guard function that redefines a TypeGeoviewLayerConfig as a TypeEsriDynamicLayerConfig if the geoviewLayerType attribute of
- * the verifyIfLayer parameter is ESRI_DYNAMIC. The type ascention applies only to the true block of the if clause that use
- * this function.
- *
- * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerConfigIsEsriDynamic = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeEsriDynamicLayerConfig => {
-  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
-};
-
-/**
- * type guard function that redefines a TypeLayerEntryConfig as a EsriDynamicLayerEntryConfig if the geoviewLayerType attribute
- * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is ESRI_DYNAMIC. The type ascention applies only to the true block of
- * the if clause that use this function.
- *
- * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
- * valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewEntryIsEsriDynamic = (
-  verifyIfGeoViewEntry: TypeLayerEntryConfig
-): verifyIfGeoViewEntry is EsriDynamicLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
-};

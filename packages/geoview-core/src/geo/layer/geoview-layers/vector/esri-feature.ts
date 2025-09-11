@@ -7,13 +7,11 @@ import Feature from 'ol/Feature';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import {
-  TypeLayerEntryConfig,
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
-  CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
   TypeMetadataEsriFeature,
-} from '@/api/config/types/map-schema-types';
+} from '@/api/config/types/layer-schema-types';
 
 import { commonProcessLayerMetadata, commonValidateListOfLayerEntryConfig } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { LayerNotFeatureLayerError } from '@/core/exceptions/layer-exceptions';
@@ -42,8 +40,10 @@ export class EsriFeature extends AbstractGeoViewVector {
    * Constructs an EsriFeature Layer configuration processor.
    * @param {TypeEsriFeatureLayerConfig} layerConfig The layer configuration.
    */
+  // The constructor is not useless, it narrows down the accepted parameter type.
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(layerConfig: TypeEsriFeatureLayerConfig) {
-    super(CONST_LAYER_TYPES.ESRI_FEATURE, layerConfig);
+    super(layerConfig);
   }
 
   /**
@@ -166,14 +166,14 @@ export class EsriFeature extends AbstractGeoViewVector {
 
   /**
    * Performs specific validation that can only be done by the child of the AbstractGeoViewEsriLayer class.
-   * @param {TypeLayerEntryConfig} layerConfig - The layer config to check.
+   * @param {ConfigBaseClass} layerConfig - The layer config to check.
    * @param {esriIndex} esriIndex - The esri layer index config to check.
    * @returns {boolean} true if an error is detected.
    */
-  esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig, esriIndex: number): boolean {
+  esriChildHasDetectedAnError(layerConfig: ConfigBaseClass, esriIndex: number): boolean {
     if (this.getMetadata()!.layers[esriIndex].type !== 'Feature Layer') {
       // Add a layer load error
-      this.addLayerLoadError(new LayerNotFeatureLayerError(layerConfig.layerPath, layerConfig.getLayerName()), layerConfig);
+      this.addLayerLoadError(new LayerNotFeatureLayerError(layerConfig.layerPath, layerConfig.getLayerNameCascade()), layerConfig);
       return true;
     }
     return false;
@@ -228,15 +228,9 @@ export class EsriFeature extends AbstractGeoViewVector {
     geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
       const layerEntryConfig = new EsriFeatureLayerEntryConfig({
         geoviewLayerConfig,
-        schemaTag: CONST_LAYER_TYPES.ESRI_FEATURE,
-        entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
         layerId: `${layerEntry.index}`,
         layerName: layerEntry.layerName || `${layerEntry.id}`,
-        source: {
-          format: 'EsriJSON',
-          dataAccessPath: layerEntry.source?.dataAccessPath || undefined,
-        },
-      } as unknown as EsriFeatureLayerEntryConfig);
+      });
       return layerEntryConfig;
     });
 
@@ -284,28 +278,3 @@ export class EsriFeature extends AbstractGeoViewVector {
     return AbstractGeoViewRaster.processConfig(myLayer);
   }
 }
-
-/**
- * type guard function that redefines a TypeGeoviewLayerConfig as a TypeEsriFeatureLayerConfig if the geoviewLayerType attribute
- * of the verifyIfLayer parameter is ESRI_FEATURE. The type ascention applies only to the true block of the if clause that use
- * this function.
- * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerConfigIsEsriFeature = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeEsriFeatureLayerConfig => {
-  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_FEATURE;
-};
-
-/**
- * type guard function that redefines a TypeLayerEntryConfig as a EsriFeatureLayerEntryConfig if the geoviewLayerType
- * attribute of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is ESRI_FEATURE. The type ascention applies only to the true
- * block of the if clause that use this function.
- * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention
- * is valid
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewEntryIsEsriFeature = (
-  verifyIfGeoViewEntry: TypeLayerEntryConfig
-): verifyIfGeoViewEntry is EsriFeatureLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_FEATURE;
-};

@@ -29,6 +29,10 @@
       width: 90%;
       padding: 2px;
     }
+    .text-info {
+      color: blue;
+      font-size: smaller;
+    }
     .text-error {
       color: red;
     }
@@ -94,18 +98,25 @@
       </div>
       <br />
       <div class="section">
+        <span id="txtProcessInfoVector" class="text-info">When working with a vector layer, some source information is only retrieved when the layer is actually added on a map, as to not download the features twice (once in the config processing and once when the layer is added to a map)</span>
+      </div>
+      <div class="section">
+        <span id="txtError" class="text-error"></span>
+      </div>
+      <div class="section result">
+        <div id="loadingOverlayInit" class="loading-overlay"><img src="https://discuss.wxpython.org/uploads/default/original/2X/6/6d0ec30d8b8f77ab999f765edd8866e8a97d59a3.gif" /></div>
+        <textarea id="textResultInit" name="textResultInit"></textarea>
+      </div>
+      <br />
+      <div class="section">
         <span>Layers:<input id="txtLayers" type="text" class="text-input" /></span>
       </div>
       <div class="section">
         <input id="btnProcess" type="button" value="Process" />
       </div>
-      <br />
-      <div class="section">
-        <span id="txtError" class="text-error"></span>
-      </div>
       <div class="section result">
-        <div id="loadingOverlay" class="loading-overlay"><img src="https://discuss.wxpython.org/uploads/default/original/2X/6/6d0ec30d8b8f77ab999f765edd8866e8a97d59a3.gif" /></div>
-        <textarea id="textResultInit" name="textResultInit"></textarea>
+        <div id="loadingOverlayProcess" class="loading-overlay"><img src="https://discuss.wxpython.org/uploads/default/original/2X/6/6d0ec30d8b8f77ab999f765edd8866e8a97d59a3.gif" /></div>
+        <textarea id="textResultProcess" name="textResultProcess"></textarea>
       </div>
     </div>
   </div>
@@ -120,16 +131,6 @@
         url: 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer',
         layerIds: [2,3]
       },
-      'Esri Feature - Flood Map': {
-        type: 'esriFeature',
-        url: 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/canada_flood_map_inventory_en/MapServer',
-        layerIds: [0]
-      },
-      'Esri Feature - Toronto': {
-        type: 'esriFeature',
-        url: 'https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/Toronto_Neighbourhoods/FeatureServer',
-        layerIds: [0]
-      },
       'Esri Image - USA Cities (Actually an Esri Dynamic service)': {
         type: 'esriImage',
         url: 'https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/USA/MapServer',
@@ -140,6 +141,11 @@
         url: 'https://www5.agr.gc.ca/atlas/rest/services/imageservices/annual_crop_inventory_2022/ImageServer',
         layerIds: ['annual_crop_inventory_2022']
       },
+      'Image Static - Napl Ring Of Fire (no process)': {
+        type: 'imageStatic',
+        url: 'https://datacube-prod-data-public.s3.ca-central-1.amazonaws.com/store/imagery/aerial/napl/napl-ring-of-fire',
+        layerIds: ['napl-ring-of-fire-1954-08-07-60k-thumbnail.png']
+      },
       'WMS': {
         type: 'ogcWms',
         url: 'https://geo.weather.gc.ca/geomet',
@@ -147,31 +153,65 @@
       },
       'WMS - CER Assessments': {
         type: 'ogcWms',
-        url: 'https://maps-cartes.services.geo.ca/server_serveur/services/NRCan/CER_Assessments_EN/MapServer/WMSServer', // TODO: Check - This URL seems weird!?
+        url: 'https://maps-cartes.services.geo.ca/server_serveur/services/NRCan/CER_Assessments_EN/MapServer/WMSServer',
         layerIds: [0]
       },
-      'GeoJSON - Nor working, how should it work?': {
-        type: 'GeoJSON',
-        url: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata-new.meta'
+      'Vector Tiles - CBMT_CBCT_3978_V_OSM': {
+        type: 'vectorTiles',
+        url: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3978_V_OSM/VectorTileServer',
+        layerIds: ['CBMT_CBCT_3978_V_OSM']
       },
-      'GeoJSON - Polygons': {
-        type: 'GeoJSON',
-        url: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson',
-        layerIds: ['polygons.json']
+      'Vector Tiles - CBMT3978_v11 with xyz': {
+        type: 'vectorTiles',
+        url: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT3978_v11/VectorTileServer/tile/{z}/{y}/{x}.pbf'
+      },
+      'XYZ Tiles - World_Topo_Map': {
+        type: 'xyzTiles',
+        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer',
+        layerIds: ['0']
+      },
+      'XYZ Tiles - World_Topo_Map with xyz': {
+        type: 'xyzTiles',
+        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'
       },
       'CSV': {
         type: 'CSV',
-        url: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/csv-files/Station_List_Minus_HQ-MELCC.csv'
+        url: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/csv-files/Station_List_Minus_HQ-MELCC.csv',
+        isVector: true
       },
       'CSV - WaterMedia': {
         type: 'CSV',
         url: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/csv-files',
-        layerIds: ['NPRI-INRP_WaterEau_MediaGroupMilieu_2022']
+        layerIds: ['NPRI-INRP_WaterEau_MediaGroupMilieu_2022'],
+        isVector: true
+      },
+      'Esri Feature - Flood Map': {
+        type: 'esriFeature',
+        url: 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/canada_flood_map_inventory_en/MapServer',
+        layerIds: [0]
+      },
+      'Esri Feature - Toronto': {
+        type: 'esriFeature',
+        url: 'https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/Toronto_Neighbourhoods/FeatureServer',
+        layerIds: [0]
+      },
+      'GeoJSON - Polygons': {
+        type: 'GeoJSON',
+        url: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson',
+        layerIds: ['polygons.json'],
+        isVector: true
+      },
+      'GeoJSON - .meta file': {
+        type: 'GeoJSON',
+        url: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata.meta',
+        layerIds: ['polygons.json'],
+        isVector: true
       },
       'OGC Feature - Lakes': {
         type: 'ogcFeature',
         url: 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev',
-        layerIds: ['lakes']
+        layerIds: ['lakes'],
+        isVector: true
       },
       'WFS - Current Conditions': {
         type: 'ogcWfs',
@@ -183,32 +223,20 @@
         url: 'https://ahocevar.com/geoserver/wfs?REQUEST=GetCapabilities&VERSION=2.0.0&SERVICE=WFS',
         layerIds: ['usa:states']
       },
-      'XYZ Tiles - World_Topo_Map': {
-        type: 'xyzTiles',
-        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer'
-      },
-      'XYZ Tiles - World_Topo_Map with xyz': {
-        type: 'xyzTiles',
-        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'
-      },
-      'Vector Tiles - CBMT_CBCT_3978_V_OSM': {
-        type: 'vectorTiles',
-        url: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3978_V_OSM/VectorTileServer',
-        layerIds: ['CBMT_CBCT_3978_V_OSM']
-      },
-      'Vector Tiles - CBMT3978_v11 with xyz': {
-        type: 'vectorTiles',
-        url: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT3978_v11/VectorTileServer/tile/{z}/{y}/{x}.pbf'
-      },
-      'Image Static - Napl Ring Of Fire': {
-        type: 'imageStatic',
-        url: 'https://datacube-prod-data-public.s3.ca-central-1.amazonaws.com/store/imagery/aerial/napl/napl-ring-of-fire',
-        layerIds: ['napl-ring-of-fire-1954-08-07-60k-thumbnail.png']
-      },
       'Geocore - Airborne': {
         type: 'geoCore',
         url: '21b821cf-0f1c-40ee-8925-eab12d357668',
-        // layerIds: ['napl-ring-of-fire-1954-08-07-60k-thumbnail.png']
+        layerIds: ['0']
+      },
+      'Shapefile - single': {
+        type: 'shapefile',
+        url: "./datasets/shapefiles/PLAN_CrownHarvestPlans_SHP_UT83.zip",
+        layerIds: ['PLAN_CrownHarvestPlans_UT83']
+      },
+      'Shapefile - 2 layer ids': {
+        type: 'shapefile',
+        url: "./datasets/shapefiles/PLAN_CrownHarvestPlans_SHP_UT83.zip",
+        layerIds: ['PLAN_CrownHarvestPlans_UT83', 'PLAN_CrownHarvestPlansArchived_UT83']
       }
     };
 
@@ -221,7 +249,8 @@
     const txtLayers = document.getElementById('txtLayers');
     const btnInitialize = document.getElementById('btnInitialize');
     const btnProcess = document.getElementById('btnProcess');
-    const loadingOverlay = document.getElementById('loadingOverlay');
+    const loadingOverlayInit = document.getElementById('loadingOverlayInit');
+    const loadingOverlayProcess = document.getElementById('loadingOverlayProcess');
 
     function updateUI(valueInput) {
       // Update the url txt
@@ -248,6 +277,12 @@
       if (value.layerIds) {
         txtLayers.value = value.layerIds.join(', ');
       }
+
+      // If layer is vector type
+      txtProcessInfoVector.style.display = "none";
+      if (value.isVector) {
+        txtProcessInfoVector.style.display = "block";
+      }
     }
 
     function loadUI() {
@@ -263,22 +298,32 @@
       updateUrlInput(selectLayerTypes.value);
     }
 
-    function cleanUI() {
+    function cleanUIInit() {
       editorResultInit.setValue('');
       txtError.innerHTML = '';
     }
 
-    function showHideLoading(show) {
-      loadingOverlay.style.display = "none";
-      if (show) loadingOverlay.style.display = "block";
+    function cleanUIProcess() {
+      editorResultProcess.setValue('');
+      txtError.innerHTML = '';
+    }
+
+    function showHideLoadingInit(show) {
+      loadingOverlayInit.style.display = "none";
+      if (show) loadingOverlayInit.style.display = "block";
+    }
+
+    function showHideLoadingProcess(show) {
+      loadingOverlayProcess.style.display = "none";
+      if (show) loadingOverlayProcess.style.display = "block";
     }
 
     /* Initializes the Layer and fills the text area with the result */
     async function initializeLayer(layerType, layerUrl, language) {
       try {
         // Clear
-        cleanUI();
-        showHideLoading(true);
+        cleanUIInit();
+        showHideLoadingInit(true);
 
         // Call the ConfigApi to get the Layer Tree
         const initializedLayerConfig = await cgpv.api.config.createInitConfigFromType(
@@ -293,15 +338,31 @@
         editorResultInit.setValue(cgpv.api.config.serializeGeoviewLayerConfig(initializedLayerConfig));
       } finally {
         // Hide loading
-        showHideLoading(false);
+        showHideLoadingInit(false);
       }
     }
 
     async function processLayer(layerType, layerUrl, language, layerIds) {
       try {
         // Clear
-        cleanUI();
-        showHideLoading(true);
+        cleanUIProcess();
+        showHideLoadingProcess(true);
+
+        // If a geocore or shapefile
+        if (layerType === 'geoCore' || layerType === 'shapefile') {
+          // It's a geocore or shapefile, first initialize it and get the layer tree
+          const initializedLayerConfig = await cgpv.api.config.createInitConfigFromType(
+            layerType,
+            'geoviewLayerId',
+            'geoviewLayerName',
+            layerUrl.trim(),
+            language
+          );
+
+          // Tweak the parameters
+          layerType = initializedLayerConfig.geoviewLayerType;
+          layerUrl = initializedLayerConfig.metadataAccessPath;
+        }
 
         // Call the ConfigApi to process the layers into actual layer config classes
         const configClasses = await cgpv.api.config.processLayerFromType(
@@ -313,15 +374,22 @@
         );
 
         // Output instanciation result
-        editorResultInit.setValue(cgpv.api.config.serializeConfigClasses(configClasses));
+        editorResultProcess.setValue(cgpv.api.config.serializeConfigClasses(configClasses));
       } finally {
         // Hide loading
-        showHideLoading(false);
+        showHideLoadingProcess(false);
       }
     }
 
     // Transform the text area into a code text area using CodeMirror
     const editorResultInit = CodeMirror.fromTextArea(document.getElementById('textResultInit'), {
+        lineNumbers: true,
+        mode: 'text/x-perl',
+        theme: 'liquibyte',
+    });
+
+    // Transform the text area into a code text area using CodeMirror
+    const editorResultProcess = CodeMirror.fromTextArea(document.getElementById('textResultProcess'), {
         lineNumbers: true,
         mode: 'text/x-perl',
         theme: 'liquibyte',
@@ -348,7 +416,8 @@
         // If an EsriFeature, suffix the url with the layer id
         let url = txtUrl.value;
         if (value.type === 'esriFeature') {
-          url = (url + '/' + txtLayerId.value).replace("//", "/");
+          url = cleanURL(url);
+          url = url + '/' + txtLayerId.value;
         }
 
         // Go

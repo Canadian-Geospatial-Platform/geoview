@@ -14,6 +14,7 @@ import Home from './buttons/home';
 import Location from './buttons/location';
 import Projection from './buttons/projection';
 import { ButtonGroup, Box, IconButton, Collapse } from '@/ui';
+import { ExpandLessIcon, ExpandMoreIcon } from '@/ui/icons';
 import { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { getSxClasses } from './nav-bar-style';
 import { NavBarApi, NavBarCreatedEvent, NavBarRemovedEvent } from '@/core/components';
@@ -21,8 +22,6 @@ import { useUINavbarComponents } from '@/core/stores/store-interface-and-intial-
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from './nav-bar-panel-button';
-
-import { ExpandMoreIcon, ExpandLessIcon } from '@/ui/icons';
 
 import { TypeValidNavBarProps } from '@/api/config/types/map-schema-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';

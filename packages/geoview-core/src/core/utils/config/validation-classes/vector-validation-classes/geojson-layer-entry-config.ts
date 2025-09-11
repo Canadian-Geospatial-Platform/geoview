@@ -1,6 +1,11 @@
-import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
-import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES, TypeSourceGeoJSONInitialConfig } from '@/api/config/types/map-schema-types';
+import { VectorLayerEntryConfig, VectorLayerEntryConfigProps } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES, TypeSourceGeoJSONInitialConfig } from '@/api/config/types/layer-schema-types';
 import { Projection } from '@/geo/utils/projection';
+
+export interface GeoJSONLayerEntryConfigProps extends VectorLayerEntryConfigProps {
+  /** Source settings to apply to the GeoView layer source at creation time. */
+  source?: TypeSourceGeoJSONInitialConfig;
+}
 
 export class GeoJSONLayerEntryConfig extends VectorLayerEntryConfig {
   /** Tag used to link the entry to a specific schema. */
@@ -9,21 +14,23 @@ export class GeoJSONLayerEntryConfig extends VectorLayerEntryConfig {
   /** Layer entry data type. */
   override entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
 
+  /** The layer entry props that were used in the constructor. */
+  declare layerEntryProps: GeoJSONLayerEntryConfigProps;
+
   declare source: TypeSourceGeoJSONInitialConfig;
 
   /**
    * The class constructor.
-   * @param {GeoJSONLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
+   * @param {GeoJSONLayerEntryConfigProps | GeoJSONLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
    */
-  constructor(layerConfig: GeoJSONLayerEntryConfig) {
+  constructor(layerConfig: GeoJSONLayerEntryConfigProps | GeoJSONLayerEntryConfig) {
     super(layerConfig);
-    Object.assign(this, layerConfig);
 
     // Value for this.source.format can only be GeoJSON.
     this.source ??= { format: 'GeoJSON' };
     this.source.format ??= 'GeoJSON';
     this.source.dataProjection ??= Projection.PROJECTION_NAMES.LONLAT;
-    if (layerConfig.source?.geojson) this.source.geojson = layerConfig.source.geojson;
+    this.source.geojson ??= layerConfig.source?.geojson;
 
     // If undefined, we assign the metadataAccessPath of the GeoView layer to dataAccessPath and place the layerId at the end of it.
     if (!this.source.dataAccessPath) {

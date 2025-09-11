@@ -8,16 +8,14 @@ import defaultsDeep from 'lodash/defaultsDeep';
 
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
-  TypeLayerEntryConfig,
   TypeGeoviewLayerConfig,
   TypeBaseVectorSourceInitialConfig,
-  CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
   TypeMetadataGeoJSON,
-} from '@/api/config/types/map-schema-types';
+} from '@/api/config/types/layer-schema-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
-import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+import { VectorLayerEntryConfig, VectorLayerEntryConfigProps } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { logger } from '@/core/utils/logger';
 import {
@@ -43,8 +41,10 @@ export class GeoJSON extends AbstractGeoViewVector {
    * Constructs a GeoJSON Layer configuration processor.
    * @param {TypeGeoJSONLayerConfig} layerConfig the layer configuration
    */
+  // The constructor is not useless, it narrows down the accepted parameter type.
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(layerConfig: TypeGeoJSONLayerConfig) {
-    super(CONST_LAYER_TYPES.GEOJSON, layerConfig);
+    super(layerConfig);
   }
 
   /**
@@ -101,8 +101,11 @@ export class GeoJSON extends AbstractGeoViewVector {
    * @param {ConfigBaseClass} layerConfig - The layer entry config to validate.
    */
   protected override onValidateLayerEntryConfig(layerConfig: ConfigBaseClass): void {
-    if (Array.isArray(this.getMetadata()?.listOfLayerEntryConfig)) {
-      const foundEntry = this.#recursiveSearch(layerConfig.layerId, this.getMetadata()?.listOfLayerEntryConfig || []);
+    // Get the metadata
+    const metadata = this.getMetadata();
+
+    if (Array.isArray(metadata?.listOfLayerEntryConfig)) {
+      const foundEntry = this.#recursiveSearch(layerConfig.layerId, metadata.listOfLayerEntryConfig || []);
       if (!foundEntry) {
         // Add a layer load error
         this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(layerConfig), layerConfig);
@@ -126,26 +129,32 @@ export class GeoJSON extends AbstractGeoViewVector {
     // If metadata was previously found
     if (metadata) {
       // Search for the layer metadata
-      const layerMetadataFound = this.#recursiveSearch(layerConfig.layerId, metadata.listOfLayerEntryConfig) as VectorLayerEntryConfig;
+      const layerMetadataFound = this.#recursiveSearch(layerConfig.layerId, metadata.listOfLayerEntryConfig) as VectorLayerEntryConfigProps;
 
       // If the layer metadata was found
       if (layerMetadataFound) {
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.layerName = layerConfig.layerName || layerMetadataFound.layerName;
+        // If no name
+        if (!layerConfig.getLayerName()) layerConfig.setLayerName(layerMetadataFound.layerName || 'No name / Sans nom');
+
         // eslint-disable-next-line no-param-reassign
         layerConfig.source = defaultsDeep(layerConfig.source, layerMetadataFound.source);
+
         // eslint-disable-next-line no-param-reassign
         layerConfig.initialSettings = defaultsDeep(layerConfig.initialSettings, layerMetadataFound.initialSettings);
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.layerStyle = defaultsDeep(layerConfig.layerStyle, layerMetadataFound.layerStyle);
+
+        // Set the layer style
+        layerConfig.setLayerStyle(defaultsDeep(layerConfig.getLayerStyle(), layerMetadataFound.layerStyle));
+
+        // If max scale found in metadata
         if (layerMetadataFound.maxScale) {
-          // eslint-disable-next-line no-param-reassign
-          layerConfig.maxScale = Math.min(layerConfig.maxScale || Infinity, layerMetadataFound.maxScale);
+          layerConfig.setMaxScale(Math.min(layerConfig.getMaxScale() || Infinity, layerMetadataFound.maxScale));
         }
+
+        // If min scale found in metadata
         if (layerMetadataFound.minScale) {
-          // eslint-disable-next-line no-param-reassign
-          layerConfig.minScale = Math.max(layerConfig.minScale || 0, layerMetadataFound.minScale);
+          layerConfig.setMinScale(Math.max(layerConfig.getMinScale() || 0, layerMetadataFound.minScale));
         }
+
         // When the dataAccessPath stored in the layerConfig.source object is equal to the root of the metadataAccessPath with a
         // layerId ending, chances are that it was set by the config-validation because of an empty dataAcessPath value in the config.
         // This situation means that we want to use the dataAccessPath found in the metadata if it is set, otherwise we will keep the
@@ -214,15 +223,15 @@ export class GeoJSON extends AbstractGeoViewVector {
    * This method is used to do a recursive search in the array of layer entry config.
    *
    * @param {string} searchKey The layer list to search.
-   * @param {TypeLayerEntryConfig[]} metadataLayerList The layer list to search.
+   * @param {TypeLayerEntryShell[]} metadataLayerList The layer list to search.
    *
-   * @returns {TypeLayerEntryConfig | undefined} The found layer or undefined if not found.
+   * @returns {TypeLayerEntryShell | undefined} The found layer or undefined if not found.
    * @private
    */
-  #recursiveSearch(searchKey: string, metadataLayerList: TypeLayerEntryConfig[]): TypeLayerEntryConfig | undefined {
+  #recursiveSearch(searchKey: string, metadataLayerList: TypeLayerEntryShell[]): TypeLayerEntryShell | undefined {
     for (const layerMetadata of metadataLayerList) {
       if (searchKey === layerMetadata.layerId) return layerMetadata;
-      if ('isLayerGroup' in layerMetadata && (layerMetadata.isLayerGroup as boolean)) {
+      if ('isLayerGroup' in layerMetadata && (layerMetadata.isLayerGroup as boolean) && layerMetadata.listOfLayerEntryConfig) {
         const foundLayer = this.#recursiveSearch(searchKey, layerMetadata.listOfLayerEntryConfig);
         if (foundLayer) return foundLayer;
       }
@@ -288,15 +297,9 @@ export class GeoJSON extends AbstractGeoViewVector {
     geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
       const layerEntryConfig = new GeoJSONLayerEntryConfig({
         geoviewLayerConfig,
-        schemaTag: CONST_LAYER_TYPES.GEOJSON,
-        entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
         layerId: `${layerEntry.id}`,
         layerName: layerEntry.layerName || `${layerEntry.id}`,
-        source: {
-          format: 'GeoJSON',
-          dataAccessPath: `${metadataAccessPath}/${layerEntry.id}`,
-        },
-      } as unknown as GeoJSONLayerEntryConfig);
+      });
       return layerEntryConfig;
     });
 
@@ -344,30 +347,3 @@ export class GeoJSON extends AbstractGeoViewVector {
     return AbstractGeoViewVector.processConfig(myLayer);
   }
 }
-
-/**
- * type guard function that redefines a TypeGeoviewLayerConfig as a TypeGeoJSONLayerConfig if the geoviewLayerType attribute of the
- * verifyIfLayer parameter is GEOJSON. The type ascention applies only to the true block of the if clause that use this
- * function.
- *
- * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerConfigIsGeoJSON = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeGeoJSONLayerConfig => {
-  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.GEOJSON;
-};
-
-/**
- * type guard function that redefines a TypeLayerEntryConfig as a GeoJSONLayerEntryConfig if the geoviewLayerType attribute of
- * the verifyIfGeoViewEntry.geoviewLayerConfig attribute is GEOJSON. The type ascention applies only to the true block of the if
- * clause that use this function.
- *
- * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
- * valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewEntryIsGeoJSON = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is GeoJSONLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.GEOJSON;
-};

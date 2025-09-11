@@ -1,13 +1,15 @@
+import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
 import {
   CONST_LAYER_TYPES,
   CONST_LAYER_ENTRY_TYPES,
   ShapefileLayerConfig,
-  TypeDisplayLanguage,
   TypeGeoviewLayerType,
   TypeLayerEntryConfig,
   MapConfigLayerEntry,
   TypeGeoviewLayerConfig,
-} from '@/api/config/types/map-schema-types';
+} from '@/api/config/types/layer-schema-types';
+import { ConfigBaseClassProps } from '@/core/utils/config/validation-classes/config-base-class';
+import { GroupLayerEntryConfigProps } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { generateId, getLocalizedMessage } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 
@@ -102,7 +104,9 @@ export class UtilAddLayer {
    * @returns The name of the layer or undefined if none is found.
    */
   static getLayerNameById(layerTree: TypeGeoviewLayerConfig | undefined, layerId: string): string | undefined {
-    return (UtilAddLayer.getLayerById(layerTree, layerId) as TypeLayerEntryConfig)?.layerName;
+    const foundLayerEntry = UtilAddLayer.getLayerById(layerTree, layerId);
+    if (foundLayerEntry) return (foundLayerEntry as ConfigBaseClassProps).layerName;
+    return undefined;
   }
 
   /**
@@ -111,7 +115,10 @@ export class UtilAddLayer {
    * @param {string[]} layerIds - The la
    * @returns {boolean} Whether or not all of the sublayers are included
    */
-  static allSubLayersAreIncluded(layerTree: TypeGeoviewLayerConfig | TypeLayerEntryConfig, layerIds: (string | undefined)[]): boolean {
+  static allSubLayersAreIncluded(
+    layerTree: TypeGeoviewLayerConfig | GroupLayerEntryConfigProps,
+    layerIds: (string | undefined)[]
+  ): boolean {
     return layerTree.listOfLayerEntryConfig?.every((layerEntryConfig) =>
       !layerTree.listOfLayerEntryConfig
         ? layerIds.includes(layerEntryConfig.layerId)
@@ -128,14 +135,14 @@ export class UtilAddLayer {
     layerName: string,
     layerType: string,
     layerIds: string[],
-    layersToAdd: (TypeLayerEntryConfig | TypeGeoviewLayerConfig)[],
+    layersToAdd: (TypeGeoviewLayerConfig | ConfigBaseClassProps)[],
     layerIdsToAdd: string[],
     removedLayerIds: string[],
-    groupLayer: TypeLayerEntryConfig | TypeGeoviewLayerConfig
+    groupLayer: TypeGeoviewLayerConfig | GroupLayerEntryConfigProps
   ): LayerEntryConfigShell {
     // Casts
     const groupLayerAsGeoviewLayerConfig = groupLayer as TypeGeoviewLayerConfig;
-    const groupLayerAsLayerEntryConfig = groupLayer as TypeLayerEntryConfig;
+    const groupLayerAsLayerEntryConfig = groupLayer as GroupLayerEntryConfigProps;
 
     // The ID depending on the config type
     const groupLayerId = `${groupLayerAsLayerEntryConfig.layerId || groupLayerAsGeoviewLayerConfig.geoviewLayerId}`;
@@ -176,7 +183,7 @@ export class UtilAddLayer {
           if (layerIds.includes(layerEntryConfig.layerId))
             return {
               layerId: layerEntryConfig?.layerId,
-              layerName: layersToAdd.length === 1 ? layerName : layerEntryConfig?.layerName,
+              layerName: layersToAdd.length === 1 ? layerName : layerEntryConfig?.getLayerName(),
             };
           return undefined;
         })
@@ -234,7 +241,7 @@ export class UtilAddLayer {
         } else if (!removedLayerIds.includes(layerToAddAsLayerEntryConfig.layerId)) {
           listOfLayerEntryConfig.push({
             layerId: layerToAddAsLayerEntryConfig?.layerId,
-            layerName: layersToAdd.length === 1 ? layerName : layerToAddAsLayerEntryConfig?.layerName,
+            layerName: layersToAdd.length === 1 ? layerName : layerToAddAsLayerEntryConfig?.getLayerName(),
           });
         }
       });

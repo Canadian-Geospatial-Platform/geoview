@@ -7,21 +7,11 @@ import { AnyValidateFunction } from 'ajv/dist/types';
 
 import defaultsDeep from 'lodash/defaultsDeep';
 
-import { geoviewEntryIsCSV } from '@/geo/layer/geoview-layers/vector/csv';
-import { geoviewEntryIsEsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
-import { geoviewEntryIsEsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
-import { geoviewEntryIsGeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
-import { geoviewEntryIsGeoPackage } from '@/geo/layer/geoview-layers/vector/geopackage';
-import { geoviewEntryIsImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
-import { geoviewEntryIsOgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
-import { geoviewEntryIsVectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
-import { geoviewEntryIsWFS } from '@/geo/layer/geoview-layers/vector/wfs';
-import { geoviewEntryIsWKB } from '@/geo/layer/geoview-layers/vector/wkb';
-import { geoviewEntryIsWMS } from '@/geo/layer/geoview-layers/raster/wms';
-import { geoviewEntryIsXYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
+import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
 
 import {
-  TypeDisplayLanguage,
+  CONST_LAYER_TYPES,
+  CONST_GEOVIEW_SCHEMA_BY_TYPE,
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
   MapConfigLayerEntry,
@@ -29,15 +19,26 @@ import {
   mapConfigLayerEntryIsShapefile,
   layerEntryIsGroupLayer,
   TypeGeoviewLayerType,
-  CONST_LAYER_TYPES,
-  CONST_GEOVIEW_SCHEMA_BY_TYPE,
-} from '@/api/config/types/map-schema-types';
-import { geoviewEntryIsEsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
+  layerEntryIsEsriFeatureFromConfig,
+  layerEntryIsEsriDynamicFromConfig,
+  layerEntryIsEsriImageFromConfig,
+  layerEntryIsImageStaticFromConfig,
+  layerEntryIsVectorTileFromConfig,
+  layerEntryIsOgcWmsFromConfig,
+  layerEntryIsXYZTilesFromConfig,
+  layerEntryIsCSVFromConfig,
+  layerEntryIsGeoJSONFromConfig,
+  layerEntryIsGeoPackageFromConfig,
+  layerEntryIsOgcFeatureFromConfig,
+  layerEntryIsWFSFromConfig,
+  layerEntryIsWKBFromConfig,
+  ConfigClassOrType,
+} from '@/api/config/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
 
 import { generateId } from '@/core/utils/utilities';
 import schema from '@/core/../../schema.json';
-
+import { ConfigBaseClass } from './validation-classes/config-base-class';
 import { CsvLayerEntryConfig } from './validation-classes/vector-validation-classes/csv-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from './validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriFeatureLayerEntryConfig } from './validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
@@ -169,9 +170,8 @@ export class ConfigValidation {
 
   /**
    * Validate the map features configuration.
-   * @param {TypeMapFeaturesConfig} mapFeaturesConfigToValidate - The map features configuration to validate.
-   *
-   * @returns {TypeMapFeaturesConfig} A valid map features configuration.
+   * @param {MapConfigLayerEntry[]} listOfGeoviewLayerConfig - The map features configuration to validate.
+   * @returns {MapConfigLayerEntry[]} A valid map features configuration.
    */
   validateLayersConfigAgainstSchema(
     listOfGeoviewLayerConfig: MapConfigLayerEntry[],
@@ -301,17 +301,17 @@ export class ConfigValidation {
   /**
    * Process recursively the layer entries to create layers and layer groups.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The GeoView layer configuration to adjust and validate.
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig - The list of layer entry configurations to process.
+   * @param {ConfigClassOrType[]} listOfLayerEntryConfig - The list of layer entry configurations to process.
    * @param {TypeGeoviewLayerConfig | GroupLayerEntryConfig} parentLayerConfig - The parent layer configuration of all the
    * layer entry configurations found in the list of layer entries.
    * @private
    */
   static #processLayerEntryConfig(
     geoviewLayerConfig: TypeGeoviewLayerConfig,
-    listOfLayerEntryConfig: TypeLayerEntryConfig[],
+    listOfLayerEntryConfig: ConfigClassOrType[],
     parentLayerConfig?: GroupLayerEntryConfig
   ): void {
-    listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig, i: number) => {
+    listOfLayerEntryConfig.forEach((layerConfig, i: number) => {
       // links the entry to its GeoView layer config.
       layerConfig.geoviewLayerConfig = geoviewLayerConfig;
       // links the entry to its parent layer configuration.
@@ -338,12 +338,16 @@ export class ConfigValidation {
       if (!layerConfig.initialSettings.states) layerConfig.initialSettings.states = { visible: true };
       if (layerConfig.initialSettings?.states?.visible !== false) layerConfig.initialSettings.states.visible = true;
 
-      if (layerConfig.minScale) {
-        layerConfig.minScale = Math.min(layerConfig.minScale, parentLayerConfig?.minScale || Infinity);
+      const minScale = ConfigBaseClass.getClassOrTypeMinScale(layerConfig);
+      if (minScale) {
+        // Set the min scale
+        ConfigBaseClass.setClassOrTypeMinScale(layerConfig, Math.min(minScale, parentLayerConfig?.getMinScale() || Infinity));
       }
 
-      if (layerConfig.maxScale) {
-        layerConfig.maxScale = Math.max(layerConfig.maxScale, parentLayerConfig?.maxScale || 0);
+      const maxScale = ConfigBaseClass.getClassOrTypeMaxScale(layerConfig);
+      if (maxScale) {
+        // Set the max scale
+        ConfigBaseClass.setClassOrTypeMaxScale(layerConfig, Math.max(maxScale, parentLayerConfig?.getMaxScale() || 0));
       }
 
       // Merge the rest of parent and child settings
@@ -358,31 +362,31 @@ export class ConfigValidation {
         const parent = new GroupLayerEntryConfig(layerConfig);
         listOfLayerEntryConfig[i] = parent;
         ConfigValidation.#processLayerEntryConfig(geoviewLayerConfig, parent.listOfLayerEntryConfig, parent);
-      } else if (geoviewEntryIsWMS(layerConfig)) {
+      } else if (layerEntryIsOgcWmsFromConfig(layerConfig)) {
         listOfLayerEntryConfig[i] = new OgcWmsLayerEntryConfig(layerConfig);
-      } else if (geoviewEntryIsImageStatic(layerConfig)) {
+      } else if (layerEntryIsImageStaticFromConfig(layerConfig)) {
         listOfLayerEntryConfig[i] = new ImageStaticLayerEntryConfig(layerConfig);
-      } else if (geoviewEntryIsXYZTiles(layerConfig)) {
+      } else if (layerEntryIsXYZTilesFromConfig(layerConfig)) {
         listOfLayerEntryConfig[i] = new XYZTilesLayerEntryConfig(layerConfig);
-      } else if (geoviewEntryIsVectorTiles(layerConfig)) {
+      } else if (layerEntryIsVectorTileFromConfig(layerConfig)) {
         listOfLayerEntryConfig[i] = new VectorTilesLayerEntryConfig(layerConfig);
-      } else if (geoviewEntryIsEsriDynamic(layerConfig)) {
+      } else if (layerEntryIsEsriDynamicFromConfig(layerConfig)) {
         listOfLayerEntryConfig[i] = new EsriDynamicLayerEntryConfig(layerConfig);
-      } else if (geoviewEntryIsEsriFeature(layerConfig)) {
+      } else if (layerEntryIsEsriFeatureFromConfig(layerConfig)) {
         listOfLayerEntryConfig[i] = new EsriFeatureLayerEntryConfig(layerConfig);
-      } else if (geoviewEntryIsEsriImage(layerConfig)) {
+      } else if (layerEntryIsEsriImageFromConfig(layerConfig)) {
         listOfLayerEntryConfig[i] = new EsriImageLayerEntryConfig(layerConfig);
-      } else if (geoviewEntryIsWFS(layerConfig)) {
+      } else if (layerEntryIsWFSFromConfig(layerConfig)) {
         listOfLayerEntryConfig[i] = new WfsLayerEntryConfig(layerConfig);
-      } else if (geoviewEntryIsOgcFeature(layerConfig)) {
+      } else if (layerEntryIsOgcFeatureFromConfig(layerConfig)) {
         listOfLayerEntryConfig[i] = new OgcFeatureLayerEntryConfig(layerConfig);
-      } else if (geoviewEntryIsGeoPackage(layerConfig)) {
+      } else if (layerEntryIsGeoPackageFromConfig(layerConfig)) {
         listOfLayerEntryConfig[i] = new GeoPackageLayerEntryConfig(layerConfig);
-      } else if (geoviewEntryIsGeoJSON(layerConfig)) {
+      } else if (layerEntryIsGeoJSONFromConfig(layerConfig)) {
         listOfLayerEntryConfig[i] = new GeoJSONLayerEntryConfig(layerConfig);
-      } else if (geoviewEntryIsCSV(layerConfig)) {
+      } else if (layerEntryIsCSVFromConfig(layerConfig)) {
         listOfLayerEntryConfig[i] = new CsvLayerEntryConfig(layerConfig);
-      } else if (geoviewEntryIsWKB(layerConfig)) {
+      } else if (layerEntryIsWKBFromConfig(layerConfig)) {
         listOfLayerEntryConfig[i] = new WkbLayerEntryConfig(layerConfig);
       } else {
         // Unsupported layer type
