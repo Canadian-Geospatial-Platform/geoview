@@ -48,6 +48,7 @@ import { ImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
 import { OgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
 import { VectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 import { WFS } from '@/geo/layer/geoview-layers/vector/wfs';
+import { WKB } from '@/geo/layer/geoview-layers/vector/wkb';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
 import { XYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
 
@@ -167,9 +168,10 @@ export class ConfigApi {
    * Converts the stringMapFeatureConfig to a json object. Comments will be removed from the string.
    * @param {string} stringMapFeatureConfig The map configuration string to convert to JSON format.
    * @returns {MapFeatureConfig | undefined} A JSON map feature configuration object.
+   * @static
    * @private
    */
-  static convertStringToJson(stringMapFeatureConfig: string): MapFeatureConfig | undefined {
+  static #convertStringToJson(stringMapFeatureConfig: string): MapFeatureConfig | undefined {
     // Erase comments in the config file.
     let newStringMapFeatureConfig = removeCommentsFromJSON(stringMapFeatureConfig);
 
@@ -308,14 +310,16 @@ export class ConfigApi {
     // If the user provided a string config, translate it to a json object because the MapFeatureConfig constructor
     // doesn't accept string config. Note that convertStringToJson returns undefined if the string config cannot
     // be translated to a json object.
-    const providedMapFeatureConfig = typeof mapConfig === 'string' ? ConfigApi.convertStringToJson(mapConfig)! : mapConfig;
-
-    // Validate the map config
-    ConfigApi.validateSchema(MAP_CONFIG_SCHEMA_PATH, providedMapFeatureConfig);
-
     try {
-      // If the user provided a valid string config with the mandatory map property, process geocore layers to translate them to their GeoView layers
+      const providedMapFeatureConfig = typeof mapConfig === 'string' ? ConfigApi.#convertStringToJson(mapConfig) : mapConfig;
+
+      // Validate
       if (!providedMapFeatureConfig) throw new MapConfigError('The string configuration provided cannot be translated to a json object');
+
+      // Validate the map config
+      ConfigApi.validateSchema(MAP_CONFIG_SCHEMA_PATH, providedMapFeatureConfig);
+
+      // Validate
       if (!providedMapFeatureConfig.map) throw new MapConfigError('The map property is mandatory');
 
       // Instanciate the mapFeatureConfig. If an error is detected, a workaround procedure
@@ -435,6 +439,8 @@ export class ConfigApi {
         return EsriFeature.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
       case 'GeoJSON':
         return GeoJSON.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+      case 'WKB':
+        return WKB.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
       case 'ogcFeature':
         return OgcFeature.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
       case 'ogcWfs':
@@ -491,14 +497,14 @@ export class ConfigApi {
     layerIds: number[] | string[]
   ): Promise<ConfigBaseClass[]> {
     // Depending on the type
-    // TODO: Check - Check, for ALL layers here, if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
+    // TODO: Check - Config init - Check, for ALL layers here, if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
     switch (layerType) {
       case 'esriDynamic':
         return EsriDynamic.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as number[], false);
       case 'esriImage':
         return EsriImage.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, false);
       case 'imageStatic':
-        // TODO: Check - Check if there's a way to better determine the source extent to send, defaults to napl-ring-of-fire's extent
+        // TODO: Check - Config init - Check if there's a way to better determine the source extent to send, defaults to napl-ring-of-fire's extent
         return ImageStatic.processGeoviewLayerConfig(
           geoviewLayerId,
           geoviewLayerName,
@@ -509,10 +515,10 @@ export class ConfigApi {
           4326
         );
       case 'vectorTiles':
-        // TODO: Check - Check if there's a way to better determine the projection to send, defaults to 'EPSG:3978'
+        // TODO: Check - Config init - Check if there's a way to better determine the projection to send, defaults to 'EPSG:3978'
         return VectorTiles.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], false, 'EPSG:3978');
       case 'ogcWms':
-        // TODO: Check - Check if there's a way to better determine the typeOfServer to send, defaults to 'mapserver'
+        // TODO: Check - Config init - Check if there's a way to better determine the typeOfServer to send, defaults to 'mapserver'
         return WMS.processGeoviewLayerConfig(
           geoviewLayerId,
           geoviewLayerName,
@@ -530,10 +536,12 @@ export class ConfigApi {
         return EsriFeature.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as number[], false);
       case 'GeoJSON':
         return GeoJSON.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], false);
+      case 'WKB':
+        return WKB.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], false);
       case 'ogcFeature':
         return OgcFeature.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], false);
       case 'ogcWfs':
-        // TODO: Check - Check if there's a way to better determine the typeOfServer to send, defaults to 'all'
+        // TODO: Check - Config init - Check if there's a way to better determine the typeOfServer to send, defaults to 'all'
         return WFS.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], false, 'all');
       default:
         // Unsupported

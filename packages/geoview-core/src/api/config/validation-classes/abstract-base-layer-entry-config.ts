@@ -1,5 +1,10 @@
 import { TypeLayerStyleConfig, TypeStyleGeometry, TypeLayerStyleSettings } from '@/api/types/map-schema-types';
-import { ConfigAbstractBaseClassOrType, TypeBaseSourceInitialConfig } from '@/api/types/layer-schema-types';
+import {
+  ConfigAbstractBaseClassOrType,
+  TypeBaseSourceInitialConfig,
+  TypeGeoviewLayerType,
+  TypeLayerEntryType,
+} from '@/api/types/layer-schema-types';
 import { ConfigBaseClass, ConfigBaseClassProps } from '@/api/config/validation-classes/config-base-class';
 import { TimeDimension } from '@/core/utils/date-mgt';
 import { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
@@ -55,8 +60,12 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * The class constructor.
    * @param {AbstractBaseLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
    */
-  protected constructor(layerConfig: AbstractBaseLayerEntryConfigProps | AbstractBaseLayerEntryConfig) {
-    super(layerConfig);
+  protected constructor(
+    layerConfig: AbstractBaseLayerEntryConfigProps | AbstractBaseLayerEntryConfig,
+    schemaTag: TypeGeoviewLayerType,
+    entryType: TypeLayerEntryType
+  ) {
+    super(layerConfig, schemaTag, entryType);
 
     // Keep attribute properties
     this.source = layerConfig.source;
@@ -241,7 +250,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
     const serialized = super.onToJson<T>() as any;
 
     // Copy values
-    serialized.initialSettings = this.initialSettings;
+    serialized.initialSettings = this.getInitialSettings();
     serialized.attributions = this.getAttributions();
     serialized.source = this.source;
 

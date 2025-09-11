@@ -69,7 +69,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
     // Update the resultSet data
     const layerPath = layer.getLayerPath();
-    this.resultSet[layerPath].eventListenerEnabled = layer.getLayerConfig().initialSettings.states?.queryable ?? true;
+    this.resultSet[layerPath].eventListenerEnabled = layer.getLayerConfig().getInitialSettings().states?.queryable ?? true; // default: true
     this.resultSet[layerPath].queryStatus = 'processed';
     this.resultSet[layerPath].features = [];
   }

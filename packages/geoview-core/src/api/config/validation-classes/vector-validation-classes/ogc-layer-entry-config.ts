@@ -1,9 +1,4 @@
-import {
-  CONST_LAYER_ENTRY_TYPES,
-  CONST_LAYER_TYPES,
-  TypeLayerMetadataOGC,
-  TypeSourceOgcFeatureInitialConfig,
-} from '@/api/types/layer-schema-types';
+import { CONST_LAYER_TYPES, TypeLayerMetadataOGC, TypeSourceOgcFeatureInitialConfig } from '@/api/types/layer-schema-types';
 import { VectorLayerEntryConfig, VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { Projection } from '@/geo/utils/projection';
 
@@ -13,12 +8,6 @@ export interface OgcFeatureLayerEntryConfigProps extends VectorLayerEntryConfigP
 }
 
 export class OgcFeatureLayerEntryConfig extends VectorLayerEntryConfig {
-  /** Tag used to link the entry to a specific schema. */
-  override schemaTag = CONST_LAYER_TYPES.OGC_FEATURE;
-
-  /** Layer entry data type. */
-  override entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
-
   /** The layer entry props that were used in the constructor. */
   declare layerEntryProps: OgcFeatureLayerEntryConfigProps;
 
@@ -29,7 +18,7 @@ export class OgcFeatureLayerEntryConfig extends VectorLayerEntryConfig {
    * @param {OgcFeatureLayerEntryConfigProps | OgcFeatureLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
    */
   constructor(layerConfig: OgcFeatureLayerEntryConfigProps | OgcFeatureLayerEntryConfig) {
-    super(layerConfig);
+    super(layerConfig, CONST_LAYER_TYPES.OGC_FEATURE);
 
     // Value for this.source.format can only be featureAPI.
     this.source ??= { format: 'featureAPI' };

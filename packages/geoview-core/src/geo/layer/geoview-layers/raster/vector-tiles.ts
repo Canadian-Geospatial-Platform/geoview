@@ -9,7 +9,6 @@ import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geovie
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { TypeGeoviewLayerConfig, TypeTileGrid, CONST_LAYER_TYPES, TypeMetadataVectorTiles } from '@/api/types/layer-schema-types';
 import { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
-import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { VectorTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { logger } from '@/core/utils/logger';
@@ -61,7 +60,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
   protected override onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Redirect
     return Promise.resolve(
-      // TODO: Check - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
+      // TODO: Check - Config init - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
       VectorTiles.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, this.metadataAccessPath, false, [])
     );
   }
@@ -72,8 +71,11 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * @returns {Promise<VectorTilesLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
   protected override async onProcessLayerMetadata(layerConfig: VectorTilesLayerEntryConfig): Promise<VectorTilesLayerEntryConfig> {
-    if (this.getMetadata()) {
-      const { tileInfo, fullExtent, minScale, maxScale, minZoom, maxZoom } = this.getMetadata()!;
+    // Get the metadata
+    const metadata = this.getMetadata();
+
+    if (metadata) {
+      const { tileInfo, fullExtent, minScale, maxScale, minZoom, maxZoom } = metadata;
       const newTileGrid: TypeTileGrid = {
         extent: [fullExtent.xmin, fullExtent.ymin, fullExtent.xmax, fullExtent.ymax],
         origin: [tileInfo.origin.x, tileInfo.origin.y],
@@ -83,8 +85,9 @@ export class VectorTiles extends AbstractGeoViewRaster {
 
       // eslint-disable-next-line no-param-reassign
       layerConfig.source.tileGrid = newTileGrid;
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
+
+      // Validate and update the extent initial settings
+      layerConfig.validateUpdateInitialSettingsExtent();
 
       // Add projection definition if not already included
       if (fullExtent.spatialReference) {
@@ -110,13 +113,13 @@ export class VectorTiles extends AbstractGeoViewRaster {
       // Second, set the min/max zoom levels based on the service / config.
       // GV Vector tiles should always have a minZoom and maxZoom, so -Infinity or Infinity should never be set as a value
       if (minZoom) {
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.initialSettings.minZoom = Math.max(layerConfig.initialSettings.minZoom ?? -Infinity, minZoom);
+        // Validate and update the minZoom initial settings
+        layerConfig.validateUpdateInitialSettingsMinZoom(minZoom);
       }
 
       if (maxZoom) {
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.initialSettings.maxZoom = Math.min(layerConfig.initialSettings.maxZoom ?? Infinity, maxZoom);
+        // Validate and update the minZoom initial settings
+        layerConfig.validateUpdateInitialSettingsMaxZoom(maxZoom);
       }
     }
 

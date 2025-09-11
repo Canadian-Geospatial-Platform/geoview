@@ -224,7 +224,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
           // If there's no determined layer style in the layer config
           if (!layerConfig.getLayerStyle()) {
             // If the layer visible state is invisible upon load or the style has been applied, we should query legend
-            shouldQueryLegend = !layerConfig.initialSettings?.states?.visible || layer.styleApplied;
+            shouldQueryLegend = !layerConfig.getInitialSettings()?.states?.visible || layer.styleApplied;
           }
         }
       }

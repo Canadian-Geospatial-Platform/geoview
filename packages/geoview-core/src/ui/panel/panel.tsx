@@ -16,6 +16,7 @@ import { getSxClasses } from '@/ui/panel/panel-style';
 import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { DEFAULT_APPBAR_CORE } from '@/api/types/map-schema-types';
 import { FocusTrapContainer } from '@/core/components/common';
+import { delay } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 
 /**
@@ -49,7 +50,6 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
   const { status: open = false, isFocusTrapped = false, panelStyles, panelGroupName } = panel;
 
   // Hooks
-  // TODO: refactor - language values should be pass as props
   const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
@@ -90,14 +90,22 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
       }
 
       // Wait the transition period (+50 ms just to be sure of shenanigans)
-      setTimeout(() => {
-        onOpen?.();
-      }, theme.transitions.duration.standard + 50);
+      delay(theme.transitions.duration.standard + 50)
+        .then(() => {
+          onOpen?.();
+        })
+        .catch(() => {
+          logger.logPromiseFailed('in delay in UI.PANEL - open');
+        });
     } else {
       // Wait the transition period (+50 ms just to be sure of shenanigans)
-      setTimeout(() => {
-        onClose?.();
-      }, theme.transitions.duration.standard + 50);
+      delay(theme.transitions.duration.standard + 50)
+        .then(() => {
+          onClose?.();
+        })
+        .catch(() => {
+          logger.logPromiseFailed('in delay in UI.PANEL - open');
+        });
     }
   }, [open, theme.transitions.duration.standard, onOpen, onClose]);
 

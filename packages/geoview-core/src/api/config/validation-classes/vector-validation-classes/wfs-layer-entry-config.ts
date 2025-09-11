@@ -1,9 +1,4 @@
-import {
-  CONST_LAYER_ENTRY_TYPES,
-  CONST_LAYER_TYPES,
-  TypeLayerMetadataWfs,
-  TypeSourceWFSVectorInitialConfig,
-} from '@/api/types/layer-schema-types';
+import { CONST_LAYER_TYPES, TypeLayerMetadataWfs, TypeSourceWFSVectorInitialConfig } from '@/api/types/layer-schema-types';
 import { VectorLayerEntryConfig, VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { Projection } from '@/geo/utils/projection';
 
@@ -13,12 +8,6 @@ export interface WfsLayerEntryConfigProps extends VectorLayerEntryConfigProps {
 }
 
 export class WfsLayerEntryConfig extends VectorLayerEntryConfig {
-  /** Tag used to link the entry to a specific schema. */
-  override schemaTag = CONST_LAYER_TYPES.WFS;
-
-  /** Layer entry data type. */
-  override entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
-
   /** The layer entry props that were used in the constructor. */
   declare layerEntryProps: WfsLayerEntryConfigProps;
 
@@ -29,7 +18,7 @@ export class WfsLayerEntryConfig extends VectorLayerEntryConfig {
    * @param {WfsLayerEntryConfigProps | WfsLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
    */
   constructor(layerConfig: WfsLayerEntryConfigProps | WfsLayerEntryConfig) {
-    super(layerConfig);
+    super(layerConfig, CONST_LAYER_TYPES.WFS);
 
     // Value for this.source.format can only be WFS.
     this.source ??= { format: 'WFS' };

@@ -80,7 +80,6 @@
       {
         "geoviewLayerId": "21b821cf-0f1c-40ee-8925-eab12d357668",
         "geoviewLayerName": "The Canadian Radiological Monitoring Network - Airborne Radioactivity",
-        "zIndex": 2,
         "metadataAccessPath": "",
         "geoviewLayerType": "geoCore",
         "initialSettings": {

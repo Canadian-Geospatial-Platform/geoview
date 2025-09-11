@@ -223,6 +223,11 @@
         url: 'https://ahocevar.com/geoserver/wfs?REQUEST=GetCapabilities&VERSION=2.0.0&SERVICE=WFS',
         layerIds: ['usa:states']
       },
+      'WKB - Rivers': {
+        type: 'WKB',
+        url: 'https://some-wkb-url/rivers',
+        layerIds: ['rivers']
+      },
       'Geocore - Airborne': {
         type: 'geoCore',
         url: '21b821cf-0f1c-40ee-8925-eab12d357668',
@@ -240,7 +245,8 @@
       },
       'GeoPackage - Rivers': {
         type: 'GeoPackage',
-        url: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/geopackages/rivers.gpkg'
+        url: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/geopackages/rivers.gpkg',
+        layerIds: ['rivers']
       }
     };
 
@@ -353,7 +359,7 @@
         showHideLoadingProcess(true);
 
         // If a geocore or shapefile
-        if (layerType === 'geoCore' || layerType === 'shapefile') {
+        if (layerType === 'geoCore' || layerType === 'shapefile' || layerType === 'GeoPackage') {
           // It's a geocore or shapefile, first initialize it and get the layer tree
           const initializedLayerConfig = await cgpv.api.config.createInitConfigFromType(
             layerType,

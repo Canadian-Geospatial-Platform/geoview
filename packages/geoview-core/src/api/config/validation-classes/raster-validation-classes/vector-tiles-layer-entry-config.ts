@@ -1,5 +1,6 @@
 import {
   ConfigVectorTilesClassOrType,
+  CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
   TypeMetadataVectorTiles,
   TypeSourceTileInitialConfig,
@@ -16,9 +17,6 @@ export interface VectorTilesLayerEntryConfigProps extends AbstractBaseLayerEntry
 }
 
 export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
-  /** Tag used to link the entry to a specific schema. */
-  override schemaTag = CONST_LAYER_TYPES.VECTOR_TILES;
-
   declare source: TypeSourceTileInitialConfig;
 
   /** The style url */
@@ -29,7 +27,7 @@ export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
    * @param {VectorTilesLayerEntryConfigProps | VectorTilesLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
    */
   constructor(layerConfig: VectorTilesLayerEntryConfigProps | VectorTilesLayerEntryConfig) {
-    super(layerConfig);
+    super(layerConfig, CONST_LAYER_TYPES.VECTOR_TILES, CONST_LAYER_ENTRY_TYPES.RASTER_TILE);
 
     // Keep attributes
     this.#styleUrl = VectorTilesLayerEntryConfig.getClassOrTypeStyleUrl(layerConfig);

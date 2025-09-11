@@ -10,6 +10,7 @@ import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-v
 import { useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useMapProjection } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
+import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 
 interface JSONExportButtonProps {
   rows: unknown[];
@@ -203,7 +204,7 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
     setIsExporting(true);
     try {
       const layer = getLayer(layerPath);
-      const layerIsEsriDynamic = layer?.type === 'esriDynamic';
+      const layerIsEsriDynamic = layer?.type === CONST_LAYER_TYPES.ESRI_DYNAMIC;
 
       const jsonGenerator = getJson(layerIsEsriDynamic);
       const chunks = [];

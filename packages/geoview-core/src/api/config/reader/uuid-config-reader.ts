@@ -148,7 +148,7 @@ export class UUIDmapConfigReader {
             );
           } else if (layerType === CONST_LAYER_TYPES.WFS) {
             // Redirect
-            // TODO: Check - Check if there's a way to better determine the vector strategy to send, defaults to 'all'
+            // TODO: Check - Config init - Check if there's a way to better determine the vector strategy to send, defaults to 'all'
             geoviewLayerConfig = WFS.createGeoviewLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, 'all', layerEntries);
           } else if (layerType === CONST_LAYER_TYPES.OGC_FEATURE) {
             // Redirect

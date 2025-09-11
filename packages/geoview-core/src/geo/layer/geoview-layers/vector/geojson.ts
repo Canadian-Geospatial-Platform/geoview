@@ -13,7 +13,6 @@ import {
   CONST_LAYER_TYPES,
   TypeMetadataGeoJSON,
 } from '@/api/types/layer-schema-types';
-import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { GeoJSONLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
 import { VectorLayerEntryConfig, VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { Fetch } from '@/core/utils/fetch-helper';
@@ -92,7 +91,7 @@ export class GeoJSON extends AbstractGeoViewVector {
     const id = this.metadataAccessPath.substring(idx + 1);
 
     // Redirect
-    // TODO: Check - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
+    // TODO: Check - Config init - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
     return Promise.resolve(GeoJSON.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, [{ id }]));
   }
 
@@ -134,13 +133,13 @@ export class GeoJSON extends AbstractGeoViewVector {
       // If the layer metadata was found
       if (layerMetadataFound) {
         // If no name
-        if (!layerConfig.getLayerName()) layerConfig.setLayerName(layerMetadataFound.layerName || 'No name / Sans nom');
+        if (!layerConfig.getLayerName()) layerConfig.setLayerName(layerMetadataFound.layerName || layerConfig.getLayerNameCascade());
 
         // eslint-disable-next-line no-param-reassign
         layerConfig.source = defaultsDeep(layerConfig.source, layerMetadataFound.source);
 
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.initialSettings = defaultsDeep(layerConfig.initialSettings, layerMetadataFound.initialSettings);
+        // Set the initial settings
+        layerConfig.setInitialSettings(defaultsDeep(layerConfig.getInitialSettings(), layerMetadataFound.initialSettings));
 
         // Set the layer style
         layerConfig.setLayerStyle(defaultsDeep(layerConfig.getLayerStyle(), layerMetadataFound.layerStyle));
@@ -171,8 +170,8 @@ export class GeoJSON extends AbstractGeoViewVector {
         }
       }
 
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
+      // Validate and update the extent initial settings
+      layerConfig.validateUpdateInitialSettingsExtent();
     }
 
     // Setting the layer metadata now with the updated config values. Setting the layer metadata with the config, directly, like it's done in CSV

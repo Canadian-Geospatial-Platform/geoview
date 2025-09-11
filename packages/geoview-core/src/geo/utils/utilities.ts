@@ -25,13 +25,6 @@ import { TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
 import { TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import { NetworkError } from '@/core/exceptions/core-exceptions';
 
-/**
- * Interface used for css style declarations
- */
-interface TypeCSSStyleDeclaration extends CSSStyleDeclaration {
-  mozTransform: string;
-}
-
 // available layer types
 export const layerTypes = CONST_LAYER_TYPES;
 
@@ -238,54 +231,6 @@ export function getLegendStylesFromConfig(styleConfig: TypeLayerStyleConfig): Pr
 }
 
 /**
- * Gets computed translate values
- * https://zellwk.com/blog/css-translate-values-in-javascript/
- * @param {HTMLElement} element the HTML element to get value for
- * @returns {Object} the x, y and z translation values
- */
-// TODO: clean - not use anywhere
-export function getTranslateValues(element: HTMLElement): {
-  x: number;
-  y: number;
-  z: number;
-} {
-  const style = window.getComputedStyle(element) as TypeCSSStyleDeclaration;
-  const matrix = style.transform || style.webkitTransform || style.mozTransform;
-  const values = { x: 0, y: 0, z: 0 };
-
-  // No transform property. Simply return 0 values.
-  if (matrix === 'none' || matrix === undefined) return values;
-
-  // Can either be 2d or 3d transform
-  const matrixType = matrix.includes('3d') ? '3d' : '2d';
-  const matrixMatch = matrix.match(/matrix.*\((.+)\)/);
-  const matrixValues = matrixMatch && matrixMatch[1].split(', ');
-
-  // 2d matrices have 6 values
-  // Last 2 values are X and Y.
-  // 2d matrices does not have Z value.
-  if (matrixType === '2d') {
-    return {
-      x: Number(matrixValues && matrixValues[4]),
-      y: Number(matrixValues && matrixValues[5]),
-      z: 0,
-    };
-  }
-
-  // 3d matrices have 16 values
-  // The 13th, 14th, and 15th values are X, Y, and Z
-  if (matrixType === '3d') {
-    return {
-      x: Number(matrixValues && matrixValues[12]),
-      y: Number(matrixValues && matrixValues[13]),
-      z: Number(matrixValues && matrixValues[14]),
-    };
-  }
-
-  return values;
-}
-
-/**
  * Format the coordinates for degrees - minutes - seconds (lat, long)
  * @param {number} value the value to format
  * @returns {string} the formatted value
@@ -437,6 +382,18 @@ export function validateExtent(extent: Extent, code: string = 'EPSG:4326'): Exte
 }
 
 /**
+ * Validates lat long, LCC, or Web Mercator extent if it is defined.
+ * @param {Extent} extent - The extent to validate.
+ * @param {string} code - The projection code of the extent. Default EPSG:4326.
+ * @returns {Extent | undefined} The validated extent if it was defined.
+ */
+export function validateExtentWhenDefined(extent: Extent | undefined, code: string = 'EPSG:4326'): Extent | undefined {
+  // Validate extent if it is defined
+  if (extent) return validateExtent(extent, code);
+  return undefined;
+}
+
+/**
  * Checks if a given extent is long/lat.
  * @param {Extent} extent - The extent to check.
  * @returns {boolean} Whether or not the extent is long/lat
@@ -457,17 +414,6 @@ export function isExtentLonLat(extent: Extent): boolean {
   return false;
 }
 
-/**
- * Validates lat long, LCC, or Web Mercator extent if it is defined.
- * @param {Extent} extent - The extent to validate.
- * @param {string} code - The projection code of the extent. Default EPSG:4326.
- * @returns {Extent | undefined} The validated extent if it was defined.
- */
-export function validateExtentWhenDefined(extent: Extent | undefined, code: string = 'EPSG:4326'): Extent | undefined {
-  // Validate extent if it is defined
-  if (extent) return validateExtent(extent, code);
-  return undefined;
-}
 // #endregion EXTENT
 
 /**

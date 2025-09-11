@@ -20,12 +20,6 @@ export interface OgcWmsLayerEntryConfigProps extends AbstractBaseLayerEntryConfi
  * Type used to define a GeoView image layer to display on the map.
  */
 export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
-  /** Tag used to link the entry to a specific schema. */
-  override schemaTag = CONST_LAYER_TYPES.WMS;
-
-  /** Layer entry data type. */
-  override entryType = CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE;
-
   /** The layer entry props that were used in the constructor. */
   declare layerEntryProps: OgcWmsLayerEntryConfigProps;
 
@@ -37,7 +31,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * @param {OgcWmsLayerEntryConfigProps | OgcWmsLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
    */
   constructor(layerConfig: OgcWmsLayerEntryConfigProps | OgcWmsLayerEntryConfig) {
-    super(layerConfig);
+    super(layerConfig, CONST_LAYER_TYPES.WMS, CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE);
 
     // Write the default properties when not specified
     this.source ??= {};

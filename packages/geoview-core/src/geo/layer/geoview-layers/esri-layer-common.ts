@@ -1,6 +1,5 @@
 import { Extent } from 'ol/extent';
 
-import { validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { TimeDimensionESRI, DateMgt } from '@/core/utils/date-mgt';
 import { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
@@ -36,7 +35,7 @@ import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
-import { LayerEntryConfigLayerIdEsriMustBeNumberError } from '@/core/exceptions/layer-exceptions';
+import { LayerEntryConfigLayerIdEsriMustBeNumberError, LayerServiceMetadataEmptyError } from '@/core/exceptions/layer-exceptions';
 import {
   LayerEntryConfigEmptyLayerGroupError,
   LayerEntryConfigLayerIdNotFoundError,
@@ -220,8 +219,13 @@ export function commonProcessTimeDimension(
 export function commonProcessFeatureInfoConfig(
   layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig
 ): void {
-  const { layerPath } = layerConfig;
-  const layerMetadata = layerConfig.getLayerMetadata()!; // FIXME: Address the '!' marker here..
+  // Get the layer metadata
+  const layerMetadata = layerConfig.getLayerMetadata();
+
+  // If no metadata, throw metadata empty error (maybe change to just return if this is too strict? Trying the more strict approach first..)
+  if (!layerMetadata)
+    throw new LayerServiceMetadataEmptyError(layerConfig.geoviewLayerConfig.geoviewLayerId, layerConfig.getLayerNameCascade());
+
   const queryable = layerMetadata.capabilities.includes('Query');
   if (layerConfig.source.featureInfo) {
     // if queryable flag is undefined, set it accordingly to what is specified in the metadata
@@ -233,7 +237,7 @@ export function commonProcessFeatureInfoConfig(
     else if (layerConfig.source.featureInfo.queryable && layerMetadata.type !== 'Group Layer' && !layerMetadata.fields.length) {
       // eslint-disable-next-line no-param-reassign
       layerConfig.source.featureInfo.queryable = false;
-      logger.logWarning(`Layer ${layerPath} has no fields defined in the service metadata. Queryable set to false.`);
+      logger.logWarning(`Layer ${layerConfig.layerPath} has no fields defined in the service metadata. Queryable set to false.`);
     }
     // The queryable flag comes from the user config
   } else {
@@ -285,11 +289,17 @@ export function commonProcessFeatureInfoConfig(
 export function commonProcessInitialSettings(
   layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig
 ): void {
-  // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
+  // Get the layer metadata
   const layerMetadata = layerConfig.getLayerMetadata();
-  if (layerConfig.initialSettings?.states?.visible === undefined) {
-    // eslint-disable-next-line no-param-reassign
-    layerConfig.initialSettings.states = { visible: !!layerMetadata?.defaultVisibility };
+
+  // TODO: Refactor - Config vs Metadata - There is a logic issue here as layerConfig.initialSettings.states.visible can never be undefined because
+  // TO.DOCONT: in ConfigValidation.#processLayerEntryConfig we set it to states.visible = true off-the-bat, and that happens before the metadata is processed.
+  // TO.DOCONT: Then, here, when the layer metadata is processed, it checks what was in the config (which as been filled already).
+  // TO.DOCONT: If the intent is to use the metadata only if the config state.visible is undefined, then it can't be
+  // TO.DOCONT: automatically pre-filled in ConfigValidation.#processLayerEntryConfig prior to processing the metadata.
+  if (layerConfig.getInitialSettings()?.states?.visible === undefined) {
+    // Update the states initial settings
+    layerConfig.updateInitialSettingsStateVisible(!!layerMetadata?.defaultVisibility);
   }
 
   // Update Max / Min Scales with value if service doesn't allow the configured value for proper UI functionality
@@ -307,10 +317,11 @@ export function commonProcessInitialSettings(
     layerConfig.maxRecordCount = layerMetadata?.maxRecordCount || 0;
   }
 
-  // eslint-disable-next-line no-param-reassign
-  layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
+  // Validate and update the extent initial settings
+  layerConfig.validateUpdateInitialSettingsExtent();
 
-  if (!layerConfig.initialSettings?.bounds && layerMetadata?.extent) {
+  // If no bounds defined in the initial settings and an extent is defined in the metadata
+  if (!layerConfig.getInitialSettings()?.bounds && layerMetadata?.extent) {
     const layerExtent = [
       layerMetadata.extent.xmin,
       layerMetadata.extent.ymin,
@@ -325,12 +336,14 @@ export function commonProcessInitialSettings(
         layerMetadata.extent.spatialReference,
         Projection.getProjectionLonLat()
       );
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.initialSettings.bounds = lonlatExtent;
+
+      // Update the bounds initial settings
+      layerConfig.updateInitialSettings({ bounds: lonlatExtent });
     }
   }
-  // eslint-disable-next-line no-param-reassign
-  layerConfig.initialSettings.bounds = validateExtent(layerConfig.initialSettings.bounds || [-180, -90, 180, 90]);
+
+  // Validate and update the bounds initial settings
+  layerConfig.validateUpdateInitialSettingsBounds();
 }
 
 /**
@@ -404,7 +417,7 @@ export function parseFeatureInfoEntries(records: EsriRelatedRecordsJsonResponseR
 
 /**
  * Asynchronously queries an Esri feature layer given the url and returns an array of `TypeFeatureInfoEntryPartial` records.
- * @param {string} url An Esri url indicating a feature layer to query
+ * @param {string} url - An Esri url indicating a feature layer to query
  * @returns {TypeFeatureInfoEntryPartial[] | null} An array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
  */
 export function queryRecordsByUrl(url: string): Promise<TypeFeatureInfoEntryPartial[]> {
@@ -414,8 +427,8 @@ export function queryRecordsByUrl(url: string): Promise<TypeFeatureInfoEntryPart
 
 /**
  * Asynchronously queries an Esri relationship table given the url and returns an array of `TypeFeatureInfoEntryPartial` records.
- * @param {url} string An Esri url indicating a relationship table to query
- * @param {recordGroupIndex} number The group index of the relationship layer on which to read the related records
+ * @param {string} url - An Esri url indicating a relationship table to query
+ * @param {number} recordGroupIndex - The group index of the relationship layer on which to read the related records
  * @returns {TypeFeatureInfoEntryPartial[] | null} An array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
  */
 export function queryRelatedRecordsByUrl(url: string, recordGroupIndex: number): Promise<TypeFeatureInfoEntryPartial[]> {

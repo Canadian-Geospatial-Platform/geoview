@@ -357,7 +357,8 @@
       "mapIdAlreadyExists": "Map with ID '__param__' already exists.",
       "geoviewStoreNotFound": "GeoView Store on Map '__param__' not found.",
       "mapDivNotExists": "Div with id ${divId} does not exist",
-      "mapWrongCall": "Div with id __param__ has a class 'geoview-map' and should be initialized via a 'cgpv.init()' call."
+      "mapWrongCall": "Div with id __param__ has a class 'geoview-map' and should be initialized via a 'cgpv.init()' call.",
+      "pluginStateUninitialized": "The Plugin state for '__param__' on Map '__param__' is uninitialized"
     },
     "geocore": {
       "uuidNotFound": "GeoCore layer identifier '__param__' does not exist on the server.",

@@ -24,7 +24,6 @@ import { findPropertyByRegexPath } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { WfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
-import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { LayerNoCapabilitiesError } from '@/core/exceptions/layer-exceptions';
 import { LayerEntryConfigLayerIdNotFoundError } from '@/core/exceptions/layer-entry-config-exceptions';
 import { GVWFS } from '@/geo/layer/gv-layers/vector/gv-wfs';
@@ -115,8 +114,8 @@ export class WFS extends AbstractGeoViewVector {
     });
 
     // Redirect
-    // TODO: Check - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
-    // TODO: Check - Check if there's a way to better determine the vector strategy flag, defaults to 'all', how is it used here?
+    // TODO: Check - Config init - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
+    // TODO: Check - Config init - Check if there's a way to better determine the vector strategy flag, defaults to 'all', how is it used here?
     return WFS.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, 'all', entries);
   }
 
@@ -152,22 +151,23 @@ export class WFS extends AbstractGeoViewVector {
         return;
       }
 
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
+      // Validate and update the extent initial settings
+      layerConfig.validateUpdateInitialSettingsExtent();
 
-      if (!layerConfig.initialSettings?.bounds && foundMetadata['ows:WGS84BoundingBox']) {
+      // If no bounds defined in the initial settings and an extent is defined in the metadata
+      if (!layerConfig.getInitialSettings()?.bounds && foundMetadata['ows:WGS84BoundingBox']) {
         // TODO: Check - This additional processing seem valid, but is it at the right place? A bit confusing with the rest of the codebase.
         // TODO: Refactor - Layers refactoring. Validate if this code is still being executed after the layers migration. This code may easily have been forgotten.
         const lowerCorner = foundMetadata['ows:WGS84BoundingBox']['ows:LowerCorner']['#text'].split(' ');
         const upperCorner = foundMetadata['ows:WGS84BoundingBox']['ows:UpperCorner']['#text'].split(' ');
         const bounds = [Number(lowerCorner[0]), Number(lowerCorner[1]), Number(upperCorner[0]), Number(upperCorner[1])];
 
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.initialSettings.bounds = bounds;
+        // Update the bounds initial settings
+        layerConfig.updateInitialSettings({ bounds: bounds });
       }
 
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.initialSettings.bounds = validateExtentWhenDefined(layerConfig.initialSettings.bounds);
+      // Validate and update the bounds initial settings
+      layerConfig.validateUpdateInitialSettingsBounds();
     }
   }
 
@@ -303,8 +303,7 @@ export class WFS extends AbstractGeoViewVector {
     // Query XML to Json
     const responseJson = await Fetch.fetchXMLToJson(`${queryUrl}${getCapabilitiesUrl}`);
 
-    // Parse the WFS_Capabilities
-    // TODO: Check - Maybe we want to return the root here, not just the WFS_Capabilities node information and adjust the return type?
+    // Parse the WFS_Capabilities opening the root node right away to skip to the meat.
     return findPropertyByRegexPath(responseJson, /(?:WFS_Capabilities)/) as TypeMetadataWFS;
   }
 

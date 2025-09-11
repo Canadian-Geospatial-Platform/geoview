@@ -63,7 +63,6 @@ function DrawerUI(props: DrawerPropsExtend): JSX.Element {
   const { variant, status, className, style, children, ...rest } = props;
 
   // Hooks
-  // TODO: refactor - language values should be pass as props
   const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);

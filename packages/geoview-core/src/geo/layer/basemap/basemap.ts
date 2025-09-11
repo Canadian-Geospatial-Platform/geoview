@@ -579,63 +579,6 @@ export class BasemapApi {
     throw new CoreBasemapCreationError();
   }
 
-  // TODO: Cleanup - Not used anymore? (Code doesn't seem very good anyways with the bilingual things? Commenting out for now 2025-07-30)
-  // /**
-  //  * Create a custom basemap.
-  //  * @param {TypeBasemapProps} basemapProps - Basemap properties.
-  //  * @param {TypeValidMapProjectionCodes} projection - Projection code.
-  //  * @param {TypeDisplayLanguage} language - Optional language.
-  //  * @returns {TypeBasemapProps} The created custom basemap.
-  //  */
-  // createCustomBasemap(
-  //   basemapProps: TypeBasemapProps,
-  //   projection: TypeValidMapProjectionCodes,
-  //   language?: TypeDisplayLanguage
-  // ): TypeBasemapProps {
-  //   interface bilingual {
-  //     en: string;
-  //     fr: string;
-  //   }
-
-  //   // Extract bilangual sections
-  //   const name: bilingual = basemapProps.name as unknown as bilingual;
-  //   const description: bilingual = basemapProps.description as unknown as bilingual;
-  //   const thumbnailUrl: bilingual = basemapProps.thumbnailUrl as unknown as bilingual;
-  //   const attribution: bilingual = basemapProps.attribution as unknown as bilingual;
-
-  //   // Check if language is provided for the basemap creation
-  //   const languageCode = language === undefined ? AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId) : language;
-
-  //   // Create the basemap properties
-  //   const formatProps: TypeBasemapProps = { ...basemapProps };
-  //   formatProps.name = languageCode === 'en' ? name.en : name.fr;
-  //   formatProps.layers = basemapProps.layers.map((layer) => {
-  //     return {
-  //       ...layer,
-  //       url: languageCode === 'en' ? (layer.url as unknown as bilingual).en : (layer.url as unknown as bilingual).fr,
-  //       // TODO: Handle custom vector tile basemaps too
-  //       source: new XYZ({
-  //         attributions: attribution[languageCode],
-  //         projection: Projection.PROJECTIONS[projection],
-  //         url: languageCode === 'en' ? (layer.url as unknown as bilingual).en : (layer.url as unknown as bilingual).fr,
-  //         crossOrigin: 'Anonymous',
-  //         tileGrid: new TileGrid({
-  //           extent: this.defaultExtent,
-  //           origin: this.defaultOrigin,
-  //           resolutions: this.defaultResolutions!,
-  //         }),
-  //       }),
-  //     };
-  //   });
-  //   formatProps.type = 'test';
-  //   formatProps.description = languageCode === 'en' ? description.en : description.fr;
-  //   formatProps.altText = languageCode === 'en' ? description.en : description.fr;
-  //   formatProps.thumbnailUrl = languageCode === 'en' ? thumbnailUrl.en : thumbnailUrl.fr;
-  //   formatProps.attribution = languageCode === 'en' ? [attribution.en] : [attribution.fr];
-
-  //   return formatProps;
-  // }
-
   // #endregion
 
   /**

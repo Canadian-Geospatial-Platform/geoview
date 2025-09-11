@@ -127,31 +127,43 @@ export class GVWMS extends AbstractGVRaster {
     // If the layer is invisible
     if (!this.getVisible()) return [];
 
-    // Get the layer config and source
+    // Get the layer config and its initial settings
     const layerConfig = this.getLayerConfig();
+    let initialSettings = layerConfig.getInitialSettings();
 
-    // TODO: Check - Why are we checking if bounds are properly set in this getFeatureInfoAtLonLat override? Seems late or out of order?
-    // Check if bounds are properly set
-    if (!layerConfig.initialSettings.bounds) {
-      const newBounds = this.getBounds(map.getView().getProjection(), MapViewer.DEFAULT_STOPS);
-      if (newBounds)
-        layerConfig.initialSettings.bounds = Projection.transformExtentFromProj(
-          newBounds,
-          map.getView().getProjection(),
-          Projection.getProjectionLonLat()
-        );
-      else return [];
+    // Ensure bounds are available in the settings
+    if (!initialSettings.bounds) {
+      const projection = map.getView().getProjection();
+      const computedBounds = this.getBounds(projection, MapViewer.DEFAULT_STOPS);
+
+      // If no computed bounds, return
+      if (!computedBounds) return [];
+
+      const transformedBounds = Projection.transformExtentFromProj(computedBounds, projection, Projection.getProjectionLonLat());
+
+      // Update initial settings with computed bounds
+      layerConfig.updateInitialSettings({ bounds: transformedBounds });
+
+      // Re-fetch settings after the update to ensure consistency
+      initialSettings = layerConfig.getInitialSettings();
     }
 
-    // Project the lonlat to map projection
-    const clickCoordinate = Projection.transformFromLonLat(lonlat, map.getView().getProjection());
-    if (
-      lonlat[0] < layerConfig.initialSettings.bounds[0] ||
-      layerConfig.initialSettings.bounds[2] < lonlat[0] ||
-      lonlat[1] < layerConfig.initialSettings.bounds[1] ||
-      layerConfig.initialSettings.bounds[3] < lonlat[1]
-    )
+    // If bounds still not set, return
+    if (!initialSettings.bounds) return [];
+
+    // Check if the clicked lon/lat is within the bounds
+    const [lon, lat] = lonlat;
+    const [minX, minY, maxX, maxY] = initialSettings.bounds;
+
+    // If out of bounds, don't bother and return
+    if (lon < minX || lon > maxX || lat < minY || lat > maxY) {
+      // Log warning
+      logger.logWarning(`Coordinates for the bounds were out-of-bounds for layer ${layerConfig.layerPath}`);
       return [];
+    }
+
+    // Project the lon/lat to the map's projection
+    const clickCoordinate = Projection.transformFromLonLat(lonlat, map.getView().getProjection());
 
     let infoFormat = '';
     const featureInfoFormat = this.getLayerConfig().getServiceMetadata()?.Capability?.Request?.GetFeatureInfo?.Format;
@@ -287,7 +299,7 @@ export class GVWMS extends AbstractGVRaster {
     const layerConfig = this.getLayerConfig();
 
     // Get the layer config bounds
-    let layerConfigBounds = layerConfig?.initialSettings?.bounds;
+    let layerConfigBounds = layerConfig?.getInitialSettings()?.bounds;
 
     // If layer bounds were found, project
     if (layerConfigBounds) {
@@ -317,7 +329,7 @@ export class GVWMS extends AbstractGVRaster {
       layerBounds = layerConfigBounds;
     }
 
-    // Validate
+    // Validate the bounds before returning them
     layerBounds = validateExtentWhenDefined(layerBounds, projection.getCode());
 
     // Return the calculated bounds

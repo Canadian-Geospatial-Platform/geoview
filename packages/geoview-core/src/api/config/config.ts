@@ -1,14 +1,10 @@
-import { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import {
   MapConfigLayerEntry,
-  layerEntryIsGroupLayer,
   CONST_LAYER_TYPES,
   TypeGeoviewLayerType,
   mapConfigLayerEntryIsGeoCore,
   mapConfigLayerEntryIsGeoPackage,
   mapConfigLayerEntryIsShapefile,
-  TypeLayerEntryType,
-  CONST_LAYER_ENTRY_TYPES,
   TypeLayerEntryConfig,
 } from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
@@ -16,7 +12,7 @@ import { logger } from '@/core/utils/logger';
 import { ConfigValidation, ErrorCallbackDelegate } from '@/api/config/config-validation';
 import { generateId } from '@/core/utils/utilities';
 import { LayerInvalidGeoviewLayerTypeError } from '@/core/exceptions/layer-exceptions';
-import { NotSupportedError } from '@/core/exceptions/core-exceptions';
+import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 
 /**
  * Class to read and validate the GeoView map features configuration. Will validate every item for structure and valid values.
@@ -26,27 +22,13 @@ import { NotSupportedError } from '@/core/exceptions/core-exceptions';
  * @class Config
  */
 export class Config {
-  /** The element associated to the map properties configuration.. */
-  // #mapElement: Element;
-
-  /** Config validation object used to validate the configuration and define default values */
-  configValidation: ConfigValidation;
-
-  /**
-   * Constructor
-   * @param {TypeDisplayLanguage} language - The language
-   */
-  constructor(language: TypeDisplayLanguage) {
-    // Instanciate the configuration validator.
-    this.configValidation = new ConfigValidation(language);
-  }
-
   /**
    * Get a valid map configuration.
    * @param {MapConfigLayerEntry[]} listOfGeoviewLayerConfig - The list of Geoview layer config to validate.
    * @returns {MapConfigLayerEntry} A valid map config layer entry.
+   * @static
    */
-  prevalidateGeoviewLayersConfig(
+  static prevalidateGeoviewLayersConfig(
     listOfGeoviewLayerConfig: MapConfigLayerEntry[],
     onErrorCallback: ErrorCallbackDelegate
   ): MapConfigLayerEntry[] {
@@ -75,7 +57,7 @@ export class Config {
     }
 
     // TODO: refactor - return only the layers
-    const validLayers = this.configValidation.validateLayersConfigAgainstSchema(listOfGeoviewLayerConfig, onErrorCallback);
+    const validLayers = ConfigValidation.validateLayersConfigAgainstSchema(listOfGeoviewLayerConfig, onErrorCallback);
 
     // Log
     logger.logDebug('CONFIG-LAYERS-VALIDATED', validLayers);
@@ -88,16 +70,16 @@ export class Config {
    * Initializes all layer entry type fields accordingly to the GeoView layer type.
    * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig - The list of layer entry configuration to adjust.
    * @param {TypeGeoviewLayerType} geoviewLayerType - The GeoView layer type.
+   * @static
    * @private
    */
-  #setLayerEntryType(listOfLayerEntryConfig: TypeLayerEntryConfig[], geoviewLayerType: TypeGeoviewLayerType): void {
+  static #setLayerEntryType(listOfLayerEntryConfig: TypeLayerEntryConfig[], geoviewLayerType: TypeGeoviewLayerType): void {
     listOfLayerEntryConfig?.forEach((layerConfig) => {
-      if (layerEntryIsGroupLayer(layerConfig)) this.#setLayerEntryType(layerConfig.listOfLayerEntryConfig, geoviewLayerType);
+      if (ConfigBaseClass.getClassOrTypeEntryTypeIsGroup(layerConfig))
+        Config.#setLayerEntryType(layerConfig.listOfLayerEntryConfig, geoviewLayerType);
       else {
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.schemaTag = geoviewLayerType;
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.entryType = Config.getLayerEntryTypeFromLayerType(geoviewLayerType);
+        ConfigBaseClass.setClassOrTypeSchemaTag(layerConfig, geoviewLayerType);
+        ConfigBaseClass.setClassOrTypeEntryType(layerConfig, ConfigBaseClass.getLayerEntryTypeFromLayerType(geoviewLayerType));
       }
     });
   }
@@ -108,8 +90,9 @@ export class Config {
    * @param {MapConfigLayerEntry[]} listOfGeoviewLayerConfig - The list of layer configurations to validate and initialize.
    * @param {ErrorCallbackDelegate} onErrorCallback - A callback function invoked when a validation error occurs.
    * @returns {MapConfigLayerEntry[] | undefined} The validated list of layer configs, or `undefined` if invalid.
+   * @static
    */
-  initializeMapConfig(
+  static initializeMapConfig(
     mapId: string,
     listOfGeoviewLayerConfig: MapConfigLayerEntry[],
     onErrorCallback: ErrorCallbackDelegate
@@ -119,39 +102,6 @@ export class Config {
       logger.logInfo(`- Map: ${mapId} - Empty JSON configuration object, using default -`);
     }
 
-    return this.prevalidateGeoviewLayersConfig(listOfGeoviewLayerConfig, onErrorCallback);
-  }
-
-  /**
-   * Returns the corresponding layer entry type for a given GeoView layer type.
-   * This method maps a `TypeGeoviewLayerType` (e.g., CSV, WMS, XYZ_TILES)
-   * to its associated `TypeLayerEntryType` (e.g., VECTOR, RASTER_IMAGE, RASTER_TILE).
-   * Useful for determining how a layer should be handled/rendered internally.
-   * @param {TypeGeoviewLayerType} layerType - The GeoView layer type to convert.
-   * @returns The corresponding layer entry type.
-   * @throws {NotSupportedError} If the provided `layerType` is not supported for conversion.
-   */
-  static getLayerEntryTypeFromLayerType(layerType: TypeGeoviewLayerType): TypeLayerEntryType {
-    switch (layerType) {
-      case CONST_LAYER_TYPES.CSV:
-      case CONST_LAYER_TYPES.GEOJSON:
-      case CONST_LAYER_TYPES.OGC_FEATURE:
-      case CONST_LAYER_TYPES.WFS:
-      case CONST_LAYER_TYPES.WKB:
-      case CONST_LAYER_TYPES.ESRI_FEATURE:
-        return CONST_LAYER_ENTRY_TYPES.VECTOR;
-
-      case CONST_LAYER_TYPES.IMAGE_STATIC:
-      case CONST_LAYER_TYPES.ESRI_DYNAMIC:
-      case CONST_LAYER_TYPES.ESRI_IMAGE:
-      case CONST_LAYER_TYPES.WMS:
-        return CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE;
-      case CONST_LAYER_TYPES.XYZ_TILES:
-      case CONST_LAYER_TYPES.VECTOR_TILES:
-        return CONST_LAYER_ENTRY_TYPES.RASTER_TILE;
-      default:
-        // Throw unsupported error
-        throw new NotSupportedError(`Unsupported layer type ${layerType} to convert to layer entry`);
-    }
+    return Config.prevalidateGeoviewLayersConfig(listOfGeoviewLayerConfig, onErrorCallback);
   }
 }

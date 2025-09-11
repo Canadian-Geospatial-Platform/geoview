@@ -1,4 +1,5 @@
 import { ISwiperState, SwipeOrientation } from '@/core/stores/store-interface-and-intial-values/swiper-state';
+import { PluginStateUninitializedError } from '@/core/exceptions/geoview-exceptions';
 import { logger } from '@/core/utils/logger';
 
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
@@ -17,27 +18,51 @@ export class SwiperEventProcessor extends AbstractEventProcessor {
   // GV ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
 
   /**
+   * Checks if the Swiper plugin is iniitialized for the given map.
+   * @param {string} mapId - The map id
+   * @returns {boolean} True when the Swiper plugin is initialized.
+   */
+  static isSwiperInitialized(mapId: string): boolean {
+    try {
+      // Get its state, this will throw PluginStateUninitializedError if uninitialized
+      this.getSwiperState(mapId);
+      return true;
+    } catch {
+      // Uninitialized
+      return false;
+    }
+  }
+
+  /**
    * Shortcut to get the Swiper state for a given map id
    * @param {string} mapId - The mapId
-   * @returns {ISwiperState | undefined} The Swiper state. Forcing the return to also be 'undefined', because
-   *                                       there will be no swiperState if the Swiper plugin isn't active.
-   *                                       This helps the developers making sure the existence is checked.
+   * @returns {ISwiperState} The Swiper state.
+   * @throws {PluginStateUninitializedError} When the Swiper plugin is uninitialized.
    */
-  // TODO: Cleanup - No more "| undefined" shenanigans, remove it and remove comment, it's too risky for race conditions to have it 'maybe' there..
-  // TO.DOCONT: Do the same thing for geochart-event-processor
-  protected static getSwiperState(mapId: string): ISwiperState | undefined {
-    // Return the swiper state when it exists
-    return super.getState(mapId).swiperState;
+  protected static getSwiperState(mapId: string): ISwiperState {
+    // Get the swiper state
+    const { swiperState } = super.getState(mapId);
+
+    // If not found
+    if (!swiperState) throw new PluginStateUninitializedError('Swiper', mapId);
+
+    // Return it
+    return swiperState;
   }
 
   /**
    * Sets the layer paths on which the swiper should be activated.
    *
    * @param {string} mapId - The map id.
-   * @returns {}
+   * @returns {string[]} The layer paths
+   * @throws {PluginStateUninitializedError} When the Swiper plugin is uninitialized.
    */
-  static getLayerPaths(mapId: string): string[] | undefined {
-    return this.getSwiperState(mapId)?.layerPaths;
+  static getLayerPaths(mapId: string): string[] {
+    // Get the swiper state which is only initialized if the Swiper Plugin exists.
+    const swiperState = this.getSwiperState(mapId);
+
+    // Return the layer paths
+    return swiperState.layerPaths;
   }
 
   /**
@@ -45,10 +70,14 @@ export class SwiperEventProcessor extends AbstractEventProcessor {
    *
    * @param {string} mapId - The map id
    * @param {string[]} layerPaths - The array of layer paths
+   * @throws {PluginStateUninitializedError} When the Swiper plugin is uninitialized.
    */
   static setLayerPaths(mapId: string, layerPaths: string[]): void {
+    // Get the swiper state which is only initialized if the Swiper Plugin exists.
+    const swiperState = this.getSwiperState(mapId);
+
     // set store layer paths
-    this.getSwiperState(mapId)?.setterActions.setLayerPaths(layerPaths);
+    swiperState.setterActions.setLayerPaths(layerPaths);
 
     // Log
     logger.logInfo('Added Swiper functionality for layer paths:', layerPaths);
@@ -60,21 +89,23 @@ export class SwiperEventProcessor extends AbstractEventProcessor {
    * Adds a swiper functionality to the specified map id and layer path
    * @param {string} mapId - The map ID
    * @param {string} layerPath - The layer path
+   * @throws {PluginStateUninitializedError} When the Swiper plugin is uninitialized.
    */
   static addLayerPath(mapId: string, layerPath: string): void {
-    // The processor needs an initialized layer paths store which is only initialized if the Swiper Plugin exists.
-    // Therefore, we validate its existence first.
-    if (!this.getSwiperState(mapId)) return;
-    if (!this.getSwiperState(mapId)?.layerPaths) return;
+    // Get the swiper state which is only initialized if the Swiper Plugin exists.
+    const swiperState = this.getSwiperState(mapId);
+
+    // If no layer paths, return
+    if (!swiperState.layerPaths) return;
 
     // If not already added
-    if (!this.getSwiperState(mapId)!.layerPaths.includes(layerPath)) {
+    if (!swiperState.layerPaths.includes(layerPath)) {
       // Add in the array
-      const updatedArray = [...this.getSwiperState(mapId)!.layerPaths];
+      const updatedArray = [...swiperState.layerPaths];
       updatedArray.push(layerPath);
 
       // Update the layer data array in the store
-      this.getSwiperState(mapId)!.setterActions.setLayerPaths(updatedArray);
+      swiperState.setterActions.setLayerPaths(updatedArray);
 
       // Log
       logger.logInfo('Added Swiper functionality for layer path:', layerPath);
@@ -90,24 +121,26 @@ export class SwiperEventProcessor extends AbstractEventProcessor {
    * Removes a swiper functionality for the specified map id and layer path
    * @param {string} mapId - The map ID
    * @param {string} layerPath - The layer path
+   * @throws {PluginStateUninitializedError} When the Swiper plugin is uninitialized.
    */
   static removeLayerPath(mapId: string, layerPath: string): void {
-    // The processor needs an initialized layer paths store which is only initialized if the Swiper Plugin exists.
-    // Therefore, we validate its existence first.
-    if (!this.getSwiperState(mapId)) return;
-    if (!this.getSwiperState(mapId)?.layerPaths) return;
+    // Get the swiper state which is only initialized if the Swiper Plugin exists.
+    const swiperState = this.getSwiperState(mapId);
+
+    // If no layer paths, return
+    if (!swiperState.layerPaths) return;
 
     // Find the index with the layer path
-    const layerIndex = this.getSwiperState(mapId)!.layerPaths.findIndex((layer) => layer === layerPath);
+    const layerIndex = swiperState.layerPaths.findIndex((layer) => layer === layerPath);
 
     // Config to remove
     if (layerIndex !== undefined && layerIndex >= 0) {
       // Remove from the array
-      const updatedArray = [...this.getSwiperState(mapId)!.layerPaths];
+      const updatedArray = [...swiperState.layerPaths];
       updatedArray.splice(layerIndex, 1);
 
       // Update the layer data array in the store
-      this.getSwiperState(mapId)!.setterActions.setLayerPaths(updatedArray);
+      swiperState.setterActions.setLayerPaths(updatedArray);
 
       // Log
       logger.logInfo('Removed Swiper functionality for layer path:', layerPath);
@@ -122,18 +155,20 @@ export class SwiperEventProcessor extends AbstractEventProcessor {
   /**
    * Removes the swiper functionality for all layer paths
    * @param {string} mapId - The map ID
+   * @throws {PluginStateUninitializedError} When the Swiper plugin is uninitialized.
    */
   static removeAll(mapId: string): void {
-    // The processor needs an initialized layer paths store which is only initialized if the Swiper Plugin exists.
-    // Therefore, we validate its existence first.
-    if (!this.getSwiperState(mapId)) return;
-    if (!this.getSwiperState(mapId)?.layerPaths) return;
+    // Get the swiper state which is only initialized if the Swiper Plugin exists.
+    const swiperState = this.getSwiperState(mapId);
+
+    // If no layer paths, return
+    if (!swiperState.layerPaths) return;
 
     // Get all layer paths
-    const { layerPaths } = this.getSwiperState(mapId)!;
+    const { layerPaths } = swiperState;
 
     // Update the layer data array in the store
-    this.getSwiperState(mapId)!.setterActions.setLayerPaths([]);
+    swiperState.setterActions.setLayerPaths([]);
 
     // Log
     logger.logInfo('Removed Swiper functionality for all layer paths', layerPaths);
@@ -145,10 +180,14 @@ export class SwiperEventProcessor extends AbstractEventProcessor {
    * Sets the orientation of the swiper.
    * @param {string} mapId - The map IDh
    * @param {SwipeOrientation} orientation - The orientation to set
+   * @throws {PluginStateUninitializedError} When the Swiper plugin is uninitialized.
    */
   static setOrientation(mapId: string, orientation: SwipeOrientation): void {
+    // Get the swiper state which is only initialized if the Swiper Plugin exists.
+    const swiperState = this.getSwiperState(mapId);
+
     // set store orientation
-    this.getSwiperState(mapId)?.setterActions.setOrientation(orientation);
+    swiperState.setterActions.setOrientation(orientation);
   }
 
   // #endregion
