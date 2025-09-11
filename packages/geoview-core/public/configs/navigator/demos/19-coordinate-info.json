@@ -43,7 +43,8 @@
         "legend",
         "details"
       ]
-    }
+    },
+    "selectedTab": "details"
   },
   "navBar": ["basemap-select", "home", "zoom", "fullscreen"],
   "corePackages": [],
