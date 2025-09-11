@@ -25,6 +25,7 @@ import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geovie
 import {
   CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
+  GeoPackageLayerConfig,
   MapConfigLayerEntry,
   ShapefileLayerConfig,
   TypeGeoviewLayerConfig,
@@ -35,6 +36,7 @@ import {
 import { UtilAddLayer } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
 import { AddLayerTree } from '@/core/components/layers/left-panel/add-new-layer/add-layer-tree';
 import { ShapefileReader } from '@/core/utils/config/reader/shapefile-reader';
+import { GeoPackageReader } from '@/core/utils/config/reader/geopackage-reader';
 
 const sxClasses = {
   buttonGroup: {
@@ -43,7 +45,7 @@ const sxClasses = {
   },
 };
 
-const { GEOCORE, SHAPEFILE } = CONST_LAYER_ENTRY_TYPES;
+const { GEOCORE, GEOPACKAGE, SHAPEFILE } = CONST_LAYER_ENTRY_TYPES;
 
 interface FileUploadSectionProps {
   onFileSelected: (file: File, fileURL: string, fileName: string) => void;
@@ -95,6 +97,7 @@ function FileUploadSection({ onFileSelected, onUrlChanged, displayURL, disabledL
     if (
       upFilename.endsWith('.JSON') ||
       upFilename.endsWith('.GEOJSON') ||
+      upFilename.endsWith('.GPKG') ||
       upFilename.endsWith('.CSV') ||
       upFilename.endsWith('.ZIP') ||
       upFilename.endsWith('.SHP')
@@ -198,7 +201,7 @@ function FileUploadSection({ onFileSelected, onUrlChanged, displayURL, disabledL
           ref={fileInputRef}
           style={{ display: 'none' }}
           onChange={handleChange}
-          accept=".json, .geojson, .csv, .zip, .shp"
+          accept=".json, .geojson, .gpkg, .csv, .zip, .shp"
         />
       </Box>
       <Button
@@ -250,7 +253,6 @@ export function AddNewLayer(): JSX.Element {
   // Hook
   const { t } = useTranslation<string>();
 
-  // TODO: refactor - add the Geopacakges when refactor is done GEOPACKAGE
   const { CSV, ESRI_DYNAMIC, ESRI_FEATURE, ESRI_IMAGE, GEOJSON, WMS, WFS, OGC_FEATURE, XYZ_TILES, VECTOR_TILES } = CONST_LAYER_TYPES;
 
   // States
@@ -437,6 +439,10 @@ export function AddNewLayer(): JSX.Element {
       const filename = layerURL.split('/').pop()?.split('.')[0];
       if (filename) setLayerName(filename);
       promise = Promise.resolve(true);
+    } else if (layerType === GEOPACKAGE) {
+      const filename = layerURL.split('/').pop()?.split('.')[0];
+      if (filename) setLayerName(filename);
+      promise = Promise.resolve(true);
     } else if (
       layerType === WMS ||
       layerType === WFS ||
@@ -517,6 +523,11 @@ export function AddNewLayer(): JSX.Element {
     if (newGeoViewLayer.geoviewLayerType === SHAPEFILE)
       // eslint-disable-next-line no-param-reassign
       newGeoViewLayer = await ShapefileReader.convertShapefileConfigToGeoJson(newGeoViewLayer as ShapefileLayerConfig);
+
+    // GeoPackage config must be converted to WKB before we proceed
+    if (newGeoViewLayer.geoviewLayerType === GEOPACKAGE)
+      // eslint-disable-next-line no-param-reassign
+      newGeoViewLayer = await GeoPackageReader.createLayerConfigFromGeoPackage(newGeoViewLayer as GeoPackageLayerConfig);
 
     // Use the config to convert simplified layer config into proper layer config
     const config = new Config(language);

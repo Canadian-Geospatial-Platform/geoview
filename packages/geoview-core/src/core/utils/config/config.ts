@@ -1,10 +1,11 @@
 import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
 import {
-  mapConfigLayerEntryIsGeoCore,
   MapConfigLayerEntry,
   layerEntryIsGroupLayer,
   CONST_LAYER_TYPES,
   TypeGeoviewLayerType,
+  mapConfigLayerEntryIsGeoCore,
+  mapConfigLayerEntryIsGeoPackage,
   mapConfigLayerEntryIsShapefile,
   TypeLayerEntryType,
   CONST_LAYER_ENTRY_TYPES,
@@ -59,7 +60,11 @@ export class Config {
           geoviewLayerEntry.geoviewLayerId = `${geoviewLayerEntry.geoviewLayerId}:${generateId(8)}`;
         }
 
-        if (mapConfigLayerEntryIsGeoCore(geoviewLayerEntry) || mapConfigLayerEntryIsShapefile(geoviewLayerEntry)) {
+        if (
+          mapConfigLayerEntryIsGeoCore(geoviewLayerEntry) ||
+          mapConfigLayerEntryIsShapefile(geoviewLayerEntry) ||
+          mapConfigLayerEntryIsGeoPackage(geoviewLayerEntry)
+        ) {
           //  Skip it, because we don't validate the GeoCore configuration anymore. Not the same way as typical GeoView Layer Types at least.
           // TODO Why not do GeoCore request here? Then could easily replace listOfLayerEntries and validate / process along with other layers
         } else if (Object.values(CONST_LAYER_TYPES).includes(geoviewLayerEntry.geoviewLayerType)) {
@@ -130,7 +135,6 @@ export class Config {
     switch (layerType) {
       case CONST_LAYER_TYPES.CSV:
       case CONST_LAYER_TYPES.GEOJSON:
-      case CONST_LAYER_TYPES.GEOPACKAGE:
       case CONST_LAYER_TYPES.OGC_FEATURE:
       case CONST_LAYER_TYPES.WFS:
       case CONST_LAYER_TYPES.WKB:

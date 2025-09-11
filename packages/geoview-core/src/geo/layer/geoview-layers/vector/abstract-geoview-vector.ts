@@ -31,6 +31,7 @@ import {
   LayerTooManyEsriFeatures,
 } from '@/core/exceptions/layer-exceptions';
 import { LayerEntryConfigVectorSourceURLNotDefinedError } from '@/core/exceptions/layer-entry-config-exceptions';
+import { WkbLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
 
 // Some constants
 const EXCLUDED_HEADERS_LAT = ['latitude', 'lat', 'y', 'ycoord', 'latitude|latitude', 'latitude | latitude'];
@@ -241,6 +242,30 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
             extent,
           })
         );
+      }
+
+      case CONST_LAYER_TYPES.WKB: {
+        if ((layerConfig as WkbLayerEntryConfig).source.geoPackageFeatures?.length) {
+          const { geoPackageFeatures, dataProjection } = (layerConfig as WkbLayerEntryConfig).source;
+          const features = geoPackageFeatures!.map(({ geom, properties }) => {
+            const feature = source.getFormat()!.readFeatures(geom, {
+              ...readOptions,
+              dataProjection,
+              featureProjection: projection,
+            })[0];
+            if (properties) feature.setProperties(properties);
+
+            return feature;
+          });
+
+          return features;
+        }
+
+        return source.getFormat()!.readFeatures(responseText, {
+          ...readOptions,
+          featureProjection: projection,
+          extent,
+        });
       }
 
       default:

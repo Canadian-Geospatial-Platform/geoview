@@ -16,6 +16,7 @@ import {
   TypeLayerEntryConfig,
   MapConfigLayerEntry,
   mapConfigLayerEntryIsGeoCore,
+  mapConfigLayerEntryIsGeoPackage,
   mapConfigLayerEntryIsShapefile,
   layerEntryIsGroupLayer,
   TypeGeoviewLayerType,
@@ -28,7 +29,6 @@ import {
   layerEntryIsXYZTilesFromConfig,
   layerEntryIsCSVFromConfig,
   layerEntryIsGeoJSONFromConfig,
-  layerEntryIsGeoPackageFromConfig,
   layerEntryIsOgcFeatureFromConfig,
   layerEntryIsWFSFromConfig,
   layerEntryIsWKBFromConfig,
@@ -44,7 +44,6 @@ import { EsriDynamicLayerEntryConfig } from './validation-classes/raster-validat
 import { EsriFeatureLayerEntryConfig } from './validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { EsriImageLayerEntryConfig } from './validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { GeoJSONLayerEntryConfig } from './validation-classes/vector-validation-classes/geojson-layer-entry-config';
-import { GeoPackageLayerEntryConfig } from './validation-classes/vector-validation-classes/geopackage-layer-config-entry';
 import { ImageStaticLayerEntryConfig } from './validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import { OgcFeatureLayerEntryConfig } from './validation-classes/vector-validation-classes/ogc-layer-entry-config';
 import { OgcWmsLayerEntryConfig } from './validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
@@ -190,7 +189,11 @@ export class ConfigValidation {
     for (let i = 0; i < listOfGeoviewLayerConfig.length && isValid; i++) {
       // If not GeoCore, validate the geoview configuration with the schema.
       // GeoCore doesn't have schema validation as part of the routine below, because they're not a TypeGeoviewLayerType anymore
-      if (!mapConfigLayerEntryIsGeoCore(listOfGeoviewLayerConfig[i]) && !mapConfigLayerEntryIsShapefile(listOfGeoviewLayerConfig[i])) {
+      if (
+        !mapConfigLayerEntryIsGeoCore(listOfGeoviewLayerConfig[i]) &&
+        !mapConfigLayerEntryIsShapefile(listOfGeoviewLayerConfig[i]) &&
+        !mapConfigLayerEntryIsGeoPackage(listOfGeoviewLayerConfig[i])
+      ) {
         const gvLayerConfigCasted = listOfGeoviewLayerConfig[i] as TypeGeoviewLayerConfig;
         isValid = this.#isValidTypeListOfLayerEntryConfig(
           gvLayerConfigCasted.geoviewLayerType,
@@ -227,7 +230,11 @@ export class ConfigValidation {
       const validConfigs: typeof listOfMapConfigLayerEntry = [];
 
       listOfMapConfigLayerEntry.forEach((geoviewLayerConfig) => {
-        if (mapConfigLayerEntryIsGeoCore(geoviewLayerConfig) || mapConfigLayerEntryIsShapefile(geoviewLayerConfig)) {
+        if (
+          mapConfigLayerEntryIsGeoCore(geoviewLayerConfig) ||
+          mapConfigLayerEntryIsShapefile(geoviewLayerConfig) ||
+          mapConfigLayerEntryIsGeoPackage(geoviewLayerConfig)
+        ) {
           // As-is we keep it
           validConfigs.push(geoviewLayerConfig);
         } else {
@@ -380,8 +387,6 @@ export class ConfigValidation {
         listOfLayerEntryConfig[i] = new WfsLayerEntryConfig(layerConfig);
       } else if (layerEntryIsOgcFeatureFromConfig(layerConfig)) {
         listOfLayerEntryConfig[i] = new OgcFeatureLayerEntryConfig(layerConfig);
-      } else if (layerEntryIsGeoPackageFromConfig(layerConfig)) {
-        listOfLayerEntryConfig[i] = new GeoPackageLayerEntryConfig(layerConfig);
       } else if (layerEntryIsGeoJSONFromConfig(layerConfig)) {
         listOfLayerEntryConfig[i] = new GeoJSONLayerEntryConfig(layerConfig);
       } else if (layerEntryIsCSVFromConfig(layerConfig)) {

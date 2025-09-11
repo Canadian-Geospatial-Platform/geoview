@@ -294,12 +294,14 @@ function createStrokeOptions(settings: TypeSimpleSymbolVectorConfig | TypeLineSt
     // eslint-disable-next-line no-param-reassign
     else settings.stroke.color = getDefaultColor(1, true);
   }
+
   const strokeOptions: StrokeOptions = {
     color: settings.stroke?.color,
     width: settings.stroke?.width,
-    lineCap: 'butt',
-    lineJoin: 'bevel',
-    lineDash: lineDashSettings[settings.stroke?.lineStyle !== undefined ? settings.stroke?.lineStyle : 'solid'],
+    lineCap: settings.stroke?.lineCap || 'butt',
+    lineJoin: settings.stroke?.lineJoin || 'bevel',
+    lineDash:
+      settings.stroke?.lineDash || lineDashSettings[settings.stroke?.lineStyle !== undefined ? settings.stroke?.lineStyle : 'solid'],
   };
   return strokeOptions;
 }

@@ -365,6 +365,7 @@ export const CONFIG_PROXY_URL = 'https://maps.canada.ca/wmsproxy/ws/wmsproxy/exe
 export const CONFIG_METADATA_RECORDS_URL = '';
 
 export const CONFIG_GEOCORE_TYPE = 'geoCore';
+export const CONFIG_GEOPACKAGE_TYPE = 'GeoPackage';
 export const CONFIG_SHAPEFILE_TYPE = 'shapefile';
 
 // valid zoom levels from each projection
@@ -575,6 +576,12 @@ export interface TypeLineStringVectorConfig extends TypeBaseVectorGeometryConfig
 export type TypeStrokeSymbolConfig = {
   /** Color to use for vector features. */
   color?: string;
+  /** Line cap style. */
+  lineCap?: 'butt' | 'round' | 'square';
+  /** Line dash pattern. */
+  lineDash?: number[];
+  /** Line join style. */
+  lineJoin?: 'bevel' | 'round' | 'miter';
   /** Line style to use for the feature. */
   lineStyle?: TypeLineStyle;
   /** Width to use for the stroke */

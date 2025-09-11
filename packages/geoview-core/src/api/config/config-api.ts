@@ -6,6 +6,7 @@ import { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config'
 import {
   DEFAULT_MAP_FEATURE_CONFIG,
   CONFIG_GEOCORE_TYPE,
+  CONFIG_GEOPACKAGE_TYPE,
   CONFIG_SHAPEFILE_TYPE,
   TypeBasemapOptions,
   TypeDisplayLanguage,
@@ -30,8 +31,9 @@ import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 
 import { isJsonString, isValidUUID, removeCommentsFromJSON } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
-import { UUIDmapConfigReader } from '@/core/utils/config/reader/uuid-config-reader';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
+import { UUIDmapConfigReader } from '@/core/utils/config/reader/uuid-config-reader';
+import { GeoPackageReader } from '@/core/utils/config/reader/geopackage-reader';
 import { ShapefileReader } from '@/core/utils/config/reader/shapefile-reader';
 
 import { LayerApi } from '@/geo/layer/layer';
@@ -81,7 +83,7 @@ export class ConfigApi {
 
     if (/.(?:GEO)?JSON(?:$|\?)/i.test(url)) return CONST_LAYER_TYPES.GEOJSON;
 
-    if (upperUrl.endsWith('.GPKG')) return CONST_LAYER_TYPES.GEOPACKAGE;
+    if (upperUrl.endsWith('.GPKG')) return CONFIG_GEOPACKAGE_TYPE;
 
     if (upperUrl.includes('VECTORTILESERVER')) return CONST_LAYER_TYPES.VECTOR_TILES;
 
@@ -451,6 +453,13 @@ export class ConfigApi {
           language,
           mapId
         );
+      case 'GeoPackage':
+        // For GeoPackage, we build a WKB config
+        return await GeoPackageReader.createLayerConfigFromGeoPackage({
+          geoviewLayerId,
+          geoviewLayerType: 'GeoPackage',
+          metadataAccessPath: layerURL,
+        });
       case 'shapefile':
         // For Shapefile, we build the Config from GeoJson
         return await ShapefileReader.convertShapefileConfigToGeoJson({
