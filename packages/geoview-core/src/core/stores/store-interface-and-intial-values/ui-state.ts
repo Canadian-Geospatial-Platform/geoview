@@ -4,7 +4,7 @@ import {
   TypeValidFooterBarTabsCoreProps,
   TypeValidMapCorePackageProps,
   TypeValidNavBarProps,
-} from '@/api/config/types/map-schema-types';
+} from '@/api/types/map-schema-types';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';

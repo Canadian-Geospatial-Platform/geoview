@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { animated } from '@react-spring/web';
 import { Box, List, ListItem, ListItemButton, Paper, Tooltip, Typography, ProgressBar } from '@/ui';
 
-import { TypeFeatureInfoEntry, TypeQueryStatus } from '@/api/config/types/map-schema-types';
-import { TypeLayerStatus } from '@/api/config/types/layer-schema-types';
+import { TypeFeatureInfoEntry, TypeQueryStatus } from '@/api/types/map-schema-types';
+import { TypeLayerStatus } from '@/api/types/layer-schema-types';
 import { getSxClasses } from './layer-list-style';
 import { LayerIcon } from './layer-icon';
 import { logger } from '@/core/utils/logger';

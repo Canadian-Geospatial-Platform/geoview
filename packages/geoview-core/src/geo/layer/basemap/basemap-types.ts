@@ -1,7 +1,7 @@
 import { OSM, VectorTile, XYZ } from 'ol/source';
 import { Extent } from 'ol/extent';
-import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
-import { TypeLod } from '@/api/config/types/layer-schema-types';
+import { TypeDisplayLanguage } from '@/api/types/map-schema-types';
+import { TypeLod } from '@/api/types/layer-schema-types';
 import { TypeProjection } from '@/geo/utils/projection';
 
 /**

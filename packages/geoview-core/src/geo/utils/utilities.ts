@@ -18,8 +18,8 @@ import { Projection } from '@/geo/utils/projection';
 
 import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
-import { CONFIG_PROXY_URL, TypeLayerStyleConfig, TypeValidMapProjectionCodes } from '@/api/config/types/map-schema-types';
-import { CONST_LAYER_TYPES, TypeMetadataWMS } from '@/api/config/types/layer-schema-types';
+import { CONFIG_PROXY_URL, TypeLayerStyleConfig, TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
+import { CONST_LAYER_TYPES, TypeMetadataWMS } from '@/api/types/layer-schema-types';
 
 import { TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
 import { TypeMapMouseInfo } from '@/geo/map/map-viewer';

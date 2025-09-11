@@ -2,28 +2,19 @@ import BaseLayer from 'ol/layer/Base';
 import { Extent } from 'ol/extent';
 import { GeoJSONObject } from 'ol/format/GeoJSON';
 
-import { GeoCore } from '@/geo/layer/other/geocore';
-import { GeometryApi } from '@/geo/layer/geometry/geometry';
-import { FeatureHighlight } from '@/geo/map/feature-highlight';
+import { GeoCore } from '@/api/config/geocore';
+import { ConfigValidation } from '@/api/config/config-validation';
 
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
-import { ConfigValidation } from '@/core/utils/config/config-validation';
 import { generateId, isValidUUID, whenThisThen } from '@/core/utils/utilities';
 import {
   ConfigBaseClass,
   LayerStatusChangedDelegate as ConfigLayerStatusChangedDelegate,
   LayerStatusChangedEvent as ConfigLayerStatusChangedEvent,
-} from '@/core/utils/config/validation-classes/config-base-class';
+} from '@/api/config/validation-classes/config-base-class';
 import { logger } from '@/core/utils/logger';
-import {
-  AbstractGeoViewLayer,
-  LayerEntryProcessedEvent,
-  LayerGroupCreatedEvent,
-  LayerEntryRegisterInitEvent,
-  LayerGVCreatedEvent,
-} from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeDisplayLanguage, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
+import { TypeDisplayLanguage, TypeOutfieldsType } from '@/api/types/map-schema-types';
 import {
   MapConfigLayerEntry,
   TypeGeoviewLayerConfig,
@@ -45,7 +36,16 @@ import {
   layerConfigIsOgcFeatureFromType,
   layerConfigIsWFSFromType,
   layerConfigIsWKBFromType,
-} from '@/api/config/types/layer-schema-types';
+} from '@/api/types/layer-schema-types';
+import {
+  AbstractGeoViewLayer,
+  LayerEntryProcessedEvent,
+  LayerGroupCreatedEvent,
+  LayerEntryRegisterInitEvent,
+  LayerGVCreatedEvent,
+} from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { GeometryApi } from '@/geo/layer/geometry/geometry';
+import { FeatureHighlight } from '@/geo/map/feature-highlight';
 import { GeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
 import { GeoPackage } from '@/geo/layer/geoview-layers/vector/geopackage';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
@@ -97,8 +97,8 @@ import { getExtentUnion, getZoomFromScale } from '@/geo/utils/utilities';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { MapViewer } from '@/geo/map/map-viewer';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
 import { GeochartEventProcessor } from '@/api/event-processors/event-processor-children/geochart-event-processor';
 import { SwiperEventProcessor } from '@/api/event-processors/event-processor-children/swiper-event-processor';
@@ -108,7 +108,7 @@ import { TypeLegendItem } from '@/core/components/layers/types';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { LayerGeoCoreError } from '@/core/exceptions/geocore-exceptions';
-import { ShapefileReader } from '@/core/utils/config/reader/shapefile-reader';
+import { ShapefileReader } from '@/api/config/reader/shapefile-reader';
 
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS

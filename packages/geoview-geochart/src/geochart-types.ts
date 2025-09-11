@@ -1,5 +1,5 @@
 import { GeoChartConfig, ChartType } from 'geochart';
-import { GeoViewGeoChartConfig as GeoViewGeoChartCoreConfig } from 'geoview-core/core/utils/config/reader/uuid-config-reader';
+import { GeoViewGeoChartConfig as GeoViewGeoChartCoreConfig } from 'geoview-core/api/config/reader/uuid-config-reader';
 
 /**
  * Definition of options used for the layers definition in the plugin.

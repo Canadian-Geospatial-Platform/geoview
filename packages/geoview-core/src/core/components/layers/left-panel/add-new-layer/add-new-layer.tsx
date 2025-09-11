@@ -19,7 +19,7 @@ import { useAppDisabledLayerTypes, useAppDisplayLanguage } from '@/core/stores/s
 import { ConfigApi } from '@/api/config/config-api';
 import { logger } from '@/core/utils/logger';
 import { generateId, getLocalizedMessage, isValidUUID } from '@/core/utils/utilities';
-import { Config } from '@/core/utils/config/config';
+import { Config } from '@/api/config/config';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
@@ -30,11 +30,11 @@ import {
   TypeGeoviewLayerConfig,
   TypeGeoviewLayerType,
   TypeInitialGeoviewLayerType,
-} from '@/api/config/types/layer-schema-types';
+} from '@/api/types/layer-schema-types';
 
 import { UtilAddLayer } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
 import { AddLayerTree } from '@/core/components/layers/left-panel/add-new-layer/add-layer-tree';
-import { ShapefileReader } from '@/core/utils/config/reader/shapefile-reader';
+import { ShapefileReader } from '@/api/config/reader/shapefile-reader';
 
 const sxClasses = {
   buttonGroup: {

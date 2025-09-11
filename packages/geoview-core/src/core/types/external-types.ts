@@ -12,7 +12,7 @@ export * from '@/core/containers/focus-trap';
 export * from '@/core/components/common/hooks/use-html-to-react';
 export * from '@/core/containers/shell';
 export * from '@/core/translation/i18n';
-export * from '@/core/utils/config/config';
+export * from '@/api/config/config';
 export * from '@/core/utils/constant';
 export * from '@/core/utils/date-mgt';
 export * from '@/core/utils/utilities';

@@ -23,7 +23,7 @@ import { logger } from '@/core/utils/logger';
 import { useFeatureFieldInfos } from './hooks';
 import { CONTAINER_TYPE, LAYER_STATUS, TABS } from '@/core/utils/constant';
 import { MappedLayerDataType } from './data-table-types';
-import { DEFAULT_APPBAR_CORE } from '@/api/config/types/map-schema-types';
+import { DEFAULT_APPBAR_CORE } from '@/api/types/map-schema-types';
 import { TypeContainerBox } from '@/core/types/global-types';
 import DataSkeleton from './data-skeleton';
 

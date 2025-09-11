@@ -11,10 +11,10 @@ import { getUid, Map as OLMap } from 'ol';
 import cloneDeep from 'lodash/cloneDeep';
 import { TimeDimension, DateMgt, TypeDateFragments } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
-import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
+import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import {
   TypeLayerStyleConfig,
@@ -26,13 +26,13 @@ import {
   TypeStyleGeometry,
   TypeOutfieldsType,
   TypeOutfields,
-} from '@/api/config/types/map-schema-types';
+} from '@/api/types/map-schema-types';
 import {
   TypeLayerMetadataWMS,
   TypeLayerMetadataFields,
   TypeLayerMetadataEsri,
   TypeLayerMetadataVector,
-} from '@/api/config/types/layer-schema-types';
+} from '@/api/types/layer-schema-types';
 import { getLegendStyles, getFeatureImageSource, processStyle } from '@/geo/utils/renderer/geoview-renderer';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';

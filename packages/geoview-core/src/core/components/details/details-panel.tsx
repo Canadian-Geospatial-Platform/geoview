@@ -12,7 +12,7 @@ import {
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useMapStoreActions, useMapVisibleLayers, useMapClickCoordinates } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
-import { TypeFeatureInfoEntry, TypeLayerData } from '@/api/config/types/map-schema-types';
+import { TypeFeatureInfoEntry, TypeLayerData } from '@/api/types/map-schema-types';
 
 import { LayerListEntry, Layout } from '@/core/components/common';
 import { checkSelectedLayerPathList } from '@/core/components/common/comp-common';

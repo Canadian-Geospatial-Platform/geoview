@@ -5,7 +5,7 @@ import { Box, ProgressBar } from '@/ui';
 import { useUIActiveAppBarTab, useUIActiveTrapGeoView, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { GeolocatorResult } from '@/core/components/geolocator/geolocator-result';
 import { getSxClasses } from '@/core/components/geolocator/geolocator-style';
-import { DEFAULT_APPBAR_CORE } from '@/api/config/types/map-schema-types';
+import { DEFAULT_APPBAR_CORE } from '@/api/types/map-schema-types';
 import { FocusTrapContainer } from '@/core/components/common';
 import { logger } from '@/core/utils/logger';
 import { useGeolocator } from '@/core/components/geolocator/hooks/use-geolocator';

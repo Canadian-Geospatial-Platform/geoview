@@ -8,7 +8,7 @@ import { fromExtent } from 'ol/geom/Polygon';
 import { Coordinate } from 'ol/coordinate';
 import { Color } from 'ol/color';
 
-import { TypeHighlightColors, TypeFeatureInfoEntry } from '@/api/config/types/map-schema-types';
+import { TypeHighlightColors, TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import { logger } from '@/core/utils/logger';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { PointMarkers } from './point-markers';

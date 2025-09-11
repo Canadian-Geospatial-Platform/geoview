@@ -1,6 +1,6 @@
 import { useStore } from 'zustand';
-import { GeoViewGeoChartConfig } from '@/core/utils/config/reader/uuid-config-reader';
-import { TypeFeatureInfoEntry, TypeQueryStatus, TypeResultSet, TypeResultSetEntry } from '@/api/config/types/map-schema-types';
+import { GeoViewGeoChartConfig } from '@/api/config/reader/uuid-config-reader';
+import { TypeFeatureInfoEntry, TypeQueryStatus, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
 
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';

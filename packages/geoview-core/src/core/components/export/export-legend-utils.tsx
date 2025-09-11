@@ -6,7 +6,7 @@ import { TypeLegendLayer } from '@/core/components/layers/types';
 import { useTimeSliderLayers } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 
 import { logger } from '@/core/utils/logger';
-import { CONST_LAYER_TYPES } from '@/api/config/types/layer-schema-types';
+import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { getSxClasses } from './export-modal-style';
 import { DateMgt } from '@/core/utils/date-mgt';
 

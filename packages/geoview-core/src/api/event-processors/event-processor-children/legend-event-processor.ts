@@ -1,12 +1,12 @@
-import { Extent, TypeLayerStyleSettings, TypeFeatureInfoEntry, TypeStyleGeometry } from '@/api/config/types/map-schema-types';
+import { Extent, TypeLayerStyleSettings, TypeFeatureInfoEntry, TypeStyleGeometry } from '@/api/types/map-schema-types';
 import { TimeDimension } from '@/core/utils/date-mgt';
-import { CONST_LAYER_TYPES, TypeGeoviewLayerType, TypeLayerControls } from '@/api/config/types/layer-schema-types';
+import { CONST_LAYER_TYPES, TypeGeoviewLayerType, TypeLayerControls } from '@/api/types/layer-schema-types';
 import { TypeLegendLayer, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import { TypeWmsLegend, isImageStaticLegend, isVectorLegend, isWmsLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
+import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { ILayerState, TypeLegend, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { LayerNotFoundError, LayerWrongTypeError } from '@/core/exceptions/layer-exceptions';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';

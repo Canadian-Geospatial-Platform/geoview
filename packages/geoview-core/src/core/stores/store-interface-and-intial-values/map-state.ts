@@ -16,7 +16,7 @@ import {
   TypeFeatureInfoEntry,
   TypePointMarker,
   MAP_CENTER,
-} from '@/api/config/types/map-schema-types';
+} from '@/api/types/map-schema-types';
 import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { Projection } from '@/geo/utils/projection';

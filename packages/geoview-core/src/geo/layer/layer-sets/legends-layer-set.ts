@@ -1,7 +1,7 @@
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
-import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
+import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { logger } from '@/core/utils/logger';
-import { TypeLayerStatus } from '@/api/config/types/layer-schema-types';
+import { TypeLayerStatus } from '@/api/types/layer-schema-types';
 import { AbstractLayerSet, PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { TypeLegend, TypeLegendResultSet, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractGVLayer, StyleChangedDelegate, StyleChangedEvent } from '@/geo/layer/gv-layers/abstract-gv-layer';
@@ -11,7 +11,7 @@ import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { LayerApi } from '@/geo/layer/layer';
-import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 
 /**
  * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing

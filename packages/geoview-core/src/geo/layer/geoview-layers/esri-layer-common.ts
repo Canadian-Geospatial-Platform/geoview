@@ -3,9 +3,9 @@ import { Extent } from 'ol/extent';
 import { validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { TimeDimensionESRI, DateMgt } from '@/core/utils/date-mgt';
-import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
-import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
+import { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
+import { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
+import { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import {
   TypeFeatureInfoEntryPartial,
   TypeStyleGeometry,
@@ -13,17 +13,17 @@ import {
   rangeDomainType,
   TypeOutfields,
   TypeOutfieldsType,
-} from '@/api/config/types/map-schema-types';
+} from '@/api/types/map-schema-types';
 import {
   CONST_LAYER_TYPES,
   TypeLayerMetadataEsri,
   layerEntryIsEsriFeatureFromConfig,
   layerEntryIsEsriDynamicFromConfig,
   layerEntryIsEsriImageFromConfig,
-} from '@/api/config/types/layer-schema-types';
+} from '@/api/types/layer-schema-types';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
-import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
+import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import {
   esriConvertEsriGeometryTypeToOLGeometryType,
   esriParseFeatureInfoEntries,

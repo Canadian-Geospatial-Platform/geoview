@@ -1,15 +1,11 @@
 import { Map as OLMap } from 'ol';
 
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { QueryType, TypeFeatureInfoEntry, TypeLocation, TypeResultSet, TypeResultSetEntry } from '@/api/config/types/map-schema-types';
-import { TypeLayerStatus } from '@/api/config/types/layer-schema-types';
+import { QueryType, TypeFeatureInfoEntry, TypeLocation, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
+import { TypeLayerStatus } from '@/api/types/layer-schema-types';
 import { generateId, whenThisThen } from '@/core/utils/utilities';
-import {
-  ConfigBaseClass,
-  LayerStatusChangedDelegate,
-  LayerStatusChangedEvent,
-} from '@/core/utils/config/validation-classes/config-base-class';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { ConfigBaseClass, LayerStatusChangedDelegate, LayerStatusChangedEvent } from '@/api/config/validation-classes/config-base-class';
+import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { LayerApi } from '@/geo/layer/layer';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';

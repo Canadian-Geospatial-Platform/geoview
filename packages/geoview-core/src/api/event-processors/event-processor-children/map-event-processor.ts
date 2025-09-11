@@ -22,14 +22,14 @@ import {
   TypeFeatureInfoEntry,
   TypeMapConfig,
   TypeMapFeaturesInstance,
-} from '@/api/config/types/map-schema-types';
+} from '@/api/types/map-schema-types';
 import {
   CONST_LAYER_TYPES,
   MapConfigLayerEntry,
   TypeLayerInitialSettings,
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
-} from '@/api/config/types/layer-schema-types';
+} from '@/api/types/layer-schema-types';
 import { api } from '@/app';
 import { LayerApi } from '@/geo/layer/layer';
 import { MapViewer, TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer';
@@ -53,8 +53,8 @@ import { LegendEventProcessor } from '@/api/event-processors/event-processor-chi
 import { IMapState, TypeOrderedLayerInfo, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { getAppCrosshairsActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { TypeHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
-import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
@@ -64,7 +64,7 @@ import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { InvalidExtentError } from '@/core/exceptions/geoview-exceptions';
 import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-vector-tile';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 
 // GV The paradigm when working with MapEventProcessor vs MapState goes like this:
 // GV MapState provides: 'state values', 'actions' and 'setterActions'.

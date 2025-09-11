@@ -11,15 +11,15 @@ import {
   TypeOfServer,
   TypeMetadataWMS,
   TypeMetadataWMSCapabilityLayer,
-} from '@/api/config/types/layer-schema-types';
+} from '@/api/types/layer-schema-types';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { CallbackNewMetadataDelegate, getWMSServiceMetadata, validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
 import {
   OgcWmsLayerEntryConfig,
   OgcWmsLayerEntryConfigProps,
-} from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { GroupLayerEntryConfig, GroupLayerEntryConfigProps } from '@/core/utils/config/validation-classes/group-layer-entry-config';
-import { ConfigBaseClass, TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
+} from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import { GroupLayerEntryConfig, GroupLayerEntryConfigProps } from '@/api/config/validation-classes/group-layer-entry-config';
+import { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { CancelledError, PromiseRejectErrorWrapper } from '@/core/exceptions/core-exceptions';
 import { LayerDataAccessPathMandatoryError, LayerNoCapabilitiesError } from '@/core/exceptions/layer-exceptions';
 import {
@@ -29,7 +29,7 @@ import {
 import { deepMergeObjects } from '@/core/utils/utilities';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.WMS;

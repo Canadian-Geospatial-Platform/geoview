@@ -5,7 +5,7 @@
 
 import { Extent } from 'ol/extent';
 import { getLocalizedMessage } from '@/core/utils/utilities';
-import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
+import { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import { logger } from '@/core/utils/logger';
 
 /**

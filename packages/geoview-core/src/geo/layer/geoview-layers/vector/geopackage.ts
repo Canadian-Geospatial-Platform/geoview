@@ -16,17 +16,17 @@ import {
   TypePolygonVectorConfig,
   TypeFillStyle,
   TypeOutfields,
-} from '@/api/config/types/map-schema-types';
+} from '@/api/types/map-schema-types';
 import {
   CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
-} from '@/api/config/types/layer-schema-types';
-import { GeoPackageLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geopackage-layer-config-entry';
-import { TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
-import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
-import { GroupLayerEntryConfig, GroupLayerEntryConfigProps } from '@/core/utils/config/validation-classes/group-layer-entry-config';
+} from '@/api/types/layer-schema-types';
+import { GeoPackageLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/geopackage-layer-config-entry';
+import { TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
+import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
+import { GroupLayerEntryConfig, GroupLayerEntryConfigProps } from '@/api/config/validation-classes/group-layer-entry-config';
 import { logger } from '@/core/utils/logger';
 import { LayerNotCreatedError } from '@/core/exceptions/layer-exceptions';
 import { formatError, NotImplementedError, NotSupportedError } from '@/core/exceptions/core-exceptions';
