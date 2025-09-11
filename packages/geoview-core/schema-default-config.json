@@ -30,7 +30,10 @@
   "externalPackages": [],
   "serviceUrls": {
     "geocoreUrl": "https://geocore.api.geo.ca",
-    "geolocator": "https://geolocator.api.geo.ca?keys=geonames,nominatim,locate"
+    "geolocator": "https://geolocator.api.geo.ca?keys=geonames,nominatim,locate",
+    "utmZoneUrl": "https://geogratis.gc.ca/services/delimitation/en/utmzone",
+    "ntsSheetUrl": "https://geogratis.gc.ca/services/delimitation/en/nts",
+    "altitudeUrl": "https://geogratis.gc.ca/services/elevation/cdem/altitude"
   },
   "version": "1.0"
 }
