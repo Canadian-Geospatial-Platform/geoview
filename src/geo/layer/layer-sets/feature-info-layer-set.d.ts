@@ -1,6 +1,6 @@
 import { Coordinate } from 'ol/coordinate';
 import { EventDelegateBase } from '@/api/events/event-helper';
-import { TypeResultSet } from '@/api/config/types/map-schema-types';
+import { TypeResultSet } from '@/api/types/map-schema-types';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { EventType, AbstractLayerSet, PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { LayerApi } from '@/geo/layer/layer';

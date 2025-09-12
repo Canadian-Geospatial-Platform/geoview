@@ -1,4 +1,4 @@
-import { TypeGeoviewLayerConfig } from '@/api/config/types/map-schema-types';
+import { TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
 export interface AddLayerTreeProps {
     layerTree: TypeGeoviewLayerConfig;
     onSelectedItemsChange(items: string[]): void;

@@ -47,12 +47,20 @@ export declare class Fetch {
      * @param {RequestInit?} init - The optional initialization parameters for the fetch.
      * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
      * @returns {Promise<string>} The fetched text response.
-     * @throws {ResponseError} If the response is not OK (non-2xx).
      * @throws {ResponseEmptyError} If the JSON response is empty.
+     */
+    static fetchText(url: string, init?: RequestInit, timeoutMs?: number): Promise<string>;
+    /**
+     * Fetches a url for an array buffer response.
+     * @param {string} url - The url to fetch.
+     * @param {RequestInit?} init - The optional initialization parameters for the fetch.
+     * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
+     * @returns {Promise<ArrayBuffer>} The fetched array buffer response.
+     * @throws {ResponseError} If the response is not OK (non-2xx).
      * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
      * @throws {Error} For any other unexpected failures.
      */
-    static fetchText(url: string, init?: RequestInit, timeoutMs?: number): Promise<string>;
+    static fetchArrayBuffer(url: string, init?: RequestInit, timeoutMs?: number): Promise<ArrayBuffer>;
     /**
      * Fetches a url for a blob response.
      * @param {string} url - The url to fetch.

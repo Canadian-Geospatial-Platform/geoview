@@ -1,1 +1,0 @@
-{"version":3,"file":"shapefile-reader.d.ts","sourceRoot":"","sources":["../../../../../../src/core/utils/config/reader/shapefile-reader.ts"],"names":[],"mappings":"AACA,OAAO,EAA8C,oBAAoB,EAAE,MAAM,qCAAqC,CAAC;AACvH,OAAO,EAAE,sBAAsB,EAAE,MAAM,2CAA2C,CAAC;AAInF;;;;GAIG;AACH,qBAAa,eAAe;IAC1B;;;;OAIG;WACU,+BAA+B,CAAC,WAAW,EAAE,oBAAoB,GAAG,OAAO,CAAC,sBAAsB,CAAC;CAuEjH"}

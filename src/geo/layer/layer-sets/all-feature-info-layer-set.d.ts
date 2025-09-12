@@ -1,4 +1,4 @@
-import { QueryType, TypeFeatureInfoEntry } from '@/api/config/types/map-schema-types';
+import { QueryType, TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { AbstractLayerSet, PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { TypeAllFeatureInfoResultSet, TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';

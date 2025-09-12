@@ -11,9 +11,10 @@ import { Coordinate } from 'ol/coordinate';
 import View from 'ol/View';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeLayerStyleConfig, TypeMetadataWMS, TypeValidMapProjectionCodes } from '@/api/config/types/map-schema-types';
+import { TypeLayerStyleConfig, TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
+import { TypeMetadataWMS } from '@/api/types/layer-schema-types';
 import { TypeMapMouseInfo } from '@/geo/map/map-viewer';
-export declare const layerTypes: Record<"CSV" | "WKB" | "ESRI_DYNAMIC" | "ESRI_FEATURE" | "ESRI_IMAGE" | "IMAGE_STATIC" | "GEOJSON" | "GEOPACKAGE" | "XYZ_TILES" | "VECTOR_TILES" | "OGC_FEATURE" | "WFS" | "WMS", import("@/api/config/types/map-schema-types").TypeGeoviewLayerType>;
+export declare const layerTypes: Record<"CSV" | "WKB" | "ESRI_DYNAMIC" | "ESRI_FEATURE" | "ESRI_IMAGE" | "IMAGE_STATIC" | "GEOJSON" | "XYZ_TILES" | "VECTOR_TILES" | "OGC_FEATURE" | "WFS" | "WMS", import("@/api/types/layer-schema-types").TypeGeoviewLayerType>;
 /** The type for the function callback for getWMSServiceMetadata() */
 export type CallbackNewMetadataDelegate = (proxyUsed: string) => void;
 /**

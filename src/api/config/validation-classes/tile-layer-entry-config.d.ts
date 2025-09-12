@@ -1,0 +1,12 @@
+import { TypeSourceTileInitialConfig } from '@/api/types/layer-schema-types';
+import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config';
+/**
+ * Type used to define a GeoView image layer to display on the map.
+ */
+export declare abstract class TileLayerEntryConfig extends AbstractBaseLayerEntryConfig {
+    /** Layer entry data type. */
+    entryType: import("@/api/types/layer-schema-types").TypeLayerEntryType;
+    /** Initial settings to apply to the GeoView image layer source at creation time. */
+    source: TypeSourceTileInitialConfig;
+}
+//# sourceMappingURL=tile-layer-entry-config.d.ts.map

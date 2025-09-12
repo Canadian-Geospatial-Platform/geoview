@@ -1,7 +1,9 @@
 import { Map as OLMap } from 'ol';
 import { EventDelegateBase } from '@/api/events/event-helper';
-import { QueryType, TypeFeatureInfoEntry, TypeLayerEntryConfig, TypeLayerStatus, TypeLocation, TypeResultSet, TypeResultSetEntry } from '@/api/config/types/map-schema-types';
-import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
+import { QueryType, TypeFeatureInfoEntry, TypeLocation, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
+import { TypeLayerStatus } from '@/api/types/layer-schema-types';
+import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { LayerApi } from '@/geo/layer/layer';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
@@ -150,12 +152,12 @@ export declare abstract class AbstractLayerSet {
     /**
      * Align records with informatiom provided by OutFields from layer config.
      * This will update fields in and delete unwanted fields from the arrayOfRecords
-     * @param {TypeLayerEntryConfig} layerPath - Path of the layer to get config from.
+     * @param {AbstractBaseLayerEntryConfig} layerEntryConfig - The layer entry config object.
      * @param {TypeFeatureInfoEntry[]} arrayOfRecords - Features to delete fields from.
      * @protected
      * @static
      */
-    protected static alignRecordsWithOutFields(layerEntryConfig: TypeLayerEntryConfig, arrayOfRecords: TypeFeatureInfoEntry[]): void;
+    protected static alignRecordsWithOutFields(layerEntryConfig: AbstractBaseLayerEntryConfig, arrayOfRecords: TypeFeatureInfoEntry[]): void;
     /**
      * Registers a callback to be executed whenever the layer set is updated.
      * @param {LayerSetUpdatedDelegate} callback - The callback function

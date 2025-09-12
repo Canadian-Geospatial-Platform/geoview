@@ -1,5 +1,5 @@
 import { Extent } from 'ol/extent';
-import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
+import { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 /**
  * Base error for GeoView that includes the map ID and supports localized messages.
  * @extends {Error}

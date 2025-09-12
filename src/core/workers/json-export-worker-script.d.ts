@@ -1,4 +1,4 @@
-import { SerializedGeometry } from '@/api/config/types/map-schema-types';
+import { SerializedGeometry } from '@/api/types/map-schema-types';
 /**
  * This worker script is designed to be used with the JsonExportWorker class.
  * It handles the transformation of GeoJSON features from one coordinate system to another.

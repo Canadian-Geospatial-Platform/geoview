@@ -7,7 +7,7 @@ import { MapViewer } from '@/geo/map/map-viewer';
 import * as GeoUtilities from '@/geo/utils/utilities';
 import { LayerApi } from '@/geo/layer/layer';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { TypeMapFeaturesInstance } from '@/api/config/types/map-schema-types';
+import { TypeMapFeaturesInstance } from '@/api/types/map-schema-types';
 /**
  * Class used to handle api calls (events, functions etc...)
  *

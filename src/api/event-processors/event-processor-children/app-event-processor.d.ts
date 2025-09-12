@@ -1,4 +1,4 @@
-import { TypeDisplayLanguage, TypeDisplayTheme } from '@/api/config/types/map-schema-types';
+import { TypeDisplayLanguage, TypeDisplayTheme } from '@/api/types/map-schema-types';
 import { IAppState } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { NotificationDetailsType } from '@/core/components';

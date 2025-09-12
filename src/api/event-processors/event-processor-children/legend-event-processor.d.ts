@@ -1,4 +1,5 @@
-import { Extent, TypeFeatureInfoEntry, TypeTemporalDimension } from '@/api/config/types/map-schema-types';
+import { Extent, TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
+import { TimeDimension } from '@/core/utils/date-mgt';
 import { TypeLegendLayer, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import { ILayerState, TypeLegend, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
@@ -81,20 +82,20 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
      */
     static getExtentFromFeatures(mapId: string, layerPath: string, objectIds: string[], outfield?: string): Promise<Extent>;
     /**
-     * Retrieves the temporal dimension information for a specific layer.
+     * Retrieves the time dimension information for a specific layer.
      *
      * @param {string} mapId - The unique identifier of the map instance.
      * @param {string} layerPath - The path to the layer.
-     * @returns {TypeTemporalDimension | undefined} - The temporal dimension information of the layer, or `undefined` if not available.
+     * @returns {TimeDimension | undefined} - The temporal dimension information of the layer, or `undefined` if not available.
      *
      * @description
-     * This method fetches the Geoview layer for the specified layer path and checks if it has a `getTemporalDimension` method.
+     * This method fetches the Geoview layer for the specified layer path and checks if it has a `getTimeDimension` method.
      * If the method exists, it retrieves the temporal dimension information for the layer.
      * If the layer doesn't support temporal dimensions, the method returns `undefined`.
      *
      * @throws {LayerNotFoundError} - If the specified layer cannot be found.
      */
-    static getLayerTemporalDimension(mapId: string, layerPath: string): TypeTemporalDimension | undefined;
+    static getLayerTimeDimension(mapId: string, layerPath: string): TimeDimension | undefined;
     static getLayerIconImage(layerLegend: TypeLegend | null): TypeLegendLayerItem[] | undefined;
     /**
      * This method propagates the information stored in the legend layer set to the store.

@@ -2,7 +2,7 @@ import { Extent } from 'ol/extent';
 import BaseLayer from 'ol/layer/Base';
 import OLMap from 'ol/Map';
 import { OverviewMap as OLOverviewMap } from 'ol/control';
-import { TypeBasemapOptions, TypeValidMapProjectionCodes, TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
+import { TypeBasemapOptions, TypeValidMapProjectionCodes, TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import { TypeBasemapProps, BasemapCreationList } from '@/geo/layer/basemap/basemap-types';
 import { EventDelegateBase } from '@/api/events/event-helper';
 import { MapViewer } from '@/geo/map/map-viewer';

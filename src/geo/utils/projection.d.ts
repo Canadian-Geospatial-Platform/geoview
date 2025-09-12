@@ -109,6 +109,13 @@ export declare abstract class Projection {
      */
     static transformToLonLat(coordinate: Coordinate, projection: OLProjection): Coordinate;
     /**
+     * Function for converting a coordinate to a UTM Northing / Easting
+     * @param {Coordinate} coordinate - The coordinate to be converted
+     * @param {string} utmZone - The utm zone the return coordinates will be in
+     * @returns {Coordinate} The returned coordinates in UTM Northing / Easting
+     */
+    static transformToUTMNorthingEasting(coordinate: Coordinate, utmZone: string): Coordinate;
+    /**
      * Fetches definitions for unsupported projections and adds them.
      * @param {TypeProjection} projection - Object containing wkid and possibly latestWkid from service metadata.
      */

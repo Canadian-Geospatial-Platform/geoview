@@ -1,7 +1,7 @@
 import VectorSource from 'ol/source/Vector';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
-import { OgcFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
-import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
+import { OgcFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
+import { TypeOutfieldsType } from '@/api/types/map-schema-types';
 /**
  * Manages an OGC-Feature layer.
  *

@@ -73,7 +73,7 @@ export type TypeTimeSliderProps = {
     locked: boolean;
     reversed: boolean;
     defaultValue: string;
-    temporalDimension: TimeDimension;
+    timeDimension: TimeDimension;
 };
 export declare const useTimeSliderLayers: () => TimeSliderLayerSet | undefined;
 export declare const useTimeSliderSelectedLayerPath: () => string;
