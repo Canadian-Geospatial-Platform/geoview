@@ -11,7 +11,7 @@ import {
   TypeUtmZoneResponse,
   TypeAltitudeResponse,
   TypeNtsResponse,
-} from '@/api/config/types/map-schema-types';
+} from '@/api/types/map-schema-types';
 import { IFeatureInfoState, TypeFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { MapEventProcessor } from './map-event-processor';
