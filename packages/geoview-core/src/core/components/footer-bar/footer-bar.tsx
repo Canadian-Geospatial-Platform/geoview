@@ -18,7 +18,7 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { FooterBarApi, FooterTabCreatedEvent, FooterTabRemovedEvent } from '@/core/components';
-import { DEFAULT_FOOTER_TABS_ORDER } from '@/api/config/types/map-schema-types';
+import { DEFAULT_FOOTER_TABS_ORDER } from '@/api/types/map-schema-types';
 import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 
 // default tabs icon and class

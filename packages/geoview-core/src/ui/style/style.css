@@ -45,10 +45,13 @@ Hold viewer specific css not inside theme
 }
 
 /* override default MUI grid style */
-.layer-details-panel.MuiGrid-container,
-.layer-details-panel .MuiGrid-container {
+.responsive-layout-right-main-content.MuiGrid-container,
+.responsive-layout-right-main-content .MuiGrid-container {
   background: unset !important;
 }
-.MuiGrid-container:first-of-type:not(#footerbar-header) {
+.responsive-layout-right-main-content .details-feature-info-table .feature-info-row.MuiGrid-container {
+  background: var(--row-bg-color, initial) !important;
+}
+.MuiGrid-container:first-of-type {
   border: none !important;
 }

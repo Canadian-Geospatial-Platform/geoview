@@ -198,6 +198,13 @@ function addLayers(layers) {
                       mapViewer.notifications.showWarning('Map language changed', []);
                       mapViewer.notifications.addNotificationWarning(`MapViewer: Map language changed to ${lang}`);
                   }
+
+                  // OSDP event trapping for notification
+                  // Listen to layer removed event
+                  mapViewer.layer.onLayerConfigRemoved((sender, payload) => {
+                    mapViewer.notifications.addNotificationSuccess('LayerApi: ' + payload.layerName + ' removed'); // does not show on map
+                    mapViewer.notifications.showMessage('Layer '  + payload.layerName + ' removed', [], true); // true will add a notification
+                  });
                 });
               } catch (error) {
                 console.error('Failed to create map from config', error);
@@ -367,6 +374,14 @@ cgpv.api.getMapViewer('Map1').replaceMapConfigLayerNames(pairs, mapConfig, true)
                 mapViewer.notifications.showWarning('Map language changed', []);
                 mapViewer.notifications.addNotificationWarning(`MapViewer: Map language changed to ${lang}`);
             }
+
+            // OSDP event trapping for notification
+            // Listen to layer removed event
+            mapViewer.layer.onLayerConfigRemoved((sender, payload) => {
+              mapViewer.notifications.addNotificationSuccess('LayerApi: ' + payload.layerName + ' removed'); // does not show on map
+              mapViewer.notifications.showMessage('Layer '  + payload.layerName + ' removed', [], true); // true will add a notification
+            });
+
           });
         } catch (error) {
           console.error('Failed to create map from config', error);
