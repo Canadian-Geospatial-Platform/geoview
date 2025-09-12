@@ -3,7 +3,7 @@ import { useTheme } from '@mui/material/styles';
 import { logger } from '@/core/utils/logger';
 import { LayerList, LayerListEntry } from './layer-list';
 import { ResponsiveGridLayout, ResponsiveGridLayoutExposedMethods } from './responsive-grid-layout';
-import { Tooltip, Typography } from '@/ui';
+import { Box, Tooltip, Typography } from '@/ui';
 import { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
@@ -11,6 +11,7 @@ import { useSelectorLayerName } from '@/core/stores/store-interface-and-intial-v
 
 interface LayoutProps {
   children?: ReactNode;
+  layoutSwitch?: ReactNode; // Only Coordinate info switch at the moment
   guideContentIds?: string[];
   layerList: LayerListEntry[];
   selectedLayerPath: string | undefined;
@@ -33,6 +34,7 @@ const TITLE_STYLES = {
 
 export function Layout({
   children,
+  layoutSwitch,
   guideContentIds,
   layerList,
   selectedLayerPath,
@@ -81,8 +83,18 @@ export function Layout({
     // Log
     logger.logTraceUseCallback('LAYOUT - renderLayerList');
 
+    // Display any switches here for the AppBar
+    if (layoutSwitch && containerType === CONTAINER_TYPE.APP_BAR) {
+      return (
+        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+          <Box sx={{ alignSelf: 'flex-start', p: 1 }}>{layoutSwitch}</Box>
+          <LayerList selectedLayerPath={selectedLayerPath} onListItemClick={handleLayerChange} layerList={layerList} />
+        </Box>
+      );
+    }
+
     return <LayerList selectedLayerPath={selectedLayerPath} onListItemClick={handleLayerChange} layerList={layerList} />;
-  }, [selectedLayerPath, layerList, handleLayerChange]);
+  }, [layoutSwitch, containerType, selectedLayerPath, handleLayerChange, layerList]);
 
   /**
    * Render layer title
@@ -110,7 +122,7 @@ export function Layout({
   return (
     <ResponsiveGridLayout
       ref={responsiveLayoutRef}
-      leftTop={null}
+      leftTop={containerType === CONTAINER_TYPE.FOOTER_BAR ? layoutSwitch : undefined}
       leftMain={renderLayerList()}
       rightMain={children}
       guideContentIds={guideContentIds}

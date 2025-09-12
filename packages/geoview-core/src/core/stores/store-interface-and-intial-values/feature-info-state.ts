@@ -4,6 +4,7 @@ import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeFeatureInfoEntry, TypeResultSet, TypeResultSetEntry, TypeQueryStatus, TypeFieldEntry } from '@/api/types/map-schema-types';
 import { TypeGeoviewLayerType } from '@/api/types/layer-schema-types';
+import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with FeatureInfoEventProcessor vs FeatureInfoState
@@ -18,6 +19,8 @@ export interface IFeatureInfoState {
   layerDataArrayBatch: TypeFeatureInfoResultSetEntry[];
   layerDataArrayBatchLayerPathBypass: string;
   selectedLayerPath: string;
+  coordinateInfoEnabled: boolean;
+  setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
 
   actions: {
     addCheckedFeature: (feature: TypeFeatureInfoEntry) => void;
@@ -26,6 +29,7 @@ export interface IFeatureInfoState {
     setLayerDataArrayBatch: (layerDataArray: TypeFeatureInfoResultSetEntry[]) => void;
     setLayerDataArrayBatchLayerPathBypass: (layerPath: string) => void;
     setSelectedLayerPath: (selectedLayerPath: string) => void;
+    toggleCoordinateInfoEnabled: () => void;
   };
 
   setterActions: {
@@ -35,6 +39,7 @@ export interface IFeatureInfoState {
     setLayerDataArrayBatch: (layerDataArray: TypeFeatureInfoResultSetEntry[]) => void;
     setLayerDataArrayBatchLayerPathBypass: (layerPath: string) => void;
     setSelectedLayerPath: (selectedLayerPath: string) => void;
+    toggleCoordinateInfoEnabled: () => void;
   };
 }
 
@@ -53,6 +58,18 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
     layerDataArrayBatch: [],
     layerDataArrayBatchLayerPathBypass: '',
     selectedLayerPath: '',
+    coordinateInfoEnabled: false,
+
+    // Initialize default
+    setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
+      set({
+        detailsState: {
+          ...get().detailsState,
+          coordinateInfoEnabled:
+            (geoviewConfig.globalSettings?.coordinateInfoEnabled && !geoviewConfig.globalSettings?.hideCoordinateInfoSwitch) || false,
+        },
+      });
+    },
 
     // #region ACTIONS
 
@@ -80,6 +97,10 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
       setSelectedLayerPath(selectedLayerPath: string) {
         // Redirect to setter
         get().detailsState.setterActions.setSelectedLayerPath(selectedLayerPath);
+      },
+      toggleCoordinateInfoEnabled: (): void => {
+        // Redirect to setter
+        get().detailsState.setterActions.toggleCoordinateInfoEnabled();
       },
     },
 
@@ -135,6 +156,19 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
           },
         });
       },
+      toggleCoordinateInfoEnabled: () => {
+        const { coordinateInfoEnabled } = get().detailsState;
+        set({
+          detailsState: {
+            ...get().detailsState,
+            coordinateInfoEnabled: !coordinateInfoEnabled,
+          },
+        });
+        const { clickCoordinates } = get().mapState;
+        if (!coordinateInfoEnabled && clickCoordinates) {
+          FeatureInfoEventProcessor.getCoordinateInfo(get().mapId, clickCoordinates);
+        }
+      },
     },
 
     // #endregion ACTIONS
@@ -181,6 +215,9 @@ export const useDetailsLayerDataArray = (): TypeFeatureInfoResultSetEntry[] =>
 export const useDetailsLayerDataArrayBatch = (): TypeFeatureInfoResultSetEntry[] =>
   useStore(useGeoViewStore(), (state) => state.detailsState.layerDataArrayBatch);
 export const useDetailsSelectedLayerPath = (): string => useStore(useGeoViewStore(), (state) => state.detailsState.selectedLayerPath);
+
+export const useDetailsCoordinateInfoEnabled = (): boolean =>
+  useStore(useGeoViewStore(), (state) => state.detailsState.coordinateInfoEnabled);
 
 export const useDetailsStoreActions = (): FeatureInfoActions => useStore(useGeoViewStore(), (state) => state.detailsState.actions);
 

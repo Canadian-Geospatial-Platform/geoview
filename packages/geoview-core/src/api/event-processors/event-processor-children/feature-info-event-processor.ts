@@ -1,12 +1,21 @@
 import { logger } from '@/core/utils/logger';
 import { EventType } from '@/geo/layer/layer-sets/abstract-layer-set';
+import { TypeMapMouseInfo } from '@/geo/map/map-viewer';
+import { Projection } from '@/geo/utils/projection';
 
 import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '@/api/event-processors/abstract-event-processor';
 import { UIEventProcessor } from './ui-event-processor';
-import { TypeResultSetEntry } from '@/api/types/map-schema-types';
+import {
+  TypeFeatureInfoEntry,
+  TypeResultSetEntry,
+  TypeUtmZoneResponse,
+  TypeAltitudeResponse,
+  TypeNtsResponse,
+} from '@/api/types/map-schema-types';
 import { IFeatureInfoState, TypeFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { MapEventProcessor } from './map-event-processor';
+import { doUntil } from '@/core/utils/utilities';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -38,7 +47,44 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
       }
     );
 
-    return [layerDataArrayUpdateBatch];
+    const { mapId } = store.getState();
+
+    const clickCoordinates = store.subscribe(
+      (state) => state.mapState.clickCoordinates,
+      (coords) => {
+        if (!coords) return;
+        // Log
+        logger.logTraceCoreStoreSubscription('FEATURE-INFO EVENT PROCESSOR - clickCoordinates', coords);
+
+        FeatureInfoEventProcessor.getCoordinateInfo(mapId, coords);
+      }
+    );
+
+    const coordinateInfoEnabledSubscription = store.subscribe(
+      (state) => state.detailsState.coordinateInfoEnabled,
+      (enabled) => {
+        if (enabled) {
+          // Create empty coordinate info layer when enabled
+          FeatureInfoEventProcessor.createCoordinateInfoLayer(mapId);
+        } else {
+          // Remove coordinate info layer when disabled
+          FeatureInfoEventProcessor.deleteFeatureInfo(mapId, 'coordinate-info');
+        }
+      }
+    );
+
+    // Check initial state and create coordinate info layer if neeeded
+    if (store.getState().detailsState.coordinateInfoEnabled) {
+      doUntil(() => {
+        if (mapId) {
+          FeatureInfoEventProcessor.createCoordinateInfoLayer(mapId);
+          return true;
+        }
+        return false;
+      }, 1000);
+    }
+
+    return [layerDataArrayUpdateBatch, clickCoordinates, coordinateInfoEnabledSubscription];
   }
 
   // **********************************************************
@@ -70,7 +116,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   /**
    * Get the selectedLayerPath value
    * @param {string} mapId - The map identifier
-   * @returns {string}} the selected layer path
+   * @returns {string} the selected layer path
    */
   static getSelectedLayerPath(mapId: string): string {
     return this.getFeatureInfoState(mapId).selectedLayerPath;
@@ -118,11 +164,20 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * Deletes the specified layer path from the layer sets in the store. The update of the array will also trigger an update in a batched manner.
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path to delete
-   * @returns {Promise<void>}
+   * @returns {void}
    */
   static deleteFeatureInfo(mapId: string, layerPath: string): void {
     // The feature info state
     const featureInfoState = this.getFeatureInfoState(mapId);
+
+    // Clear selected layer path and layer data array patch layer path bypass if they are the current path
+    if (layerPath === featureInfoState.selectedLayerPath) {
+      featureInfoState.setterActions.setSelectedLayerPath('');
+    }
+
+    if (layerPath === featureInfoState.layerDataArrayBatchLayerPathBypass) {
+      featureInfoState.setterActions.setLayerDataArrayBatchLayerPathBypass('');
+    }
 
     // Redirect to helper function
     this.#deleteFromArray(featureInfoState.layerDataArray, layerPath, (layerArrayResult) => {
@@ -139,7 +194,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * @param {T[]} layerArray - The layer array to work with
    * @param {string} layerPath - The layer path to delete
    * @param {(layerArray: T[]) => void} onDeleteCallback - The callback executed when the array is updated
-   * @returns {Promise<void>}
+   * @returns {void}
    * @private
    */
   static #deleteFromArray<T extends TypeResultSetEntry>(
@@ -234,6 +289,110 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
       featureInfoState.layerDataArrayBatchLayerPathBypass,
       featureInfoState.setterActions.setLayerDataArrayBatchLayerPathBypass
     );
+  }
+
+  static createCoordinateInfoLayer(mapId: string, features: TypeFeatureInfoEntry[] = []): void {
+    const coordinateInfoLayer = {
+      layerPath: 'coordinate-info',
+      layerName: 'Coordinate Information',
+      eventListenerEnabled: false,
+      queryStatus: 'processed',
+      layerStatus: 'processed',
+      numOffeature: 1,
+      features,
+    } as unknown as TypeFeatureInfoResultSetEntry & { numOffeatures: number };
+
+    // Get layer array, minus the coordinate-info layer
+    const featureInfoState = this.getFeatureInfoState(mapId);
+    const currentLayerDataArray = [...featureInfoState.layerDataArray].filter((layer) => layer.layerPath !== 'coordinate-info');
+
+    // Add the new coordinate info layer
+    currentLayerDataArray.push(coordinateInfoLayer);
+
+    // Update the store directly
+    featureInfoState.setterActions.setLayerDataArray(currentLayerDataArray);
+  }
+
+  /**
+   * Queries coordinate information from endpoints
+   * @param {string} mapId - The map ID
+   * @param {[number, number]} coordinates - The lng/lat coordinates
+   * @returns {Promise<TypeCoordinateInfo>} Promise of coordinate information
+   */
+  static getCoordinateInfo(mapId: string, coordinates: TypeMapMouseInfo): void {
+    // If the coordinate info is not enabled, clear any existing info
+    const state = this.getFeatureInfoState(mapId);
+    if (!state.coordinateInfoEnabled) {
+      this.deleteFeatureInfo(mapId, 'coordinate-info');
+      return;
+    }
+
+    const [lng, lat] = coordinates.lonlat;
+
+    const serviceUrls = this.getState(mapId).mapConfig?.serviceUrls;
+    if (!serviceUrls) return;
+    const { utmZoneUrl, ntsSheetUrl, altitudeUrl } = serviceUrls;
+    Promise.allSettled([
+      fetch(`${utmZoneUrl}?bbox=${lng}%2C${lat}%2C${lng}%2C${lat}`).then((r) => r.json()) as Promise<TypeUtmZoneResponse>,
+      fetch(`${ntsSheetUrl}?bbox=${lng}%2C${lat}%2C${lng}%2C${lat}`).then((r) => r.json()) as Promise<TypeNtsResponse>,
+      fetch(`${altitudeUrl}?lat=${lat}&lon=${lng}`).then((r) => r.json()) as Promise<TypeAltitudeResponse>,
+    ])
+      .then(([utmResult, ntsResult, elevationResult]) => {
+        const utmData = utmResult.status === 'fulfilled' ? utmResult.value : undefined;
+        const ntsData = ntsResult.status === 'fulfilled' ? ntsResult.value : undefined;
+        const elevationData = elevationResult.status === 'fulfilled' ? elevationResult.value : undefined;
+
+        const utmIdentifier = utmData?.features[0].properties.identifier;
+        const [easting, northing] = utmIdentifier
+          ? Projection.transformToUTMNorthingEasting(coordinates.lonlat, utmIdentifier)
+          : [undefined, undefined];
+
+        // Create coordinate info layer entry
+        const coordinateFeature: TypeFeatureInfoEntry[] = [
+          {
+            uid: 'coordinate-info-feature',
+            fieldInfo: {
+              latitude: { value: lat.toFixed(6), fieldKey: 0, dataType: 'number', alias: 'Latitude', domain: null },
+              longitude: { value: lng.toFixed(6), fieldKey: 1, dataType: 'number', alias: 'Longitude', domain: null },
+              utmZone: { value: utmIdentifier, fieldKey: 2, dataType: 'string', alias: 'UTM Identifier', domain: null },
+              easting: { value: easting?.toFixed(2), fieldKey: 3, dataType: 'number', alias: 'Easting', domain: null },
+              northing: { value: northing?.toFixed(2), fieldKey: 4, dataType: 'number', alias: 'Northing', domain: null },
+              ntsMapsheet: {
+                value: ntsData?.features
+                  .filter((f) => f.properties.name !== '')
+                  .sort((f) => f.properties.scale)
+                  .map((f) => {
+                    const scale = `${f.properties.scale / 1000}K`;
+                    return `${f.properties.identifier} - ${f.properties.name} - ${scale}`;
+                  })
+                  .join('\n'),
+                fieldKey: 5,
+                dataType: 'string',
+                alias: 'NTS Mapsheets',
+                domain: null,
+              },
+              elevation: {
+                value: elevationData?.altitude ? `${elevationData.altitude} m` : undefined,
+                fieldKey: 6,
+                dataType: 'string',
+                alias: 'Elevation',
+                domain: null,
+              },
+            },
+            extent: undefined,
+            geometry: undefined,
+            featureKey: 0,
+            nameField: null,
+            geoviewLayerType: 'CSV',
+            layerPath: 'coordinate-info',
+          },
+        ];
+        this.createCoordinateInfoLayer(mapId, coordinateFeature);
+      })
+      .catch((error: unknown) => {
+        // Log
+        logger.logPromiseFailed('Failed to get coordinate info', error);
+      });
   }
 
   // #endregion

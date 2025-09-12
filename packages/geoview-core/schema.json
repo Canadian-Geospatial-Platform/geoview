@@ -411,6 +411,21 @@
           "type": "string",
           "description": "Service end point to access metadata of layers.",
           "default": "https://open.canada.ca/data/en/dataset/"
+        },
+        "utmZoneUrl": {
+          "type": "string",
+          "description": "Service end point to access UTM zone of a point.",
+          "default": "https://geogratis.gc.ca/services/delimitation/en/utmzone"
+        },
+        "ntsSheetUrl": {
+          "type": "string",
+          "description": "Service end point to access NTS sheet of a point.",
+          "default": "https://geogratis.gc.ca/services/delimitation/en/nts"
+        },
+        "altitudeUrl": {
+          "type": "string",
+          "description": "Service end point to access altitude of a point.",
+          "default": "https://geogratis.gc.ca/services/elevation/cdem/altitude"
         }
       }
     },
@@ -452,6 +467,16 @@
         "showUnsymbolizedFeatures": {
           "type": "boolean",
           "description": "Whether or not to show unsymbolized features.",
+          "default": false
+        },
+        "coordinateInfoEnabled": {
+          "type": "boolean",
+          "description": "Whether or not the coordinate information too should be enabled.",
+          "default": true
+        },
+        "hideCoordinateInfoSwitch": {
+          "type": "boolean",
+          "description": "Whether or not to show the coordinate info switch",
           "default": false
         }
       }

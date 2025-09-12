@@ -93,6 +93,8 @@
       "imageStatic",
       "vectorTiles"
     ],
-    "showUnsymbolizedFeatures": true
+    "showUnsymbolizedFeatures": true,
+    "coordinateInfoEnabled": true,
+    "hideCoordinateInfoSwitch": false
   }
 }

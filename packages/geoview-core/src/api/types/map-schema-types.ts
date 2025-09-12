@@ -163,6 +163,21 @@ export type TypeServiceUrls = {
    * Default = CONFIG_METADATA_RECORDS_URL
    */
   metadataUrl?: string;
+  /**
+   * An optional utm zone service end point url.
+   * Default = CONFIG_UTM_ZONE_URL ("https://geogratis.gc.ca/services/delimitation/en/utmzone")
+   */
+  utmZoneUrl?: string;
+  /**
+   * An optional utm zone service end point url.
+   * Default = CONFIG_NTS_SHEET_URL ("https://geogratis.gc.ca/services/delimitation/en/nts")
+   */
+  ntsSheetUrl?: string;
+  /**
+   * An optional utm zone service end point url.
+   * Default = CONFIG_ALTITUDE_URL ("https://geogratis.gc.ca/services/elevation/cdem/altitude")
+   */
+  altitudeUrl?: string;
 };
 
 /** Valid schema version number. */
@@ -179,6 +194,10 @@ export type TypeGlobalSettings = {
   disabledLayerTypes?: TypeGeoviewLayerType[];
   /** Whether to display unsymbolized features in the datatable and other components */
   showUnsymbolizedFeatures?: boolean;
+  /** Whether the initial state of the coordinate info tool should be enabled */
+  coordinateInfoEnabled?: boolean;
+  /** Whether the coordinate info tool should be removed from the UI */
+  hideCoordinateInfoSwitch?: boolean;
 };
 
 /** Definition of the map configuration settings. */
@@ -364,6 +383,15 @@ export const CONFIG_PROXY_URL = 'https://maps.canada.ca/wmsproxy/ws/wmsproxy/exe
 /** The default metadata recors url for uuid layer (empty because it needs to be set by config en and fr) */
 export const CONFIG_METADATA_RECORDS_URL = '';
 
+/** The default utm zone url */
+export const CONFIG_UTM_ZONE_URL = 'https://geogratis.gc.ca/services/delimitation/en/utmzone';
+
+/** The default nts sheet url */
+export const CONFIG_NTS_SHEET_URL = 'https://geogratis.gc.ca/services/delimitation/en/nts';
+
+/** The default altitude url */
+export const CONFIG_ALTITUDE_URL = 'https://geogratis.gc.ca/services/elevation/cdem/altitude';
+
 export const CONFIG_GEOCORE_TYPE = 'geoCore';
 export const CONFIG_GEOPACKAGE_TYPE = 'GeoPackage';
 export const CONFIG_SHAPEFILE_TYPE = 'shapefile';
@@ -425,11 +453,16 @@ export const DEFAULT_MAP_FEATURE_CONFIG = {
     geolocatorUrl: CONFIG_GEOLOCATOR_URL,
     proxyUrl: CONFIG_PROXY_URL,
     metadataUrl: CONFIG_METADATA_RECORDS_URL,
+    utmZoneUrl: CONFIG_UTM_ZONE_URL,
+    ntsSheetUrl: CONFIG_NTS_SHEET_URL,
+    altitudeUrl: CONFIG_ALTITUDE_URL,
   },
   globalSettings: {
     canRemoveSublayers: true,
     disabledLayerTypes: [],
     showUnsymbolizedFeatures: false,
+    coordinateInfoEnabled: false,
+    hideCoordinateInfoSwitch: false,
   },
   schemaVersionUsed: '1.0',
 } as unknown as MapFeatureConfig;
@@ -727,6 +760,57 @@ export type TypeLayerData = {
 };
 
 // #endregion RESULT SET
+
+// #region URL Responses
+export interface TypeUtmZoneFeature {
+  type: 'Feature';
+  properties: {
+    identifier: string;
+    centralMeridian: number;
+  };
+  bbox: [number, number, number, number];
+  geometry: {
+    type: 'Polygon';
+    coordinates: number[][][];
+  };
+}
+
+export interface TypeUtmZoneResponse {
+  type: 'FeatureCollection';
+  count: number;
+  features: TypeUtmZoneFeature[];
+}
+
+export interface TypeNtsFeature {
+  type: 'Feature';
+  properties: {
+    identifier: string;
+    name: string;
+    scale: number;
+  };
+  bbox: [number, number, number, number];
+  geometry: {
+    type: 'Polygon';
+    coordinates: number[][][];
+  };
+}
+
+export interface TypeNtsResponse {
+  type: 'FeatureCollection';
+  count: number;
+  features: TypeNtsFeature[];
+}
+
+export interface TypeAltitudeResponse {
+  altitude: number;
+  vertex: boolean;
+  geometry: {
+    type: 'Point';
+    coordinates: [number, number];
+  };
+}
+
+// #endregion
 
 /**
  * Type guard function that redefines a TypeBaseVectorGeometryConfig as a TypeLineStringVectorConfig if the type attribute of the
