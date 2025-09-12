@@ -103,7 +103,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
     }
     return {
       geolocator: { icon: <SearchIcon />, content: <Geolocator key="geolocator" /> },
-      guide: { icon: <QuestionMarkIcon />, content: <Guide fullWidth containerType={CONTAINER_TYPE.APP_BAR} /> },
+      guide: { icon: <QuestionMarkIcon />, content: <Guide containerType={CONTAINER_TYPE.APP_BAR} /> },
       details: { icon: <InfoOutlinedIcon />, content: <DetailsPanel fullWidth containerType={CONTAINER_TYPE.APP_BAR} /> },
       legend: { icon: <LegendIcon />, content: <Legend fullWidth containerType={CONTAINER_TYPE.APP_BAR} /> },
       layers: { icon: <LayersOutlinedIcon />, content: <LayersPanel containerType={CONTAINER_TYPE.APP_BAR} /> },
@@ -206,10 +206,16 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const getPanelWidth = useCallback(
     (tab: string): number => {
       let width = 400;
-      if ((tab === DEFAULT_APPBAR_CORE.DATA_TABLE || tab === DEFAULT_APPBAR_CORE.LAYERS) && isMapFullScreen) {
+      if (
+        (tab === DEFAULT_APPBAR_CORE.DATA_TABLE || tab === DEFAULT_APPBAR_CORE.LAYERS || tab === DEFAULT_APPBAR_CORE.GUIDE) &&
+        isMapFullScreen
+      ) {
         width = window.screen.width - 65;
       }
-      if ((tab === DEFAULT_APPBAR_CORE.DATA_TABLE || tab === DEFAULT_APPBAR_CORE.LAYERS) && !isMapFullScreen) {
+      if (
+        (tab === DEFAULT_APPBAR_CORE.DATA_TABLE || tab === DEFAULT_APPBAR_CORE.LAYERS || tab === DEFAULT_APPBAR_CORE.GUIDE) &&
+        !isMapFullScreen
+      ) {
         width = geoviewElement?.clientWidth ?? 0;
       }
       return width;
