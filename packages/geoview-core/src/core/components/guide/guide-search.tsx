@@ -36,7 +36,7 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
   const findAllMatches = useCallback(
     (term: string) => {
       logger.logTraceUseCallback('GUIDE-SEARCH - findAllMatches');
-      if (!term.trim() || !guide) {
+      if (!term.trim() || term.trim().length < 3 || !guide) {
         setAllMatches([]);
         setCurrentMatchIndex(0);
         return;
@@ -80,17 +80,48 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
     (content: string, sectionIndex: number): string => {
       logger.logTraceUseCallback('GUIDE-SEARCH - highlightSearchTerm');
 
-      if (!searchTerm.trim()) return content;
+      if (!searchTerm.trim() || searchTerm.trim().length < 3) return content;
 
       const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')})`, 'gi');
       let matchCount = 0;
 
-      return content.replace(regex, (match) => {
-        const globalMatchIndex = allMatches.findIndex((m) => m.sectionIndex === sectionIndex && m.matchIndex === matchCount);
-        const isCurrentMatch = globalMatchIndex === currentMatchIndex;
-        matchCount++;
-        return `<mark class="search-highlight${isCurrentMatch ? ' current-match' : ''}">${match}</mark>`;
+      // Protect markdown links and code blocks from highlighting
+      const protectedRanges: Array<{ start: number; end: number }> = [];
+      const patterns = [
+        /\[([^\]]+)\]\([^)]+\)/g, // [text](url)
+        /`[^`]+`/g, // `code`
+        /```[\s\S]*?```/g, // ```code blocks```
+      ];
+
+      patterns.forEach((pattern) => {
+        let match = pattern.exec(content);
+        while (match !== null) {
+          protectedRanges.push({ start: match.index, end: match.index + match[0].length });
+          match = pattern.exec(content);
+        }
       });
+
+      let result = content;
+      let offset = 0;
+
+      content.replace(regex, (match, p1, matchIndex) => {
+        // Check if match is in protected range
+        const isProtected = protectedRanges.some((range) => matchIndex >= range.start && matchIndex < range.end);
+
+        if (!isProtected) {
+          const globalMatchIndex = allMatches.findIndex((m) => m.sectionIndex === sectionIndex && m.matchIndex === matchCount);
+          const isCurrentMatch = globalMatchIndex === currentMatchIndex;
+          const replacement = `<mark class="search-highlight${isCurrentMatch ? ' current-match' : ''}">${match}</mark>`;
+
+          const actualIndex = matchIndex + offset;
+          result = result.slice(0, actualIndex) + replacement + result.slice(actualIndex + match.length);
+          offset += replacement.length - match.length;
+        }
+        matchCount++;
+        return match;
+      });
+
+      return result;
     },
     [searchTerm, allMatches, currentMatchIndex]
   );
