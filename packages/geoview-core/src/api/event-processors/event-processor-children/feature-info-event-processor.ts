@@ -15,7 +15,7 @@ import {
 import { IFeatureInfoState, TypeFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { MapEventProcessor } from './map-event-processor';
-import { doUntil } from '@/app';
+import { doUntil } from '@/core/utils/utilities';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -56,7 +56,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
         // Log
         logger.logTraceCoreStoreSubscription('FEATURE-INFO EVENT PROCESSOR - clickCoordinates', coords);
 
-        FeatureInfoEventProcessor.#getCoordinateInfo(mapId, coords);
+        FeatureInfoEventProcessor.getCoordinateInfo(mapId, coords);
       }
     );
 
@@ -319,7 +319,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * @param {[number, number]} coordinates - The lng/lat coordinates
    * @returns {Promise<TypeCoordinateInfo>} Promise of coordinate information
    */
-  static #getCoordinateInfo(mapId: string, coordinates: TypeMapMouseInfo): void {
+  static getCoordinateInfo(mapId: string, coordinates: TypeMapMouseInfo): void {
     // If the coordinate info is not enabled, clear any existing info
     const state = this.getFeatureInfoState(mapId);
     if (!state.coordinateInfoEnabled) {
@@ -341,7 +341,6 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
         const utmData = utmResult.status === 'fulfilled' ? utmResult.value : undefined;
         const ntsData = ntsResult.status === 'fulfilled' ? ntsResult.value : undefined;
         const elevationData = elevationResult.status === 'fulfilled' ? elevationResult.value : undefined;
-        // const declinationData = declinationResult.status === 'fulfilled' ? declinationResult.value : undefined;
 
         const utmIdentifier = utmData?.features[0].properties.identifier;
         const [easting, northing] = utmIdentifier
@@ -359,7 +358,10 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
               easting: { value: easting?.toFixed(2), fieldKey: 3, dataType: 'number', alias: 'Easting', domain: null },
               northing: { value: northing?.toFixed(2), fieldKey: 4, dataType: 'number', alias: 'Northing', domain: null },
               ntsMapsheet: {
-                value: ntsData?.features.map((f) => f.properties.name).join(', '),
+                value: ntsData?.features
+                  .map((f) => f.properties.name)
+                  .filter((name) => name !== '')
+                  .join(', '),
                 fieldKey: 5,
                 dataType: 'string',
                 alias: 'NTS Mapsheets',
