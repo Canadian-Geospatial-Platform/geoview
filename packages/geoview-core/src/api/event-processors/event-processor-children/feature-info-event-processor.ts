@@ -359,9 +359,13 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
               northing: { value: northing?.toFixed(2), fieldKey: 4, dataType: 'number', alias: 'Northing', domain: null },
               ntsMapsheet: {
                 value: ntsData?.features
-                  .map((f) => f.properties.name)
-                  .filter((name) => name !== '')
-                  .join(', '),
+                  .filter((f) => f.properties.name !== '')
+                  .sort((f) => f.properties.scale)
+                  .map((f) => {
+                    const scale = `${f.properties.scale / 1000}K`;
+                    return `${f.properties.identifier} - ${f.properties.name} - ${scale}`;
+                  })
+                  .join('\n'),
                 fieldKey: 5,
                 dataType: 'string',
                 alias: 'NTS Mapsheets',

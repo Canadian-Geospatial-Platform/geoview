@@ -154,7 +154,9 @@ export function CoordinateInfo({ fullWidth }: TypeCoordinateInfoProps): JSX.Elem
                 {t('details.ntsMapsheet')}
               </Typography>
               <Box sx={sxClasses.coordinateInfoContent}>
-                <Typography>{ntsMapsheet}</Typography>
+                {ntsMapsheet.split('\n').map((line) => (
+                  <Typography key={line}>{line}</Typography>
+                ))}
               </Box>
             </ListItem>
           )}
