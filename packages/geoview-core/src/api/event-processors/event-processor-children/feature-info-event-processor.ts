@@ -360,7 +360,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
               ntsMapsheet: {
                 value: ntsData?.features
                   .filter((f) => f.properties.name !== '')
-                  .sort((a, b) => b.properties.scale - a.properties.scale)
+                  .sort((f) => f.properties.scale)
                   .map((f) => {
                     const scale = `${f.properties.scale / 1000}K`;
                     return `${f.properties.identifier} - ${f.properties.name} - ${scale}`;
