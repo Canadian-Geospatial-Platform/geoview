@@ -170,6 +170,10 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
             coordinateInfoEnabled: !coordinateInfoEnabled,
           },
         });
+        const { clickCoordinates } = get().mapState;
+        if (!coordinateInfoEnabled && clickCoordinates) {
+          FeatureInfoEventProcessor.getCoordinateInfo(get().mapId, clickCoordinates);
+        }
       },
     },
 
