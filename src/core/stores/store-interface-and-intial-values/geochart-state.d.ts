@@ -1,5 +1,5 @@
-import { GeoViewGeoChartConfig } from '@/core/utils/config/reader/uuid-config-reader';
-import { TypeFeatureInfoEntry, TypeQueryStatus, TypeResultSet, TypeResultSetEntry } from '@/api/config/types/map-schema-types';
+import { GeoViewGeoChartConfig } from '@/api/config/reader/uuid-config-reader';
+import { TypeFeatureInfoEntry, TypeQueryStatus, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 type GeochartActions = IGeochartState['actions'];
 export interface IGeochartState {

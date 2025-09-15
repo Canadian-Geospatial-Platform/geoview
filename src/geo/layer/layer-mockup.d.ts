@@ -1,4 +1,5 @@
-import { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerEntryType, TypeLayerStyleConfig, TypeVectorSourceFormats } from '@/api/config/types/map-schema-types';
+import { TypeLayerStyleConfig } from '@/api/types/map-schema-types';
+import { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerEntryType, TypeVectorSourceFormats } from '@/api/types/layer-schema-types';
 import { TimeDimension } from '@/core/utils/date-mgt';
 export declare abstract class LayerMockup {
     #private;
@@ -23,11 +24,11 @@ export declare abstract class LayerMockup {
     static configCESIMetadata(): unknown;
     static configTemporalTestBedMetadata(): unknown;
     static configHistoricalFloodMetadata(): unknown;
-    static configHistoricalFloodTemporalDimension(): TimeDimension;
+    static configHistoricalFloodTimeDimension(): TimeDimension;
     static configRadarMetadata(): unknown;
-    static configRadarTemporalDimension(): TimeDimension;
+    static configRadarTimeDimension(): TimeDimension;
     static configMSIMetadata(): unknown;
-    static configMSITemporalDimension(): TimeDimension;
+    static configMSITimeDimension(): TimeDimension;
     static configLayerEntry(layerId: string, layerName: string, entryType: TypeLayerEntryType, metadata: unknown, source: unknown, style: unknown): TypeLayerEntryConfig;
 }
 //# sourceMappingURL=layer-mockup.d.ts.map

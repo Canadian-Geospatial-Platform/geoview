@@ -10,8 +10,8 @@ import { Pixel } from 'ol/pixel';
 import { Projection as OLProjection } from 'ol/proj';
 import { EventDelegateBase } from '@/api/events/event-helper';
 import { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
-import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
-import { TypeFeatureInfoEntry, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
+import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
+import { TypeFeatureInfoEntry, TypeOutfieldsType } from '@/api/types/map-schema-types';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { TypeDateFragments } from '@/core/utils/date-mgt';
 /**

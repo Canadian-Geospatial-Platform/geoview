@@ -1,10 +1,11 @@
 import BaseLayer from 'ol/layer/Base';
 import { TypeDateFragments } from '@/core/utils/date-mgt';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import { EventDelegateBase } from '@/api/events/event-helper';
-import { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerInitialSettings, TypeLayerStatus, TypeStyleGeometry, TypeGeoviewLayerType } from '@/api/config/types/map-schema-types';
-import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
+import { TypeStyleGeometry } from '@/api/types/map-schema-types';
+import { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerInitialSettings, TypeLayerStatus } from '@/api/types/layer-schema-types';
+import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { SnackbarType } from '@/core/utils/notifications';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
@@ -34,8 +35,6 @@ export declare abstract class AbstractGeoViewLayer {
     static readonly DEFAULT_WAIT_PERIOD_METADATA_WARNING: number;
     /** The default hit tolerance */
     hitTolerance: number;
-    /** The type of GeoView layer that is instantiated. */
-    type: TypeGeoviewLayerType;
     /** The unique identifier for the GeoView layer. The value of this attribute is extracted from the mapLayerConfig parameter.
      * If its value is undefined, a unique value is generated.
      */
@@ -59,10 +58,9 @@ export declare abstract class AbstractGeoViewLayer {
     serverDateFragmentsOrder?: TypeDateFragments;
     /**
      * Constructor
-     * @param {TypeGeoviewLayerType} type - The type of GeoView layer that is instantiated.
      * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The GeoView layer configuration options.
      */
-    constructor(type: TypeGeoviewLayerType, geoviewLayerConfig: TypeGeoviewLayerConfig);
+    constructor(geoviewLayerConfig: TypeGeoviewLayerConfig);
     /**
      * Must override method to read the service metadata from the metadataAccessPath.
      * @returns {Promise<T>} A promise resolved once the metadata has been fetched.
@@ -94,6 +92,11 @@ export declare abstract class AbstractGeoViewLayer {
      * A quick getter to help identify which layer class the current instance is coming from.
      */
     getClassName(): string;
+    /**
+     * Gets the first layer entry name if any sub-layers exist or else gets the geoviewLayerName or even the geoviewLayerId.
+     * @returns {string} The layer entry name if any sub-layers exist or the geoviewLayerName or even the geoviewLayerId.
+     */
+    geLayerEntryNameOrGeoviewLayerName(): string;
     /**
      * Gets the Geoview layer id.
      * @returns {string} The geoview layer id

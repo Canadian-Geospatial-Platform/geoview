@@ -1,6 +1,6 @@
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { ITimeSliderState, TimeSliderLayerSet, TypeTimeSliderValues, TypeTimeSliderProps } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
-import { TypeLayerEntryConfig } from '@/api/config/types/map-schema-types';
+import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 export declare class TimeSliderEventProcessor extends AbstractEventProcessor {
     #private;
@@ -34,9 +34,10 @@ export declare class TimeSliderEventProcessor extends AbstractEventProcessor {
     /**
      * Checks if the layer has time slider values. If there are, adds the time slider layer and applies filters.
      * @param {string} mapId - The map id of the state to act on
-     * @param {TypeLayerEntryConfig} layerConfig - The layer path of the layer to add to the state
+     * @param {AbstractGVLayer} layer - The layer to add to the state
+     * @param {TypeTimeSliderProps?} timesliderConfig - Optional time slider configuration
      */
-    static checkInitTimeSliderLayerAndApplyFilters(mapId: string, layer: AbstractGVLayer, layerConfig: TypeLayerEntryConfig, timesliderConfig?: TypeTimeSliderProps): void;
+    static checkInitTimeSliderLayerAndApplyFilters(mapId: string, layer: AbstractGVLayer, timesliderConfig?: TypeTimeSliderProps): void;
     /**
      * Removes a time slider layer from the state
      * @param {string} mapId - The map id of the state to act on
@@ -47,10 +48,10 @@ export declare class TimeSliderEventProcessor extends AbstractEventProcessor {
      * Get initial values for a layer's time slider states
      *
      * @param {string} mapId - The id of the map
-     * @param {TypeLayerEntryConfig} layerConfig - The layer path of the layer to add to the state
+     * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer path of the layer to add to the state
      * @returns {TimeSliderLayer | undefined}
      */
-    static getInitialTimeSliderValues(mapId: string, layerConfig: TypeLayerEntryConfig, timesliderConfig?: TypeTimeSliderProps): TypeTimeSliderValues | undefined;
+    static getInitialTimeSliderValues(mapId: string, layerConfig: AbstractBaseLayerEntryConfig, timesliderConfig?: TypeTimeSliderProps): TypeTimeSliderValues | undefined;
     /**
      * Guesses the estimated steps that should be used by the slider, depending on the value range
      * @param {number} minValue - The minimum value

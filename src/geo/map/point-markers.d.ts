@@ -2,7 +2,7 @@ import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import { FeatureHighlight } from '@/geo/map/feature-highlight';
 import { MapViewer } from '@/geo/map/map-viewer';
-import { TypePointMarker } from '@/api/config/types/map-schema-types';
+import { TypePointMarker } from '@/api/types/map-schema-types';
 /**
  * A class to handle point markers
  *

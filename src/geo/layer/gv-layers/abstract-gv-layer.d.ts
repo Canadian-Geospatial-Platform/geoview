@@ -8,12 +8,12 @@ import Source from 'ol/source/Source';
 import { Projection as OLProjection } from 'ol/proj';
 import { Map as OLMap } from 'ol';
 import { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
-import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
+import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { EventDelegateBase } from '@/api/events/event-helper';
-import { TypeLayerStyleConfig, TypeFeatureInfoEntry, codedValueType, rangeDomainType, TypeLocation, QueryType, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
+import { TypeLayerStyleConfig, TypeFeatureInfoEntry, codedValueType, rangeDomainType, TypeLocation, QueryType, TypeOutfieldsType } from '@/api/types/map-schema-types';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { SnackbarType } from '@/core/utils/notifications';
@@ -133,7 +133,7 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
      * Gets the temporal dimension that is associated to the layer.
      * @returns {TimeDimension | undefined} The temporal dimension associated to the layer or undefined.
      */
-    getTemporalDimension(): TimeDimension | undefined;
+    getTimeDimension(): TimeDimension | undefined;
     /**
      * Gets the flag if layer use its time dimension, this can be use to exclude layers from time function like time slider
      * @returns {boolean} The flag indicating if the layer should be included in time awareness functions such as the Time Slider. True by default.

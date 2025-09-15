@@ -2,7 +2,7 @@ import { ImageArcGISRest } from 'ol/source';
 import { Image as ImageLayer } from 'ol/layer';
 import { Extent } from 'ol/extent';
 import { Projection as OLProjection } from 'ol/proj';
-import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
+import { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 /**

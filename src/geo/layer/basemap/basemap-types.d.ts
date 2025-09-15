@@ -1,6 +1,7 @@
 import { OSM, VectorTile, XYZ } from 'ol/source';
 import { Extent } from 'ol/extent';
-import { TypeDisplayLanguage, TypeLod } from '@/api/config/types/map-schema-types';
+import { TypeDisplayLanguage } from '@/api/types/map-schema-types';
+import { TypeLod } from '@/api/types/layer-schema-types';
 import { TypeProjection } from '@/geo/utils/projection';
 /**
  * interface used to define a new basemap.

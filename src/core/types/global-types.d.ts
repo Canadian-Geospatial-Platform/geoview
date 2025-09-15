@@ -3,7 +3,7 @@ import type { createRoot } from 'react-dom/client';
 import type * as translate from 'react-i18next';
 import type { useTheme } from '@mui/material/styles';
 import type { useMediaQuery } from '@mui/material';
-import { TypeDisplayLanguage, TypeMapFeaturesInstance } from '@/api/config/types/map-schema-types';
+import { TypeDisplayLanguage, TypeMapFeaturesInstance } from '@/api/types/map-schema-types';
 import { API } from '@/api/api';
 import { logger } from '@/core/utils/logger';
 import { useWhatChanged } from '@/core/utils/useWhatChanged';

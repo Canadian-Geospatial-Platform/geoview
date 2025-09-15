@@ -1,8 +1,9 @@
 import Static from 'ol/source/ImageStatic';
-import { ConfigBaseClass, TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
+import { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, CONST_LAYER_TYPES, Extent } from '@/api/config/types/map-schema-types';
-import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
+import { Extent } from '@/api/types/map-schema-types';
+import { TypeGeoviewLayerConfig, CONST_LAYER_TYPES, TypeValidSourceProjectionCodes } from '@/api/types/layer-schema-types';
+import { ImageStaticLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import { GVImageStatic } from '@/geo/layer/gv-layers/raster/gv-image-static';
 export interface TypeImageStaticLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: typeof CONST_LAYER_TYPES.IMAGE_STATIC;
@@ -83,7 +84,7 @@ export declare class ImageStatic extends AbstractGeoViewRaster {
      * @param {number} sourceProjection - Indicates the projection used for the sourceExtent.
      * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
      */
-    static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerIds: string[], isTimeAware: boolean, sourceExtent: Extent, sourceProjection: number): Promise<ConfigBaseClass[]>;
+    static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerIds: string[], isTimeAware: boolean, sourceExtent: Extent, sourceProjection: TypeValidSourceProjectionCodes): Promise<ConfigBaseClass[]>;
     /**
      * Creates a StaticImage source from a layer config.
      * @param {ImageStaticLayerEntryConfig} layerConfig - Configuration for the image static layer.
@@ -92,24 +93,4 @@ export declare class ImageStatic extends AbstractGeoViewRaster {
      */
     static createImageStaticSource(layerConfig: ImageStaticLayerEntryConfig): Static;
 }
-/**
- * type guard function that redefines a TypeGeoviewLayerConfig as a TypeImageStaticLayerConfig if the geoviewLayerType attribute of the
- * verifyIfLayer parameter is ImageStatic. The type ascention applies only to the true block of the if clause that use this function.
- *
- * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export declare const layerConfigIsImageStatic: (verifyIfLayer: TypeGeoviewLayerConfig) => verifyIfLayer is TypeImageStaticLayerConfig;
-/**
- * type guard function that redefines a TypeLayerEntryConfig as a ImageStaticLayerEntryConfig if the geoviewLayerType attribute of the
- * verifyIfGeoViewEntry.geoviewLayerConfig attribute is ImageStatic. The type ascention applies only to the true block of
- * the if clause that use this function.
- *
- * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
- * valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export declare const geoviewEntryIsImageStatic: (verifyIfGeoViewEntry: TypeLayerEntryConfig) => verifyIfGeoViewEntry is ImageStaticLayerEntryConfig;
 //# sourceMappingURL=image-static.d.ts.map

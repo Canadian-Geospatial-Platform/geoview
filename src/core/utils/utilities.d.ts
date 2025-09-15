@@ -1,5 +1,5 @@
 import { Root } from 'react-dom/client';
-import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
+import { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
 /**
  * Take string like "My string is __param__" and replace parameters (__param__) from array of values
@@ -19,12 +19,12 @@ export declare function replaceParams(params: unknown[], message: string): strin
  */
 export declare function getLocalizedMessage(language: TypeDisplayLanguage, messageKey: string, params?: unknown[] | undefined): string;
 /**
- * Deep merge objects togheter. Latest object will overwrite value on previous one
+ * Deep merge objects together. Latest object will overwrite value on previous one
  * if property exist.
  * @param {unknown[]} objects - The objects to deep merge.
- * @returns {unknown} The merged object
+ * @returns {T} The merged object
  */
-export declare function deepMergeObjects(...objects: unknown[]): unknown;
+export declare function deepMergeObjects<T>(...objects: unknown[]): T;
 /**
  * Check if an object is empty
  * @param {object} obj - The object to test

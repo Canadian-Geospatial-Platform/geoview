@@ -1,6 +1,6 @@
 import { GeoviewStoreType } from '@/core/stores';
 import { GeoChartStoreByLayerPath, IGeochartState, TypeGeochartResultSetEntry } from '@/core/stores/store-interface-and-intial-values/geochart-state';
-import { GeoViewGeoChartConfig } from '@/core/utils/config/reader/uuid-config-reader';
+import { GeoViewGeoChartConfig } from '@/api/config/reader/uuid-config-reader';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 /**
  * Event processor focusing on interacting with the geochart state in the store.

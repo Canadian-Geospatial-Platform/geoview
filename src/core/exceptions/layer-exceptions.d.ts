@@ -1,4 +1,4 @@
-import { TypeGeoviewLayerType, TypeLayerEntryType } from '@/api/config/types/map-schema-types';
+import { TypeGeoviewLayerType, TypeLayerEntryType } from '@/api/types/layer-schema-types';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 /**
  * Error related to a specific GeoView layer, extending GeoViewError with the layer ID.
@@ -115,6 +115,26 @@ export declare class LayerMissingGeoviewLayerIdError extends LayerError {
      * @param {TypeGeoviewLayerType} geoviewLayerType - The Geoview layer type
      */
     constructor(geoviewLayerType: TypeGeoviewLayerType);
+}
+/**
+ * Error thrown when a GeoView layer is missing a required `source.extent`.
+ * This typically indicates a configuration issue for a specific layer type.
+ */
+export declare class LayerMissingSourceExtentError extends LayerError {
+    /**
+     * Constructs a new LayerMissingSourceExtentError instance.
+     */
+    constructor();
+}
+/**
+ * Error thrown when a GeoView layer is missing a required `source.projection`.
+ * This typically indicates a configuration issue for a specific layer type.
+ */
+export declare class LayerMissingSourceProjectionError extends LayerError {
+    /**
+     * Constructs a new LayerMissingSourceProjectionError instance.
+     */
+    constructor();
 }
 /**
  * Custom error class thrown when the GeoView layer configuration is invalid due to the ESRI layer ID not being a number.

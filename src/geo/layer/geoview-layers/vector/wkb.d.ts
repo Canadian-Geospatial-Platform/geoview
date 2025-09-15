@@ -3,11 +3,11 @@ import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import Feature from 'ol/Feature';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
-import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, CONST_LAYER_TYPES, TypeMetadataGeoJSON } from '@/api/config/types/map-schema-types';
-import { WkbLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
-import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+import { TypeGeoviewLayerConfig, CONST_LAYER_TYPES, TypeMetadataGeoJSON } from '@/api/types/layer-schema-types';
+import { WkbLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
+import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { GVWKB } from '@/geo/layer/gv-layers/vector/gv-wkb';
-import { ConfigBaseClass, TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
+import { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 export interface TypeWkbLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: typeof CONST_LAYER_TYPES.WKB;
     listOfLayerEntryConfig: WkbLayerEntryConfig[];
@@ -112,20 +112,4 @@ export declare class WKB extends AbstractGeoViewVector {
      */
     static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerIds: string[], isTimeAware: boolean): Promise<ConfigBaseClass[]>;
 }
-/**
- * Type guard function that redefines a TypeGeoviewLayerConfig as a TypeWkbLayerConfig if the geoviewLayerType attribute of the
- * verifyIfLayer parameter is WKB. The type ascention applies only to the true block of the if clause that use this
- * function.
- * @param {TypeGeoviewLayerConfig} verifyIfLayer - Polymorphic object to test in order to determine if the type ascention is valid.
- * @returns {boolean} true if the type ascention is valid.
- */
-export declare const layerConfigIsWkb: (verifyIfLayer: TypeGeoviewLayerConfig) => verifyIfLayer is TypeWkbLayerConfig;
-/**
- * Type guard function that redefines a TypeLayerEntryConfig as a WkbLayerEntryConfig if the geoviewLayerType attribute of
- * the verifyIfGeoViewEntry.geoviewLayerConfig attribute is WKB. The type ascention applies only to the true block of the if
- * clause that use this function.
- * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry - Polymorphic object to test in order to determine if the type ascention is valid.
- * @returns {boolean} true if the type ascention is valid.
- */
-export declare const geoviewEntryIsWKB: (verifyIfGeoViewEntry: TypeLayerEntryConfig) => verifyIfGeoViewEntry is WkbLayerEntryConfig;
 //# sourceMappingURL=wkb.d.ts.map

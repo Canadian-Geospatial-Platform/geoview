@@ -1,10 +1,10 @@
 import { Coordinate } from 'ol/coordinate';
 import { TypeDateFragments } from '@/core/utils/date-mgt';
-import { TypeStyleGeometry, TypeFeatureInfoEntryPartial, codedValueType, rangeDomainType, TypeOutfieldsType, TypeAliasLookup, TypeOutfields } from '@/api/config/types/map-schema-types';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
-import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
+import { TypeStyleGeometry, TypeFeatureInfoEntryPartial, codedValueType, rangeDomainType, TypeOutfieldsType, TypeAliasLookup, TypeOutfields } from '@/api/types/map-schema-types';
+import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
+import { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
+import { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 /**
  * Returns the type of the specified field.
  * @param {AbstractBaseLayerEntryConfig} layerConfig The layer config

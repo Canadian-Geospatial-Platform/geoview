@@ -1,6 +1,7 @@
 import { Style } from 'ol/style';
 import Feature, { FeatureLike } from 'ol/Feature';
-import { TypeLayerStyleConfigType, TypeKindOfVectorSettings, TypeStyleGeometry, TypeLayerStyleSettings, TypeLayerStyleConfig, TypeLayerStyleConfigInfo, TypeAliasLookup, TypeLayerMetadataFields } from '@/api/config/types/map-schema-types';
+import { TypeLayerStyleConfigType, TypeKindOfVectorSettings, TypeStyleGeometry, TypeLayerStyleSettings, TypeLayerStyleConfig, TypeLayerStyleConfigInfo, TypeAliasLookup } from '@/api/types/map-schema-types';
+import { TypeLayerMetadataFields } from '@/api/types/layer-schema-types';
 import { FilterNodeType } from './geoview-renderer-types';
 import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 type TypeStyleProcessor = (styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, filterEquation?: FilterNodeType[], legendFilterIsOff?: boolean, domainsLookup?: TypeLayerMetadataFields[], aliasLookup?: TypeAliasLookup) => Style | undefined;

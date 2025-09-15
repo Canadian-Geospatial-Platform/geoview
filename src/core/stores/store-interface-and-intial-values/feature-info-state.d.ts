@@ -1,5 +1,7 @@
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
-import { TypeFeatureInfoEntry, TypeResultSet, TypeResultSetEntry, TypeQueryStatus, TypeFieldEntry, TypeGeoviewLayerType } from '@/api/config/types/map-schema-types';
+import { TypeFeatureInfoEntry, TypeResultSet, TypeResultSetEntry, TypeQueryStatus, TypeFieldEntry } from '@/api/types/map-schema-types';
+import { TypeGeoviewLayerType } from '@/api/types/layer-schema-types';
+import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 type FeatureInfoActions = IFeatureInfoState['actions'];
 export interface IFeatureInfoState {
     checkedFeatures: Array<TypeFeatureInfoEntry>;
@@ -7,6 +9,8 @@ export interface IFeatureInfoState {
     layerDataArrayBatch: TypeFeatureInfoResultSetEntry[];
     layerDataArrayBatchLayerPathBypass: string;
     selectedLayerPath: string;
+    coordinateInfoEnabled: boolean;
+    setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
     actions: {
         addCheckedFeature: (feature: TypeFeatureInfoEntry) => void;
         removeCheckedFeature: (feature: TypeFeatureInfoEntry | 'all') => void;
@@ -14,6 +18,7 @@ export interface IFeatureInfoState {
         setLayerDataArrayBatch: (layerDataArray: TypeFeatureInfoResultSetEntry[]) => void;
         setLayerDataArrayBatchLayerPathBypass: (layerPath: string) => void;
         setSelectedLayerPath: (selectedLayerPath: string) => void;
+        toggleCoordinateInfoEnabled: () => void;
     };
     setterActions: {
         addCheckedFeature: (feature: TypeFeatureInfoEntry) => void;
@@ -22,6 +27,7 @@ export interface IFeatureInfoState {
         setLayerDataArrayBatch: (layerDataArray: TypeFeatureInfoResultSetEntry[]) => void;
         setLayerDataArrayBatchLayerPathBypass: (layerPath: string) => void;
         setSelectedLayerPath: (selectedLayerPath: string) => void;
+        toggleCoordinateInfoEnabled: () => void;
     };
 }
 /**
@@ -55,6 +61,7 @@ export declare const useDetailsCheckedFeatures: () => TypeFeatureInfoEntry[];
 export declare const useDetailsLayerDataArray: () => TypeFeatureInfoResultSetEntry[];
 export declare const useDetailsLayerDataArrayBatch: () => TypeFeatureInfoResultSetEntry[];
 export declare const useDetailsSelectedLayerPath: () => string;
+export declare const useDetailsCoordinateInfoEnabled: () => boolean;
 export declare const useDetailsStoreActions: () => FeatureInfoActions;
 export declare const useSelectorLayerQueryStatus: (layerPath: string) => TypeQueryStatus | undefined;
 export declare const useSelectorLayerFeatures: (layerPath: string) => TypeFeatureInfoEntry[] | undefined;

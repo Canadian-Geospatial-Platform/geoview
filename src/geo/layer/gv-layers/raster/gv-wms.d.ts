@@ -5,12 +5,12 @@ import { Extent } from 'ol/extent';
 import { Projection as OLProjection } from 'ol/proj';
 import { Map as OLMap } from 'ol';
 import { TypeWmsLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { TypeFeatureInfoEntry } from '@/api/config/types/map-schema-types';
+import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { TypeDateFragments } from '@/core/utils/date-mgt';
-import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
+import { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 /**
  * Manages a WMS layer.
  *

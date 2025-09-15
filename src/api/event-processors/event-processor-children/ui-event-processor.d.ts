@@ -1,4 +1,4 @@
-import { TypeValidAppBarCoreProps, TypeValidFooterBarTabsCoreProps, TypeValidMapCorePackageProps } from '@/api/config/types/map-schema-types';
+import { TypeValidAppBarCoreProps, TypeValidFooterBarTabsCoreProps, TypeValidMapCorePackageProps } from '@/api/types/map-schema-types';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { IUIState, ActiveAppBarTabType } from '@/core/stores/store-interface-and-intial-values/ui-state';
 export declare class UIEventProcessor extends AbstractEventProcessor {

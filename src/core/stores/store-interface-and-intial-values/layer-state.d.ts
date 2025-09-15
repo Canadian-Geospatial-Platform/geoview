@@ -2,7 +2,9 @@ import { Extent } from 'ol/extent';
 import { TypeLayersViewDisplayState, TypeLegendItem, TypeLegendLayer, TypeLegendLayerItem } from '@/core/components/layers/types';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
-import { TypeFeatureInfoEntryPartial, TypeLayerStatus, TypeLayerStyleConfig, TypeResultSet, TypeResultSetEntry, TypeLayerControls, TypeGeoviewLayerType, TypeTemporalDimension } from '@/api/config/types/map-schema-types';
+import { TypeFeatureInfoEntryPartial, TypeLayerStyleConfig, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
+import { TimeDimension } from '@/core/utils/date-mgt';
+import { TypeLayerStatus, TypeLayerControls, TypeGeoviewLayerType } from '@/api/types/layer-schema-types';
 import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 type LayerActions = ILayerState['actions'];
 export interface ILayerState {
@@ -24,7 +26,7 @@ export interface ILayerState {
         getLayerDefaultFilter: (layerPath: string) => string | undefined;
         getLayerDeleteInProgress: () => string;
         getLayerServiceProjection: (layerPath: string) => string | undefined;
-        getLayerTemporalDimension: (layerPath: string) => TypeTemporalDimension | undefined;
+        getLayerTimeDimension: (layerPath: string) => TimeDimension | undefined;
         refreshLayer: (layerPath: string) => void;
         reloadLayer: (layerPath: string) => void;
         setAllItemsVisibility: (layerPath: string, visibility: boolean) => void;

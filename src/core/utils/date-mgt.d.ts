@@ -1,7 +1,8 @@
 import { Dayjs } from 'dayjs';
 import 'dayjs/locale/en-ca';
 import 'dayjs/locale/fr-ca';
-import { TypeDisplayLanguage, TypeMetadataWMSCapabilityLayerDimension } from '@/api/config/types/map-schema-types';
+import { TypeDisplayLanguage } from '@/api/types/map-schema-types';
+import { TypeMetadataWMSCapabilityLayerDimension } from '@/api/types/layer-schema-types';
 export type TypeDateFragments = [number[], number[], string[]];
 /**
  * Type used to define the date precision pattern to use.

@@ -1,5 +1,7 @@
 import { EventType } from '@/geo/layer/layer-sets/abstract-layer-set';
+import { TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
+import { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import { IFeatureInfoState, TypeFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
 /**
@@ -22,7 +24,7 @@ export declare class FeatureInfoEventProcessor extends AbstractEventProcessor {
     /**
      * Get the selectedLayerPath value
      * @param {string} mapId - The map identifier
-     * @returns {string}} the selected layer path
+     * @returns {string} the selected layer path
      */
     static getSelectedLayerPath(mapId: string): string;
     /**
@@ -44,7 +46,7 @@ export declare class FeatureInfoEventProcessor extends AbstractEventProcessor {
      * Deletes the specified layer path from the layer sets in the store. The update of the array will also trigger an update in a batched manner.
      * @param {string} mapId - The map identifier
      * @param {string} layerPath - The layer path to delete
-     * @returns {Promise<void>}
+     * @returns {void}
      */
     static deleteFeatureInfo(mapId: string, layerPath: string): void;
     /**
@@ -56,5 +58,13 @@ export declare class FeatureInfoEventProcessor extends AbstractEventProcessor {
      * @returns {Promise<void>}
      */
     static propagateFeatureInfoToStore(mapId: string, eventType: EventType, resultSetEntry: TypeFeatureInfoResultSetEntry): Promise<void>;
+    static createCoordinateInfoLayer(mapId: string, features?: TypeFeatureInfoEntry[]): void;
+    /**
+     * Queries coordinate information from endpoints
+     * @param {string} mapId - The map ID
+     * @param {[number, number]} coordinates - The lng/lat coordinates
+     * @returns {Promise<TypeCoordinateInfo>} Promise of coordinate information
+     */
+    static getCoordinateInfo(mapId: string, coordinates: TypeMapMouseInfo): void;
 }
 //# sourceMappingURL=feature-info-event-processor.d.ts.map

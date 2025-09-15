@@ -1,6 +1,7 @@
-import { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config';
-import { TypeDisplayLanguage, TypeGeoviewLayerConfig, TypeInitialGeoviewLayerType, TypeLayerStyleConfig } from '@/api/config/types/map-schema-types';
-import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
+import { MapFeatureConfig } from '@/api/config/map-feature-config';
+import { TypeDisplayLanguage, TypeLayerStyleConfig } from '@/api/types/map-schema-types';
+import { TypeGeoviewLayerConfig, TypeInitialGeoviewLayerType } from '@/api/types/layer-schema-types';
+import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 /**
  * The API class that create configuration object. It is used to validate and read the service and layer metadata.
  * @exports
@@ -105,5 +106,11 @@ export declare class ConfigApi {
      * @returns {string} The serialized array of ConfigBaseClass.
      */
     static serializeConfigClasses(layerConfigs: ConfigBaseClass[]): string;
+    /**
+     * Utility function to validate a UUID.
+     * @param {string} uuid - The uuid to test.
+     * @returns {boolean} True if the provided uuid is a valid uuid.
+     */
+    static isValidUUID(uuid: string): boolean;
 }
 //# sourceMappingURL=config-api.d.ts.map

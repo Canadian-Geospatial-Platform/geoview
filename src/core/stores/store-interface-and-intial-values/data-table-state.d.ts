@@ -1,5 +1,5 @@
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
-import { TypeFeatureInfoEntry, TypeLayerData, TypeResultSet, TypeResultSetEntry } from '@/api/config/types/map-schema-types';
+import { TypeFeatureInfoEntry, TypeLayerData, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 type DataTableActions = IDataTableState['actions'];
 export interface IDataTableState {

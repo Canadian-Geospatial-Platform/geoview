@@ -3,6 +3,7 @@ import { LayerListEntry } from './layer-list';
 import { TypeContainerBox } from '@/core/types/global-types';
 interface LayoutProps {
     children?: ReactNode;
+    layoutSwitch?: ReactNode;
     guideContentIds?: string[];
     layerList: LayerListEntry[];
     selectedLayerPath: string | undefined;
@@ -12,6 +13,6 @@ interface LayoutProps {
     onIsEnlargeClicked?: (isEnlarge: boolean) => void;
     onGuideIsOpen?: (isGuideOpen: boolean) => void;
 }
-export declare function Layout({ children, guideContentIds, layerList, selectedLayerPath, onLayerListClicked, onIsEnlargeClicked, fullWidth, onGuideIsOpen, containerType, }: LayoutProps): JSX.Element;
+export declare function Layout({ children, layoutSwitch, guideContentIds, layerList, selectedLayerPath, onLayerListClicked, onIsEnlargeClicked, fullWidth, onGuideIsOpen, containerType, }: LayoutProps): JSX.Element;
 export {};
 //# sourceMappingURL=layout.d.ts.map

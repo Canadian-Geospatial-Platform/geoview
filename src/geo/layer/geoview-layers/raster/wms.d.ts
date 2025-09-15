@@ -1,9 +1,9 @@
 import { ImageWMS } from 'ol/source';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, TypeOfServer, CONST_LAYER_TYPES, TypeMetadataWMSCapabilityLayer, TypeMetadataWMS } from '@/api/config/types/map-schema-types';
+import { CONST_LAYER_TYPES, TypeGeoviewLayerConfig, TypeOfServer, TypeMetadataWMS, TypeMetadataWMSCapabilityLayer } from '@/api/types/layer-schema-types';
 import { CallbackNewMetadataDelegate } from '@/geo/utils/utilities';
-import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { ConfigBaseClass, TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
+import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: typeof CONST_LAYER_TYPES.WMS;
@@ -105,19 +105,20 @@ export declare class WMS extends AbstractGeoViewRaster {
      */
     static initGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, fullSubLayers: boolean): Promise<TypeGeoviewLayerConfig>;
     /**
-     * Creates a configuration object for a WMS layer.
-     * This function constructs a `TypeWMSLayerConfig` object that describes an WMS layer
-     * and its associated entry configurations based on the provided parameters.
+     * Creates a complete configuration object for a WMS GeoView layer.
+     * This function constructs a `TypeWMSLayerConfig` object that defines a WMS layer and its associated
+     * entries. It supports both individual layers and nested group layers through recursive processing.
      * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
-     * @param {string} geoviewLayerName - The display name of the GeoView layer.
-     * @param {string} metadataAccessPath - The URL or path to access metadata.
-     * @param {TypeOfServer} serverType - The server type.
-     * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
-     * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
-     * @param {unknown} customGeocoreLayerConfig - An optional layer config from Geocore.
-     * @returns {TypeWMSLayerConfig} The constructed configuration object for the WMS layer.
+     * @param {string} geoviewLayerName - The human-readable name of the GeoView layer.
+     * @param {string} metadataAccessPath - The URL or path used to access the layer's metadata.
+     * @param {TypeOfServer} serverType - The type of WMS server (e.g., 'geoserver', 'mapserver').
+     * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering or animation.
+     * @param {TypeLayerEntryShell[]} layerEntries - The root array of parsed layer entries (may include nested groups).
+     * @param {boolean} fullSubLayers - If false, will simulate legacy behavior and skip deeper layers after the first.
+     * @param {unknown} [customGeocoreLayerConfig={}] - Optional custom layer configuration to merge into leaf layers.
+     * @returns {TypeWMSLayerConfig} The fully constructed WMS layer configuration object.
      */
-    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, serverType: TypeOfServer, isTimeAware: boolean, layerEntries: TypeLayerEntryShell[], customGeocoreLayerConfig?: unknown): TypeWMSLayerConfig;
+    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, serverType: TypeOfServer, isTimeAware: boolean, layerEntries: TypeLayerEntryShell[], fullSubLayers: boolean, customGeocoreLayerConfig?: unknown): TypeWMSLayerConfig;
     /**
      * Processes a WMS GeoviewLayerConfig and returns a promise
      * that resolves to an array of `ConfigBaseClass` layer entry configurations.
@@ -134,26 +135,8 @@ export declare class WMS extends AbstractGeoViewRaster {
      * @param {TypeOfServer} typeOfServer - Indicates the type of server.
      * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
      */
-    static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerIds: number[], isTimeAware: boolean, typeOfServer: TypeOfServer): Promise<ConfigBaseClass[]>;
+    static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerIds: number[], isTimeAware: boolean, typeOfServer: TypeOfServer, fullSubLayers: boolean): Promise<ConfigBaseClass[]>;
 }
-/**
- * type guard function that redefines a TypeGeoviewLayerConfig as a TypeWMSLayerConfig if the geoviewLayerType attribute of the
- * verifyIfLayer parameter is WMS. The type ascention applies only to the true block of the if clause that use this function.
- *
- * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export declare const layerConfigIsWMS: (verifyIfLayer: TypeGeoviewLayerConfig) => verifyIfLayer is TypeWMSLayerConfig;
-/**
- * type guard function that redefines a TypeLayerEntryConfig as a OgcWmsLayerEntryConfig if the geoviewLayerType attribute of the
- * verifyIfGeoViewEntry.geoviewLayerConfig attribute is WMS. The type ascention applies only to the true block of
- * the if clause that use this function.
- *
- * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
- * valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export declare const geoviewEntryIsWMS: (verifyIfGeoViewEntry: TypeLayerEntryConfig) => verifyIfGeoViewEntry is OgcWmsLayerEntryConfig;
+/** Delegate type for the callback when processing group layers */
+export type GroupLayerCreatedDelegate = (config: ConfigBaseClass) => void;
 //# sourceMappingURL=wms.d.ts.map

@@ -1,10 +1,10 @@
 import { ImageArcGISRest } from 'ol/source';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, CONST_LAYER_TYPES, TypeMetadataEsriDynamic } from '@/api/config/types/map-schema-types';
+import { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
+import { CONST_LAYER_TYPES, TypeGeoviewLayerConfig, TypeMetadataEsriDynamic } from '@/api/types/layer-schema-types';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
-import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
-import { ConfigBaseClass, TypeLayerEntryShell } from '@/core/utils/config/validation-classes/config-base-class';
+import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
+import { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 export interface TypeEsriDynamicLayerConfig extends TypeGeoviewLayerConfig {
     geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_DYNAMIC;
     listOfLayerEntryConfig: (GroupLayerEntryConfig | EsriDynamicLayerEntryConfig)[];
@@ -54,10 +54,10 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
     protected onCreateGVLayer(layerConfig: EsriDynamicLayerEntryConfig): GVEsriDynamic;
     /**
      * Performs specific validation that can only be done by the child of the AbstractGeoViewEsriLayer class.
-     * @param {TypeLayerEntryConfig} layerConfig - The layer config to check.
+     * @param {ConfigBaseClass} layerConfig - The layer config to check.
      * @returns {boolean} true if an error is detected.
      */
-    esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig): boolean;
+    esriChildHasDetectedAnError(layerConfig: ConfigBaseClass): boolean;
     /**
      * Initializes a GeoView layer configuration for an Esri Dynamic layer.
      * This method creates a basic TypeGeoviewLayerConfig using the provided
@@ -120,25 +120,4 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
         subLayerIds: number[];
     }[]): TypeLayerEntryShell[];
 }
-/**
- * type guard function that redefines a TypeGeoviewLayerConfig as a TypeEsriDynamicLayerConfig if the geoviewLayerType attribute of
- * the verifyIfLayer parameter is ESRI_DYNAMIC. The type ascention applies only to the true block of the if clause that use
- * this function.
- *
- * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export declare const layerConfigIsEsriDynamic: (verifyIfLayer: TypeGeoviewLayerConfig) => verifyIfLayer is TypeEsriDynamicLayerConfig;
-/**
- * type guard function that redefines a TypeLayerEntryConfig as a EsriDynamicLayerEntryConfig if the geoviewLayerType attribute
- * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is ESRI_DYNAMIC. The type ascention applies only to the true block of
- * the if clause that use this function.
- *
- * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
- * valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export declare const geoviewEntryIsEsriDynamic: (verifyIfGeoViewEntry: TypeLayerEntryConfig) => verifyIfGeoViewEntry is EsriDynamicLayerEntryConfig;
 //# sourceMappingURL=esri-dynamic.d.ts.map
