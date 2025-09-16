@@ -49,8 +49,8 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
   // #region Helper functions
   /**
    * Gets ranges of protected content that should not be highlighted during search
-   * @param content - The content to analyze
-   * @returns Array of start/end positions for protected ranges
+   * @param {string} content - The content to analyze
+   * @returns {Array<{start: number, end: number}>} Array of start/end positions for protected ranges
    */
   const getProtectedRanges = useCallback((content: string) => {
     // Log
@@ -69,8 +69,8 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
 
   /**
    * Identifies table ranges in markdown content
-   * @param content - The content to analyze
-   * @returns Array of start/end positions for table ranges
+   * @param {string} content - The content to analyze
+   * @returns {Array<{start: number, end: number}>} Array of start/end positions for table ranges
    */
   const getTableRanges = useCallback((content: string) => {
     // Log
@@ -104,7 +104,7 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
 
   /**
    * Finds all search matches across all guide sections
-   * @param term - The search term to find
+   * @param {string} term - The search term to find
    */
   const findAllMatches = useCallback(
     (term: string) => {
@@ -182,9 +182,9 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
 
   /**
    * Highlights search terms in content with visual markers
-   * @param content - The content to highlight
-   * @param sectionIndex - The section index being processed
-   * @returns Content with highlighted search terms
+   * @param {string} content - The content to highlight
+   * @param {number} sectionIndex - The section index being processed
+   * @returns {string} Content with highlighted search terms
    */
   const highlightSearchTerm = useCallback(
     (content: string, sectionIndex: number): string => {
@@ -278,7 +278,7 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
 
   /**
    * Navigates to a specific search match
-   * @param index - The match index to navigate to
+   * @param {number} index - The match index to navigate to
    */
   const navigateToMatch = useCallback(
     (index: number) => {
@@ -364,7 +364,7 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
 
   /**
    * Handles keyboard navigation for search
-   * @param e - The keyboard event
+   * @param {React.KeyboardEvent} e - The keyboard event
    */
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
