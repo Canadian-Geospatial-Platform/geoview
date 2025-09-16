@@ -47,6 +47,11 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // #region Helper functions
+  /**
+   * Gets ranges of protected content that should not be highlighted during search
+   * @param content - The content to analyze
+   * @returns Array of start/end positions for protected ranges
+   */
   const getProtectedRanges = useCallback((content: string) => {
     // Log
     logger.logTraceUseCallback('GUIDE-SEARCH - getProtectedRanges');
@@ -62,6 +67,11 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
     return protectedRanges;
   }, []);
 
+  /**
+   * Identifies table ranges in markdown content
+   * @param content - The content to analyze
+   * @returns Array of start/end positions for table ranges
+   */
   const getTableRanges = useCallback((content: string) => {
     // Log
     logger.logTraceUseCallback('GUIDE-SEARCH - getTableRanges');
@@ -93,7 +103,8 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
   // #endregion Helper functions
 
   /**
-   * Find all matches across all sections
+   * Finds all search matches across all guide sections
+   * @param term - The search term to find
    */
   const findAllMatches = useCallback(
     (term: string) => {
@@ -170,7 +181,10 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
   );
 
   /**
-   * Highlights search term in content with navigation markers
+   * Highlights search terms in content with visual markers
+   * @param content - The content to highlight
+   * @param sectionIndex - The section index being processed
+   * @returns Content with highlighted search terms
    */
   const highlightSearchTerm = useCallback(
     (content: string, sectionIndex: number): string => {
@@ -242,7 +256,9 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
     [searchTerm, allMatches, currentMatchIndex, t, getProtectedRanges, getTableRanges]
   );
 
-  // Update matches when search term changes
+  /**
+   * Updates search matches when search term changes
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('GUIDE-SEARCH - search term changes');
@@ -250,7 +266,9 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
     findAllMatches(searchTerm);
   }, [searchTerm, findAllMatches]);
 
-  // Notify parent of search state changes
+  /**
+   * Notifies parent component of search state changes
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('GUIDE-SEARCH - notify parent of search state changes');
@@ -258,6 +276,10 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
     onSearchStateChange(searchTerm, highlightSearchTerm);
   }, [searchTerm, highlightSearchTerm, onSearchStateChange]);
 
+  /**
+   * Navigates to a specific search match
+   * @param index - The match index to navigate to
+   */
   const navigateToMatch = useCallback(
     (index: number) => {
       // Log
@@ -305,6 +327,9 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
     [allMatches, onSectionChange]
   );
 
+  /**
+   * Navigates to the next search match
+   */
   const handleNext = useCallback(() => {
     // Log
     logger.logTraceUseCallback('GUIDE-SEARCH - handleNext');
@@ -313,6 +338,9 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
     navigateToMatch(nextIndex);
   }, [currentMatchIndex, allMatches.length, navigateToMatch]);
 
+  /**
+   * Navigates to the previous search match
+   */
   const handlePrevious = useCallback(() => {
     // Log
     logger.logTraceUseCallback('GUIDE-SEARCH - handlePrevious');
@@ -321,6 +349,9 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
     navigateToMatch(prevIndex);
   }, [currentMatchIndex, allMatches.length, navigateToMatch]);
 
+  /**
+   * Clears the search term and resets search state
+   */
   const handleClear = useCallback(() => {
     // Log
     logger.logTraceUseCallback('GUIDE-SEARCH - handleClear');
@@ -331,6 +362,10 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
     setTimeout(() => searchInputRef.current?.focus(), 0);
   }, []);
 
+  /**
+   * Handles keyboard navigation for search
+   * @param e - The keyboard event
+   */
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       // Log
