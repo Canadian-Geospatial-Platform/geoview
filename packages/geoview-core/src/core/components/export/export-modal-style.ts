@@ -128,4 +128,36 @@ export const getSxClasses = (theme: Theme): any => ({
     color: theme.palette.geoViewColor.grey.dark[800],
     margin: '1rem',
   },
+  dialogActions: {
+    padding: '1rem',
+    gap: '0.5rem',
+  },
+
+  buttonBase: {
+    fontSize: theme.palette.geoViewFontSize.sm,
+    padding: '0.7rem 1rem',
+    height: '47px',
+  },
+
+  buttonOutlined: {
+    fontSize: theme.palette.geoViewFontSize.sm,
+    padding: '0.7rem 1rem',
+    height: '47px',
+    borderColor: theme.palette.geoViewColor.primary.main,
+    color: theme.palette.geoViewColor.primary.main,
+    '&:hover': {
+      borderColor: theme.palette.geoViewColor.primary.dark[200],
+      backgroundColor: theme.palette.geoViewColor.primary.light[100],
+    },
+  },
+
+  buttonContained: {
+    fontSize: theme.palette.geoViewFontSize.sm,
+    padding: '0.7rem 1rem',
+    backgroundColor: theme.palette.geoViewColor.primary.main,
+    height: '47px',
+    '&:hover': {
+      backgroundColor: theme.palette.geoViewColor.primary.dark[200],
+    },
+  },
 });

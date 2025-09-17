@@ -272,6 +272,7 @@
     "title": "Télécharger la carte en PNG",
     "cancelBtn": "Annuler",
     "exportBtn": "Télécharger",
+    "dpiBtn": "PPP",
     "exportTitle": "Titre",
     "approx": "approx.",
     "fileExportDefaultPrefixName": "carte-export"

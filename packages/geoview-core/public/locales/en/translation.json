@@ -272,6 +272,7 @@
     "title": "Download map as PNG",
     "cancelBtn": "Cancel",
     "exportBtn": "Download",
+    "dpiBtn": "DPI",
     "exportTitle": "Title",
     "approx": "approx.",
     "fileExportDefaultPrefixName": "map-export"
