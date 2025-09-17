@@ -247,7 +247,7 @@ export default function ExportModal(): JSX.Element {
                   fontEmbedCSS: '',
                   width: getCanvasWidth(dialogBox),
                   height: clonedContent.offsetHeight,
-                  pixelRatio: 2,
+                  pixelRatio: exportMapResolution / 96,
                 })
                 .then((dataUrl) => {
                   // Reset map
