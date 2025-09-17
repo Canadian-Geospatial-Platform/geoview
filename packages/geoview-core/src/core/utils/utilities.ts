@@ -361,19 +361,20 @@ export function parseJSONConfig<T>(configStr: string): T {
 
 /**
 /**
- * Export the image data url as a PNG
- * @param {string} dataUrl - The data Url to be downloaded as png.
+ * Export the image data url to a file
+ * @param {string} dataUrl - The data Url to be downloaded.
  * @param {string} name - The name of exported file
+ * @param {string} format - The format of the exported file
  */
-export function exportPNG(dataUrl: string, name: string): void {
+export function exportImage(dataUrl: string, name: string, format: 'png' | 'jpeg' = 'png'): void {
   try {
     const element = document.createElement('a');
-    const filename = `${name}.png`;
+    const filename = `${name}.${format}`;
     element.setAttribute('href', dataUrl);
     element.setAttribute('download', filename);
     element.click();
   } catch (error: unknown) {
-    logger.logError(`Error trying to export PNG.`, error);
+    logger.logError(`Error trying to export ${format}.`, error);
   }
 }
 

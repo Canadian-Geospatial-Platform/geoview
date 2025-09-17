@@ -21,7 +21,7 @@ import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers'
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { Projection } from '@/geo/utils/projection';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { TypeMapMouseInfo } from '@/geo/map/map-viewer';
+import { MapViewer, TypeMapMouseInfo } from '@/geo/map/map-viewer';
 
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
@@ -80,6 +80,7 @@ export interface IMapState {
     createBasemapFromOptions: (basemapOptions: TypeBasemapOptions) => Promise<void>;
     getMapLayerParentHidden(layerPath: string): boolean;
     isLayerHiddenOnMap(layerPath: string): boolean;
+    getMapViewer: () => MapViewer;
     getPixelFromCoordinate: (coord: Coordinate) => Pixel;
     showClickMarker: (marker: TypeClickMarker) => void;
     hideClickMarker: () => void;
@@ -274,6 +275,15 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           !MapEventProcessor.findMapLayerFromOrderedInfo(get().mapId, layerPath, get().mapState.orderedLayerInfo)?.inVisibleRange ||
           !MapEventProcessor.findMapLayerFromOrderedInfo(get().mapId, layerPath, get().mapState.orderedLayerInfo)?.visible
         );
+      },
+
+      /**
+       * Returns the map viewer.
+       * @returns {MapViewer} - The map viewer
+       */
+      getMapViewer: (): MapViewer => {
+        // Redirect to processor
+        return MapEventProcessor.getMapViewer(get().mapId);
       },
 
       /**
