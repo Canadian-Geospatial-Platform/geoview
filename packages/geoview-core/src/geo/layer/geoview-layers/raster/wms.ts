@@ -390,11 +390,12 @@ export class WMS extends AbstractGeoViewRaster {
     // Wait for all requests to settle (either fulfilled or rejected)
     const results = await Promise.allSettled(metadataPromises);
 
-    // If all metadata fetches failed, flag the first layer's parent as errored and abort
-    if (results.every((r) => r.status === 'rejected')) {
-      // Set the parent in error
-      layers[0].parentLayerConfig?.setLayerStatusError();
-    }
+    // Trying to comment this out, as the typing seems wrong (setLayerStatusError has not been a function of GroupLayerEntryConfig for a long time...) 2025-09-18
+    // // If all metadata fetches failed, flag the first layer's parent as errored and abort
+    // if (results.every((r) => r.status === 'rejected')) {
+    //   // Set the parent in error
+    //   layers[0].getParentLayerConfig?.setLayerStatusError();
+    // }
 
     // Merge metadata results
     let baseMetadata: TypeMetadataWMS | undefined;
@@ -456,7 +457,7 @@ export class WMS extends AbstractGeoViewRaster {
                 // No capabilities found in the response
                 reject(
                   new PromiseRejectErrorWrapper(
-                    new LayerNoCapabilitiesError(layerConfig.geoviewLayerConfig.geoviewLayerId, layerConfig.getLayerNameCascade()),
+                    new LayerNoCapabilitiesError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerNameCascade()),
                     layerConfig
                   )
                 );
@@ -914,13 +915,13 @@ export class WMS extends AbstractGeoViewRaster {
         // Create the Group layer in preparation for recursion
         const groupLayer = new GroupLayerEntryConfig({
           ...layerConfig.cloneLayerProps(),
-          geoviewLayerConfig: layerConfig.geoviewLayerConfig,
           layerId: `${subLayer.layerId}`,
           layerName: subLayer.layerName,
           listOfLayerEntryConfig: [],
         });
 
-        groupLayer.parentLayerConfig = layerConfig;
+        // Assign the parent
+        groupLayer.setParentLayerConfig(layerConfig);
 
         // Recursive call
         WMS.#createGroupLayerRec(subLayer.listOfLayerEntryConfig!, groupLayer, fullSubLayers, callbackGroupLayerCreated);
@@ -931,9 +932,11 @@ export class WMS extends AbstractGeoViewRaster {
         // Handle leaf layer
         const subLayerEntryConfig = new OgcWmsLayerEntryConfig({
           ...layerConfig.cloneLayerProps(),
-          geoviewLayerConfig: layerConfig.geoviewLayerConfig,
         });
-        subLayerEntryConfig.parentLayerConfig = layerConfig;
+
+        // TODO: ALEX - Refactor - Instead of assigning these props after the fact, assign them before creating the OgcWmsLayerEntryConfig
+        // Assign the parent
+        subLayerEntryConfig.setParentLayerConfig(layerConfig);
         subLayerEntryConfig.layerId = `${subLayer.layerId}`;
         subLayerEntryConfig.setLayerName(subLayer.layerName!);
 

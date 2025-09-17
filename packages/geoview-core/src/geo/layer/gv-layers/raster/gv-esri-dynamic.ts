@@ -106,7 +106,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
     try {
       if (!layerConfig) return null;
-      const legendUrl = `${layerConfig.geoviewLayerConfig.metadataAccessPath}/legend?f=json`;
+      const legendUrl = `${layerConfig.getMetadataAccessPath()}/legend?f=json`;
       const legendJson = await Fetch.fetchJson<TypeEsriImageLayerLegend>(legendUrl);
 
       let legendInfo;

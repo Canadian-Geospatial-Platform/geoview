@@ -158,7 +158,7 @@ export class GeoJSON extends AbstractGeoViewVector {
         // layerId ending, chances are that it was set by the config-validation because of an empty dataAcessPath value in the config.
         // This situation means that we want to use the dataAccessPath found in the metadata if it is set, otherwise we will keep the
         // config dataAccessPath value.
-        let metadataAccessPathRoot = layerConfig.geoviewLayerConfig?.metadataAccessPath;
+        let metadataAccessPathRoot = layerConfig.getMetadataAccessPath();
         if (metadataAccessPathRoot) {
           metadataAccessPathRoot =
             metadataAccessPathRoot.split('/').length > 1 ? metadataAccessPathRoot.split('/').slice(0, -1).join('/') : './';

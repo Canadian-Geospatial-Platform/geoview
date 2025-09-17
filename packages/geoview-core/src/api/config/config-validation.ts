@@ -13,18 +13,6 @@ import {
   mapConfigLayerEntryIsGeoPackage,
   mapConfigLayerEntryIsShapefile,
   TypeGeoviewLayerType,
-  layerEntryIsEsriFeatureFromConfig,
-  layerEntryIsEsriDynamicFromConfig,
-  layerEntryIsEsriImageFromConfig,
-  layerEntryIsImageStaticFromConfig,
-  layerEntryIsVectorTileFromConfig,
-  layerEntryIsOgcWmsFromConfig,
-  layerEntryIsXYZTilesFromConfig,
-  layerEntryIsCSVFromConfig,
-  layerEntryIsGeoJSONFromConfig,
-  layerEntryIsOgcFeatureFromConfig,
-  layerEntryIsWFSFromConfig,
-  layerEntryIsWKBFromConfig,
   ConfigClassOrType,
 } from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
@@ -43,7 +31,7 @@ import { VectorTilesLayerEntryConfig } from '@/api/config/validation-classes/ras
 import { WfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import { WkbLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
 import { XYZTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
-import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
+import { GroupLayerEntryConfig, GroupLayerEntryConfigProps } from '@/api/config/validation-classes/group-layer-entry-config';
 
 import { LayerMetadataAccessPathMandatoryError, LayerMissingGeoviewLayerIdError } from '@/core/exceptions/layer-exceptions';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
@@ -272,12 +260,11 @@ export class ConfigValidation {
     parentLayerConfig?: GroupLayerEntryConfig
   ): void {
     listOfLayerEntryConfig.forEach((layerConfig, i: number) => {
-      // links the entry to its GeoView layer config.
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.geoviewLayerConfig = geoviewLayerConfig;
-      // links the entry to its parent layer configuration.
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.parentLayerConfig = parentLayerConfig;
+      // Link the entry to its GeoView layer config.
+      ConfigBaseClass.setClassOrTypeGeoviewLayerConfig(layerConfig, geoviewLayerConfig);
+
+      // Link the entry to its parent layer configuration if any
+      ConfigBaseClass.setClassOrTypeParentLayerConfig(layerConfig, parentLayerConfig);
 
       // layerConfig.initialSettings attributes that are not defined inherits parent layer settings that are defined.
       let initialSettings = ConfigBaseClass.getClassOrTypeInitialSettings(layerConfig);
@@ -323,11 +310,11 @@ export class ConfigValidation {
         initialSettings = ConfigBaseClass.getClassOrTypeInitialSettings(layerConfig);
       }
 
-      // Merge the rest of parent and child settings
-      ConfigBaseClass.setClassOrTypeInitialSettings(
-        layerConfig,
-        defaultsDeep(initialSettings, parentInitialSettings || layerConfig.geoviewLayerConfig?.initialSettings)
-      );
+      // If there's a parent
+      if (parentInitialSettings) {
+        // Merge the rest of parent and child settings
+        ConfigBaseClass.setClassOrTypeInitialSettings(layerConfig, defaultsDeep(initialSettings, parentInitialSettings));
+      }
 
       const minScale = ConfigBaseClass.getClassOrTypeMinScale(layerConfig);
       if (minScale) {
@@ -341,52 +328,55 @@ export class ConfigValidation {
         ConfigBaseClass.setClassOrTypeMaxScale(layerConfig, Math.max(maxScale, parentLayerConfig?.getMaxScale() || 0));
       }
 
+      // Get the properties to be able to create the config object
+      const layerConfigProps = ConfigBaseClass.getClassOrTypeLayerEntryProps(layerConfig);
+
       if (ConfigBaseClass.getClassOrTypeEntryTypeIsGroup(layerConfig)) {
         // We must set the parents of all elements in the group.
         ConfigValidation.#recursivelySetChildParent(geoviewLayerConfig, [layerConfig], parentLayerConfig);
-        const parent = new GroupLayerEntryConfig(layerConfig);
+        const parent = new GroupLayerEntryConfig(layerConfigProps as GroupLayerEntryConfigProps);
         // eslint-disable-next-line no-param-reassign
         listOfLayerEntryConfig[i] = parent;
         ConfigValidation.#processLayerEntryConfig(geoviewLayerConfig, parent.listOfLayerEntryConfig, parent);
-      } else if (layerEntryIsOgcWmsFromConfig(layerConfig)) {
+      } else if (OgcWmsLayerEntryConfig.isClassOrTypeWMS(layerConfig)) {
         // eslint-disable-next-line no-param-reassign
-        listOfLayerEntryConfig[i] = new OgcWmsLayerEntryConfig(layerConfig);
-      } else if (layerEntryIsImageStaticFromConfig(layerConfig)) {
+        listOfLayerEntryConfig[i] = new OgcWmsLayerEntryConfig(layerConfigProps);
+      } else if (ImageStaticLayerEntryConfig.isClassOrTypeImageStatic(layerConfig)) {
         // eslint-disable-next-line no-param-reassign
-        listOfLayerEntryConfig[i] = new ImageStaticLayerEntryConfig(layerConfig);
-      } else if (layerEntryIsXYZTilesFromConfig(layerConfig)) {
+        listOfLayerEntryConfig[i] = new ImageStaticLayerEntryConfig(layerConfigProps);
+      } else if (XYZTilesLayerEntryConfig.isClassOrTypeXYZTiles(layerConfig)) {
         // eslint-disable-next-line no-param-reassign
-        listOfLayerEntryConfig[i] = new XYZTilesLayerEntryConfig(layerConfig);
-      } else if (layerEntryIsVectorTileFromConfig(layerConfig)) {
+        listOfLayerEntryConfig[i] = new XYZTilesLayerEntryConfig(layerConfigProps);
+      } else if (VectorTilesLayerEntryConfig.isClassOrTypeVectorTiles(layerConfig)) {
         // eslint-disable-next-line no-param-reassign
-        listOfLayerEntryConfig[i] = new VectorTilesLayerEntryConfig(layerConfig);
-      } else if (layerEntryIsEsriDynamicFromConfig(layerConfig)) {
+        listOfLayerEntryConfig[i] = new VectorTilesLayerEntryConfig(layerConfigProps);
+      } else if (EsriDynamicLayerEntryConfig.isClassOrTypeEsriDynamic(layerConfig)) {
         // eslint-disable-next-line no-param-reassign
-        listOfLayerEntryConfig[i] = new EsriDynamicLayerEntryConfig(layerConfig);
-      } else if (layerEntryIsEsriFeatureFromConfig(layerConfig)) {
+        listOfLayerEntryConfig[i] = new EsriDynamicLayerEntryConfig(layerConfigProps);
+      } else if (EsriFeatureLayerEntryConfig.isClassOrTypeEsriFeature(layerConfig)) {
         // eslint-disable-next-line no-param-reassign
-        listOfLayerEntryConfig[i] = new EsriFeatureLayerEntryConfig(layerConfig);
-      } else if (layerEntryIsEsriImageFromConfig(layerConfig)) {
+        listOfLayerEntryConfig[i] = new EsriFeatureLayerEntryConfig(layerConfigProps);
+      } else if (EsriImageLayerEntryConfig.isClassOrTypeEsriImage(layerConfig)) {
         // eslint-disable-next-line no-param-reassign
-        listOfLayerEntryConfig[i] = new EsriImageLayerEntryConfig(layerConfig);
-      } else if (layerEntryIsWFSFromConfig(layerConfig)) {
+        listOfLayerEntryConfig[i] = new EsriImageLayerEntryConfig(layerConfigProps);
+      } else if (WfsLayerEntryConfig.isClassOrTypeWFSLayer(layerConfig)) {
         // eslint-disable-next-line no-param-reassign
-        listOfLayerEntryConfig[i] = new WfsLayerEntryConfig(layerConfig);
-      } else if (layerEntryIsOgcFeatureFromConfig(layerConfig)) {
+        listOfLayerEntryConfig[i] = new WfsLayerEntryConfig(layerConfigProps);
+      } else if (OgcFeatureLayerEntryConfig.isClassOrTypeOGCLayer(layerConfig)) {
         // eslint-disable-next-line no-param-reassign
-        listOfLayerEntryConfig[i] = new OgcFeatureLayerEntryConfig(layerConfig);
-      } else if (layerEntryIsGeoJSONFromConfig(layerConfig)) {
+        listOfLayerEntryConfig[i] = new OgcFeatureLayerEntryConfig(layerConfigProps);
+      } else if (GeoJSONLayerEntryConfig.isClassOrTypeGeoJSON(layerConfig)) {
         // eslint-disable-next-line no-param-reassign
-        listOfLayerEntryConfig[i] = new GeoJSONLayerEntryConfig(layerConfig);
-      } else if (layerEntryIsCSVFromConfig(layerConfig)) {
+        listOfLayerEntryConfig[i] = new GeoJSONLayerEntryConfig(layerConfigProps);
+      } else if (CsvLayerEntryConfig.isClassOrTypeCSV(layerConfig)) {
         // eslint-disable-next-line no-param-reassign
-        listOfLayerEntryConfig[i] = new CsvLayerEntryConfig(layerConfig);
-      } else if (layerEntryIsWKBFromConfig(layerConfig)) {
+        listOfLayerEntryConfig[i] = new CsvLayerEntryConfig(layerConfigProps);
+      } else if (WkbLayerEntryConfig.isClassOrTypeWKBLayer(layerConfig)) {
         // eslint-disable-next-line no-param-reassign
-        listOfLayerEntryConfig[i] = new WkbLayerEntryConfig(layerConfig);
+        listOfLayerEntryConfig[i] = new WkbLayerEntryConfig(layerConfigProps);
       } else {
         // Unsupported layer type
-        throw new NotSupportedError(`Unsupported layer entry config type '${layerConfig.geoviewLayerConfig?.geoviewLayerType}'`);
+        throw new NotSupportedError(`Unsupported layer entry config type '${ConfigBaseClass.getClassOrTypeSchemaTag(layerConfig)}`);
       }
     });
   }
@@ -404,11 +394,11 @@ export class ConfigValidation {
     listOfLayerEntryConfig: TypeLayerEntryConfig[],
     parentLayerConfig?: GroupLayerEntryConfig
   ): void {
+    // If there's no parent to set, return
+    if (!parentLayerConfig) return;
+
     listOfLayerEntryConfig.forEach((layerConfig) => {
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.parentLayerConfig = parentLayerConfig;
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.geoviewLayerConfig = geoviewLayerConfig;
+      layerConfig.setParentLayerConfig(parentLayerConfig);
       if (ConfigBaseClass.getClassOrTypeEntryTypeIsGroup(layerConfig))
         ConfigValidation.#recursivelySetChildParent(geoviewLayerConfig, layerConfig.listOfLayerEntryConfig, layerConfig);
     });

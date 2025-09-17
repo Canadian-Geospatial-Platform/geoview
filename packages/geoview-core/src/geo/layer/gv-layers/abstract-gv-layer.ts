@@ -111,13 +111,13 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     this.#olSource = olSource;
 
     // Keep the date formatting information
-    this.#serverDateFragmentsOrder = layerConfig.geoviewLayerConfig.serviceDateFormat
-      ? DateMgt.getDateFragmentsOrder(layerConfig.geoviewLayerConfig.serviceDateFormat)
+    this.#serverDateFragmentsOrder = layerConfig.getGeoviewLayerConfig()?.serviceDateFormat
+      ? DateMgt.getDateFragmentsOrder(layerConfig.getGeoviewLayerConfig()?.serviceDateFormat)
       : undefined;
     this.#externalFragmentsOrder = layerConfig.getExternalFragmentsOrder();
 
-    // Boolean indicating if the layer should be included in time awareness functions such as the Time Slider. True by default.
-    this.#isTimeAware = layerConfig.geoviewLayerConfig.isTimeAware === undefined ? true : layerConfig.geoviewLayerConfig.isTimeAware;
+    // Boolean indicating if the layer should be included in time awareness functions such as the Time Slider.
+    this.#isTimeAware = layerConfig.getGeoviewLayerConfig()?.isTimeAware ?? true; // default: true
 
     // If there is a layer style in the config, set it in the layer
     const style = layerConfig.getLayerStyle();
@@ -725,7 +725,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   async onFetchLegend(): Promise<TypeLegend | null> {
     try {
       const legend: TypeLegend = {
-        type: this.getLayerConfig().geoviewLayerConfig.geoviewLayerType,
+        type: this.getLayerConfig().getSchemaTag()!,
         styleConfig: this.getStyle(),
         legend: await getLegendStyles(this.getStyle()),
       };
@@ -816,7 +816,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
         const featureInfoEntry: TypeFeatureInfoEntry = {
           uid: getUid(feature),
           featureKey: featureKeyCounter++,
-          geoviewLayerType: this.getLayerConfig().geoviewLayerConfig.geoviewLayerType,
+          geoviewLayerType: this.getLayerConfig().getSchemaTag()!,
           feature,
           geometry: feature.getGeometry(),
           extent,
