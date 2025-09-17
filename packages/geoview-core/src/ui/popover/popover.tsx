@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Popover as MaterialPopover, PopoverProps } from '@mui/material';
+import { FocusTrap } from '@/ui';
 import { ARROW_KEYS_WITH_SPACE } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
 
@@ -70,12 +71,25 @@ function PopoverUI(props: PopoverProps): JSX.Element {
     logger.logTraceUseEffect('UI.POPOVER - handleKeyDown', open);
     if (open) {
       window.addEventListener('keydown', handleKeyDown);
+      // Focus the close button when popover opens
+      setTimeout(() => {
+        const closeButton = document.querySelector('[data-testid="CloseIcon"]')?.closest('button') as HTMLButtonElement;
+        if (closeButton) {
+          closeButton.focus();
+        }
+      }, 100);
     }
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [open]);
-  return <MaterialPopover {...props} />;
+  return (
+    <MaterialPopover {...props}>
+      <FocusTrap open={open} disableAutoFocus>
+        {props.children}
+      </FocusTrap>
+    </MaterialPopover>
+  );
 }
 
 export const Popover = PopoverUI;

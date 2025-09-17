@@ -76,13 +76,15 @@ const ResponsiveGridLayout = forwardRef(
       return {
         setIsRightPanelVisible: (isVisible: boolean) => setIsRightPanelVisible(isVisible),
         setRightPanelFocus: () => {
-          if (rightMainRef.current) {
-            rightMainRef.current.tabIndex = 0;
-            rightMainRef.current?.focus();
+          if (rightMainRef.current && !isGuideOpen) {
+            setTimeout(() => {
+              rightMainRef.current.tabIndex = 0;
+              rightMainRef.current?.focus();
+            }, 0);
           }
         },
       };
-    });
+    }, [isGuideOpen]);
 
     useEffect(() => {
       if (rightMain) {
@@ -146,13 +148,11 @@ const ResponsiveGridLayout = forwardRef(
       [onIsEnlargeClicked]
     );
 
+    const previousFocusRef = useRef<HTMLElement | null>(null);
+
     const handleOpenGuide = useCallback((): void => {
-      // Open guide if it is closed and we have guide contents to display
-      if (guideContentIds && !isGuideOpen) {
-        setIsGuideOpen(true);
-        rightMainRef.current?.focus();
-      } else if (isGuideOpen) setIsGuideOpen(false); // Close guide if it is open
-    }, [guideContentIds, isGuideOpen]);
+      setIsGuideOpen(!isGuideOpen);
+    }, [isGuideOpen]);
 
     // If we're on mobile
     if (theme.breakpoints.down('md')) {
@@ -215,19 +215,22 @@ const ResponsiveGridLayout = forwardRef(
           type="text"
           variant="outlined"
           size="small"
-          onClick={() => handleOpenGuide()}
+          onClick={handleOpenGuide}
           tooltip={t('general.openGuide')!}
           startIcon={<QuestionMarkIcon />}
-          className={`'guideButton' ${isGuideOpen ? 'active' : ''}`}
+          className={`guideButton ${isGuideOpen ? 'active' : ''}`}
         >
           {t('general.guide')}
         </Button>
       );
     };
 
+    const fullScreenButtonRef = useRef<HTMLButtonElement>(null);
+
     const renderFullScreenButton = (): JSX.Element => {
       return (
         <Button
+          ref={fullScreenButtonRef}
           makeResponsive
           type="text"
           variant="outlined"
@@ -288,7 +291,13 @@ const ResponsiveGridLayout = forwardRef(
 
       return (
         <>
-          <FullScreenDialog open={isFullScreen} onClose={() => setIsFullScreen(false)}>
+          <FullScreenDialog 
+            open={isFullScreen} 
+            onClose={() => {
+              setIsFullScreen(false);
+              setTimeout(() => fullScreenButtonRef.current?.focus(), 100);
+            }}
+          >
             <Box sx={sxClasses.rightMainContent} className="responsive-layout-right-main-content fullscreen-mode">
               {content}
             </Box>
