@@ -117,7 +117,7 @@ export class GeoPackageReader {
                       GeoPackageReader.#processFeatureInfoConfig(matchingLayerData.geoPackageFeatures[0].properties),
                     geoPackageFeatures: matchingLayerData.geoPackageFeatures,
                   },
-                } as unknown as WkbLayerEntryConfig)
+                })
               );
             } else {
               // If no matching layer data, log error
@@ -147,7 +147,7 @@ export class GeoPackageReader {
                     GeoPackageReader.#processFeatureInfoConfig(layerData.geoPackageFeatures[0].properties),
                   geoPackageFeatures: layerData.geoPackageFeatures,
                 },
-              } as unknown as WkbLayerEntryConfig)
+              })
             );
           });
         }
@@ -183,7 +183,7 @@ export class GeoPackageReader {
               featureInfo: GeoPackageReader.#processFeatureInfoConfig(layerData.geoPackageFeatures[0].properties),
               geoPackageFeatures: layerData.geoPackageFeatures,
             },
-          } as unknown as WkbLayerEntryConfig)
+          })
         );
       });
     }

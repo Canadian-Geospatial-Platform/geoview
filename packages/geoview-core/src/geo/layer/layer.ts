@@ -34,18 +34,6 @@ import {
   mapConfigLayerEntryIsShapefile,
   TypeLayerStatus,
   GeoCoreLayerConfig,
-  layerConfigIsEsriDynamicFromType,
-  layerConfigIsEsriImageFromType,
-  layerConfigIsImageStaticFromType,
-  layerConfigIsVectorTilesFromType,
-  layerConfigIsOgcWmsFromType,
-  layerConfigIsXYZTilesFromType,
-  layerConfigIsCSVFromType,
-  layerConfigIsEsriFeatureFromType,
-  layerConfigIsGeoJSONFromType,
-  layerConfigIsOgcFeatureFromType,
-  layerConfigIsWFSFromType,
-  layerConfigIsWKBFromType,
   GeoPackageLayerConfig,
 } from '@/api/types/layer-schema-types';
 
@@ -112,6 +100,18 @@ import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { LayerGeoCoreError } from '@/core/exceptions/geocore-exceptions';
 import { ShapefileReader } from '@/api/config/reader/shapefile-reader';
 import { GeoPackageReader } from '@/api/config/reader/geopackage-reader';
+import { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
+import { CsvLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
+import { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
+import { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
+import { GeoJSONLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
+import { ImageStaticLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
+import { OgcFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
+import { WfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
+import { WkbLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
+import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import { XYZTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
+import { VectorTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
@@ -335,6 +335,7 @@ export class LayerApi {
    * @returns {ConfigBaseClass | undefined} The layer configuration or undefined if not found.
    */
   getLayerEntryConfig(layerPath: string): ConfigBaseClass | undefined {
+    // TODO: Refactor - Major - Throw an exception when not found!
     return this.#layerEntryConfigs?.[layerPath];
   }
 
@@ -734,7 +735,7 @@ export class LayerApi {
       configs
         .filter((config) => {
           // Filter to just Geocore layers and not child layers
-          if (isValidUUID(config.geoviewLayerConfig.geoviewLayerId) && config.parentLayerConfig === undefined) {
+          if (isValidUUID(config.getGeoviewLayerId()) && !config.getParentLayerConfig()) {
             return true;
           }
           return false;
@@ -743,7 +744,7 @@ export class LayerApi {
           // Remove and add back in GeoCore Layers and return their promises
           parentPaths.push(config.layerPath);
           this.removeLayerUsingPath(config.layerPath);
-          return this.addGeoviewLayerByGeoCoreUUID(config.geoviewLayerConfig.geoviewLayerId);
+          return this.addGeoviewLayerByGeoCoreUUID(config.getGeoviewLayerId());
         })
     )
       .then(() => {
@@ -791,7 +792,7 @@ export class LayerApi {
    */
   reloadLayer(layerPath: string): void {
     const layerEntryConfig = this.getLayerEntryConfig(layerPath);
-    const geoviewLayer = layerEntryConfig ? this.#geoviewLayers[layerEntryConfig.geoviewLayerConfig.geoviewLayerId] : undefined;
+    const geoviewLayer = layerEntryConfig ? this.#geoviewLayers[layerEntryConfig.getGeoviewLayerId()] : undefined;
 
     if (layerEntryConfig && geoviewLayer) {
       if (layerEntryConfig instanceof GroupLayerEntryConfig) {
@@ -992,9 +993,9 @@ export class LayerApi {
 
     // initialize these two constant now because we will delete the information used to get their values.
     const indexToDelete = layerEntryConfig
-      ? layerEntryConfig.parentLayerConfig?.listOfLayerEntryConfig.findIndex((layerConfig) => layerConfig === layerEntryConfig)
+      ? layerEntryConfig.getParentLayerConfig()?.listOfLayerEntryConfig.findIndex((layerConfig) => layerConfig === layerEntryConfig)
       : undefined;
-    const listOfLayerEntryConfigAffected = this.getLayerEntryConfig(layerPath)?.parentLayerConfig?.listOfLayerEntryConfig;
+    const listOfLayerEntryConfigAffected = this.getLayerEntryConfig(layerPath)?.getParentLayerConfig()?.listOfLayerEntryConfig;
 
     // Remove layer info from registered layers
     this.getLayerEntryConfigIds().forEach((registeredLayerPath) => {
@@ -1761,29 +1762,19 @@ export class LayerApi {
   }
 
   /**
-   * TODO Add this function to utilties
    * Gets all child paths from a parent path
    * @param {string} parentPath - The parent path
    * @returns {string[]} Child layer paths
    */
   #getAllChildPaths(parentPath: string): string[] {
-    const parentLayerEntryConfig = this.getLayerEntryConfig(parentPath)?.geoviewLayerConfig.listOfLayerEntryConfig;
+    const parentLayerEntryConfig = this.getLayerEntryConfig(parentPath);
 
-    if (!parentLayerEntryConfig) return [];
+    // If it's not a group, throw
+    if (!(parentLayerEntryConfig instanceof GroupLayerEntryConfig))
+      throw new LayerWrongTypeError(parentPath, parentLayerEntryConfig?.getLayerNameCascade());
 
-    function getChildPaths(listOfLayerEntryConfig: TypeLayerEntryConfig[]): string[] {
-      const layerPaths: string[] = [];
-      listOfLayerEntryConfig.forEach((entryConfig) => {
-        layerPaths.push(entryConfig.layerPath);
-        if (entryConfig.listOfLayerEntryConfig) {
-          layerPaths.push(...getChildPaths(entryConfig.listOfLayerEntryConfig));
-        }
-      });
-      return layerPaths;
-    }
-
-    const layerPaths = getChildPaths(parentLayerEntryConfig);
-    return layerPaths;
+    // Return all the layer paths inside that group
+    return parentLayerEntryConfig.getLayerPathsAll();
   }
 
   #setLayerInVisibleRange(gvLayer: AbstractGVLayer | GVGroupLayer, layerConfig: TypeLayerEntryConfig): void {
@@ -1836,10 +1827,10 @@ export class LayerApi {
 
   /**
    * Registers layer information for the ordered layer info in the store.
-   * @param {TypeLayerEntryConfig} layerConfig - The layer configuration to be reordered.
+   * @param {ConfigBaseClass} layerConfig - The layer configuration to be reordered.
    * @private
    */
-  #registerForOrderedLayerInfo(layerConfig: TypeLayerEntryConfig): void {
+  #registerForOrderedLayerInfo(layerConfig: ConfigBaseClass): void {
     // If the map index for the given layer path hasn't been set yet
     if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.getMapId(), layerConfig.layerPath) === -1) {
       // Get the parent layer path
@@ -1847,12 +1838,15 @@ export class LayerApi {
       parentLayerPathArray.pop();
       const parentLayerPath = parentLayerPathArray.join('/');
 
+      // Get the parent layer config, if any
+      const parentLayerConfig = layerConfig.getParentLayerConfig();
+
       // If the map index of a parent layer path has been set and it is a valid UUID, the ordered layer info is a place holder
       // registered while the geocore layer info was fetched
       if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.getMapId(), parentLayerPath) !== -1 && isValidUUID(parentLayerPath)) {
         // Replace the placeholder ordered layer info
         MapEventProcessor.replaceOrderedLayerInfo(this.getMapId(), layerConfig, parentLayerPath);
-      } else if (layerConfig.parentLayerConfig) {
+      } else if (parentLayerConfig) {
         // Here the map index of a sub layer path hasn't been set and there's a parent layer config for the current layer config
         // Get the map index of the parent layer path
         const parentLayerIndex = MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.getMapId(), parentLayerPath);
@@ -1863,25 +1857,29 @@ export class LayerApi {
         // If the map index of the parent has been set
         if (parentLayerIndex !== -1) {
           // Add the ordered layer information for the sub layer path based on the parent index + the number of child layers
-          MapEventProcessor.addOrderedLayerInfoByConfig(this.getMapId(), layerConfig, parentLayerIndex + numberOfLayers);
+          MapEventProcessor.addOrderedLayerInfoByConfig(
+            this.getMapId(),
+            layerConfig as TypeLayerEntryConfig,
+            parentLayerIndex + numberOfLayers
+          );
         } else {
           // If we get here, something went wrong and we have a sub layer being registered before the parent
           logger.logError(`Sub layer ${layerConfig.layerPath} registered in layer order before parent layer`);
-          MapEventProcessor.addOrderedLayerInfoByConfig(this.getMapId(), layerConfig.parentLayerConfig);
+          MapEventProcessor.addOrderedLayerInfoByConfig(this.getMapId(), parentLayerConfig);
         }
       } else {
         // Add the orderedLayerInfo for layer that hasn't been set and has no parent layer or geocore placeholder
-        MapEventProcessor.addOrderedLayerInfoByConfig(this.getMapId(), layerConfig);
+        MapEventProcessor.addOrderedLayerInfoByConfig(this.getMapId(), layerConfig as TypeLayerEntryConfig);
       }
     }
   }
 
   /**
    * Registers layer information for TimeSlider.
-   * @param {TypeLayerEntryConfig} layerConfig - The layer configuration to be unregistered.
+   * @param {ConfigBaseClass} layerConfig - The layer configuration to be unregistered.
    * @private
    */
-  async #registerForTimeSlider(layerConfig: TypeLayerEntryConfig): Promise<void> {
+  async #registerForTimeSlider(layerConfig: ConfigBaseClass): Promise<void> {
     try {
       // Wait until the layer is loaded (or processed?)
       await whenThisThen(() => layerConfig.isGreaterThanOrEqualTo('processed'), LayerApi.#MAX_WAIT_TIME_SLIDER_REGISTRATION);
@@ -2369,7 +2367,10 @@ export class LayerApi {
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The config to get the info from.
    * @returns {TypeOrderedLayerInfo[]} The array of ordered layer info.
    */
-  static generateArrayOfLayerOrderInfo(geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig): TypeOrderedLayerInfo[] {
+  static generateArrayOfLayerOrderInfo(geoviewLayerConfig: TypeGeoviewLayerConfig | ConfigBaseClass): TypeOrderedLayerInfo[] {
+    // TODO: REFACTOR - This function has issues with the expected types and what it's truly doing.
+    // TO.DOCONT: Sometimes, it receives a ConfigBaseClass instance and sometimes a regular json object and the 'as' casting happening
+    // TO.DOCONT: herein makes it TypeScript compliant, but untrue.
     const newOrderedLayerInfos: TypeOrderedLayerInfo[] = [];
 
     const addSubLayerPathToLayerOrder = (layerEntryConfig: TypeLayerEntryConfig, layerPath: string): void => {
@@ -2399,8 +2400,7 @@ export class LayerApi {
       if ((geoviewLayerConfig as TypeGeoviewLayerConfig).listOfLayerEntryConfig.length > 1) {
         const layerPath = `${(geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId}/base-group`;
         // Using as any, because even a TypeGeoviewLayerConfig can have initialSettings? To confirm...
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const settingsGVLC = ConfigBaseClass.getClassOrTypeInitialSettings(geoviewLayerConfig as any)?.states;
+        const settingsGVLC = ConfigBaseClass.getClassOrTypeInitialSettings(geoviewLayerConfig)?.states;
 
         const layerInfo: TypeOrderedLayerInfo = {
           layerPath,
@@ -2431,46 +2431,45 @@ export class LayerApi {
    * - If the layer type is not supported, an error is thrown.
    * - TODO: Refactor to use the validated configuration with metadata already fetched.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The configuration object for the GeoView layer.
-   * @param {string} mapProjectionForVectorTiles - The projection string to be used when creating Vector Tiles layers.
    * @returns {AbstractGeoViewLayer} An instance of the corresponding `AbstractGeoViewLayer` subclass.
    * @throws {NotSupportedError} If the configuration does not match any supported layer type.
    */
   createLayerConfigFromType(geoviewLayerConfig: TypeGeoviewLayerConfig): AbstractGeoViewLayer {
     // TODO: Refactor - Here the function should use the structure created by validation config with the metadata fetch and no need to pass the validation.
-    if (layerConfigIsCSVFromType(geoviewLayerConfig)) {
+    if (CsvLayerEntryConfig.isClassOrTypeCSV(geoviewLayerConfig)) {
       return new CSV(geoviewLayerConfig);
     }
-    if (layerConfigIsEsriDynamicFromType(geoviewLayerConfig)) {
+    if (EsriDynamicLayerEntryConfig.isClassOrTypeEsriDynamic(geoviewLayerConfig)) {
       return new EsriDynamic(geoviewLayerConfig);
     }
-    if (layerConfigIsEsriFeatureFromType(geoviewLayerConfig)) {
+    if (EsriFeatureLayerEntryConfig.isClassOrTypeEsriFeature(geoviewLayerConfig)) {
       return new EsriFeature(geoviewLayerConfig);
     }
-    if (layerConfigIsEsriImageFromType(geoviewLayerConfig)) {
+    if (EsriImageLayerEntryConfig.isClassOrTypeEsriImage(geoviewLayerConfig)) {
       return new EsriImage(geoviewLayerConfig);
     }
-    if (layerConfigIsGeoJSONFromType(geoviewLayerConfig)) {
+    if (GeoJSONLayerEntryConfig.isClassOrTypeGeoJSON(geoviewLayerConfig)) {
       return new GeoJSON(geoviewLayerConfig);
     }
-    if (layerConfigIsImageStaticFromType(geoviewLayerConfig)) {
+    if (ImageStaticLayerEntryConfig.isClassOrTypeImageStatic(geoviewLayerConfig)) {
       return new ImageStatic(geoviewLayerConfig);
     }
-    if (layerConfigIsOgcFeatureFromType(geoviewLayerConfig)) {
+    if (OgcFeatureLayerEntryConfig.isClassOrTypeOGCLayer(geoviewLayerConfig)) {
       return new OgcFeature(geoviewLayerConfig);
     }
-    if (layerConfigIsVectorTilesFromType(geoviewLayerConfig)) {
+    if (VectorTilesLayerEntryConfig.isClassOrTypeVectorTiles(geoviewLayerConfig)) {
       return new VectorTiles(geoviewLayerConfig, this.mapViewer.getProjection());
     }
-    if (layerConfigIsWFSFromType(geoviewLayerConfig)) {
+    if (WfsLayerEntryConfig.isClassOrTypeWFSLayer(geoviewLayerConfig)) {
       return new WFS(geoviewLayerConfig);
     }
-    if (layerConfigIsWKBFromType(geoviewLayerConfig)) {
+    if (WkbLayerEntryConfig.isClassOrTypeWKBLayer(geoviewLayerConfig)) {
       return new WKB(geoviewLayerConfig);
     }
-    if (layerConfigIsOgcWmsFromType(geoviewLayerConfig)) {
+    if (OgcWmsLayerEntryConfig.isClassOrTypeWMS(geoviewLayerConfig)) {
       return new WMS(geoviewLayerConfig, LayerApi.DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS);
     }
-    if (layerConfigIsXYZTilesFromType(geoviewLayerConfig)) {
+    if (XYZTilesLayerEntryConfig.isClassOrTypeXYZTiles(geoviewLayerConfig)) {
       return new XYZTiles(geoviewLayerConfig);
     }
 

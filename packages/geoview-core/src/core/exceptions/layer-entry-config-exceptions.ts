@@ -22,13 +22,7 @@ export class LayerEntryConfigError extends LayerError {
    * @param {unknown[]} params - Optional parameters to customize the error message.
    */
   protected constructor(layerConfig: ConfigBaseClass, messageKey: string | undefined = undefined, params: unknown[] = []) {
-    super(
-      layerConfig.layerPath,
-      messageKey || 'validation.layer.loadfailed',
-      params || [
-        layerConfig.getLayerName() || layerConfig.geoviewLayerConfig.geoviewLayerName || layerConfig.layerId || layerConfig.layerPath,
-      ]
-    );
+    super(layerConfig.layerPath, messageKey || 'validation.layer.loadfailed', params || [layerConfig.getLayerNameCascade()]);
 
     // Keep the layer
     this.layerConfig = layerConfig;

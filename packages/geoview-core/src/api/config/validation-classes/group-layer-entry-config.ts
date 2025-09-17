@@ -9,9 +9,6 @@ export interface GroupLayerEntryConfigProps extends ConfigBaseClassProps {
  * Type used to define a layer group.
  */
 export class GroupLayerEntryConfig extends ConfigBaseClass {
-  /** The layer entry props that were used in the constructor. */
-  declare layerEntryProps: GroupLayerEntryConfigProps;
-
   /** Source settings to apply to the GeoView layer source at creation time is not used by groups. */
   // TODO: Refactor - Config - This attribute should be removed and logic applied using OO pattern once the constructor is cleaned up.
   declare source: never;
@@ -22,12 +19,32 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * The class constructor.
-   * @param {GroupLayerEntryConfigProps | GroupLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
+   * @param {GroupLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
    */
   // TO: Until this is fixed, this constructor supports sending a GroupLayerEntryConfig in its typing, for now (GroupLayerEntryConfigProps | GroupLayerEntryConfig)... though it should only be a GroupLayerEntryConfigProps eventually
-  constructor(layerConfig: GroupLayerEntryConfigProps | GroupLayerEntryConfig) {
+  constructor(layerConfig: GroupLayerEntryConfigProps) {
     super(layerConfig, undefined, CONST_LAYER_ENTRY_TYPES.GROUP);
     this.listOfLayerEntryConfig = layerConfig.listOfLayerEntryConfig || [];
+  }
+
+  getLayerPaths(): string[] {
+    return this.listOfLayerEntryConfig.map((geoviewLayerEntryConfig) => geoviewLayerEntryConfig.layerPath);
+  }
+
+  getLayerPathsAll(): string[] {
+    function getChildPaths(listOfLayerEntryConfig: TypeLayerEntryConfig[]): string[] {
+      const layerPaths: string[] = [];
+      listOfLayerEntryConfig.forEach((entryConfig) => {
+        layerPaths.push(entryConfig.layerPath);
+        if (entryConfig.listOfLayerEntryConfig) {
+          layerPaths.push(...getChildPaths(entryConfig.listOfLayerEntryConfig));
+        }
+      });
+      return layerPaths;
+    }
+
+    // Go recursive and return
+    return getChildPaths([this]);
   }
 
   /**

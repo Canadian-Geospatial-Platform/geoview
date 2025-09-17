@@ -283,7 +283,7 @@ export class WKB extends AbstractGeoViewVector {
           format: 'WKB',
           dataAccessPath: layerEntry.source?.dataAccessPath || metadataAccessPath,
         },
-      } as unknown as WkbLayerEntryConfig);
+      });
       return layerEntryConfig;
     });
 

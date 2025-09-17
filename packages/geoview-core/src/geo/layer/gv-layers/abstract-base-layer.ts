@@ -119,7 +119,7 @@ export abstract class AbstractBaseLayer {
    * @returns {string} The geoview layer id
    */
   getGeoviewLayerId(): string {
-    return this.#layerConfig.geoviewLayerConfig.geoviewLayerId;
+    return this.#layerConfig.getGeoviewLayerId();
   }
 
   /**
@@ -127,7 +127,7 @@ export abstract class AbstractBaseLayer {
    * @returns {string | undefined} The layer name
    */
   getGeoviewLayerName(): string | undefined {
-    return this.#layerConfig.geoviewLayerConfig.geoviewLayerName;
+    return this.#layerConfig.getGeoviewLayerName();
   }
 
   /**

@@ -8,8 +8,9 @@ import {
   TypeLayerEntryConfig,
   MapConfigLayerEntry,
   TypeGeoviewLayerConfig,
+  ConfigClassOrType,
 } from '@/api/types/layer-schema-types';
-import { ConfigBaseClassProps } from '@/api/config/validation-classes/config-base-class';
+import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { GroupLayerEntryConfigProps } from '@/api/config/validation-classes/group-layer-entry-config';
 import { generateId, getLocalizedMessage } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
@@ -107,7 +108,8 @@ export class UtilAddLayer {
    */
   static getLayerNameById(layerTree: TypeGeoviewLayerConfig | undefined, layerId: string): string | undefined {
     const foundLayerEntry = UtilAddLayer.getLayerById(layerTree, layerId);
-    if (foundLayerEntry) return (foundLayerEntry as ConfigBaseClassProps).layerName;
+    // Using as ConfigClassOrType, because of the types confusion between class instance and regular object
+    if (foundLayerEntry) return ConfigBaseClass.getClassOrTypeLayerName(foundLayerEntry as ConfigClassOrType);
     return undefined;
   }
 
@@ -121,11 +123,20 @@ export class UtilAddLayer {
     layerTree: TypeGeoviewLayerConfig | GroupLayerEntryConfigProps,
     layerIds: (string | undefined)[]
   ): boolean {
-    return layerTree.listOfLayerEntryConfig?.every((layerEntryConfig) =>
-      !layerTree.listOfLayerEntryConfig
-        ? layerIds.includes(layerEntryConfig.layerId)
-        : layerIds.includes(layerEntryConfig.layerId) && UtilAddLayer.allSubLayersAreIncluded(layerEntryConfig, layerIds)
-    );
+    const subLayers = layerTree.listOfLayerEntryConfig;
+
+    // If there are no sublayers, nothing to check
+    if (!subLayers) return true;
+
+    return subLayers.every((layerEntryConfig) => {
+      const layerIdIncluded = layerIds.includes(layerEntryConfig.layerId);
+      const subTree = ConfigBaseClass.getClassOrTypeGeoviewLayerConfig(layerEntryConfig);
+
+      // Recursively check sublayers if present
+      const allChildrenIncluded = UtilAddLayer.allSubLayersAreIncluded(subTree, layerIds);
+
+      return layerIdIncluded && allChildrenIncluded;
+    });
   }
 
   /**
@@ -137,7 +148,7 @@ export class UtilAddLayer {
     layerName: string,
     layerType: string,
     layerIds: string[],
-    layersToAdd: (TypeGeoviewLayerConfig | ConfigBaseClassProps)[],
+    layersToAdd: (TypeGeoviewLayerConfig | TypeLayerEntryConfig)[],
     layerIdsToAdd: string[],
     removedLayerIds: string[],
     groupLayer: TypeGeoviewLayerConfig | GroupLayerEntryConfigProps
@@ -180,7 +191,7 @@ export class UtilAddLayer {
               layersToAdd,
               layerIdsToAdd,
               removedLayerIds,
-              layerEntryConfig
+              ConfigBaseClass.getClassOrTypeGeoviewLayerConfig(layerEntryConfig)
             );
           if (layerIds.includes(layerEntryConfig.layerId))
             return {

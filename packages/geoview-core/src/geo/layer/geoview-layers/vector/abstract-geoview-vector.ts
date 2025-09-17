@@ -11,7 +11,6 @@ import { getUid } from 'ol/util';
 import { TypeOutfields } from '@/api/types/map-schema-types';
 import {
   CONST_LAYER_TYPES,
-  layerEntryIsGeoJSONFromConfig,
   TypeBaseVectorSourceInitialConfig,
   TypeFeatureInfoLayerConfig,
   TypePostSettings,
@@ -32,6 +31,7 @@ import {
 } from '@/core/exceptions/layer-exceptions';
 import { LayerEntryConfigVectorSourceURLNotDefinedError } from '@/core/exceptions/layer-entry-config-exceptions';
 import { WkbLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
+import { GeoJSONLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
 
 // Some constants
 const EXCLUDED_HEADERS_LAT = ['latitude', 'lat', 'y', 'ycoord', 'latitude|latitude', 'latitude | latitude'];
@@ -118,11 +118,13 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         const url = AbstractGeoViewVector.#resolveUrl(layerConfig, vectorSource, extent, resolution, projection);
 
         if (layerConfig.getSchemaTag() !== CONST_LAYER_TYPES.WKB) {
+          // Cast it to a GeoJson layer type
+          const layerConfigGeoJSON = layerConfig as GeoJSONLayerEntryConfig;
+
           // Fetch the data, or use passed geoJSON if present
-          responseText =
-            layerEntryIsGeoJSONFromConfig(layerConfig) && layerConfig.source?.geojson
-              ? layerConfig.source.geojson
-              : await AbstractGeoViewVector.#fetchData(url, layerConfig.source?.postSettings);
+          responseText = layerConfigGeoJSON.source?.geojson
+            ? layerConfigGeoJSON.source.geojson
+            : await AbstractGeoViewVector.#fetchData(url, layerConfig.source?.postSettings);
         } else responseText = layerConfig.source!.dataAccessPath as string;
 
         // If Esri Feature

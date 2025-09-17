@@ -424,7 +424,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           items: [] as TypeLegendItem[],
           children: [] as TypeLegendLayer[],
           icons: icons || [],
-          url: layerConfig.geoviewLayerConfig.metadataAccessPath,
+          url: layerConfig.getMetadataAccessPath(),
         };
 
         // Add the icons as items on the layer entry

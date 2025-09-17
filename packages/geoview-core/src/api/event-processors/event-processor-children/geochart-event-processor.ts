@@ -77,6 +77,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    * Checks if the Geochart plugin is iniitialized for the given map.
    * @param {string} mapId - The map id
    * @returns {boolean} True when the Geochart plugin is initialized.
+   * @static
    */
   static isGeochartInitialized(mapId: string): boolean {
     try {
@@ -94,6 +95,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The mapId
    * @returns {IGeochartState} The Geochart state.
    * @throws {PluginStateUninitializedError} When the Geochart plugin is uninitialized.
+   * @static
    */
   protected static getGeochartState(mapId: string): IGeochartState {
     // Get the geochart state
@@ -111,6 +113,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The mapId
    * @param {'geochartChartsConfig' | 'layerDataArray' | 'layerDataArrayBatchLayerPathBypass' | 'selectedLayerPath'} state - The state to get
    * @returns {string | TypeGeochartResultSetEntry[] | GeoChartStoreByLayerPath} The requested state
+   * @static
    */
   static getSingleGeochartState(
     mapId: string,
@@ -131,6 +134,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId the map id
    * @param {GeoViewGeoChartConfig[]} charts The array of JSON configuration for GeoChart
    * @throws {PluginStateUninitializedError} When the Geochart plugin is uninitialized.
+   * @static
    */
   static setGeochartCharts(mapId: string, charts: GeoViewGeoChartConfig[]): void {
     // Get the geochart state which is only initialized if the Geochart Plugin exists.
@@ -167,6 +171,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    * @param {string} layerPath The layer path
    * @param {GeoViewGeoChartConfig} chartConfig The Geochart Configuration
    * @throws {PluginStateUninitializedError} When the Geochart plugin is uninitialized.
+   * @static
    */
   static addGeochartChart(mapId: string, layerPath: string, chartConfig: GeoViewGeoChartConfig): void {
     // Get the geochart state which is only initialized if the Geochart Plugin exists.
@@ -191,6 +196,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId The map ID
    * @param {string} layerPath The layer path
    * @throws {PluginStateUninitializedError} When the Geochart plugin is uninitialized.
+   * @static
    */
   static removeGeochartChart(mapId: string, layerPath: string): void {
     // Get the geochart state which is only initialized if the Geochart Plugin exists.
@@ -224,6 +230,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    * @param {TypeGeochartResultSetEntry[]} layerDataArray The layer data array to propagate in the store
    * @returns {Promise<void>}
    * @throws {PluginStateUninitializedError} When the Geochart plugin is uninitialized.
+   * @static
    * @private
    */
   static #propagateArrayDataToStore(mapId: string, layerDataArray: TypeGeochartResultSetEntry[]): void {
@@ -244,6 +251,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    * @param {TypeGeochartResultSetEntry[]} layerDataArray - The layer data array to batch on
    * @returns {Promise<void>} Promise upon completion
    * @throws {PluginStateUninitializedError} When the Geochart plugin is uninitialized.
+   * @static
    * @private
    */
   static #propagateFeatureInfoToStoreBatch(mapId: string, layerDataArray: TypeGeochartResultSetEntry[]): Promise<void> {

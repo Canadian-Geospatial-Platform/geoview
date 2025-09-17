@@ -163,8 +163,8 @@ export abstract class AbstractGeoViewLayer {
 
       this.listOfLayerEntryConfig = [layerGroup];
       layerGroup.listOfLayerEntryConfig.forEach((layerConfig) => {
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.parentLayerConfig = layerGroup;
+        // Set the parent config
+        layerConfig.setParentLayerConfig(layerGroup);
       });
     }
   }
@@ -635,7 +635,10 @@ export abstract class AbstractGeoViewLayer {
       if (!layerGroup) {
         // All children of this level in the tree have the same parent, so we use the first element of the array to retrieve the parent node.
         // eslint-disable-next-line no-param-reassign
-        layerGroup = this.createLayerGroup(listOfLayerEntryConfig[0].parentLayerConfig!, listOfLayerEntryConfig[0].getInitialSettings());
+        layerGroup = this.createLayerGroup(
+          listOfLayerEntryConfig[0].getParentLayerConfig()!,
+          listOfLayerEntryConfig[0].getInitialSettings()
+        );
       }
 
       // TODO: Refactor - Rework this Promise to be "Promise<AbstractBaseLayer>"

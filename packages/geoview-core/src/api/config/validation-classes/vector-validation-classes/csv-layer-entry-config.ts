@@ -1,6 +1,6 @@
 import { VectorLayerEntryConfig, VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
-import { TypeSourceCSVInitialConfig } from '@/geo/layer/geoview-layers/vector/csv';
-import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
+import { TypeCSVLayerConfig, TypeSourceCSVInitialConfig } from '@/geo/layer/geoview-layers/vector/csv';
+import { ConfigClassOrType, CONST_LAYER_TYPES, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
 import { Projection } from '@/geo/utils/projection';
 
 export interface CsvLayerEntryConfigProps extends VectorLayerEntryConfigProps {
@@ -13,9 +13,6 @@ export interface CsvLayerEntryConfigProps extends VectorLayerEntryConfigProps {
 }
 
 export class CsvLayerEntryConfig extends VectorLayerEntryConfig {
-  /** The layer entry props that were used in the constructor. */
-  declare layerEntryProps: CsvLayerEntryConfigProps;
-
   /** Source settings to apply to the GeoView layer source at creation time. */
   declare source: TypeSourceCSVInitialConfig;
 
@@ -24,9 +21,9 @@ export class CsvLayerEntryConfig extends VectorLayerEntryConfig {
 
   /**
    * The class constructor.
-   * @param {CsvLayerEntryConfigProps | CsvLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
+   * @param {CsvLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
    */
-  constructor(layerConfig: CsvLayerEntryConfigProps | CsvLayerEntryConfig) {
+  constructor(layerConfig: CsvLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.CSV);
     this.valueSeparator = layerConfig.valueSeparator;
 
@@ -35,7 +32,7 @@ export class CsvLayerEntryConfig extends VectorLayerEntryConfig {
     this.source.format ??= 'CSV';
     this.source.separator ??= ',';
     this.source.dataProjection ??= Projection.PROJECTION_NAMES.LONLAT;
-    this.source.dataAccessPath ??= layerConfig.source?.dataAccessPath ?? this.geoviewLayerConfig.metadataAccessPath;
+    this.source.dataAccessPath ??= layerConfig.source?.dataAccessPath ?? this.getMetadataAccessPath();
 
     // Normalize dataAccessPath if needed
     const path = this.source.dataAccessPath!;
@@ -52,5 +49,18 @@ export class CsvLayerEntryConfig extends VectorLayerEntryConfig {
       }
       this.source.dataAccessPath = normalizedPath;
     }
+  }
+
+  /**
+   * Type guard that checks whether the given configuration (class instance or plain object)
+   * represents a CSV layer type.
+   * Supports `ConfigClassOrType` (class instance or plain object) and plain layer config objects (`TypeGeoviewLayerConfig`).
+   * @param {ConfigClassOrType | TypeGeoviewLayerConfig} layerConfig - The layer config to check. Can be an instance of a config class or a raw config object.
+   * @returns `true` if the config is for a CSV layer; otherwise `false`.
+   * @static
+   */
+  static isClassOrTypeCSV(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): layerConfig is TypeCSVLayerConfig {
+    // Redirect
+    return this.isClassOrTypeSchemaTag(layerConfig, CONST_LAYER_TYPES.CSV);
   }
 }
