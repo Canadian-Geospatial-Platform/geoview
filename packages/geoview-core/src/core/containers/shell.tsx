@@ -241,6 +241,17 @@ export function Shell(props: ShellProps): JSX.Element {
     scrollIfNotVisible(shellRef.current.children[0] as HTMLElement, 'start');
   }, []);
 
+  /**
+   * Handles skip link navigation by focusing the target element
+   * @param {string} targetId - The ID of the element to focus
+   */
+  const handleSkipLinkClick = useCallback((targetId: string) => {
+    const targetElement = document.getElementById(targetId);
+    if (targetElement) {
+      targetElement.focus();
+    }
+  }, []);
+
   // Mount component
   useEffect(() => {
     // Log
@@ -272,7 +283,13 @@ export function Shell(props: ShellProps): JSX.Element {
 
   return (
     <Box sx={sxClasses.all}>
-      <Link id={`toplink-${mapViewer.mapId}`} href={`#bottomlink-${mapViewer.mapId}`} tabIndex={0} sx={{ ...sxClasses.skip, top: '0px' }}>
+      <Link
+        id={`toplink-${mapViewer.mapId}`}
+        href={`#bottomlink-${mapViewer.mapId}`}
+        tabIndex={0}
+        sx={{ ...sxClasses.skip, top: '0px' }}
+        onClick={() => handleSkipLinkClick(`bottomlink-${mapViewer.mapId}`)}
+      >
         {t('keyboardnav.start')}
       </Link>
       <FocusTrap open={activeTrapGeoView}>
@@ -322,6 +339,7 @@ export function Shell(props: ShellProps): JSX.Element {
         href={`#toplink-${mapViewer.mapId}`}
         tabIndex={0}
         sx={{ ...sxClasses.skip, bottom: '0px' }}
+        onClick={() => handleSkipLinkClick(`toplink-${mapViewer.mapId}`)}
       >
         {t('keyboardnav.end')}
       </Link>

@@ -222,6 +222,17 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   useEventListener<HTMLElement>('keydown', manageLinks, document.getElementById(`bottomlink-${focusTrapId}`));
   useEventListener<HTMLElement>('keydown', manageLinks, document.getElementById(`toplink-${focusTrapId}`));
 
+  // Ensure the enable button gets focus when modal opens
+  useEffect(() => {
+    if (open) {
+      setTimeout(() => {
+        document.getElementById('enable-focus')?.focus();
+      }, 100);
+    }
+  }, [open]);
+
+  // Test comment to verify file path resolution
+
   return (
     <Modal
       container={document.getElementById(focusTrapId)!}
