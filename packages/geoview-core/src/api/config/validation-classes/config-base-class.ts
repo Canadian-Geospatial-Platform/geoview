@@ -1,7 +1,7 @@
 import { cloneDeep } from 'lodash';
 
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { Extent } from '@/api/types/map-schema-types';
+import { Extent, TypeLayerStyleConfig } from '@/api/types/map-schema-types';
 import {
   ConfigClassOrType,
   CONST_LAYER_ENTRY_TYPES,
@@ -18,7 +18,7 @@ import { logger } from '@/core/utils/logger';
 import { LAYER_STATUS } from '@/core/utils/constant';
 import { GroupLayerEntryConfig, GroupLayerEntryConfigProps } from './group-layer-entry-config';
 import { NotImplementedError, NotSupportedError } from '@/core/exceptions/core-exceptions';
-import { DateMgt, TypeDateFragments } from '@/core/utils/date-mgt';
+import { DateMgt, TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 
@@ -34,6 +34,10 @@ export interface ConfigBaseClassProps {
   maxScale?: number;
   isMetadataLayerGroup?: boolean;
   parentLayerConfig?: GroupLayerEntryConfig;
+  attributions?: string[];
+  bounds?: number[];
+  timeDimension?: TimeDimension;
+  layerStyle?: TypeLayerStyleConfig;
 }
 
 /**

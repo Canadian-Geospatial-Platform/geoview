@@ -236,6 +236,18 @@ export class UtilAddLayer {
     const listOfLayerEntryConfig: LayerEntryConfigShell[] = [];
     const layersToAdd = layerIdsToAdd.map((layerId) => UtilAddLayer.getLayerById(layerTree, layerId)).filter((layerToAdd) => !!layerToAdd);
 
+    // If the layers to add is only 1 and it's already a group, go as-is
+    if (layersToAdd.length === 1 && layersToAdd[0].listOfLayerEntryConfig?.length > 0) {
+      // Return it
+      return {
+        geoviewLayerId: generateId(18),
+        geoviewLayerName: layerName,
+        geoviewLayerType: layerType as TypeGeoviewLayerType,
+        metadataAccessPath: layerURL,
+        listOfLayerEntryConfig: layersToAdd[0].listOfLayerEntryConfig as unknown as TypeLayerEntryConfig[],
+      };
+    }
+
     if (layersToAdd.length) {
       const removedLayerIds: string[] = [];
       const layerIds = layerIdsToAdd.map((layerId) => layerId.split('/').pop()!);
@@ -247,7 +259,7 @@ export class UtilAddLayer {
         const layerToAddAsLayerEntryConfig = layerToAdd as TypeLayerEntryConfig;
 
         // If it's a TypeGeoviewLayerConfig or a entry group
-        if (layerToAddAsGeoviewLayerConfig.geoviewLayerId || layerToAddAsLayerEntryConfig.getEntryTypeIsGroup()) {
+        if ((layerToAdd as TypeGeoviewLayerConfig).geoviewLayerId || layerToAddAsLayerEntryConfig.getEntryTypeIsGroup()) {
           // Create a group layer for the layers
           listOfLayerEntryConfig.push(
             UtilAddLayer.createLayerEntryConfigForGroupLayer(
