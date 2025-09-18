@@ -145,9 +145,7 @@ export default function ExportModal(): JSX.Element {
       setIsMapExporting(true);
 
       const overviewMap = mapElement.getElementsByClassName('ol-overviewmap')[0] as HTMLDivElement;
-      if (overviewMap) {
-        overviewMap.style.display = 'none';
-      }
+      if (overviewMap) overviewMap.style.display = 'none';
 
       // Create a temporary container
       if (activeModalId === 'export' && mapImageRef.current && dialogRef.current) {
@@ -160,125 +158,88 @@ export default function ExportModal(): JSX.Element {
 
           // Store original map state
           const mapSize = map.getSize();
-          const viewResolution = map.getView().getResolution();
 
           // Calculate high-res map canvas dimensions based on current map size
           const printWidth = Math.round((mapSize![0] * exportMapResolution) / 96); // Convert from 96 DPI to export DPI value
           const printHeight = Math.round((mapSize![1] * exportMapResolution) / 96);
 
-          map.once('rendercomplete', () => {
-            // Create high-res canvas for just the resulting map that we will export
-            const resultCanvas = document.createElement('canvas');
-            resultCanvas.width = printWidth;
-            resultCanvas.height = printHeight;
-            const resultContext = resultCanvas.getContext('2d');
-            if (!resultContext) return;
+          // Create high-res canvas for just the resulting map that we will export
+          const resultCanvas = document.createElement('canvas');
+          resultCanvas.width = printWidth;
+          resultCanvas.height = printHeight;
+          const resultContext = resultCanvas.getContext('2d');
+          if (!resultContext) return;
 
-            // Transform the canvas to the higher resolution
-            // GV There were three canvases, 2 are needed for the export to work properly
-            // GV.CONT 1 for layers / text and 1 for geometry layers from the basemap
-            // GV.CONT In the export-pdf ol example, they use '.ol-layer canvas' for the query, which misses the geom canvas
-            Array.prototype.forEach.call(mapViewport.querySelectorAll('canvas'), (canvas: HTMLCanvasElement) => {
-              const isOverviewCanvas = canvas.closest('.ol-overviewmap');
-              // Ignore the overview map canvas since it's not exported
-              if (!isOverviewCanvas && canvas.width > 0) {
-                const { opacity } = (canvas.parentNode as HTMLElement).style;
-                resultContext.globalAlpha = opacity === '' ? 1 : Number(opacity);
+          // Capture and upsample current canvases
+          // GV There were three canvases, 2 are needed for the export to work properly
+          // GV.CONT 1 for layers / text and 1 for geometry layers from the basemap
+          // GV.CONT In the export-pdf ol example, they use '.ol-layer canvas' for the query, which misses the geom canvas
+          Array.prototype.forEach.call(mapViewport.querySelectorAll('canvas'), (canvas: HTMLCanvasElement) => {
+            const isOverviewCanvas = canvas.closest('.ol-overviewmap');
+            // Ignore the overview map canvas since it's not exported
+            if (!isOverviewCanvas && canvas.width > 0) {
+              const { opacity } = (canvas.parentNode as HTMLElement).style;
+              resultContext.globalAlpha = opacity === '' ? 1 : Number(opacity);
 
-                // Calculate scale to fit the high-res canvas
-                const scaleX = printWidth / canvas.width;
-                const scaleY = printHeight / canvas.height;
-
-                // Get the transform parameters from the style's transform matrix
-                const { transform } = canvas.style;
-                if (transform && transform !== 'none') {
-                  const matrix = transform
-                    .match(/^matrix\(([^(]*)\)$/)![1]
-                    .split(',')
-                    .map(Number);
-                  // Apply the transform to the result map context
-                  resultContext.setTransform(
-                    matrix[0] * scaleX,
-                    matrix[1] * scaleY,
-                    matrix[2] * scaleX,
-                    matrix[3] * scaleY,
-                    matrix[4] * scaleX,
-                    matrix[5] * scaleY
-                  );
-                } else {
-                  resultContext.setTransform(scaleX, 0, 0, scaleY, 0, 0);
-                }
-                // Draw the map canvas onto our result canvas
-                resultContext.drawImage(canvas, 0, 0, printWidth, printHeight);
-              }
-            });
-
-            resultContext.globalAlpha = 1;
-            resultContext.setTransform(1, 0, 0, 1, 0, 0);
-
-            // Replace the map image in the preview with high-res version
-            const mapImage = mapImageRef.current;
-            if (mapImage) {
-              mapImage.innerHTML = '';
-              const img = new Image();
-              img.src = resultCanvas.toDataURL('image/png');
-              img.style.maxWidth = `${getCanvasWidth(dialogBox)}px`;
-              mapImage.appendChild(img);
+              // Draw the map canvas onto our result canvas
+              resultContext.drawImage(canvas, 0, 0, printWidth, printHeight);
             }
-
-            // Export the entire layout with high-res map
-            const tempContainer = document.createElement('div');
-            tempContainer.style.position = 'absolute';
-            tempContainer.style.left = '-9999px';
-            tempContainer.style.width = `${getCanvasWidth(dialogBox)}px`;
-
-            // Clone the content
-            if (!exportContainerRef.current) return;
-            const clonedContent = exportContainerRef.current.cloneNode(true) as HTMLDivElement;
-
-            tempContainer.appendChild(clonedContent);
-            document.body.appendChild(tempContainer);
-
-            // Small delay to ensure content is rendered
-            setTimeout(() => {
-              htmlToImage
-                .toPng(clonedContent, {
-                  backgroundColor: theme.palette.common.white,
-                  fontEmbedCSS: '',
-                  width: getCanvasWidth(dialogBox),
-                  height: clonedContent.offsetHeight,
-                  pixelRatio: exportMapResolution / 96,
-                })
-                .then((dataUrl) => {
-                  // Reset map
-                  setIsMapExporting(false);
-                  map.setSize(mapSize);
-                  map.getView().setResolution(viewResolution!);
-
-                  // Clean up
-                  document.body.removeChild(tempContainer);
-                  exportImage(dataUrl, `${fileExportDefaultPrefixName}-${exportTitle !== '' ? exportTitle.trim() : mapId}`, 'png');
-                  setActiveAppBarTab('legend', false, false);
-                  disableFocusTrap();
-                  if (overviewMap) {
-                    overviewMap.style.display = '';
-                  }
-                })
-                .catch((error: unknown) => {
-                  setIsMapExporting(false);
-                  if (overviewMap) {
-                    overviewMap.style.display = '';
-                  }
-                  logger.logError('Error while exporting the image', error);
-                });
-            }, 100);
           });
 
-          // Set print size (this triggers the high-DPI rendering)
-          const printSize = [printWidth, printHeight];
-          map.setSize(printSize);
-          const scaling = Math.min(printWidth / mapSize![0], printHeight / mapSize![1]);
-          map.getView().setResolution(viewResolution! / scaling);
+          // Replace the map image in the preview with high-res version
+          const mapImage = mapImageRef.current;
+          if (mapImage) {
+            mapImage.innerHTML = '';
+            const img = new Image();
+            img.src = resultCanvas.toDataURL('image/png');
+            img.style.maxWidth = `${getCanvasWidth(dialogBox)}px`;
+            mapImage.appendChild(img);
+          }
+
+          // Export the entire layout with high-res map
+          const tempContainer = document.createElement('div');
+          tempContainer.style.position = 'absolute';
+          tempContainer.style.left = '-9999px';
+          tempContainer.style.width = `${getCanvasWidth(dialogBox)}px`;
+
+          // Clone the content
+          if (!exportContainerRef.current) return;
+          const clonedContent = exportContainerRef.current.cloneNode(true) as HTMLDivElement;
+
+          tempContainer.appendChild(clonedContent);
+          document.body.appendChild(tempContainer);
+
+          // Small delay to ensure content is rendered
+          setTimeout(() => {
+            htmlToImage
+              .toPng(clonedContent, {
+                backgroundColor: theme.palette.common.white,
+                fontEmbedCSS: '',
+                width: getCanvasWidth(dialogBox),
+                height: clonedContent.offsetHeight,
+                pixelRatio: exportMapResolution / 96,
+              })
+              .then((dataUrl) => {
+                // Reset map
+                setIsMapExporting(false);
+
+                // Clean up
+                document.body.removeChild(tempContainer);
+                exportImage(dataUrl, `${fileExportDefaultPrefixName}-${exportTitle !== '' ? exportTitle.trim() : mapId}`, 'png');
+                setActiveAppBarTab('legend', false, false);
+                disableFocusTrap();
+                if (overviewMap) {
+                  overviewMap.style.display = '';
+                }
+              })
+              .catch((error: unknown) => {
+                setIsMapExporting(false);
+                if (overviewMap) {
+                  overviewMap.style.display = '';
+                }
+                logger.logError('Error while exporting the image', error);
+              });
+          }, 100);
         }
       }
     }
