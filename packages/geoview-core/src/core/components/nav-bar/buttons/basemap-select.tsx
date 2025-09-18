@@ -41,23 +41,26 @@ export default function BasemapSelect({ closePanel }: { closePanel?: () => void 
   /**
    * Handles basemap selection and updates basemap
    */
-  const handleChoice = useCallback((basemapChoice: string): void => {
-    setSelectedBasemap(basemapChoice);
-    createBasemapFromOptions(basemapChoice === 'default' ? configBasemapOptions : basemapChoiceOptions[basemapChoice]).catch(
-      (error: unknown) => {
-        // Log
-        logger.logPromiseFailed('setBaseMap in basemaps.ts', error);
-      }
-    );
-    
-    // Focus the close button after selection
-    setTimeout(() => {
-      const closeButton = document.querySelector('.MuiDialogTitle-root button') as HTMLButtonElement;
-      if (closeButton) {
-        closeButton.focus();
-      }
-    }, 100);
-  }, [configBasemapOptions, createBasemapFromOptions]);
+  const handleChoice = useCallback(
+    (basemapChoice: string): void => {
+      setSelectedBasemap(basemapChoice);
+      createBasemapFromOptions(basemapChoice === 'default' ? configBasemapOptions : basemapChoiceOptions[basemapChoice]).catch(
+        (error: unknown) => {
+          // Log
+          logger.logPromiseFailed('setBaseMap in basemaps.ts', error);
+        }
+      );
+
+      // Focus the close button after selection
+      setTimeout(() => {
+        const closeButton = document.querySelector('.MuiDialogTitle-root button') as HTMLButtonElement;
+        if (closeButton) {
+          closeButton.focus();
+        }
+      }, 100);
+    },
+    [configBasemapOptions, createBasemapFromOptions]
+  );
 
   /**
    * Render buttons in navbar panel.

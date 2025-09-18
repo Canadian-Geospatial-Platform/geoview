@@ -22,8 +22,7 @@ interface FocusTrapProps {
   focusTrapId: string;
 }
 
-// Define constantsand style outside component
-const BORDER_STYLE = '5px solid black' as const;
+// Define constants and style outside component
 const FOCUS_DELAY = 0;
 const MODAL_BUTTON_STYLES = {
   width: 'initial',
@@ -121,7 +120,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
       },
       handleKeyDown: (evt: KeyboardEvent) => {
         if (!ARROW_KEY_CODES.includes(evt.code)) {
-          mapElementStore.style.border = 'unset';
+          //mapElementStore.style.border = 'unset';
         }
 
         if (evt.code === 'KeyQ' && evt.ctrlKey) {
@@ -153,10 +152,10 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
       mapHTMLElement.addEventListener('keydown', handleExit);
 
       // The setTimeout is used to ensure the DOM has been updated and the element is ready to receive focus
-      setTimeout(() => document.getElementById(`mapTargetElement-${mapId}`)?.focus(), FOCUS_DELAY);
-      setCrosshairActive(true);
+      // Focus on the skip to main content link to skip app bar
+      setTimeout(() => document.getElementById(`main-map-${mapId}`)?.focus(), FOCUS_DELAY);
     }
-  }, [handleExit, mapId, setActiveTrapGeoView, setCrosshairActive]);
+  }, [handleExit, mapId, setActiveTrapGeoView]);
 
   // Handle button clicks
   const handleEnable = useCallback((): void => {
@@ -164,7 +163,6 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
     setOpen(false);
     setFocusTrap();
-    document.getElementById(`mapTargetElement-${mapId}`)!.style.border = BORDER_STYLE;
   }, [mapId, setFocusTrap]);
 
   const handleSkip = useCallback((): void => {
@@ -209,8 +207,6 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
             () => {
               setOpen(false);
               exitFocus();
-              // remove border from the map
-              document.getElementById(`mapTargetElement-${mapId}`)!.style.border = 'unset';
             },
             { once: true }
           );
@@ -230,8 +226,6 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
       }, 100);
     }
   }, [open]);
-
-  // Test comment to verify file path resolution
 
   return (
     <Modal

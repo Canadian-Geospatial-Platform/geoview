@@ -14,7 +14,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     right: theme.spacing(7),
     padding: '6px',
     display: 'flex',
-    flexDirection: 'column-reverse',
+    flexDirection: 'column',
     marginRight: 0,
     zIndex: 150,
     pointerEvents: 'all',

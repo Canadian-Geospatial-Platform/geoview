@@ -18,6 +18,7 @@ import {
   useAppFullscreenActive,
   useAppGeoviewHTMLElement,
   useAppHeight,
+  useAppStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/app-state';
 import {
   useUIActiveFocusItem,
@@ -89,6 +90,7 @@ export function Shell(props: ShellProps): JSX.Element {
   const geoviewElement = useAppGeoviewHTMLElement();
   const appHeight = useAppHeight();
   const footerTabContainer = geoviewElement.querySelector(`[id^="${mapId}-tabsContainer"]`) as HTMLElement;
+  const { setCrosshairActive } = useAppStoreActions();
 
   // SxClasses
   const sxClasses = useMemo(() => getShellSxClasses(theme, appHeight), [theme, appHeight]);
@@ -111,7 +113,9 @@ export function Shell(props: ShellProps): JSX.Element {
    * @param {MapComponentPayload} payload The map component being added
    */
   const handleMapAddComponent = useCallback((sender: MapViewer, event: MapComponentAddedEvent): void => {
+    // Log
     logger.logTraceUseCallback('SHELL - handleMapAddComponent');
+
     setComponents((tempComponents) => ({
       ...tempComponents,
       [event.mapComponentId]: event.component,
@@ -124,7 +128,9 @@ export function Shell(props: ShellProps): JSX.Element {
    */
   const handleMapRemoveComponent = useCallback(
     (sender: MapViewer, event: MapComponentRemovedEvent) => {
+      // Log
       logger.logTraceUseCallback('SHELL - handleMapRemoveComponent');
+
       const tempComponents: Record<string, JSX.Element> = { ...components };
       delete tempComponents[event.mapComponentId];
 
@@ -141,7 +147,9 @@ export function Shell(props: ShellProps): JSX.Element {
    */
   const handleModalOpen = useCallback(
     (sender: ModalApi, event: ModalEvent) => {
+      // Log
       logger.logTraceUseCallback('SHELL - handleModalOpen', event.modalId);
+
       setModalProps(mapViewer.modal.modals[event.modalId]);
       setModalOpen(true);
     },
@@ -152,7 +160,9 @@ export function Shell(props: ShellProps): JSX.Element {
    * Handles when the modal needs to close (only 1 at a time is allowed)
    */
   const handleModalClose = useCallback((sender: ModalApi, event: ModalEvent): void => {
+    // Log
     logger.logTraceUseCallback('SHELL - handleModalClose', event.modalId);
+
     setModalOpen(false);
   }, []);
 
@@ -162,6 +172,7 @@ export function Shell(props: ShellProps): JSX.Element {
    */
   const handleSnackBarOpen = useCallback(
     (sender: Notifications, payload: SnackBarOpenEvent): void => {
+      // Log
       logger.logTraceUseCallback('SHELL - handleSnackBarOpen', payload);
 
       // Create button
@@ -207,6 +218,9 @@ export function Shell(props: ShellProps): JSX.Element {
    */
   const handleSnackBarClose = useCallback(
     (event?: React.SyntheticEvent | Event, reason?: string) => {
+      // Log
+      logger.logTraceUseCallback('SHELL - handleSnackBarClose', reason);
+
       // Remove displayed message from queue
       mapViewer.notifications.snackbarMessageQueue.shift();
       if (reason === 'clickaway') {
@@ -246,10 +260,26 @@ export function Shell(props: ShellProps): JSX.Element {
    * @param {string} targetId - The ID of the element to focus
    */
   const handleSkipLinkClick = useCallback((targetId: string) => {
+    // Log
+    logger.logTraceUseCallback('SHELL - handleSkipLinkClick', targetId);
+
     const targetElement = document.getElementById(targetId);
     if (targetElement) {
       targetElement.focus();
     }
+  }, []);
+
+  /**
+   * Handles the skip to main content by focusing the map container element so keyboard users can quickly access the map,
+   * and activates the crosshair for visual feedback.
+   */
+  const handleSkipToMainContent = useCallback(() => {
+    // Log
+    logger.logTraceUseCallback('SHELL - handleSkipToMainContent');
+
+    // The setTimeout is used to ensure the DOM has been updated and the element is ready to receive focus
+    setTimeout(() => document.getElementById(`mapTargetElement-${mapId}`)?.focus(), 0);
+    setCrosshairActive(true);
   }, []);
 
   // Mount component
@@ -294,15 +324,25 @@ export function Shell(props: ShellProps): JSX.Element {
       </Link>
       <FocusTrap open={activeTrapGeoView}>
         <Box ref={shellRef} id={`shell-${mapViewer.mapId}`} sx={sxClasses.shell} className="geoview-shell" tabIndex={-1} aria-hidden="true">
+          <Link
+            id={`main-map-${mapViewer.mapId}`}
+            href={`#main-map-${mapViewer.mapId}`}
+            tabIndex={0}
+            sx={{ ...sxClasses.skip, top: '0px' }}
+            onClick={() => handleSkipToMainContent()}
+          >
+            {t('keyboardnav.map')}
+          </Link>
+
           <Box id={`map-${mapViewer.mapId}`} sx={sxClasses.mapShellContainer} className="mapContainer" ref={mapShellContainerRef}>
             <CircularProgress isLoaded={mapLoaded} />
             <CircularProgress isLoaded={!circularProgressActive} />
             <AppBar api={mapViewer.appBarApi} onScrollShellIntoView={handleScrollShellIntoView} />
-            <MapInfo onScrollShellIntoView={handleScrollShellIntoView} />
             <Box sx={sxClasses.mapContainer}>
               <Map viewer={mapViewer} />
             </Box>
             {interaction === 'dynamic' && <NavBar api={mapViewer.navBarApi} />}
+            <MapInfo onScrollShellIntoView={handleScrollShellIntoView} />
             <Snackbar
               snackBarId={mapViewer.mapId}
               message={snackbarMessage}

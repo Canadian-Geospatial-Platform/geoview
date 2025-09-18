@@ -289,7 +289,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
 
   return (
     <Box ref={navBarRef} sx={sxClasses.navBarRef}>
-      {Object.keys(buttonPanelGroups).map((key) => renderButtonPanelGroup(buttonPanelGroups[key], key))}
+      {[...Object.keys(buttonPanelGroups)].reverse().map((key) => renderButtonPanelGroup(buttonPanelGroups[key], key))}
     </Box>
   );
 }
