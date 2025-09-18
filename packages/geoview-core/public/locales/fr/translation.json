@@ -215,6 +215,7 @@
   "keyboardnav": {
     "start": "Aller après l'élément carte",
     "end": "Aller avant l'élément carte",
+    "map": "Aller au contenu principal - Carte",
     "focusdialog": {
       "title": "Navigation clavier",
       "main": "Si activé, le focus sera verrouillé sur le visualiseur. \nPour sortir, appuyez sur <strong>CTRL + Q</strong>.",

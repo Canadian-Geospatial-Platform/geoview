@@ -78,7 +78,7 @@ const ResponsiveGridLayout = forwardRef(
         setRightPanelFocus: () => {
           if (rightMainRef.current && !isGuideOpen) {
             setTimeout(() => {
-              rightMainRef.current.tabIndex = 0;
+              if (rightMainRef.current) rightMainRef.current.tabIndex = 0;
               rightMainRef.current?.focus();
             }, 0);
           }
@@ -147,8 +147,6 @@ const ResponsiveGridLayout = forwardRef(
       },
       [onIsEnlargeClicked]
     );
-
-    const previousFocusRef = useRef<HTMLElement | null>(null);
 
     const handleOpenGuide = useCallback((): void => {
       setIsGuideOpen(!isGuideOpen);

@@ -93,8 +93,6 @@ export default function Version(): JSX.Element {
     if (open) setOpen(false);
   }, [open]);
 
-
-
   return (
     <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
       <Box sx={{ padding: interaction === 'dynamic' ? 'none' : '5px' }}>

@@ -215,6 +215,7 @@
   "keyboardnav": {
     "start": "Skip after map element",
     "end": "Skip before map element",
+    "map": "Skip to main content - Map",
     "focusdialog": {
       "title": "Keyboard navigation",
       "main": "If enabled, we will keep focus locked on the viewer.\nTo exit, press <strong>CTRL + Q</strong>",

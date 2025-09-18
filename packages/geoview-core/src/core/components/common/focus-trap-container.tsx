@@ -41,7 +41,7 @@ export const FocusTrapContainer = memo(function FocusTrapContainer({
   const { t } = useTranslation<string>();
 
   // Store
-  const { disableFocusTrap } = useUIStoreActions();
+  const { disableFocusTrap, enableFocusTrap } = useUIStoreActions();
   const activeTrapGeoView = useUIActiveTrapGeoView();
   const focusItem = useUIActiveFocusItem();
 
@@ -103,9 +103,6 @@ export const FocusTrapContainer = memo(function FocusTrapContainer({
     }
   }, [focusItem, id]);
 
-  // Store actions
-  const { enableFocusTrap } = useUIStoreActions();
-
   // For footer panels, auto-activate focus trap when panel becomes active
   useEffect(() => {
     if (containerType === CONTAINER_TYPE.FOOTER_BAR && activeTrapGeoView && open) {
@@ -131,9 +128,10 @@ export const FocusTrapContainer = memo(function FocusTrapContainer({
         };
       }
     }
+
+    // Always return a cleanup function or undefined
+    return undefined;
   }, [containerType, activeTrapGeoView, open, id, focusItem.activeElementId, enableFocusTrap]);
-
-
 
   return (
     <FocusTrap open={isActive} disableAutoFocus>

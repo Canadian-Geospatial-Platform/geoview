@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, isValidElement } from 'react';
 import { Popover as MaterialPopover, PopoverProps } from '@mui/material';
 import { FocusTrap } from '@/ui';
 import { ARROW_KEYS_WITH_SPACE } from '@/core/utils/constant';
@@ -61,11 +61,8 @@ const handleKeyDown = (event: KeyboardEvent): void => {
  *
  * @see {@link https://mui.com/material-ui/react-popover/|Material-UI Popover}
  */
-function PopoverUI(props: PopoverProps): JSX.Element {
+function PopoverUI({ open, children, ...props }: PopoverProps): JSX.Element {
   logger.logTraceRenderDetailed('ui/popover/popover');
-
-  // Get constant from props
-  const { open } = props;
 
   useEffect(() => {
     logger.logTraceUseEffect('UI.POPOVER - handleKeyDown', open);
@@ -83,10 +80,11 @@ function PopoverUI(props: PopoverProps): JSX.Element {
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [open]);
+
   return (
-    <MaterialPopover {...props}>
+    <MaterialPopover open={open} {...props}>
       <FocusTrap open={open} disableAutoFocus>
-        {props.children}
+        {isValidElement(children) ? children : <span />}
       </FocusTrap>
     </MaterialPopover>
   );
