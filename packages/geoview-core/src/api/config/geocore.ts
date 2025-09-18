@@ -60,8 +60,11 @@ export class GeoCore {
         // Get the layerPath from geocore response
         const layerPath = geochartConfig.layers[0].layerId;
 
-        // Add a GeoChart
-        GeochartEventProcessor.addGeochartChart(mapId, layerPath, geochartConfig);
+        // If a Geochart is initialized
+        if (GeochartEventProcessor.isGeochartInitialized(mapId)) {
+          // Add a GeoChart
+          GeochartEventProcessor.addGeochartChart(mapId, layerPath, geochartConfig);
+        }
       });
     }
 

@@ -46,11 +46,11 @@ export class ConfigValidation {
   /**
    * Print a trace to help locate schema errors.
    * @param {AnyValidateFunction<unknown>} validate - The Ajv validator.
-   * @param {TypeLayerEntryConfig} objectAffected - Object that was validated.
+   * @param {unknown} objectAffected - Object that was validated.
    * @static
    * @private
    */
-  static #printSchemaError(validate: AnyValidateFunction<unknown>, objectAffected: TypeLayerEntryConfig): void {
+  static #printSchemaError(validate: AnyValidateFunction<unknown>, objectAffected: unknown): void {
     for (let i = 0; i < validate.errors!.length; i += 1) {
       const error = validate.errors![i];
       const { instancePath } = error;
@@ -384,21 +384,21 @@ export class ConfigValidation {
   /**
    * Process recursively the layer entries to set the parents of each entries.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The GeoView layer configuration.
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig - The list of layer entry configurations to process.
+   * @param {ConfigClassOrType[]} listOfLayerEntryConfig - The list of layer entry configurations to process.
    * @param {GroupLayerEntryConfig} parentLayerConfig - The parent layer configuration of all the
    * layer configurations found in the list of layer entries.
    * @private
    */
   static #recursivelySetChildParent(
     geoviewLayerConfig: TypeGeoviewLayerConfig,
-    listOfLayerEntryConfig: TypeLayerEntryConfig[],
+    listOfLayerEntryConfig: ConfigClassOrType[],
     parentLayerConfig?: GroupLayerEntryConfig
   ): void {
     // If there's no parent to set, return
     if (!parentLayerConfig) return;
 
     listOfLayerEntryConfig.forEach((layerConfig) => {
-      layerConfig.setParentLayerConfig(parentLayerConfig);
+      ConfigBaseClass.setClassOrTypeParentLayerConfig(layerConfig, parentLayerConfig);
       if (ConfigBaseClass.getClassOrTypeEntryTypeIsGroup(layerConfig))
         ConfigValidation.#recursivelySetChildParent(geoviewLayerConfig, layerConfig.listOfLayerEntryConfig, layerConfig);
     });
