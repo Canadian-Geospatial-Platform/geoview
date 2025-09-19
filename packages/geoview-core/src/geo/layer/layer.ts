@@ -335,7 +335,7 @@ export class LayerApi {
    * @returns {ConfigBaseClass | undefined} The layer configuration or undefined if not found.
    */
   getLayerEntryConfig(layerPath: string): ConfigBaseClass | undefined {
-    // TODO: Refactor - Major - Throw an exception when not found!
+    // TODO: Refactor - LayerApi - Throw an exception when not found!
     return this.#layerEntryConfigs?.[layerPath];
   }
 
@@ -2392,8 +2392,8 @@ export class LayerApi {
 
     // TODO: REFACTOR - This function has issues with the expected types and what it's truly doing.
     // TO.DOCONT: Sometimes, geoviewLayerConfig is a ConfigBaseClass instance and sometimes a regular json object
-    // GV: The old code was doing `if (theGeoviewLayerConfig.geoviewLayerId)` which condition is only possible when `geoviewLayerId` is a property of the class instance
-    // GV: Now that it's not a property anymore, that code was only being executed when the objet was a json object.
+    // GV: The old code was doing `if (theGeoviewLayerConfig.geoviewLayerId)` which condition is only possible when `geoviewLayerId` is a property of the class instance.
+    // GV: However, since that it's not a property anymore, that code was only being executed when the objet was a json object. For a while now...
     // GV: Attempting to fix it by supporting both the class instance and the json object by doing something like:
     // GV: const theGeoviewLayerConfig = ConfigBaseClass.getClassOrTypeGeoviewLayerConfig(geoviewLayerConfig);
     // GV: was actually making it worse. Therefore, I'm assuming the correct condition check is to check if the variable is a

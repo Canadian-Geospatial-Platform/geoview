@@ -63,6 +63,13 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     return super.getLayerMetadata() as TypeLayerMetadataWMS | undefined;
   }
 
+  /**
+   * Normalizes both the metadata and data access paths by replacing legacy wrapper segments in the URL.
+   * Specifically, this method replaces `wrapper/ramp/ogc` with `ows` in the metadata access path,
+   * then applies the normalized value to both the metadata and data access paths.
+   * This ensures consistency between the two paths and supports updated endpoint structures.
+   * @private
+   */
   #normalizeMetadataAndDataAccessPaths(): void {
     // Get the metadata access path
     const metadataAccessPath = this.getMetadataAccessPath()!;
