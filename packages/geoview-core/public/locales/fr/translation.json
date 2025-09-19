@@ -123,6 +123,7 @@
     "serviceGeoJSON": "GeoJSON",
     "serviceGeoPackage": "GeoPackage",
     "serviceCSV": "Valeurs séparées par des virgules (CSV)",
+    "serviceWKB": "Format binaire bien connu (WKB)",
     "serviceRasterTile": "Tuiles 'raster' XYZ",
     "serviceImageStatic": "Image statique",
     "serviceGroup": "Groupe de couches",
