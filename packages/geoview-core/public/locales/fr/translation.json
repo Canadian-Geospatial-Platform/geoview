@@ -358,6 +358,7 @@
       "geoviewStoreNotFound": "Le 'React Store' sur la carte '__param__' est introuvable.",
       "mapDivNotExists": "Div avec identifiant __param__ does not exist.",
       "mapWrongCall": "Div avec identifiant __param__ a une classe 'geoview-map' et devrait être initialisé via un appel à 'cgpv.init()'.",
+      "pluginConfigNotFound": "La configuration pour le Plugin au chemin d'accès '__path__' est introuvable.",
       "pluginStateUninitialized": "L'état du Plugin '__param__' sur la carte '__param__' n'est pas initialisé."
     },
     "geocore": {
