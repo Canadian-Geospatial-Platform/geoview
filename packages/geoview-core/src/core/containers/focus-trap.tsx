@@ -163,7 +163,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
     setOpen(false);
     setFocusTrap();
-  }, [mapId, setFocusTrap]);
+  }, [setFocusTrap]);
 
   const handleSkip = useCallback((): void => {
     setOpen(false);
@@ -213,7 +213,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
         }
       }
     },
-    [exitFocus, focusTrapId, handleScrolling, mapId]
+    [exitFocus, focusTrapId, handleScrolling]
   );
   useEventListener<HTMLElement>('keydown', manageLinks, document.getElementById(`bottomlink-${focusTrapId}`));
   useEventListener<HTMLElement>('keydown', manageLinks, document.getElementById(`toplink-${focusTrapId}`));

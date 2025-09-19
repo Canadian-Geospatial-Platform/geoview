@@ -280,7 +280,7 @@ export function Shell(props: ShellProps): JSX.Element {
     // The setTimeout is used to ensure the DOM has been updated and the element is ready to receive focus
     setTimeout(() => document.getElementById(`mapTargetElement-${mapId}`)?.focus(), 0);
     setCrosshairActive(true);
-  }, []);
+  }, [mapId, setCrosshairActive]);
 
   // Mount component
   useEffect(() => {

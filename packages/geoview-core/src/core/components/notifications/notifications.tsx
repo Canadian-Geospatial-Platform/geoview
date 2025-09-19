@@ -27,7 +27,6 @@ import { logger } from '@/core/utils/logger';
 import { useMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useShake } from '@/core/utils/useSpringAnimations';
 import { handleEscapeKey } from '@/core/utils/utilities';
-import { FocusTrapContainer } from '@/core/components/common';
 import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { SxStyles } from '@/ui/style/types';
 
