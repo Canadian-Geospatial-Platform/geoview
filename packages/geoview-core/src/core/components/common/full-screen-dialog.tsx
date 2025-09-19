@@ -39,6 +39,8 @@ export const FullScreenDialog = memo(function FullScreenDialog({
       }, 500);
       return () => clearTimeout(timer);
     }
+
+    return undefined;
   }, [open]);
 
 

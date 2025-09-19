@@ -21,7 +21,7 @@ const basemapChoiceOptions: Record<string, TypeBasemapOptions> = {
  * Create a basemap select button to open the select panel, and set panel content
  * @returns {JSX.Element} the created basemap select button
  */
-export default function BasemapSelect({ closePanel }: { closePanel?: () => void }): JSX.Element {
+export default function BasemapSelect(): JSX.Element {
   // Log
   logger.logTraceRender('components/nav-bar/buttons/basemap');
 

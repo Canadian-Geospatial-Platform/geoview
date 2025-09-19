@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { ReactElement, useEffect, useRef, useCallback } from 'react';
 import { Popper as MaterialPopper, PopperProps } from '@mui/material';
 import { animated } from '@react-spring/web';
 import { useFadeIn } from '@/core/utils/useSpringAnimations';
@@ -13,6 +13,7 @@ interface PopperPropsExtend extends PopperProps {
   handleKeyDown?: (key: string, callbackFn: () => void) => void;
   focusSelector?: string;
   focusTrap?: boolean;
+  children: ReactElement;
 }
 
 /**
@@ -72,7 +73,7 @@ function PopperUI({ open, onClose, handleKeyDown, focusSelector, focusTrap = fal
   const AnimatedPopper = animated(MaterialPopper);
 
   // Ref
-  const popperRef = useRef<HTMLDivElement>(null);
+  const popperRef = useRef<HTMLDivElement | null>(null);
   const setPopperRef = useCallback((node: HTMLDivElement | null) => {
     popperRef.current = node;
   }, []);
