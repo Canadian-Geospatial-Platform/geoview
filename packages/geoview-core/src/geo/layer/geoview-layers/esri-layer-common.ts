@@ -114,10 +114,12 @@ export function commonValidateListOfLayerEntryConfig(layer: EsriDynamic | EsriFe
 
         metadata.layers[esriIndex].subLayerIds.forEach((layerId) => {
           // Clone the layer props and tweak them
-          const subLayerProps = layerConfig.cloneLayerProps();
-          subLayerProps.layerId = `${layerId}`;
-          subLayerProps.parentLayerConfig = groupLayerConfig;
-          subLayerProps.layerName = metadata.layers.filter((item) => item.id === layerId)[0].name;
+          const subLayerProps = {
+            ...layerConfig.cloneLayerProps(),
+            layerId: `${layerId}`,
+            layerName: metadata.layers.filter((item) => item.id === layerId)[0].name,
+            parentLayerConfig: groupLayerConfig,
+          };
 
           let subLayerEntryConfig;
           if (layerConfig instanceof EsriDynamicLayerEntryConfig) {
