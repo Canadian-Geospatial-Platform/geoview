@@ -10,6 +10,7 @@ type Shape = {
   right: string;
 };
 
+// #region MUI
 declare module '@mui/material/styles' {
   // allow configuration using `createTheme`
   interface ThemeOptions {
@@ -99,3 +100,5 @@ declare module '@mui/material/styles/createTypography' {
     };
   }
 }
+
+// #endregion MUI

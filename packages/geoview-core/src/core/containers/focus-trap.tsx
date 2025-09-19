@@ -120,7 +120,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
       },
       handleKeyDown: (evt: KeyboardEvent) => {
         if (!ARROW_KEY_CODES.includes(evt.code)) {
-          //mapElementStore.style.border = 'unset';
+          mapElementStore.style.border = 'unset';
         }
 
         if (evt.code === 'KeyQ' && evt.ctrlKey) {
@@ -153,7 +153,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
       // The setTimeout is used to ensure the DOM has been updated and the element is ready to receive focus
       // Focus on the skip to main content link to skip app bar
-      setTimeout(() => document.getElementById(`main-map-${mapId}`)?.focus(), FOCUS_DELAY);
+      setTimeout(() => document.getElementById(`main-map-${mapId}`)?.focus({ preventScroll: true }), FOCUS_DELAY);
     }
   }, [handleExit, mapId, setActiveTrapGeoView]);
 
