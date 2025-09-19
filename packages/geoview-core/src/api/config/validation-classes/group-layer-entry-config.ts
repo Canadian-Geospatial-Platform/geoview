@@ -23,14 +23,24 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
    */
   // TO: Until this is fixed, this constructor supports sending a GroupLayerEntryConfig in its typing, for now (GroupLayerEntryConfigProps | GroupLayerEntryConfig)... though it should only be a GroupLayerEntryConfigProps eventually
   constructor(layerConfig: GroupLayerEntryConfigProps) {
-    super(layerConfig, undefined, CONST_LAYER_ENTRY_TYPES.GROUP);
+    super(layerConfig, layerConfig.geoviewLayerConfig.geoviewLayerType, CONST_LAYER_ENTRY_TYPES.GROUP);
     this.listOfLayerEntryConfig = layerConfig.listOfLayerEntryConfig || [];
   }
 
+  /**
+   * Returns the `layerPath` values of all immediate child layers in `listOfLayerEntryConfig`.
+   * This method does **not** recurse into nested sublayers.
+   * @returns {string[]} An array of `layerPath` strings for direct sublayers.
+   */
   getLayerPaths(): string[] {
     return this.listOfLayerEntryConfig.map((geoviewLayerEntryConfig) => geoviewLayerEntryConfig.layerPath);
   }
 
+  /**
+   * Recursively returns the `layerPath` values of all layers and sublayers starting from this layer.
+   * This includes the `layerPath` of the current layer, its direct children, and all nested descendants.
+   * @returns {string[]} An array of `layerPath` strings for all descendant layers (including nested groups).
+   */
   getLayerPathsAll(): string[] {
     function getChildPaths(listOfLayerEntryConfig: TypeLayerEntryConfig[]): string[] {
       const layerPaths: string[] = [];

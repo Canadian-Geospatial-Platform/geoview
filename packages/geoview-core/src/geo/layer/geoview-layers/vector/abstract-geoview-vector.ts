@@ -118,7 +118,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         const url = AbstractGeoViewVector.#resolveUrl(layerConfig, vectorSource, extent, resolution, projection);
 
         if (layerConfig.getSchemaTag() !== CONST_LAYER_TYPES.WKB) {
-          // Cast it to a GeoJson layer type
+          // Cast it to a GeoJson layer type, because we treat WKB entry configs like GeoJson's
           const layerConfigGeoJSON = layerConfig as GeoJSONLayerEntryConfig;
 
           // Fetch the data, or use passed geoJSON if present

@@ -19,6 +19,8 @@ import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-lay
 import { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 
 export interface TypeEsriDynamicLayerConfig extends TypeGeoviewLayerConfig {
+  // TODO: Refactor - Layers - Get rid of the `geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_DYNAMIC` property in this interface and all others in other layers.
+  // TO.DOCONT: In fact, probably get rid of all these interfaces altogether and implement the class structures better with regards to their possible `listOfLayerEntryConfig`.
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_DYNAMIC;
   listOfLayerEntryConfig: (GroupLayerEntryConfig | EsriDynamicLayerEntryConfig)[];
 }

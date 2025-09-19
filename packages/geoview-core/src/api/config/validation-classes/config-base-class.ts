@@ -99,7 +99,7 @@ export abstract class ConfigBaseClass {
    */
   // TODO: Refactor - There is an oddity inside LayerApi.addGeoviewLayer to the effect that it's calling validateListOfGeoviewLayerConfig even if it was already called in config-validation.
   // TO.DOCONT: Until this is fixed, this constructor supports sending a ConfigBaseClass in its typing, for now (ConfigClassOrType = ConfigBaseClassProps | ConfigBaseClass)... though it should only be a ConfigBaseClassProps eventually.
-  protected constructor(layerConfig: ConfigClassOrType, schemaTag: TypeGeoviewLayerType | undefined, entryType: TypeLayerEntryType) {
+  protected constructor(layerConfig: ConfigClassOrType, schemaTag: TypeGeoviewLayerType, entryType: TypeLayerEntryType) {
     // Transfer the properties from the object to the class (without using Object.assign anymore)
     this.layerEntryProps = ConfigBaseClass.getClassOrTypeLayerEntryProps(layerConfig);
     this.layerId = layerConfig.layerId;
@@ -204,30 +204,58 @@ export abstract class ConfigBaseClass {
     return ConfigBaseClass.getClassOrTypeEntryTypeIsGroup(this);
   }
 
+  /**
+   * Returns the GeoView layer configuration associated with this layer entry.
+   * @returns {TypeGeoviewLayerConfig} The GeoView layer configuration object.
+   */
   getGeoviewLayerConfig(): TypeGeoviewLayerConfig {
     return this.layerEntryProps.geoviewLayerConfig;
   }
 
+  /**
+   * Retrieves the parent layer configuration if this layer is part of a group.
+   * @returns {GroupLayerEntryConfig | undefined} The parent group layer config, or undefined if not in a group.
+   */
   getParentLayerConfig(): GroupLayerEntryConfig | undefined {
     return this.layerEntryProps.parentLayerConfig;
   }
 
+  /**
+   * Sets the parent layer configuration for this layer.
+   * @param {GroupLayerEntryConfig} parentLayerConfig - The parent group layer configuration to assign.
+   */
   setParentLayerConfig(parentLayerConfig: GroupLayerEntryConfig): void {
     this.layerEntryProps.parentLayerConfig = parentLayerConfig;
   }
 
+  /**
+   * Returns the unique GeoView layer ID associated with this layer entry.
+   * @returns {string} The GeoView layer ID.
+   */
   getGeoviewLayerId(): string {
     return this.getGeoviewLayerConfig().geoviewLayerId;
   }
 
+  /**
+   * Returns the display name of the GeoView layer, if defined.
+   * @returns {string | undefined} The GeoView layer name, or undefined if not set.
+   */
   getGeoviewLayerName(): string | undefined {
     return this.getGeoviewLayerConfig().geoviewLayerName;
   }
 
+  /**
+   * Retrieves the metadata access path used by this GeoView layer.
+   * @returns {string | undefined} The metadata access path, or undefined if not set.
+   */
   getMetadataAccessPath(): string | undefined {
     return this.getGeoviewLayerConfig().metadataAccessPath;
   }
 
+  /**
+   * Updates the metadata access path for this GeoView layer.
+   * @param {string} metadataAccessPath - The new metadata access path to assign.
+   */
   setMetadataAccessPath(metadataAccessPath: string): void {
     this.getGeoviewLayerConfig().metadataAccessPath = metadataAccessPath;
   }
@@ -805,6 +833,14 @@ export abstract class ConfigBaseClass {
     return ConfigBaseClass.getClassOrTypeEntryType(layerConfig) === CONST_LAYER_ENTRY_TYPES.GROUP;
   }
 
+  /**
+   * Extracts the `layerEntryProps` from either a class instance (`ConfigBaseClass`) or a plain configuration object.
+   * This function acts as a type guard and converter to ensure consistent access to `layerEntryProps`,
+   * whether the input is a class or a raw configuration type.
+   * @template T - A subtype of `ConfigBaseClassProps`.
+   * @param {ConfigClassOrType | TypeGeoviewLayerConfig} layerConfig - The configuration, which may be a class or a plain object.
+   * @returns {T} The extracted `layerEntryProps` cast to the expected type.
+   */
   static getClassOrTypeLayerEntryProps<T extends ConfigBaseClassProps>(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): T {
     if (layerConfig instanceof ConfigBaseClass) {
       return layerConfig.layerEntryProps as T;
@@ -813,6 +849,12 @@ export abstract class ConfigBaseClass {
     return layerConfig as T;
   }
 
+  /**
+   * Retrieves the `geoviewLayerConfig` from a layer configuration object or class.
+   * Internally uses `getClassOrTypeLayerEntryProps()` to normalize access to the configuration structure.
+   * @param {ConfigClassOrType | TypeGeoviewLayerConfig} layerConfig - The configuration, which may be a class instance or a plain object.
+   * @returns {TypeGeoviewLayerConfig} The `geoviewLayerConfig` associated with the provided configuration.
+   */
   static getClassOrTypeGeoviewLayerConfig(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): TypeGeoviewLayerConfig {
     return ConfigBaseClass.getClassOrTypeLayerEntryProps(layerConfig).geoviewLayerConfig;
   }
@@ -832,6 +874,13 @@ export abstract class ConfigBaseClass {
     }
   }
 
+  /**
+   * Retrieves the `parentLayerConfig` from the provided layer configuration, whether it's a class instance or a plain object.
+   * This allows consistent access to the parent group layer config regardless of whether the input is an instance of
+   * `ConfigBaseClass` or a raw config type.
+   * @param {ConfigClassOrType} layerConfig - The layer configuration to extract the parent from.
+   * @returns {GroupLayerEntryConfig | undefined} The parent group layer config, or `undefined` if this layer has no parent.
+   */
   static getClassOrTypeParentLayerConfig(layerConfig: ConfigClassOrType): GroupLayerEntryConfig | undefined {
     return ConfigBaseClass.getClassOrTypeLayerEntryProps(layerConfig).parentLayerConfig;
   }
