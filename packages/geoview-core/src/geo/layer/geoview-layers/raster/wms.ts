@@ -917,11 +917,9 @@ export class WMS extends AbstractGeoViewRaster {
           ...layerConfig.cloneLayerProps(),
           layerId: `${subLayer.layerId}`,
           layerName: subLayer.layerName,
+          parentLayerConfig: layerConfig,
           listOfLayerEntryConfig: [],
         });
-
-        // Assign the parent
-        groupLayer.setParentLayerConfig(layerConfig);
 
         // Recursive call
         WMS.#createGroupLayerRec(subLayer.listOfLayerEntryConfig!, groupLayer, fullSubLayers, callbackGroupLayerCreated);
@@ -932,14 +930,12 @@ export class WMS extends AbstractGeoViewRaster {
         // Handle leaf layer
         const subLayerEntryConfig = new OgcWmsLayerEntryConfig({
           ...layerConfig.cloneLayerProps(),
+          layerId: `${subLayer.layerId}`,
+          layerName: subLayer.layerName!,
+          parentLayerConfig: layerConfig,
         });
 
-        // TODO: ALEX - Refactor - Instead of assigning these props after the fact, assign them before creating the OgcWmsLayerEntryConfig
-        // Assign the parent
-        subLayerEntryConfig.setParentLayerConfig(layerConfig);
-        subLayerEntryConfig.layerId = `${subLayer.layerId}`;
-        subLayerEntryConfig.setLayerName(subLayer.layerName!);
-
+        // Cumulate
         newListOfLayerEntryConfig.push(subLayerEntryConfig);
 
         // Simulate the legacy bug behavior
