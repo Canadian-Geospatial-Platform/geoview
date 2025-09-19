@@ -971,6 +971,9 @@ export class LayerApi {
     // Get the layer entry config to remove
     const layerEntryConfig = this.getLayerEntryConfig(layerPath);
 
+    // Throw if not found
+    if (!layerEntryConfig) throw new LayerNotFoundError(layerPath);
+
     // initialize these two constant now because we will delete the information used to get their values.
     const indexToDelete = layerEntryConfig
       ? layerEntryConfig.parentLayerConfig?.listOfLayerEntryConfig.findIndex((layerConfig) => layerConfig === layerEntryConfig)
@@ -1051,7 +1054,7 @@ export class LayerApi {
     }
 
     // Emit about it
-    this.#emitLayerConfigRemoved({ layerPath });
+    this.#emitLayerConfigRemoved({ layerPath, layerName: layerEntryConfig.getLayerName() || 'No name / Sans nom' });
 
     // Log
     logger.logInfo(`Layer removed for ${layerPath}`);
@@ -2557,6 +2560,8 @@ export type LayerErrorDelegate = EventDelegateBase<LayerApi, LayerErrorEvent, vo
 export type LayerPathEvent = {
   // The layer path
   layerPath: string;
+  // The layer name
+  layerName: string;
 };
 
 /**

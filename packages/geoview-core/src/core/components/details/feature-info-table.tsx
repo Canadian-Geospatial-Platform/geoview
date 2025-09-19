@@ -118,8 +118,13 @@ export const FeatureRow = memo(function FeatureRow({ featureInfoItem, index, onI
     <Grid
       container
       spacing={5}
+      className="feature-info-row"
+      style={
+        {
+          '--row-bg-color': index % 2 > 0 ? theme.palette.geoViewColor.bgColor.darken(0.1) : 'transparent',
+        } as React.CSSProperties
+      }
       sx={{
-        backgroundColor: index % 2 > 0 ? theme.palette.geoViewColor.bgColor.darken(0.1) : '',
         color: index % 2 > 0 ? theme.palette.geoViewColor.bgColor.darken(0.9) : '',
         marginBottom: '1.25rem',
       }}
@@ -174,7 +179,7 @@ export const FeatureInfoTable = memo(function FeatureInfoTable({ featureInfoList
   if (featureInfoList.length > 0 && featureInfoList[featureInfoList.length - 1].alias === 'geoviewID') featureInfoList.pop();
 
   return (
-    <Box sx={sxClasses.boxContainerFeatureInfo}>
+    <Box className="details-feature-info-table" sx={sxClasses.boxContainerFeatureInfo}>
       {featureInfoList.map((featureInfoItem, index) => (
         <FeatureRow
           key={`${featureInfoItem.alias}_${generateId()}`}
