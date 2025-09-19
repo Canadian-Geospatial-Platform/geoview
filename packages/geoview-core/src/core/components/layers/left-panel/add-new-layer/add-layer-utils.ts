@@ -38,7 +38,7 @@ export class UtilAddLayer {
    * @returns {Array<[string, string]>} An array where each item is a tuple: [layerType, localizedName].
    */
   static getLocalizeLayerType(language: TypeDisplayLanguage, includeStatic: boolean): Array<[string, string]> {
-    const { CSV, ESRI_DYNAMIC, ESRI_FEATURE, ESRI_IMAGE, GEOJSON, WMS, WFS, OGC_FEATURE, XYZ_TILES, VECTOR_TILES } = CONST_LAYER_TYPES;
+    const { CSV, ESRI_DYNAMIC, ESRI_FEATURE, ESRI_IMAGE, GEOJSON, WMS, WFS, WKB, OGC_FEATURE, XYZ_TILES, VECTOR_TILES } = CONST_LAYER_TYPES;
     const { GEOCORE, GEOPACKAGE, SHAPEFILE } = CONST_LAYER_ENTRY_TYPES;
     const layerOptions: [string, string][] = [
       [CSV, getLocalizedMessage(language, 'layers.serviceCSV')],
@@ -50,6 +50,7 @@ export class UtilAddLayer {
       [GEOPACKAGE, getLocalizedMessage(language, 'layers.serviceGeoPackage')],
       [WMS, getLocalizedMessage(language, 'layers.serviceOgcWMS')],
       [WFS, getLocalizedMessage(language, 'layers.serviceOgcWFS')],
+      [WKB , getLocalizedMessage(language, 'layers.serviceWKB')],
       [OGC_FEATURE, getLocalizedMessage(language, 'layers.serviceOgcFeature')],
       [XYZ_TILES, getLocalizedMessage(language, 'layers.serviceRasterTile')],
       [VECTOR_TILES, getLocalizedMessage(language, 'layers.serviceVectorTile')],

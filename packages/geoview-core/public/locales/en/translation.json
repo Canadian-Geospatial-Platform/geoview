@@ -123,6 +123,7 @@
     "serviceGeoJSON": "GeoJSON",
     "serviceGeoPackage": "GeoPackage",
     "serviceCSV": "Comma Separated Values (CSV)",
+    "serviceWKB": "Well-Known Binary (WKB)",
     "serviceRasterTile": "XYZ Raster Tiles",
     "serviceImageStatic": "Static Image",
     "serviceGroup": "Group Layer",
