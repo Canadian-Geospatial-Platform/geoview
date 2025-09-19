@@ -2364,13 +2364,10 @@ export class LayerApi {
 
   /**
    * Generate an array of layer info for the orderedLayerList.
-   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The config to get the info from.
+   * @param {TypeGeoviewLayerConfig | ConfigBaseClass} geoviewLayerConfig - The config to get the info from.
    * @returns {TypeOrderedLayerInfo[]} The array of ordered layer info.
    */
   static generateArrayOfLayerOrderInfo(geoviewLayerConfig: TypeGeoviewLayerConfig | ConfigBaseClass): TypeOrderedLayerInfo[] {
-    // TODO: REFACTOR - This function has issues with the expected types and what it's truly doing.
-    // TO.DOCONT: Sometimes, it receives a ConfigBaseClass instance and sometimes a regular json object and the 'as' casting happening
-    // TO.DOCONT: herein makes it TypeScript compliant, but untrue.
     const newOrderedLayerInfos: TypeOrderedLayerInfo[] = [];
 
     const addSubLayerPathToLayerOrder = (layerEntryConfig: TypeLayerEntryConfig, layerPath: string): void => {
@@ -2396,9 +2393,18 @@ export class LayerApi {
       }
     };
 
-    if ((geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId) {
-      if ((geoviewLayerConfig as TypeGeoviewLayerConfig).listOfLayerEntryConfig.length > 1) {
-        const layerPath = `${(geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId}/base-group`;
+    // TODO: REFACTOR - This function has issues with the expected types and what it's truly doing.
+    // TO.DOCONT: Sometimes, geoviewLayerConfig is a ConfigBaseClass instance and sometimes a regular json object
+    // GV: The old code was doing `if (theGeoviewLayerConfig.geoviewLayerId)` which condition is only possible when `geoviewLayerId` is a property of the class instance
+    // GV: Now that it's not a property anymore, that code was only being executed when the objet was a json object.
+    // GV: Attempting to fix it by supporting both the class instance and the json object by doing something like:
+    // GV: const theGeoviewLayerConfig = ConfigBaseClass.getClassOrTypeGeoviewLayerConfig(geoviewLayerConfig);
+    // GV: was actually making it worse. Therefore, I'm assuming the correct condition check is to check if the variable is a
+    // GV: json object (not a class instance), so I'm changing it for clarity. However, I'm not sure what the whole intention is here.
+
+    if (!(geoviewLayerConfig instanceof ConfigBaseClass)) {
+      if (geoviewLayerConfig.listOfLayerEntryConfig?.length > 1) {
+        const layerPath = `${geoviewLayerConfig.geoviewLayerId}/base-group`;
         // Using as any, because even a TypeGeoviewLayerConfig can have initialSettings? To confirm...
         const settingsGVLC = ConfigBaseClass.getClassOrTypeInitialSettings(geoviewLayerConfig)?.states;
 
@@ -2410,14 +2416,16 @@ export class LayerApi {
         };
 
         newOrderedLayerInfos.push(layerInfo);
-        (geoviewLayerConfig as TypeGeoviewLayerConfig).listOfLayerEntryConfig.forEach((layerEntryConfig) => {
+        geoviewLayerConfig.listOfLayerEntryConfig.forEach((layerEntryConfig) => {
           addSubLayerPathToLayerOrder(layerEntryConfig, layerPath);
         });
       } else {
-        const layerEntryConfig = (geoviewLayerConfig as TypeGeoviewLayerConfig).listOfLayerEntryConfig[0];
+        const layerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig[0];
         addSubLayerPathToLayerOrder(layerEntryConfig, layerEntryConfig.layerPath);
       }
-    } else addSubLayerPathToLayerOrder(geoviewLayerConfig as TypeLayerEntryConfig, (geoviewLayerConfig as TypeLayerEntryConfig).layerPath);
+    } else {
+      addSubLayerPathToLayerOrder(geoviewLayerConfig as TypeLayerEntryConfig, geoviewLayerConfig.layerPath);
+    }
 
     return newOrderedLayerInfos;
   }

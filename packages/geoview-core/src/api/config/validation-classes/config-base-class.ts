@@ -805,7 +805,7 @@ export abstract class ConfigBaseClass {
     return ConfigBaseClass.getClassOrTypeEntryType(layerConfig) === CONST_LAYER_ENTRY_TYPES.GROUP;
   }
 
-  static getClassOrTypeLayerEntryProps<T extends ConfigBaseClassProps>(layerConfig: ConfigClassOrType): T {
+  static getClassOrTypeLayerEntryProps<T extends ConfigBaseClassProps>(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): T {
     if (layerConfig instanceof ConfigBaseClass) {
       return layerConfig.layerEntryProps as T;
     }
@@ -813,7 +813,7 @@ export abstract class ConfigBaseClass {
     return layerConfig as T;
   }
 
-  static getClassOrTypeGeoviewLayerConfig(layerConfig: ConfigClassOrType): TypeGeoviewLayerConfig {
+  static getClassOrTypeGeoviewLayerConfig(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): TypeGeoviewLayerConfig {
     return ConfigBaseClass.getClassOrTypeLayerEntryProps(layerConfig).geoviewLayerConfig;
   }
 
