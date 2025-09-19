@@ -168,16 +168,9 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
       });
 
       setAllMatches(matches);
-      setCurrentMatchIndex(0);
-
-      // Auto-select first match
-      if (matches.length > 0) {
-        setTimeout(() => {
-          onSectionChange(matches[0].sectionIndex);
-        }, 100);
-      }
+      setCurrentMatchIndex(-1);
     },
-    [guide, onSectionChange, getProtectedRanges, getTableRanges]
+    [guide, getProtectedRanges, getTableRanges]
   );
 
   /**
