@@ -289,11 +289,7 @@ export function commonProcessInitialSettings(
   // Get the layer metadata
   const layerMetadata = layerConfig.getLayerMetadata();
 
-  // TODO: Refactor - Config vs Metadata - There is a logic issue here as layerConfig.initialSettings.states.visible can never be undefined because
-  // TO.DOCONT: in ConfigValidation.#processLayerEntryConfig we set it to states.visible = true off-the-bat, and that happens before the metadata is processed.
-  // TO.DOCONT: Then, here, when the layer metadata is processed, it checks what was in the config (which as been filled already).
-  // TO.DOCONT: If the intent is to use the metadata only if the config state.visible is undefined, then it can't be
-  // TO.DOCONT: automatically pre-filled in ConfigValidation.#processLayerEntryConfig prior to processing the metadata.
+  // If no visibility by default has been configured apply the default visibility from the metadata
   if (layerConfig.getInitialSettings()?.states?.visible === undefined) {
     // Update the states initial settings
     layerConfig.updateInitialSettingsStateVisible(!!layerMetadata?.defaultVisibility);
