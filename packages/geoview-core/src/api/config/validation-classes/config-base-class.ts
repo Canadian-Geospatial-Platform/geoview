@@ -1035,10 +1035,15 @@ export abstract class ConfigBaseClass {
       return layerConfig.getSchemaTag() === layerType;
     }
 
-    // Try to cast it as ConfigBaseClassProps
+    // Try to cast it as ConfigBaseClassProps and check schemaTag
     const configBaseProps = layerConfig as ConfigBaseClassProps;
-    if (configBaseProps.geoviewLayerConfig) {
+    if (configBaseProps.schemaTag) {
       return configBaseProps.schemaTag === layerType;
+    }
+
+    // Try from within the geoviewLayerConfig property
+    if (configBaseProps.geoviewLayerConfig) {
+      return configBaseProps.geoviewLayerConfig.geoviewLayerType === layerType;
     }
 
     // Try to use it as a TypeGeoviewLayerConfig
