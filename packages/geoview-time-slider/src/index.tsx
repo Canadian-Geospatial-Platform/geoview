@@ -14,7 +14,6 @@ export interface SliderFilterProps {
   title: string;
   description: string;
   range: string[];
-  defaultValue: string;
   minAndMax: number[];
   field: string;
   singleHandle: boolean;
@@ -131,7 +130,8 @@ class TimeSliderPlugin extends FooterPlugin {
       value: this.value!,
       label: 'timeSlider.title',
       icon: <TimeSliderIcon />,
-      content: <TimeSliderPanel mapId={this.mapViewer.mapId} configObj={this.getConfig()} />,
+      // Config is not needed as the store keeps track of values
+      content: <TimeSliderPanel mapId={this.mapViewer.mapId} />,
     };
   }
 

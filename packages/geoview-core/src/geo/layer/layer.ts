@@ -2466,7 +2466,7 @@ export class LayerApi {
       return new OgcFeature(geoviewLayerConfig);
     }
     if (VectorTilesLayerEntryConfig.isClassOrTypeVectorTiles(geoviewLayerConfig)) {
-      return new VectorTiles(geoviewLayerConfig, this.mapViewer.getProjection());
+      return new VectorTiles(geoviewLayerConfig, this.mapViewer.getProjection().getCode());
     }
     if (WfsLayerEntryConfig.isClassOrTypeWFSLayer(geoviewLayerConfig)) {
       return new WFS(geoviewLayerConfig);

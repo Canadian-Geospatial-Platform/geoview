@@ -50,7 +50,9 @@
   "theme": "geo.ca",
   "appBar": {
     "tabs": {
-      "core": ["export"]
+      "core": [
+        "export"
+      ]
     }
   },
   "components": [
@@ -106,13 +108,21 @@
             "description": "Custom inline description",
             "locked": true,
             "reversed": true,
-            "defaultValue": "2024-02-21T14:54:00Z"
+            "timeDimension": {
+              "default": [
+                "2024-02-21T14:54:00Z"
+              ]
+            }
           },
           {
             "layerPaths": [
               "MSI/msi-94-or-more"
             ],
-            "defaultValue": "2011-08-15T00:00:00Z"
+            "timeDimension": {
+              "default": [
+                "2011-08-15T00:00:00Z"
+              ]
+            }
           }
         ]
       }
