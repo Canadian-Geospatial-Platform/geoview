@@ -1,5 +1,3 @@
-import { cloneDeep } from 'lodash';
-
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { Extent, TypeLayerStyleConfig } from '@/api/types/map-schema-types';
 import {
@@ -576,7 +574,7 @@ export abstract class ConfigBaseClass {
    */
   protected onCloneLayerProps(): ConfigBaseClassProps {
     // Return a cloned copy of the layer entry props that were used to create this layer entry config
-    return cloneDeep(this.layerEntryProps);
+    return { ...this.layerEntryProps };
   }
 
   /**
