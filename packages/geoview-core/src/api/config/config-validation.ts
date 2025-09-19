@@ -183,7 +183,6 @@ export class ConfigValidation {
           try {
             // The default value for geoviewLayerConfig.initialSettings.visible is true.
             const geoviewLayerConfigCasted = geoviewLayerConfig;
-            if (!geoviewLayerConfigCasted.initialSettings) geoviewLayerConfigCasted.initialSettings = { states: { visible: true } };
 
             // Validate the geoview layer id
             ConfigValidation.#geoviewLayerIdIsMandatory(geoviewLayerConfigCasted);
@@ -268,22 +267,6 @@ export class ConfigValidation {
 
       // layerConfig.initialSettings attributes that are not defined inherits parent layer settings that are defined.
       let initialSettings = ConfigBaseClass.getClassOrTypeInitialSettings(layerConfig);
-      if (!initialSettings.states) {
-        // TODO: Refactor - Check if we should really provide a states { visible: true } by default here? Because
-        // TO.DOCONT: doing so makes it impossible when the metadata is processed to know if the visible: true was originally undefined or if it was intentionally configured as such.
-        // TO.DOCONT: Later, all the code sees is that the config specifies states with visible: true
-        ConfigBaseClass.setClassOrTypeInitialSettings(layerConfig, { states: { visible: true } });
-        // Reget it to make sure the chain of updates works
-        initialSettings = ConfigBaseClass.getClassOrTypeInitialSettings(layerConfig);
-      }
-
-      if (initialSettings.states?.visible === undefined) {
-        ConfigBaseClass.setClassOrTypeInitialSettings(layerConfig, {
-          states: { ...initialSettings.states, visible: true },
-        });
-        // Reget it to make sure the chain of updates works
-        initialSettings = ConfigBaseClass.getClassOrTypeInitialSettings(layerConfig);
-      }
 
       // Get the parent initial settings
       const parentInitialSettings = ConfigBaseClass.getClassOrTypeInitialSettings(parentLayerConfig);

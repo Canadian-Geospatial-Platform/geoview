@@ -970,10 +970,20 @@ export abstract class ConfigBaseClass {
   static getClassOrTypeInitialSettings(
     layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig | undefined
   ): Readonly<TypeLayerInitialSettings> {
+    let settings: TypeLayerInitialSettings | undefined;
+
     if (layerConfig instanceof ConfigBaseClass) {
-      return layerConfig.getInitialSettings();
+      settings = layerConfig.getInitialSettings();
+    } else {
+      settings = layerConfig?.initialSettings;
     }
-    return { ...layerConfig?.initialSettings };
+
+    return {
+      ...settings,
+      states: {
+        ...settings?.states, // Preserve existing settings
+      },
+    };
   }
 
   /**
