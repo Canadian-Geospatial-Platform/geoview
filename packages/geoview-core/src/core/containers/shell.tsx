@@ -277,9 +277,9 @@ export function Shell(props: ShellProps): JSX.Element {
     // Log
     logger.logTraceUseCallback('SHELL - handleSkipToMainContent');
 
-    // The setTimeout is used to ensure the DOM has been updated and the element is ready to receive focus
-    setTimeout(() => document.getElementById(`mapTargetElement-${mapId}`)?.focus(), 0);
+    // Focus the map and set crosshair
     setCrosshairActive(true);
+    document.getElementById(`mapTargetElement-${mapId}`)?.focus();
   }, [mapId, setCrosshairActive]);
 
   // Mount component
@@ -322,14 +322,17 @@ export function Shell(props: ShellProps): JSX.Element {
       >
         {t('keyboardnav.start')}
       </Link>
-      <FocusTrap open={activeTrapGeoView}>
-        <Box ref={shellRef} id={`shell-${mapViewer.mapId}`} sx={sxClasses.shell} className="geoview-shell" tabIndex={-1} aria-hidden="true">
+      <FocusTrap open={activeTrapGeoView} disableAutoFocus>
+        <Box ref={shellRef} id={`shell-${mapViewer.mapId}`} sx={sxClasses.shell} className="geoview-shell" tabIndex={-1}>
           <Link
             id={`main-map-${mapViewer.mapId}`}
             href={`#main-map-${mapViewer.mapId}`}
             tabIndex={0}
             sx={{ ...sxClasses.skip, top: '0px' }}
-            onClick={() => handleSkipToMainContent()}
+            onClick={(e) => {
+              e.preventDefault();
+              handleSkipToMainContent();
+            }}
           >
             {t('keyboardnav.map')}
           </Link>
