@@ -196,7 +196,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     const values = singleHandle
       ? [DateMgt.convertToMilliseconds(defaultValue)]
       : defaultValueIsArray
-        ? [DateMgt.convertToMilliseconds(defaultValue), DateMgt.convertToMilliseconds(defaultToUse[1])]
+        ? [DateMgt.convertToMilliseconds(defaultToUse[0]), DateMgt.convertToMilliseconds(defaultToUse[1])]
         : [...minAndMax];
 
     // If using discrete axis
@@ -215,11 +215,11 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
       field,
       fieldAlias,
       singleHandle,
-      filtering: true,
+      filtering: timesliderConfig?.filtering !== false,
       values,
-      delay: 1000,
-      locked: undefined,
-      reversed: undefined,
+      delay: timesliderConfig?.delay || 1000,
+      locked: timesliderConfig?.locked,
+      reversed: timesliderConfig?.reversed,
       displayPattern,
     };
   }

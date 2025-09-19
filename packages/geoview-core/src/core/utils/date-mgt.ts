@@ -82,7 +82,7 @@ type RangeItems = {
  */
 export type TimeDimension = {
   field: string;
-  default: string;
+  default: string | string[];
   unitSymbol?: string;
   rangeItems: RangeItems;
   nearestValues: 'discrete' | 'absolute';
@@ -230,7 +230,7 @@ export abstract class DateMgt {
 
     // create or reformat date in ISO format
     const pattern = `${datePattern !== undefined ? DEFAULT_DATE_PRECISION[datePattern] : ''}${
-      timePattern !== undefined ? DEFAULT_TIME_PRECISION[timePattern] : ''
+      timePattern ? DEFAULT_TIME_PRECISION[timePattern] : ''
     }`;
 
     // output as local by default

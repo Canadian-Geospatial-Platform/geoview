@@ -303,12 +303,14 @@ export interface TypeTimeSliderValues {
 
 export type TypeTimeSliderProps = {
   layerPaths: string[];
-  title: string;
-  description: string;
-  locked: boolean;
-  reversed: boolean;
-  defaultValue: string;
-  timeDimension: TimeDimension;
+  title?: string;
+  delay?: number;
+  filtering?: boolean;
+  description?: string;
+  locked?: boolean;
+  reversed?: boolean;
+  defaultValue?: string;
+  timeDimension?: TimeDimension;
 };
 
 // **********************************************************

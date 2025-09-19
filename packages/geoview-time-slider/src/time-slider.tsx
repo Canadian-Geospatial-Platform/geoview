@@ -11,10 +11,8 @@ import { logger } from 'geoview-core/core/utils/logger';
 
 import { DateMgt } from 'geoview-core/core/utils/date-mgt';
 import { getSxClasses } from './time-slider-style';
-import { ConfigProps } from './time-slider-types';
 
 interface TimeSliderProps {
-  config: ConfigProps;
   layerPath: string;
 }
 
@@ -29,7 +27,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   logger.logTraceRender('geoview-time-slider/time-slider', props);
 
   const { cgpv } = window;
-  const { config, layerPath } = props;
+  const { layerPath } = props;
   const { reactUtilities, ui } = cgpv;
   const { useTheme } = ui;
   const { useState, useRef, useEffect, useCallback } = reactUtilities.react;
@@ -64,9 +62,8 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   const sliderDeltaRef = useRef<number>();
 
   // Get actions and states from store
-  // TODO: evaluate best option to set value by layer path.... trough a getter?
-  const { setTitle, setDefaultValue, setDescription, setValues, setLocked, setReversed, setDelay, setStep, setFiltering } =
-    useTimeSliderStoreActions();
+  // TODO: evaluate best option to set value by layer path.... through a getter?
+  const { setValues, setLocked, setReversed, setDelay, setStep, setFiltering } = useTimeSliderStoreActions();
   const displayLanguage = useAppDisplayLanguage();
 
   // TODO: check performance as we should technically have one selector by constant
@@ -116,7 +113,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
       value: timeMarks[i],
       // If timeframe is a single day, use time. If it is a single year, drop year from dates.
       label:
-        displayPattern[1] !== undefined
+        displayPattern[1] !== undefined && displayPattern[1] !== null
           ? DateMgt.formatDatePattern(timeMarks[i], undefined, displayPattern[1])
           : DateMgt.formatDatePattern(timeMarks[i], displayPattern[0], displayPattern[1]),
     });
@@ -221,41 +218,6 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   }, [moveSlider]);
 
   // #region USE EFFECT
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('TIME-SLIDER - mount');
-
-    // TODO: add mechanism to initialize these values during store onInitialize
-    const sliderConfig = config?.sliders?.find((o: { layerPaths: string[] }) => o.layerPaths.includes(layerPath));
-    if (title === undefined) setTitle(layerPath, sliderConfig?.title || '');
-    if (description === undefined) setDescription(layerPath, sliderConfig?.description || '');
-    if (locked === undefined) setLocked(layerPath, sliderConfig?.locked !== undefined ? sliderConfig?.locked : false);
-    if (reversed === undefined) setReversed(layerPath, sliderConfig?.reversed !== undefined ? sliderConfig?.reversed : false);
-    if (defaultValue === undefined) setDefaultValue(layerPath, sliderConfig?.defaultValue || '');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('TIME-SLIDER - config layerPath', config, layerPath);
-
-    const sliderConfig = config?.sliders?.find((o: { layerPaths: string[] }) => o.layerPaths.includes(layerPath));
-    if (sliderConfig?.defaultValue) {
-      // update values based on slider's default value
-      const defaultValueIsArray = Array.isArray(sliderConfig?.defaultValue);
-      if (defaultValueIsArray) {
-        setValues(layerPath, [
-          DateMgt.convertToMilliseconds(sliderConfig?.defaultValue[0]),
-          DateMgt.convertToMilliseconds(sliderConfig?.defaultValue[1]),
-        ]);
-      } else if (range.includes(sliderConfig?.defaultValue)) {
-        setValues(layerPath, [DateMgt.convertToMilliseconds(sliderConfig?.defaultValue)]);
-      } else {
-        setValues(layerPath, [DateMgt.convertToMilliseconds(range[0])]);
-      }
-    }
-  }, [config, layerPath, range, setFiltering, setValues]);
-
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('TIME-SLIDER - values filtering', values, filtering);

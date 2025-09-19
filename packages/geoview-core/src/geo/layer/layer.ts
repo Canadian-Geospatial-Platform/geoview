@@ -2442,7 +2442,6 @@ export class LayerApi {
    * - If the layer type is not supported, an error is thrown.
    * - TODO: Refactor to use the validated configuration with metadata already fetched.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The configuration object for the GeoView layer.
-   * @param {string} mapProjectionForVectorTiles - The projection string to be used when creating Vector Tiles layers.
    * @returns {AbstractGeoViewLayer} An instance of the corresponding `AbstractGeoViewLayer` subclass.
    * @throws {NotSupportedError} If the configuration does not match any supported layer type.
    */
@@ -2470,7 +2469,7 @@ export class LayerApi {
       return new OgcFeature(geoviewLayerConfig);
     }
     if (layerConfigIsVectorTilesFromType(geoviewLayerConfig)) {
-      return new VectorTiles(geoviewLayerConfig, this.mapViewer.getProjection());
+      return new VectorTiles(geoviewLayerConfig, this.mapViewer.getProjection().getCode());
     }
     if (layerConfigIsWFSFromType(geoviewLayerConfig)) {
       return new WFS(geoviewLayerConfig);

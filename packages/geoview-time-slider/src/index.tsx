@@ -131,7 +131,7 @@ class TimeSliderPlugin extends FooterPlugin {
       value: this.value!,
       label: 'timeSlider.title',
       icon: <TimeSliderIcon />,
-      content: <TimeSliderPanel mapId={this.mapViewer.mapId} configObj={this.getConfig()} />,
+      content: <TimeSliderPanel mapId={this.mapViewer.mapId} />,
     };
   }
 
