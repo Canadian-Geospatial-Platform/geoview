@@ -50,7 +50,7 @@ export class UtilAddLayer {
       [GEOPACKAGE, getLocalizedMessage(language, 'layers.serviceGeoPackage')],
       [WMS, getLocalizedMessage(language, 'layers.serviceOgcWMS')],
       [WFS, getLocalizedMessage(language, 'layers.serviceOgcWFS')],
-      [WKB , getLocalizedMessage(language, 'layers.serviceWKB')],
+      [WKB, getLocalizedMessage(language, 'layers.serviceWKB')],
       [OGC_FEATURE, getLocalizedMessage(language, 'layers.serviceOgcFeature')],
       [XYZ_TILES, getLocalizedMessage(language, 'layers.serviceRasterTile')],
       [VECTOR_TILES, getLocalizedMessage(language, 'layers.serviceVectorTile')],

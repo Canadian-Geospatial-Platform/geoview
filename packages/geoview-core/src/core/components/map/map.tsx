@@ -14,7 +14,12 @@ import { HoverTooltip } from '@/core/components/hover-tooltip/hover-tooltip';
 import { MapViewer } from '@/geo/map/map-viewer';
 
 import { getSxClasses } from './map-style';
-import { useMapLoaded, useMapNorthArrow, useMapOverviewMap, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import {
+  useMapLoaded,
+  useMapNorthArrow,
+  useMapOverviewMap,
+  useMapStoreActions,
+} from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useAppCrosshairsActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
@@ -76,7 +81,7 @@ export function Map(props: MapProps): JSX.Element {
     logger.logTraceUseEffect('MAP - Enable WCAG map interactions', isCrosshairsActive);
 
     setActiveMapInteractionWCAG(isCrosshairsActive);
-  }, [isCrosshairsActive]);
+  }, [isCrosshairsActive, setActiveMapInteractionWCAG]);
 
   return (
     // ? the map is focusable and needs to be tabbable for keyboard navigation

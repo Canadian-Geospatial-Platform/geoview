@@ -451,7 +451,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 
       /**
        * Sets the map interaction for WCAG compliance (pan and zoom).
-       * @param {boolean} active - The interaction state 
+       * @param {boolean} active - The interaction state
        */
       setActiveMapInteractionWCAG: (active: boolean): void => {
         // Redirect to processor
