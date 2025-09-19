@@ -1,4 +1,6 @@
 import { ChangeEvent, MouseEventHandler, RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { pdf } from '@react-pdf/renderer';
+import ReactDOMServer from 'react-dom/server';
 
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
@@ -22,6 +24,7 @@ import { useLayerLegendLayers } from '@/core/stores/store-interface-and-intial-v
 import { LegendContainer } from '@/core/components/export/export-legend-utils';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { getSxClasses } from './export-modal-style';
+import { ExportDocument } from './pdf-layout';
 
 interface TypeScale {
   scaleId: string;
@@ -126,6 +129,123 @@ export default function ExportModal(): JSX.Element {
     const paddingRight = Number(dialogBoxCompStyles.getPropertyValue('padding-left').match(/\d+/)![0]);
 
     return dialogBox.clientWidth - paddingLeft - paddingRight;
+  };
+
+  // Callback
+  const getScaleWidth = useCallback(
+    (mode: number): string => {
+      switch (mode) {
+        case SCALE_MODES.METRIC:
+          return scale.lineWidthMetric;
+        case SCALE_MODES.IMPERIAL:
+          return scale.lineWidthImperial;
+        default:
+          return 'none';
+      }
+    },
+    [scale.lineWidthMetric, scale.lineWidthImperial]
+  );
+
+  /**
+   * Export as PDF using React-PDF
+   */
+  const exportVectorPDF = (): void => {
+    if (!exportContainerRef?.current || !textFieldRef.current || !exportTitleRef.current) return;
+
+    setIsMapExporting(true);
+
+    const overviewMap = mapElement.getElementsByClassName('ol-overviewmap')[0] as HTMLDivElement;
+    if (overviewMap) overviewMap.style.display = 'none';
+
+    if (activeModalId === 'export' && mapImageRef.current && dialogRef.current) {
+      const mapViewer = getMapViewer();
+      if (mapViewer?.map) {
+        const { map } = mapViewer;
+        const mapSize = map.getSize();
+        if (!mapSize) return;
+
+        // Capture map canvas (same as before)
+        const printWidth = Math.round((mapSize[0] * exportMapResolution) / 96);
+        const printHeight = Math.round((mapSize[1] * exportMapResolution) / 96);
+
+        const resultCanvas = document.createElement('canvas');
+        resultCanvas.width = printWidth;
+        resultCanvas.height = printHeight;
+        const resultContext = resultCanvas.getContext('2d');
+        if (!resultContext) return;
+
+        Array.prototype.forEach.call(mapViewport.querySelectorAll('canvas'), (canvas: HTMLCanvasElement) => {
+          const isOverviewCanvas = canvas.closest('.ol-overviewmap');
+          if (!isOverviewCanvas && canvas.width > 0) {
+            const { opacity } = (canvas.parentNode as HTMLElement).style;
+            resultContext.globalAlpha = opacity === '' ? 1 : Number(opacity);
+            resultContext.drawImage(canvas, 0, 0, printWidth, printHeight);
+          }
+        });
+
+        // Extract north arrow SVG paths
+        let northArrowSvgPaths = null;
+        if (northArrow) {
+          try {
+            const iconString = ReactDOMServer.renderToString(<NorthArrowIcon width={24} height={24} />);
+            const parser = new DOMParser();
+            const svgDoc = parser.parseFromString(iconString, 'image/svg+xml');
+            const paths = svgDoc.querySelectorAll('path');
+
+            if (paths.length > 0) {
+              northArrowSvgPaths = Array.from(paths).map((path) => ({
+                d: path.getAttribute('d'),
+                fill: path.getAttribute('fill'),
+                stroke: path.getAttribute('stroke'),
+                strokeWidth: path.getAttribute('stroke-width'),
+                transform: `rotate(${rotationAngle.angle} 12 12)`,
+              }));
+            }
+          } catch (error) {
+            logger.logError('Error extracting north arrow SVG', error);
+          }
+        }
+
+        // Generate PDF
+        const generatePDF = async () => {
+          try {
+            const mapDataUrl = resultCanvas.toDataURL('image/jpeg', 0.9);
+
+            const blob = await pdf(
+              <ExportDocument
+                mapDataUrl={mapDataUrl}
+                exportTitle={exportTitle}
+                scaleText={`${scaleValues[0].label} ${t('exportModal.approx')}`}
+                northArrowSvg={northArrowSvgPaths}
+                legendLayers={legendLayers}
+                disclaimer={t('mapctrl.disclaimer.message')}
+                attributions={mapAttributions.slice(0, 2)}
+                date={DateMgt.formatDate(new Date(), 'YYYY-MM-DD, hh:mm:ss A')}
+              />
+            ).toBlob();
+
+            // Download
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${fileExportDefaultPrefixName}-${exportTitle !== '' ? exportTitle.trim() : mapId}.pdf`;
+            a.click();
+            URL.revokeObjectURL(url);
+          } catch (error: unknown) {
+            logger.logError('Error generating PDF', error);
+          } finally {
+            setIsMapExporting(false);
+            setActiveAppBarTab('legend', false, false);
+            disableFocusTrap();
+            if (overviewMap) {
+              overviewMap.style.display = '';
+            }
+          }
+        };
+
+        generatePDF().catch((error) => logger.logError(error));
+      }
+    }
   };
 
   /**
@@ -249,21 +369,6 @@ export default function ExportModal(): JSX.Element {
     setActiveAppBarTab('legend', false, false);
     disableFocusTrap();
   };
-
-  // Callback
-  const getScaleWidth = useCallback(
-    (mode: number): string => {
-      switch (mode) {
-        case SCALE_MODES.METRIC:
-          return scale.lineWidthMetric;
-        case SCALE_MODES.IMPERIAL:
-          return scale.lineWidthImperial;
-        default:
-          return 'none';
-      }
-    },
-    [scale.lineWidthMetric, scale.lineWidthImperial]
-  );
 
   useEffect(() => {
     // Log
@@ -422,6 +527,16 @@ export default function ExportModal(): JSX.Element {
         <Button type="text" onClick={handleDpiMenuClick} variant="outlined" size="small" sx={sxClasses.buttonOutlined}>
           {t('exportModal.dpiBtn')}: {exportMapResolution}
         </Button>
+        <LoadingButton
+          loading={isMapExporting}
+          variant="contained"
+          onClick={exportVectorPDF}
+          size="small"
+          sx={sxClasses.buttonContained}
+          disabled={isLegendLoading || isMapLoading}
+        >
+          Export PDF
+        </LoadingButton>
         <LoadingButton
           loading={isMapExporting}
           variant="contained"
