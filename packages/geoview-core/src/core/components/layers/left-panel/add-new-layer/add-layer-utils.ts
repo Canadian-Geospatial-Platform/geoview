@@ -120,20 +120,18 @@ export class UtilAddLayer {
    * @returns {boolean} Whether or not all of the sublayers are included
    */
   static allSubLayersAreIncluded(
-    layerTree: TypeGeoviewLayerConfig | GroupLayerEntryConfigProps,
+    layerTree: TypeGeoviewLayerConfig | TypeLayerEntryConfig | GroupLayerEntryConfigProps,
     layerIds: (string | undefined)[]
   ): boolean {
     const subLayers = layerTree.listOfLayerEntryConfig;
 
-    // If there are no sublayers, nothing to check
-    if (!subLayers) return true;
+    if (!subLayers) return true; // No children to check
 
     return subLayers.every((layerEntryConfig) => {
       const layerIdIncluded = layerIds.includes(layerEntryConfig.layerId);
-      const subTree = ConfigBaseClass.getClassOrTypeGeoviewLayerConfig(layerEntryConfig);
 
-      // Recursively check sublayers if present
-      const allChildrenIncluded = UtilAddLayer.allSubLayersAreIncluded(subTree, layerIds);
+      // Recursively check if this entry has sublayers and if they are all included
+      const allChildrenIncluded = UtilAddLayer.allSubLayersAreIncluded(layerEntryConfig, layerIds);
 
       return layerIdIncluded && allChildrenIncluded;
     });
