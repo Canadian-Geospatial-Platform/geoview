@@ -221,6 +221,7 @@ export default function ExportModal(): JSX.Element {
                 disclaimer={t('mapctrl.disclaimer.message')}
                 attributions={mapAttributions.slice(0, 2)}
                 date={DateMgt.formatDate(new Date(), 'YYYY-MM-DD, hh:mm:ss A')}
+                mapId={mapId}
               />
             ).toBlob();
 

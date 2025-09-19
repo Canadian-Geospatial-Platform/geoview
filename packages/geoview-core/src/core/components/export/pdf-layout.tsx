@@ -1,5 +1,8 @@
 import { Document, Page, Text, View, Image, Svg, Path } from '@react-pdf/renderer';
 import { TypeLegendLayer } from '@/core/components/layers/types';
+import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
+import { TypeTimeSliderValues, TimeSliderLayerSet } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+import { DateMgt } from '@/core/utils/date-mgt';
 
 interface ExportDocumentProps {
   mapDataUrl: string;
@@ -16,14 +19,89 @@ interface ExportDocumentProps {
   disclaimer: string;
   attributions: string[];
   date: string;
+  mapId: string;
+  timeSliderLayers?: TimeSliderLayerSet;
 }
 
 interface FlattenedLegendItem {
-  type: 'layer' | 'item' | 'child';
+  type: 'layer' | 'item' | 'child' | 'wms' | 'time';
   data: TypeLegendLayer;
   parentName?: string;
   depth: number;
+  timeInfo?: TypeTimeSliderValues;
 }
+
+// Filter and process layers like LegendContainerComponent does
+const processLegendLayers = (layers: TypeLegendLayer[], mapId: string, timeSliderLayers?: TimeSliderLayerSet): FlattenedLegendItem[] => {
+  const allItems: FlattenedLegendItem[] = [];
+
+  const flattenLayer = (layer: TypeLegendLayer, depth = 0): FlattenedLegendItem[] => {
+    const items: FlattenedLegendItem[] = [];
+
+    // Check if layer has any meaningful legend content
+    const hasVisibleItems = layer.items.some((item) => item.isVisible);
+    const hasWMSLegend = layer.type === CONST_LAYER_TYPES.WMS && layer.icons?.[0]?.iconImage && layer.icons[0].iconImage !== 'no data';
+    const hasTimeDimension = Boolean(timeSliderLayers?.[layer.layerPath]?.range?.length);
+    const hasChildren = layer.children && layer.children.length > 0;
+
+    // Skip layers with no legend content (like XYZ/vector tiles without symbolization)
+    if (!hasVisibleItems && !hasWMSLegend && !hasTimeDimension && !hasChildren) {
+      return items;
+    }
+
+    // Add the layer itself
+    items.push({ type: depth === 0 ? 'layer' : 'child', data: layer, depth });
+
+    // Add WMS legend image if available
+    if (hasWMSLegend) {
+      items.push({
+        type: 'wms',
+        data: layer,
+        parentName: layer.layerName,
+        depth: depth + 1,
+      });
+    }
+
+    // Add time dimension if available
+    if (hasTimeDimension) {
+      const timeDimension = timeSliderLayers?.[layer.layerPath];
+      items.push({
+        type: 'time',
+        data: layer,
+        parentName: layer.layerName,
+        depth: depth + 1,
+        timeInfo: timeDimension,
+      });
+    }
+
+    // Add visible layer items only
+    layer.items.forEach((item) => {
+      if (item.isVisible) {
+        items.push({
+          type: 'item',
+          data: { ...layer, items: [item] },
+          parentName: layer.layerName,
+          depth: depth + 1,
+        });
+      }
+    });
+
+    // Recursively add children
+    if (layer.children) {
+      layer.children.forEach((child) => {
+        items.push(...flattenLayer(child, depth + 1));
+      });
+    }
+
+    return items;
+  };
+
+  layers.forEach((layer) => {
+    allItems.push(...flattenLayer(layer));
+  });
+
+  return allItems;
+};
 
 // Group items by their root layer and distribute smartly
 const distributeIntoColumns = (items: FlattenedLegendItem[]): FlattenedLegendItem[][] => {
@@ -77,6 +155,8 @@ export const ExportDocument = ({
   disclaimer,
   attributions,
   date,
+  mapId,
+  timeSliderLayers,
 }: ExportDocumentProps) => (
   <Document>
     <Page size="LETTER" style={{ padding: 36, fontFamily: 'Helvetica' }}>
@@ -150,36 +230,7 @@ export const ExportDocument = ({
           <Text style={{ fontSize: 11, fontWeight: 'bold', marginBottom: 10 }}>Legend</Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
             {(() => {
-              // Recursive function to flatten all legend items
-              const flattenLayer = (layer: TypeLegendLayer, depth = 0): FlattenedLegendItem[] => {
-                const items: FlattenedLegendItem[] = [];
-
-                // Add the layer itself
-                items.push({ type: depth === 0 ? 'layer' : 'child', data: layer, depth });
-
-                // Add layer items
-                layer.items.forEach((item) => {
-                  items.push({ type: 'item', data: { ...layer, items: [item] }, parentName: layer.layerName, depth: depth + 1 });
-                });
-
-                // Recursively add children
-                if (layer.children) {
-                  layer.children.forEach((child) => {
-                    items.push(...flattenLayer(child, depth + 1));
-                  });
-                }
-
-                return items;
-              };
-
-              // Flatten all legend items into a single array
-              const allItems: FlattenedLegendItem[] = [];
-
-              legendLayers.forEach((layer) => {
-                allItems.push(...flattenLayer(layer));
-              });
-
-              // Split into 4 columns
+              const allItems = processLegendLayers(legendLayers, mapId, timeSliderLayers);
               const columns = distributeIntoColumns(allItems);
 
               return columns.map((columnItems, columnIndex) => (
@@ -195,6 +246,35 @@ export const ExportDocument = ({
                           style={{ fontSize: 9, fontWeight: 'bold', marginBottom: 3, marginTop: index > 0 ? 8 : 0 }}
                         >
                           {item.data.layerName}
+                        </Text>
+                      );
+                    } else if (item.type === 'wms') {
+                      return (
+                        <View key={`wms-${item.data.layerPath}`} style={{ marginLeft: indentLevel + 3, marginBottom: 2 }}>
+                          <Image src={item.data.icons?.[0]?.iconImage || ''} style={{ width: 60, height: 'auto' }} />
+                        </View>
+                      );
+                    } else if (item.type === 'time') {
+                      // Format time dimension display
+                      const timeText = item.timeInfo?.singleHandle
+                        ? DateMgt.formatDate(
+                            new Date(item.timeInfo.values[0]),
+                            item.timeInfo.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
+                          )
+                        : `${DateMgt.formatDate(
+                            new Date(item.timeInfo?.values[0] || 0),
+                            item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
+                          )} - ${DateMgt.formatDate(
+                            new Date(item.timeInfo?.values[1] || 0),
+                            item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
+                          )}`;
+
+                      return (
+                        <Text
+                          key={`time-${item.data.layerPath}`}
+                          style={{ fontSize: 7, fontStyle: 'italic', marginLeft: indentLevel + 3, marginBottom: 2 }}
+                        >
+                          {timeText}
                         </Text>
                       );
                     } else if (item.type === 'child') {
