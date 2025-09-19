@@ -49,6 +49,7 @@
     "@mui/x-date-pickers": "^7.20.0",
     "@mui/x-tree-view": "^7.17.0",
     "@nieuwlandgeo/sldreader": "^0.4.3",
+    "@react-pdf/renderer": "^4.3.0",
     "@react-spring/web": "^10.0.1",
     "ajv": "^8.17.1",
     "ajv-errors": "^3.0.0",
