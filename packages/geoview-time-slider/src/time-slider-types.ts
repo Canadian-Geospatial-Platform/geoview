@@ -6,7 +6,6 @@ export type SliderProps = {
   description: string;
   locked: boolean;
   reversed: boolean;
-  defaultValue: string;
   timeDimension: TimeDimension;
 };
 

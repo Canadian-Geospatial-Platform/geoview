@@ -15,10 +15,8 @@ import { TABS } from 'geoview-core/core/utils/constant';
 
 import { DateMgt } from 'geoview-core/core/utils/date-mgt';
 import { TimeSlider } from './time-slider';
-import { ConfigProps } from './time-slider-types';
 
 interface TypeTimeSliderProps {
-  configObj: ConfigProps;
   mapId: string;
 }
 
@@ -29,10 +27,10 @@ interface TypeTimeSliderProps {
  * @returns {JSX.Element} The time slider tab
  */
 export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
-  const { mapId, configObj } = props;
+  const { mapId } = props;
   const { cgpv } = window as TypeWindow;
   const { reactUtilities } = cgpv;
-  const { useCallback, useMemo, useEffect } = reactUtilities.react;
+  const { useCallback, useMemo } = reactUtilities.react;
 
   // get values from store
   const visibleLayers = useMapVisibleLayers();
@@ -123,17 +121,6 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
       });
   }, [legendLayers, timeSliderLayers, visibleLayers, mapId, isLayerHiddenOnMap]);
 
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('TIME-SLIDER-PANEL - memoLayersList', memoLayersList, selectedLayerPath);
-
-    // If the selected layer path isn't in the list of layers possible, clear it
-    if (selectedLayerPath && !memoLayersList.map((layer: { layerPath: string }) => layer.layerPath).includes(selectedLayerPath)) {
-      // Clear the selected layer path
-      setSelectedLayerPath('');
-    }
-  }, [memoLayersList, selectedLayerPath, setSelectedLayerPath]);
-
   /**
    * Renders the right panel content based on selected Layer path of time slider.
    * NOTE: Here we return null, so that in responsive grid layout, it can be used as flag to render the guide for time slider.
@@ -141,7 +128,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
    */
   const renderContent = (): JSX.Element | null => {
     if (selectedLayerPath && timeSliderLayers && selectedLayerPath in timeSliderLayers) {
-      return <TimeSlider config={configObj} layerPath={selectedLayerPath} key={selectedLayerPath} />;
+      return <TimeSlider layerPath={selectedLayerPath} key={selectedLayerPath} />;
     }
 
     return null;

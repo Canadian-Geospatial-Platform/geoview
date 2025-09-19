@@ -110,8 +110,8 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     // Add it
     this.getTimesliderState(mapId)?.setterActions.addTimeSliderLayer(timeSliderLayer);
 
-    const { defaultValue, field, filtering, minAndMax, values } = timeSliderLayer[layerPath];
-    this.updateFilters(mapId, layerPath, defaultValue, field, filtering, minAndMax, values);
+    const { field, filtering, minAndMax, values } = timeSliderLayer[layerPath];
+    this.updateFilters(mapId, layerPath, field, filtering, minAndMax, values);
 
     // Make sure tab is visible
     UIEventProcessor.showTab(mapId, 'time-slider');
@@ -173,9 +173,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     // Set defaults values from temporal dimension
     const { range } = timesliderConfig?.timeDimension?.rangeItems || timeDimensionInfo!.rangeItems;
 
-    const defaultToUse = configTimeDimension?.default || timeDimensionInfo!.default;
-    const defaultValueIsArray = Array.isArray(defaultToUse);
-    const defaultValue = timesliderConfig?.defaultValue || (defaultValueIsArray ? defaultToUse[0] : defaultToUse);
+    const defaultDates = configTimeDimension?.default || timeDimensionInfo!.default;
 
     const minAndMax: number[] = [DateMgt.convertToMilliseconds(range[0]), DateMgt.convertToMilliseconds(range[range.length - 1])];
     const field = configTimeDimension?.field || timeDimensionInfo!.field;
@@ -192,12 +190,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
       if (timeOutfield) fieldAlias = timeOutfield.alias;
     }
 
-    // eslint-disable-next-line no-nested-ternary
-    const values = singleHandle
-      ? [DateMgt.convertToMilliseconds(defaultValue)]
-      : defaultValueIsArray
-        ? [DateMgt.convertToMilliseconds(defaultValue), DateMgt.convertToMilliseconds(defaultToUse[1])]
-        : [...minAndMax];
+    const values = defaultDates.map((date) => DateMgt.convertToMilliseconds(date));
 
     // If using discrete axis
     let step: number | undefined;
@@ -208,18 +201,17 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
 
     return {
       range,
-      defaultValue,
       discreteValues: nearestValues === 'discrete',
       step,
       minAndMax,
       field,
       fieldAlias,
       singleHandle,
-      filtering: true,
+      filtering: timesliderConfig?.filtering !== false,
       values,
-      delay: 1000,
-      locked: undefined,
-      reversed: undefined,
+      delay: timesliderConfig?.delay || 1000,
+      locked: timesliderConfig?.locked,
+      reversed: timesliderConfig?.reversed,
       displayPattern,
     };
   }
@@ -281,22 +273,13 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    *
    * @param {string} mapId - The id of the map
    * @param {string} layerPath - The path of the layer to filter
-   * @param {string} defaultValue - The default value to use if filters are off
    * @param {string} field - The field to filter the layer by
    * @param {boolean} filtering - Whether the layer should be filtered or returned to default
    * @param {number[]} minAndMax - Minimum and maximum values of slider
    * @param {number[]} values - Filter values to apply
    * @returns {void}
    */
-  static updateFilters(
-    mapId: string,
-    layerPath: string,
-    defaultValue: string,
-    field: string,
-    filtering: boolean,
-    minAndMax: number[],
-    values: number[]
-  ): void {
+  static updateFilters(mapId: string, layerPath: string, field: string, filtering: boolean, minAndMax: number[], values: number[]): void {
     // Get the layer using the map event processor
     const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
 
@@ -307,13 +290,13 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
         if (newValue !== 'Invalid DateZ') filter = `${field}=date '${newValue}'`;
         else filter = '';
       } else {
-        filter = `${field}=date '${defaultValue}'`;
+        filter = `${field}=date '${DateMgt.formatDateToISO(minAndMax[0])}'`;
       }
     } else if (geoviewLayer instanceof GVEsriImage) {
       if (filtering) {
-        filter = `time=${minAndMax[0]},${values[0]}`;
+        filter = `time=${minAndMax[0]},${DateMgt.formatDateToISO(values[0])}`;
       } else {
-        filter = `time=${minAndMax[0]},${defaultValue}`;
+        filter = `time=${minAndMax[0]},${DateMgt.formatDateToISO(minAndMax[1])}`;
       }
     } else if (filtering) {
       filter = `${field} >= date '${DateMgt.formatDateToISO(values[0])}'`;

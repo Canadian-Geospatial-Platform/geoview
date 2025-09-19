@@ -82,7 +82,7 @@ type RangeItems = {
  */
 export type TimeDimension = {
   field: string;
-  default: string;
+  default: string[];
   unitSymbol?: string;
   rangeItems: RangeItems;
   nearestValues: 'discrete' | 'absolute';
@@ -230,7 +230,7 @@ export abstract class DateMgt {
 
     // create or reformat date in ISO format
     const pattern = `${datePattern !== undefined ? DEFAULT_DATE_PRECISION[datePattern] : ''}${
-      timePattern !== undefined ? DEFAULT_TIME_PRECISION[timePattern] : ''
+      timePattern ? DEFAULT_TIME_PRECISION[timePattern] : ''
     }`;
 
     // output as local by default
@@ -370,7 +370,9 @@ export abstract class DateMgt {
 
     const timeDimension: TimeDimension = {
       field: startTimeField,
-      default: rangeItems.range[rangeItems.range.length - 1],
+      default: singleHandle
+        ? [rangeItems.range[rangeItems.range.length - 1]]
+        : [rangeItems.range[0], rangeItems.range[rangeItems.range.length - 1]],
       unitSymbol: '',
       rangeItems,
       nearestValues: startTimeField === '' ? 'absolute' : 'discrete',
@@ -392,7 +394,7 @@ export abstract class DateMgt {
     const rangeItems = this.createRangeOGC(dimensionObject.values);
     const timeDimension: TimeDimension = {
       field: dimensionObject.name,
-      default: dimensionObject.default || rangeItems.range[0],
+      default: [dimensionObject.default || rangeItems.range[0]],
       unitSymbol: dimensionObject.unitSymbol || '',
       rangeItems,
       nearestValues: dimensionObject.nearestValues !== false ? 'absolute' : 'discrete',

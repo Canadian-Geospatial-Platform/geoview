@@ -27,7 +27,6 @@ export interface ITimeSliderState {
     setReversed: (layerPath: string, locked: boolean) => void;
     setSelectedLayerPath: (layerPath: string) => void;
     setStep: (layerPath: string, step: number) => void;
-    setDefaultValue: (layerPath: string, defaultValue: string) => void;
     setValues: (layerPath: string, values: number[]) => void;
     setDisplayPattern: (layerPath: string, value: [DatePrecision, TimePrecision]) => void;
   };
@@ -44,7 +43,6 @@ export interface ITimeSliderState {
     setSelectedLayerPath: (layerPath: string) => void;
     setSliderFilters: (newSliderFilters: Record<string, string>) => void;
     setStep: (layerPath: string, step: number) => void;
-    setDefaultValue: (layerPath: string, defaultValue: string) => void;
     setValues: (layerPath: string, values: number[]) => void;
     setDisplayPattern: (layerPath: string, value: [DatePrecision, TimePrecision]) => void;
   };
@@ -93,8 +91,8 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
       },
       setFiltering(layerPath: string, filtering: boolean): void {
         // Redirect to TimeSliderEventProcessor
-        const { defaultValue, field, minAndMax, values } = get().timeSliderState.timeSliderLayers[layerPath];
-        TimeSliderEventProcessor.updateFilters(get().mapId, layerPath, defaultValue, field, filtering, minAndMax, values);
+        const { field, minAndMax, values } = get().timeSliderState.timeSliderLayers[layerPath];
+        TimeSliderEventProcessor.updateFilters(get().mapId, layerPath, field, filtering, minAndMax, values);
       },
       setLocked(layerPath: string, locked: boolean): void {
         // Redirect to setter
@@ -112,14 +110,10 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
         // Redirect to setter
         get().timeSliderState.setterActions.setStep(layerPath, step);
       },
-      setDefaultValue(layerPath: string, defaultValue: string): void {
-        // Redirect to setter
-        get().timeSliderState.setterActions.setDefaultValue(layerPath, defaultValue);
-      },
       setValues(layerPath: string, values: number[]): void {
         // Redirect to TimeSliderEventProcessor
-        const { defaultValue, field, minAndMax, filtering } = get().timeSliderState.timeSliderLayers[layerPath];
-        TimeSliderEventProcessor.updateFilters(get().mapId, layerPath, defaultValue, field, filtering, minAndMax, values);
+        const { field, minAndMax, filtering } = get().timeSliderState.timeSliderLayers[layerPath];
+        TimeSliderEventProcessor.updateFilters(get().mapId, layerPath, field, filtering, minAndMax, values);
       },
       setDisplayPattern(layerPath: string, value: [DatePrecision, TimePrecision]): void {
         // Redirect to setter
@@ -240,16 +234,6 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
           },
         });
       },
-      setDefaultValue(layerPath: string, defaultValue: string): void {
-        const sliderLayers = get().timeSliderState.timeSliderLayers;
-        sliderLayers[layerPath].defaultValue = defaultValue;
-        set({
-          timeSliderState: {
-            ...get().timeSliderState,
-            timeSliderLayers: { ...sliderLayers },
-          },
-        });
-      },
       setValues(layerPath: string, values: number[]): void {
         const sliderLayers = get().timeSliderState.timeSliderLayers;
         sliderLayers[layerPath].values = values;
@@ -283,7 +267,6 @@ export type TimeSliderLayerSet = {
 };
 
 export interface TypeTimeSliderValues {
-  defaultValue: string;
   delay: number;
   description?: string;
   discreteValues: boolean;
@@ -303,12 +286,13 @@ export interface TypeTimeSliderValues {
 
 export type TypeTimeSliderProps = {
   layerPaths: string[];
-  title: string;
-  description: string;
-  locked: boolean;
-  reversed: boolean;
-  defaultValue: string;
-  timeDimension: TimeDimension;
+  title?: string;
+  delay?: number;
+  filtering?: boolean;
+  description?: string;
+  locked?: boolean;
+  reversed?: boolean;
+  timeDimension?: TimeDimension;
 };
 
 // **********************************************************
