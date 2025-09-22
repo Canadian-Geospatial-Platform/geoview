@@ -123,7 +123,6 @@ export class EsriImage extends AbstractGeoViewRaster {
       new EsriImageLayerEntryConfig({
         geoviewLayerConfig,
         layerId: trimmedPath.split('/').slice(-2, -1)[0],
-        layerName: trimmedPath.split('/').slice(-2, -1)[0],
       }),
     ];
 
