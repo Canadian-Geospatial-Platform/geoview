@@ -289,10 +289,10 @@ export function commonProcessInitialSettings(
   // Get the layer metadata
   const layerMetadata = layerConfig.getLayerMetadata();
 
-  // If no visibility by default has been configured apply the default visibility from the metadata
-  if (layerConfig.getInitialSettings()?.states?.visible === undefined) {
+  // If no visibility by default has been configured and there's a defaultVisibility found in the layer metadata, apply the latter
+  if (layerConfig.getInitialSettings()?.states?.visible === undefined && layerMetadata?.defaultVisibility) {
     // Update the states initial settings
-    layerConfig.updateInitialSettingsStateVisible(!!layerMetadata?.defaultVisibility);
+    layerConfig.updateInitialSettingsStateVisible(!!layerMetadata.defaultVisibility);
   }
 
   // Update Max / Min Scales with value if service doesn't allow the configured value for proper UI functionality
