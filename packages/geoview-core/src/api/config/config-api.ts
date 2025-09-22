@@ -419,6 +419,33 @@ export class ConfigApi {
     language?: TypeDisplayLanguage,
     mapId?: string
   ): Promise<TypeGeoviewLayerConfig> {
+    // If working with geoCore
+    if (layerType === 'geoCore') {
+      // For GeoCore, we build the Config from the Geocore service
+      const layerConfigFromGeocore = await GeoCore.createLayerConfigFromUUID(layerURL, language || 'en', mapId);
+
+      // Get the layer entries that GeoCore has configured
+      const layerConfigFromGeocoreEntries = layerConfigFromGeocore.listOfLayerEntryConfig?.map((layerEntry) => layerEntry.layerId);
+
+      // Loop back to create the correct config based on the type
+      const layerConfigForGeoview = await ConfigApi.createInitConfigFromType(
+        layerConfigFromGeocore.geoviewLayerType,
+        layerConfigFromGeocore.geoviewLayerId,
+        layerConfigFromGeocore.geoviewLayerName!,
+        layerConfigFromGeocore.metadataAccessPath!,
+        language,
+        mapId
+      );
+
+      // Tweak the Geoview config based on the response from GeoCore, as the Geoview config might need to be stripped out.
+      layerConfigForGeoview.listOfLayerEntryConfig = layerConfigForGeoview.listOfLayerEntryConfig.filter((layerEntry) => {
+        return layerConfigFromGeocoreEntries.includes(layerEntry.layerId);
+      });
+
+      // Return
+      return layerConfigForGeoview;
+    }
+
     // Depending on the type
     switch (layerType) {
       case 'esriDynamic':
@@ -445,20 +472,6 @@ export class ConfigApi {
         return OgcFeature.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
       case 'ogcWfs':
         return WFS.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
-      case 'geoCore':
-        // For GeoCore, we build the Config from the Geocore service
-        // eslint-disable-next-line no-case-declarations
-        const layerConfigFromGeocore = await GeoCore.createLayerConfigFromUUID(layerURL, language || 'en', mapId);
-
-        // Now, loop back to create the correct config based on the type
-        return ConfigApi.createInitConfigFromType(
-          layerConfigFromGeocore.geoviewLayerType,
-          layerConfigFromGeocore.geoviewLayerId,
-          layerConfigFromGeocore.geoviewLayerName!,
-          layerConfigFromGeocore.metadataAccessPath!,
-          language,
-          mapId
-        );
       case 'GeoPackage':
         // For GeoPackage, we build a WKB config
         return await GeoPackageReader.createLayerConfigFromGeoPackage({

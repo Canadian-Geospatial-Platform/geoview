@@ -903,11 +903,12 @@ export abstract class ConfigBaseClass {
    * @param {ConfigClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
    * @returns {string | undefined} The layer name or undefined.
    */
-  static getClassOrTypeLayerName(layerConfig: ConfigClassOrType | undefined): string | undefined {
+  static getClassOrTypeLayerName(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig | undefined): string | undefined {
     if (layerConfig instanceof ConfigBaseClass) {
       return layerConfig.getLayerName();
     }
-    return layerConfig?.layerName;
+
+    return (layerConfig as ConfigBaseClassProps)?.layerName || (layerConfig as TypeGeoviewLayerConfig).geoviewLayerName;
   }
 
   /**
