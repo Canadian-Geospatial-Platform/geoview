@@ -52,6 +52,8 @@ export declare const VALID_DISPLAY_THEME: TypeDisplayTheme[];
 export type TypeValidNavBarProps = 'zoom' | 'fullscreen' | 'home' | 'location' | 'basemap-select' | 'projection' | 'drawer';
 /** Supported footer bar tabs */
 export type TypeValidFooterBarTabsCoreProps = 'legend' | 'layers' | 'details' | 'data-table' | 'time-slider' | 'geochart' | 'guide';
+/** Default tabs order */
+export declare const DEFAULT_FOOTER_TABS_ORDER: string[];
 /** Footer bar tabs custom definition. */
 export type TypeFooterBarTabsCustomProps = {
     id: string;

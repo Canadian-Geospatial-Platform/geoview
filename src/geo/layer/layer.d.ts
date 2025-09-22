@@ -495,6 +495,7 @@ export type LayerErrorDelegate = EventDelegateBase<LayerApi, LayerErrorEvent, vo
  */
 export type LayerPathEvent = {
     layerPath: string;
+    layerName: string;
 };
 /**
  * Define a delegate for the event handler function signature

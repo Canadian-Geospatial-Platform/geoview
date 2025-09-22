@@ -53,6 +53,7 @@ export declare const cgpv: {
     reactUtilities: {
         react: typeof React;
         createRoot: typeof createRoot;
+        createElement: typeof React.createElement;
     };
     translate: typeof translate;
     ui: {
