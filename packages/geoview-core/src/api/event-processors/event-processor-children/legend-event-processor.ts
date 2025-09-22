@@ -1,6 +1,6 @@
 import { Extent, TypeLayerStyleSettings, TypeFeatureInfoEntry, TypeStyleGeometry } from '@/api/types/map-schema-types';
 import { TimeDimension } from '@/core/utils/date-mgt';
-import { CONST_LAYER_TYPES, TypeLayerControls } from '@/api/types/layer-schema-types';
+import { CONST_LAYER_TYPES, TypeGeoviewLayerType, TypeLayerControls } from '@/api/types/layer-schema-types';
 import { TypeLegendLayer, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import { TypeWmsLegend, isImageStaticLegend, isVectorLegend, isWmsLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
@@ -370,7 +370,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
             layerName,
             layerStatus: legendResultSetEntry.layerStatus,
             legendQueryStatus: legendResultSetEntry.legendQueryStatus,
-            type: layerConfig.getSchemaTag(),
+            type: layerConfig.getEntryType() as TypeGeoviewLayerType, // TODO: Check - Bug - This typing is invalid, but we have to keep it for it to work for now...
             canToggle: legendResultSetEntry.data?.type !== CONST_LAYER_TYPES.ESRI_IMAGE,
             opacity: layerConfig.getInitialSettings()?.states?.opacity ?? 1, // default: 1
             icons: [] as TypeLegendLayerItem[],
