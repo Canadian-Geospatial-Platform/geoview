@@ -127,6 +127,7 @@ export class UUIDmapConfigReader {
               {
                 id: layerIndex,
                 index: layerIndex,
+                layerName,
                 source: {
                   dataAccessPath: layerUrl,
                 },
