@@ -358,7 +358,7 @@
       "geoviewStoreNotFound": "GeoView Store on Map '__param__' not found.",
       "mapDivNotExists": "Div with id ${divId} does not exist",
       "mapWrongCall": "Div with id __param__ has a class 'geoview-map' and should be initialized via a 'cgpv.init()' call.",
-      "pluginConfigNotFound": "The Plugin configuration at path '__path__' couldn't be found.",
+      "pluginConfigNotFound": "The Plugin configuration at path '__param__' couldn't be found.",
       "pluginStateUninitialized": "The Plugin state for '__param__' on Map '__param__' is uninitialized."
     },
     "geocore": {
