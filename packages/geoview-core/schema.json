@@ -1520,6 +1520,11 @@
           "type": "boolean",
           "default": true,
           "description": "If true, the image will be exported with the background color of the map set as its transparent color. Only the .png and .gif formats support transparency."
+        },
+        "forceServiceProjection": {
+          "type": "boolean",
+          "default": true,
+          "description": "If true, the layer will call the service using its native SRID so that OpenLayers take charge of the reprojection on the map."
         }
       }
     },
