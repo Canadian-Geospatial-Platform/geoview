@@ -47,6 +47,9 @@ export const FocusTrapContainer = memo(function FocusTrapContainer({
 
   // Callbacks
   const handleClose = useCallback((): void => {
+    // Log
+    logger.logTraceUseCallback('FOCUS-TRAP-ELEMENT - handleClose');
+
     // For footer bar containers, completely disable trap and focus tab selector
     if (containerType === CONTAINER_TYPE.FOOTER_BAR) {
       // Clear the active element first to disable focus trap
@@ -64,6 +67,9 @@ export const FocusTrapContainer = memo(function FocusTrapContainer({
 
   // Memoize
   const isActive = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('FOCUS-TRAP-ELEMENT - isActive');
+
     // For footer bar containers, activate focus trap when WCAG is enabled and this container is active
     if (containerType === CONTAINER_TYPE.FOOTER_BAR) {
       return activeTrapGeoView && id === focusItem.activeElementId;
@@ -105,6 +111,9 @@ export const FocusTrapContainer = memo(function FocusTrapContainer({
 
   // For footer panels, auto-activate focus trap when panel becomes active
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('FOCUS-TRAP-ELEMENT - enableFocusTrap', id, open);
+
     if (containerType === CONTAINER_TYPE.FOOTER_BAR && activeTrapGeoView && open) {
       // Auto-enable focus trap when footer panel opens
       enableFocusTrap({ activeElementId: id, callbackElementId: id });
@@ -112,7 +121,11 @@ export const FocusTrapContainer = memo(function FocusTrapContainer({
   }, [containerType, activeTrapGeoView, open, id, enableFocusTrap]);
 
   // Additional: Handle focus into already open footer panels
+  // TODO: WCAG - Still need to be fully fix
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('FOCUS-TRAP-ELEMENT - enableFocusTrap already open footer', open, id);
+
     if (containerType === CONTAINER_TYPE.FOOTER_BAR && activeTrapGeoView && open && id !== focusItem.activeElementId) {
       const container = document.getElementById(id);
       if (container) {

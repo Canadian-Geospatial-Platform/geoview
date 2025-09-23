@@ -92,9 +92,10 @@ function PopperUI({ open, onClose, handleKeyDown, focusSelector, focusTrap = fal
   }, [open, onClose, handleKeyDown]);
 
   useEffect(() => {
-    /**
-     * Focus management when popper opens
-     */
+    // Log
+    logger.logTraceUseEffect('UI.POPPER - handle focus management', open, focusSelector);
+
+    // Focus management when popper opens
     if (open && focusSelector) {
       setTimeout(() => {
         const focusElement = popperRef.current?.querySelector(focusSelector) as HTMLElement;

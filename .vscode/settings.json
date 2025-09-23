@@ -1,3 +1,87 @@
 {
-    "files.autoSave": "afterDelay"
+  "editor.detectIndentation": false,
+  "editor.renderWhitespace": "selection",
+  "editor.tabSize": 2,
+  "editor.hover.delay": 1000,
+  "eslint.enable": true,
+  "eslint.useFlatConfig": true,
+  "eslint.validate": ["typescript", "typescriptreact"],
+  "eslint.probe": ["typescript", "typescriptreact"],
+  "eslint.workingDirectories": ["packages"],
+  "window.title": "${activeEditorMedium}${separator}${rootName}${separator}${profileName}",
+  "files.associations": {
+    "*.json": "json"
+  },
+  "typescript.preferences.autoImportFileExcludePatterns": [
+    "packages/geoview-core/src/core/types/external-types.ts",
+    "packages/geoview-core/src/ui/index.ts",
+    "packages/geoview-core/src/geo/index.ts",
+    "packages/geoview-core/src/api/index.ts",
+    "packages/geoview-core/src/ui/index.ts"
+  ],
+  "better-comments.tags": [
+    {
+      "tag": "!",
+      "color": "#FF2D00",
+      "strikethrough": false,
+      "underline": false,
+      "backgroundColor": "transparent",
+      "bold": false,
+      "italic": false
+    },
+    {
+      "tag": "?",
+      "color": "#3498DB",
+      "strikethrough": false,
+      "underline": false,
+      "backgroundColor": "transparent",
+      "bold": false,
+      "italic": false
+    },
+    {
+      "tag": "//",
+      "color": "#474747",
+      "strikethrough": true,
+      "underline": false,
+      "backgroundColor": "transparent",
+      "bold": false,
+      "italic": false
+    },
+    {
+      "tag": "fixme",
+      "color": "#FF2D00",
+      "strikethrough": false,
+      "underline": false,
+      "backgroundColor": "transparent",
+      "bold": false,
+      "italic": false
+    },
+    {
+      "tag": "todo",
+      "color": "#FF8C00",
+      "strikethrough": false,
+      "underline": false,
+      "backgroundColor": "transparent",
+      "bold": false,
+      "italic": false
+    },
+    {
+      "tag": "*",
+      "color": "#98C379",
+      "strikethrough": false,
+      "underline": false,
+      "backgroundColor": "transparent",
+      "bold": false,
+      "italic": false
+    },
+    {
+      "tag": "gv",
+      "color": "#FF00FF",
+      "strikethrough": false,
+      "underline": false,
+      "backgroundColor": "transparent",
+      "bold": false,
+      "italic": false
+    }
+  ]
 }

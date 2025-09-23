@@ -961,7 +961,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
   static setMapKeyboardPanInteractions(mapId: string, panDelta: number): void {
     const mapElement = this.getMapViewer(mapId).map;
 
-    // replace the KeyboardPan interraction by a new one
+    // replace the KeyboardPan interaction by a new one
     mapElement.getInteractions().forEach((interactionItem) => {
       if (interactionItem instanceof KeyboardPan) {
         mapElement.removeInteraction(interactionItem);
@@ -973,7 +973,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
   static setActiveMapInteractionWCAG(mapId: string, active: boolean): void {
     const mapElement = this.getMapViewer(mapId).map;
 
-    // replace the KeyboardPan interraction by a new one
+    // replace the KeyboardPan interaction by a new one
     mapElement.getInteractions().forEach((interactionItem) => {
       if (interactionItem instanceof KeyboardPan) interactionItem.setActive(active);
       if (interactionItem instanceof KeyboardZoom) interactionItem.setActive(active);

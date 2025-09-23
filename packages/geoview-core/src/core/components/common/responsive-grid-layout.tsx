@@ -62,6 +62,7 @@ const ResponsiveGridLayout = forwardRef(
     // Refs for focus management
     const guideContainerRef = useRef<HTMLDivElement>(null);
     const guideToggleBtnRef = useRef<HTMLButtonElement>(null);
+    const fullScreenBtnRef = useRef<HTMLButtonElement>(null);
 
     // Store
     const mapId = useGeoViewMapId();
@@ -266,12 +267,10 @@ const ResponsiveGridLayout = forwardRef(
       );
     };
 
-    const fullScreenButtonRef = useRef<HTMLButtonElement>(null);
-
     const renderFullScreenButton = (): JSX.Element => {
       return (
         <Button
-          ref={fullScreenButtonRef}
+          ref={fullScreenBtnRef}
           makeResponsive
           type="text"
           variant="outlined"
@@ -353,7 +352,7 @@ const ResponsiveGridLayout = forwardRef(
             open={isFullScreen}
             onClose={() => {
               setIsFullScreen(false);
-              setTimeout(() => fullScreenButtonRef.current?.focus(), 100);
+              setTimeout(() => fullScreenBtnRef.current?.focus(), 100);
             }}
           >
             <Box sx={sxClasses.rightMainContent} className="responsive-layout-right-main-content fullscreen-mode">
@@ -364,7 +363,6 @@ const ResponsiveGridLayout = forwardRef(
           <Box
             ref={isGuideOpen ? undefined : rightMainRef}
             sx={sxClasses.rightMainContent}
-            // tabIndex={isGuideOpen ? 0 : 0}
             className={isGuideOpen ? 'responsive-layout-right-main-content guide-container' : 'responsive-layout-right-main-content'}
           >
             {content || <Typography className="noSelection">{t('layers.noSelection')}</Typography>}

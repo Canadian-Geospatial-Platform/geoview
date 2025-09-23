@@ -43,6 +43,9 @@ export default function BasemapSelect(): JSX.Element {
    */
   const handleChoice = useCallback(
     (basemapChoice: string): void => {
+      // Log
+      logger.logTraceUseCallback('BASEMAP-SELECT, handleChoice', basemapChoice);
+
       setSelectedBasemap(basemapChoice);
       createBasemapFromOptions(basemapChoice === 'default' ? configBasemapOptions : basemapChoiceOptions[basemapChoice]).catch(
         (error: unknown) => {
