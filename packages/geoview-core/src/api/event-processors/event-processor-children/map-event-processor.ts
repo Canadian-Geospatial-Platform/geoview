@@ -66,6 +66,8 @@ import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-v
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
+import { DateMgt, TimeDimension } from '@/core/utils/date-mgt';
+import { TypeTimeSliderProps } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 
 // GV The paradigm when working with MapEventProcessor vs MapState goes like this:
 // GV MapState provides: 'state values', 'actions' and 'setterActions'.
@@ -1458,6 +1460,55 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   /**
+   * Creates a geoview layer config based on current layer state.
+   * @param {string} mapId - Id of map.
+   * @returns {TypeTimeSliderProps[] | undefined} Array of time slider props.
+   */
+  static #createTimeSliderConfigs(mapId: string): TypeTimeSliderProps[] | undefined {
+    // Get time slider info
+    const timeSliderLayers = TimeSliderEventProcessor.getTimeSliderLayers(mapId);
+
+    if (timeSliderLayers) {
+      const timeSliderProps: TypeTimeSliderProps[] = [];
+      Object.keys(timeSliderLayers).forEach((layerPath) => {
+        // Get values from time slider layers
+        const { title, description, locked, reversed, values, delay, filtering, range, discreteValues, displayPattern, field } =
+          timeSliderLayers[layerPath];
+
+        // Build time dimension
+        const timeDimension: TimeDimension = {
+          field,
+          default: values.map((value) => DateMgt.formatDateToISO(value)),
+          nearestValues: discreteValues ? 'discrete' : 'absolute',
+          displayPattern,
+          rangeItems: {
+            type: '',
+            range,
+          },
+          singleHandle: values.length === 1,
+          isValid: true,
+        };
+
+        // Add info to prop list
+        timeSliderProps.push({
+          layerPaths: [layerPath],
+          title,
+          description,
+          delay,
+          filtering,
+          locked,
+          reversed,
+          timeDimension,
+        });
+      });
+
+      return timeSliderProps;
+    }
+
+    return undefined;
+  }
+
+  /**
    * Creates a map config based on current map state.
    * @param {string} mapId - Id of map.
    * @param {boolean | "hybrid"} overrideGeocoreServiceNames - Indicates if geocore layer names should be kept as is or returned to defaults.
@@ -1511,6 +1562,15 @@ export class MapEventProcessor extends AbstractEventProcessor {
         viewSettings,
       };
 
+      // Create time slider config and add to core package configs
+      let { corePackagesConfig } = config;
+      const sliders = this.#createTimeSliderConfigs(mapId);
+      if (corePackagesConfig && sliders) {
+        const configObj = corePackagesConfig?.find((packageConfig) => Object.keys(packageConfig).includes('time-slider'));
+        if (configObj) configObj['time-slider'] = { sliders };
+        else corePackagesConfig.push({ 'time-slider': { sliders } });
+      } else if (sliders) corePackagesConfig = [{ 'time-slider': { sliders } }];
+
       // Construct map config
       const newMapConfig: TypeMapFeaturesInstance = {
         map,
@@ -1521,7 +1581,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
         overviewMap: config.overviewMap,
         components: config.components,
         corePackages: config.corePackages,
-        corePackagesConfig: config.corePackagesConfig,
+        corePackagesConfig,
         externalPackages: config.externalPackages,
         serviceUrls: config.serviceUrls,
         schemaVersionUsed: config.schemaVersionUsed,

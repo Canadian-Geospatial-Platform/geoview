@@ -2492,7 +2492,7 @@ export abstract class LayerMockup {
   static configHistoricalFloodTimeDimension(): TimeDimension {
     return {
       field: 'time_slider_date',
-      default: '2023-01-01T05:00:00Z',
+      default: ['2023-01-01T05:00:00Z'],
       unitSymbol: '',
       rangeItems: {
         type: 'discrete',
@@ -3369,7 +3369,7 @@ export abstract class LayerMockup {
   static configRadarTimeDimension(): TimeDimension {
     return {
       field: 'time',
-      default: '2024-05-23T22:54:00Z',
+      default: ['2024-05-23T22:54:00Z'],
       unitSymbol: '',
       rangeItems: {
         type: 'discrete',
@@ -3608,7 +3608,7 @@ export abstract class LayerMockup {
   static configMSITimeDimension(): TimeDimension {
     return {
       field: 'time',
-      default: '2000-08-15T00:00:00Z',
+      default: ['2000-08-15T00:00:00Z'],
       unitSymbol: '',
       rangeItems: {
         type: 'discrete',
