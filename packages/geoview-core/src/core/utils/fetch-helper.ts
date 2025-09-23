@@ -213,7 +213,9 @@ export class Fetch {
    * @param {RequestInit?} init - The optional initialization parameters for the fetch.
    * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
    * @returns {Promise<string | ArrayBuffer | null>} The image as a base64 string or ArrayBuffer, or null on failure.
+   * @throws {ResponseError} If the response is not OK (non-2xx).
    * @throws {ResponseContentError} If the fetched blob is of type 'text/xml', indicating an unexpected server error.
+   * @throws {Error} For any other unexpected failures.
    */
   static async fetchBlobImage(url: string, init?: RequestInit, timeoutMs?: number): Promise<string | ArrayBuffer | null> {
     // Fetch the blob
