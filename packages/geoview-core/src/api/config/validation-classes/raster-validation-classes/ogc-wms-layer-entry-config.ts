@@ -68,16 +68,28 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    */
   #normalizeMetadataAndDataAccessPaths(): void {
     // Get the metadata access path
-    const metadataAccessPath = this.getMetadataAccessPath()!;
+    let metadataAccessPath = this.getMetadataAccessPath()!;
 
     // Normalize it
-    const metadataAccessPathNormalized = metadataAccessPath.replace('wrapper/ramp/ogc', 'ows');
+    metadataAccessPath = metadataAccessPath.replace('wrapper/ramp/ogc', 'ows');
 
-    // Set it back tweaking the url
-    this.setMetadataAccessPath(metadataAccessPathNormalized);
+    // Set the normalized url in the metadata access path
+    this.setMetadataAccessPath(metadataAccessPath);
 
-    // Save the url in the data access path
-    this.setDataAccessPath(metadataAccessPathNormalized);
+    // Get the data access path
+    let dataAccessPath = this.getDataAccessPath();
+
+    // If any, normalize it as well in case the provided one also needed to be normalized
+    if (dataAccessPath) {
+      // Normalize it
+      dataAccessPath = dataAccessPath.replace('wrapper/ramp/ogc', 'ows');
+    } else {
+      // No data access path was provided, use the newly normalized metadata access path
+      dataAccessPath = metadataAccessPath;
+    }
+
+    // Save the normalized url in the data access path
+    this.setDataAccessPath(dataAccessPath);
   }
 
   /**
