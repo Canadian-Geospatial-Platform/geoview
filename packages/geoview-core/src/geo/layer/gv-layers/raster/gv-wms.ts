@@ -6,7 +6,7 @@ import { Extent } from 'ol/extent';
 import { Projection as OLProjection } from 'ol/proj';
 import { Map as OLMap } from 'ol';
 
-import { TypeWmsLegend, TypeWmsLegendStyle } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeWmsLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { xmlToJson } from '@/core/utils/utilities';
 import { getExtentIntersection, validateExtentWhenDefined } from '@/geo/utils/utilities';
@@ -26,7 +26,7 @@ import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { Projection } from '@/geo/utils/projection';
 import { LayerInvalidFeatureInfoFormatWMSError, LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions';
 import { MapViewer } from '@/geo/map/map-viewer';
-import { formatError, NetworkError } from '@/core/exceptions/core-exceptions';
+import { formatError, NetworkError, ResponseContentError } from '@/core/exceptions/core-exceptions';
 import { TypeDateFragments } from '@/core/utils/date-mgt';
 import { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 
@@ -255,7 +255,6 @@ export class GVWMS extends AbstractGVRaster {
       // Get the layer config in a loaded phase
       const layerConfig = this.getLayerConfig();
       const legendImage = await GVWMS.#getLegendImage(layerConfig);
-      const styleLegends: TypeWmsLegendStyle[] = [];
 
       if (legendImage) {
         const image = await loadImage(legendImage as string);
@@ -270,22 +269,27 @@ export class GVWMS extends AbstractGVRaster {
           return {
             type: CONST_LAYER_TYPES.WMS,
             legend: drawingCanvas,
-            styles: styleLegends.length ? styleLegends : undefined,
+            styles: undefined, // TODO: Should probably put something in 'styles' here?
           };
         }
       }
-
-      // No good
-      return {
-        type: CONST_LAYER_TYPES.WMS,
-        legend: null,
-        styles: styleLegends.length > 1 ? styleLegends : undefined,
-      };
     } catch (error: unknown) {
-      // Log
-      logger.logError('gv-wms.onFetchLegend()\n', error);
-      return null;
+      // Depending on the error
+      if (error instanceof ResponseContentError) {
+        // Log warning
+        logger.logWarning('gv-wms.onFetchLegend()\n', `${error} - Maybe the WMS legend is expecting a query on the parent layer?`);
+      } else {
+        // Unknown error
+        logger.logError('gv-wms.onFetchLegend()\n', error);
+      }
     }
+
+    // No good
+    return {
+      type: CONST_LAYER_TYPES.WMS,
+      legend: null,
+      styles: undefined,
+    };
   }
 
   /**
@@ -516,57 +520,41 @@ export class GVWMS extends AbstractGVRaster {
    * @private
    */
   static #getLegendImage(layerConfig: OgcWmsLayerEntryConfig, chosenStyle?: string): Promise<string | ArrayBuffer | null> {
-    const promisedImage = new Promise<string | ArrayBuffer | null>((resolve) => {
-      const readImage = (blob: Blob): Promise<string | ArrayBuffer | null> =>
-        new Promise((resolveImage) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolveImage(reader.result);
-          reader.onerror = () => resolveImage(null);
-          reader.readAsDataURL(blob);
-        });
+    // Build the legend URL
+    let queryUrl: string | undefined;
 
-      let queryUrl: string | undefined;
-      const legendUrlFromCapabilities = GVWMS.#getLegendUrlFromCapabilities(layerConfig, chosenStyle);
-      if (legendUrlFromCapabilities) queryUrl = legendUrlFromCapabilities.OnlineResource;
-      else if (Object.keys(layerConfig.getServiceMetadata()?.Capability?.Request || {}).includes('GetLegendGraphic'))
+    const legendUrlFromCapabilities = GVWMS.#getLegendUrlFromCapabilities(layerConfig, chosenStyle);
+    if (legendUrlFromCapabilities) {
+      queryUrl = legendUrlFromCapabilities.OnlineResource;
+    } else {
+      const hasGetLegendGraphic = Object.keys(layerConfig.getServiceMetadata()?.Capability?.Request || {}).includes('GetLegendGraphic');
+      if (hasGetLegendGraphic) {
         queryUrl = `${layerConfig.getMetadataAccessPath()}service=WMS&version=1.3.0&request=GetLegendGraphic&FORMAT=image/png&layer=${layerConfig.layerId}`;
+      }
+    }
 
-      if (queryUrl) {
-        queryUrl = queryUrl.toLowerCase().startsWith('http:') ? `https${queryUrl.slice(4)}` : queryUrl;
+    // Fetch and return the image (handle proxy fallback for CORS/network errors)
+    if (!queryUrl) throw new ResponseContentError('No url to fetch the legend with');
 
-        /** For some layers the layer loads fine through the proxy, but fetching the legend fails
-         * We try the fetch first without the proxy and if we get a network error, try again with the proxy.
-         */
-        Fetch.fetchBlob(queryUrl)
-          .then((responseBlob) => {
-            // Expected response, return it as image
-            resolve(readImage(responseBlob));
-          })
-          .catch((error: unknown) => {
-            // If a network error such as CORS
-            if (error instanceof NetworkError) {
-              // Try appending link with proxy url to avoid CORS issues
-              queryUrl = `${CONFIG_PROXY_URL}?${queryUrl}`;
+    // Ensure HTTPS
+    if (queryUrl.toLowerCase().startsWith('http:')) {
+      queryUrl = `https${queryUrl.slice(4)}`;
+    }
 
-              Fetch.fetchBlob(queryUrl)
-                .then((responseBlob) => {
-                  // Expected response, return it as image
-                  resolve(readImage(responseBlob));
-                })
-                .catch(() => {
-                  // Just absolute fail
-                  resolve(null);
-                });
-            } else {
-              // Not a CORS issue, return null
-              resolve(null);
-            }
-          });
-        // No URL to query
-      } else resolve(null);
-    });
+    try {
+      // Fetch the image
+      return Fetch.fetchBlobImage(queryUrl);
+    } catch (error) {
+      // Retry with proxy if it's a network error (e.g., CORS)
+      if (error instanceof NetworkError) {
+        // Read the blob again, using the proxy this time
+        const proxyUrl = `${CONFIG_PROXY_URL}?${queryUrl}`;
+        return Fetch.fetchBlobImage(proxyUrl);
+      }
 
-    return promisedImage;
+      // Failed
+      throw error;
+    }
   }
 
   /**
