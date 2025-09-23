@@ -33,6 +33,8 @@
         "legend",
         "layers",
         "details",
+        "geochart",
+        "time-slider",
         "data-table"
       ]
     }
