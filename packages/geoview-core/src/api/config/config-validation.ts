@@ -181,11 +181,8 @@ export class ConfigValidation {
           validConfigs.push(geoviewLayerConfig);
         } else {
           try {
-            // The default value for geoviewLayerConfig.initialSettings.visible is true.
-            const geoviewLayerConfigCasted = geoviewLayerConfig;
-
             // Validate the geoview layer id
-            ConfigValidation.#geoviewLayerIdIsMandatory(geoviewLayerConfigCasted);
+            ConfigValidation.#geoviewLayerIdIsMandatory(geoviewLayerConfig);
 
             // Depending on the geoview layer type
             switch (geoviewLayerConfig.geoviewLayerType) {
@@ -195,7 +192,7 @@ export class ConfigValidation {
               case CONST_LAYER_TYPES.OGC_FEATURE:
               case CONST_LAYER_TYPES.WFS:
               case CONST_LAYER_TYPES.WMS:
-                ConfigValidation.#metadataAccessPathIsMandatory(geoviewLayerConfigCasted);
+                ConfigValidation.#metadataAccessPathIsMandatory(geoviewLayerConfig);
                 break;
               default:
                 // All good
@@ -203,10 +200,10 @@ export class ConfigValidation {
             }
 
             // Process the layer entry config
-            ConfigValidation.#processLayerEntryConfig(geoviewLayerConfigCasted, geoviewLayerConfigCasted.listOfLayerEntryConfig);
+            ConfigValidation.#processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
 
             // Add it as a valid entry
-            validConfigs.push(geoviewLayerConfigCasted);
+            validConfigs.push(geoviewLayerConfig);
           } catch (error: unknown) {
             // An error happened with a geoview layer config, log and continue with the others
             GeoViewError.logError(error);

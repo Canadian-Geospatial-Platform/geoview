@@ -37,10 +37,6 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     this.source ??= {};
     this.source.serverType ??= layerConfig.source?.serverType || 'mapserver';
 
-    // When the dataAccessPath is undefined and the metadataAccessPath ends with ".xml", the dataAccessPath is temporarilly
-    // set to '' and will be filled in the fetchAndSetServiceMetadata method of the class WMS.
-    this.source.dataAccessPath ??= layerConfig.source?.dataAccessPath ?? '';
-
     // Normalize the access paths
     this.#normalizeMetadataAndDataAccessPaths();
   }

@@ -35,10 +35,10 @@ export class WkbLayerEntryConfig extends VectorLayerEntryConfig {
 
   /**
    * Type guard that checks whether the given configuration (class instance or plain object)
-   * represents a OGC Feature layer type.
+   * represents a WKB Feature layer type.
    * Supports `ConfigClassOrType` (class instance or plain object) and plain layer config objects (`TypeGeoviewLayerConfig`).
    * @param {ConfigClassOrType | TypeGeoviewLayerConfig} layerConfig - The layer config to check. Can be an instance of a config class or a raw config object.
-   * @returns `true` if the config is for a OGC Feature layer; otherwise `false`.
+   * @returns `true` if the config is for a WKB Feature layer; otherwise `false`.
    * @static
    */
   static isClassOrTypeWKBLayer(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): layerConfig is TypeWkbLayerConfig {

@@ -42,10 +42,10 @@ export class WfsLayerEntryConfig extends VectorLayerEntryConfig {
 
   /**
    * Type guard that checks whether the given configuration (class instance or plain object)
-   * represents a OGC Feature layer type.
+   * represents a WFS Feature layer type.
    * Supports `ConfigClassOrType` (class instance or plain object) and plain layer config objects (`TypeGeoviewLayerConfig`).
    * @param {ConfigClassOrType | TypeGeoviewLayerConfig} layerConfig - The layer config to check. Can be an instance of a config class or a raw config object.
-   * @returns `true` if the config is for a OGC Feature layer; otherwise `false`.
+   * @returns `true` if the config is for a WFS Feature layer; otherwise `false`.
    * @static
    */
   static isClassOrTypeWFSLayer(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): layerConfig is TypeWFSLayerConfig {
