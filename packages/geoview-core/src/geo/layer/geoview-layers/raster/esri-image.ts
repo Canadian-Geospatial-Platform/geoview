@@ -40,7 +40,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    */
   protected override onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Redirect
-    // TODO: Check - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
+    // TODO: Check - Config init -Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
     return Promise.resolve(EsriImage.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, this.metadataAccessPath, false));
   }
 
@@ -123,7 +123,6 @@ export class EsriImage extends AbstractGeoViewRaster {
       new EsriImageLayerEntryConfig({
         geoviewLayerConfig,
         layerId: trimmedPath.split('/').slice(-2, -1)[0],
-        layerName: trimmedPath.split('/').slice(-2, -1)[0],
       }),
     ];
 

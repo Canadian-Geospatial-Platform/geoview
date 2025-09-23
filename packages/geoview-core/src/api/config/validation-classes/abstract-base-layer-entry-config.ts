@@ -1,5 +1,5 @@
 import { TypeLayerStyleConfig, TypeStyleGeometry, TypeLayerStyleSettings } from '@/api/types/map-schema-types';
-import { ConfigAbstractBaseClassOrType, TypeBaseSourceInitialConfig } from '@/api/types/layer-schema-types';
+import { ConfigClassOrType, TypeBaseSourceInitialConfig, TypeGeoviewLayerType, TypeLayerEntryType } from '@/api/types/layer-schema-types';
 import { ConfigBaseClass, ConfigBaseClassProps } from '@/api/config/validation-classes/config-base-class';
 import { TimeDimension } from '@/core/utils/date-mgt';
 import { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
@@ -55,8 +55,12 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * The class constructor.
    * @param {AbstractBaseLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
    */
-  protected constructor(layerConfig: AbstractBaseLayerEntryConfigProps | AbstractBaseLayerEntryConfig) {
-    super(layerConfig);
+  protected constructor(
+    layerConfig: AbstractBaseLayerEntryConfigProps | AbstractBaseLayerEntryConfig,
+    schemaTag: TypeGeoviewLayerType,
+    entryType: TypeLayerEntryType
+  ) {
+    super(layerConfig, schemaTag, entryType);
 
     // Keep attribute properties
     this.source = layerConfig.source;
@@ -218,6 +222,14 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   }
 
   /**
+   * Gets the data access path from the source object.
+   * @returns {string | undefined} The data access path.
+   */
+  getDataAccessPath(): string | undefined {
+    return this.source?.dataAccessPath;
+  }
+
+  /**
    * Sets the data access path for the source object.
    * This method is called when the data access path is being set.
    * If the `source` object is undefined or null, it initializes it as an empty object.
@@ -241,7 +253,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
     const serialized = super.onToJson<T>() as any;
 
     // Copy values
-    serialized.initialSettings = this.initialSettings;
+    serialized.initialSettings = this.getInitialSettings();
     serialized.attributions = this.getAttributions();
     serialized.source = this.source;
 
@@ -254,22 +266,24 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * @param {ConfigAbstractBaseClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
    * @returns {string | undefined} The layer style or undefined.
    */
-  static getClassOrTypeLayerStyle(layerConfig: ConfigAbstractBaseClassOrType | undefined): TypeLayerStyleConfig | undefined {
-    if (layerConfig instanceof ConfigBaseClass) {
+  static getClassOrTypeLayerStyle(layerConfig: ConfigClassOrType | undefined): TypeLayerStyleConfig | undefined {
+    if (layerConfig instanceof AbstractBaseLayerEntryConfig) {
       return layerConfig.getLayerStyle();
     }
-    return layerConfig?.layerStyle;
+    // Try to narrow the type and return, worst case it will be undefined
+    return (layerConfig as AbstractBaseLayerEntryConfigProps)?.layerStyle;
   }
 
   /**
    * Helper function to support when a layerConfig is either a class instance or a regular json object.
-   * @param {ConfigAbstractBaseClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
+   * @param {ConfigClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
    * @returns {string | undefined} The layer filter or undefined.
    */
-  static getClassOrTypeLayerFilter(layerConfig: ConfigAbstractBaseClassOrType | undefined): string | undefined {
-    if (layerConfig instanceof ConfigBaseClass) {
+  static getClassOrTypeLayerFilter(layerConfig: ConfigClassOrType | undefined): string | undefined {
+    if (layerConfig instanceof AbstractBaseLayerEntryConfig) {
       return layerConfig.getLayerFilter();
     }
-    return layerConfig?.layerFilter;
+    // Try to narrow the type and return, worst case it will be undefined
+    return (layerConfig as AbstractBaseLayerEntryConfigProps)?.layerFilter;
   }
 }

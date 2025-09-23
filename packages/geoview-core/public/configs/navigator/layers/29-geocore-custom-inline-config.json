@@ -81,7 +81,7 @@
       "geoviewLayerId": "0fca08b5-e9d0-414b-a3c4-092ff9c5e326",
       "listOfLayerEntryConfig": [
         {
-          "layerId": "6",
+          "layerId": "0",
           "layerName": "NS Marine Water Quality Data",
           "initialSettings": {
             "states": {

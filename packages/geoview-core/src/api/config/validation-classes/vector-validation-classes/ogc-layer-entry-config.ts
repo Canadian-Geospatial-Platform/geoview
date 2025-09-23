@@ -1,9 +1,11 @@
 import {
-  CONST_LAYER_ENTRY_TYPES,
+  ConfigClassOrType,
   CONST_LAYER_TYPES,
+  TypeGeoviewLayerConfig,
   TypeLayerMetadataOGC,
   TypeSourceOgcFeatureInitialConfig,
 } from '@/api/types/layer-schema-types';
+import { TypeOgcFeatureLayerConfig } from '@/geo/layer/geoview-layers/vector/ogc-feature';
 import { VectorLayerEntryConfig, VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { Projection } from '@/geo/utils/projection';
 
@@ -13,29 +15,20 @@ export interface OgcFeatureLayerEntryConfigProps extends VectorLayerEntryConfigP
 }
 
 export class OgcFeatureLayerEntryConfig extends VectorLayerEntryConfig {
-  /** Tag used to link the entry to a specific schema. */
-  override schemaTag = CONST_LAYER_TYPES.OGC_FEATURE;
-
-  /** Layer entry data type. */
-  override entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
-
-  /** The layer entry props that were used in the constructor. */
-  declare layerEntryProps: OgcFeatureLayerEntryConfigProps;
-
   declare source: TypeSourceOgcFeatureInitialConfig;
 
   /**
    * The class constructor.
-   * @param {OgcFeatureLayerEntryConfigProps | OgcFeatureLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
+   * @param {OgcFeatureLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
    */
-  constructor(layerConfig: OgcFeatureLayerEntryConfigProps | OgcFeatureLayerEntryConfig) {
-    super(layerConfig);
+  constructor(layerConfig: OgcFeatureLayerEntryConfigProps) {
+    super(layerConfig, CONST_LAYER_TYPES.OGC_FEATURE);
 
     // Value for this.source.format can only be featureAPI.
     this.source ??= { format: 'featureAPI' };
     this.source.format ??= 'featureAPI';
     this.source.dataProjection ??= Projection.PROJECTION_NAMES.LONLAT;
-    this.source.dataAccessPath ??= layerConfig.source?.dataAccessPath ?? this.geoviewLayerConfig.metadataAccessPath;
+    this.source.dataAccessPath ??= layerConfig.source?.dataAccessPath ?? this.getMetadataAccessPath();
   }
 
   /**
@@ -45,5 +38,18 @@ export class OgcFeatureLayerEntryConfig extends VectorLayerEntryConfig {
    */
   override getLayerMetadata(): TypeLayerMetadataOGC | undefined {
     return super.getLayerMetadata() as TypeLayerMetadataOGC | undefined;
+  }
+
+  /**
+   * Type guard that checks whether the given configuration (class instance or plain object)
+   * represents a OGC Feature layer type.
+   * Supports `ConfigClassOrType` (class instance or plain object) and plain layer config objects (`TypeGeoviewLayerConfig`).
+   * @param {ConfigClassOrType | TypeGeoviewLayerConfig} layerConfig - The layer config to check. Can be an instance of a config class or a raw config object.
+   * @returns `true` if the config is for a OGC Feature layer; otherwise `false`.
+   * @static
+   */
+  static isClassOrTypeOGCLayer(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): layerConfig is TypeOgcFeatureLayerConfig {
+    // Redirect
+    return this.isClassOrTypeSchemaTag(layerConfig, CONST_LAYER_TYPES.OGC_FEATURE);
   }
 }

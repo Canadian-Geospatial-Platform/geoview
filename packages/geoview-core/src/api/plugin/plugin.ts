@@ -146,6 +146,8 @@ export abstract class Plugin {
           } catch (error: unknown) {
             // Log warning
             logger.logWarning(`Config not found.`, error);
+            // Notify with a warning
+            mapViewer.notifications.addNotificationWarning('error.map.pluginConfigNotFound', [configPath]);
           }
         }
 

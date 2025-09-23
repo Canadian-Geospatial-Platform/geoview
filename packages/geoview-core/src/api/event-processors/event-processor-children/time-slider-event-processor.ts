@@ -16,6 +16,7 @@ import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { LayerNotFoundError, LayerWrongTypeError } from '@/core/exceptions/layer-exceptions';
+import { PluginStateUninitializedError } from '@/core/exceptions/geoview-exceptions';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -28,44 +29,85 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
   // GV ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
 
   // #region
+
+  /**
+   * Checks if the Time Slider plugin is iniitialized for the given map.
+   * @param {string} mapId - The map id
+   * @returns {boolean} True when the Time lider plugin is initialized.
+   * @static
+   */
+  static isTimeSliderInitialized(mapId: string): boolean {
+    try {
+      // Get its state, this will throw PluginStateUninitializedError if uninitialized
+      this.getTimeSliderState(mapId);
+      return true;
+    } catch {
+      // Uninitialized
+      return false;
+    }
+  }
+
   /**
    * Shortcut to get the TimeSlider state for a given map id
    * @param {string} mapId - The mapId
-   * @returns {ITimeSliderState | undefined} The Time Slider state. Forcing the return to also be 'undefined', because
-   *                                         there will be no timeSliderState if the TimeSlider plugin isn't active.
-   *                                         This helps the developers making sure the existence is checked.
+   * @returns {ITimeSliderState} The Time Slider state.
+   * @throws {PluginStateUninitializedError} When the Time Slider plugin is uninitialized.
+   * @static
    */
-  protected static getTimesliderState(mapId: string): ITimeSliderState | undefined {
-    // Return the time slider state
-    return super.getState(mapId).timeSliderState;
+  protected static getTimeSliderState(mapId: string): ITimeSliderState {
+    // Get the time slider state
+    const { timeSliderState } = super.getState(mapId);
+
+    // If not found
+    if (!timeSliderState) throw new PluginStateUninitializedError('TimeSlider', mapId);
+
+    // Return it
+    return timeSliderState;
   }
 
   /**
    * Gets time slider layers.
    * @param {string} mapId - The map id of the state to act on
-   * @returns {TimeSliderLayerSet | undefined} The time slider layer set or undefined
+   * @returns {TimeSliderLayerSet} The time slider layer set or undefined
+   * @throws {PluginStateUninitializedError} When the Time Slider plugin is uninitialized.
+   * @static
    */
-  static getTimeSliderLayers(mapId: string): TimeSliderLayerSet | undefined {
-    return this.getTimesliderState(mapId)?.timeSliderLayers;
+  static getTimeSliderLayers(mapId: string): TimeSliderLayerSet {
+    return this.getTimeSliderState(mapId).timeSliderLayers;
   }
 
   /**
    * Gets time slider selected layer path.
    * @param {string} mapId - The map id of the state to act on
-   * @returns {string} The selected time slider layer path or undefined
+   * @returns {string} The selected time slider layer path
+   * @throws {PluginStateUninitializedError} When the Time Slider plugin is uninitialized.
+   * @static
    */
-  static getTimeSliderSelectedLayer(mapId: string): string | undefined {
-    return this.getTimesliderState(mapId)?.selectedLayerPath;
+  static getTimeSliderSelectedLayer(mapId: string): string {
+    return this.getTimeSliderState(mapId).selectedLayerPath;
   }
 
   /**
-   * Gets filter(s) for a layer.
+   * Gets filter(s) for all layers.
+   * @param {string} mapId - The map id of the state to act on
+   * @returns {string} The time slider filter(s) for the layer
+   * @throws {PluginStateUninitializedError} When the Time Slider plugin is uninitialized.
+   * @static
+   */
+  static getTimeSliderFilters(mapId: string): Record<string, string> {
+    return this.getTimeSliderState(mapId).sliderFilters;
+  }
+
+  /**
+   * Gets filter(s) for a specific layer path.
    * @param {string} mapId - The map id of the state to act on
    * @param {string} layerPath - The path of the layer
-   * @returns {string | undefined} The time slider filter(s) for the layer
+   * @returns {string} The time slider filter(s) for the layer
+   * @throws {PluginStateUninitializedError} When the Time Slider plugin is uninitialized.
+   * @static
    */
-  static getTimeSliderFilter(mapId: string, layerPath: string): string | undefined {
-    return this.getTimesliderState(mapId)?.sliderFilters[layerPath];
+  static getTimeSliderFilter(mapId: string, layerPath: string): string {
+    return this.getTimeSliderFilters(mapId)[layerPath];
   }
 
   /**
@@ -73,10 +115,11 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map id of the state to act on
    * @param {AbstractGVLayer} layer - The layer to add to the state
    * @param {TypeTimeSliderProps?} timesliderConfig - Optional time slider configuration
+   * @static
    */
   static checkInitTimeSliderLayerAndApplyFilters(mapId: string, layer: AbstractGVLayer, timesliderConfig?: TypeTimeSliderProps): void {
-    // If there is no TimeSlider
-    if (!this.getTimesliderState(mapId)) return;
+    // If there is no Time Slider, ignore
+    if (!this.isTimeSliderInitialized(mapId)) return;
 
     // Get the temporal dimension, if any
     const tempDimension = layer.getTimeDimension();
@@ -99,16 +142,18 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map id of the state to act on
    * @param {string} layerPath - The layer path of the layer to add to the state
    * @param {TypeTimeSliderValues} timeSliderValues - The time slider values to add and apply filters
+   * @throws {PluginStateUninitializedError} When the Time Slider plugin is uninitialized.
+   * @static
    */
   static #addTimeSliderLayerAndApplyFilters(mapId: string, layerPath: string, timeSliderValues: TypeTimeSliderValues): void {
-    // If there is no TimeSlider
-    if (!this.getTimesliderState(mapId)) return; // Skip
+    // Get the timeslider state which is only initialized if the TimeSlider Plugin exists.
+    const timeSliderState = this.getTimeSliderState(mapId);
 
     // Create set part (because that's how it works for now)
     const timeSliderLayer = { [layerPath]: timeSliderValues };
 
     // Add it
-    this.getTimesliderState(mapId)?.setterActions.addTimeSliderLayer(timeSliderLayer);
+    timeSliderState.setterActions.addTimeSliderLayer(timeSliderLayer);
 
     const { defaultValue, field, filtering, minAndMax, values } = timeSliderLayer[layerPath];
     this.updateFilters(mapId, layerPath, defaultValue, field, filtering, minAndMax, values);
@@ -121,16 +166,18 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    * Removes a time slider layer from the state
    * @param {string} mapId - The map id of the state to act on
    * @param {string} layerPath - The layer path of the layer to remove from the state
+   * @throws {PluginStateUninitializedError} When the TimeSlider plugin is uninitialized.
+   * @static
    */
   static removeTimeSliderLayer(mapId: string, layerPath: string): void {
-    // Get the timeslider state
-    const timeSliderState = this.getTimesliderState(mapId);
+    // Get the timeslider state which is only initialized if the TimeSlider Plugin exists.
+    const timeSliderState = this.getTimeSliderState(mapId);
 
     // Redirect
-    timeSliderState?.setterActions.removeTimeSliderLayer(layerPath);
+    timeSliderState.setterActions.removeTimeSliderLayer(layerPath);
 
-    // If there are no layers with time dimension
-    if (!timeSliderState || !Object.keys(timeSliderState.timeSliderLayers).length) {
+    // If there are no more layers with time dimension
+    if (!Object.keys(timeSliderState.timeSliderLayers).length) {
       // Hide tab
       UIEventProcessor.hideTab(mapId, 'time-slider');
     }
@@ -142,6 +189,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The id of the map
    * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer path of the layer to add to the state
    * @returns {TimeSliderLayer | undefined}
+   * @static
    */
   static getInitialTimeSliderValues(
     mapId: string,
@@ -229,6 +277,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    * @param {number} minValue - The minimum value
    * @param {number} maxValue - The maximum value
    * @returns The estimated stepping value based on the min and max values
+   * @static
    */
   static guessEstimatedStep(minValue: number, maxValue: number): number | undefined {
     const day1 = 86400000; // 24h x 60m x 60s x 1000ms = 86,400,000ms in a day
@@ -250,10 +299,12 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    * Sets the selected layer path
    * @param {string} mapId - The map id of the state to act on
    * @param {string} layerPath - The layer path to use
+   * @throws {PluginStateUninitializedError} When the TimeSlider plugin is uninitialized.
+   * @static
    */
   static setSelectedLayerPath(mapId: string, layerPath: string): void {
     // Redirect
-    this.getTimesliderState(mapId)?.setterActions.setSelectedLayerPath(layerPath);
+    this.getTimeSliderState(mapId).setterActions.setSelectedLayerPath(layerPath);
   }
 
   /**
@@ -261,10 +312,12 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map id of the state to act on
    * @param {string} layerPath - The layer path to use
    * @param {string} filter - The filter
+   * @throws {PluginStateUninitializedError} When the TimeSlider plugin is uninitialized.
+   * @static
    */
   static addOrUpdateSliderFilter(mapId: string, layerPath: string, filter: string): void {
-    const curSliderFilters = this.getTimesliderState(mapId)?.sliderFilters;
-    this.getTimesliderState(mapId)?.setterActions.setSliderFilters({ ...curSliderFilters, [layerPath]: filter });
+    const curSliderFilters = this.getTimeSliderFilters(mapId);
+    this.getTimeSliderState(mapId).setterActions.setSliderFilters({ ...curSliderFilters, [layerPath]: filter });
   }
 
   // #endregion
@@ -287,6 +340,8 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    * @param {number[]} minAndMax - Minimum and maximum values of slider
    * @param {number[]} values - Filter values to apply
    * @returns {void}
+   * @throws {PluginStateUninitializedError} When the TimeSlider plugin is uninitialized.
+   * @static
    */
   static updateFilters(
     mapId: string,
@@ -327,8 +382,8 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
       }
     }
 
-    this.getTimesliderState(mapId)?.setterActions.setFiltering(layerPath, filtering);
-    this.getTimesliderState(mapId)?.setterActions.setValues(layerPath, values);
+    this.getTimeSliderState(mapId).setterActions.setFiltering(layerPath, filtering);
+    this.getTimeSliderState(mapId).setterActions.setValues(layerPath, values);
     this.addOrUpdateSliderFilter(mapId, layerPath, filter);
     MapEventProcessor.applyLayerFilters(mapId, layerPath);
 

@@ -14,7 +14,7 @@ import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
  * @exports
  * @class GeoCore
  */
-export abstract class GeoCore {
+export class GeoCore {
   /**
    * Gets GeoView layer configurations list from the UUIDs of the list of layer entry configurations.
    * @param {string} uuid - The UUID of the layer
@@ -60,8 +60,11 @@ export abstract class GeoCore {
         // Get the layerPath from geocore response
         const layerPath = geochartConfig.layers[0].layerId;
 
-        // Add a GeoChart
-        GeochartEventProcessor.addGeochartChart(mapId, layerPath, geochartConfig);
+        // If a Geochart is initialized
+        if (GeochartEventProcessor.isGeochartInitialized(mapId)) {
+          // Add a GeoChart
+          GeochartEventProcessor.addGeochartChart(mapId, layerPath, geochartConfig);
+        }
       });
     }
 
@@ -75,8 +78,7 @@ export abstract class GeoCore {
       // Use the name from the first layer if none is provided in the config
       if (!tempLayerConfig.geoviewLayerName) tempLayerConfig.geoviewLayerName = response.layers[0].geoviewLayerName;
 
-      const config = new Config(language);
-      const newLayerConfig = config.prevalidateGeoviewLayersConfig([tempLayerConfig], (errorKey: string, params: string[]) => {
+      const newLayerConfig = Config.prevalidateGeoviewLayersConfig([tempLayerConfig], (errorKey: string, params: string[]) => {
         // When an error happens, raise the exception, we handle it higher in this case
         throw new GeoViewError(errorKey, params);
       });

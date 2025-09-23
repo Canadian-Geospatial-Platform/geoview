@@ -132,7 +132,10 @@ export class Fetch {
    * @param {RequestInit?} init - The optional initialization parameters for the fetch.
    * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
    * @returns {Promise<string>} The fetched text response.
+   * @throws {ResponseError} If the response is not OK (non-2xx).
    * @throws {ResponseEmptyError} If the JSON response is empty.
+   * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
+   * @throws {Error} For any other unexpected failures.
    */
   static async fetchText(url: string, init?: RequestInit, timeoutMs?: number): Promise<string> {
     // Get the buffer array of the response
@@ -200,6 +203,37 @@ export class Fetch {
       // Clear the timeout, if any. We're done
       clearTimeout(timeoutId);
     }
+  }
+
+  /**
+   * Fetches a blob from the given URL and attempts to read it as an image.
+   * Returns a base64-encoded string or ArrayBuffer depending on the file type.
+   * Throws an error if the response contains XML (likely an error page).
+   * @param {string} url - The URL to fetch the image blob from.
+   * @param {RequestInit?} init - The optional initialization parameters for the fetch.
+   * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
+   * @returns {Promise<string | ArrayBuffer | null>} The image as a base64 string or ArrayBuffer, or null on failure.
+   * @throws {ResponseError} If the response is not OK (non-2xx).
+   * @throws {ResponseContentError} If the fetched blob is of type 'text/xml', indicating an unexpected server error.
+   * @throws {Error} For any other unexpected failures.
+   */
+  static async fetchBlobImage(url: string, init?: RequestInit, timeoutMs?: number): Promise<string | ArrayBuffer | null> {
+    // Fetch the blob
+    const blob = await Fetch.fetchBlob(url, init, timeoutMs);
+
+    // If blob type is xml
+    if (blob.type === 'text/xml') {
+      // Throw an error
+      throw new ResponseContentError(`Content contained unexpected XML data instead of image (${url}).`);
+    }
+
+    // Read the image file
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = (error: unknown) => reject(error);
+      reader.readAsDataURL(blob);
+    });
   }
 
   /**

@@ -314,18 +314,20 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     const setLayerControls = (layerConfig: ConfigBaseClass, isChild: boolean = false): TypeLayerControls => {
       const removeDefault = isChild ? MapEventProcessor.getGeoViewMapConfig(mapId)?.globalSettings?.canRemoveSublayers !== false : true;
 
-      const controls: TypeLayerControls = {
-        highlight: layerConfig.initialSettings?.controls?.highlight !== undefined ? layerConfig.initialSettings?.controls?.highlight : true,
-        hover: layerConfig.initialSettings?.controls?.hover !== undefined ? layerConfig.initialSettings?.controls?.hover : false,
-        opacity: layerConfig.initialSettings?.controls?.opacity !== undefined ? layerConfig.initialSettings?.controls?.opacity : true,
-        query: layerConfig.initialSettings?.controls?.query !== undefined ? layerConfig.initialSettings?.controls?.query : false,
-        remove: layerConfig.initialSettings?.controls?.remove !== undefined ? layerConfig.initialSettings?.controls?.remove : removeDefault,
-        table: layerConfig.initialSettings?.controls?.table !== undefined ? layerConfig.initialSettings?.controls?.table : true,
-        visibility:
-          layerConfig.initialSettings?.controls?.visibility !== undefined ? layerConfig.initialSettings?.controls?.visibility : true,
-        zoom: layerConfig.initialSettings?.controls?.zoom !== undefined ? layerConfig.initialSettings?.controls?.zoom : true,
+      // Get the initial settings
+      const initialSettings = layerConfig.getInitialSettings();
+
+      // Get the layer controls using default values when needed
+      return {
+        highlight: initialSettings?.controls?.highlight ?? true, // default: true
+        hover: initialSettings?.controls?.hover ?? false, // default: false
+        opacity: initialSettings?.controls?.opacity ?? true, // default: true
+        query: initialSettings?.controls?.query ?? false, // default: false
+        remove: initialSettings?.controls?.remove ?? removeDefault, // default: removeDefault
+        table: initialSettings?.controls?.table ?? true, // default: true
+        visibility: initialSettings?.controls?.visibility ?? true, // default: true
+        zoom: initialSettings?.controls?.zoom ?? true, // default: true
       };
-      return controls;
     };
 
     // TODO: refactor - avoid nested function relying on outside parameter like layerPathNodes
@@ -368,9 +370,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
             layerName,
             layerStatus: legendResultSetEntry.layerStatus,
             legendQueryStatus: legendResultSetEntry.legendQueryStatus,
-            type: layerConfig.entryType as TypeGeoviewLayerType,
+            type: layerConfig.getEntryType() as TypeGeoviewLayerType, // TODO: Check - Bug - This typing is invalid, but we have to keep it for it to work for now...
             canToggle: legendResultSetEntry.data?.type !== CONST_LAYER_TYPES.ESRI_IMAGE,
-            opacity: layerConfig.initialSettings?.states?.opacity ? layerConfig.initialSettings.states.opacity : 1,
+            opacity: layerConfig.getInitialSettings()?.states?.opacity ?? 1, // default: 1
             icons: [] as TypeLegendLayerItem[],
             items: [] as TypeLegendItem[],
             children: [] as TypeLegendLayer[],
@@ -414,15 +416,15 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           layerStatus: legendResultSetEntry.layerStatus,
           legendQueryStatus: legendResultSetEntry.legendQueryStatus,
           styleConfig: legendResultSetEntry.data?.styleConfig,
-          type: legendResultSetEntry.data?.type || (layerConfig.entryType as TypeGeoviewLayerType),
+          type: legendResultSetEntry.data?.type || layerConfig.getSchemaTag(),
           canToggle: legendResultSetEntry.data?.type !== CONST_LAYER_TYPES.ESRI_IMAGE,
-          opacity: layerConfig.initialSettings?.states?.opacity || 1,
-          hoverable: layerConfig.initialSettings?.states?.hoverable,
-          queryable: layerConfig.initialSettings?.states?.queryable,
+          opacity: layerConfig.getInitialSettings()?.states?.opacity ?? 1,
+          hoverable: layerConfig.getInitialSettings()?.states?.hoverable,
+          queryable: layerConfig.getInitialSettings()?.states?.queryable,
           items: [] as TypeLegendItem[],
           children: [] as TypeLegendLayer[],
           icons: icons || [],
-          url: layerConfig.geoviewLayerConfig.metadataAccessPath,
+          url: layerConfig.getMetadataAccessPath(),
         };
 
         // Add the icons as items on the layer entry
@@ -591,13 +593,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     // TODO Update after refactor, layerEntryConfig will not know initial settings
     const layerEntryConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath);
 
-    // Set the layer status to loading
-    // TODO: Cleanup - Don't do this anymore, the loading status is handled automatically via the enhanced onLoading/onLoaded functions (2025-06-17)
-    // layerEntryConfig?.setLayerStatusLoading();
-
     // Reset layer states to original values
-    const opacity = layerEntryConfig?.initialSettings.states?.opacity || 1;
-    const visibility = layerEntryConfig?.initialSettings.states?.visible || true;
+    const opacity = layerEntryConfig?.getInitialSettings().states?.opacity ?? 1; // default: 1
+    const visibility = layerEntryConfig?.getInitialSettings().states?.visible ?? true; // default: true
     LegendEventProcessor.setLayerOpacity(mapId, layerPath, opacity);
     MapEventProcessor.setOrToggleMapLayerVisibility(mapId, layerPath, visibility);
 

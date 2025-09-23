@@ -163,8 +163,8 @@ export abstract class AbstractGeoViewLayer {
 
       this.listOfLayerEntryConfig = [layerGroup];
       layerGroup.listOfLayerEntryConfig.forEach((layerConfig) => {
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.parentLayerConfig = layerGroup;
+        // Set the parent config
+        layerConfig.setParentLayerConfig(layerGroup);
       });
     }
   }
@@ -606,7 +606,7 @@ export abstract class AbstractGeoViewLayer {
 
         // If working on a group layer
         if (layerConfig.getEntryTypeIsGroup()) {
-          const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.initialSettings);
+          const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.getInitialSettings());
           const groupReturned = await this.#processListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig, newLayerGroup);
           if (groupReturned) {
             if (layerGroup) layerGroup.addLayer(groupReturned);
@@ -635,14 +635,17 @@ export abstract class AbstractGeoViewLayer {
       if (!layerGroup) {
         // All children of this level in the tree have the same parent, so we use the first element of the array to retrieve the parent node.
         // eslint-disable-next-line no-param-reassign
-        layerGroup = this.createLayerGroup(listOfLayerEntryConfig[0].parentLayerConfig!, listOfLayerEntryConfig[0].initialSettings);
+        layerGroup = this.createLayerGroup(
+          listOfLayerEntryConfig[0].getParentLayerConfig()!,
+          listOfLayerEntryConfig[0].getInitialSettings()
+        );
       }
 
       // TODO: Refactor - Rework this Promise to be "Promise<AbstractBaseLayer>"
       const promiseOfLayerCreated: Promise<AbstractBaseLayer | undefined>[] = [];
       listOfLayerEntryConfig.forEach((layerConfig) => {
         if (layerConfig.getEntryTypeIsGroup()) {
-          const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.initialSettings);
+          const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.getInitialSettings());
           promiseOfLayerCreated.push(this.#processListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig, newLayerGroup));
         } else if (layerConfig.layerStatus === 'error') {
           // This layer was already detected as in error, don't make the layer, don't add to the list

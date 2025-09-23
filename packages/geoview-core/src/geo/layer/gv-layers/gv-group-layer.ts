@@ -28,7 +28,7 @@ export class GVGroupLayer extends AbstractBaseLayer {
     layerConfig.onLayerStatusChanged((config) => {
       if (config.layerStatus === 'loaded' && !this.loadedOnce) {
         this.loadedOnce = true;
-        this.setVisible(layerConfig.initialSettings?.states?.visible !== false);
+        this.setVisible(layerConfig.getInitialSettings()?.states?.visible ?? true); // default: true
       }
     });
   }

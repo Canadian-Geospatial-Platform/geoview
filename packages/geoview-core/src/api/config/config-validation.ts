@@ -1,13 +1,7 @@
-/* eslint-disable no-param-reassign */
-// We have a lot of reassigns. We keep it global...
-// TODO: refactor - clean the code to minimize esLint warning
-
 import Ajv from 'ajv';
 import { AnyValidateFunction } from 'ajv/dist/types';
 
 import defaultsDeep from 'lodash/defaultsDeep';
-
-import { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 
 import {
   CONST_LAYER_TYPES,
@@ -18,40 +12,26 @@ import {
   mapConfigLayerEntryIsGeoCore,
   mapConfigLayerEntryIsGeoPackage,
   mapConfigLayerEntryIsShapefile,
-  layerEntryIsGroupLayer,
   TypeGeoviewLayerType,
-  layerEntryIsEsriFeatureFromConfig,
-  layerEntryIsEsriDynamicFromConfig,
-  layerEntryIsEsriImageFromConfig,
-  layerEntryIsImageStaticFromConfig,
-  layerEntryIsVectorTileFromConfig,
-  layerEntryIsOgcWmsFromConfig,
-  layerEntryIsXYZTilesFromConfig,
-  layerEntryIsCSVFromConfig,
-  layerEntryIsGeoJSONFromConfig,
-  layerEntryIsOgcFeatureFromConfig,
-  layerEntryIsWFSFromConfig,
-  layerEntryIsWKBFromConfig,
   ConfigClassOrType,
 } from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
 
-import { generateId } from '@/core/utils/utilities';
 import schema from '@/core/../../schema.json';
-import { ConfigBaseClass } from './validation-classes/config-base-class';
-import { CsvLayerEntryConfig } from './validation-classes/vector-validation-classes/csv-layer-entry-config';
-import { EsriDynamicLayerEntryConfig } from './validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import { EsriFeatureLayerEntryConfig } from './validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
-import { EsriImageLayerEntryConfig } from './validation-classes/raster-validation-classes/esri-image-layer-entry-config';
-import { GeoJSONLayerEntryConfig } from './validation-classes/vector-validation-classes/geojson-layer-entry-config';
-import { ImageStaticLayerEntryConfig } from './validation-classes/raster-validation-classes/image-static-layer-entry-config';
-import { OgcFeatureLayerEntryConfig } from './validation-classes/vector-validation-classes/ogc-layer-entry-config';
-import { OgcWmsLayerEntryConfig } from './validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { VectorTilesLayerEntryConfig } from './validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
-import { WfsLayerEntryConfig } from './validation-classes/vector-validation-classes/wfs-layer-entry-config';
-import { WkbLayerEntryConfig } from './validation-classes/vector-validation-classes/wkb-layer-entry-config';
-import { XYZTilesLayerEntryConfig } from './validation-classes/raster-validation-classes/xyz-layer-entry-config';
-import { GroupLayerEntryConfig } from './validation-classes/group-layer-entry-config';
+import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import { CsvLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
+import { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
+import { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
+import { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
+import { GeoJSONLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
+import { ImageStaticLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
+import { OgcFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
+import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import { VectorTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
+import { WfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
+import { WkbLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
+import { XYZTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
+import { GroupLayerEntryConfig, GroupLayerEntryConfigProps } from '@/api/config/validation-classes/group-layer-entry-config';
 
 import { LayerMetadataAccessPathMandatoryError, LayerMissingGeoviewLayerIdError } from '@/core/exceptions/layer-exceptions';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
@@ -63,44 +43,14 @@ import { NotSupportedError } from '@/core/exceptions/core-exceptions';
  * @class DefaultConfig
  */
 export class ConfigValidation {
-  /** The map ID associated to the configuration. If it is undefined, a unique value will be generated and assign to it. */
-  #mapId: string;
-
-  // The map language
-  displayLanguage: TypeDisplayLanguage;
-
-  /**
-   * The ConfigValidation class constructor used to instanciate an object of this type.
-   */
-  constructor(language: TypeDisplayLanguage) {
-    this.#mapId = generateId();
-    this.displayLanguage = language;
-  }
-
-  /**
-   * Get mapId value.
-   *
-   * @returns {string} The ID of the Geoview map.
-   */
-  get mapId(): string {
-    return this.#mapId;
-  }
-
-  /**
-   * Set mapId value.
-   * @param {string} mapId - The ID of the Geoview map.
-   */
-  set mapId(mapId: string) {
-    this.#mapId = mapId;
-  }
-
   /**
    * Print a trace to help locate schema errors.
    * @param {AnyValidateFunction<unknown>} validate - The Ajv validator.
-   * @param {TypeLayerEntryConfig} objectAffected - Object that was validated.
+   * @param {unknown} objectAffected - Object that was validated.
+   * @static
    * @private
    */
-  #printSchemaError(validate: AnyValidateFunction<unknown>, objectAffected: TypeLayerEntryConfig): void {
+  static #printSchemaError(validate: AnyValidateFunction<unknown>, objectAffected: unknown): void {
     for (let i = 0; i < validate.errors!.length; i += 1) {
       const error = validate.errors![i];
       const { instancePath } = error;
@@ -111,7 +61,7 @@ export class ConfigValidation {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         node = (node as any)[path[j]];
       }
-      logger.logWarning(this.mapId, '='.repeat(200), 'Schema error: ', this.mapId, error, 'Object affected: ', this.mapId, node);
+      logger.logWarning('Schema error: ', error, 'Object affected: ', node);
     }
   }
 
@@ -122,9 +72,10 @@ export class ConfigValidation {
    * @param {Ajv} validator - The schema validator to use.
    *
    * @returns {TypeMapFeaturesConfig} A valid map features configuration.
+   * @static
    * @private
    */
-  #isValidTypeListOfLayerEntryConfig(
+  static #isValidTypeListOfLayerEntryConfig(
     geoviewLayerType: TypeGeoviewLayerType,
     listOfLayerEntryConfig: TypeLayerEntryConfig[],
     validator: Ajv,
@@ -134,7 +85,7 @@ export class ConfigValidation {
     const groupSchemaPath = `https://cgpv/schema#/definitions/TypeLayerGroupEntryConfig`;
 
     for (let i = 0; i < listOfLayerEntryConfig.length; i++) {
-      const schemaPath = layerEntryIsGroupLayer(listOfLayerEntryConfig[i]) ? groupSchemaPath : layerSchemaPath;
+      const schemaPath = ConfigBaseClass.getClassOrTypeEntryTypeIsGroup(listOfLayerEntryConfig[i]) ? groupSchemaPath : layerSchemaPath;
       const validate = validator.getSchema(schemaPath);
 
       if (!validate) {
@@ -147,15 +98,15 @@ export class ConfigValidation {
       const valid = validate(listOfLayerEntryConfig[i]);
 
       if (!valid) {
-        this.#printSchemaError(validate, listOfLayerEntryConfig[i]);
+        ConfigValidation.#printSchemaError(validate, listOfLayerEntryConfig[i]);
         return false;
       }
     }
 
     for (let i = 0; i < listOfLayerEntryConfig.length; i++) {
       if (
-        layerEntryIsGroupLayer(listOfLayerEntryConfig[i]) &&
-        !this.#isValidTypeListOfLayerEntryConfig(
+        ConfigBaseClass.getClassOrTypeEntryTypeIsGroup(listOfLayerEntryConfig[i]) &&
+        !ConfigValidation.#isValidTypeListOfLayerEntryConfig(
           geoviewLayerType,
           listOfLayerEntryConfig[i].listOfLayerEntryConfig,
           validator,
@@ -171,8 +122,9 @@ export class ConfigValidation {
    * Validate the map features configuration.
    * @param {MapConfigLayerEntry[]} listOfGeoviewLayerConfig - The map features configuration to validate.
    * @returns {MapConfigLayerEntry[]} A valid map features configuration.
+   * @static
    */
-  validateLayersConfigAgainstSchema(
+  static validateLayersConfigAgainstSchema(
     listOfGeoviewLayerConfig: MapConfigLayerEntry[],
     onErrorCallback: ErrorCallbackDelegate
   ): MapConfigLayerEntry[] {
@@ -195,7 +147,7 @@ export class ConfigValidation {
         !mapConfigLayerEntryIsGeoPackage(listOfGeoviewLayerConfig[i])
       ) {
         const gvLayerConfigCasted = listOfGeoviewLayerConfig[i] as TypeGeoviewLayerConfig;
-        isValid = this.#isValidTypeListOfLayerEntryConfig(
+        isValid = ConfigValidation.#isValidTypeListOfLayerEntryConfig(
           gvLayerConfigCasted.geoviewLayerType,
           gvLayerConfigCasted.listOfLayerEntryConfig,
           validator,
@@ -211,20 +163,10 @@ export class ConfigValidation {
 
   /**
    * Validate and adjust the list of GeoView layer configuration.
-   * @param {MapConfigLayerEntry[]} listOfGeoviewLayerConfig - The list of GeoView layer configuration to adjust and
+   * @param {MapConfigLayerEntry[]} listOfMapConfigLayerEntry - The list of GeoView layer configuration to adjust and
    * validate.
    */
-  static validateListOfGeoviewLayerConfig(listOfGeoviewLayerConfig?: MapConfigLayerEntry[]): void {
-    ConfigValidation.#doExtraValidation(listOfGeoviewLayerConfig);
-  }
-
-  /**
-   * Do extra validation that schema can not do.
-   * @param {MapConfigLayerEntry[]} listOfMapConfigLayerEntry - The list of Map Config Layer Entry configuration to adjust and
-   * validate.
-   * @private
-   */
-  static #doExtraValidation(listOfMapConfigLayerEntry?: MapConfigLayerEntry[]): void {
+  static validateListOfGeoviewLayerConfig(listOfMapConfigLayerEntry?: MapConfigLayerEntry[]): void {
     if (listOfMapConfigLayerEntry) {
       // Track only valid entries
       const validConfigs: typeof listOfMapConfigLayerEntry = [];
@@ -239,12 +181,8 @@ export class ConfigValidation {
           validConfigs.push(geoviewLayerConfig);
         } else {
           try {
-            // The default value for geoviewLayerConfig.initialSettings.visible is true.
-            const geoviewLayerConfigCasted = geoviewLayerConfig;
-            if (!geoviewLayerConfigCasted.initialSettings) geoviewLayerConfigCasted.initialSettings = { states: { visible: true } };
-
             // Validate the geoview layer id
-            ConfigValidation.#geoviewLayerIdIsMandatory(geoviewLayerConfigCasted);
+            ConfigValidation.#geoviewLayerIdIsMandatory(geoviewLayerConfig);
 
             // Depending on the geoview layer type
             switch (geoviewLayerConfig.geoviewLayerType) {
@@ -254,7 +192,7 @@ export class ConfigValidation {
               case CONST_LAYER_TYPES.OGC_FEATURE:
               case CONST_LAYER_TYPES.WFS:
               case CONST_LAYER_TYPES.WMS:
-                ConfigValidation.#metadataAccessPathIsMandatory(geoviewLayerConfigCasted);
+                ConfigValidation.#metadataAccessPathIsMandatory(geoviewLayerConfig);
                 break;
               default:
                 // All good
@@ -262,10 +200,10 @@ export class ConfigValidation {
             }
 
             // Process the layer entry config
-            ConfigValidation.#processLayerEntryConfig(geoviewLayerConfigCasted, geoviewLayerConfigCasted.listOfLayerEntryConfig);
+            ConfigValidation.#processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
 
             // Add it as a valid entry
-            validConfigs.push(geoviewLayerConfigCasted);
+            validConfigs.push(geoviewLayerConfig);
           } catch (error: unknown) {
             // An error happened with a geoview layer config, log and continue with the others
             GeoViewError.logError(error);
@@ -274,8 +212,7 @@ export class ConfigValidation {
       });
       // We're done processing the listOfMapConfigLayerEntry and we only have valid ones in the validConfigs list
       // Repopulate the original array
-      listOfMapConfigLayerEntry.length = 0;
-      listOfMapConfigLayerEntry.push(...validConfigs);
+      listOfMapConfigLayerEntry.splice(0, listOfMapConfigLayerEntry.length, ...validConfigs);
     }
   }
 
@@ -319,31 +256,45 @@ export class ConfigValidation {
     parentLayerConfig?: GroupLayerEntryConfig
   ): void {
     listOfLayerEntryConfig.forEach((layerConfig, i: number) => {
-      // links the entry to its GeoView layer config.
-      layerConfig.geoviewLayerConfig = geoviewLayerConfig;
-      // links the entry to its parent layer configuration.
-      layerConfig.parentLayerConfig = parentLayerConfig;
+      // Link the entry to its GeoView layer config.
+      ConfigBaseClass.setClassOrTypeGeoviewLayerConfig(layerConfig, geoviewLayerConfig);
+
+      // Link the entry to its parent layer configuration if any
+      ConfigBaseClass.setClassOrTypeParentLayerConfig(layerConfig, parentLayerConfig);
+
       // layerConfig.initialSettings attributes that are not defined inherits parent layer settings that are defined.
+      let initialSettings = ConfigBaseClass.getClassOrTypeInitialSettings(layerConfig);
 
-      // Handle Zoom and Scale levels before default merge of settings
-      if (layerConfig.initialSettings?.minZoom) {
-        layerConfig.initialSettings.minZoom = Math.max(
-          layerConfig.initialSettings.minZoom,
-          parentLayerConfig?.initialSettings?.minZoom || 0
-        );
+      // Get the parent initial settings
+      const parentInitialSettings = ConfigBaseClass.getClassOrTypeInitialSettings(parentLayerConfig);
+
+      // Handle minZoom before default merge of settings
+      if (initialSettings?.minZoom) {
+        // Validate the minZoom value
+        const minZoom = Math.max(initialSettings.minZoom, parentInitialSettings?.minZoom || 0);
+
+        // Update the minZoom initial settings
+        ConfigBaseClass.setClassOrTypeInitialSettings(layerConfig, { ...initialSettings, minZoom });
+        // Reget it to make sure the chain of updates works
+        initialSettings = ConfigBaseClass.getClassOrTypeInitialSettings(layerConfig);
       }
 
-      if (layerConfig.initialSettings?.maxZoom) {
-        layerConfig.initialSettings.maxZoom = Math.min(
-          layerConfig.initialSettings.maxZoom,
-          parentLayerConfig?.initialSettings?.maxZoom || 23
-        );
+      // Handle maxZoom before default merge of settings
+      if (initialSettings?.maxZoom) {
+        // Validate the maxZoom value
+        const maxZoom = Math.min(initialSettings.maxZoom, parentInitialSettings?.maxZoom || 23);
+
+        // Update the maxZoom initial settings
+        ConfigBaseClass.setClassOrTypeInitialSettings(layerConfig, { ...initialSettings, maxZoom });
+        // Reget it to make sure the chain of updates works
+        initialSettings = ConfigBaseClass.getClassOrTypeInitialSettings(layerConfig);
       }
 
-      // Make sure visible is set so it is not overridden by parent layer
-      if (!layerConfig.initialSettings) layerConfig.initialSettings = { states: { visible: true } };
-      if (!layerConfig.initialSettings.states) layerConfig.initialSettings.states = { visible: true };
-      if (layerConfig.initialSettings?.states?.visible !== false) layerConfig.initialSettings.states.visible = true;
+      // If there's a parent
+      if (parentInitialSettings) {
+        // Merge the rest of parent and child settings
+        ConfigBaseClass.setClassOrTypeInitialSettings(layerConfig, defaultsDeep(initialSettings, parentInitialSettings));
+      }
 
       const minScale = ConfigBaseClass.getClassOrTypeMinScale(layerConfig);
       if (minScale) {
@@ -357,45 +308,55 @@ export class ConfigValidation {
         ConfigBaseClass.setClassOrTypeMaxScale(layerConfig, Math.max(maxScale, parentLayerConfig?.getMaxScale() || 0));
       }
 
-      // Merge the rest of parent and child settings
-      layerConfig.initialSettings = defaultsDeep(
-        layerConfig.initialSettings,
-        layerConfig.parentLayerConfig?.initialSettings || layerConfig.geoviewLayerConfig?.initialSettings
-      );
+      // Get the properties to be able to create the config object
+      const layerConfigProps = ConfigBaseClass.getClassOrTypeLayerEntryProps(layerConfig);
 
-      if (layerEntryIsGroupLayer(layerConfig)) {
+      if (ConfigBaseClass.getClassOrTypeEntryTypeIsGroup(layerConfig)) {
         // We must set the parents of all elements in the group.
         ConfigValidation.#recursivelySetChildParent(geoviewLayerConfig, [layerConfig], parentLayerConfig);
-        const parent = new GroupLayerEntryConfig(layerConfig);
+        const parent = new GroupLayerEntryConfig(layerConfigProps as GroupLayerEntryConfigProps);
+        // eslint-disable-next-line no-param-reassign
         listOfLayerEntryConfig[i] = parent;
         ConfigValidation.#processLayerEntryConfig(geoviewLayerConfig, parent.listOfLayerEntryConfig, parent);
-      } else if (layerEntryIsOgcWmsFromConfig(layerConfig)) {
-        listOfLayerEntryConfig[i] = new OgcWmsLayerEntryConfig(layerConfig);
-      } else if (layerEntryIsImageStaticFromConfig(layerConfig)) {
-        listOfLayerEntryConfig[i] = new ImageStaticLayerEntryConfig(layerConfig);
-      } else if (layerEntryIsXYZTilesFromConfig(layerConfig)) {
-        listOfLayerEntryConfig[i] = new XYZTilesLayerEntryConfig(layerConfig);
-      } else if (layerEntryIsVectorTileFromConfig(layerConfig)) {
-        listOfLayerEntryConfig[i] = new VectorTilesLayerEntryConfig(layerConfig);
-      } else if (layerEntryIsEsriDynamicFromConfig(layerConfig)) {
-        listOfLayerEntryConfig[i] = new EsriDynamicLayerEntryConfig(layerConfig);
-      } else if (layerEntryIsEsriFeatureFromConfig(layerConfig)) {
-        listOfLayerEntryConfig[i] = new EsriFeatureLayerEntryConfig(layerConfig);
-      } else if (layerEntryIsEsriImageFromConfig(layerConfig)) {
-        listOfLayerEntryConfig[i] = new EsriImageLayerEntryConfig(layerConfig);
-      } else if (layerEntryIsWFSFromConfig(layerConfig)) {
-        listOfLayerEntryConfig[i] = new WfsLayerEntryConfig(layerConfig);
-      } else if (layerEntryIsOgcFeatureFromConfig(layerConfig)) {
-        listOfLayerEntryConfig[i] = new OgcFeatureLayerEntryConfig(layerConfig);
-      } else if (layerEntryIsGeoJSONFromConfig(layerConfig)) {
-        listOfLayerEntryConfig[i] = new GeoJSONLayerEntryConfig(layerConfig);
-      } else if (layerEntryIsCSVFromConfig(layerConfig)) {
-        listOfLayerEntryConfig[i] = new CsvLayerEntryConfig(layerConfig);
-      } else if (layerEntryIsWKBFromConfig(layerConfig)) {
-        listOfLayerEntryConfig[i] = new WkbLayerEntryConfig(layerConfig);
+      } else if (OgcWmsLayerEntryConfig.isClassOrTypeWMS(layerConfig)) {
+        // eslint-disable-next-line no-param-reassign
+        listOfLayerEntryConfig[i] = new OgcWmsLayerEntryConfig(layerConfigProps);
+      } else if (ImageStaticLayerEntryConfig.isClassOrTypeImageStatic(layerConfig)) {
+        // eslint-disable-next-line no-param-reassign
+        listOfLayerEntryConfig[i] = new ImageStaticLayerEntryConfig(layerConfigProps);
+      } else if (XYZTilesLayerEntryConfig.isClassOrTypeXYZTiles(layerConfig)) {
+        // eslint-disable-next-line no-param-reassign
+        listOfLayerEntryConfig[i] = new XYZTilesLayerEntryConfig(layerConfigProps);
+      } else if (VectorTilesLayerEntryConfig.isClassOrTypeVectorTiles(layerConfig)) {
+        // eslint-disable-next-line no-param-reassign
+        listOfLayerEntryConfig[i] = new VectorTilesLayerEntryConfig(layerConfigProps);
+      } else if (EsriDynamicLayerEntryConfig.isClassOrTypeEsriDynamic(layerConfig)) {
+        // eslint-disable-next-line no-param-reassign
+        listOfLayerEntryConfig[i] = new EsriDynamicLayerEntryConfig(layerConfigProps);
+      } else if (EsriFeatureLayerEntryConfig.isClassOrTypeEsriFeature(layerConfig)) {
+        // eslint-disable-next-line no-param-reassign
+        listOfLayerEntryConfig[i] = new EsriFeatureLayerEntryConfig(layerConfigProps);
+      } else if (EsriImageLayerEntryConfig.isClassOrTypeEsriImage(layerConfig)) {
+        // eslint-disable-next-line no-param-reassign
+        listOfLayerEntryConfig[i] = new EsriImageLayerEntryConfig(layerConfigProps);
+      } else if (WfsLayerEntryConfig.isClassOrTypeWFSLayer(layerConfig)) {
+        // eslint-disable-next-line no-param-reassign
+        listOfLayerEntryConfig[i] = new WfsLayerEntryConfig(layerConfigProps);
+      } else if (OgcFeatureLayerEntryConfig.isClassOrTypeOGCLayer(layerConfig)) {
+        // eslint-disable-next-line no-param-reassign
+        listOfLayerEntryConfig[i] = new OgcFeatureLayerEntryConfig(layerConfigProps);
+      } else if (GeoJSONLayerEntryConfig.isClassOrTypeGeoJSON(layerConfig)) {
+        // eslint-disable-next-line no-param-reassign
+        listOfLayerEntryConfig[i] = new GeoJSONLayerEntryConfig(layerConfigProps);
+      } else if (CsvLayerEntryConfig.isClassOrTypeCSV(layerConfig)) {
+        // eslint-disable-next-line no-param-reassign
+        listOfLayerEntryConfig[i] = new CsvLayerEntryConfig(layerConfigProps);
+      } else if (WkbLayerEntryConfig.isClassOrTypeWKBLayer(layerConfig)) {
+        // eslint-disable-next-line no-param-reassign
+        listOfLayerEntryConfig[i] = new WkbLayerEntryConfig(layerConfigProps);
       } else {
         // Unsupported layer type
-        throw new NotSupportedError(`Unsupported layer entry config type '${layerConfig.geoviewLayerConfig?.geoviewLayerType}'`);
+        throw new NotSupportedError(`Unsupported layer entry config type '${ConfigBaseClass.getClassOrTypeSchemaTag(layerConfig)}`);
       }
     });
   }
@@ -403,20 +364,22 @@ export class ConfigValidation {
   /**
    * Process recursively the layer entries to set the parents of each entries.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The GeoView layer configuration.
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig - The list of layer entry configurations to process.
+   * @param {ConfigClassOrType[]} listOfLayerEntryConfig - The list of layer entry configurations to process.
    * @param {GroupLayerEntryConfig} parentLayerConfig - The parent layer configuration of all the
    * layer configurations found in the list of layer entries.
    * @private
    */
   static #recursivelySetChildParent(
     geoviewLayerConfig: TypeGeoviewLayerConfig,
-    listOfLayerEntryConfig: TypeLayerEntryConfig[],
+    listOfLayerEntryConfig: ConfigClassOrType[],
     parentLayerConfig?: GroupLayerEntryConfig
   ): void {
+    // If there's no parent to set, return
+    if (!parentLayerConfig) return;
+
     listOfLayerEntryConfig.forEach((layerConfig) => {
-      layerConfig.parentLayerConfig = parentLayerConfig;
-      layerConfig.geoviewLayerConfig = geoviewLayerConfig;
-      if (layerEntryIsGroupLayer(layerConfig))
+      ConfigBaseClass.setClassOrTypeParentLayerConfig(layerConfig, parentLayerConfig);
+      if (ConfigBaseClass.getClassOrTypeEntryTypeIsGroup(layerConfig))
         ConfigValidation.#recursivelySetChildParent(geoviewLayerConfig, layerConfig.listOfLayerEntryConfig, layerConfig);
     });
   }

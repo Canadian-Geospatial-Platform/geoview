@@ -1,12 +1,10 @@
 import shp from 'shpjs';
-import { ConfigAbstractBaseClassOrType, ShapefileLayerConfig } from '@/api/types/layer-schema-types';
+import { ConfigAbstractBaseClassOrType, ConfigClassOrType, ShapefileLayerConfig } from '@/api/types/layer-schema-types';
 import { GeoJSON as LayerGeoJSON, TypeGeoJSONLayerConfig } from '@/geo/layer/geoview-layers/vector/geojson';
-import {
-  GeoJSONLayerEntryConfig,
-  GeoJSONLayerEntryConfigProps,
-} from '@/api/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
+import { GeoJSONLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
+import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { generateId } from '@/core/utils/utilities';
-import { AbstractBaseLayerEntryConfig } from '../validation-classes/abstract-base-layer-entry-config';
 import { Fetch } from '@/core/utils/fetch-helper';
 
 /**
@@ -48,14 +46,15 @@ export class ShapefileReader {
         .map((layerGeojson) => {
           const matchingLayerEntryConfig = layerConfig.listOfLayerEntryConfig?.find(
             (layerEntryConfig) => layerEntryConfig.layerId === layerGeojson.fileName
-          ) as GeoJSONLayerEntryConfigProps;
+          ) as ConfigClassOrType;
+
           if (!layerConfig.listOfLayerEntryConfig || matchingLayerEntryConfig) {
             return new GeoJSONLayerEntryConfig({
               geoviewLayerConfig,
               layerId: layerGeojson.fileName || generateId(),
               layerName: layerGeojson.fileName,
               layerStyle: AbstractBaseLayerEntryConfig.getClassOrTypeLayerStyle(matchingLayerEntryConfig),
-              initialSettings: matchingLayerEntryConfig?.initialSettings,
+              initialSettings: AbstractBaseLayerEntryConfig.getClassOrTypeInitialSettings(matchingLayerEntryConfig),
               source: {
                 format: 'GeoJSON',
                 geojson: JSON.stringify(layerGeojson),
@@ -77,7 +76,7 @@ export class ShapefileReader {
         layerId: geojson.fileName || filename || generateId(),
         layerName: layerConfig.geoviewLayerName || geojson.fileName,
         layerStyle: AbstractBaseLayerEntryConfig.getClassOrTypeLayerStyle(passedLayerEntryConfig),
-        initialSettings: passedLayerEntryConfig?.initialSettings,
+        initialSettings: ConfigBaseClass.getClassOrTypeInitialSettings(passedLayerEntryConfig),
         source: {
           format: 'GeoJSON',
           geojson: JSON.stringify(geojson),

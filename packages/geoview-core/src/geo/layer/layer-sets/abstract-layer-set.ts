@@ -356,7 +356,8 @@ export abstract class AbstractLayerSet {
 
     // Update the name with a possibly updated layerName during layer status progression
     // (depending on how this translates in the new layers process, might not need this anymore)
-    this.resultSet[layerConfig.layerPath].layerName = layerConfig.getLayerName() || layerConfig.geoviewLayerConfig.geoviewLayerName!;
+    this.resultSet[layerConfig.layerPath].layerName =
+      layerConfig.getLayerName() || layerConfig.getGeoviewLayerName() || 'No name / Sans nom';
   }
 
   /**

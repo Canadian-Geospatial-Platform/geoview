@@ -106,7 +106,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
     try {
       if (!layerConfig) return null;
-      const legendUrl = `${layerConfig.geoviewLayerConfig.metadataAccessPath}/legend?f=json`;
+      const legendUrl = `${layerConfig.getMetadataAccessPath()}/legend?f=json`;
       const legendJson = await Fetch.fetchJson<TypeEsriImageLayerLegend>(legendUrl);
 
       let legendInfo;
@@ -131,7 +131,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       legendInfo.forEach((info) => {
         const styleInfo: TypeLayerStyleConfigInfo = {
           label: info.label,
-          visible: layerConfig.initialSettings.states?.visible || true,
+          visible: layerConfig.getInitialSettings().states?.visible ?? true, // default: true,
           values: info.label.split(','),
           settings: {
             type: 'iconSymbol',

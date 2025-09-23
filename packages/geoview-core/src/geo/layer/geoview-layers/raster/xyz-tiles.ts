@@ -5,7 +5,6 @@ import defaultsDeep from 'lodash/defaultsDeep';
 
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { TypeSourceTileInitialConfig, TypeGeoviewLayerConfig, CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
-import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import {
   TypeMetadataXYZTiles,
   XYZTilesLayerEntryConfig,
@@ -68,7 +67,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
   protected override onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Redirect
     return Promise.resolve(
-      // TODO: Check - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
+      // TODO: Check - Config init - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
       XYZTiles.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, this.metadataAccessPath, false, [])
     );
   }
@@ -116,7 +115,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * @returns {Promise<XYZTilesLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
   protected override onProcessLayerMetadata(layerConfig: XYZTilesLayerEntryConfig): Promise<XYZTilesLayerEntryConfig> {
-    // TODO Need to see why the metadata isn't handled properly for ESRI XYZ tiles.
+    // TODO: Need to see why the metadata isn't handled properly for ESRI XYZ tiles.
     // GV Possibly caused by a difference between OGC and ESRI XYZ Tiles, but only have ESRI XYZ Tiles as example currently
     // GV Also, might be worth checking out OGCMapTile for this? https://openlayers.org/en/latest/examples/ogc-map-tiles-geographic.html
     // GV Seems like it can deal with less specificity in the url and can handle the x y z internally?
@@ -139,14 +138,17 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
       // If found
       if (metadataLayerConfigFound) {
-        // metadataLayerConfigFound can not be undefined because we have already validated the config exist
+        // Set the layer metadata. metadataLayerConfigFound can't be undefined because we have already validated the config exist
         layerConfig.setLayerMetadata(metadataLayerConfigFound);
+
         // eslint-disable-next-line no-param-reassign
         layerConfig.source = defaultsDeep(layerConfig.source, metadataLayerConfigFound.source);
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.initialSettings = defaultsDeep(layerConfig.initialSettings, metadataLayerConfigFound.initialSettings);
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
+
+        // Set the initial settings
+        layerConfig.setInitialSettings(defaultsDeep(layerConfig.getInitialSettings(), metadataLayerConfigFound.initialSettings));
+
+        // Validate and update the extent initial settings
+        layerConfig.validateUpdateInitialSettingsExtent();
 
         // Set zoom limits for max / min zooms
         const maxScale = metadataLayerConfigFound?.maxScale;

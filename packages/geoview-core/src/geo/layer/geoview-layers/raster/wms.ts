@@ -7,13 +7,12 @@ import {
   CONST_LAYER_ENTRY_TYPES,
   TypeLayerEntryConfig,
   TypeGeoviewLayerConfig,
-  layerEntryIsGroupLayer,
   TypeOfServer,
   TypeMetadataWMS,
   TypeMetadataWMSCapabilityLayer,
 } from '@/api/types/layer-schema-types';
 import { DateMgt } from '@/core/utils/date-mgt';
-import { CallbackNewMetadataDelegate, getWMSServiceMetadata, validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
+import { CallbackNewMetadataDelegate, getWMSServiceMetadata } from '@/geo/utils/utilities';
 import {
   OgcWmsLayerEntryConfig,
   OgcWmsLayerEntryConfigProps,
@@ -146,8 +145,8 @@ export class WMS extends AbstractGeoViewRaster {
     const entries = WMS.#buildLayerTree(layers);
 
     // Redirect
-    // TODO: Check - Check if there's a way to better determine the typeOfServer flag, defaults to mapserver, how is it used here?
-    // TODO: Check - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
+    // TODO: Check - Config init - Check if there's a way to better determine the typeOfServer flag, defaults to mapserver, how is it used here?
+    // TODO: Check - Config init - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
     return WMS.createGeoviewLayerConfig(
       this.geoviewLayerId,
       metadata?.Capability.Layer.Title || this.geoviewLayerName,
@@ -235,12 +234,13 @@ export class WMS extends AbstractGeoViewRaster {
         layerConfig.setMinScale(Math.min(layerConfig.getMinScale() ?? Infinity, layerCapabilities.MaxScaleDenominator));
       }
 
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
+      // Validate and update the extent initial settings
+      layerConfig.validateUpdateInitialSettingsExtent();
 
-      if (!layerConfig.initialSettings?.bounds && layerCapabilities.EX_GeographicBoundingBox) {
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.initialSettings.bounds = validateExtent(layerCapabilities.EX_GeographicBoundingBox);
+      // If no bounds defined in the initial settings and an extent is defined in the layer capabilities metadata
+      if (!layerConfig.getInitialSettings()?.bounds && layerCapabilities.EX_GeographicBoundingBox) {
+        // Validate and update the bounds initial settings
+        layerConfig.validateUpdateInitialSettingsBounds(layerCapabilities.EX_GeographicBoundingBox);
       }
 
       // If there's a dimension
@@ -390,11 +390,13 @@ export class WMS extends AbstractGeoViewRaster {
     // Wait for all requests to settle (either fulfilled or rejected)
     const results = await Promise.allSettled(metadataPromises);
 
-    // If all metadata fetches failed, flag the first layer's parent as errored and abort
-    if (results.every((r) => r.status === 'rejected')) {
-      // Set the parent in error
-      layers[0].parentLayerConfig?.setLayerStatusError();
-    }
+    // TODO: Cleanup - Dead code
+    // Trying to comment this out, as the typing seems wrong (setLayerStatusError has not been a function of GroupLayerEntryConfig for a long time...) 2025-09-18
+    // // If all metadata fetches failed, flag the first layer's parent as errored and abort
+    // if (results.every((r) => r.status === 'rejected')) {
+    //   // Set the parent in error
+    //   layers[0].getParentLayerConfig?.setLayerStatusError();
+    // }
 
     // Merge metadata results
     let baseMetadata: TypeMetadataWMS | undefined;
@@ -456,7 +458,7 @@ export class WMS extends AbstractGeoViewRaster {
                 // No capabilities found in the response
                 reject(
                   new PromiseRejectErrorWrapper(
-                    new LayerNoCapabilitiesError(layerConfig.geoviewLayerConfig.geoviewLayerId, layerConfig.getLayerNameCascade()),
+                    new LayerNoCapabilitiesError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerNameCascade()),
                     layerConfig
                   )
                 );
@@ -593,7 +595,7 @@ export class WMS extends AbstractGeoViewRaster {
     const gatherLayerIds = (listOfLayerEntryConfig = this.listOfLayerEntryConfig): void => {
       if (listOfLayerEntryConfig.length) {
         listOfLayerEntryConfig.forEach((layerConfig) => {
-          if (layerEntryIsGroupLayer(layerConfig)) gatherLayerIds(layerConfig.listOfLayerEntryConfig);
+          if (ConfigBaseClass.getClassOrTypeEntryTypeIsGroup(layerConfig)) gatherLayerIds(layerConfig.listOfLayerEntryConfig);
           else arrayOfLayerIds.push(layerConfig);
         });
       }
@@ -895,7 +897,7 @@ export class WMS extends AbstractGeoViewRaster {
     const newListOfLayerEntryConfig: ConfigBaseClass[] = [];
 
     // GV Special WMS group layer case situation...
-    // TODO: Bug - There was an issue with the layer configuration for a long time ('Private element not on object') which
+    // TODO: Bug - fullSubLayers - There was an issue with the layer configuration for a long time ('Private element not on object') which
     // TO.DOCONT: was causing the loop below to fail before finishing the first loop (midway deep into 'registerLayerConfigInit()').
     // TO.DOCONT: The fact that an exception was raised was actually provoking the behavior that we want with the UI display of
     // TO.DOCONT: the WMS group layers (between Layers and Details tabs).
@@ -914,13 +916,11 @@ export class WMS extends AbstractGeoViewRaster {
         // Create the Group layer in preparation for recursion
         const groupLayer = new GroupLayerEntryConfig({
           ...layerConfig.cloneLayerProps(),
-          geoviewLayerConfig: layerConfig.geoviewLayerConfig,
           layerId: `${subLayer.layerId}`,
           layerName: subLayer.layerName,
+          parentLayerConfig: layerConfig,
           listOfLayerEntryConfig: [],
         });
-
-        groupLayer.parentLayerConfig = layerConfig;
 
         // Recursive call
         WMS.#createGroupLayerRec(subLayer.listOfLayerEntryConfig!, groupLayer, fullSubLayers, callbackGroupLayerCreated);
@@ -931,12 +931,12 @@ export class WMS extends AbstractGeoViewRaster {
         // Handle leaf layer
         const subLayerEntryConfig = new OgcWmsLayerEntryConfig({
           ...layerConfig.cloneLayerProps(),
-          geoviewLayerConfig: layerConfig.geoviewLayerConfig,
+          layerId: `${subLayer.layerId}`,
+          layerName: subLayer.layerName!,
+          parentLayerConfig: layerConfig,
         });
-        subLayerEntryConfig.parentLayerConfig = layerConfig;
-        subLayerEntryConfig.layerId = `${subLayer.layerId}`;
-        subLayerEntryConfig.setLayerName(subLayer.layerName!);
 
+        // Cumulate
         newListOfLayerEntryConfig.push(subLayerEntryConfig);
 
         // Simulate the legacy bug behavior
@@ -949,12 +949,11 @@ export class WMS extends AbstractGeoViewRaster {
       }
     });
 
-    // TODO: Bug - Continuation of the TODO Bug above.. Purposely don't do this anymore (the throw will cause skipping of this)
+    // TODO: Bug - fullSubLayers - Continuation of the TODO Bug above.. Purposely don't do this anymore (the throw will cause skipping of this)
     // TO.DOCONT: in order to reproduce the old behavior now that the 'Private element' bug is fixed..
     // TO.DOCONT: Leaving the code there, uncommented, so that if/when we remove the throw of the
     // TO.DOCONT: 'Processing cancelled' this gets executed as would be expected
-    // eslint-disable-next-line no-param-reassign
-    layerConfig.entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
+    layerConfig.setEntryType(CONST_LAYER_ENTRY_TYPES.GROUP);
     layerConfig.setIsMetadataLayerGroup(true);
     // eslint-disable-next-line no-param-reassign
     layerConfig.listOfLayerEntryConfig = newListOfLayerEntryConfig as TypeLayerEntryConfig[];

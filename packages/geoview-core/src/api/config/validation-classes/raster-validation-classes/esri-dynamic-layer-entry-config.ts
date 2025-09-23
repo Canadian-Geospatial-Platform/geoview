@@ -1,6 +1,8 @@
 import {
+  ConfigClassOrType,
   CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
+  TypeGeoviewLayerConfig,
   TypeLayerMetadataEsri,
   TypeMetadataEsriDynamic,
   TypeSourceEsriDynamicInitialConfig,
@@ -9,6 +11,7 @@ import {
   AbstractBaseLayerEntryConfig,
   AbstractBaseLayerEntryConfigProps,
 } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import { TypeEsriDynamicLayerConfig } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 
 export interface EsriDynamicLayerEntryConfigProps extends AbstractBaseLayerEntryConfigProps {
   /** Source settings to apply to the GeoView layer source at creation time. */
@@ -21,15 +24,6 @@ export interface EsriDynamicLayerEntryConfigProps extends AbstractBaseLayerEntry
  * Type used to define a GeoView image layer to display on the map.
  */
 export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
-  /** Tag used to link the entry to a specific schema. */
-  override schemaTag = CONST_LAYER_TYPES.ESRI_DYNAMIC;
-
-  /** Layer entry data type. */
-  override entryType = CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE;
-
-  /** The layer entry props that were used in the constructor. */
-  declare layerEntryProps: EsriDynamicLayerEntryConfigProps;
-
   /** Source settings to apply to the GeoView image layer source at creation time. */
   declare source: TypeSourceEsriDynamicInitialConfig;
 
@@ -38,15 +32,15 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * The class constructor.
-   * @param {EsriDynamicLayerEntryConfigProps | EsriDynamicLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
+   * @param {EsriDynamicLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
    */
-  constructor(layerConfig: EsriDynamicLayerEntryConfigProps | EsriDynamicLayerEntryConfig) {
-    super(layerConfig);
+  constructor(layerConfig: EsriDynamicLayerEntryConfigProps) {
+    super(layerConfig, CONST_LAYER_TYPES.ESRI_DYNAMIC, CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE);
     this.maxRecordCount = layerConfig.maxRecordCount;
 
     // Write the default properties when not specified
     this.source ??= {};
-    this.source.dataAccessPath ??= layerConfig.source?.dataAccessPath ?? this.geoviewLayerConfig.metadataAccessPath;
+    this.source.dataAccessPath ??= layerConfig.source?.dataAccessPath ?? this.getMetadataAccessPath();
 
     // Format the dataAccessPath correctly
     if (!this.source.dataAccessPath!.endsWith('/')) this.source.dataAccessPath += '/';
@@ -68,5 +62,18 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    */
   override getLayerMetadata(): TypeLayerMetadataEsri | undefined {
     return super.getLayerMetadata() as TypeLayerMetadataEsri | undefined;
+  }
+
+  /**
+   * Type guard that checks whether the given configuration (class instance or plain object)
+   * represents an Esri Dynamic layer type.
+   * Supports `ConfigClassOrType` (class instance or plain object) and plain layer config objects (`TypeGeoviewLayerConfig`).
+   * @param {ConfigClassOrType | TypeGeoviewLayerConfig} layerConfig - The layer config to check. Can be an instance of a config class or a raw config object.
+   * @returns `true` if the config is for an Esri Dynamic layer; otherwise `false`.
+   * @static
+   */
+  static isClassOrTypeEsriDynamic(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): layerConfig is TypeEsriDynamicLayerConfig {
+    // Redirect
+    return this.isClassOrTypeSchemaTag(layerConfig, CONST_LAYER_TYPES.ESRI_DYNAMIC);
   }
 }

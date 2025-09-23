@@ -64,6 +64,7 @@ export class GeoPackageReader {
       geoviewLayerId: layerConfig.geoviewLayerId,
       geoviewLayerName: layerConfig.geoviewLayerName,
       geoviewLayerType: CONST_LAYER_TYPES.WKB,
+      metadataAccessPath: layerConfig.metadataAccessPath,
       initialSettings: layerConfig.initialSettings,
       listOfLayerEntryConfig: [],
     };
@@ -96,12 +97,12 @@ export class GeoPackageReader {
             // Find layer data for the sublayer
             const matchingLayerData = layersData.find((layerData) => layerData.name === sublayerEntryConfig.layerId);
             if (matchingLayerData) {
-              const { layerId, initialSettings } = sublayerEntryConfig;
+              const { layerId } = sublayerEntryConfig;
               const layerName = ConfigBaseClass.getClassOrTypeLayerName(sublayerEntryConfig);
               listOfSubLayerEntryConfig.push(
                 new WkbLayerEntryConfig({
                   geoviewLayerConfig,
-                  initialSettings,
+                  initialSettings: ConfigBaseClass.getClassOrTypeInitialSettings(sublayerEntryConfig),
                   layerId,
                   layerName: layerName || matchingLayerData.name,
                   layerStyle: matchingLayerData.styleSld ? GeoPackageReader.#processGeopackageStyle(matchingLayerData.styleSld) : undefined,
@@ -116,7 +117,7 @@ export class GeoPackageReader {
                       GeoPackageReader.#processFeatureInfoConfig(matchingLayerData.geoPackageFeatures[0].properties),
                     geoPackageFeatures: matchingLayerData.geoPackageFeatures,
                   },
-                } as unknown as WkbLayerEntryConfig)
+                })
               );
             } else {
               // If no matching layer data, log error
@@ -146,7 +147,7 @@ export class GeoPackageReader {
                     GeoPackageReader.#processFeatureInfoConfig(layerData.geoPackageFeatures[0].properties),
                   geoPackageFeatures: layerData.geoPackageFeatures,
                 },
-              } as unknown as WkbLayerEntryConfig)
+              })
             );
           });
         }
@@ -182,7 +183,7 @@ export class GeoPackageReader {
               featureInfo: GeoPackageReader.#processFeatureInfoConfig(layerData.geoPackageFeatures[0].properties),
               geoPackageFeatures: layerData.geoPackageFeatures,
             },
-          } as unknown as WkbLayerEntryConfig)
+          })
         );
       });
     }

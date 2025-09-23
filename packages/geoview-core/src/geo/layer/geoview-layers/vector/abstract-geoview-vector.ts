@@ -11,7 +11,6 @@ import { getUid } from 'ol/util';
 import { TypeOutfields } from '@/api/types/map-schema-types';
 import {
   CONST_LAYER_TYPES,
-  layerEntryIsGeoJSONFromConfig,
   TypeBaseVectorSourceInitialConfig,
   TypeFeatureInfoLayerConfig,
   TypePostSettings,
@@ -32,6 +31,7 @@ import {
 } from '@/core/exceptions/layer-exceptions';
 import { LayerEntryConfigVectorSourceURLNotDefinedError } from '@/core/exceptions/layer-entry-config-exceptions';
 import { WkbLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
+import { GeoJSONLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
 
 // Some constants
 const EXCLUDED_HEADERS_LAT = ['latitude', 'lat', 'y', 'ycoord', 'latitude|latitude', 'latitude | latitude'];
@@ -117,12 +117,14 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         // Resolve the url
         const url = AbstractGeoViewVector.#resolveUrl(layerConfig, vectorSource, extent, resolution, projection);
 
-        if (layerConfig.schemaTag !== 'WKB') {
+        if (layerConfig.getSchemaTag() !== CONST_LAYER_TYPES.WKB) {
+          // Cast it to a GeoJson layer type, because we treat WKB entry configs like GeoJson's
+          const layerConfigGeoJSON = layerConfig as GeoJSONLayerEntryConfig;
+
           // Fetch the data, or use passed geoJSON if present
-          responseText =
-            layerEntryIsGeoJSONFromConfig(layerConfig) && layerConfig.source?.geojson
-              ? layerConfig.source.geojson
-              : await AbstractGeoViewVector.#fetchData(url, layerConfig.source?.postSettings);
+          responseText = layerConfigGeoJSON.source?.geojson
+            ? layerConfigGeoJSON.source.geojson
+            : await AbstractGeoViewVector.#fetchData(url, layerConfig.source?.postSettings);
         } else responseText = layerConfig.source!.dataAccessPath as string;
 
         // If Esri Feature
@@ -219,7 +221,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   ): Promise<Feature[] | undefined> {
     // TODO: Refactor - Consider changing the return type to Promise<Feature[]>
 
-    switch (layerConfig.schemaTag) {
+    switch (layerConfig.getSchemaTag()) {
       case CONST_LAYER_TYPES.CSV:
         // Attempt to convert CSV text to OpenLayers features
         return AbstractGeoViewVector.#convertCsv(responseText, layerConfig, Projection.getProjectionFromString(projection));
@@ -325,7 +327,6 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    */
   // GV: featureLimit ideal amount varies with the service and with maxAllowableOffset.
   // TODO: Add options for featureLimit to config
-  // TODO: Will need to move with onCreateVectorSource
   static #getEsriFeatures(url: string, featureCount: number, maxRecordCount?: number, featureLimit: number = 1000): Promise<unknown[]> {
     // Update url
     const baseUrl = url.replace('&returnCountOnly=true', `&outfields=*&geometryPrecision=1&maxAllowableOffset=5`);

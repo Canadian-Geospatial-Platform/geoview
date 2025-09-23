@@ -1,9 +1,9 @@
-import { cloneDeep } from 'lodash';
-
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { Extent } from '@/api/types/map-schema-types';
+import { Extent, TypeLayerStyleConfig } from '@/api/types/map-schema-types';
 import {
   ConfigClassOrType,
+  CONST_LAYER_ENTRY_TYPES,
+  CONST_LAYER_TYPES,
   TypeGeoviewLayerConfig,
   TypeGeoviewLayerType,
   TypeLayerEntryType,
@@ -11,60 +11,56 @@ import {
   TypeLayerStatus,
   TypeTileGrid,
   TypeValidSourceProjectionCodes,
-  layerEntryIsGroupLayer,
 } from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
 import { LAYER_STATUS } from '@/core/utils/constant';
 import { GroupLayerEntryConfig, GroupLayerEntryConfigProps } from './group-layer-entry-config';
-import { NotImplementedError } from '@/core/exceptions/core-exceptions';
-import { DateMgt, TypeDateFragments } from '@/core/utils/date-mgt';
-import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config';
+import { NotImplementedError, NotSupportedError } from '@/core/exceptions/core-exceptions';
+import { DateMgt, TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
+import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 
 export interface ConfigBaseClassProps {
-  /** The display name of the layer (English/French). */
-  schemaTag?: TypeGeoviewLayerType; // This property isn't necessary in the config as the class handles them, but we have it explicit here for the ConfigClassOrType thing.
-  entryType?: TypeLayerEntryType; // This property isn't necessary in the config as the class handles them, but we have it explicit here for the ConfigClassOrType thing.
   layerId: string;
   geoviewLayerConfig: TypeGeoviewLayerConfig;
+  schemaTag?: TypeGeoviewLayerType; // This property isn't necessary in the config as the class handles them, but we have it explicit here for the ConfigClassOrType thing.
+  entryType?: TypeLayerEntryType; // This property isn't necessary in the config as the class handles them, but we have it explicit here for the ConfigClassOrType thing.
+  layerPath?: string; // This property isn't necessary in the config, but we have it explicit here for the ConfigClassOrType thing.
   layerName?: string;
   initialSettings?: TypeLayerInitialSettings;
   minScale?: number;
   maxScale?: number;
   isMetadataLayerGroup?: boolean;
   parentLayerConfig?: GroupLayerEntryConfig;
+  attributions?: string[];
+  bounds?: number[];
+  timeDimension?: TimeDimension;
+  layerStyle?: TypeLayerStyleConfig;
 }
 
 /**
  * Base type used to define a GeoView layer to display on the map. Unless specified,its properties are not part of the schema.
  */
 export abstract class ConfigBaseClass {
-  /** Tag used to link the entry to a specific schema. This element is part of the schema. */
-  // GV Cannot put it #schemaTag as it breaks things
-  abstract schemaTag: TypeGeoviewLayerType;
-
-  /** Layer entry data type. This element is part of the schema. */
-  // GV Cannot put it #entryType as it breaks things
-  abstract entryType: TypeLayerEntryType;
-
-  /** The layer entry properties used to create the layer entry config */
-  layerEntryProps: ConfigBaseClassProps;
-
   /** The identifier of the layer to display on the map. This element is part of the schema. */
-  // GV Cannot put it #entryType as it breaks things
   // TODO: This should be #layerId. We should use getLayerId() and setLayerId() instead and fix the issues that come up when doing so. Same with other attributes.
+  // GV Cannot put it #layerId as it breaks things
   layerId: string;
 
-  /** It is used to link the layer entry config to the GeoView layer config. */
-  geoviewLayerConfig: TypeGeoviewLayerConfig;
-
-  /** It is used to link the layer entry config to the parent's layer config. */
-  parentLayerConfig: GroupLayerEntryConfig | undefined;
+  /** The layer entry properties used to create the layer entry config */
+  protected layerEntryProps: ConfigBaseClassProps;
 
   /**
    * Initial settings to apply to the GeoView layer entry at creation time. Initial settings are inherited from the parent in the
    * configuration tree.
    */
-  initialSettings: TypeLayerInitialSettings;
+  #initialSettings: TypeLayerInitialSettings;
+
+  /** The schema tag for the layer entry config */
+  #schemaTag?: TypeGeoviewLayerType;
+
+  /** The entry type for the layer entry config */
+  #entryType: TypeLayerEntryType;
 
   /** The display name of the layer. */
   #layerName?: string;
@@ -101,25 +97,29 @@ export abstract class ConfigBaseClass {
    */
   // TODO: Refactor - There is an oddity inside LayerApi.addGeoviewLayer to the effect that it's calling validateListOfGeoviewLayerConfig even if it was already called in config-validation.
   // TO.DOCONT: Until this is fixed, this constructor supports sending a ConfigBaseClass in its typing, for now (ConfigClassOrType = ConfigBaseClassProps | ConfigBaseClass)... though it should only be a ConfigBaseClassProps eventually.
-  protected constructor(layerConfig: ConfigClassOrType) {
-    // Keep attribute properties
-    if (layerConfig instanceof ConfigBaseClass) {
-      this.layerEntryProps = layerConfig.layerEntryProps;
-    } else {
-      // Regular
-      this.layerEntryProps = layerConfig;
-    }
-
+  protected constructor(layerConfig: ConfigClassOrType, schemaTag: TypeGeoviewLayerType, entryType: TypeLayerEntryType) {
     // Transfer the properties from the object to the class (without using Object.assign anymore)
+    this.layerEntryProps = ConfigBaseClass.getClassOrTypeLayerEntryProps(layerConfig);
     this.layerId = layerConfig.layerId;
-    this.geoviewLayerConfig = layerConfig.geoviewLayerConfig;
-    this.parentLayerConfig = layerConfig.parentLayerConfig;
-    this.initialSettings = layerConfig.initialSettings ?? {};
+    this.#schemaTag = schemaTag;
+    this.#entryType = entryType;
+    this.#initialSettings = ConfigBaseClass.getClassOrTypeInitialSettings(layerConfig);
     this.#layerName = ConfigBaseClass.getClassOrTypeLayerName(layerConfig);
     this.#minScale = ConfigBaseClass.getClassOrTypeMinScale(layerConfig);
     this.#maxScale = ConfigBaseClass.getClassOrTypeMaxScale(layerConfig);
     this.#isMetadataLayerGroup = ConfigBaseClass.getClassOrTypeIsMetadataLayerGroup(layerConfig);
   }
+
+  /**
+   * Overridable method to apply the data access path to this layer entry and its children.
+   * Subclasses should override this method to implement the logic needed
+   * to update the data access path on the current layer entry, including
+   * any recursive behavior for child entries or associated sources.
+   * @param {string} dataAccessPath - The data access path to set.
+   * @protected
+   * @abstract
+   */
+  protected abstract onSetDataAccessPath(dataAccessPath: string): void;
 
   /**
    * The layerPath getter method for the ConfigBaseClass class and its descendant classes.
@@ -144,7 +144,7 @@ export abstract class ConfigBaseClass {
    * fallsback on the layerPath.
    */
   getLayerNameCascade(): string {
-    return this.#layerName || this.geoviewLayerConfig.geoviewLayerName || this.geoviewLayerConfig.geoviewLayerId || this.layerPath;
+    return this.#layerName || this.getGeoviewLayerName() || this.getGeoviewLayerId() || this.layerPath;
   }
 
   /**
@@ -163,11 +163,99 @@ export abstract class ConfigBaseClass {
   }
 
   /**
+   * Gets the schema tag for the layer entry config.
+   * @returns {TypeGeoviewLayerType | undefined } The layer entry type (or undefined, e.g. groups).
+   */
+  getSchemaTag(): TypeGeoviewLayerType | undefined {
+    return this.#schemaTag;
+  }
+
+  /**
+   * Sets the schema tag for the layer entry config.
+   * @param {TypeGeoviewLayerType} schemaTag - The schema tag.
+   */
+  setSchemaTag(schemaTag: TypeGeoviewLayerType): void {
+    this.#schemaTag = schemaTag;
+  }
+
+  /**
+   * Gets the layer entry type for the layer entry config.
+   * @returns {TypeLayerEntryType} The layer entry type.
+   */
+  getEntryType(): TypeLayerEntryType {
+    return this.#entryType;
+  }
+
+  /**
+   * Sets the layer entry type for the layer entry config.
+   * @param {TypeLayerEntryType} entryType - The layer entry type.
+   */
+  setEntryType(entryType: TypeLayerEntryType): void {
+    this.#entryType = entryType;
+  }
+
+  /**
    * Type guard that checks if this entry is a group layer entry.
    * @returns {boolean} True if this is a GroupLayerEntryConfig.
    */
   getEntryTypeIsGroup(): this is GroupLayerEntryConfig {
-    return layerEntryIsGroupLayer(this);
+    return ConfigBaseClass.getClassOrTypeEntryTypeIsGroup(this);
+  }
+
+  /**
+   * Returns the GeoView layer configuration associated with this layer entry.
+   * @returns {TypeGeoviewLayerConfig} The GeoView layer configuration object.
+   */
+  getGeoviewLayerConfig(): TypeGeoviewLayerConfig {
+    return this.layerEntryProps.geoviewLayerConfig;
+  }
+
+  /**
+   * Retrieves the parent layer configuration if this layer is part of a group.
+   * @returns {GroupLayerEntryConfig | undefined} The parent group layer config, or undefined if not in a group.
+   */
+  getParentLayerConfig(): GroupLayerEntryConfig | undefined {
+    return this.layerEntryProps.parentLayerConfig;
+  }
+
+  /**
+   * Sets the parent layer configuration for this layer.
+   * @param {GroupLayerEntryConfig} parentLayerConfig - The parent group layer configuration to assign.
+   */
+  setParentLayerConfig(parentLayerConfig: GroupLayerEntryConfig): void {
+    this.layerEntryProps.parentLayerConfig = parentLayerConfig;
+  }
+
+  /**
+   * Returns the unique GeoView layer ID associated with this layer entry.
+   * @returns {string} The GeoView layer ID.
+   */
+  getGeoviewLayerId(): string {
+    return this.getGeoviewLayerConfig().geoviewLayerId;
+  }
+
+  /**
+   * Returns the display name of the GeoView layer, if defined.
+   * @returns {string | undefined} The GeoView layer name, or undefined if not set.
+   */
+  getGeoviewLayerName(): string | undefined {
+    return this.getGeoviewLayerConfig().geoviewLayerName;
+  }
+
+  /**
+   * Retrieves the metadata access path used by this GeoView layer.
+   * @returns {string | undefined} The metadata access path, or undefined if not set.
+   */
+  getMetadataAccessPath(): string | undefined {
+    return this.getGeoviewLayerConfig().metadataAccessPath;
+  }
+
+  /**
+   * Updates the metadata access path for this GeoView layer.
+   * @param {string} metadataAccessPath - The new metadata access path to assign.
+   */
+  setMetadataAccessPath(metadataAccessPath: string): void {
+    this.getGeoviewLayerConfig().metadataAccessPath = metadataAccessPath;
   }
 
   /**
@@ -226,6 +314,110 @@ export abstract class ConfigBaseClass {
   }
 
   /**
+   * Gets the initial settings.
+   * @returns {Readonly<TypeLayerInitialSettings>} The initial settings.
+   */
+  getInitialSettings(): Readonly<TypeLayerInitialSettings> {
+    return { ...this.#initialSettings };
+  }
+
+  /**
+   * Sets the initial settings.
+   * @param {TypeLayerInitialSettings} newSettings - The new initial settings.
+   */
+  setInitialSettings(newSettings: TypeLayerInitialSettings): void {
+    this.#initialSettings = { ...newSettings };
+  }
+
+  /**
+   * Updates the `initialSettings` by applying the specified updates using a shallow merge.
+   * Only the provided fields in the `updates` object will be changed; all other existing values are preserved.
+   * This method returns the instance to support method chaining.
+   * @param {Partial<TypeLayerInitialSettings>} updates - A partial object containing the fields to update in the initial settings.
+   * @returns The current instance (for chaining).
+   */
+  updateInitialSettings(updates: Partial<TypeLayerInitialSettings>): this {
+    this.#initialSettings = {
+      ...this.#initialSettings,
+      ...updates,
+    };
+    return this;
+  }
+
+  /**
+   * Validates and updates the `minZoom` value in the `initialSettings` object.
+   * Ensures that the `minZoom` is not decreased unintentionally by keeping the more restrictive (higher) value
+   * between the existing `minZoom` and the provided `minZoomToValidate`.
+   * This uses a shallow update via `updateInitialSettings()` and supports method chaining by returning the instance.
+   * @param {boolean} visible - The candidate `minZoom` value to validate against the current setting.
+   * @returns The current instance (for chaining).
+   */
+  updateInitialSettingsStateVisible(visible: boolean): this {
+    // Update the state visible initial settings
+    this.updateInitialSettings({ states: { ...this.getInitialSettings().states, visible } });
+    return this;
+  }
+
+  /**
+   * Validates and updates the `minZoom` value in the `initialSettings` object.
+   * Ensures that the `minZoom` is not decreased unintentionally by keeping the more restrictive (higher) value
+   * between the existing `minZoom` and the provided `minZoomToValidate`.
+   * This uses a shallow update via `updateInitialSettings()` and supports method chaining by returning the instance.
+   * @param {number} minZoomToValidate - The candidate `minZoom` value to validate against the current setting.
+   * @returns The current instance (for chaining).
+   */
+  validateUpdateInitialSettingsMinZoom(minZoomToValidate: number): this {
+    // Validate and update the extent initial settings
+    this.updateInitialSettings({ minZoom: Math.max(this.getInitialSettings().minZoom ?? -Infinity, minZoomToValidate) });
+    return this;
+  }
+
+  /**
+   * Validates and updates the `maxZoom` value in the `initialSettings` object.
+   * Ensures that the `maxZoom` is not increased unintentionally by keeping the more restrictive (lower) value
+   * between the existing `maxZoom` and the provided `maxZoomToValidate`.
+   *
+   * This uses a shallow update via `updateInitialSettings()` and supports method chaining by returning the instance.
+   * @param {number} maxZoomToValidate - The candidate `maxZoom` value to validate against the current setting.
+   * @returns The current instance (for chaining).
+   */
+  validateUpdateInitialSettingsMaxZoom(maxZoomToValidate: number): this {
+    // Validate and update the extent initial settings
+    this.updateInitialSettings({ maxZoom: Math.min(this.getInitialSettings().maxZoom ?? Infinity, maxZoomToValidate) });
+    return this;
+  }
+
+  /**
+   * Validates and updates the `extent` in the `initialSettings` object, if necessary.
+   * If no extent is explicitly provided, the current `initialSettings.extent` is used by default.
+   * The provided extent (or existing one) is passed to `validateExtentWhenDefined()` to apply any required corrections.
+   * The result is then shallowly merged into `initialSettings` using `updateInitialSettings()`.
+   * Supports method chaining by returning the instance.
+   * @param {Extent | undefined} extentToValidate - The extent to validate and apply. If omitted, defaults to the current `initialSettings.extent`.
+   * @returns The current instance (for chaining).
+   */
+  validateUpdateInitialSettingsExtent(extentToValidate: Extent | undefined = this.getInitialSettings().extent): this {
+    // Validate and update the extent initial settings
+    this.updateInitialSettings({ extent: validateExtentWhenDefined(extentToValidate) });
+    return this;
+  }
+
+  /**
+   * Validates and updates the `bounds` in the `initialSettings` object, if necessary.
+   * If no bounds is explicitly provided, the current `initialSettings.bounds` is used by default.
+   * The provided bounds (or existing one) is passed to `validateExtentWhenDefined()` to apply any required corrections.
+   * The result is then shallowly merged into `initialSettings` using `updateInitialSettings()`.
+   * Supports method chaining by returning the instance.
+   * @param {Extent | undefined} boundsToValidate - The bounds to validate and apply. If omitted, defaults to the current `initialSettings.bounds`.
+   * @returns The current instance (for chaining).
+   */
+  validateUpdateInitialSettingsBounds(boundsToValidate: Extent | undefined = this.getInitialSettings().bounds): this {
+    // Validate and update the bounds initial settings
+    this.updateInitialSettings({ bounds: validateExtentWhenDefined(boundsToValidate) });
+    return this;
+  }
+
+  /**
    * Returns the sibling layer configurations of the current layer.
    * If the current layer has a parent, this method retrieves all layer entry
    * configs under the same parent. It can optionally exclude layers of type 'group'.
@@ -233,9 +425,12 @@ export abstract class ConfigBaseClass {
    * @returns {ConfigBaseClass[]} An array of sibling layer configurations. Returns an empty array if there is no parent.
    */
   getSiblings(includeGroups: boolean = false): ConfigBaseClass[] {
+    // Get the parent layer config, if any
+    const parentLayerConfig = this.getParentLayerConfig();
+
     // If there's a parent
-    if (this.parentLayerConfig) {
-      return this.parentLayerConfig.listOfLayerEntryConfig.filter((config) => includeGroups || !config.getEntryTypeIsGroup());
+    if (parentLayerConfig) {
+      return parentLayerConfig.listOfLayerEntryConfig.filter((config) => includeGroups || !config.getEntryTypeIsGroup());
     }
 
     // No siblings
@@ -247,7 +442,7 @@ export abstract class ConfigBaseClass {
    * @returns {TypeDateFragments} The Date Fragments
    */
   getExternalFragmentsOrder(): TypeDateFragments {
-    return DateMgt.getDateFragmentsOrder(this.geoviewLayerConfig.externalDateFormat);
+    return DateMgt.getDateFragmentsOrder(this.getGeoviewLayerConfig().externalDateFormat);
   }
 
   /**
@@ -261,17 +456,6 @@ export abstract class ConfigBaseClass {
     // Redirect
     this.onSetDataAccessPath(dataAccessPath);
   }
-
-  /**
-   * Overridable method to apply the data access path to this layer entry and its children.
-   * Subclasses should override this method to implement the logic needed
-   * to update the data access path on the current layer entry, including
-   * any recursive behavior for child entries or associated sources.
-   * @param {string} dataAccessPath - The data access path to set.
-   * @protected
-   * @abstract
-   */
-  protected abstract onSetDataAccessPath(dataAccessPath: string): void;
 
   /**
    * Sets the layer status to registered.
@@ -390,7 +574,7 @@ export abstract class ConfigBaseClass {
    */
   protected onCloneLayerProps(): ConfigBaseClassProps {
     // Return a cloned copy of the layer entry props that were used to create this layer entry config
-    return cloneDeep(this.layerEntryProps);
+    return { ...this.layerEntryProps };
   }
 
   /**
@@ -409,8 +593,8 @@ export abstract class ConfigBaseClass {
    */
   protected onToJson<T>(): T {
     return {
-      schemaTag: this.schemaTag,
-      entryType: this.entryType,
+      schemaTag: this.getSchemaTag(),
+      entryType: this.getEntryType(),
       layerId: this.layerId,
       layerName: this.getLayerName(),
       isMetadataLayerGroup: this.getIsMetadataLayerGroup(),
@@ -426,12 +610,12 @@ export abstract class ConfigBaseClass {
    * @param {string?} name - The layer name. Will use this.getLayerName() when undefined.
    * @returns {GroupLayerEntryConfigProps} The configuration object representing the group layer.
    */
-  toGroupLayerConfig(name?: string): GroupLayerEntryConfigProps {
+  toGroupLayerConfigProps(name?: string): GroupLayerEntryConfigProps {
+    // To json object
     const groupLayerProps = this.toJson<GroupLayerEntryConfigProps>();
-    groupLayerProps.layerId = this.layerId;
     groupLayerProps.layerName = name || this.getLayerName();
-    groupLayerProps.geoviewLayerConfig = this.geoviewLayerConfig;
-    groupLayerProps.parentLayerConfig = this.parentLayerConfig;
+    groupLayerProps.geoviewLayerConfig = this.getGeoviewLayerConfig();
+    groupLayerProps.parentLayerConfig = this.getParentLayerConfig();
     groupLayerProps.isMetadataLayerGroup = true;
     groupLayerProps.listOfLayerEntryConfig = [];
     return groupLayerProps;
@@ -468,8 +652,11 @@ export abstract class ConfigBaseClass {
    * - If neither condition is met, the parent status remains unchanged.
    */
   static #updateLayerStatusParentRec(currentConfig: ConfigBaseClass): void {
+    // Get the parent config, if any
+    const parentLayerConfig = currentConfig.getParentLayerConfig();
+
     // If there's no parent
-    if (!currentConfig.parentLayerConfig) return;
+    if (!parentLayerConfig) return;
 
     // Get all siblings of the layer
     const siblings = currentConfig.getSiblings(true);
@@ -480,9 +667,9 @@ export abstract class ConfigBaseClass {
     // If at least one layer is loading
     if (siblingsInLoading.length > 0) {
       // Set the parent layer status as loading
-      currentConfig.parentLayerConfig.setLayerStatusLoading();
+      parentLayerConfig.setLayerStatusLoading();
       // Continue with the parent
-      ConfigBaseClass.#updateLayerStatusParentRec(currentConfig.parentLayerConfig);
+      ConfigBaseClass.#updateLayerStatusParentRec(parentLayerConfig);
       return;
     }
 
@@ -492,9 +679,9 @@ export abstract class ConfigBaseClass {
     // If all siblings are loaded
     if (siblings.length === siblingsInLoaded.length) {
       // Set the parent layer status as loaded
-      currentConfig.parentLayerConfig.setLayerStatusLoaded();
+      parentLayerConfig.setLayerStatusLoaded();
       // Continue with the parent
-      ConfigBaseClass.#updateLayerStatusParentRec(currentConfig.parentLayerConfig);
+      ConfigBaseClass.#updateLayerStatusParentRec(parentLayerConfig);
       return;
     }
 
@@ -504,9 +691,9 @@ export abstract class ConfigBaseClass {
     // If all siblings are in fact in error or loaded
     if (siblings.length === siblingsInError.length) {
       // Set the parent layer status as error
-      currentConfig.parentLayerConfig.setLayerStatusError();
+      parentLayerConfig.setLayerStatusError();
       // Continue with the parent
-      ConfigBaseClass.#updateLayerStatusParentRec(currentConfig.parentLayerConfig);
+      ConfigBaseClass.#updateLayerStatusParentRec(parentLayerConfig);
     }
   }
 
@@ -520,8 +707,15 @@ export abstract class ConfigBaseClass {
   static #evaluateLayerPath(layerConfig: ConfigBaseClass, layerPath?: string): string {
     let pathEnding = layerPath;
     if (pathEnding === undefined) pathEnding = layerConfig.layerId;
-    if (!layerConfig.parentLayerConfig) return `${layerConfig.geoviewLayerConfig.geoviewLayerId}/${pathEnding}`;
-    return this.#evaluateLayerPath(layerConfig.parentLayerConfig, `${layerConfig.parentLayerConfig.layerId}/${pathEnding}`);
+
+    // Get the parent config, if any
+    const parentLayerConfig = layerConfig.getParentLayerConfig();
+
+    // If no parent
+    if (!parentLayerConfig) return `${layerConfig.getGeoviewLayerId()}/${pathEnding}`;
+
+    // Go recursive
+    return this.#evaluateLayerPath(parentLayerConfig, `${parentLayerConfig.layerId}/${pathEnding}`);
   }
 
   /**
@@ -535,10 +729,173 @@ export abstract class ConfigBaseClass {
   static allLayerStatusAreGreaterThanOrEqualTo(layerStatus: TypeLayerStatus, listOfLayerEntryConfig: ConfigBaseClass[]): boolean {
     // Try to find a layer that is not greater than or equal to the layerStatus parameter. If you can, return false
     return !listOfLayerEntryConfig.find((layerConfig) => {
-      if (layerEntryIsGroupLayer(layerConfig))
+      if (ConfigBaseClass.getClassOrTypeEntryTypeIsGroup(layerConfig))
         return !this.allLayerStatusAreGreaterThanOrEqualTo(layerStatus, layerConfig.listOfLayerEntryConfig);
       return !layerConfig.isGreaterThanOrEqualTo(layerStatus);
     });
+  }
+
+  /**
+   * Returns the corresponding layer entry type for a given GeoView layer type.
+   * This method maps a `TypeGeoviewLayerType` (e.g., CSV, WMS, XYZ_TILES)
+   * to its associated `TypeLayerEntryType` (e.g., VECTOR, RASTER_IMAGE, RASTER_TILE).
+   * Useful for determining how a layer should be handled/rendered internally.
+   * @param {TypeGeoviewLayerType} layerType - The GeoView layer type to convert.
+   * @returns The corresponding layer entry type.
+   * @throws {NotSupportedError} If the provided `layerType` is not supported for conversion.
+   */
+  static getLayerEntryTypeFromLayerType(layerType: TypeGeoviewLayerType): TypeLayerEntryType {
+    switch (layerType) {
+      case CONST_LAYER_TYPES.CSV:
+      case CONST_LAYER_TYPES.GEOJSON:
+      case CONST_LAYER_TYPES.OGC_FEATURE:
+      case CONST_LAYER_TYPES.WFS:
+      case CONST_LAYER_TYPES.WKB:
+      case CONST_LAYER_TYPES.ESRI_FEATURE:
+        return CONST_LAYER_ENTRY_TYPES.VECTOR;
+
+      case CONST_LAYER_TYPES.IMAGE_STATIC:
+      case CONST_LAYER_TYPES.ESRI_DYNAMIC:
+      case CONST_LAYER_TYPES.ESRI_IMAGE:
+      case CONST_LAYER_TYPES.WMS:
+        return CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE;
+      case CONST_LAYER_TYPES.XYZ_TILES:
+      case CONST_LAYER_TYPES.VECTOR_TILES:
+        return CONST_LAYER_ENTRY_TYPES.RASTER_TILE;
+      default:
+        // Throw unsupported error
+        throw new NotSupportedError(`Unsupported layer type ${layerType} to convert to layer entry`);
+    }
+  }
+
+  // #region HELPER METHODS TO WORK WITH A CONFIG INSTANCE OR A CONFIG JSON OBJECT
+
+  /**
+   * Helper function to support when a layerConfig is either a class instance or a regular json object.
+   * @param {ConfigClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
+   * @returns {TypeGeoviewLayerType | undefined} The schema tag or undefined.
+   */
+  static getClassOrTypeSchemaTag(layerConfig: ConfigClassOrType | undefined): TypeGeoviewLayerType | undefined {
+    if (layerConfig instanceof ConfigBaseClass) {
+      return layerConfig.getSchemaTag();
+    }
+    return layerConfig?.schemaTag;
+  }
+
+  /**
+   * Helper function to support when a layerConfig is either a class instance or a regular json object.
+   * @param {ConfigClassOrType} layerConfig - The layer config class instance or regular json object.
+   * @param {TypeGeoviewLayerType} schemaTag - The schema tag.
+   */
+  static setClassOrTypeSchemaTag(layerConfig: ConfigClassOrType, schemaTag: TypeGeoviewLayerType): void {
+    if (layerConfig instanceof ConfigBaseClass) {
+      layerConfig.setSchemaTag(schemaTag);
+    } else {
+      // eslint-disable-next-line no-param-reassign
+      layerConfig.schemaTag = schemaTag;
+    }
+  }
+
+  /**
+   * Helper function to support when a layerConfig is either a class instance or a regular json object.
+   * @param {ConfigClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
+   * @returns {TypeLayerEntryType | undefined} The layer entry type or undefined.
+   */
+  static getClassOrTypeEntryType(layerConfig: ConfigClassOrType | undefined): TypeLayerEntryType | undefined {
+    if (layerConfig instanceof ConfigBaseClass) {
+      return layerConfig.getEntryType();
+    }
+    return layerConfig?.entryType;
+  }
+
+  /**
+   * Helper function to support when a layerConfig is either a class instance or a regular json object.
+   * @param {ConfigClassOrType} layerConfig - The layer config class instance or regular json object.
+   * @param {TypeLayerEntryType} entryType - The entry type.
+   */
+  static setClassOrTypeEntryType(layerConfig: ConfigClassOrType, entryType: TypeLayerEntryType): void {
+    if (layerConfig instanceof ConfigBaseClass) {
+      layerConfig.setEntryType(entryType);
+    } else {
+      // eslint-disable-next-line no-param-reassign
+      layerConfig.entryType = entryType;
+    }
+  }
+
+  /**
+   * Helper typeguard function to support when a layerConfig is either a class instance or a regular json object.
+   * @param {ConfigClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
+   * @returns {GroupLayerEntryConfig} The group layer entry config when the layerConfig is a group entry type.
+   */
+  static getClassOrTypeEntryTypeIsGroup(layerConfig: ConfigClassOrType | undefined): layerConfig is GroupLayerEntryConfig {
+    return ConfigBaseClass.getClassOrTypeEntryType(layerConfig) === CONST_LAYER_ENTRY_TYPES.GROUP;
+  }
+
+  /**
+   * Extracts the `layerEntryProps` from either a class instance (`ConfigBaseClass`) or a plain configuration object.
+   * This function acts as a type guard and converter to ensure consistent access to `layerEntryProps`,
+   * whether the input is a class or a raw configuration type.
+   * @template T - A subtype of `ConfigBaseClassProps`.
+   * @param {ConfigClassOrType | TypeGeoviewLayerConfig} layerConfig - The configuration, which may be a class or a plain object.
+   * @returns {T} The extracted `layerEntryProps` cast to the expected type.
+   */
+  static getClassOrTypeLayerEntryProps<T extends ConfigBaseClassProps>(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): T {
+    if (layerConfig instanceof ConfigBaseClass) {
+      return layerConfig.layerEntryProps as T;
+    }
+    // As-is
+    return layerConfig as T;
+  }
+
+  /**
+   * Retrieves the `geoviewLayerConfig` from a layer configuration object or class.
+   * Internally uses `getClassOrTypeLayerEntryProps()` to normalize access to the configuration structure.
+   * @param {ConfigClassOrType | TypeGeoviewLayerConfig} layerConfig - The configuration, which may be a class instance or a plain object.
+   * @returns {TypeGeoviewLayerConfig} The `geoviewLayerConfig` associated with the provided configuration.
+   */
+  static getClassOrTypeGeoviewLayerConfig(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): TypeGeoviewLayerConfig {
+    return ConfigBaseClass.getClassOrTypeLayerEntryProps(layerConfig).geoviewLayerConfig;
+  }
+
+  /**
+   * Helper function to support when a layerConfig is either a class instance or a regular json object.
+   * @param {ConfigClassOrType} layerConfig - The layer config class instance or regular json object.
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The geoviewLayerConfig to apply.
+   */
+  static setClassOrTypeGeoviewLayerConfig(layerConfig: ConfigClassOrType, geoviewLayerConfig: TypeGeoviewLayerConfig): void {
+    if (layerConfig instanceof ConfigBaseClass) {
+      // eslint-disable-next-line no-param-reassign
+      layerConfig.layerEntryProps.geoviewLayerConfig = geoviewLayerConfig;
+    } else {
+      // eslint-disable-next-line no-param-reassign
+      layerConfig.geoviewLayerConfig = geoviewLayerConfig;
+    }
+  }
+
+  /**
+   * Retrieves the `parentLayerConfig` from the provided layer configuration, whether it's a class instance or a plain object.
+   * This allows consistent access to the parent group layer config regardless of whether the input is an instance of
+   * `ConfigBaseClass` or a raw config type.
+   * @param {ConfigClassOrType} layerConfig - The layer configuration to extract the parent from.
+   * @returns {GroupLayerEntryConfig | undefined} The parent group layer config, or `undefined` if this layer has no parent.
+   */
+  static getClassOrTypeParentLayerConfig(layerConfig: ConfigClassOrType): GroupLayerEntryConfig | undefined {
+    return ConfigBaseClass.getClassOrTypeLayerEntryProps(layerConfig).parentLayerConfig;
+  }
+
+  /**
+   * Helper function to support when a layerConfig is either a class instance or a regular json object.
+   * @param {ConfigClassOrType} layerConfig - The layer config class instance or regular json object.
+   * @param {GroupLayerEntryConfig} geoviewLayerConfig - The geoviewLayerConfig to apply.
+   */
+  static setClassOrTypeParentLayerConfig(layerConfig: ConfigClassOrType, parentLayerConfig: GroupLayerEntryConfig | undefined): void {
+    if (layerConfig instanceof ConfigBaseClass) {
+      // eslint-disable-next-line no-param-reassign
+      layerConfig.layerEntryProps.parentLayerConfig = parentLayerConfig;
+    } else {
+      // eslint-disable-next-line no-param-reassign
+      layerConfig.parentLayerConfig = parentLayerConfig;
+    }
   }
 
   /**
@@ -546,11 +903,12 @@ export abstract class ConfigBaseClass {
    * @param {ConfigClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
    * @returns {string | undefined} The layer name or undefined.
    */
-  static getClassOrTypeLayerName(layerConfig: ConfigClassOrType | undefined): string | undefined {
+  static getClassOrTypeLayerName(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig | undefined): string | undefined {
     if (layerConfig instanceof ConfigBaseClass) {
       return layerConfig.getLayerName();
     }
-    return layerConfig?.layerName;
+
+    return (layerConfig as ConfigBaseClassProps)?.layerName || (layerConfig as TypeGeoviewLayerConfig).geoviewLayerName;
   }
 
   /**
@@ -608,6 +966,44 @@ export abstract class ConfigBaseClass {
   /**
    * Helper function to support when a layerConfig is either a class instance or a regular json object.
    * @param {ConfigClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
+   * @returns {TypeLayerInitialSettings} The initial settings in the layer config.
+   */
+  static getClassOrTypeInitialSettings(
+    layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig | undefined
+  ): Readonly<TypeLayerInitialSettings> {
+    let settings: TypeLayerInitialSettings | undefined;
+
+    if (layerConfig instanceof ConfigBaseClass) {
+      settings = layerConfig.getInitialSettings();
+    } else {
+      settings = layerConfig?.initialSettings;
+    }
+
+    return {
+      ...settings,
+      states: {
+        ...settings?.states, // Preserve existing settings
+      },
+    };
+  }
+
+  /**
+   * Helper function to support when a layerConfig is either a class instance or a regular json object.
+   * @param {ConfigClassOrType} layerConfig - The layer config class instance or regular json object.
+   * @param {TypeLayerInitialSettings} initialSettings - The initial settings scale to apply.
+   */
+  static setClassOrTypeInitialSettings(layerConfig: ConfigClassOrType, initialSettings: TypeLayerInitialSettings): void {
+    if (layerConfig instanceof ConfigBaseClass) {
+      layerConfig.setInitialSettings(initialSettings);
+    } else {
+      // eslint-disable-next-line no-param-reassign
+      layerConfig.initialSettings = initialSettings;
+    }
+  }
+
+  /**
+   * Helper function to support when a layerConfig is either a class instance or a regular json object.
+   * @param {ConfigClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
    * @returns {boolean} The indication if the layer config is metadata layer group.
    */
   static getClassOrTypeIsMetadataLayerGroup(layerConfig: ConfigClassOrType | undefined): boolean {
@@ -629,6 +1025,41 @@ export abstract class ConfigBaseClass {
       // eslint-disable-next-line no-param-reassign
       layerConfig.isMetadataLayerGroup = isMetadataLayerGroup;
     }
+  }
+
+  // #endregion
+
+  /**
+   * Utility type guard that checks whether the given configuration (class instance or plain object)
+   * represents a particular layer type.
+   * Supports `ConfigClassOrType` (class instance or plain object) and plain layer config objects (`TypeGeoviewLayerConfig`).
+   * @param {ConfigClassOrType | TypeGeoviewLayerConfig} layerConfig - The layer config to check. Can be an instance of a config class or a raw config object.
+   * @returns `true` if the config is for a particular layer; otherwise `false`.
+   * @static
+   * @protected
+   */
+  protected static isClassOrTypeSchemaTag<T extends ConfigClassOrType | TypeGeoviewLayerConfig>(
+    layerConfig: T,
+    layerType: TypeGeoviewLayerType
+  ): layerConfig is T {
+    if (layerConfig instanceof ConfigBaseClass) {
+      return layerConfig.getSchemaTag() === layerType;
+    }
+
+    // Try to cast it as ConfigBaseClassProps and check schemaTag
+    const configBaseProps = layerConfig as ConfigBaseClassProps;
+    if (configBaseProps.schemaTag) {
+      return configBaseProps.schemaTag === layerType;
+    }
+
+    // Try from within the geoviewLayerConfig property
+    if (configBaseProps.geoviewLayerConfig) {
+      return configBaseProps.geoviewLayerConfig.geoviewLayerType === layerType;
+    }
+
+    // Try to use it as a TypeGeoviewLayerConfig
+    const configType = layerConfig as TypeGeoviewLayerConfig;
+    return configType.geoviewLayerType === layerType;
   }
 
   // #endregion

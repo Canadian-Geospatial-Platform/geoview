@@ -5,6 +5,7 @@ import {
   TypeGeochartResultSetEntry,
 } from '@/core/stores/store-interface-and-intial-values/geochart-state';
 import { GeoViewGeoChartConfig } from '@/api/config/reader/uuid-config-reader';
+import { PluginStateUninitializedError } from '@/core/exceptions/geoview-exceptions';
 import { logger } from '@/core/utils/logger';
 
 import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '@/api/event-processors/abstract-event-processor';
@@ -63,6 +64,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
   // GV ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
 
   // #region
+
   // Holds the list of layer data arrays being buffered in the propagation process for the batch
   static #batchedPropagationLayerDataArray: BatchedPropagationLayerDataArrayByMap<TypeGeochartResultSetEntry> = {};
 
@@ -72,29 +74,56 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
   static #timeDelayBetweenPropagationsForBatch = 2000;
 
   /**
-   * Shortcut to get the Geochart state for a given map id
-   * @param {string} mapId The mapId
-   * @returns {IGeochartState | undefined} The Geochart state. Forcing the return to also be 'undefined', because
-   *                                       there will be no geochartState if the Geochart plugin isn't active.
-   *                                       This helps the developers making sure the existence is checked.
+   * Checks if the Geochart plugin is iniitialized for the given map.
+   * @param {string} mapId - The map id
+   * @returns {boolean} True when the Geochart plugin is initialized.
+   * @static
    */
-  protected static getGeochartState(mapId: string): IGeochartState | undefined {
-    // Return the geochart state when it exists
-    return super.getState(mapId).geochartState;
+  static isGeochartInitialized(mapId: string): boolean {
+    try {
+      // Get its state, this will throw PluginStateUninitializedError if uninitialized
+      this.getGeochartState(mapId);
+      return true;
+    } catch {
+      // Uninitialized
+      return false;
+    }
+  }
+
+  /**
+   * Shortcut to get the Geochart state for a given map id
+   * @param {string} mapId - The mapId
+   * @returns {IGeochartState} The Geochart state.
+   * @throws {PluginStateUninitializedError} When the Geochart plugin is uninitialized.
+   * @static
+   */
+  protected static getGeochartState(mapId: string): IGeochartState {
+    // Get the geochart state
+    const { geochartState } = super.getState(mapId);
+
+    // If not found
+    if (!geochartState) throw new PluginStateUninitializedError('Geochart', mapId);
+
+    // Return it
+    return geochartState;
   }
 
   /**
    * Get a specific state.
    * @param {string} mapId - The mapId
    * @param {'geochartChartsConfig' | 'layerDataArray' | 'layerDataArrayBatchLayerPathBypass' | 'selectedLayerPath'} state - The state to get
-   * @returns {string | TypeGeochartResultSetEntry[] | GeoChartStoreByLayerPath | undefined} The requested state
+   * @returns {string | TypeGeochartResultSetEntry[] | GeoChartStoreByLayerPath} The requested state
+   * @static
    */
   static getSingleGeochartState(
     mapId: string,
     state: 'geochartChartsConfig' | 'layerDataArray' | 'layerDataArrayBatchLayerPathBypass' | 'selectedLayerPath'
-  ): string | TypeGeochartResultSetEntry[] | GeoChartStoreByLayerPath | undefined {
-    if (this.getGeochartState(mapId)) return this.getGeochartState(mapId)![state];
-    return undefined;
+  ): string | TypeGeochartResultSetEntry[] | GeoChartStoreByLayerPath {
+    // Get the geochart state which is only initialized if the Geochart Plugin exists.
+    const geochartState = this.getGeochartState(mapId);
+
+    // Return the state
+    return geochartState[state];
   }
 
   /**
@@ -104,8 +133,13 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    *
    * @param {string} mapId the map id
    * @param {GeoViewGeoChartConfig[]} charts The array of JSON configuration for GeoChart
+   * @throws {PluginStateUninitializedError} When the Geochart plugin is uninitialized.
+   * @static
    */
   static setGeochartCharts(mapId: string, charts: GeoViewGeoChartConfig[]): void {
+    // Get the geochart state which is only initialized if the Geochart Plugin exists.
+    const geochartState = this.getGeochartState(mapId);
+
     // The store object representation
     const chartData: GeoChartStoreByLayerPath = {};
 
@@ -122,7 +156,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
     });
 
     // Set store charts config
-    this.getGeochartState(mapId)?.setterActions.setGeochartCharts(chartData);
+    geochartState.setterActions.setGeochartCharts(chartData);
 
     // If there is chart data, tab should not be hidden
     if (Object.keys(chartData).length) UIEventProcessor.showTab(mapId, 'geochart');
@@ -136,18 +170,19 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId The map ID
    * @param {string} layerPath The layer path
    * @param {GeoViewGeoChartConfig} chartConfig The Geochart Configuration
+   * @throws {PluginStateUninitializedError} When the Geochart plugin is uninitialized.
+   * @static
    */
   static addGeochartChart(mapId: string, layerPath: string, chartConfig: GeoViewGeoChartConfig): void {
-    // The processor needs an initialized chart store which is only initialized if the Geochart plugin exists.
-    // Therefore, we validate its existence first.
-    if (!this.getGeochartState(mapId)) return;
+    // Get the geochart state which is only initialized if the Geochart Plugin exists.
+    const geochartState = this.getGeochartState(mapId);
 
     // Config to add
     const toAdd: GeoChartStoreByLayerPath = {};
     toAdd[layerPath] = chartConfig;
 
     // Update the layer data array in the store
-    this.getGeochartState(mapId)!.setterActions.setGeochartCharts({ ...this.getGeochartState(mapId)?.geochartChartsConfig, ...toAdd });
+    geochartState.setterActions.setGeochartCharts({ ...geochartState.geochartChartsConfig, ...toAdd });
 
     // Make sure tab is not hidden
     UIEventProcessor.showTab(mapId, 'geochart');
@@ -160,26 +195,29 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    * Removes a GeoChart Configuration at the specified map id and layer path
    * @param {string} mapId The map ID
    * @param {string} layerPath The layer path
+   * @throws {PluginStateUninitializedError} When the Geochart plugin is uninitialized.
+   * @static
    */
   static removeGeochartChart(mapId: string, layerPath: string): void {
-    // The processor needs an initialized chart store which is only initialized if the Geochart plugin exists.
-    // Therefore, we validate its existence first.
-    if (!this.getGeochartState(mapId)) return;
-    if (!this.getGeochartState(mapId)?.geochartChartsConfig) return;
+    // Get the geochart state which is only initialized if the Geochart Plugin exists.
+    const geochartState = this.getGeochartState(mapId);
+
+    // If no geochartChartsConfig, return
+    if (!geochartState.geochartChartsConfig) return;
 
     // Config to remove
-    if (Object.keys(this.getGeochartState(mapId)!.geochartChartsConfig).includes(layerPath)) {
+    if (Object.keys(geochartState.geochartChartsConfig).includes(layerPath)) {
       // Grab the config
-      const chartConfigs = this.getGeochartState(mapId)!.geochartChartsConfig;
+      const chartConfigs = geochartState.geochartChartsConfig;
 
       // Delete the config
       delete chartConfigs[layerPath];
 
       // Update the layer data array in the store
-      this.getGeochartState(mapId)!.setterActions.setGeochartCharts({ ...chartConfigs });
+      geochartState.setterActions.setGeochartCharts({ ...chartConfigs });
 
       // If there are no more geochart layers, hide tab
-      if (!Object.keys(this.getGeochartState(mapId)!.geochartChartsConfig).length) UIEventProcessor.hideTab(mapId, 'geochart');
+      if (!Object.keys(geochartState.geochartChartsConfig).length) UIEventProcessor.hideTab(mapId, 'geochart');
 
       // Log
       logger.logInfo('Removed GeoChart configs for layer path:', layerPath);
@@ -191,15 +229,16 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId The map id
    * @param {TypeGeochartResultSetEntry[]} layerDataArray The layer data array to propagate in the store
    * @returns {Promise<void>}
+   * @throws {PluginStateUninitializedError} When the Geochart plugin is uninitialized.
+   * @static
    * @private
    */
   static #propagateArrayDataToStore(mapId: string, layerDataArray: TypeGeochartResultSetEntry[]): void {
-    // To propagate in the store, the processor needs an initialized chart store which is only initialized if the Geochart plugin exists.
-    // Therefore, we validate its existence first.
-    if (!this.getGeochartState(mapId)) return;
+    // Get the geochart state which is only initialized if the Geochart Plugin exists.
+    const geochartState = this.getGeochartState(mapId);
 
     // Update the layer data array in the store
-    this.getGeochartState(mapId)!.setterActions.setLayerDataArray(layerDataArray);
+    geochartState.setterActions.setLayerDataArray(layerDataArray);
   }
 
   /**
@@ -211,15 +250,13 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map id
    * @param {TypeGeochartResultSetEntry[]} layerDataArray - The layer data array to batch on
    * @returns {Promise<void>} Promise upon completion
+   * @throws {PluginStateUninitializedError} When the Geochart plugin is uninitialized.
+   * @static
    * @private
    */
   static #propagateFeatureInfoToStoreBatch(mapId: string, layerDataArray: TypeGeochartResultSetEntry[]): Promise<void> {
-    // To propagate in the store, the processor needs an initialized chart store which is only initialized if the Geochart plugin exists.
-    // Therefore, we validate its existence first.
-    if (!this.getGeochartState(mapId)) return Promise.resolve();
-
-    // The geochart state as validated
-    const geochartState = this.getGeochartState(mapId)!;
+    // Get the geochart state which is only initialized if the Geochart Plugin exists.
+    const geochartState = this.getGeochartState(mapId);
 
     // Redirect to batch propagate
     return this.helperPropagateArrayStoreBatch(

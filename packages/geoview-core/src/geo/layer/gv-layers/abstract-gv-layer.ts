@@ -111,13 +111,13 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     this.#olSource = olSource;
 
     // Keep the date formatting information
-    this.#serverDateFragmentsOrder = layerConfig.geoviewLayerConfig.serviceDateFormat
-      ? DateMgt.getDateFragmentsOrder(layerConfig.geoviewLayerConfig.serviceDateFormat)
+    this.#serverDateFragmentsOrder = layerConfig.getGeoviewLayerConfig()?.serviceDateFormat
+      ? DateMgt.getDateFragmentsOrder(layerConfig.getGeoviewLayerConfig()?.serviceDateFormat)
       : undefined;
     this.#externalFragmentsOrder = layerConfig.getExternalFragmentsOrder();
 
-    // Boolean indicating if the layer should be included in time awareness functions such as the Time Slider. True by default.
-    this.#isTimeAware = layerConfig.geoviewLayerConfig.isTimeAware === undefined ? true : layerConfig.geoviewLayerConfig.isTimeAware;
+    // Boolean indicating if the layer should be included in time awareness functions such as the Time Slider.
+    this.#isTimeAware = layerConfig.getGeoviewLayerConfig()?.isTimeAware ?? true; // default: true
 
     // If there is a layer style in the config, set it in the layer
     const style = layerConfig.getLayerStyle();
@@ -305,7 +305,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     // If first time
     if (!this.loadedOnce) {
       // Now that the layer is loaded, set its visibility correctly (had to be done in the loaded event, not before, per prior note in pre-refactor)
-      this.setVisible(layerConfig.initialSettings?.states?.visible !== false);
+      this.setVisible(layerConfig.getInitialSettings()?.states?.visible ?? true); // default: true
 
       // Emit event for the first time the layer got loaded
       this.#emitLayerFirstLoaded();
@@ -725,7 +725,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   async onFetchLegend(): Promise<TypeLegend | null> {
     try {
       const legend: TypeLegend = {
-        type: this.getLayerConfig().geoviewLayerConfig.geoviewLayerType,
+        type: this.getLayerConfig().getSchemaTag()!,
         styleConfig: this.getStyle(),
         legend: await getLegendStyles(this.getStyle()),
       };
@@ -816,7 +816,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
         const featureInfoEntry: TypeFeatureInfoEntry = {
           uid: getUid(feature),
           featureKey: featureKeyCounter++,
-          geoviewLayerType: this.getLayerConfig().geoviewLayerConfig.geoviewLayerType,
+          geoviewLayerType: this.getLayerConfig().getSchemaTag()!,
           feature,
           geometry: feature.getGeometry(),
           extent,
@@ -959,12 +959,19 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
     // Set the layer options as read from the initialSettings
     // GV We disable the warnings, because this function purpose is to actually initialize the given parameter
+
+    // If a className is defined in the initial settings, set it in the layer options
     // eslint-disable-next-line no-param-reassign
-    if (layerConfig.initialSettings?.className !== undefined) layerOptions.className = layerConfig.initialSettings.className;
+    if (layerConfig.getInitialSettings()?.className !== undefined) layerOptions.className = layerConfig.getInitialSettings().className;
+
+    // If an extent is defined in the initial settings, set it in the layer options
     // eslint-disable-next-line no-param-reassign
-    if (layerConfig.initialSettings?.extent !== undefined) layerOptions.extent = layerConfig.initialSettings.extent;
-    // eslint-disable-next-line no-param-reassign
-    if (layerConfig.initialSettings?.states?.opacity !== undefined) layerOptions.opacity = layerConfig.initialSettings.states.opacity;
+    if (layerConfig.getInitialSettings()?.extent !== undefined) layerOptions.extent = layerConfig.getInitialSettings().extent;
+
+    // If an opacity is defined in the initial settings, set it in the layer options
+    if (layerConfig.getInitialSettings()?.states?.opacity !== undefined)
+      // eslint-disable-next-line no-param-reassign
+      layerOptions.opacity = layerConfig.getInitialSettings().states!.opacity;
   }
 
   /**

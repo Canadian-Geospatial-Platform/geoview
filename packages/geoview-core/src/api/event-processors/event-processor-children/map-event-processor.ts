@@ -65,6 +65,7 @@ import { InvalidExtentError } from '@/core/exceptions/geoview-exceptions';
 import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-vector-tile';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 
 // GV The paradigm when working with MapEventProcessor vs MapState goes like this:
 // GV MapState provides: 'state values', 'actions' and 'setterActions'.
@@ -847,23 +848,17 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * Replace a layer in the orderedLayerInfo array.
    *
    * @param {string} mapId The ID of the map to add the layer to.
-   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The config of the layer to add.
+   * @param {ConfigBaseClass} layerConfig The config of the layer to add.
    * @param {string} layerPathToReplace The layerPath of the info to replace.
    * @return {void}
    */
-  static replaceOrderedLayerInfo(
-    mapId: string,
-    geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig,
-    layerPathToReplace?: string
-  ): void {
+  static replaceOrderedLayerInfo(mapId: string, layerConfig: ConfigBaseClass, layerPathToReplace?: string): void {
     const { orderedLayerInfo } = this.getMapStateProtected(mapId);
-    const layerPath = (geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId
-      ? `${(geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId}/base-group`
-      : (geoviewLayerConfig as TypeLayerEntryConfig).layerPath;
+    const layerPath = layerConfig.getGeoviewLayerId() ? `${layerConfig.getGeoviewLayerId()}/base-group` : layerConfig.layerPath;
     const pathToSearch = layerPathToReplace || layerPath;
     const index = this.getMapIndexFromOrderedLayerInfo(mapId, pathToSearch);
     const replacedLayers = this.findMapLayerAndChildrenFromOrderedInfo(mapId, pathToSearch);
-    const newOrderedLayerInfo = LayerApi.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
+    const newOrderedLayerInfo = LayerApi.generateArrayOfLayerOrderInfo(layerConfig);
     orderedLayerInfo.splice(index, replacedLayers.length, ...newOrderedLayerInfo);
 
     // Redirect
@@ -1208,7 +1203,13 @@ export class MapEventProcessor extends AbstractEventProcessor {
     if (geoviewLayer) {
       const initialFilter = this.getInitialFilter(mapId, layerPath);
       const tableFilter = DataTableEventProcessor.getTableFilter(mapId, layerPath);
-      const sliderFilter = TimeSliderEventProcessor.getTimeSliderFilter(mapId, layerPath);
+
+      // If the TimeSlider is initialized
+      let sliderFilter;
+      if (TimeSliderEventProcessor.isTimeSliderInitialized(mapId)) {
+        // Assign it for the return
+        sliderFilter = TimeSliderEventProcessor.getTimeSliderFilter(mapId, layerPath);
+      }
       return [initialFilter, tableFilter, sliderFilter].filter((filter) => filter);
     }
     return undefined;
@@ -1234,11 +1235,14 @@ export class MapEventProcessor extends AbstractEventProcessor {
     ) {
       // Depending on the instance
       if (geoviewLayer instanceof GVWMS || geoviewLayer instanceof GVEsriImage) {
-        // Read filter information
-        const filter = TimeSliderEventProcessor.getTimeSliderFilter(mapId, layerPath);
+        // If the Time Slider is initialized
+        if (TimeSliderEventProcessor.isTimeSliderInitialized(mapId)) {
+          // Read filter information
+          const filter = TimeSliderEventProcessor.getTimeSliderFilter(mapId, layerPath);
 
-        // If filter was defined
-        if (filter) geoviewLayer.applyViewFilter(filter);
+          // If filter was defined
+          if (filter) geoviewLayer.applyViewFilter(filter);
+        }
       } else {
         // Read filter information
         const filters = this.getActiveVectorFilters(mapId, layerPath) || [''];
@@ -1285,11 +1289,11 @@ export class MapEventProcessor extends AbstractEventProcessor {
         hoverable: orderedLayerInfo.hoverable,
       },
       controls: legendLayerInfo.controls,
-      bounds: layerEntryConfig.initialSettings.bounds,
-      className: layerEntryConfig.initialSettings.className,
-      extent: layerEntryConfig.initialSettings.extent,
-      minZoom: layerEntryConfig.initialSettings.minZoom,
-      maxZoom: layerEntryConfig.initialSettings.maxZoom,
+      bounds: layerEntryConfig.getInitialSettings().bounds,
+      className: layerEntryConfig.getInitialSettings().className,
+      extent: layerEntryConfig.getInitialSettings().extent,
+      minZoom: layerEntryConfig.getInitialSettings().minZoom,
+      maxZoom: layerEntryConfig.getInitialSettings().maxZoom,
     };
   }
 
@@ -1398,16 +1402,18 @@ export class MapEventProcessor extends AbstractEventProcessor {
       return undefined;
     }
 
-    const { geoviewLayerConfig } = layerEntryConfig;
+    // Get info
     const orderedLayerInfo = this.findMapLayerFromOrderedInfo(mapId, layerPath);
     const legendLayerInfo = LegendEventProcessor.getLegendLayerInfo(mapId, layerPath);
 
     // Check if the layer is a geocore layers
     const isGeocore = isValidUUID(layerPath.split('/')[0]);
 
-    const layerEntryLayerPaths = geoviewLayerConfig.listOfLayerEntryConfig.map(
-      (geoviewLayerEntryConfig) => geoviewLayerEntryConfig.layerPath
-    );
+    // If is a group
+    let layerEntryLayerPaths: string[] = [];
+    if (layerEntryConfig instanceof GroupLayerEntryConfig) {
+      layerEntryLayerPaths = layerEntryConfig.getLayerPaths();
+    }
 
     // Check for sublayers
     const sublayerPaths = this.getMapLayerOrder(mapId).filter(
@@ -1430,22 +1436,22 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const newGeoviewLayerConfig: MapConfigLayerEntry =
       isGeocore && overrideGeocoreServiceNames !== true
         ? {
-            geoviewLayerId: geoviewLayerConfig.geoviewLayerId,
-            geoviewLayerName: overrideGeocoreServiceNames === false ? undefined : geoviewLayerConfig.geoviewLayerName,
+            geoviewLayerId: layerEntryConfig.getGeoviewLayerId(),
+            geoviewLayerName: overrideGeocoreServiceNames === false ? undefined : layerEntryConfig.getGeoviewLayerName(),
             geoviewLayerType: 'geoCore',
             initialSettings,
             listOfLayerEntryConfig,
           }
         : {
-            externalDateFormat: geoviewLayerConfig.externalDateFormat,
-            geoviewLayerId: geoviewLayerConfig.geoviewLayerId,
-            geoviewLayerName: geoviewLayerConfig.geoviewLayerName,
-            geoviewLayerType: geoviewLayerConfig.geoviewLayerType,
+            externalDateFormat: layerEntryConfig.getGeoviewLayerConfig()?.externalDateFormat,
+            geoviewLayerId: layerEntryConfig.getGeoviewLayerId(),
+            geoviewLayerName: layerEntryConfig.getGeoviewLayerName(),
+            geoviewLayerType: layerEntryConfig.getSchemaTag()!,
             initialSettings,
-            isTimeAware: geoviewLayerConfig.isTimeAware,
+            isTimeAware: layerEntryConfig.getGeoviewLayerConfig()?.isTimeAware,
             listOfLayerEntryConfig,
-            metadataAccessPath: geoviewLayerConfig.metadataAccessPath,
-            serviceDateFormat: geoviewLayerConfig.serviceDateFormat,
+            metadataAccessPath: layerEntryConfig.getMetadataAccessPath(),
+            serviceDateFormat: layerEntryConfig.getGeoviewLayerConfig()?.serviceDateFormat,
           };
 
     return newGeoviewLayerConfig;
@@ -1465,7 +1471,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     if (config) {
       // Get paths of top level layers
       const layerOrder = this.getMapLayerOrder(mapId).filter(
-        (layerPath) => this.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath)?.parentLayerConfig === undefined
+        (layerPath) => !this.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath)?.getParentLayerConfig()
       );
 
       // Build list of geoview layer configs
@@ -1542,8 +1548,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
         if (selectedDataTableLayerPath) newMapConfig.footerBar.selectedDataTableLayerPath = selectedDataTableLayerPath as string;
         const selectedLayerLayerPath = LegendEventProcessor.getLayerPanelState(mapId, 'selectedLayerPath');
         if (selectedLayerLayerPath) newMapConfig.footerBar.selectedLayersLayerPath = selectedLayerLayerPath as string;
-        const selectedTimeSliderLayerPath = TimeSliderEventProcessor.getTimeSliderSelectedLayer(mapId);
-        if (selectedTimeSliderLayerPath) newMapConfig.footerBar.selectedTimeSliderLayerPath = selectedTimeSliderLayerPath;
+
+        // If the TimeSlider plugin is initialized
+        if (TimeSliderEventProcessor.isTimeSliderInitialized(mapId)) {
+          // Store it
+          newMapConfig.footerBar.selectedTimeSliderLayerPath = TimeSliderEventProcessor.getTimeSliderSelectedLayer(mapId);
+        }
       }
 
       return newMapConfig;

@@ -32,6 +32,7 @@ import {
   TypeGeoviewLayerType,
   TypeInitialGeoviewLayerType,
 } from '@/api/types/layer-schema-types';
+import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 
 import { UtilAddLayer } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
 import { AddLayerTree } from '@/core/components/layers/left-panel/add-new-layer/add-layer-tree';
@@ -410,11 +411,15 @@ export function AddNewLayer(): JSX.Element {
         // Get the name and ID of the first entry before deleting the listOfLayerEntryConfig
         const idOfFirstLayerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig[0]?.layerId;
         const nameOfFirstLayerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig[0]?.getLayerName();
-        setLayerName(nameOfFirstLayerEntryConfig || idOfFirstLayerEntryConfig);
+        setLayerName(nameOfFirstLayerEntryConfig || geoviewLayerConfig.geoviewLayerName || idOfFirstLayerEntryConfig);
         setLayerTree(geoviewLayerConfig);
 
-        // If there's more than 1 layer entry
-        setIsMultiple(geoviewLayerConfig.listOfLayerEntryConfig.length > 1);
+        // If there's more than 1 layer entry or 1 entry which is a group
+        setIsMultiple(
+          geoviewLayerConfig.listOfLayerEntryConfig.length > 1 ||
+            (geoviewLayerConfig.listOfLayerEntryConfig.length === 1 &&
+              geoviewLayerConfig.listOfLayerEntryConfig[0] instanceof GroupLayerEntryConfig)
+        );
 
         // If there's any listOfLayerEntryConfig entry
         if (geoviewLayerConfig.listOfLayerEntryConfig.length > 0) {
@@ -530,8 +535,7 @@ export function AddNewLayer(): JSX.Element {
       newGeoViewLayer = await GeoPackageReader.createLayerConfigFromGeoPackage(newGeoViewLayer as GeoPackageLayerConfig);
 
     // Use the config to convert simplified layer config into proper layer config
-    const config = new Config(language);
-    const configObj = config.initializeMapConfig(mapId, [newGeoViewLayer], (errorKey: string, params: string[]) => {
+    const configObj = Config.initializeMapConfig(mapId, [newGeoViewLayer], (errorKey: string, params: string[]) => {
       // Get the message for the logger
       const message = getLocalizedMessage(language, errorKey, params);
 
