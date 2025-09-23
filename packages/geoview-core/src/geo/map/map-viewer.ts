@@ -306,7 +306,7 @@ export class MapViewer {
     const projection = Projection.PROJECTIONS[mapViewSettings.projection];
 
     let extentProjected: Extent | undefined;
-    if (mapViewSettings.maxExtent)
+    if (mapViewSettings.maxExtent && projection)
       extentProjected = Projection.transformExtentFromProj(mapViewSettings.maxExtent, Projection.getProjectionLonLat(), projection);
 
     const initialMap = new OLMap({
