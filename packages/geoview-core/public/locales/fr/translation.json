@@ -274,6 +274,7 @@
     "exportBtn": "Télécharger",
     "formatBtn": "Format",
     "dpiBtn": "PPP",
+    "qualityBtn": "Qualité",
     "exportTitle": "Titre",
     "approx": "approx.",
     "fileExportDefaultPrefixName": "carte-export",

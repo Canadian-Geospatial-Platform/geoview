@@ -8,6 +8,7 @@ import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { ExportDocument } from '@/core/components/export/pdf-layout';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
+import { exportFile } from '@/core/utils/utilities';
 
 // GV Buffer polyfill for react-pdf
 if (typeof window !== 'undefined') {
@@ -186,7 +187,13 @@ export async function exportPDFMap(mapId: string, params: exportPDFMapParams): P
 /**
  * Converts a PDF URL to PNG using PDF.js and canvas rendering
  */
-export async function convertPdfUrlToPng(pdfUrl: string, filename?: string, dpi: number = 300): Promise<string | void> {
+export async function convertPdfUrlToImage(
+  pdfUrl: string,
+  filename?: string,
+  dpi: number = 300,
+  format: 'png' | 'jpeg' = 'png',
+  quality: number = 1
+): Promise<string | void> {
   try {
     // Load the PDF document
     const loadingTask = pdfjsLib.getDocument(pdfUrl);
@@ -224,14 +231,11 @@ export async function convertPdfUrlToPng(pdfUrl: string, filename?: string, dpi:
     await page.render(renderContext).promise;
 
     // Convert canvas to data URL
-    const dataUrl = canvas.toDataURL('image/png', 1.0);
+    const dataUrl = canvas.toDataURL(`image/${format}`, quality);
 
     if (filename) {
       // Download the image
-      const a = document.createElement('a');
-      a.href = dataUrl;
-      a.download = `${filename}.png`;
-      a.click();
+      exportFile(dataUrl, filename, format);
     } else {
       // Return data URL for preview
       return dataUrl;
