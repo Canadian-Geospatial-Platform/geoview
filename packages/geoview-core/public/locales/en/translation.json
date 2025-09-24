@@ -274,6 +274,7 @@
     "exportBtn": "Download",
     "formatBtn": "Format",
     "dpiBtn": "DPI",
+    "qualityBtn": "Quality",
     "exportTitle": "Title",
     "approx": "approx.",
     "fileExportDefaultPrefixName": "map-export",

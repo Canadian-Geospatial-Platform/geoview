@@ -6,10 +6,13 @@ import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Loading
 import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { exportFile } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 
 import { getSxClasses } from './export-modal-style';
-import { exportPDFMap, convertPdfUrlToPng } from './utilities';
+import { exportPDFMap, convertPdfUrlToImage } from './utilities';
+
+type FileFormat = 'pdf' | 'png' | 'jpeg';
 
 /**
  * Export modal window component to export the viewer information in a PNG file
@@ -37,13 +40,16 @@ export default function ExportModal(): JSX.Element {
   const [isLegendLoading, setIsLegendLoading] = useState(true);
   const [isMapExporting, setIsMapExporting] = useState(false);
   const [exportTitle, setExportTitle] = useState<string>('');
-  const [exportMapResolution, setExportMapResolution] = useState(150); // GV THE DPI of the exported map
-  const [exportFormat, setExportFormat] = useState<'pdf' | 'png'>('pdf');
+  const [exportMapResolution, setExportMapResolution] = useState(300);
+  const [exportFormat, setExportFormat] = useState<FileFormat>('pdf');
   const exportContainerRef = useRef(null) as RefObject<HTMLDivElement>;
   const [dpiMenuOpen, setDpiMenuOpen] = useState(false);
   const [dpiAnchorEl, setDpiAnchorEl] = useState<null | HTMLElement>(null);
   const [formatMenuOpen, setFormatMenuOpen] = useState(false);
   const [formatAnchorEl, setFormatAnchorEl] = useState<null | HTMLElement>(null);
+  const [jpegQuality, setJpegQuality] = useState(90); // Default 90%
+  const [qualityMenuOpen, setQualityMenuOpen] = useState(false);
+  const [qualityAnchorEl, setQualityAnchorEl] = useState<null | HTMLElement>(null);
   const [pageSize, setPageSize] = useState<'LETTER' | 'LEGAL' | 'TABLOID'>('LETTER');
   const [pageSizeMenuOpen, setPageSizeMenuOpen] = useState(false);
   const [pageSizeAnchorEl, setPageSizeAnchorEl] = useState<null | HTMLElement>(null);
@@ -51,41 +57,46 @@ export default function ExportModal(): JSX.Element {
   const [pngPreviewUrl, setPngPreviewUrl] = useState<string>('');
 
   const fileExportDefaultPrefixName = t('exportModal.fileExportDefaultPrefixName');
+  // Generate quality options: 50%, 60%, 70%, 80%, 90%, 100%
+  const qualityOptions = Array.from({ length: 11 }, (_, i) => 50 + i * 5);
 
-  const handleExport = useCallback(
-    async (format: 'pdf' | 'png') => {
+  const handleExport = useCallback(() => {
+    (async () => {
       setIsMapExporting(true);
       try {
         const disclaimer = t('mapctrl.disclaimer.message');
-        const dpi = format === 'pdf' ? 300 : exportMapResolution;
+        const dpi = exportFormat === 'pdf' ? 300 : exportMapResolution;
         const pdfUrl = await exportPDFMap(mapId, { exportTitle, disclaimer, size: pageSize });
 
         const filename = `${fileExportDefaultPrefixName}-${exportTitle.trim() || mapId}`;
 
-        if (format === 'pdf') {
-          const a = document.createElement('a');
-          a.href = pdfUrl;
-          a.download = `${filename}.pdf`;
-          a.click();
+        if (exportFormat === 'pdf') {
+          exportFile(pdfUrl, filename, exportFormat);
         } else {
-          await convertPdfUrlToPng(pdfUrl, filename, dpi);
+          await convertPdfUrlToImage(pdfUrl, filename, dpi, exportFormat, jpegQuality / 100);
         }
 
         URL.revokeObjectURL(pdfUrl);
       } catch (error) {
-        logger.logError(`Error exporting ${format.toUpperCase()}`, error);
+        logger.logError(`Error exporting ${exportFormat.toUpperCase()}`, error);
       } finally {
         setIsMapExporting(false);
         setActiveAppBarTab('legend', false, false);
         disableFocusTrap();
       }
-    },
-    [t, exportMapResolution, mapId, exportTitle, pageSize, fileExportDefaultPrefixName, setActiveAppBarTab, disableFocusTrap]
-  );
-
-  const exportMap = useCallback(() => {
-    handleExport(exportFormat).catch((error) => logger.logError(error));
-  }, [handleExport, exportFormat]);
+    })().catch((error) => logger.logError(error));
+  }, [
+    t,
+    exportFormat,
+    exportMapResolution,
+    mapId,
+    exportTitle,
+    pageSize,
+    fileExportDefaultPrefixName,
+    jpegQuality,
+    setActiveAppBarTab,
+    disableFocusTrap,
+  ]);
 
   const handleCloseModal = useCallback(() => {
     setActiveAppBarTab('legend', false, false);
@@ -105,7 +116,7 @@ export default function ExportModal(): JSX.Element {
         try {
           const disclaimer = t('mapctrl.disclaimer.message');
           const pdfUrl = await exportPDFMap(mapId, { exportTitle: '', disclaimer, size: pageSize });
-          const pngDataUrl = (await convertPdfUrlToPng(pdfUrl)) as string;
+          const pngDataUrl = (await convertPdfUrlToImage(pdfUrl)) as string;
           setPngPreviewUrl(pngDataUrl);
           URL.revokeObjectURL(pdfUrl);
         } catch (error) {
@@ -133,7 +144,7 @@ export default function ExportModal(): JSX.Element {
   }, []);
 
   const handleSelectFormat = useCallback(
-    (format: 'pdf' | 'png') => {
+    (format: FileFormat) => {
       setExportFormat(format);
       if (format === 'pdf') {
         setExportMapResolution(300);
@@ -177,6 +188,23 @@ export default function ExportModal(): JSX.Element {
     [handlePageSizeMenuClose]
   );
 
+  const handleQualityMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+    setQualityAnchorEl(event.currentTarget);
+    setQualityMenuOpen(true);
+  };
+
+  const handleQualityMenuClose = useCallback(() => {
+    setQualityMenuOpen(false);
+  }, []);
+
+  const handleSelectQuality = useCallback(
+    (quality: number) => {
+      setJpegQuality(quality);
+      handleQualityMenuClose();
+    },
+    [handleQualityMenuClose]
+  );
+
   return (
     <Dialog open={activeModalId === 'export'} onClose={handleCloseModal} fullWidth maxWidth="xl" disablePortal>
       <DialogTitle>{t('exportModal.title')}</DialogTitle>
@@ -216,13 +244,14 @@ export default function ExportModal(): JSX.Element {
         <Menu id="format-selection" open={formatMenuOpen} onClose={handleFormatMenuClose} anchorEl={formatAnchorEl}>
           <MenuItem onClick={() => handleSelectFormat('pdf')}>PDF</MenuItem>
           <MenuItem onClick={() => handleSelectFormat('png')}>PNG</MenuItem>
+          <MenuItem onClick={() => handleSelectFormat('jpeg')}>JPEG</MenuItem>
         </Menu>
         <Button type="text" onClick={handleFormatMenuClick} variant="outlined" size="small" sx={sxClasses.buttonOutlined}>
           Format: {exportFormat.toUpperCase()}
         </Button>
 
         {/* DPI Selection - Only show for PNG */}
-        {exportFormat === 'png' && (
+        {(exportFormat === 'png' || exportFormat === 'jpeg') && (
           <>
             <Menu id="dpi-selection" open={dpiMenuOpen} onClose={handleMenuClose} anchorEl={dpiAnchorEl}>
               <MenuItem onClick={() => handleSelectDpi(96)}>96 {t('exportModal.dpiBtn')}</MenuItem>
@@ -231,6 +260,22 @@ export default function ExportModal(): JSX.Element {
             </Menu>
             <Button type="text" onClick={handleDpiMenuClick} variant="outlined" size="small" sx={sxClasses.buttonOutlined}>
               {t('exportModal.dpiBtn')}: {exportMapResolution}
+            </Button>
+          </>
+        )}
+
+        {/* Quality Selection - Only show for JPEG */}
+        {exportFormat === 'jpeg' && (
+          <>
+            <Menu id="quality-selection" open={qualityMenuOpen} onClose={handleQualityMenuClose} anchorEl={qualityAnchorEl}>
+              {qualityOptions.map((quality) => (
+                <MenuItem key={quality} onClick={() => handleSelectQuality(quality)}>
+                  {quality}%
+                </MenuItem>
+              ))}
+            </Menu>
+            <Button type="text" onClick={handleQualityMenuClick} variant="outlined" size="small" sx={sxClasses.buttonOutlined}>
+              {t('exportModal.qualityBtn')}: {jpegQuality}%
             </Button>
           </>
         )}
@@ -248,7 +293,7 @@ export default function ExportModal(): JSX.Element {
         <LoadingButton
           loading={isMapExporting}
           variant="contained"
-          onClick={exportMap}
+          onClick={handleExport}
           size="small"
           sx={sxClasses.buttonContained}
           disabled={isLegendLoading || isMapLoading}
