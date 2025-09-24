@@ -366,7 +366,7 @@ export function parseJSONConfig<T>(configStr: string): T {
  * @param {string} name - The name of exported file
  * @param {string} format - The format of the exported file
  */
-export function exportImage(dataUrl: string, name: string, format: 'png' | 'jpeg' = 'png'): void {
+export function exportFile(dataUrl: string, name: string, format: 'pdf' | 'png' | 'jpeg' = 'png'): void {
   try {
     const element = document.createElement('a');
     const filename = `${name}.${format}`;
