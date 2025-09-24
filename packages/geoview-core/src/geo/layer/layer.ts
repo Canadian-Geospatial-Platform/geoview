@@ -112,6 +112,7 @@ import { WkbLayerEntryConfig } from '@/api/config/validation-classes/vector-vali
 import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { XYZTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { VectorTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
+import { TypeTimeSliderProps } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
@@ -1876,7 +1877,7 @@ export class LayerApi {
 
   /**
    * Registers layer information for TimeSlider.
-   * @param {ConfigBaseClass} layerConfig - The layer configuration to be unregistered.
+   * @param {ConfigBaseClass} layerConfig - The layer configuration to be registered.
    * @private
    */
   async #registerForTimeSlider(layerConfig: ConfigBaseClass): Promise<void> {
@@ -1885,10 +1886,16 @@ export class LayerApi {
       await whenThisThen(() => layerConfig.isGreaterThanOrEqualTo('processed'), LayerApi.#MAX_WAIT_TIME_SLIDER_REGISTRATION);
       const geoviewLayer = this.getGeoviewLayer(layerConfig.layerPath);
 
+      // Get time slider config if present in map config
+      const timeSliderConfigs = MapEventProcessor.getGeoViewMapConfig(this.getMapId())?.corePackagesConfig?.find((config) =>
+        Object.keys(config).includes('time-slider')
+      )?.['time-slider'] as TypeTimeSliderProps[];
+      const layerSliderConfig = timeSliderConfigs?.find((slider: TypeTimeSliderProps) => slider.layerPaths.includes(layerConfig.layerPath));
+
       // If the layer is loaded AND flag is true to use time dimension, continue
       if (geoviewLayer instanceof AbstractGVLayer && geoviewLayer.getIsTimeAware() && geoviewLayer.getTimeDimension()) {
         // Check (if dimension is valid) and add time slider layer when needed
-        TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.getMapId(), geoviewLayer);
+        TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.getMapId(), geoviewLayer, layerSliderConfig);
       }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error: unknown) {

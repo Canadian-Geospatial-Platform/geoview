@@ -125,7 +125,6 @@ export class UtilAddLayer {
     layerIds: (string | undefined)[]
   ): boolean {
     const subLayers = layerTree.listOfLayerEntryConfig;
-
     if (!subLayers) return true; // No children to check
 
     return subLayers.every((layerEntryConfig) => {
@@ -189,7 +188,7 @@ export class UtilAddLayer {
               layersToAdd,
               layerIdsToAdd,
               removedLayerIds,
-              ConfigBaseClass.getClassOrTypeGeoviewLayerConfig(layerEntryConfig)
+              layerEntryConfig as GroupLayerEntryConfig
             );
           if (layerIds.includes(layerEntryConfig.layerId))
             return {
