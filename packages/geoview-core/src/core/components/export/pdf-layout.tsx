@@ -4,10 +4,18 @@ import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { TypeTimeSliderValues, TimeSliderLayerSet } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { DateMgt } from '@/core/utils/date-mgt';
 
+// Page size specific styling
+const PAGE_CONFIGS = {
+  LETTER: { size: 'LETTER' as const, mapHeight: 400, legendColumns: 4 },
+  LEGAL: { size: 'LEGAL' as const, mapHeight: 600, legendColumns: 4 },
+  TABLOID: { size: 'TABLOID' as const, mapHeight: 800, legendColumns: 6 },
+};
+
 interface ExportDocumentProps {
   mapDataUrl: string;
   exportTitle: string;
   scaleText: string;
+  scaleLineWidth: string;
   northArrowSvg: Array<{
     d: string | null;
     fill: string | null;
@@ -21,6 +29,7 @@ interface ExportDocumentProps {
   date: string;
   mapId: string;
   timeSliderLayers?: TimeSliderLayerSet;
+  pageSize: 'LETTER' | 'LEGAL' | 'TABLOID';
 }
 
 interface FlattenedLegendItem {
@@ -104,10 +113,12 @@ const processLegendLayers = (layers: TypeLegendLayer[], mapId: string, timeSlide
 };
 
 // Group items by their root layer and distribute smartly
-const distributeIntoColumns = (items: FlattenedLegendItem[]): FlattenedLegendItem[][] => {
-  if (!items || items.length === 0) return [[], [], [], []];
+const distributeIntoColumns = (items: FlattenedLegendItem[], numColumns: number): FlattenedLegendItem[][] => {
+  if (!items || items.length === 0) return Array(numColumns).fill([]);
 
-  const columns: FlattenedLegendItem[][] = [[], [], [], []];
+  const columns: FlattenedLegendItem[][] = Array(numColumns)
+    .fill(null)
+    .map(() => []);
   let currentColumn = 0;
   let currentGroup: FlattenedLegendItem[] = [];
   let currentRootLayer = '';
@@ -128,8 +139,11 @@ const distributeIntoColumns = (items: FlattenedLegendItem[]): FlattenedLegendIte
       const estimatedGroupSize = items.filter((i) => (i.type === 'layer' ? i.data.layerName : i.parentName || '') === rootLayer).length;
 
       // If current column already has items and adding this group would make it too long, move to next column
-      if (columns[currentColumn].length > 0 && columns[currentColumn].length + estimatedGroupSize > Math.ceil(items.length / 4) + 3) {
-        currentColumn = Math.min(currentColumn + 1, 3);
+      if (
+        columns[currentColumn].length > 0 &&
+        columns[currentColumn].length + estimatedGroupSize > Math.ceil(items.length / numColumns) + 3
+      ) {
+        currentColumn = Math.min(currentColumn + 1, numColumns - 1);
       }
 
       currentRootLayer = rootLayer;
@@ -146,10 +160,11 @@ const distributeIntoColumns = (items: FlattenedLegendItem[]): FlattenedLegendIte
   return columns;
 };
 
-export const ExportDocument = ({
+export function ExportDocument({
   mapDataUrl,
   exportTitle,
   scaleText,
+  scaleLineWidth,
   northArrowSvg,
   legendLayers,
   disclaimer,
@@ -157,165 +172,172 @@ export const ExportDocument = ({
   date,
   mapId,
   timeSliderLayers,
-}: ExportDocumentProps) => (
-  <Document>
-    <Page size="LETTER" style={{ padding: 36, fontFamily: 'Helvetica' }}>
-      {/* Title */}
-      {exportTitle && <Text style={{ fontSize: 16, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 }}>{exportTitle || ''}</Text>}
+  pageSize,
+}: ExportDocumentProps): JSX.Element {
+  const config = PAGE_CONFIGS[pageSize];
 
-      {/* Map */}
-      <Image src={mapDataUrl} style={{ width: 'calc(100% + 50px)', maxHeight: 400, objectFit: 'contain', marginBottom: 10 }} />
+  return (
+    <Document>
+      <Page size={config.size} style={{ padding: 36, fontFamily: 'Helvetica' }}>
+        {/* Title */}
+        {exportTitle && exportTitle.trim() && (
+          <Text style={{ fontSize: 16, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 }}>{exportTitle.trim()}</Text>
+        )}
 
-      {/* Scale and North Arrow */}
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        {/* Scale bar with line */}
-        <View style={{ justifyContent: 'center' }}>
-          <View
-            style={{
-              width: 60,
-              height: 1,
-              backgroundColor: 'black',
-              marginBottom: 2,
-              position: 'relative',
-            }}
-          >
-            {/* Left tick */}
+        {/* Map */}
+        <Image src={mapDataUrl} style={{ width: '100%', maxHeight: config.mapHeight, objectFit: 'contain', marginBottom: 10 }} />
+
+        {/* Scale and North Arrow */}
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+          {/* Scale bar with line */}
+          <View style={{ justifyContent: 'center', alignItems: 'center' }}>
             <View
               style={{
-                position: 'absolute',
-                left: 0,
-                top: -3,
-                width: 1,
-                height: 8,
+                width: parseInt(scaleLineWidth, 10),
+                height: 1,
                 backgroundColor: 'black',
+                marginBottom: 2,
+                position: 'relative',
               }}
-            />
-            {/* Right tick */}
-            <View
-              style={{
-                position: 'absolute',
-                right: 0,
-                top: -3,
-                width: 1,
-                height: 8,
-                backgroundColor: 'black',
-              }}
-            />
+            >
+              {/* Left tick */}
+              <View
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  top: -3,
+                  width: 1,
+                  height: 8,
+                  backgroundColor: 'black',
+                }}
+              />
+              {/* Right tick */}
+              <View
+                style={{
+                  position: 'absolute',
+                  right: 0,
+                  top: -3,
+                  width: 1,
+                  height: 8,
+                  backgroundColor: 'black',
+                }}
+              />
+            </View>
+            <Text style={{ fontSize: 10, marginTop: 2, textAlign: 'center' }}>{scaleText}</Text>
           </View>
-          <Text style={{ fontSize: 10, marginTop: 2 }}>{scaleText}</Text>
+          {northArrowSvg && (
+            <View style={{ width: 40, height: 40 }}>
+              <Svg viewBox="285 142 24 24" style={{ width: 40, height: 40 }}>
+                {northArrowSvg.map((pathData, index) => {
+                  return (
+                    <Path
+                      // eslint-disable-next-line react/no-array-index-key
+                      key={`path-${index}`}
+                      d={pathData.d || ''}
+                      fill={pathData.fill || 'black'}
+                      stroke={pathData.stroke || 'none'}
+                      strokeWidth={pathData.strokeWidth || '0'}
+                    />
+                  );
+                })}
+              </Svg>
+            </View>
+          )}
         </View>
-        {northArrowSvg && (
-          <View style={{ width: 40, height: 40 }}>
-            <Svg viewBox="285 142 24 24" style={{ width: 40, height: 40 }}>
-              {northArrowSvg.map((pathData, index) => {
-                return (
-                  <Path
-                    // eslint-disable-next-line react/no-array-index-key
-                    key={`path-${index}`}
-                    d={pathData.d || ''}
-                    fill={pathData.fill || 'black'}
-                    stroke={pathData.stroke || 'none'}
-                    strokeWidth={pathData.strokeWidth || '0'}
-                  />
-                );
-              })}
-            </Svg>
+
+        {/* Legend */}
+        {legendLayers && legendLayers.length > 0 && (
+          <View style={{ marginBottom: 20, marginTop: -20 }}>
+            <Text style={{ fontSize: 11, fontWeight: 'bold', marginBottom: 10 }}>Legend</Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+              {(() => {
+                const allItems = processLegendLayers(legendLayers, mapId, timeSliderLayers);
+                const columns = distributeIntoColumns(allItems, config.legendColumns);
+
+                return columns.map((columnItems, columnIndex) => (
+                  // eslint-disable-next-line react/no-array-index-key
+                  <View key={columnIndex} style={{ width: `${100 / config.legendColumns}%`, paddingRight: 3 }}>
+                    {columnItems.map((item, index) => {
+                      const indentLevel = Math.min(item.depth, 3);
+
+                      if (item.type === 'layer') {
+                        return (
+                          <Text
+                            key={`layer-${item.data.layerPath}`}
+                            style={{ fontSize: 9, fontWeight: 'bold', marginBottom: 3, marginTop: index > 0 ? 8 : 0 }}
+                          >
+                            {item.data.layerName}
+                          </Text>
+                        );
+                      } else if (item.type === 'wms') {
+                        return (
+                          <View key={`wms-${item.data.layerPath}`} style={{ marginLeft: indentLevel + 3, marginBottom: 2 }}>
+                            <Image src={item.data.icons?.[0]?.iconImage || ''} style={{ width: 60, height: 'auto' }} />
+                          </View>
+                        );
+                      } else if (item.type === 'time') {
+                        // Format time dimension display
+                        const timeText = item.timeInfo?.singleHandle
+                          ? DateMgt.formatDate(
+                              new Date(item.timeInfo.values[0]),
+                              item.timeInfo.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
+                            )
+                          : `${DateMgt.formatDate(
+                              new Date(item.timeInfo?.values[0] || 0),
+                              item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
+                            )} - ${DateMgt.formatDate(
+                              new Date(item.timeInfo?.values[1] || 0),
+                              item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
+                            )}`;
+
+                        return (
+                          <Text
+                            key={`time-${item.data.layerPath}`}
+                            style={{ fontSize: 7, fontStyle: 'italic', marginLeft: indentLevel + 3, marginBottom: 2 }}
+                          >
+                            {timeText}
+                          </Text>
+                        );
+                      } else if (item.type === 'child') {
+                        return (
+                          <Text
+                            key={`child-${item.data.layerPath}`}
+                            style={{ fontSize: 8, fontWeight: 'bold', marginBottom: 2, marginLeft: indentLevel, marginTop: 3 }}
+                          >
+                            {item.data.layerName || 'Unnamed Layer'}
+                          </Text>
+                        );
+                      } else {
+                        const legendItem = item.data.items[0];
+                        return (
+                          <View
+                            key={`item-${item.parentName}-${legendItem?.name}`}
+                            style={{ flexDirection: 'row', alignItems: 'center', marginLeft: indentLevel + 3, marginBottom: 1 }}
+                          >
+                            {legendItem?.icon && <Image src={legendItem.icon} style={{ width: 8, height: 8, marginRight: 2 }} />}
+                            <Text style={{ fontSize: 7, flexShrink: 1 }}>{legendItem?.name || 'Unnamed Item'}</Text>
+                          </View>
+                        );
+                      }
+                    })}
+                  </View>
+                ));
+              })()}
+            </View>
           </View>
         )}
-      </View>
 
-      {/* Legend */}
-      {legendLayers && legendLayers.length > 0 && (
-        <View style={{ marginBottom: 20, marginTop: -20 }}>
-          <Text style={{ fontSize: 11, fontWeight: 'bold', marginBottom: 10 }}>Legend</Text>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-            {(() => {
-              const allItems = processLegendLayers(legendLayers, mapId, timeSliderLayers);
-              const columns = distributeIntoColumns(allItems);
-
-              return columns.map((columnItems, columnIndex) => (
-                // eslint-disable-next-line react/no-array-index-key
-                <View key={columnIndex} style={{ width: '25%', paddingRight: 3 }}>
-                  {columnItems.map((item, index) => {
-                    const indentLevel = Math.min(item.depth, 3);
-
-                    if (item.type === 'layer') {
-                      return (
-                        <Text
-                          key={`layer-${item.data.layerPath}`}
-                          style={{ fontSize: 9, fontWeight: 'bold', marginBottom: 3, marginTop: index > 0 ? 8 : 0 }}
-                        >
-                          {item.data.layerName}
-                        </Text>
-                      );
-                    } else if (item.type === 'wms') {
-                      return (
-                        <View key={`wms-${item.data.layerPath}`} style={{ marginLeft: indentLevel + 3, marginBottom: 2 }}>
-                          <Image src={item.data.icons?.[0]?.iconImage || ''} style={{ width: 60, height: 'auto' }} />
-                        </View>
-                      );
-                    } else if (item.type === 'time') {
-                      // Format time dimension display
-                      const timeText = item.timeInfo?.singleHandle
-                        ? DateMgt.formatDate(
-                            new Date(item.timeInfo.values[0]),
-                            item.timeInfo.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
-                          )
-                        : `${DateMgt.formatDate(
-                            new Date(item.timeInfo?.values[0] || 0),
-                            item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
-                          )} - ${DateMgt.formatDate(
-                            new Date(item.timeInfo?.values[1] || 0),
-                            item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
-                          )}`;
-
-                      return (
-                        <Text
-                          key={`time-${item.data.layerPath}`}
-                          style={{ fontSize: 7, fontStyle: 'italic', marginLeft: indentLevel + 3, marginBottom: 2 }}
-                        >
-                          {timeText}
-                        </Text>
-                      );
-                    } else if (item.type === 'child') {
-                      return (
-                        <Text
-                          key={`child-${item.data.layerPath}`}
-                          style={{ fontSize: 8, fontWeight: 'bold', marginBottom: 2, marginLeft: indentLevel, marginTop: 3 }}
-                        >
-                          {item.data.layerName}
-                        </Text>
-                      );
-                    } else {
-                      const legendItem = item.data.items[0];
-                      return (
-                        <View
-                          key={`item-${item.parentName}-${legendItem?.name}`}
-                          style={{ flexDirection: 'row', alignItems: 'center', marginLeft: indentLevel + 3, marginBottom: 1 }}
-                        >
-                          {legendItem?.icon && <Image src={legendItem.icon} style={{ width: 8, height: 8, marginRight: 2 }} />}
-                          <Text style={{ fontSize: 7, flexShrink: 1 }}>{legendItem?.name || 'Unnamed Item'}</Text>
-                        </View>
-                      );
-                    }
-                  })}
-                </View>
-              ));
-            })()}
-          </View>
+        {/* Footer */}
+        <View style={{ position: 'absolute', bottom: 30, left: 36, right: 36 }}>
+          <Text style={{ fontSize: 8, textAlign: 'center', marginBottom: 5 }}>{disclaimer || ''}</Text>
+          {attributions.map((attr) => (
+            <Text key={`${attr.slice(0, 5)}`} style={{ fontSize: 8, textAlign: 'center', marginBottom: 2 }}>
+              {attr || ''}
+            </Text>
+          ))}
+          <Text style={{ fontSize: 8, textAlign: 'center' }}>{date || ''}</Text>
         </View>
-      )}
-
-      {/* Footer */}
-      <View style={{ position: 'absolute', bottom: 30, left: 36, right: 36 }}>
-        <Text style={{ fontSize: 8, textAlign: 'center', marginBottom: 5 }}>{disclaimer || ''}</Text>
-        {attributions.map((attr) => (
-          <Text key={`${attr.slice(0, 5)}`} style={{ fontSize: 8, textAlign: 'center', marginBottom: 2 }}>
-            {attr || ''}
-          </Text>
-        ))}
-        <Text style={{ fontSize: 8, textAlign: 'center' }}>{date || ''}</Text>
-      </View>
-    </Page>
-  </Document>
-);
+      </Page>
+    </Document>
+  );
+}

@@ -272,10 +272,15 @@
     "title": "Download map as PNG",
     "cancelBtn": "Cancel",
     "exportBtn": "Download",
+    "formatBtn": "Format",
     "dpiBtn": "DPI",
     "exportTitle": "Title",
     "approx": "approx.",
-    "fileExportDefaultPrefixName": "map-export"
+    "fileExportDefaultPrefixName": "map-export",
+    "pageSize": "Page size",
+    "letter": "Letter",
+    "legal": "Legal",
+    "tabloid": "Tabloid"
   },
   "geolocator": {
     "title": "Geolocator",
