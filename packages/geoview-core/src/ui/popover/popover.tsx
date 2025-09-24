@@ -1,8 +1,10 @@
 import { useEffect, isValidElement } from 'react';
 import { Popover as MaterialPopover, PopoverProps } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { FocusTrap } from '@/ui';
 import { ARROW_KEYS_WITH_SPACE } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
+import { delay } from '@/core/utils/utilities';
 
 // Disable arrow key so user can't move the page when popover is open
 const handleKeyDown = (event: KeyboardEvent): void => {
@@ -64,22 +66,30 @@ const handleKeyDown = (event: KeyboardEvent): void => {
 function PopoverUI({ open, children, ...props }: PopoverProps): JSX.Element {
   logger.logTraceRenderDetailed('ui/popover/popover');
 
+  // Hook
+  const theme = useTheme();
+
   useEffect(() => {
     logger.logTraceUseEffect('UI.POPOVER - handleKeyDown', open);
     if (open) {
       window.addEventListener('keydown', handleKeyDown);
-      // Focus the close button when popover opens
-      setTimeout(() => {
-        const closeButton = document.querySelector('[data-testid="CloseIcon"]')?.closest('button') as HTMLButtonElement;
-        if (closeButton) {
-          closeButton.focus();
-        }
-      }, 100);
+
+      // Wait the transition period then focus the close button when popover opens
+      delay(theme.transitions.duration.shortest)
+        .then(() => {
+          const closeButton = document.querySelector('[data-testid="CloseIcon"]')?.closest('button') as HTMLButtonElement;
+          if (closeButton) {
+            closeButton.focus();
+          }
+        })
+        .catch(() => {
+          logger.logPromiseFailed('in delay in UI.POPOVER - open');
+        });
     }
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [open]);
+  }, [open, theme.transitions.duration.shortest]);
 
   return (
     <MaterialPopover open={open} {...props}>

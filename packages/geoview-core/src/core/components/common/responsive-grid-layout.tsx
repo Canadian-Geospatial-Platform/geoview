@@ -320,8 +320,8 @@ const ResponsiveGridLayout = forwardRef(
       return (
         <Box ref={guideContainerRef} tabIndex={0} sx={{ padding: '20px', overflow: 'auto' }}>
           <Box className="guideBox">
-            {/* Close button, only shown WCAG is enabled */}
-            {isFocusTrap && (
+            {/* Close button, only shown WCAG is enabled and not fullScreen */}
+            {(isFocusTrap && !isFullScreen) && (
               <IconButton
                 id={`layout-close-guide-${mapId}`}
                 onClick={handleCloseGuide}
@@ -352,7 +352,7 @@ const ResponsiveGridLayout = forwardRef(
             open={isFullScreen}
             onClose={() => {
               setIsFullScreen(false);
-              setTimeout(() => fullScreenBtnRef.current?.focus(), 100);
+              fullScreenBtnRef.current?.focus();
             }}
           >
             <Box sx={sxClasses.rightMainContent} className="responsive-layout-right-main-content fullscreen-mode">

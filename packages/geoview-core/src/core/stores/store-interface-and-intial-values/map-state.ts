@@ -97,7 +97,6 @@ export interface IMapState {
     setOrToggleLayerVisibility: (layerPath: string, newValue?: boolean) => boolean;
     setAllLayersVisibility: (visibility: boolean) => void;
     setMapKeyboardPanInteractions: (panDelta: number) => void;
-    setActiveMapInteractionWCAG: (active: boolean) => void;
     setProjection: (projectionCode: TypeValidMapProjectionCodes) => void;
     setZoom: (zoom: number, duration?: number) => void;
     setInteraction: (interaction: TypeInteraction) => void;
@@ -447,15 +446,6 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       setMapKeyboardPanInteractions: (panDelta: number): void => {
         // Redirect to processor
         MapEventProcessor.setMapKeyboardPanInteractions(get().mapId, panDelta);
-      },
-
-      /**
-       * Sets the map interaction for WCAG compliance (pan and zoom).
-       * @param {boolean} active - The interaction state
-       */
-      setActiveMapInteractionWCAG: (active: boolean): void => {
-        // Redirect to processor
-        MapEventProcessor.setActiveMapInteractionWCAG(get().mapId, active);
       },
 
       /**

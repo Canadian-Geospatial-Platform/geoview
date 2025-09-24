@@ -1,9 +1,10 @@
 import { ReactElement, useEffect, useRef, useCallback } from 'react';
-import { Popper as MaterialPopper, PopperProps } from '@mui/material';
+import { Popper as MaterialPopper, PopperProps, useTheme } from '@mui/material';
 import { animated } from '@react-spring/web';
 import { useFadeIn } from '@/core/utils/useSpringAnimations';
 import { logger } from '@/core/utils/logger';
 import { FocusTrap } from '@/ui';
+import { delay } from '@/core/utils/utilities';
 
 /**
  * Properties for the Popper component extending Material-UI's PopperProps
@@ -71,6 +72,7 @@ function PopperUI({ open, onClose, handleKeyDown, focusSelector, focusTrap = fal
   // Hooks
   const fadeInAnimation = useFadeIn();
   const AnimatedPopper = animated(MaterialPopper);
+  const theme = useTheme();
 
   // Ref
   const popperRef = useRef<HTMLDivElement | null>(null);
@@ -97,14 +99,19 @@ function PopperUI({ open, onClose, handleKeyDown, focusSelector, focusTrap = fal
 
     // Focus management when popper opens
     if (open && focusSelector) {
-      setTimeout(() => {
-        const focusElement = popperRef.current?.querySelector(focusSelector) as HTMLElement;
-        if (focusElement) {
-          focusElement.focus();
-        }
-      }, 100);
+      // Wait the transition period then focus the close button when popover opens
+      delay(theme.transitions.duration.shortest)
+        .then(() => {
+          const focusElement = popperRef.current?.querySelector(focusSelector) as HTMLElement;
+          if (focusElement) {
+            focusElement.focus();
+          }
+        })
+        .catch(() => {
+          logger.logPromiseFailed('in delay in UI.POPPER - open');
+        });
     }
-  }, [open, focusSelector]);
+  }, [open, focusSelector, theme.transitions.duration.shortest]);
 
   // TODO: style - manage z-index in theme
   return (

@@ -221,9 +221,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   // Ensure the enable button gets focus when modal opens
   useEffect(() => {
     if (open) {
-      setTimeout(() => {
-        document.getElementById('enable-focus')?.focus();
-      }, 100);
+      setTimeout(() => document.getElementById('enable-focus')?.focus(), FOCUS_DELAY);
     }
   }, [open]);
 

@@ -14,13 +14,7 @@ import { HoverTooltip } from '@/core/components/hover-tooltip/hover-tooltip';
 import { MapViewer } from '@/geo/map/map-viewer';
 
 import { getSxClasses } from './map-style';
-import {
-  useMapLoaded,
-  useMapNorthArrow,
-  useMapOverviewMap,
-  useMapStoreActions,
-} from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useAppCrosshairsActive } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useMapLoaded, useMapNorthArrow, useMapOverviewMap } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import { useLayersAreLoading } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -54,8 +48,6 @@ export function Map(props: MapProps): JSX.Element {
   const northArrow = useMapNorthArrow();
   const mapLoaded = useMapLoaded();
   const layersAreLoading = useLayersAreLoading();
-  const isCrosshairsActive = useAppCrosshairsActive();
-  const { setActiveMapInteractionWCAG } = useMapStoreActions();
 
   // flag to check if map is initialized. we added to prevent double rendering in StrictMode
   const hasRun = useRef<boolean>(false);
@@ -75,13 +67,6 @@ export function Map(props: MapProps): JSX.Element {
       viewer.createMap(mapElement.current);
     }
   }, [viewer]);
-
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('MAP - Enable WCAG map interactions', isCrosshairsActive);
-
-    setActiveMapInteractionWCAG(isCrosshairsActive);
-  }, [isCrosshairsActive, setActiveMapInteractionWCAG]);
 
   return (
     // ? the map is focusable and needs to be tabbable for keyboard navigation

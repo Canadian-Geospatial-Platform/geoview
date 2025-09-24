@@ -55,12 +55,10 @@ export default function BasemapSelect(): JSX.Element {
       );
 
       // Focus the close button after selection
-      setTimeout(() => {
-        const closeButton = document.querySelector('.MuiDialogTitle-root button') as HTMLButtonElement;
-        if (closeButton) {
-          closeButton.focus();
-        }
-      }, 100);
+      const closeButton = document.querySelector('.MuiDialogTitle-root button') as HTMLButtonElement;
+      if (closeButton) {
+        closeButton.focus();
+      }
     },
     [configBasemapOptions, createBasemapFromOptions]
   );
