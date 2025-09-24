@@ -270,10 +270,15 @@
     "title": "Télécharger la carte en PNG",
     "cancelBtn": "Annuler",
     "exportBtn": "Télécharger",
+    "formatBtn": "Format",
     "dpiBtn": "PPP",
     "exportTitle": "Titre",
     "approx": "approx.",
-    "fileExportDefaultPrefixName": "carte-export"
+    "fileExportDefaultPrefixName": "carte-export",
+    "pageSize": "Taille des pages",
+    "letter": "Lettre",
+    "legal": "Légal",
+    "tabloid": "Tabloïd"
   },
   "geolocator": {
     "title": "Géolocalisation",
