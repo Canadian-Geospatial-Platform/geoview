@@ -73,7 +73,7 @@ export async function exportPDFMap(mapId: string, params: exportPDFMapParams): P
   const mapImageHeight = MAP_IMAGE_DIMENSIONS[size].height;
   const aspectRatio = mapImageWidth / mapImageHeight;
 
-  // Adjust the map size to correct aspect ratio
+  // Adjust the map size to correct aspect ratio to avoid stretching the map
   let newMapWidth, newMapHeight;
   if (mapSize[0] / mapSize[1] < aspectRatio) {
     // Width is increased to meet aspect ratio
@@ -82,11 +82,11 @@ export async function exportPDFMap(mapId: string, params: exportPDFMapParams): P
   } else {
     // Height is increased to meet aspect ratio
     newMapWidth = mapSize[0];
-    newMapHeight = mapSize[0] * aspectRatio;
+    newMapHeight = mapSize[0] / aspectRatio;
   }
 
   // Temporarily resize the map for export
-  map.setSize([newMapWidth, newMapHeight]); // Convert back to screen pixels
+  map.setSize([newMapWidth, newMapHeight]);
 
   // Wait for map to re-render
   await new Promise((resolve) => {
