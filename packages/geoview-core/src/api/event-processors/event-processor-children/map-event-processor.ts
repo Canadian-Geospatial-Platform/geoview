@@ -33,6 +33,7 @@ import {
 import { api } from '@/app';
 import { LayerApi } from '@/geo/layer/layer';
 import { MapViewer, TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer';
+import { TypeMapStateForExportLayout } from '@/core/components/export/utilities';
 import { PluginsContainer } from '@/api/plugin/plugin-types';
 import { Projection } from '@/geo/utils/projection';
 import { isPointInExtent, isExtentLonLat } from '@/geo/utils/utilities';
@@ -332,6 +333,21 @@ export class MapEventProcessor extends AbstractEventProcessor {
         projected: [],
         dragging: false,
       },
+    };
+  }
+
+  /**
+   * Gets the map state information for creating the export layout
+   * @param {string} mapId - The map id
+   * @returns {TypeMapStateForExportLayout} The map state required for the export layout
+   */
+  static getMapStateForExportLayout(mapId: string): TypeMapStateForExportLayout {
+    const mapState = this.getMapStateProtected(mapId);
+    return {
+      attribution: mapState.attribution,
+      northArrow: mapState.northArrow,
+      northArrowElement: mapState.northArrowElement,
+      scale: mapState.scale,
     };
   }
 

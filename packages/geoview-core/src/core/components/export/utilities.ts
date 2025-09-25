@@ -3,12 +3,15 @@ import { Buffer } from 'buffer';
 import * as pdfjsLib from 'pdfjs-dist';
 import { pdf, DocumentProps } from '@react-pdf/renderer';
 
+import { TypeNorthArrow, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { ExportDocument } from '@/core/components/export/pdf-layout';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { exportFile } from '@/core/utils/utilities';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 
 // GV Buffer polyfill for react-pdf
 if (typeof window !== 'undefined') {
@@ -23,6 +26,13 @@ interface exportPDFMapParams {
   disclaimer: string;
   size: 'LETTER' | 'TABLOID' | 'LEGAL';
 }
+
+export type TypeMapStateForExportLayout = {
+  attribution: string[];
+  northArrow: boolean;
+  northArrowElement: TypeNorthArrow;
+  scale: TypeScaleInfo;
+};
 
 // Export dimension constants at 300DPI
 const MAP_IMAGE_DIMENSIONS = {
@@ -47,20 +57,18 @@ const MAP_IMAGE_DIMENSIONS = {
  * Generate PDF export preview for a map by pulling data from store state
  */
 export async function exportPDFMap(mapId: string, params: exportPDFMapParams): Promise<string> {
-  const store = getGeoViewStore(mapId);
-  const state = store.getState();
-
   const { exportTitle, disclaimer, size } = params;
 
   // Get all needed data from store state
-  const mapElement = state.appState.geoviewHTMLElement;
+  const mapElement = AppEventProcessor.getGeoviewHTMLElement(mapId);
   const mapViewer = MapEventProcessor.getMapViewer(mapId);
-  const { northArrow, scale } = state.mapState;
-  const mapAttributions = state.mapState.attribution;
-  const rotationAngle = state.mapState.northArrowElement.degreeRotation || 0;
-  const legendLayers = state.layerState.legendLayers.filter(
+  const mapState = MapEventProcessor.getMapStateForExportLayout(mapId);
+  const { northArrow, scale, attribution, northArrowElement } = mapState;
+  const rotationAngle = northArrowElement.degreeRotation || 0;
+  const legendLayers = LegendEventProcessor.getLegendLayers(mapId).filter(
     (layer) => layer.layerStatus === 'loaded' && (layer.items.length === 0 || layer.items.some((item) => item.isVisible))
   );
+  const orderedLayersInfo = MapEventProcessor.getMapOrderedLayerInfo(mapId);
 
   if (!mapViewer?.map) throw new Error('Map not available');
 
@@ -168,8 +176,9 @@ export async function exportPDFMap(mapId: string, params: exportPDFMapParams): P
         scaleLineWidth: scale.lineWidthMetric,
         northArrowSvg: northArrowSvgPaths,
         legendLayers: cleanLegendLayers,
+        orderedLayerInfo: orderedLayersInfo,
         disclaimer: disclaimer,
-        attributions: mapAttributions.slice(0, 2),
+        attributions: attribution,
         date: DateMgt.formatDate(new Date(), 'YYYY-MM-DD, hh:mm:ss A'),
         mapId,
         timeSliderLayers: undefined,
