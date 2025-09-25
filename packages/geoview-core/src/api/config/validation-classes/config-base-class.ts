@@ -15,7 +15,7 @@ import {
 import { logger } from '@/core/utils/logger';
 import { LAYER_STATUS } from '@/core/utils/constant';
 import { GroupLayerEntryConfig, GroupLayerEntryConfigProps } from './group-layer-entry-config';
-import { NotImplementedError, NotSupportedError } from '@/core/exceptions/core-exceptions';
+import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 import { DateMgt, TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
@@ -621,26 +621,6 @@ export abstract class ConfigBaseClass {
     return groupLayerProps;
   }
 
-  /**
-   * Clones the configuration class.
-   * @returns {ConfigBaseClass} The cloned ConfigBaseClass object.
-   */
-  clone(): ConfigBaseClass {
-    // Redirect to clone the object and return it
-    return this.onClone();
-  }
-
-  /**
-   * Overridable function to clone a child of a ConfigBaseClass.
-   * @returns {ConfigBaseClass} The cloned child object of a ConfigBaseClass.
-   */
-  protected onClone(): ConfigBaseClass {
-    // Crash on purpose.
-    // GV Make sure to implement a 'protected override onClone(): ConfigBaseClass' in the child-class to
-    // GV use this cloning feature. See OgcWMSLayerEntryConfig for example.
-    throw new NotImplementedError(`Not implemented exception onClone on layer path ${this.layerPath}`);
-  }
-
   // #region STATIC
 
   /**
@@ -909,6 +889,20 @@ export abstract class ConfigBaseClass {
     }
 
     return (layerConfig as ConfigBaseClassProps)?.layerName || (layerConfig as TypeGeoviewLayerConfig).geoviewLayerName;
+  }
+
+  /**
+   * Helper function to support when a layerConfig is either a class instance or a regular json object.
+   * @param {ConfigClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
+   * @param {string} layerName - The layer name to apply.
+   */
+  static setClassOrTypeLayerName(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig | undefined, layerName: string): void {
+    if (layerConfig instanceof ConfigBaseClass) {
+      layerConfig.setLayerName(layerName);
+    }
+
+    // eslint-disable-next-line no-param-reassign
+    if (layerConfig) (layerConfig as ConfigBaseClassProps).layerName = layerName;
   }
 
   /**

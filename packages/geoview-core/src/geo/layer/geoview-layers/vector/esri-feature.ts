@@ -19,6 +19,7 @@ import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstrac
 import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 export interface TypeSourceEsriFeatureInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'EsriJSON';
@@ -171,10 +172,10 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @returns {boolean} true if an error is detected.
    */
   esriChildHasDetectedAnError(layerConfig: ConfigBaseClass, esriIndex: number): boolean {
+    // If the metadata for the particular layer doesn't indicate 'Feature Layer' as the type
     if (this.getMetadata()!.layers[esriIndex].type !== 'Feature Layer') {
-      // Add a layer load error
-      this.addLayerLoadError(new LayerNotFeatureLayerError(layerConfig.layerPath, layerConfig.getLayerNameCascade()), layerConfig);
-      return true;
+      // Log warning
+      GeoViewError.logWarning(new LayerNotFeatureLayerError(layerConfig.layerPath, layerConfig.getLayerNameCascade()));
     }
     return false;
   }

@@ -418,9 +418,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           styleConfig: legendResultSetEntry.data?.styleConfig,
           type: legendResultSetEntry.data?.type || layerConfig.getSchemaTag(),
           canToggle: legendResultSetEntry.data?.type !== CONST_LAYER_TYPES.ESRI_IMAGE,
-          opacity: layerConfig.getInitialSettings()?.states?.opacity ?? 1,
-          hoverable: layerConfig.getInitialSettings()?.states?.hoverable,
-          queryable: layerConfig.getInitialSettings()?.states?.queryable,
+          opacity: layerConfig.getInitialSettings()?.states?.opacity ?? 1, // default: 1
+          hoverable: layerConfig.getInitialSettings()?.states?.hoverable, // TODO: Check - Should it be default: true here?
+          queryable: layerConfig.getInitialSettings()?.states?.queryable, // TODO: Check - Should it be default: true here?
           items: [] as TypeLegendItem[],
           children: [] as TypeLegendLayer[],
           icons: icons || [],

@@ -61,6 +61,38 @@ export class GeoViewError extends Error {
    */
   static logError(error: unknown, language: TypeDisplayLanguage = 'en'): void {
     // Get the message
+    const message = GeoViewError.#extractMessage(error, language);
+
+    // Log it
+    logger.logError(message);
+  }
+
+  /**
+   * Logs an error using the application's logger.
+   * If the error is a GeoViewError, its message is translated to English (default) before logging.
+   * @param {unknown} error - The error to be logged. Can be any type.
+   * @param {TypeDisplayLanguage} language - The language to translate the error into. English by default.
+   */
+  static logWarning(error: unknown, language: TypeDisplayLanguage = 'en'): void {
+    // Get the message
+    const message = GeoViewError.#extractMessage(error, language);
+
+    // Log it
+    logger.logWarning(message);
+  }
+
+  /**
+   * Extracts a user-friendly message from an error object, optionally translating it based on the provided language.
+   * Handles different types of errors:
+   * - If the error is a standard `Error`, extracts its message.
+   * - If the error is a `GeoViewError`, translates the message using the specified language.
+   * - If the error has a `cause`, appends it to the message.
+   * @param {unknown} error - The error object from which to extract the message.
+   * @param {TypeDisplayLanguage} [language='en'] - The language code used for translating the message (default is English).
+   * @returns {string} The extracted and possibly translated error message as a string.
+   */
+  static #extractMessage(error: unknown, language: TypeDisplayLanguage = 'en'): string {
+    // Get the message
     let message = error;
 
     // If the error is an actual Error object (great)
@@ -75,8 +107,8 @@ export class GeoViewError extends Error {
     // If there's a cause of the error inside
     if (error instanceof Error && error.cause) message += ` | ${error.cause}`;
 
-    // Log it
-    logger.logError(message);
+    // Return the message
+    return String(message);
   }
 }
 
