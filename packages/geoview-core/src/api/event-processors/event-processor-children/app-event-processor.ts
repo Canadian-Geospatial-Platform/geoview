@@ -58,9 +58,18 @@ export class AppEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Shortcut to get the display theme for a given map id
+   * Shortcut to get the GeoView HTML Element
    * @param {string} mapId - The mapId
-   * @returns {TypeDisplayTheme} The display theme.
+   * @returns {HTMLElement} The GeoView HTML Element
+   */
+  static getGeoviewHTMLElement(mapId: string): HTMLElement {
+    return this.getAppState(mapId).geoviewHTMLElement;
+  }
+
+  /**
+   * Shortcut to get if unsymbolized features should be shown
+   * @param {string} mapId - The mapId
+   * @returns {boolean} Whether unsymbolized features should be shown
    */
   static getShowUnsymbolizedFeatures(mapId: string): boolean {
     return this.getAppState(mapId).showUnsymbolizedFeatures;

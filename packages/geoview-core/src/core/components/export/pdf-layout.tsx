@@ -3,6 +3,7 @@ import { TypeLegendLayer } from '@/core/components/layers/types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { TypeTimeSliderValues, TimeSliderLayerSet } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { DateMgt } from '@/core/utils/date-mgt';
+import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 // Page size specific styling
 const PAGE_CONFIGS = {
@@ -24,6 +25,7 @@ interface ExportDocumentProps {
     transform: string;
   }> | null;
   legendLayers: TypeLegendLayer[];
+  orderedLayerInfo: TypeOrderedLayerInfo[];
   disclaimer: string;
   attributions: string[];
   date: string;
@@ -37,15 +39,28 @@ interface FlattenedLegendItem {
   data: TypeLegendLayer;
   parentName?: string;
   depth: number;
+  isRoot: boolean;
   timeInfo?: TypeTimeSliderValues;
 }
 
 // Filter and process layers like LegendContainerComponent does
-const processLegendLayers = (layers: TypeLegendLayer[], mapId: string, timeSliderLayers?: TimeSliderLayerSet): FlattenedLegendItem[] => {
+const processLegendLayers = (
+  layers: TypeLegendLayer[],
+  mapId: string,
+  orderedLayerInfo: TypeOrderedLayerInfo[],
+  timeSliderLayers?: TimeSliderLayerSet
+): FlattenedLegendItem[] => {
   const allItems: FlattenedLegendItem[] = [];
 
-  const flattenLayer = (layer: TypeLegendLayer, depth = 0): FlattenedLegendItem[] => {
+  const flattenLayer = (layer: TypeLegendLayer, depth = 0, rootLayerName?: string): FlattenedLegendItem[] => {
     const items: FlattenedLegendItem[] = [];
+    const currentRootName = rootLayerName || layer.layerName;
+
+    // Check if layer is visible on the map
+    const layerInfo = orderedLayerInfo.find((info) => info.layerPath === layer.layerPath);
+    if (!layerInfo?.visible) {
+      return items;
+    }
 
     // Check if layer has any meaningful legend content
     const hasVisibleItems = layer.items.some((item) => item.isVisible);
@@ -59,15 +74,22 @@ const processLegendLayers = (layers: TypeLegendLayer[], mapId: string, timeSlide
     }
 
     // Add the layer itself
-    items.push({ type: depth === 0 ? 'layer' : 'child', data: layer, depth });
+    items.push({
+      type: depth === 0 ? 'layer' : 'child',
+      data: layer,
+      depth,
+      isRoot: depth === 0,
+      parentName: depth === 0 ? undefined : currentRootName,
+    });
 
     // Add WMS legend image if available
     if (hasWMSLegend) {
       items.push({
         type: 'wms',
         data: layer,
-        parentName: layer.layerName,
+        parentName: currentRootName,
         depth: depth + 1,
+        isRoot: false,
       });
     }
 
@@ -77,8 +99,9 @@ const processLegendLayers = (layers: TypeLegendLayer[], mapId: string, timeSlide
       items.push({
         type: 'time',
         data: layer,
-        parentName: layer.layerName,
+        parentName: currentRootName,
         depth: depth + 1,
+        isRoot: false,
         timeInfo: timeDimension,
       });
     }
@@ -89,8 +112,9 @@ const processLegendLayers = (layers: TypeLegendLayer[], mapId: string, timeSlide
         items.push({
           type: 'item',
           data: { ...layer, items: [item] },
-          parentName: layer.layerName,
+          parentName: currentRootName,
           depth: depth + 1,
+          isRoot: false,
         });
       }
     });
@@ -98,7 +122,7 @@ const processLegendLayers = (layers: TypeLegendLayer[], mapId: string, timeSlide
     // Recursively add children
     if (layer.children) {
       layer.children.forEach((child) => {
-        items.push(...flattenLayer(child, depth + 1));
+        items.push(...flattenLayer(child, depth + 1, currentRootName));
       });
     }
 
@@ -119,43 +143,38 @@ const distributeIntoColumns = (items: FlattenedLegendItem[], numColumns: number)
   const columns: FlattenedLegendItem[][] = Array(numColumns)
     .fill(null)
     .map(() => []);
-  let currentColumn = 0;
+
+  // Group items by root layers
+  const groups: FlattenedLegendItem[][] = [];
   let currentGroup: FlattenedLegendItem[] = [];
-  let currentRootLayer = '';
 
   items.forEach((item) => {
-    // Determine root layer for grouping
-    const rootLayer = item.type === 'layer' ? item.data.layerName : item.parentName || '';
-
-    // If we're starting a new root layer group
-    if (rootLayer !== currentRootLayer) {
-      // Add previous group to current column if it exists
-      if (currentGroup.length > 0) {
-        columns[currentColumn].push(...currentGroup);
-        currentGroup = [];
-      }
-
-      // Check if we should move to next column (if current group would be too long)
-      const estimatedGroupSize = items.filter((i) => (i.type === 'layer' ? i.data.layerName : i.parentName || '') === rootLayer).length;
-
-      // If current column already has items and adding this group would make it too long, move to next column
-      if (
-        columns[currentColumn].length > 0 &&
-        columns[currentColumn].length + estimatedGroupSize > Math.ceil(items.length / numColumns) + 3
-      ) {
-        currentColumn = Math.min(currentColumn + 1, numColumns - 1);
-      }
-
-      currentRootLayer = rootLayer;
+    if (item.isRoot && currentGroup.length > 0) {
+      groups.push(currentGroup);
+      currentGroup = [];
     }
-
     currentGroup.push(item);
   });
 
-  // Add final group
   if (currentGroup.length > 0) {
-    columns[currentColumn].push(...currentGroup);
+    groups.push(currentGroup);
   }
+
+  // Distribute groups to balance column sizes
+  groups.forEach((group) => {
+    // Find column with fewest items
+    let targetColumn = 0;
+    let minItems = columns[0].length;
+
+    for (let i = 1; i < numColumns; i++) {
+      if (columns[i].length < minItems) {
+        minItems = columns[i].length;
+        targetColumn = i;
+      }
+    }
+
+    columns[targetColumn].push(...group);
+  });
 
   return columns;
 };
@@ -167,6 +186,7 @@ export function ExportDocument({
   scaleLineWidth,
   northArrowSvg,
   legendLayers,
+  orderedLayerInfo,
   disclaimer,
   attributions,
   date,
@@ -251,7 +271,7 @@ export function ExportDocument({
             <Text style={{ fontSize: 11, fontWeight: 'bold', marginBottom: 10 }}>Legend</Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
               {(() => {
-                const allItems = processLegendLayers(legendLayers, mapId, timeSliderLayers);
+                const allItems = processLegendLayers(legendLayers, mapId, orderedLayerInfo, timeSliderLayers);
                 const columns = distributeIntoColumns(allItems, config.legendColumns);
 
                 return columns.map((columnItems, columnIndex) => (
