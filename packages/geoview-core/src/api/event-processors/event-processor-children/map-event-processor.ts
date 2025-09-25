@@ -1666,10 +1666,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
     removeUnlisted: boolean
   ): void {
     listOfLayerEntryConfigs?.forEach((layerEntryConfig) => {
-      const layerName = layerEntryConfig.getLayerName();
+      const layerName = ConfigBaseClass.getClassOrTypeLayerName(layerEntryConfig);
       // If there's a name in pairsDict that matches
-      if (layerName && pairsDict[layerName]) layerEntryConfig.setLayerName(pairsDict[layerName]);
-      else if (removeUnlisted) layerEntryConfig.setLayerName('');
+      if (layerName && pairsDict[layerName]) ConfigBaseClass.setClassOrTypeLayerName(layerEntryConfig, pairsDict[layerName]);
+      else if (removeUnlisted) ConfigBaseClass.setClassOrTypeLayerName(layerEntryConfig, '');
       if (layerEntryConfig.listOfLayerEntryConfig?.length)
         this.#replaceLayerEntryConfigNames(pairsDict, layerEntryConfig.listOfLayerEntryConfig, removeUnlisted);
     });

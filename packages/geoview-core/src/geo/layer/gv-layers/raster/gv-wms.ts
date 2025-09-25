@@ -3,7 +3,7 @@ import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { Coordinate } from 'ol/coordinate';
 import { ImageArcGISRest, ImageWMS } from 'ol/source';
 import { Extent } from 'ol/extent';
-import { Projection as OLProjection } from 'ol/proj';
+import { Projection as OLProjection, ProjectionLike } from 'ol/proj';
 import { Map as OLMap } from 'ol';
 
 import { TypeWmsLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -26,7 +26,7 @@ import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { Projection } from '@/geo/utils/projection';
 import { LayerInvalidFeatureInfoFormatWMSError, LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions';
 import { MapViewer } from '@/geo/map/map-viewer';
-import { formatError, NetworkError, ResponseContentError } from '@/core/exceptions/core-exceptions';
+import { formatError, NetworkError, NotSupportedError, ResponseContentError } from '@/core/exceptions/core-exceptions';
 import { TypeDateFragments } from '@/core/utils/date-mgt';
 import { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 
@@ -37,6 +37,9 @@ import { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raste
  * @class GVWMS
  */
 export class GVWMS extends AbstractGVRaster {
+  /** Keep in mind which info format worked best when getting feature info the first time, as to not have to recheck for every query after */
+  #featureInfoFormatWorkingFormat: string | undefined;
+
   /**
    * Constructs a GVWMS layer to manage an OpenLayer layer.
    * @param {ImageWMS} olSource - The OpenLayer source.
@@ -165,84 +168,349 @@ export class GVWMS extends AbstractGVRaster {
     // Project the lon/lat to the map's projection
     const clickCoordinate = Projection.transformFromLonLat(lonlat, map.getView().getProjection());
 
-    let infoFormat = '';
-    const featureInfoFormat = this.getLayerConfig().getServiceMetadata()?.Capability?.Request?.GetFeatureInfo?.Format;
-    if (featureInfoFormat)
-      if (featureInfoFormat.includes('text/xml')) infoFormat = 'text/xml';
-      else if (featureInfoFormat.includes('text/html')) infoFormat = 'text/html';
-      else if (featureInfoFormat.includes('text/plain')) infoFormat = 'text/plain';
-      else {
-        // Failed
-        throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
-      }
-
+    // Get the source and resolution
     const wmsSource = this.getOLSource();
     const viewResolution = map.getView().getResolution()!;
-    const featureInfoUrl = wmsSource?.getFeatureInfoUrl(clickCoordinate, viewResolution, map.getView().getProjection().getCode(), {
+    const projectionCode = map.getView().getProjection().getCode();
+
+    let featureMember: Record<string, unknown> | undefined;
+    try {
+      // If not sure which info format works with the layer
+      if (!this.#featureInfoFormatWorkingFormat) {
+        // Try various info format and keep in mind which one worked
+        featureMember = await this.#getFeatureInfoUsingAllPatternsAndKeepWhichWorked(
+          layerConfig,
+          wmsSource,
+          clickCoordinate,
+          viewResolution,
+          projectionCode,
+          abortController
+        );
+      } else if (this.#featureInfoFormatWorkingFormat === 'text/xml') {
+        // We know text/xml works, let's use that
+        featureMember = await GVWMS.#getFeatureInfoUsingXML(
+          layerConfig,
+          wmsSource,
+          clickCoordinate,
+          viewResolution,
+          projectionCode,
+          abortController
+        );
+      } else if (this.#featureInfoFormatWorkingFormat === 'text/html') {
+        // We know text/xml works, let's use that
+        featureMember = await GVWMS.#getFeatureInfoUsingHTML(
+          layerConfig,
+          wmsSource,
+          clickCoordinate,
+          viewResolution,
+          projectionCode,
+          abortController
+        );
+      } else if (this.#featureInfoFormatWorkingFormat === 'text/plain') {
+        // We know text/xml works, let's use that
+        featureMember = await GVWMS.#getFeatureInfoUsingPlain(
+          layerConfig,
+          wmsSource,
+          clickCoordinate,
+          viewResolution,
+          projectionCode,
+          abortController
+        );
+      } else {
+        // Unsupported feature info format
+        logger.logError('Unsupported info format in GVWMS.getFeatureInfoAtLonLat');
+        throw new NotSupportedError('Unsupported info format');
+      }
+    } catch {
+      // Eat the error, we failed
+    }
+
+    // If managed to read data
+    if (featureMember) {
+      return GVWMS.#formatWmsFeatureInfoResult(layerConfig.layerPath, featureMember, clickCoordinate);
+    }
+
+    // Failed
+    return [];
+  }
+
+  /**
+   * Attempts to retrieve feature information from a WMS layer using a prioritized list of supported formats:
+   * `text/xml`, `text/html`, and `text/plain`, in that order.
+   * For each supported format found in the layer's WMS capabilities, the method tries to fetch feature info
+   * using that format. The first successful format is saved internally for future reference.
+   * If no format returns usable feature info, an error is thrown.
+   * @param {OgcWmsLayerEntryConfig} layerConfig - Configuration for the WMS layer from which to retrieve feature info.
+   * @param {ImageWMS} wmsSource - The OpenLayers WMS source instance used to build the GetFeatureInfo requests.
+   * @param {Coordinate} clickCoordinate - The coordinate on the map where the user clicked.
+   * @param {number} viewResolution - The current resolution of the map view.
+   * @param {ProjectionLike} projectionCode - The projection used for the request (e.g., 'EPSG:3857').
+   * @param {AbortController} [abortController] - Optional abort controller to cancel the request if needed.
+   * @returns {Promise<Record<string, unknown>>} A promise that resolves to the feature info response, in the format of the first successful retrieval.
+   * @throws {LayerInvalidFeatureInfoFormatWMSError} If no supported format returns usable feature info data.
+   */
+  async #getFeatureInfoUsingAllPatternsAndKeepWhichWorked(
+    layerConfig: OgcWmsLayerEntryConfig,
+    wmsSource: ImageWMS,
+    clickCoordinate: Coordinate,
+    viewResolution: number,
+    projectionCode: ProjectionLike,
+    abortController: AbortController | undefined = undefined
+  ): Promise<Record<string, unknown>> {
+    // Get the supported info formats
+    const featureInfoFormat = this.getLayerConfig().getServiceMetadata()?.Capability?.Request?.GetFeatureInfo?.Format;
+
+    // If the info format includes XML
+    let featureMember: Record<string, unknown> | undefined;
+    if (featureInfoFormat?.includes('text/xml')) {
+      try {
+        // Try to get the feature member using XML format
+        featureMember = await GVWMS.#getFeatureInfoUsingXML(
+          layerConfig,
+          wmsSource,
+          clickCoordinate,
+          viewResolution,
+          projectionCode,
+          abortController
+        );
+
+        // Keep in mind this query worked
+        this.#featureInfoFormatWorkingFormat = 'text/xml';
+      } catch {
+        // Failed to retrieve featureMember using HTML, eat the error, we'll try with another format
+      }
+    }
+
+    // If not found anything and info format includes HTML
+    if (!featureMember && featureInfoFormat?.includes('text/html')) {
+      try {
+        featureMember = await GVWMS.#getFeatureInfoUsingHTML(
+          layerConfig,
+          wmsSource,
+          clickCoordinate,
+          viewResolution,
+          projectionCode,
+          abortController
+        );
+
+        // Keep in mind this query worked, for next time
+        this.#featureInfoFormatWorkingFormat = 'text/html';
+      } catch {
+        // Failed to retrieve featureMember using HTML, eat the error, we'll try with another format
+      }
+    }
+
+    // If not found anything, last attempt with text/plain
+    if (!featureMember) {
+      try {
+        featureMember = await GVWMS.#getFeatureInfoUsingPlain(
+          layerConfig,
+          wmsSource,
+          clickCoordinate,
+          viewResolution,
+          projectionCode,
+          abortController
+        );
+
+        // Keep in mind this query worked
+        this.#featureInfoFormatWorkingFormat = 'text/plain';
+      } catch {
+        // Failed to retrieve featureMember using plain, eat the error, we'll handle the case below
+      }
+    }
+
+    // If any found result
+    if (featureMember) return featureMember;
+
+    // Failed
+    throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
+  }
+
+  /**
+   * Retrieves feature information from a WMS layer using the `text/xml` info format.
+   * This method performs a `GetFeatureInfo` request at the specified map coordinate,
+   * using the provided WMS source and projection. It returns a Promise of a Record<string, unknown> response.
+   * @param {OgcWmsLayerEntryConfig} layerConfig - Configuration object for the target WMS layer.
+   * @param {ImageWMS} wmsSource - The OpenLayers WMS source used to construct the request.
+   * @param {Coordinate} clickCoordinate - The coordinate on the map where the user clicked.
+   * @param {number} viewResolution - The current resolution of the map view.
+   * @param {ProjectionLike} projectionCode - The projection in which the request should be made (e.g., 'EPSG:3857').
+   * @param {AbortController} [abortController] - Optional AbortController to allow cancellation of the request.
+   * @returns {Promise<Record<string, unknown>>} A promise that resolves to a Record<string, unknown>.
+   */
+  static async #getFeatureInfoUsingXML(
+    layerConfig: OgcWmsLayerEntryConfig,
+    wmsSource: ImageWMS,
+    clickCoordinate: Coordinate,
+    viewResolution: number,
+    projectionCode: ProjectionLike,
+    abortController: AbortController | undefined = undefined
+  ): Promise<Record<string, unknown>> {
+    // Try to get the information using xml format
+    const responseData = await GVWMS.#readFeatureInfo(
+      layerConfig,
+      wmsSource,
+      clickCoordinate,
+      viewResolution,
+      projectionCode,
+      'text/xml',
+      abortController
+    );
+
+    // Read the response as json
+    const xmlDomResponse = new DOMParser().parseFromString(responseData, 'text/xml');
+    const jsonResponse = xmlToJson(xmlDomResponse);
+
+    // GV TODO: We should use a WMS format setting in the schema to decide what feature info response interpreter to use
+    // GV For the moment, we try to guess the response format based on properties returned from the query
+    let featureMember: Record<string, unknown> | undefined;
+    const featureCollection = GVWMS.#getAttribute(jsonResponse, 'FeatureCollection');
+    if (featureCollection) featureMember = GVWMS.#getAttribute(featureCollection, 'featureMember');
+    else {
+      const featureInfoResponse = GVWMS.#getAttribute(jsonResponse, 'FeatureInfoResponse');
+      if (featureInfoResponse) {
+        featureMember = GVWMS.#getAttribute(featureInfoResponse, 'FIELDS');
+        if (featureMember) featureMember = GVWMS.#getAttribute(featureMember, '@attributes');
+      } else {
+        const getFeatureInfoResponse = GVWMS.#getAttribute(jsonResponse, 'GetFeatureInfoResponse');
+
+        // If there's a 'Layer' property
+        if (getFeatureInfoResponse && 'Layer' in getFeatureInfoResponse) {
+          // Cast it
+          const getFeatureInfoResponseCasted = getFeatureInfoResponse as unknown as TypeMetadataFeatureInfo;
+          featureMember = {};
+          featureMember['Layer name'] = getFeatureInfoResponseCasted?.Layer?.['@attributes']?.name;
+          if (getFeatureInfoResponseCasted?.Layer?.Attribute?.['@attributes']) {
+            const fieldName = getFeatureInfoResponseCasted.Layer.Attribute['@attributes'].name;
+            const fieldValue = getFeatureInfoResponseCasted.Layer.Attribute['@attributes'].value;
+            featureMember[fieldName] = fieldValue;
+          }
+        }
+      }
+    }
+
+    // If found
+    if (featureMember) {
+      // Success!
+      return featureMember;
+    }
+
+    // Failed
+    throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
+  }
+
+  /**
+   * Retrieves feature information from a WMS layer using the `text/html` info format.
+   * This method performs a `GetFeatureInfo` request at the specified map coordinate,
+   * using the provided WMS source and projection. It returns the html response
+   * wrapped in a structured object for downstream compatibility.
+   * @param {OgcWmsLayerEntryConfig} layerConfig - Configuration object for the target WMS layer.
+   * @param {ImageWMS} wmsSource - The OpenLayers WMS source used to construct the request.
+   * @param {Coordinate} clickCoordinate - The coordinate on the map where the user clicked.
+   * @param {number} viewResolution - The current resolution of the map view.
+   * @param {ProjectionLike} projectionCode - The projection in which the request should be made (e.g., 'EPSG:3857').
+   * @param {AbortController} [abortController] - Optional AbortController to allow cancellation of the request.
+   * @returns {Promise<Record<string, unknown>>} A promise that resolves to an object containing the html info response
+   *                                             under the key `html`.
+   */
+  static async #getFeatureInfoUsingHTML(
+    layerConfig: OgcWmsLayerEntryConfig,
+    wmsSource: ImageWMS,
+    clickCoordinate: Coordinate,
+    viewResolution: number,
+    projectionCode: ProjectionLike,
+    abortController: AbortController | undefined = undefined
+  ): Promise<Record<string, unknown>> {
+    // Try to get the information using html format
+    const responseData = await GVWMS.#readFeatureInfo(
+      layerConfig,
+      wmsSource,
+      clickCoordinate,
+      viewResolution,
+      projectionCode,
+      'text/html',
+      abortController
+    );
+
+    // The response is in html format
+    return { html: responseData };
+  }
+
+  /**
+   * Retrieves feature information from a WMS layer using the `text/plain` info format.
+   * This method performs a `GetFeatureInfo` request at the specified map coordinate,
+   * using the provided WMS source and projection. It returns the plain-text response
+   * wrapped in a structured object for downstream compatibility.
+   * @param {OgcWmsLayerEntryConfig} layerConfig - Configuration object for the target WMS layer.
+   * @param {ImageWMS} wmsSource - The OpenLayers WMS source used to construct the request.
+   * @param {Coordinate} clickCoordinate - The coordinate on the map where the user clicked.
+   * @param {number} viewResolution - The current resolution of the map view.
+   * @param {ProjectionLike} projectionCode - The projection in which the request should be made (e.g., 'EPSG:3857').
+   * @param {AbortController} [abortController] - Optional AbortController to allow cancellation of the request.
+   * @returns {Promise<Record<string, unknown>>} A promise that resolves to an object containing the plain-text feature info response
+   *                                             under the key `plain_text['#text']`.
+   */
+  static async #getFeatureInfoUsingPlain(
+    layerConfig: OgcWmsLayerEntryConfig,
+    wmsSource: ImageWMS,
+    clickCoordinate: Coordinate,
+    viewResolution: number,
+    projectionCode: ProjectionLike,
+    abortController: AbortController | undefined = undefined
+  ): Promise<Record<string, unknown>> {
+    // Try to get the information using plain format
+    const responseData = await GVWMS.#readFeatureInfo(
+      layerConfig,
+      wmsSource,
+      clickCoordinate,
+      viewResolution,
+      projectionCode,
+      'text/plain',
+      abortController
+    );
+
+    // The response is in plain format
+    // eslint-disable-next-line camelcase
+    return { plain_text: { '#text': responseData } };
+  }
+
+  /**
+   * Attempts to retrieve feature information from a WMS layer at a specified coordinate.
+   * Builds a GetFeatureInfo URL using the WMS source and fetches the response as plain text.
+   * If the feature info URL cannot be generated, an error is thrown.
+   * @param {OgcWmsLayerEntryConfig} layerConfig - The configuration object for the WMS layer.
+   * @param {ImageWMS} wmsSource - The OpenLayers WMS source used to construct the GetFeatureInfo URL.
+   * @param {Coordinate} clickCoordinate - The map coordinate where the user clicked.
+   * @param {number} viewResolution - The current map view resolution.
+   * @param {ProjectionLike} projectionCode - The projection of the map (e.g., 'EPSG:3857').
+   * @param {string} infoFormat - The desired format for the feature info response (e.g., 'text/xml', 'application/json').
+   * @param {AbortController} [abortController] - Optional abort controller to cancel the request if needed.
+   * @returns {Promise<string>} A promise that resolves to the response text from the GetFeatureInfo request.
+   * @throws {LayerInvalidFeatureInfoFormatWMSError} If the GetFeatureInfo URL could not be constructed,
+   *         which likely indicates the info format is unsupported or the layer is misconfigured.
+   */
+  static #readFeatureInfo(
+    layerConfig: OgcWmsLayerEntryConfig,
+    wmsSource: ImageWMS,
+    clickCoordinate: Coordinate,
+    viewResolution: number,
+    projectionCode: ProjectionLike,
+    infoFormat: string,
+    abortController: AbortController | undefined = undefined
+  ): Promise<string> {
+    // Try XML
+    const featureInfoUrl = wmsSource?.getFeatureInfoUrl(clickCoordinate, viewResolution, projectionCode, {
       INFO_FORMAT: infoFormat,
     });
 
+    // If retrieved something
     if (featureInfoUrl) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let featureMember: any;
-
-      // Perform query
-      const responseData = await Fetch.fetchText(featureInfoUrl, { signal: abortController?.signal });
-      if (infoFormat === 'text/xml') {
-        // Read string as Json
-        const xmlDomResponse = new DOMParser().parseFromString(responseData, 'text/xml');
-        const jsonResponse = xmlToJson(xmlDomResponse);
-
-        // GV TODO: We should use a WMS format setting in the schema to decide what feature info response interpreter to use
-        // GV For the moment, we try to guess the response format based on properties returned from the query
-        const featureCollection = GVWMS.#getAttribute(jsonResponse, 'FeatureCollection');
-        if (featureCollection) featureMember = GVWMS.#getAttribute(featureCollection, 'featureMember');
-        else {
-          const featureInfoResponse = GVWMS.#getAttribute(jsonResponse, 'FeatureInfoResponse');
-          if (featureInfoResponse) {
-            featureMember = GVWMS.#getAttribute(featureInfoResponse, 'FIELDS');
-            if (featureMember) featureMember = GVWMS.#getAttribute(featureMember, '@attributes');
-          } else {
-            const getFeatureInfoResponse = GVWMS.#getAttribute(jsonResponse, 'GetFeatureInfoResponse');
-            // If there's a 'Layer' property
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            if ('Layer' in (getFeatureInfoResponse as any)) {
-              // Cast it
-              const getFeatureInfoResponseCasted = getFeatureInfoResponse as TypeMetadataFeatureInfo;
-              featureMember = {};
-              featureMember['Layer name'] = getFeatureInfoResponseCasted?.Layer?.['@attributes']?.name;
-              if (getFeatureInfoResponseCasted?.Layer?.Attribute?.['@attributes']) {
-                const fieldName = getFeatureInfoResponseCasted.Layer.Attribute['@attributes'].name;
-                const fieldValue = getFeatureInfoResponseCasted.Layer.Attribute['@attributes'].value;
-                featureMember[fieldName] = fieldValue;
-              }
-            }
-          }
-        }
-      } else if (infoFormat === 'text/html') {
-        // The response is in html format
-        featureMember = { html: responseData };
-      } else {
-        // The response is in text format
-        // eslint-disable-next-line camelcase
-        featureMember = { plain_text: { '#text': responseData } };
-      }
-
-      // If managed to read data
-      if (featureMember) {
-        const featureInfoResult = GVWMS.#formatWmsFeatureInfoResult(layerConfig.layerPath, featureMember, clickCoordinate);
-        return featureInfoResult;
-      }
-
-      // Log warning
-      logger.logWarning(`Invalid information returned in the getFeatureInfo for layer ${layerConfig.layerPath}`);
-    } else {
-      // Log warning
-      logger.logWarning(`No feature url to get the feature info from for the WMS layer ${layerConfig.layerPath}`);
+      // Get the response data as text
+      return Fetch.fetchText(featureInfoUrl, { signal: abortController?.signal });
     }
 
-    // Empty
-    return [];
+    // Error
+    throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
   }
 
   /**
@@ -564,9 +832,9 @@ export class GVWMS extends AbstractGVRaster {
    * @returns {unknown | undefined} The attribute information.
    * @private
    */
-  static #getAttribute(jsonObject: unknown, attributeEnding: string): unknown | undefined {
+  static #getAttribute(jsonObject: unknown, attributeEnding: string): Record<string, unknown> | undefined {
     if (typeof jsonObject === 'object' && jsonObject !== null && !Array.isArray(jsonObject)) {
-      const record = jsonObject as Record<string, unknown>;
+      const record = jsonObject as Record<string, Record<string, unknown>>;
       const keyFound = Object.keys(record).find((key) => key.endsWith(attributeEnding));
       return keyFound ? record[keyFound] : undefined;
     }

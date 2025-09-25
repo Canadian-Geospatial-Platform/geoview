@@ -107,12 +107,24 @@ export const FeatureRow = memo(function FeatureRow({ featureInfoItem, index, onI
   const theme = useTheme();
   const { alias, value } = featureInfoItem;
 
-  // Stringify values and create array of string to split item with ';' to separate images
-  let stringValue: string | string[] = Array.isArray(value) ? String(value.map(stringify)) : String(stringify(value));
-  stringValue = stringValue.toString().split(';');
+  // Get the original value in an array
+  let stringValues = useMemo(() => [''], []);
+  if (value) {
+    stringValues = [String(value)];
+  }
+
+  // TODO: Check - Solidify this logic. I'm adding an attempt to guess the value content is a list of images before proceeding with
+  // TO.DOCONT: the logic with the ';' here. It's rough, but it's an improvement. Originally it was not checking at all what the
+  // TO.DOCONT: content was and was doing it on everything, including html content and such!
+  // If the value contains an array of images
+  if (typeof value === 'string' && String(value).includes?.(';http')) {
+    // Stringify values and create array of string to split item with ';' to separate images
+    const stringValue: string = Array.isArray(value) ? String(value.map(stringify)) : String(stringify(value));
+    stringValues = stringValue.split(';');
+  }
 
   // Generate stable IDs for each item when component mounts
-  const itemIds = useMemo(() => stringValue.map(() => generateId()), [stringValue]);
+  const itemIds = useMemo(() => stringValues.map(() => generateId()), [stringValues]);
 
   return (
     <Grid
@@ -150,7 +162,7 @@ export const FeatureRow = memo(function FeatureRow({ featureInfoItem, index, onI
           flexGrow: 1,
         }}
       >
-        {stringValue.map((item: string, idx: number) => (
+        {stringValues.map((item: string, idx: number) => (
           <FeatureItem
             key={`${alias}_${itemIds[idx]}`}
             item={item}
