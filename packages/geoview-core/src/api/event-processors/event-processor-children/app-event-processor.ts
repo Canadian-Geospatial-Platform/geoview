@@ -123,6 +123,9 @@ export class AppEventProcessor extends AbstractEventProcessor {
 
   static setAppIsCrosshairActive(mapId: string, isActive: boolean): void {
     this.getAppState(mapId).setterActions.setCrosshairActive(isActive);
+
+    // Because the map is focused/blured, we need to enable/disable the map interaction for WCAG
+    MapEventProcessor.setActiveMapInteractionWCAG(mapId, isActive);
   }
 
   static setDisplayLanguage(mapId: string, lang: TypeDisplayLanguage): Promise<void> {

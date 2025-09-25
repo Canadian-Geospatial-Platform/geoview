@@ -10,7 +10,7 @@ import importPlugin from 'eslint-plugin-import';
 export default [
   js.configs.recommended,
   {
-    ignores: ['node_modules/', 'dist/'],
+    ignores: ['node_modules/', 'dist/', 'eslint.config.js'],
   },
   {
     files: ['**/*.{js,jsx,ts,tsx}'],

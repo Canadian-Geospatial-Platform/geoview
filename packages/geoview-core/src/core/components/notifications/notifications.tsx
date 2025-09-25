@@ -27,7 +27,6 @@ import { logger } from '@/core/utils/logger';
 import { useMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useShake } from '@/core/utils/useSpringAnimations';
 import { handleEscapeKey } from '@/core/utils/utilities';
-import { FocusTrapContainer } from '@/core/components/common';
 import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { SxStyles } from '@/ui/style/types';
 
@@ -261,6 +260,8 @@ export default memo(function Notifications(): JSX.Element {
           placement="right-end"
           onClose={handleClickAway}
           container={mapElem}
+          focusSelector="h3 + div button:last-child"
+          focusTrap={activeTrapGeoView}
           modifiers={[
             {
               name: 'eventListeners',
@@ -274,26 +275,24 @@ export default memo(function Notifications(): JSX.Element {
           }}
           handleKeyDown={(key, callBackFn) => handleEscapeKey(key, '', false, callBackFn)}
         >
-          <FocusTrapContainer id={`${mapId}-notification`} open={open && activeTrapGeoView}>
-            <Paper sx={sxClasses.notificationPanel}>
-              <NotificationHeader
-                onClose={handleClickAway}
-                onRemoveAll={removeAllNotifications}
-                hasNotifications={notifications.length > 0}
-                t={t}
-                sxClasses={sxClasses}
-              />
-              <Box sx={sxClasses.notificationsList}>
-                {notifications.length > 0 ? (
-                  notificationsList
-                ) : (
-                  <Typography component="div" sx={{ padding: '10px 15px' }}>
-                    {t('appbar.noNotificationsAvailable')}
-                  </Typography>
-                )}
-              </Box>
-            </Paper>
-          </FocusTrapContainer>
+          <Paper sx={sxClasses.notificationPanel}>
+            <NotificationHeader
+              onClose={handleClickAway}
+              onRemoveAll={removeAllNotifications}
+              hasNotifications={notifications.length > 0}
+              t={t}
+              sxClasses={sxClasses}
+            />
+            <Box sx={sxClasses.notificationsList}>
+              {notifications.length > 0 ? (
+                notificationsList
+              ) : (
+                <Typography component="div" sx={{ padding: '10px 15px' }}>
+                  {t('appbar.noNotificationsAvailable')}
+                </Typography>
+              )}
+            </Box>
+          </Paper>
         </Popper>
       </Box>
     </ClickAwayListener>

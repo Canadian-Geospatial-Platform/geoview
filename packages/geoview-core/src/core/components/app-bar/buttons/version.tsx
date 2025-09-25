@@ -115,6 +115,7 @@ export default function Version(): JSX.Element {
           placement="right-end"
           onClose={handleClickAway}
           container={mapElem}
+          focusSelector="button"
           modifiers={[
             {
               name: 'eventListeners',

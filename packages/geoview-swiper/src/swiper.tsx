@@ -12,9 +12,10 @@ import { useSwiperLayerPaths, useSwiperOrientation } from 'geoview-core/core/sto
 import { logger } from 'geoview-core/core/utils/logger';
 import { getLocalizedMessage, delay } from 'geoview-core/core/utils/utilities';
 import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
-import { useMapVisibleLayers } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
+import { useMapSize, useMapVisibleLayers } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
 import { MapViewer } from 'geoview-core/geo/map/map-viewer';
-import { sxClasses } from './swiper-style';
+import { getSxClasses } from './swiper-style';
+import { useMemo } from 'react';
 
 type SwiperProps = {
   viewer: MapViewer;
@@ -39,11 +40,17 @@ export function Swiper(props: SwiperProps): JSX.Element {
   const { useEffect, useState, useRef, useCallback } = reactUtilities.react;
   const { Box, Tooltip, HandleIcon } = ui.elements;
 
+  // Refs
   const mapSize = useRef<number[]>(viewer.map?.getSize() || [0, 0]);
   const swiperValueVertical = useRef(50);
   const swiperValueHorizontal = useRef(50);
   const swiperRef = useRef<HTMLElement>();
 
+  // SxClasses
+  const mapHeight = useMapSize()[1];
+  const sxClasses = useMemo(() => getSxClasses(mapHeight), [mapHeight]);
+
+  // States
   const [olLayers, setOlLayers] = useState<BaseLayer[]>([]);
   const [xPositionVertical, setXPositionVertical] = useState(mapSize.current[0] / 2);
   const [yPositionVertical, setYPositionVertical] = useState(0);

@@ -1,4 +1,4 @@
-import { createElement, ReactNode, useState } from 'react';
+import { createElement, ReactNode, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMapBasemapOptions, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
@@ -40,17 +40,28 @@ export default function BasemapSelect(): JSX.Element {
 
   /**
    * Handles basemap selection and updates basemap
-   * @returns {JSX.Element} the created basemap select button
    */
-  const handleChoice = (basemapChoice: string): void => {
-    setSelectedBasemap(basemapChoice);
-    createBasemapFromOptions(basemapChoice === 'default' ? configBasemapOptions : basemapChoiceOptions[basemapChoice]).catch(
-      (error: unknown) => {
-        // Log
-        logger.logPromiseFailed('setBaseMap in basemaps.ts', error);
+  const handleChoice = useCallback(
+    (basemapChoice: string): void => {
+      // Log
+      logger.logTraceUseCallback('BASEMAP-SELECT, handleChoice', basemapChoice);
+
+      setSelectedBasemap(basemapChoice);
+      createBasemapFromOptions(basemapChoice === 'default' ? configBasemapOptions : basemapChoiceOptions[basemapChoice]).catch(
+        (error: unknown) => {
+          // Log
+          logger.logPromiseFailed('setBaseMap in basemaps.ts', error);
+        }
+      );
+
+      // Focus the close button after selection
+      const closeButton = document.querySelector('.MuiDialogTitle-root button') as HTMLButtonElement;
+      if (closeButton) {
+        closeButton.focus();
       }
-    );
-  };
+    },
+    [configBasemapOptions, createBasemapFromOptions]
+  );
 
   /**
    * Render buttons in navbar panel.

@@ -1,7 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, isValidElement } from 'react';
 import { Popover as MaterialPopover, PopoverProps } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import { FocusTrap } from '@/ui';
 import { ARROW_KEYS_WITH_SPACE } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
+import { delay } from '@/core/utils/utilities';
 
 // Disable arrow key so user can't move the page when popover is open
 const handleKeyDown = (event: KeyboardEvent): void => {
@@ -60,22 +63,41 @@ const handleKeyDown = (event: KeyboardEvent): void => {
  *
  * @see {@link https://mui.com/material-ui/react-popover/|Material-UI Popover}
  */
-function PopoverUI(props: PopoverProps): JSX.Element {
+function PopoverUI({ open, children, ...props }: PopoverProps): JSX.Element {
   logger.logTraceRenderDetailed('ui/popover/popover');
 
-  // Get constant from props
-  const { open } = props;
+  // Hook
+  const theme = useTheme();
 
   useEffect(() => {
     logger.logTraceUseEffect('UI.POPOVER - handleKeyDown', open);
     if (open) {
       window.addEventListener('keydown', handleKeyDown);
+
+      // Wait the transition period then focus the close button when popover opens
+      delay(theme.transitions.duration.shortest)
+        .then(() => {
+          const closeButton = document.querySelector('[data-testid="CloseIcon"]')?.closest('button') as HTMLButtonElement;
+          if (closeButton) {
+            closeButton.focus();
+          }
+        })
+        .catch(() => {
+          logger.logPromiseFailed('in delay in UI.POPOVER - open');
+        });
     }
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [open]);
-  return <MaterialPopover {...props} />;
+  }, [open, theme.transitions.duration.shortest]);
+
+  return (
+    <MaterialPopover open={open} {...props}>
+      <FocusTrap open={open} disableAutoFocus>
+        {isValidElement(children) ? children : <span />}
+      </FocusTrap>
+    </MaterialPopover>
+  );
 }
 
 export const Popover = PopoverUI;

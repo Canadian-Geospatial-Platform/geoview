@@ -1,6 +1,7 @@
-import { memo, ReactNode } from 'react';
+import { memo, ReactNode, useEffect, useRef } from 'react';
 import { DialogProps } from '@mui/material';
 import { CloseIcon, Dialog, DialogContent, IconButton } from '@/ui';
+import { logger } from '@/core/utils/logger';
 
 interface FullScreenDialogProps extends DialogProps {
   open: boolean;
@@ -27,6 +28,25 @@ export const FullScreenDialog = memo(function FullScreenDialog({
   children,
   ...dialogProps
 }: FullScreenDialogProps): JSX.Element {
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('FULL SCREEN DIALOG - open with focus on close', open);
+
+    if (open) {
+      const timer = setTimeout(() => {
+        const closeButton = document.querySelector('.buttonFilledOutline') as HTMLButtonElement;
+        if (closeButton) {
+          closeButton.focus();
+        }
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+
+    return undefined;
+  }, [open]);
+
   return (
     <Dialog
       fullScreen
@@ -38,7 +58,7 @@ export const FullScreenDialog = memo(function FullScreenDialog({
       sx={{ maxHeight: '100% !important' }}
     >
       <DialogContent sx={DIALOG_CONTENT_STYLES}>
-        <IconButton onClick={onClose} color="primary" className="buttonFilledOutline" sx={CLOSE_BUTTON_STYLES}>
+        <IconButton ref={closeButtonRef} onClick={onClose} color="primary" className="buttonFilledOutline" sx={CLOSE_BUTTON_STYLES}>
           <CloseIcon />
         </IconButton>
         {children}

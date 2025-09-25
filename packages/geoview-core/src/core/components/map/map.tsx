@@ -53,6 +53,7 @@ export function Map(props: MapProps): JSX.Element {
   const hasRun = useRef<boolean>(false);
 
   useEffect(() => {
+    // Log
     logger.logTraceUseEffect('MAP - viewer');
 
     // FIXME: Here, we're preventing a double run, because at this level it's not only impacting a rendering thing, it's impacting the core

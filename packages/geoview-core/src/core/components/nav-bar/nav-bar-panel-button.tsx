@@ -11,6 +11,7 @@ import { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { logger } from '@/core/utils/logger';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { handleEscapeKey } from '@/core/utils/utilities';
+import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 interface NavbarPanelButtonType {
   buttonPanel: TypeButtonPanel;
@@ -33,6 +34,7 @@ export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType
   // Store
   const mapId = useGeoViewMapId();
   const geoviewElement = useAppGeoviewHTMLElement();
+  const activeTrapGeoView = useUIActiveTrapGeoView();
 
   // States
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
@@ -96,6 +98,8 @@ export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType
           placement="left-end"
           onClose={handleClickAway}
           container={shellContainer}
+          focusSelector="button"
+          focusTrap={activeTrapGeoView}
           sx={{ marginRight: '5px !important' }}
           handleKeyDown={(key, callBackFn) => handleEscapeKey(key, '', false, callBackFn)}
         >

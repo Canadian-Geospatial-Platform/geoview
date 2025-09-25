@@ -2,14 +2,15 @@ import { useState, ReactNode, useCallback, forwardRef, useImperativeHandle, Ref,
 import { useTranslation } from 'react-i18next';
 import { SxProps, useTheme } from '@mui/material/styles';
 import Markdown from 'markdown-to-jsx';
-import { Box, FullscreenIcon, ButtonGroup, Button, Typography } from '@/ui';
+import { Box, FullscreenIcon, ButtonGroup, Button, Typography, IconButton } from '@/ui';
 import { ResponsiveGrid } from './responsive-grid';
 import { getSxClasses } from './responsive-grid-layout-style';
 import { FullScreenDialog } from './full-screen-dialog';
 import { logger } from '@/core/utils/logger';
 import { ArrowBackIcon, ArrowForwardIcon, CloseIcon, QuestionMarkIcon } from '@/ui/icons';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useAppGuide, useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useUISelectedFooterLayerListItemId } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useUIActiveTrapGeoView, useUISelectedFooterLayerListItemId } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { handleEscapeKey } from '@/core/utils/utilities';
@@ -58,9 +59,16 @@ const ResponsiveGridLayout = forwardRef(
     // Ref for right panel
     const rightMainRef = useRef<HTMLDivElement>();
 
+    // Refs for focus management
+    const guideContainerRef = useRef<HTMLDivElement>(null);
+    const guideToggleBtnRef = useRef<HTMLButtonElement>(null);
+    const fullScreenBtnRef = useRef<HTMLButtonElement>(null);
+
     // Store
+    const mapId = useGeoViewMapId();
     const guide = useAppGuide();
     const selectedFooterLayerListItemId = useUISelectedFooterLayerListItemId();
+    const isFocusTrap = useUIActiveTrapGeoView();
 
     // States
     const [isRightPanelVisible, setIsRightPanelVisible] = useState(false);
@@ -72,17 +80,23 @@ const ResponsiveGridLayout = forwardRef(
     const sxClasses = useMemo(() => getSxClasses(theme, containerType!), [theme, containerType]);
 
     // Expose imperative methods to parent component
-    useImperativeHandle(ref, function handleRef() {
-      return {
-        setIsRightPanelVisible: (isVisible: boolean) => setIsRightPanelVisible(isVisible),
-        setRightPanelFocus: () => {
-          if (rightMainRef.current) {
-            rightMainRef.current.tabIndex = 0;
-            rightMainRef.current?.focus();
-          }
-        },
-      };
-    });
+    useImperativeHandle(
+      ref,
+      function handleRef() {
+        return {
+          setIsRightPanelVisible: (isVisible: boolean) => setIsRightPanelVisible(isVisible),
+          setRightPanelFocus: () => {
+            if (rightMainRef.current && !isGuideOpen) {
+              setTimeout(() => {
+                if (rightMainRef.current) rightMainRef.current.tabIndex = 0;
+                rightMainRef.current?.focus();
+              }, 0);
+            }
+          },
+        };
+      },
+      [isGuideOpen]
+    );
 
     useEffect(() => {
       if (rightMain) {
@@ -135,7 +149,7 @@ const ResponsiveGridLayout = forwardRef(
     const handleIsEnlarge = useCallback(
       (isEnlarge: boolean): void => {
         // Log
-        logger.logTraceUseCallback('LAYOUT - handleIsEnlarge');
+        logger.logTraceUseCallback('LAYOUT - handleIsEnlarge', isEnlarge);
 
         // Set the isEnlarge
         setIsEnlarged(isEnlarge);
@@ -147,12 +161,39 @@ const ResponsiveGridLayout = forwardRef(
     );
 
     const handleOpenGuide = useCallback((): void => {
-      // Open guide if it is closed and we have guide contents to display
-      if (guideContentIds && !isGuideOpen) {
-        setIsGuideOpen(true);
-        rightMainRef.current?.focus();
-      } else if (isGuideOpen) setIsGuideOpen(false); // Close guide if it is open
-    }, [guideContentIds, isGuideOpen]);
+      // Log
+      logger.logTraceUseCallback('LAYOUT - handleOpenGuide', !isGuideOpen);
+
+      setIsGuideOpen(!isGuideOpen);
+    }, [isGuideOpen]);
+
+    /**
+     * Focus management for the guide close button using requestAnimationFrame.
+     *
+     * We use requestAnimationFrame instead of direct ref focus because:
+     * 1. React's state updates are asynchronous - when setIsGuideOpen runs, the DOM isn't updated yet
+     * 2. Even useEffect runs before the DOM is painted with the new elements
+     * 3. requestAnimationFrame ensures we run the focus after the browser has painted the new DOM
+     */
+    useEffect(() => {
+      // Log
+      logger.logTraceUseEffect('LAYOUT - focus on close button when guide is open in WCAG');
+
+      if (isGuideOpen) {
+        // Use RAF for next frame
+        requestAnimationFrame(() => {
+          document.getElementById(`layout-close-guide-${mapId}`)?.focus();
+        });
+      }
+    }, [isGuideOpen, mapId]);
+
+    // Add a handler to close the guide and return focus to the Guide button
+    const handleCloseGuide = useCallback(() => {
+      setIsGuideOpen(false);
+      setTimeout(() => {
+        guideToggleBtnRef.current?.focus();
+      }, 200);
+    }, []);
 
     // If we're on mobile
     if (theme.breakpoints.down('md')) {
@@ -211,14 +252,15 @@ const ResponsiveGridLayout = forwardRef(
 
       return (
         <Button
+          ref={guideToggleBtnRef}
           makeResponsive
           type="text"
           variant="outlined"
           size="small"
-          onClick={() => handleOpenGuide()}
+          onClick={handleOpenGuide}
           tooltip={t('general.openGuide')!}
           startIcon={<QuestionMarkIcon />}
-          className={`'guideButton' ${isGuideOpen ? 'active' : ''}`}
+          className={`guideButton ${isGuideOpen ? 'active' : ''}`}
         >
           {t('general.guide')}
         </Button>
@@ -228,6 +270,7 @@ const ResponsiveGridLayout = forwardRef(
     const renderFullScreenButton = (): JSX.Element => {
       return (
         <Button
+          ref={fullScreenBtnRef}
           makeResponsive
           type="text"
           variant="outlined"
@@ -275,8 +318,25 @@ const ResponsiveGridLayout = forwardRef(
       if (!content) return null;
 
       return (
-        <Box sx={{ padding: '20px', overflow: 'auto' }}>
+        <Box ref={guideContainerRef} tabIndex={0} sx={{ padding: '20px', overflow: 'auto' }}>
           <Box className="guideBox">
+            {/* Close button, only shown WCAG is enabled and not fullScreen */}
+            {(isFocusTrap && !isFullScreen) && (
+              <IconButton
+                id={`layout-close-guide-${mapId}`}
+                onClick={handleCloseGuide}
+                sx={{
+                  position: 'absolute',
+                  top: 15,
+                  right: 15,
+                  zIndex: 1000,
+                }}
+                tabIndex={0}
+                aria-label={t('general.closeGuide') || 'Close guide'}
+              >
+                <CloseIcon />
+              </IconButton>
+            )}
             <Markdown options={{ wrapper: 'article' }}>{content}</Markdown>
           </Box>
         </Box>
@@ -288,16 +348,21 @@ const ResponsiveGridLayout = forwardRef(
 
       return (
         <>
-          <FullScreenDialog open={isFullScreen} onClose={() => setIsFullScreen(false)}>
+          <FullScreenDialog
+            open={isFullScreen}
+            onClose={() => {
+              setIsFullScreen(false);
+              fullScreenBtnRef.current?.focus();
+            }}
+          >
             <Box sx={sxClasses.rightMainContent} className="responsive-layout-right-main-content fullscreen-mode">
               {content}
             </Box>
           </FullScreenDialog>
 
           <Box
-            ref={rightMainRef}
+            ref={isGuideOpen ? undefined : rightMainRef}
             sx={sxClasses.rightMainContent}
-            tabIndex={-1}
             className={isGuideOpen ? 'responsive-layout-right-main-content guide-container' : 'responsive-layout-right-main-content'}
           >
             {content || <Typography className="noSelection">{t('layers.noSelection')}</Typography>}
@@ -306,7 +371,7 @@ const ResponsiveGridLayout = forwardRef(
       );
     };
 
-   return (
+    return (
       <Box ref={ref} sx={sxClasses.container} className="responsive-layout-container">
         <ResponsiveGrid.Root sx={{ pt: 8, pb: 0, paddingTop: '0' }} className="responsive-layout-top-row">
           {!fullWidth && (
@@ -325,7 +390,7 @@ const ResponsiveGridLayout = forwardRef(
             isRightPanelVisible={isRightPanelVisible}
             isEnlarged={isEnlarged}
             fullWidth={fullWidth}
-            sxProps={{ zIndex: isFullScreen ? 'unset' : 100, alignContent: 'flex-end', }}
+            sxProps={{ zIndex: isFullScreen ? 'unset' : 100, alignContent: 'flex-end' }}
             className="responsive-layout-right-top"
           >
             <Box

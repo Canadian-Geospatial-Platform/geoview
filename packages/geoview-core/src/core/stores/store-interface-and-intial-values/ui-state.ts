@@ -167,7 +167,10 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
       },
       disableFocusTrap: (callBackElementId: string) => {
         const id = callBackElementId ?? (get().uiState.focusItem.callbackElementId as string);
-        document.getElementById(id)?.focus();
+        // Don't focus if 'no-focus' is passed
+        if (id !== 'no-focus') {
+          document.getElementById(id)?.focus();
+        }
         set({
           uiState: {
             ...get().uiState,

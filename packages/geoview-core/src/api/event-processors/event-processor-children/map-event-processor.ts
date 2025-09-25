@@ -3,7 +3,7 @@ import { ScaleLine, OverviewMap as OLOverviewMap } from 'ol/control';
 import Overlay from 'ol/Overlay';
 import { Extent } from 'ol/extent';
 import { FitOptions } from 'ol/View';
-import { KeyboardPan } from 'ol/interaction';
+import { KeyboardPan, KeyboardZoom } from 'ol/interaction';
 import { Coordinate } from 'ol/coordinate';
 import { Size } from 'ol/size';
 import { Pixel } from 'ol/pixel';
@@ -961,13 +961,23 @@ export class MapEventProcessor extends AbstractEventProcessor {
   static setMapKeyboardPanInteractions(mapId: string, panDelta: number): void {
     const mapElement = this.getMapViewer(mapId).map;
 
-    // replace the KeyboardPan interraction by a new one
+    // replace the KeyboardPan interaction by a new one
     mapElement.getInteractions().forEach((interactionItem) => {
       if (interactionItem instanceof KeyboardPan) {
         mapElement.removeInteraction(interactionItem);
       }
     });
     mapElement.addInteraction(new KeyboardPan({ pixelDelta: panDelta }));
+  }
+
+  static setActiveMapInteractionWCAG(mapId: string, active: boolean): void {
+    const mapElement = this.getMapViewer(mapId).map;
+
+    // replace the KeyboardPan interaction by a new one
+    mapElement.getInteractions().forEach((interactionItem) => {
+      if (interactionItem instanceof KeyboardPan) interactionItem.setActive(active);
+      if (interactionItem instanceof KeyboardZoom) interactionItem.setActive(active);
+    });
   }
 
   /**

@@ -8,9 +8,6 @@ import { SxStyles } from '@/ui/style/types';
  * @returns {Object} the sx classes object
  */
 export const getFocusTrapSxClasses = (theme: Theme): SxStyles => {
-  const borderColor =
-    theme.palette.mode === 'light' ? theme.palette.geoViewColor.primary.dark[300] : theme.palette.geoViewColor.primary.light[300];
-
   return {
     trap: {
       display: 'flex',
@@ -22,12 +19,6 @@ export const getFocusTrapSxClasses = (theme: Theme): SxStyles => {
       width: '100%',
       zIndex: theme.zIndex.focusDialog,
       overflow: 'hidden',
-    },
-    exitFocus: {
-      border: 'unset',
-    },
-    enableFocus: {
-      border: `5px solid ${borderColor}`,
     },
   };
 };
