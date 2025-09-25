@@ -350,7 +350,7 @@
       "wrongType": "La couche '__param__' n'est pas du type attendu.",
       "notAGeoJsonLayer": "Ce n'est pas une couche GeoJSON pour la couche '__param__'.",
       "notAnEsriDynamicLayer": "Ce n'est pas une couche dynamique Esri pour la couche '__param__'.",
-      "notAFeatureLayer": "L'identifiant de couche n'est pas une couche d'entités '__param__'.",
+      "notAFeatureLayer": "L'identifiant de couche n'est pas une couche d'entités pour la couche '__param__'.",
       "notQueryableLayer": "La couche '__param__' n'est pas interrogeable.",
       "notAbleToQuery": "Impossible de téléchager les données pour '__param__'."
     },
