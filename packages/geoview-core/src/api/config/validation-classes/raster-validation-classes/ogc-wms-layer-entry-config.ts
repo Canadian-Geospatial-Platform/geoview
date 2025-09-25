@@ -7,7 +7,6 @@ import {
   TypeMetadataWMS,
   TypeSourceImageWmsInitialConfig,
 } from '@/api/types/layer-schema-types';
-import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import {
   AbstractBaseLayerEntryConfig,
   AbstractBaseLayerEntryConfigProps,
@@ -90,14 +89,6 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
     // Save the normalized url in the data access path
     this.setDataAccessPath(dataAccessPath);
-  }
-
-  /**
-   * Clones an instance of a OgcWmsLayerEntryConfig.
-   * @returns {ConfigBaseClass} The cloned OgcWmsLayerEntryConfig instance
-   */
-  protected override onClone(): ConfigBaseClass {
-    return new OgcWmsLayerEntryConfig(this.layerEntryProps);
   }
 
   /**

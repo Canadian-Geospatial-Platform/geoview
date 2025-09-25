@@ -259,7 +259,11 @@ export function addUiComponent(targetDivId: string, component: React.ReactElemen
  * @returns {string} Sanitized HTML or empty string if all dirty
  */
 export function sanitizeHtmlContent(contentHtml: string): string {
-  return sanitizeHtml(contentHtml);
+  return sanitizeHtml(contentHtml, {
+    allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img']),
+    allowedAttributes: { img: ['src'] },
+    allowedSchemes: ['data', 'http', 'https'],
+  });
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

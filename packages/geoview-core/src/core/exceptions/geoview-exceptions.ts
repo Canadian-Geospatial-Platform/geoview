@@ -61,6 +61,28 @@ export class GeoViewError extends Error {
    */
   static logError(error: unknown, language: TypeDisplayLanguage = 'en'): void {
     // Get the message
+    const message = GeoViewError.#extractMessage(error, language);
+
+    // Log it
+    logger.logError(message);
+  }
+
+  /**
+   * Logs an error using the application's logger.
+   * If the error is a GeoViewError, its message is translated to English (default) before logging.
+   * @param {unknown} error - The error to be logged. Can be any type.
+   * @param {TypeDisplayLanguage} language - The language to translate the error into. English by default.
+   */
+  static logWarning(error: unknown, language: TypeDisplayLanguage = 'en'): void {
+    // Get the message
+    const message = GeoViewError.#extractMessage(error, language);
+
+    // Log it
+    logger.logWarning(message);
+  }
+
+  static #extractMessage(error: unknown, language: TypeDisplayLanguage = 'en'): string {
+    // Get the message
     let message = error;
 
     // If the error is an actual Error object (great)
@@ -75,8 +97,8 @@ export class GeoViewError extends Error {
     // If there's a cause of the error inside
     if (error instanceof Error && error.cause) message += ` | ${error.cause}`;
 
-    // Log it
-    logger.logError(message);
+    // Return the message
+    return String(message);
   }
 }
 

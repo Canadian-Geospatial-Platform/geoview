@@ -380,7 +380,8 @@ export abstract class AbstractGeoViewLayer {
       // If an AbstractBaseLayerEntryConfig
       if (layerConfig instanceof AbstractBaseLayerEntryConfig) {
         // Copy the service metadata right away
-        layerConfig.setServiceMetadata(this.#metadata);
+        // TODO: Check - Is this really the right place to set the ServiceMetadata?
+        layerConfig.setServiceMetadata(this.getMetadata());
 
         // If there's a copyrightText found in the metadata
         // GV Can be any object so disable eslint and proceed with caution
@@ -565,6 +566,9 @@ export abstract class AbstractGeoViewLayer {
     try {
       // If no errors already happened on the layer path being processed
       if (layerConfig.layerStatus !== 'error') {
+        // Set the service metadata in the entry config instance as we're about to process the layer metadata
+        layerConfig.setServiceMetadata(this.getMetadata());
+
         // Process and, yes, keep the await here, because we want to make extra sure the onProcessLayerMetadata is
         // executed asynchronously, even if the implementation of the overriden method is synchronous.
         // All so that the try/catch works nicely here.
