@@ -150,10 +150,11 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     // Log
     logger.logTraceUseMemo('FOOTER-BAR - memoFooterBarTabs', tabsList, memoTabs);
 
+    // Set the allTabs (union of all footer tabs) and get the needed keys
     const allTabs = { ...tabsList, ...memoTabs };
-    const availableTabKeys = Object.keys(allTabs);
+    const availableTabKeys: string[] = [...Object.keys(tabsList), 'guide'];
 
-    // Custom tabs first, then core tabs in DEFAULT_FOOTER_TABS_ORDER
+    // Custom tabs first, then core tabs in DEFAULT_FOOTER_TABS_ORDER ... last guide
     const customTabKeys = availableTabKeys.filter((tabKey) => !DEFAULT_FOOTER_TABS_ORDER.includes(tabKey));
     const coreTabKeys = DEFAULT_FOOTER_TABS_ORDER.filter((tabKey) => availableTabKeys.includes(tabKey));
     const orderedTabKeys = customTabKeys.concat(coreTabKeys);

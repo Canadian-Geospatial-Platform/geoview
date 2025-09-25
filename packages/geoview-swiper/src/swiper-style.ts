@@ -1,8 +1,15 @@
-export const sxClasses = {
+/**
+ * Get custom sx classes for the swiper
+ *
+ * @param {number} mapHeight - The map height
+ * @returns {Object} the sx classes object as any
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const getSxClasses = (mapHeight: number): any => ({
   layerSwipe: {
     position: 'absolute',
     width: '100%',
-    height: '100%',
+    height: `calc(${mapHeight}px - 40px)`,
   },
 
   handle: {
@@ -67,4 +74,4 @@ export const sxClasses = {
       },
     },
   },
-};
+});
