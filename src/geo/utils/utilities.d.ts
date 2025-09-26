@@ -82,17 +82,6 @@ export declare function createEmptyBasemap(): TileLayer<XYZ | OSM | VectorTile>;
  */
 export declare function getLegendStylesFromConfig(styleConfig: TypeLayerStyleConfig): Promise<TypeVectorLayerStyles>;
 /**
- * Gets computed translate values
- * https://zellwk.com/blog/css-translate-values-in-javascript/
- * @param {HTMLElement} element the HTML element to get value for
- * @returns {Object} the x, y and z translation values
- */
-export declare function getTranslateValues(element: HTMLElement): {
-    x: number;
-    y: number;
-    z: number;
-};
-/**
  * Format the coordinates for degrees - minutes - seconds (lat, long)
  * @param {number} value the value to format
  * @returns {string} the formatted value
@@ -144,18 +133,18 @@ export declare function polygonToExtent(polygon: Polygon): Extent;
  */
 export declare function validateExtent(extent: Extent, code?: string): Extent;
 /**
- * Checks if a given extent is long/lat.
- * @param {Extent} extent - The extent to check.
- * @returns {boolean} Whether or not the extent is long/lat
- */
-export declare function isExtentLonLat(extent: Extent): boolean;
-/**
  * Validates lat long, LCC, or Web Mercator extent if it is defined.
  * @param {Extent} extent - The extent to validate.
  * @param {string} code - The projection code of the extent. Default EPSG:4326.
  * @returns {Extent | undefined} The validated extent if it was defined.
  */
 export declare function validateExtentWhenDefined(extent: Extent | undefined, code?: string): Extent | undefined;
+/**
+ * Checks if a given extent is long/lat.
+ * @param {Extent} extent - The extent to check.
+ * @returns {boolean} Whether or not the extent is long/lat
+ */
+export declare function isExtentLonLat(extent: Extent): boolean;
 /**
  * Gets the area of a given geometry
  * @param {Geometry} geometry the geometry to calculate the area

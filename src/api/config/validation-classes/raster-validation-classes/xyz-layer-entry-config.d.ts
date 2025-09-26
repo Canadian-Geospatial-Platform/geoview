@@ -1,4 +1,5 @@
-import { TypeSourceImageXYZTilesInitialConfig } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
+import { ConfigClassOrType, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
+import { TypeSourceImageXYZTilesInitialConfig, TypeXYZTilesConfig } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
 import { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { TileLayerEntryConfig } from '@/api/config/validation-classes/tile-layer-entry-config';
 export interface XYZTilesLayerEntryConfigProps extends AbstractBaseLayerEntryConfigProps {
@@ -10,12 +11,6 @@ export interface XYZTilesLayerEntryConfigProps extends AbstractBaseLayerEntryCon
     maxScaleDenominator?: number;
 }
 export declare class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
-    /** Tag used to link the entry to a specific schema. */
-    schemaTag: import("@/api/types/layer-schema-types").TypeGeoviewLayerType;
-    /** Layer entry data type. */
-    entryType: import("@/api/types/layer-schema-types").TypeLayerEntryType;
-    /** The layer entry props that were used in the constructor. */
-    layerEntryProps: XYZTilesLayerEntryConfigProps;
     source: TypeSourceImageXYZTilesInitialConfig;
     /** The minimum scale denominator as read from metadata */
     minScaleDenominator: number;
@@ -23,9 +18,18 @@ export declare class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
     maxScaleDenominator: number;
     /**
      * The class constructor.
-     * @param {XYZTilesLayerEntryConfigProps | XYZTilesLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
+     * @param {XYZTilesLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
      */
-    constructor(layerConfig: XYZTilesLayerEntryConfigProps | XYZTilesLayerEntryConfigProps);
+    constructor(layerConfig: XYZTilesLayerEntryConfigProps);
+    /**
+     * Type guard that checks whether the given configuration (class instance or plain object)
+     * represents a XYZTiles layer type.
+     * Supports `ConfigClassOrType` (class instance or plain object) and plain layer config objects (`TypeGeoviewLayerConfig`).
+     * @param {ConfigClassOrType | TypeGeoviewLayerConfig} layerConfig - The layer config to check. Can be an instance of a config class or a raw config object.
+     * @returns `true` if the config is for a XYZTiles layer; otherwise `false`.
+     * @static
+     */
+    static isClassOrTypeXYZTiles(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): layerConfig is TypeXYZTilesConfig;
 }
 export interface TypeMetadataXYZTiles {
     layers: TypeMetadataXYZTilesLayer[];

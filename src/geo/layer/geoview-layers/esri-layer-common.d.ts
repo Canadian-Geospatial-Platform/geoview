@@ -67,14 +67,14 @@ export declare function commonProcessLayerMetadata<T extends EsriDynamicLayerEnt
 export declare function parseFeatureInfoEntries(records: EsriRelatedRecordsJsonResponseRelatedRecord[]): TypeFeatureInfoEntryPartial[];
 /**
  * Asynchronously queries an Esri feature layer given the url and returns an array of `TypeFeatureInfoEntryPartial` records.
- * @param {string} url An Esri url indicating a feature layer to query
+ * @param {string} url - An Esri url indicating a feature layer to query
  * @returns {TypeFeatureInfoEntryPartial[] | null} An array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
  */
 export declare function queryRecordsByUrl(url: string): Promise<TypeFeatureInfoEntryPartial[]>;
 /**
  * Asynchronously queries an Esri relationship table given the url and returns an array of `TypeFeatureInfoEntryPartial` records.
- * @param {url} string An Esri url indicating a relationship table to query
- * @param {recordGroupIndex} number The group index of the relationship layer on which to read the related records
+ * @param {string} url - An Esri url indicating a relationship table to query
+ * @param {number} recordGroupIndex - The group index of the relationship layer on which to read the related records
  * @returns {TypeFeatureInfoEntryPartial[] | null} An array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
  */
 export declare function queryRelatedRecordsByUrl(url: string, recordGroupIndex: number): Promise<TypeFeatureInfoEntryPartial[]>;

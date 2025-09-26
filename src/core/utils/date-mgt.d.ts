@@ -24,7 +24,7 @@ type RangeItems = {
  */
 export type TimeDimension = {
     field: string;
-    default: string;
+    default: string[];
     unitSymbol?: string;
     rangeItems: RangeItems;
     nearestValues: 'discrete' | 'absolute';

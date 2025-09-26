@@ -1,3 +1,4 @@
+import { ReactElement } from 'react';
 import { PopperProps } from '@mui/material';
 /**
  * Properties for the Popper component extending Material-UI's PopperProps
@@ -5,6 +6,9 @@ import { PopperProps } from '@mui/material';
 interface PopperPropsExtend extends PopperProps {
     onClose?: () => void;
     handleKeyDown?: (key: string, callbackFn: () => void) => void;
+    focusSelector?: string;
+    focusTrap?: boolean;
+    children: ReactElement;
 }
 /**
  * Create a customized Material UI Popper component.
@@ -55,7 +59,7 @@ interface PopperPropsExtend extends PopperProps {
  *
  * @see {@link https://mui.com/material-ui/react-popper/|Material-UI Popper}
  */
-declare function PopperUI({ open, onClose, handleKeyDown, ...props }: PopperPropsExtend): JSX.Element;
+declare function PopperUI({ open, onClose, handleKeyDown, focusSelector, focusTrap, children, ...props }: PopperPropsExtend): JSX.Element;
 export declare const Popper: typeof PopperUI;
 export {};
 //# sourceMappingURL=popper.d.ts.map

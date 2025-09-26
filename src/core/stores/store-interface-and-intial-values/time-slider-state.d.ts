@@ -17,7 +17,6 @@ export interface ITimeSliderState {
         setReversed: (layerPath: string, locked: boolean) => void;
         setSelectedLayerPath: (layerPath: string) => void;
         setStep: (layerPath: string, step: number) => void;
-        setDefaultValue: (layerPath: string, defaultValue: string) => void;
         setValues: (layerPath: string, values: number[]) => void;
         setDisplayPattern: (layerPath: string, value: [DatePrecision, TimePrecision]) => void;
     };
@@ -33,7 +32,6 @@ export interface ITimeSliderState {
         setSelectedLayerPath: (layerPath: string) => void;
         setSliderFilters: (newSliderFilters: Record<string, string>) => void;
         setStep: (layerPath: string, step: number) => void;
-        setDefaultValue: (layerPath: string, defaultValue: string) => void;
         setValues: (layerPath: string, values: number[]) => void;
         setDisplayPattern: (layerPath: string, value: [DatePrecision, TimePrecision]) => void;
     };
@@ -49,7 +47,6 @@ export type TimeSliderLayerSet = {
     [layerPath: string]: TypeTimeSliderValues;
 };
 export interface TypeTimeSliderValues {
-    defaultValue: string;
     delay: number;
     description?: string;
     discreteValues: boolean;
@@ -68,12 +65,13 @@ export interface TypeTimeSliderValues {
 }
 export type TypeTimeSliderProps = {
     layerPaths: string[];
-    title: string;
-    description: string;
-    locked: boolean;
-    reversed: boolean;
-    defaultValue: string;
-    timeDimension: TimeDimension;
+    title?: string;
+    delay?: number;
+    filtering?: boolean;
+    description?: string;
+    locked?: boolean;
+    reversed?: boolean;
+    timeDimension?: TimeDimension;
 };
 export declare const useTimeSliderLayers: () => TimeSliderLayerSet | undefined;
 export declare const useTimeSliderSelectedLayerPath: () => string;

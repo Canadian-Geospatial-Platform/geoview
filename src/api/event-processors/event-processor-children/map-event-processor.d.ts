@@ -15,6 +15,7 @@ import { TypeClickMarker } from '@/core/components';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { IMapState, TypeOrderedLayerInfo, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { TypeHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 export declare class MapEventProcessor extends AbstractEventProcessor {
     #private;
     /**
@@ -191,11 +192,11 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      * Replace a layer in the orderedLayerInfo array.
      *
      * @param {string} mapId The ID of the map to add the layer to.
-     * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The config of the layer to add.
+     * @param {ConfigBaseClass} layerConfig The config of the layer to add.
      * @param {string} layerPathToReplace The layerPath of the info to replace.
      * @return {void}
      */
-    static replaceOrderedLayerInfo(mapId: string, geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig, layerPathToReplace?: string): void;
+    static replaceOrderedLayerInfo(mapId: string, layerConfig: ConfigBaseClass, layerPathToReplace?: string): void;
     /**
      * Add a new layer to the orderedLayerInfo array using a layer config.
      *
@@ -225,6 +226,7 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     static resetBasemap(mapId: string): Promise<void>;
     static setBasemap(mapId: string, basemapOptions: TypeBasemapOptions): Promise<void>;
     static setMapKeyboardPanInteractions(mapId: string, panDelta: number): void;
+    static setActiveMapInteractionWCAG(mapId: string, active: boolean): void;
     /**
      * Set the React root overview map element so it can be destroy if the map element is destroyed
      *

@@ -18,13 +18,6 @@ export declare class ConfigApi {
      */
     static guessLayerType(url: string): string | undefined;
     /**
-     * Converts the stringMapFeatureConfig to a json object. Comments will be removed from the string.
-     * @param {string} stringMapFeatureConfig The map configuration string to convert to JSON format.
-     * @returns {MapFeatureConfig | undefined} A JSON map feature configuration object.
-     * @private
-     */
-    static convertStringToJson(stringMapFeatureConfig: string): MapFeatureConfig | undefined;
-    /**
      * Gets a map feature config from url parameters.
      * @param {string} urlStringParams The url parameters.
      *

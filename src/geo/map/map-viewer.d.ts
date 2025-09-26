@@ -428,7 +428,6 @@ export declare class MapViewer {
     createMapConfigFromMapState(overrideGeocoreServiceNames?: boolean | 'hybrid'): TypeMapFeaturesInstance | undefined;
     /**
      * Searches through a map config and replaces any matching layer names with their provided partner.
-     *
      * @param {string[][]} namePairs -  The array of name pairs. Presumably one english and one french name in each pair.
      * @param {TypeMapFeaturesInstance} mapConfig - The config to modify, or one created using the current map state if not provided.
      * @param {boolean} removeUnlisted - Whether or not names not provided should be removed from config.
