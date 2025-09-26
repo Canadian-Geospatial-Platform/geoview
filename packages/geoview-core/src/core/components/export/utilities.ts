@@ -12,6 +12,8 @@ import { logger } from '@/core/utils/logger';
 import { exportFile } from '@/core/utils/utilities';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
+import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
+import { Size } from 'ol/size';
 
 // GV Buffer polyfill for react-pdf
 if (typeof window !== 'undefined') {
@@ -32,6 +34,7 @@ export type TypeMapStateForExportLayout = {
   northArrow: boolean;
   northArrowElement: TypeNorthArrow;
   scale: TypeScaleInfo;
+  mapSize: Size;
 };
 
 // Export dimension constants at 300DPI
@@ -53,28 +56,30 @@ const MAP_IMAGE_DIMENSIONS = {
   },
 };
 
+const RERENDER_TIMEOUT = 500;
+
 /**
- * Generate PDF export preview for a map by pulling data from store state
+ * Generate the PDF export for the map
+ * @param {string} mapId - The map ID
+ * @param {exportPDFMapParams} params - The export params being passed
+ * @returns {Promise<string>} The PDF blob url
  */
-export async function exportPDFMap(mapId: string, params: exportPDFMapParams): Promise<string> {
+export async function createPDFMapUrl(mapId: string, params: exportPDFMapParams): Promise<string> {
   const { exportTitle, disclaimer, size } = params;
 
   // Get all needed data from store state
   const mapElement = AppEventProcessor.getGeoviewHTMLElement(mapId);
-  const mapViewer = MapEventProcessor.getMapViewer(mapId);
   const mapState = MapEventProcessor.getMapStateForExportLayout(mapId);
-  const { northArrow, scale, attribution, northArrowElement } = mapState;
-  const rotationAngle = northArrowElement.degreeRotation || 0;
+  const { northArrow, scale, attribution, northArrowElement, mapSize } = mapState;
+  const rotationAngle = parseFloat(northArrowElement.degreeRotation) || 0;
   const legendLayers = LegendEventProcessor.getLegendLayers(mapId).filter(
     (layer) => layer.layerStatus === 'loaded' && (layer.items.length === 0 || layer.items.some((item) => item.isVisible))
   );
-  const orderedLayersInfo = MapEventProcessor.getMapOrderedLayerInfo(mapId);
-
-  if (!mapViewer?.map) throw new Error('Map not available');
-
-  const { map } = mapViewer;
-  const mapSize = map.getSize();
-  if (!mapSize) throw new Error('Map size not available');
+  const orderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfo(mapId);
+  let timeSliderLayers = undefined;
+  if (TimeSliderEventProcessor.isTimeSliderInitialized(mapId)) {
+    timeSliderLayers = TimeSliderEventProcessor.getTimeSliderLayers(mapId);
+  }
 
   // Adjust map to correct aspect ratio for PDF map
   const mapImageWidth = MAP_IMAGE_DIMENSIONS[size].width;
@@ -94,11 +99,11 @@ export async function exportPDFMap(mapId: string, params: exportPDFMapParams): P
   }
 
   // Temporarily resize the map for export
-  map.setSize([newMapWidth, newMapHeight]);
+  MapEventProcessor.setMapSize(mapId, [newMapWidth, newMapHeight], true);
 
   // Wait for map to re-render
   await new Promise((resolve) => {
-    setTimeout(resolve, 100);
+    setTimeout(resolve, RERENDER_TIMEOUT);
   });
 
   const resultCanvas = document.createElement('canvas');
@@ -119,7 +124,7 @@ export async function exportPDFMap(mapId: string, params: exportPDFMapParams): P
   });
 
   // Restore original map size
-  map.setSize(mapSize);
+  MapEventProcessor.setMapSize(mapId, mapSize, true);
 
   const mapDataUrl = resultCanvas.toDataURL('image/jpeg', 0.9);
 
@@ -145,7 +150,6 @@ export async function exportPDFMap(mapId: string, params: exportPDFMapParams): P
           fill: path.getAttribute('fill'),
           stroke: path.getAttribute('stroke'),
           strokeWidth: path.getAttribute('stroke-width'),
-          transform: `rotate(${rotationAngle} 12 12)`,
         }));
       }
     } catch (error) {
@@ -175,13 +179,13 @@ export async function exportPDFMap(mapId: string, params: exportPDFMapParams): P
         scaleText: `${scale.labelGraphicMetric} (approx)`,
         scaleLineWidth: scale.lineWidthMetric,
         northArrowSvg: northArrowSvgPaths,
+        northArrowRotation: rotationAngle,
         legendLayers: cleanLegendLayers,
-        orderedLayerInfo: orderedLayersInfo,
+        orderedLayerInfo: orderedLayerInfo,
         disclaimer: disclaimer,
         attributions: attribution,
         date: DateMgt.formatDate(new Date(), 'YYYY-MM-DD, hh:mm:ss A'),
-        mapId,
-        timeSliderLayers: undefined,
+        timeSliderLayers: timeSliderLayers,
         pageSize: size,
       }) as ReactElement<DocumentProps>
     ).toBlob();
@@ -195,6 +199,12 @@ export async function exportPDFMap(mapId: string, params: exportPDFMapParams): P
 
 /**
  * Converts a PDF URL to PNG using PDF.js and canvas rendering
+ * @param {string} pdfUrl - The pdf url to convert
+ * @param {string} filename - The filename to save the image as
+ * @param {number} dpi - The dpi of the resulting image
+ * @param {string} format - The format of the image (jpeg or png)
+ * @param {number} quality - The quality of the JPEG image (e.g. 0.95)
+ * @returns {Promise<string | void>} The resulting image blob url or void if filename is provided (which triggers the export instead of preview)
  */
 export async function convertPdfUrlToImage(
   pdfUrl: string,

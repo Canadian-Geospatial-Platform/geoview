@@ -267,7 +267,7 @@
     "invalidConfig": "Invalid JSON config, default configuration applied."
   },
   "exportModal": {
-    "title": "Download map as PNG",
+    "title": "Map preview",
     "cancelBtn": "Cancel",
     "exportBtn": "Download",
     "formatBtn": "Format",

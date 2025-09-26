@@ -267,7 +267,7 @@
     "invalidConfig": "Configuration JSON non valide, configuration par défaut appliquée."
   },
   "exportModal": {
-    "title": "Télécharger la carte en PNG",
+    "title": "Aperçu de la carte",
     "cancelBtn": "Annuler",
     "exportBtn": "Télécharger",
     "formatBtn": "Format",
@@ -276,7 +276,7 @@
     "exportTitle": "Titre",
     "approx": "approx.",
     "fileExportDefaultPrefixName": "carte-export",
-    "pageSize": "Taille des pages",
+    "pageSize": "Taille de la page",
     "letter": "Lettre",
     "legal": "Légal",
     "tabloid": "Tabloïd"
