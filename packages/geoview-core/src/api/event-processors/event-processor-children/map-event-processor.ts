@@ -348,6 +348,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       northArrow: mapState.northArrow,
       northArrowElement: mapState.northArrowElement,
       scale: mapState.scale,
+      mapSize: mapState.size,
     };
   }
 
@@ -411,8 +412,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
     this.getMapStateProtected(mapId).setterActions.setRotation(rotation);
   }
 
-  static setMapSize(mapId: string, size: Size): void {
+  static setMapSize(mapId: string, size: Size, resizeMap: boolean = false): void {
     // Save in store
+    if (resizeMap) this.getMapViewer(mapId).map.setSize(size);
     this.getMapStateProtected(mapId).setterActions.setMapSize(size);
   }
 
