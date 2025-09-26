@@ -390,13 +390,14 @@ export class WMS extends AbstractGeoViewRaster {
     // Wait for all requests to settle (either fulfilled or rejected)
     const results = await Promise.allSettled(metadataPromises);
 
-    // TODO: Cleanup - Dead code
-    // Trying to comment this out, as the typing seems wrong (setLayerStatusError has not been a function of GroupLayerEntryConfig for a long time...) 2025-09-18
-    // // If all metadata fetches failed, flag the first layer's parent as errored and abort
-    // if (results.every((r) => r.status === 'rejected')) {
-    //   // Set the parent in error
-    //   layers[0].getParentLayerConfig?.setLayerStatusError();
-    // }
+    // If metadata fetching failed, flag the parent as error
+    // GV: This is good to have when the metadata fails and we don't have the layer config objects fully loaded yet
+    // GV: Disconnect from the VPN and try a service that requires VPN to test this.
+    // TODO: Think of a better way to handle this? Improve the 'setLayerStatusError' internally to check for siblings and set the parent - instead of here?
+    if (results.every((r) => r.status === 'rejected')) {
+      // Set the parent in error
+      layers[0].getParentLayerConfig()?.setLayerStatusError();
+    }
 
     // Merge metadata results
     let baseMetadata: TypeMetadataWMS | undefined;

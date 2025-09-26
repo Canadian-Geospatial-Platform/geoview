@@ -28,6 +28,8 @@ export abstract class AbstractLayerSet {
   resultSet: TypeResultSet = {};
 
   /** Indicates the default when registering a layer config */
+  // GV: Only the LegendsLayerSet registers the layer configs to track the 'boxes' in the UI.
+  // GV: The other layer sets register the layer OBJECTS instead of the layer CONFIGS.
   #defaultRegisterLayerConfigCheck = false;
 
   // The registered layers
@@ -154,7 +156,7 @@ export abstract class AbstractLayerSet {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected onRegisterLayerConfigCheck(layerConfig: ConfigBaseClass): boolean {
     // Override this function to perform registration condition logic in the inherited classes
-    // By default, a layer-set doesn't register layer configs
+    // By default, a layer-set doesn't register layer configs, it typically registers the layer objects but not the layer config
     return this.#defaultRegisterLayerConfigCheck;
   }
 
