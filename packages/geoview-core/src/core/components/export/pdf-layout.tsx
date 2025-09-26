@@ -7,9 +7,9 @@ import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-v
 
 // Page size specific styling
 const PAGE_CONFIGS = {
-  LETTER: { size: 'LETTER' as const, mapHeight: 400, legendColumns: 4 },
-  LEGAL: { size: 'LEGAL' as const, mapHeight: 600, legendColumns: 4 },
-  TABLOID: { size: 'TABLOID' as const, mapHeight: 800, legendColumns: 6 },
+  LETTER: { size: 'LETTER' as const, mapHeight: 400, legendColumns: 4, maxLegendHeight: 450 },
+  LEGAL: { size: 'LEGAL' as const, mapHeight: 600, legendColumns: 4, maxLegendHeight: 500 },
+  TABLOID: { size: 'TABLOID' as const, mapHeight: 800, legendColumns: 6, maxLegendHeight: 620 },
 };
 
 interface ExportDocumentProps {
@@ -22,14 +22,13 @@ interface ExportDocumentProps {
     fill: string | null;
     stroke: string | null;
     strokeWidth: string | null;
-    transform: string;
   }> | null;
+  northArrowRotation: number;
   legendLayers: TypeLegendLayer[];
   orderedLayerInfo: TypeOrderedLayerInfo[];
   disclaimer: string;
   attributions: string[];
   date: string;
-  mapId: string;
   timeSliderLayers?: TimeSliderLayerSet;
   pageSize: 'LETTER' | 'LEGAL' | 'TABLOID';
 }
@@ -43,10 +42,33 @@ interface FlattenedLegendItem {
   timeInfo?: TypeTimeSliderValues;
 }
 
-// Filter and process layers like LegendContainerComponent does
+// Estimate item heights (rough approximation)
+const estimateItemHeight = (item: FlattenedLegendItem): number => {
+  switch (item.type) {
+    case 'layer':
+      return 20;
+    case 'child':
+      return 15;
+    case 'wms':
+      return 60; // WMS images are typically larger
+    case 'time':
+      return 12;
+    case 'item':
+      return 10;
+    default:
+      return 10;
+  }
+};
+
+/**
+ * Filter and flatten layers for placement in the legend
+ * @param {TypeLegendLayer[]} layers - The legend layers to be shown in the legend
+ * @param {TypeOrdderedLayerInfo[]} orderedLayerInfo - The orderedLayerInfo to be used to filter out layers that aren't visible
+ * @param {TimeSliderLayerSet} timeSliderLayers - Any layers that are time enabled
+ * @returns {FlattenedLegendItem[]} The flattened list of all the items in the legend
+ */
 const processLegendLayers = (
   layers: TypeLegendLayer[],
-  mapId: string,
   orderedLayerInfo: TypeOrderedLayerInfo[],
   timeSliderLayers?: TimeSliderLayerSet
 ): FlattenedLegendItem[] => {
@@ -82,17 +104,6 @@ const processLegendLayers = (
       parentName: depth === 0 ? undefined : currentRootName,
     });
 
-    // Add WMS legend image if available
-    if (hasWMSLegend) {
-      items.push({
-        type: 'wms',
-        data: layer,
-        parentName: currentRootName,
-        depth: depth + 1,
-        isRoot: false,
-      });
-    }
-
     // Add time dimension if available
     if (hasTimeDimension) {
       const timeDimension = timeSliderLayers?.[layer.layerPath];
@@ -103,6 +114,17 @@ const processLegendLayers = (
         depth: depth + 1,
         isRoot: false,
         timeInfo: timeDimension,
+      });
+    }
+
+    // Add WMS legend image if available
+    if (hasWMSLegend) {
+      items.push({
+        type: 'wms',
+        data: layer,
+        parentName: currentRootName,
+        depth: depth + 1,
+        isRoot: false,
       });
     }
 
@@ -136,13 +158,19 @@ const processLegendLayers = (
   return allItems;
 };
 
-// Group items by their root layer and distribute smartly
-const distributeIntoColumns = (items: FlattenedLegendItem[], numColumns: number): FlattenedLegendItem[][] => {
+/**
+ * Group items by their root layer and distribute in the columns
+ * @param {FlattenedLegendItem[]} items - The flattened list of legend items to be placed in the legend
+ * @param {number} numColumns - The maximum number of columns that can be used
+ * @returns {FlattenedLegendItem[][]} The flattened legend items distributed between the columns
+ */
+const distributeIntoColumns = (items: FlattenedLegendItem[], numColumns: number, maxHeight: number): FlattenedLegendItem[][] => {
   if (!items || items.length === 0) return Array(numColumns).fill([]);
 
   const columns: FlattenedLegendItem[][] = Array(numColumns)
     .fill(null)
     .map(() => []);
+  const columnHeights: number[] = Array(numColumns).fill(0);
 
   // Group items by root layers
   const groups: FlattenedLegendItem[][] = [];
@@ -162,21 +190,124 @@ const distributeIntoColumns = (items: FlattenedLegendItem[], numColumns: number)
 
   // Distribute groups to balance column sizes
   groups.forEach((group) => {
-    // Find column with fewest items
-    let targetColumn = 0;
-    let minItems = columns[0].length;
+    const groupHeight = group.reduce((sum, item) => sum + estimateItemHeight(item), 0);
 
-    for (let i = 1; i < numColumns; i++) {
-      if (columns[i].length < minItems) {
-        minItems = columns[i].length;
+    // Find column with space for this group
+    let targetColumn = 0;
+    for (let i = 0; i < numColumns; i++) {
+      if (columnHeights[i] + groupHeight <= maxHeight && columnHeights[i] < columnHeights[targetColumn]) {
         targetColumn = i;
       }
     }
 
-    columns[targetColumn].push(...group);
+    // If group is too large, split it (but keep root layer with at least one child)
+    if (columnHeights[targetColumn] + groupHeight > maxHeight && group.length > 2) {
+      // Keep root + first few items in current column
+      const rootAndSome = group.slice(0, Math.max(2, Math.floor(group.length / 2)));
+      const remaining = group.slice(rootAndSome.length);
+
+      columns[targetColumn].push(...rootAndSome);
+      columnHeights[targetColumn] += rootAndSome.reduce((sum, item) => sum + estimateItemHeight(item), 0);
+
+      // Find next available column for remaining items
+      const nextColumn = (targetColumn + 1) % numColumns;
+      columns[nextColumn].push(...remaining);
+      columnHeights[nextColumn] += remaining.reduce((sum, item) => sum + estimateItemHeight(item), 0);
+    } else {
+      columns[targetColumn].push(...group);
+      columnHeights[targetColumn] += groupHeight;
+    }
   });
 
   return columns;
+};
+
+/**
+ * Render the legend columns with dynamic width based on content
+ */
+const renderLegendColumns = (
+  legendLayers: TypeLegendLayer[],
+  orderedLayerInfo: TypeOrderedLayerInfo[],
+  config: (typeof PAGE_CONFIGS)[keyof typeof PAGE_CONFIGS],
+  timeSliderLayers?: TimeSliderLayerSet
+) => {
+  const allItems = processLegendLayers(legendLayers, orderedLayerInfo, timeSliderLayers);
+  const columns = distributeIntoColumns(allItems, config.legendColumns, config.maxLegendHeight);
+
+  // Count non-empty columns so legend is spread out when there are empty columns
+  const nonEmptyColumns = columns.filter((column) => column.length > 0);
+  const actualColumnCount = nonEmptyColumns.length;
+
+  return columns
+    .filter((column) => column.length > 0) // filter out empty columns
+    .map((columnItems, columnIndex) => (
+      // eslint-disable-next-line react/no-array-index-key
+      <View key={columnIndex} style={{ width: `${100 / actualColumnCount}%` }}>
+        {columnItems.map((item, index) => {
+          const indentLevel = Math.min(item.depth, 3);
+
+          if (item.type === 'layer') {
+            return (
+              <Text
+                key={`layer-${item.data.layerPath}`}
+                style={{ fontSize: 9, fontWeight: 'bold', marginBottom: 3, marginTop: index > 0 ? 8 : 0 }}
+              >
+                {item.data.layerName}
+              </Text>
+            );
+          } else if (item.type === 'wms') {
+            return (
+              <View key={`wms-${item.data.layerPath}`} style={{ marginLeft: indentLevel + 3, marginBottom: 2 }}>
+                <Image src={item.data.icons?.[0]?.iconImage || ''} style={{ width: 60, maxHeight: 100, objectFit: 'contain' }} />
+              </View>
+            );
+          } else if (item.type === 'time') {
+            // Format time dimension display
+            const timeText = item.timeInfo?.singleHandle
+              ? DateMgt.formatDate(
+                  new Date(item.timeInfo.values[0]),
+                  item.timeInfo.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
+                )
+              : `${DateMgt.formatDate(
+                  new Date(item.timeInfo?.values[0] || 0),
+                  item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
+                )} - ${DateMgt.formatDate(
+                  new Date(item.timeInfo?.values[1] || 0),
+                  item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
+                )}`;
+
+            return (
+              <Text
+                key={`time-${item.data.layerPath}`}
+                style={{ fontSize: 7, fontStyle: 'italic', marginLeft: indentLevel, marginBottom: 2 }}
+              >
+                {timeText}
+              </Text>
+            );
+          } else if (item.type === 'child') {
+            return (
+              <Text
+                key={`child-${item.data.layerPath}`}
+                style={{ fontSize: 8, fontWeight: 'bold', marginBottom: 2, marginLeft: indentLevel, marginTop: 3 }}
+              >
+                {item.data.layerName || 'Unnamed Layer'}
+              </Text>
+            );
+          } else {
+            const legendItem = item.data.items[0];
+            return (
+              <View
+                key={`item-${item.parentName}-${legendItem?.name}`}
+                style={{ flexDirection: 'row', alignItems: 'center', marginLeft: indentLevel + 3, marginBottom: 1 }}
+              >
+                {legendItem?.icon && <Image src={legendItem.icon} style={{ width: 8, height: 8, marginRight: 2 }} />}
+                <Text style={{ fontSize: 7, flexShrink: 1 }}>{legendItem?.name || 'Unnamed Item'}</Text>
+              </View>
+            );
+          }
+        })}
+      </View>
+    ));
 };
 
 export function ExportDocument({
@@ -185,12 +316,12 @@ export function ExportDocument({
   scaleText,
   scaleLineWidth,
   northArrowSvg,
+  northArrowRotation,
   legendLayers,
   orderedLayerInfo,
   disclaimer,
   attributions,
   date,
-  mapId,
   timeSliderLayers,
   pageSize,
 }: ExportDocumentProps): JSX.Element {
@@ -246,7 +377,7 @@ export function ExportDocument({
             <Text style={{ fontSize: 10, marginTop: 2, textAlign: 'center' }}>{scaleText}</Text>
           </View>
           {northArrowSvg && (
-            <View style={{ width: 40, height: 40 }}>
+            <View style={{ width: 40, height: 40, transform: `rotate(${northArrowRotation - 180}deg)` }}>
               <Svg viewBox="285 142 24 24" style={{ width: 40, height: 40 }}>
                 {northArrowSvg.map((pathData, index) => {
                   return (
@@ -267,83 +398,18 @@ export function ExportDocument({
 
         {/* Legend */}
         {legendLayers && legendLayers.length > 0 && (
-          <View style={{ marginBottom: 20, marginTop: -20 }}>
-            <Text style={{ fontSize: 11, fontWeight: 'bold', marginBottom: 10 }}>Legend</Text>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-              {(() => {
-                const allItems = processLegendLayers(legendLayers, mapId, orderedLayerInfo, timeSliderLayers);
-                const columns = distributeIntoColumns(allItems, config.legendColumns);
-
-                return columns.map((columnItems, columnIndex) => (
-                  // eslint-disable-next-line react/no-array-index-key
-                  <View key={columnIndex} style={{ width: `${100 / config.legendColumns}%`, paddingRight: 3 }}>
-                    {columnItems.map((item, index) => {
-                      const indentLevel = Math.min(item.depth, 3);
-
-                      if (item.type === 'layer') {
-                        return (
-                          <Text
-                            key={`layer-${item.data.layerPath}`}
-                            style={{ fontSize: 9, fontWeight: 'bold', marginBottom: 3, marginTop: index > 0 ? 8 : 0 }}
-                          >
-                            {item.data.layerName}
-                          </Text>
-                        );
-                      } else if (item.type === 'wms') {
-                        return (
-                          <View key={`wms-${item.data.layerPath}`} style={{ marginLeft: indentLevel + 3, marginBottom: 2 }}>
-                            <Image src={item.data.icons?.[0]?.iconImage || ''} style={{ width: 60, height: 'auto' }} />
-                          </View>
-                        );
-                      } else if (item.type === 'time') {
-                        // Format time dimension display
-                        const timeText = item.timeInfo?.singleHandle
-                          ? DateMgt.formatDate(
-                              new Date(item.timeInfo.values[0]),
-                              item.timeInfo.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
-                            )
-                          : `${DateMgt.formatDate(
-                              new Date(item.timeInfo?.values[0] || 0),
-                              item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
-                            )} - ${DateMgt.formatDate(
-                              new Date(item.timeInfo?.values[1] || 0),
-                              item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
-                            )}`;
-
-                        return (
-                          <Text
-                            key={`time-${item.data.layerPath}`}
-                            style={{ fontSize: 7, fontStyle: 'italic', marginLeft: indentLevel + 3, marginBottom: 2 }}
-                          >
-                            {timeText}
-                          </Text>
-                        );
-                      } else if (item.type === 'child') {
-                        return (
-                          <Text
-                            key={`child-${item.data.layerPath}`}
-                            style={{ fontSize: 8, fontWeight: 'bold', marginBottom: 2, marginLeft: indentLevel, marginTop: 3 }}
-                          >
-                            {item.data.layerName || 'Unnamed Layer'}
-                          </Text>
-                        );
-                      } else {
-                        const legendItem = item.data.items[0];
-                        return (
-                          <View
-                            key={`item-${item.parentName}-${legendItem?.name}`}
-                            style={{ flexDirection: 'row', alignItems: 'center', marginLeft: indentLevel + 3, marginBottom: 1 }}
-                          >
-                            {legendItem?.icon && <Image src={legendItem.icon} style={{ width: 8, height: 8, marginRight: 2 }} />}
-                            <Text style={{ fontSize: 7, flexShrink: 1 }}>{legendItem?.name || 'Unnamed Item'}</Text>
-                          </View>
-                        );
-                      }
-                    })}
-                  </View>
-                ));
-              })()}
-            </View>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'center',
+              alignItems: 'flex-start',
+              gap: 10,
+              paddingLeft: 10,
+              marginTop: -20,
+              marginBottom: 20,
+            }}
+          >
+            {renderLegendColumns(legendLayers, orderedLayerInfo, config, timeSliderLayers)}
           </View>
         )}
 

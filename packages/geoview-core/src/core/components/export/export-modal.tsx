@@ -10,9 +10,15 @@ import { exportFile } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 
 import { getSxClasses } from './export-modal-style';
-import { exportPDFMap, convertPdfUrlToImage } from './utilities';
+import { createPDFMapUrl, convertPdfUrlToImage } from './utilities';
 
 type FileFormat = 'pdf' | 'png' | 'jpeg';
+
+type DocumentSize = 'LETTER' | 'LEGAL' | 'TABLOID';
+
+const QUALITY_OPTIONS = [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100];
+
+const PREVIEW_TIMEOUT = 200;
 
 /**
  * Export modal window component to export the viewer information in a PNG file
@@ -33,7 +39,6 @@ export default function ExportModal(): JSX.Element {
   const mapElement = useAppGeoviewHTMLElement();
   const { disableFocusTrap, setActiveAppBarTab } = useUIStoreActions();
   const activeModalId = useUIActiveFocusItem().activeElementId;
-  // const { isOpen } = useUIActiveAppBarTab();
 
   // State & refs
   const [isMapLoading, setIsMapLoading] = useState(true);
@@ -50,60 +55,73 @@ export default function ExportModal(): JSX.Element {
   const [jpegQuality, setJpegQuality] = useState(90); // Default 90%
   const [qualityMenuOpen, setQualityMenuOpen] = useState(false);
   const [qualityAnchorEl, setQualityAnchorEl] = useState<null | HTMLElement>(null);
-  const [pageSize, setPageSize] = useState<'LETTER' | 'LEGAL' | 'TABLOID'>('LETTER');
+  const [pageSize, setPageSize] = useState<DocumentSize>('LETTER');
   const [pageSizeMenuOpen, setPageSizeMenuOpen] = useState(false);
   const [pageSizeAnchorEl, setPageSizeAnchorEl] = useState<null | HTMLElement>(null);
   const dialogRef = useRef(null) as RefObject<HTMLDivElement>;
   const [pngPreviewUrl, setPngPreviewUrl] = useState<string>('');
 
   const fileExportDefaultPrefixName = t('exportModal.fileExportDefaultPrefixName');
-  // Generate quality options: 50%, 60%, 70%, 80%, 90%, 100%
-  const qualityOptions = Array.from({ length: 11 }, (_, i) => 50 + i * 5);
-
-  const handleExport = useCallback(() => {
-    (async () => {
-      setIsMapExporting(true);
-      try {
-        const disclaimer = t('mapctrl.disclaimer.message');
-        const dpi = exportFormat === 'pdf' ? 300 : exportMapResolution;
-        const pdfUrl = await exportPDFMap(mapId, { exportTitle, disclaimer, size: pageSize });
-
-        const filename = `${fileExportDefaultPrefixName}-${exportTitle.trim() || mapId}`;
-
-        if (exportFormat === 'pdf') {
-          exportFile(pdfUrl, filename, exportFormat);
-        } else {
-          await convertPdfUrlToImage(pdfUrl, filename, dpi, exportFormat, jpegQuality / 100);
-        }
-
-        URL.revokeObjectURL(pdfUrl);
-      } catch (error) {
-        logger.logError(`Error exporting ${exportFormat.toUpperCase()}`, error);
-      } finally {
-        setIsMapExporting(false);
-        setActiveAppBarTab('legend', false, false);
-        disableFocusTrap();
-      }
-    })().catch((error) => logger.logError(error));
-  }, [
-    t,
-    exportFormat,
-    exportMapResolution,
-    mapId,
-    exportTitle,
-    pageSize,
-    fileExportDefaultPrefixName,
-    jpegQuality,
-    setActiveAppBarTab,
-    disableFocusTrap,
-  ]);
 
   const handleCloseModal = useCallback(() => {
     setActiveAppBarTab('legend', false, false);
     disableFocusTrap();
   }, [setActiveAppBarTab, disableFocusTrap]);
 
-  // Generate preview when modal opens
+  // Generate preview of PDF
+  const generatePreview = useCallback(async () => {
+    try {
+      setIsMapLoading(true);
+      const disclaimer = t('mapctrl.disclaimer.message');
+      const pdfUrl = await createPDFMapUrl(mapId, { exportTitle: '', disclaimer, size: pageSize });
+      const pngDataUrl = (await convertPdfUrlToImage(pdfUrl)) as string;
+      setPngPreviewUrl(pngDataUrl);
+      URL.revokeObjectURL(pdfUrl);
+    } catch (error) {
+      logger.logError(error);
+    } finally {
+      setIsMapLoading(false);
+      setIsLegendLoading(false);
+    }
+  }, [t, mapId, pageSize]);
+
+  // Export the requested file
+  const performExport = useCallback(async () => {
+    try {
+      setIsMapExporting(true);
+      const disclaimer = t('mapctrl.disclaimer.message');
+      const dpi = exportFormat === 'pdf' ? 300 : exportMapResolution;
+      const pdfUrl = await createPDFMapUrl(mapId, { exportTitle, disclaimer, size: pageSize });
+
+      const filename = `${fileExportDefaultPrefixName}-${exportTitle.trim() || mapId}`;
+
+      if (exportFormat === 'pdf') {
+        exportFile(pdfUrl, filename, exportFormat);
+      } else {
+        await convertPdfUrlToImage(pdfUrl, filename, dpi, exportFormat, jpegQuality / 100);
+      }
+
+      URL.revokeObjectURL(pdfUrl);
+    } catch (error) {
+      logger.logError(`Error exporting ${exportFormat.toUpperCase()}`, error);
+    } finally {
+      setIsMapExporting(false);
+      setActiveAppBarTab('legend', false, false);
+      disableFocusTrap();
+    }
+  }, [
+    disableFocusTrap,
+    exportFormat,
+    exportMapResolution,
+    exportTitle,
+    fileExportDefaultPrefixName,
+    jpegQuality,
+    mapId,
+    pageSize,
+    setActiveAppBarTab,
+    t,
+  ]);
+
   useEffect(() => {
     if (activeModalId !== 'export') return;
 
@@ -111,28 +129,18 @@ export default function ExportModal(): JSX.Element {
     if (overviewMap) overviewMap.style.visibility = 'hidden';
 
     const timer = setTimeout(() => {
-      (async () => {
-        setIsMapLoading(true);
-        try {
-          const disclaimer = t('mapctrl.disclaimer.message');
-          const pdfUrl = await exportPDFMap(mapId, { exportTitle: '', disclaimer, size: pageSize });
-          const pngDataUrl = (await convertPdfUrlToImage(pdfUrl)) as string;
-          setPngPreviewUrl(pngDataUrl);
-          URL.revokeObjectURL(pdfUrl);
-        } catch (error) {
-          logger.logError(error);
-        } finally {
-          setIsMapLoading(false);
-          setIsLegendLoading(false);
-        }
-      })().catch((error) => logger.logError(error));
-    }, 200);
+      generatePreview().catch((error) => logger.logError(error));
+    }, PREVIEW_TIMEOUT);
 
     return () => {
       clearTimeout(timer);
       if (overviewMap) overviewMap.style.visibility = 'visible';
     };
-  }, [t, activeModalId, mapElement, mapId, pageSize]);
+  }, [activeModalId, generatePreview, mapElement]);
+
+  const handleExport = useCallback(() => {
+    performExport().catch((error) => logger.logError(error));
+  }, [performExport]);
 
   const handleFormatMenuClick = (event: React.MouseEvent<HTMLElement>) => {
     setFormatAnchorEl(event.currentTarget);
@@ -250,7 +258,7 @@ export default function ExportModal(): JSX.Element {
           Format: {exportFormat.toUpperCase()}
         </Button>
 
-        {/* DPI Selection - Only show for PNG */}
+        {/* DPI Selection - Only show for PNG and JPEG */}
         {(exportFormat === 'png' || exportFormat === 'jpeg') && (
           <>
             <Menu id="dpi-selection" open={dpiMenuOpen} onClose={handleMenuClose} anchorEl={dpiAnchorEl}>
@@ -268,7 +276,7 @@ export default function ExportModal(): JSX.Element {
         {exportFormat === 'jpeg' && (
           <>
             <Menu id="quality-selection" open={qualityMenuOpen} onClose={handleQualityMenuClose} anchorEl={qualityAnchorEl}>
-              {qualityOptions.map((quality) => (
+              {QUALITY_OPTIONS.map((quality) => (
                 <MenuItem key={quality} onClick={() => handleSelectQuality(quality)}>
                   {quality}%
                 </MenuItem>
