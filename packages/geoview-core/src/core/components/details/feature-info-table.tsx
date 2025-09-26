@@ -109,7 +109,7 @@ export const FeatureRow = memo(function FeatureRow({ featureInfoItem, index, onI
 
   // Get the original value in an array
   let stringValues = useMemo(() => [''], []);
-  if (value) {
+  if (value !== undefined) {
     stringValues = [String(value)];
   }
 
