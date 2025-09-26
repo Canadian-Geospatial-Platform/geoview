@@ -42,21 +42,7 @@
             "layerName": "Group",
             "listOfLayerEntryConfig": [
               {
-                "layerId": "CURRENT_CONDITIONS",
-                "source": {
-                  "featureInfo": {
-                    "queryable": true,
-                    "nameField": "plain_text",
-                    "outfields": [
-                      {
-                        "name": "plain_text",
-                        "alias": "Forcast",
-                        "type": "string",
-                        "domain": null
-                      }
-                    ]
-                  }
-                }
+                "layerId": "CURRENT_CONDITIONS"
               },
               {
                 "layerId": "GDPS.ETA_ICEC",
@@ -112,7 +98,7 @@
         ]
       },
       {
-        "geoviewLayerId": "LYR1",
+        "geoviewLayerId": "canadaEnergyRegulator",
         "geoviewLayerName": "Canada Energy Regulator",
         "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/services/NRCan/CER_Assessments_EN/MapServer/WMSServer",
         "geoviewLayerType": "ogcWms",
