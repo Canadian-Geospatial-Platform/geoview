@@ -12,6 +12,8 @@ const PAGE_CONFIGS = {
   TABLOID: { size: 'TABLOID' as const, mapHeight: 800, legendColumns: 6, maxLegendHeight: 620 },
 };
 
+type TypePageConfig = (typeof PAGE_CONFIGS)[keyof typeof PAGE_CONFIGS];
+
 interface ExportDocumentProps {
   mapDataUrl: string;
   exportTitle: string;
@@ -50,7 +52,7 @@ const estimateItemHeight = (item: FlattenedLegendItem): number => {
     case 'child':
       return 15;
     case 'wms':
-      return 60; // WMS images are typically larger
+      return 100; // WMS images are typically larger
     case 'time':
       return 12;
     case 'item':
@@ -58,6 +60,32 @@ const estimateItemHeight = (item: FlattenedLegendItem): number => {
     default:
       return 10;
   }
+};
+
+/**
+ * Estimate footer height based on content
+ */
+const estimateFooterHeight = (disclaimer: string, attributions: string[]): number => {
+  const baseLineHeight = 12; // 8px font + 4px spacing
+  const marginBottom = 5; // disclaimer margin
+
+  // Estimate disclaimer lines (assuming ~80 chars per line at font size 8)
+  const disclaimerLines = disclaimer ? Math.ceil(disclaimer.length / 80) : 0;
+  const disclaimerHeight = disclaimerLines * baseLineHeight + (disclaimerLines > 0 ? marginBottom : 0);
+
+  // Estimate attribution lines
+  const attributionHeight = attributions.reduce((total, attr) => {
+    const lines = Math.ceil(attr.length / 80);
+    return total + lines * baseLineHeight + 2; // 2px margin per attribution
+  }, 0);
+
+  // Date line
+  const dateHeight = baseLineHeight;
+
+  // Add padding and margins
+  const totalHeight = disclaimerHeight + attributionHeight + dateHeight + 20; // 20px for margins/padding
+
+  return Math.max(totalHeight, 60); // Minimum 60px
 };
 
 /**
@@ -164,13 +192,20 @@ const processLegendLayers = (
  * @param {number} numColumns - The maximum number of columns that can be used
  * @returns {FlattenedLegendItem[][]} The flattened legend items distributed between the columns
  */
-const distributeIntoColumns = (items: FlattenedLegendItem[], numColumns: number, maxHeight: number): FlattenedLegendItem[][] => {
-  if (!items || items.length === 0) return Array(numColumns).fill([]);
+const distributeIntoColumns = (
+  items: FlattenedLegendItem[],
+  numColumns: number,
+  maxHeight: number,
+  disclaimer: string,
+  attributions: string[]
+): { fittedColumns: FlattenedLegendItem[][]; overflowItems: FlattenedLegendItem[] } => {
+  if (!items || items.length === 0) return { fittedColumns: Array(numColumns).fill([]), overflowItems: [] };
 
   const columns: FlattenedLegendItem[][] = Array(numColumns)
     .fill(null)
     .map(() => []);
   const columnHeights: number[] = Array(numColumns).fill(0);
+  const overflowItems: FlattenedLegendItem[] = [];
 
   // Group items by root layers
   const groups: FlattenedLegendItem[][] = [];
@@ -188,126 +223,122 @@ const distributeIntoColumns = (items: FlattenedLegendItem[], numColumns: number,
     groups.push(currentGroup);
   }
 
-  // Distribute groups to balance column sizes
+  // Reserve space for footer (approximately 60px)
+  const footerReservedSpace = estimateFooterHeight(disclaimer, attributions);
+  const adjustedMaxHeight = maxHeight - footerReservedSpace;
+
+  // Distribute groups strictly - no splitting allowed
   groups.forEach((group) => {
     const groupHeight = group.reduce((sum, item) => sum + estimateItemHeight(item), 0);
 
-    // Find column with space for this group
-    let targetColumn = 0;
+    // Find the column with the least content that can fit this entire group
+    let targetColumn = -1;
+    let minHeight = Infinity;
+
     for (let i = 0; i < numColumns; i++) {
-      if (columnHeights[i] + groupHeight <= maxHeight && columnHeights[i] < columnHeights[targetColumn]) {
+      if (columnHeights[i] + groupHeight <= adjustedMaxHeight && columnHeights[i] < minHeight) {
         targetColumn = i;
+        minHeight = columnHeights[i];
       }
     }
 
-    // If group is too large, split it (but keep root layer with at least one child)
-    if (columnHeights[targetColumn] + groupHeight > maxHeight && group.length > 2) {
-      // Keep root + first few items in current column
-      const rootAndSome = group.slice(0, Math.max(2, Math.floor(group.length / 2)));
-      const remaining = group.slice(rootAndSome.length);
-
-      columns[targetColumn].push(...rootAndSome);
-      columnHeights[targetColumn] += rootAndSome.reduce((sum, item) => sum + estimateItemHeight(item), 0);
-
-      // Find next available column for remaining items
-      const nextColumn = (targetColumn + 1) % numColumns;
-      columns[nextColumn].push(...remaining);
-      columnHeights[nextColumn] += remaining.reduce((sum, item) => sum + estimateItemHeight(item), 0);
+    // If no column can fit the entire group, move to overflow
+    if (targetColumn === -1) {
+      overflowItems.push(...group);
     } else {
       columns[targetColumn].push(...group);
       columnHeights[targetColumn] += groupHeight;
     }
   });
 
-  return columns;
+  return { fittedColumns: columns, overflowItems };
 };
 
 /**
  * Render the legend columns with dynamic width based on content
  */
-const renderLegendColumns = (
-  legendLayers: TypeLegendLayer[],
-  orderedLayerInfo: TypeOrderedLayerInfo[],
-  config: (typeof PAGE_CONFIGS)[keyof typeof PAGE_CONFIGS],
-  timeSliderLayers?: TimeSliderLayerSet
-) => {
-  const allItems = processLegendLayers(legendLayers, orderedLayerInfo, timeSliderLayers);
-  const columns = distributeIntoColumns(allItems, config.legendColumns, config.maxLegendHeight);
+const renderLegendColumns = (columns: FlattenedLegendItem[][], overflowItems?: FlattenedLegendItem[], config?: TypePageConfig) => {
+  let itemsToRender: FlattenedLegendItem[][];
 
-  // Count non-empty columns so legend is spread out when there are empty columns
-  const nonEmptyColumns = columns.filter((column) => column.length > 0);
-  const actualColumnCount = nonEmptyColumns.length;
+  if (overflowItems && config) {
+    // Distribute overflow items into columns for the overflow page
+    const { fittedColumns } = distributeIntoColumns(overflowItems, config.legendColumns, config.maxLegendHeight, '', []);
+    itemsToRender = fittedColumns.filter((column) => column.length > 0);
+  } else {
+    // Use the provided columns for the main page
+    itemsToRender = columns.filter((column) => column.length > 0);
+  }
 
-  return columns
-    .filter((column) => column.length > 0) // filter out empty columns
-    .map((columnItems, columnIndex) => (
-      // eslint-disable-next-line react/no-array-index-key
-      <View key={columnIndex} style={{ width: `${100 / actualColumnCount}%` }}>
-        {columnItems.map((item, index) => {
-          const indentLevel = Math.min(item.depth, 3);
+  const actualColumnCount = itemsToRender.length;
 
-          if (item.type === 'layer') {
-            return (
-              <Text
-                key={`layer-${item.data.layerPath}`}
-                style={{ fontSize: 9, fontWeight: 'bold', marginBottom: 3, marginTop: index > 0 ? 8 : 0 }}
-              >
-                {item.data.layerName}
-              </Text>
-            );
-          } else if (item.type === 'wms') {
-            return (
-              <View key={`wms-${item.data.layerPath}`} style={{ marginLeft: indentLevel + 3, marginBottom: 2 }}>
-                <Image src={item.data.icons?.[0]?.iconImage || ''} style={{ width: 60, maxHeight: 100, objectFit: 'contain' }} />
-              </View>
-            );
-          } else if (item.type === 'time') {
-            // Format time dimension display
-            const timeText = item.timeInfo?.singleHandle
-              ? DateMgt.formatDate(
-                  new Date(item.timeInfo.values[0]),
-                  item.timeInfo.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
-                )
-              : `${DateMgt.formatDate(
-                  new Date(item.timeInfo?.values[0] || 0),
-                  item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
-                )} - ${DateMgt.formatDate(
-                  new Date(item.timeInfo?.values[1] || 0),
-                  item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
-                )}`;
+  return itemsToRender.map((columnItems, columnIndex) => (
+    // eslint-disable-next-line react/no-array-index-key
+    <View key={columnIndex} style={{ width: `${100 / actualColumnCount}%` }}>
+      {columnItems.map((item, index) => {
+        const indentLevel = Math.min(item.depth, 3);
 
-            return (
-              <Text
-                key={`time-${item.data.layerPath}`}
-                style={{ fontSize: 7, fontStyle: 'italic', marginLeft: indentLevel, marginBottom: 2 }}
-              >
-                {timeText}
-              </Text>
-            );
-          } else if (item.type === 'child') {
-            return (
-              <Text
-                key={`child-${item.data.layerPath}`}
-                style={{ fontSize: 8, fontWeight: 'bold', marginBottom: 2, marginLeft: indentLevel, marginTop: 3 }}
-              >
-                {item.data.layerName || 'Unnamed Layer'}
-              </Text>
-            );
-          } else {
-            const legendItem = item.data.items[0];
-            return (
-              <View
-                key={`item-${item.parentName}-${legendItem?.name}`}
-                style={{ flexDirection: 'row', alignItems: 'center', marginLeft: indentLevel + 3, marginBottom: 1 }}
-              >
-                {legendItem?.icon && <Image src={legendItem.icon} style={{ width: 8, height: 8, marginRight: 2 }} />}
-                <Text style={{ fontSize: 7, flexShrink: 1 }}>{legendItem?.name || 'Unnamed Item'}</Text>
-              </View>
-            );
-          }
-        })}
-      </View>
-    ));
+        if (item.type === 'layer') {
+          return (
+            <Text
+              key={`layer-${item.data.layerPath}`}
+              style={{ fontSize: 9, fontWeight: 'bold', marginBottom: 3, marginTop: index > 0 ? 8 : 0 }}
+            >
+              {item.data.layerName}
+            </Text>
+          );
+        } else if (item.type === 'wms') {
+          return (
+            <View key={`wms-${item.data.layerPath}`} style={{ marginLeft: indentLevel + 3, marginBottom: 2 }}>
+              <Image src={item.data.icons?.[0]?.iconImage || ''} style={{ width: 60, maxHeight: 100, objectFit: 'contain' }} />
+            </View>
+          );
+        } else if (item.type === 'time') {
+          // Format time dimension display
+          const timeText = item.timeInfo?.singleHandle
+            ? DateMgt.formatDate(
+                new Date(item.timeInfo.values[0]),
+                item.timeInfo.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
+              )
+            : `${DateMgt.formatDate(
+                new Date(item.timeInfo?.values[0] || 0),
+                item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
+              )} - ${DateMgt.formatDate(
+                new Date(item.timeInfo?.values[1] || 0),
+                item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
+              )}`;
+
+          return (
+            <Text
+              key={`time-${item.data.layerPath}`}
+              style={{ fontSize: 7, fontStyle: 'italic', marginLeft: indentLevel, marginBottom: 2 }}
+            >
+              {timeText}
+            </Text>
+          );
+        } else if (item.type === 'child') {
+          return (
+            <Text
+              key={`child-${item.data.layerPath}`}
+              style={{ fontSize: 8, fontWeight: 'bold', marginBottom: 2, marginLeft: indentLevel, marginTop: 3 }}
+            >
+              {item.data.layerName || 'Unnamed Layer'}
+            </Text>
+          );
+        } else {
+          const legendItem = item.data.items[0];
+          return (
+            <View
+              key={`item-${item.parentName}-${legendItem?.name}`}
+              style={{ flexDirection: 'row', alignItems: 'center', marginLeft: indentLevel + 3, marginBottom: 1 }}
+            >
+              {legendItem?.icon && <Image src={legendItem.icon} style={{ width: 8, height: 8, marginRight: 2 }} />}
+              <Text style={{ fontSize: 7, flexShrink: 1 }}>{legendItem?.name || 'Unnamed Item'}</Text>
+            </View>
+          );
+        }
+      })}
+    </View>
+  ));
 };
 
 export function ExportDocument({
@@ -327,6 +358,17 @@ export function ExportDocument({
 }: ExportDocumentProps): JSX.Element {
   const config = PAGE_CONFIGS[pageSize];
 
+  // Process legend data
+  const allItems = processLegendLayers(legendLayers, orderedLayerInfo, timeSliderLayers);
+  const { fittedColumns, overflowItems } = distributeIntoColumns(
+    allItems,
+    config.legendColumns,
+    config.maxLegendHeight,
+    disclaimer,
+    attributions
+  );
+  const hasOverflow = overflowItems.length > 0;
+
   return (
     <Document>
       <Page size={config.size} style={{ padding: 36, fontFamily: 'Helvetica' }}>
@@ -344,7 +386,7 @@ export function ExportDocument({
           <View style={{ justifyContent: 'center', alignItems: 'center' }}>
             <View
               style={{
-                width: parseInt(scaleLineWidth, 10),
+                width: scaleLineWidth,
                 height: 1,
                 backgroundColor: 'black',
                 marginBottom: 2,
@@ -355,10 +397,10 @@ export function ExportDocument({
               <View
                 style={{
                   position: 'absolute',
-                  left: 0,
+                  left: -0.5, // Move half tick width outside
                   top: -3,
                   width: 1,
-                  height: 8,
+                  height: 6,
                   backgroundColor: 'black',
                 }}
               />
@@ -366,10 +408,10 @@ export function ExportDocument({
               <View
                 style={{
                   position: 'absolute',
-                  right: 0,
+                  right: -0.5, // Move half tick width outside
                   top: -3,
                   width: 1,
-                  height: 8,
+                  height: 6,
                   backgroundColor: 'black',
                 }}
               />
@@ -404,12 +446,12 @@ export function ExportDocument({
               justifyContent: 'center',
               alignItems: 'flex-start',
               gap: 10,
-              paddingLeft: 10,
-              marginTop: -20,
+              paddingLeft: 2,
+              marginTop: 20,
               marginBottom: 20,
             }}
           >
-            {renderLegendColumns(legendLayers, orderedLayerInfo, config, timeSliderLayers)}
+            {renderLegendColumns(fittedColumns)}
           </View>
         )}
 
@@ -424,6 +466,25 @@ export function ExportDocument({
           <Text style={{ fontSize: 8, textAlign: 'center' }}>{date || ''}</Text>
         </View>
       </Page>
+
+      {/* Overflow Page - only if needed */}
+      {hasOverflow && (
+        <Page size={config.size} style={{ padding: 36, fontFamily: 'Helvetica' }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'center',
+              alignItems: 'flex-start',
+              gap: 10,
+              paddingLeft: 2,
+              marginTop: 20,
+              marginBottom: 20,
+            }}
+          >
+            {renderLegendColumns([], overflowItems, config)}
+          </View>
+        </Page>
+      )}
     </Document>
   );
 }

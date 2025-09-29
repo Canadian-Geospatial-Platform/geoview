@@ -348,7 +348,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       northArrow: mapState.northArrow,
       northArrowElement: mapState.northArrowElement,
       scale: mapState.scale,
-      mapSize: mapState.size,
+      mapRotation: mapState.rotation,
     };
   }
 
@@ -856,6 +856,40 @@ export class MapEventProcessor extends AbstractEventProcessor {
       if (layer.getVisible() !== newVisibility) {
         layerApi.setOrToggleLayerVisibility(layer.getLayerPath(), newVisibility);
       }
+    });
+  }
+
+  static refreshAllMapLayersAndWait(mapId: string, maxWait: number = 10000): Promise<void> {
+    const mapViewer = this.getMapViewer(mapId);
+    mapViewer.layer.refreshLayers();
+    mapViewer.basemap.refreshBasemap();
+
+    // Wait for all tile sources to finish loading
+    return new Promise<void>((resolve) => {
+      let checkCount = 0;
+      const maxChecks = maxWait / 100;
+
+      const checkTilesLoaded = () => {
+        checkCount++;
+        let allLoaded = true;
+
+        //Check all layers for loading state
+        mapViewer.map.getAllLayers().forEach((layer) => {
+          const source = layer.getSource();
+          if (source && typeof source.getState === 'function') {
+            if (source.getState() === 'loading') {
+              allLoaded = false;
+            }
+          }
+        });
+
+        if (allLoaded || checkCount >= maxChecks) {
+          resolve();
+        } else {
+          setTimeout(checkTilesLoaded, 100);
+        }
+      };
+      checkTilesLoaded();
     });
   }
 

@@ -13,7 +13,6 @@ import { exportFile } from '@/core/utils/utilities';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
-import { Size } from 'ol/size';
 
 // GV Buffer polyfill for react-pdf
 if (typeof window !== 'undefined') {
@@ -21,7 +20,7 @@ if (typeof window !== 'undefined') {
 }
 
 // Set worker path for PDF.js
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
 
 interface exportPDFMapParams {
   exportTitle: string;
@@ -34,7 +33,7 @@ export type TypeMapStateForExportLayout = {
   northArrow: boolean;
   northArrowElement: TypeNorthArrow;
   scale: TypeScaleInfo;
-  mapSize: Size;
+  mapRotation: number;
 };
 
 // Export dimension constants at 300DPI
@@ -56,8 +55,6 @@ const MAP_IMAGE_DIMENSIONS = {
   },
 };
 
-const RERENDER_TIMEOUT = 500;
-
 /**
  * Generate the PDF export for the map
  * @param {string} mapId - The map ID
@@ -70,8 +67,9 @@ export async function createPDFMapUrl(mapId: string, params: exportPDFMapParams)
   // Get all needed data from store state
   const mapElement = AppEventProcessor.getGeoviewHTMLElement(mapId);
   const mapState = MapEventProcessor.getMapStateForExportLayout(mapId);
-  const { northArrow, scale, attribution, northArrowElement, mapSize } = mapState;
-  const rotationAngle = parseFloat(northArrowElement.degreeRotation) || 0;
+  const { northArrow, scale, attribution, northArrowElement, mapRotation } = mapState;
+  const currentRotation = (mapRotation * 180) / Math.PI;
+  const rotationAngle = parseFloat(northArrowElement.degreeRotation) + currentRotation;
   const legendLayers = LegendEventProcessor.getLegendLayers(mapId).filter(
     (layer) => layer.layerStatus === 'loaded' && (layer.items.length === 0 || layer.items.some((item) => item.isVisible))
   );
@@ -84,27 +82,6 @@ export async function createPDFMapUrl(mapId: string, params: exportPDFMapParams)
   // Adjust map to correct aspect ratio for PDF map
   const mapImageWidth = MAP_IMAGE_DIMENSIONS[size].width;
   const mapImageHeight = MAP_IMAGE_DIMENSIONS[size].height;
-  const aspectRatio = mapImageWidth / mapImageHeight;
-
-  // Adjust the map size to correct aspect ratio to avoid stretching the map
-  let newMapWidth, newMapHeight;
-  if (mapSize[0] / mapSize[1] < aspectRatio) {
-    // Width is increased to meet aspect ratio
-    newMapWidth = mapSize[1] * aspectRatio;
-    newMapHeight = mapSize[1];
-  } else {
-    // Height is increased to meet aspect ratio
-    newMapWidth = mapSize[0];
-    newMapHeight = mapSize[0] / aspectRatio;
-  }
-
-  // Temporarily resize the map for export
-  MapEventProcessor.setMapSize(mapId, [newMapWidth, newMapHeight], true);
-
-  // Wait for map to re-render
-  await new Promise((resolve) => {
-    setTimeout(resolve, RERENDER_TIMEOUT);
-  });
 
   const resultCanvas = document.createElement('canvas');
   resultCanvas.width = mapImageWidth;
@@ -114,17 +91,55 @@ export async function createPDFMapUrl(mapId: string, params: exportPDFMapParams)
   if (!resultContext) throw new Error('Canvas context not available');
 
   const viewport = mapElement.getElementsByClassName('ol-viewport')[0];
+
+  // Apply rotation if needed
+  if (mapRotation !== 0) {
+    resultContext.save();
+    resultContext.translate(mapImageWidth / 2, mapImageHeight / 2);
+    resultContext.rotate(mapRotation);
+  }
+
+  // To be used later for calculating the scale bar width
+  let browserMapWidth;
+
+  // GV This tries it's best to fit the map image into the canvas. However;
+  // GV.Cont at close to 45 degrees, there will be unfetched tiles in the corners
   Array.prototype.forEach.call(viewport.querySelectorAll('canvas'), (canvas: HTMLCanvasElement) => {
     const isOverviewCanvas = canvas.closest('.ol-overviewmap');
     if (!isOverviewCanvas && canvas.width > 0) {
       const { opacity } = (canvas.parentNode as HTMLElement).style;
       resultContext.globalAlpha = opacity === '' ? 1 : Number(opacity);
-      resultContext.drawImage(canvas, 0, 0, mapImageWidth, mapImageHeight);
+
+      // Calculate scaling for the map
+      browserMapWidth = canvas.width;
+      const scaleX = mapImageWidth / canvas.width;
+      const scaleY = mapImageHeight / canvas.height;
+      const canvasScale = Math.max(scaleX, scaleY); // Fill completely, may crop edges
+
+      const scaledWidth = canvas.width * canvasScale;
+      const scaledHeight = canvas.height * canvasScale;
+
+      if (mapRotation !== 0) {
+        // Rotated: draw centered at origin (coordinate system already translated)
+        resultContext.drawImage(canvas, -scaledWidth / 2, -scaledHeight / 2, scaledWidth, scaledHeight);
+      } else {
+        // Not rotated: calculate offset to center in canvas
+        const offsetX = (mapImageWidth - scaledWidth) / 2;
+        const offsetY = (mapImageHeight - scaledHeight) / 2;
+        resultContext.drawImage(canvas, offsetX, offsetY, scaledWidth, scaledHeight);
+      }
     }
   });
 
-  // Restore original map size
-  MapEventProcessor.setMapSize(mapId, mapSize, true);
+  // Calculate scale line width for pdf
+  const pdfScaleFactor = browserMapWidth! / mapImageWidth; // Normalize to a base width
+  const pdfScaleWidth = Math.round(parseFloat(scale.lineWidthMetric) * pdfScaleFactor);
+  const pdfScaleLineWidth = `${pdfScaleWidth}px`;
+
+  // Restore context if rotated
+  if (currentRotation !== 0) {
+    resultContext.restore();
+  }
 
   const mapDataUrl = resultCanvas.toDataURL('image/jpeg', 0.9);
 
@@ -177,7 +192,7 @@ export async function createPDFMapUrl(mapId: string, params: exportPDFMapParams)
         mapDataUrl,
         exportTitle: exportTitle,
         scaleText: `${scale.labelGraphicMetric} (approx)`,
-        scaleLineWidth: scale.lineWidthMetric,
+        scaleLineWidth: pdfScaleLineWidth,
         northArrowSvg: northArrowSvgPaths,
         northArrowRotation: rotationAngle,
         legendLayers: cleanLegendLayers,
@@ -241,6 +256,7 @@ export async function convertPdfUrlToImage(
 
     // Render PDF page into canvas
     const renderContext = {
+      canvas: canvas,
       canvasContext: context,
       viewport: viewport,
       intent: 'print',
