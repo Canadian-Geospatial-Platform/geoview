@@ -1,6 +1,6 @@
 import { createElement, ReactElement } from 'react';
 import { Buffer } from 'buffer';
-import * as pdfjsLib from 'pdfjs-dist';
+import { getDocument, GlobalWorkerOptions, version } from 'pdfjs-dist';
 import { pdf, DocumentProps } from '@react-pdf/renderer';
 
 import { TypeNorthArrow, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
@@ -20,7 +20,7 @@ if (typeof window !== 'undefined') {
 }
 
 // Set worker path for PDF.js
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${version}/pdf.worker.min.mjs`;
 
 interface exportPDFMapParams {
   exportTitle: string;
@@ -230,7 +230,7 @@ export async function convertPdfUrlToImage(
 ): Promise<string | void> {
   try {
     // Load the PDF document
-    const loadingTask = pdfjsLib.getDocument(pdfUrl);
+    const loadingTask = getDocument(pdfUrl);
     const pdfFile = await loadingTask.promise;
 
     // Get the first page
