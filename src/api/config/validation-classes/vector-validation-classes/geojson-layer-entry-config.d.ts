@@ -1,21 +1,25 @@
 import { VectorLayerEntryConfig, VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
-import { TypeSourceGeoJSONInitialConfig } from '@/api/types/layer-schema-types';
+import { ConfigClassOrType, TypeGeoviewLayerConfig, TypeSourceGeoJSONInitialConfig } from '@/api/types/layer-schema-types';
+import { TypeGeoJSONLayerConfig } from '@/geo/layer/geoview-layers/vector/geojson';
 export interface GeoJSONLayerEntryConfigProps extends VectorLayerEntryConfigProps {
     /** Source settings to apply to the GeoView layer source at creation time. */
     source?: TypeSourceGeoJSONInitialConfig;
 }
 export declare class GeoJSONLayerEntryConfig extends VectorLayerEntryConfig {
-    /** Tag used to link the entry to a specific schema. */
-    schemaTag: import("@/api/types/layer-schema-types").TypeGeoviewLayerType;
-    /** Layer entry data type. */
-    entryType: import("@/api/types/layer-schema-types").TypeLayerEntryType;
-    /** The layer entry props that were used in the constructor. */
-    layerEntryProps: GeoJSONLayerEntryConfigProps;
     source: TypeSourceGeoJSONInitialConfig;
     /**
      * The class constructor.
-     * @param {GeoJSONLayerEntryConfigProps | GeoJSONLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
+     * @param {GeoJSONLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
      */
-    constructor(layerConfig: GeoJSONLayerEntryConfigProps | GeoJSONLayerEntryConfig);
+    constructor(layerConfig: GeoJSONLayerEntryConfigProps);
+    /**
+     * Type guard that checks whether the given configuration (class instance or plain object)
+     * represents a GeoJSON layer type.
+     * Supports `ConfigClassOrType` (class instance or plain object) and plain layer config objects (`TypeGeoviewLayerConfig`).
+     * @param {ConfigClassOrType | TypeGeoviewLayerConfig} layerConfig - The layer config to check. Can be an instance of a config class or a raw config object.
+     * @returns `true` if the config is for a GeoJSON layer; otherwise `false`.
+     * @static
+     */
+    static isClassOrTypeGeoJSON(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): layerConfig is TypeGeoJSONLayerConfig;
 }
 //# sourceMappingURL=geojson-layer-entry-config.d.ts.map

@@ -1,7 +1,6 @@
 import { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import { TypeLayerEntryConfig, MapConfigLayerEntry, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
-import { ConfigBaseClassProps } from '@/api/config/validation-classes/config-base-class';
-import { GroupLayerEntryConfigProps } from '@/api/config/validation-classes/group-layer-entry-config';
+import { GroupLayerEntryConfig, GroupLayerEntryConfigProps } from '@/api/config/validation-classes/group-layer-entry-config';
 type BuildGeoViewLayerInput = {
     layerIdsToAdd: string[];
     layerName: string;
@@ -43,13 +42,13 @@ export declare class UtilAddLayer {
      * @param {string[]} layerIds - The la
      * @returns {boolean} Whether or not all of the sublayers are included
      */
-    static allSubLayersAreIncluded(layerTree: TypeGeoviewLayerConfig | GroupLayerEntryConfigProps, layerIds: (string | undefined)[]): boolean;
+    static allSubLayersAreIncluded(layerTree: TypeGeoviewLayerConfig | TypeLayerEntryConfig | GroupLayerEntryConfigProps, layerIds: (string | undefined)[]): boolean;
     /**
      * Creates a layer entry config shell for a group layer.
      * @param {GroupLayerEntryConfig} groupLayer - The group layer
      * @returns {LayerEntryConfigShell} The resulting layer entry config shell
      */
-    static createLayerEntryConfigForGroupLayer(layerName: string, layerType: string, layerIds: string[], layersToAdd: (TypeGeoviewLayerConfig | ConfigBaseClassProps)[], layerIdsToAdd: string[], removedLayerIds: string[], groupLayer: TypeGeoviewLayerConfig | GroupLayerEntryConfigProps): LayerEntryConfigShell;
+    static createLayerEntryConfigForGroupLayer(layerName: string, layerType: string, layerIds: string[], layersToAdd: (TypeGeoviewLayerConfig | TypeLayerEntryConfig)[], layerIdsToAdd: string[], removedLayerIds: string[], groupLayer: TypeGeoviewLayerConfig | GroupLayerEntryConfig | GroupLayerEntryConfigProps): LayerEntryConfigShell;
     /**
      * Builds a geoview layer config from provided layer IDs.
      * @param {BuildGeoViewLayerInput} inputProps - The layer information

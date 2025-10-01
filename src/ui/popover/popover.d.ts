@@ -48,7 +48,7 @@ import { PopoverProps } from '@mui/material';
  *
  * @see {@link https://mui.com/material-ui/react-popover/|Material-UI Popover}
  */
-declare function PopoverUI(props: PopoverProps): JSX.Element;
+declare function PopoverUI({ open, children, ...props }: PopoverProps): JSX.Element;
 export declare const Popover: typeof PopoverUI;
 export {};
 //# sourceMappingURL=popover.d.ts.map

@@ -5,6 +5,7 @@ import { TypeDisplayLanguage } from '@/api/types/map-schema-types';
  * @extends {Error}
  */
 export declare class GeoViewError extends Error {
+    #private;
     /** The localized key or message */
     readonly messageKey: string;
     /** The parameters to be translated using the localizedKey */
@@ -29,6 +30,13 @@ export declare class GeoViewError extends Error {
      * @param {TypeDisplayLanguage} language - The language to translate the error into. English by default.
      */
     static logError(error: unknown, language?: TypeDisplayLanguage): void;
+    /**
+     * Logs an error using the application's logger.
+     * If the error is a GeoViewError, its message is translated to English (default) before logging.
+     * @param {unknown} error - The error to be logged. Can be any type.
+     * @param {TypeDisplayLanguage} language - The language to translate the error into. English by default.
+     */
+    static logWarning(error: unknown, language?: TypeDisplayLanguage): void;
 }
 /**
  * Error thrown when a map viewer with a specified ID is not found.
@@ -171,7 +179,7 @@ export declare class NoExtentError extends GeoViewError {
 export declare class InitDivNotExistError extends GeoViewError {
     /**
      * Creates an instance of InitDivNotExistError.
-     * @param {string} mapId - The map id for which a wront function call was made.
+     * @param {string} mapId - The map id for which a wrong function call was made.
      */
     constructor(mapId: string);
 }
@@ -182,8 +190,19 @@ export declare class InitDivNotExistError extends GeoViewError {
 export declare class InitMapWrongCallError extends GeoViewError {
     /**
      * Creates an instance of InitMapWrongCallError.
-     * @param {string} mapId - The map id for which a wront function call was made.
+     * @param {string} mapId - The map id for which a wrong function call was made.
      */
     constructor(mapId: string);
+}
+/**
+ * Error thrown when a plugin state hasn't been initialized and we're trying to access it.
+ */
+export declare class PluginStateUninitializedError extends GeoViewError {
+    /**
+     * Creates an instance of PluginStateUninitializedError.
+     * @param {string} pluginId - The plugin id for which the state was uninitialized.
+     * @param {string} mapId - The map id
+     */
+    constructor(pluginId: string, mapId: string);
 }
 //# sourceMappingURL=geoview-exceptions.d.ts.map

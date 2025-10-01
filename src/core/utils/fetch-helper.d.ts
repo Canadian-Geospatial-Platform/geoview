@@ -47,7 +47,10 @@ export declare class Fetch {
      * @param {RequestInit?} init - The optional initialization parameters for the fetch.
      * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
      * @returns {Promise<string>} The fetched text response.
+     * @throws {ResponseError} If the response is not OK (non-2xx).
      * @throws {ResponseEmptyError} If the JSON response is empty.
+     * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
+     * @throws {Error} For any other unexpected failures.
      */
     static fetchText(url: string, init?: RequestInit, timeoutMs?: number): Promise<string>;
     /**
@@ -61,6 +64,19 @@ export declare class Fetch {
      * @throws {Error} For any other unexpected failures.
      */
     static fetchArrayBuffer(url: string, init?: RequestInit, timeoutMs?: number): Promise<ArrayBuffer>;
+    /**
+     * Fetches a blob from the given URL and attempts to read it as an image.
+     * Returns a base64-encoded string or ArrayBuffer depending on the file type.
+     * Throws an error if the response contains XML (likely an error page).
+     * @param {string} url - The URL to fetch the image blob from.
+     * @param {RequestInit?} init - The optional initialization parameters for the fetch.
+     * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
+     * @returns {Promise<string | ArrayBuffer | null>} The image as a base64 string or ArrayBuffer, or null on failure.
+     * @throws {ResponseError} If the response is not OK (non-2xx).
+     * @throws {ResponseContentError} If the fetched blob is of type 'text/xml', indicating an unexpected server error.
+     * @throws {Error} For any other unexpected failures.
+     */
+    static fetchBlobImage(url: string, init?: RequestInit, timeoutMs?: number): Promise<string | ArrayBuffer | null>;
     /**
      * Fetches a url for a blob response.
      * @param {string} url - The url to fetch.

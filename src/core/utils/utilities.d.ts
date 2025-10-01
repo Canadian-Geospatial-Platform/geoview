@@ -109,12 +109,11 @@ export declare function watchHtmlElementRemoval(key: string, element: HTMLElemen
  */
 export declare function removeCommentsFromJSON(config: string): string;
 /**
- * Parses JSON config
- *
- * @param {string} configObjStr - Map config to parse
- * @returns {unknown} Cleaned and parsed config object
+ * Parses JSON config string into a JSON object of type T.
+ * @param {string} configStr - Map config to parse
+ * @returns {T} Cleaned and parsed config object
  */
-export declare function parseJSONConfig(configObjStr: string): unknown;
+export declare function parseJSONConfig<T>(configStr: string): T;
 /**
 /**
  * Export the image data url as a PNG

@@ -7,21 +7,27 @@ export interface GroupLayerEntryConfigProps extends ConfigBaseClassProps {
  * Type used to define a layer group.
  */
 export declare class GroupLayerEntryConfig extends ConfigBaseClass {
-    /** Layer entry data type. */
-    entryType: import("@/api/types/layer-schema-types").TypeLayerEntryType;
-    /** The layer entry props that were used in the constructor. */
-    layerEntryProps: GroupLayerEntryConfigProps;
-    /** Tag used to link the entry to a specific schema is not used by groups. */
-    schemaTag: never;
     /** Source settings to apply to the GeoView layer source at creation time is not used by groups. */
     source: never;
     /** The list of layer entry configurations to use from the GeoView layer group. */
     listOfLayerEntryConfig: TypeLayerEntryConfig[];
     /**
      * The class constructor.
-     * @param {GroupLayerEntryConfigProps | GroupLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
+     * @param {GroupLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
      */
-    constructor(layerConfig: GroupLayerEntryConfigProps | GroupLayerEntryConfig);
+    constructor(layerConfig: GroupLayerEntryConfigProps);
+    /**
+     * Returns the `layerPath` values of all immediate child layers in `listOfLayerEntryConfig`.
+     * This method does **not** recurse into nested sublayers.
+     * @returns {string[]} An array of `layerPath` strings for direct sublayers.
+     */
+    getLayerPaths(): string[];
+    /**
+     * Recursively returns the `layerPath` values of all layers and sublayers starting from this layer.
+     * This includes the `layerPath` of the current layer, its direct children, and all nested descendants.
+     * @returns {string[]} An array of `layerPath` strings for all descendant layers (including nested groups).
+     */
+    getLayerPathsAll(): string[];
     /**
      * Updates the data access path for all layer entries in the configuration.
      * This method overrides a base implementation to recursively apply the provided

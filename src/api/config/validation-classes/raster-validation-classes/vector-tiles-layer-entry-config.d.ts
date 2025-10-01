@@ -1,6 +1,7 @@
-import { ConfigVectorTilesClassOrType, TypeMetadataVectorTiles, TypeSourceTileInitialConfig } from '@/api/types/layer-schema-types';
+import { ConfigClassOrType, ConfigVectorTilesClassOrType, TypeGeoviewLayerConfig, TypeMetadataVectorTiles, TypeSourceTileInitialConfig } from '@/api/types/layer-schema-types';
 import { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { TileLayerEntryConfig } from '@/api/config/validation-classes/tile-layer-entry-config';
+import { TypeVectorTilesConfig } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 export interface VectorTilesLayerEntryConfigProps extends AbstractBaseLayerEntryConfigProps {
     /** Source settings to apply to the GeoView layer source at creation time. */
     source?: TypeSourceTileInitialConfig;
@@ -9,14 +10,12 @@ export interface VectorTilesLayerEntryConfigProps extends AbstractBaseLayerEntry
 }
 export declare class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
     #private;
-    /** Tag used to link the entry to a specific schema. */
-    schemaTag: import("@/api/types/layer-schema-types").TypeGeoviewLayerType;
     source: TypeSourceTileInitialConfig;
     /**
      * The class constructor.
-     * @param {VectorTilesLayerEntryConfigProps | VectorTilesLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
+     * @param {VectorTilesLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
      */
-    constructor(layerConfig: VectorTilesLayerEntryConfigProps | VectorTilesLayerEntryConfig);
+    constructor(layerConfig: VectorTilesLayerEntryConfigProps);
     /**
      * Gets the style url or undefined.
      */
@@ -44,5 +43,14 @@ export declare class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
      * @param {string} styleUrl - The style url.
      */
     static setClassOrTypeStyleUrl(layerConfig: ConfigVectorTilesClassOrType, styleUrl: string): void;
+    /**
+     * Type guard that checks whether the given configuration (class instance or plain object)
+     * represents a VectorTiles layer type.
+     * Supports `ConfigClassOrType` (class instance or plain object) and plain layer config objects (`TypeGeoviewLayerConfig`).
+     * @param {ConfigClassOrType | TypeGeoviewLayerConfig} layerConfig - The layer config to check. Can be an instance of a config class or a raw config object.
+     * @returns `true` if the config is for a VectorTiles layer; otherwise `false`.
+     * @static
+     */
+    static isClassOrTypeVectorTiles(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): layerConfig is TypeVectorTilesConfig;
 }
 //# sourceMappingURL=vector-tiles-layer-entry-config.d.ts.map

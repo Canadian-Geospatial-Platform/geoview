@@ -1,5 +1,6 @@
 import { VectorLayerEntryConfig, VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
-import { TypeSourceCSVInitialConfig } from '@/geo/layer/geoview-layers/vector/csv';
+import { TypeCSVLayerConfig, TypeSourceCSVInitialConfig } from '@/geo/layer/geoview-layers/vector/csv';
+import { ConfigClassOrType, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
 export interface CsvLayerEntryConfigProps extends VectorLayerEntryConfigProps {
     /** Source settings to apply to the GeoView layer source at creation time. */
     source?: TypeSourceCSVInitialConfig;
@@ -7,20 +8,23 @@ export interface CsvLayerEntryConfigProps extends VectorLayerEntryConfigProps {
     valueSeparator?: string;
 }
 export declare class CsvLayerEntryConfig extends VectorLayerEntryConfig {
-    /** Tag used to link the entry to a specific schema. */
-    schemaTag: import("@/api/types/layer-schema-types").TypeGeoviewLayerType;
-    /** Layer entry data type. */
-    entryType: import("@/api/types/layer-schema-types").TypeLayerEntryType;
-    /** The layer entry props that were used in the constructor. */
-    layerEntryProps: CsvLayerEntryConfigProps;
     /** Source settings to apply to the GeoView layer source at creation time. */
     source: TypeSourceCSVInitialConfig;
     /** Character separating values in csv file */
     valueSeparator?: string;
     /**
      * The class constructor.
-     * @param {CsvLayerEntryConfigProps | CsvLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
+     * @param {CsvLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
      */
-    constructor(layerConfig: CsvLayerEntryConfigProps | CsvLayerEntryConfig);
+    constructor(layerConfig: CsvLayerEntryConfigProps);
+    /**
+     * Type guard that checks whether the given configuration (class instance or plain object)
+     * represents a CSV layer type.
+     * Supports `ConfigClassOrType` (class instance or plain object) and plain layer config objects (`TypeGeoviewLayerConfig`).
+     * @param {ConfigClassOrType | TypeGeoviewLayerConfig} layerConfig - The layer config to check. Can be an instance of a config class or a raw config object.
+     * @returns `true` if the config is for a CSV layer; otherwise `false`.
+     * @static
+     */
+    static isClassOrTypeCSV(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): layerConfig is TypeCSVLayerConfig;
 }
 //# sourceMappingURL=csv-layer-entry-config.d.ts.map

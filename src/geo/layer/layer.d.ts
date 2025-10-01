@@ -6,7 +6,7 @@ import { FeatureHighlight } from '@/geo/map/feature-highlight';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeDisplayLanguage, TypeOutfieldsType } from '@/api/types/map-schema-types';
-import { MapConfigLayerEntry, TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerStatus } from '@/api/types/layer-schema-types';
+import { MapConfigLayerEntry, TypeGeoviewLayerConfig, TypeLayerStatus } from '@/api/types/layer-schema-types';
 import { HoverFeatureInfoLayerSet } from '@/geo/layer/layer-sets/hover-feature-info-layer-set';
 import { AllFeatureInfoLayerSet } from '@/geo/layer/layer-sets/all-feature-info-layer-set';
 import { LegendsLayerSet } from '@/geo/layer/layer-sets/legends-layer-set';
@@ -425,10 +425,10 @@ export declare class LayerApi {
     static convertMapConfigsToGeoviewLayerConfig(mapId: string, language: TypeDisplayLanguage, mapConfigLayerEntries: MapConfigLayerEntry[], errorCallback: (mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => void): Promise<TypeGeoviewLayerConfig>[];
     /**
      * Generate an array of layer info for the orderedLayerList.
-     * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The config to get the info from.
+     * @param {TypeGeoviewLayerConfig | ConfigBaseClass} geoviewLayerConfig - The config to get the info from.
      * @returns {TypeOrderedLayerInfo[]} The array of ordered layer info.
      */
-    static generateArrayOfLayerOrderInfo(geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig): TypeOrderedLayerInfo[];
+    static generateArrayOfLayerOrderInfo(geoviewLayerConfig: TypeGeoviewLayerConfig | ConfigBaseClass): TypeOrderedLayerInfo[];
     /**
      * Creates an instance of a specific `AbstractGeoViewLayer` subclass based on the given GeoView layer configuration.
      * This function determines the correct layer type from the configuration and instantiates it accordingly.
@@ -438,7 +438,6 @@ export declare class LayerApi {
      * - If the layer type is not supported, an error is thrown.
      * - TODO: Refactor to use the validated configuration with metadata already fetched.
      * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The configuration object for the GeoView layer.
-     * @param {string} mapProjectionForVectorTiles - The projection string to be used when creating Vector Tiles layers.
      * @returns {AbstractGeoViewLayer} An instance of the corresponding `AbstractGeoViewLayer` subclass.
      * @throws {NotSupportedError} If the configuration does not match any supported layer type.
      */

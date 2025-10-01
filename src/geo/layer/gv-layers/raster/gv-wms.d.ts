@@ -19,6 +19,8 @@ import { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raste
  */
 export declare class GVWMS extends AbstractGVRaster {
     #private;
+    /** The max feature count returned by the GetFeatureInfo */
+    static readonly DEFAULT_MAX_FEATURE_COUNT: number;
     /**
      * Constructs a GVWMS layer to manage an OpenLayer layer.
      * @param {ImageWMS} olSource - The OpenLayer source.
@@ -27,20 +29,20 @@ export declare class GVWMS extends AbstractGVRaster {
     constructor(olSource: ImageWMS, layerConfig: OgcWmsLayerEntryConfig);
     /**
      * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
-     * @override
      * @returns {ImageLayer<ImageWMS>} The strongly-typed OpenLayers type.
+     * @override
      */
     getOLLayer(): ImageLayer<ImageWMS>;
     /**
      * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
-     * @override
      * @returns {ImageWMS} The ImageWMS source instance associated with this layer.
+     * @override
      */
     getOLSource(): ImageWMS;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @override
      * @returns {OgcWmsLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
+     * @override
      */
     getLayerConfig(): OgcWmsLayerEntryConfig;
     /**
@@ -50,6 +52,7 @@ export declare class GVWMS extends AbstractGVRaster {
      * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
      * @param {AbortController?} abortController - The optional abort controller.
      * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+     * @override
      */
     protected getFeatureInfoAtCoordinate(map: OLMap, location: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
@@ -59,20 +62,21 @@ export declare class GVWMS extends AbstractGVRaster {
      * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
      * @param {AbortController?} abortController - The optional abort controller.
      * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+     * @override
      */
     protected getFeatureInfoAtLonLat(map: OLMap, lonlat: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overrides the fetching of the legend for a WMS layer.
-     * @override
      * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
+     * @override
      */
     onFetchLegend(): Promise<TypeWmsLegend | null>;
     /**
      * Overrides the way to get the bounds for this layer type.
      * @param {OLProjection} projection - The projection to get the bounds into.
      * @param {number} stops - The number of stops to use to generate the extent.
-     * @override
      * @returns {Extent | undefined} The layer bounding box.
+     * @override
      */
     onGetBounds(projection: OLProjection, stops: number): Extent | undefined;
     /**
@@ -100,6 +104,7 @@ export declare class GVWMS extends AbstractGVRaster {
      * @param {string | undefined} filter - The raw filter string input (defaults to an empty string if not provided).
      * @param {Function?} callbackWhenUpdated - Optional callback that is invoked with the final filter string if the layer was updated.
      * @throws {LayerInvalidLayerFilterError} If the filter expression fails to parse or cannot be applied.
+     * @static
      */
     static applyViewFilterOnSource(layerConfig: OgcWmsLayerEntryConfig | EsriImageLayerEntryConfig, source: ImageWMS | ImageArcGISRest, externalDateFragments: TypeDateFragments | undefined, layer: GVWMS | GVEsriImage | undefined, filter?: string | undefined, callbackWhenUpdated?: ((filterToUse: string) => void) | undefined): void;
 }

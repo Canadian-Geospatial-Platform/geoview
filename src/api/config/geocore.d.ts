@@ -5,7 +5,7 @@ import { GeoCoreLayerConfig, TypeGeoviewLayerConfig } from '@/api/types/layer-sc
  * @exports
  * @class GeoCore
  */
-export declare abstract class GeoCore {
+export declare class GeoCore {
     /**
      * Gets GeoView layer configurations list from the UUIDs of the list of layer entry configurations.
      * @param {string} uuid - The UUID of the layer

@@ -1,5 +1,5 @@
 import { TypeLayerStyleConfig, TypeStyleGeometry, TypeLayerStyleSettings } from '@/api/types/map-schema-types';
-import { ConfigAbstractBaseClassOrType, TypeBaseSourceInitialConfig } from '@/api/types/layer-schema-types';
+import { ConfigClassOrType, TypeBaseSourceInitialConfig, TypeGeoviewLayerType, TypeLayerEntryType } from '@/api/types/layer-schema-types';
 import { ConfigBaseClass, ConfigBaseClassProps } from '@/api/config/validation-classes/config-base-class';
 import { TimeDimension } from '@/core/utils/date-mgt';
 import { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
@@ -24,7 +24,7 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
      * The class constructor.
      * @param {AbstractBaseLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
      */
-    protected constructor(layerConfig: AbstractBaseLayerEntryConfigProps | AbstractBaseLayerEntryConfig);
+    protected constructor(layerConfig: AbstractBaseLayerEntryConfigProps | AbstractBaseLayerEntryConfig, schemaTag: TypeGeoviewLayerType, entryType: TypeLayerEntryType);
     /**
      * Gets the service metadata that is associated to the service.
      * @returns {unknown | undefined} The service metadata or undefined.
@@ -116,6 +116,11 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
      */
     setLegendFilterIsOff(legendFilterIsOff: boolean): void;
     /**
+     * Gets the data access path from the source object.
+     * @returns {string | undefined} The data access path.
+     */
+    getDataAccessPath(): string | undefined;
+    /**
      * Sets the data access path for the source object.
      * This method is called when the data access path is being set.
      * If the `source` object is undefined or null, it initializes it as an empty object.
@@ -134,12 +139,12 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
      * @param {ConfigAbstractBaseClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
      * @returns {string | undefined} The layer style or undefined.
      */
-    static getClassOrTypeLayerStyle(layerConfig: ConfigAbstractBaseClassOrType | undefined): TypeLayerStyleConfig | undefined;
+    static getClassOrTypeLayerStyle(layerConfig: ConfigClassOrType | undefined): TypeLayerStyleConfig | undefined;
     /**
      * Helper function to support when a layerConfig is either a class instance or a regular json object.
-     * @param {ConfigAbstractBaseClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
+     * @param {ConfigClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
      * @returns {string | undefined} The layer filter or undefined.
      */
-    static getClassOrTypeLayerFilter(layerConfig: ConfigAbstractBaseClassOrType | undefined): string | undefined;
+    static getClassOrTypeLayerFilter(layerConfig: ConfigClassOrType | undefined): string | undefined;
 }
 //# sourceMappingURL=abstract-base-layer-entry-config.d.ts.map
