@@ -238,7 +238,7 @@ export async function createCanvasMapUrls(mapId: string, props: FileExportProps)
 
   // Convert to canvas
   const quality = jpegQuality ?? 1;
-  const mainCanvas = await html2canvas.default(mainElement.firstChild as HTMLElement, { scale: dpi / 96 });
+  const mainCanvas = await html2canvas.default(mainElement.firstChild as HTMLElement, { scale: dpi / 96, logging: false });
   results.push(mainCanvas.toDataURL(`image/${format}`, quality));
   document.body.removeChild(mainElement);
 
@@ -265,8 +265,8 @@ export async function createCanvasMapUrls(mapId: string, props: FileExportProps)
     overflowElement.innerHTML = overflowHtml;
     document.body.appendChild(overflowElement);
 
-    const overflowCanvas = await html2canvas.default(overflowElement.firstChild as HTMLElement);
-    results.push(overflowCanvas.toDataURL('image/png'));
+    const overflowCanvas = await html2canvas.default(overflowElement.firstChild as HTMLElement, { scale: dpi / 96, logging: false });
+    results.push(overflowCanvas.toDataURL(`image/${format}`, quality));
     document.body.removeChild(overflowElement);
   }
 
