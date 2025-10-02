@@ -1,39 +1,66 @@
-import { createElement, ReactElement } from 'react';
+import { createElement } from 'react';
 import { Buffer } from 'buffer';
-import { getDocument, GlobalWorkerOptions, version } from 'pdfjs-dist';
-import { pdf, DocumentProps } from '@react-pdf/renderer';
 
 import { TypeNorthArrow, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { TypeLegendLayer } from '@/core/components/layers/types';
+import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
+import { TypeTimeSliderValues, TimeSliderLayerSet } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { ExportDocument } from '@/core/components/export/pdf-layout';
-import { DateMgt } from '@/core/utils/date-mgt';
-import { logger } from '@/core/utils/logger';
-import { exportFile } from '@/core/utils/utilities';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
-import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
+
+import { logger } from '@/core/utils/logger';
 import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
+import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 
 // GV Buffer polyfill for react-pdf
 if (typeof window !== 'undefined') {
   (window as typeof globalThis).Buffer = Buffer;
 }
 
-// Set worker path for PDF.js
-GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${version}/pdf.worker.min.mjs`;
-
-interface exportPDFMapParams {
-  exportTitle: string;
-  disclaimer: string;
-  size: 'LETTER' | 'TABLOID' | 'LEGAL';
-}
+export type TypeValidPageSizes = 'LETTER' | 'TABLOID' | 'LEGAL';
 
 export type TypeMapStateForExportLayout = {
   attribution: string[];
   northArrow: boolean;
   northArrowElement: TypeNorthArrow;
-  scale: TypeScaleInfo;
+  mapScale: TypeScaleInfo;
   mapRotation: number;
+};
+
+export interface FlattenedLegendItem {
+  type: 'layer' | 'item' | 'child' | 'wms' | 'time';
+  data: TypeLegendLayer;
+  parentName?: string;
+  depth: number;
+  isRoot: boolean;
+  timeInfo?: TypeTimeSliderValues;
+}
+
+export type TypePageConfig = (typeof PAGE_CONFIGS)[keyof typeof PAGE_CONFIGS];
+
+export type TypeMapInfoResult = {
+  mapDataUrl: string;
+  scaleText: string;
+  scaleLineWidth: string;
+  northArrowSvg: Array<{
+    d: string | null;
+    fill: string | null;
+    stroke: string | null;
+    strokeWidth: string | null;
+  }> | null;
+  northArrowRotation: number;
+  attributions: string[];
+  fittedColumns: FlattenedLegendItem[][];
+  fittedOverflowItems?: FlattenedLegendItem[][];
+};
+
+// Page size specific styling
+export const PAGE_CONFIGS = {
+  LETTER: { size: 'LETTER' as const, mapHeight: 400, legendColumns: 4, maxLegendHeight: 450, canvasWidth: 612, canvasHeight: 792 },
+  LEGAL: { size: 'LEGAL' as const, mapHeight: 600, legendColumns: 4, maxLegendHeight: 500, canvasWidth: 612, canvasHeight: 1008 },
+  TABLOID: { size: 'TABLOID' as const, mapHeight: 800, legendColumns: 6, maxLegendHeight: 620, canvasWidth: 792, canvasHeight: 1224 },
 };
 
 // Export dimension constants at 300DPI
@@ -55,33 +82,231 @@ const MAP_IMAGE_DIMENSIONS = {
   },
 };
 
+// Estimate item heights (rough approximation)
+const estimateItemHeight = (item: FlattenedLegendItem): number => {
+  switch (item.type) {
+    case 'layer':
+      return 20;
+    case 'child':
+      return 15;
+    case 'wms':
+      return 100; // WMS images are typically larger
+    case 'time':
+      return 12;
+    case 'item':
+      return 10;
+    default:
+      return 10;
+  }
+};
+
+/**
+ * Estimate footer height based on content
+ */
+const estimateFooterHeight = (disclaimer: string, attributions: string[]): number => {
+  const baseLineHeight = 12; // 8px font + 4px spacing
+  const marginBottom = 5; // disclaimer margin
+
+  // Estimate disclaimer lines (assuming ~80 chars per line at font size 8)
+  const disclaimerLines = disclaimer ? Math.ceil(disclaimer.length / 80) : 0;
+  const disclaimerHeight = disclaimerLines * baseLineHeight + (disclaimerLines > 0 ? marginBottom : 0);
+
+  // Estimate attribution lines
+  const attributionHeight = attributions.reduce((total, attr) => {
+    const lines = Math.ceil(attr.length / 80);
+    return total + lines * baseLineHeight + 2; // 2px margin per attribution
+  }, 0);
+
+  // Date line
+  const dateHeight = baseLineHeight;
+
+  // Add padding and margins
+  const totalHeight = disclaimerHeight + attributionHeight + dateHeight + 20; // 20px for margins/padding
+
+  return Math.max(totalHeight, 60); // Minimum 60px
+};
+
+/**
+ * Filter and flatten layers for placement in the legend
+ * @param {TypeLegendLayer[]} layers - The legend layers to be shown in the legend
+ * @param {TypeOrdderedLayerInfo[]} orderedLayerInfo - The orderedLayerInfo to be used to filter out layers that aren't visible
+ * @param {TimeSliderLayerSet} timeSliderLayers - Any layers that are time enabled
+ * @returns {FlattenedLegendItem[]} The flattened list of all the items in the legend
+ */
+export const processLegendLayers = (
+  layers: TypeLegendLayer[],
+  orderedLayerInfo: TypeOrderedLayerInfo[],
+  timeSliderLayers?: TimeSliderLayerSet
+): FlattenedLegendItem[] => {
+  const allItems: FlattenedLegendItem[] = [];
+
+  const flattenLayer = (layer: TypeLegendLayer, depth = 0, rootLayerName?: string): FlattenedLegendItem[] => {
+    const items: FlattenedLegendItem[] = [];
+    const currentRootName = rootLayerName || layer.layerName;
+
+    // Check if layer is visible on the map
+    const layerInfo = orderedLayerInfo.find((info) => info.layerPath === layer.layerPath);
+    if (!layerInfo?.visible) {
+      return items;
+    }
+
+    // Check if layer has any meaningful legend content
+    const hasVisibleItems = layer.items.some((item) => item.isVisible);
+    const hasWMSLegend = layer.type === CONST_LAYER_TYPES.WMS && layer.icons?.[0]?.iconImage && layer.icons[0].iconImage !== 'no data';
+    const hasTimeDimension = Boolean(timeSliderLayers?.[layer.layerPath]?.range?.length);
+    const hasChildren = layer.children && layer.children.length > 0;
+
+    // Skip layers with no legend content (like XYZ/vector tiles without symbolization)
+    if (!hasVisibleItems && !hasWMSLegend && !hasTimeDimension && !hasChildren) {
+      return items;
+    }
+
+    // Add the layer itself
+    items.push({
+      type: depth === 0 ? 'layer' : 'child',
+      data: layer,
+      depth,
+      isRoot: depth === 0,
+      parentName: depth === 0 ? undefined : currentRootName,
+    });
+
+    // Add time dimension if available
+    if (hasTimeDimension) {
+      const timeDimension = timeSliderLayers?.[layer.layerPath];
+      items.push({
+        type: 'time',
+        data: layer,
+        parentName: currentRootName,
+        depth: depth + 1,
+        isRoot: false,
+        timeInfo: timeDimension,
+      });
+    }
+
+    // Add WMS legend image if available
+    if (hasWMSLegend) {
+      items.push({
+        type: 'wms',
+        data: layer,
+        parentName: currentRootName,
+        depth: depth + 1,
+        isRoot: false,
+      });
+    }
+
+    // Add visible layer items only
+    layer.items.forEach((item) => {
+      if (item.isVisible) {
+        items.push({
+          type: 'item',
+          data: { ...layer, items: [item] },
+          parentName: currentRootName,
+          depth: depth + 1,
+          isRoot: false,
+        });
+      }
+    });
+
+    // Recursively add children
+    if (layer.children) {
+      layer.children.forEach((child) => {
+        items.push(...flattenLayer(child, depth + 1, currentRootName));
+      });
+    }
+
+    return items;
+  };
+
+  layers.forEach((layer) => {
+    allItems.push(...flattenLayer(layer));
+  });
+
+  return allItems;
+};
+
+/**
+ * Group items by their root layer and distribute in the columns
+ * @param {FlattenedLegendItem[]} items - The flattened list of legend items to be placed in the legend
+ * @param {number} numColumns - The maximum number of columns that can be used
+ * @returns {FlattenedLegendItem[][]} The flattened legend items distributed between the columns
+ */
+export const distributeIntoColumns = (
+  items: FlattenedLegendItem[],
+  numColumns: number,
+  maxHeight: number,
+  disclaimer: string,
+  attributions: string[]
+): { fittedColumns: FlattenedLegendItem[][]; overflowItems: FlattenedLegendItem[] } => {
+  if (!items || items.length === 0) return { fittedColumns: Array(numColumns).fill([]), overflowItems: [] };
+
+  const columns: FlattenedLegendItem[][] = Array(numColumns)
+    .fill(null)
+    .map(() => []);
+  const columnHeights: number[] = Array(numColumns).fill(0);
+  const overflowItems: FlattenedLegendItem[] = [];
+
+  // Group items by root layers
+  const groups: FlattenedLegendItem[][] = [];
+  let currentGroup: FlattenedLegendItem[] = [];
+
+  items.forEach((item) => {
+    if (item.isRoot && currentGroup.length > 0) {
+      groups.push(currentGroup);
+      currentGroup = [];
+    }
+    currentGroup.push(item);
+  });
+
+  if (currentGroup.length > 0) {
+    groups.push(currentGroup);
+  }
+
+  // Reserve space for footer (approximately 60px)
+  const footerReservedSpace = estimateFooterHeight(disclaimer, attributions);
+  const adjustedMaxHeight = maxHeight - footerReservedSpace;
+
+  // Distribute groups strictly - no splitting allowed
+  groups.forEach((group) => {
+    const groupHeight = group.reduce((sum, item) => sum + estimateItemHeight(item), 0);
+
+    // Find the column with the least content that can fit this entire group
+    let targetColumn = -1;
+    let minHeight = Infinity;
+
+    for (let i = 0; i < numColumns; i++) {
+      if (columnHeights[i] + groupHeight <= adjustedMaxHeight && columnHeights[i] < minHeight) {
+        targetColumn = i;
+        minHeight = columnHeights[i];
+      }
+    }
+
+    // If no column can fit the entire group, move to overflow
+    if (targetColumn === -1) {
+      overflowItems.push(...group);
+    } else {
+      columns[targetColumn].push(...group);
+      columnHeights[targetColumn] += groupHeight;
+    }
+  });
+
+  return { fittedColumns: columns, overflowItems };
+};
+
 /**
  * Generate the PDF export for the map
  * @param {string} mapId - The map ID
- * @param {exportPDFMapParams} params - The export params being passed
- * @returns {Promise<string>} The PDF blob url
+ * @param {TypeValidPageSizes} pageSize - The page size for aspect ratio
+ * @returns {TypeMapInfoResult} The map image data URL and browser canvas size
  */
-export async function createPDFMapUrl(mapId: string, params: exportPDFMapParams): Promise<string> {
-  const { exportTitle, disclaimer, size } = params;
-
+export async function getMapInfo(mapId: string, pageSize: TypeValidPageSizes, disclaimer: string): Promise<TypeMapInfoResult> {
   // Get all needed data from store state
   const mapElement = AppEventProcessor.getGeoviewHTMLElement(mapId);
   const mapState = MapEventProcessor.getMapStateForExportLayout(mapId);
-  const { northArrow, scale, attribution, northArrowElement, mapRotation } = mapState;
-  const currentRotation = (mapRotation * 180) / Math.PI;
-  const rotationAngle = parseFloat(northArrowElement.degreeRotation) + currentRotation;
-  const legendLayers = LegendEventProcessor.getLegendLayers(mapId).filter(
-    (layer) => layer.layerStatus === 'loaded' && (layer.items.length === 0 || layer.items.some((item) => item.isVisible))
-  );
-  const orderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfo(mapId);
-  let timeSliderLayers = undefined;
-  if (TimeSliderEventProcessor.isTimeSliderInitialized(mapId)) {
-    timeSliderLayers = TimeSliderEventProcessor.getTimeSliderLayers(mapId);
-  }
+  const { northArrow, northArrowElement, attribution, mapRotation, mapScale } = mapState;
 
   // Adjust map to correct aspect ratio for PDF map
-  const mapImageWidth = MAP_IMAGE_DIMENSIONS[size].width;
-  const mapImageHeight = MAP_IMAGE_DIMENSIONS[size].height;
+  const mapImageWidth = MAP_IMAGE_DIMENSIONS[pageSize].width;
+  const mapImageHeight = MAP_IMAGE_DIMENSIONS[pageSize].height;
 
   const resultCanvas = document.createElement('canvas');
   resultCanvas.width = mapImageWidth;
@@ -99,7 +324,6 @@ export async function createPDFMapUrl(mapId: string, params: exportPDFMapParams)
     resultContext.rotate(mapRotation);
   }
 
-  // To be used later for calculating the scale bar width
   let browserMapWidth;
 
   // GV This tries it's best to fit the map image into the canvas. However;
@@ -131,21 +355,29 @@ export async function createPDFMapUrl(mapId: string, params: exportPDFMapParams)
     }
   });
 
-  // Calculate scale line width for pdf
-  const pdfScaleFactor = browserMapWidth! / mapImageWidth; // Normalize to a base width
-  const pdfScaleWidth = Math.round(parseFloat(scale.lineWidthMetric) * pdfScaleFactor);
-  const pdfScaleLineWidth = `${pdfScaleWidth}px`;
+  // Calculate scale line width
+  const pdfScaleFactor = browserMapWidth! / mapImageWidth;
+  const pdfScaleWidth = Math.round(parseFloat(mapScale.lineWidthMetric) * pdfScaleFactor);
+  const scaleLineWidth = `${pdfScaleWidth}px`;
 
   // Restore context if rotated
-  if (currentRotation !== 0) {
+  if (mapRotation !== 0) {
     resultContext.restore();
   }
 
-  const mapDataUrl = resultCanvas.toDataURL('image/jpeg', 0.9);
-
-  if (!mapDataUrl || mapDataUrl === 'data:,') {
-    throw new Error('Failed to capture map image');
+  // Get all other state data
+  const legendLayers = LegendEventProcessor.getLegendLayers(mapId).filter(
+    (layer) => layer.layerStatus === 'loaded' && (layer.items.length === 0 || layer.items.some((item) => item.isVisible))
+  );
+  const orderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfo(mapId);
+  let timeSliderLayers = undefined;
+  if (TimeSliderEventProcessor.isTimeSliderInitialized(mapId)) {
+    timeSliderLayers = TimeSliderEventProcessor.getTimeSliderLayers(mapId);
   }
+
+  // Get rotation angle for north arrow
+  const currentRotation = (mapRotation * 180) / Math.PI;
+  const rotationAngle = parseFloat(northArrowElement.degreeRotation) + currentRotation;
 
   // Generate north arrow SVG
   let northArrowSvgPaths = null;
@@ -186,97 +418,31 @@ export async function createPDFMapUrl(mapId: string, params: exportPDFMapParams)
       })),
   }));
 
-  try {
-    const blob = await pdf(
-      createElement(ExportDocument, {
-        mapDataUrl,
-        exportTitle: exportTitle,
-        scaleText: `${scale.labelGraphicMetric} (approx)`,
-        scaleLineWidth: pdfScaleLineWidth,
-        northArrowSvg: northArrowSvgPaths,
-        northArrowRotation: rotationAngle,
-        legendLayers: cleanLegendLayers,
-        orderedLayerInfo: orderedLayerInfo,
-        disclaimer: disclaimer,
-        attributions: attribution,
-        date: DateMgt.formatDate(new Date(), 'YYYY-MM-DD, hh:mm:ss A'),
-        timeSliderLayers: timeSliderLayers,
-        pageSize: size,
-      }) as ReactElement<DocumentProps>
-    ).toBlob();
+  // Process legend data
+  const config = PAGE_CONFIGS[pageSize];
+  const allItems = processLegendLayers(cleanLegendLayers, orderedLayerInfo, timeSliderLayers);
+  const { fittedColumns, overflowItems } = distributeIntoColumns(
+    allItems,
+    config.legendColumns,
+    config.maxLegendHeight,
+    disclaimer,
+    attribution
+  );
 
-    return URL.createObjectURL(blob);
-  } catch (error) {
-    logger.logError(error);
-    throw new Error(`Failed to generate PDF: ${error}`);
+  let fittedOverflowItems;
+  if (overflowItems) {
+    const distributedOverflow = distributeIntoColumns(overflowItems, config.legendColumns, config.maxLegendHeight, '', []);
+    fittedOverflowItems = distributedOverflow.fittedColumns.filter((items) => items.length > 0);
   }
-}
 
-/**
- * Converts a PDF URL to PNG using PDF.js and canvas rendering
- * @param {string} pdfUrl - The pdf url to convert
- * @param {string} filename - The filename to save the image as
- * @param {number} dpi - The dpi of the resulting image
- * @param {string} format - The format of the image (jpeg or png)
- * @param {number} quality - The quality of the JPEG image (e.g. 0.95)
- * @returns {Promise<string | void>} The resulting image blob url or void if filename is provided (which triggers the export instead of preview)
- */
-export async function convertPdfUrlToImage(
-  pdfUrl: string,
-  filename?: string,
-  dpi: number = 300,
-  format: 'png' | 'jpeg' = 'png',
-  quality: number = 1
-): Promise<string | void> {
-  try {
-    // Load the PDF document
-    const loadingTask = getDocument(pdfUrl);
-    const pdfFile = await loadingTask.promise;
-
-    // Get the first page
-    const page = await pdfFile.getPage(1);
-
-    // Set scale for good quality (1 = 100% of original size)
-    const scale = Math.max((dpi / 300) * 3, 1); // 300 is the DPI of the PDF, minimum of scale = 1
-    const viewport = page.getViewport({ scale });
-
-    // Create canvas
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
-
-    if (!context) {
-      throw new Error('Could not get canvas context');
-    }
-
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
-
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
-
-    // Render PDF page into canvas
-    const renderContext = {
-      canvas: canvas,
-      canvasContext: context,
-      viewport: viewport,
-      intent: 'print',
-      renderInteractiveForms: false,
-    };
-
-    await page.render(renderContext).promise;
-
-    // Convert canvas to data URL
-    const dataUrl = canvas.toDataURL(`image/${format}`, quality);
-
-    if (filename) {
-      // Download the image
-      exportFile(dataUrl, filename, format);
-    } else {
-      // Return data URL for preview
-      return dataUrl;
-    }
-  } catch (error) {
-    logger.logError('PDF to PNG conversion failed:', error);
-    throw new Error(`Failed to convert PDF to PNG: ${error}`);
-  }
+  return {
+    mapDataUrl: resultCanvas.toDataURL('image/jpeg', 0.98),
+    scaleText: `${mapScale.labelGraphicMetric} (approx)`,
+    scaleLineWidth,
+    northArrowSvg: northArrowSvgPaths,
+    northArrowRotation: rotationAngle,
+    attributions: attribution,
+    fittedColumns,
+    fittedOverflowItems,
+  };
 }

@@ -10,7 +10,8 @@ import { exportFile } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 
 import { getSxClasses } from './export-modal-style';
-import { createPDFMapUrl, convertPdfUrlToImage } from './utilities';
+import { createPDFMapUrl } from './pdf-layout';
+import { createCanvasMapUrls } from './canvas-layout';
 
 type FileFormat = 'pdf' | 'png' | 'jpeg';
 
@@ -19,6 +20,15 @@ type DocumentSize = 'LETTER' | 'LEGAL' | 'TABLOID';
 const QUALITY_OPTIONS = [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100];
 
 const PREVIEW_TIMEOUT = 200;
+
+export interface FileExportProps {
+  exportTitle: string;
+  disclaimer: string;
+  pageSize: DocumentSize;
+  dpi: number;
+  jpegQuality?: number;
+  format: FileFormat;
+}
 
 /**
  * Export modal window component to export the viewer information in a PNG file
@@ -59,7 +69,7 @@ export default function ExportModal(): JSX.Element {
   const [pageSizeMenuOpen, setPageSizeMenuOpen] = useState(false);
   const [pageSizeAnchorEl, setPageSizeAnchorEl] = useState<null | HTMLElement>(null);
   const dialogRef = useRef(null) as RefObject<HTMLDivElement>;
-  const [pngPreviewUrl, setPngPreviewUrl] = useState<string>('');
+  const [pngPreviewUrls, setPngPreviewUrls] = useState<string[]>([]);
 
   const fileExportDefaultPrefixName = t('exportModal.fileExportDefaultPrefixName');
 
@@ -73,10 +83,9 @@ export default function ExportModal(): JSX.Element {
     try {
       setIsMapLoading(true);
       const disclaimer = t('mapctrl.disclaimer.message');
-      const pdfUrl = await createPDFMapUrl(mapId, { exportTitle: '', disclaimer, size: pageSize });
-      const pngDataUrl = (await convertPdfUrlToImage(pdfUrl)) as string;
-      setPngPreviewUrl(pngDataUrl);
-      URL.revokeObjectURL(pdfUrl);
+      const pngUrls = await createCanvasMapUrls(mapId, { exportTitle: '', disclaimer, pageSize: pageSize, dpi: 96, format: 'jpeg' });
+      setPngPreviewUrls(pngUrls);
+      pngUrls.forEach((url) => URL.revokeObjectURL(url));
     } catch (error) {
       logger.logError(error);
     } finally {
@@ -91,17 +100,30 @@ export default function ExportModal(): JSX.Element {
       setIsMapExporting(true);
       const disclaimer = t('mapctrl.disclaimer.message');
       const dpi = exportFormat === 'pdf' ? 300 : exportMapResolution;
-      const pdfUrl = await createPDFMapUrl(mapId, { exportTitle, disclaimer, size: pageSize });
-
       const filename = `${fileExportDefaultPrefixName}-${exportTitle.trim() || mapId}`;
 
       if (exportFormat === 'pdf') {
+        const pdfUrl = await createPDFMapUrl(mapId, { exportTitle, disclaimer, pageSize: pageSize, dpi, format: exportFormat });
         exportFile(pdfUrl, filename, exportFormat);
+        URL.revokeObjectURL(pdfUrl);
       } else {
-        await convertPdfUrlToImage(pdfUrl, filename, dpi, exportFormat, jpegQuality / 100);
+        const imageUrl = await createCanvasMapUrls(mapId, {
+          exportTitle,
+          disclaimer,
+          pageSize: pageSize,
+          dpi,
+          jpegQuality,
+          format: exportFormat,
+        });
+        imageUrl.forEach((url, i) => {
+          let exportName = filename;
+          if (i > 0) {
+            exportName = `${filename}-legend-overflow-${i}`;
+          }
+          exportFile(url, exportName, exportFormat);
+          URL.revokeObjectURL(url);
+        });
       }
-
-      URL.revokeObjectURL(pdfUrl);
     } catch (error) {
       logger.logError(`Error exporting ${exportFormat.toUpperCase()}`, error);
     } finally {
@@ -235,8 +257,11 @@ export default function ExportModal(): JSX.Element {
               return <Skeleton variant="rounded" width={600} height={777} sx={{ margin: '0 auto' }} />;
             }
 
-            if (pngPreviewUrl) {
-              return <img src={pngPreviewUrl} alt="Export Preview" style={{ width: 600, height: 777, border: '1px solid #ccc' }} />;
+            if (pngPreviewUrls) {
+              return pngPreviewUrls.map((imageUrl) => {
+                const key = imageUrl.substring(imageUrl.length - 10);
+                return <img key={key} src={imageUrl} alt="Export Preview" style={{ width: 600, height: 777, border: '1px solid #ccc' }} />;
+              });
             }
 
             return <Box sx={{ width: 600, height: 777, border: '1px solid #ccc', margin: '0 auto' }}>Loading preview...</Box>;
