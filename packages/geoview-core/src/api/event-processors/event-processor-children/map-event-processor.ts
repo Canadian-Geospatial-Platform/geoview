@@ -1572,14 +1572,16 @@ export class MapEventProcessor extends AbstractEventProcessor {
         viewSettings,
       };
 
-      // Create time slider config and add to core package configs
       let { corePackagesConfig } = config;
-      const sliders = this.#createTimeSliderConfigs(mapId);
-      if (corePackagesConfig && sliders) {
-        const configObj = corePackagesConfig?.find((packageConfig) => Object.keys(packageConfig).includes('time-slider'));
-        if (configObj) configObj['time-slider'] = { sliders };
-        else corePackagesConfig.push({ 'time-slider': { sliders } });
-      } else if (sliders) corePackagesConfig = [{ 'time-slider': { sliders } }];
+      // Create time slider config and add to core package configs
+      if (TimeSliderEventProcessor.isTimeSliderInitialized(mapId)) {
+        const sliders = this.#createTimeSliderConfigs(mapId);
+        if (corePackagesConfig && sliders) {
+          const configObj = corePackagesConfig?.find((packageConfig) => Object.keys(packageConfig).includes('time-slider'));
+          if (configObj) configObj['time-slider'] = { sliders };
+          else corePackagesConfig.push({ 'time-slider': { sliders } });
+        } else if (sliders) corePackagesConfig = [{ 'time-slider': { sliders } }];
+      }
 
       // Construct map config
       const newMapConfig: TypeMapFeaturesInstance = {
