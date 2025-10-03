@@ -4,6 +4,7 @@ import { Document, Page, Text, View, Image, Svg, Path } from '@react-pdf/rendere
 import { DateMgt } from '@/core/utils/date-mgt';
 import { getMapInfo, FlattenedLegendItem, PAGE_CONFIGS, TypeValidPageSizes } from './utilities';
 import { FileExportProps } from './export-modal';
+import { PDF_STYLES } from './layout-styles';
 
 interface ExportDocumentProps {
   mapDataUrl: string;
@@ -41,17 +42,14 @@ const renderLegendColumns = (columns: FlattenedLegendItem[][]) => {
 
           if (item.type === 'layer') {
             return (
-              <Text
-                key={`layer-${item.data.layerPath}`}
-                style={{ fontSize: 9, fontWeight: 'bold', marginBottom: 3, marginTop: index > 0 ? 8 : 0 }}
-              >
+              <Text key={`layer-${item.data.layerPath}`} style={PDF_STYLES.layerText(index > 0 ? 8 : 0)}>
                 {item.data.layerName}
               </Text>
             );
           } else if (item.type === 'wms') {
             return (
-              <View key={`wms-${item.data.layerPath}`} style={{ marginLeft: indentLevel + 3, marginBottom: 2 }}>
-                <Image src={item.data.icons?.[0]?.iconImage || ''} style={{ width: 60, maxHeight: 100, objectFit: 'contain' }} />
+              <View key={`wms-${item.data.layerPath}`} style={PDF_STYLES.wmsContainer(indentLevel)}>
+                <Image src={item.data.icons?.[0]?.iconImage || ''} style={PDF_STYLES.wmsImage} />
               </View>
             );
           } else if (item.type === 'time') {
@@ -70,31 +68,22 @@ const renderLegendColumns = (columns: FlattenedLegendItem[][]) => {
                 )}`;
 
             return (
-              <Text
-                key={`time-${item.data.layerPath}`}
-                style={{ fontSize: 7, fontStyle: 'italic', marginLeft: indentLevel, marginBottom: 2 }}
-              >
+              <Text key={`time-${item.data.layerPath}`} style={PDF_STYLES.timeText(indentLevel)}>
                 {timeText}
               </Text>
             );
           } else if (item.type === 'child') {
             return (
-              <Text
-                key={`child-${item.data.layerPath}`}
-                style={{ fontSize: 8, fontWeight: 'bold', marginBottom: 2, marginLeft: indentLevel, marginTop: 3 }}
-              >
+              <Text key={`child-${item.data.layerPath}`} style={PDF_STYLES.childText(indentLevel)}>
                 {item.data.layerName || 'Unnamed Layer'}
               </Text>
             );
           } else {
             const legendItem = item.data.items[0];
             return (
-              <View
-                key={`item-${item.parentName}-${legendItem?.name}`}
-                style={{ flexDirection: 'row', alignItems: 'center', marginLeft: indentLevel + 3, marginBottom: 1 }}
-              >
-                {legendItem?.icon && <Image src={legendItem.icon} style={{ width: 8, height: 8, marginRight: 2 }} />}
-                <Text style={{ fontSize: 7, flexShrink: 1 }}>{legendItem?.name || 'Unnamed Item'}</Text>
+              <View key={`item-${item.parentName}-${legendItem?.name}`} style={PDF_STYLES.itemContainer(indentLevel)}>
+                {legendItem?.icon && <Image src={legendItem.icon} style={PDF_STYLES.itemIcon} />}
+                <Text style={PDF_STYLES.itemText}>{legendItem?.name || 'Unnamed Item'}</Text>
               </View>
             );
           }
@@ -121,72 +110,51 @@ export function ExportDocument({
 
   return (
     <Document>
-      <Page size={config.size} style={{ padding: 36, fontFamily: 'Helvetica' }}>
+      <Page size={config.size} style={PDF_STYLES.page}>
         {/* Title */}
-        {exportTitle && exportTitle.trim() && (
-          <Text style={{ fontSize: 16, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 }}>{exportTitle.trim()}</Text>
-        )}
+        {exportTitle && exportTitle.trim() && <Text style={PDF_STYLES.title}>{exportTitle.trim()}</Text>}
 
         {/* Map */}
-        <View
-          style={{
-            marginBottom: 10,
-            borderWidth: 1,
-            borderColor: 'black',
-            borderStyle: 'solid',
-          }}
-        >
+        <View style={PDF_STYLES.mapContainer}>
           <Image
             src={mapDataUrl}
             style={{
-              width: '100%',
+              ...PDF_STYLES.mapImage,
               maxHeight: config.mapHeight,
-              objectFit: 'contain',
             }}
           />
         </View>
 
         {/* Scale and North Arrow */}
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+        <View style={PDF_STYLES.scaleContainer}>
           {/* Scale bar with line */}
-          <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+          <View style={PDF_STYLES.scaleBarContainer}>
             <View
               style={{
+                ...PDF_STYLES.scaleLine,
                 width: scaleLineWidth,
-                height: 1,
-                backgroundColor: 'black',
-                marginBottom: 2,
-                position: 'relative',
               }}
             >
               {/* Left tick */}
               <View
                 style={{
-                  position: 'absolute',
-                  left: -0.5, // Move half tick width outside
-                  top: -3,
-                  width: 1,
-                  height: 6,
-                  backgroundColor: 'black',
+                  ...PDF_STYLES.scaleTick,
+                  ...PDF_STYLES.scaleTickLeft,
                 }}
               />
               {/* Right tick */}
               <View
                 style={{
-                  position: 'absolute',
-                  right: -0.5, // Move half tick width outside
-                  top: -3,
-                  width: 1,
-                  height: 6,
-                  backgroundColor: 'black',
+                  ...PDF_STYLES.scaleTick,
+                  ...PDF_STYLES.scaleTickRight,
                 }}
               />
             </View>
-            <Text style={{ fontSize: 10, marginTop: 2, textAlign: 'center' }}>{scaleText}</Text>
+            <Text style={PDF_STYLES.scaleText}>{scaleText}</Text>
           </View>
           {northArrowSvg && (
-            <View style={{ width: 40, height: 40, transform: `rotate(${northArrowRotation - 180}deg)` }}>
-              <Svg viewBox="285 142 24 24" style={{ width: 40, height: 40 }}>
+            <View style={{ ...PDF_STYLES.northArrow, transform: `rotate(${northArrowRotation - 180}deg)` }}>
+              <Svg viewBox="285 142 24 24" style={PDF_STYLES.northArrowSvg}>
                 {northArrowSvg.map((pathData, index) => {
                   return (
                     <Path
@@ -205,50 +173,24 @@ export function ExportDocument({
         </View>
 
         {/* Legend */}
-        {fittedColumns && fittedColumns.length > 0 && (
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'center',
-              alignItems: 'flex-start',
-              gap: 10,
-              paddingLeft: 2,
-              marginTop: 20,
-              marginBottom: 20,
-            }}
-          >
-            {renderLegendColumns(fittedColumns)}
-          </View>
-        )}
+        {fittedColumns && fittedColumns.length > 0 && <View style={PDF_STYLES.legendContainer}>{renderLegendColumns(fittedColumns)}</View>}
 
         {/* Footer */}
-        <View style={{ position: 'absolute', bottom: 30, left: 36, right: 36 }}>
-          <Text style={{ fontSize: 8, textAlign: 'center', marginBottom: 5 }}>{disclaimer || ''}</Text>
+        <View style={PDF_STYLES.footer}>
+          <Text style={PDF_STYLES.footerDisclaimer}>{disclaimer || ''}</Text>
           {attributions.map((attr) => (
-            <Text key={`${attr.slice(0, 5)}`} style={{ fontSize: 8, textAlign: 'center', marginBottom: 2 }}>
+            <Text key={`${attr.slice(0, 5)}`} style={PDF_STYLES.footerAttribution}>
               {attr || ''}
             </Text>
           ))}
-          <Text style={{ fontSize: 8, textAlign: 'center' }}>{date || ''}</Text>
+          <Text style={PDF_STYLES.footerDate}>{date || ''}</Text>
         </View>
       </Page>
 
       {/* Overflow Page - only if needed */}
       {fittedOverflowItems && fittedOverflowItems.length > 0 && (
-        <Page size={config.size} style={{ padding: 36, fontFamily: 'Helvetica' }}>
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'center',
-              alignItems: 'flex-start',
-              gap: 10,
-              paddingLeft: 2,
-              marginTop: 20,
-              marginBottom: 20,
-            }}
-          >
-            {renderLegendColumns(fittedOverflowItems)}
-          </View>
+        <Page size={config.size} style={PDF_STYLES.page}>
+          <View style={PDF_STYLES.overflowContainer}>{renderLegendColumns(fittedOverflowItems)}</View>
         </Page>
       )}
     </Document>

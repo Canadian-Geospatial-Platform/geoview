@@ -5,6 +5,7 @@ import * as html2canvas from '@html2canvas/html2canvas';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { FileExportProps } from './export-modal';
 import { PAGE_CONFIGS, FlattenedLegendItem, getMapInfo, TypeValidPageSizes } from './utilities';
+import { CANVAS_STYLES } from './layout-styles';
 
 interface CanvasDocumentProps {
   mapDataUrl: string;
@@ -41,17 +42,14 @@ const renderCanvasLegendColumns = (columns: FlattenedLegendItem[][]) => {
 
           if (item.type === 'layer') {
             return (
-              <div
-                key={`layer-${item.data.layerPath}`}
-                style={{ fontSize: '9px', fontWeight: 'bold', marginBottom: '3px', marginTop: index > 0 ? '8px' : '0' }}
-              >
+              <div key={`layer-${item.data.layerPath}`} style={CANVAS_STYLES.layerText(index > 0 ? '8px' : '0')}>
                 {item.data.layerName}
               </div>
             );
           } else if (item.type === 'wms') {
             return (
-              <div key={`wms-${item.data.layerPath}`} style={{ marginLeft: `${indentLevel + 3}px`, marginBottom: '2px' }}>
-                <img src={item.data.icons?.[0]?.iconImage || ''} style={{ width: '60px', maxHeight: '100px', objectFit: 'contain' }} />
+              <div key={`wms-${item.data.layerPath}`} style={CANVAS_STYLES.wmsContainer(indentLevel)}>
+                <img src={item.data.icons?.[0]?.iconImage || ''} style={CANVAS_STYLES.wmsImage} />
               </div>
             );
           } else if (item.type === 'time') {
@@ -69,31 +67,22 @@ const renderCanvasLegendColumns = (columns: FlattenedLegendItem[][]) => {
                 )}`;
 
             return (
-              <div
-                key={`time-${item.data.layerPath}`}
-                style={{ fontSize: '7px', fontStyle: 'italic', marginLeft: `${indentLevel}px`, marginBottom: '2px' }}
-              >
+              <div key={`time-${item.data.layerPath}`} style={CANVAS_STYLES.timeText(indentLevel)}>
                 {timeText}
               </div>
             );
           } else if (item.type === 'child') {
             return (
-              <div
-                key={`child-${item.data.layerPath}`}
-                style={{ fontSize: '8px', fontWeight: 'bold', marginBottom: '2px', marginLeft: `${indentLevel}px`, marginTop: '3px' }}
-              >
+              <div key={`child-${item.data.layerPath}`} style={CANVAS_STYLES.childText(indentLevel)}>
                 {item.data.layerName || 'Unnamed Layer'}
               </div>
             );
           } else {
             const legendItem = item.data.items[0];
             return (
-              <div
-                key={`item-${item.parentName}-${legendItem?.name}`}
-                style={{ display: 'flex', alignItems: 'center', marginLeft: `${indentLevel + 3}px`, marginBottom: '1px' }}
-              >
-                {legendItem?.icon && <img src={legendItem.icon} style={{ width: '8px', height: '8px', marginRight: '2px' }} />}
-                <span style={{ fontSize: '7px' }}>{legendItem?.name || 'Unnamed Item'}</span>
+              <div key={`item-${item.parentName}-${legendItem?.name}`} style={CANVAS_STYLES.itemContainer(indentLevel)}>
+                {legendItem?.icon && <img src={legendItem.icon} style={CANVAS_STYLES.itemIcon} />}
+                <span style={CANVAS_STYLES.itemText}>{legendItem?.name || 'Unnamed Item'}</span>
               </div>
             );
           }
@@ -115,59 +104,33 @@ export function CanvasDocument({
   date,
   pageSize,
 }: CanvasDocumentProps): JSX.Element {
-  const config = PAGE_CONFIGS[pageSize];
+  const { canvasWidth, canvasHeight } = PAGE_CONFIGS[pageSize];
 
   return (
-    <div
-      style={{
-        width: `${config.canvasWidth}px`,
-        height: `${config.canvasHeight}px`,
-        padding: '36px',
-        fontFamily: 'Arial',
-        backgroundColor: 'white',
-        display: 'flex',
-        flexDirection: 'column',
-        boxSizing: 'border-box',
-      }}
-    >
+    <div style={CANVAS_STYLES.page(canvasWidth, canvasHeight)}>
       {/* Title */}
-      {exportTitle && exportTitle.trim() && (
-        <h1 style={{ fontSize: '16px', fontWeight: 'bold', textAlign: 'center', marginBottom: '20px', margin: '0 0 20px 0' }}>
-          {exportTitle.trim()}
-        </h1>
-      )}
+      {exportTitle && exportTitle.trim() && <h1 style={CANVAS_STYLES.title}>{exportTitle.trim()}</h1>}
 
       {/* Map */}
-      <img
-        src={mapDataUrl}
-        style={{
-          width: '100%',
-          maxHeight: `${config.mapHeight}px`,
-          objectFit: 'contain',
-          marginBottom: '10px',
-          borderWidth: 1,
-          borderColor: 'black',
-          borderStyle: 'solid',
-        }}
-      />
+      <img src={mapDataUrl} style={CANVAS_STYLES.mapImage} />
 
       {/* Scale and North Arrow */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+      <div style={CANVAS_STYLES.scaleContainer}>
         {/* Scale bar */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <div style={{ position: 'relative', width: scaleLineWidth, height: '1px', backgroundColor: 'black', marginBottom: '2px' }}>
+        <div style={CANVAS_STYLES.scaleBarContainer}>
+          <div style={{ ...CANVAS_STYLES.scaleLine, width: scaleLineWidth }}>
             {/* Left tick */}
-            <div style={{ position: 'absolute', left: '-0.5px', top: '-3px', width: '1px', height: '6px', backgroundColor: 'black' }} />
+            <div style={{ ...CANVAS_STYLES.scaleTick, ...CANVAS_STYLES.scaleTickLeft }} />
             {/* Right tick */}
-            <div style={{ position: 'absolute', right: '-0.5px', top: '-3px', width: '1px', height: '6px', backgroundColor: 'black' }} />
+            <div style={{ ...CANVAS_STYLES.scaleTick, ...CANVAS_STYLES.scaleTickRight }} />
           </div>
-          <span style={{ fontSize: '10px', marginTop: '2px' }}>{scaleText}</span>
+          <span style={CANVAS_STYLES.scaleText}>{scaleText}</span>
         </div>
 
         {/* North Arrow */}
         {northArrowSvg && (
-          <div style={{ width: '40px', height: '40px', transform: `rotate(${northArrowRotation - 180}deg)` }}>
-            <svg viewBox="285 142 24 24" style={{ width: '40px', height: '40px' }}>
+          <div style={{ ...CANVAS_STYLES.northArrow, transform: `rotate(${northArrowRotation - 180}deg)` }}>
+            <svg viewBox="285 142 24 24" style={CANVAS_STYLES.northArrowSvg}>
               {northArrowSvg.map((pathData, index) => (
                 <path
                   // eslint-disable-next-line react/no-array-index-key
@@ -184,31 +147,17 @@ export function CanvasDocument({
       </div>
 
       {/* Legend */}
-      {fittedColumns.length > 0 && (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'flex-start',
-            gap: '10px',
-            paddingLeft: '2px',
-            marginTop: '20px',
-            marginBottom: '20px',
-          }}
-        >
-          {renderCanvasLegendColumns(fittedColumns)}
-        </div>
-      )}
+      {fittedColumns.length > 0 && <div style={CANVAS_STYLES.legendContainer}>{renderCanvasLegendColumns(fittedColumns)}</div>}
 
       {/* Footer */}
-      <div style={{ fontSize: '8px', textAlign: 'center', marginTop: 'auto', paddingTop: '20px' }}>
-        <div style={{ marginBottom: '5px' }}>{disclaimer || ''}</div>
+      <div style={CANVAS_STYLES.footer}>
+        <div style={CANVAS_STYLES.footerDisclaimer}>{disclaimer || ''}</div>
         {attributions.map((attr) => (
-          <div key={`${attr.slice(0, 5)}`} style={{ marginBottom: '2px' }}>
+          <div key={`${attr.slice(0, 5)}`} style={CANVAS_STYLES.footerAttribution}>
             {attr || ''}
           </div>
         ))}
-        <div>{date || ''}</div>
+        <div style={CANVAS_STYLES.footerDate}>{date || ''}</div>
       </div>
     </div>
   );
@@ -243,21 +192,11 @@ export async function createCanvasMapUrls(mapId: string, props: FileExportProps)
   document.body.removeChild(mainElement);
 
   if (fittedOverflowItems && fittedOverflowItems.length > 0) {
+    const { canvasWidth, canvasHeight } = PAGE_CONFIGS[pageSize];
     // Create overflow page (just legend)
     const overflowHtml = ReactDOMServer.renderToString(
-      <div style={{ width: '612px', height: '792px', padding: '36px', fontFamily: 'Arial', backgroundColor: 'white' }}>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'flex-start',
-            gap: '10px',
-            paddingLeft: '2px',
-            marginTop: '20px',
-          }}
-        >
-          {renderCanvasLegendColumns(fittedOverflowItems)}
-        </div>
+      <div style={CANVAS_STYLES.overflowPage(canvasWidth, canvasHeight)}>
+        <div style={CANVAS_STYLES.overflowContainer}>{renderCanvasLegendColumns(fittedOverflowItems)}</div>
       </div>
     );
 
