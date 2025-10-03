@@ -9,7 +9,8 @@ import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-inti
 import { exportFile } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 
-import { getSxClasses } from './export-modal-style';
+import { Theme } from '@mui/material/styles';
+import { SxStyles } from '@/ui/style/types';
 import { createPDFMapUrl } from './pdf-layout';
 import { createCanvasMapUrls } from './canvas-layout';
 
@@ -29,6 +30,30 @@ export interface FileExportProps {
   jpegQuality?: number;
   format: FileFormat;
 }
+
+const getSxClasses = (theme: Theme): SxStyles => ({
+  buttonOutlined: {
+    fontSize: theme.palette.geoViewFontSize.sm,
+    padding: '0.7rem 1rem',
+    height: '47px',
+    borderColor: theme.palette.geoViewColor.primary.main,
+    color: theme.palette.geoViewColor.primary.main,
+    '&:hover': {
+      borderColor: theme.palette.geoViewColor.primary.dark[200],
+      backgroundColor: theme.palette.geoViewColor.primary.light[100],
+    },
+  },
+
+  buttonContained: {
+    fontSize: theme.palette.geoViewFontSize.sm,
+    padding: '0.7rem 1rem',
+    backgroundColor: theme.palette.geoViewColor.primary.main,
+    height: '47px',
+    '&:hover': {
+      backgroundColor: theme.palette.geoViewColor.primary.dark[200],
+    },
+  },
+});
 
 /**
  * Export modal window component to export the viewer information in a PNG file
