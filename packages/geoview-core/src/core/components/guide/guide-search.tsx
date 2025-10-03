@@ -7,7 +7,7 @@ import { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values
 import { logger } from '@/core/utils/logger';
 
 // Protection pattern functions that return new regex instances
-const getProtectionPatterns = () => [
+const getProtectionPatterns = (): RegExp[] => [
   /\[[^\]]*\]\([^)]*\)/gi, // [text](url) - markdown links (case-insensitive)
   /!\[([^\]]*)\]\([^)]+\)/gi, // ![alt](image-url) (case-insensitive)
   /`[^`]+`/g, // `code`
@@ -33,7 +33,7 @@ interface SearchMatch {
   tableLineStart?: number;
 }
 
-export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: GuideSearchProps) {
+export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: GuideSearchProps): JSX.Element {
   logger.logTraceRender('components/guide/guide');
 
   // Hooks

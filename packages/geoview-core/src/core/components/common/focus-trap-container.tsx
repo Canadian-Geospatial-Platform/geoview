@@ -130,7 +130,7 @@ export const FocusTrapContainer = memo(function FocusTrapContainer({
       const container = document.getElementById(id);
       if (container) {
         // Add focus listener directly to the container
-        const handleContainerFocus = () => {
+        const handleContainerFocus = (): void => {
           // Use the same approach as tab selection - directly enable focus trap
           enableFocusTrap({ activeElementId: id, callbackElementId: id });
         };
