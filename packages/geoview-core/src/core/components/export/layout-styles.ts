@@ -1,4 +1,12 @@
-export const SHARED_STYLES = {
+const COLORS = {
+  lightGrey: '#f5f5f5',
+  standardGrey: '#9e9e9e',
+  mediumGrey: '#757575',
+  darkGrey: '#424242',
+};
+const SHARED_STYLES = {
+  fontFamily: 'Helvetica',
+
   // Layout dimensions
   padding: 36,
 
@@ -12,9 +20,9 @@ export const SHARED_STYLES = {
   itemFontSize: 7,
 
   // Spacing
-  titleMarginBottom: 20,
+  titleMarginBottom: 10,
   mapMarginBottom: 10,
-  scaleMarginBottom: 20,
+  scaleMarginBottom: 10,
   legendMarginTop: 5,
   legendMarginBottom: 5,
   layerMarginBottom: 3,
@@ -27,14 +35,14 @@ export const SHARED_STYLES = {
 
   // Border
   borderWidth: 1,
-  borderColor: 'black',
+  borderColor: COLORS.darkGrey,
 
   // Scale bar
   scaleLineHeight: 1,
   scaleLineMarginBottom: 2,
   scaleTextMarginTop: 2,
   scaleTickWidth: 1,
-  scaleTickHeight: 6,
+  scaleTickHeight: 8,
   scaleTickOffset: -0.5,
   scaleTickTop: -3,
 
@@ -65,7 +73,7 @@ export const SHARED_STYLES = {
 
 // PDF-specific styles (react-pdf format)
 export const PDF_STYLES = {
-  page: { padding: SHARED_STYLES.padding, fontFamily: 'Helvetica' },
+  page: { padding: SHARED_STYLES.padding, fontFamily: SHARED_STYLES.fontFamily },
   title: {
     fontSize: SHARED_STYLES.titleFontSize,
     fontWeight: 'bold',
@@ -103,8 +111,10 @@ export const PDF_STYLES = {
   scaleTickRight: { right: SHARED_STYLES.scaleTickOffset },
   scaleText: {
     fontSize: SHARED_STYLES.scaleFontSize,
+    color: COLORS.darkGrey,
     marginTop: SHARED_STYLES.scaleTextMarginTop,
     textAlign: 'center',
+    textTransform: 'lowercase',
   },
   northArrow: {
     width: SHARED_STYLES.northArrowSize,
@@ -128,6 +138,8 @@ export const PDF_STYLES = {
     fontWeight: 'bold',
     marginBottom: SHARED_STYLES.layerMarginBottom,
     marginTop,
+    flexWrap: 'nowrap' as const,
+    whiteSpace: 'nowrap',
   }),
   wmsContainer: (indentLevel: number) => ({
     marginLeft: indentLevel + 3,
@@ -162,8 +174,14 @@ export const PDF_STYLES = {
     height: SHARED_STYLES.itemIconSize,
     marginRight: SHARED_STYLES.itemIconMarginRight,
   },
-  itemText: { fontSize: SHARED_STYLES.itemFontSize, flexShrink: 1 },
+  itemText: {
+    fontSize: SHARED_STYLES.itemFontSize,
+    flexShrink: 1,
+    flexWrap: 'nowrap',
+    whiteSpace: 'nowrap',
+  },
   footer: {
+    fontSize: `${SHARED_STYLES.footerFontSize}px`,
     position: 'absolute',
     bottom: SHARED_STYLES.footerBottom,
     left: SHARED_STYLES.padding,
@@ -171,16 +189,21 @@ export const PDF_STYLES = {
   },
   footerDisclaimer: {
     fontSize: SHARED_STYLES.footerFontSize,
+    color: COLORS.darkGrey,
     textAlign: 'center',
     marginBottom: SHARED_STYLES.footerMarginBottom,
+    paddingLeft: '4px',
+    paddingRight: '4px',
   },
   footerAttribution: {
     fontSize: SHARED_STYLES.footerFontSize,
+    color: COLORS.darkGrey,
     textAlign: 'center',
     marginBottom: SHARED_STYLES.footerItemMarginBottom,
   },
   footerDate: {
     fontSize: SHARED_STYLES.footerFontSize,
+    color: COLORS.darkGrey,
     textAlign: 'center',
   },
   overflowContainer: {
@@ -200,7 +223,7 @@ export const CANVAS_STYLES = {
     width: `${width}px`,
     height: `${height}px`,
     padding: `${SHARED_STYLES.padding}px`,
-    fontFamily: 'Arial',
+    fontFamily: SHARED_STYLES.fontFamily,
     backgroundColor: 'white',
     display: 'flex' as const,
     flexDirection: 'column' as const,
@@ -249,7 +272,9 @@ export const CANVAS_STYLES = {
   scaleTickRight: { right: `${SHARED_STYLES.scaleTickOffset}px` },
   scaleText: {
     fontSize: `${SHARED_STYLES.scaleFontSize}px`,
+    color: COLORS.darkGrey,
     marginTop: `${SHARED_STYLES.scaleTextMarginTop}px`,
+    textTransform: 'lowercase',
   },
   northArrow: {
     width: `${SHARED_STYLES.northArrowSize}px`,
@@ -273,6 +298,8 @@ export const CANVAS_STYLES = {
     fontWeight: 'bold',
     marginBottom: `${SHARED_STYLES.layerMarginBottom}px`,
     marginTop,
+    flexWrap: 'nowrap' as const,
+    whiteSpace: 'nowrap',
   }),
   wmsContainer: (indentLevel: number) => ({
     marginLeft: `${indentLevel + 3}px`,
@@ -307,24 +334,39 @@ export const CANVAS_STYLES = {
     height: `${SHARED_STYLES.itemIconSize}px`,
     marginRight: `${SHARED_STYLES.itemIconMarginRight}px`,
   },
-  itemText: { fontSize: `${SHARED_STYLES.itemFontSize}px` },
+  itemText: {
+    fontSize: `${SHARED_STYLES.itemFontSize}px`,
+    flexWrap: 'nowrap',
+    whiteSpace: 'nowrap',
+  },
   footer: {
     fontSize: `${SHARED_STYLES.footerFontSize}px`,
     textAlign: 'center',
     marginTop: 'auto',
     paddingTop: `${SHARED_STYLES.legendMarginTop * 4}px`,
   },
-  footerDisclaimer: { marginBottom: `${SHARED_STYLES.footerMarginBottom}px` },
-  footerAttribution: { marginBottom: `${SHARED_STYLES.footerItemMarginBottom}px` },
+  footerDisclaimer: {
+    fontSize: SHARED_STYLES.footerFontSize,
+    color: COLORS.darkGrey,
+    textAlign: 'center',
+    marginBottom: `${SHARED_STYLES.footerMarginBottom}px`,
+  },
+  footerAttribution: {
+    fontSize: SHARED_STYLES.footerFontSize,
+    color: COLORS.darkGrey,
+    textAlign: 'center',
+    marginBottom: `${SHARED_STYLES.footerItemMarginBottom}px`,
+  },
   footerDate: {
     fontSize: SHARED_STYLES.footerFontSize,
+    color: COLORS.darkGrey,
     textAlign: 'center',
   },
   overflowPage: (width: number, height: number) => ({
     width: `${width}px`,
     height: `${height}px`,
     padding: `${SHARED_STYLES.padding}px`,
-    fontFamily: 'Arial',
+    fontFamily: SHARED_STYLES.fontFamily,
     backgroundColor: 'white',
   }),
   overflowContainer: {
