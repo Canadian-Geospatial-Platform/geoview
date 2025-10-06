@@ -58,11 +58,12 @@ export class OgcFeature extends AbstractGeoViewVector {
   /**
    * Overrides the way the metadata is fetched.
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
+   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<T = TypeMetadataOGCFeature>} A promise with the metadata or undefined when no metadata for the particular layer type.
    */
-  protected override onFetchServiceMetadata<T = TypeMetadataOGCFeature>(): Promise<T> {
+  protected override onFetchServiceMetadata<T = TypeMetadataOGCFeature>(abortSignal?: AbortSignal): Promise<T> {
     // Fetch it
-    return OgcFeature.fetchMetadata(this.metadataAccessPath) as Promise<T>;
+    return OgcFeature.fetchMetadata(this.metadataAccessPath, abortSignal) as Promise<T>;
   }
 
   /**
@@ -147,15 +148,19 @@ export class OgcFeature extends AbstractGeoViewVector {
   /**
    * Overrides the way the layer metadata is processed.
    * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<VectorLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
-  protected override async onProcessLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<VectorLayerEntryConfig> {
+  protected override async onProcessLayerMetadata(
+    layerConfig: VectorLayerEntryConfig,
+    abortSignal?: AbortSignal
+  ): Promise<VectorLayerEntryConfig> {
     const metadataUrl = this.metadataAccessPath;
     if (metadataUrl) {
       const queryUrl = metadataUrl.endsWith('/')
         ? `${metadataUrl}collections/${layerConfig.layerId}/queryables?f=json`
         : `${metadataUrl}/collections/${layerConfig.layerId}/queryables?f=json`;
-      const queryResultData = await Fetch.fetchJson<TypeLayerMetadataQueryables>(queryUrl);
+      const queryResultData = await Fetch.fetchJson<TypeLayerMetadataQueryables>(queryUrl, { signal: abortSignal });
       if (queryResultData.properties) {
         layerConfig.setLayerMetadata(queryResultData.properties);
         OgcFeature.#processFeatureInfoConfig(queryResultData.properties, layerConfig);
@@ -257,13 +262,14 @@ export class OgcFeature extends AbstractGeoViewVector {
   /**
    * Fetches the metadata for a typical OGCFeature class.
    * @param {string} url - The url to query the metadata from.
+   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    */
-  static fetchMetadata(url: string): Promise<TypeMetadataOGCFeature> {
+  static fetchMetadata(url: string, abortSignal?: AbortSignal): Promise<TypeMetadataOGCFeature> {
     // The url
     const queryUrl = url.endsWith('/') ? `${url}collections?f=json` : `${url}/collections?f=json`;
 
     // Set it
-    return Fetch.fetchJson<TypeMetadataOGCFeature>(queryUrl);
+    return Fetch.fetchJson<TypeMetadataOGCFeature>(queryUrl, { signal: abortSignal });
   }
 
   /**

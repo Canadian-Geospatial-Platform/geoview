@@ -59,13 +59,14 @@ export class WKB extends AbstractGeoViewVector {
   /**
    * Overrides the way the metadata is fetched.
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
+   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<T = TypeMetadataGeoJSON | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
    */
-  protected override onFetchServiceMetadata<T = TypeMetadataGeoJSON | undefined>(): Promise<T> {
+  protected override onFetchServiceMetadata<T = TypeMetadataGeoJSON | undefined>(abortSignal?: AbortSignal): Promise<T> {
     // If metadataAccessPath ends with .meta or .json
     if (this.metadataAccessPath.toLowerCase().endsWith('.meta') || this.metadataAccessPath.toLowerCase().endsWith('.json')) {
       // Fetch it
-      return WKB.fetchMetadata(this.metadataAccessPath) as Promise<T>;
+      return WKB.fetchMetadata(this.metadataAccessPath, abortSignal) as Promise<T>;
     }
 
     // The metadataAccessPath didn't seem like it was containing actual metadata, so it was skipped
@@ -221,9 +222,9 @@ export class WKB extends AbstractGeoViewVector {
    * Fetches the metadata for a typical GeoJson class.
    * @param {string} url - The url to query the metadata from.
    */
-  static fetchMetadata(url: string): Promise<TypeMetadataGeoJSON> {
+  static fetchMetadata(url: string, abortSignal?: AbortSignal): Promise<TypeMetadataGeoJSON> {
     // Return it
-    return Fetch.fetchJson<TypeMetadataGeoJSON>(url);
+    return Fetch.fetchJson<TypeMetadataGeoJSON>(url, { signal: abortSignal });
   }
 
   /**

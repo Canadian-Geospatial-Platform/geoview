@@ -267,6 +267,7 @@ export function AddNewLayer(): JSX.Element {
   const [isMultiple, setIsMultiple] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [stepButtonEnabled, setStepButtonEnabled] = useState<boolean>(false);
+  const [abortController, setAbortController] = useState<AbortController>(new AbortController());
   const isSingle = !isMultiple;
 
   // Ref
@@ -361,12 +362,17 @@ export function AddNewLayer(): JSX.Element {
 
   /**
    * Handle the first step of the layer addition process
-   *
-   * @description Validates the layer URL and attempts to guess the layer type.
+   * Validates the layer URL and attempts to guess the layer type.
    * If valid, advances to the next step.
    * @returns {void}
    */
   const handleStep1 = (): void => {
+    // If we return here after step 2, URL/UUID and type will be out of sync
+    if (layerType === GEOCORE) setLayerURL(displayURL);
+
+    // Set new AbortController to handle returning to this step
+    setAbortController(new AbortController());
+
     let valid = true;
     if (layerURL.trim() === '') {
       valid = false;
@@ -399,7 +405,8 @@ export function AddNewLayer(): JSX.Element {
           'tempoName',
           layerURL,
           language,
-          mapId
+          mapId,
+          abortController.signal
         );
 
         // Set the layer type as it may have changed in the case of GeoCore for example
@@ -440,11 +447,7 @@ export function AddNewLayer(): JSX.Element {
     };
 
     let promise;
-    if (layerType === SHAPEFILE) {
-      const filename = layerURL.split('/').pop()?.split('.')[0];
-      if (filename) setLayerName(filename);
-      promise = Promise.resolve(true);
-    } else if (layerType === GEOPACKAGE) {
+    if (layerType === SHAPEFILE || layerType === GEOPACKAGE) {
       const filename = layerURL.split('/').pop()?.split('.')[0];
       if (filename) setLayerName(filename);
       promise = Promise.resolve(true);
@@ -468,21 +471,20 @@ export function AddNewLayer(): JSX.Element {
     }
 
     // If we have a promise of a layer validation
-    if (promise) {
+    if (promise && !abortController.signal.aborted) {
       promise
         .then((isValid) => {
           if (isValid) {
             setIsLoading(false);
-            setActiveStep(2);
-            // disable continue button until a layer entry is selected
-            // setStepButtonEnabled(false);
+            if (!abortController.signal.aborted) setActiveStep(2);
+            else setAbortController(new AbortController());
           }
         })
         .catch((error: unknown) => {
           // Log
           logger.logPromiseFailed('promise of layer validation in handleStep2 in AddNewLayer', error);
         });
-    }
+    } else if (abortController.signal.aborted) setAbortController(new AbortController());
   };
 
   /**
@@ -506,7 +508,8 @@ export function AddNewLayer(): JSX.Element {
     if (valid) {
       // If a single layer is added, use its name instead of service name
       const firstLayerName = UtilAddLayer.getLayerNameById(layerTree, layerIdsToAdd[0]);
-      if (layerIdsToAdd.length === 1 && firstLayerName) setLayerName(firstLayerName);
+      const isSingleGroupLayer = layerIdsToAdd.every((layerId) => layerId.split('/')[0] === layerIdsToAdd[0]);
+      if ((layerIdsToAdd.length === 1 || isSingleGroupLayer) && firstLayerName) setLayerName(firstLayerName);
       setActiveStep(3);
     }
   };
@@ -517,6 +520,9 @@ export function AddNewLayer(): JSX.Element {
    * @returns {Promise<void>}
    */
   const addGeoviewLayer = async (newGeoViewLayer: MapConfigLayerEntry): Promise<void> => {
+    // Create new abort controller to handle canceling of this step.
+    setAbortController(new AbortController());
+
     // Remove unwanted items from sources before proceeding
     if (newGeoViewLayer.listOfLayerEntryConfig?.length)
       newGeoViewLayer.listOfLayerEntryConfig.forEach((layerEntryConfig) => {
@@ -527,12 +533,18 @@ export function AddNewLayer(): JSX.Element {
     // Shapefile config must be converted to GeoJSON before we proceed
     if (newGeoViewLayer.geoviewLayerType === SHAPEFILE)
       // eslint-disable-next-line no-param-reassign
-      newGeoViewLayer = await ShapefileReader.convertShapefileConfigToGeoJson(newGeoViewLayer as ShapefileLayerConfig);
+      newGeoViewLayer = await ShapefileReader.convertShapefileConfigToGeoJson(
+        newGeoViewLayer as ShapefileLayerConfig,
+        abortController.signal
+      );
 
     // GeoPackage config must be converted to WKB before we proceed
     if (newGeoViewLayer.geoviewLayerType === GEOPACKAGE)
       // eslint-disable-next-line no-param-reassign
-      newGeoViewLayer = await GeoPackageReader.createLayerConfigFromGeoPackage(newGeoViewLayer as GeoPackageLayerConfig);
+      newGeoViewLayer = await GeoPackageReader.createLayerConfigFromGeoPackage(
+        newGeoViewLayer as GeoPackageLayerConfig,
+        abortController.signal
+      );
 
     // Use the config to convert simplified layer config into proper layer config
     const configObj = Config.initializeMapConfig(mapId, [newGeoViewLayer], (errorKey: string, params: string[]) => {
@@ -552,8 +564,8 @@ export function AddNewLayer(): JSX.Element {
 
       logger.logDebug('newGeoViewLayer to add', configObj[0]);
       // Add the layer using the proper function
-      const addedLayer = mapViewer.layer.addGeoviewLayer(configObj[0] as TypeGeoviewLayerConfig);
-      if (addedLayer) {
+      const addedLayer = mapViewer.layer.addGeoviewLayer(configObj[0] as TypeGeoviewLayerConfig, abortController.signal);
+      if (addedLayer && !abortController.signal.aborted) {
         // Wait on the promise
         addedLayer.promiseLayer
           .then(() => {
@@ -565,7 +577,7 @@ export function AddNewLayer(): JSX.Element {
             logger.logPromiseFailed('addedLayer.promiseLayer in handleStepLast in AddNewLayer', error);
             setIsLoading(false);
           });
-      }
+      } else if (abortController.signal.aborted) setAbortController(new AbortController());
     }
   };
 
@@ -606,8 +618,13 @@ export function AddNewLayer(): JSX.Element {
    * Handle the behavior of the 'Back' button in the Stepper UI
    */
   const handleBack = (): void => {
-    setActiveStep((prevActiveStep: number) => prevActiveStep - 1);
+    // On step 1 or 3, abort the fetch that may be underway
+    if (activeStep === 1 || activeStep === 3) {
+      abortController.abort();
+      setIsLoading(false);
+    }
 
+    setActiveStep((prevActiveStep: number) => prevActiveStep - 1);
     // We assume previous step ok, so enable continue button
     setStepButtonEnabled(true);
   };
@@ -727,22 +744,24 @@ export function AddNewLayer(): JSX.Element {
   // TODO: refactor - remove the unstable nested component
   // eslint-disable-next-line react/no-unstable-nested-components
   function NavButtons({ isFirst = false, isLast = false, handleNext }: ButtonPropsLayerPanel): JSX.Element {
-    return isLoading ? (
-      <Box sx={{ padding: 10 }}>
-        <CircularProgressBase />
-      </Box>
-    ) : (
+    return (
       <ButtonGroup sx={sxClasses.buttonGroup}>
-        <Button
-          variant="contained"
-          className="buttonOutlineFilled"
-          size="small"
-          type="text"
-          disabled={isLast ? layerName === undefined || layerName === '' : !stepButtonEnabled}
-          onClick={handleNext}
-        >
-          {isLast ? t('layers.finish') : t('layers.continue')}
-        </Button>
+        {isLoading ? (
+          <Button sx={{ width: '80px' }} type="icon" size="small" variant="contained" className="buttonOutlineFilled" disabled>
+            <CircularProgressBase size="20px" />
+          </Button>
+        ) : (
+          <Button
+            variant="contained"
+            className="buttonOutlineFilled"
+            size="small"
+            type="text"
+            disabled={isLast ? layerName === undefined || layerName === '' : !stepButtonEnabled}
+            onClick={handleNext}
+          >
+            {isLast ? t('layers.finish') : t('layers.continue')}
+          </Button>
+        )}
         {!isFirst && (
           <Button
             variant="contained"

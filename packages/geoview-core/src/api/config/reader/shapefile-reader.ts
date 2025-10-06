@@ -15,15 +15,19 @@ import { Fetch } from '@/core/utils/fetch-helper';
 export class ShapefileReader {
   /**
    * Generates GeoJson layer config from a shapefile.
-   * @param {TypeShapefileLayerConfig} layerConfig - the config to convert
+   * @param {TypeShapefileLayerConfig} layerConfig - The config to convert.
+   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<TypeGeoJSONLayerConfig>} A geojson layer config
    */
-  static async convertShapefileConfigToGeoJson(layerConfig: ShapefileLayerConfig): Promise<TypeGeoJSONLayerConfig> {
+  static async convertShapefileConfigToGeoJson(
+    layerConfig: ShapefileLayerConfig,
+    abortSignal?: AbortSignal
+  ): Promise<TypeGeoJSONLayerConfig> {
     // shp expects either a url, path to a .zip, or an array buffer, so file url must be converted
     let shapefileURL: ArrayBuffer | string = layerConfig.metadataAccessPath;
     let filename: string | undefined;
     if (shapefileURL.startsWith('blob')) {
-      shapefileURL = await Fetch.fetchArrayBuffer(shapefileURL);
+      shapefileURL = await Fetch.fetchArrayBuffer(shapefileURL, { signal: abortSignal });
     } else {
       filename = shapefileURL.split('/').pop()?.split('.')[0];
     }

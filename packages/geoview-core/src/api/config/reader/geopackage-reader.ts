@@ -56,9 +56,10 @@ export class GeoPackageReader {
   /**
    * Generates a WKB layer config from a GeoPackage.
    * @param {GeoPackageLayerConfig} layerConfig - the config to convert
+   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<TypeWkbLayerConfig>} A WKB layer config
    */
-  static async createLayerConfigFromGeoPackage(layerConfig: GeoPackageLayerConfig): Promise<TypeWkbLayerConfig> {
+  static async createLayerConfigFromGeoPackage(layerConfig: GeoPackageLayerConfig, abortSignal?: AbortSignal): Promise<TypeWkbLayerConfig> {
     // Set up WKB layer config so it can be used in layer entry configs
     const geoviewLayerConfig: TypeWkbLayerConfig = {
       geoviewLayerId: layerConfig.geoviewLayerId,
@@ -88,7 +89,7 @@ export class GeoPackageReader {
 
         // Read the GeoPackage
         // eslint-disable-next-line no-await-in-loop
-        const layersData = await GeoPackageReader.#getGeoPackageData(url);
+        const layersData = await GeoPackageReader.#getGeoPackageData(url, abortSignal);
 
         // Compile sublayer entry configs from the list of layer entry configs
         const listOfSubLayerEntryConfig: WkbLayerEntryConfig[] = [];
@@ -166,7 +167,7 @@ export class GeoPackageReader {
       }
     } else {
       // No layer entry configs, we are just attempting to load from the metadataAccessPath
-      const layersData = await GeoPackageReader.#getGeoPackageData(layerConfig.metadataAccessPath);
+      const layersData = await GeoPackageReader.#getGeoPackageData(layerConfig.metadataAccessPath, abortSignal);
       layersData.forEach((layerData) => {
         listOfLayerEntryConfig.push(
           new WkbLayerEntryConfig({
@@ -194,14 +195,15 @@ export class GeoPackageReader {
 
   /**
    * Fetches a GeoPackage and creates layer data from it.
-   * @param {string} url - The URL of the GeoPackage
-   * @returns {Promise<LayerData[]>} Promise of the layer data
+   * @param {string} url - The URL of the GeoPackage.
+   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+   * @returns {Promise<LayerData[]>} Promise of the layer data.
    * @private
    */
-  static async #getGeoPackageData(url: string): Promise<GeoPackageLayerData[]> {
+  static async #getGeoPackageData(url: string, abortSignal?: AbortSignal): Promise<GeoPackageLayerData[]> {
     // Load the GeoPackage and SqlJs at the same time
     const promises = [
-      Fetch.fetchArrayBuffer(url),
+      Fetch.fetchArrayBuffer(url, { signal: abortSignal }),
       initSqlJs({
         locateFile: (file) => `https://sql.js.org/dist/${file}`,
       }),
