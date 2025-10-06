@@ -138,8 +138,8 @@ export const PDF_STYLES = {
     fontWeight: 'bold',
     marginBottom: SHARED_STYLES.layerMarginBottom,
     marginTop,
-    flexWrap: 'nowrap' as const,
-    whiteSpace: 'nowrap',
+    flexWrap: 'wrap' as const,
+    whiteSpace: 'normal',
   }),
   wmsContainer: (indentLevel: number) => ({
     marginLeft: indentLevel + 3,
@@ -298,8 +298,8 @@ export const CANVAS_STYLES = {
     fontWeight: 'bold',
     marginBottom: `${SHARED_STYLES.layerMarginBottom}px`,
     marginTop,
-    flexWrap: 'nowrap' as const,
-    whiteSpace: 'nowrap',
+    flexWrap: 'wrap' as const,
+    whiteSpace: 'normal',
   }),
   wmsContainer: (indentLevel: number) => ({
     marginLeft: `${indentLevel + 3}px`,

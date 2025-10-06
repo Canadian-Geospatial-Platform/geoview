@@ -191,7 +191,7 @@ export async function createCanvasMapUrls(mapId: string, props: FileExportProps)
   results.push(mainCanvas.toDataURL(`image/${format}`, quality));
   document.body.removeChild(mainElement);
 
-  if (fittedOverflowItems && fittedOverflowItems.length > 0) {
+  if (fittedOverflowItems && fittedOverflowItems.filter((column) => column.length > 0).length > 0) {
     const { canvasWidth, canvasHeight } = PAGE_CONFIGS[pageSize];
     // Create overflow page (just legend)
     const overflowHtml = ReactDOMServer.renderToString(

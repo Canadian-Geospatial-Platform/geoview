@@ -188,7 +188,7 @@ export function ExportDocument({
       </Page>
 
       {/* Overflow Page - only if needed */}
-      {fittedOverflowItems && fittedOverflowItems.length > 0 && (
+      {fittedOverflowItems && fittedOverflowItems.filter((column) => column.length > 0).length > 0 && (
         <Page size={config.size} style={PDF_STYLES.page}>
           <View style={PDF_STYLES.overflowContainer}>{renderLegendColumns(fittedOverflowItems)}</View>
         </Page>

@@ -432,7 +432,7 @@ export async function getMapInfo(mapId: string, pageSize: TypeValidPageSizes, di
   let fittedOverflowItems;
   if (overflowItems) {
     const distributedOverflow = distributeIntoColumns(overflowItems, config.legendColumns, config.maxLegendHeight, '', []);
-    fittedOverflowItems = distributedOverflow.fittedColumns.filter((items) => items.length > 0);
+    fittedOverflowItems = distributedOverflow.fittedColumns;
   }
 
   return {
