@@ -17,17 +17,19 @@ import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 export class GeoCore {
   /**
    * Gets GeoView layer configurations list from the UUIDs of the list of layer entry configurations.
-   * @param {string} uuid - The UUID of the layer
-   * @param {TypeDisplayLanguage} language - The language
-   * @param {string} mapId - The optional map id
-   * @param {GeoCoreLayerConfig?} layerConfig - The optional layer configuration
+   * @param {string} uuid - The UUID of the layer.
+   * @param {TypeDisplayLanguage} language - The language.
+   * @param {string} mapId - The optional map id.
+   * @param {GeoCoreLayerConfig?} layerConfig - The optional layer configuration.
+   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<TypeGeoviewLayerConfig>} List of layer configurations to add to the map.
    */
   static async createLayerConfigFromUUID(
     uuid: string,
     language: TypeDisplayLanguage,
     mapId?: string,
-    layerConfig?: GeoCoreLayerConfig
+    layerConfig?: GeoCoreLayerConfig,
+    abortSignal?: AbortSignal
   ): Promise<TypeGeoviewLayerConfig> {
     // If there's a mapId provided, validate the uuid
     let { geocoreUrl } = DEFAULT_MAP_FEATURE_CONFIG.serviceUrls;
@@ -48,7 +50,7 @@ export class GeoCore {
     }
 
     // Get the GV config from UUID and await
-    const response = await UUIDmapConfigReader.getGVConfigFromUUIDs(geocoreUrl, language, [uuid.split(':')[0]]);
+    const response = await UUIDmapConfigReader.getGVConfigFromUUIDs(geocoreUrl, language, [uuid.split(':')[0]], abortSignal);
 
     // Validate the generated Geoview Layer Config
     ConfigValidation.validateListOfGeoviewLayerConfig(response.layers);

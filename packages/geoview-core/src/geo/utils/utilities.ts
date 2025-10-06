@@ -47,21 +47,23 @@ export function getESRIServiceMetadata(url: string): Promise<unknown> {
  * Fetch the json response from the XML response of a WMS getCapabilities request.
  * @param {string} url - The url the url of the WMS server.
  * @param {string} layers - The layers to query separate by.
+ * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
  * @returns {Promise<TypeMetadataWMS>} A json promise containing the result of the query.
  */
 export async function getWMSServiceMetadata(
   url: string,
   layers?: string,
-  callbackNewMetadataUrl?: CallbackNewMetadataDelegate
+  callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
+  abortSignal?: AbortSignal
 ): Promise<TypeMetadataWMS> {
-  let capUrl = url.includes('request=GetCapabilities') ? url : `${url}?service=WMS&version=1.3.0&request=GetCapabilities`;
+  let capUrl = url.toLowerCase().includes('request=getcapabilities') ? url : `${url}?service=WMS&version=1.3.0&request=GetCapabilities`;
   let capabilitiesString;
   try {
     // If any layers
     if (layers) capUrl = `${capUrl}&Layers=${layers}`;
 
     // Fetch the metadata
-    capabilitiesString = await Fetch.fetchText(capUrl);
+    capabilitiesString = await Fetch.fetchText(capUrl, { signal: abortSignal });
   } catch (error: unknown) {
     // If a network error such as CORS
     if (error instanceof NetworkError) {

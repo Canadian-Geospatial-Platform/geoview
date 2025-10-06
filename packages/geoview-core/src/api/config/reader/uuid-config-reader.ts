@@ -33,16 +33,22 @@ export class UUIDmapConfigReader {
    * @param {string} baseUrl - The base url of GeoCore API
    * @param {TypeDisplayLanguage} lang - The language to get the config for
    * @param {string[]} uuids - A list of uuids to get the configurations for
+   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<UUIDmapConfigReaderResponse>} Layers and Geocharts read and parsed from uuids results from GeoCore
    */
-  static async getGVConfigFromUUIDs(baseUrl: string, lang: TypeDisplayLanguage, uuids: string[]): Promise<UUIDmapConfigReaderResponse> {
+  static async getGVConfigFromUUIDs(
+    baseUrl: string,
+    lang: TypeDisplayLanguage,
+    uuids: string[],
+    abortSignal?: AbortSignal
+  ): Promise<UUIDmapConfigReaderResponse> {
     let result;
     try {
       // Build the url
       const url = `${baseUrl}/vcs?lang=${lang}&id=${uuids.toString()}&referrer=${window.location.hostname}`;
 
       // Fetch the config
-      result = await Fetch.fetchJson<GeoCoreConfigResponseRoot>(url);
+      result = await Fetch.fetchJson<GeoCoreConfigResponseRoot>(url, { signal: abortSignal });
 
       // Return the parsed response
       return {
