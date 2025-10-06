@@ -204,10 +204,7 @@ export default [
   // Ignores
   {
     ignores: [
-      'eslint.config.js',
-      '**/node_modules/**',
-      '**/dist/**',
-      '**/build/**'
+      'node_modules/', 'dist/', 'eslint.config.js'
     ]
   }
 ];
