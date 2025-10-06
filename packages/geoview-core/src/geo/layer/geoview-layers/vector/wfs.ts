@@ -71,11 +71,12 @@ export class WFS extends AbstractGeoViewVector {
   /**
    * Overrides the way the metadata is fetched.
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
+   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<T = TypeMetadataWFS>} A promise with the metadata or undefined when no metadata for the particular layer type.
    */
-  protected override async onFetchServiceMetadata<T = TypeMetadataWFS>(): Promise<T> {
+  protected override async onFetchServiceMetadata<T = TypeMetadataWFS>(abortSignal?: AbortSignal): Promise<T> {
     // Fetch it
-    const metadata = await WFS.fetchMetadata(this.metadataAccessPath);
+    const metadata = await WFS.fetchMetadata(this.metadataAccessPath, abortSignal);
 
     // If not found
     if (!metadata) throw new LayerNoCapabilitiesError(this.geoviewLayerId, this.geoviewLayerName);
@@ -86,12 +87,13 @@ export class WFS extends AbstractGeoViewVector {
 
   /**
    * Overrides the way a geoview layer config initializes its layer entries.
+   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
    */
-  protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
+  protected override async onInitLayerEntries(abortSignal?: AbortSignal): Promise<TypeGeoviewLayerConfig> {
     // Fetch metadata
     const rootUrl = this.metadataAccessPath;
-    const metadata = await this.onFetchServiceMetadata();
+    const metadata = await this.onFetchServiceMetadata(abortSignal);
 
     // Now that we have metadata, get the layer ids from it
     if (!Array.isArray(metadata.FeatureTypeList?.FeatureType))
@@ -174,9 +176,13 @@ export class WFS extends AbstractGeoViewVector {
   /**
    * Overrides the way the layer metadata is processed.
    * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<VectorLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
-  protected override async onProcessLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<VectorLayerEntryConfig> {
+  protected override async onProcessLayerMetadata(
+    layerConfig: VectorLayerEntryConfig,
+    abortSignal?: AbortSignal
+  ): Promise<VectorLayerEntryConfig> {
     let queryUrl = layerConfig.source!.dataAccessPath;
 
     // check if url contains metadata parameters for the getCapabilities request and reformat the urls
@@ -202,14 +208,14 @@ export class WFS extends AbstractGeoViewVector {
     const describeFeatureUrl = `${queryUrl}?service=WFS&request=DescribeFeatureType&version=${this.getVersion()}&outputFormat=${encodeURIComponent(outputFormat)}&typeName=${layerConfig.layerId}`;
 
     if (describeFeatureUrl && outputFormat === 'application/json') {
-      const layerMetadata = await Fetch.fetchJson<WFSJsonResponse>(describeFeatureUrl);
+      const layerMetadata = await Fetch.fetchJson<WFSJsonResponse>(describeFeatureUrl, { signal: abortSignal });
       if (Array.isArray(layerMetadata.featureTypes) && Array.isArray(layerMetadata.featureTypes[0].properties)) {
         layerConfig.setLayerMetadata(layerMetadata.featureTypes[0].properties);
         WFS.#processFeatureInfoConfig(layerMetadata.featureTypes[0].properties, layerConfig as WfsLayerEntryConfig);
       }
     } else if (describeFeatureUrl && outputFormat.toUpperCase().includes('XML')) {
       // Fetch the XML and read the content as Json
-      const xmlJsonDescribe = await Fetch.fetchXMLToJson(describeFeatureUrl);
+      const xmlJsonDescribe = await Fetch.fetchXMLToJson(describeFeatureUrl, { signal: abortSignal });
       const prefix = Object.keys(xmlJsonDescribe)[0].includes('xsd:') ? 'xsd:' : '';
       const xmlJsonSchema = xmlJsonDescribe[`${prefix}schema`] as Record<string, unknown>;
       const xmlJsonSchemaComplexType = xmlJsonSchema[`${prefix}complexType`] as Record<string, unknown>;
@@ -293,15 +299,16 @@ export class WFS extends AbstractGeoViewVector {
   /**
    * Fetches the metadata for a typical WFS class.
    * @param {string} url - The url to query the metadata from.
+   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<TypeMetadataWFS | undefined>} Promise with the metadata when fetched or undefined when capabilities weren't found.
    */
-  static async fetchMetadata(url: string): Promise<TypeMetadataWFS | undefined> {
+  static async fetchMetadata(url: string, abortSignal?: AbortSignal): Promise<TypeMetadataWFS | undefined> {
     // Check if url contains metadata parameters for the getCapabilities request and reformat the urls
     const getCapabilitiesUrl = url.indexOf('?') > -1 ? url.substring(url.indexOf('?')) : `?service=WFS&request=GetCapabilities`;
     const queryUrl = url.indexOf('?') > -1 ? url.substring(0, url.indexOf('?')) : url;
 
     // Query XML to Json
-    const responseJson = await Fetch.fetchXMLToJson(`${queryUrl}${getCapabilitiesUrl}`);
+    const responseJson = await Fetch.fetchXMLToJson(`${queryUrl}${getCapabilitiesUrl}`, { signal: abortSignal });
 
     // Parse the WFS_Capabilities opening the root node right away to skip to the meat.
     return findPropertyByRegexPath(responseJson, /(?:WFS_Capabilities)/) as TypeMetadataWFS;

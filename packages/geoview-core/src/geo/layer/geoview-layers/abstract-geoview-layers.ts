@@ -150,6 +150,8 @@ export abstract class AbstractGeoViewLayer {
     if (!listOfLayerEntryConfig) return;
     if (listOfLayerEntryConfig.length === 0) return;
     if (listOfLayerEntryConfig.length === 1) {
+      if (!listOfLayerEntryConfig[0].getLayerName() && geoviewLayerConfig.geoviewLayerName)
+        listOfLayerEntryConfig[0].setLayerName(geoviewLayerConfig.geoviewLayerName);
       this.listOfLayerEntryConfig = listOfLayerEntryConfig;
     } else {
       const layerGroup = new GroupLayerEntryConfig({
@@ -171,9 +173,10 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Must override method to read the service metadata from the metadataAccessPath.
+   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<T>} A promise resolved once the metadata has been fetched.
    */
-  protected abstract onFetchServiceMetadata<T>(): Promise<T>;
+  protected abstract onFetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T>;
 
   /**
    * Must override method to initialize a layer entry based on a GeoView layer config.
@@ -184,9 +187,13 @@ export abstract class AbstractGeoViewLayer {
   /**
    * Must override method to process a layer entry and return a Promise of an Open Layer Base Layer object.
    * @param {AbstractBaseLayerEntryConfig} layerConfig - Information needed to create the GeoView layer.
+   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<AbstractBaseLayerEntryConfig>} The Promise that the config metadata has been processed.
    */
-  protected abstract onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig>;
+  protected abstract onProcessLayerMetadata(
+    layerConfig: AbstractBaseLayerEntryConfig,
+    abortSignal?: AbortSignal
+  ): Promise<AbstractBaseLayerEntryConfig>;
 
   /**
    * Must override method to create a GV Layer from a layer configuration.
@@ -258,8 +265,10 @@ export abstract class AbstractGeoViewLayer {
    * is queryable, it will subscribe to the details-panel and every time the user clicks on the map, the panel will ask the layer
    * to return the descriptive information of all the features in a tolerance radius. This information will be used to populate
    * the details-panel.
+   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+   * @returns {Promise<ConfigBaseClass[]>} A promise of the config base classes created.
    */
-  async createGeoViewLayers(): Promise<ConfigBaseClass[]> {
+  async createGeoViewLayers(abortSignal?: AbortSignal): Promise<ConfigBaseClass[]> {
     // Log
     logger.logTraceCore('ABSTRACT-GEOVIEW-LAYERS - createGeoViewLayers', this.listOfLayerEntryConfig);
 
@@ -270,7 +279,7 @@ export abstract class AbstractGeoViewLayer {
     logger.logMarkerStart(logTimingsKey);
 
     // Fetch and set the service metadata
-    await this.#fetchAndSetServiceMetadata();
+    await this.#fetchAndSetServiceMetadata(abortSignal);
 
     // Log the time it took thus far
     logger.logMarkerCheck(logTimingsKey, 'to fetch the service metadata');
@@ -286,13 +295,17 @@ export abstract class AbstractGeoViewLayer {
       // Use a combination of those flags to determine what to do moving forward (for now).
 
       // Process the layer metadata for each layer entry
-      await this.#processListOfLayerMetadata(this.listOfLayerEntryConfig, (sender, event) => {
-        // If no errors
-        if (event.errors.length === 0) {
-          // Keep the config
-          configBaseClassCreated.push(event.config);
-        }
-      });
+      await this.#processListOfLayerMetadata(
+        this.listOfLayerEntryConfig,
+        (sender, event) => {
+          // If no errors
+          if (event.errors.length === 0) {
+            // Keep the config
+            configBaseClassCreated.push(event.config);
+          }
+        },
+        abortSignal
+      );
 
       // Log the time it took thus far
       logger.logMarkerCheck(logTimingsKey, `to process the (${this.listOfLayerEntryConfig.length}) layer metadata(s)`);
@@ -313,19 +326,21 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Fetches the metadata by calling onFetchServiceMetadata.
+   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<T>} Returns a Promise of a metadata
    */
-  fetchServiceMetadata<T>(): Promise<T> {
+  fetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T> {
     // Redirect
-    return this.onFetchServiceMetadata<T>();
+    return this.onFetchServiceMetadata<T>(abortSignal);
   }
 
   /**
    * This method reads the service metadata from the metadataAccessPath and stores it in the 'metadata' property.
+   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<void>} A promise resolved once the metadata has been fetched and assigned to the 'metadata' property.
    * @private
    */
-  async #fetchAndSetServiceMetadata(): Promise<void> {
+  async #fetchAndSetServiceMetadata(abortSignal?: AbortSignal): Promise<void> {
     try {
       // If there's a metadata access path
       if (this.metadataAccessPath) {
@@ -338,7 +353,7 @@ export abstract class AbstractGeoViewLayer {
         // Process and, yes, keep the await here, because we want to make extra sure the onFetchAndSetServiceMetadata is
         // executed asynchronously, even if the implementation of the overriden method is synchronous.
         // All so that the try/catch works nicely here.
-        this.#metadata = await this.fetchServiceMetadata();
+        this.#metadata = await this.fetchServiceMetadata(abortSignal);
       } else {
         // GV It's possible there is no metadataAccessPath, e.g.: CSV (csvLYR2), we keep the if condition here
         // Skip
@@ -460,12 +475,14 @@ export abstract class AbstractGeoViewLayer {
   /**
    * Recursively processes the metadata of each layer in the "layer list" configuration.
    * @param {ConfigBaseClass[]} listOfLayerEntryConfig - The list of layers to process.
+   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<void>} A promise that the execution is completed.
    * @private
    */
   async #processListOfLayerMetadata(
     listOfLayerEntryConfig: ConfigBaseClass[],
-    callbackLayerConfigCreated: LayerConfigCreatedDelegate
+    callbackLayerConfigCreated: LayerConfigCreatedDelegate,
+    abortSignal?: AbortSignal
   ): Promise<void> {
     // Log
     logger.logTraceCore(
@@ -475,7 +492,7 @@ export abstract class AbstractGeoViewLayer {
 
     // Create a promise for each metadata layer found throughout the recursive config
     const allPromises: Promise<ConfigBaseClass>[] = [];
-    this.#processLayerMetadataRec(listOfLayerEntryConfig, allPromises);
+    this.#processLayerMetadataRec(listOfLayerEntryConfig, allPromises, abortSignal);
 
     // Wait for all the layers to be processed
     const arrayOfLayerConfigs = await Promise.allSettled(allPromises);
@@ -534,9 +551,15 @@ export abstract class AbstractGeoViewLayer {
    * Recursively gathers all the promises of layer metadata for all the layer entry configs.
    * @param listOfLayerEntryConfig - The list of layer entry config currently being processed.
    * @param promisesEntryMetadata - The gathered promises as the recursive function is called.
+   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @private
    */
-  #processLayerMetadataRec(listOfLayerEntryConfig: ConfigBaseClass[], promisesEntryMetadata: Promise<ConfigBaseClass>[]): void {
+  #processLayerMetadataRec(
+    listOfLayerEntryConfig: ConfigBaseClass[],
+    promisesEntryMetadata: Promise<ConfigBaseClass>[],
+    abortSignal?: AbortSignal
+  ): void {
     // For each layer entry in the config
     listOfLayerEntryConfig.forEach((layerConfig) => {
       // If is a group layer
@@ -548,7 +571,7 @@ export abstract class AbstractGeoViewLayer {
         this.#processLayerMetadataRec(layerConfig.listOfLayerEntryConfig, promisesEntryMetadata);
       } else {
         // Not a group layer, process the layer metadata normally
-        promisesEntryMetadata.push(this.#processLayerMetadata(layerConfig as AbstractBaseLayerEntryConfig));
+        promisesEntryMetadata.push(this.#processLayerMetadata(layerConfig as AbstractBaseLayerEntryConfig, abortSignal));
       }
     });
   }
@@ -562,7 +585,7 @@ export abstract class AbstractGeoViewLayer {
                                                       to attach the layerConfig with it.
    * @private
    */
-  async #processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
+  async #processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig, abortSignal?: AbortSignal): Promise<AbstractBaseLayerEntryConfig> {
     try {
       // If no errors already happened on the layer path being processed
       if (layerConfig.layerStatus !== 'error') {
@@ -572,7 +595,7 @@ export abstract class AbstractGeoViewLayer {
         // Process and, yes, keep the await here, because we want to make extra sure the onProcessLayerMetadata is
         // executed asynchronously, even if the implementation of the overriden method is synchronous.
         // All so that the try/catch works nicely here.
-        return await this.onProcessLayerMetadata(layerConfig);
+        return await this.onProcessLayerMetadata(layerConfig, abortSignal);
       }
 
       // Return as-is

@@ -59,11 +59,12 @@ export class EsriFeature extends AbstractGeoViewVector {
   /**
    * Overrides the way the metadata is fetched.
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
+   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<T = TypeMetadataEsriFeature | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
    */
-  protected override async onFetchServiceMetadata<T = TypeMetadataEsriFeature | undefined>(): Promise<T> {
+  protected override async onFetchServiceMetadata<T = TypeMetadataEsriFeature | undefined>(abortSignal?: AbortSignal): Promise<T> {
     // Query
-    const responseJson = await Fetch.fetchJson<T>(`${this.metadataAccessPath}?f=json`);
+    const responseJson = await Fetch.fetchJson<T>(`${this.metadataAccessPath}?f=json`, { signal: abortSignal });
 
     // Validate the metadata response
     AbstractGeoViewRaster.throwIfMetatadaHasError(this.geoviewLayerId, this.geoviewLayerName, responseJson);
@@ -74,24 +75,25 @@ export class EsriFeature extends AbstractGeoViewVector {
 
   /**
    * Overrides the way a geoview layer config initializes its layer entries.
+   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
    */
-  protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
+  protected override async onInitLayerEntries(abortSignal?: AbortSignal): Promise<TypeGeoviewLayerConfig> {
     // Fetch metadata
-    let sep = '/MapServer/';
-    let idx = this.metadataAccessPath.lastIndexOf(sep);
+    let sep = '/mapserver/';
+    let idx = this.metadataAccessPath.toLowerCase().lastIndexOf(sep);
     let rootUrl = this.metadataAccessPath;
     if (idx > 0) {
       rootUrl = this.metadataAccessPath.substring(0, idx + sep.length);
     }
-    sep = '/FeatureServer/';
-    idx = this.metadataAccessPath.lastIndexOf(sep);
+    sep = '/featureserver/';
+    idx = this.metadataAccessPath.toLowerCase().lastIndexOf(sep);
     if (idx > 0) {
       rootUrl = this.metadataAccessPath.substring(0, idx + sep.length);
     }
 
     // Fetch metadata
-    const metadata = await this.onFetchServiceMetadata();
+    const metadata = await this.onFetchServiceMetadata(abortSignal);
 
     // Now that we have metadata, get the layer ids from it
     const entries = [];
@@ -122,10 +124,14 @@ export class EsriFeature extends AbstractGeoViewVector {
   /**
    * Overrides the way the layer metadata is processed.
    * @param {EsriFeatureLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<EsriFeatureLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
-  protected override onProcessLayerMetadata(layerConfig: EsriFeatureLayerEntryConfig): Promise<EsriFeatureLayerEntryConfig> {
-    return commonProcessLayerMetadata(this, layerConfig);
+  protected override onProcessLayerMetadata(
+    layerConfig: EsriFeatureLayerEntryConfig,
+    abortSignal?: AbortSignal
+  ): Promise<EsriFeatureLayerEntryConfig> {
+    return commonProcessLayerMetadata(this, layerConfig, abortSignal);
   }
 
   /**

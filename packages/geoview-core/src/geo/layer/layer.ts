@@ -532,11 +532,12 @@ export class LayerApi {
   /**
    * Adds a layer to the map. This is the main method to add a GeoView Layer on the map.
    * It handles all the processing, including the validations, and makes sure to inform the layer sets about the layer.
-   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The geoview layer configuration to add
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The geoview layer configuration to add.
+   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {GeoViewLayerAddedResult} The result of the addition of the geoview layer.
    * The result contains the instanciated GeoViewLayer along with a promise that will resolve when the layer will be officially on the map.
    */
-  addGeoviewLayer(geoviewLayerConfig: TypeGeoviewLayerConfig): GeoViewLayerAddedResult {
+  addGeoviewLayer(geoviewLayerConfig: TypeGeoviewLayerConfig, abortSignal?: AbortSignal): GeoViewLayerAddedResult {
     // TODO: Refactor - This should be dealt with the config classes and this line commented out
     // eslint-disable-next-line no-param-reassign
     geoviewLayerConfig.geoviewLayerId ||= generateId(18);
@@ -554,7 +555,7 @@ export class LayerApi {
       throw new LayerCreatedTwiceError(geoviewLayerConfig.geoviewLayerId, geoviewLayerConfig.geoviewLayerName);
     } else {
       // Process the addition of the layer
-      const result: GeoViewLayerAddedResult = this.#addGeoviewLayerStep2(geoviewLayerConfig);
+      const result: GeoViewLayerAddedResult = this.#addGeoviewLayerStep2(geoviewLayerConfig, abortSignal);
 
       // Upon termination, we want to check if there was any errors and log/show them within this addGeoviewLayer function which can be called from external
       result.promiseLayer
@@ -579,12 +580,13 @@ export class LayerApi {
 
   /**
    * Continues the addition of the geoview layer.
-   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The geoview layer configuration to add
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The geoview layer configuration to add.
+   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {GeoViewLayerAddedResult} The result of the addition of the geoview layer.
    * The result contains the instanciated GeoViewLayer along with a promise that will resolve when the layer will be officially on the map.
    * @private
    */
-  #addGeoviewLayerStep2(geoviewLayerConfig: TypeGeoviewLayerConfig): GeoViewLayerAddedResult {
+  #addGeoviewLayerStep2(geoviewLayerConfig: TypeGeoviewLayerConfig, abortSignal?: AbortSignal): GeoViewLayerAddedResult {
     // Create the layer for the processing
     const layerBeingAdded = this.createLayerConfigFromType(geoviewLayerConfig);
 
@@ -702,7 +704,7 @@ export class LayerApi {
     const promiseLayer = new Promise<void>((resolve, reject) => {
       // Continue the addition process
       layerBeingAdded
-        .createGeoViewLayers()
+        .createGeoViewLayers(abortSignal)
         .then(() => {
           // Add the layer on the map
           this.#addToMap(layerBeingAdded);
@@ -989,95 +991,100 @@ export class LayerApi {
     // Get the layer entry config to remove
     const layerEntryConfig = this.getLayerEntryConfig(layerPath);
 
+    //TODO: There's an issue with the useEffect in single-layer.tsx triggering twice on layers added through add layers,
+    //TODO: The error was always triggering and crashing the map, so it is replaced with the logError here.
     // Throw if not found
-    if (!layerEntryConfig) throw new LayerNotFoundError(layerPath);
+    // if (!layerEntryConfig) throw new LayerNotFoundError(layerPath);
 
-    // initialize these two constant now because we will delete the information used to get their values.
-    const indexToDelete = layerEntryConfig
-      ? layerEntryConfig.getParentLayerConfig()?.listOfLayerEntryConfig.findIndex((layerConfig) => layerConfig === layerEntryConfig)
-      : undefined;
-    const listOfLayerEntryConfigAffected = this.getLayerEntryConfig(layerPath)?.getParentLayerConfig()?.listOfLayerEntryConfig;
+    if (!layerEntryConfig) logger.logError('Layer not found');
+    else {
+      // initialize these two constant now because we will delete the information used to get their values.
+      const indexToDelete = layerEntryConfig
+        ? layerEntryConfig.getParentLayerConfig()?.listOfLayerEntryConfig.findIndex((layerConfig) => layerConfig === layerEntryConfig)
+        : undefined;
+      const listOfLayerEntryConfigAffected = this.getLayerEntryConfig(layerPath)?.getParentLayerConfig()?.listOfLayerEntryConfig;
 
-    // Remove layer info from registered layers
-    this.getLayerEntryConfigIds().forEach((registeredLayerPath) => {
-      if (registeredLayerPath.startsWith(`${layerPath}/`) || registeredLayerPath === layerPath) {
-        // Remove actual OL layer from the map
-        if (this.getOLLayer(registeredLayerPath)) this.mapViewer.map.removeLayer(this.getOLLayer(registeredLayerPath) as BaseLayer);
+      // Remove layer info from registered layers
+      this.getLayerEntryConfigIds().forEach((registeredLayerPath) => {
+        if (registeredLayerPath.startsWith(`${layerPath}/`) || registeredLayerPath === layerPath) {
+          // Remove actual OL layer from the map
+          if (this.getOLLayer(registeredLayerPath)) this.mapViewer.map.removeLayer(this.getOLLayer(registeredLayerPath) as BaseLayer);
 
-        // Unregister layer config from the application
-        this.unregisterLayerConfig(this.getLayerEntryConfig(registeredLayerPath)!);
+          // Unregister layer config from the application
+          this.unregisterLayerConfig(this.getLayerEntryConfig(registeredLayerPath)!);
 
-        // Unregister the events on the layer
-        if (this.#gvLayers[registeredLayerPath] instanceof AbstractGVLayer)
-          this.#unregisterLayerHandlers(this.#gvLayers[registeredLayerPath]);
-        else if (this.#gvLayers[registeredLayerPath] instanceof GVGroupLayer)
-          this.#unregisterGroupLayerHandlers(this.#gvLayers[registeredLayerPath]);
+          // Unregister the events on the layer
+          if (this.#gvLayers[registeredLayerPath] instanceof AbstractGVLayer)
+            this.#unregisterLayerHandlers(this.#gvLayers[registeredLayerPath]);
+          else if (this.#gvLayers[registeredLayerPath] instanceof GVGroupLayer)
+            this.#unregisterGroupLayerHandlers(this.#gvLayers[registeredLayerPath]);
 
-        // Remove from registered layer configs
-        delete this.#layerEntryConfigs[registeredLayerPath];
-        delete this.#geoviewLayers[registeredLayerPath];
+          // Remove from registered layer configs
+          delete this.#layerEntryConfigs[registeredLayerPath];
+          delete this.#geoviewLayers[registeredLayerPath];
 
-        // Remove from registered layers
-        delete this.#gvLayers[registeredLayerPath];
-        delete this.#olLayers[registeredLayerPath];
-      }
-    });
+          // Remove from registered layers
+          delete this.#gvLayers[registeredLayerPath];
+          delete this.#olLayers[registeredLayerPath];
+        }
+      });
 
-    // Now that some layers have been removed, check if they are all effectively loaded/error and update store if so
-    this.#checkIfAllLayersLoaded();
+      // Now that some layers have been removed, check if they are all effectively loaded/error and update store if so
+      this.#checkIfAllLayersLoaded();
 
-    // Remove from parents listOfLayerEntryConfig
-    if (listOfLayerEntryConfigAffected) listOfLayerEntryConfigAffected.splice(indexToDelete!, 1);
+      // Remove from parents listOfLayerEntryConfig
+      if (listOfLayerEntryConfigAffected) listOfLayerEntryConfigAffected.splice(indexToDelete!, 1);
 
-    // Remove layer from geoview layers
-    if (this.#geoviewLayers[layerPathNodes[0]]) {
-      const geoviewLayer = this.#geoviewLayers[layerPathNodes[0]];
+      // Remove layer from geoview layers
+      if (this.#geoviewLayers[layerPathNodes[0]]) {
+        const geoviewLayer = this.#geoviewLayers[layerPathNodes[0]];
 
-      // If it is a single layer, remove geoview layer
-      if (layerPathNodes.length === 1 || (layerPathNodes.length === 2 && geoviewLayer.listOfLayerEntryConfig.length === 1)) {
-        geoviewLayer.olRootLayer?.dispose();
-        if (geoviewLayer.olRootLayer) delete geoviewLayer.olRootLayer;
+        // If it is a single layer, remove geoview layer
+        if (layerPathNodes.length === 1 || (layerPathNodes.length === 2 && geoviewLayer.listOfLayerEntryConfig.length === 1)) {
+          geoviewLayer.olRootLayer?.dispose();
+          if (geoviewLayer.olRootLayer) delete geoviewLayer.olRootLayer;
 
-        delete this.#geoviewLayers[layerPathNodes[0]];
-        const { mapFeaturesConfig } = this.mapViewer;
+          delete this.#geoviewLayers[layerPathNodes[0]];
+          const { mapFeaturesConfig } = this.mapViewer;
 
-        // TODO: refactor - remove cast
-        if (mapFeaturesConfig.map.listOfGeoviewLayerConfig)
-          mapFeaturesConfig.map.listOfGeoviewLayerConfig = mapFeaturesConfig.map.listOfGeoviewLayerConfig.filter(
-            (geoviewLayerConfig) => geoviewLayerConfig.geoviewLayerId !== layerPath
-          );
-      } else if (layerPathNodes.length === 2) {
-        const updatedListOfLayerEntryConfig = geoviewLayer.listOfLayerEntryConfig.filter(
-          (entryConfig) => entryConfig.layerId !== layerPathNodes[1]
-        );
-        geoviewLayer.listOfLayerEntryConfig = updatedListOfLayerEntryConfig;
-      } else {
-        // For layer paths more than two deep, drill down through listOfLayerEntryConfigs to layer entry config to remove
-        let layerEntryConfig2 = geoviewLayer.listOfLayerEntryConfig.find((entryConfig) => entryConfig.layerId === layerPathNodes[1]);
-
-        for (let i = 1; i < layerPathNodes.length; i++) {
-          if (i === layerPathNodes.length - 1 && layerEntryConfig2) {
-            // When we get to the top level, remove the layer entry config
-            const updatedListOfLayerEntryConfig = layerEntryConfig2.listOfLayerEntryConfig.filter(
-              (entryConfig) => entryConfig.layerId !== layerPathNodes[i]
+          // TODO: refactor - remove cast
+          if (mapFeaturesConfig.map.listOfGeoviewLayerConfig)
+            mapFeaturesConfig.map.listOfGeoviewLayerConfig = mapFeaturesConfig.map.listOfGeoviewLayerConfig.filter(
+              (geoviewLayerConfig) => geoviewLayerConfig.geoviewLayerId !== layerPath
             );
-            geoviewLayer.listOfLayerEntryConfig = updatedListOfLayerEntryConfig;
-          } else if (layerEntryConfig2) {
-            // Not on the top level, so update to the latest
-            layerEntryConfig2 = layerEntryConfig2.listOfLayerEntryConfig.find((entryConfig) => entryConfig.layerId === layerPathNodes[i]);
+        } else if (layerPathNodes.length === 2) {
+          const updatedListOfLayerEntryConfig = geoviewLayer.listOfLayerEntryConfig.filter(
+            (entryConfig) => entryConfig.layerId !== layerPathNodes[1]
+          );
+          geoviewLayer.listOfLayerEntryConfig = updatedListOfLayerEntryConfig;
+        } else {
+          // For layer paths more than two deep, drill down through listOfLayerEntryConfigs to layer entry config to remove
+          let layerEntryConfig2 = geoviewLayer.listOfLayerEntryConfig.find((entryConfig) => entryConfig.layerId === layerPathNodes[1]);
+
+          for (let i = 1; i < layerPathNodes.length; i++) {
+            if (i === layerPathNodes.length - 1 && layerEntryConfig2) {
+              // When we get to the top level, remove the layer entry config
+              const updatedListOfLayerEntryConfig = layerEntryConfig2.listOfLayerEntryConfig.filter(
+                (entryConfig) => entryConfig.layerId !== layerPathNodes[i]
+              );
+              geoviewLayer.listOfLayerEntryConfig = updatedListOfLayerEntryConfig;
+            } else if (layerEntryConfig2) {
+              // Not on the top level, so update to the latest
+              layerEntryConfig2 = layerEntryConfig2.listOfLayerEntryConfig.find((entryConfig) => entryConfig.layerId === layerPathNodes[i]);
+            }
           }
         }
       }
+
+      // Emit about it
+      this.#emitLayerConfigRemoved({ layerPath, layerName: layerEntryConfig.getLayerName() || 'No name / Sans nom' });
+
+      // Log
+      logger.logInfo(`Layer removed for ${layerPath}`);
+
+      // Redirect to feature info delete
+      FeatureInfoEventProcessor.deleteFeatureInfo(this.getMapId(), layerPath);
     }
-
-    // Emit about it
-    this.#emitLayerConfigRemoved({ layerPath, layerName: layerEntryConfig.getLayerName() || 'No name / Sans nom' });
-
-    // Log
-    logger.logInfo(`Layer removed for ${layerPath}`);
-
-    // Redirect to feature info delete
-    FeatureInfoEventProcessor.deleteFeatureInfo(this.getMapId(), layerPath);
   }
 
   /**

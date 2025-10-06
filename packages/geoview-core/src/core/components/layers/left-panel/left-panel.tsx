@@ -24,6 +24,9 @@ export function LeftPanel({ showLayerDetailsPanel, isLayoutEnlarged }: LeftPanel
   const layerDeleteInProgress = useLayerDeleteInProgress();
   const { deleteLayer } = useLayerStoreActions();
 
+  // TODO: This triggers twice on layers added through add layers tab being removed early.
+  // TODO: Ie. through view on layers in error, or switching layers tabs after starting.
+  // TODO: The second time happens before layerDeleteInProgress can be reset.
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('LEFT-PANEL - deleteLayer, displayState, layerDeleteInProgress');

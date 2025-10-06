@@ -101,18 +101,23 @@ export class WMS extends AbstractGeoViewRaster {
    * - Otherwise, the method constructs a WMS GetCapabilities request.
    *   - If no specific layer configs are provided, a single metadata fetch is made.
    *   - If layer configs are present (e.g., Geomet use case), individual layer metadata is merged.
+   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<T = TypeMetadataWMS | undefined>} A promise resolving to the parsed metadata object,
    * or `undefined` if metadata could not be retrieved or no capabilities were found.
    */
-  protected override onFetchServiceMetadata<T = TypeMetadataWMS | undefined>(): Promise<T> {
+  protected override onFetchServiceMetadata<T = TypeMetadataWMS | undefined>(abortSignal?: AbortSignal): Promise<T> {
     // If metadata is in XML format (not WMS GetCapabilities)
     const isXml = WMS.#isXmlMetadata(this.metadataAccessPath);
     if (isXml) {
       // Fetch the XML
-      return this.#fetchXmlServiceMetadata(this.metadataAccessPath, (proxyUsed) => {
-        // Update the access path to use the proxy if one was required
-        this.metadataAccessPath = `${proxyUsed}${this.metadataAccessPath}`;
-      }) as Promise<T>;
+      return this.#fetchXmlServiceMetadata(
+        this.metadataAccessPath,
+        (proxyUsed) => {
+          // Update the access path to use the proxy if one was required
+          this.metadataAccessPath = `${proxyUsed}${this.metadataAccessPath}`;
+        },
+        abortSignal
+      ) as Promise<T>;
     }
 
     // Construct a proper WMS GetCapabilities URL
@@ -132,11 +137,12 @@ export class WMS extends AbstractGeoViewRaster {
 
   /**
    * Overrides the way a geoview layer config initializes its layer entries.
+   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
    */
-  protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
+  protected override async onInitLayerEntries(abortSignal?: AbortSignal): Promise<TypeGeoviewLayerConfig> {
     // Get the metadata
-    const metadata = await this.onFetchServiceMetadata();
+    const metadata = await this.onFetchServiceMetadata(abortSignal);
 
     // Based on the capabilities
     const layers = metadata!.Capability.Layer.Layer;
@@ -485,12 +491,17 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {string} metadataUrl The metadataAccessPath
    * @param {Function} callbackNewMetadataUrl - Callback executed when a proxy had to be used to fetch the metadata.
    *                                            The parameter sent in the callback is the proxy prefix with the '?' at the end.
+   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<void>} A promise that the execution is completed.
    * @private
    */
-  async #fetchXmlServiceMetadata(metadataUrl: string, callbackNewMetadataUrl?: (proxyUsed: string) => void): Promise<TypeMetadataWMS> {
+  async #fetchXmlServiceMetadata(
+    metadataUrl: string,
+    callbackNewMetadataUrl?: (proxyUsed: string) => void,
+    abortSignal?: AbortSignal
+  ): Promise<TypeMetadataWMS> {
     // Fetch it
-    const capabilities = await WMS.fetchMetadataWMS(metadataUrl, callbackNewMetadataUrl);
+    const capabilities = await WMS.fetchMetadataWMS(metadataUrl, callbackNewMetadataUrl, abortSignal);
 
     this.#processMetadataInheritance(capabilities.Capability.Layer);
 
@@ -666,11 +677,16 @@ export class WMS extends AbstractGeoViewRaster {
    * Fetches the metadata for WMS Capabilities.
    * @param {string} url - The url to query the metadata from.
    * @param {CallbackNewMetadataDelegate} callbackNewMetadataUrl - Callback executed when a proxy had to be used to fetch the metadata.
+   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * The parameter sent in the callback is the proxy prefix with the '?' at the end.
    */
-  static fetchMetadataWMS(url: string, callbackNewMetadataUrl?: CallbackNewMetadataDelegate): Promise<TypeMetadataWMS> {
+  static fetchMetadataWMS(
+    url: string,
+    callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
+    abortSignal?: AbortSignal
+  ): Promise<TypeMetadataWMS> {
     // Redirect
-    return getWMSServiceMetadata(url, undefined, callbackNewMetadataUrl);
+    return getWMSServiceMetadata(url, undefined, callbackNewMetadataUrl, abortSignal);
   }
 
   /**
