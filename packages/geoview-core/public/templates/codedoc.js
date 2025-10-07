@@ -279,3 +279,114 @@ function cleanURL(url) {
     // Reconstruct the cleaned URL
     return `${protocolPart}://${domain}${path}`;
 }
+
+function testSuiteCreateTable(mapID) {
+  const wrapper = document.createElement('div');
+
+  wrapper.innerHTML = `
+    <div style="text-align:right;">
+      <span id="suitesCheck-${mapID}"></span>
+    </div>
+    <div style="text-align:right;">
+      Suites: <span id="suitesCompleted-${mapID}">0</span>/<span id="suitesTotal-${mapID}">0</span>
+    </div>
+    <div style="text-align:right;">
+      Running: <span id="testsRunning-${mapID}">0</span> | Done: <span id="testsDone-${mapID}">0</span>/<span id="testsTotal-${mapID}">0</span>
+    </div>
+    <table id="tableResults-${mapID}" class="tableResults">
+      <colgroup>
+        <col>
+        <col style="width: 80px;">
+        <col>
+      </colgroup>
+      <thead>
+        <tr><td>TEST</td><td>RESULT</td><td>DETAILS</td></tr>
+      </thead>
+      <tbody id="tableBody-${mapID}"></tbody>
+    </table>
+  `;
+
+  return wrapper;
+}
+
+function testSuiteUpdateTotals(plugin) {
+  const suitesCompleted = document.getElementById('suitesCompleted-' + plugin.mapViewer.mapId);
+  suitesCompleted.textContent = plugin.getSuitesCompleted();
+  const suitesTotal = document.getElementById('suitesTotal-' + plugin.mapViewer.mapId);
+  suitesTotal.textContent = plugin.getSuitesTotal();
+  const suitesCheck = document.getElementById('suitesCheck-' + plugin.mapViewer.mapId);
+  const suiteRunning = plugin.getTestsRunning() > 0;
+  const completedFully = plugin.getTestsDoneAllAndSuiteDone();
+  const allSuccess = plugin.getTestsDoneAllSuccessAndSuiteDone();
+  suitesCheck.textContent = completedFully ? (allSuccess ? '✔' : '✘') : suiteRunning ? '⏳' : '';
+  suitesCheck.style.color = completedFully ? (allSuccess ? 'green' : 'red') : 'black';
+  const testsRunning = document.getElementById('testsRunning-' + plugin.mapViewer.mapId);
+  testsRunning.textContent = plugin.getTestsRunning();
+  const testsDone = document.getElementById('testsDone-' + plugin.mapViewer.mapId);
+  testsDone.textContent = plugin.getTestsDone();
+  const testsTotal = document.getElementById('testsTotal-' + plugin.mapViewer.mapId);
+  testsTotal.textContent = plugin.getTestsTotal();
+}
+
+function testSuiteAddOrUpdateTestResultRow(plugin, testSuite, testTester, test, details) {
+  let passed = null;
+  if (test.getStatus() === 'success') passed = true;
+  else if (test.getStatus() === 'failed') passed = false;
+
+  // Find the table for the map id
+  const tableBody = document.getElementById('tableBody-' + plugin.mapViewer.mapId);
+  if (!tableBody) {
+    console.error('Table body element with id "tableBody' + plugin.mapViewer.mapId + '" not found.');
+    return;
+  }
+
+  // Try to find an existing row by ID
+  let row = document.getElementById(test.id);
+
+  if (!row) {
+    // If it doesn't exist, create a new row
+    row = document.createElement('tr');
+    row.id = test.id;
+
+    // Create and append the three cells
+    row.appendChild(document.createElement('td'));
+    row.appendChild(document.createElement('td'));
+    row.appendChild(document.createElement('td'));
+
+    tableBody.appendChild(row);
+  }
+
+  // Update result cells
+  const testCell = row.cells?.[0];
+  let testMessage = '<strong>' + test.getTitle() + '</strong><br/>';
+  testMessage += '<font style="font-size: x-small;">' + '<i>[' + testSuite.name + ' | ' + testTester.name + ']' + '</i></font>';
+  testMessage += test.getStepsAsHtml();
+  testCell.innerHTML = testMessage;
+
+  const resultCell = row.cells?.[1];
+  const detailsCell = row.cells?.[2];
+
+  if (resultCell) {
+    resultCell.style.textAlign = 'center';
+    if (passed === true) {
+      resultCell.style.color = 'green';
+      resultCell.textContent = '✔';
+    } else if (passed === false) {
+      resultCell.style.color = 'red';
+      resultCell.textContent = '✘';
+      detailsCell.textContent = details;
+      detailsCell.style.whiteSpace = 'pre-line';
+    } else {
+      resultCell.style.color = 'black';
+      resultCell.textContent = '⏳';
+    }
+  }
+}
+
+function testSuiteEmptyTestResults(plugin) {
+  // Empty the table
+  const tableBody = document.getElementById('tableBody-' + plugin.mapViewer.mapId);
+  while (tableBody.firstChild) {
+    tableBody.removeChild(tableBody.firstChild);
+  }
+}

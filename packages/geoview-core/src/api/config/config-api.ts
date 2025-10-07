@@ -430,7 +430,8 @@ export class ConfigApi {
     // If working with geoCore
     if (layerType === 'geoCore') {
       // For GeoCore, we build the Config from the Geocore service
-      const layerConfigFromGeocore = await GeoCore.createLayerConfigFromUUID(layerURL, language || 'en', mapId, undefined, abortSignal);
+      const response = await GeoCore.createLayerConfigFromUUID(layerURL, language || 'en', mapId, undefined, abortSignal);
+      const layerConfigFromGeocore = response.config;
 
       // Get the layer entries that GeoCore has configured
       const layerIdsFromGeocoreEntries = layerConfigFromGeocore.listOfLayerEntryConfig?.map((layerEntry) => layerEntry.layerId);

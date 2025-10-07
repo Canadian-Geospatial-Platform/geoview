@@ -69,7 +69,7 @@ export class GeometryApi {
 
   /**
    * Emits an event to all handlers.
-   * @param {GeometryAddedEvent} event The event to emit
+   * @param {GeometryAddedEvent} event - The event to emit
    * @private
    */
   #emitGeometryAdded(event: GeometryAddedEvent): void {
@@ -79,7 +79,7 @@ export class GeometryApi {
 
   /**
    * Registers a geometry added event handler.
-   * @param {GeometryAddedDelegate} callback The callback to be executed whenever the event is emitted
+   * @param {GeometryAddedDelegate} callback - The callback to be executed whenever the event is emitted
    */
   onGeometryAdded(callback: GeometryAddedDelegate): void {
     // Register the event handler
@@ -88,7 +88,7 @@ export class GeometryApi {
 
   /**
    * Unregisters a geometry added event handler.
-   * @param {GeometryAddedDelegate} callback The callback to stop being called whenever the event is emitted
+   * @param {GeometryAddedDelegate} callback - The callback to stop being called whenever the event is emitted
    */
   offGeometryAdded(callback: GeometryAddedDelegate): void {
     // Unregister the event handler

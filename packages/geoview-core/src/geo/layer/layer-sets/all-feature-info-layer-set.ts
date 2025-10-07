@@ -82,6 +82,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
    * @param {string} layerPath - The layerPath that will be queried
    * @param {QueryType} queryType - The query's type to perform
    * @returns {Promise<TypeFeatureInfoEntry[] | void>} A promise which will hold the result of the query
+   * @throws {LayerNotFoundError} - If the specified layer cannot be found.
    */
   // TODO: (future development) The queryType is a door opened to allow the triggering using a bounding box or a polygon.
   queryLayer(layerPath: string, queryType: QueryType = 'all'): Promise<TypeFeatureInfoEntry[] | void> {
@@ -98,8 +99,8 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
       // Get the layer config and layer associated with the layer path
       const layer = this.layerApi.getGeoviewLayer(layerPath);
 
-      // If layer was found
-      if (layer && layer instanceof AbstractGVLayer) {
+      // If layer was found and of right type
+      if (layer instanceof AbstractGVLayer) {
         // Flag processing
         this.resultSet[layerPath].queryStatus = 'processing';
 

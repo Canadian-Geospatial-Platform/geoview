@@ -64,7 +64,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {ImageArcGISRest} olSource - The OpenLayer source.
    * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer configuration.
    */
-  public constructor(olSource: ImageArcGISRest, layerConfig: EsriDynamicLayerEntryConfig) {
+  constructor(olSource: ImageArcGISRest, layerConfig: EsriDynamicLayerEntryConfig) {
     super(olSource, layerConfig);
 
     // TODO: Performance - Do we need worker pool or one worker per layer is enough. If a worker is already working we should terminate it

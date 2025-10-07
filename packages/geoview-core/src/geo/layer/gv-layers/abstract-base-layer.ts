@@ -285,7 +285,7 @@ export abstract class AbstractBaseLayer {
 
   /**
    * Emits an event to all handlers.
-   * @param {VisibleChangedEvent} event The event to emit
+   * @param {VisibleChangedEvent} event - The event to emit
    * @private
    */
   #emitVisibleChanged(event: VisibleChangedEvent): void {
@@ -295,7 +295,7 @@ export abstract class AbstractBaseLayer {
 
   /**
    * Registers a visible changed event handler.
-   * @param {VisibleChangedDelegate} callback The callback to be executed whenever the event is emitted
+   * @param {VisibleChangedDelegate} callback - The callback to be executed whenever the event is emitted
    */
   onVisibleChanged(callback: VisibleChangedDelegate): void {
     // Register the event handler
@@ -304,7 +304,7 @@ export abstract class AbstractBaseLayer {
 
   /**
    * Unregisters a visible changed event handler.
-   * @param {VisibleChangedDelegate} callback The callback to stop being called whenever the event is emitted
+   * @param {VisibleChangedDelegate} callback - The callback to stop being called whenever the event is emitted
    */
   offVisibleChanged(callback: VisibleChangedDelegate): void {
     // Unregister the event handler

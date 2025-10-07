@@ -10,7 +10,7 @@ import type { ILayerState, TypeLegend, TypeLegendResultSetEntry } from '@/core/s
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { LayerNotFoundError, LayerWrongTypeError } from '@/core/exceptions/layer-exceptions';
+import { LayerWrongTypeError } from '@/core/exceptions/layer-exceptions';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
@@ -149,7 +149,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * If the projection or its code is not available, the method returns `undefined`.
    */
   static getLayerServiceProjection(mapId: string, layerPath: string): string | undefined {
-    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
+    // TODO: Check - Do we want it to throw instead of handling when undefined? (call getGeoviewLayer instead of getGeoviewLayerIfExists)
+    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerIfExists(layerPath);
 
     if (geoviewLayer && 'getMetadataProjection' in geoviewLayer && typeof geoviewLayer.getMetadataProjection === 'function') {
       const projection = geoviewLayer.getMetadataProjection();
@@ -195,6 +196,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string[]} objectIds - The IDs of features to get extents from.
    * @param {string} outfield - ID field to return for services that require a value in outfields.
    * @returns {Promise<Extent>} The extent of the feature, if available
+   * @throws {LayerNotFoundError} - If the specified layer cannot be found.
    */
   static getExtentFromFeatures(mapId: string, layerPath: string, objectIds: string[], outfield?: string): Promise<Extent> {
     // Get the layer api
@@ -202,7 +204,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
     // Get the layer
     const layer = layerApi.getGeoviewLayer(layerPath);
-    if (!layer) throw new LayerNotFoundError(layerPath);
 
     // If not a GVLayer
     if (!(layer instanceof AbstractGVLayer)) throw new LayerWrongTypeError(layerPath, layer.getLayerName());
@@ -217,12 +218,10 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The unique identifier of the map instance.
    * @param {string} layerPath - The path to the layer.
    * @returns {TimeDimension | undefined} - The temporal dimension information of the layer, or `undefined` if not available.
-   *
    * @description
    * This method fetches the Geoview layer for the specified layer path and checks if it has a `getTimeDimension` method.
    * If the method exists, it retrieves the temporal dimension information for the layer.
    * If the layer doesn't support temporal dimensions, the method returns `undefined`.
-   *
    * @throws {LayerNotFoundError} - If the specified layer cannot be found.
    */
   static getLayerTimeDimension(mapId: string, layerPath: string): TimeDimension | undefined {
@@ -231,7 +230,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
     // Get the layer
     const layer = layerApi.getGeoviewLayer(layerPath);
-    if (!layer) throw new LayerNotFoundError(layerPath);
 
     // Get the temporal dimension calling the GV Layer method, check if getTimeDimension exists and is a function
     if (layer instanceof AbstractGVLayer) return layer.getTimeDimension();
@@ -318,7 +316,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId The map identifier.
    * @param {TypeLegendResultSetEntry} legendResultSetEntry The legend result set that triggered the propagation.
    */
-  public static propagateLegendToStore(mapId: string, legendResultSetEntry: TypeLegendResultSetEntry): void {
+  static propagateLegendToStore(mapId: string, legendResultSetEntry: TypeLegendResultSetEntry): void {
     const { layerPath } = legendResultSetEntry;
     const layerPathNodes = layerPath.split('/');
 
@@ -356,8 +354,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       // If not found, skip
       if (!layerConfig) return;
 
-      // Get the layer
-      const layer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(entryLayerPath);
+      // Get the layer if exists
+      const layer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerIfExists(entryLayerPath);
 
       // Interpret the layer name the best we can
       const layerName = layer?.getLayerName() || layerConfig.getLayerNameCascade();
@@ -596,7 +594,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    */
   static refreshLayer(mapId: string, layerPath: string): void {
     // Get the layer through layer API
-    const layer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
+    const layer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerIfExists(layerPath);
 
     // Refresh the layer
     layer?.refresh(MapEventProcessor.getMapViewer(mapId).getProjection());

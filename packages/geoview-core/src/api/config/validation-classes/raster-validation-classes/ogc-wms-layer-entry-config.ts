@@ -56,6 +56,18 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   }
 
   /**
+   * Returns a list of supported CRS (Coordinate Reference System) identifiers
+   * from the WMS service metadata.
+   * The method normalizes the CRS entries to strings, handling both plain strings
+   * and CRS objects (with a `.Name` property).
+   * @returns {string[]} An array of supported CRS identifiers (e.g., 'EPSG:3857').
+   */
+  getSupportedCRSs(): string[] {
+    // Normalize CRS entries to strings
+    return (this.getServiceMetadata()?.Capability.Layer.CRS ?? []).map((crs) => (typeof crs === 'string' ? crs : crs.Name));
+  }
+
+  /**
    * Normalizes both the metadata and data access paths by replacing legacy wrapper segments in the URL.
    * Specifically, this method replaces `wrapper/ramp/ogc` with `ows` in the metadata access path,
    * then applies the normalized value to both the metadata and data access paths.

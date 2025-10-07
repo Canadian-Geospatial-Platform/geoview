@@ -47,7 +47,7 @@ export class GVWMS extends AbstractGVRaster {
    * @param {ImageWMS} olSource - The OpenLayer source.
    * @param {OgcWmsLayerEntryConfig} layerConfig - The layer configuration.
    */
-  public constructor(olSource: ImageWMS, layerConfig: OgcWmsLayerEntryConfig) {
+  constructor(olSource: ImageWMS, layerConfig: OgcWmsLayerEntryConfig) {
     super(olSource, layerConfig);
 
     // Create the image layer options.

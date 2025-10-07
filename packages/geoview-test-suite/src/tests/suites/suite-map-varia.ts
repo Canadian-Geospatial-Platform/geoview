@@ -1,0 +1,51 @@
+import type { API } from 'geoview-core/api/api';
+import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
+import { GeocoreTester } from '../testers/geocore-tester';
+import { MapTester } from '../testers/map-tester';
+import { GVAbstractTestSuite } from './abstract-gv-test-suite';
+
+/**
+ * The GeoView Test Suite.
+ */
+export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
+  /** The Map Tester used in this Test Suite */
+  #mapTester: MapTester;
+
+  /** The Geocore Tester used in this Test Suite */
+  #geocoreTester: GeocoreTester;
+
+  /**
+   * Constructs the Test Suite
+   * @param {API} api - The shared api
+   * @param {MapViewer} mapViewer - The map viewer
+   */
+  constructor(api: API, mapViewer: MapViewer) {
+    super('TestSuiteMapVaria', api, mapViewer);
+
+    // Create the Geocore tester
+    this.#geocoreTester = new GeocoreTester(api, mapViewer);
+    this.addTester(this.#geocoreTester);
+
+    // Create the Map tester
+    this.#mapTester = new MapTester(api, mapViewer);
+    this.addTester(this.#mapTester);
+  }
+
+  /**
+   * Overrides the implementation to perform the tests for this Test Suite.
+   * @returns {Promise<unknown>} A Promise which resolves when tests are completed.
+   */
+  protected override onLaunchTestSuite(): Promise<unknown> {
+    // Test the map state
+    const pmapState = this.#mapTester.testMapState();
+
+    // Test Geocore with Airborne
+    const pAirborne = this.#geocoreTester.testStandaloneGeocoreWithAirborne();
+
+    // Test the zoom
+    const pZoom = this.#mapTester.testMapZoom(5, 500);
+
+    // Resolve when all
+    return Promise.all([pmapState, pAirborne, pZoom]);
+  }
+}

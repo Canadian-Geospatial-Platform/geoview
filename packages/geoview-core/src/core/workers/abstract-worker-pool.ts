@@ -54,7 +54,7 @@ export abstract class AbstractWorkerPool<T> {
    * Add a message handler to all workers in the pool
    * @param {MessageEvent} handler - The message handler to add
    */
-  public addMessageHandler(handler: (event: MessageEvent) => void): void {
+  addMessageHandler(handler: (event: MessageEvent) => void): void {
     this.workers.forEach((worker) => worker.addMessageHandler(handler));
   }
 
@@ -62,11 +62,11 @@ export abstract class AbstractWorkerPool<T> {
    * Remove a message handler from all workers in the pool
    * @param {MessageEvent} handler - The message handler to remove
    */
-  public removeMessageHandler(handler: (event: MessageEvent) => void): void {
+  removeMessageHandler(handler: (event: MessageEvent) => void): void {
     this.workers.forEach((worker) => worker.removeMessageHandler(handler));
   }
 
-  public terminate(): void {
+  terminate(): void {
     this.workers.forEach((worker) => worker.terminate());
     this.workers = [];
     this.busyWorkers.clear();

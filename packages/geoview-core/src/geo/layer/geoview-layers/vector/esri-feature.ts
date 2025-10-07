@@ -76,41 +76,48 @@ export class EsriFeature extends AbstractGeoViewVector {
    */
   protected override async onInitLayerEntries(abortSignal?: AbortSignal): Promise<TypeGeoviewLayerConfig> {
     // Fetch metadata
-    let sep = '/mapserver/';
-    let idx = this.metadataAccessPath.toLowerCase().lastIndexOf(sep);
-    let rootUrl = this.metadataAccessPath;
-    if (idx > 0) {
-      rootUrl = this.metadataAccessPath.substring(0, idx + sep.length);
-    }
-    sep = '/featureserver/';
-    idx = this.metadataAccessPath.toLowerCase().lastIndexOf(sep);
-    if (idx > 0) {
-      rootUrl = this.metadataAccessPath.substring(0, idx + sep.length);
-    }
-
-    // Fetch metadata
     const metadata = await this.onFetchServiceMetadata(abortSignal);
 
-    // Now that we have metadata, get the layer ids from it
+    // If metadata was fetched successfully
     const entries = [];
     if (metadata) {
-      entries.push({
-        id: Number(metadata.id),
-        index: Number(metadata.id),
-        layerId: metadata.id,
-        layerName: metadata.name,
-      });
+      // If MapServer url
+      let sep = '/mapserver';
+      let idx = this.metadataAccessPath.toLowerCase().lastIndexOf(sep);
+
+      if (idx > 0) {
+        // The layer id is in the metadata at root
+        entries.push({
+          id: Number(metadata.id),
+          index: Number(metadata.id),
+          layerId: Number(metadata.id),
+          layerName: metadata.name,
+        });
+      } else {
+        // If FeatureServer url, the metadata is in the first layer
+        sep = '/featureserver';
+        idx = this.metadataAccessPath.toLowerCase().lastIndexOf(sep);
+        if (idx > 0) {
+          // The layer metadata is in the first layer of the metadata
+          const layer = metadata.layers[0];
+          entries.push({
+            id: layer.id,
+            index: layer.id,
+            layerId: layer.id,
+            layerName: layer.name,
+          });
+        }
+      }
     }
 
     // Redirect
-    // TODO: Check - Config init -  a way to better determine the isTimeAware flag, defaults to false, how is it used here?
-    return EsriFeature.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, entries);
+    // TODO: Check - Config init - a way to better determine the isTimeAware flag, defaults to false, how is it used here?
+    return EsriFeature.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, this.metadataAccessPath, false, entries);
   }
 
   /**
    * This method validates recursively the configuration of the layer entries to ensure that it is a feature layer identified
    * with a numeric layerId and creates a group entry when a layer is a group.
-   *
    * @param {ConfigBaseClass[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
   protected override onValidateListOfLayerEntryConfig(listOfLayerEntryConfig: ConfigBaseClass[]): void {
@@ -232,7 +239,7 @@ export class EsriFeature extends AbstractGeoViewVector {
       const layerEntryConfig = new EsriFeatureLayerEntryConfig({
         geoviewLayerConfig,
         layerId: `${layerEntry.index}`,
-        layerName: layerEntry.layerName || `${layerEntry.id}`,
+        layerName: layerEntry.layerName,
       });
       return layerEntryConfig;
     });

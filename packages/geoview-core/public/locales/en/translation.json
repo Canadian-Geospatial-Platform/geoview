@@ -255,9 +255,9 @@
       "unableToCreateGroupLayer": "Unable to create group layer '__param__'.",
       "vectorSourceUrlNotDefined": "Vector source URL is not defined for layer '__param__'.",
       "tooManyEsriFeatures": "Layer '__param__' has too many features (__param__) to function properly. Consider loading as ESRI Dynamic if possible",
-      "vectorTileLayerProjectionMismatch": "Vector tile layer '__param__' projection does not match the map projection.",
       "extentParameterNotDefined": "Parameter extent is not defined in source element for layer '__param__'.",
-      "projectionParameterNotDefined": "Parameter projection is not defined in source element for layer '__param__'."
+      "projectionParameterNotDefined": "Parameter projection is not defined in source element for layer '__param__'.",
+      "projectionNotSupported": "The map projection '__param__' isn't supported by the layer '__param__'."
     },
     "schema": {
       "notFound": "A schema error was found, check the console to see what is wrong.",
@@ -323,6 +323,9 @@
   "geoChart": {
     "noChartAvailable": "Click on the map on a layer with chart"
   },
+  "testSuite": {
+    "initializationError": "Test Suite '__param__' failed to initialize on map '__param__'."
+  },
   "guide": {
     "title": "Guide",
     "search": "Search guide...",
@@ -369,8 +372,9 @@
       "geoviewStoreNotFound": "GeoView Store on Map '__param__' not found.",
       "mapDivNotExists": "Div with id ${divId} does not exist",
       "mapWrongCall": "Div with id __param__ has a class 'geoview-map' and should be initialized via a 'cgpv.init()' call.",
-      "pluginConfigNotFound": "The Plugin configuration at path '__param__' couldn't be found.",
-      "pluginStateUninitialized": "The Plugin state for '__param__' on Map '__param__' is uninitialized."
+      "pluginError": "A major error on Plugin '__param__' on map '__param__' has happened.",
+      "pluginConfigNotFound": "The Plugin configuration '__param__' on map '__param__' at path '__param__' couldn't be found.",
+      "pluginStateUninitialized": "The Plugin state for '__param__' on map '__param__' is uninitialized."
     },
     "geocore": {
       "uuidNotFound": "GeoCore layer identifier '__param__' does not exist on the server.",

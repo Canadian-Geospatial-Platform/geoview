@@ -22,7 +22,9 @@ export class GVGeoJSON extends AbstractGVVector {
    * @param {VectorSource} olSource - The OpenLayer source.
    * @param {GeoJSONLayerEntryConfig} layerConfig - The layer configuration.
    */
-  public constructor(olSource: VectorSource, layerConfig: GeoJSONLayerEntryConfig) {
+  // The constructor is not useless, it narrows down the accepted parameter type.
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
+  constructor(olSource: VectorSource, layerConfig: GeoJSONLayerEntryConfig) {
     super(olSource, layerConfig);
   }
 

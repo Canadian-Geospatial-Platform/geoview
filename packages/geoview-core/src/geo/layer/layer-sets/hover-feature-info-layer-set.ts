@@ -94,6 +94,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
   /**
    * Queries the features at the provided coordinate for all the registered layers.
    * @param {Coordinate} pixelCoordinate - The pixel coordinate where to query the features
+   * @throws {LayerNotFoundError} - If the specified layer cannot be found.
    */
   queryLayers(pixelCoordinate: Coordinate): void {
     // FIXME: Watch out for code reentrancy between queries!
@@ -117,8 +118,8 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
       this.resultSet[layerPath].feature = undefined;
       this.resultSet[layerPath].queryStatus = 'error';
 
-      // If layer was found
-      if (layer && layer instanceof AbstractGVLayer) {
+      // If layer was found and of right type
+      if (layer instanceof AbstractGVLayer) {
         // Flag processing
         this.resultSet[layerPath].queryStatus = 'init';
 

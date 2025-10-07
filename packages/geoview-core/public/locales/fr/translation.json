@@ -255,9 +255,9 @@
       "unableToCreateGroupLayer": "Impossible de créer le groupe de couches '__param__'.",
       "vectorSourceUrlNotDefined": "L'URL de la source vectorielle n'est pas définie pour la couche '__param__'.",
       "tooManyEsriFeatures": "La couche '__param__' a trop de caractéristiques (__param__) pour fonctionner correctement. Envisager le chargement en tant que ESRI Dynamic si possible",
-      "vectorTileLayerProjectionMismatch": "La projection de la couche vectorielle tuilée '__param__' ne correspond pas à celle de la carte.",
       "extentParameterNotDefined": "Le paramètre extent n'est pas défini dans l'élément source pour la couche '__param__'.",
-      "projectionParameterNotDefined": "Le paramètre projection n'est pas défini dans l'élément source pour la couche '__param__'."
+      "projectionParameterNotDefined": "Le paramètre projection n'est pas défini dans l'élément source pour la couche '__param__'.",
+      "projectionNotSupported": "La projection de la carte '__param__' n'est pas supportée par la couche '__param__'."
     },
     "schema": {
       "notFound": "Une erreur de schéma a été trouvée, vérifiez la console pour voir ce qui ne va pas.",
@@ -323,6 +323,9 @@
   "geochart": {
     "noChartAvailable": "Cliquer sur une couche de la carte qui contient un graphique"
   },
+  "testSuite": {
+    "initializationError": "L'initialisation de la suite de Test '__param__' a échoué sur la carte '__param__'."
+  },
   "guide": {
     "title": "Guide",
     "search": "Rechercher dans le guide...",
@@ -369,7 +372,8 @@
       "geoviewStoreNotFound": "Le 'React Store' sur la carte '__param__' est introuvable.",
       "mapDivNotExists": "Div avec identifiant __param__ does not exist.",
       "mapWrongCall": "Div avec identifiant __param__ a une classe 'geoview-map' et devrait être initialisé via un appel à 'cgpv.init()'.",
-      "pluginConfigNotFound": "La configuration pour le Plugin au chemin d'accès '__param__' est introuvable.",
+      "pluginError": "Une erreur majeure sur le Plugin '__param__' sur la carte '__param__' est survenue.",
+      "pluginConfigNotFound": "La configuration pour le Plugin '__param__' sur la carte '__param__' au chemin d'accès '__param__' est introuvable.",
       "pluginStateUninitialized": "L'état du Plugin '__param__' sur la carte '__param__' n'est pas initialisé."
     },
     "geocore": {

@@ -704,7 +704,7 @@ export interface TypeMetadataWMSCapabilityLayer {
   MinScaleDenominator: number;
   MaxScaleDenominator: number;
   Style: TypeMetadataWMSCapabilityLayerStyle[];
-  CRS: TypeMetadataWMSCapabilityLayerCRS[];
+  CRS: TypeMetadataWMSCapabilityLayerCRS[] | string[];
   Dimension: TypeMetadataWMSCapabilityLayerDimension[];
   EX_GeographicBoundingBox: Extent;
   queryable: boolean;
