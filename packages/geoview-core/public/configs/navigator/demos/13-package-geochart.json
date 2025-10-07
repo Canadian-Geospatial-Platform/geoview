@@ -134,7 +134,11 @@
               "xAxis": {
                 "type": "time",
                 "property": "CollectionStart_DebutPrelevement",
-                "label": "Collected date"
+                "label": "Collected date",
+                "timeFormat": {
+                  "en": "MMM dd, yyyy",
+                  "fr": "d MMM yyyy"
+                }
               },
               "yAxis": {
                 "type": "linear",
