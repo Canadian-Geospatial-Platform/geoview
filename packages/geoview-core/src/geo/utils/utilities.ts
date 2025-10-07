@@ -126,6 +126,25 @@ export function getOGCServerUrl(url: string): string {
   return ogcServerUrl;
 }
 
+/**
+ * Replaces or adds the BBOX parameter in a WMS GetMap URL.
+ * @param url - The original WMS GetMap URL
+ * @param newBBOX - The new BBOX to set, as an array of 4 numbers: [minX, minY, maxX, maxY]
+ * @returns A new URL string with the updated BBOX parameter
+ */
+export function replaceCRSAndBBOXParam(url: string, newCRS: string, newBBOX: number[]): string {
+  const urlObj = new URL(url);
+
+  // Format the new BBOX as a comma-separated string
+  const bboxString = newBBOX.join(',');
+
+  // Replace or add the BBOX parameter
+  urlObj.searchParams.set('BBOX', bboxString);
+  urlObj.searchParams.set('CRS', newCRS);
+
+  return urlObj.toString();
+}
+
 // #endregion FETCH METADATA
 
 // #region GEOMETRY

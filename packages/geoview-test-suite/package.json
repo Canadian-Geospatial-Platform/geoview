@@ -1,0 +1,36 @@
+{
+  "name": "geoview-test-suite",
+  "version": "1.0.0",
+  "description": "A Test suite for the geoview project",
+  "main": "src/index.tsx",
+  "keywords": [
+    "swiper"
+  ],
+  "author": "Alexandre Roy",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc --build"
+  },
+  "dependencies": {
+    "react-draggable": "^4.4.6",
+    "lodash": "^4.17.21",
+    "ol": "10.5.0"
+  },
+  "peerDependencies": {
+    "geoview-core": "workspace:^2.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zustand": "~5.0.0"
+  },
+  "devDependencies": {
+    "geoview-core": "workspace:^2.0.0",
+    "@babel/core": "^7.25.8",
+    "@babel/runtime": "^7.25.7",
+    "@types/lodash": "^4.17.10",
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.6.3"
+  }
+}

@@ -9,6 +9,14 @@ import importPlugin from 'eslint-plugin-import';
 
 export default [
   js.configs.recommended,
+  // Ignores (actually recommended to be first in the whole config logic)
+  {
+    ignores: [
+      'node_modules/', 'dist/', 'eslint.config.js',
+    ]
+  },
+
+  // Core logic
   {
     files: ['**/*.{js,jsx,ts,tsx}'],
     languageOptions: {
@@ -204,10 +212,5 @@ export default [
         ecmaVersion: 2018,
       },
     },
-  },
-
-  // Ignores
-  {
-    ignores: ['node_modules/', 'dist/', 'eslint.config.js'],
-  },
+  }
 ];

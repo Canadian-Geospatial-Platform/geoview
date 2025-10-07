@@ -20,7 +20,7 @@ export class GVGroupLayer extends AbstractBaseLayer {
    * @param {LayerGroup} olLayerGroup - The OpenLayer group layer.
    * @param {GroupLayerEntryConfig} layerConfig - The layer configuration.
    */
-  public constructor(olLayerGroup: LayerGroup, layerConfig: GroupLayerEntryConfig) {
+  constructor(olLayerGroup: LayerGroup, layerConfig: GroupLayerEntryConfig) {
     super(layerConfig);
     this.setOLLayer(olLayerGroup);
 

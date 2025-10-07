@@ -395,6 +395,24 @@ export class LayerNotCreatedError extends LayerError {
 }
 
 /**
+ * Custom error class thrown when a GeoView layer status was 'error' when it was expecting another status.
+ * @extends {LayerError}
+ */
+export class LayerStatusErrorError extends LayerError {
+  /**
+   * Constructor to initialize the LayerStatusErrorError with the layer ID.
+   * @param {string} geoviewLayerId - The ID of the GeoView layer that failed to be created.
+   * @param {string | undefined} layerName - The layer name.
+   */
+  constructor(geoviewLayerId: string, layerName: string | undefined) {
+    super(geoviewLayerId, 'validation.layer.statusWasError', [layerName || geoviewLayerId]);
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, LayerStatusErrorError.prototype);
+  }
+}
+
+/**
  * Custom error class thrown when no capabilities are found (or capabilities are empty)
  * for a GeoView layer on a map.
  * This error typically occurs when the capabilities for a specific layer are either not available

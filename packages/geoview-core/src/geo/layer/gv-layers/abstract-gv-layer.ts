@@ -42,9 +42,9 @@ import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { SnackbarType } from '@/core/utils/notifications';
 import { NotImplementedError, NotSupportedError } from '@/core/exceptions/core-exceptions';
-import { LayerNotQueryableError } from '@/core/exceptions/layer-exceptions';
+import { LayerNotQueryableError, LayerStatusErrorError } from '@/core/exceptions/layer-exceptions';
 import { createAliasLookup } from '@/geo/layer/gv-layers/utils';
-import { delay } from '@/core/utils/utilities';
+import { delay, whenThisThen } from '@/core/utils/utilities';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer layer.
@@ -742,6 +742,25 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   /**
+   * Utility function allowing to wait for the layer to be loaded at least once.
+   * @param {number} timeout - A timeout for the period to wait for. Defaults to 30,000 ms.
+   * @returns {Promise<void>} A Promise that resolves when the layer has been loaded at least once.
+   */
+  waitLoadedOnce(timeout: number = 30000): Promise<void> {
+    // Create a promise and wait until the layer is first loaded
+    return whenThisThen(() => {
+      // If the layer is in error, abort the waiting
+      if (this.getLayerStatus() === 'error') {
+        // The layer is in error, throw error
+        throw new LayerStatusErrorError(this.getGeoviewLayerId(), this.getLayerName());
+      }
+
+      // If the layer was first loaded
+      return this.loadedOnce;
+    }, timeout).then();
+  }
+
+  /**
    * Overridable function set the style according to the fetched legend information
    *
    * @param {TypeLegend} legend - The fetched legend information
@@ -1112,7 +1131,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /**
    * Emits an event to all handlers.
-   * @param {LegendQueryingEvent} event The event to emit
+   * @param {LegendQueryingEvent} event - The event to emit
    * @private
    */
   #emitLegendQuerying(): void {
@@ -1122,7 +1141,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /**
    * Registers a legend querying event handler.
-   * @param {LegendQueryingDelegate} callback The callback to be executed whenever the event is emitted
+   * @param {LegendQueryingDelegate} callback - The callback to be executed whenever the event is emitted
    */
   onLegendQuerying(callback: LegendQueryingDelegate): void {
     // Register the event handler
@@ -1131,7 +1150,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /**
    * Unregisters a legend querying event handler.
-   * @param {LegendQueryingDelegate} callback The callback to stop being called whenever the event is emitted
+   * @param {LegendQueryingDelegate} callback - The callback to stop being called whenever the event is emitted
    */
   offLegendQuerying(callback: LegendQueryingDelegate): void {
     // Unregister the event handler
@@ -1140,7 +1159,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /**
    * Emits an event to all handlers.
-   * @param {LegendQueriedEvent} event The event to emit
+   * @param {LegendQueriedEvent} event - The event to emit
    * @private
    */
   #emitLegendQueried(event: LegendQueriedEvent): void {
@@ -1150,7 +1169,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /**
    * Registers a legend queried event handler.
-   * @param {LegendQueriedDelegate} callback The callback to be executed whenever the event is emitted
+   * @param {LegendQueriedDelegate} callback - The callback to be executed whenever the event is emitted
    */
   onLegendQueried(callback: LegendQueriedDelegate): void {
     // Register the event handler
@@ -1159,7 +1178,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /**
    * Unregisters a legend queried event handler.
-   * @param {LegendQueriedDelegate} callback The callback to stop being called whenever the event is emitted
+   * @param {LegendQueriedDelegate} callback - The callback to stop being called whenever the event is emitted
    */
   offLegendQueried(callback: LegendQueriedDelegate): void {
     // Unregister the event handler

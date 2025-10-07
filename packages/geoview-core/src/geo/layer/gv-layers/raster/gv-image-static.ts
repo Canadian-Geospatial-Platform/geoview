@@ -26,7 +26,7 @@ export class GVImageStatic extends AbstractGVRaster {
    * @param {Static} olSource - The OpenLayer source.
    * @param {ImageStaticLayerEntryConfig} layerConfig - The layer configuration.
    */
-  public constructor(olSource: Static, layerConfig: ImageStaticLayerEntryConfig) {
+  constructor(olSource: Static, layerConfig: ImageStaticLayerEntryConfig) {
     super(olSource, layerConfig);
 
     // Create the image layer options.

@@ -33,7 +33,7 @@ export class GVEsriImage extends AbstractGVRaster {
    * @param {ImageArcGISRest} olSource - The OpenLayer source.
    * @param {EsriImageLayerEntryConfig} layerConfig - The layer configuration.
    */
-  public constructor(olSource: ImageArcGISRest, layerConfig: EsriImageLayerEntryConfig) {
+  constructor(olSource: ImageArcGISRest, layerConfig: EsriImageLayerEntryConfig) {
     super(olSource, layerConfig);
 
     // Create the image layer options.

@@ -520,20 +520,26 @@ function _whenThisThenThat<T>(
   // GV This pattern immediately calls the callback and then starts checking recursively.
   // Do not change this for a 'doUntil' as the latter only calls the callback *after* the first checkFrequency expires.
 
-  // Check if we're good
-  const v = checkCallback();
+  let v: T;
 
-  // If check was positive
+  try {
+    // Try to run the check
+    v = checkCallback();
+  } catch (err) {
+    // If the check throws, we fail immediately
+    failCallback(err);
+    return;
+  }
+
+  // If check was positive or anything of value
   if (v) {
-    // Do that and we're done
     doCallback(v);
     return;
   }
 
   // If expired
   if (Date.now() - startDate.getTime() > timeout) {
-    // Failed, took too long, this throws an exception in typical async/await contexts
-    failCallback(`Task abandonned, took over ${timeout} ms to get anything.`);
+    failCallback(`Task abandoned: exceeded timeout of ${timeout} ms.`);
     return;
   }
 

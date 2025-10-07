@@ -76,7 +76,7 @@ export class ModalApi {
 
   /**
    * Emits an event to all handlers.
-   * @param {ModalEvent} event The event to emit
+   * @param {ModalEvent} event - The event to emit
    * @private
    */
   #emitModalOpened(event: ModalEvent): void {
@@ -86,7 +86,7 @@ export class ModalApi {
 
   /**
    * Registers a modal opened event handler.
-   * @param {ModalOpenedDelegate} callback The callback to be executed whenever the event is emitted
+   * @param {ModalOpenedDelegate} callback - The callback to be executed whenever the event is emitted
    */
   onModalOpened(callback: ModalOpenedDelegate): void {
     // Register the event handler
@@ -95,7 +95,7 @@ export class ModalApi {
 
   /**
    * Unregisters a modal opened an event handler.
-   * @param {ModalOpenedDelegate} callback The callback to stop being called whenever the event is emitted
+   * @param {ModalOpenedDelegate} callback - The callback to stop being called whenever the event is emitted
    */
   offModalOpened(callback: ModalOpenedDelegate): void {
     // Unregister the event handler
@@ -104,7 +104,7 @@ export class ModalApi {
 
   /**
    * Emits an event to all handlers.
-   * @param {ModalEvent} event The event to emit
+   * @param {ModalEvent} event - The event to emit
    * @private
    */
   #emitModalClosed(event: ModalEvent): void {
@@ -114,7 +114,7 @@ export class ModalApi {
 
   /**
    * Registers a modal closed event handler.
-   * @param {ModalClosedDelegate} callback The callback to be executed whenever the event is emitted
+   * @param {ModalClosedDelegate} callback - The callback to be executed whenever the event is emitted
    */
   onModalClosed(callback: ModalClosedDelegate): void {
     // Register the event handler
@@ -123,7 +123,7 @@ export class ModalApi {
 
   /**
    * Unregisters a modal closed event handler.
-   * @param {ModalClosedDelegate} callback The callback to stop being called whenever the event is emitted
+   * @param {ModalClosedDelegate} callback - The callback to stop being called whenever the event is emitted
    */
   offModalClosed(callback: ModalClosedDelegate): void {
     // Unregister the event handler

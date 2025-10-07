@@ -659,13 +659,19 @@ export class WMS extends AbstractGeoViewRaster {
           if (!styleFound) layer.Style.push(parentStyle);
         });
       }
+
       if (parentLayer.CRS) {
         // eslint-disable-next-line no-param-reassign
         if (!layer.CRS) layer.CRS = [];
-        parentLayer.CRS.forEach((parentCRS) => {
-          const crsFound = layer.CRS.find((crsEntry) => crsEntry.Name === parentCRS.Name);
-          if (!crsFound) layer.CRS.push(parentCRS);
-        });
+
+        const layerCRSSet = new Set<string>(layer.CRS.map((crs) => (typeof crs === 'string' ? crs : crs.Name)));
+
+        for (const parentCRS of parentLayer.CRS) {
+          const parentCRSName = typeof parentCRS === 'string' ? parentCRS : parentCRS.Name;
+          if (!layerCRSSet.has(parentCRSName)) {
+            (layer.CRS as string[]).push(parentCRSName);
+          }
+        }
       }
     }
     if (layer?.Layer !== undefined) layer.Layer.forEach((subLayer) => this.#processMetadataInheritance(subLayer, layer));

@@ -148,7 +148,7 @@ export class Transform extends Interaction {
    * Gets the features being transformed.
    * @returns {Collection<Feature<Geometry>>} The features.
    */
-  public getFeatures(): Collection<Feature<Geometry>> {
+  getFeatures(): Collection<Feature<Geometry>> {
     return this.#ol_transform.features;
   }
 
@@ -156,7 +156,7 @@ export class Transform extends Interaction {
    * Sets the features to be transformed.
    * @param {Collection<Feature<Geometry>>} features - The features to transform.
    */
-  public setFeatures(features: Collection<Feature<Geometry>>): void {
+  setFeatures(features: Collection<Feature<Geometry>>): void {
     // Clear existing features
     this.#ol_transform.features.clear();
 
@@ -170,7 +170,7 @@ export class Transform extends Interaction {
    * Adds a feature to be transformed.
    * @param {Feature<Geometry>} feature - The feature to add.
    */
-  public addFeature(feature: Feature<Geometry>): void {
+  addFeature(feature: Feature<Geometry>): void {
     this.#ol_transform.features.push(feature);
   }
 
@@ -178,7 +178,7 @@ export class Transform extends Interaction {
    * Removes a feature from being transformed.
    * @param {Feature<Geometry>} feature - The feature to remove.
    */
-  public removeFeature(feature: Feature<Geometry>): void {
+  removeFeature(feature: Feature<Geometry>): void {
     this.#ol_transform.features.remove(feature);
   }
 
@@ -187,7 +187,7 @@ export class Transform extends Interaction {
    * @param {Feature<Geometry>} feature - The feature to check.
    * @returns {boolean} True if the feature is being transformed.
    */
-  public isFeatureBeingTransformed(feature: Feature<Geometry>): boolean {
+  isFeatureBeingTransformed(feature: Feature<Geometry>): boolean {
     return this.#ol_transform.isFeatureBeingTransformed(feature);
   }
 
@@ -195,7 +195,7 @@ export class Transform extends Interaction {
    * Gets the currently selected/transforming feature.
    * @returns {Feature<Geometry> | undefined} The selected feature.
    */
-  public getSelectedFeature(): Feature<Geometry> | undefined {
+  getSelectedFeature(): Feature<Geometry> | undefined {
     return this.#ol_transform.getSelectedFeature();
   }
 
@@ -203,7 +203,7 @@ export class Transform extends Interaction {
    * Checks if any transformation is currently active.
    * @returns {boolean} True if transformation is active.
    */
-  public isTransforming(): boolean {
+  isTransforming(): boolean {
     return this.#ol_transform.isTransforming();
   }
 
@@ -212,49 +212,49 @@ export class Transform extends Interaction {
    * @param {Feature<Geometry>} feature - The feature to select.
    * @param {boolean} clearHistory - If true, clears the previous history stack. Default is true.
    */
-  public selectFeature(feature: Feature<Geometry>, clearHistory: boolean = true): void {
+  selectFeature(feature: Feature<Geometry>, clearHistory: boolean = true): void {
     this.#ol_transform.selectFeature(feature, clearHistory);
   }
 
   /**
    * Clears the current selection.
    */
-  public clearSelection(): void {
+  clearSelection(): void {
     this.#ol_transform.clearSelection();
   }
 
   /**
    * Displays the text editor for the selected feature
    */
-  public showTextEditor(): void {
+  showTextEditor(): void {
     this.#ol_transform.showTextEditor();
   }
 
   /**
    * Undo the last action
    */
-  public undo(callback?: () => void): boolean {
+  undo(callback?: () => void): boolean {
     return this.#ol_transform.undo(callback);
   }
 
   /**
    * Redo the last action
    */
-  public redo(callback?: () => void): boolean {
+  redo(callback?: () => void): boolean {
     return this.#ol_transform.redo(callback);
   }
 
   /**
    * Checks if undo is possible
    */
-  public canUndo(): boolean {
+  canUndo(): boolean {
     return this.#ol_transform.canUndo();
   }
 
   /**
    * Checks if redo is possible
    */
-  public canRedo(): boolean {
+  canRedo(): boolean {
     return this.#ol_transform.canRedo();
   }
 
