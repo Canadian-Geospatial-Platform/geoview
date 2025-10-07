@@ -1,3 +1,22 @@
+/*
+Export Process Overview:
+- Modal displays preview and handles user input (title, format, page size, etc.)
+- Canvas layout (createCanvasMapUrls) generates raster images for preview/export
+- PDF layout (createPDFMapUrl) generates vector PDFs for export only
+- Both call utilities>getMapInfo for map preparation and legend processing
+
+Key Processing Steps:
+- getMapInfo captures map canvas at 300DPI, extracts scale/north arrow, processes legend data
+- Map rotation handled by canvas transforms during capture
+- Legend items filtered by visibility and flattened into hierarchy with height estimates
+- Footer space reserved based on disclaimer/attribution text length estimates
+
+Legend Distribution Logic:
+- Distributes parent+child groups into columns based on available space
+- Groups that don't fit move to overflow page
+- Maintains vector quality until final rasterization (canvas) or keeps vectors (PDF)
+*/
+
 import { ChangeEvent, RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
@@ -99,12 +118,14 @@ export default function ExportModal(): JSX.Element {
   const fileExportDefaultPrefixName = t('exportModal.fileExportDefaultPrefixName');
 
   const handleCloseModal = useCallback(() => {
+    logger.logTraceUseCallback('EXPORT-MODAL - handleCloseModal');
     setActiveAppBarTab('legend', false, false);
     disableFocusTrap();
   }, [setActiveAppBarTab, disableFocusTrap]);
 
   // Generate preview of PDF
   const generatePreview = useCallback(async () => {
+    logger.logTraceUseCallback('EXPORT-MODAL - generatePreview Callback');
     try {
       setIsMapLoading(true);
       const disclaimer = t('mapctrl.disclaimer.message');
@@ -121,6 +142,7 @@ export default function ExportModal(): JSX.Element {
 
   // Export the requested file
   const performExport = useCallback(async () => {
+    logger.logTraceUseCallback('EXPORT-MODAL - performExport');
     try {
       setIsMapExporting(true);
       const disclaimer = t('mapctrl.disclaimer.message');
@@ -170,6 +192,7 @@ export default function ExportModal(): JSX.Element {
   ]);
 
   useEffect(() => {
+    logger.logTraceUseEffect('EXPORT-MODAL - generatePreview useEffect');
     if (activeModalId !== 'export') return;
 
     const overviewMap = mapElement.getElementsByClassName('ol-overviewmap')[0] as HTMLDivElement;
@@ -186,6 +209,7 @@ export default function ExportModal(): JSX.Element {
   }, [activeModalId, generatePreview, mapElement]);
 
   const handleExport = useCallback(() => {
+    logger.logTraceUseCallback('EXPORT-MODAL - handleExport');
     performExport().catch((error) => logger.logError(error));
   }, [performExport]);
 
@@ -195,11 +219,13 @@ export default function ExportModal(): JSX.Element {
   };
 
   const handleFormatMenuClose = useCallback(() => {
+    logger.logTraceUseCallback('EXPORT-MODAL - handleFormatMenuClose');
     setFormatMenuOpen(false);
   }, []);
 
   const handleSelectFormat = useCallback(
     (format: FileFormat) => {
+      logger.logTraceUseCallback('EXPORT-MODAL - handleSelectFormat');
       setExportFormat(format);
       if (format === 'pdf') {
         setExportMapResolution(300);
@@ -215,11 +241,13 @@ export default function ExportModal(): JSX.Element {
   };
 
   const handleMenuClose = useCallback(() => {
+    logger.logTraceUseCallback('EXPORT-MODAL - handleMenuClose');
     setDpiMenuOpen(false);
   }, []);
 
   const handleSelectDpi = useCallback(
     (dpi: number) => {
+      logger.logTraceUseCallback('EXPORT-MODAL - handleSelectDpi');
       setExportMapResolution(dpi);
       handleMenuClose();
     },
@@ -232,6 +260,7 @@ export default function ExportModal(): JSX.Element {
   };
 
   const handlePageSizeMenuClose = useCallback(() => {
+    logger.logTraceUseCallback('EXPORT-MODAL - handlePageSizeMenuClose');
     setPageSizeMenuOpen(false);
   }, []);
 
@@ -249,11 +278,13 @@ export default function ExportModal(): JSX.Element {
   };
 
   const handleQualityMenuClose = useCallback(() => {
+    logger.logTraceUseCallback('EXPORT-MODAL - handleQualityMenuClose');
     setQualityMenuOpen(false);
   }, []);
 
   const handleSelectQuality = useCallback(
     (quality: number) => {
+      logger.logTraceUseCallback('EXPORT-MODAL - handleSelectQuality');
       setJpegQuality(quality);
       handleQualityMenuClose();
     },

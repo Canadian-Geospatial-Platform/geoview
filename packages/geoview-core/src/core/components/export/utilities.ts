@@ -14,6 +14,8 @@ import { logger } from '@/core/utils/logger';
 import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 
+import { SHARED_STYLES } from './layout-styles';
+
 // GV Buffer polyfill for react-pdf
 if (typeof window !== 'undefined') {
   (window as typeof globalThis).Buffer = Buffer;
@@ -82,30 +84,37 @@ const MAP_IMAGE_DIMENSIONS = {
   },
 };
 
-// Estimate item heights (rough approximation)
+/**
+ * Estimate item heights (rough approximation)
+ * @param {FlattenedLegendItem} item - The item to get the estimate height for
+ * @returns {number} The estimated height
+ */
 const estimateItemHeight = (item: FlattenedLegendItem): number => {
   switch (item.type) {
     case 'layer':
-      return 20;
+      return SHARED_STYLES.layerFontSize + SHARED_STYLES.layerMarginBottom + SHARED_STYLES.layerMarginTop / 2; // Average marginTop (0-8px)
     case 'child':
-      return 15;
+      return SHARED_STYLES.childFontSize + SHARED_STYLES.childMarginBottom + SHARED_STYLES.childMarginTop;
     case 'wms':
-      return 100; // WMS images are typically larger
+      return SHARED_STYLES.wmsImageMaxHeight + SHARED_STYLES.wmsMarginBottom;
     case 'time':
-      return 12;
+      return SHARED_STYLES.timeFontSize + SHARED_STYLES.timeMarginBottom + 3; // Line-height spacing
     case 'item':
-      return 10;
+      return SHARED_STYLES.itemFontSize + SHARED_STYLES.itemMarginBottom + 2; // Line-height spacing
     default:
-      return 10;
+      return SHARED_STYLES.itemFontSize + SHARED_STYLES.itemMarginBottom + 2;
   }
 };
 
 /**
  * Estimate footer height based on content
+ * @param {string} disclaimer - The disclaimer text
+ * @param {string[]} attributions - The array of attribution texts
+ * @returns {number} The estimated height of the footer
  */
 const estimateFooterHeight = (disclaimer: string, attributions: string[]): number => {
-  const baseLineHeight = 12; // 8px font + 4px spacing
-  const marginBottom = 5; // disclaimer margin
+  const baseLineHeight = SHARED_STYLES.footerFontSize + 4; // 8px font + 4px spacing
+  const marginBottom = SHARED_STYLES.footerMarginBottom; // disclaimer margin
 
   // Estimate disclaimer lines (assuming ~80 chars per line at font size 8)
   const disclaimerLines = disclaimer ? Math.ceil(disclaimer.length / 80) : 0;
@@ -114,14 +123,14 @@ const estimateFooterHeight = (disclaimer: string, attributions: string[]): numbe
   // Estimate attribution lines
   const attributionHeight = attributions.reduce((total, attr) => {
     const lines = Math.ceil(attr.length / 80);
-    return total + lines * baseLineHeight + 2; // 2px margin per attribution
+    return total + lines * baseLineHeight + SHARED_STYLES.footerItemMarginBottom;
   }, 0);
 
   // Date line
   const dateHeight = baseLineHeight;
 
   // Add padding and margins
-  const totalHeight = disclaimerHeight + attributionHeight + dateHeight + 20; // 20px for margins/padding
+  const totalHeight = disclaimerHeight + attributionHeight + dateHeight + SHARED_STYLES.footerBottom; // 20px for margins/padding
 
   return Math.max(totalHeight, 60); // Minimum 60px
 };
@@ -228,14 +237,18 @@ export const processLegendLayers = (
  * Group items by their root layer and distribute in the columns
  * @param {FlattenedLegendItem[]} items - The flattened list of legend items to be placed in the legend
  * @param {number} numColumns - The maximum number of columns that can be used
+ * @param {number} maxHeight - The maximum height available on the rest of the page
+ * @param {string} disclaimer - The disclaimer text to be displayed in the footer
+ * @param {string[]} attributions - The attributions to be displayed in the footer
  * @returns {FlattenedLegendItem[][]} The flattened legend items distributed between the columns
  */
 export const distributeIntoColumns = (
   items: FlattenedLegendItem[],
   numColumns: number,
-  maxHeight: number,
+  maxLegendHeight: number,
   disclaimer: string,
-  attributions: string[]
+  attributions: string[],
+  exportTitle?: string
 ): { fittedColumns: FlattenedLegendItem[][]; overflowItems: FlattenedLegendItem[] } => {
   if (!items || items.length === 0) return { fittedColumns: Array(numColumns).fill([]), overflowItems: [] };
 
@@ -263,7 +276,8 @@ export const distributeIntoColumns = (
 
   // Reserve space for footer (approximately 60px)
   const footerReservedSpace = estimateFooterHeight(disclaimer, attributions);
-  const adjustedMaxHeight = maxHeight - footerReservedSpace;
+  const titleReservedSpace = exportTitle && exportTitle.trim() ? SHARED_STYLES.titleFontSize + SHARED_STYLES.titleMarginBottom : 0;
+  const adjustedMaxHeight = maxLegendHeight - footerReservedSpace - titleReservedSpace;
 
   // Distribute groups strictly - no splitting allowed
   groups.forEach((group) => {
@@ -293,12 +307,19 @@ export const distributeIntoColumns = (
 };
 
 /**
- * Generate the PDF export for the map
+ * Gathers information about the map for sizing and creates the map image url for placement in the layout
  * @param {string} mapId - The map ID
  * @param {TypeValidPageSizes} pageSize - The page size for aspect ratio
+ * @param {string} disclaimer - The disclaimer text
+ * @param {string} title - The title text
  * @returns {TypeMapInfoResult} The map image data URL and browser canvas size
  */
-export async function getMapInfo(mapId: string, pageSize: TypeValidPageSizes, disclaimer: string): Promise<TypeMapInfoResult> {
+export async function getMapInfo(
+  mapId: string,
+  pageSize: TypeValidPageSizes,
+  disclaimer: string,
+  title: string
+): Promise<TypeMapInfoResult> {
   // Get all needed data from store state
   const mapElement = AppEventProcessor.getGeoviewHTMLElement(mapId);
   const mapState = MapEventProcessor.getMapStateForExportLayout(mapId);
@@ -426,7 +447,8 @@ export async function getMapInfo(mapId: string, pageSize: TypeValidPageSizes, di
     config.legendColumns,
     config.maxLegendHeight,
     disclaimer,
-    attribution
+    attribution,
+    title
   );
 
   let fittedOverflowItems;

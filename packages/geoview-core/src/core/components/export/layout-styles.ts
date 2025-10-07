@@ -4,7 +4,8 @@ const COLORS = {
   mediumGrey: '#757575',
   darkGrey: '#424242',
 };
-const SHARED_STYLES = {
+
+export const SHARED_STYLES = {
   fontFamily: 'Helvetica',
 
   // Layout dimensions
@@ -54,7 +55,7 @@ const SHARED_STYLES = {
   legendPaddingLeft: 2,
 
   // WMS
-  wmsImageWidth: 60,
+  wmsImageWidth: 80,
   wmsImageMaxHeight: 100,
 
   // Item icons

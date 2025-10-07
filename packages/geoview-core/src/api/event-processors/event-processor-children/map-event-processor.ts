@@ -859,6 +859,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
     });
   }
 
+  /**
+   * A method for refreshing all the layers in the map and waiting for them to reload
+   * @param {string} mapId - The Map ID
+   * @param {number} maxWait - The max wait time in ms
+   * @returns {Promise<void>} - A promise that resolves when all layers are loaded or max wait time reached
+   */
   static refreshAllMapLayersAndWait(mapId: string, maxWait: number = 10000): Promise<void> {
     const mapViewer = this.getMapViewer(mapId);
     mapViewer.layer.refreshLayers();
