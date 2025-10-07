@@ -1,0 +1,150 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": false
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "wmsLYR1-spatiotemporel",
+        "geoviewLayerName": "Spatiotemporel",
+        "metadataAccessPath": "https://geo.weather.gc.ca/geomet",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "RADAR_1KM_RSNO",
+            "layerName": "Test Spatiotemporel",
+            "source": {
+              "wmsStyle": "Radar-Snow_14colors"
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "geojsonLYR5",
+        "geoviewLayerName": "GeoJSON Sample",
+        "metadataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata.meta",
+        "geoviewLayerType": "GeoJSON",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "polygons.json",
+            "layerName": "Polygons"
+          },
+          {
+            "layerId": "lines.json",
+            "layerName": "Lines"
+          },
+          {
+            "entryType": "group",
+            "layerId": "point-feature-group",
+            "layerName": "Points",
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "icon_points.json",
+                "layerName": "Icons"
+              },
+              {
+                "layerId": "points.json",
+                "layerName": "Points"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "theme": "geo.ca",
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "legend",
+        "layers",
+        "details",
+        "geochart"
+      ]
+    },
+    "selectedTab": "geochart"
+  },
+  "corePackages": [],
+  "corePackagesConfig": [
+    {
+      "geochart": {
+        "charts": [
+          {
+            "layers": [
+              {
+                "layerId": "wmsLYR1-spatiotemporel/RADAR_1KM_RSNO",
+                "propertyValue": "OBJECTID",
+                "propertyDisplay": "Location_Emplacement"
+              }
+            ],
+            "chart": "line",
+            "title": "Line Chart with OGC Features",
+            "query": {
+              "type": "ogcAPIFeatures",
+              "url": "https://pygeoapi-stage.cdtk.geogc.ca/collections/ft::seismic_reflection:seismic_reflection_imagery",
+              "queryOptions": {
+                "whereClauses": [
+                  {
+                    "field": "YEAR",
+                    "valueFrom": "YEAR"
+                  }
+                ]
+              }
+            },
+            "geochart": {
+              "xAxis": {
+                "type": "time",
+                "timeFormat": "MMM d, yyyy, HH:mm",
+                "property": "DATE_START"
+              },
+              "yAxis": {
+                "property": "YEAR"
+              }
+            },
+            "ui": {
+              "download": true
+            },
+            "datasources": [
+              {
+                "display": "1996",
+                "sourceItem": {
+                  "YEAR": 1996
+                }
+              },
+              {
+                "display": "1997",
+                "sourceItem": {
+                  "YEAR": 1997
+                }
+              },
+              {
+                "display": "1998",
+                "sourceItem": {
+                  "YEAR": 1998
+                }
+              },
+              {
+                "display": "1999",
+                "sourceItem": {
+                  "YEAR": 1999
+                }
+              },
+              {
+                "display": "2000",
+                "sourceItem": {
+                  "YEAR": 2000
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
