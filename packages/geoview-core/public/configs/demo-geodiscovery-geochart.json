@@ -114,7 +114,6 @@
                 "display": true
               },
               "stepsSwitcher": true,
-              "resetStates": true,
               "description": "Airborne Radionuclide Concentrations",
               "download": true
             }
@@ -169,7 +168,6 @@
                 "display": true
               },
               "stepsSwitcher": true,
-              "resetStates": true,
               "description": "Airborne Radionuclide Concentrations",
               "download": true
             }

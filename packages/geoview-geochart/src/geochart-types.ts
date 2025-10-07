@@ -11,6 +11,13 @@ export type GeoViewGeoChartConfigLayer = {
 };
 
 /**
+ * Definition of options for all charts.
+ */
+export type GeoViewGeoChartRootConfig = {
+  charts: GeoViewGeoChartConfig[];
+};
+
+/**
  * Definition of options for each type of chart used for by the plugin.
  */
 // GV This type is the geoview-geochart equivalent of the homonym 'GeoViewGeoChartConfig' in geoview-core\utils\reader\uuid-config-reader.ts

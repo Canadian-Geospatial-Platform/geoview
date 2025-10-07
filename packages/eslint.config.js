@@ -10,9 +10,6 @@ import importPlugin from 'eslint-plugin-import';
 export default [
   js.configs.recommended,
   {
-    ignores: ['node_modules/', 'dist/', 'eslint.config.js'],
-  },
-  {
     files: ['**/*.{js,jsx,ts,tsx}'],
     languageOptions: {
       parser: tsparser,
@@ -95,8 +92,7 @@ export default [
       '@typescript-eslint/no-useless-constructor': 'error',
       'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': 'warn',
-      '@typescript-eslint/no-unnecessary-type-assertion': 'off',
-      '@typescript-eslint/explicit-function-return-type': 'off',
+      '@typescript-eslint/no-unnecessary-type-assertion': 'warn',
       'no-use-before-define': 'off',
       '@typescript-eslint/no-use-before-define': 'error',
       'no-shadow': 'off',
@@ -118,6 +114,12 @@ export default [
       '@typescript-eslint/no-misused-promises': 'error',
       '@typescript-eslint/no-unsafe-function-type': 'error',
       '@typescript-eslint/no-floating-promises': 'error',
+      '@typescript-eslint/explicit-function-return-type': [
+        1,
+        {
+          allowExpressions: true,
+        },
+      ],
 
       // React Hooks rules
       'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
@@ -154,6 +156,7 @@ export default [
       'prefer-destructuring': ['error', { 'array': false, 'object': true }],
       'prefer-const': 'error',
       'no-console': 'error',
+      'no-alert': 'error',
       'no-cond-assign': ['error', 'always'],
       'no-loop-func': 'error',
       'no-bitwise': 'error',
@@ -185,20 +188,7 @@ export default [
 
     },
   },
-  // TypeScript specific overrides
-  {
-    files: ['*.ts', '*.mts', '*.cts', '*.tsx'],
-    rules: {
-      '@typescript-eslint/no-floating-promises': 1, // Warning
-      '@typescript-eslint/no-misused-promises': 1, // Warning
-      '@typescript-eslint/explicit-function-return-type': [
-        1,
-        {
-          allowExpressions: true,
-        },
-      ],
-    },
-  },
+
   // Webpack config files
   {
     files: ['webpack.*.js'],
@@ -210,4 +200,11 @@ export default [
       },
     },
   },
+
+  // Ignores
+  {
+    ignores: [
+      'node_modules/', 'dist/', 'eslint.config.js'
+    ]
+  }
 ];

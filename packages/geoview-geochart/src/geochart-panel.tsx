@@ -22,7 +22,7 @@ import { logger } from 'geoview-core/core/utils/logger';
 import { TABS } from 'geoview-core/core/utils/constant';
 
 import { GeoChart } from './geochart';
-import { convertGeoViewGeoChartConfigFromCore, GeoViewGeoChartConfig } from './geochart-types';
+import { convertGeoViewGeoChartConfigFromCore, GeoViewGeoChartRootConfig } from './geochart-types';
 
 interface GeoChartPanelProps {
   mapId: string;
@@ -138,7 +138,10 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   const memoConfigObj = useMemo(() => {
     // Memoize a better config object using the geoview-geochart type-equivalent instead of the store's
     return Object.fromEntries(
-      Object.entries(configObj).map(([layerPath, layerChartConfig]) => [layerPath, convertGeoViewGeoChartConfigFromCore(layerChartConfig)])
+      Object.entries(configObj).map(([layerPath, layerChartConfig]) => [
+        layerPath,
+        { charts: [convertGeoViewGeoChartConfigFromCore(layerChartConfig)] } as GeoViewGeoChartRootConfig,
+      ])
     );
   }, [configObj]);
 
@@ -228,17 +231,17 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
 
   /**
    * Renders a single GeoChart component
-   * @param {GeoViewGeoChartConfig} chartConfig - The Chart Config to assign the the GeoChart
+   * @param {GeoViewGeoChartRootConfig} chartsConfig - The Charts Root Config to assign the the GeoChart
    * @param {CSSProperties} sx - Styling to apply (basically if the GeoChart should be visible or not depending on the selected layer)
    * @returns {JSX.Element}
    */
-  const renderChart = (chartConfig: GeoViewGeoChartConfig, sx: React.CSSProperties, key: string): JSX.Element => {
+  const renderChart = (chartsConfig: GeoViewGeoChartRootConfig, sx: React.CSSProperties, key: string): JSX.Element => {
     return (
       <GeoChart
         sx={sx}
         key={key}
         mapId={mapId}
-        config={{ charts: [chartConfig] }}
+        config={chartsConfig}
         layers={storeArrayOfLayerData}
         schemaValidator={schemaValidator}
         provideCallbackRedraw={(theCallbackRedraw) => handleProvideCallbackRedraw(key, theCallbackRedraw)}

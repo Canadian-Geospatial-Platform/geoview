@@ -234,6 +234,9 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    * @private
    */
   static #propagateArrayDataToStore(mapId: string, layerDataArray: TypeGeochartResultSetEntry[]): void {
+    // TODO: Performance - Take a look at how the propagation to the array like that retriggers every component listening on the layerDataArray for all layer paths.
+    // TO.DOCONT: For example the GeoChart loads the records twice in the Chart for each map click, even if it was another layerPath result that triggered the layerDataArray hook?
+
     // Get the geochart state which is only initialized if the Geochart Plugin exists.
     const geochartState = this.getGeochartState(mapId);
 

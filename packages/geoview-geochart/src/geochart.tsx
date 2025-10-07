@@ -6,7 +6,7 @@ import { TypeWindow } from 'geoview-core/core/types/global-types';
 import { TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';
 import { logger } from 'geoview-core/core/utils/logger';
 import { ConfigBaseClass } from 'geoview-core/api/config/validation-classes/config-base-class';
-import { findLayerDataAndConfigFromQueryResults, loadDatasources } from './geochart-parsing';
+import { GeoChartParsing } from './geochart-parsing';
 import { PluginGeoChartConfig, GeoViewGeoChartConfig, GeoViewGeoChartConfigLayer } from './geochart-types';
 
 /**
@@ -112,13 +112,13 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
       GeoViewGeoChartConfigLayer | undefined,
       ConfigBaseClass | undefined,
       TypeFeatureInfoEntry[] | undefined,
-    ] = findLayerDataAndConfigFromQueryResults(config, MapEventProcessor.getMapViewerLayerAPI(mapId), layers);
+    ] = GeoChartParsing.findLayerDataAndConfigFromQueryResults(config, MapEventProcessor.getMapViewerLayerAPI(mapId), layers);
 
     // If found a chart for the layer
     let chartConfig;
     if (foundData && foundLayerEntry) {
       // Check and attach datasources to the Chart config
-      chartConfig = loadDatasources(foundConfigChart!, foundConfigChartLyr!, foundData);
+      chartConfig = GeoChartParsing.loadDatasources(foundConfigChart!, foundConfigChartLyr!, foundData);
 
       // Set the title
       chartConfig.title = foundLayerEntry.getLayerName();

@@ -201,7 +201,7 @@ function ModalUI(props: DialogPropsExtend): JSX.Element {
    */
   const createdModal = (modal: TypeModalProps): JSX.Element => {
     // eslint-disable-next-line react/no-unstable-nested-components
-    const CustomDialog = () => (
+    const CustomDialog = (): JSX.Element => (
       <AnimatedDialog
         open={open}
         onClose={modal.close}

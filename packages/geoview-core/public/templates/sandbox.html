@@ -199,9 +199,9 @@
           // get config and test if JSON is valid
           const configArea = document.getElementById('configGeoview');
           const regexExp = /(?<!\\)'/g
-          const configJSON = JSON.parse(configArea.value.replaceAll(regexExp, `"`).replaceAll('\\', '\\\\'));
+          const configJSON = JSON.parse(configArea.value.replace(/\\/g, '\\\\'));
 
-          const validConfig = cgpv.api.config.validateMapConfig(document.getElementById('configGeoview').value.replaceAll(regexExp, '"'), 'en');
+          const validConfig = cgpv.api.config.validateMapConfig(configJSON, 'en');
 
           // set class and message
           message.classList.add('config-json-valid');
@@ -248,7 +248,8 @@
 
         // create map
         try {
-          const mapViewer = await cgpv.api.createMapFromConfig('map1', document.getElementById('configGeoview').value.replaceAll(regexExp, '"'));
+          const configArea = document.getElementById('configGeoview');
+          const mapViewer = await cgpv.api.createMapFromConfig('map1', configArea.value.replace(/\\/g, '\\\\'));
           listenToLegendLayerSetChanges('sandboxMap-state', mapViewer);
         } catch (error) {
           console.error('Failed to create map from config', error);
@@ -407,7 +408,6 @@
                                 'display': true
                               },
                               'stepsSwitcher': true,
-                              'resetStates': true,
                               'description': 'This is a description text',
                               'download': true
                           }

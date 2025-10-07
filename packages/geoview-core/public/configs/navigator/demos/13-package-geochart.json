@@ -134,7 +134,11 @@
               "xAxis": {
                 "type": "time",
                 "property": "CollectionStart_DebutPrelevement",
-                "label": "Collected date"
+                "label": "Collected date",
+                "timeFormat": {
+                  "en": "MMM dd, yyyy",
+                  "fr": "d MMM yyyy"
+                }
               },
               "yAxis": {
                 "type": "linear",
@@ -156,7 +160,7 @@
                 "display": true
               },
               "stepsSwitcher": true,
-              "resetStates": true,
+              "scalesSwitcher": ["linear", "logarithmic"],
               "description": "This is a description text",
               "download": true
             }
@@ -207,7 +211,6 @@
                 "display": true
               },
               "stepsSwitcher": true,
-              "resetStates": true,
               "description": "This is an ArcGIS Online layer chart",
               "download": true
             }
@@ -234,7 +237,6 @@
               }
             },
             "ui": {
-              "resetStates": true,
               "download": true
             }
           },
@@ -256,9 +258,6 @@
             "category": {
               "property": "location",
               "usePalette": false
-            },
-            "ui": {
-              "resetStates": true
             },
             "datasources": [
               {
@@ -351,9 +350,6 @@
             "category": {
               "property": "location",
               "usePalette": false
-            },
-            "ui": {
-              "resetStates": true
             },
             "datasources": [
               {
