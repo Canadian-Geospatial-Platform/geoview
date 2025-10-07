@@ -1,5 +1,4 @@
-import React from 'react';
-import ReactDOMServer from 'react-dom/server';
+import { renderToString } from 'react-dom/server';
 import * as html2canvas from '@html2canvas/html2canvas';
 
 import { DateMgt } from '@/core/utils/date-mgt';
@@ -28,8 +27,10 @@ interface CanvasDocumentProps {
 
 /**
  * Render legend columns for canvas (HTML)
+ * @param {FlattenedLegendItem[][]} columns - The flattened columns to be placed into the legend
+ * @returns {JSX.Element[]} - The rendered legend columns
  */
-const renderCanvasLegendColumns = (columns: FlattenedLegendItem[][]) => {
+const renderCanvasLegendColumns = (columns: FlattenedLegendItem[][]): JSX.Element[] => {
   const actualColumnCount = columns.filter((column) => column.length > 0).length;
 
   return columns
@@ -91,6 +92,11 @@ const renderCanvasLegendColumns = (columns: FlattenedLegendItem[][]) => {
     ));
 };
 
+/**
+ * The Canvas that is created for the map export
+ * @param {CanvasDocumentProps} props - The Canvas Document properties
+ * @returns {JSX.Element} The resulting html map
+ */
 export function CanvasDocument({
   mapDataUrl,
   exportTitle,
@@ -163,16 +169,22 @@ export function CanvasDocument({
   );
 }
 
+/**
+ * Creates the HTML map and converts to canvas and then image for the export
+ * @param {string} mapId - The map ID
+ * @param {FileExportProps} props - The file export props
+ * @returns {Promise<string[]>} A string of URLs for the images (Map and overflow pages)
+ */
 export async function createCanvasMapUrls(mapId: string, props: FileExportProps): Promise<string[]> {
   const results = [];
   const { exportTitle, disclaimer, pageSize, dpi, jpegQuality, format } = props;
 
   // Get map info
-  const mapInfo = await getMapInfo(mapId, pageSize, disclaimer);
+  const mapInfo = await getMapInfo(mapId, pageSize, disclaimer, exportTitle);
   const { fittedOverflowItems } = mapInfo;
 
   // Create main page HTML
-  const mainPageHtml = ReactDOMServer.renderToString(
+  const mainPageHtml = renderToString(
     <CanvasDocument
       {...mapInfo}
       exportTitle={exportTitle}
@@ -194,7 +206,7 @@ export async function createCanvasMapUrls(mapId: string, props: FileExportProps)
   if (fittedOverflowItems && fittedOverflowItems.filter((column) => column.length > 0).length > 0) {
     const { canvasWidth, canvasHeight } = PAGE_CONFIGS[pageSize];
     // Create overflow page (just legend)
-    const overflowHtml = ReactDOMServer.renderToString(
+    const overflowHtml = renderToString(
       <div style={CANVAS_STYLES.overflowPage(canvasWidth, canvasHeight)}>
         <div style={CANVAS_STYLES.overflowContainer}>{renderCanvasLegendColumns(fittedOverflowItems)}</div>
       </div>

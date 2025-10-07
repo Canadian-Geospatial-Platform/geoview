@@ -28,8 +28,10 @@ interface ExportDocumentProps {
 
 /**
  * Render the legend columns with dynamic width based on content
+ * @param {FlattenedLegendItem[][]} columns - The columns / distributed items to be placed in the legend
+ * @returns {JSX.Element[]} The rendered legend columns
  */
-const renderLegendColumns = (columns: FlattenedLegendItem[][]) => {
+const renderLegendColumns = (columns: FlattenedLegendItem[][]): JSX.Element[] => {
   const actualColumnCount = columns.filter((column) => column.length > 0).length;
 
   return columns
@@ -92,6 +94,11 @@ const renderLegendColumns = (columns: FlattenedLegendItem[][]) => {
     ));
 };
 
+/**
+ * The pdf document that is created for the export
+ * @param {ExportDocumentProps} props - The props to be used to create the pdf document
+ * @returns {JSX.Element} The rendered pdf document
+ */
 export function ExportDocument({
   mapDataUrl,
   exportTitle,
@@ -197,11 +204,17 @@ export function ExportDocument({
   );
 }
 
+/**
+ * Creates the PDF map and returns the url for download
+ * @param {string} mapId - THe map ID
+ * @param {FileExportProps} params - The file export props
+ * @returns {Promise<string>} The URL for the PDF map
+ */
 export async function createPDFMapUrl(mapId: string, params: FileExportProps): Promise<string> {
   const { exportTitle, disclaimer, pageSize } = params;
 
   // Get map info
-  const mapInfo = await getMapInfo(mapId, pageSize, disclaimer);
+  const mapInfo = await getMapInfo(mapId, pageSize, disclaimer, exportTitle);
 
   // Create PDF
   const blob = await pdf(
