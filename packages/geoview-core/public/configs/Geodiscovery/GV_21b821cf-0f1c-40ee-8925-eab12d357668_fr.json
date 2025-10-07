@@ -1,0 +1,114 @@
+{
+    "map": {
+        "interaction": "dynamic",
+        "viewSettings": {
+            "projection": 3978
+        },
+        "basemapOptions": {
+            "basemapId": "transport",
+            "shaded": false,
+            "labeled": false
+        },
+        "listOfGeoviewLayerConfig": [
+            {
+                "geoviewLayerId": "Radioactivité de l\u0027air",
+                "geoviewLayerName": "Radioactivité de l\u0027air",
+                "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_fr/MapServer",
+                "geoviewLayerType": "esriDynamic",
+                "listOfLayerEntryConfig": [
+                    {
+                        "layerId": "1"
+                    }
+                ]
+            },
+            {  
+				"geoviewLayerId": "Périmètre de localisation des stations",
+				"geoviewLayerName": "Périmètre de localisation des stations",
+				"metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_fr/MapServer",
+				"geoviewLayerType": "esriDynamic",
+				"listOfLayerEntryConfig": [
+                   {
+						"layerId": "2"
+                   }
+				]
+			}
+        ]
+    },
+    "theme": "geo.ca",
+    "footerBar": {
+        "tabs": {
+            "core": [
+                "legend",
+                "layers",
+                "details",
+				"data-table",
+                "geochart"
+            ]
+        },
+        "selectedTab": "geochart"
+    },
+    "corePackages": [],
+    "corePackagesConfig": [
+        {
+            "geochart": {
+                "charts": [
+                    {
+                        "layers": [
+                            {
+                                "layerId": "Radioactivité de l\u0027air/1",
+                                "propertyValue": "OBJECTID",
+                                "propertyDisplay": "Location_Emplacement"
+                            }
+                        ],
+                        "chart": "line",
+                        "query": {
+                            "type": "esriRegular",
+                            "url": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_fr/MapServer/3",
+                            "queryOptions": {
+                                "whereClauses": [
+                                    {
+                                        "field": "Location_Emplacement",
+                                        "prefix": "\u0027",
+                                        "valueFrom": "Location_Emplacement",
+                                        "suffix": "\u0027"
+                                    }
+                                ],
+                                "orderByField": "CollectionStart_DebutPrelevement"
+                            }
+                        },
+                        "geochart": {
+                            "xAxis": {
+                                "type": "time",
+                                "property": "CollectionStart_DebutPrelevement",
+                                "label": "Date"
+                            },
+                            "yAxis": {
+                                "type": "linear",
+                                "property": "Activity_Activite_mBqm3",
+                                "label": "Concentration (mBq/m³)",
+                                "tooltipSuffix": "mBq/m³"
+                            },
+                            "borderWidth": 1
+                        },
+                        "category": {
+                            "property": "Radionuclide_Radionucleide",
+                            "usePalette": false
+                        },
+                        "ui": {
+                            "xSlider": {
+                                "display": true
+                            },
+                            "ySlider": {
+                                "display": true
+                            },
+                            "stepsSwitcher": true,
+                            "resetStates": true,
+                            "description": "",
+                            "download": true
+                        }
+                    }                    
+                ]
+            }
+        }
+    ]
+}

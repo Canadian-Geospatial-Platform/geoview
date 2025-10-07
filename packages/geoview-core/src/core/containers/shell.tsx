@@ -322,7 +322,7 @@ export function Shell(props: ShellProps): JSX.Element {
       >
         {t('keyboardnav.start')}
       </Link>
-      <FocusTrap open={activeTrapGeoView} disableAutoFocus>
+      <FocusTrap open={activeTrapGeoView}>
         <Box ref={shellRef} id={`shell-${mapViewer.mapId}`} sx={sxClasses.shell} className="geoview-shell" tabIndex={-1}>
           <Link
             id={`main-map-${mapViewer.mapId}`}

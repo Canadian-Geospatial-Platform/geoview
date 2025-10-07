@@ -1,0 +1,110 @@
+{
+    "map": {
+        "interaction": "dynamic",
+        "viewSettings": {
+            "projection": 3978
+        },
+        "basemapOptions": {
+            "basemapId": "transport",
+            "shaded": false,
+            "labeled": false
+        },
+        "listOfGeoviewLayerConfig": [
+            {
+                "geoviewLayerId": "fpsn_fr",
+                "geoviewLayerName": "Surveillance de la radioactivité environnementale en temps réel au Canada",
+                "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/fpsn_fr/MapServer",
+                "geoviewLayerType": "esriDynamic",
+                "listOfLayerEntryConfig": [
+                    {
+                        "layerId": "1"
+                    }
+                ]
+            },
+            {  
+				"geoviewLayerId": "perimetre_localisation_stations",
+				"geoviewLayerName": "Périmètre de localisation des stations",
+				"metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/fpsn_fr/MapServer",
+				"geoviewLayerType": "esriDynamic",
+				"listOfLayerEntryConfig": [
+                   {
+						"layerId": "2"
+                   }
+				]
+			}
+        ]
+    },
+    "theme": "geo.ca",
+    "footerBar": {
+        "tabs": {
+            "core": [
+                "legend",
+                "layers",
+                "details",
+				"data-table",
+                "geochart"
+            ]
+        },
+        "selectedTab": "geochart"
+    },
+    "corePackages": [],
+    "corePackagesConfig": [
+        {
+            "geochart": {
+                "charts": [
+                    {
+                        "layers": [
+                            {
+                                "layerId": "fpsn_fr/1",
+                                "propertyValue": "OBJECTID",
+                                "propertyDisplay": "nom_emplacement"
+                            }
+                        ],
+                        "chart": "line",
+                        "query": {
+                            "type": "esriRegular",
+                            "url": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/fpsn_fr/MapServer/3",
+                            "queryOptions": {
+                                "whereClauses": [
+                                    {
+                                        "field": "nom_emplacement",
+                                        "prefix": "\u0027",
+                                        "valueFrom": "nom_emplacement",
+                                        "suffix": "\u0027"
+                                    }
+                                ],
+                                "orderByField": "heure_fin"
+                            }
+                        },
+                        "geochart": {
+                            "xAxis": {
+                                "type": "time",
+                                "property": "heure_fin",
+                                "label": "Date"
+                            },
+                            "yAxis": {
+                                "type": "linear",
+                                "property": "valeur_nSvH",
+                                "label": "Débit de dose gamma (nSv/h)",
+                                "tooltipSuffix": "nSv/h"
+                            },
+                            "borderWidth": 1
+                        },
+                        "ui": {
+                            "xSlider": {
+                                "display": true
+                            },
+                            "ySlider": {
+                                "display": true
+                            },
+                            "stepsSwitcher": true,
+                            "resetStates": true,
+                            "description": "",
+                            "download": true
+                        }
+                    }                    
+                ]
+            }
+        }
+    ]
+}

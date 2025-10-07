@@ -272,7 +272,9 @@ export class API {
 
         if (mapId !== undefined) {
           const mapFocus = activeEl?.getAttribute('id') === `mapTargetElement-${mapId}`;
-          logger.logInfo(`Map ${mapId} focus and crosshair is enabled`, [mapFocus]);
+
+          // Only log if map is in focus, if not... too much logging
+          if (mapFocus) logger.logInfo(`Map ${mapId} focus and crosshair is enabled`, [mapFocus]);
           AppEventProcessor.setAppIsCrosshairActive(mapId, mapFocus);
         }
       }

@@ -117,6 +117,13 @@ function SliderUI(props: SliderProps): JSX.Element {
     }
   }, []);
 
+  useEffect(() => {
+    logger.logTraceUseEffect('UI.SLIDER - parent value', parentValue);
+
+    // Update it internally when the parent has updated the value
+    setValue(parentValue);
+  }, [parentValue]);
+
   // GV There is a bug with focus on slider element. When the arrow key is pressed, the event trigger value change
   // GV for the slider then the slider value is updated. This causes the slider to lose focus.
   // GV The solution is to manually focus the slider element when the arrow key is pressed.
@@ -213,20 +220,6 @@ function SliderUI(props: SliderProps): JSX.Element {
     }
   }, [checkOverlap, containerId]);
   useEventListener<Window>('resize', removeLabelOverlap, window);
-
-  useEffect(() => {
-    logger.logTraceUseEffect('UI.SLIDER - parent value', parentValue);
-
-    // Update it internally when the parent has updated the value
-    setValue(parentValue);
-  }, [parentValue]);
-
-  useEffect(() => {
-    logger.logTraceUseEffect('UI.SLIDER - focus when mount');
-
-    // Focus the slider when the component mounts
-    focusSlider();
-  }, [focusSlider]);
 
   // Add this new effect to handle slider value changes
   useLayoutEffect(() => {
