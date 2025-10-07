@@ -156,7 +156,7 @@
                 "display": true
               },
               "stepsSwitcher": true,
-              "resetStates": true,
+              "scalesSwitcher": ["linear", "logarithmic"],
               "description": "This is a description text",
               "download": true
             }
@@ -207,7 +207,6 @@
                 "display": true
               },
               "stepsSwitcher": true,
-              "resetStates": true,
               "description": "This is an ArcGIS Online layer chart",
               "download": true
             }
@@ -234,7 +233,6 @@
               }
             },
             "ui": {
-              "resetStates": true,
               "download": true
             }
           },
@@ -256,9 +254,6 @@
             "category": {
               "property": "location",
               "usePalette": false
-            },
-            "ui": {
-              "resetStates": true
             },
             "datasources": [
               {
@@ -351,9 +346,6 @@
             "category": {
               "property": "location",
               "usePalette": false
-            },
-            "ui": {
-              "resetStates": true
             },
             "datasources": [
               {
