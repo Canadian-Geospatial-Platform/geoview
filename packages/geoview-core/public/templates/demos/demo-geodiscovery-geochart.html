@@ -13,6 +13,84 @@
     <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
     <link rel="stylesheet" href="css/style.css" />
+        <style>
+      .actionButton {
+        padding: 5px;
+      }
+
+      .selector-container {
+        display: flex;
+        flex-direction: row;
+        margin: 10px;
+      }
+
+      .selector {
+        padding: 15px;
+      }
+
+      .editor {
+        display: inline-flex;
+        gap: 10px;
+        font-family: monospace;
+        line-height: 21px;
+        background: #282a3a;
+        border-radius: 2px;
+        padding: 20px 10px;
+        height: 600px;
+        overflow-y: auto;
+      }
+
+      .line-numbers {
+        width: 20px;
+        text-align: right;
+        height: 9999px;
+      }
+
+      .line-numbers span {
+        counter-increment: linenumber;
+      }
+
+      .line-numbers span::before {
+        content: counter(linenumber);
+        display: block;
+        color: #506882;
+      }
+
+      textarea {
+        height: 9999px;
+        line-height: 21px;
+        overflow-y: hidden;
+        padding: 0;
+        border: 0;
+        background: #282a3a;
+        color: #fff;
+        min-width: 500px;
+        outline: none;
+        resize: none;
+      }
+
+      select {
+        max-width: 96%;
+      }
+
+      @media screen and (max-width: 600px) {
+        .selector-container {
+          display: flex;
+          flex-direction: column;
+          width: 100%;
+        }
+        .selector-container p {
+          margin-bottom: 0px;
+        }
+        .selector {
+          padding: 8px;
+        }
+        textarea {
+          min-width: 96%;
+          max-width: 96%;
+        }
+      }
+    </style>
   </head>
 
   <body>
@@ -22,57 +100,102 @@
           <tr>
             <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
             <td class="header-title">
-              <h1><strong>GeoDiscovery Geochart Demo (EN/FR)</strong></h1>
+              <h1 id="top"><strong>GeoDiscovery Geochart Demo (EN/FR)</strong></h1>
             </td>
           </tr>
         </tbody>
       </table>
       </br>
       <a href="./demos.html">Main</a></br>
-      <a href="#HLCONF1">1. Radionuclide Releases - Nuclear Processing Facilities / Direct Discharge</a></br>
-      <a href="#HLCONF2">2. Radionuclide Releases - Nuclear Processing Facilities / Stack Emissions</a></br>
-      <a href="#HLCONF3">3. Radionuclide Releases - Uranium Mines and Mills / Direct Discharge</a></br>
-      <a href="#HLCONF4">4. Radionuclide Releases - Nuclear Power Plants / Stack Emissions</a></br>
-      <a href="#HLCONF5">5. Radionuclide Releases - Canadian Nuclear Laboratories / Direct Discharge</a></br>
-      <a href="#HLCONF6">6. Radionuclide Releases - Elliot Lake closed mine sites / Direct Discharge</a></br>
-      <a href="#HLCONF7">7. Radionuclide Releases - Nuclear Power Plants / Direct Discharge</a></br>
-      <a href="#HLCONF8">8. Radionuclide Releases - Canadian Nuclear Laboratories / Stack Emissions</a></br>
-      <a href="#HLCONF9">9. Regional Information and Monitoring Network</a></br>
-      <a href="#HLCONF10">10. The Canadian Radiological Monitoring Network - Strontium-90 in Milk</a></br>
-      <a href="#HLCONF11">11. The Canadian Radiological Monitoring Network - Airborne Radioactivity</a></br>
-      <a href="#HLCONF12">12. The Canadian Radiological Monitoring Network - Environmental Dosimetry</a></br>
-      <a href="#HLCONF13">13. The Canadian Radiological Monitoring Network - Tritium in Atmospheric Water Vapour</a></br>
-      <a href="#HLCONF14">14. The Canadian Radiological Monitoring Network - Gross Alpha / Beta in Drinking Water</a></br>
-      <a href="#HLCONF15">15. Real-time Environmental Radioactivity Monitoring in Canada</a></br>
     </div>
 
-    <div class="map-title-holder">
-      <h4 id="HLCONF1">Radionuclide Releases - Nuclear Processing Facilities / Direct Discharge</h4>
+     <div class="selector-container">
+      <p>Configuration to load:</p>
+      <div class="selector">
+        <select name="Config Loader" id="configLoader">
+          <option value="">--select--</option>
+          <option value="./configs/Geodiscovery/GV_0c25772d-da22-4ac1-b130-c1d97b935f6f_en.json">1a. Radionuclide Releases - Nuclear Processing Facilities / Direct Discharge - EN</option>
+          <option value="./configs/Geodiscovery/GV_0c25772d-da22-4ac1-b130-c1d97b935f6f_fr.json">1b. Radionuclide Releases - Nuclear Processing Facilities / Direct Discharge - FR</option>
+          <option value="./configs/Geodiscovery/GV_2ac52cb2-94b8-4b91-9419-cebdf535790a_en.json">2a. Radionuclide Releases - Nuclear Processing Facilities / Stack Emissions - EN</option>
+          <option value="./configs/Geodiscovery/GV_2ac52cb2-94b8-4b91-9419-cebdf535790a_fr.json">2b. Radionuclide Releases - Nuclear Processing Facilities / Stack Emissions - FR</option>
+          <option value="./configs/Geodiscovery/GV_3ac296d1-4a97-45ab-82c5-2a4f963cf4e6_en.json">3a. Radionuclide Releases - Uranium Mines and Mills / Direct Discharge - EN</option>
+          <option value="./configs/Geodiscovery/GV_3ac296d1-4a97-45ab-82c5-2a4f963cf4e6_fr.json">3b. Radionuclide Releases - Uranium Mines and Mills / Direct Discharge - FR</option>
+          <option value="./configs/Geodiscovery/GV_5d0d636a-f28a-4639-9d6a-a73a9f6ab2d6_en.json">4a. Radionuclide Releases - Nuclear Power Plants / Stack Emissions - EN</option>
+          <option value="./configs/Geodiscovery/GV_5d0d636a-f28a-4639-9d6a-a73a9f6ab2d6_fr.json">4b. Radionuclide Releases - Nuclear Power Plants / Stack Emissions - FR</option>
+          <option value="./configs/Geodiscovery/GV_108b3df4-f24f-4a75-868d-315c563d029c_en.json">5a. Radionuclide Releases - Canadian Nuclear Laboratories / Direct Discharge - EN</option>
+          <option value="./configs/Geodiscovery/GV_108b3df4-f24f-4a75-868d-315c563d029c_fr.json">5b. Radionuclide Releases - Canadian Nuclear Laboratories / Direct Discharge - FR</option>
+          <option value="./configs/Geodiscovery/GV_a8177faf-6cdd-4afd-83af-331248b3d168_en.json">6a. Radionuclide Releases - Elliot Lake closed mine sites / Direct Discharge - EN</option>
+          <option value="./configs/Geodiscovery/GV_a8177faf-6cdd-4afd-83af-331248b3d168_fr.json">6b. Radionuclide Releases - Elliot Lake closed mine sites / Direct Discharge - FR</option>
+          <option value="./configs/Geodiscovery/GV_c0f487b5-56b7-438d-8ccc-c13a38ab6f2e_en.json">7a. Radionuclide Releases - Nuclear Power Plants / Direct Discharge - EN</option>
+          <option value="./configs/Geodiscovery/GV_c0f487b5-56b7-438d-8ccc-c13a38ab6f2e_fr.json">7b. Radionuclide Releases - Nuclear Power Plants / Direct Discharge - FR</option>
+          <option value="./configs/Geodiscovery/GV_eaf01a95-a241-445e-b1a9-ff2256b59f98_en.json">8a. Radionuclide Releases - Canadian Nuclear Laboratories / Stack Emissions - EN</option>
+          <option value="./configs/Geodiscovery/GV_eaf01a95-a241-445e-b1a9-ff2256b59f98_fr.json">8b. Radionuclide Releases - Canadian Nuclear Laboratories / Stack Emissions - FR</option>
+          <option value="./configs/Geodiscovery/GV_c25c2a90-9a96-4bcf-924a-3aba0755cc21_en.json">9a. Regional Information and Monitoring Network - EN</option>
+          <option value="./configs/Geodiscovery/GV_c25c2a90-9a96-4bcf-924a-3aba0755cc21_fr.json">9b. Regional Information and Monitoring Network - FR</option>
+          <option value="./configs/Geodiscovery/GV_12acd145-626a-49eb-b850-0a59c9bc7506_en.json">10a. The Canadian Radiological Monitoring Network - Strontium-90 in Milk - EN</option>
+          <option value="./configs/Geodiscovery/GV_12acd145-626a-49eb-b850-0a59c9bc7506_fr.json">10b. The Canadian Radiological Monitoring Network - Strontium-90 in Milk - FR</option>
+          <option value="./configs/Geodiscovery/GV_21b821cf-0f1c-40ee-8925-eab12d357668_en.json">11a. The Canadian Radiological Monitoring Network - Airborne Radioactivity - EN</option>
+          <option value="./configs/Geodiscovery/GV_21b821cf-0f1c-40ee-8925-eab12d357668_fr.json">11b. The Canadian Radiological Monitoring Network - Airborne Radioactivity - FR</option>
+          <option value="./configs/Geodiscovery/GV_67bedee8-beb0-4b3a-a1c6-24a4cda08afe_en.json">12a. The Canadian Radiological Monitoring Network - Environmental Dosimetry - EN</option>
+          <option value="./configs/Geodiscovery/GV_67bedee8-beb0-4b3a-a1c6-24a4cda08afe_fr.json">12b. The Canadian Radiological Monitoring Network - Environmental Dosimetry - FR</option>
+          <option value="./configs/Geodiscovery/GV_16348a20-02f4-4557-b68c-d1754e3026a4_en.json">13a. The Canadian Radiological Monitoring Network - Tritium in Atmospheric Water Vapour - EN</option>
+          <option value="./configs/Geodiscovery/GV_16348a20-02f4-4557-b68c-d1754e3026a4_fr.json">13b. The Canadian Radiological Monitoring Network - Tritium in Atmospheric Water Vapour - FR</option>
+          <option value="./configs/Geodiscovery/GV_685257af-5592-49de-8726-90090c6c3061_en.json">14a. The Canadian Radiological Monitoring Network - Gross Alpha / Beta in Drinking Water - EN</option>
+          <option value="./configs/Geodiscovery/GV_685257af-5592-49de-8726-90090c6c3061_fr.json">14b. The Canadian Radiological Monitoring Network - Gross Alpha / Beta in Drinking Water - FR</option>
+          <option value="./configs/Geodiscovery/GV_f0d1c3a9-cf78-4b07-af55-9e8d4303449e_en.json">15a. Real-time Environmental Radioactivity Monitoring in Canada - EN</option>
+          <option value="./configs/Geodiscovery/GV_f0d1c3a9-cf78-4b07-af55-9e8d4303449e_fr.json">15b. Real-time Environmental Radioactivity Monitoring in Canada - FR</option>
+        </select>
+      </div>
     </div>
-    <div id="map1en" class="geoview-map" data-lang="en" data-config-url="./configs/Geodiscovery/GV_0c25772d-da22-4ac1-b130-c1d97b935f6f_en.json"></div>
-    <div id="map1fr" class="geoview-map" data-lang="fr" data-config-url="./configs/Geodiscovery/GV_0c25772d-da22-4ac1-b130-c1d97b935f6f_fr.json"></div>
 
-    <div class="map-title-holder">
-      <h4 id="HLCONF2">Radionuclide Releases - Nuclear Processing Facilities / Stack Emissions</h4>
+    <input id="switchLang" value="en" style="display: none;"></input>
+    <input id="switchTheme" value="geo.ca" style="display: none;"></input>
+    <input id="switchProjection" value="3978" style="display: none;"></input>
+
+    <button type="button" class="collapsible">Layers Status</button>
+    <pre id="sandboxMap-state" class="panel map-title-holder"></pre>
+  
+    <div id="mapSection">
+      <h4 id="mapTitle"></h4>
+      <div id="map1"></div>
     </div>
-    <div id="map2en" class="geoview-map" data-lang="en" data-config-url="./configs/Geodiscovery/GV_2ac52cb2-94b8-4b91-9419-cebdf535790a_en.json"></div>
-    <div id="map2fr" class="geoview-map" data-lang="fr" data-config-url="./configs/Geodiscovery/GV_2ac52cb2-94b8-4b91-9419-cebdf535790a_fr.json"></div>
 
+    <div class="editor">
+      <div class="line-numbers">
+        <span></span>
+      </div>
+      <textarea id="configGeoview" name="configuration" rows="30" cols="150">
+        Select a configuration file to see its content...
+      </textarea>
+    </div>
+  
     <script src="codedoc.js"></script>
     <script>
-      // Register handler when map has been initialized
-      cgpv.onMapInit((mapViewer) => {
-        listenToLegendLayerSetChanges(`H${mapViewer.mapId}-state`, mapViewer);
+      const confiLgoader = document.getElementById('configLoader');
+      const switchLang = document.getElementById('switchLang');
+      const mapTitle = document.getElementById('mapTitle');
+      const urlParams = new URLSearchParams(window.location.search);
+      const config = urlParams.get('config');
+      const mapId = 'map1';
+
+      // ------------------ CONFIG SELECTOR SECTION START -----------------------------------------
+      configLoader.addEventListener('change', async (e) => {
+        mapTitle.textContent = Array.from(confiLgoader.options).find(opt => opt.value === e.target.value)?.text;
+        switchLang.value = e.target.value.includes('_en.json') ? 'en' : 'fr';
+        onConfigChange(mapId, e);
       });
+      // ------------------ CONFIG SELECTOR SECTION END -----------------------------------------
+
+      // If there's a config
+      if (config) {
+        mapTitle.textContent = Array.from(confiLgoader.options).find(opt => opt.value === config)?.text;
+        switchLang.value = config.includes('_en.json') ? 'en' : 'fr';
+        configLoader.value = config;
+        configLoader.dispatchEvent(new Event('change'));
+      }
 
       // initialize cgpv
       cgpv.init();
-
-      // create snippets
-      window.addEventListener('load', () => {
-        createCodeSnippet();
-        createConfigSnippet();
-      });
     </script>
   </body>
 </html>
