@@ -139,14 +139,11 @@ class TimeSliderPlugin extends FooterPlugin {
    * Overrides the addition of the TimeSlider Footer Plugin to make sure to set the time slider configs in the store and apply filters.
    */
   override onAdd(): void {
-    // If map layers are all 'loaded' already
-    if (this.mapViewer.mapLayersLoaded) {
-      // Layers are already 'loaded', initialize the time slider plugin
+    // Once the map is ready we can initialize the time slider. Layers will be registered for the time slider as they load.
+    if (this.mapViewer.mapReady) {
       this.initTimeSliderPlugin();
     } else {
-      // Wait for the layers to be 'loaded' so that their 'layerTimeDimension' information is set ('techhnically, it's 'processed', but putting 'loaded' to better support layers migration)
-      this.mapViewer.onMapLayersLoaded(() => {
-        // Initialize the time slider plugin once all layers are 'loaded'
+      this.mapViewer.onMapReady(() => {
         this.initTimeSliderPlugin();
       });
     }

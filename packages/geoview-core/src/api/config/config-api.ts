@@ -25,6 +25,7 @@ import {
   MapConfigLayerEntry,
   TypeGeoviewLayerConfig,
   TypeInitialGeoviewLayerType,
+  TypeLayerEntryConfig,
 } from '@/api/types/layer-schema-types';
 import { MapConfigError } from '@/core/exceptions/config-exceptions';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
@@ -408,6 +409,7 @@ export class ConfigApi {
    * @param {string} layerURL - The URL endpoint associated with the layer (e.g., service URL, file path).
    * @param {TypeDisplayLanguage} language - The language, used for the geocore layer types to know which language to use when extracting layer information.
    * @param {string} mapId - The map id, used for the geocore layer types, to determine the layer id.
+   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<TypeGeoviewLayerConfig>} A Promise of a fully initialized `TypeGeoviewLayerConfig`.
    * @throws {NotSupportedError} If the provided layer type is not recognized or supported.
    */
@@ -417,15 +419,16 @@ export class ConfigApi {
     geoviewLayerName: string,
     layerURL: string,
     language?: TypeDisplayLanguage,
-    mapId?: string
+    mapId?: string,
+    abortSignal: AbortSignal | undefined = undefined
   ): Promise<TypeGeoviewLayerConfig> {
     // If working with geoCore
     if (layerType === 'geoCore') {
       // For GeoCore, we build the Config from the Geocore service
-      const layerConfigFromGeocore = await GeoCore.createLayerConfigFromUUID(layerURL, language || 'en', mapId);
+      const layerConfigFromGeocore = await GeoCore.createLayerConfigFromUUID(layerURL, language || 'en', mapId, undefined, abortSignal);
 
       // Get the layer entries that GeoCore has configured
-      const layerConfigFromGeocoreEntries = layerConfigFromGeocore.listOfLayerEntryConfig?.map((layerEntry) => layerEntry.layerId);
+      const layerIdsFromGeocoreEntries = layerConfigFromGeocore.listOfLayerEntryConfig?.map((layerEntry) => layerEntry.layerId);
 
       // Loop back to create the correct config based on the type
       const layerConfigForGeoview = await ConfigApi.createInitConfigFromType(
@@ -434,13 +437,25 @@ export class ConfigApi {
         layerConfigFromGeocore.geoviewLayerName!,
         layerConfigFromGeocore.metadataAccessPath!,
         language,
-        mapId
+        mapId,
+        abortSignal
       );
 
       // Tweak the Geoview config based on the response from GeoCore, as the Geoview config might need to be stripped out.
-      layerConfigForGeoview.listOfLayerEntryConfig = layerConfigForGeoview.listOfLayerEntryConfig.filter((layerEntry) => {
-        return layerConfigFromGeocoreEntries.includes(layerEntry.layerId);
-      });
+      const checkIfLayerEntryShouldBeIncluded = (listOfLayerEntryConfig: TypeLayerEntryConfig[]): TypeLayerEntryConfig[] => {
+        const includedLayerEntryConfigs: TypeLayerEntryConfig[] = [];
+        listOfLayerEntryConfig.forEach((layerEntryConfig) => {
+          if (layerIdsFromGeocoreEntries.includes(layerEntryConfig.layerId)) includedLayerEntryConfigs.push(layerEntryConfig);
+          else if (layerEntryConfig.listOfLayerEntryConfig) {
+            const includedLayers = checkIfLayerEntryShouldBeIncluded(layerEntryConfig.listOfLayerEntryConfig);
+            if (includedLayers.length) includedLayerEntryConfigs.push(...includedLayers);
+          }
+        });
+
+        return includedLayerEntryConfigs;
+      };
+
+      layerConfigForGeoview.listOfLayerEntryConfig = checkIfLayerEntryShouldBeIncluded(layerConfigForGeoview.listOfLayerEntryConfig);
 
       // Return
       return layerConfigForGeoview;
@@ -474,11 +489,14 @@ export class ConfigApi {
         return WFS.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
       case 'GeoPackage':
         // For GeoPackage, we build a WKB config
-        return await GeoPackageReader.createLayerConfigFromGeoPackage({
-          geoviewLayerId,
-          geoviewLayerType: 'GeoPackage',
-          metadataAccessPath: layerURL,
-        });
+        return await GeoPackageReader.createLayerConfigFromGeoPackage(
+          {
+            geoviewLayerId,
+            geoviewLayerType: 'GeoPackage',
+            metadataAccessPath: layerURL,
+          },
+          abortSignal
+        );
       case 'shapefile':
         // For Shapefile, we build the Config from GeoJson
         return await ShapefileReader.convertShapefileConfigToGeoJson({

@@ -125,7 +125,6 @@ export class UtilAddLayer {
     layerIds: (string | undefined)[]
   ): boolean {
     const subLayers = layerTree.listOfLayerEntryConfig;
-
     if (!subLayers) return true; // No children to check
 
     return subLayers.every((layerEntryConfig) => {
@@ -169,7 +168,11 @@ export class UtilAddLayer {
     if (layerType === CONST_LAYER_TYPES.ESRI_DYNAMIC && UtilAddLayer.allSubLayersAreIncluded(groupLayer, layerIds)) {
       return {
         layerId: groupLayerAsLayerEntryConfig?.layerId,
-        layerName: layersToAdd.length === 1 ? layerName : ConfigBaseClass.getClassOrTypeLayerName(groupLayer),
+        // If there is only one layer, or a single group layer, use the provided name from the text field
+        layerName:
+          layersToAdd.length === 1 || layersToAdd.length === longLayerIdsToRemove.length
+            ? layerName
+            : ConfigBaseClass.getClassOrTypeLayerName(groupLayer),
       };
     }
 
@@ -178,7 +181,11 @@ export class UtilAddLayer {
       layerId: `group-${groupLayerAsLayerEntryConfig?.layerId}`,
       isLayerGroup: true,
       entryType: 'group',
-      layerName: layersToAdd.length === 1 ? layerName : ConfigBaseClass.getClassOrTypeLayerName(groupLayer),
+      // If there is only one layer, or a single group layer, use the provided name from the text field
+      layerName:
+        layersToAdd.length === 1 || layersToAdd.length === longLayerIdsToRemove.length
+          ? layerName
+          : ConfigBaseClass.getClassOrTypeLayerName(groupLayer),
       listOfLayerEntryConfig: groupLayer.listOfLayerEntryConfig
         .map((layerEntryConfig) => {
           if (layerEntryConfig.listOfLayerEntryConfig?.length && layerIds.includes(layerEntryConfig.layerId))
@@ -189,7 +196,7 @@ export class UtilAddLayer {
               layersToAdd,
               layerIdsToAdd,
               removedLayerIds,
-              ConfigBaseClass.getClassOrTypeGeoviewLayerConfig(layerEntryConfig)
+              layerEntryConfig as GroupLayerEntryConfig
             );
           if (layerIds.includes(layerEntryConfig.layerId))
             return {
@@ -285,7 +292,7 @@ export class UtilAddLayer {
     // If none, create one
     if (!listOfLayerEntryConfig.length)
       listOfLayerEntryConfig.push({
-        layerId: generateId(8),
+        layerId: layerIdsToAdd[0],
         layerName,
       });
 

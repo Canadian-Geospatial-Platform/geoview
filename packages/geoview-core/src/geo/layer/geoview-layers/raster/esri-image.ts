@@ -47,10 +47,14 @@ export class EsriImage extends AbstractGeoViewRaster {
   /**
    * Overrides the way the layer metadata is processed.
    * @param {EsriImageLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<EsriImageLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
-  protected override onProcessLayerMetadata(layerConfig: EsriImageLayerEntryConfig): Promise<EsriImageLayerEntryConfig> {
-    return commonProcessLayerMetadata(this, layerConfig);
+  protected override onProcessLayerMetadata(
+    layerConfig: EsriImageLayerEntryConfig,
+    abortSignal?: AbortSignal
+  ): Promise<EsriImageLayerEntryConfig> {
+    return commonProcessLayerMetadata(this, layerConfig, abortSignal);
   }
 
   /**

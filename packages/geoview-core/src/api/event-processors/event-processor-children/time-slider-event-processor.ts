@@ -248,19 +248,21 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     }
 
     return {
-      range,
+      delay: timesliderConfig?.delay || 1000,
       discreteValues: nearestValues === 'discrete',
-      step,
-      minAndMax,
+      description: timesliderConfig?.description,
+      displayPattern,
       field,
       fieldAlias,
-      singleHandle,
       filtering: timesliderConfig?.filtering !== false,
-      values,
-      delay: timesliderConfig?.delay || 1000,
       locked: timesliderConfig?.locked,
+      minAndMax,
+      range,
       reversed: timesliderConfig?.reversed,
-      displayPattern,
+      singleHandle,
+      step,
+      title: timesliderConfig?.title,
+      values,
     };
   }
 

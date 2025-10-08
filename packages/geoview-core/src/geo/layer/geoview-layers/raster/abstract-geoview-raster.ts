@@ -10,11 +10,12 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
   /**
    * Overrides the way the metadata is fetched.
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
+   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<T>} A promise with the metadata or undefined when no metadata for the particular layer type.
    */
-  protected override onFetchServiceMetadata<T>(): Promise<T> {
+  protected override onFetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T> {
     // Fetch it
-    return AbstractGeoViewRaster.fetchMetadata<T>(this.metadataAccessPath, this.geoviewLayerId, this.geoviewLayerName);
+    return AbstractGeoViewRaster.fetchMetadata<T>(this.metadataAccessPath, this.geoviewLayerId, this.geoviewLayerName, abortSignal);
   }
 
   // #region STATIC
@@ -26,15 +27,16 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
    * @param {string} url - The base URL to fetch the metadata from (e.g., ArcGIS REST endpoint).
    * @param {string} geoviewLayerId - The unique identifier for the GeoView layer.
    * @param {string} geoviewLayerName - The display name of the GeoView layer (used in error messages).
+   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<T>} A promise resolving to the parsed JSON metadata response.
    * @throws {ServiceError} If the metadata response contains an error.
    */
-  static async fetchMetadata<T>(url: string, geoviewLayerId: string, geoviewLayerName: string): Promise<T> {
+  static async fetchMetadata<T>(url: string, geoviewLayerId: string, geoviewLayerName: string, abortSignal?: AbortSignal): Promise<T> {
     // The url
     const parsedUrl = url.toLowerCase().endsWith('json') ? url : `${url}?f=json`;
 
     // Query and read
-    const responseJson = await Fetch.fetchJson<T>(parsedUrl);
+    const responseJson = await Fetch.fetchJson<T>(parsedUrl, { signal: abortSignal });
 
     // Validate the metadata response
     AbstractGeoViewRaster.throwIfMetatadaHasError(geoviewLayerId, geoviewLayerName, responseJson);
