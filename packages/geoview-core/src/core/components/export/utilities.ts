@@ -38,6 +38,7 @@ export interface FlattenedLegendItem {
   depth: number;
   isRoot: boolean;
   timeInfo?: TypeTimeSliderValues;
+  calculatedHeight?: number;
 }
 
 export type TypePageConfig = (typeof PAGE_CONFIGS)[keyof typeof PAGE_CONFIGS];
@@ -60,9 +61,9 @@ export type TypeMapInfoResult = {
 
 // Page size specific styling
 export const PAGE_CONFIGS = {
-  LETTER: { size: 'LETTER' as const, mapHeight: 400, legendColumns: 4, maxLegendHeight: 450, canvasWidth: 612, canvasHeight: 792 },
-  LEGAL: { size: 'LEGAL' as const, mapHeight: 600, legendColumns: 4, maxLegendHeight: 500, canvasWidth: 612, canvasHeight: 1008 },
-  TABLOID: { size: 'TABLOID' as const, mapHeight: 800, legendColumns: 6, maxLegendHeight: 620, canvasWidth: 792, canvasHeight: 1224 },
+  LETTER: { size: 'LETTER' as const, mapHeight: 400, legendColumns: 4, maxLegendHeight: 375, canvasWidth: 612, canvasHeight: 792 },
+  LEGAL: { size: 'LEGAL' as const, mapHeight: 600, legendColumns: 4, maxLegendHeight: 425, canvasWidth: 612, canvasHeight: 1008 },
+  TABLOID: { size: 'TABLOID' as const, mapHeight: 800, legendColumns: 6, maxLegendHeight: 550, canvasWidth: 792, canvasHeight: 1224 },
 };
 
 // Export dimension constants at 300DPI
@@ -85,18 +86,67 @@ const MAP_IMAGE_DIMENSIONS = {
 };
 
 /**
+ * Calculate actual WMS image height based on aspect ratio
+ * @param {string} imageUrl - The image url
+ * @returns {Promise<number>} The calculated height
+ */
+const calculateWMSImageHeight = (imageUrl: string | undefined): Promise<number> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const maxWidth = SHARED_STYLES.wmsImageWidth;
+      const maxHeight = SHARED_STYLES.wmsImageMaxHeight;
+
+      const aspectRatio = img.height / img.width;
+      const scaledHeight = Math.min(maxWidth * aspectRatio, maxHeight);
+
+      resolve(scaledHeight + SHARED_STYLES.wmsMarginBottom);
+    };
+    img.onerror = () => resolve(SHARED_STYLES.wmsImageMaxHeight + SHARED_STYLES.wmsMarginBottom);
+    if (!imageUrl) {
+      resolve(SHARED_STYLES.wmsImageMaxHeight + SHARED_STYLES.wmsMarginBottom);
+    } else {
+      img.src = imageUrl;
+    }
+  });
+};
+
+/**
+ * Estimate text height based on character count and available width
+ * Attempts to account for word wrapping
+ * @param {string} text - The text to be placed
+ * @param {number} fontSize - The font size (px)
+ * @param {number} availableWidth - The available width in the column
+ * @returns {number} - The calcualted height of the text
+ */
+const estimateTextHeight = (text: string, fontSize: number, availableWidth: number): number => {
+  const avgCharWidth = fontSize * 0.6; // Rough estimate for character width
+  const charsPerLine = Math.floor(availableWidth / avgCharWidth);
+  const lines = Math.max(1, Math.ceil(text.length / charsPerLine));
+  return lines * (fontSize + 2); // fontSize + line spacing
+};
+
+/**
  * Estimate item heights (rough approximation)
  * @param {FlattenedLegendItem} item - The item to get the estimate height for
  * @returns {number} The estimated height
  */
-const estimateItemHeight = (item: FlattenedLegendItem): number => {
+const estimateItemHeight = (item: FlattenedLegendItem, pageSize: TypeValidPageSizes): number => {
+  // Calculate column width based on page size and number of columns
+  const config = PAGE_CONFIGS[pageSize];
+  const availableWidth = config.canvasWidth - SHARED_STYLES.padding * 2 - SHARED_STYLES.legendGap * (config.legendColumns - 1);
+  const columnWidth = availableWidth / config.legendColumns;
+
   switch (item.type) {
-    case 'layer':
-      return SHARED_STYLES.layerFontSize + SHARED_STYLES.layerMarginBottom + SHARED_STYLES.layerMarginTop / 2; // Average marginTop (0-8px)
+    case 'layer': {
+      const textHeight = estimateTextHeight(item.data.layerName || '', SHARED_STYLES.layerFontSize, columnWidth);
+      return textHeight + SHARED_STYLES.layerMarginBottom + SHARED_STYLES.layerMarginTop / 2;
+    }
     case 'child':
       return SHARED_STYLES.childFontSize + SHARED_STYLES.childMarginBottom + SHARED_STYLES.childMarginTop;
-    case 'wms':
-      return SHARED_STYLES.wmsImageMaxHeight + SHARED_STYLES.wmsMarginBottom;
+    case 'wms': {
+      return item.calculatedHeight || SHARED_STYLES.wmsImageMaxHeight + SHARED_STYLES.wmsMarginBottom;
+    }
     case 'time':
       return SHARED_STYLES.timeFontSize + SHARED_STYLES.timeMarginBottom + 3; // Line-height spacing
     case 'item':
@@ -248,6 +298,7 @@ export const distributeIntoColumns = (
   maxLegendHeight: number,
   disclaimer: string,
   attributions: string[],
+  pageSize: TypeValidPageSizes,
   exportTitle?: string
 ): { fittedColumns: FlattenedLegendItem[][]; overflowItems: FlattenedLegendItem[] } => {
   if (!items || items.length === 0) return { fittedColumns: Array(numColumns).fill([]), overflowItems: [] };
@@ -281,7 +332,7 @@ export const distributeIntoColumns = (
 
   // Distribute groups strictly - no splitting allowed
   groups.forEach((group) => {
-    const groupHeight = group.reduce((sum, item) => sum + estimateItemHeight(item), 0);
+    const groupHeight = group.reduce((sum, item) => sum + estimateItemHeight(item, pageSize), 0);
 
     // Find the column with the least content that can fit this entire group
     let targetColumn = -1;
@@ -442,18 +493,34 @@ export async function getMapInfo(
   // Process legend data
   const config = PAGE_CONFIGS[pageSize];
   const allItems = processLegendLayers(cleanLegendLayers, orderedLayerInfo, timeSliderLayers);
+
+  // Pre-calculate WMS image heights
+  const wmsItems = allItems.filter((item) => item.type === 'wms');
+  const heightPromises = wmsItems.map((item) => calculateWMSImageHeight(item.data.icons?.[0]?.iconImage || ''));
+  const calculatedHeights = await Promise.all(heightPromises);
+
+  // Create new items array with calculated heights
+  const itemsWithHeights = allItems.map((item) => {
+    if (item.type === 'wms') {
+      const wmsIndex = wmsItems.indexOf(item);
+      return { ...item, calculatedHeight: calculatedHeights[wmsIndex] };
+    }
+    return item;
+  });
+
   const { fittedColumns, overflowItems } = distributeIntoColumns(
-    allItems,
+    itemsWithHeights,
     config.legendColumns,
     config.maxLegendHeight,
     disclaimer,
     attribution,
+    pageSize,
     title
   );
 
   let fittedOverflowItems;
   if (overflowItems) {
-    const distributedOverflow = distributeIntoColumns(overflowItems, config.legendColumns, config.maxLegendHeight, '', []);
+    const distributedOverflow = distributeIntoColumns(overflowItems, config.legendColumns, config.maxLegendHeight, '', [], pageSize);
     fittedOverflowItems = distributedOverflow.fittedColumns;
   }
 
