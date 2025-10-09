@@ -21,6 +21,13 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     margin: '0 auto',
   },
 
+  mapLoading: {
+    width: 600,
+    height: 777,
+    border: '1px solid #ccc',
+    margin: '0 auto',
+  },
+
   dialogActions: {
     padding: '1rem',
     gap: '0.5rem',
