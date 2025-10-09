@@ -2,6 +2,30 @@ import { Theme } from '@mui/material/styles';
 import { SxStyles } from '@/ui/style/types';
 
 export const getSxClasses = (theme: Theme): SxStyles => ({
+  title: {
+    marginBottom: 2,
+    textAlign: 'center',
+  },
+
+  titleInput: {
+    minWidth: 300,
+  },
+
+  mapPreview: {
+    width: 600,
+    height: 777,
+    border: '1px solid #ccc',
+  },
+
+  mapSkeletonMargin: {
+    margin: '0 auto',
+  },
+
+  dialogActions: {
+    padding: '1rem',
+    gap: '0.5rem',
+  },
+
   buttonOutlined: {
     fontSize: theme.palette.geoViewFontSize.sm,
     padding: '0.7rem 1rem',

@@ -124,6 +124,8 @@ export default function ExportModal(): JSX.Element {
       const dpi = exportFormat === 'pdf' ? 300 : exportMapResolution;
       const filename = `${fileExportDefaultPrefixName}-${exportTitle.trim() || mapId}`;
 
+      // TODO Find a way to use sx in the pdf/canvas-layout files.
+      // TO.DO Probably would need to pass the theme to the createPDFMapUrl and createCanvasMapUrls here and in above generatePreview
       if (exportFormat === 'pdf') {
         const pdfUrl = await createPDFMapUrl(mapId, { exportTitle, disclaimer, pageSize: pageSize, dpi, format: exportFormat });
         exportFile(pdfUrl, filename, exportFormat);
@@ -166,6 +168,7 @@ export default function ExportModal(): JSX.Element {
     t,
   ]);
 
+  // Use Effect to generate the image preview on load
   useEffect(() => {
     logger.logTraceUseEffect('EXPORT-MODAL - generatePreview useEffect');
     if (activeModalId !== 'export') return;
@@ -271,13 +274,13 @@ export default function ExportModal(): JSX.Element {
       <DialogTitle>{t('exportModal.title')}</DialogTitle>
       <DialogContent dividers ref={dialogRef}>
         {/* Title input */}
-        <Box sx={{ marginBottom: 2, textAlign: 'center' }}>
+        <Box sx={sxClasses.title}>
           <TextField
             label={t('exportModal.exportTitle')}
             variant="standard"
             value={exportTitle}
             onChange={(e: ChangeEvent<HTMLInputElement>) => setExportTitle(e.target.value)}
-            sx={{ minWidth: 300 }}
+            sx={sxClasses.titleInput}
           />
         </Box>
 
@@ -285,17 +288,17 @@ export default function ExportModal(): JSX.Element {
         <Box ref={exportContainerRef} sx={{ textAlign: 'center' }}>
           {(() => {
             if (isMapLoading || isLegendLoading) {
-              return <Skeleton variant="rounded" width={600} height={777} sx={{ margin: '0 auto' }} />;
+              return <Skeleton variant="rounded" width={600} height={777} sx={sxClasses.mapSkeletonMargin} />;
             }
 
             if (pngPreviewUrls) {
               return pngPreviewUrls.map((imageUrl) => {
                 const key = imageUrl.substring(imageUrl.length - 10);
-                return <img key={key} src={imageUrl} alt="Export Preview" style={{ width: 600, height: 777, border: '1px solid #ccc' }} />;
+                return <Box component="img" key={key} src={imageUrl} alt="Export Preview" sx={sxClasses.mapPreview} />;
               });
             }
 
-            return <Box sx={{ width: 600, height: 777, border: '1px solid #ccc', margin: '0 auto' }}>Loading preview...</Box>;
+            return <Box sx={sxClasses.mapLoading}>Loading preview...</Box>;
           })()}
         </Box>
       </DialogContent>

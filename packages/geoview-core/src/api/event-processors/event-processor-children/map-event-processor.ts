@@ -859,46 +859,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
     });
   }
 
-  /**
-   * A method for refreshing all the layers in the map and waiting for them to reload
-   * @param {string} mapId - The Map ID
-   * @param {number} maxWait - The max wait time in ms
-   * @returns {Promise<void>} - A promise that resolves when all layers are loaded or max wait time reached
-   */
-  static refreshAllMapLayersAndWait(mapId: string, maxWait: number = 10000): Promise<void> {
-    const mapViewer = this.getMapViewer(mapId);
-    mapViewer.layer.refreshLayers();
-    mapViewer.basemap.refreshBasemap();
-
-    // Wait for all tile sources to finish loading
-    return new Promise<void>((resolve) => {
-      let checkCount = 0;
-      const maxChecks = maxWait / 100;
-
-      const checkTilesLoaded = () => {
-        checkCount++;
-        let allLoaded = true;
-
-        //Check all layers for loading state
-        mapViewer.map.getAllLayers().forEach((layer) => {
-          const source = layer.getSource();
-          if (source && typeof source.getState === 'function') {
-            if (source.getState() === 'loading') {
-              allLoaded = false;
-            }
-          }
-        });
-
-        if (allLoaded || checkCount >= maxChecks) {
-          resolve();
-        } else {
-          setTimeout(checkTilesLoaded, 100);
-        }
-      };
-      checkTilesLoaded();
-    });
-  }
-
   static reorderLayer(mapId: string, layerPath: string, move: number): void {
     // Redirect to state API
     api.getMapViewer(mapId).stateApi.reorderLayers(mapId, layerPath, move);
