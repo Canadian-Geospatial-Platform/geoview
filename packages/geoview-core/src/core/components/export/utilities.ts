@@ -7,12 +7,14 @@ import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { TypeTimeSliderValues, TimeSliderLayerSet } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 
+// TODO As a utility file, the EventProcessors probably shouldn't be here, but it removes a lot of duplication
+// TO.DO from the pdf-layout and canvas-layout files. Possibly a rename or a better solution could be found.
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
-
-import { logger } from '@/core/utils/logger';
 import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
+
+import { logger } from '@/core/utils/logger';
 
 import { SHARED_STYLES } from './layout-styles';
 
