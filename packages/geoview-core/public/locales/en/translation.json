@@ -269,12 +269,19 @@
     "invalidConfig": "Invalid JSON config, default configuration applied."
   },
   "exportModal": {
-    "title": "Download map as PNG",
+    "title": "Map preview",
     "cancelBtn": "Cancel",
     "exportBtn": "Download",
+    "formatBtn": "Format",
+    "dpiBtn": "DPI",
+    "qualityBtn": "Quality",
     "exportTitle": "Title",
     "approx": "approx.",
-    "fileExportDefaultPrefixName": "map-export"
+    "fileExportDefaultPrefixName": "map-export",
+    "pageSize": "Page size",
+    "letter": "Letter",
+    "legal": "Legal",
+    "tabloid": "Tabloid"
   },
   "geolocator": {
     "title": "Geolocator",

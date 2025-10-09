@@ -75,6 +75,15 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
+   * Gets the full legend layers list
+   * @param {string} mapId - The mapId
+   * @returns {TypeLegendLayer[]} The list of legend layers
+   */
+  static getLegendLayers(mapId: string): TypeLegendLayer[] {
+    return LegendEventProcessor.getLayerState(mapId).legendLayers;
+  }
+
+  /**
    * Gets the layer bounds for a layer path
    * @param {string} mapId - The map id
    * @param {string} layerPath - The layer path
