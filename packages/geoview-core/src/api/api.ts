@@ -195,7 +195,7 @@ export class API {
 
     // Delay to allow all components to load
     // GV: This is to allow for OL map and pointMarkers to be ready
-    await Utilities.delay(1000);
+    await Utilities.delay(250);
     return mapViewerPromise;
   }
 
