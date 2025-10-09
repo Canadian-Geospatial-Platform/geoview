@@ -191,7 +191,7 @@ export default function ExportModal(): JSX.Element {
     performExport().catch((error) => logger.logError(error));
   }, [performExport]);
 
-  const handleFormatMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+  const handleFormatMenuClick = (event: React.MouseEvent<HTMLElement>): void => {
     setFormatAnchorEl(event.currentTarget);
     setFormatMenuOpen(true);
   };
@@ -213,7 +213,7 @@ export default function ExportModal(): JSX.Element {
     [handleFormatMenuClose]
   );
 
-  const handleDpiMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+  const handleDpiMenuClick = (event: React.MouseEvent<HTMLElement>): void => {
     setDpiAnchorEl(event.currentTarget);
     setDpiMenuOpen(true);
   };
@@ -232,7 +232,7 @@ export default function ExportModal(): JSX.Element {
     [handleMenuClose]
   );
 
-  const handlePageSizeMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+  const handlePageSizeMenuClick = (event: React.MouseEvent<HTMLElement>): void => {
     setPageSizeAnchorEl(event.currentTarget);
     setPageSizeMenuOpen(true);
   };
@@ -250,7 +250,7 @@ export default function ExportModal(): JSX.Element {
     [handlePageSizeMenuClose]
   );
 
-  const handleQualityMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+  const handleQualityMenuClick = (event: React.MouseEvent<HTMLElement>): void => {
     setQualityAnchorEl(event.currentTarget);
     setQualityMenuOpen(true);
   };
