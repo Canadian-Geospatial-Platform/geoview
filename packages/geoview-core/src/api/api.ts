@@ -179,7 +179,7 @@ export class API {
    * @returns {Promise<MapViewer>} A Promise containing the MapViewer which will be created from the configuration.
    */
   // This function is called by the template, and since the template use the instance of the object from cgpv.api, this function has to be on the instance, not static. Refactor this?
-  createMapFromConfig(divId: string, mapConfig: string, divHeight?: number): Promise<MapViewer> {
+  async createMapFromConfig(divId: string, mapConfig: string, divHeight?: number): Promise<MapViewer> {
     // Get the map div
     const mapDiv = document.getElementById(divId);
     if (!mapDiv) throw new InitDivNotExistError(divId);
@@ -191,7 +191,12 @@ export class API {
     if (divHeight) mapDiv.style.height = `${divHeight}px`;
 
     // Init by function call
-    return initMapDivFromFunctionCall(mapDiv, mapConfig);
+    const mapViewerPromise = initMapDivFromFunctionCall(mapDiv, mapConfig);
+
+    // Delay to allow all components to load
+    // GV: This is to allow for OL map and pointMarkers to be ready
+    await Utilities.delay(1000);
+    return mapViewerPromise;
   }
 
   /**
