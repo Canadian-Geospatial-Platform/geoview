@@ -261,7 +261,7 @@ export function addUiComponent(targetDivId: string, component: React.ReactElemen
 export function sanitizeHtmlContent(contentHtml: string): string {
   return sanitizeHtml(contentHtml, {
     allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img']),
-    allowedAttributes: { img: ['src'] },
+    allowedAttributes: { img: ['src'], a: ['href'] },
     allowedSchemes: ['data', 'http', 'https'],
   });
 }
