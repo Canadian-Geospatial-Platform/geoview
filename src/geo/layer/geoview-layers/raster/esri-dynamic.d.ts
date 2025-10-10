@@ -43,9 +43,10 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
     /**
      * Overrides the way the layer metadata is processed.
      * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer entry configuration to process.
+     * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
      * @returns {Promise<EsriDynamicLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
      */
-    protected onProcessLayerMetadata(layerConfig: EsriDynamicLayerEntryConfig): Promise<EsriDynamicLayerEntryConfig>;
+    protected onProcessLayerMetadata(layerConfig: EsriDynamicLayerEntryConfig, abortSignal?: AbortSignal): Promise<EsriDynamicLayerEntryConfig>;
     /**
      * Overrides the creation of the GV Layer
      * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer entry configuration.

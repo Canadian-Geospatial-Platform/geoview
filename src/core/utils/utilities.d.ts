@@ -116,11 +116,12 @@ export declare function removeCommentsFromJSON(config: string): string;
 export declare function parseJSONConfig<T>(configStr: string): T;
 /**
 /**
- * Export the image data url as a PNG
- * @param {string} dataUrl - The data Url to be downloaded as png.
+ * Export the image data url to a file
+ * @param {string} dataUrl - The data Url to be downloaded.
  * @param {string} name - The name of exported file
+ * @param {string} format - The format of the exported file
  */
-export declare function exportPNG(dataUrl: string, name: string): void;
+export declare function exportFile(dataUrl: string, name: string, format?: 'pdf' | 'png' | 'jpeg'): void;
 /**
  * Find an object property by regex values. The find is case insensitive.
  * @param {unknown | undefined} objectItem - The object to search in.

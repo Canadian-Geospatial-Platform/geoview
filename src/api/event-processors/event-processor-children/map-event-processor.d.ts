@@ -9,6 +9,7 @@ import { TypeBasemapOptions, TypeInteraction, TypeValidMapProjectionCodes, TypeP
 import { TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '@/api/types/layer-schema-types';
 import { LayerApi } from '@/geo/layer/layer';
 import { MapViewer, TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer';
+import { TypeMapStateForExportLayout } from '@/core/components/export/utilities';
 import { PluginsContainer } from '@/api/plugin/plugin-types';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeClickMarker } from '@/core/components';
@@ -89,6 +90,12 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      */
     static getMapLayerOrder(mapId: string): string[];
     static getMapState(mapId: string): TypeMapState;
+    /**
+     * Gets the map state information for creating the export layout
+     * @param {string} mapId - The map id
+     * @returns {TypeMapStateForExportLayout} The map state required for the export layout
+     */
+    static getMapStateForExportLayout(mapId: string): TypeMapStateForExportLayout;
     static setMapAttribution(mapId: string, attribution: string[]): void;
     static setMapLoaded(mapId: string, mapLoaded: boolean): void;
     static setMapDisplayed(mapId: string): void;
@@ -99,7 +106,7 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     static setZoom(mapId: string, zoom: number): void;
     static setIsMouseInsideMap(mapId: string, inside: boolean): void;
     static setRotation(mapId: string, rotation: number): void;
-    static setMapSize(mapId: string, size: Size): void;
+    static setMapSize(mapId: string, size: Size, resizeMap?: boolean): void;
     static setMapScale(mapId: string, scale: TypeScaleInfo): void;
     static setMapMoveEnd(mapId: string, centerCoordinates: Coordinate, pointerPosition: TypeMapMouseInfo, degreeRotation: string, isNorthVisible: boolean, mapExtent: Extent, scale: TypeScaleInfo): void;
     static setInteraction(mapId: string, interaction: TypeInteraction): void;

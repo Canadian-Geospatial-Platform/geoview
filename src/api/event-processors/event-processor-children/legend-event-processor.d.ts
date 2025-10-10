@@ -28,6 +28,12 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
      */
     static getLegendLayerInfo(mapId: string, layerPath: string): TypeLegendLayer | undefined;
     /**
+     * Gets the full legend layers list
+     * @param {string} mapId - The mapId
+     * @returns {TypeLegendLayer[]} The list of legend layers
+     */
+    static getLegendLayers(mapId: string): TypeLegendLayer[];
+    /**
      * Gets the layer bounds for a layer path
      * @param {string} mapId - The map id
      * @param {string} layerPath - The layer path
