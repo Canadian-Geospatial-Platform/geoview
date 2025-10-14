@@ -479,7 +479,7 @@ type LogMarker = {
  * A Log tracker with various keys, used to log and track object modifications accross execution timings
  */
 type LogTracker = {
-  [key: string]: NodeJS.Timeout;
+  [key: string]: ReturnType<typeof setTimeout>;
 };
 
 // Create a ConsoleLogger singleton and export it

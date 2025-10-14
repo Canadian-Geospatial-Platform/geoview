@@ -41,7 +41,7 @@ export const useGeolocator = (): UseGeolocatorReturn => {
   // Refs
   const displayLanguageRef = useRef(displayLanguage);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const fetchTimerRef = useRef<NodeJS.Timeout | undefined>();
+  const fetchTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>();
 
   // Reset state helper
   const resetState = useCallback(() => {

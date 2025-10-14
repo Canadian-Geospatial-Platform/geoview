@@ -449,9 +449,9 @@ export const delay = (ms: number): Promise<void> => {
  * @param {() => T} callback - A function that is called every `ms` milliseconds.
  *                                   If it returns `true`, the interval is cleared.
  * @param {number} ms - The interval time in milliseconds between callback executions.
- * @returns {NodeJS.Timeout} The interval timer ID, which can be used to clear the interval manually if needed.
+ * @returns {ReturnType<typeof setInterval>} The interval timer ID, which can be used to clear the interval manually if needed.
  */
-export const doUntil = <T>(callback: () => T, ms: number): NodeJS.Timeout => {
+export const doUntil = <T>(callback: () => T, ms: number): ReturnType<typeof setInterval> => {
   // Start a recurrent timer
   let done = false;
   const interval = setInterval(() => {
@@ -481,9 +481,9 @@ export const doUntil = <T>(callback: () => T, ms: number): NodeJS.Timeout => {
  * @param {() => T} callback - A function executed on each interval. If it returns `true`, the interval is cleared.
  * @param {Promise<unknown>[]} promises - An array of promises whose completion will also stop the interval.
  * @param {number} ms - The interval duration in milliseconds.
- * @returns {NodeJS.Timeout} The interval timer, which can be cleared manually if needed.
+ * @returns {ReturnType<typeof setInterval>} The interval timer, which can be cleared manually if needed.
  */
-export const doUntilPromises = <T>(callback: () => T, promises: Promise<unknown>[], ms: number): NodeJS.Timeout => {
+export const doUntilPromises = <T>(callback: () => T, promises: Promise<unknown>[], ms: number): ReturnType<typeof setInterval> => {
   // Start a recurrent timer
   const interval = doUntil(callback, ms);
 
