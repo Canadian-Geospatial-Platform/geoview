@@ -1896,8 +1896,10 @@ export class LayerApi {
       // Get time slider config if present in map config
       const timeSliderConfigs = MapEventProcessor.getGeoViewMapConfig(this.getMapId())?.corePackagesConfig?.find((config) =>
         Object.keys(config).includes('time-slider')
-      )?.['time-slider'] as TypeTimeSliderProps[];
-      const layerSliderConfig = timeSliderConfigs?.find((slider: TypeTimeSliderProps) => slider.layerPaths.includes(layerConfig.layerPath));
+      )?.['time-slider'] as Record<'sliders', TypeTimeSliderProps[]>;
+      const layerSliderConfig = timeSliderConfigs?.sliders?.find((slider: TypeTimeSliderProps) =>
+        slider.layerPaths.includes(layerConfig.layerPath)
+      );
 
       // If the layer is loaded AND flag is true to use time dimension, continue
       if (geoviewLayer instanceof AbstractGVLayer && geoviewLayer.getIsTimeAware() && geoviewLayer.getTimeDimension()) {
