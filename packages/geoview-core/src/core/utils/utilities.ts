@@ -774,3 +774,13 @@ export function scrollIfNotVisible(el: HTMLElement, blockValue: ScrollLogicalPos
     }
   }
 }
+
+/**
+ * Checks whether the current environment is running on localhost port 8080.
+ *
+ * @returns {boolean} True if the current hostname is localhost and the port is 8080; otherwise, false.
+ */
+export function isLocalhost(): boolean {
+  if (typeof window === 'undefined' || !window.location) return false;
+  return window.location.hostname === 'localhost' && window.location.port === '8080';
+}

@@ -97,7 +97,6 @@
                 "display": true
               },
               "stepsSwitcher": true,
-              "resetStates": false,
               "description": "",
               "download": true
             }

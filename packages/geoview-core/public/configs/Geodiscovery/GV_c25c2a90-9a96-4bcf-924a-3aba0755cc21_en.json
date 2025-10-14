@@ -90,8 +90,7 @@
               "borderWidth": 1
             },
             "category": {
-              "property": "Substance_Name",
-              "usePalette": false
+              "property": "Substance_Name"
             },
             "ui": {
               "xSlider": {
@@ -101,7 +100,6 @@
                 "display": true
               },
               "stepsSwitcher": true,
-              "resetStates": false,
               "description": "",
               "download": true
             }

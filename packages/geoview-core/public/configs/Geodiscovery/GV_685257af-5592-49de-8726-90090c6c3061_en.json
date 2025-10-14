@@ -90,8 +90,7 @@
               "borderWidth": 1
             },
             "category": {
-              "property": "Radionuclide_Radionucleide",
-              "usePalette": false
+              "property": "Radionuclide_Radionucleide"
             },
             "ui": {
               "xSlider": {
@@ -101,7 +100,6 @@
                 "display": true
               },
               "stepsSwitcher": true,
-              "resetStates": false,
               "description": "",
               "download": true
             }
