@@ -45,15 +45,17 @@ export declare class WMS extends AbstractGeoViewRaster {
      * - Otherwise, the method constructs a WMS GetCapabilities request.
      *   - If no specific layer configs are provided, a single metadata fetch is made.
      *   - If layer configs are present (e.g., Geomet use case), individual layer metadata is merged.
+     * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
      * @returns {Promise<T = TypeMetadataWMS | undefined>} A promise resolving to the parsed metadata object,
      * or `undefined` if metadata could not be retrieved or no capabilities were found.
      */
-    protected onFetchServiceMetadata<T = TypeMetadataWMS | undefined>(): Promise<T>;
+    protected onFetchServiceMetadata<T = TypeMetadataWMS | undefined>(abortSignal?: AbortSignal): Promise<T>;
     /**
      * Overrides the way a geoview layer config initializes its layer entries.
+     * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
      * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
      */
-    protected onInitLayerEntries(): Promise<TypeGeoviewLayerConfig>;
+    protected onInitLayerEntries(abortSignal?: AbortSignal): Promise<TypeGeoviewLayerConfig>;
     /**
      * Overrides the validation of a layer entry config.
      * @param {ConfigBaseClass} layerConfig - The layer entry config to validate.
@@ -82,9 +84,10 @@ export declare class WMS extends AbstractGeoViewRaster {
      * Fetches the metadata for WMS Capabilities.
      * @param {string} url - The url to query the metadata from.
      * @param {CallbackNewMetadataDelegate} callbackNewMetadataUrl - Callback executed when a proxy had to be used to fetch the metadata.
+     * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
      * The parameter sent in the callback is the proxy prefix with the '?' at the end.
      */
-    static fetchMetadataWMS(url: string, callbackNewMetadataUrl?: CallbackNewMetadataDelegate): Promise<TypeMetadataWMS>;
+    static fetchMetadataWMS(url: string, callbackNewMetadataUrl?: CallbackNewMetadataDelegate, abortSignal?: AbortSignal): Promise<TypeMetadataWMS>;
     /**
      * Fetches the metadata for WMS Capabilities for particular layer(s).
      * @param {string} url - The url to query the metadata from.

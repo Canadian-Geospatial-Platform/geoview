@@ -27,9 +27,10 @@ export declare function getESRIServiceMetadata(url: string): Promise<unknown>;
  * Fetch the json response from the XML response of a WMS getCapabilities request.
  * @param {string} url - The url the url of the WMS server.
  * @param {string} layers - The layers to query separate by.
+ * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
  * @returns {Promise<TypeMetadataWMS>} A json promise containing the result of the query.
  */
-export declare function getWMSServiceMetadata(url: string, layers?: string, callbackNewMetadataUrl?: CallbackNewMetadataDelegate): Promise<TypeMetadataWMS>;
+export declare function getWMSServiceMetadata(url: string, layers?: string, callbackNewMetadataUrl?: CallbackNewMetadataDelegate, abortSignal?: AbortSignal): Promise<TypeMetadataWMS>;
 /**
  * Return the map server url from a layer service.
  * @param {string} url - The service url for a wms / dynamic or feature layers.

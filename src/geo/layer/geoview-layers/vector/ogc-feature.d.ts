@@ -34,9 +34,10 @@ export declare class OgcFeature extends AbstractGeoViewVector {
     /**
      * Overrides the way the metadata is fetched.
      * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
+     * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
      * @returns {Promise<T = TypeMetadataOGCFeature>} A promise with the metadata or undefined when no metadata for the particular layer type.
      */
-    protected onFetchServiceMetadata<T = TypeMetadataOGCFeature>(): Promise<T>;
+    protected onFetchServiceMetadata<T = TypeMetadataOGCFeature>(abortSignal?: AbortSignal): Promise<T>;
     /**
      * Overrides the way a geoview layer config initializes its layer entries.
      * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
@@ -50,9 +51,10 @@ export declare class OgcFeature extends AbstractGeoViewVector {
     /**
      * Overrides the way the layer metadata is processed.
      * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration to process.
+     * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
      * @returns {Promise<VectorLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
      */
-    protected onProcessLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<VectorLayerEntryConfig>;
+    protected onProcessLayerMetadata(layerConfig: VectorLayerEntryConfig, abortSignal?: AbortSignal): Promise<VectorLayerEntryConfig>;
     /**
      * Overrides the creation of the source configuration for the vector layer.
      * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration.
@@ -70,8 +72,9 @@ export declare class OgcFeature extends AbstractGeoViewVector {
     /**
      * Fetches the metadata for a typical OGCFeature class.
      * @param {string} url - The url to query the metadata from.
+     * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
      */
-    static fetchMetadata(url: string): Promise<TypeMetadataOGCFeature>;
+    static fetchMetadata(url: string, abortSignal?: AbortSignal): Promise<TypeMetadataOGCFeature>;
     /**
      * Initializes a GeoView layer configuration for an OGC Feature layer.
      * This method creates a basic TypeGeoviewLayerConfig using the provided

@@ -129,11 +129,12 @@ export declare class LayerApi {
     /**
      * Adds a layer to the map. This is the main method to add a GeoView Layer on the map.
      * It handles all the processing, including the validations, and makes sure to inform the layer sets about the layer.
-     * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The geoview layer configuration to add
+     * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The geoview layer configuration to add.
+     * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
      * @returns {GeoViewLayerAddedResult} The result of the addition of the geoview layer.
      * The result contains the instanciated GeoViewLayer along with a promise that will resolve when the layer will be officially on the map.
      */
-    addGeoviewLayer(geoviewLayerConfig: TypeGeoviewLayerConfig): GeoViewLayerAddedResult;
+    addGeoviewLayer(geoviewLayerConfig: TypeGeoviewLayerConfig, abortSignal?: AbortSignal): GeoViewLayerAddedResult;
     /**
      * Refreshes GeoCore Layers
      */

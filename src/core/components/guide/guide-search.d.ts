@@ -4,6 +4,6 @@ interface GuideSearchProps {
     onSectionChange: (sectionIndex: number) => void;
     onSearchStateChange: (searchTerm: string, highlightFunction: (content: string, sectionIndex: number) => string) => void;
 }
-export declare function GuideSearch({ guide, onSectionChange, onSearchStateChange }: GuideSearchProps): import("react").JSX.Element;
+export declare function GuideSearch({ guide, onSectionChange, onSearchStateChange }: GuideSearchProps): JSX.Element;
 export {};
 //# sourceMappingURL=guide-search.d.ts.map

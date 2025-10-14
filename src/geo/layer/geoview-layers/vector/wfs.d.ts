@@ -40,14 +40,16 @@ export declare class WFS extends AbstractGeoViewVector {
     /**
      * Overrides the way the metadata is fetched.
      * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
+     * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
      * @returns {Promise<T = TypeMetadataWFS>} A promise with the metadata or undefined when no metadata for the particular layer type.
      */
-    protected onFetchServiceMetadata<T = TypeMetadataWFS>(): Promise<T>;
+    protected onFetchServiceMetadata<T = TypeMetadataWFS>(abortSignal?: AbortSignal): Promise<T>;
     /**
      * Overrides the way a geoview layer config initializes its layer entries.
+     * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
      * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
      */
-    protected onInitLayerEntries(): Promise<TypeGeoviewLayerConfig>;
+    protected onInitLayerEntries(abortSignal?: AbortSignal): Promise<TypeGeoviewLayerConfig>;
     /**
      * Overrides the validation of a layer entry config.
      * @param {ConfigBaseClass} layerConfig - The layer entry config to validate.
@@ -56,9 +58,10 @@ export declare class WFS extends AbstractGeoViewVector {
     /**
      * Overrides the way the layer metadata is processed.
      * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration to process.
+     * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
      * @returns {Promise<VectorLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
      */
-    protected onProcessLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<VectorLayerEntryConfig>;
+    protected onProcessLayerMetadata(layerConfig: VectorLayerEntryConfig, abortSignal?: AbortSignal): Promise<VectorLayerEntryConfig>;
     /**
      * Overrides the creation of the source configuration for the vector layer
      * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry configuration.
@@ -76,9 +79,10 @@ export declare class WFS extends AbstractGeoViewVector {
     /**
      * Fetches the metadata for a typical WFS class.
      * @param {string} url - The url to query the metadata from.
+     * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
      * @returns {Promise<TypeMetadataWFS | undefined>} Promise with the metadata when fetched or undefined when capabilities weren't found.
      */
-    static fetchMetadata(url: string): Promise<TypeMetadataWFS | undefined>;
+    static fetchMetadata(url: string, abortSignal?: AbortSignal): Promise<TypeMetadataWFS | undefined>;
     /**
      * Initializes a GeoView layer configuration for a WFS layer.
      * This method creates a basic TypeGeoviewLayerConfig using the provided

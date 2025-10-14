@@ -50,13 +50,12 @@ export declare function commonProcessInitialSettings(layerConfig: EsriFeatureLay
 /**
  * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
  * initial settings, fields and aliases).
- *
  * @param {EsriDynamic | EsriFeature | EsriImage} layer The ESRI layer instance pointer.
  * @param {TypeLayerEntryConfig} layerConfig The layer entry configuration to process.
- *
+ * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
  * @returns {Promise<TypeLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
  */
-export declare function commonProcessLayerMetadata<T extends EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig | EsriImageLayerEntryConfig>(layer: EsriDynamic | EsriFeature | EsriImage, layerConfig: T): Promise<T>;
+export declare function commonProcessLayerMetadata<T extends EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig | EsriImageLayerEntryConfig>(layer: EsriDynamic | EsriFeature | EsriImage, layerConfig: T, abortSignal?: AbortSignal): Promise<T>;
 /**
  * Transforms the query results of an Esri service response - when not querying on the Layers themselves (giving a 'reduced' FeatureInfoEntry).
  * The transformation reads the Esri formatted information and return a list of `TypeFeatureInfoEntryPartial` records.

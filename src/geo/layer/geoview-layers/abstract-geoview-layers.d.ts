@@ -63,9 +63,10 @@ export declare abstract class AbstractGeoViewLayer {
     constructor(geoviewLayerConfig: TypeGeoviewLayerConfig);
     /**
      * Must override method to read the service metadata from the metadataAccessPath.
+     * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
      * @returns {Promise<T>} A promise resolved once the metadata has been fetched.
      */
-    protected abstract onFetchServiceMetadata<T>(): Promise<T>;
+    protected abstract onFetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T>;
     /**
      * Must override method to initialize a layer entry based on a GeoView layer config.
      * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
@@ -74,9 +75,10 @@ export declare abstract class AbstractGeoViewLayer {
     /**
      * Must override method to process a layer entry and return a Promise of an Open Layer Base Layer object.
      * @param {AbstractBaseLayerEntryConfig} layerConfig - Information needed to create the GeoView layer.
+     * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
      * @returns {Promise<AbstractBaseLayerEntryConfig>} The Promise that the config metadata has been processed.
      */
-    protected abstract onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig>;
+    protected abstract onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig, abortSignal?: AbortSignal): Promise<AbstractBaseLayerEntryConfig>;
     /**
      * Must override method to create a GV Layer from a layer configuration.
      * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
@@ -124,13 +126,16 @@ export declare abstract class AbstractGeoViewLayer {
      * is queryable, it will subscribe to the details-panel and every time the user clicks on the map, the panel will ask the layer
      * to return the descriptive information of all the features in a tolerance radius. This information will be used to populate
      * the details-panel.
+     * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+     * @returns {Promise<ConfigBaseClass[]>} A promise of the config base classes created.
      */
-    createGeoViewLayers(): Promise<ConfigBaseClass[]>;
+    createGeoViewLayers(abortSignal?: AbortSignal): Promise<ConfigBaseClass[]>;
     /**
      * Fetches the metadata by calling onFetchServiceMetadata.
+     * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
      * @returns {Promise<T>} Returns a Promise of a metadata
      */
-    fetchServiceMetadata<T>(): Promise<T>;
+    fetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T>;
     /**
      * Recursively validates the configuration of the layer entries to ensure that each layer is correctly defined.
      * @param {ConfigBaseClass[]} listOfLayerEntryConfig - The list of layer entries configuration to validate.
