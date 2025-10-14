@@ -26,33 +26,14 @@
         ]
       },
       {
-        "geoviewLayerId": "geojsonLYR5",
-        "geoviewLayerName": "GeoJSON Sample",
-        "metadataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata.meta",
-        "geoviewLayerType": "GeoJSON",
+        "geoviewLayerId": "wmsLYR2-qgis",
+        "geoviewLayerName": "CanVec",
+        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/fpsn_station_en",
+        "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "polygons.json",
-            "layerName": "Polygons"
-          },
-          {
-            "layerId": "lines.json",
-            "layerName": "Lines"
-          },
-          {
-            "entryType": "group",
-            "layerId": "point-feature-group",
-            "layerName": "Points",
-            "listOfLayerEntryConfig": [
-              {
-                "layerId": "icon_points.json",
-                "layerName": "Icons"
-              },
-              {
-                "layerId": "points.json",
-                "layerName": "Points"
-              }
-            ]
+            "layerId": "fpsn_stations_93f70155_ff12_4ab2_8100_53763727cbe4",
+            "layerName": "Stations"
           }
         ]
       }
@@ -142,6 +123,42 @@
                 }
               }
             ]
+          },
+                    {
+            "layers": [
+              {
+                "layerId": "wmsLYR2-qgis/fpsn_stations_93f70155_ff12_4ab2_8100_53763727cbe4",
+                "propertyValue": "OBJECTID",
+                "propertyDisplay": "Location_Emplacement"
+              }
+            ],
+            "chart": "line",
+            "title": "Line Chart with OGC Features",
+            "query": {
+              "type": "ogcAPIFeatures",
+              "url": "https://pygeoapi-stage.cdtk.geogc.ca/collections/ft::fpsn:fpsn_latest_90days_measure?f=json",
+              "queryOptions": {
+                "whereClauses": [
+                  {
+                    "field": "YEAR",
+                    "valueFrom": "YEAR"
+                  }
+                ]
+              }
+            },
+            "geochart": {
+              "xAxis": {
+                "type": "time",
+                "timeFormat": "MMM d, yyyy, HH:mm",
+                "property": "DATE_START"
+              },
+              "yAxis": {
+                "property": "YEAR"
+              }
+            },
+            "ui": {
+              "download": true
+            }
           }
         ]
       }
