@@ -10,7 +10,7 @@ import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react
 import { getFocusTrapSxClasses } from './containers-style';
 import { ARROW_KEY_CODES } from '@/core/utils/constant';
 import { useAppGeoviewHTMLElement, useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useUIActiveTrapGeoView, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { logger } from '@/core/utils/logger';
 import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
 
@@ -54,6 +54,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   // tracks if the last action was done through a keyboard (map navigation) or mouse (mouse movement)
   const { setCrosshairActive } = useAppStoreActions();
   const { setActiveTrapGeoView } = useUIStoreActions();
+  const activeTrapGeoView = useUIActiveTrapGeoView();
 
   // Get container and fullscreen state
   const geoviewElement = useAppGeoviewHTMLElement();
@@ -224,6 +225,24 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
       setTimeout(() => document.getElementById('enable-focus')?.focus(), FOCUS_DELAY);
     }
   }, [open]);
+
+  // Function to log the currently active/focused element
+  function handleFocusIn(): void {
+    const activeEl = document.activeElement;
+    if (activeEl) {
+      logger.logDebug('FOCUS-TRAP Focused element:', activeEl, 'id:', activeEl.id, 'class:', activeEl.className);
+    }
+  }
+
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('FOCUS-TRAP - handleFocusIn', activeTrapGeoView);
+
+    if (activeTrapGeoView) document.addEventListener('focusin', handleFocusIn);
+    else document.removeEventListener('focusin', handleFocusIn);
+
+    return () => document.removeEventListener('focusin', handleFocusIn);
+  }, [activeTrapGeoView]);
 
   return (
     <Modal

@@ -50,7 +50,7 @@ export class FeatureHighlight {
   #highlightedFeatureIds: string[] = [];
 
   /** Timeout of the bounding box highlight */
-  #bboxTimeout: NodeJS.Timeout | null = null;
+  #bboxTimeout: ReturnType<typeof setTimeout> | null = null;
 
   /**
    * Constructor
@@ -208,7 +208,7 @@ export class FeatureHighlight {
   highlightGeolocatorBBox(extent: Extent, isLayerHighlight = false): void {
     if (this.highlightSource.getFeatureById('geoLocatorFeature')) {
       this.highlightSource.removeFeature(this.highlightSource.getFeatureById('geoLocatorFeature') as Feature);
-      clearTimeout(this.#bboxTimeout as NodeJS.Timeout);
+      clearTimeout(this.#bboxTimeout as ReturnType<typeof setTimeout>);
     }
     const bboxPoly = fromExtent(extent);
     const bboxFeature = new Feature(bboxPoly);

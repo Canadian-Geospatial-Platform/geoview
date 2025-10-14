@@ -6,7 +6,7 @@ import { mountStoreDevtool } from 'simple-zustand-devtools';
 import { destroyEventProcessors, initializeEventProcessors } from '@/api/event-processors';
 import { IGeoviewState, GeoviewStoreType, geoviewStoreDefinitionWithSubscribeSelector } from './geoview-store';
 import { MapContext } from '@/core/app-start';
-import { whenThisThen } from '@/core/utils/utilities';
+import { whenThisThen, isLocalhost } from '@/core/utils/utilities';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { getItemAsNumber } from '@/core/utils/localStorage';
 
@@ -20,7 +20,7 @@ export const useStoresManager = createStore<StoresManagerState>(() => ({
 
 // Check if running in dev or if the key is set in the local storage
 const LOCAL_STORAGE_KEY_DEVTOOLS = 'GEOVIEW_DEVTOOLS';
-const DEVTOOLS_ACTIVE = process.env.NODE_ENV === 'development' || !!getItemAsNumber(LOCAL_STORAGE_KEY_DEVTOOLS);
+const DEVTOOLS_ACTIVE = isLocalhost() || !!getItemAsNumber(LOCAL_STORAGE_KEY_DEVTOOLS);
 
 /**
  * Mounts Zustand DevTools for a specific store instance.

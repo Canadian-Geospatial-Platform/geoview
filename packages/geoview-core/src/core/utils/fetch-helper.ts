@@ -29,7 +29,7 @@ export class Fetch {
 
     // If we want to use a timeout controller
     let timeoutSignal: AbortSignal | undefined;
-    let timeoutId: NodeJS.Timeout | undefined;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
     if (timeoutMs) {
       const timeoutController = Fetch.#createTimeoutAbortController(timeoutMs);
       timeoutSignal = timeoutController.controller.signal;
@@ -171,7 +171,7 @@ export class Fetch {
 
     // If we want to use a timeout controller
     let timeoutSignal: AbortSignal | undefined;
-    let timeoutId: NodeJS.Timeout | undefined;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
     if (timeoutMs) {
       const timeoutController = Fetch.#createTimeoutAbortController(timeoutMs);
       timeoutSignal = timeoutController.controller.signal;
@@ -252,7 +252,7 @@ export class Fetch {
 
     // If we want to use a timeout controller
     let timeoutSignal: AbortSignal | undefined;
-    let timeoutId: NodeJS.Timeout | undefined;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
     if (timeoutMs) {
       const timeoutController = Fetch.#createTimeoutAbortController(timeoutMs);
       timeoutSignal = timeoutController.controller.signal;
@@ -444,7 +444,7 @@ export class Fetch {
    */
   static #createTimeoutAbortController(timeoutMs: number): {
     controller: AbortController;
-    timeoutId: NodeJS.Timeout;
+    timeoutId: ReturnType<typeof setTimeout>;
   } {
     // Create the abort controller
     const controller = new AbortController();
