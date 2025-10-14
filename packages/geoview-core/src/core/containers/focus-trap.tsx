@@ -230,7 +230,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   function handleFocusIn(): void {
     const activeEl = document.activeElement;
     if (activeEl) {
-      logger.logWarning('FOCUS-TRAP Focused element:', activeEl, 'id:', activeEl.id, 'class:', activeEl.className);
+      logger.logDebug('FOCUS-TRAP Focused element:', activeEl, 'id:', activeEl.id, 'class:', activeEl.className);
     }
   }
 
