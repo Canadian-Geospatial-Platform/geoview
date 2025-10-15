@@ -114,6 +114,7 @@ import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-v
 import { XYZTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { VectorTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { TypeTimeSliderProps } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+import { RCS } from '@/api/config/rcs';
 
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
