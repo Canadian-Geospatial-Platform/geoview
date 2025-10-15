@@ -114,7 +114,6 @@ import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-v
 import { XYZTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { VectorTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { TypeTimeSliderProps } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
-import { RCS } from '@/api/config/rcs';
 
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
@@ -2345,8 +2344,8 @@ export class LayerApi {
       // Working with a shapefile layer
       promise = ShapefileReader.convertShapefileConfigToGeoJson(entry);
     } else if (mapConfigLayerEntryIsRCS(entry)) {
-      // Working with a RCS layer
-      promise = RCS.createLayerConfigFromUUID(entry.geoviewLayerId, language, entry);
+      // Working with a RCS (Geocore subset) layer
+      promise = GeoCore.createLayerConfigFromRCSUUID(entry.geoviewLayerId, language, entry);
     } else {
       // Working with a standard GeoView layer
       promise = Promise.resolve(entry);
