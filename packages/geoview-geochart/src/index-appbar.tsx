@@ -69,7 +69,7 @@ export class GeoChartAppBarPlugin extends AppBarPlugin {
   }
 
   override onCreateContent(): JSX.Element {
-    // Fetch cgpv
+    // Get cgpv
     // TODO: Create a geochart-appbar-panel equivalent to geochart-panel to hold the GeoChart itself and hook on the useGeochartConfigs store the same way geochart-panel does it
     // return <GeoChartAppBarPanel mapId={this.mapViewer.mapId} schemaValidator={new SchemaValidator()} />;
     return <div>Not implemented</div>;
