@@ -1,13 +1,10 @@
-import initSqlJs, { SqlValue } from 'sql.js';
+import type { SqlValue } from 'sql.js';
+import initSqlJs from 'sql.js';
 import * as SLDReader from '@nieuwlandgeo/sldreader';
 
-import {
-  CONST_LAYER_ENTRY_TYPES,
-  CONST_LAYER_TYPES,
-  GeoPackageLayerConfig,
-  TypeFeatureInfoLayerConfig,
-} from '@/api/types/layer-schema-types';
-import {
+import type { GeoPackageLayerConfig, TypeFeatureInfoLayerConfig } from '@/api/types/layer-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
+import type {
   TypeFillStyle,
   TypeLayerStyleConfig,
   TypeLayerStyleConfigType,
@@ -17,7 +14,7 @@ import {
   TypeSimpleSymbolVectorConfig,
   TypeStrokeSymbolConfig,
 } from '@/api/types/map-schema-types';
-import { TypeWkbLayerConfig } from '@/geo/layer/geoview-layers/vector/wkb';
+import type { TypeWkbLayerConfig } from '@/geo/layer/geoview-layers/vector/wkb';
 import { WkbLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { Fetch } from '@/core/utils/fetch-helper';

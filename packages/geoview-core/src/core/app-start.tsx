@@ -1,17 +1,18 @@
-import { createContext, StrictMode, Suspense, useMemo, Component, ErrorInfo } from 'react';
+import type { ErrorInfo } from 'react';
+import { createContext, StrictMode, Suspense, useMemo, Component } from 'react';
 import { I18nextProvider } from 'react-i18next';
-import { i18n } from 'i18next';
+import type { i18n } from 'i18next';
 
 import { ThemeProvider, StyledEngineProvider } from '@mui/material/styles';
 
 import { ScopedCssBaseline } from '@mui/material';
 import { Shell } from '@/core/containers/shell';
 import { getTheme } from '@/ui/style/theme';
-import { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
 import { useAppDisplayThemeById } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { TypeDisplayLanguage } from '@/api/types/map-schema-types';
+import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 
 // create a state that will hold map config information
 // TODO: use store, only keep map id on context for store manager to gather right store on hooks

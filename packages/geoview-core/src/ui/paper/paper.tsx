@@ -1,5 +1,7 @@
-import { forwardRef, Ref } from 'react';
-import { Paper as MaterialPaper, PaperProps } from '@mui/material';
+import type { Ref } from 'react';
+import { forwardRef } from 'react';
+import type { PaperProps } from '@mui/material';
+import { Paper as MaterialPaper } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
 /**

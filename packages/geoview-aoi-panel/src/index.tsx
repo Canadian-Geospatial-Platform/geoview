@@ -1,9 +1,10 @@
 import React from 'react'; // GV This import is to validate that we're on the right React at the end of the file
 import { AppBarPlugin } from 'geoview-core/api/plugin/appbar-plugin';
 import { AoiIcon } from 'geoview-core/ui/icons';
-import { IconButtonPropsExtend } from 'geoview-core/ui/icon-button/icon-button';
-import { TypePanelProps } from 'geoview-core/ui/panel/panel-types';
-import { AoiPanel, TypeAoiProps } from './aoi-panel';
+import type { IconButtonPropsExtend } from 'geoview-core/ui/icon-button/icon-button';
+import type { TypePanelProps } from 'geoview-core/ui/panel/panel-types';
+import type { TypeAoiProps } from './aoi-panel';
+import { AoiPanel } from './aoi-panel';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-aoi-panel.json';
 

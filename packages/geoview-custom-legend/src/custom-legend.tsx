@@ -1,4 +1,4 @@
-import { TypeWindow } from 'geoview-core/core/types/global-types';
+import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { getSxClasses } from './custom-legend-style';
 
 interface CustomLegendPanelProps {

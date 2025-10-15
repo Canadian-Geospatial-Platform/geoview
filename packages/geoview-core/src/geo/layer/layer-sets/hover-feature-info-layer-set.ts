@@ -1,12 +1,13 @@
-import { Coordinate } from 'ol/coordinate';
+import type { Coordinate } from 'ol/coordinate';
 import { logger } from '@/core/utils/logger';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
-import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import type { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
-import { AbstractLayerSet, PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
-import { LayerApi } from '@/geo/layer/layer';
+import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
+import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
+import type { LayerApi } from '@/geo/layer/layer';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { TypeHoverResultSet, TypeHoverResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import type { TypeHoverResultSet, TypeHoverResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
 
 /**

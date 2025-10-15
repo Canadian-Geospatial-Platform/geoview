@@ -1,15 +1,17 @@
-import { Coordinate } from 'ol/coordinate';
+import type { Coordinate } from 'ol/coordinate';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
-import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { TypeFeatureInfoEntry, TypeResultSet } from '@/api/types/map-schema-types';
+import type { EventDelegateBase } from '@/api/events/event-helper';
+import EventHelper from '@/api/events/event-helper';
+import type { TypeFeatureInfoEntry, TypeResultSet } from '@/api/types/map-schema-types';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
-import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
-import { EventType, AbstractLayerSet, PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
-import { LayerApi } from '@/geo/layer/layer';
-import {
+import type { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import type { EventType, PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
+import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
+import type { LayerApi } from '@/geo/layer/layer';
+import type {
   TypeFeatureInfoResultSet,
   TypeFeatureInfoResultSetEntry,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';

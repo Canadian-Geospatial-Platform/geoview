@@ -1,8 +1,8 @@
-import BaseImageLayer from 'ol/layer/BaseImage';
-import ImageSource from 'ol/source/Image';
-import LayerRenderer from 'ol/renderer/Layer';
-import { Extent } from 'ol/extent';
-import { Projection as OLProjection } from 'ol/proj';
+import type BaseImageLayer from 'ol/layer/BaseImage';
+import type ImageSource from 'ol/source/Image';
+import type LayerRenderer from 'ol/renderer/Layer';
+import type { Extent } from 'ol/extent';
+import type { Projection as OLProjection } from 'ol/proj';
 
 import { Projection } from '@/geo/utils/projection';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';

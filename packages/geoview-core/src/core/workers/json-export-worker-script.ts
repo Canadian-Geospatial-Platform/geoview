@@ -1,9 +1,9 @@
 import { expose } from 'comlink';
 import proj4 from 'proj4';
 import { register } from 'ol/proj/proj4';
-import { Coordinate } from 'ol/coordinate';
+import type { Coordinate } from 'ol/coordinate';
 
-import { SerializedGeometry } from '@/api/types/map-schema-types';
+import type { SerializedGeometry } from '@/api/types/map-schema-types';
 import { createWorkerLogger } from '@/core/workers/helper/logger-worker';
 
 /**

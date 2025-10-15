@@ -1,5 +1,6 @@
-import { ReactElement } from 'react';
-import { Fade as MaterialFade, FadeProps } from '@mui/material';
+import type { ReactElement } from 'react';
+import type { FadeProps } from '@mui/material';
+import { Fade as MaterialFade } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
 /**

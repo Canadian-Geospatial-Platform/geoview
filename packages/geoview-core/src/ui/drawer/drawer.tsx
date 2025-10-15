@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
-import { Drawer as MaterialDrawer, DrawerProps, Box } from '@mui/material';
+import type { DrawerProps } from '@mui/material';
+import { Drawer as MaterialDrawer, Box } from '@mui/material';
 
 import { IconButton } from '@/ui/icon-button/icon-button';
 import { ChevronLeftIcon, ChevronRightIcon } from '@/ui/icons/index';

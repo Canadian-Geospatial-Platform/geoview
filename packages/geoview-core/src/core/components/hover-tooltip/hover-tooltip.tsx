@@ -1,6 +1,7 @@
 import { memo, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useTheme, Theme } from '@mui/material/styles';
+import type { Theme } from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles';
 import { Box, BrowserNotSupportedIcon } from '@/ui';
 
 import {

@@ -1,5 +1,5 @@
-import { ThemeOptions } from '@mui/material';
-import { IGeoViewColors } from '@/ui/style/types';
+import type { ThemeOptions } from '@mui/material';
+import type { IGeoViewColors } from '@/ui/style/types';
 import { font, headingStyles, opacity, geoViewColors as defaultGeoViewColors, geoViewFontSizes } from '@/ui/style/default';
 import { logger } from '@/core/utils/logger';
 

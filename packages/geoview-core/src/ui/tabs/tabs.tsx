@@ -1,27 +1,19 @@
-import { SyntheticEvent, ReactNode, useState, useEffect, useMemo, MouseEvent, useCallback, useRef, memo } from 'react';
+import type { SyntheticEvent, ReactNode, MouseEvent } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef, memo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Size } from 'ol/size';
+import type { Size } from 'ol/size';
 
-import {
-  Grid,
-  Tab as MaterialTab,
-  Tabs as MaterialTabs,
-  TabsProps,
-  TabProps,
-  BoxProps,
-  Box,
-  SelectChangeEvent,
-  TabScrollButton,
-  TabScrollButtonProps,
-} from '@mui/material';
+import type { TabsProps, TabProps, BoxProps, SelectChangeEvent, TabScrollButtonProps } from '@mui/material';
+import { Grid, Tab as MaterialTab, Tabs as MaterialTabs, Box, TabScrollButton } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { logger } from '@/core/utils/logger';
 
-import { Select, TypeMenuItemProps } from '@/ui/select/select';
+import type { TypeMenuItemProps } from '@/ui/select/select';
+import { Select } from '@/ui/select/select';
 import { getSxClasses } from '@/ui/tabs/tabs-style';
 import { TabPanel } from '@/ui/tabs/tab-panel';
-import { TypeContainerBox } from '@/core/types/global-types';
+import type { TypeContainerBox } from '@/core/types/global-types';
 import { handleEscapeKey } from '@/core/utils/utilities';
 
 /**

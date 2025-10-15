@@ -1,11 +1,12 @@
-import { ReactNode, memo, useCallback, useMemo } from 'react';
+import type { ReactNode} from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { animated } from '@react-spring/web';
 import { Box, List, ListItem, ListItemButton, Paper, Tooltip, Typography, ProgressBar, LocationSearchingIcon } from '@/ui';
 
-import { TypeFeatureInfoEntry, TypeQueryStatus } from '@/api/types/map-schema-types';
-import { TypeLayerStatus } from '@/api/types/layer-schema-types';
+import type { TypeFeatureInfoEntry, TypeQueryStatus } from '@/api/types/map-schema-types';
+import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
 import { getSxClasses } from './layer-list-style';
 import { LayerIcon } from './layer-icon';
 import { logger } from '@/core/utils/logger';

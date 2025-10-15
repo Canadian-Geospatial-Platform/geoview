@@ -1,14 +1,16 @@
-import { ReactElement, useState, useCallback, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
-import { ExportToCsv, Options } from 'export-to-csv';
+import type { Options } from 'export-to-csv';
+import { ExportToCsv } from 'export-to-csv';
 
 import { type MRT_ColumnDef as MRTColumnDef } from 'material-react-table';
 
 import { IconButton, DownloadIcon, Menu, MenuItem } from '@/ui';
 import { logger } from '@/core/utils/logger';
-import { ColumnsType } from './data-table-types';
+import type { ColumnsType } from './data-table-types';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 interface ExportButtonProps {

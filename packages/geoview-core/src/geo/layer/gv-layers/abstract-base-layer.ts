@@ -1,10 +1,11 @@
-import BaseLayer from 'ol/layer/Base';
-import { Projection as OLProjection } from 'ol/proj';
+import type BaseLayer from 'ol/layer/Base';
+import type { Projection as OLProjection } from 'ol/proj';
 
-import { Extent } from '@/api/types/map-schema-types';
-import { TypeLayerStatus } from '@/api/types/layer-schema-types';
-import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import type { Extent } from '@/api/types/map-schema-types';
+import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
+import type { EventDelegateBase } from '@/api/events/event-helper';
+import EventHelper from '@/api/events/event-helper';
+import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 
 /**
  * Abstract Base Layer managing an OpenLayer layer, including a layer group.

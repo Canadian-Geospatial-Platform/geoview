@@ -1,4 +1,5 @@
-import { useSpring, SpringConfig } from '@react-spring/web';
+import type { SpringConfig } from '@react-spring/web';
+import { useSpring } from '@react-spring/web';
 
 // Common easing function
 const commonConfig: SpringConfig = { duration: 500, easing: (t) => t };

@@ -1,4 +1,5 @@
-import { GeoViewColorClass, IGeoViewColors, IGeoViewFontSizes } from '@/ui/style/types';
+import type { IGeoViewColors, IGeoViewFontSizes } from '@/ui/style/types';
+import { GeoViewColorClass } from '@/ui/style/types';
 
 export const font = "'Roboto', 'Helvetica', 'Arial', sans-serif";
 

@@ -1,4 +1,5 @@
-import { ChangeEvent, useCallback, useEffect, useMemo } from 'react';
+import type { ChangeEvent } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import debounce from 'lodash/debounce';
 import { useTheme } from '@mui/material';
 import { Box, ProgressBar } from '@/ui';

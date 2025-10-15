@@ -1,6 +1,6 @@
-import { TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { TypeFieldEntry } from '@/api/types/map-schema-types';
-import { TypeContainerBox } from '@/core/types/global-types';
+import type { TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import type { TypeFieldEntry } from '@/api/types/map-schema-types';
+import type { TypeContainerBox } from '@/core/types/global-types';
 
 export interface MappedLayerDataType extends TypeAllFeatureInfoResultSetEntry {
   fieldInfos: Partial<Record<string, TypeFieldEntry>>;

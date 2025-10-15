@@ -1,8 +1,10 @@
-import { MutableRefObject, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { MutableRefObject, ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { camelCase } from 'lodash';
 import { useTheme } from '@mui/material/styles';
 
-import { Box, Tabs, TypeTabs } from '@/ui';
+import type { TypeTabs } from '@/ui';
+import { Box, Tabs } from '@/ui';
 import { Plugin } from '@/api/plugin/plugin';
 import { getSxClasses } from './footer-bar-style';
 import { ResizeFooterPanel } from '@/core/components/footer-bar/hooks/resize-footer-panel';
@@ -17,7 +19,7 @@ import {
   useUIHiddenTabs,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { FooterBarApi, FooterTabCreatedEvent, FooterTabRemovedEvent } from '@/core/components';
+import type { FooterBarApi, FooterTabCreatedEvent, FooterTabRemovedEvent } from '@/core/components';
 import { DEFAULT_FOOTER_TABS_ORDER } from '@/api/types/map-schema-types';
 import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 

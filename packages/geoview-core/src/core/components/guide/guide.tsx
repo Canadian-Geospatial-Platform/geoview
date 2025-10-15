@@ -1,4 +1,5 @@
-import { memo, useState, ReactNode, useMemo, useCallback, useEffect } from 'react';
+import type { ReactNode } from 'react';
+import { memo, useState, useMemo, useCallback, useEffect } from 'react';
 import Markdown from 'markdown-to-jsx';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
@@ -6,10 +7,11 @@ import { Box } from '@/ui';
 import { useAppGuide } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from '@/core/utils/logger';
 import { getSxClasses } from './guide-style';
-import { LayerListEntry, Layout } from '@/core/components/common';
+import type { LayerListEntry } from '@/core/components/common';
+import { Layout } from '@/core/components/common';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { CONTAINER_TYPE, TABS } from '@/core/utils/constant';
-import { TypeContainerBox } from '@/core/types/global-types';
+import type { TypeContainerBox } from '@/core/types/global-types';
 import { GuideSearch } from './guide-search';
 
 interface GuideListItem extends LayerListEntry {

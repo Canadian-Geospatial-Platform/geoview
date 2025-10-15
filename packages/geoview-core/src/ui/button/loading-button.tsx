@@ -1,5 +1,6 @@
-import { ReactNode } from 'react';
-import { LoadingButton as MaterialLoadingButton, LoadingButtonProps } from '@mui/lab';
+import type { ReactNode } from 'react';
+import type { LoadingButtonProps } from '@mui/lab';
+import { LoadingButton as MaterialLoadingButton } from '@mui/lab';
 import { logger } from '@/core/utils/logger';
 
 /**

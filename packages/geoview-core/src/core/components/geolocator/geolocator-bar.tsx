@@ -1,4 +1,4 @@
-import { ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material';
 import { CloseIcon, SearchIcon, AppBarUI, Box, Divider, IconButton, Toolbar } from '@/ui';

@@ -1,5 +1,5 @@
-import { Theme } from '@mui/material/styles';
-import { SxStyles } from '@/ui/style/types';
+import type { Theme } from '@mui/material/styles';
+import type { SxStyles } from '@/ui/style/types';
 
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 

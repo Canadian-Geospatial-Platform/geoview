@@ -1,13 +1,14 @@
-import { GeoChart as GeoChartComponent, GeoChartConfig, ChartType, GeoChartDefaultColors, SchemaValidator, GeoChartAction } from 'geochart';
+import type { GeoChartConfig, ChartType, GeoChartDefaultColors, SchemaValidator, GeoChartAction } from 'geochart';
+import { GeoChart as GeoChartComponent } from 'geochart';
 import { useAppDisplayLanguageById, useAppStoreActions } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
-import { TypeGeochartResultSetEntry } from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
+import type { TypeGeochartResultSetEntry } from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
 import { MapEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/map-event-processor';
-import { TypeWindow } from 'geoview-core/core/types/global-types';
-import { TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';
+import type { TypeWindow } from 'geoview-core/core/types/global-types';
+import type { TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';
 import { logger } from 'geoview-core/core/utils/logger';
-import { ConfigBaseClass } from 'geoview-core/api/config/validation-classes/config-base-class';
+import type { ConfigBaseClass } from 'geoview-core/api/config/validation-classes/config-base-class';
 import { GeoChartParsing } from './geochart-parsing';
-import { PluginGeoChartConfig, GeoViewGeoChartConfig, GeoViewGeoChartConfigLayer } from './geochart-types';
+import type { PluginGeoChartConfig, GeoViewGeoChartConfig, GeoViewGeoChartConfigLayer } from './geochart-types';
 
 /**
  * Essential properties for the GeoChart

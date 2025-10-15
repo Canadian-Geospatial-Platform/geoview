@@ -1,6 +1,11 @@
-import { TypeBaseVectorGeometryConfig, TypeLayerStyleConfig } from '@/api/types/map-schema-types';
-import { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerEntryType, TypeVectorSourceFormats } from '@/api/types/layer-schema-types';
-import { TimeDimension } from '@/core/utils/date-mgt';
+import type { TypeBaseVectorGeometryConfig, TypeLayerStyleConfig } from '@/api/types/map-schema-types';
+import type {
+  TypeGeoviewLayerConfig,
+  TypeLayerEntryConfig,
+  TypeLayerEntryType,
+  TypeVectorSourceFormats,
+} from '@/api/types/layer-schema-types';
+import type { TimeDimension } from '@/core/utils/date-mgt';
 
 export abstract class LayerMockup {
   static getTop100Feature(): TypeGeoviewLayerConfig {

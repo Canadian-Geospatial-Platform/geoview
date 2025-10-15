@@ -1,9 +1,10 @@
-import { memo, ReactNode, useCallback, useEffect, useMemo } from 'react';
+import type { ReactNode} from 'react';
+import { memo, useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FocusTrap, Box, Button } from '@/ui';
 import { logger } from '@/core/utils/logger';
 import { useUIActiveFocusItem, useUIActiveTrapGeoView, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { TypeContainerBox } from '@/core/types/global-types';
+import type { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 
 interface FocusTrapContainerProps {

@@ -1,15 +1,15 @@
-import { Root } from 'react-dom/client';
-import { ScaleLine, OverviewMap as OLOverviewMap } from 'ol/control';
+import type { Root } from 'react-dom/client';
+import type { OverviewMap as OLOverviewMap } from 'ol/control';
+import { ScaleLine } from 'ol/control';
 import Overlay from 'ol/Overlay';
-import { Extent } from 'ol/extent';
-import { FitOptions } from 'ol/View';
+import type { Extent } from 'ol/extent';
+import type { FitOptions } from 'ol/View';
 import { KeyboardPan, KeyboardZoom } from 'ol/interaction';
-import { Coordinate } from 'ol/coordinate';
-import { Size } from 'ol/size';
-import { Pixel } from 'ol/pixel';
+import type { Coordinate } from 'ol/coordinate';
+import type { Size } from 'ol/size';
+import type { Pixel } from 'ol/pixel';
 
-import {
-  MAP_EXTENTS,
+import type {
   TypeBasemapOptions,
   TypeInteraction,
   TypeValidAppBarCoreProps,
@@ -23,18 +23,20 @@ import {
   TypeMapConfig,
   TypeMapFeaturesInstance,
 } from '@/api/types/map-schema-types';
-import {
-  CONST_LAYER_TYPES,
+import { MAP_EXTENTS } from '@/api/types/map-schema-types';
+import type {
   MapConfigLayerEntry,
   TypeLayerInitialSettings,
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
 } from '@/api/types/layer-schema-types';
+import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { api } from '@/app';
 import { LayerApi } from '@/geo/layer/layer';
-import { MapViewer, TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer';
-import { TypeMapStateForExportLayout } from '@/core/components/export/utilities';
-import { PluginsContainer } from '@/api/plugin/plugin-types';
+import type { TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer';
+import { MapViewer } from '@/geo/map/map-viewer';
+import type { TypeMapStateForExportLayout } from '@/core/components/export/utilities';
+import type { PluginsContainer } from '@/api/plugin/plugin-types';
 import { Projection } from '@/geo/utils/projection';
 import { isPointInExtent, isExtentLonLat } from '@/geo/utils/utilities';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
@@ -42,33 +44,34 @@ import { NORTH_POLE_POSITION, OL_ZOOM_DURATION, OL_ZOOM_MAXZOOM, OL_ZOOM_PADDING
 import { logger } from '@/core/utils/logger';
 import { isValidUUID, whenThisThen } from '@/core/utils/utilities';
 
-import { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { TypeClickMarker } from '@/core/components';
-import { TypeLegendLayer } from '@/core/components/layers/types';
+import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import type { TypeClickMarker } from '@/core/components';
+import type { TypeLegendLayer } from '@/core/components/layers/types';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
 import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
 import { UIEventProcessor } from '@/api/event-processors/event-processor-children/ui-event-processor';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
-import { IMapState, TypeOrderedLayerInfo, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+import type { IMapState, TypeOrderedLayerInfo, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { getAppCrosshairsActive } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { TypeHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import type { TypeHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
-import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
+import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
-import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { InvalidExtentError } from '@/core/exceptions/geoview-exceptions';
 import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-vector-tile';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
-import { DateMgt, TimeDimension } from '@/core/utils/date-mgt';
-import { TypeTimeSliderProps } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+import type { TimeDimension } from '@/core/utils/date-mgt';
+import { DateMgt } from '@/core/utils/date-mgt';
+import type { TypeTimeSliderProps } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 
 // GV The paradigm when working with MapEventProcessor vs MapState goes like this:
 // GV MapState provides: 'state values', 'actions' and 'setterActions'.

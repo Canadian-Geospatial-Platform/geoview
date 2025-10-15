@@ -1,8 +1,9 @@
-import { forwardRef, Ref, useCallback } from 'react';
+import type { Ref } from 'react';
+import { forwardRef, useCallback } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { Button as MaterialButton, Tooltip, useMediaQuery } from '@mui/material';
 
-import { TypeButtonProps } from '@/ui/panel/panel-types';
+import type { TypeButtonProps } from '@/ui/panel/panel-types';
 import { logger } from '@/core/utils/logger';
 
 export type ButtonProps = {

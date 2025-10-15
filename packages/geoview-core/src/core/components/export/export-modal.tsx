@@ -17,7 +17,8 @@ Legend Distribution Logic:
 - Maintains vector quality until final rasterization (canvas) or keeps vectors (PDF)
 */
 
-import { ChangeEvent, RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { ChangeEvent, RefObject } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 

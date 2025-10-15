@@ -1,17 +1,22 @@
-import { Map as OLMap } from 'ol';
+import type { Map as OLMap } from 'ol';
 
-import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { QueryType, TypeFeatureInfoEntry, TypeLocation, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
-import { TypeLayerStatus } from '@/api/types/layer-schema-types';
+import type { EventDelegateBase } from '@/api/events/event-helper';
+import EventHelper from '@/api/events/event-helper';
+import type { QueryType, TypeFeatureInfoEntry, TypeLocation, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
+import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
 import { generateId, whenThisThen } from '@/core/utils/utilities';
-import { ConfigBaseClass, LayerStatusChangedDelegate, LayerStatusChangedEvent } from '@/api/config/validation-classes/config-base-class';
-import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
-import { LayerApi } from '@/geo/layer/layer';
-import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import type {
+  ConfigBaseClass,
+  LayerStatusChangedDelegate,
+  LayerStatusChangedEvent,
+} from '@/api/config/validation-classes/config-base-class';
+import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import type { LayerApi } from '@/geo/layer/layer';
+import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
-import { AbstractBaseLayer, LayerNameChangedDelegate, LayerNameChangedEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
+import type { AbstractBaseLayer, LayerNameChangedDelegate, LayerNameChangedEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { logger } from '@/core/utils/logger';
 
 /**

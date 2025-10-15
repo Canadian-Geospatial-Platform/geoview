@@ -1,18 +1,21 @@
-import OLMap from 'ol/Map';
-import { Overlay, MapBrowserEvent } from 'ol';
+import type OLMap from 'ol/Map';
+import type { MapBrowserEvent } from 'ol';
+import { Overlay } from 'ol';
 import { Pointer as OLPointer } from 'ol/interaction';
 import Collection from 'ol/Collection';
 import Feature from 'ol/Feature';
-import { Geometry, Point, Polygon, LineString, Circle } from 'ol/geom';
+import type { Geometry } from 'ol/geom';
+import { Point, Polygon, LineString, Circle } from 'ol/geom';
 import { Style, Fill, Stroke, Circle as CircleStyle, Text, RegularShape } from 'ol/style';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
-import { Coordinate } from 'ol/coordinate';
-import { Extent, getCenter } from 'ol/extent';
+import type { Coordinate } from 'ol/coordinate';
+import type { Extent } from 'ol/extent';
+import { getCenter } from 'ol/extent';
 
 import { TransformEvent, TransformSelectionEvent, TransformDeleteFeatureEvent } from './transform-events';
 import { geometriesAreEqual } from '@/geo/utils/utilities';
-import { MapViewer } from '@/geo/map/map-viewer';
+import type { MapViewer } from '@/geo/map/map-viewer';
 
 // #region Constants
 

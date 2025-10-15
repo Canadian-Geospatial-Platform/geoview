@@ -1,6 +1,6 @@
 import type React from 'react';
-import { API } from '@/api';
-import { AbstractPlugin } from './abstract-plugin';
+import type { API } from '@/api';
+import type { AbstractPlugin } from './abstract-plugin';
 
 /**
  * interface used when creating the actual plugin.

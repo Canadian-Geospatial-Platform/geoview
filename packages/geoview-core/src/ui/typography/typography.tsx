@@ -1,5 +1,7 @@
-import { forwardRef, Ref } from 'react';
-import { Typography as MaterialTypography, TypographyProps } from '@mui/material';
+import type { Ref } from 'react';
+import { forwardRef } from 'react';
+import type { TypographyProps } from '@mui/material';
+import { Typography as MaterialTypography } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
 /**

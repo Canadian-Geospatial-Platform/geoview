@@ -1,6 +1,6 @@
 import React from 'react'; // GV This import is to validate that we're on the right React at the end of the file
-import { IconButtonPropsExtend } from 'geoview-core/ui/icon-button/icon-button';
-import { TypePanelProps } from 'geoview-core/ui/panel/panel-types';
+import type { IconButtonPropsExtend } from 'geoview-core/ui/icon-button/icon-button';
+import type { TypePanelProps } from 'geoview-core/ui/panel/panel-types';
 import { AppBarPlugin } from 'geoview-core/api/plugin/appbar-plugin';
 import { ChartIcon } from 'geoview-core/ui/icons';
 

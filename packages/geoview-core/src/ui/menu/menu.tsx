@@ -1,4 +1,5 @@
-import { Menu as MaterialMenu, MenuProps } from '@mui/material';
+import type { MenuProps } from '@mui/material';
+import { Menu as MaterialMenu } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
 /**

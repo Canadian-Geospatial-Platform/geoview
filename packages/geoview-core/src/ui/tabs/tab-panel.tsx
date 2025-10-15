@@ -1,7 +1,8 @@
-import { forwardRef, ReactNode, Ref } from 'react';
+import type { ReactNode, Ref } from 'react';
+import { forwardRef } from 'react';
 import { Box } from '@/ui';
 import { FocusTrapContainer } from '@/core/components/common';
-import { TypeContainerBox } from '@/core/types/global-types';
+import type { TypeContainerBox } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
 
 /**

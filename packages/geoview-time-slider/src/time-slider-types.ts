@@ -1,4 +1,4 @@
-import { TimeDimension } from 'geoview-core/core/utils/date-mgt';
+import type { TimeDimension } from 'geoview-core/core/utils/date-mgt';
 
 export type SliderProps = {
   layerPaths: string[];

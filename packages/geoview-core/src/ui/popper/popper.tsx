@@ -1,5 +1,7 @@
-import { ReactElement, useEffect, useRef, useCallback } from 'react';
-import { Popper as MaterialPopper, PopperProps, useTheme } from '@mui/material';
+import type { ReactElement } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
+import type { PopperProps } from '@mui/material';
+import { Popper as MaterialPopper, useTheme } from '@mui/material';
 import { animated } from '@react-spring/web';
 import { useFadeIn } from '@/core/utils/useSpringAnimations';
 import { logger } from '@/core/utils/logger';

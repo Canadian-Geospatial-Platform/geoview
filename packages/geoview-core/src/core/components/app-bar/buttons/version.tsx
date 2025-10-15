@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Typography, Box, Link, Theme, SvgIcon, ClickAwayListener, Paper, useTheme } from '@mui/material';
+import type { Theme } from '@mui/material';
+import { Typography, Box, Link, SvgIcon, ClickAwayListener, Paper, useTheme } from '@mui/material';
 
 import { GITHUB_REPO, GEO_URL_TEXT } from '@/core/utils/constant';
 import { GeoCaIcon, IconButton, Popper, CloseIcon } from '@/ui';
@@ -12,7 +13,7 @@ import { FocusTrapContainer } from '@/core/components/common/focus-trap-containe
 import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
-import { SxStyles } from '@/ui/style/types';
+import type { SxStyles } from '@/ui/style/types';
 
 // eslint-disable-next-line no-underscore-dangle
 declare const __VERSION__: TypeAppVersion;

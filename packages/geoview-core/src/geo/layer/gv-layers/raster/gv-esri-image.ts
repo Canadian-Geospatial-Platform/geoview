@@ -1,12 +1,12 @@
-import { ImageArcGISRest } from 'ol/source';
-import { Options as ImageOptions } from 'ol/layer/BaseImage';
+import type { ImageArcGISRest } from 'ol/source';
+import type { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { Image as ImageLayer } from 'ol/layer';
-import { Extent } from 'ol/extent';
-import { Projection as OLProjection } from 'ol/proj';
+import type { Extent } from 'ol/extent';
+import type { Projection as OLProjection } from 'ol/proj';
 
 import { logger } from '@/core/utils/logger';
-import { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
-import {
+import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
+import type {
   TypeIconSymbolVectorConfig,
   TypeLayerStyleConfig,
   TypeLayerStyleConfigInfo,
@@ -16,7 +16,7 @@ import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { validateExtent } from '@/geo/utils/utilities';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
-import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { Projection } from '@/geo/utils/projection';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';

@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
-import { SxProps, Theme, useTheme } from '@mui/material/styles';
-import { Divider as MaterialDivider, DividerProps } from '@mui/material';
+import type { SxProps, Theme } from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles';
+import type { DividerProps } from '@mui/material';
+import { Divider as MaterialDivider } from '@mui/material';
 
 import { getSxClasses } from '@/ui/divider/divider-style';
 import { logger } from '@/core/utils/logger';

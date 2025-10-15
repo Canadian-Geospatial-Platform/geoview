@@ -1,10 +1,11 @@
 import { forwardRef, useMemo } from 'react';
 
-import { Alert as MaterialAlert, AlertProps, Snackbar as MaterialSnackbar } from '@mui/material';
+import type { AlertProps } from '@mui/material';
+import { Alert as MaterialAlert, Snackbar as MaterialSnackbar } from '@mui/material';
 
 import { animated } from '@react-spring/web';
 import { useFadeIn } from '@/core/utils/useSpringAnimations';
-import { SnackbarType } from '@/core/utils/notifications';
+import type { SnackbarType } from '@/core/utils/notifications';
 import { logger } from '@/core/utils/logger';
 
 /**

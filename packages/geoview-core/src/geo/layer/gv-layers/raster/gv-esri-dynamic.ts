@@ -1,20 +1,20 @@
-import { ImageArcGISRest } from 'ol/source';
+import type { ImageArcGISRest } from 'ol/source';
 import { Image as ImageLayer } from 'ol/layer';
-import { Options as ImageOptions } from 'ol/layer/BaseImage';
-import { Coordinate } from 'ol/coordinate';
+import type { Options as ImageOptions } from 'ol/layer/BaseImage';
+import type { Coordinate } from 'ol/coordinate';
 import { EsriJSON } from 'ol/format';
-import { Extent } from 'ol/extent';
+import type { Extent } from 'ol/extent';
 import Feature from 'ol/Feature';
-import Geometry from 'ol/geom/Geometry';
-import { Projection as OLProjection } from 'ol/proj';
-import { Map as OLMap } from 'ol';
+import type Geometry from 'ol/geom/Geometry';
+import type { Projection as OLProjection } from 'ol/proj';
+import type { Map as OLMap } from 'ol';
 
 import { getMetersPerPixel, validateExtent } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { logger } from '@/core/utils/logger';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import {
+import type { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
+import type {
   TypeLayerStyleSettings,
   TypeFeatureInfoEntry,
   rangeDomainType,
@@ -25,19 +25,21 @@ import {
   TypeValidMapProjectionCodes,
   TypeIconSymbolVectorConfig,
 } from '@/api/types/map-schema-types';
-import { CONST_LAYER_TYPES, TypeFeatureInfoLayerConfig, TypeLayerMetadataEsriExtent } from '@/api/types/layer-schema-types';
-import { esriGetFieldType, esriGetFieldDomain, parseDateTimeValuesEsriDynamic, GeometryJson } from '@/geo/layer/gv-layers/utils';
+import type { TypeFeatureInfoLayerConfig, TypeLayerMetadataEsriExtent } from '@/api/types/layer-schema-types';
+import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
+import type { GeometryJson } from '@/geo/layer/gv-layers/utils';
+import { esriGetFieldType, esriGetFieldDomain, parseDateTimeValuesEsriDynamic } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
-import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { TypeEsriImageLayerLegend } from '@/geo/layer/gv-layers/raster/gv-esri-image';
+import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import type { TypeEsriImageLayerLegend } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { FetchEsriWorkerPool } from '@/core/workers/fetch-esri-worker-pool';
-import { QueryParams } from '@/core/workers/fetch-esri-worker-script';
+import type { QueryParams } from '@/core/workers/fetch-esri-worker-script';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { NoExtentError, NoFeaturesPropertyError } from '@/core/exceptions/geoview-exceptions';
 import { formatError, RequestAbortedError } from '@/core/exceptions/core-exceptions';
 import { LayerDataAccessPathMandatoryError, LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions';
-import { TypeDateFragments } from '@/core/utils/date-mgt';
+import type { TypeDateFragments } from '@/core/utils/date-mgt';
 
 type TypeFieldOfTheSameValue = { value: string | number | Date; nbOccurence: number };
 type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryTree }[];

@@ -1,13 +1,13 @@
 import { useStore } from 'zustand';
 
-import { Feature } from 'ol';
-import { Draw } from '@/geo/interaction/draw';
-import { Snap } from '@/geo/interaction/snap';
+import type { Feature } from 'ol';
+import type { Draw } from '@/geo/interaction/draw';
+import type { Snap } from '@/geo/interaction/snap';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
-import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
-import { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import type { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
+import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { DrawerEventProcessor } from '@/api/event-processors/event-processor-children/drawer-event-processor';
-import { Transform } from '@/geo/interaction/transform/transform';
+import type { Transform } from '@/geo/interaction/transform/transform';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with DrawerEventProcessor vs DrawerState
 

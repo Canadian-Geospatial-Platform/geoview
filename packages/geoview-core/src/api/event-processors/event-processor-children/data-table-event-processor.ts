@@ -1,12 +1,12 @@
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
-import {
+import type {
   IDataTableState,
   IDataTableSettings,
   TypeAllFeatureInfoResultSetEntry,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { logger } from '@/core/utils/logger';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { TypeFeatureInfoEntry, TypeLayerData, TypeResultSetEntry } from '@/api/types/map-schema-types';
+import type { TypeFeatureInfoEntry, TypeLayerData, TypeResultSetEntry } from '@/api/types/map-schema-types';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 

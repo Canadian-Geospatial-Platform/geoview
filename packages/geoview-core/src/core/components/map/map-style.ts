@@ -1,4 +1,4 @@
-import { SxStyles } from '@/ui/style/types';
+import type { SxStyles } from '@/ui/style/types';
 
 /**
  * Get custom sx classes for the map

@@ -2,7 +2,7 @@ import { Fragment, memo, useCallback, useEffect, useMemo, useState } from 'react
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import _ from 'lodash';
-import { TypeLegendLayer, TypeLegendItem } from '@/core/components/layers/types';
+import type { TypeLegendLayer, TypeLegendItem } from '@/core/components/layers/types';
 import { getSxClasses } from './layer-details-style';
 import {
   Box,

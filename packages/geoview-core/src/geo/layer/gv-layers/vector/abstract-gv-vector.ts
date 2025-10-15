@@ -1,22 +1,24 @@
-import BaseLayer from 'ol/layer/Base';
-import { Map as OLMap, Feature } from 'ol';
-import { FeatureLike } from 'ol/Feature';
-import { Geometry } from 'ol/geom';
+import type BaseLayer from 'ol/layer/Base';
+import type { Map as OLMap, Feature } from 'ol';
+import type { FeatureLike } from 'ol/Feature';
+import type { Geometry } from 'ol/geom';
 import VectorLayer from 'ol/layer/Vector';
-import VectorSource from 'ol/source/Vector';
-import { Options as VectorLayerOptions } from 'ol/layer/VectorImage';
-import Style from 'ol/style/Style';
-import { Coordinate } from 'ol/coordinate';
-import { Extent } from 'ol/extent';
-import { Pixel } from 'ol/pixel';
-import { Projection as OLProjection } from 'ol/proj';
+import type VectorSource from 'ol/source/Vector';
+import type { Options as VectorLayerOptions } from 'ol/layer/VectorImage';
+import type Style from 'ol/style/Style';
+import type { Coordinate } from 'ol/coordinate';
+import type { Extent } from 'ol/extent';
+import type { Pixel } from 'ol/pixel';
+import type { Projection as OLProjection } from 'ol/proj';
 import isEqual from 'lodash/isEqual';
 
-import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { FilterNodeType, NodeType } from '@/geo/utils/renderer/geoview-renderer-types';
+import type { EventDelegateBase } from '@/api/events/event-helper';
+import EventHelper from '@/api/events/event-helper';
+import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
+import { NodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { logger } from '@/core/utils/logger';
-import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
-import { TypeFeatureInfoEntry, TypeOutfieldsType } from '@/api/types/map-schema-types';
+import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
+import type { TypeFeatureInfoEntry, TypeOutfieldsType } from '@/api/types/map-schema-types';
 import { analyzeLayerFilter, getAndCreateFeatureStyle } from '@/geo/utils/renderer/geoview-renderer';
 import { createAliasLookup, featureInfoGetFieldType, parseDateTimeValuesVector } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
@@ -25,7 +27,7 @@ import { Projection } from '@/geo/utils/projection';
 import { LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions';
 import { NoExtentError } from '@/core/exceptions/geoview-exceptions';
 import { formatError } from '@/core/exceptions/core-exceptions';
-import { TypeDateFragments } from '@/core/utils/date-mgt';
+import type { TypeDateFragments } from '@/core/utils/date-mgt';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer vector type layer.

@@ -1,14 +1,6 @@
 import { useMemo } from 'react';
-import {
-  Stepper as MaterialStepper,
-  Step,
-  StepContent,
-  StepLabel,
-  StepperProps,
-  StepLabelProps,
-  StepContentProps,
-  StepProps,
-} from '@mui/material';
+import type { StepperProps, StepLabelProps, StepContentProps, StepProps } from '@mui/material';
+import { Stepper as MaterialStepper, Step, StepContent, StepLabel } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
 import { getSxClasses } from '@/ui/stepper/stepper-style';

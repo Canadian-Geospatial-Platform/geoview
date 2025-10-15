@@ -1,4 +1,4 @@
-import { TypeFillStyle } from '@/api/types/map-schema-types';
+import type { TypeFillStyle } from '@/api/types/map-schema-types';
 
 export const defaultColor = [
   '#800000',

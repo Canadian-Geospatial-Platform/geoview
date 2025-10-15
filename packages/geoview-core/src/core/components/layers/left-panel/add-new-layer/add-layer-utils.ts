@@ -1,7 +1,5 @@
-import { TypeDisplayLanguage } from '@/api/types/map-schema-types';
-import {
-  CONST_LAYER_TYPES,
-  CONST_LAYER_ENTRY_TYPES,
+import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
+import type {
   GeoPackageLayerConfig,
   ShapefileLayerConfig,
   TypeGeoviewLayerType,
@@ -10,8 +8,9 @@ import {
   TypeGeoviewLayerConfig,
   ConfigClassOrType,
 } from '@/api/types/layer-schema-types';
+import { CONST_LAYER_TYPES, CONST_LAYER_ENTRY_TYPES } from '@/api/types/layer-schema-types';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
-import { GroupLayerEntryConfig, GroupLayerEntryConfigProps } from '@/api/config/validation-classes/group-layer-entry-config';
+import type { GroupLayerEntryConfig, GroupLayerEntryConfigProps } from '@/api/config/validation-classes/group-layer-entry-config';
 import { generateId, getLocalizedMessage } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 

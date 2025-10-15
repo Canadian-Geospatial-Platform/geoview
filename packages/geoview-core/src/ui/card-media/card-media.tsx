@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
-import { CardMedia as MaterialCardMedia, CardMediaProps } from '@mui/material';
+import type { CardMediaProps } from '@mui/material';
+import { CardMedia as MaterialCardMedia } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
 /**

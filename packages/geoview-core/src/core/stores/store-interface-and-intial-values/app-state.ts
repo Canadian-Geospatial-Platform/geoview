@@ -1,14 +1,15 @@
 import { useStore } from 'zustand';
-import { VALID_DISPLAY_LANGUAGE, TypeDisplayLanguage, TypeDisplayTheme } from '@/api/types/map-schema-types';
-import { TypeInitialGeoviewLayerType } from '@/api/types/layer-schema-types';
+import type { TypeDisplayLanguage, TypeDisplayTheme } from '@/api/types/map-schema-types';
+import { VALID_DISPLAY_LANGUAGE } from '@/api/types/map-schema-types';
+import type { TypeInitialGeoviewLayerType } from '@/api/types/layer-schema-types';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
-import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
-import { NotificationDetailsType } from '@/core/components/notifications/notifications';
-import { TypeHTMLElement, TypeMapFeaturesConfig } from '@/core/types/global-types';
+import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
+import type { NotificationDetailsType } from '@/core/components/notifications/notifications';
+import type { TypeHTMLElement, TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
 import { getScriptAndAssetURL } from '@/core/utils/utilities';
-import { SnackbarType } from '@/core/utils/notifications';
+import type { SnackbarType } from '@/core/utils/notifications';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with AppEventProcessor vs AppState
 

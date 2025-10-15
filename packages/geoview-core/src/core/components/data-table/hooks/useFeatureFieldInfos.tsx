@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { MappedLayerDataType } from '@/core/components/data-table/data-table-types';
+import type { TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import type { MappedLayerDataType } from '@/core/components/data-table/data-table-types';
 import { logger } from '@/core/utils/logger';
 
 /**

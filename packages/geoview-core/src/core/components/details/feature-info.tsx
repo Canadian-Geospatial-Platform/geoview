@@ -8,7 +8,7 @@ import { useDetailsCheckedFeatures, useDetailsStoreActions } from '@/core/stores
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import { delay } from '@/core/utils/utilities';
-import { TypeFeatureInfoEntry, TypeFieldEntry } from '@/api/types/map-schema-types';
+import type { TypeFeatureInfoEntry, TypeFieldEntry } from '@/api/types/map-schema-types';
 import { FeatureInfoTable } from './feature-info-table';
 import { getSxClasses } from './details-style';
 

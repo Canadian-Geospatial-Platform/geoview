@@ -1,19 +1,19 @@
-import { Extent } from 'ol/extent';
+import type { Extent } from 'ol/extent';
 import { XYZ, OSM, VectorTile } from 'ol/source';
 import TileGrid from 'ol/tilegrid/TileGrid';
-import BaseLayer from 'ol/layer/Base';
+import type BaseLayer from 'ol/layer/Base';
 import TileLayer from 'ol/layer/Tile';
 import VectorTileLayer from 'ol/layer/VectorTile';
 import MVT from 'ol/format/MVT';
-import OLMap from 'ol/Map';
+import type OLMap from 'ol/Map';
 import { OverviewMap as OLOverviewMap } from 'ol/control';
 
 import { applyStyle } from 'ol-mapbox-style';
 
-import { TypeBasemapOptions, TypeValidMapProjectionCodes, TypeDisplayLanguage } from '@/api/types/map-schema-types';
-import { TypeLod } from '@/api/types/layer-schema-types';
+import type { TypeBasemapOptions, TypeValidMapProjectionCodes, TypeDisplayLanguage } from '@/api/types/map-schema-types';
+import type { TypeLod } from '@/api/types/layer-schema-types';
 import { delay, getLocalizedMessage } from '@/core/utils/utilities';
-import {
+import type {
   TypeBasemapProps,
   TypeBasemapLayer,
   BasemapCreationList,
@@ -24,9 +24,10 @@ import { Projection } from '@/geo/utils/projection';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { logger } from '@/core/utils/logger';
-import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
+import type { EventDelegateBase } from '@/api/events/event-helper';
+import EventHelper from '@/api/events/event-helper';
 import { BasemapTakingLongTimeError, BasemapLayerCreationError, CoreBasemapCreationError } from '@/core/exceptions/geoview-exceptions';
-import { MapViewer } from '@/geo/map/map-viewer';
+import type { MapViewer } from '@/geo/map/map-viewer';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { formatError } from '@/core/exceptions/core-exceptions';
 

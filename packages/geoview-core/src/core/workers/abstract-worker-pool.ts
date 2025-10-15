@@ -1,4 +1,4 @@
-import { AbstractWorker } from './abstract-worker';
+import type { AbstractWorker } from './abstract-worker';
 
 /**
  * Abstract base class for managing a pool of workers.

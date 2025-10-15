@@ -1,4 +1,4 @@
-import { CSSProperties, ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import parse from 'html-react-parser';
 import { Box } from '@/ui/layout';
 import { logger } from '@/core/utils/logger';

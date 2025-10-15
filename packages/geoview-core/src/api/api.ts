@@ -8,15 +8,15 @@ import { logger } from '@/core/utils/logger';
 import * as Utilities from '@/core/utils/utilities';
 
 import { Projection } from '@/geo/utils/projection';
-import { MapViewer } from '@/geo/map/map-viewer';
+import type { MapViewer } from '@/geo/map/map-viewer';
 import * as GeoUtilities from '@/geo/utils/utilities';
 import { LayerApi } from '@/geo/layer/layer';
 
 import { initMapDivFromFunctionCall, unmountMap } from '@/app';
-import { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { removeGeoviewStore } from '@/core/stores/stores-managers';
 import { InitDivNotExistError, MapViewerAlreadyExistsError, MapViewerNotFoundError } from '@/core/exceptions/geoview-exceptions';
-import { TypeMapFeaturesInstance } from '@/api/types/map-schema-types';
+import type { TypeMapFeaturesInstance } from '@/api/types/map-schema-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 /**

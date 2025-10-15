@@ -1,10 +1,12 @@
-import Static, { Options as SourceOptions } from 'ol/source/ImageStatic';
+import type { Options as SourceOptions } from 'ol/source/ImageStatic';
+import Static from 'ol/source/ImageStatic';
 
-import { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
+import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import { Extent } from '@/api/types/map-schema-types';
-import { TypeGeoviewLayerConfig, CONST_LAYER_TYPES, TypeValidSourceProjectionCodes } from '@/api/types/layer-schema-types';
+import type { Extent } from '@/api/types/map-schema-types';
+import type { TypeGeoviewLayerConfig, TypeValidSourceProjectionCodes } from '@/api/types/layer-schema-types';
+import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 
 import { ImageStaticLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import {

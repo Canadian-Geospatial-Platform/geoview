@@ -1,21 +1,24 @@
 import VectorLayer from 'ol/layer/Vector';
 import Feature from 'ol/Feature';
-import VectorSource, { Options as VectorSourceOptions } from 'ol/source/Vector';
-import { Geometry as OLGeometry, Circle, LineString, MultiLineString, Point, Polygon, MultiPolygon, MultiPoint } from 'ol/geom';
-import { Coordinate } from 'ol/coordinate';
+import type { Options as VectorSourceOptions } from 'ol/source/Vector';
+import VectorSource from 'ol/source/Vector';
+import type { Geometry as OLGeometry } from 'ol/geom';
+import { Circle, LineString, MultiLineString, Point, Polygon, MultiPolygon, MultiPoint } from 'ol/geom';
+import type { Coordinate } from 'ol/coordinate';
 import { Fill, Stroke, Style, Icon } from 'ol/style';
-import { Options as VectorLayerOptions } from 'ol/layer/BaseVector';
+import type { Options as VectorLayerOptions } from 'ol/layer/BaseVector';
 import { asArray, asString } from 'ol/color';
 
-import { MapViewer } from '@/geo/map/map-viewer';
-import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
+import type { MapViewer } from '@/geo/map/map-viewer';
+import type { EventDelegateBase } from '@/api/events/event-helper';
+import EventHelper from '@/api/events/event-helper';
 import { setAlphaColor, getScriptAndAssetURL, generateId } from '@/core/utils/utilities';
-import { TypeStyleGeometry } from '@/api/types/map-schema-types';
+import type { TypeStyleGeometry } from '@/api/types/map-schema-types';
 import { Projection } from '@/geo/utils/projection';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 
-import { TypeFeatureCircleStyle, TypeFeatureStyle, TypeIconStyle } from '@/geo/layer/geometry/geometry-types';
+import type { TypeFeatureCircleStyle, TypeFeatureStyle, TypeIconStyle } from '@/geo/layer/geometry/geometry-types';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 
 /**

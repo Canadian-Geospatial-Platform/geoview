@@ -1,13 +1,7 @@
-import {
-  CONST_LAYER_ENTRY_TYPES,
-  TypeGeoviewLayerType,
-  TypeLayerMetadataVector,
-  TypeVectorSourceInitialConfig,
-} from '@/api/types/layer-schema-types';
-import {
-  AbstractBaseLayerEntryConfig,
-  AbstractBaseLayerEntryConfigProps,
-} from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import type { TypeGeoviewLayerType, TypeLayerMetadataVector, TypeVectorSourceInitialConfig } from '@/api/types/layer-schema-types';
+import { CONST_LAYER_ENTRY_TYPES } from '@/api/types/layer-schema-types';
+import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 
 export interface VectorLayerEntryConfigProps extends AbstractBaseLayerEntryConfigProps {
   /** Source settings to apply to the GeoView layer source at creation time. */

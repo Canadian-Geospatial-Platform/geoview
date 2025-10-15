@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { FormControlLabel as MaterialFormControlLabel, Switch as MaterialSwitch, SwitchProps } from '@mui/material';
+import type { SwitchProps } from '@mui/material';
+import { FormControlLabel as MaterialFormControlLabel, Switch as MaterialSwitch } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
 import { getSxClasses } from '@/ui/switch/switch-style';

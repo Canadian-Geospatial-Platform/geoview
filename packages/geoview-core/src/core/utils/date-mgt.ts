@@ -1,12 +1,13 @@
-import dayjs, { Dayjs } from 'dayjs';
+import type { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import duration from 'dayjs/plugin/duration';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
 
 import 'dayjs/locale/en-ca';
 import 'dayjs/locale/fr-ca';
-import { TypeDisplayLanguage } from '@/api/types/map-schema-types';
-import { TypeMetadataWMSCapabilityLayerDimension } from '@/api/types/layer-schema-types';
+import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
+import type { TypeMetadataWMSCapabilityLayerDimension } from '@/api/types/layer-schema-types';
 
 dayjs.extend(duration);
 

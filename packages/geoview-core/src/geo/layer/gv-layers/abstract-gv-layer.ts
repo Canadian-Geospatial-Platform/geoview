@@ -1,22 +1,26 @@
-import BaseLayer, { Options } from 'ol/layer/Base';
-import { Coordinate } from 'ol/coordinate';
-import { Pixel } from 'ol/pixel';
-import { Extent } from 'ol/extent';
-import Feature from 'ol/Feature';
-import { Layer } from 'ol/layer';
-import Source from 'ol/source/Source';
-import { Projection as OLProjection } from 'ol/proj';
-import { getUid, Map as OLMap } from 'ol';
+import type { Options } from 'ol/layer/Base';
+import type BaseLayer from 'ol/layer/Base';
+import type { Coordinate } from 'ol/coordinate';
+import type { Pixel } from 'ol/pixel';
+import type { Extent } from 'ol/extent';
+import type Feature from 'ol/Feature';
+import type { Layer } from 'ol/layer';
+import type Source from 'ol/source/Source';
+import type { Projection as OLProjection } from 'ol/proj';
+import type { Map as OLMap } from 'ol';
+import { getUid } from 'ol';
 
 import cloneDeep from 'lodash/cloneDeep';
-import { TimeDimension, DateMgt, TypeDateFragments } from '@/core/utils/date-mgt';
+import type { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
+import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
-import { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
-import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import {
+import type { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
+import type { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
+import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import type { EventDelegateBase } from '@/api/events/event-helper';
+import EventHelper from '@/api/events/event-helper';
+import type {
   TypeLayerStyleConfig,
   TypeFeatureInfoEntry,
   codedValueType,
@@ -27,16 +31,16 @@ import {
   TypeOutfieldsType,
   TypeOutfields,
 } from '@/api/types/map-schema-types';
-import {
+import type {
   TypeLayerMetadataWMS,
   TypeLayerMetadataFields,
   TypeLayerMetadataEsri,
   TypeLayerMetadataVector,
 } from '@/api/types/layer-schema-types';
 import { getLegendStyles, getFeatureImageSource, processStyle } from '@/geo/utils/renderer/geoview-renderer';
-import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
-import { SnackbarType } from '@/core/utils/notifications';
+import type { SnackbarType } from '@/core/utils/notifications';
 import { NotImplementedError, NotSupportedError } from '@/core/exceptions/core-exceptions';
 import { LayerNotQueryableError } from '@/core/exceptions/layer-exceptions';
 import { createAliasLookup } from '@/geo/layer/gv-layers/utils';

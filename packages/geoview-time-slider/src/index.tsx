@@ -1,5 +1,5 @@
 import React from 'react'; // GV This import is to validate that we're on the right React at the end of the file
-import { TypeTabs } from 'geoview-core/ui/tabs/tabs';
+import type { TypeTabs } from 'geoview-core/ui/tabs/tabs';
 import { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 import { TimeSliderIcon } from 'geoview-core/ui';
 import { FooterPlugin } from 'geoview-core/api/plugin/footer-plugin';
@@ -8,7 +8,7 @@ import { TimeSliderEventProcessor } from 'geoview-core/api/event-processors/even
 import { TimeSliderPanel } from './time-slider-panel';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-time-slider-panel.json';
-import { ConfigProps } from './time-slider-types';
+import type { ConfigProps } from './time-slider-types';
 
 export interface SliderFilterProps {
   title: string;

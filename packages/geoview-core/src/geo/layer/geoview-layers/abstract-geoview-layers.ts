@@ -1,35 +1,37 @@
-import BaseLayer from 'ol/layer/Base';
+import type BaseLayer from 'ol/layer/Base';
 import Collection from 'ol/Collection';
-import LayerGroup, { Options as LayerGroupOptions } from 'ol/layer/Group';
+import type { Options as LayerGroupOptions } from 'ol/layer/Group';
+import LayerGroup from 'ol/layer/Group';
 
 import { delay, generateId } from '@/core/utils/utilities';
-import { TypeDateFragments, DateMgt } from '@/core/utils/date-mgt';
+import type { TypeDateFragments } from '@/core/utils/date-mgt';
+import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
-import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { TypeStyleGeometry } from '@/api/types/map-schema-types';
-import {
-  CONST_LAYER_TYPES,
+import type { EventDelegateBase } from '@/api/events/event-helper';
+import EventHelper from '@/api/events/event-helper';
+import type { TypeStyleGeometry } from '@/api/types/map-schema-types';
+import type {
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
   TypeLayerInitialSettings,
   TypeLayerStatus,
   TypeGeoviewLayerType,
-  validVectorLayerLegendTypes,
 } from '@/api/types/layer-schema-types';
+import { CONST_LAYER_TYPES, validVectorLayerLegendTypes } from '@/api/types/layer-schema-types';
 import { LayerServiceMetadataEmptyError, LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
 import {
   LayerEntryConfigEmptyLayerGroupError,
   LayerEntryConfigUnableToCreateGroupLayerError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
-import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { SnackbarType } from '@/core/utils/notifications';
+import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import type { SnackbarType } from '@/core/utils/notifications';
 import { CancelledError, ResponseEmptyError, PromiseRejectErrorWrapper, formatError } from '@/core/exceptions/core-exceptions';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
-import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
-import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import type { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 
 // Constant used to define the default layer names

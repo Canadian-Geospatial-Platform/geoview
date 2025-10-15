@@ -1,26 +1,22 @@
 import Feature from 'ol/Feature';
 import { Vector as VectorSource } from 'ol/source';
-import { Options as SourceOptions } from 'ol/source/Vector';
+import type { Options as SourceOptions } from 'ol/source/Vector';
 import { all, bbox } from 'ol/loadingstrategy';
-import { ReadOptions } from 'ol/format/Feature';
-import { Projection as OLProjection, ProjectionLike } from 'ol/proj';
+import type { ReadOptions } from 'ol/format/Feature';
+import type { Projection as OLProjection, ProjectionLike } from 'ol/proj';
 import { Point } from 'ol/geom';
-import { Extent } from 'ol/extent';
+import type { Extent } from 'ol/extent';
 import { getUid } from 'ol/util';
 
-import { TypeOutfields } from '@/api/types/map-schema-types';
-import {
-  CONST_LAYER_TYPES,
-  TypeBaseVectorSourceInitialConfig,
-  TypeFeatureInfoLayerConfig,
-  TypePostSettings,
-} from '@/api/types/layer-schema-types';
+import type { TypeOutfields } from '@/api/types/map-schema-types';
+import type { TypeBaseVectorSourceInitialConfig, TypeFeatureInfoLayerConfig, TypePostSettings } from '@/api/types/layer-schema-types';
+import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
-import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
+import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { Projection } from '@/geo/utils/projection';
 import { Fetch } from '@/core/utils/fetch-helper';
@@ -30,8 +26,8 @@ import {
   LayerTooManyEsriFeatures,
 } from '@/core/exceptions/layer-exceptions';
 import { LayerEntryConfigVectorSourceURLNotDefinedError } from '@/core/exceptions/layer-entry-config-exceptions';
-import { WkbLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
-import { GeoJSONLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
+import type { WkbLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
+import type { GeoJSONLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
 
 // Some constants
 const EXCLUDED_HEADERS_LAT = ['latitude', 'lat', 'y', 'ycoord', 'latitude|latitude', 'latitude | latitude'];

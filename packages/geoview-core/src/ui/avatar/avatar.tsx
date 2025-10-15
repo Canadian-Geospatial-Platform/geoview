@@ -1,5 +1,6 @@
 // GV: THIS UI COMPONENT IS NOT USE
-import { Avatar as MaterialAvatar, AvatarProps } from '@mui/material';
+import type { AvatarProps } from '@mui/material';
+import { Avatar as MaterialAvatar } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
 /**

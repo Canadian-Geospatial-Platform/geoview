@@ -1,6 +1,7 @@
-import { TypeWindow } from 'geoview-core/core/types/global-types';
+import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { SchemaValidator } from 'geochart';
-import { LayerListEntry, Layout } from 'geoview-core/core/components/common';
+import type { LayerListEntry } from 'geoview-core/core/components/common';
+import { Layout } from 'geoview-core/core/components/common';
 import { checkSelectedLayerPathList } from 'geoview-core/core/components/common/comp-common';
 import { Typography } from 'geoview-core/ui/typography/typography';
 import { Box } from 'geoview-core/ui';
@@ -9,12 +10,12 @@ import {
   useMapVisibleLayers,
   useMapStoreActions,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
+import type { TypeGeochartResultSetEntry } from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
 import {
   useGeochartConfigs,
   useGeochartStoreActions,
   useGeochartLayerDataArrayBatch,
   useGeochartSelectedLayerPath,
-  TypeGeochartResultSetEntry,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
 import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
@@ -22,7 +23,8 @@ import { logger } from 'geoview-core/core/utils/logger';
 import { TABS } from 'geoview-core/core/utils/constant';
 
 import { GeoChart } from './geochart';
-import { convertGeoViewGeoChartConfigFromCore, GeoViewGeoChartRootConfig } from './geochart-types';
+import type { GeoViewGeoChartRootConfig } from './geochart-types';
+import { convertGeoViewGeoChartConfigFromCore } from './geochart-types';
 
 interface GeoChartPanelProps {
   mapId: string;

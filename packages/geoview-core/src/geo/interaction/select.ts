@@ -1,14 +1,16 @@
 import { Select as OLSelect } from 'ol/interaction';
-import { SelectEvent as OLSelectEvent, Options as OLSelectOptions } from 'ol/interaction/Select';
-import Collection from 'ol/Collection';
-import Feature from 'ol/Feature';
-import { Geometry } from 'ol/geom';
+import type { SelectEvent as OLSelectEvent, Options as OLSelectOptions } from 'ol/interaction/Select';
+import type Collection from 'ol/Collection';
+import type Feature from 'ol/Feature';
+import type { Geometry } from 'ol/geom';
 
-import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
+import type { EventDelegateBase } from '@/api/events/event-helper';
+import EventHelper from '@/api/events/event-helper';
+import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { convertTypeFeatureStyleToOpenLayersStyle } from '@/geo/utils/utilities';
 
-import { Interaction, InteractionOptions } from './interaction';
+import type { InteractionOptions } from './interaction';
+import { Interaction } from './interaction';
 
 /**
  * Supported options for select interactions

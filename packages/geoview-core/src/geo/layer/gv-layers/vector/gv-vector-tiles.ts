@@ -1,12 +1,12 @@
 import VectorTileLayer from 'ol/layer/VectorTile';
-import { Options as TileOptions } from 'ol/layer/BaseTile';
-import { VectorTile } from 'ol/source';
+import type { Options as TileOptions } from 'ol/layer/BaseTile';
+import type { VectorTile } from 'ol/source';
 import { applyStyle } from 'ol-mapbox-style';
 
-import { VectorTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
+import type { VectorTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { featureInfoGetFieldType } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-vector-tile';
-import { TypeOutfieldsType } from '@/api/types/map-schema-types';
+import type { TypeOutfieldsType } from '@/api/types/map-schema-types';
 
 /**
  * Manages a Vector Tiles layer.

@@ -1,4 +1,5 @@
-import { ListItemButton as MaterialListItemButton, ListItemButtonProps } from '@mui/material';
+import type { ListItemButtonProps } from '@mui/material';
+import { ListItemButton as MaterialListItemButton } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
 /**

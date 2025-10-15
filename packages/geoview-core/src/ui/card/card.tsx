@@ -1,5 +1,6 @@
-import { ReactNode } from 'react';
-import { Card as MaterialCard, CardContent as MaterialCardContent, CardHeader as MaterialCardHeader, CardProps } from '@mui/material';
+import type { ReactNode } from 'react';
+import type { CardProps } from '@mui/material';
+import { Card as MaterialCard, CardContent as MaterialCardContent, CardHeader as MaterialCardHeader } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
 // Define valid heading elements

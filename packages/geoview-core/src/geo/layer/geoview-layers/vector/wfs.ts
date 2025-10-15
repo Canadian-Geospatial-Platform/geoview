@@ -1,15 +1,14 @@
-import { Options as SourceOptions } from 'ol/source/Vector';
+import type { Options as SourceOptions } from 'ol/source/Vector';
 import { WFS as FormatWFS } from 'ol/format';
-import { ReadOptions } from 'ol/format/Feature';
-import { Vector as VectorSource } from 'ol/source';
-import Feature from 'ol/Feature';
+import type { ReadOptions } from 'ol/format/Feature';
+import type { Vector as VectorSource } from 'ol/source';
+import type Feature from 'ol/Feature';
 import { bbox } from 'ol/loadingstrategy';
-import { Extent } from 'ol/extent';
-import { Projection as OLProjection } from 'ol/proj';
+import type { Extent } from 'ol/extent';
+import type { Projection as OLProjection } from 'ol/proj';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
-import { TypeOutfields, TypeOutfieldsType } from '@/api/types/map-schema-types';
-import {
-  CONST_LAYER_TYPES,
+import type { TypeOutfields, TypeOutfieldsType } from '@/api/types/map-schema-types';
+import type {
   TypeGeoviewLayerConfig,
   TypeSourceWfsInitialConfig,
   WFSJsonResponseFeatureTypeFields,
@@ -20,14 +19,15 @@ import {
   TypeMetadataWFSOperationMetadataOperationParameterValue,
   VectorStrategy,
 } from '@/api/types/layer-schema-types';
+import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { findPropertyByRegexPath } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { WfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
-import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
+import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { LayerNoCapabilitiesError } from '@/core/exceptions/layer-exceptions';
 import { LayerEntryConfigLayerIdNotFoundError } from '@/core/exceptions/layer-entry-config-exceptions';
 import { GVWFS } from '@/geo/layer/gv-layers/vector/gv-wfs';
-import { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
+import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 
 export interface TypeWFSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'geoviewLayerType'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.WFS;

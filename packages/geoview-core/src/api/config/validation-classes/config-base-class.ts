@@ -1,9 +1,8 @@
-import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { Extent, TypeLayerStyleConfig } from '@/api/types/map-schema-types';
-import {
+import type { EventDelegateBase } from '@/api/events/event-helper';
+import EventHelper from '@/api/events/event-helper';
+import type { Extent, TypeLayerStyleConfig } from '@/api/types/map-schema-types';
+import type {
   ConfigClassOrType,
-  CONST_LAYER_ENTRY_TYPES,
-  CONST_LAYER_TYPES,
   TypeGeoviewLayerConfig,
   TypeGeoviewLayerType,
   TypeLayerEntryType,
@@ -12,12 +11,14 @@ import {
   TypeTileGrid,
   TypeValidSourceProjectionCodes,
 } from '@/api/types/layer-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
 import { LAYER_STATUS } from '@/core/utils/constant';
-import { GroupLayerEntryConfig, GroupLayerEntryConfigProps } from './group-layer-entry-config';
+import type { GroupLayerEntryConfig, GroupLayerEntryConfigProps } from './group-layer-entry-config';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
-import { DateMgt, TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
-import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import type { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
+import { DateMgt } from '@/core/utils/date-mgt';
+import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 
 export interface ConfigBaseClassProps {

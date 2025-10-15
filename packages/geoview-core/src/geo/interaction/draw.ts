@@ -1,13 +1,15 @@
-import { Type as OLGeomType } from 'ol/geom/Geometry';
+import type { Type as OLGeomType } from 'ol/geom/Geometry';
 import { Draw as OLDraw } from 'ol/interaction';
-import { GeometryFunction, DrawEvent as OLDrawEvent, Options as OLDrawOptions } from 'ol/interaction/Draw';
-import { FlatStyle } from 'ol/style/flat';
+import type { GeometryFunction, DrawEvent as OLDrawEvent, Options as OLDrawOptions } from 'ol/interaction/Draw';
+import type { FlatStyle } from 'ol/style/flat';
 
-import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
+import type { EventDelegateBase } from '@/api/events/event-helper';
+import EventHelper from '@/api/events/event-helper';
+import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { convertTypeFeatureStyleToOpenLayersStyle } from '@/geo//utils/utilities';
 
-import { Interaction, InteractionOptions } from './interaction';
+import type { InteractionOptions } from './interaction';
+import { Interaction } from './interaction';
 
 /**
  * Supported options for drawing interactions

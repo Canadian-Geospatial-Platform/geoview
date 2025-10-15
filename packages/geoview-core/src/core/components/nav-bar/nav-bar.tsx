@@ -15,15 +15,15 @@ import Location from './buttons/location';
 import Projection from './buttons/projection';
 import { ButtonGroup, Box, IconButton, Collapse } from '@/ui';
 import { ExpandLessIcon, ExpandMoreIcon } from '@/ui/icons';
-import { TypeButtonPanel } from '@/ui/panel/panel-types';
+import type { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { getSxClasses } from './nav-bar-style';
-import { NavBarApi, NavBarCreatedEvent, NavBarRemovedEvent } from '@/core/components';
+import type { NavBarApi, NavBarCreatedEvent, NavBarRemovedEvent } from '@/core/components';
 import { useUINavbarComponents } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from './nav-bar-panel-button';
 
-import { TypeValidNavBarProps } from '@/api/types/map-schema-types';
+import type { TypeValidNavBarProps } from '@/api/types/map-schema-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 type NavBarProps = {

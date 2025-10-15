@@ -1,6 +1,7 @@
-import { forwardRef, Ref } from 'react';
+import type { Ref } from 'react';
+import { forwardRef } from 'react';
 import MaterialList from '@mui/material/List';
-import { ListProps } from '@mui/material';
+import type { ListProps } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
 /**

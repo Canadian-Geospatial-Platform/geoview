@@ -6,8 +6,9 @@ import { logger } from 'geoview-core/core/utils/logger';
 
 import schema from '../schema.json';
 import defaultConfig from '../default-config-swiper.json';
-import { ConfigProps, Swiper } from './swiper';
-import { SwipeOrientation } from './swiper-types';
+import type { ConfigProps } from './swiper';
+import { Swiper } from './swiper';
+import type { SwipeOrientation } from './swiper-types';
 
 /**
  * Create a class for the plugin instance

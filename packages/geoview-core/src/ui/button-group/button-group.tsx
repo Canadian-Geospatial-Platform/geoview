@@ -1,5 +1,7 @@
-import { Ref, forwardRef } from 'react';
-import { ButtonGroup as MaterialButtonGroup, ButtonGroupProps } from '@mui/material';
+import type { Ref } from 'react';
+import { forwardRef } from 'react';
+import type { ButtonGroupProps } from '@mui/material';
+import { ButtonGroup as MaterialButtonGroup } from '@mui/material';
 import { animated } from '@react-spring/web';
 import { useFadeIn } from '@/core/utils/useSpringAnimations';
 import { logger } from '@/core/utils/logger';

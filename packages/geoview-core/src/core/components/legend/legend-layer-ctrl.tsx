@@ -21,7 +21,7 @@ import {
   useSelectorLayerItems,
   useSelectorLayerType,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
+import type { TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
 import {
   useMapStoreActions,
   useSelectorLayerVisibility,

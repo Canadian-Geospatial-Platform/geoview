@@ -1,7 +1,7 @@
-import { ReactNode } from 'react';
-import { TooltipProps, ButtonProps, TextFieldProps } from '@mui/material';
+import type { ReactNode } from 'react';
+import type { TooltipProps, ButtonProps, TextFieldProps } from '@mui/material';
 
-import { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
+import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 
 /**
  * Interface used to initialize a button panel.

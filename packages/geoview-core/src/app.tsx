@@ -1,5 +1,6 @@
 import React, { createElement } from 'react'; // This is the real React that's exported
-import { Root, createRoot } from 'react-dom/client'; // This is the real React-DOM that's exported
+import type { Root } from 'react-dom/client';
+import { createRoot } from 'react-dom/client'; // This is the real React-DOM that's exported
 import * as translate from 'react-i18next'; // This is the real translate that's exported
 
 import { useMediaQuery } from '@mui/material';
@@ -13,15 +14,15 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 
-import { MapFeatureConfig } from '@/api/config/map-feature-config';
-import { TypeDisplayLanguage } from '@/api/types/map-schema-types';
+import type { MapFeatureConfig } from '@/api/config/map-feature-config';
+import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import * as UI from '@/ui';
 
 import AppStart from '@/core/app-start';
 import { API } from '@/api/api';
 import { ConfigApi } from '@/api/config/config-api';
 import { createI18nInstance } from '@/core/translation/i18n';
-import { MapViewerDelegate, TypeCGPV, TypeMapFeaturesConfig } from '@/core/types/global-types';
+import type { MapViewerDelegate, TypeCGPV, TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { Config } from '@/api/config/config';
 import { useWhatChanged } from '@/core/utils/useWhatChanged';
 import { addGeoViewStore } from '@/core/stores/stores-managers';

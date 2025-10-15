@@ -1,11 +1,7 @@
 import cloneDeep from 'lodash/cloneDeep';
 import defaultsDeep from 'lodash/defaultsDeep';
 
-import {
-  DEFAULT_MAP_FEATURE_CONFIG,
-  MAP_EXTENTS,
-  VALID_PROJECTION_CODES,
-  MAP_CENTER,
+import type {
   TypeAppBarProps,
   TypeDisplayTheme,
   TypeFooterBarProps,
@@ -22,6 +18,7 @@ import {
   TypeExternalPackagesProps,
   TypeValidVersions,
 } from '@/api/types/map-schema-types';
+import { DEFAULT_MAP_FEATURE_CONFIG, MAP_EXTENTS, VALID_PROJECTION_CODES, MAP_CENTER } from '@/api/types/map-schema-types';
 
 /**
  * The map feature configuration class.

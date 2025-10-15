@@ -1,7 +1,7 @@
 /* eslint-disable max-classes-per-file */
 import BaseEvent from 'ol/events/Event';
-import Feature from 'ol/Feature';
-import { Geometry } from 'ol/geom';
+import type Feature from 'ol/Feature';
+import type { Geometry } from 'ol/geom';
 
 /**
  * Event for transform operations

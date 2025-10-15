@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { IconButton, FullscreenIcon, FullscreenExitIcon } from '@/ui';
-import { TypeHTMLElement } from '@/core/types/global-types';
+import type { TypeHTMLElement } from '@/core/types/global-types';
 import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
 import { useAppStoreActions, useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';

@@ -1,9 +1,9 @@
-import VectorSource from 'ol/source/Vector';
-import { GeoJSONObject } from 'ol/format/GeoJSON';
+import type VectorSource from 'ol/source/Vector';
+import type { GeoJSONObject } from 'ol/format/GeoJSON';
 import { GeoJSON as FormatGeoJSON } from 'ol/format';
-import { Projection as OLProjection } from 'ol/proj';
+import type { Projection as OLProjection } from 'ol/proj';
 
-import { GeoJSONLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
+import type { GeoJSONLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import { Projection } from '@/geo/utils/projection';
 

@@ -1,5 +1,6 @@
 // GV: THIS UI COMPONENT IS NOT USE
-import { useState, useCallback, ReactNode, CSSProperties, memo } from 'react';
+import type { ReactNode, CSSProperties } from 'react';
+import { useState, useCallback, memo } from 'react';
 import {
   Box,
   Accordion as MaterialAccordion,

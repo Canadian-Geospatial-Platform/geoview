@@ -1,5 +1,5 @@
-import { ComponentsVariants, ComponentsOverrides, ComponentsProps } from '@mui/material';
-import { IGeoViewColors, IGeoViewFontSizes, IGeoViewSpacingAndSizing } from '@/ui/style/types';
+import type { ComponentsVariants, ComponentsOverrides, ComponentsProps } from '@mui/material';
+import type { IGeoViewColors, IGeoViewFontSizes, IGeoViewSpacingAndSizing } from '@/ui/style/types';
 
 /** https://material-ui.com/guides/typescript/ */
 

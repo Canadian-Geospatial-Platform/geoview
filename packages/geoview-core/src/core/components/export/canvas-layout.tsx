@@ -2,8 +2,9 @@ import { renderToString } from 'react-dom/server';
 import * as html2canvas from '@html2canvas/html2canvas';
 
 import { DateMgt } from '@/core/utils/date-mgt';
-import { FileExportProps } from './export-modal';
-import { PAGE_CONFIGS, FlattenedLegendItem, getMapInfo, TypeValidPageSizes } from './utilities';
+import type { FileExportProps } from './export-modal';
+import type { FlattenedLegendItem, TypeValidPageSizes } from './utilities';
+import { PAGE_CONFIGS, getMapInfo } from './utilities';
 import { CANVAS_STYLES } from './layout-styles';
 
 interface CanvasDocumentProps {

@@ -6,7 +6,7 @@ import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-int
 import { Dialog, DialogTitle, DialogContent, DialogActions, List, Button, Box, Typography, BrowserNotSupportedIcon } from '@/ui';
 import { getSxClasses } from './details-style';
 import { FeatureInfoTable } from './feature-info-table';
-import { TypeFieldEntry } from '@/api/types/map-schema-types';
+import type { TypeFieldEntry } from '@/api/types/map-schema-types';
 import { logger } from '@/core/utils/logger';
 
 /**

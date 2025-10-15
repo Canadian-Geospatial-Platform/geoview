@@ -1,12 +1,13 @@
-import {
+import type {
   ConfigClassOrType,
-  CONST_LAYER_TYPES,
   TypeGeoviewLayerConfig,
   TypeLayerMetadataOGC,
   TypeSourceOgcFeatureInitialConfig,
 } from '@/api/types/layer-schema-types';
-import { TypeOgcFeatureLayerConfig } from '@/geo/layer/geoview-layers/vector/ogc-feature';
-import { VectorLayerEntryConfig, VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
+import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
+import type { TypeOgcFeatureLayerConfig } from '@/geo/layer/geoview-layers/vector/ogc-feature';
+import type { VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
+import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { Projection } from '@/geo/utils/projection';
 
 export interface OgcFeatureLayerEntryConfigProps extends VectorLayerEntryConfigProps {

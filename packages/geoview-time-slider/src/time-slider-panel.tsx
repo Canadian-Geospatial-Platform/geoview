@@ -1,7 +1,8 @@
-import { TypeWindow } from 'geoview-core/core/types/global-types';
-import { LayerListEntry, Layout } from 'geoview-core/core/components/common';
+import type { TypeWindow } from 'geoview-core/core/types/global-types';
+import type { LayerListEntry } from 'geoview-core/core/components/common';
+import { Layout } from 'geoview-core/core/components/common';
+import type { TypeTimeSliderValues } from 'geoview-core/core/stores/store-interface-and-intial-values/time-slider-state';
 import {
-  TypeTimeSliderValues,
   useTimeSliderLayers,
   useTimeSliderSelectedLayerPath,
   useTimeSliderStoreActions,

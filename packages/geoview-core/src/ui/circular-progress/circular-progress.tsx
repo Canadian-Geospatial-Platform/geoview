@@ -1,6 +1,9 @@
-import { CSSProperties, useMemo } from 'react';
-import { SxProps, Theme, useTheme } from '@mui/material/styles';
-import { CircularProgress as MaterialCircularProgress, CircularProgressProps, Box, Fade } from '@mui/material';
+import type { CSSProperties } from 'react';
+import { useMemo } from 'react';
+import type { SxProps, Theme } from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles';
+import type { CircularProgressProps } from '@mui/material';
+import { CircularProgress as MaterialCircularProgress, Box, Fade } from '@mui/material';
 
 import { getSxClasses } from '@/ui/circular-progress/circular-progress-style';
 import { logger } from '@/core/utils/logger';

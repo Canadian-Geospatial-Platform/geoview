@@ -2,7 +2,8 @@ import { useState, useEffect, memo } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
-import Lightbox, { ViewCallbackProps } from 'yet-another-react-lightbox';
+import type { ViewCallbackProps } from 'yet-another-react-lightbox';
+import Lightbox from 'yet-another-react-lightbox';
 import Download from 'yet-another-react-lightbox/plugins/download';
 import 'yet-another-react-lightbox/styles.css';
 
