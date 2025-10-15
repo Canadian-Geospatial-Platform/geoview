@@ -35,6 +35,7 @@ import {
   TypeLayerStatus,
   GeoCoreLayerConfig,
   GeoPackageLayerConfig,
+  mapConfigLayerEntryIsRCS,
 } from '@/api/types/layer-schema-types';
 
 import { GeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
@@ -2316,7 +2317,7 @@ export class LayerApi {
 
   /**
    * Converts a map configuration layer entry into a promise of a GeoView layer configuration.
-   * Depending on the type of the layer entry (e.g., GeoCore, GeoPackage, Shapefile, or standard GeoView),
+   * Depending on the type of the layer entry (e.g., GeoCore, GeoPackage, Shapefile, RCS, or standard GeoView),
    * this function processes each entry accordingly and wraps the result in a `Promise`.
    * Errors encountered during asynchronous operations are handled via a provided callback.
    * @param {string} mapId - The unique identifier of the map instance this configuration applies to.
@@ -2342,6 +2343,9 @@ export class LayerApi {
     } else if (mapConfigLayerEntryIsShapefile(entry)) {
       // Working with a shapefile layer
       promise = ShapefileReader.convertShapefileConfigToGeoJson(entry);
+    } else if (mapConfigLayerEntryIsRCS(entry)) {
+      // Working with a RCS (Geocore subset) layer
+      promise = GeoCore.createLayerConfigFromRCSUUID(entry.geoviewLayerId, language, entry);
     } else {
       // Working with a standard GeoView layer
       promise = Promise.resolve(entry);

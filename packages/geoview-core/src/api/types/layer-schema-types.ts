@@ -46,7 +46,7 @@ export type TypeGeoviewLayerType =
   | 'xyzTiles';
 
 /** Definition of the geoview layer types accepted by the viewer. */
-export type TypeInitialGeoviewLayerType = TypeGeoviewLayerType | 'geoCore' | 'GeoPackage' | 'shapefile';
+export type TypeInitialGeoviewLayerType = TypeGeoviewLayerType | 'geoCore' | 'GeoPackage' | 'shapefile' | 'rcs';
 
 /**
  * Definition of the GeoView layer constants
@@ -115,7 +115,8 @@ export type TypeLayerEntryType =
   | 'group'
   | 'geoCore'
   | 'GeoPackage'
-  | 'shapefile';
+  | 'shapefile'
+  | 'rcs';
 
 /** The possible layer statuses when processing layer configs */
 export type TypeLayerStatus = 'newInstance' | 'registered' | 'processing' | 'processed' | 'loading' | 'loaded' | 'error';
@@ -132,7 +133,8 @@ export type LayerEntryTypesKey =
   | 'GROUP'
   | 'GEOCORE'
   | 'GEOPACKAGE'
-  | 'SHAPEFILE';
+  | 'SHAPEFILE'
+  | 'RCS';
 
 /**
  * Definition of the sub schema to use for each type of Geoview layer
@@ -173,6 +175,7 @@ export const CONST_LAYER_ENTRY_TYPES: Record<LayerEntryTypesKey, TypeLayerEntryT
   GEOCORE: 'geoCore',
   GEOPACKAGE: 'GeoPackage',
   SHAPEFILE: 'shapefile',
+  RCS: 'rcs',
 };
 
 /** Type used to define valid source projection codes. */
@@ -429,6 +432,25 @@ export type GeoCoreLayerConfig = {
   listOfLayerEntryConfig?: TypeLayerEntryConfig[];
 };
 
+export type RCSLayerConfig = {
+  /** Type of GeoView layer. */
+  geoviewLayerType: typeof CONST_LAYER_ENTRY_TYPES.RCS;
+
+  /** The GeoCore UUID. */
+  geoviewLayerId: string;
+
+  /**
+   * The display name of the layer (English/French). This overrides the default name coming from the GeoCore API.
+   */
+  geoviewLayerName?: string | undefined;
+
+  /** Initial settings to apply to the GeoCore layer at creation time. */
+  initialSettings?: TypeLayerInitialSettings;
+
+  /** The layer entries to use from the GeoCore layer. */
+  listOfLayerEntryConfig?: TypeLayerEntryConfig[];
+};
+
 export type GeoPackageLayerConfig = {
   /** Type of GeoView layer. */
   geoviewLayerType: typeof CONST_LAYER_ENTRY_TYPES.GEOPACKAGE;
@@ -481,9 +503,11 @@ export const mapConfigLayerEntryIsGeoCore = (layerConfigEntryOption: MapConfigLa
 /**
  * Type guard that checks if a given map layer configuration entry is of type GeoPackage.
  * @param {MapConfigLayerEntry} layerConfigEntryOption - The layer entry config to check
- * @returns {boolean} True if the layer is a GeoPackage layer, narrowing the type to GeoPackageLayerConfig.
+ * @returns {layerConfigEntryOption is GeoPackageLayerConfig} True if the layer is a GeoPackage layer, narrowing the type to GeoPackageLayerConfig.
  */
-export const mapConfigLayerEntryIsGeoPackage = (layerConfigEntryOption: MapConfigLayerEntry): boolean => {
+export const mapConfigLayerEntryIsGeoPackage = (
+  layerConfigEntryOption: MapConfigLayerEntry
+): layerConfigEntryOption is GeoPackageLayerConfig => {
   return layerConfigEntryOption.geoviewLayerType === CONST_LAYER_ENTRY_TYPES.GEOPACKAGE;
 };
 
@@ -498,7 +522,19 @@ export const mapConfigLayerEntryIsShapefile = (
   return layerConfigEntryOption.geoviewLayerType === CONST_LAYER_ENTRY_TYPES.SHAPEFILE;
 };
 
-export type MapConfigLayerEntry = TypeGeoviewLayerConfig | GeoCoreLayerConfig | GeoPackageLayerConfig | ShapefileLayerConfig;
+/**
+ * Type guard that checks if a given map layer configuration entry is of type RCS.
+ * @param {MapConfigLayerEntry} layerConfigEntryOption - The layer entry config to check
+ * @returns {layerConfigEntryOption is RCSLayerConfig} True if the layer is a RCS layer, narrowing the type to RCSLayerConfig.
+ */
+export const mapConfigLayerEntryIsRCS = (layerConfigEntryOption: MapConfigLayerEntry): layerConfigEntryOption is RCSLayerConfig => {
+  return layerConfigEntryOption.geoviewLayerType === CONST_LAYER_ENTRY_TYPES.RCS;
+};
+
+// Special layer configs that don't use TypeGeoviewLayerType
+type SpecialLayerConfigs = GeoCoreLayerConfig | RCSLayerConfig | GeoPackageLayerConfig | ShapefileLayerConfig;
+
+export type MapConfigLayerEntry = SpecialLayerConfigs | TypeGeoviewLayerConfig;
 
 /**
  * Temporary? function to serialize a geoview layer configuration to be able to send it to the store
@@ -535,6 +571,17 @@ export const serializeTypeGeoviewLayerConfig = (geoviewLayerConfig: MapConfigLay
       geoviewLayerId: geoviewLayerConfig.geoviewLayerId,
       geoviewLayerName: geoviewLayerConfig.geoviewLayerName,
       geoviewLayerType: geoviewLayerConfig.geoviewLayerType,
+    } as unknown as TypeGeoviewLayerConfig;
+  }
+
+  // If RCS layer entry
+  if (mapConfigLayerEntryIsRCS(geoviewLayerConfig)) {
+    // Serialize
+    return {
+      geoviewLayerId: geoviewLayerConfig.geoviewLayerId,
+      geoviewLayerName: geoviewLayerConfig.geoviewLayerName,
+      geoviewLayerType: geoviewLayerConfig.geoviewLayerType,
+      listOfLayerEntryConfig: [],
     } as unknown as TypeGeoviewLayerConfig;
   }
 

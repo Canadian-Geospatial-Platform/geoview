@@ -14,6 +14,7 @@ import {
   mapConfigLayerEntryIsShapefile,
   TypeGeoviewLayerType,
   ConfigClassOrType,
+  mapConfigLayerEntryIsRCS,
 } from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
 
@@ -144,7 +145,8 @@ export class ConfigValidation {
       if (
         !mapConfigLayerEntryIsGeoCore(listOfGeoviewLayerConfig[i]) &&
         !mapConfigLayerEntryIsShapefile(listOfGeoviewLayerConfig[i]) &&
-        !mapConfigLayerEntryIsGeoPackage(listOfGeoviewLayerConfig[i])
+        !mapConfigLayerEntryIsGeoPackage(listOfGeoviewLayerConfig[i]) &&
+        !mapConfigLayerEntryIsRCS(listOfGeoviewLayerConfig[i])
       ) {
         const gvLayerConfigCasted = listOfGeoviewLayerConfig[i] as TypeGeoviewLayerConfig;
         isValid = ConfigValidation.#isValidTypeListOfLayerEntryConfig(
@@ -175,7 +177,8 @@ export class ConfigValidation {
         if (
           mapConfigLayerEntryIsGeoCore(geoviewLayerConfig) ||
           mapConfigLayerEntryIsShapefile(geoviewLayerConfig) ||
-          mapConfigLayerEntryIsGeoPackage(geoviewLayerConfig)
+          mapConfigLayerEntryIsGeoPackage(geoviewLayerConfig) ||
+          mapConfigLayerEntryIsRCS(geoviewLayerConfig)
         ) {
           // As-is we keep it
           validConfigs.push(geoviewLayerConfig);

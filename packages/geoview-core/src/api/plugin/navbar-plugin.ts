@@ -25,7 +25,7 @@ export abstract class NavBarPlugin extends AbstractPlugin {
   protected onCreateButtonConfigs(): Record<string, TypeNavBarButtonConfig> {
     logger.logInfo('NavBar Plugin - Default onCreateButtonProps');
     // Override this to create the button props..
-    // Fetch cgpv
+    // Get cgpv
     const { cgpv } = window as TypeWindow;
     const { MapIcon } = cgpv.ui.elements;
 

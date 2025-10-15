@@ -30,6 +30,8 @@
   "externalPackages": [],
   "serviceUrls": {
     "geocoreUrl": "https://geocore.api.geo.ca",
+    "rcsUrl": "https://gcgeo.gc.ca/geonetwork/srv/api/v2/docs/",
+    "proxyUrl": "https://maps.canada.ca/wmsproxy/ws/wmsproxy/executeFromProxy",
     "geolocator": "https://geolocator.api.geo.ca?keys=geonames,nominatim,locate",
     "utmZoneUrl": "https://geogratis.gc.ca/services/delimitation/en/utmzone",
     "ntsSheetUrl": "https://geogratis.gc.ca/services/delimitation/en/nts",

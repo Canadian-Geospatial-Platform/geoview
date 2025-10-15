@@ -65,6 +65,48 @@ export class UUIDmapConfigReader {
   }
 
   /**
+   * Generates GeoView layers configurations, from Geonetwork RCS API, using a list of UUIDs.
+   * @param {string} baseUrl - The base url of GeoCore API
+   * @param {TypeDisplayLanguage} lang - The language to get the config for
+   * @param {string[]} uuids - A list of uuids to get the configurations for
+   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+   * @returns {Promise<UUIDmapConfigReaderResponse>} Layers read and parsed from uuids results from Geonetwork RCS
+   */
+  static async getGVConfigFromUUIDsRCS(
+    baseUrl: string,
+    lang: TypeDisplayLanguage,
+    uuids: string[],
+    abortSignal?: AbortSignal
+  ): Promise<UUIDmapConfigReaderResponse> {
+    let result;
+    try {
+      // Build the url
+      const url = `${baseUrl}/${lang}/${uuids.toString()}`;
+
+      // Fetch the config
+      result = await Fetch.fetchJson<GeoCoreConfigResponseRCSLayers[]>(url, {
+        signal: abortSignal,
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+        },
+      });
+
+      // Return the parsed response
+      // Mimic the Geocore full response but only fill the rcs. RCS from Geonetwork has no lang, so duplicate the value...
+      return {
+        layers: this.#getLayerConfigFromResponse(uuids, { response: { rcs: { en: result, fr: result }, gcs: [] } }, lang),
+      };
+    } catch (error: unknown) {
+      // If the promise had failed
+      if (!result) throw new LayerGeoCoreUUIDNotFoundError(uuids, formatError(error));
+
+      // Re-throw the original error otherwise
+      throw error;
+    }
+  }
+
+  /**
    * Reads and parses Layers configs from uuid request result
    * @param {string[]} uuids - The uuids to read Geocore API for
    * @param {GeoCoreConfigResponseRoot} resultData - The uuid request result

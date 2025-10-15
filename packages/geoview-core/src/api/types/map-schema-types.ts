@@ -150,6 +150,10 @@ export type TypeServiceUrls = {
    */
   geocoreUrl: string;
   /**
+   * Service end point to access API for layers specification for RCS gcGeo.
+   */
+  rcsUrl?: string;
+  /**
    * An optional proxy to be used for dealing with same-origin issues.  URL must either be a relative path on the same server
    * or an absolute path on a server which sets CORS headers.
    * Default = CONFIG_PROXY_URL ('https://maps.canada.ca/wmsproxy/ws/wmsproxy/executeFromProxy').
@@ -377,6 +381,9 @@ export const MAP_CONFIG_SCHEMA_PATH = 'https://cgpv/schema#/definitions/TypeMapF
 /** The default geocore url */
 export const CONFIG_GEOCORE_URL = 'https://geocore.api.geo.ca';
 
+/** The default RCS url */
+export const CONFIG_RCS_URL = 'https://gcgeo.gc.ca/geonetwork/srv/api/v2/docs';
+
 /** The default geolocator url */
 export const CONFIG_GEOLOCATOR_URL = 'https://geolocator.api.geo.ca?keys=geonames,nominatim,locate';
 
@@ -396,6 +403,7 @@ export const CONFIG_NTS_SHEET_URL = 'https://geogratis.gc.ca/services/delimitati
 export const CONFIG_ALTITUDE_URL = 'https://geogratis.gc.ca/services/elevation/cdem/altitude';
 
 export const CONFIG_GEOCORE_TYPE = 'geoCore';
+export const CONFIG_RCS_TYPE = 'rcs';
 export const CONFIG_GEOPACKAGE_TYPE = 'GeoPackage';
 export const CONFIG_SHAPEFILE_TYPE = 'shapefile';
 
@@ -453,6 +461,7 @@ export const DEFAULT_MAP_FEATURE_CONFIG = {
   externalPackages: [],
   serviceUrls: {
     geocoreUrl: CONFIG_GEOCORE_URL,
+    rcsUrl: CONFIG_RCS_URL,
     geolocatorUrl: CONFIG_GEOLOCATOR_URL,
     proxyUrl: CONFIG_PROXY_URL,
     metadataUrl: CONFIG_METADATA_RECORDS_URL,

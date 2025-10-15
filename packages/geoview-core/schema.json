@@ -397,6 +397,11 @@
           "type": "string",
           "default": "https://geocore.api.geo.ca"
         },
+        "rcsUrl": {
+          "description": "Service end point to access API for layers specification for RCS gcGeo.",
+          "type": "string",
+          "default": "https://gcgeo.gc.ca/geonetwork/srv/api/v2/docs"
+        },
         "proxyUrl": {
           "description": "An optional proxy to be used for dealing with same-origin issues.  URL must either be a relative path on the same server or an absolute path on a server which sets CORS headers.",
           "type": "string",

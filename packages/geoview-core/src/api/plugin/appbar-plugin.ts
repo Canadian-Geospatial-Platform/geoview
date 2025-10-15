@@ -32,7 +32,7 @@ export abstract class AppBarPlugin extends AbstractPlugin {
   protected onCreateButtonProps(): IconButtonPropsExtend {
     // Override this to create the button props..
 
-    // Fetch cgpv
+    // Get cgpv
     const { cgpv } = window as TypeWindow;
     const { MapIcon } = cgpv.ui.elements;
 
