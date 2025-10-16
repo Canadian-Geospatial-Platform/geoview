@@ -1,10 +1,11 @@
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
-import { QueryType, TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
+import type { QueryType, TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
-import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import type { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
-import { AbstractLayerSet, PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
-import {
+import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
+import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
+import type {
   TypeAllFeatureInfoResultSet,
   TypeAllFeatureInfoResultSetEntry,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';

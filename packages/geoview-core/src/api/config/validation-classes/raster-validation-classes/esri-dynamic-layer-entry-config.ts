@@ -1,17 +1,14 @@
-import {
+import type {
   ConfigClassOrType,
-  CONST_LAYER_ENTRY_TYPES,
-  CONST_LAYER_TYPES,
   TypeGeoviewLayerConfig,
   TypeLayerMetadataEsri,
   TypeMetadataEsriDynamic,
   TypeSourceEsriDynamicInitialConfig,
 } from '@/api/types/layer-schema-types';
-import {
-  AbstractBaseLayerEntryConfig,
-  AbstractBaseLayerEntryConfigProps,
-} from '@/api/config/validation-classes/abstract-base-layer-entry-config';
-import { TypeEsriDynamicLayerConfig } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
+import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
+import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import type { TypeEsriDynamicLayerConfig } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 
 export interface EsriDynamicLayerEntryConfigProps extends AbstractBaseLayerEntryConfigProps {
   /** Source settings to apply to the GeoView layer source at creation time. */

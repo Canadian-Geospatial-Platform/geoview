@@ -1,28 +1,32 @@
-import { MapBrowserEvent } from 'ol';
+import type { MapBrowserEvent } from 'ol';
 import { WMSCapabilities, WKT, GeoJSON } from 'ol/format';
-import { ReadOptions } from 'ol/format/Feature';
-import Geometry from 'ol/geom/Geometry';
+import type { ReadOptions } from 'ol/format/Feature';
+import type Geometry from 'ol/geom/Geometry';
 import { Style, Stroke, Fill, Circle } from 'ol/style';
-import { Color } from 'ol/color';
+import type { Color } from 'ol/color';
 import { getArea as getAreaOL, getLength as getLengthOL } from 'ol/sphere';
-import { containsCoordinate, Extent } from 'ol/extent';
-import { XYZ, OSM, VectorTile } from 'ol/source';
+import type { Extent } from 'ol/extent';
+import { containsCoordinate } from 'ol/extent';
+import type { OSM, VectorTile } from 'ol/source';
+import { XYZ } from 'ol/source';
 import TileLayer from 'ol/layer/Tile';
 import { LineString, Point, Polygon } from 'ol/geom';
-import { Coordinate } from 'ol/coordinate';
-import View from 'ol/View';
+import type { Coordinate } from 'ol/coordinate';
+import type View from 'ol/View';
 
-import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
+import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { Projection } from '@/geo/utils/projection';
 
-import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import type { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
-import { CONFIG_PROXY_URL, TypeLayerStyleConfig, TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
-import { CONST_LAYER_TYPES, TypeMetadataWMS } from '@/api/types/layer-schema-types';
+import type { TypeLayerStyleConfig, TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
+import { CONFIG_PROXY_URL } from '@/api/types/map-schema-types';
+import type { TypeMetadataWMS } from '@/api/types/layer-schema-types';
+import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 
-import { TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
-import { TypeMapMouseInfo } from '@/geo/map/map-viewer';
+import type { TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
+import type { TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import { NetworkError } from '@/core/exceptions/core-exceptions';
 
 // available layer types

@@ -41,16 +41,16 @@ export default [
         localStorage: 'readonly',
         Image: 'readonly',
         TrustedHTML: 'readonly',
-        btoa: 'readonly'
+        btoa: 'readonly',
       },
     },
     plugins: {
       '@typescript-eslint': tseslint,
-      'react': react,
+      react: react,
       'react-hooks': reactHooks,
       'jsx-a11y': jsxA11y,
-      'prettier': prettier,
-      'import': importPlugin,
+      prettier: prettier,
+      import: importPlugin,
     },
     settings: {
       react: { version: 'detect' },
@@ -59,7 +59,7 @@ export default [
           alias: {
             map: [
               ['@', './src'],
-              ['@public', './public']
+              ['@public', './public'],
             ],
           },
           extensions: ['.js', '.jsx', '.ts', '.tsx'],
@@ -88,6 +88,13 @@ export default [
       'react/no-unused-prop-types': 'error',
 
       // TypeScript rules
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        {
+          prefer: 'type-imports',
+          fixStyle: 'separate-type-imports',
+        },
+      ],
       'no-useless-constructor': 'off',
       '@typescript-eslint/no-useless-constructor': 'error',
       'no-unused-vars': 'off',
@@ -144,16 +151,16 @@ export default [
 
       // General rules
       'no-plusplus': 'off',
-      'no-param-reassign': ['error', { 'props': true }],
+      'no-param-reassign': ['error', { props: true }],
       'no-nested-ternary': 'error',
       'max-classes-per-file': ['error', 1],
-      'no-underscore-dangle': ['error', { 'enforceInMethodNames': true }],
+      'no-underscore-dangle': ['error', { enforceInMethodNames: true }],
       'func-names': ['error', 'as-needed'],
       'no-await-in-loop': 'error',
       'no-promise-executor-return': 'error',
-      'camelcase': 'error',
+      camelcase: 'error',
       'no-restricted-globals': ['error', 'event', 'name', 'length', 'isNaN'],
-      'prefer-destructuring': ['error', { 'array': false, 'object': true }],
+      'prefer-destructuring': ['error', { array: false, object: true }],
       'prefer-const': 'error',
       'no-console': 'error',
       'no-alert': 'error',
@@ -161,7 +168,7 @@ export default [
       'no-loop-func': 'error',
       'no-bitwise': 'error',
       'no-continue': 'error',
-      'eqeqeq': 'error',
+      eqeqeq: 'error',
       'eol-last': 'error',
       'no-restricted-imports': [
         'error',
@@ -172,7 +179,7 @@ export default [
       'no-restricted-syntax': [
         1, // Warning
         {
-          selector: ':matches(PropertyDefinition, MethodDefinition)[accessibility=\'private\']',
+          selector: ":matches(PropertyDefinition, MethodDefinition)[accessibility='private']",
           message: 'Use # prefix for private instead',
         },
       ],
@@ -184,8 +191,6 @@ export default [
           endOfLine: 'auto',
         },
       ],
-
-
     },
   },
 
@@ -203,8 +208,6 @@ export default [
 
   // Ignores
   {
-    ignores: [
-      'node_modules/', 'dist/', 'eslint.config.js'
-    ]
-  }
+    ignores: ['node_modules/', 'dist/', 'eslint.config.js'],
+  },
 ];

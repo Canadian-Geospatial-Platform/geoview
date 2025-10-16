@@ -3,14 +3,15 @@ import VectorSource from 'ol/source/Vector';
 import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style';
 import Feature from 'ol/Feature';
 import { Point, MultiPoint, LineString, MultiLineString, Polygon, MultiPolygon } from 'ol/geom';
-import { Extent, getCenter } from 'ol/extent';
+import type { Extent } from 'ol/extent';
+import { getCenter } from 'ol/extent';
 import { fromExtent } from 'ol/geom/Polygon';
-import { Coordinate } from 'ol/coordinate';
-import { Color } from 'ol/color';
+import type { Coordinate } from 'ol/coordinate';
+import type { Color } from 'ol/color';
 
-import { TypeHighlightColors, TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
+import type { TypeHighlightColors, TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import { logger } from '@/core/utils/logger';
-import { MapViewer } from '@/geo/map/map-viewer';
+import type { MapViewer } from '@/geo/map/map-viewer';
 import { PointMarkers } from './point-markers';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 

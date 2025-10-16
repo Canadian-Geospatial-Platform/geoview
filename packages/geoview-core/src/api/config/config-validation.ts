@@ -1,19 +1,21 @@
 import Ajv from 'ajv';
-import { AnyValidateFunction } from 'ajv/dist/types';
+import type { AnyValidateFunction } from 'ajv/dist/types';
 
 import defaultsDeep from 'lodash/defaultsDeep';
 
-import {
-  CONST_LAYER_TYPES,
-  CONST_GEOVIEW_SCHEMA_BY_TYPE,
+import type {
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
   MapConfigLayerEntry,
+  TypeGeoviewLayerType,
+  ConfigClassOrType,
+} from '@/api/types/layer-schema-types';
+import {
+  CONST_LAYER_TYPES,
+  CONST_GEOVIEW_SCHEMA_BY_TYPE,
   mapConfigLayerEntryIsGeoCore,
   mapConfigLayerEntryIsGeoPackage,
   mapConfigLayerEntryIsShapefile,
-  TypeGeoviewLayerType,
-  ConfigClassOrType,
   mapConfigLayerEntryIsRCS,
 } from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
@@ -32,7 +34,8 @@ import { VectorTilesLayerEntryConfig } from '@/api/config/validation-classes/ras
 import { WfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import { WkbLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
 import { XYZTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
-import { GroupLayerEntryConfig, GroupLayerEntryConfigProps } from '@/api/config/validation-classes/group-layer-entry-config';
+import type { GroupLayerEntryConfigProps } from '@/api/config/validation-classes/group-layer-entry-config';
+import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 
 import { LayerMetadataAccessPathMandatoryError, LayerMissingGeoviewLayerIdError } from '@/core/exceptions/layer-exceptions';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';

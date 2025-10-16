@@ -1,14 +1,15 @@
-import { GeoviewStoreType } from '@/core/stores';
-import {
+import type { GeoviewStoreType } from '@/core/stores';
+import type {
   GeoChartStoreByLayerPath,
   IGeochartState,
   TypeGeochartResultSetEntry,
 } from '@/core/stores/store-interface-and-intial-values/geochart-state';
-import { GeoViewGeoChartConfig } from '@/api/config/reader/uuid-config-reader';
+import type { GeoViewGeoChartConfig } from '@/api/config/reader/uuid-config-reader';
 import { PluginStateUninitializedError } from '@/core/exceptions/geoview-exceptions';
 import { logger } from '@/core/utils/logger';
 
-import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '@/api/event-processors/abstract-event-processor';
+import type { BatchedPropagationLayerDataArrayByMap } from '@/api/event-processors/abstract-event-processor';
+import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { UIEventProcessor } from './ui-event-processor';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState

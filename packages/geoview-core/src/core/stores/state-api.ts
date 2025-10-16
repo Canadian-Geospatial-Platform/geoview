@@ -3,12 +3,13 @@ import { LegendEventProcessor } from '@/api/event-processors/event-processor-chi
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { SwiperEventProcessor } from '@/api/event-processors/event-processor-children/swiper-event-processor';
 import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
-import { GeoChartStoreByLayerPath, TypeGeochartResultSetEntry } from './store-interface-and-intial-values/geochart-state';
-import { TypeOrderedLayerInfo } from './store-interface-and-intial-values/map-state';
-import { TimeSliderLayerSet } from './store-interface-and-intial-values/time-slider-state';
-import { TypeLegendLayer } from '@/core/components/layers/types';
+import type { GeoChartStoreByLayerPath, TypeGeochartResultSetEntry } from './store-interface-and-intial-values/geochart-state';
+import type { TypeOrderedLayerInfo } from './store-interface-and-intial-values/map-state';
+import type { TimeSliderLayerSet } from './store-interface-and-intial-values/time-slider-state';
+import type { TypeLegendLayer } from '@/core/components/layers/types';
 import { logger } from '@/core/utils/logger';
-import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
+import type { EventDelegateBase } from '@/api/events/event-helper';
+import EventHelper from '@/api/events/event-helper';
 
 /**
  * API to manage states.

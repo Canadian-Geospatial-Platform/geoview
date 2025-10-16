@@ -1,4 +1,5 @@
-import { Toolbar as MaterialToolbar, ToolbarProps } from '@mui/material';
+import type { ToolbarProps } from '@mui/material';
+import { Toolbar as MaterialToolbar } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
 /**

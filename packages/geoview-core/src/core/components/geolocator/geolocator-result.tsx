@@ -1,20 +1,10 @@
 import { useMemo, useState } from 'react';
-import { SelectChangeEvent, useTheme } from '@mui/material';
+import type { SelectChangeEvent } from '@mui/material';
+import { useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import {
-  Box,
-  Divider,
-  FilterAltOffIcon,
-  IconButton,
-  List,
-  ListItem,
-  ListItemText,
-  Paper,
-  Select,
-  TypeMenuItemProps,
-  Typography,
-} from '@/ui';
-import { GeoListItem } from '@/core/components/geolocator/geolocator';
+import type { TypeMenuItemProps } from '@/ui';
+import { Box, Divider, FilterAltOffIcon, IconButton, List, ListItem, ListItemText, Paper, Select, Typography } from '@/ui';
+import type { GeoListItem } from '@/core/components/geolocator/geolocator';
 import { GeoList } from '@/core/components/geolocator/geo-list';
 import { createMenuItems } from '@/core/components/geolocator/utilities';
 import { getSxClasses } from '@/core/components/geolocator/geolocator-style';

@@ -1,25 +1,28 @@
 import { Collection, Feature, Overlay } from 'ol';
 import GeoJSON from 'ol/format/GeoJSON';
-import { LineString, Polygon, Point, Circle as CircleGeom, Geometry, SimpleGeometry } from 'ol/geom';
+import type { Geometry, SimpleGeometry } from 'ol/geom';
+import { LineString, Polygon, Point, Circle as CircleGeom } from 'ol/geom';
 import { fromCircle } from 'ol/geom/Polygon';
 import { getArea, getLength } from 'ol/sphere';
 import { Text, Style, Stroke, Fill, Icon as OLIcon } from 'ol/style';
-import { StyleLike } from 'ol/style/Style';
-import { DrawEvent, GeometryFunction, SketchCoordType, createBox } from 'ol/interaction/Draw';
+import type { StyleLike } from 'ol/style/Style';
+import type { DrawEvent, GeometryFunction, SketchCoordType } from 'ol/interaction/Draw';
+import { createBox } from 'ol/interaction/Draw';
 
 import { AppEventProcessor } from './app-event-processor';
 import { MapEventProcessor } from './map-event-processor';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
-import { TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
+import type { TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
 
 import { Projection } from '@/geo/utils/projection';
 import { geometriesAreEqual } from '@/geo/utils/utilities';
-import { Draw } from '@/geo/interaction/draw';
-import { Transform } from '@/geo/interaction/transform';
-import { TransformDeleteFeatureEvent, TransformEvent, TransformSelectionEvent } from '@/geo/interaction/transform/transform-events';
-import { DEFAULT_TEXT_VALUES, IDrawerState, StyleProps } from '@/core/stores/store-interface-and-intial-values/drawer-state';
+import type { Draw } from '@/geo/interaction/draw';
+import type { Transform } from '@/geo/interaction/transform';
+import type { TransformDeleteFeatureEvent, TransformEvent, TransformSelectionEvent } from '@/geo/interaction/transform/transform-events';
+import type { IDrawerState, StyleProps } from '@/core/stores/store-interface-and-intial-values/drawer-state';
+import { DEFAULT_TEXT_VALUES } from '@/core/stores/store-interface-and-intial-values/drawer-state';
 import { generateId } from '@/core/utils/utilities';
-import { GeoviewStoreType } from '@/core/stores/geoview-store';
+import type { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState

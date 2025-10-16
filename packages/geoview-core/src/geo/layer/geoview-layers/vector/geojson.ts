@@ -1,20 +1,16 @@
-import { Options as SourceOptions } from 'ol/source/Vector';
+import type { Options as SourceOptions } from 'ol/source/Vector';
 import { GeoJSON as FormatGeoJSON } from 'ol/format';
-import { ReadOptions } from 'ol/format/Feature';
-import { Vector as VectorSource } from 'ol/source';
-import Feature from 'ol/Feature';
+import type { ReadOptions } from 'ol/format/Feature';
+import type { Vector as VectorSource } from 'ol/source';
+import type Feature from 'ol/Feature';
 
 import defaultsDeep from 'lodash/defaultsDeep';
 
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
-import {
-  TypeGeoviewLayerConfig,
-  TypeBaseVectorSourceInitialConfig,
-  CONST_LAYER_TYPES,
-  TypeMetadataGeoJSON,
-} from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerConfig, TypeBaseVectorSourceInitialConfig, TypeMetadataGeoJSON } from '@/api/types/layer-schema-types';
+import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { GeoJSONLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
-import { VectorLayerEntryConfig, VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
+import type { VectorLayerEntryConfig, VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { logger } from '@/core/utils/logger';
 import {
@@ -22,7 +18,7 @@ import {
   LayerEntryConfigLayerIdNotFoundError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import { GVGeoJSON } from '@/geo/layer/gv-layers/vector/gv-geojson';
-import { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
+import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 
 export interface TypeGeoJSONLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.GEOJSON;

@@ -1,21 +1,20 @@
 import { asArray, asString } from 'ol/color';
 import { Style, Stroke, Fill, RegularShape, Circle as StyleCircle, Icon as StyleIcon } from 'ol/style';
-import { Geometry, LineString, Point, Polygon } from 'ol/geom';
-import Icon, { Options as IconOptions } from 'ol/style/Icon';
-import { Options as CircleOptions } from 'ol/style/Circle';
-import { Options as RegularShapeOptions } from 'ol/style/RegularShape';
-import { Options as StrokeOptions } from 'ol/style/Stroke';
-import { Options as FillOptions } from 'ol/style/Fill';
-import Feature, { FeatureLike } from 'ol/Feature';
+import type { Geometry } from 'ol/geom';
+import { LineString, Point, Polygon } from 'ol/geom';
+import type { Options as IconOptions } from 'ol/style/Icon';
+import Icon from 'ol/style/Icon';
+import type { Options as CircleOptions } from 'ol/style/Circle';
+import type { Options as RegularShapeOptions } from 'ol/style/RegularShape';
+import type { Options as StrokeOptions } from 'ol/style/Stroke';
+import type { Options as FillOptions } from 'ol/style/Fill';
+import type { FeatureLike } from 'ol/Feature';
+import type Feature from 'ol/Feature';
 import { toContext } from 'ol/render';
 
 import { setAlphaColor } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
-import {
-  isFilledPolygonVectorConfig,
-  isIconSymbolVectorConfig,
-  isLineStringVectorConfig,
-  isSimpleSymbolVectorConfig,
+import type {
   TypeLayerStyleConfigType,
   TypeFillStyle,
   TypePolygonVectorConfig,
@@ -32,19 +31,16 @@ import {
   TypeAliasLookup,
   codedValueType,
 } from '@/api/types/map-schema-types';
-import { TypeLayerMetadataFields } from '@/api/types/layer-schema-types';
 import {
-  binaryKeywors,
-  defaultColor,
-  FillPaternLine,
-  FillPaternSettings,
-  FilterNodeType,
-  groupKeywords,
-  NodeType,
-  operatorPriority,
-  unaryKeywords,
-} from './geoview-renderer-types';
-import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+  isFilledPolygonVectorConfig,
+  isIconSymbolVectorConfig,
+  isLineStringVectorConfig,
+  isSimpleSymbolVectorConfig,
+} from '@/api/types/map-schema-types';
+import type { TypeLayerMetadataFields } from '@/api/types/layer-schema-types';
+import type { FillPaternLine, FillPaternSettings, FilterNodeType } from './geoview-renderer-types';
+import { binaryKeywors, defaultColor, groupKeywords, NodeType, operatorPriority, unaryKeywords } from './geoview-renderer-types';
+import type { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { logger } from '@/core/utils/logger';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 

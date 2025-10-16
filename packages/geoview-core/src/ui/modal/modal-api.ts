@@ -1,7 +1,8 @@
 import { generateId } from '@/core/utils/utilities';
-import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
+import type { EventDelegateBase } from '@/api/events/event-helper';
+import EventHelper from '@/api/events/event-helper';
 
-import { TypeModalProps } from '@/ui/modal/modal';
+import type { TypeModalProps } from '@/ui/modal/modal';
 
 /**
  * Class used to handle creating a new modal

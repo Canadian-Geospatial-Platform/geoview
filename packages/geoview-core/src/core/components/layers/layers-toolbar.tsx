@@ -8,7 +8,7 @@ import {
   useLayerDisplayState,
   useLayerLegendLayers,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { TypeLayersViewDisplayState } from './types';
+import type { TypeLayersViewDisplayState } from './types';
 import { logger } from '@/core/utils/logger';
 
 export function LayersToolbar(): JSX.Element {

@@ -1,6 +1,6 @@
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
-import { GeoviewStoreType } from '@/core/stores/geoview-store';
+import type { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { UIEventProcessor } from './event-processor-children/ui-event-processor';

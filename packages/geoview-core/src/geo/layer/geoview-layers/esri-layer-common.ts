@@ -1,11 +1,12 @@
-import { Extent } from 'ol/extent';
+import type { Extent } from 'ol/extent';
 
 import { Projection } from '@/geo/utils/projection';
-import { TimeDimensionESRI, DateMgt } from '@/core/utils/date-mgt';
+import type { TimeDimensionESRI } from '@/core/utils/date-mgt';
+import { DateMgt } from '@/core/utils/date-mgt';
 import { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
-import {
+import type {
   TypeFeatureInfoEntryPartial,
   TypeStyleGeometry,
   codedValueType,
@@ -13,22 +14,23 @@ import {
   TypeOutfields,
   TypeOutfieldsType,
 } from '@/api/types/map-schema-types';
-import { CONST_LAYER_TYPES, TypeLayerMetadataEsri } from '@/api/types/layer-schema-types';
+import type { TypeLayerMetadataEsri } from '@/api/types/layer-schema-types';
+import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
+import type { EsriRelatedRecordsJsonResponseRelatedRecord } from '@/geo/layer/gv-layers/utils';
 import {
   esriConvertEsriGeometryTypeToOLGeometryType,
   esriParseFeatureInfoEntries,
   esriQueryRecordsByUrl,
   esriQueryRelatedRecordsByUrl,
-  EsriRelatedRecordsJsonResponseRelatedRecord,
 } from '@/geo/layer/gv-layers/utils';
 import { getStyleFromEsriRenderer } from '@/geo/utils/renderer/esri-renderer';
-import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
-import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
+import type { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
+import type { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
+import type { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { LayerEntryConfigLayerIdEsriMustBeNumberError, LayerServiceMetadataEmptyError } from '@/core/exceptions/layer-exceptions';
 import {
   LayerEntryConfigEmptyLayerGroupError,

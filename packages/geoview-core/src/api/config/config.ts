@@ -1,16 +1,15 @@
+import type { MapConfigLayerEntry, TypeGeoviewLayerType, TypeLayerEntryConfig } from '@/api/types/layer-schema-types';
 import {
-  MapConfigLayerEntry,
   CONST_LAYER_TYPES,
-  TypeGeoviewLayerType,
   mapConfigLayerEntryIsGeoCore,
   mapConfigLayerEntryIsGeoPackage,
   mapConfigLayerEntryIsShapefile,
-  TypeLayerEntryConfig,
   mapConfigLayerEntryIsRCS,
 } from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
 
-import { ConfigValidation, ErrorCallbackDelegate } from '@/api/config/config-validation';
+import type { ErrorCallbackDelegate } from '@/api/config/config-validation';
+import { ConfigValidation } from '@/api/config/config-validation';
 import { generateId } from '@/core/utils/utilities';
 import { LayerInvalidGeoviewLayerTypeError } from '@/core/exceptions/layer-exceptions';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';

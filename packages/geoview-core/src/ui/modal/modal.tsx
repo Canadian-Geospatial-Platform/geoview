@@ -1,8 +1,10 @@
-import { Fragment, CSSProperties, ReactNode, useMemo } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
+import { Fragment, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
-import { Box, Dialog, DialogActions, DialogContent, DialogProps, DialogTitle } from '@mui/material';
+import type { DialogProps } from '@mui/material';
+import { Box, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 
 import { animated } from '@react-spring/web';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';

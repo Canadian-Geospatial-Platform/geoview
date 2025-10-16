@@ -1,7 +1,7 @@
-import { TypeGeoviewLayerType, TypeLayerEntryType, TypeSourceTileInitialConfig } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerType, TypeLayerEntryType, TypeSourceTileInitialConfig } from '@/api/types/layer-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
-import { XYZTilesLayerEntryConfigProps } from '@/api/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
-import { VectorTilesLayerEntryConfigProps } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
+import type { XYZTilesLayerEntryConfigProps } from '@/api/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
+import type { VectorTilesLayerEntryConfigProps } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 
 /**
  * Type used to define a GeoView image layer to display on the map.

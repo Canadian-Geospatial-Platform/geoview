@@ -1,6 +1,6 @@
-import { TypeNavBarButtonConfig } from 'geoview-core/api/plugin/navbar-plugin';
-import { TypeDrawerConfig } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
-import { TypeWindow } from 'geoview-core/core/types/global-types';
+import type { TypeNavBarButtonConfig } from 'geoview-core/api/plugin/navbar-plugin';
+import type { TypeDrawerConfig } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
+import type { TypeWindow } from 'geoview-core/core/types/global-types';
 
 import { logger } from 'geoview-core/core/utils/logger';
 

@@ -1,7 +1,8 @@
-import { TypeButtonGroupConfig, TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
-import { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
+import type { TypeButtonGroupConfig, TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
+import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 
-import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
+import type { EventDelegateBase } from '@/api/events/event-helper';
+import EventHelper from '@/api/events/event-helper';
 import { generateId } from '@/core/utils/utilities';
 
 /**

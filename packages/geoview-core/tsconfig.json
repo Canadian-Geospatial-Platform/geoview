@@ -8,6 +8,7 @@
     "declarationMap": true,
     "emitDeclarationOnly": true,
     "composite": true,
+    "verbatimModuleSyntax": true,
     "outDir": "lib",
     "lib": ["esnext", "dom", "dom.iterable", "scripthost", "webworker"],
     "paths": {
@@ -15,6 +16,6 @@
       "@public/*": ["./public/*"]
     }
   },
-  "include": ["src", "public/locales/**/*.json", "schema.json", "src/**/*.json"],
+  "include": ["src", "public/locales/**/*.json", "schema.json"],
   "exclude": ["node_modules"]
 }

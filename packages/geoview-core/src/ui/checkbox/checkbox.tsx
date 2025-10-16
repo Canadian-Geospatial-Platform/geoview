@@ -1,5 +1,7 @@
-import { forwardRef, Ref } from 'react';
-import { Checkbox as MaterialCheckbox, CheckboxProps } from '@mui/material';
+import type { Ref } from 'react';
+import { forwardRef } from 'react';
+import type { CheckboxProps } from '@mui/material';
+import { Checkbox as MaterialCheckbox } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
 /**

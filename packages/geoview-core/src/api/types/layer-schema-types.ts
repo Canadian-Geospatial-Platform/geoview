@@ -1,19 +1,19 @@
-import { codedValueType, Extent, rangeDomainType, TypeEsriFormatParameter, TypeOutfields } from '@/api/types/map-schema-types';
-import {
+import type { codedValueType, Extent, rangeDomainType, TypeEsriFormatParameter, TypeOutfields } from '@/api/types/map-schema-types';
+import type {
   AbstractBaseLayerEntryConfig,
   AbstractBaseLayerEntryConfigProps,
 } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
-import { ConfigBaseClass, ConfigBaseClassProps, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
-import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
-import {
+import type { ConfigBaseClass, ConfigBaseClassProps, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
+import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
+import type {
   VectorTilesLayerEntryConfig,
   VectorTilesLayerEntryConfigProps,
 } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
-import { GeoPackageFeature } from '@/api/config/reader/geopackage-reader';
+import type { GeoPackageFeature } from '@/api/config/reader/geopackage-reader';
 
-import { TypeProjection } from '@/geo/utils/projection';
-import { TimeDimensionESRI } from '@/core/utils/date-mgt';
-import { EsriBaseRenderer } from '@/geo/utils/renderer/esri-renderer';
+import type { TypeProjection } from '@/geo/utils/projection';
+import type { TimeDimensionESRI } from '@/core/utils/date-mgt';
+import type { EsriBaseRenderer } from '@/geo/utils/renderer/esri-renderer';
 
 /** Definition of the keys used to create the constants of the GeoView layer */
 type LayerTypesKey =

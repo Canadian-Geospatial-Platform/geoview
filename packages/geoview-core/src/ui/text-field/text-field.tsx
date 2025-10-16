@@ -1,7 +1,8 @@
-import { forwardRef, Ref } from 'react';
+import type { Ref } from 'react';
+import { forwardRef } from 'react';
 import { TextField as MaterialTextField } from '@mui/material';
 
-import { TypeTextFieldProps } from '@/ui/panel/panel-types';
+import type { TypeTextFieldProps } from '@/ui/panel/panel-types';
 import { logger } from '@/core/utils/logger';
 
 /**

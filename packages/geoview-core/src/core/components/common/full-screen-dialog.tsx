@@ -1,5 +1,6 @@
-import { memo, ReactNode, useEffect, useRef } from 'react';
-import { DialogProps } from '@mui/material';
+import type { ReactNode} from 'react';
+import { memo, useEffect, useRef } from 'react';
+import type { DialogProps } from '@mui/material';
 import { CloseIcon, Dialog, DialogContent, IconButton } from '@/ui';
 import { logger } from '@/core/utils/logger';
 

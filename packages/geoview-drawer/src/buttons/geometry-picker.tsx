@@ -1,5 +1,5 @@
 import ReactDOMServer from 'react-dom/server';
-import { TypeWindow } from 'geoview-core';
+import type { TypeWindow } from 'geoview-core';
 import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import {
   useDrawerActions,

@@ -3,11 +3,7 @@ import Ajv from 'ajv';
 import addErrors from 'ajv-errors';
 
 import { MapFeatureConfig } from '@/api/config/map-feature-config';
-import {
-  DEFAULT_MAP_FEATURE_CONFIG,
-  CONFIG_GEOCORE_TYPE,
-  CONFIG_GEOPACKAGE_TYPE,
-  CONFIG_SHAPEFILE_TYPE,
+import type {
   TypeBasemapOptions,
   TypeDisplayLanguage,
   TypeInteraction,
@@ -16,24 +12,30 @@ import {
   TypeValidMapCorePackageProps,
   TypeValidMapProjectionCodes,
   TypeZoomAndCenter,
-  MAP_CONFIG_SCHEMA_PATH,
   TypeValidVersions,
   TypeLayerStyleConfig,
 } from '@/api/types/map-schema-types';
 import {
-  CONST_LAYER_TYPES,
+  DEFAULT_MAP_FEATURE_CONFIG,
+  CONFIG_GEOCORE_TYPE,
+  CONFIG_GEOPACKAGE_TYPE,
+  CONFIG_SHAPEFILE_TYPE,
+  MAP_CONFIG_SCHEMA_PATH,
+} from '@/api/types/map-schema-types';
+import type {
   MapConfigLayerEntry,
   TypeGeoviewLayerConfig,
   TypeInitialGeoviewLayerType,
   TypeLayerEntryConfig,
 } from '@/api/types/layer-schema-types';
+import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { MapConfigError } from '@/core/exceptions/config-exceptions';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 
 import { isJsonString, isValidUUID, removeCommentsFromJSON } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { GeoCore } from '@/api/config/geocore';
-import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { UUIDmapConfigReader } from '@/api/config/reader/uuid-config-reader';
 import { GeoPackageReader } from '@/api/config/reader/geopackage-reader';
 import { ShapefileReader } from '@/api/config/reader/shapefile-reader';

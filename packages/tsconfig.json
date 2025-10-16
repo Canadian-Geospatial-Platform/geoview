@@ -12,6 +12,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
+    "verbatimModuleSyntax": true,
     "jsx": "react-jsx"
   },
   "include": [

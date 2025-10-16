@@ -1,9 +1,7 @@
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import {
-  TypeColumnFiltersState,
-  useDataTableStoreActions,
-  useDataTableLayerSettings,
-} from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import type { Dispatch, SetStateAction } from 'react';
+import { useEffect, useState } from 'react';
+import type { TypeColumnFiltersState } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { useDataTableStoreActions, useDataTableLayerSettings } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { logger } from '@/core/utils/logger';
 
 export interface UseFilterRowsProps {

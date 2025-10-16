@@ -5,7 +5,7 @@ import { Box, Collapse, List } from '@/ui';
 import { getSxClasses } from './legend-styles';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { ItemsList } from './legend-layer-items';
-import { LegendLayer } from './legend-layer';
+import type { LegendLayer } from './legend-layer';
 import {
   useSelectorLayerChildren,
   useSelectorLayerIcons,

@@ -1,14 +1,14 @@
 import ImageLayer from 'ol/layer/Image';
-import Static from 'ol/source/ImageStatic';
-import { Options as ImageOptions } from 'ol/layer/BaseImage';
-import { Extent } from 'ol/extent';
-import { Projection as OLProjection } from 'ol/proj';
+import type Static from 'ol/source/ImageStatic';
+import type { Options as ImageOptions } from 'ol/layer/BaseImage';
+import type { Extent } from 'ol/extent';
+import type { Projection as OLProjection } from 'ol/proj';
 
 import { logger } from '@/core/utils/logger';
-import { ImageStaticLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
+import type { ImageStaticLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import { loadImage } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
-import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { Projection } from '@/geo/utils/projection';
 import { validateExtent } from '@/geo/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';

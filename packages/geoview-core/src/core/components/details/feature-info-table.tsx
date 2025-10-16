@@ -7,7 +7,7 @@ import { CardMedia, Box, Grid } from '@/ui';
 import { isImage, stringify, generateId, sanitizeHtmlContent } from '@/core/utils/utilities';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { logger } from '@/core/utils/logger';
-import { TypeFieldEntry } from '@/api/types/map-schema-types';
+import type { TypeFieldEntry } from '@/api/types/map-schema-types';
 import { getSxClasses } from './details-style';
 import { useLightBox } from '@/core/components/common';
 import { Button } from '@/ui/button/button';

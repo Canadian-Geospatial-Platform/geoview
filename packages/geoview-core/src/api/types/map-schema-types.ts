@@ -1,10 +1,10 @@
-import { Coordinate } from 'ol/coordinate';
-import { Pixel } from 'ol/pixel';
-import { Geometry } from 'ol/geom';
-import Feature from 'ol/Feature';
+import type { Coordinate } from 'ol/coordinate';
+import type { Pixel } from 'ol/pixel';
+import type { Geometry } from 'ol/geom';
+import type Feature from 'ol/Feature';
 
-import { MapFeatureConfig } from '@/api/config/map-feature-config';
-import { MapConfigLayerEntry, TypeGeoviewLayerType, TypeLayerStatus } from './layer-schema-types';
+import type { MapFeatureConfig } from '@/api/config/map-feature-config';
+import type { MapConfigLayerEntry, TypeGeoviewLayerType, TypeLayerStatus } from './layer-schema-types';
 
 /**
  *  Definition of the map feature instance according to what is specified in the schema.

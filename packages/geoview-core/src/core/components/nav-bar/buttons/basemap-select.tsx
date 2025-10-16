@@ -1,12 +1,14 @@
-import { createElement, ReactNode, useState, useCallback } from 'react';
+import type { ReactNode } from 'react';
+import { createElement, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMapBasemapOptions, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
-import { TypeBasemapOptions } from '@/api/types/map-schema-types';
+import type { TypeBasemapOptions } from '@/api/types/map-schema-types';
 import { MapIcon } from '@/ui';
-import { TypePanelProps } from '@/ui/panel/panel-types';
-import { IconButtonPropsExtend, IconButton } from '@/ui/icon-button/icon-button';
+import type { TypePanelProps } from '@/ui/panel/panel-types';
+import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
+import { IconButton } from '@/ui/icon-button/icon-button';
 import { List, ListItem } from '@/ui/list';
 import { BlockIcon, PublicIcon, SatelliteIcon, SignpostIcon } from '@/ui/icons';
 

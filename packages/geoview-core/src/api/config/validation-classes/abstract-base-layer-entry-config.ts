@@ -1,8 +1,14 @@
-import { TypeLayerStyleConfig, TypeStyleGeometry, TypeLayerStyleSettings } from '@/api/types/map-schema-types';
-import { ConfigClassOrType, TypeBaseSourceInitialConfig, TypeGeoviewLayerType, TypeLayerEntryType } from '@/api/types/layer-schema-types';
-import { ConfigBaseClass, ConfigBaseClassProps } from '@/api/config/validation-classes/config-base-class';
-import { TimeDimension } from '@/core/utils/date-mgt';
-import { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
+import type { TypeLayerStyleConfig, TypeStyleGeometry, TypeLayerStyleSettings } from '@/api/types/map-schema-types';
+import type {
+  ConfigClassOrType,
+  TypeBaseSourceInitialConfig,
+  TypeGeoviewLayerType,
+  TypeLayerEntryType,
+} from '@/api/types/layer-schema-types';
+import type { ConfigBaseClassProps } from '@/api/config/validation-classes/config-base-class';
+import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import type { TimeDimension } from '@/core/utils/date-mgt';
+import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 
 export interface AbstractBaseLayerEntryConfigProps extends ConfigBaseClassProps {
   /** Source settings to apply to the GeoView layer source at creation time. */

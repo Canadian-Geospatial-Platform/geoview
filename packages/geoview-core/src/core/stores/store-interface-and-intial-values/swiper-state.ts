@@ -1,7 +1,7 @@
 import { useStore } from 'zustand';
 
 import { useGeoViewStore } from '@/core/stores/stores-managers';
-import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
+import type { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import { SwiperEventProcessor } from '@/api/event-processors/event-processor-children/swiper-event-processor';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with SwiperEventProcessor vs SwiperState

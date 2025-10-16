@@ -1,7 +1,8 @@
-import { Coordinate } from 'ol/coordinate';
+import type { Coordinate } from 'ol/coordinate';
 
-import { DateMgt, TypeDateFragments } from '@/core/utils/date-mgt';
-import {
+import type { TypeDateFragments } from '@/core/utils/date-mgt';
+import { DateMgt } from '@/core/utils/date-mgt';
+import type {
   TypeStyleGeometry,
   TypeFeatureInfoEntryPartial,
   codedValueType,
@@ -11,11 +12,11 @@ import {
   TypeAliasLookup,
   TypeOutfields,
 } from '@/api/types/map-schema-types';
-import { TypeFeatureInfoLayerConfig } from '@/api/types/layer-schema-types';
-import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
-import { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
-import { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
+import type { TypeFeatureInfoLayerConfig } from '@/api/types/layer-schema-types';
+import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import type { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
+import type { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
+import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';

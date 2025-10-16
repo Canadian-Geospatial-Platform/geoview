@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import { useTheme } from '@mui/material';
 import { Box, ListItemButton, Grid, Tooltip, Typography, ListItem } from '@/ui';
-import { GeoListItem } from '@/core/components/geolocator/geolocator';
+import type { GeoListItem } from '@/core/components/geolocator/geolocator';
 import { getSxClassesList } from '@/core/components/geolocator/geolocator-style';
 import { getBoldListTitle, getTooltipTitle } from '@/core/components/geolocator/utilities';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';

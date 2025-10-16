@@ -1,6 +1,8 @@
-import { useState, ReactNode, useCallback, forwardRef, useImperativeHandle, Ref, useEffect, useRef, useMemo } from 'react';
+import type { ReactNode, Ref} from 'react';
+import { useState, useCallback, forwardRef, useImperativeHandle, useEffect, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { SxProps, useTheme } from '@mui/material/styles';
+import type { SxProps} from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles';
 import Markdown from 'markdown-to-jsx';
 import { Box, FullscreenIcon, ButtonGroup, Button, Typography, IconButton } from '@/ui';
 import { ResponsiveGrid } from './responsive-grid';
@@ -11,7 +13,7 @@ import { ArrowBackIcon, ArrowForwardIcon, CloseIcon, QuestionMarkIcon } from '@/
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useAppGuide, useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useUIActiveTrapGeoView, useUISelectedFooterLayerListItemId } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { TypeContainerBox } from '@/core/types/global-types';
+import type { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { handleEscapeKey } from '@/core/utils/utilities';
 

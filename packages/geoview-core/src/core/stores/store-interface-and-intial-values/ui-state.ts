@@ -1,13 +1,13 @@
 import { useStore } from 'zustand';
-import {
+import type {
   TypeValidAppBarCoreProps,
   TypeValidFooterBarTabsCoreProps,
   TypeValidMapCorePackageProps,
   TypeValidNavBarProps,
 } from '@/api/types/map-schema-types';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
-import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
-import { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
+import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { UIEventProcessor } from '@/api/event-processors/event-processor-children/ui-event-processor';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState

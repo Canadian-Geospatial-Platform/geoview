@@ -1,12 +1,13 @@
-import {
+import type {
   ConfigClassOrType,
-  CONST_LAYER_TYPES,
   TypeGeoviewLayerConfig,
   TypeLayerMetadataWfs,
   TypeSourceWFSVectorInitialConfig,
 } from '@/api/types/layer-schema-types';
-import { TypeWFSLayerConfig } from '@/geo/layer/geoview-layers/vector/wfs';
-import { VectorLayerEntryConfig, VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
+import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
+import type { TypeWFSLayerConfig } from '@/geo/layer/geoview-layers/vector/wfs';
+import type { VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
+import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { Projection } from '@/geo/utils/projection';
 
 export interface WfsLayerEntryConfigProps extends VectorLayerEntryConfigProps {

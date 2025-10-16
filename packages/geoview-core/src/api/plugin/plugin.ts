@@ -1,11 +1,12 @@
 import i18next from 'i18next';
-import Ajv, { AnySchema } from 'ajv';
+import type { AnySchema } from 'ajv';
+import Ajv from 'ajv';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import { whenThisThen, getScriptAndAssetURL } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { logger } from '@/core/utils/logger';
-import { AbstractPlugin } from './abstract-plugin';
+import type { AbstractPlugin } from './abstract-plugin';
 
 /**
  * Class to manage plugins

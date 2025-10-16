@@ -1,10 +1,16 @@
 import { useStore } from 'zustand';
 
-import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
+import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
-import { TypeFeatureInfoEntry, TypeResultSet, TypeResultSetEntry, TypeQueryStatus, TypeFieldEntry } from '@/api/types/map-schema-types';
-import { TypeGeoviewLayerType } from '@/api/types/layer-schema-types';
-import { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import type {
+  TypeFeatureInfoEntry,
+  TypeResultSet,
+  TypeResultSetEntry,
+  TypeQueryStatus,
+  TypeFieldEntry,
+} from '@/api/types/map-schema-types';
+import type { TypeGeoviewLayerType } from '@/api/types/layer-schema-types';
+import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with FeatureInfoEventProcessor vs FeatureInfoState

@@ -1,24 +1,24 @@
 import { ImageWMS } from 'ol/source';
-import { Options as SourceOptions } from 'ol/source/ImageWMS';
+import type { Options as SourceOptions } from 'ol/source/ImageWMS';
 
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import {
-  CONST_LAYER_TYPES,
-  CONST_LAYER_ENTRY_TYPES,
+import type {
   TypeLayerEntryConfig,
   TypeGeoviewLayerConfig,
   TypeOfServer,
   TypeMetadataWMS,
   TypeMetadataWMSCapabilityLayer,
 } from '@/api/types/layer-schema-types';
+import { CONST_LAYER_TYPES, CONST_LAYER_ENTRY_TYPES } from '@/api/types/layer-schema-types';
 import { DateMgt } from '@/core/utils/date-mgt';
-import { CallbackNewMetadataDelegate, getWMSServiceMetadata } from '@/geo/utils/utilities';
-import {
-  OgcWmsLayerEntryConfig,
-  OgcWmsLayerEntryConfigProps,
-} from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { GroupLayerEntryConfig, GroupLayerEntryConfigProps } from '@/api/config/validation-classes/group-layer-entry-config';
-import { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
+import type { CallbackNewMetadataDelegate } from '@/geo/utils/utilities';
+import { getWMSServiceMetadata } from '@/geo/utils/utilities';
+import type { OgcWmsLayerEntryConfigProps } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import type { GroupLayerEntryConfigProps } from '@/api/config/validation-classes/group-layer-entry-config';
+import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
+import type { TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
+import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { CancelledError, PromiseRejectErrorWrapper } from '@/core/exceptions/core-exceptions';
 import { LayerDataAccessPathMandatoryError, LayerNoCapabilitiesError } from '@/core/exceptions/layer-exceptions';
 import {
@@ -28,7 +28,7 @@ import {
 import { deepMergeObjects } from '@/core/utils/utilities';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.WMS;

@@ -1,7 +1,8 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import _ from 'lodash';
-import { Theme, useTheme } from '@mui/material/styles';
+import type { Theme } from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles';
 import { ClickAwayListener } from '@mui/material';
 import { animated } from '@react-spring/web';
 import {
@@ -28,7 +29,7 @@ import { useMapInteraction } from '@/core/stores/store-interface-and-intial-valu
 import { useShake } from '@/core/utils/useSpringAnimations';
 import { handleEscapeKey } from '@/core/utils/utilities';
 import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { SxStyles } from '@/ui/style/types';
+import type { SxStyles } from '@/ui/style/types';
 
 export type NotificationDetailsType = {
   key: string;

@@ -1,24 +1,20 @@
-import { Vector as VectorSource } from 'ol/source';
-import { Options as SourceOptions } from 'ol/source/Vector';
+import type { Vector as VectorSource } from 'ol/source';
+import type { Options as SourceOptions } from 'ol/source/Vector';
 import { EsriJSON } from 'ol/format';
-import { ReadOptions } from 'ol/format/Feature';
-import Feature from 'ol/Feature';
+import type { ReadOptions } from 'ol/format/Feature';
+import type Feature from 'ol/Feature';
 
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
-import {
-  TypeVectorSourceInitialConfig,
-  TypeGeoviewLayerConfig,
-  CONST_LAYER_TYPES,
-  TypeMetadataEsriFeature,
-} from '@/api/types/layer-schema-types';
+import type { TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig, TypeMetadataEsriFeature } from '@/api/types/layer-schema-types';
+import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 
 import { commonProcessLayerMetadata, commonValidateListOfLayerEntryConfig } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { LayerNotFeatureLayerError } from '@/core/exceptions/layer-exceptions';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
+import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 export interface TypeSourceEsriFeatureInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {

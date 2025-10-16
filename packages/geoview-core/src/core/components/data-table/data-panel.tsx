@@ -18,13 +18,14 @@ import {
   useUIAppbarComponents,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
-import { LayerListEntry, Layout } from '@/core/components/common';
+import type { LayerListEntry } from '@/core/components/common';
+import { Layout } from '@/core/components/common';
 import { logger } from '@/core/utils/logger';
 import { useFeatureFieldInfos } from './hooks';
 import { CONTAINER_TYPE, LAYER_STATUS, TABS } from '@/core/utils/constant';
-import { MappedLayerDataType } from './data-table-types';
+import type { MappedLayerDataType } from './data-table-types';
 import { DEFAULT_APPBAR_CORE } from '@/api/types/map-schema-types';
-import { TypeContainerBox } from '@/core/types/global-types';
+import type { TypeContainerBox } from '@/core/types/global-types';
 import DataSkeleton from './data-skeleton';
 
 interface DataPanelType {

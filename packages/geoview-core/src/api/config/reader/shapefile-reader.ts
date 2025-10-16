@@ -1,6 +1,7 @@
 import shp from 'shpjs';
-import { ConfigAbstractBaseClassOrType, ConfigClassOrType, ShapefileLayerConfig } from '@/api/types/layer-schema-types';
-import { GeoJSON as LayerGeoJSON, TypeGeoJSONLayerConfig } from '@/geo/layer/geoview-layers/vector/geojson';
+import type { ConfigAbstractBaseClassOrType, ConfigClassOrType, ShapefileLayerConfig } from '@/api/types/layer-schema-types';
+import type { TypeGeoJSONLayerConfig } from '@/geo/layer/geoview-layers/vector/geojson';
+import { GeoJSON as LayerGeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
 import { GeoJSONLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';

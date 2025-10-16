@@ -1,11 +1,14 @@
-import { GeoviewStoreType, IGeoviewState } from '@/core/stores/geoview-store';
-import { TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { TypeFeatureInfoResultSetEntry, TypeHoverResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import { TypeGeochartResultSetEntry } from '@/core/stores/store-interface-and-intial-values/geochart-state';
+import type { GeoviewStoreType, IGeoviewState } from '@/core/stores/geoview-store';
+import type { TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import type {
+  TypeFeatureInfoResultSetEntry,
+  TypeHoverResultSetEntry,
+} from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import type { TypeGeochartResultSetEntry } from '@/core/stores/store-interface-and-intial-values/geochart-state';
 import { getGeoViewStore, getGeoViewStoreAsync } from '@/core/stores/stores-managers';
 import { logger } from '@/core/utils/logger';
 import { delay } from '@/core/utils/utilities';
-import { TypeResultSetEntry } from '@/api/types/map-schema-types';
+import type { TypeResultSetEntry } from '@/api/types/map-schema-types';
 import { GeoViewStoreOnMapNotFoundError } from '@/core/exceptions/geoview-exceptions';
 
 /**

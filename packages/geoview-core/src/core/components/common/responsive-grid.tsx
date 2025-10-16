@@ -1,6 +1,8 @@
-import { ReactNode, forwardRef, useMemo } from 'react';
+import type { ReactNode} from 'react';
+import { forwardRef, useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
-import { Grid, GridProps, SxProps } from '@/ui';
+import type { GridProps, SxProps } from '@/ui';
+import { Grid } from '@/ui';
 
 interface ResponsiveGridProps extends GridProps {
   children: ReactNode;

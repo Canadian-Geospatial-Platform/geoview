@@ -1,13 +1,14 @@
 import React from 'react'; // GV This import is to validate that we're on the right React at the end of the file
 import { FooterPlugin } from 'geoview-core/api/plugin/footer-plugin';
-import { TypeTabs } from 'geoview-core/ui/tabs/tabs';
+import type { TypeTabs } from 'geoview-core/ui/tabs/tabs';
 import { ChartIcon } from 'geoview-core/ui/icons';
 
 import { GeochartEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/geochart-event-processor';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-geochart.json';
 import { GeoChartPanel } from './geochart-panel';
-import { convertGeoViewGeoChartConfigToCore, PluginGeoChartConfig } from './geochart-types';
+import type { PluginGeoChartConfig } from './geochart-types';
+import { convertGeoViewGeoChartConfigToCore } from './geochart-types';
 
 /**
  * The Chart Plugin which will be automatically instanciated during GeoView's initialization.

@@ -5,13 +5,13 @@ import type * as translate from 'react-i18next';
 import type { useTheme } from '@mui/material/styles';
 import type { useMediaQuery } from '@mui/material';
 
-import { TypeDisplayLanguage, TypeMapFeaturesInstance } from '@/api/types/map-schema-types';
-import { API } from '@/api/api';
-import { logger } from '@/core/utils/logger';
-import { useWhatChanged } from '@/core/utils/useWhatChanged';
-import * as UI from '@/ui';
-import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
-import { MapViewer } from '@/geo/map/map-viewer';
+import type { TypeDisplayLanguage, TypeMapFeaturesInstance } from '@/api/types/map-schema-types';
+import type { API } from '@/api/api';
+import type { logger } from '@/core/utils/logger';
+import type { useWhatChanged } from '@/core/utils/useWhatChanged';
+import type * as UI from '@/ui';
+import type { AbstractPlugin } from '@/api/plugin/abstract-plugin';
+import type { MapViewer } from '@/geo/map/map-viewer';
 
 export { getGeoViewStore } from '@/core/stores/stores-managers';
 

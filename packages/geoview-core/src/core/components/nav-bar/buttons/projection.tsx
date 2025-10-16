@@ -1,10 +1,12 @@
-import { createElement, ReactNode, useCallback } from 'react';
+import type { ReactNode } from 'react';
+import { createElement, useCallback } from 'react';
 import { useMapProjection, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
-import { TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
-import { TypePanelProps } from '@/ui/panel/panel-types';
-import { IconButtonPropsExtend, IconButton } from '@/ui/icon-button/icon-button';
+import type { TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
+import type { TypePanelProps } from '@/ui/panel/panel-types';
+import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
+import { IconButton } from '@/ui/icon-button/icon-button';
 import { List, ListItem } from '@/ui/list';
 import { ProjectionIcon, PublicIcon } from '@/ui/icons';
 

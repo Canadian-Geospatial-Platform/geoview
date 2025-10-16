@@ -1,12 +1,12 @@
-import { Coordinate } from 'ol/coordinate'; // only for typing
-import Overlay from 'ol/Overlay';
-import { Extent } from 'ol/extent'; // only for Typing
-import { FitOptions } from 'ol/View'; // only for typing
-import { Size } from 'ol/size';
-import { Pixel } from 'ol/pixel';
+import type { Coordinate } from 'ol/coordinate'; // only for typing
+import type Overlay from 'ol/Overlay';
+import type { Extent } from 'ol/extent'; // only for Typing
+import type { FitOptions } from 'ol/View'; // only for typing
+import type { Size } from 'ol/size';
+import type { Pixel } from 'ol/pixel';
 import { useStore } from 'zustand';
 
-import {
+import type {
   TypeBasemapOptions,
   TypeHighlightColors,
   TypeInteraction,
@@ -15,17 +15,17 @@ import {
   TypeZoomAndCenter,
   TypeFeatureInfoEntry,
   TypePointMarker,
-  MAP_CENTER,
 } from '@/api/types/map-schema-types';
+import { MAP_CENTER } from '@/api/types/map-schema-types';
 import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
-import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
+import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { Projection } from '@/geo/utils/projection';
-import { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { TypeMapMouseInfo } from '@/geo/map/map-viewer';
+import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import type { TypeMapMouseInfo } from '@/geo/map/map-viewer';
 
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
-import { TypeHoverFeatureInfo } from './feature-info-state';
+import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
+import type { TypeHoverFeatureInfo } from './feature-info-state';
 import { logger } from '@/core/utils/logger';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with MapEventProcessor vs MapState

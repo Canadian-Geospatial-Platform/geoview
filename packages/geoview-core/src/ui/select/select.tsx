@@ -1,13 +1,7 @@
-import { Ref, forwardRef, useMemo } from 'react';
-import {
-  FormControl,
-  InputLabel,
-  InputLabelProps,
-  MenuItem,
-  Select as MaterialSelect,
-  FormControlProps,
-  SelectChangeEvent,
-} from '@mui/material';
+import type { Ref } from 'react';
+import { forwardRef, useMemo } from 'react';
+import type { InputLabelProps, FormControlProps, SelectChangeEvent } from '@mui/material';
+import { FormControl, InputLabel, MenuItem, Select as MaterialSelect } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { getSxClasses } from '@/ui/select/select-style';
 import { logger } from '@/core/utils/logger';

@@ -1,5 +1,7 @@
-import { forwardRef, Ref } from 'react';
-import { ListItem as MaterialListItem, ListItemProps } from '@mui/material';
+import type { Ref } from 'react';
+import { forwardRef } from 'react';
+import type { ListItemProps } from '@mui/material';
+import { ListItem as MaterialListItem } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
 const sxClasses = {

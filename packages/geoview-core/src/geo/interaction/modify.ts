@@ -1,15 +1,17 @@
 import { Modify as OLModify } from 'ol/interaction';
-import { ModifyEvent as OLModifyEvent, Options as OLModifyOptions } from 'ol/interaction/Modify';
+import type { ModifyEvent as OLModifyEvent, Options as OLModifyOptions } from 'ol/interaction/Modify';
 import Collection from 'ol/Collection';
-import Feature from 'ol/Feature';
-import { FlatStyle } from 'ol/style/flat';
-import { Condition } from 'ol/events/condition';
+import type Feature from 'ol/Feature';
+import type { FlatStyle } from 'ol/style/flat';
+import type { Condition } from 'ol/events/condition';
 
-import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
+import type { EventDelegateBase } from '@/api/events/event-helper';
+import EventHelper from '@/api/events/event-helper';
+import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { convertTypeFeatureStyleToOpenLayersStyle } from '@/geo/utils/utilities';
 
-import { Interaction, InteractionOptions } from './interaction';
+import type { InteractionOptions } from './interaction';
+import { Interaction } from './interaction';
 
 /**
  * Supported options for modify interactions

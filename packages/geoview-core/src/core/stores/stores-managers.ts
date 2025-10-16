@@ -4,10 +4,11 @@ import { create, createStore } from 'zustand';
 import { mountStoreDevtool } from 'simple-zustand-devtools';
 
 import { destroyEventProcessors, initializeEventProcessors } from '@/api/event-processors';
-import { IGeoviewState, GeoviewStoreType, geoviewStoreDefinitionWithSubscribeSelector } from './geoview-store';
+import type { IGeoviewState, GeoviewStoreType } from './geoview-store';
+import { geoviewStoreDefinitionWithSubscribeSelector } from './geoview-store';
 import { MapContext } from '@/core/app-start';
 import { whenThisThen, isLocalhost } from '@/core/utils/utilities';
-import { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { getItemAsNumber } from '@/core/utils/localStorage';
 
 export interface StoresManagerState {

@@ -1,7 +1,7 @@
 // TODO Remove when no longer needed
 import _ from 'lodash';
-import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeLegendLayer, TypeLegendItem } from '@/core/components/layers/types';
+import type { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import type { TypeLegendLayer, TypeLegendItem } from '@/core/components/layers/types';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { generateId } from '@/core/utils/utilities';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';

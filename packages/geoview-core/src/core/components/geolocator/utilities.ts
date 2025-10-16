@@ -1,5 +1,5 @@
-import { GeoListItem } from '@/core/components/geolocator/geolocator';
-import { TypeMenuItemProps } from '@/ui';
+import type { GeoListItem } from '@/core/components/geolocator/geolocator';
+import type { TypeMenuItemProps } from '@/ui';
 
 export type tooltipProp = Pick<GeoListItem, 'name' | 'province' | 'category'>;
 

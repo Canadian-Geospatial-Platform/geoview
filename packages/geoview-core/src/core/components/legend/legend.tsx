@@ -8,7 +8,7 @@ import { logger } from '@/core/utils/logger';
 
 import { getSxClassesMain, getSxClasses } from './legend-styles';
 import { LegendLayer } from './legend-layer';
-import { TypeLegendLayer } from '@/core/components/layers/types';
+import type { TypeLegendLayer } from '@/core/components/layers/types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
 

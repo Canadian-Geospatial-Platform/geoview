@@ -1,5 +1,5 @@
-import { Theme } from '@mui/material/styles';
-import { SxStyles } from '@/ui/style/types';
+import type { Theme } from '@mui/material/styles';
+import type { SxStyles } from '@/ui/style/types';
 
 export const getSxClasses = (theme: Theme): SxStyles => ({
   title: {

@@ -18,7 +18,8 @@ import { useLightBox } from '@/core/components/common';
 import { LayerIcon } from '@/core/components/common/layer-icon';
 import { SecondaryControls } from './legend-layer-ctrl';
 import { CollapsibleContent } from './legend-layer-container';
-import { CONST_LAYER_TYPES, TypeLayerStatus } from '@/api/types/layer-schema-types';
+import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
+import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
 

@@ -1,4 +1,5 @@
-import { Collapse as MaterialCollapse, CollapseProps } from '@mui/material';
+import type { CollapseProps } from '@mui/material';
+import { Collapse as MaterialCollapse } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
 /**

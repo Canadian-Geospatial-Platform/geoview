@@ -1,20 +1,31 @@
-import { useStore, UseBoundStore, Mutate, StoreApi } from 'zustand';
+import type { UseBoundStore, Mutate, StoreApi } from 'zustand';
+import { useStore } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import cloneDeep from 'lodash/cloneDeep';
 
 import { useGeoViewStore } from '@/core/stores/stores-managers';
-import { IAppState, initializeAppState } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { IFeatureInfoState, initFeatureInfoState } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import { ILayerState, initializeLayerState } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { IMapState, initializeMapState } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { IDataTableState, initialDataTableState } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { ITimeSliderState, initializeTimeSliderState } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
-import { IGeochartState, initializeGeochartState } from '@/core/stores/store-interface-and-intial-values/geochart-state';
-import { ISwiperState, initializeSwiperState } from '@/core/stores/store-interface-and-intial-values/swiper-state';
-import { IDrawerState, initializeDrawerState } from './store-interface-and-intial-values/drawer-state';
-import { IUIState, initializeUIState } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import type { IAppState } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { initializeAppState } from '@/core/stores/store-interface-and-intial-values/app-state';
+import type { IFeatureInfoState } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { initFeatureInfoState } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import type { ILayerState } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { initializeLayerState } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import type { IMapState } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { initializeMapState } from '@/core/stores/store-interface-and-intial-values/map-state';
+import type { IDataTableState } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { initialDataTableState } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import type { ITimeSliderState } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+import { initializeTimeSliderState } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+import type { IGeochartState } from '@/core/stores/store-interface-and-intial-values/geochart-state';
+import { initializeGeochartState } from '@/core/stores/store-interface-and-intial-values/geochart-state';
+import type { ISwiperState } from '@/core/stores/store-interface-and-intial-values/swiper-state';
+import { initializeSwiperState } from '@/core/stores/store-interface-and-intial-values/swiper-state';
+import type { IDrawerState } from './store-interface-and-intial-values/drawer-state';
+import { initializeDrawerState } from './store-interface-and-intial-values/drawer-state';
+import type { IUIState } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { initializeUIState } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
-import { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
 import { serializeTypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
 

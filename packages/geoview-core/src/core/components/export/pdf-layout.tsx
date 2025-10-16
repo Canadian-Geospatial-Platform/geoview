@@ -2,8 +2,9 @@ import { pdf } from '@react-pdf/renderer';
 
 import { Document, Page, Text, View, Image, Svg, Path } from '@react-pdf/renderer';
 import { DateMgt } from '@/core/utils/date-mgt';
-import { getMapInfo, FlattenedLegendItem, PAGE_CONFIGS, TypeValidPageSizes } from './utilities';
-import { FileExportProps } from './export-modal';
+import type { FlattenedLegendItem, TypeValidPageSizes } from './utilities';
+import { getMapInfo, PAGE_CONFIGS } from './utilities';
+import type { FileExportProps } from './export-modal';
 import { PDF_STYLES } from './layout-styles';
 
 interface ExportDocumentProps {

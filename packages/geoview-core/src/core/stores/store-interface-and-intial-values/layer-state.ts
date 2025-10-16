@@ -1,19 +1,20 @@
 import { useStore } from 'zustand';
 
-import { FitOptions } from 'ol/View';
-import { Extent } from 'ol/extent';
+import type { FitOptions } from 'ol/View';
+import type { Extent } from 'ol/extent';
 
 import { useGeoViewStore } from '@/core/stores/stores-managers';
-import { TypeLayersViewDisplayState, TypeLegendItem, TypeLegendLayer, TypeLegendLayerItem } from '@/core/components/layers/types';
-import { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
-import { TypeFeatureInfoEntryPartial, TypeLayerStyleConfig, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
-import { TimeDimension } from '@/core/utils/date-mgt';
-import { CONST_LAYER_TYPES, TypeLayerStatus, TypeLayerControls, TypeGeoviewLayerType } from '@/api/types/layer-schema-types';
+import type { TypeLayersViewDisplayState, TypeLegendItem, TypeLegendLayer, TypeLegendLayerItem } from '@/core/components/layers/types';
+import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import type { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
+import type { TypeFeatureInfoEntryPartial, TypeLayerStyleConfig, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
+import type { TimeDimension } from '@/core/utils/date-mgt';
+import type { TypeLayerStatus, TypeLayerControls, TypeGeoviewLayerType } from '@/api/types/layer-schema-types';
+import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import type { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { esriQueryRecordsByUrlObjectIds } from '@/geo/layer/gv-layers/utils';
 import { LayerNotEsriDynamicError, LayerNotFoundError } from '@/core/exceptions/layer-exceptions';

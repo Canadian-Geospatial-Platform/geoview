@@ -1,17 +1,16 @@
 import proj4 from 'proj4';
-import { Coordinate } from 'ol/coordinate';
+import type { Coordinate } from 'ol/coordinate';
 import { register } from 'ol/proj/proj4';
+import type { Projection as OLProjection, ProjectionLike } from 'ol/proj';
 import {
   get as OLGetProjection,
-  Projection as OLProjection,
   getPointResolution,
   transform as olTransform,
   transformExtent as olTransformExtent,
   fromLonLat,
   toLonLat,
-  ProjectionLike,
 } from 'ol/proj';
-import { Extent } from 'ol/extent';
+import type { Extent } from 'ol/extent';
 
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { logger } from '@/core/utils/logger';

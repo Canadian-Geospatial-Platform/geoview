@@ -1,4 +1,4 @@
-import { TypeTabs } from '@/ui/tabs/tabs';
+import type { TypeTabs } from '@/ui/tabs/tabs';
 import { logger } from '@/core/utils/logger';
 import { AbstractPlugin } from './abstract-plugin';
 

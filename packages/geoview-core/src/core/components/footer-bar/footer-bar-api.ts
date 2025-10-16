@@ -1,7 +1,8 @@
-import { TypeTabs } from '@/ui/tabs/tabs';
+import type { TypeTabs } from '@/ui/tabs/tabs';
 import { UIEventProcessor } from '@/api/event-processors/event-processor-children/ui-event-processor';
 
-import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
+import type { EventDelegateBase } from '@/api/events/event-helper';
+import EventHelper from '@/api/events/event-helper';
 import { sanitizeHtmlContent } from '@/core/utils/utilities';
 
 /**

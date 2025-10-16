@@ -1,5 +1,6 @@
 import { useEffect, isValidElement } from 'react';
-import { Popover as MaterialPopover, PopoverProps } from '@mui/material';
+import type { PopoverProps } from '@mui/material';
+import { Popover as MaterialPopover } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { FocusTrap } from '@/ui';
 import { ARROW_KEYS_WITH_SPACE } from '@/core/utils/constant';

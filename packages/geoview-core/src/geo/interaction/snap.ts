@@ -1,9 +1,10 @@
 import { Snap as OLSnap } from 'ol/interaction';
-import { Options as OLSnapOptions } from 'ol/interaction/Snap';
-import Collection from 'ol/Collection';
-import Feature from 'ol/Feature';
+import type { Options as OLSnapOptions } from 'ol/interaction/Snap';
+import type Collection from 'ol/Collection';
+import type Feature from 'ol/Feature';
 
-import { Interaction, InteractionOptions } from './interaction';
+import type { InteractionOptions } from './interaction';
+import { Interaction } from './interaction';
 
 /**
  * Supported options for snapping interactions

@@ -1,7 +1,9 @@
-import { useState, useEffect, CSSProperties, useLayoutEffect, ReactNode, useCallback, useRef, useMemo } from 'react';
-import { SxProps, Theme, useTheme } from '@mui/material/styles';
+import type { CSSProperties, ReactNode } from 'react';
+import { useState, useEffect, useLayoutEffect, useCallback, useRef, useMemo } from 'react';
+import type { SxProps, Theme } from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles';
 import { Slider as MaterialSlider } from '@mui/material';
-import { Mark } from '@mui/base';
+import type { Mark } from '@mui/base';
 import { logger } from '@/core/utils/logger';
 
 import { getSxClasses } from '@/ui/slider/slider-style';

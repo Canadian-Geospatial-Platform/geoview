@@ -1,14 +1,17 @@
-import VectorTileSource, { Options as SourceOptions } from 'ol/source/VectorTile';
-import TileGrid, { Options as TileGridOptions } from 'ol/tilegrid/TileGrid';
-import { ProjectionLike } from 'ol/proj';
+import type { Options as SourceOptions } from 'ol/source/VectorTile';
+import VectorTileSource from 'ol/source/VectorTile';
+import type { Options as TileGridOptions } from 'ol/tilegrid/TileGrid';
+import TileGrid from 'ol/tilegrid/TileGrid';
+import type { ProjectionLike } from 'ol/proj';
 
 import { applyStyle } from 'ol-mapbox-style';
 
 import { MVT } from 'ol/format';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import { TypeGeoviewLayerConfig, TypeTileGrid, CONST_LAYER_TYPES, TypeMetadataVectorTiles } from '@/api/types/layer-schema-types';
-import { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
+import type { TypeGeoviewLayerConfig, TypeTileGrid, TypeMetadataVectorTiles } from '@/api/types/layer-schema-types';
+import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
+import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { Projection } from '@/geo/utils/projection';
 import { VectorTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { logger } from '@/core/utils/logger';

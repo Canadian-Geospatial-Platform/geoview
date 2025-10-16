@@ -1,6 +1,7 @@
 // GV: THIS UI COMPONENT IS NOT USED
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { ButtonGroupProps, ClickAwayListener, Grow, MenuItem, MenuList, Paper, Popper } from '@mui/material';
+import type { ButtonGroupProps } from '@mui/material';
+import { ClickAwayListener, Grow, MenuItem, MenuList, Paper, Popper } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { Button } from '@/ui/button/button';
 import { ButtonGroup } from '@/ui/button-group/button-group';

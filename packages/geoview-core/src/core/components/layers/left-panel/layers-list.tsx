@@ -3,7 +3,7 @@ import { useTheme } from '@mui/material/styles';
 import { Box } from '@/ui';
 import { useGeoViewMapId, useMapOrderedLayers } from '@/core/stores';
 import { logger } from '@/core/utils/logger';
-import { TypeLegendLayer } from '@/core/components/layers/types';
+import type { TypeLegendLayer } from '@/core/components/layers/types';
 import { TABS } from '@/core/utils/constant';
 import { SingleLayer } from './single-layer';
 import { getSxClasses } from './left-panel-styles';

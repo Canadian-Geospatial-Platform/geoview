@@ -1,9 +1,9 @@
 import { useStore } from 'zustand';
-import { GeoViewGeoChartConfig } from '@/api/config/reader/uuid-config-reader';
-import { TypeFeatureInfoEntry, TypeQueryStatus, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
+import type { GeoViewGeoChartConfig } from '@/api/config/reader/uuid-config-reader';
+import type { TypeFeatureInfoEntry, TypeQueryStatus, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
 
 import { useGeoViewStore } from '@/core/stores/stores-managers';
-import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
+import type { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with GeochartEventProcessor vs GeochartState
 

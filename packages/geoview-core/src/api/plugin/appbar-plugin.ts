@@ -1,6 +1,6 @@
-import { TypeWindow } from '@/core/types/global-types';
-import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
-import { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
+import type { TypeWindow } from '@/core/types/global-types';
+import type { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
+import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import { AbstractPlugin } from './abstract-plugin';
 
 /**

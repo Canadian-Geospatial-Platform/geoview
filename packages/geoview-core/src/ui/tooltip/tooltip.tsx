@@ -1,5 +1,7 @@
-import { forwardRef, Ref } from 'react';
-import { Tooltip as MaterialTooltip, TooltipProps } from '@mui/material';
+import type { Ref } from 'react';
+import { forwardRef } from 'react';
+import type { TooltipProps } from '@mui/material';
+import { Tooltip as MaterialTooltip } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
 /**

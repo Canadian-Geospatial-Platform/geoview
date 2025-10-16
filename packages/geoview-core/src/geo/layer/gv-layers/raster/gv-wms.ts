@@ -1,35 +1,36 @@
 import ImageLayer from 'ol/layer/Image';
-import { Options as ImageOptions } from 'ol/layer/BaseImage';
-import { Coordinate } from 'ol/coordinate';
-import { ImageArcGISRest, ImageWMS } from 'ol/source';
-import { Extent } from 'ol/extent';
-import { Projection as OLProjection, ProjectionLike } from 'ol/proj';
-import { Map as OLMap } from 'ol';
+import type { Options as ImageOptions } from 'ol/layer/BaseImage';
+import type { Coordinate } from 'ol/coordinate';
+import type { ImageArcGISRest, ImageWMS } from 'ol/source';
+import type { Extent } from 'ol/extent';
+import type { Projection as OLProjection, ProjectionLike } from 'ol/proj';
+import type { Map as OLMap } from 'ol';
 import { isArray } from 'lodash';
 
-import { TypeWmsLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import type { TypeWmsLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { xmlToJson } from '@/core/utils/utilities';
 import { getExtentIntersection, validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { parseDateTimeValuesEsriImageOrWMS } from '@/geo/layer/gv-layers/utils';
 import { logger } from '@/core/utils/logger';
-import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { CONFIG_PROXY_URL, TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
-import {
-  CONST_LAYER_TYPES,
+import type { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
+import { CONFIG_PROXY_URL } from '@/api/types/map-schema-types';
+import type {
   TypeLayerMetadataWMSStyle,
   TypeLayerMetadataWMSStyleLegendUrl,
   TypeMetadataFeatureInfo,
 } from '@/api/types/layer-schema-types';
+import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { loadImage } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
-import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
+import type { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { Projection } from '@/geo/utils/projection';
 import { LayerInvalidFeatureInfoFormatWMSError, LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { formatError, NetworkError, ResponseContentError } from '@/core/exceptions/core-exceptions';
-import { TypeDateFragments } from '@/core/utils/date-mgt';
-import { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
+import type { TypeDateFragments } from '@/core/utils/date-mgt';
+import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 
 /**
  * Manages a WMS layer.

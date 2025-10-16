@@ -5,8 +5,9 @@ import { GeochartEventProcessor } from '@/api/event-processors/event-processor-c
 import { generateId } from '@/core/utils/utilities';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
-import { DEFAULT_MAP_FEATURE_CONFIG, TypeDisplayLanguage } from '@/api/types/map-schema-types';
-import { GeoCoreLayerConfig, RCSLayerConfig, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
+import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
+import { DEFAULT_MAP_FEATURE_CONFIG } from '@/api/types/map-schema-types';
+import type { GeoCoreLayerConfig, RCSLayerConfig, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 /**

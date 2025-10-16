@@ -1,7 +1,7 @@
 /* eslint-disable max-classes-per-file */
 // We want more than 1 Error class here to save files
 import { LayerError } from '@/core/exceptions/layer-exceptions';
-import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 
 // Classes in this file mostly inherit LayerEntryConfigError errors.
 

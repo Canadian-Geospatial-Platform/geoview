@@ -1,4 +1,5 @@
-import { SvgIcon, SvgIconProps } from '@mui/material';
+import type { SvgIconProps } from '@mui/material';
+import { SvgIcon } from '@mui/material';
 
 // ? I doubt we want to define an explicit type for this?
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -1,4 +1,5 @@
-import { CircularProgress as MaterialCircularProgress, CircularProgressProps } from '@mui/material';
+import type { CircularProgressProps } from '@mui/material';
+import { CircularProgress as MaterialCircularProgress } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
 /**

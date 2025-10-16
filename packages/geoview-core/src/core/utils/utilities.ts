@@ -1,10 +1,11 @@
-import { Root, createRoot } from 'react-dom/client';
+import type { Root } from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 import sanitizeHtml from 'sanitize-html';
 
-import { TypeDisplayLanguage } from '@/api/types/map-schema-types';
+import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import { logger } from '@/core/utils/logger';
 import i18n from '@/core/translation/i18n';
-import { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
+import type { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { Fetch } from '@/core/utils/fetch-helper';
 
 /** The observers to monitor element removals from the DOM tree */

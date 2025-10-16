@@ -18,16 +18,17 @@ import {
   useMapHideCoordinateInfoSwitch,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
-import { TypeFeatureInfoEntry, TypeLayerData } from '@/api/types/map-schema-types';
+import type { TypeFeatureInfoEntry, TypeLayerData } from '@/api/types/map-schema-types';
 
-import { LayerListEntry, Layout } from '@/core/components/common';
+import type { LayerListEntry } from '@/core/components/common';
+import { Layout } from '@/core/components/common';
 import { checkSelectedLayerPathList } from '@/core/components/common/comp-common';
 import { getSxClasses } from './details-style';
 import { FeatureInfo } from './feature-info';
 import { CONTAINER_TYPE, FEATURE_INFO_STATUS, TABS } from '@/core/utils/constant';
 import { DetailsSkeleton } from './details-skeleton';
 import { CoordinateInfo, CoordinateInfoSwitch } from './coordinate-info';
-import { TypeContainerBox } from '@/core/types/global-types';
+import type { TypeContainerBox } from '@/core/types/global-types';
 
 interface DetailsPanelType {
   fullWidth?: boolean;

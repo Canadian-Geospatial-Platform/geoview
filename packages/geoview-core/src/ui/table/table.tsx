@@ -1,4 +1,5 @@
-import { MaterialReactTable, MRT_TableOptions as MRTTableOptions, type MRT_RowData as MRTRowData } from 'material-react-table';
+import type { MRT_TableOptions as MRTTableOptions } from 'material-react-table';
+import { MaterialReactTable, type MRT_RowData as MRTRowData } from 'material-react-table';
 import { logger } from '@/core/utils/logger';
 
 /**

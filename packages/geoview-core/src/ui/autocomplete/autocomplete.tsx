@@ -1,5 +1,7 @@
-import { forwardRef, Ref } from 'react';
-import { Autocomplete as MaterialAutocomplete, AutocompleteProps, FormControl } from '@mui/material';
+import type { Ref } from 'react';
+import { forwardRef } from 'react';
+import type { AutocompleteProps } from '@mui/material';
+import { Autocomplete as MaterialAutocomplete, FormControl } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
 /**

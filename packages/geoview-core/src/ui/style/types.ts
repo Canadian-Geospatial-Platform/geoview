@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { darken, lighten, alpha } from '@mui/material';
-import { Theme } from '@mui/material/styles';
-import { SxProps } from '@mui/system';
+import type { Theme } from '@mui/material/styles';
+import type { SxProps } from '@mui/system';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 
 // Can populate using https://www.htmlcsscolor.com/hex/F1F2F5

@@ -1,10 +1,13 @@
-import { useCallback, ReactNode, useRef } from 'react';
+import type { ReactNode} from 'react';
+import { useCallback, useRef } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { logger } from '@/core/utils/logger';
-import { LayerList, LayerListEntry } from './layer-list';
-import { ResponsiveGridLayout, ResponsiveGridLayoutExposedMethods } from './responsive-grid-layout';
+import type { LayerListEntry } from './layer-list';
+import { LayerList } from './layer-list';
+import type { ResponsiveGridLayoutExposedMethods } from './responsive-grid-layout';
+import { ResponsiveGridLayout } from './responsive-grid-layout';
 import { Box, Tooltip, Typography } from '@/ui';
-import { TypeContainerBox } from '@/core/types/global-types';
+import type { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useSelectorLayerName } from '@/core/stores/store-interface-and-intial-values/layer-state';

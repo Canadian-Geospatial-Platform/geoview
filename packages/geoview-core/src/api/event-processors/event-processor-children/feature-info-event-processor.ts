@@ -1,19 +1,20 @@
 import { logger } from '@/core/utils/logger';
-import { EventType } from '@/geo/layer/layer-sets/abstract-layer-set';
-import { TypeMapMouseInfo } from '@/geo/map/map-viewer';
+import type { EventType } from '@/geo/layer/layer-sets/abstract-layer-set';
+import type { TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import { Projection } from '@/geo/utils/projection';
 
-import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '@/api/event-processors/abstract-event-processor';
+import type { BatchedPropagationLayerDataArrayByMap } from '@/api/event-processors/abstract-event-processor';
+import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { UIEventProcessor } from './ui-event-processor';
-import {
+import type {
   TypeFeatureInfoEntry,
   TypeResultSetEntry,
   TypeUtmZoneResponse,
   TypeAltitudeResponse,
   TypeNtsResponse,
 } from '@/api/types/map-schema-types';
-import { IFeatureInfoState, TypeFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import { GeoviewStoreType } from '@/core/stores/geoview-store';
+import type { IFeatureInfoState, TypeFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import type { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { MapEventProcessor } from './map-event-processor';
 import { doUntil } from '@/core/utils/utilities';
 

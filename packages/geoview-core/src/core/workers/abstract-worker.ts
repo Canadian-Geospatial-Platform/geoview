@@ -1,6 +1,7 @@
-import { wrap, Remote } from 'comlink';
+import type { Remote } from 'comlink';
+import { wrap } from 'comlink';
 import { logger } from '@/core/utils/logger';
-import { WorkerLogLevel } from './helper/logger-worker';
+import type { WorkerLogLevel } from './helper/logger-worker';
 
 /**
  * To create a new worker:

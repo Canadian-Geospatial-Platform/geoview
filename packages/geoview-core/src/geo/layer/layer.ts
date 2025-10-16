@@ -1,6 +1,6 @@
-import BaseLayer from 'ol/layer/Base';
-import { Extent } from 'ol/extent';
-import { GeoJSONObject } from 'ol/format/GeoJSON';
+import type BaseLayer from 'ol/layer/Base';
+import type { Extent } from 'ol/extent';
+import type { GeoJSONObject } from 'ol/format/GeoJSON';
 
 import { GeoCore } from '@/api/config/geocore';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
@@ -10,31 +10,33 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 
 import { ConfigValidation } from '@/api/config/config-validation';
 import { generateId, isValidUUID, whenThisThen } from '@/core/utils/utilities';
-import {
-  ConfigBaseClass,
+import type {
   LayerStatusChangedDelegate as ConfigLayerStatusChangedDelegate,
   LayerStatusChangedEvent as ConfigLayerStatusChangedEvent,
 } from '@/api/config/validation-classes/config-base-class';
+import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { logger } from '@/core/utils/logger';
 
-import {
+import type {
   AbstractGeoViewLayer,
   LayerEntryProcessedEvent,
   LayerGroupCreatedEvent,
   LayerEntryRegisterInitEvent,
   LayerGVCreatedEvent,
 } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeDisplayLanguage, TypeOutfieldsType } from '@/api/types/map-schema-types';
-import {
+import type { TypeDisplayLanguage, TypeOutfieldsType } from '@/api/types/map-schema-types';
+import type {
   MapConfigLayerEntry,
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
-  mapConfigLayerEntryIsGeoCore,
-  mapConfigLayerEntryIsGeoPackage,
-  mapConfigLayerEntryIsShapefile,
   TypeLayerStatus,
   GeoCoreLayerConfig,
   GeoPackageLayerConfig,
+} from '@/api/types/layer-schema-types';
+import {
+  mapConfigLayerEntryIsGeoCore,
+  mapConfigLayerEntryIsGeoPackage,
+  mapConfigLayerEntryIsShapefile,
   mapConfigLayerEntryIsRCS,
 } from '@/api/types/layer-schema-types';
 
@@ -51,7 +53,7 @@ import { VectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 import { CSV } from '@/geo/layer/geoview-layers/vector/csv';
 import { WKB } from '@/geo/layer/geoview-layers/vector/wkb';
 
-import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
+import type { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { HoverFeatureInfoLayerSet } from '@/geo/layer/layer-sets/hover-feature-info-layer-set';
 import { AllFeatureInfoLayerSet } from '@/geo/layer/layer-sets/all-feature-info-layer-set';
 import { LegendsLayerSet } from '@/geo/layer/layer-sets/legends-layer-set';
@@ -66,27 +68,28 @@ import {
   LayerWrongTypeError,
 } from '@/core/exceptions/layer-exceptions';
 import { LayerEntryConfigError } from '@/core/exceptions/layer-entry-config-exceptions';
-import {
+import type {
   AbstractBaseLayer,
   LayerOpacityChangedEvent,
   LayerOpacityChangedDelegate,
   VisibleChangedEvent,
   VisibleChangedDelegate,
 } from '@/geo/layer/gv-layers/abstract-base-layer';
-import {
-  AbstractGVLayer,
+import type {
   LayerDelegate as GVLayerDelegate,
   LayerErrorEvent as GVLayerErrorEvent,
   LayerErrorDelegate as GVLayerErrorDelegate,
   LayerMessageDelegate,
   LayerMessageEvent,
 } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVGeoJSON } from '@/geo/layer/gv-layers/vector/gv-geojson';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 import { getExtentUnion, getZoomFromScale } from '@/geo/utils/utilities';
 
-import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+import type { EventDelegateBase } from '@/api/events/event-helper';
+import EventHelper from '@/api/events/event-helper';
+import type { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
@@ -95,7 +98,7 @@ import { GeochartEventProcessor } from '@/api/event-processors/event-processor-c
 import { SwiperEventProcessor } from '@/api/event-processors/event-processor-children/swiper-event-processor';
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
-import { TypeLegendItem } from '@/core/components/layers/types';
+import type { TypeLegendItem } from '@/core/components/layers/types';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { LayerGeoCoreError } from '@/core/exceptions/geocore-exceptions';
@@ -113,7 +116,7 @@ import { WkbLayerEntryConfig } from '@/api/config/validation-classes/vector-vali
 import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { XYZTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { VectorTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
-import { TypeTimeSliderProps } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+import type { TypeTimeSliderProps } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS

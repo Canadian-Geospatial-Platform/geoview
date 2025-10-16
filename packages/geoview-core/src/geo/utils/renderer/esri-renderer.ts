@@ -1,11 +1,7 @@
 import { asString } from 'ol/color';
 
-import {
+import type {
   TypeKindOfVectorSettings,
-  isFilledPolygonVectorConfig,
-  isIconSymbolVectorConfig,
-  isLineStringVectorConfig,
-  isSimpleSymbolVectorConfig,
   TypeFillStyle,
   TypePolygonVectorConfig,
   TypeIconSymbolVectorConfig,
@@ -17,6 +13,12 @@ import {
   TypeLayerStyleSettings,
   TypeStyleGeometry,
   TypeSymbol,
+} from '@/api/types/map-schema-types';
+import {
+  isFilledPolygonVectorConfig,
+  isIconSymbolVectorConfig,
+  isLineStringVectorConfig,
+  isSimpleSymbolVectorConfig,
 } from '@/api/types/map-schema-types';
 
 import { logger } from '@/core/utils/logger';

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { Box, TextField, InputAdornment, IconButton } from '@/ui';
 import { SearchIcon, CloseIcon, KeyboardArrowUpIcon, KeyboardArrowDownIcon } from '@/ui/icons';
-import { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
+import type { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from '@/core/utils/logger';
 
 // Protection pattern functions that return new regex instances

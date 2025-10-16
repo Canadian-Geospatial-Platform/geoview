@@ -1,6 +1,7 @@
-import { TypeWindow } from 'geoview-core';
+import type { TypeWindow } from 'geoview-core';
 import { MuiColorInput } from 'mui-color-input';
-import { ChangeEvent, useState } from 'react';
+import type { ChangeEvent } from 'react';
+import { useState } from 'react';
 import {
   useDrawerStyle,
   useDrawerActiveGeom,

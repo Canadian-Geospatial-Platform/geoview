@@ -1,5 +1,5 @@
-import { TypeWindow } from 'geoview-core/core/types/global-types';
-import { Extent } from 'geoview-core/api/types/map-schema-types';
+import type { TypeWindow } from 'geoview-core/core/types/global-types';
+import type { Extent } from 'geoview-core/api/types/map-schema-types';
 import { logger } from 'geoview-core/core/utils/logger';
 import { useMapStoreActions } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
 import { getSxClasses } from './area-of-interest-style';

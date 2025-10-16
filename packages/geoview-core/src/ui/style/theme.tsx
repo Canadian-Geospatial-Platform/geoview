@@ -1,5 +1,6 @@
-import { Theme, ThemeOptions, createTheme } from '@mui/material/styles';
-import { TypeDisplayTheme } from '@/api/types/map-schema-types';
+import type { Theme, ThemeOptions } from '@mui/material/styles';
+import { createTheme } from '@mui/material/styles';
+import type { TypeDisplayTheme } from '@/api/types/map-schema-types';
 import { lightThemeColors } from '@/ui/style/light-theme';
 import { darkThemeColors } from '@/ui/style/dark-theme';
 import { geoCaThemeColors } from '@/ui/style/geo-ca-theme';

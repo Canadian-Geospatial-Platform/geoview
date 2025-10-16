@@ -42,13 +42,14 @@ import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-valu
 import { DateMgt } from '@/core/utils/date-mgt';
 import { isImage, delay } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
-import { VALID_DISPLAY_LANGUAGE, TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
+import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
+import { VALID_DISPLAY_LANGUAGE } from '@/api/types/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { useFilterRows, useToolbarActionMessage, useGlobalFilter } from './hooks';
 import { getSxClasses } from './data-table-style';
 import { useLightBox } from '@/core/components/common';
 import { NUMBER_FILTER, DATE_FILTER, STRING_FILTER } from '@/core/utils/constant';
-import { DataTableProps, ColumnsType } from './data-table-types';
+import type { DataTableProps, ColumnsType } from './data-table-types';
 
 /**
  * Build Data table from map.

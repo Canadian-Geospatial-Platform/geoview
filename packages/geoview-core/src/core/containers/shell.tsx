@@ -10,7 +10,8 @@ import { NavBar } from '@/core/components/nav-bar/nav-bar';
 import { FooterBar } from '@/core/components/footer-bar/footer-bar';
 import { MapInfo } from '@/core/components/map-info/map-info';
 
-import { Box, CircularProgress, Link, Modal, Snackbar, Button, TypeModalProps, ModalApi, ModalEvent } from '@/ui';
+import type { TypeModalProps, ModalApi, ModalEvent } from '@/ui';
+import { Box, CircularProgress, Link, Modal, Snackbar, Button } from '@/ui';
 import { getShellSxClasses } from './containers-style';
 import { useMapInteraction, useMapLoaded } from '@/core/stores/store-interface-and-intial-values/map-state';
 import {
@@ -31,10 +32,10 @@ import DataTableModal from '@/core/components/data-table/data-table-modal';
 import FeatureDetailModal from '@/core/components/details/feature-detail-modal';
 import { useGeoViewConfig } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
-import { MapViewer, MapComponentAddedEvent, MapComponentRemovedEvent } from '@/geo/map/map-viewer';
+import type { MapViewer, MapComponentAddedEvent, MapComponentRemovedEvent } from '@/geo/map/map-viewer';
 
 import { FocusTrapDialog } from './focus-trap';
-import { Notifications, SnackBarOpenEvent, SnackbarType } from '@/core/utils/notifications';
+import type { Notifications, SnackBarOpenEvent, SnackbarType } from '@/core/utils/notifications';
 import { useMapResize } from './use-map-resize';
 import { delay, scrollIfNotVisible } from '@/core/utils/utilities';
 

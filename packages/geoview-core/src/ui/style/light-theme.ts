@@ -1,5 +1,6 @@
 import { geoViewColors as defaultGeoViewColors } from '@/ui/style/default';
-import { GeoViewColorClass, IGeoViewColors } from '@/ui/style/types';
+import type { IGeoViewColors } from '@/ui/style/types';
+import { GeoViewColorClass } from '@/ui/style/types';
 
 export const lightThemeColors: IGeoViewColors = {
   ...defaultGeoViewColors,

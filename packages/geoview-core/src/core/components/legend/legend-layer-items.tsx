@@ -2,11 +2,11 @@ import { useTranslation } from 'react-i18next';
 import { Tooltip, useTheme } from '@mui/material';
 import { memo, useCallback, useMemo } from 'react';
 import { Box, ListItem, ListItemText, ListItemIcon, List, BrowserNotSupportedIcon } from '@/ui';
-import { TypeLegendItem } from '@/core/components/layers/types';
+import type { TypeLegendItem } from '@/core/components/layers/types';
 import { useLayerStoreActions, useSelectorLayerControls } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
-import { TypeLayerControls } from '@/api/types/layer-schema-types';
+import type { TypeLayerControls } from '@/api/types/layer-schema-types';
 import { useSelectorIsLayerHiddenOnMap } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 interface ItemsListProps {

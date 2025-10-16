@@ -1,18 +1,9 @@
-import { ChangeEvent, useEffect, useRef, useState, KeyboardEvent } from 'react';
+import type { ChangeEvent, KeyboardEvent } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { SelectChangeEvent } from '@mui/material';
-import {
-  Box,
-  Button,
-  ButtonGroup,
-  ButtonPropsLayerPanel,
-  CircularProgressBase,
-  FileUploadIcon,
-  Paper,
-  Select,
-  Stepper,
-  TextField,
-} from '@/ui';
+import type { SelectChangeEvent } from '@mui/material';
+import type { ButtonPropsLayerPanel } from '@/ui';
+import { Box, Button, ButtonGroup, CircularProgressBase, FileUploadIcon, Paper, Select, Stepper, TextField } from '@/ui';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useAppDisabledLayerTypes, useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
@@ -21,10 +12,8 @@ import { logger } from '@/core/utils/logger';
 import { generateId, getLocalizedMessage, isValidUUID } from '@/core/utils/utilities';
 import { Config } from '@/api/config/config';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import {
-  CONST_LAYER_ENTRY_TYPES,
-  CONST_LAYER_TYPES,
+import type { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import type {
   GeoPackageLayerConfig,
   MapConfigLayerEntry,
   ShapefileLayerConfig,
@@ -32,6 +21,7 @@ import {
   TypeGeoviewLayerType,
   TypeInitialGeoviewLayerType,
 } from '@/api/types/layer-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 
 import { UtilAddLayer } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';

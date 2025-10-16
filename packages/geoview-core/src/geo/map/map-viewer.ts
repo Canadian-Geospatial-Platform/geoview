@@ -1,28 +1,23 @@
-import { Root } from 'react-dom/client';
+import type { Root } from 'react-dom/client';
 
-import { i18n } from 'i18next';
+import type { i18n } from 'i18next';
 
 import debounce from 'lodash/debounce';
-import { MapBrowserEvent, MapEvent } from 'ol';
+import type { MapBrowserEvent, MapEvent } from 'ol';
 import { ObjectEvent } from 'ol/Object';
 import OLMap from 'ol/Map';
-import View, { FitOptions, ViewOptions } from 'ol/View';
-import { Coordinate } from 'ol/coordinate';
-import { Extent } from 'ol/extent';
-import { Projection as OLProjection } from 'ol/proj';
-import { Condition } from 'ol/events/condition';
+import type { FitOptions, ViewOptions } from 'ol/View';
+import View from 'ol/View';
+import type { Coordinate } from 'ol/coordinate';
+import type { Extent } from 'ol/extent';
+import type { Projection as OLProjection } from 'ol/proj';
+import type { Condition } from 'ol/events/condition';
 import { shared as iconImageCache } from 'ol/style/IconImageCache';
-import { Size } from 'ol/size';
-import { GeometryFunction } from 'ol/interaction/Draw';
+import type { Size } from 'ol/size';
+import type { GeometryFunction } from 'ol/interaction/Draw';
 
 import queryString from 'query-string';
-import {
-  MAP_CENTER,
-  MAP_EXTENTS,
-  VALID_ZOOM_LEVELS,
-  VALID_DISPLAY_LANGUAGE,
-  VALID_DISPLAY_THEME,
-  VALID_PROJECTION_CODES,
+import type {
   TypeMapFeaturesInstance,
   TypeViewSettings,
   TypeInteraction,
@@ -32,11 +27,19 @@ import {
   TypeMapViewSettings,
   TypeStyleGeometry,
 } from '@/api/types/map-schema-types';
-import { TypeLayerStatus } from '@/api/types/layer-schema-types';
+import {
+  MAP_CENTER,
+  MAP_EXTENTS,
+  VALID_ZOOM_LEVELS,
+  VALID_DISPLAY_LANGUAGE,
+  VALID_DISPLAY_THEME,
+  VALID_PROJECTION_CODES,
+} from '@/api/types/map-schema-types';
+import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
 
 import { BasemapApi } from '@/geo/layer/basemap/basemap';
 import { LayerApi } from '@/geo/layer/layer';
-import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
+import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { Projection } from '@/geo/utils/projection';
 
 import { Plugin } from '@/api/plugin/plugin';
@@ -51,26 +54,28 @@ import { Extent as ExtentInteraction } from '@/geo/interaction/extent';
 import { Modify } from '@/geo/interaction/modify';
 import { Snap } from '@/geo/interaction/snap';
 import { Translate } from '@/geo/interaction/translate';
-import { Transform, TransformOptions } from '@/geo/interaction/transform/transform';
-import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
+import type { TransformOptions } from '@/geo/interaction/transform/transform';
+import { Transform } from '@/geo/interaction/transform/transform';
+import type { EventDelegateBase } from '@/api/events/event-helper';
+import EventHelper from '@/api/events/event-helper';
 import { ModalApi } from '@/ui';
 import { delay, generateId, getLocalizedMessage, whenThisThen } from '@/core/utils/utilities';
 import { createEmptyBasemap, getPointerPositionFromMapEvent, isExtentLonLat } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { NORTH_POLE_POSITION } from '@/core/utils/constant';
-import { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
+import type { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
-import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
+import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { Notifications } from '@/core/utils/notifications';
-import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import type { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { formatError } from '@/core/exceptions/core-exceptions';
-import { PluginsContainer } from '@/api/plugin/plugin-types';
-import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
+import type { PluginsContainer } from '@/api/plugin/plugin-types';
+import type { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 
 interface TypeDocument extends Document {
   webkitExitFullscreen: () => void;

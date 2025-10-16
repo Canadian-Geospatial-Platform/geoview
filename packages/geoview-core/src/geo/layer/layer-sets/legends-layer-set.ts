@@ -1,16 +1,23 @@
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
-import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { logger } from '@/core/utils/logger';
-import { TypeLayerStatus } from '@/api/types/layer-schema-types';
-import { AbstractLayerSet, PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
-import { TypeLegend, TypeLegendResultSet, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { AbstractGVLayer, StyleChangedDelegate, StyleChangedEvent } from '@/geo/layer/gv-layers/abstract-gv-layer';
-import { AbstractGVVector, StyleAppliedDelegate, StyleAppliedEvent } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
-import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
+import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
+import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
+import type {
+  TypeLegend,
+  TypeLegendResultSet,
+  TypeLegendResultSetEntry,
+} from '@/core/stores/store-interface-and-intial-values/layer-state';
+import type { StyleChangedDelegate, StyleChangedEvent } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import type { StyleAppliedDelegate, StyleAppliedEvent } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
+import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
+import type { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
-import { LayerApi } from '@/geo/layer/layer';
+import type { LayerApi } from '@/geo/layer/layer';
 import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 
 /**

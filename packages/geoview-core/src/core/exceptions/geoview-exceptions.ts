@@ -3,9 +3,9 @@
 
 // Classes in this file mostly inherit GeoViewError.
 
-import { Extent } from 'ol/extent';
+import type { Extent } from 'ol/extent';
 import { getLocalizedMessage } from '@/core/utils/utilities';
-import { TypeDisplayLanguage } from '@/api/types/map-schema-types';
+import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import { logger } from '@/core/utils/logger';
 
 /**

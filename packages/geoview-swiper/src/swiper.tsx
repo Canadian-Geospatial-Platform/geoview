@@ -1,10 +1,10 @@
 import Draggable from 'react-draggable';
 
 import { getRenderPixel } from 'ol/render';
-import RenderEvent from 'ol/render/Event';
-import BaseLayer from 'ol/layer/Base';
-import { EventTypes } from 'ol/Observable';
-import BaseEvent from 'ol/events/Event';
+import type RenderEvent from 'ol/render/Event';
+import type BaseLayer from 'ol/layer/Base';
+import type { EventTypes } from 'ol/Observable';
+import type BaseEvent from 'ol/events/Event';
 
 import debounce from 'lodash/debounce';
 
@@ -13,7 +13,7 @@ import { logger } from 'geoview-core/core/utils/logger';
 import { getLocalizedMessage, delay } from 'geoview-core/core/utils/utilities';
 import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import { useMapSize, useMapVisibleLayers } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
-import { MapViewer } from 'geoview-core/geo/map/map-viewer';
+import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import { getSxClasses } from './swiper-style';
 import { useMemo } from 'react';
 

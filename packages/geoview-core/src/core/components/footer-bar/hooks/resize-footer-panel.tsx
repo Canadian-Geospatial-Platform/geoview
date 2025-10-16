@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { useState, MouseEvent, useMemo, memo, useCallback } from 'react';
+import type { MouseEvent } from 'react';
+import { useState, useMemo, memo, useCallback } from 'react';
 import Slider from '@mui/material/Slider';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { Box, HeightIcon, IconButton, Popover } from '@/ui';

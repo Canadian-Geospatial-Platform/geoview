@@ -1,5 +1,7 @@
-import { forwardRef, Ref } from 'react';
-import { ListItemText as MaterialListItemText, ListItemTextProps } from '@mui/material';
+import type { Ref } from 'react';
+import { forwardRef } from 'react';
+import type { ListItemTextProps } from '@mui/material';
+import { ListItemText as MaterialListItemText } from '@mui/material';
 
 const typographyProps = {
   primary: {

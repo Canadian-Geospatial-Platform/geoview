@@ -1,11 +1,11 @@
 import { createElement } from 'react';
 import { Buffer } from 'buffer';
 
-import { TypeNorthArrow, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { TypeLegendLayer } from '@/core/components/layers/types';
+import type { TypeNorthArrow, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+import type { TypeLegendLayer } from '@/core/components/layers/types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
-import { TypeTimeSliderValues, TimeSliderLayerSet } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
-import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+import type { TypeTimeSliderValues, TimeSliderLayerSet } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+import type { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 // TODO As a utility file, the EventProcessors probably shouldn't be here, but it removes a lot of duplication
 // TO.DO from the pdf-layout and canvas-layout files. Possibly a rename or a better solution could be found.

@@ -1,4 +1,5 @@
-import { useRef, useEffect, KeyboardEvent, useMemo } from 'react';
+import type { KeyboardEvent } from 'react';
+import { useRef, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // TODO: reuse our own custom ui
@@ -9,9 +10,10 @@ import { useTheme } from '@mui/material/styles';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 
 import { Box } from '@/ui/layout/index';
-import { TypePanelProps } from '@/ui/panel/panel-types';
+import type { TypePanelProps } from '@/ui/panel/panel-types';
 import { CloseIcon } from '@/ui/icons/index';
-import { IconButton, IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
+import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
+import { IconButton } from '@/ui/icon-button/icon-button';
 import { getSxClasses } from '@/ui/panel/panel-style';
 import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { DEFAULT_APPBAR_CORE } from '@/api/types/map-schema-types';

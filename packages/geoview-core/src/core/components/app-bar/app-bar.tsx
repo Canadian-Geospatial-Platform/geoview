@@ -1,13 +1,14 @@
 import { useTranslation } from 'react-i18next';
-import { useState, useEffect, useCallback, Fragment, useMemo, ReactNode, KeyboardEvent } from 'react';
+import type { ReactNode, KeyboardEvent } from 'react';
+import { useState, useEffect, useCallback, Fragment, useMemo } from 'react';
 import { camelCase } from 'lodash';
 import { useTheme } from '@mui/material/styles';
+import type { IconButtonPropsExtend } from '@/ui';
 import {
   Box,
   List,
   ListItem,
   Panel,
-  IconButtonPropsExtend,
   QuestionMarkIcon,
   InfoOutlinedIcon,
   LegendIcon,
@@ -18,7 +19,7 @@ import {
 
 import { Plugin } from '@/api/plugin/plugin';
 import { Geolocator } from '@/core/components/geolocator/geolocator';
-import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
+import type { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import ExportButton from '@/core/components/export/export-modal-button';
 import {
   useUIActiveFocusItem,
@@ -30,14 +31,16 @@ import { useMapInteraction, useMapStoreActions } from '@/core/stores/store-inter
 import { useAppFullscreenActive, useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
-import { Guide, Legend, DetailsPanel, AppBarApi, AppBarCreatedEvent, AppBarRemovedEvent, Datapanel, LayersPanel } from '@/core/components';
+import type { AppBarApi, AppBarCreatedEvent, AppBarRemovedEvent } from '@/core/components';
+import { Guide, Legend, DetailsPanel, Datapanel, LayersPanel } from '@/core/components';
 import Notifications from '@/core/components/notifications/notifications';
 
 import Version from './buttons/version';
 import { getSxClasses } from './app-bar-style';
 import { enforceArrayOrder, helpClosePanelById, helpOpenPanelById } from './app-bar-helper';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
-import { DEFAULT_APPBAR_CORE, DEFAULT_APPBAR_TABS_ORDER, TypeValidAppBarCoreProps } from '@/api/types/map-schema-types';
+import type { TypeValidAppBarCoreProps } from '@/api/types/map-schema-types';
+import { DEFAULT_APPBAR_CORE, DEFAULT_APPBAR_TABS_ORDER } from '@/api/types/map-schema-types';
 import { handleEscapeKey } from '@/core/utils/utilities';
 import { Button } from '@/ui/button/button';
 

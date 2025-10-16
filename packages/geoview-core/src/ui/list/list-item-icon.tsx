@@ -1,4 +1,5 @@
-import { ListItemIcon as MaterialListItemIcon, ListItemIconProps } from '@mui/material';
+import type { ListItemIconProps } from '@mui/material';
+import { ListItemIcon as MaterialListItemIcon } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
 /**

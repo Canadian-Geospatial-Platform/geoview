@@ -1,16 +1,16 @@
-import { Coordinate } from 'ol/coordinate';
+import type { Coordinate } from 'ol/coordinate';
 import Feature from 'ol/Feature';
 import Point from 'ol/geom/Point';
 import { Icon, Style } from 'ol/style';
-import { Extent } from 'ol/extent';
+import type { Extent } from 'ol/extent';
 import { Projection } from '@/geo/utils/projection';
 import { getExtentUnion } from '@/geo/utils/utilities';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { FeatureHighlight } from '@/geo/map/feature-highlight';
+import type { FeatureHighlight } from '@/geo/map/feature-highlight';
 import { getScriptAndAssetURL } from '@/core/utils/utilities';
-import { MapViewer } from '@/geo/map/map-viewer';
+import type { MapViewer } from '@/geo/map/map-viewer';
 import { logger } from '@/core/utils/logger';
-import { TypePointMarker } from '@/api/types/map-schema-types';
+import type { TypePointMarker } from '@/api/types/map-schema-types';
 
 /**
  * A class to handle point markers

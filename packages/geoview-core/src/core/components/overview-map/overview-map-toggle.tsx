@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 
-import { OverviewMap as OLOverviewMap } from 'ol/control';
+import type { OverviewMap as OLOverviewMap } from 'ol/control';
 import { useTranslation } from 'react-i18next';
 
 import { ChevronLeftIcon, Tooltip } from '@/ui';

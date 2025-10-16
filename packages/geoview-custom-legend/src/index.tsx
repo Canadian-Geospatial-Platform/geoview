@@ -1,9 +1,10 @@
 import React from 'react'; // GV This import is to validate that we're on the right React at the end of the file
 import { AppBarPlugin } from 'geoview-core/api/plugin/appbar-plugin';
 import { LegendIcon } from 'geoview-core/ui/icons';
-import { IconButtonPropsExtend } from 'geoview-core/ui/icon-button/icon-button';
-import { TypePanelProps } from 'geoview-core/ui/panel/panel-types';
-import { CustomLegendPanel, TypeLegendProps } from './custom-legend';
+import type { IconButtonPropsExtend } from 'geoview-core/ui/icon-button/icon-button';
+import type { TypePanelProps } from 'geoview-core/ui/panel/panel-types';
+import type { TypeLegendProps } from './custom-legend';
+import { CustomLegendPanel } from './custom-legend';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-custom-legend.json';
 

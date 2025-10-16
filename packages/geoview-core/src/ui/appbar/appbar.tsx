@@ -1,4 +1,5 @@
-import { AppBar as MaterialAppBar, AppBarProps } from '@mui/material';
+import type { AppBarProps } from '@mui/material';
+import { AppBar as MaterialAppBar } from '@mui/material';
 import { animated } from '@react-spring/web';
 import { useFadeIn } from '@/core/utils/useSpringAnimations';
 import { logger } from '@/core/utils/logger';

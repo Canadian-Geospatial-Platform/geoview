@@ -1,4 +1,5 @@
-import { Badge as MaterialBadge, BadgeProps } from '@mui/material';
+import type { BadgeProps } from '@mui/material';
+import { Badge as MaterialBadge } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
 /**

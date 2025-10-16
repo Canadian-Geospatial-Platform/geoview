@@ -1,13 +1,15 @@
-import Collection from 'ol/Collection';
-import Feature from 'ol/Feature';
-import { Geometry } from 'ol/geom';
-import VectorSource from 'ol/source/Vector';
+import type Collection from 'ol/Collection';
+import type Feature from 'ol/Feature';
+import type { Geometry } from 'ol/geom';
+import type VectorSource from 'ol/source/Vector';
 
-import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
+import type { EventDelegateBase } from '@/api/events/event-helper';
+import EventHelper from '@/api/events/event-helper';
 
-import { Interaction, InteractionOptions } from '../interaction';
+import type { InteractionOptions } from '../interaction';
+import { Interaction } from '../interaction';
 import { OLTransform, HandleType } from './transform-base';
-import { TransformEvent, TransformSelectionEvent, TransformDeleteFeatureEvent } from './transform-events';
+import type { TransformEvent, TransformSelectionEvent, TransformDeleteFeatureEvent } from './transform-events';
 
 /**
  * Supported options for transform interactions
