@@ -68,7 +68,6 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
    * Order the layers by visible layer order.
    */
   const orderedLayerData = useMemo(() => {
-    // const mergedLayers = [...new Set([...visibleLayers, ...visibleInRangeLayers])];
     return visibleInRangeLayers
       .map((layerPath) => mappedLayerData.filter((data) => data.layerPath === layerPath)[0])
       .filter((layer) => layer !== undefined && !isLayerHiddenOnMap(layer.layerPath));
