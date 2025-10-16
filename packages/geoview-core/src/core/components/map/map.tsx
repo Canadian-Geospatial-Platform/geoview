@@ -17,7 +17,7 @@ import { getSxClasses } from './map-style';
 import { useMapLoaded, useMapNorthArrow, useMapOverviewMap } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
-import { useLayersAreLoading } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerAreLayersLoading } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 type MapProps = {
   viewer: MapViewer;
@@ -47,7 +47,7 @@ export function Map(props: MapProps): JSX.Element {
   const overviewMap = useMapOverviewMap();
   const northArrow = useMapNorthArrow();
   const mapLoaded = useMapLoaded();
-  const layersAreLoading = useLayersAreLoading();
+  const layersAreLoading = useLayerAreLayersLoading();
 
   // flag to check if map is initialized. we added to prevent double rendering in StrictMode
   const hasRun = useRef<boolean>(false);

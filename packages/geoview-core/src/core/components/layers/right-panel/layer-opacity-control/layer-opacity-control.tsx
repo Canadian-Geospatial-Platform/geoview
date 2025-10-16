@@ -6,7 +6,7 @@ import { getSxClasses } from './layer-opacity-control-styles';
 import { Box, Slider, Typography } from '@/ui';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { useSelectorIsLayerHiddenOnMap } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useMapSelectorIsLayerHiddenOnMap } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 
 interface LayerOpacityControlProps {
@@ -27,7 +27,7 @@ export function LayerOpacityControl(props: LayerOpacityControlProps): JSX.Elemen
   // Store actions
   const { setLayerOpacity } = useLayerStoreActions();
 
-  const layerHidden = useSelectorIsLayerHiddenOnMap(layerDetails.layerPath);
+  const layerHidden = useMapSelectorIsLayerHiddenOnMap(layerDetails.layerPath);
 
   // State
   const [localOpacity, setLocalOpacity] = useState(layerDetails.opacity || 1);

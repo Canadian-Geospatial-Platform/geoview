@@ -296,7 +296,7 @@ export type TypeTimeSliderProps = {
 };
 
 // **********************************************************
-// Layer state selectors
+// Time-slider state selectors
 // **********************************************************
 export const useTimeSliderLayers = (): TimeSliderLayerSet | undefined =>
   useStore(useGeoViewStore(), (state) => state.timeSliderState?.timeSliderLayers);
@@ -304,4 +304,5 @@ export const useTimeSliderSelectedLayerPath = (): string => useStore(useGeoViewS
 export const useTimeSliderFilters = (): Record<string, string> =>
   useStore(useGeoViewStore(), (state) => state.timeSliderState?.sliderFilters);
 
+// Store Actions
 export const useTimeSliderStoreActions = (): TimeSliderActions => useStore(useGeoViewStore(), (state) => state.timeSliderState.actions);

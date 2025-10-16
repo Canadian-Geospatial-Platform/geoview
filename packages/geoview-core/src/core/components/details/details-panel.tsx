@@ -13,9 +13,9 @@ import {
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import {
   useMapStoreActions,
-  useMapVisibleLayers,
   useMapClickCoordinates,
   useMapHideCoordinateInfoSwitch,
+  useMapAllVisibleandInRangeLayers,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import type { TypeFeatureInfoEntry, TypeLayerData } from '@/api/types/map-schema-types';
@@ -56,7 +56,7 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
   const checkedFeatures = useDetailsCheckedFeatures();
   const coordinateInfoEnabled = useDetailsCoordinateInfoEnabled();
   const hideCoordinateInfoSwitch = useMapHideCoordinateInfoSwitch();
-  const visibleLayers = useMapVisibleLayers();
+  const visibleInRangeLayers = useMapAllVisibleandInRangeLayers();
   const mapClickCoordinates = useMapClickCoordinates();
   const { setSelectedLayerPath, removeCheckedFeature, setLayerDataArrayBatchLayerPathBypass } = useDetailsStoreActions();
   const { addHighlightedFeature, removeHighlightedFeature, isLayerHiddenOnMap } = useMapStoreActions();
@@ -128,10 +128,10 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
    */
   const memoLayersList = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('DETAILS-PANEL - memoLayersList', visibleLayers, arrayOfLayerDataBatch);
+    logger.logTraceUseMemo('DETAILS-PANEL - memoLayersList', visibleInRangeLayers, arrayOfLayerDataBatch);
 
     // Set the layers list (filter: visible - visible in range and isQueryable)
-    const layerListEntries = visibleLayers
+    const layerListEntries = visibleInRangeLayers
       .map((layerPath) => arrayOfLayerDataBatch.find((layerData) => layerData.layerPath === layerPath))
       .filter((layer) => layer && !isLayerHiddenOnMap(layer.layerPath))
       .filter((layer) => layer && layer.eventListenerEnabled)
@@ -171,7 +171,7 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
     // Combine the lists (features first, then no features)
     const orderedLayerListEntries = [...layersWithFeatures, ...layersWithoutFeatures];
     return orderedLayerListEntries;
-  }, [visibleLayers, arrayOfLayerDataBatch, coordinateInfoEnabled, isLayerHiddenOnMap, getNumFeaturesLabel, mapId]);
+  }, [visibleInRangeLayers, arrayOfLayerDataBatch, coordinateInfoEnabled, isLayerHiddenOnMap, getNumFeaturesLabel, mapId]);
 
   /**
    * Memoizes the selected layer for the LayerList component.

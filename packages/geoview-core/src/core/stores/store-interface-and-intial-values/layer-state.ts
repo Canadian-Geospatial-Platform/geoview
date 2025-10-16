@@ -4,12 +4,12 @@ import type { FitOptions } from 'ol/View';
 import type { Extent } from 'ol/extent';
 
 import { useGeoViewStore } from '@/core/stores/stores-managers';
-import type { TypeLayersViewDisplayState, TypeLegendItem, TypeLegendLayer, TypeLegendLayerItem } from '@/core/components/layers/types';
+import type { TypeLayersViewDisplayState, TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import type { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import type { TypeFeatureInfoEntryPartial, TypeLayerStyleConfig, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
 import type { TimeDimension } from '@/core/utils/date-mgt';
-import type { TypeLayerStatus, TypeLayerControls, TypeGeoviewLayerType } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerType } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
@@ -403,7 +403,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
           layerState: {
             ...get().layerState,
             legendLayers: [...legendLayers],
-            // GV Here, we use the spread operator for the custom selector hooks such as useSelectorLayerStatus to
+            // GV Here, we use the spread operator for the custom selector hooks such as useLayerSelectorLayerStatus to
             // GV notice and eventually trigger the changes that need to be get triggered
           },
         });
@@ -427,7 +427,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         });
       },
 
-      setSelectedLayerSortingArrowId: (arrowId: string) => {
+      setSelectedLayerSortingArrowId: (arrowId: string): void => {
         set({
           layerState: {
             ...get().layerState,
@@ -436,7 +436,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         });
       },
 
-      setLayersAreLoading: (areLoading: boolean) => {
+      setLayersAreLoading: (areLoading: boolean): void => {
         set({
           layerState: {
             ...get().layerState,
@@ -454,7 +454,7 @@ export type TypeLegendResultInfo = {
   data: TypeLegend | undefined | null;
 };
 
-export type LegendQueryStatus = 'init' | 'querying' | 'queried';
+export type LegendQueryStatus = 'init' | 'querying' | 'queried' | 'error';
 
 export type TypeLegend = {
   type: TypeGeoviewLayerType;
@@ -477,10 +477,9 @@ export const useLayerSelectedLayerPath = (): string | null | undefined =>
   useStore(useGeoViewStore(), (state) => state.layerState.selectedLayerPath);
 export const useLayerDisplayState = (): TypeLayersViewDisplayState => useStore(useGeoViewStore(), (state) => state.layerState.displayState);
 export const useLayerDeleteInProgress = (): string => useStore(useGeoViewStore(), (state) => state.layerState.layerDeleteInProgress);
-export const useSelectedLayerSortingArrowId = (): string =>
+export const useLayerSelectedLayerSortingArrowId = (): string =>
   useStore(useGeoViewStore(), (state) => state.layerState.selectedLayerSortingArrowId);
-export const useLayersAreLoading = (): boolean => useStore(useGeoViewStore(), (state) => state.layerState.layersAreLoading);
-export const useLayerStoreActions = (): LayerActions => useStore(useGeoViewStore(), (state) => state.layerState.actions);
+export const useLayerAreLayersLoading = (): boolean => useStore(useGeoViewStore(), (state) => state.layerState.layersAreLoading);
 
 // computed gets
 export const useSelectedLayer = (): TypeLegendLayer | undefined => {
@@ -492,7 +491,7 @@ export const useSelectedLayer = (): TypeLegendLayer | undefined => {
   return undefined;
 };
 
-export const useIconLayerSet = (layerPath: string): string[] => {
+export const useLayerIconLayerSet = (layerPath: string): string[] => {
   const layers = useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
   const layer = LegendEventProcessor.findLayerByPath(layers, layerPath);
   if (layer && layer.type !== CONST_LAYER_TYPES.WMS) {
@@ -504,62 +503,15 @@ export const useIconLayerSet = (layerPath: string): string[] => {
   return [];
 };
 
-export const useSelectorLayerId = (layerPath: string): string | undefined => {
-  // Hook
-  return useStore(useGeoViewStore(), (state) => LegendEventProcessor.findLayerByPath(state.layerState.legendLayers, layerPath)?.layerId);
-};
-
-export const useSelectorLayerName = (layerPath: string): string | undefined => {
-  // Hook
-  return useStore(useGeoViewStore(), (state) => LegendEventProcessor.findLayerByPath(state.layerState.legendLayers, layerPath)?.layerName);
-};
-
-export const useSelectorLayerType = (layerPath: string): TypeGeoviewLayerType | undefined => {
-  // Hook
-  return useStore(useGeoViewStore(), (state) => LegendEventProcessor.findLayerByPath(state.layerState.legendLayers, layerPath)?.type);
-};
-
-export const useSelectorLayerStatus = (layerPath: string): TypeLayerStatus | undefined => {
+// Selector for layer's value
+export const useLayerSelectorLayerValue = <T>(layerPath: string, value: string): T | undefined => {
   // Hook
   return useStore(
     useGeoViewStore(),
-    (state) => LegendEventProcessor.findLayerByPath(state.layerState.legendLayers, layerPath)?.layerStatus
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (state) => (LegendEventProcessor.findLayerByPath(state.layerState.legendLayers, layerPath) as any)?.[value] as T
   );
 };
 
-export const useSelectorLayerLegendQueryStatus = (layerPath: string): string | undefined => {
-  // Hook
-  return useStore(
-    useGeoViewStore(),
-    (state) => LegendEventProcessor.findLayerByPath(state.layerState.legendLayers, layerPath)?.legendQueryStatus
-  );
-};
-
-export const useSelectorLayerControls = (layerPath: string): TypeLayerControls | undefined => {
-  // Hook
-  return useStore(useGeoViewStore(), (state) => LegendEventProcessor.findLayerByPath(state.layerState.legendLayers, layerPath)?.controls);
-};
-
-export const useSelectorLayerChildren = (layerPath: string): TypeLegendLayer[] | undefined => {
-  // Hook
-  return useStore(useGeoViewStore(), (state) => {
-    // Get the state value
-    return LegendEventProcessor.findLayerByPath(state.layerState.legendLayers, layerPath)?.children;
-  });
-};
-
-export const useSelectorLayerItems = (layerPath: string): TypeLegendItem[] | undefined => {
-  // Hook
-  return useStore(useGeoViewStore(), (state) => {
-    // Get the state value
-    return LegendEventProcessor.findLayerByPath(state.layerState.legendLayers, layerPath)?.items;
-  });
-};
-
-export const useSelectorLayerIcons = (layerPath: string): TypeLegendLayerItem[] | undefined => {
-  // Hook
-  return useStore(useGeoViewStore(), (state) => {
-    // Get the state value
-    return LegendEventProcessor.findLayerByPath(state.layerState.legendLayers, layerPath)?.icons;
-  });
-};
+// Store Actions
+export const useLayerStoreActions = (): LayerActions => useStore(useGeoViewStore(), (state) => state.layerState.actions);

@@ -303,4 +303,5 @@ export const useDataTableLayerSettings = (): Record<string, IDataTableSettings> 
 export const useDataTableSelectedFeature = (): TypeFeatureInfoEntry | null =>
   useStore(useGeoViewStore(), (state) => state.dataTableState.selectedFeature);
 
+// Store Actions
 export const useDataTableStoreActions = (): DataTableActions => useStore(useGeoViewStore(), (state) => state.dataTableState.actions);

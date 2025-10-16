@@ -7,8 +7,8 @@ import { Typography } from 'geoview-core/ui/typography/typography';
 import { Box } from 'geoview-core/ui';
 import {
   useMapClickCoordinates,
-  useMapVisibleLayers,
   useMapStoreActions,
+  useMapAllVisibleandInRangeLayers,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
 import type { TypeGeochartResultSetEntry } from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
 import {
@@ -48,7 +48,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
 
   // Get states and actions from store
   const configObj = useGeochartConfigs();
-  const visibleLayers = useMapVisibleLayers();
+  const visibleInRangeLayers = useMapAllVisibleandInRangeLayers();
   const storeArrayOfLayerData = useGeochartLayerDataArrayBatch();
   const selectedLayerPath = useGeochartSelectedLayerPath();
   const { setSelectedLayerPath, setLayerDataArrayBatchLayerPathBypass } = useGeochartStoreActions();
@@ -153,7 +153,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
     logger.logTraceUseMemo('GEOCHART-PANEL - memoLayersList', storeArrayOfLayerData);
 
     // Set the layers list
-    return visibleLayers.reduce<LayerListEntry[]>((acc, layerPath) => {
+    return visibleInRangeLayers.reduce<LayerListEntry[]>((acc, layerPath) => {
       const layer = storeArrayOfLayerData.find(
         (layerData) => layerData.layerPath === layerPath && !isLayerHiddenOnMap(layerData.layerPath)
       );
@@ -173,7 +173,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
 
       return acc;
     }, []);
-  }, [visibleLayers, storeArrayOfLayerData, memoConfigObj, getNumFeaturesLabel, mapId, isLayerHiddenOnMap]);
+  }, [visibleInRangeLayers, storeArrayOfLayerData, memoConfigObj, getNumFeaturesLabel, mapId, isLayerHiddenOnMap]);
 
   /**
    * Memoizes the selected layer for the LayerList component.

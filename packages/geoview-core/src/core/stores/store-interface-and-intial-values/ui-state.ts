@@ -278,4 +278,5 @@ export const useUIFooterBarIsCollapsed = (): boolean => useStore(useGeoViewStore
 export const useUISelectedFooterLayerListItemId = (): string =>
   useStore(useGeoViewStore(), (state) => state.uiState.selectedFooterLayerListItemId);
 
+// Store Actions
 export const useUIStoreActions = (): UIActions => useStore(useGeoViewStore(), (state) => state.uiState.actions);

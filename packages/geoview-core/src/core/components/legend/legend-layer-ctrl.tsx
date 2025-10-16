@@ -16,18 +16,15 @@ import {
 import {
   useLayerHighlightedLayer,
   useLayerStoreActions,
-  useSelectorLayerChildren,
-  useSelectorLayerControls,
-  useSelectorLayerItems,
-  useSelectorLayerType,
+  useLayerSelectorLayerValue,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import type { TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
+import type { TypeGeoviewLayerType, TypeLayerStatus, TypeLayerControls } from '@/api/types/layer-schema-types';
 import {
   useMapStoreActions,
-  useSelectorLayerVisibility,
-  useSelectorLayerInVisibleRange,
-  useSelectorLayerParentHidden,
-  useSelectorLayerStatus,
+  useMapSelectorLayerVisibility,
+  useMapSelectorLayerInVisibleRange,
+  useMapSelectorLayerParentHidden,
 } from '@/core/stores/';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
@@ -83,7 +80,7 @@ const useControlActions = (layerPath: string): ControlActions => {
 const useSubtitle = (layerPath: string, children: TypeLegendLayer[], items: TypeLegendItem[]): string => {
   // Hooks
   const { t } = useTranslation();
-  const parentHidden = useSelectorLayerParentHidden(layerPath);
+  const parentHidden = useMapSelectorLayerParentHidden(layerPath);
 
   return useMemo(() => {
     if (parentHidden) return t('layers.parentHidden');
@@ -109,14 +106,14 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
   const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
-  const layerType = useSelectorLayerType(layerPath);
-  const layerChildren = useSelectorLayerChildren(layerPath);
-  const layerItems = useSelectorLayerItems(layerPath);
-  const layerControls = useSelectorLayerControls(layerPath);
-  const layerStatus = useSelectorLayerStatus(layerPath);
-  const isVisible = useSelectorLayerVisibility(layerPath);
-  const isInVisibleRange = useSelectorLayerInVisibleRange(layerPath);
-  const parentHidden = useSelectorLayerParentHidden(layerPath);
+  const layerType = useLayerSelectorLayerValue<TypeGeoviewLayerType>(layerPath, 'type');
+  const layerChildren = useLayerSelectorLayerValue<TypeLegendLayer[]>(layerPath, 'children');
+  const layerItems = useLayerSelectorLayerValue<TypeLegendItem[]>(layerPath, 'items');
+  const layerControls = useLayerSelectorLayerValue<TypeLayerControls>(layerPath, 'controls');
+  const layerStatus = useLayerSelectorLayerValue<TypeLayerStatus>(layerPath, 'layerStatus');
+  const isVisible = useMapSelectorLayerVisibility(layerPath);
+  const isInVisibleRange = useMapSelectorLayerInVisibleRange(layerPath);
+  const parentHidden = useMapSelectorLayerParentHidden(layerPath);
   const highlightedLayer = useLayerHighlightedLayer();
 
   // Is visibility button disabled?

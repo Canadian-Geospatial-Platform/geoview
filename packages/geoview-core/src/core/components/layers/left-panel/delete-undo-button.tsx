@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, CircularProgressBase, DeleteOutlineIcon, IconButton, UndoIcon } from '@/ui';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { useMapStoreActions, useSelectorLayerVisibility } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useMapStoreActions, useMapSelectorLayerVisibility } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { logger } from '@/core/utils/logger';
 
@@ -62,7 +62,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
   const { deleteLayer, setLayerDeleteInProgress, getLayerDeleteInProgress } = useLayerStoreActions();
   const { setOrToggleLayerVisibility, removeLayerHighlights } = useMapStoreActions();
   const { setSelectedFooterLayerListItemId } = useUIStoreActions();
-  const isVisible = useSelectorLayerVisibility(layerPath);
+  const isVisible = useMapSelectorLayerVisibility(layerPath);
 
   const handleDeleteClick = (): void => {
     if (isVisible) setOrToggleLayerVisibility(layerPath);

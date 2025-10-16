@@ -7,7 +7,7 @@ import {
   useTimeSliderSelectedLayerPath,
   useTimeSliderStoreActions,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/time-slider-state';
-import { useMapVisibleLayers, useMapStoreActions } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
+import { useMapStoreActions, useMapAllVisibleandInRangeLayers } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
 import { useLayerLegendLayers } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
 import { LegendEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/legend-event-processor';
 import { Box } from 'geoview-core/ui';
@@ -34,7 +34,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const { useCallback, useMemo } = reactUtilities.react;
 
   // get values from store
-  const visibleLayers = useMapVisibleLayers();
+  const visibleInRangeLayers = useMapAllVisibleandInRangeLayers();
   // timeSliderLayers will always be present here, ! used to ignore possibility of it being undefined
   const timeSliderLayers = useTimeSliderLayers()!;
   const selectedLayerPath = useTimeSliderSelectedLayerPath();
@@ -101,7 +101,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
     };
 
     // Return the layers
-    return visibleLayers
+    return visibleInRangeLayers
       .map((layerPath) => {
         return { layerPath, timeSliderLayerInfo: timeSliderLayers?.[layerPath] };
       })
@@ -120,7 +120,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
           layerUniqueId: `${mapId}-${TABS.TIME_SLIDER}-${layer.layerPath}`,
         } as LayerListEntry;
       });
-  }, [legendLayers, timeSliderLayers, visibleLayers, mapId, isLayerHiddenOnMap]);
+  }, [legendLayers, timeSliderLayers, visibleInRangeLayers, mapId, isLayerHiddenOnMap]);
 
   /**
    * Renders the right panel content based on selected Layer path of time slider.

@@ -4,11 +4,12 @@ import { Box, CircularProgressBase, ErrorIcon, GroupWorkOutlinedIcon, Icon, Brow
 
 import { getSxClasses } from '@/core/components/common/layer-icon-style';
 import {
-  useIconLayerSet,
-  useSelectorLayerChildren,
-  useSelectorLayerLegendQueryStatus,
-  useSelectorLayerStatus,
+  useLayerIconLayerSet,
+  useLayerSelectorLayerValue,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import type { LegendQueryStatus }  from '@/core/stores/store-interface-and-intial-values/layer-state';
+import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
+import type { TypeLegendLayer } from '@/core/components/layers/types';
 import { logger } from '@/core/utils/logger';
 
 export interface TypeIconStackProps {
@@ -44,7 +45,7 @@ function IconStack({ layerPath }: TypeIconStackProps): JSX.Element | null {
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Store
-  const iconData = useIconLayerSet(layerPath);
+  const iconData = useLayerIconLayerSet(layerPath);
 
   const { iconImage, iconImageStacked, numOfIcons } = useMemo(
     () => ({
@@ -134,9 +135,9 @@ export function LayerIcon({ layerPath }: LayerIconProps): JSX.Element {
   logger.logTraceRenderDetailed('components/common/layer-icon', layerPath);
 
   // Hooks
-  const layerStatus = useSelectorLayerStatus(layerPath);
-  const legendQueryStatus = useSelectorLayerLegendQueryStatus(layerPath);
-  const layerChildren = useSelectorLayerChildren(layerPath);
+  const layerStatus = useLayerSelectorLayerValue<TypeLayerStatus>(layerPath, 'layerStatus');
+  const legendQueryStatus = useLayerSelectorLayerValue<LegendQueryStatus>(layerPath, 'legendQueryStatus');
+  const layerChildren = useLayerSelectorLayerValue<TypeLegendLayer[]>(layerPath, 'children');
 
   // If has children (is a group layer)
   const hasChildren = layerChildren && layerChildren.length;
