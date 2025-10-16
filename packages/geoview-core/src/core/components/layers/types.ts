@@ -1,6 +1,7 @@
 import type { Extent } from 'ol/extent';
 import type { TypeLayerStyleConfig, TypeStyleGeometry } from '@/api/types/map-schema-types';
 import type { TypeGeoviewLayerType, TypeLayerControls, TypeLayerStatus } from '@/api/types/layer-schema-types';
+import type { LegendQueryStatus } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 export type TypeLayersViewDisplayState = 'remove' | 'add' | 'order' | 'view';
 
@@ -27,7 +28,7 @@ export interface TypeLegendLayer {
   layerPath: string;
   layerAttribution?: string[];
   layerName: string;
-  legendQueryStatus: string;
+  legendQueryStatus: LegendQueryStatus;
   type?: TypeGeoviewLayerType;
   styleConfig?: TypeLayerStyleConfig | null;
   layerStatus?: TypeLayerStatus;

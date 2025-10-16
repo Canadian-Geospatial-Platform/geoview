@@ -10,7 +10,7 @@ import { Box, Tooltip, Typography } from '@/ui';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useLayerSelectorLayerValue } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerSelectorName } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 interface LayoutProps {
   children?: ReactNode;
@@ -52,7 +52,7 @@ export function Layout({
   // Hooks
   const responsiveLayoutRef = useRef<ResponsiveGridLayoutExposedMethods>(null);
   const theme = useTheme();
-  const layerName = useLayerSelectorLayerValue<string>(selectedLayerPath!, 'layerName');
+  const layerName = useLayerSelectorName(selectedLayerPath!);
 
   // Store
   const { setSelectedFooterLayerListItemId } = useUIStoreActions();

@@ -16,10 +16,13 @@ import {
 import {
   useLayerHighlightedLayer,
   useLayerStoreActions,
-  useLayerSelectorLayerValue,
+  useLayerSelectorType,
+  useLayerSelectorChildren,
+  useLayerSelectorItems,
+  useLayerSelectorControls,
+  useLayerSelectorStatus,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import type { TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
-import type { TypeGeoviewLayerType, TypeLayerStatus, TypeLayerControls } from '@/api/types/layer-schema-types';
 import {
   useMapStoreActions,
   useMapSelectorLayerVisibility,
@@ -106,11 +109,11 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
   const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
-  const layerType = useLayerSelectorLayerValue<TypeGeoviewLayerType>(layerPath, 'type');
-  const layerChildren = useLayerSelectorLayerValue<TypeLegendLayer[]>(layerPath, 'children');
-  const layerItems = useLayerSelectorLayerValue<TypeLegendItem[]>(layerPath, 'items');
-  const layerControls = useLayerSelectorLayerValue<TypeLayerControls>(layerPath, 'controls');
-  const layerStatus = useLayerSelectorLayerValue<TypeLayerStatus>(layerPath, 'layerStatus');
+  const layerType = useLayerSelectorType(layerPath);
+  const layerChildren = useLayerSelectorChildren(layerPath);
+  const layerItems = useLayerSelectorItems(layerPath);
+  const layerControls = useLayerSelectorControls(layerPath);
+  const layerStatus = useLayerSelectorStatus(layerPath);
   const isVisible = useMapSelectorLayerVisibility(layerPath);
   const isInVisibleRange = useMapSelectorLayerInVisibleRange(layerPath);
   const parentHidden = useMapSelectorLayerParentHidden(layerPath);

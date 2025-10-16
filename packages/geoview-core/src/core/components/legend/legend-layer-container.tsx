@@ -4,13 +4,17 @@ import { useTranslation } from 'react-i18next';
 import { Box, Collapse, List } from '@/ui';
 import { getSxClasses } from './legend-styles';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
-import type { TypeGeoviewLayerType, TypeLayerStatus } from '@/api/types/layer-schema-types';
 import { ItemsList } from './legend-layer-items';
 import type { LegendLayer } from './legend-layer';
-import { useLayerSelectorLayerValue } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import {
+  useLayerSelectorChildren,
+  useLayerSelectorIcons,
+  useLayerSelectorItems,
+  useLayerSelectorStatus,
+  useLayerSelectorType,
+} from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { logger } from '@/core/utils/logger';
 import { useMapSelectorLayerLegendCollapsed } from '@/core/stores/store-interface-and-intial-values/map-state';
-import type { TypeLegendLayerItem, TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
 
 interface CollapsibleContentProps {
   layerPath: string;
@@ -61,12 +65,12 @@ export const CollapsibleContent = memo(function CollapsibleContent({
   const { t } = useTranslation();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
-  const layerType = useLayerSelectorLayerValue<TypeGeoviewLayerType>(layerPath, 'type');
   const isCollapsed = useMapSelectorLayerLegendCollapsed(layerPath);
-  const layerItems = useLayerSelectorLayerValue<TypeLegendItem[]>(layerPath, 'items');
-  const layerChildren = useLayerSelectorLayerValue<TypeLegendLayer[]>(layerPath, 'children');
-  const layerIcons = useLayerSelectorLayerValue<TypeLegendLayerItem[]>(layerPath, 'icons');
-  const layerStatus = useLayerSelectorLayerValue<TypeLayerStatus>(layerPath, 'layerStatus');
+  const layerType = useLayerSelectorType(layerPath);
+  const layerItems = useLayerSelectorItems(layerPath);
+  const layerChildren = useLayerSelectorChildren(layerPath);
+  const layerIcons = useLayerSelectorIcons(layerPath);
+  const layerStatus = useLayerSelectorStatus(layerPath);
 
   // Log
   logger.logTraceUseMemo('components/legend/legend-layer-container - CollapsibleContent', layerPath, layerChildren?.length);

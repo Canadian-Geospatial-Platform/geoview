@@ -10,7 +10,7 @@ import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
 import { getSxClasses } from './layer-list-style';
 import { LayerIcon } from './layer-icon';
 import { logger } from '@/core/utils/logger';
-import { useLayerSelectorLayerValue } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerSelectorStatus } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 export interface LayerListEntry {
   content?: string | ReactNode;
@@ -49,7 +49,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Store
-  const layerStatus = useLayerSelectorLayerValue<TypeLayerStatus>(layer.layerPath, 'layerStatus');
+  const layerStatus = useLayerSelectorStatus(layer.layerPath);
 
   // Style
   const containerClass = [

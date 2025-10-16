@@ -6,7 +6,7 @@ import type { Extent } from 'ol/extent';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import type { TypeLayersViewDisplayState, TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import type { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
+import type { TypeGetStore, TypeSetStore, IGeoviewState } from '@/core/stores/geoview-store';
 import type { TypeFeatureInfoEntryPartial, TypeLayerStyleConfig, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
 import type { TimeDimension } from '@/core/utils/date-mgt';
 import type { TypeGeoviewLayerType } from '@/api/types/layer-schema-types';
@@ -20,6 +20,7 @@ import { esriQueryRecordsByUrlObjectIds } from '@/geo/layer/gv-layers/utils';
 import { LayerNotEsriDynamicError, LayerNotFoundError } from '@/core/exceptions/layer-exceptions';
 import { NoBoundsError } from '@/core/exceptions/geoview-exceptions';
 import { logger } from '@/core/utils/logger';
+import { useCallback } from 'react';
 
 // #region INTERFACES & TYPES
 
@@ -503,15 +504,34 @@ export const useLayerIconLayerSet = (layerPath: string): string[] => {
   return [];
 };
 
-// Selector for layer's value
-export const useLayerSelectorLayerValue = <T>(layerPath: string, value: string): T | undefined => {
-  // Hook
-  return useStore(
-    useGeoViewStore(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (state) => (LegendEventProcessor.findLayerByPath(state.layerState.legendLayers, layerPath) as any)?.[value] as T
+// Generic hook that can select any key from the layer
+function useLayerSelectorLayerValueGeneric<K extends keyof TypeLegendLayer>(layerPath: string, key: K): TypeLegendLayer[K] | undefined {
+  const selector = useCallback(
+    (state: IGeoviewState) => {
+      const layer = LegendEventProcessor.findLayerByPath(state.layerState.legendLayers, layerPath);
+      return layer ? layer[key] : undefined;
+    },
+    [layerPath, key] // re-memoize only when either changes
   );
-};
+
+  return useStore(useGeoViewStore(), selector);
+}
+
+// Factory to create strongly typed layer selector hooks
+function createLayerSelectorHook<K extends keyof TypeLegendLayer>(key: K) {
+  return (layerPath: string): TypeLegendLayer[K] | undefined => useLayerSelectorLayerValueGeneric(layerPath, key);
+}
+
+// Specialized hooks
+export const useLayerSelectorId = createLayerSelectorHook('layerId');
+export const useLayerSelectorName = createLayerSelectorHook('layerName');
+export const useLayerSelectorStatus = createLayerSelectorHook('layerStatus');
+export const useLayerSelectorType = createLayerSelectorHook('type');
+export const useLayerSelectorControls = createLayerSelectorHook('controls');
+export const useLayerSelectorChildren = createLayerSelectorHook('children');
+export const useLayerSelectorItems = createLayerSelectorHook('items');
+export const useLayerSelectorIcons = createLayerSelectorHook('icons');
+export const useLayerSelectorLegendQueryStatus = createLayerSelectorHook('legendQueryStatus');
 
 // Store Actions
 export const useLayerStoreActions = (): LayerActions => useStore(useGeoViewStore(), (state) => state.layerState.actions);

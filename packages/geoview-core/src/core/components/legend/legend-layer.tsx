@@ -2,7 +2,13 @@ import { memo, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material';
 import { Box, ListItem, Tooltip, ListItemText, IconButton, KeyboardArrowDownIcon, KeyboardArrowUpIcon, ProgressBar } from '@/ui';
-import { useLayerSelectorLayerValue } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import {
+  useLayerSelectorChildren,
+  useLayerSelectorItems,
+  useLayerSelectorName,
+  useLayerSelectorStatus,
+  useLayerSelectorType,
+} from '@/core/stores/store-interface-and-intial-values/layer-state';
 import {
   useMapStoreActions,
   useMapSelectorLayerLegendCollapsed,
@@ -12,10 +18,8 @@ import { useLightBox } from '@/core/components/common';
 import { LayerIcon } from '@/core/components/common/layer-icon';
 import { SecondaryControls } from './legend-layer-ctrl';
 import { CollapsibleContent } from './legend-layer-container';
-import type { TypeLayerStatus, TypeGeoviewLayerType } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { getSxClasses } from './legend-styles';
-import type { TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
 import { logger } from '@/core/utils/logger';
 
 interface LegendLayerProps {
@@ -37,13 +41,13 @@ const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick }: LegendLay
   logger.logTraceUseMemo('components/legend/legend-layer - LegendLayerHeader', layerPath);
 
   // Hooks
-  const layerName = useLayerSelectorLayerValue<string>(layerPath, 'layerName');
-  const layerItems = useLayerSelectorLayerValue<TypeLegendItem[]>(layerPath, 'items');
-  const layerChildren = useLayerSelectorLayerValue<TypeLegendLayer[]>(layerPath, 'children');
   const isCollapsed = useMapSelectorLayerLegendCollapsed(layerPath);
   const layerHidden = useMapSelectorIsLayerHiddenOnMap(layerPath);
-  const layerType = useLayerSelectorLayerValue<TypeGeoviewLayerType>(layerPath, 'type');
-  const layerStatus = useLayerSelectorLayerValue<TypeLayerStatus>(layerPath, 'layerStatus');
+  const layerName = useLayerSelectorName(layerPath);
+  const layerItems = useLayerSelectorItems(layerPath);
+  const layerChildren = useLayerSelectorChildren(layerPath);
+  const layerType = useLayerSelectorType(layerPath);
+  const layerStatus = useLayerSelectorStatus(layerPath);
 
   // This is used to determine if the text should be wrapped in a tooltip
   const shouldShowTooltip = !!layerName && layerName.length > CONST_NAME_LENGTH_TOOLTIP;

@@ -21,13 +21,19 @@ import {
   Paper,
   Typography,
 } from '@/ui';
-import type { TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
+import type { TypeLegendLayer } from '@/core/components/layers/types';
 import {
   useLayerStoreActions,
   useLayerDisplayState,
   useLayerSelectedLayerPath,
   useLayerSelectedLayerSortingArrowId,
-  useLayerSelectorLayerValue,
+  useLayerSelectorName,
+  useLayerSelectorId,
+  useLayerSelectorStatus,
+  useLayerSelectorType,
+  useLayerSelectorControls,
+  useLayerSelectorChildren,
+  useLayerSelectorItems,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import {
   useMapStoreActions,
@@ -45,7 +51,7 @@ import { ArrowDownwardIcon, ArrowUpIcon, CenterFocusScaleIcon, LoopIcon, TableVi
 import { Divider } from '@/ui/divider/divider';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useUISelectedFooterLayerListItemId } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import type { TypeLayerStatus, TypeLayerControls, TypeGeoviewLayerType } from '@/api/types/layer-schema-types';
+import type { TypeLayerControls } from '@/api/types/layer-schema-types';
 
 interface SingleLayerProps {
   layerPath: string;
@@ -86,13 +92,13 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
   const legendExpanded = !useMapSelectorLayerLegendCollapsed(layerPath);
   const parentHidden = useMapSelectorLayerParentHidden(layerPath);
 
-  const layerId = useLayerSelectorLayerValue<string>(layerPath, 'layerId');
-  const layerName = useLayerSelectorLayerValue<string>(layerPath, 'layerName');
-  const layerStatus = useLayerSelectorLayerValue<TypeLayerStatus>(layerPath, 'layerStatus');
-  const layerType = useLayerSelectorLayerValue<TypeGeoviewLayerType>(layerPath, 'type');
-  const layerControls = useLayerSelectorLayerValue<TypeLayerControls>(layerPath, 'controls');
-  const layerChildren = useLayerSelectorLayerValue<TypeLegendLayer[]>(layerPath, 'children');
-  const layerItems = useLayerSelectorLayerValue<TypeLegendItem[]>(layerPath, 'items');
+  const layerId = useLayerSelectorId(layerPath);
+  const layerName = useLayerSelectorName(layerPath);
+  const layerStatus = useLayerSelectorStatus(layerPath);
+  const layerType = useLayerSelectorType(layerPath);
+  const layerControls = useLayerSelectorControls(layerPath);
+  const layerChildren = useLayerSelectorChildren(layerPath);
+  const layerItems = useLayerSelectorItems(layerPath);
 
   // Is visibility button disabled?
   const isLayerVisibleCapable = layerControls?.visibility;
