@@ -1,6 +1,6 @@
 import { useEffect, useRef, memo } from 'react';
 
-import type { Coordinate } from 'ol/coordinate'; // For typing only
+import type { Coordinate } from 'ol/coordinate';
 import { Box, ClickMapMarker } from '@/ui';
 
 import { useMapClickMarker, useMapClickCoordinates, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';

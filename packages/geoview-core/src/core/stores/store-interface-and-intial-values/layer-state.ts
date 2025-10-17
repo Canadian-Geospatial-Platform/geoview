@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { useStore } from 'zustand';
 
 import type { FitOptions } from 'ol/View';
@@ -20,7 +21,6 @@ import { esriQueryRecordsByUrlObjectIds } from '@/geo/layer/gv-layers/utils';
 import { LayerNotEsriDynamicError, LayerNotFoundError } from '@/core/exceptions/layer-exceptions';
 import { NoBoundsError } from '@/core/exceptions/geoview-exceptions';
 import { logger } from '@/core/utils/logger';
-import { useCallback } from 'react';
 
 // #region INTERFACES & TYPES
 

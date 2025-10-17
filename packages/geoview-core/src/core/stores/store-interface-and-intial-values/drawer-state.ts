@@ -1,6 +1,7 @@
 import { useStore } from 'zustand';
 
 import type { Feature } from 'ol';
+
 import type { Draw } from '@/geo/interaction/draw';
 import type { Snap } from '@/geo/interaction/snap';
 import { useGeoViewStore } from '@/core/stores/stores-managers';

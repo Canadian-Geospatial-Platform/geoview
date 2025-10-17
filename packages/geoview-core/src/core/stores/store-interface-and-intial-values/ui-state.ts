@@ -1,4 +1,5 @@
 import { useStore } from 'zustand';
+
 import type {
   TypeValidAppBarCoreProps,
   TypeValidFooterBarTabsCoreProps,
