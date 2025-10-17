@@ -33,6 +33,7 @@ import type {
   GeoCoreLayerConfig,
   GeoPackageLayerConfig,
 } from '@/api/types/layer-schema-types';
+import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import {
   mapConfigLayerEntryIsGeoCore,
   mapConfigLayerEntryIsGeoPackage,
@@ -46,6 +47,7 @@ import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { ImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
+import { KML } from '@/geo/layer/geoview-layers/vector/kml';
 import { WFS } from '@/geo/layer/geoview-layers/vector/wfs';
 import { OgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
 import { XYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
@@ -110,6 +112,7 @@ import { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vec
 import { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { GeoJSONLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
 import { ImageStaticLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
+import { KmlLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/kml-layer-entry-config';
 import { OgcFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
 import { WfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import { WkbLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
@@ -1832,6 +1835,9 @@ export class LayerApi {
 
     // Log
     logger.logInfo(`GeoView Layer ${geoviewLayer.geoviewLayerId} added to map ${this.getMapId()}`, geoviewLayer);
+    // GV: KML currently has no style or symbology associated with it, so we warn the user
+    if (geoviewLayer.getClassName() === CONST_LAYER_TYPES.KML)
+      this.mapViewer.notifications.showWarning('warning.layer.kmlLayerWarning', [], true);
 
     // Set the layer z indices
     MapEventProcessor.setLayerZIndices(this.getMapId());
@@ -2484,6 +2490,9 @@ export class LayerApi {
     }
     if (ImageStaticLayerEntryConfig.isClassOrTypeImageStatic(geoviewLayerConfig)) {
       return new ImageStatic(geoviewLayerConfig);
+    }
+    if (KmlLayerEntryConfig.isClassOrTypeKMLLayer(geoviewLayerConfig)) {
+      return new KML(geoviewLayerConfig);
     }
     if (OgcFeatureLayerEntryConfig.isClassOrTypeOGCLayer(geoviewLayerConfig)) {
       return new OgcFeature(geoviewLayerConfig);

@@ -10,6 +10,7 @@ import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import type { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { EventType, PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
+import { GVKML } from '@/geo/layer/gv-layers/vector/gv-kml';
 import type { LayerApi } from '@/geo/layer/layer';
 import type {
   TypeFeatureInfoResultSet,
@@ -166,7 +167,8 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
             if (arrayOfRecords.length) this.#patchMissingMetadataIfNecessary(layerPath, arrayOfRecords[0]);
 
             // Filter out unsymbolized features if the showUnsymbolizedFeatures config is false
-            if (!AppEventProcessor.getShowUnsymbolizedFeatures(this.getMapId())) {
+            // GV: KML is excluded as it currently has no symbology.
+            if (!AppEventProcessor.getShowUnsymbolizedFeatures(this.getMapId()) && !(layer instanceof GVKML)) {
               // eslint-disable-next-line no-param-reassign
               arrayOfRecords = arrayOfRecords.filter((record) => record.featureIcon);
             }

@@ -33,7 +33,8 @@ import type { GeoJSONLayerEntryConfig } from '@/api/config/validation-classes/ve
 const EXCLUDED_HEADERS_LAT = ['latitude', 'lat', 'y', 'ycoord', 'latitude|latitude', 'latitude | latitude'];
 const EXCLUDED_HEADERS_LNG = ['longitude', 'lon', 'x', 'xcoord', 'longitude|longitude', 'longitude | longitude'];
 const EXCLUDED_HEADERS_GEN = ['geometry', 'geom'];
-const EXCLUDED_HEADERS = EXCLUDED_HEADERS_LAT.concat(EXCLUDED_HEADERS_LNG).concat(EXCLUDED_HEADERS_GEN);
+const EXCLUDED_HEADERS_STYLE = ['styleUrl'];
+const EXCLUDED_HEADERS = EXCLUDED_HEADERS_LAT.concat(EXCLUDED_HEADERS_LNG).concat(EXCLUDED_HEADERS_GEN).concat(EXCLUDED_HEADERS_STYLE);
 // GV Order of these keywords matter, preference will be given in this order
 const NAME_FIELD_KEYWORDS = ['^name$', '^title$', '^label$'];
 const MAX_ESRI_FEATURES = 200000;

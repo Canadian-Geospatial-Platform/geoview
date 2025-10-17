@@ -729,6 +729,7 @@ export abstract class ConfigBaseClass {
     switch (layerType) {
       case CONST_LAYER_TYPES.CSV:
       case CONST_LAYER_TYPES.GEOJSON:
+      case CONST_LAYER_TYPES.KML:
       case CONST_LAYER_TYPES.OGC_FEATURE:
       case CONST_LAYER_TYPES.WFS:
       case CONST_LAYER_TYPES.WKB:

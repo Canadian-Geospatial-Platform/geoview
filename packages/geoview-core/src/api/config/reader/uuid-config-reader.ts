@@ -7,6 +7,7 @@ import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { GeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
 import { ImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
+import { KML } from '@/geo/layer/geoview-layers/vector/kml';
 import { OgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
 import { VectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 import { WFS } from '@/geo/layer/geoview-layers/vector/wfs';
@@ -206,6 +207,9 @@ export class UUIDmapConfigReader {
           } else if (layerType === CONST_LAYER_TYPES.GEOJSON) {
             // Redirect
             geoviewLayerConfig = GeoJSON.createGeoviewLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
+          } else if (layerType === CONST_LAYER_TYPES.KML) {
+            // Redirect
+            geoviewLayerConfig = KML.createGeoviewLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
           } else if (layerType === CONST_LAYER_TYPES.XYZ_TILES) {
             // Redirect
             geoviewLayerConfig = XYZTiles.createGeoviewLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
