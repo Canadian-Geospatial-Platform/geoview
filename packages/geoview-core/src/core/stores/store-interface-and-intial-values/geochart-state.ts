@@ -1,7 +1,7 @@
 import { useStore } from 'zustand';
+
 import type { GeoViewGeoChartConfig } from '@/api/config/reader/uuid-config-reader';
 import type { TypeFeatureInfoEntry, TypeQueryStatus, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
-
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import type { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 
@@ -139,7 +139,7 @@ export type TypeGeochartResultSetEntry = TypeResultSetEntry & GeoChartResultInfo
 export type TypeGeochartResultSet = TypeResultSet<TypeGeochartResultSetEntry>;
 
 // **********************************************************
-// Layer state selectors
+// Geochart state selectors
 // **********************************************************
 export const useGeochartConfigs = (): GeoChartStoreByLayerPath =>
   useStore(useGeoViewStore(), (state) => state.geochartState.geochartChartsConfig);
@@ -149,4 +149,5 @@ export const useGeochartLayerDataArrayBatch = (): TypeGeochartResultSetEntry[] =
   useStore(useGeoViewStore(), (state) => state.geochartState.layerDataArrayBatch);
 export const useGeochartSelectedLayerPath = (): string => useStore(useGeoViewStore(), (state) => state.geochartState.selectedLayerPath);
 
+// Store Actions
 export const useGeochartStoreActions = (): GeochartActions => useStore(useGeoViewStore(), (state) => state.geochartState.actions);

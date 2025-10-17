@@ -3,11 +3,10 @@ import { Tooltip, useTheme } from '@mui/material';
 import { memo, useCallback, useMemo } from 'react';
 import { Box, ListItem, ListItemText, ListItemIcon, List, BrowserNotSupportedIcon } from '@/ui';
 import type { TypeLegendItem } from '@/core/components/layers/types';
-import { useLayerStoreActions, useSelectorLayerControls } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerSelectorControls, useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
-import type { TypeLayerControls } from '@/api/types/layer-schema-types';
-import { useSelectorIsLayerHiddenOnMap } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useMapSelectorIsLayerHiddenOnMap } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 interface ItemsListProps {
   items: TypeLegendItem[];
@@ -57,8 +56,8 @@ export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsList
   const { t } = useTranslation<string>();
 
   const { toggleItemVisibility, getLayer } = useLayerStoreActions();
-  const layerControls: TypeLayerControls | undefined = useSelectorLayerControls(layerPath);
-  const layerHidden = useSelectorIsLayerHiddenOnMap(layerPath);
+  const layerControls = useLayerSelectorControls(layerPath);
+  const layerHidden = useMapSelectorIsLayerHiddenOnMap(layerPath);
   const canToggleItemVisibility = getLayer(layerPath)?.canToggle && layerControls?.visibility !== false;
 
   /**

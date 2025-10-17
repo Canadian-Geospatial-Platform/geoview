@@ -1,6 +1,7 @@
 import { useStore } from 'zustand';
 
 import type { Feature } from 'ol';
+
 import type { Draw } from '@/geo/interaction/draw';
 import type { Snap } from '@/geo/interaction/snap';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
@@ -748,27 +749,17 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
 // **********************************************************
 // Drawer state selectors
 // **********************************************************
-
 export const useDrawerIsDrawing = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.actions.getIsDrawing());
-
 export const useDrawerIsEditing = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.actions.getIsEditing());
-
 export const useDrawerIsSnapping = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.actions.getIsSnapping());
-
 export const useDrawerSelectedDrawingType = (): string | undefined =>
   useStore(useGeoViewStore(), (state) => state.drawerState.actions.getSelectedDrawingType());
-
 export const useDrawerActiveGeom = (): string => useStore(useGeoViewStore(), (state) => state.drawerState.activeGeom);
-
 export const useDrawerStyle = (): StyleProps => useStore(useGeoViewStore(), (state) => state.drawerState.style);
-
 export const useDrawerDrawInstance = (): Draw | undefined => useStore(useGeoViewStore(), (state) => state.drawerState.drawInstance);
-
 export const useDrawerHideMeasurements = (): boolean =>
   useStore(useGeoViewStore(), (state) => state.drawerState.actions.getHideMeasurements());
-
 export const useDrawerUndoDisabled = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.undoDisabled);
-
 export const useDrawerRedoDisabled = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.redoDisabled);
 
 // Store Actions

@@ -11,7 +11,7 @@ import {
   useDataTableStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useAppShowUnsymbolizedFeatures } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useMapVisibleLayers, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useMapStoreActions, useMapAllVisibleandInRangeLayers } from '@/core/stores/store-interface-and-intial-values/map-state';
 import {
   useUIActiveAppBarTab,
   useUIActiveFooterBarTabId,
@@ -56,7 +56,7 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
   const { triggerGetAllFeatureInfo } = useDataTableStoreActions();
   const { isLayerHiddenOnMap } = useMapStoreActions();
   const selectedTab = useUIActiveFooterBarTabId();
-  const visibleLayers = useMapVisibleLayers();
+  const visibleInRangeLayers = useMapAllVisibleandInRangeLayers();
   const { tabId, isOpen } = useUIActiveAppBarTab();
   const appBarComponents = useUIAppbarComponents();
   const showUnsymbolizedFeatures = useAppShowUnsymbolizedFeatures();
@@ -68,10 +68,10 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
    * Order the layers by visible layer order.
    */
   const orderedLayerData = useMemo(() => {
-    return visibleLayers
+    return visibleInRangeLayers
       .map((layerPath) => mappedLayerData.filter((data) => data.layerPath === layerPath)[0])
       .filter((layer) => layer !== undefined && !isLayerHiddenOnMap(layer.layerPath));
-  }, [mappedLayerData, visibleLayers, isLayerHiddenOnMap]);
+  }, [mappedLayerData, visibleInRangeLayers, isLayerHiddenOnMap]);
 
   /**
    * Update local states when layer is changed from layer list.

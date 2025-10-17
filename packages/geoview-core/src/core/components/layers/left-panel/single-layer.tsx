@@ -21,26 +21,26 @@ import {
   Paper,
   Typography,
 } from '@/ui';
-import type { TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
+import type { TypeLegendLayer } from '@/core/components/layers/types';
 import {
   useLayerStoreActions,
   useLayerDisplayState,
   useLayerSelectedLayerPath,
-  useSelectedLayerSortingArrowId,
-  useSelectorLayerItems,
-  useSelectorLayerStatus,
-  useSelectorLayerType,
-  useSelectorLayerControls,
-  useSelectorLayerName,
-  useSelectorLayerChildren,
-  useSelectorLayerId,
+  useLayerSelectedLayerSortingArrowId,
+  useLayerSelectorName,
+  useLayerSelectorId,
+  useLayerSelectorStatus,
+  useLayerSelectorType,
+  useLayerSelectorControls,
+  useLayerSelectorChildren,
+  useLayerSelectorItems,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import {
   useMapStoreActions,
-  useSelectorLayerLegendCollapsed,
-  useSelectorLayerVisibility,
-  useSelectorLayerInVisibleRange,
-  useSelectorLayerParentHidden,
+  useMapSelectorLayerLegendCollapsed,
+  useMapSelectorLayerVisibility,
+  useMapSelectorLayerInVisibleRange,
+  useMapSelectorLayerParentHidden,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { DeleteUndoButton } from './delete-undo-button';
 import { LayersList } from './layers-list';
@@ -51,7 +51,7 @@ import { ArrowDownwardIcon, ArrowUpIcon, CenterFocusScaleIcon, LoopIcon, TableVi
 import { Divider } from '@/ui/divider/divider';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useUISelectedFooterLayerListItemId } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import type { TypeLayerStatus, TypeLayerControls } from '@/api/types/layer-schema-types';
+import type { TypeLayerControls } from '@/api/types/layer-schema-types';
 
 interface SingleLayerProps {
   layerPath: string;
@@ -82,23 +82,23 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
   const selectedLayerPath = useLayerSelectedLayerPath();
   const displayState = useLayerDisplayState();
   const datatableSettings = useDataTableLayerSettings();
-  const selectedLayerSortingArrowId = useSelectedLayerSortingArrowId();
+  const selectedLayerSortingArrowId = useLayerSelectedLayerSortingArrowId();
   const selectedFooterLayerListItemId = useUISelectedFooterLayerListItemId();
 
   useDataTableStoreActions();
 
-  const isVisible = useSelectorLayerVisibility(layerPath);
-  const inVisibleRange = useSelectorLayerInVisibleRange(layerPath);
-  const legendExpanded = !useSelectorLayerLegendCollapsed(layerPath);
-  const parentHidden = useSelectorLayerParentHidden(layerPath);
+  const isVisible = useMapSelectorLayerVisibility(layerPath);
+  const inVisibleRange = useMapSelectorLayerInVisibleRange(layerPath);
+  const legendExpanded = !useMapSelectorLayerLegendCollapsed(layerPath);
+  const parentHidden = useMapSelectorLayerParentHidden(layerPath);
 
-  const layerId: string | undefined = useSelectorLayerId(layerPath);
-  const layerName: string | undefined = useSelectorLayerName(layerPath);
-  const layerStatus: TypeLayerStatus | undefined = useSelectorLayerStatus(layerPath);
-  const layerType: string | undefined = useSelectorLayerType(layerPath);
-  const layerControls: TypeLayerControls | undefined = useSelectorLayerControls(layerPath);
-  const layerChildren: TypeLegendLayer[] | undefined = useSelectorLayerChildren(layerPath);
-  const layerItems: TypeLegendItem[] | undefined = useSelectorLayerItems(layerPath);
+  const layerId = useLayerSelectorId(layerPath);
+  const layerName = useLayerSelectorName(layerPath);
+  const layerStatus = useLayerSelectorStatus(layerPath);
+  const layerType = useLayerSelectorType(layerPath);
+  const layerControls = useLayerSelectorControls(layerPath);
+  const layerChildren = useLayerSelectorChildren(layerPath);
+  const layerItems = useLayerSelectorItems(layerPath);
 
   // Is visibility button disabled?
   const isLayerVisibleCapable = layerControls?.visibility;

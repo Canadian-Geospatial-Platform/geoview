@@ -221,37 +221,8 @@ export const useDetailsLayerDataArray = (): TypeFeatureInfoResultSetEntry[] =>
 export const useDetailsLayerDataArrayBatch = (): TypeFeatureInfoResultSetEntry[] =>
   useStore(useGeoViewStore(), (state) => state.detailsState.layerDataArrayBatch);
 export const useDetailsSelectedLayerPath = (): string => useStore(useGeoViewStore(), (state) => state.detailsState.selectedLayerPath);
-
 export const useDetailsCoordinateInfoEnabled = (): boolean =>
   useStore(useGeoViewStore(), (state) => state.detailsState.coordinateInfoEnabled);
 
+// Store Actions
 export const useDetailsStoreActions = (): FeatureInfoActions => useStore(useGeoViewStore(), (state) => state.detailsState.actions);
-
-export const useSelectorLayerQueryStatus = (layerPath: string): TypeQueryStatus | undefined => {
-  // Hook
-  return useStore(
-    useGeoViewStore(),
-    (state) =>
-      FeatureInfoEventProcessor.findLayerDataFromLayerDataArray(state.mapId, layerPath, state.detailsState.layerDataArray)?.queryStatus
-  );
-};
-
-export const useSelectorLayerFeatures = (layerPath: string): TypeFeatureInfoEntry[] | undefined => {
-  // Hook
-  return useStore(useGeoViewStore(), (state) => {
-    return (
-      FeatureInfoEventProcessor.findLayerDataFromLayerDataArray(state.mapId, layerPath, state.detailsState.layerDataArray)?.features ||
-      undefined
-    );
-  });
-};
-
-export const useSelectorLayerNumOfFeatures = (layerPath: string): number | undefined => {
-  // Hook
-  return useStore(useGeoViewStore(), (state) => {
-    return (
-      FeatureInfoEventProcessor.findLayerDataFromLayerDataArray(state.mapId, layerPath, state.detailsState.layerDataArray)?.features
-        ?.length ?? 0
-    );
-  });
-};

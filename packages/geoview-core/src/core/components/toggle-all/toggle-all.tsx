@@ -3,12 +3,12 @@ import { useTheme, useMediaQuery } from '@mui/material';
 import { useCallback } from 'react';
 import { Box, Switch, Tooltip } from '@/ui';
 import {
-  useAllLayersCollapsed,
-  useAllLayersVisible,
-  useMapHasCollapsibleLayers,
+  useMapllLayersCollapsedToggle,
+  useMapAllLayersVisibleToggle,
+  useMapHasCollapsibleLayersToggle,
   useMapStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useLayerDisplayState, useLayersAreLoading } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerDisplayState, useLayerAreLayersLoading } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { logger } from '@/core/utils/logger';
 
 interface ToggleAllProps {
@@ -33,10 +33,10 @@ export function ToggleAll({ source = 'legend' }: ToggleAllProps): JSX.Element {
   const { t } = useTranslation<string>();
 
   const displayState = useLayerDisplayState();
-  const allLayersVisible = useAllLayersVisible();
-  const allLayersCollapsed = useAllLayersCollapsed();
-  const layersAreLoading = useLayersAreLoading();
-  const hasCollapsibleLayers = useMapHasCollapsibleLayers();
+  const allLayersVisible = useMapAllLayersVisibleToggle();
+  const allLayersCollapsed = useMapllLayersCollapsedToggle();
+  const layersAreLoading = useLayerAreLayersLoading();
+  const hasCollapsibleLayers = useMapHasCollapsibleLayersToggle();
   const { setAllLayersVisibility, setAllLayersCollapsed } = useMapStoreActions();
 
   const handleVisibilityToggle = useCallback(() => {

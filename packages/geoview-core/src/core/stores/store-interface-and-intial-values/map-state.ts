@@ -1,10 +1,12 @@
-import type { Coordinate } from 'ol/coordinate'; // only for typing
+import { useMemo } from 'react';
+import { useStore } from 'zustand';
+
+import type { Coordinate } from 'ol/coordinate';
 import type Overlay from 'ol/Overlay';
-import type { Extent } from 'ol/extent'; // only for Typing
-import type { FitOptions } from 'ol/View'; // only for typing
+import type { Extent } from 'ol/extent';
+import type { FitOptions } from 'ol/View';
 import type { Size } from 'ol/size';
 import type { Pixel } from 'ol/pixel';
-import { useStore } from 'zustand';
 
 import type {
   TypeBasemapOptions,
@@ -934,7 +936,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           mapState: {
             ...get().mapState,
             orderedLayerInfo: [...orderedLayerInfo],
-            // GV Here, we use the spread operator for the custom selector hooks such as useSelectorLayerLegendCollapsed to
+            // GV Here, we use the spread operator for the custom selector hooks such as useMapSelectorLayerLegendCollapsed to
             // GV notice and eventually trigger the changes that need to be get triggered
           },
         });
@@ -1113,35 +1115,33 @@ export const useMapScale = (): TypeScaleInfo => useStore(useGeoViewStore(), (sta
 export const useMapSize = (): Size => useStore(useGeoViewStore(), (state) => state.mapState.size);
 export const useMapOrderedLayers = (): string[] => useStore(useGeoViewStore(), (state) => state.mapState.orderedLayers);
 export const useMapVisibleLayers = (): string[] => useStore(useGeoViewStore(), (state) => state.mapState.visibleLayers);
-export const useMapVisibleRangeLayers = (): string[] => useStore(useGeoViewStore(), (state) => state.mapState.visibleRangeLayers);
 export const useMapZoom = (): number => useStore(useGeoViewStore(), (state) => state.mapState.zoom);
 
 // Getter function for one-time access, there is no subcription to modification
 export const getMapPointerPosition = (mapId: string): TypeMapMouseInfo | undefined =>
   getGeoViewStore(mapId).getState().mapState.pointerPosition;
 
-export const useSelectorLayerVisibility = (layerPath: string): boolean => {
+// For data-table/details/geochart/time-slider left panel layers visibility in list
+export const useMapAllVisibleandInRangeLayers = (): string[] => {
+  const visibleLayers = useStore(useGeoViewStore(), (state) => state.mapState.visibleLayers);
+  const visibleRangeLayers = useStore(useGeoViewStore(), (state) => state.mapState.visibleRangeLayers);
+  return useMemo(() => {
+    return [...new Set([...visibleLayers, ...visibleRangeLayers])];
+  }, [visibleLayers, visibleRangeLayers]);
+};
+
+// For layers/legend components
+export const useMapSelectorLayerVisibility = (layerPath: string): boolean => {
   // Hook
   return useStore(
     useGeoViewStore(),
     (state) => MapEventProcessor.findMapLayerFromOrderedInfo(state.mapId, layerPath, state.mapState.orderedLayerInfo)?.visible || false
   );
 };
-
-export const useSelectorLayerParentHidden = (layerPath: string): boolean => {
+export const useMapSelectorLayerParentHidden = (layerPath: string): boolean => {
   return useStore(useGeoViewStore(), (state) => MapEventProcessor.getMapLayerParentHidden(state.mapId, layerPath));
 };
-
-export const useAllLayersVisible = (): boolean =>
-  useStore(useGeoViewStore(), (state) => state.mapState.orderedLayerInfo.every((layer) => layer.visible));
-
-export const useMapHasCollapsibleLayers = (): boolean =>
-  useStore(useGeoViewStore(), (state) => MapEventProcessor.getLegendCollapsibleLayers(state.mapId).length > 0);
-
-export const useAllLayersCollapsed = (): boolean =>
-  useStore(useGeoViewStore(), (state) => MapEventProcessor.getAllLegendLayersCollapsed(state.mapId));
-
-export const useSelectorLayerInVisibleRange = (layerPath: string): boolean => {
+export const useMapSelectorLayerInVisibleRange = (layerPath: string): boolean => {
   // Hook
   return useStore(
     useGeoViewStore(),
@@ -1149,8 +1149,7 @@ export const useSelectorLayerInVisibleRange = (layerPath: string): boolean => {
       MapEventProcessor.findMapLayerFromOrderedInfo(state.mapId, layerPath, state.mapState.orderedLayerInfo)?.inVisibleRange || false
   );
 };
-
-export const useSelectorIsLayerHiddenOnMap = (layerPath: string): boolean => {
+export const useMapSelectorIsLayerHiddenOnMap = (layerPath: string): boolean => {
   return useStore(
     useGeoViewStore(),
     (state) =>
@@ -1159,8 +1158,7 @@ export const useSelectorIsLayerHiddenOnMap = (layerPath: string): boolean => {
       !MapEventProcessor.findMapLayerFromOrderedInfo(state.mapId, layerPath, state.mapState.orderedLayerInfo)?.visible
   );
 };
-
-export const useSelectorLayerLegendCollapsed = (layerPath: string): boolean => {
+export const useMapSelectorLayerLegendCollapsed = (layerPath: string): boolean => {
   // Hook
   return useStore(
     useGeoViewStore(),
@@ -1168,6 +1166,14 @@ export const useSelectorLayerLegendCollapsed = (layerPath: string): boolean => {
       MapEventProcessor.findMapLayerFromOrderedInfo(state.mapId, layerPath, state.mapState.orderedLayerInfo)?.legendCollapsed || false
   );
 };
+
+// For toggle-all component
+export const useMapAllLayersVisibleToggle = (): boolean =>
+  useStore(useGeoViewStore(), (state) => state.mapState.orderedLayerInfo.every((layer) => layer.visible));
+export const useMapHasCollapsibleLayersToggle = (): boolean =>
+  useStore(useGeoViewStore(), (state) => MapEventProcessor.getLegendCollapsibleLayers(state.mapId).length > 0);
+export const useMapllLayersCollapsedToggle = (): boolean =>
+  useStore(useGeoViewStore(), (state) => MapEventProcessor.getAllLegendLayersCollapsed(state.mapId));
 
 // Store Actions
 export const useMapStoreActions = (): MapActions => useStore(useGeoViewStore(), (state) => state.mapState.actions);

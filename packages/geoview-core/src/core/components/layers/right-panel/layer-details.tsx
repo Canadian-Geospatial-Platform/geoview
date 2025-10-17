@@ -42,10 +42,10 @@ import { Switch } from '@/ui/switch/switch';
 import { UtilAddLayer } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
 import {
   useMapVisibleLayers,
-  useSelectorIsLayerHiddenOnMap,
-  useSelectorLayerVisibility,
+  useMapSelectorIsLayerHiddenOnMap,
+  useMapSelectorLayerVisibility,
   useMapStoreActions,
-  useSelectorLayerParentHidden,
+  useMapSelectorLayerParentHidden,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 interface LayerDetailsProps {
@@ -65,9 +65,9 @@ const Sublayer = memo(({ layer }: SubLayerProps): JSX.Element => {
   const sxClasses = getSxClasses(theme);
 
   // Hooks
-  const layerHidden = useSelectorIsLayerHiddenOnMap(layer.layerPath);
-  const parentHidden = useSelectorLayerParentHidden(layer.layerPath);
-  const layerVisible = useSelectorLayerVisibility(layer.layerPath);
+  const layerHidden = useMapSelectorIsLayerHiddenOnMap(layer.layerPath);
+  const parentHidden = useMapSelectorLayerParentHidden(layer.layerPath);
+  const layerVisible = useMapSelectorLayerVisibility(layer.layerPath);
   const { setOrToggleLayerVisibility } = useMapStoreActions();
 
   // Return the ui
@@ -130,9 +130,9 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const layerFilter = getLayerDefaultFilter(layerDetails.layerPath);
   const layerTimeDimension = getLayerTimeDimension(layerDetails.layerPath);
   const layerNativeProjection = getLayerServiceProjection(layerDetails.layerPath);
-  const layerVisible = useSelectorLayerVisibility(layerDetails.layerPath);
-  const parentHidden = useSelectorLayerParentHidden(layerDetails.layerPath);
-  const layerHidden = useSelectorIsLayerHiddenOnMap(layerDetails.layerPath);
+  const layerVisible = useMapSelectorLayerVisibility(layerDetails.layerPath);
+  const parentHidden = useMapSelectorLayerParentHidden(layerDetails.layerPath);
+  const layerHidden = useMapSelectorIsLayerHiddenOnMap(layerDetails.layerPath);
 
   // Is highlight button disabled?
   const isLayerHighlightCapable = layerDetails.controls?.highlight;

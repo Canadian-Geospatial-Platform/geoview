@@ -85,4 +85,5 @@ export function initializeSwiperState(set: TypeSetStore, get: TypeGetStore): ISw
 export const useSwiperLayerPaths = (): string[] => useStore(useGeoViewStore(), (state) => state.swiperState.layerPaths);
 export const useSwiperOrientation = (): string => useStore(useGeoViewStore(), (state) => state.swiperState.orientation);
 
+// Store Actions
 export const useSwiperStoreActions = (): SwiperActions => useStore(useGeoViewStore(), (state) => state.swiperState.actions);

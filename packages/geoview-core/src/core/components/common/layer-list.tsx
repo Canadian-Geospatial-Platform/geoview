@@ -1,4 +1,4 @@
-import type { ReactNode} from 'react';
+import type { ReactNode } from 'react';
 import { memo, useCallback, useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
@@ -10,7 +10,7 @@ import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
 import { getSxClasses } from './layer-list-style';
 import { LayerIcon } from './layer-icon';
 import { logger } from '@/core/utils/logger';
-import { useSelectorLayerStatus } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerSelectorStatus } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 export interface LayerListEntry {
   content?: string | ReactNode;
@@ -49,7 +49,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Store
-  const layerStatus = useSelectorLayerStatus(layer.layerPath);
+  const layerStatus = useLayerSelectorStatus(layer.layerPath);
 
   // Style
   const containerClass = [

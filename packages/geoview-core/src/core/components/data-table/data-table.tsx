@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, memo, isValidElement
 import { useTranslation } from 'react-i18next';
 import debounce from 'lodash/debounce';
 
-import { getCenter } from 'ol/extent'; // only for typing
+import { getCenter } from 'ol/extent';
 
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
