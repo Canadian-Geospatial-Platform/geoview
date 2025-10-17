@@ -89,6 +89,7 @@ function FileUploadSection({ onFileSelected, onUrlChanged, displayURL, disabledL
       upFilename.endsWith('.JSON') ||
       upFilename.endsWith('.GEOJSON') ||
       upFilename.endsWith('.GPKG') ||
+      upFilename.endsWith('.KML') ||
       upFilename.endsWith('.CSV') ||
       upFilename.endsWith('.ZIP') ||
       upFilename.endsWith('.SHP')
@@ -192,7 +193,7 @@ function FileUploadSection({ onFileSelected, onUrlChanged, displayURL, disabledL
           ref={fileInputRef}
           style={{ display: 'none' }}
           onChange={handleChange}
-          accept=".json, .geojson, .gpkg, .csv, .zip, .shp"
+          accept=".json, .geojson, .gpkg, .csv, .zip, .shp, .kml"
         />
       </Box>
       <Button
@@ -244,7 +245,7 @@ export function AddNewLayer(): JSX.Element {
   // Hook
   const { t } = useTranslation<string>();
 
-  const { CSV, ESRI_DYNAMIC, ESRI_FEATURE, ESRI_IMAGE, GEOJSON, WMS, WFS, OGC_FEATURE, XYZ_TILES, VECTOR_TILES } = CONST_LAYER_TYPES;
+  const { CSV, ESRI_DYNAMIC, ESRI_FEATURE, ESRI_IMAGE, GEOJSON, KML, WMS, WFS, OGC_FEATURE, XYZ_TILES, VECTOR_TILES } = CONST_LAYER_TYPES;
 
   // States
   const [activeStep, setActiveStep] = useState(0);
@@ -450,6 +451,7 @@ export function AddNewLayer(): JSX.Element {
       layerType === ESRI_FEATURE ||
       layerType === ESRI_IMAGE ||
       layerType === GEOJSON ||
+      layerType === KML ||
       layerType === CSV ||
       layerType === VECTOR_TILES ||
       layerType === 'geoCore'

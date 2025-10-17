@@ -811,7 +811,9 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
       for (const feature of features) {
         // Get the image source for a feature using styling information and cache it
-        const imageSource = AbstractGVLayer.#getImageSource(feature, layerStyle, layerConfig, domainsLookup, aliasLookup, imageSourceDict);
+        const imageSource = layerStyle
+          ? AbstractGVLayer.#getImageSource(feature, layerStyle, layerConfig, domainsLookup, aliasLookup, imageSourceDict)
+          : undefined;
 
         // Get the extent
         const extent = feature.getGeometry()?.getExtent();

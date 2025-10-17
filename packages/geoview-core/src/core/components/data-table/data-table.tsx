@@ -70,7 +70,7 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
     useMapStoreActions();
   const { applyMapFilters, setSelectedFeature, setColumnsFiltersVisibility, getFilteredDataFromLegendVisibility } =
     useDataTableStoreActions();
-  const { getExtentFromFeatures } = useLayerStoreActions();
+  const { getExtentFromFeatures, getLayer } = useLayerStoreActions();
   const language = useAppDisplayLanguage();
   const datatableSettings = useDataTableLayerSettings();
   const showUnsymbolizedFeatures = useAppShowUnsymbolizedFeatures();
@@ -369,9 +369,10 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
 
     // get filtered feature for unique value info style so non visible class is not in the table
     let filterArray = getFilteredDataFromLegendVisibility(data.layerPath, data?.features ?? []);
-
+    const layer = getLayer(layerPath);
     // Filter out unsymbolized features if the showUnsymbolizedFeatures config is false
-    if (!showUnsymbolizedFeatures) {
+    // GV: KML is excluded as it currently has no symbology.
+    if (!showUnsymbolizedFeatures && !(layer?.type === 'KML')) {
       filterArray = filterArray.filter((record) => record.featureIcon);
     }
 
