@@ -122,6 +122,7 @@
     "serviceVectorTile": "Service de tuiles vectorielles",
     "serviceGeoJSON": "GeoJSON",
     "serviceGeoPackage": "GeoPackage",
+    "serviceKML": "Langage KML",
     "serviceCSV": "Valeurs séparées par des virgules (CSV)",
     "serviceWKB": "Format binaire bien connu (WKB)",
     "serviceRasterTile": "Tuiles 'raster' XYZ",
@@ -346,7 +347,8 @@
       "metadataTakingLongTime": "Les métadonnées pour la couche '__param__' prennent plus de temps que prévu à récupérer...",
       "metadatasTakingLongTime": "Le téléchargement des métadonnées de certaines couches prend plus de temps que...",
       "vectorTileRemoved": "La tuile vectorielle '__param__' a dû être retirée en raison d'un conflit de projection.",
-      "basemapLayerCreationError": "Erreur lors de la création de la couche de base __param__."
+      "basemapLayerCreationError": "Erreur lors de la création de la couche de base __param__.",
+      "kmlLayerWarning": "Les couches KML n'afficheront pas les symboles appropriés dans les panneaux et ne comporteront pas d'entrées dans le tableau de données."
     }
   },
   "error": {

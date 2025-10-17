@@ -23,6 +23,7 @@ type LayerTypesKey =
   | 'ESRI_IMAGE'
   | 'IMAGE_STATIC'
   | 'GEOJSON'
+  | 'KML'
   | 'XYZ_TILES'
   | 'VECTOR_TILES'
   | 'OGC_FEATURE'
@@ -38,6 +39,7 @@ export type TypeGeoviewLayerType =
   | 'esriImage'
   | 'GeoJSON'
   | 'imageStatic'
+  | 'KML'
   | 'ogcFeature'
   | 'ogcWfs'
   | 'ogcWms'
@@ -58,6 +60,7 @@ export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType> = {
   ESRI_IMAGE: 'esriImage',
   IMAGE_STATIC: 'imageStatic',
   GEOJSON: 'GeoJSON',
+  KML: 'KML',
   XYZ_TILES: 'xyzTiles',
   VECTOR_TILES: 'vectorTiles',
   OGC_FEATURE: 'ogcFeature',
@@ -146,6 +149,7 @@ export const CONST_GEOVIEW_SCHEMA_BY_TYPE: Record<TypeGeoviewLayerType, string> 
   esriFeature: 'TypeVectorLayerEntryConfig',
   esriImage: 'TypeEsriImageLayerEntryConfig',
   GeoJSON: 'TypeVectorLayerEntryConfig',
+  KML: 'TypeVectorLayerEntryConfig',
   xyzTiles: 'TypeTileLayerEntryConfig',
   vectorTiles: 'TypeTileLayerEntryConfig',
   ogcFeature: 'TypeVectorLayerEntryConfig',
@@ -160,6 +164,7 @@ export const validVectorLayerLegendTypes: TypeGeoviewLayerType[] = [
   CONST_LAYER_TYPES.ESRI_DYNAMIC,
   CONST_LAYER_TYPES.ESRI_FEATURE,
   CONST_LAYER_TYPES.ESRI_IMAGE,
+  CONST_LAYER_TYPES.KML,
   CONST_LAYER_TYPES.OGC_FEATURE,
   CONST_LAYER_TYPES.WFS,
   CONST_LAYER_TYPES.WKB,
