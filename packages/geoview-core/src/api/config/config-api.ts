@@ -48,6 +48,7 @@ import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { GeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
 import { ImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
+import { KML } from '@/geo/layer/geoview-layers/vector/kml';
 import { OgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
 import { VectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 import { WFS } from '@/geo/layer/geoview-layers/vector/wfs';
@@ -96,6 +97,8 @@ export class ConfigApi {
     if (/WMS/i.test(url)) return CONST_LAYER_TYPES.WMS;
 
     if (/.CSV(?:$|\?)/i.test(url)) return CONST_LAYER_TYPES.CSV;
+
+    if (/.KML(?:$|\?)/i.test(url)) return CONST_LAYER_TYPES.KML;
 
     if (/.(ZIP|SHP)(?:$|\?)/i.test(url)) return CONFIG_SHAPEFILE_TYPE;
 
@@ -483,6 +486,8 @@ export class ConfigApi {
         return EsriFeature.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
       case 'GeoJSON':
         return GeoJSON.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+      case 'KML':
+        return KML.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
       case 'WKB':
         return WKB.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
       case 'ogcFeature':
@@ -569,6 +574,8 @@ export class ConfigApi {
         return EsriFeature.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as number[], false);
       case 'GeoJSON':
         return GeoJSON.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], false);
+      case 'KML':
+        return KML.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], false);
       case 'WKB':
         return WKB.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], false);
       case 'ogcFeature':

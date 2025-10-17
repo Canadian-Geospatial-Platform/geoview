@@ -1626,6 +1626,7 @@
             "CSV",
             "esriFeature",
             "GeoJSON",
+            "KML",
             "ogcFeature",
             "ogcWfs",
             "WKB"
@@ -2302,6 +2303,22 @@
         ]
       }
     },
+    "TypeListOfKmlLayerEntryConfig": {
+      "description": "This type is used recursively by the IsValidTypeListOfLayerEntryConfig method coded in config-validation.ts file. It completes the validation of the list of layer entry config.",
+      "type": "array",
+      "minItems": 1,
+      "additionalProperties": false,
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "#/definitions/TypeLayerGroupEntryConfig"
+          },
+          {
+            "$ref": "#/definitions/TypeVectorLayerEntryConfig"
+          }
+        ]
+      }
+    },
     "TypeListOfOgcWfsLayerEntryConfig": {
       "description": "This type is used recursively by the IsValidTypeListOfLayerEntryConfig method coded in config-validation.ts file. It completes the validation of the list of layer entry config.",
       "type": "array",
@@ -2558,6 +2575,7 @@
           "esriFeature",
           "esriImage",
           "GeoJSON",
+          "KML",
           "xyzTiles",
           "ogcFeature",
           "ogcWfs",

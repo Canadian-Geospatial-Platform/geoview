@@ -28,6 +28,7 @@ import { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vec
 import { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { GeoJSONLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
 import { ImageStaticLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
+import { KmlLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/kml-layer-entry-config';
 import { OgcFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
 import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { VectorTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
@@ -354,6 +355,9 @@ export class ConfigValidation {
       } else if (GeoJSONLayerEntryConfig.isClassOrTypeGeoJSON(layerConfig)) {
         // eslint-disable-next-line no-param-reassign
         listOfLayerEntryConfig[i] = new GeoJSONLayerEntryConfig(layerConfigProps);
+      } else if (KmlLayerEntryConfig.isClassOrTypeKMLLayer(layerConfig)) {
+        // eslint-disable-next-line no-param-reassign
+        listOfLayerEntryConfig[i] = new KmlLayerEntryConfig(layerConfigProps);
       } else if (CsvLayerEntryConfig.isClassOrTypeCSV(layerConfig)) {
         // eslint-disable-next-line no-param-reassign
         listOfLayerEntryConfig[i] = new CsvLayerEntryConfig(layerConfigProps);

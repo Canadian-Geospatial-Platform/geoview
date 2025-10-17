@@ -373,8 +373,9 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     MapEventProcessor.applyLayerFilters(mapId, layerPath);
 
     // If we aren't showing unsymbolized features, then we need to update the feature info layer set
-    // so the data table matches the features from the time slider filter
-    if (!AppEventProcessor.getShowUnsymbolizedFeatures(mapId)) {
+    // so the data table matches the features from the time slider filter.
+    // GV: KML is excluded as it currently has no symbology.
+    if (!AppEventProcessor.getShowUnsymbolizedFeatures(mapId) && !(geoviewLayer?.getLayerConfig().getSchemaTag() === 'KML')) {
       MapEventProcessor.getMapViewerLayerAPI(mapId)
         .allFeatureInfoLayerSet.queryLayer(layerPath, 'all')
         .catch((error) => logger.logError(error));

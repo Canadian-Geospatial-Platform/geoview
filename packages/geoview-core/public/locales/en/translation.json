@@ -122,6 +122,7 @@
     "serviceVectorTile": "Vector Tile Service",
     "serviceGeoJSON": "GeoJSON",
     "serviceGeoPackage": "GeoPackage",
+    "serviceKML": "Keyhole Markup Language (KML)",
     "serviceCSV": "Comma Separated Values (CSV)",
     "serviceWKB": "Well-Known Binary (WKB)",
     "serviceRasterTile": "XYZ Raster Tiles",
@@ -346,7 +347,8 @@
       "metadataTakingLongTime": "The metadata for the layer '__param__' is taking longer than expected to fetch...",
       "metadatasTakingLongTime": "The metadata for some layers is taking longer than expected to fetch...",
       "vectorTileRemoved": "The vector tile __param__ had to be removed due to a projection conflict.",
-      "basemapLayerCreationError": "Error creating __param__ basemap."
+      "basemapLayerCreationError": "Error creating __param__ basemap.",
+      "kmlLayerWarning": "KML layers will not have proper symbols in the panels or have entries in the data table."
     }
   },
   "error": {
