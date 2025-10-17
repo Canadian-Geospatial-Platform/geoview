@@ -1,9 +1,10 @@
 import { Style } from 'ol/style';
-import Feature, { FeatureLike } from 'ol/Feature';
-import { TypeLayerStyleConfigType, TypeKindOfVectorSettings, TypeStyleGeometry, TypeLayerStyleSettings, TypeLayerStyleConfig, TypeLayerStyleConfigInfo, TypeAliasLookup } from '@/api/types/map-schema-types';
-import { TypeLayerMetadataFields } from '@/api/types/layer-schema-types';
-import { FilterNodeType } from './geoview-renderer-types';
-import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import type { FeatureLike } from 'ol/Feature';
+import type Feature from 'ol/Feature';
+import type { TypeLayerStyleConfigType, TypeKindOfVectorSettings, TypeStyleGeometry, TypeLayerStyleSettings, TypeLayerStyleConfig, TypeLayerStyleConfigInfo, TypeAliasLookup } from '@/api/types/map-schema-types';
+import type { TypeLayerMetadataFields } from '@/api/types/layer-schema-types';
+import type { FilterNodeType } from './geoview-renderer-types';
+import type { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 type TypeStyleProcessor = (styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, filterEquation?: FilterNodeType[], legendFilterIsOff?: boolean, domainsLookup?: TypeLayerMetadataFields[], aliasLookup?: TypeAliasLookup) => Style | undefined;
 /**
  * This method returns the type of geometry. It removes the Multi prefix because for the geoviewRenderer, a MultiPoint has

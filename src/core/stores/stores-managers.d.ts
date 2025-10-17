@@ -1,5 +1,5 @@
-import { GeoviewStoreType } from './geoview-store';
-import { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import type { GeoviewStoreType } from './geoview-store';
+import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 export interface StoresManagerState {
     stores: Record<string, GeoviewStoreType>;
 }

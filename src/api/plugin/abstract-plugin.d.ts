@@ -2,7 +2,7 @@ import type * as React from 'react';
 import type { createRoot } from 'react-dom/client';
 import type i18next from 'react-i18next';
 import type { useTheme } from '@mui/material/styles';
-import { MapViewer } from '@/geo/map/map-viewer';
+import type { MapViewer } from '@/geo/map/map-viewer';
 /**
  * Plugin abstract base class.
  */

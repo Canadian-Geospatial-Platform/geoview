@@ -1,6 +1,6 @@
-import { ReactNode } from 'react';
-import { LayerListEntry } from './layer-list';
-import { TypeContainerBox } from '@/core/types/global-types';
+import type { ReactNode } from 'react';
+import type { LayerListEntry } from './layer-list';
+import type { TypeContainerBox } from '@/core/types/global-types';
 interface LayoutProps {
     children?: ReactNode;
     layoutSwitch?: ReactNode;

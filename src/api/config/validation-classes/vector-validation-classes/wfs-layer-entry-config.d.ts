@@ -1,6 +1,7 @@
-import { ConfigClassOrType, TypeGeoviewLayerConfig, TypeLayerMetadataWfs, TypeSourceWFSVectorInitialConfig } from '@/api/types/layer-schema-types';
-import { TypeWFSLayerConfig } from '@/geo/layer/geoview-layers/vector/wfs';
-import { VectorLayerEntryConfig, VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
+import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeLayerMetadataWfs, TypeSourceWFSVectorInitialConfig } from '@/api/types/layer-schema-types';
+import type { TypeWFSLayerConfig } from '@/geo/layer/geoview-layers/vector/wfs';
+import type { VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
+import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 export interface WfsLayerEntryConfigProps extends VectorLayerEntryConfigProps {
     /** Source settings to apply to the GeoView layer source at creation time. */
     source?: TypeSourceWFSVectorInitialConfig;

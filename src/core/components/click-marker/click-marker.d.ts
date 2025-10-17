@@ -1,4 +1,4 @@
-import { Coordinate } from 'ol/coordinate';
+import type { Coordinate } from 'ol/coordinate';
 export type TypeClickMarker = {
     lonlat: Coordinate;
     symbology?: unknown;

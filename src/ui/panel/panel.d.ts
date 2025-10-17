@@ -1,6 +1,6 @@
-import { KeyboardEvent } from 'react';
-import { TypePanelProps } from '@/ui/panel/panel-types';
-import { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
+import type { KeyboardEvent } from 'react';
+import type { TypePanelProps } from '@/ui/panel/panel-types';
+import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 /**
  * Interface for panel properties
  */

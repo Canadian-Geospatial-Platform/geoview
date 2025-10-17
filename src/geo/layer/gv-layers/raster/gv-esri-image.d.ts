@@ -1,10 +1,10 @@
-import { ImageArcGISRest } from 'ol/source';
+import type { ImageArcGISRest } from 'ol/source';
 import { Image as ImageLayer } from 'ol/layer';
-import { Extent } from 'ol/extent';
-import { Projection as OLProjection } from 'ol/proj';
-import { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
+import type { Extent } from 'ol/extent';
+import type { Projection as OLProjection } from 'ol/proj';
+import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
-import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 /**
  * Manages an Esri Image layer.
  *

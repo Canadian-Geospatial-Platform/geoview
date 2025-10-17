@@ -1,4 +1,4 @@
-import { SnackbarType } from '@/core/utils/notifications';
+import type { SnackbarType } from '@/core/utils/notifications';
 /**
  * Properties for the Snackbar component
  */

@@ -1,5 +1,5 @@
-import { ReactElement } from 'react';
-import { FadeProps } from '@mui/material';
+import type { ReactElement } from 'react';
+import type { FadeProps } from '@mui/material';
 /**
  * Properties for the Fade component extending Material-UI's FadeProps
  */

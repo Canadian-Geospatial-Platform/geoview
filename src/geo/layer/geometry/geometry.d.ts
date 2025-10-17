@@ -1,13 +1,14 @@
 import VectorLayer from 'ol/layer/Vector';
 import Feature from 'ol/Feature';
-import VectorSource, { Options as VectorSourceOptions } from 'ol/source/Vector';
-import { Geometry as OLGeometry } from 'ol/geom';
-import { Coordinate } from 'ol/coordinate';
-import { Options as VectorLayerOptions } from 'ol/layer/BaseVector';
-import { MapViewer } from '@/geo/map/map-viewer';
-import { EventDelegateBase } from '@/api/events/event-helper';
-import { TypeStyleGeometry } from '@/api/types/map-schema-types';
-import { TypeFeatureCircleStyle, TypeFeatureStyle, TypeIconStyle } from '@/geo/layer/geometry/geometry-types';
+import type { Options as VectorSourceOptions } from 'ol/source/Vector';
+import VectorSource from 'ol/source/Vector';
+import type { Geometry as OLGeometry } from 'ol/geom';
+import type { Coordinate } from 'ol/coordinate';
+import type { Options as VectorLayerOptions } from 'ol/layer/BaseVector';
+import type { MapViewer } from '@/geo/map/map-viewer';
+import type { EventDelegateBase } from '@/api/events/event-helper';
+import type { TypeStyleGeometry } from '@/api/types/map-schema-types';
+import type { TypeFeatureCircleStyle, TypeFeatureStyle, TypeIconStyle } from '@/geo/layer/geometry/geometry-types';
 /**
  * Store a group of features
  */

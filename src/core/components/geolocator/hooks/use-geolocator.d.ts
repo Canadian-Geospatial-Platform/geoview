@@ -1,4 +1,4 @@
-import { GeoListItem } from '@/core/components/geolocator/geolocator';
+import type { GeoListItem } from '@/core/components/geolocator/geolocator';
 interface UseGeolocatorReturn {
     /** Array of geolocation results */
     data: GeoListItem[] | undefined;

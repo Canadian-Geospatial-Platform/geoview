@@ -1,4 +1,4 @@
-import { ListItemButtonProps } from '@mui/material';
+import type { ListItemButtonProps } from '@mui/material';
 /**
  * Create a customized Material UI List Item Button component.
  * This is a simple wrapper around MaterialListItemButton that maintains

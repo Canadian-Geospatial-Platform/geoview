@@ -1,7 +1,7 @@
-import { TypeNorthArrow, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { TypeLegendLayer } from '@/core/components/layers/types';
-import { TypeTimeSliderValues, TimeSliderLayerSet } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
-import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+import type { TypeNorthArrow, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+import type { TypeLegendLayer } from '@/core/components/layers/types';
+import type { TypeTimeSliderValues, TimeSliderLayerSet } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+import type { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 export type TypeValidPageSizes = 'LETTER' | 'TABLOID' | 'LEGAL';
 export type TypeMapStateForExportLayout = {
     attribution: string[];

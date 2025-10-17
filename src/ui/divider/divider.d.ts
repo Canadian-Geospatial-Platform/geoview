@@ -1,5 +1,5 @@
-import { SxProps, Theme } from '@mui/material/styles';
-import { DividerProps } from '@mui/material';
+import type { SxProps, Theme } from '@mui/material/styles';
+import type { DividerProps } from '@mui/material';
 /**
  * Properties for the Divider component extending Material-UI's DividerProps
  */

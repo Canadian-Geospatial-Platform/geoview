@@ -1,4 +1,4 @@
-import { IGeoViewColors, IGeoViewFontSizes } from '@/ui/style/types';
+import type { IGeoViewColors, IGeoViewFontSizes } from '@/ui/style/types';
 export declare const font = "'Roboto', 'Helvetica', 'Arial', sans-serif";
 export declare const defaultFontSize = 1;
 export declare const headingStyles: {

@@ -1,4 +1,4 @@
-import { SkeletonProps } from '@mui/material';
+import type { SkeletonProps } from '@mui/material';
 /**
  * Create a customized Material UI Skeleton component.
  *

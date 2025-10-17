@@ -1,7 +1,7 @@
-import VectorSource from 'ol/source/Vector';
-import WKBObject from 'ol/format/WKB';
-import { Projection as OLProjection } from 'ol/proj';
-import { WkbLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
+import type VectorSource from 'ol/source/Vector';
+import type WKBObject from 'ol/format/WKB';
+import type { Projection as OLProjection } from 'ol/proj';
+import type { WkbLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 /**
  * Manages a WKB layer.

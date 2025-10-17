@@ -1,4 +1,4 @@
-import { OverviewMap as OLOverviewMap } from 'ol/control';
+import type { OverviewMap as OLOverviewMap } from 'ol/control';
 /**
  * Properties for the overview map toggle
  */

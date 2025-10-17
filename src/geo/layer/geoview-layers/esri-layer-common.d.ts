@@ -1,13 +1,13 @@
-import { TimeDimensionESRI } from '@/core/utils/date-mgt';
+import type { TimeDimensionESRI } from '@/core/utils/date-mgt';
 import { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
-import { TypeFeatureInfoEntryPartial, TypeStyleGeometry, codedValueType, rangeDomainType, TypeOutfieldsType } from '@/api/types/map-schema-types';
-import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
-import { EsriRelatedRecordsJsonResponseRelatedRecord } from '@/geo/layer/gv-layers/utils';
-import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
-import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
-import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
+import type { TypeFeatureInfoEntryPartial, TypeStyleGeometry, codedValueType, rangeDomainType, TypeOutfieldsType } from '@/api/types/map-schema-types';
+import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import type { EsriRelatedRecordsJsonResponseRelatedRecord } from '@/geo/layer/gv-layers/utils';
+import type { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
+import type { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
+import type { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 /**
  * This method validates recursively the configuration of the layer entries to ensure that it is a feature layer identified
  * with a numeric layerId and creates a group entry when a layer is a group.

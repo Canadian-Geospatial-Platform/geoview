@@ -1,7 +1,7 @@
-import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
-import { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
-import { EventDelegateBase } from '@/api/events/event-helper';
-import { ActiveAppBarTabType } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import type { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
+import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
+import type { EventDelegateBase } from '@/api/events/event-helper';
+import type { ActiveAppBarTabType } from '@/core/stores/store-interface-and-intial-values/ui-state';
 /**
  * Class to manage buttons on the app-bar
  *

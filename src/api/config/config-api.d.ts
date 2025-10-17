@@ -1,7 +1,7 @@
 import { MapFeatureConfig } from '@/api/config/map-feature-config';
-import { TypeDisplayLanguage, TypeLayerStyleConfig } from '@/api/types/map-schema-types';
-import { TypeGeoviewLayerConfig, TypeInitialGeoviewLayerType } from '@/api/types/layer-schema-types';
-import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import type { TypeDisplayLanguage, TypeLayerStyleConfig } from '@/api/types/map-schema-types';
+import type { TypeGeoviewLayerConfig, TypeInitialGeoviewLayerType } from '@/api/types/layer-schema-types';
+import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 /**
  * The API class that create configuration object. It is used to validate and read the service and layer metadata.
  * @exports

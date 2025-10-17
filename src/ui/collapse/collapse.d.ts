@@ -1,4 +1,4 @@
-import { CollapseProps } from '@mui/material';
+import type { CollapseProps } from '@mui/material';
 /**
  * Create a customized Material UI Collapse component.
  *

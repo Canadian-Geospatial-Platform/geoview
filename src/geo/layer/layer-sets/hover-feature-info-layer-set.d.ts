@@ -1,8 +1,9 @@
-import { Coordinate } from 'ol/coordinate';
-import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
-import { AbstractLayerSet, PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
-import { LayerApi } from '@/geo/layer/layer';
-import { TypeHoverResultSet, TypeHoverResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import type { Coordinate } from 'ol/coordinate';
+import type { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
+import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
+import type { LayerApi } from '@/geo/layer/layer';
+import type { TypeHoverResultSet, TypeHoverResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 /**
  * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
  * events happening on them (in this case when the user hovers on the map) with a store

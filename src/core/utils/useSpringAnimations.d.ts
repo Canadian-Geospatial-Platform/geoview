@@ -1,4 +1,4 @@
-import { SpringConfig } from '@react-spring/web';
+import type { SpringConfig } from '@react-spring/web';
 type SpringValues = Record<string, any>;
 export declare const useFadeIn: (config?: SpringConfig) => SpringValues;
 export declare const useFadeInLeft: (config?: SpringConfig) => SpringValues;

@@ -1,6 +1,6 @@
-import { Root } from 'react-dom/client';
-import { TypeDisplayLanguage } from '@/api/types/map-schema-types';
-import { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
+import type { Root } from 'react-dom/client';
+import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
+import type { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
 /**
  * Take string like "My string is __param__" and replace parameters (__param__) from array of values
  *
@@ -155,9 +155,9 @@ export declare const delay: (ms: number) => Promise<void>;
  * @param {() => T} callback - A function that is called every `ms` milliseconds.
  *                                   If it returns `true`, the interval is cleared.
  * @param {number} ms - The interval time in milliseconds between callback executions.
- * @returns {NodeJS.Timeout} The interval timer ID, which can be used to clear the interval manually if needed.
+ * @returns {ReturnType<typeof setInterval>} The interval timer ID, which can be used to clear the interval manually if needed.
  */
-export declare const doUntil: <T>(callback: () => T, ms: number) => NodeJS.Timeout;
+export declare const doUntil: <T>(callback: () => T, ms: number) => ReturnType<typeof setInterval>;
 /**
  * Repeatedly invokes a callback function at a specified interval until one of two conditions is met:
  * - The callback function explicitly returns `true`, indicating the interval should be cleared.
@@ -167,9 +167,9 @@ export declare const doUntil: <T>(callback: () => T, ms: number) => NodeJS.Timeo
  * @param {() => T} callback - A function executed on each interval. If it returns `true`, the interval is cleared.
  * @param {Promise<unknown>[]} promises - An array of promises whose completion will also stop the interval.
  * @param {number} ms - The interval duration in milliseconds.
- * @returns {NodeJS.Timeout} The interval timer, which can be cleared manually if needed.
+ * @returns {ReturnType<typeof setInterval>} The interval timer, which can be cleared manually if needed.
  */
-export declare const doUntilPromises: <T>(callback: () => T, promises: Promise<unknown>[], ms: number) => NodeJS.Timeout;
+export declare const doUntilPromises: <T>(callback: () => T, promises: Promise<unknown>[], ms: number) => ReturnType<typeof setInterval>;
 /**
  * This generic function checks for a validity of something via the checkCallback() until it's found or until the timer runs out.
  * When the check callback returns true (or some found object), the doCallback() function is called with the found information.
@@ -237,4 +237,10 @@ export declare function isElementInViewport(el: Element): boolean;
  * @param {number} offset - Offset in pixels for 'start' (top gap) and 'end' (bottom gap) positions (default: 100)
  */
 export declare function scrollIfNotVisible(el: HTMLElement, blockValue: ScrollLogicalPosition, offset?: number): void;
+/**
+ * Checks whether the current environment is running on localhost port 8080.
+ *
+ * @returns {boolean} True if the current hostname is localhost and the port is 8080; otherwise, false.
+ */
+export declare function isLocalhost(): boolean;
 //# sourceMappingURL=utilities.d.ts.map

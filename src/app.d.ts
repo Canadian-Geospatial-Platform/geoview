@@ -12,7 +12,7 @@ import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import * as UI from '@/ui';
 import { API } from '@/api/api';
-import { MapViewerDelegate } from '@/core/types/global-types';
+import type { MapViewerDelegate } from '@/core/types/global-types';
 import { MapViewer } from '@/geo/map/map-viewer';
 export * from './core/types/external-types';
 export declare const api: API;

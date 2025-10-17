@@ -1,4 +1,4 @@
-import { BadgeProps } from '@mui/material';
+import type { BadgeProps } from '@mui/material';
 /**
  * A customized Material-UI Badge component.
  *

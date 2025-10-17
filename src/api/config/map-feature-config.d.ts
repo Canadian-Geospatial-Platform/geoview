@@ -1,4 +1,4 @@
-import { TypeAppBarProps, TypeDisplayTheme, TypeFooterBarProps, TypeGlobalSettings, TypeMapConfig, TypeCorePackagesConfig, TypeOverviewMapProps, TypeServiceUrls, TypeMapFeaturesInstance, TypeValidMapCorePackageProps, TypeValidMapComponentProps, TypeValidNavBarProps, TypeExternalPackagesProps, TypeValidVersions } from '@/api/types/map-schema-types';
+import type { TypeAppBarProps, TypeDisplayTheme, TypeFooterBarProps, TypeGlobalSettings, TypeMapConfig, TypeCorePackagesConfig, TypeOverviewMapProps, TypeServiceUrls, TypeMapFeaturesInstance, TypeValidMapCorePackageProps, TypeValidMapComponentProps, TypeValidNavBarProps, TypeExternalPackagesProps, TypeValidVersions } from '@/api/types/map-schema-types';
 /**
  * The map feature configuration class.
  */

@@ -1,6 +1,6 @@
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { type MRT_ColumnDef as MRTColumnDef } from 'material-react-table';
-import { ColumnsType } from './data-table-types';
+import type { ColumnsType } from './data-table-types';
 interface ExportButtonProps {
     layerPath: string;
     rows: ColumnsType[];

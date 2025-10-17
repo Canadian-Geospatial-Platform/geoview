@@ -1,4 +1,4 @@
-import { CardMediaProps } from '@mui/material';
+import type { CardMediaProps } from '@mui/material';
 /**
  * Properties for the Card Media component extending Material-UI's CardMediaProps
  */

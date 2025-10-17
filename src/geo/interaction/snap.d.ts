@@ -1,6 +1,7 @@
-import Collection from 'ol/Collection';
-import Feature from 'ol/Feature';
-import { Interaction, InteractionOptions } from './interaction';
+import type Collection from 'ol/Collection';
+import type Feature from 'ol/Feature';
+import type { InteractionOptions } from './interaction';
+import { Interaction } from './interaction';
 /**
  * Supported options for snapping interactions
  */

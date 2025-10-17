@@ -1,4 +1,4 @@
-import { ListProps } from '@mui/material';
+import type { ListProps } from '@mui/material';
 /**
  * Properties for the List UI
  */

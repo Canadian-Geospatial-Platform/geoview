@@ -1,22 +1,22 @@
-import { Options } from 'ol/layer/Base';
-import { Coordinate } from 'ol/coordinate';
-import { Pixel } from 'ol/pixel';
-import { Extent } from 'ol/extent';
-import Feature from 'ol/Feature';
-import { Layer } from 'ol/layer';
-import Source from 'ol/source/Source';
-import { Projection as OLProjection } from 'ol/proj';
-import { Map as OLMap } from 'ol';
-import { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
-import { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
-import { EventDelegateBase } from '@/api/events/event-helper';
-import { TypeLayerStyleConfig, TypeFeatureInfoEntry, codedValueType, rangeDomainType, TypeLocation, QueryType, TypeOutfieldsType } from '@/api/types/map-schema-types';
-import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import type { Options } from 'ol/layer/Base';
+import type { Coordinate } from 'ol/coordinate';
+import type { Pixel } from 'ol/pixel';
+import type { Extent } from 'ol/extent';
+import type Feature from 'ol/Feature';
+import type { Layer } from 'ol/layer';
+import type Source from 'ol/source/Source';
+import type { Projection as OLProjection } from 'ol/proj';
+import type { Map as OLMap } from 'ol';
+import type { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
+import type { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
+import type { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
+import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import type { EventDelegateBase } from '@/api/events/event-helper';
+import type { TypeLayerStyleConfig, TypeFeatureInfoEntry, codedValueType, rangeDomainType, TypeLocation, QueryType, TypeOutfieldsType } from '@/api/types/map-schema-types';
+import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
-import { SnackbarType } from '@/core/utils/notifications';
+import type { SnackbarType } from '@/core/utils/notifications';
 /**
  * Abstract Geoview Layer managing an OpenLayer layer.
  */

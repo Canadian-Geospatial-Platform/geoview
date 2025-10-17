@@ -1,4 +1,4 @@
-import { TypeGeoviewLayerType, TypeLayerEntryType } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerType, TypeLayerEntryType } from '@/api/types/layer-schema-types';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 /**
  * Error related to a specific GeoView layer, extending GeoViewError with the layer ID.

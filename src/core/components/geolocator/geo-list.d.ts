@@ -1,4 +1,4 @@
-import { GeoListItem } from '@/core/components/geolocator/geolocator';
+import type { GeoListItem } from '@/core/components/geolocator/geolocator';
 type GeoListProps = {
     geoListItems: GeoListItem[];
     searchValue: string;

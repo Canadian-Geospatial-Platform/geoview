@@ -1,4 +1,4 @@
-import { Remote } from 'comlink';
+import type { Remote } from 'comlink';
 /**
  * To create a new worker:
  * 1. Create a new TypeScript file for your worker in src/workers folder (e.g., my-work-script.ts).

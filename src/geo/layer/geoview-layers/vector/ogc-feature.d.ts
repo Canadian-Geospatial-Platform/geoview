@@ -1,13 +1,14 @@
-import { Options as SourceOptions } from 'ol/source/Vector';
-import { ReadOptions } from 'ol/format/Feature';
-import { Vector as VectorSource } from 'ol/source';
-import Feature from 'ol/Feature';
+import type { Options as SourceOptions } from 'ol/source/Vector';
+import type { ReadOptions } from 'ol/format/Feature';
+import type { Vector as VectorSource } from 'ol/source';
+import type Feature from 'ol/Feature';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
-import { TypeGeoviewLayerConfig, CONST_LAYER_TYPES, TypeMetadataOGCFeature } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerConfig, TypeMetadataOGCFeature } from '@/api/types/layer-schema-types';
+import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { OgcFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
-import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
+import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { GVOGCFeature } from '@/geo/layer/gv-layers/vector/gv-ogc-feature';
-import { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
+import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 export interface TypeOgcFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
     geoviewLayerType: typeof CONST_LAYER_TYPES.OGC_FEATURE;
     listOfLayerEntryConfig: OgcFeatureLayerEntryConfig[];

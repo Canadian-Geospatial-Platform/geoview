@@ -1,5 +1,5 @@
-import { TypeTabs } from '@/ui/tabs/tabs';
-import { EventDelegateBase } from '@/api/events/event-helper';
+import type { TypeTabs } from '@/ui/tabs/tabs';
+import type { EventDelegateBase } from '@/api/events/event-helper';
 /**
  * API to manage tabs on the tabs component
  *

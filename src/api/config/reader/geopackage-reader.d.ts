@@ -1,6 +1,6 @@
 import initSqlJs from 'sql.js';
-import { GeoPackageLayerConfig } from '@/api/types/layer-schema-types';
-import { TypeWkbLayerConfig } from '@/geo/layer/geoview-layers/vector/wkb';
+import type { GeoPackageLayerConfig } from '@/api/types/layer-schema-types';
+import type { TypeWkbLayerConfig } from '@/geo/layer/geoview-layers/vector/wkb';
 export interface GeoPackageFeature {
     geom: Uint8Array<ArrayBufferLike>;
     properties: initSqlJs.ParamsObject | undefined;

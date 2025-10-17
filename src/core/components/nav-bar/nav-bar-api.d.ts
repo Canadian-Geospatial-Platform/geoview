@@ -1,6 +1,6 @@
-import { TypeButtonGroupConfig, TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
-import { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
-import { EventDelegateBase } from '@/api/events/event-helper';
+import type { TypeButtonGroupConfig, TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
+import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
+import type { EventDelegateBase } from '@/api/events/event-helper';
 /**
  * Class to manage buttons on the nav-bar
  *

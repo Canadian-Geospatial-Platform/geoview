@@ -1,19 +1,19 @@
-import { Map as OLMap, Feature } from 'ol';
-import { FeatureLike } from 'ol/Feature';
-import { Geometry } from 'ol/geom';
+import type { Map as OLMap, Feature } from 'ol';
+import type { FeatureLike } from 'ol/Feature';
+import type { Geometry } from 'ol/geom';
 import VectorLayer from 'ol/layer/Vector';
-import VectorSource from 'ol/source/Vector';
-import Style from 'ol/style/Style';
-import { Coordinate } from 'ol/coordinate';
-import { Extent } from 'ol/extent';
-import { Pixel } from 'ol/pixel';
-import { Projection as OLProjection } from 'ol/proj';
-import { EventDelegateBase } from '@/api/events/event-helper';
-import { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
-import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
-import { TypeFeatureInfoEntry, TypeOutfieldsType } from '@/api/types/map-schema-types';
+import type VectorSource from 'ol/source/Vector';
+import type Style from 'ol/style/Style';
+import type { Coordinate } from 'ol/coordinate';
+import type { Extent } from 'ol/extent';
+import type { Pixel } from 'ol/pixel';
+import type { Projection as OLProjection } from 'ol/proj';
+import type { EventDelegateBase } from '@/api/events/event-helper';
+import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
+import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
+import type { TypeFeatureInfoEntry, TypeOutfieldsType } from '@/api/types/map-schema-types';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
-import { TypeDateFragments } from '@/core/utils/date-mgt';
+import type { TypeDateFragments } from '@/core/utils/date-mgt';
 /**
  * Abstract Geoview Layer managing an OpenLayer vector type layer.
  */

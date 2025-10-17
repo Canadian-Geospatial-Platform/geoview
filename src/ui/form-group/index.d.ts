@@ -1,5 +1,5 @@
 import FormGroup from '@mui/material/FormGroup';
-import { FormGroupProps } from '@mui/material';
+import type { FormGroupProps } from '@mui/material';
 export type { FormGroupProps };
 export { FormGroup };
 //# sourceMappingURL=index.d.ts.map

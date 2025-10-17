@@ -1,7 +1,7 @@
-import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
-import { TypeFeatureInfoEntry, TypeResultSet, TypeResultSetEntry, TypeQueryStatus, TypeFieldEntry } from '@/api/types/map-schema-types';
-import { TypeGeoviewLayerType } from '@/api/types/layer-schema-types';
-import { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
+import type { TypeFeatureInfoEntry, TypeResultSet, TypeResultSetEntry, TypeQueryStatus, TypeFieldEntry } from '@/api/types/map-schema-types';
+import type { TypeGeoviewLayerType } from '@/api/types/layer-schema-types';
+import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 type FeatureInfoActions = IFeatureInfoState['actions'];
 export interface IFeatureInfoState {
     checkedFeatures: Array<TypeFeatureInfoEntry>;
@@ -63,8 +63,5 @@ export declare const useDetailsLayerDataArrayBatch: () => TypeFeatureInfoResultS
 export declare const useDetailsSelectedLayerPath: () => string;
 export declare const useDetailsCoordinateInfoEnabled: () => boolean;
 export declare const useDetailsStoreActions: () => FeatureInfoActions;
-export declare const useSelectorLayerQueryStatus: (layerPath: string) => TypeQueryStatus | undefined;
-export declare const useSelectorLayerFeatures: (layerPath: string) => TypeFeatureInfoEntry[] | undefined;
-export declare const useSelectorLayerNumOfFeatures: (layerPath: string) => number | undefined;
 export {};
 //# sourceMappingURL=feature-info-state.d.ts.map

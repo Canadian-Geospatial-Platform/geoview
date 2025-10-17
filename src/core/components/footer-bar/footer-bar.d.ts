@@ -1,4 +1,4 @@
-import { FooterBarApi } from '@/core/components';
+import type { FooterBarApi } from '@/core/components';
 type FooterBarProps = {
     api: FooterBarApi;
 };

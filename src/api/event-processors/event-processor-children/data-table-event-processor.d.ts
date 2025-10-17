@@ -1,6 +1,6 @@
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
-import { IDataTableState, IDataTableSettings, TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { TypeFeatureInfoEntry, TypeLayerData } from '@/api/types/map-schema-types';
+import type { IDataTableState, IDataTableSettings, TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import type { TypeFeatureInfoEntry, TypeLayerData } from '@/api/types/map-schema-types';
 export declare class DataTableEventProcessor extends AbstractEventProcessor {
     #private;
     /**

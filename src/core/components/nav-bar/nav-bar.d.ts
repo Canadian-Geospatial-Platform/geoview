@@ -1,4 +1,4 @@
-import { NavBarApi } from '@/core/components';
+import type { NavBarApi } from '@/core/components';
 type NavBarProps = {
     api: NavBarApi;
 };

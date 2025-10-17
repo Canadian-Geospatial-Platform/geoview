@@ -1,6 +1,6 @@
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
-import { IDrawerState, StyleProps } from '@/core/stores/store-interface-and-intial-values/drawer-state';
-import { GeoviewStoreType } from '@/core/stores/geoview-store';
+import type { IDrawerState, StyleProps } from '@/core/stores/store-interface-and-intial-values/drawer-state';
+import type { GeoviewStoreType } from '@/core/stores/geoview-store';
 export declare const DRAW_GROUP_KEY = "draw-group";
 /**
  * Event processor focusing on interacting with the drawer state in the store.

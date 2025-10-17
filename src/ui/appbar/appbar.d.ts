@@ -1,4 +1,4 @@
-import { AppBarProps } from '@mui/material';
+import type { AppBarProps } from '@mui/material';
 /**
  * A customized Material-UI AppBar component with fade-in animation support.
  *

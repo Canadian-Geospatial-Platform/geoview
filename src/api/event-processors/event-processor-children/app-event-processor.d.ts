@@ -1,9 +1,9 @@
-import { TypeDisplayLanguage, TypeDisplayTheme } from '@/api/types/map-schema-types';
-import { IAppState } from '@/core/stores/store-interface-and-intial-values/app-state';
+import type { TypeDisplayLanguage, TypeDisplayTheme } from '@/api/types/map-schema-types';
+import type { IAppState } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
-import { NotificationDetailsType } from '@/core/components';
-import { TypeHTMLElement } from '@/core/types/global-types';
-import { SnackbarType } from '@/core/utils/notifications';
+import type { NotificationDetailsType } from '@/core/components';
+import type { TypeHTMLElement } from '@/core/types/global-types';
+import type { SnackbarType } from '@/core/utils/notifications';
 export declare class AppEventProcessor extends AbstractEventProcessor {
     /**
      * Shortcut to get the App state for a given map id

@@ -1,5 +1,5 @@
-import { ReactNode, RefObject } from 'react';
-import { TooltipProps, IconButtonProps } from '@mui/material';
+import type { ReactNode, RefObject } from 'react';
+import type { TooltipProps, IconButtonProps } from '@mui/material';
 /**
  * Properties for the icon button extending Material-UI's IconButtonProps
  */

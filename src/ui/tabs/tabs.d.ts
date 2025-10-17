@@ -1,6 +1,6 @@
-import { Size } from 'ol/size';
-import { TabsProps, TabProps, BoxProps } from '@mui/material';
-import { TypeContainerBox } from '@/core/types/global-types';
+import type { Size } from 'ol/size';
+import type { TabsProps, TabProps, BoxProps } from '@mui/material';
+import type { TypeContainerBox } from '@/core/types/global-types';
 /**
  * Type used for properties of each tab
  */

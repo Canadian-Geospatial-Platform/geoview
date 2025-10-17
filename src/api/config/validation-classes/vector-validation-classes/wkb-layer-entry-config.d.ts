@@ -1,6 +1,7 @@
-import { VectorLayerEntryConfig, VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
-import { ConfigClassOrType, TypeGeoviewLayerConfig, TypeSourceWkbVectorInitialConfig } from '@/api/types/layer-schema-types';
-import { TypeWkbLayerConfig } from '@/geo/layer/geoview-layers/vector/wkb';
+import type { VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
+import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
+import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeSourceWkbVectorInitialConfig } from '@/api/types/layer-schema-types';
+import type { TypeWkbLayerConfig } from '@/geo/layer/geoview-layers/vector/wkb';
 export interface WkbLayerEntryConfigProps extends VectorLayerEntryConfigProps {
     /** Source settings to apply to the GeoView layer source at creation time. */
     source?: TypeSourceWkbVectorInitialConfig;

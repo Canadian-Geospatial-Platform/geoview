@@ -1,6 +1,6 @@
-import { Coordinate } from 'ol/coordinate';
-import { Projection as OLProjection, ProjectionLike } from 'ol/proj';
-import { Extent } from 'ol/extent';
+import type { Coordinate } from 'ol/coordinate';
+import type { Projection as OLProjection, ProjectionLike } from 'ol/proj';
+import type { Extent } from 'ol/extent';
 /**
  * Class used to handle functions for transforming projections
  *

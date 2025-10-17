@@ -1,4 +1,4 @@
-import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
+import type { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 export type SwipeOrientation = 'horizontal' | 'vertical';
 type SwiperActions = ISwiperState['actions'];
 export interface ISwiperState {

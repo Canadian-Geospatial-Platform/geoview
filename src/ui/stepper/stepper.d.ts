@@ -1,4 +1,4 @@
-import { StepperProps, StepLabelProps, StepContentProps, StepProps } from '@mui/material';
+import type { StepperProps, StepLabelProps, StepContentProps, StepProps } from '@mui/material';
 /**
  * Custom MUI Stepper Props
  */

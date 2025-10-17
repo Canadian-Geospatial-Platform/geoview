@@ -1,8 +1,8 @@
-import { Coordinate } from 'ol/coordinate';
-import { Extent } from 'ol/extent';
-import { FeatureHighlight } from '@/geo/map/feature-highlight';
-import { MapViewer } from '@/geo/map/map-viewer';
-import { TypePointMarker } from '@/api/types/map-schema-types';
+import type { Coordinate } from 'ol/coordinate';
+import type { Extent } from 'ol/extent';
+import type { FeatureHighlight } from '@/geo/map/feature-highlight';
+import type { MapViewer } from '@/geo/map/map-viewer';
+import type { TypePointMarker } from '@/api/types/map-schema-types';
 /**
  * A class to handle point markers
  *

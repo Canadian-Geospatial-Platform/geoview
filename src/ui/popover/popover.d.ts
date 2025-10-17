@@ -1,4 +1,4 @@
-import { PopoverProps } from '@mui/material';
+import type { PopoverProps } from '@mui/material';
 /**
  * Create a customized Material UI Popover component.
  *

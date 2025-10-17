@@ -1,4 +1,4 @@
-import { LayerListEntry } from '@/core/components/common';
+import type { LayerListEntry } from '@/core/components/common';
 /**
  * Shared method implementing a bypass mechanism to make sure to wait until a particular layerPath indeed has 0 elements before actually changing the selection.
  * Used by the Details-Panel and the GeoChart-Panel.

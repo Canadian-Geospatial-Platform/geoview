@@ -1,4 +1,4 @@
-import { AbstractPlugin } from './abstract-plugin';
+import type { AbstractPlugin } from './abstract-plugin';
 /**
  * Class to manage plugins
  *

@@ -1,4 +1,5 @@
-import { MRT_TableOptions as MRTTableOptions, type MRT_RowData as MRTRowData } from 'material-react-table';
+import type { MRT_TableOptions as MRTTableOptions } from 'material-react-table';
+import { type MRT_RowData as MRTRowData } from 'material-react-table';
 /**
  * Create a Material React Table component wrapper.
  * This is a wrapper around Material React Table that maintains

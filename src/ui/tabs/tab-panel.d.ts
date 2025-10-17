@@ -1,5 +1,5 @@
-import { ReactNode } from 'react';
-import { TypeContainerBox } from '@/core/types/global-types';
+import type { ReactNode } from 'react';
+import type { TypeContainerBox } from '@/core/types/global-types';
 /**
  * Interface used for the tab panel properties
  */

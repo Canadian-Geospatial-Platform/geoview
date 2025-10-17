@@ -1,4 +1,4 @@
-import { SwitchProps } from '@mui/material';
+import type { SwitchProps } from '@mui/material';
 interface ExtendedSwitchProps extends SwitchProps {
     label?: string;
 }

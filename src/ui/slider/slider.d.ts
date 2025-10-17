@@ -1,6 +1,6 @@
-import { CSSProperties, ReactNode } from 'react';
-import { SxProps, Theme } from '@mui/material/styles';
-import { Mark } from '@mui/base';
+import type { CSSProperties, ReactNode } from 'react';
+import type { SxProps, Theme } from '@mui/material/styles';
+import type { Mark } from '@mui/base';
 /**
  * Properties for the Slider
  */

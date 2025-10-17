@@ -1,5 +1,5 @@
-import { TypeDisplayLanguage } from '@/api/types/map-schema-types';
-import { GeoCoreLayerConfig, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
+import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
+import type { GeoCoreLayerConfig, RCSLayerConfig, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
 /**
  * Class used to add geoCore layer to the map
  * @exports
@@ -16,5 +16,14 @@ export declare class GeoCore {
      * @returns {Promise<TypeGeoviewLayerConfig>} List of layer configurations to add to the map.
      */
     static createLayerConfigFromUUID(uuid: string, language: TypeDisplayLanguage, mapId?: string, layerConfig?: GeoCoreLayerConfig, abortSignal?: AbortSignal): Promise<TypeGeoviewLayerConfig>;
+    /**
+     * Gets GeoView layer configurations list from the RCS UUIDs of the list of layer entry configurations.
+     * @param {string} uuid - The UUID of the layer.
+     * @param {TypeDisplayLanguage} language - The language.
+     * @param {RCSLayerConfig?} layerConfig - The optional layer configuration.
+     * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+     * @returns {Promise<TypeGeoviewLayerConfig>} List of layer configurations to add to the map.
+     */
+    static createLayerConfigFromRCSUUID(uuid: string, language: TypeDisplayLanguage, layerConfig?: RCSLayerConfig, abortSignal?: AbortSignal): Promise<TypeGeoviewLayerConfig>;
 }
 //# sourceMappingURL=geocore.d.ts.map

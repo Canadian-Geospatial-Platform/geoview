@@ -1,10 +1,11 @@
-import { ModifyEvent as OLModifyEvent } from 'ol/interaction/Modify';
+import type { ModifyEvent as OLModifyEvent } from 'ol/interaction/Modify';
 import Collection from 'ol/Collection';
-import Feature from 'ol/Feature';
-import { Condition } from 'ol/events/condition';
-import { EventDelegateBase } from '@/api/events/event-helper';
-import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
-import { Interaction, InteractionOptions } from './interaction';
+import type Feature from 'ol/Feature';
+import type { Condition } from 'ol/events/condition';
+import type { EventDelegateBase } from '@/api/events/event-helper';
+import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
+import type { InteractionOptions } from './interaction';
+import { Interaction } from './interaction';
 /**
  * Supported options for modify interactions
  */

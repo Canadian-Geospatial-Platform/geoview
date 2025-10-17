@@ -1,6 +1,7 @@
-import { VectorLayerEntryConfig, VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
-import { ConfigClassOrType, TypeGeoviewLayerConfig, TypeSourceGeoJSONInitialConfig } from '@/api/types/layer-schema-types';
-import { TypeGeoJSONLayerConfig } from '@/geo/layer/geoview-layers/vector/geojson';
+import type { VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
+import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
+import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeSourceGeoJSONInitialConfig } from '@/api/types/layer-schema-types';
+import type { TypeGeoJSONLayerConfig } from '@/geo/layer/geoview-layers/vector/geojson';
 export interface GeoJSONLayerEntryConfigProps extends VectorLayerEntryConfigProps {
     /** Source settings to apply to the GeoView layer source at creation time. */
     source?: TypeSourceGeoJSONInitialConfig;

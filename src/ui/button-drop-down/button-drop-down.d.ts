@@ -1,4 +1,4 @@
-import { ButtonGroupProps } from '@mui/material';
+import type { ButtonGroupProps } from '@mui/material';
 /**
  * Properties for the ButtonDropDown component extending Material-UI's ButtonGroupProps
  */
