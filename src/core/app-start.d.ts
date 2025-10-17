@@ -1,5 +1,5 @@
-import { i18n } from 'i18next';
-import { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import type { i18n } from 'i18next';
+import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 export declare const MapContext: import("react").Context<TypeMapContext>;
 /**
  * Type used for the map context

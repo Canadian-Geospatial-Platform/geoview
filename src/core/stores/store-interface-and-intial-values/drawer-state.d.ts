@@ -1,9 +1,9 @@
-import { Feature } from 'ol';
-import { Draw } from '@/geo/interaction/draw';
-import { Snap } from '@/geo/interaction/snap';
-import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
-import { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { Transform } from '@/geo/interaction/transform/transform';
+import type { Feature } from 'ol';
+import type { Draw } from '@/geo/interaction/draw';
+import type { Snap } from '@/geo/interaction/snap';
+import type { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
+import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import type { Transform } from '@/geo/interaction/transform/transform';
 type DrawerActions = IDrawerState['actions'];
 export declare const DEFAULT_TEXT_VALUES: {
     en: string;

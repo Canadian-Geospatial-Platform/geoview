@@ -1,6 +1,6 @@
-import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
-import { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { DatePrecision, TimeDimension, TimePrecision } from '@/core/utils/date-mgt';
+import type { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
+import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import type { DatePrecision, TimeDimension, TimePrecision } from '@/core/utils/date-mgt';
 type TimeSliderActions = ITimeSliderState['actions'];
 export interface ITimeSliderState {
     timeSliderLayers: TimeSliderLayerSet;

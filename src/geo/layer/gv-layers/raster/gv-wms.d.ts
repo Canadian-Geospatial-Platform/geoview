@@ -1,16 +1,16 @@
 import ImageLayer from 'ol/layer/Image';
-import { Coordinate } from 'ol/coordinate';
-import { ImageArcGISRest, ImageWMS } from 'ol/source';
-import { Extent } from 'ol/extent';
-import { Projection as OLProjection } from 'ol/proj';
-import { Map as OLMap } from 'ol';
-import { TypeWmsLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
+import type { Coordinate } from 'ol/coordinate';
+import type { ImageArcGISRest, ImageWMS } from 'ol/source';
+import type { Extent } from 'ol/extent';
+import type { Projection as OLProjection } from 'ol/proj';
+import type { Map as OLMap } from 'ol';
+import type { TypeWmsLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import type { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
-import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
-import { TypeDateFragments } from '@/core/utils/date-mgt';
-import { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
+import type { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
+import type { TypeDateFragments } from '@/core/utils/date-mgt';
+import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 /**
  * Manages a WMS layer.
  *

@@ -1,4 +1,4 @@
-import { DataTableProps } from './data-table-types';
+import type { DataTableProps } from './data-table-types';
 /**
  * Build Data table from map.
  * @param {DataTableProps} data map data which will be used to build data table.

@@ -1,9 +1,10 @@
 import { ImageArcGISRest } from 'ol/source';
 import { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import { TypeGeoviewLayerConfig, CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
+import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
-import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 export interface TypeEsriImageLayerConfig extends TypeGeoviewLayerConfig {
     geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_IMAGE;
     listOfLayerEntryConfig: EsriImageLayerEntryConfig[];

@@ -1,5 +1,5 @@
-import { MapConfigLayerEntry } from '@/api/types/layer-schema-types';
-import { ErrorCallbackDelegate } from '@/api/config/config-validation';
+import type { MapConfigLayerEntry } from '@/api/types/layer-schema-types';
+import type { ErrorCallbackDelegate } from '@/api/config/config-validation';
 /**
  * Class to read and validate the GeoView map features configuration. Will validate every item for structure and valid values.
  * If error found, will replace by default values and sent a message in the console for developers to know something went wrong.

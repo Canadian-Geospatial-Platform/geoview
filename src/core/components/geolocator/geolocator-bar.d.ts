@@ -1,4 +1,4 @@
-import { ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
 interface GeolocatorBarProps {
     /** Current search input value */
     searchValue: string;

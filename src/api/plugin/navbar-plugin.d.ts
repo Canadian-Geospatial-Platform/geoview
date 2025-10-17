@@ -1,6 +1,6 @@
-import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
+import type { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import { AbstractPlugin } from './abstract-plugin';
-import { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
+import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 export type TypeNavBarButtonConfig = {
     buttonProps: IconButtonPropsExtend;
     panelProps?: TypePanelProps;

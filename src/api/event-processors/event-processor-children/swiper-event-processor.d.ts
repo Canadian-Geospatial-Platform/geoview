@@ -1,4 +1,4 @@
-import { ISwiperState, SwipeOrientation } from '@/core/stores/store-interface-and-intial-values/swiper-state';
+import type { ISwiperState, SwipeOrientation } from '@/core/stores/store-interface-and-intial-values/swiper-state';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 /**
  * Event processor focusing on interacting with the swiper state in the store.

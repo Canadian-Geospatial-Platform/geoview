@@ -1,7 +1,7 @@
-import VectorSource from 'ol/source/Vector';
-import { GeoJSONObject } from 'ol/format/GeoJSON';
-import { Projection as OLProjection } from 'ol/proj';
-import { GeoJSONLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
+import type VectorSource from 'ol/source/Vector';
+import type { GeoJSONObject } from 'ol/format/GeoJSON';
+import type { Projection as OLProjection } from 'ol/proj';
+import type { GeoJSONLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 /**
  * Manages a GeoJSON layer.

@@ -1,9 +1,9 @@
-import { Coordinate } from 'ol/coordinate';
-import { Pixel } from 'ol/pixel';
-import { Geometry } from 'ol/geom';
-import Feature from 'ol/Feature';
-import { MapFeatureConfig } from '@/api/config/map-feature-config';
-import { MapConfigLayerEntry, TypeGeoviewLayerType, TypeLayerStatus } from './layer-schema-types';
+import type { Coordinate } from 'ol/coordinate';
+import type { Pixel } from 'ol/pixel';
+import type { Geometry } from 'ol/geom';
+import type Feature from 'ol/Feature';
+import type { MapFeatureConfig } from '@/api/config/map-feature-config';
+import type { MapConfigLayerEntry, TypeGeoviewLayerType, TypeLayerStatus } from './layer-schema-types';
 /**
  *  Definition of the map feature instance according to what is specified in the schema.
  */
@@ -117,6 +117,10 @@ export type TypeServiceUrls = {
      * be another endpoint with similar output. Default = CONFIG_GEOCORE_URL ('https://geocore.api.geo.ca').
      */
     geocoreUrl: string;
+    /**
+     * Service end point to access API for layers specification for RCS gcGeo.
+     */
+    rcsUrl?: string;
     /**
      * An optional proxy to be used for dealing with same-origin issues.  URL must either be a relative path on the same server
      * or an absolute path on a server which sets CORS headers.
@@ -288,6 +292,8 @@ export type TypePointMarker = {
 export declare const MAP_CONFIG_SCHEMA_PATH = "https://cgpv/schema#/definitions/TypeMapFeaturesInstance";
 /** The default geocore url */
 export declare const CONFIG_GEOCORE_URL = "https://geocore.api.geo.ca";
+/** The default RCS url */
+export declare const CONFIG_RCS_URL = "https://gcgeo.gc.ca/geonetwork/srv/api/v2/docs";
 /** The default geolocator url */
 export declare const CONFIG_GEOLOCATOR_URL = "https://geolocator.api.geo.ca?keys=geonames,nominatim,locate";
 /** The default proxy url */
@@ -301,6 +307,7 @@ export declare const CONFIG_NTS_SHEET_URL = "https://geogratis.gc.ca/services/de
 /** The default altitude url */
 export declare const CONFIG_ALTITUDE_URL = "https://geogratis.gc.ca/services/elevation/cdem/altitude";
 export declare const CONFIG_GEOCORE_TYPE = "geoCore";
+export declare const CONFIG_RCS_TYPE = "rcs";
 export declare const CONFIG_GEOPACKAGE_TYPE = "GeoPackage";
 export declare const CONFIG_SHAPEFILE_TYPE = "shapefile";
 export declare const VALID_ZOOM_LEVELS: number[];

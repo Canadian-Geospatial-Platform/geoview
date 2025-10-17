@@ -1,5 +1,5 @@
-import { Ref } from 'react';
-import { AutocompleteProps } from '@mui/material';
+import type { Ref } from 'react';
+import type { AutocompleteProps } from '@mui/material';
 /**
  * Properties for the Autocomplete component extending Material-UI's AutocompleteProps
  */

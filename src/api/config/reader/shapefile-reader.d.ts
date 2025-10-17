@@ -1,5 +1,5 @@
-import { ShapefileLayerConfig } from '@/api/types/layer-schema-types';
-import { TypeGeoJSONLayerConfig } from '@/geo/layer/geoview-layers/vector/geojson';
+import type { ShapefileLayerConfig } from '@/api/types/layer-schema-types';
+import type { TypeGeoJSONLayerConfig } from '@/geo/layer/geoview-layers/vector/geojson';
 /**
  * A class to generate a GeoView layer config from a shapefile.
  * @exports

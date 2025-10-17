@@ -1,4 +1,4 @@
-import { LegendLayer } from './legend-layer';
+import type { LegendLayer } from './legend-layer';
 interface CollapsibleContentProps {
     layerPath: string;
     initLightBox: (imgSrc: string, title: string, index: number, total: number) => void;

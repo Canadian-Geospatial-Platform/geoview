@@ -1,5 +1,6 @@
-import { TypeLayerEntryConfig } from '@/api/types/layer-schema-types';
-import { ConfigBaseClass, ConfigBaseClassProps } from '@/api/config/validation-classes/config-base-class';
+import type { TypeLayerEntryConfig } from '@/api/types/layer-schema-types';
+import type { ConfigBaseClassProps } from '@/api/config/validation-classes/config-base-class';
+import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 export interface GroupLayerEntryConfigProps extends ConfigBaseClassProps {
     listOfLayerEntryConfig: TypeLayerEntryConfig[];
 }

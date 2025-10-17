@@ -1,5 +1,5 @@
-import { CSSProperties, ReactNode } from 'react';
-import { DialogProps } from '@mui/material';
+import type { CSSProperties, ReactNode } from 'react';
+import type { DialogProps } from '@mui/material';
 /**
  * Properties for the Modal component extending Material-UI's DialogProps
  */

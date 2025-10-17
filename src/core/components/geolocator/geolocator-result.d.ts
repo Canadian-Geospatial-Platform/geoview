@@ -1,4 +1,4 @@
-import { GeoListItem } from '@/core/components/geolocator/geolocator';
+import type { GeoListItem } from '@/core/components/geolocator/geolocator';
 interface GeolocatorFiltersType {
     geoLocationData: GeoListItem[];
     searchValue: string;

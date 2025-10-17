@@ -1,11 +1,11 @@
-import { Extent } from 'ol/extent';
-import BaseLayer from 'ol/layer/Base';
-import OLMap from 'ol/Map';
+import type { Extent } from 'ol/extent';
+import type BaseLayer from 'ol/layer/Base';
+import type OLMap from 'ol/Map';
 import { OverviewMap as OLOverviewMap } from 'ol/control';
-import { TypeBasemapOptions, TypeValidMapProjectionCodes, TypeDisplayLanguage } from '@/api/types/map-schema-types';
-import { TypeBasemapProps, BasemapCreationList } from '@/geo/layer/basemap/basemap-types';
-import { EventDelegateBase } from '@/api/events/event-helper';
-import { MapViewer } from '@/geo/map/map-viewer';
+import type { TypeBasemapOptions, TypeValidMapProjectionCodes, TypeDisplayLanguage } from '@/api/types/map-schema-types';
+import type { TypeBasemapProps, BasemapCreationList } from '@/geo/layer/basemap/basemap-types';
+import type { EventDelegateBase } from '@/api/events/event-helper';
+import type { MapViewer } from '@/geo/map/map-viewer';
 /**
  * A class to get a Basemap for a define projection and language. For the moment, a list maps are available and
  * can be filtered by projection (currently only WM and LCC projections are listed,

@@ -1,6 +1,6 @@
 import { AbstractWorkerPool } from './abstract-worker-pool';
-import { FetchEsriWorkerType } from './fetch-esri-worker';
-import { QueryParams } from './fetch-esri-worker-script';
+import type { FetchEsriWorkerType } from './fetch-esri-worker';
+import type { QueryParams } from './fetch-esri-worker-script';
 /**
  * Worker pool for managing ESRI fetch operations.
  * Extends AbstractWorkerPool to handle concurrent ESRI service requests.

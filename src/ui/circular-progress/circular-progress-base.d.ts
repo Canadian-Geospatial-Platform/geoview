@@ -1,4 +1,4 @@
-import { CircularProgressProps } from '@mui/material';
+import type { CircularProgressProps } from '@mui/material';
 /**
  * A customized Material UI Circular Progress Base component.
  *

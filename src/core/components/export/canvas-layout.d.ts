@@ -1,5 +1,5 @@
-import { FileExportProps } from './export-modal';
-import { FlattenedLegendItem, TypeValidPageSizes } from './utilities';
+import type { FileExportProps } from './export-modal';
+import type { FlattenedLegendItem, TypeValidPageSizes } from './utilities';
 interface CanvasDocumentProps {
     mapDataUrl: string;
     exportTitle: string;

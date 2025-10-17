@@ -1,7 +1,8 @@
-import { ExtentEvent as OLExtentEvent } from 'ol/interaction/Extent';
-import { EventDelegateBase } from '@/api/events/event-helper';
-import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
-import { Interaction, InteractionOptions } from './interaction';
+import type { ExtentEvent as OLExtentEvent } from 'ol/interaction/Extent';
+import type { EventDelegateBase } from '@/api/events/event-helper';
+import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
+import type { InteractionOptions } from './interaction';
+import { Interaction } from './interaction';
 /**
  * Supported options for extent interactions
  */

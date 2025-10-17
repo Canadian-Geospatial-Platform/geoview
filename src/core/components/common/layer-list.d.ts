@@ -1,6 +1,6 @@
-import { ReactNode } from 'react';
-import { TypeFeatureInfoEntry, TypeQueryStatus } from '@/api/types/map-schema-types';
-import { TypeLayerStatus } from '@/api/types/layer-schema-types';
+import type { ReactNode } from 'react';
+import type { TypeFeatureInfoEntry, TypeQueryStatus } from '@/api/types/map-schema-types';
+import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
 export interface LayerListEntry {
     content?: string | ReactNode;
     layerName: string;

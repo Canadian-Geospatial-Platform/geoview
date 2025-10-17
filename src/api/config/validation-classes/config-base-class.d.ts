@@ -1,9 +1,9 @@
-import { EventDelegateBase } from '@/api/events/event-helper';
-import { Extent, TypeLayerStyleConfig } from '@/api/types/map-schema-types';
-import { ConfigClassOrType, TypeGeoviewLayerConfig, TypeGeoviewLayerType, TypeLayerEntryType, TypeLayerInitialSettings, TypeLayerStatus, TypeTileGrid, TypeValidSourceProjectionCodes } from '@/api/types/layer-schema-types';
-import { GroupLayerEntryConfig, GroupLayerEntryConfigProps } from './group-layer-entry-config';
-import { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
-import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import type { EventDelegateBase } from '@/api/events/event-helper';
+import type { Extent, TypeLayerStyleConfig } from '@/api/types/map-schema-types';
+import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeGeoviewLayerType, TypeLayerEntryType, TypeLayerInitialSettings, TypeLayerStatus, TypeTileGrid, TypeValidSourceProjectionCodes } from '@/api/types/layer-schema-types';
+import type { GroupLayerEntryConfig, GroupLayerEntryConfigProps } from './group-layer-entry-config';
+import type { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
+import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 export interface ConfigBaseClassProps {
     layerId: string;
     geoviewLayerConfig: TypeGeoviewLayerConfig;

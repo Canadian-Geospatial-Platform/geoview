@@ -1,5 +1,5 @@
-import { ReactNode } from 'react';
-import { LoadingButtonProps } from '@mui/lab';
+import type { ReactNode } from 'react';
+import type { LoadingButtonProps } from '@mui/lab';
 /**
  * Properties for the LoadingButton component extending Material-UI's LoadingButtonProps
  */

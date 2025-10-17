@@ -1,4 +1,4 @@
-import { MapViewer } from '@/geo/map/map-viewer';
+import type { MapViewer } from '@/geo/map/map-viewer';
 type MapProps = {
     viewer: MapViewer;
 };

@@ -1,7 +1,8 @@
-import { GeometryFunction, DrawEvent as OLDrawEvent } from 'ol/interaction/Draw';
-import { EventDelegateBase } from '@/api/events/event-helper';
-import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
-import { Interaction, InteractionOptions } from './interaction';
+import type { GeometryFunction, DrawEvent as OLDrawEvent } from 'ol/interaction/Draw';
+import type { EventDelegateBase } from '@/api/events/event-helper';
+import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
+import type { InteractionOptions } from './interaction';
+import { Interaction } from './interaction';
 /**
  * Supported options for drawing interactions
  */

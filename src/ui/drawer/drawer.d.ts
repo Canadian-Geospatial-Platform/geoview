@@ -1,4 +1,4 @@
-import { DrawerProps } from '@mui/material';
+import type { DrawerProps } from '@mui/material';
 /**
  * Properties for the Drawer component extending Material-UI's DrawerProps
  */

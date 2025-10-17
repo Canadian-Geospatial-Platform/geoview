@@ -1,5 +1,5 @@
-import { Interaction as OLInteraction } from 'ol/interaction';
-import { MapViewer } from '@/geo/map/map-viewer';
+import type { Interaction as OLInteraction } from 'ol/interaction';
+import type { MapViewer } from '@/geo/map/map-viewer';
 /**
  * Options for interactions
  */

@@ -1,8 +1,9 @@
 import VectorTileSource from 'ol/source/VectorTile';
-import { ProjectionLike } from 'ol/proj';
+import type { ProjectionLike } from 'ol/proj';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import { TypeGeoviewLayerConfig, CONST_LAYER_TYPES, TypeMetadataVectorTiles } from '@/api/types/layer-schema-types';
-import { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
+import type { TypeGeoviewLayerConfig, TypeMetadataVectorTiles } from '@/api/types/layer-schema-types';
+import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
+import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { VectorTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { GVVectorTiles } from '@/geo/layer/gv-layers/vector/gv-vector-tiles';
 export interface TypeVectorTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {

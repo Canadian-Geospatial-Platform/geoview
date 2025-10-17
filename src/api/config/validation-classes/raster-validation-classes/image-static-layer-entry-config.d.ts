@@ -1,6 +1,7 @@
-import { ConfigClassOrType, TypeGeoviewLayerConfig, TypeSourceImageStaticInitialConfig } from '@/api/types/layer-schema-types';
-import { AbstractBaseLayerEntryConfig, AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
-import { TypeImageStaticLayerConfig } from '@/geo/layer/geoview-layers/raster/image-static';
+import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeSourceImageStaticInitialConfig } from '@/api/types/layer-schema-types';
+import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import type { TypeImageStaticLayerConfig } from '@/geo/layer/geoview-layers/raster/image-static';
 export interface ImageStaticLayerEntryConfigProps extends AbstractBaseLayerEntryConfigProps {
     /** Source settings to apply to the GeoView layer source at creation time. */
     source?: TypeSourceImageStaticInitialConfig;

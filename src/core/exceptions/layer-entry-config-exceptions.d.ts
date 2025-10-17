@@ -1,5 +1,5 @@
 import { LayerError } from '@/core/exceptions/layer-exceptions';
-import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 /**
  * Custom error class thrown when the configuration for a GeoView layer fails to load.
  * This error is used when there is a failure while loading or processing the configuration of a GeoView layer.

@@ -1,4 +1,4 @@
-import { InputLabelProps, FormControlProps, SelectChangeEvent } from '@mui/material';
+import type { InputLabelProps, FormControlProps, SelectChangeEvent } from '@mui/material';
 /**
  * Custom MUI Select properties
  */

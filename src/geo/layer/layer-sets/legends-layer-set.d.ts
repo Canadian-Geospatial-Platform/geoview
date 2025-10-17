@@ -1,9 +1,10 @@
-import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
-import { TypeLayerStatus } from '@/api/types/layer-schema-types';
-import { AbstractLayerSet, PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
-import { TypeLegendResultSet, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
-import { LayerApi } from '@/geo/layer/layer';
+import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
+import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
+import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
+import type { TypeLegendResultSet, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import type { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import type { LayerApi } from '@/geo/layer/layer';
 /**
  * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
  * events happening on them (in this case when the layers are going through the layer statuses and legend querying) with a store

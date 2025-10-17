@@ -1,4 +1,4 @@
-import { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
+import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 interface FeatureInfoProps {
     feature: TypeFeatureInfoEntry;
 }

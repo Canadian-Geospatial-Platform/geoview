@@ -1,4 +1,4 @@
-import { TypeLayerStyleConfig } from '@/api/types/map-schema-types';
+import type { TypeLayerStyleConfig } from '@/api/types/map-schema-types';
 /**
  * type guard function that redefines an EsriBaseRenderer as an EsriUniqueValueRenderer if the type attribute of the
  * verifyIfRenderer parameter is 'uniqueValue'. The type ascention applies only to the true block of the if clause that use

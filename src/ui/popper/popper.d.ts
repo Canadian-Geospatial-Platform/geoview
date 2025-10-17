@@ -1,5 +1,5 @@
-import { ReactElement } from 'react';
-import { PopperProps } from '@mui/material';
+import type { ReactElement } from 'react';
+import type { PopperProps } from '@mui/material';
 /**
  * Properties for the Popper component extending Material-UI's PopperProps
  */

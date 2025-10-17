@@ -1,15 +1,15 @@
-import BaseLayer from 'ol/layer/Base';
-import { TypeDateFragments } from '@/core/utils/date-mgt';
+import type BaseLayer from 'ol/layer/Base';
+import type { TypeDateFragments } from '@/core/utils/date-mgt';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
-import { EventDelegateBase } from '@/api/events/event-helper';
-import { TypeStyleGeometry } from '@/api/types/map-schema-types';
-import { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerInitialSettings, TypeLayerStatus } from '@/api/types/layer-schema-types';
+import type { EventDelegateBase } from '@/api/events/event-helper';
+import type { TypeStyleGeometry } from '@/api/types/map-schema-types';
+import type { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerInitialSettings, TypeLayerStatus } from '@/api/types/layer-schema-types';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
-import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { SnackbarType } from '@/core/utils/notifications';
-import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
-import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import type { SnackbarType } from '@/core/utils/notifications';
+import type { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 /**
  * The AbstractGeoViewLayer class is the abstraction class of all GeoView Layers classes.

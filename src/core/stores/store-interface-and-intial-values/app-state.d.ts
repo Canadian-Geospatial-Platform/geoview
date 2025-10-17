@@ -1,9 +1,9 @@
-import { TypeDisplayLanguage, TypeDisplayTheme } from '@/api/types/map-schema-types';
-import { TypeInitialGeoviewLayerType } from '@/api/types/layer-schema-types';
-import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
-import { NotificationDetailsType } from '@/core/components/notifications/notifications';
-import { TypeHTMLElement, TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { SnackbarType } from '@/core/utils/notifications';
+import type { TypeDisplayLanguage, TypeDisplayTheme } from '@/api/types/map-schema-types';
+import type { TypeInitialGeoviewLayerType } from '@/api/types/layer-schema-types';
+import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
+import type { NotificationDetailsType } from '@/core/components/notifications/notifications';
+import type { TypeHTMLElement, TypeMapFeaturesConfig } from '@/core/types/global-types';
+import type { SnackbarType } from '@/core/utils/notifications';
 type AppActions = IAppState['actions'];
 export interface IAppState {
     disabledLayerTypes: TypeInitialGeoviewLayerType[];

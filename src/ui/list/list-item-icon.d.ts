@@ -1,4 +1,4 @@
-import { ListItemIconProps } from '@mui/material';
+import type { ListItemIconProps } from '@mui/material';
 /**
  * Create a customized Material UI List Item Icon component.
  * This is a simple wrapper around MaterialListItemIcon that maintains

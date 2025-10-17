@@ -1,8 +1,9 @@
-import { TranslateEvent as OLTranslateEvent } from 'ol/interaction/Translate';
-import Collection from 'ol/Collection';
-import Feature from 'ol/Feature';
-import { EventDelegateBase } from '@/api/events/event-helper';
-import { Interaction, InteractionOptions } from './interaction';
+import type { TranslateEvent as OLTranslateEvent } from 'ol/interaction/Translate';
+import type Collection from 'ol/Collection';
+import type Feature from 'ol/Feature';
+import type { EventDelegateBase } from '@/api/events/event-helper';
+import type { InteractionOptions } from './interaction';
+import { Interaction } from './interaction';
 /**
  * Supported options for translate interactions
  */

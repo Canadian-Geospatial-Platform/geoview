@@ -1,5 +1,5 @@
-import { ReactNode } from 'react';
-import { GridProps, SxProps } from '@/ui';
+import type { ReactNode } from 'react';
+import type { GridProps, SxProps } from '@/ui';
 interface ResponsiveGridProps extends GridProps {
     children: ReactNode;
 }

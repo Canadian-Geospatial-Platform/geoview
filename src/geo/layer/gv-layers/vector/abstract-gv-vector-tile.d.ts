@@ -1,7 +1,7 @@
-import VectorTile from 'ol/source/VectorTile';
-import VectorTileLayer from 'ol/layer/VectorTile';
-import { Extent } from 'ol/extent';
-import { Projection as OLProjection } from 'ol/proj';
+import type VectorTile from 'ol/source/VectorTile';
+import type VectorTileLayer from 'ol/layer/VectorTile';
+import type { Extent } from 'ol/extent';
+import type { Projection as OLProjection } from 'ol/proj';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 /**
  * Abstract Geoview Layer managing an OpenLayer vector tile type layer.

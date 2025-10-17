@@ -1,5 +1,5 @@
-import { Theme } from '@mui/material/styles';
-import { SxProps } from '@mui/system';
+import type { Theme } from '@mui/material/styles';
+import type { SxProps } from '@mui/system';
 declare const ColorKeyValues: number[];
 type ColorKey = (typeof ColorKeyValues)[number];
 type ColorRecord = Record<ColorKey, string>;

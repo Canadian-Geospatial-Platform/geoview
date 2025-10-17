@@ -1,4 +1,4 @@
-import { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
+import type { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
 interface GuideSearchProps {
     guide: TypeGuideObject | undefined;
     onSectionChange: (sectionIndex: number) => void;

@@ -1,5 +1,5 @@
 import { type MRT_TableInstance as MRTTableInstance, type MRT_ColumnFiltersState as MRTColumnFiltersState } from 'material-react-table';
-import { MappedLayerDataType, ColumnsType } from '@/core/components/data-table/data-table-types';
+import type { MappedLayerDataType, ColumnsType } from '@/core/components/data-table/data-table-types';
 interface UseSelectedRowMessageProps {
     data: MappedLayerDataType;
     layerPath: string;

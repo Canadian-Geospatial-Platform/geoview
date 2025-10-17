@@ -1,4 +1,4 @@
-import { Theme } from '@mui/material/styles';
+import type { Theme } from '@mui/material/styles';
 type SxClasses = Record<string, object>;
 /**
  * Get custom sx classes for the layer left panel

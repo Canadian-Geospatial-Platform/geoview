@@ -1,5 +1,5 @@
-import { ReactNode } from 'react';
-import { DialogProps } from '@mui/material';
+import type { ReactNode } from 'react';
+import type { DialogProps } from '@mui/material';
 interface FullScreenDialogProps extends DialogProps {
     open: boolean;
     onClose: () => void;

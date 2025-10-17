@@ -1,4 +1,4 @@
-import { MapConfigLayerEntry } from '@/api/types/layer-schema-types';
+import type { MapConfigLayerEntry } from '@/api/types/layer-schema-types';
 /**
  * A class to define the default values of a GeoView map configuration and validation methods for the map config attributes.
  * @exports

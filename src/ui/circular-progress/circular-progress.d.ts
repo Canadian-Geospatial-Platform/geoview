@@ -1,6 +1,6 @@
-import { CSSProperties } from 'react';
-import { SxProps, Theme } from '@mui/material/styles';
-import { CircularProgressProps } from '@mui/material';
+import type { CSSProperties } from 'react';
+import type { SxProps, Theme } from '@mui/material/styles';
+import type { CircularProgressProps } from '@mui/material';
 /**
  * Circular Progress Properties
  */

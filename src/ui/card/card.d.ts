@@ -1,5 +1,5 @@
-import { ReactNode } from 'react';
-import { CardProps } from '@mui/material';
+import type { ReactNode } from 'react';
+import type { CardProps } from '@mui/material';
 type HeadingElement = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 /**
  * Properties for the Card component extending Material-UI's CardProps

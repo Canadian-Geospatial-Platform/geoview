@@ -1,4 +1,4 @@
-import { TypeContainerBox } from '@/core/types/global-types';
+import type { TypeContainerBox } from '@/core/types/global-types';
 interface DataPanelType {
     fullWidth?: boolean;
     containerType?: TypeContainerBox;

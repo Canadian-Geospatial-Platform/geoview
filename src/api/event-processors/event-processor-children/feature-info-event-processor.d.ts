@@ -1,9 +1,9 @@
-import { EventType } from '@/geo/layer/layer-sets/abstract-layer-set';
-import { TypeMapMouseInfo } from '@/geo/map/map-viewer';
+import type { EventType } from '@/geo/layer/layer-sets/abstract-layer-set';
+import type { TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
-import { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
-import { IFeatureInfoState, TypeFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import { GeoviewStoreType } from '@/core/stores/geoview-store';
+import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
+import type { IFeatureInfoState, TypeFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import type { GeoviewStoreType } from '@/core/stores/geoview-store';
 /**
  * Event processor focusing on interacting with the feature info state in the store (currently called detailsState).
  */

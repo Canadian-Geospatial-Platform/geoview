@@ -1,5 +1,5 @@
 import { AbstractWorker } from './abstract-worker';
-import { QueryParams } from './fetch-esri-worker-script';
+import type { QueryParams } from './fetch-esri-worker-script';
 /**
  * How to create a new worker:
  *

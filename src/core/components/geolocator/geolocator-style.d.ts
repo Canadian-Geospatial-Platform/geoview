@@ -1,5 +1,6 @@
-import { Input, Theme } from '@mui/material';
-import { SxStyles } from '@/ui/style/types';
+import type { Theme } from '@mui/material';
+import { Input } from '@mui/material';
+import type { SxStyles } from '@/ui/style/types';
 /**
  * Get custom sx classes for the geolocator
  *

@@ -1,22 +1,22 @@
-import BaseLayer from 'ol/layer/Base';
-import { Extent } from 'ol/extent';
-import { GeoJSONObject } from 'ol/format/GeoJSON';
+import type BaseLayer from 'ol/layer/Base';
+import type { Extent } from 'ol/extent';
+import type { GeoJSONObject } from 'ol/format/GeoJSON';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { FeatureHighlight } from '@/geo/map/feature-highlight';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
-import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeDisplayLanguage, TypeOutfieldsType } from '@/api/types/map-schema-types';
-import { MapConfigLayerEntry, TypeGeoviewLayerConfig, TypeLayerStatus } from '@/api/types/layer-schema-types';
+import type { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import type { TypeDisplayLanguage, TypeOutfieldsType } from '@/api/types/map-schema-types';
+import type { MapConfigLayerEntry, TypeGeoviewLayerConfig, TypeLayerStatus } from '@/api/types/layer-schema-types';
 import { HoverFeatureInfoLayerSet } from '@/geo/layer/layer-sets/hover-feature-info-layer-set';
 import { AllFeatureInfoLayerSet } from '@/geo/layer/layer-sets/all-feature-info-layer-set';
 import { LegendsLayerSet } from '@/geo/layer/layer-sets/legends-layer-set';
 import { FeatureInfoLayerSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
-import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import type { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
-import { EventDelegateBase } from '@/api/events/event-helper';
-import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+import type { EventDelegateBase } from '@/api/events/event-helper';
+import type { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { MapViewer } from '@/geo/map/map-viewer';
-import { TypeLegendItem } from '@/core/components/layers/types';
+import type { TypeLegendItem } from '@/core/components/layers/types';
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
  * @exports
@@ -404,7 +404,7 @@ export declare class LayerApi {
     offLayerItemVisibilityToggled(callback: LayerItemVisibilityToggledDelegate): void;
     /**
      * Converts a map configuration layer entry into a promise of a GeoView layer configuration.
-     * Depending on the type of the layer entry (e.g., GeoCore, GeoPackage, Shapefile, or standard GeoView),
+     * Depending on the type of the layer entry (e.g., GeoCore, GeoPackage, Shapefile, RCS, or standard GeoView),
      * this function processes each entry accordingly and wraps the result in a `Promise`.
      * Errors encountered during asynchronous operations are handled via a provided callback.
      * @param {string} mapId - The unique identifier of the map instance this configuration applies to.

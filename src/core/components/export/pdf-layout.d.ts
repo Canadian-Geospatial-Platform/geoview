@@ -1,5 +1,5 @@
-import { FlattenedLegendItem, TypeValidPageSizes } from './utilities';
-import { FileExportProps } from './export-modal';
+import type { FlattenedLegendItem, TypeValidPageSizes } from './utilities';
+import type { FileExportProps } from './export-modal';
 interface ExportDocumentProps {
     mapDataUrl: string;
     exportTitle: string;

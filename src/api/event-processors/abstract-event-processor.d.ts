@@ -1,8 +1,8 @@
-import { GeoviewStoreType, IGeoviewState } from '@/core/stores/geoview-store';
-import { TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { TypeFeatureInfoResultSetEntry, TypeHoverResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import { TypeGeochartResultSetEntry } from '@/core/stores/store-interface-and-intial-values/geochart-state';
-import { TypeResultSetEntry } from '@/api/types/map-schema-types';
+import type { GeoviewStoreType, IGeoviewState } from '@/core/stores/geoview-store';
+import type { TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import type { TypeFeatureInfoResultSetEntry, TypeHoverResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import type { TypeGeochartResultSetEntry } from '@/core/stores/store-interface-and-intial-values/geochart-state';
+import type { TypeResultSetEntry } from '@/api/types/map-schema-types';
 /**
  * Holds the buffer, on a map basis, for the propagation in batch in the layer data array store
  */

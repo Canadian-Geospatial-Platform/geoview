@@ -1,4 +1,4 @@
-import { TypeButtonPanel } from '@/ui/panel/panel-types';
+import type { TypeButtonPanel } from '@/ui/panel/panel-types';
 interface NavbarPanelButtonType {
     buttonPanel: TypeButtonPanel;
 }

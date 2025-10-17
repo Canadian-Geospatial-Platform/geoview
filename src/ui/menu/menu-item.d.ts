@@ -1,4 +1,4 @@
-import { MenuItemProps } from '@mui/material';
+import type { MenuItemProps } from '@mui/material';
 /**
  * Create a customized Material UI Menu Item component.
  *

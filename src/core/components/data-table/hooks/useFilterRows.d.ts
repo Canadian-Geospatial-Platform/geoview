@@ -1,5 +1,5 @@
-import { Dispatch, SetStateAction } from 'react';
-import { TypeColumnFiltersState } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import type { Dispatch, SetStateAction } from 'react';
+import type { TypeColumnFiltersState } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 export interface UseFilterRowsProps {
     layerPath: string;
 }

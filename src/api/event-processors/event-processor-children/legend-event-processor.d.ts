@@ -1,7 +1,7 @@
-import { Extent, TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
-import { TimeDimension } from '@/core/utils/date-mgt';
-import { TypeLegendLayer, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
-import { ILayerState, TypeLegend, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import type { Extent, TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
+import type { TimeDimension } from '@/core/utils/date-mgt';
+import type { TypeLegendLayer, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
+import type { ILayerState, TypeLegend, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 export declare class LegendEventProcessor extends AbstractEventProcessor {
     #private;

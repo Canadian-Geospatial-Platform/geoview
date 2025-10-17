@@ -1,16 +1,16 @@
-import { ImageArcGISRest } from 'ol/source';
+import type { ImageArcGISRest } from 'ol/source';
 import { Image as ImageLayer } from 'ol/layer';
-import { Coordinate } from 'ol/coordinate';
-import { Extent } from 'ol/extent';
-import { Projection as OLProjection } from 'ol/proj';
-import { Map as OLMap } from 'ol';
-import { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import { TypeFeatureInfoEntry, rangeDomainType, codedValueType, TypeLayerStyleConfig, TypeOutfieldsType } from '@/api/types/map-schema-types';
-import { TypeLayerMetadataEsriExtent } from '@/api/types/layer-schema-types';
-import { GeometryJson } from '@/geo/layer/gv-layers/utils';
+import type { Coordinate } from 'ol/coordinate';
+import type { Extent } from 'ol/extent';
+import type { Projection as OLProjection } from 'ol/proj';
+import type { Map as OLMap } from 'ol';
+import type { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
+import type { TypeFeatureInfoEntry, rangeDomainType, codedValueType, TypeLayerStyleConfig, TypeOutfieldsType } from '@/api/types/map-schema-types';
+import type { TypeLayerMetadataEsriExtent } from '@/api/types/layer-schema-types';
+import type { GeometryJson } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
-import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { TypeDateFragments } from '@/core/utils/date-mgt';
+import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import type { TypeDateFragments } from '@/core/utils/date-mgt';
 /**
  * Manages an Esri Dynamic layer.
  *

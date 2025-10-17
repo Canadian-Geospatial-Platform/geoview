@@ -1,6 +1,6 @@
-import { TypeValidAppBarCoreProps, TypeValidFooterBarTabsCoreProps, TypeValidMapCorePackageProps, TypeValidNavBarProps } from '@/api/types/map-schema-types';
-import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
-import { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import type { TypeValidAppBarCoreProps, TypeValidFooterBarTabsCoreProps, TypeValidMapCorePackageProps, TypeValidNavBarProps } from '@/api/types/map-schema-types';
+import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
+import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 type UIActions = IUIState['actions'];
 export type ActiveAppBarTabType = {
     tabId: string;

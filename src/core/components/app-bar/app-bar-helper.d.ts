@@ -1,6 +1,6 @@
-import { Dispatch, SetStateAction } from 'react';
-import { TypeButtonPanel } from '@/ui/panel/panel-types';
-import { ButtonPanelType } from './app-bar';
+import type { Dispatch, SetStateAction } from 'react';
+import type { TypeButtonPanel } from '@/ui/panel/panel-types';
+import type { ButtonPanelType } from './app-bar';
 export declare const helpOpenClosePanelByIdState: (buttonId: string, setterCallback: Dispatch<SetStateAction<ButtonPanelType>>, status: boolean, isFocusTrapped?: boolean) => void;
 export declare const helpOpenPanelById: (buttonId: string, setterCallback: Dispatch<SetStateAction<ButtonPanelType>>, isFocusTrapped?: boolean) => void;
 export declare const helpClosePanelById: (mapId: string, buttonId: string, setterCallback: Dispatch<SetStateAction<Record<string, TypeButtonPanel>>>, focusWhenNoElementCallback?: () => void) => void;

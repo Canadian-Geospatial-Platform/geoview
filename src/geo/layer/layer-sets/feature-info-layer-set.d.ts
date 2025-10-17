@@ -1,10 +1,11 @@
-import { Coordinate } from 'ol/coordinate';
-import { EventDelegateBase } from '@/api/events/event-helper';
-import { TypeResultSet } from '@/api/types/map-schema-types';
-import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
-import { EventType, AbstractLayerSet, PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
-import { LayerApi } from '@/geo/layer/layer';
-import { TypeFeatureInfoResultSet, TypeFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import type { Coordinate } from 'ol/coordinate';
+import type { EventDelegateBase } from '@/api/events/event-helper';
+import type { TypeResultSet } from '@/api/types/map-schema-types';
+import type { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import type { EventType, PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
+import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
+import type { LayerApi } from '@/geo/layer/layer';
+import type { TypeFeatureInfoResultSet, TypeFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 /**
  * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
  * events happening on them (in this case when the user click a location on the map) with a store

@@ -1,5 +1,5 @@
 import i18n from 'i18next';
-import { TypeDisplayLanguage } from '@/api/types/map-schema-types';
+import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 export default i18n;
 /**
  * Creates a new i18n instance with specified language

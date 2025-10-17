@@ -1,9 +1,9 @@
 import Feature from 'ol/Feature';
 import { Vector as VectorSource } from 'ol/source';
-import { Options as SourceOptions } from 'ol/source/Vector';
-import { ReadOptions } from 'ol/format/Feature';
+import type { Options as SourceOptions } from 'ol/source/Vector';
+import type { ReadOptions } from 'ol/format/Feature';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
+import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 /**
  * The AbstractGeoViewVector class.
  */

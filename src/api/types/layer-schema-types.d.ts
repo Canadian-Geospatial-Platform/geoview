@@ -1,18 +1,18 @@
-import { codedValueType, Extent, rangeDomainType, TypeEsriFormatParameter, TypeOutfields } from '@/api/types/map-schema-types';
-import { AbstractBaseLayerEntryConfig, AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
-import { ConfigBaseClass, ConfigBaseClassProps, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
-import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
-import { VectorTilesLayerEntryConfig, VectorTilesLayerEntryConfigProps } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
-import { GeoPackageFeature } from '@/api/config/reader/geopackage-reader';
-import { TypeProjection } from '@/geo/utils/projection';
-import { TimeDimensionESRI } from '@/core/utils/date-mgt';
-import { EsriBaseRenderer } from '@/geo/utils/renderer/esri-renderer';
+import type { codedValueType, Extent, rangeDomainType, TypeEsriFormatParameter, TypeOutfields } from '@/api/types/map-schema-types';
+import type { AbstractBaseLayerEntryConfig, AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import type { ConfigBaseClass, ConfigBaseClassProps, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
+import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
+import type { VectorTilesLayerEntryConfig, VectorTilesLayerEntryConfigProps } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
+import type { GeoPackageFeature } from '@/api/config/reader/geopackage-reader';
+import type { TypeProjection } from '@/geo/utils/projection';
+import type { TimeDimensionESRI } from '@/core/utils/date-mgt';
+import type { EsriBaseRenderer } from '@/geo/utils/renderer/esri-renderer';
 /** Definition of the keys used to create the constants of the GeoView layer */
 type LayerTypesKey = 'CSV' | 'ESRI_DYNAMIC' | 'ESRI_FEATURE' | 'ESRI_IMAGE' | 'IMAGE_STATIC' | 'GEOJSON' | 'XYZ_TILES' | 'VECTOR_TILES' | 'OGC_FEATURE' | 'WFS' | 'WKB' | 'WMS';
 /** Definition of the geoview layer types accepted by the viewer. */
 export type TypeGeoviewLayerType = 'CSV' | 'esriDynamic' | 'esriFeature' | 'esriImage' | 'GeoJSON' | 'imageStatic' | 'ogcFeature' | 'ogcWfs' | 'ogcWms' | 'vectorTiles' | 'WKB' | 'xyzTiles';
 /** Definition of the geoview layer types accepted by the viewer. */
-export type TypeInitialGeoviewLayerType = TypeGeoviewLayerType | 'geoCore' | 'GeoPackage' | 'shapefile';
+export type TypeInitialGeoviewLayerType = TypeGeoviewLayerType | 'geoCore' | 'GeoPackage' | 'shapefile' | 'rcs';
 /**
  * Definition of the GeoView layer constants
  */
@@ -51,12 +51,12 @@ export type TypePostSettings = {
     data: unknown;
 };
 /** Type of Style to apply to the GeoView vector layer source at creation time. */
-export type TypeLayerEntryType = 'vector' | 'vector-tile' | 'raster-tile' | 'raster-image' | 'group' | 'geoCore' | 'GeoPackage' | 'shapefile';
+export type TypeLayerEntryType = 'vector' | 'vector-tile' | 'raster-tile' | 'raster-image' | 'group' | 'geoCore' | 'GeoPackage' | 'shapefile' | 'rcs';
 /** The possible layer statuses when processing layer configs */
 export type TypeLayerStatus = 'newInstance' | 'registered' | 'processing' | 'processed' | 'loading' | 'loaded' | 'error';
 /** The possible strategies when working with vector layers data */
 export type VectorStrategy = 'all' | 'bbox';
-export type LayerEntryTypesKey = 'VECTOR' | 'VECTOR_TILE' | 'RASTER_TILE' | 'RASTER_IMAGE' | 'GROUP' | 'GEOCORE' | 'GEOPACKAGE' | 'SHAPEFILE';
+export type LayerEntryTypesKey = 'VECTOR' | 'VECTOR_TILE' | 'RASTER_TILE' | 'RASTER_IMAGE' | 'GROUP' | 'GEOCORE' | 'GEOPACKAGE' | 'SHAPEFILE' | 'RCS';
 /**
  * Definition of the sub schema to use for each type of Geoview layer
  */
@@ -282,6 +282,20 @@ export type GeoCoreLayerConfig = {
     /** The layer entries to use from the GeoCore layer. */
     listOfLayerEntryConfig?: TypeLayerEntryConfig[];
 };
+export type RCSLayerConfig = {
+    /** Type of GeoView layer. */
+    geoviewLayerType: typeof CONST_LAYER_ENTRY_TYPES.RCS;
+    /** The GeoCore UUID. */
+    geoviewLayerId: string;
+    /**
+     * The display name of the layer (English/French). This overrides the default name coming from the GeoCore API.
+     */
+    geoviewLayerName?: string | undefined;
+    /** Initial settings to apply to the GeoCore layer at creation time. */
+    initialSettings?: TypeLayerInitialSettings;
+    /** The layer entries to use from the GeoCore layer. */
+    listOfLayerEntryConfig?: TypeLayerEntryConfig[];
+};
 export type GeoPackageLayerConfig = {
     /** Type of GeoView layer. */
     geoviewLayerType: typeof CONST_LAYER_ENTRY_TYPES.GEOPACKAGE;
@@ -319,16 +333,23 @@ export declare const mapConfigLayerEntryIsGeoCore: (layerConfigEntryOption: MapC
 /**
  * Type guard that checks if a given map layer configuration entry is of type GeoPackage.
  * @param {MapConfigLayerEntry} layerConfigEntryOption - The layer entry config to check
- * @returns {boolean} True if the layer is a GeoPackage layer, narrowing the type to GeoPackageLayerConfig.
+ * @returns {layerConfigEntryOption is GeoPackageLayerConfig} True if the layer is a GeoPackage layer, narrowing the type to GeoPackageLayerConfig.
  */
-export declare const mapConfigLayerEntryIsGeoPackage: (layerConfigEntryOption: MapConfigLayerEntry) => boolean;
+export declare const mapConfigLayerEntryIsGeoPackage: (layerConfigEntryOption: MapConfigLayerEntry) => layerConfigEntryOption is GeoPackageLayerConfig;
 /**
  * Type guard that checks if a given map layer configuration entry is of type Shapefile.
  * @param {MapConfigLayerEntry} layerConfigEntryOption - The layer entry config to check
  * @returns {layerConfigEntryOption is ShapefileLayerConfig} True if the layer is a Shapefile layer, narrowing the type to ShapefileLayerConfig.
  */
 export declare const mapConfigLayerEntryIsShapefile: (layerConfigEntryOption: MapConfigLayerEntry) => layerConfigEntryOption is ShapefileLayerConfig;
-export type MapConfigLayerEntry = TypeGeoviewLayerConfig | GeoCoreLayerConfig | GeoPackageLayerConfig | ShapefileLayerConfig;
+/**
+ * Type guard that checks if a given map layer configuration entry is of type RCS.
+ * @param {MapConfigLayerEntry} layerConfigEntryOption - The layer entry config to check
+ * @returns {layerConfigEntryOption is RCSLayerConfig} True if the layer is a RCS layer, narrowing the type to RCSLayerConfig.
+ */
+export declare const mapConfigLayerEntryIsRCS: (layerConfigEntryOption: MapConfigLayerEntry) => layerConfigEntryOption is RCSLayerConfig;
+type SpecialLayerConfigs = GeoCoreLayerConfig | RCSLayerConfig | GeoPackageLayerConfig | ShapefileLayerConfig;
+export type MapConfigLayerEntry = SpecialLayerConfigs | TypeGeoviewLayerConfig;
 /**
  * Temporary? function to serialize a geoview layer configuration to be able to send it to the store
  * @param {MapConfigLayerEntry} geoviewLayerConfig - The geoviewlayer config to serialize

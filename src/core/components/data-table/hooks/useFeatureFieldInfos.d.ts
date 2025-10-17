@@ -1,5 +1,5 @@
-import { TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { MappedLayerDataType } from '@/core/components/data-table/data-table-types';
+import type { TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import type { MappedLayerDataType } from '@/core/components/data-table/data-table-types';
 /**
  * Custom hook for caching the mapping of fieldInfos aka columns for data table.
  * @param {TypeAllFeatureInfoResultSetEntry[]} layerData data from the query

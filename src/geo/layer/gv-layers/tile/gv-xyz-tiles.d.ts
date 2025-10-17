@@ -1,10 +1,10 @@
 import TileLayer from 'ol/layer/Tile';
-import XYZ from 'ol/source/XYZ';
-import { Extent } from 'ol/extent';
-import { Projection as OLProjection } from 'ol/proj';
-import { XYZTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
+import type XYZ from 'ol/source/XYZ';
+import type { Extent } from 'ol/extent';
+import type { Projection as OLProjection } from 'ol/proj';
+import type { XYZTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { AbstractGVTile } from '@/geo/layer/gv-layers/tile/abstract-gv-tile';
-import { TypeOutfieldsType } from '@/api/types/map-schema-types';
+import type { TypeOutfieldsType } from '@/api/types/map-schema-types';
 /**
  * Manages a Tile<XYZ> layer.
  *

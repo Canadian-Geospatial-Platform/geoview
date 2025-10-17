@@ -1,7 +1,7 @@
-import { MRT_TableInstance as MRTTableInstance, MRT_ColumnDef } from 'material-react-table';
-import { ColumnsType } from './data-table-types';
-import { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
-import { SxStyles } from '@/ui/style/types';
+import type { MRT_TableInstance as MRTTableInstance, MRT_ColumnDef } from 'material-react-table';
+import type { ColumnsType } from './data-table-types';
+import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
+import type { SxStyles } from '@/ui/style/types';
 interface TopToolbarProps<TData extends ColumnsType> {
     /**
      * Classes or styles for the component.

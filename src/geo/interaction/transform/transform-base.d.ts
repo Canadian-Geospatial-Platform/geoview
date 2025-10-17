@@ -1,14 +1,15 @@
-import { MapBrowserEvent } from 'ol';
+import type { MapBrowserEvent } from 'ol';
 import { Pointer as OLPointer } from 'ol/interaction';
 import Collection from 'ol/Collection';
 import Feature from 'ol/Feature';
-import { Geometry, Polygon, LineString } from 'ol/geom';
+import type { Geometry } from 'ol/geom';
+import { Polygon, LineString } from 'ol/geom';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
-import { Coordinate } from 'ol/coordinate';
-import { Extent } from 'ol/extent';
+import type { Coordinate } from 'ol/coordinate';
+import type { Extent } from 'ol/extent';
 import { TransformEvent, TransformSelectionEvent, TransformDeleteFeatureEvent } from './transform-events';
-import { MapViewer } from '@/geo/map/map-viewer';
+import type { MapViewer } from '@/geo/map/map-viewer';
 /**
  * Handle types for the transform interaction
  */

@@ -1,4 +1,4 @@
-import { AvatarProps } from '@mui/material';
+import type { AvatarProps } from '@mui/material';
 /**
  * Properties for the Avatar component extending Material-UI's AvatarProps
  */

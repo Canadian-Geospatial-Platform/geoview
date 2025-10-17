@@ -1,6 +1,6 @@
-import { TypeDisplayLanguage } from '@/api/types/map-schema-types';
-import { TypeGeoviewLayerConfig, TypeGeoviewLayerType, TypeOfServer } from '@/api/types/layer-schema-types';
-import { TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
+import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
+import type { TypeGeoviewLayerConfig, TypeGeoviewLayerType, TypeOfServer } from '@/api/types/layer-schema-types';
+import type { TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 /**
  * A class to generate GeoView layers config from a URL using a UUID.
  * @exports
@@ -17,6 +17,15 @@ export declare class UUIDmapConfigReader {
      * @returns {Promise<UUIDmapConfigReaderResponse>} Layers and Geocharts read and parsed from uuids results from GeoCore
      */
     static getGVConfigFromUUIDs(baseUrl: string, lang: TypeDisplayLanguage, uuids: string[], abortSignal?: AbortSignal): Promise<UUIDmapConfigReaderResponse>;
+    /**
+     * Generates GeoView layers configurations, from Geonetwork RCS API, using a list of UUIDs.
+     * @param {string} baseUrl - The base url of GeoCore API
+     * @param {TypeDisplayLanguage} lang - The language to get the config for
+     * @param {string[]} uuids - A list of uuids to get the configurations for
+     * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+     * @returns {Promise<UUIDmapConfigReaderResponse>} Layers read and parsed from uuids results from Geonetwork RCS
+     */
+    static getGVConfigFromUUIDsRCS(baseUrl: string, lang: TypeDisplayLanguage, uuids: string[], abortSignal?: AbortSignal): Promise<UUIDmapConfigReaderResponse>;
 }
 /**
  * The GeoCore response Json root.

@@ -1,4 +1,4 @@
-import { TypeLegendLayer } from '@/core/components/layers/types';
+import type { TypeLegendLayer } from '@/core/components/layers/types';
 interface LayerListProps {
     depth: number;
     layersList: TypeLegendLayer[];

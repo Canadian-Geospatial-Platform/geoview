@@ -1,4 +1,4 @@
-import { ToolbarProps } from '@mui/material';
+import type { ToolbarProps } from '@mui/material';
 /**
  * Create a customized Material UI Toolbar component.
  *

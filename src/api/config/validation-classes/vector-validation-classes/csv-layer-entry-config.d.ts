@@ -1,6 +1,7 @@
-import { VectorLayerEntryConfig, VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
-import { TypeCSVLayerConfig, TypeSourceCSVInitialConfig } from '@/geo/layer/geoview-layers/vector/csv';
-import { ConfigClassOrType, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
+import type { VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
+import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
+import type { TypeCSVLayerConfig, TypeSourceCSVInitialConfig } from '@/geo/layer/geoview-layers/vector/csv';
+import type { ConfigClassOrType, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
 export interface CsvLayerEntryConfigProps extends VectorLayerEntryConfigProps {
     /** Source settings to apply to the GeoView layer source at creation time. */
     source?: TypeSourceCSVInitialConfig;

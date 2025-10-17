@@ -1,6 +1,7 @@
-import { ConfigClassOrType, TypeGeoviewLayerConfig, TypeLayerMetadataEsri } from '@/api/types/layer-schema-types';
-import { VectorLayerEntryConfig, VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
-import { TypeEsriFeatureLayerConfig, TypeSourceEsriFeatureInitialConfig } from '@/geo/layer/geoview-layers/vector/esri-feature';
+import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeLayerMetadataEsri } from '@/api/types/layer-schema-types';
+import type { VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
+import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
+import type { TypeEsriFeatureLayerConfig, TypeSourceEsriFeatureInitialConfig } from '@/geo/layer/geoview-layers/vector/esri-feature';
 export interface EsriFeatureLayerEntryConfigProps extends VectorLayerEntryConfigProps {
     /** Source settings to apply to the GeoView layer source at creation time. */
     source?: TypeSourceEsriFeatureInitialConfig;

@@ -1,5 +1,5 @@
-import { TypeButtonPanel } from '@/ui/panel/panel-types';
-import { AppBarApi } from '@/core/components';
+import type { TypeButtonPanel } from '@/ui/panel/panel-types';
+import type { AppBarApi } from '@/core/components';
 type AppBarProps = {
     api: AppBarApi;
     onScrollShellIntoView: () => void;

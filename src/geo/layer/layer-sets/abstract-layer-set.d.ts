@@ -1,12 +1,12 @@
-import { Map as OLMap } from 'ol';
-import { EventDelegateBase } from '@/api/events/event-helper';
-import { QueryType, TypeFeatureInfoEntry, TypeLocation, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
-import { TypeLayerStatus } from '@/api/types/layer-schema-types';
-import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
-import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
-import { LayerApi } from '@/geo/layer/layer';
-import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
-import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import type { Map as OLMap } from 'ol';
+import type { EventDelegateBase } from '@/api/events/event-helper';
+import type { QueryType, TypeFeatureInfoEntry, TypeLocation, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
+import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
+import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import type { LayerApi } from '@/geo/layer/layer';
+import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import type { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 /**
  * A class to hold a set of layers associated with a value of any type.
  * Layers are added/removed to the layer-set via the registerOrUnregisterLayer function.
