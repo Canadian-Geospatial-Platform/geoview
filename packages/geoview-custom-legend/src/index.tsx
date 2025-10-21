@@ -80,7 +80,18 @@ class CustomLegendPanelPlugin extends AppBarPlugin {
   }
 
   override onCreateContent = (): JSX.Element => {
-    return <CustomLegendPanel config={this.getConfig()} />;
+    return (
+      <CustomLegendPanel
+        config={this.getConfig()}
+        onUpdateLegend={(legendList) => {
+          const currentConfig = this.getConfig();
+          this.setConfig({
+            ...currentConfig,
+            legendList,
+          });
+        }}
+      />
+    );
   };
 
   /**
