@@ -62,11 +62,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    */
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Fetch the metadata
-    const metadata = await AbstractGeoViewRaster.fetchMetadata<TypeMetadataEsriDynamic>(
-      this.metadataAccessPath,
-      this.geoviewLayerId,
-      this.geoviewLayerName
-    );
+    const metadata = await this.onFetchServiceMetadata<TypeMetadataEsriDynamic>();
 
     // Now that we have metadata
     const { layers } = metadata;

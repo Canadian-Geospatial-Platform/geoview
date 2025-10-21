@@ -1,5 +1,5 @@
 import { GVAbstractTester } from './abstract-gv-tester';
-import type { Type } from '../core/test';
+import type { ClassType } from '../core/test';
 import { Test } from '../core/test';
 import type { API } from 'geoview-core/api/api';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
@@ -13,6 +13,7 @@ import { EsriDynamicLayerEntryConfig } from 'geoview-core/api/config/validation-
 import { GroupLayerEntryConfig } from 'geoview-core/api/config/validation-classes/group-layer-entry-config';
 import { OgcWmsLayerEntryConfig } from 'geoview-core/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { WMS } from 'geoview-core/geo/layer/geoview-layers/raster/wms';
+import { LayerServiceMetadataUnableToFetchError } from 'geoview-core/core/exceptions/layer-exceptions';
 
 /**
  * Main Config testing class.
@@ -81,7 +82,7 @@ export class ConfigTester extends GVAbstractTester {
     testName: string,
     url: string,
     expectedConfig: Record<string, unknown>,
-    expectedTypeFirstLayerEntry: Type
+    expectedTypeFirstLayerEntry: ClassType
   ): Promise<Test<TypeGeoviewLayerConfig>> {
     // Dummy names
     const gvLayerId: string = 'gvLayerId';
@@ -117,6 +118,28 @@ export class ConfigTester extends GVAbstractTester {
         Test.assertIsInstance(layerEntry, expectedTypeFirstLayerEntry);
       }
     );
+  }
+
+  /**
+   * Tests the behavior of an Esri Dynamic layer configuration when initialized with a bad URL.
+   * This is a negative test case where the `EsriDynamic.initGeoviewLayerConfig` method is expected
+   * to fail due to an unreachable or invalid service URL. The test verifies that a
+   * `LayerServiceMetadataUnableToFetchError` is thrown as expected.
+   * @returns {Promise<Test<LayerServiceMetadataUnableToFetchError>>}
+   * A test object representing the result of the failed layer initialization attempt.
+   */
+  testEsriDynamicBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
+    // The bad url
+    const urlBad: string = 'https://badurl/oops';
+
+    // Test
+    return this.testError(`Test an EsriDynamic config with a bad url...`, LayerServiceMetadataUnableToFetchError, async (test) => {
+      // Creating the configuration
+      test.addStep('Creating the GeoView Layer Configuration...');
+
+      // Try it and expect a fail
+      await EsriDynamic.initGeoviewLayerConfig('gvLayerId', 'gvLayerName', urlBad);
+    });
   }
 
   // #endregion ESRI DYNAMIC
@@ -210,6 +233,28 @@ export class ConfigTester extends GVAbstractTester {
         Test.assertIsInstance(layerEntry, EsriFeatureLayerEntryConfig);
       }
     );
+  }
+
+  /**
+   * Tests the behavior of an Esri Feature layer configuration when initialized with a bad URL.
+   * This is a negative test case where the `EsriFeature.initGeoviewLayerConfig` method is expected
+   * to fail due to an unreachable or invalid service URL. The test verifies that a
+   * `LayerServiceMetadataUnableToFetchError` is thrown as expected.
+   * @returns {Promise<Test<LayerServiceMetadataUnableToFetchError>>}
+   * A test object representing the result of the failed layer initialization attempt.
+   */
+  testEsriFeatureBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
+    // The bad url
+    const urlBad: string = 'https://badurl/oops';
+
+    // Test
+    return this.testError(`Test an EsriFeature config with a bad url...`, LayerServiceMetadataUnableToFetchError, async (test) => {
+      // Creating the configuration
+      test.addStep('Creating the GeoView Layer Configuration...');
+
+      // Try it and expect a fail
+      await EsriFeature.initGeoviewLayerConfig('gvLayerId', 'gvLayerName', urlBad);
+    });
   }
 
   // #endregion ESRI FEATURE

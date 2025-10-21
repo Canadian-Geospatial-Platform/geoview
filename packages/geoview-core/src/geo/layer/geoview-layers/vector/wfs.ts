@@ -24,10 +24,11 @@ import { findPropertyByRegexPath } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { WfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
-import { LayerNoCapabilitiesError } from '@/core/exceptions/layer-exceptions';
+import { LayerNoCapabilitiesError, LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
 import { LayerEntryConfigLayerIdNotFoundError } from '@/core/exceptions/layer-entry-config-exceptions';
 import { GVWFS } from '@/geo/layer/gv-layers/vector/gv-wfs';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
+import { formatError } from '@/core/exceptions/core-exceptions';
 
 export interface TypeWFSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'geoviewLayerType'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.WFS;
@@ -73,13 +74,21 @@ export class WFS extends AbstractGeoViewVector {
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
    * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<T = TypeMetadataWFS>} A promise with the metadata or undefined when no metadata for the particular layer type.
+   * @throws {LayerServiceMetadataUnableToFetchError} If the metadata fetch fails.
+   * @throws {LayerNoCapabilitiesError} If the metadata is empty (no Capabilities).
    */
   protected override async onFetchServiceMetadata<T = TypeMetadataWFS>(abortSignal?: AbortSignal): Promise<T> {
-    // Fetch it
-    const metadata = await WFS.fetchMetadata(this.metadataAccessPath, abortSignal);
+    let metadata;
+    try {
+      // Fetch it
+      metadata = await WFS.fetchMetadata(this.metadataAccessPath, abortSignal);
+    } catch (error: unknown) {
+      // Throw
+      throw new LayerServiceMetadataUnableToFetchError(this.geoviewLayerId, this.getLayerEntryNameOrGeoviewLayerName(), formatError(error));
+    }
 
     // If not found
-    if (!metadata) throw new LayerNoCapabilitiesError(this.geoviewLayerId, this.geoviewLayerName);
+    if (!metadata) throw new LayerNoCapabilitiesError(this.geoviewLayerId, this.getLayerEntryNameOrGeoviewLayerName());
 
     // Return it
     return metadata as T;
@@ -89,6 +98,8 @@ export class WFS extends AbstractGeoViewVector {
    * Overrides the way a geoview layer config initializes its layer entries.
    * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
+   * @throws {LayerServiceMetadataUnableToFetchError} If the metadata fetch fails.
+   * @throws {LayerNoCapabilitiesError} If the metadata is empty (no Capabilities).
    */
   protected override async onInitLayerEntries(abortSignal?: AbortSignal): Promise<TypeGeoviewLayerConfig> {
     // Fetch metadata

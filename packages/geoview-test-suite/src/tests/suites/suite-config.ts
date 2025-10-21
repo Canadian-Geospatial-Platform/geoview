@@ -52,6 +52,12 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
     // Test WMS DatacubeMSI config
     const pWMSDatacubeMSI = this.#configTester.testWMSLayerWithDatacubeMSI();
 
+    // Test a true negative
+    const pEsriDynamicBadUrl = this.#configTester.testEsriDynamicBadUrl();
+
+    // Test a true negative
+    const pEsriFeatureBadUrl = this.#configTester.testEsriFeatureBadUrl();
+
     // Resolve when all
     return Promise.all([
       pEsriDynamicHistoFlood,
@@ -62,6 +68,8 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
       pEsriImage,
       pWMSMundialis,
       pWMSDatacubeMSI,
+      pEsriDynamicBadUrl,
+      pEsriFeatureBadUrl,
     ]);
   }
 }

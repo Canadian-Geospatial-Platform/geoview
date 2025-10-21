@@ -351,7 +351,7 @@
       "metadatasTakingLongTime": "Le téléchargement des métadonnées de certaines couches prend plus de temps que...",
       "vectorTileRemoved": "La tuile vectorielle '__param__' a dû être retirée en raison d'un conflit de projection.",
       "basemapLayerCreationError": "Erreur lors de la création de la couche de base __param__.",
-      "kmlLayerWarning": "Les couches KML n'afficheront pas les symboles appropriés dans les panneaux et ne comporteront pas d'entrées dans le tableau de données."
+      "kmlLayerWarning": "Les couches KML n'afficheront pas les symboles appropriés dans les panneaux et ne comporteront pas d'entrées dans le tableau de données.",
       "layerCRSNotSupported": "La référence spatiale de la carte '__param__' n'est pas officiellement supportée par la couche '__param__'. GeoView va tout de même tenté d'afficher la couche, mais celle-ci risque d'être désalignée.."
     }
   },

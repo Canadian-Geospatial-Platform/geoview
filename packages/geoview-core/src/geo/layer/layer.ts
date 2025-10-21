@@ -501,7 +501,6 @@ export class LayerApi {
    * @param {string} layerEntryConfig - The optional layer configuration
    * @returns {Promise<GeoViewLayerAddedResult>} A promise which resolves when done adding
    */
-  // TODO: Refactor - Think of dissalowing the "| void" in the promise return here
   async addGeoviewLayerByGeoCoreUUID(uuid: string, layerEntryConfig?: string): Promise<GeoViewLayerAddedResult | void> {
     // Add a place holder to the ordered layer info array
     const layerInfo: TypeOrderedLayerInfo = {
@@ -1563,7 +1562,6 @@ export class LayerApi {
     }
   }
 
-
   /**
    * Clears any overridden CRS settings on all WMS layers in the map.
    * Iterates through all GeoView layers, identifies those that are instances of `GVWMS`,
@@ -1801,10 +1799,10 @@ export class LayerApi {
   }
 
   /**
-   * Handles when a WMS layer tries to generate an image for the Map.
+   * Handles when a WMS layer failed to render an image on the map and we're trying to rescue it on-the-fly before officializing the error.
    * This callback is useful when a WMS doesn't officially support the map projection, but we still want to attempt to pull an image and put it on the map.
-   * @param {GVWMS} sender - The WMS layer which is attempting to draw image on the map.
-   * @param {ImageLoadCallbackEvent} event - The image load information which is about to be used to perform the 'GetMap' request.
+   * @param {GVWMS} sender - The WMS layer which is attempting to render its image on the map.
+   * @param {ImageLoadRescueEvent} event - The error event which happened when the image tried to be rendered.
    * @private
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -1822,6 +1820,7 @@ export class LayerApi {
 
       // If we're not already overriding the CRS
       if (!sender.getOverrideCRS()) {
+        // Get prioritized lists of projections to retry with (we want to attempt with higher priority projections)
         const highlyPrioritizedProjections = VALID_PROJECTION_CODES.map((projCode) => 'EPSG:' + projCode);
         const moderatePrioritizedProjections = Object.values(Projection.PROJECTION_NAMES);
 
@@ -1858,7 +1857,7 @@ export class LayerApi {
       }
     }
 
-    // Nothing to tweak, couldn't rescue the error
+    // Nothing to tweak, couldn't rescue the error, let it fail
     return false;
   }
 

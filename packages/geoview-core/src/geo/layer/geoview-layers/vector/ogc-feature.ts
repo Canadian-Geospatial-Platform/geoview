@@ -23,6 +23,8 @@ import {
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import { GVOGCFeature } from '@/geo/layer/gv-layers/vector/gv-ogc-feature';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
+import { LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
+import { formatError } from '@/core/exceptions/core-exceptions';
 
 export interface TypeOgcFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.OGC_FEATURE;
@@ -60,15 +62,22 @@ export class OgcFeature extends AbstractGeoViewVector {
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
    * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<T = TypeMetadataOGCFeature>} A promise with the metadata or undefined when no metadata for the particular layer type.
+   * @throws {LayerServiceMetadataUnableToFetchError} If the metadata fetch fails.
    */
   protected override onFetchServiceMetadata<T = TypeMetadataOGCFeature>(abortSignal?: AbortSignal): Promise<T> {
-    // Fetch it
-    return OgcFeature.fetchMetadata(this.metadataAccessPath, abortSignal) as Promise<T>;
+    try {
+      // Fetch it
+      return OgcFeature.fetchMetadata(this.metadataAccessPath, abortSignal) as Promise<T>;
+    } catch (error: unknown) {
+      // Throw
+      throw new LayerServiceMetadataUnableToFetchError(this.geoviewLayerId, this.getLayerEntryNameOrGeoviewLayerName(), formatError(error));
+    }
   }
 
   /**
    * Overrides the way a geoview layer config initializes its layer entries.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
+   * @throws {LayerServiceMetadataUnableToFetchError} If the metadata fetch fails.
    */
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Get the folder url
@@ -86,7 +95,7 @@ export class OgcFeature extends AbstractGeoViewVector {
     // If no id
     if (!id) {
       // Fetch the metadata
-      const metadata = await OgcFeature.fetchMetadata(this.metadataAccessPath);
+      const metadata = await this.onFetchServiceMetadata();
 
       // Now that we have metadata
       entries = metadata.collections.map((collection) => {
@@ -263,6 +272,9 @@ export class OgcFeature extends AbstractGeoViewVector {
    * Fetches the metadata for a typical OGCFeature class.
    * @param {string} url - The url to query the metadata from.
    * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+   * @throws {ResponseError} If the response is not OK (non-2xx).
+   * @throws {ResponseEmptyError} If the JSON response is empty.
+   * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
    */
   static fetchMetadata(url: string, abortSignal?: AbortSignal): Promise<TypeMetadataOGCFeature> {
     // The url

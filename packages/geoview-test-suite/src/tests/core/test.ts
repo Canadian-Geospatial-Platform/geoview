@@ -22,6 +22,9 @@ export class Test<T = unknown> {
   /** A title for the test */
   #title: string;
 
+  /** The type of test (regular, true-negative) */
+  #type: TestType = 'regular';
+
   /** The Steps the Test has processed so far */
   #steps: TestStep[] = [];
 
@@ -63,6 +66,22 @@ export class Test<T = unknown> {
    */
   setTitle(title: string): void {
     this.#title = title;
+  }
+
+  /**
+   * Gets the current title.
+   * @returns {TestType} The title.
+   */
+  getType(): TestType {
+    return this.#type;
+  }
+
+  /**
+   * Sets the title.
+   * @param {TestType} type - The type to set.
+   */
+  setType(type: TestType): void {
+    this.#type = type;
   }
 
   /**
@@ -215,7 +234,7 @@ export class Test<T = unknown> {
    * @throws {AssertionWrongInstanceError} If the value isn't defined.
    * @static
    */
-  static assertIsInstance<T>(actualValue: unknown, expectedType: Type<T>): asserts actualValue is T {
+  static assertIsInstance<T>(actualValue: unknown, expectedType: ClassType<T>): asserts actualValue is T {
     // Checks if the value is defined, first
     Test.assertIsDefined('Object instance', actualValue);
 
@@ -233,7 +252,7 @@ export class Test<T = unknown> {
    * @throws {AssertionWrongInstanceError} If the value isn't defined.
    * @static
    */
-  static assertIsErrorInstance<T extends Error>(actualError: T, expectedType: Type<T>): asserts actualError is T {
+  static assertIsErrorInstance<T extends Error>(actualError: T, expectedType: ClassType<T>): asserts actualError is T {
     // Checks if the value is defined, first
     Test.assertIsDefined('Error instance', actualError);
 
@@ -496,7 +515,7 @@ export class Test<T = unknown> {
  * @template T - The type of the instance the constructor produces.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type Type<T = unknown> = new (...args: any[]) => T;
+export type ClassType<T = unknown> = new (...args: any[]) => T;
 
 /**
  * Define a type for the result of a JSON object assertion check
@@ -526,6 +545,11 @@ export interface StatusChangedEvent extends BaseTestChangedEvent {
  * Define a delegate for the event handler function signature
  */
 export type TestChangedDelegate = EventDelegateBase<Test, BaseTestChangedEvent, void>;
+
+/**
+ * The test types
+ */
+export type TestType = 'regular' | 'true-negative';
 
 /**
  * The test statuses

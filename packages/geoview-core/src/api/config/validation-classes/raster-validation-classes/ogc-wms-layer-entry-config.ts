@@ -47,15 +47,6 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   }
 
   /**
-   * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
-   * @returns {TypeLayerMetadataEsri | undefined} The strongly-typed layer metadata specific to this layer entry config.
-   */
-  override getLayerMetadata(): TypeLayerMetadataWMS | undefined {
-    return super.getLayerMetadata() as TypeLayerMetadataWMS | undefined;
-  }
-
-  /**
    * Returns a list of supported CRS (Coordinate Reference System) identifiers
    * from the WMS service metadata.
    * The method normalizes the CRS entries to strings, handling both plain strings
@@ -64,7 +55,16 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    */
   getSupportedCRSs(): string[] {
     // Normalize CRS entries to strings
-    return (this.getServiceMetadata()?.Capability.Layer.CRS ?? []).map((crs) => (typeof crs === 'string' ? crs : crs.Name));
+    return this.getServiceMetadata()?.Capability.Layer.CRS ?? [];
+  }
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeLayerMetadataEsri | undefined} The strongly-typed layer metadata specific to this layer entry config.
+   */
+  override getLayerMetadata(): TypeLayerMetadataWMS | undefined {
+    return super.getLayerMetadata() as TypeLayerMetadataWMS | undefined;
   }
 
   /**
