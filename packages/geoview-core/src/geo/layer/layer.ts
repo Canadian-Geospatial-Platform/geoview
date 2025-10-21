@@ -1842,10 +1842,6 @@ export class LayerApi {
 
     // Set the layer z indices
     MapEventProcessor.setLayerZIndices(this.getMapId());
-
-    // GV: KML currently has no style or symbology associated with it, so we warn the user
-    if (geoviewLayer.getClassName() === CONST_LAYER_TYPES.KML)
-      this.mapViewer.notifications.showWarning('warning.layer.kmlLayerWarning', [], true);
   }
 
   /**
