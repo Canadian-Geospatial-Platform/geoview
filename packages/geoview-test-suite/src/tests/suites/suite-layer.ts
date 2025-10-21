@@ -34,7 +34,36 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
     // Test adding layer
     const pLayerEsriFeatureForestIndustry = this.#layerTester.testAddEsriFeatureForestIndustry();
 
+    // Test adding layer
+    const pLayerEsriImageElevation = this.#layerTester.testAddEsriImageWithElevation();
+
+    // Test adding layer
+    const pLayerWMSOWSMundialis = this.#layerTester.testAddWMSLayerWithOWSMundialis();
+
+    // // Depending on the map projection
+    // let pLayerWMSOWSMundialis;
+    // if (this.getMapViewer().getProjection().getCode() !== 'EPSG:3978') {
+    //   // Test adding layer
+    //   pLayerWMSOWSMundialis = this.#layerTester.testAddWMSLayerWithOWSMundialis();
+    // } else {
+    //   // Test the true negative
+    //   pLayerWMSOWSMundialis = this.#layerTester.testAddWMSLayerWithOWSMundialisTrueNegative();
+    // }
+
+    // Test adding layer
+    const pLayerWMSDatacubeOWSMSI = this.#layerTester.testAddWMSLayerWithDatacubeMSI();
+
+    // Test adding layer
+    const pLayerWSMDatacubeRingFireHalifax = this.#layerTester.testAddWMSLayerWithDatacubeRingOfFire();
+
     // Resolve when all
-    return Promise.all([pLayerEsriDynamicHistoFloods, pLayerEsriFeatureForestIndustry]);
+    return Promise.all([
+      pLayerEsriDynamicHistoFloods,
+      pLayerEsriFeatureForestIndustry,
+      pLayerEsriImageElevation,
+      pLayerWMSOWSMundialis,
+      pLayerWMSDatacubeOWSMSI,
+      pLayerWSMDatacubeRingFireHalifax,
+    ]);
   }
 }

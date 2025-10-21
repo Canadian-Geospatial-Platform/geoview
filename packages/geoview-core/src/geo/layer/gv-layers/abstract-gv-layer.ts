@@ -353,7 +353,6 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /**
    * Overridable method called when the layer image is in error and couldn't be loaded correctly.
-   * We do not put the layer status as error, as this could be specific to a zoom level and the layer is otherwise fine.
    * @param {unknown} event - The event which is being triggered.
    */
   protected onImageLoadError(event: unknown): void {

@@ -150,6 +150,24 @@ export class LayerNotQueryableError extends LayerError {
 }
 
 /**
+ * Custom error class thrown when a GeoView layer status was 'error' when it was expecting another status.
+ * @extends {LayerError}
+ */
+export class LayerStatusErrorError extends LayerError {
+  /**
+   * Constructor to initialize the LayerStatusErrorError with the layer ID.
+   * @param {string} geoviewLayerId - The ID of the GeoView layer that failed to be created.
+   * @param {string | undefined} layerName - The layer name.
+   */
+  constructor(geoviewLayerId: string, layerName: string | undefined) {
+    super(geoviewLayerId, 'error.layer.statusWasError', [layerName || geoviewLayerId]);
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, LayerStatusErrorError.prototype);
+  }
+}
+
+/**
  * Error thrown when a GeoView layer has an invalid layer type.
  * This typically indicates a configuration issue for a specific layer and its type.
  */
@@ -391,24 +409,6 @@ export class LayerNotCreatedError extends LayerError {
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, LayerNotCreatedError.prototype);
-  }
-}
-
-/**
- * Custom error class thrown when a GeoView layer status was 'error' when it was expecting another status.
- * @extends {LayerError}
- */
-export class LayerStatusErrorError extends LayerError {
-  /**
-   * Constructor to initialize the LayerStatusErrorError with the layer ID.
-   * @param {string} geoviewLayerId - The ID of the GeoView layer that failed to be created.
-   * @param {string | undefined} layerName - The layer name.
-   */
-  constructor(geoviewLayerId: string, layerName: string | undefined) {
-    super(geoviewLayerId, 'validation.layer.statusWasError', [layerName || geoviewLayerId]);
-
-    // Ensure correct inheritance (important for transpilation targets)
-    Object.setPrototypeOf(this, LayerStatusErrorError.prototype);
   }
 }
 

@@ -24,7 +24,7 @@ import type {
   LayerEntryRegisterInitEvent,
   LayerGVCreatedEvent,
 } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import type { TypeDisplayLanguage, TypeOutfieldsType } from '@/api/types/map-schema-types';
+import { VALID_PROJECTION_CODES, type TypeDisplayLanguage, type TypeOutfieldsType } from '@/api/types/map-schema-types';
 import type {
   MapConfigLayerEntry,
   TypeGeoviewLayerConfig,
@@ -87,7 +87,9 @@ import type {
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVGeoJSON } from '@/geo/layer/gv-layers/vector/gv-geojson';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
+import { GVWMS, type ImageLoadRescueDelegate, type ImageLoadRescueEvent } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { getExtentUnion, getZoomFromScale } from '@/geo/utils/utilities';
+import { Projection } from '@/geo/utils/projection';
 
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
@@ -238,6 +240,9 @@ export class LayerApi {
   /** Keep a bounded reference to the handle layer error */
   #boundedHandleLayerVisibleChanged: VisibleChangedDelegate;
 
+  /** Keep a bounded reference to the handle WMS Layer Image Load Callbacks */
+  #boundedHandleLayerWMSImageLoadRescue: ImageLoadRescueDelegate;
+
   /**
    * Initializes layer types and listen to add/remove layer events from outside
    * @param {MapViewer} mapViewer - A reference to the map viewer
@@ -262,6 +267,7 @@ export class LayerApi {
     this.#boundedHandleLayerError = this.#handleLayerError.bind(this);
     this.#boundedHandleLayerOpacityChanged = this.#handleLayerOpacityChanged.bind(this);
     this.#boundedHandleLayerVisibleChanged = this.#handleLayerVisibleChanged.bind(this);
+    this.#boundedHandleLayerWMSImageLoadRescue = this.#handleLayerWMSImageLoadRescue.bind(this);
   }
 
   /**
@@ -1557,6 +1563,18 @@ export class LayerApi {
     }
   }
 
+
+  /**
+   * Clears any overridden CRS settings on all WMS layers in the map.
+   * Iterates through all GeoView layers, identifies those that are instances of `GVWMS`,
+   * and resets their override CRS to `undefined`, allowing them to use the default projection behavior.
+   */
+  clearWMSLayersWithOverrideCRS(): void {
+    // Get all WMS layers
+    const wmsLayers = this.getGeoviewLayers().filter((layer) => layer instanceof GVWMS);
+    wmsLayers.forEach((gvLayer) => gvLayer.setOverrideCRS(undefined));
+  }
+
   // #region PRIVATE FUNCTIONS
 
   /**
@@ -1594,6 +1612,9 @@ export class LayerApi {
 
     // Register a hook when a layer visibility is changed
     gvLayer.onVisibleChanged(this.#boundedHandleLayerVisibleChanged);
+
+    // For a WMS, register a hook when the image fails to load so that we can try to rescue it
+    if (gvLayer instanceof GVWMS) gvLayer.onImageLoadRescue(this.#boundedHandleLayerWMSImageLoadRescue);
   }
 
   /**
@@ -1622,6 +1643,9 @@ export class LayerApi {
 
     // Unregister handler on layer visibility change
     gvLayer.offVisibleChanged(this.#boundedHandleLayerVisibleChanged);
+
+    // For a WMS, unregister the hook when the image load is called
+    if (gvLayer instanceof GVWMS) gvLayer.offImageLoadRescue(this.#boundedHandleLayerWMSImageLoadRescue);
   }
 
   /**
@@ -1774,6 +1798,68 @@ export class LayerApi {
    */
   #handleLayerVisibleChanged(layer: AbstractBaseLayer, event: VisibleChangedEvent): void {
     MapEventProcessor.setMapLayerVisibilityInStore(this.getMapId(), layer.getLayerPath(), event.visible);
+  }
+
+  /**
+   * Handles when a WMS layer tries to generate an image for the Map.
+   * This callback is useful when a WMS doesn't officially support the map projection, but we still want to attempt to pull an image and put it on the map.
+   * @param {GVWMS} sender - The WMS layer which is attempting to draw image on the map.
+   * @param {ImageLoadCallbackEvent} event - The image load information which is about to be used to perform the 'GetMap' request.
+   * @private
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  #handleLayerWMSImageLoadRescue(sender: GVWMS, event: ImageLoadRescueEvent): boolean {
+    // Get the supported CRS projections
+    const supportedCRSs = sender.getLayerConfig().getSupportedCRSs();
+
+    // Get the map projection
+    const mapProj = this.mapViewer.getProjection().getCode();
+
+    // If the map projection isn't supported by the WMS, that might be the issue
+    if (!supportedCRSs.includes(mapProj)) {
+      // Log warning
+      logger.logWarning(`The map projection '${mapProj}' is not officially supported by the layer '${sender.getLayerPath()}'...`);
+
+      // If we're not already overriding the CRS
+      if (!sender.getOverrideCRS()) {
+        const highlyPrioritizedProjections = VALID_PROJECTION_CODES.map((projCode) => 'EPSG:' + projCode);
+        const moderatePrioritizedProjections = Object.values(Projection.PROJECTION_NAMES);
+
+        // Attempt to find a suitable CRS
+        let selectedCRS: string | undefined;
+
+        // 1. Look in high priority list
+        selectedCRS = highlyPrioritizedProjections.find((crs) => supportedCRSs.includes(crs));
+
+        // 2. If not found, look in moderate priority list
+        if (!selectedCRS) {
+          selectedCRS = moderatePrioritizedProjections.find((crs) => supportedCRSs.includes(crs));
+        }
+
+        // 3. If still not found, just take the first supported CRS (fallback)
+        if (!selectedCRS && supportedCRSs.length > 0) {
+          selectedCRS = supportedCRSs[0];
+        }
+
+        // 4. If we found one, override
+        if (selectedCRS) {
+          // Override the CRS in the layer
+          sender.setOverrideCRS({
+            layerProjection: selectedCRS,
+            mapProjection: mapProj,
+          });
+
+          // Notify the user
+          this.mapViewer.notifications.showWarning('warning.layer.layerCRSNotSupported', [mapProj, sender.getLayerName()], true);
+
+          // Rescued
+          return true;
+        }
+      }
+    }
+
+    // Nothing to tweak, couldn't rescue the error
+    return false;
   }
 
   /**

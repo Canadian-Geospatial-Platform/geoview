@@ -688,6 +688,9 @@ export class MapViewer {
    */
   setProjection(projectionCode: TypeValidMapProjectionCodes): Promise<void> {
     if (VALID_PROJECTION_CODES.includes(Number(projectionCode))) {
+      // Clear the WMS layers that had an override CRS
+      this.layer.clearWMSLayersWithOverrideCRS();
+
       // Propagate to the store
       const promise = MapEventProcessor.setProjection(this.mapId, projectionCode);
 
