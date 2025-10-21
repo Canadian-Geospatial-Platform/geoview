@@ -19,6 +19,8 @@ import {
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import { GVWKB } from '@/geo/layer/gv-layers/vector/gv-wkb';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
+import { LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
+import { formatError } from '@/core/exceptions/core-exceptions';
 
 export interface TypeWkbLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.WKB;
@@ -56,12 +58,22 @@ export class WKB extends AbstractGeoViewVector {
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
    * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<T = TypeMetadataGeoJSON | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
+   * @throws {LayerServiceMetadataUnableToFetchError} If the metadata fetch fails.
    */
   protected override onFetchServiceMetadata<T = TypeMetadataGeoJSON | undefined>(abortSignal?: AbortSignal): Promise<T> {
     // If metadataAccessPath ends with .meta or .json
     if (this.metadataAccessPath.toLowerCase().endsWith('.meta') || this.metadataAccessPath.toLowerCase().endsWith('.json')) {
-      // Fetch it
-      return WKB.fetchMetadata(this.metadataAccessPath, abortSignal) as Promise<T>;
+      try {
+        // Fetch it
+        return WKB.fetchMetadata(this.metadataAccessPath, abortSignal) as Promise<T>;
+      } catch (error: unknown) {
+        // Throw
+        throw new LayerServiceMetadataUnableToFetchError(
+          this.geoviewLayerId,
+          this.getLayerEntryNameOrGeoviewLayerName(),
+          formatError(error)
+        );
+      }
     }
 
     // The metadataAccessPath didn't seem like it was containing actual metadata, so it was skipped
@@ -216,6 +228,9 @@ export class WKB extends AbstractGeoViewVector {
   /**
    * Fetches the metadata for a typical GeoJson class.
    * @param {string} url - The url to query the metadata from.
+   * @throws {ResponseError} If the response is not OK (non-2xx).
+   * @throws {ResponseEmptyError} If the JSON response is empty.
+   * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
    */
   static fetchMetadata(url: string, abortSignal?: AbortSignal): Promise<TypeMetadataGeoJSON> {
     // Return it

@@ -533,6 +533,7 @@ function _whenThisThenThat<T>(
 
   // If check was positive or anything of value
   if (v) {
+    // Do the callback and we're done
     doCallback(v);
     return;
   }

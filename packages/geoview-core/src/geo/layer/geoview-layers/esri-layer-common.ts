@@ -31,12 +31,17 @@ import type { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic
 import type { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import type { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
-import { LayerEntryConfigLayerIdEsriMustBeNumberError, LayerServiceMetadataEmptyError } from '@/core/exceptions/layer-exceptions';
+import {
+  LayerEntryConfigLayerIdEsriMustBeNumberError,
+  LayerServiceMetadataEmptyError,
+  LayerServiceMetadataUnableToFetchError,
+} from '@/core/exceptions/layer-exceptions';
 import {
   LayerEntryConfigEmptyLayerGroupError,
   LayerEntryConfigLayerIdNotFoundError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import { logger } from '@/core/utils/logger';
+import { formatError } from '@/core/exceptions/core-exceptions';
 
 /**
  * This method validates recursively the configuration of the layer entries to ensure that it is a feature layer identified
@@ -348,6 +353,7 @@ export function commonProcessInitialSettings(
  * @param {TypeLayerEntryConfig} layerConfig The layer entry configuration to process.
  * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
  * @returns {Promise<TypeLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
+ * @throws {LayerServiceMetadataUnableToFetchError} If the metadata fetch fails or contains an error.
  */
 export async function commonProcessLayerMetadata<
   T extends EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig | EsriImageLayerEntryConfig,
@@ -361,8 +367,14 @@ export async function commonProcessLayerMetadata<
   if (layerConfig.getSchemaTag() !== CONST_LAYER_TYPES.ESRI_IMAGE)
     queryUrl = queryUrl.endsWith('/') ? `${queryUrl}${layerConfig.layerId}` : `${queryUrl}/${layerConfig.layerId}`;
 
-  // Fetch the layer metadata
-  const responseJson = await Fetch.fetchJson<TypeLayerMetadataEsri>(`${queryUrl}?f=json`, { signal: abortSignal });
+  let responseJson;
+  try {
+    // Fetch the layer metadata
+    responseJson = await Fetch.fetchJson<TypeLayerMetadataEsri>(`${queryUrl}?f=json`, { signal: abortSignal });
+  } catch (error: unknown) {
+    // Rethrow
+    throw new LayerServiceMetadataUnableToFetchError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerName(), formatError(error));
+  }
 
   // Validate the metadata response
   AbstractGeoViewRaster.throwIfMetatadaHasError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerName(), responseJson);

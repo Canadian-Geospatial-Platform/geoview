@@ -1,8 +1,9 @@
-import type { BaseTestChangedEvent } from './test';
+import type { BaseTestChangedEvent, ClassType } from './test';
 import type { EventDelegateBase } from 'geoview-core/api/events/event-helper';
 import EventHelper from 'geoview-core/api/events/event-helper';
 import { logger } from 'geoview-core/core/utils/logger';
 import { Test } from './test';
+import { formatError } from 'geoview-core/core/exceptions/core-exceptions';
 
 /**
  * Abstract base class for creating custom testers with assertion and event capabilities.
@@ -100,12 +101,23 @@ export abstract class AbstractTester {
    */
   test<T>(
     message: string,
-    callback: BaseTestDelegate<T>,
+    callback: BaseTestDelegate<T, T>,
     callbackAssert: BaseAssertionDelegate<T>,
     callbackFinalize?: BaseFinalizeDelegate<T>
   ): Promise<Test<T>> {
     // Redirect
     return this.#testPerformTest(message, callback, callbackAssert, callbackFinalize);
+  }
+
+  testError<T extends Error>(
+    message: string,
+    errorClass: ClassType<T>,
+    callback: BaseTestDelegate<T, void>,
+    callbackAssert?: BaseAssertionDelegate<T>,
+    callbackFinalize?: BaseFinalizeDelegate<T>
+  ): Promise<Test<T>> {
+    // Redirect
+    return this.#testPerformTestError(message, errorClass, callback, callbackAssert, callbackFinalize);
   }
 
   // #region PROTECTED
@@ -272,7 +284,7 @@ export abstract class AbstractTester {
    */
   async #testPerformTest<T>(
     message: string,
-    callback: BaseTestDelegate<T>,
+    callback: BaseTestDelegate<T, T>,
     callbackAssert: BaseAssertionDelegate<T>,
     callbackFinalize?: BaseFinalizeDelegate<T>
   ): Promise<Test<T>> {
@@ -294,6 +306,90 @@ export abstract class AbstractTester {
 
       // Callback with the result to verify using an assertion check
       await callbackAssert(test, result);
+
+      // All good
+      this.onPerformingTestSuccess(test, result);
+    } catch (error: unknown) {
+      // The execution of the test has failed
+      this.onPerformingTestFailure(test, error, false);
+    }
+
+    try {
+      // Finalizing
+      this.onPerformingTestFinalization(test, callbackFinalize);
+
+      // Possibly callback for more
+      await callbackFinalize?.(test);
+    } catch (error: unknown) {
+      // The execution of the test has failed during finalization
+      this.onPerformingTestFailure(test, error, true);
+    }
+
+    // Done
+    this.onPerformingTestDone(test);
+
+    // Return the test
+    return test;
+  }
+
+  /**
+   * Executes the full lifecycle of a test when testing for an Error to be thrown, including setup, execution, assertion, success/failure handling, and optional finalization.
+   * The lifecycle consists of:
+   * - Creating a new test instance
+   * - Executing the core test logic via a callback, expecting an error to be thrown
+   * - Storing the result in the test
+   * - Optionally running additional assertions on the result
+   * - Handling success or failure states
+   * - Optionally finalizing the test (e.g., cleanup or logging)
+   * @template T - The type of the result returned by the test.
+   * @param {string} message - A human-readable description of the test.
+   * @param {BaseTestDelegate<T>} callback - Function that performs the main test logic and is supposed to throw an Error.
+   * @param {BaseAssertionDelegate<T>} callbackAssert - Function that asserts the correctness of the test result.
+   * @param {BaseFinalizeDelegate<T>} [callbackFinalize] - Optional finalization callback, called after the test completes (regardless of success or failure).
+   * @returns {Promise<Test<T>>} A promise that resolves to the fully populated {@link Test} object.
+   * @private
+   */
+  async #testPerformTestError<T extends Error>(
+    message: string,
+    errorClass: ClassType<T>,
+    callback: BaseTestDelegate<T, void>,
+    callbackAssert?: BaseAssertionDelegate<T>,
+    callbackFinalize?: BaseFinalizeDelegate<T>
+  ): Promise<Test<T>> {
+    // Create the test
+    const test = this.onCreatingTest<T>(message);
+
+    // Set the type to a true-negative, because we're testing for an Error.
+    test.setType('true-negative');
+
+    try {
+      // Testing
+      this.onPerformingTest(test);
+
+      // Start the test and expect it to fail
+      let result: Error | undefined = undefined;
+      try {
+        await callback(test);
+      } catch (error: unknown) {
+        // An error happened, as expected
+        result = formatError(error);
+
+        // Check if the right type
+        // Assign it to the current test
+        test.setResult(result as T);
+      }
+
+      // Checking assertions
+      this.onPerformingTestAssertions(test);
+
+      // Creating the configuration
+      test.addStep(`Verifying the Error obtained is '${errorClass.name}'...`);
+
+      // Check if the result is instance of the error we're testing for
+      Test.assertIsErrorInstance(result as T, errorClass);
+
+      // Callback with the result to verify using an assertion check
+      await callbackAssert?.(test, result as T);
 
       // All good
       this.onPerformingTestSuccess(test, result);
@@ -505,7 +601,7 @@ export abstract class AbstractTester {
 /**
  * Define a delegate for the event handler function signature
  */
-export type BaseTestDelegate<T = unknown> = (test: Test<T>) => T | Promise<T>;
+export type BaseTestDelegate<T = unknown, U = unknown> = (test: Test<T>) => U | Promise<U>;
 
 /**
  * Define a delegate for the event handler function signature

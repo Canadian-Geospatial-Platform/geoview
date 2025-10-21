@@ -351,7 +351,7 @@
       "metadatasTakingLongTime": "The metadata for some layers is taking longer than expected to fetch...",
       "vectorTileRemoved": "The vector tile __param__ had to be removed due to a projection conflict.",
       "basemapLayerCreationError": "Error creating __param__ basemap.",
-      "kmlLayerWarning": "KML layers will not have proper symbols in the panels or have entries in the data table."
+      "kmlLayerWarning": "KML layers will not have proper symbols in the panels or have entries in the data table.",
       "layerCRSNotSupported": "The spatial reference of the map '__param__' is not officially supported by the layer '__param__'. GeoView will still attempt to load the layer on the map, but it might be misaligned."
     }
   },

@@ -178,6 +178,7 @@ export abstract class AbstractGeoViewLayer {
    * Must override method to read the service metadata from the metadataAccessPath.
    * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<T>} A promise resolved once the metadata has been fetched.
+   * @throws {LayerServiceMetadataUnableToFetchError} If the metadata fetch fails or contains an error.
    */
   protected abstract onFetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T>;
 
@@ -225,7 +226,7 @@ export abstract class AbstractGeoViewLayer {
    * Gets the first layer entry name if any sub-layers exist or else gets the geoviewLayerName or even the geoviewLayerId.
    * @returns {string} The layer entry name if any sub-layers exist or the geoviewLayerName or even the geoviewLayerId.
    */
-  geLayerEntryNameOrGeoviewLayerName(): string {
+  getLayerEntryNameOrGeoviewLayerName(): string {
     if (this.listOfLayerEntryConfig?.length === 1) {
       // Get the layer name from the object (instance or type) inside the listOfLayerEntryConfig array
       const layerEntryName = ConfigBaseClass.getClassOrTypeLayerName(this.listOfLayerEntryConfig[0]);
@@ -331,6 +332,8 @@ export abstract class AbstractGeoViewLayer {
    * Fetches the metadata by calling onFetchServiceMetadata.
    * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<T>} Returns a Promise of a metadata
+   * @throws {LayerServiceMetadataUnableToFetchError} If the metadata fetch fails or contains an error.
+   * @throws {LayerNoCapabilitiesError} When the layer has no capabilities (WMS/WFS).
    */
   fetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T> {
     // Redirect
@@ -341,6 +344,8 @@ export abstract class AbstractGeoViewLayer {
    * This method reads the service metadata from the metadataAccessPath and stores it in the 'metadata' property.
    * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<void>} A promise resolved once the metadata has been fetched and assigned to the 'metadata' property.
+   * @throws {LayerServiceMetadataUnableToFetchError} If the metadata fetch fails or contains an error.
+   * @throws {LayerServiceMetadataEmptyError} If the metadata fetch return empty metadata.
    * @private
    */
   async #fetchAndSetServiceMetadata(abortSignal?: AbortSignal): Promise<void> {
@@ -362,23 +367,27 @@ export abstract class AbstractGeoViewLayer {
         // Skip
       }
     } catch (error: unknown) {
+      //
+      // TODO: ALEX Test the catch of a LayerNoCapabilitiesError?
+      //
+
       // Set the layer status to all layer entries to error (that logic was as-is in this refactor, leaving as-is for now)
       AbstractGeoViewLayer.#logErrorAndSetStatusErrorAll(formatError(error), this.listOfLayerEntryConfig);
 
       // If LayerServiceMetadataUnableToFetchError error
       if (error instanceof LayerServiceMetadataUnableToFetchError) {
+        // If the inner cause is a ResponseEmptyError,
+        if (error.cause instanceof ResponseEmptyError) {
+          // Throw higher
+          throw new LayerServiceMetadataEmptyError(this.geoviewLayerId, this.getLayerEntryNameOrGeoviewLayerName());
+        }
+
         // Throw as-is
         throw error;
       }
 
-      // If ResponseEmptyError error
-      if (error instanceof ResponseEmptyError) {
-        // Throw higher
-        throw new LayerServiceMetadataEmptyError(this.geoviewLayerId, this.geLayerEntryNameOrGeoviewLayerName());
-      }
-
       // Throw higher
-      throw new LayerServiceMetadataUnableToFetchError(this.geoviewLayerId, this.geLayerEntryNameOrGeoviewLayerName(), formatError(error));
+      throw new LayerServiceMetadataUnableToFetchError(this.geoviewLayerId, this.getLayerEntryNameOrGeoviewLayerName(), formatError(error));
     }
   }
 
@@ -922,7 +931,7 @@ export abstract class AbstractGeoViewLayer {
         if (ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo('processed', this.listOfLayerEntryConfig)) return true;
 
         // Emit message
-        this.emitMessage('warning.layer.metadataTakingLongTime', [this.geLayerEntryNameOrGeoviewLayerName()], 'warning');
+        this.emitMessage('warning.layer.metadataTakingLongTime', [this.getLayerEntryNameOrGeoviewLayerName()], 'warning');
 
         return false;
       },

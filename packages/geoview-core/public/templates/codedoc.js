@@ -358,7 +358,11 @@ function testSuiteAddOrUpdateTestResultRow(plugin, testSuite, testTester, test, 
 
   // Update result cells
   const testCell = row.cells?.[0];
-  let testMessage = '<strong>' + test.getTitle() + '</strong><br/>';
+  let color = '#015f00';
+  if (test.getType() === 'true-negative') {
+    color = '#6f0000';
+  }
+  let testMessage = '<font class="test-title" style="color:' + color + ';">' + test.getTitle() + '</font><br/>';
   testMessage += '<font style="font-size: x-small;">' + '<i>[' + testSuite.name + ' | ' + testTester.name + ']' + '</i></font>';
   testMessage += test.getStepsAsHtml();
   testCell.innerHTML = testMessage;

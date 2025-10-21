@@ -1,9 +1,6 @@
 import { Test } from '../core/test';
-import { TestError } from '../core/exceptions';
 import { GVAbstractTester } from './abstract-gv-tester';
 import type { API } from 'geoview-core/api/api';
-import { formatError } from 'geoview-core/core/exceptions/core-exceptions';
-import { LayerEntryNotSupportingProjectionError } from 'geoview-core/core/exceptions/layer-entry-config-exceptions';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { TypeGeoviewLayerConfig } from 'geoview-core/api/types/layer-schema-types';
 import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
@@ -164,48 +161,6 @@ export class LayerTester extends GVAbstractTester {
         // Perform assertions
         // Redirect to helper to check if the layer exists
         LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath);
-      },
-      (test) => {
-        // Redirect to helper to clean up and assert
-        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
-      }
-    );
-  }
-
-  testAddWMSLayerWithOWSMundialisTrueNegative(): Promise<Test<Error>> {
-    // Create a random geoview layer id
-    const gvLayerId = generateId();
-    const layerUrl = GVAbstractTester.OWS_MUNDIALIS;
-    const layerPath = gvLayerId + '/Dark';
-    const gvLayerName = 'OWS Mundialis';
-
-    // Test
-    return this.test(
-      `Test Adding WMS Mundialis on map which should fail...`,
-      async (test) => {
-        // Creating the configuration
-        test.addStep('Creating the GeoView Layer Configuration...');
-
-        // Create the config
-        const gvConfig = WMS.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, 'mapserver', false, [{ id: 'Dark' }], false);
-
-        let theError: Error | undefined;
-        try {
-          // Redirect to helper to add the layer to the map and wait
-          await LayerTester.helperStepAddLayerOnMapAndWaitForIt(gvConfig, test, this.getMapViewer(), layerPath);
-        } catch (error: unknown) {
-          // Expected error happened
-          theError = formatError(error);
-        }
-
-        // Return the error
-        return theError || new TestError('True negative failed');
-      },
-      (test, result) => {
-        // Perform assertions
-        // Verify the error is the correct one
-        test.addStep('Verify the error result is the expected one...');
-        Test.assertIsErrorInstance(result, LayerEntryNotSupportingProjectionError);
       },
       (test) => {
         // Redirect to helper to clean up and assert

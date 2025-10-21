@@ -1,6 +1,6 @@
 /* eslint-disable max-classes-per-file */
 
-import type { Type } from './test';
+import type { ClassType } from './test';
 
 /**
  * Custom error to indicate that an test execution (not an Assertion) has failed.
@@ -181,7 +181,7 @@ export class AssertionWrongInstanceError extends AssertionError {
    * @param {Type} expectedClassType - The expected class.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor(actualObject: any, expectedClassType: Type) {
+  constructor(actualObject: any, expectedClassType: ClassType) {
     // Call the base Error constructor with the provided message
     super(
       `Value class instance is '${actualObject.constructor.name}', expected was '${expectedClassType.name}'.`,
@@ -213,7 +213,7 @@ export class AssertionWrongErrorInstanceError extends AssertionError {
    * @param {Error} actualError - The actual error object.
    * @param {Type} expectedClassType - The expected class.
    */
-  constructor(actualError: Error, expectedClassType: Type) {
+  constructor(actualError: Error, expectedClassType: ClassType) {
     // Call the base Error constructor with the provided message
     super(
       `Error '${actualError.message}' instance is '${actualError.constructor.name}', expected was '${expectedClassType.name}'.`,

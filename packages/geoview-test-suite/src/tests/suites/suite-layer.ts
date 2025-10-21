@@ -40,16 +40,6 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
     // Test adding layer
     const pLayerWMSOWSMundialis = this.#layerTester.testAddWMSLayerWithOWSMundialis();
 
-    // // Depending on the map projection
-    // let pLayerWMSOWSMundialis;
-    // if (this.getMapViewer().getProjection().getCode() !== 'EPSG:3978') {
-    //   // Test adding layer
-    //   pLayerWMSOWSMundialis = this.#layerTester.testAddWMSLayerWithOWSMundialis();
-    // } else {
-    //   // Test the true negative
-    //   pLayerWMSOWSMundialis = this.#layerTester.testAddWMSLayerWithOWSMundialisTrueNegative();
-    // }
-
     // Test adding layer
     const pLayerWMSDatacubeOWSMSI = this.#layerTester.testAddWMSLayerWithDatacubeMSI();
 

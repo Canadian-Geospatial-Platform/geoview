@@ -53,6 +53,9 @@ export function getESRIServiceMetadata(url: string): Promise<unknown> {
  * @param {string} layers - The layers to query separate by.
  * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
  * @returns {Promise<TypeMetadataWMS>} A json promise containing the result of the query.
+ * @throws {ResponseError} If the response is not OK (non-2xx).
+ * @throws {ResponseEmptyError} If the JSON response is empty.
+ * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
  */
 export async function getWMSServiceMetadata(
   url: string,
