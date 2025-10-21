@@ -352,6 +352,7 @@
       "vectorTileRemoved": "La tuile vectorielle '__param__' a dû être retirée en raison d'un conflit de projection.",
       "basemapLayerCreationError": "Erreur lors de la création de la couche de base __param__.",
       "kmlLayerWarning": "Les couches KML n'afficheront pas les symboles appropriés dans les panneaux et ne comporteront pas d'entrées dans le tableau de données."
+      "layerCRSNotSupported": "La référence spatiale de la carte '__param__' n'est pas officiellement supportée par la couche '__param__'. GeoView va tout de même tenté d'afficher la couche, mais celle-ci risque d'être désalignée.."
     }
   },
   "error": {
@@ -360,6 +361,7 @@
       "differingFieldLengths": "La longueur des champs fournis ne correspond pas.",
       "layerNotFound": "La couche à l'emplacement '__param__' est introuvable.",
       "wrongType": "La couche '__param__' n'est pas du type attendu.",
+      "statusWasError": "Le statut de la couche '__param__' était en 'erreur'.",
       "notAGeoJsonLayer": "Ce n'est pas une couche GeoJSON pour la couche '__param__'.",
       "notAnEsriDynamicLayer": "Ce n'est pas une couche dynamique Esri pour la couche '__param__'.",
       "notAFeatureLayer": "L'identifiant de couche n'est pas une couche d'entités pour la couche '__param__'.",

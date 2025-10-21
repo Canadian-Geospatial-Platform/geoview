@@ -1,6 +1,9 @@
 import { Test } from '../core/test';
+import { TestError } from '../core/exceptions';
 import { GVAbstractTester } from './abstract-gv-tester';
 import type { API } from 'geoview-core/api/api';
+import { formatError } from 'geoview-core/core/exceptions/core-exceptions';
+import { LayerEntryNotSupportingProjectionError } from 'geoview-core/core/exceptions/layer-entry-config-exceptions';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { TypeGeoviewLayerConfig } from 'geoview-core/api/types/layer-schema-types';
 import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
@@ -8,6 +11,8 @@ import { EsriDynamic } from 'geoview-core/geo/layer/geoview-layers/raster/esri-d
 import { generateId } from 'geoview-core/core/utils/utilities';
 import { LegendEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/legend-event-processor';
 import { EsriFeature } from 'geoview-core/geo/layer/geoview-layers/vector/esri-feature';
+import { EsriImage } from 'geoview-core/geo/layer/geoview-layers/raster/esri-image';
+import { WMS } from 'geoview-core/geo/layer/geoview-layers/raster/wms';
 
 /**
  * Main Layer testing class.
@@ -54,7 +59,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        LayerTester.helperStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
       }
     );
   }
@@ -90,7 +95,209 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        LayerTester.helperStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests adding an Esri Feature Forest Industry layer on the map.
+   * @returns {Promise<Test<AbstractGVLayer>>} A Promise resolving when the test completes.
+   */
+  testAddEsriImageWithElevation(): Promise<Test<AbstractGVLayer>> {
+    // Create a random geoview layer id
+    const gvLayerId = generateId();
+    const layerUrl = GVAbstractTester.ELEVATION_IMAGE_SERVER;
+    const layerPath = gvLayerId + '/' + GVAbstractTester.ELEVATION_LAYER_ID;
+    const gvLayerName = 'Esri Image Elevation';
+
+    // Test
+    return this.test(
+      `Test Adding Esri Image Elevation on map...`,
+      (test) => {
+        // Creating the configuration
+        test.addStep('Creating the GeoView Layer Configuration...');
+
+        // Create the config
+        const gvConfig = EsriImage.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false);
+
+        // Redirect to helper to add the layer to the map and wait
+        return LayerTester.helperStepAddLayerOnMapAndWaitForIt(gvConfig, test, this.getMapViewer(), layerPath);
+      },
+      (test) => {
+        // Perform assertions
+        // Redirect to helper to check if the layer exists
+        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath);
+      },
+      (test) => {
+        // Redirect to helper to clean up and assert
+        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests adding an Esri Feature Forest Industry layer on the map.
+   * @returns {Promise<Test<AbstractGVLayer>>} A Promise resolving when the test completes.
+   */
+  testAddWMSLayerWithOWSMundialis(): Promise<Test<AbstractGVLayer>> {
+    // Create a random geoview layer id
+    const gvLayerId = generateId();
+    const layerUrl = GVAbstractTester.OWS_MUNDIALIS;
+    const layerPath = gvLayerId + '/Dark';
+    const gvLayerName = 'OWS Mundialis';
+
+    // Test
+    return this.test(
+      `Test Adding WMS Mundialis on map...`,
+      (test) => {
+        // Creating the configuration
+        test.addStep('Creating the GeoView Layer Configuration...');
+
+        // Create the config
+        const gvConfig = WMS.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, 'mapserver', false, [{ id: 'Dark' }], false);
+
+        // Redirect to helper to add the layer to the map and wait
+        return LayerTester.helperStepAddLayerOnMapAndWaitForIt(gvConfig, test, this.getMapViewer(), layerPath);
+      },
+      (test) => {
+        // Perform assertions
+        // Redirect to helper to check if the layer exists
+        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath);
+      },
+      (test) => {
+        // Redirect to helper to clean up and assert
+        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+      }
+    );
+  }
+
+  testAddWMSLayerWithOWSMundialisTrueNegative(): Promise<Test<Error>> {
+    // Create a random geoview layer id
+    const gvLayerId = generateId();
+    const layerUrl = GVAbstractTester.OWS_MUNDIALIS;
+    const layerPath = gvLayerId + '/Dark';
+    const gvLayerName = 'OWS Mundialis';
+
+    // Test
+    return this.test(
+      `Test Adding WMS Mundialis on map which should fail...`,
+      async (test) => {
+        // Creating the configuration
+        test.addStep('Creating the GeoView Layer Configuration...');
+
+        // Create the config
+        const gvConfig = WMS.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, 'mapserver', false, [{ id: 'Dark' }], false);
+
+        let theError: Error | undefined;
+        try {
+          // Redirect to helper to add the layer to the map and wait
+          await LayerTester.helperStepAddLayerOnMapAndWaitForIt(gvConfig, test, this.getMapViewer(), layerPath);
+        } catch (error: unknown) {
+          // Expected error happened
+          theError = formatError(error);
+        }
+
+        // Return the error
+        return theError || new TestError('True negative failed');
+      },
+      (test, result) => {
+        // Perform assertions
+        // Verify the error is the correct one
+        test.addStep('Verify the error result is the expected one...');
+        Test.assertIsErrorInstance(result, LayerEntryNotSupportingProjectionError);
+      },
+      (test) => {
+        // Redirect to helper to clean up and assert
+        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests adding an Esri Feature Forest Industry layer on the map.
+   * @returns {Promise<Test<AbstractGVLayer>>} A Promise resolving when the test completes.
+   */
+  testAddWMSLayerWithDatacubeMSI(): Promise<Test<AbstractGVLayer>> {
+    // Create a random geoview layer id
+    const gvLayerId = generateId();
+    const layerUrl = GVAbstractTester.DATACUBE_MSI;
+    const layerPath = gvLayerId + '/' + GVAbstractTester.DATACUBE_MSI_LAYER_NAME_MSI_OR_MORE;
+    const gvLayerName = 'Datacube MSI';
+
+    // Test
+    return this.test(
+      `Test Adding Datacube MSI on map...`,
+      (test) => {
+        // Creating the configuration
+        test.addStep('Creating the GeoView Layer Configuration...');
+
+        // Create the config
+        const gvConfig = WMS.createGeoviewLayerConfig(
+          gvLayerId,
+          gvLayerName,
+          layerUrl,
+          'mapserver',
+          false,
+          [{ id: GVAbstractTester.DATACUBE_MSI_LAYER_NAME_MSI_OR_MORE }],
+          false
+        );
+
+        // Redirect to helper to add the layer to the map and wait
+        return LayerTester.helperStepAddLayerOnMapAndWaitForIt(gvConfig, test, this.getMapViewer(), layerPath);
+      },
+      (test) => {
+        // Perform assertions
+        // Redirect to helper to check if the layer exists
+        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath);
+      },
+      (test) => {
+        // Redirect to helper to clean up and assert
+        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests adding an Esri Feature Forest Industry layer on the map.
+   * @returns {Promise<Test<AbstractGVLayer>>} A Promise resolving when the test completes.
+   */
+  testAddWMSLayerWithDatacubeRingOfFire(): Promise<Test<AbstractGVLayer>> {
+    // Create a random geoview layer id
+    const gvLayerId = generateId();
+    const layerUrl = GVAbstractTester.DATACUBE_RING_FIRE;
+    const layerPath = gvLayerId + '/' + GVAbstractTester.DATACUBE_RING_FIRE_LAYER_ID_HALIFAX;
+    const gvLayerName = 'Halifax';
+
+    // Test
+    return this.test(
+      `Test Adding Datacube Ring of Fire XML Halifax on map...`,
+      (test) => {
+        // Creating the configuration
+        test.addStep('Creating the GeoView Layer Configuration...');
+
+        // Create the config
+        const gvConfig = WMS.createGeoviewLayerConfig(
+          gvLayerId,
+          gvLayerName,
+          layerUrl,
+          'mapserver',
+          false,
+          [{ id: GVAbstractTester.DATACUBE_RING_FIRE_LAYER_ID_HALIFAX }],
+          false
+        );
+
+        // Redirect to helper to add the layer to the map and wait
+        return LayerTester.helperStepAddLayerOnMapAndWaitForIt(gvConfig, test, this.getMapViewer(), layerPath);
+      },
+      (test) => {
+        // Perform assertions
+        // Redirect to helper to check if the layer exists
+        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath);
+      },
+      (test) => {
+        // Redirect to helper to clean up and assert
+        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
       }
     );
   }
@@ -105,9 +312,9 @@ export class LayerTester extends GVAbstractTester {
    * @returns {Promise<AbstractGVLayer>} A promise that resolves to the fully loaded GeoView layer instance.
    * @static
    */
-  static async helperStepAddLayerOnMapAndWaitForIt(
+  static async helperStepAddLayerOnMapAndWaitForIt<T>(
     gvConfig: TypeGeoviewLayerConfig,
-    test: Test<AbstractGVLayer>,
+    test: Test<T>,
     mapViewer: MapViewer,
     layerPath: string
   ): Promise<AbstractGVLayer> {
@@ -123,14 +330,17 @@ export class LayerTester extends GVAbstractTester {
     // Wait for the layer to be fully added on the map
     await result.promiseLayer;
 
+    // Throw if errors
+    result.layer.throwAggregatedLayerLoadErrors();
+
     // Creating the configuration
-    test.addStep('Find the layer on the map...');
+    test.addStep(`Find the layer ${layerPath} on the map...`);
 
     // Get the layer
     const layer = mapViewer.layer.getGeoviewLayer(layerPath) as AbstractGVLayer;
 
     // Creating the configuration
-    test.addStep('Waiting for the layer to be loaded...');
+    test.addStep(`Waiting for the layer to be loaded...`);
 
     // Wait until the layer has at least loaded once
     await layer.waitLoadedOnce();
@@ -148,7 +358,7 @@ export class LayerTester extends GVAbstractTester {
    * @returns {void}
    * @static
    */
-  static helperStepAssertLayerExists(test: Test<AbstractGVLayer>, mapViewer: MapViewer, layerPath: string): void {
+  static helperStepAssertLayerExists<T>(test: Test<T>, mapViewer: MapViewer, layerPath: string): void {
     // Verify the layer is in the api
     test.addStep("Verify the store 'legendLayers' state...");
     const legendLayers = LegendEventProcessor.getLegendLayers(mapViewer.mapId);
@@ -167,7 +377,7 @@ export class LayerTester extends GVAbstractTester {
    * @returns {void}
    * @static
    */
-  static helperStepRemoveLayerAndAssert(test: Test<AbstractGVLayer>, mapViewer: MapViewer, layerPath: string): void {
+  static helperFinalizeStepRemoveLayerAndAssert<T>(test: Test<T>, mapViewer: MapViewer, layerPath: string): void {
     // Remove the added layer
     test.addStep(`Removing the layer ${layerPath} from the map...`);
     mapViewer.layer.removeLayerUsingPath(layerPath);
