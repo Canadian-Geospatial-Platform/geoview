@@ -11,6 +11,21 @@
       "items": {
         "type": "object",
         "properties": {
+          "layerPaths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "description": "Array of layer paths for the layers this time slider controls"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of fields corresponding to the layerPaths above that this time slider uses to filter each layer."
+          },
           "title": {
             "type": "string",
             "default": "Time slider title",
@@ -20,6 +35,25 @@
             "type": "string",
             "default": "Time slider description",
             "description": "The description to use."
+          },
+          "delay": {
+            "type": "number",
+            "default": 1000,
+            "enum": [
+              500,
+              750,
+              1000,
+              1500,
+              2000,
+              3000,
+              5000
+            ],
+            "description": "Delay between advances when play button is pressed"
+          },
+          "filtering": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether the time slider is filtering the layer(s) on the map"
           },
           "locked": {
             "type": "boolean",
