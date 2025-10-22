@@ -1503,34 +1503,55 @@ export class MapEventProcessor extends AbstractEventProcessor {
       const timeSliderProps: TypeTimeSliderProps[] = [];
       Object.keys(timeSliderLayers).forEach((layerPath) => {
         // Get values from time slider layers
-        const { title, description, locked, reversed, values, delay, filtering, range, discreteValues, displayPattern, field } =
-          timeSliderLayers[layerPath];
-
-        // Build time dimension
-        const timeDimension: TimeDimension = {
-          field,
-          default: values.map((value) => DateMgt.formatDateToISO(value)),
-          nearestValues: discreteValues ? 'discrete' : 'absolute',
-          displayPattern,
-          rangeItems: {
-            type: '',
-            range,
-          },
-          singleHandle: values.length === 1,
-          isValid: true,
-        };
-
-        // Add info to prop list
-        timeSliderProps.push({
-          layerPaths: [layerPath],
+        const {
+          additionalLayerpaths,
+          isMainLayerPath,
           title,
           description,
-          delay,
-          filtering,
           locked,
           reversed,
-          timeDimension,
-        });
+          values,
+          delay,
+          filtering,
+          range,
+          discreteValues,
+          displayPattern,
+          field,
+        } = timeSliderLayers[layerPath];
+
+        if (isMainLayerPath) {
+          // Build time dimension
+          const timeDimension: TimeDimension = {
+            field,
+            default: values.map((value) => DateMgt.formatDateToISO(value)),
+            nearestValues: discreteValues ? 'discrete' : 'absolute',
+            displayPattern,
+            rangeItems: {
+              type: '',
+              range,
+            },
+            singleHandle: values.length === 1,
+            isValid: true,
+          };
+
+          const fields = [field];
+          if (additionalLayerpaths) {
+            additionalLayerpaths.forEach((additionalLayerPath) => fields.push(timeSliderLayers[additionalLayerPath].field));
+          }
+
+          // Add info to prop list
+          timeSliderProps.push({
+            layerPaths: additionalLayerpaths ? [layerPath, ...additionalLayerpaths] : [layerPath],
+            title,
+            description,
+            delay,
+            fields,
+            filtering,
+            locked,
+            reversed,
+            timeDimension,
+          });
+        }
       });
 
       return timeSliderProps;

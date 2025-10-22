@@ -105,16 +105,21 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
       .map((layerPath) => {
         return { layerPath, timeSliderLayerInfo: timeSliderLayers?.[layerPath] };
       })
-      .filter((layer) => layer?.timeSliderLayerInfo && !isLayerHiddenOnMap(layer.layerPath))
+      .filter((layer) => layer?.timeSliderLayerInfo && !isLayerHiddenOnMap(layer.layerPath) && layer.timeSliderLayerInfo.isMainLayerPath)
       .map((layer) => {
+        const additionalNames = layer.timeSliderLayerInfo.additionalLayerpaths?.map(
+          (additionalLayerPath) => LegendEventProcessor.findLayerByPath(legendLayers, additionalLayerPath)?.layerName
+        );
+        const combinedAdditionalNames = additionalNames ? `, ${additionalNames.join(', ')}` : '';
+        const layerName =
+          layer.timeSliderLayerInfo.title ||
+          `${LegendEventProcessor.findLayerByPath(legendLayers, layer.layerPath)?.layerName}${combinedAdditionalNames}` ||
+          '';
         return {
-          layerName: LegendEventProcessor.findLayerByPath(legendLayers, layer.layerPath)?.layerName,
+          layerName,
           layerPath: layer.layerPath,
           layerFeatures: getFilterInfo(layer.timeSliderLayerInfo),
-          tooltip: getLayerTooltip(
-            layer.timeSliderLayerInfo,
-            LegendEventProcessor.findLayerByPath(legendLayers, layer.layerPath)?.layerName || ''
-          ),
+          tooltip: getLayerTooltip(layer.timeSliderLayerInfo, layerName),
           layerStatus: 'loaded',
           queryStatus: 'processed',
           layerUniqueId: `${mapId}-${TABS.TIME_SLIDER}-${layer.layerPath}`,
