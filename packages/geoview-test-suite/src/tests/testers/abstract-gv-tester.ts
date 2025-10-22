@@ -10,7 +10,7 @@ import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 export abstract class GVAbstractTester extends AbstractTester {
   /** GLOBAL CONSTANTS FOR THE TESTS */
 
-  /** Québec long lat */
+  /** Some long lat coordinates for map investigations */
   static readonly QUEBEC_LONLAT: Coordinate = [-71.356054449131, 46.78077550041052];
   static readonly MANITOBA_CENTER_LONLAT: Coordinate = [-86.73558298224057, 50.833271435899974];
 
@@ -59,6 +59,29 @@ export abstract class GVAbstractTester extends AbstractTester {
   static readonly DATACUBE_RING_FIRE: string = 'https://datacube.services.geo.ca/web/aerial.xml';
   static readonly DATACUBE_RING_FIRE_LAYER_ID_HALIFAX: string = 'halifax';
   static readonly DATACUBE_RING_FIRE_LAYER_ID_VICTORIA: string = 'victoria';
+
+  /** Geomet */
+  static readonly GEOMET_URL: string = 'https://geo.weather.gc.ca/geomet';
+  static readonly GEOMET_URL_CURRENT_COND_LAYER_ID: string = 'ec-msc:CURRENT_CONDITIONS';
+
+  /** Geojson */
+  static readonly GEOJSON_METADATA_META: string =
+    'https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata.meta';
+  static readonly GEOJSON_METADATA_META_FILE: string = 'metadata.meta';
+
+  static readonly CSV_STATION_LIST: string =
+    'https://canadian-geospatial-platform.github.io/geoview/public/datasets/csv-files/Station_List_Minus_HQ-MELCC.csv';
+  static readonly CSV_STATION_LIST_FILE: string = 'Station_List_Minus_HQ-MELCC.csv';
+
+  static readonly PYGEOAPI_B6RYUVAKK5: string = 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev';
+  static readonly PYGEOAPI_B6RYUVAKK5_LAKES: string = 'lakes';
+
+  static readonly WKB_SOUTH_AFRICA: string =
+    '0103000000010000000500000054E3A59BC4602540643BDF4F8D1739C05C8FC2F5284C4140EC51B81E852B34C0D578E926316843406F1283C0CAD141C01B2FDD2406012B40A4703D0AD79343C054E3A59BC4602540643BDF4F8D1739C0';
+
+  static readonly KML_TORNADO: string =
+    'https://canadian-geospatial-platform.github.io/geoview/public/datasets/kml-files/CanadianNationalTornadoDatabase_1980-2009.kml';
+  static readonly KML_TORNADO_FILE: string = 'CanadianNationalTornadoDatabase_1980-2009.kml';
 
   /** The API for the tests */
   #api: API;

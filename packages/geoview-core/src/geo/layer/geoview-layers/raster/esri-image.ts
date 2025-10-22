@@ -39,9 +39,12 @@ export class EsriImage extends AbstractGeoViewRaster {
    * Overrides the way a geoview layer config initializes its layer entries.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
    */
-  protected override onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
+  protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
+    // Attempt a fetch of the metadata
+    await this.onFetchServiceMetadata();
+
     // Redirect
-    // TODO: Check - Config init -Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
+    // TODO: Check - Config init - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
     return Promise.resolve(EsriImage.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, this.metadataAccessPath, false));
   }
 

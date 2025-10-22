@@ -64,10 +64,10 @@ export class OgcFeature extends AbstractGeoViewVector {
    * @returns {Promise<T = TypeMetadataOGCFeature>} A promise with the metadata or undefined when no metadata for the particular layer type.
    * @throws {LayerServiceMetadataUnableToFetchError} If the metadata fetch fails.
    */
-  protected override onFetchServiceMetadata<T = TypeMetadataOGCFeature>(abortSignal?: AbortSignal): Promise<T> {
+  protected override async onFetchServiceMetadata<T = TypeMetadataOGCFeature>(abortSignal?: AbortSignal): Promise<T> {
     try {
       // Fetch it
-      return OgcFeature.fetchMetadata(this.metadataAccessPath, abortSignal) as Promise<T>;
+      return (await OgcFeature.fetchMetadata(this.metadataAccessPath, abortSignal)) as T;
     } catch (error: unknown) {
       // Throw
       throw new LayerServiceMetadataUnableToFetchError(this.geoviewLayerId, this.getLayerEntryNameOrGeoviewLayerName(), formatError(error));
@@ -301,7 +301,7 @@ export class OgcFeature extends AbstractGeoViewVector {
   ): Promise<TypeGeoviewLayerConfig> {
     // Create the Layer config
     const myLayer = new OgcFeature({ geoviewLayerId, geoviewLayerName, metadataAccessPath } as TypeOgcFeatureLayerConfig);
-    return myLayer.initGeoViewLayerEntries();
+    return myLayer.onInitLayerEntries();
   }
 
   /**
