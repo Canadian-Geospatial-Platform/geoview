@@ -429,7 +429,7 @@ export class LayerApi {
       } else {
         // Depending on the error
         let uuids;
-        if (promise.reason instanceof LayerGeoCoreError) {
+        if (promise.status === 'rejected' && promise.reason instanceof LayerGeoCoreError) {
           ({ uuids } = promise.reason);
         }
 

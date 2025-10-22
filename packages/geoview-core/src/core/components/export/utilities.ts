@@ -23,7 +23,7 @@ if (typeof window !== 'undefined') {
   (window as typeof globalThis).Buffer = Buffer;
 }
 
-export type TypeValidPageSizes = 'LETTER' | 'TABLOID' | 'LEGAL' | 'AUTO';
+export type TypeValidPageSizes = 'AUTO';
 
 export type TypeMapStateForExportLayout = {
   attribution: string[];
@@ -71,25 +71,10 @@ export const PAGE_CONFIGS = {
 
 // Export dimension constants at 300DPI
 const MAP_IMAGE_DIMENSIONS = {
-  LETTER: {
-    // 8.5" X 11" => 612 X 792 @ 72dpi
-    width: 2250,
-    height: 1500,
-  },
-  TABLOID: {
-    // 11" X 17" => 792 X 1224 @ 72dpi
-    width: 2900,
-    height: 2300,
-  },
-  LEGAL: {
-    // 8.5" X 14" => 612 X 1008 @ 72 dpi
-    width: 2250,
-    height: 1900,
-  },
   AUTO: {
-    // Same width as LETTER, height calculated dynamically
-    width: 2250,
-    height: 1500, // Default, will be recalculated
+    // Width and height calculated dynamically
+    width: 100, // Default, will be recalculated
+    height: 100, // Default, will be recalculated
   },
 };
 
@@ -406,7 +391,7 @@ export async function getMapInfo(
 
   // Get browser map dimensions first for AUTO mode
   const viewport = mapElement.getElementsByClassName('ol-viewport')[0];
-  const browserCanvas = viewport.querySelector('canvas:not(.ol-overviewmap canvas)');
+  const browserCanvas = viewport.querySelector('canvas:not(.ol-overviewmap canvas)') as HTMLCanvasElement;
   const browserMapWidth = browserCanvas ? browserCanvas.width : 800;
   const browserMapHeight = browserCanvas ? browserCanvas.height : 600;
 
@@ -550,7 +535,7 @@ export async function getMapInfo(
   });
 
   // For AUTO format, calculate required height and create modified config
-  let finalConfig = config;
+  let finalConfig: TypePageConfig = config;
 
   if (pageSize === 'AUTO') {
     const totalLegendHeight = itemsWithHeights.reduce((sum, item) => sum + estimateItemHeight(item, pageSize), 0);
@@ -561,10 +546,12 @@ export async function getMapInfo(
 
     const calculatedHeight = titleHeight + mapHeight + scaleHeight + totalLegendHeight + footerHeight + SHARED_STYLES.padding * 2;
     finalConfig = {
-      ...config,
+      size: 'AUTO' as const,
+      mapHeight: config.mapHeight,
+      legendColumns: config.legendColumns,
+      maxLegendHeight: Infinity,
       canvasWidth: mapImageWidth,
       canvasHeight: Math.max(calculatedHeight, 400),
-      maxLegendHeight: Infinity,
     };
   }
 
@@ -603,7 +590,14 @@ export async function getMapInfo(
 
   // Update PAGE_CONFIGS for AUTO format to ensure canvas layout gets correct dimensions
   if (pageSize === 'AUTO') {
-    PAGE_CONFIGS.AUTO = finalConfig;
+    PAGE_CONFIGS.AUTO = {
+      size: 'AUTO' as const,
+      mapHeight: finalConfig.mapHeight,
+      legendColumns: finalConfig.legendColumns,
+      maxLegendHeight: finalConfig.maxLegendHeight,
+      canvasWidth: finalConfig.canvasWidth,
+      canvasHeight: finalConfig.canvasHeight,
+    };
   }
 
   return {
