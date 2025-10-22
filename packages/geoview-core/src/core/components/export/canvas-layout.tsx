@@ -5,86 +5,7 @@ import { DateMgt } from '@/core/utils/date-mgt';
 import type { FileExportProps } from './export-modal';
 import type { FlattenedLegendItem, TypeValidPageSizes } from './utilities';
 import { PAGE_CONFIGS, getMapInfo } from './utilities';
-import { CANVAS_STYLES } from './layout-styles';
-
-/**
- * Get scaled styles for AUTO mode
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getScaledCanvasStyles = (pageSize: TypeValidPageSizes, docWidth: number): any => {
-  if (pageSize !== 'AUTO') return CANVAS_STYLES;
-
-  // Match PDF scaling approach exactly
-  const scale = docWidth / 612;
-  return {
-    ...CANVAS_STYLES,
-    layerText: (marginTop: string) => ({
-      ...CANVAS_STYLES.layerText(marginTop),
-      fontSize: `${parseInt(CANVAS_STYLES.layerText('0').fontSize) * scale}px`,
-      wordWrap: 'break-word',
-      overflowWrap: 'break-word',
-    }),
-    childText: (indentLevel: number) => ({
-      ...CANVAS_STYLES.childText(indentLevel),
-      fontSize: `${parseInt(CANVAS_STYLES.childText(0).fontSize) * scale}px`,
-      wordWrap: 'break-word',
-      overflowWrap: 'break-word',
-    }),
-    timeText: (indentLevel: number) => ({
-      ...CANVAS_STYLES.timeText(indentLevel),
-      fontSize: `${parseInt(CANVAS_STYLES.timeText(0).fontSize) * scale}px`,
-      wordWrap: 'break-word',
-      overflowWrap: 'break-word',
-    }),
-    itemText: {
-      ...CANVAS_STYLES.itemText,
-      fontSize: `${parseInt(CANVAS_STYLES.itemText.fontSize) * scale}px`,
-      wordWrap: 'break-word',
-      overflowWrap: 'break-word',
-    },
-    title: {
-      ...CANVAS_STYLES.title,
-      fontSize: `${parseInt(CANVAS_STYLES.title.fontSize) * scale}px`,
-    },
-    scaleText: {
-      ...CANVAS_STYLES.scaleText,
-      fontSize: `${parseInt(CANVAS_STYLES.scaleText.fontSize) * scale}px`,
-    },
-    footerDisclaimer: {
-      ...CANVAS_STYLES.footerDisclaimer,
-      fontSize: `${CANVAS_STYLES.footerDisclaimer.fontSize * scale}px`,
-    },
-    footerAttribution: {
-      ...CANVAS_STYLES.footerAttribution,
-      fontSize: `${CANVAS_STYLES.footerAttribution.fontSize * scale}px`,
-    },
-    footerDate: {
-      ...CANVAS_STYLES.footerDate,
-      fontSize: `${CANVAS_STYLES.footerDate.fontSize * scale}px`,
-    },
-    northArrow: {
-      ...CANVAS_STYLES.northArrow,
-      width: `${parseInt(CANVAS_STYLES.northArrow.width) * scale}px`,
-      height: `${parseInt(CANVAS_STYLES.northArrow.height) * scale}px`,
-    },
-    northArrowSvg: {
-      ...CANVAS_STYLES.northArrowSvg,
-      width: `${parseInt(CANVAS_STYLES.northArrowSvg.width) * scale}px`,
-      height: `${parseInt(CANVAS_STYLES.northArrowSvg.height) * scale}px`,
-    },
-    itemIcon: {
-      ...CANVAS_STYLES.itemIcon,
-      width: `${parseInt(CANVAS_STYLES.itemIcon.width) * scale}px`,
-      height: `${parseInt(CANVAS_STYLES.itemIcon.height) * scale}px`,
-    },
-    wmsImage: {
-      ...CANVAS_STYLES.wmsImage,
-      maxWidth: '100%',
-      width: 'auto',
-      objectFit: 'contain',
-    },
-  };
-};
+import { CANVAS_STYLES, getScaledCanvasStyles } from './layout-styles';
 
 interface CanvasDocumentProps {
   mapDataUrl: string;
@@ -109,7 +30,7 @@ interface CanvasDocumentProps {
  * Render legend items in rows with proper alignment and dividers
  */
 const renderCanvasLegendInRows = (columns: FlattenedLegendItem[][], pageSize: TypeValidPageSizes, canvasWidth: number): JSX.Element => {
-  const scaledStyles = getScaledCanvasStyles(pageSize, canvasWidth);
+  const scaledStyles = getScaledCanvasStyles(canvasWidth);
   const allItems: FlattenedLegendItem[] = [];
 
   // Flatten all columns into single array
@@ -158,8 +79,8 @@ const renderCanvasLegendInRows = (columns: FlattenedLegendItem[][], pageSize: Ty
                 width: `${100 / rowGroups.length}%`,
                 display: 'flex',
                 flexDirection: 'column',
-                alignItems: 'flex-start',
-                alignSelf: 'flex-start',
+                flex: 1,
+                minWidth: 0,
               }}
             >
               {group.map((item, index) => {
@@ -239,7 +160,7 @@ export function CanvasDocument({
   pageSize,
 }: CanvasDocumentProps): JSX.Element {
   const { canvasWidth, canvasHeight } = PAGE_CONFIGS[pageSize];
-  const scaledStyles = getScaledCanvasStyles(pageSize, canvasWidth);
+  const scaledStyles = getScaledCanvasStyles(canvasWidth);
 
   return (
     <div style={CANVAS_STYLES.page(canvasWidth, canvasHeight)}>

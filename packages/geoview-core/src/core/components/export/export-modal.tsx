@@ -29,7 +29,7 @@ import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-inti
 import { exportFile } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 
-import { createPDFMapUrl } from './pdf-layout-auto';
+import { createPDFMapUrl } from './pdf-layout';
 import { createCanvasMapUrls } from './canvas-layout';
 import { getSxClasses } from './export-modal-style';
 
@@ -185,6 +185,8 @@ export default function ExportModal(): JSX.Element {
     };
   }, [activeModalId, generatePreview, mapElement]);
 
+  // #region HANDLERS
+
   const handleExport = useCallback(() => {
     logger.logTraceUseCallback('EXPORT-MODAL - handleExport');
     performExport().catch((error) => logger.logError(error));
@@ -249,6 +251,8 @@ export default function ExportModal(): JSX.Element {
     },
     [handleQualityMenuClose]
   );
+
+  // #endregion HANDLERS
 
   return (
     <Dialog open={activeModalId === 'export'} onClose={handleCloseModal} fullWidth maxWidth="xl" disablePortal>
