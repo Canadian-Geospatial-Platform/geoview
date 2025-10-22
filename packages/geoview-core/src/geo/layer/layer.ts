@@ -453,7 +453,7 @@ export class LayerApi {
     // For each layers in the fulfilled promises only
     promisedLayers.forEach((promise) => {
       // If fullfilled
-      if (promise.status === 'fulfilled') {
+      if (promise.status === 'fulfilled' && promise.value !== undefined) {
         // Get the geoview layer config
         const geoviewLayerConfig = promise.value;
 
@@ -479,7 +479,7 @@ export class LayerApi {
         }
 
         // For each uuid that failed
-        uuids?.forEach((uuid) => {
+        uuids?.forEach((uuid: string) => {
           // Get the index at which the TypeGeoviewLayerConfig happened
           const index = validGeoviewLayerConfigs.findIndex((mapLayerEntry) => mapLayerEntry.geoviewLayerId === uuid);
 

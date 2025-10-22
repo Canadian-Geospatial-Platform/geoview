@@ -24,8 +24,8 @@ export const SHARED_STYLES = {
   titleMarginBottom: 10,
   mapMarginBottom: 10,
   scaleMarginBottom: 10,
-  legendMarginTop: 5,
-  legendMarginBottom: 5,
+  legendMarginTop: 2,
+  legendMarginBottom: 2,
   layerMarginBottom: 3,
   layerMarginTop: 8,
   wmsMarginBottom: 2,
@@ -53,10 +53,12 @@ export const SHARED_STYLES = {
   // Legend
   legendGap: 10,
   legendPaddingLeft: 2,
+  rowDividerHeight: 1,
+  rowDividerMargin: 8,
 
   // WMS
-  wmsImageWidth: 80,
-  wmsImageMaxHeight: 100,
+  wmsImageWidth: 250,
+  wmsImageMaxHeight: 600,
 
   // Item icons
   itemIconSize: 8,
@@ -126,10 +128,9 @@ export const PDF_STYLES = {
     height: SHARED_STYLES.northArrowSize,
   },
   legendContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
     alignItems: 'flex-start',
-    gap: SHARED_STYLES.legendGap,
     paddingLeft: SHARED_STYLES.legendPaddingLeft,
     marginTop: SHARED_STYLES.legendMarginTop,
     marginBottom: SHARED_STYLES.legendMarginBottom,
@@ -147,7 +148,7 @@ export const PDF_STYLES = {
     marginBottom: SHARED_STYLES.wmsMarginBottom,
   }),
   wmsImage: {
-    width: SHARED_STYLES.wmsImageWidth,
+    maxWidth: SHARED_STYLES.wmsImageWidth,
     maxHeight: SHARED_STYLES.wmsImageMaxHeight,
     objectFit: 'contain',
   },
@@ -155,6 +156,7 @@ export const PDF_STYLES = {
     fontSize: SHARED_STYLES.timeFontSize,
     fontStyle: 'italic' as const,
     marginLeft: indentLevel,
+
     marginBottom: SHARED_STYLES.timeMarginBottom,
   }),
   childText: (indentLevel: number) => ({
@@ -178,13 +180,13 @@ export const PDF_STYLES = {
   itemText: {
     fontSize: SHARED_STYLES.itemFontSize,
     flexShrink: 1,
-    flexWrap: 'nowrap',
-    whiteSpace: 'nowrap',
+    flexWrap: 'wrap',
+    whiteSpace: 'wrap',
   },
   footer: {
     fontSize: `${SHARED_STYLES.footerFontSize}px`,
-    position: 'absolute',
-    bottom: SHARED_STYLES.footerBottom,
+    marginTop: 'auto',
+    paddingTop: 5,
     left: SHARED_STYLES.padding,
     right: SHARED_STYLES.padding,
   },
@@ -215,6 +217,21 @@ export const PDF_STYLES = {
     paddingLeft: SHARED_STYLES.legendPaddingLeft,
     marginTop: SHARED_STYLES.overflowMarginTop,
     marginBottom: SHARED_STYLES.overflowMarginBottom,
+  },
+  rowContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    gap: SHARED_STYLES.legendGap,
+    width: '100%',
+    paddingTop: SHARED_STYLES.rowDividerMargin,
+    paddingBottom: SHARED_STYLES.rowDividerMargin,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.darkGrey,
+    borderTopStyle: 'solid',
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.darkGrey,
+    borderBottomStyle: 'solid',
   },
 } as const;
 
@@ -287,12 +304,26 @@ export const CANVAS_STYLES = {
   },
   legendContainer: {
     display: 'flex',
-    justifyContent: 'center',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
     alignItems: 'flex-start',
-    gap: `${SHARED_STYLES.legendGap}px`,
     paddingLeft: `${SHARED_STYLES.legendPaddingLeft}px`,
     marginTop: `${SHARED_STYLES.legendMarginTop}px`,
     marginBottom: `${SHARED_STYLES.legendMarginBottom}px`,
+    width: '100%',
+    boxSizing: 'border-box',
+  },
+  rowContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    gap: `${SHARED_STYLES.legendGap}px`,
+    width: '100%',
+    paddingTop: `${SHARED_STYLES.rowDividerMargin}px`,
+    paddingBottom: `${SHARED_STYLES.rowDividerMargin}px`,
+    borderTop: `1px solid ${COLORS.darkGrey}`,
+    borderBottom: `1px solid ${COLORS.darkGrey}`,
   },
   layerText: (marginTop: string) => ({
     fontSize: `${SHARED_STYLES.layerFontSize}px`,
@@ -337,13 +368,13 @@ export const CANVAS_STYLES = {
   },
   itemText: {
     fontSize: `${SHARED_STYLES.itemFontSize}px`,
-    flexWrap: 'nowrap',
-    whiteSpace: 'nowrap',
+    flexWrap: 'wrap',
+    whiteSpace: 'wrap',
   },
   footer: {
     fontSize: `${SHARED_STYLES.footerFontSize}px`,
     textAlign: 'center',
-    marginTop: 'auto',
+    marginTop: '5px',
     paddingTop: `${SHARED_STYLES.legendMarginTop * 4}px`,
   },
   footerDisclaimer: {

@@ -23,7 +23,7 @@ if (typeof window !== 'undefined') {
   (window as typeof globalThis).Buffer = Buffer;
 }
 
-export type TypeValidPageSizes = 'LETTER' | 'TABLOID' | 'LEGAL';
+export type TypeValidPageSizes = 'LETTER' | 'TABLOID' | 'LEGAL' | 'AUTO';
 
 export type TypeMapStateForExportLayout = {
   attribution: string[];
@@ -66,6 +66,7 @@ export const PAGE_CONFIGS = {
   LETTER: { size: 'LETTER' as const, mapHeight: 400, legendColumns: 4, maxLegendHeight: 375, canvasWidth: 612, canvasHeight: 792 },
   LEGAL: { size: 'LEGAL' as const, mapHeight: 600, legendColumns: 4, maxLegendHeight: 425, canvasWidth: 612, canvasHeight: 1008 },
   TABLOID: { size: 'TABLOID' as const, mapHeight: 800, legendColumns: 6, maxLegendHeight: 550, canvasWidth: 792, canvasHeight: 1224 },
+  AUTO: { size: 'AUTO' as const, mapHeight: 400, legendColumns: 4, maxLegendHeight: Infinity, canvasWidth: 612, canvasHeight: 0 }, // Height calculated dynamically
 };
 
 // Export dimension constants at 300DPI
@@ -85,6 +86,11 @@ const MAP_IMAGE_DIMENSIONS = {
     width: 2250,
     height: 1900,
   },
+  AUTO: {
+    // Same width as LETTER, height calculated dynamically
+    width: 2250,
+    height: 1500, // Default, will be recalculated
+  },
 };
 
 /**
@@ -99,8 +105,12 @@ const calculateWMSImageHeight = (imageUrl: string | undefined): Promise<number> 
       const maxWidth = SHARED_STYLES.wmsImageWidth;
       const maxHeight = SHARED_STYLES.wmsImageMaxHeight;
 
-      const aspectRatio = img.height / img.width;
-      const scaledHeight = Math.min(maxWidth * aspectRatio, maxHeight);
+      // Use real image dimensions, constrained by max width and height
+      const widthScale = maxWidth / img.width;
+      const heightScale = maxHeight / img.height;
+      const scale = Math.min(widthScale, heightScale, 1); // Don't scale up
+
+      const scaledHeight = img.height * scale;
 
       resolve(scaledHeight + SHARED_STYLES.wmsMarginBottom);
     };
@@ -286,13 +296,22 @@ export const processLegendLayers = (
 };
 
 /**
+ * Check if a group contains wide content that should trigger overflow
+ * @param {FlattenedLegendItem[]} group - The group to check
+ * @returns {boolean} True if group contains wide content
+ */
+// const hasWideContent = (group: FlattenedLegendItem[]): boolean => {
+//   return group.some((item) => item.type === 'wms');
+// };
+
+/**
  * Group items by their root layer and distribute in the columns
  * @param {FlattenedLegendItem[]} items - The flattened list of legend items to be placed in the legend
  * @param {number} numColumns - The maximum number of columns that can be used
  * @param {number} maxHeight - The maximum height available on the rest of the page
  * @param {string} disclaimer - The disclaimer text to be displayed in the footer
  * @param {string[]} attributions - The attributions to be displayed in the footer
- * @returns {FlattenedLegendItem[][]} The flattened legend items distributed between the columns
+ * @returns {FlattenedLegendItem[][][]} The flattened legend items distributed into rows and columns
  */
 export const distributeIntoColumns = (
   items: FlattenedLegendItem[],
@@ -336,12 +355,19 @@ export const distributeIntoColumns = (
   groups.forEach((group) => {
     const groupHeight = group.reduce((sum, item) => sum + estimateItemHeight(item, pageSize), 0);
 
+    // For AUTO mode, don't create overflow - fit everything on one page
+    if (pageSize === 'AUTO') {
+      // Always fit content in AUTO mode
+    }
+
     // Find the column with the least content that can fit this entire group
     let targetColumn = -1;
     let minHeight = Infinity;
 
     for (let i = 0; i < numColumns; i++) {
-      if (columnHeights[i] + groupHeight <= adjustedMaxHeight && columnHeights[i] < minHeight) {
+      // For AUTO format, ignore height constraints unless it's wide content
+      const canFit = pageSize === 'AUTO' || columnHeights[i] + groupHeight <= adjustedMaxHeight;
+      if (canFit && columnHeights[i] < minHeight) {
         targetColumn = i;
         minHeight = columnHeights[i];
       }
@@ -378,9 +404,24 @@ export async function getMapInfo(
   const mapState = MapEventProcessor.getMapStateForExportLayout(mapId);
   const { northArrow, northArrowElement, attribution, mapRotation, mapScale } = mapState;
 
+  // Get browser map dimensions first for AUTO mode
+  const viewport = mapElement.getElementsByClassName('ol-viewport')[0];
+  const browserCanvas = viewport.querySelector('canvas:not(.ol-overviewmap canvas)');
+  const browserMapWidth = browserCanvas ? browserCanvas.width : 800;
+  const browserMapHeight = browserCanvas ? browserCanvas.height : 600;
+
   // Adjust map to correct aspect ratio for PDF map
-  const mapImageWidth = MAP_IMAGE_DIMENSIONS[pageSize].width;
-  const mapImageHeight = MAP_IMAGE_DIMENSIONS[pageSize].height;
+  let mapImageWidth = MAP_IMAGE_DIMENSIONS[pageSize].width;
+  let mapImageHeight = MAP_IMAGE_DIMENSIONS[pageSize].height;
+
+  // For AUTO mode, use exact browser dimensions to maintain same extent
+  if (pageSize === 'AUTO') {
+    mapImageWidth = browserMapWidth;
+    mapImageHeight = browserMapHeight;
+    // Update MAP_IMAGE_DIMENSIONS for AUTO mode
+    MAP_IMAGE_DIMENSIONS.AUTO.width = browserMapWidth;
+    MAP_IMAGE_DIMENSIONS.AUTO.height = browserMapHeight;
+  }
 
   const resultCanvas = document.createElement('canvas');
   resultCanvas.width = mapImageWidth;
@@ -389,8 +430,6 @@ export async function getMapInfo(
 
   if (!resultContext) throw new Error('Canvas context not available');
 
-  const viewport = mapElement.getElementsByClassName('ol-viewport')[0];
-
   // Apply rotation if needed
   if (mapRotation !== 0) {
     resultContext.save();
@@ -398,7 +437,7 @@ export async function getMapInfo(
     resultContext.rotate(mapRotation);
   }
 
-  let browserMapWidth;
+  let actualBrowserMapWidth;
 
   // GV This tries it's best to fit the map image into the canvas. However;
   // GV.Cont at close to 45 degrees, there will be unfetched tiles in the corners
@@ -409,7 +448,7 @@ export async function getMapInfo(
       resultContext.globalAlpha = opacity === '' ? 1 : Number(opacity);
 
       // Calculate scaling for the map
-      browserMapWidth = canvas.width;
+      actualBrowserMapWidth = canvas.width;
       const scaleX = mapImageWidth / canvas.width;
       const scaleY = mapImageHeight / canvas.height;
       const canvasScale = Math.max(scaleX, scaleY); // Fill completely, may crop edges
@@ -430,7 +469,7 @@ export async function getMapInfo(
   });
 
   // Calculate scale line width
-  const pdfScaleFactor = browserMapWidth! / mapImageWidth;
+  const pdfScaleFactor = actualBrowserMapWidth! / mapImageWidth;
   const pdfScaleWidth = Math.round(parseFloat(mapScale.lineWidthMetric) * pdfScaleFactor);
   const scaleLineWidth = `${pdfScaleWidth}px`;
 
@@ -482,12 +521,12 @@ export async function getMapInfo(
   // Clean legend data
   const cleanLegendLayers = legendLayers.map((layer) => ({
     ...layer,
-    layerName: layer.layerName || 'Unnamed Layer',
+    layerName: layer.layerName,
     items: layer.items
       .filter((item) => item && item.name)
       .map((item) => ({
         ...item,
-        name: item.name || 'Unnamed Item',
+        name: item.name,
         icon: item.icon || null,
       })),
   }));
@@ -510,20 +549,61 @@ export async function getMapInfo(
     return item;
   });
 
+  // For AUTO format, calculate required height and create modified config
+  let finalConfig = config;
+
+  if (pageSize === 'AUTO') {
+    const totalLegendHeight = itemsWithHeights.reduce((sum, item) => sum + estimateItemHeight(item, pageSize), 0);
+    const footerHeight = estimateFooterHeight(disclaimer, attribution);
+    const titleHeight = title && title.trim() ? SHARED_STYLES.titleFontSize + SHARED_STYLES.titleMarginBottom : 0;
+    const mapHeight = mapImageHeight + SHARED_STYLES.mapMarginBottom;
+    const scaleHeight = SHARED_STYLES.scaleFontSize + SHARED_STYLES.scaleMarginBottom + SHARED_STYLES.legendMarginTop;
+
+    const calculatedHeight = titleHeight + mapHeight + scaleHeight + totalLegendHeight + footerHeight + SHARED_STYLES.padding * 2;
+    finalConfig = {
+      ...config,
+      canvasWidth: mapImageWidth,
+      canvasHeight: Math.max(calculatedHeight, 400),
+      maxLegendHeight: Infinity,
+    };
+  }
+
   const { fittedColumns, overflowItems } = distributeIntoColumns(
     itemsWithHeights,
-    config.legendColumns,
-    config.maxLegendHeight,
+    finalConfig.legendColumns,
+    finalConfig.maxLegendHeight,
     disclaimer,
     attribution,
     pageSize,
     title
   );
 
+  // For AUTO mode, merge overflow items back into main columns to prevent page breaks
   let fittedOverflowItems;
-  if (overflowItems) {
-    const distributedOverflow = distributeIntoColumns(overflowItems, config.legendColumns, config.maxLegendHeight, '', [], pageSize);
+  if (pageSize === 'AUTO' && overflowItems && overflowItems.length > 0) {
+    // Add overflow items to the least filled column
+    let minColumnIndex = 0;
+    let minColumnLength = fittedColumns[0]?.length || 0;
+
+    for (let i = 1; i < fittedColumns.length; i++) {
+      if ((fittedColumns[i]?.length || 0) < minColumnLength) {
+        minColumnIndex = i;
+        minColumnLength = fittedColumns[i]?.length || 0;
+      }
+    }
+
+    fittedColumns[minColumnIndex] = [...(fittedColumns[minColumnIndex] || []), ...overflowItems];
+  } else if (overflowItems && overflowItems.length > 0 && pageSize !== 'AUTO') {
+    // Use full page height for overflow page (no map, title, or footer)
+    const overflowMaxHeight =
+      finalConfig.canvasHeight - SHARED_STYLES.padding * 2 - SHARED_STYLES.overflowMarginTop - SHARED_STYLES.overflowMarginBottom;
+    const distributedOverflow = distributeIntoColumns(overflowItems, finalConfig.legendColumns, overflowMaxHeight, '', [], pageSize);
     fittedOverflowItems = distributedOverflow.fittedColumns;
+  }
+
+  // Update PAGE_CONFIGS for AUTO format to ensure canvas layout gets correct dimensions
+  if (pageSize === 'AUTO') {
+    PAGE_CONFIGS.AUTO = finalConfig;
   }
 
   return {
