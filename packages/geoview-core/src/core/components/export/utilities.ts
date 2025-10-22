@@ -340,11 +340,6 @@ export const distributeIntoColumns = (
   groups.forEach((group) => {
     const groupHeight = group.reduce((sum, item) => sum + estimateItemHeight(item, pageSize), 0);
 
-    // For AUTO mode, don't create overflow - fit everything on one page
-    if (pageSize === 'AUTO') {
-      // Always fit content in AUTO mode
-    }
-
     // Find the column with the least content that can fit this entire group
     let targetColumn = -1;
     let minHeight = Infinity;
@@ -551,7 +546,7 @@ export async function getMapInfo(
       legendColumns: config.legendColumns,
       maxLegendHeight: Infinity,
       canvasWidth: mapImageWidth,
-      canvasHeight: Math.max(calculatedHeight, 400),
+      canvasHeight: calculatedHeight,
     };
   }
 

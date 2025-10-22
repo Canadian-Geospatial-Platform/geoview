@@ -5,9 +5,7 @@ import { DateMgt } from '@/core/utils/date-mgt';
 import type { FlattenedLegendItem, TypeValidPageSizes } from './utilities';
 import { getMapInfo, PAGE_CONFIGS } from './utilities';
 import type { FileExportProps } from './export-modal';
-import { PDF_STYLES } from './layout-styles';
-// import { width } from '@mui/system/sizing';
-// import type { AnyARecord } from 'node:dns';
+import { PDF_STYLES, getScaledPDFStyles } from './layout-styles';
 
 interface ExportDocumentProps {
   mapDataUrl: string;
@@ -135,70 +133,6 @@ const renderLegendInRows = (columns: FlattenedLegendItem[][], styles: any): JSX.
   );
 };
 
-/**
- * Get scaled styles for AUTO mode
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getScaledStyles = (pageSize: TypeValidPageSizes, docWidth: number): any => {
-  if (pageSize !== 'AUTO') return PDF_STYLES;
-
-  const scale = docWidth / 612;
-  return {
-    ...PDF_STYLES,
-    layerText: (marginTop: number) => ({
-      ...PDF_STYLES.layerText(marginTop),
-      fontSize: PDF_STYLES.layerText(0).fontSize * scale,
-    }),
-    childText: (indentLevel: number) => ({
-      ...PDF_STYLES.childText(indentLevel),
-      fontSize: PDF_STYLES.childText(0).fontSize * scale,
-    }),
-    timeText: (indentLevel: number) => ({
-      ...PDF_STYLES.timeText(indentLevel),
-      fontSize: PDF_STYLES.timeText(0).fontSize * scale,
-    }),
-    itemText: {
-      ...PDF_STYLES.itemText,
-      fontSize: PDF_STYLES.itemText.fontSize * scale,
-    },
-    title: {
-      ...PDF_STYLES.title,
-      fontSize: PDF_STYLES.title.fontSize * scale,
-    },
-    scaleText: {
-      ...PDF_STYLES.scaleText,
-      fontSize: PDF_STYLES.scaleText.fontSize * scale,
-    },
-    footerDisclaimer: {
-      ...PDF_STYLES.footerDisclaimer,
-      fontSize: PDF_STYLES.footerDisclaimer.fontSize * scale,
-    },
-    footerAttribution: {
-      ...PDF_STYLES.footerAttribution,
-      fontSize: PDF_STYLES.footerAttribution.fontSize * scale,
-    },
-    footerDate: {
-      ...PDF_STYLES.footerDate,
-      fontSize: PDF_STYLES.footerDate.fontSize * scale,
-    },
-    northArrow: {
-      ...PDF_STYLES.northArrow,
-      width: PDF_STYLES.northArrow.width * scale,
-      height: PDF_STYLES.northArrow.height * scale,
-    },
-    northArrowSvg: {
-      ...PDF_STYLES.northArrowSvg,
-      width: PDF_STYLES.northArrowSvg.width * scale,
-      height: PDF_STYLES.northArrowSvg.height * scale,
-    },
-    itemIcon: {
-      ...PDF_STYLES.itemIcon,
-      width: PDF_STYLES.itemIcon.width * scale,
-      height: PDF_STYLES.itemIcon.height * scale,
-    },
-  };
-};
-
 export function ExportDocument({
   mapDataUrl,
   exportTitle,
@@ -215,7 +149,7 @@ export function ExportDocument({
 }: ExportDocumentProps): JSX.Element {
   const config = PAGE_CONFIGS[pageSize];
   const pageDimensions = [config.canvasWidth, config.canvasHeight];
-  const scaledStyles = getScaledStyles(pageSize, config.canvasWidth);
+  const scaledStyles = getScaledPDFStyles(config.canvasWidth);
 
   return (
     <Document>
