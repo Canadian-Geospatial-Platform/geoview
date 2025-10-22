@@ -182,7 +182,7 @@ export class LayerTester extends GVAbstractTester {
 
     // Test
     return this.test(
-      `Test Adding Datacube MSI on map...`,
+      `Test Adding WMS Datacube MSI on map...`,
       (test) => {
         // Creating the configuration
         test.addStep('Creating the GeoView Layer Configuration...');
@@ -226,7 +226,7 @@ export class LayerTester extends GVAbstractTester {
 
     // Test
     return this.test(
-      `Test Adding Datacube Ring of Fire XML Halifax on map...`,
+      `Test Adding WMS Datacube Ring of Fire XML Halifax on map...`,
       (test) => {
         // Creating the configuration
         test.addStep('Creating the GeoView Layer Configuration...');

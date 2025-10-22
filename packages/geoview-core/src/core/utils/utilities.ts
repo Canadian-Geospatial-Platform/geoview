@@ -540,6 +540,7 @@ function _whenThisThenThat<T>(
 
   // If expired
   if (Date.now() - startDate.getTime() > timeout) {
+    // Failed, took too long, this throws an exception in typical async/await contexts
     failCallback(`Task abandoned: exceeded timeout of ${timeout} ms.`);
     return;
   }

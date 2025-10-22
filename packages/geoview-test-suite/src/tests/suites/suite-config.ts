@@ -28,11 +28,24 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
    * @returns {Promise<unknown>} A Promise which resolves when tests are completed.
    */
   protected override onLaunchTestSuite(): Promise<unknown> {
+    // GV START DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
+    // Test DEBUG
+    // const pDevTest0 = this.#configTester.testWKBWithSouthAfrica();
+    // const pDevTest1 = this.#configTester.testKMLWithTornado();
+    // const pDevTest2 = this.#configTester.testKMLBadUrlExpectSkip();
+
+    // Resolve when all
+    // return Promise.all([pDevTest0, pDevTest1, pDevTest2]);
+    // GV END DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
+
     // Test EsriDynamic HistoricalFloodconfig
     const pEsriDynamicHistoFlood = this.#configTester.testEsriDynamicWithHistoricalFloodEvents();
 
     // Test EsriDynamic CESI config
     const pEsriDynamicCESI = this.#configTester.testEsriDynamicWithCESI();
+
+    // Test a true negative
+    const pEsriDynamicBadUrl = this.#configTester.testEsriDynamicBadUrl();
 
     // Test EsriFeature TorontoNeighbourhoods config
     const pEsriFeatureToronto = this.#configTester.testEsriFeatureWithTorontoNeighbourhoods();
@@ -43,8 +56,14 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
     // Test EsriFeature Forest Industry config
     const pEsriFeatureForest = this.#configTester.testEsriFeatureWithForestIndustry();
 
+    // Test a true negative
+    const pEsriFeatureBadUrl = this.#configTester.testEsriFeatureBadUrl();
+
     // Test EsriImage Elevation config
     const pEsriImage = this.#configTester.testEsriImageWithElevation();
+
+    // Test a true negative
+    const pEsriImageBadUrl = this.#configTester.testEsriImageBadUrl();
 
     // Test WMS OWSMundialis config
     const pWMSMundialis = this.#configTester.testWMSLayerWithOWSMundialis();
@@ -53,23 +72,78 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
     const pWMSDatacubeMSI = this.#configTester.testWMSLayerWithDatacubeMSI();
 
     // Test a true negative
-    const pEsriDynamicBadUrl = this.#configTester.testEsriDynamicBadUrl();
+    const pWMSBadUrl = this.#configTester.testWMSBadUrl();
+
+    // Test WFS CurrentCondition config
+    const pWFSCurrentConditions = this.#configTester.testWFSLayerWithGeometCurrentConditions();
 
     // Test a true negative
-    const pEsriFeatureBadUrl = this.#configTester.testEsriFeatureBadUrl();
+    const pWFSBadUrl = this.#configTester.testWFSBadUrl();
+
+    // Test a true negative
+    const pWFSOkayUrlNoCap = this.#configTester.testWFSOkayUrlNoCap();
+
+    // Test OGC Feature config
+    const pOGcFeature = this.#configTester.testOGCFeatureWithPygeoapi();
+
+    // Test a true negative
+    const pOgcFeatureBadUrl = this.#configTester.testOGCFeatureBadUrl();
+
+    // Test a GeoJSON Metadata.meta config
+    const pGeoJson = this.#configTester.testGeojsonWithMetadataMeta();
+
+    // Test a skip
+    const pGeoJsonBadUrlSkip = this.#configTester.testGeoJSONBadUrlExpectSkip();
+
+    // Test a true negative
+    const pGeoJsonBadUrlFail = this.#configTester.testGeoJSONBadUrlExpectError();
+
+    // Test a CSV file
+    const pCSV = this.#configTester.testCSVWithStationList();
+
+    // Test a skip
+    const pCSVBadUrlSkip = this.#configTester.testCSVBadUrlExpectSkip();
+
+    // Test a WKB file
+    const pWKB = this.#configTester.testWKBWithSouthAfrica();
+
+    // Test a true negative
+    const pWKBBadUrlFail = this.#configTester.testWKBBadUrlExpectFail();
+
+    // Test a KML file
+    const pKMLTornado = this.#configTester.testKMLWithTornado();
+
+    // Test a skip
+    const pKMLSkip = this.#configTester.testKMLBadUrlExpectSkip();
 
     // Resolve when all
     return Promise.all([
       pEsriDynamicHistoFlood,
       pEsriDynamicCESI,
+      pEsriDynamicBadUrl,
       pEsriFeatureToronto,
       pEsriFeatureHisto,
       pEsriFeatureForest,
+      pEsriFeatureBadUrl,
       pEsriImage,
+      pEsriImageBadUrl,
       pWMSMundialis,
       pWMSDatacubeMSI,
-      pEsriDynamicBadUrl,
-      pEsriFeatureBadUrl,
+      pWMSBadUrl,
+      pWFSCurrentConditions,
+      pWFSBadUrl,
+      pWFSOkayUrlNoCap,
+      pOGcFeature,
+      pOgcFeatureBadUrl,
+      pGeoJson,
+      pGeoJsonBadUrlSkip,
+      pGeoJsonBadUrlFail,
+      pCSV,
+      pCSVBadUrlSkip,
+      pWKB,
+      pWKBBadUrlFail,
+      pKMLTornado,
+      pKMLSkip,
     ]);
   }
 }

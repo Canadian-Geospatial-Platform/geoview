@@ -4,16 +4,28 @@ import { Test } from '../core/test';
 import type { API } from 'geoview-core/api/api';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { TypeGeoviewLayerConfig, TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-types';
+import { LayerNoCapabilitiesError, LayerServiceMetadataUnableToFetchError } from 'geoview-core/core/exceptions/layer-exceptions';
 import { EsriDynamic } from 'geoview-core/geo/layer/geoview-layers/raster/esri-dynamic';
 import { EsriFeature } from 'geoview-core/geo/layer/geoview-layers/vector/esri-feature';
 import { EsriImage } from 'geoview-core/geo/layer/geoview-layers/raster/esri-image';
+import { WMS } from 'geoview-core/geo/layer/geoview-layers/raster/wms';
+import { WFS } from 'geoview-core/geo/layer/geoview-layers/vector/wfs';
+import { GeoJSON } from 'geoview-core/geo/layer/geoview-layers/vector/geojson';
+import { CSV } from 'geoview-core/geo/layer/geoview-layers/vector/csv';
+import { OgcFeature } from 'geoview-core/geo/layer/geoview-layers/vector/ogc-feature';
+import { WKB } from 'geoview-core/geo/layer/geoview-layers/vector/wkb';
+import { KML } from 'geoview-core/geo/layer/geoview-layers/vector/kml';
 import { EsriImageLayerEntryConfig } from 'geoview-core/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { EsriFeatureLayerEntryConfig } from 'geoview-core/api/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from 'geoview-core/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { GroupLayerEntryConfig } from 'geoview-core/api/config/validation-classes/group-layer-entry-config';
 import { OgcWmsLayerEntryConfig } from 'geoview-core/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { WMS } from 'geoview-core/geo/layer/geoview-layers/raster/wms';
-import { LayerServiceMetadataUnableToFetchError } from 'geoview-core/core/exceptions/layer-exceptions';
+import { WfsLayerEntryConfig } from 'geoview-core/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
+import { GeoJSONLayerEntryConfig } from 'geoview-core/api/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
+import { CsvLayerEntryConfig } from 'geoview-core/api/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
+import { OgcFeatureLayerEntryConfig } from 'geoview-core/api/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
+import { WkbLayerEntryConfig } from 'geoview-core/api/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
+import { KmlLayerEntryConfig } from 'geoview-core/api/config/validation-classes/vector-validation-classes/kml-layer-entry-config';
 
 /**
  * Main Config testing class.
@@ -41,7 +53,7 @@ export class ConfigTester extends GVAbstractTester {
 
     // Test the Esri Dynamic config
     return this.testEsriDynamic(
-      'Test Esri Dynamic with Historical Flood Events',
+      'Test an Esri Dynamic with Historical Flood Events',
       url,
       {
         metadataAccessPath: url,
@@ -61,7 +73,7 @@ export class ConfigTester extends GVAbstractTester {
 
     // Test the Esri Dynamic config
     return this.testEsriDynamic(
-      'Test Esri Dynamic with CESI',
+      'Test an Esri Dynamic with CESI',
       url,
       {
         metadataAccessPath: url,
@@ -104,7 +116,7 @@ export class ConfigTester extends GVAbstractTester {
         // Set step
         test.addStep('Initializing config on url: ' + url);
 
-        // Initialize an Esri Dynamic layer config
+        // Initialize the layer config
         return EsriDynamic.initGeoviewLayerConfig(gvLayerId, gvLayerName, url);
       },
       (test, result) => {
@@ -155,7 +167,7 @@ export class ConfigTester extends GVAbstractTester {
     const url = ConfigTester.TORONTO_NEIGHBOURHOODS_FEATURE_SERVER;
 
     // Test the Esri Feature config
-    return this.testEsriFeature('Test Esri Feature with Toronto Neighbourhoods', url, {
+    return this.testEsriFeature('Test an Esri Feature with Toronto Neighbourhoods', url, {
       metadataAccessPath: url,
       listOfLayerEntryConfig: [{ layerEntryProps: { layerId: '0', layerName: ConfigTester.TORONTO_NEIGHBOURHOODS_LAYER_NAME } }],
     });
@@ -170,7 +182,7 @@ export class ConfigTester extends GVAbstractTester {
     const url = ConfigTester.HISTORICAL_FLOOD_URL_MAP_SERVER_0;
 
     // Test the Esri Feature config
-    return this.testEsriFeature('Test Esri Feature with Historical Flood Events', url, {
+    return this.testEsriFeature('Test an Esri Feature with Historical Flood Events', url, {
       metadataAccessPath: url,
       listOfLayerEntryConfig: [{ layerEntryProps: { layerId: '0', layerName: ConfigTester.HISTORICAL_FLOOD_LAYER_NAME } }],
     });
@@ -185,7 +197,7 @@ export class ConfigTester extends GVAbstractTester {
     const url = ConfigTester.FOREST_INDUSTRY_MAP_SERVER_0;
 
     // Test the Esri Feature config
-    return this.testEsriFeature('Test Esri Feature with Forest Industry', url, {
+    return this.testEsriFeature('Test an Esri Feature with Forest Industry', url, {
       metadataAccessPath: url,
       listOfLayerEntryConfig: [{ layerEntryProps: { layerId: '0', layerName: ConfigTester.FOREST_INDUSTRY_LAYER_NAME } }],
     });
@@ -219,7 +231,7 @@ export class ConfigTester extends GVAbstractTester {
         // Set step
         test.addStep('Initializing config on url: ' + url);
 
-        // Initialize an Esri Feature layer config
+        // Initialize the layer config
         return EsriFeature.initGeoviewLayerConfig(gvLayerId, gvLayerName, url);
       },
       (test, result) => {
@@ -304,7 +316,7 @@ export class ConfigTester extends GVAbstractTester {
         // Set step
         test.addStep('Initializing config on url: ' + url);
 
-        // Initialize an Esri Image layer config
+        // Initialize the layer config
         return EsriImage.initGeoviewLayerConfig(gvLayerId, gvLayerName, url);
       },
       (test, result) => {
@@ -318,6 +330,20 @@ export class ConfigTester extends GVAbstractTester {
         Test.assertIsInstance(layerEntry, EsriImageLayerEntryConfig);
       }
     );
+  }
+
+  testEsriImageBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
+    // The bad url
+    const urlBad: string = 'https://badurl/oops';
+
+    // Test
+    return this.testError(`Test an EsriImage config with a bad url...`, LayerServiceMetadataUnableToFetchError, async (test) => {
+      // Creating the configuration
+      test.addStep('Creating the GeoView Layer Configuration...');
+
+      // Try it and expect a fail
+      await EsriImage.initGeoviewLayerConfig('gvLayerId', 'gvLayerName', urlBad);
+    });
   }
 
   // #endregion ESRI IMAGE
@@ -347,12 +373,12 @@ export class ConfigTester extends GVAbstractTester {
 
     // Test the Esri Feature config
     return this.test(
-      'Test WMS with OWS Mundialis',
+      'Test a WMS with OWS Mundialis',
       (test) => {
         // Set step
         test.addStep('Initializing config on url: ' + url);
 
-        // Initialize an Esri Dynamic layer config
+        // Initialize the layer config
         return WMS.initGeoviewLayerConfig(gvLayerId, gvLayerName, url, fullSubLayers);
       },
       (test, result) => {
@@ -396,12 +422,12 @@ export class ConfigTester extends GVAbstractTester {
 
     // Test the WMS
     return this.test(
-      'Test WMS with Datacube MSI',
+      'Test a WMS with Datacube MSI',
       (test) => {
         // Set step
         test.addStep('Initializing config on url: ' + url);
 
-        // Initialize an Esri Dynamic layer config
+        // Initialize the layer config
         return WMS.initGeoviewLayerConfig(gvLayerId, gvLayerName, url, fullSubLayers);
       },
       (test, result) => {
@@ -428,5 +454,483 @@ export class ConfigTester extends GVAbstractTester {
     );
   }
 
+  testWMSBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
+    // The bad url
+    const urlBad: string = 'https://badurl/oops';
+
+    // Test
+    return this.testError(`Test a WMS config with a bad url...`, LayerServiceMetadataUnableToFetchError, async (test) => {
+      // Creating the configuration
+      test.addStep('Creating the GeoView Layer Configuration...');
+
+      // Try it and expect a fail
+      await WMS.initGeoviewLayerConfig('gvLayerId', 'gvLayerName', urlBad, false);
+    });
+  }
+
   // #endregion WMS
+
+  // #region WFS
+
+  /**
+   * Tests an WFS Config using Geomet Current Conditions layer.
+   * @returns {Promise<Test<TypeGeoviewLayerConfig>>} A Promise that resolves with a Test containing the configuration.
+   */
+  testWFSLayerWithGeometCurrentConditions(): Promise<Test<TypeGeoviewLayerConfig>> {
+    // The url
+    const url = GVAbstractTester.GEOMET_URL;
+
+    // Dummy names
+    const gvLayerId: string = 'gvLayerId';
+    const gvLayerType: TypeGeoviewLayerType = 'ogcWfs';
+    const gvLayerName: string = 'Current Conditions';
+
+    // Expected config
+    const expectedConfig = {
+      geoviewLayerId: gvLayerId,
+      geoviewLayerType: gvLayerType,
+      geoviewLayerName: gvLayerName,
+    };
+
+    // Test the WMS
+    return this.test(
+      'Test a WFS with Geomet Current Conditions',
+      (test) => {
+        // Set step
+        test.addStep('Initializing config on url: ' + url);
+
+        // Initialize the layer config
+        return WFS.initGeoviewLayerConfig(gvLayerId, gvLayerName, url);
+      },
+      (test, result) => {
+        // Perform assertions
+        test.addStep('Verifying expected config...');
+        Test.assertJsonObject(result, expectedConfig);
+
+        // Supposedly 92 layer entries
+        test.addStep('Verifying 92 layer entries in the config...');
+        Test.assertIsArrayLengthEqual(result.listOfLayerEntryConfig, 92);
+
+        // Check at least one has the correct layerId
+        test.addStep('Verifying Current Conditions in the list...');
+        const foundLayerEntry = result.listOfLayerEntryConfig.find(
+          (layerEntry) => layerEntry.layerId === GVAbstractTester.GEOMET_URL_CURRENT_COND_LAYER_ID
+        );
+        Test.assertIsDefined('listOfLayerEntryConfig with Current Conditions', foundLayerEntry);
+
+        // Check it's the right type
+        test.addStep('Verifying layer entry is of the right type...');
+        Test.assertIsInstance(foundLayerEntry, WfsLayerEntryConfig);
+      }
+    );
+  }
+
+  testWFSBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
+    // The bad url
+    const urlBad: string = 'https://badurl/oops';
+
+    // Test
+    return this.testError(`Test a WFS config with a bad url...`, LayerServiceMetadataUnableToFetchError, async (test) => {
+      // Creating the configuration
+      test.addStep('Creating the GeoView Layer Configuration...');
+
+      // Try it and expect a fail
+      await WFS.initGeoviewLayerConfig('gvLayerId', 'gvLayerName', urlBad);
+    });
+  }
+
+  testWFSOkayUrlNoCap(): Promise<Test<LayerNoCapabilitiesError>> {
+    // The bad url which still respond something (not a 404, 500, etc)
+    const urlBad: string = 'https://maps.canada.ca/wmsproxy/ws/wmsproxy/executeFromProxy';
+
+    // Test
+    return this.testError(`Test a WFS config with a okay url but no capabilities...`, LayerNoCapabilitiesError, async (test) => {
+      // Creating the configuration
+      test.addStep('Creating the GeoView Layer Configuration...');
+
+      // Try it and expect a fail
+      await WFS.initGeoviewLayerConfig('gvLayerId', 'gvLayerName', urlBad);
+    });
+  }
+
+  // #endregion WFS
+
+  // #region GeoJSON
+
+  /**
+   * Tests a GeoJson Config using datasets/geojson/metadata.meta file.
+   * @returns {Promise<Test<TypeGeoviewLayerConfig>>} A Promise that resolves with a Test containing the configuration.
+   */
+  testGeojsonWithMetadataMeta(): Promise<Test<TypeGeoviewLayerConfig>> {
+    // The url
+    const url = GVAbstractTester.GEOJSON_METADATA_META;
+
+    // Dummy names
+    const gvLayerId: string = 'gvLayerId';
+    const gvLayerType: TypeGeoviewLayerType = 'GeoJSON';
+    const gvLayerName: string = 'GeojsonLayer';
+
+    // Expected config
+    const expectedConfig = {
+      geoviewLayerId: gvLayerId,
+      geoviewLayerType: gvLayerType,
+      geoviewLayerName: gvLayerName,
+    };
+
+    // Test the WMS
+    return this.test(
+      'Test a Geojson with metadata.meta file',
+      (test) => {
+        // Set step
+        test.addStep('Initializing config on url: ' + url);
+
+        // Initialize the layer config
+        return GeoJSON.initGeoviewLayerConfig(gvLayerId, gvLayerName, url);
+      },
+      (test, result) => {
+        // Perform assertions
+        test.addStep('Verifying expected config...');
+        Test.assertJsonObject(result, expectedConfig);
+
+        // Supposedly 1 layer entry
+        test.addStep('Verifying 1 layer entry in the config...');
+        Test.assertIsArrayLengthEqual(result.listOfLayerEntryConfig, 1);
+
+        // Check at least one has the correct layerId
+        test.addStep('Verifying layer id in the list...');
+        Test.assertIsEqual(result.listOfLayerEntryConfig[0].layerId, GVAbstractTester.GEOJSON_METADATA_META_FILE);
+
+        // Check it's the right type
+        test.addStep('Verifying layer entry is of the right type...');
+        Test.assertIsInstance(result.listOfLayerEntryConfig[0], GeoJSONLayerEntryConfig);
+      }
+    );
+  }
+
+  testGeoJSONBadUrlExpectSkip(): Promise<Test<void>> {
+    // The bad url
+    const urlBad: string = 'https://badurl/oops';
+
+    // Test
+    return this.test(
+      `Test a GeoJSON config with a bad url expecting a skip...`,
+      async (test) => {
+        // Creating the configuration
+        test.addStep('Creating the GeoView Layer Configuration...');
+
+        // Try it and expect a fail
+        await GeoJSON.initGeoviewLayerConfig('gvLayerId', 'gvLayerName', urlBad);
+      },
+      (test) => {
+        // Perform assertions
+        test.addStep(`At this point, the metadata was skipped and that's as intended...`);
+      }
+    );
+  }
+
+  testGeoJSONBadUrlExpectError(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
+    // The bad url ending in .meta
+    const urlBad: string = 'https://badurl/oops/metadata.meta';
+
+    // Test
+    return this.testError(
+      `Test a GeoJSON config with a bad url expecting a fail...`,
+      LayerServiceMetadataUnableToFetchError,
+      async (test) => {
+        // Creating the configuration
+        test.addStep('Creating the GeoView Layer Configuration...');
+
+        // Try it and expect a fail
+        await GeoJSON.initGeoviewLayerConfig('gvLayerId', 'gvLayerName', urlBad);
+      }
+    );
+  }
+
+  // #endregion GeoJSON
+
+  // #region CSV
+
+  /**
+   * Tests a CSV Config using csv file.
+   * @returns {Promise<Test<TypeGeoviewLayerConfig>>} A Promise that resolves with a Test containing the configuration.
+   */
+  testCSVWithStationList(): Promise<Test<TypeGeoviewLayerConfig>> {
+    // The url
+    const url = GVAbstractTester.CSV_STATION_LIST;
+
+    // Dummy names
+    const gvLayerId: string = 'gvLayerId';
+    const gvLayerType: TypeGeoviewLayerType = 'CSV';
+    const gvLayerName: string = 'CSVLayer';
+
+    // Expected config
+    const expectedConfig = {
+      geoviewLayerId: gvLayerId,
+      geoviewLayerType: gvLayerType,
+      geoviewLayerName: gvLayerName,
+    };
+
+    // Test the WMS
+    return this.test(
+      'Test a CSV with CSV file',
+      (test) => {
+        // Set step
+        test.addStep('Initializing config on url: ' + url);
+
+        // Initialize the layer config
+        return CSV.initGeoviewLayerConfig(gvLayerId, gvLayerName, url);
+      },
+      (test, result) => {
+        // Perform assertions
+        test.addStep('Verifying expected config...');
+        Test.assertJsonObject(result, expectedConfig);
+
+        // Supposedly 1 layer entry
+        test.addStep('Verifying 1 layer entry in the config...');
+        Test.assertIsArrayLengthEqual(result.listOfLayerEntryConfig, 1);
+
+        // Check at least one has the correct layerId
+        test.addStep('Verifying layer id in the list...');
+        Test.assertIsEqual(result.listOfLayerEntryConfig[0].layerId, GVAbstractTester.CSV_STATION_LIST_FILE);
+
+        // Check it's the right type
+        test.addStep('Verifying layer entry is of the right type...');
+        Test.assertIsInstance(result.listOfLayerEntryConfig[0], CsvLayerEntryConfig);
+      }
+    );
+  }
+
+  testCSVBadUrlExpectSkip(): Promise<Test<void>> {
+    // The bad url
+    const urlBad: string = 'https://badurl/oops';
+
+    // Test
+    return this.test(
+      `Test a CSV config with a bad url expecting a skip...`,
+      async (test) => {
+        // Creating the configuration
+        test.addStep('Creating the GeoView Layer Configuration...');
+
+        // Try it and expect a fail
+        await CSV.initGeoviewLayerConfig('gvLayerId', 'gvLayerName', urlBad);
+      },
+      (test) => {
+        // Perform assertions
+        test.addStep(`At this point, the metadata was skipped and that's as intended...`);
+      }
+    );
+  }
+
+  // #endregion CSV
+
+  // #region OGC Feature
+
+  /**
+   * Tests an OGC Feature Config using a Pygeoapi service.
+   * @returns {Promise<Test<TypeGeoviewLayerConfig>>} A Promise that resolves with a Test containing the configuration.
+   */
+  testOGCFeatureWithPygeoapi(): Promise<Test<TypeGeoviewLayerConfig>> {
+    // The url
+    const url = GVAbstractTester.PYGEOAPI_B6RYUVAKK5;
+
+    // Dummy names
+    const gvLayerId: string = 'gvLayerId';
+    const gvLayerType: TypeGeoviewLayerType = 'ogcFeature';
+    const gvLayerName: string = 'OGCLayer';
+
+    // Expected config
+    const expectedConfig = {
+      geoviewLayerId: gvLayerId,
+      geoviewLayerType: gvLayerType,
+      geoviewLayerName: gvLayerName,
+    };
+
+    // Test the WMS
+    return this.test(
+      'Test an OGC Feature with Pygeoapi',
+      (test) => {
+        // Set step
+        test.addStep('Initializing config on url: ' + url);
+
+        // Initialize the layer config
+        return OgcFeature.initGeoviewLayerConfig(gvLayerId, gvLayerName, url);
+      },
+      (test, result) => {
+        // Perform assertions
+        test.addStep('Verifying expected config...');
+        Test.assertJsonObject(result, expectedConfig);
+
+        // Supposedly 1 layer entry
+        test.addStep('Verifying 2 layer entry in the config...');
+        Test.assertIsArrayLengthEqual(result.listOfLayerEntryConfig, 2);
+
+        // Check at least one has the correct layerId
+        test.addStep('Verifying layer id in the list...');
+        Test.assertIsEqual(result.listOfLayerEntryConfig[0].layerId, GVAbstractTester.PYGEOAPI_B6RYUVAKK5_LAKES);
+
+        // Check it's the right type
+        test.addStep('Verifying layer entry is of the right type...');
+        Test.assertIsInstance(result.listOfLayerEntryConfig[0], OgcFeatureLayerEntryConfig);
+      }
+    );
+  }
+
+  testOGCFeatureBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
+    // The bad url
+    const urlBad: string = 'https://badurl/oops';
+
+    // Test
+    return this.testError(`Test an OGC Feature config with a bad url...`, LayerServiceMetadataUnableToFetchError, async (test) => {
+      // Creating the configuration
+      test.addStep('Creating the GeoView Layer Configuration...');
+
+      // Try it and expect a fail
+      await OgcFeature.initGeoviewLayerConfig('gvLayerId', 'gvLayerName', urlBad);
+    });
+  }
+
+  // #endregion OGC Feature
+
+  // #region WKB
+
+  /**
+   * Tests a WKB using South Africa.
+   * @returns {Promise<Test<TypeGeoviewLayerConfig>>} A Promise that resolves with a Test containing the configuration.
+   */
+  testWKBWithSouthAfrica(): Promise<Test<TypeGeoviewLayerConfig>> {
+    // The url
+    const url = GVAbstractTester.WKB_SOUTH_AFRICA;
+
+    // Dummy names
+    const gvLayerId: string = 'gvLayerId';
+    const gvLayerType: TypeGeoviewLayerType = 'WKB';
+    const gvLayerName: string = 'WKBLayer';
+
+    // Expected config
+    const expectedConfig = {
+      geoviewLayerId: gvLayerId,
+      geoviewLayerType: gvLayerType,
+      geoviewLayerName: gvLayerName,
+    };
+
+    // Test the WMS
+    return this.test(
+      'Test a WKB with South Africa',
+      (test) => {
+        // Set step
+        test.addStep('Initializing config on url: ' + url);
+
+        // Initialize the layer config
+        return WKB.initGeoviewLayerConfig(gvLayerId, gvLayerName, url);
+      },
+      (test, result) => {
+        // Perform assertions
+        test.addStep('Verifying expected config...');
+        Test.assertJsonObject(result, expectedConfig);
+
+        // Supposedly 1 layer entry
+        test.addStep('Verifying 1 layer entry in the config...');
+        Test.assertIsArrayLengthEqual(result.listOfLayerEntryConfig, 1);
+
+        // Check at least one has the correct layerId
+        test.addStep('Verifying layer id in the list...');
+        Test.assertIsEqual(result.listOfLayerEntryConfig[0].layerId, GVAbstractTester.WKB_SOUTH_AFRICA);
+
+        // Check it's the right type
+        test.addStep('Verifying layer entry is of the right type...');
+        Test.assertIsInstance(result.listOfLayerEntryConfig[0], WkbLayerEntryConfig);
+      }
+    );
+  }
+
+  testWKBBadUrlExpectFail(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
+    // The bad url
+    const urlBad: string = 'https://badurl/oops/metadata.meta';
+
+    // Test
+    return this.testError(`Test a WKB config with a bad url...`, LayerServiceMetadataUnableToFetchError, async (test) => {
+      // Creating the configuration
+      test.addStep('Creating the GeoView Layer Configuration...');
+
+      // Try it and expect a fail
+      await WKB.initGeoviewLayerConfig('gvLayerId', 'gvLayerName', urlBad);
+    });
+  }
+
+  // #endregion WKB
+
+  // #region KML
+
+  /**
+   * Tests a KML using Tornado.
+   * @returns {Promise<Test<TypeGeoviewLayerConfig>>} A Promise that resolves with a Test containing the configuration.
+   */
+  testKMLWithTornado(): Promise<Test<TypeGeoviewLayerConfig>> {
+    // The url
+    const url = GVAbstractTester.KML_TORNADO;
+
+    // Dummy names
+    const gvLayerId: string = 'gvLayerId';
+    const gvLayerType: TypeGeoviewLayerType = 'KML';
+    const gvLayerName: string = 'KMLLayer';
+
+    // Expected config
+    const expectedConfig = {
+      geoviewLayerId: gvLayerId,
+      geoviewLayerType: gvLayerType,
+      geoviewLayerName: gvLayerName,
+    };
+
+    // Test the WMS
+    return this.test(
+      'Test a KML with Tornado file',
+      (test) => {
+        // Set step
+        test.addStep('Initializing config on url: ' + url);
+
+        // Initialize the layer config
+        return KML.initGeoviewLayerConfig(gvLayerId, gvLayerName, url);
+      },
+      (test, result) => {
+        // Perform assertions
+        test.addStep('Verifying expected config...');
+        Test.assertJsonObject(result, expectedConfig);
+
+        // Supposedly 1 layer entry
+        test.addStep('Verifying 1 layer entry in the config...');
+        Test.assertIsArrayLengthEqual(result.listOfLayerEntryConfig, 1);
+
+        // Check at least one has the correct layerId
+        test.addStep('Verifying layer id in the list...');
+        Test.assertIsEqual(result.listOfLayerEntryConfig[0].layerId, GVAbstractTester.KML_TORNADO_FILE);
+
+        // Check it's the right type
+        test.addStep('Verifying layer entry is of the right type...');
+        Test.assertIsInstance(result.listOfLayerEntryConfig[0], KmlLayerEntryConfig);
+      }
+    );
+  }
+
+  testKMLBadUrlExpectSkip(): Promise<Test<void>> {
+    // The bad url
+    const urlBad: string = 'https://badurl/oops';
+
+    // Test
+    return this.test(
+      `Test a KML config with a bad url expecting a skip...`,
+      async (test) => {
+        // Creating the configuration
+        test.addStep('Creating the GeoView Layer Configuration...');
+
+        // Try it and expect a fail
+        await KML.initGeoviewLayerConfig('gvLayerId', 'gvLayerName', urlBad);
+      },
+      (test) => {
+        // Perform assertions
+        test.addStep(`At this point, the metadata was skipped and that's as intended...`);
+      }
+    );
+  }
+
+  // #endregion KML
 }

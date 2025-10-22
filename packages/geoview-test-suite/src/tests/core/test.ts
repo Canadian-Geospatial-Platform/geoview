@@ -8,6 +8,7 @@ import {
   AssertionArrayIncludingError,
   AssertionArrayLengthError,
   AssertionWrongErrorInstanceError,
+  AssertionNoErrorThrownError,
 } from './exceptions';
 import type { TestStepLevel } from './test-step';
 import { TestStep } from './test-step';
@@ -254,7 +255,7 @@ export class Test<T = unknown> {
    */
   static assertIsErrorInstance<T extends Error>(actualError: T, expectedType: ClassType<T>): asserts actualError is T {
     // Checks if the value is defined, first
-    Test.assertIsDefined('Error instance', actualError);
+    if (!actualError) throw new AssertionNoErrorThrownError(expectedType);
 
     // Checks if the value is of the expected instance type
     if (actualError instanceof expectedType) return;
