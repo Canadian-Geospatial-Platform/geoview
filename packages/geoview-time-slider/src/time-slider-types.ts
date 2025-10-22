@@ -2,6 +2,7 @@ import type { TimeDimension } from 'geoview-core/core/utils/date-mgt';
 
 export type SliderProps = {
   layerPaths: string[];
+  fields?: string[];
   title: string;
   description: string;
   locked: boolean;

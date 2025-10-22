@@ -69,6 +69,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   // TODO: check performance as we should technically have one selector by constant
   const {
     title,
+    additionalLayerpaths,
     description,
     discreteValues,
     step,
@@ -86,6 +87,11 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   // Get name from legend layers
   const legendLayers = useLayerLegendLayers();
   const name = LegendEventProcessor.findLayerByPath(legendLayers, layerPath)?.layerName;
+  const additionalNames = additionalLayerpaths?.map(
+    (additionalLayerPath) => LegendEventProcessor.findLayerByPath(legendLayers, additionalLayerPath)?.layerName
+  );
+  const combinedNames = additionalNames ? `${name}/${additionalNames.join('/')}` : name;
+  const displayTitle = title ? title : combinedNames;
 
   const timeStampRange = range.map((entry: string | number | Date) =>
     typeof entry !== 'number' ? DateMgt.convertToMilliseconds(entry) : entry
@@ -350,7 +356,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
         <Grid container sx={{ ...sxClasses.rightPanelBtnHolder, flexWrap: 'nowrap' }}>
           <Grid size={{ xs: 9 }}>
             <Typography component="div" sx={{ ...sxClasses.panelHeaders, paddingLeft: '20px', paddingTop: '10px' }}>
-              {`${title || name}`}
+              {displayTitle}
               {displayPattern[0] === undefined && ` (${DateMgt.formatDate(DateMgt.formatDateToISO(values[0]), 'YYYY-MM-DD')})`}
             </Typography>
           </Grid>
@@ -494,13 +500,14 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
             )}
           </Box>
         </Grid>
-        {description && (
-          <Grid size={{ xs: 12 }}>
-            <Typography component="div" sx={{ px: '20px', py: '5px' }}>
-              {description}
-            </Typography>
-          </Grid>
-        )}
+        {description ||
+          (title !== combinedNames && (
+            <Grid size={{ xs: 12 }}>
+              <Typography component="div" sx={{ px: '20px', py: '5px' }}>
+                {description || combinedNames}
+              </Typography>
+            </Grid>
+          ))}
       </Box>
     </Grid>
   );

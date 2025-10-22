@@ -92,8 +92,11 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
       },
       setFiltering(layerPath: string, filtering: boolean): void {
         // Redirect to TimeSliderEventProcessor
-        const { field, minAndMax, values } = get().timeSliderState.timeSliderLayers[layerPath];
+        const { field, minAndMax, values, additionalLayerpaths } = get().timeSliderState.timeSliderLayers[layerPath];
         TimeSliderEventProcessor.updateFilters(get().mapId, layerPath, field, filtering, minAndMax, values);
+        // Update filtering for additional layers
+        if (additionalLayerpaths)
+          additionalLayerpaths.forEach((additionalLayerPath) => get().timeSliderState.actions.setFiltering(additionalLayerPath, filtering));
       },
       setLocked(layerPath: string, locked: boolean): void {
         // Redirect to setter
@@ -113,8 +116,11 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
       },
       setValues(layerPath: string, values: number[]): void {
         // Redirect to TimeSliderEventProcessor
-        const { field, minAndMax, filtering } = get().timeSliderState.timeSliderLayers[layerPath];
+        const { field, minAndMax, filtering, additionalLayerpaths } = get().timeSliderState.timeSliderLayers[layerPath];
         TimeSliderEventProcessor.updateFilters(get().mapId, layerPath, field, filtering, minAndMax, values);
+        // Update values for additional layers
+        if (additionalLayerpaths)
+          additionalLayerpaths.forEach((additionalLayerPath) => get().timeSliderState.actions.setValues(additionalLayerPath, values));
       },
       setDisplayPattern(layerPath: string, value: [DatePrecision, TimePrecision]): void {
         // Redirect to setter
@@ -268,6 +274,8 @@ export type TimeSliderLayerSet = {
 };
 
 export interface TypeTimeSliderValues {
+  // Layer paths of additional layers associated with this time slider
+  additionalLayerpaths?: string[];
   delay: number;
   description?: string;
   discreteValues: boolean;
@@ -275,6 +283,8 @@ export interface TypeTimeSliderValues {
   field: string;
   fieldAlias: string;
   filtering: boolean;
+  // If false, these values are for a layer that is associated with another time slider
+  isMainLayerPath: boolean;
   locked?: boolean;
   minAndMax: number[];
   range: string[];
@@ -287,6 +297,7 @@ export interface TypeTimeSliderValues {
 
 export type TypeTimeSliderProps = {
   layerPaths: string[];
+  fields?: string[];
   title?: string;
   delay?: number;
   filtering?: boolean;
