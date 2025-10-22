@@ -5,8 +5,86 @@ import { DateMgt } from '@/core/utils/date-mgt';
 import type { FileExportProps } from './export-modal';
 import type { FlattenedLegendItem, TypeValidPageSizes } from './utilities';
 import { PAGE_CONFIGS, getMapInfo } from './utilities';
-// import { CANVAS_STYLES, SHARED_STYLES } from './layout-styles';
 import { CANVAS_STYLES } from './layout-styles';
+
+/**
+ * Get scaled styles for AUTO mode
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const getScaledCanvasStyles = (pageSize: TypeValidPageSizes, docWidth: number): any => {
+  if (pageSize !== 'AUTO') return CANVAS_STYLES;
+
+  // Match PDF scaling approach exactly
+  const scale = docWidth / 612;
+  return {
+    ...CANVAS_STYLES,
+    layerText: (marginTop: string) => ({
+      ...CANVAS_STYLES.layerText(marginTop),
+      fontSize: `${parseInt(CANVAS_STYLES.layerText('0').fontSize) * scale}px`,
+      wordWrap: 'break-word',
+      overflowWrap: 'break-word',
+    }),
+    childText: (indentLevel: number) => ({
+      ...CANVAS_STYLES.childText(indentLevel),
+      fontSize: `${parseInt(CANVAS_STYLES.childText(0).fontSize) * scale}px`,
+      wordWrap: 'break-word',
+      overflowWrap: 'break-word',
+    }),
+    timeText: (indentLevel: number) => ({
+      ...CANVAS_STYLES.timeText(indentLevel),
+      fontSize: `${parseInt(CANVAS_STYLES.timeText(0).fontSize) * scale}px`,
+      wordWrap: 'break-word',
+      overflowWrap: 'break-word',
+    }),
+    itemText: {
+      ...CANVAS_STYLES.itemText,
+      fontSize: `${parseInt(CANVAS_STYLES.itemText.fontSize) * scale}px`,
+      wordWrap: 'break-word',
+      overflowWrap: 'break-word',
+    },
+    title: {
+      ...CANVAS_STYLES.title,
+      fontSize: `${parseInt(CANVAS_STYLES.title.fontSize) * scale}px`,
+    },
+    scaleText: {
+      ...CANVAS_STYLES.scaleText,
+      fontSize: `${parseInt(CANVAS_STYLES.scaleText.fontSize) * scale}px`,
+    },
+    footerDisclaimer: {
+      ...CANVAS_STYLES.footerDisclaimer,
+      fontSize: `${CANVAS_STYLES.footerDisclaimer.fontSize * scale}px`,
+    },
+    footerAttribution: {
+      ...CANVAS_STYLES.footerAttribution,
+      fontSize: `${CANVAS_STYLES.footerAttribution.fontSize * scale}px`,
+    },
+    footerDate: {
+      ...CANVAS_STYLES.footerDate,
+      fontSize: `${CANVAS_STYLES.footerDate.fontSize * scale}px`,
+    },
+    northArrow: {
+      ...CANVAS_STYLES.northArrow,
+      width: `${parseInt(CANVAS_STYLES.northArrow.width) * scale}px`,
+      height: `${parseInt(CANVAS_STYLES.northArrow.height) * scale}px`,
+    },
+    northArrowSvg: {
+      ...CANVAS_STYLES.northArrowSvg,
+      width: `${parseInt(CANVAS_STYLES.northArrowSvg.width) * scale}px`,
+      height: `${parseInt(CANVAS_STYLES.northArrowSvg.height) * scale}px`,
+    },
+    itemIcon: {
+      ...CANVAS_STYLES.itemIcon,
+      width: `${parseInt(CANVAS_STYLES.itemIcon.width) * scale}px`,
+      height: `${parseInt(CANVAS_STYLES.itemIcon.height) * scale}px`,
+    },
+    wmsImage: {
+      ...CANVAS_STYLES.wmsImage,
+      maxWidth: '100%',
+      width: 'auto',
+      objectFit: 'contain',
+    },
+  };
+};
 
 interface CanvasDocumentProps {
   mapDataUrl: string;
@@ -30,7 +108,8 @@ interface CanvasDocumentProps {
 /**
  * Render legend items in rows with proper alignment and dividers
  */
-const renderCanvasLegendInRows = (columns: FlattenedLegendItem[][]): JSX.Element => {
+const renderCanvasLegendInRows = (columns: FlattenedLegendItem[][], pageSize: TypeValidPageSizes, canvasWidth: number): JSX.Element => {
+  const scaledStyles = getScaledCanvasStyles(pageSize, canvasWidth);
   const allItems: FlattenedLegendItem[] = [];
 
   // Flatten all columns into single array
@@ -88,7 +167,7 @@ const renderCanvasLegendInRows = (columns: FlattenedLegendItem[][]): JSX.Element
 
                 if (item.type === 'layer') {
                   return (
-                    <div key={`layer-${item.data.layerPath}`} style={CANVAS_STYLES.layerText(index > 0 ? '8px' : '0')}>
+                    <div key={`layer-${item.data.layerPath}`} style={scaledStyles.layerText(index > 0 ? '8px' : '0')}>
                       {item.data.layerName}
                     </div>
                   );
@@ -113,13 +192,13 @@ const renderCanvasLegendInRows = (columns: FlattenedLegendItem[][]): JSX.Element
                       )}`;
 
                   return (
-                    <div key={`time-${item.data.layerPath}`} style={CANVAS_STYLES.timeText(indentLevel)}>
+                    <div key={`time-${item.data.layerPath}`} style={scaledStyles.timeText(indentLevel)}>
                       {timeText}
                     </div>
                   );
                 } else if (item.type === 'child') {
                   return (
-                    <div key={`child-${item.data.layerPath}`} style={CANVAS_STYLES.childText(indentLevel)}>
+                    <div key={`child-${item.data.layerPath}`} style={scaledStyles.childText(indentLevel)}>
                       {item.data.layerName || '...'}
                     </div>
                   );
@@ -127,8 +206,8 @@ const renderCanvasLegendInRows = (columns: FlattenedLegendItem[][]): JSX.Element
                   const legendItem = item.data.items[0];
                   return (
                     <div key={`item-${item.parentName}-${legendItem?.name}`} style={CANVAS_STYLES.itemContainer(indentLevel)}>
-                      {legendItem?.icon && <img src={legendItem.icon} style={CANVAS_STYLES.itemIcon} />}
-                      <span style={CANVAS_STYLES.itemText}>{legendItem?.name}</span>
+                      {legendItem?.icon && <img src={legendItem.icon} style={scaledStyles.itemIcon} />}
+                      <span style={scaledStyles.itemText}>{legendItem?.name}</span>
                     </div>
                   );
                 }
@@ -160,11 +239,12 @@ export function CanvasDocument({
   pageSize,
 }: CanvasDocumentProps): JSX.Element {
   const { canvasWidth, canvasHeight } = PAGE_CONFIGS[pageSize];
+  const scaledStyles = getScaledCanvasStyles(pageSize, canvasWidth);
 
   return (
     <div style={CANVAS_STYLES.page(canvasWidth, canvasHeight)}>
       {/* Title */}
-      {exportTitle && exportTitle.trim() && <h1 style={CANVAS_STYLES.title}>{exportTitle.trim()}</h1>}
+      {exportTitle && exportTitle.trim() && <h1 style={scaledStyles.title}>{exportTitle.trim()}</h1>}
 
       {/* Map */}
       <img src={mapDataUrl} style={CANVAS_STYLES.mapImage} />
@@ -179,13 +259,13 @@ export function CanvasDocument({
             {/* Right tick */}
             <div style={{ ...CANVAS_STYLES.scaleTick, ...CANVAS_STYLES.scaleTickRight }} />
           </div>
-          <span style={CANVAS_STYLES.scaleText}>{scaleText}</span>
+          <span style={scaledStyles.scaleText}>{scaleText}</span>
         </div>
 
         {/* North Arrow */}
         {northArrowSvg && (
-          <div style={{ ...CANVAS_STYLES.northArrow, transform: `rotate(${northArrowRotation - 180}deg)` }}>
-            <svg viewBox="285 142 24 24" style={CANVAS_STYLES.northArrowSvg}>
+          <div style={{ ...scaledStyles.northArrow, transform: `rotate(${northArrowRotation - 180}deg)` }}>
+            <svg viewBox="285 142 24 24" style={scaledStyles.northArrow}>
               {northArrowSvg.map((pathData, index) => (
                 <path
                   // eslint-disable-next-line react/no-array-index-key
@@ -202,17 +282,19 @@ export function CanvasDocument({
       </div>
 
       {/* Legend */}
-      {fittedColumns.length > 0 && <div style={CANVAS_STYLES.legendContainer}>{renderCanvasLegendInRows(fittedColumns)}</div>}
+      {fittedColumns.length > 0 && (
+        <div style={CANVAS_STYLES.legendContainer}>{renderCanvasLegendInRows(fittedColumns, pageSize, canvasWidth)}</div>
+      )}
 
       {/* Footer */}
       <div style={CANVAS_STYLES.footer}>
-        <div style={CANVAS_STYLES.footerDisclaimer}>{disclaimer || ''}</div>
+        <div style={scaledStyles.footerDisclaimer}>{disclaimer || ''}</div>
         {attributions.map((attr) => (
-          <div key={`${attr.slice(0, 5)}`} style={CANVAS_STYLES.footerAttribution}>
+          <div key={`${attr.slice(0, 5)}`} style={scaledStyles.footerAttribution}>
             {attr || ''}
           </div>
         ))}
-        <div style={CANVAS_STYLES.footerDate}>{date || ''}</div>
+        <div style={scaledStyles.footerDate}>{date || ''}</div>
       </div>
     </div>
   );
@@ -257,7 +339,7 @@ export async function createCanvasMapUrls(mapId: string, props: FileExportProps)
     // Create overflow page (just legend)
     const overflowHtml = renderToString(
       <div style={CANVAS_STYLES.overflowPage(canvasWidth, canvasHeight)}>
-        <div style={CANVAS_STYLES.overflowContainer}>{renderCanvasLegendInRows(fittedOverflowItems)}</div>
+        <div style={CANVAS_STYLES.overflowContainer}>{renderCanvasLegendInRows(fittedOverflowItems, pageSize, canvasWidth)}</div>
       </div>
     );
 

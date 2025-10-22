@@ -35,7 +35,7 @@ import { getSxClasses } from './export-modal-style';
 
 type FileFormat = 'pdf' | 'png' | 'jpeg';
 
-type DocumentSize = 'LETTER' | 'LEGAL' | 'TABLOID' | 'AUTO';
+type DocumentSize = 'AUTO';
 
 const QUALITY_OPTIONS = [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100];
 
@@ -85,9 +85,7 @@ export default function ExportModal(): JSX.Element {
   const [jpegQuality, setJpegQuality] = useState(90); // Default 90%
   const [qualityMenuOpen, setQualityMenuOpen] = useState(false);
   const [qualityAnchorEl, setQualityAnchorEl] = useState<null | HTMLElement>(null);
-  const [pageSize, setPageSize] = useState<DocumentSize>('AUTO');
-  const [pageSizeMenuOpen, setPageSizeMenuOpen] = useState(false);
-  const [pageSizeAnchorEl, setPageSizeAnchorEl] = useState<null | HTMLElement>(null);
+  const [pageSize] = useState<DocumentSize>('AUTO');
   const dialogRef = useRef(null) as RefObject<HTMLDivElement>;
   const [pngPreviewUrls, setPngPreviewUrls] = useState<string[]>([]);
 
@@ -233,29 +231,6 @@ export default function ExportModal(): JSX.Element {
     [handleMenuClose]
   );
 
-  const handlePageSizeMenuClick = (event: React.MouseEvent<HTMLElement>): void => {
-    setPageSizeAnchorEl(event.currentTarget);
-    setPageSizeMenuOpen(true);
-  };
-
-  const handlePageSizeMenuClose = useCallback(() => {
-    logger.logTraceUseCallback('EXPORT-MODAL - handlePageSizeMenuClose');
-    setPageSizeMenuOpen(false);
-  }, []);
-
-  const handleSelectPageSize = useCallback(
-    (size: 'LETTER' | 'LEGAL' | 'TABLOID' | 'AUTO') => {
-      setPageSize(size);
-      if (size === 'AUTO' && exportFormat === 'pdf') {
-        setExportFormat('png');
-      } else if (size !== 'AUTO' && (exportFormat === 'png' || exportFormat === 'jpeg')) {
-        setExportFormat('pdf');
-      }
-      handlePageSizeMenuClose();
-    },
-    [handlePageSizeMenuClose, exportFormat]
-  );
-
   const handleQualityMenuClick = (event: React.MouseEvent<HTMLElement>): void => {
     setQualityAnchorEl(event.currentTarget);
     setQualityMenuOpen(true);
@@ -352,17 +327,6 @@ export default function ExportModal(): JSX.Element {
             </Button>
           </>
         )}
-
-        {/* Page Size Selection Menu */}
-        <Menu id="pagesize-selection" open={pageSizeMenuOpen} onClose={handlePageSizeMenuClose} anchorEl={pageSizeAnchorEl}>
-          {exportFormat === 'pdf' && <MenuItem onClick={() => handleSelectPageSize('LETTER')}>Letter (8.5" x 11")</MenuItem>}
-          {exportFormat === 'pdf' && <MenuItem onClick={() => handleSelectPageSize('LEGAL')}>Legal (8.5" x 14")</MenuItem>}
-          {exportFormat === 'pdf' && <MenuItem onClick={() => handleSelectPageSize('TABLOID')}>Tabloid (11" x 17")</MenuItem>}
-          <MenuItem onClick={() => handleSelectPageSize('AUTO')}>Auto (Fit Content)</MenuItem>
-        </Menu>
-        <Button type="text" onClick={handlePageSizeMenuClick} variant="outlined" size="small" sx={sxClasses.buttonOutlined}>
-          Size: {pageSize}
-        </Button>
 
         <LoadingButton
           loading={isMapExporting}

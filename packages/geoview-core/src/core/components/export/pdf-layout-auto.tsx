@@ -6,6 +6,8 @@ import type { FlattenedLegendItem, TypeValidPageSizes } from './utilities';
 import { getMapInfo, PAGE_CONFIGS } from './utilities';
 import type { FileExportProps } from './export-modal';
 import { PDF_STYLES } from './layout-styles';
+// import { width } from '@mui/system/sizing';
+// import type { AnyARecord } from 'node:dns';
 
 interface ExportDocumentProps {
   mapDataUrl: string;
@@ -136,7 +138,8 @@ const renderLegendInRows = (columns: FlattenedLegendItem[][], styles: any): JSX.
 /**
  * Get scaled styles for AUTO mode
  */
-const getScaledStyles = (pageSize: TypeValidPageSizes, docWidth: number): typeof PDF_STYLES => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const getScaledStyles = (pageSize: TypeValidPageSizes, docWidth: number): any => {
   if (pageSize !== 'AUTO') return PDF_STYLES;
 
   const scale = docWidth / 612;
@@ -211,12 +214,12 @@ export function ExportDocument({
   pageSize,
 }: ExportDocumentProps): JSX.Element {
   const config = PAGE_CONFIGS[pageSize];
-  const pageDimensions = pageSize === 'AUTO' ? [config.canvasWidth, config.canvasHeight] : config.size;
+  const pageDimensions = [config.canvasWidth, config.canvasHeight];
   const scaledStyles = getScaledStyles(pageSize, config.canvasWidth);
 
   return (
     <Document>
-      <Page size={pageDimensions} style={PDF_STYLES.page}>
+      <Page size={{ width: pageDimensions[0], height: pageDimensions[1] }} style={PDF_STYLES.page}>
         {exportTitle && exportTitle.trim() && <Text style={scaledStyles.title}>{exportTitle.trim()}</Text>}
 
         <View style={PDF_STYLES.mapContainer}>
@@ -271,7 +274,7 @@ export function ExportDocument({
       </Page>
 
       {pageSize !== 'AUTO' && fittedOverflowItems && fittedOverflowItems.filter((column) => column.length > 0).length > 0 && (
-        <Page size={pageDimensions} style={PDF_STYLES.page}>
+        <Page size={{ width: pageDimensions[0], height: pageDimensions[1] }} style={PDF_STYLES.page}>
           <View style={PDF_STYLES.overflowContainer}>{renderLegendInRows(fittedOverflowItems, scaledStyles)}</View>
         </Page>
       )}
