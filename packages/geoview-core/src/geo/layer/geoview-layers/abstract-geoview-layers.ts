@@ -20,7 +20,11 @@ import type {
   TypeGeoviewLayerType,
 } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES, validVectorLayerLegendTypes } from '@/api/types/layer-schema-types';
-import { LayerServiceMetadataEmptyError, LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
+import {
+  LayerNoCapabilitiesError,
+  LayerServiceMetadataEmptyError,
+  LayerServiceMetadataUnableToFetchError,
+} from '@/core/exceptions/layer-exceptions';
 import {
   LayerEntryConfigEmptyLayerGroupError,
   LayerEntryConfigUnableToCreateGroupLayerError,
@@ -367,15 +371,11 @@ export abstract class AbstractGeoViewLayer {
         // Skip
       }
     } catch (error: unknown) {
-      //
-      // TODO: ALEX Test the catch of a LayerNoCapabilitiesError?
-      //
-
       // Set the layer status to all layer entries to error (that logic was as-is in this refactor, leaving as-is for now)
       AbstractGeoViewLayer.#logErrorAndSetStatusErrorAll(formatError(error), this.listOfLayerEntryConfig);
 
       // If LayerServiceMetadataUnableToFetchError error
-      if (error instanceof LayerServiceMetadataUnableToFetchError) {
+      if (error instanceof LayerServiceMetadataUnableToFetchError || error instanceof LayerNoCapabilitiesError) {
         // If the inner cause is a ResponseEmptyError,
         if (error.cause instanceof ResponseEmptyError) {
           // Throw higher

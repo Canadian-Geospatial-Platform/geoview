@@ -204,6 +204,33 @@ export class AssertionWrongInstanceError extends AssertionError {
 }
 
 /**
+ * Custom error to indicate that no Error was thrown when one was expected (true negative tests).
+ * @extends {AssertionError}
+ */
+export class AssertionNoErrorThrownError extends AssertionError {
+  /**
+   * Creates a new AssertionNoErrorThrownError.
+   * @param {Type} expectedClassType - The expected class.
+   */
+  constructor(expectedClassType: ClassType) {
+    // Call the base Error constructor with the provided message
+    super(`No error was thrown when an error '${expectedClassType.name}' was expected.`, undefined, expectedClassType);
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'AssertionNoErrorThrownError';
+
+    // Capture the stack trace (V8-specific, e.g., Chrome and Node.js)
+    // Omits the constructor call from the trace for cleaner debugging
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, AssertionNoErrorThrownError);
+    }
+
+    // Ensure the prototype chain is correct (required in some transpilation targets)
+    Object.setPrototypeOf(this, AssertionNoErrorThrownError.prototype);
+  }
+}
+
+/**
  * Custom error to indicate that an error was of wrong instance.
  * @extends {AssertionError}
  */

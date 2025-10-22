@@ -60,12 +60,12 @@ export class WKB extends AbstractGeoViewVector {
    * @returns {Promise<T = TypeMetadataGeoJSON | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
    * @throws {LayerServiceMetadataUnableToFetchError} If the metadata fetch fails.
    */
-  protected override onFetchServiceMetadata<T = TypeMetadataGeoJSON | undefined>(abortSignal?: AbortSignal): Promise<T> {
+  protected override async onFetchServiceMetadata<T = TypeMetadataGeoJSON | undefined>(abortSignal?: AbortSignal): Promise<T> {
     // If metadataAccessPath ends with .meta or .json
     if (this.metadataAccessPath.toLowerCase().endsWith('.meta') || this.metadataAccessPath.toLowerCase().endsWith('.json')) {
       try {
         // Fetch it
-        return WKB.fetchMetadata(this.metadataAccessPath, abortSignal) as Promise<T>;
+        return (await WKB.fetchMetadata(this.metadataAccessPath, abortSignal)) as T;
       } catch (error: unknown) {
         // Throw
         throw new LayerServiceMetadataUnableToFetchError(
@@ -89,11 +89,14 @@ export class WKB extends AbstractGeoViewVector {
    * Overrides the way a geoview layer config initializes its layer entries.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
    */
-  protected override onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
+  protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Get the folder url
     const idx = this.metadataAccessPath.lastIndexOf('/');
     const rootUrl = this.metadataAccessPath.substring(0, idx);
     const id = this.metadataAccessPath.substring(idx + 1);
+
+    // Attempt a fetch of the metadata
+    await this.onFetchServiceMetadata();
 
     // Redirect
     // TODO: Check - Config init - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
