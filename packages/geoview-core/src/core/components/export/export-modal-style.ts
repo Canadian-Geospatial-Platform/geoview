@@ -12,9 +12,12 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
 
   mapPreview: {
-    width: 600,
-    height: 777,
+    maxWidth: 600,
+    maxHeight: 777,
+    width: 'auto',
+    height: 'auto',
     border: '1px solid #ccc',
+    objectFit: 'contain',
   },
 
   mapSkeletonMargin: {
@@ -22,10 +25,15 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
 
   mapLoading: {
-    width: 600,
-    height: 777,
+    maxWidth: 600,
+    maxHeight: 777,
+    width: 'auto',
+    height: 'auto',
     border: '1px solid #ccc',
     margin: '0 auto',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   dialogActions: {

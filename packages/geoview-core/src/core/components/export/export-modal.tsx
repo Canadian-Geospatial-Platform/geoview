@@ -29,13 +29,13 @@ import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-inti
 import { exportFile } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 
-import { createPDFMapUrl } from './pdf-layout';
+import { createPDFMapUrl } from './pdf-layout-auto';
 import { createCanvasMapUrls } from './canvas-layout';
 import { getSxClasses } from './export-modal-style';
 
 type FileFormat = 'pdf' | 'png' | 'jpeg';
 
-type DocumentSize = 'LETTER' | 'LEGAL' | 'TABLOID';
+type DocumentSize = 'LETTER' | 'LEGAL' | 'TABLOID' | 'AUTO';
 
 const QUALITY_OPTIONS = [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100];
 
@@ -76,7 +76,7 @@ export default function ExportModal(): JSX.Element {
   const [isMapExporting, setIsMapExporting] = useState(false);
   const [exportTitle, setExportTitle] = useState<string>('');
   const [exportMapResolution, setExportMapResolution] = useState(300);
-  const [exportFormat, setExportFormat] = useState<FileFormat>('pdf');
+  const [exportFormat, setExportFormat] = useState<FileFormat>('png');
   const exportContainerRef = useRef(null) as RefObject<HTMLDivElement>;
   const [dpiMenuOpen, setDpiMenuOpen] = useState(false);
   const [dpiAnchorEl, setDpiAnchorEl] = useState<null | HTMLElement>(null);
@@ -85,7 +85,7 @@ export default function ExportModal(): JSX.Element {
   const [jpegQuality, setJpegQuality] = useState(90); // Default 90%
   const [qualityMenuOpen, setQualityMenuOpen] = useState(false);
   const [qualityAnchorEl, setQualityAnchorEl] = useState<null | HTMLElement>(null);
-  const [pageSize, setPageSize] = useState<DocumentSize>('LETTER');
+  const [pageSize, setPageSize] = useState<DocumentSize>('AUTO');
   const [pageSizeMenuOpen, setPageSizeMenuOpen] = useState(false);
   const [pageSizeAnchorEl, setPageSizeAnchorEl] = useState<null | HTMLElement>(null);
   const dialogRef = useRef(null) as RefObject<HTMLDivElement>;
@@ -244,11 +244,16 @@ export default function ExportModal(): JSX.Element {
   }, []);
 
   const handleSelectPageSize = useCallback(
-    (size: 'LETTER' | 'LEGAL' | 'TABLOID') => {
+    (size: 'LETTER' | 'LEGAL' | 'TABLOID' | 'AUTO') => {
       setPageSize(size);
+      if (size === 'AUTO' && exportFormat === 'pdf') {
+        setExportFormat('png');
+      } else if (size !== 'AUTO' && (exportFormat === 'png' || exportFormat === 'jpeg')) {
+        setExportFormat('pdf');
+      }
       handlePageSizeMenuClose();
     },
-    [handlePageSizeMenuClose]
+    [handlePageSizeMenuClose, exportFormat]
   );
 
   const handleQualityMenuClick = (event: React.MouseEvent<HTMLElement>): void => {
@@ -311,8 +316,8 @@ export default function ExportModal(): JSX.Element {
         {/* Format Selection Menu */}
         <Menu id="format-selection" open={formatMenuOpen} onClose={handleFormatMenuClose} anchorEl={formatAnchorEl}>
           <MenuItem onClick={() => handleSelectFormat('pdf')}>PDF</MenuItem>
-          <MenuItem onClick={() => handleSelectFormat('png')}>PNG</MenuItem>
-          <MenuItem onClick={() => handleSelectFormat('jpeg')}>JPEG</MenuItem>
+          {pageSize === 'AUTO' && <MenuItem onClick={() => handleSelectFormat('png')}>PNG</MenuItem>}
+          {pageSize === 'AUTO' && <MenuItem onClick={() => handleSelectFormat('jpeg')}>JPEG</MenuItem>}
         </Menu>
         <Button type="text" onClick={handleFormatMenuClick} variant="outlined" size="small" sx={sxClasses.buttonOutlined}>
           Format: {exportFormat.toUpperCase()}
@@ -350,9 +355,10 @@ export default function ExportModal(): JSX.Element {
 
         {/* Page Size Selection Menu */}
         <Menu id="pagesize-selection" open={pageSizeMenuOpen} onClose={handlePageSizeMenuClose} anchorEl={pageSizeAnchorEl}>
-          <MenuItem onClick={() => handleSelectPageSize('LETTER')}>Letter (8.5" x 11")</MenuItem>
-          <MenuItem onClick={() => handleSelectPageSize('LEGAL')}>Legal (8.5" x 14")</MenuItem>
-          <MenuItem onClick={() => handleSelectPageSize('TABLOID')}>Tabloid (11" x 17")</MenuItem>
+          {exportFormat === 'pdf' && <MenuItem onClick={() => handleSelectPageSize('LETTER')}>Letter (8.5" x 11")</MenuItem>}
+          {exportFormat === 'pdf' && <MenuItem onClick={() => handleSelectPageSize('LEGAL')}>Legal (8.5" x 14")</MenuItem>}
+          {exportFormat === 'pdf' && <MenuItem onClick={() => handleSelectPageSize('TABLOID')}>Tabloid (11" x 17")</MenuItem>}
+          <MenuItem onClick={() => handleSelectPageSize('AUTO')}>Auto (Fit Content)</MenuItem>
         </Menu>
         <Button type="text" onClick={handlePageSizeMenuClick} variant="outlined" size="small" sx={sxClasses.buttonOutlined}>
           Size: {pageSize}

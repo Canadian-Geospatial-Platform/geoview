@@ -5,6 +5,7 @@ import { DateMgt } from '@/core/utils/date-mgt';
 import type { FileExportProps } from './export-modal';
 import type { FlattenedLegendItem, TypeValidPageSizes } from './utilities';
 import { PAGE_CONFIGS, getMapInfo } from './utilities';
+// import { CANVAS_STYLES, SHARED_STYLES } from './layout-styles';
 import { CANVAS_STYLES } from './layout-styles';
 
 interface CanvasDocumentProps {
@@ -27,70 +28,117 @@ interface CanvasDocumentProps {
 }
 
 /**
- * Render legend columns for canvas (HTML)
- * @param {FlattenedLegendItem[][]} columns - The flattened columns to be placed into the legend
- * @returns {JSX.Element[]} - The rendered legend columns
+ * Render legend items in rows with proper alignment and dividers
  */
-const renderCanvasLegendColumns = (columns: FlattenedLegendItem[][]): JSX.Element[] => {
-  const actualColumnCount = columns.filter((column) => column.length > 0).length;
+const renderCanvasLegendInRows = (columns: FlattenedLegendItem[][]): JSX.Element => {
+  const allItems: FlattenedLegendItem[] = [];
 
-  return columns
-    .filter((column) => column.length > 0)
-    .map((columnItems, columnIndex) => (
-      // eslint-disable-next-line react/no-array-index-key
-      <div key={columnIndex} style={{ width: `${100 / actualColumnCount}%` }}>
-        {columnItems.map((item, index) => {
-          const indentLevel = Math.min(item.depth, 3);
+  // Flatten all columns into single array
+  columns.forEach((column) => {
+    allItems.push(...column);
+  });
 
-          if (item.type === 'layer') {
-            return (
-              <div key={`layer-${item.data.layerPath}`} style={CANVAS_STYLES.layerText(index > 0 ? '8px' : '0')}>
-                {item.data.layerName}
-              </div>
-            );
-          } else if (item.type === 'wms') {
-            return (
-              <div key={`wms-${item.data.layerPath}`} style={CANVAS_STYLES.wmsContainer(indentLevel)}>
-                <img src={item.data.icons?.[0]?.iconImage || ''} style={CANVAS_STYLES.wmsImage} />
-              </div>
-            );
-          } else if (item.type === 'time') {
-            const timeText = item.timeInfo?.singleHandle
-              ? DateMgt.formatDate(
-                  new Date(item.timeInfo.values[0]),
-                  item.timeInfo.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
-                )
-              : `${DateMgt.formatDate(
-                  new Date(item.timeInfo?.values[0] || 0),
-                  item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
-                )} - ${DateMgt.formatDate(
-                  new Date(item.timeInfo?.values[1] || 0),
-                  item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
-                )}`;
+  // Group by root layers
+  const layerGroups: FlattenedLegendItem[][] = [];
+  let currentGroup: FlattenedLegendItem[] = [];
 
-            return (
-              <div key={`time-${item.data.layerPath}`} style={CANVAS_STYLES.timeText(indentLevel)}>
-                {timeText}
-              </div>
-            );
-          } else if (item.type === 'child') {
-            return (
-              <div key={`child-${item.data.layerPath}`} style={CANVAS_STYLES.childText(indentLevel)}>
-                {item.data.layerName || 'Unnamed Layer'}
-              </div>
-            );
-          } else {
-            const legendItem = item.data.items[0];
-            return (
-              <div key={`item-${item.parentName}-${legendItem?.name}`} style={CANVAS_STYLES.itemContainer(indentLevel)}>
-                {legendItem?.icon && <img src={legendItem.icon} style={CANVAS_STYLES.itemIcon} />}
-                <span style={CANVAS_STYLES.itemText}>{legendItem?.name || 'Unnamed Item'}</span>
-              </div>
-            );
-          }
-        })}
-      </div>
-    ));
+  allItems.forEach((item) => {
+    if (item.isRoot && currentGroup.length > 0) {
+      layerGroups.push(currentGroup);
+      currentGroup = [];
+    }
+    currentGroup.push(item);
+  });
+
+  if (currentGroup.length > 0) {
+    layerGroups.push(currentGroup);
+  }
+
+  // Create rows with max 3 layer groups per row
+  const rows: FlattenedLegendItem[][][] = [];
+  for (let i = 0; i < layerGroups.length; i += 3) {
+    rows.push(layerGroups.slice(i, i + 3));
+  }
+
+  return (
+    <div>
+      {rows.map((rowGroups, rowIndex) => (
+        <div
+          // eslint-disable-next-line react/no-array-index-key
+          key={`row-${rowIndex}`}
+          style={{
+            ...CANVAS_STYLES.rowContainer,
+            ...(rowIndex === 0 ? { borderTop: 'none', paddingTop: '0px' } : {}),
+          }}
+        >
+          {rowGroups.map((group, groupIndex) => (
+            <div
+              // eslint-disable-next-line react/no-array-index-key
+              key={`group-${groupIndex}`}
+              style={{
+                width: `${100 / rowGroups.length}%`,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                alignSelf: 'flex-start',
+              }}
+            >
+              {group.map((item, index) => {
+                const indentLevel = Math.min(item.depth, 3);
+
+                if (item.type === 'layer') {
+                  return (
+                    <div key={`layer-${item.data.layerPath}`} style={CANVAS_STYLES.layerText(index > 0 ? '8px' : '0')}>
+                      {item.data.layerName}
+                    </div>
+                  );
+                } else if (item.type === 'wms') {
+                  return (
+                    <div key={`wms-${item.data.layerPath}`} style={CANVAS_STYLES.wmsContainer(indentLevel)}>
+                      <img src={item.data.icons?.[0]?.iconImage || ''} style={CANVAS_STYLES.wmsImage} />
+                    </div>
+                  );
+                } else if (item.type === 'time') {
+                  const timeText = item.timeInfo?.singleHandle
+                    ? DateMgt.formatDate(
+                        new Date(item.timeInfo.values[0]),
+                        item.timeInfo.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
+                      )
+                    : `${DateMgt.formatDate(
+                        new Date(item.timeInfo?.values[0] || 0),
+                        item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
+                      )} - ${DateMgt.formatDate(
+                        new Date(item.timeInfo?.values[1] || 0),
+                        item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
+                      )}`;
+
+                  return (
+                    <div key={`time-${item.data.layerPath}`} style={CANVAS_STYLES.timeText(indentLevel)}>
+                      {timeText}
+                    </div>
+                  );
+                } else if (item.type === 'child') {
+                  return (
+                    <div key={`child-${item.data.layerPath}`} style={CANVAS_STYLES.childText(indentLevel)}>
+                      {item.data.layerName || '...'}
+                    </div>
+                  );
+                } else {
+                  const legendItem = item.data.items[0];
+                  return (
+                    <div key={`item-${item.parentName}-${legendItem?.name}`} style={CANVAS_STYLES.itemContainer(indentLevel)}>
+                      {legendItem?.icon && <img src={legendItem.icon} style={CANVAS_STYLES.itemIcon} />}
+                      <span style={CANVAS_STYLES.itemText}>{legendItem?.name}</span>
+                    </div>
+                  );
+                }
+              })}
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
 };
 
 /**
@@ -154,7 +202,7 @@ export function CanvasDocument({
       </div>
 
       {/* Legend */}
-      {fittedColumns.length > 0 && <div style={CANVAS_STYLES.legendContainer}>{renderCanvasLegendColumns(fittedColumns)}</div>}
+      {fittedColumns.length > 0 && <div style={CANVAS_STYLES.legendContainer}>{renderCanvasLegendInRows(fittedColumns)}</div>}
 
       {/* Footer */}
       <div style={CANVAS_STYLES.footer}>
@@ -209,7 +257,7 @@ export async function createCanvasMapUrls(mapId: string, props: FileExportProps)
     // Create overflow page (just legend)
     const overflowHtml = renderToString(
       <div style={CANVAS_STYLES.overflowPage(canvasWidth, canvasHeight)}>
-        <div style={CANVAS_STYLES.overflowContainer}>{renderCanvasLegendColumns(fittedOverflowItems)}</div>
+        <div style={CANVAS_STYLES.overflowContainer}>{renderCanvasLegendInRows(fittedOverflowItems)}</div>
       </div>
     );
 
