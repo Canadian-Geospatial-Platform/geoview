@@ -9,12 +9,10 @@ import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { UIEventProcessor } from '@/api/event-processors/event-processor-children/ui-event-processor';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { DateMgt } from '@/core/utils/date-mgt';
-import { logger } from '@/core/utils/logger';
 import { LayerNotFoundError, LayerWrongTypeError } from '@/core/exceptions/layer-exceptions';
 import { PluginStateUninitializedError } from '@/core/exceptions/geoview-exceptions';
 
@@ -214,6 +212,10 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     // Get temporal dimension info from config, if there is any
     const configTimeDimension = timesliderConfig?.timeDimension;
 
+    // Get index of layerPath, if mutliple exist
+    const index =
+      timesliderConfig && timesliderConfig.layerPaths.length > 1 ? timesliderConfig.layerPaths.indexOf(layerConfig.layerPath) : undefined;
+
     // If no temporal dimension information
     if ((!timeDimensionInfo || !timeDimensionInfo.rangeItems) && (!configTimeDimension || !configTimeDimension.rangeItems))
       return undefined;
@@ -224,10 +226,20 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     const defaultDates = configTimeDimension?.default || timeDimensionInfo!.default;
 
     const minAndMax: number[] = [DateMgt.convertToMilliseconds(range[0]), DateMgt.convertToMilliseconds(range[range.length - 1])];
-    const field = configTimeDimension?.field || timeDimensionInfo!.field;
     const singleHandle = configTimeDimension?.singleHandle || timeDimensionInfo!.singleHandle;
     const nearestValues = configTimeDimension?.nearestValues || timeDimensionInfo!.nearestValues;
     const displayPattern = configTimeDimension?.displayPattern || timeDimensionInfo!.displayPattern;
+
+    // Check if the time slider info is associated with another time slider
+    const isMainLayerPath = timesliderConfig ? timesliderConfig.layerPaths[0] === layerConfig.layerPath : true;
+    // Only use the field from the config if this is the main layer of the slider
+    let field = isMainLayerPath && configTimeDimension?.field ? configTimeDimension?.field : timeDimensionInfo!.field;
+    // Use fields from config if they are provided
+    if (timesliderConfig?.fields && index) field = timesliderConfig.fields[index];
+
+    // Paths of layers tied to this time slider, if any
+    const additionalLayerpaths =
+      isMainLayerPath && timesliderConfig && timesliderConfig.layerPaths.length > 1 ? timesliderConfig.layerPaths.slice(1) : undefined;
 
     // If the field type has an alias, use that as a label
     let fieldAlias = field;
@@ -248,6 +260,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     }
 
     return {
+      additionalLayerpaths,
       delay: timesliderConfig?.delay || 1000,
       discreteValues: nearestValues === 'discrete',
       description: timesliderConfig?.description,
@@ -255,6 +268,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
       field,
       fieldAlias,
       filtering: timesliderConfig?.filtering !== false,
+      isMainLayerPath,
       locked: timesliderConfig?.locked,
       minAndMax,
       range,
@@ -370,16 +384,8 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     this.getTimeSliderState(mapId).setterActions.setFiltering(layerPath, filtering);
     this.getTimeSliderState(mapId).setterActions.setValues(layerPath, values);
     this.addOrUpdateSliderFilter(mapId, layerPath, filter);
-    MapEventProcessor.applyLayerFilters(mapId, layerPath);
 
-    // If we aren't showing unsymbolized features, then we need to update the feature info layer set
-    // so the data table matches the features from the time slider filter.
-    // GV: KML is excluded as it currently has no symbology.
-    if (!AppEventProcessor.getShowUnsymbolizedFeatures(mapId) && !(geoviewLayer?.getLayerConfig().getSchemaTag() === 'KML')) {
-      MapEventProcessor.getMapViewerLayerAPI(mapId)
-        .allFeatureInfoLayerSet.queryLayer(layerPath, 'all')
-        .catch((error) => logger.logError(error));
-    }
+    MapEventProcessor.applyLayerFilters(mapId, layerPath);
   }
   // #endregion
 }
