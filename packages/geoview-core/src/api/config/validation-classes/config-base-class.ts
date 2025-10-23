@@ -1097,7 +1097,7 @@ export abstract class ConfigBaseClass {
 
 export type TypeLayerEntryShell = {
   id: number | string;
-  index?: number;
+  index?: number; // This property is used for the config responses coming from Geocore which have 'index' in 'layerEntries' array
   layerId?: number | string;
   layerName?: string;
   tileGrid?: TypeTileGrid;

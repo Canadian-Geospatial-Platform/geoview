@@ -14,6 +14,9 @@ export abstract class GVAbstractTester extends AbstractTester {
   static readonly QUEBEC_LONLAT: Coordinate = [-71.356054449131, 46.78077550041052];
   static readonly MANITOBA_CENTER_LONLAT: Coordinate = [-86.73558298224057, 50.833271435899974];
 
+  /** Bad url */
+  static BAD_URL = 'https://badurl/oops';
+
   /** Airborne Radioactivity uuid */
   static AIRBORNE_RADIOACTIVITY_UUID: string = '21b821cf-0f1c-40ee-8925-eab12d357668';
   static AIRBORNE_RADIOACTIVITY_GROUP: string = GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID + '/0';
@@ -23,14 +26,20 @@ export abstract class GVAbstractTester extends AbstractTester {
   /** Historical Flood */
   static readonly HISTORICAL_FLOOD_URL_MAP_SERVER: string =
     'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer';
-  static readonly HISTORICAL_FLOOD_URL_MAP_SERVER_0: string = GVAbstractTester.HISTORICAL_FLOOD_URL_MAP_SERVER + '/0';
+  static readonly HISTORICAL_FLOOD_URL_LAYER_ID: string = '0';
   static readonly HISTORICAL_FLOOD_LAYER_NAME: string = 'Historical Flood Events';
+
+  static readonly HISTORICAL_FLOOD_URL_FEATURE_SERVER: string =
+    GVAbstractTester.HISTORICAL_FLOOD_URL_MAP_SERVER + '/' + GVAbstractTester.HISTORICAL_FLOOD_URL_LAYER_ID;
 
   /** Historical Flood */
   static readonly FOREST_INDUSTRY_MAP_SERVER: string =
     'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/forest_industry_hotspots_en/MapServer';
-  static readonly FOREST_INDUSTRY_MAP_SERVER_0: string = GVAbstractTester.FOREST_INDUSTRY_MAP_SERVER + '/0';
+  static readonly FOREST_INDUSTRY_LAYER_ID: string = '0';
   static readonly FOREST_INDUSTRY_LAYER_NAME: string = 'Location of mill facilities';
+
+  static readonly FOREST_INDUSTRY_FEATURE_SERVER: string =
+    GVAbstractTester.FOREST_INDUSTRY_MAP_SERVER + '/' + GVAbstractTester.FOREST_INDUSTRY_LAYER_ID;
 
   /** CESI */
   static readonly CESI_MAP_SERVER: string = 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer';
@@ -48,6 +57,7 @@ export abstract class GVAbstractTester extends AbstractTester {
 
   /** OWS Mundialis */
   static readonly OWS_MUNDIALIS: string = 'https://ows.mundialis.de/services/service'; // NOTE: Doesn't support EPSG:3978
+  static readonly OWS_MUNDIALIS_LAYER_ID: string = 'Dark';
 
   /** Datacube MSI */
   static readonly DATACUBE_MSI: string = 'https://datacube.services.geo.ca/ows/msi';

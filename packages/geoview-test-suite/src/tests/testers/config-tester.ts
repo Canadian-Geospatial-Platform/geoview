@@ -142,7 +142,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testEsriDynamicBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
     // The bad url
-    const urlBad: string = 'https://badurl/oops';
+    const urlBad: string = GVAbstractTester.BAD_URL;
 
     // Test
     return this.testError(`Test an EsriDynamic config with a bad url...`, LayerServiceMetadataUnableToFetchError, async (test) => {
@@ -179,7 +179,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testEsriFeatureWithHistoricalFloodEvents(): Promise<Test<TypeGeoviewLayerConfig>> {
     // The url
-    const url = ConfigTester.HISTORICAL_FLOOD_URL_MAP_SERVER_0;
+    const url = ConfigTester.HISTORICAL_FLOOD_URL_FEATURE_SERVER;
 
     // Test the Esri Feature config
     return this.testEsriFeature('Test an Esri Feature with Historical Flood Events', url, {
@@ -194,7 +194,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testEsriFeatureWithForestIndustry(): Promise<Test<TypeGeoviewLayerConfig>> {
     // The url
-    const url = ConfigTester.FOREST_INDUSTRY_MAP_SERVER_0;
+    const url = ConfigTester.FOREST_INDUSTRY_FEATURE_SERVER;
 
     // Test the Esri Feature config
     return this.testEsriFeature('Test an Esri Feature with Forest Industry', url, {
@@ -257,7 +257,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testEsriFeatureBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
     // The bad url
-    const urlBad: string = 'https://badurl/oops';
+    const urlBad: string = GVAbstractTester.BAD_URL;
 
     // Test
     return this.testError(`Test an EsriFeature config with a bad url...`, LayerServiceMetadataUnableToFetchError, async (test) => {
@@ -342,7 +342,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testEsriImageBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
     // The bad url
-    const urlBad: string = 'https://badurl/oops';
+    const urlBad: string = GVAbstractTester.BAD_URL;
 
     // Test
     return this.testError(`Test an EsriImage config with a bad url...`, LayerServiceMetadataUnableToFetchError, async (test) => {
@@ -474,7 +474,7 @@ export class ConfigTester extends GVAbstractTester {
     // GV: In the case of a WMS, since a proxy is used when the url fails, and that proxy always returns a 200 response (with an internal error inside)
     // GV: We can't really test the LayerServiceMetadataUnableToFetchError error exception.
     // The bad url
-    const urlBad: string = 'https://badurl/oops';
+    const urlBad: string = GVAbstractTester.BAD_URL;
 
     // Test
     return this.testError(`Test a WMS config with a bad url...`, LayerNoCapabilitiesError, async (test) => {
@@ -553,7 +553,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testWFSBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
     // The bad url
-    const urlBad: string = 'https://badurl/oops';
+    const urlBad: string = GVAbstractTester.BAD_URL;
 
     // Test
     return this.testError(`Test a WFS config with a bad url...`, LayerServiceMetadataUnableToFetchError, async (test) => {
@@ -650,7 +650,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testGeoJSONBadUrlExpectSkip(): Promise<Test<void>> {
     // The bad url
-    const urlBad: string = 'https://badurl/oops';
+    const urlBad: string = GVAbstractTester.BAD_URL;
 
     // Test
     return this.test(
@@ -759,7 +759,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testCSVBadUrlExpectSkip(): Promise<Test<void>> {
     // The bad url
-    const urlBad: string = 'https://badurl/oops';
+    const urlBad: string = GVAbstractTester.BAD_URL;
 
     // Test
     return this.test(
@@ -842,7 +842,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testOGCFeatureBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
     // The bad url
-    const urlBad: string = 'https://badurl/oops';
+    const urlBad: string = GVAbstractTester.BAD_URL;
 
     // Test
     return this.testError(`Test an OGC Feature config with a bad url...`, LayerServiceMetadataUnableToFetchError, async (test) => {
@@ -992,7 +992,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testKMLBadUrlExpectSkip(): Promise<Test<void>> {
     // The bad url
-    const urlBad: string = 'https://badurl/oops';
+    const urlBad: string = GVAbstractTester.BAD_URL;
 
     // Test
     return this.test(
