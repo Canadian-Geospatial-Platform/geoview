@@ -372,6 +372,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {Promise<TypeMetadataWMS | undefined>} A promise resolving to the parsed metadata object,
    * or `undefined` if the fetch failed or metadata is invalid.
    * @throws {LayerServiceMetadataUnableToFetchError} Thrown when the metadata or capabilities couldn't be fetched.
+   * @throws {LayerNoCapabilitiesError} Thrown when the metadata or capabilities couldn't be fetched.
    */
   async #fetchAndProcessSingleWmsMetadata(url: string): Promise<TypeMetadataWMS | undefined> {
     let metadata;
@@ -389,11 +390,7 @@ export class WMS extends AbstractGeoViewRaster {
     // Validate the metadata response
     if (!metadata.Capability) {
       // Throw
-      throw new LayerServiceMetadataUnableToFetchError(
-        this.geoviewLayerId,
-        this.getLayerEntryNameOrGeoviewLayerName(),
-        formatError('Invalid Capability response')
-      );
+      throw new LayerNoCapabilitiesError(this.geoviewLayerId, this.getLayerEntryNameOrGeoviewLayerName());
     }
 
     // Apply metadata inheritance to ensure nested layer structures are properly populated
