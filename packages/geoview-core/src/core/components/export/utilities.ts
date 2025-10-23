@@ -156,6 +156,18 @@ const estimateItemHeight = (item: FlattenedLegendItem, pageSize: TypeValidPageSi
 };
 
 /**
+ * Calculate the per-item correction factor based on canvas width
+ * The base value of 15px was calibrated for a 1275px width canvas
+ * @param {number} canvasWidth - The canvas width
+ * @returns {number} The correction factor per item
+ */
+const calculateItemCorrectionFactor = (canvasWidth: number): number => {
+  const BASE_WIDTH = 1275;
+  const BASE_CORRECTION = 15;
+  return (canvasWidth / BASE_WIDTH) * BASE_CORRECTION;
+};
+
+/**
  * Estimate footer height based on content
  * @param {string} disclaimer - The disclaimer text
  * @param {string[]} attributions - The array of attribution texts
@@ -571,6 +583,7 @@ export async function getMapInfo(
 
   if (pageSize === 'AUTO') {
     // Calculate height of each column, including spacing between items
+    const itemCorrectionFactor = calculateItemCorrectionFactor(mapImageWidth);
     const columnHeights = fittedColumns.map((column) => {
       let height = 0;
 
@@ -583,8 +596,8 @@ export async function getMapInfo(
         }
       });
 
-      // Add correction factor for line-height, padding, and box-sizing
-      height += column.length * 15;
+      // Add correction factor for line-height, padding, and box-sizing (scales with width)
+      height += column.length * itemCorrectionFactor;
 
       return height;
     });
@@ -622,6 +635,8 @@ export async function getMapInfo(
   // For AUTO mode, merge overflow items back into main columns to prevent page breaks
   let fittedOverflowItems;
   if (pageSize === 'AUTO' && overflowItems && overflowItems.length > 0) {
+    const itemCorrectionFactor = calculateItemCorrectionFactor(mapImageWidth);
+
     // Add overflow items to the shortest column (by height) - include item spacing
     const columnHeights = fittedColumns.map((column) => {
       let height = 0;
@@ -633,8 +648,8 @@ export async function getMapInfo(
         }
       });
 
-      // Add correction factor for underestimated item heights
-      height += column.length * 15;
+      // Add correction factor for underestimated item heights (scales with width)
+      height += column.length * itemCorrectionFactor;
 
       return height;
     });
@@ -653,8 +668,8 @@ export async function getMapInfo(
         }
       });
 
-      // Add correction factor for underestimated item heights
-      height += column.length * 15;
+      // Add correction factor for underestimated item heights (scales with width)
+      height += column.length * itemCorrectionFactor;
 
       return height;
     });
