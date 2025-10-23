@@ -171,6 +171,33 @@ export class AssertionUndefinedError extends AssertionError {
 }
 
 /**
+ * Custom error to indicate that a value was unexpectedly defined.
+ * @extends {AssertionError}
+ */
+export class AssertionDefinedError extends AssertionError {
+  /**
+   * Creates a new AssertionDefinedError.
+   * @param {string} propertyPath - The name or path of the property that was undefined.
+   */
+  constructor(propertyPath: string, actualValue: unknown) {
+    // Call the base Error constructor with the provided message
+    super(`Value for '${propertyPath}' was defined.`, actualValue, undefined);
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'AssertionDefinedError';
+
+    // Capture the stack trace (V8-specific, e.g., Chrome and Node.js)
+    // Omits the constructor call from the trace for cleaner debugging
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, AssertionDefinedError);
+    }
+
+    // Ensure the prototype chain is correct (required in some transpilation targets)
+    Object.setPrototypeOf(this, AssertionDefinedError.prototype);
+  }
+}
+
+/**
  * Custom error to indicate that a value was of wrong instance.
  * @extends {AssertionError}
  */

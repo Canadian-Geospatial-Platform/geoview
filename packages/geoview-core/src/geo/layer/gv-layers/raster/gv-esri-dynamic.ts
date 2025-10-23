@@ -602,8 +602,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Handles progress messages from a worker to update layer loading status
-   * @param {MessageEvent} event - The message event from the worker containing progress data
-   * @returns {void}
+   * @param {MessageEvent} event - The message event from the worker containing progress data.
    */
   #handleWorkerMessage(event: MessageEvent): void {
     // Log

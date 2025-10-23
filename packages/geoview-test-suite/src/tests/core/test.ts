@@ -2,6 +2,7 @@ import {
   TestError,
   AssertionJSONObjectError,
   AssertionUndefinedError,
+  AssertionDefinedError,
   AssertionValueError,
   AssertionWrongInstanceError,
   AssertionArrayExcludingError,
@@ -226,6 +227,21 @@ export class Test<T = unknown> {
 
     // Throw
     throw new AssertionUndefinedError(propertyPath);
+  }
+
+  /**
+   * Asserts that a value is undefined.
+   * @param {string} propertyPath - The name or path of the array being validated.
+   * @param {T | undefined} actualValue - The actual value being checked.
+   * @throws {AssertionUndefinedError} If the value isn't defined.
+   * @static
+   */
+  static assertIsUndefined<T = unknown>(propertyPath: string, actualValue: T | undefined): void {
+    // Checks if the value is defined
+    if (actualValue === undefined || actualValue === null) return;
+
+    // Throw
+    throw new AssertionDefinedError(propertyPath, actualValue);
   }
 
   /**

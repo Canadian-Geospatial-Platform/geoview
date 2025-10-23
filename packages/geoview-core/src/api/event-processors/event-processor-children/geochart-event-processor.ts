@@ -131,7 +131,6 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    * Sets the selected layer path for a specific GeoChart map instance in the Zustand store.
    * @param {string} mapId - The unique identifier of the GeoChart map.
    * @param {string} layerPath - The path of the layer to set as selected.
-   * @returns {void}
    */
   static setSelectedGeochartLayerPath(mapId: string, layerPath: string): void {
     // Set the selected layer path

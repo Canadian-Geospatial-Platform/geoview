@@ -122,6 +122,12 @@ export default [
           ignoreOverrideMethods: true,
         },
       ],
+      "@typescript-eslint/explicit-member-accessibility": [
+        "error",
+        {
+          "accessibility": "no-public"
+        }
+      ],
       '@typescript-eslint/no-non-null-assertion': 'off',
       'require-await': 1, // Warning
       '@typescript-eslint/await-thenable': 'warn',
