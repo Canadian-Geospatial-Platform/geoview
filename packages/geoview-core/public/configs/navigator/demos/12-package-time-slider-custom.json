@@ -44,6 +44,39 @@
             "layerId": "msi-94-or-more"
           }
         ]
+      },
+      {
+        "geoviewLayerId": "fire_perimeters",
+        "geoviewLayerName": "fire_perimeters_20230915",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1"
+          }
+        ],
+        "metadataAccessPath": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NRCAN/FireCreepPerimeter_20230915/MapServer/"
+      },
+      {
+        "geoviewLayerId": "fire_progression",
+        "geoviewLayerName": "fire_progression_20230915",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0"
+          }
+        ],
+        "metadataAccessPath": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NRCAN/FireCreepPerimeter_20230915/MapServer/"
+      },
+      {
+        "geoviewLayerId": "floods_canada",
+        "geoviewLayerName": "Floods in Canada",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1"
+          }
+        ],
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/egs_sgu/rest/services/Flood_Inondation/EGS_Flood_Product_Current_en/MapServer"
       }
     ]
   },
@@ -78,30 +111,6 @@
         "sliders": [
           {
             "layerPaths": [
-              "historical-flood/0"
-            ],
-            "title": "Historical Flood Events - Custom",
-            "description": "Custom inline description",
-            "locked": false,
-            "reversed": false,
-            "timeDimension": {
-              "field": "time_slider_date",
-              "default": [
-                "1940-01-01T05:00:00Z",
-                "1960-01-01T05:00:00Z"
-              ],
-              "unitSymbol": "",
-              "rangeItems": {
-                "range": [
-                  "1900-01-01T05:00:00Z",
-                  "2000-01-01T05:00:00Z"
-                ]
-              },
-              "singleHandle": false
-            }
-          },
-          {
-            "layerPaths": [
               "wmsLYR1-spatiotemporel/RADAR_1KM_RSNO"
             ],
             "title": "Spatiotemporel - Custom",
@@ -122,6 +131,37 @@
               "default": [
                 "2011-08-15T00:00:00Z"
               ]
+            }
+          },
+          {
+            "layerPaths": [
+              "fire_progression/0",
+              "fire_perimeters/1",
+              "floods_canada/1",
+              "historical-flood/0"
+            ],
+            "title": "Progression and Perimeters of Fires and Floods",
+            "delay": 5000,
+            "filtering": false,
+            "timeDimension": {
+              "field": "DATE_",
+              "default": [
+                "2023-04-19T00:00:00Z",
+                "2025-09-15T00:00:00Z"
+              ],
+              "nearestValues": "discrete",
+              "displayPattern": [
+                "day",
+                null
+              ],
+              "rangeItems": {
+                "type": "",
+                "range": [
+                  "2023-04-19T00:00:00+00:00",
+                  "2025-09-15T00:00:00+00:00"
+                ]
+              },
+              "singleHandle": false
             }
           }
         ]
