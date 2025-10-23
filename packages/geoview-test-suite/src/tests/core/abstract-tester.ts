@@ -109,6 +109,15 @@ export abstract class AbstractTester {
     return this.#testPerformTest(message, callback, callbackAssert, callbackFinalize);
   }
 
+  /**
+   * Performs a test which is supposed to throw an error (a true negative) using the provided test callback and assertion callback.
+   * @template T The expected error that the test should throw.
+   * @param {string} message - A message describing the test.
+   * @param {BaseTestDelegate<T>} callback - The function to execute which should be throwing an error.
+   * @param {BaseAssertionDelegate<T>?} [callbackAssert] - Optional function to perform assertions on the result.
+   * @param {BaseFinalizeDelegate<T>?} [callbackFinalize] - Optional function to finalize the test after completion.
+   * @returns {Promise<TestResult<T>>} The result wrapped in an {@link TestResult} object.
+   */
   testError<T extends Error>(
     message: string,
     errorClass: ClassType<T>,

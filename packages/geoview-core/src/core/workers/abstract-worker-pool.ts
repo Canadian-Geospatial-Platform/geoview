@@ -33,7 +33,6 @@ export abstract class AbstractWorkerPool<T> {
   /**
    * Initializes the specified number of workers in the pool.
    * @param {number} numWorkers - Number of workers to create
-   * @returns {void}
    */
   protected initializeWorkers(numWorkers: number): void {
     for (let i = 0; i < numWorkers; i++) {

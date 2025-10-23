@@ -951,7 +951,6 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * @param {string[]} messageParams - Array of parameters to be interpolated into the localized message
    * @param {SnackbarType} messageType - The message type
    * @param {boolean} [notification=false] - Whether to show this as a notification. Defaults to false
-   * @returns {void}
    *
    * @example
    * this.emitMessage(
