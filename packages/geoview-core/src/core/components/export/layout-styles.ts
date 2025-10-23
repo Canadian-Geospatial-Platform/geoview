@@ -39,6 +39,8 @@ export const SHARED_STYLES = {
   northArrowSize: 40,
   legendGap: 10,
   legendPaddingLeft: 2,
+  dividerMargin: 10,
+  dividerHeight: 2,
   rowDividerHeight: 1,
   rowDividerMargin: 8,
   wmsImageWidth: 250,
@@ -118,7 +120,7 @@ export const SHARED_STYLES = {
     fontSize: 8,
     fontWeight: 'bold',
     marginBottom: 2,
-    marginLeft: indentLevel,
+    marginLeft: indentLevel * 8 + 8,
     marginTop: 3,
   }),
   itemIcon: {
@@ -167,6 +169,12 @@ export const PDF_STYLES = {
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: SHARED_STYLES.scaleMarginBottom,
+  },
+  divider: {
+    width: '100%',
+    height: SHARED_STYLES.dividerHeight,
+    backgroundColor: COLORS.standardGrey,
+    marginBottom: SHARED_STYLES.dividerMargin,
   },
   legendContainer: {
     flexDirection: 'column',
@@ -221,6 +229,7 @@ export const CANVAS_STYLES = {
   page: (width: number, height: number) => ({
     width: `${width}px`,
     height: `${height}px`,
+    minHeight: `${height}px`,
     padding: `${SHARED_STYLES.padding}px`,
     fontFamily: SHARED_STYLES.fontFamily,
     backgroundColor: 'white',
@@ -276,6 +285,12 @@ export const CANVAS_STYLES = {
     width: `${SHARED_STYLES.northArrowSize}px`,
     height: `${SHARED_STYLES.northArrowSize}px`,
   },
+  divider: {
+    width: '100%',
+    height: `${SHARED_STYLES.dividerHeight}px`,
+    backgroundColor: COLORS.standardGrey,
+    marginBottom: `${SHARED_STYLES.dividerMargin}px`,
+  },
   legendContainer: {
     display: 'flex',
     flexDirection: 'column',
@@ -325,7 +340,7 @@ export const CANVAS_STYLES = {
     ...SHARED_STYLES.childText(indentLevel),
     fontSize: `${SHARED_STYLES.childFontSize}px`,
     marginBottom: `${SHARED_STYLES.childMarginBottom}px`,
-    marginLeft: `${indentLevel}px`,
+    marginLeft: `${indentLevel * 8 + 8}px`,
     marginTop: `${SHARED_STYLES.childMarginTop}px`,
   }),
   itemContainer: (indentLevel: number) => ({

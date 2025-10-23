@@ -217,14 +217,26 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
                 const globalMatchIndex = allMatches.indexOf(tableMatch);
                 const isCurrentMatch = globalMatchIndex === currentMatchIndex;
 
-                // Add indicator before the table (only once per table)
+                // Add indicator and wrapper before the table (only once per table)
                 if (!result.includes(`<!-- table-indicator-${tableRange.start} -->`)) {
                   const insertPoint = tableRange.start + offset;
+                  const tableEndPoint = tableRange.end + offset;
 
                   const indicator = `<span data-table-indicator="${tableRange.start}" style="display: inline-block; margin: 2px 5px; padding: 6px 10px; background: ${isCurrentMatch ? '#ff6b35' : 'transparent'}; color: ${isCurrentMatch ? 'white' : 'black'}; border-radius: 3px; font-size: 1.1em; font-weight: bold;">📋 ${t('guide.tableMatch')}</span><!-- table-indicator-${tableRange.start} -->`;
 
-                  result = result.slice(0, insertPoint) + indicator + result.slice(insertPoint);
-                  offset += indicator.length;
+                  // Wrap the table with a styled div
+                  const tableWrapperStart = `<div style="border-left: 4px solid #ff6b35; padding-left: 10px; margin-left: 5px;">`;
+                  const tableWrapperEnd = `</div>`;
+
+                  // Insert indicator and wrapper start
+                  result = result.slice(0, insertPoint) + indicator + '\n' + tableWrapperStart + '\n' + result.slice(insertPoint);
+                  offset += indicator.length + tableWrapperStart.length + 2; // +2 for newlines
+
+                  // Insert wrapper end after the table
+                  const adjustedTableEnd = tableEndPoint + offset - tableRange.start;
+                  result = result.slice(0, adjustedTableEnd) + '\n' + tableWrapperEnd + result.slice(adjustedTableEnd);
+                  offset += tableWrapperEnd.length + 1; // +1 for newline
+
                   matchCount++;
                 }
               }
