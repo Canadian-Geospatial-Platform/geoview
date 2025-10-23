@@ -137,7 +137,9 @@ const estimateItemHeight = (item: FlattenedLegendItem, pageSize: TypeValidPageSi
   switch (item.type) {
     case 'layer': {
       const textHeight = estimateTextHeight(item.data.layerName || '', SHARED_STYLES.layerFontSize, columnWidth);
-      return textHeight + SHARED_STYLES.layerMarginBottom + SHARED_STYLES.layerMarginTop / 2;
+      // layerText has marginBottom always, but marginTop is 0 for first item and 8px for others
+      // We return just the base height here, marginTop will be added separately in column calculation
+      return textHeight + SHARED_STYLES.layerMarginBottom;
     }
     case 'child':
       return SHARED_STYLES.childFontSize + SHARED_STYLES.childMarginBottom + SHARED_STYLES.childMarginTop;
@@ -290,12 +292,59 @@ export const processLegendLayers = (
 // };
 
 /**
+ * Row-based packing algorithm for optimal column distribution
+ * Pre-calculates all item heights, then places tallest groups first and stacks smaller groups when possible
+ * @param {FlattenedLegendItem[][]} groups - Groups to distribute
+ * @param {number} numColumns - Number of columns
+ * @param {TypeValidPageSizes} pageSize - Page size
+ * @returns {Object} Optimized distribution
+ */
+const optimizeColumnDistribution = (
+  groups: FlattenedLegendItem[][],
+  numColumns: number,
+  pageSize: TypeValidPageSizes
+): { columns: FlattenedLegendItem[][]; columnHeights: number[]; overflow: FlattenedLegendItem[] } => {
+  // Pre-calculate heights for all items in all groups
+  const groupsWithHeights = groups.map((group) => {
+    const itemsWithHeights = group.map((item) => ({
+      ...item,
+      calculatedHeight: item.calculatedHeight || estimateItemHeight(item, pageSize),
+    }));
+    const totalHeight = itemsWithHeights.reduce((sum, item) => sum + (item.calculatedHeight || 0), 0);
+    return {
+      group: itemsWithHeights,
+      height: totalHeight,
+      id: `${group[0]?.data.layerPath || ''}-${Math.random()}`, // Unique ID for tracking
+    };
+  });
+
+  // Sort groups by height (tallest first)
+  const sortedGroups = [...groupsWithHeights].sort((a, b) => b.height - a.height);
+
+  const columns: FlattenedLegendItem[][] = Array(numColumns)
+    .fill(null)
+    .map(() => []);
+  const columnHeights: number[] = Array(numColumns).fill(0);
+
+  // Place each group one at a time into the shortest column
+  sortedGroups.forEach((groupWithHeight) => {
+    const shortestColumnIndex = columnHeights.indexOf(Math.min(...columnHeights));
+    columns[shortestColumnIndex].push(...groupWithHeight.group);
+    columnHeights[shortestColumnIndex] += groupWithHeight.height;
+  });
+
+  return { columns, columnHeights, overflow: [] };
+};
+
+/**
  * Group items by their root layer and distribute in the columns
  * @param {FlattenedLegendItem[]} items - The flattened list of legend items to be placed in the legend
  * @param {number} numColumns - The maximum number of columns that can be used
  * @param {number} maxHeight - The maximum height available on the rest of the page
- * @param {string} disclaimer - The disclaimer text to be displayed in the footer
- * @param {string[]} attributions - The attributions to be displayed in the footer
+ * @param {string} disclaimer - The disclaimer text to be displayed in the footer (reserved for future use)
+ * @param {string[]} attributions - The attributions to be displayed in the footer (reserved for future use)
+ * @param {TypeValidPageSizes} pageSize - The page size for calculation
+ * @param {string} exportTitle - Optional title for reserved space calculation (reserved for future use)
  * @returns {FlattenedLegendItem[][][]} The flattened legend items distributed into rows and columns
  */
 export const distributeIntoColumns = (
@@ -309,11 +358,11 @@ export const distributeIntoColumns = (
 ): { fittedColumns: FlattenedLegendItem[][]; overflowItems: FlattenedLegendItem[] } => {
   if (!items || items.length === 0) return { fittedColumns: Array(numColumns).fill([]), overflowItems: [] };
 
-  const columns: FlattenedLegendItem[][] = Array(numColumns)
-    .fill(null)
-    .map(() => []);
-  const columnHeights: number[] = Array(numColumns).fill(0);
-  const overflowItems: FlattenedLegendItem[] = [];
+  // Note: maxLegendHeight, disclaimer, attributions, and exportTitle are reserved for future overflow handling
+  void maxLegendHeight;
+  void disclaimer;
+  void attributions;
+  void exportTitle;
 
   // Group items by root layers
   const groups: FlattenedLegendItem[][] = [];
@@ -331,38 +380,15 @@ export const distributeIntoColumns = (
     groups.push(currentGroup);
   }
 
-  // Reserve space for footer (approximately 60px)
-  const footerReservedSpace = estimateFooterHeight(disclaimer, attributions);
-  const titleReservedSpace = exportTitle && exportTitle.trim() ? SHARED_STYLES.titleFontSize + SHARED_STYLES.titleMarginBottom : 0;
-  const adjustedMaxHeight = maxLegendHeight - footerReservedSpace - titleReservedSpace;
+  // Reserve space for footer - calculated for future overflow handling
+  // const footerReservedSpace = estimateFooterHeight(disclaimer, attributions);
+  // const titleReservedSpace = exportTitle && exportTitle.trim() ? SHARED_STYLES.titleFontSize + SHARED_STYLES.titleMarginBottom : 0;
+  // const adjustedMaxHeight = maxLegendHeight - footerReservedSpace - titleReservedSpace;
 
-  // Distribute groups strictly - no splitting allowed
-  groups.forEach((group) => {
-    const groupHeight = group.reduce((sum, item) => sum + estimateItemHeight(item, pageSize), 0);
+  // Use row-based packing algorithm for optimal distribution
+  const { columns, overflow } = optimizeColumnDistribution(groups, numColumns, pageSize);
 
-    // Find the column with the least content that can fit this entire group
-    let targetColumn = -1;
-    let minHeight = Infinity;
-
-    for (let i = 0; i < numColumns; i++) {
-      // For AUTO format, ignore height constraints unless it's wide content
-      const canFit = pageSize === 'AUTO' || columnHeights[i] + groupHeight <= adjustedMaxHeight;
-      if (canFit && columnHeights[i] < minHeight) {
-        targetColumn = i;
-        minHeight = columnHeights[i];
-      }
-    }
-
-    // If no column can fit the entire group, move to overflow
-    if (targetColumn === -1) {
-      overflowItems.push(...group);
-    } else {
-      columns[targetColumn].push(...group);
-      columnHeights[targetColumn] += groupHeight;
-    }
-  });
-
-  return { fittedColumns: columns, overflowItems };
+  return { fittedColumns: columns, overflowItems: overflow };
 };
 
 /**
@@ -529,52 +555,129 @@ export async function getMapInfo(
     return item;
   });
 
-  // For AUTO format, calculate required height and create modified config
-  let finalConfig: TypePageConfig = config;
-
-  if (pageSize === 'AUTO') {
-    const totalLegendHeight = itemsWithHeights.reduce((sum, item) => sum + estimateItemHeight(item, pageSize), 0);
-    const footerHeight = estimateFooterHeight(disclaimer, attribution);
-    const titleHeight = title && title.trim() ? SHARED_STYLES.titleFontSize + SHARED_STYLES.titleMarginBottom : 0;
-    const mapHeight = mapImageHeight + SHARED_STYLES.mapMarginBottom;
-    const scaleHeight = SHARED_STYLES.scaleFontSize + SHARED_STYLES.scaleMarginBottom + SHARED_STYLES.legendMarginTop;
-
-    const calculatedHeight = titleHeight + mapHeight + scaleHeight + totalLegendHeight + footerHeight + SHARED_STYLES.padding * 2;
-    finalConfig = {
-      size: 'AUTO' as const,
-      mapHeight: config.mapHeight,
-      legendColumns: config.legendColumns,
-      maxLegendHeight: Infinity,
-      canvasWidth: mapImageWidth,
-      canvasHeight: calculatedHeight,
-    };
-  }
-
+  // First distribute items into columns
   const { fittedColumns, overflowItems } = distributeIntoColumns(
     itemsWithHeights,
-    finalConfig.legendColumns,
-    finalConfig.maxLegendHeight,
+    config.legendColumns,
+    Infinity,
     disclaimer,
     attribution,
     pageSize,
     title
   );
 
+  // For AUTO format, calculate required height based on actual column distribution
+  let finalConfig: TypePageConfig = config;
+
+  if (pageSize === 'AUTO') {
+    // Calculate height of each column, including spacing between items
+    const columnHeights = fittedColumns.map((column) => {
+      let height = 0;
+
+      column.forEach((item, itemIndex) => {
+        height += item.calculatedHeight || estimateItemHeight(item, pageSize);
+
+        // Add marginTop for every layer item after the first
+        if (itemIndex > 0 && item.type === 'layer') {
+          height += SHARED_STYLES.layerMarginTop;
+        }
+      });
+
+      // Add correction factor for line-height, padding, and box-sizing
+      height += column.length * 15;
+
+      return height;
+    });
+
+    // The legend height is the tallest column, not the sum of all items
+    const legendHeight = Math.max(...columnHeights, 0);
+
+    const footerHeight = estimateFooterHeight(disclaimer, attribution);
+    const titleHeight = title && title.trim() ? SHARED_STYLES.titleFontSize + SHARED_STYLES.titleMarginBottom : 0;
+    const mapHeight = mapImageHeight + SHARED_STYLES.mapMarginBottom;
+    const scaleHeight = SHARED_STYLES.scaleFontSize + SHARED_STYLES.scaleMarginBottom + SHARED_STYLES.legendMarginTop;
+    const dividerHeight = SHARED_STYLES.dividerHeight + SHARED_STYLES.dividerMargin * 2; // One divider between scale and legend
+
+    // Calculate total height including all margins
+    const calculatedHeight =
+      titleHeight +
+      mapHeight +
+      scaleHeight +
+      dividerHeight +
+      legendHeight +
+      SHARED_STYLES.legendMarginBottom +
+      footerHeight +
+      SHARED_STYLES.padding * 2;
+
+    finalConfig = {
+      size: 'AUTO' as const,
+      mapHeight: config.mapHeight,
+      legendColumns: config.legendColumns,
+      maxLegendHeight: Infinity,
+      canvasWidth: mapImageWidth,
+      canvasHeight: Math.ceil(calculatedHeight),
+    };
+  }
+
   // For AUTO mode, merge overflow items back into main columns to prevent page breaks
   let fittedOverflowItems;
   if (pageSize === 'AUTO' && overflowItems && overflowItems.length > 0) {
-    // Add overflow items to the least filled column
-    let minColumnIndex = 0;
-    let minColumnLength = fittedColumns[0]?.length || 0;
+    // Add overflow items to the shortest column (by height) - include item spacing
+    const columnHeights = fittedColumns.map((column) => {
+      let height = 0;
 
-    for (let i = 1; i < fittedColumns.length; i++) {
-      if ((fittedColumns[i]?.length || 0) < minColumnLength) {
-        minColumnIndex = i;
-        minColumnLength = fittedColumns[i]?.length || 0;
-      }
-    }
+      column.forEach((item, itemIndex) => {
+        height += item.calculatedHeight || estimateItemHeight(item, pageSize);
+        if (itemIndex > 0 && item.type === 'layer') {
+          height += SHARED_STYLES.layerMarginTop;
+        }
+      });
+
+      // Add correction factor for underestimated item heights
+      height += column.length * 15;
+
+      return height;
+    });
+    const minColumnIndex = columnHeights.indexOf(Math.min(...columnHeights));
 
     fittedColumns[minColumnIndex] = [...(fittedColumns[minColumnIndex] || []), ...overflowItems];
+
+    // Recalculate canvas height after merging overflow items - include item spacing
+    const newColumnHeights = fittedColumns.map((column) => {
+      let height = 0;
+
+      column.forEach((item, itemIndex) => {
+        height += item.calculatedHeight || estimateItemHeight(item, pageSize);
+        if (itemIndex > 0 && item.type === 'layer') {
+          height += SHARED_STYLES.layerMarginTop;
+        }
+      });
+
+      // Add correction factor for underestimated item heights
+      height += column.length * 15;
+
+      return height;
+    });
+    const newLegendHeight = Math.max(...newColumnHeights, 0);
+
+    const footerHeight = estimateFooterHeight(disclaimer, attribution);
+    const titleHeight = title && title.trim() ? SHARED_STYLES.titleFontSize + SHARED_STYLES.titleMarginBottom : 0;
+    const mapHeight = mapImageHeight + SHARED_STYLES.mapMarginBottom;
+    const scaleHeight = SHARED_STYLES.scaleFontSize + SHARED_STYLES.scaleMarginBottom + SHARED_STYLES.legendMarginTop;
+    const dividerHeight = SHARED_STYLES.dividerHeight + SHARED_STYLES.dividerMargin * 2; // One divider between scale and legend
+
+    // Include all margins: page padding (top/bottom), legendMarginBottom, divider
+    const recalculatedHeight =
+      titleHeight +
+      mapHeight +
+      scaleHeight +
+      dividerHeight +
+      newLegendHeight +
+      SHARED_STYLES.legendMarginBottom +
+      footerHeight +
+      SHARED_STYLES.padding * 2;
+
+    finalConfig.canvasHeight = Math.ceil(recalculatedHeight);
   } else if (overflowItems && overflowItems.length > 0 && pageSize !== 'AUTO') {
     // Use full page height for overflow page (no map, title, or footer)
     const overflowMaxHeight =
