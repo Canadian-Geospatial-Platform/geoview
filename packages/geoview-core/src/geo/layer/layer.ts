@@ -364,7 +364,16 @@ export class LayerApi {
    * @returns {ConfigBaseClass | undefined} The layer configuration or undefined if not found.
    */
   getLayerEntryConfig(layerPath: string): ConfigBaseClass | undefined {
-    // TODO: Refactor - LayerApi - Throw an exception when not found!
+    // TODO: Refactor - LayerApi - Throw an exception when not found! Use 'getLayerEntryConfigIfExists' when it can be undefined.
+    return this.#layerEntryConfigs?.[layerPath];
+  }
+
+  /**
+   * Gets the layer configuration of the specified layer path.
+   * @param {string} layerPath The layer path.
+   * @returns {ConfigBaseClass | undefined} The layer configuration or undefined if not found.
+   */
+  getLayerEntryConfigIfExists(layerPath: string): ConfigBaseClass | undefined {
     return this.#layerEntryConfigs?.[layerPath];
   }
 
@@ -376,7 +385,7 @@ export class LayerApi {
    */
   getOLLayer(layerPath: string): BaseLayer {
     // Get the OpenLayer layer as part of the new GVLayer design
-    return this.getGeoviewLayer(layerPath)?.getOLLayer();
+    return this.getGeoviewLayer(layerPath).getOLLayer();
   }
 
   /**
@@ -1704,7 +1713,6 @@ export class LayerApi {
    * @param {string} layerMessageEvent.messageKey - Key for localized message lookup
    * @param {string[]} layerMessageEvent.messageParams - Parameters to be inserted into the localized message
    * @param {boolean} layerMessageEvent.notification - Notification configuration options
-   * @returns {void}
    *
    * @example
    * handleLayerMessage(myLayer, {
