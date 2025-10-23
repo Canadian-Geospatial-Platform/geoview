@@ -332,6 +332,14 @@ export class ConfigTester extends GVAbstractTester {
     );
   }
 
+  /**
+   * Tests the behavior of initializing an Esri Image layer configuration using an invalid metadata URL.
+   * This test verifies that when an Esri Image layer configuration is initialized with an invalid or unreachable
+   * metadata URL, the initialization process fails as expected and throws a
+   * {@link LayerServiceMetadataUnableToFetchError}.
+   * @returns {Promise<Test<LayerServiceMetadataUnableToFetchError>>}
+   * A promise that resolves with the test result, expecting a `LayerServiceMetadataUnableToFetchError`.
+   */
   testEsriImageBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
     // The bad url
     const urlBad: string = 'https://badurl/oops';
@@ -454,12 +462,22 @@ export class ConfigTester extends GVAbstractTester {
     );
   }
 
-  testWMSBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
+  /**
+   * Tests the behavior of initializing a WMS layer configuration using an invalid metadata URL.
+   * This test verifies that when a WMS layer configuration is initialized with an invalid or unreachable
+   * metadata URL, the initialization process fails as expected and throws a
+   * {@link LayerNoCapabilitiesError}.
+   * @returns {Promise<Test<LayerNoCapabilitiesError>>}
+   * A promise that resolves with the test result, expecting a `LayerNoCapabilitiesError`.
+   */
+  testWMSBadUrl(): Promise<Test<LayerNoCapabilitiesError>> {
+    // GV: In the case of a WMS, since a proxy is used when the url fails, and that proxy always returns a 200 response (with an internal error inside)
+    // GV: We can't really test the LayerServiceMetadataUnableToFetchError error exception.
     // The bad url
     const urlBad: string = 'https://badurl/oops';
 
     // Test
-    return this.testError(`Test a WMS config with a bad url...`, LayerServiceMetadataUnableToFetchError, async (test) => {
+    return this.testError(`Test a WMS config with a bad url...`, LayerNoCapabilitiesError, async (test) => {
       // Creating the configuration
       test.addStep('Creating the GeoView Layer Configuration...');
 
@@ -525,6 +543,14 @@ export class ConfigTester extends GVAbstractTester {
     );
   }
 
+  /**
+   * Tests the behavior of initializing a WFS layer configuration using an invalid metadata URL.
+   * This test verifies that when a WFS layer configuration is initialized with an invalid or unreachable
+   * metadata URL, the initialization process fails as expected and throws a
+   * {@link LayerServiceMetadataUnableToFetchError}.
+   * @returns {Promise<Test<LayerServiceMetadataUnableToFetchError>>}
+   * A promise that resolves with the test result, expecting a `LayerServiceMetadataUnableToFetchError`.
+   */
   testWFSBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
     // The bad url
     const urlBad: string = 'https://badurl/oops';
@@ -539,6 +565,13 @@ export class ConfigTester extends GVAbstractTester {
     });
   }
 
+  /**
+   * Tests the behavior of initializing a WFS layer configuration using a 'valid' URL, but without a GetCapabilities response.
+   * This test verifies that when a WFS layer configuration is initialized and the initialization process fails as expected and throws a
+   * {@link getcaoa}.
+   * @returns {Promise<Test<LayerNoCapabilitiesError>>}
+   * A promise that resolves with the test result, expecting a `LayerNoCapabilitiesError`.
+   */
   testWFSOkayUrlNoCap(): Promise<Test<LayerNoCapabilitiesError>> {
     // The bad url which still respond something (not a 404, 500, etc)
     const urlBad: string = 'https://maps.canada.ca/wmsproxy/ws/wmsproxy/executeFromProxy';
@@ -607,6 +640,14 @@ export class ConfigTester extends GVAbstractTester {
     );
   }
 
+  /**
+   * Tests the behavior of initializing a GeoJSON layer configuration using an invalid data URL
+   * that does not point to a valid metadata file.
+   * This test verifies that when a GeoJSON layer configuration is initialized with an invalid or
+   * unreachable URL (without a `.meta` suffix), the initialization process does not throw an error,
+   * but instead correctly **skips** metadata loading as intended.
+   * @returns {Promise<Test<void>>} A promise that resolves with nothing.
+   */
   testGeoJSONBadUrlExpectSkip(): Promise<Test<void>> {
     // The bad url
     const urlBad: string = 'https://badurl/oops';
@@ -628,6 +669,14 @@ export class ConfigTester extends GVAbstractTester {
     );
   }
 
+  /**
+   * Tests the behavior of initializing a GeoJSON layer configuration using an invalid metadata URL.
+   * This test verifies that when a GeoJSON layer configuration is initialized with a metadata URL
+   * ending in `.meta` that is invalid or unreachable, the initialization process correctly **fails**
+   * and throws a {@link LayerServiceMetadataUnableToFetchError}.
+   * @returns {Promise<Test<LayerServiceMetadataUnableToFetchError>>}
+   * A promise that resolves with the test result, expecting a {@link LayerServiceMetadataUnableToFetchError}.
+   */
   testGeoJSONBadUrlExpectError(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
     // The bad url ending in .meta
     const urlBad: string = 'https://badurl/oops/metadata.meta';
@@ -700,6 +749,14 @@ export class ConfigTester extends GVAbstractTester {
     );
   }
 
+  /**
+   * Tests the behavior of initializing a CSV layer configuration using an invalid metadata URL.
+   * This test verifies that when a CSV layer configuration is initialized with an invalid or unreachable
+   * metadata URL, the initialization process fails as expected and throws a
+   * {@link LayerServiceMetadataUnableToFetchError}.
+   * @returns {Promise<Test<LayerServiceMetadataUnableToFetchError>>}
+   * A promise that resolves with the test result, expecting a `LayerServiceMetadataUnableToFetchError`.
+   */
   testCSVBadUrlExpectSkip(): Promise<Test<void>> {
     // The bad url
     const urlBad: string = 'https://badurl/oops';
@@ -775,6 +832,14 @@ export class ConfigTester extends GVAbstractTester {
     );
   }
 
+  /**
+   * Tests the behavior of initializing an OGC Feature layer configuration using an invalid metadata URL.
+   * This test verifies that when an OGC Feature layer configuration is initialized with an invalid or unreachable
+   * metadata URL, the initialization process fails as expected and throws a
+   * {@link LayerServiceMetadataUnableToFetchError}.
+   * @returns {Promise<Test<LayerServiceMetadataUnableToFetchError>>}
+   * A promise that resolves with the test result, expecting a `LayerServiceMetadataUnableToFetchError`.
+   */
   testOGCFeatureBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
     // The bad url
     const urlBad: string = 'https://badurl/oops';
@@ -843,6 +908,14 @@ export class ConfigTester extends GVAbstractTester {
     );
   }
 
+  /**
+   * Tests the behavior of initializing a WKB GeoView layer configuration using an invalid metadata URL.
+   * This test verifies that when a WKB layer configuration is initialized with an invalid or unreachable
+   * metadata URL, the initialization process fails as expected and throws a
+   * {@link LayerServiceMetadataUnableToFetchError}.
+   * @returns {Promise<Test<LayerServiceMetadataUnableToFetchError>>}
+   * A promise that resolves with the test result, expecting a `LayerServiceMetadataUnableToFetchError`.
+   */
   testWKBBadUrlExpectFail(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
     // The bad url
     const urlBad: string = 'https://badurl/oops/metadata.meta';
@@ -863,7 +936,7 @@ export class ConfigTester extends GVAbstractTester {
 
   /**
    * Tests a KML using Tornado.
-   * @returns {Promise<Test<TypeGeoviewLayerConfig>>} A Promise that resolves with a Test containing the configuration.
+   * @returns {Promise<Test<TypeGeoviewLayerConfig>>} A Promise that resolves when the test completes successfully.
    */
   testKMLWithTornado(): Promise<Test<TypeGeoviewLayerConfig>> {
     // The url
@@ -911,6 +984,12 @@ export class ConfigTester extends GVAbstractTester {
     );
   }
 
+  /**
+   * Tests the behavior of initializing a KML GeoView layer configuration using an invalid URL.
+   * This test ensures that when the provided KML URL is invalid or unreachable, the initialization
+   * process correctly skips metadata loading instead of throwing an unhandled error or proceeding incorrectly.
+   * @returns {Promise<Test<void>>} A promise that resolves when the test completes successfully.
+   */
   testKMLBadUrlExpectSkip(): Promise<Test<void>> {
     // The bad url
     const urlBad: string = 'https://badurl/oops';
