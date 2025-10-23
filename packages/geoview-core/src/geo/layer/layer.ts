@@ -1811,6 +1811,7 @@ export class LayerApi {
    * This callback is useful when a WMS doesn't officially support the map projection, but we still want to attempt to pull an image and put it on the map.
    * @param {GVWMS} sender - The WMS layer which is attempting to render its image on the map.
    * @param {ImageLoadRescueEvent} event - The error event which happened when the image tried to be rendered.
+   * @returns {boolean} True if the rescue was attempted, false if we let it fail.
    * @private
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

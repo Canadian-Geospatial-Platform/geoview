@@ -28,15 +28,15 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
    * @returns {Promise<unknown>} A Promise which resolves when tests are completed.
    */
   protected override onLaunchTestSuite(): Promise<unknown> {
-    // GV START DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
-    // Test DEBUG
-    // const pDevTest0 = this.#layerTester.testAddEsriDynamicBadUrl();
-    // const pDevTest1 = this.#layerTester.testAddEsriFeatureBadUrl();
-    const pDevTest2 = this.#layerTester.testAddEsriImageBadUrl();
+    // // GV START DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
+    // // Test DEBUG
+    // // const pDevTest0 = this.#layerTester.testAddEsriDynamicBadUrl();
+    // // const pDevTest1 = this.#layerTester.testAddEsriFeatureBadUrl();
+    // const pDevTest2 = this.#layerTester.testAddEsriImageBadUrl();
 
-    // Resolve when all
-    return Promise.all([pDevTest2]);
-    // GV END DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
+    // // Resolve when all
+    // return Promise.all([pDevTest2]);
+    // // GV END DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
 
     // Test adding layer
     const pLayerEsriDynamicHistoFloods = this.#layerTester.testAddEsriDynamicHistoFloodEvents();
@@ -57,7 +57,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
     const pLayerWMSDatacubeRingFireHalifax = this.#layerTester.testAddWMSLayerWithDatacubeRingOfFire();
 
     // Test true negative
-    const pLayerWMSBadUrl = this.#layerTester.testAddWMSLayerBadUrl();
+    const pLayerWMSBadUrl = this.#layerTester.testAddWMSBadUrl();
 
     // Resolve when all
     return Promise.all([
