@@ -28,107 +28,157 @@ interface ExportDocumentProps {
 }
 
 /**
- * Render legend items in rows with proper alignment and dividers
+ * Render legend items directly from columns without re-grouping
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const renderLegendInRows = (columns: FlattenedLegendItem[][], styles: any): JSX.Element => {
-  const allItems: FlattenedLegendItem[] = [];
-
-  // Flatten all columns into single array
-  columns.forEach((column) => {
-    allItems.push(...column);
-  });
-
-  // Group by root layers
-  const layerGroups: FlattenedLegendItem[][] = [];
-  let currentGroup: FlattenedLegendItem[] = [];
-
-  allItems.forEach((item) => {
-    if (item.isRoot && currentGroup.length > 0) {
-      layerGroups.push(currentGroup);
-      currentGroup = [];
+  /**
+   * Renders a single legend item
+   */
+  const renderSingleItem = (item: FlattenedLegendItem, itemIndex: number, indentLevel: number): JSX.Element => {
+    if (item.type === 'layer') {
+      return (
+        <Text key={`layer-${item.data.layerPath}-${itemIndex}`} style={styles.layerText(itemIndex > 0 ? 8 : 0)}>
+          {item.data.layerName}
+        </Text>
+      );
     }
-    currentGroup.push(item);
-  });
-
-  if (currentGroup.length > 0) {
-    layerGroups.push(currentGroup);
-  }
-
-  // Create rows with max 3 layer groups per row
-  const rows: FlattenedLegendItem[][][] = [];
-  for (let i = 0; i < layerGroups.length; i += 3) {
-    rows.push(layerGroups.slice(i, i + 3));
-  }
-
-  return (
-    <View>
-      {rows.map((rowGroups, rowIndex) => (
-        <View
-          // eslint-disable-next-line react/no-array-index-key
-          key={`row-${rowIndex}`}
-          style={{
-            ...PDF_STYLES.rowContainer,
-            ...(rowIndex === 0 ? { borderTopWidth: 0, paddingTop: 0 } : {}),
-          }}
-        >
-          {rowGroups.map((group, groupIndex) => (
-            // eslint-disable-next-line react/no-array-index-key
-            <View key={`group-${groupIndex}`} style={{ width: `${100 / rowGroups.length}%`, flexDirection: 'column' }}>
-              {group.map((item, index) => {
-                const indentLevel = Math.min(item.depth, 3);
-
-                if (item.type === 'layer') {
-                  return (
-                    <Text key={`layer-${item.data.layerPath}`} style={styles.layerText(index > 0 ? 8 : 0)}>
-                      {item.data.layerName}
-                    </Text>
-                  );
-                } else if (item.type === 'wms') {
-                  return (
-                    <View key={`wms-${item.data.layerPath}`} style={PDF_STYLES.wmsContainer(indentLevel)}>
-                      <Image src={item.data.icons?.[0]?.iconImage || ''} style={PDF_STYLES.wmsImage} />
-                    </View>
-                  );
-                } else if (item.type === 'time') {
-                  const timeText = item.timeInfo?.singleHandle
-                    ? DateMgt.formatDate(
-                        new Date(item.timeInfo.values[0]),
-                        item.timeInfo.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
-                      )
-                    : `${DateMgt.formatDate(
-                        new Date(item.timeInfo?.values[0] || 0),
-                        item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
-                      )} - ${DateMgt.formatDate(
-                        new Date(item.timeInfo?.values[1] || 0),
-                        item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
-                      )}`;
-
-                  return (
-                    <Text key={`time-${item.data.layerPath}`} style={styles.timeText(indentLevel)}>
-                      {timeText}
-                    </Text>
-                  );
-                } else if (item.type === 'child') {
-                  return (
-                    <Text key={`child-${item.data.layerPath}`} style={styles.childText(indentLevel)}>
-                      {item.data.layerName || '...'}
-                    </Text>
-                  );
-                } else {
-                  const legendItem = item.data.items[0];
-                  return (
-                    <View key={`item-${item.parentName}-${legendItem?.name}`} style={PDF_STYLES.itemContainer(indentLevel)}>
-                      {legendItem?.icon && <Image src={legendItem.icon} style={styles.itemIcon} />}
-                      <Text style={styles.itemText}>{legendItem?.name}</Text>
-                    </View>
-                  );
-                }
-              })}
-            </View>
-          ))}
+    if (item.type === 'wms') {
+      return (
+        <View key={`wms-${item.data.layerPath}-${itemIndex}`} style={PDF_STYLES.wmsContainer(indentLevel)}>
+          <Image src={item.data.icons?.[0]?.iconImage || ''} style={PDF_STYLES.wmsImage} />
         </View>
-      ))}
+      );
+    }
+    if (item.type === 'time') {
+      const timeText = item.timeInfo?.singleHandle
+        ? DateMgt.formatDate(
+            new Date(item.timeInfo.values[0]),
+            item.timeInfo.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
+          )
+        : `${DateMgt.formatDate(
+            new Date(item.timeInfo?.values[0] || 0),
+            item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
+          )} - ${DateMgt.formatDate(
+            new Date(item.timeInfo?.values[1] || 0),
+            item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
+          )}`;
+
+      return (
+        <Text key={`time-${item.data.layerPath}-${itemIndex}`} style={styles.timeText(indentLevel)}>
+          {timeText}
+        </Text>
+      );
+    }
+    if (item.type === 'child') {
+      return (
+        <Text key={`child-${item.data.layerPath}-${itemIndex}`} style={styles.childText(indentLevel)}>
+          {item.data.layerName || '...'}
+        </Text>
+      );
+    }
+    const legendItem = item.data.items[0];
+    return (
+      <View key={`item-${item.parentName}-${legendItem?.name}-${itemIndex}`} style={PDF_STYLES.itemContainer(indentLevel)}>
+        {legendItem?.icon && <Image src={legendItem.icon} style={styles.itemIcon} />}
+        <Text style={styles.itemText}>{legendItem?.name}</Text>
+      </View>
+    );
+  };
+
+  /**
+   * Groups items into containers - wraps content (not header) in red border
+   */
+  const renderColumnItems = (column: FlattenedLegendItem[]): JSX.Element[] => {
+    const elements: JSX.Element[] = [];
+    let i = 0;
+
+    while (i < column.length) {
+      const item = column[i];
+      const indentLevel = Math.min(item.depth, 3);
+
+      // Check if this is a layer (depth 0) or child layer (any depth >= 1)
+      if (item.type === 'layer' || item.type === 'child') {
+        // First render the layer/child header WITHOUT the border
+        elements.push(renderSingleItem(item, i, indentLevel));
+
+        const currentDepth = item.depth;
+        const contentStart = i + 1;
+        let contentEnd = i + 1;
+
+        // Find all immediate children (depth = currentDepth + 1)
+        // Stop when we hit an item at same or lower depth (sibling or higher level)
+        while (contentEnd < column.length && column[contentEnd].depth > currentDepth) {
+          // Only collect items at the immediate next level for wrapping
+          if (column[contentEnd].depth === currentDepth + 1) {
+            contentEnd++;
+          } else {
+            // This is a deeper nested item, skip to find where this group ends
+            break;
+          }
+        }
+
+        // If we have direct children, check if they are content items (not child layers)
+        if (contentEnd > contentStart) {
+          const hasContentItems = column
+            .slice(contentStart, contentEnd)
+            .some((childItem) => childItem.type === 'wms' || childItem.type === 'item' || childItem.type === 'time');
+
+          if (hasContentItems) {
+            // Wrap content items with red border
+            const contentItems: JSX.Element[] = [];
+            for (let j = contentStart; j < contentEnd; j++) {
+              const contentItem = column[j];
+              const contentIndentLevel = Math.min(contentItem.depth, 3);
+
+              contentItems.push(renderSingleItem(contentItem, j, contentIndentLevel));
+            }
+
+            elements.push(
+              <View
+                key={`content-${i}`}
+                style={{
+                  borderLeftWidth: 4,
+                  borderLeftColor: '#9e9e9e',
+                  borderLeftStyle: 'solid',
+                  paddingLeft: 8,
+                  marginLeft: 8,
+                  marginBottom: 4,
+                }}
+              >
+                {contentItems}
+              </View>
+            );
+
+            i = contentEnd;
+          } else {
+            // Only child layers, no content to wrap - will be handled in next iteration
+            i++;
+          }
+        } else {
+          // No content, just move to next item
+          i++;
+        }
+      } else {
+        elements.push(renderSingleItem(item, i, indentLevel));
+        i++;
+      }
+    }
+
+    return elements;
+  };
+
+  // Render columns directly as they were distributed
+  return (
+    <View style={{ flexDirection: 'row', gap: 10, width: '100%' }}>
+      {columns.map((column, colIndex) => {
+        const columnKey = column.length > 0 ? `col-${column[0].data.layerPath}-${colIndex}` : `col-empty-${colIndex}`;
+        return (
+          <View key={columnKey} style={{ flexDirection: 'column', flex: 1, minWidth: 0 }}>
+            {renderColumnItems(column)}
+          </View>
+        );
+      })}
     </View>
   );
 };
@@ -191,6 +241,9 @@ export function ExportDocument({
             </View>
           )}
         </View>
+
+        {/* Divider between scale and legend */}
+        <View style={PDF_STYLES.divider} />
 
         {fittedColumns && fittedColumns.length > 0 && (
           <View style={PDF_STYLES.legendContainer}>{renderLegendInRows(fittedColumns, scaledStyles)}</View>
