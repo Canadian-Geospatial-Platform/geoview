@@ -8,9 +8,9 @@ import type { TypeProjection } from '@/geo/utils/projection';
 import type { TimeDimensionESRI } from '@/core/utils/date-mgt';
 import type { EsriBaseRenderer } from '@/geo/utils/renderer/esri-renderer';
 /** Definition of the keys used to create the constants of the GeoView layer */
-type LayerTypesKey = 'CSV' | 'ESRI_DYNAMIC' | 'ESRI_FEATURE' | 'ESRI_IMAGE' | 'IMAGE_STATIC' | 'GEOJSON' | 'XYZ_TILES' | 'VECTOR_TILES' | 'OGC_FEATURE' | 'WFS' | 'WKB' | 'WMS';
+type LayerTypesKey = 'CSV' | 'ESRI_DYNAMIC' | 'ESRI_FEATURE' | 'ESRI_IMAGE' | 'IMAGE_STATIC' | 'GEOJSON' | 'KML' | 'XYZ_TILES' | 'VECTOR_TILES' | 'OGC_FEATURE' | 'WFS' | 'WKB' | 'WMS';
 /** Definition of the geoview layer types accepted by the viewer. */
-export type TypeGeoviewLayerType = 'CSV' | 'esriDynamic' | 'esriFeature' | 'esriImage' | 'GeoJSON' | 'imageStatic' | 'ogcFeature' | 'ogcWfs' | 'ogcWms' | 'vectorTiles' | 'WKB' | 'xyzTiles';
+export type TypeGeoviewLayerType = 'CSV' | 'esriDynamic' | 'esriFeature' | 'esriImage' | 'GeoJSON' | 'imageStatic' | 'KML' | 'ogcFeature' | 'ogcWfs' | 'ogcWms' | 'vectorTiles' | 'WKB' | 'xyzTiles';
 /** Definition of the geoview layer types accepted by the viewer. */
 export type TypeInitialGeoviewLayerType = TypeGeoviewLayerType | 'geoCore' | 'GeoPackage' | 'shapefile' | 'rcs';
 /**

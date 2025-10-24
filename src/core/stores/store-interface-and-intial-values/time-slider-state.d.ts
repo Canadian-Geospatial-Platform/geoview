@@ -47,6 +47,7 @@ export type TimeSliderLayerSet = {
     [layerPath: string]: TypeTimeSliderValues;
 };
 export interface TypeTimeSliderValues {
+    additionalLayerpaths?: string[];
     delay: number;
     description?: string;
     discreteValues: boolean;
@@ -54,6 +55,7 @@ export interface TypeTimeSliderValues {
     field: string;
     fieldAlias: string;
     filtering: boolean;
+    isMainLayerPath: boolean;
     locked?: boolean;
     minAndMax: number[];
     range: string[];
@@ -65,6 +67,7 @@ export interface TypeTimeSliderValues {
 }
 export type TypeTimeSliderProps = {
     layerPaths: string[];
+    fields?: string[];
     title?: string;
     delay?: number;
     filtering?: boolean;
