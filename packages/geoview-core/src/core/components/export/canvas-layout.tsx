@@ -134,14 +134,7 @@ const renderCanvasLegendInRows = (columns: FlattenedLegendItem[][], pageSize: Ty
               contentItems.push(renderSingleItem(contentItem, j, contentIndentLevel));
             }
 
-            elements.push(
-              <div
-                key={`content-${i}`}
-                style={{ borderLeft: '4px solid #9e9e9e', paddingLeft: '8px', marginLeft: '8px', marginBottom: '4px' }}
-              >
-                {contentItems}
-              </div>
-            );
+            elements.push(<div key={`content-${i}`}>{contentItems}</div>);
 
             i = contentEnd;
           } else {

@@ -89,7 +89,7 @@ _Note: The map must be focused for key binding to work._
 
 Depending on the viewer configuration, the map may provide an overview map, a generic representation of the main map at a reduced size. It is located in the upper-right corner of the map.
 
-<img src="{{assetsURL}}/img/guide/navigation/overview.png" style="width: 90%;"/>
+<img src="{{assetsURL}}/img/guide/navigation/overview.png" alt="Overview map displayed in the upper-right corner of the main map" style="width: 90%;"/>
 
 Click-hold on the box in the overview map and drag it to change the extent of the main map. Clicking on the toggle icon in the top right corner of the overview map will expand or contract it.
 
@@ -105,7 +105,7 @@ Using the **Tab** key to navigate to the map and the **Keyboard Navigation** pro
 
 When the map gains focus, a crosshair is displayed in the center of the map:
 
-<img src="{{assetsURL}}/img/guide/navigation/crosshair.svg" style="width: 90%; height: 100px;"/>
+<img src="{{assetsURL}}/img/guide/navigation/crosshair.svg" alt="Crosshair marker displayed in the center of the map for keyboard navigation" style="width: 90%; height: 100px;"/>
 
 Use the **arrow** keys to move the map and **+** / **-** keys to zoom in and out. Press **Enter** to select a feature under the crosshairs and display associated data in the Details panel.
 
@@ -127,7 +127,7 @@ This map is not fully WCAG 2.0 AA compliant.
 
 Click the up chevron icon ![]({{assetsURL}}/img/guide/navigation/chevron_up.svg) on the left to expand/collapse the bar.
 
-<img src="{{assetsURL}}/img/guide/navigation/map_info.png" style="width: 90%;"/>
+<img src="{{assetsURL}}/img/guide/navigation/map_info.png" alt="Map Information Bar showing coordinates, scale, and map controls" style="width: 90%;"/>
 
 The following navigation details and functionalities are accessible in the Map Information Bar (expansion of the bar is required to view all options):
 
@@ -166,13 +166,13 @@ _Note: Some tools in the Side Bar are also available as tabs in the Footer Bar, 
 =2!geolocator=
 <a id="geolocatorSection">
 
-### <img src="{{assetsURL}}/img/guide/geosearch/geolocator.svg" width="30"/> Geolocator
+### <img src="{{assetsURL}}/img/guide/geosearch/geolocator.svg" alt="Geolocator icon" width="30"/> Geolocator
 
 <div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
 The geolocator component functions to allow users to search for places in Canada. When the geolocator icon ![]({{assetsURL}}/img/guide/geosearch/geolocator.svg) in the Side Bar is clicked, an input field for search keywords will appear on the map:
 
-<img src="{{assetsURL}}/img/guide/geosearch/searchbar_en.png" style="width: 90%;"/>
+<img src="{{assetsURL}}/img/guide/geosearch/searchbar_en.png" alt="Geolocator search bar with input field for searching locations" style="width: 90%;"/>
 
 =3!supportedSearchTypes=
 
@@ -249,7 +249,7 @@ _Note: Some tabs in the Footer Bar are also available as tools in the Side Bar, 
 =2!legend=
 <a id="legendSection"></a>
 
-<h3><img src="{{assetsURL}}/img/guide/sidebar/legend.svg" width="30"> Legend <a href="#footerSection">Top</a></h3>
+<h3><img src="{{assetsURL}}/img/guide/sidebar/legend.svg" alt="Legend icon" width="30"> Legend <a href="#footerSection">Top</a></h3>
 <div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
 The **Legend** tab displays the symbology associated with the layers displayed on the map.
@@ -290,7 +290,7 @@ The **Layers** tab has the following submenu options:
 _**Note: Click on a layer to display its Layer information in the right section.**_
 
 **Important Information**  
-If a layer’s visibility (eye) icon is disabled (greyed out) ![]({{assetsURL}}/img/guide/footer/eye_disabled.png) and the Zoom to Visible Scale icon <img src="{{assetsURL}}/img/guide/layers/scaleVisible.svg" /> is visible, this means the layer is not visible at the current map zoom level.
+If a layer's visibility (eye) icon is disabled (greyed out) ![]({{assetsURL}}/img/guide/footer/eye_disabled.png) and the Zoom to Visible Scale icon <img src="{{assetsURL}}/img/guide/layers/scaleVisible.svg" alt="Zoom to visible scale icon" /> is visible, this means the layer is not visible at the current map zoom level.
 
 - Clicking the Zoom to Visible Scale button will adjust the map to the appropriate zoom level, making the layer visible.
 - However, after zooming, you may not immediately see any features if there is no data within the current view extent.
@@ -541,7 +541,7 @@ The Feature dropdown (upper left of the chart section), can be used to select a 
 
 The visibility of data displayed on the chart can be toggled by clicking the checkbox ![]({{assetsURL}}/img/guide/layers/check.png) next to the data name shown above the chart (only for layers with multiple data items):
 
-<img src="{{assetsURL}}/img/guide/footer/checkbox.png" style="width: 90%;"/>
+<img src="{{assetsURL}}/img/guide/footer/checkbox.png" alt="Checkbox controls for toggling data visibility on the chart" style="width: 90%;"/>
 
 Select from the Download dropdown (upper right of chart section) to download chart data in JSON format. Select Download All for all data and Download Visible for only data currently visible on the chart.
 

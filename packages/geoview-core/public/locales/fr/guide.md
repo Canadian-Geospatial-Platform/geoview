@@ -85,9 +85,9 @@ _N.B. : La carte doit être focalisée pour que les combinaisons de touches fonc
 
 Selon la configuration de la visionneuse, la carte peut fournir une carte d'aperçu, une représentation générique de la carte principale à une taille réduite. Elle est située dans le coin supérieur droit de la carte.
 
-<img src="{{assetsURL}}/img/guide/navigation/overview.png" style="width: 90%;"/>
+<img src="{{assetsURL}}/img/guide/navigation/overview.png" alt="Carte d'aperçu affichée dans le coin supérieur droit de la carte principale" style="width: 90%;"/>
 
-Cliquez sur l’encadré dans la carte d’aperçu et déplacez-le pour modifier la vue sur la carte principale. Cliquez sur l’icône de basculement dans le coin supérieur droit pour afficher ou masquer la carte d’aperçu.
+Cliquez sur l'encadré dans la carte d'aperçu et déplacez-le pour modifier la vue sur la carte principale. Cliquez sur l'icône de basculement dans le coin supérieur droit pour afficher ou masquer la carte d'aperçu.
 
 =2!keyboardNavigation=
 
@@ -99,9 +99,9 @@ Les personnes qui ne peuvent pas utiliser de souris peuvent choisir de naviguer 
 
 Si vous utilisez la touche de **tabulation** pour naviguer dans la carte, la fenêtre contextuelle **Navigation clavier** s’affichera. Sélectionnez le bouton **Activer** et appuyez sur **Entrée** pour utiliser la navigation avec le clavier.
 
-Lorsque la carte est focalisée, un pointeur en croix s’affiche en son centre :
+Lorsque la carte est focalisée, un pointeur en croix s'affiche en son centre :
 
-<img src="{{assetsURL}}/img/guide/navigation/crosshair.svg" style="width: 90%; height: 100px;"/>
+<img src="{{assetsURL}}/img/guide/navigation/crosshair.svg" alt="Pointeur en croix affiché au centre de la carte pour la navigation au clavier" style="width: 90%; height: 100px;"/>
 
 Utilisez les touches **fléchées** pour déplacer la carte et les touches **+** et **-** pour faire un zoom avant ou arrière. Appuyez sur **Entrée** pour sélectionner un élément sous le pointeur en croix et en voir les données dans le panneau **Détails**.
 
@@ -123,7 +123,7 @@ La carte n’est pas pleinement conforme au niveau AA des Règles pour l’acces
 
 Cliquez sur le chevron vers le haut ![]({{assetsURL}}/img/guide/navigation/chevron_up.svg) à gauche pour développer ou réduire la barre.
 
-<img src="{{assetsURL}}/img/guide/navigation/map_info.png" style="width: 90%;"/>
+<img src="{{assetsURL}}/img/guide/navigation/map_info.png" alt="Barre d'information sur la carte montrant les coordonnées, l'échelle et les contrôles de la carte" style="width: 90%;"/>
 
 Les détails et fonctionnalités de navigation suivants sont accessibles dans la barre d'information sur la carte (il est nécessaire de développer la barre pour afficher toutes les options) :
 
@@ -162,13 +162,13 @@ _N.B. : Certains outils dans la barre latérale se trouvent aussi sous forme d�
 =2!geolocator=
 <a id="geolocatorSection">
 
-### <img src="{{assetsURL}}/img/guide/geosearch/geolocator.svg" width="30"/> Géolocalisation
+### <img src="{{assetsURL}}/img/guide/geosearch/geolocator.svg" alt="Icône de géolocalisation" width="30"/> Géolocalisation
 
 <div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
-Permet de rechercher des endroits au Canada. Si vous cliquez sur l’icône de géolocalisation ![]({{assetsURL}}/img/guide/geosearch/geolocator.svg) dans la barre latérale, un champ de recherche s’affichera sur la carte :
+Permet de rechercher des endroits au Canada. Si vous cliquez sur l'icône de géolocalisation ![]({{assetsURL}}/img/guide/geosearch/geolocator.svg) dans la barre latérale, un champ de recherche s'affichera sur la carte :
 
-<img src="{{assetsURL}}/img/guide/geosearch/searchbar_en.png" style="width: 90%;"/>
+<img src="{{assetsURL}}/img/guide/geosearch/searchbar_en.png" alt="Barre de recherche de géolocalisation avec champ de saisie pour rechercher des lieux" style="width: 90%;"/>
 
 =3!supportedSearchTypes=
 
@@ -245,7 +245,7 @@ _N.B. : Certains onglets dans la barre latérale se trouvent aussi sous forme d�
 =2!legend=
 <a id="legendSection"></a>
 
-<h3><img src="{{assetsURL}}/img/guide/sidebar/legend.svg" width="30"> Légende <a href="#footerSection">Haut de page</a></h3>
+<h3><img src="{{assetsURL}}/img/guide/sidebar/legend.svg" alt="Icône de légende" width="30"> Légende <a href="#footerSection">Haut de page</a></h3>
 <div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
 L’onglet **Légende** présente les symboles des couches affichées sur la carte.
@@ -286,7 +286,7 @@ L’onglet **Couches** comprend les sous-menus suivants :
 _**N.B. : Cliquez sur une couche pour afficher ses information dans la section de droite.**_
 
 **Information importante**  
-Si l'icône de visibilité (œil) d'une couche est désactivée (grisée) ![]({{assetsURL}}/img/guide/footer/eye_disabled.png) et que l'icône Zoom sur l'échelle visible <img src="{{assetsURL}}/img/guide/layers/scaleVisible.svg" /> est visible, cela signifie que la couche n'est pas visible au niveau de zoom actuel de la carte.
+Si l'icône de visibilité (œil) d'une couche est désactivée (grisée) ![]({{assetsURL}}/img/guide/footer/eye_disabled.png) et que l'icône Zoom sur l'échelle visible <img src="{{assetsURL}}/img/guide/layers/scaleVisible.svg" alt="Icône zoom sur l'échelle visible" /> est visible, cela signifie que la couche n'est pas visible au niveau de zoom actuel de la carte.
 
 - En cliquant sur le bouton Zoom sur l'échelle visible, la carte sera ajustée au niveau de zoom approprié, ce qui rendra la couche visible.
 - Cependant, après avoir effectué un zoom, il se peut que vous ne voyiez pas immédiatement les éléments s'il n'y a pas de données dans la zone de visualisation actuelle.
@@ -537,7 +537,7 @@ Le menu déroulant **Élément** (en haut à gauche de la section du graphique) 
 
 Vous pouvez cocher ou décocher les cases ![]({{assetsURL}}/img/guide/layers/check.png) des données au-dessus du graphique pour déterminer le contenu de celui-ci (seulement pour les couches comportant plusieurs éléments de données).
 
-<img src="{{assetsURL}}/img/guide/footer/checkbox.png" style="width: 90%;"/>
+<img src="{{assetsURL}}/img/guide/footer/checkbox.png" alt="Contrôles de cases à cocher pour activer/désactiver la visibilité des données sur le graphique" style="width: 90%;"/>
 
 Ouvrez le menu déroulant de **téléchargement** (en haut à droite de la section du graphique) pour télécharger les données du graphique en format JSON. Cliquez sur **Télécharger tout** ou **Télécharger visible** selon que vous voulez télécharger toutes les données ou seulement celles actuellement visibles sur le graphique.
 
