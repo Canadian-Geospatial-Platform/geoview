@@ -81,27 +81,28 @@ const MAP_IMAGE_DIMENSIONS = {
 /**
  * Calculate actual WMS image height based on aspect ratio
  * @param {string} imageUrl - The image url
+ * @param {number} scale - The scale factor based on document width
  * @returns {Promise<number>} The calculated height
  */
-const calculateWMSImageHeight = (imageUrl: string | undefined): Promise<number> => {
+const calculateWMSImageHeight = (imageUrl: string | undefined, scale = 1): Promise<number> => {
   return new Promise((resolve) => {
     const img = new Image();
     img.onload = () => {
-      const maxWidth = SHARED_STYLES.wmsImageWidth;
-      const maxHeight = SHARED_STYLES.wmsImageMaxHeight;
+      const maxWidth = SHARED_STYLES.wmsImageWidth * scale;
+      const maxHeight = SHARED_STYLES.wmsImageMaxHeight * scale;
 
       // Use real image dimensions, constrained by max width and height
       const widthScale = maxWidth / img.width;
       const heightScale = maxHeight / img.height;
-      const scale = Math.min(widthScale, heightScale, 1); // Don't scale up
+      const imageScale = Math.min(widthScale, heightScale, 1); // Don't scale up
 
-      const scaledHeight = img.height * scale;
+      const scaledHeight = img.height * imageScale;
 
       resolve(scaledHeight + SHARED_STYLES.wmsMarginBottom);
     };
-    img.onerror = () => resolve(SHARED_STYLES.wmsImageMaxHeight + SHARED_STYLES.wmsMarginBottom);
+    img.onerror = () => resolve(SHARED_STYLES.wmsImageMaxHeight * scale + SHARED_STYLES.wmsMarginBottom);
     if (!imageUrl) {
-      resolve(SHARED_STYLES.wmsImageMaxHeight + SHARED_STYLES.wmsMarginBottom);
+      resolve(SHARED_STYLES.wmsImageMaxHeight * scale + SHARED_STYLES.wmsMarginBottom);
     } else {
       img.src = imageUrl;
     }
@@ -126,9 +127,11 @@ const estimateTextHeight = (text: string, fontSize: number, availableWidth: numb
 /**
  * Estimate item heights (rough approximation)
  * @param {FlattenedLegendItem} item - The item to get the estimate height for
+ * @param {TypeValidPageSizes} pageSize - The page size
+ * @param {number} scale - The scale factor based on document width (default 1)
  * @returns {number} The estimated height
  */
-const estimateItemHeight = (item: FlattenedLegendItem, pageSize: TypeValidPageSizes): number => {
+const estimateItemHeight = (item: FlattenedLegendItem, pageSize: TypeValidPageSizes, scale = 1): number => {
   // Calculate column width based on page size and number of columns
   const config = PAGE_CONFIGS[pageSize];
   const availableWidth = config.canvasWidth - SHARED_STYLES.padding * 2 - SHARED_STYLES.legendGap * (config.legendColumns - 1);
@@ -144,7 +147,7 @@ const estimateItemHeight = (item: FlattenedLegendItem, pageSize: TypeValidPageSi
     case 'child':
       return SHARED_STYLES.childFontSize + SHARED_STYLES.childMarginBottom + SHARED_STYLES.childMarginTop;
     case 'wms': {
-      return item.calculatedHeight || SHARED_STYLES.wmsImageMaxHeight + SHARED_STYLES.wmsMarginBottom;
+      return item.calculatedHeight || SHARED_STYLES.wmsImageMaxHeight * scale + SHARED_STYLES.wmsMarginBottom;
     }
     case 'time':
       return SHARED_STYLES.timeFontSize + SHARED_STYLES.timeMarginBottom + 3; // Line-height spacing
@@ -341,18 +344,20 @@ export const processLegendLayers = (
  * @param {FlattenedLegendItem[][]} groups - Groups to distribute
  * @param {number} numColumns - Number of columns
  * @param {TypeValidPageSizes} pageSize - Page size
+ * @param {number} scale - The scale factor based on document width
  * @returns {Object} Optimized distribution
  */
 const optimizeColumnDistribution = (
   groups: FlattenedLegendItem[][],
   numColumns: number,
-  pageSize: TypeValidPageSizes
+  pageSize: TypeValidPageSizes,
+  scale = 1
 ): { columns: FlattenedLegendItem[][]; columnHeights: number[]; overflow: FlattenedLegendItem[] } => {
   // Pre-calculate heights for all items in all groups
   const groupsWithHeights = groups.map((group) => {
     const itemsWithHeights = group.map((item) => ({
       ...item,
-      calculatedHeight: item.calculatedHeight || estimateItemHeight(item, pageSize),
+      calculatedHeight: item.calculatedHeight || estimateItemHeight(item, pageSize, scale),
     }));
     const totalHeight = itemsWithHeights.reduce((sum, item) => sum + (item.calculatedHeight || 0), 0);
     return {
@@ -388,6 +393,7 @@ const optimizeColumnDistribution = (
  * @param {string} disclaimer - The disclaimer text to be displayed in the footer (reserved for future use)
  * @param {string[]} attributions - The attributions to be displayed in the footer (reserved for future use)
  * @param {TypeValidPageSizes} pageSize - The page size for calculation
+ * @param {number} scale - The scale factor based on document width
  * @param {string} exportTitle - Optional title for reserved space calculation (reserved for future use)
  * @returns {FlattenedLegendItem[][][]} The flattened legend items distributed into rows and columns
  */
@@ -398,6 +404,7 @@ export const distributeIntoColumns = (
   disclaimer: string,
   attributions: string[],
   pageSize: TypeValidPageSizes,
+  scale = 1,
   exportTitle?: string
 ): { fittedColumns: FlattenedLegendItem[][]; overflowItems: FlattenedLegendItem[] } => {
   if (!items || items.length === 0) return { fittedColumns: Array(numColumns).fill([]), overflowItems: [] };
@@ -430,7 +437,7 @@ export const distributeIntoColumns = (
   // const adjustedMaxHeight = maxLegendHeight - footerReservedSpace - titleReservedSpace;
 
   // Use row-based packing algorithm for optimal distribution
-  const { columns, overflow } = optimizeColumnDistribution(groups, numColumns, pageSize);
+  const { columns, overflow } = optimizeColumnDistribution(groups, numColumns, pageSize, scale);
 
   return { fittedColumns: columns, overflowItems: overflow };
 };
@@ -585,9 +592,12 @@ export async function getMapInfo(
   const config = PAGE_CONFIGS[pageSize];
   const allItems = processLegendLayers(cleanLegendLayers, orderedLayerInfo, timeSliderLayers);
 
-  // Pre-calculate WMS image heights
+  // Calculate scale factor for WMS images based on document width
+  const wmsScale = mapImageWidth / 612;
+
+  // Pre-calculate WMS image heights with scaling
   const wmsItems = allItems.filter((item) => item.type === 'wms');
-  const heightPromises = wmsItems.map((item) => calculateWMSImageHeight(item.data.icons?.[0]?.iconImage || ''));
+  const heightPromises = wmsItems.map((item) => calculateWMSImageHeight(item.data.icons?.[0]?.iconImage || '', wmsScale));
   const calculatedHeights = await Promise.all(heightPromises);
 
   // Create new items array with calculated heights
@@ -611,6 +621,7 @@ export async function getMapInfo(
     disclaimer,
     attribution,
     pageSize,
+    wmsScale,
     title
   );
 
@@ -624,7 +635,7 @@ export async function getMapInfo(
       let height = 0;
 
       column.forEach((item, itemIndex) => {
-        height += item.calculatedHeight || estimateItemHeight(item, pageSize);
+        height += item.calculatedHeight || estimateItemHeight(item, pageSize, wmsScale);
 
         // Add marginTop for every layer item after the first
         if (itemIndex > 0 && item.type === 'layer') {
@@ -647,6 +658,10 @@ export async function getMapInfo(
     const scaleHeight = SHARED_STYLES.scaleFontSize + SHARED_STYLES.scaleMarginBottom + SHARED_STYLES.legendMarginTop;
     const dividerHeight = SHARED_STYLES.dividerHeight + SHARED_STYLES.dividerMargin * 2; // One divider between scale and legend
 
+    // Add extra height buffer for very wide maps where footer needs more vertical space
+    // Base 612px needs no extra space, 1530px needs ~100px, scales logarithmically
+    const widthBasedBuffer = mapImageWidth > 1224 ? Math.log2(mapImageWidth / 612) * 50 : 0;
+
     // Calculate total height including all margins
     const calculatedHeight =
       titleHeight +
@@ -656,6 +671,7 @@ export async function getMapInfo(
       legendHeight +
       SHARED_STYLES.legendMarginBottom +
       footerHeight +
+      widthBasedBuffer +
       SHARED_STYLES.padding * 2;
 
     finalConfig = {
@@ -678,7 +694,7 @@ export async function getMapInfo(
       let height = 0;
 
       column.forEach((item, itemIndex) => {
-        height += item.calculatedHeight || estimateItemHeight(item, pageSize);
+        height += item.calculatedHeight || estimateItemHeight(item, pageSize, wmsScale);
         if (itemIndex > 0 && item.type === 'layer') {
           height += SHARED_STYLES.layerMarginTop;
         }
@@ -698,7 +714,7 @@ export async function getMapInfo(
       let height = 0;
 
       column.forEach((item, itemIndex) => {
-        height += item.calculatedHeight || estimateItemHeight(item, pageSize);
+        height += item.calculatedHeight || estimateItemHeight(item, pageSize, wmsScale);
         if (itemIndex > 0 && item.type === 'layer') {
           height += SHARED_STYLES.layerMarginTop;
         }
@@ -717,6 +733,10 @@ export async function getMapInfo(
     const scaleHeight = SHARED_STYLES.scaleFontSize + SHARED_STYLES.scaleMarginBottom + SHARED_STYLES.legendMarginTop;
     const dividerHeight = SHARED_STYLES.dividerHeight + SHARED_STYLES.dividerMargin * 2; // One divider between scale and legend
 
+    // Add extra height buffer for very wide maps where footer needs more vertical space
+    // Base 612px needs no extra space, 1530px needs ~100px, scales logarithmically
+    const widthBasedBuffer = mapImageWidth > 1224 ? Math.log2(mapImageWidth / 612) * 50 : 0;
+
     // Include all margins: page padding (top/bottom), legendMarginBottom, divider
     const recalculatedHeight =
       titleHeight +
@@ -726,6 +746,7 @@ export async function getMapInfo(
       newLegendHeight +
       SHARED_STYLES.legendMarginBottom +
       footerHeight +
+      widthBasedBuffer +
       SHARED_STYLES.padding * 2;
 
     finalConfig.canvasHeight = Math.ceil(recalculatedHeight);
@@ -733,7 +754,15 @@ export async function getMapInfo(
     // Use full page height for overflow page (no map, title, or footer)
     const overflowMaxHeight =
       finalConfig.canvasHeight - SHARED_STYLES.padding * 2 - SHARED_STYLES.overflowMarginTop - SHARED_STYLES.overflowMarginBottom;
-    const distributedOverflow = distributeIntoColumns(overflowItems, finalConfig.legendColumns, overflowMaxHeight, '', [], pageSize);
+    const distributedOverflow = distributeIntoColumns(
+      overflowItems,
+      finalConfig.legendColumns,
+      overflowMaxHeight,
+      '',
+      [],
+      pageSize,
+      wmsScale
+    );
     fittedOverflowItems = distributedOverflow.fittedColumns;
   }
 

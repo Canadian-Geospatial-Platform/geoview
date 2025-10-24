@@ -134,21 +134,7 @@ const renderLegendInRows = (columns: FlattenedLegendItem[][], styles: any): JSX.
               contentItems.push(renderSingleItem(contentItem, j, contentIndentLevel));
             }
 
-            elements.push(
-              <View
-                key={`content-${i}`}
-                style={{
-                  borderLeftWidth: 4,
-                  borderLeftColor: '#9e9e9e',
-                  borderLeftStyle: 'solid',
-                  paddingLeft: 8,
-                  marginLeft: 8,
-                  marginBottom: 4,
-                }}
-              >
-                {contentItems}
-              </View>
-            );
+            elements.push(<View key={`content-${i}`}>{contentItems}</View>);
 
             i = contentEnd;
           } else {
