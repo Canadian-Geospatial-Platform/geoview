@@ -38,6 +38,7 @@
 
       .tableResults .test-title {
         font-weight: bold;
+        cursor: pointer;
       }
 
       .tableResults tbody td {
@@ -64,6 +65,29 @@
       .tableResults ul {
         padding-inline-start: 20px;
       }
+
+      .tableResults .collapsible-content {
+        display: none;
+      }
+
+      .tableResults .collapsed .collapsible-content {
+        display: none;
+      }
+
+      .tableResults .expanded .collapsible-content {
+        display: block;
+      }
+
+      .tableResults .test-title::before {
+        content: "> ";
+        display: inline-block;
+        transition: transform 0.2s;
+      }
+
+      .tableResults tr.expanded .test-title::before {
+        transform: rotate(90deg);
+      }
+
     </style>
   </head>
 

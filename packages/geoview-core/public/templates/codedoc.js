@@ -347,6 +347,7 @@ function testSuiteAddOrUpdateTestResultRow(plugin, testSuite, testTester, test, 
     // If it doesn't exist, create a new row
     row = document.createElement('tr');
     row.id = test.id;
+    row.classList.add('collapsed');
 
     // Create and append the three cells
     row.appendChild(document.createElement('td'));
@@ -358,11 +359,16 @@ function testSuiteAddOrUpdateTestResultRow(plugin, testSuite, testTester, test, 
 
   // Update result cells
   const testCell = row.cells?.[0];
-  let color = '#015f00';
+  let color = '#515ba5';
   if (test.getType() === 'true-negative') {
-    color = '#6f006fff';
+    color = '#b778e4ff';
   }
-  let testMessage = '<font class="test-title" style="color:' + color + ';">' + test.getTitle() + '</font><br/>';
+
+  // Title
+  let testMessage = '<font class="test-title" style="color:' + color + ';" onclick="' + `this.closest('tr').classList.toggle('expanded'); this.closest('tr').classList.toggle('collapsed');">` + test.getTitle() + '</font><br/>';
+
+  // Collapsible content
+  testMessage += '<div class="collapsible-content" style="margin-top: 5px;">';
   testMessage += '<font style="font-size: x-small;">' + '<i>[' + testSuite.name + ' | ' + testTester.name + ']' + '</i></font>';
   testMessage += test.getStepsAsHtml();
   testCell.innerHTML = testMessage;
@@ -376,6 +382,9 @@ function testSuiteAddOrUpdateTestResultRow(plugin, testSuite, testTester, test, 
       resultCell.style.color = 'green';
       resultCell.textContent = '✔';
     } else if (passed === false) {
+      // Expand the row
+      row.classList.toggle('expanded');
+      row.classList.toggle('collapsed');
       resultCell.style.color = 'red';
       resultCell.textContent = '✘';
       detailsCell.textContent = details;
@@ -385,6 +394,7 @@ function testSuiteAddOrUpdateTestResultRow(plugin, testSuite, testTester, test, 
       resultCell.textContent = '⏳';
     }
   }
+  testMessage += '</div>';
 }
 
 function testSuiteEmptyTestResults(plugin) {
