@@ -1333,6 +1333,7 @@ export class LayerApi {
    *
    * @param {string} layerPath - The path of the layer.
    * @param {boolean} newValue - The new value of visibility.
+   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path
    */
   setOrToggleLayerVisibility(layerPath: string, newValue?: boolean): boolean {
     // Apply some visibility logic
@@ -1341,11 +1342,8 @@ export class LayerApi {
     const newVisibility = newValue !== undefined ? newValue : !layerVisibility;
 
     if (layerVisibility !== newVisibility) {
-      // Change visibility
-      // TODO: Check - Layer consistency - Do we want it to throw instead of handling when undefined, because now it emits a LayerVisibilityToggled even when nothing happened. Wanted behavior? (call getGeoviewLayer instead of getGeoviewLayerIfExists)
-      this.getGeoviewLayerIfExists(layerPath)?.setVisible(newVisibility);
-      // Emit event
-      this.#emitLayerVisibilityToggled({ layerPath, visibility: newVisibility });
+      // Redirect
+      this.getGeoviewLayer(layerPath).setVisible(newVisibility);
     }
 
     return newVisibility;
@@ -1356,19 +1354,11 @@ export class LayerApi {
    *
    * @param {string} layerPath - The path of the layer.
    * @param {string} name - The new name to use.
+   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path
    */
   setLayerName(layerPath: string, name: string): void {
-    // Get the layer
-    // TODO: Check - Layer consistency - Do we want it to throw instead of only logging when undefined? (call getGeoviewLayer instead of getGeoviewLayerIfExists)
-    const layer = this.getGeoviewLayerIfExists(layerPath);
-
-    // If found
-    if (layer) {
-      // Set the layer name on the layer
-      layer.setLayerName(name);
-    } else {
-      logger.logError(`Unable to find layer ${layerPath}`);
-    }
+    // Redirect
+    this.getGeoviewLayer(layerPath).setLayerName(name);
   }
 
   /**
@@ -1377,11 +1367,11 @@ export class LayerApi {
    * @param {string} layerPath - The path of the layer.
    * @param {number} opacity - The new opacity to use.
    * @param {boolean} emitOpacityChange - Whether to emit the event or not (false to avoid updating the legend layers)
+   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path
    */
   setLayerOpacity(layerPath: string, opacity: number, emitOpacityChange?: boolean): void {
-    // TODO: Check - Layer consistency - Do we want it to throw instead of handling when undefined? (call getGeoviewLayer instead of getGeoviewLayerIfExists)
-    // TO.DOCONT: Because here, it's coded differently than in 'setOrToggleLayerVisibility'. Here the event isn't raised when undefined.
-    this.getGeoviewLayerIfExists(layerPath)?.setOpacity(opacity, emitOpacityChange);
+    // Redirect
+    this.getGeoviewLayer(layerPath).setOpacity(opacity, emitOpacityChange);
   }
 
   /**
@@ -1804,6 +1794,9 @@ export class LayerApi {
    */
   #handleLayerVisibleChanged(layer: AbstractBaseLayer, event: VisibleChangedEvent): void {
     MapEventProcessor.setMapLayerVisibilityInStore(this.getMapId(), layer.getLayerPath(), event.visible);
+
+    // Emit event
+    this.#emitLayerVisibilityToggled({ layerPath: layer.getLayerPath(), visibility: event.visible });
   }
 
   /**
