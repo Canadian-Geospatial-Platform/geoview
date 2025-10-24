@@ -264,7 +264,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
 
         return new GroupLayerEntryConfig({
           geoviewLayerConfig,
-          layerId: `${layerEntry.layerId || layerEntry.id}`,
+          layerId: `${layerEntry.layerId || layerEntry.id || layerEntry.index}`,
           layerName: layerEntry.layerName,
           listOfLayerEntryConfig: subConfigs,
         });
@@ -273,7 +273,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       // Create entry config
       const layerEntryConfig: EsriDynamicLayerEntryConfigProps = {
         geoviewLayerConfig,
-        layerId: `${layerEntry.layerId || layerEntry.index || layerEntry.id}`,
+        layerId: `${layerEntry.layerId || layerEntry.id || layerEntry.index}`,
         layerName: layerEntry.layerName,
       };
 

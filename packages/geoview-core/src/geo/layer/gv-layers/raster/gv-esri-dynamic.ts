@@ -106,6 +106,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
     // Only raster layers need the alternate code
     if (layerConfig.getLayerMetadata()?.type !== 'Raster Layer') return super.onFetchLegend();
 
+    // Here, the layer type is not 'Raster Layer', could be 'Feature Layer'
+
     try {
       if (!layerConfig) return null;
       const legendUrl = `${layerConfig.getMetadataAccessPath()}/legend?f=json`;
@@ -160,7 +162,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       const legend: TypeLegend = {
         type: CONST_LAYER_TYPES.ESRI_IMAGE,
         styleConfig,
-        legend: await getLegendStyles(this.getStyle()),
+        legend: await getLegendStyles(styleConfig),
       };
 
       return legend;
