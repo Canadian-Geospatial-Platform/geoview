@@ -53,9 +53,11 @@ export function getESRIServiceMetadata(url: string): Promise<unknown> {
  * @param {string} layers - The layers to query separate by.
  * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
  * @returns {Promise<TypeMetadataWMS>} A json promise containing the result of the query.
- * @throws {ResponseError} If the response is not OK (non-2xx).
- * @throws {ResponseEmptyError} If the JSON response is empty.
- * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
+ * @throws {RequestTimeoutError} Error thrown when the request exceeds the timeout duration.
+ * @throws {RequestAbortedError} Error thrown when the request was aborted by the caller's signal.
+ * @throws {ResponseError} Error thrown when the response is not OK (non-2xx).
+ * @throws {ResponseEmptyError} Error thrown when the JSON response is empty.
+ * @throws {NetworkError} Errow thrown when a network issue happened.
  */
 export async function getWMSServiceMetadata(
   url: string,
@@ -97,7 +99,7 @@ export async function getWMSServiceMetadata(
  * Return the map server url from a layer service.
  * @param {string} url - The service url for a wms / dynamic or feature layers.
  * @param {boolean} rest - Boolean value to add rest services if not present (default false).
- * @returns The map server url.
+ * @returns {string} The map server url.
  */
 export function getMapServerUrl(url: string, rest: boolean = false): string {
   let mapServerUrl = url;
@@ -119,7 +121,7 @@ export function getMapServerUrl(url: string, rest: boolean = false): string {
 /**
  * Return the root server url from a OGC layer service.
  * @param {string} url - The service url for an ogc layer.
- * @returns The root ogc server url.
+ * @returns {string} The root ogc server url.
  */
 export function getOGCServerUrl(url: string): string {
   let ogcServerUrl = url;
@@ -131,9 +133,10 @@ export function getOGCServerUrl(url: string): string {
 
 /**
  * Replaces or adds the BBOX parameter in a WMS GetMap URL.
- * @param url - The original WMS GetMap URL
- * @param newBBOX - The new BBOX to set, as an array of 4 numbers: [minX, minY, maxX, maxY]
- * @returns A new URL string with the updated BBOX parameter
+ * @param {string} url - The original WMS GetMap URL
+ * @param {string} newCRS - The new CRS
+ * @param {number[]} newBBOX - The new BBOX to set, as an array of 4 numbers: [minX, minY, maxX, maxY]
+ * @returns {string} A new URL string with the updated BBOX parameter
  */
 export function replaceCRSAndBBOXParam(url: string, newCRS: string, newBBOX: number[]): string {
   const urlObj = new URL(url);
@@ -155,50 +158,50 @@ export function replaceCRSAndBBOXParam(url: string, newCRS: string, newBBOX: num
 /**
  * Returns the WKT representation of a given geometry.
  * @param {string} geometry - The geometry
- * @returns {string | null} The WKT representation of the geometry
+ * @returns {string | undefined} The WKT representation of the geometry
  */
-export function geometryToWKT(geometry: Geometry): string | null {
+export function geometryToWKT(geometry: Geometry): string | undefined {
   if (geometry) {
     // Get the wkt for the geometry
     const format = new WKT();
     return format.writeGeometry(geometry);
   }
-  return null;
+  return undefined;
 }
 
 /**
  * Returns the Geometry representation of a given wkt.
  * @param {string} wkt - The well known text
  * @param {ReadOptions} readOptions - Read options to convert the wkt to a geometry
- * @returns {Geometry | null} The Geometry representation of the wkt
+ * @returns {Geometry | undefined} The Geometry representation of the wkt
  */
-export function wktToGeometry(wkt: string, readOptions: ReadOptions): Geometry | null {
+export function wktToGeometry(wkt: string, readOptions: ReadOptions): Geometry | undefined {
   if (wkt) {
     // Get the feature for the wkt
     const format = new WKT();
     return format.readGeometry(wkt, readOptions);
   }
-  return null;
+  return undefined;
 }
 
 /**
  * Returns the Geometry representation of a given geojson
  * @param {string} geojson - The geojson
  * @param {ReadOptions} readOptions - Read options to convert the geojson to a geometry
- * @returns {Geometry | null} - The Geometry representation of the geojson
+ * @returns {Geometry | undefined} - The Geometry representation of the geojson
  */
-export function geojsonToGeometry(geojson: string, readOptions: ReadOptions): Geometry | null {
+export function geojsonToGeometry(geojson: string, readOptions: ReadOptions): Geometry | undefined {
   if (geojson) {
     // Get the feature for the geojson
     const format = new GeoJSON();
     return format.readGeometry(geojson, readOptions);
   }
-  return null;
+  return undefined;
 }
 
 /**
  * Default drawing style for GeoView
- * @returns an Open Layers styling for drawing on a map
+ * @returns {Style} An Open Layers styling for drawing on a map
  */
 export function getDefaultDrawingStyle(strokeColor?: Color | string, strokeWidth?: number, fillColor?: Color | string): Style {
   return new Style({
@@ -228,7 +231,7 @@ export function getDefaultDrawingStyle(strokeColor?: Color | string, strokeWidth
  * Create empty basemap tilelayer to use as initial basemap while we load basemap
  * so the viewer will not fails if basemap is not avialable
  *
- * @returns {TileLayer<XYZ>} return the created basemap
+ * @returns {TileLayer<XYZ>} The created empty basemap
  */
 export function createEmptyBasemap(): TileLayer<XYZ | OSM | VectorTile> {
   // create empty tilelayer to use as initial basemap while we load basemap

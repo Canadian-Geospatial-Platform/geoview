@@ -133,7 +133,7 @@ export abstract class AbstractLayerSet {
         if (layerConfig.layerStatus === 'loaded') {
           // The layer has become loaded
 
-          // Get the layer if exists yet
+          // Get the layer (not just the config) if it exists yet
           const layer = this.layerApi.getGeoviewLayerIfExists(layerConfig.layerPath);
 
           // If the layer could be found

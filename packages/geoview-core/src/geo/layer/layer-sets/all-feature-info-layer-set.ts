@@ -82,7 +82,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
    * @param {string} layerPath - The layerPath that will be queried
    * @param {QueryType} queryType - The query's type to perform
    * @returns {Promise<TypeFeatureInfoEntry[] | void>} A promise which will hold the result of the query
-   * @throws {LayerNotFoundError} - If the specified layer cannot be found.
+   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
    */
   // TODO: (future development) The queryType is a door opened to allow the triggering using a bounding box or a polygon.
   queryLayer(layerPath: string, queryType: QueryType = 'all'): Promise<TypeFeatureInfoEntry[] | void> {

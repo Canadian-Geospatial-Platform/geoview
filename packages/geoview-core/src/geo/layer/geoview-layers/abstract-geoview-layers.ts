@@ -182,7 +182,7 @@ export abstract class AbstractGeoViewLayer {
    * Must override method to read the service metadata from the metadataAccessPath.
    * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<T>} A promise resolved once the metadata has been fetched.
-   * @throws {LayerServiceMetadataUnableToFetchError} If the metadata fetch fails or contains an error.
+   * @throws {LayerServiceMetadataUnableToFetchError} Error thrown when the metadata fetch fails or contains an error.
    */
   protected abstract onFetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T>;
 
@@ -336,8 +336,8 @@ export abstract class AbstractGeoViewLayer {
    * Fetches the metadata by calling onFetchServiceMetadata.
    * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<T>} Returns a Promise of a metadata
-   * @throws {LayerServiceMetadataUnableToFetchError} If the metadata fetch fails or contains an error.
-   * @throws {LayerNoCapabilitiesError} When the layer has no capabilities (WMS/WFS).
+   * @throws {LayerServiceMetadataUnableToFetchError} Error thrown when the metadata fetch fails or contains an error.
+   * @throws {LayerNoCapabilitiesError} Error thrown when the metadata is empty (no Capabilities) (WMS/WFS layers).
    */
   fetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T> {
     // Redirect
@@ -348,8 +348,8 @@ export abstract class AbstractGeoViewLayer {
    * This method reads the service metadata from the metadataAccessPath and stores it in the 'metadata' property.
    * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<void>} A promise resolved once the metadata has been fetched and assigned to the 'metadata' property.
-   * @throws {LayerServiceMetadataUnableToFetchError} If the metadata fetch fails or contains an error.
-   * @throws {LayerServiceMetadataEmptyError} If the metadata fetch return empty metadata.
+   * @throws {LayerServiceMetadataUnableToFetchError} Error thrown when the metadata fetch fails or contains an error.
+   * @throws {LayerServiceMetadataEmptyError} Error thrown when the metadata fetch return empty metadata.
    * @private
    */
   async #fetchAndSetServiceMetadata(abortSignal?: AbortSignal): Promise<void> {

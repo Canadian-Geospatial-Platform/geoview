@@ -310,7 +310,7 @@ export class LayerApi {
    * Returns the GeoView instance associated to the layer path.
    * @param {string} layerPath - The layer path
    * @returns {AbstractBaseLayer} The new Geoview Layer
-   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path
+   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
    */
   getGeoviewLayer(layerPath: string): AbstractBaseLayer {
     // Get the layer
@@ -381,7 +381,7 @@ export class LayerApi {
    * Returns the OpenLayer instance associated with the layer path.
    * @param {string} layerPath - The layer path to the layer's configuration.
    * @returns {BaseLayer} Returns the geoview instance associated to the layer path.
-   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path
+   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
    */
   getOLLayer(layerPath: string): BaseLayer {
     // Get the OpenLayer layer as part of the new GVLayer design
@@ -1333,7 +1333,7 @@ export class LayerApi {
    *
    * @param {string} layerPath - The path of the layer.
    * @param {boolean} newValue - The new value of visibility.
-   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path
+   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
    */
   setOrToggleLayerVisibility(layerPath: string, newValue?: boolean): boolean {
     // Apply some visibility logic
@@ -1354,7 +1354,7 @@ export class LayerApi {
    *
    * @param {string} layerPath - The path of the layer.
    * @param {string} name - The new name to use.
-   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path
+   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
    */
   setLayerName(layerPath: string, name: string): void {
     // Redirect
@@ -1379,8 +1379,8 @@ export class LayerApi {
    *
    * @param {string} layerPath - The path of the layer.
    * @param {GeoJSONObject | string} geojson - The new geoJSON.
-   * @throws {LayerNotFoundError} - If the specified layer cannot be found.
-   * @throws {LayerNotGeoJsonError} - If the specified layer is not a GeoJson layer.
+   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
+   * @throws {LayerNotGeoJsonError} Error thrown when the layer is not a GeoJson layer.
    */
   setGeojsonSource(layerPath: string, geojson: GeoJSONObject | string): void {
     // Get the map id
