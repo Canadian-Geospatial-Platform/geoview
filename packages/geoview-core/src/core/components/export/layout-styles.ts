@@ -187,7 +187,7 @@ export const PDF_STYLES = {
   itemContainer: (indentLevel: number) => ({
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
-    marginLeft: indentLevel + 3,
+    marginLeft: indentLevel * 8 + 3,
     marginBottom: SHARED_STYLES.itemMarginBottom,
   }),
   itemText: {
@@ -346,7 +346,7 @@ export const CANVAS_STYLES = {
   itemContainer: (indentLevel: number) => ({
     display: 'flex',
     alignItems: 'center',
-    marginLeft: `${indentLevel + 3}px`,
+    marginLeft: `${indentLevel * 8 + 3}px`,
     marginBottom: `${SHARED_STYLES.itemMarginBottom}px`,
   }),
   itemIcon: {
@@ -458,6 +458,11 @@ export const getScaledPDFStyles = (docWidth: number): any => {
       width: PDF_STYLES.itemIcon.width * scale,
       height: PDF_STYLES.itemIcon.height * scale,
     },
+    wmsImage: {
+      ...PDF_STYLES.wmsImage,
+      maxWidth: SHARED_STYLES.wmsImageWidth * scale,
+      maxHeight: SHARED_STYLES.wmsImageMaxHeight * scale,
+    },
   };
 };
 
@@ -530,8 +535,8 @@ export const getScaledCanvasStyles = (docWidth: number): any => {
     },
     wmsImage: {
       ...CANVAS_STYLES.wmsImage,
-      maxWidth: '100%',
-      width: 'auto',
+      width: `${SHARED_STYLES.wmsImageWidth * scale}px`,
+      maxHeight: `${SHARED_STYLES.wmsImageMaxHeight * scale}px`,
       objectFit: 'contain',
     },
   };
