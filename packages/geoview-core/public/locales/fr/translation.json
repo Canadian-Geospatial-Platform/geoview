@@ -325,7 +325,6 @@
   "guide": {
     "title": "Guide",
     "search": "Rechercher dans le guide...",
-    "tableMatch": "L’expression recherchée apparaît dans ce tableau",
     "errorMessage": "Désolé, impossible de trouver le document d'aide!"
   },
   "footerBar": {

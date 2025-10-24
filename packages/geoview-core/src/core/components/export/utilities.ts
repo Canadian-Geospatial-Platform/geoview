@@ -168,6 +168,38 @@ const calculateItemCorrectionFactor = (canvasWidth: number): number => {
 };
 
 /**
+ * Calculate optimal number of columns based on available width
+ * Uses fixed minimum column width to accommodate WMS images and content
+ * @param {number} canvasWidth - The canvas width
+ * @param {number} defaultColumns - The default number of columns (4)
+ * @returns {number} The optimal number of columns (2-4)
+ */
+const calculateOptimalColumns = (canvasWidth: number, defaultColumns: number): number => {
+  // Calculate available width for legend content
+  const availableWidth = canvasWidth - SHARED_STYLES.padding * 2 - SHARED_STYLES.legendPaddingLeft;
+
+  // Minimum column width should accommodate:
+  // - WMS images (250px)
+  // - Border container (4px border + 8px padding + 8px margin = 20px)
+  // - Some breathing room for text wrapping
+  const MIN_COLUMN_WIDTH = 280;
+
+  // Try each column count from default down to 2
+  for (let numCols = defaultColumns; numCols >= 2; numCols--) {
+    const gapsNeeded = (numCols - 1) * SHARED_STYLES.legendGap;
+    const widthForColumns = availableWidth - gapsNeeded;
+    const columnWidth = widthForColumns / numCols;
+
+    if (columnWidth >= MIN_COLUMN_WIDTH) {
+      return numCols;
+    }
+  }
+
+  // Minimum of 2 columns
+  return 2;
+};
+
+/**
  * Estimate footer height based on content
  * @param {string} disclaimer - The disclaimer text
  * @param {string[]} attributions - The array of attribution texts
@@ -567,10 +599,14 @@ export async function getMapInfo(
     return item;
   });
 
-  // First distribute items into columns
+  // Calculate optimal number of columns based on canvas width to prevent overlapping
+  // Always start from 4 columns as the default maximum, not config.legendColumns which may have been modified
+  const optimalColumns = calculateOptimalColumns(mapImageWidth, 4);
+
+  // First distribute items into columns using optimal column count
   const { fittedColumns, overflowItems } = distributeIntoColumns(
     itemsWithHeights,
-    config.legendColumns,
+    optimalColumns,
     Infinity,
     disclaimer,
     attribution,
@@ -625,7 +661,7 @@ export async function getMapInfo(
     finalConfig = {
       size: 'AUTO' as const,
       mapHeight: config.mapHeight,
-      legendColumns: config.legendColumns,
+      legendColumns: optimalColumns,
       maxLegendHeight: Infinity,
       canvasWidth: mapImageWidth,
       canvasHeight: Math.ceil(calculatedHeight),
