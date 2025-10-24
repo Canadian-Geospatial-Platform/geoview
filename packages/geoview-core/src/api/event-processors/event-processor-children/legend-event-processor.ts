@@ -196,7 +196,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string[]} objectIds - The IDs of features to get extents from.
    * @param {string} outfield - ID field to return for services that require a value in outfields.
    * @returns {Promise<Extent>} The extent of the feature, if available
-   * @throws {LayerNotFoundError} - If the specified layer cannot be found.
+   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
    */
   static getExtentFromFeatures(mapId: string, layerPath: string, objectIds: string[], outfield?: string): Promise<Extent> {
     // Get the layer api
@@ -222,7 +222,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * This method fetches the Geoview layer for the specified layer path and checks if it has a `getTimeDimension` method.
    * If the method exists, it retrieves the temporal dimension information for the layer.
    * If the layer doesn't support temporal dimensions, the method returns `undefined`.
-   * @throws {LayerNotFoundError} - If the specified layer cannot be found.
+   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
    */
   static getLayerTimeDimension(mapId: string, layerPath: string): TimeDimension | undefined {
     // Get the layer api
@@ -591,10 +591,11 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * Refresh layer and reset states.
    * @param {string} mapId - The ID of the map.
    * @param {string} layerPath - The layer path of the layer to refresh.
+   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
    */
   static refreshLayer(mapId: string, layerPath: string): void {
     // Get the layer through layer API
-    const layer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerIfExists(layerPath);
+    const layer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
 
     // Refresh the layer
     layer?.refresh(MapEventProcessor.getMapViewer(mapId).getProjection());
