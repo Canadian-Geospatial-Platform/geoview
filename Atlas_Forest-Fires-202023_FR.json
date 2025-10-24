@@ -1,0 +1,998 @@
+{
+"map": {
+"components": {
+"geoSearch": {
+"enabled": true,
+"showGraphic": true,
+"showInfo": true
+},
+"mouseInfo": {
+"enabled": true,
+"spatialReference": {
+"wkid": 4326,
+"vcsWkid": null,
+"latestWkid": null,
+"latestVcsWkid": null,
+"wkt": ""
+}
+},
+"northArrow": {
+"enabled": true,
+"arrowIcon": "",
+"poleIcon": "data:image/png;base64,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"
+},
+"basemap": {
+"enabled": true
+},
+"overviewMap": {
+"enabled": true,
+"expandFactor": 4,
+"initiallyExpanded": true
+},
+"scaleBar": {
+"enabled": true
+}
+},
+"initialBasemapId": "f7f9f166",
+"extentSets": [
+{
+"id": "EXT_NRCAN_Lambert_3978",
+"default": {
+"xmin": -4844430.556896179,
+"ymin": -1052774.037634491,
+"xmax": 5666163.380958509,
+"ymax": 4170111.408136484
+},
+"full": {
+"xmax": 5666163.380958509,
+"xmin": -4844430.556896179,
+"ymax": 4170111.408136484,
+"ymin": -1052774.037634491
+},
+"maximum": {
+"xmax": 5666163.380958509,
+"xmin": -4844430.556896179,
+"ymax": 4170111.408136484,
+"ymin": -1052774.037634491
+},
+"spatialReference": {
+"wkid": 3978
+}
+},
+{
+"id": "EXT_ESRI_World_AuxMerc_3857",
+"default": {
+"xmin": -16763712,
+"ymin": 5165908,
+"xmax": -5688293,
+"ymax": 10649806
+},
+"full": {
+"xmax": -5688293,
+"xmin": -16763712,
+"ymax": 10649806,
+"ymin": 5165908
+},
+"maximum": {
+"xmax": -5688293,
+"xmin": -16763712,
+"ymax": 10649806,
+"ymin": 5165908
+},
+"spatialReference": {
+"wkid": 102100,
+"latestWkid": 3857
+}
+}
+],
+"lodSets": [
+{
+"id": "LOD_NRCAN_Lambert_3978",
+"lods": [
+{
+"level": 3,
+"resolution": 7937.5158750317505,
+"scale": 30000000
+},
+{
+"level": 4,
+"resolution": 4630.2175937685215,
+"scale": 17500000
+},
+{
+"level": 5,
+"resolution": 2645.8386250105837,
+"scale": 10000000
+},
+{
+"level": 6,
+"resolution": 1587.5031750063501,
+"scale": 6000000
+},
+{
+"level": 7,
+"resolution": 926.0435187537042,
+"scale": 3500000
+},
+{
+"level": 8,
+"resolution": 529.1677250021168,
+"scale": 2000000
+},
+{
+"level": 9,
+"resolution": 317.50063500127004,
+"scale": 1200000
+},
+{
+"level": 10,
+"resolution": 185.20870375074085,
+"scale": 700000
+},
+{
+"level": 11,
+"resolution": 111.12522225044451,
+"scale": 420000
+},
+{
+"level": 12,
+"resolution": 66.1459656252646,
+"scale": 250000
+},
+{
+"level": 13,
+"resolution": 38.36466006265346,
+"scale": 145000
+},
+{
+"level": 14,
+"resolution": 22.48962831258996,
+"scale": 85000
+},
+{
+"level": 15,
+"resolution": 13.229193125052918,
+"scale": 50000
+},
+{
+"level": 16,
+"resolution": 7.9375158750317505,
+"scale": 30000
+},
+{
+"level": 17,
+"resolution": 4.6302175937685215,
+"scale": 17500
+}
+]
+},
+{
+"id": "LOD_ESRI_World_AuxMerc_3857",
+"lods": [
+{
+"level": 0,
+"resolution": 19567.87924099992,
+"scale": 73957190.948944
+},
+{
+"level": 1,
+"resolution": 9783.93962049996,
+"scale": 36978595.474472
+},
+{
+"level": 2,
+"resolution": 4891.96981024998,
+"scale": 18489297.737236
+},
+{
+"level": 3,
+"resolution": 2445.98490512499,
+"scale": 9244648.868618
+},
+{
+"level": 4,
+"resolution": 1222.992452562495,
+"scale": 4622324.434309
+},
+{
+"level": 5,
+"resolution": 611.4962262813797,
+"scale": 2311162.217155
+},
+{
+"level": 6,
+"resolution": 305.74811314055756,
+"scale": 1155581.108577
+},
+{
+"level": 7,
+"resolution": 152.87405657041106,
+"scale": 577790.554289
+},
+{
+"level": 8,
+"resolution": 76.43702828507324,
+"scale": 288895.277144
+},
+{
+"level": 9,
+"resolution": 38.21851414253662,
+"scale": 144447.638572
+},
+{
+"level": 10,
+"resolution": 19.10925707126831,
+"scale": 72223.819286
+},
+{
+"level": 11,
+"resolution": 9.554628535634155,
+"scale": 36111.909643
+},
+{
+"level": 12,
+"resolution": 4.77731426794937,
+"scale": 18055.954822
+},
+{
+"level": 13,
+"resolution": 2.388657133974685,
+"scale": 9027.977411
+},
+{
+"level": 14,
+"resolution": 1.1943285668550503,
+"scale": 4513.988705
+},
+{
+"level": 15,
+"resolution": 0.5971642835598172,
+"scale": 2256.994353
+},
+{
+"level": 16,
+"resolution": 0.29858214164761665,
+"scale": 1128.497176
+},
+{
+"level": 17,
+"resolution": 0.14929107082380833,
+"scale": 564.248588
+},
+{
+"level": 18,
+"resolution": 0.07464553541190416,
+"scale": 282.124294
+},
+{
+"level": 19,
+"resolution": 0.03732276770595208,
+"scale": 141.062147
+},
+{
+"level": 20,
+"resolution": 0.01866138385297604,
+"scale": 70.5310735
+}
+]
+}
+],
+"tileSchemas": [
+{
+"id": "cad53536",
+"name": "Canada",
+"extentSetId": "EXT_NRCAN_Lambert_3978",
+"lodSetId": "LOD_NRCAN_Lambert_3978",
+"overviewUrl": {
+"layerType": "esriTile",
+"url": "https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBCT3978/MapServer"
+}
+},
+{
+"id": "e0ceca1d",
+"name": "Monde",
+"extentSetId": "EXT_ESRI_World_AuxMerc_3857",
+"lodSetId": "LOD_ESRI_World_AuxMerc_3857",
+"overviewUrl": {
+"layerType": "esriTile",
+"url": "https://services.arcgisonline.com/arcgis/rest/services/World_Street_Map/MapServer"
+}
+}
+],
+"baseMaps": [
+{
+"id": "f7f9f166",
+"name": "Canada : Transport avec étiquettes",
+"description": "Cette carte de base canadienne fournit un contexte géographique avec des étiquettes bilingues et met l'accent sur les réseaux de transport. De Ressources naturelles Canada.",
+"altText": "Canada : Transport avec étiquettes",
+"thumbnailUrl": "",
+"layers": [
+{
+"id": "CBME_CBCE_HS_RO_3978",
+"layerType": "esriFeature",
+"url": "https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBME_CBCE_HS_RO_3978/MapServer",
+"opacity": 1
+},
+{
+"id": "CBMT",
+"layerType": "esriFeature",
+"url": "https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBCT3978/MapServer",
+"opacity": 0.75
+}
+],
+"tileSchemaId": "cad53536",
+"attribution": {
+"text": {
+"enabled": true
+},
+"logo": {
+"enabled": false
+}
+}
+},
+{
+"id": "48fc375c",
+"name": "Canada : Transport sans étiquettes",
+"description": "Cette carte de base canadienne fournit un contexte géographique en mettant l'accent sur les réseaux de transport et ce, sans étiquettes. De Ressources naturelles Canada.",
+"altText": "Canada : Transport sans étiquettes",
+"thumbnailUrl": "",
+"layers": [
+{
+"id": "CBME_CBCE_HS_RO_3978",
+"layerType": "esriFeature",
+"url": "https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBME_CBCE_HS_RO_3978/MapServer",
+"opacity": 1
+},
+{
+"id": "CBMT_CBCT_GEOM_3978",
+"layerType": "esriFeature",
+"url": "https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBMT_CBCT_GEOM_3978/MapServer",
+"opacity": 0.75
+}
+],
+"tileSchemaId": "cad53536",
+"attribution": {
+"text": {
+"enabled": true
+},
+"logo": {
+"enabled": false
+}
+}
+},
+{
+"id": "431b5b89",
+"name": "Canada : Gris simple",
+"description": "Cette carte de base canadienne fournit un contexte géographique avec une apparence minimaliste. De Ressources naturelles Canada.",
+"altText": "Canada : Gris simple",
+"layers": [
+{
+"id": "SMR",
+"layerType": "esriFeature",
+"url": "https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/Simple/MapServer",
+"opacity": 1
+}
+],
+"tileSchemaId": "cad53536",
+"attribution": {
+"text": {
+"enabled": true
+},
+"logo": {
+"enabled": false
+}
+}
+},
+{
+"id": "2a30f9b6",
+"name": "Relief ombragé",
+"description": "Cette carte de base canadienne fournit un contexte géographique à l'aide d'un relief ombragé. De Ressources naturelles Canada.",
+"altText": "Relief ombragé",
+"layers": [
+{
+"id": "CBME_CBCE_HS_RO_3978",
+"layerType": "esriFeature",
+"url": "https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBME_CBCE_HS_RO_3978/MapServer",
+"opacity": 1
+}
+],
+"tileSchemaId": "cad53536",
+"attribution": {
+"text": {
+"enabled": true
+},
+"logo": {
+"enabled": false
+}
+}
+},
+{
+"id": "18e13bfd",
+"name": "Transport avec étiquettes",
+"description": "Cette carte de base mondiale fournit un contexte géographique avec des étiquettes bilingues et met l'accent sur les réseaux de transport. De Ressources naturelles Canada.",
+"typeSummary": "",
+"altText": "Transport avec étiquettes",
+"thumbnailUrl": "",
+"tileSchemaId": "e0ceca1d",
+"attribution": {
+"text": {
+"enabled": true,
+"value": ""
+},
+"logo": {
+"enabled": false,
+"value": "",
+"link": ""
+}
+},
+"layers": [
+{
+"id": "WorldTransportLabel",
+"layerType": "esriFeature",
+"url": "https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBMT_CBCT_GEOM_3857/MapServer",
+"opacity": 1
+},
+{
+"id": "WorldLabel",
+"layerType": "esriFeature",
+"url": "https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBCT_TXT_3857/MapServer",
+"opacity": 1
+}
+]
+},
+{
+"id": "bb32d78a",
+"name": "Transport sans étiquettes",
+"description": "Cette carte de base mondiale fournit un contexte géographique mettant l'accent sur les réseaux de transport et ce, sans étiquettes. De Ressources naturelles Canada.",
+"typeSummary": "",
+"altText": "Transport sans étiquettes",
+"thumbnailUrl": "",
+"tileSchemaId": "e0ceca1d",
+"attribution": {
+"text": {
+"enabled": true,
+"value": ""
+},
+"logo": {
+"enabled": false,
+"value": "",
+"link": ""
+}
+},
+"layers": [
+{
+"id": "WorldTransport",
+"layerType": "esriFeature",
+"url": "https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBMT_CBCT_GEOM_3857/MapServer",
+"opacity": 1
+}
+]
+},
+{
+"id": "e448891a",
+"name": "ESRI Imagerie",
+"description": "Cette carte de base mondiale fournit des images satellitaires et aériennes d'un mètre ou plus dans de nombreuses régions du monde et des images satellitaires à plus basse résolution pour le reste. D'ESRI.",
+"altText": "ESRI Imagerie",
+"layers": [
+{
+"id": "World_Imagery",
+"layerType": "esriFeature",
+"url": "https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer",
+"opacity": 1
+}
+],
+"tileSchemaId": "e0ceca1d",
+"attribution": {
+"text": {
+"enabled": true
+},
+"logo": {
+"enabled": true
+}
+}
+},
+{
+"id": "b5c5be99",
+"name": "ESRI Physique",
+"description": "Cette carte de base mondiale présente la carte physique de la Terre Naturelle à 1,24km par pixel pour la plus grande partie du monde et 500m pour les Etats-Unis. D'ESRI.",
+"altText": "ESRI Physique",
+"layers": [
+{
+"id": "World_Physical_Map",
+"layerType": "esriFeature",
+"url": "https://services.arcgisonline.com/arcgis/rest/services/World_Physical_Map/MapServer",
+"opacity": 1
+}
+],
+"tileSchemaId": "e0ceca1d",
+"attribution": {
+"text": {
+"enabled": true
+},
+"logo": {
+"enabled": true
+}
+}
+},
+{
+"id": "ae2713e8",
+"name": "ESRI Carte routière",
+"description": "Cette carte de base de rue mondial présente des données au niveau de l'autoroute. D'ESRI.",
+"altText": "ESRI Carte routière",
+"layers": [
+{
+"id": "World_Street_Map",
+"layerType": "esriFeature",
+"url": "https://services.arcgisonline.com/arcgis/rest/services/World_Street_Map/MapServer",
+"opacity": 1
+}
+],
+"tileSchemaId": "e0ceca1d",
+"attribution": {
+"text": {
+"enabled": true
+},
+"logo": {
+"enabled": true
+}
+}
+},
+{
+"id": "06acee3b",
+"name": "ESRI Relief ombragé",
+"description": "Cette carte de base mondiale fournit un contexte géographique à l'aide d'un relief ombragé. D'ESRI.",
+"altText": "ESRI Relief ombragé",
+"layers": [
+{
+"id": "World_Shaded_Relief",
+"layerType": "esriFeature",
+"url": "https://services.arcgisonline.com/arcgis/rest/services/World_Shaded_Relief/MapServer",
+"opacity": 1
+}
+],
+"tileSchemaId": "e0ceca1d",
+"attribution": {
+"text": {
+"enabled": true
+},
+"logo": {
+"enabled": true
+}
+}
+},
+{
+"id": "c53f8920",
+"name": "ESRI Topographique",
+"description": "Cette carte de base mondial fournit un contexte géographique en mettant l'accent sur la topographie. D'ESRI.",
+"altText": "ESRI Topographique",
+"layers": [
+{
+"id": "World_Topographic",
+"layerType": "esriFeature",
+"url": "https://services.arcgisonline.com/arcgis/rest/services/World_Topo_Map/MapServer",
+"opacity": 1
+}
+],
+"tileSchemaId": "e0ceca1d",
+"attribution": {
+"text": {
+"enabled": true
+},
+"logo": {
+"enabled": true
+}
+}
+}
+],
+"layers": [
+{
+"layerChoice": "esriDynamic",
+"layerType": "esriDynamic",
+"toggleSymbology": true,
+"refreshInterval": 0,
+"expectedResponseTime": 4000,
+"tolerance": 5,
+"outfields": "*",
+"imageFormat": "png32",
+"singleEntryCollapse": true,
+"controls": [
+"opacity",
+"visibility",
+"boundingBox",
+"query",
+"snapshot",
+"metadata",
+"boundaryZoom",
+"refresh",
+"reload",
+"remove",
+"settings",
+"data",
+"styles"
+],
+"disabledControls": [],
+"enableStructuredDelete": false,
+"state": {
+"opacity": 1,
+"visibility": true,
+"boundingBox": false,
+"query": true,
+"snapshot": false,
+"hovertips": true
+},
+"layerEntries": [
+{
+"outfields": "*",
+"stateOnly": false,
+"table": {
+"title": "",
+"maximize": false,
+"lazyFilter": false,
+"applyMap": false,
+"showFilter": true,
+"filterByExtent": false,
+"searchStrictMatch": false,
+"printEnabled": false,
+"columns": [
+{
+"visible": true,
+"searchable": true,
+"filter": {
+"value": "",
+"static": false
+}
+}
+]
+},
+"controls": [
+"opacity",
+"visibility",
+"boundingBox",
+"query",
+"snapshot",
+"metadata",
+"boundaryZoom",
+"refresh",
+"reload",
+"remove",
+"settings",
+"data",
+"styles"
+],
+"disabledControls": [],
+"state": {
+"opacity": 1,
+"visibility": true,
+"boundingBox": false,
+"query": true,
+"snapshot": false,
+"hovertips": true
+},
+"init": true,
+"index": 0,
+"name": "Progression d'incendie"
+}
+],
+"name": "Progression de feu",
+"id": "Progression de feu***28ae4ba7",
+"url": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NRCAN/FireCreepPerimeter_20230915_FR/MapServer"
+},
+{
+"layerChoice": "esriDynamic",
+"layerType": "esriDynamic",
+"toggleSymbology": true,
+"refreshInterval": 0,
+"expectedResponseTime": 4000,
+"tolerance": 5,
+"outfields": "*",
+"imageFormat": "png32",
+"singleEntryCollapse": true,
+"controls": [
+"opacity",
+"visibility",
+"boundingBox",
+"query",
+"snapshot",
+"metadata",
+"boundaryZoom",
+"refresh",
+"reload",
+"remove",
+"settings",
+"data",
+"styles"
+],
+"disabledControls": [],
+"enableStructuredDelete": false,
+"state": {
+"opacity": 1,
+"visibility": true,
+"boundingBox": false,
+"query": true,
+"snapshot": false,
+"hovertips": true
+},
+"layerEntries": [
+{
+"outfields": "*",
+"stateOnly": false,
+"table": {
+"title": "",
+"maximize": false,
+"lazyFilter": false,
+"applyMap": false,
+"showFilter": true,
+"filterByExtent": false,
+"searchStrictMatch": false,
+"printEnabled": false,
+"columns": [
+{
+"visible": true,
+"searchable": true,
+"filter": {
+"value": "",
+"static": false
+}
+}
+]
+},
+"controls": [
+"opacity",
+"visibility",
+"boundingBox",
+"query",
+"snapshot",
+"metadata",
+"boundaryZoom",
+"refresh",
+"reload",
+"remove",
+"settings",
+"data",
+"styles"
+],
+"disabledControls": [],
+"state": {
+"opacity": 1,
+"visibility": true,
+"boundingBox": false,
+"query": true,
+"snapshot": false,
+"hovertips": true
+},
+"init": true,
+"index": 1,
+"name": "Périmètres d'incendie"
+}
+],
+"name": "Périmètres d'incendie",
+"id": "Périmètres d'incendie***cf7dc423",
+"url": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NRCAN/FireCreepPerimeter_20230915_FR/MapServer"
+}
+],
+"legend": {
+"legendChoice": "structured",
+"type": "structured",
+"root": {
+"name": "root",
+"children": [
+{
+"infoType": "text",
+"content": "<h2>Atlas du Canada – Évolution des feux de forêt</h2> <p></p>"
+},
+{
+"layerId": "Progression de feu***28ae4ba7"
+},
+{
+"layerId": "Périmètres d'incendie***cf7dc423"
+},
+{
+"infoType": "text",
+"content": "<span style=\"padding-left:10px;display:block\">* Il est à signaler que cette carte montre la superficie approximative (par plages de 72 heures) qui a brûlé entre le 19 avril et le 9 septembre 2023, et elle a été produite par la combinaison et le traitement des données recueillies à ce jour sur les points chauds de feux de forêt.</span>"
+}
+]
+}
+},
+"legend_id": null
+},
+"ui": {
+"sideMenu": {
+"items": [
+[],
+[
+"fullscreen",
+"export",
+"share"
+],
+[
+"language",
+"help"
+]
+],
+"logo": true
+},
+"fullscreen": false,
+"theme": "default",
+"logoUrl": "",
+"failureFeedback": {
+"failureMessage": "",
+"failureImageUrl": ""
+},
+"title": "",
+"appBar": {
+"sideMenu": false,
+"geoSearch": true,
+"basemap": true,
+"layers": true
+},
+"navBar": {
+"zoom": "buttons",
+"extra": [
+"fullscreen",
+"geoLocator",
+"home",
+"help",
+"layers",
+"geoSearch",
+"basemap"
+]
+},
+"restrictNavigation": false,
+"help": {
+"folderName": "default"
+},
+"legend": {
+"reorderable": false,
+"allowImport": false,
+"isOpen": {
+"large": false,
+"medium": false,
+"small": false
+}
+},
+"tableIsOpen": {
+"id": "",
+"dynamicIndex": "",
+"large": false,
+"medium": false,
+"small": false
+},
+"widgetsWidget": ""
+},
+"services": {
+"proxyUrl": "https://maps.canada.ca/wmsproxy/ws/wmsproxy/executeFromProxy",
+"geometryUrl": "https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/Utilities/Geometry/GeometryServer",
+"exportMapUrl": "https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task",
+"search": {
+"serviceUrls": {
+"geoNames": "https://geogratis.gc.ca/services/geoname/en/geonames.json",
+"geoLocation": "https://geogratis.gc.ca/services/geolocation/en/locate?q=",
+"geoSuggest": "https://geogratis.gc.ca/services/geolocation/en/suggest?q=",
+"provinces": "https://geogratis.gc.ca/services/geoname/en/codes/province.json",
+"types": "https://geogratis.gc.ca/services/geoname/en/codes/concise.json"
+},
+"disabledSearches": [
+"NTS",
+"FSA",
+"SCALE",
+"LAT/LNG"
+],
+"settings": {
+"categories": [],
+"sortOrder": [],
+"maxResults": 100,
+"officialOnly": false
+}
+},
+"export": {
+"title": {
+"isSelected": true,
+"isSelectable": true,
+"value": ""
+},
+"footnote": {
+"isSelected": true,
+"isSelectable": false,
+"value": "© Sa Majesté la Reine du Chef du Canada, représentée par le ministre des Ressources naturelles"
+},
+"map": {
+"isSelected": true,
+"isSelectable": false
+},
+"mapElements": {
+"isSelected": true,
+"isSelectable": true
+},
+"legend": {
+"isSelected": true,
+"isSelectable": true,
+"showInfoSymbology": false,
+"showControlledSymbology": false,
+"columnWidth": 350
+},
+"timestamp": {
+"isSelected": true,
+"isSelectable": true
+},
+"timeout": 120000,
+"cleanCanvas": false
+},
+"corsEverywhere": false,
+"googleAPIKey": "",
+"esriLibUrl": ""
+},
+"version": "3.3.5",
+"language": "fr-CA",
+"plugins": {
+"rangeSlider": {
+"enable": true,
+"open": true,
+"autoinint": true,
+"controls": [
+"lock",
+"delay",
+"loop",
+"export",
+"refresh",
+"reverse"
+],
+"params": {
+"type": "date",
+"delay": "3000",
+"rangeType": "dual",
+"stepType": "dynamic",
+"precision": "0",
+"rangeInterval": 259199992,
+"startRangeEnd": false,
+"range": {
+"min": 0,
+"max": 1
+},
+"limit": {
+"min": 1681876800000,
+"max": 1694232000000,
+"staticItems": []
+},
+"units": "",
+"description": ""
+},
+"autoinit": true,
+"maximize": false,
+"maximizeDesc": true,
+"autorun": true,
+"loop": false,
+"reverse": false,
+"lock": false,
+"layers": [
+{
+"field": "DATE_",
+"isTimeAware": true,
+"id": "Progression de feu***28ae4ba7"
+},
+{
+"field": "Source_file_date",
+"isTimeAware": true,
+"id": "Périmètres d'incendie***cf7dc423"
+}
+]
+},
+"coordInfo": {
+"enable": false
+},
+"areasOfInterest": {
+"enable": false
+},
+"chart": {
+"enable": false
+},
+"swiper": {
+"enable": false
+},
+"draw": {
+"enable": false
+},
+"thematicSlider": {
+"enable": false
+}
+}
+}

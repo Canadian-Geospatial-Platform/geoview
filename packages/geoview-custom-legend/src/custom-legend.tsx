@@ -1,4 +1,6 @@
-import { TypeWindow } from 'geoview-core/core/types/global-types';
+import React from 'react';
+import type { TypeWindow } from 'geoview-core/core/types/global-types';
+import { logger } from 'geoview-core/core/utils/logger';
 import { getSxClasses } from './custom-legend-style';
 
 interface CustomLegendPanelProps {
@@ -14,7 +16,7 @@ interface LegendItem {
 
 type LegendListItems = LegendItem[];
 
-export type TypeLegendProps = {
+export type TypeLegendProps = { 
   isOpen: boolean;
   legendList: LegendListItems;
   version: string;
@@ -65,6 +67,44 @@ export function CustomLegendPanel(props: CustomLegendPanelProps): JSX.Element {
   const [editedJson, setEditedJson] = React.useState<string>('');
   const [loadedFileName, setLoadedFileName] = React.useState<string>('');
 
+  const normalizeToItems = (data: unknown): LegendItem[] | null => {
+    let validItems: LegendItem[] | null = null;
+
+    if (Array.isArray(data)) {
+      const isArrayValid = data.every(
+        (item) =>
+          typeof item === 'object' &&
+          item !== null &&
+          'legendTitle' in item &&
+          (('symbolUrl' in (item as Record<string, unknown>) && typeof (item as Record<string, unknown>).symbolUrl === 'string') ||
+            ('iconUrl' in (item as Record<string, unknown>) && typeof (item as Record<string, unknown>).iconUrl === 'string')) &&
+          typeof (item as Record<string, unknown>).legendTitle === 'string' &&
+          (!('description' in item) || typeof (item as Record<string, unknown>).description === 'string')
+      );
+      if (isArrayValid) {
+        validItems = (data as Array<Record<string, unknown>>).map((item) => ({
+          legendTitle: item.legendTitle as string,
+          symbolUrl: (item.symbolUrl as string) || (item.iconUrl as string),
+          description: (item.description as string) || '',
+        }));
+      }
+    }
+
+    if (!validItems && data && typeof data === 'object' && Array.isArray((data as Record<string, unknown>).symbologyStack)) {
+      const stack = (data as { symbologyStack: Array<Record<string, unknown>> }).symbologyStack;
+      const isStackValid = stack.every((s) => typeof s === 'object' && typeof s.image === 'string' && typeof s.text === 'string');
+      if (isStackValid) {
+        validItems = stack.map((s) => ({
+          legendTitle: s.text as string,
+          symbolUrl: s.image as string,
+          description: '',
+        }));
+      }
+    }
+
+    return validItems;
+  };
+
   const handleEditJson = (): void => {
     setEditedJson(jsonContent);
     setIsEditingJson(true);
@@ -73,41 +113,7 @@ export function CustomLegendPanel(props: CustomLegendPanelProps): JSX.Element {
   const handleSaveJson = (): void => {
     try {
       const parsedJson = JSON.parse(editedJson);
-
-      // Validate/normalize JSON: support array of items and object with symbologyStack
-      let validItems: LegendItem[] | null = null;
-
-      // Case 1: Array of items with legendTitle and symbolUrl/iconUrl
-      if (Array.isArray(parsedJson)) {
-        const isArrayValid = parsedJson.every(
-          (item) =>
-            typeof item === 'object' &&
-            'legendTitle' in item &&
-            (('symbolUrl' in item && typeof item.symbolUrl === 'string') || ('iconUrl' in item && typeof item.iconUrl === 'string')) &&
-            typeof item.legendTitle === 'string' &&
-            (!('description' in item) || typeof item.description === 'string')
-        );
-        if (isArrayValid) {
-          validItems = parsedJson.map((item) => ({
-            legendTitle: item.legendTitle,
-            symbolUrl: (item.symbolUrl || item.iconUrl) as string,
-            description: (item.description as string) || '',
-          }));
-        }
-      }
-
-      // Case 2: Object with symbologyStack [{ image, text }]
-      if (!validItems && parsedJson && typeof parsedJson === 'object' && Array.isArray(parsedJson.symbologyStack)) {
-        const stack = parsedJson.symbologyStack;
-        const isStackValid = stack.every((s) => typeof s === 'object' && typeof s.image === 'string' && typeof s.text === 'string');
-        if (isStackValid) {
-          validItems = stack.map((s) => ({
-            legendTitle: s.text,
-            symbolUrl: s.image,
-            description: '',
-          }));
-        }
-      }
+      const validItems = normalizeToItems(parsedJson);
 
       if (validItems) {
         if (onUpdateLegend) {
@@ -146,40 +152,7 @@ export function CustomLegendPanel(props: CustomLegendPanelProps): JSX.Element {
 
         // Store the formatted JSON content
         setJsonContent(JSON.stringify(jsonData, null, 2));
-
-        let validItems: LegendItem[] | null = null;
-
-        // Case 1: Array of items with legendTitle and symbolUrl/iconUrl
-        if (Array.isArray(jsonData)) {
-          const isArrayValid = jsonData.every(
-            (item) =>
-              typeof item === 'object' &&
-              'legendTitle' in item &&
-              (('symbolUrl' in item && typeof item.symbolUrl === 'string') || ('iconUrl' in item && typeof item.iconUrl === 'string')) &&
-              typeof item.legendTitle === 'string' &&
-              (!('description' in item) || typeof item.description === 'string')
-          );
-          if (isArrayValid) {
-            validItems = jsonData.map((item) => ({
-              legendTitle: item.legendTitle,
-              symbolUrl: (item.symbolUrl || item.iconUrl) as string,
-              description: (item.description as string) || '',
-            }));
-          }
-        }
-
-        // Case 2: Object with symbologyStack [{ image, text }]
-        if (!validItems && jsonData && typeof jsonData === 'object' && Array.isArray(jsonData.symbologyStack)) {
-          const stack = jsonData.symbologyStack;
-          const isStackValid = stack.every((s) => typeof s === 'object' && typeof s.image === 'string' && typeof s.text === 'string');
-          if (isStackValid) {
-            validItems = stack.map((s) => ({
-              legendTitle: s.text,
-              symbolUrl: s.image,
-              description: '',
-            }));
-          }
-        }
+        const validItems = normalizeToItems(jsonData);
 
         if (validItems) {
           if (onUpdateLegend) {
@@ -204,6 +177,41 @@ export function CustomLegendPanel(props: CustomLegendPanelProps): JSX.Element {
     };
     reader.readAsText(file);
   };
+
+  React.useEffect(() => {
+    let cancelled = false;
+    const tryFetch = async (paths: string[]): Promise<void> => {
+      const settled = await Promise.allSettled(
+        paths.map((p) =>
+          fetch(p).then((res) => {
+            if (!res.ok) return Promise.reject();
+            return res.json().then((data) => ({ path: p, data }));
+          })
+        )
+      ); 
+
+      for (let i = 0; i < settled.length; i++) {
+        const result = settled[i];
+        if (result.status === 'fulfilled') {
+          const { path, data } = result.value as { path: string; data: unknown };
+          const items = normalizeToItems(data);
+          if (items && !cancelled) {
+            if (onUpdateLegend) onUpdateLegend(items);
+            setJsonContent(JSON.stringify(data, null, 2));
+            setHasLoadedData(true);
+            setLoadedFileName(path);
+            return;
+          }
+        }
+      }
+    };
+    if (!hasLoadedData && legendList.length === 0) {
+      void tryFetch(['customlegend.json', '/customlegend.json', './customlegend.json']);
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [hasLoadedData, legendList.length, onUpdateLegend]);
 
   const handleEditClick = (index: number): void => {
     setEditingIndex(index);
