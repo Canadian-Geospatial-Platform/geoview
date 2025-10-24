@@ -229,6 +229,28 @@ class TestSuitePlugin extends AbstractPlugin {
   }
 
   /**
+   * Gets the total number of currently done successfully tests in the Suite.
+   * @returns {number} The total number of tests done.
+   */
+  getTestsDoneSuccess(): number {
+    // For each test suite
+    return this.testSuites.reduce((total, testSuite) => {
+      return total + testSuite.getTestsDoneSuccess();
+    }, 0);
+  }
+
+  /**
+   * Gets the total number of currently done failed tests in the Suite.
+   * @returns {number} The total number of tests done.
+   */
+  getTestsDoneFailed(): number {
+    // For each test suite
+    return this.testSuites.reduce((total, testSuite) => {
+      return total + testSuite.getTestsDoneFailed();
+    }, 0);
+  }
+
+  /**
    * Gets the total number of tests across all test suites.
    * @returns {number} The total number of tests.
    */

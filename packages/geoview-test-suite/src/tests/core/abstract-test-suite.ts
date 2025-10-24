@@ -55,6 +55,24 @@ export abstract class AbstractTestSuite {
   }
 
   /**
+   * Gets the total number of currently done successful tests in the Suite.
+   * @returns {number} The total number of tests done.
+   */
+  getTestsDoneSuccess(): number {
+    // Return the total completed tests across all testers
+    return this.#testers.reduce((total, tester) => total + tester.getTestsDoneSuccess(), 0);
+  }
+
+  /**
+   * Gets the total number of currently done failed tests in the Suite.
+   * @returns {number} The total number of tests done.
+   */
+  getTestsDoneFailed(): number {
+    // Return the total completed tests across all testers
+    return this.#testers.reduce((total, tester) => total + tester.getTestsDoneFailed(), 0);
+  }
+
+  /**
    * Gets if all tests are done.
    * @returns {boolean} Indicate if the tests are all done.
    */

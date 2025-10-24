@@ -66,6 +66,22 @@ export abstract class AbstractTester {
   }
 
   /**
+   * Gets the total number of currently done successful tests which were successful.
+   * @returns {number} The total number of tests.
+   */
+  getTestsDoneSuccess(): number {
+    return this.#testsDone.filter((test) => test.getStatus() === 'success').length;
+  }
+
+  /**
+   * Gets the total number of currently done failed tests which were successful.
+   * @returns {number} The total number of tests.
+   */
+  getTestsDoneFailed(): number {
+    return this.getTestsDone() - this.getTestsDoneSuccess();
+  }
+
+  /**
    * Gets if all tests are done.
    * @returns {boolean} Indicate if the tests are all done.
    */

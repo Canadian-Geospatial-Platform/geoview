@@ -79,7 +79,8 @@
       }
 
       .tableResults .test-title::before {
-        content: "> ";
+        content: "▶";
+        margin-right: 3px;
         display: inline-block;
         transition: transform 0.2s;
       }
@@ -121,6 +122,15 @@
       </table>
     </div>
 
+    <div style="text-align:right;">
+      <span id="allSuitesCheck"></span>
+    </div>
+    <div style="text-align:right;">
+      Suites: <span id="allSuitesCompleted">0</span>/<span id="allSuitesTotal">0</span>
+    </div>
+    <div style="text-align:right;">
+      Running: <span id="allSuitesTestsRunning">0</span> | Done success: <span id="allSuitesTestsDoneSuccess" style="color:green;">0</span> | Done failed: <span id="allSuitesTestsDoneFailed" style="color:red;">0</span> | Done: <span id="allSuitesTestsDone">0</span>/<span id="allSuitesTestsTotal">0</span>
+    </div>
     <button onclick="launchTestsAll()">LAUNCH TESTS ALL MAPS!</button>
 
     <div class="map-title-holder">
@@ -261,7 +271,7 @@
     ></div>
 
     <div class="map-title-holder">
-      <h4 id="HEVNT3">4. Tests on map 4 (EPSG: 3978)</h4>
+      <h4 id="HEVNT4">4. Tests on map 4 (EPSG: 3978)</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
     <button onclick="launchTests('map4')">LAUNCH TESTS MAP3!</button>
@@ -404,7 +414,10 @@
         plugin.onTestUpdated((sender, event) => {
           // Add a row to the table
           testSuiteAddOrUpdateTestResultRow(plugin, event.suite, event.tester, event.test, event.test.getError()?.message);
+
+          // Update
           testSuiteUpdateTotals(plugin);
+          testSuiteUpdateGrandTotal(testSuitesPlugins);
         });
       });
 
@@ -433,6 +446,7 @@
 
           // Update
           testSuiteUpdateTotals(plugin);
+          testSuiteUpdateGrandTotal(testSuitesPlugins);
         } else {
           // Alert
           throw new Error('Tests are already running, please wait.')

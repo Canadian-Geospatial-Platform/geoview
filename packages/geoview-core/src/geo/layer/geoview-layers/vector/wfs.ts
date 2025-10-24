@@ -433,7 +433,7 @@ export class WFS extends AbstractGeoViewVector {
       const layerEntryConfig = new WfsLayerEntryConfig({
         geoviewLayerConfig,
         layerId: `${layerEntry.id}`,
-        layerName: layerEntry.layerName || `${layerEntry.id}`,
+        layerName: layerEntry.layerName || geoviewLayerName || `${layerEntry.id}`,
         source: {
           format: 'WFS',
           strategy,

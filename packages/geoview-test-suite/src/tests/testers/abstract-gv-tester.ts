@@ -17,6 +17,9 @@ export abstract class GVAbstractTester extends AbstractTester {
   /** Bad url */
   static BAD_URL = 'https://badurl/oops';
 
+  /** WMS Proxy URL */
+  static WMS_PROXY_URL = 'https://maps.canada.ca/wmsproxy/ws/wmsproxy/executeFromProxy';
+
   /** Airborne Radioactivity uuid */
   static AIRBORNE_RADIOACTIVITY_UUID: string = '21b821cf-0f1c-40ee-8925-eab12d357668';
   static AIRBORNE_RADIOACTIVITY_GROUP: string = GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID + '/0';
@@ -78,6 +81,7 @@ export abstract class GVAbstractTester extends AbstractTester {
   static readonly GEOJSON_METADATA_META: string =
     'https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata.meta';
   static readonly GEOJSON_METADATA_META_FILE: string = 'metadata.meta';
+  static readonly GEOJSON_POLYGONS: string = 'polygons.json';
 
   static readonly CSV_STATION_LIST: string =
     'https://canadian-geospatial-platform.github.io/geoview/public/datasets/csv-files/Station_List_Minus_HQ-MELCC.csv';

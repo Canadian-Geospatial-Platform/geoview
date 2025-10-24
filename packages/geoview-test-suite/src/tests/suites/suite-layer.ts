@@ -30,22 +30,31 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
   protected override onLaunchTestSuite(): Promise<unknown> {
     // // GV START DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
     // // Test DEBUG
-    // // const pDevTest0 = this.#layerTester.testAddEsriDynamicBadUrl();
-    // // const pDevTest1 = this.#layerTester.testAddEsriFeatureBadUrl();
-    // const pDevTest2 = this.#layerTester.testAddEsriImageBadUrl();
+    // const pDevTest0 = this.#layerTester.testAddKMLWithBadUrl();
+    // const pDevTest1 = this.#layerTester.testAddWKBWithBadUrl();
+    // // const pDevTest2 = this.#layerTester.testAddOGCFeatureWithPygeoapi();
 
     // // Resolve when all
-    // return Promise.all([pDevTest2]);
+    // return Promise.all([pDevTest0, pDevTest1]);
     // // GV END DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
 
     // Test adding layer
     const pLayerEsriDynamicHistoFloods = this.#layerTester.testAddEsriDynamicHistoFloodEvents();
 
+    // Test true negative
+    const pLayerEsriDynamicBadUrl = this.#layerTester.testAddEsriDynamicBadUrl();
+
     // Test adding layer
     const pLayerEsriFeatureForestIndustry = this.#layerTester.testAddEsriFeatureForestIndustry();
 
+    // Test true negative
+    const pLayerEsriFeatureBadUrl = this.#layerTester.testAddEsriFeatureBadUrl();
+
     // Test adding layer
     const pLayerEsriImageElevation = this.#layerTester.testAddEsriImageWithElevation();
+
+    // Test true negative
+    const pLayerEsriImageBadUrl = this.#layerTester.testAddEsriImageBadUrl();
 
     // Test adding layer
     const pLayerWMSOWSMundialis = this.#layerTester.testAddWMSLayerWithOWSMundialis();
@@ -59,15 +68,70 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
     // Test true negative
     const pLayerWMSBadUrl = this.#layerTester.testAddWMSBadUrl();
 
+    // Test adding layer
+    const pLayerWFSWithGeometCurrentConditions = this.#layerTester.testAddWFSLayerWithWithGeometCurrentConditions();
+
+    // Test true negative
+    const pLayerWFSBadUrl = this.#layerTester.testAddWFSBadUrl();
+
+    // Test true negative
+    const pLayerWFSOkayUrlNoCap = this.#layerTester.testAddWFSOkayUrlNoCap();
+
+    // Test adding layer
+    const pLayerGeoJSONWithPolygons = this.#layerTester.testAddGeoJSONWithMetadataPolygons();
+
+    // Test true negative
+    const pLayerGeoJSonBadUrl = this.#layerTester.testAddGeoJSONBadUrl();
+
+    // Test adding layer
+    const pLayerCSVStationList = this.#layerTester.testAddCSVWithStationList();
+
+    // Test true negative
+    const pLayerCSVBadUrl = this.#layerTester.testAddCSVWithBadUrl();
+
+    // Test adding layer
+    const pLayerOGCFeatureWithPygeoapi = this.#layerTester.testAddOGCFeatureWithPygeoapi();
+
+    // Test true negative
+    const pLayerOGCFeatureBadUrl = this.#layerTester.testAddOGCFeatureWithBadUrl();
+
+    // Test adding layer
+    const pLayerWKBWithSouthAfrica = this.#layerTester.testAddWKBWithSouthAfrica();
+
+    // Test true negative
+    const pLayerWKBBadUrl = this.#layerTester.testAddWKBWithBadUrl();
+
+    // Test adding layer
+    const pLayerKMLWithTornado = this.#layerTester.testAddKMLWithTornado();
+
+    // Test true negative
+    const pLayerKMLBadUrl = this.#layerTester.testAddKMLWithBadUrl();
+
     // Resolve when all
     return Promise.all([
       pLayerEsriDynamicHistoFloods,
+      pLayerEsriDynamicBadUrl,
       pLayerEsriFeatureForestIndustry,
+      pLayerEsriFeatureBadUrl,
       pLayerEsriImageElevation,
+      pLayerEsriImageBadUrl,
       pLayerWMSOWSMundialis,
       pLayerWMSDatacubeOWSMSI,
       pLayerWMSDatacubeRingFireHalifax,
       pLayerWMSBadUrl,
+      pLayerWFSWithGeometCurrentConditions,
+      pLayerWFSBadUrl,
+      pLayerWFSOkayUrlNoCap,
+      pLayerGeoJSONWithPolygons,
+      pLayerGeoJSonBadUrl,
+      pLayerCSVStationList,
+      pLayerCSVBadUrl,
+      pLayerOGCFeatureWithPygeoapi,
+      pLayerOGCFeatureBadUrl,
+      pLayerWKBWithSouthAfrica,
+      pLayerWKBBadUrl,
+      pLayerKMLWithTornado,
+      pLayerKMLBadUrl,
     ]);
   }
 }

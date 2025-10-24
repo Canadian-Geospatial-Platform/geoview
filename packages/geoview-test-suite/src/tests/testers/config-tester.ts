@@ -473,6 +473,7 @@ export class ConfigTester extends GVAbstractTester {
   testWMSBadUrl(): Promise<Test<LayerNoCapabilitiesError>> {
     // GV: In the case of a WMS, since a proxy is used when the url fails, and that proxy always returns a 200 response (with an internal error inside)
     // GV: We can't really test the LayerServiceMetadataUnableToFetchError error exception.
+
     // The bad url
     const urlBad: string = GVAbstractTester.BAD_URL;
 
@@ -574,7 +575,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testWFSOkayUrlNoCap(): Promise<Test<LayerNoCapabilitiesError>> {
     // The bad url which still respond something (not a 404, 500, etc)
-    const urlBad: string = 'https://maps.canada.ca/wmsproxy/ws/wmsproxy/executeFromProxy';
+    const urlBad: string = GVAbstractTester.WMS_PROXY_URL;
 
     // Test
     return this.testError(`Test a WFS config with a okay url but no capabilities...`, LayerNoCapabilitiesError, async (test) => {
