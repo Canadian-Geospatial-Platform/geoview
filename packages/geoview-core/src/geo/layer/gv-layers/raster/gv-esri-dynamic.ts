@@ -102,11 +102,16 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
    */
   override async onFetchLegend(): Promise<TypeLegend | null> {
+    // Get the config
     const layerConfig = this.getLayerConfig();
-    // Only raster layers need the alternate code
-    if (layerConfig.getLayerMetadata()?.type !== 'Raster Layer') return super.onFetchLegend();
 
-    // Here, the layer type is not 'Raster Layer', could be 'Feature Layer'
+    // If not a Raster Layer type
+    if (layerConfig.getLayerMetadata()?.type !== 'Raster Layer') {
+      // Regular fetch
+      return super.onFetchLegend();
+    }
+
+    // At this point, the layer type is 'Raster Layer'
 
     try {
       if (!layerConfig) return null;

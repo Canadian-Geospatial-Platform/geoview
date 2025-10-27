@@ -229,7 +229,7 @@ class TestSuitePlugin extends AbstractPlugin {
   }
 
   /**
-   * Gets the total number of currently done successfully tests in the Suite.
+   * Gets the total number of currently done successfully across all test suites.
    * @returns {number} The total number of tests done.
    */
   getTestsDoneSuccess(): number {
@@ -240,7 +240,7 @@ class TestSuitePlugin extends AbstractPlugin {
   }
 
   /**
-   * Gets the total number of currently done failed tests in the Suite.
+   * Gets the total number of currently done failed across all test suites
    * @returns {number} The total number of tests done.
    */
   getTestsDoneFailed(): number {
@@ -263,15 +263,15 @@ class TestSuitePlugin extends AbstractPlugin {
 
   /**
    * Gets if all tests are done.
-   * @returns {boolean} Indicate if the tests are all done.
+   * @returns {boolean} Indicate if the tests are all done across all test suites.
    */
   getTestsDoneAll(): boolean {
     return this.testSuites.every((suite) => suite.getTestsDoneAll());
   }
 
   /**
-   * Gets if all the tests are done and successfully and the test suite is done.
-   * @returns {boolean} Indicate if the tests are all done and finished successfully and the test suite is done.
+   * Gets if all the tests are done across all test suites.
+   * @returns {boolean} Indicate if the tests are all done across all test suites.
    */
   getTestsDoneAllAndSuiteDone(): boolean {
     return this.getSuitesDone() && this.getTestsDoneAll();
