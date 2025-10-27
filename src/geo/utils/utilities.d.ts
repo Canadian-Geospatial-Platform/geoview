@@ -15,7 +15,7 @@ import type { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-
 import type { TypeLayerStyleConfig, TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
 import type { TypeMetadataWMS } from '@/api/types/layer-schema-types';
 import type { TypeMapMouseInfo } from '@/geo/map/map-viewer';
-export declare const layerTypes: Record<"CSV" | "WKB" | "ESRI_DYNAMIC" | "ESRI_FEATURE" | "ESRI_IMAGE" | "IMAGE_STATIC" | "GEOJSON" | "XYZ_TILES" | "VECTOR_TILES" | "OGC_FEATURE" | "WFS" | "WMS", import("@/api/types/layer-schema-types").TypeGeoviewLayerType>;
+export declare const layerTypes: Record<"CSV" | "KML" | "WKB" | "ESRI_DYNAMIC" | "ESRI_FEATURE" | "ESRI_IMAGE" | "IMAGE_STATIC" | "GEOJSON" | "XYZ_TILES" | "VECTOR_TILES" | "OGC_FEATURE" | "WFS" | "WMS", import("@/api/types/layer-schema-types").TypeGeoviewLayerType>;
 /** The type for the function callback for getWMSServiceMetadata() */
 export type CallbackNewMetadataDelegate = (proxyUsed: string) => void;
 /**
