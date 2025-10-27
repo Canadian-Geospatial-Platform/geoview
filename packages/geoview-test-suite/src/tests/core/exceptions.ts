@@ -318,6 +318,34 @@ export class AssertionArrayLengthError extends AssertionError {
 }
 
 /**
+ * Custom error to indicate that an array did not have the minimum expected length.
+ * @extends {AssertionError}
+ */
+export class AssertionArrayLengthMinimalError extends AssertionError {
+  /**
+   * Creates a new AssertionArrayLengthMinimalError.
+   * @param {number | undefined} actualLength - Actual array length.
+   * @param {number} expectedLength - Expected array length.
+   */
+  constructor(actualLength: number | undefined, expectedLength: number) {
+    // Call the base Error constructor with the provided message
+    super(`Array length is ${actualLength}, expected was at least ${expectedLength}`, actualLength, expectedLength);
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'AssertionArrayLengthMinimalError';
+
+    // Capture the stack trace (V8-specific, e.g., Chrome and Node.js)
+    // Omits the constructor call from the trace for cleaner debugging
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, AssertionArrayLengthMinimalError);
+    }
+
+    // Ensure the prototype chain is correct (required in some transpilation targets)
+    Object.setPrototypeOf(this, AssertionArrayLengthMinimalError.prototype);
+  }
+}
+
+/**
  * Custom error to indicate that an array did not include the expected value (so the inclusion failed).
  * @extends {AssertionError}
  */

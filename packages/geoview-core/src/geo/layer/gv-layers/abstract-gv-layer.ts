@@ -66,6 +66,9 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   /** The OpenLayer source */
   #olSource: Source;
 
+  /** The legend as fetched */
+  #layerLegend?: TypeLegend;
+
   /** Style to apply to the vector layer. */
   #layerStyle?: TypeLayerStyleConfig;
 
@@ -398,6 +401,22 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   /**
+   * Gets the legend associated with the layer.
+   * @returns The layer legend
+   */
+  getLegend(): TypeLegend | undefined {
+    return this.#layerLegend;
+  }
+
+  /**
+   * Sets the legend associated with the layer.
+   * @param {TypeLegend} legend - The layer legend
+   */
+  setLegend(legend: TypeLegend): void {
+    this.#layerLegend = legend;
+  }
+
+  /**
    * Gets the layer style
    * @returns The layer style
    */
@@ -705,6 +724,8 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       .then((legend) => {
         // If legend was received
         if (legend) {
+          // Set the legend
+          this.setLegend(legend);
           // Save the style according to the legend
           this.onSetStyleAccordingToLegend(legend);
           // Emit legend information once retrieved
@@ -756,6 +777,44 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
       // If the layer was first loaded
       return this.loadedOnce;
+    }, timeout).then();
+  }
+
+  /**
+   * Utility function allowing to wait for the layer legend to be fetched.
+   * @param {number} timeout - A timeout for the period to wait for. Defaults to 30,000 ms.
+   * @returns {Promise<void>} A Promise that resolves when the layer legend has been fetched.
+   */
+  waitLegendFetched(timeout: number = 30000): Promise<void> {
+    // Create a promise and wait until the layer is first loaded
+    return whenThisThen(() => {
+      // If the layer is in error, abort the waiting
+      if (this.getLayerStatus() === 'error') {
+        // The layer is in error, throw error
+        throw new LayerStatusErrorError(this.getGeoviewLayerId(), this.getLayerName());
+      }
+
+      // If the layer was first loaded
+      return this.getLegend();
+    }, timeout).then();
+  }
+
+  /**
+   * Utility function allowing to wait for the layer style to be applied.
+   * @param {number} timeout - A timeout for the period to wait for. Defaults to 30,000 ms.
+   * @returns {Promise<void>} A Promise that resolves when the layer style has been applied.
+   */
+  waitStyleApplied(timeout: number = 30000): Promise<void> {
+    // Create a promise and wait until the layer is first loaded
+    return whenThisThen(() => {
+      // If the layer is in error, abort the waiting
+      if (this.getLayerStatus() === 'error') {
+        // The layer is in error, throw error
+        throw new LayerStatusErrorError(this.getGeoviewLayerId(), this.getLayerName());
+      }
+
+      // If the layer was first loaded
+      return this.getStyle();
     }, timeout).then();
   }
 

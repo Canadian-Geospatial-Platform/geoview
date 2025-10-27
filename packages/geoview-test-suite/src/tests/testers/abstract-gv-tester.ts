@@ -44,6 +44,9 @@ export abstract class GVAbstractTester extends AbstractTester {
   static readonly FOREST_INDUSTRY_FEATURE_SERVER: string =
     GVAbstractTester.FOREST_INDUSTRY_MAP_SERVER + '/' + GVAbstractTester.FOREST_INDUSTRY_LAYER_ID;
 
+  /** EsriDynamic with Raster Layers */
+  static readonly RASTER_LAYERS_UUID: string = 'ac2096a6-7b4a-464e-9e08-eca7873dd88c';
+
   /** CESI */
   static readonly CESI_MAP_SERVER: string = 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer';
   static readonly CESI_GROUP_0_LAYER_NAME: string = 'Water quantity';

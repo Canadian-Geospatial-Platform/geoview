@@ -391,7 +391,7 @@ function testSuiteAddOrUpdateTestResultRow(plugin, testSuite, testTester, test, 
     // If it doesn't exist, create a new row
     row = document.createElement('tr');
     row.id = test.id;
-    row.classList.add('collapsed');
+    row.classList.add('expanded');
 
     // Create and append the three cells
     row.appendChild(document.createElement('td'));
@@ -423,12 +423,14 @@ function testSuiteAddOrUpdateTestResultRow(plugin, testSuite, testTester, test, 
   if (resultCell) {
     resultCell.style.textAlign = 'center';
     if (passed === true) {
+      row.classList.add('collapsed');
+      row.classList.remove('expanded');
       resultCell.style.color = 'green';
       resultCell.textContent = '✔';
     } else if (passed === false) {
       // Expand the row
-      row.classList.toggle('expanded');
-      row.classList.toggle('collapsed');
+      row.classList.add('expanded');
+      row.classList.remove('collapsed');
       resultCell.style.color = 'red';
       resultCell.textContent = '✘';
       detailsCell.textContent = details;
