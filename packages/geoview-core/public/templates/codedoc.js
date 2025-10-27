@@ -280,20 +280,24 @@ function cleanURL(url) {
     return `${protocolPart}://${domain}${path}`;
 }
 
-function testSuiteCreateTable(mapID) {
+function testSuiteCreateTable(plugin) {
+  // The map id
+  const mapId = plugin.mapViewer.mapId;
+  const description = plugin.getDescriptionAsHtml();
   const wrapper = document.createElement('div');
 
   wrapper.innerHTML = `
+    <div style="white-space: pre-line;"><h3>${description}</h3></div>
     <div style="text-align:right;">
-      <span id="suitesCheck-${mapID}"></span>
+      <span id="suitesCheck-${mapId}"></span>
     </div>
     <div style="text-align:right;">
-      Suites: <span id="suitesCompleted-${mapID}">0</span>/<span id="suitesTotal-${mapID}">0</span>
+      Suites: <span id="suitesCompleted-${mapId}">0</span>/<span id="suitesTotal-${mapId}">0</span>
     </div>
     <div style="text-align:right;">
-      Running: <span id="testsRunning-${mapID}">0</span> | Done success: <span id="testsDoneSuccess-${mapID}" style="color:green;">0</span> | Done failed: <span id="testsDoneFailed-${mapID}" style="color:red;">0</span> | Done: <span id="testsDone-${mapID}">0</span>/<span id="testsTotal-${mapID}">0</span>
+      Running: <span id="testsRunning-${mapId}">0</span> | Done success: <span id="testsDoneSuccess-${mapId}" style="color:green;">0</span> | Done failed: <span id="testsDoneFailed-${mapId}" style="color:red;">0</span> | Done: <span id="testsDone-${mapId}">0</span>/<span id="testsTotal-${mapId}">0</span>
     </div>
-    <table id="tableResults-${mapID}" class="tableResults">
+    <table id="tableResults-${mapId}" class="tableResults">
       <colgroup>
         <col>
         <col style="width: 80px;">
@@ -302,7 +306,7 @@ function testSuiteCreateTable(mapID) {
       <thead>
         <tr><td>TEST</td><td>RESULT</td><td>DETAILS</td></tr>
       </thead>
-      <tbody id="tableBody-${mapID}"></tbody>
+      <tbody id="tableBody-${mapId}"></tbody>
     </table>
   `;
 
@@ -391,7 +395,7 @@ function testSuiteAddOrUpdateTestResultRow(plugin, testSuite, testTester, test, 
     // If it doesn't exist, create a new row
     row = document.createElement('tr');
     row.id = test.id;
-    row.classList.add('collapsed');
+    row.classList.add('expanded');
 
     // Create and append the three cells
     row.appendChild(document.createElement('td'));
@@ -413,7 +417,7 @@ function testSuiteAddOrUpdateTestResultRow(plugin, testSuite, testTester, test, 
 
   // Collapsible content
   testMessage += '<div class="collapsible-content" style="margin-top: 5px;">';
-  testMessage += '<font style="font-size: x-small;">' + '<i>[' + testSuite.name + ' | ' + testTester.name + ']' + '</i></font>';
+  testMessage += '<font style="font-size: x-small;">' + '<i>[' + testSuite.getName() + ' | ' + testTester.getName() + ']' + '</i></font>';
   testMessage += test.getStepsAsHtml();
   testCell.innerHTML = testMessage;
 
@@ -423,12 +427,14 @@ function testSuiteAddOrUpdateTestResultRow(plugin, testSuite, testTester, test, 
   if (resultCell) {
     resultCell.style.textAlign = 'center';
     if (passed === true) {
+      row.classList.add('collapsed');
+      row.classList.remove('expanded');
       resultCell.style.color = 'green';
       resultCell.textContent = '✔';
     } else if (passed === false) {
       // Expand the row
-      row.classList.toggle('expanded');
-      row.classList.toggle('collapsed');
+      row.classList.add('expanded');
+      row.classList.remove('collapsed');
       resultCell.style.color = 'red';
       resultCell.textContent = '✘';
       detailsCell.textContent = details;

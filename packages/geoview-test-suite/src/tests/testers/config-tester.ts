@@ -1,8 +1,6 @@
 import { GVAbstractTester } from './abstract-gv-tester';
 import type { ClassType } from '../core/test';
 import { Test } from '../core/test';
-import type { API } from 'geoview-core/api/api';
-import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { TypeGeoviewLayerConfig, TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-types';
 import { LayerNoCapabilitiesError, LayerServiceMetadataUnableToFetchError } from 'geoview-core/core/exceptions/layer-exceptions';
 import { EsriDynamic } from 'geoview-core/geo/layer/geoview-layers/raster/esri-dynamic';
@@ -26,6 +24,8 @@ import { CsvLayerEntryConfig } from 'geoview-core/api/config/validation-classes/
 import { OgcFeatureLayerEntryConfig } from 'geoview-core/api/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
 import { WkbLayerEntryConfig } from 'geoview-core/api/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
 import { KmlLayerEntryConfig } from 'geoview-core/api/config/validation-classes/vector-validation-classes/kml-layer-entry-config';
+import type { GeoCoreLayerConfigResponse } from 'geoview-core/api/config/geocore';
+import { GeoCore } from 'geoview-core/api/config/geocore';
 
 /**
  * Main Config testing class.
@@ -33,12 +33,11 @@ import { KmlLayerEntryConfig } from 'geoview-core/api/config/validation-classes/
  */
 export class ConfigTester extends GVAbstractTester {
   /**
-   * Constructs a ConfigTester
-   * @param {API} api - The api.
-   * @param {string} mapViewer - The map viewer.
+   * Returns the name of the Tester.
+   * @returns {string} The name of the Tester.
    */
-  constructor(api: API, mapViewer: MapViewer) {
-    super('ConfigTester', api, mapViewer);
+  override getName(): string {
+    return 'ConfigTester';
   }
 
   // #region ESRI DYNAMIC
@@ -164,12 +163,14 @@ export class ConfigTester extends GVAbstractTester {
    */
   testEsriFeatureWithTorontoNeighbourhoods(): Promise<Test<TypeGeoviewLayerConfig>> {
     // The url
-    const url = ConfigTester.TORONTO_NEIGHBOURHOODS_FEATURE_SERVER;
+    const url = ConfigTester.FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_URL;
 
     // Test the Esri Feature config
     return this.testEsriFeature('Test an Esri Feature with Toronto Neighbourhoods', url, {
       metadataAccessPath: url,
-      listOfLayerEntryConfig: [{ layerEntryProps: { layerId: '0', layerName: ConfigTester.TORONTO_NEIGHBOURHOODS_LAYER_NAME } }],
+      listOfLayerEntryConfig: [
+        { layerEntryProps: { layerId: '0', layerName: ConfigTester.FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_LAYER_NAME } },
+      ],
     });
   }
 
@@ -180,10 +181,11 @@ export class ConfigTester extends GVAbstractTester {
   testEsriFeatureWithHistoricalFloodEvents(): Promise<Test<TypeGeoviewLayerConfig>> {
     // The url
     const url = ConfigTester.HISTORICAL_FLOOD_URL_FEATURE_SERVER;
+    const expectedUrl = ConfigTester.HISTORICAL_FLOOD_URL_MAP_SERVER;
 
     // Test the Esri Feature config
     return this.testEsriFeature('Test an Esri Feature with Historical Flood Events', url, {
-      metadataAccessPath: url,
+      metadataAccessPath: expectedUrl,
       listOfLayerEntryConfig: [{ layerEntryProps: { layerId: '0', layerName: ConfigTester.HISTORICAL_FLOOD_LAYER_NAME } }],
     });
   }
@@ -195,10 +197,11 @@ export class ConfigTester extends GVAbstractTester {
   testEsriFeatureWithForestIndustry(): Promise<Test<TypeGeoviewLayerConfig>> {
     // The url
     const url = ConfigTester.FOREST_INDUSTRY_FEATURE_SERVER;
+    const expectedUrl = ConfigTester.FOREST_INDUSTRY_MAP_SERVER;
 
     // Test the Esri Feature config
     return this.testEsriFeature('Test an Esri Feature with Forest Industry', url, {
-      metadataAccessPath: url,
+      metadataAccessPath: expectedUrl,
       listOfLayerEntryConfig: [{ layerEntryProps: { layerId: '0', layerName: ConfigTester.FOREST_INDUSTRY_LAYER_NAME } }],
     });
   }
@@ -279,12 +282,12 @@ export class ConfigTester extends GVAbstractTester {
    */
   testEsriImageWithElevation(): Promise<Test<TypeGeoviewLayerConfig>> {
     // The url
-    const url = ConfigTester.ELEVATION_IMAGE_SERVER;
+    const url = ConfigTester.IMAGE_SERVER_ELEVATION_URL;
 
     // Test the Esri Image config
     return this.testEsriImage('Test Esri Image with Elevation', url, {
       metadataAccessPath: url,
-      listOfLayerEntryConfig: [{ layerEntryProps: { layerId: ConfigTester.ELEVATION_LAYER_ID } }],
+      listOfLayerEntryConfig: [{ layerEntryProps: { layerId: ConfigTester.IMAGE_SERVER_ELEVATION_LAYER_ID } }],
     });
   }
 
@@ -575,7 +578,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testWFSOkayUrlNoCap(): Promise<Test<LayerNoCapabilitiesError>> {
     // The bad url which still respond something (not a 404, 500, etc)
-    const urlBad: string = GVAbstractTester.WMS_PROXY_URL;
+    const urlBad: string = GVAbstractTester.FAKE_URL_ALWAYS_RETURNING_RESPONSE_INSTEAD_OF_NETWORK_ERROR;
 
     // Test
     return this.testError(`Test a WFS config with a okay url but no capabilities...`, LayerNoCapabilitiesError, async (test) => {
@@ -1013,4 +1016,45 @@ export class ConfigTester extends GVAbstractTester {
   }
 
   // #endregion KML
+
+  // #region Geocore
+
+  /**
+   * Tests the Geocore service using Airborne Radioactivity information.
+   * @returns {Promise<Test<GeoCoreLayerConfigResponse>>} A Promise that resolves with the Test containing the response from Geocore.
+   */
+  testStandaloneGeocoreWithAirborne(): Promise<Test<GeoCoreLayerConfigResponse>> {
+    // The values
+    const uuid = GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID;
+    const language = 'en';
+    const expectedConfig = {
+      config: {
+        geoviewLayerId: GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID,
+        geoviewLayerType: 'esriDynamic',
+        geoviewLayerName: GVAbstractTester.AIRBORNE_RADIOACTIVITY_LAYER_GROUP_NAME,
+      },
+      geocharts: {
+        [GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID_WITH_SUFFIX]: {
+          layers: [],
+          chart: 'line',
+        },
+      },
+    };
+
+    // Perform the test
+    return this.test(
+      'Test Geocore with Airborne',
+      () => {
+        // Create a layer config from UUID using Geocore
+        return GeoCore.createLayerConfigFromUUID(uuid, language, undefined, undefined);
+      },
+      (test, result) => {
+        // Perform assertions
+        test.addStep('Verifying expected geoview geocore config...');
+        Test.assertJsonObject(result, expectedConfig);
+      }
+    );
+  }
+
+  // #endregion Geocore
 }

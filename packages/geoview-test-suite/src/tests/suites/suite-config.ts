@@ -16,7 +16,7 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
    * @param {MapViewer} mapViewer - The map viewer
    */
   constructor(api: API, mapViewer: MapViewer) {
-    super('TestSuiteConfig', api, mapViewer);
+    super(api, mapViewer);
 
     // Create the Config tester
     this.#configTester = new ConfigTester(api, mapViewer);
@@ -24,19 +24,34 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
   }
 
   /**
+   * Returns the name of the Test Suite.
+   * @returns {string} The name of the Test Suite.
+   */
+  override getName(): string {
+    return 'Config Test Suite';
+  }
+
+  /**
+   * Returns the description of the Test Suite.
+   * @returns {string} The description of the Test Suite.
+   */
+  override getDescriptionAsHtml(): string {
+    return 'Test Suite to perform various layer config related tests.';
+  }
+
+  /**
    * Overrides the implementation to perform the tests for this Test Suite.
    * @returns {Promise<unknown>} A Promise which resolves when tests are completed.
    */
   protected override onLaunchTestSuite(): Promise<unknown> {
-    // GV START DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
-    // Test DEBUG
-    // const pDevTest0 = this.#configTester.testWKBWithSouthAfrica();
-    // const pDevTest1 = this.#configTester.testKMLWithTornado();
-    // const pDevTest2 = this.#configTester.testKMLBadUrlExpectSkip();
+    // // GV START DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
+    // // Test DEBUG
+    // const pDevTest0 = this.#configTester.testEsriFeatureWithForestIndustry();
+    // // const pDevTest2 = this.#configTester.testKMLBadUrlExpectSkip();
 
-    // Resolve when all
-    // return Promise.all([pDevTest0, pDevTest1, pDevTest2]);
-    // GV END DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
+    // // Resolve when all
+    // return Promise.all([pDevTest0]);
+    // // GV END DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
 
     // Test EsriDynamic HistoricalFloodconfig
     const pEsriDynamicHistoFlood = this.#configTester.testEsriDynamicWithHistoricalFloodEvents();
@@ -116,6 +131,9 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
     // Test a skip
     const pKMLSkip = this.#configTester.testKMLBadUrlExpectSkip();
 
+    // Test a Geocore
+    const pGeocoreAirborne = this.#configTester.testStandaloneGeocoreWithAirborne();
+
     // Resolve when all
     return Promise.all([
       pEsriDynamicHistoFlood,
@@ -144,6 +162,7 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
       pWKBBadUrlFail,
       pKMLTornado,
       pKMLSkip,
+      pGeocoreAirborne,
     ]);
   }
 }

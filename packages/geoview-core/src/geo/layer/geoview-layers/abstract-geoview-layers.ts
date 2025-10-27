@@ -835,7 +835,7 @@ export abstract class AbstractGeoViewLayer {
    * Gets if the layer processing has generated errors.
    * @returns {boolean} True when the layer processing has generated errors in the 'layerLoadError' list.
    */
-  hasLayerLoadeErrors(): boolean {
+  hasLayerLoadedErrors(): boolean {
     return this.layerLoadError.length > 0;
   }
 
@@ -844,7 +844,7 @@ export abstract class AbstractGeoViewLayer {
    */
   aggregateLayerLoadErrors(): AggregateError | undefined {
     // If any errors compiled up
-    if (this.hasLayerLoadeErrors()) {
+    if (this.hasLayerLoadedErrors()) {
       // Throw an aggregated exception
       return new AggregateError(this.layerLoadError, 'Multiple errors happened. See this.layerLoadError for the list.');
     }

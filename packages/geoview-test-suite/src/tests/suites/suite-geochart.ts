@@ -18,12 +18,29 @@ export class GVTestSuiteGeochart extends GVAbstractTestSuite {
    * @param {MapViewer} mapViewer - The map viewer
    */
   constructor(api: API, mapViewer: MapViewer) {
-    super('TestSuiteGeochart', api, mapViewer);
+    super(api, mapViewer);
 
     // Create the Geochart tester
     this.#geochartTester = new GeochartTester(api, mapViewer);
     this.addTester(this.#geochartTester);
   }
+
+  /**
+   * Returns the name of the Test Suite.
+   * @returns {string} The name of the Test Suite.
+   */
+  override getName(): string {
+    return 'Geochart Test Suite';
+  }
+
+  /**
+   * Returns the description of the Test Suite.
+   * @returns {string} The description of the Test Suite.
+   */
+  override getDescriptionAsHtml(): string {
+    return 'Test Suite to perform various Geochart related tests.';
+  }
+
   /**
    * Overrides the check if the Test Suite can be executed.
    * @returns {Promise<boolean>} A Promise resolving to true when the Test Suite can be launched for the given map.

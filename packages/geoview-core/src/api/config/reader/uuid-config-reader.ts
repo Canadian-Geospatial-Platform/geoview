@@ -224,7 +224,7 @@ export class UUIDmapConfigReader {
             // GV: Everything needed to create the geoview layer is in the URL. The layerId of the layerEntryConfig is not used,
             // GV: but we need to create a layerEntryConfig in the list for the layer to be displayed.
             // Redirect
-            geoviewLayerConfig = EsriImage.createGeoviewLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware);
+            geoviewLayerConfig = EsriImage.createGeoviewLayerConfigSimple(idClean, layerName, layerUrl, layerIsTimeAware);
           } else {
             // Throw
             throw new NotSupportedError(`Layer type ${layerType} not supported`);

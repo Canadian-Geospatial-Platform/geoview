@@ -89,6 +89,7 @@ export class EsriFeature extends AbstractGeoViewVector {
 
     // If metadata was fetched successfully
     const entries = [];
+    let finalUrl = this.metadataAccessPath;
     if (metadata) {
       // If MapServer url
       let sep = '/mapserver';
@@ -96,6 +97,7 @@ export class EsriFeature extends AbstractGeoViewVector {
 
       if (idx > 0) {
         // The layer id is in the metadata at root
+        finalUrl = this.metadataAccessPath.substring(0, idx + sep.length);
         entries.push({
           id: Number(metadata.id),
           index: Number(metadata.id),
@@ -121,7 +123,7 @@ export class EsriFeature extends AbstractGeoViewVector {
 
     // Redirect
     // TODO: Check - Config init - a way to better determine the isTimeAware flag, defaults to false, how is it used here?
-    return EsriFeature.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, this.metadataAccessPath, false, entries);
+    return EsriFeature.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, finalUrl, false, entries);
   }
 
   /**

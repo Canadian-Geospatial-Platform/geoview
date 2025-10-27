@@ -179,6 +179,15 @@ class TestSuitePlugin extends AbstractPlugin {
   }
 
   /**
+   * Gets the description, in html format, for all the Test Suites part of this Plugin.
+   * @returns {string} The description of all test suites.
+   */
+  getDescriptionAsHtml(): string {
+    // For each Test Suite
+    return this.testSuites.map((suite) => suite.getDescriptionAsHtml()).join('<br/>');
+  }
+
+  /**
    * Gets the number of test suites that have been completed.
    * Caution, a test suite can be completed even though some tests are still running, depending
    * on the promises management in the suite.
@@ -229,7 +238,7 @@ class TestSuitePlugin extends AbstractPlugin {
   }
 
   /**
-   * Gets the total number of currently done successfully tests in the Suite.
+   * Gets the total number of currently done successfully across all test suites.
    * @returns {number} The total number of tests done.
    */
   getTestsDoneSuccess(): number {
@@ -240,7 +249,7 @@ class TestSuitePlugin extends AbstractPlugin {
   }
 
   /**
-   * Gets the total number of currently done failed tests in the Suite.
+   * Gets the total number of currently done failed across all test suites
    * @returns {number} The total number of tests done.
    */
   getTestsDoneFailed(): number {
@@ -263,15 +272,15 @@ class TestSuitePlugin extends AbstractPlugin {
 
   /**
    * Gets if all tests are done.
-   * @returns {boolean} Indicate if the tests are all done.
+   * @returns {boolean} Indicate if the tests are all done across all test suites.
    */
   getTestsDoneAll(): boolean {
     return this.testSuites.every((suite) => suite.getTestsDoneAll());
   }
 
   /**
-   * Gets if all the tests are done and successfully and the test suite is done.
-   * @returns {boolean} Indicate if the tests are all done and finished successfully and the test suite is done.
+   * Gets if all the tests are done across all test suites.
+   * @returns {boolean} Indicate if the tests are all done across all test suites.
    */
   getTestsDoneAllAndSuiteDone(): boolean {
     return this.getSuitesDone() && this.getTestsDoneAll();

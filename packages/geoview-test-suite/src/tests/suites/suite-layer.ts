@@ -16,11 +16,27 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
    * @param {MapViewer} mapViewer - The map viewer
    */
   constructor(api: API, mapViewer: MapViewer) {
-    super('TestSuiteLayer', api, mapViewer);
+    super(api, mapViewer);
 
     // Create the Geocore tester
     this.#layerTester = new LayerTester(api, mapViewer);
     this.addTester(this.#layerTester);
+  }
+
+  /**
+   * Returns the name of the Test Suite.
+   * @returns {string} The name of the Test Suite.
+   */
+  override getName(): string {
+    return 'Layer Test Suite';
+  }
+
+  /**
+   * Returns the description of the Test Suite.
+   * @returns {string} The description of the Test Suite.
+   */
+  override getDescriptionAsHtml(): string {
+    return 'Test Suite to perform various layer related tests.';
   }
 
   /**
@@ -30,16 +46,19 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
   protected override onLaunchTestSuite(): Promise<unknown> {
     // // GV START DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
     // // Test DEBUG
-    // const pDevTest0 = this.#layerTester.testAddKMLWithBadUrl();
-    // const pDevTest1 = this.#layerTester.testAddWKBWithBadUrl();
+    // const pDevTest0 = this.#layerTester.testAddEsriDynamicWithRasterLayersViaGeocore();
+    // // const pDevTest1 = this.#layerTester.testAddWKBWithBadUrl();
     // // const pDevTest2 = this.#layerTester.testAddOGCFeatureWithPygeoapi();
 
     // // Resolve when all
-    // return Promise.all([pDevTest0, pDevTest1]);
+    // return Promise.all([pDevTest0]);
     // // GV END DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
 
     // Test adding layer
     const pLayerEsriDynamicHistoFloods = this.#layerTester.testAddEsriDynamicHistoFloodEvents();
+
+    // Test adding layer EsriDynamic with Raster Layer inside, via Geocore UUID
+    const pLayerEsriDynamicWithRasterLayersViaGeocore = this.#layerTester.testAddEsriDynamicWithRasterLayersViaGeocore();
 
     // Test true negative
     const pLayerEsriDynamicBadUrl = this.#layerTester.testAddEsriDynamicBadUrl();
@@ -110,6 +129,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
     // Resolve when all
     return Promise.all([
       pLayerEsriDynamicHistoFloods,
+      pLayerEsriDynamicWithRasterLayersViaGeocore,
       pLayerEsriDynamicBadUrl,
       pLayerEsriFeatureForestIndustry,
       pLayerEsriFeatureBadUrl,

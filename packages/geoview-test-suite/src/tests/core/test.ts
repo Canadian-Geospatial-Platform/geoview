@@ -8,6 +8,7 @@ import {
   AssertionArrayExcludingError,
   AssertionArrayIncludingError,
   AssertionArrayLengthError,
+  AssertionArrayLengthMinimalError,
   AssertionWrongErrorInstanceError,
   AssertionNoErrorThrownError,
 } from './exceptions';
@@ -292,6 +293,20 @@ export class Test<T = unknown> {
 
     // Throw
     throw new AssertionArrayLengthError(array?.length, expectedValue);
+  }
+
+  /**
+   * Asserts that a length of a given array is equal to the expected length.
+   * @param {unknown[] | undefined} array - The array to check the length.
+   * @param {number} expectedMinimumLength - The expected minimum length of the array.
+   * @throws {AssertionArrayLengthMinimalError} If the values are not strictly equal.
+   * @static
+   */
+  static assertIsArrayLengthMinimal(array: unknown[] | undefined, expectedMinimumLength: number): void {
+    if (array?.length ?? 0 >= expectedMinimumLength) return;
+
+    // Throw
+    throw new AssertionArrayLengthMinimalError(array?.length ?? 0, expectedMinimumLength);
   }
 
   /**

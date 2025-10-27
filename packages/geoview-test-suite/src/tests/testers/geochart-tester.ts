@@ -3,7 +3,6 @@ import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
 import { LayerTester } from './layer-tester';
 import { delay } from 'geoview-core/core/utils/utilities';
-import type { API } from 'geoview-core/api/api';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 import { GeochartEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/geochart-event-processor';
@@ -15,12 +14,11 @@ import { UIEventProcessor } from 'geoview-core/api/event-processors/event-proces
  */
 export class GeochartTester extends GVAbstractTester {
   /**
-   * Constructs a GeochartTester
-   * @param {API} api - The api.
-   * @param {string} mapViewer - The map viewer.
+   * Returns the name of the Tester.
+   * @returns {string} The name of the Tester.
    */
-  constructor(api: API, mapViewer: MapViewer) {
-    super('GeochartTester', api, mapViewer);
+  override getName(): string {
+    return 'GeochartTester';
   }
 
   /**

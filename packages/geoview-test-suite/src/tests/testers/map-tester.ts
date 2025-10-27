@@ -2,8 +2,7 @@ import { TestError } from '../core/exceptions';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
 import { delay } from 'geoview-core/core/utils/utilities';
-import type { API } from 'geoview-core/api/api';
-import type { MapViewer, TypeMapState } from 'geoview-core/geo/map/map-viewer';
+import type { TypeMapState } from 'geoview-core/geo/map/map-viewer';
 import type { TypeMapFeaturesConfig } from 'geoview-core/core/types/global-types';
 import { MapEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/map-event-processor';
 
@@ -13,12 +12,11 @@ import { MapEventProcessor } from 'geoview-core/api/event-processors/event-proce
  */
 export class MapTester extends GVAbstractTester {
   /**
-   * Constructs a MapTester
-   * @param {API} api - The api.
-   * @param {string} mapViewer - The map viewer.
+   * Returns the name of the Tester.
+   * @returns {string} The name of the Tester.
    */
-  constructor(api: API, mapViewer: MapViewer) {
-    super('MapTester', api, mapViewer);
+  override getName(): string {
+    return 'MapTester';
   }
 
   /**

@@ -1853,6 +1853,9 @@ export class LayerApi {
           // Notify the user
           this.mapViewer.notifications.showWarning('warning.layer.layerCRSNotSupported', [mapProj, sender.getLayerName()], true);
 
+          // Force a refresh so the layer gets drawn with the overridden CRS
+          sender.refresh(this.mapViewer.getProjection());
+
           // Rescued
           return true;
         }
