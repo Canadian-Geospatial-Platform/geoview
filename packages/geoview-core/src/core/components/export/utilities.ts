@@ -659,15 +659,6 @@ export const processLegendLayers = (
 };
 
 /**
- * Check if a group contains wide content that should trigger overflow
- * @param {FlattenedLegendItem[]} group - The group to check
- * @returns {boolean} True if group contains wide content
- */
-// const hasWideContent = (group: FlattenedLegendItem[]): boolean => {
-//   return group.some((item) => item.type === 'wms');
-// };
-
-/**
  * Row-based packing algorithm for optimal column distribution
  * Pre-calculates all item heights, then places tallest groups first and stacks smaller groups when possible
  * @param {FlattenedLegendItem[][]} groups - Groups to distribute
@@ -718,31 +709,17 @@ const optimizeColumnDistribution = (
  * Group items by their root layer and distribute in the columns
  * @param {FlattenedLegendItem[]} items - The flattened list of legend items to be placed in the legend
  * @param {number} numColumns - The maximum number of columns that can be used
- * @param {number} maxHeight - The maximum height available on the rest of the page
- * @param {string} disclaimer - The disclaimer text to be displayed in the footer (reserved for future use)
- * @param {string[]} attributions - The attributions to be displayed in the footer (reserved for future use)
  * @param {TypeValidPageSizes} pageSize - The page size for calculation
  * @param {number} scale - The scale factor based on document width
- * @param {string} exportTitle - Optional title for reserved space calculation (reserved for future use)
  * @returns {FlattenedLegendItem[][][]} The flattened legend items distributed into rows and columns
  */
 export const distributeIntoColumns = (
   items: FlattenedLegendItem[],
   numColumns: number,
-  maxLegendHeight: number,
-  disclaimer: string,
-  attributions: string[],
   pageSize: TypeValidPageSizes,
-  scale = 1,
-  exportTitle?: string
+  scale = 1
 ): { fittedColumns: FlattenedLegendItem[][]; overflowItems: FlattenedLegendItem[] } => {
   if (!items || items.length === 0) return { fittedColumns: Array(numColumns).fill([]), overflowItems: [] };
-
-  // Note: maxLegendHeight, disclaimer, attributions, and exportTitle are reserved for future overflow handling
-  void maxLegendHeight;
-  void disclaimer;
-  void attributions;
-  void exportTitle;
 
   // Group items by root layers
   const groups: FlattenedLegendItem[][] = [];
@@ -759,11 +736,6 @@ export const distributeIntoColumns = (
   if (currentGroup.length > 0) {
     groups.push(currentGroup);
   }
-
-  // Reserve space for footer - calculated for future overflow handling
-  // const footerReservedSpace = estimateFooterHeight(disclaimer, attributions);
-  // const titleReservedSpace = exportTitle && exportTitle.trim() ? SHARED_STYLES.titleFontSize + SHARED_STYLES.titleMarginBottom : 0;
-  // const adjustedMaxHeight = maxLegendHeight - footerReservedSpace - titleReservedSpace;
 
   // Use row-based packing algorithm for optimal distribution
   const { columns, overflow } = optimizeColumnDistribution(groups, numColumns, pageSize, scale);
@@ -943,16 +915,7 @@ export async function getMapInfo(
   const optimalColumns = calculateOptimalColumns(mapImageWidth, 4);
 
   // First distribute items into columns using optimal column count
-  const { fittedColumns, overflowItems } = distributeIntoColumns(
-    itemsWithHeights,
-    optimalColumns,
-    Infinity,
-    disclaimer,
-    attribution,
-    pageSize,
-    wmsScale,
-    title
-  );
+  const { fittedColumns, overflowItems } = distributeIntoColumns(itemsWithHeights, optimalColumns, pageSize, wmsScale);
 
   // For AUTO format, calculate required height based on actual column distribution
   let finalConfig: TypePageConfig = config;
@@ -1080,18 +1043,7 @@ export async function getMapInfo(
 
     finalConfig.canvasHeight = Math.ceil(recalculatedHeight);
   } else if (overflowItems && overflowItems.length > 0 && pageSize !== 'AUTO') {
-    // Use full page height for overflow page (no map, title, or footer)
-    const overflowMaxHeight =
-      finalConfig.canvasHeight - SHARED_STYLES.padding * 2 - SHARED_STYLES.overflowMarginTop - SHARED_STYLES.overflowMarginBottom;
-    const distributedOverflow = distributeIntoColumns(
-      overflowItems,
-      finalConfig.legendColumns,
-      overflowMaxHeight,
-      '',
-      [],
-      pageSize,
-      wmsScale
-    );
+    const distributedOverflow = distributeIntoColumns(overflowItems, finalConfig.legendColumns, pageSize, wmsScale);
     fittedOverflowItems = distributedOverflow.fittedColumns;
   }
 
