@@ -179,6 +179,15 @@ class TestSuitePlugin extends AbstractPlugin {
   }
 
   /**
+   * Gets the description, in html format, for all the Test Suites part of this Plugin.
+   * @returns {string} The description of all test suites.
+   */
+  getDescriptionAsHtml(): string {
+    // For each Test Suite
+    return this.testSuites.map((suite) => suite.getDescriptionAsHtml()).join('<br/>');
+  }
+
+  /**
    * Gets the number of test suites that have been completed.
    * Caution, a test suite can be completed even though some tests are still running, depending
    * on the promises management in the suite.

@@ -1,6 +1,5 @@
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
-import type { API } from 'geoview-core/api/api';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import { LayerStatusErrorError } from 'geoview-core/core/exceptions/layer-exceptions';
 import { LayerNoCapabilitiesError, LayerServiceMetadataUnableToFetchError } from 'geoview-core/core/exceptions/layer-exceptions';
@@ -25,12 +24,11 @@ import { KML } from 'geoview-core/geo/layer/geoview-layers/vector/kml';
  */
 export class LayerTester extends GVAbstractTester {
   /**
-   * Constructs a LayerTester
-   * @param {API} api - The api.
-   * @param {string} mapViewer - The map viewer.
+   * Returns the name of the Tester.
+   * @returns {string} The name of the Tester.
    */
-  constructor(api: API, mapViewer: MapViewer) {
-    super('LayerTester', api, mapViewer);
+  override getName(): string {
+    return 'LayerTester';
   }
 
   // #region ESRI DYNAMIC
@@ -581,7 +579,7 @@ export class LayerTester extends GVAbstractTester {
   testAddWFSOkayUrlNoCap(): Promise<Test<LayerNoCapabilitiesError>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
-    const layerUrl = GVAbstractTester.WMS_PROXY_URL;
+    const layerUrl = GVAbstractTester.FAKE_URL_ALWAYS_RETURNING_RESPONSE_INSTEAD_OF_NETWORK_ERROR;
     const layerPath = gvLayerId + '/' + GVAbstractTester.GEOMET_URL_CURRENT_COND_LAYER_ID;
     const gvLayerName = 'Current Conditions';
 

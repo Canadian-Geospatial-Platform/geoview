@@ -37,9 +37,9 @@ export abstract class AbstractTester {
   #testsDone: Test[] = [];
 
   /**
-   * Constructs a Tester.
+   * Mustoverride function to provide a name for the Tester.
    */
-  protected constructor(public name: string) {}
+  abstract getName(): string;
 
   /**
    * Gets the total number of tests.

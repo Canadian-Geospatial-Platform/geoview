@@ -17,8 +17,8 @@ export abstract class GVAbstractTestSuite extends AbstractTestSuite {
    * @param {API} api - The api, mainly used to retrieve the MapViewer.
    * @param {string} mapViewer - The map viewer.
    */
-  protected constructor(name: string, api: API, mapViewer: MapViewer) {
-    super(name);
+  protected constructor(api: API, mapViewer: MapViewer) {
+    super();
 
     // Keep attributes
     this.#api = api;

@@ -23,9 +23,14 @@ export abstract class AbstractTestSuite {
   #onTestersTestFailureHandlers: TesterFailureDelegate[] = [];
 
   /**
-   * Constructs a Test Suite.
+   * Mustoverride function to provide a name for the Test Suite.
    */
-  protected constructor(public name: string) {}
+  abstract getName(): string;
+
+  /**
+   * Mustoverride function to provide a description, in Html format, for the Test Suite.
+   */
+  abstract getDescriptionAsHtml(): string;
 
   /**
    * Gets the total number of tests in the Suite.

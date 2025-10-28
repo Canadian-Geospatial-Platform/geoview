@@ -16,11 +16,27 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
    * @param {MapViewer} mapViewer - The map viewer
    */
   constructor(api: API, mapViewer: MapViewer) {
-    super('TestSuiteLayer', api, mapViewer);
+    super(api, mapViewer);
 
     // Create the Geocore tester
     this.#layerTester = new LayerTester(api, mapViewer);
     this.addTester(this.#layerTester);
+  }
+
+  /**
+   * Returns the name of the Test Suite.
+   * @returns {string} The name of the Test Suite.
+   */
+  override getName(): string {
+    return 'Layer Test Suite';
+  }
+
+  /**
+   * Returns the description of the Test Suite.
+   * @returns {string} The description of the Test Suite.
+   */
+  override getDescriptionAsHtml(): string {
+    return 'Test Suite to perform various layer related tests.';
   }
 
   /**

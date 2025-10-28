@@ -17,8 +17,13 @@ export abstract class GVAbstractTester extends AbstractTester {
   /** Bad url */
   static BAD_URL = 'https://badurl/oops';
 
-  /** WMS Proxy URL */
-  static WMS_PROXY_URL = 'https://maps.canada.ca/wmsproxy/ws/wmsproxy/executeFromProxy';
+  /**
+   * Fake url acting like a WMS/WFS url for a GetCapabilities call - the proxy is a good url to use to fake this.
+   * Something like https://google.ca will get turned into https://google.ca/?service=WFS&request=GetCapabilities and that's
+   * not a 200 response and we can't test with that.
+   * Not using the core config url constant on purpose, because it serves a whole different purpose here.
+   */
+  static FAKE_URL_ALWAYS_RETURNING_RESPONSE_INSTEAD_OF_NETWORK_ERROR = 'https://maps.canada.ca/wmsproxy/ws/wmsproxy/executeFromProxy';
 
   /** Airborne Radioactivity uuid */
   static AIRBORNE_RADIOACTIVITY_UUID: string = '21b821cf-0f1c-40ee-8925-eab12d357668';
@@ -108,12 +113,11 @@ export abstract class GVAbstractTester extends AbstractTester {
 
   /**
    * Constructs a GeoView specific tester.
-   * @param {string} name - The name of this Tester.
    * @param {API} api - The api.
    * @param {string} mapViewer - The map viewer.
    */
-  constructor(name: string, api: API, mapViewer: MapViewer) {
-    super(name);
+  constructor(api: API, mapViewer: MapViewer) {
+    super();
 
     // Keep the attributes
     this.#api = api;

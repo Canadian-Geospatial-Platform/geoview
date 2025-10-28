@@ -109,6 +109,7 @@
               <a href="#HEVNT2">2. Tests map 2 (EPSG: 3978)</a><br />
               <a href="#HEVNT3">3. Tests map 3 (EPSG: 3857)</a><br />
               <a href="#HEVNT4">4. Tests map 4 (EPSG: 3978)</a><br />
+              <a href="#HEVNT5">5. Tests map 5 (EPSG: 3978)</a><br />
             </td>
           </tr>
         </tbody>
@@ -133,12 +134,13 @@
     </div>
     <button onclick="launchTestsAll()">LAUNCH TESTS ALL MAPS!</button>
 
-    <div class="map-title-holder">
+
+    <!-- REGION MAP 1 -->
+     <div class="map-title-holder">
       <h4 id="HEVNT1">1. Tests on map 1 (EPSG: 3978)</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
     <button onclick="launchTests('map1')">LAUNCH TESTS MAP1!</button>
-
 
     <div id="testSuiteTable-map1"></div>
     <br/>
@@ -162,7 +164,7 @@
           'corePackages': ['test-suite'],
           'corePackagesConfig': [
             {
-              'test-suite': { 'suites': ['suite-config', 'suite-map'] }
+              'test-suite': { 'suites': ['suite-config'] }
             }
           ],
           'theme': 'geo.ca',
@@ -177,13 +179,14 @@
           }
         }"
     ></div>
+    <!-- END REGION MAP 1 -->
 
+    <!-- REGION MAP 2 -->
     <div class="map-title-holder">
       <h4 id="HEVNT2">2. Tests on map 2 (EPSG: 3978)</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
     <button onclick="launchTests('map2')">LAUNCH TESTS MAP2!</button>
-
 
     <div id="testSuiteTable-map2"></div>
     <br/>
@@ -223,13 +226,14 @@
           }
         }"
     ></div>
+    <!-- END REGION MAP 2 -->
 
+    <!-- REGION MAP 3 -->
     <div class="map-title-holder">
       <h4 id="HEVNT3">3. Tests on map 3 (EPSG: 3857)</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
     <button onclick="launchTests('map3')">LAUNCH TESTS MAP3!</button>
-
 
     <div id="testSuiteTable-map3"></div>
     <br/>
@@ -269,18 +273,79 @@
           }
         }"
     ></div>
+    <!-- END REGION MAP 3 -->
 
+    <!-- REGION MAP 4 -->
     <div class="map-title-holder">
       <h4 id="HEVNT4">4. Tests on map 4 (EPSG: 3978)</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
     <button onclick="launchTests('map4')">LAUNCH TESTS MAP3!</button>
 
-
     <div id="testSuiteTable-map4"></div>
     <br/>
     <div
       id="map4"
+      class="geoview-map"
+      data-lang="en"
+      data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'projection': 3978
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': true,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'geojsonLYR5',
+                'geoviewLayerName': 'GeoJSON Sample',
+                'metadataAccessPath': 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata.meta',
+                'geoviewLayerType': 'GeoJSON',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': 'polygons.json',
+                    'layerName': 'Polygons'
+                  }
+                ]
+              }
+            ]
+          },
+          'components': [],
+          'corePackages': ['test-suite'],
+          'corePackagesConfig': [
+            {
+              'test-suite': { 'suites': ['suite-map'] }
+            }
+          ],
+          'theme': 'geo.ca',
+          'footerBar': {
+            'tabs': {
+              'core': [
+                'legend',
+                'layers',
+                'details'
+              ]
+            }
+          }
+        }"
+    ></div>
+    <!-- END REGION MAP 4 -->
+
+    <!-- REGION MAP 5 -->
+    <div class="map-title-holder">
+      <h4 id="HEVNT5">5. Tests on map 5 (EPSG: 4326)</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <button onclick="launchTests('map5')">LAUNCH TESTS MAP5!</button>
+
+    <div id="testSuiteTable-map5"></div>
+    <br/>
+    <div
+      id="map5"
       class="geoview-map"
       data-lang="en"
       data-config="{
@@ -394,6 +459,7 @@
           }
         }"
     ></div>
+    <!-- END REGION MAP 5 -->
 
     <script>
       // The test suites plugins (1 plugin per map)
@@ -408,7 +474,7 @@
         testSuitesPlugins[plugin.mapViewer.mapId] = plugin;
 
         // Create the table html
-        document.getElementById('testSuiteTable-' + plugin.mapViewer.mapId).appendChild(testSuiteCreateTable(plugin.mapViewer.mapId));
+        document.getElementById('testSuiteTable-' + plugin.mapViewer.mapId).appendChild(testSuiteCreateTable(plugin));
 
         // Hook the test update
         plugin.onTestUpdated((sender, event) => {
