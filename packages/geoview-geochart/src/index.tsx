@@ -83,6 +83,9 @@ class GeoChartFooterPlugin extends FooterPlugin {
       const configs = this.getConfig().charts.map((config) => convertGeoViewGeoChartConfigToCore(config));
       GeochartEventProcessor.setGeochartCharts(this.mapViewer.mapId, configs);
     }
+
+    // Wire a handler using a custom hook on the window resize event
+    window.addEventListener('resize', this.handleWindowResize.bind(this));
   }
 
   /**
@@ -91,12 +94,7 @@ class GeoChartFooterPlugin extends FooterPlugin {
    */
   override onCreateContentProps(): TypeTabs {
     // Create element
-    const content = (
-      <GeoChartPanel
-        mapId={this.mapViewer.mapId}
-        provideCallbackRedraw={(theCallbackRedraw) => this.handleProvideCallbackRedraw(theCallbackRedraw)}
-      />
-    );
+    const content = <GeoChartPanel mapId={this.mapViewer.mapId} provideCallbackRedraw={this.handleProvideCallbackRedraw.bind(this)} />;
 
     return {
       id: 'geochart',
@@ -113,6 +111,14 @@ class GeoChartFooterPlugin extends FooterPlugin {
   handleProvideCallbackRedraw(callbackRedraw: () => void): void {
     // Keep it
     this.callbackRedraw = callbackRedraw;
+  }
+
+  /**
+   * Handles when the window resizes
+   */
+  handleWindowResize(): void {
+    // Redraw the chart
+    this.redrawChart();
   }
 
   /**
