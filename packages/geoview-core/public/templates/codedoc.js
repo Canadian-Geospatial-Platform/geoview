@@ -287,7 +287,7 @@ function testSuiteCreateTable(plugin) {
   const wrapper = document.createElement('div');
 
   wrapper.innerHTML = `
-    <div style="white-space: pre-line;"><h3>${description}</h3></div>
+    <div style="white-space: pre-line;">${description}</div>
     <div style="text-align:right;">
       <span id="suitesCheck-${mapId}"></span>
     </div>
