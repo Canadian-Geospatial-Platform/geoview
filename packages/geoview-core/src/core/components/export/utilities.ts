@@ -15,6 +15,7 @@ import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 
 import { logger } from '@/core/utils/logger';
+import { DateMgt } from '@/core/utils/date-mgt';
 
 import { SHARED_STYLES } from './layout-styles';
 
@@ -76,6 +77,334 @@ const MAP_IMAGE_DIMENSIONS = {
     width: 100, // Default, will be recalculated
     height: 100, // Default, will be recalculated
   },
+};
+
+/**
+ * Element factory interface for creating renderer-specific elements
+ * Allows us to abstract between Canvas (HTML) and PDF rendering
+ */
+export interface ElementFactory {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  View: (props: any) => JSX.Element;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Text: (props: any) => JSX.Element;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Image: (props: any) => JSX.Element;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Span: (props: any) => JSX.Element;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Svg: (props: any) => JSX.Element;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Path: (props: any) => JSX.Element;
+}
+
+/**
+ * Renders a single legend item using the provided element factory
+ * @param {FlattenedLegendItem} item - The item to render
+ * @param {number} itemIndex - Index of the item in the column
+ * @param {number} indentLevel - The indentation level (0-3)
+ * @param {ElementFactory} factory - Element factory for creating elements
+ * @param {any} scaledStyles - The scaled styles object
+ * @param {any} baseStyles - The base styles object (CANVAS_STYLES or PDF_STYLES)
+ * @returns {JSX.Element} The rendered item
+ */
+export const renderSingleLegendItem = (
+  item: FlattenedLegendItem,
+  itemIndex: number,
+  indentLevel: number,
+  factory: ElementFactory,
+  scaledStyles: any, // eslint-disable-line @typescript-eslint/no-explicit-any
+  baseStyles: any // eslint-disable-line @typescript-eslint/no-explicit-any
+): JSX.Element => {
+  const { View, Text, Image, Span } = factory;
+
+  if (item.type === 'layer') {
+    const marginValue = itemIndex > 0 ? '8px' : 0;
+    const pdfMarginValue = itemIndex > 0 ? 8 : 0;
+    return createElement(
+      Text,
+      {
+        key: `layer-${item.data.layerPath}-${itemIndex}`,
+        style: scaledStyles.layerText(typeof marginValue === 'string' ? marginValue : pdfMarginValue),
+      },
+      item.data.layerName
+    );
+  }
+
+  if (item.type === 'wms') {
+    return createElement(
+      View,
+      {
+        key: `wms-${item.data.layerPath}-${itemIndex}`,
+        style: baseStyles.wmsContainer(indentLevel),
+      },
+      createElement(Image, {
+        src: item.data.icons?.[0]?.iconImage || '',
+        style: baseStyles.wmsImage,
+      })
+    );
+  }
+
+  if (item.type === 'time') {
+    const timeText = item.timeInfo?.singleHandle
+      ? DateMgt.formatDate(
+          new Date(item.timeInfo.values[0]),
+          item.timeInfo.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
+        )
+      : `${DateMgt.formatDate(
+          new Date(item.timeInfo?.values[0] || 0),
+          item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
+        )} - ${DateMgt.formatDate(
+          new Date(item.timeInfo?.values[1] || 0),
+          item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
+        )}`;
+
+    return createElement(
+      Text,
+      {
+        key: `time-${item.data.layerPath}-${itemIndex}`,
+        style: scaledStyles.timeText(indentLevel),
+      },
+      timeText
+    );
+  }
+
+  if (item.type === 'child') {
+    return createElement(
+      Text,
+      {
+        key: `child-${item.data.layerPath}-${itemIndex}`,
+        style: scaledStyles.childText(indentLevel),
+      },
+      item.data.layerName || '...'
+    );
+  }
+
+  // Default: item type
+  const legendItem = item.data.items[0];
+  return createElement(
+    View,
+    {
+      key: `item-${item.parentName}-${legendItem?.name}-${itemIndex}`,
+      style: baseStyles.itemContainer(indentLevel),
+    },
+    legendItem?.icon && createElement(Image, { src: legendItem.icon, style: scaledStyles.itemIcon }),
+    createElement(Span, { style: scaledStyles.itemText }, legendItem?.name)
+  );
+};
+
+/**
+ * Groups items into containers - wraps content items
+ * @param {FlattenedLegendItem[]} column - The column items to render
+ * @param {ElementFactory} factory - Element factory for creating elements
+ * @param {any} scaledStyles - The scaled styles object
+ * @param {any} baseStyles - The base styles object
+ * @returns {JSX.Element[]} Array of rendered elements
+ */
+export const renderColumnItems = (
+  column: FlattenedLegendItem[],
+  factory: ElementFactory,
+  scaledStyles: any, // eslint-disable-line @typescript-eslint/no-explicit-any
+  baseStyles: any // eslint-disable-line @typescript-eslint/no-explicit-any
+): JSX.Element[] => {
+  const { View } = factory;
+  const elements: JSX.Element[] = [];
+  let i = 0;
+
+  while (i < column.length) {
+    const item = column[i];
+    const indentLevel = Math.min(item.depth, 3);
+
+    // Check if this is a layer (depth 0) or child layer (any depth >= 1)
+    if (item.type === 'layer' || item.type === 'child') {
+      // First render the layer/child header WITHOUT the border
+      elements.push(renderSingleLegendItem(item, i, indentLevel, factory, scaledStyles, baseStyles));
+
+      const currentDepth = item.depth;
+      const contentStart = i + 1;
+      let contentEnd = i + 1;
+
+      // Find all immediate children (depth = currentDepth + 1)
+      // Stop when we hit an item at same or lower depth (sibling or higher level)
+      while (contentEnd < column.length && column[contentEnd].depth > currentDepth) {
+        // Only collect items at the immediate next level for wrapping
+        if (column[contentEnd].depth === currentDepth + 1) {
+          contentEnd++;
+        } else {
+          // This is a deeper nested item, skip to find where this group ends
+          break;
+        }
+      }
+
+      // If we have direct children, check if they are content items (not child layers)
+      if (contentEnd > contentStart) {
+        const hasContentItems = column
+          .slice(contentStart, contentEnd)
+          .some((childItem) => childItem.type === 'wms' || childItem.type === 'item' || childItem.type === 'time');
+
+        if (hasContentItems) {
+          // Wrap content items
+          const contentItems: JSX.Element[] = [];
+          for (let j = contentStart; j < contentEnd; j++) {
+            const contentItem = column[j];
+            const contentIndentLevel = Math.min(contentItem.depth, 3);
+
+            contentItems.push(renderSingleLegendItem(contentItem, j, contentIndentLevel, factory, scaledStyles, baseStyles));
+          }
+
+          elements.push(createElement(View, { key: `content-${i}` }, ...contentItems));
+
+          i = contentEnd;
+        } else {
+          // Only child layers, no content to wrap - will be handled in next iteration
+          i++;
+        }
+      } else {
+        // No content, just move to next item
+        i++;
+      }
+    } else {
+      elements.push(renderSingleLegendItem(item, i, indentLevel, factory, scaledStyles, baseStyles));
+      i++;
+    }
+  }
+
+  return elements;
+};
+
+/**
+ * Renders legend columns using the provided element factory
+ * @param {FlattenedLegendItem[][]} columns - The columns to render
+ * @param {ElementFactory} factory - Element factory for creating elements
+ * @param {any} scaledStyles - The scaled styles object
+ * @param {any} baseStyles - The base styles object
+ * @returns {JSX.Element} The rendered legend
+ */
+export const renderLegendColumns = (
+  columns: FlattenedLegendItem[][],
+  factory: ElementFactory,
+  scaledStyles: any, // eslint-disable-line @typescript-eslint/no-explicit-any
+  baseStyles: any // eslint-disable-line @typescript-eslint/no-explicit-any
+): JSX.Element => {
+  const { View } = factory;
+
+  return createElement(
+    View,
+    { style: { display: 'flex', flexDirection: 'row', gap: 10, width: '100%' } },
+    ...columns.map((column, colIndex) => {
+      const columnKey = column.length > 0 ? `col-${column[0].data.layerPath}-${colIndex}` : `col-empty-${colIndex}`;
+      return createElement(
+        View,
+        {
+          key: columnKey,
+          style: { display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 },
+        },
+        ...renderColumnItems(column, factory, scaledStyles, baseStyles)
+      );
+    })
+  );
+};
+
+/**
+ * Renders footer section
+ * @param {string} disclaimer - The disclaimer text
+ * @param {string[]} attributions - The attribution texts
+ * @param {string} date - The date string
+ * @param {ElementFactory} factory - Element factory for creating elements
+ * @param {any} scaledStyles - The scaled styles object
+ * @returns {JSX.Element} The rendered footer
+ */
+export const renderFooter = (
+  disclaimer: string,
+  attributions: string[],
+  date: string,
+  factory: ElementFactory,
+  scaledStyles: any // eslint-disable-line @typescript-eslint/no-explicit-any
+): JSX.Element => {
+  const { View, Text } = factory;
+
+  return createElement(
+    View,
+    { style: scaledStyles.footer || {} },
+    createElement(Text, { style: scaledStyles.footerDisclaimer }, disclaimer || ''),
+    ...attributions.map((attr) => createElement(Text, { key: `${attr.slice(0, 5)}`, style: scaledStyles.footerAttribution }, attr || '')),
+    createElement(Text, { style: scaledStyles.footerDate }, date || '')
+  );
+};
+
+/**
+ * Renders scale bar with ticks
+ * @param {string} scaleText - The scale text
+ * @param {string} scaleLineWidth - The scale line width
+ * @param {ElementFactory} factory - Element factory for creating elements
+ * @param {any} scaledStyles - The scaled styles object
+ * @param {any} baseStyles - The base styles object
+ * @returns {JSX.Element} The rendered scale bar
+ */
+export const renderScaleBar = (
+  scaleText: string,
+  scaleLineWidth: string,
+  factory: ElementFactory,
+  scaledStyles: any, // eslint-disable-line @typescript-eslint/no-explicit-any
+  baseStyles: any // eslint-disable-line @typescript-eslint/no-explicit-any
+): JSX.Element => {
+  const { View, Text } = factory;
+
+  return createElement(
+    View,
+    { style: baseStyles.scaleBarContainer },
+    createElement(
+      View,
+      { style: { ...baseStyles.scaleLine, width: scaleLineWidth } },
+      createElement(View, { style: { ...baseStyles.scaleTick, ...baseStyles.scaleTickLeft } }),
+      createElement(View, { style: { ...baseStyles.scaleTick, ...baseStyles.scaleTickRight } })
+    ),
+    createElement(Text, { style: scaledStyles.scaleText }, scaleText)
+  );
+};
+
+/**
+ * Renders north arrow SVG
+ * @param {Array} northArrowSvg - The north arrow SVG path data
+ * @param {number} northArrowRotation - The rotation angle
+ * @param {ElementFactory} factory - Element factory for creating elements
+ * @param {any} scaledStyles - The scaled styles object
+ * @returns {JSX.Element | null} The rendered north arrow or null
+ */
+export const renderNorthArrow = (
+  northArrowSvg: Array<{
+    d: string | null;
+    fill: string | null;
+    stroke: string | null;
+    strokeWidth: string | null;
+  }> | null,
+  northArrowRotation: number,
+  factory: ElementFactory,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  scaledStyles: any
+): JSX.Element | null => {
+  if (!northArrowSvg) return null;
+
+  const { View, Svg, Path } = factory;
+
+  return createElement(
+    View,
+    { style: { ...scaledStyles.northArrow, transform: `rotate(${northArrowRotation - 180}deg)` } },
+    createElement(
+      Svg,
+      { viewBox: '285 142 24 24', style: scaledStyles.northArrowSvg },
+      ...northArrowSvg.map((pathData, index) =>
+        createElement(Path, {
+          // eslint-disable-next-line react/no-array-index-key
+          key: `path-${index}`,
+          d: pathData.d || '',
+          fill: pathData.fill || 'black',
+          stroke: pathData.stroke || 'none',
+          strokeWidth: pathData.strokeWidth || '0',
+        })
+      )
+    )
+  );
 };
 
 /**
