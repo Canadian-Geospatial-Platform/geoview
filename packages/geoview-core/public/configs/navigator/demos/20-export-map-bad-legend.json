@@ -37,6 +37,32 @@
       {
         "geoviewLayerType": "geoCore",
         "geoviewLayerId": "a4b190fe-e090-4e6d-881e-b87956c07977"
+      },
+      {
+        "geoviewLayerType": "geoCore",
+        "geoviewLayerId": "ae385105-e48c-4b54-bd0f-dfb7303301cb"
+      },
+      {
+        "geoviewLayerId": "ERG10",
+        "geoviewLayerName": "ERG10",
+        "metadataAccessPath": "https://geo.meteo.gc.ca/geomet?lang=fr&service=WMS&request=GetCapabilities&layers=REPS.DIAG.6_PRMM.ERGE10",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "REPS.DIAG.6_PRMM.ERGE10"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "ecumene",
+        "geoviewLayerName": "CulatEcumeneor",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/CanEcumeneV3_en/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0"
+          }
+        ]
       }
     ]
   },
