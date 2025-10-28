@@ -50,21 +50,33 @@ export abstract class GVAbstractTester extends AbstractTester {
     GVAbstractTester.FOREST_INDUSTRY_MAP_SERVER + '/' + GVAbstractTester.FOREST_INDUSTRY_LAYER_ID;
 
   /** EsriDynamic with Raster Layers */
-  static readonly RASTER_LAYERS_UUID: string = 'ac2096a6-7b4a-464e-9e08-eca7873dd88c';
+  static readonly ESRI_DYNAMIC_LABOUR_FORCE_UUID: string = 'ac2096a6-7b4a-464e-9e08-eca7873dd88c';
+  static readonly ESRI_DYNAMIC_LABOUR_FORCE_GROUP: string = '0';
+  static readonly ESRI_DYNAMIC_LABOUR_FORCE_PETROLEUM: string = '0/1';
+  static readonly ESRI_DYNAMIC_LABOUR_FORCE_MINERALS: string = '0/2';
+  static readonly ESRI_DYNAMIC_LABOUR_FORCE_FORESTRY: string = '0/3';
+  static readonly ESRI_DYNAMIC_LABOUR_FORCE_FISHERIES: string = '0/4';
+  static readonly ESRI_DYNAMIC_LABOUR_FORCE_AGRICULTURE: string = '0/5';
+  static readonly ESRI_DYNAMIC_LABOUR_FORCE_CANECUMENE: string = '0/6';
 
   /** CESI */
   static readonly CESI_MAP_SERVER: string = 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer';
   static readonly CESI_GROUP_0_LAYER_NAME: string = 'Water quantity';
 
   /** Toronto */
-  static readonly TORONTO_NEIGHBOURHOODS_FEATURE_SERVER: string =
+  static readonly FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_URL: string =
     'https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/Toronto_Neighbourhoods/FeatureServer';
-  static readonly TORONTO_NEIGHBOURHOODS_LAYER_NAME: string = 'Toronto_Neighbourhoods';
+  static readonly FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_LAYER_NAME: string = 'Toronto_Neighbourhoods';
 
   /** Elevation */
-  static readonly ELEVATION_IMAGE_SERVER: string =
+  static readonly IMAGE_SERVER_ELEVATION_URL: string =
     'https://ws.geoservices.lrc.gov.on.ca/arcgis5/rest/services/Elevation/FRI_CHM_SPL/ImageServer';
-  static readonly ELEVATION_LAYER_ID: string = 'FRI_CHM_SPL';
+  static readonly IMAGE_SERVER_ELEVATION_LAYER_ID: string = 'FRI_CHM_SPL';
+
+  /** USA Image Server */
+  static readonly IMAGE_SERVER_USA_URL: string = 'https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/USA/MapServer';
+  static readonly IMAGE_SERVER_USA_LAYER_ID_CITIES: string = '0';
+  static readonly IMAGE_SERVER_USA_LAYER_ID_ROADS: string = '1';
 
   /** OWS Mundialis */
   static readonly OWS_MUNDIALIS: string = 'https://ows.mundialis.de/services/service'; // NOTE: Doesn't support EPSG:3978

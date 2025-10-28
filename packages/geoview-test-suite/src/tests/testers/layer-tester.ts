@@ -17,6 +17,7 @@ import { CSV } from 'geoview-core/geo/layer/geoview-layers/vector/csv';
 import { OgcFeature } from 'geoview-core/geo/layer/geoview-layers/vector/ogc-feature';
 import { WKB } from 'geoview-core/geo/layer/geoview-layers/vector/wkb';
 import { KML } from 'geoview-core/geo/layer/geoview-layers/vector/kml';
+import type { GeoViewLayerAddedResult } from 'geoview-core/geo/layer/layer';
 
 /**
  * Main Layer testing class.
@@ -47,7 +48,7 @@ export class LayerTester extends GVAbstractTester {
     // Test
     return this.test(
       `Test Adding Esri Dynamic Histo Flood Events on map...`,
-      (test) => {
+      async (test) => {
         // Creating the configuration
         test.addStep('Creating the GeoView Layer Configuration...');
 
@@ -57,7 +58,10 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        return LayerTester.helperStepAddLayerOnMapAndWaitForIt(gvConfig, test, this.getMapViewer(), layerPath);
+        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+
+        // Find the layer and wait until its ready
+        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
       },
       (test) => {
         // Perform assertions
@@ -100,7 +104,7 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMapAndWaitForIt(gvConfig, test, this.getMapViewer(), layerPath);
+        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
       },
       undefined,
       (test) => {
@@ -116,24 +120,42 @@ export class LayerTester extends GVAbstractTester {
    * A promise that resolves with the test result, expecting a `AbstractGVLayer`.
    */
   testAddEsriDynamicWithRasterLayersViaGeocore(): Promise<Test<AbstractGVLayer>> {
-    const gvLayerId = GVAbstractTester.RASTER_LAYERS_UUID;
-    const layerPathGroup = gvLayerId + '/0';
-    const layerPath2 = gvLayerId + '/0/2';
+    const gvLayerId = GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_UUID;
+    const layerPathGroup = gvLayerId + '/' + GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_GROUP;
+    const layerPathPetroleum = gvLayerId + '/' + GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_PETROLEUM;
+    const layerPathMinerals = gvLayerId + '/' + GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_MINERALS;
+    const layerPathForestry = gvLayerId + '/' + GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_FORESTRY;
+    const layerPathFisheries = gvLayerId + '/' + GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_FISHERIES;
+    const layerPathAgriculture = gvLayerId + '/' + GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_AGRICULTURE;
+    const layerPathCanecumene = gvLayerId + '/' + GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_CANECUMENE;
 
     // Test
     return this.test(
       `Test Adding Esri Dynamic with Raster Layers via Geocore...`,
-      (test) => {
+      async (test) => {
         // Creating the configuration
         test.addStep('Creating the GeoView Layer Configuration...');
 
         // Redirect to helper to add the layer to the map and wait
-        return LayerTester.helperStepAddLayerFromUUIDOnMapAndWaitForIt(gvLayerId, test, this.getMapViewer(), layerPath2);
+        await LayerTester.helperStepAddLayerOnMapFromUUID(test, this.getMapViewer(), gvLayerId);
+
+        // Find the layer and wait until its ready
+        await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPathPetroleum);
+        await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPathMinerals);
+        await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPathForestry);
+        await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPathFisheries);
+        await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPathAgriculture);
+        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPathCanecumene);
       },
       (test) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        return LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath2);
+        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPathPetroleum);
+        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPathMinerals);
+        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPathForestry);
+        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPathFisheries);
+        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPathAgriculture);
+        return LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPathCanecumene);
       },
       (test) => {
         // Redirect to helper to clean up and assert
@@ -160,7 +182,7 @@ export class LayerTester extends GVAbstractTester {
     // Test
     return this.test(
       `Test Adding Esri Feature Forest Industry on map...`,
-      (test) => {
+      async (test) => {
         // Creating the configuration
         test.addStep('Creating the GeoView Layer Configuration...');
 
@@ -170,7 +192,10 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        return LayerTester.helperStepAddLayerOnMapAndWaitForIt(gvConfig, test, this.getMapViewer(), layerPath);
+        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+
+        // Find the layer and wait until its ready
+        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
       },
       (test) => {
         // Perform assertions
@@ -213,7 +238,7 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMapAndWaitForIt(gvConfig, test, this.getMapViewer(), layerPath);
+        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
       },
       undefined,
       (test) => {
@@ -234,22 +259,25 @@ export class LayerTester extends GVAbstractTester {
   testAddEsriImageWithElevation(): Promise<Test<AbstractGVLayer>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
-    const layerUrl = GVAbstractTester.ELEVATION_IMAGE_SERVER;
-    const layerPath = gvLayerId + '/' + GVAbstractTester.ELEVATION_LAYER_ID;
+    const layerUrl = GVAbstractTester.IMAGE_SERVER_ELEVATION_URL;
+    const layerPath = gvLayerId + '/' + GVAbstractTester.IMAGE_SERVER_ELEVATION_LAYER_ID;
     const gvLayerName = 'Esri Image Elevation';
 
     // Test
     return this.test(
       `Test Adding Esri Image Elevation on map...`,
-      (test) => {
+      async (test) => {
         // Creating the configuration
         test.addStep('Creating the GeoView Layer Configuration...');
 
         // Create the config
-        const gvConfig = EsriImage.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false);
+        const gvConfig = EsriImage.createGeoviewLayerConfigSimple(gvLayerId, gvLayerName, layerUrl, false);
 
         // Redirect to helper to add the layer to the map and wait
-        return LayerTester.helperStepAddLayerOnMapAndWaitForIt(gvConfig, test, this.getMapViewer(), layerPath);
+        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+
+        // Find the layer and wait until its ready
+        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
       },
       (test) => {
         // Perform assertions
@@ -259,6 +287,58 @@ export class LayerTester extends GVAbstractTester {
       (test) => {
         // Redirect to helper to clean up and assert
         LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests adding an Esri Feature Forest Industry layer on the map.
+   * @returns {Promise<Test<AbstractGVLayer>>} A Promise resolving when the test completes.
+   */
+  testAddEsriImageWithUSA(): Promise<Test<AbstractGVLayer>> {
+    // Create a random geoview layer id
+    const gvLayerId = generateId();
+    const layerUrl = GVAbstractTester.IMAGE_SERVER_USA_URL;
+    const layerPathGroup = gvLayerId + '/base-group';
+    const layerPathCities = gvLayerId + '/base-group/' + GVAbstractTester.IMAGE_SERVER_USA_LAYER_ID_CITIES;
+    const layerPathRoads = gvLayerId + '/base-group/' + GVAbstractTester.IMAGE_SERVER_USA_LAYER_ID_ROADS;
+    const gvLayerName = 'Esri Image USA';
+
+    // Test
+    return this.test(
+      `Test Adding Esri Image USA on map...`,
+      async (test) => {
+        // Creating the configuration
+        test.addStep('Creating the GeoView Layer Configuration...');
+
+        // Create the config
+        const gvConfig = EsriImage.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
+          {
+            id: GVAbstractTester.IMAGE_SERVER_USA_LAYER_ID_CITIES,
+            layerName: 'Cities',
+          },
+          {
+            id: GVAbstractTester.IMAGE_SERVER_USA_LAYER_ID_ROADS,
+            layerName: 'Roads',
+          },
+        ]);
+
+        // Redirect to helper to add the layer to the map and wait
+        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+
+        // Find the layer and wait until its ready
+        await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPathCities);
+        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPathRoads);
+      },
+      (test) => {
+        // Perform assertions
+        // Redirect to helper to check if the layer exists
+        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPathCities);
+        return LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPathRoads);
+      },
+      (test) => {
+        // Redirect to helper to clean up and assert
+        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPathGroup);
       }
     );
   }
@@ -274,8 +354,8 @@ export class LayerTester extends GVAbstractTester {
   testAddEsriImageBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
-    const layerUrl = GVAbstractTester.BAD_URL + '/' + GVAbstractTester.ELEVATION_LAYER_ID + '/ImageServer'; // Has to be formatted like this, because we're guessing the layer id with url parsing!
-    const layerPath = gvLayerId + '/' + GVAbstractTester.ELEVATION_LAYER_ID;
+    const layerUrl = GVAbstractTester.BAD_URL + '/' + GVAbstractTester.IMAGE_SERVER_ELEVATION_LAYER_ID + '/ImageServer'; // Has to be formatted like this, because we're guessing the layer id with url parsing!
+    const layerPath = gvLayerId + '/' + GVAbstractTester.IMAGE_SERVER_ELEVATION_LAYER_ID;
     const gvLayerName = 'Esri Image Elevation';
 
     // Test
@@ -287,10 +367,10 @@ export class LayerTester extends GVAbstractTester {
         test.addStep('Creating the GeoView Layer Configuration...');
 
         // Create the config
-        const gvConfig = EsriImage.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false);
+        const gvConfig = EsriImage.createGeoviewLayerConfigSimple(gvLayerId, gvLayerName, layerUrl, false);
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMapAndWaitForIt(gvConfig, test, this.getMapViewer(), layerPath);
+        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
       },
       undefined,
       (test) => {
@@ -319,7 +399,7 @@ export class LayerTester extends GVAbstractTester {
     // Test
     return this.test(
       `Test Adding WMS Mundialis on map...`,
-      (test) => {
+      async (test) => {
         // Creating the configuration
         test.addStep('Creating the GeoView Layer Configuration...');
 
@@ -335,7 +415,10 @@ export class LayerTester extends GVAbstractTester {
         );
 
         // Redirect to helper to add the layer to the map and wait
-        return LayerTester.helperStepAddLayerOnMapAndWaitForIt(gvConfig, test, this.getMapViewer(), layerPath, hasStyle);
+        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+
+        // Find the layer and wait until its ready
+        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath, hasStyle);
       },
       (test) => {
         // Perform assertions
@@ -364,7 +447,7 @@ export class LayerTester extends GVAbstractTester {
     // Test
     return this.test(
       `Test Adding WMS Datacube MSI on map...`,
-      (test) => {
+      async (test) => {
         // Creating the configuration
         test.addStep('Creating the GeoView Layer Configuration...');
 
@@ -380,7 +463,10 @@ export class LayerTester extends GVAbstractTester {
         );
 
         // Redirect to helper to add the layer to the map and wait
-        return LayerTester.helperStepAddLayerOnMapAndWaitForIt(gvConfig, test, this.getMapViewer(), layerPath, hasStyle);
+        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+
+        // Find the layer and wait until its ready
+        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath, hasStyle);
       },
       (test) => {
         // Perform assertions
@@ -409,7 +495,7 @@ export class LayerTester extends GVAbstractTester {
     // Test
     return this.test(
       `Test Adding WMS Datacube Ring of Fire XML Halifax on map...`,
-      (test) => {
+      async (test) => {
         // Creating the configuration
         test.addStep('Creating the GeoView Layer Configuration...');
 
@@ -425,7 +511,10 @@ export class LayerTester extends GVAbstractTester {
         );
 
         // Redirect to helper to add the layer to the map and wait
-        return LayerTester.helperStepAddLayerOnMapAndWaitForIt(gvConfig, test, this.getMapViewer(), layerPath, hasStyle);
+        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+
+        // Find the layer and wait until its ready
+        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath, hasStyle);
       },
       (test) => {
         // Perform assertions
@@ -477,7 +566,7 @@ export class LayerTester extends GVAbstractTester {
         );
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMapAndWaitForIt(gvConfig, test, this.getMapViewer(), layerPath);
+        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
       },
       undefined,
       (test) => {
@@ -505,7 +594,7 @@ export class LayerTester extends GVAbstractTester {
     // Test
     return this.test(
       `Test Adding WFS with Geomet Current Conditions layer on map...`,
-      (test) => {
+      async (test) => {
         // Creating the configuration
         test.addStep('Creating the GeoView Layer Configuration...');
 
@@ -515,7 +604,10 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        return LayerTester.helperStepAddLayerOnMapAndWaitForIt(gvConfig, test, this.getMapViewer(), layerPath);
+        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+
+        // Find the layer and wait until its ready
+        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
       },
       (test) => {
         // Perform assertions
@@ -558,7 +650,7 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMapAndWaitForIt(gvConfig, test, this.getMapViewer(), layerPath);
+        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
       },
       undefined,
       (test) => {
@@ -597,7 +689,7 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMapAndWaitForIt(gvConfig, test, this.getMapViewer(), layerPath);
+        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
       },
       undefined,
       (test) => {
@@ -625,7 +717,7 @@ export class LayerTester extends GVAbstractTester {
     // Test
     return this.test(
       `Test Adding GeoJSON with Metadata layer on map...`,
-      (test) => {
+      async (test) => {
         // Creating the configuration
         test.addStep('Creating the GeoView Layer Configuration...');
 
@@ -635,7 +727,10 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        return LayerTester.helperStepAddLayerOnMapAndWaitForIt(gvConfig, test, this.getMapViewer(), layerPath);
+        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+
+        // Find the layer and wait until its ready
+        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
       },
       (test) => {
         // Perform assertions
@@ -680,7 +775,10 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMapAndWaitForIt(gvConfig, test, this.getMapViewer(), layerPath);
+        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+
+        // Find the layer and wait until its ready
+        await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
       },
       undefined,
       (test) => {
@@ -708,7 +806,7 @@ export class LayerTester extends GVAbstractTester {
     // Test
     return this.test(
       `Test Adding a CSV with Station List layer on map...`,
-      (test) => {
+      async (test) => {
         // Creating the configuration
         test.addStep('Creating the GeoView Layer Configuration...');
 
@@ -718,7 +816,10 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        return LayerTester.helperStepAddLayerOnMapAndWaitForIt(gvConfig, test, this.getMapViewer(), layerPath);
+        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+
+        // Find the layer and wait until its ready
+        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
       },
       (test) => {
         // Perform assertions
@@ -763,7 +864,10 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMapAndWaitForIt(gvConfig, test, this.getMapViewer(), layerPath);
+        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+
+        // Find the layer and wait until its ready
+        await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
       },
       undefined,
       (test) => {
@@ -791,7 +895,7 @@ export class LayerTester extends GVAbstractTester {
     // Test
     return this.test(
       `Test Adding an OGC Feature with Pygeoapi layer on map...`,
-      (test) => {
+      async (test) => {
         // Creating the configuration
         test.addStep('Creating the GeoView Layer Configuration...');
 
@@ -801,7 +905,10 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        return LayerTester.helperStepAddLayerOnMapAndWaitForIt(gvConfig, test, this.getMapViewer(), layerPath);
+        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+
+        // Find the layer and wait until its ready
+        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
       },
       (test) => {
         // Perform assertions
@@ -844,7 +951,7 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMapAndWaitForIt(gvConfig, test, this.getMapViewer(), layerPath);
+        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
       },
       undefined,
       (test) => {
@@ -873,7 +980,7 @@ export class LayerTester extends GVAbstractTester {
     // Test
     return this.test(
       `Test Adding a WKB with South Africa layer on map...`,
-      (test) => {
+      async (test) => {
         // Creating the configuration
         test.addStep('Creating the GeoView Layer Configuration...');
 
@@ -881,7 +988,10 @@ export class LayerTester extends GVAbstractTester {
         const gvConfig = WKB.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [{ id: GVAbstractTester.WKB_SOUTH_AFRICA }]);
 
         // Redirect to helper to add the layer to the map and wait
-        return LayerTester.helperStepAddLayerOnMapAndWaitForIt(gvConfig, test, this.getMapViewer(), layerPath, hasStyle);
+        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+
+        // Find the layer and wait until its ready
+        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath, hasStyle);
       },
       (test) => {
         // Perform assertions
@@ -924,7 +1034,10 @@ export class LayerTester extends GVAbstractTester {
         const gvConfig = WKB.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [{ id: GVAbstractTester.WKB_SOUTH_AFRICA }]);
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMapAndWaitForIt(gvConfig, test, this.getMapViewer(), layerPath);
+        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+
+        // Find the layer and wait until its ready
+        await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
       },
       undefined,
       (test) => {
@@ -953,7 +1066,7 @@ export class LayerTester extends GVAbstractTester {
     // Test
     return this.test(
       `Test Adding a KML with Tornado layer on map...`,
-      (test) => {
+      async (test) => {
         // Creating the configuration
         test.addStep('Creating the GeoView Layer Configuration...');
 
@@ -961,7 +1074,10 @@ export class LayerTester extends GVAbstractTester {
         const gvConfig = KML.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [{ id: GVAbstractTester.KML_TORNADO_FILE }]);
 
         // Redirect to helper to add the layer to the map and wait
-        return LayerTester.helperStepAddLayerOnMapAndWaitForIt(gvConfig, test, this.getMapViewer(), layerPath, hasStyle);
+        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+
+        // Find the layer and wait until its ready
+        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath, hasStyle);
       },
       (test) => {
         // Perform assertions
@@ -1004,7 +1120,10 @@ export class LayerTester extends GVAbstractTester {
         const gvConfig = KML.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [{ id: GVAbstractTester.KML_TORNADO_FILE }]);
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMapAndWaitForIt(gvConfig, test, this.getMapViewer(), layerPath);
+        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+
+        // Find the layer and wait until its ready
+        await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
       },
       undefined,
       (test) => {
@@ -1021,20 +1140,17 @@ export class LayerTester extends GVAbstractTester {
   /**
    * Adds a GeoView layer to the map, waits for it to load completely, and returns the loaded layer instance.
    * Each step of the process is logged into the provided test instance for traceability and debugging.
-   * @param {TypeGeoviewLayerConfig} gvConfig - The configuration object defining the GeoView layer to be added.
    * @param {Test<AbstractGVLayer>} test - The test instance used to log each step in the layer setup process.
    * @param {MapViewer} mapViewer - The map viewer to which the layer will be added.
-   * @param {string} layerPath - The unique path or ID used to retrieve the added layer from the map viewer.
-   * @returns {Promise<AbstractGVLayer>} A promise that resolves to the fully loaded GeoView layer instance.
+   * @param {TypeGeoviewLayerConfig} gvConfig - The configuration object defining the GeoView layer to be added.
+   * @returns {Promise<GeoViewLayerAddedResult>} A promise that resolves to the fully loaded GeoView layer instance.
    * @static
    */
-  static async helperStepAddLayerOnMapAndWaitForIt<T>(
-    gvConfig: TypeGeoviewLayerConfig,
+  static async helperStepAddLayerOnMap<T>(
     test: Test<T>,
     mapViewer: MapViewer,
-    layerPath: string,
-    waitStyle: boolean = true
-  ): Promise<AbstractGVLayer> {
+    gvConfig: TypeGeoviewLayerConfig
+  ): Promise<GeoViewLayerAddedResult> {
     // Adding the layer on the map
     test.addStep('Adding the layer on the map...');
 
@@ -1050,6 +1166,59 @@ export class LayerTester extends GVAbstractTester {
     // Throw if errors
     result.layer.throwAggregatedLayerLoadErrors();
 
+    // Return the layer
+    return result;
+  }
+
+  /**
+   * Adds a GeoView layer to the map, waits for it to load completely, and returns the loaded layer instance.
+   * Each step of the process is logged into the provided test instance for traceability and debugging.
+   * @param {Test<AbstractGVLayer>} test - The test instance used to log each step in the layer setup process.
+   * @param {MapViewer} mapViewer - The map viewer to which the layer will be added.
+   * @param {TypeGeoviewLayerConfig} gvConfig - The configuration object defining the GeoView layer to be added.
+   * @returns {Promise<GeoViewLayerAddedResult | void>} A promise that resolves to the fully loaded GeoView layer instance.
+   * @static
+   */
+  static async helperStepAddLayerOnMapFromUUID<T>(
+    test: Test<T>,
+    mapViewer: MapViewer,
+    uuid: string
+  ): Promise<GeoViewLayerAddedResult | void> {
+    // Adding the layer on the map
+    test.addStep('Adding the layer on the map...');
+
+    // Add the geoview layer by geocore uuid
+    const result = await mapViewer.layer.addGeoviewLayerByGeoCoreUUID(uuid);
+
+    // Creating the configuration
+    test.addStep('Waiting for the layer to be added...');
+
+    // Wait for the layer to be fully added on the map
+    await result?.promiseLayer;
+
+    // Throw if errors
+    result?.layer.throwAggregatedLayerLoadErrors();
+
+    // Return the layer
+    return result;
+  }
+
+  /**
+   * Adds a GeoView layer to the map, waits for it to load completely, and returns the loaded layer instance.
+   * Each step of the process is logged into the provided test instance for traceability and debugging.
+   * @param {TypeGeoviewLayerConfig} gvConfig - The configuration object defining the GeoView layer to be added.
+   * @param {Test<AbstractGVLayer>} test - The test instance used to log each step in the layer setup process.
+   * @param {MapViewer} mapViewer - The map viewer to which the layer will be added.
+   * @param {string} layerPath - The unique path or ID used to retrieve the added layer from the map viewer.
+   * @returns {Promise<AbstractGVLayer>} A promise that resolves to the fully loaded GeoView layer instance.
+   * @static
+   */
+  static async helperStepCheckLayerAtLayerPath<T>(
+    test: Test<T>,
+    mapViewer: MapViewer,
+    layerPath: string,
+    waitStyle: boolean = true
+  ): Promise<AbstractGVLayer> {
     // Creating the configuration
     test.addStep(`Find the layer ${layerPath} on the map...`);
 
@@ -1077,53 +1246,6 @@ export class LayerTester extends GVAbstractTester {
   }
 
   /**
-   * Adds a GeoView layer to the map, waits for it to load completely, and returns the loaded layer instance.
-   * Each step of the process is logged into the provided test instance for traceability and debugging.
-   * @param {TypeGeoviewLayerConfig} gvConfig - The configuration object defining the GeoView layer to be added.
-   * @param {Test<AbstractGVLayer>} test - The test instance used to log each step in the layer setup process.
-   * @param {MapViewer} mapViewer - The map viewer to which the layer will be added.
-   * @param {string} layerPath - The unique path or ID used to retrieve the added layer from the map viewer.
-   * @returns {Promise<AbstractGVLayer>} A promise that resolves to the fully loaded GeoView layer instance.
-   * @static
-   */
-  static async helperStepAddLayerFromUUIDOnMapAndWaitForIt<T>(
-    uuid: string,
-    test: Test<T>,
-    mapViewer: MapViewer,
-    layerPath: string
-  ): Promise<AbstractGVLayer> {
-    // Adding the layer on the map
-    test.addStep('Adding the layer on the map...');
-
-    // Add the geoview layer by geocore uuid
-    const result = await mapViewer.layer.addGeoviewLayerByGeoCoreUUID(uuid);
-
-    // Creating the configuration
-    test.addStep('Waiting for the layer to be added...');
-
-    // Wait for the layer to be fully added on the map
-    await result!.promiseLayer;
-
-    // Throw if errors
-    result!.layer.throwAggregatedLayerLoadErrors();
-
-    // Creating the configuration
-    test.addStep(`Find the layer ${layerPath} on the map...`);
-
-    // Get the layer
-    const layer = mapViewer.layer.getGeoviewLayer(layerPath) as AbstractGVLayer;
-
-    // Creating the configuration
-    test.addStep(`Waiting for the layer to be loaded...`);
-
-    // Wait until the layer has at least loaded once
-    await layer.waitLoadedOnce();
-
-    // Return the layer
-    return layer;
-  }
-
-  /**
    * Asserts that a layer with the given path exists in the map's legend store.
    * Logs the verification step in the test instance.
    * @param {Test<AbstractGVLayer>} test - The test instance used to record the verification step.
@@ -1141,7 +1263,7 @@ export class LayerTester extends GVAbstractTester {
     const legendLayer = LegendEventProcessor.getLegendLayerInfo(mapViewer.mapId, layerPath);
 
     // Verify the layer has a legend information
-    test.addStep(`Verify the layer has legend information...`);
+    test.addStep(`Verify the layer ${layerPath} has legend information...`);
     Test.assertIsDefined('legendLayer', legendLayer);
 
     // If checking the style

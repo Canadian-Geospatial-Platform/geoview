@@ -11,7 +11,7 @@ import { commonProcessLayerMetadata } from '@/geo/layer/geoview-layers/esri-laye
 import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
-import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 
 export interface TypeEsriImageLayerConfig extends TypeGeoviewLayerConfig {
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_IMAGE;
@@ -45,7 +45,9 @@ export class EsriImage extends AbstractGeoViewRaster {
 
     // Redirect
     // TODO: Check - Config init - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
-    return Promise.resolve(EsriImage.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, this.metadataAccessPath, false));
+    return Promise.resolve(
+      EsriImage.createGeoviewLayerConfigSimple(this.geoviewLayerId, this.geoviewLayerName, this.metadataAccessPath, false)
+    );
   }
 
   /**
@@ -107,7 +109,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @returns {TypeEsriImageLayerConfig} The constructed configuration object for the Esri Image layer.
    */
-  static createGeoviewLayerConfig(
+  static createGeoviewLayerConfigSimple(
     geoviewLayerId: string,
     geoviewLayerName: string,
     metadataAccessPath: string,
@@ -139,6 +141,46 @@ export class EsriImage extends AbstractGeoViewRaster {
   }
 
   /**
+   * Creates a configuration object for a Esri Image layer.
+   * This function constructs a `TypeEsriImageLayerConfig` object that describes an Esri Image layer
+   * and its associated entry configurations based on the provided parameters.
+   * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
+   * @param {string} geoviewLayerName - The display name of the GeoView layer.
+   * @param {string} metadataAccessPath - The URL or path to access metadata.
+   * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
+   * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
+   * @returns {TypeEsriImageLayerConfig} The constructed configuration object for the Esri Image layer.
+   */
+  static createGeoviewLayerConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    metadataAccessPath: string,
+    isTimeAware: boolean,
+    layerEntries: TypeLayerEntryShell[]
+  ): TypeEsriImageLayerConfig {
+    const geoviewLayerConfig: TypeEsriImageLayerConfig = {
+      geoviewLayerId,
+      geoviewLayerName,
+      metadataAccessPath,
+      geoviewLayerType: CONST_LAYER_TYPES.ESRI_IMAGE,
+      isTimeAware,
+      listOfLayerEntryConfig: [],
+    };
+
+    // Recursively map layer entries
+    geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
+      return new EsriImageLayerEntryConfig({
+        geoviewLayerConfig: geoviewLayerConfig,
+        layerId: `${layerEntry.id}`,
+        layerName: layerEntry.layerName,
+      });
+    });
+
+    // Return it
+    return geoviewLayerConfig;
+  }
+
+  /**
    * Processes an Esri Image GeoviewLayerConfig and returns a promise
    * that resolves to an array of `ConfigBaseClass` layer entry configurations.
    *
@@ -159,7 +201,7 @@ export class EsriImage extends AbstractGeoViewRaster {
     isTimeAware: boolean
   ): Promise<ConfigBaseClass[]> {
     // Create the Layer config
-    const layerConfig = EsriImage.createGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, url, isTimeAware);
+    const layerConfig = EsriImage.createGeoviewLayerConfigSimple(geoviewLayerId, geoviewLayerName, url, isTimeAware);
 
     // Create the class from geoview-layers package
     const myLayer = new EsriImage(layerConfig);

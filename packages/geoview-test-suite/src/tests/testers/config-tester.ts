@@ -163,12 +163,14 @@ export class ConfigTester extends GVAbstractTester {
    */
   testEsriFeatureWithTorontoNeighbourhoods(): Promise<Test<TypeGeoviewLayerConfig>> {
     // The url
-    const url = ConfigTester.TORONTO_NEIGHBOURHOODS_FEATURE_SERVER;
+    const url = ConfigTester.FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_URL;
 
     // Test the Esri Feature config
     return this.testEsriFeature('Test an Esri Feature with Toronto Neighbourhoods', url, {
       metadataAccessPath: url,
-      listOfLayerEntryConfig: [{ layerEntryProps: { layerId: '0', layerName: ConfigTester.TORONTO_NEIGHBOURHOODS_LAYER_NAME } }],
+      listOfLayerEntryConfig: [
+        { layerEntryProps: { layerId: '0', layerName: ConfigTester.FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_LAYER_NAME } },
+      ],
     });
   }
 
@@ -278,12 +280,12 @@ export class ConfigTester extends GVAbstractTester {
    */
   testEsriImageWithElevation(): Promise<Test<TypeGeoviewLayerConfig>> {
     // The url
-    const url = ConfigTester.ELEVATION_IMAGE_SERVER;
+    const url = ConfigTester.IMAGE_SERVER_ELEVATION_URL;
 
     // Test the Esri Image config
     return this.testEsriImage('Test Esri Image with Elevation', url, {
       metadataAccessPath: url,
-      listOfLayerEntryConfig: [{ layerEntryProps: { layerId: ConfigTester.ELEVATION_LAYER_ID } }],
+      listOfLayerEntryConfig: [{ layerEntryProps: { layerId: ConfigTester.IMAGE_SERVER_ELEVATION_LAYER_ID } }],
     });
   }
 

@@ -46,7 +46,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
   protected override onLaunchTestSuite(): Promise<unknown> {
     // // GV START DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
     // // Test DEBUG
-    // const pDevTest0 = this.#layerTester.testAddWMSLayerWithOWSMundialis();
+    // const pDevTest0 = this.#layerTester.testAddEsriDynamicWithRasterLayersViaGeocore();
     // // const pDevTest1 = this.#layerTester.testAddWKBWithBadUrl();
     // // const pDevTest2 = this.#layerTester.testAddOGCFeatureWithPygeoapi();
 
