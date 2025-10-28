@@ -1107,6 +1107,7 @@ export async function getLegendStyles(styleConfig: TypeLayerStyleConfig | undefi
   try {
     if (!styleConfig) return {};
     const legendStyles: TypeVectorLayerStyles = {};
+
     if (styleConfig.Point) {
       // ======================================================================================================================
       // Point style configuration ============================================================================================

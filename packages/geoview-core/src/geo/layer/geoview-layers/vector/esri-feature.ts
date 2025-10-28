@@ -10,12 +10,13 @@ import type { TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig, TypeMetadat
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 
 import { commonProcessLayerMetadata, commonValidateListOfLayerEntryConfig } from '@/geo/layer/geoview-layers/esri-layer-common';
-import { LayerNotFeatureLayerError } from '@/core/exceptions/layer-exceptions';
+import { LayerNotFeatureLayerError, LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
 import { Fetch } from '@/core/utils/fetch-helper';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { formatError } from '@/core/exceptions/core-exceptions';
 
 export interface TypeSourceEsriFeatureInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'EsriJSON';
@@ -57,13 +58,20 @@ export class EsriFeature extends AbstractGeoViewVector {
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
    * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<T = TypeMetadataEsriFeature | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
+   * @throws {LayerServiceMetadataUnableToFetchError} If the metadata fetch fails or contains an error.
    */
   protected override async onFetchServiceMetadata<T = TypeMetadataEsriFeature | undefined>(abortSignal?: AbortSignal): Promise<T> {
-    // Query
-    const responseJson = await Fetch.fetchJson<T>(`${this.metadataAccessPath}?f=json`, { signal: abortSignal });
+    let responseJson;
+    try {
+      // Query
+      responseJson = await Fetch.fetchJson<T>(`${this.metadataAccessPath}?f=json`, { signal: abortSignal });
+    } catch (error: unknown) {
+      // Throw
+      throw new LayerServiceMetadataUnableToFetchError(this.geoviewLayerId, this.getLayerEntryNameOrGeoviewLayerName(), formatError(error));
+    }
 
     // Validate the metadata response
-    AbstractGeoViewRaster.throwIfMetatadaHasError(this.geoviewLayerId, this.geoviewLayerName, responseJson);
+    AbstractGeoViewRaster.throwIfMetatadaHasError(this.geoviewLayerId, this.getLayerEntryNameOrGeoviewLayerName(), responseJson);
 
     // Return it
     return responseJson as T;
@@ -73,44 +81,54 @@ export class EsriFeature extends AbstractGeoViewVector {
    * Overrides the way a geoview layer config initializes its layer entries.
    * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
+   * @throws {LayerServiceMetadataUnableToFetchError} If the metadata fetch fails or contains an error.
    */
   protected override async onInitLayerEntries(abortSignal?: AbortSignal): Promise<TypeGeoviewLayerConfig> {
     // Fetch metadata
-    let sep = '/mapserver/';
-    let idx = this.metadataAccessPath.toLowerCase().lastIndexOf(sep);
-    let rootUrl = this.metadataAccessPath;
-    if (idx > 0) {
-      rootUrl = this.metadataAccessPath.substring(0, idx + sep.length);
-    }
-    sep = '/featureserver/';
-    idx = this.metadataAccessPath.toLowerCase().lastIndexOf(sep);
-    if (idx > 0) {
-      rootUrl = this.metadataAccessPath.substring(0, idx + sep.length);
-    }
-
-    // Fetch metadata
     const metadata = await this.onFetchServiceMetadata(abortSignal);
 
-    // Now that we have metadata, get the layer ids from it
+    // If metadata was fetched successfully
     const entries = [];
+    let finalUrl = this.metadataAccessPath;
     if (metadata) {
-      entries.push({
-        id: Number(metadata.id),
-        index: Number(metadata.id),
-        layerId: metadata.id,
-        layerName: metadata.name,
-      });
+      // If MapServer url
+      let sep = '/mapserver';
+      let idx = this.metadataAccessPath.toLowerCase().lastIndexOf(sep);
+
+      if (idx > 0) {
+        // The layer id is in the metadata at root
+        finalUrl = this.metadataAccessPath.substring(0, idx + sep.length);
+        entries.push({
+          id: Number(metadata.id),
+          index: Number(metadata.id),
+          layerId: Number(metadata.id),
+          layerName: metadata.name,
+        });
+      } else {
+        // If FeatureServer url, the metadata is in the first layer
+        sep = '/featureserver';
+        idx = this.metadataAccessPath.toLowerCase().lastIndexOf(sep);
+        if (idx > 0) {
+          // The layer metadata is in the first layer of the metadata
+          const layer = metadata.layers[0];
+          entries.push({
+            id: layer.id,
+            index: layer.id,
+            layerId: layer.id,
+            layerName: layer.name,
+          });
+        }
+      }
     }
 
     // Redirect
-    // TODO: Check - Config init -  a way to better determine the isTimeAware flag, defaults to false, how is it used here?
-    return EsriFeature.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, entries);
+    // TODO: Check - Config init - a way to better determine the isTimeAware flag, defaults to false, how is it used here?
+    return EsriFeature.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, finalUrl, false, entries);
   }
 
   /**
    * This method validates recursively the configuration of the layer entries to ensure that it is a feature layer identified
    * with a numeric layerId and creates a group entry when a layer is a group.
-   *
    * @param {ConfigBaseClass[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
   protected override onValidateListOfLayerEntryConfig(listOfLayerEntryConfig: ConfigBaseClass[]): void {
@@ -231,8 +249,8 @@ export class EsriFeature extends AbstractGeoViewVector {
     geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
       const layerEntryConfig = new EsriFeatureLayerEntryConfig({
         geoviewLayerConfig,
-        layerId: `${layerEntry.index}`,
-        layerName: layerEntry.layerName || `${layerEntry.id}`,
+        layerId: `${layerEntry.index || layerEntry.id}`,
+        layerName: layerEntry.layerName,
       });
       return layerEntryConfig;
     });

@@ -1,7 +1,7 @@
+import type { GeoViewGeoChartConfig } from '@/api/config/reader/uuid-config-reader';
 import { UUIDmapConfigReader } from '@/api/config/reader/uuid-config-reader';
 import { Config } from '@/api/config/config';
 import { ConfigValidation } from '@/api/config/config-validation';
-import { GeochartEventProcessor } from '@/api/event-processors/event-processor-children/geochart-event-processor';
 import { generateId } from '@/core/utils/utilities';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
@@ -23,7 +23,7 @@ export class GeoCore {
    * @param {string} mapId - The optional map id.
    * @param {GeoCoreLayerConfig?} layerConfig - The optional layer configuration.
    * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
-   * @returns {Promise<TypeGeoviewLayerConfig>} List of layer configurations to add to the map.
+   * @returns {Promise<GeoCoreLayerConfigResponse>} List of layer configurations to add to the map.
    */
   static async createLayerConfigFromUUID(
     uuid: string,
@@ -31,7 +31,7 @@ export class GeoCore {
     mapId?: string,
     layerConfig?: GeoCoreLayerConfig,
     abortSignal?: AbortSignal
-  ): Promise<TypeGeoviewLayerConfig> {
+  ): Promise<GeoCoreLayerConfigResponse> {
     // If there's a mapId provided, validate the uuid
     let { geocoreUrl } = DEFAULT_MAP_FEATURE_CONFIG.serviceUrls;
 
@@ -56,20 +56,12 @@ export class GeoCore {
     // Validate the generated Geoview Layer Config
     ConfigValidation.validateListOfGeoviewLayerConfig(response.layers);
 
-    // If there's a mapId, check for geochart
-    if (mapId) {
-      // For each found geochart associated with the Geocore UUIDs
-      response.geocharts?.forEach((geochartConfig) => {
-        // Get the layerPath from geocore response
-        const layerPath = geochartConfig.layers[0].layerId;
-
-        // If a Geochart is initialized
-        if (GeochartEventProcessor.isGeochartInitialized(mapId)) {
-          // Add a GeoChart
-          GeochartEventProcessor.addGeochartChart(mapId, layerPath, geochartConfig);
-        }
-      });
-    }
+    // For each found GeoChart associated with the Geocore UUIDs
+    const geocharts: { [key: string]: GeoViewGeoChartConfig } = {};
+    response.geocharts?.forEach((geochartConfig) => {
+      // Get the layerPath from geocore response
+      geocharts[geochartConfig.layers[0].layerId] = geochartConfig;
+    });
 
     // Use user supplied listOfLayerEntryConfig if provided
     if (layerConfig?.listOfLayerEntryConfig || layerConfig?.initialSettings) {
@@ -87,7 +79,7 @@ export class GeoCore {
       });
 
       // Return the created layer config from the merged config informations
-      return newLayerConfig[0] as TypeGeoviewLayerConfig;
+      return { config: newLayerConfig[0] as TypeGeoviewLayerConfig, geocharts };
     }
 
     // In case of simplified geocoreConfig being provided, just update geoviewLayerName and the first layer
@@ -104,7 +96,7 @@ export class GeoCore {
     }
 
     // Always only first one
-    return response.layers[0];
+    return { config: response.layers[0], geocharts };
   }
 
   /**
@@ -142,3 +134,8 @@ export class GeoCore {
     return response.layers[0];
   }
 }
+
+export type GeoCoreLayerConfigResponse = {
+  config: TypeGeoviewLayerConfig;
+  geocharts: { [key: string]: GeoViewGeoChartConfig };
+};

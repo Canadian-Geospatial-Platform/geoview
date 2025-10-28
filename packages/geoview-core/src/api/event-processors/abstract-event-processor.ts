@@ -60,7 +60,7 @@ export abstract class AbstractEventProcessor {
    * Initializes the processor
    * @param {GeoviewStoreType} store the store to initialize the processor with
    */
-  public initialize(store: GeoviewStoreType): void {
+  initialize(store: GeoviewStoreType): void {
     // Call on initialize for the inherited classes to initialize and return their subscribtions
     const subs = this.onInitialize(store);
     if (subs) this.#subscriptionArr.push(...subs);
@@ -78,7 +78,7 @@ export abstract class AbstractEventProcessor {
    * Destroys the processor
    * @param {GeoviewStoreType} store the store to initialize the processor with
    */
-  public destroy(): void {
+  destroy(): void {
     // Call onDestroy for the inherited classes to destroy themselves. Their subscriptions returned upon initializations will already be destroyed.
     this.onDestroy();
   }

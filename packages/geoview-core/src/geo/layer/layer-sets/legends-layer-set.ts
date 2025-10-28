@@ -144,9 +144,8 @@ export class LegendsLayerSet extends AbstractLayerSet {
     const { layerPath } = layerConfig;
 
     // Get the layer, skip when not found
-    const layer = this.layerApi.getGeoviewLayer(layerPath);
+    const layer = this.layerApi.getGeoviewLayerIfExists(layerPath);
     if (!layer) return; // Skip when no layer found
-    // TODO: Check - Is this check necessary or are we always supposed to have a layer
 
     // If the layer legend should be queried (and not already querying).
     // GV Gotta make sure that we're not already querying, because EsriImage layers, for example, adjust the

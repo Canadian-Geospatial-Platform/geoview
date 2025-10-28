@@ -23,7 +23,7 @@ export class GVXYZTiles extends AbstractGVTile {
    * @param {XYZ} olSource - The OpenLayer source.
    * @param {XYZTilesLayerEntryConfig} layerConfig - The layer configuration.
    */
-  public constructor(olSource: XYZ, layerConfig: XYZTilesLayerEntryConfig) {
+  constructor(olSource: XYZ, layerConfig: XYZTilesLayerEntryConfig) {
     super(olSource, layerConfig);
 
     // Create the tile layer options.

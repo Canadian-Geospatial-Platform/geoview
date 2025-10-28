@@ -7,10 +7,11 @@ import type { Projection as OLProjection, ProjectionLike } from 'ol/proj';
 import type { Map as OLMap } from 'ol';
 import { isArray } from 'lodash';
 
+import EventHelper, { type EventDelegateBase } from '@/api/events/event-helper';
 import type { TypeWmsLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { xmlToJson } from '@/core/utils/utilities';
-import { getExtentIntersection, validateExtentWhenDefined } from '@/geo/utils/utilities';
+import { getExtentIntersection, replaceCRSAndBBOXParam, validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { parseDateTimeValuesEsriImageOrWMS } from '@/geo/layer/gv-layers/utils';
 import { logger } from '@/core/utils/logger';
 import type { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
@@ -42,12 +43,18 @@ export class GVWMS extends AbstractGVRaster {
   /** The max feature count returned by the GetFeatureInfo */
   static readonly DEFAULT_MAX_FEATURE_COUNT: number = 100;
 
+  /** Keep all callback delegates references */
+  #onImageLoadRescueHandlers: ImageLoadRescueDelegate[] = [];
+
+  /** Indicates if the CRS is to be overridden, because the layer struggles loading on the map */
+  #overrideCRS?: CRSOverride;
+
   /**
    * Constructs a GVWMS layer to manage an OpenLayer layer.
    * @param {ImageWMS} olSource - The OpenLayer source.
    * @param {OgcWmsLayerEntryConfig} layerConfig - The layer configuration.
    */
-  public constructor(olSource: ImageWMS, layerConfig: OgcWmsLayerEntryConfig) {
+  constructor(olSource: ImageWMS, layerConfig: OgcWmsLayerEntryConfig) {
     super(olSource, layerConfig);
 
     // Create the image layer options.
@@ -58,6 +65,33 @@ export class GVWMS extends AbstractGVRaster {
 
     // Init the layer options with initial settings
     AbstractGVRaster.initOptionsWithInitialSettings(imageLayerOptions, layerConfig);
+
+    // Hook a custom function to the ImageLoadFunction of the source object
+    olSource.setImageLoadFunction((image, src) => {
+      // Assign the src to the image, this is the regular behavior
+      // eslint-disable-next-line no-param-reassign
+      (image.getImage() as HTMLImageElement).src = src;
+
+      // Get if we're overriding the CRS
+      const overridingCRS = this.getOverrideCRS();
+
+      // If we're overriding the CRS for the layer as an attempt to do on-the-fly projection for tricky layers
+      if (overridingCRS) {
+        // Rebuild the URL with a reprojected BBOX
+        const imageExtent = image.getExtent();
+        const supportedBBOX = Projection.transformExtentFromProj(
+          imageExtent,
+          Projection.getProjectionFromString(overridingCRS.mapProjection),
+          Projection.getProjectionFromString(overridingCRS.layerProjection)
+        );
+
+        // Replace the BBOX param in the src url
+        const newUrl = replaceCRSAndBBOXParam(src, overridingCRS.layerProjection, supportedBBOX);
+
+        // eslint-disable-next-line no-param-reassign
+        (image.getImage() as HTMLImageElement).src = newUrl;
+      }
+    });
 
     // Create and set the OpenLayer layer
     this.setOLLayer(new ImageLayer(imageLayerOptions));
@@ -93,6 +127,39 @@ export class GVWMS extends AbstractGVRaster {
   override getLayerConfig(): OgcWmsLayerEntryConfig {
     // Call parent and cast
     return super.getLayerConfig() as OgcWmsLayerEntryConfig;
+  }
+
+  /**
+   * Overrides when the layer image is in error and couldn't be loaded correctly.
+   * @param {unknown} event - The event which is being triggered.
+   */
+  protected override onImageLoadError(event: unknown): void {
+    // The WMS image failed to load.. check if there's something we can do..
+    const rescued: boolean[] = this.#emitImageLoadRescue({ imageLoadErrorEvent: event });
+
+    // If rescued
+    if (rescued.length > 0 && rescued[0]) {
+      // We've rescued(?) the situation, eat the error for now
+    } else {
+      // Not rescued, call parent
+      super.onImageLoadError(event);
+    }
+  }
+
+  /**
+   * Gets if the CRS is to be overridden, because the layer struggles with the current map projection.
+   * @returns {CRSOverride | undefined} The CRS Override properties if any.
+   */
+  getOverrideCRS(): CRSOverride | undefined {
+    return this.#overrideCRS;
+  }
+
+  /**
+   * Sets if the CRS is to be overridden, because the layer struggles with the current map projection.
+   * @param {CRSOverride | undefined} value - The CRS Override properties or undefined.
+   */
+  setOverrideCRS(value: CRSOverride | undefined): void {
+    this.#overrideCRS = value;
   }
 
   /**
@@ -1088,4 +1155,48 @@ export class GVWMS extends AbstractGVRaster {
   }
 
   // #endregion STATIC METHODS
+
+  // #region EVENTS
+
+  /**
+   * Emits an event to all handlers when the layer's sent a message.
+   * @param {ImageLoadRescueEvent} event - The event to emit
+   * @private
+   */
+  #emitImageLoadRescue(event: ImageLoadRescueEvent): boolean[] {
+    // Emit the event for all handlers
+    return EventHelper.emitEvent(this, this.#onImageLoadRescueHandlers, event);
+  }
+
+  /**
+   * Registers an image load callback event handler.
+   * @param {ImageLoadRescueDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onImageLoadRescue(callback: ImageLoadRescueDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onImageLoadRescueHandlers, callback);
+  }
+
+  /**
+   * Unregisters an image load callback event handler.
+   * @param {ImageLoadRescueDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offImageLoadRescue(callback: ImageLoadRescueDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onImageLoadRescueHandlers, callback);
+  }
+
+  // #endregion EVENTS
 }
+
+export type CRSOverride = { layerProjection: string; mapProjection: string };
+
+/**
+ * Define an event for the delegate
+ */
+export type ImageLoadRescueEvent = { imageLoadErrorEvent: unknown };
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+export type ImageLoadRescueDelegate = EventDelegateBase<GVWMS, ImageLoadRescueEvent, boolean>;

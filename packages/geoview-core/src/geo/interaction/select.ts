@@ -79,7 +79,7 @@ export class Select extends Interaction {
    * Gets the selected features.
    * @returns {Collection<Feature<Geometry>>} The selected features.
    */
-  public getFeatures(): Collection<Feature<Geometry>> {
+  getFeatures(): Collection<Feature<Geometry>> {
     return this.#ol_select.getFeatures();
   }
 

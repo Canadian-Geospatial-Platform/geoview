@@ -37,11 +37,14 @@ export class KML extends AbstractGeoViewVector {
    * Overrides the way a geoview layer config initializes its layer entries.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
    */
-  protected override onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
+  protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Get the folder url
     const idx = this.metadataAccessPath.lastIndexOf('/');
     const rootUrl = this.metadataAccessPath.substring(0, idx);
     const id = this.metadataAccessPath.substring(idx + 1);
+
+    // Attempt a fetch of the metadata
+    await this.onFetchServiceMetadata();
 
     // Redirect
     return Promise.resolve(KML.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, [{ id }]));

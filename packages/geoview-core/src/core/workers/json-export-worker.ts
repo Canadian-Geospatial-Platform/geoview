@@ -51,7 +51,7 @@ export class JsonExportWorker extends AbstractWorker<JsonExportWorkerType> {
    * @param {TypeWorkerExportProjectionInfo} projectionInfo - Object containing source and target CRS.
    * @returns A promise that resolves when initialization is complete.
    */
-  public async init(projectionInfo: TypeWorkerExportProjectionInfo): Promise<void> {
+  async init(projectionInfo: TypeWorkerExportProjectionInfo): Promise<void> {
     await this.proxy.init(projectionInfo);
   }
 
@@ -61,7 +61,7 @@ export class JsonExportWorker extends AbstractWorker<JsonExportWorkerType> {
    * @param {boolean} isFirst - Boolean indicating if this is the first chunk.
    * @returns A promise that resolves to the processed JSON string.
    */
-  public async process(chunk: TypeWorkerExportChunk[], isFirst: boolean): Promise<string> {
+  async process(chunk: TypeWorkerExportChunk[], isFirst: boolean): Promise<string> {
     const result = await this.proxy.process(chunk, isFirst);
     return result;
   }

@@ -42,9 +42,9 @@ import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { SnackbarType } from '@/core/utils/notifications';
 import { NotImplementedError, NotSupportedError } from '@/core/exceptions/core-exceptions';
-import { LayerNotQueryableError } from '@/core/exceptions/layer-exceptions';
+import { LayerNotQueryableError, LayerStatusErrorError } from '@/core/exceptions/layer-exceptions';
 import { createAliasLookup } from '@/geo/layer/gv-layers/utils';
-import { delay } from '@/core/utils/utilities';
+import { delay, whenThisThen } from '@/core/utils/utilities';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer layer.
@@ -65,6 +65,9 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /** The OpenLayer source */
   #olSource: Source;
+
+  /** The legend as fetched */
+  #layerLegend?: TypeLegend;
 
   /** Style to apply to the vector layer. */
   #layerStyle?: TypeLayerStyleConfig;
@@ -353,7 +356,6 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /**
    * Overridable method called when the layer image is in error and couldn't be loaded correctly.
-   * We do not put the layer status as error, as this could be specific to a zoom level and the layer is otherwise fine.
    * @param {unknown} event - The event which is being triggered.
    */
   protected onImageLoadError(event: unknown): void {
@@ -396,6 +398,22 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   getHitTolerance(): number {
     return AbstractGVLayer.DEFAULT_HIT_TOLERANCE;
+  }
+
+  /**
+   * Gets the legend associated with the layer.
+   * @returns The layer legend
+   */
+  getLegend(): TypeLegend | undefined {
+    return this.#layerLegend;
+  }
+
+  /**
+   * Sets the legend associated with the layer.
+   * @param {TypeLegend} legend - The layer legend
+   */
+  setLegend(legend: TypeLegend): void {
+    this.#layerLegend = legend;
   }
 
   /**
@@ -706,6 +724,8 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       .then((legend) => {
         // If legend was received
         if (legend) {
+          // Set the legend
+          this.setLegend(legend);
           // Save the style according to the legend
           this.onSetStyleAccordingToLegend(legend);
           // Emit legend information once retrieved
@@ -739,6 +759,63 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       logger.logError(error);
       return null;
     }
+  }
+
+  /**
+   * Utility function allowing to wait for the layer to be loaded at least once.
+   * @param {number} timeout - A timeout for the period to wait for. Defaults to 30,000 ms.
+   * @returns {Promise<void>} A Promise that resolves when the layer has been loaded at least once.
+   */
+  waitLoadedOnce(timeout: number = 30000): Promise<void> {
+    // Create a promise and wait until the layer is first loaded
+    return whenThisThen(() => {
+      // If the layer is in error, abort the waiting
+      if (this.getLayerStatus() === 'error') {
+        // The layer is in error, throw error
+        throw new LayerStatusErrorError(this.getGeoviewLayerId(), this.getLayerName());
+      }
+
+      // If the layer was first loaded
+      return this.loadedOnce;
+    }, timeout).then();
+  }
+
+  /**
+   * Utility function allowing to wait for the layer legend to be fetched.
+   * @param {number} timeout - A timeout for the period to wait for. Defaults to 30,000 ms.
+   * @returns {Promise<void>} A Promise that resolves when the layer legend has been fetched.
+   */
+  waitLegendFetched(timeout: number = 30000): Promise<void> {
+    // Create a promise and wait until the layer is first loaded
+    return whenThisThen(() => {
+      // If the layer is in error, abort the waiting
+      if (this.getLayerStatus() === 'error') {
+        // The layer is in error, throw error
+        throw new LayerStatusErrorError(this.getGeoviewLayerId(), this.getLayerName());
+      }
+
+      // If the layer was first loaded
+      return this.getLegend();
+    }, timeout).then();
+  }
+
+  /**
+   * Utility function allowing to wait for the layer style to be applied.
+   * @param {number} timeout - A timeout for the period to wait for. Defaults to 30,000 ms.
+   * @returns {Promise<void>} A Promise that resolves when the layer style has been applied.
+   */
+  waitStyleApplied(timeout: number = 30000): Promise<void> {
+    // Create a promise and wait until the layer is first loaded
+    return whenThisThen(() => {
+      // If the layer is in error, abort the waiting
+      if (this.getLayerStatus() === 'error') {
+        // The layer is in error, throw error
+        throw new LayerStatusErrorError(this.getGeoviewLayerId(), this.getLayerName());
+      }
+
+      // If the layer was first loaded
+      return this.getStyle();
+    }, timeout).then();
   }
 
   /**
@@ -933,7 +1010,6 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * @param {string[]} messageParams - Array of parameters to be interpolated into the localized message
    * @param {SnackbarType} messageType - The message type
    * @param {boolean} [notification=false] - Whether to show this as a notification. Defaults to false
-   * @returns {void}
    *
    * @example
    * this.emitMessage(
@@ -1112,7 +1188,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /**
    * Emits an event to all handlers.
-   * @param {LegendQueryingEvent} event The event to emit
+   * @param {LegendQueryingEvent} event - The event to emit
    * @private
    */
   #emitLegendQuerying(): void {
@@ -1122,7 +1198,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /**
    * Registers a legend querying event handler.
-   * @param {LegendQueryingDelegate} callback The callback to be executed whenever the event is emitted
+   * @param {LegendQueryingDelegate} callback - The callback to be executed whenever the event is emitted
    */
   onLegendQuerying(callback: LegendQueryingDelegate): void {
     // Register the event handler
@@ -1131,7 +1207,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /**
    * Unregisters a legend querying event handler.
-   * @param {LegendQueryingDelegate} callback The callback to stop being called whenever the event is emitted
+   * @param {LegendQueryingDelegate} callback - The callback to stop being called whenever the event is emitted
    */
   offLegendQuerying(callback: LegendQueryingDelegate): void {
     // Unregister the event handler
@@ -1140,7 +1216,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /**
    * Emits an event to all handlers.
-   * @param {LegendQueriedEvent} event The event to emit
+   * @param {LegendQueriedEvent} event - The event to emit
    * @private
    */
   #emitLegendQueried(event: LegendQueriedEvent): void {
@@ -1150,7 +1226,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /**
    * Registers a legend queried event handler.
-   * @param {LegendQueriedDelegate} callback The callback to be executed whenever the event is emitted
+   * @param {LegendQueriedDelegate} callback - The callback to be executed whenever the event is emitted
    */
   onLegendQueried(callback: LegendQueriedDelegate): void {
     // Register the event handler
@@ -1159,7 +1235,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /**
    * Unregisters a legend queried event handler.
-   * @param {LegendQueriedDelegate} callback The callback to stop being called whenever the event is emitted
+   * @param {LegendQueriedDelegate} callback - The callback to stop being called whenever the event is emitted
    */
   offLegendQueried(callback: LegendQueriedDelegate): void {
     // Unregister the event handler

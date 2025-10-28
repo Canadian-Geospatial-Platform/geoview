@@ -339,7 +339,7 @@
       "description": "Valid values for the map core package array.",
       "additionalProperties": false,
       "enum": [
-        "swiper"
+        "swiper", "test-suite"
       ]
     },
     "TypeMapCorePackages": {
