@@ -14,6 +14,11 @@
     <script src="codedoc.js"></script>
 
     <style>
+      .btnLaunchTests {
+        width: 100%;
+        padding: 5px 0px;
+      }
+
       .tableResults {
         table-layout: fixed;
         width: 100%;
@@ -88,19 +93,11 @@
       .tableResults tr.expanded .test-title::before {
         transform: rotate(90deg);
       }
-
     </style>
   </head>
 
   <body>
     <div class="header-table">
-      <table>
-        <tbody>
-          <tr>
-            <td>This page is used to run functional testing on various maps.</td>
-          </tr>
-        </tbody>
-      </table>
       <table>
         <tbody>
           <tr>
@@ -132,7 +129,7 @@
     <div style="text-align:right;">
       Running: <span id="allSuitesTestsRunning">0</span> | Done success: <span id="allSuitesTestsDoneSuccess" style="color:green;">0</span> | Done failed: <span id="allSuitesTestsDoneFailed" style="color:red;">0</span> | Done: <span id="allSuitesTestsDone">0</span>/<span id="allSuitesTestsTotal">0</span>
     </div>
-    <button onclick="launchTestsAll()">LAUNCH TESTS ALL MAPS!</button>
+    <button class="btnLaunchTests" onclick="launchTestsAll()">LAUNCH TESTS ALL MAPS!</button>
 
 
     <!-- REGION MAP 1 -->
@@ -140,7 +137,6 @@
       <h4 id="HEVNT1">1. Tests on map 1 (EPSG: 3978)</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
-    <button onclick="launchTests('map1')">LAUNCH TESTS MAP1!</button>
 
     <div id="testSuiteTable-map1"></div>
     <br/>
@@ -186,7 +182,6 @@
       <h4 id="HEVNT2">2. Tests on map 2 (EPSG: 3978)</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
-    <button onclick="launchTests('map2')">LAUNCH TESTS MAP2!</button>
 
     <div id="testSuiteTable-map2"></div>
     <br/>
@@ -233,7 +228,6 @@
       <h4 id="HEVNT3">3. Tests on map 3 (EPSG: 3857)</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
-    <button onclick="launchTests('map3')">LAUNCH TESTS MAP3!</button>
 
     <div id="testSuiteTable-map3"></div>
     <br/>
@@ -280,7 +274,6 @@
       <h4 id="HEVNT4">4. Tests on map 4 (EPSG: 3978)</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
-    <button onclick="launchTests('map4')">LAUNCH TESTS MAP3!</button>
 
     <div id="testSuiteTable-map4"></div>
     <br/>
@@ -340,7 +333,6 @@
       <h4 id="HEVNT5">5. Tests on map 5 (EPSG: 4326)</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
-    <button onclick="launchTests('map5')">LAUNCH TESTS MAP5!</button>
 
     <div id="testSuiteTable-map5"></div>
     <br/>
@@ -474,7 +466,10 @@
         testSuitesPlugins[plugin.mapViewer.mapId] = plugin;
 
         // Create the table html
-        document.getElementById('testSuiteTable-' + plugin.mapViewer.mapId).appendChild(testSuiteCreateTable(plugin));
+        const htmlSection = testSuiteCreateTable(plugin);
+
+        // Create the table html
+        document.getElementById('testSuiteTable-' + plugin.mapViewer.mapId).appendChild(htmlSection);
 
         // Hook the test update
         plugin.onTestUpdated((sender, event) => {

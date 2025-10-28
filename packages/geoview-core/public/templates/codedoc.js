@@ -297,6 +297,8 @@ function testSuiteCreateTable(plugin) {
     <div style="text-align:right;">
       Running: <span id="testsRunning-${mapId}">0</span> | Done success: <span id="testsDoneSuccess-${mapId}" style="color:green;">0</span> | Done failed: <span id="testsDoneFailed-${mapId}" style="color:red;">0</span> | Done: <span id="testsDone-${mapId}">0</span>/<span id="testsTotal-${mapId}">0</span>
     </div>
+    <button class="btnLaunchTests" onclick="launchTests('${mapId}')">LAUNCH TESTS ${mapId} !</button>
+    <br/><br/>
     <table id="tableResults-${mapId}" class="tableResults">
       <colgroup>
         <col>
