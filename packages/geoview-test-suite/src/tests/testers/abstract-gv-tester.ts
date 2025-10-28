@@ -40,12 +40,11 @@ export abstract class GVAbstractTester extends AbstractTester {
   static readonly HISTORICAL_FLOOD_URL_FEATURE_SERVER: string =
     GVAbstractTester.HISTORICAL_FLOOD_URL_MAP_SERVER + '/' + GVAbstractTester.HISTORICAL_FLOOD_URL_LAYER_ID;
 
-  /** Historical Flood */
+  /** Forest Industry Hotspots */
   static readonly FOREST_INDUSTRY_MAP_SERVER: string =
     'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/forest_industry_hotspots_en/MapServer';
   static readonly FOREST_INDUSTRY_LAYER_ID: string = '0';
   static readonly FOREST_INDUSTRY_LAYER_NAME: string = 'Location of mill facilities';
-
   static readonly FOREST_INDUSTRY_FEATURE_SERVER: string =
     GVAbstractTester.FOREST_INDUSTRY_MAP_SERVER + '/' + GVAbstractTester.FOREST_INDUSTRY_LAYER_ID;
 

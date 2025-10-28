@@ -46,8 +46,7 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
   protected override onLaunchTestSuite(): Promise<unknown> {
     // // GV START DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
     // // Test DEBUG
-    // const pDevTest0 = this.#configTester.testStandaloneGeocoreWithAirborne();
-    // // const pDevTest1 = this.#configTester.testKMLWithTornado();
+    // const pDevTest0 = this.#configTester.testEsriFeatureWithForestIndustry();
     // // const pDevTest2 = this.#configTester.testKMLBadUrlExpectSkip();
 
     // // Resolve when all

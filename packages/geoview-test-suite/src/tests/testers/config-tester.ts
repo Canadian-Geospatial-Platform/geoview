@@ -181,10 +181,11 @@ export class ConfigTester extends GVAbstractTester {
   testEsriFeatureWithHistoricalFloodEvents(): Promise<Test<TypeGeoviewLayerConfig>> {
     // The url
     const url = ConfigTester.HISTORICAL_FLOOD_URL_FEATURE_SERVER;
+    const expectedUrl = ConfigTester.HISTORICAL_FLOOD_URL_MAP_SERVER;
 
     // Test the Esri Feature config
     return this.testEsriFeature('Test an Esri Feature with Historical Flood Events', url, {
-      metadataAccessPath: url,
+      metadataAccessPath: expectedUrl,
       listOfLayerEntryConfig: [{ layerEntryProps: { layerId: '0', layerName: ConfigTester.HISTORICAL_FLOOD_LAYER_NAME } }],
     });
   }
@@ -196,10 +197,11 @@ export class ConfigTester extends GVAbstractTester {
   testEsriFeatureWithForestIndustry(): Promise<Test<TypeGeoviewLayerConfig>> {
     // The url
     const url = ConfigTester.FOREST_INDUSTRY_FEATURE_SERVER;
+    const expectedUrl = ConfigTester.FOREST_INDUSTRY_MAP_SERVER;
 
     // Test the Esri Feature config
     return this.testEsriFeature('Test an Esri Feature with Forest Industry', url, {
-      metadataAccessPath: url,
+      metadataAccessPath: expectedUrl,
       listOfLayerEntryConfig: [{ layerEntryProps: { layerId: '0', layerName: ConfigTester.FOREST_INDUSTRY_LAYER_NAME } }],
     });
   }
