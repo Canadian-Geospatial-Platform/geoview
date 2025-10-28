@@ -57,7 +57,7 @@ export const SHARED_STYLES = {
   page: { padding: 36, fontFamily: 'Helvetica' },
   title: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: 'semibold',
     textAlign: 'center',
     marginBottom: 10,
   },
@@ -107,7 +107,6 @@ export const SHARED_STYLES = {
   }),
   wmsImage: {
     maxWidth: 250,
-    maxHeight: 600,
     objectFit: 'contain',
   },
   timeText: (indentLevel: number) => ({
@@ -326,8 +325,7 @@ export const CANVAS_STYLES = {
   }),
   wmsImage: {
     ...SHARED_STYLES.wmsImage,
-    width: `${SHARED_STYLES.wmsImageWidth}px`,
-    maxHeight: `${SHARED_STYLES.wmsImageMaxHeight}px`,
+    maxWidth: `${SHARED_STYLES.wmsImageWidth}px`,
     objectFit: 'contain',
   },
   timeText: (indentLevel: number) => ({
@@ -461,7 +459,6 @@ export const getScaledPDFStyles = (docWidth: number): any => {
     wmsImage: {
       ...PDF_STYLES.wmsImage,
       maxWidth: SHARED_STYLES.wmsImageWidth * scale,
-      maxHeight: SHARED_STYLES.wmsImageMaxHeight * scale,
     },
   };
 };
@@ -535,8 +532,7 @@ export const getScaledCanvasStyles = (docWidth: number): any => {
     },
     wmsImage: {
       ...CANVAS_STYLES.wmsImage,
-      width: `${SHARED_STYLES.wmsImageWidth * scale}px`,
-      maxHeight: `${SHARED_STYLES.wmsImageMaxHeight * scale}px`,
+      maxWidth: `${SHARED_STYLES.wmsImageWidth * scale}px`,
       objectFit: 'contain',
     },
   };
