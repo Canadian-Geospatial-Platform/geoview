@@ -93,7 +93,7 @@ export class GVEsriImage extends AbstractGVRaster {
       if (legendJson.layers && legendJson.layers.length === 1) {
         legendInfo = legendJson.layers[0].legend;
       } else if (legendJson.layers.length) {
-        const layerInfo = legendJson.layers.find((layer) => layer.layerId === layerConfig.layerId);
+        const layerInfo = legendJson.layers.find((layer) => Number(layer.layerId) === Number(layerConfig.layerId));
         if (layerInfo) legendInfo = layerInfo.legend;
       }
       if (!legendInfo) {
