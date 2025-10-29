@@ -1,19 +1,18 @@
-import { useTheme, Tabs as MaterialTabs, Tab as MaterialTab } from '@mui/material';
+import { useTheme } from '@mui/material';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ToggleAll } from '../toggle-all/toggle-all';
 import { Box, Typography } from '@/ui';
-import { useGeoViewMapId, useUIActiveAppBarTab, useUIActiveFooterBarTabId, useLayerLegendLayers } from '@/core/stores/';
+import { useGeoViewMapId, useLayerLegendLayers } from '@/core/stores/';
 import { logger } from '@/core/utils/logger';
 
 import { getSxClassesMain, getSxClasses } from './legend-styles';
-import { LegendCustom } from './legend-custom';
 import { LegendLayer } from './legend-layer';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
 
-interface LegendType {
+interface LegendCustomProps {
   fullWidth?: boolean;
   containerType?: 'appBar' | 'footerBar';
 }
@@ -49,8 +48,8 @@ const responsiveWidths = {
   },
 } as const;
 
-export function Legend({ fullWidth, containerType = CONTAINER_TYPE.FOOTER_BAR }: LegendType): JSX.Element | null {
-  logger.logTraceRender('components/legend/legend');
+export function LegendCustom({ fullWidth, containerType = CONTAINER_TYPE.FOOTER_BAR }: LegendCustomProps): JSX.Element {
+  logger.logTraceRender('components/legend/legend-custom');
 
   // Hooks
   const { t } = useTranslation<string>();
@@ -60,18 +59,16 @@ export function Legend({ fullWidth, containerType = CONTAINER_TYPE.FOOTER_BAR }:
 
   // State
   const [formattedLegendLayerList, setFormattedLegendLayersList] = useState<TypeLegendLayer[][]>([]);
-  const [subTabIndex, setSubTabIndex] = useState<number>(0);
+  const [itemsJson, setItemsJson] = useState<string>('[]');
 
   // Store
   const mapId = useGeoViewMapId();
-  const footerId = useUIActiveFooterBarTabId();
-  const appBarId = useUIActiveAppBarTab();
   const layersList = useLayerLegendLayers();
 
   // Memoize breakpoint values
   const breakpoints = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('LEGEND - breakpoints', theme.breakpoints.values);
+    logger.logTraceUseMemo('LEGEND-CUSTOM - breakpoints', theme.breakpoints.values);
 
     return {
       sm: theme.breakpoints.values.sm,
@@ -118,11 +115,48 @@ export function Legend({ fullWidth, containerType = CONTAINER_TYPE.FOOTER_BAR }:
   // Memoize the window resize handler and use the hook to add listener to avoid many creation
   const handleWindowResize = useCallback(() => {
     // Log
-    logger.logTraceUseCallback('LEGEND - window resize event');
+    logger.logTraceUseCallback('LEGEND-CUSTOM - window resize event');
 
     // Update the layer list based on window size
     updateLegendLayerListByWindowSize(layersList);
   }, [layersList, updateLegendLayerListByWindowSize]);
+
+  // Helper to flatten a layer and all its children
+  const flattenLayerTree = useCallback((layer: TypeLegendLayer): TypeLegendLayer[] => {
+    const acc: TypeLegendLayer[] = [layer];
+    if (Array.isArray(layer.children) && layer.children.length) {
+      layer.children.forEach((child) => {
+        acc.push(...flattenLayerTree(child));
+      });
+    }
+    return acc;
+  }, []);
+
+  // Keep editable JSON in sync with current items list
+  useEffect(() => {
+    const detailed = formattedLegendLayerList
+      .flat() // flatten columns
+      .flatMap((l) => flattenLayerTree(l)) // include children recursively
+      .map((l) => ({
+        layerPath: l.layerPath,
+        layerName: l.layerName,
+        items: (l.items || []).map(({ geometryType, name, isVisible, icon }) => ({ geometryType, name, isVisible, icon })),
+        icons: (l.icons || []).map(({ geometryType, iconType, name, iconImage, iconImageStacked, iconList }) => ({
+          geometryType,
+          iconType,
+          name,
+          iconImage,
+          iconImageStacked,
+          iconList: (iconList || []).map(({ geometryType: g, name: n, isVisible: v, icon: i }) => ({
+            geometryType: g,
+            name: n,
+            isVisible: v,
+            icon: i,
+          })),
+        })),
+      }));
+    setItemsJson(JSON.stringify(detailed, null, 2));
+  }, [formattedLegendLayerList, flattenLayerTree]);
 
   // Wire a handler using a custom hook on the window resize event
   useEventListener<Window>('resize', handleWindowResize, window);
@@ -130,7 +164,7 @@ export function Legend({ fullWidth, containerType = CONTAINER_TYPE.FOOTER_BAR }:
   // Handle initial layer setup
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('LEGEND - layer setup', layersList);
+    logger.logTraceUseEffect('LEGEND-CUSTOM - layer setup', layersList);
 
     // Update the layer list based on window size
     updateLegendLayerListByWindowSize(layersList);
@@ -139,7 +173,7 @@ export function Legend({ fullWidth, containerType = CONTAINER_TYPE.FOOTER_BAR }:
   // Memoize the no layers content
   const noLayersContent = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('components/legend - noLayersContent');
+    logger.logTraceUseMemo('components/legend-custom - noLayersContent');
 
     return (
       <Box sx={styles.noLayersContainer}>
@@ -156,7 +190,7 @@ export function Legend({ fullWidth, containerType = CONTAINER_TYPE.FOOTER_BAR }:
   // Memoize the rendered content based on whether there are legend layers
   const content = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('components/legend - content', formattedLegendLayerList.length);
+    logger.logTraceUseMemo('components/legend-custom - content', formattedLegendLayerList.length);
 
     if (!formattedLegendLayerList.length) {
       return noLayersContent;
@@ -172,35 +206,42 @@ export function Legend({ fullWidth, containerType = CONTAINER_TYPE.FOOTER_BAR }:
     ));
   }, [formattedLegendLayerList, fullWidth, noLayersContent]);
 
-  // Early return with empty fragment if not the active tab
-  if (footerId !== 'legend' && appBarId.tabId !== 'legend') return null;
-
   return (
     <>
       <Box sx={sxClasses.toggleBar}>
         <ToggleAll />
       </Box>
-      <Box sx={{ px: '0.5rem' }}>
-        <MaterialTabs
-          value={subTabIndex}
-          onChange={(_, v) => setSubTabIndex(v)}
-          variant="scrollable"
-          scrollButtons="auto"
-          aria-label="legend sub-tabs"
-        >
-          <MaterialTab label={t('Layers legend')} />
-          <MaterialTab label={t('legend-custom')} />
-        </MaterialTabs>
-      </Box>
       <Box
         sx={{ background: theme.palette.geoViewColor.bgColor.main, ...sxClassesMain.container }}
-        id={`${mapId}-${containerType}-legendContainer`}
+        id={`${mapId}-${containerType}-legendCustom`}
       >
-        {subTabIndex === 0 ? (
-          <Box sx={styles.flexContainer}>{content}</Box>
-        ) : (
-          <LegendCustom containerType={containerType} fullWidth={fullWidth} />
-        )}
+        <Box sx={styles.flexContainer}>{content}</Box>
+      </Box>
+      <Box sx={{ mt: 2, pl: '20px', pr: '20px', pb: '5px' }}>
+        <Typography variant="subtitle1" sx={{ mb: 1 }}>
+          {t('Items JSON (editable)')}
+        </Typography>
+        <Box
+          component="textarea"
+          value={itemsJson}
+          onChange={(e) => setItemsJson((e.target as HTMLTextAreaElement).value)}
+          wrap="off"
+          sx={{
+            width: '300px',
+            minHeight: '80px',
+            maxHeight: '300px',
+            fontFamily: 'monospace',
+            fontSize: '0.875rem',
+            lineHeight: 1.4,
+            padding: '0.5rem',
+            borderRadius: '6px',
+            border: `1px solid ${theme.palette.divider}`,
+            background: theme.palette.background.paper,
+            color: theme.palette.text.primary,
+            overflow: 'scroll',
+            whiteSpace: 'pre',
+          }}
+        />
       </Box>
     </>
   );
