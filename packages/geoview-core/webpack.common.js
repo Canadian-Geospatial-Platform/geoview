@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 // all lines below (3-10) needs the eslint escape no-var-requires.
 // It is a file for the buid and constant, they are reuse later in the file. It is the reason why we keep it global...
 const webpack = require('webpack');
@@ -15,7 +14,6 @@ const date = new Date().toISOString();
 const [major, minor, patch] = packageJSON.version.split('.');
 const hash = JSON.stringify(childProcess.execSync('git rev-parse HEAD').toString().trim());
 
-// eslint-disable-next-line no-console
 console.log(`Build CGP Viewer: ${major}.${minor}.${patch} - ${date}`);
 
 // inject all sample files
@@ -164,7 +162,7 @@ const config = {
         use: ['html-loader', 'markdown-loader'],
       },
       {
-        test: /\-worker-script\.(js|ts)$/,
+        test: /-worker-script\.(js|ts)$/,
         exclude: /node_modules/,
         use: [
           {
@@ -197,7 +195,7 @@ const config = {
     new CopyWebpackPlugin({
       patterns: [
         { from: '../../docs', to: 'docs' },
-        { from: './public/docs', to: 'public/docs', noErrorOnMissing: true }, // TypeDoc generated API docs
+        { from: './public/typeDocAPI', to: 'public/typeDocAPI', noErrorOnMissing: true }, // TypeDoc generated API docs
         { from: './public/img', to: 'img' },
         { from: './public/configs', to: 'configs' },
         { from: './public/locales', to: 'locales', noErrorOnMissing: true },
