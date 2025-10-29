@@ -1,5 +1,9 @@
 # Events API
 
+> **📘 Technical Documentation:** This documents the internal event system implementation.
+>
+> **For API Users:** Use MapViewer and Layer event handlers instead (e.g., `mapViewer.onMapMoveEnd(callback)`). See [Event Processors Guide](../doc-new/event-processors.md) for the complete API.
+
 The Event API provides an interface for managing events and event handlers on the GeoView core cgpv viewer. In the following sections, it is stated in some places that the event handler name must be a string concatenation separated by forward slashes. Although not mandatory, it is worth mentioning that this strategy is intended to allow bulk deactivation of event lists using a handler prefix, usually the map identifier. We will discuss that in the `offAll` section.
 
 The event API will allow you to listen to events that are emitted from the viewer, create your own event listeners, emit events that are being listened from the viewer and emit your own created events.

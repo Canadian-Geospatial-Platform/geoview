@@ -1,4 +1,5 @@
 # JavaScript Packages
+
 ## Creating a package using vanilla javascript
 
 To create a package, start by creating a JavaScript file preferably with the packages name.
@@ -202,3 +203,13 @@ The viewer is bundled with core packages, you can load them by passing their id 
 ></div>
 ```
 
+## See Also
+
+> **⚠️ Legacy Approach:** This document describes vanilla JavaScript plugin development using IIFE pattern.
+>
+> **For Modern Development:** Use TypeScript and the monorepo structure described in [Packages & Plugins Guide](./doc-new/packages.md) for better type safety and tooling support.
+
+- **[Packages & Plugins Guide](./doc-new/packages.md)** - Modern TypeScript plugin development (recommended)
+- **[Core Packages](./packages-core.md)** - Rush.js monorepo setup
+- **[Event Processors](./doc-new/event-processors.md)** - State management for plugins
+- **[API Reference](./doc-new/api.md)** - Main API methods
