@@ -94,7 +94,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
   /**
    * Queries the features at the provided coordinate for all the registered layers.
    * @param {Coordinate} pixelCoordinate - The pixel coordinate where to query the features
-   * @throws {LayerNotFoundError} - If the specified layer cannot be found.
+   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
    */
   queryLayers(pixelCoordinate: Coordinate): void {
     // FIXME: Watch out for code reentrancy between queries!
