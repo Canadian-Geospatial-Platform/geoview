@@ -50,6 +50,7 @@ Best practices and patterns for contributing to GeoView core:
 - **[Using TypeScript](./programming/using-type.md)** - TypeScript patterns and types
 - **[Using Zustand Store](./programming/using-store.md)** - State management internals
 - **[Event Processor Architecture](./programming/event-processor-architecture.md)** - Creating custom event processors
+- **[Layer Set Architecture](./programming/layerset-architecture.md)** - Layer Set system internals
 - **[Adding Layer Types](./programming/adding-layer-types.md)** - Implementing new layer types
 - **[Logging](./programming/logging.md)** - Logging standards and practices
 - **[Object-Oriented Patterns](./programming/object-oriented.md)** - OOP patterns in GeoView

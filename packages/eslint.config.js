@@ -11,9 +11,7 @@ export default [
   js.configs.recommended,
   // Ignores (actually recommended to be first in the whole config logic)
   {
-    ignores: [
-      'node_modules/', 'dist/', 'eslint.config.js',
-    ]
+    ignores: ['node_modules/', 'dist/', 'eslint.config.js'],
   },
 
   // Core logic
@@ -122,11 +120,11 @@ export default [
           ignoreOverrideMethods: true,
         },
       ],
-      "@typescript-eslint/explicit-member-accessibility": [
-        "error",
+      '@typescript-eslint/explicit-member-accessibility': [
+        'error',
         {
-          "accessibility": "no-public"
-        }
+          accessibility: 'no-public',
+        },
       ],
       '@typescript-eslint/no-non-null-assertion': 'off',
       'require-await': 1, // Warning
@@ -208,6 +206,12 @@ export default [
     },
   },
 
+  // Disable type-aware linting for JavaScript files
+  {
+    files: ['**/*.js'],
+    extends: [tseslint.configs.disableTypeChecked],
+  },
+
   // Webpack config files
   {
     files: ['webpack.*.js'],
@@ -218,5 +222,5 @@ export default [
         ecmaVersion: 2018,
       },
     },
-  }
+  },
 ];

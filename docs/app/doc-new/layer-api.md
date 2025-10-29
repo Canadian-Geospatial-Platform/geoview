@@ -1276,8 +1276,49 @@ mapViewer.layer.setGeojsonSource("myGeoJsonLayer", geojson);
 
 ---
 
+## Layer Sets
+
+The Layer API provides access to four **Layer Sets** that automatically manage layer-specific data:
+
+- **`legendsLayerSet`** - Legend and symbology information for all layers
+- **`featureInfoLayerSet`** - Feature information at specific locations (for map clicks)
+- **`allFeatureInfoLayerSet`** - All features from all layers (for data tables, exports)
+- **`hoverFeatureInfoLayerSet`** - Feature information under mouse cursor (for tooltips)
+
+**Quick Example:**
+
+```typescript
+// Access legend data
+const legendsLayerSet = mapViewer.layer.legendsLayerSet;
+Object.values(legendsLayerSet.resultSet).forEach((entry) => {
+  console.log(`Legend for ${entry.layerName}:`, entry.items);
+});
+
+// Query features on click
+mapViewer.onMapSingleClick((sender, payload) => {
+  mapViewer.layer.featureInfoLayerSet.queryLayers(payload.lnglat).then(() => {
+    // Access queried features
+    Object.values(mapViewer.layer.featureInfoLayerSet.resultSet).forEach(
+      (entry) => {
+        console.log(
+          `Features in ${entry.layerName}:`,
+          entry.featureInfo?.features
+        );
+      }
+    );
+  });
+});
+```
+
+**For complete Layer Sets documentation, examples, and patterns, see:**
+
+→ **[Layer Sets Guide](./layersets.md)**
+
+---
+
 ## See Also
 
+- **[Layer Sets](./layersets.md)** - Working with layer sets for legends, features, and hover info
 - [Event Processors](./event-processors.md) - State management and event handling
 - [Configuration Reference](./configuration-reference.md) - Layer configuration options
 - [API Reference](./api.md) - Main API entry points
