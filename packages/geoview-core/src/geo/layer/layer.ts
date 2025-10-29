@@ -479,7 +479,7 @@ export class LayerApi {
         }
 
         // For each uuid that failed
-        uuids?.forEach((uuid) => {
+        uuids?.forEach((uuid: string) => {
           // Get the index at which the TypeGeoviewLayerConfig happened
           const index = validGeoviewLayerConfigs.findIndex((mapLayerEntry) => mapLayerEntry.geoviewLayerId === uuid);
 
