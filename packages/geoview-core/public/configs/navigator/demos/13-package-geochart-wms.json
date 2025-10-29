@@ -128,20 +128,20 @@
             "layers": [
               {
                 "layerId": "wmsLYR2-qgis/fpsn_stations_93f70155_ff12_4ab2_8100_53763727cbe4",
-                "propertyValue": "OBJECTID",
-                "propertyDisplay": "Location_Emplacement"
+                "propertyValue": "fid",
+                "propertyDisplay": "Location Name"
               }
             ],
             "chart": "line",
             "title": "Line Chart with OGC Features",
             "query": {
               "type": "ogcAPIFeatures",
-              "url": "https://pygeoapi-stage.cdtk.geogc.ca/collections/ft::fpsn:fpsn_latest_90days_measure?f=json",
+              "url": "https://pygeoapi-stage.cdtk.geogc.ca/collections/ft::fpsn:fpsn_latest_90days_measure",
               "queryOptions": {
                 "whereClauses": [
                   {
-                    "field": "YEAR",
-                    "valueFrom": "YEAR"
+                    "field": "location_emplacement",
+                    "valueFrom": "Location Name"
                   }
                 ]
               }
@@ -150,10 +150,12 @@
               "xAxis": {
                 "type": "time",
                 "timeFormat": "MMM d, yyyy, HH:mm",
-                "property": "DATE_START"
+                "property": "starttime_heuredebut_utc",
+                "label": "Start Time (UTC)"
               },
               "yAxis": {
-                "property": "YEAR"
+                "property": "value_valeur_nsvhr",
+                "label": "NSVHR Value"
               }
             },
             "ui": {

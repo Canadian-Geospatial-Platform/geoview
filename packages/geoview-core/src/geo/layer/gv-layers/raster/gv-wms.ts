@@ -11,7 +11,7 @@ import EventHelper, { type EventDelegateBase } from '@/api/events/event-helper';
 import type { TypeWmsLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { xmlToJson } from '@/core/utils/utilities';
-import { getExtentIntersection, replaceCRSAndBBOXParam, validateExtentWhenDefined } from '@/geo/utils/utilities';
+import { getExtentIntersection, replaceCRSandBBOXParam, validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { parseDateTimeValuesEsriImageOrWMS } from '@/geo/layer/gv-layers/utils';
 import { logger } from '@/core/utils/logger';
 import type { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
@@ -42,6 +42,15 @@ import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/
 export class GVWMS extends AbstractGVRaster {
   /** The max feature count returned by the GetFeatureInfo */
   static readonly DEFAULT_MAX_FEATURE_COUNT: number = 100;
+
+  /** The default Get Feature Info tolerance to use for QGIS Server services which are more picky by default (really needs to be zoomed in to get results, by default) */
+  static readonly DEFAULT_GET_FEATURE_INFO_TOLERANCE: number = 20;
+
+  /** The Get Feature Info feature count to use */
+  #getFeatureInfoFeatureCount: number = GVWMS.DEFAULT_MAX_FEATURE_COUNT;
+
+  /** The Get Feature Info tolerance to use for QGIS Server services which are more picky by default (really needs to be zoomed in to get results, by default) */
+  #getFeatureInfoTolerance: number = GVWMS.DEFAULT_GET_FEATURE_INFO_TOLERANCE;
 
   /** Keep all callback delegates references */
   #onImageLoadRescueHandlers: ImageLoadRescueDelegate[] = [];
@@ -86,7 +95,7 @@ export class GVWMS extends AbstractGVRaster {
         );
 
         // Replace the BBOX param in the src url
-        const newUrl = replaceCRSAndBBOXParam(src, overridingCRS.layerProjection, supportedBBOX);
+        const newUrl = replaceCRSandBBOXParam(src, overridingCRS.layerProjection, supportedBBOX);
 
         // eslint-disable-next-line no-param-reassign
         (image.getImage() as HTMLImageElement).src = newUrl;
@@ -160,6 +169,38 @@ export class GVWMS extends AbstractGVRaster {
    */
   setOverrideCRS(value: CRSOverride | undefined): void {
     this.#overrideCRS = value;
+  }
+
+  /**
+   * Gets the feature count used for GetFeatureInfo requests.
+   * @returns {number} The current GetFeatureInfo feature count.
+   */
+  getGetFeatureInfoFeatureCount(): number {
+    return this.#getFeatureInfoFeatureCount;
+  }
+
+  /**
+   * Sets the feature count used for GetFeatureInfo requests.
+   * @param {number} value - The new GetFeatureInfo feature count.
+   */
+  setGetFeatureInfoFeatureCount(value: number): void {
+    this.#getFeatureInfoFeatureCount = value;
+  }
+
+  /**
+   * Gets the current pixel tolerance used for GetFeatureInfo requests for QGIS Server Services.
+   * @returns {number} The current GetFeatureInfo pixel tolerance.
+   */
+  getGetFeatureInfoTolerance(): number {
+    return this.#getFeatureInfoTolerance;
+  }
+
+  /**
+   * Sets the current pixel tolerance used for GetFeatureInfo requests for QGIS Server Services.
+   * @param {number} value - The new GetFeatureInfo pixel tolerance.
+   */
+  setGetFeatureInfoTolerance(value: number): void {
+    this.#getFeatureInfoTolerance = value;
   }
 
   /**
@@ -438,9 +479,10 @@ export class GVWMS extends AbstractGVRaster {
           wmsSource,
           clickCoordinate,
           viewResolution,
+          this.getGetFeatureInfoTolerance(),
           projectionCode,
           'application/geojson',
-          GVWMS.DEFAULT_MAX_FEATURE_COUNT,
+          this.getGetFeatureInfoFeatureCount(),
           abortController
         );
       } catch {
@@ -459,9 +501,10 @@ export class GVWMS extends AbstractGVRaster {
           wmsSource,
           clickCoordinate,
           viewResolution,
+          this.getGetFeatureInfoTolerance(),
           projectionCode,
           'application/json',
-          GVWMS.DEFAULT_MAX_FEATURE_COUNT,
+          this.getGetFeatureInfoFeatureCount(),
           abortController
         );
       } catch {
@@ -481,6 +524,7 @@ export class GVWMS extends AbstractGVRaster {
           wmsSource,
           clickCoordinate,
           viewResolution,
+          this.getGetFeatureInfoTolerance(),
           projectionCode,
           abortController
         );
@@ -502,6 +546,7 @@ export class GVWMS extends AbstractGVRaster {
           wmsSource,
           clickCoordinate,
           viewResolution,
+          this.getGetFeatureInfoTolerance(),
           projectionCode,
           abortController
         );
@@ -522,6 +567,7 @@ export class GVWMS extends AbstractGVRaster {
           wmsSource,
           clickCoordinate,
           viewResolution,
+          this.getGetFeatureInfoTolerance(),
           projectionCode,
           abortController
         );
@@ -643,6 +689,7 @@ export class GVWMS extends AbstractGVRaster {
     wmsSource: ImageWMS,
     clickCoordinate: Coordinate,
     viewResolution: number,
+    qgisServerTolerance: number,
     projectionCode: ProjectionLike,
     infoFormat: 'application/json' | 'application/geojson',
     maxFeatures: number | undefined,
@@ -654,6 +701,7 @@ export class GVWMS extends AbstractGVRaster {
       wmsSource,
       clickCoordinate,
       viewResolution,
+      qgisServerTolerance,
       projectionCode,
       infoFormat,
       maxFeatures,
@@ -717,6 +765,7 @@ export class GVWMS extends AbstractGVRaster {
     wmsSource: ImageWMS,
     clickCoordinate: Coordinate,
     viewResolution: number,
+    qgisServerTolerance: number,
     projectionCode: ProjectionLike,
     abortController: AbortController | undefined = undefined
   ): Promise<Record<string, unknown>> {
@@ -726,6 +775,7 @@ export class GVWMS extends AbstractGVRaster {
       wmsSource,
       clickCoordinate,
       viewResolution,
+      qgisServerTolerance,
       projectionCode,
       'text/xml',
       undefined,
@@ -795,6 +845,7 @@ export class GVWMS extends AbstractGVRaster {
     wmsSource: ImageWMS,
     clickCoordinate: Coordinate,
     viewResolution: number,
+    qgisServerTolerance: number,
     projectionCode: ProjectionLike,
     abortController: AbortController | undefined = undefined
   ): Promise<Record<string, unknown>> {
@@ -804,6 +855,7 @@ export class GVWMS extends AbstractGVRaster {
       wmsSource,
       clickCoordinate,
       viewResolution,
+      qgisServerTolerance,
       projectionCode,
       'text/html',
       undefined,
@@ -846,6 +898,7 @@ export class GVWMS extends AbstractGVRaster {
     wmsSource: ImageWMS,
     clickCoordinate: Coordinate,
     viewResolution: number,
+    qgisServerTolerance: number,
     projectionCode: ProjectionLike,
     abortController: AbortController | undefined = undefined
   ): Promise<Record<string, unknown>> {
@@ -855,6 +908,7 @@ export class GVWMS extends AbstractGVRaster {
       wmsSource,
       clickCoordinate,
       viewResolution,
+      qgisServerTolerance,
       projectionCode,
       'text/plain',
       undefined,
@@ -889,6 +943,7 @@ export class GVWMS extends AbstractGVRaster {
     wmsSource: ImageWMS,
     clickCoordinate: Coordinate,
     viewResolution: number,
+    qgisServerTolerance: number,
     projectionCode: ProjectionLike,
     infoFormat: string,
     maxFeatures: number | undefined,
@@ -904,10 +959,15 @@ export class GVWMS extends AbstractGVRaster {
       params.FEATURE_COUNT = maxFeatures;
     }
 
-    // Try XML
+    // Set the QGIS Server tolerances
+    params.FI_POINT_TOLERANCE = qgisServerTolerance;
+    params.FI_LINE_TOLERANCE = qgisServerTolerance;
+    params.FI_POLYGON_TOLERANCE = qgisServerTolerance;
+
+    // Generate the url
     const featureInfoUrl = wmsSource?.getFeatureInfoUrl(clickCoordinate, viewResolution, projectionCode, params);
 
-    // If retrieved something
+    // If generated a url
     if (featureInfoUrl) {
       // Get the response data as text
       return Fetch.fetchText(featureInfoUrl, { signal: abortController?.signal });
