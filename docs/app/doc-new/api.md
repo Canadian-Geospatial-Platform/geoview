@@ -1,5 +1,7 @@
 # GeoView API Documentation
 
+> **🔍 Complete TypeScript API:** For full type definitions, interfaces, and auto-generated documentation, see [TypeDoc API Reference](https://canadian-geospatial-platform.github.io/geoview/public/docs/)
+
 ## Overview
 
 The GeoView API provides a comprehensive interface for managing map viewers, handling events, and accessing various utilities within the GeoView application. This documentation covers the main API class and its functions.
@@ -23,11 +25,125 @@ class API {
 
 ### Properties
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `config` | `ConfigApi` | Access to configuration API (work in progress) |
-| `plugin` | `typeof Plugin` | Access to plugin functionality |
-| `utilities` | `Object` | Collection of utility functions |
+| Property    | Type            | Description                                    |
+| ----------- | --------------- | ---------------------------------------------- |
+| `config`    | `ConfigApi`     | Access to configuration API (work in progress) |
+| `plugin`    | `typeof Plugin` | Access to plugin functionality                 |
+| `utilities` | `Object`        | Collection of utility functions                |
+
+## API Methods
+
+### Map Management
+
+#### createMapFromConfig()
+
+Creates a new map viewer instance from a configuration object.
+
+```typescript
+createMapFromConfig(
+  divId: string,
+  mapConfig: TypeMapConfig,
+  divHeight?: string
+): MapViewer
+```
+
+**Parameters:**
+
+- `divId` - The ID of the HTML div element to contain the map
+- `mapConfig` - Map configuration object
+- `divHeight` - Optional height for the map container (e.g., '600px', '100%')
+
+**Returns:** `MapViewer` instance
+
+**Example:**
+
+```typescript
+const mapViewer = cgpv.api.createMapFromConfig(
+  "mapDiv",
+  {
+    map: {
+      interaction: "dynamic",
+      viewSettings: {
+        zoom: 4,
+        center: [-95, 55],
+        projection: 3978,
+      },
+      basemapOptions: {
+        basemapId: "transport",
+        shaded: true,
+      },
+    },
+    theme: "dark",
+    language: "en",
+  },
+  "800px"
+);
+```
+
+---
+
+#### reload()
+
+Reloads a map with a new configuration or refreshes the current configuration.
+
+```typescript
+reload(mapId: string, mapConfig?: TypeMapConfig): void
+```
+
+**Parameters:**
+
+- `mapId` - The ID of the map to reload
+- `mapConfig` - Optional new map configuration
+
+---
+
+#### deleteMapViewer()
+
+Removes a map viewer instance and cleans up resources.
+
+```typescript
+deleteMapViewer(mapId: string, unmountDiv?: boolean): void
+```
+
+**Parameters:**
+
+- `mapId` - The ID of the map to delete
+- `unmountDiv` - Whether to unmount the React component from the div (default: true)
+
+---
+
+#### getMapViewer()
+
+Gets an existing map viewer instance (throws error if not found).
+
+```typescript
+getMapViewer(mapId: string): MapViewer
+```
+
+**Parameters:**
+
+- `mapId` - The ID of the map to retrieve
+
+**Returns:** `MapViewer` instance
+
+---
+
+#### getMapViewerAsync()
+
+Gets a map viewer instance asynchronously, waiting for it to be created if necessary.
+
+```typescript
+async getMapViewerAsync(mapId: string, timeout?: number): Promise<MapViewer>
+```
+
+**Parameters:**
+
+- `mapId` - The ID of the map to retrieve
+- `timeout` - Maximum wait time in milliseconds (default: 10000)
+
+**Returns:** Promise resolving to `MapViewer` instance
+
+---
 
 ## Utilities
 
@@ -42,4 +158,15 @@ utilities: {
 }
 ```
 
-For more information about utilities functions, see api-utilities.md
+For complete documentation of all utility functions, see [api-utilities.md](./api-utilities.md)
+
+---
+
+## See Also
+
+- [api-utilities.md](./api-utilities.md) - Complete utilities documentation
+- [map-viewer-api-doc.md](./map-viewer-api-doc.md) - MapViewer instance methods
+- [layer-api.md](./layer-api.md) - Layer management API
+- [event-processors.md](./event-processors.md) - Event processors documentation
+- [cgpv.md](./cgpv.md) - Global cgpv object documentation
+- [packages.md](./packages.md) - Plugin packages
