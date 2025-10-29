@@ -416,8 +416,17 @@ export const renderNorthArrow = (
  * @returns {Promise<number>} The calculated height including scaled margin
  */
 const calculateWMSImageHeight = (imageUrl: string | undefined, scale = 1, layerName = 'unknown'): Promise<number> => {
+  // Missing URL fallback
+  if (!imageUrl) {
+    const scaledMargin = SHARED_STYLES.wmsMarginBottom * scale;
+    const fallbackHeight = 100 * scale + scaledMargin;
+    logger.logWarning(`WMS Image "${layerName}" has no URL, using fallback: ${Math.round(fallbackHeight)}px`);
+    return Promise.resolve(fallbackHeight);
+  }
+
   return new Promise((resolve) => {
     const img = new Image();
+    img.src = imageUrl;
 
     img.onload = () => {
       const maxWidth = SHARED_STYLES.wmsImageWidth * scale;
@@ -447,16 +456,6 @@ const calculateWMSImageHeight = (imageUrl: string | undefined, scale = 1, layerN
       logger.logError(`WMS Image "${layerName}" failed to load, using fallback: ${Math.round(fallbackHeight)}px`);
       resolve(fallbackHeight);
     };
-
-    // Missing URL fallback
-    if (!imageUrl) {
-      const scaledMargin = SHARED_STYLES.wmsMarginBottom * scale;
-      const fallbackHeight = 100 * scale + scaledMargin;
-      logger.logWarning(`WMS Image "${layerName}" has no URL, using fallback: ${Math.round(fallbackHeight)}px`);
-      resolve(fallbackHeight);
-    } else {
-      img.src = imageUrl;
-    }
   });
 };
 

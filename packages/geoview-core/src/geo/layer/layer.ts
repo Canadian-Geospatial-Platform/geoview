@@ -453,7 +453,7 @@ export class LayerApi {
     // For each layers in the fulfilled promises only
     promisedLayers.forEach((promise) => {
       // If fullfilled
-      if (promise.status === 'fulfilled' && promise.value !== undefined) {
+      if (promise.status === 'fulfilled') {
         // Get the geoview layer config
         const geoviewLayerConfig = promise.value;
 
@@ -474,7 +474,7 @@ export class LayerApi {
       } else {
         // Depending on the error
         let uuids;
-        if (promise.status === 'rejected' && promise.reason instanceof LayerGeoCoreError) {
+        if (promise.reason instanceof LayerGeoCoreError) {
           ({ uuids } = promise.reason);
         }
 
