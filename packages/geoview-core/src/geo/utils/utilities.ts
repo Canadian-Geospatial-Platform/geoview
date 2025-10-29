@@ -138,7 +138,7 @@ export function getOGCServerUrl(url: string): string {
  * @param {number[]} newBBOX - The new BBOX to set, as an array of 4 numbers: [minX, minY, maxX, maxY]
  * @returns {string} A new URL string with the updated BBOX parameter
  */
-export function replaceCRSAndBBOXParam(url: string, newCRS: string, newBBOX: number[]): string {
+export function replaceCRSandBBOXParam(url: string, newCRS: string, newBBOX: number[]): string {
   const urlObj = new URL(url);
 
   // Format the new BBOX as a comma-separated string
