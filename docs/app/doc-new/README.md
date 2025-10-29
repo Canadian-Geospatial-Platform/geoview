@@ -42,11 +42,12 @@ This folder contains the **official API documentation** for using GeoView in you
 ### State & Events
 
 - **[Event Processors](./event-processors.md)** - Modern event handling and state management
+- **[Layer Sets](./layersets.md)** - Working with layer sets (legends, features, hover info)
 - **[Event Creation](./event-creation.md)** - Creating custom events
 - **[Event System](./event.md)** - Event system overview
 - **[Map Events](./event-map.md)** - Map-specific events
 - **[Layer Events](./event-layer.md)** - Layer-specific events
-- **[LayerSet Events](./event-layerset.md)** - LayerSet event handling
+- **[LayerSet Events](./event-layerset.md)** - LayerSet event handling (internal)
 
 ### Plugins & Extensions
 
@@ -87,6 +88,14 @@ This folder contains the **official API documentation** for using GeoView in you
 #### ...manage state in my plugin
 
 → [Event Processors](./event-processors.md) - Create a custom Event Processor
+
+#### ...access legend or feature data
+
+→ [Layer Sets](./layersets.md) - Using Layer Sets for legends, features, and hover info
+
+#### ...build a data table or export features
+
+→ [Layer Sets - AllFeatureInfoLayerSet](./layersets.md#3-allfeatureinfolayerset)
 
 ## Architecture Overview
 
