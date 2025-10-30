@@ -279,3 +279,180 @@ function cleanURL(url) {
     // Reconstruct the cleaned URL
     return `${protocolPart}://${domain}${path}`;
 }
+
+function testSuiteCreateTable(plugin) {
+  // The map id
+  const mapId = plugin.mapViewer.mapId;
+  const description = plugin.getDescriptionAsHtml();
+  const wrapper = document.createElement('div');
+
+  wrapper.innerHTML = `
+    <div style="white-space: pre-line;">${description}</div>
+    <div style="text-align:right;">
+      <span id="suitesCheck-${mapId}"></span>
+    </div>
+    <div style="text-align:right;">
+      Suites: <span id="suitesCompleted-${mapId}">0</span>/<span id="suitesTotal-${mapId}">0</span>
+    </div>
+    <div style="text-align:right;">
+      Running: <span id="testsRunning-${mapId}">0</span> | Done success: <span id="testsDoneSuccess-${mapId}" style="color:green;">0</span> | Done failed: <span id="testsDoneFailed-${mapId}" style="color:red;">0</span> | Done: <span id="testsDone-${mapId}">0</span>/<span id="testsTotal-${mapId}">0</span>
+    </div>
+    <button class="btnLaunchTests" onclick="launchTests('${mapId}')">LAUNCH TESTS ${mapId} !</button>
+    <br/><br/>
+    <table id="tableResults-${mapId}" class="tableResults">
+      <colgroup>
+        <col>
+        <col style="width: 80px;">
+        <col>
+      </colgroup>
+      <thead>
+        <tr><td>TEST</td><td>RESULT</td><td>DETAILS</td></tr>
+      </thead>
+      <tbody id="tableBody-${mapId}"></tbody>
+    </table>
+  `;
+
+  return wrapper;
+}
+
+function testSuiteUpdateTotals(plugin) {
+  const suitesCompleted = document.getElementById('suitesCompleted-' + plugin.mapViewer.mapId);
+  suitesCompleted.textContent = plugin.getSuitesCompleted();
+  const suitesTotal = document.getElementById('suitesTotal-' + plugin.mapViewer.mapId);
+  suitesTotal.textContent = plugin.getSuitesTotal();
+  const suitesCheck = document.getElementById('suitesCheck-' + plugin.mapViewer.mapId);
+  const suiteRunning = plugin.getTestsRunning() > 0;
+  const completedFully = plugin.getTestsDoneAllAndSuiteDone();
+  const allSuccess = plugin.getTestsDoneAllSuccessAndSuiteDone();
+  suitesCheck.textContent = completedFully ? (allSuccess ? '✔' : '✘') : suiteRunning ? '⏳' : '';
+  suitesCheck.style.color = completedFully ? (allSuccess ? 'green' : 'red') : 'black';
+  const testsRunning = document.getElementById('testsRunning-' + plugin.mapViewer.mapId);
+  testsRunning.textContent = plugin.getTestsRunning();
+  const testsDoneSuccess = document.getElementById('testsDoneSuccess-' + plugin.mapViewer.mapId);
+  testsDoneSuccess.textContent = plugin.getTestsDoneSuccess();
+  const testsDoneFailed = document.getElementById('testsDoneFailed-' + plugin.mapViewer.mapId);
+  testsDoneFailed.textContent = plugin.getTestsDoneFailed();
+  const testsDone = document.getElementById('testsDone-' + plugin.mapViewer.mapId);
+  testsDone.textContent = plugin.getTestsDone();
+  const testsTotal = document.getElementById('testsTotal-' + plugin.mapViewer.mapId);
+  testsTotal.textContent = plugin.getTestsTotal();
+}
+
+function testSuiteUpdateGrandTotal(plugins) {
+  let totalSuitesCompleted = 0;
+  let totalSuitesTotal = 0;
+  let totalTestsRunning = 0;
+  let totalTestsDoneSuccess = 0;
+  let totalTestsDoneFailed = 0;
+  let totalTestsDone = 0;
+  let totalTestsTotal = 0;
+  const thePlugins = Object.values(plugins);
+  thePlugins.forEach(plugin => {
+    totalSuitesCompleted += plugin.getSuitesCompleted();
+    totalSuitesTotal += plugin.getSuitesTotal();
+    totalTestsRunning += plugin.getTestsRunning();
+    totalTestsDoneSuccess += plugin.getTestsDoneSuccess();
+    totalTestsDoneFailed += plugin.getTestsDoneFailed();
+    totalTestsDone += plugin.getTestsDone();
+    totalTestsTotal += plugin.getTestsTotal();
+  });
+  const suitesCompleted = document.getElementById('allSuitesCompleted');
+  suitesCompleted.textContent = totalSuitesCompleted;
+  const suitesTotal = document.getElementById('allSuitesTotal');
+  suitesTotal.textContent = totalSuitesTotal;
+  const suitesCheck = document.getElementById('allSuitesCheck');
+  const suiteRunning = totalTestsRunning > 0;
+  const completedFully = thePlugins.every(plugin => plugin.getTestsDoneAllAndSuiteDone());
+  const allSuccess = thePlugins.every(plugin => plugin.getTestsDoneAllSuccessAndSuiteDone());
+  suitesCheck.textContent = completedFully ? (allSuccess ? '✔' : '✘') : suiteRunning ? '⏳' : '';
+  suitesCheck.style.color = completedFully ? (allSuccess ? 'green' : 'red') : 'black';
+  const testsRunning = document.getElementById('allSuitesTestsRunning');
+  testsRunning.textContent = totalTestsRunning;
+  const testsDoneSuccess = document.getElementById('allSuitesTestsDoneSuccess');
+  testsDoneSuccess.textContent = totalTestsDoneSuccess;
+  const testsDoneFailed = document.getElementById('allSuitesTestsDoneFailed');
+  testsDoneFailed.textContent = totalTestsDoneFailed;
+  const testsDone = document.getElementById('allSuitesTestsDone');
+  testsDone.textContent = totalTestsDone;
+  const testsTotal = document.getElementById('allSuitesTestsTotal');
+  testsTotal.textContent = totalTestsTotal;
+}
+
+function testSuiteAddOrUpdateTestResultRow(plugin, testSuite, testTester, test, details) {
+  let passed = null;
+  if (test.getStatus() === 'success') passed = true;
+  else if (test.getStatus() === 'failed') passed = false;
+
+  // Find the table for the map id
+  const tableBody = document.getElementById('tableBody-' + plugin.mapViewer.mapId);
+  if (!tableBody) {
+    console.error('Table body element with id "tableBody' + plugin.mapViewer.mapId + '" not found.');
+    return;
+  }
+
+  // Try to find an existing row by ID
+  let row = document.getElementById(test.id);
+
+  if (!row) {
+    // If it doesn't exist, create a new row
+    row = document.createElement('tr');
+    row.id = test.id;
+    row.classList.add('expanded');
+
+    // Create and append the three cells
+    row.appendChild(document.createElement('td'));
+    row.appendChild(document.createElement('td'));
+    row.appendChild(document.createElement('td'));
+
+    tableBody.appendChild(row);
+  }
+
+  // Update result cells
+  const testCell = row.cells?.[0];
+  let color = '#515ba5';
+  if (test.getType() === 'true-negative') {
+    color = '#b778e4ff';
+  }
+
+  // Title
+  let testMessage = '<font class="test-title" style="color:' + color + ';" onclick="' + `this.closest('tr').classList.toggle('expanded'); this.closest('tr').classList.toggle('collapsed');">` + test.getTitle() + '</font><br/>';
+
+  // Collapsible content
+  testMessage += '<div class="collapsible-content" style="margin-top: 5px;">';
+  testMessage += '<font style="font-size: x-small;">' + '<i>[' + testSuite.getName() + ' | ' + testTester.getName() + ']' + '</i></font>';
+  testMessage += test.getStepsAsHtml();
+  testCell.innerHTML = testMessage;
+
+  const resultCell = row.cells?.[1];
+  const detailsCell = row.cells?.[2];
+
+  if (resultCell) {
+    resultCell.style.textAlign = 'center';
+    if (passed === true) {
+      row.classList.add('collapsed');
+      row.classList.remove('expanded');
+      resultCell.style.color = 'green';
+      resultCell.textContent = '✔';
+    } else if (passed === false) {
+      // Expand the row
+      row.classList.add('expanded');
+      row.classList.remove('collapsed');
+      resultCell.style.color = 'red';
+      resultCell.textContent = '✘';
+      detailsCell.textContent = details;
+      detailsCell.style.whiteSpace = 'pre-line';
+    } else {
+      resultCell.style.color = 'black';
+      resultCell.textContent = '⏳';
+    }
+  }
+  testMessage += '</div>';
+}
+
+function testSuiteEmptyTestResults(plugin) {
+  // Empty the table
+  const tableBody = document.getElementById('tableBody-' + plugin.mapViewer.mapId);
+  while (tableBody.firstChild) {
+    tableBody.removeChild(tableBody.firstChild);
+  }
+}

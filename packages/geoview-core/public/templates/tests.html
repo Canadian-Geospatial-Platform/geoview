@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Functional Testing - Canadian Geospatial Platform Viewer</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="codedoc.js"></script>
+
+    <style>
+      .btnLaunchTests {
+        width: 100%;
+        padding: 5px 0px;
+      }
+
+      .tableResults {
+        table-layout: fixed;
+        width: 100%;
+        border-collapse: collapse;
+        font-family: Arial, sans-serif;
+      }
+
+      .tableResults thead {
+        background-color: #515ba5;
+        color: #e0e0e0;
+        font-weight: bold;
+      }
+
+      .tableResults thead td {
+        text-align: center;
+      }
+
+      .tableResults td {
+        padding: 6px 8px;
+        width: inherit;
+      }
+
+      .tableResults .test-title {
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .tableResults tbody td {
+        overflow: auto;
+      }
+
+      .tableResults th, .tableResults td {
+        text-align: left;
+      }
+
+      .tableResults th {
+        background-color: #e0e0e0;
+        font-weight: bold;
+      }
+
+      .tableResults tr:nth-child(even) {
+        background-color: #fafafa;
+      }
+
+      .tableResults tbody tr:hover {
+        background-color: #f1f1f1;
+      }
+
+      .tableResults ul {
+        padding-inline-start: 20px;
+      }
+
+      .tableResults .collapsible-content {
+        display: none;
+      }
+
+      .tableResults .collapsed .collapsible-content {
+        display: none;
+      }
+
+      .tableResults .expanded .collapsible-content {
+        display: block;
+      }
+
+      .tableResults .test-title::before {
+        content: "▶";
+        margin-right: 3px;
+        display: inline-block;
+        transition: transform 0.2s;
+      }
+
+      .tableResults tr.expanded .test-title::before {
+        transform: rotate(90deg);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="header-table">
+      <table>
+        <tbody>
+          <tr>
+            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
+            <td class="header-title">
+              <h1><strong>Functional Testing</strong></h1>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <a href="./index.html">Main</a><br />
+              <a href="#HEVNT1">1. Tests map 1 (EPSG: 3978)</a><br />
+              <a href="#HEVNT2">2. Tests map 2 (EPSG: 3978)</a><br />
+              <a href="#HEVNT3">3. Tests map 3 (EPSG: 3857)</a><br />
+              <a href="#HEVNT4">4. Tests map 4 (EPSG: 3978)</a><br />
+              <a href="#HEVNT5">5. Tests map 5 (EPSG: 3978)</a><br />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="text-align:right;">
+      <span id="allSuitesCheck"></span>
+    </div>
+    <div style="text-align:right;">
+      Suites: <span id="allSuitesCompleted">0</span>/<span id="allSuitesTotal">0</span>
+    </div>
+    <div style="text-align:right;">
+      Running: <span id="allSuitesTestsRunning">0</span> | Done success: <span id="allSuitesTestsDoneSuccess" style="color:green;">0</span> | Done failed: <span id="allSuitesTestsDoneFailed" style="color:red;">0</span> | Done: <span id="allSuitesTestsDone">0</span>/<span id="allSuitesTestsTotal">0</span>
+    </div>
+    <button class="btnLaunchTests" onclick="launchTestsAll()">LAUNCH TESTS ALL MAPS!</button>
+
+
+    <!-- REGION MAP 1 -->
+     <div class="map-title-holder">
+      <h4 id="HEVNT1">1. Tests on map 1 (EPSG: 3978)</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+
+    <div id="testSuiteTable-map1"></div>
+    <br/>
+    <div
+      id="map1"
+      class="geoview-map"
+      data-lang="en"
+      data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'projection': 3978
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': true,
+              'labeled': true
+            }
+          },
+          'components': [],
+          'corePackages': ['test-suite'],
+          'corePackagesConfig': [
+            {
+              'test-suite': { 'suites': ['suite-config'] }
+            }
+          ],
+          'theme': 'geo.ca',
+          'footerBar': {
+            'tabs': {
+              'core': [
+                'legend',
+                'layers',
+                'details'
+              ]
+            }
+          }
+        }"
+    ></div>
+    <!-- END REGION MAP 1 -->
+
+    <!-- REGION MAP 2 -->
+    <div class="map-title-holder">
+      <h4 id="HEVNT2">2. Tests on map 2 (EPSG: 3978)</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+
+    <div id="testSuiteTable-map2"></div>
+    <br/>
+    <div
+      id="map2"
+      class="geoview-map"
+      data-lang="en"
+      data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'projection': 3978
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': true,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': []
+          },
+          'components': [],
+          'corePackages': ['test-suite'],
+          'corePackagesConfig': [
+            {
+              'test-suite': { 'suites': ['suite-layer'] }
+            }
+          ],
+          'theme': 'geo.ca',
+          'footerBar': {
+            'tabs': {
+              'core': [
+                'legend',
+                'layers',
+                'details'
+              ]
+            }
+          }
+        }"
+    ></div>
+    <!-- END REGION MAP 2 -->
+
+    <!-- REGION MAP 3 -->
+    <div class="map-title-holder">
+      <h4 id="HEVNT3">3. Tests on map 3 (EPSG: 3857)</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+
+    <div id="testSuiteTable-map3"></div>
+    <br/>
+    <div
+      id="map3"
+      class="geoview-map"
+      data-lang="en"
+      data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'projection': 3857
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': true,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': []
+          },
+          'components': [],
+          'corePackages': ['test-suite'],
+          'corePackagesConfig': [
+            {
+              'test-suite': { 'suites': ['suite-layer'] }
+            }
+          ],
+          'theme': 'geo.ca',
+          'footerBar': {
+            'tabs': {
+              'core': [
+                'legend',
+                'layers',
+                'details'
+              ]
+            }
+          }
+        }"
+    ></div>
+    <!-- END REGION MAP 3 -->
+
+    <!-- REGION MAP 4 -->
+    <div class="map-title-holder">
+      <h4 id="HEVNT4">4. Tests on map 4 (EPSG: 3978)</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+
+    <div id="testSuiteTable-map4"></div>
+    <br/>
+    <div
+      id="map4"
+      class="geoview-map"
+      data-lang="en"
+      data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'projection': 3978
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': true,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'geojsonLYR5',
+                'geoviewLayerName': 'GeoJSON Sample',
+                'metadataAccessPath': 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata.meta',
+                'geoviewLayerType': 'GeoJSON',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': 'polygons.json',
+                    'layerName': 'Polygons'
+                  }
+                ]
+              }
+            ]
+          },
+          'components': [],
+          'corePackages': ['test-suite'],
+          'corePackagesConfig': [
+            {
+              'test-suite': { 'suites': ['suite-map'] }
+            }
+          ],
+          'theme': 'geo.ca',
+          'footerBar': {
+            'tabs': {
+              'core': [
+                'legend',
+                'layers',
+                'details'
+              ]
+            }
+          }
+        }"
+    ></div>
+    <!-- END REGION MAP 4 -->
+
+    <!-- REGION MAP 5 -->
+    <div class="map-title-holder">
+      <h4 id="HEVNT5">5. Tests on map 5 (EPSG: 4326)</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+
+    <div id="testSuiteTable-map5"></div>
+    <br/>
+    <div
+      id="map5"
+      class="geoview-map"
+      data-lang="en"
+      data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'projection': 3978
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': true,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'geojsonLYR5',
+                'geoviewLayerName': 'GeoJSON Sample',
+                'metadataAccessPath': 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata.meta',
+                'geoviewLayerType': 'GeoJSON',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': 'polygons.json',
+                    'layerName': 'Polygons'
+                  }
+                ]
+              }
+            ]
+          },
+          'components': [],
+          'corePackages': ['test-suite'],
+          'corePackagesConfig': [
+            {
+              'geochart': {
+                'charts': [
+                  {
+                    'layers': [
+                      {
+                        'layerId': 'geojsonLYR5/polygons.json'
+                      }
+                    ],
+                    'chart': 'pie',
+                    'geochart': {
+                      'xAxis': {
+                        'property': 'label'
+                      },
+                      'yAxis': {
+                        'property': 'data'
+                      }
+                    },
+                    'category': {
+                      'property': 'location'
+                    },
+                    'datasources': [
+                      {
+                        'display': 'Feature',
+                        'items': [
+                          {
+                            'data': 92,
+                            'label': 'Hockey',
+                            'location': 'Victoria'
+                          },
+                          {
+                            'data': 43.54,
+                            'label': 'Baseball',
+                            'location': 'Victoria'
+                          },
+                          {
+                            'data': 12.3,
+                            'label': 'Basketball',
+                            'location': 'Victoria'
+                          },
+                          {
+                            'data': 66,
+                            'label': 'Football',
+                            'location': 'Victoria'
+                          },
+                          {
+                            'data': 75,
+                            'label': 'Soccer',
+                            'location': 'Victoria'
+                          },
+                          {
+                            'data': 553,
+                            'label': 'Hockey',
+                            'location': 'Toronto'
+                          },
+                          {
+                            'data': 54,
+                            'label': 'Baseball',
+                            'location': 'Toronto'
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              'test-suite': { 'suites': ['suite-geochart'] }
+            }
+          ],
+          'theme': 'geo.ca',
+          'footerBar': {
+            'tabs': {
+              'core': [
+                'legend',
+                'layers',
+                'details',
+                'geochart'
+              ]
+            }
+          }
+        }"
+    ></div>
+    <!-- END REGION MAP 5 -->
+
+    <script>
+      // The test suites plugins (1 plugin per map)
+      const testSuitesPlugins = {};
+
+      // Register a handler when a map viewer is initialized
+      cgpv.onMapInit((mapViewer) => {
+        // Get the test-suite plugin as loaded in the map viewer
+        const plugin = mapViewer.plugins['test-suite'];
+
+        // Keep in global object on the page
+        testSuitesPlugins[plugin.mapViewer.mapId] = plugin;
+
+        // Create the table html
+        const htmlSection = testSuiteCreateTable(plugin);
+
+        // Create the table html
+        document.getElementById('testSuiteTable-' + plugin.mapViewer.mapId).appendChild(htmlSection);
+
+        // Hook the test update
+        plugin.onTestUpdated((sender, event) => {
+          // Add a row to the table
+          testSuiteAddOrUpdateTestResultRow(plugin, event.suite, event.tester, event.test, event.test.getError()?.message);
+
+          // Update
+          testSuiteUpdateTotals(plugin);
+          testSuiteUpdateGrandTotal(testSuitesPlugins);
+        });
+      });
+
+      // initialize cgpv
+      cgpv.init();
+
+      function launchTestsAll() {
+        // Launch all tests
+        Object.keys(testSuitesPlugins).forEach((mapId) => {
+          // Redirect
+          launchTests(mapId);
+        });
+      }
+
+      async function launchTests(mapId) {
+        // Get the plugin
+        const plugin = testSuitesPlugins[mapId];
+
+        // Launch the test suite if no tests are running
+        if (plugin.getTestsRunning() === 0) {
+          // Empty the html table
+          testSuiteEmptyTestResults(plugin);
+
+          // Launch the test suites
+          await plugin.launchTestSuites();
+
+          // Update
+          testSuiteUpdateTotals(plugin);
+          testSuiteUpdateGrandTotal(testSuitesPlugins);
+        } else {
+          // Alert
+          throw new Error('Tests are already running, please wait.')
+        }
+      }
+    </script>
+  </body>
+</html>

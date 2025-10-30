@@ -15,7 +15,9 @@ export class GVWFS extends AbstractGVVector {
    * @param {VectorSource} olSource - The OpenLayer source.
    * @param {WfsLayerEntryConfig} layerConfig - The layer configuration.
    */
-  public constructor(olSource: VectorSource, layerConfig: WfsLayerEntryConfig) {
+  // The constructor is not useless, it narrows down the accepted parameter type.
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
+  constructor(olSource: VectorSource, layerConfig: WfsLayerEntryConfig) {
     super(olSource, layerConfig);
   }
 

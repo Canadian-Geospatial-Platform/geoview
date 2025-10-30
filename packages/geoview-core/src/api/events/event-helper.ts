@@ -10,7 +10,7 @@ export default class EventHelper {
    * @param {EventDelegateBase<T, U, Z>[]} handlersList - The list of handlers to be called with the event
    * @param {U} event - The event to emit
    */
-  public static emitEvent<T, U, Z>(sender: T, handlersList: EventDelegateBase<T, U, Z>[], event: U): Z[] {
+  static emitEvent<T, U, Z>(sender: T, handlersList: EventDelegateBase<T, U, Z>[], event: U): Z[] {
     // Trigger all the handlers in the array
     return handlersList.map((handler) => handler(sender, event));
   }
@@ -20,7 +20,7 @@ export default class EventHelper {
    * @param {EventDelegateBase<T, U, Z>[]} handlersList - The list of handlers to be called with the event
    * @param {EventDelegateBase<T, U, Z>} callback - The callback to be executed whenever the event is raised
    */
-  public static onEvent<T, U, Z>(handlersList: EventDelegateBase<T, U, Z>[], callback: EventDelegateBase<T, U, Z>): void {
+  static onEvent<T, U, Z>(handlersList: EventDelegateBase<T, U, Z>[], callback: EventDelegateBase<T, U, Z>): void {
     // Push a new callback handler to the list of handlers
     handlersList.push(callback);
   }
@@ -30,7 +30,7 @@ export default class EventHelper {
    * @param {EventDelegateBase<T, U, Z>[]} handlersList - The list of handlers on which to check to remove the handler
    * @param {EventDelegateBase<T, U, Z>} callback - The callback to stop being called whenever the event is emitted
    */
-  public static offEvent<T, U, Z>(handlersList: EventDelegateBase<T, U, Z>[], callback: EventDelegateBase<T, U, Z>): void {
+  static offEvent<T, U, Z>(handlersList: EventDelegateBase<T, U, Z>[], callback: EventDelegateBase<T, U, Z>): void {
     // Find the callback and remove it
     const index = handlersList.indexOf(callback);
     if (index !== -1) {

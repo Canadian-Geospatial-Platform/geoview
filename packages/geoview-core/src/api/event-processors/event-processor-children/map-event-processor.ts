@@ -1175,13 +1175,14 @@ export class MapEventProcessor extends AbstractEventProcessor {
    *
    * @param {string} mapId - ID of map to zoom on
    * @param {string} layerPath - Path of layer to zoom to.
+   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
    */
   static zoomToLayerVisibleScale(mapId: string, layerPath: string): void {
     const view = this.getMapViewer(mapId).getView();
     const mapZoom = view.getZoom();
     const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
-    const layerMaxZoom = geoviewLayer!.getMaxZoom();
-    const layerMinZoom = geoviewLayer!.getMinZoom();
+    const layerMaxZoom = geoviewLayer.getMaxZoom();
+    const layerMinZoom = geoviewLayer.getMinZoom();
 
     // Set the right zoom (Infinity will act as a no change in zoom level)
     let layerZoom = Infinity;
@@ -1191,7 +1192,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // Change view to go to proper zoom centered in the middle of layer extent
     // If there is no layerExtent or if the zoom needs to zoom out, the center will be undefined and not use
     // Check if the map center is already in the layer extent and if so, do not center
-    const layerExtent = (geoviewLayer! as AbstractGVLayer).getBounds(this.getMapViewer(mapId).getProjection(), MapViewer.DEFAULT_STOPS);
+    const layerExtent = (geoviewLayer as AbstractGVLayer).getBounds(this.getMapViewer(mapId).getProjection(), MapViewer.DEFAULT_STOPS);
     const centerExtent =
       layerExtent && layerMinZoom > mapZoom! && !isPointInExtent(view.getCenter()!, layerExtent)
         ? [(layerExtent[2] + layerExtent[0]) / 2, (layerExtent[1] + layerExtent[3]) / 2]
@@ -1212,7 +1213,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
   static setLayerZIndices = (mapId: string): void => {
     const reversedLayers = [...this.getMapStateProtected(mapId).orderedLayerInfo].reverse();
     reversedLayers.forEach((orderedLayerInfo, index) => {
-      const olLayer = this.getMapViewerLayerAPI(mapId).getOLLayer(orderedLayerInfo.layerPath);
+      const olLayer = this.getMapViewerLayerAPI(mapId).getOLLayerIfExists(orderedLayerInfo.layerPath);
       if (olLayer) olLayer?.setZIndex(index + 10);
     });
   };
@@ -1232,7 +1233,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} layerPath The path for the layer to get filters from.
    */
   static getActiveVectorFilters(mapId: string, layerPath: string): (string | undefined)[] | undefined {
-    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
+    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerIfExists(layerPath);
     if (geoviewLayer) {
       const initialFilter = this.getInitialFilter(mapId, layerPath);
       const tableFilter = DataTableEventProcessor.getTableFilter(mapId, layerPath);
@@ -1256,7 +1257,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    */
   static applyLayerFilters(mapId: string, layerPath: string): void {
     // Get the Geoview layer
-    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
+    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerIfExists(layerPath);
 
     // If found it and of right type
     if (

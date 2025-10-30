@@ -64,7 +64,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {ImageArcGISRest} olSource - The OpenLayer source.
    * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer configuration.
    */
-  public constructor(olSource: ImageArcGISRest, layerConfig: EsriDynamicLayerEntryConfig) {
+  constructor(olSource: ImageArcGISRest, layerConfig: EsriDynamicLayerEntryConfig) {
     super(olSource, layerConfig);
 
     // TODO: Performance - Do we need worker pool or one worker per layer is enough. If a worker is already working we should terminate it
@@ -102,9 +102,16 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
    */
   override async onFetchLegend(): Promise<TypeLegend | null> {
+    // Get the config
     const layerConfig = this.getLayerConfig();
-    // Only raster layers need the alternate code
-    if (layerConfig.getLayerMetadata()?.type !== 'Raster Layer') return super.onFetchLegend();
+
+    // If not a Raster Layer type
+    if (layerConfig.getLayerMetadata()?.type !== 'Raster Layer') {
+      // Regular fetch
+      return super.onFetchLegend();
+    }
+
+    // At this point, the layer type is 'Raster Layer'
 
     try {
       if (!layerConfig) return null;
@@ -160,7 +167,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       const legend: TypeLegend = {
         type: CONST_LAYER_TYPES.ESRI_IMAGE,
         styleConfig,
-        legend: await getLegendStyles(this.getStyle()),
+        legend: await getLegendStyles(styleConfig),
       };
 
       return legend;
@@ -602,8 +609,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Handles progress messages from a worker to update layer loading status
-   * @param {MessageEvent} event - The message event from the worker containing progress data
-   * @returns {void}
+   * @param {MessageEvent} event - The message event from the worker containing progress data.
    */
   #handleWorkerMessage(event: MessageEvent): void {
     // Log

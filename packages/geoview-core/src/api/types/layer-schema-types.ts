@@ -704,7 +704,7 @@ export interface TypeMetadataWMSCapabilityLayer {
   MinScaleDenominator: number;
   MaxScaleDenominator: number;
   Style: TypeMetadataWMSCapabilityLayerStyle[];
-  CRS: TypeMetadataWMSCapabilityLayerCRS[];
+  CRS: string[];
   Dimension: TypeMetadataWMSCapabilityLayerDimension[];
   EX_GeographicBoundingBox: Extent;
   queryable: boolean;
@@ -713,10 +713,6 @@ export interface TypeMetadataWMSCapabilityLayer {
   fixedWidth: unknown;
   fixedHeight: unknown;
   noSubsets: unknown;
-}
-
-export interface TypeMetadataWMSCapabilityLayerCRS {
-  Name: string;
 }
 
 export interface TypeMetadataWMSCapabilityLayerBBox {

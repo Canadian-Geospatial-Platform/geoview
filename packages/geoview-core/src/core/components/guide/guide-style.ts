@@ -23,6 +23,9 @@ export const getSxClasses = (theme: Theme): SxStyles =>
           '& img': {
             verticalAlign: 'bottom',
           },
+          '& img[src$=".svg"]': {
+            width: '30px',
+          },
         },
         '& h3': {
           marginBottom: '5px',
