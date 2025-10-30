@@ -1,4 +1,4 @@
-# MapViewer Public Functions
+﻿# MapViewer Public Functions
 
 Below is a comprehensive list of all public functions available on a MapViewer instance obtained through `cgpv.api.getMapViewer('mapId')`.
 

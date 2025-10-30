@@ -1,4 +1,4 @@
-# GeoView Events Documentation
+﻿# GeoView Events Documentation
 
 ## Overview
 
@@ -24,8 +24,8 @@ Where:
 
 ## Common Events
 
-- [Map Events](./event-map.md)
-- [Layer Events](./event-layer.md)
+- [Map Events](app/doc-new/event-map.md)
+- [Layer Events](app/doc-new/event-layer.md)
 
 
 ## Best Practices

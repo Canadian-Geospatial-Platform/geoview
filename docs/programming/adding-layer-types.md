@@ -1,8 +1,8 @@
-# Adding New Layer Types
+﻿# Adding New Layer Types
 
 > **👥 Audience:** Core developers extending GeoView functionality
 >
-> **For API Users:** See [GeoView Layers Guide](../app/doc-new/layers.md) for using existing layer types
+> **For API Users:** See [GeoView Layers Guide](app/doc-new/layers.md) for using existing layer types
 
 This guide explains how to add support for new layer types to GeoView.
 
@@ -23,15 +23,20 @@ AbstractGeoViewLayers (parent)
 │   ├── EsriDynamic
 │   ├── EsriImage
 │   ├── ImageStatic
-│   ├── OgcWms
+│   ├── OgcWms (wms.ts)
+│   ├── VectorTiles
 │   └── XyzTiles
 └── AbstractGeoViewVector
+    ├── CSV
     ├── EsriFeature
     ├── GeoJSON
-    ├── GeoPackage
+    ├── KML
     ├── OgcFeature
-    └── OgcWfs
+    ├── OgcWfs (wfs.ts)
+    └── WKB
 ```
+
+> **Note:** `GeoPackage` and `shapefile` are input file formats that are automatically converted to one of the vector types above (typically GeoJSON or WKB) during loading, so they don't have dedicated class implementations.
 
 ## Step 1: Determine Layer Category
 
@@ -47,7 +52,12 @@ First, determine if your new layer type is **raster** or **vector** based on the
 
 - `Vector`, `VectorTile`
 - `GeoJSON`, `KML`, `GPX`
+- `WKB` (Well-Known Binary)
+- `CSV` (with coordinates)
 - Extends `VectorSource`
+
+**Note on Vector Tiles:**
+Despite being in the `raster` folder, `VectorTiles` represents pre-tiled vector data (Mapbox Vector Tiles/MVT format) and is different from raster XYZ tiles. It's organized under raster due to its tile-based delivery mechanism.
 
 ## Step 2: Create Layer Class
 
@@ -154,9 +164,9 @@ Update `packages/geoview-core/src/geo/layer/geoview-layers/abstract-geoview-laye
 ### Add to DEFAULT_LAYER_NAMES
 
 ```typescript
-export const DEFAULT_LAYER_NAMES: Record<string, TypeLocalizedString> = {
+export const DEFAULT_LAYER_NAMES: string = {
   // ... existing entries
-  imageStatic: { en: "Static Image", fr: "Image statique" },
+  imageStatic: "Static Image",
 };
 ```
 
@@ -418,7 +428,7 @@ const mapViewer = cgpv.api.createMapFromConfig("mapId", {
     {
       geoviewLayerId: "testImageStatic",
       geoviewLayerType: "imageStatic",
-      metadataAccessPath: { en: "https://example.com/image.png" },
+      metadataAccessPath: "https://example.com/image.png",
       listOfLayerEntryConfig: [
         {
           layerId: "image",
@@ -540,11 +550,11 @@ protected applyStyle(olLayer: BaseLayer, styleConfig: any): void {
 
 ## See Also
 
-- **[GeoView Layers Guide](../app/doc-new/layers.md)** - User-facing layer documentation
-- **[Layer API Reference](../app/doc-new/layer-api.md)** - API methods
-- **[TypeScript Patterns](./using-type.md)** - TypeScript conventions
-- **[Best Practices](./best-practices.md)** - General coding standards
-- **[Testing Guide](./testing.md)** - Testing patterns
+- **[GeoView Layers Guide](app/doc-new/layers.md)** - User-facing layer documentation
+- **[Layer API Reference](app/doc-new/layer-api.md)** - API methods
+- **[TypeScript Patterns](programming/using-type.md)** - TypeScript conventions
+- **[Best Practices](programming/best-practices.md)** - General coding standards
+- **[Testing Guide](programming/testing.md)** - Testing patterns
 
 ## Example: Complete Layer Implementation
 

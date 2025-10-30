@@ -1,4 +1,4 @@
-# GeoView API Utilities Documentation
+﻿# GeoView API Utilities Documentation
 
 Below is a categorized list of all utility functions available in GeoView. These utilities can be used to perform common tasks in map applications.
 

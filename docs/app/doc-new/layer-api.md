@@ -1,4 +1,4 @@
-# Layer API Reference
+﻿# Layer API Reference
 
 The `LayerApi` class provides comprehensive methods for managing map layers in GeoView. It handles layer creation, removal, configuration, visibility, and interaction with various layer types including WMS, ESRI services, GeoJSON, and more.
 
@@ -52,19 +52,13 @@ addGeoviewLayer(
 ```typescript
 const result = mapViewer.layer.addGeoviewLayer({
   geoviewLayerId: "myLayer",
-  geoviewLayerName: {
-    en: "My WMS Layer",
-    fr: "Ma couche WMS",
-  },
+  geoviewLayerName: "My WMS Layer",
   geoviewLayerType: "ogcWms",
-  metadataAccessPath: {
-    en: "https://example.com/wms",
-    fr: "https://example.com/wms",
-  },
+  metadataAccessPath: "https://example.com/wms",
   listOfLayerEntryConfig: [
     {
       layerId: "layer1",
-      layerName: { en: "Layer 1", fr: "Couche 1" },
+      layerName: "Layer 1"
     },
   ],
 });
@@ -1217,26 +1211,15 @@ const olLayer = await mapViewer.layer.getOLLayerAsync(
 ```typescript
 mapViewer.layer.addGeoviewLayer({
   geoviewLayerId: "wmsLayer",
-  geoviewLayerName: { en: "WMS Layer" },
+  geoviewLayerName: "WMS Layer",
   geoviewLayerType: "ogcWms",
-  metadataAccessPath: { en: "https://example.com/wms" },
+  metadataAccessPath: "https://example.com/wms",
   listOfLayerEntryConfig: [
     {
       layerId: "layer1",
-      layerName: { en: "Layer 1" },
+      layerName: "Layer 1"
     },
   ],
-});
-```
-
-### Adding a GeoJSON Layer
-
-```typescript
-mapViewer.layer.addGeoviewLayer({
-  geoviewLayerId: "geojsonLayer",
-  geoviewLayerName: { en: "GeoJSON Layer" },
-  geoviewLayerType: "geoJSON",
-  metadataAccessPath: { en: "/data/mydata.geojson" },
 });
 ```
 

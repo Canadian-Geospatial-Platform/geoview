@@ -1,4 +1,4 @@
-### Layer Events
+﻿### Layer Events
 ```typescript
 // Layer configuration added
 mapViewer.layer.onLayerConfigAdded((sender, payload) => {

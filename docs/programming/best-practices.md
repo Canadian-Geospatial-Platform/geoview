@@ -1,4 +1,4 @@
-# Best Practices #
+﻿# Best Practices #
 In the VS Code development environment, many of the coding rules are imposed by the prettier and eslint code checkers. However, the
 configuration of some rules is not easily done for these checkers. We must therefore, for these particular cases, rely on the
 goodwill of our programmers. Here are some additional rules that you must follow.

@@ -1,6 +1,6 @@
-# GeoView API Documentation
+﻿# GeoView API Documentation
 
-> **🔍 Complete TypeScript API:** For full type definitions, interfaces, and auto-generated documentation, see [TypeDoc API Reference](https://canadian-geospatial-platform.github.io/geoview/public/docs/)
+> **🔍 Complete TypeScript API:** For full type definitions, interfaces, and auto-generated documentation, see [TypeDoc API Reference](https://canadian-geospatial-platform.github.io/geoview/public/typeDocAPI/)
 
 ## Overview
 
@@ -158,15 +158,15 @@ utilities: {
 }
 ```
 
-For complete documentation of all utility functions, see [api-utilities.md](./api-utilities.md)
+For complete documentation of all utility functions, see [api-utilities.md](app/doc-new/api-utilities.md)
 
 ---
 
 ## See Also
 
-- [api-utilities.md](./api-utilities.md) - Complete utilities documentation
-- [map-viewer-api-doc.md](./map-viewer-api-doc.md) - MapViewer instance methods
-- [layer-api.md](./layer-api.md) - Layer management API
-- [event-processors.md](./event-processors.md) - Event processors documentation
-- [cgpv.md](./cgpv.md) - Global cgpv object documentation
-- [packages.md](./packages.md) - Plugin packages
+- [api-utilities.md](app/doc-new/api-utilities.md) - Complete utilities documentation
+- [map-viewer-api-doc.md](app/doc-new/map-viewer-api-doc.md) - MapViewer instance methods
+- [layer-api.md](app/doc-new/layer-api.md) - Layer management API
+- [event-processors.md](app/doc-new/event-processors.md) - Event processors documentation
+- [cgpv.md](app/doc-new/cgpv.md) - Global cgpv object documentation
+- [packages.md](app/doc-new/packages.md) - Plugin packages

@@ -1,4 +1,4 @@
-# MapViewer API Documentation
+﻿# MapViewer API Documentation
 
 Below is a categorized list of all functions available on a MapViewer instance obtained through `cgpv.api.getMapViewer('mapId')`.
 

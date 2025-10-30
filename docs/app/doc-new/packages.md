@@ -1,4 +1,4 @@
-# GeoView Packages and Plugins
+﻿# GeoView Packages and Plugins
 
 GeoView is built as a monorepo with a core package and several plugin packages that extend functionality. This document covers all available packages and how to use them.
 
@@ -37,12 +37,6 @@ All packages are managed using Rush.js and built with TypeScript.
 - Event processor architecture
 - Multilingual support (English/French)
 - Accessibility features
-
-**Installation:**
-
-```bash
-npm install geoview-core
-```
 
 **Usage:**
 
@@ -88,12 +82,12 @@ cgpv.api.createMapFromConfig("mapId", {
   },
   theme: "dark",
   components: ["north-arrow", "overview-map"],
-  corePackages: ["basemap-panel"],
+  corePackages: [],
   surmountedComponents: [],
 });
 ```
 
-**See Also:** [API Reference](./api.md), [Map Viewer API](./map-viewer-api-doc.md)
+**See Also:** [API Reference](app/doc-new/api.md), [Map Viewer API](app/doc-new/map-viewer-api-doc.md)
 
 ---
 
@@ -132,8 +126,26 @@ The time slider is typically included in the GeoView build. To use it:
 
 ```json
 {
-  "plugins": ["time-slider-panel"]
+  "footerBar": {
+    "tabs": {
+      "core": ["time-slider"]
+    },
+    "selectedTab": "time-slider",
+    "selectedTimeSliderLayerPath": "layerPath"
+  }
 }
+```
+
+```json
+"corePackagesConfig": [
+        {
+            "time-slider": {
+                "sliders": [
+                    {
+                      ...
+                    }]
+            }
+        }]
 ```
 
 **Programmatic:**
@@ -161,13 +173,11 @@ if (TimeSliderEventProcessor.isTimeSliderInitialized("mapId")) {
       {
         "geoviewLayerId": "wmsTimeLayer",
         "geoviewLayerType": "ogcWms",
-        "metadataAccessPath": {
-          "en": "https://example.com/wms"
-        },
+        "metadataAccessPath": "https://example.com/wms",
         "listOfLayerEntryConfig": [
           {
             "layerId": "temperature",
-            "layerName": { "en": "Temperature" },
+            "layerName": "Temperature",
             "source": {
               "featureInfo": {
                 "queryable": true
@@ -210,7 +220,7 @@ const filters = TimeSliderEventProcessor.getTimeSliderFilters("mapId");
 const timeValues = TimeSliderEventProcessor.getTimeSliderValues("mapId");
 ```
 
-**See Also:** [TimeSliderEventProcessor](./event-processors.md#3-timeslidereventprocessor)
+**See Also:** [TimeSliderEventProcessor](app/doc-new/event-processors.md#3-timeslidereventprocessor)
 
 ---
 
@@ -266,34 +276,25 @@ if (GeochartEventProcessor.isGeochartInitialized("mapId")) {
 
 ```json
 {
-  "map": {
-    "listOfGeoviewLayerConfig": [
-      {
-        "geoviewLayerId": "populationLayer",
-        "geoviewLayerType": "esriFeature",
-        "metadataAccessPath": {
-          "en": "https://example.com/FeatureServer/0"
-        }
-      }
-    ]
-  },
-  "plugins": ["geochart"],
-  "geochart": {
-    "charts": [
-      {
-        "chartId": "populationChart",
-        "chartType": "bar",
-        "layerPath": "populationLayer",
-        "xAxis": "city",
-        "yAxis": "population",
-        "title": {
-          "en": "Population by City",
-          "fr": "Population par ville"
-        }
-      }
-    ]
+  "footerBar": {
+    "tabs": {
+      "core": ["geochart"]
+    },
+    "selectedTab": "geochart"
   }
 }
+```
+
+```json
+"corePackagesConfig": [
+        {
+            "geochart": {
+                "charts": [
+                    {
+                      ...
+                    }]
+            }
+        }]
 ```
 
 #### API Methods
@@ -311,7 +312,7 @@ const charts = GeochartEventProcessor.getGeochartCharts("mapId");
 GeochartEventProcessor.propagateGeochartToStore("mapId", layerPath, chartData);
 ```
 
-**See Also:** [GeochartEventProcessor](./event-processors.md#8-geocharteventprocessor)
+**See Also:** [GeochartEventProcessor](app/doc-new/event-processors.md#8-geocharteventprocessor)
 
 ---
 
@@ -353,7 +354,7 @@ GeochartEventProcessor.propagateGeochartToStore("mapId", layerPath, chartData);
 
 ```json
 {
-  "plugins": ["swiper"]
+  "corePackages": ["swiper"]
 }
 ```
 
@@ -377,30 +378,28 @@ if (SwiperEventProcessor.isSwiperInitialized("mapId")) {
     "listOfGeoviewLayerConfig": [
       {
         "geoviewLayerId": "layer2020",
-        "geoviewLayerName": { "en": "2020 Imagery" },
+        "geoviewLayerName": "2020 Imagery",
         "geoviewLayerType": "xyzTiles",
-        "metadataAccessPath": {
-          "en": "https://tiles.example.com/2020/{z}/{x}/{y}.png"
-        }
+        "metadataAccessPath": "https://tiles.example.com/2020/{z}/{x}/{y}.png"
       },
       {
         "geoviewLayerId": "layer2024",
-        "geoviewLayerName": { "en": "2024 Imagery" },
+        "geoviewLayerName": "2024 Imagery",
         "geoviewLayerType": "xyzTiles",
-        "metadataAccessPath": {
-          "en": "https://tiles.example.com/2024/{z}/{x}/{y}.png"
-        }
+        "metadataAccessPath": "https://tiles.example.com/2024/{z}/{x}/{y}.png"
       }
     ]
   },
-  "plugins": ["swiper"],
-  "swiper": {
-    "orientation": "vertical",
-    "layers": {
-      "left": ["layer2020"],
-      "right": ["layer2024"]
+  "corePackage": ["swiper"],
+  "corePackagesConfig": [
+    {
+      "swiper": {
+        "orientation": "horizontal",
+        "keyboardOffset": 10,
+        "layers": ["esriFeatureLYR4/0"]
+      }
     }
-  }
+  ]
 }
 ```
 
@@ -416,7 +415,7 @@ const isInitialized = SwiperEventProcessor.isSwiperInitialized("mapId");
 const swiperState = SwiperEventProcessor.getSwiperState("mapId");
 ```
 
-**See Also:** [SwiperEventProcessor](./event-processors.md#9-swipereventprocessor)
+**See Also:** [SwiperEventProcessor](app/doc-new/event-processors.md#9-swipereventprocessor)
 
 ---
 
@@ -470,13 +469,29 @@ if (DrawerEventProcessor.isDrawerInitialized("mapId")) {
 
 ```json
 {
-  "plugins": ["drawer"],
-  "drawer": {
-    "tools": ["point", "line", "polygon", "circle", "rectangle"],
-    "measureEnabled": true,
-    "snapToFeatures": true,
-    "snapTolerance": 10
-  }
+  "navBar": ["drawer"],
+  "corePackagesConfig": [
+    {
+      "drawer": {
+        "style": {
+          "fillColor": "rgba(252, 241, 0, 0.3)",
+          "strokeColor": "#000000",
+          "strokeWidth": 1.3
+        },
+        "activeGeom": "LineString",
+        "geomTypes": [
+          "Point",
+          "Text",
+          "LineString",
+          "Polygon",
+          "Rectangle",
+          "Circle",
+          "Star"
+        ],
+        "hideMeasurements": false
+      }
+    }
+  ]
 }
 ```
 
@@ -504,7 +519,7 @@ DrawerEventProcessor.clearDrawings("mapId");
 const geojson = DrawerEventProcessor.exportAsGeoJSON("mapId");
 ```
 
-**See Also:** [DrawerEventProcessor](./event-processors.md#10-drawereventprocessor)
+**See Also:** [DrawerEventProcessor](app/doc-new/event-processors.md#10-drawereventprocessor)
 
 ---
 
@@ -537,7 +552,7 @@ const geojson = DrawerEventProcessor.exportAsGeoJSON("mapId");
 
 ```json
 {
-  "plugins": ["aoi-panel"]
+  "navBar": ["aoi-panel"]
 }
 ```
 
@@ -545,14 +560,31 @@ const geojson = DrawerEventProcessor.exportAsGeoJSON("mapId");
 
 ```json
 {
-  "plugins": ["aoi-panel"],
-  "aoi-panel": {
-    "allowMultiple": true,
-    "defaultName": "My Area",
-    "enableImport": true,
-    "enableExport": true,
-    "storageKey": "geoview-aoi-library"
-  }
+  "appBar": {
+    "tabs": {
+      "core": ["aoi-panel"]
+    }
+  },
+  "corePackagesConfig": [
+    {
+      "aoi-panel": {
+        "isOpen": true,
+        "aoiList": [
+          {
+            "imageUrl": "https://encrypted-tbn1.gstatic.com/licensed-image?q=tbn:ANd9GcSbleN5tjC2Dilx77SCBJD9f3CxlnDEEGx5qY786BpVlu4JLzUd1ixjIOfO1WX5mJjUQLmSSg4JFuNWgqGZJZDV7LBH8y3QBz3KrjuHdg",
+            "aoiTitle": "CN Tower",
+            "extent": [-79.3881, 43.6416, -79.3861, 43.6436]
+          },
+          {
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/licensed-image?q=tbn:ANd9GcTCSU8D4pV4fY9MfYa6NZvpcMrCDhxE-ySOSzbxqSCC67_loNeJ9WI-2Ki7zCfU36M0Iwt7-4aw0y3_Vg8t_8sxo86xS6HVewQdYjOOXA",
+            "aoiTitle": "Parliament Hill",
+            "extent": [-75.7019, 45.4226, -75.6999, 45.4246]
+          }
+        ],
+        "version": "1.0"
+      }
+    }
+  ]
 }
 ```
 
@@ -592,31 +624,7 @@ const geojson = DrawerEventProcessor.exportAsGeoJSON("mapId");
 
 #### Configuration Example
 
-```json
-{
-  "plugins": ["custom-legend"],
-  "custom-legend": {
-    "legendId": "myLegend",
-    "title": { "en": "Custom Legend", "fr": "Légende personnalisée" },
-    "layout": "vertical",
-    "style": {
-      "fontSize": "14px",
-      "fontFamily": "Arial",
-      "backgroundColor": "#ffffff"
-    },
-    "items": [
-      {
-        "label": { "en": "Category 1", "fr": "Catégorie 1" },
-        "symbol": {
-          "type": "circle",
-          "color": "#ff0000",
-          "size": 10
-        }
-      }
-    ]
-  }
-}
-```
+... To come
 
 ---
 
@@ -772,7 +780,7 @@ rush add -p lodash --caret
 
 ## See Also
 
-- [Event Processors](./event-processors.md) - State management for plugins
-- [Configuration Reference](./configuration-reference.md) - Plugin configuration options
-- [API Reference](./api.md) - Core API methods
-- [State Management](./state-management.md) - Zustand store architecture
+- [Event Processors](app/doc-new/event-processors.md) - State management for plugins
+- [Configuration Reference](app/doc-new/configuration-reference.md) - Plugin configuration options
+- [API Reference](app/doc-new/api.md) - Core API methods
+- [State Management](app/doc-new/state-management.md) - Zustand store architecture

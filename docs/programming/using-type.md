@@ -1,4 +1,4 @@
-# Using TypeJson* #
+﻿# Using TypeJson* #
 
 Among the types that have been created for the GeoView application, those that allow working with Json-encoded data
 are probably the most subtle to understand. For this reason we have put together some explanations here to help you

@@ -1,22 +1,42 @@
-# Events related documentation
+# ⚠️ DEPRECATED - Event System Documentation
 
-> **📘 Note:** This folder contains technical documentation about the internal event system implementation.
->
-> **For API Users:** See [Event Processors](../doc-new/event-processors.md) for how to use events and actions in your applications.
+> **📘 This folder is being deprecated.** Content has been migrated to the new documentation structure.
 
-## Event System Documentation
+## 🔄 Migration Guide
 
-- [Events API](./events-api.md) - Event system implementation details
-- [Events and Payloads](./event-payloads.md) - Event data structures
-- [LayerSet event managment](./LayerSet/LayerSet-event-managment.md)
-  - [LayerSet class description](./LayerSet/LayerSet-event-managment.md#layerset-class)
-  - [LayerSet state diagram](./LayerSet/LayerSet-event-managment.md#layerset-state-diagram)
-- [LegendsLayerSet event managment](./LegendsLayerSet/LegendsLayerSet-event-managment.md)
-  - [LegendsLayerSet class description](./LegendsLayerSet/LegendsLayerSet-event-managment.md#legendslayerset-class)
-  - [LegendsLayerSet state diagram](./LegendsLayerSet/LegendsLayerSet-event-managment.md#legendslayerset-state-diagram)
-- [FeatureInfoLayerSet event managment](./FeatureInfoLayerSet/FeatureInfoLayerSet-event-managment.md)
-  - [FeatureInfoLayerSet class description](./FeatureInfoLayerSet/FeatureInfoLayerSet-event-managment.md#FeatureInfoLayerSet-class)
-  - [FeatureInfoLayerSet state diagram](./FeatureInfoLayerSet/FeatureInfoLayerSet-event-managment.md#FeatureInfoLayerSet-state-diagram)
+**For API Users (using GeoView in your applications):**
+
+- 📘 **Using Events & Actions** → See [Event Processors Guide](../doc-new/event-processors.md)
+- 🎯 **Layer Sets (Legends, Features)** → See [Layer Sets Guide](../doc-new/layersets.md)
+- 📚 **Event API Reference** → See [Event System](../doc-new/event.md), [Map Events](../doc-new/event-map.md), [Layer Events](../doc-new/event-layer.md)
+
+**For Core Developers (contributing to GeoView):**
+
+- 🏗️ **Event Processor Architecture** → See [Event Processor Architecture](../../programming/event-processor-architecture.md)
+- 🔧 **Layer Set Architecture** → See [Layer Set Architecture](../../programming/layerset-architecture.md)
+- 🛠️ **Creating Custom Processors** → See [Event Processor Architecture - Custom Processors](../../programming/event-processor-architecture.md#creating-custom-event-processors)
+
+## 📚 Complete Documentation
+
+Visit the new documentation structure:
+
+- [API Documentation](../doc-new/) - For GeoView users
+- [Programming Guide](../../programming/) - For GeoView developers
+
+---
+
+## Old Content (Deprecated)
+
+<details>
+<summary>Click to view old documentation structure (contains draw.io diagrams - not maintained)</summary>
+
+### Event System Documentation
+
+- [Events API](./events-api.md) - ⚠️ See [Event Processors](../doc-new/event-processors.md) instead
+- [Events and Payloads](./event-payloads.md) - ⚠️ See [TypeDoc API](../../../public/typeDocAPI/) for type definitions
+- [LayerSet event managment](./LayerSet/LayerSet-event-managment.md) - ⚠️ See [Layer Set Architecture](../../programming/layerset-architecture.md)
+- [LegendsLayerSet event managment](./LegendsLayerSet/LegendsLayerSet-event-managment.md) - ⚠️ See [Layer Sets Guide](../doc-new/layersets.md)
+- [FeatureInfoLayerSet event managment](./FeatureInfoLayerSet/FeatureInfoLayerSet-event-managment.md) - ⚠️ See [Layer Sets Guide](../doc-new/layersets.md)
 
 ## Events vs Actions
 
