@@ -1,4 +1,4 @@
-# CGPV API: Functions and Events
+﻿# CGPV API: Functions and Events
 
 This document lists and describes the main functions and event hooks available on the `cgpv` global object, which is the entry point for interacting with GeoView maps and their lifecycle.
 

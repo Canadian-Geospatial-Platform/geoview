@@ -1,4 +1,4 @@
-# Using Logging #
+﻿# Using Logging #
 
 There are 2 ways to log to help debugging.
 - `logger` class essentially embeds console.log by offering a cleaner and organized way to structure logging information.

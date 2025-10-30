@@ -1,8 +1,8 @@
-# Layer Set Architecture
+﻿# Layer Set Architecture
 
 > **👥 Audience:** Core GeoView developers
 >
-> **For API Users:** See [Layer Sets Guide](../../app/doc-new/layersets.md) for using Layer Sets in your applications
+> **For API Users:** See [Layer Sets Guide](app/doc-new/layersets.md) for using Layer Sets in your applications
 
 This document describes the internal architecture and implementation details of the Layer Set system in GeoView.
 
@@ -85,8 +85,15 @@ Layer Sets use a bi-directional event system:
 **Registration Condition:**
 
 ```typescript
-protected onRegisterLayerConfigCheck(layerConfig: ConfigBaseClass): boolean {
-  // Register all layer configs
+/**
+ * Overrides the behavior to apply when an all-feature-info-layer-set wants to check for condition to register a layer in its set.
+ * @param {AbstractBaseLayer} layer - The layer
+ * @param {string} layerPath - The layer path
+ * @returns {boolean} True when the layer should be registered to this legends-layer-set
+ */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+protected override onRegisterLayerCheck(layer: AbstractBaseLayer): boolean {
+  // Always register layers for the legends-layer-set, because we want 'the box' in the UI to show the layer status progression
   return true;
 }
 ```
@@ -116,9 +123,14 @@ protected onRegisterLayerConfigCheck(layerConfig: ConfigBaseClass): boolean {
 **Registration Condition:**
 
 ```typescript
-protected onRegisterLayerConfigCheck(layerConfig: ConfigBaseClass): boolean {
-  // Only queryable layers
-  return layerConfig.geoviewLayerType !== 'esriDynamic' || layerConfig.layerEntries.length > 0;
+/**
+ * Overrides the behavior to apply when a feature-info-layer-set wants to check for condition to register a layer in its set.
+ * @param {AbstractBaseLayer} layer - The layer
+ * @returns {boolean} True when the layer should be registered to this feature-info-layer-set.
+ */
+protected override onRegisterLayerCheck(layer: AbstractBaseLayer): boolean {
+  // Return if the layer is of queryable type and source is queryable
+  return super.onRegisterLayerCheck(layer) && AbstractLayerSet.isQueryableType(layer) && AbstractLayerSet.isSourceQueryable(layer);
 }
 ```
 
@@ -152,11 +164,19 @@ async queryLayers(location?: TypeLocation, extent?: Extent): Promise<void> {
 **Registration Condition:**
 
 ```typescript
-protected onRegisterLayerConfigCheck(layerConfig: ConfigBaseClass): boolean {
-  // Only layers with feature data
-  return layerConfig.geoviewLayerType === 'geoJSON' ||
-         layerConfig.geoviewLayerType === 'esriFeature' ||
-         // ... other vector types
+/**
+ * Overrides the behavior to apply when a feature-info-layer-set wants to check for condition to register a layer in its set.
+ * @param {AbstractBaseLayer} layer - The layer
+ * @returns {boolean} True when the layer should be registered to this all-feature-info-layer-set.
+ */
+protected override onRegisterLayerCheck(layer: AbstractBaseLayer): boolean {
+  // Return if the layer is of queryable type and source is queryable
+  return (
+    super.onRegisterLayerCheck(layer) &&
+    AbstractLayerSet.isQueryableType(layer) &&
+    !(layer instanceof GVWMS) &&
+    AbstractLayerSet.isSourceQueryable(layer)
+  );
 }
 ```
 
@@ -196,9 +216,19 @@ async queryLayers(location?: undefined, extent?: Extent): Promise<void> {
 **Registration Condition:**
 
 ```typescript
-protected onRegisterLayerConfigCheck(layerConfig: ConfigBaseClass): boolean {
-  // Only hoverable layers
-  return layerConfig.geoviewLayerType !== 'ogcWms'; // Example
+/**
+ * Overrides the behavior to apply when a hover-feature-info-layer-set wants to check for condition to register a layer in its set.
+ * @param {AbstractBaseLayer} layer - The layer
+ * @returns {boolean} True when the layer should be registered to this hover-feature-info-layer-set.
+ */
+protected override onRegisterLayerCheck(layer: AbstractBaseLayer): boolean {
+  // Return if the layer is of queryable type and source is queryable
+  return (
+    super.onRegisterLayerCheck(layer) &&
+    AbstractLayerSet.isQueryableType(layer) &&
+    !(layer instanceof GVWMS) &&
+    AbstractLayerSet.isSourceQueryable(layer)
+  );
 }
 ```
 
@@ -319,34 +349,21 @@ protected unregisterLayer(layerPath: string): void {
 
 ### Propagation Pattern
 
-Each Layer Set implements `onPropagateToStore()` to update the Zustand store:
+Each Layer Set implements `onPropagateToStore()` to update the Zustand store (i.e. FeatureInfoLayerSet):
 
 ```typescript
-protected onPropagateToStore(resultSetEntry: TypeResultSetEntry, type: PropagationType): void {
-  const { layerPath } = resultSetEntry;
-
-  switch (type) {
-    case 'config-registration':
-      // Add placeholder to store
-      this.#setLegendsLayerSetEntry(layerPath, resultSetEntry);
-      break;
-
-    case 'layer-registration':
-      // Layer ready, update store with initial data
-      this.#setLegendsLayerSetEntry(layerPath, resultSetEntry);
-      break;
-
-    case 'resultSet':
-      // Data updated, sync to store
-      this.#setLegendsLayerSetEntry(layerPath, resultSetEntry);
-      break;
-
-    case 'remove':
-      // Remove from store
-      this.#deleteLegendsLayerSetEntry(layerPath);
-      break;
+  /**
+   * Propagates the resultSetEntry to the store
+   * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry to propagate to the store
+   * @private
+   */
+  #propagateToStore(resultSetEntry: TypeFeatureInfoResultSetEntry, eventType: EventType = 'click'): void {
+    // Propagate
+    FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.getMapId(), eventType, resultSetEntry).catch((error: unknown) => {
+      // Log
+      logger.logPromiseFailed('FeatureInfoEventProcessor.propagateToStore in FeatureInfoLayerSet', error);
+    });
   }
-}
 ```
 
 ### Store Structure
@@ -354,13 +371,27 @@ protected onPropagateToStore(resultSetEntry: TypeResultSetEntry, type: Propagati
 Store slices mirror Layer Set resultSets:
 
 ```typescript
-// In LayerEventProcessor store slice
-interface LayerState {
-  legendsLayerSet: TypeResultSet;
-  featureInfoLayerSet: TypeResultSet;
-  allFeatureInfoLayerSet: TypeResultSet;
-  hoverFeatureInfoLayerSet: TypeResultSet;
+// In Layer State store slice
+export interface ILayerState {
+  highlightedLayer: string;
+  selectedLayer: TypeLegendLayer;
+  selectedLayerPath: string | undefined | null;
+  legendLayers: TypeLegendLayer[];
+  displayState: TypeLayersViewDisplayState;
+  layerDeleteInProgress: string;
+  selectedLayerSortingArrowId: string;
+  layersAreLoading: boolean;
+  setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
+
+  actions: {
+   ...
+  };
+
+  setterActions: {
+    ...
+  };
 }
+
 ```
 
 ### React Integration
@@ -369,11 +400,10 @@ React components subscribe to store slices:
 
 ```typescript
 function LegendPanel() {
-  const legendsLayerSet = useLayerStoreState((state) => state.legendsLayerSet);
-
+  const layersList = useLayerLegendLayers();
   return (
     <div>
-      {Object.values(legendsLayerSet).map((entry) => (
+      {Object.values(layersList).map((entry) => (
         <LegendLayer key={entry.layerPath} entry={entry} />
       ))}
     </div>
@@ -407,29 +437,6 @@ Propagate to store
 React components re-render with new features
 ```
 
-### Concurrent Query Prevention
-
-```typescript
-// In AllFeatureInfoLayerSet
-private isQuerying = false;
-
-async queryLayers(): Promise<void> {
-  if (this.isQuerying) {
-    console.warn('Query already in progress');
-    return;
-  }
-
-  this.isQuerying = true;
-
-  try {
-    // Perform queries
-    await Promise.all(/* ... */);
-  } finally {
-    this.isQuerying = false;
-  }
-}
-```
-
 ## Event Management
 
 ### Layer Set Events
@@ -458,24 +465,6 @@ class AbstractLayerSet {
     });
   }
 }
-```
-
-### Event Types
-
-```typescript
-type PropagationType =
-  | "config-registration" // Layer config added
-  | "layer-registration" // Layer created
-  | "resultSet" // Data updated
-  | "remove"; // Layer removed
-
-type LayerSetUpdatedDelegate = (
-  sender: AbstractLayerSet,
-  payload: {
-    resultSetEntry: TypeResultSetEntry;
-    type: PropagationType;
-  }
-) => void;
 ```
 
 ## Best Practices for Core Developers
@@ -567,7 +556,7 @@ Use TypeScript strictly:
 
 ```typescript
 interface MyCustomResultSetEntry extends TypeResultSetEntry {
-  myCustomData: MyCustomType | null;
+  myCustomData: MyCustomType;
 }
 
 export class MyCustomLayerSet extends AbstractLayerSet {
@@ -586,90 +575,14 @@ const mapViewer = cgpv.api.getMapViewer("mapId");
 const legendsLayerSet = mapViewer.layer.legendsLayerSet;
 
 // Inspect result set
-console.log(legendsLayerSet.resultSet);
+logger.logDebug(legendsLayerSet.resultSet);
 
 // Check specific layer
-console.log(legendsLayerSet.resultSet["myLayer"]);
+logger.logDebug(legendsLayerSet.resultSet["myLayer"]);
 
 // Listen to updates
 legendsLayerSet.onLayerSetUpdated((sender, payload) => {
-  console.log("Updated:", payload);
-});
-```
-
-### Event Tracing
-
-Enable event tracing in development:
-
-```typescript
-class AbstractLayerSet {
-  #emitLayerSetUpdated(
-    resultSetEntry: TypeResultSetEntry,
-    type: PropagationType
-  ): void {
-    if (process.env.NODE_ENV === "development") {
-      console.log(`[LayerSet] ${this.constructor.name} updated:`, {
-        layerPath: resultSetEntry.layerPath,
-        type,
-        entry: resultSetEntry,
-      });
-    }
-
-    this.#layerSetUpdatedEmitter.emit({ resultSetEntry, type });
-  }
-}
-```
-
-## Testing Layer Sets
-
-### Unit Tests
-
-```typescript
-describe("FeatureInfoLayerSet", () => {
-  let layerApi: LayerApi;
-  let featureInfoLayerSet: FeatureInfoLayerSet;
-
-  beforeEach(() => {
-    // Setup
-    layerApi = createMockLayerApi();
-    featureInfoLayerSet = new FeatureInfoLayerSet(layerApi);
-  });
-
-  it("should register queryable layers", () => {
-    const config = createMockConfig({ geoviewLayerType: "geoJSON" });
-    featureInfoLayerSet.registerLayerConfig(config);
-
-    expect(config.layerPath in featureInfoLayerSet.resultSet).toBe(true);
-  });
-
-  it("should query features at location", async () => {
-    const location = { lon: -75.6972, lat: 45.4215 };
-    await featureInfoLayerSet.queryLayers(location);
-
-    const entry = featureInfoLayerSet.resultSet["testLayer"];
-    expect(entry.queryStatus).toBe("processed");
-    expect(entry.featureInfo?.queriedLocation).toEqual(location);
-  });
-});
-```
-
-### Integration Tests
-
-```typescript
-describe("Layer Set Store Integration", () => {
-  it("should sync to store on update", () => {
-    const { mapViewer, store } = setupTestMap();
-    const legendsLayerSet = mapViewer.layer.legendsLayerSet;
-
-    // Add layer
-    mapViewer.layer.addGeoviewLayer(testConfig);
-
-    // Check store
-    const storeEntry =
-      store.getState().layerState.legendsLayerSet[testConfig.layerPath];
-    expect(storeEntry).toBeDefined();
-    expect(storeEntry.layerPath).toBe(testConfig.layerPath);
-  });
+  logger.logDebug("Updated:", payload);
 });
 ```
 
@@ -677,10 +590,10 @@ describe("Layer Set Store Integration", () => {
 
 **For API Users:**
 
-- [Layer Sets Guide](../../app/doc-new/layersets.md) - Using Layer Sets in applications
+- [Layer Sets Guide](app/doc-new/layersets.md) - Using Layer Sets in applications
 
 **For Core Developers:**
 
-- [Event Processor Architecture](./event-processor-architecture.md) - Store and event system
-- [Layer Architecture](./layer-architecture.md) - Layer implementation details
-- [Adding Layer Types](./adding-layer-types.md) - Implementing new layer types
+- [Event Processor Architecture](programming/event-processor-architecture.md) - Store and event system
+- [Layer Architecture](programming/layer-architecture.md) - Layer implementation details
+- [Adding Layer Types](programming/adding-layer-types.md) - Implementing new layer types

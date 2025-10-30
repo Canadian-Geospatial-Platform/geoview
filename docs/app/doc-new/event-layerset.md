@@ -1,4 +1,4 @@
-# Layer Sets in GeoView
+﻿# Layer Sets in GeoView
 
 GeoView uses the concept of Layer Sets to manage and synchronize groups of layers and their associated data, events, and UI updates. Each Layer Set is responsible for a specific aspect of layer management and interacts with the store and event processors to keep the application state in sync.
 
@@ -29,7 +29,7 @@ All Layer Sets in GeoView (`AllFeatureInfoLayerSet`, `FeatureInfoLayerSet`, `Leg
     - For `LegendsLayerSet`, the value is the legend/symbology info for that layer.
 
 **Example structure:**
-```js
+```ts
 {
   "layer1/path": { ...data for layer 1... },
   "layer2/path": { ...data for layer 2... }

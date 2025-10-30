@@ -1,4 +1,4 @@
-# GeoView Documentation
+﻿# GeoView Documentation
 
 Welcome to the GeoView documentation! This documentation is organized by audience and use case.
 
@@ -10,19 +10,19 @@ Welcome to the GeoView documentation! This documentation is organized by audienc
 
 Complete API reference for using GeoView in your applications:
 
-- **[API Reference](./app/doc-new/api.md)** - Main API entry points (createMapFromConfig, getMapViewer, etc.)
-- **[MapViewer API](./app/doc-new/map-viewer-api-doc.md)** - MapViewer instance methods
-- **[GeoView Layers](./app/doc-new/layers.md)** - Layer types, configuration, and concepts
-- **[Layer API](./app/doc-new/layer-api.md)** - Layer management (add, remove, configure layers)
-- **[Event Processors](./app/doc-new/event-processors.md)** - State management and event handling
-- **[API Utilities](./app/doc-new/api-utilities.md)** - Utility functions (core, geo, projection, date)
-- **[Packages & Plugins](./app/doc-new/packages.md)** - Plugin system and available packages
-- **[Creating Maps](./app/doc-new/create-map.md)** - How to create and configure maps
-- **[CGPV Global Object](./app/doc-new/cgpv.md)** - Global cgpv object reference
+- **[API Reference](app/doc-new/api.md)** - Main API entry points (createMapFromConfig, getMapViewer, etc.)
+- **[MapViewer API](app/doc-new/map-viewer-api-doc.md)** - MapViewer instance methods
+- **[GeoView Layers](app/doc-new/layers.md)** - Layer types, configuration, and concepts
+- **[Layer API](app/doc-new/layer-api.md)** - Layer management (add, remove, configure layers)
+- **[Event Processors](app/doc-new/event-processors.md)** - State management and event handling
+- **[API Utilities](app/doc-new/api-utilities.md)** - Utility functions (core, geo, projection, date)
+- **[Packages & Plugins](app/doc-new/packages.md)** - Plugin system and available packages
+- **[Creating Maps](app/doc-new/create-map.md)** - How to create and configure maps
+- **[CGPV Global Object](app/doc-new/cgpv.md)** - Global cgpv object reference
 
 ### TypeScript API Reference (TypeDoc)
 
-> **🔍 Complete API Reference:** For detailed TypeScript interfaces, types, classes, and functions, see our auto-generated [TypeDoc API Documentation](https://canadian-geospatial-platform.github.io/geoview/public/docs/)
+> **🔍 Complete API Reference:** For detailed TypeScript interfaces, types, classes, and functions, see our auto-generated [TypeDoc API Documentation](https://canadian-geospatial-platform.github.io/geoview/public/typeDocAPI/)
 
 **What's in TypeDoc:**
 
@@ -46,14 +46,14 @@ Complete API reference for using GeoView in your applications:
 
 Best practices and patterns for contributing to GeoView core:
 
-- **[Best Practices](./programming/best-practices.md)** - Coding standards and conventions
-- **[Using TypeScript](./programming/using-type.md)** - TypeScript patterns and types
-- **[Using Zustand Store](./programming/using-store.md)** - State management internals
-- **[Event Processor Architecture](./programming/event-processor-architecture.md)** - Creating custom event processors
-- **[Layer Set Architecture](./programming/layerset-architecture.md)** - Layer Set system internals
-- **[Adding Layer Types](./programming/adding-layer-types.md)** - Implementing new layer types
-- **[Logging](./programming/logging.md)** - Logging standards and practices
-- **[Object-Oriented Patterns](./programming/object-oriented.md)** - OOP patterns in GeoView
+- **[Best Practices](programming/best-practices.md)** - Coding standards and conventions
+- **[Using TypeScript](programming/using-type.md)** - TypeScript patterns and types
+- **[Using Zustand Store](programming/using-store.md)** - State management internals
+- **[Event Processor Architecture](programming/event-processor-architecture.md)** - Creating custom event processors
+- **[Layer Set Architecture](programming/layerset-architecture.md)** - Layer Set system internals
+- **[Adding Layer Types](programming/adding-layer-types.md)** - Implementing new layer types
+- **[Logging](programming/logging.md)** - Logging standards and practices
+- **[Object-Oriented Patterns](programming/object-oriented.md)** - OOP patterns in GeoView
 
 ## 🛠️ For Plugin & Extension Developers
 
@@ -71,13 +71,13 @@ Guides for extending GeoView functionality:
 
 > **📘 Note:** Layer documentation has been consolidated into [doc-new](./app/doc-new/):
 >
-> - **For API Users:** See [GeoView Layers Guide](./app/doc-new/layers.md)
-> - **For Core Developers:** See [Adding Layer Types](./programming/adding-layer-types.md)
+> - **For API Users:** See [GeoView Layers Guide](app/doc-new/layers.md)
+> - **For Core Developers:** See [Adding Layer Types](programming/adding-layer-types.md)
 
 > **📘 Note:** Event documentation has been consolidated into [doc-new](./app/doc-new/):
 >
-> - **For API Users:** See [Event System](./app/doc-new/event.md), [Map Events](./app/doc-new/event-map.md), and [Layer Events](./app/doc-new/event-layer.md)
-> - **For Core Developers:** See [Event Processor Architecture](./programming/event-processor-architecture.md)
+> - **For API Users:** See [Event System](app/doc-new/event.md), [Map Events](app/doc-new/event-map.md), and [Layer Events](app/doc-new/event-layer.md)
+> - **For Core Developers:** See [Event Processor Architecture](programming/event-processor-architecture.md)
 
 ## 📚 Additional Resources
 
@@ -97,12 +97,12 @@ Guides for extending GeoView functionality:
 
 | Task            | Documentation                                            |
 | --------------- | -------------------------------------------------------- |
-| Create a map    | [Creating Maps](./app/doc-new/create-map.md)             |
-| Add a layer     | [Layer API](./app/doc-new/layer-api.md#adding-layers)    |
-| Create a plugin | [Packages](./app/doc-new/packages.md#plugin-development) |
-| Handle events   | [Event Processors](./app/doc-new/event-processors.md)    |
-| Use utilities   | [API Utilities](./app/doc-new/api-utilities.md)          |
-| Contribute code | [Best Practices](./programming/best-practices.md)        |
+| Create a map    | [Creating Maps](app/doc-new/create-map.md)             |
+| Add a layer     | [Layer API](app/doc-new/layer-api.md#adding-layers)    |
+| Create a plugin | [Packages](app/doc-new/packages.md#plugin-development) |
+| Handle events   | [Event Processors](app/doc-new/event-processors.md)    |
+| Use utilities   | [API Utilities](app/doc-new/api-utilities.md)          |
+| Contribute code | [Best Practices](programming/best-practices.md)        |
 
 ## 📖 Documentation Structure
 
@@ -118,7 +118,7 @@ docs/
 └── programming/          # Internal development practices
 
 TypeDoc (Auto-generated):
-└── public/docs/          # Complete TypeScript API reference
+└── public/typeDocAPI/    # Complete TypeScript API reference
     ├── modules.html      # All exported modules
     ├── classes/          # Class documentation
     ├── interfaces/       # Interface definitions
@@ -128,12 +128,12 @@ TypeDoc (Auto-generated):
 
 ### Documentation Types Explained
 
-| Type                  | Location            | Purpose                               | When to Use                           |
-| --------------------- | ------------------- | ------------------------------------- | ------------------------------------- |
-| **User Guides**       | `docs/app/doc-new/` | How to use GeoView APIs with examples | Learning how to build with GeoView    |
-| **TypeDoc Reference** | `public/docs/`      | Complete TypeScript API definitions   | Looking up exact types and signatures |
-| **Developer Guides**  | `docs/programming/` | Internal architecture and patterns    | Contributing to GeoView core          |
-| **Extension Guides**  | `docs/app/`         | Creating plugins and packages         | Building GeoView extensions           |
+| Type                  | Location             | Purpose                               | When to Use                           |
+| --------------------- | -------------------- | ------------------------------------- | ------------------------------------- |
+| **User Guides**       | `docs/app/doc-new/`  | How to use GeoView APIs with examples | Learning how to build with GeoView    |
+| **TypeDoc Reference** | `public/typeDocAPI/` | Complete TypeScript API definitions   | Looking up exact types and signatures |
+| **Developer Guides**  | `docs/programming/`  | Internal architecture and patterns    | Contributing to GeoView core          |
+| **Extension Guides**  | `docs/app/`          | Creating plugins and packages         | Building GeoView extensions           |
 
 ## 🔄 Key Concepts
 
@@ -146,11 +146,11 @@ GeoView uses a clear separation between **listening to events** and **performing
 - **Actions (Modifying State):** Use Event Processor static methods
   - Example: `MapEventProcessor.setView('map1', center, zoom)`
 
-See [Event Processors Guide](./app/doc-new/event-processors.md) for details on the architecture.
+See [Event Processors Guide](app/doc-new/event-processors.md) for details on the architecture.
 
 ### Package Development
 
-Plugin development uses TypeScript and the monorepo structure. See the [Packages Guide](./app/doc-new/packages.md#plugin-development) for complete instructions.
+Plugin development uses TypeScript and the monorepo structure. See the [Packages Guide](app/doc-new/packages.md#plugin-development) for complete instructions.
 
 ## 🤝 Contributing to Documentation
 

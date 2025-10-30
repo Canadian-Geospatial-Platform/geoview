@@ -1,4 +1,4 @@
-# Object Oriented in Typescript #
+﻿# Object Oriented in Typescript #
 Best practices in object-oriented programming (OOP) are crucial for writing clean, maintainable, and efficient code. Here are some key best practices to follow:
 
 ## 1. Encapsulation ##

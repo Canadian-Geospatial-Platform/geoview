@@ -14,9 +14,9 @@ export default [
     ignores: ['node_modules/', 'dist/', 'eslint.config.js'],
   },
 
-  // Core logic
+  // Core logic for TypeScript files
   {
-    files: ['**/*.{js,jsx,ts,tsx}'],
+    files: ['**/*.{ts,tsx}'],
     languageOptions: {
       parser: tsparser,
       parserOptions: {
@@ -206,21 +206,28 @@ export default [
     },
   },
 
-  // Disable type-aware linting for JavaScript files
+  // JavaScript files (without type-aware linting)
   {
-    files: ['**/*.js'],
-    extends: [tseslint.configs.disableTypeChecked],
-  },
-
-  // Webpack config files
-  {
-    files: ['webpack.*.js'],
+    files: ['**/*.{js,jsx}'],
     languageOptions: {
-      parser: '@babel/eslint-parser',
       parserOptions: {
-        requireConfigFile: false,
-        ecmaVersion: 2018,
+        ecmaVersion: 'latest',
+        sourceType: 'module',
       },
+      globals: {
+        window: 'readonly',
+        document: 'readonly',
+        console: 'readonly',
+        process: 'readonly',
+        __dirname: 'readonly',
+        module: 'readonly',
+        require: 'readonly',
+      },
+    },
+    rules: {
+      // General JS linting rules (no type-aware rules)
+      'no-console': 'off',
+      'no-unused-vars': 'warn',
     },
   },
 ];

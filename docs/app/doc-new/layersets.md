@@ -1,4 +1,4 @@
-# Layer Sets
+﻿# Layer Sets
 
 Layer Sets are a core feature of GeoView that automatically manage and organize layer-specific data across your map. They provide real-time access to legends, feature information, and layer data that updates automatically as layers are added, removed, or queried.
 
@@ -219,31 +219,6 @@ async function buildDataTable() {
 }
 ```
 
-**Example: CSV Export:**
-
-```typescript
-function exportToCSV() {
-  allFeatureInfoLayerSet.queryLayers().then(() => {
-    const rows = [];
-
-    Object.values(allFeatureInfoLayerSet.resultSet).forEach((entry) => {
-      if (entry.featureInfo?.features) {
-        entry.featureInfo.features.forEach((feature) => {
-          rows.push({
-            LayerName: entry.layerName,
-            ...feature.properties,
-          });
-        });
-      }
-    });
-
-    // Convert to CSV and download
-    const csv = convertToCSV(rows);
-    downloadFile(csv, "export.csv", "text/csv");
-  });
-}
-```
-
 ---
 
 ### 4. HoverFeatureInfoLayerSet
@@ -278,21 +253,6 @@ hoverLayerSet.onLayerSetUpdated((sender, payload) => {
   } else {
     hideTooltip();
   }
-});
-```
-
-**Optimized Hover with Debouncing:**
-
-```typescript
-let hoverTimeout;
-
-mapViewer.onMapPointerMove((sender, payload) => {
-  clearTimeout(hoverTimeout);
-
-  // Debounce to avoid excessive queries
-  hoverTimeout = setTimeout(() => {
-    hoverFeatureInfoLayerSet.queryLayers(payload.lnglat);
-  }, 100); // Wait 100ms after mouse stops moving
 });
 ```
 
@@ -418,51 +378,9 @@ const processedLayers = Object.entries(allFeatureInfoLayerSet.resultSet)
 console.log("Processed layers:", processedLayers);
 ```
 
-### Pattern 5: Combining Layer Sets
-
-```typescript
-// Combine legend and feature info
-legendsLayerSet.onLayerSetUpdated((sender, payload) => {
-  if (payload.type === "layer-registration") {
-    const layerPath = payload.resultSetEntry.layerPath;
-
-    // Query features for this layer
-    featureInfoLayerSet.queryLayers(currentLocation).then(() => {
-      const legendEntry = legendsLayerSet.resultSet[layerPath];
-      const featureEntry = featureInfoLayerSet.resultSet[layerPath];
-
-      // Display combined info
-      displayLayerInfo({
-        legend: legendEntry,
-        features: featureEntry,
-      });
-    });
-  }
-});
-```
-
 ---
 
 ## Advanced Usage
-
-### Querying with Bounding Boxes
-
-Query features within a specific geographic area:
-
-```typescript
-// Define bounding box [minX, minY, maxX, maxY]
-const extent = [-76.0, 45.0, -75.0, 46.0];
-
-allFeatureInfoLayerSet.queryLayers(undefined, extent).then(() => {
-  Object.values(allFeatureInfoLayerSet.resultSet).forEach((entry) => {
-    if (entry.featureInfo?.extent) {
-      console.log(
-        `${entry.layerName}: ${entry.featureInfo.features?.length} features in extent`
-      );
-    }
-  });
-});
-```
 
 ### Working with Sublayers
 
@@ -565,136 +483,7 @@ document.addEventListener("click", (e) => {
 });
 ```
 
-### Example 2: Custom Legend Panel
-
-```typescript
-const legendsLayerSet = mapViewer.layer.legendsLayerSet;
-
-function renderLegendPanel() {
-  const panel = document.getElementById("legend-panel");
-  let html = "<h2>Map Legends</h2>";
-
-  Object.values(legendsLayerSet.resultSet).forEach((entry) => {
-    if (entry.layerStatus === "processed" && entry.items) {
-      html += `
-        <div class="legend-layer">
-          <h3>${entry.layerName}</h3>
-          <div class="legend-items">
-      `;
-
-      entry.items.forEach((item) => {
-        html += `
-          <div class="legend-item">
-            <img src="${item.icon}" alt="${item.label}">
-            <span>${item.label}</span>
-          </div>
-        `;
-      });
-
-      html += "</div></div>";
-    }
-  });
-
-  panel.innerHTML = html;
-}
-
-// Update panel when legends change
-legendsLayerSet.onLayerSetUpdated(() => {
-  renderLegendPanel();
-});
-
-// Initial render
-renderLegendPanel();
-```
-
-### Example 3: Data Table with Export
-
-```typescript
-const allFeatureInfoLayerSet = mapViewer.layer.allFeatureInfoLayerSet;
-
-async function buildInteractiveTable() {
-  // Query all features
-  await allFeatureInfoLayerSet.queryLayers();
-
-  const table = document.createElement("table");
-  const thead = document.createElement("thead");
-  const tbody = document.createElement("tbody");
-
-  // Build header
-  const headerRow = thead.insertRow();
-  headerRow.insertCell().textContent = "Layer";
-
-  // Get all property keys
-  const allKeys = new Set();
-  Object.values(allFeatureInfoLayerSet.resultSet).forEach((entry) => {
-    if (entry.featureInfo?.features) {
-      entry.featureInfo.features.forEach((feature) => {
-        Object.keys(feature.properties).forEach((key) => allKeys.add(key));
-      });
-    }
-  });
-
-  allKeys.forEach((key) => {
-    headerRow.insertCell().textContent = key;
-  });
-
-  // Build body
-  Object.values(allFeatureInfoLayerSet.resultSet).forEach((entry) => {
-    if (entry.featureInfo?.features) {
-      entry.featureInfo.features.forEach((feature) => {
-        const row = tbody.insertRow();
-        row.insertCell().textContent = entry.layerName;
-
-        allKeys.forEach((key) => {
-          row.insertCell().textContent = feature.properties[key] || "";
-        });
-      });
-    }
-  });
-
-  table.appendChild(thead);
-  table.appendChild(tbody);
-  document.getElementById("table-container").appendChild(table);
-}
-
-// Export function
-function exportTableToCSV() {
-  const rows = [];
-  const allKeys = new Set();
-
-  // Collect all data
-  Object.values(allFeatureInfoLayerSet.resultSet).forEach((entry) => {
-    if (entry.featureInfo?.features) {
-      entry.featureInfo.features.forEach((feature) => {
-        Object.keys(feature.properties).forEach((key) => allKeys.add(key));
-        rows.push({
-          Layer: entry.layerName,
-          ...feature.properties,
-        });
-      });
-    }
-  });
-
-  // Generate CSV
-  const headers = ["Layer", ...Array.from(allKeys)];
-  let csv = headers.join(",") + "\n";
-
-  rows.forEach((row) => {
-    const values = headers.map((header) => row[header] || "");
-    csv += values.join(",") + "\n";
-  });
-
-  // Download
-  const blob = new Blob([csv], { type: "text/csv" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "map-data.csv";
-  a.click();
-}
-```
-
-### Example 4: Hover Tooltip
+### Example 2: Hover Tooltip
 
 ```typescript
 const hoverLayerSet = mapViewer.layer.hoverFeatureInfoLayerSet;
@@ -833,7 +622,7 @@ function processFeatures(entry: TypeResultSetEntry) {
 
 ## TypeScript Support
 
-Layer Sets are fully typed for TypeScript projects. For complete type definitions, see the [TypeDoc Reference](../../../public/docs/).
+Layer Sets are fully typed for TypeScript projects. For complete type definitions, see the [TypeDoc Reference](../../../public/typeDocAPI/).
 
 **Key Types:**
 
@@ -861,12 +650,11 @@ import type {
 
 ## See Also
 
-- [Layer API](./layer-api.md) - Complete Layer API reference with all methods
-- [Event Processors](./event-processors.md) - State management and event handling patterns
-- [API Reference](./api.md) - Main GeoView API entry points
-- [TypeDoc Reference](../../../public/docs/) - Auto-generated API documentation
+- [Layer API](app/doc-new/layer-api.md) - Complete Layer API reference with all methods
+- [Event Processors](app/doc-new/event-processors.md) - State management and event handling patterns
+- [API Reference](app/doc-new/api.md) - Main GeoView API entry points
+- [TypeDoc Reference](../../../public/typeDocAPI/) - Auto-generated API documentation
 
 **For Core Developers:**
 
-- [Layer Set Event Management](../../app/event/LayerSet/LayerSet-event-managment.md) - Internal event architecture
-- [Layer Set Architecture](./event-layerset.md) - Technical implementation details
+- [Layer Set Architecture](../../programming/layerset-architecture.md) - Technical implementation details and internal event system

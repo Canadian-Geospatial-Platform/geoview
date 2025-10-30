@@ -1,4 +1,4 @@
-# Map Viewer Events Documentation
+﻿# Map Viewer Events Documentation
 
 Below is an alphabetical list of all map viewer events available in GeoView. These events can be used to respond to various map interactions and state changes.
 

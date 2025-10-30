@@ -1,8 +1,8 @@
-# Event Processor Architecture
+﻿# Event Processor Architecture
 
 > **👥 Audience:** Core developers contributing to GeoView
 >
-> **For API Users:** See [Event Processors API](../app/doc-new/event-processors.md) for usage documentation
+> **For API Users:** See [Event Processors API](app/doc-new/event-processors.md) for usage documentation
 
 This document explains the internal architecture of Event Processors, how they integrate with the Zustand store, and how to create custom processors.
 
@@ -499,68 +499,9 @@ const mapState = {
    }
    ```
 
-## Testing Event Processors
-
-### Unit Testing
-
-```typescript
-import { MapEventProcessor } from "@/api/event-processors/event-processor-children/map-event-processor";
-import { createMockStore } from "@/test-utils/mock-store";
-
-describe("MapEventProcessor", () => {
-  let store: GeoviewStoreType;
-  const mapId = "test-map";
-
-  beforeEach(() => {
-    store = createMockStore();
-    MapEventProcessor.initialize(mapId, store);
-  });
-
-  afterEach(() => {
-    MapEventProcessor.destroy(mapId);
-  });
-
-  it("should set zoom level", () => {
-    MapEventProcessor.setZoom(mapId, 10);
-    const state = MapEventProcessor.getMapState(mapId);
-    expect(state.zoom).toBe(10);
-  });
-
-  it("should validate zoom level", () => {
-    expect(() => {
-      MapEventProcessor.setZoom(mapId, -1);
-    }).toThrow("Invalid zoom level");
-  });
-});
-```
-
-### Integration Testing
-
-```typescript
-describe("MapEventProcessor Integration", () => {
-  it("should coordinate map and legend updates", () => {
-    const mapId = "test-map";
-
-    // Perform action
-    MapEventProcessor.setLayerOpacity(mapId, "layer-path", 0.5);
-
-    // Verify map state updated
-    const mapState = MapEventProcessor.getMapState(mapId);
-    expect(mapState.layers["layer-path"].opacity).toBe(0.5);
-
-    // Verify legend state updated
-    const legendState = LegendEventProcessor.getLegendLayerInfo(
-      mapId,
-      "layer-path"
-    );
-    expect(legendState.opacity).toBe(0.5);
-  });
-});
-```
-
 ## See Also
 
-- **[Event Processors API](../app/doc-new/event-processors.md)** - Public API documentation
-- **[Using Zustand Store](./using-store.md)** - Store patterns and practices
-- **[Best Practices](./best-practices.md)** - General coding standards
-- **[TypeScript Patterns](./using-type.md)** - TypeScript conventions
+- **[Event Processors API](app/doc-new/event-processors.md)** - Public API documentation
+- **[Using Zustand Store](programming/using-store.md)** - Store patterns and practices
+- **[Best Practices](programming/best-practices.md)** - General coding standards
+- **[TypeScript Patterns](programming/using-type.md)** - TypeScript conventions

@@ -1,4 +1,4 @@
-## How to Add a New Event to `LayerApi`
+﻿## How to Add a New Event to `LayerApi`
 
 The `LayerApi` class uses a consistent pattern for event handling, based on:
 - **Event types** (event payloads)

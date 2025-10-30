@@ -1,8 +1,8 @@
-# Event Processors API
+﻿# Event Processors API
 
 > **👥 Audience:** API users building applications with GeoView
 >
-> **For Core Developers:** See [Event Processor Architecture](../../../programming/event-processor-architecture.md) for implementation details
+> **For Core Developers:** See [Event Processor Architecture](programming/event-processor-architecture.md) for implementation details
 
 Event Processors provide static methods to perform actions and manage state in GeoView. Use them to control maps, layers, UI elements, and plugin functionality.
 
@@ -481,7 +481,7 @@ static startDrawing(mapId: string, geometryType: string): void
 static stopDrawing(mapId: string): void
 ```
 
-## Best Practices
+## Best Practices for Plugin Event Processors
 
 ### 1. Check Plugin Initialization
 
@@ -494,7 +494,7 @@ import { TimeSliderEventProcessor } from "geoview-core";
 if (TimeSliderEventProcessor.isTimeSliderInitialized("mapId")) {
   const timeLayers = TimeSliderEventProcessor.getTimeSliderLayers("mapId");
 } else {
-  console.warn("Time Slider plugin not initialized");
+  logger.logWarning("Time Slider plugin not initialized");
 }
 ```
 
@@ -503,9 +503,9 @@ if (TimeSliderEventProcessor.isTimeSliderInitialized("mapId")) {
 ```typescript
 try {
   const state = MapEventProcessor.getMapState("mapId");
-  console.log("Zoom level:", state.zoom);
+  logger.logInfo("Zoom level:", state.zoom);
 } catch (error) {
-  console.error("Failed to get map state:", error);
+  logger.logError("Failed to get map state:", error);
 }
 ```
 
@@ -536,7 +536,7 @@ const layerInfo = LegendEventProcessor.getLegendLayerInfo(
   "mapId",
   "layer-path"
 );
-if (layerInfo && !layerInfo.visible) {
+if (layerInfo && layerInfo.visible) {
   MapEventProcessor.setLayerOpacity("mapId", "layer-path", 1);
 }
 ```
@@ -558,83 +558,19 @@ import { TimeSliderEventProcessor, GeochartEventProcessor } from "geoview-core";
 
 // Check multiple plugin states
 const hasTimeSlider = TimeSliderEventProcessor.isTimeSliderInitialized("mapId");
-const hasGeochart = GeochartEventProcessor.isGeochartInitialized("mapId");
 
 if (hasTimeSlider) {
   const timeLayers = TimeSliderEventProcessor.getTimeSliderLayers("mapId");
-  console.log("Time-enabled layers:", timeLayers.length);
 }
-```
-
-## Complete Example
-
-Here's a complete example showing how to use Event Processors in an application:
-
-```typescript
-import {
-  MapEventProcessor,
-  LegendEventProcessor,
-  UIEventProcessor,
-} from "geoview-core";
-
-class MapController {
-  constructor(private mapId: string) {}
-
-  // Initialize map with specific view
-  async initialize() {
-    // Set initial view
-    MapEventProcessor.setView(this.mapId, [-75.6972, 45.4215], 10);
-
-    // Configure basemap
-    MapEventProcessor.setBasemap(this.mapId, "transport");
-
-    // Open legend panel
-    UIEventProcessor.openPanel(this.mapId, "legend");
-  }
-
-  // Focus on specific layer
-  focusOnLayer(layerPath: string) {
-    const layerInfo = LegendEventProcessor.getLegendLayerInfo(
-      this.mapId,
-      layerPath
-    );
-
-    if (layerInfo && layerInfo.bounds) {
-      // Zoom to layer bounds
-      const bounds = layerInfo.bounds;
-      MapEventProcessor.setView(
-        this.mapId,
-        [(bounds[0] + bounds[2]) / 2, (bounds[1] + bounds[3]) / 2],
-        12
-      );
-    }
-  }
-
-  // Get current state
-  getMapInfo() {
-    const mapState = MapEventProcessor.getMapState(this.mapId);
-    return {
-      zoom: mapState.zoom,
-      center: mapState.center,
-      projection: mapState.currentProjection,
-    };
-  }
-}
-
-// Usage
-const controller = new MapController("myMap");
-await controller.initialize();
-controller.focusOnLayer("my-layer-path");
-console.log(controller.getMapInfo());
 ```
 
 ## See Also
 
-- **[MapViewer API](./map-viewer-api-doc.md)** - For listening to events
-- **[Layer API](./layer-api.md)** - For layer management methods
-- **[API Reference](./api.md)** - Main API entry points
-- **[Packages & Plugins](./packages.md)** - Plugin development
+- **[MapViewer API](app/doc-new/map-viewer-api-doc.md)** - For listening to events
+- **[Layer API](app/doc-new/layer-api.md)** - For layer management methods
+- **[API Reference](app/doc-new/api.md)** - Main API entry points
+- **[Packages & Plugins](app/doc-new/packages.md)** - Plugin development
 
 ---
 
-> **🔧 For Core Developers:** See [Event Processor Architecture](../../../programming/event-processor-architecture.md) for implementation details, creating custom processors, and internal patterns.
+> **🔧 For Core Developers:** See [Event Processor Architecture](programming/event-processor-architecture.md) for implementation details, creating custom processors, and internal patterns.

@@ -1,4 +1,4 @@
-### Creating Maps in GeoView
+﻿### Creating Maps in GeoView
 
 There are two main approaches to create maps in GeoView:
 
@@ -234,7 +234,7 @@ hasMapViewer(mapId: string): boolean
 getMapViewer(mapId: string): MapViewer
 ```
 _Implementation_
-``` ttypescripts
+``` typescripts
 const myMap = cgpv.api.getMapViewer('Map1');
 myMap.layer.addGeoviewLayerByGeoCoreUUID(layer)
 ```
