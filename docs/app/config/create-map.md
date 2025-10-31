@@ -17,7 +17,7 @@ Specifically, it looks for `<div>` elements with certain attributes that identif
 
 **Typical requirements for a GeoView map container:**
 - The element is a `<div>`.
-- It has the attribute `data-geoview-map`.
+- It has the class attribute value `geoview-map`.
 - It may include additional attributes such as `data-config`, `data-config-url`, `data-lang`, or `data-shared` to specify map configuration, language, or shared state.
 - The `data-config` has precedence over `data-config-url` if both are provided.
 
@@ -189,7 +189,6 @@ cgpv.onMapReady((mapViewer) => {
   // NOTE: some layers can be further along in their individual status at the time this event is triggered(!).
   console.log('Map ready for interaction:', mapViewer.id);
 });
-
 ```
 These events are important for proper initialization sequencing:
 - onMapInit - Fires when the map object is first initialized, but before layers are processed
@@ -202,7 +201,8 @@ Using these events helps you properly sequence your application's initialization
 The api.maps array is now private and only accessible from the api. The ```cgpv.api.maps``` is not available anymore. To access and interact with the maps, new functions have been added.
 
 - How to get a list of maps available
-``` typescript
+
+```typescript
 /**
  * Gets the list of all map IDs currently in the collection.
  *
@@ -212,7 +212,8 @@ getMapViewerIds(): string[]
 ```
 
 - How to know if a map exist
-``` typescript
+
+```typescript
 /**
  * Return true if a map id is already registered.
  *
@@ -223,7 +224,8 @@ hasMapViewer(mapId: string): boolean
 ```
 
 - How to access a map by id
-``` typescript
+
+```typescript
 /**
  * Gets a map viewer instance by its ID.
  *
@@ -234,13 +236,14 @@ hasMapViewer(mapId: string): boolean
 getMapViewer(mapId: string): MapViewer
 ```
 _Implementation_
-``` typescripts
+```typescripts
 const myMap = cgpv.api.getMapViewer('Map1');
 myMap.layer.addGeoviewLayerByGeoCoreUUID(layer)
 ```
 
 - How to delete a map instance
-``` typescript
+
+```typescript
 /**
  * Delete a map viewer instance by its ID.
  *
@@ -251,7 +254,7 @@ myMap.layer.addGeoviewLayerByGeoCoreUUID(layer)
 deleteMapViewer(mapId: string, deleteContainer: boolean): Promise<HTMLElement | void> {
 ```
 _Implementation_
-``` typescript
+```typescript
 if (cgpv.api.hasMapViewer(map)) {
   cgpv.api.deleteMapViewer(map, false).then(() => {
     resolve();

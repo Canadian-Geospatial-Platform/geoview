@@ -2,7 +2,7 @@
 
 Welcome to the GeoView documentation! This documentation is organized by audience and use case.
 
-## ?? For GeoView Users (API Documentation)
+## 📖 For GeoView Users (API Documentation)
 
 ### API Reference
 
@@ -66,15 +66,15 @@ Package system and development:
 
 ### TypeScript API Reference (TypeDoc)
 
-> **?? Complete API Reference:** For detailed TypeScript interfaces, types, classes, and functions, see our auto-generated [TypeDoc API Documentation](https://canadian-geospatial-platform.github.io/geoview/public/typeDocAPI/)
+> **📚 Complete API Reference:** For detailed TypeScript interfaces, types, classes, and functions, see our auto-generated [TypeDoc API Documentation](https://canadian-geospatial-platform.github.io/geoview/public/typeDocAPI/)
 
 **What's in TypeDoc:**
 
-- ?? All exported classes, interfaces, and types
-- ?? Complete function signatures with parameter details
-- ?? JSDoc comments and usage examples
-- ?? Cross-referenced type definitions
-- ?? Event payload types and validation functions
+- ✓ All exported classes, interfaces, and types
+- ✓ Complete function signatures with parameter details
+- ✓ JSDoc comments and usage examples
+- ✓ Cross-referenced type definitions
+- ✓ Event payload types and validation functions
 
 **Use TypeDoc for:**
 
@@ -84,7 +84,7 @@ Package system and development:
 - Exploring internal class hierarchies
 - TypeScript type checking in your IDE
 
-## ?? For GeoView Developers (Internal Development)
+## 🔧 For GeoView Developers (Internal Development)
 
 **Location:** [`programming/`](./programming/)
 
@@ -99,7 +99,7 @@ Best practices and patterns for contributing to GeoView core:
 - **[Logging](programming/logging.md)** - Logging standards and practices
 - **[Object-Oriented Patterns](programming/object-oriented.md)** - OOP patterns in GeoView
 
-## ??? For Packages & Extension Developers
+## 🔌 For Packages & Extension Developers
 
 **Location:** [`app/`](./app/)
 
@@ -115,12 +115,12 @@ Guides for extending GeoView functionality:
 
 ### Documentation Organization
 
-> **?? Documentation Structure:**
+> **📂 Documentation Structure:**
 >
 > - **For API Users:** See [API Reference](app/api/), [Layers](app/layers/), and [Events](app/events/)
 > - **For Core Developers:** See [Programming Guides](programming/)
 
-## ?? Additional Resources
+## 📋 Additional Resources
 
 ### UI & Theming
 
@@ -132,7 +132,7 @@ Guides for extending GeoView functionality:
 - **[Loading Maps](./app/loading-maps.md)** - Map initialization methods
 - **[Accessing Types](./app/accessing-types.md)** - TypeScript type definitions
 
-## ??? Documentation Quick Navigation
+## 🗺️ Documentation Quick Navigation
 
 ### Common Tasks
 
@@ -147,7 +147,7 @@ Guides for extending GeoView functionality:
 | Run tests        | [Test Suite Guide](app/testing/using-test-suite.md)       |
 | Contribute code  | [Best Practices](programming/best-practices.md)           |
 
-## ?? Documentation Structure
+## 📁 Documentation Structure
 
 ```
 docs/
@@ -182,7 +182,7 @@ TypeDoc (Auto-generated):
 | **Developer Guides**  | `docs/programming/`  | Internal architecture and patterns  | Contributing to GeoView core            |
 | **Extension Guides**  | `docs/app/packages/` | Creating packages                   | Building GeoView extensions             |
 
-## ?? Key Concepts
+## 💡 Key Concepts
 
 ### Events vs Actions
 
@@ -199,7 +199,7 @@ See [Event Processors Guide](app/events/event-processors.md) for details on the 
 
 Package development uses TypeScript and the monorepo structure. See the [Core Package Development Guide](app/packages/core-packages.md) for complete instructions.
 
-## ?? Contributing to Documentation
+## ✍️ Contributing to Documentation
 
 When adding documentation:
 

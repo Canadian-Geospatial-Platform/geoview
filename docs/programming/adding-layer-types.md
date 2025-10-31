@@ -1,6 +1,6 @@
 # Adding New Layer Types
 
-> **?? Audience:** Core developers extending GeoView functionality
+> ** Audience:** Core developers extending GeoView functionality
 >
 > **For API Users:** See [GeoView Layers Guide](app/layers/layers.md) for using existing layer types
 

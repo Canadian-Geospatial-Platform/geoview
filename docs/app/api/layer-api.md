@@ -16,9 +16,9 @@ const layerApi = mapViewer.layer;
 
 ## Layer Types Supported
 
-- **Vector Layers:** GeoJSON, WFS, OGC Feature, ESRI Feature, CSV, KML, WKB, Shapefile
+- **Vector Layers:** GeoJSON, WFS, OGC Feature, ESRI Feature, CSV, KML, WKB
 - **Raster Layers:** WMS, ESRI Dynamic, ESRI Image, XYZ Tiles, Vector Tiles, Image Static
-- **Special:** GeoCore, GeoPackage, RCS
+- **Special:** GeoCore, GeoPackage, Shapefile, RCS
 
 ---
 
@@ -646,7 +646,7 @@ mapViewer.layer.replaceFeatureOutfields(
   "myLayer",
   ["string", "number", "number"],
   ["name", "population", "area"],
-  ["Name", "Population", "Area (km²)"]
+  ["Name", "Population", "Area (kmï¿½)"]
 );
 ```
 

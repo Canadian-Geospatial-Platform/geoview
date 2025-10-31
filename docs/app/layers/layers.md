@@ -1,6 +1,6 @@
 # GeoView Layers
 
-> **?? Audience:** Developers using GeoView in their applications
+> **👥 Audience:** Developers using GeoView in their applications
 >
 > **For Core Contributors:** See [Adding Layer Types](programming/adding-layer-types.md) for implementation details
 
@@ -115,7 +115,7 @@ const result = mapViewer.layer.addGeoviewLayer({
   listOfLayerEntryConfig: [
     {
       layerId: "layer1",
-      layerName: "Layer 1"
+      layerName: "Layer 1",
     },
   ],
 });
@@ -442,7 +442,7 @@ Raster layers use server-defined styles. Check your service's capabilities for a
 2. **Provide localized names**
 
    ```typescript
-   geoviewLayerName: 'English Name'
+   geoviewLayerName: "English Name";
    ```
 
 3. **Set initial visibility and opacity**
@@ -788,4 +788,4 @@ mapViewer.layer.onVisibilityChanged((sender, payload) => {
 
 ---
 
-> **?? For Core Contributors:** See [Adding Layer Types](programming/adding-layer-types.md) for implementing new layer types
+> **🔧 For Core Contributors:** See [Adding Layer Types](programming/adding-layer-types.md) for implementing new layer types

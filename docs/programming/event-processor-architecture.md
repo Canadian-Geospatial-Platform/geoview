@@ -1,6 +1,6 @@
 # Event Processor Architecture
 
-> **?? Audience:** Core developers contributing to GeoView
+> ** Audience:** Core developers contributing to GeoView
 >
 > **For API Users:** See [Event Processors API](app/events/event-processors.md) for usage documentation
 

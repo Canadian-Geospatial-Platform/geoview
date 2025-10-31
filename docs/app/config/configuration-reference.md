@@ -425,59 +425,66 @@ Display and behavior settings applied when the layer is created.
 
 ```typescript
 interface TypeLayerInitialSettings {
-  // Visibility
-  visible?: boolean;
+  // Control settings
+  controls?: TypeLayerControls;
 
-  // Zoom constraints
-  extent?: Extent;
+  // Geographic constraints
   bounds?: Extent;
+  extent?: Extent;
   minZoom?: number;
   maxZoom?: number;
 
-  // States
-  states?: {
-    opacity?: number;
-    queryable?: boolean;
-    hoverable?: boolean;
-  };
+  // CSS styling
+  className?: string;
+
+  // Layer states
+  states?: TypeLayerStates;
+}
+
+interface TypeLayerControls {
+  highlight?: boolean; // Is highlight control available. Default = true
+  hover?: boolean; // Is hover control available. Default = true
+  opacity?: boolean; // Is opacity control available. Default = true
+  query?: boolean; // Is query control available. Default = true
+  remove?: boolean; // Is remove control available. Default = false
+  table?: boolean; // Is table available. Default = true
+  visibility?: boolean; // Is visibility control available. Default = true
+  zoom?: boolean; // Is zoom available. Default = true
+}
+
+interface TypeLayerStates {
+  visible?: boolean; // Is layer initially visible. Default = true
+  legendCollapsed?: boolean; // Is legend initially collapsed. Default = false
+  opacity?: number; // Initial opacity [0..1]. Default = 1
+  hoverable?: boolean; // Is layer hoverable initially. Default = true
+  queryable?: boolean; // Is layer queryable initially. Default = false
 }
 ```
 
 ### Properties
 
-#### visible
+#### controls
 
-Initial visibility of the layer.
-
-```typescript
-visible?: boolean;
-```
-
-**Default:** `true`
-
-**Example:**
+Settings for availability of layer controls in the UI.
 
 ```typescript
-initialSettings: {
-  visible: false; // Layer starts hidden
-}
-```
-
----
-
-#### extent
-
-Geographic extent for the layer (in layer's projection).
-
-```typescript
-extent?: Extent; // [minX, minY, maxX, maxY]
+controls?: TypeLayerControls;
 ```
 
 **Example:**
 
 ```typescript
 initialSettings: {
-  extent: [-120, 40, -100, 50]; // [west, south, east, north]
+  controls: {
+    highlight: true,    // Allow highlight control
+    hover: true,        // Allow hover control
+    opacity: true,      // Allow opacity slider
+    query: true,        // Allow feature queries
+    remove: false,      // Hide remove button
+    table: true,        // Allow data table
+    visibility: true,   // Allow visibility toggle
+    zoom: true          // Allow zoom to layer
+  }
 }
 ```
 
@@ -499,7 +506,25 @@ initialSettings: {
 }
 ```
 
-**Note:** `extent` uses layer projection, `bounds` always uses WGS84.
+---
+
+#### extent
+
+Geographic extent that constrains the view (in layer's projection).
+
+```typescript
+extent?: Extent; // [minX, minY, maxX, maxY]
+```
+
+**Example:**
+
+```typescript
+initialSettings: {
+  extent: [-120, 40, -100, 50]; // [west, south, east, north]
+}
+```
+
+**Note:** `extent` uses layer projection, `bounds` uses WGS84.
 
 ---
 
@@ -508,8 +533,8 @@ initialSettings: {
 Zoom level constraints for layer visibility.
 
 ```typescript
-minZoom?: number; // 0-23
-maxZoom?: number; // 0-23
+minZoom?: number; // Minimum zoom level (exclusive)
+maxZoom?: number; // Maximum zoom level (inclusive)
 ```
 
 **Examples:**
@@ -518,13 +543,103 @@ maxZoom?: number; // 0-23
 // Only visible at street level
 initialSettings: {
   minZoom: 10,
-  maxZoom: 18,
+  maxZoom: 18
 }
 
 // Only visible at world/country level
 initialSettings: {
   minZoom: 0,
-  maxZoom: 6,
+  maxZoom: 6
+}
+```
+
+---
+
+#### className
+
+CSS class name to set on the layer element.
+
+```typescript
+className?: string;
+```
+
+**Example:**
+
+```typescript
+initialSettings: {
+  className: "my-custom-layer";
+}
+```
+
+---
+
+#### states
+
+Initial state settings for the layer.
+
+```typescript
+states?: TypeLayerStates;
+```
+
+**Example:**
+
+```typescript
+initialSettings: {
+  states: {
+    visible: true,
+    legendCollapsed: false,
+    opacity: 1.0,
+    hoverable: true,
+    queryable: false
+  }
+}
+```
+
+---
+
+#### states.visible
+
+Initial visibility of the layer.
+
+```typescript
+states?: {
+  visible?: boolean;
+};
+```
+
+**Default:** `true`
+
+**Example:**
+
+```typescript
+initialSettings: {
+  states: {
+    visible: false; // Layer starts hidden
+  }
+}
+```
+
+---
+
+#### states.legendCollapsed
+
+Whether the layer's legend is initially collapsed.
+
+```typescript
+states?: {
+  legendCollapsed?: boolean;
+};
+```
+
+**Default:** `false`
+
+**Example:**
+
+```typescript
+initialSettings: {
+  states: {
+    legendCollapsed: true; // Start with legend collapsed
+  }
 }
 ```
 
@@ -548,40 +663,15 @@ states?: {
 // Semi-transparent overlay
 initialSettings: {
   states: {
-    opacity: 0.5,
-  },
+    opacity: 0.5;
+  }
 }
 
 // Very subtle background
 initialSettings: {
   states: {
-    opacity: 0.2,
-  },
-}
-```
-
----
-
-#### states.queryable
-
-Whether the layer responds to feature info queries (clicks).
-
-```typescript
-states?: {
-  queryable?: boolean;
-};
-```
-
-**Default:** `true`
-
-**Example:**
-
-```typescript
-// Disable feature info for basemap
-initialSettings: {
-  states: {
-    queryable: false,
-  },
+    opacity: 0.2;
+  }
 }
 ```
 
@@ -597,16 +687,40 @@ states?: {
 };
 ```
 
+**Default:** `true`
+
+**Example:**
+
+```typescript
+initialSettings: {
+  states: {
+    hoverable: false; // Disable hover tooltips
+  }
+}
+```
+
+---
+
+#### states.queryable
+
+Whether the layer responds to feature info queries (clicks).
+
+```typescript
+states?: {
+  queryable?: boolean;
+};
+```
+
 **Default:** `false`
 
 **Example:**
 
 ```typescript
-// Enable hover tooltips
+// Enable feature info for basemap
 initialSettings: {
   states: {
-    hoverable: true,
-  },
+    queryable: true;
+  }
 }
 ```
 
@@ -625,13 +739,35 @@ Configuration varies by layer type:
 ```typescript
 interface TypeSourceVectorInitialConfig {
   dataAccessPath?: string;
-  format?: string;
-  featureInfo?: {
-    queryable?: boolean;
-    nameField?: string;
-    outfields?: string[];
-  };
+  maxRecordCount?: number;
+  layerFilter?: string;
+  format?: TypeVectorSourceFormats;
+  featureInfo?: TypeFeatureInfoLayerConfig;
+  strategy?: VectorStrategy; // 'all' | 'bbox'
+  dataProjection?: string;
+  postSettings?: TypePostSettings;
+  separator?: string; // For CSV files
+  crossOrigin?: string;
+  projection?: 3978 | 3857 | 4326;
 }
+
+interface TypeFeatureInfoLayerConfig {
+  queryable: boolean;
+  nameField?: string;
+  outfields?: TypeOutfields[];
+}
+
+type TypeVectorSourceFormats =
+  | "GeoJSON"
+  | "EsriJSON"
+  | "KML"
+  | "WFS"
+  | "featureAPI"
+  | "CSV"
+  | "MVT"
+  | "WKB";
+
+type VectorStrategy = "all" | "bbox";
 ```
 
 **Example:**
@@ -640,11 +776,13 @@ interface TypeSourceVectorInitialConfig {
 source: {
   dataAccessPath: "/data/features.geojson",
   format: "GeoJSON",
+  maxRecordCount: 10000,
+  strategy: "bbox",
   featureInfo: {
     queryable: true,
     nameField: "name",
-    outfields: ["name", "population", "area"],
-  },
+    outfields: ["name", "population", "area"]
+  }
 }
 ```
 
@@ -653,24 +791,59 @@ source: {
 #### Raster Sources (WMS, ESRI Image, XYZ)
 
 ```typescript
-interface TypeSourceImageInitialConfig {
-  format?: string;
-  transparent?: boolean;
-  featureInfo?: {
-    queryable?: boolean;
-  };
+// Union type for different image sources
+type TypeSourceImageInitialConfig =
+  | TypeSourceImageWmsInitialConfig
+  | TypeSourceImageEsriInitialConfig
+  | TypeSourceImageStaticInitialConfig;
+
+// WMS Image Source
+interface TypeSourceImageWmsInitialConfig {
+  serverType?: "mapserver" | "geoserver" | "qgis";
+  wmsStyle?: string | string[];
+  featureInfo?: TypeFeatureInfoLayerConfig;
+  crossOrigin?: string;
+  projection?: 3978 | 3857 | 4326;
+}
+
+// ESRI Image Source
+interface TypeSourceImageEsriInitialConfig {
+  format?: "PNG" | "PNG8" | "PNG24" | "PNG32" | "JPG" | "GIF" | "BMP";
+  transparent?: boolean; // Default = true
+  crossOrigin?: string;
+  projection?: 3978 | 3857 | 4326;
+}
+
+// Static Image Source
+interface TypeSourceImageStaticInitialConfig {
+  extent: Extent; // Required for static images
+  crossOrigin?: string;
+  projection?: 3978 | 3857 | 4326;
+  featureInfo?: { queryable: false }; // Must be false
 }
 ```
 
-**Example:**
+**Examples:**
 
 ```typescript
+// WMS source
 source: {
-  format: "image/png",
-  transparent: true,
+  serverType: "mapserver",
+  wmsStyle: "default",
   featureInfo: {
-    queryable: true,
-  },
+    queryable: true
+  }
+}
+
+// ESRI Image source
+source: {
+  format: "PNG32",
+  transparent: true
+}
+
+// Static Image source
+source: {
+  extent: [-180, -90, 180, 90]
 }
 ```
 

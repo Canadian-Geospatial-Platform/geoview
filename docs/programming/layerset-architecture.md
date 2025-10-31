@@ -1,6 +1,6 @@
 # Layer Set Architecture
 
-> **?? Audience:** Core GeoView developers
+> ** Audience:** Core GeoView developers
 >
 > **For API Users:** See [Layer Sets Guide](app/layers/layersets.md) for using Layer Sets in your applications
 
