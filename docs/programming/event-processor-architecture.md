@@ -1,8 +1,8 @@
-﻿# Event Processor Architecture
+# Event Processor Architecture
 
-> **👥 Audience:** Core developers contributing to GeoView
+> **?? Audience:** Core developers contributing to GeoView
 >
-> **For API Users:** See [Event Processors API](app/doc-new/event-processors.md) for usage documentation
+> **For API Users:** See [Event Processors API](app/events/event-processors.md) for usage documentation
 
 This document explains the internal architecture of Event Processors, how they integrate with the Zustand store, and how to create custom processors.
 
@@ -13,9 +13,9 @@ This document explains the internal architecture of Event Processors, how they i
 GeoView uses a modified Zustand pattern with Event Processors sitting between components and store actions:
 
 ```
-UI Component ──> MapState.actions ──> EventProcessor ──> MapState.setterActions
-Backend Code ──> EventProcessor ──> MapState.setterActions
-MapViewer Events ──> EventProcessor ──> MapState.setterActions
+UI Component --> MapState.actions --> EventProcessor --> MapState.setterActions
+Backend Code --> EventProcessor --> MapState.setterActions
+MapViewer Events --> EventProcessor --> MapState.setterActions
 ```
 
 ### Design Principles
@@ -42,19 +42,19 @@ MapViewer Events ──> EventProcessor ──> MapState.setterActions
 
 **Benefits:**
 
-- ✅ Single source of truth for business logic
-- ✅ Separation of UI concerns from state management
-- ✅ Easier testing (mock Event Processors instead of store)
-- ✅ Centralized side effects (logging, analytics, map updates)
-- ✅ Type-safe state access
+- ? Single source of truth for business logic
+- ? Separation of UI concerns from state management
+- ? Easier testing (mock Event Processors instead of store)
+- ? Centralized side effects (logging, analytics, map updates)
+- ? Type-safe state access
 
 **Compared to Direct Store Access:**
 
 ```typescript
-// ❌ Bad: Direct store manipulation (no validation, no side effects)
+// ? Bad: Direct store manipulation (no validation, no side effects)
 store.setState({ mapState: { zoom: 10 } });
 
-// ✅ Good: Through Event Processor (validation, logging, map sync)
+// ? Good: Through Event Processor (validation, logging, map sync)
 MapEventProcessor.setZoom("mapId", 10);
 ```
 
@@ -418,18 +418,18 @@ const mapState = {
 
 ## Best Practices
 
-### DO ✅
+### DO ?
 
 1. **Keep Event Processors static**
 
    ```typescript
-   static getSomeValue(mapId: string) { }  // ✅ Good
+   static getSomeValue(mapId: string) { }  // ? Good
    ```
 
 2. **Use protected methods for state access**
 
    ```typescript
-   protected static getCustomState(mapId: string) { }  // ✅ Good
+   protected static getCustomState(mapId: string) { }  // ? Good
    ```
 
 3. **Validate inputs**
@@ -462,26 +462,26 @@ const mapState = {
    }
    ```
 
-### DON'T ❌
+### DON'T ?
 
 1. **Don't create instance methods**
 
    ```typescript
-   getSomeValue() { }  // ❌ Bad - should be static
+   getSomeValue() { }  // ? Bad - should be static
    ```
 
 2. **Don't expose state directly**
 
    ```typescript
    static getState(mapId: string) {
-     return super.getState(mapId);  // ❌ Bad - too much access
+     return super.getState(mapId);  // ? Bad - too much access
    }
    ```
 
 3. **Don't create circular dependencies**
 
    ```typescript
-   // ❌ Bad
+   // ? Bad
    MapEventProcessor -> LegendEventProcessor -> MapEventProcessor
    ```
 
@@ -489,19 +489,19 @@ const mapState = {
 
    ```typescript
    protected override onDestroy(): void {
-     // ❌ Bad - forgot to call super
+     // ? Bad - forgot to call super
      // Custom cleanup only
    }
 
    protected override onDestroy(): void {
-     // ✅ Good
+     // ? Good
      super.onDestroy(); // Always call parent
    }
    ```
 
 ## See Also
 
-- **[Event Processors API](app/doc-new/event-processors.md)** - Public API documentation
+- **[Event Processors API](app/events/event-processors.md)** - Public API documentation
 - **[Using Zustand Store](programming/using-store.md)** - Store patterns and practices
 - **[Best Practices](programming/best-practices.md)** - General coding standards
 - **[TypeScript Patterns](programming/using-type.md)** - TypeScript conventions

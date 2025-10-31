@@ -1,8 +1,8 @@
-﻿# Layer Set Architecture
+# Layer Set Architecture
 
-> **👥 Audience:** Core GeoView developers
+> **?? Audience:** Core GeoView developers
 >
-> **For API Users:** See [Layer Sets Guide](app/doc-new/layersets.md) for using Layer Sets in your applications
+> **For API Users:** See [Layer Sets Guide](app/layers/layersets.md) for using Layer Sets in your applications
 
 This document describes the internal architecture and implementation details of the Layer Set system in GeoView.
 
@@ -107,10 +107,10 @@ protected override onRegisterLayerCheck(layer: AbstractBaseLayer): boolean {
 
 **Event Flow:**
 
-1. Layer config added → Register in resultSet
-2. Layer created → Update layerStatus to 'processing'
-3. Style loaded → Populate items, set status to 'processed'
-4. Style changed → Update items, emit update event
+1. Layer config added ? Register in resultSet
+2. Layer created ? Update layerStatus to 'processing'
+3. Style loaded ? Populate items, set status to 'processed'
+4. Style changed ? Update items, emit update event
 
 ---
 
@@ -417,23 +417,23 @@ function LegendPanel() {
 
 ```
 User Click
-  ↓
+  ?
 MapViewer.onMapSingleClick event
-  ↓
+  ?
 FeatureInfoLayerSet.queryLayers(location)
-  ↓
+  ?
 For each registered layer:
-  ↓
+  ?
   Layer.queryAtCoordinate(location)
-    ↓
+    ?
     OGC GetFeatureInfo / WFS GetFeature / Vector query
-    ↓
-  Parse response → TypeFeatureInfoEntry[]
-  ↓
+    ?
+  Parse response ? TypeFeatureInfoEntry[]
+  ?
 Update resultSet[layerPath].featureInfo
-  ↓
+  ?
 Propagate to store
-  ↓
+  ?
 React components re-render with new features
 ```
 
@@ -590,10 +590,9 @@ legendsLayerSet.onLayerSetUpdated((sender, payload) => {
 
 **For API Users:**
 
-- [Layer Sets Guide](app/doc-new/layersets.md) - Using Layer Sets in applications
+- [Layer Sets Guide](app/layers/layersets.md) - Using Layer Sets in applications
 
 **For Core Developers:**
 
 - [Event Processor Architecture](programming/event-processor-architecture.md) - Store and event system
-- [Layer Architecture](programming/layer-architecture.md) - Layer implementation details
-- [Adding Layer Types](programming/adding-layer-types.md) - Implementing new layer types
+- [Adding Layer Types](programming/adding-layer-types.md) - Layer implementation details and adding new layer types
