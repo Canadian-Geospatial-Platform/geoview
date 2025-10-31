@@ -15,63 +15,219 @@
       <h1 class="index-header-title"><strong>Canadian Geospatial Platform (CGP) - GeoView Project -</strong></h1>
       <hr />
       <hr />
-      <h4>Documentation</h4>
-      <a class="page-link" href="./docs/" target="_blank">📘 User Documentation</a>
-      <a class="page-link" href="./public/typeDocAPI/index.html" target="_blank">🔍 TypeDoc API Reference</a>
-      <br />
-      <br />
-      <br />
-      <h4>Sandbox</h4>
-      <a class="page-link" href="./sandbox.html">Sandbox</a>
-      <a class="page-link" href="./config-sandbox.html">Config Sandbox</a>
-      <a class="page-link" href="./config-sandbox2.html">Config Sandbox 2</a>
 
-      <h4>Configuration Navigators</h4>
-      <a class="page-link" href="./demos-navigator.html">Demos Navigator</a>
-      <a class="page-link" href="./layers-navigator.html">Layers Navigator</a>
+      <!-- Tabs Navigation -->
+      <div class="tabs">
+        <button class="tab-button active" onclick="openTab(event, 'navigators')">Navigators</button>
+        <button class="tab-button" onclick="openTab(event, 'sandbox')">Sandbox</button>
+        <button class="tab-button" onclick="openTab(event, 'demos')">Demos</button>
+        <button class="tab-button" onclick="openTab(event, 'specific-demos')">Specific Demos</button>
+        <button class="tab-button" onclick="openTab(event, 'testing')">Testing</button>
+        <button class="tab-button" onclick="openTab(event, 'documentation')">Documentation</button>
+      </div>
 
-      <h4>Basic Loading</h4>
-      <a class="page-link" href="./default-config.html">Default Configuration</a>
-      <a class="page-link" href="./api-loads.html?geoms=000183ed-8864-42f0-ae43-c4313a860720,0083baf1-8145-4207-a84f-3d85ef2943a5"
-        >API loads</a
-      >
+      <!-- Navigators Tab -->
+      <div id="navigators" class="tab-content active">
+        <div class="demo-section">
+          <h4>🧭 Configuration Navigators</h4>
+          <p>Interactive navigators to explore and test different GeoView configurations and layer types.</p>
+          <ul class="demo-list">
+            <li><a href="./demos-navigator.html">Demos Navigator</a></li>
+            <li><a href="./layers-navigator.html">Layers Navigator</a></li>
+          </ul>
+        </div>
+      </div>
 
-      <h4>Custom Behaviour</h4>
-      <a class="page-link" href="./add-layers.html">Add Layers</a>
-      <a class="page-link" href="./pygeoapi-processes.html">pygeoapi process</a>
-      <a class="page-link" href="./ui-components.html">UI Components</a>
+      <!-- Demos Tab -->
+      <div id="demos" class="tab-content">
+        <div class="demo-section">
+          <h4>🚀 Basic Loading</h4>
+          <ul class="demo-list">
+            <li><a href="./default-config.html">Default Configuration</a></li>
+            <li>
+              <a href="./api-loads.html?geoms=000183ed-8864-42f0-ae43-c4313a860720,0083baf1-8145-4207-a84f-3d85ef2943a5">API Loads</a>
+            </li>
+          </ul>
+        </div>
 
-      <h4>Internal Package</h4>
-      <a class="page-link" href="./loading-packages.html">Loading Packages</a>
-      <a class="page-link" href="./package-swiper.html">Package - Swiper (interactive)</a>
+        <div class="demo-section">
+          <h4>🎨 Custom Behaviour</h4>
+          <ul class="demo-list">
+            <li><a href="./add-layers.html">Add Layers</a></li>
+            <li><a href="./pygeoapi-processes.html">pygeoapi Process</a></li>
+            <li><a href="./ui-components.html">UI Components</a></li>
+          </ul>
+        </div>
 
-      <h4>API and Events</h4>
-      <a class="page-link" href="./api-functions-test.html">API Functions Test</a>
-      <a class="page-link" href="./events.html">Events</a>
-      <a class="page-link" href="./add-panels.html">Add Panels</a>
-      <a class="page-link" href="./geometry.html">Geometry</a>
-      <a class="page-link" href="./footer-bar.html">Footer bar (vanilla JS)</a>
+        <div class="demo-section">
+          <h4>📦 Internal Packages</h4>
+          <ul class="demo-list">
+            <li><a href="./loading-packages.html">Loading Packages</a></li>
+            <li><a href="./package-swiper.html">Package - Swiper (interactive)</a></li>
+          </ul>
+        </div>
 
-      <h4>Interactions</h4>
-      <a class="page-link" href="./inter-all.html">Interactions (all-in)</a>
-      <a class="page-link" href="./inter-select.html">Select</a>
-      <a class="page-link" href="./inter-draw.html">Draw</a>
-      <a class="page-link" href="./inter-modify.html">Modify</a>
-      <a class="page-link" href="./inter-translate.html">Translate</a>
-      <a class="page-link" href="./inter-snap.html">Snap</a>
-      <a class="page-link" href="./inter-extent.html">Extent</a>
-      <a class="page-link" href="./inter-bounding-box-selector.html">Bounding Box Selector</a>
+        <div class="demo-section">
+          <h4>🔧 API and Events</h4>
+          <ul class="demo-list">
+            <li><a href="./api-functions-test.html">API Functions Test</a></li>
+            <li><a href="./events.html">Events</a></li>
+            <li><a href="./add-panels.html">Add Panels</a></li>
+            <li><a href="./geometry.html">Geometry</a></li>
+            <li><a href="./footer-bar.html">Footer Bar (vanilla JS)</a></li>
+          </ul>
+        </div>
 
-      <h4>Demos</h4>
-      <a class="page-link" href="./demos.html">Specific Demos Pages</a>
-      <a class="page-link" href="./demo-function-event.html">API Function and Event Demo</a>
+        <div class="demo-section">
+          <h4>🖱️ Interactions</h4>
+          <ul class="demo-list">
+            <li><a href="./inter-all.html">Interactions (all-in)</a></li>
+            <li><a href="./inter-select.html">Select</a></li>
+            <li><a href="./inter-draw.html">Draw</a></li>
+            <li><a href="./inter-modify.html">Modify</a></li>
+            <li><a href="./inter-translate.html">Translate</a></li>
+            <li><a href="./inter-snap.html">Snap</a></li>
+            <li><a href="./inter-extent.html">Extent</a></li>
+            <li><a href="./inter-bounding-box-selector.html">Bounding Box Selector</a></li>
+          </ul>
+        </div>
 
-      <h4>Other</h4>
-      <a class="page-link" href="./load-test.html">Performance Test</a>
-      <a class="page-link" href="./outliers.html">Outlier Layer Demo Pages</a>
+        <div class="demo-section">
+          <h4>🔍 Other</h4>
+          <ul class="demo-list">
+            <li><a href="./load-test.html">Performance Test</a></li>
+            <li><a href="./outliers.html">Outlier Layer Demo Pages</a></li>
+          </ul>
+        </div>
+      </div>
 
-      <h4>Functional Testing</h4>
-      <a class="page-link" href="./tests.html">Tests</a>
+      <!-- Sandbox Tab -->
+      <div id="sandbox" class="tab-content">
+        <div class="demo-section">
+          <h4>🛠️ Interactive Sandbox</h4>
+          <p>Experiment with GeoView in a live sandbox environment. Test configurations, explore features, and prototype your solutions.</p>
+          <ul class="demo-list">
+            <li><a href="./sandbox.html">Main Sandbox</a></li>
+            <li><a href="./config-sandbox.html">Config Sandbox</a></li>
+            <li><a href="./config-sandbox2.html">Config Sandbox 2</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Specific Demos Tab -->
+      <div id="specific-demos" class="tab-content">
+        <div class="demo-section">
+          <h4>🎯 Featured Demo</h4>
+          <ul class="demo-list">
+            <li><a href="./demo-function-event.html">API Function and Event Demo</a></li>
+          </ul>
+        </div>
+
+        <div class="demo-section">
+          <h4>🏛️ Canada's Spatial Data Infrastructure</h4>
+          <ul class="demo-list">
+            <li><a href="./demo-cgdi.html">Water Starter Kit</a></li>
+          </ul>
+        </div>
+
+        <div class="demo-section">
+          <h4>🔬 Open Science Data Portal</h4>
+          <ul class="demo-list">
+            <li><a href="./demo-osdp-integration.html">Geoview Integration</a></li>
+            <li><a href="./demo-osdp-air.html">Air Quality</a></li>
+            <li><a href="./demo-osdp-biodiversity.html">Biodiversity</a></li>
+            <li><a href="./demo-osdp-climate.html">Climate</a></li>
+            <li><a href="./demo-osdp-economy.html">Economy and Industry</a></li>
+            <li><a href="./demo-osdp-health.html">Health</a></li>
+            <li><a href="./demo-osdp-land.html">Land</a></li>
+            <li><a href="./demo-osdp-society.html">Society and Culture</a></li>
+            <li><a href="./demo-osdp-water.html">Water</a></li>
+            <li><a href="./demo-osdp-non-currated.html">Non Currated Maps</a></li>
+          </ul>
+        </div>
+
+        <div class="demo-section">
+          <h4>🪨 GSC (Geological Survey of Canada)</h4>
+          <ul class="demo-list">
+            <li><a href="./demo-gsc.html">GSC 46E</a></li>
+          </ul>
+        </div>
+
+        <div class="demo-section">
+          <h4>🌊 EGS (Emergency Geomatics Services)</h4>
+          <ul class="demo-list">
+            <li><a href="./demo-flood.html">Active Floods</a></li>
+          </ul>
+        </div>
+
+        <div class="demo-section">
+          <h4>🗺️ World of Maps</h4>
+          <ul class="demo-list">
+            <li><a href="./demo-world-of-maps.html">NTS Search</a></li>
+          </ul>
+        </div>
+
+        <div class="demo-section">
+          <h4>📚 Other Specific Demos</h4>
+          <ul class="demo-list">
+            <li><a href="./demo-important-layers.html">Important Layers Test Panel</a></li>
+            <li><a href="./demo-geojson-inject.html">GeoJSON Injection</a></li>
+            <li><a href="./demo-esri-renderer.html">ESRI Custom Renderer</a></li>
+            <li><a href="./demo-app-geo-v2.html?id=f129611d-7ca1-418b-8390-ebac5adf958e">App Geo v2</a></li>
+            <li><a href="./demo-geodiscovery-geochart.html">Geodiscovery Geochart</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Testing Tab -->
+      <div id="testing" class="tab-content">
+        <div class="demo-section">
+          <h4>🧪 Functional Testing</h4>
+          <p>Run automated tests to verify GeoView functionality across different scenarios.</p>
+          <ul class="demo-list">
+            <li><a href="./tests.html">Functional Test Suite</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Documentation Tab -->
+      <div id="documentation" class="tab-content">
+        <div class="demo-section">
+          <h4>📖 User Documentation</h4>
+          <p>Comprehensive guides and references for using GeoView in your applications.</p>
+          <ul class="demo-list">
+            <li><a href="./docs/" target="_blank">Documentation Home</a></li>
+          </ul>
+        </div>
+
+        <div class="demo-section">
+          <h4>🔍 API Reference</h4>
+          <p>Complete API documentation and type definitions for GeoView development.</p>
+          <ul class="demo-list">
+            <li><a href="./public/typeDocAPI/index.html" target="_blank">TypeDoc API Reference</a></li>
+          </ul>
+        </div>
+      </div>
     </div>
+
+    <script>
+      function openTab(evt, tabName) {
+        // Hide all tab contents
+        var tabContents = document.getElementsByClassName('tab-content');
+        for (var i = 0; i < tabContents.length; i++) {
+          tabContents[i].classList.remove('active');
+        }
+
+        // Remove active class from all tab buttons
+        var tabButtons = document.getElementsByClassName('tab-button');
+        for (var i = 0; i < tabButtons.length; i++) {
+          tabButtons[i].classList.remove('active');
+        }
+
+        // Show the current tab and mark button as active
+        document.getElementById(tabName).classList.add('active');
+        evt.currentTarget.classList.add('active');
+      }
+    </script>
   </body>
 </html>
