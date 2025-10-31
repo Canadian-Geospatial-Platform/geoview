@@ -1,8 +1,8 @@
-﻿# Using Zustand Store
+# Using Zustand Store
 
-> **🎯 Audience:** GeoView core developers
+> **?? Audience:** GeoView core developers
 >
-> **For API Users:** See [Event Processors](app/doc-new/event-processors.md) for the public API approach to state management.
+> **For API Users:** See [Event Processors](app/events/event-processors.md) for the public API approach to state management.
 
 We use [Zustand](https://github.com/pmndrs/zustand) store for our state management. We define a list of functions and concept to follow....
 For this reason we have put together some explanations here to help you use store functionnalities when programming.
@@ -126,6 +126,6 @@ TO COME
 
 ## See Also
 
-- **[Event Processors](app/doc-new/event-processors.md)** - Public API for state management
+- **[Event Processors](app/events/event-processors.md)** - Public API for state management
 - **[Best Practices](programming/best-practices.md)** - Coding standards
 - **[Using TypeScript](programming/using-type.md)** - TypeScript patterns

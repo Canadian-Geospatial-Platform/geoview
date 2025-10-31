@@ -1,8 +1,8 @@
-﻿# Adding New Layer Types
+# Adding New Layer Types
 
-> **👥 Audience:** Core developers extending GeoView functionality
+> **?? Audience:** Core developers extending GeoView functionality
 >
-> **For API Users:** See [GeoView Layers Guide](app/doc-new/layers.md) for using existing layer types
+> **For API Users:** See [GeoView Layers Guide](app/layers/layers.md) for using existing layer types
 
 This guide explains how to add support for new layer types to GeoView.
 
@@ -19,21 +19,21 @@ Both categories extend the parent abstract class `AbstractGeoViewLayers`.
 
 ```
 AbstractGeoViewLayers (parent)
-├── AbstractGeoViewRaster
-│   ├── EsriDynamic
-│   ├── EsriImage
-│   ├── ImageStatic
-│   ├── OgcWms (wms.ts)
-│   ├── VectorTiles
-│   └── XyzTiles
-└── AbstractGeoViewVector
-    ├── CSV
-    ├── EsriFeature
-    ├── GeoJSON
-    ├── KML
-    ├── OgcFeature
-    ├── OgcWfs (wfs.ts)
-    └── WKB
++-- AbstractGeoViewRaster
+�   +-- EsriDynamic
+�   +-- EsriImage
+�   +-- ImageStatic
+�   +-- OgcWms (wms.ts)
+�   +-- VectorTiles
+�   +-- XyzTiles
++-- AbstractGeoViewVector
+    +-- CSV
+    +-- EsriFeature
+    +-- GeoJSON
+    +-- KML
+    +-- OgcFeature
+    +-- OgcWfs (wfs.ts)
+    +-- WKB
 ```
 
 > **Note:** `GeoPackage` and `shapefile` are input file formats that are automatically converted to one of the vector types above (typically GeoJSON or WKB) during loading, so they don't have dedicated class implementations.
@@ -509,7 +509,7 @@ protected applyStyle(olLayer: BaseLayer, styleConfig: any): void {
 
 ## Best Practices
 
-### ✅ DO
+### ? DO
 
 1. **Extend the correct abstract class** (Raster vs Vector)
 2. **Implement all abstract methods** completely
@@ -519,7 +519,7 @@ protected applyStyle(olLayer: BaseLayer, styleConfig: any): void {
 6. **Document your layer type** in user-facing docs
 7. **Follow naming conventions** (e.g., `ImageStatic`, not `StaticImage`)
 
-### ❌ DON'T
+### ? DON'T
 
 1. **Don't modify abstract classes** unless necessary
 2. **Don't bypass validation** - use schema validation
@@ -550,11 +550,10 @@ protected applyStyle(olLayer: BaseLayer, styleConfig: any): void {
 
 ## See Also
 
-- **[GeoView Layers Guide](app/doc-new/layers.md)** - User-facing layer documentation
-- **[Layer API Reference](app/doc-new/layer-api.md)** - API methods
+- **[GeoView Layers Guide](app/layers/layers.md)** - User-facing layer documentation
+- **[Layer API Reference](app/api/layer-api.md)** - API methods
 - **[TypeScript Patterns](programming/using-type.md)** - TypeScript conventions
 - **[Best Practices](programming/best-practices.md)** - General coding standards
-- **[Testing Guide](programming/testing.md)** - Testing patterns
 
 ## Example: Complete Layer Implementation
 

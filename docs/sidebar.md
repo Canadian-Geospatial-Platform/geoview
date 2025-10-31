@@ -1,20 +1,46 @@
 - [Home](/)
 - [Getting Started](README.md)
 
-- **API Documentation (Users)**
+- **Getting Started**
 
-  - [Overview](app/doc-new/README.md)
-  - [API Reference](app/doc-new/api.md)
-  - [Create a Map](app/doc-new/create-map.md)
-  - [Configuration Reference](app/doc-new/configuration-reference.md)
-  - [Event Processors](app/doc-new/event-processors.md)
-  - [Events](app/doc-new/event.md)
-  - [Layer API](app/doc-new/layer-api.md)
-  - [Layers Guide](app/doc-new/layers.md)
-  - [LayerSets](app/doc-new/layersets.md)
-  - [Packages/Plugins](app/doc-new/packages.md)
-  - [Utilities](app/doc-new/api-utilities.md)
-  - [MapViewer API](app/doc-new/map-viewer-api-doc.md)
+  - [Documentation Overview](README.md)
+
+- **Configuration**
+
+  - [Creating Maps](app/config/create-map.md)
+  - [Configuration Reference](app/config/configuration-reference.md)
+
+- **API Reference**
+
+  - [CGPV API](app/api/cgpv.md)
+  - [MapViewer API](app/api/map-viewer-api.md)
+  - [Layer API](app/api/layer-api.md)
+  - [Geometry API](app/api/geometry-api.md)
+  - [Utilities](app/api/utilities.md)
+
+- **Layers**
+
+  - [Layers Guide](app/layers/layers.md)
+  - [LayerSets](app/layers/layersets.md)
+
+- **Events**
+
+  - [Event System](app/events/event-system.md)
+  - [Map Events](app/events/map-events.md)
+  - [Layer Events](app/events/layer-events.md)
+  - [Event Processors](app/events/event-processors.md)
+
+- **Packages**
+
+  - [Packages Overview](app/packages/README.md)
+  - [Core Packages](app/packages/geoview-core-packages.md)
+  - [Package Development](app/packages/core-packages.md)
+
+- **Testing**
+
+  - [Test Suite Guide](app/testing/README.md)
+  - [Using Tests](app/testing/using-test-suite.md)
+  - [Creating Tests](app/testing/creating-tests.md)
 
 - **Developer Documentation**
 

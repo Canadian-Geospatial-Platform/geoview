@@ -1,4 +1,4 @@
-ï»¿# Using TypeJson* #
+# Using TypeJson* #
 
 Among the types that have been created for the GeoView application, those that allow working with Json-encoded data
 are probably the most subtle to understand. For this reason we have put together some explanations here to help you
@@ -34,8 +34,8 @@ Here are two declaration examples that use the TypeJsonObject type.
           action_back: 'Back',
         },
         fr: {
-          detailsPanel: 'DÃ©tails',
-          nothing_found: 'Aucun rÃ©sultats',
+          detailsPanel: 'Détails',
+          nothing_found: 'Aucun résultats',
           action_back: 'Retour',
         },
       });
