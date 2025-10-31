@@ -1,12 +1,12 @@
-import type { ReactNode } from 'react';
-import { useCallback, useRef } from 'react';
+import type { ReactNode, Ref } from 'react';
+import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { logger } from '@/core/utils/logger';
 import type { LayerListEntry } from './layer-list';
 import { LayerList } from './layer-list';
 import type { ResponsiveGridLayoutExposedMethods } from './responsive-grid-layout';
 import { ResponsiveGridLayout } from './responsive-grid-layout';
-import { Box, Tooltip, Typography } from '@/ui';
+import { Tooltip, Typography } from '@/ui';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
@@ -18,26 +18,33 @@ interface LayoutProps {
   guideContentIds?: string[];
   layerList: LayerListEntry[];
   selectedLayerPath: string | undefined;
-  fullWidth?: boolean;
-  containerType?: TypeContainerBox;
   onLayerListClicked: (layer: LayerListEntry) => void;
   onIsEnlargeClicked?: (isEnlarge: boolean) => void;
   onGuideIsOpen?: (isGuideOpen: boolean) => void;
+<<<<<<< HEAD
   onRightPanelClosed?: () => void;
   onRightPanelVisibilityChanged?: (isVisible: boolean) => void;
+=======
+  containerType?: TypeContainerBox;
+  hideEnlargeBtn?: boolean;
+  toggleMode?: boolean;
+>>>>>>> ab8c937f2 (Adjust the details panel in the app bar to show details and layers simultaneously)
 }
 
 // Constants outside component to prevent recreating every render
 const TITLE_STYLES = {
   fontWeight: '600',
-  marginTop: '12px',
   overflow: 'hidden',
   display: '-webkit-box',
   webkitBoxOrient: 'vertical',
   webkitLineClamp: '2',
 } as const;
 
-export function Layout({
+interface LayoutExposedMethods {
+  showRightPanel: (visible: boolean) => void;
+};
+
+const Layout = forwardRef(({
   children,
   layoutSwitch,
   guideContentIds,
@@ -45,12 +52,14 @@ export function Layout({
   selectedLayerPath,
   onLayerListClicked,
   onIsEnlargeClicked,
-  fullWidth,
   onGuideIsOpen,
   onRightPanelClosed,
   onRightPanelVisibilityChanged,
   containerType = CONTAINER_TYPE.FOOTER_BAR,
-}: LayoutProps): JSX.Element {
+  hideEnlargeBtn,
+  toggleMode = false,
+}: LayoutProps,
+ref: Ref<LayoutExposedMethods>) => {
   logger.logTraceRender('components/common/layout');
 
   // Hooks
@@ -90,18 +99,8 @@ export function Layout({
     // Log
     logger.logTraceUseCallback('LAYOUT - renderLayerList');
 
-    // Display any switches here for the AppBar
-    if (layoutSwitch && containerType === CONTAINER_TYPE.APP_BAR) {
-      return (
-        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-          <Box sx={{ alignSelf: 'flex-start', p: 1, width: '100%' }}>{layoutSwitch}</Box>
-          <LayerList selectedLayerPath={selectedLayerPath} onListItemClick={handleLayerChange} layerList={layerList} />
-        </Box>
-      );
-    }
-
     return <LayerList selectedLayerPath={selectedLayerPath} onListItemClick={handleLayerChange} layerList={layerList} />;
-  }, [layoutSwitch, containerType, selectedLayerPath, handleLayerChange, layerList]);
+  }, [selectedLayerPath, handleLayerChange, layerList]);
 
   /**
    * Render layer title
@@ -112,9 +111,8 @@ export function Layout({
     const sxClasses = {
       ...TITLE_STYLES,
       fontSize: theme.palette.geoViewFontSize.lg,
-      textAlign: fullWidth || containerType === CONTAINER_TYPE.APP_BAR ? 'center' : 'left',
-      width: fullWidth || containerType === CONTAINER_TYPE.APP_BAR ? '100%' : 'auto',
-      ...(!fullWidth && { [theme.breakpoints.up('md')]: { display: 'none' } }),
+      width: containerType === CONTAINER_TYPE.APP_BAR ? '100%' : 'auto',
+      ...(!toggleMode && { [theme.breakpoints.up('md')]: { display: 'none' } }),
     };
 
     return (
@@ -124,22 +122,33 @@ export function Layout({
         </Typography>
       </Tooltip>
     );
-  }, [containerType, fullWidth, layerName, theme.breakpoints, theme.palette.geoViewFontSize.lg]);
+  }, [containerType, layerName, theme.breakpoints, theme.palette.geoViewFontSize.lg, toggleMode]);
+
+  // Expose methods to parent component
+  useImperativeHandle( ref, () => ({
+    showRightPanel: (visible: boolean) => {
+      responsiveLayoutRef.current?.setIsRightPanelVisible(visible);
+    }
+  }));
 
   return (
     <ResponsiveGridLayout
       ref={responsiveLayoutRef}
-      leftTop={containerType === CONTAINER_TYPE.FOOTER_BAR ? layoutSwitch : undefined}
+      leftTop={layoutSwitch}
       leftMain={renderLayerList()}
+      rightTop={renderLayerTitle()}
       rightMain={children}
       guideContentIds={guideContentIds}
-      rightTop={renderLayerTitle()}
       onIsEnlargeClicked={onIsEnlargeClicked}
-      fullWidth={fullWidth}
       onGuideIsOpen={onGuideIsOpen}
       onRightPanelClosed={onRightPanelClosed}
       onRightPanelVisibilityChanged={onRightPanelVisibilityChanged}
+      hideEnlargeBtn={hideEnlargeBtn}
       containerType={containerType}
+      toggleMode={toggleMode}
     />
   );
-}
+});
+
+export { Layout };
+export type { LayoutExposedMethods };

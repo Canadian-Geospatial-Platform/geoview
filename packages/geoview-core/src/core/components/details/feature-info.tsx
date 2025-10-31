@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, useMemo, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
+<<<<<<< HEAD
 
 import {
   List,
@@ -14,6 +15,9 @@ import {
   HighlightOutlinedIcon,
   ChartIcon,
 } from '@/ui';
+=======
+import { Box, BrowserNotSupportedIcon, HighlightIcon, HighlightOutlinedIcon, IconButton, Paper, Typography, ZoomInSearchIcon } from '@/ui';
+>>>>>>> ab8c937f2 (Adjust the details panel in the app bar to show details and layers simultaneously)
 import { useDetailsCheckedFeatures, useDetailsStoreActions } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useGeochartLayerDataArrayBatch, useGeochartStoreActions } from '@/core/stores/store-interface-and-intial-values/geochart-state';
@@ -280,9 +284,9 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
         onGeochart={handleGeochart}
       />
 
-      <List sx={sxClasses.featureInfoListContainer}>
+      <Box sx={sxClasses.featureInfoListContainer}>
         <FeatureInfoTable featureInfoList={featureInfoList} />
-      </List>
+      </Box>
     </Paper>
   );
 }

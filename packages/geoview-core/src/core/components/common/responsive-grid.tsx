@@ -13,26 +13,25 @@ interface ResponsiveGridPanelProps extends GridProps {
   isRightPanelVisible: boolean;
   sxProps?: SxProps;
   isEnlarged: boolean;
-  fullWidth?: boolean;
   className?: string;
+  toggleMode?: boolean;
 }
 
 // Constants outside component to prevent recreating every render
-const PADDING = '0 12px 0 12px';
+const PADDING = '0 6px';
 const MOBILE_BREAKPOINT = 'md';
-const DEFAULT_PADDING_LEFT = '1rem';
 
 // Panel size configurations
 // Define the base breakpoint sizes without xs since it's common
 type BaseBreakpointSize = 'sm' | 'md' | 'lg' | 'xl';
 
 // PanelSize type that ensures xs is always included
-type PanelSize = { xs: number } & Record<string, number>;
+type PanelSize = { xs: number | 'auto' | 'grow' } & Record<string, number | 'auto' | 'grow'>;
 
 // Panel configuration type
 type PanelConfig = {
-  normal: Partial<Record<BaseBreakpointSize, number>>;
-  enlarged: Partial<Record<BaseBreakpointSize, number>>;
+  normal: Partial<Record<BaseBreakpointSize, number | 'auto' | 'grow'>>;
+  enlarged: Partial<Record<BaseBreakpointSize, number | 'auto' | 'grow'>>;
 };
 
 // Constants with correct typing
@@ -40,7 +39,7 @@ const PANEL_SIZES = {
   default: { xs: 12 } as PanelSize,
   left: {
     normal: { md: 4, lg: 4 },
-    enlarged: { md: 2, lg: 1.25 },
+    enlarged: { md: 2, lg: 1.25 }
   } as PanelConfig,
   right: {
     normal: { md: 8, lg: 8 },
@@ -51,8 +50,10 @@ const PANEL_SIZES = {
 /**
  * Get the left panel grid width size
  */
-const getLeftPanelSize = (fullWidth: boolean, isRightPanelVisible: boolean, isEnlarged: boolean): PanelSize => {
-  if (fullWidth) return PANEL_SIZES.default;
+const getLeftPanelSize = (isRightPanelVisible: boolean, isEnlarged: boolean, toggleMode: boolean): PanelSize => {
+  if ( toggleMode ) {
+    return isRightPanelVisible ? { xs: 'auto' } : { xs: 'grow' };
+  }
 
   return {
     xs: isRightPanelVisible ? 0 : 12,
@@ -63,8 +64,10 @@ const getLeftPanelSize = (fullWidth: boolean, isRightPanelVisible: boolean, isEn
 /**
  * Get the right panel grid width size
  */
-const getRightPanelSize = (fullWidth: boolean, isRightPanelVisible: boolean, isEnlarged: boolean): PanelSize => {
-  if (fullWidth) return PANEL_SIZES.default;
+const getRightPanelSize = (isRightPanelVisible: boolean, isEnlarged: boolean, toggleMode: boolean): PanelSize => {
+  if ( toggleMode ) {
+    return isRightPanelVisible ? { xs: 'grow' } : { xs: 0 };
+  }
 
   return {
     xs: !isRightPanelVisible ? 0 : 12,
@@ -72,13 +75,13 @@ const getRightPanelSize = (fullWidth: boolean, isRightPanelVisible: boolean, isE
   };
 };
 
-const usePanelSize = (fullWidth: boolean, isRightPanelVisible: boolean, isEnlarged: boolean): { left: PanelSize; right: PanelSize } => {
+const usePanelSize = (isRightPanelVisible: boolean, isEnlarged: boolean, toggleMode: boolean): { left: PanelSize; right: PanelSize } => {
   return useMemo(
     () => ({
-      left: getLeftPanelSize(fullWidth, isRightPanelVisible, isEnlarged),
-      right: getRightPanelSize(fullWidth, isRightPanelVisible, isEnlarged),
+      left: getLeftPanelSize(isRightPanelVisible, isEnlarged, toggleMode),
+      right: getRightPanelSize(isRightPanelVisible, isEnlarged, toggleMode),
     }),
-    [fullWidth, isRightPanelVisible, isEnlarged]
+    [isRightPanelVisible, isEnlarged, toggleMode]
   );
 };
 
@@ -104,8 +107,8 @@ ResponsiveGridRoot.displayName = 'ResponsiveGridRoot';
  * @param {boolean} [props.isRightPanelVisible=false] - Controls the visibility of the right panel
  * @param {SxProps} [props.sxProps={}] - MUI System props for custom styling
  * @param {boolean} props.isEnlarged - Whether the panel is in enlarged state
- * @param {boolean} [props.fullWidth=false] - Whether the panel should take full width
  * @param {boolean} props.isLeftPanel - Determines if this is a left panel (true) or right panel (false)
+ * @param {boolean} props.toggleMode - Alternate mode for the grid that resizes the left panel based on right panel visibility
  * @param {Ref} ref - Forward ref for the Grid component
  * @returns {JSX.Element} A responsive grid panel component
  */
@@ -117,8 +120,8 @@ const ResponsiveGridPanel = forwardRef(
       isRightPanelVisible = false,
       sxProps = {},
       isEnlarged,
-      fullWidth = false,
       isLeftPanel,
+      toggleMode = false,
       ...rest
     }: ResponsiveGridPanelProps & { isLeftPanel: boolean },
     ref
@@ -135,26 +138,24 @@ const ResponsiveGridPanel = forwardRef(
       [isRightPanelVisible, theme.breakpoints, isLeftPanel]
     );
 
-    const size = usePanelSize(fullWidth, isRightPanelVisible, isEnlarged);
+    const size = usePanelSize(isRightPanelVisible, isEnlarged, toggleMode);
 
     return (
       <Grid
         className={className}
         size={isLeftPanel ? size.left : size.right}
+        padding="0 10px"
         sx={{
           ...(isLeftPanel
             ? {}
             : {
                 position: 'relative',
-                [theme.breakpoints.up(MOBILE_BREAKPOINT)]: {
-                  paddingLeft: DEFAULT_PADDING_LEFT,
-                },
               }),
           ...sxProps,
-          ...(!fullWidth && displayStyles),
-          ...(fullWidth && {
+          ...(!toggleMode && displayStyles),
+          ...(toggleMode && {
             // eslint-disable-next-line no-nested-ternary
-            display: isLeftPanel ? (isRightPanelVisible ? 'none' : 'block') : !isRightPanelVisible ? 'none' : 'flex',
+            display: isLeftPanel ? 'flex' : !isRightPanelVisible ? 'none' : 'flex',
           }),
         }}
         component="div"

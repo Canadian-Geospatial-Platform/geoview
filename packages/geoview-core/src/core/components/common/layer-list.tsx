@@ -3,7 +3,7 @@ import { memo, useCallback, useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { animated } from '@react-spring/web';
-import { Box, List, ListItem, ListItemButton, Paper, Tooltip, Typography, ProgressBar, LocationSearchingIcon } from '@/ui';
+import { Badge, Box, List, ListItem, ListItemButton, Paper, Tooltip, Typography, ProgressBar, LocationSearchingIcon } from '@/ui';
 
 import type { TypeFeatureInfoEntry, TypeQueryStatus } from '@/api/types/map-schema-types';
 import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
@@ -132,7 +132,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
               ) : (
                 layer.layerPath && !layer.content && <LayerIcon layerPath={layer.layerPath} />
               )}
-              <Box sx={sxClasses.listPrimaryText}>
+              <Box sx={sxClasses.listPrimaryText} className="layerInfo">
                 <Typography component="div" className="layerTitle">
                   {layer.layerName}
                 </Typography>
@@ -142,6 +142,9 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
                   </Typography>
                 </Box>
               </Box>
+              {layer.layerPath !== 'coordinate-info' && (layer.numOffeatures ?? 0 ) > 0 &&  (
+                <Badge badgeContent={layer.numOffeatures} max={99} color="info" sx={sxClasses.layerCount} className="layer-count"></Badge>
+              )}
             </ListItemButton>
             {layerStatus === 'loading' && (
               <Box sx={sxClasses.progressBar}>

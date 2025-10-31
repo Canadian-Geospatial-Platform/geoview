@@ -1,21 +1,32 @@
 import type { Theme } from '@mui/material/styles';
 import type { SxStyles } from '@/ui/style/types';
 
-import { CONTAINER_TYPE } from '@/core/utils/constant';
-
 /**
  *  Get custom sx classes for the common grid layout
  *
  * @param {Theme} theme - The MUI theme object containing styling configurations
- * @param {string} containerType - The type of container ('app-bar' or 'footer-bar')
  * @returns {SxStyles} An object containing MUI SX styling properties
  */
-export const getSxClasses = (theme: Theme, containerType: string): SxStyles => ({
+export const getSxClasses = (theme: Theme): SxStyles => ({
   container: {
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
-    padding: containerType === CONTAINER_TYPE.FOOTER_BAR ? '20px 12px 12px 12px' : '20px 10px 10px 10px',
+    padding: '16px 0',
+  },
+  topRow: {
+    '& .responsive-layout-left-top': {
+      alignItems: 'end',
+      '&.MuiGrid-grid-xs-auto': {
+        width: '100%',
+      }
+    },
+    '& .responsive-layout-right-top': {
+      alignItems: 'end',
+      '&.MuiGrid-grid-xs-auto': {
+        width: '100%',
+      }
+    }
   },
   rightButtonsContainer: {
     backgroundColor: theme.palette.geoViewColor.bgColor.light[300],
@@ -67,7 +78,7 @@ export const getSxClasses = (theme: Theme, containerType: string): SxStyles => (
     },
     '& .guideBox': {
       color: `${theme.palette.geoViewColor.grey.dark[800]}  !important`,
-      margin: '1rem',
+      padding: '16px',
       img: {
         maxWidth: '100%',
       },
@@ -110,5 +121,21 @@ export const getSxClasses = (theme: Theme, containerType: string): SxStyles => (
   gridLeftMain: {
     height: '100%',
     overflowY: 'auto',
+    '&.MuiGrid-grid-xs-auto': {
+      '& .layer-panel': {
+        width: '52px',
+      },
+      '& .MuiListItemButton-root' : {
+        justifyContent: 'center',
+        padding: '0 8px',
+        minHeight: '48px',
+        '& .layer-count': {
+          display: 'block'
+        },
+        '& .layerInfo': {
+          display: 'none'
+        }
+      }
+    }
   },
 });
