@@ -54,6 +54,7 @@ export declare function commonProcessInitialSettings(layerConfig: EsriFeatureLay
  * @param {TypeLayerEntryConfig} layerConfig The layer entry configuration to process.
  * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
  * @returns {Promise<TypeLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
+ * @throws {LayerServiceMetadataUnableToFetchError} Error thrown when the metadata fetch fails or contains an error.
  */
 export declare function commonProcessLayerMetadata<T extends EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig | EsriImageLayerEntryConfig>(layer: EsriDynamic | EsriFeature | EsriImage, layerConfig: T, abortSignal?: AbortSignal): Promise<T>;
 /**

@@ -74,6 +74,8 @@ export declare class TimeSliderEventProcessor extends AbstractEventProcessor {
      * @param {string} mapId - The id of the map
      * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer path of the layer to add to the state
      * @returns {TimeSliderLayer | undefined}
+     * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
+     * @throws {LayerWrongTypeError} Error thrown when the specified layer is of wrong type.
      * @static
      */
     static getInitialTimeSliderValues(mapId: string, layerConfig: AbstractBaseLayerEntryConfig, timesliderConfig?: TypeTimeSliderProps): TypeTimeSliderValues | undefined;

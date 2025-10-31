@@ -4,7 +4,7 @@ import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstrac
 import type { TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
-import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 export interface TypeEsriImageLayerConfig extends TypeGeoviewLayerConfig {
     geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_IMAGE;
     listOfLayerEntryConfig: EsriImageLayerEntryConfig[];
@@ -60,7 +60,19 @@ export declare class EsriImage extends AbstractGeoViewRaster {
      * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
      * @returns {TypeEsriImageLayerConfig} The constructed configuration object for the Esri Image layer.
      */
-    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean): TypeEsriImageLayerConfig;
+    static createGeoviewLayerConfigSimple(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean): TypeEsriImageLayerConfig;
+    /**
+     * Creates a configuration object for a Esri Image layer.
+     * This function constructs a `TypeEsriImageLayerConfig` object that describes an Esri Image layer
+     * and its associated entry configurations based on the provided parameters.
+     * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
+     * @param {string} geoviewLayerName - The display name of the GeoView layer.
+     * @param {string} metadataAccessPath - The URL or path to access metadata.
+     * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
+     * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
+     * @returns {TypeEsriImageLayerConfig} The constructed configuration object for the Esri Image layer.
+     */
+    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean, layerEntries: TypeLayerEntryShell[]): TypeEsriImageLayerConfig;
     /**
      * Processes an Esri Image GeoviewLayerConfig and returns a promise
      * that resolves to an array of `ConfigBaseClass` layer entry configurations.

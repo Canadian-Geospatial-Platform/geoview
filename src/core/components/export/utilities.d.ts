@@ -2,7 +2,7 @@ import type { TypeNorthArrow, TypeScaleInfo } from '@/core/stores/store-interfac
 import type { TypeLegendLayer } from '@/core/components/layers/types';
 import type { TypeTimeSliderValues, TimeSliderLayerSet } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import type { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
-export type TypeValidPageSizes = 'LETTER' | 'TABLOID' | 'LEGAL';
+export type TypeValidPageSizes = 'AUTO';
 export type TypeMapStateForExportLayout = {
     attribution: string[];
     northArrow: boolean;
@@ -60,7 +60,94 @@ export declare const PAGE_CONFIGS: {
         canvasWidth: number;
         canvasHeight: number;
     };
+    AUTO: {
+        size: "AUTO";
+        mapHeight: number;
+        legendColumns: number;
+        maxLegendHeight: number;
+        canvasWidth: number;
+        canvasHeight: number;
+    };
 };
+/**
+ * Element factory interface for creating renderer-specific elements
+ * Allows us to abstract between Canvas (HTML) and PDF rendering
+ */
+export interface ElementFactory {
+    View: (props: any) => JSX.Element;
+    Text: (props: any) => JSX.Element;
+    Image: (props: any) => JSX.Element;
+    Span: (props: any) => JSX.Element;
+    Svg: (props: any) => JSX.Element;
+    Path: (props: any) => JSX.Element;
+}
+/**
+ * Renders a single legend item using the provided element factory
+ * @param {FlattenedLegendItem} item - The item to render
+ * @param {number} itemIndex - Index of the item in the column
+ * @param {number} indentLevel - The indentation level (0-3)
+ * @param {ElementFactory} factory - Element factory for creating elements
+ * @param {any} scaledStyles - The scaled styles object
+ * @param {any} baseStyles - The base styles object (CANVAS_STYLES or PDF_STYLES)
+ * @returns {JSX.Element} The rendered item
+ */
+export declare const renderSingleLegendItem: (item: FlattenedLegendItem, itemIndex: number, indentLevel: number, factory: ElementFactory, scaledStyles: any, // eslint-disable-line @typescript-eslint/no-explicit-any
+baseStyles: any) => JSX.Element;
+/**
+ * Groups items into containers - wraps content items
+ * @param {FlattenedLegendItem[]} column - The column items to render
+ * @param {ElementFactory} factory - Element factory for creating elements
+ * @param {any} scaledStyles - The scaled styles object
+ * @param {any} baseStyles - The base styles object
+ * @returns {JSX.Element[]} Array of rendered elements
+ */
+export declare const renderColumnItems: (column: FlattenedLegendItem[], factory: ElementFactory, scaledStyles: any, // eslint-disable-line @typescript-eslint/no-explicit-any
+baseStyles: any) => JSX.Element[];
+/**
+ * Renders legend columns using the provided element factory
+ * @param {FlattenedLegendItem[][]} columns - The columns to render
+ * @param {ElementFactory} factory - Element factory for creating elements
+ * @param {any} scaledStyles - The scaled styles object
+ * @param {any} baseStyles - The base styles object
+ * @returns {JSX.Element} The rendered legend
+ */
+export declare const renderLegendColumns: (columns: FlattenedLegendItem[][], factory: ElementFactory, scaledStyles: any, // eslint-disable-line @typescript-eslint/no-explicit-any
+baseStyles: any) => JSX.Element;
+/**
+ * Renders footer section
+ * @param {string} disclaimer - The disclaimer text
+ * @param {string[]} attributions - The attribution texts
+ * @param {string} date - The date string
+ * @param {ElementFactory} factory - Element factory for creating elements
+ * @param {any} scaledStyles - The scaled styles object
+ * @returns {JSX.Element} The rendered footer
+ */
+export declare const renderFooter: (disclaimer: string, attributions: string[], date: string, factory: ElementFactory, scaledStyles: any) => JSX.Element;
+/**
+ * Renders scale bar with ticks
+ * @param {string} scaleText - The scale text
+ * @param {string} scaleLineWidth - The scale line width
+ * @param {ElementFactory} factory - Element factory for creating elements
+ * @param {any} scaledStyles - The scaled styles object
+ * @param {any} baseStyles - The base styles object
+ * @returns {JSX.Element} The rendered scale bar
+ */
+export declare const renderScaleBar: (scaleText: string, scaleLineWidth: string, factory: ElementFactory, scaledStyles: any, // eslint-disable-line @typescript-eslint/no-explicit-any
+baseStyles: any) => JSX.Element;
+/**
+ * Renders north arrow SVG
+ * @param {Array} northArrowSvg - The north arrow SVG path data
+ * @param {number} northArrowRotation - The rotation angle
+ * @param {ElementFactory} factory - Element factory for creating elements
+ * @param {any} scaledStyles - The scaled styles object
+ * @returns {JSX.Element | null} The rendered north arrow or null
+ */
+export declare const renderNorthArrow: (northArrowSvg: Array<{
+    d: string | null;
+    fill: string | null;
+    stroke: string | null;
+    strokeWidth: string | null;
+}> | null, northArrowRotation: number, factory: ElementFactory, scaledStyles: any) => JSX.Element | null;
 /**
  * Filter and flatten layers for placement in the legend
  * @param {TypeLegendLayer[]} layers - The legend layers to be shown in the legend
@@ -73,12 +160,11 @@ export declare const processLegendLayers: (layers: TypeLegendLayer[], orderedLay
  * Group items by their root layer and distribute in the columns
  * @param {FlattenedLegendItem[]} items - The flattened list of legend items to be placed in the legend
  * @param {number} numColumns - The maximum number of columns that can be used
- * @param {number} maxHeight - The maximum height available on the rest of the page
- * @param {string} disclaimer - The disclaimer text to be displayed in the footer
- * @param {string[]} attributions - The attributions to be displayed in the footer
- * @returns {FlattenedLegendItem[][]} The flattened legend items distributed between the columns
+ * @param {TypeValidPageSizes} pageSize - The page size for calculation
+ * @param {number} scale - The scale factor based on document width
+ * @returns {FlattenedLegendItem[][][]} The flattened legend items distributed into rows and columns
  */
-export declare const distributeIntoColumns: (items: FlattenedLegendItem[], numColumns: number, maxLegendHeight: number, disclaimer: string, attributions: string[], pageSize: TypeValidPageSizes, exportTitle?: string) => {
+export declare const distributeIntoColumns: (items: FlattenedLegendItem[], numColumns: number, pageSize: TypeValidPageSizes, scale?: number) => {
     fittedColumns: FlattenedLegendItem[][];
     overflowItems: FlattenedLegendItem[];
 };

@@ -94,6 +94,18 @@ export declare class LayerNotQueryableError extends LayerError {
     constructor(layerPath: string, layerName: string | undefined);
 }
 /**
+ * Custom error class thrown when a GeoView layer status was 'error' when it was expecting another status.
+ * @extends {LayerError}
+ */
+export declare class LayerStatusErrorError extends LayerError {
+    /**
+     * Constructor to initialize the LayerStatusErrorError with the layer ID.
+     * @param {string} geoviewLayerId - The ID of the GeoView layer that failed to be created.
+     * @param {string | undefined} layerName - The layer name.
+     */
+    constructor(geoviewLayerId: string, layerName: string | undefined);
+}
+/**
  * Error thrown when a GeoView layer has an invalid layer type.
  * This typically indicates a configuration issue for a specific layer and its type.
  */

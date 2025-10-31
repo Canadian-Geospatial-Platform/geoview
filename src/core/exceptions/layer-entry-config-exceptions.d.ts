@@ -80,18 +80,18 @@ export declare class LayerEntryConfigVectorSourceURLNotDefinedError extends Laye
     constructor(layerConfig: ConfigBaseClass);
 }
 /**
- * Error thrown when a vector tile layer's projection does not match the map's projection.
- * Vector tile layers must use the same spatial reference (projection) as the map.
- * This error occurs when a mismatch is detected between the layer's projection
+ * Error thrown when a layer entry projection does not support the map's projection.
+ * This error occurs when a mismatch is detected between the layer's suported projection
  * and the map's configured projection, which may lead to rendering or alignment issues.
  * @extends {LayerEntryConfigError}
  */
-export declare class LayerEntryConfigVectorTileProjectionNotMatchingMapProjectionError extends LayerEntryConfigError {
+export declare class LayerEntryNotSupportingProjectionError extends LayerEntryConfigError {
     /**
-     * Creates an instance of LayerEntryConfigVectorTileProjectionNotMatchingMapProjectionError.
+     * Creates an instance of LayerEntryNotSupportingProjectionError.
+     * @param {string} mapProjection - The map projection that the layer entry doesn't support.
      * @param {ConfigBaseClass} layerConfig - The configuration object for the vector tile layer with the invalid projection.
      */
-    constructor(layerConfig: ConfigBaseClass);
+    constructor(mapProjection: string, layerConfig: ConfigBaseClass);
 }
 /**
  * Error thrown when a specified WMS sub-layer cannot be found in the provided layer configuration.

@@ -30,51 +30,64 @@ export declare function getESRIServiceMetadata(url: string): Promise<unknown>;
  * @param {string} layers - The layers to query separate by.
  * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
  * @returns {Promise<TypeMetadataWMS>} A json promise containing the result of the query.
+ * @throws {RequestTimeoutError} Error thrown when the request exceeds the timeout duration.
+ * @throws {RequestAbortedError} Error thrown when the request was aborted by the caller's signal.
+ * @throws {ResponseError} Error thrown when the response is not OK (non-2xx).
+ * @throws {ResponseEmptyError} Error thrown when the JSON response is empty.
+ * @throws {NetworkError} Errow thrown when a network issue happened.
  */
 export declare function getWMSServiceMetadata(url: string, layers?: string, callbackNewMetadataUrl?: CallbackNewMetadataDelegate, abortSignal?: AbortSignal): Promise<TypeMetadataWMS>;
 /**
  * Return the map server url from a layer service.
  * @param {string} url - The service url for a wms / dynamic or feature layers.
  * @param {boolean} rest - Boolean value to add rest services if not present (default false).
- * @returns The map server url.
+ * @returns {string} The map server url.
  */
 export declare function getMapServerUrl(url: string, rest?: boolean): string;
 /**
  * Return the root server url from a OGC layer service.
  * @param {string} url - The service url for an ogc layer.
- * @returns The root ogc server url.
+ * @returns {string} The root ogc server url.
  */
 export declare function getOGCServerUrl(url: string): string;
 /**
+ * Replaces or adds the BBOX parameter in a WMS GetMap URL.
+ * @param {string} url - The original WMS GetMap URL
+ * @param {string} newCRS - The new CRS
+ * @param {number[]} newBBOX - The new BBOX to set, as an array of 4 numbers: [minX, minY, maxX, maxY]
+ * @returns {string} A new URL string with the updated BBOX parameter
+ */
+export declare function replaceCRSandBBOXParam(url: string, newCRS: string, newBBOX: number[]): string;
+/**
  * Returns the WKT representation of a given geometry.
  * @param {string} geometry - The geometry
- * @returns {string | null} The WKT representation of the geometry
+ * @returns {string | undefined} The WKT representation of the geometry
  */
-export declare function geometryToWKT(geometry: Geometry): string | null;
+export declare function geometryToWKT(geometry: Geometry): string | undefined;
 /**
  * Returns the Geometry representation of a given wkt.
  * @param {string} wkt - The well known text
  * @param {ReadOptions} readOptions - Read options to convert the wkt to a geometry
- * @returns {Geometry | null} The Geometry representation of the wkt
+ * @returns {Geometry | undefined} The Geometry representation of the wkt
  */
-export declare function wktToGeometry(wkt: string, readOptions: ReadOptions): Geometry | null;
+export declare function wktToGeometry(wkt: string, readOptions: ReadOptions): Geometry | undefined;
 /**
  * Returns the Geometry representation of a given geojson
  * @param {string} geojson - The geojson
  * @param {ReadOptions} readOptions - Read options to convert the geojson to a geometry
- * @returns {Geometry | null} - The Geometry representation of the geojson
+ * @returns {Geometry | undefined} - The Geometry representation of the geojson
  */
-export declare function geojsonToGeometry(geojson: string, readOptions: ReadOptions): Geometry | null;
+export declare function geojsonToGeometry(geojson: string, readOptions: ReadOptions): Geometry | undefined;
 /**
  * Default drawing style for GeoView
- * @returns an Open Layers styling for drawing on a map
+ * @returns {Style} An Open Layers styling for drawing on a map
  */
 export declare function getDefaultDrawingStyle(strokeColor?: Color | string, strokeWidth?: number, fillColor?: Color | string): Style;
 /**
  * Create empty basemap tilelayer to use as initial basemap while we load basemap
  * so the viewer will not fails if basemap is not avialable
  *
- * @returns {TileLayer<XYZ>} return the created basemap
+ * @returns {TileLayer<XYZ>} The created empty basemap
  */
 export declare function createEmptyBasemap(): TileLayer<XYZ | OSM | VectorTile>;
 /**

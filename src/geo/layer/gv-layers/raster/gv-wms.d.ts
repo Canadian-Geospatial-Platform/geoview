@@ -4,6 +4,7 @@ import type { ImageArcGISRest, ImageWMS } from 'ol/source';
 import type { Extent } from 'ol/extent';
 import type { Projection as OLProjection } from 'ol/proj';
 import type { Map as OLMap } from 'ol';
+import { type EventDelegateBase } from '@/api/events/event-helper';
 import type { TypeWmsLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import type { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
@@ -21,6 +22,8 @@ export declare class GVWMS extends AbstractGVRaster {
     #private;
     /** The max feature count returned by the GetFeatureInfo */
     static readonly DEFAULT_MAX_FEATURE_COUNT: number;
+    /** The default Get Feature Info tolerance to use for QGIS Server services which are more picky by default (really needs to be zoomed in to get results, by default) */
+    static readonly DEFAULT_GET_FEATURE_INFO_TOLERANCE: number;
     /**
      * Constructs a GVWMS layer to manage an OpenLayer layer.
      * @param {ImageWMS} olSource - The OpenLayer source.
@@ -45,6 +48,41 @@ export declare class GVWMS extends AbstractGVRaster {
      * @override
      */
     getLayerConfig(): OgcWmsLayerEntryConfig;
+    /**
+     * Overrides when the layer image is in error and couldn't be loaded correctly.
+     * @param {unknown} event - The event which is being triggered.
+     */
+    protected onImageLoadError(event: unknown): void;
+    /**
+     * Gets if the CRS is to be overridden, because the layer struggles with the current map projection.
+     * @returns {CRSOverride | undefined} The CRS Override properties if any.
+     */
+    getOverrideCRS(): CRSOverride | undefined;
+    /**
+     * Sets if the CRS is to be overridden, because the layer struggles with the current map projection.
+     * @param {CRSOverride | undefined} value - The CRS Override properties or undefined.
+     */
+    setOverrideCRS(value: CRSOverride | undefined): void;
+    /**
+     * Gets the feature count used for GetFeatureInfo requests.
+     * @returns {number} The current GetFeatureInfo feature count.
+     */
+    getGetFeatureInfoFeatureCount(): number;
+    /**
+     * Sets the feature count used for GetFeatureInfo requests.
+     * @param {number} value - The new GetFeatureInfo feature count.
+     */
+    setGetFeatureInfoFeatureCount(value: number): void;
+    /**
+     * Gets the current pixel tolerance used for GetFeatureInfo requests for QGIS Server Services.
+     * @returns {number} The current GetFeatureInfo pixel tolerance.
+     */
+    getGetFeatureInfoTolerance(): number;
+    /**
+     * Sets the current pixel tolerance used for GetFeatureInfo requests for QGIS Server Services.
+     * @param {number} value - The new GetFeatureInfo pixel tolerance.
+     */
+    setGetFeatureInfoTolerance(value: number): void;
     /**
      * Overrides the return of feature information at a given coordinate.
      * @param {OLMap} map - The Map where to get Feature Info At Coordinate from.
@@ -107,5 +145,29 @@ export declare class GVWMS extends AbstractGVRaster {
      * @static
      */
     static applyViewFilterOnSource(layerConfig: OgcWmsLayerEntryConfig | EsriImageLayerEntryConfig, source: ImageWMS | ImageArcGISRest, externalDateFragments: TypeDateFragments | undefined, layer: GVWMS | GVEsriImage | undefined, filter?: string | undefined, callbackWhenUpdated?: ((filterToUse: string) => void) | undefined): void;
+    /**
+     * Registers an image load callback event handler.
+     * @param {ImageLoadRescueDelegate} callback - The callback to be executed whenever the event is emitted
+     */
+    onImageLoadRescue(callback: ImageLoadRescueDelegate): void;
+    /**
+     * Unregisters an image load callback event handler.
+     * @param {ImageLoadRescueDelegate} callback - The callback to stop being called whenever the event is emitted
+     */
+    offImageLoadRescue(callback: ImageLoadRescueDelegate): void;
 }
+export type CRSOverride = {
+    layerProjection: string;
+    mapProjection: string;
+};
+/**
+ * Define an event for the delegate
+ */
+export type ImageLoadRescueEvent = {
+    imageLoadErrorEvent: unknown;
+};
+/**
+ * Define a delegate for the event handler function signature
+ */
+export type ImageLoadRescueDelegate = EventDelegateBase<GVWMS, ImageLoadRescueEvent, boolean>;
 //# sourceMappingURL=gv-wms.d.ts.map

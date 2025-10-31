@@ -19,8 +19,9 @@ export declare abstract class Plugin {
      * @param {typeof AbstractPlugin} constructor - The plugin class (React Component)
      * @param {string} mapId - Id of map to add this plugin to
      * @param {unknown} props - The plugin options
+     * @returns {Promise<AbstractPlugin>} A Promise which resolves with the Plugin instance.
      */
-    static addPlugin(pluginId: string, constructor: typeof AbstractPlugin, mapId: string, props?: unknown): Promise<void>;
+    static addPlugin(pluginId: string, constructor: typeof AbstractPlugin, mapId: string, props?: unknown): Promise<AbstractPlugin>;
     /**
      * Delete a specific plugin loaded in a map
      *
