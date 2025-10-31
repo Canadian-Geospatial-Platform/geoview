@@ -196,8 +196,8 @@ Test Configuration Structure
   Error Details:
     AssertionJSONObjectError: JSON object structure mismatch
       Mismatches:
-      - config.layers[0].type — actual: "esriFeature", expected: "esriDynamic"
-      - config.visible — actual: false, expected: true
+      - config.layers[0].type - actual: "esriFeature", expected: "esriDynamic"
+      - config.visible - actual: false, expected: true
 ```
 
 **Cause**: Object structure or values don't match expected

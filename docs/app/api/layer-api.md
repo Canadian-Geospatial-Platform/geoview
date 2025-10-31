@@ -58,7 +58,7 @@ const result = mapViewer.layer.addGeoviewLayer({
   listOfLayerEntryConfig: [
     {
       layerId: "layer1",
-      layerName: "Layer 1"
+      layerName: "Layer 1",
     },
   ],
 });
@@ -646,7 +646,7 @@ mapViewer.layer.replaceFeatureOutfields(
   "myLayer",
   ["string", "number", "number"],
   ["name", "population", "area"],
-  ["Name", "Population", "Area (km�)"]
+  ["Name", "Population", "Area (km²)"]
 );
 ```
 
@@ -1217,7 +1217,7 @@ mapViewer.layer.addGeoviewLayer({
   listOfLayerEntryConfig: [
     {
       layerId: "layer1",
-      layerName: "Layer 1"
+      layerName: "Layer 1",
     },
   ],
 });

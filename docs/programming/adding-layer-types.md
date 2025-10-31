@@ -20,12 +20,12 @@ Both categories extend the parent abstract class `AbstractGeoViewLayers`.
 ```
 AbstractGeoViewLayers (parent)
 +-- AbstractGeoViewRaster
-¶   +-- EsriDynamic
-¶   +-- EsriImage
-¶   +-- ImageStatic
-¶   +-- OgcWms (wms.ts)
-¶   +-- VectorTiles
-¶   +-- XyzTiles
+|   +-- EsriDynamic
+|   +-- EsriImage
+|   +-- ImageStatic
+|   +-- OgcWms (wms.ts)
+|   +-- VectorTiles
+|   +-- XyzTiles
 +-- AbstractGeoViewVector
     +-- CSV
     +-- EsriFeature
@@ -509,7 +509,7 @@ protected applyStyle(olLayer: BaseLayer, styleConfig: any): void {
 
 ## Best Practices
 
-### ? DO
+### ‚úÖ DO
 
 1. **Extend the correct abstract class** (Raster vs Vector)
 2. **Implement all abstract methods** completely
@@ -519,7 +519,7 @@ protected applyStyle(olLayer: BaseLayer, styleConfig: any): void {
 6. **Document your layer type** in user-facing docs
 7. **Follow naming conventions** (e.g., `ImageStatic`, not `StaticImage`)
 
-### ? DON'T
+### ‚ùå DON'T
 
 1. **Don't modify abstract classes** unless necessary
 2. **Don't bypass validation** - use schema validation
