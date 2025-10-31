@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Functional Testing - Canadian Geospatial Platform Viewer</title>
+    <link rel="shortcut icon" href="../favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="../img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="stylesheet" href="../css/style.css" />
+    <script src="codedoc.js"></script>
+
+    <style>
+      .btnLaunchTests {
+        width: 100%;
+        padding: 5px 0px;
+      }
+
+      .tableResults {
+        table-layout: fixed;
+        width: 100%;
+        border-collapse: collapse;
+        font-family: Arial, sans-serif;
+      }
+
+      .tableResults thead {
+        background-color: #515ba5;
+        color: #e0e0e0;
+        font-weight: bold;
+      }
+
+      .tableResults thead td {
+        text-align: center;
+      }
+
+      .tableResults td {
+        padding: 6px 8px;
+        width: inherit;
+      }
+
+      .tableResults .test-title {
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .tableResults tbody td {
+        overflow: auto;
+      }
+
+      .tableResults th, .tableResults td {
+        text-align: left;
+      }
+
+      .tableResults th {
+        background-color: #e0e0e0;
+        font-weight: bold;
+      }
+
+      .tableResults tr:nth-child(even) {
+        background-color: #fafafa;
+      }
+
+      .tableResults tbody tr:hover {
+        background-color: #f1f1f1;
+      }
+
+      .tableResults ul {
+        padding-inline-start: 20px;
+      }
+
+      .tableResults .collapsible-content {
+        display: none;
+      }
+
+      .tableResults .collapsed .collapsible-content {
+        display: none;
+      }
+
+      .tableResults .expanded .collapsible-content {
+        display: block;
+      }
+
+      .tableResults .test-title::before {
+        content: "▶";
+        margin-right: 3px;
+        display: inline-block;
+        transition: transform 0.2s;
+      }
+
+      .tableResults tr.expanded .test-title::before {
+        transform: rotate(90deg);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="header-table">
+      <table>
+        <tbody>
+          <tr>
+            <td><img class="header-logo" alt="logo" src="../img/Logo.png" /></td>
+            <td class="header-title">
+              <h1><strong>Functional Testing</strong></h1>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <a href="../index.html">Main</a><br />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Tabs Navigation -->
+    <div class="tabs">
+      <button class="tab-button" onclick="openTab(event, 'run-all')">Run All Tests</button>
+      <button class="tab-button active" onclick="openTab(event, 'map1')">Map 1 (EPSG: 3978)</button>
+      <button class="tab-button" onclick="openTab(event, 'map2')">Map 2 (EPSG: 3978)</button>
+      <button class="tab-button" onclick="openTab(event, 'map3')">Map 3 (EPSG: 3857)</button>
+      <button class="tab-button" onclick="openTab(event, 'map4')">Map 4 (EPSG: 3978)</button>
+      <button class="tab-button" onclick="openTab(event, 'map5')">Map 5 (EPSG: 3978)</button>
+    </div>
+
+    <!-- Run All Tests Tab -->
+    <div id="run-all" class="tab-content">
+      <h3>Overall Test Summary</h3>
+      <div style="text-align:right;">
+        <span id="allSuitesCheck"></span>
+      </div>
+      <div style="text-align:right;">
+        Suites: <span id="allSuitesCompleted">0</span>/<span id="allSuitesTotal">0</span>
+      </div>
+      <div style="text-align:right;">
+        Running: <span id="allSuitesTestsRunning">0</span> | Done success: <span id="allSuitesTestsDoneSuccess" style="color:green;">0</span> | Done failed: <span id="allSuitesTestsDoneFailed" style="color:red;">0</span> | Done: <span id="allSuitesTestsDone">0</span>/<span id="allSuitesTestsTotal">0</span>
+      </div>
+      <button class="btnLaunchTests" onclick="launchTestsAll()">LAUNCH TESTS ALL MAPS!</button>
+
+      <h3 style="margin-top: 30px;">Test Results by Map</h3>
+      
+      <!-- Map 1 Results -->
+      <button id="collapsibleMap1" class="collapsible" onclick="toggleCollapsible(this)">
+        <span style="font-weight: bold;">Map 1 - Config Tests (EPSG: 3978)</span>
+        <span id="statsMap1" style="font-size: 0.9em; margin-left: 20px;">Running: 0 | Done success: 0 | Done failed: 0 | Done: 0/0</span>
+      </button>
+      <div class="panel">
+        <div id="runAllMap1Results"></div>
+      </div>
+
+      <!-- Map 2 Results -->
+      <button id="collapsibleMap2" class="collapsible" onclick="toggleCollapsible(this)">
+        <span style="font-weight: bold;">Map 2 - Layer Tests (EPSG: 3978)</span>
+        <span id="statsMap2" style="font-size: 0.9em; margin-left: 20px;">Running: 0 | Done success: 0 | Done failed: 0 | Done: 0/0</span>
+      </button>
+      <div class="panel">
+        <div id="runAllMap2Results"></div>
+      </div>
+
+      <!-- Map 3 Results -->
+      <button id="collapsibleMap3" class="collapsible" onclick="toggleCollapsible(this)">
+        <span style="font-weight: bold;">Map 3 - Layer Tests (EPSG: 3857)</span>
+        <span id="statsMap3" style="font-size: 0.9em; margin-left: 20px;">Running: 0 | Done success: 0 | Done failed: 0 | Done: 0/0</span>
+      </button>
+      <div class="panel">
+        <div id="runAllMap3Results"></div>
+      </div>
+
+      <!-- Map 4 Results -->
+      <button id="collapsibleMap4" class="collapsible" onclick="toggleCollapsible(this)">
+        <span style="font-weight: bold;">Map 4 - Map Tests (EPSG: 3978)</span>
+        <span id="statsMap4" style="font-size: 0.9em; margin-left: 20px;">Running: 0 | Done success: 0 | Done failed: 0 | Done: 0/0</span>
+      </button>
+      <div class="panel">
+        <div id="runAllMap4Results"></div>
+      </div>
+
+      <!-- Map 5 Results -->
+      <button id="collapsibleMap5" class="collapsible" onclick="toggleCollapsible(this)">
+        <span style="font-weight: bold;">Map 5 - Geochart Tests (EPSG: 3978)</span>
+        <span id="statsMap5" style="font-size: 0.9em; margin-left: 20px;">Running: 0 | Done success: 0 | Done failed: 0 | Done: 0/0</span>
+      </button>
+      <div class="panel">
+        <div id="runAllMap5Results"></div>
+      </div>
+    </div>
+
+    <!-- Map 1 Tab -->
+    <div id="map1" class="tab-content active">
+      <!-- REGION MAP 1 -->
+     <div class="map-title-holder">
+      <h4 id="HEVNT1">1. Tests on map 1 (EPSG: 3978)</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+
+    <div id="testSuiteTable-map1"></div>
+    <br/>
+    <div
+      id="map1"
+      class="geoview-map"
+      data-lang="en"
+      data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'projection': 3978
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': true,
+              'labeled': true
+            }
+          },
+          'components': [],
+          'corePackages': ['test-suite'],
+          'corePackagesConfig': [
+            {
+              'test-suite': { 'suites': ['suite-config'] }
+            }
+          ],
+          'theme': 'geo.ca',
+          'footerBar': {
+            'tabs': {
+              'core': [
+                'legend',
+                'layers',
+                'details'
+              ]
+            }
+          }
+        }"
+    ></div>
+    <!-- END REGION MAP 1 -->
+    </div>
+
+    <!-- Map 2 Tab -->
+    <div id="map2" class="tab-content">
+      <!-- REGION MAP 2 -->
+    <div class="map-title-holder">
+      <h4 id="HEVNT2">2. Tests on map 2 (EPSG: 3978)</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+
+    <div id="testSuiteTable-map2"></div>
+    <br/>
+    <div
+      id="map2"
+      class="geoview-map"
+      data-lang="en"
+      data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'projection': 3978
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': true,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': []
+          },
+          'components': [],
+          'corePackages': ['test-suite'],
+          'corePackagesConfig': [
+            {
+              'test-suite': { 'suites': ['suite-layer'] }
+            }
+          ],
+          'theme': 'geo.ca',
+          'footerBar': {
+            'tabs': {
+              'core': [
+                'legend',
+                'layers',
+                'details'
+              ]
+            }
+          }
+        }"
+    ></div>
+    <!-- END REGION MAP 2 -->
+    </div>
+
+    <!-- Map 3 Tab -->
+    <div id="map3" class="tab-content">
+      <!-- REGION MAP 3 -->
+    <div class="map-title-holder">
+      <h4 id="HEVNT3">3. Tests on map 3 (EPSG: 3857)</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+
+    <div id="testSuiteTable-map3"></div>
+    <br/>
+    <div
+      id="map3"
+      class="geoview-map"
+      data-lang="en"
+      data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'projection': 3857
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': true,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': []
+          },
+          'components': [],
+          'corePackages': ['test-suite'],
+          'corePackagesConfig': [
+            {
+              'test-suite': { 'suites': ['suite-layer'] }
+            }
+          ],
+          'theme': 'geo.ca',
+          'footerBar': {
+            'tabs': {
+              'core': [
+                'legend',
+                'layers',
+                'details'
+              ]
+            }
+          }
+        }"
+    ></div>
+    <!-- END REGION MAP 3 -->
+    </div>
+
+    <!-- Map 4 Tab -->
+    <div id="map4" class="tab-content">
+      <!-- REGION MAP 4 -->
+    <div class="map-title-holder">
+      <h4 id="HEVNT4">4. Tests on map 4 (EPSG: 3978)</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+
+    <div id="testSuiteTable-map4"></div>
+    <br/>
+    <div
+      id="map4"
+      class="geoview-map"
+      data-lang="en"
+      data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'projection': 3978
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': true,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'geojsonLYR5',
+                'geoviewLayerName': 'GeoJSON Sample',
+                'metadataAccessPath': 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata.meta',
+                'geoviewLayerType': 'GeoJSON',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': 'polygons.json',
+                    'layerName': 'Polygons'
+                  }
+                ]
+              }
+            ]
+          },
+          'components': [],
+          'corePackages': ['test-suite'],
+          'corePackagesConfig': [
+            {
+              'test-suite': { 'suites': ['suite-map'] }
+            }
+          ],
+          'theme': 'geo.ca',
+          'footerBar': {
+            'tabs': {
+              'core': [
+                'legend',
+                'layers',
+                'details'
+              ]
+            }
+          }
+        }"
+    ></div>
+    <!-- END REGION MAP 4 -->
+    </div>
+
+    <!-- Map 5 Tab -->
+    <div id="map5" class="tab-content">
+      <!-- REGION MAP 5 -->
+    <div class="map-title-holder">
+      <h4 id="HEVNT5">5. Tests on map 5 (EPSG: 4326)</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+
+    <div id="testSuiteTable-map5"></div>
+    <br/>
+    <div
+      id="map5"
+      class="geoview-map"
+      data-lang="en"
+      data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'projection': 3978
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': true,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'geojsonLYR5',
+                'geoviewLayerName': 'GeoJSON Sample',
+                'metadataAccessPath': 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata.meta',
+                'geoviewLayerType': 'GeoJSON',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': 'polygons.json',
+                    'layerName': 'Polygons'
+                  }
+                ]
+              }
+            ]
+          },
+          'components': [],
+          'corePackages': ['test-suite'],
+          'corePackagesConfig': [
+            {
+              'geochart': {
+                'charts': [
+                  {
+                    'layers': [
+                      {
+                        'layerId': 'geojsonLYR5/polygons.json'
+                      }
+                    ],
+                    'chart': 'pie',
+                    'geochart': {
+                      'xAxis': {
+                        'property': 'label'
+                      },
+                      'yAxis': {
+                        'property': 'data'
+                      }
+                    },
+                    'category': {
+                      'property': 'location'
+                    },
+                    'datasources': [
+                      {
+                        'display': 'Feature',
+                        'items': [
+                          {
+                            'data': 92,
+                            'label': 'Hockey',
+                            'location': 'Victoria'
+                          },
+                          {
+                            'data': 43.54,
+                            'label': 'Baseball',
+                            'location': 'Victoria'
+                          },
+                          {
+                            'data': 12.3,
+                            'label': 'Basketball',
+                            'location': 'Victoria'
+                          },
+                          {
+                            'data': 66,
+                            'label': 'Football',
+                            'location': 'Victoria'
+                          },
+                          {
+                            'data': 75,
+                            'label': 'Soccer',
+                            'location': 'Victoria'
+                          },
+                          {
+                            'data': 553,
+                            'label': 'Hockey',
+                            'location': 'Toronto'
+                          },
+                          {
+                            'data': 54,
+                            'label': 'Baseball',
+                            'location': 'Toronto'
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              'test-suite': { 'suites': ['suite-geochart'] }
+            }
+          ],
+          'theme': 'geo.ca',
+          'footerBar': {
+            'tabs': {
+              'core': [
+                'legend',
+                'layers',
+                'details',
+                'geochart'
+              ]
+            }
+          }
+        }"
+    ></div>
+    <!-- END REGION MAP 5 -->
+    </div>
+
+    <script>
+      let mapsInitialized = false;
+      
+      function openTab(evt, tabName) {
+        // For "Run All Tests", make all tab contents visible so maps can initialize
+        if (tabName === 'runAllTestsTab') {
+          // Show all tabs temporarily for map initialization
+          var allTabContents = document.getElementsByClassName('tab-content');
+          for (var i = 0; i < allTabContents.length; i++) {
+            allTabContents[i].classList.add('active');
+          }
+          mapsInitialized = true;
+          
+          // After maps initialize, hide all except Run All Tests
+          setTimeout(function() {
+            var tabContents = document.getElementsByClassName('tab-content');
+            for (var i = 0; i < tabContents.length; i++) {
+              if (tabContents[i].id !== tabName) {
+                tabContents[i].classList.remove('active');
+              }
+            }
+          }, 2000);
+        } else {
+          // Normal tab switching - hide all tab contents
+          var tabContents = document.getElementsByClassName('tab-content');
+          for (var i = 0; i < tabContents.length; i++) {
+            tabContents[i].classList.remove('active');
+          }
+          
+          // Show the current tab
+          document.getElementById(tabName).classList.add('active');
+        }
+
+        // Remove active class from all tab buttons
+        var tabButtons = document.getElementsByClassName('tab-button');
+        for (var i = 0; i < tabButtons.length; i++) {
+          tabButtons[i].classList.remove('active');
+        }
+        
+        // Mark button as active
+        evt.currentTarget.classList.add('active');
+      }
+
+      function toggleCollapsible(element) {
+        element.classList.toggle('active');
+        var panel = element.nextElementSibling;
+        if (panel.style.display === 'block') {
+          panel.style.display = 'none';
+        } else {
+          panel.style.display = 'block';
+        }
+      }
+    </script>
+
+    <script>
+      // The test suites plugins (1 plugin per map)
+      const testSuitesPlugins = {};
+
+      // Register a handler when a map viewer is initialized
+      cgpv.onMapInit((mapViewer) => {
+        // Get the test-suite plugin as loaded in the map viewer
+        const plugin = mapViewer.plugins['test-suite'];
+
+        // Keep in global object on the page
+        testSuitesPlugins[plugin.mapViewer.mapId] = plugin;
+
+        // Create the table html
+        const htmlSection = testSuiteCreateTable(plugin);
+
+        // Create the table html for individual map tab
+        document.getElementById('testSuiteTable-' + plugin.mapViewer.mapId).appendChild(htmlSection);
+
+        // Create a second table for the "Run All Tests" tab with modified IDs
+        const htmlSectionClone = testSuiteCreateTable(plugin);
+        
+        // Modify all IDs in the clone to avoid conflicts
+        const tempDiv = document.createElement('div');
+        tempDiv.appendChild(htmlSectionClone);
+        const elementsWithId = tempDiv.querySelectorAll('[id]');
+        elementsWithId.forEach(element => {
+          element.id = 'runAll-' + element.id;
+        });
+        
+        // Remove the launch button from the clone
+        const launchButton = tempDiv.querySelector('.btnLaunchTests');
+        if (launchButton) {
+          launchButton.remove();
+        }
+        
+        // Append to the "Run All Tests" collapsible section
+        const runAllResultsId = 'runAll' + plugin.mapViewer.mapId.charAt(0).toUpperCase() + plugin.mapViewer.mapId.slice(1) + 'Results';
+        const runAllContainer = document.getElementById(runAllResultsId);
+        if (runAllContainer) {
+          runAllContainer.appendChild(htmlSectionClone);
+        }
+
+        // Hook the test update to update BOTH tables
+        plugin.onTestUpdated((sender, event) => {
+          // Add a row to the INDIVIDUAL map tab table
+          testSuiteAddOrUpdateTestResultRow(plugin, event.suite, event.tester, event.test, event.test.getError()?.message);
+
+          // Add a row to the "RUN ALL TESTS" tab table (with modified IDs)
+          testSuiteAddOrUpdateTestResultRowClone(plugin, event.suite, event.tester, event.test, event.test.getError()?.message);
+
+          // Update totals in both tables
+          testSuiteUpdateTotals(plugin);
+          testSuiteUpdateTotalsClone(plugin);
+          testSuiteUpdateGrandTotal(testSuitesPlugins);
+
+          // Update global stats
+          updateGlobalStats();
+        });
+      });
+
+      // Clone version of testSuiteAddOrUpdateTestResultRow for "Run All Tests" tab
+      function testSuiteAddOrUpdateTestResultRowClone(plugin, testSuite, testTester, test, details) {
+        let passed = null;
+        if (test.getStatus() === 'success') passed = true;
+        else if (test.getStatus() === 'failed') passed = false;
+
+        // Find the table for the map id in "Run All Tests" section (with runAll- prefix)
+        const tableBody = document.getElementById('runAll-tableBody-' + plugin.mapViewer.mapId);
+        if (!tableBody) {
+          return;
+        }
+
+        // Try to find an existing row by ID
+        let row = document.getElementById('runAll-' + test.id);
+
+        if (!row) {
+          // If it doesn't exist, create a new row
+          row = document.createElement('tr');
+          row.id = 'runAll-' + test.id;
+          row.classList.add('expanded');
+
+          // Create and append the three cells
+          row.appendChild(document.createElement('td'));
+          row.appendChild(document.createElement('td'));
+          row.appendChild(document.createElement('td'));
+
+          tableBody.appendChild(row);
+        }
+
+        // Update result cells (same logic as original)
+        const testCell = row.cells?.[0];
+        let color = '#515ba5';
+        if (test.getType() === 'true-negative') {
+          color = '#b778e4ff';
+        }
+
+        // Title
+        let testMessage = '<font class="test-title" style="color:' + color + ';" onclick="' + `this.closest('tr').classList.toggle('expanded'); this.closest('tr').classList.toggle('collapsed');">` + test.getTitle() + '</font><br/>';
+        
+        // Collapsible content
+        testMessage += '<div class="collapsible-content" style="margin-top: 5px;">';
+        testMessage += '<font style="font-size: x-small;">' + '<i>[' + testSuite.getName() + ' | ' + testTester.getName() + ']' + '</i></font>';
+        testMessage += test.getStepsAsHtml();
+        testCell.innerHTML = testMessage;
+
+        const resultCell = row.cells?.[1];
+        if (resultCell) {
+          resultCell.style.textAlign = 'center';
+          if (passed === true) {
+            row.classList.add('collapsed');
+            row.classList.remove('expanded');
+            resultCell.style.color = 'green';
+            resultCell.textContent = '✔';
+          } else if (passed === false) {
+            row.classList.add('expanded');
+            row.classList.remove('collapsed');
+            resultCell.style.color = 'red';
+            resultCell.textContent = '✘';
+          } else {
+            resultCell.style.color = 'black';
+            resultCell.textContent = '⏳';
+          }
+        }
+
+        const detailsCell = row.cells?.[2];
+        if (detailsCell) detailsCell.textContent = details ?? '';
+      }
+
+      // Clone version of testSuiteUpdateTotals for "Run All Tests" tab
+      function testSuiteUpdateTotalsClone(plugin) {
+        const mapId = plugin.mapViewer.mapId;
+        
+        const suitesCompleted = document.getElementById('runAll-suitesCompleted-' + mapId);
+        if (suitesCompleted) suitesCompleted.textContent = plugin.getSuitesCompleted();
+        
+        const suitesTotal = document.getElementById('runAll-suitesTotal-' + mapId);
+        if (suitesTotal) suitesTotal.textContent = plugin.getSuitesTotal();
+        
+        const suitesCheck = document.getElementById('runAll-suitesCheck-' + mapId);
+        if (suitesCheck) {
+          const suiteRunning = plugin.getTestsRunning() > 0;
+          const completedFully = plugin.getTestsDoneAllAndSuiteDone();
+          const allSuccess = plugin.getTestsDoneAllSuccessAndSuiteDone();
+          suitesCheck.textContent = completedFully ? (allSuccess ? '✔' : '✘') : suiteRunning ? '⏳' : '';
+          suitesCheck.style.color = completedFully ? (allSuccess ? 'green' : 'red') : 'black';
+        }
+        
+        const testsRunning = document.getElementById('runAll-testsRunning-' + mapId);
+        if (testsRunning) testsRunning.textContent = plugin.getTestsRunning();
+        
+        const testsDoneSuccess = document.getElementById('runAll-testsDoneSuccess-' + mapId);
+        if (testsDoneSuccess) testsDoneSuccess.textContent = plugin.getTestsDoneSuccess();
+        
+        const testsDoneFailed = document.getElementById('runAll-testsDoneFailed-' + mapId);
+        if (testsDoneFailed) testsDoneFailed.textContent = plugin.getTestsDoneFailed();
+        
+        const testsDone = document.getElementById('runAll-testsDone-' + mapId);
+        if (testsDone) testsDone.textContent = plugin.getTestsDone();
+        
+        const testsTotal = document.getElementById('runAll-testsTotal-' + mapId);
+        if (testsTotal) testsTotal.textContent = plugin.getTestsTotal();
+        
+        // Update the collapsible button stats
+        const mapNumber = mapId.replace('map', '');
+        const statsSpan = document.getElementById('statsMap' + mapNumber);
+        if (statsSpan) {
+          const running = plugin.getTestsRunning();
+          const doneSuccess = plugin.getTestsDoneSuccess();
+          const doneFailed = plugin.getTestsDoneFailed();
+          const done = plugin.getTestsDone();
+          const total = plugin.getTestsTotal();
+          
+          statsSpan.innerHTML = `Running: <span style="color: ${running > 0 ? 'orange' : '#666'};">${running}</span> | Done success: <span style="color: #28a745;">${doneSuccess}</span> | Done failed: <span style="color: #dc3545;">${doneFailed}</span> | Done: ${done}/${total}`;
+        }
+      }
+      
+      // Function to update the global statistics in "Run All Tests" tab
+      function updateGlobalStats() {
+        let totalRunning = 0;
+        let totalDoneSuccess = 0;
+        let totalDoneFailed = 0;
+        let totalDone = 0;
+        let totalTests = 0;
+        let totalSuitesCompleted = 0;
+        let totalSuites = 0;
+        
+        // Sum up stats from all maps
+        Object.keys(testSuitesPlugins).forEach(mapId => {
+          const plugin = testSuitesPlugins[mapId];
+          totalRunning += plugin.getTestsRunning();
+          totalDoneSuccess += plugin.getTestsDoneSuccess();
+          totalDoneFailed += plugin.getTestsDoneFailed();
+          totalDone += plugin.getTestsDone();
+          totalTests += plugin.getTestsTotal();
+          totalSuitesCompleted += plugin.getSuitesCompleted();
+          totalSuites += plugin.getSuitesTotal();
+        });
+        
+        // Update the display
+        const runningSpan = document.getElementById('allSuitesTestsRunning');
+        if (runningSpan) runningSpan.textContent = totalRunning;
+        
+        const doneSuccessSpan = document.getElementById('allSuitesTestsDoneSuccess');
+        if (doneSuccessSpan) doneSuccessSpan.textContent = totalDoneSuccess;
+        
+        const doneFailedSpan = document.getElementById('allSuitesTestsDoneFailed');
+        if (doneFailedSpan) doneFailedSpan.textContent = totalDoneFailed;
+        
+        const doneSpan = document.getElementById('allSuitesTestsDone');
+        if (doneSpan) doneSpan.textContent = totalDone;
+        
+        const totalSpan = document.getElementById('allSuitesTestsTotal');
+        if (totalSpan) totalSpan.textContent = totalTests;
+        
+        const suitesCompletedSpan = document.getElementById('allSuitesCompleted');
+        if (suitesCompletedSpan) suitesCompletedSpan.textContent = totalSuitesCompleted;
+        
+        const suitesTotalSpan = document.getElementById('allSuitesTotal');
+        if (suitesTotalSpan) suitesTotalSpan.textContent = totalSuites;
+        
+        // Update button states based on running tests
+        updateButtonStates();
+      }
+      
+      // Function to update button states based on running tests
+      function updateButtonStates() {
+        // Check if any tests are running
+        let anyTestsRunning = false;
+        
+        Object.keys(testSuitesPlugins).forEach(mapId => {
+          const plugin = testSuitesPlugins[mapId];
+          if (plugin.getTestsRunning() > 0) {
+            anyTestsRunning = true;
+          }
+        });
+        
+        // Disable "Launch All Tests" button if any test is running
+        const launchAllButton = document.querySelector('button[onclick="launchTestsAll()"]');
+        if (launchAllButton) {
+          launchAllButton.disabled = anyTestsRunning;
+          launchAllButton.style.opacity = anyTestsRunning ? '0.5' : '1';
+          launchAllButton.style.cursor = anyTestsRunning ? 'not-allowed' : 'pointer';
+        }
+        
+        // Disable individual map buttons if any test is running
+        Object.keys(testSuitesPlugins).forEach(mapId => {
+          const button = document.querySelector(`button[onclick="launchTests('${mapId}')"]`);
+          if (button) {
+            button.disabled = anyTestsRunning;
+            button.style.opacity = anyTestsRunning ? '0.5' : '1';
+            button.style.cursor = anyTestsRunning ? 'not-allowed' : 'pointer';
+          }
+        });
+      }
+
+      // initialize cgpv
+      cgpv.init();
+
+      function launchTestsAll() {
+        // Launch all tests
+        Object.keys(testSu
