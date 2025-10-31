@@ -28,7 +28,7 @@ import { doUntil } from '@/core/utils/utilities';
 import type { TypeFeatureInfoEntry, TypeLayerData } from '@/api/types/map-schema-types';
 import type { TypeMapMouseInfo } from '@/geo/map/map-viewer';
 
-import type { LayerListEntry } from '@/core/components/common';
+import type { LayerListEntry, LayoutExposedMethods } from '@/core/components/common';
 import { Layout } from '@/core/components/common';
 import { checkSelectedLayerPathList } from '@/core/components/common/comp-common';
 import { getSxClasses } from './details-style';
@@ -39,7 +39,6 @@ import { CoordinateInfo, CoordinateInfoSwitch } from './coordinate-info';
 import type { TypeContainerBox } from '@/core/types/global-types';
 
 interface DetailsPanelType {
-  fullWidth?: boolean;
   containerType?: TypeContainerBox;
 }
 
@@ -49,7 +48,7 @@ interface DetailsPanelType {
  * @param {DetailsPanelProps} props The properties passed to LayersListFooter
  * @returns {JSX.Element} the layers list
  */
-export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE.FOOTER_BAR }: DetailsPanelType): JSX.Element {
+export function DetailsPanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: DetailsPanelType): JSX.Element {
   logger.logTraceRender('components/details/details-panel');
 
   // Hooks
@@ -82,6 +81,7 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
   const prevLayerFeatures = useRef<TypeFeatureInfoEntry[] | undefined | null>();
   const prevFeatureIndex = useRef<number>(0); // 0 because that's the default index for the features
   const prevMapClickCoordinates = useRef<TypeMapMouseInfo | undefined>(mapClickCoordinates);
+  const layoutRef = useRef<LayoutExposedMethods>(null);
 
   // #region MAIN HOOKS SECTION ***************************************************************************************
 
@@ -509,9 +509,7 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
     resetCurrentIndex();
   }
 
-  /**
-   * Select a layer after a map click happened on the map.
-   */
+  // Select a layer after a map click happened on the map.
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('DETAILS-PANEL- mapClickCoordinates', mapClickCoordinates);
@@ -520,11 +518,21 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
     const coordinatesChanged =
       mapClickCoordinates && JSON.stringify(mapClickCoordinates) !== JSON.stringify(prevMapClickCoordinates.current);
 
-    // If nothing was previously selected at all
-    if (mapClickCoordinates && memoLayersList?.length && !selectedLayerPath.length) {
-      const selectedLayer = memoLayersList.find((layer) => !!layer.numOffeatures);
-      // Select the first layer that has features
-      setSelectedLayerPath(selectedLayer?.layerPath ?? '');
+    // Show the details for a feature on map click
+    if (mapClickCoordinates && memoLayersList?.length) {
+      // Select the first layer that has features and isn't the coordinate info
+      const selectedLayer = memoLayersList.find((layer) => !!layer.numOffeatures && layer.layerPath !== 'coordinate-info');
+      let newSelectedLayerPath = selectedLayer?.layerPath ?? '';
+
+      // Fallback to the coordinate info if it's enabled and no features are available
+      if (!selectedLayer && coordinateInfoEnabled) {
+        newSelectedLayerPath = 'coordinate-info';
+      }
+
+      setSelectedLayerPath(newSelectedLayerPath);
+
+      // make sure the right panel is visible
+      layoutRef.current?.showRightPanel(true);
     }
 
     // On new map click (coordinates changed), clear all highlights, checked features, and layer features
@@ -540,7 +548,7 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
       prevMapClickCoordinates.current = mapClickCoordinates;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapClickCoordinates, memoLayersList, setSelectedLayerPath]);
+  }, [mapClickCoordinates, memoLayersList, setSelectedLayerPath, coordinateInfoEnabled]);
 
   /**
    * Clear highlights and checked features when the details panel is closed
@@ -591,7 +599,7 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
    */
   const renderContent = (): JSX.Element | null => {
     if (selectedLayerPath === 'coordinate-info') {
-      return <CoordinateInfo fullWidth={fullWidth} />;
+      return <CoordinateInfo />;
     }
 
     // If there is no layer, return null for the guide to show
@@ -609,17 +617,17 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
       const currentFeature = memoSelectedLayerDataFeatures[currentFeatureIndex];
 
       return (
-        <Box sx={fullWidth ? sxClasses.rightPanelContainer : { ...sxClasses.rightPanelContainer }}>
+        <Box sx={sxClasses.rightPanelContainer}>
           <Grid container sx={sxClasses.rightPanelBtnHolder}>
-            <Grid size={{ xs: 6 }}>
-              <Box style={{ marginLeft: '1.375rem' }}>
+            <Grid size={{ xs: 6 }} sx={{ alignSelf: 'center' }}>
+              <Box>
                 {t('details.featureDetailsTitle')
                   .replace('{count}', `${currentFeatureIndex + 1}`)
                   .replace('{total}', `${memoSelectedLayerDataFeatures?.length}`)}
               </Box>
             </Grid>
             <Grid size={{ xs: 6 }}>
-              <Box sx={{ textAlign: 'right', marginRight: '1.625rem' }}>
+              <Box sx={{ textAlign: 'right' }}>
                 <IconButton
                   aria-label={t('details.previousFeatureBtn')}
                   tooltipPlacement="top"
@@ -630,7 +638,7 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
                   <ArrowBackIosOutlinedIcon />
                 </IconButton>
                 <IconButton
-                  sx={{ marginLeft: '1.25rem' }}
+                  sx={{ marginLeft: '16px' }}
                   aria-label={t('details.nextFeatureBtn')}
                   tooltipPlacement="top"
                   onClick={() => handleFeatureNavigateChange(1)}
@@ -653,11 +661,11 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
 
   return (
     <Layout
+      ref={layoutRef}
       containerType={containerType}
       layoutSwitch={
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Box sx={{ maxWidth: '80%', flexShrink: 1 }}>{!hideCoordinateInfoSwitch && <CoordinateInfoSwitch />}</Box>
-          <Box sx={{ flexGrow: 1 }} />
+        <Box sx={sxClasses.layoutSwitch}>
+          {!hideCoordinateInfoSwitch && <CoordinateInfoSwitch />}
           <IconButton
             aria-label={t('details.clearAllfeatures')}
             tooltipPlacement="top"
@@ -672,8 +680,9 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
       selectedLayerPath={selectedLayerPath}
       layerList={memoLayersList}
       onLayerListClicked={(layerEntry) => handleLayerChange(layerEntry)}
-      fullWidth={fullWidth}
       guideContentIds={['details']}
+      hideEnlargeBtn={containerType === CONTAINER_TYPE.APP_BAR}
+      toggleMode={containerType === CONTAINER_TYPE.APP_BAR}
     >
       {renderContent()}
     </Layout>

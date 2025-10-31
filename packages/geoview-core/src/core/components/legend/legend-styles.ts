@@ -8,11 +8,10 @@ type SxClasses = Record<string, object>;
  */
 export const getSxClassesMain = (): SxClasses => ({
   container: {
-    padding: '20px',
-    paddingBottom: '40px', // For map info bar
+    padding: '16px',
     display: 'flex',
     flexDirection: 'column',
-    height: '100%',
+    height: 'calc(100% - 47px)', // 47px is the height of the div containing the show/hide toggles
     overflowY: 'auto',
     overflowX: 'hidden',
   },

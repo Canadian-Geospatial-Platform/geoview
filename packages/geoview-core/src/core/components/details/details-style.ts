@@ -28,14 +28,11 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     color: theme.palette.geoViewColor.textColor.main,
   },
   rightPanelBtnHolder: {
-    marginTop: '20px',
-    paddingBottom: '9px',
+    padding: '10px 16px',
     boxShadow: `0px 12px 9px -13px ${theme.palette.geoViewColor.bgColor.dark[200]}`,
   },
   featureInfoListContainer: {
-    paddingLeft: '25px',
-    paddingRight: '25px',
-    paddingBottom: '25px',
+    padding: '0 16px 16px',
     overflowY: 'auto',
     overflowX: 'hidden',
   },
@@ -47,6 +44,14 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     color: theme.palette.geoViewColor.primary.main,
     '&.Mui-checked': {
       color: theme.palette.geoViewColor.primary.main,
+    },
+  },
+  featureInfoRow: {
+    margin: '5px 0',
+    padding: '5px',
+    '&:nth-of-type(odd)': {
+      backgroundColor: theme.palette.geoViewColor.bgColor.darken(0.1),
+      color: theme.palette.geoViewColor.bgColor.darken(0.9),
     },
   },
   featureInfoItemValue: {
@@ -72,9 +77,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     fontSize: theme.palette.geoViewFontSize.default,
     lineHeight: '19px',
   },
-  featureInfoRow: {
-    marginBottom: '1.25rem',
-  },
   flexBoxAlignCenter: {
     display: 'flex',
     flexDirection: 'row',
@@ -87,25 +89,27 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       },
     },
   },
+  layoutSwitch: {
+    alignItems: 'center',
+    display: 'flex',
+    gap: '10px',
+    justifyContent: 'space-between',
+    marginBottom: '10px',
+    width: '100%',
+  },
   coordinateInfoContainer: {
-    padding: 2,
+    backgroundColor: theme.palette.geoViewColor.bgColor.light[600],
+    padding: '16px',
   },
   coordinateInfoTitle: {
-    mb: 2,
-    mt: 2,
-    ml: 10,
+    mb: 10,
   },
   coordinateInfoSection: {
     flexDirection: 'column',
     alignItems: 'flex-start',
+    marginBottom: '10px',
   },
   coordinateInfoSectionTitle: {
     fontWeight: 'bold',
-  },
-  coordinateInfoContent: {
-    ml: 2,
-  },
-  coordinateInfoSubContent: {
-    ml: 2,
   },
 });

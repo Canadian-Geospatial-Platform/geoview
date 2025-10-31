@@ -108,7 +108,6 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
       rightTop={layerTitle()}
       rightMain={rightPanel()}
       guideContentIds={guideContent()}
-      fullWidth={false}
       hideEnlargeBtn={displayState !== 'view'}
       containerType={containerType}
       onIsEnlargeClicked={handleIsEnlargeClicked}

@@ -19,7 +19,6 @@ interface GuideListItem extends LayerListEntry {
 }
 
 interface GuideType {
-  fullWidth?: boolean;
   containerType?: TypeContainerBox;
 }
 
@@ -29,7 +28,7 @@ interface GuideType {
  * @returns {JSX.Element} the guide (help) component
  */
 // Memoizes entire component, preventing re-renders if props haven't changed
-export const Guide = memo(function GuidePanel({ fullWidth = false, containerType = CONTAINER_TYPE.FOOTER_BAR }: GuideType): JSX.Element {
+export const Guide = memo(function GuidePanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: GuideType): JSX.Element {
   logger.logTraceRender('components/guide/guide');
 
   // Hooks
@@ -213,7 +212,6 @@ export const Guide = memo(function GuidePanel({ fullWidth = false, containerType
           selectedLayerPath={selectedLayerPath}
           layerList={layersList}
           onLayerListClicked={handleGuideItemClick}
-          fullWidth={fullWidth}
           aria-label={ariaLabel}
         >
           <Box sx={sxClasses.rightPanelContainer} aria-label={ariaLabel} className="guidebox-container">

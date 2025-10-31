@@ -12,7 +12,6 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
   list: {
     color: 'text.primary',
     width: '100%',
-    paddingRight: '14px !important',
     overflowY: 'auto',
     // layer title
     '& .MuiListItemText-primary': {

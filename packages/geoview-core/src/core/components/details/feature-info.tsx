@@ -1,19 +1,7 @@
 import { useCallback, useEffect, useState, useMemo, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-
-import {
-  List,
-  ZoomInSearchIcon,
-  Tooltip,
-  IconButton,
-  Paper,
-  Box,
-  Typography,
-  BrowserNotSupportedIcon,
-  HighlightIcon,
-  HighlightOutlinedIcon,
-} from '@/ui';
+import { Box, BrowserNotSupportedIcon, HighlightIcon, HighlightOutlinedIcon, IconButton, Paper, Typography, ZoomInSearchIcon } from '@/ui';
 import { useDetailsCheckedFeatures, useDetailsStoreActions } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
@@ -95,17 +83,15 @@ const FeatureHeader = memo(function FeatureHeader({ iconSrc, name, hasGeometry, 
           [theme.breakpoints.down('sm')]: { display: 'none' },
         }}
       >
-        <Tooltip title={t('details.keepFeatureSelected')} placement="top" enterDelay={1000}>
-          <IconButton
-            aria-label={t('details.keepFeatureSelected')}
-            tooltipPlacement="top"
-            disabled={!hasGeometry}
-            onClick={onCheckChange}
-            sx={sxClasses.selectFeatureCheckbox}
-          >
-            {checked ? <HighlightIcon /> : <HighlightOutlinedIcon />}
-          </IconButton>
-        </Tooltip>
+        <IconButton
+          aria-label={t('details.keepFeatureSelected')}
+          tooltipPlacement="top"
+          disabled={!hasGeometry}
+          onClick={onCheckChange}
+          sx={sxClasses.selectFeatureCheckbox}
+        >
+          {checked ? <HighlightIcon /> : <HighlightOutlinedIcon />}
+        </IconButton>
         <IconButton
           color="primary"
           aria-label={t('details.zoomTo')}
@@ -235,9 +221,9 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
         onZoomIn={handleZoomIn}
       />
 
-      <List sx={sxClasses.featureInfoListContainer}>
+      <Box sx={sxClasses.featureInfoListContainer}>
         <FeatureInfoTable featureInfoList={featureInfoList} />
-      </List>
+      </Box>
     </Paper>
   );
 }

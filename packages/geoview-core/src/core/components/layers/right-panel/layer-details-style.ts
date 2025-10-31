@@ -16,7 +16,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     textOverflow: 'ellipsis',
   },
   layerDetails: {
-    padding: '20px',
+    padding: '16px',
   },
   buttonDescriptionContainer: {
     display: 'flex',

@@ -23,11 +23,11 @@ interface ResponsiveGridLayoutProps {
   rightTop?: ReactNode;
   guideContentIds?: string[];
   rightMain: ReactNode;
-  fullWidth?: boolean;
   onIsEnlargeClicked?: (isEnlarge: boolean) => void;
   onGuideIsOpen?: (isGuideOpen: boolean) => void;
   hideEnlargeBtn?: boolean;
   containerType?: TypeContainerBox;
+  toggleMode?: boolean;
 }
 
 interface ResponsiveGridLayoutExposedMethods {
@@ -42,12 +42,12 @@ const ResponsiveGridLayout = forwardRef(
       leftMain = null,
       rightTop = null,
       rightMain = null,
-      fullWidth = false,
       guideContentIds = [],
       onIsEnlargeClicked,
       onGuideIsOpen,
       hideEnlargeBtn = false,
       containerType,
+      toggleMode = false,
     }: ResponsiveGridLayoutProps,
     ref: Ref<ResponsiveGridLayoutExposedMethods>
   ) => {
@@ -79,7 +79,7 @@ const ResponsiveGridLayout = forwardRef(
     const [isFullScreen, setIsFullScreen] = useState(false);
 
     // sxClasses
-    const sxClasses = useMemo(() => getSxClasses(theme, containerType!), [theme, containerType]);
+    const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
     // Expose imperative methods to parent component
     useImperativeHandle(
@@ -199,7 +199,7 @@ const ResponsiveGridLayout = forwardRef(
 
     // If we're on mobile
     if (theme.breakpoints.down('md')) {
-      if (!(leftMain || leftTop) && !isRightPanelVisible && !fullWidth) {
+      if (!(leftMain || leftTop) && !isRightPanelVisible) {
         setIsRightPanelVisible(true);
       }
     }
@@ -226,8 +226,9 @@ const ResponsiveGridLayout = forwardRef(
     };
 
     const renderCloseButton = (): JSX.Element | null => {
+
       // Check conditions for hiding the button
-      if (!fullWidth && (window.innerWidth >= theme.breakpoints.values.md || !isRightPanelVisible)) {
+      if ( (!toggleMode) && (window.innerWidth >= theme.breakpoints.values.md || !isRightPanelVisible)) {
         return null;
       }
 
@@ -320,7 +321,7 @@ const ResponsiveGridLayout = forwardRef(
       if (!content) return null;
 
       return (
-        <Box ref={guideContainerRef} tabIndex={0} sx={{ padding: '20px', overflow: 'auto' }}>
+        <Box ref={guideContainerRef} tabIndex={0}>
           <Box className="guideBox">
             {/* Close button, only shown WCAG is enabled and not fullScreen */}
             {isFocusTrap && !isFullScreen && (
@@ -365,7 +366,7 @@ const ResponsiveGridLayout = forwardRef(
           <Box
             ref={isGuideOpen ? undefined : rightMainRef}
             sx={sxClasses.rightMainContent}
-            className={isGuideOpen ? 'responsive-layout-right-main-content guide-container' : 'responsive-layout-right-main-content'}
+            className={`responsive-layout-right-main-content ${isGuideOpen ? 'guide-container' : ''}`}
           >
             {content || <Typography className="noSelection">{t('layers.noSelection')}</Typography>}
           </Box>
@@ -375,34 +376,33 @@ const ResponsiveGridLayout = forwardRef(
 
     return (
       <Box ref={ref} sx={sxClasses.container} className="responsive-layout-container">
-        <ResponsiveGrid.Root sx={{ pt: 8, pb: 0, paddingTop: '0' }} className="responsive-layout-top-row">
-          {!fullWidth && (
-            <ResponsiveGrid.Left
-              isRightPanelVisible={isRightPanelVisible}
-              isEnlarged={isEnlarged}
-              aria-hidden={!isRightPanelVisible}
-              sxProps={{ zIndex: isFullScreen ? 'unset' : 200 }}
-              className="responsive-layout-left-top"
-            >
-              {/* This panel is hidden from screen readers when not visible */}
-              {leftTop}
-            </ResponsiveGrid.Left>
-          )}
+        <ResponsiveGrid.Root sx={sxClasses.topRow} className="responsive-layout-top-row">
+          <ResponsiveGrid.Left
+            isRightPanelVisible={isRightPanelVisible}
+            isEnlarged={isEnlarged}
+            aria-hidden={!isRightPanelVisible}
+            toggleMode={toggleMode}
+            sxProps={{ zIndex: isFullScreen ? 'unset' : 200 }}
+            className="responsive-layout-left-top"
+          >
+            {/* This panel is hidden from screen readers when not visible */}
+            {leftTop}
+          </ResponsiveGrid.Left>
           <ResponsiveGrid.Right
             isRightPanelVisible={isRightPanelVisible}
             isEnlarged={isEnlarged}
-            fullWidth={fullWidth}
+            toggleMode={toggleMode}
             sxProps={{ zIndex: isFullScreen ? 'unset' : 100, alignContent: 'flex-end' }}
             className="responsive-layout-right-top"
           >
             <Box
               sx={{
                 display: 'flex',
-                alignItems: fullWidth || containerType === CONTAINER_TYPE.APP_BAR ? 'end' : 'center',
-                flexDirection: fullWidth || containerType === CONTAINER_TYPE.APP_BAR ? 'column' : 'row',
-                gap: fullWidth || containerType === CONTAINER_TYPE.APP_BAR ? '10px' : '0',
+                alignItems: containerType === CONTAINER_TYPE.APP_BAR ? 'end' : 'center',
+                flexDirection: containerType === CONTAINER_TYPE.APP_BAR ? 'column' : 'row',
+                gap: containerType === CONTAINER_TYPE.APP_BAR ? '10px' : '0',
                 [theme.breakpoints.up('md')]: {
-                  justifyContent: fullWidth || containerType === CONTAINER_TYPE.APP_BAR ? 'space-between' : 'right',
+                  justifyContent: containerType === CONTAINER_TYPE.APP_BAR ? 'space-between' : 'right',
                 },
                 [theme.breakpoints.down('md')]: {
                   justifyContent: 'space-between',
@@ -414,7 +414,7 @@ const ResponsiveGridLayout = forwardRef(
 
               <Box sx={sxClasses.rightButtonsContainer}>
                 <ButtonGroup size="small" variant="outlined" aria-label={t('details.guideControls')!}>
-                  {!fullWidth && !hideEnlargeBtn && renderEnlargeButton()}
+                  {!toggleMode && !hideEnlargeBtn && renderEnlargeButton()}
                   {!!guideContentIds?.length && renderGuideButton()}
                   {!isMapFullScreen && renderFullScreenButton()}
                   {!!(leftMain || leftTop) && renderCloseButton()}
@@ -434,7 +434,7 @@ const ResponsiveGridLayout = forwardRef(
           <ResponsiveGrid.Left
             isEnlarged={isEnlarged}
             isRightPanelVisible={isRightPanelVisible}
-            fullWidth={fullWidth}
+            toggleMode={toggleMode}
             aria-hidden={!isRightPanelVisible}
             sxProps={sxClasses.gridLeftMain as SxProps}
             className="responsive-layout-left-main"
@@ -444,7 +444,7 @@ const ResponsiveGridLayout = forwardRef(
           <ResponsiveGrid.Right
             isEnlarged={isEnlarged}
             isRightPanelVisible={isRightPanelVisible}
-            fullWidth={fullWidth}
+            toggleMode={toggleMode}
             sxProps={sxClasses.gridRightMain as SxProps}
             className="responsive-layout-right-main"
           >
