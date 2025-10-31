@@ -1,6 +1,6 @@
 # Event Processors API
 
-> **?? Audience:** API users building applications with GeoView
+> **👥 Audience:** API users building applications with GeoView
 >
 > **For Core Developers:** See [Event Processor Architecture](programming/event-processor-architecture.md) for implementation details
 
@@ -331,7 +331,7 @@ UIEventProcessor.openPanel("mapId", "legend");
 // Add a footer bar tab
 UIEventProcessor.addFooterBarTab("mapId", "custom-tab", {
   label: "My Tab",
-  icon: "<i>??</i>",
+  icon: "<i class='material-icons'>info</i>",
   content: "<div>Tab content</div>",
 });
 
@@ -573,4 +573,4 @@ if (hasTimeSlider) {
 
 ---
 
-> **?? For Core Developers:** See [Event Processor Architecture](programming/event-processor-architecture.md) for implementation details, creating custom processors, and internal patterns.
+> **🔧 For Core Developers:** See [Event Processor Architecture](programming/event-processor-architecture.md) for implementation details, creating custom processors, and internal patterns.

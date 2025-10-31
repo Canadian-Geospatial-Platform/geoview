@@ -1,6 +1,6 @@
 # GeoView API Documentation
 
-> **?? Complete TypeScript API:** For full type definitions, interfaces, and auto-generated documentation, see [TypeDoc API Reference](https://canadian-geospatial-platform.github.io/geoview/public/typeDocAPI/)
+> **📚 Complete TypeScript API:** For full type definitions, interfaces, and auto-generated documentation, see [TypeDoc API Reference](https://canadian-geospatial-platform.github.io/geoview/public/typeDocAPI/)
 
 ## Overview
 
@@ -32,6 +32,7 @@ class API {
 | `utilities` | `Object`        | Collection of utility functions                |
 
 **Important Note:** Internally we use the term plugins for api reference and but package when we use it as a working plugin.
+
 ## API Methods
 
 ### Map Management

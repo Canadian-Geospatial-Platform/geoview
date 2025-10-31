@@ -1,6 +1,6 @@
 # Using Zustand Store
 
-> **?? Audience:** GeoView core developers
+> ** Audience:** GeoView core developers
 >
 > **For API Users:** See [Event Processors](app/events/event-processors.md) for the public API approach to state management.
 
