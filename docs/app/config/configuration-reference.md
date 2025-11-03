@@ -1,14 +1,18 @@
 # Configuration Reference
 
-Complete reference for GeoView layer configuration objects. This guide covers all configuration options for creating and managing map layers.
+Complete reference for GeoView configuration objects. This guide covers all configuration options for creating and managing maps, layers, and packages.
 
 > **Quick Start:** See [Creating Maps](app/config/create-map.md) for basic usage examples  
 > **For Core Developers:** See [Adding Layer Types](programming/adding-layer-types.md) for implementation details
+
+> **⚠️ Schema Validation:** Always check the browser console for schema validation errors and discrepancies. The console will display detailed error messages including the schema path, affected property, and allowed values. Invalid configurations will be rejected with specific error messages indicating what needs to be corrected.
 
 ---
 
 ## Table of Contents
 
+- [Schema Validation](#schema-validation)
+- [Map Configuration](#map-configuration)
 - [GeoView Layer Configuration](#geoview-layer-configuration)
 - [Layer Entry Configuration](#layer-entry-configuration)
 - [Initial Settings](#initial-settings)
@@ -16,7 +20,765 @@ Complete reference for GeoView layer configuration objects. This guide covers al
 - [Layer Style Configuration](#layer-style-configuration)
 - [Temporal Configuration](#temporal-configuration)
 - [Layer Types](#layer-types)
+- [Package Configuration](#package-configuration)
 - [Complete Examples](#complete-examples)
+
+---
+
+## Schema Validation
+
+GeoView uses JSON Schema validation to ensure configuration objects are valid before creating maps and layers.
+
+### Checking for Validation Errors
+
+**Always check the browser console** for schema validation errors and discrepancies. The console will display detailed error messages when a configuration doesn't match the schema.
+
+### Understanding Validation Errors
+
+When a validation error occurs, you'll see a message in the console with the following information:
+
+```
+======================================================================
+SchemaPath: https://cgpv/schema#/definitions/TypeMapFeaturesInstance
+Schema error: {
+  instancePath: '/map/viewSettings/projection',
+  schemaPath: '#/definitions/TypeValidMapProjectionCodes/enum',
+  keyword: 'enum',
+  params: { allowedValues: [3978, 3857] },
+  message: 'must be equal to one of the allowed values'
+}
+Object affected: 4326
+```
+
+**Key information:**
+
+- **instancePath**: The location of the invalid property in your configuration
+- **keyword**: The validation rule that failed (e.g., `enum`, `type`, `required`)
+- **params**: Additional details, such as allowed values
+- **message**: Human-readable description of the error
+- **Object affected**: The invalid value you provided
+
+### Common Validation Errors
+
+1. **Invalid Enum Value**
+
+   - **Error**: `must be equal to one of the allowed values`
+   - **Solution**: Check the `params.allowedValues` in the error and use one of those values
+
+2. **Missing Required Property**
+
+   - **Error**: `must have required property 'propertyName'`
+   - **Solution**: Add the missing required property to your configuration
+
+3. **Wrong Type**
+
+   - **Error**: `must be string/number/boolean/array/object`
+   - **Solution**: Ensure the property value matches the expected type
+
+4. **Additional Properties Not Allowed**
+   - **Error**: `must NOT have additional properties`
+   - **Solution**: Remove properties that aren't part of the schema
+
+### Validation Tips
+
+- Start with a minimal valid configuration and add properties incrementally
+- Use the [Sandbox](./sandbox.html) page to test configurations interactively
+- Refer to this documentation for valid property values
+- Check the schema files in `packages/geoview-core/` for complete type definitions
+
+---
+
+## Map Configuration
+
+Configuration for the map instance, including basemap, view settings, interactions, and initial layers.
+
+### TypeMapFeaturesInstance
+
+The root configuration object for initializing a GeoView map.
+
+```typescript
+interface TypeMapFeaturesInstance {
+  // Required
+  map: TypeMapConfig;
+
+  // Optional
+  theme?: TypeDisplayTheme;
+  navBar?: TypeNavBarProps;
+  footerBar?: TypeFooterBarProps;
+  appBar?: TypeAppBarProps;
+  overviewMap?: TypeOverviewMapProps;
+  components?: TypeMapComponents;
+  corePackages?: TypeMapCorePackages;
+  corePackagesConfig?: TypeCorePackagesConfig;
+  externalPackages?: TypeExternalPackages;
+  serviceUrls?: TypeServiceUrls;
+  globalSettings?: TypeGlobalSettings;
+}
+```
+
+### TypeMapConfig
+
+Main map configuration object.
+
+```typescript
+interface TypeMapConfig {
+  // Required
+  basemapOptions: TypeBasemapOptions;
+  interaction: TypeInteraction;
+  viewSettings: TypeViewSettings;
+
+  // Optional
+  listOfGeoviewLayerConfig?: TypeListOfGeoviewLayerConfig;
+  highlightColor?: TypeHighlightColors;
+  overlayObjects?: TypeOverlayObjects;
+  extraOptions?: object; // OpenLayers map options
+}
+```
+
+### Map Properties
+
+#### basemapOptions (Required)
+
+Configuration for the basemap.
+
+```typescript
+basemapOptions: {
+  basemapId: TypeBasemapId;
+  shaded: boolean;
+  labeled: boolean;
+}
+```
+
+**Properties:**
+
+- **basemapId** (Required): Basemap identifier
+
+  - `"transport"` - Transportation basemap
+  - `"simple"` - Simple basemap
+  - `"shaded"` - Shaded relief basemap
+  - `"osm"` - OpenStreetMap basemap
+  - `"nogeom"` - No geometry/blank basemap
+  - `"imagery"` - Imagery/satellite basemap
+  - `"labeled"` - Labeled basemap
+
+- **shaded** (Required): Enable or disable shaded basemap (if basemap id is set to shaded then this should be false)
+- **labeled** (Required): Enable or disable basemap labels
+
+**Examples:**
+
+```typescript
+// Transport basemap with shading and labels
+basemapOptions: {
+  basemapId: "transport",
+  shaded: true,
+  labeled: true
+}
+```
+
+---
+
+#### interaction (Required)
+
+Map interaction mode.
+
+```typescript
+interaction: "dynamic" | "static";
+```
+
+**Valid Values:**
+
+- `"dynamic"` - Full map interaction (pan, zoom, click, etc.)
+- `"static"` - Static map with no interaction
+
+**Default:** `"dynamic"`
+
+**Example:**
+
+```typescript
+interaction: "dynamic";
+```
+
+---
+
+#### viewSettings (Required)
+
+Initial view configuration for the map.
+
+```typescript
+viewSettings: {
+  initialView?: TypeMapViewSettings;
+  homeView?: TypeMapViewSettings;
+  enableRotation?: boolean;
+  rotation?: number;
+  maxExtent?: Extent;
+  minZoom?: number;
+  maxZoom?: number;
+  projection: TypeValidMapProjectionCodes;
+}
+
+TypeMapViewSettings: {
+  zoomAndCenter?: [number, [number, number]];
+  extent?: Extent;
+  layerIds?: string[];
+}
+```
+
+**Properties:**
+
+- **projection** (Required): EPSG projection code (default: 3978)
+
+  - `3978` - Canada Lambert Conformal Conic
+  - `3857` - Web Mercator
+
+  > **Note:** Only these two projections are currently supported. Using any other EPSG code will result in a schema validation error.
+
+- **initialView** (Optional): Settings for the initial view for map
+  - **zoomAndCenter**: [zoom, [longitude, latitude]] format. Longitude domain = [-160..160], Latitude domain = [-80..80]
+  - **extent**: [minX, minY, maxX, maxY] extent coordinates
+  - **layerIds**: Geoview layer ID(s) or layer path(s) to use as initial map focus. If empty, will use all layers
+- **homeView** (Optional): Settings for the home nav bar button (same structure as initialView)
+
+- **enableRotation** (Optional): Enable rotation. If false, a rotation constraint that always sets the rotation to zero is used (default: true)
+
+- **rotation** (Optional): The initial rotation for the view in **degrees** (positive rotation clockwise, 0 means North). Will be converted to radians by the viewer. Domain = [0..360] (default: 0)
+
+- **maxExtent** (Optional): The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates (default: [-135, 25, -50, 89])
+
+- **minZoom** (Optional): The minimum zoom level used to determine the resolution constraint. Domain = [0..20]. If not set, will use default from basemap (default: 0)
+
+- **maxZoom** (Optional): The maximum zoom level used to determine the resolution constraint. Domain = [0..20]. If not set, will use default from basemap (default: 20)
+
+**Examples:**
+
+```typescript
+// Basic view settings with zoomAndCenter
+viewSettings: {
+  projection: 3978,
+  initialView: {
+    zoomAndCenter: [12, [-75.7, 45.4]] // Ottawa
+  }
+}
+
+// With Web Mercator projection, zoom constraints and rotation enabled (in degrees)
+viewSettings: {
+  projection: 3978,
+  initialView: {
+    zoomAndCenter: [14, [-73.6, 45.5]] // Montreal
+  },
+  enableRotation: true,
+  rotation: 45 // 45 degrees clockwise
+}
+
+// Using extent instead of zoomAndCenter
+viewSettings: {
+  projection: 3978,
+  initialView: {
+    extent: [-76.0, 45.0, -75.0, 46.0]
+  }
+}
+
+// Using layerIds to focus on specific layers
+viewSettings: {
+  projection: 3978,
+  initialView: {
+    layerIds: ["layer1", "layer2"]
+  }
+}
+```
+
+---
+
+#### listOfGeoviewLayerConfig (Optional)
+
+Array of layer configurations to add to the map.
+
+```typescript
+listOfGeoviewLayerConfig?: Array<TypeGeoviewLayerConfig>;
+```
+
+See [GeoView Layer Configuration](#geoview-layer-configuration) section for details.
+
+**Example:**
+
+```typescript
+listOfGeoviewLayerConfig: [
+  {
+    geoviewLayerId: "wms-layer",
+    geoviewLayerType: "ogcWms",
+    metadataAccessPath: "https://example.com/wms",
+  },
+];
+```
+
+---
+
+#### highlightColor (Optional)
+
+Color to use for feature highlighting.
+
+```typescript
+highlightColor?: "black" | "white" | "red" | "green";
+```
+
+**Valid Values:**
+
+- `"black"` - Black highlight color
+- `"white"` - White highlight color
+- `"red"` - Red highlight color
+- `"green"` - Green highlight color
+
+**Example:**
+
+```typescript
+highlightColor: "red";
+```
+
+---
+
+#### overlayObjects (Optional)
+
+Additional overlay objects to add to the map.
+
+```typescript
+overlayObjects?: Array<object>;
+```
+
+**Example:**
+
+```typescript
+overlayObjects: [
+  // Custom OpenLayers overlay objects
+];
+```
+
+---
+
+#### extraOptions (Optional)
+
+Additional OpenLayers map options.
+
+```typescript
+extraOptions?: object;
+```
+
+**Example:**
+
+```typescript
+extraOptions: {
+  // OpenLayers Map constructor options
+}
+```
+
+---
+
+### Complete Map Configuration Example
+
+```typescript
+map: {
+  basemapOptions: {
+    basemapId: "transport",
+    shaded: true,
+    labeled: true
+  },
+  interaction: "dynamic",
+  viewSettings: {
+    projection: 3978,
+    initialView: {
+      zoomAndCenter: [12, [-106, 60]]
+    },
+    minZoom: 4,
+    maxZoom: 18,
+    enableRotation: false
+  },
+  listOfGeoviewLayerConfig: [
+    {
+      geoviewLayerId: "my-layer",
+      geoviewLayerType: "ogcWms",
+      metadataAccessPath: "https://example.com/wms",
+      ...
+    }
+  ]
+}
+```
+
+---
+
+#### theme (Optional)
+
+Visual theme for the map interface.
+
+```typescript
+theme?: "dark" | "light" | "geo.ca";
+```
+
+**Valid Values:**
+
+- `"dark"` - Dark theme
+- `"light"` - Light theme
+- `"geo.ca"` - Default Geo.ca theme
+
+**Default:** `"geo.ca"`
+
+**Example:**
+
+```typescript
+theme: "dark";
+```
+
+---
+
+#### navBar (Optional)
+
+Controls available on the navigation bar.
+
+```typescript
+navBar?: Array<"zoom" | "fullscreen" | "home" | "location" | "basemap-select" | "projection" | "drawer">;
+```
+
+**Valid Values:**
+
+- `"zoom"` - Zoom in/out controls
+- `"fullscreen"` - Fullscreen toggle
+- `"home"` - Return to initial extent
+- `"location"` - Geolocator control
+- `"basemap-select"` - Basemap selector
+- `"projection"` - Projection selector
+- `"drawer"` - **Drawer package** - Drawing tools
+
+**Default:** `["zoom", "fullscreen", "home", "basemap-select"]`
+
+**Example:**
+
+```typescript
+// Include drawer package in navbar
+navBar: ["zoom", "fullscreen", "home", "drawer"];
+```
+
+> **Note:** The `"drawer"` option requires the **drawer package** to be configured. See [Drawer Package](#drawer-package) configuration.
+
+---
+
+#### footerBar (Optional)
+
+Configuration for footer bar tabs.
+
+```typescript
+footerBar?: {
+  tabs: {
+    core: TypeValidFooterBarTabsCoreProps[];
+    custom: TypeFooterBarTabsCustomProps[];
+  };
+  collapsed: boolean;
+  selectedTab: TypeValidFooterBarTabsCoreProps;
+  selectedLayersLayerPath: string;
+  selectedDataTableLayerPath: string;
+  selectedTimeSliderLayerPath: string;
+};
+
+TypeValidFooterBarTabsCoreProps = "legend" | "layers" | "details" | "data-table" | "time-slider" | "geochart" | "guide";
+
+TypeFooterBarTabsCustomProps = {
+  id: string;
+  label: string;
+  contentHTML: string;
+};
+```
+
+**Properties:**
+
+- **tabs** (Required): Tab configuration
+
+  - **core** (Required): Array of core tab identifiers
+    - `"legend"` - Layer legend display
+    - `"layers"` - Layer list and management
+    - `"details"` - Feature details viewer
+    - `"data-table"` - Tabular data view
+    - `"time-slider"` - **Time Slider package** - Temporal data controls
+    - `"geochart"` - **GeoChart package** - Chart visualization
+    - `"guide"` - User guide tab
+  - **custom**: Array of custom tab definitions
+
+- **collapsed**: Whether the footer bar is initially collapsed
+
+- **selectedTab**: The initially selected tab
+
+- **selectedLayersLayerPath**: Layer path for layers tab selection
+
+- **selectedDataTableLayerPath**: Layer path for data table tab selection
+
+- **selectedTimeSliderLayerPath**: Layer path for time slider tab selection
+
+**Default:** `{ tabs: { core: ["legend", "layers", "details", "data-table"], custom: [] }, collapsed: false }`
+
+**Example:**
+
+```typescript
+footerBar: {
+  tabs: {
+    core: ["layers", "legend", "details", "time-slider", "geochart"],
+    custom: []
+  },
+  collapsed: false,
+  selectedTab: "layers"
+}
+```
+
+> **Note:** The `"time-slider"` and `"geochart"` tabs require their respective packages to be configured. See [Time Slider Package](#time-slider-package) and [GeoChart Package](#geochart-package) configuration.
+
+---
+
+#### appBar (Optional)
+
+Configuration for app bar tabs.
+
+```typescript
+appBar?: {
+  tabs: {
+    core: TypeValidAppBarCoreProps[];
+  };
+  collapsed: boolean;
+  selectedTab: TypeValidAppBarCoreProps;
+  selectedLayersLayerPath: string;
+  selectedDataTableLayerPath: string;
+  selectedTimeSliderLayerPath: string;
+};
+
+TypeValidAppBarCoreProps = "geolocator" | "export" | "aoi-panel" | "custom-legend" | "guide" | "legend" | "details" | "data-table" | "layers";
+```
+
+**Properties:**
+
+- **tabs** (Required): Tab configuration
+
+  - **core** (Required): Array of core tab identifiers
+    - `"geolocator"` - Location search and navigation
+    - `"export"` - Map export functionality
+    - `"aoi-panel"` - **AOI Panel package** - Area of interest selection
+    - `"custom-legend"` - **Custom Legend package** - Custom legend display
+    - `"guide"` - User guide tab
+    - `"legend"` - Layer legend display
+    - `"details"` - Feature details viewer
+    - `"data-table"` - Tabular data view
+    - `"layers"` - Layer list and management
+
+- **collapsed**: Whether the app bar is initially collapsed
+
+- **selectedTab**: The initially selected tab
+
+- **selectedLayersLayerPath**: Layer path for layers tab selection
+
+- **selectedDataTableLayerPath**: Layer path for data table tab selection
+
+- **selectedTimeSliderLayerPath**: Layer path for time slider tab selection
+
+**Default:** `{ tabs: { core: ["geolocator"] }, collapsed: false }`
+
+**Example:**
+
+```typescript
+appBar: {
+  tabs: {
+    core: ["geolocator", "export", "aoi-panel", "custom-legend"]
+  },
+  collapsed: false,
+  selectedTab: "geolocator"
+}
+```
+
+> **Note:** The `"aoi-panel"` tab requires the **aoi-panel package** to be configured. See [Area of Interest Panel Package](#area-of-interest-aoi-panel-package) configuration.
+
+---
+
+#### overviewMap (Optional)
+
+Configuration for the overview map.
+
+```typescript
+overviewMap?: {
+  hideOnZoom?: boolean;
+  collapsed?: boolean;
+};
+```
+
+**Properties:**
+
+- `hideOnZoom` - Hide overview map when zoomed in
+- `collapsed` - Start with overview map collapsed
+
+**Example:**
+
+```typescript
+overviewMap: {
+  hideOnZoom: true,
+  collapsed: false
+}
+```
+
+---
+
+#### corePackages (Optional)
+
+List of core packages to load. Currently only contains the Swiper package.
+
+```typescript
+corePackages?: Array<"swiper">;
+```
+
+**Available Packages:**
+
+- `"swiper"` - Layer swipe comparison tool
+
+**Example:**
+
+```typescript
+corePackages: ["swiper"];
+```
+
+> **Note:** Other packages (GeoChart, Time Slider, AOI Panel, Drawer) are loaded through their respective tab configurations in `appBar`, `footerBar`, or `navBar`.
+
+---
+
+#### corePackagesConfig (Optional)
+
+Configuration for all packages. Each array element is an object with the package name as the key.
+
+```typescript
+corePackagesConfig?: Array<{
+  [packageName: string]: PackageConfig;
+}>;
+```
+
+See package-specific sections ([Swiper](#swiper-package), [GeoChart](#geochart-package), [Time Slider](#time-slider-package)) for detailed configuration options.
+
+**Examples:**
+
+```typescript
+// Swiper package configuration
+corePackagesConfig: [
+  {
+    swiper: {
+      orientation: "vertical",
+      layers: ["layer1", "layer2"],
+      keyboardOffset: 20,
+    },
+  },
+];
+
+// Time Slider package configuration
+corePackagesConfig: [
+  {
+    "time-slider": {
+      sliders: [
+        {
+          layerPaths: ["weather-layer/temperature"],
+          title: "Weather Timeline",
+          delay: 1000,
+        },
+      ],
+    },
+  },
+];
+
+// Multiple packages
+corePackagesConfig: [
+  {
+    swiper: {
+      orientation: "horizontal",
+      layers: ["layer1/0"],
+    },
+  },
+  {
+    geochart: {
+      charts: [
+        {
+          type: "bar",
+          title: "Population Data",
+        },
+      ],
+    },
+  },
+];
+```
+
+---
+
+#### serviceUrls (Optional)
+
+URLs for external services.
+
+```typescript
+serviceUrls?: {
+  geocoreUrl?: string;
+  rcsUrl?: string;
+  proxyUrl?: string;
+  geolocator?: string;
+  utmZoneUrl?: string;
+  ntsSheetUrl?: string;
+  altitudeUrl?: string;
+};
+```
+
+**Example:**
+
+```typescript
+serviceUrls: {
+  geolocator: "https://geolocator.api.geo.ca?keys=geonames,nominatim",
+  geocoreUrl: "https://geocore.api.geo.ca"
+}
+```
+
+---
+
+#### globalSettings (Optional)
+
+Global settings for the map instance.
+
+```typescript
+globalSettings?: TypeGlobalSettings;
+
+TypeGlobalSettings = {
+  canRemoveSublayers?: boolean;
+  disabledLayerTypes?: TypeGeoviewLayerType[];
+  showUnsymbolizedFeatures?: boolean;
+  coordinateInfoEnabled?: boolean;
+  hideCoordinateInfoSwitch?: boolean;
+};
+```
+
+**Properties:**
+
+- **canRemoveSublayers** (Optional): Whether or not sublayers can be removed from layer groups
+
+  - **Type:** `boolean`
+  - **Default:** `true`
+
+- **disabledLayerTypes** (Optional): Array of layer types that should be disabled
+
+  - **Type:** `TypeGeoviewLayerType[]`
+  - **Valid values:** `"esriDynamic"`, `"esriFeature"`, `"imageStatic"`, `"geoJSON"`, `"geoPackage"`, `"xyzTiles"`, `"vectorTiles"`, `"ogcFeature"`, `"ogcWms"`, `"ogcWfs"`, `"CSV"`
+
+- **showUnsymbolizedFeatures** (Optional): Whether to display unsymbolized features in the datatable and other components
+
+  - **Type:** `boolean`
+
+- **coordinateInfoEnabled** (Optional): Whether the initial state of the coordinate info tool should be enabled
+
+  - **Type:** `boolean`
+
+- **hideCoordinateInfoSwitch** (Optional): Whether the coordinate info tool should be removed from the UI
+  - **Type:** `boolean`
+
+**Example:**
+
+```typescript
+globalSettings: {
+  canRemoveSublayers: true,
+  disabledLayerTypes: ["ogcWfs", "CSV"],
+  showUnsymbolizedFeatures: false,
+  coordinateInfoEnabled: true,
+  hideCoordinateInfoSwitch: false
+}
+```
 
 ---
 
@@ -178,11 +940,11 @@ See [Layer Entry Configuration](#layer-entry-configuration) section.
 listOfLayerEntryConfig: [
   {
     layerId: "0",
-    layerName: { en: "Temperature", fr: "Température" },
+    layerName: "Temperature",
   },
   {
     layerId: "1",
-    layerName: { en: "Precipitation", fr: "Précipitations" },
+    layerName: "Precipitation",
   },
 ];
 ```
@@ -323,9 +1085,6 @@ layerId: "temperature";
 
 // For ESRI services (numeric ID)
 layerId: "0";
-
-// For file-based layers (generated or filename)
-layerId: "my-features";
 ```
 
 ---
@@ -1036,10 +1795,10 @@ Temporal layers automatically work with the Time Slider package. See [Packages](
   geoviewLayerId: "geojson-data",
   geoviewLayerType: "GeoJSON",
   geoviewLayerName: "GeoJSON Layer",
-  metadataAccessPath: "/data/features.geojson",
+  metadataAccessPath: "/data/features",
   listOfLayerEntryConfig: [
     {
-      layerId: "features",
+      layerId: "polygons",
       layerName: "Features",
       layerStyle: {
         fillColor: "#FF0000",
@@ -1060,7 +1819,7 @@ Temporal layers automatically work with the Time Slider package. See [Packages](
   geoviewLayerId: "csv-points",
   geoviewLayerType: "CSV",
   geoviewLayerName: "CSV Points",
-  metadataAccessPath: "/data/points.csv",
+  metadataAccessPath: "/data/",
   listOfLayerEntryConfig: [
     {
       layerId: "points",
@@ -1081,18 +1840,397 @@ Temporal layers automatically work with the Time Slider package. See [Packages](
 
 ```typescript
 {
-  geoviewLayerId: "xyz-tiles",
+  geoviewLayerId: "xyzTilesLYR2",
+  geoviewLayerName: "GNOSIS_Blue_Marble",
+  metadataAccessPath: "https://maps.gnosis.earth/ogcapi/collections/blueMarble/map/tiles/WebMercatorQuad",
   geoviewLayerType: "xyzTiles",
-  geoviewLayerName: "XYZ Tiles",
-  metadataAccessPath: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
   listOfLayerEntryConfig: [
     {
-      layerId: "tiles",
-      layerName: "Tiles",
-    },
-  ],
+      layerId: "blueMarble",
+      layerName: "GNOSIS Blue Marble",
+      source: {
+        dataAccessPath: "https://maps.gnosis.earth/ogcapi/collections/blueMarble/map/tiles/WebMercatorQuad/{z}/{y}/{x}.jpg"
+      }
+    }
 }
 ```
+
+---
+
+## Package Configuration
+
+Configuration schemas for GeoView packages. Packages are loaded and configured through different sections of the map configuration:
+
+- **Swiper**: Configured in `corePackages` and `corePackagesConfig`
+- **GeoChart**: Loaded via `footerBar.tabs.core: ["geochart"]`
+- **Time Slider**: Loaded via `footerBar.tabs.core: ["time-slider"]`
+- **AOI Panel**: Loaded via `appBar.tabs.core: ["aoi-panel"]`
+- **Drawer**: Loaded via `navBar: ["drawer"]`
+
+### Package Configuration Methods
+
+#### Method 1: Core Packages (Swiper only)
+
+```typescript
+corePackages: ["swiper"],
+corePackagesConfig: [
+  {
+    packageName: "swiper",
+    configObj: {
+      // Swiper-specific configuration
+    }
+  }
+]
+```
+
+#### Method 2: Tab-based Loading (GeoChart, Time Slider, AOI Panel, Drawer)
+
+These packages are automatically loaded when included in their respective UI sections and configured through their default config files or via the package-specific configuration mechanisms.
+
+---
+
+### GeoChart Package
+
+Chart visualization package for displaying data charts based on layer features.
+
+**Loading:** Include `"geochart"` in `footerBar.tabs.core` array to enable this package.
+
+#### Schema
+
+```typescript
+interface GeochartConfig {
+  charts: Array<ChartConfig>;
+  version?: string;
+}
+
+interface ChartConfig {
+  // Chart-specific properties defined in schema-chart.json
+  type: "line" | "bar" | "pie" | "area" | "scatter";
+  title?: string;
+  data?: object;
+  // Additional chart properties...
+}
+```
+
+#### Example
+
+```typescript
+corePackagesConfig: [
+  {
+    geochart: {
+      charts: [
+        {
+          type: "bar",
+          title: "Population by City",
+          layerPath: "population-layer",
+          xAxis: "city",
+          yAxis: "population",
+        },
+      ],
+    },
+  },
+];
+```
+
+---
+
+### Time Slider Package
+
+Temporal data control package for filtering time-aware layers.
+
+**Loading:** Include `"time-slider"` in `footerBar.tabs.core` array to enable this package.
+
+#### Schema
+
+```typescript
+interface TimeSliderConfig {
+  sliders: Array<SliderConfig>;
+}
+
+interface SliderConfig {
+  // Required
+  layerPaths: Array<string>;
+
+  // Optional
+  fields?: Array<string>;
+  title?: string;
+  description?: string;
+  delay?: 500 | 750 | 1000 | 1500 | 2000 | 3000 | 5000;
+  filtering?: boolean;
+  locked?: boolean;
+  reversed?: boolean;
+  timeDimension?: {
+    field?: string;
+    default?: Array<string>;
+    displayPattern?: Array<{
+      datePrecision?: "" | "year" | "month" | "day";
+      timePrecision?: "" | "hour" | "minute" | "second";
+    }>;
+  };
+}
+```
+
+#### Properties
+
+- **layerPaths** (Required): Array of layer paths to control
+- **fields**: Array of field names for filtering (one per layer path)
+- **title**: Display title for the slider
+- **description**: Description text
+- **delay**: Animation delay in milliseconds (default: 1000)
+- **filtering**: Enable/disable filtering (default: true)
+- **locked**: Lock slider handles (default: false)
+- **reversed**: Reverse animation direction (default: false)
+- **timeDimension**: OGC time dimension configuration
+
+#### Example
+
+```typescript
+corePackagesConfig: [
+  {
+    "time-slider": {
+      sliders: [
+        {
+          layerPaths: [
+            "weather-layer/temperature",
+            "weather-layer/precipitation",
+          ],
+          fields: ["timestamp", "date"],
+          title: "Weather Data Timeline",
+          description: "Filter weather data by time",
+          delay: 1000,
+          filtering: true,
+          locked: false,
+          reversed: false,
+        },
+      ],
+    },
+  },
+];
+```
+
+---
+
+### Swiper Package
+
+Layer comparison package using a swipe control.
+
+**Loading:** Include `"swiper"` in `corePackages` array and provide configuration in `corePackagesConfig`.
+
+#### Schema
+
+```typescript
+interface SwiperConfig {
+  // Required
+  orientation: "vertical" | "horizontal";
+  layers: Array<string>;
+
+  // Optional
+  keyboardOffset?: number;
+  version?: string;
+}
+```
+
+#### Properties
+
+- **orientation** (Required): Swiper bar orientation
+  - `"vertical"` - Vertical swipe bar
+  - `"horizontal"` - Horizontal swipe bar
+- **layers** (Required): Array of layer IDs to include in swiper
+- **keyboardOffset**: Pixel offset when using keyboard (default: 10, range: 10-100)
+- **version**: Schema version (default: "1.0")
+
+#### Example
+
+```typescript
+corePackagesConfig: [
+  {
+    swiper: {
+      orientation: "vertical",
+      layers: ["satellite-imagery", "street-map"],
+      keyboardOffset: 20,
+    },
+  },
+];
+```
+
+---
+
+### Area of Interest (AOI) Panel Package
+
+Panel for selecting predefined areas of interest.
+
+**Loading:** Include `"aoi-panel"` in `appBar.tabs.core` array to enable this package.
+
+#### Schema
+
+```typescript
+interface AoiPanelConfig {
+  isOpen?: boolean;
+  aoiList?: Array<AoiItem>;
+}
+
+interface AoiItem {
+  imageUrl?: string;
+  aoiTitle?: string;
+  extent: [number, number, number, number]; // [minX, minY, maxX, maxY]
+}
+```
+
+#### Properties
+
+- **isOpen**: Initial panel state (default: false)
+- **aoiList**: Array of area of interest definitions
+  - **imageUrl**: Preview image URL
+  - **aoiTitle**: Display name
+  - **extent**: Geographic extent [minLon, minLat, maxLon, maxLat]
+
+#### Example
+
+```typescript
+corePackagesConfig: [
+  {
+    "aoi-panel": {
+      isOpen: false,
+      aoiList: [
+        {
+          imageUrl: "/images/ottawa.png",
+          aoiTitle: "Ottawa",
+          extent: [-76.0, 45.2, -75.5, 45.6],
+        },
+        {
+          imageUrl: "/images/toronto.png",
+          aoiTitle: "Toronto",
+          extent: [-79.7, 43.5, -79.0, 43.9],
+        },
+      ],
+    },
+  },
+];
+```
+
+---
+
+### Custom Legend Package
+
+Custom legend panel for displaying layer legends.
+
+**Loading:** Custom legend functionality (configuration varies based on implementation).
+
+#### Schema
+
+```typescript
+interface CustomLegendConfig {
+  // Custom legend configuration properties
+  version?: string;
+}
+```
+
+#### Example
+
+```typescript
+corePackagesConfig: [
+  {
+    "custom-legend": {
+      version: "1.0",
+    },
+  },
+];
+```
+
+---
+
+### Drawer Package
+
+Side drawer panel for additional content.
+
+**Loading:** Include `"drawer"` in `navBar` array to enable this package.
+
+#### Schema
+
+```typescript
+interface DrawerConfig {
+  // Drawer configuration properties
+  version?: string;
+}
+```
+
+#### Example
+
+```typescript
+corePackagesConfig: [
+  {
+    drawer: {
+      version: "1.0",
+    },
+  },
+];
+```
+
+---
+
+### Complete Package Configuration Example
+
+```typescript
+{
+  map: {
+    basemapOptions: {
+      basemapId: "transport",
+      shaded: true,
+      labeled: true
+    },
+    interaction: "dynamic",
+    viewSettings: {
+      projection: 3978,
+      initialView: {
+        zoomAndCenter: [10, [-75.7, 45.4]]
+      }
+    },
+    listOfGeoviewLayerConfig: [
+      {
+        geoviewLayerId: "weather-data",
+        geoviewLayerType: "ogcWms",
+        metadataAccessPath: "https://example.com/wms"
+      },
+      {
+        geoviewLayerId: "satellite-layer",
+        geoviewLayerType: "esriImage",
+        metadataAccessPath: "https://example.com/arcgis/rest/services/satellite"
+      }
+    ]
+  },
+  theme: "geo.ca",
+  navBar: ["zoom", "fullscreen", "home", "drawer"],
+  appBar: {
+    tabs: {
+      core: ["geolocator", "aoi-panel"]
+    }
+  },
+  footerBar: {
+    tabs: {
+      core: ["legend", "layers", "details", "time-slider"]
+    }
+  },
+  // Swiper is the only package in corePackages
+  corePackages: ["swiper"],
+  corePackagesConfig: [
+    {
+      swiper: {
+        orientation: "vertical",
+        layers: ["weather-data", "satellite-layer"],
+        keyboardOffset: 20
+      }
+    }
+  ]
+}
+```
+
+> **Note:** In the example above:
+>
+> - **Swiper** is configured via `corePackages` and `corePackagesConfig`
+> - **Drawer** is enabled by including it in `navBar`
+> - **AOI Panel** is enabled by including it in `appBar.tabs.core`
+> - **Time Slider** and **GeoChart** are enabled by including them in `footerBar.tabs.core`
+> - Each package uses its default configuration file or can be configured through package-specific mechanisms
 
 ---
 
@@ -1114,9 +2252,6 @@ Temporal layers automatically work with the Time Slider package. See [Packages](
       queryable: true,
     },
   },
-  isTimeAware: true,
-  serviceDateFormat: "YYYY-MM-DDTHH:mm:ss",
-  externalDateFormat: "YYYY-MM-DD HH:mm",
   listOfLayerEntryConfig: [
     {
       layerId: "temperature",
@@ -1267,29 +2402,6 @@ initialSettings: {
   states: {
     opacity: 0.6, // Allow basemap to show through
   },
-}
-```
-
-### 5. Configure Feature Info
-
-Specify which fields to display:
-
-```typescript
-source: {
-  featureInfo: {
-    queryable: true,
-    outfields: ["name", "population", "area"], // Only these fields
-  },
-}
-```
-
-### 6. Set Bounds for Better Performance
-
-Limit the geographic extent:
-
-```typescript
-initialSettings: {
-  bounds: [-75.9, 45.3, -75.5, 45.6], // Ottawa area only
 }
 ```
 

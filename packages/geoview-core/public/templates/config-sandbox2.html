@@ -54,69 +54,79 @@
 </head>
 
 <body>
-  <div class="header-table">
-    <table>
-      <tbody>
-        <tr>
-          <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
-          <td class="header-title">
-            <h1><strong>Sandbox Configuration</strong></h1>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <table>
-      <tbody>
-        <tr>
-          <td><a href="./index.html">Main</a><br /></td>
-        </tr>
-      </tbody>
-    </table>
-    <div>This page is used to test the ConfigApi.</div>
-    <div>
-      <div class="section">
-        <span>Language:
-          <select id="language" class="select">
-            <option value="en">en</option>
-            <option value="fr">fr</option>
+  <div>
+    <div class="page-header">
+      <img class="header-logo" alt="logo" src="./img/Logo.png" />
+      <div class="page-header-titles">
+        <h1 class="index-header-title"><strong>Plateforme Géospatiale Canadienne (PGC) - Projet GeoView -</strong></h1>
+        <h1 class="index-header-title"><strong>Canadian Geospatial Platform (CGP) - GeoView Project -</strong></h1>
+      </div>
+    </div>
+    <hr />
+    <hr />
+    
+    <div class="back-to-main">
+      <a href="./index.html?tab=sandbox">← Back to Main</a>
+    </div>
+
+    <div class="demo-section">
+      <h4>Configuration Sandbox</h4>
+      <p>
+        Test the ConfigApi with different layer types and configurations. Initialize layers from URLs and process their configurations to see the generated layer metadata.
+      </p>
+    </div>
+    <div class="demo-section">
+      <h4>Layer Configuration</h4>
+      <div class="section sandbox-option-flex">
+        <div class="navigator-option-group">
+          <label for="language" class="navigator-label">Language:</label>
+          <select id="language" class="select navigator-select">
+            <option value="en">English</option>
+            <option value="fr">French</option>
           </select>
-        </span>
+        </div>
+        <div>
+          <label for="urls" class="navigator-label">Layer type:</label>
+          <select id="urls" class="select navigator-select-full"></select>
+        </div>
       </div>
-      <div class="section">
-        <span>Layer type:
-          <select id="urls" class="select"></select>
-        </span>
+      <div class="section navigator-option-group">
+        <label for="txtUrl" class="navigator-label">URL:</label>
+        <input id="txtUrl" type="text" class="text-input sandbox-input-full" />
       </div>
-      <div class="section">
-        <span>URL:<input id="txtUrl" type="text" class="text-input" /></span>
+      <div id="section-layer-id" class="section sandbox-section-spacing" style="display: none">
+        <label for="txtLayerId" class="sandbox-label-block">Layer ID:</label>
+        <input id="txtLayerId" type="text" class="text-input sandbox-input-full" />
       </div>
-      <div id="section-layer-id" class="section" style="display: none;">
-        <span>Layer id:<input id="txtLayerId" type="text" class="text-input" /></span>
+      <div class="section sandbox-section-spacing">
+        <button id="btnInitialize" type="button" class="btn btn-primary">Initialize</button>
       </div>
-      <div class="section">
-        <input id="btnInitialize" type="button" value="Initialize" />
+      <div class="section sandbox-info-box">
+        <p id="txtProcessInfoVector" class="sandbox-info-text">
+          <strong>ℹ️ Note:</strong> When working with a vector layer, some source information is only retrieved when the layer is actually added on a map, as to not download the features twice (once in the config processing and once when the layer is added to a map).
+        </p>
       </div>
-      <br />
-      <div class="section">
-        <span id="txtProcessInfoVector" class="text-info">When working with a vector layer, some source information is only retrieved when the layer is actually added on a map, as to not download the features twice (once in the config processing and once when the layer is added to a map)</span>
+      <div class="section sandbox-min-height">
+        <span id="txtError" class="text-error sandbox-error-text"></span>
       </div>
-      <div class="section">
-        <span id="txtError" class="text-error"></span>
-      </div>
-      <div class="section result">
+      <div class="section result sandbox-section-spacing">
         <div id="loadingOverlayInit" class="loading-overlay"><img src="https://discuss.wxpython.org/uploads/default/original/2X/6/6d0ec30d8b8f77ab999f765edd8866e8a97d59a3.gif" /></div>
-        <textarea id="textResultInit" name="textResultInit"></textarea>
+        <textarea id="textResultInit" name="textResultInit" class="sandbox-textarea"></textarea>
       </div>
-      <br />
-      <div class="section">
-        <span>Layers:<input id="txtLayers" type="text" class="text-input" /></span>
+    </div>
+
+    <div class="demo-section">
+      <h4>Process Layers</h4>
+      <div class="section sandbox-section-spacing">
+        <label for="txtLayers" class="sandbox-label-block">Layers:</label>
+        <input id="txtLayers" type="text" class="text-input sandbox-input-full" />
       </div>
-      <div class="section">
-        <input id="btnProcess" type="button" value="Process" />
+      <div class="section sandbox-section-spacing">
+        <button id="btnProcess" type="button" class="btn btn-success">Process</button>
       </div>
-      <div class="section result">
+      <div class="section result sandbox-section-spacing">
         <div id="loadingOverlayProcess" class="loading-overlay"><img src="https://discuss.wxpython.org/uploads/default/original/2X/6/6d0ec30d8b8f77ab999f765edd8866e8a97d59a3.gif" /></div>
-        <textarea id="textResultProcess" name="textResultProcess"></textarea>
+        <textarea id="textResultProcess" name="textResultProcess" class="sandbox-textarea"></textarea>
       </div>
     </div>
   </div>

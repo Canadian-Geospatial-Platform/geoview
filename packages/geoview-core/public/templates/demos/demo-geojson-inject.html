@@ -14,56 +14,50 @@
   </head>
 
   <body>
-    <div class="header-table">
-      <table>
-        <tbody>
-          <tr>
-            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
-            <td class="header-title">
-              <h1><strong>Empty GeoJSON Layer</strong></h1>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td><a href="./index.html">Main</a><br /></td>
-          </tr>
-          <tr>
-            <td>
-              <p>This page is used to show injecting geojson features into an existing layers</p>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="page-header">
+      <img class="header-logo" alt="logo" src="./img/Logo.png" />
+      <div class="page-header-titles">
+        <h1 class="index-header-title"><strong>Plateforme Géospatiale Canadienne (PGC) - Projet GeoView -</strong></h1>
+      <h1 class="index-header-title"><strong>Canadian Geospatial Platform (CGP) - GeoView Project -</strong></h1>
+      </div>
     </div>
-
-    <div
-      id="map1"
-      class="geoview-map"
-      data-lang="en"
-      data-config-url="./configs/geojson-inject.json"
-    ></div>
+    <hr />
     <hr />
     <div>
-      <h3>API Functions:</h3>
-      <ul>
+
+      <div class="back-to-main">
+        <a href="./index.html?tab=specific-demos">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>Empty GeoJSON Layer Demo</h4>
+        <p>This page demonstrates injecting GeoJSON features into existing layers</p>
+      </div>
+    </div>
+
+    <div id="map1" class="geoview-map" data-lang="en" data-config-url="./configs/geojson-inject.json"></div>
+
+    <div class="demo-section">
+      <h4>API Functions:</h4>
+      <ul class="demo-function-list">
         <li>
-          <button id="Add-points1">Place points set 1</button><br />
-          cgpv.api.getMapViewer('map1').layer.setGeojsonSource('geojsonLYR1/blank.json', points1);
+          <button class="btn btn-primary" id="Add-points1">Place points set 1</button><br />
+          <code>cgpv.api.getMapViewer('map1').layer.setGeojsonSource('geojsonLYR1/blank.json', points1);</code>
         </li>
         <li>
-          <button id="Add-points2">Place points set 2</button><br />
-          cgpv.api.getMapViewer('map1').layer.setGeojsonSource('geojsonLYR1/blank.json', points2);
+          <button class="btn btn-primary" id="Add-points2">Place points set 2</button><br />
+          <code>cgpv.api.getMapViewer('map1').layer.setGeojsonSource('geojsonLYR1/blank.json', points2);</code>
         </li>
         <li>
-          <button id="Add-points3">Place points set 3</button><br />
-          cgpv.api.getMapViewer('map1').layer.setGeojsonSource('geojsonLYR1/blank.json', points3);
+          <button class="btn btn-primary" id="Add-points3">Place points set 3</button><br />
+          <code>cgpv.api.getMapViewer('map1').layer.setGeojsonSource('geojsonLYR1/blank.json', points3);</code>
         </li>
         <li>
-          <button id="Replace-outfields">Replace feature outfields</button><br />
-          cgpv.api.getMapViewer('map1').layer.replaceFeatureOutfields('geojsonLYR1/blank.json', ['string', 'string', 'string'], ['program', 'title_en', 'project_id'], ['Program', 'Title', 'ID']);
+          <button class="btn btn-primary" id="Replace-outfields">Replace feature outfields</button><br />
+          <code
+            >cgpv.api.getMapViewer('map1').layer.replaceFeatureOutfields('geojsonLYR1/blank.json', ['string', 'string', 'string'],
+            ['program', 'title_en', 'project_id'], ['Program', 'Title', 'ID']);</code
+          >
         </li>
       </ul>
     </div>
@@ -85,7 +79,8 @@
               program: 'GEP',
               project_id:
                 '1 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
-              title_en: '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              title_en:
+                '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
               project_leader:
                 '3 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
               geo_scope: '????',
@@ -101,7 +96,8 @@
               program: 'GGN',
               project_id:
                 '1 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
-              title_en: '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              title_en:
+                '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
               project_leader:
                 '3 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
               geo_scope: '????',
@@ -117,7 +113,8 @@
               program: 'GGP',
               project_id:
                 '1 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
-              title_en: '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              title_en:
+                '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
               project_leader:
                 '3 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
               geo_scope: '????',
@@ -159,7 +156,8 @@
               program: 'CMGD',
               project_id:
                 '1 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
-              title_en: '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              title_en:
+                '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
               project_leader:
                 '3 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
               geo_scope: '????',
@@ -175,7 +173,8 @@
               program: 'EGP',
               project_id:
                 '1 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
-              title_en: '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              title_en:
+                '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
               project_leader:
                 '3 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
               geo_scope: '????',
@@ -191,7 +190,8 @@
               program: 'EGP2024',
               project_id:
                 '1 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
-              title_en: '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              title_en:
+                '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
               project_leader:
                 '3 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
               geo_scope: '????',
@@ -213,7 +213,14 @@
 
       // add an event listener when a button is clicked
       replaceFieldsButton.addEventListener('click', () => {
-        cgpv.api.getMapViewer('map1').layer.replaceFeatureOutfields('geojsonLYR1/blank.json', ['string', 'string', 'string'], ['program', 'title_en', 'project_id'], ['Program', 'Title', 'ID']);
+        cgpv.api
+          .getMapViewer('map1')
+          .layer.replaceFeatureOutfields(
+            'geojsonLYR1/blank.json',
+            ['string', 'string', 'string'],
+            ['program', 'title_en', 'project_id'],
+            ['Program', 'Title', 'ID']
+          );
       });
     </script>
   </body>

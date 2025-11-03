@@ -98,26 +98,26 @@
   </head>
 
   <body>
-    <div class="header-table">
-      <table>
-        <tbody>
-          <tr>
-            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
-            <td class="header-title">
-              <h1><strong>Functional Testing</strong></h1>
-            </td>
-          </tr>
-          <tr>
-            <td><a href="./index.html">Main</a><br /></td>
-          </tr>
-        </tbody>
-      </table>
+    <div>
+      <div class="page-header">
+      <img class="header-logo" alt="logo" src="./img/Logo.png" />
+      <div class="page-header-titles">
+        <h1 class="index-header-title"><strong>Plateforme Géospatiale Canadienne (PGC) - Projet GeoView -</strong></h1>
+        <h1 class="index-header-title"><strong>Canadian Geospatial Platform (CGP) - GeoView Project -</strong></h1>
+      </div>
+    </div>
+      <hr />
+      <hr />
+
+      <div class="back-to-main">
+        <a href="./index.html?tab=testing">← Back to Main</a>
+      </div>
     </div>
 
     <!-- Tabs Navigation -->
     <div class="tabs">
-      <button class="tab-button" onclick="openTab(event, 'run-all')">Run All Tests</button>
-      <button class="tab-button active" onclick="openTab(event, 'map1')">Map 1 (EPSG: 3978)</button>
+      <button class="tab-button active" onclick="openTab(event, 'run-all')">Run All Tests</button>
+      <button class="tab-button" onclick="openTab(event, 'map1')">Map 1 (EPSG: 3978)</button>
       <button class="tab-button" onclick="openTab(event, 'map2')">Map 2 (EPSG: 3978)</button>
       <button class="tab-button" onclick="openTab(event, 'map3')">Map 3 (EPSG: 3857)</button>
       <button class="tab-button" onclick="openTab(event, 'map4')">Map 4 (EPSG: 3978)</button>
@@ -125,7 +125,7 @@
     </div>
 
     <!-- Run All Tests Tab -->
-    <div id="run-all" class="tab-content">
+    <div id="run-all" class="tab-content active">
       <h3>Overall Test Summary</h3>
       <div style="text-align: right">
         <span id="allSuitesCheck"></span>
@@ -190,7 +190,7 @@
     </div>
 
     <!-- Map 1 Tab -->
-    <div id="map1" class="tab-content active">
+    <div id="map1" class="tab-content">
       <!-- REGION MAP 1 -->
       <div class="map-title-holder">
         <h4 id="HEVNT1">1. Tests on map 1 (EPSG: 3978)</h4>

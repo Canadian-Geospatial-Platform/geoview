@@ -10,9 +10,13 @@
 
   <body>
     <div>
-      <img class="center-logo header-logo" alt="logo" src="./img/Logo.png" />
-      <h1 class="index-header-title"><strong>Plateforme Géospatiale Canadienne (PGC) - Projet GeoView -</strong></h1>
-      <h1 class="index-header-title"><strong>Canadian Geospatial Platform (CGP) - GeoView Project -</strong></h1>
+      <div class="page-header">
+        <img class="header-logo" alt="logo" src="./img/Logo.png" />
+        <div class="page-header-titles">
+          <h1 class="index-header-title"><strong>Plateforme Géospatiale Canadienne (PGC) - Projet GeoView -</strong></h1>
+          <h1 class="index-header-title"><strong>Canadian Geospatial Platform (CGP) - GeoView Project -</strong></h1>
+        </div>
+      </div>
       <hr />
       <hr />
 
@@ -100,8 +104,7 @@
           <p>Experiment with GeoView in a live sandbox environment. Test configurations, explore features, and prototype your solutions.</p>
           <ul class="demo-list">
             <li><a href="./sandbox.html">Main Sandbox</a></li>
-            <li><a href="./config-sandbox.html">Config Sandbox</a></li>
-            <li><a href="./config-sandbox2.html">Config Sandbox 2</a></li>
+            <li><a href="./config-sandbox2.html">Config Sandbox</a></li>
           </ul>
         </div>
       </div>
@@ -235,6 +238,18 @@
         document.getElementById(tabName).classList.add('active');
         evt.currentTarget.classList.add('active');
       }
+
+      // Check URL parameter to open specific tab on load
+      window.addEventListener('DOMContentLoaded', function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tab = urlParams.get('tab');
+        if (tab) {
+          const tabButton = document.querySelector(`[onclick*="${tab}"]`);
+          if (tabButton) {
+            tabButton.click();
+          }
+        }
+      });
     </script>
   </body>
 </html>

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -11,103 +11,49 @@
     <meta name="msapplication-TileColor" content="#da532c" />
     <meta name="theme-color" content="#ffffff" />
     <link rel="stylesheet" href="css/style.css" />
-    <style>
-      /* Style the tab */
-      .tab {
-        overflow: hidden;
-        border: 1px solid #ccc;
-        background-color: #f1f1f1;
-      }
-
-      /* Style the buttons inside the tab */
-      .tab button {
-        background-color: inherit;
-        float: left;
-        border: none;
-        outline: none;
-        cursor: pointer;
-        padding: 14px 16px;
-        transition: 0.3s;
-        font-size: 17px;
-      }
-
-      /* Change background color of buttons on hover */
-      .tab button:hover {
-        background-color: #ddd;
-      }
-
-      /* Create an active/current tablink class */
-      .tab button.active {
-        background-color: #ccc;
-      }
-
-      /* Style the tab content */
-      .tabcontent {
-        display: none;
-        padding: 6px 12px;
-        border: 1px solid #ccc;
-        border-top: none;
-      }
-
-      .load-test-params {
-        display: inline;
-      }
-
-      input,
-      label,
-      button {
-        margin: 5px;
-      }
-
-      #url {
-        width: 500px;
-      }
-    </style>
   </head>
 
   <body>
-    <div class="header-table">
-      <table>
-        <tbody>
-          <tr>
-            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
-            <td class="header-title">
-              <h1><strong>Load Test</strong></h1>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td><a href="./index.html">Main</a><br /></td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td>This page is used to showcase rendering time</td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="page-header">
+      <img class="header-logo" alt="logo" src="./img/Logo.png" />
+      <div class="page-header-titles">
+        <h1 class="index-header-title"><strong>Plateforme Géospatiale Canadienne (PGC) - Projet GeoView -</strong></h1>
+      <h1 class="index-header-title"><strong>Canadian Geospatial Platform (CGP) - GeoView Project -</strong></h1>
+      </div>
     </div>
-    <br />
-    <span>Add GeoJSON Features</span><br />
-    <div id="jsonFeatures" class="load-test-params">
-      <label id="featuretype">Geometry</label>
-      <select name="jsonfeaturetype" id="jsonfeaturetype">
-        <option value="jsonPoint">Point</option>
-        <option value="jsonLine">Line</option>
-        <option value="jsonPolygon">Polygon</option>
-      </select>
-      <label id="featureCntlbl">Count</label>
-      <input id="featureCnt" />
-      <button id="load-features-btn">Load Data</button><br />
+    <hr />
+    <hr />
+    <div>
+
+      <div class="back-to-main">
+        <a href="./index.html?tab=testing">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>Load Test</h4>
+        <p>This page is used to showcase rendering time</p>
+      </div>
+
+      <div class="demo-section">
+        <h4>Add GeoJSON Features</h4>
+        <div id="jsonFeatures" class="navigator-option-group navigator-selector-wrap">
+          <label for="jsonfeaturetype" class="navigator-label">Geometry:</label>
+          <select name="jsonfeaturetype" id="jsonfeaturetype" class="navigator-select">
+            <option value="jsonPoint">Point</option>
+            <option value="jsonLine">Line</option>
+            <option value="jsonPolygon">Polygon</option>
+          </select>
+          <label for="featureCnt" class="navigator-label">Count:</label>
+          <input id="featureCnt" class="sandbox-input-short" type="number" placeholder="Count" />
+          <button id="load-features-btn" class="btn btn-success">Load Data</button>
+        </div>
+        <div class="sandbox-section-spacing">
+          <div><strong>Time to render:</strong> <span id="timer">-</span></div>
+          <div><strong>Time to zoom:</strong> <span id="zoomtime">-</span></div>
+        </div>
+      </div>
     </div>
-    <br />
-    <span>Time to render: </span><span id="timer"></span><br />
-    <span>Time to zoom : </span><span id="zoomtime"></span><br />
+
     <div
       id="map1"
       class="geoview-map"
@@ -145,7 +91,7 @@
           setTimeout(() => mapViewer.map.on('movestart', () => (tzoom0 = performance.now())), 1000);
           setTimeout(
             () =>
-            mapViewer.map.on('moveend', () => {
+              mapViewer.map.on('moveend', () => {
                 var tzoom1 = performance.now();
                 document.getElementById('zoomtime').innerText = Math.round(tzoom1 - tzoom0) / 1000 + ' Seconds';
               }),

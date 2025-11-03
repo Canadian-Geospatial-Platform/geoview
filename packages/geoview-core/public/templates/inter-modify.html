@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -15,45 +15,28 @@
   </head>
 
   <body>
-    <div class="header-table">
-      <table>
-        <tbody>
-          <tr>
-            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
-            <td class="header-title">
-              <h1><strong>Modify (interactions)</strong></h1>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td>
-              <ol>
-                <a href="./index.html">Main</a>
-                <li><a href="#MODIFY1">Modify (simple case)</a></li>
-              </ol>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td>This page is used to showcase different Modify functionalities</td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="page-header">
+      <img class="header-logo" alt="logo" src="./img/Logo.png" />
+      <div class="page-header-titles">
+        <h1 class="index-header-title"><strong>Plateforme Géospatiale Canadienne (PGC) - Projet GeoView -</strong></h1>
+      <h1 class="index-header-title"><strong>Canadian Geospatial Platform (CGP) - GeoView Project -</strong></h1>
+      </div>
+    </div>
+    <hr />
+    <hr />
+    <div>
+
+      <div class="back-to-main">
+        <a href="./index.html?tab=demos">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>Modify (interactions)</h4>
+        <p>This page is used to showcase different Modify functionalities. In this example, all shapes <span style="color: red">except the red one</span> are modifiable.</p>
+      </div>
     </div>
 
     <!-- SNAP -->
-    <div class="map-title-holder">
-      <h4 id="MODIFY1">1. Modify (simple case)</h4>
-      <a class="ref-link" href="#top">Top</a>
-    </div>
-    <div>In this example, all shapes <span style="color: red">except the red one</span> are modifiable.</div>
-
     <div style="position: relative">
       <div class="logs-container">
         <div class="logs-container-title">API EVENTS LOGS</div>
@@ -80,12 +63,13 @@
             },
             'theme': 'geo.ca',
             'corePackages': []
-          }"></div>
-  </div>
-  <hr />
-  <button type="button" class="collapsible">Code Snippet</button>
-  <pre id="codeSnippet" class="panel"></pre>
-  <!-- /MODIFY -->
+          }"
+      ></div>
+    </div>
+    <hr />
+    <button type="button" class="collapsible">Code Snippet</button>
+    <pre id="codeSnippet" class="panel"></pre>
+    <!-- /MODIFY -->
 
     <script>
       let map1;

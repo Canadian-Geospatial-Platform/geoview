@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -16,58 +16,46 @@
   </head>
 
   <body>
-    <div class="header-table">
-      <table>
-        <tbody>
-          <tr>
-            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
-            <td class="header-title">
-              <h1><strong>Outlier geocore with many group layers</strong></h1>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td>
-              <a href="./index.html">Main</a><br />
-              <a href="./outliers.html">Outlier Layers</a><br />
-            </td>
-          </tr>
-          <tr>
-            <td><p>This page is used to showcase a geocore uuid with many group layers</p></td>
-          </tr>
-          </tr>
-        </tbody>
-      </table>
+    <div>
+      <div class="page-header">
+      <img class="header-logo" alt="logo" src="./img/Logo.png" />
+      <div class="page-header-titles">
+        <h1 class="index-header-title"><strong>Plateforme Géospatiale Canadienne (PGC) - Projet GeoView -</strong></h1>
+        <h1 class="index-header-title"><strong>Canadian Geospatial Platform (CGP) - GeoView Project -</strong></h1>
+      </div>
+    </div>
+      <hr />
+      <hr />
+
+      <div class="back-to-main">
+        <a href="./outliers.html">← Back to Outliers</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>Outlier GeoCore with Many Group Layers</h4>
+        <p>This page is used to showcase a geocore uuid with many group layers.</p>
+      </div>
     </div>
 
-    <div class="map-title-holder">
-      <h4 id="Hmap1">Many Group Layers</h4>
-    </div>
     <button class="collapsible active">Layers Status</button>
     <pre id="Hmap1-state" class="panel map-title-holder"></pre>
     <hr />
 
-    <select name="projections" id="projections">
+    <select name="projections" id="projections" class="navigator-select">
       <option value="3857">Web Mercator (3857)</option>
       <option value="3978">LCC (3978)</option>
     </select>
-    <button type="button" onclick="reloadMap()">Set Projection</button>
+    <button type="button" class="btn btn-primary" onclick="reloadMap()">Set Projection</button>
 
-    <div
-      id="map1"
-      class="geoview-map"
-      data-lang="en"
-      data-config-url="./configs/many-groups.json"
-    ></div>
+    <div id="map1" class="geoview-map" data-lang="en" data-config-url="./configs/many-groups.json"></div>
+    <hr />
 
-    <div>
-      Outlier Layers:
-      <ul>
+    <div class="demo-section">
+      <h4>Outlier Layers:</h4>
+      <ul class="demo-list">
         <li>
-          Huge number of group layers and layers: <a href="https://github.com/Canadian-Geospatial-Platform/geoview/issues/2642">Issue #2642</a>
+          <strong>Huge number of group layers and sub-layers</strong>
+          <a href="https://github.com/Canadian-Geospatial-Platform/geoview/issues/2642" target="_blank">Issue #2642</a>
         </li>
       </ul>
     </div>

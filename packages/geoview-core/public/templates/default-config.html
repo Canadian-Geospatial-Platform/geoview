@@ -31,51 +31,44 @@
   </head>
 
   <body>
-    <div class="header-table">
-      <table>
-        <tbody>
-          <tr>
-            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
-            <td class="header-title">
-              <h1><strong>Default Configuration</strong></h1>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td>
-              <a href="./index.html">Main</a><br />
-              <a href="#HLCONF1">1. Load from no config object</a><br />
-              <a href="#HLCONF2">2. Load with wrong JSON object</a><br />
-              <a href="#HLCONF3">3. Load with bad config values</a><br />
-              <a href="#HLCONF4">4. Load layers with bad config values</a><br />
-              <a href="#HLCONF5A">5.A Load config from URL params</a><br />
-              <a href="#HLCONF5B">5.B Load config from div params</a><br />
-              <a href="#HLCONF6">6. Load config from file</a><br />
-              <a href="#HLCONF7">7. Load config from function call</a><br />
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td>This page is used to showcase how we validate map configuration object before creating the map.</td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="page-header">
+      <img class="header-logo" alt="logo" src="./img/Logo.png" />
+      <div class="page-header-titles">
+        <h1 class="index-header-title"><strong>Plateforme Géospatiale Canadienne (PGC) - Projet GeoView -</strong></h1>
+      <h1 class="index-header-title"><strong>Canadian Geospatial Platform (CGP) - GeoView Project -</strong></h1>
+      </div>
     </div>
-    <div class="map-title-holder">
+    <hr />
+    <hr />
+    <div>
+
+      <div class="back-to-main">
+        <a href="./index.html?tab=demos">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>Default Configuration</h4>
+        <p>This page is used to showcase how we validate map configuration object before creating the map.</p>
+        <ul class="demo-list" style="display: flex; flex-direction: column">
+          <li><a href="#HLCONF1">1. Load from no config object</a></li>
+          <li><a href="#HLCONF2">2. Load with wrong JSON object</a></li>
+          <li><a href="#HLCONF3">3. Load with bad config values</a></li>
+          <li><a href="#HLCONF4">4. Load layers with bad config values</a></li>
+          <li><a href="#HLCONF5A">5.A Load config from URL params</a></li>
+          <li><a href="#HLCONF5B">5.B Load config from div params</a></li>
+          <li><a href="#HLCONF6">6. Load config from file</a></li>
+          <li><a href="#HLCONF7">7. Load config from function call</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="demo-section">
       <h4 id="HLCONF1">1. Load from no config object</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
     <div id="map1" class="geoview-map"></div>
     <p>This map will will load with default configuration because none is provided.</p>
-    <hr />
 
-    <div class="map-title-holder">
+    <div class="demo-section">
       <h4 id="HLCONF2">2. Load with wrong JSON object</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
@@ -94,9 +87,8 @@
           }"
     ></div>
     <p>This map will load with bad configuration (<strong>'center': [-100, 'x']</strong>) replaced with default.</p>
-    <hr />
 
-    <div class="map-title-holder">
+    <div class="demo-section">
       <h4 id="HLCONF3">3. Load with bad config values</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
@@ -126,10 +118,9 @@
     ></div>
     <p>This map will load with bad configuration replaced with default.</p>
     <button type="button" class="collapsible">Configuration Snippet</button>
-    <pre id="CONF3CS" class="panel"></pre>
-    <hr />
+    <pre id="map3CS" class="panel"></pre>
 
-    <div class="map-title-holder">
+    <div class="demo-section">
       <h4 id="HLCONF4">4. Load layers with bad config values</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
@@ -172,10 +163,9 @@
     ></div>
     <p>This map will not load layers with bad configuration and inform the user.</p>
     <button type="button" class="collapsible">Configuration Snippet</button>
-    <pre id="CONF4CS" class="panel"></pre>
-    <hr />
+    <pre id="map4CS" class="panel"></pre>
 
-    <div class="map-title-holder">
+    <div class="demo-section">
       <h4 id="HLCONF5A">5.A. Load config from URL params</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
@@ -185,9 +175,8 @@
       <strong>data-config</strong> attribute was also provided then the later will have its configuration overriden with config from url
       parameters.
     </p>
-    <hr />
 
-    <div class="map-title-holder">
+    <div class="demo-section">
       <h4 id="HLCONF5B">5.B. Load config from div params</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
@@ -220,17 +209,15 @@
       This map loads its configurations from the div parameters by providing a <strong>data-geocore-keys</strong> and optionally a
       <strong>data-geocore-endpoint</strong>.
     </p>
-    <hr />
 
-    <div class="map-title-holder">
+    <div class="demo-section">
       <h4 id="HLCONF6">6. Load config from file</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
     <div id="map6" class="geoview-map" data-lang="en" data-config-url="./configs/my-config.json"></div>
     <p>This map loads its configurations from a file by providing <strong>data-config-url</strong>, the map is static!</p>
-    <hr />
 
-    <div class="map-title-holder">
+    <div class="demo-section">
       <h4 id="HLCONF7">7. Load config from function call</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
@@ -270,7 +257,7 @@
                       layerId: '0',
                     },
                   ],
-                }
+                },
               ],
             },
             components: ['overview-map'],

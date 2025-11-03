@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -16,61 +16,44 @@
   </head>
 
   <body>
-    <div class="header-table">
-      <table>
-        <tbody>
-          <tr>
-            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
-            <td class="header-title">
-              <h1><strong>Draw (interactions)</strong></h1>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td>
-              <ol>
-                <a href="./index.html">Main</a>
-                <li><a href="#DRAW">Draw (simple case)</a></li>
-              </ol>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td>This page is used to showcase different Draw functionalities</td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="page-header">
+      <img class="header-logo" alt="logo" src="./img/Logo.png" />
+      <div class="page-header-titles">
+        <h1 class="index-header-title"><strong>Plateforme Géospatiale Canadienne (PGC) - Projet GeoView -</strong></h1>
+      <h1 class="index-header-title"><strong>Canadian Geospatial Platform (CGP) - GeoView Project -</strong></h1>
+      </div>
+    </div>
+    <hr />
+    <hr />
+    <div>
+
+      <div class="back-to-main">
+        <a href="./index.html?tab=demos">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>Draw (interactions)</h4>
+        <p>This page is used to showcase different Draw functionalities. In this example, select a shape to draw and start drawing.</p>
+      </div>
     </div>
 
     <!-- SELECT -->
-    <div class="map-title-holder">
-      <h4 id="SELECT1">1. Draw (simple case)</h4>
-      <a class="ref-link" href="#top">Top</a>
-    </div>
-    <div>In this example, select a shape to draw and start drawing.</div>
-
     <div class="draw-menu" style="text-align: center">
       <div id="drawGroup">
         <div class="draw-menu-item">
           <span>Select shape:</span>
-          <select name="Draw switcher" id="switchDraw1" onchange="selDrawChanged1('drawGroup');">
+          <select class="form-select" name="Draw switcher" id="switchDraw1" onchange="selDrawChanged1('drawGroup');">
             <option value="None" selected>None</option>
             <option value="Point">Points</option>
             <option value="LineString">Lines</option>
             <option value="Circle">Circles</option>
             <option value="Polygon">Polygons</option>
           </select>
-          <button onclick="btnDrawStop1('switchDraw1')">Stop drawing</button>
+          <button class="btn btn-primary" onclick="btnDrawStop1('switchDraw1')">Stop drawing</button>
         </div>
 
         <div class="draw-menu-item">
-          <button onclick="btnClearGroup1('drawGroup')">Clear</button>
+          <button class="btn btn-primary" onclick="btnClearGroup1('drawGroup')">Clear</button>
         </div>
       </div>
     </div>
@@ -101,11 +84,12 @@
             },
             'theme': 'geo.ca',
             'corePackages': []
-          }"></div>
-  </div>
-  <hr />
-  <button type="button" class="collapsible">Code Snippet</button>
-  <pre id="codeSnippet" class="panel"></pre>
+          }"
+      ></div>
+    </div>
+    <hr />
+    <button type="button" class="collapsible">Code Snippet</button>
+    <pre id="codeSnippet" class="panel"></pre>
 
     <script>
       let map1;

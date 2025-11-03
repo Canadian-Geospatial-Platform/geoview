@@ -11,86 +11,39 @@
     <meta name="msapplication-TileColor" content="#da532c" />
     <meta name="theme-color" content="#ffffff" />
     <link rel="stylesheet" href="css/style.css" />
-    <style>
-      li.source-link {
-        cursor: pointer;
-        color: #6082b6;
-      }
-
-      .sourceLinkCopied {
-        position: fixed;
-        top: 6px;
-        right: 6px;
-        background-color: darkblue;
-        color: white;
-        padding: 16px;
-        font-size: 16px;
-        min-width: 150px;
-        text-align: center;
-        border-radius: 5px;
-        z-index: 1;
-      }
-
-      .container {
-        display: flex;
-        flex-direction: row;
-        gap: 20px;
-      }
-
-      .selector {
-        display: flex;
-        flex-direction: column;
-        width: 400px;
-      }
-
-      table.display-fields,
-      th.display-fields,
-      td.display-fields {
-        border: 1px solid black;
-        border-collapse: collapse;
-      }
-    </style>
   </head>
 
   <body>
-    <div class="header-table">
-      <table>
-        <tbody>
-          <tr>
-            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
-            <td class="header-title">
-              <h1><strong>Important Layers Test Panel</strong></h1>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <a href="./index.html">Main</a><br />
-              <a href="#HUC1">Drop-down Zone</a><br />
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td>
-              This page allows you to load different geospatial layers depending on the service selected in the drop-down lists below the
-              map.
-            </td>
-          </tr>
-        </tbody>
-      </table>
+       <div class="page-header">
+      <img class="header-logo" alt="logo" src="./img/Logo.png" />
+      <div class="page-header-titles">
+        <h1 class="index-header-title"><strong>Plateforme Géospatiale Canadienne (PGC) - Projet GeoView -</strong></h1>
+      <h1 class="index-header-title"><strong>Canadian Geospatial Platform (CGP) - GeoView Project -</strong></h1>
+      </div>
+    </div>
+    <hr />
+    <hr />
+    <div>
+
+      <div class="back-to-main back-to-main-flex">
+        <a href="./index.html?tab=testing" class="btn btn-primary">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>Test Important Layers</h4>
+      </div>
     </div>
 
-    <div class="map-title-holder">
-      <h4>1. Selected Maps</h4>
-    </div>
 
-    <select name="projections" id="projections">
-      <option value="3857">Web Mercator (3857)</option>
-      <option value="3978">LCC (3978)</option>
-    </select>
-    <button type="button" onclick="reloadMap()">Set Projection</button>
+      <div class="navigator-option-group">
+        <label for="projections" class="navigator-label">Projection:</label>
+        <select name="projections" id="projections" class="navigator-select">
+          <option value="3857">Web Mercator (3857)</option>
+          <option value="3978">LCC (3978)</option>
+        </select>
+        <button type="button" class="btn btn-primary" onclick="reloadMap()">Set Projection</button>
+      </div>
+    </div>
 
     <button class="collapsible active">Layers Status</button>
     <pre id="mapWM-state" class="panel map-title-holder"></pre>
@@ -128,47 +81,46 @@
         }
       }"
     ></div>
-    <h4 id="HUC1">Drop-down Selectors</h4>
-    <div style="font-size: smaller">
-      <div class="container">
-        <div class="selector">
-          <div>Group Selector</div>
-          <select id="selectGroup">
+    
+    <div class="demo-section">
+      <h4 id="HUC1">Drop-down Selectors</h4>
+      <div class="navigator-selector-wrap">
+        <div class="demo-important-selector">
+          <label class="navigator-label">Group Selector</label>
+          <select id="selectGroup" class="navigator-select">
             <option value="dataTeam">Data Team</option>
             <option value="OSDP">OSDP</option>
           </select>
         </div>
-        <div class="selector">
-          <div>Sub Group Selector</div>
-          <select id="selectSubGroup"></select>
+        <div class="demo-important-selector">
+          <label class="navigator-label">Sub Group Selector</label>
+          <select id="selectSubGroup" class="navigator-select"></select>
         </div>
-        <div class="selector">
-          <div>Service Selector</div>
-          <select id="selectService"></select>
+        <div class="demo-important-selector">
+          <label class="navigator-label">Service Selector</label>
+          <select id="selectService" class="navigator-select"></select>
         </div>
-        <div class="selector">
-          <div>&nbsp;</div>
-          <button type="button" style="width: 100px" onclick="addLayer()">Add layer</button>
+        <div class="demo-important-selector">
+          <label class="navigator-label">&nbsp;</label>
+          <button type="button" class="btn btn-success" onclick="addLayer()">Add layer</button>
         </div>
       </div>
-      <br />
       <div>
-        <table class="display-fields" style="width: 1400px">
+        <table class="display-fields">
           <tr>
-            <td class="display-fields" style="width: 10%">Type</td>
+            <td class="display-fields">Type</td>
             <td class="display-fields" id="type-field"></td>
           </tr>
           <tr>
-            <td class="display-fields" style="width: 10%">Access Path</td>
+            <td class="display-fields">Access Path</td>
             <td class="display-fields" id="access-path-field"></td>
           </tr>
           <tr>
-            <td class="display-fields" style="width: 10%">Layer Id</td>
+            <td class="display-fields">Layer Id</td>
             <td class="display-fields" id="layer-id-field"></td>
           </tr>
         </table>
       </div>
-      <br />
     </div>
     <hr />
     <button type="button" class="collapsible">Configuration Snippet</button>

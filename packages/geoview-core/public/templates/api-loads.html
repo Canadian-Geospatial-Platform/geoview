@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -14,36 +14,27 @@
   </head>
 
   <body>
-    <div class="header-table">
-      <table>
-        <tbody>
-          <tr>
-            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
-            <td class="header-title">
-              <h1><strong>API Loads</strong></h1>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <a href="./index.html">Main</a><br />
-              <a href="#HLNG1">1. Load from URL keys</a><br />
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td>This page is used to showcase how we can add geometries and layers from an API call.</td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="page-header">
+      <img class="header-logo" alt="logo" src="./img/Logo.png" />
+      <div class="page-header-titles">
+        <h1 class="index-header-title"><strong>Plateforme Géospatiale Canadienne (PGC) - Projet GeoView -</strong></h1>
+      <h1 class="index-header-title"><strong>Canadian Geospatial Platform (CGP) - GeoView Project -</strong></h1>
+      </div>
+    </div>
+    <hr />
+    <hr />
+    <div>
+
+      <div class="back-to-main">
+        <a href="./index.html?tab=demos">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>API Loads</h4>
+        <p>This page is used to showcase how we can add geometries and layers from an API call.</p>
+      </div>
     </div>
 
-    <div class="map-title-holder">
-      <h4 id="HLNG1">1. Load from URL keys</h4>
-      <a class="ref-link" href="#top">Top</a>
-    </div>
     <div
       id="map1"
       class="geoview-map"
@@ -64,15 +55,14 @@
           'components': [],
           'corePackages': [],
           'theme': 'geo.ca'
-        }"></div>
+        }"
+    ></div>
 
     <p>This map will call pygeoapi API to gather the geometry from id provided by URL geoms parameter and load them on the map.</p>
     <p>
       div configuration: <strong>data-geometry-endpoint</strong> =
       "https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev/collections/canadian-geospatial-platform/items/"
     </p>
-    <button type="button" class="collapsible">Configuration Snippet</button>
-    <pre id="LNG1CS" class="panel"></pre>
     <script src="codedoc.js"></script>
     <script>
       // initialize cgpv

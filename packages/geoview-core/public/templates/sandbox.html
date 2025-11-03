@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -8,104 +8,32 @@
     <meta name="msapplication-TileColor" content="#da532c" />
     <meta name="msapplication-config" content="./img/browserconfig.xml" />
     <meta name="theme-color" content="#ffffff" />
-    <meta name="msapplication-TileColor" content="#da532c" />
-    <meta name="theme-color" content="#ffffff" />
-    <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
     <link rel="stylesheet" href="css/style.css" />
-
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>
-    <%= htmlWebpackPlugin.options.title %>
-  </title>
-  <link rel="shortcut icon" href="./favicon.ico" />
-  <meta name="msapplication-TileColor" content="#da532c" />
-  <meta name="msapplication-config" content="./img/browserconfig.xml" />
-  <meta name="theme-color" content="#ffffff" />
-  <meta name="msapplication-TileColor" content="#da532c" />
-  <meta name="theme-color" content="#ffffff" />
-  <link rel="stylesheet" href="css/style.css" />
-    <style>
-      .editor {
-        display: inline-flex;
-        gap: 10px;
-        font-family: monospace;
-        line-height: 21px;
-        background: #282a3a;
-        border-radius: 2px;
-        padding: 20px 10px;
-        height: 600px;
-        overflow-y: auto;
-      }
-
-      .line-numbers {
-        width: 20px;
-        text-align: right;
-        height: 9999px;
-      }
-
-      .line-numbers span {
-        counter-increment: linenumber;
-      }
-
-      .line-numbers span::before {
-        content: counter(linenumber);
-        display: block;
-        color: #506882;
-      }
-
-      textarea {
-        height: 99999px;
-        line-height: 21px;
-        overflow-y: hidden;
-        padding: 0;
-        border: 0;
-        background: #282a3a;
-        color: #fff;
-        min-width: 500px;
-        outline: none;
-        resize: none;
-      }
-
-      .selector-container {
-        display: flex;
-        margin: 5px;
-      }
-
-      .selector {
-        padding: 15px;
-      }
-    </style>
   </head>
 
   <body>
-    <div class="header-table">
-      <table>
-        <tbody>
-          <tr>
-            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
-            <td class="header-title">
-              <h1><strong>Sandbox</strong></h1>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td><a href="./index.html">Main</a><br /></td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td>This page is used to test map configuration.</td>
-          </tr>
-        </tbody>
-      </table>
+    <div>
+      <div class="page-header">
+      <img class="header-logo" alt="logo" src="./img/Logo.png" />
+      <div class="page-header-titles">
+        <h1 class="index-header-title"><strong>Plateforme Géospatiale Canadienne (PGC) - Projet GeoView -</strong></h1>
+        <h1 class="index-header-title"><strong>Canadian Geospatial Platform (CGP) - GeoView Project -</strong></h1>
+      </div>
+    </div>
+      <hr />
+      <hr />
+
+      <div class="back-to-main">
+        <a href="../index.html?tab=sandbox">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>Interactive Sandbox</h4>
+        <p>
+          Experiment with GeoView in a live sandbox environment. Test configurations, explore features, and prototype your solutions. Edit
+          the JSON configuration below and click "Reload" to see your changes.
+        </p>
+      </div>
     </div>
     <div class="editor">
       <div class="line-numbers">
@@ -204,42 +132,42 @@
 }
       </textarea>
     </div>
-    <div>
-      <button id="validateConfig" style="margin: 10px">Validate</button>
-      <button id="createMap" style="margin: 10px">Create Map</button>
-      <button id="deleteMap" style="margin: 10px">Delete map</button>
-      <span id="validationMessage" style="margin: 10px">File not validate...</span>
+
+    <div class="navigator-toolbar">
+      <button id="validateConfig" class="btn btn-success btn-large">Validate</button>
+      <button id="createMap" class="btn btn-primary btn-large">Create Map</button>
+      <button id="deleteMap" class="btn btn-danger btn-large">Delete Map</button>
+      <span id="validationMessage" class="sandbox-validation-msg">File not validated...</span>
     </div>
 
-    <div>Create Map with custom size</div>
-    <div class="selector-container">
-      <p>Map Width:</p>
-      <div class="selector">
-        <input type="text" placeholder="Width of the map" id="mapWidth" />
-      </div>
-      <p>Map height:</p>
-      <div class="selector">
-        <input type="text" placeholder="Height of the map" id="mapHeight" />
-      </div>
-
-      <div class="selector">
-        <button type="button" id="applyMapSize" disabled>Apply Size</button>
+    <div class="demo-section">
+      <h4>Custom Map Size</h4>
+      <div class="selector-container navigator-selector-wrap">
+        <div class="navigator-option-group">
+          <label for="mapWidth" class="navigator-label">Width:</label>
+          <input type="text" placeholder="Width (px)" id="mapWidth" class="sandbox-input-short" />
+        </div>
+        <div class="navigator-option-group">
+          <label for="mapHeight" class="navigator-label">Height:</label>
+          <input type="text" placeholder="Height (px)" id="mapHeight" class="sandbox-input-short" />
+        </div>
+        <button type="button" id="applyMapSize" disabled class="btn btn-primary">Apply Size</button>
       </div>
     </div>
-    <div class="map-title-holder">
-      <h4 id="HLCONF1">Sanbox Map</h4>
-      <a class="ref-link" href="#top">Top</a>
+
+    <div class="demo-section">
+      <h4 id="HLCONF1">Sandbox Map</h4>
     </div>
     <button type="button" class="collapsible">Layers Status</button>
     <pre id="sandboxMap-state" class="panel map-title-holder"></pre>
-    <div id="mapSection">
+
+    <div id="mapSection" class="navigator-map-section">
       <div id="map1"></div>
     </div>
-    <p>This map loads its configurations from the text area.</p>
-    <hr />
 
-    <button type="button" class="collapsible">Code Snippet</button>
-    <pre id="codeSnippet" class="panel"></pre>
+    <div class="demo-section">
+      <p><em>This map loads its configuration from the text area above.</em></p>
+    </div>
 
     <script src="codedoc.js"></script>
     <script>
@@ -256,8 +184,9 @@
         try {
           // get config and test if JSON is valid
           const configArea = document.getElementById('configGeoview');
-          const regexExp = /(?<!\\)'/g
-          const configJSON = JSON.parse(configArea.value.replace(/\\/g, '\\\\'));
+          const regexExp = /(?<!\\)'/g;
+          // Replace single quotes with double quotes
+          const configJSON = JSON.parse(configArea.value.replace(regexExp, '"'));
 
           const validConfig = cgpv.api.config.validateMapConfig(configJSON, 'en');
 
@@ -301,13 +230,14 @@
 
         document.getElementById('mapSection').appendChild(newDiv);
 
-        // Regex expression to cature all single quotes (') except those preceded by a backslash (\)
-        const regexExp = /(?<!\\)'/g
+        // Regex expression to capture all single quotes (') except those preceded by a backslash (\)
+        const regexExp = /(?<!\\)'/g;
 
         // create map
         try {
           const configArea = document.getElementById('configGeoview');
-          const mapViewer = await cgpv.api.createMapFromConfig('map1', configArea.value.replace(/\\/g, '\\\\'));
+          // Replace single quotes with double quotes to make valid JSON
+          const mapViewer = await cgpv.api.createMapFromConfig('map1', configArea.value.replace(regexExp, '"'));
           listenToLegendLayerSetChanges('sandboxMap-state', mapViewer);
         } catch (error) {
           console.error('Failed to create map from config', error);
@@ -385,101 +315,111 @@
       });
 
       // Create default map==========================================================================================================
-      cgpv.api.createMapFromConfig('map1', JSON.stringify({
-              'map': {
-                'interaction': 'dynamic',
-                'viewSettings': {
-                  'projection': 3978
-                },
-                'basemapOptions': {
-                  'basemapId': 'transport',
-                  'shaded': false,
-                  'labeled': true
-                },
-                'listOfGeoviewLayerConfig': [{
-                  'geoviewLayerId':'airborne_radioactivity',
-                  'geoviewLayerName':'Airborne Radioactivity',
-                  'metadataAccessPath':'https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_en/MapServer',
-                  'geoviewLayerType':'esriDynamic',
-                  'listOfLayerEntryConfig': [
+      cgpv.api
+        .createMapFromConfig(
+          'map1',
+          JSON.stringify({
+            map: {
+              interaction: 'dynamic',
+              viewSettings: {
+                projection: 3978,
+              },
+              basemapOptions: {
+                basemapId: 'transport',
+                shaded: false,
+                labeled: true,
+              },
+              listOfGeoviewLayerConfig: [
+                {
+                  geoviewLayerId: 'airborne_radioactivity',
+                  geoviewLayerName: 'Airborne Radioactivity',
+                  metadataAccessPath:
+                    'https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_en/MapServer',
+                  geoviewLayerType: 'esriDynamic',
+                  listOfLayerEntryConfig: [
                     {
-                        'layerId':'0'
-                    }
-                  ]
-              }]
-              },
-              'components': ['overview-map'],
-              'footerBar': {
-                'tabs': {
-                  'core': ['legend', 'layers', 'details', 'data-table', 'geochart']
-                }
-              },
-              'corePackages': [],
-              'corePackagesConfig':[
-                  {
-                    'geochart': { 'charts': [
-                        {
-                          'layers':[{
-                              'layerId':'airborne_radioactivity/0/2',
-                              'propertyValue': 'OBJECTID',
-                              'propertyDisplay': 'Location_Emplacement'
-                          }],
-                          'chart': 'line',
-                          'query': {
-                              'type': 'esriRegular',
-                              'url': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_en/MapServer/3',
-                              'queryOptions': {
-                                'whereClauses': [
-                                    {
-                                      'field': 'Location_Emplacement',
-                                      'prefix': '\u0027',
-                                      'valueFrom': 'Location_Emplacement',
-                                      'suffix': '\u0027'
-                                    }
-                                ],
-                                'orderByField': 'CollectionStart_DebutPrelevement'
-                              }
-                          },
-                          'geochart': {
-                              'xAxis': {
-                                'type': 'time',
-                                'property': 'CollectionStart_DebutPrelevement',
-                                'label': 'Collected date'
-                              },
-                              'yAxis': {
-                                'type': 'linear',
-                                'property': 'Activity_Activite_mBqm3',
-                                'label': 'Activity (mBqm3)',
-                                'tooltipSuffix': 'mBqm3'
-                              },
-                              'borderWidth': 1
-                          },
-                          'category': {
-                              'property': 'Radionuclide_Radionucleide',
-                              'usePalette': false
-                          },
-                          'ui': {
-                              'xSlider': {
-                                'display': true
-                              },
-                              'ySlider': {
-                                'display': true
-                              },
-                              'stepsSwitcher': true,
-                              'description': 'This is a description text',
-                              'download': true
-                          }
-                        }
-                    ]}
-                  }
+                      layerId: '0',
+                    },
+                  ],
+                },
               ],
-              'theme': 'geo.ca'
-        })
-      )
-      .then(() => listenToLegendLayerSetChanges('sandboxMap-state', cgpv.api.getMapViewer('map1')))
-      .catch((error) => {
-        console.error('Failed to create map from config', error);
-      });
+            },
+            components: ['overview-map'],
+            footerBar: {
+              tabs: {
+                core: ['legend', 'layers', 'details', 'data-table', 'geochart'],
+              },
+            },
+            corePackages: [],
+            corePackagesConfig: [
+              {
+                geochart: {
+                  charts: [
+                    {
+                      layers: [
+                        {
+                          layerId: 'airborne_radioactivity/0/2',
+                          propertyValue: 'OBJECTID',
+                          propertyDisplay: 'Location_Emplacement',
+                        },
+                      ],
+                      chart: 'line',
+                      query: {
+                        type: 'esriRegular',
+                        url: 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_en/MapServer/3',
+                        queryOptions: {
+                          whereClauses: [
+                            {
+                              field: 'Location_Emplacement',
+                              prefix: '\u0027',
+                              valueFrom: 'Location_Emplacement',
+                              suffix: '\u0027',
+                            },
+                          ],
+                          orderByField: 'CollectionStart_DebutPrelevement',
+                        },
+                      },
+                      geochart: {
+                        xAxis: {
+                          type: 'time',
+                          property: 'CollectionStart_DebutPrelevement',
+                          label: 'Collected date',
+                        },
+                        yAxis: {
+                          type: 'linear',
+                          property: 'Activity_Activite_mBqm3',
+                          label: 'Activity (mBqm3)',
+                          tooltipSuffix: 'mBqm3',
+                        },
+                        borderWidth: 1,
+                      },
+                      category: {
+                        property: 'Radionuclide_Radionucleide',
+                        usePalette: false,
+                      },
+                      ui: {
+                        xSlider: {
+                          display: true,
+                        },
+                        ySlider: {
+                          display: true,
+                        },
+                        stepsSwitcher: true,
+                        description: 'This is a description text',
+                        download: true,
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+            theme: 'geo.ca',
+          })
+        )
+        .then(() => listenToLegendLayerSetChanges('sandboxMap-state', cgpv.api.getMapViewer('map1')))
+        .catch((error) => {
+          console.error('Failed to create map from config', error);
+        });
     </script>
   </body>
 </html>

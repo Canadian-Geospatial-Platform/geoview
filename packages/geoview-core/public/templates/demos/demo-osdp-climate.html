@@ -16,54 +16,45 @@
   </head>
 
   <body>
-    <div class="header-table">
-      <table>
-        <tbody>
-          <tr>
-            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
-            <td class="header-title">
-              <h1><strong>OSDP Climate Demo</strong></h1>
-            </td>
-          </tr>
-          <tr>
-            <td><a href="./demos.html">Main</a><br /></td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td><p>Demonstration of Open Science Data Portal - Climate in GeoView</p></td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="page-header">
+      <img class="header-logo" alt="logo" src="./img/Logo.png" />
+      <div class="page-header-titles">
+        <h1 class="index-header-title"><strong>Plateforme Géospatiale Canadienne (PGC) - Projet GeoView -</strong></h1>
+      <h1 class="index-header-title"><strong>Canadian Geospatial Platform (CGP) - GeoView Project -</strong></h1>
+      </div>
+    </div>
+    <hr />
+    <hr />
+    <div>
+
+      <div class="back-to-main">
+        <a href="./index.html?tab=specific-demos">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>OSDP Climate Demo</h4>
+        <p>Demonstration of Open Science Data Portal - Climate in GeoView</p>
+        <ul class="demo-list">
+          <li><a href="https://osdp-psdo.canada.ca/en/learn-about/climate" target="_blank">Original RAMP Climate</a></li>
+        </ul>
+      </div>
     </div>
 
-    <a href="https://osdp-psdo.canada.ca/en/learn-about/climate">Original RAMP Climate</a><br />
-
-    <div class="map-title-holder">
+    <div class="demo-section">
       <h4 id="HMap1">Climate (English)</h4>
+      <a class="ref-link" href="#top">Top</a>
     </div>
-    <button class="collapsible active">Layers Status</button>
+    <button class="btn btn-primary collapsible active">Layers Status</button>
     <pre id="HMap1-state" class="panel map-title-holder"></pre>
-    <div
-      id="Map1"
-      class="geoview-map"
-      data-lang="en"
-      data-config-url="./configs/OSDP/osdp-climate_en.json"
-    ></div>
+    <div id="Map1" class="geoview-map" data-lang="en" data-config-url="./configs/OSDP/osdp-climate_en.json"></div>
 
-    <div class="map-title-holder">
+    <div class="demo-section">
       <h4 id="HMap2">Climate (French)</h4>
+      <a class="ref-link" href="#top">Top</a>
     </div>
-    <button class="collapsible active">Layers Status</button>
+    <button class="btn btn-primary collapsible active">Layers Status</button>
     <pre id="HMap2-state" class="panel map-title-holder"></pre>
-    <div
-      id="Map2"
-      class="geoview-map"
-      data-lang="fr"
-      data-config-url="./configs/OSDP/osdp-climate_fr.json"
-    ></div>
+    <div id="Map2" class="geoview-map" data-lang="fr" data-config-url="./configs/OSDP/osdp-climate_fr.json"></div>
 
     <script src="codedoc.js"></script>
     <script>

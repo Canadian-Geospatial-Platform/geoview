@@ -1,118 +1,75 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ESRI Renderer - Canadian Geospatial Platform Viewer</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ESRI Renderer - Canadian Geospatial Platform Viewer</title>
-  <link rel="shortcut icon" href="./favicon.ico" />
-  <meta name="msapplication-TileColor" content="#da532c" />
-  <meta name="msapplication-config" content="./img/browserconfig.xml" />
-  <meta name="theme-color" content="#ffffff" />
-  <meta name="msapplication-TileColor" content="#da532c" />
-  <meta name="theme-color" content="#ffffff" />
-  <link rel="stylesheet" href="css/style.css" />
+  <body>
+    <div class="page-header">
+      <img class="header-logo" alt="logo" src="./img/Logo.png" />
+      <div class="page-header-titles">
+        <h1 class="index-header-title"><strong>Plateforme Géospatiale Canadienne (PGC) - Projet GeoView -</strong></h1>
+      <h1 class="index-header-title"><strong>Canadian Geospatial Platform (CGP) - GeoView Project -</strong></h1>
+      </div>
+    </div>
+    <hr />
+    <hr />
+    <div>
 
-  <style>
-    label {
-      font-size: 14px;
-      font-style: italic;
-    }
+      <div class="back-to-main">
+        <a href="./index.html?tab=specific-demos">← Back to Main</a>
+      </div>
 
-    #serviceUrlInput {
-      width: 700px;
-    }
+      <div class="demo-section">
+        <h4>ESRI Renderer Style Configuration Demo</h4>
+        <p>This page is used to create a valid GeoView style config from an ESRI Renderer.</p>
+      </div>
+    </div>
 
-    textarea {
-      height: 99999px;
-      line-height: 21px;
-      overflow-y: hidden;
-      padding: 0;
-      border: 0;
-      background: #282a3a;
-      color: #fff;
-      min-width: 500px;
-      outline: none;
-      resize: none;
-      overflow-x: auto;
-      white-space: nowrap;
-    }
-  </style>
-</head>
+    <div class="demo-section">
+      <h4>Configuration Options</h4>
+      <div style="margin-bottom: 15px">
+        <label for="renderer">Input ESRI Renderer examples:</label>
+        <select class="form-select" name="renderer" id="renderer" style="display: inline-block; width: auto; margin-left: 10px">
+          <option value="simple">Simple</option>
+          <option value="uniqueValue">Unique Value</option>
+          <option value="classBreak">Class Break</option>
+        </select>
+        <button class="btn btn-primary" id="executeButton" style="margin-left: 15px">Execute</button>
+      </div>
+    </div>
+    <div class="demo-section">
+      <h4>Input ESRI Renderer:</h4>
+      <div class="editor">
+        <div class="line-numbers" id="inputLineNumbers">
+          <span></span>
+        </div>
+        <textarea id="inputTextArea" cols="110"> </textarea>
+      </div>
+    </div>
 
-<body>
-  <div class="header-table">
-    <table>
-      <tbody>
-        <tr>
-          <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
-          <td class="header-title">
-            <h1><strong>ESRI Renderer Style Configuration Demo</strong></h1>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <table>
-      <tbody>
-        <tr>
-          <td><a href="./index.html">Main</a><br /></td>
-        </tr>
-      </tbody>
-    </table>
-    <table>
-      <tbody>
-        <tr>
-          <td>
-            <p>
-              This page is used to create a valid GeoView style config from an ESRI Renderer.
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <span>Input ESRI Renderer examples</span>
-            <select name="renderer" id="renderer">
-              <option value="simple">Simple</option>
-              <option value="uniqueValue">Unique Value</option>
-              <option value="classBreak">Class Break</option>
-            </select>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <button id="executeButton">Execute</button>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <span>Input ESRI Renderer:</span>
-            <div class="editor">
-              <div class="line-numbers" id="inputLineNumbers">
-                <span></span>
-              </div>
-              <textarea id="inputTextArea" cols="110">
-              </textarea>
-            </div>
-          </td>
-          <td>
-            <span>Style configuration:</span>
-            <div class="editor">
-              <div class="line-numbers" id="outputLineNumbers">
-                <span></span>
-              </div>
-              <textarea id="outputTextArea" cols="110">
-              </textarea>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <p>
-              The resulting configuration can be used to set a layer's "layerStyle" property. <br>
-              <i>Example:</i>
-              <pre>
-                <code>
-'listOfGeoviewLayerConfig': [{
+    <div class="demo-section">
+      <h4>Output Style Configuration:</h4>
+      <div class="editor">
+        <div class="line-numbers" id="outputLineNumbers">
+          <span></span>
+        </div>
+        <textarea id="outputTextArea" cols="110"> </textarea>
+      </div>
+    </div>
+    <div class="demo-section">
+      <h4>Usage Example</h4>
+      <p>The resulting configuration can be used to set a layer's "layerStyle" property.</p>
+      <pre><code>'listOfGeoviewLayerConfig': [{
   'geoviewLayerId': 'M6QU5DFK9PY3U',
   "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer",
   "geoviewLayerType": "esriFeature",
@@ -120,335 +77,278 @@
     "layerId": 0,
     "layerStyle": {<strong>OUTPUT STYLE CONFIG HERE</strong>}
   }]
-}]
-                </code>
-              </pre>
-            </p>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+}]</code></pre>
+    </div>
 
-  <script src="codedoc.js"></script>
+    <script src="codedoc.js"></script>
 
-  <script>
-    // Function used to generate line numbers in the input and output containers.
-    generateLineNumbers = (textContainerId, lineNumbersContainerId) => {
-      const textarea = document.getElementById(textContainerId);
-      const lineNumbersContainer = document.getElementById(lineNumbersContainerId);
-      const lines = textarea.value.split('\n').length + 1;
-      const lineNumbers = Array.from({ length: lines }, (_, index) => '').join('<span />');
-      lineNumbersContainer.innerHTML = lineNumbers;
-    };
+    <script>
+      // Function used to generate line numbers in the input and output containers.
+      generateLineNumbers = (textContainerId, lineNumbersContainerId) => {
+        const textarea = document.getElementById(textContainerId);
+        const lineNumbersContainer = document.getElementById(lineNumbersContainerId);
+        const lines = textarea.value.split('\n').length + 1;
+        const lineNumbers = Array.from({ length: lines }, (_, index) => '').join('<span />');
+        lineNumbersContainer.innerHTML = lineNumbers;
+      };
 
-    const initialValue = {
-      simple: {
-        "type": "simple",
-        "symbol": {
-          "type": "esriSMS",
-          "color": [
-            255,
-            130,
-            0,
-            217
-          ],
-          "angle": 0,
-          "xoffset": 0,
-          "yoffset": 0,
-          "size": 6,
-          "style": "esriSMSCircle",
-          "outline": {
-            "type": "esriSLS",
-            "color": [
-              255,
-              255,
-              255,
-              128
-            ],
-            "width": 0.998,
-            "style": "esriSLSSolid"
-          }
-        }
-      },
-      uniqueValue: {
-        "type": "uniqueValue",
-        "field1": "magnitude_codelist",
-        "field2": null,
-        "field3": null,
-        "defaultSymbol": null,
-        "defaultLabel": null,
-        "uniqueValueInfos": [
-          {
-            "symbol": {
-              "type": "esriSMS",
-              "style": "esriSMSCircle",
-              "color": [30, 0, 120, 255],
-              "size": 5,
-              "angle": 0,
-              "xoffset": 0,
-              "yoffset": 0,
-              "outline": {
-                "color": [0, 0, 0, 255],
-                "width": 1
-              }
+      const initialValue = {
+        simple: {
+          type: 'simple',
+          symbol: {
+            type: 'esriSMS',
+            color: [255, 130, 0, 217],
+            angle: 0,
+            xoffset: 0,
+            yoffset: 0,
+            size: 6,
+            style: 'esriSMSCircle',
+            outline: {
+              type: 'esriSLS',
+              color: [255, 255, 255, 128],
+              width: 0.998,
+              style: 'esriSLSSolid',
             },
-            "value": "\u003C2",
-            "label": "Magnitude less than 2",
-            "description": ""
           },
-          {
-            "symbol": {
-              "type": "esriSMS",
-              "style": "esriSMSCircle",
-              "color": [120, 0, 190, 255],
-              "size": 7,
-              "angle": 0,
-              "xoffset": 0,
-              "yoffset": 0,
-              "outline": {
-                "color": [0, 0, 0, 255],
-                "width": 1
-              }
-            },
-            "value": "2",
-            "label": "2 to \u003C3",
-            "description": ""
-          },
-          {
-            "symbol": {
-              "type": "esriSMS",
-              "style": "esriSMSCircle",
-              "color": [190, 0, 120, 255],
-              "size": 9,
-              "angle": 0,
-              "xoffset": 0,
-              "yoffset": 0,
-              "outline": {
-                "color": [0, 0, 0, 255],
-                "width": 1
-              }
-            },
-            "value": "3",
-            "label": "3 to \u003C4",
-            "description": ""
-          },
-          {
-            "symbol": {
-              "type": "esriSMS",
-              "style": "esriSMSCircle",
-              "color": [255, 0, 0, 255],
-              "size": 11,
-              "angle": 0,
-              "xoffset": 0,
-              "yoffset": 0,
-              "outline": {
-                "color": [0, 0, 0, 255],
-                "width": 1
-              }
-            },
-            "value": "4",
-            "label": "4 to \u003C5",
-            "description": ""
-          },
-          {
-            "symbol": {
-              "type": "esriPMS",
-              "url": "b8f9b8aae8e27144906b05cc6a013fd8",
-              "imageData": "iVBORw0KGgoAAAANSUhEUgAAACIAAAAfCAYAAACCox+xAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAA2VJREFUWIXNl39o1GUcx1+3W3uM0209tmBudguuLV0/RqVX80fUDKtp5s5JfyxYQaChkMQSKopZgjRBCO0HFAlSf0y04mwykAnGzKMfiDFo7vrjqHEj9ZOODvx4eeuP79du2u685Zdd73+e5/l8P5/P84Ln+XwevqX8T1TqQY4Sd8wUFcQYsxSYUNVvigoCRIAJoKggPlVtc0G2uOPMg1hrwyJS684Xi0isKCCpVGrdNfPigARUI00GzsPlYdUI0DXjINbaB0Sk7sUFkE7DxiHusNbeLyI/zihIKpWKAISrIAN+hv6xzSyIVW2fZ6ChHDIZCEJmzCnl170AsWQ7ZU4ZY+qTqqHuENxU4kRsaYCXh7XBGNOsqqcL2DsDSC6Qh4C9QFW+DKoKwMPzsrZlNZQwDKo6WADEGaAT6MsF0gfcZ2CfQgvAeguPVv87kw+oL8+uF1TAB41T7zqQhP2SXQIdQHKyz1R3JKnwOLDVwDu9gv/ZO+HpWvDnObSbS2HDwqttf2Ug+psDYeCywpvADqZ4IHNd1glgR8Dao3XI/rYY87vGYOu9MHdWbpjJOnsR3j0FPQkIweivxrSj+m0u/7xVIyIxgbub4OOeBO3HxmD3Enhwbn6I78/BhkH4QSEIX8ThBVTP54sppHzHTzpX5flz8OGiAcoONUNrzdTOX4/CquMQhDSwOQEfFbBH4X1E4FNRaoFtFf7cfpXutwS8TYEQ0wJx9RTAPTZruPLu+9xx0reVODCeg9QA4deCUFHmGP68BHt+duYv3QVzyqC8DN4KQXecZqCaa8rUC5A2wLfidmcxMg5d38FXbn8YPAM7Fzm9paUauuP4gLXA+16DRAAaKyE6Cu3HIQCZkGHbYsvso0leaejHdzAMy2+7KsZTkCpg6UoL752C7QlYZvh9KGDXxEVOxJMQNubLpoAeaotR2RWEiIUDwiPArcBZr0CeAfz9Av0CTxqih5UOVMavOMRUB1HqOi0HehLO8wD4gTXAJ16BOMdiSM8OsPGw5Ex8Ya+w4jnLpp9S7DqplLqxnoBUAo+ttvwSFZ5AiV8vYJ+wG+hfbznSK7QAFcCFGwVpNcbsioq+gdMtC9VIrxAyxmxX1Vbg8xsF6VPVz6YBMFlpVX0VuOV6joWA/PEfIaaVw4tfTk/0N13QHet8ojHFAAAAAElFTkSuQmCC",
-              "contentType": "image/png",
-              "width": 25,
-              "height": 23,
-              "angle": 0,
-              "xoffset": 0,
-              "yoffset": 0
-            },
-            "value": "5",
-            "label": "5 to \u003C6",
-            "description": ""
-          },
-          {
-            "symbol": {
-              "type": "esriPMS",
-              "url": "dd81a7bf9c022f548c8454885656bd21",
-              "imageData": "iVBORw0KGgoAAAANSUhEUgAAACcAAAAkCAYAAAAKNyObAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAABD5JREFUWIXNmH1MVXUYxz/AlR8vl7KjLQ9UYKC1rhOQTYyZBcEgyRgvTjC3NplBL+KWtaKJvdl6maswX0bmS3PDWOVGRNPRbEot19LR5p22qHZb7thWJ1+4xcPLpT/OvSAGlwscBt9/zjnP+T3f3+fe5/xeznEwg+WYboBgshuuFPjULjM74WYD7wHNQJ8dhnbCPQzoSqn7ReRLOwxtg3PpVLgNEJFSYEbBxZkmuf7zYuBJwDdZU7vgHjJk0OsWpdRyETk5WVNb4AIlTVTgERCRMmBGwMV2meQDNFRBwQ4ASoBNwMBkjO2Ae9AjRFZmQY4L7k2Edg8JmqZlmqZ5alrhAiUtTgdHBDy6AtoPgdfrLQOmFS5KhEKA9CQrsCzZOopICfDMZMyvh7sRCAPwvKGWRDgkJljy52fU0upGUZVZoN9kxRbMgzQdOgzmNz+l1WQkmb8E8+jpVX/fUStu/2U/cHU0uPuA/cCcxOdljN8FYLUpTh+KzHLAY9nwRCMU7TTrQ/UAfldKrRORE6PBfQakAoeA7BDogKGSBpSVEmrmsH7Xi8hf1wZHeuYuALlALfAS4MhP4creDcTdOscq+VhafDv4Phj53k8X6Vu7i+7TBk6sv+1ZrA3D/zTagPABrymljotI47FOkhY8h6+5hp68Raiw8FAQh6vfB0e+p2vN+zgBp1LqfGxsbLlpmj+MlhN0tIrIt0Aa0CCwpmAHamsh/2zOJyYu6FAZLvMq1B2ha087Tn/ogIhsFBFvsLxQppLLQDnQBtS/0krsV2fp2VtJ5ML4sZPP/Arle+jtNHECV4Bq4HAI/Y5rntsHfA181O4h7a6tcKoWliaPnnC0A1buBGAW8B1QAQSdWiYKB/AjcI+mME0h+oao4I1n+4uoKy4YwnKgdzydjXuFUEotMUWiM3VImRe87aIEUIAhJADxgGdK4bBeYlifY62lAXm74eR5yL4boiKtmDMa6lbBlhbA2qm8M6VwKZqUu42hNRTg5z+g6gByvBO1NoP+11cTcdtc6162C2gBTbHalCmE0zQtw22Y8XdqsFAHnw9aO+gr2k0EVgV9jaeJOHqWgaZqwnJcQ6U1hWWADhhTAuf1eksAHs+FfwXqWune3kZgWOwDXgbeNYWSvHrYtoqBjXmEvVAIL7YShvV+sXtK4FI0qXAb4BuAnDfp6zCIAi4BG4BP/M1KgSrg7S0txJw4hy8vlXAYLK39cLquu9yGMR/g6Y8Hc9uBdcBv1zVvwHqHONzWSWpbpxX0CiuAucCftsIZhlF6zWU/8CqwzX8+ks4BmUqpt0SkBkAgHCjCegTsg8M/hQAepdQjIvJNCDkiIpuAY8BB4GagzG64ZGAx0ARUicjlEPMC+sKf/yHwANZ3lUt2weUDlVi75InqIlAAbPb7NY2VECrcfqB74lyDGgC2A2OsypZChbMDbNx+M/rL5n+qSli//HCkMAAAAABJRU5ErkJggg==",
-              "contentType": "image/png",
-              "width": 29,
-              "height": 27,
-              "angle": 0,
-              "xoffset": 0,
-              "yoffset": 0
-            },
-            "value": "\u003E=6",
-            "label": "\u003E or equal to 6",
-            "description": ""
-          }
-        ],
-        "fieldDelimiter": ","
-      },
-      classBreak: {
-        "authoringInfo": {
-          "classificationMethod": "esriClassifyEqualInterval",
-          "type": "classedSize"
         },
-        "type": "classBreaks",
-        "classBreakInfos": [
-          {
-            "label": "-0.7 – 1.37",
-            "classMaxValue": 1.3749999850988388,
-            "symbol": {
-              "type": "esriSMS",
-              "color": [
-                227,
-                139,
-                79,
-                255
-              ],
-              "angle": 0,
-              "xoffset": 0,
-              "yoffset": 0,
-              "size": 1.5,
-              "style": "esriSMSCircle",
-              "outline": {
-                "type": "esriSLS",
-                "color": [
-                  255,
-                  255,
-                  255,
-                  64
-                ],
-                "width": 0.75,
-                "style": "esriSLSSolid"
-              }
-            }
+        uniqueValue: {
+          type: 'uniqueValue',
+          field1: 'magnitude_codelist',
+          field2: null,
+          field3: null,
+          defaultSymbol: null,
+          defaultLabel: null,
+          uniqueValueInfos: [
+            {
+              symbol: {
+                type: 'esriSMS',
+                style: 'esriSMSCircle',
+                color: [30, 0, 120, 255],
+                size: 5,
+                angle: 0,
+                xoffset: 0,
+                yoffset: 0,
+                outline: {
+                  color: [0, 0, 0, 255],
+                  width: 1,
+                },
+              },
+              value: '\u003C2',
+              label: 'Magnitude less than 2',
+              description: '',
+            },
+            {
+              symbol: {
+                type: 'esriSMS',
+                style: 'esriSMSCircle',
+                color: [120, 0, 190, 255],
+                size: 7,
+                angle: 0,
+                xoffset: 0,
+                yoffset: 0,
+                outline: {
+                  color: [0, 0, 0, 255],
+                  width: 1,
+                },
+              },
+              value: '2',
+              label: '2 to \u003C3',
+              description: '',
+            },
+            {
+              symbol: {
+                type: 'esriSMS',
+                style: 'esriSMSCircle',
+                color: [190, 0, 120, 255],
+                size: 9,
+                angle: 0,
+                xoffset: 0,
+                yoffset: 0,
+                outline: {
+                  color: [0, 0, 0, 255],
+                  width: 1,
+                },
+              },
+              value: '3',
+              label: '3 to \u003C4',
+              description: '',
+            },
+            {
+              symbol: {
+                type: 'esriSMS',
+                style: 'esriSMSCircle',
+                color: [255, 0, 0, 255],
+                size: 11,
+                angle: 0,
+                xoffset: 0,
+                yoffset: 0,
+                outline: {
+                  color: [0, 0, 0, 255],
+                  width: 1,
+                },
+              },
+              value: '4',
+              label: '4 to \u003C5',
+              description: '',
+            },
+            {
+              symbol: {
+                type: 'esriPMS',
+                url: 'b8f9b8aae8e27144906b05cc6a013fd8',
+                imageData:
+                  'iVBORw0KGgoAAAANSUhEUgAAACIAAAAfCAYAAACCox+xAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAA2VJREFUWIXNl39o1GUcx1+3W3uM0209tmBudguuLV0/RqVX80fUDKtp5s5JfyxYQaChkMQSKopZgjRBCO0HFAlSf0y04mwykAnGzKMfiDFo7vrjqHEj9ZOODvx4eeuP79du2u685Zdd73+e5/l8P5/P84Ln+XwevqX8T1TqQY4Sd8wUFcQYsxSYUNVvigoCRIAJoKggPlVtc0G2uOPMg1hrwyJS684Xi0isKCCpVGrdNfPigARUI00GzsPlYdUI0DXjINbaB0Sk7sUFkE7DxiHusNbeLyI/zihIKpWKAISrIAN+hv6xzSyIVW2fZ6ChHDIZCEJmzCnl170AsWQ7ZU4ZY+qTqqHuENxU4kRsaYCXh7XBGNOsqqcL2DsDSC6Qh4C9QFW+DKoKwMPzsrZlNZQwDKo6WADEGaAT6MsF0gfcZ2CfQgvAeguPVv87kw+oL8+uF1TAB41T7zqQhP2SXQIdQHKyz1R3JKnwOLDVwDu9gv/ZO+HpWvDnObSbS2HDwqttf2Ug+psDYeCywpvADqZ4IHNd1glgR8Dao3XI/rYY87vGYOu9MHdWbpjJOnsR3j0FPQkIweivxrSj+m0u/7xVIyIxgbub4OOeBO3HxmD3Enhwbn6I78/BhkH4QSEIX8ThBVTP54sppHzHTzpX5flz8OGiAcoONUNrzdTOX4/CquMQhDSwOQEfFbBH4X1E4FNRaoFtFf7cfpXutwS8TYEQ0wJx9RTAPTZruPLu+9xx0reVODCeg9QA4deCUFHmGP68BHt+duYv3QVzyqC8DN4KQXecZqCaa8rUC5A2wLfidmcxMg5d38FXbn8YPAM7Fzm9paUauuP4gLXA+16DRAAaKyE6Cu3HIQCZkGHbYsvso0leaejHdzAMy2+7KsZTkCpg6UoL752C7QlYZvh9KGDXxEVOxJMQNubLpoAeaotR2RWEiIUDwiPArcBZr0CeAfz9Av0CTxqih5UOVMavOMRUB1HqOi0HehLO8wD4gTXAJ16BOMdiSM8OsPGw5Ex8Ya+w4jnLpp9S7DqplLqxnoBUAo+ttvwSFZ5AiV8vYJ+wG+hfbznSK7QAFcCFGwVpNcbsioq+gdMtC9VIrxAyxmxX1Vbg8xsF6VPVz6YBMFlpVX0VuOV6joWA/PEfIaaVw4tfTk/0N13QHet8ojHFAAAAAElFTkSuQmCC',
+                contentType: 'image/png',
+                width: 25,
+                height: 23,
+                angle: 0,
+                xoffset: 0,
+                yoffset: 0,
+              },
+              value: '5',
+              label: '5 to \u003C6',
+              description: '',
+            },
+            {
+              symbol: {
+                type: 'esriPMS',
+                url: 'dd81a7bf9c022f548c8454885656bd21',
+                imageData:
+                  'iVBORw0KGgoAAAANSUhEUgAAACcAAAAkCAYAAAAKNyObAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAABD5JREFUWIXNmH1MVXUYxz/AlR8vl7KjLQ9UYKC1rhOQTYyZBcEgyRgvTjC3NplBL+KWtaKJvdl6maswX0bmS3PDWOVGRNPRbEot19LR5p22qHZb7thWJ1+4xcPLpT/OvSAGlwscBt9/zjnP+T3f3+fe5/xeznEwg+WYboBgshuuFPjULjM74WYD7wHNQJ8dhnbCPQzoSqn7ReRLOwxtg3PpVLgNEJFSYEbBxZkmuf7zYuBJwDdZU7vgHjJk0OsWpdRyETk5WVNb4AIlTVTgERCRMmBGwMV2meQDNFRBwQ4ASoBNwMBkjO2Ae9AjRFZmQY4L7k2Edg8JmqZlmqZ5alrhAiUtTgdHBDy6AtoPgdfrLQOmFS5KhEKA9CQrsCzZOopICfDMZMyvh7sRCAPwvKGWRDgkJljy52fU0upGUZVZoN9kxRbMgzQdOgzmNz+l1WQkmb8E8+jpVX/fUStu/2U/cHU0uPuA/cCcxOdljN8FYLUpTh+KzHLAY9nwRCMU7TTrQ/UAfldKrRORE6PBfQakAoeA7BDogKGSBpSVEmrmsH7Xi8hf1wZHeuYuALlALfAS4MhP4creDcTdOscq+VhafDv4Phj53k8X6Vu7i+7TBk6sv+1ZrA3D/zTagPABrymljotI47FOkhY8h6+5hp68Raiw8FAQh6vfB0e+p2vN+zgBp1LqfGxsbLlpmj+MlhN0tIrIt0Aa0CCwpmAHamsh/2zOJyYu6FAZLvMq1B2ha087Tn/ogIhsFBFvsLxQppLLQDnQBtS/0krsV2fp2VtJ5ML4sZPP/Arle+jtNHECV4Bq4HAI/Y5rntsHfA181O4h7a6tcKoWliaPnnC0A1buBGAW8B1QAQSdWiYKB/AjcI+mME0h+oao4I1n+4uoKy4YwnKgdzydjXuFUEotMUWiM3VImRe87aIEUIAhJADxgGdK4bBeYlifY62lAXm74eR5yL4boiKtmDMa6lbBlhbA2qm8M6VwKZqUu42hNRTg5z+g6gByvBO1NoP+11cTcdtc6162C2gBTbHalCmE0zQtw22Y8XdqsFAHnw9aO+gr2k0EVgV9jaeJOHqWgaZqwnJcQ6U1hWWADhhTAuf1eksAHs+FfwXqWune3kZgWOwDXgbeNYWSvHrYtoqBjXmEvVAIL7YShvV+sXtK4FI0qXAb4BuAnDfp6zCIAi4BG4BP/M1KgSrg7S0txJw4hy8vlXAYLK39cLquu9yGMR/g6Y8Hc9uBdcBv1zVvwHqHONzWSWpbpxX0CiuAucCftsIZhlF6zWU/8CqwzX8+ks4BmUqpt0SkBkAgHCjCegTsg8M/hQAepdQjIvJNCDkiIpuAY8BB4GagzG64ZGAx0ARUicjlEPMC+sKf/yHwANZ3lUt2weUDlVi75InqIlAAbPb7NY2VECrcfqB74lyDGgC2A2OsypZChbMDbNx+M/rL5n+qSli//HCkMAAAAABJRU5ErkJggg==',
+                contentType: 'image/png',
+                width: 29,
+                height: 27,
+                angle: 0,
+                xoffset: 0,
+                yoffset: 0,
+              },
+              value: '\u003E=6',
+              label: '\u003E or equal to 6',
+              description: '',
+            },
+          ],
+          fieldDelimiter: ',',
+        },
+        classBreak: {
+          authoringInfo: {
+            classificationMethod: 'esriClassifyEqualInterval',
+            type: 'classedSize',
           },
-          {
-            "label": "> 1.37 – 3.4",
-            "classMaxValue": 3.4499999582767487,
-            "symbol": {
-              "type": "esriSMS",
-              "color": [
-                227,
-                139,
-                79,
-                255
-              ],
-              "angle": 0,
-              "xoffset": 0,
-              "yoffset": 0,
-              "size": 4.833333333333334,
-              "style": "esriSMSCircle",
-              "outline": {
-                "type": "esriSLS",
-                "color": [
-                  255,
-                  255,
-                  255,
-                  64
-                ],
-                "width": 0.75,
-                "style": "esriSLSSolid"
-              }
-            }
-          },
-          {
-            "label": "> 3.4 – 5.5",
-            "classMaxValue": 5.5249999314546585,
-            "symbol": {
-              "type": "esriSMS",
-              "color": [
-                227,
-                139,
-                79,
-                255
-              ],
-              "angle": 0,
-              "xoffset": 0,
-              "yoffset": 0,
-              "size": 8.166666666666668,
-              "style": "esriSMSCircle",
-              "outline": {
-                "type": "esriSLS",
-                "color": [
-                  255,
-                  255,
-                  255,
-                  64
-                ],
-                "width": 0.75,
-                "style": "esriSLSSolid"
-              }
-            }
-          },
-          {
-            "label": "> 5.5 – 7.5",
-            "classMaxValue": 7.599999904632568,
-            "symbol": {
-              "type": "esriSMS",
-              "color": [
-                227,
-                139,
-                79,
-                255
-              ],
-              "angle": 0,
-              "xoffset": 0,
-              "yoffset": 0,
-              "size": 11.5,
-              "style": "esriSMSCircle",
-              "outline": {
-                "type": "esriSLS",
-                "color": [
-                  255,
-                  255,
-                  255,
-                  64
-                ],
-                "width": 0.75,
-                "style": "esriSLSSolid"
-              }
-            }
-          }
-        ],
-        "field": "magnitude",
-        "minValue": -0.699999988079071
-      }
-    }
+          type: 'classBreaks',
+          classBreakInfos: [
+            {
+              label: '-0.7 – 1.37',
+              classMaxValue: 1.3749999850988388,
+              symbol: {
+                type: 'esriSMS',
+                color: [227, 139, 79, 255],
+                angle: 0,
+                xoffset: 0,
+                yoffset: 0,
+                size: 1.5,
+                style: 'esriSMSCircle',
+                outline: {
+                  type: 'esriSLS',
+                  color: [255, 255, 255, 64],
+                  width: 0.75,
+                  style: 'esriSLSSolid',
+                },
+              },
+            },
+            {
+              label: '> 1.37 – 3.4',
+              classMaxValue: 3.4499999582767487,
+              symbol: {
+                type: 'esriSMS',
+                color: [227, 139, 79, 255],
+                angle: 0,
+                xoffset: 0,
+                yoffset: 0,
+                size: 4.833333333333334,
+                style: 'esriSMSCircle',
+                outline: {
+                  type: 'esriSLS',
+                  color: [255, 255, 255, 64],
+                  width: 0.75,
+                  style: 'esriSLSSolid',
+                },
+              },
+            },
+            {
+              label: '> 3.4 – 5.5',
+              classMaxValue: 5.5249999314546585,
+              symbol: {
+                type: 'esriSMS',
+                color: [227, 139, 79, 255],
+                angle: 0,
+                xoffset: 0,
+                yoffset: 0,
+                size: 8.166666666666668,
+                style: 'esriSMSCircle',
+                outline: {
+                  type: 'esriSLS',
+                  color: [255, 255, 255, 64],
+                  width: 0.75,
+                  style: 'esriSLSSolid',
+                },
+              },
+            },
+            {
+              label: '> 5.5 – 7.5',
+              classMaxValue: 7.599999904632568,
+              symbol: {
+                type: 'esriSMS',
+                color: [227, 139, 79, 255],
+                angle: 0,
+                xoffset: 0,
+                yoffset: 0,
+                size: 11.5,
+                style: 'esriSMSCircle',
+                outline: {
+                  type: 'esriSLS',
+                  color: [255, 255, 255, 64],
+                  width: 0.75,
+                  style: 'esriSLSSolid',
+                },
+              },
+            },
+          ],
+          field: 'magnitude',
+          minValue: -0.699999988079071,
+        },
+      };
 
-    const rendererDropdown = document.getElementById('renderer');
-    const executeButton = document.getElementById('executeButton');
-    const intputTextArea = document.getElementById('inputTextArea');
-    const outputTextArea = document.getElementById('outputTextArea');
+      const rendererDropdown = document.getElementById('renderer');
+      const executeButton = document.getElementById('executeButton');
+      const intputTextArea = document.getElementById('inputTextArea');
+      const outputTextArea = document.getElementById('outputTextArea');
 
-    inputTextArea.value = JSON.stringify(initialValue[rendererDropdown.value], undefined, 2);
-    generateLineNumbers('inputTextArea', 'inputLineNumbers');
-
-    rendererDropdown.addEventListener('change', () => {
       inputTextArea.value = JSON.stringify(initialValue[rendererDropdown.value], undefined, 2);
       generateLineNumbers('inputTextArea', 'inputLineNumbers');
-    });
 
-    executeButton.addEventListener('click', async (e) => {
-      const geoViewRenderer = cgpv.api.config.getStyleFromESRIRenderer(inputTextArea.value);
-      outputTextArea.value = JSON.stringify(geoViewRenderer, undefined, 2);
-      generateLineNumbers('outputTextArea', 'outputLineNumbers');
-    });
+      rendererDropdown.addEventListener('change', () => {
+        inputTextArea.value = JSON.stringify(initialValue[rendererDropdown.value], undefined, 2);
+        generateLineNumbers('inputTextArea', 'inputLineNumbers');
+      });
 
-    // Utility functions ========================================================================================================
+      executeButton.addEventListener('click', async (e) => {
+        const geoViewRenderer = cgpv.api.config.getStyleFromESRIRenderer(inputTextArea.value);
+        outputTextArea.value = JSON.stringify(geoViewRenderer, undefined, 2);
+        generateLineNumbers('outputTextArea', 'outputLineNumbers');
+      });
 
-    // Function used to display messages to report progression of the process.
-    printMessage = (messageObject, messageString, status) => {
-      if (status === 'error') {
-        messageObject.classList.remove('config-json-valid');
-        messageObject.classList.add('config-error');
-      } else {
-        messageObject.classList.add('config-json-valid');
-        messageObject.classList.remove('config-error');
-      }
-      messageObject.innerHTML = messageString;
-    }
+      // Utility functions ========================================================================================================
 
-  </script>
-</body>
-
+      // Function used to display messages to report progression of the process.
+      printMessage = (messageObject, messageString, status) => {
+        if (status === 'error') {
+          messageObject.classList.remove('config-json-valid');
+          messageObject.classList.add('config-error');
+        } else {
+          messageObject.classList.add('config-json-valid');
+          messageObject.classList.remove('config-error');
+        }
+        messageObject.innerHTML = messageString;
+      };
+    </script>
+  </body>
 </html>

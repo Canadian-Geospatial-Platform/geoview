@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -16,42 +16,27 @@
   </head>
 
   <body>
-    <div class="header-table">
-      <table>
-        <tbody>
-          <tr>
-            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
-            <td class="header-title">
-              <h1><strong>High Detail Layer</strong></h1>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td>
-              <a href="./index.html">Main</a><br />
-              <a href="./outliers.html">Outlier Layers</a><br />
-            </td>
-          </tr>
-          <tr>
-            <td><p>This page is used to showcase a highly detailed layer that causes slow down</p></td>
-          </tr>
-          </tr>
-          <tr>
-            <td>
-              <a href="#Hmap1">1. Highly detailed layers - slow</a><br />
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div>
+      <div class="page-header">
+      <img class="header-logo" alt="logo" src="./img/Logo.png" />
+      <div class="page-header-titles">
+        <h1 class="index-header-title"><strong>Plateforme Géospatiale Canadienne (PGC) - Projet GeoView -</strong></h1>
+        <h1 class="index-header-title"><strong>Canadian Geospatial Platform (CGP) - GeoView Project -</strong></h1>
+      </div>
+    </div>
+      <hr />
+      <hr />
+
+      <div class="back-to-main">
+        <a href="./outliers.html">← Back to Outliers</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>High Detail Layer</h4>
+        <p>This page is used to showcase a highly detailed layer that causes slow down.</p>
+      </div>
     </div>
 
-    <div class="map-title-holder">
-      <h4 id="Hmap1">1. Highly detailed layers - slow</h4>
-      <a class="ref-link" href="#top">Top</a>
-    </div>
     <button class="collapsible active">Layers Status</button>
     <pre id="Hmap1-state" class="panel map-title-holder"></pre>
     <hr />

@@ -11,115 +11,39 @@
     <meta name="msapplication-TileColor" content="#da532c" />
     <meta name="theme-color" content="#ffffff" />
     <link rel="stylesheet" href="css/style.css" />
-    <style>
-      .actionButton {
-        padding: 5px;
-      }
-
-      .selector-container {
-        display: flex;
-        flex-direction: row;
-        margin: 10px;
-      }
-
-      .selector {
-        padding: 15px;
-      }
-
-      .editor {
-        display: inline-flex;
-        gap: 10px;
-        font-family: monospace;
-        line-height: 21px;
-        background: #282a3a;
-        border-radius: 2px;
-        padding: 20px 10px;
-        height: 600px;
-        overflow-y: auto;
-      }
-
-      .line-numbers {
-        width: 20px;
-        text-align: right;
-        height: 9999px;
-      }
-
-      .line-numbers span {
-        counter-increment: linenumber;
-      }
-
-      .line-numbers span::before {
-        content: counter(linenumber);
-        display: block;
-        color: #506882;
-      }
-
-      textarea {
-        height: 9999px;
-        line-height: 21px;
-        overflow-y: hidden;
-        padding: 0;
-        border: 0;
-        background: #282a3a;
-        color: #fff;
-        min-width: 500px;
-        outline: none;
-        resize: none;
-      }
-
-      select {
-        max-width: 96%;
-      }
-
-      @media screen and (max-width: 600px) {
-        .selector-container {
-          display: flex;
-          flex-direction: column;
-          width: 100%;
-        }
-        .selector-container p {
-          margin-bottom: 0px;
-        }
-        .selector {
-          padding: 8px;
-        }
-        textarea {
-          min-width: 96%;
-          max-width: 96%;
-        }
-      }
-    </style>
   </head>
 
   <body>
-    <div class="header-table">
-      <table>
-        <tbody>
-          <tr>
-            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
-            <td class="header-title">
-              <h1><strong>Layers Navigator</strong></h1>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td><a href="./index.html">Main</a><br /></td>
-          </tr>
-          <tr>
-            <td><a href="./demos-navigator.html">Demos Navigator</a><br /></td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="page-header">
+      <img class="header-logo" alt="logo" src="./img/Logo.png" />
+      <div class="page-header-titles">
+        <h1 class="index-header-title"><strong>Plateforme Géospatiale Canadienne (PGC) - Projet GeoView -</strong></h1>
+      <h1 class="index-header-title"><strong>Canadian Geospatial Platform (CGP) - GeoView Project -</strong></h1>
+      </div>
+    </div>
+    <hr />
+    <hr />
+    <div>
+
+      <div class="back-to-main back-to-main-flex">
+        <a href="./index.html?tab=navigators" class="btn btn-primary">← Back to Main</a>
+        <a href="./demos-navigator.html" class="btn btn-success">Demos Navigator →</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>Layers Navigator</h4>
+        <p>
+          Interactive navigator to explore and test different GeoView layer types and configurations. Select a layer configuration from the
+          dropdown to load and visualize it on the map.
+        </p>
+      </div>
     </div>
 
-    <hr />
-    <div class="selector-container">
-      <p>Configuration to load:</p>
-      <div class="selector">
-        <select name="Config Loader" id="configLoader">
+    <div class="demo-section">
+      <h4>Select Configuration</h4>
+      <div class="selector-container navigator-selector-row">
+        <label for="configLoader" class="navigator-label-nowrap">Configuration to load:</label>
+        <select name="Config Loader" id="configLoader" class="navigator-select-full">
           <option value="">--select--</option>
           <option value="./configs/navigator/layers/all-layers.json">All Layer Types</option>
           <option value="./configs/navigator/layers/csv.json">CSV</option>
@@ -160,45 +84,51 @@
       </div>
     </div>
 
-    <div class="selector-container">
-      <p>Display Language:</p>
-      <div class="selector">
-        <select name="Switch Language" id="switchLang">
-          <option value="en">English</option>
-          <option value="fr">French</option>
-          <option value="unsupported">Not Supported</option>
-        </select>
-        <input type="checkbox" id="resetLayer" name="resetLayer" checked />
-        <label for="resetLayer">Reset Layers</label>
-      </div>
-      <p>Display Theme:</p>
-      <div class="selector">
-        <select name="Switch Theme" id="switchTheme">
-          <option value="geo.ca">Geo.ca</option>
-          <option value="light">Light</option>
-          <option value="dark">Dark</option>
-          <option value="unsupported">Not Supported</option>
-        </select>
-      </div>
-      <p>Display Projection:</p>
-      <div class="selector">
-        <select name="Switch Projection" id="switchProjection">
-          <option value="3978">LCC (3978)</option>
-          <option value="3857">Web Mercator (3857)</option>
-          <option value="unsupported">Not Supported</option>
-        </select>
+    <div class="demo-section">
+      <h4>Display Options</h4>
+      <div class="selector-container navigator-selector-wrap">
+        <div class="navigator-option-group">
+          <label for="switchLang" class="navigator-label">Language:</label>
+          <select name="Switch Language" id="switchLang" class="navigator-select">
+            <option value="en">English</option>
+            <option value="fr">French</option>
+            <option value="unsupported">Not Supported</option>
+          </select>
+        </div>
+        <div class="navigator-option-group-narrow">
+          <input type="checkbox" id="resetLayer" name="resetLayer" checked class="navigator-checkbox" />
+          <label for="resetLayer" class="navigator-checkbox">Reset Layers</label>
+        </div>
+        <div class="navigator-option-group">
+          <label for="switchTheme" class="navigator-label">Theme:</label>
+          <select name="Switch Theme" id="switchTheme" class="navigator-select">
+            <option value="geo.ca">Geo.ca</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+            <option value="unsupported">Not Supported</option>
+          </select>
+        </div>
+        <div class="navigator-option-group">
+          <label for="switchProjection" class="navigator-label">Projection:</label>
+          <select name="Switch Projection" id="switchProjection" class="navigator-select">
+            <option value="3978">LCC (3978)</option>
+            <option value="3857">Web Mercator (3857)</option>
+            <option value="unsupported">Not Supported</option>
+          </select>
+        </div>
       </div>
     </div>
-    <hr />
 
-    <button type="button" class="collapsible">Layers Status</button>
-    <pre id="sandboxMap-state" class="panel map-title-holder"></pre>
+    <div class="demo-section">
+      <h4>Map Viewer</h4>
+      <button type="button" class="collapsible">Layers Status</button>
+      <pre id="sandboxMap-state" class="panel map-title-holder"></pre>
 
-    <div id="mapSection">
-      <div id="map1"></div>
+      <div id="mapSection" class="navigator-map-section">
+        <div id="map1"></div>
+      </div>
+      <p><em>This map loads its configuration from the selected configuration file.</em></p>
     </div>
-    <p>This map loads its configurations from a selected configuration file.</p>
-    <hr />
 
     <div class="editor">
       <div class="line-numbers">
@@ -209,8 +139,10 @@
       </textarea>
     </div>
 
-    <div class="actionButton">Reload Map <button id="Reload-Button">Reload</button></div>
-    <div class="actionButton">Remove Map <button id="Remove-Button">Remove</button></div>
+    <div class="navigator-toolbar">
+      <button id="Reload-Button" class="btn btn-primary btn-large">Reload Map</button>
+      <button id="Remove-Button" class="btn btn-danger btn-large">Remove Map</button>
+    </div>
     <hr />
 
     <button type="button" class="collapsible">Code Snippet</button>

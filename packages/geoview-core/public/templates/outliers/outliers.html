@@ -1,42 +1,59 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Outlier Layer Demos - Canadian Geospatial Platform Viewer</title>
     <link rel="shortcut icon" href="./favicon.ico" />
     <meta name="msapplication-TileColor" content="#da532c" />
     <meta name="msapplication-config" content="./img/browserconfig.xml" />
     <meta name="theme-color" content="#ffffff" />
-    <meta name="msapplication-TileColor" content="#da532c" />
-    <meta name="theme-color" content="#ffffff" />
-    <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
     <link rel="stylesheet" href="css/style.css" />
   </head>
 
   <body>
     <div>
-      <img class="center-logo header-logo" alt="logo" src="./img/Logo.png" />
-      <h1 class="index-header-title"><strong>Outlier Demos</strong></h1>
-      <h2 class="index-header-title"><strong>Plateforme Géospatiale Canadienne (PGC) - Projet GeoView -</strong></h2>
-      <h2 class="index-header-title"><strong>Canadian Geospatial Platform (CGP) - GeoView Project -</strong></h2>
+      <div class="page-header">
+      <img class="header-logo" alt="logo" src="./img/Logo.png" />
+      <div class="page-header-titles">
+        <h1 class="index-header-title"><strong>Plateforme Géospatiale Canadienne (PGC) - Projet GeoView -</strong></h1>
+        <h1 class="index-header-title"><strong>Canadian Geospatial Platform (CGP) - GeoView Project -</strong></h1>
+      </div>
+    </div>
       <hr />
       <hr />
-      <a href="./index.html">Main</a>
-      <br />
-      <br />
-      <h4>Outlier Layers</h4>
-      <a href="./outlier-style.html">Style Issues</a><br />
-      <a href="./outlier-geometry.html">Feature Issues</a><br />
-      <a href="./outlier-metadata.html">Metadata Issues</a><br />
-      <h4>Performance Issue (Huge) Layers</h4>
-      <a href="./outlier-ESRI-maxRecordCount.html">Max Record Count Layers</a><br />
-      <a href="./outlier-GeoAI.html">GeoAI</a><br />
-      <a href="./outlier-elections-2019.html">Elections 2019</a><br />
-      <a href="./outlier-performance.html">Many slow layers in different projection</a><br />
-      <a href="./outlier-many-groups.html">Many group layers</a><br />
-      <br />
+
+      <div class="back-to-main">
+        <a href="./index.html?tab=testing">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>Outlier Layer Demos</h4>
+        <p>
+          Test pages for layers with various issues including styling problems, geometry issues, metadata challenges, and performance
+          concerns.
+        </p>
+      </div>
+
+      <div class="demo-section">
+        <h4>Outlier Layers</h4>
+        <ul class="demo-list">
+          <li><a href="./outlier-style.html">Style Issues</a></li>
+          <li><a href="./outlier-geometry.html">Feature Issues</a></li>
+          <li><a href="./outlier-metadata.html">Metadata Issues</a></li>
+        </ul>
+      </div>
+
+      <div class="demo-section">
+        <h4>Performance Issue (Huge) Layers</h4>
+        <ul class="demo-list">
+          <li><a href="./outlier-ESRI-maxRecordCount.html">Max Record Count Layers</a></li>
+          <li><a href="./outlier-GeoAI.html">GeoAI</a></li>
+          <li><a href="./outlier-elections-2019.html">Elections 2019</a></li>
+          <li><a href="./outlier-performance.html">Many slow layers in different projection</a></li>
+          <li><a href="./outlier-many-groups.html">Many group layers</a></li>
+        </ul>
+      </div>
     </div>
   </body>
 </html>

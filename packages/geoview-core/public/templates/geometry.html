@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -14,47 +14,40 @@
   </head>
 
   <body>
-    <div class="header-table">
-      <table>
-        <tbody>
-          <tr>
-            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
-            <td class="header-title">
-              <h1><strong>Geometry</strong></h1>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td><a href="./index.html">Main</a><br /></td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td>This page is used to showcase how the viewer may implement different geometry functions</td>
-            <hr />
-          </tr>
-        </tbody>
-      </table>
+    <div class="page-header">
+      <img class="header-logo" alt="logo" src="./img/Logo.png" />
+      <div class="page-header-titles">
+        <h1 class="index-header-title"><strong>Plateforme Géospatiale Canadienne (PGC) - Projet GeoView -</strong></h1>
+        <h1 class="index-header-title"><strong>Canadian Geospatial Platform (CGP) - GeoView Project -</strong></h1>
+      </div>
     </div>
-    <button class="create-group-btn">Create Geometry Group</button>
-    <input type="text" id="groupname" />
+    <hr />
+    <hr />
+    <div>
+
+      <div class="back-to-main">
+        <a href="./index.html?tab=demos">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>Geometry</h4>
+        <p>This page is used to showcase how the viewer may implement different geometry functions</p>
+      </div>
+    </div>
+    <button class="btn btn-primary create-group-btn">Create Geometry Group</button>
+    <input class="form-control" type="text" id="groupname" />
     <div>
       <label>Active Geometry Group</label>
-      <select name="selectGroupsName" id="selectGroupsName">
+      <select class="form-select" name="selectGroupsName" id="selectGroupsName">
         <option value="">Default</option>
       </select>
-      <button class="delete-group-btn">Delete Active Group</button>
+      <button class="btn btn-primary delete-group-btn">Delete Active Group</button>
     </div>
     <div class="toolbar">
-      <button class="add-polyline-btn">Add Polyline</button>
-      <button class="add-polygon-btn">Add Polygon</button>
-      <button class="add-circle-btn">Add Circle</button>
-      <button class="add-marker-icon-btn">Add Marker Icon</button>
+      <button class="btn btn-primary add-polyline-btn">Add Polyline</button>
+      <button class="btn btn-primary add-polygon-btn">Add Polygon</button>
+      <button class="btn btn-primary add-circle-btn">Add Circle</button>
+      <button class="btn btn-primary add-marker-icon-btn">Add Marker Icon</button>
     </div>
     <label> Geometries will be created in the active group. The Delete Group button will delete geometries from the active group. </label>
     <div
@@ -76,18 +69,18 @@
         'components': [],
         'corePackages': [],
         'theme': 'geo.ca'
-      }"></div>
-  <p></p>
-  <hr />
-  <label>
-    Theses buttons creates a geometry in a group named static which is not the active group.</label>
-  <div>
-  <button class="create-polyline-in-static-group-btn">Add Polyline To Static Group</button>
-  <button class="create-polygon-in-static-group-btn">Add Polygon To Static Group</button>
-  <button class="create-circle-in-static-group-btn">Add Circle To Static Group</button>
-  <button class="create-marker-in-static-group-btn">Add Marker To Static Group</button>
-  </div>
-  <hr />
+      }"
+    ></div>
+
+    <hr />
+    <label> Theses buttons creates a geometry in a group named static which is not the active group.</label>
+    <div>
+      <button class="btn btn-primary create-polyline-in-static-group-btn">Add Polyline To Static Group</button>
+      <button class="btn btn-primary create-polygon-in-static-group-btn">Add Polygon To Static Group</button>
+      <button class="btn btn-primary create-circle-in-static-group-btn">Add Circle To Static Group</button>
+      <button class="btn btn-primary create-marker-in-static-group-btn">Add Marker To Static Group</button>
+    </div>
+    <hr />
     <button type="button" class="collapsible">Code Snippet</button>
     <pre id="codeSnippet" class="panel"></pre>
 
@@ -224,15 +217,17 @@
 
       function addCircleInStaticGroup(mapViewer) {
         // call an api function to draw a circle with default style
-        const circle1 = mapViewer.layer.geometry.addCircle([-90, 55], {
-        style: {
-            fillColor: 'magenta',
-            fillOpacity: 0.5,
-            radius: 10,
-          }
-        },
-        undefined,
-        'static'
+        const circle1 = mapViewer.layer.geometry.addCircle(
+          [-90, 55],
+          {
+            style: {
+              fillColor: 'magenta',
+              fillOpacity: 0.5,
+              radius: 10,
+            },
+          },
+          undefined,
+          'static'
         );
       }
       function addCircle(mapViewer) {
@@ -268,11 +263,7 @@
 
       function addMarkerInStaticGroup(mapViewer) {
         // call an api function to draw a marker icon with default styles
-        const markerIcon1 = mapViewer.layer.geometry.addMarkerIcon([-100, 55],
-        undefined,
-        undefined,
-        'static'
-        );
+        const markerIcon1 = mapViewer.layer.geometry.addMarkerIcon([-100, 55], undefined, undefined, 'static');
       }
       function addMarkerIcon(mapViewer) {
         // call an api function to draw a marker icon with default styles
@@ -305,7 +296,7 @@
           // get addPolyline button element and add event handler
           var addPolylineBtn = document.getElementsByClassName('add-polyline-btn')[0];
           addPolylineBtn.addEventListener('click', function (e) {
-            let groupName = document.getElementById('selectGroupsName').value
+            let groupName = document.getElementById('selectGroupsName').value;
             addPolyline(mapViewer);
           });
 
@@ -367,32 +358,28 @@
           createPolylineInStaticGroup.addEventListener('click', function (e) {
             // create geometry in static group
             addPolylineInStaticGroup(mapViewer);
-            }
-          );
+          });
 
           // get create GeomtryFromGroup button element and add event handler
           const createPolygonInStaticGroup = document.getElementsByClassName('create-polygon-in-static-group-btn')[0];
           createPolygonInStaticGroup.addEventListener('click', function (e) {
             // create geometry in static group
             addPolygonInStaticGroup(mapViewer);
-            }
-          );
+          });
 
           // get create GeomtryFromGroup button element and add event handler
           const createCircleInStaticGroup = document.getElementsByClassName('create-circle-in-static-group-btn')[0];
           createCircleInStaticGroup.addEventListener('click', function (e) {
             // create geometry in static group
             addCircleInStaticGroup(mapViewer);
-            }
-          );
+          });
 
           // get create GeomtryFromGroup button element and add event handler
           const createMarkerInStaticGroup = document.getElementsByClassName('create-marker-in-static-group-btn')[0];
           createMarkerInStaticGroup.addEventListener('click', function (e) {
             // create geometry in static group
             addMarkerInStaticGroup(mapViewer);
-            }
-          );
+          });
 
           // listen to geometry added event
           mapViewer.layer.geometry.onGeometryAdded((sender, payload) => {
