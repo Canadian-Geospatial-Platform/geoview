@@ -353,7 +353,7 @@ static batchUpdate(mapId: string, updates: CustomUpdate[]): void {
 
   // Emit single event after batch
   const mapViewer = MapEventProcessor.getMapViewer(mapId);
-  mapViewer.onBatchUpdate.emit({ count: updates.length });
+  mapViewer.emitBatchUpdate({ count: updates.length });
 }
 ```
 

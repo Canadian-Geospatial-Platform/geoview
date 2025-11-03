@@ -8,11 +8,19 @@ Below is a categorized list of all utility functions available in GeoView. These
 // Access utilities through the API instance
 const id = cgpv.api.utilities.core.generateId();
 const dmsCoords = cgpv.api.utilities.geo.coordFormatDMS(45.4215);
-const transformedPoints = cgpv.api.utilities.projection.transformPoints(points, fromProj, toProj);
-const formattedDate = cgpv.api.utilities.date.formatDate(new Date(), 'YYYY-MM-DD');
+const transformedPoints = cgpv.api.utilities.projection.transformPoints(
+  points,
+  fromProj,
+  toProj
+);
+const formattedDate = cgpv.api.utilities.date.formatDate(
+  new Date(),
+  "YYYY-MM-DD"
+);
 ```
 
 ## Utility Categories Quick Links
+
 - [Core Utilities](#core-utilities)
 - [Geo Utilities](#geo-utilities)
 - [Projection Utilities](#projection-utilities)
@@ -25,6 +33,7 @@ const formattedDate = cgpv.api.utilities.date.formatDate(new Date(), 'YYYY-MM-DD
 General-purpose functions for string manipulation, object handling, DOM operations, and other common programming tasks.
 
 #### Functions Quick Links
+
 - [replaceParams](#replaceParams)
 - [getLocalizedMessage](#getLocalizedMessage)
 - [deepMergeObjects](#deepMergeObjects)
@@ -43,6 +52,7 @@ General-purpose functions for string manipulation, object handling, DOM operatio
 <a id="replaceParams"></a>
 
 #### replaceParams
+
 ```typescript
 /**
  * Take string like "My string is __param__" and replace parameters (__param__) from array of values
@@ -56,6 +66,7 @@ cgpv.api.utilities.core.replaceParams(params, message);
 <a id="getLocalizedMessage"></a>
 
 #### getLocalizedMessage
+
 ```typescript
 /**
  * Return proper language Geoview localized values from map i18n instance
@@ -70,11 +81,12 @@ cgpv.api.utilities.core.getLocalizedMessage(language, messageKey, params);
 <a id="deepMergeObjects"></a>
 
 #### deepMergeObjects
+
 ```typescript
 /**
  * Deep merge objects together. Latest object will overwrite value on previous one if property exists.
- * @param {TypeJsonObject} objects - The objects to deep merge
- * @returns {TypeJsonObject} The merged object
+ * @param {Record<string, unknown>} objects - The objects to deep merge
+ * @returns {Record<string, unknown>} The merged object
  */
 cgpv.api.utilities.core.deepMergeObjects(...objects);
 ```
@@ -82,6 +94,7 @@ cgpv.api.utilities.core.deepMergeObjects(...objects);
 <a id="isObjectEmpty"></a>
 
 #### isObjectEmpty
+
 ```typescript
 /**
  * Check if an object is empty
@@ -94,6 +107,7 @@ cgpv.api.utilities.core.isObjectEmpty(obj);
 <a id="getScriptAndAssetURL"></a>
 
 #### getScriptAndAssetURL
+
 ```typescript
 /**
  * Get the URL of main script cgpv-main so we can access the assets
@@ -105,6 +119,7 @@ cgpv.api.utilities.core.getScriptAndAssetURL();
 <a id="generateId"></a>
 
 #### generateId
+
 ```typescript
 /**
  * Generates a unique id of the specified length.
@@ -117,6 +132,7 @@ cgpv.api.utilities.core.generateId(length);
 <a id="isValidUUID"></a>
 
 #### isValidUUID
+
 ```typescript
 /**
  * Validates if a UUID respects the format.
@@ -129,6 +145,7 @@ cgpv.api.utilities.core.isValidUUID(uuid);
 <a id="setAlphaColor"></a>
 
 #### setAlphaColor
+
 ```typescript
 /**
  * Set alpha for a color
@@ -142,6 +159,7 @@ cgpv.api.utilities.core.setAlphaColor(colorArray, alpha);
 <a id="isJsonString"></a>
 
 #### isJsonString
+
 ```typescript
 /**
  * Validates if a JSON string is well formatted
@@ -154,6 +172,7 @@ cgpv.api.utilities.core.isJsonString(str);
 <a id="xmlToJson"></a>
 
 #### xmlToJson
+
 ```typescript
 /**
  * Converts an XML document object into a json object
@@ -166,6 +185,7 @@ cgpv.api.utilities.core.xmlToJson(xml);
 <a id="addUiComponent"></a>
 
 #### addUiComponent
+
 ```typescript
 /**
  * Add a UI component to a custom div. Do not listen to event from here, pass in the props
@@ -179,6 +199,7 @@ cgpv.api.utilities.core.addUiComponent(targetDivId, component);
 <a id="sanitizeHtmlContent"></a>
 
 #### sanitizeHtmlContent
+
 ```typescript
 /**
  * Sanitize HTML to remove threat
@@ -191,6 +212,7 @@ cgpv.api.utilities.core.sanitizeHtmlContent(contentHtml);
 <a id="delay"></a>
 
 #### delay
+
 ```typescript
 /**
  * Delay helper function.
@@ -203,6 +225,7 @@ cgpv.api.utilities.core.delay(ms);
 <a id="escapeRegExp"></a>
 
 #### escapeRegExp
+
 ```typescript
 /**
  * Escape special characters from string
@@ -219,6 +242,7 @@ cgpv.api.utilities.core.escapeRegExp(text);
 Geographic utility functions for working with maps and spatial data.
 
 #### Functions Quick Links
+
 - [getESRIServiceMetadata](#getESRIServiceMetadata)
 - [getWMSServiceMetadata](#getWMSServiceMetadata)
 - [getMapServerUrl](#getMapServerUrl)
@@ -233,11 +257,12 @@ Geographic utility functions for working with maps and spatial data.
 <a id="getESRIServiceMetadata"></a>
 
 #### getESRIServiceMetadata
+
 ```typescript
 /**
  * Fetch the json response from the ESRI map server to get REST endpoint metadata
  * @param {string} url the url of the ESRI map server
- * @returns {Promise<TypeJsonObject>} a json promise containing the result of the query
+ * @returns {Promise<Record<string, unknown>>} a json promise containing the result of the query
  */
 cgpv.api.utilities.geo.getESRIServiceMetadata(url);
 ```
@@ -245,12 +270,13 @@ cgpv.api.utilities.geo.getESRIServiceMetadata(url);
 <a id="getWMSServiceMetadata"></a>
 
 #### getWMSServiceMetadata
+
 ```typescript
 /**
  * Fetch the json response from the XML response of a WMS getCapabilities request
  * @param {string} url the url the url of the WMS server
  * @param {string} layers the layers to query separate by ,
- * @returns {Promise<TypeJsonObject>} a json promise containing the result of the query
+ * @returns {Promise<Record<string, unknown>>} a json promise containing the result of the query
  */
 cgpv.api.utilities.geo.getWMSServiceMetadata(url, layers);
 ```
@@ -258,6 +284,7 @@ cgpv.api.utilities.geo.getWMSServiceMetadata(url, layers);
 <a id="getMapServerUrl"></a>
 
 #### getMapServerUrl
+
 ```typescript
 /**
  * Return the map server url from a layer service
@@ -271,6 +298,7 @@ cgpv.api.utilities.geo.getMapServerUrl(url, rest);
 <a id="geometryToWKT"></a>
 
 #### geometryToWKT
+
 ```typescript
 /**
  * Returns the WKT representation of a given geometry
@@ -283,6 +311,7 @@ cgpv.api.utilities.geo.geometryToWKT(geometry);
 <a id="wktToGeometry"></a>
 
 #### wktToGeometry
+
 ```typescript
 /**
  * Returns the Geometry representation of a given wkt
@@ -296,17 +325,23 @@ cgpv.api.utilities.geo.wktToGeometry(wkt, readOptions);
 <a id="getDefaultDrawingStyle"></a>
 
 #### getDefaultDrawingStyle
+
 ```typescript
 /**
  * Default drawing style for GeoView
  * @returns an Open Layers styling for drawing on a map
  */
-cgpv.api.utilities.geo.getDefaultDrawingStyle(strokeColor, strokeWidth, fillColor);
+cgpv.api.utilities.geo.getDefaultDrawingStyle(
+  strokeColor,
+  strokeWidth,
+  fillColor
+);
 ```
 
 <a id="coordFormatDMS"></a>
 
 #### coordFormatDMS
+
 ```typescript
 /**
  * Format the coordinates for degrees - minutes - seconds (lat, long)
@@ -319,6 +354,7 @@ cgpv.api.utilities.geo.coordFormatDMS(value);
 <a id="getArea"></a>
 
 #### getArea
+
 ```typescript
 /**
  * Gets the area of a given geometry
@@ -331,6 +367,7 @@ cgpv.api.utilities.geo.getArea(geometry);
 <a id="getLength"></a>
 
 #### getLength
+
 ```typescript
 /**
  * Gets the length of a given geometry
@@ -343,6 +380,7 @@ cgpv.api.utilities.geo.getLength(geometry);
 <a id="calculateDistance"></a>
 
 #### calculateDistance
+
 ```typescript
 /**
  * Calculates distance along a path define by array of Coordinates
@@ -361,6 +399,7 @@ cgpv.api.utilities.geo.calculateDistance(coordinates, inProj, outProj);
 Utilities for handling map projections.
 
 #### Functions Quick Links
+
 - [transformAndDensifyExtent](#transformAndDensifyExtent)
 - [transformPoints](#transformPoints)
 - [transformFromLonLat](#transformFromLonLat)
@@ -370,6 +409,7 @@ Utilities for handling map projections.
 <a id="transformAndDensifyExtent"></a>
 
 #### transformAndDensifyExtent
+
 ```typescript
 /**
  * Transforms an extent from source projection to destination projection.
@@ -379,12 +419,18 @@ Utilities for handling map projections.
  * @param {number} stops - Optional number of stops per side used for the transform. The default value is 25.
  * @returns The densified extent transformed in the destination projection.
  */
-cgpv.api.utilities.projection.transformAndDensifyExtent(extent, source, destination, stops);
+cgpv.api.utilities.projection.transformAndDensifyExtent(
+  extent,
+  source,
+  destination,
+  stops
+);
 ```
 
 <a id="transformPoints"></a>
 
 #### transformPoints
+
 ```typescript
 /**
  * Converts points from one projection to another using proj4
@@ -398,6 +444,7 @@ cgpv.api.utilities.projection.transformPoints(points, fromProj, toProj);
 <a id="transformFromLonLat"></a>
 
 #### transformFromLonLat
+
 ```typescript
 /**
  * Wrapper around OpenLayers function to transforms a coordinate from longitude/latitude.
@@ -411,6 +458,7 @@ cgpv.api.utilities.projection.transformFromLonLat(coordinate, projection);
 <a id="transformToLonLat"></a>
 
 #### transformToLonLat
+
 ```typescript
 /**
  * Wrapper around OpenLayers function to transforms a coordinate to longitude/latitude.
@@ -424,6 +472,7 @@ cgpv.api.utilities.projection.transformToLonLat(coordinate, projection);
 <a id="transformCoordinates"></a>
 
 #### transformCoordinates
+
 ```typescript
 /**
  * Transform coordinates between two projections
@@ -432,7 +481,11 @@ cgpv.api.utilities.projection.transformToLonLat(coordinate, projection);
  * @param {string} endProjection - The transformed projection of the coordinates.
  * @returns {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined} The transformed coordinates
  */
-cgpv.api.utilities.projection.transformCoordinates(coordinates, startProjection, endProjection);
+cgpv.api.utilities.projection.transformCoordinates(
+  coordinates,
+  startProjection,
+  endProjection
+);
 ```
 
 <a id="date-management-utilities"></a>
@@ -442,6 +495,7 @@ cgpv.api.utilities.projection.transformCoordinates(coordinates, startProjection,
 Utilities for handling dates and time.
 
 #### Functions Quick Links
+
 - [convertToLocal](#convertToLocal)
 - [convertToUTC](#convertToUTC)
 - [formatDate](#formatDate)
@@ -453,6 +507,7 @@ Utilities for handling dates and time.
 <a id="convertToLocal"></a>
 
 #### convertToLocal
+
 ```typescript
 /**
  * Convert a UTC date to a local date
@@ -465,6 +520,7 @@ cgpv.api.utilities.date.convertToLocal(date);
 <a id="convertToUTC"></a>
 
 #### convertToUTC
+
 ```typescript
 /**
  * Convert a date local to a UTC date
@@ -477,6 +533,7 @@ cgpv.api.utilities.date.convertToUTC(date);
 <a id="formatDate"></a>
 
 #### formatDate
+
 ```typescript
 /**
  * Format a date to specific format like 'YYYY-MM-DD'
@@ -490,6 +547,7 @@ cgpv.api.utilities.date.formatDate(date, format);
 <a id="formatDatePattern"></a>
 
 #### formatDatePattern
+
 ```typescript
 /**
  * Format a date to a pattern
@@ -504,6 +562,7 @@ cgpv.api.utilities.date.formatDatePattern(date, datePattern, timePattern);
 <a id="formatDateToISO"></a>
 
 #### formatDateToISO
+
 ```typescript
 /**
  * Converts a Date object to an ISO 8601 formatted string in the local time zone.
@@ -516,6 +575,7 @@ cgpv.api.utilities.date.formatDateToISO(date);
 <a id="convertToMilliseconds"></a>
 
 #### convertToMilliseconds
+
 ```typescript
 /**
  * Convert a date to milliseconds
@@ -528,6 +588,7 @@ cgpv.api.utilities.date.convertToMilliseconds(date);
 <a id="convertMilisecondsToDate"></a>
 
 #### convertMilisecondsToDate
+
 ```typescript
 /**
  * Convert a milliseconds date to string date. Date format is YYYY-MM-DDTHH:mm:ss.

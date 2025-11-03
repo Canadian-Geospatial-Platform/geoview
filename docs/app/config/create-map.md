@@ -192,7 +192,7 @@ cgpv.onMapReady((mapViewer) => {
 ```
 These events are important for proper initialization sequencing:
 - onMapInit - Fires when the map object is first initialized, but before layers are processed
-- onMapReady - Fires when the map and UI are fully loaded and ready for interaction
+- onMapReady - Fires when the map and UI are fully loaded and ready for interaction (**note** layers might not be ready)
 
 Using these events helps you properly sequence your application's initialization logic.
 

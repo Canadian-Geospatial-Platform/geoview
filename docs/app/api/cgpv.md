@@ -36,7 +36,7 @@ cgpv.init();
 ---
 
 ### `cgpv.onMapReady(callback)`
-Registers a callback that fires when the map and UI are fully loaded and ready for interaction.
+Registers a callback that fires when the map and UI are fully loaded and ready for interaction (**note** layers might not be ready).
 
 ```typescript
 cgpv.onMapReady((mapViewer) => {

@@ -61,24 +61,25 @@ interface TypeResultSetEntry {
 
 ### 3. Event-Driven Synchronization
 
-Layer Sets use a bi-directional event system:
+Layer Sets use an event-driven system to track layer state changes and propagate updates:
 
-**Inbound Events:**
+**Inbound Events (Layer Sets listen to):**
 
-- `LAYER_SET.LAYER_REGISTRATION` - New layer added to map
-- `LAYER_SET.REQUEST_LAYER_INVENTORY` - Request all current layers
-- Layer-specific events (config changes, style updates, etc.)
+- `onLayerStatusChanged` - Layer status progression (init → loading → loaded → error)
+- `onLayerNameChanged` - Layer name/alias updates
+- `onStyleChanged` - Layer style modifications (legends layer set)
+- `onStyleApplied` - Vector layer style application (legends layer set)
 
-**Outbound Events:**
+**Outbound Events (Layer Sets emit):**
 
-- `LAYER_SET.UPDATED` - Layer Set data changed
-- Store updates via `onPropagateToStore()`
+- `onLayerSetUpdated` - Emitted when layer set data changes, containing the updated result set entry
+- Store propagation via `onPropagateToStore()` - Updates the Zustand store for React components
 
 ## Layer Set Implementations
 
 ### LegendsLayerSet
 
-**Purpose:** Manages legend/symbology information for UI rendering.
+**Purpose:** Tracks layer status progression and fetches legend/symbology data for all layers.
 
 **Store Connection:** `legendsLayerSet` slice in LayerEventProcessor
 
@@ -86,9 +87,8 @@ Layer Sets use a bi-directional event system:
 
 ```typescript
 /**
- * Overrides the behavior to apply when an all-feature-info-layer-set wants to check for condition to register a layer in its set.
+ * Overrides the behavior to apply when checking for condition to register a layer in its set.
  * @param {AbstractBaseLayer} layer - The layer
- * @param {string} layerPath - The layer path
  * @returns {boolean} True when the layer should be registered to this legends-layer-set
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -100,17 +100,21 @@ protected override onRegisterLayerCheck(layer: AbstractBaseLayer): boolean {
 
 **Key Features:**
 
-- Tracks parent-child relationships via `children` array
-- Maintains legend items with icons and labels
-- Updates on style changes
-- Used by Legend Panel and layer list UI components
+- Registers ALL layers (regardless of type) to track their layer status in the UI
+- Queries and fetches legend data when layer reaches 'processed' status or higher
+- Tracks `legendQueryStatus` ('init' → 'querying' → 'queried') separate from layer status
+- Listens to `onLayerStyleChanged` and `onStyleApplied` events to re-query legends when styles update
+- Handles vector layers that need style application before querying legends
+- Used by Legend Panel and layer list UI components to display symbology
 
 **Event Flow:**
 
-1. Layer config added ? Register in resultSet
-2. Layer created ? Update layerStatus to 'processing'
-3. Style loaded ? Populate items, set status to 'processed'
-4. Style changed ? Update items, emit update event
+1. Layer config added → Register in resultSet with `legendQueryStatus: 'init'`
+2. Layer created → Track layer status progression (init → loading → loaded → processed)
+3. Layer reaches 'processed' status → Query legend via `layer.queryLegend()`
+4. Legend query starts → Set `legendQueryStatus: 'querying'`
+5. Legend data received → Store legend data, set `legendQueryStatus: 'queried'`, propagate to store
+6. Style changes → Re-query legend automatically
 
 ---
 
@@ -441,30 +445,47 @@ React components re-render with new features
 
 ### Layer Set Events
 
-Layer Sets emit events through `EventHelper`:
+Layer Sets emit events through `EventHelper` static methods:
 
 ```typescript
 class AbstractLayerSet {
-  #layerSetUpdatedEmitter = new EventHelper<LayerSetUpdatedDelegate>();
+  /** Keep all callback delegates references */
+  #onLayerSetUpdatedHandlers: LayerSetUpdatedDelegate[] = [];
 
+  /**
+   * Registers a callback to be executed whenever the layer set is updated.
+   */
   onLayerSetUpdated(callback: LayerSetUpdatedDelegate): void {
-    this.#layerSetUpdatedEmitter.register(callback);
+    EventHelper.onEvent(this.#onLayerSetUpdatedHandlers, callback);
   }
 
+  /**
+   * Unregisters a callback from being called whenever the layer set is updated.
+   */
   offLayerSetUpdated(callback: LayerSetUpdatedDelegate): void {
-    this.#layerSetUpdatedEmitter.unregister(callback);
+    EventHelper.offEvent(this.#onLayerSetUpdatedHandlers, callback);
   }
 
-  #emitLayerSetUpdated(
-    resultSetEntry: TypeResultSetEntry,
-    type: PropagationType
-  ): void {
-    this.#layerSetUpdatedEmitter.emit({
-      resultSetEntry,
-      type,
-    });
+  /**
+   * Emits an event to all registered handlers.
+   */
+  #emitLayerSetUpdated(event: LayerSetUpdatedEvent): void {
+    EventHelper.emitEvent(this, this.#onLayerSetUpdatedHandlers, event);
+  }
+
+  /**
+   * Called to emit layer set updated event with layerPath and resultSet.
+   */
+  protected onLayerSetUpdatedProcess(layerPath: string): void {
+    this.#emitLayerSetUpdated({ layerPath, resultSet: this.resultSet });
   }
 }
+
+// Event type definition
+type LayerSetUpdatedEvent = {
+  layerPath: string;
+  resultSet: TypeResultSet;
+};
 ```
 
 ## Best Practices for Core Developers

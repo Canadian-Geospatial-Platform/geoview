@@ -31,14 +31,15 @@ const hoverFeatureInfoLayerSet = mapViewer.layer.hoverFeatureInfoLayerSet;
 
 ### 1. LegendsLayerSet
 
-Manages legend and symbology information for all layers.
+Tracks layer status progression and fetches legend/symbology information for all layers.
 
 **Common Use Cases:**
 
 - Building custom legend UI components
-- Accessing layer symbology and style information
-- Displaying legend items with icons and labels
-- Tracking layer hierarchy (parent/child relationships)
+- Displaying layer symbology with icons and labels
+- Tracking layer loading status in the UI
+- Monitoring when legend data becomes available
+- Responding to layer style changes
 
 **Basic Usage:**
 

@@ -183,6 +183,9 @@ See [Configuration Reference](app/config/configuration-reference.md) for complet
 // Get all layer IDs
 const layerIds = mapViewer.layer.getGeoviewLayerIds();
 
+// Get all layer paths (includes sublayers)
+const layerPaths = mapViewer.layer.getGeoviewLayerPaths();
+
 // Get layer by path
 const layerPath = "myLayer/sublayer1";
 const layer = mapViewer.layer.getGeoviewLayerByLayerPath(layerPath);
@@ -194,21 +197,21 @@ const config = mapViewer.layer.getLayerConfig(layerPath);
 ### Control Visibility
 
 ```typescript
-// Set visibility
-mapViewer.layer.setVisible(layerPath, true);
-
 // Get visibility
 const isVisible = mapViewer.layer.getVisible(layerPath);
+
+// Set visibility
+mapViewer.layer.setVisible(layerPath, true);
 ```
 
 ### Control Opacity
 
 ```typescript
-// Set opacity (0 = transparent, 1 = opaque)
-mapViewer.layer.setOpacity(layerPath, 0.7);
-
 // Get opacity
 const opacity = mapViewer.layer.getOpacity(layerPath);
+
+// Set opacity (0 = transparent, 1 = opaque)
+mapViewer.layer.setOpacity(layerPath, 0.7);
 ```
 
 ### Remove Layers
