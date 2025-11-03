@@ -38,12 +38,12 @@ export declare class GeometryApi {
     constructor(mapViewer: MapViewer);
     /**
      * Registers a geometry added event handler.
-     * @param {GeometryAddedDelegate} callback The callback to be executed whenever the event is emitted
+     * @param {GeometryAddedDelegate} callback - The callback to be executed whenever the event is emitted
      */
     onGeometryAdded(callback: GeometryAddedDelegate): void;
     /**
      * Unregisters a geometry added event handler.
-     * @param {GeometryAddedDelegate} callback The callback to stop being called whenever the event is emitted
+     * @param {GeometryAddedDelegate} callback - The callback to stop being called whenever the event is emitted
      */
     offGeometryAdded(callback: GeometryAddedDelegate): void;
     /**

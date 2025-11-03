@@ -21,7 +21,8 @@ export declare class VectorTiles extends AbstractGeoViewRaster {
     fallbackProjection: ProjectionLike;
     /**
      * Constructs a VectorTiles Layer configuration processor.
-     * @param {TypeVectorTilesConfig} layerConfig the layer configuration
+     * @param {TypeVectorTilesConfig} layerConfig - The layer configuration
+     * @param {ProjectionLike} fallbackProjection - The map projection when this layer is being created, for validation purposes.
      */
     constructor(layerConfig: TypeVectorTilesConfig, fallbackProjection: ProjectionLike);
     /**

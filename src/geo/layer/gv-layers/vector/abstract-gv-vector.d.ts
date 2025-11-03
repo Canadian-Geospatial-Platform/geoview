@@ -111,12 +111,12 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
     setStyleApplied(styleApplied: boolean): void;
     /**
      * Registers a style applied event handler.
-     * @param {StyleAppliedDelegate} callback The callback to be executed whenever the event is emitted
+     * @param {StyleAppliedDelegate} callback - The callback to be executed whenever the event is emitted
      */
     onStyleApplied(callback: StyleAppliedDelegate): void;
     /**
      * Unregisters a style applied event handler.
-     * @param {StyleAppliedDelegate} callback The callback to stop being called whenever the event is emitted
+     * @param {StyleAppliedDelegate} callback - The callback to stop being called whenever the event is emitted
      */
     offStyleApplied(callback: StyleAppliedDelegate): void;
     /**

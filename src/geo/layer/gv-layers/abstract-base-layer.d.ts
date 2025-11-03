@@ -161,12 +161,12 @@ export declare abstract class AbstractBaseLayer {
     offLayerNameChanged(callback: LayerNameChangedDelegate): void;
     /**
      * Registers a visible changed event handler.
-     * @param {VisibleChangedDelegate} callback The callback to be executed whenever the event is emitted
+     * @param {VisibleChangedDelegate} callback - The callback to be executed whenever the event is emitted
      */
     onVisibleChanged(callback: VisibleChangedDelegate): void;
     /**
      * Unregisters a visible changed event handler.
-     * @param {VisibleChangedDelegate} callback The callback to stop being called whenever the event is emitted
+     * @param {VisibleChangedDelegate} callback - The callback to stop being called whenever the event is emitted
      */
     offVisibleChanged(callback: VisibleChangedDelegate): void;
     /**

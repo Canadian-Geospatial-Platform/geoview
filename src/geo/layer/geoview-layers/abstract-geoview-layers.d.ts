@@ -65,6 +65,7 @@ export declare abstract class AbstractGeoViewLayer {
      * Must override method to read the service metadata from the metadataAccessPath.
      * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
      * @returns {Promise<T>} A promise resolved once the metadata has been fetched.
+     * @throws {LayerServiceMetadataUnableToFetchError} Error thrown when the metadata fetch fails or contains an error.
      */
     protected abstract onFetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T>;
     /**
@@ -98,7 +99,7 @@ export declare abstract class AbstractGeoViewLayer {
      * Gets the first layer entry name if any sub-layers exist or else gets the geoviewLayerName or even the geoviewLayerId.
      * @returns {string} The layer entry name if any sub-layers exist or the geoviewLayerName or even the geoviewLayerId.
      */
-    geLayerEntryNameOrGeoviewLayerName(): string;
+    getLayerEntryNameOrGeoviewLayerName(): string;
     /**
      * Gets the Geoview layer id.
      * @returns {string} The geoview layer id
@@ -134,6 +135,8 @@ export declare abstract class AbstractGeoViewLayer {
      * Fetches the metadata by calling onFetchServiceMetadata.
      * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
      * @returns {Promise<T>} Returns a Promise of a metadata
+     * @throws {LayerServiceMetadataUnableToFetchError} Error thrown when the metadata fetch fails or contains an error.
+     * @throws {LayerNoCapabilitiesError} Error thrown when the metadata is empty (no Capabilities) (WMS/WFS layers).
      */
     fetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T>;
     /**
@@ -181,7 +184,6 @@ export declare abstract class AbstractGeoViewLayer {
      * @param {string[] | undefined} messageParams - Array of parameters to be interpolated into the localized message
      * @param {SnackbarType} messageType - The message type
      * @param {boolean} [notification=false] - Whether to show this as a notification. Defaults to false
-     * @returns {void}
      *
      * @example
      * this.emitMessage(
@@ -201,6 +203,11 @@ export declare abstract class AbstractGeoViewLayer {
      * @param {ConfigBaseClass | undefined} layerConfig - Optional layer config
      */
     addLayerLoadError(error: Error, layerConfig: ConfigBaseClass | undefined): void;
+    /**
+     * Gets if the layer processing has generated errors.
+     * @returns {boolean} True when the layer processing has generated errors in the 'layerLoadError' list.
+     */
+    hasLayerLoadedErrors(): boolean;
     /**
      * Aggregates the errors that might have happened during processing and that are stored in layerLoadError, if any.
      */
@@ -222,57 +229,57 @@ export declare abstract class AbstractGeoViewLayer {
     getAllLayerEntryConfigs(): ConfigBaseClass[];
     /**
      * Emits an event to all handlers.
-     * @param {LayerEntryRegisterInitEvent} event The event to emit
+     * @param {LayerEntryRegisterInitEvent} event - The event to emit
      */
     emitLayerEntryRegisterInit(event: LayerEntryRegisterInitEvent): void;
     /**
      * Registers a layer entry config processed event handler.
-     * @param {LayerEntryRegisterInitDelegate} callback The callback to be executed whenever the event is emitted
+     * @param {LayerEntryRegisterInitDelegate} callback - The callback to be executed whenever the event is emitted
      */
     onLayerEntryRegisterInit(callback: LayerEntryRegisterInitDelegate): void;
     /**
      * Unregisters a layer entry config processed event handler.
-     * @param {LayerEntryRegisterInitDelegate} callback The callback to stop being called whenever the event is emitted
+     * @param {LayerEntryRegisterInitDelegate} callback - The callback to stop being called whenever the event is emitted
      */
     offLayerEntryRegisterInit(callback: LayerEntryRegisterInitDelegate): void;
     /**
      * Registers a layer entry config processed event handler.
-     * @param {LayerEntryProcessedDelegate} callback The callback to be executed whenever the event is emitted
+     * @param {LayerEntryProcessedDelegate} callback - The callback to be executed whenever the event is emitted
      */
     onLayerEntryProcessed(callback: LayerEntryProcessedDelegate): void;
     /**
      * Unregisters a layer entry config processed event handler.
-     * @param {LayerEntryProcessedDelegate} callback The callback to stop being called whenever the event is emitted
+     * @param {LayerEntryProcessedDelegate} callback - The callback to stop being called whenever the event is emitted
      */
     offLayerEntryProcessed(callback: LayerEntryProcessedDelegate): void;
     /**
      * Registers a config created event handler.
-     * @param {LayerConfigCreatedDelegate} callback The callback to be executed whenever the event is emitted
+     * @param {LayerConfigCreatedDelegate} callback - The callback to be executed whenever the event is emitted
      */
     onLayerConfigCreated(callback: LayerConfigCreatedDelegate): void;
     /**
      * Unregisters a config created event handler.
-     * @param {LayerConfigCreatedDelegate} callback The callback to stop being called whenever the event is emitted
+     * @param {LayerConfigCreatedDelegate} callback - The callback to stop being called whenever the event is emitted
      */
     offLayerConfigCreated(callback: LayerConfigCreatedDelegate): void;
     /**
      * Registers a config created event handler.
-     * @param {LayerGVCreatedDelegate} callback The callback to be executed whenever the event is emitted
+     * @param {LayerGVCreatedDelegate} callback - The callback to be executed whenever the event is emitted
      */
     onLayerGVCreated(callback: LayerGVCreatedDelegate): void;
     /**
      * Unregisters a config created event handler.
-     * @param {LayerGVCreatedDelegate} callback The callback to stop being called whenever the event is emitted
+     * @param {LayerGVCreatedDelegate} callback - The callback to stop being called whenever the event is emitted
      */
     offLayerGVCreated(callback: LayerGVCreatedDelegate): void;
     /**
      * Registers a layer creation event handler.
-     * @param {LayerGroupCreatedDelegate} callback The callback to be executed whenever the event is emitted
+     * @param {LayerGroupCreatedDelegate} callback - The callback to be executed whenever the event is emitted
      */
     onLayerGroupCreated(callback: LayerGroupCreatedDelegate): void;
     /**
      * Unregisters a layer creation event handler.
-     * @param {LayerGroupCreatedDelegate} callback The callback to stop being called whenever the event is emitted
+     * @param {LayerGroupCreatedDelegate} callback - The callback to stop being called whenever the event is emitted
      */
     offLayerGroupCreated(callback: LayerGroupCreatedDelegate): void;
     /**

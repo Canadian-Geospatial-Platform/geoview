@@ -38,18 +38,19 @@ export declare class EsriFeature extends AbstractGeoViewVector {
      * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
      * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
      * @returns {Promise<T = TypeMetadataEsriFeature | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
+     * @throws {LayerServiceMetadataUnableToFetchError} Error thrown when the metadata fetch fails or contains an error.
      */
     protected onFetchServiceMetadata<T = TypeMetadataEsriFeature | undefined>(abortSignal?: AbortSignal): Promise<T>;
     /**
      * Overrides the way a geoview layer config initializes its layer entries.
      * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
      * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
+     * @throws {LayerServiceMetadataUnableToFetchError} Error thrown when the metadata fetch fails or contains an error.
      */
     protected onInitLayerEntries(abortSignal?: AbortSignal): Promise<TypeGeoviewLayerConfig>;
     /**
      * This method validates recursively the configuration of the layer entries to ensure that it is a feature layer identified
      * with a numeric layerId and creates a group entry when a layer is a group.
-     *
      * @param {ConfigBaseClass[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
      */
     protected onValidateListOfLayerEntryConfig(listOfLayerEntryConfig: ConfigBaseClass[]): void;

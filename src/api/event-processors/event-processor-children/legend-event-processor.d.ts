@@ -85,6 +85,7 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
      * @param {string[]} objectIds - The IDs of features to get extents from.
      * @param {string} outfield - ID field to return for services that require a value in outfields.
      * @returns {Promise<Extent>} The extent of the feature, if available
+     * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
      */
     static getExtentFromFeatures(mapId: string, layerPath: string, objectIds: string[], outfield?: string): Promise<Extent>;
     /**
@@ -93,13 +94,11 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
      * @param {string} mapId - The unique identifier of the map instance.
      * @param {string} layerPath - The path to the layer.
      * @returns {TimeDimension | undefined} - The temporal dimension information of the layer, or `undefined` if not available.
-     *
      * @description
      * This method fetches the Geoview layer for the specified layer path and checks if it has a `getTimeDimension` method.
      * If the method exists, it retrieves the temporal dimension information for the layer.
      * If the layer doesn't support temporal dimensions, the method returns `undefined`.
-     *
-     * @throws {LayerNotFoundError} - If the specified layer cannot be found.
+     * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
      */
     static getLayerTimeDimension(mapId: string, layerPath: string): TimeDimension | undefined;
     static getLayerIconImage(layerLegend: TypeLegend | null): TypeLegendLayerItem[] | undefined;
@@ -145,6 +144,7 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
      * Refresh layer and reset states.
      * @param {string} mapId - The ID of the map.
      * @param {string} layerPath - The layer path of the layer to refresh.
+     * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
      */
     static refreshLayer(mapId: string, layerPath: string): void;
     /**

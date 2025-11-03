@@ -271,6 +271,7 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      *
      * @param {string} mapId - ID of map to zoom on
      * @param {string} layerPath - Path of layer to zoom to.
+     * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
      */
     static zoomToLayerVisibleScale(mapId: string, layerPath: string): void;
     /**

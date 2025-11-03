@@ -98,7 +98,6 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
     protected onError(event: unknown): void;
     /**
      * Overridable method called when the layer image is in error and couldn't be loaded correctly.
-     * We do not put the layer status as error, as this could be specific to a zoom level and the layer is otherwise fine.
      * @param {unknown} event - The event which is being triggered.
      */
     protected onImageLoadError(event: unknown): void;
@@ -112,6 +111,16 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
      * @returns {number} The hit tolerance
      */
     getHitTolerance(): number;
+    /**
+     * Gets the legend associated with the layer.
+     * @returns The layer legend
+     */
+    getLegend(): TypeLegend | undefined;
+    /**
+     * Sets the legend associated with the layer.
+     * @param {TypeLegend} legend - The layer legend
+     */
+    setLegend(legend: TypeLegend): void;
     /**
      * Gets the layer style
      * @returns The layer style
@@ -255,6 +264,24 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
      */
     onFetchLegend(): Promise<TypeLegend | null>;
     /**
+     * Utility function allowing to wait for the layer to be loaded at least once.
+     * @param {number} timeout - A timeout for the period to wait for. Defaults to 30,000 ms.
+     * @returns {Promise<void>} A Promise that resolves when the layer has been loaded at least once.
+     */
+    waitLoadedOnce(timeout?: number): Promise<void>;
+    /**
+     * Utility function allowing to wait for the layer legend to be fetched.
+     * @param {number} timeout - A timeout for the period to wait for. Defaults to 30,000 ms.
+     * @returns {Promise<void>} A Promise that resolves when the layer legend has been fetched.
+     */
+    waitLegendFetched(timeout?: number): Promise<void>;
+    /**
+     * Utility function allowing to wait for the layer style to be applied.
+     * @param {number} timeout - A timeout for the period to wait for. Defaults to 30,000 ms.
+     * @returns {Promise<void>} A Promise that resolves when the layer style has been applied.
+     */
+    waitStyleApplied(timeout?: number): Promise<void>;
+    /**
      * Overridable function set the style according to the fetched legend information
      *
      * @param {TypeLegend} legend - The fetched legend information
@@ -283,7 +310,6 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
      * @param {string[]} messageParams - Array of parameters to be interpolated into the localized message
      * @param {SnackbarType} messageType - The message type
      * @param {boolean} [notification=false] - Whether to show this as a notification. Defaults to false
-     * @returns {void}
      *
      * @example
      * this.emitMessage(
@@ -304,22 +330,22 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
     protected static initOptionsWithInitialSettings(layerOptions: Options, layerConfig: AbstractBaseLayerEntryConfig): void;
     /**
      * Registers a legend querying event handler.
-     * @param {LegendQueryingDelegate} callback The callback to be executed whenever the event is emitted
+     * @param {LegendQueryingDelegate} callback - The callback to be executed whenever the event is emitted
      */
     onLegendQuerying(callback: LegendQueryingDelegate): void;
     /**
      * Unregisters a legend querying event handler.
-     * @param {LegendQueryingDelegate} callback The callback to stop being called whenever the event is emitted
+     * @param {LegendQueryingDelegate} callback - The callback to stop being called whenever the event is emitted
      */
     offLegendQuerying(callback: LegendQueryingDelegate): void;
     /**
      * Registers a legend queried event handler.
-     * @param {LegendQueriedDelegate} callback The callback to be executed whenever the event is emitted
+     * @param {LegendQueriedDelegate} callback - The callback to be executed whenever the event is emitted
      */
     onLegendQueried(callback: LegendQueriedDelegate): void;
     /**
      * Unregisters a legend queried event handler.
-     * @param {LegendQueriedDelegate} callback The callback to stop being called whenever the event is emitted
+     * @param {LegendQueriedDelegate} callback - The callback to stop being called whenever the event is emitted
      */
     offLegendQueried(callback: LegendQueriedDelegate): void;
     /**

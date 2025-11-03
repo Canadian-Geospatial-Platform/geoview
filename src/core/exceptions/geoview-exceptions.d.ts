@@ -195,6 +195,28 @@ export declare class InitMapWrongCallError extends GeoViewError {
     constructor(mapId: string);
 }
 /**
+ * Error thrown when a Plugin error happened.
+ */
+export declare class PluginError extends GeoViewError {
+    /**
+     * Creates an instance of PluginError.
+     * @param {string} pluginId - The plugin id for which the state was uninitialized.
+     * @param {string} mapId - The map id
+     */
+    constructor(pluginId: string, mapId: string);
+}
+/**
+ * Error thrown when a Plugin configuration couldn't be found.
+ */
+export declare class PluginConfigNotFoundError extends GeoViewError {
+    /**
+     * Creates an instance of PluginConfigNotFoundError.
+     * @param {string} pluginId - The plugin id for which the config was not found.
+     * @param {string} mapId - The map id
+     */
+    constructor(pluginId: string, mapId: string, path: string);
+}
+/**
  * Error thrown when a plugin state hasn't been initialized and we're trying to access it.
  */
 export declare class PluginStateUninitializedError extends GeoViewError {
@@ -204,5 +226,16 @@ export declare class PluginStateUninitializedError extends GeoViewError {
      * @param {string} mapId - The map id
      */
     constructor(pluginId: string, mapId: string);
+}
+/**
+ * Error thrown when a Test Suite fails to initialize.
+ */
+export declare class TestSuiteInitializationError extends GeoViewError {
+    /**
+     * Creates an instance of TestSuiteInitializationError.
+     * @param {string} testSuite - The plugin id for which the state was uninitialized.
+     * @param {string} mapId - The map id
+     */
+    constructor(testSuite: string, mapId: string);
 }
 //# sourceMappingURL=geoview-exceptions.d.ts.map

@@ -1,5 +1,5 @@
 type FileFormat = 'pdf' | 'png' | 'jpeg';
-type DocumentSize = 'LETTER' | 'LEGAL' | 'TABLOID';
+type DocumentSize = 'AUTO';
 export interface FileExportProps {
     exportTitle: string;
     disclaimer: string;

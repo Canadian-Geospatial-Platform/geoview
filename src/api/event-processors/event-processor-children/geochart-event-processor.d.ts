@@ -37,6 +37,12 @@ export declare class GeochartEventProcessor extends AbstractEventProcessor {
      */
     static getSingleGeochartState(mapId: string, state: 'geochartChartsConfig' | 'layerDataArray' | 'layerDataArrayBatchLayerPathBypass' | 'selectedLayerPath'): string | TypeGeochartResultSetEntry[] | GeoChartStoreByLayerPath;
     /**
+     * Sets the selected layer path for a specific GeoChart map instance in the Zustand store.
+     * @param {string} mapId - The unique identifier of the GeoChart map.
+     * @param {string} layerPath - The path of the layer to set as selected.
+     */
+    static setSelectedGeochartLayerPath(mapId: string, layerPath: string): void;
+    /**
      * Sets the default layers from configuration.
      * In the store, the GeoChart configurations are stored in an object with layerPath as its property name
      * (to retrieve the configuration per layer faster).

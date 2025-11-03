@@ -37,6 +37,7 @@ export declare class WKB extends AbstractGeoViewVector {
      * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
      * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
      * @returns {Promise<T = TypeMetadataGeoJSON | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
+     * @throws {LayerServiceMetadataUnableToFetchError} Error thrown when the metadata fetch fails or contains an error.
      */
     protected onFetchServiceMetadata<T = TypeMetadataGeoJSON | undefined>(abortSignal?: AbortSignal): Promise<T>;
     /**
@@ -72,6 +73,10 @@ export declare class WKB extends AbstractGeoViewVector {
     /**
      * Fetches the metadata for a typical GeoJson class.
      * @param {string} url - The url to query the metadata from.
+     * @throws {RequestTimeoutError} Error thrown when the request exceeds the timeout duration.
+     * @throws {RequestAbortedError} Error thrown when the request was aborted by the caller's signal.
+     * @throws {ResponseError} Error thrown when the response is not OK (non-2xx).
+     * @throws {ResponseEmptyError} Error thrown when the JSON response is empty.
      */
     static fetchMetadata(url: string, abortSignal?: AbortSignal): Promise<TypeMetadataGeoJSON>;
     /**

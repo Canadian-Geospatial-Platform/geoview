@@ -35,22 +35,22 @@ export declare class ModalApi {
     closeModal: (modalId: string) => void;
     /**
      * Registers a modal opened event handler.
-     * @param {ModalOpenedDelegate} callback The callback to be executed whenever the event is emitted
+     * @param {ModalOpenedDelegate} callback - The callback to be executed whenever the event is emitted
      */
     onModalOpened(callback: ModalOpenedDelegate): void;
     /**
      * Unregisters a modal opened an event handler.
-     * @param {ModalOpenedDelegate} callback The callback to stop being called whenever the event is emitted
+     * @param {ModalOpenedDelegate} callback - The callback to stop being called whenever the event is emitted
      */
     offModalOpened(callback: ModalOpenedDelegate): void;
     /**
      * Registers a modal closed event handler.
-     * @param {ModalClosedDelegate} callback The callback to be executed whenever the event is emitted
+     * @param {ModalClosedDelegate} callback - The callback to be executed whenever the event is emitted
      */
     onModalClosed(callback: ModalClosedDelegate): void;
     /**
      * Unregisters a modal closed event handler.
-     * @param {ModalClosedDelegate} callback The callback to stop being called whenever the event is emitted
+     * @param {ModalClosedDelegate} callback - The callback to stop being called whenever the event is emitted
      */
     offModalClosed(callback: ModalClosedDelegate): void;
 }

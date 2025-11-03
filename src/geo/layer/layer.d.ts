@@ -5,7 +5,7 @@ import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { FeatureHighlight } from '@/geo/map/feature-highlight';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import type { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import type { TypeDisplayLanguage, TypeOutfieldsType } from '@/api/types/map-schema-types';
+import { type TypeDisplayLanguage, type TypeOutfieldsType } from '@/api/types/map-schema-types';
 import type { MapConfigLayerEntry, TypeGeoviewLayerConfig, TypeLayerStatus } from '@/api/types/layer-schema-types';
 import { HoverFeatureInfoLayerSet } from '@/geo/layer/layer-sets/hover-feature-info-layer-set';
 import { AllFeatureInfoLayerSet } from '@/geo/layer/layer-sets/all-feature-info-layer-set';
@@ -69,12 +69,17 @@ export declare class LayerApi {
     getGeoviewLayers(): AbstractBaseLayer[];
     /**
      * Returns the GeoView instance associated to the layer path.
-     * The first element of the layerPath is the geoviewLayerId and this function will
-     * work with either the geoViewLayerId or the layerPath.
      * @param {string} layerPath - The layer path
-     * @returns The new Geoview Layer
+     * @returns {AbstractBaseLayer} The new Geoview Layer
+     * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
      */
-    getGeoviewLayer(layerPath: string): AbstractBaseLayer | undefined;
+    getGeoviewLayer(layerPath: string): AbstractBaseLayer;
+    /**
+     * Returns the GeoView instance associated to the layer path.
+     * @param {string} layerPath - The layer path
+     * @returns {AbstractBaseLayer | undefined} The new Geoview Layer or undefined when not found
+     */
+    getGeoviewLayerIfExists(layerPath: string): AbstractBaseLayer | undefined;
     /**
      * Verifies if a layer is registered. Returns true if registered.
      * @param {string} layerPath - The layer path to check.
@@ -98,11 +103,24 @@ export declare class LayerApi {
      */
     getLayerEntryConfig(layerPath: string): ConfigBaseClass | undefined;
     /**
+     * Gets the layer configuration of the specified layer path.
+     * @param {string} layerPath The layer path.
+     * @returns {ConfigBaseClass | undefined} The layer configuration or undefined if not found.
+     */
+    getLayerEntryConfigIfExists(layerPath: string): ConfigBaseClass | undefined;
+    /**
      * Returns the OpenLayer instance associated with the layer path.
      * @param {string} layerPath - The layer path to the layer's configuration.
      * @returns {BaseLayer} Returns the geoview instance associated to the layer path.
+     * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
      */
-    getOLLayer(layerPath: string): BaseLayer | undefined;
+    getOLLayer(layerPath: string): BaseLayer;
+    /**
+     * Returns the OpenLayer instance associated with the layer path.
+     * @param {string} layerPath - The layer path to the layer's configuration.
+     * @returns {BaseLayer | undefined} Returns the geoview instance associated to the layer path.
+     */
+    getOLLayerIfExists(layerPath: string): BaseLayer | undefined;
     /**
      * Asynchronously returns the OpenLayer layer associated to a specific layer path.
      * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
@@ -123,9 +141,9 @@ export declare class LayerApi {
      * Adds a Geoview Layer by GeoCore UUID.
      * @param {string} uuid - The GeoCore UUID to add to the map
      * @param {string} layerEntryConfig - The optional layer configuration
-     * @returns {Promise<void>} A promise which resolves when done adding
+     * @returns {Promise<GeoViewLayerAddedResult>} A promise which resolves when done adding
      */
-    addGeoviewLayerByGeoCoreUUID(uuid: string, layerEntryConfig?: string): Promise<void>;
+    addGeoviewLayerByGeoCoreUUID(uuid: string, layerEntryConfig?: string): Promise<GeoViewLayerAddedResult | void>;
     /**
      * Adds a layer to the map. This is the main method to add a GeoView Layer on the map.
      * It handles all the processing, including the validations, and makes sure to inform the layer sets about the layer.
@@ -225,6 +243,7 @@ export declare class LayerApi {
      *
      * @param {string} layerPath - The path of the layer.
      * @param {boolean} newValue - The new value of visibility.
+     * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
      */
     setOrToggleLayerVisibility(layerPath: string, newValue?: boolean): boolean;
     /**
@@ -232,6 +251,7 @@ export declare class LayerApi {
      *
      * @param {string} layerPath - The path of the layer.
      * @param {string} name - The new name to use.
+     * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
      */
     setLayerName(layerPath: string, name: string): void;
     /**
@@ -240,6 +260,7 @@ export declare class LayerApi {
      * @param {string} layerPath - The path of the layer.
      * @param {number} opacity - The new opacity to use.
      * @param {boolean} emitOpacityChange - Whether to emit the event or not (false to avoid updating the legend layers)
+     * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path
      */
     setLayerOpacity(layerPath: string, opacity: number, emitOpacityChange?: boolean): void;
     /**
@@ -247,6 +268,8 @@ export declare class LayerApi {
      *
      * @param {string} layerPath - The path of the layer.
      * @param {GeoJSONObject | string} geojson - The new geoJSON.
+     * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
+     * @throws {LayerNotGeoJsonError} Error thrown when the layer is not a GeoJson layer.
      */
     setGeojsonSource(layerPath: string, geojson: GeoJSONObject | string): void;
     /**
@@ -282,6 +305,12 @@ export declare class LayerApi {
      * @param geoviewLayerId - The Geoview layer id for which the error happened.
      */
     showLayerError(error: unknown, geoviewLayerId: string): void;
+    /**
+     * Clears any overridden CRS settings on all WMS layers in the map.
+     * Iterates through all GeoView layers, identifies those that are instances of `GVWMS`,
+     * and resets their override CRS to `undefined`, allowing them to use the default projection behavior.
+     */
+    clearWMSLayersWithOverrideCRS(): void;
     /**
      * Registers a layer config error event handler.
      * @param {LayerConfigErrorDelegate} callback - The callback to be executed whenever the event is emitted

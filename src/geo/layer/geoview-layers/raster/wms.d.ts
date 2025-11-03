@@ -50,12 +50,14 @@ export declare class WMS extends AbstractGeoViewRaster {
      * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
      * @returns {Promise<T = TypeMetadataWMS | undefined>} A promise resolving to the parsed metadata object,
      * or `undefined` if metadata could not be retrieved or no capabilities were found.
+     * @throws {LayerServiceMetadataUnableToFetchError} Error thrown when the metadata fetch fails or contains an error.
      */
     protected onFetchServiceMetadata<T = TypeMetadataWMS | undefined>(abortSignal?: AbortSignal): Promise<T>;
     /**
      * Overrides the way a geoview layer config initializes its layer entries.
      * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
      * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
+     * @throws {LayerServiceMetadataUnableToFetchError} Error thrown when the metadata fetch fails or contains an error.
      */
     protected onInitLayerEntries(abortSignal?: AbortSignal): Promise<TypeGeoviewLayerConfig>;
     /**
@@ -86,8 +88,13 @@ export declare class WMS extends AbstractGeoViewRaster {
      * Fetches the metadata for WMS Capabilities.
      * @param {string} url - The url to query the metadata from.
      * @param {CallbackNewMetadataDelegate} callbackNewMetadataUrl - Callback executed when a proxy had to be used to fetch the metadata.
-     * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
      * The parameter sent in the callback is the proxy prefix with the '?' at the end.
+     * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+     * @throws {RequestTimeoutError} Error thrown when the request exceeds the timeout duration.
+     * @throws {RequestAbortedError} Error thrown when the request was aborted by the caller's signal.
+     * @throws {ResponseError} Error thrown when the response is not OK (non-2xx).
+     * @throws {ResponseEmptyError} Error thrown when the JSON response is empty.
+     * @throws {NetworkError} Errow thrown when a network issue happened.
      */
     static fetchMetadataWMS(url: string, callbackNewMetadataUrl?: CallbackNewMetadataDelegate, abortSignal?: AbortSignal): Promise<TypeMetadataWMS>;
     /**
@@ -96,8 +103,13 @@ export declare class WMS extends AbstractGeoViewRaster {
      * @param {string} layers - The layers to get the capabilities for.
      * @param {CallbackNewMetadataDelegate} callbackNewMetadataUrl - Callback executed when a proxy had to be used to fetch the metadata.
      * The parameter sent in the callback is the proxy prefix with the '?' at the end.
+     * @throws {RequestTimeoutError} Error thrown when the request exceeds the timeout duration.
+     * @throws {RequestAbortedError} Error thrown when the request was aborted by the caller's signal.
+     * @throws {ResponseError} Error thrown when the response is not OK (non-2xx).
+     * @throws {ResponseEmptyError} Error thrown when the JSON response is empty.
+     * @throws {NetworkError} Errow thrown when a network issue happened.
      */
-    static fetchMetadataWMSForLayer(url: string, layers: string, callbackNewMetadataUrl?: (proxyUsed: string) => void): Promise<TypeMetadataWMS>;
+    static fetchMetadataWMSForLayer(url: string, layers: string, callbackNewMetadataUrl?: CallbackNewMetadataDelegate): Promise<TypeMetadataWMS>;
     /**
      * Initializes a GeoView layer configuration for a WMS layer.
      * This method creates a basic TypeGeoviewLayerConfig using the provided
