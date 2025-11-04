@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -50,7 +50,8 @@
         overflow: auto;
       }
 
-      .tableResults th, .tableResults td {
+      .tableResults th,
+      .tableResults td {
         text-align: left;
       }
 
@@ -84,7 +85,7 @@
       }
 
       .tableResults .test-title::before {
-        content: "▶";
+        content: '▶';
         margin-right: 3px;
         display: inline-block;
         transition: transform 0.2s;
@@ -97,49 +98,48 @@
   </head>
 
   <body>
-    <div class="header-table">
-      <table>
-        <tbody>
-          <tr>
-            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
-            <td class="header-title">
-              <h1><strong>Functional Testing</strong></h1>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <a href="./index.html">Main</a><br />
-              <a href="#HEVNT1">1. Tests map 1 (EPSG: 3978)</a><br />
-              <a href="#HEVNT2">2. Tests map 2 (EPSG: 3978)</a><br />
-              <a href="#HEVNT3">3. Tests map 3 (EPSG: 3857)</a><br />
-              <a href="#HEVNT4">4. Tests map 4 (EPSG: 3978)</a><br />
-              <a href="#HEVNT5">5. Tests map 5 (EPSG: 3978)</a><br />
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div>
+      <div id="page-header"></div>
+
+      <div class="back-to-main">
+        <a href="./index.html?tab=testing">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>Functional Testing</h4>
+        <p>Quick links to test sections:</p>
+        <ul class="demo-list">
+          <li><a href="#HEVNT1">1. Tests map 1 (EPSG: 3978)</a></li>
+          <li><a href="#HEVNT2">2. Tests map 2 (EPSG: 3978)</a></li>
+          <li><a href="#HEVNT3">3. Tests map 3 (EPSG: 3857)</a></li>
+          <li><a href="#HEVNT4">4. Tests map 4 (EPSG: 3978)</a></li>
+          <li><a href="#HEVNT5">5. Tests map 5 (EPSG: 3978)</a></li>
+        </ul>
+      </div>
     </div>
 
-    <div style="text-align:right;">
+    <div style="text-align: right">
       <span id="allSuitesCheck"></span>
     </div>
-    <div style="text-align:right;">
-      Suites: <span id="allSuitesCompleted">0</span>/<span id="allSuitesTotal">0</span>
-    </div>
-    <div style="text-align:right;">
-      Running: <span id="allSuitesTestsRunning">0</span> | Done success: <span id="allSuitesTestsDoneSuccess" style="color:green;">0</span> | Done failed: <span id="allSuitesTestsDoneFailed" style="color:red;">0</span> | Done: <span id="allSuitesTestsDone">0</span>/<span id="allSuitesTestsTotal">0</span>
+    <div style="text-align: right">Suites: <span id="allSuitesCompleted">0</span>/<span id="allSuitesTotal">0</span></div>
+    <div style="text-align: right">
+      Running: <span id="allSuitesTestsRunning">0</span> | Done success:
+      <span id="allSuitesTestsDoneSuccess" style="color: green">0</span> | Done failed:
+      <span id="allSuitesTestsDoneFailed" style="color: red">0</span> | Done: <span id="allSuitesTestsDone">0</span>/<span
+        id="allSuitesTestsTotal"
+        >0</span
+      >
     </div>
     <button class="btnLaunchTests" onclick="launchTestsAll()">LAUNCH TESTS ALL MAPS!</button>
 
-
     <!-- REGION MAP 1 -->
-     <div class="map-title-holder">
+    <div class="map-title-holder">
       <h4 id="HEVNT1">1. Tests on map 1 (EPSG: 3978)</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
 
     <div id="testSuiteTable-map1"></div>
-    <br/>
+    <br />
     <div
       id="map1"
       class="geoview-map"
@@ -184,7 +184,7 @@
     </div>
 
     <div id="testSuiteTable-map2"></div>
-    <br/>
+    <br />
     <div
       id="map2"
       class="geoview-map"
@@ -230,7 +230,7 @@
     </div>
 
     <div id="testSuiteTable-map3"></div>
-    <br/>
+    <br />
     <div
       id="map3"
       class="geoview-map"
@@ -276,7 +276,7 @@
     </div>
 
     <div id="testSuiteTable-map4"></div>
-    <br/>
+    <br />
     <div
       id="map4"
       class="geoview-map"
@@ -335,7 +335,7 @@
     </div>
 
     <div id="testSuiteTable-map5"></div>
-    <br/>
+    <br />
     <div
       id="map5"
       class="geoview-map"
@@ -454,6 +454,8 @@
     <!-- END REGION MAP 5 -->
 
     <script>
+      insertPageHeader();
+
       // The test suites plugins (1 plugin per map)
       const testSuitesPlugins = {};
 
@@ -510,7 +512,7 @@
           testSuiteUpdateGrandTotal(testSuitesPlugins);
         } else {
           // Alert
-          throw new Error('Tests are already running, please wait.')
+          throw new Error('Tests are already running, please wait.');
         }
       }
     </script>

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -14,34 +14,23 @@
   </head>
 
   <body>
-    <div class="header-table">
-      <table>
-        <tbody>
-          <tr>
-            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
-            <td class="header-title">
-              <h1><strong>Add Panels</strong></h1>
-            </td>
-          </tr>
-          <tr>
-            <td><a href="./index.html">Main</a><br /></td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td>This page is used to showcase adding panels to the app-bar and adding panels and buttons to the navbar.</td>
-          </tr>
-        </tbody>
-      </table>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./index.html?tab=demos">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>Add Panels</h4>
+        <p>This page is used to showcase adding panels to the app-bar and adding panels and buttons to the navbar.</p>
+      </div>
     </div>
 
     <div class="toolbar">
-      <button class="add-appbar-panel-btn">Add Appbar Panel</button>
-      <button class="add-navbar-panel-btn">Add Navbar Panel</button>
-      <button class="add-navbar-button-btn">Add Navbar Button</button>
-      <input type="text" id="navbar-button-group-name" placeholder="Enter group name" value="groupName1" />
+      <button class="btn btn-primary add-appbar-panel-btn">Add Appbar Panel</button>
+      <button class="btn btn-primary add-navbar-panel-btn">Add Navbar Panel</button>
+      <button class="btn btn-primary add-navbar-button-btn">Add Navbar Button</button>
+      <input class="form-control" type="text" id="navbar-button-group-name" placeholder="Enter group name" value="groupName1" />
     </div>
     <div
       id="map1"
@@ -70,13 +59,14 @@
         'theme': 'geo.ca'
       }"
     ></div>
-    <p></p>
 
     <button type="button" class="collapsible">Code Snippet</button>
     <pre id="codeSnippet" class="panel"></pre>
 
     <script src="codedoc.js"></script>
     <script>
+      insertPageHeader();
+
       // Register handler when map has been initialized
       cgpv.onMapInit((mapViewer) => {
         // If map1

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -15,52 +15,38 @@
   </head>
 
   <body>
-    <div class="header-table">
-      <table>
-        <tbody>
-          <tr>
-            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
-            <td class="header-title">
-              <h1><strong>Bounding Box Selector</strong></h1>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td>
-              <a href="./index.html">Main</a>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td>This page demonstrates how the modify and translate interactions can be used to
-              create an advanced bounding box selector. This can be useful for assigning coordinates
-              to spatial filters while perfoming geographic queries.</td>
-          </tr>
-        </tbody>
-      </table>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./index.html?tab=demos">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>Bounding Box Selector</h4>
+        <p>
+          This page demonstrates how the modify and translate interactions can be used to create an advanced bounding box selector. This can
+          be useful for assigning coordinates to spatial filters while perfoming geographic queries.
+        </p>
+      </div>
     </div>
 
-    <div class="map-title-holder">
+    <div class="demo-section">
       <h4>Bounding Box Selector</h4>
     </div>
-    <div>Modify the bounding box by entering coordinates below or adjusting it directly on the map.
-      Click and drag the box to move it, or drag its vertices to resize it.<div>
+    <div>
+      Modify the bounding box by entering coordinates below or adjusting it directly on the map. Click and drag the box to move it, or drag
+      its vertices to resize it.
+    </div>
 
     <div>
       <label for="north">North:</label>
-      <input type="number" id="north" name="north" min="-90" max="90" step="any" value="70" />
+      <input class="form-control" type="number" id="north" name="north" min="-90" max="90" step="any" value="70" />
       <label for="east">East:</label>
-      <input type="number" id="east" name="east" min="-180" max="180" step="any" value="-70" />
+      <input class="form-control" type="number" id="east" name="east" min="-180" max="180" step="any" value="-70" />
       <label for="south">South:</label>
-      <input type="number" id="south" name="south" min="-90" max="90" step="any" value="60" />
+      <input class="form-control" type="number" id="south" name="south" min="-90" max="90" step="any" value="60" />
       <label for="west">West:</label>
-      <input type="number" id="west" name="west" min="-90" max="90" step="any" value="-100" />
+      <input class="form-control" type="number" id="west" name="west" min="-90" max="90" step="any" value="-100" />
     </div>
 
     <div style="position: relative">
@@ -82,13 +68,16 @@
             },
             'theme': 'geo.ca',
             'corePackages': []
-          }"></div>
+          }"
+      ></div>
     </div>
     <hr />
     <button type="button" class="collapsible">Code Snippet</button>
     <pre id="codeSnippet" class="panel"></pre>
 
     <script>
+      insertPageHeader();
+
       let map1;
       function initMap1(map) {
         // Keep reference
@@ -207,10 +196,7 @@
               // the original coordinate set.
               if (modifiedIndex === -1) {
                 for (let i = 0; i < newCoordinates.length - 1; i++) {
-                  if (
-                    bboxCoordinates[i][0] !== newCoordinates[i][0] ||
-                    bboxCoordinates[i][1] !== newCoordinates[i][1]
-                  ) {
+                  if (bboxCoordinates[i][0] !== newCoordinates[i][0] || bboxCoordinates[i][1] !== newCoordinates[i][1]) {
                     modifiedIndex = i;
                     break;
                   }
@@ -220,9 +206,10 @@
               // If the bounding box has been modified from it's previous state,
               // update it's vertices to ensure that it remains a rectangle.
               // Update the isUpdating flag to prevent redundant modifications.
-              if (modifiedIndex !== -1 &&
+              if (
+                modifiedIndex !== -1 &&
                 (bboxCoordinates[modifiedIndex][0] !== newCoordinates[modifiedIndex][0] ||
-                bboxCoordinates[modifiedIndex][1] !== newCoordinates[modifiedIndex][1])
+                  bboxCoordinates[modifiedIndex][1] !== newCoordinates[modifiedIndex][1])
               ) {
                 // Block additional updates
                 isUpdating = true;
@@ -252,18 +239,10 @@
         const westEl = document.getElementById('west');
 
         // Find input values based on coordinates
-        const northVal = coordinates.find((coord, i, arr) =>
-          i > 0 && coord[1] > arr[i - 1][1]
-        )[1];
-        const eastVal = coordinates.find((coord, i, arr) =>
-          i > 0 && coord[0] > arr[i - 1][0]
-        )[0];
-        const southVal = coordinates.find((coord, i, arr) =>
-          i > 0 && coord[1] < arr[i - 1][1]
-        )[1];
-        const westVal = coordinates.find((coord, i, arr) =>
-          i > 0 && coord[0] < arr[i - 1][0]
-        )[0];
+        const northVal = coordinates.find((coord, i, arr) => i > 0 && coord[1] > arr[i - 1][1])[1];
+        const eastVal = coordinates.find((coord, i, arr) => i > 0 && coord[0] > arr[i - 1][0])[0];
+        const southVal = coordinates.find((coord, i, arr) => i > 0 && coord[1] < arr[i - 1][1])[1];
+        const westVal = coordinates.find((coord, i, arr) => i > 0 && coord[0] < arr[i - 1][0])[0];
 
         // Set the input values to the new coordinates
         northEl.value = northVal;
@@ -299,7 +278,7 @@
         modifiedCoords[oppositeIndex] = [coords[oppositeIndex][0], coords[oppositeIndex][1]];
 
         // Close the polygon
-        modifiedCoords[4] = modifiedCoords[0]
+        modifiedCoords[4] = modifiedCoords[0];
 
         return modifiedCoords;
       }
@@ -313,13 +292,15 @@
         const westVal = document.getElementById('west').value;
 
         // New bounding box coordinates
-        let newCoordinates = [[
-          [westVal, southVal],
-          [westVal, northVal],
-          [eastVal, northVal],
-          [eastVal, southVal],
-          [westVal, southVal]
-        ]];
+        let newCoordinates = [
+          [
+            [westVal, southVal],
+            [westVal, northVal],
+            [eastVal, northVal],
+            [eastVal, southVal],
+            [westVal, southVal],
+          ],
+        ];
 
         // Set the bbox coordinates
         geometry.setFeatureCoords(bboxId, newCoordinates, lonLatProjection);

@@ -1,152 +1,92 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Loading Packages - Canadian Geospatial Platform Viewer</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>
-    Loading Packages - Canadian Geospatial Platform Viewer
-  </title>
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="shortcut icon" href="./favicon.ico" />
-  <meta name="msapplication-TileColor" content="#da532c" />
-  <meta name="msapplication-config" content="./img/browserconfig.xml" />
-  <meta name="theme-color" content="#ffffff" />
-  <meta name="msapplication-TileColor" content="#da532c" />
-  <meta name="theme-color" content="#ffffff" />
-  <style>
-    .panel {
-      display: inline-block;
-      background: #ffffff;
-      box-shadow: 0px 0px 5px 5px #666666;
-      -webkit-box-shadow: 2px 2px 5px 5x #666666;
-      -moz-box-shadow: 2px 2px 5px 5px #666666;
-      margin: 10px;
-      padding: 10px;
-      font-size: 12px;
-    }
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./index.html?tab=demos">← Back to Main</a>
+      </div>
 
-    .toolbar {
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
-      width: 100%;
-      margin: 10px;
-    }
+      <div class="demo-section">
+        <h4>Loading Packages</h4>
+        <p>This page is used to showcase loading / unloading packages at runtime.</p>
+      </div>
+    </div>
+    <div class="toolbar">
+      <button class="btn btn-primary" id="load-aoi-panel-btn">Load Area of Interest Panel</button>
+      <button class="btn btn-primary" id="unload-aoi-panel-btn">Unload Area of Interest Panel</button>
+      <button class="btn btn-primary" id="load-custom-legend-btn">Load Custom Legend</button>
+      <button class="btn btn-primary" id="unload-custom-legend-btn">Unload Custom Legend</button>
+    </div>
 
-    button {
-      margin: 10px;
-    }
+    <div id="map1" class="geoview-map" data-lang="en" data-config-url="./configs/loading-packages-config.json"></div>
 
-    body {
-      padding: 50px;
-    }
+    <button type="button" class="btn btn-primary collapsible active">Code Snippet</button>
+    <pre id="codeSnippet" class="panel"></pre>
 
-    .titleheader {
-      width: 979px;
-      text-align: center;
-    }
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
 
-    .header-table {
-      width: 1180px;
-      text-align: left;
-      margin: 0 auto;
-    }
+      // Register handler when map has been initialized
+      cgpv.onMapInit((mapViewer) => {
+        if (mapViewer.mapId === 'map1') {
+          // get load aoi panel button element
+          var loadAoiPanelBtn = document.getElementById('load-aoi-panel-btn');
 
-    .logo {
-      height: 120px;
-      width: 120px;
-      text-align: left;
-    }
-  </style>
-</head>
+          // add event handler to the load aoi panel button
+          loadAoiPanelBtn.addEventListener('click', function (e) {
+            cgpv.api.plugin.addPlugin('aoi-panel', window.geoviewPlugins['aoi-panel'], mapViewer.mapId);
+          });
 
-<body>
-  <div class="header-table">
-    <table>
-      <tbody>
-        <tr>
-          <td><img class="logo" alt="logo" src="./img/Logo.png" /></td>
-          <td class="header-title">
-            <h1><strong>Loading Packages</strong></h1>
-          </td>
-        </tr>
-        <tr>
-          <td><a href="./index.html">Main</a><br /></td>
-        </tr>
-      </tbody>
-    </table>
-    <table>
-      <tbody>
-        <tr>
-          <td>This page is used to showcase loading / unloading packages at runtime.</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  <div class="toolbar">
-    <button id="load-aoi-panel-btn">Load Area of Interest Panel</button>
-    <button id="unload-aoi-panel-btn">Unload Area of Interest Panel</button>
-    <button id="load-custom-legend-btn">Load Custom Legend</button>
-    <button id="unload-custom-legend-btn">Unload Custom Legend </button>
-  </div>
+          // get unload aoi panel button element
+          var unloadAoiPanelBtn = document.getElementById('unload-aoi-panel-btn');
 
-  <div id="map1" class="geoview-map" data-lang="en" data-config-url="./configs/loading-packages-config.json"></div>
-  <p></p>
-  <hr />
+          // add event handler to the unload aoi panel button
+          unloadAoiPanelBtn.addEventListener('click', function (e) {
+            cgpv.api.plugin.removePlugin('aoi-panel', mapViewer.mapId);
+          });
 
-  <button type="button" class="collapsible">Code Snippet</button>
-  <pre id="codeSnippet" class="panel"></pre>
+          // get load custom legend button element
+          var loadCustomLegendBtn = document.getElementById('load-custom-legend-btn');
 
-  <script src="codedoc.js"></script>
-  <script>
-    // Register handler when map has been initialized
-    cgpv.onMapInit((mapViewer) => {
-      if (mapViewer.mapId === 'map1') {
-        // get load aoi panel button element
-        var loadAoiPanelBtn = document.getElementById('load-aoi-panel-btn');
+          // add event handler to the load custom legend button
+          loadCustomLegendBtn.addEventListener('click', function (e) {
+            if (!window?.geoviewPlugins) window.geoviewPlugins = {};
+            cgpv.api.plugin.addPlugin('custom-legend', window.geoviewPlugins['custom-legend'], mapViewer.mapId);
+          });
 
-        // add event handler to the load aoi panel button
-        loadAoiPanelBtn.addEventListener('click', function (e) {
-          cgpv.api.plugin.addPlugin('aoi-panel', window.geoviewPlugins['aoi-panel'], mapViewer.mapId);
-        });
+          // get unload custom legend button element
+          var unloadCustomLegendBtn = document.getElementById('unload-custom-legend-btn');
 
-        // get unload aoi panel button element
-        var unloadAoiPanelBtn = document.getElementById('unload-aoi-panel-btn');
+          // add event handler to the unload custom legend button
+          unloadCustomLegendBtn.addEventListener('click', function (e) {
+            cgpv.api.plugin.removePlugin('custom-legend', mapViewer.mapId);
+          });
+        }
+      });
 
-        // add event handler to the unload aoi panel button
-        unloadAoiPanelBtn.addEventListener('click', function (e) {
-          cgpv.api.plugin.removePlugin('aoi-panel', mapViewer.mapId);
-        });
+      // initialize cgpv
+      cgpv.init();
 
-        // get load custom legend button element
-        var loadCustomLegendBtn = document.getElementById('load-custom-legend-btn');
-
-        // add event handler to the load custom legend button
-        loadCustomLegendBtn.addEventListener('click', function (e) {
-          if (!window?.geoviewPlugins) window.geoviewPlugins = {};
-          cgpv.api.plugin.addPlugin('custom-legend', window.geoviewPlugins['custom-legend'], mapViewer.mapId);
-        });
-
-        // get unload custom legend button element
-        var unloadCustomLegendBtn = document.getElementById('unload-custom-legend-btn');
-
-        // add event handler to the unload custom legend button
-        unloadCustomLegendBtn.addEventListener('click', function (e) {
-          cgpv.api.plugin.removePlugin('custom-legend', mapViewer.mapId);
-        });
-      }
-    });
-
-    // initialize cgpv
-    cgpv.init();
-
-    // create snippets
-    window.addEventListener('load', () => {
-      createCodeSnippet();
-      createConfigSnippet();
-    });
-  </script>
-</body>
-
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });
+    </script>
+  </body>
 </html>

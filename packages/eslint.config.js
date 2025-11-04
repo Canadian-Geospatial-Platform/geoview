@@ -11,14 +11,12 @@ export default [
   js.configs.recommended,
   // Ignores (actually recommended to be first in the whole config logic)
   {
-    ignores: [
-      'node_modules/', 'dist/', 'eslint.config.js',
-    ]
+    ignores: ['node_modules/', 'dist/', 'eslint.config.js'],
   },
 
-  // Core logic
+  // Core logic for TypeScript files
   {
-    files: ['**/*.{js,jsx,ts,tsx}'],
+    files: ['**/*.{ts,tsx}'],
     languageOptions: {
       parser: tsparser,
       parserOptions: {
@@ -122,11 +120,11 @@ export default [
           ignoreOverrideMethods: true,
         },
       ],
-      "@typescript-eslint/explicit-member-accessibility": [
-        "error",
+      '@typescript-eslint/explicit-member-accessibility': [
+        'error',
         {
-          "accessibility": "no-public"
-        }
+          accessibility: 'no-public',
+        },
       ],
       '@typescript-eslint/no-non-null-assertion': 'off',
       'require-await': 1, // Warning
@@ -208,15 +206,28 @@ export default [
     },
   },
 
-  // Webpack config files
+  // JavaScript files (without type-aware linting)
   {
-    files: ['webpack.*.js'],
+    files: ['**/*.{js,jsx}'],
     languageOptions: {
-      parser: '@babel/eslint-parser',
       parserOptions: {
-        requireConfigFile: false,
-        ecmaVersion: 2018,
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+      },
+      globals: {
+        window: 'readonly',
+        document: 'readonly',
+        console: 'readonly',
+        process: 'readonly',
+        __dirname: 'readonly',
+        module: 'readonly',
+        require: 'readonly',
       },
     },
-  }
+    rules: {
+      // General JS linting rules (no type-aware rules)
+      'no-console': 'off',
+      'no-unused-vars': 'warn',
+    },
+  },
 ];

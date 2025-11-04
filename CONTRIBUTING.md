@@ -118,7 +118,7 @@ Must be one of the following:
 * __chore__: Changes to the build process or auxiliary tools and libraries such as documentation generation
 
 __Scope__
-The scope could be anything specifying place of the commit change. For example UI, geoSearch, plugin, API, etc...
+The scope could be anything specifying place of the commit change. For example UI, geoSearch, package, API, etc...
 
 __Subject__
 The subject contains succinct description of the change.

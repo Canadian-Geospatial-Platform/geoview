@@ -43,7 +43,6 @@ function createCodeSnippetUsingIDs() {
     // Try to find a codeSnippet flag interested in that script
     const script = scripts[i];
     document.querySelectorAll(`[id-script="${script.id}"]`).forEach((el) => {
-      // eslint-disable-next-line no-param-reassign
       el.innerHTML = `<pre>${script.textContent}</pre>`;
     });
   }
@@ -90,7 +89,6 @@ function createConfigSnippet() {
         );
       }
     } catch (error) {
-      // eslint-disable-next-line no-console
       console.log('Error trapped in createConfigSnippet');
     }
   }
@@ -107,7 +105,7 @@ function createCollapsible() {
     const content = coll[i].nextElementSibling;
     if (coll[i].classList.contains('active')) content.style.display = 'block';
     else content.style.display = 'none';
-    // eslint-disable-next-line func-names
+
     coll[i].addEventListener('click', function () {
       this.classList.toggle('active');
       if (this.classList.contains('active')) content.style.display = 'block';
@@ -209,7 +207,7 @@ function listenToLegendLayerSetChanges(elementId, mapViewer) {
 }
 
 async function onConfigChange(mapId, e) {
-    // create new map in a new dom node
+  // create new map in a new dom node
   let mapDiv = document.getElementById(mapId);
   if (mapDiv === null) {
     mapDiv = document.createElement('div');
@@ -260,24 +258,24 @@ async function onConfigChange(mapId, e) {
 }
 
 function cleanURL(url) {
-    // Split the protocol and the rest
-    const [protocolPart, rest] = url.split("://");
+  // Split the protocol and the rest
+  const [protocolPart, rest] = url.split('://');
 
-    // Split domain and path
-    const firstSlashIndex = rest.indexOf('/');
-    const domain = firstSlashIndex === -1 ? rest : rest.substring(0, firstSlashIndex);
-    let path = firstSlashIndex === -1 ? '' : rest.substring(firstSlashIndex);
+  // Split domain and path
+  const firstSlashIndex = rest.indexOf('/');
+  const domain = firstSlashIndex === -1 ? rest : rest.substring(0, firstSlashIndex);
+  let path = firstSlashIndex === -1 ? '' : rest.substring(firstSlashIndex);
 
-    // Replace multiple slashes with one in path
-    path = path.replace(/\/+/g, '/');
+  // Replace multiple slashes with one in path
+  path = path.replace(/\/+/g, '/');
 
-    // Remove trailing slash if it's not the root "/"
-    if (path.length > 1 && path.endsWith('/')) {
-        path = path.slice(0, -1);
-    }
+  // Remove trailing slash if it's not the root "/"
+  if (path.length > 1 && path.endsWith('/')) {
+    path = path.slice(0, -1);
+  }
 
-    // Reconstruct the cleaned URL
-    return `${protocolPart}://${domain}${path}`;
+  // Reconstruct the cleaned URL
+  return `${protocolPart}://${domain}${path}`;
 }
 
 function testSuiteCreateTable(plugin) {
@@ -315,27 +313,30 @@ function testSuiteCreateTable(plugin) {
   return wrapper;
 }
 
-function testSuiteUpdateTotals(plugin) {
-  const suitesCompleted = document.getElementById('suitesCompleted-' + plugin.mapViewer.mapId);
-  suitesCompleted.textContent = plugin.getSuitesCompleted();
-  const suitesTotal = document.getElementById('suitesTotal-' + plugin.mapViewer.mapId);
-  suitesTotal.textContent = plugin.getSuitesTotal();
-  const suitesCheck = document.getElementById('suitesCheck-' + plugin.mapViewer.mapId);
-  const suiteRunning = plugin.getTestsRunning() > 0;
-  const completedFully = plugin.getTestsDoneAllAndSuiteDone();
-  const allSuccess = plugin.getTestsDoneAllSuccessAndSuiteDone();
-  suitesCheck.textContent = completedFully ? (allSuccess ? '✔' : '✘') : suiteRunning ? '⏳' : '';
-  suitesCheck.style.color = completedFully ? (allSuccess ? 'green' : 'red') : 'black';
-  const testsRunning = document.getElementById('testsRunning-' + plugin.mapViewer.mapId);
-  testsRunning.textContent = plugin.getTestsRunning();
-  const testsDoneSuccess = document.getElementById('testsDoneSuccess-' + plugin.mapViewer.mapId);
-  testsDoneSuccess.textContent = plugin.getTestsDoneSuccess();
-  const testsDoneFailed = document.getElementById('testsDoneFailed-' + plugin.mapViewer.mapId);
-  testsDoneFailed.textContent = plugin.getTestsDoneFailed();
-  const testsDone = document.getElementById('testsDone-' + plugin.mapViewer.mapId);
-  testsDone.textContent = plugin.getTestsDone();
-  const testsTotal = document.getElementById('testsTotal-' + plugin.mapViewer.mapId);
-  testsTotal.textContent = plugin.getTestsTotal();
+function testSuiteUpdateTotals(plugin, idPrefix = '') {
+  const prefix = idPrefix ? idPrefix + '-' : '';
+  const suitesCompleted = document.getElementById(prefix + 'suitesCompleted-' + plugin.mapViewer.mapId);
+  if (suitesCompleted) suitesCompleted.textContent = plugin.getSuitesCompleted();
+  const suitesTotal = document.getElementById(prefix + 'suitesTotal-' + plugin.mapViewer.mapId);
+  if (suitesTotal) suitesTotal.textContent = plugin.getSuitesTotal();
+  const suitesCheck = document.getElementById(prefix + 'suitesCheck-' + plugin.mapViewer.mapId);
+  if (suitesCheck) {
+    const suiteRunning = plugin.getTestsRunning() > 0;
+    const completedFully = plugin.getTestsDoneAllAndSuiteDone();
+    const allSuccess = plugin.getTestsDoneAllSuccessAndSuiteDone();
+    suitesCheck.textContent = completedFully ? (allSuccess ? '✔' : '✘') : suiteRunning ? '⏳' : '';
+    suitesCheck.style.color = completedFully ? (allSuccess ? 'green' : 'red') : 'black';
+  }
+  const testsRunning = document.getElementById(prefix + 'testsRunning-' + plugin.mapViewer.mapId);
+  if (testsRunning) testsRunning.textContent = plugin.getTestsRunning();
+  const testsDoneSuccess = document.getElementById(prefix + 'testsDoneSuccess-' + plugin.mapViewer.mapId);
+  if (testsDoneSuccess) testsDoneSuccess.textContent = plugin.getTestsDoneSuccess();
+  const testsDoneFailed = document.getElementById(prefix + 'testsDoneFailed-' + plugin.mapViewer.mapId);
+  if (testsDoneFailed) testsDoneFailed.textContent = plugin.getTestsDoneFailed();
+  const testsDone = document.getElementById(prefix + 'testsDone-' + plugin.mapViewer.mapId);
+  if (testsDone) testsDone.textContent = plugin.getTestsDone();
+  const testsTotal = document.getElementById(prefix + 'testsTotal-' + plugin.mapViewer.mapId);
+  if (testsTotal) testsTotal.textContent = plugin.getTestsTotal();
 }
 
 function testSuiteUpdateGrandTotal(plugins) {
@@ -347,7 +348,7 @@ function testSuiteUpdateGrandTotal(plugins) {
   let totalTestsDone = 0;
   let totalTestsTotal = 0;
   const thePlugins = Object.values(plugins);
-  thePlugins.forEach(plugin => {
+  thePlugins.forEach((plugin) => {
     totalSuitesCompleted += plugin.getSuitesCompleted();
     totalSuitesTotal += plugin.getSuitesTotal();
     totalTestsRunning += plugin.getTestsRunning();
@@ -362,8 +363,8 @@ function testSuiteUpdateGrandTotal(plugins) {
   suitesTotal.textContent = totalSuitesTotal;
   const suitesCheck = document.getElementById('allSuitesCheck');
   const suiteRunning = totalTestsRunning > 0;
-  const completedFully = thePlugins.every(plugin => plugin.getTestsDoneAllAndSuiteDone());
-  const allSuccess = thePlugins.every(plugin => plugin.getTestsDoneAllSuccessAndSuiteDone());
+  const completedFully = thePlugins.every((plugin) => plugin.getTestsDoneAllAndSuiteDone());
+  const allSuccess = thePlugins.every((plugin) => plugin.getTestsDoneAllSuccessAndSuiteDone());
   suitesCheck.textContent = completedFully ? (allSuccess ? '✔' : '✘') : suiteRunning ? '⏳' : '';
   suitesCheck.style.color = completedFully ? (allSuccess ? 'green' : 'red') : 'black';
   const testsRunning = document.getElementById('allSuitesTestsRunning');
@@ -378,25 +379,26 @@ function testSuiteUpdateGrandTotal(plugins) {
   testsTotal.textContent = totalTestsTotal;
 }
 
-function testSuiteAddOrUpdateTestResultRow(plugin, testSuite, testTester, test, details) {
+function testSuiteAddOrUpdateTestResultRow(plugin, testSuite, testTester, test, details, idPrefix = '') {
   let passed = null;
   if (test.getStatus() === 'success') passed = true;
   else if (test.getStatus() === 'failed') passed = false;
 
+  const prefix = idPrefix ? idPrefix + '-' : '';
+
   // Find the table for the map id
-  const tableBody = document.getElementById('tableBody-' + plugin.mapViewer.mapId);
+  const tableBody = document.getElementById(prefix + 'tableBody-' + plugin.mapViewer.mapId);
   if (!tableBody) {
-    console.error('Table body element with id "tableBody' + plugin.mapViewer.mapId + '" not found.');
     return;
   }
 
   // Try to find an existing row by ID
-  let row = document.getElementById(test.id);
+  let row = document.getElementById(prefix + test.id);
 
   if (!row) {
     // If it doesn't exist, create a new row
     row = document.createElement('tr');
-    row.id = test.id;
+    row.id = prefix + test.id;
     row.classList.add('expanded');
 
     // Create and append the three cells
@@ -415,7 +417,13 @@ function testSuiteAddOrUpdateTestResultRow(plugin, testSuite, testTester, test, 
   }
 
   // Title
-  let testMessage = '<font class="test-title" style="color:' + color + ';" onclick="' + `this.closest('tr').classList.toggle('expanded'); this.closest('tr').classList.toggle('collapsed');">` + test.getTitle() + '</font><br/>';
+  let testMessage =
+    '<font class="test-title" style="color:' +
+    color +
+    ';" onclick="' +
+    `this.closest('tr').classList.toggle('expanded'); this.closest('tr').classList.toggle('collapsed');">` +
+    test.getTitle() +
+    '</font><br/>';
 
   // Collapsible content
   testMessage += '<div class="collapsible-content" style="margin-top: 5px;">';
@@ -454,5 +462,27 @@ function testSuiteEmptyTestResults(plugin) {
   const tableBody = document.getElementById('tableBody-' + plugin.mapViewer.mapId);
   while (tableBody.firstChild) {
     tableBody.removeChild(tableBody.firstChild);
+  }
+}
+
+/**
+ * Insert the standard page header with logo and titles
+ * Call this function at the beginning of the body tag with an empty div: <div id="page-header"></div>
+ */
+function insertPageHeader() {
+  const headerHTML = `
+    <div class="page-header">
+      <img class="header-logo" alt="logo" src="./img/Logo.png" />
+      <div class="page-header-titles">
+        <h1 class="index-header-title"><strong>Plateforme Géospatiale Canadienne (PGC) - Projet GeoView -</strong></h1>
+        <h1 class="index-header-title"><strong>Canadian Geospatial Platform (CGP) - GeoView Project -</strong></h1>
+      </div>
+    </div>
+    <div style="border-bottom: 3px solid #515ba5; margin: 20px 0;"></div>
+  `;
+
+  const headerElement = document.getElementById('page-header');
+  if (headerElement) {
+    headerElement.innerHTML = headerHTML;
   }
 }

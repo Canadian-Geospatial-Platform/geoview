@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -15,48 +15,22 @@
   </head>
 
   <body>
-    <div class="header-table">
-      <table>
-        <tbody>
-          <tr>
-            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
-            <td class="header-title">
-              <h1><strong>Snap (interactions)</strong></h1>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td>
-              <ol>
-                <a href="./index.html">Main</a>
-                <li><a href="#SNAP1">Snap (simple case)</a></li>
-              </ol>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td>This page is used to showcase different Snap functionalities</td>
-          </tr>
-        </tbody>
-      </table>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./index.html?tab=demos">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>Snap (interactions)</h4>
+        <p>
+          This page is used to showcase different Snap functionalities. In this example, the <span style="color: red">red polygon</span> is
+          a snappable geometry onto which you can modify/snap the other available shapes.
+        </p>
+      </div>
     </div>
 
     <!-- SNAP -->
-    <div class="map-title-holder">
-      <h4 id="SNAP1">1. Snap (simple case)</h4>
-      <a class="ref-link" href="#top">Top</a>
-    </div>
-    <div>
-      In this example, the <span style="color: red">red polygon</span> is a snappable geometry onto which you can modify/snap the other
-      available shapes.
-    </div>
-
     <div style="position: relative">
       <div class="logs-container">
         <div class="logs-container-title">API EVENTS LOGS</div>
@@ -83,14 +57,17 @@
             },
             'theme': 'geo.ca',
             'corePackages': []
-          }"></div>
-  </div>
-  <hr />
-  <button type="button" class="collapsible">Code Snippet</button>
-  <pre id="codeSnippet" class="panel"></pre>
-  <!-- /SNAP -->
+          }"
+      ></div>
+    </div>
+    <hr />
+    <button type="button" class="collapsible">Code Snippet</button>
+    <pre id="codeSnippet" class="panel"></pre>
+    <!-- /SNAP -->
 
     <script>
+      insertPageHeader();
+
       let map1;
       function initMap1(map) {
         // Keep reference

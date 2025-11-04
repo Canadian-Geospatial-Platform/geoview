@@ -13,9 +13,10 @@ The types needs to be rebuild from time to time. To do this, follow this procedu
 ```
 rush build:core
 ```
-This will create a branch called ```types``` in your origin remote
 
-__NOTE: the current workflow is not able to push to upstream so manual procedure is needed__
+This will create a branch called `types` in your origin remote
+
+**NOTE: the current workflow is not able to push to upstream so manual procedure is needed**
 Create a Pull Request to merge your origin types branch into upstream types.
 
 ### How does it work
@@ -51,7 +52,7 @@ To import types, you simply import it from the `geoview-core-types` module.
 
 In a typescript react project you can import types like this:
 
-    import { TypeWindow, TypeJsonObject, TypeButtonPanel } from "geoview-core-types";
+    import { TypeWindow, TypeButtonPanel } from "geoview-core-types";
 
 #### Recommendation:
 

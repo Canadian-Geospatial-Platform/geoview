@@ -4,7 +4,7 @@ geoview-core is a package that manages the core viewer functionalities. Among th
 
 - An [API](https://github.com/Canadian-Geospatial-Platform/geoview/tree/develop/packages/geoview-core/src/api) that is exported to be used for internal and external packages
   - APIs to manage [events](https://github.com/Canadian-Geospatial-Platform/geoview/tree/develop/packages/geoview-core/src/api/events)
-  - APIs to manage [plugins](https://github.com/Canadian-Geospatial-Platform/geoview/tree/develop/packages/geoview-core/src/api/plugin)
+  - APIs to manage [plugins(packages)](https://github.com/Canadian-Geospatial-Platform/geoview/tree/develop/packages/geoview-core/src/api/plugin)
   - APIs to control maps
 - Main rendering of maps and [core](https://github.com/Canadian-Geospatial-Platform/geoview/tree/develop/packages/geoview-core/src/core) components
 - Layers and [Geospatial](https://github.com/Canadian-Geospatial-Platform/geoview/tree/develop/packages/geoview-core/src/geo) functionalities
