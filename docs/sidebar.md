@@ -54,4 +54,4 @@
   - [Object Oriented](programming/object-oriented.md)
 
 - **TypeDoc API**
-  - [TypeScript API Reference](../public/typeDocAPI/index.html ":ignore")
+  - [TypeScript API Reference](../docs/typedoc/index.html ":ignore")

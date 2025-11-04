@@ -66,7 +66,7 @@ Package system and development:
 
 ### TypeScript API Reference (TypeDoc)
 
-> **📚 Complete API Reference:** For detailed TypeScript interfaces, types, classes, and functions, see our auto-generated [TypeDoc API Documentation](https://canadian-geospatial-platform.github.io/geoview/public/typeDocAPI/)
+> **📚 Complete API Reference:** For detailed TypeScript interfaces, types, classes, and functions, see our auto-generated [TypeDoc API Documentation](https://canadian-geospatial-platform.github.io/geoview/docs/typedoc/)
 
 **What's in TypeDoc:**
 
@@ -164,7 +164,7 @@ docs/
 +-- programming/          # Internal development practices
 
 TypeDoc (Auto-generated):
-+-- public/typeDocAPI/    # Complete TypeScript API reference
++-- docs/typedoc/         # Complete TypeScript API reference
     +-- modules.html      # All exported modules
     +-- classes/          # Class documentation
     +-- interfaces/       # Interface definitions
@@ -178,7 +178,7 @@ TypeDoc (Auto-generated):
 | --------------------- | -------------------- | ----------------------------------- | --------------------------------------- |
 | **API Reference**     | `docs/app/api/`      | Complete API function reference     | Looking up API methods and parameters   |
 | **Configuration**     | `docs/app/config/`   | Map creation and configuration      | Setting up maps and configuring GeoView |
-| **TypeDoc Reference** | `public/typeDocAPI/` | Complete TypeScript API definitions | Looking up exact types and signatures   |
+| **TypeDoc Reference** | `docs/typedoc/`      | Complete TypeScript API definitions | Looking up exact types and signatures   |
 | **Developer Guides**  | `docs/programming/`  | Internal architecture and patterns  | Contributing to GeoView core            |
 | **Extension Guides**  | `docs/app/packages/` | Creating packages                   | Building GeoView extensions             |
 

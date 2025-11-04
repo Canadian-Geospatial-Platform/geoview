@@ -195,7 +195,7 @@ const config = {
     new CopyWebpackPlugin({
       patterns: [
         { from: '../../docs', to: 'docs' },
-        { from: './public/typeDocAPI', to: 'public/typeDocAPI', noErrorOnMissing: true }, // TypeDoc generated API docs
+        { from: './public/typeDocAPI', to: 'docs/typedoc', noErrorOnMissing: true }, // TypeDoc generated API docs
         { from: './public/img', to: 'img' },
         { from: './public/configs', to: 'configs' },
         { from: './public/locales', to: 'locales', noErrorOnMissing: true },

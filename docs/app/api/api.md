@@ -1,6 +1,6 @@
 # GeoView API Documentation
 
-> **📚 Complete TypeScript API:** For full type definitions, interfaces, and auto-generated documentation, see [TypeDoc API Reference](https://canadian-geospatial-platform.github.io/geoview/public/typeDocAPI/)
+> **📚 Complete TypeScript API:** For full type definitions, interfaces, and auto-generated documentation, see [TypeDoc API Reference](https://canadian-geospatial-platform.github.io/geoview/docs/typedoc/)
 
 ## Overview
 
