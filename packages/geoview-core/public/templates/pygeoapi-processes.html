@@ -17,20 +17,13 @@
 </head>
 
 <body>
+  <div id="page-header"></div>
   <div>
-    <div class="page-header">
-      <img class="header-logo" alt="logo" src="./img/Logo.png" />
-      <div class="page-header-titles">
-        <h1 class="index-header-title"><strong>Plateforme Géospatiale Canadienne (PGC) - Projet GeoView -</strong></h1>
-        <h1 class="index-header-title"><strong>Canadian Geospatial Platform (CGP) - GeoView Project -</strong></h1>
-      </div>
+    <div class="back-to-main">
+      <a href="./index.html?tab=demos">← Back to Main</a>
     </div>
-      <hr />
-      <hr />
 
-      <div class="back-to-main">
-        <a href="./index.html?tab=demos">← Back to Main</a>
-      </div>    <div class="demo-section">
+    <div class="demo-section">
       <h4>PyGeoAPI process on a GeoJSON layer</h4>
       <p>This page is used to showcase how we can load a GeoJSON layer from data returned by a process using a POST query.</p>
     </div>
@@ -81,15 +74,15 @@
     <tbody>
       <tr style="border: 1px solid black;padding: 15px; width: 5%;">
         <td style="border: 1px solid black;padding: 15px; width: 5%;">
-          <button id="Add-GeoMet-Button">Raster Drill process</button><br />
-          Latitude: <input id="GeoMet-Lat-Input" type="number" value=51.132831196692806></input><br />
-          Longitude: <input id="GeoMet-Long-Input" type="number" value=-114.74968888274337></input><br />
+          <button id="Add-GeoMet-Button" class="btn btn-primary">Raster Drill process</button><br />
+          Latitude: <input id="GeoMet-Lat-Input" type="number" class="form-control" style="width: 250px; margin: 5px 0;" value=51.132831196692806></input><br />
+          Longitude: <input id="GeoMet-Long-Input" type="number" class="form-control" style="width: 250px; margin: 5px 0;" value=-114.74968888274337></input><br />
           <label> Added Layer ID : </label><label id="GeoMet-New-Layer-Id-Label"></label>
         </td>
         <td style="border: 1px solid black;padding: 15px; width: 5%;">
-          <button id="Add-Hydro-Button">Downstream Analysis</button><br />
-          Latitude: <input id="Hydro-Lat-Input" type="number" value=47.02115799969316></input><br />
-          Longitude: <input id="Hydro-Long-Input" type="number" value=-65.93753763004142></input><br />
+          <button id="Add-Hydro-Button" class="btn btn-success">Downstream Analysis</button><br />
+          Latitude: <input id="Hydro-Lat-Input" type="number" class="form-control" style="width: 250px; margin: 5px 0;" value=47.02115799969316></input><br />
+          Longitude: <input id="Hydro-Long-Input" type="number" class="form-control" style="width: 250px; margin: 5px 0;" value=-65.93753763004142></input><br />
           <label> Added Layer ID : </label><label id="Hydro-New-Layer-Id-Label"></label>
         </td>
       </tr>
@@ -98,7 +91,7 @@
   <hr />
   <p>This map has an empty configuration. You can add a GeoJSON layer by clicking the buttons.</p>
   <button type="button" class="collapsible">Configuration Snippet</button>
-  <pre id="LYR5CS" class="panel"></pre>
+  <pre id="map1CS" class="panel"></pre>
   <hr />
 
   <button type="button" class="collapsible">Code Snippet</button>
@@ -106,6 +99,8 @@
 
   <script src="codedoc.js"></script>
   <script>
+    insertPageHeader();
+
     // initialize cgpv
     cgpv.init();
 

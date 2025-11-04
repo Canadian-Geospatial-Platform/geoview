@@ -15,25 +15,18 @@
   </head>
 
   <body>
-    <div class="page-header">
-      <img class="header-logo" alt="logo" src="./img/Logo.png" />
-      <div class="page-header-titles">
-        <h1 class="index-header-title"><strong>Plateforme Géospatiale Canadienne (PGC) - Projet GeoView -</strong></h1>
-      <h1 class="index-header-title"><strong>Canadian Geospatial Platform (CGP) - GeoView Project -</strong></h1>
-      </div>
-    </div>
-    <hr />
-    <hr />
+    <div id="page-header"></div>
     <div>
-
       <div class="back-to-main">
         <a href="./index.html?tab=demos">← Back to Main</a>
       </div>
 
       <div class="demo-section">
         <h4>Interactions</h4>
-        <p>This page is used to showcase different Interactions functionalities, In this example, select a shape to draw in a specific group, draw the shape, adjust modifying capabilities on the group, adjust
-      snapping capabilities on the group.</p>
+        <p>
+          This page is used to showcase different Interactions functionalities, In this example, select a shape to draw in a specific group,
+          draw the shape, adjust modifying capabilities on the group, adjust snapping capabilities on the group.
+        </p>
       </div>
     </div>
 
@@ -176,6 +169,8 @@
     <!-- /ALL -->
 
     <script>
+      insertPageHeader();
+
       let groupInteractions = {
         geomGroupA: {},
         geomGroupB: {},

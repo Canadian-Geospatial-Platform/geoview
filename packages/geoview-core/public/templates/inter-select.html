@@ -15,25 +15,18 @@
   </head>
 
   <body>
-    <div class="page-header">
-      <img class="header-logo" alt="logo" src="./img/Logo.png" />
-      <div class="page-header-titles">
-        <h1 class="index-header-title"><strong>Plateforme Géospatiale Canadienne (PGC) - Projet GeoView -</strong></h1>
-      <h1 class="index-header-title"><strong>Canadian Geospatial Platform (CGP) - GeoView Project -</strong></h1>
-      </div>
-    </div>
-    <hr />
-    <hr />
+    <div id="page-header"></div>
     <div>
-
       <div class="back-to-main">
         <a href="./index.html?tab=demos">← Back to Main</a>
       </div>
 
       <div class="demo-section">
         <h4>Select (interactions)</h4>
-        <p>This page is used to showcase different Select functionalities. In this example, all shapes are selectable. Click features to see information on the selection. Hold shift-key to select more than one
-      shape.</p>
+        <p>
+          This page is used to showcase different Select functionalities. In this example, all shapes are selectable. Click features to see
+          information on the selection. Hold shift-key to select more than one shape.
+        </p>
       </div>
     </div>
 
@@ -73,6 +66,8 @@
     <!-- /SELECT -->
 
     <script>
+      insertPageHeader();
+
       let map1;
       function initMap1(map) {
         // Keep reference

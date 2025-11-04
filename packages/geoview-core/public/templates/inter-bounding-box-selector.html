@@ -15,15 +15,7 @@
   </head>
 
   <body>
-    <div class="page-header">
-      <img class="header-logo" alt="logo" src="./img/Logo.png" />
-      <div class="page-header-titles">
-        <h1 class="index-header-title"><strong>Plateforme Géospatiale Canadienne (PGC) - Projet GeoView -</strong></h1>
-        <h1 class="index-header-title"><strong>Canadian Geospatial Platform (CGP) - GeoView Project -</strong></h1>
-      </div>
-    </div>
-    <hr />
-    <hr />
+    <div id="page-header"></div>
     <div>
       <div class="back-to-main">
         <a href="./index.html?tab=demos">← Back to Main</a>
@@ -84,6 +76,8 @@
     <pre id="codeSnippet" class="panel"></pre>
 
     <script>
+      insertPageHeader();
+
       let map1;
       function initMap1(map) {
         // Keep reference

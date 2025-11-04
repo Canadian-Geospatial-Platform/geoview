@@ -99,15 +99,7 @@
 
   <body>
     <div>
-      <div class="page-header">
-      <img class="header-logo" alt="logo" src="./img/Logo.png" />
-      <div class="page-header-titles">
-        <h1 class="index-header-title"><strong>Plateforme Géospatiale Canadienne (PGC) - Projet GeoView -</strong></h1>
-        <h1 class="index-header-title"><strong>Canadian Geospatial Platform (CGP) - GeoView Project -</strong></h1>
-      </div>
-    </div>
-      <hr />
-      <hr />
+      <div id="page-header"></div>
 
       <div class="back-to-main">
         <a href="./index.html?tab=testing">← Back to Main</a>
@@ -526,6 +518,8 @@
     </div>
 
     <script>
+      insertPageHeader();
+
       let mapsInitialized = false;
 
       function openTab(evt, tabName) {
@@ -626,141 +620,18 @@
           // Add a row to the INDIVIDUAL map tab table
           testSuiteAddOrUpdateTestResultRow(plugin, event.suite, event.tester, event.test, event.test.getError()?.message);
 
-          // Add a row to the "RUN ALL TESTS" tab table (with modified IDs)
-          testSuiteAddOrUpdateTestResultRowClone(plugin, event.suite, event.tester, event.test, event.test.getError()?.message);
+          // Add a row to the "RUN ALL TESTS" tab table (with 'runAll' prefix)
+          testSuiteAddOrUpdateTestResultRow(plugin, event.suite, event.tester, event.test, event.test.getError()?.message, 'runAll');
 
           // Update totals in both tables
           testSuiteUpdateTotals(plugin);
-          testSuiteUpdateTotalsClone(plugin);
+          testSuiteUpdateTotals(plugin, 'runAll');
           testSuiteUpdateGrandTotal(testSuitesPlugins);
 
           // Update global stats
           updateGlobalStats();
         });
       });
-
-      // Clone version of testSuiteAddOrUpdateTestResultRow for "Run All Tests" tab
-      function testSuiteAddOrUpdateTestResultRowClone(plugin, testSuite, testTester, test, details) {
-        let passed = null;
-        if (test.getStatus() === 'success') passed = true;
-        else if (test.getStatus() === 'failed') passed = false;
-
-        // Find the table for the map id in "Run All Tests" section (with runAll- prefix)
-        const tableBody = document.getElementById('runAll-tableBody-' + plugin.mapViewer.mapId);
-        if (!tableBody) {
-          return;
-        }
-
-        // Try to find an existing row by ID
-        let row = document.getElementById('runAll-' + test.id);
-
-        if (!row) {
-          // If it doesn't exist, create a new row
-          row = document.createElement('tr');
-          row.id = 'runAll-' + test.id;
-          row.classList.add('expanded');
-
-          // Create and append the three cells
-          row.appendChild(document.createElement('td'));
-          row.appendChild(document.createElement('td'));
-          row.appendChild(document.createElement('td'));
-
-          tableBody.appendChild(row);
-        }
-
-        // Update result cells (same logic as original)
-        const testCell = row.cells?.[0];
-        let color = '#515ba5';
-        if (test.getType() === 'true-negative') {
-          color = '#b778e4ff';
-        }
-
-        // Title
-        let testMessage =
-          '<font class="test-title" style="color:' +
-          color +
-          ';" onclick="' +
-          `this.closest('tr').classList.toggle('expanded'); this.closest('tr').classList.toggle('collapsed');">` +
-          test.getTitle() +
-          '</font><br/>';
-
-        // Collapsible content
-        testMessage += '<div class="collapsible-content" style="margin-top: 5px;">';
-        testMessage +=
-          '<font style="font-size: x-small;">' + '<i>[' + testSuite.getName() + ' | ' + testTester.getName() + ']' + '</i></font>';
-        testMessage += test.getStepsAsHtml();
-        testCell.innerHTML = testMessage;
-
-        const resultCell = row.cells?.[1];
-        if (resultCell) {
-          resultCell.style.textAlign = 'center';
-          if (passed === true) {
-            row.classList.add('collapsed');
-            row.classList.remove('expanded');
-            resultCell.style.color = 'green';
-            resultCell.textContent = '✔';
-          } else if (passed === false) {
-            row.classList.add('expanded');
-            row.classList.remove('collapsed');
-            resultCell.style.color = 'red';
-            resultCell.textContent = '✘';
-          } else {
-            resultCell.style.color = 'black';
-            resultCell.textContent = '⏳';
-          }
-        }
-
-        const detailsCell = row.cells?.[2];
-        if (detailsCell) detailsCell.textContent = details ?? '';
-      }
-
-      // Clone version of testSuiteUpdateTotals for "Run All Tests" tab
-      function testSuiteUpdateTotalsClone(plugin) {
-        const mapId = plugin.mapViewer.mapId;
-
-        const suitesCompleted = document.getElementById('runAll-suitesCompleted-' + mapId);
-        if (suitesCompleted) suitesCompleted.textContent = plugin.getSuitesCompleted();
-
-        const suitesTotal = document.getElementById('runAll-suitesTotal-' + mapId);
-        if (suitesTotal) suitesTotal.textContent = plugin.getSuitesTotal();
-
-        const suitesCheck = document.getElementById('runAll-suitesCheck-' + mapId);
-        if (suitesCheck) {
-          const suiteRunning = plugin.getTestsRunning() > 0;
-          const completedFully = plugin.getTestsDoneAllAndSuiteDone();
-          const allSuccess = plugin.getTestsDoneAllSuccessAndSuiteDone();
-          suitesCheck.textContent = completedFully ? (allSuccess ? '✔' : '✘') : suiteRunning ? '⏳' : '';
-          suitesCheck.style.color = completedFully ? (allSuccess ? 'green' : 'red') : 'black';
-        }
-
-        const testsRunning = document.getElementById('runAll-testsRunning-' + mapId);
-        if (testsRunning) testsRunning.textContent = plugin.getTestsRunning();
-
-        const testsDoneSuccess = document.getElementById('runAll-testsDoneSuccess-' + mapId);
-        if (testsDoneSuccess) testsDoneSuccess.textContent = plugin.getTestsDoneSuccess();
-
-        const testsDoneFailed = document.getElementById('runAll-testsDoneFailed-' + mapId);
-        if (testsDoneFailed) testsDoneFailed.textContent = plugin.getTestsDoneFailed();
-
-        const testsDone = document.getElementById('runAll-testsDone-' + mapId);
-        if (testsDone) testsDone.textContent = plugin.getTestsDone();
-
-        const testsTotal = document.getElementById('runAll-testsTotal-' + mapId);
-        if (testsTotal) testsTotal.textContent = plugin.getTestsTotal();
-
-        // Update the collapsible button stats
-        const mapNumber = mapId.replace('map', '');
-        const statsSpan = document.getElementById('statsMap' + mapNumber);
-        if (statsSpan) {
-          const running = plugin.getTestsRunning();
-          const doneSuccess = plugin.getTestsDoneSuccess();
-          const doneFailed = plugin.getTestsDoneFailed();
-          const done = plugin.getTestsDone();
-          const total = plugin.getTestsTotal();
-
-          statsSpan.innerHTML = `Running: <span style="color: ${running > 0 ? 'orange' : '#666'};">${running}</span> | Done success: <span style="color: #28a745;">${doneSuccess}</span> | Done failed: <span style="color: #dc3545;">${doneFailed}</span> | Done: ${done}/${total}`;
-        }
-      }
 
       // Function to update the global statistics in "Run All Tests" tab
       function updateGlobalStats() {
@@ -782,6 +653,19 @@
           totalTests += plugin.getTestsTotal();
           totalSuitesCompleted += plugin.getSuitesCompleted();
           totalSuites += plugin.getSuitesTotal();
+
+          // Update the collapsible button stats for each map
+          const mapNumber = mapId.replace('map', '');
+          const statsSpan = document.getElementById('statsMap' + mapNumber);
+          if (statsSpan) {
+            const running = plugin.getTestsRunning();
+            const doneSuccess = plugin.getTestsDoneSuccess();
+            const doneFailed = plugin.getTestsDoneFailed();
+            const done = plugin.getTestsDone();
+            const total = plugin.getTestsTotal();
+
+            statsSpan.innerHTML = `Running: <span style="color: ${running > 0 ? 'orange' : '#666'};">${running}</span> | Done success: <span style="color: #28a745;">${doneSuccess}</span> | Done failed: <span style="color: #dc3545;">${doneFailed}</span> | Done: ${done}/${total}`;
+          }
         });
 
         // Update the display

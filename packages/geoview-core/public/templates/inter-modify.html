@@ -15,24 +15,18 @@
   </head>
 
   <body>
-    <div class="page-header">
-      <img class="header-logo" alt="logo" src="./img/Logo.png" />
-      <div class="page-header-titles">
-        <h1 class="index-header-title"><strong>Plateforme Géospatiale Canadienne (PGC) - Projet GeoView -</strong></h1>
-      <h1 class="index-header-title"><strong>Canadian Geospatial Platform (CGP) - GeoView Project -</strong></h1>
-      </div>
-    </div>
-    <hr />
-    <hr />
+    <div id="page-header"></div>
     <div>
-
       <div class="back-to-main">
         <a href="./index.html?tab=demos">← Back to Main</a>
       </div>
 
       <div class="demo-section">
         <h4>Modify (interactions)</h4>
-        <p>This page is used to showcase different Modify functionalities. In this example, all shapes <span style="color: red">except the red one</span> are modifiable.</p>
+        <p>
+          This page is used to showcase different Modify functionalities. In this example, all shapes
+          <span style="color: red">except the red one</span> are modifiable.
+        </p>
       </div>
     </div>
 
@@ -72,6 +66,8 @@
     <!-- /MODIFY -->
 
     <script>
+      insertPageHeader();
+
       let map1;
       function initMap1(map) {
         // Keep reference

@@ -16,17 +16,8 @@
   </head>
 
   <body>
-    <div class="page-header">
-      <img class="header-logo" alt="logo" src="./img/Logo.png" />
-      <div class="page-header-titles">
-        <h1 class="index-header-title"><strong>Plateforme Géospatiale Canadienne (PGC) - Projet GeoView -</strong></h1>
-      <h1 class="index-header-title"><strong>Canadian Geospatial Platform (CGP) - GeoView Project -</strong></h1>
-      </div>
-    </div>
-    <hr />
-    <hr />
+    <div id="page-header"></div>
     <div>
-
       <div class="back-to-main">
         <a href="./index.html?tab=specific-demos">← Back to Main</a>
       </div>
@@ -45,7 +36,7 @@
       <h4 id="Hmap1">Floods (English)</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
-    <button class="btn btn-primary collapsible active">Layers Status</button>
+    <button class="collapsible">Layers Status</button>
     <pre id="Hmap1-state" class="panel map-title-holder"></pre>
     <div
       id="map1"
@@ -115,7 +106,7 @@
       <h4 id="Hmap2">Floods (French)</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
-    <button class="btn btn-primary collapsible active">Layers Status</button>
+    <button class="collapsible">Layers Status</button>
     <pre id="Hmap2-state" class="panel map-title-holder"></pre>
     <div
       id="map2"
@@ -183,6 +174,8 @@
 
     <script src="codedoc.js"></script>
     <script>
+      insertPageHeader();
+
       // Register handler when map has been initialized
       cgpv.onMapInit((mapViewer) => {
         listenToLegendLayerSetChanges(`H${mapViewer.mapId}-state`, mapViewer);

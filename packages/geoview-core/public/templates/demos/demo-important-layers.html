@@ -14,18 +14,8 @@
   </head>
 
   <body>
-       <div class="page-header">
-      <img class="header-logo" alt="logo" src="./img/Logo.png" />
-      <div class="page-header-titles">
-        <h1 class="index-header-title"><strong>Plateforme Géospatiale Canadienne (PGC) - Projet GeoView -</strong></h1>
-      <h1 class="index-header-title"><strong>Canadian Geospatial Platform (CGP) - GeoView Project -</strong></h1>
-      </div>
-    </div>
-    <hr />
-    <hr />
-    <div>
-
-      <div class="back-to-main back-to-main-flex">
+    <div id="page-header"></div>
+    <div>      <div class="back-to-main back-to-main-flex">
         <a href="./index.html?tab=testing" class="btn btn-primary">← Back to Main</a>
       </div>
 
@@ -45,7 +35,7 @@
       </div>
     </div>
 
-    <button class="collapsible active">Layers Status</button>
+    <button class="collapsible">Layers Status</button>
     <pre id="mapWM-state" class="panel map-title-holder"></pre>
 
     <div
@@ -123,12 +113,11 @@
       </div>
     </div>
     <hr />
-    <button type="button" class="collapsible">Configuration Snippet</button>
-    <pre id="mapWMCS" class="panel"></pre>
-    <hr />
 
     <script src="codedoc.js"></script>
     <script>
+      insertPageHeader();
+
       async function addGeocore(uuid) {
         const geoviewConfig = await cgpv.api.layer.convertMapConfigToGeoviewLayerConfig('map1', 'en', {
           geoviewLayerType: 'geoCore',
