@@ -21,7 +21,8 @@
     "basemapOptions": {
       "basemapId": "transport",
       "shaded": true,
-      "labeled": true
+      "labeled": true,
+      "labelZIndex": 20
     }
   },
   "components": [

@@ -650,7 +650,7 @@ export class BasemapApi {
             updateWhileAnimating: true,
             updateWhileInteracting: true,
             // Only declutter labels and add className otherwise (https://github.com/openlayers/openlayers/issues/10096)
-            ...(layer.basemapId === 'label' ? { declutter: true } : { className: 'geom' }),
+            ...(layer.basemapId === 'label' ? { declutter: true, zIndex: this.basemapOptions.labelZIndex ?? 0 } : { className: 'geom' }),
           });
 
           // Apply Style to Vector Tile Basemap
