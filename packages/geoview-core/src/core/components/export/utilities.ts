@@ -40,8 +40,6 @@ export const EXPORT_CONSTANTS = {
   WMS_INDENT_PER_LEVEL: 10, // Indent in pixels per depth level
 } as const;
 
-export type TypeValidPageSizes = 'AUTO';
-
 export type TypeMapStateForExportLayout = {
   attribution: string[];
   northArrow: boolean;
@@ -62,8 +60,6 @@ export interface FlattenedLegendItem {
   wmsImageSize?: { width: number; height: number }; // Actual measured WMS image dimensions
 }
 
-export type TypePageConfig = (typeof PAGE_CONFIGS)[keyof typeof PAGE_CONFIGS];
-
 export type TypeMapInfoResult = {
   mapDataUrl: string;
   scaleText: string;
@@ -78,11 +74,7 @@ export type TypeMapInfoResult = {
   attributions: string[];
   fittedColumns: FlattenedLegendItem[][];
   columnWidths?: number[];
-};
-
-// Page size configuration (AUTO mode only)
-export const PAGE_CONFIGS = {
-  AUTO: { size: 'AUTO' as const, mapHeight: 400, legendColumns: 4, maxLegendHeight: Infinity, canvasWidth: 612, canvasHeight: 0 }, // Height calculated dynamically
+  canvasWidth: number;
 };
 
 // Export dimension constants at 300DPI
@@ -93,6 +85,25 @@ const MAP_IMAGE_DIMENSIONS = {
     height: 100, // Default, will be recalculated
   },
 };
+
+/**
+ * Element factory interface for creating renderer-specific elements
+ * Allows us to abstract between Canvas (HTML) and PDF rendering
+ */
+export interface ElementFactory {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  View: (props: any) => JSX.Element;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Text: (props: any) => JSX.Element;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Image: (props: any) => JSX.Element;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Span: (props: any) => JSX.Element;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Svg: (props: any) => JSX.Element;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Path: (props: any) => JSX.Element;
+}
 
 /**
  * Extract native dimensions from a base64-encoded PNG image by reading the IHDR chunk.
@@ -125,25 +136,6 @@ function getPNGDimensions(base64Data: string): { width: number; height: number }
 }
 
 /**
- * Element factory interface for creating renderer-specific elements
- * Allows us to abstract between Canvas (HTML) and PDF rendering
- */
-export interface ElementFactory {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  View: (props: any) => JSX.Element;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Text: (props: any) => JSX.Element;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Image: (props: any) => JSX.Element;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Span: (props: any) => JSX.Element;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Svg: (props: any) => JSX.Element;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Path: (props: any) => JSX.Element;
-}
-
-/**
  * Renders a single legend item (layer, child, wms, time, or item type) using the provided element factory.
  * Handles different item types with appropriate styling and structure:
  * - layer: Root layer name with optional separator line
@@ -160,7 +152,7 @@ export interface ElementFactory {
  * @param {any} baseStyles - The base styles object with factory-specific properties
  * @returns {JSX.Element} The rendered item element
  */
-export const renderSingleLegendItem = (
+const renderSingleLegendItem = (
   item: FlattenedLegendItem,
   itemIndex: number,
   indentLevel: number,
@@ -259,15 +251,15 @@ export const renderSingleLegendItem = (
   // Default: item type
   const legendItem = item.data.items[0];
 
-  // Extract native PNG dimensions and apply inline for consistent sizing
+  // Extract native PNG dimensions and reduce by half for better layout
   let iconStyle = scaledStyles.itemIcon;
   if (legendItem?.icon) {
     const dimensions = getPNGDimensions(legendItem.icon);
     if (dimensions) {
-      // Apply minimum 4px size to ensure icons are visible
+      // Reduce dimensions by half, with minimum 4px size to ensure icons are visible
       const minSize = 4;
-      const width = Math.max(dimensions.width, minSize);
-      const height = Math.max(dimensions.height, minSize);
+      const width = Math.max(dimensions.width / 2, minSize);
+      const height = Math.max(dimensions.height / 2, minSize);
 
       iconStyle = {
         ...scaledStyles.itemIcon,
@@ -304,7 +296,7 @@ export const renderSingleLegendItem = (
  * @param {any} baseStyles - The base styles object for layout
  * @returns {JSX.Element[]} Array of rendered elements (headers + content containers)
  */
-export const renderColumnItems = (
+const renderColumnItems = (
   column: FlattenedLegendItem[],
   factory: ElementFactory,
   scaledStyles: any, // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -659,7 +651,7 @@ const calculateOptimalColumns = (canvasWidth: number, defaultColumns: number): n
  * @param {TimeSliderLayerSet} [timeSliderLayers] - Time-enabled layers with dimension data
  * @returns {FlattenedLegendItem[]} Flattened array of all legend items with depth/parent info
  */
-export const processLegendLayers = (
+const processLegendLayers = (
   layers: TypeLegendLayer[],
   orderedLayerInfo: TypeOrderedLayerInfo[],
   timeSliderLayers?: TimeSliderLayerSet
@@ -782,11 +774,10 @@ export const processLegendLayers = (
  * - All content fits on single auto-sized page
  *
  * @param {string} mapId - The GeoView map ID
- * @param {TypeValidPageSizes} pageSize - The page size ('AUTO' only - throws error for others)
  * @returns {Promise<TypeMapInfoResult>} Map image URL, scale info, north arrow, legend columns, and column widths
- * @throws {Error} If pageSize is not 'AUTO' or if canvas context is unavailable
+ * @throws {Error} If canvas context is unavailable
  */
-export async function getMapInfo(mapId: string, pageSize: TypeValidPageSizes): Promise<TypeMapInfoResult> {
+export async function getMapInfo(mapId: string): Promise<TypeMapInfoResult> {
   // Get all needed data from store state
   const mapElement = AppEventProcessor.getGeoviewHTMLElement(mapId);
   const mapState = MapEventProcessor.getMapStateForExportLayout(mapId);
@@ -798,18 +789,12 @@ export async function getMapInfo(mapId: string, pageSize: TypeValidPageSizes): P
   const browserMapWidth = browserCanvas ? browserCanvas.width : 800;
   const browserMapHeight = browserCanvas ? browserCanvas.height : 600;
 
-  // Adjust map to correct aspect ratio for PDF map
-  let mapImageWidth = MAP_IMAGE_DIMENSIONS[pageSize].width;
-  let mapImageHeight = MAP_IMAGE_DIMENSIONS[pageSize].height;
-
-  // For AUTO mode, use exact browser dimensions to maintain same extent
-  if (pageSize === 'AUTO') {
-    mapImageWidth = browserMapWidth;
-    mapImageHeight = browserMapHeight;
-    // Update MAP_IMAGE_DIMENSIONS for AUTO mode
-    MAP_IMAGE_DIMENSIONS.AUTO.width = browserMapWidth;
-    MAP_IMAGE_DIMENSIONS.AUTO.height = browserMapHeight;
-  }
+  // Adjust map to correct aspect ratio for PDF map (AUTO mode uses exact browser dimensions)
+  const mapImageWidth = browserMapWidth;
+  const mapImageHeight = browserMapHeight;
+  // Update MAP_IMAGE_DIMENSIONS for AUTO mode
+  MAP_IMAGE_DIMENSIONS.AUTO.width = browserMapWidth;
+  MAP_IMAGE_DIMENSIONS.AUTO.height = browserMapHeight;
 
   const resultCanvas = document.createElement('canvas');
   resultCanvas.width = mapImageWidth;
@@ -920,7 +905,6 @@ export async function getMapInfo(mapId: string, pageSize: TypeValidPageSizes): P
   }));
 
   // Process legend data
-  const config = PAGE_CONFIGS[pageSize];
   const allItems = processLegendLayers(cleanLegendLayers, orderedLayerInfo, timeSliderLayers);
 
   // Calculate scale factor for WMS images based on document width
@@ -947,417 +931,390 @@ export async function getMapInfo(mapId: string, pageSize: TypeValidPageSizes): P
   const optimalColumns = calculateOptimalColumns(mapImageWidth, EXPORT_CONSTANTS.DEFAULT_MAX_COLUMNS);
 
   // For AUTO format, we need to measure actual heights first, then optimize
-  let fittedColumns: FlattenedLegendItem[][];
-  let columnWidths: number[] | undefined;
-  let finalConfig: TypePageConfig;
+  // Import styles dynamically (needed for measurement)
+  const { getScaledCanvasStyles } = await import('./layout-styles');
+  const scaledStyles = getScaledCanvasStyles(mapImageWidth);
 
-  if (pageSize === 'AUTO') {
-    // Import styles dynamically (needed for measurement)
-    const { getScaledCanvasStyles } = await import('./layout-styles');
-    const scaledStyles = getScaledCanvasStyles(mapImageWidth);
+  // STEP 1: Group items by root layers
+  const groups: FlattenedLegendItem[][] = [];
+  let currentGroup: FlattenedLegendItem[] = [];
 
-    // STEP 1: Group items by root layers
-    const groups: FlattenedLegendItem[][] = [];
-    let currentGroup: FlattenedLegendItem[] = [];
-
-    itemsWithHeights.forEach((item) => {
-      if (item.isRoot && currentGroup.length > 0) {
-        groups.push(currentGroup);
-        currentGroup = [];
-      }
-      currentGroup.push(item);
-    });
-
-    if (currentGroup.length > 0) {
+  itemsWithHeights.forEach((item) => {
+    if (item.isRoot && currentGroup.length > 0) {
       groups.push(currentGroup);
+      currentGroup = [];
     }
+    currentGroup.push(item);
+  });
 
-    // STEP 2: Measure each layer group's actual height AND width ONCE
-    const dummyContainer = document.createElement('div');
-    dummyContainer.style.position = 'absolute';
-    dummyContainer.style.left = '-9999px';
-    dummyContainer.style.top = '0';
-    // Don't constrain width - let it expand naturally
-    dummyContainer.style.width = 'max-content';
-    dummyContainer.style.visibility = 'hidden';
-    dummyContainer.style.pointerEvents = 'none';
-    document.body.appendChild(dummyContainer);
+  if (currentGroup.length > 0) {
+    groups.push(currentGroup);
+  }
 
-    // Maximum width per column - WMS images can be up to 500px for text readability
-    // For text content, use a reasonable max based on available width
-    const maxColumnWidth = Math.min(500, Math.floor(mapImageWidth / optimalColumns) - 20); // Leave room for gaps
+  // STEP 2: Measure each layer group's actual height AND width ONCE
+  const dummyContainer = document.createElement('div');
+  dummyContainer.style.position = 'absolute';
+  dummyContainer.style.left = '-9999px';
+  dummyContainer.style.top = '0';
+  // Don't constrain width - let it expand naturally
+  dummyContainer.style.width = 'max-content';
+  dummyContainer.style.visibility = 'hidden';
+  dummyContainer.style.pointerEvents = 'none';
+  document.body.appendChild(dummyContainer);
 
-    const groupHeights = groups.map((group) => {
-      const groupDiv = document.createElement('div');
-      groupDiv.style.display = 'flex';
-      groupDiv.style.flexDirection = 'column';
-      groupDiv.style.maxWidth = `${maxColumnWidth}px`; // Constrain to max column width
-      groupDiv.style.width = 'max-content'; // Natural width up to max
+  // Maximum width per column - WMS images can be up to 500px for text readability
+  // For text content, use a reasonable max based on available width
+  const maxColumnWidth = Math.min(500, Math.floor(mapImageWidth / optimalColumns) - 20); // Leave room for gaps
 
-      group.forEach((item, itemIndex) => {
-        const indentLevel = Math.min(item.depth, 3);
+  const groupHeights = groups.map((group) => {
+    const groupDiv = document.createElement('div');
+    groupDiv.style.display = 'flex';
+    groupDiv.style.flexDirection = 'column';
+    groupDiv.style.maxWidth = `${maxColumnWidth}px`; // Constrain to max column width
+    groupDiv.style.width = 'max-content'; // Natural width up to max
 
-        if (item.type === 'layer') {
-          if (itemIndex > 0) {
-            const separator = document.createElement('div');
-            Object.assign(separator.style, scaledStyles.layerSeparator('18px'));
-            groupDiv.appendChild(separator);
-          }
-          const layerText = document.createElement('div');
-          Object.assign(layerText.style, scaledStyles.layerText());
-          layerText.textContent = item.data.layerName || '';
-          groupDiv.appendChild(layerText);
-        } else if (item.type === 'wms') {
-          const wmsContainer = document.createElement('div');
-          Object.assign(wmsContainer.style, {
-            marginLeft: `${indentLevel * EXPORT_CONSTANTS.WMS_INDENT_PER_LEVEL}px`,
-            marginBottom: `${SHARED_STYLES.wmsMarginBottom}px`,
-            maxWidth: `${EXPORT_CONSTANTS.WMS_MAX_WIDTH}px`,
-            width: '100%',
-          });
-          const img = document.createElement('img');
-          img.src = item.data.icons?.[0]?.iconImage || '';
-          Object.assign(img.style, {
-            maxWidth: '100%', // Fit within container (max 500px)
-            width: 'auto',
-            height: 'auto',
-            display: 'block',
-          });
+    group.forEach((item, itemIndex) => {
+      const indentLevel = Math.min(item.depth, 3);
 
-          // Store reference to capture actual dimensions after measurement
-          img.dataset.itemIndex = String(itemIndex);
-
-          wmsContainer.appendChild(img);
-          groupDiv.appendChild(wmsContainer);
-        } else if (item.type === 'time') {
-          const timeText = document.createElement('div');
-          Object.assign(timeText.style, scaledStyles.timeText(indentLevel));
-          const timeValue = item.timeInfo?.singleHandle
-            ? DateMgt.formatDate(
-                new Date(item.timeInfo.values[0]),
-                item.timeInfo.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
-              )
-            : `${DateMgt.formatDate(
-                new Date(item.timeInfo?.values[0] || 0),
-                item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
-              )} - ${DateMgt.formatDate(
-                new Date(item.timeInfo?.values[1] || 0),
-                item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
-              )}`;
-          timeText.textContent = timeValue;
-          groupDiv.appendChild(timeText);
-        } else if (item.type === 'child') {
-          const childText = document.createElement('div');
-          Object.assign(childText.style, scaledStyles.childText(indentLevel));
-          childText.textContent = item.data.layerName || '...';
-          groupDiv.appendChild(childText);
-        } else {
-          const legendItem = item.data.items[0];
-          const itemContainer = document.createElement('div');
-          Object.assign(itemContainer.style, {
-            display: 'flex',
-            alignItems: 'center',
-            marginLeft: `${indentLevel * 10}px`,
-            marginBottom: `${SHARED_STYLES.itemMarginBottom}px`,
-          });
-
-          if (legendItem?.icon) {
-            const icon = document.createElement('img');
-            icon.src = legendItem.icon;
-            const dimensions = getPNGDimensions(legendItem.icon);
-            if (dimensions) {
-              const minSize = 4;
-              icon.style.width = `${Math.max(dimensions.width, minSize)}px`;
-              icon.style.height = `${Math.max(dimensions.height, minSize)}px`;
-            } else {
-              icon.style.width = '8px';
-              icon.style.height = '8px';
-            }
-            icon.style.marginRight = '4px';
-            itemContainer.appendChild(icon);
-          }
-
-          const text = document.createElement('span');
-          Object.assign(text.style, scaledStyles.itemText);
-          text.textContent = legendItem?.name || '';
-          itemContainer.appendChild(text);
-          groupDiv.appendChild(itemContainer);
+      if (item.type === 'layer') {
+        if (itemIndex > 0) {
+          const separator = document.createElement('div');
+          Object.assign(separator.style, scaledStyles.layerSeparator('18px'));
+          groupDiv.appendChild(separator);
         }
-      });
-
-      dummyContainer.appendChild(groupDiv);
-      const { height, width } = groupDiv.getBoundingClientRect();
-
-      // Capture actual WMS image dimensions after layout
-      group.forEach((item, itemIndex) => {
-        if (item.type === 'wms') {
-          const img = groupDiv.querySelector(`img[data-item-index="${itemIndex}"]`) as HTMLImageElement;
-          if (img) {
-            const imgRect = img.getBoundingClientRect();
-            // eslint-disable-next-line no-param-reassign
-            item.wmsImageSize = {
-              width: Math.round(imgRect.width),
-              height: Math.round(imgRect.height),
-            };
-          }
-        }
-      });
-
-      dummyContainer.removeChild(groupDiv);
-
-      const layerName = group[0]?.data.layerName || 'unknown';
-
-      return { group, height, width, layerName };
-    });
-
-    document.body.removeChild(dummyContainer);
-
-    // STEP 3: Calculate required column width and verify number of columns fits
-    // Each column width = widest layer in that column
-    // We need to ensure all columns fit within available width
-    const calculateColumnsAndWidths = (numCols: number): { cols: FlattenedLegendItem[][]; colWidths: number[]; totalWidth: number } => {
-      const groupsPerCol = Math.ceil(groups.length / numCols);
-      const cols: FlattenedLegendItem[][] = Array(numCols)
-        .fill(null)
-        .map(() => []);
-      const colWidths: number[] = Array(numCols).fill(0);
-
-      // Distribute groups
-      groupHeights.forEach((gh, index) => {
-        const colIndex = Math.min(Math.floor(index / groupsPerCol), numCols - 1);
-        cols[colIndex].push(...gh.group);
-        colWidths[colIndex] = Math.max(colWidths[colIndex], gh.width);
-      });
-
-      // Total width = sum of column widths + gaps between columns
-      const totalWidth = colWidths.reduce((sum, w) => sum + w, 0) + (numCols - 1) * EXPORT_CONSTANTS.COLUMN_GAP;
-      return { cols, colWidths, totalWidth };
-    };
-
-    // Start with optimal columns and reduce if needed
-    let finalColumns = optimalColumns;
-    let result = calculateColumnsAndWidths(finalColumns);
-
-    while (result.totalWidth > mapImageWidth && finalColumns > 1) {
-      finalColumns--;
-      result = calculateColumnsAndWidths(finalColumns);
-    }
-
-    // STEP 4: Initial even distribution using measured heights
-    const groupsPerColumn = Math.ceil(groups.length / finalColumns);
-    const columns: FlattenedLegendItem[][] = Array(finalColumns)
-      .fill(null)
-      .map(() => []);
-    const columnHeights: number[] = Array(finalColumns).fill(0);
-    const localColumnWidths: number[] = Array(finalColumns).fill(0);
-
-    groupHeights.forEach((groupWithHeight, index) => {
-      const columnIndex = Math.floor(index / groupsPerColumn);
-      const targetColumn = Math.min(columnIndex, finalColumns - 1);
-
-      columns[targetColumn].push(...groupWithHeight.group);
-      columnHeights[targetColumn] += groupWithHeight.height;
-      localColumnWidths[targetColumn] = Math.max(localColumnWidths[targetColumn], groupWithHeight.width);
-    });
-
-    // Fill empty columns by moving last layer from previous columns
-    for (let col = finalColumns - 1; col >= 0; col--) {
-      if (columnHeights[col] === 0 && col > 0) {
-        // Find the nearest previous column with more than 1 layer
-        for (let prevCol = col - 1; prevCol >= 0; prevCol--) {
-          const layersInPrevCol = columns[prevCol].filter((item) => item.isRoot);
-          if (layersInPrevCol.length > 1) {
-            // Move last layer from prevCol to empty col
-            const lastLayer = layersInPrevCol[layersInPrevCol.length - 1];
-            const lastLayerIndex = columns[prevCol].lastIndexOf(lastLayer);
-            const layerItems = columns[prevCol].slice(lastLayerIndex);
-
-            // Find height and width
-            const layerGroup = groupHeights.find((g) => g.group[0] === lastLayer);
-            if (layerGroup) {
-              const layerHeight = layerGroup.height;
-              const layerWidth = layerGroup.width;
-
-              // Move items
-              columns[prevCol].splice(lastLayerIndex);
-              columns[col] = [...layerItems, ...columns[col]];
-
-              // Update heights
-              columnHeights[prevCol] -= layerHeight;
-              columnHeights[col] += layerHeight;
-
-              // Update widths (recalculate max width for both columns)
-              localColumnWidths[prevCol] = Math.max(
-                ...columns[prevCol].filter((item) => item.isRoot).map((item) => groupHeights.find((g) => g.group[0] === item)?.width || 0)
-              );
-              localColumnWidths[col] = Math.max(localColumnWidths[col], layerWidth);
-
-              break;
-            }
-          }
-        }
-      }
-    }
-
-    // STEP 5: Optimize using pre-measured heights with 2-step look-ahead
-    let iteration = 0;
-    let improved = true;
-
-    while (improved && iteration < EXPORT_CONSTANTS.MAX_OPTIMIZATION_ITERATIONS) {
-      improved = false;
-      iteration++;
-
-      const maxHeight = Math.max(...columnHeights);
-      const minHeight = Math.min(...columnHeights);
-      const balanceRatio = minHeight / maxHeight;
-
-      if (balanceRatio > EXPORT_CONSTANTS.COLUMN_BALANCE_THRESHOLD) {
-        break;
-      }
-
-      // Strategy: Try all possible 1-step and 2-step move sequences
-      // Find the sequence that most reduces imbalance
-      let bestSequence: Array<{ fromCol: number; toCol: number; layerName: string }> | null = null;
-      let bestFinalImbalance = maxHeight - minHeight;
-
-      // Try all single moves
-      for (let fromCol1 = 0; fromCol1 < finalColumns - 1; fromCol1++) {
-        const layersInCol1 = columns[fromCol1].filter((item) => item.isRoot);
-        if (layersInCol1.length <= 1) {
-          // eslint-disable-next-line no-continue
-          continue;
-        }
-
-        const layer1 = layersInCol1[layersInCol1.length - 1];
-        const group1 = groupHeights.find((g) => g.group[0] === layer1);
-        if (!group1) {
-          // eslint-disable-next-line no-continue
-          continue;
-        }
-
-        // Simulate first move
-        const heights1 = [...columnHeights];
-        heights1[fromCol1] -= group1.height;
-        heights1[fromCol1 + 1] += group1.height;
-
-        const imbalance1 = Math.max(...heights1) - Math.min(...heights1);
-
-        // Check if single move is better
-        if (imbalance1 < bestFinalImbalance) {
-          bestFinalImbalance = imbalance1;
-          bestSequence = [{ fromCol: fromCol1, toCol: fromCol1 + 1, layerName: layer1.data.layerName }];
-        }
-
-        // Now try a second move after this first move
-        // Need to simulate the column state after move 1
-        const tempColumns = columns.map((col, idx) => {
-          if (idx === fromCol1) {
-            // Remove last layer
-            const lastLayerIdx = col.lastIndexOf(layer1);
-            return col.slice(0, lastLayerIdx);
-          }
-          if (idx === fromCol1 + 1) {
-            // Add layer at beginning
-            const lastLayerIdx = columns[fromCol1].lastIndexOf(layer1);
-            const layerItems = columns[fromCol1].slice(lastLayerIdx);
-            return [...layerItems, ...col];
-          }
-          return col;
+        const layerText = document.createElement('div');
+        Object.assign(layerText.style, scaledStyles.layerText());
+        layerText.textContent = item.data.layerName || '';
+        groupDiv.appendChild(layerText);
+      } else if (item.type === 'wms') {
+        const wmsContainer = document.createElement('div');
+        Object.assign(wmsContainer.style, {
+          marginLeft: `${indentLevel * EXPORT_CONSTANTS.WMS_INDENT_PER_LEVEL}px`,
+          marginBottom: `${SHARED_STYLES.wmsMarginBottom}px`,
+          maxWidth: `${EXPORT_CONSTANTS.WMS_MAX_WIDTH}px`,
+          width: '100%',
+        });
+        const img = document.createElement('img');
+        img.src = item.data.icons?.[0]?.iconImage || '';
+        Object.assign(img.style, {
+          maxWidth: '100%', // Fit within container (max 500px)
+          width: 'auto',
+          height: 'auto',
+          display: 'block',
         });
 
-        // Try all possible second moves from this new state
-        for (let fromCol2 = 0; fromCol2 < finalColumns - 1; fromCol2++) {
-          const layersInCol2 = tempColumns[fromCol2].filter((item) => item.isRoot);
-          if (layersInCol2.length <= 1) {
-            // eslint-disable-next-line no-continue
-            continue;
+        // Store reference to capture actual dimensions after measurement
+        img.dataset.itemIndex = String(itemIndex);
+
+        wmsContainer.appendChild(img);
+        groupDiv.appendChild(wmsContainer);
+      } else if (item.type === 'time') {
+        const timeText = document.createElement('div');
+        Object.assign(timeText.style, scaledStyles.timeText(indentLevel));
+        const timeValue = item.timeInfo?.singleHandle
+          ? DateMgt.formatDate(
+              new Date(item.timeInfo.values[0]),
+              item.timeInfo.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
+            )
+          : `${DateMgt.formatDate(
+              new Date(item.timeInfo?.values[0] || 0),
+              item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
+            )} - ${DateMgt.formatDate(
+              new Date(item.timeInfo?.values[1] || 0),
+              item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
+            )}`;
+        timeText.textContent = timeValue;
+        groupDiv.appendChild(timeText);
+      } else if (item.type === 'child') {
+        const childText = document.createElement('div');
+        Object.assign(childText.style, scaledStyles.childText(indentLevel));
+        childText.textContent = item.data.layerName || '...';
+        groupDiv.appendChild(childText);
+      } else {
+        const legendItem = item.data.items[0];
+        const itemContainer = document.createElement('div');
+        Object.assign(itemContainer.style, {
+          display: 'flex',
+          alignItems: 'center',
+          marginLeft: `${indentLevel * 10}px`,
+          marginBottom: `${SHARED_STYLES.itemMarginBottom}px`,
+        });
+
+        if (legendItem?.icon) {
+          const icon = document.createElement('img');
+          icon.src = legendItem.icon;
+          const dimensions = getPNGDimensions(legendItem.icon);
+          if (dimensions) {
+            const minSize = 4;
+            icon.style.width = `${Math.max(dimensions.width, minSize)}px`;
+            icon.style.height = `${Math.max(dimensions.height, minSize)}px`;
+          } else {
+            icon.style.width = '8px';
+            icon.style.height = '8px';
           }
+          icon.style.marginRight = '4px';
+          itemContainer.appendChild(icon);
+        }
 
-          const layer2 = layersInCol2[layersInCol2.length - 1];
-          const group2 = groupHeights.find((g) => g.group[0] === layer2);
-          if (!group2) {
-            // eslint-disable-next-line no-continue
-            continue;
-          }
+        const text = document.createElement('span');
+        Object.assign(text.style, scaledStyles.itemText);
+        text.textContent = legendItem?.name || '';
+        itemContainer.appendChild(text);
+        groupDiv.appendChild(itemContainer);
+      }
+    });
 
-          // Simulate second move
-          const heights2 = [...heights1];
-          heights2[fromCol2] -= group2.height;
-          heights2[fromCol2 + 1] += group2.height;
+    dummyContainer.appendChild(groupDiv);
+    const { height, width } = groupDiv.getBoundingClientRect();
 
-          const imbalance2 = Math.max(...heights2) - Math.min(...heights2);
-
-          // Check if 2-step sequence is better
-          if (imbalance2 < bestFinalImbalance) {
-            bestFinalImbalance = imbalance2;
-            bestSequence = [
-              { fromCol: fromCol1, toCol: fromCol1 + 1, layerName: layer1.data.layerName },
-              { fromCol: fromCol2, toCol: fromCol2 + 1, layerName: layer2.data.layerName },
-            ];
-          }
+    // Capture actual WMS image dimensions after layout
+    group.forEach((item, itemIndex) => {
+      if (item.type === 'wms') {
+        const img = groupDiv.querySelector(`img[data-item-index="${itemIndex}"]`) as HTMLImageElement;
+        if (img) {
+          const imgRect = img.getBoundingClientRect();
+          // eslint-disable-next-line no-param-reassign
+          item.wmsImageSize = {
+            width: Math.round(imgRect.width),
+            height: Math.round(imgRect.height),
+          };
         }
       }
+    });
 
-      // Execute best sequence if found and it improves things
-      const currentImbalance = maxHeight - minHeight;
-      if (bestSequence && bestFinalImbalance < currentImbalance) {
-        for (const move of bestSequence) {
-          const { fromCol, toCol } = move;
-          const layersInCol = columns[fromCol].filter((item) => item.isRoot);
-          const lastLayer = layersInCol[layersInCol.length - 1];
-          const lastLayerIndex = columns[fromCol].lastIndexOf(lastLayer);
+    dummyContainer.removeChild(groupDiv);
+
+    const layerName = group[0]?.data.layerName || 'unknown';
+
+    return { group, height, width, layerName };
+  });
+
+  document.body.removeChild(dummyContainer);
+
+  // STEP 3: Calculate required column width and verify number of columns fits
+  // Each column width = widest layer in that column
+  // We need to ensure all columns fit within available width
+  const calculateColumnsAndWidths = (numCols: number): { cols: FlattenedLegendItem[][]; colWidths: number[]; totalWidth: number } => {
+    const groupsPerCol = Math.ceil(groups.length / numCols);
+    const cols: FlattenedLegendItem[][] = Array(numCols)
+      .fill(null)
+      .map(() => []);
+    const colWidths: number[] = Array(numCols).fill(0);
+
+    // Distribute groups
+    groupHeights.forEach((gh, index) => {
+      const colIndex = Math.min(Math.floor(index / groupsPerCol), numCols - 1);
+      cols[colIndex].push(...gh.group);
+      colWidths[colIndex] = Math.max(colWidths[colIndex], gh.width);
+    });
+
+    // Total width = sum of column widths + gaps between columns
+    const totalWidth = colWidths.reduce((sum, w) => sum + w, 0) + (numCols - 1) * EXPORT_CONSTANTS.COLUMN_GAP;
+    return { cols, colWidths, totalWidth };
+  };
+
+  // Start with optimal columns and reduce if needed
+  let finalColumns = optimalColumns;
+  let result = calculateColumnsAndWidths(finalColumns);
+
+  while (result.totalWidth > mapImageWidth && finalColumns > 1) {
+    finalColumns--;
+    result = calculateColumnsAndWidths(finalColumns);
+  }
+
+  // STEP 4: Initial even distribution using measured heights
+  const groupsPerColumn = Math.ceil(groups.length / finalColumns);
+  const columns: FlattenedLegendItem[][] = Array(finalColumns)
+    .fill(null)
+    .map(() => []);
+  const columnHeights: number[] = Array(finalColumns).fill(0);
+  const localColumnWidths: number[] = Array(finalColumns).fill(0);
+
+  groupHeights.forEach((groupWithHeight, index) => {
+    const columnIndex = Math.floor(index / groupsPerColumn);
+    const targetColumn = Math.min(columnIndex, finalColumns - 1);
+
+    columns[targetColumn].push(...groupWithHeight.group);
+    columnHeights[targetColumn] += groupWithHeight.height;
+    localColumnWidths[targetColumn] = Math.max(localColumnWidths[targetColumn], groupWithHeight.width);
+  });
+
+  // Fill empty columns by moving last layer from previous columns
+  for (let col = finalColumns - 1; col >= 0; col--) {
+    if (columnHeights[col] === 0 && col > 0) {
+      // Find the nearest previous column with more than 1 layer
+      for (let prevCol = col - 1; prevCol >= 0; prevCol--) {
+        const layersInPrevCol = columns[prevCol].filter((item) => item.isRoot);
+        if (layersInPrevCol.length > 1) {
+          // Move last layer from prevCol to empty col
+          const lastLayer = layersInPrevCol[layersInPrevCol.length - 1];
+          const lastLayerIndex = columns[prevCol].lastIndexOf(lastLayer);
+          const layerItems = columns[prevCol].slice(lastLayerIndex);
+
+          // Find height and width
           const layerGroup = groupHeights.find((g) => g.group[0] === lastLayer);
-
           if (layerGroup) {
             const layerHeight = layerGroup.height;
             const layerWidth = layerGroup.width;
-            const layerItems = columns[fromCol].slice(lastLayerIndex);
 
             // Move items
-            columns[fromCol].splice(lastLayerIndex);
-            columns[toCol] = [...layerItems, ...columns[toCol]];
+            columns[prevCol].splice(lastLayerIndex);
+            columns[col] = [...layerItems, ...columns[col]];
 
             // Update heights
-            columnHeights[fromCol] -= layerHeight;
-            columnHeights[toCol] += layerHeight;
+            columnHeights[prevCol] -= layerHeight;
+            columnHeights[col] += layerHeight;
 
             // Update widths (recalculate max width for both columns)
-            localColumnWidths[fromCol] = Math.max(
-              0,
-              ...columns[fromCol].filter((item) => item.isRoot).map((item) => groupHeights.find((g) => g.group[0] === item)?.width || 0)
+            localColumnWidths[prevCol] = Math.max(
+              ...columns[prevCol].filter((item) => item.isRoot).map((item) => groupHeights.find((g) => g.group[0] === item)?.width || 0)
             );
-            localColumnWidths[toCol] = Math.max(localColumnWidths[toCol], layerWidth);
+            localColumnWidths[col] = Math.max(localColumnWidths[col], layerWidth);
+
+            break;
           }
         }
+      }
+    }
+  }
 
-        improved = true;
+  // STEP 5: Optimize using pre-measured heights with 2-step look-ahead
+  let iteration = 0;
+  let improved = true;
+
+  while (improved && iteration < EXPORT_CONSTANTS.MAX_OPTIMIZATION_ITERATIONS) {
+    improved = false;
+    iteration++;
+
+    const maxHeight = Math.max(...columnHeights);
+    const minHeight = Math.min(...columnHeights);
+    const balanceRatio = minHeight / maxHeight;
+
+    if (balanceRatio > EXPORT_CONSTANTS.COLUMN_BALANCE_THRESHOLD) {
+      break;
+    }
+
+    // Strategy: Try all possible 1-step and 2-step move sequences
+    // Find the sequence that most reduces imbalance
+    let bestSequence: Array<{ fromCol: number; toCol: number; layerName: string }> | null = null;
+    let bestFinalImbalance = maxHeight - minHeight;
+
+    // Try all single moves
+    for (let fromCol1 = 0; fromCol1 < finalColumns - 1; fromCol1++) {
+      const layersInCol1 = columns[fromCol1].filter((item) => item.isRoot);
+      if (layersInCol1.length <= 1) {
+        // eslint-disable-next-line no-continue
+        continue;
+      }
+
+      const layer1 = layersInCol1[layersInCol1.length - 1];
+      const group1 = groupHeights.find((g) => g.group[0] === layer1);
+      if (!group1) {
+        // eslint-disable-next-line no-continue
+        continue;
+      }
+
+      // Simulate first move
+      const heights1 = [...columnHeights];
+      heights1[fromCol1] -= group1.height;
+      heights1[fromCol1 + 1] += group1.height;
+
+      const imbalance1 = Math.max(...heights1) - Math.min(...heights1);
+
+      // Check if single move is better
+      if (imbalance1 < bestFinalImbalance) {
+        bestFinalImbalance = imbalance1;
+        bestSequence = [{ fromCol: fromCol1, toCol: fromCol1 + 1, layerName: layer1.data.layerName }];
+      }
+
+      // Now try a second move after this first move
+      // Need to simulate the column state after move 1
+      const tempColumns = columns.map((col, idx) => {
+        if (idx === fromCol1) {
+          // Remove last layer
+          const lastLayerIdx = col.lastIndexOf(layer1);
+          return col.slice(0, lastLayerIdx);
+        }
+        if (idx === fromCol1 + 1) {
+          // Add layer at beginning
+          const lastLayerIdx = columns[fromCol1].lastIndexOf(layer1);
+          const layerItems = columns[fromCol1].slice(lastLayerIdx);
+          return [...layerItems, ...col];
+        }
+        return col;
+      });
+
+      // Try all possible second moves from this new state
+      for (let fromCol2 = 0; fromCol2 < finalColumns - 1; fromCol2++) {
+        const layersInCol2 = tempColumns[fromCol2].filter((item) => item.isRoot);
+        if (layersInCol2.length <= 1) {
+          // eslint-disable-next-line no-continue
+          continue;
+        }
+
+        const layer2 = layersInCol2[layersInCol2.length - 1];
+        const group2 = groupHeights.find((g) => g.group[0] === layer2);
+        if (!group2) {
+          // eslint-disable-next-line no-continue
+          continue;
+        }
+
+        // Simulate second move
+        const heights2 = [...heights1];
+        heights2[fromCol2] -= group2.height;
+        heights2[fromCol2 + 1] += group2.height;
+
+        const imbalance2 = Math.max(...heights2) - Math.min(...heights2);
+
+        // Check if 2-step sequence is better
+        if (imbalance2 < bestFinalImbalance) {
+          bestFinalImbalance = imbalance2;
+          bestSequence = [
+            { fromCol: fromCol1, toCol: fromCol1 + 1, layerName: layer1.data.layerName },
+            { fromCol: fromCol2, toCol: fromCol2 + 1, layerName: layer2.data.layerName },
+          ];
+        }
       }
     }
 
-    fittedColumns = columns;
-    columnWidths = localColumnWidths; // Assign local columnWidths to outer scope
+    // Execute best sequence if found and it improves things
+    const currentImbalance = maxHeight - minHeight;
+    if (bestSequence && bestFinalImbalance < currentImbalance) {
+      for (const move of bestSequence) {
+        const { fromCol, toCol } = move;
+        const layersInCol = columns[fromCol].filter((item) => item.isRoot);
+        const lastLayer = layersInCol[layersInCol.length - 1];
+        const lastLayerIndex = columns[fromCol].lastIndexOf(lastLayer);
+        const layerGroup = groupHeights.find((g) => g.group[0] === lastLayer);
 
-    finalConfig = {
-      size: 'AUTO' as const,
-      mapHeight: config.mapHeight,
-      legendColumns: optimalColumns,
-      maxLegendHeight: Infinity,
-      canvasWidth: mapImageWidth,
-      canvasHeight: 0, // Will be measured from actual rendered canvas
-    };
+        if (layerGroup) {
+          const layerHeight = layerGroup.height;
+          const layerWidth = layerGroup.width;
+          const layerItems = columns[fromCol].slice(lastLayerIndex);
 
-    // Update PAGE_CONFIGS for AUTO format
-    PAGE_CONFIGS.AUTO = {
-      size: 'AUTO' as const,
-      mapHeight: finalConfig.mapHeight,
-      legendColumns: finalConfig.legendColumns,
-      maxLegendHeight: finalConfig.maxLegendHeight,
-      canvasWidth: finalConfig.canvasWidth,
-      canvasHeight: finalConfig.canvasHeight,
-    };
-  } else {
-    throw new Error('Only AUTO page size is supported');
+          // Move items
+          columns[fromCol].splice(lastLayerIndex);
+          columns[toCol] = [...layerItems, ...columns[toCol]];
+
+          // Update heights
+          columnHeights[fromCol] -= layerHeight;
+          columnHeights[toCol] += layerHeight;
+
+          // Update widths (recalculate max width for both columns)
+          localColumnWidths[fromCol] = Math.max(
+            0,
+            ...columns[fromCol].filter((item) => item.isRoot).map((item) => groupHeights.find((g) => g.group[0] === item)?.width || 0)
+          );
+          localColumnWidths[toCol] = Math.max(localColumnWidths[toCol], layerWidth);
+        }
+      }
+
+      improved = true;
+    }
   }
+
+  const fittedColumns = columns;
+  const columnWidths = localColumnWidths;
 
   return {
     mapDataUrl: resultCanvas.toDataURL('image/jpeg', EXPORT_CONSTANTS.JPEG_QUALITY),
@@ -1368,5 +1325,6 @@ export async function getMapInfo(mapId: string, pageSize: TypeValidPageSizes): P
     attributions: attribution,
     fittedColumns,
     columnWidths,
+    canvasWidth: mapImageWidth,
   };
 }

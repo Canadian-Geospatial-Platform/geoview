@@ -3,8 +3,8 @@ import { renderToString } from 'react-dom/server';
 
 import { Document, Page, Text, View, Image, Svg, Path } from '@react-pdf/renderer';
 import { DateMgt } from '@/core/utils/date-mgt';
-import type { FlattenedLegendItem, TypeValidPageSizes, ElementFactory } from './utilities';
-import { getMapInfo, PAGE_CONFIGS, renderLegendColumns, renderFooter, renderScaleBar, renderNorthArrow } from './utilities';
+import type { FlattenedLegendItem, ElementFactory } from './utilities';
+import { getMapInfo, renderLegendColumns, renderFooter, renderScaleBar, renderNorthArrow } from './utilities';
 import type { FileExportProps } from './export-modal';
 import { PDF_STYLES, getScaledPDFStyles } from './layout-styles';
 import { CanvasDocument } from './canvas-layout';
@@ -26,7 +26,8 @@ interface ExportDocumentProps {
   date: string;
   fittedColumns: FlattenedLegendItem[][];
   columnWidths?: number[];
-  pageSize: TypeValidPageSizes;
+  canvasWidth: number;
+  canvasHeight: number;
 }
 
 // PDF element factory for react-pdf elements
@@ -59,11 +60,11 @@ export function ExportDocument({
   date,
   fittedColumns,
   columnWidths,
-  pageSize,
+  canvasWidth,
+  canvasHeight,
 }: ExportDocumentProps): JSX.Element {
-  const config = PAGE_CONFIGS[pageSize];
-  const pageDimensions = [config.canvasWidth, config.canvasHeight];
-  const scaledStyles = getScaledPDFStyles(config.canvasWidth);
+  const pageDimensions = [canvasWidth, canvasHeight];
+  const scaledStyles = getScaledPDFStyles(canvasWidth);
 
   return (
     <Document>
@@ -75,7 +76,7 @@ export function ExportDocument({
             src={mapDataUrl}
             style={{
               ...PDF_STYLES.mapImage,
-              maxHeight: pageSize === 'AUTO' ? 'auto' : config.mapHeight,
+              maxHeight: 'auto', // AUTO mode only
             }}
           />
         </View>
@@ -99,8 +100,8 @@ export function ExportDocument({
 }
 
 export async function createPDFMapUrl(mapId: string, params: FileExportProps): Promise<string> {
-  const { exportTitle, disclaimer, pageSize } = params;
-  const mapInfo = await getMapInfo(mapId, pageSize);
+  const { exportTitle, disclaimer } = params;
+  const mapInfo = await getMapInfo(mapId);
 
   // First, render a temporary canvas to measure actual height
   const tempHtml = renderToString(
@@ -109,7 +110,7 @@ export async function createPDFMapUrl(mapId: string, params: FileExportProps): P
       exportTitle={exportTitle}
       disclaimer={disclaimer}
       date={DateMgt.formatDate(new Date(), 'YYYY-MM-DD, hh:mm:ss A')}
-      pageSize={pageSize}
+      canvasWidth={mapInfo.canvasWidth}
     />
   );
   const tempElement = document.createElement('div');
@@ -118,8 +119,7 @@ export async function createPDFMapUrl(mapId: string, params: FileExportProps): P
 
   // Measure the actual rendered height
   const renderedElement = tempElement.firstChild as HTMLElement;
-  const actualCanvasHeight = renderedElement.getBoundingClientRect().height;
-  PAGE_CONFIGS[pageSize].canvasHeight = Math.ceil(actualCanvasHeight);
+  const actualCanvasHeight = Math.ceil(renderedElement.getBoundingClientRect().height);
 
   // Clean up temporary element
   document.body.removeChild(tempElement);
@@ -131,7 +131,8 @@ export async function createPDFMapUrl(mapId: string, params: FileExportProps): P
       exportTitle={exportTitle}
       disclaimer={disclaimer}
       date={DateMgt.formatDate(new Date(), 'YYYY-MM-DD, hh:mm:ss A')}
-      pageSize={pageSize}
+      canvasWidth={mapInfo.canvasWidth}
+      canvasHeight={actualCanvasHeight}
     />
   ).toBlob();
   return URL.createObjectURL(blob);

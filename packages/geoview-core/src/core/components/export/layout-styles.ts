@@ -3,7 +3,7 @@ const COLORS = {
   standardGrey: '#9e9e9e',
   mediumGrey: '#757575',
   darkGrey: '#424242',
-};
+} as const;
 
 export const SHARED_STYLES = {
   fontFamily: 'Helvetica',
@@ -435,6 +435,12 @@ export const CANVAS_STYLES = {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getScaledPDFStyles = (docWidth: number): any => {
   const scale = docWidth / 612;
+
+  // Pre-compute base styles to avoid redundant function calls
+  const baseLayerText = PDF_STYLES.layerText();
+  const baseChildText = PDF_STYLES.childText(0);
+  const baseTimeText = PDF_STYLES.timeText(0);
+
   return {
     ...PDF_STYLES,
     layerSeparator: (marginTop: number) => ({
@@ -455,16 +461,16 @@ export const getScaledPDFStyles = (docWidth: number): any => {
       objectFit: 'contain',
     },
     layerText: () => ({
-      ...PDF_STYLES.layerText(),
-      fontSize: PDF_STYLES.layerText().fontSize * scale,
+      ...baseLayerText,
+      fontSize: baseLayerText.fontSize * scale,
     }),
     childText: (indentLevel: number) => ({
       ...PDF_STYLES.childText(indentLevel),
-      fontSize: PDF_STYLES.childText(0).fontSize * scale,
+      fontSize: baseChildText.fontSize * scale,
     }),
     timeText: (indentLevel: number) => ({
       ...PDF_STYLES.timeText(indentLevel),
-      fontSize: PDF_STYLES.timeText(0).fontSize * scale,
+      fontSize: baseTimeText.fontSize * scale,
     }),
     itemText: {
       ...PDF_STYLES.itemText,
@@ -514,69 +520,86 @@ export const getScaledPDFStyles = (docWidth: number): any => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getScaledCanvasStyles = (docWidth: number): any => {
   const scale = docWidth / 612;
+
+  // Pre-compute base styles and extract numeric values to avoid repetitive parseInt() calls
+  const baseLayerText = CANVAS_STYLES.layerText();
+  const baseChildText = CANVAS_STYLES.childText(0);
+  const baseTimeText = CANVAS_STYLES.timeText(0);
+
+  // Pre-extract numeric font sizes and dimensions
+  const layerTextSize = parseInt(baseLayerText.fontSize);
+  const childTextSize = parseInt(baseChildText.fontSize);
+  const timeTextSize = parseInt(baseTimeText.fontSize);
+  const itemTextSize = parseInt(CANVAS_STYLES.itemText.fontSize);
+  const titleSize = parseInt(CANVAS_STYLES.title.fontSize);
+  const scaleTextSize = parseInt(CANVAS_STYLES.scaleText.fontSize);
+  const footerSize = parseInt(CANVAS_STYLES.footerDisclaimer.fontSize);
+  const northArrowSize = parseInt(CANVAS_STYLES.northArrow.width);
+  const itemIconSize = parseInt(CANVAS_STYLES.itemIcon.width);
+
   return {
     ...CANVAS_STYLES,
     layerSeparator: (marginTop: string) => ({
       ...CANVAS_STYLES.layerSeparator(marginTop),
     }),
     layerText: () => ({
-      ...CANVAS_STYLES.layerText(),
-      fontSize: `${parseInt(CANVAS_STYLES.layerText().fontSize) * scale}px`,
+      ...baseLayerText,
+      fontSize: `${layerTextSize * scale}px`,
       wordWrap: 'break-word' as const,
       overflowWrap: 'break-word' as const,
     }),
     childText: (indentLevel: number) => ({
       ...CANVAS_STYLES.childText(indentLevel),
-      fontSize: `${parseInt(CANVAS_STYLES.childText(0).fontSize) * scale}px`,
+      fontSize: `${childTextSize * scale}px`,
       wordWrap: 'break-word' as const,
       overflowWrap: 'break-word' as const,
     }),
     timeText: (indentLevel: number) => ({
       ...CANVAS_STYLES.timeText(indentLevel),
-      fontSize: `${parseInt(CANVAS_STYLES.timeText(0).fontSize) * scale}px`,
+      fontSize: `${timeTextSize * scale}px`,
       wordWrap: 'break-word' as const,
       overflowWrap: 'break-word' as const,
     }),
     itemText: {
       ...CANVAS_STYLES.itemText,
-      fontSize: `${parseInt(CANVAS_STYLES.itemText.fontSize) * scale}px`,
+      fontSize: `${itemTextSize * scale}px`,
       wordWrap: 'break-word' as const,
       overflowWrap: 'break-word' as const,
     },
     title: {
       ...CANVAS_STYLES.title,
-      fontSize: `${parseInt(CANVAS_STYLES.title.fontSize) * scale}px`,
+      fontSize: `${titleSize * scale}px`,
     },
     scaleText: {
       ...CANVAS_STYLES.scaleText,
-      fontSize: `${parseInt(CANVAS_STYLES.scaleText.fontSize) * scale}px`,
+      fontSize: `${scaleTextSize * scale}px`,
     },
     footerDisclaimer: {
       ...CANVAS_STYLES.footerDisclaimer,
-      fontSize: `${parseInt(CANVAS_STYLES.footerDisclaimer.fontSize) * scale}px`,
+      fontSize: `${footerSize * scale}px`,
     },
     footerAttribution: {
       ...CANVAS_STYLES.footerAttribution,
-      fontSize: `${parseInt(CANVAS_STYLES.footerAttribution.fontSize) * scale}px`,
+      fontSize: `${footerSize * scale}px`,
     },
     footerDate: {
       ...CANVAS_STYLES.footerDate,
-      fontSize: `${parseInt(CANVAS_STYLES.footerDate.fontSize) * scale}px`,
+      fontSize: `${footerSize * scale}px`,
     },
     northArrow: {
       ...CANVAS_STYLES.northArrow,
-      width: `${parseInt(CANVAS_STYLES.northArrow.width) * scale}px`,
-      height: `${parseInt(CANVAS_STYLES.northArrow.height) * scale}px`,
+      width: `${northArrowSize * scale}px`,
+      height: `${northArrowSize * scale}px`,
     },
     northArrowSvg: {
       ...CANVAS_STYLES.northArrowSvg,
-      width: `${parseInt(CANVAS_STYLES.northArrowSvg.width) * scale}px`,
-      height: `${parseInt(CANVAS_STYLES.northArrowSvg.height) * scale}px`,
+      width: `${northArrowSize * scale}px`,
+      height: `${northArrowSize * scale}px`,
     },
     itemIcon: {
       ...CANVAS_STYLES.itemIcon,
-      width: `${parseInt(CANVAS_STYLES.itemIcon.width) * scale}px`,
-      height: `${parseInt(CANVAS_STYLES.itemIcon.height) * scale}px`,
+      width: `${itemIconSize * scale}px`,
+      height: `${itemIconSize * scale}px`,
     },
     wmsImage: {
       ...CANVAS_STYLES.wmsImage,
