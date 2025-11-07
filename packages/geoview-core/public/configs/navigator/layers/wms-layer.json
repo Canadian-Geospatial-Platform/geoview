@@ -7,7 +7,8 @@
     "basemapOptions": {
       "basemapId": "transport",
       "shaded": false,
-      "labeled": true
+      "labeled": true,
+      "labelZIndex": 20
     },
     "listOfGeoviewLayerConfig": [
       {

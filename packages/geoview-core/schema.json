@@ -502,6 +502,11 @@
           "type": "boolean",
           "default": true,
           "description": "Enable or disable basemap labels"
+        },
+        "labelZIndex" : {
+          "type": "number",
+          "default": 0,
+          "description": "Z-index of the basemap labels"
         }
       },
       "required": [
