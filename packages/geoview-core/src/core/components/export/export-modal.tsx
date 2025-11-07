@@ -38,8 +38,6 @@ import { getSxClasses } from './export-modal-style';
 
 type FileFormat = 'pdf' | 'png' | 'jpeg';
 
-type DocumentSize = 'AUTO';
-
 const QUALITY_OPTIONS = [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100];
 
 const PREVIEW_TIMEOUT = 200;
@@ -47,7 +45,6 @@ const PREVIEW_TIMEOUT = 200;
 export interface FileExportProps {
   exportTitle: string;
   disclaimer: string;
-  pageSize: DocumentSize;
   dpi: number;
   jpegQuality?: number;
   format: FileFormat;
@@ -88,7 +85,6 @@ export default function ExportModal(): JSX.Element {
   const [jpegQuality, setJpegQuality] = useState(90); // Default 90%
   const [qualityMenuOpen, setQualityMenuOpen] = useState(false);
   const [qualityAnchorEl, setQualityAnchorEl] = useState<null | HTMLElement>(null);
-  const [pageSize] = useState<DocumentSize>('AUTO');
   const dialogRef = useRef(null) as RefObject<HTMLDivElement>;
   const [pngPreviewUrls, setPngPreviewUrls] = useState<string[]>([]);
 
@@ -110,7 +106,7 @@ export default function ExportModal(): JSX.Element {
     try {
       setIsMapLoading(true);
       const disclaimer = t('mapctrl.disclaimer.message');
-      const pngUrls = await createCanvasMapUrls(mapId, { exportTitle: '', disclaimer, pageSize: pageSize, dpi: 96, format: 'jpeg' });
+      const pngUrls = await createCanvasMapUrls(mapId, { exportTitle: '', disclaimer, dpi: 96, format: 'jpeg' });
       setPngPreviewUrls(pngUrls);
       pngUrls.forEach((url) => URL.revokeObjectURL(url));
     } catch (error) {
@@ -119,7 +115,7 @@ export default function ExportModal(): JSX.Element {
       setIsMapLoading(false);
       setIsLegendLoading(false);
     }
-  }, [t, mapId, pageSize]);
+  }, [t, mapId]);
 
   // Export the requested file
   const performExport = useCallback(async () => {
@@ -133,14 +129,13 @@ export default function ExportModal(): JSX.Element {
       // TODO Find a way to use sx in the pdf/canvas-layout files.
       // TO.DO Probably would need to pass the theme to the createPDFMapUrl and createCanvasMapUrls here and in above generatePreview
       if (exportFormat === 'pdf') {
-        const pdfUrl = await createPDFMapUrl(mapId, { exportTitle, disclaimer, pageSize: pageSize, dpi, format: exportFormat });
+        const pdfUrl = await createPDFMapUrl(mapId, { exportTitle, disclaimer, dpi, format: exportFormat });
         exportFile(pdfUrl, filename, exportFormat);
         URL.revokeObjectURL(pdfUrl);
       } else {
         const imageUrl = await createCanvasMapUrls(mapId, {
           exportTitle,
           disclaimer,
-          pageSize: pageSize,
           dpi,
           jpegQuality,
           format: exportFormat,
@@ -169,7 +164,6 @@ export default function ExportModal(): JSX.Element {
     fileExportDefaultPrefixName,
     jpegQuality,
     mapId,
-    pageSize,
     setActiveAppBarTab,
     t,
   ]);
@@ -306,8 +300,8 @@ export default function ExportModal(): JSX.Element {
         {/* Format Selection Menu */}
         <Menu id="format-selection" open={formatMenuOpen} onClose={handleFormatMenuClose} anchorEl={formatAnchorEl}>
           <MenuItem onClick={() => handleSelectFormat('pdf')}>PDF</MenuItem>
-          {pageSize === 'AUTO' && <MenuItem onClick={() => handleSelectFormat('png')}>PNG</MenuItem>}
-          {pageSize === 'AUTO' && <MenuItem onClick={() => handleSelectFormat('jpeg')}>JPEG</MenuItem>}
+          <MenuItem onClick={() => handleSelectFormat('png')}>PNG</MenuItem>
+          <MenuItem onClick={() => handleSelectFormat('jpeg')}>JPEG</MenuItem>
         </Menu>
         <Button type="text" onClick={handleFormatMenuClick} variant="outlined" size="small" sx={sxClasses.buttonOutlined}>
           Format: {exportFormat.toUpperCase()}

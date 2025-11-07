@@ -3,16 +3,8 @@ import * as html2canvas from '@html2canvas/html2canvas';
 
 import { DateMgt } from '@/core/utils/date-mgt';
 import type { FileExportProps } from './export-modal';
-import type { FlattenedLegendItem, TypeValidPageSizes, ElementFactory } from './utilities';
-import {
-  PAGE_CONFIGS,
-  getMapInfo,
-  renderLegendColumns,
-  renderFooter,
-  renderScaleBar,
-  renderNorthArrow,
-  EXPORT_CONSTANTS,
-} from './utilities';
+import type { FlattenedLegendItem, ElementFactory } from './utilities';
+import { getMapInfo, renderLegendColumns, renderFooter, renderScaleBar, renderNorthArrow, EXPORT_CONSTANTS } from './utilities';
 import { CANVAS_STYLES, getScaledCanvasStyles } from './layout-styles';
 
 interface CanvasDocumentProps {
@@ -32,7 +24,7 @@ interface CanvasDocumentProps {
   date: string;
   fittedColumns: FlattenedLegendItem[][];
   columnWidths?: number[];
-  pageSize: TypeValidPageSizes;
+  canvasWidth: number;
 }
 
 // Canvas element factory for HTML elements
@@ -48,12 +40,7 @@ const canvasElementFactory: ElementFactory = {
 /**
  * Render legend items directly from columns without re-grouping
  */
-const renderCanvasLegendInRows = (
-  columns: FlattenedLegendItem[][],
-  pageSize: TypeValidPageSizes,
-  canvasWidth: number,
-  columnWidths?: number[]
-): JSX.Element => {
+const renderCanvasLegendInRows = (columns: FlattenedLegendItem[][], canvasWidth: number, columnWidths?: number[]): JSX.Element => {
   const scaledStyles = getScaledCanvasStyles(canvasWidth);
   return renderLegendColumns(columns, canvasElementFactory, scaledStyles, CANVAS_STYLES, columnWidths);
 };
@@ -75,9 +62,8 @@ export function CanvasDocument({
   disclaimer,
   attributions,
   date,
-  pageSize,
+  canvasWidth,
 }: CanvasDocumentProps): JSX.Element {
-  const { canvasWidth } = PAGE_CONFIGS[pageSize];
   const scaledStyles = getScaledCanvasStyles(canvasWidth);
 
   return (
@@ -98,8 +84,8 @@ export function CanvasDocument({
       <div style={CANVAS_STYLES.divider} />
 
       {/* Legend */}
-      {fittedColumns.length > 0 && (
-        <div style={CANVAS_STYLES.legendContainer}>{renderCanvasLegendInRows(fittedColumns, pageSize, canvasWidth, columnWidths)}</div>
+      {fittedColumns && fittedColumns.length > 0 && (
+        <div style={CANVAS_STYLES.legendContainer}>{renderCanvasLegendInRows(fittedColumns, canvasWidth, columnWidths)}</div>
       )}
 
       {/* Footer */}
@@ -116,10 +102,10 @@ export function CanvasDocument({
  */
 export async function createCanvasMapUrls(mapId: string, props: FileExportProps): Promise<string[]> {
   const results = [];
-  const { exportTitle, disclaimer, pageSize, dpi, jpegQuality, format } = props;
+  const { exportTitle, disclaimer, dpi, jpegQuality, format } = props;
 
   // Get map info
-  const mapInfo = await getMapInfo(mapId, pageSize);
+  const mapInfo = await getMapInfo(mapId);
 
   // Create main page HTML
   const mainPageHtml = renderToString(
@@ -128,7 +114,7 @@ export async function createCanvasMapUrls(mapId: string, props: FileExportProps)
       exportTitle={exportTitle}
       disclaimer={disclaimer}
       date={DateMgt.formatDate(new Date(), 'YYYY-MM-DD, hh:mm:ss A')}
-      pageSize={pageSize}
+      canvasWidth={mapInfo.canvasWidth}
     />
   );
   const mainElement = document.createElement('div');
@@ -140,10 +126,6 @@ export async function createCanvasMapUrls(mapId: string, props: FileExportProps)
   const quality = jpegQuality ?? 1;
   const mainCanvas = await html2canvas.default(renderedElement, { scale: dpi / EXPORT_CONSTANTS.DEFAULT_DPI, logging: false });
   results.push(mainCanvas.toDataURL(`image/${format}`, quality));
-
-  // Capture actual canvas height for PDF generation
-  const actualCanvasHeight = renderedElement.getBoundingClientRect().height;
-  PAGE_CONFIGS[pageSize].canvasHeight = Math.ceil(actualCanvasHeight);
 
   document.body.removeChild(mainElement);
 
