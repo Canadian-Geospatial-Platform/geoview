@@ -156,7 +156,7 @@ export const SHARED_STYLES = {
   },
   footer: {
     fontSize: 8,
-    marginTop: 'auto',
+    marginTop: 10, // Fixed margin instead of auto - let content dictate height
     paddingTop: 5,
     paddingLeft: 0,
     paddingRight: 0,
@@ -247,10 +247,10 @@ export const PDF_STYLES = {
 
 // Canvas-specific styles (CSS format)
 export const CANVAS_STYLES = {
-  page: (width: number, height: number) => ({
+  page: (width: number) => ({
     width: `${width}px`,
-    height: `${height}px`,
-    minHeight: `${height}px`,
+    // height removed - let content determine height
+    minHeight: 'auto', // Auto height based on content
     padding: `${SHARED_STYLES.padding}px`,
     fontFamily: SHARED_STYLES.fontFamily,
     backgroundColor: 'white',
@@ -394,7 +394,7 @@ export const CANVAS_STYLES = {
     ...SHARED_STYLES.footer,
     fontSize: `${SHARED_STYLES.footerFontSize}px`,
     textAlign: 'center',
-    marginTop: 'auto',
+    marginTop: `${SHARED_STYLES.legendMarginTop * 4}px`, // Fixed margin instead of auto
     paddingTop: `${SHARED_STYLES.legendMarginTop * 4}px`,
   },
   footerDisclaimer: {
@@ -411,9 +411,9 @@ export const CANVAS_STYLES = {
     ...SHARED_STYLES.footerDate,
     fontSize: `${SHARED_STYLES.footerFontSize}px`,
   },
-  overflowPage: (width: number, height: number) => ({
+  overflowPage: (width: number) => ({
     width: `${width}px`,
-    height: `${height}px`,
+    minHeight: 'auto', // Auto height based on content
     padding: `${SHARED_STYLES.padding}px`,
     fontFamily: SHARED_STYLES.fontFamily,
     backgroundColor: 'white',
@@ -440,6 +440,20 @@ export const getScaledPDFStyles = (docWidth: number): any => {
     layerSeparator: (marginTop: number) => ({
       ...SHARED_STYLES.layerSeparator(marginTop),
     }),
+    wmsContainer: (indentLevel: number) => ({
+      ...PDF_STYLES.wmsContainer(indentLevel),
+      marginLeft: indentLevel + 3,
+      marginBottom: SHARED_STYLES.wmsMarginBottom,
+      maxWidth: 500,
+      width: '100%',
+    }),
+    wmsImage: {
+      ...PDF_STYLES.wmsImage,
+      width: 'auto', // Match Canvas/Preview: preserve native size
+      height: 'auto',
+      maxWidth: '100%',
+      objectFit: 'contain',
+    },
     layerText: () => ({
       ...PDF_STYLES.layerText(),
       fontSize: PDF_STYLES.layerText().fontSize * scale,
@@ -490,10 +504,6 @@ export const getScaledPDFStyles = (docWidth: number): any => {
       ...PDF_STYLES.itemIcon,
       width: PDF_STYLES.itemIcon.width * scale,
       height: PDF_STYLES.itemIcon.height * scale,
-    },
-    wmsImage: {
-      ...PDF_STYLES.wmsImage,
-      maxWidth: SHARED_STYLES.wmsImageWidth * scale,
     },
   };
 };
