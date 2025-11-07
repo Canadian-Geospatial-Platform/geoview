@@ -4,7 +4,15 @@ import * as html2canvas from '@html2canvas/html2canvas';
 import { DateMgt } from '@/core/utils/date-mgt';
 import type { FileExportProps } from './export-modal';
 import type { FlattenedLegendItem, TypeValidPageSizes, ElementFactory } from './utilities';
-import { PAGE_CONFIGS, getMapInfo, renderLegendColumns, renderFooter, renderScaleBar, renderNorthArrow } from './utilities';
+import {
+  PAGE_CONFIGS,
+  getMapInfo,
+  renderLegendColumns,
+  renderFooter,
+  renderScaleBar,
+  renderNorthArrow,
+  EXPORT_CONSTANTS,
+} from './utilities';
 import { CANVAS_STYLES, getScaledCanvasStyles } from './layout-styles';
 
 interface CanvasDocumentProps {
@@ -111,8 +119,7 @@ export async function createCanvasMapUrls(mapId: string, props: FileExportProps)
   const { exportTitle, disclaimer, pageSize, dpi, jpegQuality, format } = props;
 
   // Get map info
-  const mapInfo = await getMapInfo(mapId, pageSize, disclaimer, exportTitle);
-  const { fittedOverflowItems } = mapInfo;
+  const mapInfo = await getMapInfo(mapId, pageSize);
 
   // Create main page HTML
   const mainPageHtml = renderToString(
@@ -131,7 +138,7 @@ export async function createCanvasMapUrls(mapId: string, props: FileExportProps)
   // Convert to canvas
   const renderedElement = mainElement.firstChild as HTMLElement;
   const quality = jpegQuality ?? 1;
-  const mainCanvas = await html2canvas.default(renderedElement, { scale: dpi / 96, logging: false });
+  const mainCanvas = await html2canvas.default(renderedElement, { scale: dpi / EXPORT_CONSTANTS.DEFAULT_DPI, logging: false });
   results.push(mainCanvas.toDataURL(`image/${format}`, quality));
 
   // Capture actual canvas height for PDF generation
@@ -139,24 +146,6 @@ export async function createCanvasMapUrls(mapId: string, props: FileExportProps)
   PAGE_CONFIGS[pageSize].canvasHeight = Math.ceil(actualCanvasHeight);
 
   document.body.removeChild(mainElement);
-
-  if (fittedOverflowItems && fittedOverflowItems.filter((column) => column.length > 0).length > 0) {
-    const { canvasWidth } = PAGE_CONFIGS[pageSize];
-    // Create overflow page (just legend)
-    const overflowHtml = renderToString(
-      <div style={CANVAS_STYLES.overflowPage(canvasWidth)}>
-        <div style={CANVAS_STYLES.overflowContainer}>{renderCanvasLegendInRows(fittedOverflowItems, pageSize, canvasWidth)}</div>
-      </div>
-    );
-
-    const overflowElement = document.createElement('div');
-    overflowElement.innerHTML = overflowHtml;
-    document.body.appendChild(overflowElement);
-
-    const overflowCanvas = await html2canvas.default(overflowElement.firstChild as HTMLElement, { scale: dpi / 96, logging: false });
-    results.push(overflowCanvas.toDataURL(`image/${format}`, quality));
-    document.body.removeChild(overflowElement);
-  }
 
   return results;
 }

@@ -26,7 +26,6 @@ interface ExportDocumentProps {
   date: string;
   fittedColumns: FlattenedLegendItem[][];
   columnWidths?: number[];
-  fittedOverflowItems?: FlattenedLegendItem[][];
   pageSize: TypeValidPageSizes;
 }
 
@@ -60,7 +59,6 @@ export function ExportDocument({
   date,
   fittedColumns,
   columnWidths,
-  fittedOverflowItems,
   pageSize,
 }: ExportDocumentProps): JSX.Element {
   const config = PAGE_CONFIGS[pageSize];
@@ -96,19 +94,13 @@ export function ExportDocument({
 
         {renderFooter(disclaimer, attributions, date, pdfElementFactory, scaledStyles)}
       </Page>
-
-      {pageSize !== 'AUTO' && fittedOverflowItems && fittedOverflowItems.filter((column) => column.length > 0).length > 0 && (
-        <Page size={{ width: pageDimensions[0], height: pageDimensions[1] }} style={PDF_STYLES.page}>
-          <View style={PDF_STYLES.overflowContainer}>{renderLegendInRows(fittedOverflowItems, scaledStyles)}</View>
-        </Page>
-      )}
     </Document>
   );
 }
 
 export async function createPDFMapUrl(mapId: string, params: FileExportProps): Promise<string> {
   const { exportTitle, disclaimer, pageSize } = params;
-  const mapInfo = await getMapInfo(mapId, pageSize, disclaimer, exportTitle);
+  const mapInfo = await getMapInfo(mapId, pageSize);
 
   // First, render a temporary canvas to measure actual height
   const tempHtml = renderToString(

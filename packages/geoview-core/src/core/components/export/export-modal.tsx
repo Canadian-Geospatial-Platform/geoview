@@ -1,20 +1,23 @@
 /*
 Export Process Overview:
-- Modal displays preview and handles user input (title, format, page size, etc.)
+- Modal displays preview and handles user input (title, format, DPI, quality)
 - Canvas layout (createCanvasMapUrls) generates raster images for preview/export
 - PDF layout (createPDFMapUrl) generates vector PDFs for export only
 - Both call utilities>getMapInfo for map preparation and legend processing
 
 Key Processing Steps:
-- getMapInfo captures map canvas at 300DPI, extracts scale/north arrow, processes legend data
+- getMapInfo captures map canvas, extracts scale/north arrow, processes legend data
 - Map rotation handled by canvas transforms during capture
-- Legend items filtered by visibility and flattened into hierarchy with height estimates
-- Footer space reserved based on disclaimer/attribution text length estimates
+- Legend items filtered by visibility and flattened into hierarchy
+- Document uses AUTO mode only - height calculated dynamically from rendered content
 
 Legend Distribution Logic:
-- Distributes parent+child groups into columns based on available space
-- Groups that don't fit move to overflow page
-- Maintains vector quality until final rasterization (canvas) or keeps vectors (PDF)
+- Measures actual rendered height/width of each layer group in DOM
+- Distributes groups into 2-4 columns based on available width (min 280px/column)
+- Uses 2-step look-ahead optimization to balance column heights
+- Column widths justify to fill available space without gaps
+- All content fits on single auto-sized page (no overflow pages)
+- Canvas/PDF rendering uses measured dimensions for consistent output
 */
 
 import type { ChangeEvent, RefObject } from 'react';
@@ -95,6 +98,10 @@ export default function ExportModal(): JSX.Element {
     logger.logTraceUseCallback('EXPORT-MODAL - handleCloseModal');
     setActiveAppBarTab('legend', false, false);
     disableFocusTrap();
+    // Clear preview content so skeleton shows on next open
+    setPngPreviewUrls([]);
+    setIsMapLoading(false);
+    setIsLegendLoading(false);
   }, [setActiveAppBarTab, disableFocusTrap]);
 
   // Generate preview of PDF
@@ -171,6 +178,10 @@ export default function ExportModal(): JSX.Element {
   useEffect(() => {
     logger.logTraceUseEffect('EXPORT-MODAL - generatePreview useEffect');
     if (activeModalId !== 'export') return;
+
+    // Reset loading states to show skeleton immediately when modal opens
+    setIsMapLoading(true);
+    setIsLegendLoading(true);
 
     const overviewMap = mapElement.getElementsByClassName('ol-overviewmap')[0] as HTMLDivElement;
     if (overviewMap) overviewMap.style.visibility = 'hidden';
