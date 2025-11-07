@@ -23,6 +23,23 @@ if (typeof window !== 'undefined') {
   (window as typeof globalThis).Buffer = Buffer;
 }
 
+// Export constants
+export const EXPORT_CONSTANTS = {
+  // DPI and quality settings
+  DEFAULT_DPI: 96, // Standard screen DPI
+  JPEG_QUALITY: 0.98, // JPEG compression quality for map image
+
+  // Column optimization
+  COLUMN_BALANCE_THRESHOLD: 0.8, // Columns within 80% height ratio are considered balanced
+  MAX_OPTIMIZATION_ITERATIONS: 20, // Maximum iterations for column balancing
+  DEFAULT_MAX_COLUMNS: 4, // Default maximum number of legend columns
+  COLUMN_GAP: 10, // Gap between legend columns in pixels
+
+  // WMS image constraints
+  WMS_MAX_WIDTH: 500, // Maximum width for WMS images
+  WMS_INDENT_PER_LEVEL: 10, // Indent in pixels per depth level
+} as const;
+
 export type TypeValidPageSizes = 'AUTO';
 
 export type TypeMapStateForExportLayout = {
@@ -61,14 +78,10 @@ export type TypeMapInfoResult = {
   attributions: string[];
   fittedColumns: FlattenedLegendItem[][];
   columnWidths?: number[];
-  fittedOverflowItems?: FlattenedLegendItem[][];
 };
 
-// Page size specific styling
+// Page size configuration (AUTO mode only)
 export const PAGE_CONFIGS = {
-  LETTER: { size: 'LETTER' as const, mapHeight: 400, legendColumns: 4, maxLegendHeight: 375, canvasWidth: 612, canvasHeight: 792 },
-  LEGAL: { size: 'LEGAL' as const, mapHeight: 600, legendColumns: 4, maxLegendHeight: 425, canvasWidth: 612, canvasHeight: 1008 },
-  TABLOID: { size: 'TABLOID' as const, mapHeight: 800, legendColumns: 6, maxLegendHeight: 550, canvasWidth: 792, canvasHeight: 1224 },
   AUTO: { size: 'AUTO' as const, mapHeight: 400, legendColumns: 4, maxLegendHeight: Infinity, canvasWidth: 612, canvasHeight: 0 }, // Height calculated dynamically
 };
 
@@ -82,10 +95,12 @@ const MAP_IMAGE_DIMENSIONS = {
 };
 
 /**
- * Extract native dimensions from a base64-encoded PNG image
- * PNG format stores width/height in IHDR chunk (bytes 16-23)
+ * Extract native dimensions from a base64-encoded PNG image by reading the IHDR chunk.
+ * PNG format stores width/height in IHDR chunk at bytes 16-23 after the 8-byte signature.
+ * Used to ensure legend icons render at their actual size without scaling artifacts.
+ *
  * @param {string} base64Data - The base64 image string (with or without data:image/png;base64, prefix)
- * @returns {{ width: number; height: number } | null} The image dimensions or null if cannot be extracted
+ * @returns {{ width: number; height: number } | null} The image dimensions in pixels, or null if extraction fails
  */
 function getPNGDimensions(base64Data: string): { width: number; height: number } | null {
   try {
@@ -129,14 +144,21 @@ export interface ElementFactory {
 }
 
 /**
- * Renders a single legend item using the provided element factory
- * @param {FlattenedLegendItem} item - The item to render
- * @param {number} itemIndex - Index of the item in the column
- * @param {number} indentLevel - The indentation level (0-3)
- * @param {ElementFactory} factory - Element factory for creating elements
- * @param {any} scaledStyles - The scaled styles object
- * @param {any} baseStyles - The base styles object (CANVAS_STYLES or PDF_STYLES)
- * @returns {JSX.Element} The rendered item
+ * Renders a single legend item (layer, child, wms, time, or item type) using the provided element factory.
+ * Handles different item types with appropriate styling and structure:
+ * - layer: Root layer name with optional separator line
+ * - child: Child layer name with indentation
+ * - wms: WMS legend image with actual measured dimensions
+ * - time: Time dimension text (single date or range)
+ * - item: Legend icon + label with native PNG dimensions
+ *
+ * @param {FlattenedLegendItem} item - The legend item to render
+ * @param {number} itemIndex - Index of the item in the column (used for separator logic)
+ * @param {number} indentLevel - The indentation level (0-3) based on item depth
+ * @param {ElementFactory} factory - Element factory for creating renderer-specific elements (Canvas/PDF)
+ * @param {any} scaledStyles - The scaled styles object (CANVAS_STYLES or PDF_STYLES)
+ * @param {any} baseStyles - The base styles object with factory-specific properties
+ * @returns {JSX.Element} The rendered item element
  */
 export const renderSingleLegendItem = (
   item: FlattenedLegendItem,
@@ -267,12 +289,20 @@ export const renderSingleLegendItem = (
 };
 
 /**
- * Groups items into containers - wraps content items
- * @param {FlattenedLegendItem[]} column - The column items to render
- * @param {ElementFactory} factory - Element factory for creating elements
- * @param {any} scaledStyles - The scaled styles object
- * @param {any} baseStyles - The base styles object
- * @returns {JSX.Element[]} Array of rendered elements
+ * Renders all items in a legend column, grouping content items under their parent layers.
+ * Wraps immediate children (non-child-layer items) in a container for proper visual grouping.
+ * Recursively processes nested child layers to maintain hierarchy.
+ *
+ * Processing logic:
+ * - Layer/child headers rendered first
+ * - Immediate children (wms, time, item) wrapped in container
+ * - Nested child layers processed separately (not wrapped)
+ *
+ * @param {FlattenedLegendItem[]} column - The column items to render in order
+ * @param {ElementFactory} factory - Element factory for creating renderer-specific elements
+ * @param {any} scaledStyles - The scaled styles object for sizing
+ * @param {any} baseStyles - The base styles object for layout
+ * @returns {JSX.Element[]} Array of rendered elements (headers + content containers)
  */
 export const renderColumnItems = (
   column: FlattenedLegendItem[],
@@ -343,12 +373,20 @@ export const renderColumnItems = (
 };
 
 /**
- * Renders legend columns using the provided element factory
- * @param {FlattenedLegendItem[][]} columns - The columns to render
- * @param {ElementFactory} factory - Element factory for creating elements
- * @param {any} scaledStyles - The scaled styles object
- * @param {any} baseStyles - The base styles object
- * @returns {JSX.Element} The rendered legend
+ * Renders multiple legend columns in a flexbox container with dynamic or fixed widths.
+ * Uses space-between justification when columnWidths are provided to eliminate gaps.
+ * Falls back to gap-based layout for equal-width columns.
+ *
+ * Layout modes:
+ * - With columnWidths: Justified layout, each column has exact width, no gaps
+ * - Without columnWidths: Flex layout with 10px gaps between equal-width columns
+ *
+ * @param {FlattenedLegendItem[][]} columns - Array of columns, each containing legend items
+ * @param {ElementFactory} factory - Element factory for creating renderer-specific elements
+ * @param {any} scaledStyles - The scaled styles object for sizing
+ * @param {any} baseStyles - The base styles object for layout
+ * @param {number[]} [columnWidths] - Optional array of column widths in pixels for justified layout
+ * @returns {JSX.Element} The rendered legend container with all columns
  */
 export const renderLegendColumns = (
   columns: FlattenedLegendItem[][],
@@ -393,13 +431,15 @@ export const renderLegendColumns = (
 };
 
 /**
- * Renders footer section
- * @param {string} disclaimer - The disclaimer text
- * @param {string[]} attributions - The attribution texts
- * @param {string} date - The date string
- * @param {ElementFactory} factory - Element factory for creating elements
- * @param {any} scaledStyles - The scaled styles object
- * @returns {JSX.Element} The rendered footer
+ * Renders the footer section with disclaimer, attributions, and date.
+ * Footer appears at the bottom of the export document in all formats.
+ *
+ * @param {string} disclaimer - The disclaimer text to display
+ * @param {string[]} attributions - Array of attribution texts (one per map layer)
+ * @param {string} date - The export date string to display
+ * @param {ElementFactory} factory - Element factory for creating renderer-specific elements
+ * @param {any} scaledStyles - The scaled styles object with footer styling
+ * @returns {JSX.Element} The rendered footer container
  */
 export const renderFooter = (
   disclaimer: string,
@@ -420,13 +460,16 @@ export const renderFooter = (
 };
 
 /**
- * Renders scale bar with ticks
- * @param {string} scaleText - The scale text
- * @param {string} scaleLineWidth - The scale line width
- * @param {ElementFactory} factory - Element factory for creating elements
- * @param {any} scaledStyles - The scaled styles object
- * @param {any} baseStyles - The base styles object
- * @returns {JSX.Element} The rendered scale bar
+ * Renders a scale bar with tick marks and label text.
+ * The scale bar width is dynamically calculated to match the map extent.
+ * Includes left and right tick marks to clearly indicate the measurement distance.
+ *
+ * @param {string} scaleText - The scale text label (e.g., "100 km (approx)")
+ * @param {string} scaleLineWidth - The scale line width as CSS string (e.g., "150px")
+ * @param {ElementFactory} factory - Element factory for creating renderer-specific elements
+ * @param {any} scaledStyles - The scaled styles object for text sizing
+ * @param {any} baseStyles - The base styles object for scale bar layout
+ * @returns {JSX.Element} The rendered scale bar container
  */
 export const renderScaleBar = (
   scaleText: string,
@@ -451,12 +494,15 @@ export const renderScaleBar = (
 };
 
 /**
- * Renders north arrow SVG
- * @param {Array} northArrowSvg - The north arrow SVG path data
- * @param {number} northArrowRotation - The rotation angle
- * @param {ElementFactory} factory - Element factory for creating elements
- * @param {any} scaledStyles - The scaled styles object
- * @returns {JSX.Element | null} The rendered north arrow or null
+ * Renders a north arrow SVG icon with rotation to indicate true north direction.
+ * The rotation accounts for both map rotation and user-configured north arrow orientation.
+ * Returns null if north arrow is disabled or SVG data is unavailable.
+ *
+ * @param {Array} northArrowSvg - Array of SVG path data with stroke/fill properties
+ * @param {number} northArrowRotation - The rotation angle in degrees (includes map rotation + config offset)
+ * @param {ElementFactory} factory - Element factory for creating renderer-specific elements
+ * @param {any} scaledStyles - The scaled styles object for sizing and rotation
+ * @returns {JSX.Element | null} The rendered north arrow SVG or null if disabled
  */
 export const renderNorthArrow = (
   northArrowSvg: Array<{
@@ -495,12 +541,15 @@ export const renderNorthArrow = (
 };
 
 /**
- * Calculate actual WMS image height based on aspect ratio
+ * Calculates actual WMS image height by loading the image and applying max-width constraint.
+ * Images wider than maxWidth (500px * scale) are scaled down proportionally.
+ * Narrower images keep their original dimensions (no stretching).
+ * Includes scaled margin to match CSS rendering.
  *
- * @param {string} imageUrl - The image url
- * @param {number} scale - The scale factor based on document width (e.g., 1.634 for 1000px, 3.922 for 2400px)
- * @param {string} layerName - The layer name for error logging
- * @returns {Promise<number>} The calculated height including scaled margin
+ * @param {string | undefined} imageUrl - The WMS image URL (data URI or http/https)
+ * @param {number} [scale=1] - The scale factor based on document width (e.g., 1.634 for 1000px, 3.922 for 2400px)
+ * @param {string} [layerName='unknown'] - The layer name for error/warning logging
+ * @returns {Promise<number>} The calculated height in pixels including scaled margin
  */
 const calculateWMSImageHeight = (imageUrl: string | undefined, scale = 1, layerName = 'unknown'): Promise<number> => {
   // Missing URL fallback
@@ -532,7 +581,6 @@ const calculateWMSImageHeight = (imageUrl: string | undefined, scale = 1, layerN
       const scaledMargin = SHARED_STYLES.wmsMarginBottom * scale;
       const totalHeight = finalHeight + scaledMargin;
 
-      // TODO: Fix wrong height calculation - WMS images still appear to be overestimated in final layout
       resolve(totalHeight);
     };
 
@@ -547,70 +595,19 @@ const calculateWMSImageHeight = (imageUrl: string | undefined, scale = 1, layerN
 };
 
 /**
- * Estimate text height based on character count and available width
- * Attempts to account for word wrapping
- * @param {string} text - The text to be placed
- * @param {number} fontSize - The font size (px)
- * @param {number} availableWidth - The available width in the column
- * @returns {number} - The calcualted height of the text
- */
-const estimateTextHeight = (text: string, fontSize: number, availableWidth: number): number => {
-  const avgCharWidth = fontSize * 0.6; // Rough estimate for character width
-  const charsPerLine = Math.floor(availableWidth / avgCharWidth);
-  const lines = Math.max(1, Math.ceil(text.length / charsPerLine));
-  return lines * (fontSize + 2); // fontSize + line spacing
-};
-
-/**
- * Estimate individual legend item heights for layout calculation
+ * Calculates optimal number of columns (2-4) based on available width and minimum column requirements.
+ * Ensures each column can accommodate:
+ * - WMS images up to 500px wide
+ * - Content padding and margins (20px total)
+ * - Text content with reasonable wrapping (minimum 280px per column)
  *
- * @param {FlattenedLegendItem} item - The legend item to estimate
- * @param {TypeValidPageSizes} pageSize - The page size for column width calculation
- * @param {number} scale - The scale factor (only used for WMS images)
- * @returns {number} The estimated height in pixels
- */
-const estimateItemHeight = (item: FlattenedLegendItem, pageSize: TypeValidPageSizes, scale = 1): number => {
-  const config = PAGE_CONFIGS[pageSize];
-  const availableWidth = config.canvasWidth - SHARED_STYLES.padding * 2 - SHARED_STYLES.legendGap * (config.legendColumns - 1);
-  const columnWidth = availableWidth / config.legendColumns;
-
-  // NOTE: Legend items (layer, child, time, item) use base heights without scaling
-  // CSS flex layout handles visual scaling via getScaled* functions
-  // Only WMS images are pre-calculated with scaling applied
-  // TODO: Fix wrong height calculation - Items still appear overestimated in final layout
-  switch (item.type) {
-    case 'layer': {
-      const textHeight = estimateTextHeight(item.data.layerName || '', SHARED_STYLES.layerFontSize, columnWidth);
-      return textHeight + SHARED_STYLES.layerMarginBottom; // marginTop added separately in column calculation
-    }
-    case 'child':
-      // childFontSize(8) + childMarginBottom(2) + childMarginTop(3) - adjustment(1)
-      return SHARED_STYLES.childFontSize + SHARED_STYLES.childMarginBottom + SHARED_STYLES.childMarginTop - 1;
-    case 'wms': {
-      // WMS images have pre-calculated heights with scaling applied
-      const scaledMargin = SHARED_STYLES.wmsMarginBottom * scale;
-      const height = item.calculatedHeight || 100 * scale + scaledMargin;
-      if (!item.calculatedHeight) {
-        logger.logWarning(`WMS item "${item.data.layerName}" missing calculatedHeight, using fallback: ${Math.round(height)}px`);
-      }
-      return height;
-    }
-    case 'time':
-      // timeFontSize(7) + timeMarginBottom(2) + adjustment(1)
-      return SHARED_STYLES.timeFontSize + SHARED_STYLES.timeMarginBottom + 1;
-    case 'item':
-      // itemFontSize(7) + itemMarginBottom(1)
-      return SHARED_STYLES.itemFontSize + SHARED_STYLES.itemMarginBottom;
-    default:
-      return SHARED_STYLES.itemFontSize + SHARED_STYLES.itemMarginBottom;
-  }
-};
-
-/**
- * Calculate optimal number of columns based on available width
- * Uses fixed minimum column width to accommodate WMS images and content
- * @param {number} canvasWidth - The canvas width
- * @param {number} defaultColumns - The default number of columns (4)
+ * Algorithm:
+ * - Tries each column count from default (4) down to minimum (2)
+ * - Returns first count where all columns meet minimum width requirement
+ * - Falls back to 2 columns if narrower document
+ *
+ * @param {number} canvasWidth - The total canvas/document width in pixels
+ * @param {number} defaultColumns - The default maximum number of columns (typically 4)
  * @returns {number} The optimal number of columns (2-4)
  */
 const calculateOptimalColumns = (canvasWidth: number, defaultColumns: number): number => {
@@ -639,45 +636,28 @@ const calculateOptimalColumns = (canvasWidth: number, defaultColumns: number): n
 };
 
 /**
- * Estimate footer height based on content
- * @param {string} disclaimer - The disclaimer text
- * @param {string[]} attributions - The array of attribution texts
- * @returns {number} The estimated height of the footer
- */
-const estimateFooterHeight = (disclaimer: string, attributions: string[]): number => {
-  const baseLineHeight = SHARED_STYLES.footerFontSize + 2; // 8px font + 2px spacing (reduced from 4)
-  const marginBottom = SHARED_STYLES.footerMarginBottom;
-
-  // Estimate disclaimer lines (assuming ~80 chars per line at font size 8 to be more conservative)
-  const disclaimerLines = disclaimer ? Math.ceil(disclaimer.length / 80) : 0;
-  const disclaimerHeight = disclaimerLines * baseLineHeight + (disclaimerLines > 0 ? marginBottom : 0);
-
-  // Estimate attribution lines (also using 80 chars per line)
-  const attributionHeight = attributions.reduce((total, attr) => {
-    const lines = Math.ceil(attr.length / 80);
-    return total + lines * baseLineHeight + SHARED_STYLES.footerItemMarginBottom;
-  }, 0);
-
-  // Date line
-  const dateHeight = baseLineHeight;
-
-  // Total without extra padding - the footer paddingTop is already in CSS
-  const totalHeight = disclaimerHeight + attributionHeight + dateHeight;
-
-  logger.logInfo(
-    `Footer height estimate - Disclaimer: ${disclaimerHeight}px (${disclaimerLines} lines), ` +
-      `Attributions: ${attributionHeight}px (${attributions.length} items), Date: ${dateHeight}px, Total: ${totalHeight}px`
-  );
-
-  return totalHeight;
-};
-
-/**
- * Filter and flatten layers for placement in the legend
- * @param {TypeLegendLayer[]} layers - The legend layers to be shown in the legend
- * @param {TypeOrdderedLayerInfo[]} orderedLayerInfo - The orderedLayerInfo to be used to filter out layers that aren't visible
- * @param {TimeSliderLayerSet} timeSliderLayers - Any layers that are time enabled
- * @returns {FlattenedLegendItem[]} The flattened list of all the items in the legend
+ * Filters and flattens hierarchical legend layers into a linear array for layout processing.
+ * Recursively processes layer trees, filtering by visibility and content availability.
+ * Preserves depth information and parent-child relationships for proper rendering.
+ *
+ * Processing steps:
+ * 1. Filters layers by visibility (orderedLayerInfo)
+ * 2. Checks for meaningful content (items, icons, time dimensions, children)
+ * 3. Recursively processes children to prevent empty parent headers
+ * 4. Flattens structure while preserving depth and parentName
+ * 5. Adds layer header, time dimension, WMS image (if applicable), visible items
+ *
+ * Item types in result:
+ * - layer: Root layer (depth 0)
+ * - child: Nested layer (depth >= 1)
+ * - time: Time dimension for temporal layers
+ * - wms: WMS/dynamic service legend image
+ * - item: Individual legend icon + label
+ *
+ * @param {TypeLegendLayer[]} layers - The legend layers from the map state
+ * @param {TypeOrderedLayerInfo[]} orderedLayerInfo - Layer visibility info for filtering
+ * @param {TimeSliderLayerSet} [timeSliderLayers] - Time-enabled layers with dimension data
+ * @returns {FlattenedLegendItem[]} Flattened array of all legend items with depth/parent info
  */
 export const processLegendLayers = (
   layers: TypeLegendLayer[],
@@ -780,181 +760,33 @@ export const processLegendLayers = (
 };
 
 /**
- * Even distribution with height-based optimization
- * 1. Distribute layers evenly across columns (preserving order)
- * 2. Calculate actual column heights
- * 3. Move layers from tall columns to adjacent shorter columns to balance
- * @param {FlattenedLegendItem[][]} groups - Groups to distribute (in order)
- * @param {number} numColumns - Number of columns
- * @param {TypeValidPageSizes} pageSize - Page size
- * @param {number} scale - The scale factor based on document width
- * @returns {Object} Distribution with balanced heights, preserving order
+ * Main export processing function - gathers map data, processes legend, and optimizes layout.
+ *
+ * Workflow (AUTO mode only):
+ * 1. Captures map canvas at browser dimensions (maintains extent/scale)
+ * 2. Extracts scale bar, north arrow, and attribution data
+ * 3. Filters and flattens legend layers by visibility
+ * 4. Pre-calculates WMS image heights by loading images
+ * 5. Measures actual rendered dimensions of each layer group in DOM
+ * 6. Calculates optimal column count (2-4) based on available width
+ * 7. Distributes layer groups across columns evenly
+ * 8. Optimizes column balance using 2-step look-ahead algorithm (max 20 iterations)
+ * 9. Calculates column widths for justified layout (eliminates gaps)
+ * 10. Captures actual WMS image dimensions after layout
+ *
+ * Key features:
+ * - Uses actual DOM measurement for accuracy (no estimation)
+ * - Maintains map extent by using browser canvas dimensions
+ * - Handles map rotation via canvas transforms
+ * - Balances columns within 80% height ratio threshold
+ * - All content fits on single auto-sized page
+ *
+ * @param {string} mapId - The GeoView map ID
+ * @param {TypeValidPageSizes} pageSize - The page size ('AUTO' only - throws error for others)
+ * @returns {Promise<TypeMapInfoResult>} Map image URL, scale info, north arrow, legend columns, and column widths
+ * @throws {Error} If pageSize is not 'AUTO' or if canvas context is unavailable
  */
-const optimizeColumnDistribution = (
-  groups: FlattenedLegendItem[][],
-  numColumns: number,
-  pageSize: TypeValidPageSizes,
-  scale = 1
-): { columns: FlattenedLegendItem[][]; columnHeights: number[]; overflow: FlattenedLegendItem[] } => {
-  // Pre-calculate heights for all items in all groups
-  const groupsWithHeights = groups.map((group) => {
-    const itemsWithHeights = group.map((item) => ({
-      ...item,
-      calculatedHeight: item.calculatedHeight || estimateItemHeight(item, pageSize, scale),
-    }));
-    const totalHeight = itemsWithHeights.reduce((sum, item) => sum + (item.calculatedHeight || 0), 0);
-    return {
-      group: itemsWithHeights,
-      height: totalHeight,
-      layerName: group[0]?.data.layerName || 'unknown',
-    };
-  });
-
-  // STEP 1: Even distribution - distribute groups evenly across columns
-  const groupsPerColumn = Math.ceil(groups.length / numColumns);
-  const columns: FlattenedLegendItem[][] = Array(numColumns)
-    .fill(null)
-    .map(() => []);
-  const columnHeights: number[] = Array(numColumns).fill(0);
-
-  groupsWithHeights.forEach((groupWithHeight, index) => {
-    const columnIndex = Math.floor(index / groupsPerColumn);
-    const targetColumn = Math.min(columnIndex, numColumns - 1);
-
-    columns[targetColumn].push(...groupWithHeight.group);
-    columnHeights[targetColumn] += groupWithHeight.height;
-  });
-
-  logger.logInfo(`Initial even distribution (${groupsPerColumn} groups per column):`);
-  columnHeights.forEach((height, index) => {
-    const itemCount = columns[index].filter((item) => item.isRoot).length;
-    logger.logInfo(`  Column ${index}: ${height.toFixed(1)}px (${itemCount} layers, ${columns[index].length} items)`);
-  });
-
-  // STEP 2: Optimize by moving layers from tall columns to adjacent shorter columns
-  const maxIterations = 20;
-  let iteration = 0;
-  let improved = true;
-
-  while (improved && iteration < maxIterations) {
-    improved = false;
-    iteration++;
-
-    // Find tallest column
-    const maxHeight = Math.max(...columnHeights);
-    const maxColIndex = columnHeights.indexOf(maxHeight);
-    const minHeight = Math.min(...columnHeights);
-
-    // Stop if columns are reasonably balanced (within 20% of each other)
-    const balanceRatio = minHeight / maxHeight;
-    if (balanceRatio > 0.8) {
-      logger.logInfo(`  Columns are balanced (ratio: ${(balanceRatio * 100).toFixed(1)}%), stopping optimization`);
-      break;
-    }
-
-    // Try moving last layer from tall column to next column (if exists)
-    const layersInMaxCol = columns[maxColIndex].filter((item) => item.isRoot);
-    if (layersInMaxCol.length > 1 && maxColIndex < numColumns - 1) {
-      const lastLayer = layersInMaxCol[layersInMaxCol.length - 1];
-      const lastLayerIndex = columns[maxColIndex].lastIndexOf(lastLayer);
-
-      // Get all items for this layer (layer + its children)
-      const layerItems = columns[maxColIndex].slice(lastLayerIndex);
-      const layerHeight = layerItems.reduce((sum, item) => sum + (item.calculatedHeight || estimateItemHeight(item, pageSize, scale)), 0);
-
-      // Check if moving to next column would improve balance
-      const nextColHeight = columnHeights[maxColIndex + 1];
-      const newMaxHeight = columnHeights[maxColIndex] - layerHeight;
-      const newNextHeight = nextColHeight + layerHeight;
-
-      // Calculate new max after this move
-      const newGlobalMax = Math.max(
-        ...columnHeights.map((h, i) => {
-          if (i === maxColIndex) return newMaxHeight;
-          if (i === maxColIndex + 1) return newNextHeight;
-          return h;
-        })
-      );
-
-      // Move if it reduces the overall maximum height
-      if (newGlobalMax < maxHeight) {
-        // Move layer to next column (prepend to maintain order)
-        columns[maxColIndex].splice(lastLayerIndex);
-        columns[maxColIndex + 1] = [...layerItems, ...columns[maxColIndex + 1]];
-        columnHeights[maxColIndex] = newMaxHeight;
-        columnHeights[maxColIndex + 1] = newNextHeight;
-        improved = true;
-
-        logger.logInfo(
-          `  Iteration ${iteration}: Moved "${lastLayer.data.layerName}" from Column ${maxColIndex} to ${maxColIndex + 1} ` +
-            `(${layerHeight.toFixed(1)}px) - Max height: ${maxHeight.toFixed(1)}px → ${newGlobalMax.toFixed(1)}px`
-        );
-      }
-    }
-  }
-
-  // STEP 3: Log final distribution
-  logger.logInfo(`Optimized distribution after ${iteration} iterations:`);
-  columnHeights.forEach((height, index) => {
-    const layerCount = columns[index].filter((item) => item.isRoot).length;
-    logger.logInfo(`  Column ${index}: ${height.toFixed(1)}px (${layerCount} layers, ${columns[index].length} items)`);
-  });
-
-  return { columns, columnHeights, overflow: [] };
-};
-
-/**
- * Group items by their root layer and distribute in the columns
- * @param {FlattenedLegendItem[]} items - The flattened list of legend items to be placed in the legend
- * @param {number} numColumns - The maximum number of columns that can be used
- * @param {TypeValidPageSizes} pageSize - The page size for calculation
- * @param {number} scale - The scale factor based on document width
- * @returns {FlattenedLegendItem[][][]} The flattened legend items distributed into rows and columns
- */
-export const distributeIntoColumns = (
-  items: FlattenedLegendItem[],
-  numColumns: number,
-  pageSize: TypeValidPageSizes,
-  scale = 1
-): { fittedColumns: FlattenedLegendItem[][]; overflowItems: FlattenedLegendItem[] } => {
-  if (!items || items.length === 0) return { fittedColumns: Array(numColumns).fill([]), overflowItems: [] };
-
-  // Group items by root layers
-  const groups: FlattenedLegendItem[][] = [];
-  let currentGroup: FlattenedLegendItem[] = [];
-
-  items.forEach((item) => {
-    if (item.isRoot && currentGroup.length > 0) {
-      groups.push(currentGroup);
-      currentGroup = [];
-    }
-    currentGroup.push(item);
-  });
-
-  if (currentGroup.length > 0) {
-    groups.push(currentGroup);
-  }
-
-  // Use row-based packing algorithm for optimal distribution
-  const { columns, overflow } = optimizeColumnDistribution(groups, numColumns, pageSize, scale);
-
-  return { fittedColumns: columns, overflowItems: overflow };
-};
-
-/**
- * Gathers information about the map for sizing and creates the map image url for placement in the layout
- * @param {string} mapId - The map ID
- * @param {TypeValidPageSizes} pageSize - The page size for aspect ratio
- * @param {string} disclaimer - The disclaimer text
- * @param {string} title - The title text
- * @returns {TypeMapInfoResult} The map image data URL and browser canvas size
- */
-export async function getMapInfo(
-  mapId: string,
-  pageSize: TypeValidPageSizes,
-  disclaimer: string,
-  title: string
-): Promise<TypeMapInfoResult> {
+export async function getMapInfo(mapId: string, pageSize: TypeValidPageSizes): Promise<TypeMapInfoResult> {
   // Get all needed data from store state
   const mapElement = AppEventProcessor.getGeoviewHTMLElement(mapId);
   const mapState = MapEventProcessor.getMapStateForExportLayout(mapId);
@@ -1111,12 +943,11 @@ export async function getMapInfo(
   });
 
   // Calculate optimal number of columns based on canvas width to prevent overlapping
-  // Always start from 4 columns as the default maximum, not config.legendColumns which may have been modified
-  const optimalColumns = calculateOptimalColumns(mapImageWidth, 4);
+  // Always start from default maximum columns, not config.legendColumns which may have been modified
+  const optimalColumns = calculateOptimalColumns(mapImageWidth, EXPORT_CONSTANTS.DEFAULT_MAX_COLUMNS);
 
   // For AUTO format, we need to measure actual heights first, then optimize
   let fittedColumns: FlattenedLegendItem[][];
-  let overflowItems: FlattenedLegendItem[];
   let columnWidths: number[] | undefined;
   let finalConfig: TypePageConfig;
 
@@ -1152,7 +983,6 @@ export async function getMapInfo(
     dummyContainer.style.pointerEvents = 'none';
     document.body.appendChild(dummyContainer);
 
-    logger.logInfo('Measuring layer group dimensions:');
     // Maximum width per column - WMS images can be up to 500px for text readability
     // For text content, use a reasonable max based on available width
     const maxColumnWidth = Math.min(500, Math.floor(mapImageWidth / optimalColumns) - 20); // Leave room for gaps
@@ -1180,9 +1010,9 @@ export async function getMapInfo(
         } else if (item.type === 'wms') {
           const wmsContainer = document.createElement('div');
           Object.assign(wmsContainer.style, {
-            marginLeft: `${indentLevel * 10}px`,
+            marginLeft: `${indentLevel * EXPORT_CONSTANTS.WMS_INDENT_PER_LEVEL}px`,
             marginBottom: `${SHARED_STYLES.wmsMarginBottom}px`,
-            maxWidth: '500px',
+            maxWidth: `${EXPORT_CONSTANTS.WMS_MAX_WIDTH}px`,
             width: '100%',
           });
           const img = document.createElement('img');
@@ -1276,18 +1106,15 @@ export async function getMapInfo(
       dummyContainer.removeChild(groupDiv);
 
       const layerName = group[0]?.data.layerName || 'unknown';
-      logger.logInfo(`  Layer "${layerName}": ${height.toFixed(1)}px × ${width.toFixed(1)}px (${group.length} items)`);
 
       return { group, height, width, layerName };
     });
 
     document.body.removeChild(dummyContainer);
-    logger.logInfo(`Measured ${groupHeights.length} layer groups`);
 
     // STEP 3: Calculate required column width and verify number of columns fits
     // Each column width = widest layer in that column
     // We need to ensure all columns fit within available width
-    const columnGap = 10; // Gap between columns (matches CSS gap in renderLegendColumns)
     const calculateColumnsAndWidths = (numCols: number): { cols: FlattenedLegendItem[][]; colWidths: number[]; totalWidth: number } => {
       const groupsPerCol = Math.ceil(groups.length / numCols);
       const cols: FlattenedLegendItem[][] = Array(numCols)
@@ -1303,7 +1130,7 @@ export async function getMapInfo(
       });
 
       // Total width = sum of column widths + gaps between columns
-      const totalWidth = colWidths.reduce((sum, w) => sum + w, 0) + (numCols - 1) * columnGap;
+      const totalWidth = colWidths.reduce((sum, w) => sum + w, 0) + (numCols - 1) * EXPORT_CONSTANTS.COLUMN_GAP;
       return { cols, colWidths, totalWidth };
     };
 
@@ -1314,12 +1141,7 @@ export async function getMapInfo(
     while (result.totalWidth > mapImageWidth && finalColumns > 1) {
       finalColumns--;
       result = calculateColumnsAndWidths(finalColumns);
-      logger.logInfo(`Reducing to ${finalColumns} columns (total width: ${result.totalWidth.toFixed(1)}px)`);
     }
-
-    logger.logInfo(
-      `Using ${finalColumns} columns with widths: [${result.colWidths.map((w) => w.toFixed(1)).join(', ')}]px (total: ${result.totalWidth.toFixed(1)}px)`
-    );
 
     // STEP 4: Initial even distribution using measured heights
     const groupsPerColumn = Math.ceil(groups.length / finalColumns);
@@ -1370,7 +1192,6 @@ export async function getMapInfo(
               );
               localColumnWidths[col] = Math.max(localColumnWidths[col], layerWidth);
 
-              logger.logInfo(`  Moved "${lastLayer.data.layerName}" from Column ${prevCol} to ${col} to fill empty column`);
               break;
             }
           }
@@ -1378,20 +1199,11 @@ export async function getMapInfo(
       }
     }
 
-    logger.logInfo(`Initial distribution after filling empty columns (${groupsPerColumn} groups per column):`);
-    columnHeights.forEach((height, index) => {
-      const layerCount = columns[index].filter((item) => item.isRoot).length;
-      logger.logInfo(
-        `  Column ${index}: ${height.toFixed(1)}px × ${localColumnWidths[index].toFixed(1)}px (${layerCount} layers, ${columns[index].length} items)`
-      );
-    });
-
     // STEP 5: Optimize using pre-measured heights with 2-step look-ahead
-    const maxIterations = 20;
     let iteration = 0;
     let improved = true;
 
-    while (improved && iteration < maxIterations) {
+    while (improved && iteration < EXPORT_CONSTANTS.MAX_OPTIMIZATION_ITERATIONS) {
       improved = false;
       iteration++;
 
@@ -1399,8 +1211,7 @@ export async function getMapInfo(
       const minHeight = Math.min(...columnHeights);
       const balanceRatio = minHeight / maxHeight;
 
-      if (balanceRatio > 0.8) {
-        logger.logInfo(`  Columns balanced (ratio: ${(balanceRatio * 100).toFixed(1)}%), stopping at iteration ${iteration}`);
+      if (balanceRatio > EXPORT_CONSTANTS.COLUMN_BALANCE_THRESHOLD) {
         break;
       }
 
@@ -1520,55 +1331,11 @@ export async function getMapInfo(
         }
 
         improved = true;
-        const newMax = Math.max(...columnHeights);
-        const newMin = Math.min(...columnHeights);
-        const moveDesc = bestSequence.map((m) => `${m.layerName}(${m.fromCol}→${m.toCol})`).join(', ');
-        logger.logInfo(
-          `  Iteration ${iteration}: ${bestSequence.length}-step: ${moveDesc} - ` +
-            `Imbalance: ${currentImbalance.toFixed(1)}px → ${(newMax - newMin).toFixed(1)}px`
-        );
       }
     }
 
-    logger.logInfo(`Final optimized distribution after ${iteration} iterations:`);
-    columnHeights.forEach((height, idx) => {
-      const layerCount = columns[idx].filter((item) => item.isRoot).length;
-      logger.logInfo(
-        `  Column ${idx}: ${height.toFixed(1)}px × ${localColumnWidths[idx].toFixed(1)}px (${layerCount} layers, ${columns[idx].length} items)`
-      );
-    });
-
     fittedColumns = columns;
     columnWidths = localColumnWidths; // Assign local columnWidths to outer scope
-    overflowItems = [];
-
-    // Use the final optimized heights for document layout
-    const legendHeight = Math.max(...columnHeights, 0);
-    logger.logInfo(`Legend height (max column): ${legendHeight}px`);
-
-    // Scale components outside the flex legend container
-    const footerHeight = estimateFooterHeight(disclaimer, attribution) * wmsScale;
-    const titleHeight = title && title.trim() ? (SHARED_STYLES.titleFontSize + SHARED_STYLES.titleMarginBottom) * wmsScale : 0;
-    const mapHeight = mapImageHeight + SHARED_STYLES.mapMarginBottom * wmsScale;
-    const scaleHeight = (SHARED_STYLES.scaleFontSize + SHARED_STYLES.scaleMarginBottom + SHARED_STYLES.legendMarginTop) * wmsScale;
-    const dividerHeight = (SHARED_STYLES.dividerHeight + SHARED_STYLES.dividerMargin * 2) * wmsScale;
-
-    logger.logInfo(
-      `Component heights - Title: ${titleHeight}, Map: ${mapHeight}, Scale: ${scaleHeight}, Divider: ${dividerHeight}, Footer: ${footerHeight}`
-    );
-
-    // Calculate total document height
-    const calculatedHeight =
-      titleHeight +
-      mapHeight +
-      scaleHeight +
-      dividerHeight +
-      legendHeight +
-      SHARED_STYLES.legendMarginBottom +
-      footerHeight +
-      SHARED_STYLES.padding * 2 * wmsScale +
-      20;
-    logger.logInfo(`Total calculated height: ${calculatedHeight}px (padding: ${SHARED_STYLES.padding * 2 * wmsScale})`);
 
     finalConfig = {
       size: 'AUTO' as const,
@@ -1576,77 +1343,10 @@ export async function getMapInfo(
       legendColumns: optimalColumns,
       maxLegendHeight: Infinity,
       canvasWidth: mapImageWidth,
-      canvasHeight: Math.ceil(calculatedHeight),
+      canvasHeight: 0, // Will be measured from actual rendered canvas
     };
-  } else {
-    // Non-AUTO mode: use estimate-based distribution
-    const distribution = distributeIntoColumns(itemsWithHeights, optimalColumns, pageSize, wmsScale);
-    ({ fittedColumns, overflowItems } = distribution);
-    finalConfig = config;
-  }
 
-  // For AUTO mode, merge overflow items back into main columns to prevent page breaks
-  let fittedOverflowItems;
-  if (pageSize === 'AUTO' && overflowItems && overflowItems.length > 0) {
-    // Calculate current column heights
-    const columnHeights = fittedColumns.map((column) => {
-      let height = 0;
-
-      column.forEach((item, itemIndex) => {
-        if (itemIndex > 0 && item.type === 'layer') {
-          height += SHARED_STYLES.layerMarginTop;
-        }
-        height += item.calculatedHeight || estimateItemHeight(item, pageSize, wmsScale);
-      });
-
-      return height;
-    });
-
-    // Add overflow items to the shortest column
-    const minColumnIndex = columnHeights.indexOf(Math.min(...columnHeights));
-    fittedColumns[minColumnIndex] = [...(fittedColumns[minColumnIndex] || []), ...overflowItems];
-
-    // Recalculate canvas height after merging overflow items
-    const newColumnHeights = fittedColumns.map((column) => {
-      let height = 0;
-
-      column.forEach((item, itemIndex) => {
-        if (itemIndex > 0 && item.type === 'layer') {
-          height += SHARED_STYLES.layerMarginTop;
-        }
-        height += item.calculatedHeight || estimateItemHeight(item, pageSize, wmsScale);
-      });
-
-      return height;
-    });
-
-    const newLegendHeight = Math.max(...newColumnHeights, 0);
-
-    // Recalculate total height with new legend height (using same scaling as before)
-    const footerHeight = estimateFooterHeight(disclaimer, attribution) * wmsScale;
-    const titleHeight = title && title.trim() ? (SHARED_STYLES.titleFontSize + SHARED_STYLES.titleMarginBottom) * wmsScale : 0;
-    const mapHeight = mapImageHeight + SHARED_STYLES.mapMarginBottom * wmsScale;
-    const scaleHeight = (SHARED_STYLES.scaleFontSize + SHARED_STYLES.scaleMarginBottom + SHARED_STYLES.legendMarginTop) * wmsScale;
-    const dividerHeight = (SHARED_STYLES.dividerHeight + SHARED_STYLES.dividerMargin * 2) * wmsScale;
-
-    const recalculatedHeight =
-      titleHeight +
-      mapHeight +
-      scaleHeight +
-      dividerHeight +
-      newLegendHeight +
-      SHARED_STYLES.legendMarginBottom +
-      footerHeight +
-      SHARED_STYLES.padding * 2 * wmsScale;
-
-    finalConfig.canvasHeight = Math.ceil(recalculatedHeight);
-  } else if (overflowItems && overflowItems.length > 0 && pageSize !== 'AUTO') {
-    const distributedOverflow = distributeIntoColumns(overflowItems, finalConfig.legendColumns, pageSize, wmsScale);
-    fittedOverflowItems = distributedOverflow.fittedColumns;
-  }
-
-  // Update PAGE_CONFIGS for AUTO format to ensure canvas layout gets correct dimensions
-  if (pageSize === 'AUTO') {
+    // Update PAGE_CONFIGS for AUTO format
     PAGE_CONFIGS.AUTO = {
       size: 'AUTO' as const,
       mapHeight: finalConfig.mapHeight,
@@ -1655,22 +1355,18 @@ export async function getMapInfo(
       canvasWidth: finalConfig.canvasWidth,
       canvasHeight: finalConfig.canvasHeight,
     };
-    logger.logInfo(`Final AUTO page config - Width: ${finalConfig.canvasWidth}px, Height: ${finalConfig.canvasHeight}px`);
+  } else {
+    throw new Error('Only AUTO page size is supported');
   }
 
-  logger.logInfo(
-    `Returning map info - Columns: ${fittedColumns.length}, Total items: ${fittedColumns.reduce((sum, col) => sum + col.length, 0)}`
-  );
-
   return {
-    mapDataUrl: resultCanvas.toDataURL('image/jpeg', 0.98),
+    mapDataUrl: resultCanvas.toDataURL('image/jpeg', EXPORT_CONSTANTS.JPEG_QUALITY),
     scaleText: `${mapScale.labelGraphicMetric} (approx)`,
     scaleLineWidth,
     northArrowSvg: northArrowSvgPaths,
     northArrowRotation: rotationAngle,
     attributions: attribution,
     fittedColumns,
-    columnWidths: pageSize === 'AUTO' ? columnWidths : undefined,
-    fittedOverflowItems,
+    columnWidths,
   };
 }
