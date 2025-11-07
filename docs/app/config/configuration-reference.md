@@ -146,6 +146,7 @@ basemapOptions: {
   basemapId: TypeBasemapId;
   shaded: boolean;
   labeled: boolean;
+  labelZIndex: number;
 }
 ```
 
@@ -163,6 +164,7 @@ basemapOptions: {
 
 - **shaded** (Required): Enable or disable shaded basemap (if basemap id is set to shaded then this should be false)
 - **labeled** (Required): Enable or disable basemap labels
+- **labelZIndex** (Optional): Used to set the zIndex of the basemap's label layer. A value of 10 will put it under the very first layer, so if you have two layers, you will need to set it to 12 or higher for it to be above all layers. Setting it to an arbitrarily large number, like 999, will work to ensure that it ends up above all the layers in the map.
 
 **Examples:**
 
@@ -171,7 +173,8 @@ basemapOptions: {
 basemapOptions: {
   basemapId: "transport",
   shaded: true,
-  labeled: true
+  labeled: true,
+  labelZIndex: 20
 }
 ```
 
