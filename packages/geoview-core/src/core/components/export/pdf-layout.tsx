@@ -1,4 +1,5 @@
 import { pdf } from '@react-pdf/renderer';
+import { renderToString } from 'react-dom/server';
 
 import { Document, Page, Text, View, Image, Svg, Path } from '@react-pdf/renderer';
 import { DateMgt } from '@/core/utils/date-mgt';
@@ -6,6 +7,7 @@ import type { FlattenedLegendItem, TypeValidPageSizes, ElementFactory } from './
 import { getMapInfo, PAGE_CONFIGS, renderLegendColumns, renderFooter, renderScaleBar, renderNorthArrow } from './utilities';
 import type { FileExportProps } from './export-modal';
 import { PDF_STYLES, getScaledPDFStyles } from './layout-styles';
+import { CanvasDocument } from './canvas-layout';
 
 interface ExportDocumentProps {
   mapDataUrl: string;
@@ -108,6 +110,29 @@ export async function createPDFMapUrl(mapId: string, params: FileExportProps): P
   const { exportTitle, disclaimer, pageSize } = params;
   const mapInfo = await getMapInfo(mapId, pageSize, disclaimer, exportTitle);
 
+  // First, render a temporary canvas to measure actual height
+  const tempHtml = renderToString(
+    <CanvasDocument
+      {...mapInfo}
+      exportTitle={exportTitle}
+      disclaimer={disclaimer}
+      date={DateMgt.formatDate(new Date(), 'YYYY-MM-DD, hh:mm:ss A')}
+      pageSize={pageSize}
+    />
+  );
+  const tempElement = document.createElement('div');
+  tempElement.innerHTML = tempHtml;
+  document.body.appendChild(tempElement);
+
+  // Measure the actual rendered height
+  const renderedElement = tempElement.firstChild as HTMLElement;
+  const actualCanvasHeight = renderedElement.getBoundingClientRect().height;
+  PAGE_CONFIGS[pageSize].canvasHeight = Math.ceil(actualCanvasHeight);
+
+  // Clean up temporary element
+  document.body.removeChild(tempElement);
+
+  // Now create the PDF with the correct height
   const blob = await pdf(
     <ExportDocument
       {...mapInfo}

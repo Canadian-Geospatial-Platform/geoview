@@ -41,6 +41,8 @@ export interface FlattenedLegendItem {
   isRoot: boolean;
   timeInfo?: TypeTimeSliderValues;
   calculatedHeight?: number;
+  calculatedWidth?: number;
+  wmsImageSize?: { width: number; height: number }; // Actual measured WMS image dimensions
 }
 
 export type TypePageConfig = (typeof PAGE_CONFIGS)[keyof typeof PAGE_CONFIGS];
@@ -176,6 +178,14 @@ export const renderSingleLegendItem = (
   }
 
   if (item.type === 'wms') {
+    const imageStyle = item.wmsImageSize
+      ? {
+          ...baseStyles.wmsImage,
+          width: item.wmsImageSize.width,
+          height: item.wmsImageSize.height,
+        }
+      : baseStyles.wmsImage;
+
     return createElement(
       View,
       {
@@ -184,7 +194,7 @@ export const renderSingleLegendItem = (
       },
       createElement(Image, {
         src: item.data.icons?.[0]?.iconImage || '',
-        style: baseStyles.wmsImage,
+        style: imageStyle,
       })
     );
   }
@@ -1183,6 +1193,10 @@ export async function getMapInfo(
             height: 'auto',
             display: 'block',
           });
+
+          // Store reference to capture actual dimensions after measurement
+          img.dataset.itemIndex = String(itemIndex);
+
           wmsContainer.appendChild(img);
           groupDiv.appendChild(wmsContainer);
         } else if (item.type === 'time') {
@@ -1243,6 +1257,22 @@ export async function getMapInfo(
 
       dummyContainer.appendChild(groupDiv);
       const { height, width } = groupDiv.getBoundingClientRect();
+
+      // Capture actual WMS image dimensions after layout
+      group.forEach((item, itemIndex) => {
+        if (item.type === 'wms') {
+          const img = groupDiv.querySelector(`img[data-item-index="${itemIndex}"]`) as HTMLImageElement;
+          if (img) {
+            const imgRect = img.getBoundingClientRect();
+            // eslint-disable-next-line no-param-reassign
+            item.wmsImageSize = {
+              width: Math.round(imgRect.width),
+              height: Math.round(imgRect.height),
+            };
+          }
+        }
+      });
+
       dummyContainer.removeChild(groupDiv);
 
       const layerName = group[0]?.data.layerName || 'unknown';
