@@ -23,6 +23,7 @@ interface ExportDocumentProps {
   attributions: string[];
   date: string;
   fittedColumns: FlattenedLegendItem[][];
+  columnWidths?: number[];
   fittedOverflowItems?: FlattenedLegendItem[][];
   pageSize: TypeValidPageSizes;
 }
@@ -41,8 +42,8 @@ const pdfElementFactory: ElementFactory = {
  * Render legend items directly from columns without re-grouping
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const renderLegendInRows = (columns: FlattenedLegendItem[][], styles: any): JSX.Element => {
-  return renderLegendColumns(columns, pdfElementFactory, styles, PDF_STYLES);
+const renderLegendInRows = (columns: FlattenedLegendItem[][], styles: any, columnWidths?: number[]): JSX.Element => {
+  return renderLegendColumns(columns, pdfElementFactory, styles, PDF_STYLES, columnWidths);
 };
 
 export function ExportDocument({
@@ -56,6 +57,7 @@ export function ExportDocument({
   attributions,
   date,
   fittedColumns,
+  columnWidths,
   fittedOverflowItems,
   pageSize,
 }: ExportDocumentProps): JSX.Element {
@@ -87,7 +89,7 @@ export function ExportDocument({
         <View style={PDF_STYLES.divider} />
 
         {fittedColumns && fittedColumns.length > 0 && (
-          <View style={PDF_STYLES.legendContainer}>{renderLegendInRows(fittedColumns, scaledStyles)}</View>
+          <View style={PDF_STYLES.legendContainer}>{renderLegendInRows(fittedColumns, scaledStyles, columnWidths)}</View>
         )}
 
         {renderFooter(disclaimer, attributions, date, pdfElementFactory, scaledStyles)}

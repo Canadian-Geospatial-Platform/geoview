@@ -3,7 +3,6 @@ import { Buffer } from 'buffer';
 
 import type { TypeNorthArrow, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
-import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { TypeTimeSliderValues, TimeSliderLayerSet } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import type { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 
@@ -59,6 +58,7 @@ export type TypeMapInfoResult = {
   northArrowRotation: number;
   attributions: string[];
   fittedColumns: FlattenedLegendItem[][];
+  columnWidths?: number[];
   fittedOverflowItems?: FlattenedLegendItem[][];
 };
 
@@ -78,6 +78,34 @@ const MAP_IMAGE_DIMENSIONS = {
     height: 100, // Default, will be recalculated
   },
 };
+
+/**
+ * Extract native dimensions from a base64-encoded PNG image
+ * PNG format stores width/height in IHDR chunk (bytes 16-23)
+ * @param {string} base64Data - The base64 image string (with or without data:image/png;base64, prefix)
+ * @returns {{ width: number; height: number } | null} The image dimensions or null if cannot be extracted
+ */
+function getPNGDimensions(base64Data: string): { width: number; height: number } | null {
+  try {
+    // Remove data URL prefix if present
+    const base64 = base64Data.replace(/^data:image\/\w+;base64,/, '');
+
+    // Decode base64 to binary
+    const buffer = Buffer.from(base64, 'base64');
+
+    // PNG IHDR chunk is at bytes 16-23 (after 8-byte PNG signature and 8-byte chunk header)
+    // Width: 4 bytes at position 16-19, Height: 4 bytes at position 20-23
+    // eslint-disable-next-line no-bitwise
+    const width = (buffer[16] << 24) | (buffer[17] << 16) | (buffer[18] << 8) | buffer[19];
+    // eslint-disable-next-line no-bitwise
+    const height = (buffer[20] << 24) | (buffer[21] << 16) | (buffer[22] << 8) | buffer[23];
+
+    return { width, height };
+  } catch (error) {
+    logger.logError('Failed to extract PNG dimensions', error);
+    return null;
+  }
+}
 
 /**
  * Element factory interface for creating renderer-specific elements
@@ -119,16 +147,32 @@ export const renderSingleLegendItem = (
   const { View, Text, Image, Span } = factory;
 
   if (item.type === 'layer') {
-    const marginValue = itemIndex > 0 ? '8px' : 0;
-    const pdfMarginValue = itemIndex > 0 ? 8 : 0;
-    return createElement(
+    const marginValue = itemIndex > 0 ? '18px' : 0;
+    const pdfMarginValue = itemIndex > 0 ? 18 : 0;
+
+    // Add separator line above layer (except for first layer)
+    const separator =
+      itemIndex > 0
+        ? createElement(View, {
+            key: `separator-${item.data.layerPath}-${itemIndex}`,
+            style: scaledStyles.layerSeparator(typeof marginValue === 'string' ? marginValue : pdfMarginValue),
+          })
+        : null;
+
+    const layerText = createElement(
       Text,
       {
         key: `layer-${item.data.layerPath}-${itemIndex}`,
-        style: scaledStyles.layerText(typeof marginValue === 'string' ? marginValue : pdfMarginValue),
+        style: scaledStyles.layerText(),
       },
       item.data.layerName
     );
+
+    // Return wrapper with separator + text, or just text if no separator
+    if (separator) {
+      return createElement(View, { key: `layer-wrapper-${item.data.layerPath}-${itemIndex}` }, separator, layerText);
+    }
+    return layerText;
   }
 
   if (item.type === 'wms') {
@@ -182,13 +226,32 @@ export const renderSingleLegendItem = (
 
   // Default: item type
   const legendItem = item.data.items[0];
+
+  // Extract native PNG dimensions and apply inline for consistent sizing
+  let iconStyle = scaledStyles.itemIcon;
+  if (legendItem?.icon) {
+    const dimensions = getPNGDimensions(legendItem.icon);
+    if (dimensions) {
+      // Apply minimum 4px size to ensure icons are visible
+      const minSize = 4;
+      const width = Math.max(dimensions.width, minSize);
+      const height = Math.max(dimensions.height, minSize);
+
+      iconStyle = {
+        ...scaledStyles.itemIcon,
+        width,
+        height,
+      };
+    }
+  }
+
   return createElement(
     View,
     {
       key: `item-${item.parentName}-${legendItem?.name}-${itemIndex}`,
       style: baseStyles.itemContainer(indentLevel),
     },
-    legendItem?.icon && createElement(Image, { src: legendItem.icon, style: scaledStyles.itemIcon }),
+    legendItem?.icon && createElement(Image, { src: legendItem.icon, style: iconStyle }),
     createElement(Span, { style: scaledStyles.itemText }, legendItem?.name)
   );
 };
@@ -226,9 +289,15 @@ export const renderColumnItems = (
 
       // Find all immediate children (depth = currentDepth + 1)
       // Stop when we hit an item at same or lower depth (sibling or higher level)
+      // IMPORTANT: Only collect content items (not child layers) to wrap
       while (contentEnd < column.length && column[contentEnd].depth > currentDepth) {
-        // Only collect items at the immediate next level for wrapping
+        // Only collect items at the immediate next level
         if (column[contentEnd].depth === currentDepth + 1) {
+          const nextItem = column[contentEnd];
+          // Stop if we encounter a child layer - it needs its own processing
+          if (nextItem.type === 'child') {
+            break;
+          }
           contentEnd++;
         } else {
           // This is a deeper nested item, skip to find where this group ends
@@ -236,31 +305,22 @@ export const renderColumnItems = (
         }
       }
 
-      // If we have direct children, check if they are content items (not child layers)
+      // If we have direct children (content items only, not child layers)
       if (contentEnd > contentStart) {
-        const hasContentItems = column
-          .slice(contentStart, contentEnd)
-          .some((childItem) => childItem.type === 'wms' || childItem.type === 'item' || childItem.type === 'time');
+        // Wrap content items
+        const contentItems: JSX.Element[] = [];
+        for (let j = contentStart; j < contentEnd; j++) {
+          const contentItem = column[j];
+          const contentIndentLevel = Math.min(contentItem.depth, 3);
 
-        if (hasContentItems) {
-          // Wrap content items
-          const contentItems: JSX.Element[] = [];
-          for (let j = contentStart; j < contentEnd; j++) {
-            const contentItem = column[j];
-            const contentIndentLevel = Math.min(contentItem.depth, 3);
-
-            contentItems.push(renderSingleLegendItem(contentItem, j, contentIndentLevel, factory, scaledStyles, baseStyles));
-          }
-
-          elements.push(createElement(View, { key: `content-${i}` }, ...contentItems));
-
-          i = contentEnd;
-        } else {
-          // Only child layers, no content to wrap - will be handled in next iteration
-          i++;
+          contentItems.push(renderSingleLegendItem(contentItem, j, contentIndentLevel, factory, scaledStyles, baseStyles));
         }
+
+        elements.push(createElement(View, { key: `content-${i}` }, ...contentItems));
+
+        i = contentEnd;
       } else {
-        // No content, just move to next item
+        // No content to wrap, just move to next item
         i++;
       }
     } else {
@@ -284,20 +344,37 @@ export const renderLegendColumns = (
   columns: FlattenedLegendItem[][],
   factory: ElementFactory,
   scaledStyles: any, // eslint-disable-line @typescript-eslint/no-explicit-any
-  baseStyles: any // eslint-disable-line @typescript-eslint/no-explicit-any
+  baseStyles: any, // eslint-disable-line @typescript-eslint/no-explicit-any
+  columnWidths?: number[]
 ): JSX.Element => {
   const { View } = factory;
 
+  // Use space-between for justified layout when columnWidths are provided
+  const containerStyle = columnWidths
+    ? { display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%' }
+    : { display: 'flex', flexDirection: 'row', gap: 10, width: '100%' };
+
   return createElement(
     View,
-    { style: { display: 'flex', flexDirection: 'row', gap: 10, width: '100%' } },
+    { style: containerStyle },
     ...columns.map((column, colIndex) => {
       const columnKey = column.length > 0 ? `col-${column[0].data.layerPath}-${colIndex}` : `col-empty-${colIndex}`;
+      const columnStyle = columnWidths
+        ? {
+            display: 'flex',
+            flexDirection: 'column',
+            width: `${columnWidths[colIndex]}px`,
+            maxWidth: `${columnWidths[colIndex]}px`,
+            minWidth: 0,
+            overflow: 'hidden',
+          }
+        : { display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 };
+
       return createElement(
         View,
         {
           key: columnKey,
-          style: { display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 },
+          style: columnStyle,
         },
         ...renderColumnItems(column, factory, scaledStyles, baseStyles)
       );
@@ -561,13 +638,13 @@ const estimateFooterHeight = (disclaimer: string, attributions: string[]): numbe
   const baseLineHeight = SHARED_STYLES.footerFontSize + 2; // 8px font + 2px spacing (reduced from 4)
   const marginBottom = SHARED_STYLES.footerMarginBottom;
 
-  // Estimate disclaimer lines (assuming ~100 chars per line at font size 8, increased from 80)
-  const disclaimerLines = disclaimer ? Math.ceil(disclaimer.length / 100) : 0;
+  // Estimate disclaimer lines (assuming ~80 chars per line at font size 8 to be more conservative)
+  const disclaimerLines = disclaimer ? Math.ceil(disclaimer.length / 80) : 0;
   const disclaimerHeight = disclaimerLines * baseLineHeight + (disclaimerLines > 0 ? marginBottom : 0);
 
-  // Estimate attribution lines
+  // Estimate attribution lines (also using 80 chars per line)
   const attributionHeight = attributions.reduce((total, attr) => {
-    const lines = Math.ceil(attr.length / 100);
+    const lines = Math.ceil(attr.length / 80);
     return total + lines * baseLineHeight + SHARED_STYLES.footerItemMarginBottom;
   }, 0);
 
@@ -576,6 +653,11 @@ const estimateFooterHeight = (disclaimer: string, attributions: string[]): numbe
 
   // Total without extra padding - the footer paddingTop is already in CSS
   const totalHeight = disclaimerHeight + attributionHeight + dateHeight;
+
+  logger.logInfo(
+    `Footer height estimate - Disclaimer: ${disclaimerHeight}px (${disclaimerLines} lines), ` +
+      `Attributions: ${attributionHeight}px (${attributions.length} items), Date: ${dateHeight}px, Total: ${totalHeight}px`
+  );
 
   return totalHeight;
 };
@@ -606,12 +688,24 @@ export const processLegendLayers = (
 
     // Check if layer has any meaningful legend content
     const hasVisibleItems = layer.items.some((item) => item.isVisible);
-    const hasWMSLegend = layer.type === CONST_LAYER_TYPES.WMS && layer.icons?.[0]?.iconImage && layer.icons[0].iconImage !== 'no data';
+    const hasLayerIcons = layer.icons?.[0]?.iconImage && layer.icons[0].iconImage !== 'no data';
     const hasTimeDimension = Boolean(timeSliderLayers?.[layer.layerPath]?.range?.length);
     const hasChildren = layer.children && layer.children.length > 0;
 
+    // Pre-process children to check if any will be included (prevents empty parent headers)
+    const processedChildren: FlattenedLegendItem[] = [];
+    if (hasChildren && layer.children) {
+      layer.children.forEach((child) => {
+        processedChildren.push(...flattenLayer(child, depth + 1, currentRootName));
+      });
+    }
+
     // Skip layers with no legend content (like XYZ/vector tiles without symbolization)
-    if (!hasVisibleItems && !hasWMSLegend && !hasTimeDimension && !hasChildren) {
+    // Allow layers with empty items array (items.length === 0) as they may have symbolization
+    // defined that hasn't been processed into items yet
+    // Now also checks if children resulted in any items
+    const hasEmptyItemsArray = layer.items.length === 0;
+    if (!hasVisibleItems && !hasLayerIcons && !hasTimeDimension && processedChildren.length === 0 && !hasEmptyItemsArray) {
       return items;
     }
 
@@ -637,8 +731,9 @@ export const processLegendLayers = (
       });
     }
 
-    // Add WMS legend image if available
-    if (hasWMSLegend) {
+    // Add layer legend image if available (WMS, esriDynamic, etc.)
+    // Only add if there are no visible items to avoid duplication
+    if (hasLayerIcons && !hasVisibleItems) {
       items.push({
         type: 'wms',
         data: layer,
@@ -661,12 +756,8 @@ export const processLegendLayers = (
       }
     });
 
-    // Recursively add children
-    if (layer.children) {
-      layer.children.forEach((child) => {
-        items.push(...flattenLayer(child, depth + 1, currentRootName));
-      });
-    }
+    // Add the pre-processed children
+    items.push(...processedChildren);
 
     return items;
   };
@@ -679,14 +770,15 @@ export const processLegendLayers = (
 };
 
 /**
- * Round-robin distribution algorithm that preserves layer order
- * Pre-calculates all item heights, then distributes groups sequentially across columns
- * This maintains the original layer order when reading top-to-bottom, left-to-right
- * @param {FlattenedLegendItem[][]} groups - Groups to distribute
+ * Even distribution with height-based optimization
+ * 1. Distribute layers evenly across columns (preserving order)
+ * 2. Calculate actual column heights
+ * 3. Move layers from tall columns to adjacent shorter columns to balance
+ * @param {FlattenedLegendItem[][]} groups - Groups to distribute (in order)
  * @param {number} numColumns - Number of columns
  * @param {TypeValidPageSizes} pageSize - Page size
  * @param {number} scale - The scale factor based on document width
- * @returns {Object} Distribution that preserves layer order
+ * @returns {Object} Distribution with balanced heights, preserving order
  */
 const optimizeColumnDistribution = (
   groups: FlattenedLegendItem[][],
@@ -704,21 +796,98 @@ const optimizeColumnDistribution = (
     return {
       group: itemsWithHeights,
       height: totalHeight,
-      id: `${group[0]?.data.layerPath || ''}-${Math.random()}`, // Unique ID for tracking
+      layerName: group[0]?.data.layerName || 'unknown',
     };
   });
 
-  // Use round-robin distribution to preserve layer order
+  // STEP 1: Even distribution - distribute groups evenly across columns
+  const groupsPerColumn = Math.ceil(groups.length / numColumns);
   const columns: FlattenedLegendItem[][] = Array(numColumns)
     .fill(null)
     .map(() => []);
   const columnHeights: number[] = Array(numColumns).fill(0);
 
-  // Distribute groups sequentially across columns (round-robin)
   groupsWithHeights.forEach((groupWithHeight, index) => {
-    const columnIndex = index % numColumns;
-    columns[columnIndex].push(...groupWithHeight.group);
-    columnHeights[columnIndex] += groupWithHeight.height;
+    const columnIndex = Math.floor(index / groupsPerColumn);
+    const targetColumn = Math.min(columnIndex, numColumns - 1);
+
+    columns[targetColumn].push(...groupWithHeight.group);
+    columnHeights[targetColumn] += groupWithHeight.height;
+  });
+
+  logger.logInfo(`Initial even distribution (${groupsPerColumn} groups per column):`);
+  columnHeights.forEach((height, index) => {
+    const itemCount = columns[index].filter((item) => item.isRoot).length;
+    logger.logInfo(`  Column ${index}: ${height.toFixed(1)}px (${itemCount} layers, ${columns[index].length} items)`);
+  });
+
+  // STEP 2: Optimize by moving layers from tall columns to adjacent shorter columns
+  const maxIterations = 20;
+  let iteration = 0;
+  let improved = true;
+
+  while (improved && iteration < maxIterations) {
+    improved = false;
+    iteration++;
+
+    // Find tallest column
+    const maxHeight = Math.max(...columnHeights);
+    const maxColIndex = columnHeights.indexOf(maxHeight);
+    const minHeight = Math.min(...columnHeights);
+
+    // Stop if columns are reasonably balanced (within 20% of each other)
+    const balanceRatio = minHeight / maxHeight;
+    if (balanceRatio > 0.8) {
+      logger.logInfo(`  Columns are balanced (ratio: ${(balanceRatio * 100).toFixed(1)}%), stopping optimization`);
+      break;
+    }
+
+    // Try moving last layer from tall column to next column (if exists)
+    const layersInMaxCol = columns[maxColIndex].filter((item) => item.isRoot);
+    if (layersInMaxCol.length > 1 && maxColIndex < numColumns - 1) {
+      const lastLayer = layersInMaxCol[layersInMaxCol.length - 1];
+      const lastLayerIndex = columns[maxColIndex].lastIndexOf(lastLayer);
+
+      // Get all items for this layer (layer + its children)
+      const layerItems = columns[maxColIndex].slice(lastLayerIndex);
+      const layerHeight = layerItems.reduce((sum, item) => sum + (item.calculatedHeight || estimateItemHeight(item, pageSize, scale)), 0);
+
+      // Check if moving to next column would improve balance
+      const nextColHeight = columnHeights[maxColIndex + 1];
+      const newMaxHeight = columnHeights[maxColIndex] - layerHeight;
+      const newNextHeight = nextColHeight + layerHeight;
+
+      // Calculate new max after this move
+      const newGlobalMax = Math.max(
+        ...columnHeights.map((h, i) => {
+          if (i === maxColIndex) return newMaxHeight;
+          if (i === maxColIndex + 1) return newNextHeight;
+          return h;
+        })
+      );
+
+      // Move if it reduces the overall maximum height
+      if (newGlobalMax < maxHeight) {
+        // Move layer to next column (prepend to maintain order)
+        columns[maxColIndex].splice(lastLayerIndex);
+        columns[maxColIndex + 1] = [...layerItems, ...columns[maxColIndex + 1]];
+        columnHeights[maxColIndex] = newMaxHeight;
+        columnHeights[maxColIndex + 1] = newNextHeight;
+        improved = true;
+
+        logger.logInfo(
+          `  Iteration ${iteration}: Moved "${lastLayer.data.layerName}" from Column ${maxColIndex} to ${maxColIndex + 1} ` +
+            `(${layerHeight.toFixed(1)}px) - Max height: ${maxHeight.toFixed(1)}px → ${newGlobalMax.toFixed(1)}px`
+        );
+      }
+    }
+  }
+
+  // STEP 3: Log final distribution
+  logger.logInfo(`Optimized distribution after ${iteration} iterations:`);
+  columnHeights.forEach((height, index) => {
+    const layerCount = columns[index].filter((item) => item.isRoot).length;
+    logger.logInfo(`  Column ${index}: ${height.toFixed(1)}px (${layerCount} layers, ${columns[index].length} items)`);
   });
 
   return { columns, columnHeights, overflow: [] };
@@ -935,40 +1104,428 @@ export async function getMapInfo(
   // Always start from 4 columns as the default maximum, not config.legendColumns which may have been modified
   const optimalColumns = calculateOptimalColumns(mapImageWidth, 4);
 
-  // First distribute items into columns using optimal column count
-  const { fittedColumns, overflowItems } = distributeIntoColumns(itemsWithHeights, optimalColumns, pageSize, wmsScale);
-
-  // For AUTO format, calculate required height based on actual column distribution
-  let finalConfig: TypePageConfig = config;
+  // For AUTO format, we need to measure actual heights first, then optimize
+  let fittedColumns: FlattenedLegendItem[][];
+  let overflowItems: FlattenedLegendItem[];
+  let columnWidths: number[] | undefined;
+  let finalConfig: TypePageConfig;
 
   if (pageSize === 'AUTO') {
-    // Calculate each column's height for layout
-    const columnHeights = fittedColumns.map((column) => {
-      let height = 0;
+    // Import styles dynamically (needed for measurement)
+    const { getScaledCanvasStyles } = await import('./layout-styles');
+    const scaledStyles = getScaledCanvasStyles(mapImageWidth);
 
-      column.forEach((item, itemIndex) => {
-        // Add layerMarginTop for all layers except the first item in column
-        if (itemIndex > 0 && item.type === 'layer') {
-          height += SHARED_STYLES.layerMarginTop;
-        }
+    // STEP 1: Group items by root layers
+    const groups: FlattenedLegendItem[][] = [];
+    let currentGroup: FlattenedLegendItem[] = [];
 
-        const itemHeight = item.calculatedHeight || estimateItemHeight(item, pageSize, wmsScale);
-        height += itemHeight;
-      });
-
-      return height;
+    itemsWithHeights.forEach((item) => {
+      if (item.isRoot && currentGroup.length > 0) {
+        groups.push(currentGroup);
+        currentGroup = [];
+      }
+      currentGroup.push(item);
     });
 
-    // Legend height is the tallest column
+    if (currentGroup.length > 0) {
+      groups.push(currentGroup);
+    }
+
+    // STEP 2: Measure each layer group's actual height AND width ONCE
+    const dummyContainer = document.createElement('div');
+    dummyContainer.style.position = 'absolute';
+    dummyContainer.style.left = '-9999px';
+    dummyContainer.style.top = '0';
+    // Don't constrain width - let it expand naturally
+    dummyContainer.style.width = 'max-content';
+    dummyContainer.style.visibility = 'hidden';
+    dummyContainer.style.pointerEvents = 'none';
+    document.body.appendChild(dummyContainer);
+
+    logger.logInfo('Measuring layer group dimensions:');
+    // Maximum width per column - WMS images can be up to 500px for text readability
+    // For text content, use a reasonable max based on available width
+    const maxColumnWidth = Math.min(500, Math.floor(mapImageWidth / optimalColumns) - 20); // Leave room for gaps
+
+    const groupHeights = groups.map((group) => {
+      const groupDiv = document.createElement('div');
+      groupDiv.style.display = 'flex';
+      groupDiv.style.flexDirection = 'column';
+      groupDiv.style.maxWidth = `${maxColumnWidth}px`; // Constrain to max column width
+      groupDiv.style.width = 'max-content'; // Natural width up to max
+
+      group.forEach((item, itemIndex) => {
+        const indentLevel = Math.min(item.depth, 3);
+
+        if (item.type === 'layer') {
+          if (itemIndex > 0) {
+            const separator = document.createElement('div');
+            Object.assign(separator.style, scaledStyles.layerSeparator('18px'));
+            groupDiv.appendChild(separator);
+          }
+          const layerText = document.createElement('div');
+          Object.assign(layerText.style, scaledStyles.layerText());
+          layerText.textContent = item.data.layerName || '';
+          groupDiv.appendChild(layerText);
+        } else if (item.type === 'wms') {
+          const wmsContainer = document.createElement('div');
+          Object.assign(wmsContainer.style, {
+            marginLeft: `${indentLevel * 10}px`,
+            marginBottom: `${SHARED_STYLES.wmsMarginBottom}px`,
+            maxWidth: '500px',
+            width: '100%',
+          });
+          const img = document.createElement('img');
+          img.src = item.data.icons?.[0]?.iconImage || '';
+          Object.assign(img.style, {
+            maxWidth: '100%', // Fit within container (max 500px)
+            width: 'auto',
+            height: 'auto',
+            display: 'block',
+          });
+          wmsContainer.appendChild(img);
+          groupDiv.appendChild(wmsContainer);
+        } else if (item.type === 'time') {
+          const timeText = document.createElement('div');
+          Object.assign(timeText.style, scaledStyles.timeText(indentLevel));
+          const timeValue = item.timeInfo?.singleHandle
+            ? DateMgt.formatDate(
+                new Date(item.timeInfo.values[0]),
+                item.timeInfo.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
+              )
+            : `${DateMgt.formatDate(
+                new Date(item.timeInfo?.values[0] || 0),
+                item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
+              )} - ${DateMgt.formatDate(
+                new Date(item.timeInfo?.values[1] || 0),
+                item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
+              )}`;
+          timeText.textContent = timeValue;
+          groupDiv.appendChild(timeText);
+        } else if (item.type === 'child') {
+          const childText = document.createElement('div');
+          Object.assign(childText.style, scaledStyles.childText(indentLevel));
+          childText.textContent = item.data.layerName || '...';
+          groupDiv.appendChild(childText);
+        } else {
+          const legendItem = item.data.items[0];
+          const itemContainer = document.createElement('div');
+          Object.assign(itemContainer.style, {
+            display: 'flex',
+            alignItems: 'center',
+            marginLeft: `${indentLevel * 10}px`,
+            marginBottom: `${SHARED_STYLES.itemMarginBottom}px`,
+          });
+
+          if (legendItem?.icon) {
+            const icon = document.createElement('img');
+            icon.src = legendItem.icon;
+            const dimensions = getPNGDimensions(legendItem.icon);
+            if (dimensions) {
+              const minSize = 4;
+              icon.style.width = `${Math.max(dimensions.width, minSize)}px`;
+              icon.style.height = `${Math.max(dimensions.height, minSize)}px`;
+            } else {
+              icon.style.width = '8px';
+              icon.style.height = '8px';
+            }
+            icon.style.marginRight = '4px';
+            itemContainer.appendChild(icon);
+          }
+
+          const text = document.createElement('span');
+          Object.assign(text.style, scaledStyles.itemText);
+          text.textContent = legendItem?.name || '';
+          itemContainer.appendChild(text);
+          groupDiv.appendChild(itemContainer);
+        }
+      });
+
+      dummyContainer.appendChild(groupDiv);
+      const { height, width } = groupDiv.getBoundingClientRect();
+      dummyContainer.removeChild(groupDiv);
+
+      const layerName = group[0]?.data.layerName || 'unknown';
+      logger.logInfo(`  Layer "${layerName}": ${height.toFixed(1)}px × ${width.toFixed(1)}px (${group.length} items)`);
+
+      return { group, height, width, layerName };
+    });
+
+    document.body.removeChild(dummyContainer);
+    logger.logInfo(`Measured ${groupHeights.length} layer groups`);
+
+    // STEP 3: Calculate required column width and verify number of columns fits
+    // Each column width = widest layer in that column
+    // We need to ensure all columns fit within available width
+    const columnGap = 10; // Gap between columns (matches CSS gap in renderLegendColumns)
+    const calculateColumnsAndWidths = (numCols: number): { cols: FlattenedLegendItem[][]; colWidths: number[]; totalWidth: number } => {
+      const groupsPerCol = Math.ceil(groups.length / numCols);
+      const cols: FlattenedLegendItem[][] = Array(numCols)
+        .fill(null)
+        .map(() => []);
+      const colWidths: number[] = Array(numCols).fill(0);
+
+      // Distribute groups
+      groupHeights.forEach((gh, index) => {
+        const colIndex = Math.min(Math.floor(index / groupsPerCol), numCols - 1);
+        cols[colIndex].push(...gh.group);
+        colWidths[colIndex] = Math.max(colWidths[colIndex], gh.width);
+      });
+
+      // Total width = sum of column widths + gaps between columns
+      const totalWidth = colWidths.reduce((sum, w) => sum + w, 0) + (numCols - 1) * columnGap;
+      return { cols, colWidths, totalWidth };
+    };
+
+    // Start with optimal columns and reduce if needed
+    let finalColumns = optimalColumns;
+    let result = calculateColumnsAndWidths(finalColumns);
+
+    while (result.totalWidth > mapImageWidth && finalColumns > 1) {
+      finalColumns--;
+      result = calculateColumnsAndWidths(finalColumns);
+      logger.logInfo(`Reducing to ${finalColumns} columns (total width: ${result.totalWidth.toFixed(1)}px)`);
+    }
+
+    logger.logInfo(
+      `Using ${finalColumns} columns with widths: [${result.colWidths.map((w) => w.toFixed(1)).join(', ')}]px (total: ${result.totalWidth.toFixed(1)}px)`
+    );
+
+    // STEP 4: Initial even distribution using measured heights
+    const groupsPerColumn = Math.ceil(groups.length / finalColumns);
+    const columns: FlattenedLegendItem[][] = Array(finalColumns)
+      .fill(null)
+      .map(() => []);
+    const columnHeights: number[] = Array(finalColumns).fill(0);
+    const localColumnWidths: number[] = Array(finalColumns).fill(0);
+
+    groupHeights.forEach((groupWithHeight, index) => {
+      const columnIndex = Math.floor(index / groupsPerColumn);
+      const targetColumn = Math.min(columnIndex, finalColumns - 1);
+
+      columns[targetColumn].push(...groupWithHeight.group);
+      columnHeights[targetColumn] += groupWithHeight.height;
+      localColumnWidths[targetColumn] = Math.max(localColumnWidths[targetColumn], groupWithHeight.width);
+    });
+
+    // Fill empty columns by moving last layer from previous columns
+    for (let col = finalColumns - 1; col >= 0; col--) {
+      if (columnHeights[col] === 0 && col > 0) {
+        // Find the nearest previous column with more than 1 layer
+        for (let prevCol = col - 1; prevCol >= 0; prevCol--) {
+          const layersInPrevCol = columns[prevCol].filter((item) => item.isRoot);
+          if (layersInPrevCol.length > 1) {
+            // Move last layer from prevCol to empty col
+            const lastLayer = layersInPrevCol[layersInPrevCol.length - 1];
+            const lastLayerIndex = columns[prevCol].lastIndexOf(lastLayer);
+            const layerItems = columns[prevCol].slice(lastLayerIndex);
+
+            // Find height and width
+            const layerGroup = groupHeights.find((g) => g.group[0] === lastLayer);
+            if (layerGroup) {
+              const layerHeight = layerGroup.height;
+              const layerWidth = layerGroup.width;
+
+              // Move items
+              columns[prevCol].splice(lastLayerIndex);
+              columns[col] = [...layerItems, ...columns[col]];
+
+              // Update heights
+              columnHeights[prevCol] -= layerHeight;
+              columnHeights[col] += layerHeight;
+
+              // Update widths (recalculate max width for both columns)
+              localColumnWidths[prevCol] = Math.max(
+                ...columns[prevCol].filter((item) => item.isRoot).map((item) => groupHeights.find((g) => g.group[0] === item)?.width || 0)
+              );
+              localColumnWidths[col] = Math.max(localColumnWidths[col], layerWidth);
+
+              logger.logInfo(`  Moved "${lastLayer.data.layerName}" from Column ${prevCol} to ${col} to fill empty column`);
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    logger.logInfo(`Initial distribution after filling empty columns (${groupsPerColumn} groups per column):`);
+    columnHeights.forEach((height, index) => {
+      const layerCount = columns[index].filter((item) => item.isRoot).length;
+      logger.logInfo(
+        `  Column ${index}: ${height.toFixed(1)}px × ${localColumnWidths[index].toFixed(1)}px (${layerCount} layers, ${columns[index].length} items)`
+      );
+    });
+
+    // STEP 5: Optimize using pre-measured heights with 2-step look-ahead
+    const maxIterations = 20;
+    let iteration = 0;
+    let improved = true;
+
+    while (improved && iteration < maxIterations) {
+      improved = false;
+      iteration++;
+
+      const maxHeight = Math.max(...columnHeights);
+      const minHeight = Math.min(...columnHeights);
+      const balanceRatio = minHeight / maxHeight;
+
+      if (balanceRatio > 0.8) {
+        logger.logInfo(`  Columns balanced (ratio: ${(balanceRatio * 100).toFixed(1)}%), stopping at iteration ${iteration}`);
+        break;
+      }
+
+      // Strategy: Try all possible 1-step and 2-step move sequences
+      // Find the sequence that most reduces imbalance
+      let bestSequence: Array<{ fromCol: number; toCol: number; layerName: string }> | null = null;
+      let bestFinalImbalance = maxHeight - minHeight;
+
+      // Try all single moves
+      for (let fromCol1 = 0; fromCol1 < finalColumns - 1; fromCol1++) {
+        const layersInCol1 = columns[fromCol1].filter((item) => item.isRoot);
+        if (layersInCol1.length <= 1) {
+          // eslint-disable-next-line no-continue
+          continue;
+        }
+
+        const layer1 = layersInCol1[layersInCol1.length - 1];
+        const group1 = groupHeights.find((g) => g.group[0] === layer1);
+        if (!group1) {
+          // eslint-disable-next-line no-continue
+          continue;
+        }
+
+        // Simulate first move
+        const heights1 = [...columnHeights];
+        heights1[fromCol1] -= group1.height;
+        heights1[fromCol1 + 1] += group1.height;
+
+        const imbalance1 = Math.max(...heights1) - Math.min(...heights1);
+
+        // Check if single move is better
+        if (imbalance1 < bestFinalImbalance) {
+          bestFinalImbalance = imbalance1;
+          bestSequence = [{ fromCol: fromCol1, toCol: fromCol1 + 1, layerName: layer1.data.layerName }];
+        }
+
+        // Now try a second move after this first move
+        // Need to simulate the column state after move 1
+        const tempColumns = columns.map((col, idx) => {
+          if (idx === fromCol1) {
+            // Remove last layer
+            const lastLayerIdx = col.lastIndexOf(layer1);
+            return col.slice(0, lastLayerIdx);
+          }
+          if (idx === fromCol1 + 1) {
+            // Add layer at beginning
+            const lastLayerIdx = columns[fromCol1].lastIndexOf(layer1);
+            const layerItems = columns[fromCol1].slice(lastLayerIdx);
+            return [...layerItems, ...col];
+          }
+          return col;
+        });
+
+        // Try all possible second moves from this new state
+        for (let fromCol2 = 0; fromCol2 < finalColumns - 1; fromCol2++) {
+          const layersInCol2 = tempColumns[fromCol2].filter((item) => item.isRoot);
+          if (layersInCol2.length <= 1) {
+            // eslint-disable-next-line no-continue
+            continue;
+          }
+
+          const layer2 = layersInCol2[layersInCol2.length - 1];
+          const group2 = groupHeights.find((g) => g.group[0] === layer2);
+          if (!group2) {
+            // eslint-disable-next-line no-continue
+            continue;
+          }
+
+          // Simulate second move
+          const heights2 = [...heights1];
+          heights2[fromCol2] -= group2.height;
+          heights2[fromCol2 + 1] += group2.height;
+
+          const imbalance2 = Math.max(...heights2) - Math.min(...heights2);
+
+          // Check if 2-step sequence is better
+          if (imbalance2 < bestFinalImbalance) {
+            bestFinalImbalance = imbalance2;
+            bestSequence = [
+              { fromCol: fromCol1, toCol: fromCol1 + 1, layerName: layer1.data.layerName },
+              { fromCol: fromCol2, toCol: fromCol2 + 1, layerName: layer2.data.layerName },
+            ];
+          }
+        }
+      }
+
+      // Execute best sequence if found and it improves things
+      const currentImbalance = maxHeight - minHeight;
+      if (bestSequence && bestFinalImbalance < currentImbalance) {
+        for (const move of bestSequence) {
+          const { fromCol, toCol } = move;
+          const layersInCol = columns[fromCol].filter((item) => item.isRoot);
+          const lastLayer = layersInCol[layersInCol.length - 1];
+          const lastLayerIndex = columns[fromCol].lastIndexOf(lastLayer);
+          const layerGroup = groupHeights.find((g) => g.group[0] === lastLayer);
+
+          if (layerGroup) {
+            const layerHeight = layerGroup.height;
+            const layerWidth = layerGroup.width;
+            const layerItems = columns[fromCol].slice(lastLayerIndex);
+
+            // Move items
+            columns[fromCol].splice(lastLayerIndex);
+            columns[toCol] = [...layerItems, ...columns[toCol]];
+
+            // Update heights
+            columnHeights[fromCol] -= layerHeight;
+            columnHeights[toCol] += layerHeight;
+
+            // Update widths (recalculate max width for both columns)
+            localColumnWidths[fromCol] = Math.max(
+              0,
+              ...columns[fromCol].filter((item) => item.isRoot).map((item) => groupHeights.find((g) => g.group[0] === item)?.width || 0)
+            );
+            localColumnWidths[toCol] = Math.max(localColumnWidths[toCol], layerWidth);
+          }
+        }
+
+        improved = true;
+        const newMax = Math.max(...columnHeights);
+        const newMin = Math.min(...columnHeights);
+        const moveDesc = bestSequence.map((m) => `${m.layerName}(${m.fromCol}→${m.toCol})`).join(', ');
+        logger.logInfo(
+          `  Iteration ${iteration}: ${bestSequence.length}-step: ${moveDesc} - ` +
+            `Imbalance: ${currentImbalance.toFixed(1)}px → ${(newMax - newMin).toFixed(1)}px`
+        );
+      }
+    }
+
+    logger.logInfo(`Final optimized distribution after ${iteration} iterations:`);
+    columnHeights.forEach((height, idx) => {
+      const layerCount = columns[idx].filter((item) => item.isRoot).length;
+      logger.logInfo(
+        `  Column ${idx}: ${height.toFixed(1)}px × ${localColumnWidths[idx].toFixed(1)}px (${layerCount} layers, ${columns[idx].length} items)`
+      );
+    });
+
+    fittedColumns = columns;
+    columnWidths = localColumnWidths; // Assign local columnWidths to outer scope
+    overflowItems = [];
+
+    // Use the final optimized heights for document layout
     const legendHeight = Math.max(...columnHeights, 0);
+    logger.logInfo(`Legend height (max column): ${legendHeight}px`);
 
     // Scale components outside the flex legend container
-    // Legend items NOT scaled (CSS handles via flex), other components scaled
     const footerHeight = estimateFooterHeight(disclaimer, attribution) * wmsScale;
     const titleHeight = title && title.trim() ? (SHARED_STYLES.titleFontSize + SHARED_STYLES.titleMarginBottom) * wmsScale : 0;
     const mapHeight = mapImageHeight + SHARED_STYLES.mapMarginBottom * wmsScale;
     const scaleHeight = (SHARED_STYLES.scaleFontSize + SHARED_STYLES.scaleMarginBottom + SHARED_STYLES.legendMarginTop) * wmsScale;
     const dividerHeight = (SHARED_STYLES.dividerHeight + SHARED_STYLES.dividerMargin * 2) * wmsScale;
+
+    logger.logInfo(
+      `Component heights - Title: ${titleHeight}, Map: ${mapHeight}, Scale: ${scaleHeight}, Divider: ${dividerHeight}, Footer: ${footerHeight}`
+    );
 
     // Calculate total document height
     const calculatedHeight =
@@ -979,7 +1536,9 @@ export async function getMapInfo(
       legendHeight +
       SHARED_STYLES.legendMarginBottom +
       footerHeight +
-      SHARED_STYLES.padding * 2 * wmsScale;
+      SHARED_STYLES.padding * 2 * wmsScale +
+      20;
+    logger.logInfo(`Total calculated height: ${calculatedHeight}px (padding: ${SHARED_STYLES.padding * 2 * wmsScale})`);
 
     finalConfig = {
       size: 'AUTO' as const,
@@ -989,6 +1548,11 @@ export async function getMapInfo(
       canvasWidth: mapImageWidth,
       canvasHeight: Math.ceil(calculatedHeight),
     };
+  } else {
+    // Non-AUTO mode: use estimate-based distribution
+    const distribution = distributeIntoColumns(itemsWithHeights, optimalColumns, pageSize, wmsScale);
+    ({ fittedColumns, overflowItems } = distribution);
+    finalConfig = config;
   }
 
   // For AUTO mode, merge overflow items back into main columns to prevent page breaks
@@ -1061,7 +1625,12 @@ export async function getMapInfo(
       canvasWidth: finalConfig.canvasWidth,
       canvasHeight: finalConfig.canvasHeight,
     };
+    logger.logInfo(`Final AUTO page config - Width: ${finalConfig.canvasWidth}px, Height: ${finalConfig.canvasHeight}px`);
   }
+
+  logger.logInfo(
+    `Returning map info - Columns: ${fittedColumns.length}, Total items: ${fittedColumns.reduce((sum, col) => sum + col.length, 0)}`
+  );
 
   return {
     mapDataUrl: resultCanvas.toDataURL('image/jpeg', 0.98),
@@ -1071,6 +1640,7 @@ export async function getMapInfo(
     northArrowRotation: rotationAngle,
     attributions: attribution,
     fittedColumns,
+    columnWidths: pageSize === 'AUTO' ? columnWidths : undefined,
     fittedOverflowItems,
   };
 }

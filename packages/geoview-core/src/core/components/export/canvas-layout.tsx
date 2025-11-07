@@ -23,6 +23,7 @@ interface CanvasDocumentProps {
   attributions: string[];
   date: string;
   fittedColumns: FlattenedLegendItem[][];
+  columnWidths?: number[];
   pageSize: TypeValidPageSizes;
 }
 
@@ -39,9 +40,14 @@ const canvasElementFactory: ElementFactory = {
 /**
  * Render legend items directly from columns without re-grouping
  */
-const renderCanvasLegendInRows = (columns: FlattenedLegendItem[][], pageSize: TypeValidPageSizes, canvasWidth: number): JSX.Element => {
+const renderCanvasLegendInRows = (
+  columns: FlattenedLegendItem[][],
+  pageSize: TypeValidPageSizes,
+  canvasWidth: number,
+  columnWidths?: number[]
+): JSX.Element => {
   const scaledStyles = getScaledCanvasStyles(canvasWidth);
-  return renderLegendColumns(columns, canvasElementFactory, scaledStyles, CANVAS_STYLES);
+  return renderLegendColumns(columns, canvasElementFactory, scaledStyles, CANVAS_STYLES, columnWidths);
 };
 
 /**
@@ -57,6 +63,7 @@ export function CanvasDocument({
   northArrowSvg,
   northArrowRotation,
   fittedColumns,
+  columnWidths,
   disclaimer,
   attributions,
   date,
@@ -84,7 +91,7 @@ export function CanvasDocument({
 
       {/* Legend */}
       {fittedColumns.length > 0 && (
-        <div style={CANVAS_STYLES.legendContainer}>{renderCanvasLegendInRows(fittedColumns, pageSize, canvasWidth)}</div>
+        <div style={CANVAS_STYLES.legendContainer}>{renderCanvasLegendInRows(fittedColumns, pageSize, canvasWidth, columnWidths)}</div>
       )}
 
       {/* Footer */}

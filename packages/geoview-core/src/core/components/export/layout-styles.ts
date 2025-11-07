@@ -20,7 +20,7 @@ export const SHARED_STYLES = {
   scaleMarginBottom: 10,
   legendMarginTop: 2,
   legendMarginBottom: 2,
-  layerMarginBottom: 3,
+  layerMarginBottom: 5,
   layerMarginTop: 8,
   wmsMarginBottom: 2,
   timeMarginBottom: 2,
@@ -37,13 +37,13 @@ export const SHARED_STYLES = {
   scaleTickOffset: -0.5,
   scaleTickTop: -3,
   northArrowSize: 40,
-  legendGap: 10,
+  legendGap: 15,
   legendPaddingLeft: 2,
   dividerMargin: 10,
   dividerHeight: 2,
   rowDividerHeight: 1,
   rowDividerMargin: 8,
-  wmsImageWidth: 250,
+  wmsImageWidth: 400,
   wmsImageMaxHeight: 600,
   itemIconSize: 8,
   itemIconMarginRight: 2,
@@ -93,20 +93,38 @@ export const SHARED_STYLES = {
   },
   northArrow: { width: 40, height: 40 },
   northArrowSvg: { width: 40, height: 40 },
-  layerText: (marginTop: number | string) => ({
+  layerSeparator: (marginTop: number | string) => ({
+    marginTop,
+    marginBottom: SHARED_STYLES.layerMarginBottom,
+    width: '50%',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    borderTopWidth: 0.5,
+    borderTopColor: COLORS.standardGrey,
+    borderTopStyle: 'solid' as const,
+  }),
+  layerText: () => ({
     fontSize: 9,
     fontWeight: 'bold',
     marginBottom: 3,
-    marginTop,
+    marginTop: 0,
     flexWrap: 'wrap' as const,
     whiteSpace: 'normal',
+    wordWrap: 'break-word' as const,
+    overflowWrap: 'break-word' as const,
   }),
   wmsContainer: (indentLevel: number) => ({
     marginLeft: indentLevel + 3,
     marginBottom: 2,
+    maxWidth: 500, // Max width for text readability, but will be constrained by column width
+    width: '100%', // Take full column width up to max
   }),
   wmsImage: {
-    maxWidth: 250,
+    // WMS GetLegendGraphic images have variable native sizes (server-dependent)
+    // Preserve native size as much as possible for text readability, max 500px
+    width: 'auto',
+    height: 'auto',
+    maxWidth: '100%', // Fit within container (which is max 500px)
     objectFit: 'contain',
   },
   timeText: (indentLevel: number) => ({
@@ -121,6 +139,8 @@ export const SHARED_STYLES = {
     marginBottom: 2,
     marginLeft: indentLevel * 8 + 8,
     marginTop: 3,
+    wordWrap: 'break-word' as const,
+    overflowWrap: 'break-word' as const,
   }),
   itemIcon: {
     width: 8,
@@ -131,6 +151,8 @@ export const SHARED_STYLES = {
     fontSize: 7,
     flexShrink: 1,
     flexWrap: 'wrap',
+    wordWrap: 'break-word' as const,
+    overflowWrap: 'break-word' as const,
   },
   footer: {
     fontSize: 8,
@@ -313,8 +335,16 @@ export const CANVAS_STYLES = {
     borderTop: `1px solid ${COLORS.darkGrey}`,
     borderBottom: `1px solid ${COLORS.darkGrey}`,
   },
-  layerText: (marginTop: string) => ({
-    ...SHARED_STYLES.layerText(marginTop),
+  layerSeparator: (marginTop: string) => ({
+    marginTop,
+    marginBottom: `${SHARED_STYLES.layerMarginBottom}px`,
+    width: '50%',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    borderTop: `0.5px solid ${COLORS.standardGrey}`,
+  }),
+  layerText: () => ({
+    ...SHARED_STYLES.layerText(),
     fontSize: `${SHARED_STYLES.layerFontSize}px`,
     marginBottom: `${SHARED_STYLES.layerMarginBottom}px`,
   }),
@@ -322,10 +352,12 @@ export const CANVAS_STYLES = {
     ...SHARED_STYLES.wmsContainer(indentLevel),
     marginLeft: `${indentLevel + 3}px`,
     marginBottom: `${SHARED_STYLES.wmsMarginBottom}px`,
+    maxWidth: '500px',
+    width: '100%',
   }),
   wmsImage: {
     ...SHARED_STYLES.wmsImage,
-    maxWidth: `${SHARED_STYLES.wmsImageWidth}px`,
+    maxWidth: '100%', // Fit within container
     objectFit: 'contain',
   },
   timeText: (indentLevel: number) => ({
@@ -405,9 +437,12 @@ export const getScaledPDFStyles = (docWidth: number): any => {
   const scale = docWidth / 612;
   return {
     ...PDF_STYLES,
-    layerText: (marginTop: number) => ({
-      ...PDF_STYLES.layerText(marginTop),
-      fontSize: PDF_STYLES.layerText(0).fontSize * scale,
+    layerSeparator: (marginTop: number) => ({
+      ...SHARED_STYLES.layerSeparator(marginTop),
+    }),
+    layerText: () => ({
+      ...PDF_STYLES.layerText(),
+      fontSize: PDF_STYLES.layerText().fontSize * scale,
     }),
     childText: (indentLevel: number) => ({
       ...PDF_STYLES.childText(indentLevel),
@@ -471,9 +506,12 @@ export const getScaledCanvasStyles = (docWidth: number): any => {
   const scale = docWidth / 612;
   return {
     ...CANVAS_STYLES,
-    layerText: (marginTop: string) => ({
-      ...CANVAS_STYLES.layerText(marginTop),
-      fontSize: `${parseInt(CANVAS_STYLES.layerText('0').fontSize) * scale}px`,
+    layerSeparator: (marginTop: string) => ({
+      ...CANVAS_STYLES.layerSeparator(marginTop),
+    }),
+    layerText: () => ({
+      ...CANVAS_STYLES.layerText(),
+      fontSize: `${parseInt(CANVAS_STYLES.layerText().fontSize) * scale}px`,
       wordWrap: 'break-word' as const,
       overflowWrap: 'break-word' as const,
     }),
