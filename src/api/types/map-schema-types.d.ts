@@ -196,6 +196,8 @@ export type TypeBasemapOptions = {
     shaded: boolean;
     /** Enable or disable basemap labels. */
     labeled: boolean;
+    /** Z Index of label layer */
+    labelZIndex?: number;
 };
 /** Definition of the basemap options type. */
 export type TypeBasemapId = 'transport' | 'osm' | 'simple' | 'nogeom' | 'shaded' | 'imagery' | 'labeled';
