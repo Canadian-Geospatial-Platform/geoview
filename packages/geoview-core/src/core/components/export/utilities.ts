@@ -140,6 +140,25 @@ function getPNGDimensions(base64Data: string): { width: number; height: number }
 }
 
 /**
+ * Sanitizes legend text for PDF rendering by replacing problematic Unicode characters with safe alternatives.
+ * React-pdf has issues with certain characters (≤, ≥, etc.) which get rendered incorrectly in legend items.
+ * Uses Unicode escape codes to ensure proper matching regardless of source encoding.
+ *
+ * @param {string} text - The legend text to sanitize
+ * @returns {string} The sanitized text safe for PDF rendering
+ */
+const sanitizeLegendText = (text: string): string => {
+  return text
+    .replace(/\u2264/g, '<=') // Less than or equal (≤) → <=
+    .replace(/\u2265/g, '>=') // Greater than or equal (≥) → >=
+    .replace(/≤/g, '<=') // Literal ≤ → <=
+    .replace(/≥/g, '>=') // Literal ≥ → >=
+    .replace(/\u2013/g, '-') // En dash (–) → hyphen
+    .replace(/\u2014/g, '-') // Em dash (—) → hyphen
+    .replace(/\u2212/g, '-'); // Minus sign (−) → hyphen
+};
+
+/**
  * Renders a single legend item (layer, child, wms, time, or item type) using the provided element factory.
  * Handles different item types with appropriate styling and structure:
  * - layer: Root layer name with optional separator line
@@ -185,7 +204,7 @@ const renderSingleLegendItem = (
         key: `layer-${item.data.layerPath}-${itemIndex}`,
         style: scaledStyles.layerText(),
       },
-      item.data.layerName
+      sanitizeLegendText(item.data.layerName || '')
     );
 
     // Return wrapper with separator + text, or just text if no separator
@@ -248,7 +267,7 @@ const renderSingleLegendItem = (
         key: `child-${item.data.layerPath}-${itemIndex}`,
         style: scaledStyles.childText(indentLevel),
       },
-      item.data.layerName || '...'
+      sanitizeLegendText(item.data.layerName || '...')
     );
   }
 
@@ -280,7 +299,7 @@ const renderSingleLegendItem = (
       style: baseStyles.itemContainer(indentLevel),
     },
     legendItem?.icon && createElement(Image, { src: legendItem.icon, style: iconStyle }),
-    createElement(Span, { style: scaledStyles.itemText }, legendItem?.name)
+    createElement(Span, { style: scaledStyles.itemText }, sanitizeLegendText(legendItem?.name || ''))
   );
 };
 
@@ -411,6 +430,7 @@ export const renderLegendColumns = (
             maxWidth: `${columnWidths[colIndex]}px`,
             minWidth: 0,
             overflow: 'hidden',
+            paddingRight: colIndex < columns.length - 1 ? EXPORT_CONSTANTS.COLUMN_GAP : 0,
           }
         : { display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 };
 

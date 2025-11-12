@@ -278,7 +278,14 @@ export default function ExportModal(): JSX.Element {
         <Box ref={exportContainerRef} sx={{ textAlign: 'center' }}>
           {(() => {
             if (isMapLoading || isLegendLoading) {
-              return <Skeleton variant="rounded" width={600} height={777} sx={sxClasses.mapSkeletonMargin} />;
+              // Calculate skeleton dimensions: 80% of dialog width with map aspect ratio
+              const dialogWidth = dialogRef.current?.offsetWidth || window.innerWidth * 0.8;
+              const skeletonWidth = dialogWidth * 0.8;
+              const mapCanvas = mapElement.querySelector('.ol-viewport canvas:not(.ol-overviewmap canvas)') as HTMLCanvasElement;
+              const mapAspectRatio = mapCanvas ? mapCanvas.height / mapCanvas.width : 1.3;
+              const skeletonHeight = skeletonWidth * mapAspectRatio;
+
+              return <Skeleton variant="rounded" width={skeletonWidth} height={skeletonHeight} sx={sxClasses.mapSkeletonMargin} />;
             }
 
             if (pngPreviewUrls) {
