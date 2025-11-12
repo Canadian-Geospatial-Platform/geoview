@@ -32,9 +32,9 @@ import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-inti
 import { exportFile } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 
-import { createPDFMapUrl } from './pdf-layout';
-import { createCanvasMapUrls } from './canvas-layout';
-import { getSxClasses } from './export-modal-style';
+import { createPDFMapUrl } from '@/core/components/export/pdf-layout';
+import { createCanvasMapUrls } from '@/core/components/export/canvas-layout';
+import { getSxClasses } from '@/core/components/export/export-modal-style';
 
 type FileFormat = 'pdf' | 'png' | 'jpeg';
 
@@ -90,25 +90,15 @@ export default function ExportModal(): JSX.Element {
 
   const fileExportDefaultPrefixName = t('exportModal.fileExportDefaultPrefixName');
 
-  const handleCloseModal = useCallback(() => {
-    logger.logTraceUseCallback('EXPORT-MODAL - handleCloseModal');
-    setActiveAppBarTab('legend', false, false);
-    disableFocusTrap();
-    // Clear preview content so skeleton shows on next open
-    setPngPreviewUrls([]);
-    setIsMapLoading(false);
-    setIsLegendLoading(false);
-  }, [setActiveAppBarTab, disableFocusTrap]);
-
-  // Generate preview of PDF
+  // Generate preview
   const generatePreview = useCallback(async () => {
     logger.logTraceUseCallback('EXPORT-MODAL - generatePreview Callback');
     try {
       setIsMapLoading(true);
       const disclaimer = t('mapctrl.disclaimer.message');
-      const pngUrls = await createCanvasMapUrls(mapId, { exportTitle: '', disclaimer, dpi: 96, format: 'jpeg' });
-      setPngPreviewUrls(pngUrls);
-      pngUrls.forEach((url) => URL.revokeObjectURL(url));
+      const pngUrl = await createCanvasMapUrls(mapId, { exportTitle: '', disclaimer, dpi: 96, format: 'jpeg' });
+      setPngPreviewUrls([pngUrl]);
+      URL.revokeObjectURL(pngUrl);
     } catch (error) {
       logger.logError(error);
     } finally {
@@ -124,7 +114,13 @@ export default function ExportModal(): JSX.Element {
       setIsMapExporting(true);
       const disclaimer = t('mapctrl.disclaimer.message');
       const dpi = exportFormat === 'pdf' ? 300 : exportMapResolution;
-      const filename = `${fileExportDefaultPrefixName}-${exportTitle.trim() || mapId}`;
+
+      // Sanitize filename: limit to 20 characters and remove special characters
+      const sanitizedTitle = (exportTitle.trim() || mapId)
+        .replace(/[^a-zA-Z0-9-_]/g, '_') // Replace special characters with underscore
+        .replace(/_+/g, '_') // Collapse multiple underscores into one
+        .substring(0, 35); // Limit to 35 characters
+      const filename = `${fileExportDefaultPrefixName}-${sanitizedTitle}`;
 
       // TODO Find a way to use sx in the pdf/canvas-layout files.
       // TO.DO Probably would need to pass the theme to the createPDFMapUrl and createCanvasMapUrls here and in above generatePreview
@@ -140,14 +136,8 @@ export default function ExportModal(): JSX.Element {
           jpegQuality,
           format: exportFormat,
         });
-        imageUrl.forEach((url, i) => {
-          let exportName = filename;
-          if (i > 0) {
-            exportName = `${filename}-legend-overflow-${i}`;
-          }
-          exportFile(url, exportName, exportFormat);
-          URL.revokeObjectURL(url);
-        });
+        exportFile(imageUrl, filename, exportFormat);
+        URL.revokeObjectURL(imageUrl);
       }
     } catch (error) {
       logger.logError(`Error exporting ${exportFormat.toUpperCase()}`, error);
@@ -191,6 +181,16 @@ export default function ExportModal(): JSX.Element {
   }, [activeModalId, generatePreview, mapElement]);
 
   // #region HANDLERS
+
+  const handleCloseModal = useCallback(() => {
+    logger.logTraceUseCallback('EXPORT-MODAL - handleCloseModal');
+    setActiveAppBarTab('legend', false, false);
+    disableFocusTrap();
+    // Clear preview content so skeleton shows on next open
+    setPngPreviewUrls([]);
+    setIsMapLoading(false);
+    setIsLegendLoading(false);
+  }, [setActiveAppBarTab, disableFocusTrap]);
 
   const handleExport = useCallback(() => {
     logger.logTraceUseCallback('EXPORT-MODAL - handleExport');

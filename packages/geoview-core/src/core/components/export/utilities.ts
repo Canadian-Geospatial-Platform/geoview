@@ -1,5 +1,6 @@
 import { createElement } from 'react';
 import { Buffer } from 'buffer';
+import { renderToString } from 'react-dom/server';
 
 import type { TypeNorthArrow, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
@@ -15,8 +16,10 @@ import { LegendEventProcessor } from '@/api/event-processors/event-processor-chi
 
 import { logger } from '@/core/utils/logger';
 import { DateMgt } from '@/core/utils/date-mgt';
+import { NorthArrowIcon } from '@/core/components/north-arrow/north-arrow-icon';
 
-import { SHARED_STYLES } from './layout-styles';
+import { SHARED_STYLES, getScaledCanvasStyles } from '@/core/components/export/layout-styles';
+import { CanvasDocument } from '@/core/components/export/canvas-layout';
 
 // GV Buffer polyfill for react-pdf
 if (typeof window !== 'undefined') {
@@ -75,9 +78,10 @@ export type TypeMapInfoResult = {
   fittedColumns: FlattenedLegendItem[][];
   columnWidths?: number[];
   canvasWidth: number;
+  canvasHeight: number;
 };
 
-// Export dimension constants at 300DPI
+// Export dimension constants at 300DPI (only AUTO is supported)
 const MAP_IMAGE_DIMENSIONS = {
   AUTO: {
     // Width and height calculated dynamically
@@ -765,6 +769,7 @@ const processLegendLayers = (
  * 8. Optimizes column balance using 2-step look-ahead algorithm (max 20 iterations)
  * 9. Calculates column widths for justified layout (eliminates gaps)
  * 10. Captures actual WMS image dimensions after layout
+ * 11. Measures final canvas height with actual title/disclaimer for accurate sizing
  *
  * Key features:
  * - Uses actual DOM measurement for accuracy (no estimation)
@@ -774,10 +779,12 @@ const processLegendLayers = (
  * - All content fits on single auto-sized page
  *
  * @param {string} mapId - The GeoView map ID
- * @returns {Promise<TypeMapInfoResult>} Map image URL, scale info, north arrow, legend columns, and column widths
+ * @param {string} exportTitle - The export title (affects height calculation)
+ * @param {string} disclaimer - The disclaimer text (affects height calculation)
+ * @returns {Promise<TypeMapInfoResult>} Map image URL, scale info, north arrow, legend columns, canvas dimensions
  * @throws {Error} If canvas context is unavailable
  */
-export async function getMapInfo(mapId: string): Promise<TypeMapInfoResult> {
+export async function getMapInfo(mapId: string, exportTitle: string, disclaimer: string): Promise<TypeMapInfoResult> {
   // Get all needed data from store state
   const mapElement = AppEventProcessor.getGeoviewHTMLElement(mapId);
   const mapState = MapEventProcessor.getMapStateForExportLayout(mapId);
@@ -869,10 +876,7 @@ export async function getMapInfo(mapId: string): Promise<TypeMapInfoResult> {
   let northArrowSvgPaths = null;
   if (northArrow) {
     try {
-      const ReactDOMServer = await import('react-dom/server');
-      const { NorthArrowIcon } = await import('@/core/components/north-arrow/north-arrow-icon');
-
-      const iconString = ReactDOMServer.renderToString(createElement(NorthArrowIcon, { width: 24, height: 24 }));
+      const iconString = renderToString(createElement(NorthArrowIcon, { width: 24, height: 24 }));
       const parser = new DOMParser();
       const svgDoc = parser.parseFromString(iconString, 'image/svg+xml');
       const paths = svgDoc.querySelectorAll('path');
@@ -930,9 +934,7 @@ export async function getMapInfo(mapId: string): Promise<TypeMapInfoResult> {
   // Always start from default maximum columns, not config.legendColumns which may have been modified
   const optimalColumns = calculateOptimalColumns(mapImageWidth, EXPORT_CONSTANTS.DEFAULT_MAX_COLUMNS);
 
-  // For AUTO format, we need to measure actual heights first, then optimize
-  // Import styles dynamically (needed for measurement)
-  const { getScaledCanvasStyles } = await import('./layout-styles');
+  // We need to measure actual heights first, then optimize
   const scaledStyles = getScaledCanvasStyles(mapImageWidth);
 
   // STEP 1: Group items by root layers
@@ -966,128 +968,148 @@ export async function getMapInfo(mapId: string): Promise<TypeMapInfoResult> {
   // For text content, use a reasonable max based on available width
   const maxColumnWidth = Math.min(500, Math.floor(mapImageWidth / optimalColumns) - 20); // Leave room for gaps
 
-  const groupHeights = groups.map((group) => {
-    const groupDiv = document.createElement('div');
-    groupDiv.style.display = 'flex';
-    groupDiv.style.flexDirection = 'column';
-    groupDiv.style.maxWidth = `${maxColumnWidth}px`; // Constrain to max column width
-    groupDiv.style.width = 'max-content'; // Natural width up to max
+  const groupHeights = await Promise.all(
+    groups.map(async (group) => {
+      const groupDiv = document.createElement('div');
+      groupDiv.style.display = 'flex';
+      groupDiv.style.flexDirection = 'column';
+      groupDiv.style.maxWidth = `${maxColumnWidth}px`; // Constrain to max column width
+      groupDiv.style.width = 'max-content'; // Natural width up to max
 
-    group.forEach((item, itemIndex) => {
-      const indentLevel = Math.min(item.depth, 3);
+      group.forEach((item, itemIndex) => {
+        const indentLevel = Math.min(item.depth, 3);
 
-      if (item.type === 'layer') {
-        if (itemIndex > 0) {
-          const separator = document.createElement('div');
-          Object.assign(separator.style, scaledStyles.layerSeparator('18px'));
-          groupDiv.appendChild(separator);
-        }
-        const layerText = document.createElement('div');
-        Object.assign(layerText.style, scaledStyles.layerText());
-        layerText.textContent = item.data.layerName || '';
-        groupDiv.appendChild(layerText);
-      } else if (item.type === 'wms') {
-        const wmsContainer = document.createElement('div');
-        Object.assign(wmsContainer.style, {
-          marginLeft: `${indentLevel * EXPORT_CONSTANTS.WMS_INDENT_PER_LEVEL}px`,
-          marginBottom: `${SHARED_STYLES.wmsMarginBottom}px`,
-          maxWidth: `${EXPORT_CONSTANTS.WMS_MAX_WIDTH}px`,
-          width: '100%',
-        });
-        const img = document.createElement('img');
-        img.src = item.data.icons?.[0]?.iconImage || '';
-        Object.assign(img.style, {
-          maxWidth: '100%', // Fit within container (max 500px)
-          width: 'auto',
-          height: 'auto',
-          display: 'block',
-        });
-
-        // Store reference to capture actual dimensions after measurement
-        img.dataset.itemIndex = String(itemIndex);
-
-        wmsContainer.appendChild(img);
-        groupDiv.appendChild(wmsContainer);
-      } else if (item.type === 'time') {
-        const timeText = document.createElement('div');
-        Object.assign(timeText.style, scaledStyles.timeText(indentLevel));
-        const timeValue = item.timeInfo?.singleHandle
-          ? DateMgt.formatDate(
-              new Date(item.timeInfo.values[0]),
-              item.timeInfo.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
-            )
-          : `${DateMgt.formatDate(
-              new Date(item.timeInfo?.values[0] || 0),
-              item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
-            )} - ${DateMgt.formatDate(
-              new Date(item.timeInfo?.values[1] || 0),
-              item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
-            )}`;
-        timeText.textContent = timeValue;
-        groupDiv.appendChild(timeText);
-      } else if (item.type === 'child') {
-        const childText = document.createElement('div');
-        Object.assign(childText.style, scaledStyles.childText(indentLevel));
-        childText.textContent = item.data.layerName || '...';
-        groupDiv.appendChild(childText);
-      } else {
-        const legendItem = item.data.items[0];
-        const itemContainer = document.createElement('div');
-        Object.assign(itemContainer.style, {
-          display: 'flex',
-          alignItems: 'center',
-          marginLeft: `${indentLevel * 10}px`,
-          marginBottom: `${SHARED_STYLES.itemMarginBottom}px`,
-        });
-
-        if (legendItem?.icon) {
-          const icon = document.createElement('img');
-          icon.src = legendItem.icon;
-          const dimensions = getPNGDimensions(legendItem.icon);
-          if (dimensions) {
-            const minSize = 4;
-            icon.style.width = `${Math.max(dimensions.width, minSize)}px`;
-            icon.style.height = `${Math.max(dimensions.height, minSize)}px`;
-          } else {
-            icon.style.width = '8px';
-            icon.style.height = '8px';
+        if (item.type === 'layer') {
+          if (itemIndex > 0) {
+            const separator = document.createElement('div');
+            Object.assign(separator.style, scaledStyles.layerSeparator('18px'));
+            groupDiv.appendChild(separator);
           }
-          icon.style.marginRight = '4px';
-          itemContainer.appendChild(icon);
+          const layerText = document.createElement('div');
+          Object.assign(layerText.style, scaledStyles.layerText());
+          layerText.textContent = item.data.layerName || '';
+          groupDiv.appendChild(layerText);
+        } else if (item.type === 'wms') {
+          const wmsContainer = document.createElement('div');
+          Object.assign(wmsContainer.style, {
+            marginLeft: `${indentLevel * EXPORT_CONSTANTS.WMS_INDENT_PER_LEVEL}px`,
+            marginBottom: `${SHARED_STYLES.wmsMarginBottom}px`,
+            maxWidth: `${EXPORT_CONSTANTS.WMS_MAX_WIDTH}px`,
+            width: '100%',
+          });
+          const img = document.createElement('img');
+          img.src = item.data.icons?.[0]?.iconImage || '';
+          Object.assign(img.style, {
+            maxWidth: '100%', // Fit within container (max 500px)
+            width: 'auto',
+            height: 'auto',
+            display: 'block',
+          });
+
+          // Store reference to capture actual dimensions after measurement
+          img.dataset.itemIndex = String(itemIndex);
+
+          wmsContainer.appendChild(img);
+          groupDiv.appendChild(wmsContainer);
+        } else if (item.type === 'time') {
+          const timeText = document.createElement('div');
+          Object.assign(timeText.style, scaledStyles.timeText(indentLevel));
+          const timeValue = item.timeInfo?.singleHandle
+            ? DateMgt.formatDate(
+                new Date(item.timeInfo.values[0]),
+                item.timeInfo.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
+              )
+            : `${DateMgt.formatDate(
+                new Date(item.timeInfo?.values[0] || 0),
+                item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
+              )} - ${DateMgt.formatDate(
+                new Date(item.timeInfo?.values[1] || 0),
+                item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
+              )}`;
+          timeText.textContent = timeValue;
+          groupDiv.appendChild(timeText);
+        } else if (item.type === 'child') {
+          const childText = document.createElement('div');
+          Object.assign(childText.style, scaledStyles.childText(indentLevel));
+          childText.textContent = item.data.layerName || '...';
+          groupDiv.appendChild(childText);
+        } else {
+          const legendItem = item.data.items[0];
+          const itemContainer = document.createElement('div');
+          Object.assign(itemContainer.style, {
+            display: 'flex',
+            alignItems: 'center',
+            marginLeft: `${indentLevel * 10}px`,
+            marginBottom: `${SHARED_STYLES.itemMarginBottom}px`,
+          });
+
+          if (legendItem?.icon) {
+            const icon = document.createElement('img');
+            icon.src = legendItem.icon;
+            const dimensions = getPNGDimensions(legendItem.icon);
+            if (dimensions) {
+              const minSize = 4;
+              icon.style.width = `${Math.max(dimensions.width, minSize)}px`;
+              icon.style.height = `${Math.max(dimensions.height, minSize)}px`;
+            } else {
+              icon.style.width = '8px';
+              icon.style.height = '8px';
+            }
+            icon.style.marginRight = '4px';
+            itemContainer.appendChild(icon);
+          }
+
+          const text = document.createElement('span');
+          Object.assign(text.style, scaledStyles.itemText);
+          text.textContent = legendItem?.name || '';
+          itemContainer.appendChild(text);
+          groupDiv.appendChild(itemContainer);
         }
+      });
 
-        const text = document.createElement('span');
-        Object.assign(text.style, scaledStyles.itemText);
-        text.textContent = legendItem?.name || '';
-        itemContainer.appendChild(text);
-        groupDiv.appendChild(itemContainer);
-      }
-    });
+      dummyContainer.appendChild(groupDiv);
 
-    dummyContainer.appendChild(groupDiv);
-    const { height, width } = groupDiv.getBoundingClientRect();
+      // Wait for all images in this group to load before measuring
+      const images = groupDiv.querySelectorAll('img');
+      await Promise.all(
+        Array.from(images).map(
+          (image) =>
+            new Promise<void>((resolve) => {
+              if (image.complete) {
+                resolve();
+              } else {
+                const loadHandler = (): void => resolve();
+                image.addEventListener('load', loadHandler, { once: true });
+                image.addEventListener('error', loadHandler, { once: true }); // Continue even if image fails to load
+              }
+            })
+        )
+      );
 
-    // Capture actual WMS image dimensions after layout
-    group.forEach((item, itemIndex) => {
-      if (item.type === 'wms') {
-        const img = groupDiv.querySelector(`img[data-item-index="${itemIndex}"]`) as HTMLImageElement;
-        if (img) {
-          const imgRect = img.getBoundingClientRect();
-          // eslint-disable-next-line no-param-reassign
-          item.wmsImageSize = {
-            width: Math.round(imgRect.width),
-            height: Math.round(imgRect.height),
-          };
+      const { height, width } = groupDiv.getBoundingClientRect();
+
+      // Capture actual WMS image dimensions after layout
+      group.forEach((item, itemIndex) => {
+        if (item.type === 'wms') {
+          const img = groupDiv.querySelector(`img[data-item-index="${itemIndex}"]`) as HTMLImageElement;
+          if (img) {
+            const imgRect = img.getBoundingClientRect();
+            // eslint-disable-next-line no-param-reassign
+            item.wmsImageSize = {
+              width: Math.round(imgRect.width),
+              height: Math.round(imgRect.height),
+            };
+          }
         }
-      }
-    });
+      });
 
-    dummyContainer.removeChild(groupDiv);
+      dummyContainer.removeChild(groupDiv);
 
-    const layerName = group[0]?.data.layerName || 'unknown';
+      const layerName = group[0]?.data.layerName || 'unknown';
 
-    return { group, height, width, layerName };
-  });
+      return { group, height, width, layerName };
+    })
+  );
 
   document.body.removeChild(dummyContainer);
 
@@ -1316,6 +1338,30 @@ export async function getMapInfo(mapId: string): Promise<TypeMapInfoResult> {
   const fittedColumns = columns;
   const columnWidths = localColumnWidths;
 
+  // Measure canvas height by rendering temporary CanvasDocument (reused by PDF/PNG exports)
+  const tempHtml = renderToString(
+    createElement(CanvasDocument, {
+      mapDataUrl: resultCanvas.toDataURL('image/jpeg', EXPORT_CONSTANTS.JPEG_QUALITY),
+      scaleText: `${mapScale.labelGraphicMetric} (approx)`,
+      scaleLineWidth,
+      northArrowSvg: northArrowSvgPaths,
+      northArrowRotation: rotationAngle,
+      attributions: attribution,
+      fittedColumns,
+      columnWidths,
+      canvasWidth: mapImageWidth,
+      exportTitle, // Use actual title for accurate height
+      disclaimer, // Use actual disclaimer for accurate height
+      date: DateMgt.formatDate(new Date(), 'YYYY-MM-DD, hh:mm:ss A'),
+    })
+  );
+  const tempElement = document.createElement('div');
+  tempElement.innerHTML = tempHtml;
+  document.body.appendChild(tempElement);
+  const renderedElement = tempElement.firstChild as HTMLElement;
+  const canvasHeight = Math.ceil(renderedElement.getBoundingClientRect().height);
+  document.body.removeChild(tempElement);
+
   return {
     mapDataUrl: resultCanvas.toDataURL('image/jpeg', EXPORT_CONSTANTS.JPEG_QUALITY),
     scaleText: `${mapScale.labelGraphicMetric} (approx)`,
@@ -1326,5 +1372,6 @@ export async function getMapInfo(mapId: string): Promise<TypeMapInfoResult> {
     fittedColumns,
     columnWidths,
     canvasWidth: mapImageWidth,
+    canvasHeight,
   };
 }

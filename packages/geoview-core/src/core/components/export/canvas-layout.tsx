@@ -2,10 +2,17 @@ import { renderToString } from 'react-dom/server';
 import * as html2canvas from '@html2canvas/html2canvas';
 
 import { DateMgt } from '@/core/utils/date-mgt';
-import type { FileExportProps } from './export-modal';
-import type { FlattenedLegendItem, ElementFactory } from './utilities';
-import { getMapInfo, renderLegendColumns, renderFooter, renderScaleBar, renderNorthArrow, EXPORT_CONSTANTS } from './utilities';
-import { CANVAS_STYLES, getScaledCanvasStyles } from './layout-styles';
+import type { FileExportProps } from '@/core/components/export/export-modal';
+import type { FlattenedLegendItem, ElementFactory } from '@/core/components/export/utilities';
+import {
+  getMapInfo,
+  renderLegendColumns,
+  renderFooter,
+  renderScaleBar,
+  renderNorthArrow,
+  EXPORT_CONSTANTS,
+} from '@/core/components/export/utilities';
+import { CANVAS_STYLES, getScaledCanvasStyles } from '@/core/components/export/layout-styles';
 
 interface CanvasDocumentProps {
   mapDataUrl: string;
@@ -38,7 +45,11 @@ const canvasElementFactory: ElementFactory = {
 };
 
 /**
- * Render legend items directly from columns without re-grouping
+ * Render legend items in columns for canvas export
+ * @param {FlattenedLegendItem[][]} columns - Pre-organized legend items grouped into columns
+ * @param {number} canvasWidth - The width of the canvas in pixels
+ * @param {number[]} columnWidths - Optional array of column widths in pixels
+ * @returns {JSX.Element} The rendered legend columns as JSX
  */
 const renderCanvasLegendInRows = (columns: FlattenedLegendItem[][], canvasWidth: number, columnWidths?: number[]): JSX.Element => {
   const scaledStyles = getScaledCanvasStyles(canvasWidth);
@@ -98,14 +109,13 @@ export function CanvasDocument({
  * Creates the HTML map and converts to canvas and then image for the export
  * @param {string} mapId - The map ID
  * @param {FileExportProps} props - The file export props
- * @returns {Promise<string[]>} A string of URLs for the images (Map and overflow pages)
+ * @returns {Promise<string>} A data URL for the exported image
  */
-export async function createCanvasMapUrls(mapId: string, props: FileExportProps): Promise<string[]> {
-  const results = [];
+export async function createCanvasMapUrls(mapId: string, props: FileExportProps): Promise<string> {
   const { exportTitle, disclaimer, dpi, jpegQuality, format } = props;
 
-  // Get map info
-  const mapInfo = await getMapInfo(mapId);
+  // Get map info with title/disclaimer for accurate height calculation
+  const mapInfo = await getMapInfo(mapId, exportTitle, disclaimer);
 
   // Create main page HTML
   const mainPageHtml = renderToString(
@@ -125,9 +135,9 @@ export async function createCanvasMapUrls(mapId: string, props: FileExportProps)
   const renderedElement = mainElement.firstChild as HTMLElement;
   const quality = jpegQuality ?? 1;
   const mainCanvas = await html2canvas.default(renderedElement, { scale: dpi / EXPORT_CONSTANTS.DEFAULT_DPI, logging: false });
-  results.push(mainCanvas.toDataURL(`image/${format}`, quality));
+  const dataUrl = mainCanvas.toDataURL(`image/${format}`, quality);
 
   document.body.removeChild(mainElement);
 
-  return results;
+  return dataUrl;
 }

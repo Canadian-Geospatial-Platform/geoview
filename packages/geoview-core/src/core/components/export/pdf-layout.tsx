@@ -1,13 +1,11 @@
 import { pdf } from '@react-pdf/renderer';
-import { renderToString } from 'react-dom/server';
 
 import { Document, Page, Text, View, Image, Svg, Path } from '@react-pdf/renderer';
 import { DateMgt } from '@/core/utils/date-mgt';
-import type { FlattenedLegendItem, ElementFactory } from './utilities';
-import { getMapInfo, renderLegendColumns, renderFooter, renderScaleBar, renderNorthArrow } from './utilities';
-import type { FileExportProps } from './export-modal';
-import { PDF_STYLES, getScaledPDFStyles } from './layout-styles';
-import { CanvasDocument } from './canvas-layout';
+import type { FlattenedLegendItem, ElementFactory } from '@/core/components/export/utilities';
+import { getMapInfo, renderLegendColumns, renderFooter, renderScaleBar, renderNorthArrow } from '@/core/components/export/utilities';
+import type { FileExportProps } from '@/core/components/export/export-modal';
+import { PDF_STYLES, getScaledPDFStyles } from '@/core/components/export/layout-styles';
 
 interface ExportDocumentProps {
   mapDataUrl: string;
@@ -41,13 +39,22 @@ const pdfElementFactory: ElementFactory = {
 };
 
 /**
- * Render legend items directly from columns without re-grouping
+ * Render legend items in columns for PDF export
+ * @param {FlattenedLegendItem[][]} columns - Pre-organized legend items grouped into columns
+ * @param {any} styles - Scaled styles for the PDF layout
+ * @param {number[]} columnWidths - Optional array of column widths in pixels
+ * @returns {JSX.Element} The rendered legend columns as JSX
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const renderLegendInRows = (columns: FlattenedLegendItem[][], styles: any, columnWidths?: number[]): JSX.Element => {
   return renderLegendColumns(columns, pdfElementFactory, styles, PDF_STYLES, columnWidths);
 };
 
+/**
+ * The PDF export document that is created for the map export
+ * @param {ExportDocumentProps} props - The PDF Export Document properties
+ * @returns {JSX.Element} The resulting html map
+ */
 export function ExportDocument({
   mapDataUrl,
   exportTitle,
@@ -99,32 +106,17 @@ export function ExportDocument({
   );
 }
 
+/**
+ * Creates the PDF map for the export
+ * @param {string} mapId - The map ID
+ * @param {FileExportProps} props - The file export props
+ * @returns {Promise<string>} A string URL for the document
+ */
 export async function createPDFMapUrl(mapId: string, params: FileExportProps): Promise<string> {
   const { exportTitle, disclaimer } = params;
-  const mapInfo = await getMapInfo(mapId);
+  const mapInfo = await getMapInfo(mapId, exportTitle, disclaimer);
 
-  // First, render a temporary canvas to measure actual height
-  const tempHtml = renderToString(
-    <CanvasDocument
-      {...mapInfo}
-      exportTitle={exportTitle}
-      disclaimer={disclaimer}
-      date={DateMgt.formatDate(new Date(), 'YYYY-MM-DD, hh:mm:ss A')}
-      canvasWidth={mapInfo.canvasWidth}
-    />
-  );
-  const tempElement = document.createElement('div');
-  tempElement.innerHTML = tempHtml;
-  document.body.appendChild(tempElement);
-
-  // Measure the actual rendered height
-  const renderedElement = tempElement.firstChild as HTMLElement;
-  const actualCanvasHeight = Math.ceil(renderedElement.getBoundingClientRect().height);
-
-  // Clean up temporary element
-  document.body.removeChild(tempElement);
-
-  // Now create the PDF with the correct height
+  // Use pre-calculated canvas height from getMapInfo (measured during preview)
   const blob = await pdf(
     <ExportDocument
       {...mapInfo}
@@ -132,7 +124,7 @@ export async function createPDFMapUrl(mapId: string, params: FileExportProps): P
       disclaimer={disclaimer}
       date={DateMgt.formatDate(new Date(), 'YYYY-MM-DD, hh:mm:ss A')}
       canvasWidth={mapInfo.canvasWidth}
-      canvasHeight={actualCanvasHeight}
+      canvasHeight={mapInfo.canvasHeight}
     />
   ).toBlob();
   return URL.createObjectURL(blob);
