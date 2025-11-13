@@ -116,6 +116,10 @@ export abstract class GVAbstractTester extends AbstractTester {
     'https://canadian-geospatial-platform.github.io/geoview/public/datasets/kml-files/CanadianNationalTornadoDatabase_1980-2009.kml';
   static readonly KML_TORNADO_FILE: string = 'CanadianNationalTornadoDatabase_1980-2009.kml';
 
+  static readonly GEOTIFF_VEGETATION: string =
+    'https://datacube-prod-data-public.s3.ca-central-1.amazonaws.com/store/eo4ce/vegetation/vegetation-2020-fCOVER.tif';
+  static readonly GEOTIFF_VEGETATION_FILE: string = 'vegetation-2020-fCOVER.tif';
+
   /** The API for the tests */
   #api: API;
 

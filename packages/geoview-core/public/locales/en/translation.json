@@ -122,6 +122,7 @@
     "serviceVectorTile": "Vector Tile Service",
     "serviceGeoJSON": "GeoJSON",
     "serviceGeoPackage": "GeoPackage",
+    "serviceGeoTIFF": "GeoTIFF",
     "serviceKML": "Keyhole Markup Language (KML)",
     "serviceCSV": "Comma Separated Values (CSV)",
     "serviceWKB": "Well-Known Binary (WKB)",

@@ -23,6 +23,7 @@ type LayerTypesKey =
   | 'ESRI_IMAGE'
   | 'IMAGE_STATIC'
   | 'GEOJSON'
+  | 'GEOTIFF'
   | 'KML'
   | 'XYZ_TILES'
   | 'VECTOR_TILES'
@@ -38,6 +39,7 @@ export type TypeGeoviewLayerType =
   | 'esriFeature'
   | 'esriImage'
   | 'GeoJSON'
+  | 'GeoTIFF'
   | 'imageStatic'
   | 'KML'
   | 'ogcFeature'
@@ -58,8 +60,9 @@ export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType> = {
   ESRI_DYNAMIC: 'esriDynamic',
   ESRI_FEATURE: 'esriFeature',
   ESRI_IMAGE: 'esriImage',
-  IMAGE_STATIC: 'imageStatic',
   GEOJSON: 'GeoJSON',
+  GEOTIFF: 'GeoTIFF',
+  IMAGE_STATIC: 'imageStatic',
   KML: 'KML',
   XYZ_TILES: 'xyzTiles',
   VECTOR_TILES: 'vectorTiles',
@@ -144,11 +147,12 @@ export type LayerEntryTypesKey =
  */
 export const CONST_GEOVIEW_SCHEMA_BY_TYPE: Record<TypeGeoviewLayerType, string> = {
   CSV: 'TypeVectorLayerEntryConfig',
-  imageStatic: 'TypeImageStaticLayerEntryConfig',
   esriDynamic: 'TypeEsriDynamicLayerEntryConfig',
   esriFeature: 'TypeVectorLayerEntryConfig',
   esriImage: 'TypeEsriImageLayerEntryConfig',
   GeoJSON: 'TypeVectorLayerEntryConfig',
+  GeoTIFF: 'TypeGeoTIFFLayerEntryConfig',
+  imageStatic: 'TypeImageStaticLayerEntryConfig',
   KML: 'TypeVectorLayerEntryConfig',
   xyzTiles: 'TypeTileLayerEntryConfig',
   vectorTiles: 'TypeTileLayerEntryConfig',
@@ -207,6 +211,12 @@ export type TypeBaseSourceInitialConfig = {
 export interface TypeSourceTileInitialConfig extends TypeBaseSourceInitialConfig {
   /** Tile grid parameters to use. */
   tileGrid?: TypeTileGrid;
+}
+
+/** Initial settings for GeoTIFF sources. */
+export interface TypeSourceGeoTIFFInitialConfig extends TypeBaseSourceInitialConfig {
+  /** Path(s) to file containing external overviews. */
+  overviews?: string[];
 }
 
 /** Initial settings for WMS image sources. */
