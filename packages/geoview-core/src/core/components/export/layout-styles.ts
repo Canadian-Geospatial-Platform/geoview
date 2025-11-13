@@ -36,7 +36,7 @@ export const SHARED_STYLES = {
   scaleTickHeight: 8,
   scaleTickOffset: -0.5,
   scaleTickTop: -3,
-  northArrowSize: 40,
+  northArrowSize: 30,
   legendGap: 15,
   legendPaddingLeft: 2,
   dividerMargin: 10,
@@ -62,12 +62,11 @@ export const SHARED_STYLES = {
     marginBottom: 10,
   },
   mapContainer: {
-    marginBottom: 10,
     borderWidth: 1,
     borderColor: COLORS.darkGrey,
     borderStyle: 'solid',
   },
-  mapImage: { width: '100%', objectFit: 'contain' },
+  mapImage: { width: '100%', objectFit: 'contain', borderWidth: 1, borderColor: COLORS.mediumGrey, borderStyle: 'solid' },
   scaleBarContainer: { justifyContent: 'center', alignItems: 'center' },
   scaleLine: {
     height: 1,

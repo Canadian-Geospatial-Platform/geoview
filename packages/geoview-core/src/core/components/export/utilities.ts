@@ -810,11 +810,13 @@ export async function getMapInfo(mapId: string, exportTitle: string, disclaimer:
   const mapState = MapEventProcessor.getMapStateForExportLayout(mapId);
   const { northArrow, northArrowElement, attribution, mapRotation, mapScale } = mapState;
 
-  // Get browser map dimensions first for AUTO mode
-  const viewport = mapElement.getElementsByClassName('ol-viewport')[0];
-  const browserCanvas = viewport.querySelector('canvas:not(.ol-overviewmap canvas)') as HTMLCanvasElement;
-  const browserMapWidth = browserCanvas ? browserCanvas.width : 800;
-  const browserMapHeight = browserCanvas ? browserCanvas.height : 600;
+  // Get browser map dimensions from viewport element (not canvas, which changes size when rotated)
+  const viewport = mapElement.getElementsByClassName('ol-viewport')[0] as HTMLElement;
+  const viewportRect = viewport.getBoundingClientRect();
+
+  // Use viewport dimensions, not canvas dimensions (canvas size changes when map rotates)
+  const browserMapWidth = Math.round(viewportRect.width);
+  const browserMapHeight = Math.round(viewportRect.height);
 
   // Adjust map to correct aspect ratio for PDF map (AUTO mode uses exact browser dimensions)
   const mapImageWidth = browserMapWidth;
@@ -830,53 +832,52 @@ export async function getMapInfo(mapId: string, exportTitle: string, disclaimer:
 
   if (!resultContext) throw new Error('Canvas context not available');
 
-  // Apply rotation if needed
+  // GV IMPORTANT: Apply rotation transform to match browser display
+  // GV.Cont Viewport dimensions stay constant (e.g., 800x400), rotation is applied via canvas transform
+  // GV.Cont OpenLayers renders to a larger canvas when rotated, we scale it to fill the viewport
+  // GV.Cont This may result in slight cropping at edges, especially at projection limits
   if (mapRotation !== 0) {
     resultContext.save();
     resultContext.translate(mapImageWidth / 2, mapImageHeight / 2);
     resultContext.rotate(mapRotation);
   }
 
-  let actualBrowserMapWidth;
-
-  // GV This tries it's best to fit the map image into the canvas. However;
-  // GV.Cont at close to 45 degrees, there will be unfetched tiles in the corners
+  // Copy OpenLayers canvas layers to result canvas
   Array.prototype.forEach.call(viewport.querySelectorAll('canvas'), (canvas: HTMLCanvasElement) => {
     const isOverviewCanvas = canvas.closest('.ol-overviewmap');
     if (!isOverviewCanvas && canvas.width > 0) {
       const { opacity } = (canvas.parentNode as HTMLElement).style;
       resultContext.globalAlpha = opacity === '' ? 1 : Number(opacity);
 
-      // Calculate scaling for the map
-      actualBrowserMapWidth = canvas.width;
+      // Calculate scale factor to fill viewport (maintains zoom level, may crop edges)
       const scaleX = mapImageWidth / canvas.width;
       const scaleY = mapImageHeight / canvas.height;
-      const canvasScale = Math.max(scaleX, scaleY); // Fill completely, may crop edges
+      const scale = Math.max(scaleX, scaleY);
 
-      const scaledWidth = canvas.width * canvasScale;
-      const scaledHeight = canvas.height * canvasScale;
+      const scaledWidth = canvas.width * scale;
+      const scaledHeight = canvas.height * scale;
 
       if (mapRotation !== 0) {
-        // Rotated: draw centered at origin (coordinate system already translated)
+        // Rotated: draw centered at rotated origin
         resultContext.drawImage(canvas, -scaledWidth / 2, -scaledHeight / 2, scaledWidth, scaledHeight);
       } else {
-        // Not rotated: calculate offset to center in canvas
+        // Not rotated: draw centered in viewport
         const offsetX = (mapImageWidth - scaledWidth) / 2;
         const offsetY = (mapImageHeight - scaledHeight) / 2;
-        resultContext.drawImage(canvas, offsetX, offsetY, scaledWidth, scaledHeight);
+        resultContext.drawImage(canvas, 0, 0, canvas.width, canvas.height, offsetX, offsetY, scaledWidth, scaledHeight);
       }
     }
   });
-
-  // Calculate scale line width
-  const pdfScaleFactor = actualBrowserMapWidth! / mapImageWidth;
-  const pdfScaleWidth = Math.round(parseFloat(mapScale.lineWidthMetric) * pdfScaleFactor);
-  const scaleLineWidth = `${pdfScaleWidth}px`;
 
   // Restore context if rotated
   if (mapRotation !== 0) {
     resultContext.restore();
   }
+
+  // Calculate scale line width using viewport width (not canvas width which may be rotated)
+  const pdfScaleFactor = browserMapWidth / mapImageWidth;
+  const pdfScaleWidth = Math.round(parseFloat(mapScale.lineWidthMetric) * pdfScaleFactor);
+  const scaleLineWidth = `${pdfScaleWidth}px`;
 
   // Get all other state data
   const legendLayers = LegendEventProcessor.getLegendLayers(mapId).filter(
