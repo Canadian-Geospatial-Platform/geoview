@@ -24,7 +24,7 @@ import type {
   LayerEntryRegisterInitEvent,
   LayerGVCreatedEvent,
 } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import type { TypeDisplayLanguage, TypeOutfieldsType } from '@/api/types/map-schema-types';
+import { VALID_PROJECTION_CODES, type TypeDisplayLanguage, type TypeOutfieldsType } from '@/api/types/map-schema-types';
 import type {
   MapConfigLayerEntry,
   TypeGeoviewLayerConfig,
@@ -87,7 +87,9 @@ import type {
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVGeoJSON } from '@/geo/layer/gv-layers/vector/gv-geojson';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
+import { GVWMS, type ImageLoadRescueDelegate, type ImageLoadRescueEvent } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { getExtentUnion, getZoomFromScale } from '@/geo/utils/utilities';
+import { Projection } from '@/geo/utils/projection';
 
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
@@ -238,6 +240,9 @@ export class LayerApi {
   /** Keep a bounded reference to the handle layer error */
   #boundedHandleLayerVisibleChanged: VisibleChangedDelegate;
 
+  /** Keep a bounded reference to the handle WMS Layer Image Load Callbacks */
+  #boundedHandleLayerWMSImageLoadRescue: ImageLoadRescueDelegate;
+
   /**
    * Initializes layer types and listen to add/remove layer events from outside
    * @param {MapViewer} mapViewer - A reference to the map viewer
@@ -262,6 +267,7 @@ export class LayerApi {
     this.#boundedHandleLayerError = this.#handleLayerError.bind(this);
     this.#boundedHandleLayerOpacityChanged = this.#handleLayerOpacityChanged.bind(this);
     this.#boundedHandleLayerVisibleChanged = this.#handleLayerVisibleChanged.bind(this);
+    this.#boundedHandleLayerWMSImageLoadRescue = this.#handleLayerWMSImageLoadRescue.bind(this);
   }
 
   /**
@@ -302,12 +308,27 @@ export class LayerApi {
 
   /**
    * Returns the GeoView instance associated to the layer path.
-   * The first element of the layerPath is the geoviewLayerId and this function will
-   * work with either the geoViewLayerId or the layerPath.
    * @param {string} layerPath - The layer path
-   * @returns The new Geoview Layer
+   * @returns {AbstractBaseLayer} The new Geoview Layer
+   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
    */
-  getGeoviewLayer(layerPath: string): AbstractBaseLayer | undefined {
+  getGeoviewLayer(layerPath: string): AbstractBaseLayer {
+    // Get the layer
+    const layer = this.#gvLayers[layerPath];
+
+    // If not found
+    if (!layer) throw new LayerNotFoundError(layerPath);
+
+    // Return the layer
+    return layer;
+  }
+
+  /**
+   * Returns the GeoView instance associated to the layer path.
+   * @param {string} layerPath - The layer path
+   * @returns {AbstractBaseLayer | undefined} The new Geoview Layer or undefined when not found
+   */
+  getGeoviewLayerIfExists(layerPath: string): AbstractBaseLayer | undefined {
     return this.#gvLayers[layerPath];
   }
 
@@ -343,7 +364,16 @@ export class LayerApi {
    * @returns {ConfigBaseClass | undefined} The layer configuration or undefined if not found.
    */
   getLayerEntryConfig(layerPath: string): ConfigBaseClass | undefined {
-    // TODO: Refactor - LayerApi - Throw an exception when not found!
+    // TODO: Refactor - LayerApi - Throw an exception when not found! Use 'getLayerEntryConfigIfExists' when it can be undefined.
+    return this.#layerEntryConfigs?.[layerPath];
+  }
+
+  /**
+   * Gets the layer configuration of the specified layer path.
+   * @param {string} layerPath The layer path.
+   * @returns {ConfigBaseClass | undefined} The layer configuration or undefined if not found.
+   */
+  getLayerEntryConfigIfExists(layerPath: string): ConfigBaseClass | undefined {
     return this.#layerEntryConfigs?.[layerPath];
   }
 
@@ -351,10 +381,21 @@ export class LayerApi {
    * Returns the OpenLayer instance associated with the layer path.
    * @param {string} layerPath - The layer path to the layer's configuration.
    * @returns {BaseLayer} Returns the geoview instance associated to the layer path.
+   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
    */
-  getOLLayer(layerPath: string): BaseLayer | undefined {
+  getOLLayer(layerPath: string): BaseLayer {
     // Get the OpenLayer layer as part of the new GVLayer design
-    return this.getGeoviewLayer(layerPath)?.getOLLayer();
+    return this.getGeoviewLayer(layerPath).getOLLayer();
+  }
+
+  /**
+   * Returns the OpenLayer instance associated with the layer path.
+   * @param {string} layerPath - The layer path to the layer's configuration.
+   * @returns {BaseLayer | undefined} Returns the geoview instance associated to the layer path.
+   */
+  getOLLayerIfExists(layerPath: string): BaseLayer | undefined {
+    // Get the OpenLayer layer as part of the new GVLayer design
+    return this.getGeoviewLayerIfExists(layerPath)?.getOLLayer();
   }
 
   /**
@@ -370,7 +411,8 @@ export class LayerApi {
     // Make sure the open layer has been created, sometimes it can still be in the process of being created
     return whenThisThen(
       () => {
-        return this.getOLLayer(layerPath)!;
+        // Get the ol layer if it exists yet
+        return this.getOLLayerIfExists(layerPath)!;
       },
       timeout,
       checkFrequency
@@ -437,7 +479,7 @@ export class LayerApi {
         }
 
         // For each uuid that failed
-        uuids?.forEach((uuid) => {
+        uuids?.forEach((uuid: string) => {
           // Get the index at which the TypeGeoviewLayerConfig happened
           const index = validGeoviewLayerConfigs.findIndex((mapLayerEntry) => mapLayerEntry.geoviewLayerId === uuid);
 
@@ -466,9 +508,9 @@ export class LayerApi {
    * Adds a Geoview Layer by GeoCore UUID.
    * @param {string} uuid - The GeoCore UUID to add to the map
    * @param {string} layerEntryConfig - The optional layer configuration
-   * @returns {Promise<void>} A promise which resolves when done adding
+   * @returns {Promise<GeoViewLayerAddedResult>} A promise which resolves when done adding
    */
-  async addGeoviewLayerByGeoCoreUUID(uuid: string, layerEntryConfig?: string): Promise<void> {
+  async addGeoviewLayerByGeoCoreUUID(uuid: string, layerEntryConfig?: string): Promise<GeoViewLayerAddedResult | void> {
     // Add a place holder to the ordered layer info array
     const layerInfo: TypeOrderedLayerInfo = {
       layerPath: uuid,
@@ -514,15 +556,21 @@ export class LayerApi {
         };
 
       // Create the layers from the UUID
-      const geoviewLayerConfig = await GeoCore.createLayerConfigFromUUID(
-        uuid,
-        this.mapViewer.getDisplayLanguage(),
-        this.getMapId(),
-        optionalConfig
-      );
+      const response = await GeoCore.createLayerConfigFromUUID(uuid, this.mapViewer.getDisplayLanguage(), this.getMapId(), optionalConfig);
+      const geoviewLayerConfig = response.config;
+
+      // TODO: Refactor - Move this logic inside addGeoviewLayer. Anyways for now here is better than when it was in createLayerConfigFromUUID.
+      // If a Geochart is initialized
+      if (GeochartEventProcessor.isGeochartInitialized(this.getMapId())) {
+        // For each layer path
+        Object.entries(response.geocharts).forEach(([layerPath, geochartConfig]) => {
+          // Add a GeoChart
+          GeochartEventProcessor.addGeochartChart(this.getMapId(), layerPath, geochartConfig);
+        });
+      }
 
       // Add the geoview layer
-      this.addGeoviewLayer(geoviewLayerConfig);
+      return this.addGeoviewLayer(geoviewLayerConfig);
     } catch (error: unknown) {
       // An error happening here likely means an issue with the UUID or a trivial config error.
       // The majority of typicaly errors happen in the addGeoviewLayer promise catcher, not here.
@@ -818,7 +866,8 @@ export class LayerApi {
         this.getLayerEntryConfigIds().forEach((registeredLayerPath) => {
           if (registeredLayerPath.startsWith(`${layerPath}/`) || registeredLayerPath === layerPath) {
             // Remove actual OL layer from the map
-            if (this.getOLLayer(registeredLayerPath)) this.mapViewer.map.removeLayer(this.getOLLayer(registeredLayerPath) as BaseLayer);
+            const layer = this.getOLLayerIfExists(registeredLayerPath);
+            if (layer) this.mapViewer.map.removeLayer(layer);
 
             // Unregister the events on the layer
             if (this.#gvLayers[registeredLayerPath] instanceof AbstractGVLayer)
@@ -1019,7 +1068,8 @@ export class LayerApi {
       this.getLayerEntryConfigIds().forEach((registeredLayerPath) => {
         if (registeredLayerPath.startsWith(`${layerPath}/`) || registeredLayerPath === layerPath) {
           // Remove actual OL layer from the map
-          if (this.getOLLayer(registeredLayerPath)) this.mapViewer.map.removeLayer(this.getOLLayer(registeredLayerPath) as BaseLayer);
+          const layer = this.getOLLayerIfExists(registeredLayerPath);
+          if (layer) this.mapViewer.map.removeLayer(layer);
 
           // Unregister layer config from the application
           this.unregisterLayerConfig(this.getLayerEntryConfig(registeredLayerPath)!);
@@ -1105,7 +1155,7 @@ export class LayerApi {
    */
   highlightLayer(layerPath: string): void {
     this.removeHighlightLayer();
-    const theLayerMain = this.getGeoviewLayer(layerPath);
+    const theLayerMain = this.getGeoviewLayerIfExists(layerPath);
 
     this.#highlightedLayer = { layerPath, originalOpacity: theLayerMain?.getOpacity() };
     theLayerMain?.setOpacity(1);
@@ -1117,7 +1167,7 @@ export class LayerApi {
     if (layer && layer.getEntryTypeIsGroup()) {
       this.getLayerEntryConfigIds().forEach((registeredLayerPath) => {
         // Trying to get the layer associated with the layer path, can be undefined because the layer might be in error
-        const theLayer = this.getGeoviewLayer(registeredLayerPath);
+        const theLayer = this.getGeoviewLayerIfExists(registeredLayerPath);
         if (theLayer) {
           if (
             !(registeredLayerPath.startsWith(`${layerPath}/`) || registeredLayerPath === layerPath) &&
@@ -1125,13 +1175,13 @@ export class LayerApi {
           ) {
             const otherOpacity = theLayer.getOpacity();
             theLayer.setOpacity((otherOpacity || 1) * 0.25);
-          } else this.getOLLayer(registeredLayerPath)!.setZIndex(999);
+          } else theLayer.getOLLayer().setZIndex(999);
         }
       });
     } else {
       this.getLayerEntryConfigIds().forEach((registeredLayerPath) => {
         // Trying to get the layer associated with the layer path, can be undefined because the layer might be in error
-        const theLayer = this.getGeoviewLayer(registeredLayerPath);
+        const theLayer = this.getGeoviewLayerIfExists(registeredLayerPath);
         if (theLayer) {
           if (registeredLayerPath !== layerPath && theLayer.getLayerConfig()?.getEntryTypeIsRegular()) {
             const otherOpacity = theLayer.getOpacity();
@@ -1139,7 +1189,7 @@ export class LayerApi {
           }
         }
       });
-      this.getOLLayer(layerPath)?.setZIndex(999);
+      this.getOLLayerIfExists(layerPath)?.setZIndex(999);
     }
   }
 
@@ -1158,7 +1208,7 @@ export class LayerApi {
       if (layerConfig?.getEntryTypeIsGroup()) {
         this.getLayerEntryConfigIds().forEach((registeredLayerPath) => {
           // Trying to get the layer associated with the layer path, can be undefined because the layer might be in error
-          const theLayer = this.getGeoviewLayer(registeredLayerPath);
+          const theLayer = this.getGeoviewLayerIfExists(registeredLayerPath);
           if (theLayer) {
             if (
               !(registeredLayerPath.startsWith(`${layerPath}/`) || registeredLayerPath === layerPath) &&
@@ -1172,7 +1222,7 @@ export class LayerApi {
       } else {
         this.getLayerEntryConfigIds().forEach((registeredLayerPath) => {
           // Trying to get the layer associated with the layer path, can be undefined because the layer might be in error
-          const theLayer = this.getGeoviewLayer(registeredLayerPath);
+          const theLayer = this.getGeoviewLayerIfExists(registeredLayerPath);
           if (theLayer) {
             if (registeredLayerPath !== layerPath && theLayer.getLayerConfig().getEntryTypeIsRegular()) {
               const otherOpacity = theLayer.getOpacity();
@@ -1239,7 +1289,7 @@ export class LayerApi {
    */
   setItemVisibility(layerPath: string, item: TypeLegendItem, visibility: boolean, updateLegendLayers: boolean = true): void {
     // Get registered layer config
-    const layer = this.getGeoviewLayer(layerPath);
+    const layer = this.getGeoviewLayerIfExists(layerPath);
 
     // If the layer is a regular layer (not a group)
     if (layer instanceof AbstractGVLayer) {
@@ -1283,6 +1333,7 @@ export class LayerApi {
    *
    * @param {string} layerPath - The path of the layer.
    * @param {boolean} newValue - The new value of visibility.
+   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
    */
   setOrToggleLayerVisibility(layerPath: string, newValue?: boolean): boolean {
     // Apply some visibility logic
@@ -1291,10 +1342,8 @@ export class LayerApi {
     const newVisibility = newValue !== undefined ? newValue : !layerVisibility;
 
     if (layerVisibility !== newVisibility) {
-      // Change visibility
-      this.getGeoviewLayer(layerPath)?.setVisible(newVisibility);
-      // Emit event
-      this.#emitLayerVisibilityToggled({ layerPath, visibility: newVisibility });
+      // Redirect
+      this.getGeoviewLayer(layerPath).setVisible(newVisibility);
     }
 
     return newVisibility;
@@ -1305,18 +1354,11 @@ export class LayerApi {
    *
    * @param {string} layerPath - The path of the layer.
    * @param {string} name - The new name to use.
+   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
    */
   setLayerName(layerPath: string, name: string): void {
-    // Get the layer
-    const layer = this.getGeoviewLayer(layerPath);
-
-    // If found
-    if (layer) {
-      // Set the layer name on the layer
-      layer.setLayerName(name);
-    } else {
-      logger.logError(`Unable to find layer ${layerPath}`);
-    }
+    // Redirect
+    this.getGeoviewLayer(layerPath).setLayerName(name);
   }
 
   /**
@@ -1325,9 +1367,11 @@ export class LayerApi {
    * @param {string} layerPath - The path of the layer.
    * @param {number} opacity - The new opacity to use.
    * @param {boolean} emitOpacityChange - Whether to emit the event or not (false to avoid updating the legend layers)
+   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path
    */
   setLayerOpacity(layerPath: string, opacity: number, emitOpacityChange?: boolean): void {
-    this.getGeoviewLayer(layerPath)?.setOpacity(opacity, emitOpacityChange);
+    // Redirect
+    this.getGeoviewLayer(layerPath).setOpacity(opacity, emitOpacityChange);
   }
 
   /**
@@ -1335,6 +1379,8 @@ export class LayerApi {
    *
    * @param {string} layerPath - The path of the layer.
    * @param {GeoJSONObject | string} geojson - The new geoJSON.
+   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
+   * @throws {LayerNotGeoJsonError} Error thrown when the layer is not a GeoJson layer.
    */
   setGeojsonSource(layerPath: string, geojson: GeoJSONObject | string): void {
     // Get the map id
@@ -1342,9 +1388,6 @@ export class LayerApi {
 
     // Get the GeoviewLayer
     const gvLayer = this.getGeoviewLayer(layerPath);
-
-    // If not found
-    if (!gvLayer) throw new LayerNotFoundError(layerPath);
 
     // If not of right type
     if (!(gvLayer instanceof GVGeoJSON)) throw new LayerNotGeoJsonError(layerPath, gvLayer.getLayerName());
@@ -1518,6 +1561,17 @@ export class LayerApi {
     }
   }
 
+  /**
+   * Clears any overridden CRS settings on all WMS layers in the map.
+   * Iterates through all GeoView layers, identifies those that are instances of `GVWMS`,
+   * and resets their override CRS to `undefined`, allowing them to use the default projection behavior.
+   */
+  clearWMSLayersWithOverrideCRS(): void {
+    // Get all WMS layers
+    const wmsLayers = this.getGeoviewLayers().filter((layer) => layer instanceof GVWMS);
+    wmsLayers.forEach((gvLayer) => gvLayer.setOverrideCRS(undefined));
+  }
+
   // #region PRIVATE FUNCTIONS
 
   /**
@@ -1555,6 +1609,9 @@ export class LayerApi {
 
     // Register a hook when a layer visibility is changed
     gvLayer.onVisibleChanged(this.#boundedHandleLayerVisibleChanged);
+
+    // For a WMS, register a hook when the image fails to load so that we can try to rescue it
+    if (gvLayer instanceof GVWMS) gvLayer.onImageLoadRescue(this.#boundedHandleLayerWMSImageLoadRescue);
   }
 
   /**
@@ -1583,6 +1640,9 @@ export class LayerApi {
 
     // Unregister handler on layer visibility change
     gvLayer.offVisibleChanged(this.#boundedHandleLayerVisibleChanged);
+
+    // For a WMS, unregister the hook when the image load is called
+    if (gvLayer instanceof GVWMS) gvLayer.offImageLoadRescue(this.#boundedHandleLayerWMSImageLoadRescue);
   }
 
   /**
@@ -1643,7 +1703,6 @@ export class LayerApi {
    * @param {string} layerMessageEvent.messageKey - Key for localized message lookup
    * @param {string[]} layerMessageEvent.messageParams - Parameters to be inserted into the localized message
    * @param {boolean} layerMessageEvent.notification - Notification configuration options
-   * @returns {void}
    *
    * @example
    * handleLayerMessage(myLayer, {
@@ -1735,6 +1794,76 @@ export class LayerApi {
    */
   #handleLayerVisibleChanged(layer: AbstractBaseLayer, event: VisibleChangedEvent): void {
     MapEventProcessor.setMapLayerVisibilityInStore(this.getMapId(), layer.getLayerPath(), event.visible);
+
+    // Emit event
+    this.#emitLayerVisibilityToggled({ layerPath: layer.getLayerPath(), visibility: event.visible });
+  }
+
+  /**
+   * Handles when a WMS layer failed to render an image on the map and we're trying to rescue it on-the-fly before officializing the error.
+   * This callback is useful when a WMS doesn't officially support the map projection, but we still want to attempt to pull an image and put it on the map.
+   * @param {GVWMS} sender - The WMS layer which is attempting to render its image on the map.
+   * @param {ImageLoadRescueEvent} event - The error event which happened when the image tried to be rendered.
+   * @returns {boolean} True if the rescue was attempted, false if we let it fail.
+   * @private
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  #handleLayerWMSImageLoadRescue(sender: GVWMS, event: ImageLoadRescueEvent): boolean {
+    // Get the supported CRS projections
+    const supportedCRSs = sender.getLayerConfig().getSupportedCRSs();
+
+    // Get the map projection
+    const mapProj = this.mapViewer.getProjection().getCode();
+
+    // If the map projection isn't supported by the WMS, that might be the issue
+    if (!supportedCRSs.includes(mapProj)) {
+      // Log warning
+      logger.logWarning(`The map projection '${mapProj}' is not officially supported by the layer '${sender.getLayerPath()}'...`);
+
+      // If we're not already overriding the CRS
+      if (!sender.getOverrideCRS()) {
+        // Get prioritized lists of projections to retry with (we want to attempt with higher priority projections)
+        const highlyPrioritizedProjections = VALID_PROJECTION_CODES.map((projCode) => 'EPSG:' + projCode);
+        const moderatePrioritizedProjections = Object.values(Projection.PROJECTION_NAMES);
+
+        // Attempt to find a suitable CRS
+        let selectedCRS: string | undefined;
+
+        // 1. Look in high priority list
+        selectedCRS = highlyPrioritizedProjections.find((crs) => supportedCRSs.includes(crs));
+
+        // 2. If not found, look in moderate priority list
+        if (!selectedCRS) {
+          selectedCRS = moderatePrioritizedProjections.find((crs) => supportedCRSs.includes(crs));
+        }
+
+        // 3. If still not found, just take the first supported CRS (fallback)
+        if (!selectedCRS && supportedCRSs.length > 0) {
+          selectedCRS = supportedCRSs[0];
+        }
+
+        // 4. If we found one, override
+        if (selectedCRS) {
+          // Override the CRS in the layer
+          sender.setOverrideCRS({
+            layerProjection: selectedCRS,
+            mapProjection: mapProj,
+          });
+
+          // Notify the user
+          this.mapViewer.notifications.showWarning('warning.layer.layerCRSNotSupported', [mapProj, sender.getLayerName()], true);
+
+          // Force a refresh so the layer gets drawn with the overridden CRS
+          sender.refresh(this.mapViewer.getProjection());
+
+          // Rescued
+          return true;
+        }
+      }
+    }
+
+    // Nothing to tweak, couldn't rescue the error, let it fail
+    return false;
   }
 
   /**
@@ -1934,7 +2063,7 @@ export class LayerApi {
     // If a leaf
     if (layerConfig.getEntryTypeIsRegular()) {
       // Get the layer
-      const layer = this.getGeoviewLayer(layerConfig.layerPath) as AbstractGVLayer;
+      const layer = this.getGeoviewLayerIfExists(layerConfig.layerPath) as AbstractGVLayer;
 
       if (layer) {
         // Get the bounds of the layer
@@ -2346,7 +2475,7 @@ export class LayerApi {
     let promise: Promise<TypeGeoviewLayerConfig>;
     if (mapConfigLayerEntryIsGeoCore(entry)) {
       // Working with a GeoCore layer
-      promise = GeoCore.createLayerConfigFromUUID(entry.geoviewLayerId, language, mapId, entry);
+      promise = GeoCore.createLayerConfigFromUUID(entry.geoviewLayerId, language, mapId, entry).then((response) => response.config);
     } else if (mapConfigLayerEntryIsGeoPackage(entry)) {
       // Working with a geopackage layer
       promise = GeoPackageReader.createLayerConfigFromGeoPackage(entry as GeoPackageLayerConfig);

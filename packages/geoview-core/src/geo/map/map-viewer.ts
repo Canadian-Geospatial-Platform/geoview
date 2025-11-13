@@ -601,7 +601,6 @@ export class MapViewer {
     if (!status) {
       // Store the extent before any size changes occur
       const currentExtent = this.getView().calculateExtent();
-      const { currentZoom } = this.getMapState();
       let sizeChangeHandled = false; // Add flag to track if we've handled the size change
 
       // Store the extent and other relevant information
@@ -609,19 +608,17 @@ export class MapViewer {
         if (sizeChangeHandled) return; // Skip if we've already handled it
         sizeChangeHandled = true; // Set flag to prevent multiple executions
 
-        if (currentZoom < 5.5) this.setZoomLevel(currentZoom - 0.5);
-        else
-          this.zoomToExtent(currentExtent, { padding: [0, 0, 0, 0] })
-            .then(() => {
-              // Force render
-              this.map.renderSync();
+        this.zoomToExtent(currentExtent, { padding: [0, 0, 0, 0] })
+          .then(() => {
+            // Force render
+            this.map.renderSync();
 
-              // Remove the listener after handling
-              this.map.un('change:size', handleSizeChange);
-            })
-            .catch((error: unknown) => {
-              logger.logError('Error during zoom after fullscreen exit:', error);
-            });
+            // Remove the listener after handling
+            this.map.un('change:size', handleSizeChange);
+          })
+          .catch((error: unknown) => {
+            logger.logError('Error during zoom after fullscreen exit:', error);
+          });
       };
 
       // Add the listener before exiting fullscreen
@@ -688,6 +685,9 @@ export class MapViewer {
    */
   setProjection(projectionCode: TypeValidMapProjectionCodes): Promise<void> {
     if (VALID_PROJECTION_CODES.includes(Number(projectionCode))) {
+      // Clear the WMS layers that had an override CRS
+      this.layer.clearWMSLayersWithOverrideCRS();
+
       // Propagate to the store
       const promise = MapEventProcessor.setProjection(this.mapId, projectionCode);
 

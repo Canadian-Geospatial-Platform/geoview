@@ -59,15 +59,15 @@ Les commandes de navigation permettent d'ajuster l'étendue de la visualisation,
 
 Selon la configuration de la visionneuse, le coin inférieur droit de la carte contient les commandes de navigation suivantes :
 
-| Symbole                                                                      | Nom                      | Description                                                                                                                                                 |
-| ---------------------------------------------------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| <img src="{{assetsURL}}/img/guide/navigation/fullscreen.svg" width="30"/>    | Plein écran              | Permet de voir la carte sur toute la page en passant de la taille originale au plein écran.                                                                 |
-| <img src="{{assetsURL}}/img/guide/navigation/plus.svg" width="30"/>          | Zoom avant               | Permet de faire un zoom avant d’un niveau à la fois pour voir le contenu plus en détail; fonctionne aussi avec la touche d’addition du clavier (+).         |
-| <img src="{{assetsURL}}/img/guide/navigation/minus.svg" width="30"/>         | Zoom arrière             | Permet de faire un zoom arrière d’un niveau à la fois pour voir le contenu moins en détail; fonctionne aussi avec la touche de soustraction du clavier (-). |
-| <img src="{{assetsURL}}/img/guide/navigation/geolocation.svg" width="30"/>   | Géolocalisation          | Permet de zoomer et de déplacer la carte sur votre position géographique.                                                                                   |
-| <img src="{{assetsURL}}/img/guide/navigation/home.svg" width="30"/>          | Vue initiale             | Permet de zoomer et de déplacer la carte pour retourner à la vue initiale.                                                                                  |
-| <img src="{{assetsURL}}/img/guide/navigation/basemapSelect.svg" width="30"/> | Changer la carte de base | Permet de changer la carte de base.                                                                                                                         |
-| <img src="{{assetsURL}}/img/guide/navigation/projection.svg" width="30"/>    | Changer la projection    | Permet de changer la projection de la carte entre Web Mercator et LCC.                                                                                      |
+| Symbole                                                                                                                  | Nom                      | Description                                                                                                                                                 |
+| ------------------------------------------------------------------------------------------------------------------------ | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ![Une icône représentant la fonction « Plein écran »]({{assetsURL}}/img/guide/navigation/fullscreen.svg)                 | Plein écran              | Permet de voir la carte sur toute la page en passant de la taille originale au plein écran.                                                                 |
+| ![Une icône représentant la fonction « Zoom avant »]({{assetsURL}}/img/guide/navigation/plus.svg)                        | Zoom avant               | Permet de faire un zoom avant d'un niveau à la fois pour voir le contenu plus en détail; fonctionne aussi avec la touche d'addition du clavier (+).         |
+| ![Une icône représentant la fonction « Zoom arrière »]({{assetsURL}}/img/guide/navigation/minus.svg)                     | Zoom arrière             | Permet de faire un zoom arrière d'un niveau à la fois pour voir le contenu moins en détail; fonctionne aussi avec la touche de soustraction du clavier (-). |
+| ![Une icône représentant la fonction « Géolocalisation »]({{assetsURL}}/img/guide/navigation/geolocation.svg)            | Géolocalisation          | Permet de zoomer et de déplacer la carte sur votre position géographique.                                                                                   |
+| ![Une icône représentant la fonction « Vue initiale »]({{assetsURL}}/img/guide/navigation/home.svg)                      | Vue initiale             | Permet de zoomer et de déplacer la carte pour retourner à la vue initiale.                                                                                  |
+| ![Une icône représentant la fonction « Changer la carte de base »]({{assetsURL}}/img/guide/navigation/basemapSelect.svg) | Changer la carte de base | Permet de changer la carte de base.                                                                                                                         |
+| ![Une icône représentant la fonction « Changer la projection »]({{assetsURL}}/img/guide/navigation/projection.svg)       | Changer la projection    | Permet de changer la projection de la carte entre Web Mercator et LCC.                                                                                      |
 
 Vous pouvez aussi déplacer la carte avec les touches fléchées vers la gauche, la droite, le haut et le bas, ou en cliquant sur la carte et en la faisant glisser. Lorsque le pointeur est sur la carte, la molette de la souris permet de faire un zoom avant et arrière.
 
@@ -85,9 +85,9 @@ _N.B. : La carte doit être focalisée pour que les combinaisons de touches fonc
 
 Selon la configuration de la visionneuse, la carte peut fournir une carte d'aperçu, une représentation générique de la carte principale à une taille réduite. Elle est située dans le coin supérieur droit de la carte.
 
-<img src="{{assetsURL}}/img/guide/navigation/overview.png" style="width: 90%;"/>
+<img src="{{assetsURL}}/img/guide/navigation/overview.png" alt="Carte d'aperçu affichée dans le coin supérieur droit de la carte principale" style="width: 90%;"/>
 
-Cliquez sur l’encadré dans la carte d’aperçu et déplacez-le pour modifier la vue sur la carte principale. Cliquez sur l’icône de basculement dans le coin supérieur droit pour afficher ou masquer la carte d’aperçu.
+Cliquez sur l'encadré dans la carte d'aperçu et déplacez-le pour modifier la vue sur la carte principale. Cliquez sur l'icône de basculement dans le coin supérieur droit pour afficher ou masquer la carte d'aperçu.
 
 =2!keyboardNavigation=
 
@@ -99,9 +99,9 @@ Les personnes qui ne peuvent pas utiliser de souris peuvent choisir de naviguer 
 
 Si vous utilisez la touche de **tabulation** pour naviguer dans la carte, la fenêtre contextuelle **Navigation clavier** s’affichera. Sélectionnez le bouton **Activer** et appuyez sur **Entrée** pour utiliser la navigation avec le clavier.
 
-Lorsque la carte est focalisée, un pointeur en croix s’affiche en son centre :
+Lorsque la carte est focalisée, un pointeur en croix s'affiche en son centre :
 
-<img src="{{assetsURL}}/img/guide/navigation/crosshair.svg" style="width: 90%; height: 100px;"/>
+<img src="{{assetsURL}}/img/guide/navigation/crosshair.svg" alt="Pointeur en croix affiché au centre de la carte pour la navigation au clavier" style="width: 90%; height: 100px;"/>
 
 Utilisez les touches **fléchées** pour déplacer la carte et les touches **+** et **-** pour faire un zoom avant ou arrière. Appuyez sur **Entrée** pour sélectionner un élément sous le pointeur en croix et en voir les données dans le panneau **Détails**.
 
@@ -123,17 +123,17 @@ La carte n’est pas pleinement conforme au niveau AA des Règles pour l’acces
 
 Cliquez sur le chevron vers le haut ![]({{assetsURL}}/img/guide/navigation/chevron_up.svg) à gauche pour développer ou réduire la barre.
 
-<img src="{{assetsURL}}/img/guide/navigation/map_info.png" style="width: 90%;"/>
+<img src="{{assetsURL}}/img/guide/navigation/map_info.png" alt="Barre d'information sur la carte montrant les coordonnées, l'échelle et les contrôles de la carte" style="width: 90%;"/>
 
 Les détails et fonctionnalités de navigation suivants sont accessibles dans la barre d'information sur la carte (il est nécessaire de développer la barre pour afficher toutes les options) :
 
-| Symbole                                                                  | Nom                                   | Description                                                                                                                                                                                                                                                                     |
-| ------------------------------------------------------------------------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| <img src="{{assetsURL}}/img/guide/navigation/attribute.svg" width="30"/> | Attributs                             | Droits d’auteur et autres attributs de la carte.                                                                                                                                                                                                                                |
-|                                                                          | Coordonnées géographiques             | Cliquez sur les coordonnées pour passer d’un format de coordonnées à l’autre : degrés, minutes et secondes (DMS), degrés décimaux ou coordonnées projetées.                                                                                                                     |
-|                                                                          | Échelle de la carte                   | Cliquez sur l’échelle de la carte pour basculer entre l’échelle et la résolution.                                                                                                                                                                                               |
-| <img src="{{assetsURL}}/img/guide/navigation/up_arrow.svg" width="30"/>  | Réinitialiser la rotation de la carte | Cliquez sur cette flèche pour rétablir l’orientation initiale de la carte. _N.B. : L’option Nord fixe doit être désactivée._                                                                                                                                                    |
-|                                                                          | Nord fixe                             | Option qui s’active et se désactive. Activez-la pour garder la carte orientée le nord au haut. Accessible seulement sur certaines projections (p. ex. LCC). _N.B. : Il n’est pas possible de réinitialiser la rotation de la carte lorsque l’option **Nord fixe** est activée._ |
+| Symbole                                                                                                                          | Nom                                   | Description                                                                                                                                                                                                                                                                     |
+| -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ![Une icône représentant la fonction « Attributs »]({{assetsURL}}/img/guide/navigation/attribute.svg)                            | Attributs                             | Droits d'auteur et autres attributs de la carte.                                                                                                                                                                                                                                |
+|                                                                                                                                  | Coordonnées géographiques             | Cliquez sur les coordonnées pour passer d’un format de coordonnées à l’autre : degrés, minutes et secondes (DMS), degrés décimaux ou coordonnées projetées.                                                                                                                     |
+|                                                                                                                                  | Échelle de la carte                   | Cliquez sur l’échelle de la carte pour basculer entre l’échelle et la résolution.                                                                                                                                                                                               |
+| ![Une icône représentant la fonction « Réinitialiser la rotation de la carte »]({{assetsURL}}/img/guide/navigation/up_arrow.svg) | Réinitialiser la rotation de la carte | Cliquez sur cette flèche pour rétablir l'orientation initiale de la carte. _N.B. : L'option Nord fixe doit être désactivée._                                                                                                                                                    |
+|                                                                                                                                  | Nord fixe                             | Option qui s’active et se désactive. Activez-la pour garder la carte orientée le nord au haut. Accessible seulement sur certaines projections (p. ex. LCC). _N.B. : Il n’est pas possible de réinitialiser la rotation de la carte lorsque l’option **Nord fixe** est activée._ |
 
 =1!sidebar=
 
@@ -147,28 +147,28 @@ _Les outils affichés peuvent varier en fonction de la configuration de la carte
 
 _N.B. : Certains outils dans la barre latérale se trouvent aussi sous forme d’onglet dans le pied de page, comme **Légende**, **Couches**, **Données** et **Détails**. Lorsqu’ouverts à partir de la barre latérale, **Légende** et **Détails** s’affichent sur la carte dans un format « mobile » condensé (une seule colonne). Ouverts à partir du pied de page, ils s’affichent comme onglets au bas de la carte dans un format détaillé complet._
 
-| Symbole                                                                   | Nom                                   | Description                                                                                                  |
-| ------------------------------------------------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| <img src="{{assetsURL}}/img/guide/geosearch/geolocator.svg" width="30"/>  | [Géolocalisation](#geolocatorSection) | Cliquez sur l’icône de géolocalisation; un champ de recherche s’affiche sur la carte.                        |
-| <img src="{{assetsURL}}/img/guide/sidebar/legend.svg" width="30"/>        | Légende                               | Légende des icônes de la carte (_voir la section sur le pied de page pour en savoir plus_).                  |
-| <img src="{{assetsURL}}/img/guide/footer/layers_30.svg" width="30"/>      | Couches                               | Outil de gestion des couches (_voir la section sur le pied de page pour en savoir plus_).                    |
-| <img src="{{assetsURL}}/img/guide/sidebar/details.svg" width="30"/>       | Détails                               | Information détaillée des éléments sélectionnés (_voir la section sur le pied de page pour en savoir plus_). |
-| <img src="{{assetsURL}}/img/guide/footer/data_table.svg" width="30"/>     | Données                               | Table d'information détaillée des éléments (_voir la section sur le pied de page pour en savoir plus_).      |
-| <img src="{{assetsURL}}/img/guide/sidebar/guide.svg" width="30"/>         | Guide                                 | Guide d’aide.                                                                                                |
-| <img src="{{assetsURL}}/img/guide/sidebar/export.svg" width="30"/>        | [Télécharger](#exportSection)         | Pour télécharger la carte en fichier PNG.                                                                    |
-| <img src="{{assetsURL}}/img/guide/sidebar/notifications.svg" width="30"/> | Notification                          | Présente les messages et les notifications pour la carte.                                                    |
-| <img src="{{assetsURL}}/img/guide/sidebar/about.svg" width="30"/>         | À propos de GéoView                   | Affiche les renseignements sur le visualiseur GéoView.                                                       |
+| Symbole                                                                                                     | Nom                                   | Description                                                                                                  |
+| ----------------------------------------------------------------------------------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| ![Une icône représentant la fonction « Géolocalisation »]({{assetsURL}}/img/guide/geosearch/geolocator.svg) | [Géolocalisation](#geolocatorSection) | Cliquez sur l'icône de géolocalisation; un champ de recherche s'affiche sur la carte.                        |
+| ![Une icône représentant la fonction « Légende »]({{assetsURL}}/img/guide/sidebar/legend.svg)               | Légende                               | Légende des icônes de la carte (_voir la section sur le pied de page pour en savoir plus_).                  |
+| ![Une icône représentant la fonction « Couches »]({{assetsURL}}/img/guide/footer/layers_30.svg)             | Couches                               | Outil de gestion des couches (_voir la section sur le pied de page pour en savoir plus_).                    |
+| ![Une icône représentant la fonction « Détails »]({{assetsURL}}/img/guide/sidebar/details.svg)              | Détails                               | Information détaillée des éléments sélectionnés (_voir la section sur le pied de page pour en savoir plus_). |
+| ![Une icône représentant la fonction « Données »]({{assetsURL}}/img/guide/footer/data_table.svg)            | Données                               | Table d'information détaillée des éléments (_voir la section sur le pied de page pour en savoir plus_).      |
+| ![Une icône représentant la fonction « Guide »]({{assetsURL}}/img/guide/sidebar/guide.svg)                  | Guide                                 | Guide d'aide.                                                                                                |
+| ![Une icône représentant la fonction « Télécharger »]({{assetsURL}}/img/guide/sidebar/export.svg)           | [Télécharger](#exportSection)         | Pour télécharger la carte en fichier PNG.                                                                    |
+| ![Une icône représentant la fonction « Notification »]({{assetsURL}}/img/guide/sidebar/notifications.svg)   | Notification                          | Présente les messages et les notifications pour la carte.                                                    |
+| ![Une icône représentant la fonction « À propos de GéoView »]({{assetsURL}}/img/guide/sidebar/about.svg)    | À propos de GéoView                   | Affiche les renseignements sur le visualiseur GéoView.                                                       |
 
 =2!geolocator=
 <a id="geolocatorSection">
 
-### <img src="{{assetsURL}}/img/guide/geosearch/geolocator.svg" width="30"/> Géolocalisation
+### <img src="{{assetsURL}}/img/guide/geosearch/geolocator.svg" alt="Icône de géolocalisation" width="30"/> Géolocalisation
 
 <div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
-Permet de rechercher des endroits au Canada. Si vous cliquez sur l’icône de géolocalisation ![]({{assetsURL}}/img/guide/geosearch/geolocator.svg) dans la barre latérale, un champ de recherche s’affichera sur la carte :
+Permet de rechercher des endroits au Canada. Si vous cliquez sur l'icône de géolocalisation ![]({{assetsURL}}/img/guide/geosearch/geolocator.svg) dans la barre latérale, un champ de recherche s'affichera sur la carte :
 
-<img src="{{assetsURL}}/img/guide/geosearch/searchbar_en.png" style="width: 90%;"/>
+<img src="{{assetsURL}}/img/guide/geosearch/searchbar_en.png" alt="Barre de recherche de géolocalisation avec champ de saisie pour rechercher des lieux" style="width: 90%;"/>
 
 =3!supportedSearchTypes=
 
@@ -245,7 +245,7 @@ _N.B. : Certains onglets dans la barre latérale se trouvent aussi sous forme d�
 =2!legend=
 <a id="legendSection"></a>
 
-<h3><img src="{{assetsURL}}/img/guide/sidebar/legend.svg" width="30"> Légende <a href="#footerSection">Haut de page</a></h3>
+<h3><img src="{{assetsURL}}/img/guide/sidebar/legend.svg" alt="Icône de légende" width="30"> Légende <a href="#footerSection">Haut de page</a></h3>
 <div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
 L’onglet **Légende** présente les symboles des couches affichées sur la carte.
@@ -256,12 +256,12 @@ Pour celles à éléments complexes (plusieurs symboles par couche), les icônes
 
 Vous pouvez développer ou réduire la liste des symboles d’une couche sous son nom. Certaines couches ont parfois une légende graphique; le cas échéant, elle sera dans le même format de liste déroulante.
 
-| Symbole                                                                 | Nom                                | Description                                                                                                                                                                        |
-| ----------------------------------------------------------------------- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| <img src="{{assetsURL}}/img/guide/layers/scaleVisible.svg" width="30"/> | Zoom sur l'échelle visible         | Zoom sur l'échelle visible de la couche, un déplacement de la carte peut être nécessaire pour localiser les éléments. _N.B. : Seulement disponible quand la couche est hors zoom_. |
-| <img src="{{assetsURL}}/img/guide/footer/view_25.svg" width="30"/>      | Basculer la visibilité             | Basculer la visibilité de la couche.                                                                                                                                               |
-| <img src="{{assetsURL}}/img/guide/layers/highlight_60.svg" width="30"/> | Couche mise en évidence            | Place la couche au premier plan, diminue l’opacité des autres couches et affiche le périmètre de la couche.                                                                        |
-| <img src="{{assetsURL}}/img/guide/layers/zoom_60.svg" width="30"/>      | Zoom sur le périmètre de la couche | Déplace la carte et fait un zoom pour que le périmètre de la couche soit visible.                                                                                                  |
+| Symbole                                                                                                                  | Nom                                | Description                                                                                                                                                                        |
+| ------------------------------------------------------------------------------------------------------------------------ | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ![Une icône représentant la fonction « Zoom sur l'échelle visible »]({{assetsURL}}/img/guide/layers/scaleVisible.svg)    | Zoom sur l'échelle visible         | Zoom sur l'échelle visible de la couche, un déplacement de la carte peut être nécessaire pour localiser les éléments. _N.B. : Seulement disponible quand la couche est hors zoom_. |
+| ![Une icône représentant la fonction « Basculer la visibilité »]({{assetsURL}}/img/guide/footer/view_25.svg)             | Basculer la visibilité             | Basculer la visibilité de la couche.                                                                                                                                               |
+| ![Une icône représentant la fonction « Couche mise en évidence »]({{assetsURL}}/img/guide/layers/highlight_60.svg)       | Couche mise en évidence            | Place la couche au premier plan, diminue l'opacité des autres couches et affiche le périmètre de la couche.                                                                        |
+| ![Une icône représentant la fonction « Zoom sur le périmètre de la couche »]({{assetsURL}}/img/guide/layers/zoom_60.svg) | Zoom sur le périmètre de la couche | Déplace la carte et fait un zoom pour que le périmètre de la couche soit visible.                                                                                                  |
 
 _N.B. : Lorsque la couche est cachée, les fonctions affectant la couche sur la carte sont désactivées et le texte de la couche est gris et en italique._
 
@@ -286,7 +286,7 @@ L’onglet **Couches** comprend les sous-menus suivants :
 _**N.B. : Cliquez sur une couche pour afficher ses information dans la section de droite.**_
 
 **Information importante**  
-Si l'icône de visibilité (œil) d'une couche est désactivée (grisée) ![]({{assetsURL}}/img/guide/footer/eye_disabled.png) et que l'icône Zoom sur l'échelle visible <img src="{{assetsURL}}/img/guide/layers/scaleVisible.svg" /> est visible, cela signifie que la couche n'est pas visible au niveau de zoom actuel de la carte.
+Si l'icône de visibilité (œil) d'une couche est désactivée (grisée) ![]({{assetsURL}}/img/guide/footer/eye_disabled.png) et que l'icône Zoom sur l'échelle visible <img src="{{assetsURL}}/img/guide/layers/scaleVisible.svg" alt="Icône zoom sur l'échelle visible" /> est visible, cela signifie que la couche n'est pas visible au niveau de zoom actuel de la carte.
 
 - En cliquant sur le bouton Zoom sur l'échelle visible, la carte sera ajustée au niveau de zoom approprié, ce qui rendra la couche visible.
 - Cependant, après avoir effectué un zoom, il se peut que vous ne voyiez pas immédiatement les éléments s'il n'y a pas de données dans la zone de visualisation actuelle.
@@ -333,13 +333,13 @@ Dans l’onglet **Vue**, si vous cliquez sur une couche dans la section de gauch
 
 _N.B. : Les paramètres accessibles dépendent de plusieurs facteurs, comme le type de couche et la configuration._
 
-| Symbole                                                                  | Nom                     | Description                                                                                                 |
-| ------------------------------------------------------------------------ | ----------------------- | ----------------------------------------------------------------------------------------------------------- |
-| <img src="{{assetsURL}}/img/guide/layers/table_view_60.svg" width="30"/> | Table détaillée         | Ouvre une vue simplifiée du tableau des données.                                                            |
-| <img src="{{assetsURL}}/img/guide/layers/refresh_60.svg" width="30"/>    | Réinitialiser la couche | Réinitialiser la couche dans sont état initial.                                                             |
-| <img src="{{assetsURL}}/img/guide/layers/highlight_60.svg" width="30"/>  | Couche mise en évidence | Place la couche au premier plan, diminue l’opacité des autres couches et affiche le périmètre de la couche. |
-| <img src="{{assetsURL}}/img/guide/layers/zoom_60.svg" width="30"/>       | Zoom sur la couche      | Déplace la carte et fait un zoom pour que le périmètre de la couche soit visible.                           |
-| <img src="{{assetsURL}}/img/guide/layers/opacity.png" width="80"/>       | Opacité                 | Curseur permettant d’augmenter ou de diminuer l’opacité de la couche.                                       |
+| Symbole                                                                                                            | Nom                     | Description                                                                                                 |
+| ------------------------------------------------------------------------------------------------------------------ | ----------------------- | ----------------------------------------------------------------------------------------------------------- |
+| ![Une icône représentant la fonction « Table détaillée »]({{assetsURL}}/img/guide/layers/table_view_60.svg)        | Table détaillée         | Ouvre une vue simplifiée du tableau des données.                                                            |
+| ![Une icône représentant la fonction « Réinitialiser la couche »]({{assetsURL}}/img/guide/layers/refresh_60.svg)   | Réinitialiser la couche | Réinitialiser la couche dans sont état initial.                                                             |
+| ![Une icône représentant la fonction « Couche mise en évidence »]({{assetsURL}}/img/guide/layers/highlight_60.svg) | Couche mise en évidence | Place la couche au premier plan, diminue l'opacité des autres couches et affiche le périmètre de la couche. |
+| ![Une icône représentant la fonction « Zoom sur la couche »]({{assetsURL}}/img/guide/layers/zoom_60.svg)           | Zoom sur la couche      | Déplace la carte et fait un zoom pour que le périmètre de la couche soit visible.                           |
+| ![Une icône représentant la fonction « Opacité »]({{assetsURL}}/img/guide/layers/opacity.png)                      | Opacité                 | Curseur permettant d'augmenter ou de diminuer l'opacité de la couche.                                       |
 
 _N.B. : Lorsque la couche est cachée, les fonctions affectant la couche sur la carte sont désactivées._
 
@@ -425,14 +425,14 @@ Les commandes de l’onglet **Données** se trouvent dans le coin supérieur dro
 
 _N.B. : Selon différents facteurs, certaines options sont désactivées ou présélectionnées._
 
-| Symbole                                                                     | Nom                           | Description                                                                                                                                        |
-| --------------------------------------------------------------------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| <img src="{{assetsURL}}/img/guide/datatable/filters_clear.svg" width="30"/> | Effacer les filters           | Effacer tout les filtres de la table.                                                                                                              |
-| <img src="{{assetsURL}}/img/guide/datatable/filter_toggle.svg" width="30"/> | Afficher/masquer les filtres  | Basculer entre l’affichage et le masquage des filtres.                                                                                             |
-| <img src="{{assetsURL}}/img/guide/datatable/filter.png" width="30"/>        | Interrupteur de filtres       | Appliquer les filtres à la carte.                                                                                                                  |
-| <img src="{{assetsURL}}/img/guide/datatable/column_show.svg" width="30"/>   | Afficher/masquer les colonnes | Choisir les colonnes visibles et épingler des colonnes à gauche ou à droite du tableau.                                                            |
-| <img src="{{assetsURL}}/img/guide/datatable/density.svg" width="30"/>       | Densité                       | Modifier la hauteur des lignes du tableau de données.                                                                                              |
-| <img src="{{assetsURL}}/img/guide/datatable/export.svg" width="30"/>        | Télécharger                   | Télécharger le tableau en format CSV ou GeoJSON. Pourrait échouer sur un appareil mobile en raison des restrictions de téléchargement de fichiers. |
+| Symbole                                                                                                                     | Nom                           | Description                                                                                                                                        |
+| --------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ![Une icône représentant la fonction « Effacer les filters »]({{assetsURL}}/img/guide/datatable/filters_clear.svg)          | Effacer les filters           | Effacer tout les filtres de la table.                                                                                                              |
+| ![Une icône représentant la fonction « Afficher/masquer les filtres »]({{assetsURL}}/img/guide/datatable/filter_toggle.svg) | Afficher/masquer les filtres  | Basculer entre l'affichage et le masquage des filtres.                                                                                             |
+| ![Une icône représentant la fonction « Interrupteur de filtres »]({{assetsURL}}/img/guide/datatable/filter.png)             | Interrupteur de filtres       | Appliquer les filtres à la carte.                                                                                                                  |
+| ![Une icône représentant la fonction « Afficher/masquer les colonnes »]({{assetsURL}}/img/guide/datatable/column_show.svg)  | Afficher/masquer les colonnes | Choisir les colonnes visibles et épingler des colonnes à gauche ou à droite du tableau.                                                            |
+| ![Une icône représentant la fonction « Densité »]({{assetsURL}}/img/guide/datatable/density.svg)                            | Densité                       | Modifier la hauteur des lignes du tableau de données.                                                                                              |
+| ![Une icône représentant la fonction « Télécharger »]({{assetsURL}}/img/guide/datatable/export.svg)                         | Télécharger                   | Télécharger le tableau en format CSV ou GeoJSON. Pourrait échouer sur un appareil mobile en raison des restrictions de téléchargement de fichiers. |
 
 Les trois premières colonnes du tableau de données sont **Icône**, **Zoom** et **Détails**. Les autres colonnes varient selon la couche sélectionnée.
 
@@ -537,7 +537,7 @@ Le menu déroulant **Élément** (en haut à gauche de la section du graphique) 
 
 Vous pouvez cocher ou décocher les cases ![]({{assetsURL}}/img/guide/layers/check.png) des données au-dessus du graphique pour déterminer le contenu de celui-ci (seulement pour les couches comportant plusieurs éléments de données).
 
-<img src="{{assetsURL}}/img/guide/footer/checkbox.png" style="width: 90%;"/>
+<img src="{{assetsURL}}/img/guide/footer/checkbox.png" alt="Contrôles de cases à cocher pour activer/désactiver la visibilité des données sur le graphique" style="width: 90%;"/>
 
 Ouvrez le menu déroulant de **téléchargement** (en haut à droite de la section du graphique) pour télécharger les données du graphique en format JSON. Cliquez sur **Télécharger tout** ou **Télécharger visible** selon que vous voulez télécharger toutes les données ou seulement celles actuellement visibles sur le graphique.
 

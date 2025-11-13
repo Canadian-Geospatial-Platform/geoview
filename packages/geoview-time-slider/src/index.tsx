@@ -162,7 +162,7 @@ class TimeSliderPlugin extends FooterPlugin {
     if (initialTimeSliderLayerPaths) {
       initialTimeSliderLayerPaths.forEach((layerPath) => {
         // Get the layer
-        const layer = this.mapViewer.layer.getGeoviewLayer(layerPath);
+        const layer = this.mapViewer.layer.getGeoviewLayerIfExists(layerPath);
 
         // Get the time slider config for the layer
         const timesliderConfig = this.getConfig().sliders.find((slider) => slider.layerPaths.includes(layerPath));
@@ -186,7 +186,7 @@ class TimeSliderPlugin extends FooterPlugin {
   #filterTimeSliderLayers(layerPaths: string[]): string[] {
     const filteredLayerPaths = layerPaths.filter((layerPath) => {
       // Get the layer
-      const layer = this.mapViewer.layer.getGeoviewLayer(layerPath);
+      const layer = this.mapViewer.layer.getGeoviewLayerIfExists(layerPath);
 
       // If of the right type
       if (layer instanceof AbstractGVLayer) {

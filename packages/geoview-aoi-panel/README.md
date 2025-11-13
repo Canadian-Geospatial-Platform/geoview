@@ -17,7 +17,7 @@ The **Area of Interest** or **AOI** package for GeoView allows users to define, 
 
 ### Installation
 
-The installation process is not done using npm as in a traditional way. It involves running the JavaScript files that dynamicaly adds the plugin, installing the AOI package, which allows you to use it in your project.
+The installation process is not done using npm as in a traditional way. It involves running the JavaScript files that dynamicaly adds the package, installing the AOI package, which allows you to use it in your project.
 
 ### Configuration
 

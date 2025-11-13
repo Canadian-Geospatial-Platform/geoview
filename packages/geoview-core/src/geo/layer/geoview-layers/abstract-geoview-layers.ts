@@ -20,7 +20,11 @@ import type {
   TypeGeoviewLayerType,
 } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES, validVectorLayerLegendTypes } from '@/api/types/layer-schema-types';
-import { LayerServiceMetadataEmptyError, LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
+import {
+  LayerNoCapabilitiesError,
+  LayerServiceMetadataEmptyError,
+  LayerServiceMetadataUnableToFetchError,
+} from '@/core/exceptions/layer-exceptions';
 import {
   LayerEntryConfigEmptyLayerGroupError,
   LayerEntryConfigUnableToCreateGroupLayerError,
@@ -178,6 +182,7 @@ export abstract class AbstractGeoViewLayer {
    * Must override method to read the service metadata from the metadataAccessPath.
    * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<T>} A promise resolved once the metadata has been fetched.
+   * @throws {LayerServiceMetadataUnableToFetchError} Error thrown when the metadata fetch fails or contains an error.
    */
   protected abstract onFetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T>;
 
@@ -225,7 +230,7 @@ export abstract class AbstractGeoViewLayer {
    * Gets the first layer entry name if any sub-layers exist or else gets the geoviewLayerName or even the geoviewLayerId.
    * @returns {string} The layer entry name if any sub-layers exist or the geoviewLayerName or even the geoviewLayerId.
    */
-  geLayerEntryNameOrGeoviewLayerName(): string {
+  getLayerEntryNameOrGeoviewLayerName(): string {
     if (this.listOfLayerEntryConfig?.length === 1) {
       // Get the layer name from the object (instance or type) inside the listOfLayerEntryConfig array
       const layerEntryName = ConfigBaseClass.getClassOrTypeLayerName(this.listOfLayerEntryConfig[0]);
@@ -331,6 +336,8 @@ export abstract class AbstractGeoViewLayer {
    * Fetches the metadata by calling onFetchServiceMetadata.
    * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<T>} Returns a Promise of a metadata
+   * @throws {LayerServiceMetadataUnableToFetchError} Error thrown when the metadata fetch fails or contains an error.
+   * @throws {LayerNoCapabilitiesError} Error thrown when the metadata is empty (no Capabilities) (WMS/WFS layers).
    */
   fetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T> {
     // Redirect
@@ -341,6 +348,8 @@ export abstract class AbstractGeoViewLayer {
    * This method reads the service metadata from the metadataAccessPath and stores it in the 'metadata' property.
    * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<void>} A promise resolved once the metadata has been fetched and assigned to the 'metadata' property.
+   * @throws {LayerServiceMetadataUnableToFetchError} Error thrown when the metadata fetch fails or contains an error.
+   * @throws {LayerServiceMetadataEmptyError} Error thrown when the metadata fetch return empty metadata.
    * @private
    */
   async #fetchAndSetServiceMetadata(abortSignal?: AbortSignal): Promise<void> {
@@ -366,19 +375,19 @@ export abstract class AbstractGeoViewLayer {
       AbstractGeoViewLayer.#logErrorAndSetStatusErrorAll(formatError(error), this.listOfLayerEntryConfig);
 
       // If LayerServiceMetadataUnableToFetchError error
-      if (error instanceof LayerServiceMetadataUnableToFetchError) {
+      if (error instanceof LayerServiceMetadataUnableToFetchError || error instanceof LayerNoCapabilitiesError) {
+        // If the inner cause is a ResponseEmptyError,
+        if (error.cause instanceof ResponseEmptyError) {
+          // Throw higher
+          throw new LayerServiceMetadataEmptyError(this.geoviewLayerId, this.getLayerEntryNameOrGeoviewLayerName());
+        }
+
         // Throw as-is
         throw error;
       }
 
-      // If ResponseEmptyError error
-      if (error instanceof ResponseEmptyError) {
-        // Throw higher
-        throw new LayerServiceMetadataEmptyError(this.geoviewLayerId, this.geLayerEntryNameOrGeoviewLayerName());
-      }
-
       // Throw higher
-      throw new LayerServiceMetadataUnableToFetchError(this.geoviewLayerId, this.geLayerEntryNameOrGeoviewLayerName(), formatError(error));
+      throw new LayerServiceMetadataUnableToFetchError(this.geoviewLayerId, this.getLayerEntryNameOrGeoviewLayerName(), formatError(error));
     }
   }
 
@@ -788,7 +797,6 @@ export abstract class AbstractGeoViewLayer {
    * @param {string[] | undefined} messageParams - Array of parameters to be interpolated into the localized message
    * @param {SnackbarType} messageType - The message type
    * @param {boolean} [notification=false] - Whether to show this as a notification. Defaults to false
-   * @returns {void}
    *
    * @example
    * this.emitMessage(
@@ -824,11 +832,19 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
+   * Gets if the layer processing has generated errors.
+   * @returns {boolean} True when the layer processing has generated errors in the 'layerLoadError' list.
+   */
+  hasLayerLoadedErrors(): boolean {
+    return this.layerLoadError.length > 0;
+  }
+
+  /**
    * Aggregates the errors that might have happened during processing and that are stored in layerLoadError, if any.
    */
   aggregateLayerLoadErrors(): AggregateError | undefined {
     // If any errors compiled up
-    if (this.layerLoadError.length > 0) {
+    if (this.hasLayerLoadedErrors()) {
       // Throw an aggregated exception
       return new AggregateError(this.layerLoadError, 'Multiple errors happened. See this.layerLoadError for the list.');
     }
@@ -841,13 +857,15 @@ export abstract class AbstractGeoViewLayer {
    * Throws an aggregate error based on the 'layerLoadError' list, if any.
    */
   throwAggregatedLayerLoadErrors(): void {
-    // Aggregate the error
-    const aggregatedError = this.aggregateLayerLoadErrors();
-
-    // If any errors compiled up
-    if (aggregatedError) {
-      // Throw it
-      throw aggregatedError;
+    // If no errors
+    if (this.layerLoadError.length === 0) {
+      // Nothing to do
+    } else {
+      // Errors happened
+      // If only one, throw as-is
+      if (this.layerLoadError.length === 1) throw this.layerLoadError[0];
+      // Aggregate the error into one and throw it
+      throw this.aggregateLayerLoadErrors();
     }
   }
 
@@ -912,7 +930,7 @@ export abstract class AbstractGeoViewLayer {
         if (ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo('processed', this.listOfLayerEntryConfig)) return true;
 
         // Emit message
-        this.emitMessage('warning.layer.metadataTakingLongTime', [this.geLayerEntryNameOrGeoviewLayerName()], 'warning');
+        this.emitMessage('warning.layer.metadataTakingLongTime', [this.getLayerEntryNameOrGeoviewLayerName()], 'warning');
 
         return false;
       },
@@ -924,7 +942,7 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Emits an event to all handlers.
-   * @param {LayerEntryRegisterInitEvent} event The event to emit
+   * @param {LayerEntryRegisterInitEvent} event - The event to emit
    */
   // TODO: Try to make this function private/protected. Public for now in this refactoring..
   emitLayerEntryRegisterInit(event: LayerEntryRegisterInitEvent): void {
@@ -934,7 +952,7 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Registers a layer entry config processed event handler.
-   * @param {LayerEntryRegisterInitDelegate} callback The callback to be executed whenever the event is emitted
+   * @param {LayerEntryRegisterInitDelegate} callback - The callback to be executed whenever the event is emitted
    */
   onLayerEntryRegisterInit(callback: LayerEntryRegisterInitDelegate): void {
     // Register the event handler
@@ -943,7 +961,7 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Unregisters a layer entry config processed event handler.
-   * @param {LayerEntryRegisterInitDelegate} callback The callback to stop being called whenever the event is emitted
+   * @param {LayerEntryRegisterInitDelegate} callback - The callback to stop being called whenever the event is emitted
    */
   offLayerEntryRegisterInit(callback: LayerEntryRegisterInitDelegate): void {
     // Unregister the event handler
@@ -952,7 +970,7 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Emits an event to all handlers.
-   * @param {LayerEntryProcessedEvent} event The event to emit
+   * @param {LayerEntryProcessedEvent} event - The event to emit
    * @private
    */
   #emitLayerEntryProcessed(event: LayerEntryProcessedEvent): void {
@@ -962,7 +980,7 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Registers a layer entry config processed event handler.
-   * @param {LayerEntryProcessedDelegate} callback The callback to be executed whenever the event is emitted
+   * @param {LayerEntryProcessedDelegate} callback - The callback to be executed whenever the event is emitted
    */
   onLayerEntryProcessed(callback: LayerEntryProcessedDelegate): void {
     // Register the event handler
@@ -971,7 +989,7 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Unregisters a layer entry config processed event handler.
-   * @param {LayerEntryProcessedDelegate} callback The callback to stop being called whenever the event is emitted
+   * @param {LayerEntryProcessedDelegate} callback - The callback to stop being called whenever the event is emitted
    */
   offLayerEntryProcessed(callback: LayerEntryProcessedDelegate): void {
     // Unregister the event handler
@@ -980,7 +998,7 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Emits an event to all handlers.
-   * @param {LayerConfigCreatedEvent} event The event to emit
+   * @param {LayerConfigCreatedEvent} event - The event to emit
    * @private
    */
   #emitLayerConfigCreated(event: LayerConfigCreatedEvent): void {
@@ -990,7 +1008,7 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Registers a config created event handler.
-   * @param {LayerConfigCreatedDelegate} callback The callback to be executed whenever the event is emitted
+   * @param {LayerConfigCreatedDelegate} callback - The callback to be executed whenever the event is emitted
    */
   onLayerConfigCreated(callback: LayerConfigCreatedDelegate): void {
     // Register the event handler
@@ -999,7 +1017,7 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Unregisters a config created event handler.
-   * @param {LayerConfigCreatedDelegate} callback The callback to stop being called whenever the event is emitted
+   * @param {LayerConfigCreatedDelegate} callback - The callback to stop being called whenever the event is emitted
    */
   offLayerConfigCreated(callback: LayerConfigCreatedDelegate): void {
     // Unregister the event handler
@@ -1008,7 +1026,7 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Emits an event to all handlers.
-   * @param {LayerGVCreatedEvent} event The event to emit
+   * @param {LayerGVCreatedEvent} event - The event to emit
    * @private
    */
   #emitLayerGVCreated(event: LayerGVCreatedEvent): void {
@@ -1018,7 +1036,7 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Registers a config created event handler.
-   * @param {LayerGVCreatedDelegate} callback The callback to be executed whenever the event is emitted
+   * @param {LayerGVCreatedDelegate} callback - The callback to be executed whenever the event is emitted
    */
   onLayerGVCreated(callback: LayerGVCreatedDelegate): void {
     // Register the event handler
@@ -1027,7 +1045,7 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Unregisters a config created event handler.
-   * @param {LayerGVCreatedDelegate} callback The callback to stop being called whenever the event is emitted
+   * @param {LayerGVCreatedDelegate} callback - The callback to stop being called whenever the event is emitted
    */
   offLayerGVCreated(callback: LayerGVCreatedDelegate): void {
     // Unregister the event handler
@@ -1036,7 +1054,7 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Emits an event to all handlers.
-   * @param {LayerGroupCreatedEvent} event The event to emit
+   * @param {LayerGroupCreatedEvent} event - The event to emit
    * @private
    */
   #emitLayerGroupCreated(event: LayerGroupCreatedEvent): void {
@@ -1046,7 +1064,7 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Registers a layer creation event handler.
-   * @param {LayerGroupCreatedDelegate} callback The callback to be executed whenever the event is emitted
+   * @param {LayerGroupCreatedDelegate} callback - The callback to be executed whenever the event is emitted
    */
   onLayerGroupCreated(callback: LayerGroupCreatedDelegate): void {
     // Register the event handler
@@ -1055,7 +1073,7 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Unregisters a layer creation event handler.
-   * @param {LayerGroupCreatedDelegate} callback The callback to stop being called whenever the event is emitted
+   * @param {LayerGroupCreatedDelegate} callback - The callback to stop being called whenever the event is emitted
    */
   offLayerGroupCreated(callback: LayerGroupCreatedDelegate): void {
     // Unregister the event handler
@@ -1166,17 +1184,11 @@ export abstract class AbstractGeoViewLayer {
       layer
         .createGeoViewLayers()
         .then((configs) => {
-          // If no errors
-          if (layer.layerLoadError.length === 0) {
-            // Resolve with the configurations
-            resolve(configs);
-          } else {
-            // Errors happened
-            // If only one, throw as-is
-            if (layer.layerLoadError.length === 1) throw layer.layerLoadError[0];
-            // Throw them all inside an AggregateError
-            layer.throwAggregatedLayerLoadErrors();
-          }
+          // Throw if any errors happened
+          layer.throwAggregatedLayerLoadErrors();
+
+          // Resolve with the configurations
+          resolve(configs);
         })
         .catch((error: unknown) => {
           // Reject

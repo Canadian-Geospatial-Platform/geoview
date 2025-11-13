@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -16,62 +16,38 @@
   </head>
 
   <body>
-    <div class="header-table">
-      <table>
-        <tbody>
-          <tr>
-            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
-            <td class="header-title">
-              <h1><strong>Outlier layers with max record count</strong></h1>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td>
-              <a href="./index.html">Main</a><br />
-              <a href="./outliers.html">Outlier Layers</a><br />
-            </td>
-          </tr>
-          <tr>
-            <td><p>This page is used to showcase layers with a max record counts of 1000 and more features</p></td>
-          </tr>
-          </tr>
-        </tbody>
-      </table>
+    <div>
+      <div id="page-header"></div>
+
+      <div class="back-to-main">
+        <a href="./outliers.html">← Back to Outliers</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>Outlier Layers with Max Record Count</h4>
+        <p>This page is used to showcase layers with a max record counts of 1000 and more features.</p>
+      </div>
     </div>
 
-    <div class="map-title-holder">
-      <h4 id="Hmap1">Max Record Count Layers</h4>
-      <a class="ref-link" href="#top">Top</a>
-    </div>
-    <button class="collapsible active">Layers Status</button>
+    <button class="collapsible">Layers Status</button>
     <pre id="Hmap1-state" class="panel map-title-holder"></pre>
     <hr />
-    <div
-      id="map1"
-      class="geoview-map"
-      data-lang="en"
-      data-config-url="./configs/max-record-count.json"
-    ></div>
+    <div id="map1" class="geoview-map" data-lang="en" data-config-url="./configs/max-record-count.json"></div>
+    <hr />
 
-    <div>
-      Outlier Layers:
-      <ul>
-        <li>
-          Advance Polling District (ESRI Feature) - maxRecordCount of 1000, with 6172 features - Issue #2199
-        </li>
-        <li>
-          Completed (ESRI Dynamic) - maxRecordCount of 1000, with 3000 features - Issue #2199
-        </li>
+    <div class="demo-section">
+      <h4>Outlier Layers:</h4>
+      <ul class="demo-list">
+        <li><strong>Advance Polling District (ESRI Feature)</strong> - maxRecordCount of 1000, with 6172 features - Issue #2199</li>
+        <li><strong>Completed (ESRI Dynamic)</strong> - maxRecordCount of 1000, with 3000 features - Issue #2199</li>
       </ul>
     </div>
     <hr />
 
     <script src="codedoc.js"></script>
     <script>
+      insertPageHeader();
+
       // Register handler when map has been initialized
       cgpv.onMapInit((mapViewer) => {
         listenToLegendLayerSetChanges(`H${mapViewer.mapId}-state`, mapViewer);

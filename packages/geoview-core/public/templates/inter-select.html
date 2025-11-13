@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -15,48 +15,22 @@
   </head>
 
   <body>
-    <div class="header-table">
-      <table>
-        <tbody>
-          <tr>
-            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
-            <td class="header-title">
-              <h1><strong>Select (interactions)</strong></h1>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td>
-              <ol>
-                <a href="./index.html">Main</a>
-                <li><a href="#SELECT1">Select (simple case)</a></li>
-              </ol>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td>This page is used to showcase different Select functionalities</td>
-          </tr>
-        </tbody>
-      </table>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./index.html?tab=demos">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>Select (interactions)</h4>
+        <p>
+          This page is used to showcase different Select functionalities. In this example, all shapes are selectable. Click features to see
+          information on the selection. Hold shift-key to select more than one shape.
+        </p>
+      </div>
     </div>
 
     <!-- SELECT -->
-    <div class="map-title-holder">
-      <h4 id="SELECT1">1. Select (simple case)</h4>
-      <a class="ref-link" href="#top">Top</a>
-    </div>
-    <div>
-      In this example, all shapes are selectable. Click features to see information on the selection. Hold shift-key to select more than one
-      shape.
-    </div>
-
     <div style="position: relative">
       <div class="logs-container">
         <div class="logs-container-title">API EVENTS LOGS</div>
@@ -83,14 +57,17 @@
             },
             'theme': 'geo.ca',
             'corePackages': []
-          }"></div>
-  </div>
-  <hr />
-  <button type="button" class="collapsible">Code Snippet</button>
-  <pre id="codeSnippet" class="panel"></pre>
-  <!-- /SELECT -->
+          }"
+      ></div>
+    </div>
+    <hr />
+    <button type="button" class="collapsible">Code Snippet</button>
+    <pre id="codeSnippet" class="panel"></pre>
+    <!-- /SELECT -->
 
     <script>
+      insertPageHeader();
+
       let map1;
       function initMap1(map) {
         // Keep reference

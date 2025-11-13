@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -15,48 +15,23 @@
   </head>
 
   <body>
-    <div class="header-table">
-      <table>
-        <tbody>
-          <tr>
-            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
-            <td class="header-title">
-              <h1><strong>Extent (interactions)</strong></h1>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td>
-              <ol>
-                <a href="./index.html">Main</a>
-                <li><a href="#EXTENT1">Extent (simple case)</a></li>
-              </ol>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td>This page is used to showcase different Extent functionalities</td>
-          </tr>
-        </tbody>
-      </table>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./index.html?tab=demos">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>Extent (interactions)</h4>
+        <p>
+          This page is used to showcase different Extent functionalities. This example shows how to use an Extent interaction to draw a
+          modifiable extent. Use Shift-Drag to draw an extent. Shift-Drag on the corners or edges of the extent to resize it. Shift-Click
+          off the extent to remove it.
+        </p>
+      </div>
     </div>
 
     <!-- EXTENT -->
-    <div class="map-title-holder">
-      <h4 id="EXTENT1">1. Extent (simple case)</h4>
-      <a class="ref-link" href="#top">Top</a>
-    </div>
-    <div>
-      This example shows how to use an Extent interaction to draw a modifiable extent. Use Shift-Drag to draw an extent. Shift-Drag on the
-      corners or edges of the extent to resize it. Shift-Click off the extent to remove it.
-    </div>
-
     <div style="position: relative">
       <div class="logs-container">
         <div class="logs-container-title">API EVENTS LOGS</div>
@@ -83,14 +58,17 @@
             },
             'theme': 'geo.ca',
             'corePackages': []
-          }"></div>
-  </div>
-  <hr />
-  <button type="button" class="collapsible">Code Snippet</button>
-  <pre id="codeSnippet" class="panel"></pre>
-  <!-- /Extent -->
+          }"
+      ></div>
+    </div>
+    <hr />
+    <button type="button" class="collapsible">Code Snippet</button>
+    <pre id="codeSnippet" class="panel"></pre>
+    <!-- /Extent -->
 
     <script>
+      insertPageHeader();
+
       let map1;
       function initMap1(map) {
         // Keep reference

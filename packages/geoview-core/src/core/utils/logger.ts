@@ -487,7 +487,7 @@ type LogTracker = {
 export const logger = new ConsoleLogger(LOG_LEVEL);
 logger.logInfo('Logger initialized');
 
-// Uncomment to test the logger main functions to see how they look in console
+// GV: Uncomment to test the logger main functions to see how they look in console
 // logger.logTraceDetailed('trace detailed');
 // logger.logTraceUseEffectUnmount('trace use effect unmount');
 // logger.logTraceRender('trace render');

@@ -339,7 +339,7 @@
       "description": "Valid values for the map core package array.",
       "additionalProperties": false,
       "enum": [
-        "swiper"
+        "swiper", "test-suite"
       ]
     },
     "TypeMapCorePackages": {
@@ -502,6 +502,11 @@
           "type": "boolean",
           "default": true,
           "description": "Enable or disable basemap labels"
+        },
+        "labelZIndex" : {
+          "type": "number",
+          "default": 0,
+          "description": "Z-index of the basemap labels"
         }
       },
       "required": [
