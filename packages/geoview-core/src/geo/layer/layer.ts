@@ -46,6 +46,7 @@ import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
+import { GeoTIFF } from '@/geo/layer/geoview-layers/raster/geotiff';
 import { ImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
 import { KML } from '@/geo/layer/geoview-layers/vector/kml';
 import { WFS } from '@/geo/layer/geoview-layers/vector/wfs';
@@ -113,6 +114,7 @@ import { CsvLayerEntryConfig } from '@/api/config/validation-classes/vector-vali
 import { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { GeoJSONLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
+import { GeoTIFFLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/geotiff-layer-entry-config';
 import { ImageStaticLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import { KmlLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/kml-layer-entry-config';
 import { OgcFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
@@ -2593,8 +2595,8 @@ export class LayerApi {
    * Creates an instance of a specific `AbstractGeoViewLayer` subclass based on the given GeoView layer configuration.
    * This function determines the correct layer type from the configuration and instantiates it accordingly.
    * @remarks
-   * - This method currently supports GeoJSON, CSV, WMS, Esri Dynamic, Esri Feature, Esri Image,
-   *   ImageStatic, WFS, OGC Feature, XYZ Tiles, and Vector Tiles.
+   * - This method currently supports GeoJSON, CSV, WMS, Esri Dynamic, Esri Feature, Esri Image, GeoTIFF
+   *   ImageStatic, KML, WFS, WKB, OGC Feature, XYZ Tiles, and Vector Tiles.
    * - If the layer type is not supported, an error is thrown.
    * - TODO: Refactor to use the validated configuration with metadata already fetched.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The configuration object for the GeoView layer.
@@ -2617,6 +2619,9 @@ export class LayerApi {
     }
     if (GeoJSONLayerEntryConfig.isClassOrTypeGeoJSON(geoviewLayerConfig)) {
       return new GeoJSON(geoviewLayerConfig);
+    }
+    if (GeoTIFFLayerEntryConfig.isClassOrTypeGeoTIFF(geoviewLayerConfig)) {
+      return new GeoTIFF(geoviewLayerConfig);
     }
     if (ImageStaticLayerEntryConfig.isClassOrTypeImageStatic(geoviewLayerConfig)) {
       return new ImageStatic(geoviewLayerConfig);
