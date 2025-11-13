@@ -1,0 +1,25 @@
+{
+  "isOpen": true,
+  "legendList": [
+    {
+      "legendTitle": "Urban Areas",
+      "symbolUrl": "https://raw.githubusercontent.com/CanFrenchGIS/sample-assets/main/legend/urban.png",
+      "description": "Built-up zones and cities"
+    },
+    {
+      "legendTitle": "Water Bodies",
+      "symbolUrl": "https://raw.githubusercontent.com/CanFrenchGIS/sample-assets/main/legend/water.png",
+      "description": "Lakes and rivers"
+    },
+    {
+      "legendTitle": "Forest",
+      "symbolUrl": "https://raw.githubusercontent.com/CanFrenchGIS/sample-assets/main/legend/forest.png"
+    },
+    {
+      "legendTitle": "Roads",
+      "symbolUrl": "https://raw.githubusercontent.com/CanFrenchGIS/sample-assets/main/legend/road.png",
+      "description": "Primary and secondary roads"
+    }
+  ],
+  "version": "1.0"
+}

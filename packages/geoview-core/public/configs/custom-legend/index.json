@@ -1,0 +1,7 @@
+{
+  "files": [
+    { "name": "test2.json", "title": "Sample Legend (Test 2)" },
+    { "name": "group.json", "title": "Group Legend" },
+    { "name": "test.json", "title": "Test Legend" }
+  ]
+}
