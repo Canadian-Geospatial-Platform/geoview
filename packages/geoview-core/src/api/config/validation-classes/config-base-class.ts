@@ -742,6 +742,7 @@ export abstract class ConfigBaseClass {
       case CONST_LAYER_TYPES.WMS:
         return CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE;
       case CONST_LAYER_TYPES.XYZ_TILES:
+      case CONST_LAYER_TYPES.GEOTIFF:
       case CONST_LAYER_TYPES.VECTOR_TILES:
         return CONST_LAYER_ENTRY_TYPES.RASTER_TILE;
       default:
