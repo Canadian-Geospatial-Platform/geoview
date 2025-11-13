@@ -148,7 +148,7 @@ export class ExportUtilities {
    * @param {string} text - The legend text to sanitize
    * @returns {string} The sanitized text safe for PDF rendering
    */
-  static #sanitizeLegendText = (text: string): string => {
+  static #sanitizeLegendText(text: string): string {
     return text
       .replace(/\u2264/g, '<=') // Less than or equal (≤) → <=
       .replace(/\u2265/g, '>=') // Greater than or equal (≥) → >=
@@ -157,7 +157,7 @@ export class ExportUtilities {
       .replace(/\u2013/g, '-') // En dash (–) → hyphen
       .replace(/\u2014/g, '-') // Em dash (—) → hyphen
       .replace(/\u2212/g, '-'); // Minus sign (−) → hyphen
-  };
+  }
 
   /**
    * Renders a single legend item (layer, child, wms, time, or item type) using the provided element factory.
@@ -176,14 +176,14 @@ export class ExportUtilities {
    * @param {any} baseStyles - The base styles object with factory-specific properties
    * @returns {JSX.Element} The rendered item element
    */
-  static #renderSingleLegendItem = (
+  static #renderSingleLegendItem(
     item: FlattenedLegendItem,
     itemIndex: number,
     indentLevel: number,
     factory: ElementFactory,
     scaledStyles: any, // eslint-disable-line @typescript-eslint/no-explicit-any
     baseStyles: any // eslint-disable-line @typescript-eslint/no-explicit-any
-  ): JSX.Element => {
+  ): JSX.Element {
     const { View, Text, Image, Span } = factory;
 
     if (item.type === 'layer') {
@@ -302,7 +302,7 @@ export class ExportUtilities {
       legendItem?.icon && createElement(Image, { src: legendItem.icon, style: iconStyle }),
       createElement(Span, { style: scaledStyles.itemText }, this.#sanitizeLegendText(legendItem?.name || ''))
     );
-  };
+  }
 
   /**
    * Renders all items in a legend column, grouping content items under their parent layers.
@@ -320,12 +320,12 @@ export class ExportUtilities {
    * @param {any} baseStyles - The base styles object for layout
    * @returns {JSX.Element[]} Array of rendered elements (headers + content containers)
    */
-  static #renderColumnItems = (
+  static #renderColumnItems(
     column: FlattenedLegendItem[],
     factory: ElementFactory,
     scaledStyles: any, // eslint-disable-line @typescript-eslint/no-explicit-any
     baseStyles: any // eslint-disable-line @typescript-eslint/no-explicit-any
-  ): JSX.Element[] => {
+  ): JSX.Element[] {
     const { View } = factory;
     const elements: JSX.Element[] = [];
     let i = 0;
@@ -386,7 +386,7 @@ export class ExportUtilities {
     }
 
     return elements;
-  };
+  }
 
   /**
    * Renders multiple legend columns in a flexbox container with dynamic or fixed widths.
@@ -568,7 +568,7 @@ export class ExportUtilities {
    * @param {string} [layerName='unknown'] - The layer name for error/warning logging
    * @returns {Promise<number>} The calculated height in pixels including scaled margin
    */
-  static #calculateWMSImageHeight = (imageUrl: string | undefined, scale = 1, layerName = 'unknown'): Promise<number> => {
+  static #calculateWMSImageHeight(imageUrl: string | undefined, scale = 1, layerName = 'unknown'): Promise<number> {
     // Missing URL fallback
     if (!imageUrl) {
       const scaledMargin = SHARED_STYLES.wmsMarginBottom * scale;
@@ -609,7 +609,7 @@ export class ExportUtilities {
         resolve(fallbackHeight);
       };
     });
-  };
+  }
 
   /**
    * Calculates optimal number of columns (2-4) based on available width and minimum column requirements.
@@ -627,7 +627,7 @@ export class ExportUtilities {
    * @param {number} defaultColumns - The default maximum number of columns (typically 4)
    * @returns {number} The optimal number of columns (2-4)
    */
-  static #calculateOptimalColumns = (canvasWidth: number, defaultColumns: number): number => {
+  static #calculateOptimalColumns(canvasWidth: number, defaultColumns: number): number {
     // Calculate available width for legend content
     const availableWidth = canvasWidth - SHARED_STYLES.padding * 2 - SHARED_STYLES.legendPaddingLeft;
 
@@ -650,7 +650,7 @@ export class ExportUtilities {
 
     // Minimum of 2 columns
     return 2;
-  };
+  }
 
   /**
    * Filters and flattens hierarchical legend layers into a linear array for layout processing.
@@ -676,11 +676,11 @@ export class ExportUtilities {
    * @param {TimeSliderLayerSet} [timeSliderLayers] - Time-enabled layers with dimension data
    * @returns {FlattenedLegendItem[]} Flattened array of all legend items with depth/parent info
    */
-  static #processLegendLayers = (
+  static #processLegendLayers(
     layers: TypeLegendLayer[],
     orderedLayerInfo: TypeOrderedLayerInfo[],
     timeSliderLayers?: TimeSliderLayerSet
-  ): FlattenedLegendItem[] => {
+  ): FlattenedLegendItem[] {
     const allItems: FlattenedLegendItem[] = [];
 
     const flattenLayer = (layer: TypeLegendLayer, depth = 0, rootLayerName?: string): FlattenedLegendItem[] => {
@@ -774,7 +774,7 @@ export class ExportUtilities {
     });
 
     return allItems;
-  };
+  }
 
   /**
    * Main export processing function - gathers map data, processes legend, and optimizes layout.
