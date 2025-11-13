@@ -27,6 +27,7 @@ import { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/ras
 import { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { GeoJSONLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
+import { GeoTIFFLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/geotiff-layer-entry-config';
 import { ImageStaticLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import { KmlLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/kml-layer-entry-config';
 import { OgcFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
@@ -328,6 +329,9 @@ export class ConfigValidation {
       } else if (OgcWmsLayerEntryConfig.isClassOrTypeWMS(layerConfig)) {
         // eslint-disable-next-line no-param-reassign
         listOfLayerEntryConfig[i] = new OgcWmsLayerEntryConfig(layerConfigProps);
+      } else if (GeoTIFFLayerEntryConfig.isClassOrTypeGeoTIFF(layerConfig)) {
+        // eslint-disable-next-line no-param-reassign
+        listOfLayerEntryConfig[i] = new GeoTIFFLayerEntryConfig(layerConfigProps);
       } else if (ImageStaticLayerEntryConfig.isClassOrTypeImageStatic(layerConfig)) {
         // eslint-disable-next-line no-param-reassign
         listOfLayerEntryConfig[i] = new ImageStaticLayerEntryConfig(layerConfigProps);

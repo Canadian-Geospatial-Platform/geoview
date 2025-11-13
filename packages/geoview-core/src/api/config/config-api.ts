@@ -48,6 +48,7 @@ import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { GeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
 import { ImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
+import { GeoTIFF } from '@/geo/layer/geoview-layers/raster/geotiff';
 import { KML } from '@/geo/layer/geoview-layers/vector/kml';
 import { OgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
 import { VectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
@@ -475,6 +476,8 @@ export class ConfigApi {
         return EsriImage.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
       case 'imageStatic':
         return ImageStatic.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+      case 'GeoTIFF':
+        return GeoTIFF.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
       case 'vectorTiles':
         return VectorTiles.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
       case 'ogcWms':
@@ -542,6 +545,8 @@ export class ConfigApi {
         return EsriDynamic.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as number[], false);
       case 'esriImage':
         return EsriImage.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, false);
+      case 'GeoTIFF':
+        return GeoTIFF.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], false);
       case 'imageStatic':
         // TODO: Check - Config init - Check if there's a way to better determine the source extent to send, defaults to napl-ring-of-fire's extent
         return ImageStatic.processGeoviewLayerConfig(

@@ -37,7 +37,7 @@ export class UtilAddLayer {
    * @returns {Array<[string, string]>} An array where each item is a tuple: [layerType, localizedName].
    */
   static getLocalizeLayerType(language: TypeDisplayLanguage, includeStatic: boolean): Array<[string, string]> {
-    const { CSV, ESRI_DYNAMIC, ESRI_FEATURE, ESRI_IMAGE, GEOJSON, KML, WMS, WFS, WKB, OGC_FEATURE, XYZ_TILES, VECTOR_TILES } =
+    const { CSV, ESRI_DYNAMIC, ESRI_FEATURE, ESRI_IMAGE, GEOJSON, GEOTIFF, KML, WMS, WFS, WKB, OGC_FEATURE, XYZ_TILES, VECTOR_TILES } =
       CONST_LAYER_TYPES;
     const { GEOCORE, GEOPACKAGE, SHAPEFILE } = CONST_LAYER_ENTRY_TYPES;
     const layerOptions: [string, string][] = [
@@ -48,6 +48,7 @@ export class UtilAddLayer {
       [ESRI_IMAGE, getLocalizedMessage(language, 'layers.serviceEsriImage')],
       [GEOJSON, getLocalizedMessage(language, 'layers.serviceGeoJSON')],
       [GEOPACKAGE, getLocalizedMessage(language, 'layers.serviceGeoPackage')],
+      [GEOTIFF, getLocalizedMessage(language, 'layers.serviceGeoTIFF')],
       [KML, getLocalizedMessage(language, 'layers.serviceKML')],
       [WMS, getLocalizedMessage(language, 'layers.serviceOgcWMS')],
       [WFS, getLocalizedMessage(language, 'layers.serviceOgcWFS')],

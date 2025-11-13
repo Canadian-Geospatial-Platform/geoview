@@ -77,6 +77,7 @@ export class KML extends AbstractGeoViewVector {
   ): VectorSource<Feature> {
     // eslint-disable-next-line no-param-reassign
     readOptions.dataProjection = (layerConfig.source as TypeBaseVectorSourceInitialConfig).dataProjection;
+
     // eslint-disable-next-line no-param-reassign
     sourceOptions.url = layerConfig.source!.dataAccessPath!;
     // eslint-disable-next-line no-param-reassign

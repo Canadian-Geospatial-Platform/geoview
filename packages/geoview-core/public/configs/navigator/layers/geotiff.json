@@ -1,0 +1,68 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": false
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "gtLYR1",
+        "geoviewLayerName": "no-overviews",
+        "metadataAccessPath": "https://openlayers.org/data/raster/",
+        "geoviewLayerType": "GeoTIFF",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "no-overviews.tif",
+            "source": {
+              "overviews": [
+                "https://openlayers.org/data/raster/no-overviews.tif.ovr"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "gtLYR2",
+        "geoviewLayerName": "Lightning - 30/10/2025",
+        "metadataAccessPath": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/36/Q/WD/2020/7/S2A_36QWD_20200701_0_L2A/",
+        "geoviewLayerType": "GeoTIFF",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "TCI.tif"
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "overview-map"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "legend",
+        "layers",
+        "details",
+        "data-table"
+      ]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "export"
+      ]
+    }
+  }
+}
