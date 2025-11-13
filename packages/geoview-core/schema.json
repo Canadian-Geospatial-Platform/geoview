@@ -241,7 +241,8 @@
         "guide",
         "data-table",
         "layers",
-        "aoi-panel"
+        "aoi-panel",
+        "custom-legend"
       ]
     },
     "TypeAppBarProps": {
