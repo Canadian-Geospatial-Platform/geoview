@@ -126,6 +126,9 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
     // Test true negative
     const pLayerKMLBadUrl = this.#layerTester.testAddKMLWithBadUrl();
 
+    // Test adding layer
+    const pLayerGeoTIFFVegetation = this.#layerTester.testAddGeotiffLayerWithDatacubeVegetation();
+
     // Resolve when all
     return Promise.all([
       pLayerEsriDynamicHistoFloods,
@@ -152,6 +155,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
       pLayerWKBBadUrl,
       pLayerKMLWithTornado,
       pLayerKMLBadUrl,
+      pLayerGeoTIFFVegetation,
     ]);
   }
 }

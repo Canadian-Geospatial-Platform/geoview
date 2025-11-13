@@ -1474,6 +1474,44 @@
       ],
       "description": "The type of the remote WMS server. The default value is mapserver."
     },
+    "TypeSourceGeoTIFFInitialConfig": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "dataAccessPath": {
+          "type": "string",
+          "description": "The path to reach the data to display. If not specified, metadatAccessPath will be assigned to it."
+        },
+        "crossOrigin": {
+          "type": "string",
+          "description": "The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data with the Canvas renderer."
+        },
+        "overviews": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          },
+          "description": "Path(s) to external overviews."
+        },
+        "projection": {
+          "type": "integer",
+          "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada."
+        },
+        "featureInfo": {
+          "$ref": "#/definitions/TypeFeatureInfoNotQueryable"
+        },
+        "extent": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "number"
+          },
+          "description": "The extent of the static image. Called with [minX, minY, maxX, maxY] extent coordinates."
+        }
+      }
+    },
     "TypeSourceImageStaticInitialConfig": {
       "additionalProperties": false,
       "type": "object",
@@ -1991,6 +2029,56 @@
         "layerId"
       ]
     },
+    "TypeGeoTIFFLayerEntryConfig": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "schemaTag": {
+          "enum": [
+            "GeoTIFF"
+          ]
+        },
+        "entryType": {
+          "enum": [
+            "raster-tile"
+          ]
+        },
+        "layerId": {
+          "type": "string",
+          "description": "The id of the layer to display on the map."
+        },
+        "layerName": {
+          "type": "string",
+          "description": "The display name of the layer."
+        },
+        "initialSettings": {
+          "$ref": "#/definitions/TypeLayerInitialSettings",
+          "description": "Initial settings to apply to the layer entry at creation time. Initial settings are inherited from the parent in the configuration tree."
+        },
+        "minScale": {
+          "type": "number",
+          "description": "The minimum scale (furthest zoomed out scale) where the layer will still be seen."
+        },
+        "maxScale": {
+          "type": "number",
+          "description": "The maximum scale (furthest zoomed in scale) where the layer will still be seen."
+        },
+        "source": {
+          "$ref": "#/definitions/TypeSourceGeoTIFFInitialConfig"
+        },
+        "not": {
+          "listOfLayerEntryConfig": {
+            "$ref": "#/definitions/TypeListOfLayerEntryConfig",
+            "description": "The list of layer entry configurations to use from the GeoView layer group."
+          }
+        }
+      },
+      "required": [
+        "schemaTag",
+        "entryType",
+        "layerId"
+      ]
+    },
     "TypeImageStaticLayerEntryConfig": {
       "additionalProperties": false,
       "type": "object",
@@ -2208,6 +2296,22 @@
           },
           {
             "$ref": "#/definitions/TypeOgcWmsLayerEntryConfig"
+          }
+        ]
+      }
+    },
+    "TypeListOfGeotiffLayerEntryConfig": {
+      "description": "This type is used recursively by the IsValidTypeListOfLayerEntryConfig method coded in config-validation.ts file. It completes the validation of the list of layer entry config.",
+      "type": "array",
+      "minItems": 1,
+      "additionalProperties": false,
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "#/definitions/TypeLayerGroupEntryConfig"
+          },
+          {
+            "$ref": "#/definitions/TypeGeotiffLayerEntryConfig"
           }
         ]
       }

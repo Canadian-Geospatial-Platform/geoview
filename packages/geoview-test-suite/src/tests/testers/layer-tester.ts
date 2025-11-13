@@ -13,6 +13,7 @@ import { EsriImage } from 'geoview-core/geo/layer/geoview-layers/raster/esri-ima
 import { WMS } from 'geoview-core/geo/layer/geoview-layers/raster/wms';
 import { WFS } from 'geoview-core/geo/layer/geoview-layers/vector/wfs';
 import { GeoJSON } from 'geoview-core/geo/layer/geoview-layers/vector/geojson';
+import { GeoTIFF } from 'geoview-core/geo/layer/geoview-layers/raster/geotiff';
 import { CSV } from 'geoview-core/geo/layer/geoview-layers/vector/csv';
 import { OgcFeature } from 'geoview-core/geo/layer/geoview-layers/vector/ogc-feature';
 import { WKB } from 'geoview-core/geo/layer/geoview-layers/vector/wkb';
@@ -789,6 +790,52 @@ export class LayerTester extends GVAbstractTester {
   }
 
   // #endregion GeoJSON
+
+  // #region GeoTIFF
+
+  /**
+   * Tests adding a GeoTIFF layer on the map.
+   * @returns {Promise<Test<AbstractGVLayer>>} A Promise resolving when the test completes.
+   */
+  testAddGeotiffLayerWithDatacubeVegetation(): Promise<Test<AbstractGVLayer>> {
+    // Create a random geoview layer id
+    const gvLayerId = generateId();
+    const layerUrl = GVAbstractTester.GEOTIFF_VEGETATION;
+    const gvLayerName = 'Datacube Vegetation';
+    const layerPath = gvLayerId + '/' + GVAbstractTester.GEOTIFF_VEGETATION_FILE;
+    const hasStyle: boolean = false;
+
+    // Test
+    return this.test(
+      `Test Adding GeoTIFF Datacube Vegetation on map...`,
+      async (test) => {
+        // Creating the configuration
+        test.addStep('Creating the GeoView Layer Configuration...');
+
+        // Create the config
+        const gvConfig = GeoTIFF.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
+          { id: GVAbstractTester.GEOTIFF_VEGETATION_FILE },
+        ]);
+
+        // Redirect to helper to add the layer to the map and wait
+        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+
+        // Find the layer and wait until its ready
+        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath, hasStyle);
+      },
+      (test) => {
+        // Perform assertions
+        // Redirect to helper to check if the layer exists
+        return LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath, hasStyle);
+      },
+      (test) => {
+        // Redirect to helper to clean up and assert
+        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+      }
+    );
+  }
+
+  // #endregion GeoTIFF
 
   // #region CSV
 
