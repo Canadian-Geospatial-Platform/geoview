@@ -3,7 +3,7 @@ import { pdf } from '@react-pdf/renderer';
 import { Document, Page, Text, View, Image, Svg, Path } from '@react-pdf/renderer';
 import { DateMgt } from '@/core/utils/date-mgt';
 import type { FlattenedLegendItem, ElementFactory } from '@/core/components/export/utilities';
-import { getMapInfo, renderLegendColumns, renderFooter, renderScaleBar, renderNorthArrow } from '@/core/components/export/utilities';
+import { ExportUtilities } from '@/core/components/export/utilities';
 import type { FileExportProps } from '@/core/components/export/export-modal';
 import { PDF_STYLES, getScaledPDFStyles } from '@/core/components/export/layout-styles';
 
@@ -47,7 +47,7 @@ const pdfElementFactory: ElementFactory = {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const renderLegendInRows = (columns: FlattenedLegendItem[][], styles: any, columnWidths?: number[]): JSX.Element => {
-  return renderLegendColumns(columns, pdfElementFactory, styles, PDF_STYLES, columnWidths);
+  return ExportUtilities.renderLegendColumns(columns, pdfElementFactory, styles, PDF_STYLES, columnWidths);
 };
 
 /**
@@ -89,8 +89,8 @@ export function ExportDocument({
         </View>
 
         <View style={PDF_STYLES.scaleContainer}>
-          {renderScaleBar(scaleText, scaleLineWidth, pdfElementFactory, scaledStyles, PDF_STYLES)}
-          {renderNorthArrow(northArrowSvg, northArrowRotation, pdfElementFactory, scaledStyles)}
+          {ExportUtilities.renderScaleBar(scaleText, scaleLineWidth, pdfElementFactory, scaledStyles, PDF_STYLES)}
+          {ExportUtilities.renderNorthArrow(northArrowSvg, northArrowRotation, pdfElementFactory, scaledStyles)}
         </View>
 
         {/* Divider between scale and legend */}
@@ -100,7 +100,7 @@ export function ExportDocument({
           <View style={PDF_STYLES.legendContainer}>{renderLegendInRows(fittedColumns, scaledStyles, columnWidths)}</View>
         )}
 
-        {renderFooter(disclaimer, attributions, date, pdfElementFactory, scaledStyles)}
+        {ExportUtilities.renderFooter(disclaimer, attributions, date, pdfElementFactory, scaledStyles)}
       </Page>
     </Document>
   );
@@ -114,7 +114,7 @@ export function ExportDocument({
  */
 export async function createPDFMapUrl(mapId: string, params: FileExportProps): Promise<string> {
   const { exportTitle, disclaimer } = params;
-  const mapInfo = await getMapInfo(mapId, exportTitle, disclaimer);
+  const mapInfo = await ExportUtilities.getMapInfo(mapId, exportTitle, disclaimer);
 
   // Use pre-calculated canvas height from getMapInfo (measured during preview)
   const blob = await pdf(

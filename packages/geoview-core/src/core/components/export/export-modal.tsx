@@ -90,13 +90,15 @@ export default function ExportModal(): JSX.Element {
 
   const fileExportDefaultPrefixName = t('exportModal.fileExportDefaultPrefixName');
 
-  // Generate preview
+  // Generate preview at maximum quality (300 DPI) - export will regenerate at selected DPI
   const generatePreview = useCallback(async () => {
     logger.logTraceUseCallback('EXPORT-MODAL - generatePreview Callback');
     try {
       setIsMapLoading(true);
       const disclaimer = t('mapctrl.disclaimer.message');
-      const pngUrl = await createCanvasMapUrls(mapId, { exportTitle: '', disclaimer, dpi: 96, format: 'jpeg' });
+      // Always generate at 300 DPI for best quality, browser will downsample for display
+      // Export regenerates canvas at user-selected DPI anyway
+      const pngUrl = await createCanvasMapUrls(mapId, { exportTitle: '', disclaimer, dpi: 300, format: 'jpeg' });
       setPngPreviewUrls([pngUrl]);
       URL.revokeObjectURL(pngUrl);
     } catch (error) {

@@ -4,14 +4,7 @@ import * as html2canvas from '@html2canvas/html2canvas';
 import { DateMgt } from '@/core/utils/date-mgt';
 import type { FileExportProps } from '@/core/components/export/export-modal';
 import type { FlattenedLegendItem, ElementFactory } from '@/core/components/export/utilities';
-import {
-  getMapInfo,
-  renderLegendColumns,
-  renderFooter,
-  renderScaleBar,
-  renderNorthArrow,
-  EXPORT_CONSTANTS,
-} from '@/core/components/export/utilities';
+import { ExportUtilities, EXPORT_CONSTANTS } from '@/core/components/export/utilities';
 import { CANVAS_STYLES, getScaledCanvasStyles } from '@/core/components/export/layout-styles';
 
 interface CanvasDocumentProps {
@@ -53,7 +46,7 @@ const canvasElementFactory: ElementFactory = {
  */
 const renderCanvasLegendInRows = (columns: FlattenedLegendItem[][], canvasWidth: number, columnWidths?: number[]): JSX.Element => {
   const scaledStyles = getScaledCanvasStyles(canvasWidth);
-  return renderLegendColumns(columns, canvasElementFactory, scaledStyles, CANVAS_STYLES, columnWidths);
+  return ExportUtilities.renderLegendColumns(columns, canvasElementFactory, scaledStyles, CANVAS_STYLES, columnWidths);
 };
 
 /**
@@ -87,8 +80,8 @@ export function CanvasDocument({
 
       {/* Scale and North Arrow */}
       <div style={CANVAS_STYLES.scaleContainer}>
-        {renderScaleBar(scaleText, scaleLineWidth, canvasElementFactory, scaledStyles, CANVAS_STYLES)}
-        {renderNorthArrow(northArrowSvg, northArrowRotation, canvasElementFactory, scaledStyles)}
+        {ExportUtilities.renderScaleBar(scaleText, scaleLineWidth, canvasElementFactory, scaledStyles, CANVAS_STYLES)}
+        {ExportUtilities.renderNorthArrow(northArrowSvg, northArrowRotation, canvasElementFactory, scaledStyles)}
       </div>
 
       {/* Divider between scale and legend */}
@@ -100,7 +93,7 @@ export function CanvasDocument({
       )}
 
       {/* Footer */}
-      {renderFooter(disclaimer, attributions, date, canvasElementFactory, scaledStyles)}
+      {ExportUtilities.renderFooter(disclaimer, attributions, date, canvasElementFactory, scaledStyles)}
     </div>
   );
 }
@@ -115,7 +108,7 @@ export async function createCanvasMapUrls(mapId: string, props: FileExportProps)
   const { exportTitle, disclaimer, dpi, jpegQuality, format } = props;
 
   // Get map info with title/disclaimer for accurate height calculation
-  const mapInfo = await getMapInfo(mapId, exportTitle, disclaimer);
+  const mapInfo = await ExportUtilities.getMapInfo(mapId, exportTitle, disclaimer);
 
   // Create main page HTML
   const mainPageHtml = renderToString(
