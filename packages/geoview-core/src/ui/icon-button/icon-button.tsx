@@ -5,9 +5,16 @@ import { logger } from '@/core/utils/logger';
 
 /**
  * Properties for the icon button extending Material-UI's IconButtonProps
+ *
+ * Children is required to display the icon. Without it, the button would be empty.
+ * aria-label is required for accessibility (an icon button will never have a text label so it needs a descriptive label for screen readers).
+ * tooltip is optional but will use aria-label as a fallback. This is for better UX.
  */
-export interface IconButtonPropsExtend extends IconButtonProps {
-  children?: ReactNode;
+
+// TODO: remove visible prop if not needed in future
+export interface IconButtonPropsExtend extends Omit<IconButtonProps, 'aria-label'> {
+  children: ReactNode;
+  'aria-label': string;
   tooltip?: string;
   tooltipPlacement?: TooltipProps['placement'];
   tabIndex?: number;
@@ -19,16 +26,26 @@ export interface IconButtonPropsExtend extends IconButtonProps {
  * Create a customized Material UI Icon Button component.
  *
  * @component
+ * @param {IconButtonPropsExtend} props - The properties passed to the Icon Button element
+ * @param {ReactNode} props.children - **Required.** The icon or content to display inside the button
+ * @param {string} props.aria-label - **Required.** Screen reader text for accessibility
+ * @param {string} [props.tooltip] - Optional. Tooltip text shown on hover (defaults to aria-label if not provided)
+ * @param {TooltipProps['placement']} [props.tooltipPlacement] - Optional. Position of the tooltip (top, bottom, left, right)
+ * @param {number} [props.tabIndex] - Optional. Tab order for keyboard navigation
+ * @param {RefObject<HTMLButtonElement>} [props.iconRef] - Optional. Ref to access the button element
+ * @param {boolean} [props.visible] - Optional. Controls button visibility
+ * @returns {JSX.Element} The Icon Button component
  * @example
  * ```tsx
  * // Basic usage
- * <IconButton>
+ * <IconButton aria-label="Delete item">
  *   <DeleteIcon />
  * </IconButton>
  *
  * // With tooltip
  * <IconButton
- *   tooltip="Delete item"
+ *   aria-label="Delete item"
+ *   tooltip="Delete item permanently"
  *   tooltipPlacement="top"
  * >
  *   <DeleteIcon />
@@ -36,6 +53,8 @@ export interface IconButtonPropsExtend extends IconButtonProps {
  *
  * // With custom styling
  * <IconButton
+ *   aria-label="Edit item"
+ *   tooltip="Edit this item"
  *   className="custom-button"
  *   size="small"
  *   color="primary"
@@ -45,22 +64,20 @@ export interface IconButtonPropsExtend extends IconButtonProps {
  *
  * // With disabled state
  * <IconButton
+ *   aria-label="Save document"
  *   disabled={true}
  *   tooltip="Not available"
  * >
  *   <SaveIcon />
  * </IconButton>
  * ```
- *
- * @param {IconButtonPropsExtend} props - The properties passed to the Icon Button element
- * @returns {JSX.Element} The Icon Button component
+
  *
  * @see {@link https://mui.com/material-ui/react-button/#icon-button}
  */
 function IconButtonUI(props: IconButtonPropsExtend): JSX.Element {
   logger.logTraceRenderDetailed('ui/icon-button/icon-button');
 
-  // TODO: WCAG - Do we need to pass aria label? We should freuse toltip or title when define
   // Get constant from props
   const {
     sx,
@@ -80,12 +97,13 @@ function IconButtonUI(props: IconButtonPropsExtend): JSX.Element {
     ...rest
   } = props;
 
+  // Tooltip can usually be the same as aria-label, but can be different if needed
   function createIconButtonUI(): JSX.Element {
     return (
       <MaterialIconButton
         id={id}
         sx={sx}
-        aria-label={ariaLabel || tooltip}
+        aria-label={ariaLabel}
         style={style}
         className={className}
         onClick={onClick}
@@ -96,7 +114,7 @@ function IconButtonUI(props: IconButtonPropsExtend): JSX.Element {
         color={color}
         {...rest}
       >
-        {children && children}
+        {children}
       </MaterialIconButton>
     );
   }
@@ -106,7 +124,7 @@ function IconButtonUI(props: IconButtonPropsExtend): JSX.Element {
   }
 
   return (
-    <Tooltip title={tooltip} placement={tooltipPlacement} slots={{ transition: Fade }}>
+    <Tooltip title={tooltip || ariaLabel} placement={tooltipPlacement} slots={{ transition: Fade }}>
       {createIconButtonUI()}
     </Tooltip>
   );

@@ -34,7 +34,14 @@ export default function Home(): JSX.Element {
   };
 
   return (
-    <IconButton id="home" tooltip={t('mapnav.home')!} tooltipPlacement="left" onClick={handleZoom} sx={sxClasses.navButton}>
+    <IconButton
+      id="home"
+      aria-label={t('mapnav.home')}
+      tooltip={t('mapnav.home')!}
+      tooltipPlacement="left"
+      onClick={handleZoom}
+      sx={sxClasses.navButton}
+    >
       <HomeIcon />
     </IconButton>
   );

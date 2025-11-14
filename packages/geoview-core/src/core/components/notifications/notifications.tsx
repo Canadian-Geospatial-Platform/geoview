@@ -47,11 +47,13 @@ const NotificationItem = memo(function NotificationItem({
   onRemove,
   theme,
   sxClasses,
+  t,
 }: {
   notification: NotificationDetailsType;
   onRemove: (key: string) => void;
   theme: Theme;
   sxClasses: SxStyles;
+  t: (key: string) => string;
 }) {
   const handleRemove = useCallback(() => {
     logger.logTraceUseCallback('NOTIFICATION - remove', notification.key);
@@ -88,7 +90,7 @@ const NotificationItem = memo(function NotificationItem({
           <Box sx={sxClasses.notificationsCount}>{notification.count}</Box>
         </Box>
       )}
-      <IconButton onClick={handleRemove}>
+      <IconButton aria-label={t('general.close')} tooltip={t('general.close')} onClick={handleRemove}>
         <CloseIcon />
       </IconButton>
     </Box>
@@ -106,6 +108,7 @@ const NotificationHeader = memo(function NotificationHeader({
   onClose: () => void;
   onRemoveAll: () => void;
   hasNotifications: boolean;
+
   t: (key: string) => string;
   sxClasses: SxStyles;
 }) {
@@ -125,7 +128,7 @@ const NotificationHeader = memo(function NotificationHeader({
         >
           {t('appbar.removeAllNotifications')}
         </Button>
-        <IconButton sx={{ ml: '0.25rem' }} onClick={onClose}>
+        <IconButton aria-label={t('general.close')} tooltip={t('general.close')} sx={{ ml: '0.25rem' }} onClick={onClose}>
           <CloseIcon />
         </IconButton>
       </Box>
@@ -231,9 +234,10 @@ export default memo(function Notifications(): JSX.Element {
           onRemove={handleRemoveNotification}
           theme={theme}
           sxClasses={sxClasses}
+          t={t}
         />
       )),
-    [notifications, handleRemoveNotification, theme, sxClasses]
+    [notifications, handleRemoveNotification, theme, sxClasses, t]
   );
 
   return (
@@ -242,7 +246,7 @@ export default memo(function Notifications(): JSX.Element {
         <IconButton
           id="notification"
           tooltip={t('appbar.notifications')!}
-          aria-label={t('appbar.notifications')!}
+          aria-label={t('appbar.notifications')}
           tooltipPlacement="right"
           onClick={handleOpenPopover}
           className={`${interaction === 'dynamic' ? 'buttonFilled' : 'style4'} ${open ? 'active' : ''}`}

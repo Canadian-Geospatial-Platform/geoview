@@ -83,7 +83,8 @@ export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType
         <IconButton
           key={buttonPanel.button.id}
           id={buttonPanel.button.id}
-          tooltip={t(buttonPanel.button.tooltip!)!}
+          aria-label={buttonPanel.button['aria-label']}
+          tooltip={buttonPanel.button.tooltip}
           tooltipPlacement={buttonPanel.button.tooltipPlacement}
           sx={sxClasses.navButton}
           onClick={(e) => handleClick(e)}
@@ -107,7 +108,13 @@ export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType
             <DialogTitle sx={sxClasses.popoverTitle}>
               <span style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
                 {t(buttonPanel.panel?.title as string) ?? ''}
-                <IconButton size="small" onClick={closePanel} sx={{ padding: 0.5, color: 'inherit', position: 'relative', left: '16px' }}>
+                <IconButton
+                  size="small"
+                  aria-label={t('general.close')}
+                  tooltip={t('general.close')!}
+                  onClick={closePanel}
+                  sx={{ padding: 0.5, color: 'inherit', position: 'relative', left: '16px' }}
+                >
                   <CloseIcon fontSize="small" />
                 </IconButton>
               </span>

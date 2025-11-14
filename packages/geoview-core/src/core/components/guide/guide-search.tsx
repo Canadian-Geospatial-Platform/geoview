@@ -6,6 +6,8 @@ import { SearchIcon, CloseIcon, KeyboardArrowUpIcon, KeyboardArrowDownIcon } fro
 import type { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from '@/core/utils/logger';
 
+// TODO: WCAG - guide.arrowUp and guide.arrowUpn translations need to be reviewed for clarity
+
 // Protection pattern functions that return new regex instances
 const getProtectionPatterns = (): RegExp[] => [
   /!\[[^\]]*\]\([^)]+\)/gi, // ![alt](image-url) - markdown images (case-insensitive)
@@ -401,10 +403,22 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
                       <Box sx={{ fontSize: '0.75rem', color: 'text.secondary', whiteSpace: 'nowrap' }}>
                         {currentMatchIndex + 1} of {allMatches.length}
                       </Box>
-                      <IconButton size="small" onClick={handlePrevious} disabled={allMatches.length === 0}>
+                      <IconButton
+                        size="small"
+                        aria-label={t('guide.arrowUp')}
+                        tooltip={t('guide.arrowUp')!}
+                        onClick={handlePrevious}
+                        disabled={allMatches.length === 0}
+                      >
                         <KeyboardArrowUpIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />
                       </IconButton>
-                      <IconButton size="small" onClick={handleNext} disabled={allMatches.length === 0}>
+                      <IconButton
+                        size="small"
+                        aria-label={t('guide.arrowDown')}
+                        tooltip={t('guide.arrowDown')!}
+                        onClick={handleNext}
+                        disabled={allMatches.length === 0}
+                      >
                         <KeyboardArrowDownIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />
                       </IconButton>
                     </>
@@ -413,6 +427,8 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
                     size="small"
                     edge="end"
                     color="inherit"
+                    aria-label={t('general.close')}
+                    tooltip={t('general.close')!}
                     onClick={handleClear}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
