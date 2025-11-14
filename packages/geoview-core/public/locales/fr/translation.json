@@ -131,6 +131,7 @@
     "name": "Nom",
     "layerSelect": "Sélectionner couche(s)",
     "deleteLayer": "Supprimer la couche",
+    "undoLayer": "Annuler la suppression de la couche",
     "errorDisabled": "Le type de couche « __param__ » est désactivé dans cette carte.",
     "errorEmpty": "__param__ ne peut être vide.",
     "errorNone": "Pas de fichier ou de source ajouté.",
@@ -174,7 +175,14 @@
     "layerServiceProjection": "Projection du service : ",
     "layerHoverable": "Info au passage de la souris",
     "layerQueryable": "Info au click de la souris",
-    "noSelection": "Aucune sélection"
+    "noSelection": "Aucune sélection",
+    "showAllLayers": "Afficher tous les couches",
+    "hideAllLayers": "Masquer tous les couches",
+    "showLayer": "Afficher la couche {{name}}",
+    "hideLayer": "Masquer la couche {{name}}",
+    "tableViewNone": "Tableau (indisponible)",
+    "moveLayerUp": "Déplacer la couche vers le haut",
+    "moveLayerDown": "Déplacer la couche vers le bas"
   },
   "details": {
     "title": "Détails",
@@ -329,7 +337,9 @@
   "guide": {
     "title": "Guide",
     "search": "Rechercher dans le guide...",
-    "errorMessage": "Désolé, impossible de trouver le document d'aide!"
+    "errorMessage": "Désolé, impossible de trouver le document d'aide!",
+    "arrowUp": "Déplacer vers le haut",
+    "arrowDown": "Déplacer vers le bas"
   },
   "footerBar": {
     "resizeTooltip": "Redimensionner",

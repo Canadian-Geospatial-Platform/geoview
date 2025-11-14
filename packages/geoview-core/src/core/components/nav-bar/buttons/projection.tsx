@@ -84,6 +84,7 @@ export default function Projection(): JSX.Element {
 
   // Set up props for nav bar panel button
   const button: IconButtonPropsExtend = {
+    'aria-label': 'mapnav.projection',
     tooltip: 'mapnav.projection',
     children: createElement(ProjectionIcon),
     tooltipPlacement: 'left',

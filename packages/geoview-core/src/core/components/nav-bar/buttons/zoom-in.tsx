@@ -25,6 +25,7 @@ export default function ZoomIn(): JSX.Element {
   return (
     <IconButton
       id="zoomIn"
+      aria-label={t('mapnav.zoomIn')}
       tooltip={t('mapnav.zoomIn')!}
       tooltipPlacement="left"
       onClick={() => setZoom(zoom + 0.5)}

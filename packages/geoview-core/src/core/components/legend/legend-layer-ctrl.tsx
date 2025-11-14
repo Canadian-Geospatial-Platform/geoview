@@ -32,6 +32,9 @@ import {
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
 
+// TODO: WCAG - Check all icon buttons for aria-label clarity and translations
+// TODO: WCAG - Check all icon buttons for "state related" aria values (i.e aria-checked, aria-disabled, etc.)
+
 interface SecondaryControlsProps {
   layerPath: string;
 }
@@ -141,6 +144,7 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
       <Box sx={sxClasses.subtitle}>
         <IconButton
           edge="end"
+          aria-label={t('layers.zoomVisibleScale')}
           tooltip={t('layers.zoomVisibleScale')!}
           className={`buttonOutline ${isZoomToVisibleScaleCapable ? '' : 'outOfRangeButton'}`}
           onClick={controls.handleZoomToLayerVisibleScale}
@@ -150,6 +154,7 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
         {isLayerVisibleCapable && (
           <IconButton
             edge={isInVisibleRange ? false : 'end'}
+            aria-label={t('layers.toggleVisibility')}
             tooltip={t('layers.toggleVisibility')!}
             className="buttonOutline"
             onClick={controls.handleToggleVisibility}
@@ -160,6 +165,7 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
         )}
         {isLayerHighlightCapable && (
           <IconButton
+            aria-label={t('legend.highlightLayer')}
             tooltip={t('legend.highlightLayer')!}
             sx={styles.btnMargin}
             className="buttonOutline"
@@ -171,6 +177,7 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
         )}
         {isLayerZoomToExtentCapable && (
           <IconButton
+            aria-label={t('legend.zoomTo')}
             tooltip={t('legend.zoomTo')!}
             className="buttonOutline"
             onClick={controls.handleZoomTo}
