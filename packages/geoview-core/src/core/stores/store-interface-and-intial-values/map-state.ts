@@ -18,7 +18,7 @@ import type {
   TypeFeatureInfoEntry,
   TypePointMarker,
 } from '@/api/types/map-schema-types';
-import { MAP_CENTER } from '@/api/types/map-schema-types';
+import { MAP_CENTER, MAP_ZOOM_LEVEL } from '@/api/types/map-schema-types';
 import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
 import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { Projection } from '@/geo/utils/projection';
@@ -181,7 +181,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     hoverFeatureInfo: undefined,
     initialFilters: {},
     initialView: {
-      zoomAndCenter: [3.5, MAP_CENTER[3857]],
+      zoomAndCenter: [MAP_ZOOM_LEVEL[3857], MAP_CENTER[3857]],
     },
     interaction: 'static',
     isMouseInsideMap: false,
@@ -225,8 +225,8 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           featureHighlightColor: geoviewConfig.map.highlightColor || 'black',
           hideCoordinateInfoSwitch: geoviewConfig.globalSettings?.hideCoordinateInfoSwitch || false,
           homeView: geoviewConfig.map.viewSettings.homeView ||
-            geoviewConfig.map.viewSettings.initialView || { zoomAndCenter: [3.5, MAP_CENTER[3857]] },
-          initialView: geoviewConfig.map.viewSettings.initialView || { zoomAndCenter: [3.5, MAP_CENTER[3857]] },
+            geoviewConfig.map.viewSettings.initialView || { zoomAndCenter: [4.5, MAP_CENTER[3857]] },
+          initialView: geoviewConfig.map.viewSettings.initialView || { zoomAndCenter: [4.5, MAP_CENTER[3857]] },
           interaction: geoviewConfig.map.interaction || 'dynamic',
           mapExtent: geoviewConfig.map.viewSettings.maxExtent,
           northArrow: geoviewConfig.components!.indexOf('north-arrow') > -1 || false,
@@ -236,7 +236,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           rotation: geoviewConfig.map.viewSettings.rotation || 0,
           zoom: geoviewConfig.map.viewSettings.initialView?.zoomAndCenter
             ? geoviewConfig.map.viewSettings.initialView.zoomAndCenter[0]
-            : 3.5,
+            : 4.5,
         },
       });
     },

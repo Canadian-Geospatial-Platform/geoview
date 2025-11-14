@@ -72,6 +72,8 @@
     "tabs": {
       "core": [
         "geolocator",
+        "legend",
+        "details",
         "export"
       ]
     }
@@ -85,14 +87,13 @@
   "footerBar": {
     "tabs": {
       "core": [
-        "legend",
         "layers",
-        "details",
         "data-table"
       ]
     }
   },
   "components": [
+    "overview-map",
     "north-arrow"
   ],
   "corePackages": [],

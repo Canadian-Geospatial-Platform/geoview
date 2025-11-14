@@ -4,10 +4,10 @@
     "viewSettings": {
             "projection": 3978,
 			"initialView": {
-            "zoomAndCenter": [3.5, [-90, 60]]
+            "zoomAndCenter": [4.5, [-90, 60]]
             },
             "homeView": {
-              "zoomAndCenter": [3.5, [-90, 60]]
+              "zoomAndCenter": [4.5, [-90, 60]]
             }
           },
     "basemapOptions": {

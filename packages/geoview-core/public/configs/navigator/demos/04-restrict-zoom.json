@@ -2,7 +2,7 @@
   "map": {
     "interaction": "dynamic",
     "viewSettings": {
-      "minZoom": 4,
+      "minZoom": 6,
       "maxZoom": 8,
       "projection": 3978
     },

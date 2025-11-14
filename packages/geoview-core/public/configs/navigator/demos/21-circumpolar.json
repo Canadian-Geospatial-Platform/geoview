@@ -2,6 +2,9 @@
   "map": {
     "interaction": "dynamic",
     "viewSettings": {
+      "initialView": {
+        "zoomAndCenter": [4, [-110, 82]]
+      },
       "projection": 3978
     },
     "basemapOptions": {
@@ -11,9 +14,8 @@
     },
     "listOfGeoviewLayerConfig": [
       {
-        "geoviewLayerType": "rcs",
-        "geoviewLayerId": "fe83a604-aa5a-4e46-903c-685f8b0cc33c",
-        "geoviewLayerName": "RCS"
+        "geoviewLayerType": "geoCore",
+        "geoviewLayerId": "8b83fd58-5953-4b80-8009-94d44ff89844"
       }
     ]
   },

@@ -5,6 +5,7 @@ import { delay } from 'geoview-core/core/utils/utilities';
 import type { TypeMapState } from 'geoview-core/geo/map/map-viewer';
 import type { TypeMapFeaturesConfig } from 'geoview-core/core/types/global-types';
 import { MapEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/map-event-processor';
+import type { Extent } from 'geoview-core/api/types/map-schema-types';
 
 /**
  * Main Map testing class.
@@ -95,6 +96,66 @@ export class MapTester extends GVAbstractTester {
         // Unzooms to original position
         test.addStep('Unzooms to the original zoom...');
         MapEventProcessor.zoom(this.getMapId(), currentZoom, zoomDuration);
+      }
+    );
+  }
+
+  testSwitchProjectionAndExtent(): Promise<Test<Extent>> {
+    // Get the current init extent
+    const { mapExtent } = MapEventProcessor.getMapState(this.getMapId());
+
+    // Test the projection/initial extent
+    return this.test(
+      'Test switch projection back and forth, zoom and zoom to initial extent',
+      async (test) => {
+        // Update the step
+        test.addStep('Performing projection switch to 3857...');
+
+        // Add a delay ensuring anyprevious tester operation is done
+        await delay(2000);
+
+        // Perform a projection switch
+        await MapEventProcessor.setProjection(this.getMapId(), 3857);
+
+        // Wait for the projection switch to end (1000 for store to update)
+        await delay(1000);
+
+        // Update the step
+        test.addStep('Performing zoom to level 1...');
+
+        // Perform a zoom
+        MapEventProcessor.zoom(this.getMapId(), 1, 1000);
+
+        // Wait for the zoom to end (1000 for store to update)
+        await delay(1000);
+
+        // Update the step
+        test.addStep('Performing projection switch to original...');
+
+        // Perform a projection switch
+        await MapEventProcessor.setProjection(this.getMapId(), 3978);
+
+        // Wait for the zoom to end (1000 for store to update)
+        await delay(1000);
+
+        // Update the step
+        test.addStep('Performing zomm to inital extent...');
+        // Zoom to initial extent
+        await MapEventProcessor.zoomToInitialExtent(this.getMapId());
+
+        // Update the step
+        test.addStep('Waiting for zoom to finish...');
+
+        // Wait for the zoom to end (1000 for store to update)
+        await delay(1000);
+
+        // Return the result
+        return MapEventProcessor.getMapState(this.getMapId()).mapExtent;
+      },
+      (test, result) => {
+        // Perform assertions
+        test.addStep('Verifying expected map extent in the store...');
+        Test.assertIsArrayEqual<number>(mapExtent, result);
       }
     );
   }

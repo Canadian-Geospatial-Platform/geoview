@@ -216,6 +216,35 @@ export class Test<T = unknown> {
   }
 
   /**
+   * Asserts that two arrays have equal values (deep comparison).
+   * @param {T[]} actualValue - The actual array being checked.
+   * @param {T[]} expectedValue - The expected array to compare against.
+   * @throws {AssertionError} If the arrays are not equal.
+   * @static
+   */
+  static assertIsArrayEqual<T = unknown>(actualValue: T[], expectedValue: T[]): void {
+    // Check if both are arrays
+    if (!Array.isArray(actualValue) || !Array.isArray(expectedValue)) {
+      throw new AssertionValueError(actualValue, expectedValue);
+    }
+
+    // Check if lengths are equal
+    if (actualValue.length !== expectedValue.length) {
+      throw new AssertionValueError(actualValue, expectedValue);
+    }
+
+    // Compare each element
+    for (let i = 0; i < actualValue.length; i++) {
+      if (actualValue[i] !== expectedValue[i]) {
+        throw new AssertionValueError(actualValue, expectedValue);
+      }
+    }
+
+    // If we get here, arrays are equal
+    return;
+  }
+
+  /**
    * Asserts that a value is defined.
    * @param {string} propertyPath - The name or path of the array being validated.
    * @param {T | undefined} actualValue - The actual value being checked.

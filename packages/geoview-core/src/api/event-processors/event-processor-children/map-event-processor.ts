@@ -324,6 +324,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
       currentProjection: mapState.currentProjection,
       currentZoom: mapState.zoom,
       mapCenterCoordinates: mapState.centerCoordinates,
+      mapExtent: mapState.mapExtent!,
+      rotation: mapState.rotation,
       pointerPosition: mapState.pointerPosition || {
         pixel: [],
         lonlat: [],
@@ -471,13 +473,16 @@ export class MapEventProcessor extends AbstractEventProcessor {
       ];
       const newProjection = projectionCode;
 
-      // If maxExtent was provided and native projection, apply
+      // If maxExtent was provided and un the native projection, apply
       // GV The extent is different between LCC and WM and switching from one to the other may introduce weird constraint.
       // GV We may have to keep extent as array for configuration file but, technically, user does not change projection often.
       // GV A wider LCC extent like [-125, 30, -60, 89] (minus -125) will introduce distortion on larger screen...
-      // GV It is why we apply the max extent only on native projection
+      // GV It is why we apply the max extent only on native projection, otherwise we apply default
       const viewSettings = this.getGeoViewMapConfig(mapId)?.map.viewSettings;
-      const mapMaxExtent = viewSettings!.maxExtent && newProjection === viewSettings!.projection ? MAP_EXTENTS[newProjection] : undefined;
+      const mapMaxExtent =
+        viewSettings!.maxExtent && Number(newProjection) === Number(viewSettings!.projection)
+          ? viewSettings?.maxExtent
+          : MAP_EXTENTS[newProjection];
 
       // create new view settings
       const newView: TypeViewSettings = {

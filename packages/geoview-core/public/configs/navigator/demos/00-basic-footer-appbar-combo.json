@@ -257,11 +257,11 @@
   },
   "appBar": {
     "tabs": {
-      "core": ["legend", "details"]
+      "core": ["geolocator", "legend", "details", "export"]
     },
     "selectedTab": "legend"
   },
-  "navBar": ["zoom", "fullscreen", "home", "location"],
+  "navBar": ["zoom", "fullscreen", "home", "location", "basemap-select"],
   "components": ["north-arrow", "overview-map"],
   "corePackages": [],
   "externalPackages": []

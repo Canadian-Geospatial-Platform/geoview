@@ -40,14 +40,15 @@
     ]
   },
   "theme": "geo.ca",
+  "appBar": {
+    "tabs": {
+      "core": ["geolocator", "legend", "details", "export"]
+    }
+  },
+  "components": ["north-arrow", "overview-map"],
   "footerBar": {
     "tabs": {
-      "core": [
-        "legend",
-        "layers",
-        "details",
-        "geochart"
-      ]
+      "core": ["layers", "geochart"]
     },
     "selectedTab": "geochart"
   },
@@ -124,7 +125,7 @@
               }
             ]
           },
-                    {
+          {
             "layers": [
               {
                 "layerId": "wmsLYR2-qgis/fpsn_stations_93f70155_ff12_4ab2_8100_53763727cbe4",

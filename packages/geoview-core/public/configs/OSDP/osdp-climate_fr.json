@@ -23,8 +23,7 @@
               "states": {
                 "visible": false
               }
-            },
-            "menuVisible": false
+            }
           }
         ]
       },
@@ -62,7 +61,6 @@
         "geolocator",
         "legend",
         "details",
-        "time-slider",
         "export"
       ]
     }
@@ -71,7 +69,8 @@
     "tabs": {
       "core": [
         "layers",
-        "data-table"
+        "data-table",
+        "time-slider"
       ]
     }
   },
