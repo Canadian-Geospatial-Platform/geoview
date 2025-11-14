@@ -100,7 +100,7 @@ function DrawerUI(props: DrawerPropsExtend): JSX.Element {
     >
       <Box sx={sxClasses.toolbar}>
         <IconButton
-          tooltip={open ? t('general.close')! : t('general.open')!}
+          aria-label={open ? t('general.close') : t('general.open')}
           tooltipPlacement="right"
           onClick={() => {
             handleDrawerToggle(!open);

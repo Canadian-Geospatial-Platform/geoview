@@ -34,6 +34,7 @@ export abstract class NavBarPlugin extends AbstractPlugin {
       main: {
         buttonProps: {
           id: 'someNavBarPluginButton',
+          'aria-label': 'Some aria label',
           tooltip: 'Some tooltip',
           tooltipPlacement: 'right',
           children: this.react.createElement(MapIcon),
