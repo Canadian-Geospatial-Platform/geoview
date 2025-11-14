@@ -299,6 +299,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
       .map((tab): [IconButtonPropsExtend, TypePanelProps, string] => {
         const button: IconButtonPropsExtend = {
           id: tab,
+          'aria-label': t(`${camelCase(tab)}.title`),
           tooltip: t(`${camelCase(tab)}.title`)!,
           tooltipPlacement: 'bottom',
           children: memoPanels[tab].icon,

@@ -22,6 +22,9 @@ import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
 
+// TODO: WCAG Issue #3108 - Check all icon buttons for aria-label clarity and translations
+// TODO: WCAG Issue #3108 - Check all icon buttons for "state related" aria values (i.e aria-checked, aria-disabled, etc.)
+
 interface LegendLayerProps {
   layerPath: string;
 }
@@ -67,7 +70,7 @@ const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick }: LegendLay
         secondary={<SecondaryControls layerPath={layerPath} />}
       />
       {((layerChildren && layerChildren.length > 0) || (layerItems && layerItems.length > 1) || layerType === CONST_LAYER_TYPES.WMS) && (
-        <IconButton className="buttonOutline" onClick={onExpandClick} edge="end" size="small" tooltip={tooltip}>
+        <IconButton className="buttonOutline" onClick={onExpandClick} edge="end" size="small" aria-label={tooltip} tooltip={tooltip}>
           {!isCollapsed ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
         </IconButton>
       )}

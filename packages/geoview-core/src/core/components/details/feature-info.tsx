@@ -86,6 +86,7 @@ const FeatureHeader = memo(function FeatureHeader({ iconSrc, name, hasGeometry, 
         </Tooltip>
         <IconButton
           color="primary"
+          aria-label={t('details.zoomTo')}
           tooltip={t('details.zoomTo')!}
           tooltipPlacement="top"
           disabled={!hasGeometry}

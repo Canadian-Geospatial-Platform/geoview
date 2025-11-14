@@ -1,5 +1,6 @@
-import type { ReactNode} from 'react';
+import type { ReactNode } from 'react';
 import { memo, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { DialogProps } from '@mui/material';
 import { CloseIcon, Dialog, DialogContent, IconButton } from '@/ui';
 import { logger } from '@/core/utils/logger';
@@ -31,6 +32,9 @@ export const FullScreenDialog = memo(function FullScreenDialog({
 }: FullScreenDialogProps): JSX.Element {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
+  // Hooks
+  const { t } = useTranslation<string>();
+
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('FULL SCREEN DIALOG - open with focus on close', open);
@@ -59,7 +63,15 @@ export const FullScreenDialog = memo(function FullScreenDialog({
       sx={{ maxHeight: '100% !important' }}
     >
       <DialogContent sx={DIALOG_CONTENT_STYLES}>
-        <IconButton ref={closeButtonRef} onClick={onClose} color="primary" className="buttonFilledOutline" sx={CLOSE_BUTTON_STYLES}>
+        <IconButton
+          ref={closeButtonRef}
+          onClick={onClose}
+          aria-label={t('general.close')}
+          tooltip={t('general.close')!}
+          color="primary"
+          className="buttonFilledOutline"
+          sx={CLOSE_BUTTON_STYLES}
+        >
           <CloseIcon />
         </IconButton>
         {children}

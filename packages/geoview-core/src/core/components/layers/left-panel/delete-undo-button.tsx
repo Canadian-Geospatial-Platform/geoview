@@ -23,6 +23,8 @@ function UndoButtonWithProgress(props: UndoButtonProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/left-panel/delete-undo-button/UndoButtonWithProgress');
 
+  const { t } = useTranslation<string>();
+
   const { progressValue, onUndo, handleKeyDown } = props;
   return (
     <Box sx={{ position: 'relative', display: 'inline-flex' }} onClick={onUndo}>
@@ -39,7 +41,13 @@ function UndoButtonWithProgress(props: UndoButtonProps): JSX.Element {
           justifyContent: 'center',
         }}
       >
-        <IconButton edge="end" size="small" onKeyDown={(e) => handleKeyDown(e)}>
+        <IconButton
+          aria-label={t('layers.undoLayer')}
+          tooltip={t('layers.undoLayer')!}
+          edge="end"
+          size="small"
+          onKeyDown={(e) => handleKeyDown(e)}
+        >
           <UndoIcon />
         </IconButton>
       </Box>
@@ -133,6 +141,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
         edge="end"
         size="small"
         onKeyDown={(e) => handleDeleteKeyDown(e)}
+        aria-label={t('layers.deleteLayer')}
         tooltip={t('layers.deleteLayer')!}
       >
         <DeleteOutlineIcon color="error" />
@@ -141,7 +150,14 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
   }
   if (!inUndoState) {
     return (
-      <IconButton onClick={handleDeleteClick} edge="end" size="small" disabled>
+      <IconButton
+        aria-label={t('layers.deleteLayer')}
+        tooltip={t('layers.deleteLayer')!}
+        onClick={handleDeleteClick}
+        edge="end"
+        size="small"
+        disabled
+      >
         <DeleteOutlineIcon color="disabled" />
       </IconButton>
     );

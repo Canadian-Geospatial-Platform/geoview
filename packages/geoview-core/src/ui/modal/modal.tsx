@@ -241,6 +241,7 @@ function ModalUI(props: DialogPropsExtend): JSX.Element {
             ) : null}
             <IconButton
               id={`${modalId}-close-button`}
+              aria-label={t('close')}
               tooltip={t('close')!}
               tooltipPlacement="right"
               onClick={modal.close}

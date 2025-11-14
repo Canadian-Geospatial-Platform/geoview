@@ -389,6 +389,9 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
         ZOOM: (
           <IconButton
             color="primary"
+            aria-label={t('dataTable.zoom')}
+            tooltip={t('dataTable.zoom')!}
+            tooltipPlacement="top"
             // Function returns void promise instead of void, other work arounds led to more eslint issues
             onClick={() => {
               handleZoomIn(feature).catch((error) => logger.logError('Zoom failed:', error));
@@ -402,6 +405,9 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
           <Box marginLeft="0.3rem">
             <IconButton
               color="primary"
+              aria-label={t('dataTable.details')}
+              tooltip={t('dataTable.details')!}
+              tooltipPlacement="top"
               onClick={() => {
                 setSelectedFeature(feature);
                 enableFocusTrap({ activeElementId: 'featureDetailDataTable', callbackElementId: 'table-details' });
