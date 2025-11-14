@@ -3,7 +3,7 @@ const COLORS = {
   standardGrey: '#9e9e9e',
   mediumGrey: '#757575',
   darkGrey: '#424242',
-};
+} as const;
 
 export const SHARED_STYLES = {
   fontFamily: 'Helvetica',
@@ -20,7 +20,7 @@ export const SHARED_STYLES = {
   scaleMarginBottom: 10,
   legendMarginTop: 2,
   legendMarginBottom: 2,
-  layerMarginBottom: 3,
+  layerMarginBottom: 5,
   layerMarginTop: 8,
   wmsMarginBottom: 2,
   timeMarginBottom: 2,
@@ -36,14 +36,14 @@ export const SHARED_STYLES = {
   scaleTickHeight: 8,
   scaleTickOffset: -0.5,
   scaleTickTop: -3,
-  northArrowSize: 40,
-  legendGap: 10,
+  northArrowSize: 30,
+  legendGap: 15,
   legendPaddingLeft: 2,
   dividerMargin: 10,
   dividerHeight: 2,
   rowDividerHeight: 1,
   rowDividerMargin: 8,
-  wmsImageWidth: 250,
+  wmsImageWidth: 400,
   wmsImageMaxHeight: 600,
   itemIconSize: 8,
   itemIconMarginRight: 2,
@@ -62,12 +62,11 @@ export const SHARED_STYLES = {
     marginBottom: 10,
   },
   mapContainer: {
-    marginBottom: 10,
     borderWidth: 1,
     borderColor: COLORS.darkGrey,
     borderStyle: 'solid',
   },
-  mapImage: { width: '100%', objectFit: 'contain' },
+  mapImage: { width: '100%', objectFit: 'contain', borderWidth: 1, borderColor: COLORS.mediumGrey, borderStyle: 'solid' },
   scaleBarContainer: { justifyContent: 'center', alignItems: 'center' },
   scaleLine: {
     height: 1,
@@ -93,20 +92,38 @@ export const SHARED_STYLES = {
   },
   northArrow: { width: 40, height: 40 },
   northArrowSvg: { width: 40, height: 40 },
-  layerText: (marginTop: number | string) => ({
+  layerSeparator: (marginTop: number | string) => ({
+    marginTop,
+    marginBottom: SHARED_STYLES.layerMarginBottom,
+    width: '50%',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    borderTopWidth: 0.5,
+    borderTopColor: COLORS.standardGrey,
+    borderTopStyle: 'solid' as const,
+  }),
+  layerText: () => ({
     fontSize: 9,
     fontWeight: 'bold',
     marginBottom: 3,
-    marginTop,
+    marginTop: 0,
     flexWrap: 'wrap' as const,
     whiteSpace: 'normal',
+    wordWrap: 'break-word' as const,
+    overflowWrap: 'break-word' as const,
   }),
   wmsContainer: (indentLevel: number) => ({
     marginLeft: indentLevel + 3,
     marginBottom: 2,
+    maxWidth: 500, // Max width for text readability, but will be constrained by column width
+    width: '100%', // Take full column width up to max
   }),
   wmsImage: {
-    maxWidth: 250,
+    // WMS GetLegendGraphic images have variable native sizes (server-dependent)
+    // Preserve native size as much as possible for text readability, max 500px
+    width: 'auto',
+    height: 'auto',
+    maxWidth: '100%', // Fit within container (which is max 500px)
     objectFit: 'contain',
   },
   timeText: (indentLevel: number) => ({
@@ -121,6 +138,8 @@ export const SHARED_STYLES = {
     marginBottom: 2,
     marginLeft: indentLevel * 8 + 8,
     marginTop: 3,
+    wordWrap: 'break-word' as const,
+    overflowWrap: 'break-word' as const,
   }),
   itemIcon: {
     width: 8,
@@ -131,10 +150,12 @@ export const SHARED_STYLES = {
     fontSize: 7,
     flexShrink: 1,
     flexWrap: 'wrap',
+    wordWrap: 'break-word' as const,
+    overflowWrap: 'break-word' as const,
   },
   footer: {
     fontSize: 8,
-    marginTop: 'auto',
+    marginTop: 10, // Fixed margin instead of auto - let content dictate height
     paddingTop: 5,
     paddingLeft: 0,
     paddingRight: 0,
@@ -225,10 +246,10 @@ export const PDF_STYLES = {
 
 // Canvas-specific styles (CSS format)
 export const CANVAS_STYLES = {
-  page: (width: number, height: number) => ({
+  page: (width: number) => ({
     width: `${width}px`,
-    height: `${height}px`,
-    minHeight: `${height}px`,
+    // height removed - let content determine height
+    minHeight: 'auto', // Auto height based on content
     padding: `${SHARED_STYLES.padding}px`,
     fontFamily: SHARED_STYLES.fontFamily,
     backgroundColor: 'white',
@@ -313,8 +334,16 @@ export const CANVAS_STYLES = {
     borderTop: `1px solid ${COLORS.darkGrey}`,
     borderBottom: `1px solid ${COLORS.darkGrey}`,
   },
-  layerText: (marginTop: string) => ({
-    ...SHARED_STYLES.layerText(marginTop),
+  layerSeparator: (marginTop: string) => ({
+    marginTop,
+    marginBottom: `${SHARED_STYLES.layerMarginBottom}px`,
+    width: '50%',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    borderTop: `0.5px solid ${COLORS.standardGrey}`,
+  }),
+  layerText: () => ({
+    ...SHARED_STYLES.layerText(),
     fontSize: `${SHARED_STYLES.layerFontSize}px`,
     marginBottom: `${SHARED_STYLES.layerMarginBottom}px`,
   }),
@@ -322,10 +351,12 @@ export const CANVAS_STYLES = {
     ...SHARED_STYLES.wmsContainer(indentLevel),
     marginLeft: `${indentLevel + 3}px`,
     marginBottom: `${SHARED_STYLES.wmsMarginBottom}px`,
+    maxWidth: '500px',
+    width: '100%',
   }),
   wmsImage: {
     ...SHARED_STYLES.wmsImage,
-    maxWidth: `${SHARED_STYLES.wmsImageWidth}px`,
+    maxWidth: '100%', // Fit within container
     objectFit: 'contain',
   },
   timeText: (indentLevel: number) => ({
@@ -362,7 +393,7 @@ export const CANVAS_STYLES = {
     ...SHARED_STYLES.footer,
     fontSize: `${SHARED_STYLES.footerFontSize}px`,
     textAlign: 'center',
-    marginTop: 'auto',
+    marginTop: `${SHARED_STYLES.legendMarginTop * 4}px`, // Fixed margin instead of auto
     paddingTop: `${SHARED_STYLES.legendMarginTop * 4}px`,
   },
   footerDisclaimer: {
@@ -379,9 +410,9 @@ export const CANVAS_STYLES = {
     ...SHARED_STYLES.footerDate,
     fontSize: `${SHARED_STYLES.footerFontSize}px`,
   },
-  overflowPage: (width: number, height: number) => ({
+  overflowPage: (width: number) => ({
     width: `${width}px`,
-    height: `${height}px`,
+    minHeight: 'auto', // Auto height based on content
     padding: `${SHARED_STYLES.padding}px`,
     fontFamily: SHARED_STYLES.fontFamily,
     backgroundColor: 'white',
@@ -403,19 +434,42 @@ export const CANVAS_STYLES = {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getScaledPDFStyles = (docWidth: number): any => {
   const scale = docWidth / 612;
+
+  // Pre-compute base styles to avoid redundant function calls
+  const baseLayerText = PDF_STYLES.layerText();
+  const baseChildText = PDF_STYLES.childText(0);
+  const baseTimeText = PDF_STYLES.timeText(0);
+
   return {
     ...PDF_STYLES,
-    layerText: (marginTop: number) => ({
-      ...PDF_STYLES.layerText(marginTop),
-      fontSize: PDF_STYLES.layerText(0).fontSize * scale,
+    layerSeparator: (marginTop: number) => ({
+      ...SHARED_STYLES.layerSeparator(marginTop),
+    }),
+    wmsContainer: (indentLevel: number) => ({
+      ...PDF_STYLES.wmsContainer(indentLevel),
+      marginLeft: indentLevel + 3,
+      marginBottom: SHARED_STYLES.wmsMarginBottom,
+      maxWidth: 500,
+      width: '100%',
+    }),
+    wmsImage: {
+      ...PDF_STYLES.wmsImage,
+      width: 'auto', // Match Canvas/Preview: preserve native size
+      height: 'auto',
+      maxWidth: '100%',
+      objectFit: 'contain',
+    },
+    layerText: () => ({
+      ...baseLayerText,
+      fontSize: baseLayerText.fontSize * scale,
     }),
     childText: (indentLevel: number) => ({
       ...PDF_STYLES.childText(indentLevel),
-      fontSize: PDF_STYLES.childText(0).fontSize * scale,
+      fontSize: baseChildText.fontSize * scale,
     }),
     timeText: (indentLevel: number) => ({
       ...PDF_STYLES.timeText(indentLevel),
-      fontSize: PDF_STYLES.timeText(0).fontSize * scale,
+      fontSize: baseTimeText.fontSize * scale,
     }),
     itemText: {
       ...PDF_STYLES.itemText,
@@ -456,10 +510,6 @@ export const getScaledPDFStyles = (docWidth: number): any => {
       width: PDF_STYLES.itemIcon.width * scale,
       height: PDF_STYLES.itemIcon.height * scale,
     },
-    wmsImage: {
-      ...PDF_STYLES.wmsImage,
-      maxWidth: SHARED_STYLES.wmsImageWidth * scale,
-    },
   };
 };
 
@@ -469,66 +519,86 @@ export const getScaledPDFStyles = (docWidth: number): any => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getScaledCanvasStyles = (docWidth: number): any => {
   const scale = docWidth / 612;
+
+  // Pre-compute base styles and extract numeric values to avoid repetitive parseInt() calls
+  const baseLayerText = CANVAS_STYLES.layerText();
+  const baseChildText = CANVAS_STYLES.childText(0);
+  const baseTimeText = CANVAS_STYLES.timeText(0);
+
+  // Pre-extract numeric font sizes and dimensions
+  const layerTextSize = parseInt(baseLayerText.fontSize);
+  const childTextSize = parseInt(baseChildText.fontSize);
+  const timeTextSize = parseInt(baseTimeText.fontSize);
+  const itemTextSize = parseInt(CANVAS_STYLES.itemText.fontSize);
+  const titleSize = parseInt(CANVAS_STYLES.title.fontSize);
+  const scaleTextSize = parseInt(CANVAS_STYLES.scaleText.fontSize);
+  const footerSize = parseInt(CANVAS_STYLES.footerDisclaimer.fontSize);
+  const northArrowSize = parseInt(CANVAS_STYLES.northArrow.width);
+  const itemIconSize = parseInt(CANVAS_STYLES.itemIcon.width);
+
   return {
     ...CANVAS_STYLES,
-    layerText: (marginTop: string) => ({
-      ...CANVAS_STYLES.layerText(marginTop),
-      fontSize: `${parseInt(CANVAS_STYLES.layerText('0').fontSize) * scale}px`,
+    layerSeparator: (marginTop: string) => ({
+      ...CANVAS_STYLES.layerSeparator(marginTop),
+    }),
+    layerText: () => ({
+      ...baseLayerText,
+      fontSize: `${layerTextSize * scale}px`,
       wordWrap: 'break-word' as const,
       overflowWrap: 'break-word' as const,
     }),
     childText: (indentLevel: number) => ({
       ...CANVAS_STYLES.childText(indentLevel),
-      fontSize: `${parseInt(CANVAS_STYLES.childText(0).fontSize) * scale}px`,
+      fontSize: `${childTextSize * scale}px`,
       wordWrap: 'break-word' as const,
       overflowWrap: 'break-word' as const,
     }),
     timeText: (indentLevel: number) => ({
       ...CANVAS_STYLES.timeText(indentLevel),
-      fontSize: `${parseInt(CANVAS_STYLES.timeText(0).fontSize) * scale}px`,
+      fontSize: `${timeTextSize * scale}px`,
       wordWrap: 'break-word' as const,
       overflowWrap: 'break-word' as const,
     }),
     itemText: {
       ...CANVAS_STYLES.itemText,
-      fontSize: `${parseInt(CANVAS_STYLES.itemText.fontSize) * scale}px`,
+      fontSize: `${itemTextSize * scale}px`,
       wordWrap: 'break-word' as const,
       overflowWrap: 'break-word' as const,
     },
     title: {
       ...CANVAS_STYLES.title,
-      fontSize: `${parseInt(CANVAS_STYLES.title.fontSize) * scale}px`,
+      fontSize: `${titleSize * scale}px`,
     },
     scaleText: {
       ...CANVAS_STYLES.scaleText,
-      fontSize: `${parseInt(CANVAS_STYLES.scaleText.fontSize) * scale}px`,
+      fontSize: `${scaleTextSize * scale}px`,
     },
     footerDisclaimer: {
       ...CANVAS_STYLES.footerDisclaimer,
-      fontSize: `${parseInt(CANVAS_STYLES.footerDisclaimer.fontSize) * scale}px`,
+      fontSize: `${footerSize * scale}px`,
     },
     footerAttribution: {
       ...CANVAS_STYLES.footerAttribution,
-      fontSize: `${parseInt(CANVAS_STYLES.footerAttribution.fontSize) * scale}px`,
+      fontSize: `${footerSize * scale}px`,
     },
     footerDate: {
       ...CANVAS_STYLES.footerDate,
-      fontSize: `${parseInt(CANVAS_STYLES.footerDate.fontSize) * scale}px`,
+      fontSize: `${footerSize * scale}px`,
     },
     northArrow: {
       ...CANVAS_STYLES.northArrow,
-      width: `${parseInt(CANVAS_STYLES.northArrow.width) * scale}px`,
-      height: `${parseInt(CANVAS_STYLES.northArrow.height) * scale}px`,
+      width: `${northArrowSize * scale}px`,
+      height: `${northArrowSize * scale}px`,
     },
     northArrowSvg: {
       ...CANVAS_STYLES.northArrowSvg,
-      width: `${parseInt(CANVAS_STYLES.northArrowSvg.width) * scale}px`,
-      height: `${parseInt(CANVAS_STYLES.northArrowSvg.height) * scale}px`,
+      width: `${northArrowSize * scale}px`,
+      height: `${northArrowSize * scale}px`,
     },
     itemIcon: {
       ...CANVAS_STYLES.itemIcon,
-      width: `${parseInt(CANVAS_STYLES.itemIcon.width) * scale}px`,
-      height: `${parseInt(CANVAS_STYLES.itemIcon.height) * scale}px`,
+      width: `${itemIconSize * scale}px`,
+      height: `${itemIconSize * scale}px`,
     },
     wmsImage: {
       ...CANVAS_STYLES.wmsImage,

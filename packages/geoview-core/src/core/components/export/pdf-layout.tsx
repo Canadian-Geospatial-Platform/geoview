@@ -2,10 +2,10 @@ import { pdf } from '@react-pdf/renderer';
 
 import { Document, Page, Text, View, Image, Svg, Path } from '@react-pdf/renderer';
 import { DateMgt } from '@/core/utils/date-mgt';
-import type { FlattenedLegendItem, TypeValidPageSizes, ElementFactory } from './utilities';
-import { getMapInfo, PAGE_CONFIGS, renderLegendColumns, renderFooter, renderScaleBar, renderNorthArrow } from './utilities';
-import type { FileExportProps } from './export-modal';
-import { PDF_STYLES, getScaledPDFStyles } from './layout-styles';
+import type { FlattenedLegendItem, ElementFactory } from '@/core/components/export/utilities';
+import { ExportUtilities } from '@/core/components/export/utilities';
+import type { FileExportProps } from '@/core/components/export/export-modal';
+import { PDF_STYLES, getScaledPDFStyles } from '@/core/components/export/layout-styles';
 
 interface ExportDocumentProps {
   mapDataUrl: string;
@@ -23,8 +23,9 @@ interface ExportDocumentProps {
   attributions: string[];
   date: string;
   fittedColumns: FlattenedLegendItem[][];
-  fittedOverflowItems?: FlattenedLegendItem[][];
-  pageSize: TypeValidPageSizes;
+  columnWidths?: number[];
+  canvasWidth: number;
+  canvasHeight: number;
 }
 
 // PDF element factory for react-pdf elements
@@ -38,13 +39,22 @@ const pdfElementFactory: ElementFactory = {
 };
 
 /**
- * Render legend items directly from columns without re-grouping
+ * Render legend items in columns for PDF export
+ * @param {FlattenedLegendItem[][]} columns - Pre-organized legend items grouped into columns
+ * @param {any} styles - Scaled styles for the PDF layout
+ * @param {number[]} columnWidths - Optional array of column widths in pixels
+ * @returns {JSX.Element} The rendered legend columns as JSX
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const renderLegendInRows = (columns: FlattenedLegendItem[][], styles: any): JSX.Element => {
-  return renderLegendColumns(columns, pdfElementFactory, styles, PDF_STYLES);
+const renderLegendInRows = (columns: FlattenedLegendItem[][], styles: any, columnWidths?: number[]): JSX.Element => {
+  return ExportUtilities.renderLegendColumns(columns, pdfElementFactory, styles, PDF_STYLES, columnWidths);
 };
 
+/**
+ * The PDF export document that is created for the map export
+ * @param {ExportDocumentProps} props - The PDF Export Document properties
+ * @returns {JSX.Element} The resulting html map
+ */
 export function ExportDocument({
   mapDataUrl,
   exportTitle,
@@ -56,12 +66,12 @@ export function ExportDocument({
   attributions,
   date,
   fittedColumns,
-  fittedOverflowItems,
-  pageSize,
+  columnWidths,
+  canvasWidth,
+  canvasHeight,
 }: ExportDocumentProps): JSX.Element {
-  const config = PAGE_CONFIGS[pageSize];
-  const pageDimensions = [config.canvasWidth, config.canvasHeight];
-  const scaledStyles = getScaledPDFStyles(config.canvasWidth);
+  const pageDimensions = [canvasWidth, canvasHeight];
+  const scaledStyles = getScaledPDFStyles(canvasWidth);
 
   return (
     <Document>
@@ -73,46 +83,48 @@ export function ExportDocument({
             src={mapDataUrl}
             style={{
               ...PDF_STYLES.mapImage,
-              maxHeight: pageSize === 'AUTO' ? 'auto' : config.mapHeight,
+              maxHeight: 'auto', // AUTO mode only
             }}
           />
         </View>
 
         <View style={PDF_STYLES.scaleContainer}>
-          {renderScaleBar(scaleText, scaleLineWidth, pdfElementFactory, scaledStyles, PDF_STYLES)}
-          {renderNorthArrow(northArrowSvg, northArrowRotation, pdfElementFactory, scaledStyles)}
+          {ExportUtilities.renderScaleBar(scaleText, scaleLineWidth, pdfElementFactory, scaledStyles, PDF_STYLES)}
+          {ExportUtilities.renderNorthArrow(northArrowSvg, northArrowRotation, pdfElementFactory, scaledStyles)}
         </View>
 
         {/* Divider between scale and legend */}
         <View style={PDF_STYLES.divider} />
 
         {fittedColumns && fittedColumns.length > 0 && (
-          <View style={PDF_STYLES.legendContainer}>{renderLegendInRows(fittedColumns, scaledStyles)}</View>
+          <View style={PDF_STYLES.legendContainer}>{renderLegendInRows(fittedColumns, scaledStyles, columnWidths)}</View>
         )}
 
-        {renderFooter(disclaimer, attributions, date, pdfElementFactory, scaledStyles)}
+        {ExportUtilities.renderFooter(disclaimer, attributions, date, pdfElementFactory, scaledStyles)}
       </Page>
-
-      {pageSize !== 'AUTO' && fittedOverflowItems && fittedOverflowItems.filter((column) => column.length > 0).length > 0 && (
-        <Page size={{ width: pageDimensions[0], height: pageDimensions[1] }} style={PDF_STYLES.page}>
-          <View style={PDF_STYLES.overflowContainer}>{renderLegendInRows(fittedOverflowItems, scaledStyles)}</View>
-        </Page>
-      )}
     </Document>
   );
 }
 
+/**
+ * Creates the PDF map for the export
+ * @param {string} mapId - The map ID
+ * @param {FileExportProps} props - The file export props
+ * @returns {Promise<string>} A string URL for the document
+ */
 export async function createPDFMapUrl(mapId: string, params: FileExportProps): Promise<string> {
-  const { exportTitle, disclaimer, pageSize } = params;
-  const mapInfo = await getMapInfo(mapId, pageSize, disclaimer, exportTitle);
+  const { exportTitle, disclaimer } = params;
+  const mapInfo = await ExportUtilities.getMapInfo(mapId, exportTitle, disclaimer);
 
+  // Use pre-calculated canvas height from getMapInfo (measured during preview)
   const blob = await pdf(
     <ExportDocument
       {...mapInfo}
       exportTitle={exportTitle}
       disclaimer={disclaimer}
       date={DateMgt.formatDate(new Date(), 'YYYY-MM-DD, hh:mm:ss A')}
-      pageSize={pageSize}
+      canvasWidth={mapInfo.canvasWidth}
+      canvasHeight={mapInfo.canvasHeight}
     />
   ).toBlob();
   return URL.createObjectURL(blob);

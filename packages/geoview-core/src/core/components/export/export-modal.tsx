@@ -1,20 +1,23 @@
 /*
 Export Process Overview:
-- Modal displays preview and handles user input (title, format, page size, etc.)
+- Modal displays preview and handles user input (title, format, DPI, quality)
 - Canvas layout (createCanvasMapUrls) generates raster images for preview/export
 - PDF layout (createPDFMapUrl) generates vector PDFs for export only
 - Both call utilities>getMapInfo for map preparation and legend processing
 
 Key Processing Steps:
-- getMapInfo captures map canvas at 300DPI, extracts scale/north arrow, processes legend data
+- getMapInfo captures map canvas, extracts scale/north arrow, processes legend data
 - Map rotation handled by canvas transforms during capture
-- Legend items filtered by visibility and flattened into hierarchy with height estimates
-- Footer space reserved based on disclaimer/attribution text length estimates
+- Legend items filtered by visibility and flattened into hierarchy
+- Document uses AUTO mode only - height calculated dynamically from rendered content
 
 Legend Distribution Logic:
-- Distributes parent+child groups into columns based on available space
-- Groups that don't fit move to overflow page
-- Maintains vector quality until final rasterization (canvas) or keeps vectors (PDF)
+- Measures actual rendered height/width of each layer group in DOM
+- Distributes groups into 2-4 columns based on available width (min 280px/column)
+- Uses 2-step look-ahead optimization to balance column heights
+- Column widths justify to fill available space without gaps
+- All content fits on single auto-sized page (no overflow pages)
+- Canvas/PDF rendering uses measured dimensions for consistent output
 */
 
 import type { ChangeEvent, RefObject } from 'react';
@@ -29,13 +32,11 @@ import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-inti
 import { exportFile } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 
-import { createPDFMapUrl } from './pdf-layout';
-import { createCanvasMapUrls } from './canvas-layout';
-import { getSxClasses } from './export-modal-style';
+import { createPDFMapUrl } from '@/core/components/export/pdf-layout';
+import { createCanvasMapUrls } from '@/core/components/export/canvas-layout';
+import { getSxClasses } from '@/core/components/export/export-modal-style';
 
 type FileFormat = 'pdf' | 'png' | 'jpeg';
-
-type DocumentSize = 'AUTO';
 
 const QUALITY_OPTIONS = [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100];
 
@@ -44,7 +45,6 @@ const PREVIEW_TIMEOUT = 200;
 export interface FileExportProps {
   exportTitle: string;
   disclaimer: string;
-  pageSize: DocumentSize;
   dpi: number;
   jpegQuality?: number;
   format: FileFormat;
@@ -85,34 +85,29 @@ export default function ExportModal(): JSX.Element {
   const [jpegQuality, setJpegQuality] = useState(90); // Default 90%
   const [qualityMenuOpen, setQualityMenuOpen] = useState(false);
   const [qualityAnchorEl, setQualityAnchorEl] = useState<null | HTMLElement>(null);
-  const [pageSize] = useState<DocumentSize>('AUTO');
   const dialogRef = useRef(null) as RefObject<HTMLDivElement>;
   const [pngPreviewUrls, setPngPreviewUrls] = useState<string[]>([]);
 
   const fileExportDefaultPrefixName = t('exportModal.fileExportDefaultPrefixName');
 
-  const handleCloseModal = useCallback(() => {
-    logger.logTraceUseCallback('EXPORT-MODAL - handleCloseModal');
-    setActiveAppBarTab('legend', false, false);
-    disableFocusTrap();
-  }, [setActiveAppBarTab, disableFocusTrap]);
-
-  // Generate preview of PDF
+  // Generate preview at maximum quality (300 DPI) - export will regenerate at selected DPI
   const generatePreview = useCallback(async () => {
     logger.logTraceUseCallback('EXPORT-MODAL - generatePreview Callback');
     try {
       setIsMapLoading(true);
       const disclaimer = t('mapctrl.disclaimer.message');
-      const pngUrls = await createCanvasMapUrls(mapId, { exportTitle: '', disclaimer, pageSize: pageSize, dpi: 96, format: 'jpeg' });
-      setPngPreviewUrls(pngUrls);
-      pngUrls.forEach((url) => URL.revokeObjectURL(url));
+      // Always generate at 300 DPI for best quality, browser will downsample for display
+      // Export regenerates canvas at user-selected DPI anyway
+      const pngUrl = await createCanvasMapUrls(mapId, { exportTitle: '', disclaimer, dpi: 300, format: 'jpeg' });
+      setPngPreviewUrls([pngUrl]);
+      URL.revokeObjectURL(pngUrl);
     } catch (error) {
       logger.logError(error);
     } finally {
       setIsMapLoading(false);
       setIsLegendLoading(false);
     }
-  }, [t, mapId, pageSize]);
+  }, [t, mapId]);
 
   // Export the requested file
   const performExport = useCallback(async () => {
@@ -121,31 +116,30 @@ export default function ExportModal(): JSX.Element {
       setIsMapExporting(true);
       const disclaimer = t('mapctrl.disclaimer.message');
       const dpi = exportFormat === 'pdf' ? 300 : exportMapResolution;
-      const filename = `${fileExportDefaultPrefixName}-${exportTitle.trim() || mapId}`;
+
+      // Sanitize filename: limit to 20 characters and remove special characters
+      const sanitizedTitle = (exportTitle.trim() || mapId)
+        .replace(/[^a-zA-Z0-9-_]/g, '_') // Replace special characters with underscore
+        .replace(/_+/g, '_') // Collapse multiple underscores into one
+        .substring(0, 35); // Limit to 35 characters
+      const filename = `${fileExportDefaultPrefixName}-${sanitizedTitle}`;
 
       // TODO Find a way to use sx in the pdf/canvas-layout files.
       // TO.DO Probably would need to pass the theme to the createPDFMapUrl and createCanvasMapUrls here and in above generatePreview
       if (exportFormat === 'pdf') {
-        const pdfUrl = await createPDFMapUrl(mapId, { exportTitle, disclaimer, pageSize: pageSize, dpi, format: exportFormat });
+        const pdfUrl = await createPDFMapUrl(mapId, { exportTitle, disclaimer, dpi, format: exportFormat });
         exportFile(pdfUrl, filename, exportFormat);
         URL.revokeObjectURL(pdfUrl);
       } else {
         const imageUrl = await createCanvasMapUrls(mapId, {
           exportTitle,
           disclaimer,
-          pageSize: pageSize,
           dpi,
           jpegQuality,
           format: exportFormat,
         });
-        imageUrl.forEach((url, i) => {
-          let exportName = filename;
-          if (i > 0) {
-            exportName = `${filename}-legend-overflow-${i}`;
-          }
-          exportFile(url, exportName, exportFormat);
-          URL.revokeObjectURL(url);
-        });
+        exportFile(imageUrl, filename, exportFormat);
+        URL.revokeObjectURL(imageUrl);
       }
     } catch (error) {
       logger.logError(`Error exporting ${exportFormat.toUpperCase()}`, error);
@@ -162,7 +156,6 @@ export default function ExportModal(): JSX.Element {
     fileExportDefaultPrefixName,
     jpegQuality,
     mapId,
-    pageSize,
     setActiveAppBarTab,
     t,
   ]);
@@ -171,6 +164,10 @@ export default function ExportModal(): JSX.Element {
   useEffect(() => {
     logger.logTraceUseEffect('EXPORT-MODAL - generatePreview useEffect');
     if (activeModalId !== 'export') return;
+
+    // Reset loading states to show skeleton immediately when modal opens
+    setIsMapLoading(true);
+    setIsLegendLoading(true);
 
     const overviewMap = mapElement.getElementsByClassName('ol-overviewmap')[0] as HTMLDivElement;
     if (overviewMap) overviewMap.style.visibility = 'hidden';
@@ -186,6 +183,16 @@ export default function ExportModal(): JSX.Element {
   }, [activeModalId, generatePreview, mapElement]);
 
   // #region HANDLERS
+
+  const handleCloseModal = useCallback(() => {
+    logger.logTraceUseCallback('EXPORT-MODAL - handleCloseModal');
+    setActiveAppBarTab('legend', false, false);
+    disableFocusTrap();
+    // Clear preview content so skeleton shows on next open
+    setPngPreviewUrls([]);
+    setIsMapLoading(false);
+    setIsLegendLoading(false);
+  }, [setActiveAppBarTab, disableFocusTrap]);
 
   const handleExport = useCallback(() => {
     logger.logTraceUseCallback('EXPORT-MODAL - handleExport');
@@ -273,7 +280,14 @@ export default function ExportModal(): JSX.Element {
         <Box ref={exportContainerRef} sx={{ textAlign: 'center' }}>
           {(() => {
             if (isMapLoading || isLegendLoading) {
-              return <Skeleton variant="rounded" width={600} height={777} sx={sxClasses.mapSkeletonMargin} />;
+              // Calculate skeleton dimensions: 80% of dialog width with map aspect ratio
+              const dialogWidth = dialogRef.current?.offsetWidth || window.innerWidth * 0.8;
+              const skeletonWidth = dialogWidth * 0.8;
+              const mapCanvas = mapElement.querySelector('.ol-viewport canvas:not(.ol-overviewmap canvas)') as HTMLCanvasElement;
+              const mapAspectRatio = mapCanvas ? mapCanvas.height / mapCanvas.width : 1.3;
+              const skeletonHeight = skeletonWidth * mapAspectRatio;
+
+              return <Skeleton variant="rounded" width={skeletonWidth} height={skeletonHeight} sx={sxClasses.mapSkeletonMargin} />;
             }
 
             if (pngPreviewUrls) {
@@ -295,8 +309,8 @@ export default function ExportModal(): JSX.Element {
         {/* Format Selection Menu */}
         <Menu id="format-selection" open={formatMenuOpen} onClose={handleFormatMenuClose} anchorEl={formatAnchorEl}>
           <MenuItem onClick={() => handleSelectFormat('pdf')}>PDF</MenuItem>
-          {pageSize === 'AUTO' && <MenuItem onClick={() => handleSelectFormat('png')}>PNG</MenuItem>}
-          {pageSize === 'AUTO' && <MenuItem onClick={() => handleSelectFormat('jpeg')}>JPEG</MenuItem>}
+          <MenuItem onClick={() => handleSelectFormat('png')}>PNG</MenuItem>
+          <MenuItem onClick={() => handleSelectFormat('jpeg')}>JPEG</MenuItem>
         </Menu>
         <Button type="text" onClick={handleFormatMenuClick} variant="outlined" size="small" sx={sxClasses.buttonOutlined}>
           Format: {exportFormat.toUpperCase()}

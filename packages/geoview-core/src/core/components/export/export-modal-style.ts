@@ -12,8 +12,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
 
   mapPreview: {
-    maxWidth: 600,
-    maxHeight: 777,
+    maxWidth: '80%',
     width: 'auto',
     height: 'auto',
     border: '1px solid #ccc',
@@ -25,8 +24,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
 
   mapLoading: {
-    maxWidth: 600,
-    maxHeight: 777,
+    maxWidth: '80%',
     width: 'auto',
     height: 'auto',
     border: '1px solid #ccc',
