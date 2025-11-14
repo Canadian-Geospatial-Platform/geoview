@@ -99,8 +99,7 @@ export default function Version(): JSX.Element {
       <Box sx={{ padding: interaction === 'dynamic' ? 'none' : '5px' }}>
         <IconButton
           id="version-button"
-          tooltip={t('appbar.version')!}
-          aria-label={t('appbar.version')!}
+          aria-label={t('appbar.version')}
           tooltipPlacement="right"
           onClick={handleOpenPopover}
           className={`${interaction === 'dynamic' ? 'buttonFilled' : 'style4'} ${open ? 'active' : ''}`}
@@ -136,7 +135,7 @@ export default function Version(): JSX.Element {
                 <Typography sx={sxClasses.versionsInfoTitle} component="h3">
                   {t('appbar.version')}
                 </Typography>
-                <IconButton onClick={handleClickAway}>
+                <IconButton onClick={handleClickAway} aria-label={t('general.close')} tooltipPlacement="right">
                   <CloseIcon />
                 </IconButton>
               </Box>

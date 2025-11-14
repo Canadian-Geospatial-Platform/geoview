@@ -48,6 +48,10 @@ import {
   useMapSelectorLayerParentHidden,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 
+// TODO: WCAG Issue #3108 - Fix layers.moreInfo button (button nested within a button)
+// TODO: WCAG Issue #3108 - Check all disabled buttons. They may need special treatment. Need to find instance in UI first)
+// TODO: WCAG Issue #3108 - Check all icon buttons for "state related" aria values (i.e aria-checked, aria-disabled, etc.)
+
 interface LayerDetailsProps {
   layerDetails: TypeLegendLayer;
 }
@@ -63,6 +67,7 @@ const Sublayer = memo(({ layer }: SubLayerProps): JSX.Element => {
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
+  const { t } = useTranslation<string>();
 
   // Hooks
   const layerHidden = useMapSelectorIsLayerHiddenOnMap(layer.layerPath);
@@ -73,7 +78,15 @@ const Sublayer = memo(({ layer }: SubLayerProps): JSX.Element => {
   // Return the ui
   return (
     <ListItem>
-      <IconButton color="primary" onClick={() => setOrToggleLayerVisibility(layer.layerPath)} disabled={parentHidden}>
+      <IconButton
+        color="primary"
+        role="checkbox"
+        onClick={() => setOrToggleLayerVisibility(layer.layerPath)}
+        disabled={parentHidden}
+        aria-checked={layerVisible === true}
+        aria-label={layerVisible ? t('layers.hideLayer', { name: layer.layerName }) : t('layers.showLayer', { name: layer.layerName })}
+        tooltipPlacement="left"
+      >
         {layerVisible ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
       </IconButton>
       <LayerIcon layerPath={layer.layerPath} />
@@ -263,14 +276,22 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
     if (!layerDetails.canToggle) {
       return (
-        <IconButton disabled tooltip={t('layers.visibilityIsAlways')!}>
+        <IconButton disabled role="checkbox" aria-label={t('layers.visibilityIsAlways')} aria-checked={false} tooltipPlacement="left">
           <CheckBoxIcon color="disabled" />
         </IconButton>
       );
     }
 
     return (
-      <IconButton color="primary" onClick={() => toggleItemVisibility(layerDetails.layerPath, item)} disabled={layerHidden}>
+      <IconButton
+        role="checkbox"
+        color="primary"
+        aria-label={item.isVisible ? t('layers.hideLayer', { name: item.name }) : t('layers.showLayer', { name: item.name })}
+        aria-checked={item.isVisible === true}
+        tooltipPlacement="left"
+        onClick={() => toggleItemVisibility(layerDetails.layerPath, item)}
+        disabled={layerHidden}
+      >
         {item.isVisible === true ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
       </IconButton>
     );
@@ -279,14 +300,22 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   function renderHeaderCheckbox(): JSX.Element {
     if (!layerDetails.canToggle) {
       return (
-        <IconButton disabled>
+        <IconButton disabled role="checkbox" aria-label={t('layers.visibilityIsAlways')} aria-checked={false} tooltipPlacement="left">
           <CheckBoxIcon color="disabled" />
         </IconButton>
       );
     }
 
     return (
-      <IconButton color="primary" onClick={() => setAllItemsVisibility(layerDetails.layerPath, !allItemsChecked())} disabled={layerHidden}>
+      <IconButton
+        color="primary"
+        role="checkbox"
+        aria-label={allItemsChecked() ? t('layers.hideAllLayers') : t('layers.showAllLayers')}
+        aria-checked={allItemsChecked() === true}
+        tooltipPlacement="left"
+        onClick={() => setAllItemsVisibility(layerDetails.layerPath, !allItemsChecked())}
+        disabled={layerHidden}
+      >
         {allItemsChecked() ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
       </IconButton>
     );
@@ -345,12 +374,12 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   function renderDetailsButton(): JSX.Element {
     if (layerDetails.controls?.table !== false)
       return (
-        <IconButton id="table-details" tooltip={t('legend.tableDetails')!} className="buttonOutline" onClick={handleOpenTable}>
+        <IconButton id="table-details" aria-label={t('legend.tableDetails')} className="buttonOutline" onClick={handleOpenTable}>
           <TableViewIcon />
         </IconButton>
       );
     return (
-      <IconButton id="table-details" className="buttonOutline" disabled>
+      <IconButton aria-label={t('layers.tableViewNone')} id="table-details" className="buttonOutline" disabled>
         <TableViewIcon color="disabled" />
       </IconButton>
     );
@@ -360,7 +389,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     if (isLayerHighlightCapable)
       return (
         <IconButton
-          tooltip={t('legend.highlightLayer')!}
+          aria-label={t('legend.highlightLayer')}
           onClick={handleHighlightLayer}
           className={highlightedLayer === layerDetails.layerPath ? 'buttonOutline active' : 'buttonOutline'}
           disabled={layerHidden}
@@ -375,7 +404,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     if (isLayerZoomToExtentCapable)
       return (
         <IconButton
-          tooltip={t('legend.zoomTo')!}
+          aria-label={t('legend.zoomTo')}
           onClick={handleZoomTo}
           className="buttonOutline"
           disabled={layerDetails.bounds === undefined || layerHidden}
@@ -390,7 +419,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     return (
       <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px', marginLeft: 'auto' }}>
         {datatableSettings[layerDetails.layerPath] && renderDetailsButton()}
-        <IconButton tooltip={t('legend.refreshLayer')!} className="buttonOutline" onClick={handleRefreshLayer}>
+        <IconButton aria-label={t('legend.refreshLayer')} className="buttonOutline" onClick={handleRefreshLayer}>
           <RestartAltIcon />
         </IconButton>
         {renderHighlightButton()}
@@ -493,7 +522,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
       <Box>
         <Button type="text" sx={{ fontSize: theme.palette.geoViewFontSize.sm }} onClick={() => setIsInfoCollapse(!isInfoCollapse)}>
           {`${t('layers.moreInfo')}`}
-          <IconButton className="buttonOutline" edge="end" size="small" tooltip={t('layers.toggleCollapse')!}>
+          <IconButton className="buttonOutline" edge="end" size="small" aria-label={t('layers.toggleCollapse')}>
             {isInfoCollapse ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </Button>
@@ -588,7 +617,15 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
             {layerDetails.children.length > 0 && (
               <Grid container direction="row" alignItems="center" justifyItems="stretch">
                 <Grid size={{ xs: 'auto' }}>
-                  <IconButton color="primary" onClick={handleToggleAllVisibility} disabled={layerHidden}>
+                  <IconButton
+                    role="checkbox"
+                    aria-label={allSublayersVisible ? t('layers.hideAllLayers') : t('layers.showAllLayers')}
+                    aria-checked={allSublayersVisible === true}
+                    tooltipPlacement="left"
+                    color="primary"
+                    onClick={handleToggleAllVisibility}
+                    disabled={layerHidden}
+                  >
                     {allSublayersVisible ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
                   </IconButton>
                 </Grid>

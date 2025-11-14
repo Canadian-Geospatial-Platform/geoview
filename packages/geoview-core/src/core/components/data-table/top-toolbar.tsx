@@ -88,7 +88,6 @@ function TopToolbar(props: TopToolbarProps<ColumnsType>): JSX.Element {
 
           <IconButton
             className="buttonOutline"
-            tooltip={t('dataTable.clearFilters')}
             aria-label={t('dataTable.clearFilters')}
             color="primary"
             onClick={() => useTable?.resetColumnFilters()}

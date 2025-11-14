@@ -9,6 +9,7 @@ import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import { IconButton } from '@/ui/icon-button/icon-button';
 import { List, ListItem } from '@/ui/list';
 import { ProjectionIcon, PublicIcon } from '@/ui/icons';
+import { useTranslation } from 'react-i18next';
 
 const projectionChoiceOptions: {
   [key: string]: {
@@ -27,6 +28,8 @@ const projectionChoiceOptions: {
 export default function Projection(): JSX.Element {
   // Log
   logger.logTraceRender('components/nav-bar/buttons/projection');
+
+  const { t } = useTranslation<string>();
 
   // Store
   const projection = useMapProjection();
@@ -54,7 +57,6 @@ export default function Projection(): JSX.Element {
           <IconButton
             id="button-wm"
             aria-label={projectionChoiceOptions['3857'].name}
-            tooltip={projectionChoiceOptions['3857'].name}
             tooltipPlacement="left"
             size="small"
             onClick={() => handleChoice(projectionChoiceOptions['3857'].code)}
@@ -68,7 +70,6 @@ export default function Projection(): JSX.Element {
           <IconButton
             id="button-lcc"
             aria-label={projectionChoiceOptions['3978'].name}
-            tooltip={projectionChoiceOptions['3978'].name}
             tooltipPlacement="left"
             size="small"
             onClick={() => handleChoice(projectionChoiceOptions['3978'].code)}
@@ -84,7 +85,7 @@ export default function Projection(): JSX.Element {
 
   // Set up props for nav bar panel button
   const button: IconButtonPropsExtend = {
-    tooltip: 'mapnav.projection',
+    'aria-label': t('mapnav.projection'),
     children: createElement(ProjectionIcon),
     tooltipPlacement: 'left',
   };

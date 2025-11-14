@@ -202,7 +202,8 @@ export function NavBar(props: NavBarProps): JSX.Element {
           <IconButton
             key={buttonPanel.button.id}
             id={buttonPanel.button.id}
-            tooltip={t(buttonPanel.button.tooltip!)!}
+            aria-label={buttonPanel.button['aria-label']}
+            tooltip={buttonPanel.button.tooltip}
             tooltipPlacement={buttonPanel.button.tooltipPlacement}
             sx={sxClasses.navButton}
             onClick={buttonPanel.button.onClick}
@@ -274,7 +275,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
           {needsExpansion && (
             <IconButton
               key={`expand-${groupName}`}
-              tooltip={isExpanded ? 'Show less' : 'Show more'}
+              aria-label={isExpanded ? t('general.close') : t('general.open')}
               tooltipPlacement="left"
               sx={sxClasses.navButton}
               onClick={toggleExpansion}

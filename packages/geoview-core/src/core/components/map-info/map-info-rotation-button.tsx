@@ -48,13 +48,7 @@ export const MapInfoRotationButton = memo(function MapInfoRotationButton(): JSX.
   );
 
   return (
-    <IconButton
-      tooltipPlacement="top"
-      tooltip={t('mapctrl.rotation.resetRotation')!}
-      aria-label={t('mapctrl.rotation.resetRotation')!}
-      onClick={handleRotationReset}
-      sx={buttonStyles}
-    >
+    <IconButton aria-label={t('mapctrl.rotation.resetRotation')} tooltipPlacement="top" onClick={handleRotationReset} sx={buttonStyles}>
       <ArrowUpIcon ref={iconRef} style={iconStyles} />
     </IconButton>
   );
