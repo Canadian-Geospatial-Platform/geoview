@@ -82,7 +82,7 @@ export const Attribution = memo(function Attribution(): JSX.Element {
         className={open ? 'active' : ''}
         tooltipPlacement="top"
         tooltip={t('mapctrl.attribution.tooltip')!}
-        aria-label={t('mapctrl.attribution.tooltip')!}
+        aria-label={t('mapctrl.attribution.tooltip')}
         sx={buttonStyles}
       >
         <MoreHorizIcon />

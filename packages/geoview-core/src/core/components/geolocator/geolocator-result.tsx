@@ -119,6 +119,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
               size="small"
               edge="end"
               color="inherit"
+              aria-label={t('geolocator.clearFilters')}
               tooltip={t('geolocator.clearFilters')!}
               onClick={handleClearFilters}
               disabled={!geoLocationData.length}

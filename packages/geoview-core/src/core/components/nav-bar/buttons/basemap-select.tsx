@@ -76,7 +76,7 @@ export default function BasemapSelect(): JSX.Element {
           <ListItem>
             <IconButton
               id="button-default"
-              aria-label={t('basemaps.default')!}
+              aria-label={t('basemaps.default')}
               tooltip={t('basemaps.default')!}
               tooltipPlacement="left"
               size="small"
@@ -91,7 +91,7 @@ export default function BasemapSelect(): JSX.Element {
         <ListItem>
           <IconButton
             id="button-transport"
-            aria-label={t('basemaps.transport')!}
+            aria-label={t('basemaps.transport')}
             tooltip={t('basemaps.transport')!}
             tooltipPlacement="left"
             size="small"
@@ -105,7 +105,7 @@ export default function BasemapSelect(): JSX.Element {
         <ListItem>
           <IconButton
             id="button-imagery"
-            aria-label={t('basemaps.imagery')!}
+            aria-label={t('basemaps.imagery')}
             tooltip={t('basemaps.imagery')!}
             tooltipPlacement="left"
             size="small"
@@ -119,7 +119,7 @@ export default function BasemapSelect(): JSX.Element {
         <ListItem>
           <IconButton
             id="button-simple"
-            aria-label={t('basemaps.simple')!}
+            aria-label={t('basemaps.simple')}
             tooltip={t('basemaps.simple')!}
             tooltipPlacement="left"
             size="small"
@@ -133,7 +133,7 @@ export default function BasemapSelect(): JSX.Element {
         <ListItem>
           <IconButton
             id="button-nogeom"
-            aria-label={t('basemaps.nogeom')!}
+            aria-label={t('basemaps.nogeom')}
             tooltip={t('basemaps.nogeom')!}
             tooltipPlacement="left"
             size="small"
@@ -150,7 +150,8 @@ export default function BasemapSelect(): JSX.Element {
 
   // Set up props for nav bar panel button
   const button: IconButtonPropsExtend = {
-    tooltip: 'mapnav.basemap',
+    'aria-label': t('mapnav.basemap'),
+    tooltip: t('mapnav.basemap')!,
     children: createElement(MapIcon),
     tooltipPlacement: 'left',
   };

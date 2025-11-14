@@ -33,7 +33,7 @@ export default function ExportButton({ className = '', sxDetails }: ExportProps)
     <IconButton
       id={`${mapId}-export-btn`}
       tooltip={t('appbar.export')!}
-      aria-label={t('appbar.export')!}
+      aria-label={t('appbar.export')}
       tooltipPlacement="right"
       onClick={() => enableFocusTrap({ activeElementId: 'export', callbackElementId: `${mapId}-export-btn` })}
       sx={{ [theme.breakpoints.down('md')]: { display: 'none' }, ...sxDetails }}
