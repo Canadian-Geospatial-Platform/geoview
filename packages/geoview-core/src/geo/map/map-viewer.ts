@@ -742,7 +742,7 @@ export class MapViewer {
    * @param {number} zoom - New zoom level
    */
   setZoomLevel(zoom: number): void {
-    MapEventProcessor.setZoom(this.mapId, zoom);
+    this.getView().setZoom(zoom);
   }
 
   /**
