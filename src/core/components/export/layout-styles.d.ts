@@ -13,7 +13,7 @@ export declare const SHARED_STYLES: {
     readonly scaleMarginBottom: 10;
     readonly legendMarginTop: 2;
     readonly legendMarginBottom: 2;
-    readonly layerMarginBottom: 3;
+    readonly layerMarginBottom: 5;
     readonly layerMarginTop: 8;
     readonly wmsMarginBottom: 2;
     readonly timeMarginBottom: 2;
@@ -21,7 +21,7 @@ export declare const SHARED_STYLES: {
     readonly childMarginTop: 3;
     readonly itemMarginBottom: 1;
     readonly borderWidth: 1;
-    readonly borderColor: string;
+    readonly borderColor: "#424242";
     readonly scaleLineHeight: 1;
     readonly scaleLineMarginBottom: 2;
     readonly scaleTextMarginTop: 2;
@@ -29,14 +29,14 @@ export declare const SHARED_STYLES: {
     readonly scaleTickHeight: 8;
     readonly scaleTickOffset: -0.5;
     readonly scaleTickTop: -3;
-    readonly northArrowSize: 40;
-    readonly legendGap: 10;
+    readonly northArrowSize: 30;
+    readonly legendGap: 15;
     readonly legendPaddingLeft: 2;
     readonly dividerMargin: 10;
     readonly dividerHeight: 2;
     readonly rowDividerHeight: 1;
     readonly rowDividerMargin: 8;
-    readonly wmsImageWidth: 250;
+    readonly wmsImageWidth: 400;
     readonly wmsImageMaxHeight: 600;
     readonly itemIconSize: 8;
     readonly itemIconMarginRight: 2;
@@ -56,14 +56,16 @@ export declare const SHARED_STYLES: {
         readonly marginBottom: 10;
     };
     readonly mapContainer: {
-        readonly marginBottom: 10;
         readonly borderWidth: 1;
-        readonly borderColor: string;
+        readonly borderColor: "#424242";
         readonly borderStyle: "solid";
     };
     readonly mapImage: {
         readonly width: "100%";
         readonly objectFit: "contain";
+        readonly borderWidth: 1;
+        readonly borderColor: "#757575";
+        readonly borderStyle: "solid";
     };
     readonly scaleBarContainer: {
         readonly justifyContent: "center";
@@ -71,7 +73,7 @@ export declare const SHARED_STYLES: {
     };
     readonly scaleLine: {
         readonly height: 1;
-        readonly backgroundColor: string;
+        readonly backgroundColor: "#424242";
         readonly marginBottom: 2;
         readonly position: "relative";
     };
@@ -80,7 +82,7 @@ export declare const SHARED_STYLES: {
         readonly top: -3;
         readonly width: 1;
         readonly height: 8;
-        readonly backgroundColor: string;
+        readonly backgroundColor: "#424242";
     };
     readonly scaleTickLeft: {
         readonly left: -0.5;
@@ -90,7 +92,7 @@ export declare const SHARED_STYLES: {
     };
     readonly scaleText: {
         readonly fontSize: 10;
-        readonly color: string;
+        readonly color: "#424242";
         readonly marginTop: 2;
         readonly textAlign: "center";
         readonly textTransform: "lowercase";
@@ -103,20 +105,36 @@ export declare const SHARED_STYLES: {
         readonly width: 40;
         readonly height: 40;
     };
-    readonly layerText: (marginTop: number | string) => {
+    readonly layerSeparator: (marginTop: number | string) => {
+        marginTop: string | number;
+        marginBottom: 5;
+        width: string;
+        marginLeft: string;
+        marginRight: string;
+        borderTopWidth: number;
+        borderTopColor: "#9e9e9e";
+        borderTopStyle: "solid";
+    };
+    readonly layerText: () => {
         fontSize: number;
         fontWeight: string;
         marginBottom: number;
-        marginTop: string | number;
+        marginTop: number;
         flexWrap: "wrap";
         whiteSpace: string;
+        wordWrap: "break-word";
+        overflowWrap: "break-word";
     };
     readonly wmsContainer: (indentLevel: number) => {
         marginLeft: number;
         marginBottom: number;
+        maxWidth: number;
+        width: string;
     };
     readonly wmsImage: {
-        readonly maxWidth: 250;
+        readonly width: "auto";
+        readonly height: "auto";
+        readonly maxWidth: "100%";
         readonly objectFit: "contain";
     };
     readonly timeText: (indentLevel: number) => {
@@ -131,6 +149,8 @@ export declare const SHARED_STYLES: {
         marginBottom: number;
         marginLeft: number;
         marginTop: number;
+        wordWrap: "break-word";
+        overflowWrap: "break-word";
     };
     readonly itemIcon: {
         readonly width: 8;
@@ -141,17 +161,19 @@ export declare const SHARED_STYLES: {
         readonly fontSize: 7;
         readonly flexShrink: 1;
         readonly flexWrap: "wrap";
+        readonly wordWrap: "break-word";
+        readonly overflowWrap: "break-word";
     };
     readonly footer: {
         readonly fontSize: 8;
-        readonly marginTop: "auto";
+        readonly marginTop: 10;
         readonly paddingTop: 5;
         readonly paddingLeft: 0;
         readonly paddingRight: 0;
     };
     readonly footerDisclaimer: {
         readonly fontSize: 8;
-        readonly color: string;
+        readonly color: "#424242";
         readonly textAlign: "center";
         readonly marginBottom: 0;
         readonly paddingLeft: 0;
@@ -159,13 +181,13 @@ export declare const SHARED_STYLES: {
     };
     readonly footerAttribution: {
         readonly fontSize: 8;
-        readonly color: string;
+        readonly color: "#424242";
         readonly textAlign: "center";
         readonly marginBottom: 2;
     };
     readonly footerDate: {
         readonly fontSize: 8;
-        readonly color: string;
+        readonly color: "#424242";
         readonly textAlign: "center";
     };
 };
@@ -179,7 +201,7 @@ export declare const PDF_STYLES: {
     readonly divider: {
         readonly width: "100%";
         readonly height: 2;
-        readonly backgroundColor: string;
+        readonly backgroundColor: "#9e9e9e";
         readonly marginBottom: 10;
     };
     readonly legendContainer: {
@@ -201,10 +223,12 @@ export declare const PDF_STYLES: {
         readonly fontSize: 7;
         readonly flexShrink: 1;
         readonly flexWrap: "wrap";
+        readonly wordWrap: "break-word";
+        readonly overflowWrap: "break-word";
     };
     readonly footer: {
         readonly fontSize: "8px";
-        readonly marginTop: "auto";
+        readonly marginTop: 10;
         readonly paddingTop: 5;
         readonly paddingLeft: 0;
         readonly paddingRight: 0;
@@ -213,7 +237,7 @@ export declare const PDF_STYLES: {
         readonly flexDirection: "row";
         readonly justifyContent: "center";
         readonly alignItems: "flex-start";
-        readonly gap: 10;
+        readonly gap: 15;
         readonly paddingLeft: 2;
         readonly marginTop: 20;
         readonly marginBottom: 20;
@@ -222,15 +246,15 @@ export declare const PDF_STYLES: {
         readonly flexDirection: "row";
         readonly justifyContent: "flex-start";
         readonly alignItems: "flex-start";
-        readonly gap: 10;
+        readonly gap: 15;
         readonly width: "100%";
         readonly paddingTop: 8;
         readonly paddingBottom: 8;
         readonly borderTopWidth: 1;
-        readonly borderTopColor: string;
+        readonly borderTopColor: "#424242";
         readonly borderTopStyle: "solid";
         readonly borderBottomWidth: 1;
-        readonly borderBottomColor: string;
+        readonly borderBottomColor: "#424242";
         readonly borderBottomStyle: "solid";
     };
     readonly fontFamily: "Helvetica";
@@ -247,7 +271,7 @@ export declare const PDF_STYLES: {
     readonly scaleMarginBottom: 10;
     readonly legendMarginTop: 2;
     readonly legendMarginBottom: 2;
-    readonly layerMarginBottom: 3;
+    readonly layerMarginBottom: 5;
     readonly layerMarginTop: 8;
     readonly wmsMarginBottom: 2;
     readonly timeMarginBottom: 2;
@@ -255,7 +279,7 @@ export declare const PDF_STYLES: {
     readonly childMarginTop: 3;
     readonly itemMarginBottom: 1;
     readonly borderWidth: 1;
-    readonly borderColor: string;
+    readonly borderColor: "#424242";
     readonly scaleLineHeight: 1;
     readonly scaleLineMarginBottom: 2;
     readonly scaleTextMarginTop: 2;
@@ -263,14 +287,14 @@ export declare const PDF_STYLES: {
     readonly scaleTickHeight: 8;
     readonly scaleTickOffset: -0.5;
     readonly scaleTickTop: -3;
-    readonly northArrowSize: 40;
-    readonly legendGap: 10;
+    readonly northArrowSize: 30;
+    readonly legendGap: 15;
     readonly legendPaddingLeft: 2;
     readonly dividerMargin: 10;
     readonly dividerHeight: 2;
     readonly rowDividerHeight: 1;
     readonly rowDividerMargin: 8;
-    readonly wmsImageWidth: 250;
+    readonly wmsImageWidth: 400;
     readonly wmsImageMaxHeight: 600;
     readonly itemIconSize: 8;
     readonly itemIconMarginRight: 2;
@@ -290,14 +314,16 @@ export declare const PDF_STYLES: {
         readonly marginBottom: 10;
     };
     readonly mapContainer: {
-        readonly marginBottom: 10;
         readonly borderWidth: 1;
-        readonly borderColor: string;
+        readonly borderColor: "#424242";
         readonly borderStyle: "solid";
     };
     readonly mapImage: {
         readonly width: "100%";
         readonly objectFit: "contain";
+        readonly borderWidth: 1;
+        readonly borderColor: "#757575";
+        readonly borderStyle: "solid";
     };
     readonly scaleBarContainer: {
         readonly justifyContent: "center";
@@ -305,7 +331,7 @@ export declare const PDF_STYLES: {
     };
     readonly scaleLine: {
         readonly height: 1;
-        readonly backgroundColor: string;
+        readonly backgroundColor: "#424242";
         readonly marginBottom: 2;
         readonly position: "relative";
     };
@@ -314,7 +340,7 @@ export declare const PDF_STYLES: {
         readonly top: -3;
         readonly width: 1;
         readonly height: 8;
-        readonly backgroundColor: string;
+        readonly backgroundColor: "#424242";
     };
     readonly scaleTickLeft: {
         readonly left: -0.5;
@@ -324,7 +350,7 @@ export declare const PDF_STYLES: {
     };
     readonly scaleText: {
         readonly fontSize: 10;
-        readonly color: string;
+        readonly color: "#424242";
         readonly marginTop: 2;
         readonly textAlign: "center";
         readonly textTransform: "lowercase";
@@ -337,20 +363,36 @@ export declare const PDF_STYLES: {
         readonly width: 40;
         readonly height: 40;
     };
-    readonly layerText: (marginTop: number | string) => {
+    readonly layerSeparator: (marginTop: number | string) => {
+        marginTop: string | number;
+        marginBottom: 5;
+        width: string;
+        marginLeft: string;
+        marginRight: string;
+        borderTopWidth: number;
+        borderTopColor: "#9e9e9e";
+        borderTopStyle: "solid";
+    };
+    readonly layerText: () => {
         fontSize: number;
         fontWeight: string;
         marginBottom: number;
-        marginTop: string | number;
+        marginTop: number;
         flexWrap: "wrap";
         whiteSpace: string;
+        wordWrap: "break-word";
+        overflowWrap: "break-word";
     };
     readonly wmsContainer: (indentLevel: number) => {
         marginLeft: number;
         marginBottom: number;
+        maxWidth: number;
+        width: string;
     };
     readonly wmsImage: {
-        readonly maxWidth: 250;
+        readonly width: "auto";
+        readonly height: "auto";
+        readonly maxWidth: "100%";
         readonly objectFit: "contain";
     };
     readonly timeText: (indentLevel: number) => {
@@ -365,6 +407,8 @@ export declare const PDF_STYLES: {
         marginBottom: number;
         marginLeft: number;
         marginTop: number;
+        wordWrap: "break-word";
+        overflowWrap: "break-word";
     };
     readonly itemIcon: {
         readonly width: 8;
@@ -373,7 +417,7 @@ export declare const PDF_STYLES: {
     };
     readonly footerDisclaimer: {
         readonly fontSize: 8;
-        readonly color: string;
+        readonly color: "#424242";
         readonly textAlign: "center";
         readonly marginBottom: 0;
         readonly paddingLeft: 0;
@@ -381,20 +425,19 @@ export declare const PDF_STYLES: {
     };
     readonly footerAttribution: {
         readonly fontSize: 8;
-        readonly color: string;
+        readonly color: "#424242";
         readonly textAlign: "center";
         readonly marginBottom: 2;
     };
     readonly footerDate: {
         readonly fontSize: 8;
-        readonly color: string;
+        readonly color: "#424242";
         readonly textAlign: "center";
     };
 };
 export declare const CANVAS_STYLES: {
-    readonly page: (width: number, height: number) => {
+    readonly page: (width: number) => {
         width: string;
-        height: string;
         minHeight: string;
         padding: string;
         fontFamily: "Helvetica";
@@ -414,6 +457,9 @@ export declare const CANVAS_STYLES: {
         readonly marginBottom: "10px";
         readonly width: "100%";
         readonly objectFit: "contain";
+        readonly borderWidth: 1;
+        readonly borderColor: "#757575";
+        readonly borderStyle: "solid";
     };
     readonly scaleContainer: {
         readonly display: "flex";
@@ -430,7 +476,7 @@ export declare const CANVAS_STYLES: {
     readonly scaleLine: {
         readonly height: "1px";
         readonly marginBottom: "2px";
-        readonly backgroundColor: string;
+        readonly backgroundColor: "#424242";
         readonly position: "relative";
     };
     readonly scaleTick: {
@@ -438,7 +484,7 @@ export declare const CANVAS_STYLES: {
         readonly width: "1px";
         readonly height: "8px";
         readonly position: "absolute";
-        readonly backgroundColor: string;
+        readonly backgroundColor: "#424242";
     };
     readonly scaleTickLeft: {
         readonly left: "-0.5px";
@@ -449,22 +495,22 @@ export declare const CANVAS_STYLES: {
     readonly scaleText: {
         readonly fontSize: "10px";
         readonly marginTop: "2px";
-        readonly color: string;
+        readonly color: "#424242";
         readonly textAlign: "center";
         readonly textTransform: "lowercase";
     };
     readonly northArrow: {
-        readonly width: "40px";
-        readonly height: "40px";
+        readonly width: "30px";
+        readonly height: "30px";
     };
     readonly northArrowSvg: {
-        readonly width: "40px";
-        readonly height: "40px";
+        readonly width: "30px";
+        readonly height: "30px";
     };
     readonly divider: {
         readonly width: "100%";
         readonly height: "2px";
-        readonly backgroundColor: string;
+        readonly backgroundColor: "#9e9e9e";
         readonly marginBottom: "10px";
     };
     readonly legendContainer: {
@@ -483,28 +529,42 @@ export declare const CANVAS_STYLES: {
         readonly flexDirection: "row";
         readonly justifyContent: "flex-start";
         readonly alignItems: "flex-start";
-        readonly gap: "10px";
+        readonly gap: "15px";
         readonly width: "100%";
         readonly paddingTop: "8px";
         readonly paddingBottom: "8px";
-        readonly borderTop: `1px solid ${string}`;
-        readonly borderBottom: `1px solid ${string}`;
+        readonly borderTop: "1px solid #424242";
+        readonly borderBottom: "1px solid #424242";
     };
-    readonly layerText: (marginTop: string) => {
+    readonly layerSeparator: (marginTop: string) => {
+        marginTop: string;
+        marginBottom: string;
+        width: string;
+        marginLeft: string;
+        marginRight: string;
+        borderTop: string;
+    };
+    readonly layerText: () => {
         fontSize: string;
         marginBottom: string;
         fontWeight: string;
-        marginTop: string | number;
+        marginTop: number;
         flexWrap: "wrap";
         whiteSpace: string;
+        wordWrap: "break-word";
+        overflowWrap: "break-word";
     };
     readonly wmsContainer: (indentLevel: number) => {
         marginLeft: string;
         marginBottom: string;
+        maxWidth: string;
+        width: string;
     };
     readonly wmsImage: {
-        readonly maxWidth: "250px";
+        readonly maxWidth: "100%";
         readonly objectFit: "contain";
+        readonly width: "auto";
+        readonly height: "auto";
     };
     readonly timeText: (indentLevel: number) => {
         fontSize: string;
@@ -518,6 +578,8 @@ export declare const CANVAS_STYLES: {
         marginLeft: string;
         marginTop: string;
         fontWeight: string;
+        wordWrap: "break-word";
+        overflowWrap: "break-word";
     };
     readonly itemContainer: (indentLevel: number) => {
         display: string;
@@ -535,11 +597,13 @@ export declare const CANVAS_STYLES: {
         readonly whiteSpace: "wrap";
         readonly flexShrink: 1;
         readonly flexWrap: "wrap";
+        readonly wordWrap: "break-word";
+        readonly overflowWrap: "break-word";
     };
     readonly footer: {
         readonly fontSize: "8px";
         readonly textAlign: "center";
-        readonly marginTop: "auto";
+        readonly marginTop: `${number}px`;
         readonly paddingTop: `${number}px`;
         readonly paddingLeft: 0;
         readonly paddingRight: 0;
@@ -547,7 +611,7 @@ export declare const CANVAS_STYLES: {
     readonly footerDisclaimer: {
         readonly fontSize: "8px";
         readonly marginBottom: "5px";
-        readonly color: string;
+        readonly color: "#424242";
         readonly textAlign: "center";
         readonly paddingLeft: 0;
         readonly paddingRight: 0;
@@ -555,17 +619,17 @@ export declare const CANVAS_STYLES: {
     readonly footerAttribution: {
         readonly fontSize: "8px";
         readonly marginBottom: "2px";
-        readonly color: string;
+        readonly color: "#424242";
         readonly textAlign: "center";
     };
     readonly footerDate: {
         readonly fontSize: "8px";
-        readonly color: string;
+        readonly color: "#424242";
         readonly textAlign: "center";
     };
-    readonly overflowPage: (width: number, height: number) => {
+    readonly overflowPage: (width: number) => {
         width: string;
-        height: string;
+        minHeight: string;
         padding: string;
         fontFamily: "Helvetica";
         backgroundColor: string;
@@ -574,7 +638,7 @@ export declare const CANVAS_STYLES: {
         readonly display: "flex";
         readonly justifyContent: "center";
         readonly alignItems: "flex-start";
-        readonly gap: "10px";
+        readonly gap: "15px";
         readonly paddingLeft: "2px";
         readonly marginTop: "20px";
         readonly marginBottom: "20px";

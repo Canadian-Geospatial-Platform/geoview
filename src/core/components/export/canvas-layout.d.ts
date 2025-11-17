@@ -1,5 +1,5 @@
-import type { FileExportProps } from './export-modal';
-import type { FlattenedLegendItem, TypeValidPageSizes } from './utilities';
+import type { FileExportProps } from '@/core/components/export/export-modal';
+import type { FlattenedLegendItem } from '@/core/components/export/utilities';
 interface CanvasDocumentProps {
     mapDataUrl: string;
     exportTitle: string;
@@ -16,20 +16,21 @@ interface CanvasDocumentProps {
     attributions: string[];
     date: string;
     fittedColumns: FlattenedLegendItem[][];
-    pageSize: TypeValidPageSizes;
+    columnWidths?: number[];
+    canvasWidth: number;
 }
 /**
  * The Canvas that is created for the map export
  * @param {CanvasDocumentProps} props - The Canvas Document properties
  * @returns {JSX.Element} The resulting html map
  */
-export declare function CanvasDocument({ mapDataUrl, exportTitle, scaleText, scaleLineWidth, northArrowSvg, northArrowRotation, fittedColumns, disclaimer, attributions, date, pageSize, }: CanvasDocumentProps): JSX.Element;
+export declare function CanvasDocument({ mapDataUrl, exportTitle, scaleText, scaleLineWidth, northArrowSvg, northArrowRotation, fittedColumns, columnWidths, disclaimer, attributions, date, canvasWidth, }: CanvasDocumentProps): JSX.Element;
 /**
  * Creates the HTML map and converts to canvas and then image for the export
  * @param {string} mapId - The map ID
  * @param {FileExportProps} props - The file export props
- * @returns {Promise<string[]>} A string of URLs for the images (Map and overflow pages)
+ * @returns {Promise<string>} A data URL for the exported image
  */
-export declare function createCanvasMapUrls(mapId: string, props: FileExportProps): Promise<string[]>;
+export declare function createCanvasMapUrls(mapId: string, props: FileExportProps): Promise<string>;
 export {};
 //# sourceMappingURL=canvas-layout.d.ts.map

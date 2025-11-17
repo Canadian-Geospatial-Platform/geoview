@@ -1,9 +1,7 @@
 type FileFormat = 'pdf' | 'png' | 'jpeg';
-type DocumentSize = 'AUTO';
 export interface FileExportProps {
     exportTitle: string;
     disclaimer: string;
-    pageSize: DocumentSize;
     dpi: number;
     jpegQuality?: number;
     format: FileFormat;
