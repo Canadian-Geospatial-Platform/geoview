@@ -248,7 +248,7 @@ export const VALID_INTERACTION: TypeInteraction[] = ['static', 'dynamic'];
 
 /** Definition of the view settings. */
 export type TypeViewSettings = {
-  /** Settings for the initial view for map, default vallue for zoomAndCenter is defined by the projection */
+  /** Settings for the initial view for map, default value for zoomAndCenter is defined by the projection */
   initialView?: TypeMapViewSettings;
   /** Settings for the home nav bar button. */
   homeView?: TypeMapViewSettings;
