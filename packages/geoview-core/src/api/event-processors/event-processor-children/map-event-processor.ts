@@ -1120,7 +1120,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - ID of the map to return to original view
    * @returns Promise<void>
    */
-  static async zoomToInitialExtent(mapId: string): Promise<void> {
+  static zoomToInitialExtent(mapId: string): Promise<void> {
     const currProjection = this.getMapStateProtected(mapId).currentProjection;
     let extent: Extent = MAP_EXTENTS[currProjection];
     const options: FitOptions = { padding: OL_ZOOM_PADDING, duration: OL_ZOOM_DURATION };
@@ -1162,7 +1162,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
         Projection.getProjectionFromString(`EPSG:${currProjection}`)
       );
 
-    return await this.zoomToExtent(mapId, extent, options);
+    return this.zoomToExtent(mapId, extent, options);
   }
 
   /**
