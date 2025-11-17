@@ -117,7 +117,7 @@
     "overview-map"
   ],
   "overviewMap": {
-    "hideOnZoom": 6
+    "hideOnZoom": 7
   },
   "navBar": [
     "zoom",

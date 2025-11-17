@@ -52,7 +52,7 @@
     }
   },
   "overviewMap": {
-    "hideOnZoom": 0
+    "hideOnZoom": 7
   },
   "components": ["overview-map"],
   "corePackages": [],

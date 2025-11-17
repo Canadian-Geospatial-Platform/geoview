@@ -468,7 +468,9 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
        */
       setZoom: (zoom: number, duration?: number): void => {
         // Redirect to processor
-        MapEventProcessor.zoom(get().mapId, zoom, duration);
+        MapEventProcessor.zoom(get().mapId, zoom, duration).catch((error: unknown) => {
+          logger.logError('Map-State Failed to set zoom', error);
+        });
       },
 
       /**

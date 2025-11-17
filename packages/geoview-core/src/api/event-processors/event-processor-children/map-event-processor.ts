@@ -559,9 +559,19 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // GV No need to save in the store, because this will trigger an event on MapViewer which will take care of updating the store
   }
 
-  static zoom(mapId: string, zoom: number, duration: number = OL_ZOOM_DURATION): void {
+  static zoom(mapId: string, zoom: number, duration: number = OL_ZOOM_DURATION): Promise<void> {
     // Do the actual zoom
     this.getMapViewer(mapId).map.getView().animate({ zoom, duration });
+
+    // Use a Promise and resolve it when the duration expired
+    return new Promise((resolve) => {
+      setTimeout(
+        () => {
+          resolve();
+        },
+        (duration || OL_ZOOM_DURATION) + 150
+      );
+    });
     // GV No need to save in the store, because this will trigger an event on MapViewer which will take care of updating the store
   }
 
@@ -1022,6 +1032,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId The map id.
    * @param {Extent} extent The extent to zoom to.
    * @param {FitOptions} options The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11, duration: 500 }).
+   * @returns Promise<void>
    */
   static zoomToExtent(
     mapId: string,
@@ -1109,7 +1120,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - ID of the map to return to original view
    * @returns Promise<void>
    */
-  static zoomToInitialExtent(mapId: string): Promise<void> {
+  static async zoomToInitialExtent(mapId: string): Promise<void> {
     const currProjection = this.getMapStateProtected(mapId).currentProjection;
     let extent: Extent = MAP_EXTENTS[currProjection];
     const options: FitOptions = { padding: OL_ZOOM_PADDING, duration: OL_ZOOM_DURATION };
@@ -1151,7 +1162,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
         Projection.getProjectionFromString(`EPSG:${currProjection}`)
       );
 
-    return this.zoomToExtent(mapId, extent, options);
+    return await this.zoomToExtent(mapId, extent, options);
   }
 
   /**

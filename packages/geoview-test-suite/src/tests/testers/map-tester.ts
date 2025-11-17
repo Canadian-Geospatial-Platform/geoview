@@ -5,7 +5,7 @@ import { delay } from 'geoview-core/core/utils/utilities';
 import type { TypeMapState } from 'geoview-core/geo/map/map-viewer';
 import type { TypeMapFeaturesConfig } from 'geoview-core/core/types/global-types';
 import { MapEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/map-event-processor';
-import type { Extent } from 'geoview-core/api/types/map-schema-types';
+import type { Extent, TypeValidMapProjectionCodes } from 'geoview-core/api/types/map-schema-types';
 
 /**
  * Main Map testing class.
@@ -100,54 +100,62 @@ export class MapTester extends GVAbstractTester {
     );
   }
 
-  testSwitchProjectionAndExtent(): Promise<Test<Extent>> {
+  /**
+   * Tests switching between projections, zooming, and returning to initial extent.
+   * This test performs the following operations:
+   * 1. Switches projection to the second projection
+   * 2. Zooms to a specified level
+   * 3. Switches back to the initial projection
+   * 4. Zooms back to the initial extent
+   * 5. Verifies the map extent matches the original extent
+   *
+   * @param {TypeValidMapProjectionCodes} initialProjection - The initial projection code.
+   * @param {TypeValidMapProjectionCodes} secondProjection - The target projection code to switch to.
+   * @param {number} zoomLevel - The zoom level to test during projection switch.
+   * @returns {Promise<Test<Extent>>} A Promise that resolves with the Test containing the final map extent.
+   */
+  async testSwitchProjectionAndExtent(
+    initialProjection: TypeValidMapProjectionCodes,
+    secondProjection: TypeValidMapProjectionCodes,
+    zoomLevel: number
+  ): Promise<Test<Extent>> {
+    // Zoom to initial extent
+    await MapEventProcessor.zoomToInitialExtent(this.getMapId());
+
     // Get the current init extent
-    const { mapExtent } = MapEventProcessor.getMapState(this.getMapId());
+    const { mapExtent, currentProjection } = MapEventProcessor.getMapState(this.getMapId());
 
     // Test the projection/initial extent
     return this.test(
       'Test switch projection back and forth, zoom and zoom to initial extent',
       async (test) => {
-        // Update the step
-        test.addStep('Performing projection switch to 3857...');
+        // Test the projection value
+        if (currentProjection === secondProjection)
+          throw new TestError(`False precondition, map projection was already at projection destination ${secondProjection}`);
 
-        // Add a delay ensuring anyprevious tester operation is done
-        await delay(2000);
+        // Update the step
+        test.addStep(`Performing projection switch to ${secondProjection}...`);
 
         // Perform a projection switch
-        await MapEventProcessor.setProjection(this.getMapId(), 3857);
-
-        // Wait for the projection switch to end (1000 for store to update)
-        await delay(1000);
+        await MapEventProcessor.setProjection(this.getMapId(), secondProjection);
 
         // Update the step
-        test.addStep('Performing zoom to level 1...');
+        test.addStep(`Performing zoom to level ${zoomLevel}...`);
 
         // Perform a zoom
-        MapEventProcessor.zoom(this.getMapId(), 1, 1000);
-
-        // Wait for the zoom to end (1000 for store to update)
-        await delay(1000);
+        MapEventProcessor.zoom(this.getMapId(), zoomLevel, 1000);
 
         // Update the step
         test.addStep('Performing projection switch to original...');
 
         // Perform a projection switch
-        await MapEventProcessor.setProjection(this.getMapId(), 3978);
-
-        // Wait for the zoom to end (1000 for store to update)
-        await delay(1000);
+        await MapEventProcessor.setProjection(this.getMapId(), initialProjection);
 
         // Update the step
         test.addStep('Performing zomm to inital extent...');
+
         // Zoom to initial extent
         await MapEventProcessor.zoomToInitialExtent(this.getMapId());
-
-        // Update the step
-        test.addStep('Waiting for zoom to finish...');
-
-        // Wait for the zoom to end (1000 for store to update)
-        await delay(1000);
 
         // Return the result
         return MapEventProcessor.getMapState(this.getMapId()).mapExtent;

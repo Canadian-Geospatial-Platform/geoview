@@ -248,7 +248,7 @@ export const VALID_INTERACTION: TypeInteraction[] = ['static', 'dynamic'];
 
 /** Definition of the view settings. */
 export type TypeViewSettings = {
-  /** Settings for the initial view for map, default is zoomAndCenter is define by the projection */
+  /** Settings for the initial view for map, default vallue for zoomAndCenter is defined by the projection */
   initialView?: TypeMapViewSettings;
   /** Settings for the home nav bar button. */
   homeView?: TypeMapViewSettings;
@@ -455,13 +455,13 @@ export const DEFAULT_MAP_FEATURE_CONFIG = {
   navBar: ['zoom', 'fullscreen', 'home', 'basemap-select'],
   footerBar: {
     tabs: {
-      core: ['legend', 'layers', 'details', 'data-table'],
+      core: ['layers', 'data-table'],
       custom: [],
     },
     collapsed: false,
   },
   components: ['north-arrow', 'overview-map'],
-  appBar: { tabs: { core: ['geolocator'] } },
+  appBar: { tabs: { core: ['geolocator', 'legend', 'details', 'export'] } },
   corePackages: [],
   corePackagesConfig: [],
   overviewMap: { hideOnZoom: 0 },
