@@ -225,8 +225,8 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           featureHighlightColor: geoviewConfig.map.highlightColor || 'black',
           hideCoordinateInfoSwitch: geoviewConfig.globalSettings?.hideCoordinateInfoSwitch || false,
           homeView: geoviewConfig.map.viewSettings.homeView ||
-            geoviewConfig.map.viewSettings.initialView || { zoomAndCenter: [4.5, MAP_CENTER[3857]] },
-          initialView: geoviewConfig.map.viewSettings.initialView || { zoomAndCenter: [4.5, MAP_CENTER[3857]] },
+            geoviewConfig.map.viewSettings.initialView || { zoomAndCenter: [MAP_ZOOM_LEVEL[3857], MAP_CENTER[3857]] },
+          initialView: geoviewConfig.map.viewSettings.initialView || { zoomAndCenter: [MAP_ZOOM_LEVEL[3857], MAP_CENTER[3857]] },
           interaction: geoviewConfig.map.interaction || 'dynamic',
           mapExtent: geoviewConfig.map.viewSettings.maxExtent,
           northArrow: geoviewConfig.components!.indexOf('north-arrow') > -1 || false,

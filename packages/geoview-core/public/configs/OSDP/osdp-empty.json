@@ -2,14 +2,14 @@
   "map": {
     "interaction": "dynamic",
     "viewSettings": {
-            "projection": 3978,
-			"initialView": {
-            "zoomAndCenter": [4.5, [-90, 60]]
-            },
-            "homeView": {
-              "zoomAndCenter": [4.5, [-90, 60]]
-            }
-          },
+      "projection": 3978,
+      "initialView": {
+        "zoomAndCenter": [4.5, [-90, 60]]
+      },
+      "homeView": {
+        "zoomAndCenter": [4.5, [-90, 60]]
+      }
+    },
     "basemapOptions": {
       "basemapId": "transport",
       "shaded": false,
@@ -21,20 +21,12 @@
   "navBar": ["zoom", "fullscreen", "home", "location", "basemap-select"],
   "appBar": {
     "tabs": {
-      "core": [
-        "geolocator",
-        "legend",
-        "details",
-        "export"
-      ]
+      "core": ["geolocator", "legend", "details", "export"]
     }
   },
   "footerBar": {
     "tabs": {
-      "core": [
-        "layers",
-        "data-table"
-      ]
+      "core": ["layers", "data-table"]
     }
   },
   "corePackages": [],
