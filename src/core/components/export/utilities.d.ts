@@ -1,8 +1,16 @@
 import type { TypeNorthArrow, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
-import type { TypeTimeSliderValues, TimeSliderLayerSet } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
-import type { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
-export type TypeValidPageSizes = 'AUTO';
+import type { TypeTimeSliderValues } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+export declare const EXPORT_CONSTANTS: {
+    readonly DEFAULT_DPI: 96;
+    readonly JPEG_QUALITY: 0.98;
+    readonly COLUMN_BALANCE_THRESHOLD: 0.8;
+    readonly MAX_OPTIMIZATION_ITERATIONS: 20;
+    readonly DEFAULT_MAX_COLUMNS: 4;
+    readonly COLUMN_GAP: 10;
+    readonly WMS_MAX_WIDTH: 500;
+    readonly WMS_INDENT_PER_LEVEL: 10;
+};
 export type TypeMapStateForExportLayout = {
     attribution: string[];
     northArrow: boolean;
@@ -18,8 +26,24 @@ export interface FlattenedLegendItem {
     isRoot: boolean;
     timeInfo?: TypeTimeSliderValues;
     calculatedHeight?: number;
+    calculatedWidth?: number;
+    wmsImageSize?: {
+        width: number;
+        height: number;
+    };
 }
-export type TypePageConfig = (typeof PAGE_CONFIGS)[keyof typeof PAGE_CONFIGS];
+/**
+ * Element factory interface for creating renderer-specific elements
+ * Allows us to abstract between Canvas (HTML) and PDF rendering
+ */
+export interface ElementFactory {
+    View: (props: any) => JSX.Element;
+    Text: (props: any) => JSX.Element;
+    Image: (props: any) => JSX.Element;
+    Span: (props: any) => JSX.Element;
+    Svg: (props: any) => JSX.Element;
+    Path: (props: any) => JSX.Element;
+}
 export type TypeMapInfoResult = {
     mapDataUrl: string;
     scaleText: string;
@@ -33,148 +57,103 @@ export type TypeMapInfoResult = {
     northArrowRotation: number;
     attributions: string[];
     fittedColumns: FlattenedLegendItem[][];
-    fittedOverflowItems?: FlattenedLegendItem[][];
+    columnWidths?: number[];
+    canvasWidth: number;
+    canvasHeight: number;
 };
-export declare const PAGE_CONFIGS: {
-    LETTER: {
-        size: "LETTER";
-        mapHeight: number;
-        legendColumns: number;
-        maxLegendHeight: number;
-        canvasWidth: number;
-        canvasHeight: number;
-    };
-    LEGAL: {
-        size: "LEGAL";
-        mapHeight: number;
-        legendColumns: number;
-        maxLegendHeight: number;
-        canvasWidth: number;
-        canvasHeight: number;
-    };
-    TABLOID: {
-        size: "TABLOID";
-        mapHeight: number;
-        legendColumns: number;
-        maxLegendHeight: number;
-        canvasWidth: number;
-        canvasHeight: number;
-    };
-    AUTO: {
-        size: "AUTO";
-        mapHeight: number;
-        legendColumns: number;
-        maxLegendHeight: number;
-        canvasWidth: number;
-        canvasHeight: number;
-    };
-};
-/**
- * Element factory interface for creating renderer-specific elements
- * Allows us to abstract between Canvas (HTML) and PDF rendering
- */
-export interface ElementFactory {
-    View: (props: any) => JSX.Element;
-    Text: (props: any) => JSX.Element;
-    Image: (props: any) => JSX.Element;
-    Span: (props: any) => JSX.Element;
-    Svg: (props: any) => JSX.Element;
-    Path: (props: any) => JSX.Element;
+export declare class ExportUtilities {
+    #private;
+    /**
+     * Renders multiple legend columns in a flexbox container with dynamic or fixed widths.
+     * Uses space-between justification when columnWidths are provided to eliminate gaps.
+     * Falls back to gap-based layout for equal-width columns.
+     *
+     * Layout modes:
+     * - With columnWidths: Justified layout, each column has exact width, no gaps
+     * - Without columnWidths: Flex layout with 10px gaps between equal-width columns
+     *
+     * @param {FlattenedLegendItem[][]} columns - Array of columns, each containing legend items
+     * @param {ElementFactory} factory - Element factory for creating renderer-specific elements
+     * @param {any} scaledStyles - The scaled styles object for sizing
+     * @param {any} baseStyles - The base styles object for layout
+     * @param {number[]} [columnWidths] - Optional array of column widths in pixels for justified layout
+     * @returns {JSX.Element} The rendered legend container with all columns
+     */
+    static renderLegendColumns(columns: FlattenedLegendItem[][], factory: ElementFactory, scaledStyles: any, // eslint-disable-line @typescript-eslint/no-explicit-any
+    baseStyles: any, // eslint-disable-line @typescript-eslint/no-explicit-any
+    columnWidths?: number[]): JSX.Element;
+    /**
+     * Renders the footer section with disclaimer, attributions, and date.
+     * Footer appears at the bottom of the export document in all formats.
+     *
+     * @param {string} disclaimer - The disclaimer text to display
+     * @param {string[]} attributions - Array of attribution texts (one per map layer)
+     * @param {string} date - The export date string to display
+     * @param {ElementFactory} factory - Element factory for creating renderer-specific elements
+     * @param {any} scaledStyles - The scaled styles object with footer styling
+     * @returns {JSX.Element} The rendered footer container
+     */
+    static renderFooter(disclaimer: string, attributions: string[], date: string, factory: ElementFactory, scaledStyles: any): JSX.Element;
+    /**
+     * Renders a scale bar with tick marks and label text.
+     * The scale bar width is dynamically calculated to match the map extent.
+     * Includes left and right tick marks to clearly indicate the measurement distance.
+     *
+     * @param {string} scaleText - The scale text label (e.g., "100 km (approx)")
+     * @param {string} scaleLineWidth - The scale line width as CSS string (e.g., "150px")
+     * @param {ElementFactory} factory - Element factory for creating renderer-specific elements
+     * @param {any} scaledStyles - The scaled styles object for text sizing
+     * @param {any} baseStyles - The base styles object for scale bar layout
+     * @returns {JSX.Element} The rendered scale bar container
+     */
+    static renderScaleBar(scaleText: string, scaleLineWidth: string, factory: ElementFactory, scaledStyles: any, // eslint-disable-line @typescript-eslint/no-explicit-any
+    baseStyles: any): JSX.Element;
+    /**
+     * Renders a north arrow SVG icon with rotation to indicate true north direction.
+     * The rotation accounts for both map rotation and user-configured north arrow orientation.
+     * Returns null if north arrow is disabled or SVG data is unavailable.
+     *
+     * @param {Array} northArrowSvg - Array of SVG path data with stroke/fill properties
+     * @param {number} northArrowRotation - The rotation angle in degrees (includes map rotation + config offset)
+     * @param {ElementFactory} factory - Element factory for creating renderer-specific elements
+     * @param {any} scaledStyles - The scaled styles object for sizing and rotation
+     * @returns {JSX.Element | null} The rendered north arrow SVG or null if disabled
+     */
+    static renderNorthArrow(northArrowSvg: Array<{
+        d: string | null;
+        fill: string | null;
+        stroke: string | null;
+        strokeWidth: string | null;
+    }> | null, northArrowRotation: number, factory: ElementFactory, scaledStyles: any): JSX.Element | null;
+    /**
+     * Main export processing function - gathers map data, processes legend, and optimizes layout.
+     *
+     * Workflow (AUTO mode only):
+     * 1. Captures map canvas at browser dimensions (maintains extent/scale)
+     * 2. Extracts scale bar, north arrow, and attribution data
+     * 3. Filters and flattens legend layers by visibility
+     * 4. Pre-calculates WMS image heights by loading images
+     * 5. Measures actual rendered dimensions of each layer group in DOM
+     * 6. Calculates optimal column count (2-4) based on available width
+     * 7. Distributes layer groups across columns evenly
+     * 8. Optimizes column balance using 2-step look-ahead algorithm (max 20 iterations)
+     * 9. Calculates column widths for justified layout (eliminates gaps)
+     * 10. Captures actual WMS image dimensions after layout
+     * 11. Measures final canvas height with actual title/disclaimer for accurate sizing
+     *
+     * Key features:
+     * - Uses actual DOM measurement for accuracy (no estimation)
+     * - Maintains map extent by using browser canvas dimensions
+     * - Handles map rotation via canvas transforms
+     * - Balances columns within 80% height ratio threshold
+     * - All content fits on single auto-sized page
+     *
+     * @param {string} mapId - The GeoView map ID
+     * @param {string} exportTitle - The export title (affects height calculation)
+     * @param {string} disclaimer - The disclaimer text (affects height calculation)
+     * @returns {Promise<TypeMapInfoResult>} Map image URL, scale info, north arrow, legend columns, canvas dimensions
+     * @throws {Error} If canvas context is unavailable
+     */
+    static getMapInfo(mapId: string, exportTitle: string, disclaimer: string): Promise<TypeMapInfoResult>;
 }
-/**
- * Renders a single legend item using the provided element factory
- * @param {FlattenedLegendItem} item - The item to render
- * @param {number} itemIndex - Index of the item in the column
- * @param {number} indentLevel - The indentation level (0-3)
- * @param {ElementFactory} factory - Element factory for creating elements
- * @param {any} scaledStyles - The scaled styles object
- * @param {any} baseStyles - The base styles object (CANVAS_STYLES or PDF_STYLES)
- * @returns {JSX.Element} The rendered item
- */
-export declare const renderSingleLegendItem: (item: FlattenedLegendItem, itemIndex: number, indentLevel: number, factory: ElementFactory, scaledStyles: any, // eslint-disable-line @typescript-eslint/no-explicit-any
-baseStyles: any) => JSX.Element;
-/**
- * Groups items into containers - wraps content items
- * @param {FlattenedLegendItem[]} column - The column items to render
- * @param {ElementFactory} factory - Element factory for creating elements
- * @param {any} scaledStyles - The scaled styles object
- * @param {any} baseStyles - The base styles object
- * @returns {JSX.Element[]} Array of rendered elements
- */
-export declare const renderColumnItems: (column: FlattenedLegendItem[], factory: ElementFactory, scaledStyles: any, // eslint-disable-line @typescript-eslint/no-explicit-any
-baseStyles: any) => JSX.Element[];
-/**
- * Renders legend columns using the provided element factory
- * @param {FlattenedLegendItem[][]} columns - The columns to render
- * @param {ElementFactory} factory - Element factory for creating elements
- * @param {any} scaledStyles - The scaled styles object
- * @param {any} baseStyles - The base styles object
- * @returns {JSX.Element} The rendered legend
- */
-export declare const renderLegendColumns: (columns: FlattenedLegendItem[][], factory: ElementFactory, scaledStyles: any, // eslint-disable-line @typescript-eslint/no-explicit-any
-baseStyles: any) => JSX.Element;
-/**
- * Renders footer section
- * @param {string} disclaimer - The disclaimer text
- * @param {string[]} attributions - The attribution texts
- * @param {string} date - The date string
- * @param {ElementFactory} factory - Element factory for creating elements
- * @param {any} scaledStyles - The scaled styles object
- * @returns {JSX.Element} The rendered footer
- */
-export declare const renderFooter: (disclaimer: string, attributions: string[], date: string, factory: ElementFactory, scaledStyles: any) => JSX.Element;
-/**
- * Renders scale bar with ticks
- * @param {string} scaleText - The scale text
- * @param {string} scaleLineWidth - The scale line width
- * @param {ElementFactory} factory - Element factory for creating elements
- * @param {any} scaledStyles - The scaled styles object
- * @param {any} baseStyles - The base styles object
- * @returns {JSX.Element} The rendered scale bar
- */
-export declare const renderScaleBar: (scaleText: string, scaleLineWidth: string, factory: ElementFactory, scaledStyles: any, // eslint-disable-line @typescript-eslint/no-explicit-any
-baseStyles: any) => JSX.Element;
-/**
- * Renders north arrow SVG
- * @param {Array} northArrowSvg - The north arrow SVG path data
- * @param {number} northArrowRotation - The rotation angle
- * @param {ElementFactory} factory - Element factory for creating elements
- * @param {any} scaledStyles - The scaled styles object
- * @returns {JSX.Element | null} The rendered north arrow or null
- */
-export declare const renderNorthArrow: (northArrowSvg: Array<{
-    d: string | null;
-    fill: string | null;
-    stroke: string | null;
-    strokeWidth: string | null;
-}> | null, northArrowRotation: number, factory: ElementFactory, scaledStyles: any) => JSX.Element | null;
-/**
- * Filter and flatten layers for placement in the legend
- * @param {TypeLegendLayer[]} layers - The legend layers to be shown in the legend
- * @param {TypeOrdderedLayerInfo[]} orderedLayerInfo - The orderedLayerInfo to be used to filter out layers that aren't visible
- * @param {TimeSliderLayerSet} timeSliderLayers - Any layers that are time enabled
- * @returns {FlattenedLegendItem[]} The flattened list of all the items in the legend
- */
-export declare const processLegendLayers: (layers: TypeLegendLayer[], orderedLayerInfo: TypeOrderedLayerInfo[], timeSliderLayers?: TimeSliderLayerSet) => FlattenedLegendItem[];
-/**
- * Group items by their root layer and distribute in the columns
- * @param {FlattenedLegendItem[]} items - The flattened list of legend items to be placed in the legend
- * @param {number} numColumns - The maximum number of columns that can be used
- * @param {TypeValidPageSizes} pageSize - The page size for calculation
- * @param {number} scale - The scale factor based on document width
- * @returns {FlattenedLegendItem[][][]} The flattened legend items distributed into rows and columns
- */
-export declare const distributeIntoColumns: (items: FlattenedLegendItem[], numColumns: number, pageSize: TypeValidPageSizes, scale?: number) => {
-    fittedColumns: FlattenedLegendItem[][];
-    overflowItems: FlattenedLegendItem[];
-};
-/**
- * Gathers information about the map for sizing and creates the map image url for placement in the layout
- * @param {string} mapId - The map ID
- * @param {TypeValidPageSizes} pageSize - The page size for aspect ratio
- * @param {string} disclaimer - The disclaimer text
- * @param {string} title - The title text
- * @returns {TypeMapInfoResult} The map image data URL and browser canvas size
- */
-export declare function getMapInfo(mapId: string, pageSize: TypeValidPageSizes, disclaimer: string, title: string): Promise<TypeMapInfoResult>;
 //# sourceMappingURL=utilities.d.ts.map
