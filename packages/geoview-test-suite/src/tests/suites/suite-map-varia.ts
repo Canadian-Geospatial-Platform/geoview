@@ -43,14 +43,18 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
    * Overrides the implementation to perform the tests for this Test Suite.
    * @returns {Promise<unknown>} A Promise which resolves when tests are completed.
    */
-  protected override onLaunchTestSuite(): Promise<unknown> {
+  protected override async onLaunchTestSuite(): Promise<unknown> {
     // Test the map state
     const pmapState = this.#mapTester.testMapState();
 
     // Test the zoom
     const pZoom = this.#mapTester.testMapZoom(5, 500);
+    await pZoom;
+
+    // Test projection switch and zoom to initial extent
+    const pProjection = this.#mapTester.testSwitchProjectionAndExtent(3978, 3857, 1);
 
     // Resolve when all
-    return Promise.all([pmapState, pZoom]);
+    return Promise.all([pmapState, pZoom, pProjection]);
   }
 }

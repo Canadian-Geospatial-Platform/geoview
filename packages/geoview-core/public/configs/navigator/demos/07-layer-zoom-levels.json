@@ -66,10 +66,15 @@
       }
     ]
   },
-  "components": ["overview-map"],
+  "components": ["overview-map", "north-arrow"],
   "footerBar": {
     "tabs": {
-      "core": ["legend", "layers", "details", "data-table"]
+      "core": ["layers", "data-table"]
+    }
+  },
+    "appBar": {
+    "tabs": {
+      "core": ["geolocator", "legend", "details", "export"]
     }
   },
   "corePackages": [],

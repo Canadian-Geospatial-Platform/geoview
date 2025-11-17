@@ -34,6 +34,7 @@ import {
   VALID_DISPLAY_LANGUAGE,
   VALID_DISPLAY_THEME,
   VALID_PROJECTION_CODES,
+  MAP_ZOOM_LEVEL,
 } from '@/api/types/map-schema-types';
 import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
 
@@ -311,8 +312,12 @@ export class MapViewer {
     const projection = Projection.PROJECTIONS[mapViewSettings.projection];
 
     let extentProjected: Extent | undefined;
-    if (mapViewSettings.maxExtent && projection)
+    if (mapViewSettings.maxExtent && projection) {
       extentProjected = Projection.transformExtentFromProj(mapViewSettings.maxExtent, Projection.getProjectionLonLat(), projection);
+
+      // Special case for EPSG:3978 maxExtent top value to avoid cutting Canada north parts when north = 90
+      if (mapViewSettings.projection === 3978 && mapViewSettings.maxExtent[3] === 90) extentProjected[3] = 9000000;
+    }
 
     const initialMap = new OLMap({
       target: mapElement,
@@ -325,7 +330,9 @@ export class MapViewer {
             : MAP_CENTER[mapViewSettings.projection],
           projection
         ),
-        zoom: mapViewSettings.initialView?.zoomAndCenter ? mapViewSettings.initialView?.zoomAndCenter[0] : 3.5,
+        zoom: mapViewSettings.initialView?.zoomAndCenter
+          ? mapViewSettings.initialView?.zoomAndCenter[0]
+          : MAP_ZOOM_LEVEL[mapViewSettings.projection],
         extent: extentProjected || undefined,
         minZoom: mapViewSettings.minZoom || VALID_ZOOM_LEVELS[0],
         maxZoom: mapViewSettings.maxZoom || VALID_ZOOM_LEVELS[1],
@@ -482,12 +489,17 @@ export class MapViewer {
     viewOptions.minZoom = mapView.minZoom ? mapView.minZoom : currentView.getMinZoom();
     viewOptions.maxZoom = mapView.maxZoom ? mapView.maxZoom : currentView.getMaxZoom();
     viewOptions.rotation = mapView.rotation ? mapView.rotation : currentView.getRotation();
-    if (mapView.maxExtent)
+
+    if (mapView.maxExtent) {
       viewOptions.extent = Projection.transformExtentFromProj(
         mapView.maxExtent,
         Projection.getProjectionLonLat(),
         Projection.getProjectionFromString(`EPSG:${mapView.projection}`)
       );
+
+      // Special case for EPSG:3978 maxExtent top value to avoid cutting Canada north parts when north = 90
+      if (Number(mapView.projection) === 3978 && mapView.maxExtent[3] === 90) viewOptions.extent[3] = 9000000;
+    }
 
     const newView = new View(viewOptions);
     this.map.setView(newView);
@@ -2256,6 +2268,8 @@ export type TypeMapState = {
   currentProjection: number;
   currentZoom: number;
   mapCenterCoordinates: Coordinate;
+  mapExtent: Extent;
+  rotation: number;
   singleClickedPosition: TypeMapMouseInfo;
   pointerPosition: TypeMapMouseInfo;
 };

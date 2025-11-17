@@ -5,6 +5,7 @@ import { delay } from 'geoview-core/core/utils/utilities';
 import type { TypeMapState } from 'geoview-core/geo/map/map-viewer';
 import type { TypeMapFeaturesConfig } from 'geoview-core/core/types/global-types';
 import { MapEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/map-event-processor';
+import type { Extent, TypeValidMapProjectionCodes } from 'geoview-core/api/types/map-schema-types';
 
 /**
  * Main Map testing class.
@@ -75,7 +76,7 @@ export class MapTester extends GVAbstractTester {
         test.addStep('Performing zoom...');
 
         // Perform a zoom
-        MapEventProcessor.zoom(this.getMapId(), zoomEnd, zoomDuration);
+        await MapEventProcessor.zoom(this.getMapId(), zoomEnd, zoomDuration);
 
         // Update the step
         test.addStep('Waiting for zoom to finish...');
@@ -91,10 +92,78 @@ export class MapTester extends GVAbstractTester {
         test.addStep('Verifying expected zoom in the store...');
         Test.assertIsEqual(MapEventProcessor.getMapState(this.getMapId()).currentZoom, result);
       },
-      (test) => {
+      async (test) => {
         // Unzooms to original position
         test.addStep('Unzooms to the original zoom...');
-        MapEventProcessor.zoom(this.getMapId(), currentZoom, zoomDuration);
+        await MapEventProcessor.zoom(this.getMapId(), currentZoom, zoomDuration);
+      }
+    );
+  }
+
+  /**
+   * Tests switching between projections, zooming, and returning to initial extent.
+   * This test performs the following operations:
+   * 1. Switches projection to the second projection
+   * 2. Zooms to a specified level
+   * 3. Switches back to the initial projection
+   * 4. Zooms back to the initial extent
+   * 5. Verifies the map extent matches the original extent
+   *
+   * @param {TypeValidMapProjectionCodes} initialProjection - The initial projection code.
+   * @param {TypeValidMapProjectionCodes} secondProjection - The target projection code to switch to.
+   * @param {number} zoomLevel - The zoom level to test during projection switch.
+   * @returns {Promise<Test<Extent>>} A Promise that resolves with the Test containing the final map extent.
+   */
+  async testSwitchProjectionAndExtent(
+    initialProjection: TypeValidMapProjectionCodes,
+    secondProjection: TypeValidMapProjectionCodes,
+    zoomLevel: number
+  ): Promise<Test<Extent>> {
+    // Zoom to initial extent
+    await MapEventProcessor.zoomToInitialExtent(this.getMapId());
+
+    // Get the current init extent
+    const { mapExtent, currentProjection } = MapEventProcessor.getMapState(this.getMapId());
+
+    // Test the projection/initial extent
+    return this.test(
+      'Test switch projection back and forth, zoom and zoom to initial extent',
+      async (test) => {
+        // Test the projection value
+        if (currentProjection === secondProjection)
+          throw new TestError(`False precondition, map projection was already at projection destination ${secondProjection}`);
+
+        // Update the step
+        test.addStep(`Performing projection switch to ${secondProjection}...`);
+
+        // Perform a projection switch
+        await MapEventProcessor.setProjection(this.getMapId(), secondProjection);
+
+        // Update the step
+        test.addStep(`Performing zoom to level ${zoomLevel}...`);
+
+        // Perform a zoom
+        await MapEventProcessor.zoom(this.getMapId(), zoomLevel, 1000);
+
+        // Update the step
+        test.addStep('Performing projection switch to original...');
+
+        // Perform a projection switch
+        await MapEventProcessor.setProjection(this.getMapId(), initialProjection);
+
+        // Update the step
+        test.addStep('Performing zomm to inital extent...');
+
+        // Zoom to initial extent
+        await MapEventProcessor.zoomToInitialExtent(this.getMapId());
+
+        // Return the result
+        return MapEventProcessor.getMapState(this.getMapId()).mapExtent;
+      },
+      (test, result) => {
+        // Perform assertions
+        test.addStep('Verifying expected map extent in the store...');
+        Test.assertIsArrayEqual<number>(mapExtent, result);
       }
     );
   }

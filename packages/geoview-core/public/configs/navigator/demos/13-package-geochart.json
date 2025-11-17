@@ -90,12 +90,16 @@
     ]
   },
   "theme": "geo.ca",
+  "appBar": {
+    "tabs": {
+      "core": ["geolocator", "legend", "details", "export"]
+    }
+  },
+  "components": ["north-arrow", "overview-map"],
   "footerBar": {
     "tabs": {
       "core": [
-        "legend",
         "layers",
-        "details",
         "geochart"
       ]
     },

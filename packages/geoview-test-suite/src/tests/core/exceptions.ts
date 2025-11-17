@@ -144,6 +144,33 @@ export class AssertionValueError extends AssertionError {
 }
 
 /**
+ * Custom error to indicate that a value is not an array when expected to be.
+ * @extends {AssertionError}
+ */
+export class AssertionValueNotAnArrayError extends AssertionError {
+  /**
+   * Creates a new AssertionValueNotAnArrayError.
+   * @param {unknown} actual - Actual value.
+   */
+  constructor(actual: unknown) {
+    // Call the base Error constructor with the provided message
+    super(`Value is not an array, got '${typeof actual}'.`, actual, 'Array');
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'AssertionValueNotAnArrayError';
+
+    // Capture the stack trace (V8-specific, e.g., Chrome and Node.js)
+    // Omits the constructor call from the trace for cleaner debugging
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, AssertionValueNotAnArrayError);
+    }
+
+    // Ensure the prototype chain is correct (required in some transpilation targets)
+    Object.setPrototypeOf(this, AssertionValueNotAnArrayError.prototype);
+  }
+}
+
+/**
  * Custom error to indicate that a value was unexpectedly undefined.
  * @extends {AssertionError}
  */
@@ -398,6 +425,41 @@ export class AssertionArrayExcludingError<T> extends AssertionError {
 
     // Ensure the prototype chain is correct (required in some transpilation targets)
     Object.setPrototypeOf(this, AssertionArrayExcludingError.prototype);
+  }
+}
+
+/**
+ * Custom error to indicate that two arrays are not equal (they differ at a specific position).
+ * @extends {AssertionError}
+ */
+export class AssertionArraysNotEqualError<T> extends AssertionError {
+  /**
+   * Creates a new AssertionArraysNotEqualError.
+   * @param {T[] | undefined} array1 - First array (expected).
+   * @param {T[] | undefined} array2 - Second array (actual).
+   * @param {number} index - Index where the arrays differ.
+   * @param {T} expectedValue - Expected value at the index.
+   * @param {T} actualValue - Actual value at the index.
+   */
+  constructor(array1: T[] | undefined, array2: T[] | undefined, index: number, expectedValue: T, actualValue: T) {
+    // Call the base Error constructor with the provided message
+    super(
+      `The 2 provided arrays differ at position index ${index}, expected value was '${expectedValue}' but found '${actualValue}'.`,
+      array2,
+      array1
+    );
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'AssertionArraysNotEqualError';
+
+    // Capture the stack trace (V8-specific, e.g., Chrome and Node.js)
+    // Omits the constructor call from the trace for cleaner debugging
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, AssertionArraysNotEqualError);
+    }
+
+    // Ensure the prototype chain is correct (required in some transpilation targets)
+    Object.setPrototypeOf(this, AssertionArraysNotEqualError.prototype);
   }
 }
 

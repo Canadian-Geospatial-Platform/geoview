@@ -11,6 +11,8 @@ import {
   AssertionArrayLengthMinimalError,
   AssertionWrongErrorInstanceError,
   AssertionNoErrorThrownError,
+  AssertionValueNotAnArrayError,
+  AssertionArraysNotEqualError,
 } from './exceptions';
 import type { TestStepLevel } from './test-step';
 import { TestStep } from './test-step';
@@ -213,6 +215,38 @@ export class Test<T = unknown> {
 
     // Throw
     throw new AssertionValueError(actualValue, expectedValue);
+  }
+
+  /**
+   * Asserts that two arrays have equal values and in the same order (deep comparison).
+   * @param {T[]} actualValue - The actual array being checked.
+   * @param {T[]} expectedValue - The expected array to compare against.
+   * @throws {AssertionError} If the arrays are not equal.
+   * @static
+   */
+  static assertIsArrayEqual<T = unknown>(actualValue: T[], expectedValue: T[]): void {
+    // Check if both are arrays
+    if (!Array.isArray(actualValue)) {
+      throw new AssertionValueNotAnArrayError(actualValue);
+    }
+    if (!Array.isArray(expectedValue)) {
+      throw new AssertionValueNotAnArrayError(expectedValue);
+    }
+
+    // Check if lengths are equal
+    if (actualValue.length !== expectedValue.length) {
+      throw new AssertionArrayLengthError(actualValue.length, expectedValue.length);
+    }
+
+    // Compare each element
+    for (let i = 0; i < actualValue.length; i++) {
+      if (actualValue[i] !== expectedValue[i]) {
+        throw new AssertionArraysNotEqualError(actualValue, expectedValue, i, expectedValue[i], actualValue[i]);
+      }
+    }
+
+    // If we get here, arrays are equal
+    return;
   }
 
   /**

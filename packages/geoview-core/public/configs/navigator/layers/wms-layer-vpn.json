@@ -12,7 +12,7 @@
     "listOfGeoviewLayerConfig": [
       {
         "geoviewLayerId": "erml",
-        "geoviewLayerName": "Erml" ,
+        "geoviewLayerName": "Erml",
         "metadataAccessPath": "https://geoconnex.ca/central-node/geoserver/erml/ows?service=WMS&version=1.3.0&request=GetCapabilities",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
@@ -28,17 +28,18 @@
       }
     ]
   },
-  "components": ["overview-map"],
+  "components": ["overview-map", "north-arrow"],
+  "overviewMap": { "hideOnZoom": 7 },
   "footerBar": {
     "tabs": {
-      "core": ["legend", "layers", "details", "time-slider"]
+      "core": ["layers", "data-table"]
     }
   },
   "corePackages": [],
   "theme": "geo.ca",
   "appBar": {
     "tabs": {
-      "core": ["geolocator", "export"]
+      "core": ["geolocator", "legend", "details", "export"]
     }
   }
 }

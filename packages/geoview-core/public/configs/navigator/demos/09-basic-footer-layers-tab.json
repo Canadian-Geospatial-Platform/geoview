@@ -137,10 +137,10 @@
     ]
   },
   "theme": "geo.ca",
-  "components": [],
+  "components": ["north-arrow", "overview-map"],
   "footerBar": {
     "tabs": {
-      "core": ["legend", "layers", "details", "data-table"]
+      "core": ["legend", "details", "layers", "data-table"]
     },
     "selectedTab": "layers",
     "selectedLayersLayerPath": "airborne_radioactivity/1"

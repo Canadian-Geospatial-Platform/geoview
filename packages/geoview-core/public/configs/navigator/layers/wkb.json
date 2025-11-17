@@ -3,16 +3,9 @@
     "interaction": "dynamic",
     "viewSettings": {
       "initialView": {
-        "layerIds": [
-          "wkbLYR1/1"
-        ]
+        "layerIds": ["wkbLYR1/1"]
       },
-      "maxExtent": [
-        -180,
-        -90,
-        180,
-        90
-      ],
+      "maxExtent": [-180, -90, 180, 90],
       "projection": 3857
     },
     "basemapOptions": {
@@ -47,30 +40,18 @@
       }
     ]
   },
-  "components": [
-    "overview-map"
-  ],
-  "overviewMap": {
-    "hideOnZoom": 7
-  },
+  "components": ["overview-map", "north-arrow"],
+  "overviewMap": { "hideOnZoom": 7 },
   "footerBar": {
     "tabs": {
-      "core": [
-        "legend",
-        "layers",
-        "details",
-        "data-table"
-      ]
+      "core": ["layers", "data-table"]
     }
   },
   "corePackages": [],
   "theme": "geo.ca",
   "appBar": {
     "tabs": {
-      "core": [
-        "geolocator",
-        "export"
-      ]
+      "core": ["geolocator", "legend", "details", "export"]
     }
   }
 }

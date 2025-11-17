@@ -701,6 +701,29 @@ table.state {
   flex: 1;
 }
 
+/* Ensure code elements inside list items match the text size */
+.option-item ul li code {
+  font-size: 16px;
+  margin: 2px 6px;
+  background-color: #f6f8fa;
+  border: 1px solid #e1e4e8;
+  border-radius: 3px;
+}
+
+p code {
+  font-size: 16px;
+  margin: 2px 6px;
+  background-color: #f6f8fa;
+  border: 1px solid #e1e4e8;
+  border-radius: 3px;
+}
+
+.option-item {
+  border-top: 2px solid #4CAF50;
+  padding-bottom: 8px;
+  margin-bottom: 15px;
+}
+
 /* Demo Important Layers Styles */
 li.source-link {
   cursor: pointer;
@@ -772,4 +795,3 @@ td.display-fields {
   font-family: 'Courier New', Courier, monospace;
   font-size: 13px;
 }
-

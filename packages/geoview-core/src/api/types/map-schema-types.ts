@@ -248,7 +248,7 @@ export const VALID_INTERACTION: TypeInteraction[] = ['static', 'dynamic'];
 
 /** Definition of the view settings. */
 export type TypeViewSettings = {
-  /** Settings for the initial view for map, default is zoomAndCenter of [3.5, [-90, 60]] */
+  /** Settings for the initial view for map, default value for zoomAndCenter is defined by the projection */
   initialView?: TypeMapViewSettings;
   /** Settings for the home nav bar button. */
   homeView?: TypeMapViewSettings;
@@ -333,18 +333,23 @@ export const BASEMAP_LABEL: Record<TypeValidMapProjectionCodes, boolean[]> = {
 // valid center levels from each projection
 export const VALID_MAP_CENTER: Record<TypeValidMapProjectionCodes, Record<string, number[]>> = {
   3857: { lat: [-90, 90], long: [-180, 180] },
-  3978: { lat: [40, 90], long: [-140, 40] },
+  3978: { lat: [40, 90], long: [-140, -60] },
 };
 
 // extents and center for each projection
 export const MAP_EXTENTS: Record<TypeValidMapProjectionCodes, number[]> = {
   3857: [-180, 0, 80, 84],
-  3978: [-135, 25, -45, 89],
+  3978: [-150, -10, -30, 90],
 };
 
 export const MAP_CENTER: Record<TypeValidMapProjectionCodes, [number, number]> = {
-  3857: [-90, 67],
+  3857: [-90, 65],
   3978: [-90, 60],
+};
+
+export const MAP_ZOOM_LEVEL: Record<TypeValidMapProjectionCodes, number> = {
+  3857: 3.5,
+  3978: 4.5,
 };
 
 /** Type used to define valid highlight colors. */
@@ -435,7 +440,7 @@ export const DEFAULT_MAP_FEATURE_CONFIG = {
     },
     viewSettings: {
       initialView: {
-        zoomAndCenter: [3.5, MAP_CENTER[3978]],
+        zoomAndCenter: [MAP_ZOOM_LEVEL[3978], MAP_CENTER[3978]],
       },
       enableRotation: true,
       rotation: 0,
@@ -450,13 +455,13 @@ export const DEFAULT_MAP_FEATURE_CONFIG = {
   navBar: ['zoom', 'fullscreen', 'home', 'basemap-select'],
   footerBar: {
     tabs: {
-      core: ['legend', 'layers', 'details', 'data-table'],
+      core: ['layers', 'data-table'],
       custom: [],
     },
     collapsed: false,
   },
   components: ['north-arrow', 'overview-map'],
-  appBar: { tabs: { core: ['geolocator'] } },
+  appBar: { tabs: { core: ['geolocator', 'legend', 'details', 'export'] } },
   corePackages: [],
   corePackagesConfig: [],
   overviewMap: { hideOnZoom: 0 },
