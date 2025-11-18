@@ -1039,6 +1039,14 @@ export class MapEventProcessor extends AbstractEventProcessor {
     extent: Extent,
     options: FitOptions = { padding: OL_ZOOM_PADDING, maxZoom: OL_ZOOM_MAXZOOM, duration: OL_ZOOM_DURATION }
   ): Promise<void> {
+    // Merge user options with defaults
+    const defaultOptions: FitOptions = {
+      padding: OL_ZOOM_PADDING,
+      maxZoom: OL_ZOOM_MAXZOOM,
+      duration: OL_ZOOM_DURATION,
+    };
+
+    const mergedOptions: FitOptions = { ...defaultOptions, ...options };
     // Validate the extent coordinates - need to make sure we aren't excluding zero with !number
     if (
       !extent.some((number) => {
@@ -1046,7 +1054,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       })
     ) {
       // store state will be updated by map event
-      this.getMapViewer(mapId).getView().fit(extent, options);
+      this.getMapViewer(mapId).getView().fit(extent, mergedOptions);
 
       // Use a Promise and resolve it when the duration expired
       return new Promise((resolve) => {
