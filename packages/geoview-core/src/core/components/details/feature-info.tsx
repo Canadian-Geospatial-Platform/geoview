@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useState, useMemo, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-import { getCenter } from 'ol/extent';
 
 import { List, ZoomInSearchIcon, Tooltip, IconButton, Checkbox, Paper, Box, Typography, BrowserNotSupportedIcon } from '@/ui';
 import { useDetailsCheckedFeatures, useDetailsStoreActions } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
-import { delay } from '@/core/utils/utilities';
+import { bufferExtent } from '@/geo/utils/utilities';
 import type { TypeFeatureInfoEntry, TypeFieldEntry } from '@/api/types/map-schema-types';
 import { FeatureInfoTable } from './feature-info-table';
 import { getSxClasses } from './details-style';
@@ -112,7 +111,7 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
   // Store
   const checkedFeatures = useDetailsCheckedFeatures();
   const { addCheckedFeature, removeCheckedFeature } = useDetailsStoreActions();
-  const { zoomToExtent, highlightBBox, transformPoints, showClickMarker } = useMapStoreActions();
+  const { zoomToExtent, highlightBBox, addHighlightedFeature } = useMapStoreActions();
 
   // Feature data processing
   const featureData = useMemo(() => {
@@ -169,27 +168,25 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
       event.stopPropagation();
       if (!featureData?.extent) return;
 
-      const center = getCenter(featureData.extent);
-      const newCenter = transformPoints([center], 4326)[0];
+      // Buffer the extent to avoid zooming too close if it's a point
+      const isPoint = featureData.geometry!.getType() === 'Point';
+      const zoomExtent = isPoint ? bufferExtent(featureData.extent, 1000) : featureData.extent;
 
-      // Zoom to extent and wait for it to finish
-      // TODO: We have the same patch in data-table, see if we should create a reusable custom patch / or cahnge desing
-      zoomToExtent(featureData.extent)
-        .then(async () => {
-          // Typically, the click marker is removed after a zoom, so wait a bit here and re-add it...
-          // TODO: Refactor - Zoom ClickMarker - Improve the logic in general of when/if a click marker should be removed after a zoom
-          await delay(150);
-
-          // Add (back?) a click marker, and bbox extent who will disapear
-          showClickMarker({ lonlat: newCenter });
-          highlightBBox(featureData.extent!, false);
+      // Zoom to extent and highlight the feature
+      zoomToExtent(zoomExtent, { padding: [5, 5, 5, 5], maxZoom: 17 })
+        .then(() => {
+          // Highlight the bounding box
+          if (featureData.extent && !isPoint) {
+            highlightBBox(featureData.extent, false);
+          }
+          // Add the current feature to highlights
+          addHighlightedFeature(feature);
         })
         .catch((error: unknown) => {
-          // Log
           logger.logPromiseFailed('zoomToExtent in handleZoomIn in FeatureInfoNew', error);
         });
     },
-    [featureData, transformPoints, zoomToExtent, showClickMarker, highlightBBox]
+    [featureData, feature, zoomToExtent, highlightBBox, addHighlightedFeature]
   );
 
   // Effects
