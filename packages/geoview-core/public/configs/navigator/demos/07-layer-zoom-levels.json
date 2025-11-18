@@ -34,6 +34,10 @@
         ]
       },
       {
+        "geoviewLayerId": "ae385105-e48c-4b54-bd0f-dfb7303301cb",
+        "geoviewLayerType": "geoCore"
+      },
+      {
         "geoviewLayerId": "uniqueValueId",
         "geoviewLayerName": "uniqueValue",
         "metadataAccessPath": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/",
