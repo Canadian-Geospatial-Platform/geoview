@@ -16,6 +16,7 @@ import {
   useMapClickCoordinates,
   useMapHideCoordinateInfoSwitch,
   useMapAllVisibleandInRangeLayers,
+  useMapVisibleLayers,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import type { TypeFeatureInfoEntry, TypeLayerData } from '@/api/types/map-schema-types';
@@ -57,9 +58,10 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
   const coordinateInfoEnabled = useDetailsCoordinateInfoEnabled();
   const hideCoordinateInfoSwitch = useMapHideCoordinateInfoSwitch();
   const visibleInRangeLayers = useMapAllVisibleandInRangeLayers();
+  const visibleLayers = useMapVisibleLayers();
   const mapClickCoordinates = useMapClickCoordinates();
   const { setSelectedLayerPath, removeCheckedFeature, setLayerDataArrayBatchLayerPathBypass } = useDetailsStoreActions();
-  const { addHighlightedFeature, removeHighlightedFeature, isLayerHiddenOnMap } = useMapStoreActions();
+  const { addHighlightedFeature, removeHighlightedFeature } = useMapStoreActions();
 
   // States
   const [currentFeatureIndex, setCurrentFeatureIndex] = useState<number>(0);
@@ -131,9 +133,8 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
     logger.logTraceUseMemo('DETAILS-PANEL - memoLayersList', visibleInRangeLayers, arrayOfLayerDataBatch);
 
     // Set the layers list (filter: visible - visible in range and isQueryable)
-    const layerListEntries = visibleInRangeLayers
+    const layerListEntries = visibleLayers
       .map((layerPath) => arrayOfLayerDataBatch.find((layerData) => layerData.layerPath === layerPath))
-      .filter((layer) => layer && !isLayerHiddenOnMap(layer.layerPath))
       .filter((layer) => layer && layer.eventListenerEnabled)
       .map(
         (layer) =>
@@ -171,7 +172,7 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
     // Combine the lists (features first, then no features)
     const orderedLayerListEntries = [...layersWithFeatures, ...layersWithoutFeatures];
     return orderedLayerListEntries;
-  }, [visibleInRangeLayers, arrayOfLayerDataBatch, coordinateInfoEnabled, isLayerHiddenOnMap, getNumFeaturesLabel, mapId]);
+  }, [visibleLayers, visibleInRangeLayers, arrayOfLayerDataBatch, coordinateInfoEnabled, getNumFeaturesLabel, mapId]);
 
   /**
    * Memoizes the selected layer for the LayerList component.
@@ -260,17 +261,25 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
     clearHighlightsUnchecked(prevLayerFeatures.current);
     clearHighlightsUnchecked(memoSelectedLayerDataFeatures);
 
-    // If any features
-    if (memoSelectedLayerDataFeatures && memoSelectedLayerDataFeatures.length) {
-      addHighlightedFeature(memoSelectedLayerDataFeatures[currentFeatureIndex]);
+    // Re-add highlights for checked features (they should persist)
+    if (checkedFeatures.length > 0) {
+      checkedFeatures.forEach((checkedFeature) => {
+        addHighlightedFeature(checkedFeature);
+      });
     }
+
+    // Features are highlighted when:
+    // 1. User navigates with arrows (handleFeatureNavigateChange -> updateFeatureSelected)
+    // 2. User zooms to feature (feature-info.tsx -> handleZoomIn -> addHighlightedFeature)
+    // 3. User checks the checkbox (kept via checkedFeatures and re-added above)
+    // 4. Initial map click (first feature gets highlighted by updateFeatureSelected in resetCurrentIndex)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     memoLayersList,
     memoSelectedLayerDataFeatures,
-    currentFeatureIndex,
-    addHighlightedFeature,
-    removeHighlightedFeature,
+    checkedFeatures,
     clearHighlightsUnchecked,
+    // Do NOT add currentFeatureIndex or addHighlightedFeature to prevent auto-highlighting wrong feature
   ]);
 
   /**
@@ -357,31 +366,39 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
    * the previously selected feature index so that in the useEffect, later, the component can udpate
    * the selected features with the store.
    */
-  const resetCurrentIndex = (): void => {
+  const resetCurrentIndex = (resetIndex: boolean = false): void => {
     // Keep reference on previously selected layer
     prevLayerSelected.current = arrayOfLayerDataBatch.find((layer) => layer.layerPath === selectedLayerPathLocal);
     // Keep reference on previously selected features
     prevLayerFeatures.current = prevLayerSelected.current?.features;
     // Keep reference on previously selected index
     prevFeatureIndex.current = currentFeatureIndex;
-    // Reset the indexing
-    setCurrentFeatureIndex(0);
+    // Reset the indexing only if requested (e.g., when layer path changes)
+    if (resetIndex) {
+      setCurrentFeatureIndex(0);
+    }
   };
-
-  // If the array of layer data has changed since last render
-  if (arrayOfLayerListLocal !== memoLayersList) {
-    // Selected array layer data changed
-    setArrayOfLayerListLocal(memoLayersList);
-    // Reset the feature index, because there may be less features this time than where the index was before
-    resetCurrentIndex();
-  }
 
   // If the layer path has changed since last render
   if (selectedLayerPathLocal !== selectedLayerPath) {
     // Selected layer path changed
     setSelectedLayerPathLocal(selectedLayerPath);
     // Reset the feature index, because it's a whole different selected layer with different features
-    resetCurrentIndex();
+    resetCurrentIndex(true);
+  }
+
+  // If the array of layer data has changed since last render
+  if (arrayOfLayerListLocal !== memoLayersList) {
+    // Selected array layer data changed
+    setArrayOfLayerListLocal(memoLayersList);
+    // Update references but DON'T reset the feature index if we're still on the same layer
+    // Only reset if the current index is out of bounds for the new features array
+    const currentLayerFeatures = memoSelectedLayerDataFeatures;
+    if (currentLayerFeatures && currentFeatureIndex >= currentLayerFeatures.length) {
+      resetCurrentIndex(true);
+    } else {
+      resetCurrentIndex(false);
+    }
   }
 
   /**
@@ -399,6 +416,39 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapClickCoordinates, memoLayersList, setSelectedLayerPath]);
+
+  /**
+   * Highlight the first feature when a layer is initially selected after a map click
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect(
+      'DETAILS-PANEL - highlight first feature on initial selection',
+      selectedLayerPath,
+      memoSelectedLayerDataFeatures
+    );
+
+    // Only highlight on initial selection (when currentFeatureIndex is 0 and we have features)
+    if (
+      selectedLayerPath &&
+      memoSelectedLayerDataFeatures &&
+      memoSelectedLayerDataFeatures.length > 0 &&
+      currentFeatureIndex === 0 &&
+      mapClickCoordinates
+    ) {
+      const firstFeature = memoSelectedLayerDataFeatures[0];
+      if (firstFeature && !isFeatureInCheckedFeatures(firstFeature)) {
+        addHighlightedFeature(firstFeature);
+      }
+    }
+  }, [
+    selectedLayerPath,
+    memoSelectedLayerDataFeatures,
+    currentFeatureIndex,
+    mapClickCoordinates,
+    isFeatureInCheckedFeatures,
+    addHighlightedFeature,
+  ]);
 
   /**
    * Check all layers status is processed while querying
