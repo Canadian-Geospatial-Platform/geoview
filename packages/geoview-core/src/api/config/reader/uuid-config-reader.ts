@@ -6,6 +6,7 @@ import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { GeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
+import { GeoTIFF } from '@/geo/layer/geoview-layers/raster/geotiff';
 import { ImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
 import { KML } from '@/geo/layer/geoview-layers/vector/kml';
 import { OgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
@@ -216,6 +217,9 @@ export class UUIDmapConfigReader {
           } else if (layerType === CONST_LAYER_TYPES.VECTOR_TILES) {
             // Redirect
             geoviewLayerConfig = VectorTiles.createGeoviewLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
+          } else if (layerType === CONST_LAYER_TYPES.GEOTIFF) {
+            // Redirect
+            geoviewLayerConfig = GeoTIFF.createGeoviewLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
           } else if (layerType === CONST_LAYER_TYPES.IMAGE_STATIC) {
             // Redirect
             geoviewLayerConfig = ImageStatic.createGeoviewLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);

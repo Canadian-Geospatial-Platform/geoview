@@ -13,6 +13,7 @@ import { CSV } from 'geoview-core/geo/layer/geoview-layers/vector/csv';
 import { OgcFeature } from 'geoview-core/geo/layer/geoview-layers/vector/ogc-feature';
 import { WKB } from 'geoview-core/geo/layer/geoview-layers/vector/wkb';
 import { KML } from 'geoview-core/geo/layer/geoview-layers/vector/kml';
+import { GeoTIFF } from 'geoview-core/geo/layer/geoview-layers/raster/geotiff';
 import { EsriImageLayerEntryConfig } from 'geoview-core/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { EsriFeatureLayerEntryConfig } from 'geoview-core/api/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from 'geoview-core/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
@@ -24,6 +25,7 @@ import { CsvLayerEntryConfig } from 'geoview-core/api/config/validation-classes/
 import { OgcFeatureLayerEntryConfig } from 'geoview-core/api/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
 import { WkbLayerEntryConfig } from 'geoview-core/api/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
 import { KmlLayerEntryConfig } from 'geoview-core/api/config/validation-classes/vector-validation-classes/kml-layer-entry-config';
+import { GeoTIFFLayerEntryConfig } from 'geoview-core/api/config/validation-classes/raster-validation-classes/geotiff-layer-entry-config';
 import type { GeoCoreLayerConfigResponse } from 'geoview-core/api/config/geocore';
 import { GeoCore } from 'geoview-core/api/config/geocore';
 
@@ -1016,6 +1018,87 @@ export class ConfigTester extends GVAbstractTester {
   }
 
   // #endregion KML
+
+  // #region GeoTIFF
+
+  /**
+   * Tests a GeoTIFF using  datacube vegetation.
+   * @returns {Promise<Test<TypeGeoviewLayerConfig>>} A Promise that resolves when the test completes successfully.
+   */
+  testGeoTIFFWithVegetation(): Promise<Test<TypeGeoviewLayerConfig>> {
+    // The url
+    const url = GVAbstractTester.GEOTIFF_VEGETATION;
+
+    // Dummy names
+    const gvLayerId: string = 'gvLayerId';
+    const gvLayerType: TypeGeoviewLayerType = 'GeoTIFF';
+    const gvLayerName: string = 'GeoTIFFLayer';
+
+    // Expected config
+    const expectedConfig = {
+      geoviewLayerId: gvLayerId,
+      geoviewLayerType: gvLayerType,
+      geoviewLayerName: gvLayerName,
+    };
+
+    // Test the GeoTIFF
+    return this.test(
+      'Test a GeoTIFF with Vegetation',
+      (test) => {
+        // Set step
+        test.addStep('Initializing config on url: ' + url);
+
+        // Initialize the layer config
+        return GeoTIFF.initGeoviewLayerConfig(gvLayerId, gvLayerName, url);
+      },
+      (test, result) => {
+        // Perform assertions
+        test.addStep('Verifying expected config...');
+        Test.assertJsonObject(result, expectedConfig);
+
+        // Supposedly 1 layer entry
+        test.addStep('Verifying 1 layer entry in the config...');
+        Test.assertIsArrayLengthEqual(result.listOfLayerEntryConfig, 1);
+
+        // Check at least one has the correct layerId
+        test.addStep('Verifying layer id in the list...');
+        Test.assertIsEqual(result.listOfLayerEntryConfig[0].layerId, GVAbstractTester.GEOTIFF_VEGETATION_FILE);
+
+        // Check it's the right type
+        test.addStep('Verifying layer entry is of the right type...');
+        Test.assertIsInstance(result.listOfLayerEntryConfig[0], GeoTIFFLayerEntryConfig);
+      }
+    );
+  }
+
+  /**
+   * Tests the behavior of initializing a KML GeoView layer configuration using an invalid URL.
+   * This test ensures that when the provided KML URL is invalid or unreachable, the initialization
+   * process correctly skips metadata loading instead of throwing an unhandled error or proceeding incorrectly.
+   * @returns {Promise<Test<void>>} A promise that resolves when the test completes successfully.
+   */
+  testGeoTIFFBadUrlExpectSkip(): Promise<Test<void>> {
+    // The bad url
+    const urlBad: string = GVAbstractTester.BAD_URL;
+
+    // Test
+    return this.test(
+      `Test a GeoTIFF config with a bad url expecting a skip...`,
+      async (test) => {
+        // Creating the configuration
+        test.addStep('Creating the GeoView Layer Configuration...');
+
+        // Try it and expect a fail
+        await GeoTIFF.initGeoviewLayerConfig('gvLayerId', 'gvLayerName', urlBad);
+      },
+      (test) => {
+        // Perform assertions
+        test.addStep(`At this point, the metadata was skipped and that's as intended...`);
+      }
+    );
+  }
+
+  // #endregion GeoTIFF
 
   // #region Geocore
 
