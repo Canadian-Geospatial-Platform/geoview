@@ -3,19 +3,9 @@
     "interaction": "dynamic",
     "viewSettings": {
       "projection": 3978,
-      "maxExtent": [
-        -125,
-        30,
-        -60,
-        89
-      ],
+      "maxExtent": [-125, 30, -60, 89],
       "initialView": {
-        "extent": [
-          618157.4086582607,
-          -950073.2626501226,
-          2039609.776216048,
-          476729.6157014831
-        ]
+        "extent": [618157.4086582607, -950073.2626501226, 2039609.776216048, 476729.6157014831]
       }
     },
     "basemapOptions": {
@@ -25,10 +15,7 @@
       "labelZIndex": 20
     }
   },
-  "components": [
-    "overview-map",
-    "north-arrow"
-  ],
+  "components": ["overview-map", "north-arrow"],
   "overviewMap": {
     "hideOnZoom": 7
   },

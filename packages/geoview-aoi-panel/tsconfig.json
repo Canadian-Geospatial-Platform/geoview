@@ -3,14 +3,10 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "geoview-core/*": [
-        "../geoview-core/src/*"
-      ]
+      "geoview-core/*": ["../geoview-core/src/*"]
     }
   },
-  "include": [
-    "src"
-  ],
+  "include": ["src"],
   "references": [
     {
       "path": "../geoview-core"
