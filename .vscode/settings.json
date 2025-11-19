@@ -15,13 +15,8 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "always"
   },
-  "eslint.probe": [
-    "typescript",
-    "typescriptreact"
-  ],
-  "eslint.workingDirectories": [
-    "packages"
-  ],
+  "eslint.probe": ["typescript", "typescriptreact"],
+  "eslint.workingDirectories": ["packages"],
   "window.title": "${activeEditorMedium}${separator}${rootName}${separator}${profileName}",
   "files.associations": {
     "*.json": "json"

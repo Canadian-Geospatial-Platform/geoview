@@ -27,29 +27,20 @@
     ]
   },
   "theme": "light",
-  "components": [
-    "north-arrow",
-    "overview-map"
-  ],
+  "components": ["north-arrow", "overview-map"],
   "appBar": {
     "tabs": {
-      "core": [
-        "legend"
-      ]
+      "core": ["legend"]
     }
   },
-  "corePackages": [
-    "swiper"
-  ],
+  "corePackages": ["swiper"],
   "externalPackages": [],
   "corePackagesConfig": [
     {
       "swiper": {
         "orientation": "horizontal",
         "keyboardOffset": 10,
-        "layers": [
-          "esriFeatureLYR4/0"
-        ]
+        "layers": ["esriFeatureLYR4/0"]
       }
     }
   ]

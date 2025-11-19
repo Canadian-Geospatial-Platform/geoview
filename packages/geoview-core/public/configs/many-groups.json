@@ -16,31 +16,18 @@
       }
     ]
   },
-  "components": [
-    "overview-map",
-    "north-arrow"
-  ],
+  "components": ["overview-map", "north-arrow"],
   "overviewMap": {
     "hideOnZoom": 7
   },
   "appBar": {
     "tabs": {
-      "core": [
-        "export",
-        "legend",
-        "details",
-        "geolocator"
-      ]
+      "core": ["export", "legend", "details", "geolocator"]
     }
   },
   "footerBar": {
     "tabs": {
-      "core": [
-        "layers",
-        "geochart",
-        "time-slider",
-        "data-table"
-      ]
+      "core": ["layers", "geochart", "time-slider", "data-table"]
     }
   },
   "corePackages": [],

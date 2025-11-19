@@ -19,6 +19,7 @@ import { OgcFeature } from 'geoview-core/geo/layer/geoview-layers/vector/ogc-fea
 import { WKB } from 'geoview-core/geo/layer/geoview-layers/vector/wkb';
 import { KML } from 'geoview-core/geo/layer/geoview-layers/vector/kml';
 import type { GeoViewLayerAddedResult } from 'geoview-core/geo/layer/layer';
+import type { TypeMapFeaturesInstance } from 'geoview-core/api/types/map-schema-types';
 
 /**
  * Main Layer testing class.
@@ -1225,6 +1226,61 @@ export class LayerTester extends GVAbstractTester {
   }
 
   // #endregion KML
+
+  // #region Settings
+
+  /**
+   * Tests initial settings properly cascading to sub layers.
+   * @returns {Promise<Test<AbstractGeoViewLayer>>} A Promise that resolves when the test completes successfully.
+   */
+  testInitialSettingsCascade(): Promise<Test<TypeMapFeaturesInstance | undefined>> {
+    // The config
+    const config = GVAbstractTester.INITIAL_SETTINGS_CONFIG;
+
+    // Expected config
+    const expectedResults = {
+      groupHighlight: false,
+      groupRemove: false,
+      childHighlight: true,
+    };
+
+    // Test the WMS
+    return this.test(
+      'Test initial settings cascade',
+      async (test) => {
+        // Add the layer to the map and get the AbstractGeoViewLayer
+        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), config as unknown as TypeGeoviewLayerConfig);
+
+        // Return created map config
+        return this.getMapViewer().createMapConfigFromMapState();
+      },
+      (test, result) => {
+        const layer = result?.map?.listOfGeoviewLayerConfig.find(
+          (geoviewLayer) => geoviewLayer.geoviewLayerId === config.geoviewLayerId
+          // GV: Casting as any to avoid TS error related to incompatible types between AbstractGeoViewLayerConfig and TypeGeoviewLayerConfig
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ) as any;
+
+        // Perform assertions
+        test.addStep('Verifying group layer highlight control...');
+        Test.assertIsEqual(layer?.initialSettings?.controls?.highlight, expectedResults.groupHighlight);
+
+        test.addStep('Verifying group layer remove control...');
+        Test.assertIsEqual(layer?.listOfLayerEntryConfig?.[0]?.initialSettings?.controls?.remove, expectedResults.groupRemove);
+
+        test.addStep('Verifying child layer highlight control...');
+        Test.assertIsEqual(
+          layer?.listOfLayerEntryConfig?.[0]?.listOfLayerEntryConfig?.[0]?.initialSettings?.controls?.highlight,
+          expectedResults.childHighlight
+        );
+
+        // Redirect to helper to clean up and assert
+        LayerTester.helperFinalizeStepRemoveLayerConfigAndAssert(test, this.getMapViewer(), 'geojsonLYR1/point-feature-group');
+      }
+    );
+  }
+
+  // #endregion Settings
 
   // #region HELPERS
 

@@ -132,6 +132,9 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
     // Test true negative
     const pLayerGeoTIFFBadUrl = this.#layerTester.testAddGeoTIFFWithBadUrl();
 
+    // Test initial settings cascade
+    const pInitialSettingsCascade = this.#layerTester.testInitialSettingsCascade();
+
     // Resolve when all
     return Promise.all([
       pLayerEsriDynamicHistoFloods,
@@ -160,6 +163,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
       pLayerKMLBadUrl,
       pLayerGeoTIFFVegetation,
       pLayerGeoTIFFBadUrl,
+      pInitialSettingsCascade,
     ]);
   }
 }
