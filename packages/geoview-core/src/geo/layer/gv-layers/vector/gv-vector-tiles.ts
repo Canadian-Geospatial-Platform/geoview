@@ -20,7 +20,7 @@ export class GVVectorTiles extends AbstractGVVectorTile {
    * @param {VectorTile} olSource - The OpenLayer source.
    * @param {VectorTilesLayerEntryConfig} layerConfig - The layer configuration.
    */
-  public constructor(olSource: VectorTile, layerConfig: VectorTilesLayerEntryConfig) {
+  constructor(olSource: VectorTile, layerConfig: VectorTilesLayerEntryConfig) {
     super(olSource, layerConfig);
 
     // Create the tile layer options.

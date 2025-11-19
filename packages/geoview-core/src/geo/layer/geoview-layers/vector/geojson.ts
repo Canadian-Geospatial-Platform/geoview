@@ -19,6 +19,8 @@ import {
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import { GVGeoJSON } from '@/geo/layer/gv-layers/vector/gv-geojson';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
+import { LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
+import { formatError } from '@/core/exceptions/core-exceptions';
 
 export interface TypeGeoJSONLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.GEOJSON;
@@ -56,36 +58,45 @@ export class GeoJSON extends AbstractGeoViewVector {
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
    * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<T = TypeMetadataGeoJSON | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
+   * @throws {LayerServiceMetadataUnableToFetchError} Error thrown when the metadata fetch fails or contains an error.
    */
-  protected override onFetchServiceMetadata<T = TypeMetadataGeoJSON | undefined>(abortSignal?: AbortSignal): Promise<T> {
-    // If metadataAccessPath ends with .meta, .json or .geojson
-    if (
-      this.metadataAccessPath.toLowerCase().endsWith('.meta') ||
-      this.metadataAccessPath.toLowerCase().endsWith('.json') ||
-      this.metadataAccessPath.toLowerCase().endsWith('.geojson')
-    ) {
-      // Fetch it
-      return GeoJSON.fetchMetadata(this.metadataAccessPath, abortSignal) as Promise<T>;
+  protected override async onFetchServiceMetadata<T = TypeMetadataGeoJSON | undefined>(abortSignal?: AbortSignal): Promise<T> {
+    try {
+      // If metadataAccessPath ends with .meta, .json or .geojson
+      if (
+        this.metadataAccessPath.toLowerCase().endsWith('.meta') ||
+        this.metadataAccessPath.toLowerCase().endsWith('.json') ||
+        this.metadataAccessPath.toLowerCase().endsWith('.geojson')
+      ) {
+        // Fetch it
+        return (await GeoJSON.fetchMetadata(this.metadataAccessPath, abortSignal)) as T;
+      }
+
+      // The metadataAccessPath didn't seem like it was containing actual metadata, so it was skipped
+      logger.logWarning(
+        `The metadataAccessPath '${this.metadataAccessPath}' didn't seem like it was containing actual metadata, so it was skipped`
+      );
+
+      // None
+      return Promise.resolve(undefined) as Promise<T>;
+    } catch (error: unknown) {
+      // Throw
+      throw new LayerServiceMetadataUnableToFetchError(this.geoviewLayerId, this.getLayerEntryNameOrGeoviewLayerName(), formatError(error));
     }
-
-    // The metadataAccessPath didn't seem like it was containing actual metadata, so it was skipped
-    logger.logWarning(
-      `The metadataAccessPath '${this.metadataAccessPath}' didn't seem like it was containing actual metadata, so it was skipped`
-    );
-
-    // None
-    return Promise.resolve(undefined) as Promise<T>;
   }
 
   /**
    * Overrides the way a geoview layer config initializes its layer entries.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
    */
-  protected override onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
+  protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Get the folder url
     const idx = this.metadataAccessPath.lastIndexOf('/');
     const rootUrl = this.metadataAccessPath.substring(0, idx);
     const id = this.metadataAccessPath.substring(idx + 1);
+
+    // Attempt a fetch of the metadata
+    await this.onFetchServiceMetadata();
 
     // Redirect
     // TODO: Check - Config init - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
@@ -239,6 +250,10 @@ export class GeoJSON extends AbstractGeoViewVector {
    * Fetches the metadata for a typical GeoJson class.
    * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @param {string} url - The url to query the metadata from.
+   * @throws {RequestTimeoutError} Error thrown when the request exceeds the timeout duration.
+   * @throws {RequestAbortedError} Error thrown when the request was aborted by the caller's signal.
+   * @throws {ResponseError} Error thrown when the response is not OK (non-2xx).
+   * @throws {ResponseEmptyError} Error thrown when the JSON response is empty.
    */
   static fetchMetadata(url: string, abortSignal?: AbortSignal): Promise<TypeMetadataGeoJSON> {
     // Return it

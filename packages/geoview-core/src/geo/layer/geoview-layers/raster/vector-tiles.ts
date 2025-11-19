@@ -16,7 +16,7 @@ import { Projection } from '@/geo/utils/projection';
 import { VectorTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { logger } from '@/core/utils/logger';
 import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
-import { LayerEntryConfigVectorTileProjectionNotMatchingMapProjectionError } from '@/core/exceptions/layer-entry-config-exceptions';
+import { LayerEntryNotSupportingProjectionError } from '@/core/exceptions/layer-entry-config-exceptions';
 import { GVVectorTiles } from '@/geo/layer/gv-layers/vector/gv-vector-tiles';
 
 // TODO: Implement method to validate Vector Tiles service
@@ -40,7 +40,8 @@ export class VectorTiles extends AbstractGeoViewRaster {
 
   /**
    * Constructs a VectorTiles Layer configuration processor.
-   * @param {TypeVectorTilesConfig} layerConfig the layer configuration
+   * @param {TypeVectorTilesConfig} layerConfig - The layer configuration
+   * @param {ProjectionLike} fallbackProjection - The map projection when this layer is being created, for validation purposes.
    */
   constructor(layerConfig: TypeVectorTilesConfig, fallbackProjection: ProjectionLike) {
     super(layerConfig);
@@ -310,7 +311,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
       layerConfig.setLayerStatusError();
 
       // Raise error
-      throw new LayerEntryConfigVectorTileProjectionNotMatchingMapProjectionError(layerConfig);
+      throw new LayerEntryNotSupportingProjectionError(fallbackProjection as string, layerConfig);
     }
 
     // If tileGrid configuration exists, construct and assign an ol/tilegrid/TileGrid

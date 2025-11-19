@@ -13,7 +13,7 @@ import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { DateMgt } from '@/core/utils/date-mgt';
-import { LayerNotFoundError, LayerWrongTypeError } from '@/core/exceptions/layer-exceptions';
+import { LayerWrongTypeError } from '@/core/exceptions/layer-exceptions';
 import { PluginStateUninitializedError } from '@/core/exceptions/geoview-exceptions';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
@@ -187,6 +187,8 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The id of the map
    * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer path of the layer to add to the state
    * @returns {TimeSliderLayer | undefined}
+   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
+   * @throws {LayerWrongTypeError} Error thrown when the specified layer is of wrong type.
    * @static
    */
   static getInitialTimeSliderValues(
@@ -199,9 +201,6 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
 
     // Cast the layer
     const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerConfig.layerPath);
-
-    // If not found
-    if (!geoviewLayer) throw new LayerNotFoundError(layerConfig.layerPath);
 
     // If not of right type
     if (!(geoviewLayer instanceof AbstractGVLayer)) throw new LayerWrongTypeError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
@@ -354,7 +353,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    */
   static updateFilters(mapId: string, layerPath: string, field: string, filtering: boolean, minAndMax: number[], values: number[]): void {
     // Get the layer using the map event processor
-    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
+    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerIfExists(layerPath);
 
     let filter: string;
     if (geoviewLayer instanceof WMS || geoviewLayer instanceof GVWMS) {

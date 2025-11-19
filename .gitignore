@@ -85,5 +85,6 @@ common/config/rush/pnpm-lock.yaml
 
 **/packages/geoview-core/types
 packages/geoview-core/public/docs/
+packages/geoview-core/public/typeDocAPI/
 
 .direnv/

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -16,65 +16,43 @@
   </head>
 
   <body>
-    <div class="header-table">
-      <table>
-        <tbody>
-          <tr>
-            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
-            <td class="header-title">
-              <h1><strong>Outlier layers with performace issue</strong></h1>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td>
-              <a href="./index.html">Main</a><br />
-              <a href="./outliers.html">Outlier Layers</a><br />
-            </td>
-          </tr>
-          <tr>
-            <td><p>This page is used to showcase layers with few layer with bad performance with different original server projection</p></td>
-          </tr>
-          </tr>
-        </tbody>
-      </table>
+    <div>
+      <div id="page-header"></div>
+
+      <div class="back-to-main">
+        <a href="./outliers.html">← Back to Outliers</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>Outlier Layers with Performance Issues</h4>
+        <p>This page is used to showcase layers with bad performance with different original server projections.</p>
+      </div>
     </div>
 
-    <div class="map-title-holder">
-      <h4 id="Hmap1">Max Record Count Layers</h4>
-      <a class="ref-link" href="#top">Top</a>
-    </div>
-    <button class="collapsible active">Layers Status</button>
+    <button class="collapsible">Layers Status</button>
     <pre id="Hmap1-state" class="panel map-title-holder"></pre>
     <hr />
 
-    <select name="projections" id="projections">
+    <select name="projections" id="projections" class="navigator-select">
       <option value="3857">Web Mercator (3857)</option>
       <option value="3978">LCC (3978)</option>
     </select>
-    <button type="button" onclick="reloadMap()">Set Projection</button>
+    <button type="button" class="btn btn-primary" onclick="reloadMap()">Set Projection</button>
 
-    <div
-      id="map1"
-      class="geoview-map"
-      data-lang="en"
-      data-config-url="./configs/performance.json"
-    ></div>
+    <div id="map1" class="geoview-map" data-lang="en" data-config-url="./configs/performance.json"></div>
+    <hr />
 
-    <div>
-      Outlier Layers:
-      <ul>
+    <div class="demo-section">
+      <h4>Outlier Layers</h4>
+      <ul class="demo-list">
         <li>
-          Fieldnotes 2020-2021: Pacific Science Field Operations, 14 sub layer, identify of northern polygon crash the layer.
+          <strong>Fieldnotes 2020-2021: Pacific Science Field Operations</strong> - 14 sub layer, identify of northern polygon crash the
+          layer.
         </li>
+        <li><strong>Protected and conserved area</strong> - Heavy layer in 3879.</li>
         <li>
-          Protected and conserved area - Heavy layer in 3879.
-        </li>
-        <li>
-          Canada Nature Fund for Aquatic Species at Risk (CNFASAR) - Heavy layer in 3857, plus no field define for uniqueValue symbology.
+          <strong>Canada Nature Fund for Aquatic Species at Risk (CNFASAR)</strong> - Heavy layer in 3857, plus no field define for
+          uniqueValue symbology.
         </li>
       </ul>
     </div>
@@ -82,6 +60,8 @@
 
     <script src="codedoc.js"></script>
     <script>
+      insertPageHeader();
+
       // Register handler when map has been initialized
       cgpv.onMapInit((mapViewer) => {
         listenToLegendLayerSetChanges(`H${mapViewer.mapId}-state`, mapViewer);

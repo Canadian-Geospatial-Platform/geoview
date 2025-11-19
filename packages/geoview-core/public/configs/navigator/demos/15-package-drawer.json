@@ -19,14 +19,14 @@
     "north-arrow",
     "overview-map"
   ],
-  "footerBar": {
+  "appBar": {
     "tabs": {
       "core": [
         "legend"
       ]
     }
   },
-  "navBar": ["drawer", "basemap-select"],
+  "navBar": ["drawer", "basemap-select", "projection"],
   "corePackages": [],
   "externalPackages": [],
   "corePackagesConfig": [{

@@ -62,7 +62,7 @@ export abstract class AbstractLayerSet {
   /**
    * A quick getter to help identify which layerset class the current instance is coming from.
    */
-  public getClassName(): string {
+  getClassName(): string {
     // Return the name of the class
     return this.constructor.name;
   }
@@ -133,8 +133,8 @@ export abstract class AbstractLayerSet {
         if (layerConfig.layerStatus === 'loaded') {
           // The layer has become loaded
 
-          // Get the layer
-          const layer = this.layerApi.getGeoviewLayer(layerConfig.layerPath);
+          // Get the layer (not just the config) if it exists yet
+          const layer = this.layerApi.getGeoviewLayerIfExists(layerConfig.layerPath);
 
           // If the layer could be found
           if (layer) {
@@ -267,7 +267,7 @@ export abstract class AbstractLayerSet {
     this.onUnregisterLayerConfig(this.layerApi.getLayerEntryConfig(layerPath));
 
     // Call the unregistration function for the layer-set. This method is different for each child.
-    this.onUnregisterLayer(this.layerApi.getGeoviewLayer(layerPath));
+    this.onUnregisterLayer(this.layerApi.getGeoviewLayerIfExists(layerPath));
 
     // Delete from the store
     this.onDeleteFromStore(layerPath);

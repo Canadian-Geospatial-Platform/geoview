@@ -15,7 +15,9 @@ export class GVOGCFeature extends AbstractGVVector {
    * @param {VectorSource} olSource - The OpenLayer source.
    * @param {OgcFeatureLayerEntryConfig} layerConfig - The layer configuration.
    */
-  public constructor(olSource: VectorSource, layerConfig: OgcFeatureLayerEntryConfig) {
+  // The constructor is not useless, it narrows down the accepted parameter type.
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
+  constructor(olSource: VectorSource, layerConfig: OgcFeatureLayerEntryConfig) {
     super(olSource, layerConfig);
   }
 

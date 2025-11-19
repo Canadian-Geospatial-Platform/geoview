@@ -39,6 +39,10 @@
       "projectFolder": "packages/geoview-swiper"
     },
     {
+      "packageName": "geoview-test-suite",
+      "projectFolder": "packages/geoview-test-suite"
+    },
+    {
       "packageName": "geoview-time-slider",
       "projectFolder": "packages/geoview-time-slider"
     },

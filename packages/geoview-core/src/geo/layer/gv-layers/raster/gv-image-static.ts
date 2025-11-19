@@ -26,7 +26,7 @@ export class GVImageStatic extends AbstractGVRaster {
    * @param {Static} olSource - The OpenLayer source.
    * @param {ImageStaticLayerEntryConfig} layerConfig - The layer configuration.
    */
-  public constructor(olSource: Static, layerConfig: ImageStaticLayerEntryConfig) {
+  constructor(olSource: Static, layerConfig: ImageStaticLayerEntryConfig) {
     super(olSource, layerConfig);
 
     // Create the image layer options.
@@ -103,7 +103,7 @@ export class GVImageStatic extends AbstractGVRaster {
   }
 
   /**
-   * Overrides the fetching of the legend for an Esri image layer.
+   * Overrides the fetching of the legend for a static image layer.
    * @override
    * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
    */

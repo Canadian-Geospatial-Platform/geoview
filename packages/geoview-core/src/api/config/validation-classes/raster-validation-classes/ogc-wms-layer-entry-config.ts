@@ -47,6 +47,15 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   }
 
   /**
+   * Returns a list of supported CRS (Coordinate Reference System) identifiers
+   * from the WMS service metadata.
+   * @returns {string[]} An array of supported CRS identifiers (e.g., 'EPSG:3857').
+   */
+  getSupportedCRSs(): string[] {
+    return this.getServiceMetadata()?.Capability.Layer.CRS ?? [];
+  }
+
+  /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
    * @returns {TypeLayerMetadataEsri | undefined} The strongly-typed layer metadata specific to this layer entry config.

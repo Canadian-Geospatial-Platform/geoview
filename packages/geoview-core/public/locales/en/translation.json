@@ -122,6 +122,7 @@
     "serviceVectorTile": "Vector Tile Service",
     "serviceGeoJSON": "GeoJSON",
     "serviceGeoPackage": "GeoPackage",
+    "serviceGeoTIFF": "GeoTIFF",
     "serviceKML": "Keyhole Markup Language (KML)",
     "serviceCSV": "Comma Separated Values (CSV)",
     "serviceWKB": "Well-Known Binary (WKB)",
@@ -255,9 +256,9 @@
       "unableToCreateGroupLayer": "Unable to create group layer '__param__'.",
       "vectorSourceUrlNotDefined": "Vector source URL is not defined for layer '__param__'.",
       "tooManyEsriFeatures": "Layer '__param__' has too many features (__param__) to function properly. Consider loading as ESRI Dynamic if possible",
-      "vectorTileLayerProjectionMismatch": "Vector tile layer '__param__' projection does not match the map projection.",
       "extentParameterNotDefined": "Parameter extent is not defined in source element for layer '__param__'.",
-      "projectionParameterNotDefined": "Parameter projection is not defined in source element for layer '__param__'."
+      "projectionParameterNotDefined": "Parameter projection is not defined in source element for layer '__param__'.",
+      "projectionNotSupported": "The map projection '__param__' isn't supported by the layer '__param__'."
     },
     "schema": {
       "notFound": "A schema error was found, check the console to see what is wrong.",
@@ -323,10 +324,12 @@
   "geoChart": {
     "noChartAvailable": "Click on the map on a layer with chart"
   },
+  "testSuite": {
+    "initializationError": "Test Suite '__param__' failed to initialize on map '__param__'."
+  },
   "guide": {
     "title": "Guide",
     "search": "Search guide...",
-    "tableMatch": "Table match",
     "errorMessage": "Sorry, unable to find the help document!"
   },
   "footerBar": {
@@ -348,7 +351,8 @@
       "metadatasTakingLongTime": "The metadata for some layers is taking longer than expected to fetch...",
       "vectorTileRemoved": "The vector tile __param__ had to be removed due to a projection conflict.",
       "basemapLayerCreationError": "Error creating __param__ basemap.",
-      "kmlLayerWarning": "KML layers will not have proper symbols in the panels or have entries in the data table."
+      "kmlLayerWarning": "KML layers will not have proper symbols in the panels or have entries in the data table.",
+      "layerCRSNotSupported": "The spatial reference of the map '__param__' is not officially supported by the layer '__param__'. GeoView will still attempt to load the layer on the map, but it might be misaligned."
     }
   },
   "error": {
@@ -357,6 +361,7 @@
       "differingFieldLengths": "Length of provided fields do not match.",
       "layerNotFound": "Layer at layer path '__param__' not found.",
       "wrongType": "Layer '__param__' isn't of the expected type.",
+      "statusWasError": "Layer '__param__' status was 'error'.",
       "notAGeoJsonLayer": "Not a GeoJson layer for layer '__param__'.",
       "notAnEsriDynamicLayer": "Not an Esri Dynamic Layer for layer '__param__'.",
       "notAFeatureLayer": "Layer id not a Feature Layer for layer '__param__'.",
@@ -369,8 +374,9 @@
       "geoviewStoreNotFound": "GeoView Store on Map '__param__' not found.",
       "mapDivNotExists": "Div with id ${divId} does not exist",
       "mapWrongCall": "Div with id __param__ has a class 'geoview-map' and should be initialized via a 'cgpv.init()' call.",
-      "pluginConfigNotFound": "The Plugin configuration at path '__param__' couldn't be found.",
-      "pluginStateUninitialized": "The Plugin state for '__param__' on Map '__param__' is uninitialized."
+      "pluginError": "A major error on Plugin '__param__' on map '__param__' has happened.",
+      "pluginConfigNotFound": "The Plugin configuration '__param__' on map '__param__' at path '__param__' couldn't be found.",
+      "pluginStateUninitialized": "The Plugin state for '__param__' on map '__param__' is uninitialized."
     },
     "geocore": {
       "uuidNotFound": "GeoCore layer identifier '__param__' does not exist on the server.",

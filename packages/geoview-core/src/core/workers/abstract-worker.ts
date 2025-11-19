@@ -90,20 +90,20 @@ export abstract class AbstractWorker<T> {
    * @param args - Arguments to pass to the worker for initialization.
    * @returns A promise that resolves when the worker is initialized.
    */
-  public abstract init(...args: unknown[]): Promise<void>;
+  abstract init(...args: unknown[]): Promise<void>;
 
   /**
    * Process the worker. This method should be implemented by subclasses.
    * @param args - Arguments to pass to the worker for process.
    * @returns A promise that resolves when the worker is processed.
    */
-  public abstract process(...args: unknown[]): Promise<unknown>;
+  abstract process(...args: unknown[]): Promise<unknown>;
 
   /**
    * Add method to register message handlers
    * @param {MessageEvent} handler - The message handler to add.
    */
-  public addMessageHandler(handler: (event: MessageEvent) => void): void {
+  addMessageHandler(handler: (event: MessageEvent) => void): void {
     this.#messageHandlers.push(handler);
   }
 
@@ -111,7 +111,7 @@ export abstract class AbstractWorker<T> {
    * Add method to remove message handlers
    * @param  {MessageEvent} handler - The message handler to remove.
    */
-  public removeMessageHandler(handler: (event: MessageEvent) => void): void {
+  removeMessageHandler(handler: (event: MessageEvent) => void): void {
     const index = this.#messageHandlers.indexOf(handler);
     if (index > -1) {
       this.#messageHandlers.splice(index, 1);

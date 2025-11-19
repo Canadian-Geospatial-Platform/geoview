@@ -16,33 +16,27 @@
   </head>
 
   <body>
-    <div class="header-table">
-      <table>
-        <tbody>
-          <tr>
-            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
-            <td class="header-title">
-              <h1><strong>EGS Demo</strong></h1>
-            </td>
-          </tr>
-          <tr>
-            <td><a href="./demos.html">Main</a><br /></td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td><p>Demonstration of EGS Floods map</p></td>
-          </tr>
-        </tbody>
-      </table>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./index.html?tab=specific-demos">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>EGS Floods Demo</h4>
+        <p>Demonstration of Emergency Geomatics Services (EGS) Floods map</p>
+        <ul class="demo-list">
+          <li><a href="#Hmap1">Floods (English)</a></li>
+          <li><a href="#Hmap2">Floods (French)</a></li>
+        </ul>
+      </div>
     </div>
 
-    <div class="map-title-holder">
+    <div class="demo-section">
       <h4 id="Hmap1">Floods (English)</h4>
+      <a class="ref-link" href="#top">Top</a>
     </div>
-    <button class="collapsible active">Layers Status</button>
+    <button class="collapsible">Layers Status</button>
     <pre id="Hmap1-state" class="panel map-title-holder"></pre>
     <div
       id="map1"
@@ -91,7 +85,7 @@
           ]
         },
         'components': ['north-arrow', 'overview-map'],
-        'overviewMap': {'hideOnZoom': 6},
+        'overviewMap': {'hideOnZoom': 7},
         'navBar': ['zoom', 'fullscreen', 'home', 'location'],
         'appBar': {
           'tabs': {
@@ -108,10 +102,11 @@
         }"
     ></div>
 
-    <div class="map-title-holder">
+    <div class="demo-section">
       <h4 id="Hmap2">Floods (French)</h4>
+      <a class="ref-link" href="#top">Top</a>
     </div>
-    <button class="collapsible active">Layers Status</button>
+    <button class="collapsible">Layers Status</button>
     <pre id="Hmap2-state" class="panel map-title-holder"></pre>
     <div
       id="map2"
@@ -160,7 +155,7 @@
           ]
         },
         'components': ['north-arrow', 'overview-map'],
-        'overviewMap': {'hideOnZoom': 6},
+        'overviewMap': {'hideOnZoom': 7},
         'navBar': ['zoom', 'fullscreen', 'home', 'location'],
         'appBar': {
           'tabs': {
@@ -179,6 +174,8 @@
 
     <script src="codedoc.js"></script>
     <script>
+      insertPageHeader();
+
       // Register handler when map has been initialized
       cgpv.onMapInit((mapViewer) => {
         listenToLegendLayerSetChanges(`H${mapViewer.mapId}-state`, mapViewer);

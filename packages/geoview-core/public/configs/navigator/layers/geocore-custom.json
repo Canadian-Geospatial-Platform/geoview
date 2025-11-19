@@ -20,23 +20,18 @@
       }
     ]
   },
-  "components": [
-    "overview-map"
-  ],
-  "overviewMap": {
-    "hideOnZoom": 7
-  },
+  "components": ["overview-map", "north-arrow"],
+  "overviewMap": { "hideOnZoom": 7 },
   "footerBar": {
     "tabs": {
-      "core": [
-        "legend",
-        "layers",
-        "details",
-        "geochart",
-        "data-table"
-      ]
+      "core": ["layers", "data-table"]
     }
   },
   "corePackages": [],
-  "theme": "geo.ca"
+  "theme": "geo.ca",
+  "appBar": {
+    "tabs": {
+      "core": ["geolocator", "legend", "details", "export"]
+    }
+  }
 }

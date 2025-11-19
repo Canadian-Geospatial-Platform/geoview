@@ -8,16 +8,13 @@ import { logger } from '@/core/utils/logger';
 
 // Protection pattern functions that return new regex instances
 const getProtectionPatterns = (): RegExp[] => [
+  /!\[[^\]]*\]\([^)]+\)/gi, // ![alt](image-url) - markdown images (case-insensitive)
   /\[[^\]]*\]\([^)]*\)/gi, // [text](url) - markdown links (case-insensitive)
-  /!\[([^\]]*)\]\([^)]+\)/gi, // ![alt](image-url) (case-insensitive)
   /`[^`]+`/g, // `code`
   /```[\s\S]*?```/g, // ```code blocks```
-  /^\s*\|[-\s:]+\|\s*$/gm, // |---|---| (table separators)
-  /^\s*\|\s*[-:]+\s*\|/gm, // table header separators
-  /<img\s+[^>]*>/gi, // <img> tags with space after img
+  /<img\s+[^>]*>/gi, // <img> tags
   /&lt;img\b[^&]*?&gt;/gi, // HTML-encoded <img> tags
   /<[^>]+>/gi, // <html tags> (case-insensitive)
-  /<[^>]+\/>/gi, // <self-closing tags/> (case-insensitive)
 ];
 
 interface GuideSearchProps {
@@ -28,9 +25,6 @@ interface GuideSearchProps {
 
 interface SearchMatch {
   sectionIndex: number;
-  matchIndex: number;
-  isTable?: boolean;
-  tableLineStart?: number;
 }
 
 export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: GuideSearchProps): JSX.Element {
@@ -65,39 +59,6 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
       }
     });
     return protectedRanges;
-  }, []);
-
-  /**
-   * Identifies table ranges in markdown content
-   * @param {string} content - The content to analyze
-   * @returns {Array<{start: number, end: number}>} Array of start/end positions for table ranges
-   */
-  const getTableRanges = useCallback((content: string) => {
-    // Log
-    logger.logTraceUseCallback('GUIDE-SEARCH - getTableRanges');
-
-    const tableRanges: Array<{ start: number; end: number }> = [];
-    const lines = content.split('\n');
-    let currentTableStart = -1;
-
-    lines.forEach((line, lineIndex) => {
-      const isTableRow = /^\s*\|.*\|\s*$/.test(line);
-      if (isTableRow && currentTableStart === -1) {
-        currentTableStart = lineIndex;
-      } else if (!isTableRow && currentTableStart !== -1) {
-        const tableStartPos = lines.slice(0, currentTableStart).join('\n').length + (currentTableStart > 0 ? 1 : 0);
-        const tableEndPos = lines.slice(0, lineIndex).join('\n').length;
-        tableRanges.push({ start: tableStartPos, end: tableEndPos });
-        currentTableStart = -1;
-      }
-    });
-
-    if (currentTableStart !== -1) {
-      const tableStartPos = lines.slice(0, currentTableStart).join('\n').length + (currentTableStart > 0 ? 1 : 0);
-      tableRanges.push({ start: tableStartPos, end: content.length });
-    }
-
-    return tableRanges;
   }, []);
 
   // #endregion Helper functions
@@ -135,12 +96,9 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
         }
 
         const protectedRanges = getProtectedRanges(content);
-        const tableRanges = getTableRanges(content);
 
         // Only count matches that are not in protected ranges
         regex.lastIndex = 0; // Reset regex state
-        let matchIndex = 0;
-        const tablesWithMatches = new Set<number>();
         let currentMatch = regex.exec(content);
 
         while (currentMatch !== null) {
@@ -148,20 +106,7 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
           const isProtected = protectedRanges.some((range) => matchStart >= range.start && matchStart < range.end);
 
           if (!isProtected) {
-            // Check if match is in any table
-            const tableRange = tableRanges.find((range) => matchStart >= range.start && matchStart < range.end);
-
-            if (tableRange) {
-              // Group all matches in the same table as one
-              if (!tablesWithMatches.has(tableRange.start)) {
-                tablesWithMatches.add(tableRange.start);
-                matches.push({ sectionIndex, matchIndex, isTable: true, tableLineStart: tableRange.start });
-                matchIndex++;
-              }
-            } else {
-              matches.push({ sectionIndex, matchIndex });
-              matchIndex++;
-            }
+            matches.push({ sectionIndex });
           }
           currentMatch = regex.exec(content);
         }
@@ -170,11 +115,42 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
       setAllMatches(matches);
       setCurrentMatchIndex(-1);
     },
-    [guide, getProtectedRanges, getTableRanges]
+    [guide, getProtectedRanges]
   );
 
   /**
-   * Highlights search terms in content with visual markers
+   * Recursively finds all text nodes in a DOM node, excluding certain elements
+   * @param {Node} node - The DOM node to search
+   * @param {Node[]} textNodes - Array to store found text nodes
+   * @param {Set<string>} skipTags - Set of tag names to skip
+   */
+  const findTextNodes = useCallback(
+    (node: Node, textNodes: Node[], skipTags: Set<string> = new Set(['SCRIPT', 'STYLE', 'CODE', 'PRE', 'IMG'])): void => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const parentTag = node.parentElement?.tagName || '';
+        // Skip if parent is in skipTags
+        if (!skipTags.has(parentTag)) {
+          // Special case: skip anchor tags that are inside table cells
+          if (parentTag === 'A') {
+            const grandparentTag = node.parentElement?.parentElement?.tagName || '';
+            if (grandparentTag === 'TD') {
+              return; // Skip anchor tags inside table cells
+            }
+          }
+          textNodes.push(node);
+        }
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        const element = node as Element;
+        if (!skipTags.has(element.tagName)) {
+          node.childNodes.forEach((child) => findTextNodes(child, textNodes, skipTags));
+        }
+      }
+    },
+    []
+  );
+
+  /**
+   * Highlights search terms in content with visual markers using DOM-based approach
    * @param {string} content - The content to highlight
    * @param {number} sectionIndex - The section index being processed
    * @returns {string} Content with highlighted search terms
@@ -186,67 +162,96 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
 
       if (!searchTerm.trim() || searchTerm.trim().length < 3) return content;
 
-      const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')})`, 'gi');
-      let matchCount = 0;
+      // Step 1: Extract and remove markdown image patterns only (not HTML img tags)
+      const protectedPatterns: { placeholder: string; original: string }[] = [];
+      let contentWithoutProtected = content;
 
-      const protectedRanges = getProtectedRanges(content);
+      // Find markdown patterns
+      const patterns = [
+        /!\[[^\]]*\]\([^)]+\)/gi, // ![alt](url) - markdown images
+        /\[[^\]]*\]\([^)]*\)/g, // [text](url) - markdown links
+      ];
 
-      let result = content;
-      let offset = 0;
-
-      content.replace(regex, (match, p1, matchIndex) => {
-        // Check if match is in protected range
-        const isProtected = protectedRanges.some((range) => matchIndex >= range.start && matchIndex < range.end);
-
-        if (!isProtected) {
-          // Check if this match corresponds to a table match
-          const lineStart = content.lastIndexOf('\n', matchIndex) + 1;
-          const currentLine = content.substring(lineStart, content.indexOf('\n', matchIndex) || content.length);
-          const isInTable = /^\s*\|.*\|\s*$/.test(currentLine);
-
-          if (isInTable) {
-            const tableRanges = getTableRanges(content);
-            const tableRange = tableRanges.find((range) => matchIndex >= range.start && matchIndex < range.end);
-
-            if (tableRange) {
-              const tableMatch = allMatches.find(
-                (m) => m.sectionIndex === sectionIndex && m.isTable && m.tableLineStart === tableRange.start
-              );
-
-              if (tableMatch) {
-                const globalMatchIndex = allMatches.indexOf(tableMatch);
-                const isCurrentMatch = globalMatchIndex === currentMatchIndex;
-
-                // Add indicator before the table (only once per table)
-                if (!result.includes(`<!-- table-indicator-${tableRange.start} -->`)) {
-                  const insertPoint = tableRange.start + offset;
-
-                  const indicator = `<span data-table-indicator="${tableRange.start}" style="display: inline-block; margin: 2px 5px; padding: 6px 10px; background: ${isCurrentMatch ? '#ff6b35' : 'transparent'}; color: ${isCurrentMatch ? 'white' : 'black'}; border-radius: 3px; font-size: 1.1em; font-weight: bold;">📋 ${t('guide.tableMatch')}</span><!-- table-indicator-${tableRange.start} -->`;
-
-                  result = result.slice(0, insertPoint) + indicator + result.slice(insertPoint);
-                  offset += indicator.length;
-                  matchCount++;
-                }
-              }
-            }
-          } else {
-            // Normal highlighting for non-table content
-            const globalMatchIndex = allMatches.findIndex((m) => m.sectionIndex === sectionIndex && m.matchIndex === matchCount);
-            const isCurrentMatch = globalMatchIndex === currentMatchIndex;
-            const replacement = `<mark className="search-highlight${isCurrentMatch ? ' current-match' : ''}">${match}</mark>`;
-
-            const actualIndex = matchIndex + offset;
-            result = result.slice(0, actualIndex) + replacement + result.slice(actualIndex + match.length);
-            offset += replacement.length - match.length;
-            matchCount++;
-          }
-        }
-        return match;
+      let index = 0;
+      patterns.forEach((patternTemplate) => {
+        // Create a new regex instance to avoid modifying the original
+        const pattern = new RegExp(patternTemplate.source, patternTemplate.flags);
+        const matches = Array.from(content.matchAll(pattern));
+        matches.forEach((match) => {
+          const placeholder = `__GEOVIEW_PROTECTED_${index}__`;
+          protectedPatterns.push({ placeholder, original: match[0] });
+          // Replace this specific occurrence
+          contentWithoutProtected = contentWithoutProtected.replace(match[0], placeholder);
+          index++;
+        });
       });
 
-      return result;
+      // Step 2: Create a temporary DOM element to parse the HTML
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = contentWithoutProtected;
+
+      const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')})`, 'gi');
+
+      // Count matches from all previous sections to calculate the global match index
+      let globalMatchCounter = 0;
+      for (let i = 0; i < sectionIndex; i++) {
+        const previousSectionMatches = allMatches.filter((m) => m.sectionIndex === i);
+        globalMatchCounter += previousSectionMatches.length;
+      }
+
+      // Process all text nodes in document order and highlight matches
+      const allTextNodes: Node[] = [];
+      findTextNodes(tempDiv, allTextNodes);
+
+      allTextNodes.forEach((textNode) => {
+        const text = textNode.textContent || '';
+        const matches = Array.from(text.matchAll(regex));
+
+        if (matches.length > 0) {
+          const fragment = document.createDocumentFragment();
+          let lastIndex = 0;
+
+          matches.forEach((match) => {
+            const matchStart = match.index;
+            const matchEnd = matchStart + match[0].length;
+
+            // Add text before match
+            if (matchStart > lastIndex) {
+              fragment.appendChild(document.createTextNode(text.substring(lastIndex, matchStart)));
+            }
+
+            // Check if this is the current match
+            const isThisMatchCurrent = globalMatchCounter === currentMatchIndex;
+
+            // Create highlighted span
+            const mark = document.createElement('mark');
+            mark.className = `search-highlight${isThisMatchCurrent ? ' current-match' : ''}`;
+            mark.textContent = match[0];
+            fragment.appendChild(mark);
+
+            lastIndex = matchEnd;
+            globalMatchCounter++;
+          });
+
+          // Add remaining text after last match
+          if (lastIndex < text.length) {
+            fragment.appendChild(document.createTextNode(text.substring(lastIndex)));
+          }
+
+          // Replace text node with fragment
+          textNode.parentNode?.replaceChild(fragment, textNode);
+        }
+      });
+
+      // Step 3: Restore all protected patterns
+      let finalHTML = tempDiv.innerHTML;
+      protectedPatterns.forEach(({ placeholder, original }) => {
+        finalHTML = finalHTML.replace(placeholder, original);
+      });
+
+      return finalHTML;
     },
-    [searchTerm, allMatches, currentMatchIndex, t, getProtectedRanges, getTableRanges]
+    [searchTerm, allMatches, currentMatchIndex, findTextNodes]
   );
 
   /**
@@ -301,18 +306,10 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
 
         // Wait a bit more for potential expansion animation
         setTimeout(() => {
-          if (match.isTable) {
-            // For table matches, scroll to the table indicator
-            const tableIndicator = document.querySelector(`span[data-table-indicator="${match.tableLineStart}"]`);
-            if (tableIndicator) {
-              tableIndicator.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-          } else {
-            // For regular matches, scroll to the highlighted text
-            const currentMatch = document.querySelector('.current-match');
-            if (currentMatch) {
-              currentMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
+          // For all matches, scroll to the highlighted text
+          const currentMatchElement = document.querySelector('.current-match');
+          if (currentMatchElement) {
+            currentMatchElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
         }, 100);
       }, 300);

@@ -32,7 +32,7 @@
     "overview-map"
   ],
   "overviewMap": {
-    "hideOnZoom": 5
+    "hideOnZoom": 7
   },
   "appBar": {
     "tabs": {
