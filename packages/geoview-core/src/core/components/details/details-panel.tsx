@@ -137,6 +137,28 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
   );
 
   /**
+   * Checks if a feature has valid geometry
+   * @param {TypeFeatureInfoEntry} feature - The feature to check
+   * @returns {boolean} true if feature has valid geometry
+   */
+  const hasValidGeometry = useCallback((feature: TypeFeatureInfoEntry | undefined): boolean => {
+    return !!(feature?.geometry && feature?.extent && !feature.extent.includes(Infinity));
+  }, []);
+
+  /**
+   * Memoizes whether the panel is currently open
+   */
+  const isPanelOpen = useMemo(() => {
+    if (containerType === CONTAINER_TYPE.FOOTER_BAR) {
+      return selectedTab === TABS.DETAILS && !isCollapsed;
+    }
+    if (containerType === CONTAINER_TYPE.APP_BAR) {
+      return activeAppBarTab.tabId === 'details' && activeAppBarTab.isOpen;
+    }
+    return false;
+  }, [containerType, selectedTab, isCollapsed, activeAppBarTab]);
+
+  /**
    * Memoizes the layers list for the LayerList component and centralizing indexing purposes.
    */
   const memoLayersList = useMemo(() => {
@@ -295,22 +317,13 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
     // Log
     logger.logTraceUseEffect('DETAILS-PANEL - memoSelectedLayerDataFeatures changed', memoLayersList, memoSelectedLayerDataFeatures);
 
-    // Check if panel is open before highlighting
-    let isPanelOpen = false;
-    if (containerType === CONTAINER_TYPE.FOOTER_BAR) {
-      isPanelOpen = selectedTab === TABS.DETAILS && !isCollapsed;
-    } else if (containerType === CONTAINER_TYPE.APP_BAR) {
-      isPanelOpen = activeAppBarTab.tabId === 'details' && activeAppBarTab.isOpen;
-    }
-
     // Clear the unchecked highlights
     clearHighlightsUnchecked(prevLayerFeatures.current);
     clearHighlightsUnchecked(memoSelectedLayerDataFeatures);
 
     // Re-highlight all checked features to ensure they persist through zoom
     checkedFeatures.forEach((checkedFeature) => {
-      const hasGeometry = !!(checkedFeature?.geometry && checkedFeature?.extent && !checkedFeature.extent.includes(Infinity));
-      if (hasGeometry) {
+      if (hasValidGeometry(checkedFeature)) {
         addHighlightedFeature(checkedFeature);
       }
     });
@@ -318,26 +331,19 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
     // Highlight current feature if panel is open and feature has geometry
     if (isPanelOpen && memoSelectedLayerDataFeatures && memoSelectedLayerDataFeatures.length) {
       const featureToHighlight = memoSelectedLayerDataFeatures[currentFeatureIndex];
-      // Check if feature has geometry before highlighting (computed inline)
-      const hasGeometry = !!(featureToHighlight?.geometry && featureToHighlight?.extent && !featureToHighlight.extent.includes(Infinity));
 
-      if (featureToHighlight && hasGeometry) {
+      if (hasValidGeometry(featureToHighlight)) {
         addHighlightedFeature(featureToHighlight);
       }
     }
   }, [
-    memoLayersList,
     memoSelectedLayerDataFeatures,
-    arrayOfLayerDataBatch,
     currentFeatureIndex,
     addHighlightedFeature,
-    removeHighlightedFeature,
     clearHighlightsUnchecked,
     checkedFeatures,
-    containerType,
-    selectedTab,
-    isCollapsed,
-    activeAppBarTab,
+    isPanelOpen,
+    hasValidGeometry,
     geometryLoaded,
   ]);
 
@@ -351,19 +357,10 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
     if (featureToCheck && !featureToCheck.geometry) {
       const intervalId = setInterval(() => {
         const currentFeature = memoSelectedLayerDataFeatures?.[currentFeatureIndex];
-        const hasGeometry = !!(currentFeature?.geometry && currentFeature?.extent && !currentFeature.extent.includes(Infinity));
 
-        if (hasGeometry) {
+        if (hasValidGeometry(currentFeature)) {
           // Geometry loaded! Trigger highlight by forcing a re-render
           clearInterval(intervalId);
-
-          // Check if panel is still open
-          let isPanelOpen = false;
-          if (containerType === CONTAINER_TYPE.FOOTER_BAR) {
-            isPanelOpen = selectedTab === TABS.DETAILS && !isCollapsed;
-          } else if (containerType === CONTAINER_TYPE.APP_BAR) {
-            isPanelOpen = activeAppBarTab.tabId === 'details' && activeAppBarTab.isOpen;
-          }
 
           if (isPanelOpen) {
             addHighlightedFeature(currentFeature);
@@ -384,7 +381,7 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
     }
 
     return undefined;
-  }, [memoSelectedLayerDataFeatures, currentFeatureIndex, containerType, selectedTab, isCollapsed, activeAppBarTab, addHighlightedFeature]);
+  }, [memoSelectedLayerDataFeatures, currentFeatureIndex, isPanelOpen, addHighlightedFeature, hasValidGeometry]);
 
   /**
    * Effect used to persist the layer path bypass for the layerDataArray.
