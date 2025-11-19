@@ -45,7 +45,9 @@
                 "layerId": "points_1.json",
                 "layerName": "Points 1",
                 "initialSettings": {
-                  "controls": { "remove": true }
+                  "controls": {
+                    "remove": true
+                  }
                 }
               },
               {
@@ -63,15 +65,26 @@
     ]
   },
   "theme": "geo.ca",
-  "components": ["north-arrow", "overview-map"],
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
   "appBar": {
     "tabs": {
-      "core": ["geolocator", "legend", "details", "export"]
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
     }
   },
   "footerBar": {
     "tabs": {
-      "core": ["layers", "data-table"]
+      "core": [
+        "layers",
+        "data-table"
+      ]
     },
     "selectedTab": "layers"
   },
