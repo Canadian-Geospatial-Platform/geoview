@@ -73,7 +73,7 @@
   "components": ["overview-map", "north-arrow"],
   "footerBar": {
     "tabs": {
-      "core": ["layers", "details", "data-table"]
+      "core": ["layers", "data-table"]
     }
   },
     "appBar": {
