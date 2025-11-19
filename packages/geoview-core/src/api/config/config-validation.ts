@@ -254,7 +254,7 @@ export class ConfigValidation {
    * Process recursively the layer entries to create layers and layer groups.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The GeoView layer configuration to adjust and validate.
    * @param {ConfigClassOrType[]} listOfLayerEntryConfig - The list of layer entry configurations to process.
-   * @param {TypeGeoviewLayerConfig | GroupLayerEntryConfig} parentLayerConfig - The parent layer configuration of all the
+   * @param {GroupLayerEntryConfig} parentLayerConfig - The parent layer configuration of all the
    * layer entry configurations found in the list of layer entries.
    * @private
    */
@@ -274,7 +274,14 @@ export class ConfigValidation {
       let initialSettings = ConfigBaseClass.getClassOrTypeInitialSettings(layerConfig);
 
       // Get the parent initial settings
-      const parentInitialSettings = ConfigBaseClass.getClassOrTypeInitialSettings(parentLayerConfig);
+      const parentInitialSettings = parentLayerConfig
+        ? ConfigBaseClass.getClassOrTypeInitialSettings(parentLayerConfig)
+        : geoviewLayerConfig.initialSettings;
+
+      // Make sure visible is set so it is not overridden by parent layer
+      if (!initialSettings) initialSettings = { states: { visible: true } };
+      if (!initialSettings.states) initialSettings = { ...initialSettings, states: { visible: true } };
+      if (initialSettings.states!.visible !== false) initialSettings.states!.visible = true;
 
       // Handle minZoom before default merge of settings
       if (initialSettings?.minZoom) {
