@@ -70,15 +70,26 @@
       }
     ]
   },
-  "components": ["overview-map", "north-arrow"],
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
   "footerBar": {
     "tabs": {
-      "core": ["layers", "data-table"]
+      "core": [
+        "layers",
+        "data-table"
+      ]
     }
   },
-    "appBar": {
+  "appBar": {
     "tabs": {
-      "core": ["geolocator", "legend", "details", "export"]
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
     }
   },
   "corePackages": [],
