@@ -1441,9 +1441,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
   ): MapConfigLayerEntry | undefined {
     // Get needed info
     const layerEntryConfig = this.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath);
+    const geoviewLayerConfig = layerEntryConfig?.getGeoviewLayerConfig();
 
     // If not found, log warning and skip
-    if (!layerEntryConfig) {
+    if (!layerEntryConfig || !geoviewLayerConfig) {
       // Log
       logger.logWarning(`Couldn't find the layer entry config for layer path '${layerPath}'`);
       return undefined;
@@ -1470,7 +1471,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     // Build list of sublayer entry configs
     const listOfLayerEntryConfig: TypeLayerEntryConfig[] = [];
-    if (sublayerPaths.length)
+    if (sublayerPaths.length && layerEntryConfig.layerId === 'base-group')
       sublayerPaths.forEach((sublayerPath) =>
         listOfLayerEntryConfig.push(this.#createLayerEntryConfig(mapId, sublayerPath, isGeocore, overrideGeocoreServiceNames))
       );
@@ -1483,22 +1484,22 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const newGeoviewLayerConfig: MapConfigLayerEntry =
       isGeocore && overrideGeocoreServiceNames !== true
         ? {
-            geoviewLayerId: layerEntryConfig.getGeoviewLayerId(),
+            geoviewLayerId: geoviewLayerConfig.geoviewLayerId,
             geoviewLayerName: overrideGeocoreServiceNames === false ? undefined : layerEntryConfig.getGeoviewLayerName(),
             geoviewLayerType: 'geoCore',
             initialSettings,
             listOfLayerEntryConfig,
           }
         : {
-            externalDateFormat: layerEntryConfig.getGeoviewLayerConfig()?.externalDateFormat,
-            geoviewLayerId: layerEntryConfig.getGeoviewLayerId(),
-            geoviewLayerName: layerEntryConfig.getGeoviewLayerName(),
-            geoviewLayerType: layerEntryConfig.getSchemaTag()!,
+            externalDateFormat: geoviewLayerConfig.externalDateFormat,
+            geoviewLayerId: geoviewLayerConfig.geoviewLayerId,
+            geoviewLayerName: geoviewLayerConfig.geoviewLayerName,
+            geoviewLayerType: geoviewLayerConfig.geoviewLayerType,
             initialSettings,
-            isTimeAware: layerEntryConfig.getGeoviewLayerConfig()?.isTimeAware,
+            isTimeAware: geoviewLayerConfig.isTimeAware,
             listOfLayerEntryConfig,
-            metadataAccessPath: layerEntryConfig.getMetadataAccessPath(),
-            serviceDateFormat: layerEntryConfig.getGeoviewLayerConfig()?.serviceDateFormat,
+            metadataAccessPath: geoviewLayerConfig.metadataAccessPath,
+            serviceDateFormat: geoviewLayerConfig.serviceDateFormat,
           };
 
     return newGeoviewLayerConfig;

@@ -171,12 +171,7 @@
             },
             "source": {
               "dataAccessPath": "https://datacube-prod-data-public.s3.ca-central-1.amazonaws.com/store/imagery/aerial/napl/napl-ring-of-fire/napl-ring-of-fire-1954-08-07-60k-thumbnail.png",
-              "extent": [
-                -87.77486341686723,
-                51.62285357468582,
-                -84.57727128084842,
-                53.833354975551075
-              ],
+              "extent": [-87.77486341686723, 51.62285357468582, -84.57727128084842, 53.833354975551075],
               "projection": 4326
             },
             "minScale": 10000000
@@ -264,29 +259,18 @@
       }
     ]
   },
-  "components": [
-    "overview-map",
-    "north-arrow"
-  ],
+  "components": ["overview-map", "north-arrow"],
   "overviewMap": {
     "hideOnZoom": 7
   },
   "footerBar": {
     "tabs": {
-      "core": [
-        "layers",
-        "data-table"
-      ]
+      "core": ["layers", "data-table"]
     }
   },
   "appBar": {
     "tabs": {
-      "core": [
-        "geolocator",
-        "legend",
-        "details",
-        "export"
-      ]
+      "core": ["geolocator", "legend", "details", "export"]
     }
   },
   "corePackages": [],
