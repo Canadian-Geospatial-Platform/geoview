@@ -19,7 +19,10 @@
           {
             "layerId": "0",
             "layerName": "World Topo Map",
-            "initialSettings": { "minZoom": 3, "maxZoom": 8 }
+            "initialSettings": {
+              "minZoom": 3,
+              "maxZoom": 8
+            }
           }
         ]
       },
@@ -40,18 +43,31 @@
       }
     ]
   },
-  "components": ["overview-map", "north-arrow"],
-  "overviewMap": { "hideOnZoom": 7 },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
   "footerBar": {
     "tabs": {
-      "core": ["layers", "data-table"]
+      "core": [
+        "layers",
+        "data-table"
+      ]
     }
   },
   "corePackages": [],
   "theme": "geo.ca",
   "appBar": {
     "tabs": {
-      "core": ["geolocator", "legend", "details", "export"]
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
     }
   }
 }

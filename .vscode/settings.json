@@ -4,19 +4,24 @@
   "editor.tabSize": 2,
   "editor.hover.delay": 1000,
   "files.eol": "\n",
-   "eslint.enable": true,
+  "eslint.enable": true,
   "eslint.useFlatConfig": true,
   "eslint.validate": [
     "javascript",
     "javascriptreact",
-    "typescript", 
+    "typescript",
     "typescriptreact"
   ],
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "always"
   },
-  "eslint.probe": ["typescript", "typescriptreact"],
-  "eslint.workingDirectories": ["packages"],
+  "eslint.probe": [
+    "typescript",
+    "typescriptreact"
+  ],
+  "eslint.workingDirectories": [
+    "packages"
+  ],
   "window.title": "${activeEditorMedium}${separator}${rootName}${separator}${profileName}",
   "files.associations": {
     "*.json": "json"

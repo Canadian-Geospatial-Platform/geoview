@@ -36,19 +36,36 @@
       }
     ]
   },
-  "components": ["north-arrow", "overview-map"],
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
   "overviewMap": {
     "hideOnZoom": 7
   },
-  "navBar": ["zoom", "fullscreen", "home", "location", "basemap-select"],
+  "navBar": [
+    "zoom",
+    "fullscreen",
+    "home",
+    "location",
+    "basemap-select"
+  ],
   "appBar": {
     "tabs": {
-      "core": ["geolocator", "legend", "details", "export"]
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
     }
   },
   "footerBar": {
     "tabs": {
-      "core": ["layers", "data-table"]
+      "core": [
+        "layers",
+        "data-table"
+      ]
     }
   },
   "corePackages": [],

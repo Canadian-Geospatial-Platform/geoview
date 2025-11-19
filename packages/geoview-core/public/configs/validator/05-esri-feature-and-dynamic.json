@@ -92,10 +92,17 @@
       }
     ]
   },
-  "components": ["overview-map"],
+  "components": [
+    "overview-map"
+  ],
   "footerBar": {
     "tabs": {
-      "core": ["legend", "layers", "details", "data-table"]
+      "core": [
+        "legend",
+        "layers",
+        "details",
+        "data-table"
+      ]
     }
   },
   "corePackages": [],

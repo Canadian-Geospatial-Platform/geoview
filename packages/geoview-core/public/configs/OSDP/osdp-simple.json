@@ -11,7 +11,10 @@
     },
     "listOfGeoviewLayerConfig": []
   },
-  "components": ["north-arrow", "overview-map"],
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
   "overviewMap": {
     "hideOnZoom": 7
   },

@@ -208,11 +208,27 @@
   "theme": "geo.ca",
   "appBar": {
     "tabs": {
-      "core": ["geolocator", "export", "guide", "details", "legend", "data-table", "layers"]
+      "core": [
+        "geolocator",
+        "export",
+        "guide",
+        "details",
+        "legend",
+        "data-table",
+        "layers"
+      ]
     }
   },
-  "navBar": ["zoom", "fullscreen", "home", "location"],
-  "components": ["north-arrow", "overview-map"],
+  "navBar": [
+    "zoom",
+    "fullscreen",
+    "home",
+    "location"
+  ],
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
   "corePackages": [],
   "externalPackages": []
 }

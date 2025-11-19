@@ -2,7 +2,12 @@
   "map": {
     "interaction": "dynamic",
     "viewSettings": {
-      "maxExtent": [-180, -50, 180, 89],
+      "maxExtent": [
+        -180,
+        -50,
+        180,
+        89
+      ],
       "projection": 3857
     },
     "basemapOptions": {
@@ -17,11 +22,22 @@
       }
     ]
   },
-  "components": ["overview-map", "north-arrow"],
-  "navBar": ["home", "projection"],
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "navBar": [
+    "home",
+    "projection"
+  ],
   "footerBar": {
     "tabs": {
-      "core": ["legend", "layers", "details", "data-table"]
+      "core": [
+        "legend",
+        "layers",
+        "details",
+        "data-table"
+      ]
     }
   },
   "corePackages": [],
