@@ -2,6 +2,7 @@ import type { Coordinate } from 'ol/coordinate';
 import { AbstractTester } from '../core/abstract-tester';
 import type { API } from 'geoview-core/api/api';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
+import type { TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-types';
 
 /**
  * Main GeoView Abstract Tester class.
@@ -124,7 +125,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     geoviewLayerId: 'geojsonLYR1',
     geoviewLayerName: 'GeoJSON Sample',
     metadataAccessPath: './datasets/geojson/metadata.meta',
-    geoviewLayerType: 'GeoJSON',
+    geoviewLayerType: 'GeoJSON' as TypeGeoviewLayerType,
     initialSettings: {
       controls: {
         highlight: false,

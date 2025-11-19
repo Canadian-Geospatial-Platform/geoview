@@ -28,7 +28,8 @@ import { KmlLayerEntryConfig } from 'geoview-core/api/config/validation-classes/
 import { GeoTIFFLayerEntryConfig } from 'geoview-core/api/config/validation-classes/raster-validation-classes/geotiff-layer-entry-config';
 import type { GeoCoreLayerConfigResponse } from 'geoview-core/api/config/geocore';
 import { GeoCore } from 'geoview-core/api/config/geocore';
-import type { GeoViewLayerAddedResult } from 'geoview-core/geo/layer/layer';
+import { Config, getLocalizedMessage } from 'geoview-core/app';
+import { logger } from 'geoview-core/core/utils/logger';
 
 /**
  * Main Config testing class.
@@ -1145,47 +1146,58 @@ export class ConfigTester extends GVAbstractTester {
   // #region Settings
 
   /**
-   * Tests initial settings properly cascading to sub layers.
-   * @returns {Promise<Test<AbstractGeoViewLayer>>} A Promise that resolves when the test completes successfully.
+   * Tests the settings cascade properly to the sublayers.
+   * @returns {Promise<Test<MapConfigLayerEntry>>} A Promise that resolves with the Test containing the response from Geocore.
    */
-  testInitialSettingsCascade(): Promise<Test<GeoViewLayerAddedResult>> {
-    // The config
+  testSettingsCascadeToSublayers(): Promise<Test<MapConfigLayerEntry>> {
+    // The values
     const config = GVAbstractTester.INITIAL_SETTINGS_CONFIG;
 
     // Expected config
     const expectedResults = {
-      groupHighlight: false,
-      groupRemove: false,
-      childHighlight: true,
+      geoviewLayer: { highlight: false, zoom: false },
+      group: { highlight: false, remove: false, zoom: false },
+      child: { highlight: true, remove: false, zoom: false },
     };
 
-    // Test the WMS
+    // Perform the test
     return this.test(
-      'Test initial settings cascade',
-      async () => {
-        // Convert the config to a geoview layer config
-        const geoviewLayerConfig = await this.getApi().layer.convertMapConfigToGeoviewLayerConfig(
+      'Test Settings Cascade to Sublayers',
+      () => {
+        // Use the config to convert simplified layer config into proper layer config
+        const configObj = Config.initializeMapConfig(
           this.getMapId(),
-          'en',
-          config as unknown as MapConfigLayerEntry,
-          () => {}
+          [config as unknown as MapConfigLayerEntry],
+          (errorKey: string, params: string[]) => {
+            // Get the message for the logger
+            const message = getLocalizedMessage('en', errorKey, params);
+
+            // Log it
+            logger.logWarning(`- Map ${this.getMapId()}: ${message}`);
+
+            // Show the error using its key (which will get translated)
+            this.getMapViewer().notifications.showError(errorKey, params);
+          }
         );
 
-        // Add the layer to the map and get the AbstractGeoViewLayer
-        return this.getMapViewer().layer.addGeoviewLayer(geoviewLayerConfig);
+        if (!configObj || !configObj[0]) {
+          throw new Error('Failed to initialize map config');
+        }
+
+        return configObj[0];
       },
       (test, result) => {
-        // Perform assertions
-        test.addStep('Verifying group layer highlight control...');
-        Test.assertIsEqual(result.layer.listOfLayerEntryConfig[0].getInitialSettings().controls?.highlight, expectedResults.groupHighlight);
+        // Perform assertions on specific properties only
+        test.addStep('Verifying geoview layer controls...');
+        Test.assertJsonObject(result.initialSettings?.controls, expectedResults.geoviewLayer);
 
-        test.addStep('Verifying group layer remove control...');
-        Test.assertIsEqual(result.layer.listOfLayerEntryConfig[0].getInitialSettings().controls?.remove, expectedResults.groupRemove);
+        test.addStep('Verifying group layer controls...');
+        Test.assertJsonObject(result.listOfLayerEntryConfig?.[0].getInitialSettings().controls, expectedResults.group);
 
-        test.addStep('Verifying child layer highlight control...');
-        Test.assertIsEqual(
-          result.layer.listOfLayerEntryConfig[0].listOfLayerEntryConfig[0].getInitialSettings().controls?.highlight,
-          expectedResults.childHighlight
+        test.addStep('Verifying child layer controls...');
+        Test.assertJsonObject(
+          result.listOfLayerEntryConfig?.[0].listOfLayerEntryConfig?.[0].getInitialSettings().controls,
+          expectedResults.child
         );
       }
     );

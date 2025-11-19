@@ -117,7 +117,7 @@ export class GeoTIFF extends AbstractGeoViewRaster {
     try {
       const srcView = await source.getView();
       const projection = typeof srcView?.projection === 'string' ? srcView.projection : srcView?.projection?.getCode();
-      const projectionObject: TypeProjection = projection ? { wkid: Number(projection) } : { wkid: 4326 };
+      const projectionObject: TypeProjection = projection ? { wkid: Number(projection.replace('EPSG:', '')) } : { wkid: 4326 };
 
       // Add projection definition if not already included
       // TODO: call Projection.addProjectionIfMissingUsingObj once Alex's PR is merged.
@@ -195,9 +195,6 @@ export class GeoTIFF extends AbstractGeoViewRaster {
           entryType: CONST_LAYER_ENTRY_TYPES.RASTER_TILE,
           layerId: `${layerEntry.id}`,
           layerName: `${layerEntry.layerName || layerEntry.id}`,
-          source: {
-            dataAccessPath: metadataAccessPath,
-          },
         });
         return layerEntryConfig;
       });
@@ -209,9 +206,6 @@ export class GeoTIFF extends AbstractGeoViewRaster {
           entryType: CONST_LAYER_ENTRY_TYPES.RASTER_TILE,
           layerId: metadataAccessPath.split('/').pop() || generateId(18),
           layerName: geoviewLayerName,
-          source: {
-            dataAccessPath: metadataAccessPath,
-          },
         }),
       ];
 

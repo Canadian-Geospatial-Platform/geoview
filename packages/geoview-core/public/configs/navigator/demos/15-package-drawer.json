@@ -15,22 +15,13 @@
     "listOfGeoviewLayerConfig": []
   },
   "theme": "light",
-  "components": [
-    "north-arrow",
-    "overview-map"
-  ],
+  "components": ["north-arrow", "overview-map"],
   "appBar": {
     "tabs": {
-      "core": [
-        "legend"
-      ]
+      "core": ["legend"]
     }
   },
-  "navBar": [
-    "drawer",
-    "basemap-select",
-    "projection"
-  ],
+  "navBar": ["drawer", "basemap-select", "projection"],
   "corePackages": [],
   "externalPackages": [],
   "corePackagesConfig": [
@@ -42,15 +33,7 @@
           "strokeWidth": 1.3
         },
         "activeGeom": "LineString",
-        "geomTypes": [
-          "Point",
-          "Text",
-          "LineString",
-          "Polygon",
-          "Rectangle",
-          "Circle",
-          "Star"
-        ],
+        "geomTypes": ["Point", "Text", "LineString", "Polygon", "Rectangle", "Circle", "Star"],
         "hideMeasurements": false
       }
     }

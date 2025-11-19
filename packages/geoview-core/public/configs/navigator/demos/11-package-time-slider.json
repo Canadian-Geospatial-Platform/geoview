@@ -59,9 +59,7 @@
           {
             "layerId": "msi-94-or-more",
             "source": {
-              "wmsStyle": [
-                "msi-binary"
-              ]
+              "wmsStyle": ["msi-binary"]
             }
           }
         ]
@@ -71,25 +69,13 @@
   "theme": "geo.ca",
   "appBar": {
     "tabs": {
-      "core": [
-        "geolocator",
-        "legend",
-        "details",
-        "export"
-      ]
+      "core": ["geolocator", "legend", "details", "export"]
     }
   },
-  "components": [
-    "north-arrow",
-    "overview-map"
-  ],
+  "components": ["north-arrow", "overview-map"],
   "footerBar": {
     "tabs": {
-      "core": [
-        "layers",
-        "data-table",
-        "time-slider"
-      ]
+      "core": ["layers", "data-table", "time-slider"]
     },
     "selectedTab": "time-slider",
     "selectedTimeSliderLayerPath": "historical-flood/0"

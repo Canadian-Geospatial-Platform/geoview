@@ -140,8 +140,8 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
     // Test a Geocore
     const pGeocoreAirborne = this.#configTester.testStandaloneGeocoreWithAirborne();
 
-    // Test initial settings cascade
-    const pInitialSettingsCascade = this.#configTester.testInitialSettingsCascade();
+    // Test settings cascade to sublayers
+    const pSettingsCascadeToSublayers = this.#configTester.testSettingsCascadeToSublayers();
 
     // Resolve when all
     return Promise.all([
@@ -174,7 +174,7 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
       pLayerGeoTIFFVegetation,
       pGeoTIFFSkip,
       pGeocoreAirborne,
-      pInitialSettingsCascade,
+      pSettingsCascadeToSublayers,
     ]);
   }
 }
