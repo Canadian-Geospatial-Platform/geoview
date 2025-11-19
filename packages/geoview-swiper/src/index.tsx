@@ -1,7 +1,6 @@
 import React from 'react'; // GV This import is to validate that we're on the right React at the end of the file
 import { MapPlugin } from 'geoview-core/api/plugin/map-plugin';
 import { SwiperEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/swiper-event-processor';
-import { LayerNotFoundError } from 'geoview-core/core/exceptions/layer-exceptions';
 import { logger } from 'geoview-core/core/utils/logger';
 
 import schema from '../schema.json';
@@ -88,9 +87,8 @@ class SwiperPlugin extends MapPlugin {
    */
   activateForLayer(layerPath: string): void {
     try {
-      // Check if the layer exists on the map
-      const olLayer = this.mapViewer.layer.getOLLayer(layerPath);
-      if (!olLayer) throw new LayerNotFoundError(layerPath);
+      // Check if the layer exists on the map, this call throws when it doesn't exist
+      this.mapViewer.layer.getOLLayer(layerPath);
 
       // Add the layer path
       SwiperEventProcessor.addLayerPath(this.mapViewer.mapId, layerPath);

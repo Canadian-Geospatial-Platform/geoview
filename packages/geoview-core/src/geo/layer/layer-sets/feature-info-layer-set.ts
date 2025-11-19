@@ -99,6 +99,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    * Queries the features at the provided coordinate for all the registered layers.
    * @param {Coordinate} lonLatCoordinate - The longitude/latitude coordinate where to query the features
    * @returns {Promise<TypeFeatureInfoResultSet>} A promise which will hold the result of the query
+   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
    */
   async queryLayers(lonLatCoordinate: Coordinate): Promise<TypeFeatureInfoResultSet> {
     // FIXME: Watch out for code reentrancy between queries!
@@ -121,8 +122,8 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
       // Get the layer config and layer associated with the layer path
       const layer = this.layerApi.getGeoviewLayer(layerPath);
 
-      // If layer was found
-      if (layer && layer instanceof AbstractGVLayer) {
+      // If layer was found and of right type
+      if (layer instanceof AbstractGVLayer) {
         // If state is not in visible range
         if (!AbstractLayerSet.isInVisibleRange(layer, this.layerApi.mapViewer.getView().getZoom())) return;
 

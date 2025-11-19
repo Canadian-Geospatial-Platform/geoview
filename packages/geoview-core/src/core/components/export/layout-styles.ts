@@ -3,15 +3,11 @@ const COLORS = {
   standardGrey: '#9e9e9e',
   mediumGrey: '#757575',
   darkGrey: '#424242',
-};
+} as const;
 
 export const SHARED_STYLES = {
   fontFamily: 'Helvetica',
-
-  // Layout dimensions
   padding: 36,
-
-  // Typography
   titleFontSize: 16,
   scaleFontSize: 10,
   footerFontSize: 8,
@@ -19,26 +15,20 @@ export const SHARED_STYLES = {
   childFontSize: 8,
   timeFontSize: 7,
   itemFontSize: 7,
-
-  // Spacing
   titleMarginBottom: 10,
   mapMarginBottom: 10,
   scaleMarginBottom: 10,
-  legendMarginTop: 5,
-  legendMarginBottom: 5,
-  layerMarginBottom: 3,
+  legendMarginTop: 2,
+  legendMarginBottom: 2,
+  layerMarginBottom: 5,
   layerMarginTop: 8,
   wmsMarginBottom: 2,
   timeMarginBottom: 2,
   childMarginBottom: 2,
   childMarginTop: 3,
   itemMarginBottom: 1,
-
-  // Border
   borderWidth: 1,
   borderColor: COLORS.darkGrey,
-
-  // Scale bar
   scaleLineHeight: 1,
   scaleLineMarginBottom: 2,
   scaleTextMarginTop: 2,
@@ -46,166 +36,187 @@ export const SHARED_STYLES = {
   scaleTickHeight: 8,
   scaleTickOffset: -0.5,
   scaleTickTop: -3,
-
-  // North arrow
-  northArrowSize: 40,
-
-  // Legend
-  legendGap: 10,
+  northArrowSize: 30,
+  legendGap: 15,
   legendPaddingLeft: 2,
-
-  // WMS
-  wmsImageWidth: 80,
-  wmsImageMaxHeight: 100,
-
-  // Item icons
+  dividerMargin: 10,
+  dividerHeight: 2,
+  rowDividerHeight: 1,
+  rowDividerMargin: 8,
+  wmsImageWidth: 400,
+  wmsImageMaxHeight: 600,
   itemIconSize: 8,
   itemIconMarginRight: 2,
-
-  // Footer
   footerBottom: 30,
   footerMarginBottom: 5,
   footerItemMarginBottom: 2,
-
-  // Overflow page
   overflowMarginTop: 20,
   overflowMarginBottom: 20,
+
+  // Base styles
+  page: { padding: 36, fontFamily: 'Helvetica' },
+  title: {
+    fontSize: 16,
+    fontWeight: 'semibold',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  mapContainer: {
+    borderWidth: 1,
+    borderColor: COLORS.darkGrey,
+    borderStyle: 'solid',
+  },
+  mapImage: { width: '100%', objectFit: 'contain', borderWidth: 1, borderColor: COLORS.mediumGrey, borderStyle: 'solid' },
+  scaleBarContainer: { justifyContent: 'center', alignItems: 'center' },
+  scaleLine: {
+    height: 1,
+    backgroundColor: COLORS.darkGrey,
+    marginBottom: 2,
+    position: 'relative',
+  },
+  scaleTick: {
+    position: 'absolute',
+    top: -3,
+    width: 1,
+    height: 8,
+    backgroundColor: COLORS.darkGrey,
+  },
+  scaleTickLeft: { left: -0.5 },
+  scaleTickRight: { right: -0.5 },
+  scaleText: {
+    fontSize: 10,
+    color: COLORS.darkGrey,
+    marginTop: 2,
+    textAlign: 'center',
+    textTransform: 'lowercase',
+  },
+  northArrow: { width: 40, height: 40 },
+  northArrowSvg: { width: 40, height: 40 },
+  layerSeparator: (marginTop: number | string) => ({
+    marginTop,
+    marginBottom: SHARED_STYLES.layerMarginBottom,
+    width: '50%',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    borderTopWidth: 0.5,
+    borderTopColor: COLORS.standardGrey,
+    borderTopStyle: 'solid' as const,
+  }),
+  layerText: () => ({
+    fontSize: 9,
+    fontWeight: 'bold',
+    marginBottom: 3,
+    marginTop: 0,
+    flexWrap: 'wrap' as const,
+    whiteSpace: 'normal',
+    wordWrap: 'break-word' as const,
+    overflowWrap: 'break-word' as const,
+  }),
+  wmsContainer: (indentLevel: number) => ({
+    marginLeft: indentLevel + 3,
+    marginBottom: 2,
+    maxWidth: 500, // Max width for text readability, but will be constrained by column width
+    width: '100%', // Take full column width up to max
+  }),
+  wmsImage: {
+    // WMS GetLegendGraphic images have variable native sizes (server-dependent)
+    // Preserve native size as much as possible for text readability, max 500px
+    width: 'auto',
+    height: 'auto',
+    maxWidth: '100%', // Fit within container (which is max 500px)
+    objectFit: 'contain',
+  },
+  timeText: (indentLevel: number) => ({
+    fontSize: 7,
+    fontStyle: 'italic' as const,
+    marginLeft: indentLevel,
+    marginBottom: 2,
+  }),
+  childText: (indentLevel: number) => ({
+    fontSize: 8,
+    fontWeight: 'bold',
+    marginBottom: 2,
+    marginLeft: indentLevel * 8 + 8,
+    marginTop: 3,
+    wordWrap: 'break-word' as const,
+    overflowWrap: 'break-word' as const,
+  }),
+  itemIcon: {
+    width: 8,
+    height: 8,
+    marginRight: 2,
+  },
+  itemText: {
+    fontSize: 7,
+    flexShrink: 1,
+    flexWrap: 'wrap',
+    wordWrap: 'break-word' as const,
+    overflowWrap: 'break-word' as const,
+  },
+  footer: {
+    fontSize: 8,
+    marginTop: 10, // Fixed margin instead of auto - let content dictate height
+    paddingTop: 5,
+    paddingLeft: 0,
+    paddingRight: 0,
+  },
+  footerDisclaimer: {
+    fontSize: 8,
+    color: COLORS.darkGrey,
+    textAlign: 'center',
+    marginBottom: 0,
+    paddingLeft: 0,
+    paddingRight: 0,
+  },
+  footerAttribution: {
+    fontSize: 8,
+    color: COLORS.darkGrey,
+    textAlign: 'center',
+    marginBottom: 2,
+  },
+  footerDate: {
+    fontSize: 8,
+    color: COLORS.darkGrey,
+    textAlign: 'center',
+  },
 } as const;
 
 // PDF-specific styles (react-pdf format)
 export const PDF_STYLES = {
-  page: { padding: SHARED_STYLES.padding, fontFamily: SHARED_STYLES.fontFamily },
-  title: {
-    fontSize: SHARED_STYLES.titleFontSize,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: SHARED_STYLES.titleMarginBottom,
-  },
-  mapContainer: {
-    marginBottom: SHARED_STYLES.mapMarginBottom,
-    borderWidth: SHARED_STYLES.borderWidth,
-    borderColor: SHARED_STYLES.borderColor,
-    borderStyle: 'solid',
-  },
-  mapImage: { width: '100%', objectFit: 'contain' },
+  ...SHARED_STYLES,
   scaleContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: SHARED_STYLES.scaleMarginBottom,
   },
-  scaleBarContainer: { justifyContent: 'center', alignItems: 'center' },
-  scaleLine: {
-    height: SHARED_STYLES.scaleLineHeight,
-    backgroundColor: SHARED_STYLES.borderColor,
-    marginBottom: SHARED_STYLES.scaleLineMarginBottom,
-    position: 'relative',
-  },
-  scaleTick: {
-    position: 'absolute',
-    top: SHARED_STYLES.scaleTickTop,
-    width: SHARED_STYLES.scaleTickWidth,
-    height: SHARED_STYLES.scaleTickHeight,
-    backgroundColor: SHARED_STYLES.borderColor,
-  },
-  scaleTickLeft: { left: SHARED_STYLES.scaleTickOffset },
-  scaleTickRight: { right: SHARED_STYLES.scaleTickOffset },
-  scaleText: {
-    fontSize: SHARED_STYLES.scaleFontSize,
-    color: COLORS.darkGrey,
-    marginTop: SHARED_STYLES.scaleTextMarginTop,
-    textAlign: 'center',
-    textTransform: 'lowercase',
-  },
-  northArrow: {
-    width: SHARED_STYLES.northArrowSize,
-    height: SHARED_STYLES.northArrowSize,
-  },
-  northArrowSvg: {
-    width: SHARED_STYLES.northArrowSize,
-    height: SHARED_STYLES.northArrowSize,
+  divider: {
+    width: '100%',
+    height: SHARED_STYLES.dividerHeight,
+    backgroundColor: COLORS.standardGrey,
+    marginBottom: SHARED_STYLES.dividerMargin,
   },
   legendContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
     alignItems: 'flex-start',
-    gap: SHARED_STYLES.legendGap,
     paddingLeft: SHARED_STYLES.legendPaddingLeft,
     marginTop: SHARED_STYLES.legendMarginTop,
     marginBottom: SHARED_STYLES.legendMarginBottom,
   },
-  layerText: (marginTop: number) => ({
-    fontSize: SHARED_STYLES.layerFontSize,
-    fontWeight: 'bold',
-    marginBottom: SHARED_STYLES.layerMarginBottom,
-    marginTop,
-    flexWrap: 'wrap' as const,
-    whiteSpace: 'normal',
-  }),
-  wmsContainer: (indentLevel: number) => ({
-    marginLeft: indentLevel + 3,
-    marginBottom: SHARED_STYLES.wmsMarginBottom,
-  }),
-  wmsImage: {
-    width: SHARED_STYLES.wmsImageWidth,
-    maxHeight: SHARED_STYLES.wmsImageMaxHeight,
-    objectFit: 'contain',
-  },
-  timeText: (indentLevel: number) => ({
-    fontSize: SHARED_STYLES.timeFontSize,
-    fontStyle: 'italic' as const,
-    marginLeft: indentLevel,
-    marginBottom: SHARED_STYLES.timeMarginBottom,
-  }),
-  childText: (indentLevel: number) => ({
-    fontSize: SHARED_STYLES.childFontSize,
-    fontWeight: 'bold',
-    marginBottom: SHARED_STYLES.childMarginBottom,
-    marginLeft: indentLevel,
-    marginTop: SHARED_STYLES.childMarginTop,
-  }),
   itemContainer: (indentLevel: number) => ({
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
-    marginLeft: indentLevel + 3,
+    marginLeft: indentLevel * 8 + 3,
     marginBottom: SHARED_STYLES.itemMarginBottom,
   }),
-  itemIcon: {
-    width: SHARED_STYLES.itemIconSize,
-    height: SHARED_STYLES.itemIconSize,
-    marginRight: SHARED_STYLES.itemIconMarginRight,
-  },
   itemText: {
-    fontSize: SHARED_STYLES.itemFontSize,
-    flexShrink: 1,
-    flexWrap: 'nowrap',
-    whiteSpace: 'nowrap',
+    ...SHARED_STYLES.itemText,
+    whiteSpace: 'wrap',
   },
   footer: {
+    ...SHARED_STYLES.footer,
     fontSize: `${SHARED_STYLES.footerFontSize}px`,
-    position: 'absolute',
-    bottom: SHARED_STYLES.footerBottom,
-    left: SHARED_STYLES.padding,
-    right: SHARED_STYLES.padding,
-  },
-  footerDisclaimer: {
-    fontSize: SHARED_STYLES.footerFontSize,
-    color: COLORS.darkGrey,
-    textAlign: 'center',
-    marginBottom: SHARED_STYLES.footerMarginBottom,
-    paddingLeft: '4px',
-    paddingRight: '4px',
-  },
-  footerAttribution: {
-    fontSize: SHARED_STYLES.footerFontSize,
-    color: COLORS.darkGrey,
-    textAlign: 'center',
-    marginBottom: SHARED_STYLES.footerItemMarginBottom,
-  },
-  footerDate: {
-    fontSize: SHARED_STYLES.footerFontSize,
-    color: COLORS.darkGrey,
-    textAlign: 'center',
   },
   overflowContainer: {
     flexDirection: 'row',
@@ -216,13 +227,29 @@ export const PDF_STYLES = {
     marginTop: SHARED_STYLES.overflowMarginTop,
     marginBottom: SHARED_STYLES.overflowMarginBottom,
   },
+  rowContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    gap: SHARED_STYLES.legendGap,
+    width: '100%',
+    paddingTop: SHARED_STYLES.rowDividerMargin,
+    paddingBottom: SHARED_STYLES.rowDividerMargin,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.darkGrey,
+    borderTopStyle: 'solid',
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.darkGrey,
+    borderBottomStyle: 'solid',
+  },
 } as const;
 
 // Canvas-specific styles (CSS format)
 export const CANVAS_STYLES = {
-  page: (width: number, height: number) => ({
+  page: (width: number) => ({
     width: `${width}px`,
-    height: `${height}px`,
+    // height removed - let content determine height
+    minHeight: 'auto', // Auto height based on content
     padding: `${SHARED_STYLES.padding}px`,
     fontFamily: SHARED_STYLES.fontFamily,
     backgroundColor: 'white',
@@ -231,19 +258,13 @@ export const CANVAS_STYLES = {
     boxSizing: 'border-box' as const,
   }),
   title: {
+    ...SHARED_STYLES.title,
     fontSize: `${SHARED_STYLES.titleFontSize}px`,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: `${SHARED_STYLES.titleMarginBottom}px`,
     margin: `0 0 ${SHARED_STYLES.titleMarginBottom}px 0`,
   },
   mapImage: {
-    width: '100%',
-    objectFit: 'contain',
+    ...SHARED_STYLES.mapImage,
     marginBottom: `${SHARED_STYLES.mapMarginBottom}px`,
-    borderWidth: SHARED_STYLES.borderWidth,
-    borderColor: SHARED_STYLES.borderColor,
-    borderStyle: 'solid',
   },
   scaleContainer: {
     display: 'flex',
@@ -252,120 +273,146 @@ export const CANVAS_STYLES = {
     marginBottom: `${SHARED_STYLES.scaleMarginBottom}px`,
   },
   scaleBarContainer: {
+    ...SHARED_STYLES.scaleBarContainer,
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center',
   },
   scaleLine: {
-    position: 'relative',
+    ...SHARED_STYLES.scaleLine,
     height: `${SHARED_STYLES.scaleLineHeight}px`,
-    backgroundColor: SHARED_STYLES.borderColor,
     marginBottom: `${SHARED_STYLES.scaleLineMarginBottom}px`,
   },
   scaleTick: {
-    position: 'absolute',
+    ...SHARED_STYLES.scaleTick,
     top: `${SHARED_STYLES.scaleTickTop}px`,
     width: `${SHARED_STYLES.scaleTickWidth}px`,
     height: `${SHARED_STYLES.scaleTickHeight}px`,
-    backgroundColor: SHARED_STYLES.borderColor,
   },
   scaleTickLeft: { left: `${SHARED_STYLES.scaleTickOffset}px` },
   scaleTickRight: { right: `${SHARED_STYLES.scaleTickOffset}px` },
   scaleText: {
+    ...SHARED_STYLES.scaleText,
     fontSize: `${SHARED_STYLES.scaleFontSize}px`,
-    color: COLORS.darkGrey,
     marginTop: `${SHARED_STYLES.scaleTextMarginTop}px`,
-    textTransform: 'lowercase',
   },
   northArrow: {
+    ...SHARED_STYLES.northArrow,
     width: `${SHARED_STYLES.northArrowSize}px`,
     height: `${SHARED_STYLES.northArrowSize}px`,
   },
   northArrowSvg: {
+    ...SHARED_STYLES.northArrowSvg,
     width: `${SHARED_STYLES.northArrowSize}px`,
     height: `${SHARED_STYLES.northArrowSize}px`,
   },
+  divider: {
+    width: '100%',
+    height: `${SHARED_STYLES.dividerHeight}px`,
+    backgroundColor: COLORS.standardGrey,
+    marginBottom: `${SHARED_STYLES.dividerMargin}px`,
+  },
   legendContainer: {
     display: 'flex',
-    justifyContent: 'center',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
     alignItems: 'flex-start',
-    gap: `${SHARED_STYLES.legendGap}px`,
     paddingLeft: `${SHARED_STYLES.legendPaddingLeft}px`,
     marginTop: `${SHARED_STYLES.legendMarginTop}px`,
     marginBottom: `${SHARED_STYLES.legendMarginBottom}px`,
+    width: '100%',
+    boxSizing: 'border-box',
   },
-  layerText: (marginTop: string) => ({
-    fontSize: `${SHARED_STYLES.layerFontSize}px`,
-    fontWeight: 'bold',
-    marginBottom: `${SHARED_STYLES.layerMarginBottom}px`,
+  rowContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    gap: `${SHARED_STYLES.legendGap}px`,
+    width: '100%',
+    paddingTop: `${SHARED_STYLES.rowDividerMargin}px`,
+    paddingBottom: `${SHARED_STYLES.rowDividerMargin}px`,
+    borderTop: `1px solid ${COLORS.darkGrey}`,
+    borderBottom: `1px solid ${COLORS.darkGrey}`,
+  },
+  layerSeparator: (marginTop: string) => ({
     marginTop,
-    flexWrap: 'wrap' as const,
-    whiteSpace: 'normal',
+    marginBottom: `${SHARED_STYLES.layerMarginBottom}px`,
+    width: '50%',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    borderTop: `0.5px solid ${COLORS.standardGrey}`,
+  }),
+  layerText: () => ({
+    ...SHARED_STYLES.layerText(),
+    fontSize: `${SHARED_STYLES.layerFontSize}px`,
+    marginBottom: `${SHARED_STYLES.layerMarginBottom}px`,
   }),
   wmsContainer: (indentLevel: number) => ({
+    ...SHARED_STYLES.wmsContainer(indentLevel),
     marginLeft: `${indentLevel + 3}px`,
     marginBottom: `${SHARED_STYLES.wmsMarginBottom}px`,
+    maxWidth: '500px',
+    width: '100%',
   }),
   wmsImage: {
-    width: `${SHARED_STYLES.wmsImageWidth}px`,
-    maxHeight: `${SHARED_STYLES.wmsImageMaxHeight}px`,
+    ...SHARED_STYLES.wmsImage,
+    maxWidth: '100%', // Fit within container
     objectFit: 'contain',
   },
   timeText: (indentLevel: number) => ({
+    ...SHARED_STYLES.timeText(indentLevel),
     fontSize: `${SHARED_STYLES.timeFontSize}px`,
-    fontStyle: 'italic',
     marginLeft: `${indentLevel}px`,
     marginBottom: `${SHARED_STYLES.timeMarginBottom}px`,
   }),
   childText: (indentLevel: number) => ({
+    ...SHARED_STYLES.childText(indentLevel),
     fontSize: `${SHARED_STYLES.childFontSize}px`,
-    fontWeight: 'bold',
     marginBottom: `${SHARED_STYLES.childMarginBottom}px`,
-    marginLeft: `${indentLevel}px`,
+    marginLeft: `${indentLevel * 8 + 8}px`,
     marginTop: `${SHARED_STYLES.childMarginTop}px`,
   }),
   itemContainer: (indentLevel: number) => ({
     display: 'flex',
     alignItems: 'center',
-    marginLeft: `${indentLevel + 3}px`,
+    marginLeft: `${indentLevel * 8 + 3}px`,
     marginBottom: `${SHARED_STYLES.itemMarginBottom}px`,
   }),
   itemIcon: {
+    ...SHARED_STYLES.itemIcon,
     width: `${SHARED_STYLES.itemIconSize}px`,
     height: `${SHARED_STYLES.itemIconSize}px`,
     marginRight: `${SHARED_STYLES.itemIconMarginRight}px`,
   },
   itemText: {
+    ...SHARED_STYLES.itemText,
     fontSize: `${SHARED_STYLES.itemFontSize}px`,
-    flexWrap: 'nowrap',
-    whiteSpace: 'nowrap',
+    whiteSpace: 'wrap',
   },
   footer: {
+    ...SHARED_STYLES.footer,
     fontSize: `${SHARED_STYLES.footerFontSize}px`,
     textAlign: 'center',
-    marginTop: 'auto',
+    marginTop: `${SHARED_STYLES.legendMarginTop * 4}px`, // Fixed margin instead of auto
     paddingTop: `${SHARED_STYLES.legendMarginTop * 4}px`,
   },
   footerDisclaimer: {
-    fontSize: SHARED_STYLES.footerFontSize,
-    color: COLORS.darkGrey,
-    textAlign: 'center',
+    ...SHARED_STYLES.footerDisclaimer,
+    fontSize: `${SHARED_STYLES.footerFontSize}px`,
     marginBottom: `${SHARED_STYLES.footerMarginBottom}px`,
   },
   footerAttribution: {
-    fontSize: SHARED_STYLES.footerFontSize,
-    color: COLORS.darkGrey,
-    textAlign: 'center',
+    ...SHARED_STYLES.footerAttribution,
+    fontSize: `${SHARED_STYLES.footerFontSize}px`,
     marginBottom: `${SHARED_STYLES.footerItemMarginBottom}px`,
   },
   footerDate: {
-    fontSize: SHARED_STYLES.footerFontSize,
-    color: COLORS.darkGrey,
-    textAlign: 'center',
+    ...SHARED_STYLES.footerDate,
+    fontSize: `${SHARED_STYLES.footerFontSize}px`,
   },
-  overflowPage: (width: number, height: number) => ({
+  overflowPage: (width: number) => ({
     width: `${width}px`,
-    height: `${height}px`,
+    minHeight: 'auto', // Auto height based on content
     padding: `${SHARED_STYLES.padding}px`,
     fontFamily: SHARED_STYLES.fontFamily,
     backgroundColor: 'white',
@@ -380,3 +427,183 @@ export const CANVAS_STYLES = {
     marginBottom: `${SHARED_STYLES.overflowMarginBottom}px`,
   },
 } as const;
+
+/**
+ * Get scaled PDF styles for AUTO mode
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const getScaledPDFStyles = (docWidth: number): any => {
+  const scale = docWidth / 612;
+
+  // Pre-compute base styles to avoid redundant function calls
+  const baseLayerText = PDF_STYLES.layerText();
+  const baseChildText = PDF_STYLES.childText(0);
+  const baseTimeText = PDF_STYLES.timeText(0);
+
+  return {
+    ...PDF_STYLES,
+    layerSeparator: (marginTop: number) => ({
+      ...SHARED_STYLES.layerSeparator(marginTop),
+    }),
+    wmsContainer: (indentLevel: number) => ({
+      ...PDF_STYLES.wmsContainer(indentLevel),
+      marginLeft: indentLevel + 3,
+      marginBottom: SHARED_STYLES.wmsMarginBottom,
+      maxWidth: 500,
+      width: '100%',
+    }),
+    wmsImage: {
+      ...PDF_STYLES.wmsImage,
+      width: 'auto', // Match Canvas/Preview: preserve native size
+      height: 'auto',
+      maxWidth: '100%',
+      objectFit: 'contain',
+    },
+    layerText: () => ({
+      ...baseLayerText,
+      fontSize: baseLayerText.fontSize * scale,
+    }),
+    childText: (indentLevel: number) => ({
+      ...PDF_STYLES.childText(indentLevel),
+      fontSize: baseChildText.fontSize * scale,
+    }),
+    timeText: (indentLevel: number) => ({
+      ...PDF_STYLES.timeText(indentLevel),
+      fontSize: baseTimeText.fontSize * scale,
+    }),
+    itemText: {
+      ...PDF_STYLES.itemText,
+      fontSize: PDF_STYLES.itemText.fontSize * scale,
+    },
+    title: {
+      ...PDF_STYLES.title,
+      fontSize: PDF_STYLES.title.fontSize * scale,
+    },
+    scaleText: {
+      ...PDF_STYLES.scaleText,
+      fontSize: PDF_STYLES.scaleText.fontSize * scale,
+    },
+    footerDisclaimer: {
+      ...PDF_STYLES.footerDisclaimer,
+      fontSize: PDF_STYLES.footerDisclaimer.fontSize * scale,
+    },
+    footerAttribution: {
+      ...PDF_STYLES.footerAttribution,
+      fontSize: PDF_STYLES.footerAttribution.fontSize * scale,
+    },
+    footerDate: {
+      ...PDF_STYLES.footerDate,
+      fontSize: PDF_STYLES.footerDate.fontSize * scale,
+    },
+    northArrow: {
+      ...PDF_STYLES.northArrow,
+      width: PDF_STYLES.northArrow.width * scale,
+      height: PDF_STYLES.northArrow.height * scale,
+    },
+    northArrowSvg: {
+      ...PDF_STYLES.northArrowSvg,
+      width: PDF_STYLES.northArrowSvg.width * scale,
+      height: PDF_STYLES.northArrowSvg.height * scale,
+    },
+    itemIcon: {
+      ...PDF_STYLES.itemIcon,
+      width: PDF_STYLES.itemIcon.width * scale,
+      height: PDF_STYLES.itemIcon.height * scale,
+    },
+  };
+};
+
+/**
+ * Get scaled Canvas styles for AUTO mode
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const getScaledCanvasStyles = (docWidth: number): any => {
+  const scale = docWidth / 612;
+
+  // Pre-compute base styles and extract numeric values to avoid repetitive parseInt() calls
+  const baseLayerText = CANVAS_STYLES.layerText();
+  const baseChildText = CANVAS_STYLES.childText(0);
+  const baseTimeText = CANVAS_STYLES.timeText(0);
+
+  // Pre-extract numeric font sizes and dimensions
+  const layerTextSize = parseInt(baseLayerText.fontSize);
+  const childTextSize = parseInt(baseChildText.fontSize);
+  const timeTextSize = parseInt(baseTimeText.fontSize);
+  const itemTextSize = parseInt(CANVAS_STYLES.itemText.fontSize);
+  const titleSize = parseInt(CANVAS_STYLES.title.fontSize);
+  const scaleTextSize = parseInt(CANVAS_STYLES.scaleText.fontSize);
+  const footerSize = parseInt(CANVAS_STYLES.footerDisclaimer.fontSize);
+  const northArrowSize = parseInt(CANVAS_STYLES.northArrow.width);
+  const itemIconSize = parseInt(CANVAS_STYLES.itemIcon.width);
+
+  return {
+    ...CANVAS_STYLES,
+    layerSeparator: (marginTop: string) => ({
+      ...CANVAS_STYLES.layerSeparator(marginTop),
+    }),
+    layerText: () => ({
+      ...baseLayerText,
+      fontSize: `${layerTextSize * scale}px`,
+      wordWrap: 'break-word' as const,
+      overflowWrap: 'break-word' as const,
+    }),
+    childText: (indentLevel: number) => ({
+      ...CANVAS_STYLES.childText(indentLevel),
+      fontSize: `${childTextSize * scale}px`,
+      wordWrap: 'break-word' as const,
+      overflowWrap: 'break-word' as const,
+    }),
+    timeText: (indentLevel: number) => ({
+      ...CANVAS_STYLES.timeText(indentLevel),
+      fontSize: `${timeTextSize * scale}px`,
+      wordWrap: 'break-word' as const,
+      overflowWrap: 'break-word' as const,
+    }),
+    itemText: {
+      ...CANVAS_STYLES.itemText,
+      fontSize: `${itemTextSize * scale}px`,
+      wordWrap: 'break-word' as const,
+      overflowWrap: 'break-word' as const,
+    },
+    title: {
+      ...CANVAS_STYLES.title,
+      fontSize: `${titleSize * scale}px`,
+    },
+    scaleText: {
+      ...CANVAS_STYLES.scaleText,
+      fontSize: `${scaleTextSize * scale}px`,
+    },
+    footerDisclaimer: {
+      ...CANVAS_STYLES.footerDisclaimer,
+      fontSize: `${footerSize * scale}px`,
+    },
+    footerAttribution: {
+      ...CANVAS_STYLES.footerAttribution,
+      fontSize: `${footerSize * scale}px`,
+    },
+    footerDate: {
+      ...CANVAS_STYLES.footerDate,
+      fontSize: `${footerSize * scale}px`,
+    },
+    northArrow: {
+      ...CANVAS_STYLES.northArrow,
+      width: `${northArrowSize * scale}px`,
+      height: `${northArrowSize * scale}px`,
+    },
+    northArrowSvg: {
+      ...CANVAS_STYLES.northArrowSvg,
+      width: `${northArrowSize * scale}px`,
+      height: `${northArrowSize * scale}px`,
+    },
+    itemIcon: {
+      ...CANVAS_STYLES.itemIcon,
+      width: `${itemIconSize * scale}px`,
+      height: `${itemIconSize * scale}px`,
+    },
+    wmsImage: {
+      ...CANVAS_STYLES.wmsImage,
+      maxWidth: `${SHARED_STYLES.wmsImageWidth * scale}px`,
+      objectFit: 'contain',
+    },
+  };
+};

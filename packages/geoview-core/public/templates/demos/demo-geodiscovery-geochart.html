@@ -13,106 +13,24 @@
     <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
     <link rel="stylesheet" href="css/style.css" />
-        <style>
-      .actionButton {
-        padding: 5px;
-      }
-
-      .selector-container {
-        display: flex;
-        flex-direction: row;
-        margin: 10px;
-      }
-
-      .selector {
-        padding: 15px;
-      }
-
-      .editor {
-        display: inline-flex;
-        gap: 10px;
-        font-family: monospace;
-        line-height: 21px;
-        background: #282a3a;
-        border-radius: 2px;
-        padding: 20px 10px;
-        height: 600px;
-        overflow-y: auto;
-      }
-
-      .line-numbers {
-        width: 20px;
-        text-align: right;
-        height: 9999px;
-      }
-
-      .line-numbers span {
-        counter-increment: linenumber;
-      }
-
-      .line-numbers span::before {
-        content: counter(linenumber);
-        display: block;
-        color: #506882;
-      }
-
-      textarea {
-        height: 9999px;
-        line-height: 21px;
-        overflow-y: hidden;
-        padding: 0;
-        border: 0;
-        background: #282a3a;
-        color: #fff;
-        min-width: 500px;
-        outline: none;
-        resize: none;
-      }
-
-      select {
-        max-width: 96%;
-      }
-
-      @media screen and (max-width: 600px) {
-        .selector-container {
-          display: flex;
-          flex-direction: column;
-          width: 100%;
-        }
-        .selector-container p {
-          margin-bottom: 0px;
-        }
-        .selector {
-          padding: 8px;
-        }
-        textarea {
-          min-width: 96%;
-          max-width: 96%;
-        }
-      }
-    </style>
   </head>
 
   <body>
-    <div class="header-table">
-      <table>
-        <tbody>
-          <tr>
-            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
-            <td class="header-title">
-              <h1 id="top"><strong>GeoDiscovery Geochart Demo (EN/FR)</strong></h1>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      </br>
-      <a href="./demos.html">Main</a></br>
+    <div id="page-header"></div>
+    <div>      <div class="back-to-main">
+        <a href="./index.html?tab=specific-demos">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>GeoDiscovery Geochart Demo (EN/FR)</h4>
+        <p>Demonstration of GeoDiscovery integration with Geochart plugin</p>
+      </div>
     </div>
 
      <div class="selector-container">
       <p>Configuration to load:</p>
       <div class="selector">
-        <select name="Config Loader" id="configLoader">
+        <select class="form-select" name="Config Loader" id="configLoader">
           <option value="">--select--</option>
           <option value="./configs/geo-discovery/GV_0c25772d-da22-4ac1-b130-c1d97b935f6f_en.json">1a. Radionuclide Releases - Nuclear Processing Facilities / Direct Discharge - EN</option>
           <option value="./configs/geo-discovery/GV_0c25772d-da22-4ac1-b130-c1d97b935f6f_fr.json">1b. Radionuclide Releases - Nuclear Processing Facilities / Direct Discharge - FR</option>
@@ -155,7 +73,7 @@
     <button type="button" class="collapsible">Layers Status</button>
     <pre id="sandboxMap-state" class="panel map-title-holder"></pre>
   
-    <div id="mapSection">
+    <div id="mapSection" class="demo-section">
       <h4 id="mapTitle"></h4>
       <div id="map1"></div>
     </div>
@@ -171,6 +89,8 @@
   
     <script src="codedoc.js"></script>
     <script>
+      insertPageHeader();
+
       const confiLgoader = document.getElementById('configLoader');
       const switchLang = document.getElementById('switchLang');
       const mapTitle = document.getElementById('mapTitle');

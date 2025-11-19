@@ -15,7 +15,9 @@ export class GVKML extends AbstractGVVector {
    * @param {VectorSource} olSource - The OpenLayer source.
    * @param {KmlLayerEntryConfig} layerConfig - The layer configuration.
    */
-  public constructor(olSource: VectorSource, layerConfig: KmlLayerEntryConfig) {
+  // The constructor is not useless, it narrows down the accepted parameter type.
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
+  constructor(olSource: VectorSource, layerConfig: KmlLayerEntryConfig) {
     super(olSource, layerConfig);
   }
 

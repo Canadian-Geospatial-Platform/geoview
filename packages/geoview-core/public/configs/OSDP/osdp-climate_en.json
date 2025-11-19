@@ -46,7 +46,7 @@
     "overview-map"
   ],
   "overviewMap": {
-    "hideOnZoom": 6
+    "hideOnZoom": 7
   },
   "navBar": [
     "zoom",
@@ -61,7 +61,6 @@
         "geolocator",
         "legend",
         "details",
-        "time-slider",
         "export"
       ]
     }
@@ -70,7 +69,8 @@
     "tabs": {
       "core": [
         "layers",
-        "data-table"
+        "data-table",
+        "time-slider"
       ]
     }
   },

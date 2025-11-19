@@ -30,7 +30,7 @@ export class FetchEsriWorkerPool extends AbstractWorkerPool<FetchEsriWorkerType>
    * @returns {Promise<void>}
    * @throws {Error} When worker initialization fails
    */
-  public async init(): Promise<void> {
+  async init(): Promise<void> {
     try {
       await Promise.all(this.workers.map((worker) => worker.init()));
       this.#logger.logTrace('Worker pool initialized');
@@ -46,7 +46,7 @@ export class FetchEsriWorkerPool extends AbstractWorkerPool<FetchEsriWorkerType>
    * @returns {Promise<unknown>} The query results
    * @throws {Error} When no workers are available or query processing fails
    */
-  public async process(params: QueryParams): Promise<unknown> {
+  async process(params: QueryParams): Promise<unknown> {
     const availableWorker = this.getAvailableWorker();
     if (!availableWorker) {
       throw new Error('No available workers');

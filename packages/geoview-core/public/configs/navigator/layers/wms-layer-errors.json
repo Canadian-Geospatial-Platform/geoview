@@ -12,7 +12,7 @@
     "listOfGeoviewLayerConfig": [
       {
         "geoviewLayerId": "Hydro",
-        "geoviewLayerName": "Error metadata" ,
+        "geoviewLayerName": "Error metadata",
         "metadataAccessPath": "https://maps.geogratis.gc.ca/wms/hydro_network_enERROR",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
@@ -32,7 +32,7 @@
       },
       {
         "geoviewLayerId": "Hydro2",
-        "geoviewLayerName": "Error layerId" ,
+        "geoviewLayerName": "Error layerId",
         "metadataAccessPath": "https://maps.geogratis.gc.ca/wms/hydro_network_en",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
@@ -58,17 +58,18 @@
       }
     ]
   },
-  "components": ["overview-map"],
+  "components": ["overview-map", "north-arrow"],
+  "overviewMap": { "hideOnZoom": 7 },
   "footerBar": {
     "tabs": {
-      "core": ["legend", "layers", "details"]
+      "core": ["layers", "data-table"]
     }
   },
   "corePackages": [],
   "theme": "geo.ca",
   "appBar": {
     "tabs": {
-      "core": ["geolocator", "export"]
+      "core": ["geolocator", "legend", "details", "export"]
     }
   }
 }

@@ -83,23 +83,13 @@
   "theme": "geo.ca",
   "appBar": {
     "tabs": {
-      "core": [
-        "export"
-      ]
+      "core": ["geolocator", "legend", "details", "export"]
     }
   },
-  "components": [
-    "north-arrow",
-    "overview-map"
-  ],
+  "components": ["north-arrow", "overview-map"],
   "footerBar": {
     "tabs": {
-      "core": [
-        "legend",
-        "layers",
-        "details",
-        "time-slider"
-      ]
+      "core": ["layers", "time-slider"]
     },
     "selectedTab": "time-slider",
     "selectedTimeSliderLayerPath": "wmsLYR1-spatiotemporel/RADAR_1KM_RSNO"
@@ -110,56 +100,34 @@
       "time-slider": {
         "sliders": [
           {
-            "layerPaths": [
-              "wmsLYR1-spatiotemporel/RADAR_1KM_RSNO"
-            ],
+            "layerPaths": ["wmsLYR1-spatiotemporel/RADAR_1KM_RSNO"],
             "title": "Spatiotemporel - Custom",
             "description": "Custom inline description",
             "locked": true,
             "reversed": true,
             "timeDimension": {
-              "default": [
-                "2024-02-21T14:54:00Z"
-              ]
+              "default": ["2024-02-21T14:54:00Z"]
             }
           },
           {
-            "layerPaths": [
-              "MSI/msi-94-or-more"
-            ],
+            "layerPaths": ["MSI/msi-94-or-more"],
             "timeDimension": {
-              "default": [
-                "2011-08-15T00:00:00Z"
-              ]
+              "default": ["2011-08-15T00:00:00Z"]
             }
           },
           {
-            "layerPaths": [
-              "fire_progression/0",
-              "fire_perimeters/1",
-              "floods_canada/1",
-              "historical-flood/0"
-            ],
+            "layerPaths": ["fire_progression/0", "fire_perimeters/1", "floods_canada/1", "historical-flood/0"],
             "title": "Progression and Perimeters of Fires and Floods",
             "delay": 5000,
             "filtering": false,
             "timeDimension": {
               "field": "DATE_",
-              "default": [
-                "2023-04-19T00:00:00Z",
-                "2025-09-15T00:00:00Z"
-              ],
+              "default": ["2023-04-19T00:00:00Z", "2025-09-15T00:00:00Z"],
               "nearestValues": "discrete",
-              "displayPattern": [
-                "day",
-                null
-              ],
+              "displayPattern": ["day", null],
               "rangeItems": {
                 "type": "",
-                "range": [
-                  "2023-04-19T00:00:00+00:00",
-                  "2025-09-15T00:00:00+00:00"
-                ]
+                "range": ["2023-04-19T00:00:00+00:00", "2025-09-15T00:00:00+00:00"]
               },
               "singleHandle": false
             }

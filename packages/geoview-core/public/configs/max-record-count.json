@@ -41,12 +41,12 @@
   "navBar": ["zoom", "fullscreen", "location", "home"],
   "appBar": {
     "tabs": {
-      "core": ["geolocator", "legend", "export"]
+      "core": ["geolocator", "legend", "details", "export"]
     }
   },
   "footerBar": {
     "tabs": {
-      "core": ["legend", "layers", "details", "data-table"]
+      "core": ["layers", "data-table"]
     }
   },
   "theme": "geo.ca"

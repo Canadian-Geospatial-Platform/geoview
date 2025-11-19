@@ -16,33 +16,19 @@
   </head>
 
   <body>
-    <div class="header-table">
-      <table>
-        <tbody>
-          <tr>
-            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
-            <td class="header-title">
-              <h1><strong>CGDI Water Resources Demo</strong></h1>
-            </td>
-          </tr>
-          <tr>
-            <td><a href="./demos.html">Main</a><br /></td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td><p>Demonstration of National Spatial Data Catalogue - Water Resources Starter Kit in GeoView</p></td>
-          </tr>
-        </tbody>
-      </table>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./index.html?tab=specific-demos">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>CGDI Water Resources Demo</h4>
+        <p>Demonstration of Canadian Geospatial Data Infrastructure (CGDI) - Water Resources Starter Kit in GeoView</p>
+      </div>
     </div>
 
-    <div class="map-title-holder">
-      <h4 id="Hmap1">Water Resources</h4>
-    </div>
-    <button class="collapsible active">Layers Status</button>
+    <button class="collapsible">Layers Status</button>
     <pre id="Hmap1-state" class="panel map-title-holder"></pre>
     <div
       id="map1"
@@ -250,6 +236,8 @@
 
     <script src="codedoc.js"></script>
     <script>
+      insertPageHeader();
+
       // Register handler when map has been initialized
       cgpv.onMapInit((mapViewer) => {
         listenToLegendLayerSetChanges(`H${mapViewer.mapId}-state`, mapViewer);

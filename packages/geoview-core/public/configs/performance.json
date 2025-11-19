@@ -29,17 +29,21 @@
     ]
   },
   "components": [
-    "overview-map"
+    "overview-map",
+    "north-arrow"
   ],
   "overviewMap": {
     "hideOnZoom": 7
   },
+   "appBar": {
+    "tabs": {
+      "core": ["geolocator", "legend", "details", "export"]
+    }
+  },
   "footerBar": {
     "tabs": {
       "core": [
-        "legend",
         "layers",
-        "details",
         "geochart",
         "data-table"
       ]

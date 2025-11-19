@@ -324,6 +324,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
       currentProjection: mapState.currentProjection,
       currentZoom: mapState.zoom,
       mapCenterCoordinates: mapState.centerCoordinates,
+      mapExtent: mapState.mapExtent!,
+      rotation: mapState.rotation,
       pointerPosition: mapState.pointerPosition || {
         pixel: [],
         lonlat: [],
@@ -471,13 +473,16 @@ export class MapEventProcessor extends AbstractEventProcessor {
       ];
       const newProjection = projectionCode;
 
-      // If maxExtent was provided and native projection, apply
+      // If maxExtent was provided and un the native projection, apply
       // GV The extent is different between LCC and WM and switching from one to the other may introduce weird constraint.
       // GV We may have to keep extent as array for configuration file but, technically, user does not change projection often.
       // GV A wider LCC extent like [-125, 30, -60, 89] (minus -125) will introduce distortion on larger screen...
-      // GV It is why we apply the max extent only on native projection
+      // GV It is why we apply the max extent only on native projection, otherwise we apply default
       const viewSettings = this.getGeoViewMapConfig(mapId)?.map.viewSettings;
-      const mapMaxExtent = viewSettings!.maxExtent && newProjection === viewSettings!.projection ? MAP_EXTENTS[newProjection] : undefined;
+      const mapMaxExtent =
+        viewSettings!.maxExtent && Number(newProjection) === Number(viewSettings!.projection)
+          ? viewSettings?.maxExtent
+          : MAP_EXTENTS[newProjection];
 
       // create new view settings
       const newView: TypeViewSettings = {
@@ -554,9 +559,19 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // GV No need to save in the store, because this will trigger an event on MapViewer which will take care of updating the store
   }
 
-  static zoom(mapId: string, zoom: number, duration: number = OL_ZOOM_DURATION): void {
+  static zoom(mapId: string, zoom: number, duration: number = OL_ZOOM_DURATION): Promise<void> {
     // Do the actual zoom
     this.getMapViewer(mapId).map.getView().animate({ zoom, duration });
+
+    // Use a Promise and resolve it when the duration expired
+    return new Promise((resolve) => {
+      setTimeout(
+        () => {
+          resolve();
+        },
+        (duration || OL_ZOOM_DURATION) + 150
+      );
+    });
     // GV No need to save in the store, because this will trigger an event on MapViewer which will take care of updating the store
   }
 
@@ -1017,6 +1032,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId The map id.
    * @param {Extent} extent The extent to zoom to.
    * @param {FitOptions} options The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11, duration: 500 }).
+   * @returns Promise<void>
    */
   static zoomToExtent(
     mapId: string,
@@ -1175,13 +1191,14 @@ export class MapEventProcessor extends AbstractEventProcessor {
    *
    * @param {string} mapId - ID of map to zoom on
    * @param {string} layerPath - Path of layer to zoom to.
+   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
    */
   static zoomToLayerVisibleScale(mapId: string, layerPath: string): void {
     const view = this.getMapViewer(mapId).getView();
     const mapZoom = view.getZoom();
     const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
-    const layerMaxZoom = geoviewLayer!.getMaxZoom();
-    const layerMinZoom = geoviewLayer!.getMinZoom();
+    const layerMaxZoom = geoviewLayer.getMaxZoom();
+    const layerMinZoom = geoviewLayer.getMinZoom();
 
     // Set the right zoom (Infinity will act as a no change in zoom level)
     let layerZoom = Infinity;
@@ -1191,7 +1208,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // Change view to go to proper zoom centered in the middle of layer extent
     // If there is no layerExtent or if the zoom needs to zoom out, the center will be undefined and not use
     // Check if the map center is already in the layer extent and if so, do not center
-    const layerExtent = (geoviewLayer! as AbstractGVLayer).getBounds(this.getMapViewer(mapId).getProjection(), MapViewer.DEFAULT_STOPS);
+    const layerExtent = (geoviewLayer as AbstractGVLayer).getBounds(this.getMapViewer(mapId).getProjection(), MapViewer.DEFAULT_STOPS);
     const centerExtent =
       layerExtent && layerMinZoom > mapZoom! && !isPointInExtent(view.getCenter()!, layerExtent)
         ? [(layerExtent[2] + layerExtent[0]) / 2, (layerExtent[1] + layerExtent[3]) / 2]
@@ -1212,7 +1229,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
   static setLayerZIndices = (mapId: string): void => {
     const reversedLayers = [...this.getMapStateProtected(mapId).orderedLayerInfo].reverse();
     reversedLayers.forEach((orderedLayerInfo, index) => {
-      const olLayer = this.getMapViewerLayerAPI(mapId).getOLLayer(orderedLayerInfo.layerPath);
+      const olLayer = this.getMapViewerLayerAPI(mapId).getOLLayerIfExists(orderedLayerInfo.layerPath);
       if (olLayer) olLayer?.setZIndex(index + 10);
     });
   };
@@ -1232,7 +1249,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} layerPath The path for the layer to get filters from.
    */
   static getActiveVectorFilters(mapId: string, layerPath: string): (string | undefined)[] | undefined {
-    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
+    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerIfExists(layerPath);
     if (geoviewLayer) {
       const initialFilter = this.getInitialFilter(mapId, layerPath);
       const tableFilter = DataTableEventProcessor.getTableFilter(mapId, layerPath);
@@ -1256,7 +1273,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    */
   static applyLayerFilters(mapId: string, layerPath: string): void {
     // Get the Geoview layer
-    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
+    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerIfExists(layerPath);
 
     // If found it and of right type
     if (

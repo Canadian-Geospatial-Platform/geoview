@@ -12,10 +12,23 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
    * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<T>} A promise with the metadata or undefined when no metadata for the particular layer type.
+   * @throws {LayerServiceMetadataUnableToFetchError} Error thrown when the metadata fetch fails or contains an error.
    */
-  protected override onFetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T> {
-    // Fetch it
-    return AbstractGeoViewRaster.fetchMetadata<T>(this.metadataAccessPath, this.geoviewLayerId, this.geoviewLayerName, abortSignal);
+  protected override async onFetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T> {
+    let responseJson;
+    try {
+      // Fetch it
+      responseJson = await AbstractGeoViewRaster.fetchMetadata<T>(this.metadataAccessPath, abortSignal);
+    } catch (error: unknown) {
+      // Throw
+      throw new LayerServiceMetadataUnableToFetchError(this.geoviewLayerId, this.getLayerEntryNameOrGeoviewLayerName(), formatError(error));
+    }
+
+    // Validate the metadata response
+    AbstractGeoViewRaster.throwIfMetatadaHasError(this.geoviewLayerId, this.getLayerEntryNameOrGeoviewLayerName(), responseJson);
+
+    // Return it
+    return responseJson;
   }
 
   // #region STATIC
@@ -25,24 +38,19 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
    * If the URL does not end with `.json`, the query string `?f=json` is appended to request JSON format.
    * The response is parsed and checked for service-level errors. If an error is found, an exception is thrown.
    * @param {string} url - The base URL to fetch the metadata from (e.g., ArcGIS REST endpoint).
-   * @param {string} geoviewLayerId - The unique identifier for the GeoView layer.
-   * @param {string} geoviewLayerName - The display name of the GeoView layer (used in error messages).
    * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<T>} A promise resolving to the parsed JSON metadata response.
-   * @throws {ServiceError} If the metadata response contains an error.
+   * @throws {RequestTimeoutError} Error thrown when the request exceeds the timeout duration.
+   * @throws {RequestAbortedError} Error thrown when the request was aborted by the caller's signal.
+   * @throws {ResponseError} Error thrown when the response is not OK (non-2xx).
+   * @throws {ResponseEmptyError} Error thrown when the JSON response is empty.
    */
-  static async fetchMetadata<T>(url: string, geoviewLayerId: string, geoviewLayerName: string, abortSignal?: AbortSignal): Promise<T> {
+  static fetchMetadata<T>(url: string, abortSignal?: AbortSignal): Promise<T> {
     // The url
     const parsedUrl = url.toLowerCase().endsWith('json') ? url : `${url}?f=json`;
 
     // Query and read
-    const responseJson = await Fetch.fetchJson<T>(parsedUrl, { signal: abortSignal });
-
-    // Validate the metadata response
-    AbstractGeoViewRaster.throwIfMetatadaHasError(geoviewLayerId, geoviewLayerName, responseJson);
-
-    // Return the response
-    return responseJson;
+    return Fetch.fetchJson<T>(parsedUrl, { signal: abortSignal });
   }
 
   /**
@@ -50,6 +58,7 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
    * @param {string} geoviewLayerId - The geoview layer id
    * @param {string | undefined} layerName - The layer name
    * @param {any} metadata - The metadata to check
+   * @throws {LayerServiceMetadataUnableToFetchError} Error thrown when the metadata fetch fails or contains an error.
    */
   // GV The metadata structure can be anything, we only care to check if there's an error inside of it
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

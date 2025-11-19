@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -14,40 +14,18 @@
   </head>
 
   <body>
-    <div class="header-table">
-      <table>
-        <tbody>
-          <tr>
-            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
-            <td class="header-title">
-              <h1><strong>UI Components</strong></h1>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td>
-              <a href="./index.html">Main</a><br />
-              <a href="#SLIDER">1. Slider MUI Component</a><br />
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td>This page is used to showcase different Core UI components</td>
-          </tr>
-        </tbody>
-      </table>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./index.html?tab=demos">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>UI Components</h4>
+        <p>This page is used to showcase different Core UI components</p>
+      </div>
     </div>
 
-    <div class="map-title-holder">
-      <h4 id="SLIDER">1. Slider MUI Component</h4>
-      <a class="ref-link" href="#top">Top</a>
-    </div>
     <div
       id="map1"
       class="geoview-map"
@@ -82,8 +60,6 @@
         }"
     ></div>
     <p></p>
-    <button type="button" class="collapsible">Configuration Snippet</button>
-    <pre id="UI1CS" class="panel"></pre>
     <hr />
 
     <!-- SLIDER SECTION START -->
@@ -95,17 +71,15 @@
 
     <div id="UI1-slider1" class="Panel" style="padding-top: 20px; width: 75%; padding-left: 25%"></div>
     <div class="toolbar">
-      <button type="button" id="sliderminmax">Set Slider Min/Max</button>
-      <button type="button" id="slidervalues">Set Slider Values</button>
+      <button type="button" class="btn btn-primary" id="sliderminmax">Set Slider Min/Max</button>
+      <button type="button" class="btn btn-primary" id="slidervalues">Set Slider Values</button>
     </div>
-    <hr />
 
     <div id="UI1-slider2" class="Panel" style="padding-top: 20px; width: 50%; padding-left: 25%"></div>
     <div class="panel" style="display: block">
       <h3>Accessing slider value from outside of the core viewer using api event listeners</h3>
       <div class="slider-position2"></div>
     </div>
-    <hr />
     <!-- SLIDER SECTION END -->
 
     <button type="button" class="collapsible">Code Snippet</button>
@@ -113,6 +87,8 @@
 
     <script src="codedoc.js"></script>
     <script>
+      insertPageHeader();
+
       function createAndAddSliderComponent(domId, propsSlider) {
         // Create the react element
         const compSlider = cgpv.reactUtilities.react.createElement(cgpv.ui.elements.Slider, propsSlider);
@@ -173,7 +149,9 @@
               track: 'normal',
               onChange: (dates) => {
                 const field = mapViewer.layer.getGeoviewLayer('historical-flood/0').getTimeDimension().field;
-                mapViewer.layer.getGeoviewLayer('historical-flood/0').applyViewFilter(`${field} >= date '${dates[0]}-01-01' and ${field} <= date '${dates[1]}-12-31'`);
+                mapViewer.layer
+                  .getGeoviewLayer('historical-flood/0')
+                  .applyViewFilter(`${field} >= date '${dates[0]}-01-01' and ${field} <= date '${dates[1]}-12-31'`);
               },
             })
           );

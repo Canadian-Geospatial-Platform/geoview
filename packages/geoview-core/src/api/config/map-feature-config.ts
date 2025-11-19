@@ -18,7 +18,7 @@ import type {
   TypeExternalPackagesProps,
   TypeValidVersions,
 } from '@/api/types/map-schema-types';
-import { DEFAULT_MAP_FEATURE_CONFIG, MAP_EXTENTS, VALID_PROJECTION_CODES, MAP_CENTER } from '@/api/types/map-schema-types';
+import { DEFAULT_MAP_FEATURE_CONFIG, MAP_EXTENTS, VALID_PROJECTION_CODES, MAP_CENTER, MAP_ZOOM_LEVEL } from '@/api/types/map-schema-types';
 
 /**
  * The map feature configuration class.
@@ -119,7 +119,7 @@ export class MapFeatureConfig {
 
     // Set values specific to projection
     mapConfig.viewSettings.maxExtent = [...MAP_EXTENTS[proj]];
-    mapConfig.viewSettings.initialView = { zoomAndCenter: [3.5, MAP_CENTER[proj]] };
+    mapConfig.viewSettings.initialView = { zoomAndCenter: [MAP_ZOOM_LEVEL[proj], MAP_CENTER[proj]] };
 
     // Return it
     return mapConfig;

@@ -396,6 +396,46 @@ export class InitMapWrongCallError extends GeoViewError {
 }
 
 /**
+ * Error thrown when a Plugin error happened.
+ */
+export class PluginError extends GeoViewError {
+  /**
+   * Creates an instance of PluginError.
+   * @param {string} pluginId - The plugin id for which the state was uninitialized.
+   * @param {string} mapId - The map id
+   */
+  constructor(pluginId: string, mapId: string) {
+    super('error.map.pluginError', [pluginId, mapId]);
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'PluginError';
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, PluginError.prototype);
+  }
+}
+
+/**
+ * Error thrown when a Plugin configuration couldn't be found.
+ */
+export class PluginConfigNotFoundError extends GeoViewError {
+  /**
+   * Creates an instance of PluginConfigNotFoundError.
+   * @param {string} pluginId - The plugin id for which the config was not found.
+   * @param {string} mapId - The map id
+   */
+  constructor(pluginId: string, mapId: string, path: string) {
+    super('error.map.pluginConfigNotFound', [pluginId, mapId, path]);
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'PluginConfigNotFoundError';
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, PluginConfigNotFoundError.prototype);
+  }
+}
+
+/**
  * Error thrown when a plugin state hasn't been initialized and we're trying to access it.
  */
 export class PluginStateUninitializedError extends GeoViewError {
@@ -412,5 +452,25 @@ export class PluginStateUninitializedError extends GeoViewError {
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, PluginStateUninitializedError.prototype);
+  }
+}
+
+/**
+ * Error thrown when a Test Suite fails to initialize.
+ */
+export class TestSuiteInitializationError extends GeoViewError {
+  /**
+   * Creates an instance of TestSuiteInitializationError.
+   * @param {string} testSuite - The plugin id for which the state was uninitialized.
+   * @param {string} mapId - The map id
+   */
+  constructor(testSuite: string, mapId: string) {
+    super('testSuite.initializationError', [testSuite, mapId]);
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'TestSuiteInitializationError';
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, TestSuiteInitializationError.prototype);
   }
 }

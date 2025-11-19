@@ -22,7 +22,9 @@ export class GVWKB extends AbstractGVVector {
    * @param {VectorSource} olSource - The OpenLayer source.
    * @param {WkbLayerEntryConfig} layerConfig - The layer configuration.
    */
-  public constructor(olSource: VectorSource, layerConfig: WkbLayerEntryConfig) {
+  // The constructor is not useless, it narrows down the accepted parameter type.
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
+  constructor(olSource: VectorSource, layerConfig: WkbLayerEntryConfig) {
     super(olSource, layerConfig);
   }
 
