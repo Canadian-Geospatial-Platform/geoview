@@ -10,16 +10,22 @@ import {
   useDetailsSelectedLayerPath,
   useDetailsCoordinateInfoEnabled,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import {
+  useUIActiveFooterBarTabId,
+  useUIFooterBarIsCollapsed,
+  useUIActiveAppBarTab,
+} from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import {
   useMapStoreActions,
   useMapClickCoordinates,
   useMapHideCoordinateInfoSwitch,
   useMapAllVisibleandInRangeLayers,
-  useMapVisibleLayers,
+  useMapOrderedLayers,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import type { TypeFeatureInfoEntry, TypeLayerData } from '@/api/types/map-schema-types';
+import type { TypeMapMouseInfo } from '@/geo/map/map-viewer';
 
 import type { LayerListEntry } from '@/core/components/common';
 import { Layout } from '@/core/components/common';
@@ -58,18 +64,23 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
   const coordinateInfoEnabled = useDetailsCoordinateInfoEnabled();
   const hideCoordinateInfoSwitch = useMapHideCoordinateInfoSwitch();
   const visibleInRangeLayers = useMapAllVisibleandInRangeLayers();
-  const visibleLayers = useMapVisibleLayers();
+  const orderedLayers = useMapOrderedLayers();
   const mapClickCoordinates = useMapClickCoordinates();
+  const selectedTab = useUIActiveFooterBarTabId();
+  const isCollapsed = useUIFooterBarIsCollapsed();
+  const activeAppBarTab = useUIActiveAppBarTab();
   const { setSelectedLayerPath, removeCheckedFeature, setLayerDataArrayBatchLayerPathBypass } = useDetailsStoreActions();
-  const { addHighlightedFeature, removeHighlightedFeature } = useMapStoreActions();
+  const { addHighlightedFeature, removeHighlightedFeature, isLayerHiddenOnMap } = useMapStoreActions();
 
   // States
   const [currentFeatureIndex, setCurrentFeatureIndex] = useState<number>(0);
   const [selectedLayerPathLocal, setSelectedLayerPathLocal] = useState<string>(selectedLayerPath);
   const [arrayOfLayerListLocal, setArrayOfLayerListLocal] = useState<LayerListEntry[]>([]);
+  const [geometryLoaded, setGeometryLoaded] = useState<number>(0); // Counter to force re-render when geometry loads
   const prevLayerSelected = useRef<TypeLayerData>();
   const prevLayerFeatures = useRef<TypeFeatureInfoEntry[] | undefined | null>();
   const prevFeatureIndex = useRef<number>(0); // 0 because that's the default index for the features
+  const prevMapClickCoordinates = useRef<TypeMapMouseInfo | undefined>(mapClickCoordinates);
 
   // #region MAIN HOOKS SECTION ***************************************************************************************
 
@@ -133,8 +144,9 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
     logger.logTraceUseMemo('DETAILS-PANEL - memoLayersList', visibleInRangeLayers, arrayOfLayerDataBatch);
 
     // Set the layers list (filter: visible - visible in range and isQueryable)
-    const layerListEntries = visibleLayers
+    const layerListEntries = visibleInRangeLayers
       .map((layerPath) => arrayOfLayerDataBatch.find((layerData) => layerData.layerPath === layerPath))
+      .filter((layer) => layer && !isLayerHiddenOnMap(layer.layerPath))
       .filter((layer) => layer && layer.eventListenerEnabled)
       .map(
         (layer) =>
@@ -149,6 +161,25 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
             layerUniqueId: `${mapId}-${TABS.DETAILS}-${layer?.layerPath ?? ''}`,
           }) as LayerListEntry
       );
+
+    // Merge in-range and out-of-range layers while preserving order from arrayOfLayerDataBatch
+    const existingLayerPaths = new Set(layerListEntries.map((entry) => entry.layerPath));
+
+    // Add layers with features that aren't already in the list (out-of-range layers with features)
+    arrayOfLayerDataBatch.forEach((layer) => {
+      if ((layer.features?.length ?? 0) > 0 && !existingLayerPaths.has(layer.layerPath)) {
+        layerListEntries.push({
+          layerName: layer.layerName ?? '',
+          layerPath: layer.layerPath,
+          layerStatus: layer.layerStatus,
+          queryStatus: layer.queryStatus,
+          numOffeatures: layer.features?.length ?? 0,
+          layerFeatures: getNumFeaturesLabel(layer),
+          tooltip: `${layer.layerName}, ${getNumFeaturesLabel(layer)}`,
+          layerUniqueId: `${mapId}-${TABS.DETAILS}-${layer.layerPath}`,
+        });
+      }
+    });
 
     // Add coordinate info layer if it exists in arrayOfLayerDataBatch
     const coordinateInfoLayer = arrayOfLayerDataBatch.find((layer) => layer.layerPath === 'coordinate-info');
@@ -169,10 +200,20 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
     const layersWithFeatures = layerListEntries.filter((layer) => layer.numOffeatures && layer.numOffeatures > 0);
     const layersWithoutFeatures = layerListEntries.filter((layer) => layer.numOffeatures === 0);
 
+    // Sort layersWithFeatures according to orderedLayers
+    layersWithFeatures.sort((a, b) => {
+      const indexA = orderedLayers.indexOf(a.layerPath);
+      const indexB = orderedLayers.indexOf(b.layerPath);
+      // If not found in orderedLayers, put at the end
+      if (indexA === -1) return 1;
+      if (indexB === -1) return -1;
+      return indexA - indexB;
+    });
+
     // Combine the lists (features first, then no features)
     const orderedLayerListEntries = [...layersWithFeatures, ...layersWithoutFeatures];
     return orderedLayerListEntries;
-  }, [visibleLayers, visibleInRangeLayers, arrayOfLayerDataBatch, coordinateInfoEnabled, getNumFeaturesLabel, mapId]);
+  }, [visibleInRangeLayers, arrayOfLayerDataBatch, coordinateInfoEnabled, isLayerHiddenOnMap, getNumFeaturesLabel, mapId, orderedLayers]);
 
   /**
    * Memoizes the selected layer for the LayerList component.
@@ -242,12 +283,9 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
     // Log
     logger.logTraceUseEffect('DETAILS-PANEL - memoLayersList changed', memoLayersList);
 
-    // Clear all
-    removeHighlightedFeature('all');
-
     // Unselect the layer path if no more layers in the list
     if (!memoLayersList.length) setSelectedLayerPath('');
-  }, [memoLayersList, setSelectedLayerPath, removeHighlightedFeature]);
+  }, [memoLayersList, setSelectedLayerPath]);
 
   /**
    * Effect used when the layers list changes.
@@ -257,30 +295,96 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
     // Log
     logger.logTraceUseEffect('DETAILS-PANEL - memoSelectedLayerDataFeatures changed', memoLayersList, memoSelectedLayerDataFeatures);
 
+    // Check if panel is open before highlighting
+    let isPanelOpen = false;
+    if (containerType === CONTAINER_TYPE.FOOTER_BAR) {
+      isPanelOpen = selectedTab === TABS.DETAILS && !isCollapsed;
+    } else if (containerType === CONTAINER_TYPE.APP_BAR) {
+      isPanelOpen = activeAppBarTab.tabId === 'details' && activeAppBarTab.isOpen;
+    }
+
     // Clear the unchecked highlights
     clearHighlightsUnchecked(prevLayerFeatures.current);
     clearHighlightsUnchecked(memoSelectedLayerDataFeatures);
 
-    // Re-add highlights for checked features (they should persist)
-    if (checkedFeatures.length > 0) {
-      checkedFeatures.forEach((checkedFeature) => {
+    // Re-highlight all checked features to ensure they persist through zoom
+    checkedFeatures.forEach((checkedFeature) => {
+      const hasGeometry = !!(checkedFeature?.geometry && checkedFeature?.extent && !checkedFeature.extent.includes(Infinity));
+      if (hasGeometry) {
         addHighlightedFeature(checkedFeature);
-      });
-    }
+      }
+    });
 
-    // Features are highlighted when:
-    // 1. User navigates with arrows (handleFeatureNavigateChange -> updateFeatureSelected)
-    // 2. User zooms to feature (feature-info.tsx -> handleZoomIn -> addHighlightedFeature)
-    // 3. User checks the checkbox (kept via checkedFeatures and re-added above)
-    // 4. Initial map click (first feature gets highlighted by updateFeatureSelected in resetCurrentIndex)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Highlight current feature if panel is open and feature has geometry
+    if (isPanelOpen && memoSelectedLayerDataFeatures && memoSelectedLayerDataFeatures.length) {
+      const featureToHighlight = memoSelectedLayerDataFeatures[currentFeatureIndex];
+      // Check if feature has geometry before highlighting (computed inline)
+      const hasGeometry = !!(featureToHighlight?.geometry && featureToHighlight?.extent && !featureToHighlight.extent.includes(Infinity));
+
+      if (featureToHighlight && hasGeometry) {
+        addHighlightedFeature(featureToHighlight);
+      }
+    }
   }, [
     memoLayersList,
     memoSelectedLayerDataFeatures,
-    checkedFeatures,
+    arrayOfLayerDataBatch,
+    currentFeatureIndex,
+    addHighlightedFeature,
+    removeHighlightedFeature,
     clearHighlightsUnchecked,
-    // Do NOT add currentFeatureIndex or addHighlightedFeature to prevent auto-highlighting wrong feature
+    checkedFeatures,
+    containerType,
+    selectedTab,
+    isCollapsed,
+    activeAppBarTab,
+    geometryLoaded,
   ]);
+
+  /**
+   * Poll for geometry loading on the current feature
+   */
+  useEffect(() => {
+    const featureToCheck = memoSelectedLayerDataFeatures?.[currentFeatureIndex];
+
+    // If feature exists but doesn't have geometry yet, set up polling
+    if (featureToCheck && !featureToCheck.geometry) {
+      const intervalId = setInterval(() => {
+        const currentFeature = memoSelectedLayerDataFeatures?.[currentFeatureIndex];
+        const hasGeometry = !!(currentFeature?.geometry && currentFeature?.extent && !currentFeature.extent.includes(Infinity));
+
+        if (hasGeometry) {
+          // Geometry loaded! Trigger highlight by forcing a re-render
+          clearInterval(intervalId);
+
+          // Check if panel is still open
+          let isPanelOpen = false;
+          if (containerType === CONTAINER_TYPE.FOOTER_BAR) {
+            isPanelOpen = selectedTab === TABS.DETAILS && !isCollapsed;
+          } else if (containerType === CONTAINER_TYPE.APP_BAR) {
+            isPanelOpen = activeAppBarTab.tabId === 'details' && activeAppBarTab.isOpen;
+          }
+
+          if (isPanelOpen) {
+            addHighlightedFeature(currentFeature);
+          }
+
+          // Force re-render to enable zoom/checkbox buttons
+          setGeometryLoaded((prev) => prev + 1);
+        }
+      }, 500); // Check every 500ms
+
+      // Cleanup interval after 30 seconds or on unmount
+      const timeoutId = setTimeout(() => clearInterval(intervalId), 30000);
+
+      return () => {
+        clearInterval(intervalId);
+        clearTimeout(timeoutId);
+      };
+    }
+
+    return undefined;
+  }, [memoSelectedLayerDataFeatures, currentFeatureIndex, containerType, selectedTab, isCollapsed, activeAppBarTab, addHighlightedFeature]);
 
   /**
    * Effect used to persist the layer path bypass for the layerDataArray.
@@ -366,39 +470,38 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
    * the previously selected feature index so that in the useEffect, later, the component can udpate
    * the selected features with the store.
    */
-  const resetCurrentIndex = (resetIndex: boolean = false): void => {
+  const resetCurrentIndex = (): void => {
     // Keep reference on previously selected layer
     prevLayerSelected.current = arrayOfLayerDataBatch.find((layer) => layer.layerPath === selectedLayerPathLocal);
     // Keep reference on previously selected features
     prevLayerFeatures.current = prevLayerSelected.current?.features;
     // Keep reference on previously selected index
     prevFeatureIndex.current = currentFeatureIndex;
-    // Reset the indexing only if requested (e.g., when layer path changes)
-    if (resetIndex) {
-      setCurrentFeatureIndex(0);
-    }
+    // Reset the indexing
+    setCurrentFeatureIndex(0);
   };
+
+  // If the array of layer data has changed since last render
+  if (arrayOfLayerListLocal !== memoLayersList) {
+    // Selected array layer data changed
+    setArrayOfLayerListLocal(memoLayersList);
+
+    // Only reset the feature index if the number of features in the currently selected layer changed
+    const currentSelectedLayer = memoLayersList.find((layer) => layer.layerPath === selectedLayerPath);
+    const previousSelectedLayer = arrayOfLayerListLocal.find((layer) => layer.layerPath === selectedLayerPath);
+
+    // Reset index only if feature count changed for the selected layer
+    if (currentSelectedLayer && previousSelectedLayer && currentSelectedLayer.numOffeatures !== previousSelectedLayer.numOffeatures) {
+      resetCurrentIndex();
+    }
+  }
 
   // If the layer path has changed since last render
   if (selectedLayerPathLocal !== selectedLayerPath) {
     // Selected layer path changed
     setSelectedLayerPathLocal(selectedLayerPath);
     // Reset the feature index, because it's a whole different selected layer with different features
-    resetCurrentIndex(true);
-  }
-
-  // If the array of layer data has changed since last render
-  if (arrayOfLayerListLocal !== memoLayersList) {
-    // Selected array layer data changed
-    setArrayOfLayerListLocal(memoLayersList);
-    // Update references but DON'T reset the feature index if we're still on the same layer
-    // Only reset if the current index is out of bounds for the new features array
-    const currentLayerFeatures = memoSelectedLayerDataFeatures;
-    if (currentLayerFeatures && currentFeatureIndex >= currentLayerFeatures.length) {
-      resetCurrentIndex(true);
-    } else {
-      resetCurrentIndex(false);
-    }
+    resetCurrentIndex();
   }
 
   /**
@@ -408,47 +511,59 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
     // Log
     logger.logTraceUseEffect('DETAILS-PANEL- mapClickCoordinates', mapClickCoordinates);
 
+    // Check if coordinates actually changed (new map click)
+    const coordinatesChanged =
+      mapClickCoordinates && JSON.stringify(mapClickCoordinates) !== JSON.stringify(prevMapClickCoordinates.current);
+
     // If nothing was previously selected at all
     if (mapClickCoordinates && memoLayersList?.length && !selectedLayerPath.length) {
       const selectedLayer = memoLayersList.find((layer) => !!layer.numOffeatures);
       // Select the first layer that has features
       setSelectedLayerPath(selectedLayer?.layerPath ?? '');
     }
+
+    // On new map click (coordinates changed), clear all highlights, checked features, and layer features
+    if (coordinatesChanged) {
+      removeHighlightedFeature('all');
+      removeCheckedFeature('all');
+      // Clear features from all layers to remove out-of-range layers from display
+      arrayOfLayerDataBatch.forEach((layer) => {
+        // eslint-disable-next-line no-param-reassign
+        layer.features = [];
+      });
+      // Update the ref to current coordinates
+      prevMapClickCoordinates.current = mapClickCoordinates;
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapClickCoordinates, memoLayersList, setSelectedLayerPath]);
 
   /**
-   * Highlight the first feature when a layer is initially selected after a map click
+   * Clear highlights and checked features when the details panel is closed
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect(
-      'DETAILS-PANEL - highlight first feature on initial selection',
-      selectedLayerPath,
-      memoSelectedLayerDataFeatures
-    );
+    logger.logTraceUseEffect('DETAILS-PANEL - panel closed check', selectedTab, isCollapsed, activeAppBarTab, containerType);
 
-    // Only highlight on initial selection (when currentFeatureIndex is 0 and we have features)
-    if (
-      selectedLayerPath &&
-      memoSelectedLayerDataFeatures &&
-      memoSelectedLayerDataFeatures.length > 0 &&
-      currentFeatureIndex === 0 &&
-      mapClickCoordinates
-    ) {
-      const firstFeature = memoSelectedLayerDataFeatures[0];
-      if (firstFeature && !isFeatureInCheckedFeatures(firstFeature)) {
-        addHighlightedFeature(firstFeature);
-      }
+    let shouldClear = false;
+
+    if (containerType === CONTAINER_TYPE.FOOTER_BAR) {
+      // For footer bar: clear when not on details tab or footer is collapsed
+      shouldClear = selectedTab !== TABS.DETAILS || isCollapsed;
+    } else if (containerType === CONTAINER_TYPE.APP_BAR) {
+      // For app bar: clear when details panel is closed (tabId === 'details' and isOpen === false)
+      shouldClear = activeAppBarTab.tabId === 'details' && !activeAppBarTab.isOpen;
     }
-  }, [
-    selectedLayerPath,
-    memoSelectedLayerDataFeatures,
-    currentFeatureIndex,
-    mapClickCoordinates,
-    isFeatureInCheckedFeatures,
-    addHighlightedFeature,
-  ]);
+
+    if (shouldClear) {
+      logger.logTraceUseEffect('DETAILS-PANEL - panel closed check !!!!e');
+
+      // Clear all highlights
+      removeHighlightedFeature('all');
+      // Clear all checked features
+      removeCheckedFeature('all');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedTab, isCollapsed, activeAppBarTab, containerType]);
 
   /**
    * Check all layers status is processed while querying
@@ -535,7 +650,7 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
               </Box>
             </Grid>
           </Grid>
-          <FeatureInfo feature={currentFeature} />
+          <FeatureInfo key={`${currentFeature?.uid}-${currentFeature?.geometry ? 'with-geo' : 'no-geo'}`} feature={currentFeature} />
         </Box>
       );
     }
