@@ -140,6 +140,9 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
     // Test a Geocore
     const pGeocoreAirborne = this.#configTester.testStandaloneGeocoreWithAirborne();
 
+    // Test initial settings cascade
+    const pInitialSettingsCascade = this.#configTester.testInitialSettingsCascade();
+
     // Resolve when all
     return Promise.all([
       pEsriDynamicHistoFlood,
@@ -171,6 +174,7 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
       pLayerGeoTIFFVegetation,
       pGeoTIFFSkip,
       pGeocoreAirborne,
+      pInitialSettingsCascade,
     ]);
   }
 }
