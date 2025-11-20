@@ -91,7 +91,7 @@ $ rush update --full
 ### Build the project:
 
 ```
-$ rush build:core
+$ rush build
 ```
 
 Output build files will be placed under
@@ -113,7 +113,7 @@ GeoView will be serve from http://localhost:8080/
 ### Build the project:
 
 ```
-$ rush build:core
+$ rush build
 ```
 
 ### Push the dist folder to your gh-pages

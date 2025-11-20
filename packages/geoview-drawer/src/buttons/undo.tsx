@@ -38,7 +38,7 @@ export default function Redo(): JSX.Element {
   return (
     <IconButton
       id="undo"
-      tooltip={getLocalizedMessage(displayLanguage, 'drawer.undoTooltip')}
+      aria-label={getLocalizedMessage(displayLanguage, 'drawer.undoTooltip')}
       tooltipPlacement="left"
       onClick={handleUndo}
       sx={sxClasses.navButton}

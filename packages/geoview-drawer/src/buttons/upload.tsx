@@ -45,7 +45,7 @@ export default function Upload(): JSX.Element {
   return (
     <IconButton
       id="upload"
-      tooltip={getLocalizedMessage(displayLanguage, 'drawer.uploadTooltip')}
+      aria-label={getLocalizedMessage(displayLanguage, 'drawer.uploadTooltip')}
       tooltipPlacement="left"
       onClick={handleUpload}
       sx={sxClasses.navButton}

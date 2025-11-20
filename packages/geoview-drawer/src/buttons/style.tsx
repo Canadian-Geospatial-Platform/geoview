@@ -373,7 +373,7 @@ export function StylePanel(): JSX.Element {
             </Typography>
             <Box sx={{ display: 'flex', gap: 1, width: '100%' }}>
               <IconButton
-                tooltip={getLocalizedMessage(displayLanguage, 'drawer.textBold')}
+                aria-label={getLocalizedMessage(displayLanguage, 'drawer.textBold')}
                 tooltipPlacement="bottom"
                 onClick={handleToggleBold}
                 className={style.textBold ? 'highlighted active' : ''}
@@ -382,7 +382,7 @@ export function StylePanel(): JSX.Element {
                 <FormatBoldIcon />
               </IconButton>
               <IconButton
-                tooltip={getLocalizedMessage(displayLanguage, 'drawer.textItalic')}
+                aria-label={getLocalizedMessage(displayLanguage, 'drawer.textItalic')}
                 tooltipPlacement="bottom"
                 onClick={handleToggleItalic}
                 className={style.textItalic ? 'highlighted active' : ''}

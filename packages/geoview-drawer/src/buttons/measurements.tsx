@@ -50,7 +50,7 @@ export default function Measurements(): JSX.Element {
   return (
     <IconButton
       id="measure"
-      tooltip={getLocalizedMessage(displayLanguage, 'drawer.toggleMeasurements')}
+      aria-label={getLocalizedMessage(displayLanguage, 'drawer.toggleMeasurements')}
       tooltipPlacement="left"
       onClick={handleToggleMeasurements}
       sx={sxClasses.navButton}

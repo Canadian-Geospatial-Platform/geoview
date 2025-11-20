@@ -38,7 +38,7 @@ export default function Redo(): JSX.Element {
   return (
     <IconButton
       id="redo"
-      tooltip={getLocalizedMessage(displayLanguage, 'drawer.redoTooltip')}
+      aria-label={getLocalizedMessage(displayLanguage, 'drawer.redoTooltip')}
       tooltipPlacement="left"
       onClick={handleRedo}
       sx={sxClasses.navButton}

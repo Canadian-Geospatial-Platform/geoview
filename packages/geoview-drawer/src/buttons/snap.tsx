@@ -50,7 +50,7 @@ export default function Snapping(): JSX.Element {
   return (
     <IconButton
       id="snap"
-      tooltip={getLocalizedMessage(displayLanguage, 'drawer.toggleSnapping')}
+      aria-label={getLocalizedMessage(displayLanguage, 'drawer.toggleSnapping')}
       tooltipPlacement="left"
       onClick={handleToggleSnapping}
       className={isSnapping ? 'highlighted active' : ''}

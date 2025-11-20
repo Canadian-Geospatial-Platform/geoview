@@ -29,6 +29,8 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
   buttonConfigs.draw = {
     buttonProps: {
       id: 'drawer-draw',
+      'aria-label': 'drawer.ToggleDrawing',
+      tooltipPlacement: 'left',
       children: createElement(Draw),
       visible: true,
     },
@@ -41,7 +43,7 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
   buttonConfigs.geometryPicker = {
     buttonProps: {
       id: 'drawer-geometry-picker',
-      tooltip: 'drawer.geometryPicker',
+      'aria-label': 'drawer.geometryPicker',
       tooltipPlacement: 'left',
       children: createElement(GeometryPickerButton),
       visible: true,
@@ -60,7 +62,7 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
   buttonConfigs.style = {
     buttonProps: {
       id: 'drawer-style',
-      tooltip: 'drawer.style',
+      'aria-label': 'drawer.style',
       tooltipPlacement: 'left',
       children: createElement(StyleButton),
       visible: true,
@@ -79,6 +81,8 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
   buttonConfigs.edit = {
     buttonProps: {
       id: 'drawer-edit',
+      'aria-label': 'drawer.edit',
+      tooltipPlacement: 'left',
       children: createElement(Edit),
       visible: true,
     },
@@ -89,6 +93,8 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
   buttonConfigs.snap = {
     buttonProps: {
       id: 'drawer-snap',
+      'aria-label': 'drawer.toggleSnapping',
+      tooltipPlacement: 'left',
       children: createElement(Snapping),
       visible: true,
     },
@@ -99,6 +105,8 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
   buttonConfigs.measure = {
     buttonProps: {
       id: 'drawer-measure',
+      'aria-label': 'drawer.toggleMeasurements',
+      tooltipPlacement: 'left',
       children: createElement(Measurements),
       visible: true,
     },
@@ -109,6 +117,8 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
   buttonConfigs.undo = {
     buttonProps: {
       id: 'drawer-undo',
+      'aria-label': 'drawer.undoTooltip',
+      tooltipPlacement: 'left',
       children: createElement(Undo),
       visible: true,
     },
@@ -119,6 +129,8 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
   buttonConfigs.redo = {
     buttonProps: {
       id: 'drawer-redo',
+      'aria-label': 'drawer.redoTooltip',
+      tooltipPlacement: 'left',
       children: createElement(Redo),
       visible: true,
     },
@@ -129,6 +141,8 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
   buttonConfigs.download = {
     buttonProps: {
       id: 'drawer-download',
+      'aria-label': 'drawer.downloadTooltip',
+      tooltipPlacement: 'left',
       children: createElement(Download),
       visible: true,
     },
@@ -139,6 +153,8 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
   buttonConfigs.upload = {
     buttonProps: {
       id: 'drawer-upload',
+      'aria-label': 'drawer.uploadTooltip',
+      tooltipPlacement: 'left',
       children: createElement(Upload),
       visible: true,
     },
@@ -149,6 +165,8 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
   buttonConfigs.clear = {
     buttonProps: {
       id: 'drawer-clear',
+      'aria-label': 'drawer.clearTooltip',
+      tooltipPlacement: 'left',
       children: createElement(Clear),
       visible: true,
     },

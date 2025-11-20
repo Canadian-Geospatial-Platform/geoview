@@ -231,7 +231,7 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
         <ListItem sx={sxClasses.listItem}>
           <IconButton
             id="button-point"
-            tooltip={getLocalizedMessage(displayLanguage, 'drawer.point')}
+            aria-label={getLocalizedMessage(displayLanguage, 'drawer.point')}
             tooltipPlacement="left"
             size="small"
             onClick={handleGeometrySelectPoint}
@@ -246,7 +246,7 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
         <ListItem sx={sxClasses.listItem}>
           <IconButton
             id="button-text"
-            tooltip={getLocalizedMessage(displayLanguage, 'drawer.text')}
+            aria-label={getLocalizedMessage(displayLanguage, 'drawer.text')}
             tooltipPlacement="left"
             size="small"
             onClick={handleGeometrySelectText}
@@ -261,7 +261,7 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
         <ListItem sx={sxClasses.listItem}>
           <IconButton
             id="button-linestring"
-            tooltip={getLocalizedMessage(displayLanguage, 'drawer.linestring')}
+            aria-label={getLocalizedMessage(displayLanguage, 'drawer.linestring')}
             tooltipPlacement="left"
             size="small"
             onClick={handleGeometrySelectLineString}
@@ -276,7 +276,7 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
         <ListItem sx={sxClasses.listItem}>
           <IconButton
             id="button-polygon"
-            tooltip={getLocalizedMessage(displayLanguage, 'drawer.polygon')}
+            aria-label={getLocalizedMessage(displayLanguage, 'drawer.polygon')}
             tooltipPlacement="left"
             size="small"
             onClick={handleGeometrySelectPolygon}
@@ -291,7 +291,7 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
         <ListItem sx={sxClasses.listItem}>
           <IconButton
             id="button-rectangle"
-            tooltip={getLocalizedMessage(displayLanguage, 'drawer.rectangle')}
+            aria-label={getLocalizedMessage(displayLanguage, 'drawer.rectangle')}
             tooltipPlacement="left"
             size="small"
             onClick={handleGeometrySelectRectangle}
@@ -306,7 +306,7 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
         <ListItem sx={sxClasses.listItem}>
           <IconButton
             id="button-circle"
-            tooltip={getLocalizedMessage(displayLanguage, 'drawer.circle')}
+            aria-label={getLocalizedMessage(displayLanguage, 'drawer.circle')}
             tooltipPlacement="left"
             size="small"
             onClick={handleGeometrySelectCircle}
@@ -321,7 +321,7 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
         <ListItem sx={sxClasses.listItem}>
           <IconButton
             id="button-star"
-            tooltip={getLocalizedMessage(displayLanguage, 'drawer.star')}
+            aria-label={getLocalizedMessage(displayLanguage, 'drawer.star')}
             tooltipPlacement="left"
             size="small"
             onClick={handleGeometrySelectStar}
