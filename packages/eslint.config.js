@@ -48,6 +48,7 @@ export default [
         Image: 'readonly',
         TrustedHTML: 'readonly',
         btoa: 'readonly',
+        structuredClone: 'readonly',
       },
     },
     plugins: {

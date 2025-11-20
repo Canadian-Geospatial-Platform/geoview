@@ -16,7 +16,7 @@ export interface VectorLayerEntryConfigProps extends AbstractBaseLayerEntryConfi
 // TODO: Refactor - This class should be named 'AbstractVectorLayerEntryConfig' to align with others
 export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /** Initial settings to apply to the GeoView vector layer source at creation time. */
-  declare source?: TypeVectorSourceInitialConfig;
+  declare source: TypeVectorSourceInitialConfig;
 
   /** Max number of records for query */
   maxRecordCount?: number;
@@ -38,7 +38,7 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
     // TODO: Refactor - Remove this function in favor of a generic to be used by the class signature itself:
     // TO.DOCONT: `class AbstractBaseLayerEntryConfig<TLayerMetadata = unknown>`
     // TO.DOCONT: `class VectorLayerEntryConfig<TLayerMetadata = TypeLayerMetadataVector> extends AbstractBaseLayerEntryConfig<TypeLayerMetadataVector>`
-    // TO.DOCONT: `class WfsLayerEntryConfig extends VectorLayerEntryConfig<TypeLayerMetadataWfs[]>`
+    // TO.DOCONT: `class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig<TypeLayerMetadataWfs[]>`
     return super.getLayerMetadata() as TypeLayerMetadataVector | undefined;
   }
 }

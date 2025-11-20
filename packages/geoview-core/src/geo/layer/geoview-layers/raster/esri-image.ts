@@ -7,8 +7,7 @@ import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstrac
 import type { TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 
-import { commonProcessLayerMetadata } from '@/geo/layer/geoview-layers/esri-layer-common';
-import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
+import { EsriUtilities } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
@@ -30,8 +29,11 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {TypeEsriImageLayerConfig} layerConfig The layer configuration.
    */
   constructor(layerConfig: TypeEsriImageLayerConfig) {
+    // TODO: Check - Rework this serviceDateFormat, serverDateFragmentsOrder, externalDateFormat and DateMgt.getDateFragmentsOrder stuff
+    // TO.DOCONT: Why are we setting serviceDateFormat to default only in esri dynamic and esri image?
+    // TO.DOCONT: I've added getters/setters in ConfigBaseClass in preparation to simplify these dates processing
     // eslint-disable-next-line no-param-reassign
-    if (!layerConfig.serviceDateFormat) layerConfig.serviceDateFormat = 'DD/MM/YYYY HH:MM:SSZ';
+    layerConfig.serviceDateFormat ??= 'DD/MM/YYYY HH:MM:SSZ';
     super(layerConfig);
   }
 
@@ -60,7 +62,7 @@ export class EsriImage extends AbstractGeoViewRaster {
     layerConfig: EsriImageLayerEntryConfig,
     abortSignal?: AbortSignal
   ): Promise<EsriImageLayerEntryConfig> {
-    return commonProcessLayerMetadata(this, layerConfig, abortSignal);
+    return EsriUtilities.commonProcessLayerMetadata(this, layerConfig, abortSignal);
   }
 
   /**
@@ -214,32 +216,33 @@ export class EsriImage extends AbstractGeoViewRaster {
    * Creates an ImageArcGISRest source from a layer config.
    * @param {EsriImageLayerEntryConfig} layerConfig - The configuration for the EsriImage layer.
    * @returns A fully configured ImageArcGISRest source.
-   * @throws If required config fields like dataAccessPath are missing.
+   * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
    */
   static createEsriImageSource(layerConfig: EsriImageLayerEntryConfig): ImageArcGISRest {
-    const { source } = layerConfig;
-
-    if (!source?.dataAccessPath) {
-      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
-    }
-
     const sourceOptions: SourceOptions = {
-      url: source.dataAccessPath,
+      url: layerConfig.getDataAccessPath(),
       attributions: layerConfig.getAttributions(),
       params: {
         LAYERS: `show:${layerConfig.layerId}`,
-        ...(source.transparent !== undefined && { transparent: source.transparent }),
-        ...(source.format && { format: source.format }),
+        ...(layerConfig.source.transparent !== undefined && { transparent: layerConfig.source.transparent }),
+        ...(layerConfig.source.format && { format: layerConfig.source.format }),
       },
-      crossOrigin: source.crossOrigin ?? 'Anonymous',
-      projection: source.projection ? `EPSG:${source.projection}` : undefined,
+      crossOrigin: layerConfig.source.crossOrigin ?? 'Anonymous',
+      projection: layerConfig.source.projection ? `EPSG:${layerConfig.source.projection}` : undefined,
     };
 
     // Create the source
     const olSource = new ImageArcGISRest(sourceOptions);
 
     // Apply the filter on the source right away, before the first load
-    GVWMS.applyViewFilterOnSource(layerConfig, olSource, layerConfig.getExternalFragmentsOrder(), undefined, layerConfig.getLayerFilter());
+    GVWMS.applyViewFilterOnSource(
+      layerConfig,
+      olSource,
+      undefined,
+      layerConfig.getExternalFragmentsOrder(),
+      undefined,
+      layerConfig.getLayerFilter()
+    );
 
     // Return the source
     return olSource;

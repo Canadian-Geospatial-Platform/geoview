@@ -23,17 +23,15 @@ export class ImageStaticLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   constructor(layerConfig: ImageStaticLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.IMAGE_STATIC, CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE);
 
-    // Write the default properties when not specified
-    this.source.dataAccessPath ??= layerConfig.source?.dataAccessPath ?? this.getMetadataAccessPath();
-
+    // If not pointing to an image file directly
     if (
-      !this.source.dataAccessPath!.toLowerCase().endsWith('.png') &&
-      !this.source.dataAccessPath!.toLowerCase().endsWith('.jpg') &&
-      !this.source.dataAccessPath!.toLowerCase().endsWith('.jpeg')
-    )
-      this.source.dataAccessPath = this.source.dataAccessPath!.endsWith('/')
-        ? `${this.source.dataAccessPath}${this.layerId}`
-        : `${this.source.dataAccessPath}/${this.layerId}`;
+      !this.getDataAccessPath().toLowerCase().endsWith('.png') &&
+      !this.getDataAccessPath().toLowerCase().endsWith('.jpg') &&
+      !this.getDataAccessPath().toLowerCase().endsWith('.jpeg')
+    ) {
+      // Set it
+      this.setDataAccessPath(`${this.getDataAccessPath(true)}${this.layerId}`);
+    }
   }
 
   /**

@@ -15,7 +15,6 @@ import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validati
 import { Projection } from '@/geo/utils/projection';
 import { VectorTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { logger } from '@/core/utils/logger';
-import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 import { LayerEntryNotSupportingProjectionError } from '@/core/exceptions/layer-entry-config-exceptions';
 import { GVVectorTiles } from '@/geo/layer/gv-layers/vector/gv-vector-tiles';
 
@@ -93,15 +92,8 @@ export class VectorTiles extends AbstractGeoViewRaster {
       // Validate and update the extent initial settings
       layerConfig.validateUpdateInitialSettingsExtent();
 
-      // Add projection definition if not already included
-      if (fullExtent.spatialReference) {
-        try {
-          Projection.getProjectionFromObj(fullExtent.spatialReference);
-        } catch (error: unknown) {
-          logger.logWarning('Unsupported projection, attempting to add projection now.', error);
-          await Projection.addProjection(fullExtent.spatialReference);
-        }
-      }
+      // Check if we support that projection and if not add it on-the-fly
+      await Projection.addProjectionIfMissing(fullExtent.spatialReference);
 
       // Set zoom levels. Vector tiles may be unique as they can have both scale and zoom level properties
       // First set the min/max scales based on the service / config
@@ -283,24 +275,17 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * @param {VectorTilesLayerEntryConfig} layerConfig - Configuration object for the vector tile layer.
    * @param {ProjectionLike} fallbackProjection - Fallback projection if none is provided in the config.
    * @returns An initialized VectorTileSource ready for use in a layer.
-   * @throws If required config fields like dataAccessPath are missing.
+   * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
    */
   static createVectorTileSource(layerConfig: VectorTilesLayerEntryConfig, fallbackProjection: ProjectionLike): VectorTileSource {
-    const { source } = layerConfig;
-
-    // Ensure the dataAccessPath is defined; required for fetching tiles
-    if (!source?.dataAccessPath) {
-      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
-    }
-
     // Create the source options
     const sourceOptions: SourceOptions = {
-      url: source.dataAccessPath,
+      url: layerConfig.getDataAccessPath(),
       format: new MVT(),
     };
 
     // Assign projection from config if present, otherwise use fallback (e.g., map's current projection)
-    sourceOptions.projection = source.projection ? `EPSG:${source.projection}` : `${fallbackProjection}`;
+    sourceOptions.projection = layerConfig.source.projection ? `EPSG:${layerConfig.source.projection}` : `${fallbackProjection}`;
 
     // Validate the spatial reference in the tileInfo (if set) is the same as the source
     if (
@@ -315,12 +300,12 @@ export class VectorTiles extends AbstractGeoViewRaster {
     }
 
     // If tileGrid configuration exists, construct and assign an ol/tilegrid/TileGrid
-    if (source.tileGrid) {
+    if (layerConfig.source.tileGrid) {
       const tileGridOptions: TileGridOptions = {
-        origin: source.tileGrid.origin,
-        resolutions: source.tileGrid.resolutions,
-        tileSize: source.tileGrid.tileSize,
-        extent: source.tileGrid.extent,
+        origin: layerConfig.source.tileGrid.origin,
+        resolutions: layerConfig.source.tileGrid.resolutions,
+        tileSize: layerConfig.source.tileGrid.tileSize,
+        extent: layerConfig.source.tileGrid.extent,
       };
       sourceOptions.tileGrid = new TileGrid(tileGridOptions);
     }

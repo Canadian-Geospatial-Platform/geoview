@@ -1,4 +1,5 @@
-import type { BaseTestChangedEvent, ClassType } from './test';
+import type { BaseTestChangedEvent } from './test';
+import type { ClassType } from 'geoview-core/core/types/global-types';
 import type { EventDelegateBase } from 'geoview-core/api/events/event-helper';
 import EventHelper from 'geoview-core/api/events/event-helper';
 import { logger } from 'geoview-core/core/utils/logger';
@@ -197,7 +198,7 @@ export abstract class AbstractTester {
     test.setStatus('verifying');
     test.addStep('Verifying assertions...', 'major');
 
-    // TODO: Emit something?
+    // TODO: Minor - Emit something?
     // this.#emitTesting({ test });
   }
 

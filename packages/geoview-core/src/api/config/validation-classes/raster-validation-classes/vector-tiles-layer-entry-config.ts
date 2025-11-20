@@ -34,15 +34,10 @@ export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
     // Keep attributes
     this.#styleUrl = VectorTilesLayerEntryConfig.getClassOrTypeStyleUrl(layerConfig);
 
-    // Write the default properties when not specified
-    this.source ??= {};
-    this.source.dataAccessPath ??= layerConfig.source?.dataAccessPath ?? this.getMetadataAccessPath();
-
-    // Format the dataAccessPath correctly
-    if (!this.source.dataAccessPath!.toLowerCase().endsWith('.pbf')) {
-      this.source.dataAccessPath = this.source.dataAccessPath!.endsWith('/')
-        ? `${this.source.dataAccessPath}tile/{z}/{y}/{x}.pbf`
-        : `${this.source.dataAccessPath}/tile/{z}/{y}/{x}.pbf`;
+    // If not pointing to an image file directly
+    if (!this.getDataAccessPath().toLowerCase().endsWith('.pbf')) {
+      // Set it
+      this.setDataAccessPath(`${this.getDataAccessPath(true)}tile/{z}/{y}/{x}.pbf`);
     }
   }
 

@@ -1,5 +1,3 @@
-// TODO Remove when no longer needed
-import _ from 'lodash';
 import type { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import type { TypeLegendLayer, TypeLegendItem } from '@/core/components/layers/types';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
@@ -175,7 +173,7 @@ export function useLegendHelpers(): unknown {
     ];
 
     const legendInfo = MapEventProcessor.getMapViewerLayerAPI(mapId).legendsLayerSet.resultSet;
-    const keys = _.keys(legendInfo);
+    const keys = Object.keys(legendInfo);
 
     keys.forEach((i) => {
       const setData = legendInfo[i];

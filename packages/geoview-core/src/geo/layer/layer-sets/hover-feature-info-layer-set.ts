@@ -2,7 +2,6 @@ import type { Coordinate } from 'ol/coordinate';
 import { logger } from '@/core/utils/logger';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import type { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
-import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
 import type { LayerApi } from '@/geo/layer/layer';
@@ -50,12 +49,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
    */
   protected override onRegisterLayerCheck(layer: AbstractBaseLayer): boolean {
     // Return if the layer is of queryable type and source is queryable
-    return (
-      super.onRegisterLayerCheck(layer) &&
-      AbstractLayerSet.isQueryableType(layer) &&
-      !(layer instanceof GVWMS) &&
-      AbstractLayerSet.isSourceQueryable(layer)
-    );
+    return super.onRegisterLayerCheck(layer) && AbstractLayerSet.isQueryableType(layer) && AbstractLayerSet.isSourceQueryable(layer);
   }
 
   /**
@@ -94,7 +88,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
   /**
    * Queries the features at the provided coordinate for all the registered layers.
    * @param {Coordinate} pixelCoordinate - The pixel coordinate where to query the features
-   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    */
   queryLayers(pixelCoordinate: Coordinate): void {
     // FIXME: Watch out for code reentrancy between queries!
@@ -146,7 +140,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
         promiseResult
           .then((arrayOfRecords) => {
             if (arrayOfRecords.length) {
-              const nameField = arrayOfRecords[0].nameField || (Object.entries(arrayOfRecords[0].fieldInfo)[0] as unknown as string);
+              const nameField = arrayOfRecords[0].nameField || Object.entries(arrayOfRecords[0].fieldInfo)[0]?.[0];
               const fieldInfo = arrayOfRecords[0].fieldInfo[nameField];
 
               this.resultSet[layerPath].feature = {

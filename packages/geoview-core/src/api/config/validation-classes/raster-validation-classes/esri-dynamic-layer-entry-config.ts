@@ -9,6 +9,8 @@ import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/types/layer-sc
 import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import type { TypeEsriDynamicLayerConfig } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
+import { GeoUtilities } from '@/geo/utils/utilities';
+import type { TypeStyleGeometry } from '@/api/types/map-schema-types';
 
 export interface EsriDynamicLayerEntryConfigProps extends AbstractBaseLayerEntryConfigProps {
   /** Source settings to apply to the GeoView layer source at creation time. */
@@ -34,13 +36,6 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   constructor(layerConfig: EsriDynamicLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.ESRI_DYNAMIC, CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE);
     this.maxRecordCount = layerConfig.maxRecordCount;
-
-    // Write the default properties when not specified
-    this.source ??= {};
-    this.source.dataAccessPath ??= layerConfig.source?.dataAccessPath ?? this.getMetadataAccessPath();
-
-    // Format the dataAccessPath correctly
-    if (!this.source.dataAccessPath!.endsWith('/')) this.source.dataAccessPath += '/';
   }
 
   /**
@@ -59,6 +54,16 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    */
   override getLayerMetadata(): TypeLayerMetadataEsri | undefined {
     return super.getLayerMetadata() as TypeLayerMetadataEsri | undefined;
+  }
+
+  /**
+   * Overrides the get geometry type to interpret the esri type name.
+   * @returns {TypeStyleGeometry} The geometry type.
+   * @throws {NotSupportedError} When the geometry type is not supported.
+   */
+  protected override onGetGeometryType(): TypeStyleGeometry {
+    // Check the geometry type based on the Esri type name
+    return GeoUtilities.esriConvertEsriGeometryTypeToOLGeometryType(this.getGeometryField()!.type);
   }
 
   /**

@@ -157,7 +157,7 @@ class TimeSliderPlugin extends FooterPlugin {
    */
   initTimeSliderPlugin(): void {
     // Now the layerTimeDimension should be good on the layers
-    const orderedLayerPaths = this.mapViewer.layer.getLayerEntryConfigIds();
+    const orderedLayerPaths = this.mapViewer.layer.getLayerEntryLayerPaths();
     const initialTimeSliderLayerPaths = this.#filterTimeSliderLayers(orderedLayerPaths);
     if (initialTimeSliderLayerPaths) {
       initialTimeSliderLayerPaths.forEach((layerPath) => {

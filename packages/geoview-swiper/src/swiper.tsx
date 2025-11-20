@@ -6,11 +6,10 @@ import type BaseLayer from 'ol/layer/Base';
 import type { EventTypes } from 'ol/Observable';
 import type BaseEvent from 'ol/events/Event';
 
-import debounce from 'lodash/debounce';
-
 import { useSwiperLayerPaths, useSwiperOrientation } from 'geoview-core/core/stores/store-interface-and-intial-values/swiper-state';
 import { logger } from 'geoview-core/core/utils/logger';
 import { getLocalizedMessage, delay } from 'geoview-core/core/utils/utilities';
+import { debounce } from 'geoview-core/core/utils/debounce';
 import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import { useMapSize, useMapVisibleLayers } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';

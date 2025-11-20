@@ -48,7 +48,7 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
     const pmapState = this.#mapTester.testMapState();
 
     // Test the zoom
-    const pZoom = this.#mapTester.testMapZoom(5, 500);
+    const pZoom = this.#mapTester.testMapZoom(7, 1000);
     await pZoom;
 
     // Test projection switch and zoom to initial extent

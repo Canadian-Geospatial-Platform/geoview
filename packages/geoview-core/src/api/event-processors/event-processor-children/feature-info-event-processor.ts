@@ -385,6 +385,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
             featureKey: 0,
             nameField: null,
             geoviewLayerType: 'CSV',
+            supportZoomTo: true,
             layerPath: 'coordinate-info',
           },
         ];

@@ -11,6 +11,8 @@ import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
  * Abstract Geoview Layer managing an OpenLayer raster type layer.
  */
 export abstract class AbstractGVRaster extends AbstractGVLayer {
+  // #region OVERRIDES
+
   /**
    * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
    * @override
@@ -24,6 +26,10 @@ export abstract class AbstractGVRaster extends AbstractGVLayer {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return super.getOLLayer() as BaseImageLayer<ImageSource, LayerRenderer<any>>;
   }
+
+  // #endregion OVERRIDES
+
+  // #region METHODS
 
   /**
    * Gets the metadata extent projection, if any.
@@ -66,4 +72,6 @@ export abstract class AbstractGVRaster extends AbstractGVLayer {
     // No layer metadata extent could be found
     return undefined;
   }
+
+  // #endregion METHODS
 }
