@@ -32,6 +32,9 @@ import {
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
 
+// TODO: WCAG Issue #3108 - Check all icon buttons for aria-label clarity and translations
+// TODO: WCAG Issue #3108 - Check all icon buttons for "state related" aria values (i.e aria-checked, aria-disabled, etc.)
+
 interface SecondaryControlsProps {
   layerPath: string;
 }
@@ -141,7 +144,7 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
       <Box sx={sxClasses.subtitle}>
         <IconButton
           edge="end"
-          tooltip={t('layers.zoomVisibleScale')!}
+          aria-label={t('layers.zoomVisibleScale')}
           className={`buttonOutline ${isZoomToVisibleScaleCapable ? '' : 'outOfRangeButton'}`}
           onClick={controls.handleZoomToLayerVisibleScale}
         >
@@ -150,7 +153,7 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
         {isLayerVisibleCapable && (
           <IconButton
             edge={isInVisibleRange ? false : 'end'}
-            tooltip={t('layers.toggleVisibility')!}
+            aria-label={t('layers.toggleVisibility')}
             className="buttonOutline"
             onClick={controls.handleToggleVisibility}
             disabled={!isInVisibleRange || parentHidden || layerStatus === 'error'}
@@ -160,7 +163,7 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
         )}
         {isLayerHighlightCapable && (
           <IconButton
-            tooltip={t('legend.highlightLayer')!}
+            aria-label={t('legend.highlightLayer')}
             sx={styles.btnMargin}
             className="buttonOutline"
             onClick={controls.handleHighlightLayer}
@@ -171,7 +174,7 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
         )}
         {isLayerZoomToExtentCapable && (
           <IconButton
-            tooltip={t('legend.zoomTo')!}
+            aria-label={t('legend.zoomTo')}
             className="buttonOutline"
             onClick={controls.handleZoomTo}
             disabled={!isInVisibleRange || parentHidden || !isVisible || layerStatus === 'error'}

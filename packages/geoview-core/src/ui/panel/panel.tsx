@@ -154,9 +154,8 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
             action={
               open ? (
                 <IconButton
-                  tooltip={t('general.close')!}
+                  aria-label={t('general.close')}
                   tooltipPlacement="right"
-                  aria-label={t('general.close')!}
                   size="small"
                   onClick={() => onGeneralClose?.()}
                   iconRef={closeBtnRef}
