@@ -1,3 +1,5 @@
+import type { FitOptions } from 'ol/View';
+
 // Repositry URL for GitHub
 export const GITHUB_REPO = 'https://github.com/Canadian-Geospatial-Platform/geoview';
 
@@ -9,14 +11,17 @@ export const GEO_URL_TEXT = {
 
 // OpenLayer constants
 export const OL_ZOOM_DURATION = 500;
-
 export const OL_ZOOM_MAXZOOM = 13;
+export const OL_ZOOM_PADDING: [number, number, number, number] = [100, 100, 100, 100];
+export const DEFAULT_OL_FITOPTIONS: FitOptions = {
+  padding: OL_ZOOM_PADDING,
+  maxZoom: OL_ZOOM_MAXZOOM,
+  duration: OL_ZOOM_DURATION,
+};
 
 // The north pole position use for north arrow marker and get north arrow rotation angle
 // north value (set longitude to be half of Canada extent (142° W, 52° W)) - projection central meridian is -95
 export const NORTH_POLE_POSITION: [number, number] = [90, -95];
-
-export const OL_ZOOM_PADDING: [number, number, number, number] = [100, 100, 100, 100];
 
 export const OL_OVERVIEWMAP_SIZE = {
   width: '150px',
