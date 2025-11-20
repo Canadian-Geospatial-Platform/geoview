@@ -4,7 +4,7 @@ import type { VectorTile } from 'ol/source';
 import { applyStyle } from 'ol-mapbox-style';
 
 import type { VectorTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
-import { featureInfoGetFieldType } from '@/geo/layer/gv-layers/utils';
+import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-vector-tile';
 import type { TypeOutfieldsType } from '@/api/types/map-schema-types';
 
@@ -34,6 +34,8 @@ export class GVVectorTiles extends AbstractGVVectorTile {
     this.setOLLayer(new VectorTileLayer({ ...tileLayerOptions, declutter }));
   }
 
+  // #region OVERRIDES
+
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
@@ -51,8 +53,12 @@ export class GVVectorTiles extends AbstractGVVectorTile {
    */
   protected override onGetFieldType(fieldName: string): TypeOutfieldsType {
     // Redirect
-    return featureInfoGetFieldType(this.getLayerConfig(), fieldName);
+    return GVLayerUtilities.featureInfoGetFieldType(this.getLayerConfig(), fieldName);
   }
+
+  // #endregion OVERRIDES
+
+  // #region METHODS
 
   /**
    * Used to change the style of the vector tile layer.
@@ -74,4 +80,6 @@ export class GVVectorTiles extends AbstractGVVectorTile {
     // Done, no style, no layer, no source, or no tilegrid to process
     return Promise.resolve();
   }
+
+  // #endregion METHODS
 }

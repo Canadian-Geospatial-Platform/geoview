@@ -27,13 +27,6 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    */
   constructor(layerConfig: EsriImageLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.ESRI_IMAGE, CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE);
-
-    // Write the default properties when not specified
-    this.source ??= {};
-
-    // Format the dataAccessPath correctly
-    this.source.dataAccessPath = this.getMetadataAccessPath();
-    if (!this.source.dataAccessPath!.endsWith('/')) this.source.dataAccessPath += '/';
   }
 
   /**

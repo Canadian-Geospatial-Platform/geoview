@@ -21,6 +21,8 @@ export class GVKML extends AbstractGVVector {
     super(olSource, layerConfig);
   }
 
+  // #region OVERRIDES
+
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
@@ -30,4 +32,6 @@ export class GVKML extends AbstractGVVector {
     // Call parent and cast
     return super.getLayerConfig() as KmlLayerEntryConfig;
   }
+
+  // #endregion OVERRIDES
 }

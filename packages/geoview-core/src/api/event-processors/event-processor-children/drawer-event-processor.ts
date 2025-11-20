@@ -15,7 +15,7 @@ import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-pr
 import type { TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
 
 import { Projection } from '@/geo/utils/projection';
-import { geometriesAreEqual } from '@/geo/utils/utilities';
+import { GeoUtilities } from '@/geo/utils/utilities';
 import type { Draw } from '@/geo/interaction/draw';
 import type { Transform } from '@/geo/interaction/transform';
 import type { TransformDeleteFeatureEvent, TransformEvent, TransformSelectionEvent } from '@/geo/interaction/transform/transform-events';
@@ -227,7 +227,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Sets the text value to the default text value of the current language
-   * @param {string} mapId The map ID
+   * @param {string} mapId - The map ID
    */
   static #updateDefaultText(mapId: string): void {
     const state = this.getDrawerState(mapId);
@@ -983,7 +983,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
             const currentGeometry = previousFeature.getGeometry();
 
             // Check for changes
-            const geometryChanged = currentGeometry && !geometriesAreEqual(savedState.originalGeometry, currentGeometry);
+            const geometryChanged = currentGeometry && !GeoUtilities.geometriesAreEqual(savedState.originalGeometry, currentGeometry);
             const styleChanged =
               savedState.originalStyleStored && savedState.originalStyle && savedState.originalStyle !== previousFeature.getStyle();
 

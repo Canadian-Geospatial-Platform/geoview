@@ -9,7 +9,7 @@ import type Geometry from 'ol/geom/Geometry';
 import type { Projection as OLProjection } from 'ol/proj';
 import type { Map as OLMap } from 'ol';
 
-import { getMetersPerPixel, validateExtent } from '@/geo/utils/utilities';
+import { GeoUtilities } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { logger } from '@/core/utils/logger';
 import { Fetch } from '@/core/utils/fetch-helper';
@@ -21,28 +21,29 @@ import type {
   codedValueType,
   TypeLayerStyleConfig,
   TypeLayerStyleConfigInfo,
+  TypeLayerStyleValueCondition,
   TypeOutfieldsType,
   TypeValidMapProjectionCodes,
   TypeIconSymbolVectorConfig,
+  TypeOutfields,
 } from '@/api/types/map-schema-types';
-import type { TypeFeatureInfoLayerConfig, TypeLayerMetadataEsriExtent } from '@/api/types/layer-schema-types';
+import type { TypeLayerMetadataEsriExtent } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { GeometryJson } from '@/geo/layer/gv-layers/utils';
-import { esriGetFieldType, esriGetFieldDomain, parseDateTimeValuesEsriDynamic } from '@/geo/layer/gv-layers/utils';
+import { EsriUtilities } from '@/geo/layer/geoview-layers/esri-layer-common';
+import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
-import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
+import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import type { TypeEsriImageLayerLegend } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { FetchEsriWorkerPool } from '@/core/workers/fetch-esri-worker-pool';
 import type { QueryParams } from '@/core/workers/fetch-esri-worker-script';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
-import { NoExtentError, NoFeaturesPropertyError } from '@/core/exceptions/geoview-exceptions';
+import { NoFeaturesPropertyError } from '@/core/exceptions/geoview-exceptions';
 import { formatError, RequestAbortedError } from '@/core/exceptions/core-exceptions';
-import { LayerDataAccessPathMandatoryError, LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions';
+import { LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions';
 import type { TypeDateFragments } from '@/core/utils/date-mgt';
-
-type TypeFieldOfTheSameValue = { value: string | number | Date; nbOccurence: number };
-type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryTree }[];
+import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 
 /**
  * Manages an Esri Dynamic layer.
@@ -95,6 +96,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
     // Create and set the OpenLayer layer
     this.setOLLayer(new ImageLayer(imageLayerOptions));
   }
+
+  // #region OVERRIDES
 
   /**
    * Overrides the fetching of the legend for an Esri Dynamic layer.
@@ -167,7 +170,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       const legend: TypeLegend = {
         type: CONST_LAYER_TYPES.ESRI_IMAGE,
         styleConfig,
-        legend: await getLegendStyles(styleConfig),
+        legend: await GeoviewRenderer.getLegendStyles(styleConfig),
       };
 
       return legend;
@@ -205,7 +208,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     if (metadataExtent && metadataProjection) {
       // Transform extent to given projection
       metadataExtent = Projection.transformExtentFromProj(metadataExtent, metadataProjection, projection, stops);
-      metadataExtent = validateExtent(metadataExtent, projection.getCode());
+      metadataExtent = GeoUtilities.validateExtent(metadataExtent, projection.getCode());
     }
 
     // Return the calculated layer bounds
@@ -214,46 +217,36 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Sends a query to get ESRI Dynamic feature geometries and calculates an extent from them.
-   * @param {string[]} objectIds - The IDs of the features to calculate the extent from.
+   * @param {number[] | string[]} objectIds - The IDs of the features to calculate the extent from.
    * @param {OLProjection} outProjection - The output projection for the extent.
    * @param {string?} outfield - ID field to return for services that require a value in outfields.
    * @override
    * @returns {Promise<Extent>} The extent of the features, if available.
+   * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
+   * @throws {ResponseError} When the response is not OK (non-2xx).
+   * @throws {ResponseEmptyError} When the JSON response is empty.
+   * @throws {ResponseTypeError} When the response from the service is not an object.
+   * @throws {ResponseContentError} When the response actually contains an error within it.
+   * @throws {NetworkError} When a network issue happened.
    */
-  override async onGetExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
+  override async onGetExtentFromFeatures(objectIds: number[] | string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
     // Get url for service from layer entry config
     const layerEntryConfig = this.getLayerConfig();
-    let baseUrl = layerEntryConfig.source.dataAccessPath;
 
-    // If no base url
-    if (!baseUrl) throw new LayerDataAccessPathMandatoryError(layerEntryConfig.layerPath, layerEntryConfig.getLayerNameCascade());
-
-    // Construct query
-    if (!baseUrl.endsWith('/')) baseUrl += '/';
-
-    // Use the returnExtentOnly=true to get only the extent of ids
-    // TODO: We should return a real extent geometry Projection.transformAndDensifyExtent
-    const idString = objectIds.join('%2C');
-    const outfieldQuery = outfield ? `&outFields=${outfield}` : '';
-    const queryUrl = `${baseUrl}${layerEntryConfig.layerId}/query?&f=json&objectIds=${idString}${outfieldQuery}&returnExtentOnly=true`;
+    // Use the returnExtentOnly=true to get only the extent of ids and ask in the right projection right away
+    const idStringClause = `&objectIds=${objectIds.join('%2C')}`;
+    const outfieldQueryClause = outfield ? `&outFields=${outfield}` : '';
+    const outSrClause = `&outSR=${Projection.readEPSGNumber(outProjection)}`;
+    const queryUrl = `${layerEntryConfig.getDataAccessPath(true)}${layerEntryConfig.layerId}/query?${idStringClause}${outfieldQueryClause}${outSrClause}&returnExtentOnly=true&f=json`;
 
     // Fetch
     const responseJson = await Fetch.fetchEsriJson<EsriQueryJsonResponse>(queryUrl);
     const { extent } = responseJson;
 
-    const projectionExtent: OLProjection | undefined = Projection.getProjectionFromObj(extent.spatialReference);
-
-    if (extent && projectionExtent) {
-      const projExtent = Projection.transformExtentFromProj(
-        [extent.xmin, extent.ymin, extent.xmax, extent.ymax],
-        projectionExtent,
-        outProjection
-      );
-      return validateExtent(projExtent, outProjection.getCode());
-    }
-
-    // Throw
-    throw new NoExtentError(this.getLayerPath());
+    // Validate and return the extent
+    return GeoUtilities.validateExtent([extent.xmin, extent.ymin, extent.xmax, extent.ymax], outProjection.getCode());
   }
 
   /**
@@ -303,7 +296,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    */
   protected override onGetFieldType(fieldName: string): TypeOutfieldsType {
     // Redirect
-    return esriGetFieldType(this.getLayerConfig(), fieldName);
+    return EsriUtilities.esriGetFieldType(this.getLayerConfig(), fieldName);
   }
 
   /**
@@ -313,15 +306,19 @@ export class GVEsriDynamic extends AbstractGVRaster {
    */
   protected override onGetFieldDomain(fieldName: string): null | codedValueType | rangeDomainType {
     // Redirect
-    return esriGetFieldDomain(this.getLayerConfig(), fieldName);
+    return EsriUtilities.esriGetFieldDomain(this.getLayerConfig(), fieldName);
   }
 
   /**
    * Overrides the get all feature information for all the features stored in the layer.
+   * @param {OLMap} map - The Map so that we can grab the resolution/projection we want to get features on.
    * @param {AbortController?} abortController - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
-  protected override async getAllFeatureInfo(abortController: AbortController | undefined = undefined): Promise<TypeFeatureInfoEntry[]> {
+  protected override async getAllFeatureInfo(
+    map: OLMap,
+    abortController: AbortController | undefined = undefined
+  ): Promise<TypeFeatureInfoEntry[]> {
     // Get the layer config in a loaded phase
     const layerConfig = this.getLayerConfig();
 
@@ -382,6 +379,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} abortController - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+   * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
    */
   protected override async getFeatureInfoAtLonLat(
     map: OLMap,
@@ -395,13 +393,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
     // Get the layer config in a loaded phase
     const layerConfig = this.getLayerConfig();
 
-    // If not queryable or there no url access path to query return []
-    if (!layerConfig.source.featureInfo?.queryable) return [];
-
-    let identifyUrl = layerConfig.source.dataAccessPath;
-    if (!identifyUrl) return [];
-
-    identifyUrl = identifyUrl.endsWith('/') ? identifyUrl : `${identifyUrl}/`;
+    // If not queryable return []
+    if (!layerConfig.getQueryableDefaulted()) return [];
 
     // GV: We cannot directly use the view extent and reproject. If we do so some layers (issue #2413) identify will return empty resultset
     // GV.CONT: This happen with max extent as initial extent and 3978 projection. If we use only the LL and UP corners for the reprojection it works
@@ -414,8 +407,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
     const mapProjNumber = parseInt(map.getView().getProjection().getCode()?.split(':')[1] || '', 10);
 
     // Identify query to get oid features value and attributes, at this point we do not query geometry
-    identifyUrl =
-      `${identifyUrl}identify?f=json&tolerance=${this.getHitTolerance()}` +
+    const identifyUrl =
+      `${layerConfig.getDataAccessPath(true)}identify?f=json&tolerance=${this.getHitTolerance()}` +
       `&mapExtent=${extent.xmin},${extent.ymin},${extent.xmax},${extent.ymax}` +
       `&imageDisplay=${size[0]},${size[1]},96` +
       `&layers=visible:${layerConfig.layerId}` +
@@ -429,15 +422,16 @@ export class GVEsriDynamic extends AbstractGVRaster {
     // If no features identified return []
     if (identifyJsonResponse.results.length === 0) return [];
 
+    // Get the outfields
+    const outfields = layerConfig.getOutfields();
+
     // Extract OBJECTIDs
-    const oidField = layerConfig.source.featureInfo.outfields
-      ? layerConfig.source.featureInfo.outfields.filter((field) => field.type === 'oid')[0].name
-      : 'OBJECTID';
+    const oidField = outfields?.find((field) => field.type === 'oid')?.name ?? 'OBJECTID';
     const objectIds = identifyJsonResponse.results.map((result) => String(result.attributes[oidField]).replace(',', ''));
 
     // Get meters per pixel to set the maxAllowableOffset to simplify return geometry
     const maxAllowableOffset = queryGeometry
-      ? getMetersPerPixel(mapProjNumber as TypeValidMapProjectionCodes, map.getView().getResolution() || 7000, lonlat[1])
+      ? GeoUtilities.getMetersPerPixel(mapProjNumber as TypeValidMapProjectionCodes, map.getView().getResolution() || 7000, lonlat[1])
       : 0;
 
     // TODO: Performance - We need to separate the query attribute from geometry. We can use the attributes returned by identify to show details panel
@@ -532,6 +526,10 @@ export class GVEsriDynamic extends AbstractGVRaster {
     return arrayOfFeatureInfoEntries;
   }
 
+  // #endregion OVERRIDES
+
+  // #region METHODS
+
   /**
    * Applies a view filter to an Esri Dynamic layer's source by updating the `layerDefs` parameter.
    * @param {string | undefined} filter - The raw filter string input (defaults to an empty string if not provided).
@@ -545,7 +543,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       this.getLayerConfig(),
       this.getOLSource(),
       this.getStyle(),
-      this.getExternalFragmentsOrder(),
+      this.getLayerConfig().getExternalFragmentsOrder(),
       this,
       filter,
       (filterToUse: string) => {
@@ -561,10 +559,11 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * Query all features with a web worker
    * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer config
    * @returns {Promise<EsriFeaturesJsonResponse>} A promise of esri response for query.
+   * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
    */
   #fetchAllFeatureInfoWithWorker(layerConfig: EsriDynamicLayerEntryConfig): Promise<EsriFeaturesJsonResponse> {
     const params: QueryParams = {
-      url: layerConfig.source.dataAccessPath + layerConfig.layerId,
+      url: layerConfig.getDataAccessPath(true) + layerConfig.layerId,
       geometryType: 'Point',
       objectIds: 'all',
       queryGeometry: false,
@@ -585,6 +584,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {number} projection - The spatial reference ID for the output
    * @param {number} maxAllowableOffset - The maximum allowable offset for geometry simplification
    * @returns {Promise<EsriFeaturesJsonResponse>} A promise of esri response for query.
+   * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
    */
   #fetchFeatureInfoGeometryWithWorker(
     layerConfig: EsriDynamicLayerEntryConfig,
@@ -594,8 +594,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
     maxAllowableOffset: number
   ): Promise<EsriFeaturesJsonResponse> {
     const params: QueryParams = {
-      url: layerConfig.source.dataAccessPath + layerConfig.layerId,
-      geometryType: (layerConfig.getLayerMetadata()!.geometryType as string).replace('esriGeometry', ''),
+      url: layerConfig.getDataAccessPath(true) + layerConfig.layerId,
+      geometryType: layerConfig.getLayerMetadata()!.geometryType.replace('esriGeometry', ''),
       objectIds,
       queryGeometry,
       projection,
@@ -645,6 +645,10 @@ export class GVEsriDynamic extends AbstractGVRaster {
     }
   }
 
+  // #endregion METHODS
+
+  // #region STATICMETHODS
+
   /**
    * Applies a view filter to an Esri Dynamic layer's source by updating the `layerDefs` parameter.
    * This function is responsible for generating the appropriate filter expression based on the layer configuration,
@@ -674,19 +678,18 @@ export class GVEsriDynamic extends AbstractGVRaster {
     const currentFilter = source.getParams().layerDefs;
 
     try {
-      // TODO: Check - Is this assignation necessary? What's the intent?
       // Update the layer config information (not ideal to do this here at this stage...)
       layerConfig.setLayerFilter(filterValueToUse);
-      filterValueToUse = GVEsriDynamic.getViewFilter(layerConfig, style);
+      filterValueToUse = this.getFilterFromStyle(layerConfig, style)!;
 
       // Parse the filter value to use
-      filterValueToUse = parseDateTimeValuesEsriDynamic(filterValueToUse, externalDateFragments);
+      filterValueToUse = GVLayerUtilities.parseDateTimeValuesEsriDynamic(filterValueToUse, externalDateFragments);
 
       // Create the source parameter to update
       const layerDefs = layerConfig.getLayerMetadata()?.type === 'Raster Layer' ? '' : `{"${layerConfig.layerId}": "${filterValueToUse}"}`;
 
       // Define what is considered the default filter (e.g., "1=1")
-      const isDefaultFilter = filterValueToUse === GVEsriDynamic.DEFAULT_FILTER_1EQUALS1;
+      const isDefaultFilter = filterValueToUse === this.DEFAULT_FILTER_1EQUALS1;
 
       // Define what is a no operation
       const isNewFilterEffectivelyNoop = isDefaultFilter && !currentFilter;
@@ -719,187 +722,234 @@ export class GVEsriDynamic extends AbstractGVRaster {
   }
 
   /**
-   * Gets the layer view filter. The filter is derived from the uniqueValue or the classBreak visibility flags and a layerFilter
-   * associated to the layer.
-   * @returns {string} The filter associated to the layer
+   * Builds a filter string (SQL-like or OGC-compliant) for a given layer and style configuration.
+   * This method supports:
+   * - **simple styles** → returns the base layer filter or a default `(1=1)` condition.
+   * - **unique value styles** → builds an optimized filter for visible categories.
+   * - **class breaks styles** → builds numeric range filters based on visibility flags.
+   * @param {EsriDynamicLayerEntryConfig | OgcWmsLayerEntryConfig} layerConfig - The layer configuration.
+   * @param {TypeLayerStyleConfig | undefined} style - The style configuration (optional).
+   * @returns {string | undefined} The filter expression, or `undefined` if not applicable.
    */
-  static getViewFilter(layerConfig: EsriDynamicLayerEntryConfig, style: TypeLayerStyleConfig | undefined): string {
-    // Get the layer filter
+  static getFilterFromStyle(
+    layerConfig: EsriDynamicLayerEntryConfig | OgcWmsLayerEntryConfig,
+    style: TypeLayerStyleConfig | undefined
+  ): string | undefined {
+    const isWMS = layerConfig instanceof OgcWmsLayerEntryConfig;
+    const defaultFilter = isWMS ? undefined : this.DEFAULT_FILTER_1EQUALS1;
     const layerFilter = layerConfig.getLayerFilter();
 
-    if (style) {
-      const setAllUndefinedVisibilityFlagsToYes = (styleConfig: TypeLayerStyleSettings): void => {
-        // default value is true for all undefined visibility flags
-        const settings = styleConfig.info;
-        for (let i = 0; i < settings.length; i++) if (settings[i].visible === undefined) settings[i].visible = true;
-      };
+    // No style, default behavior
+    if (!style) return this.#appendLayerFilter(defaultFilter, layerFilter);
 
-      const featuresAreAllVisible = (settings: { visible: boolean }[]): boolean => {
-        return settings.every((setting) => setting.visible !== false);
-      };
+    const styleSettings = layerConfig.getFirstStyleSettings();
+    if (!styleSettings) return this.#appendLayerFilter(defaultFilter, layerFilter);
 
-      // Get the first style settings.
-      const styleSettings = layerConfig.getFirstStyleSettings()!;
+    // Get the outfields
+    const outfields = layerConfig.getOutfields();
 
-      if (styleSettings.type === 'simple') {
-        return layerFilter || GVEsriDynamic.DEFAULT_FILTER_1EQUALS1;
+    switch (styleSettings.type) {
+      case 'simple':
+        return this.#appendLayerFilter(defaultFilter, layerFilter);
+
+      case 'uniqueValue': {
+        // Check if any fields were retrieved
+        if (!outfields) {
+          // Log warning, so we know
+          logger.logWarning(
+            'A style with filter capabilities was set on the layer, but no fields were read from vector data. Make sure source.featureInfo?.outfields has values.'
+          );
+          return this.#appendLayerFilter(defaultFilter, layerFilter);
+        }
+
+        this.#normalizeVisibility(styleSettings);
+        if (this.#allFeaturesVisible(styleSettings.info)) return this.#appendLayerFilter(defaultFilter, layerFilter);
+
+        const fieldCounts = this.#countFieldOfTheSameValue(styleSettings);
+        const fieldOrder = this.#sortFieldOfTheSameValue(styleSettings, fieldCounts);
+        const queryTree = this.#getQueryTree(styleSettings, fieldCounts, fieldOrder);
+        const query = this.#buildQueryUniqueValue(queryTree, 0, fieldOrder, styleSettings, outfields, isWMS);
+        return this.#appendLayerFilter(query, layerFilter);
       }
-      if (styleSettings.type === 'uniqueValue') {
-        setAllUndefinedVisibilityFlagsToYes(styleSettings);
-        if (featuresAreAllVisible(styleSettings.info as { visible: boolean }[]))
-          return `${GVEsriDynamic.DEFAULT_FILTER_1EQUALS1}${layerFilter ? ` and (${layerFilter})` : ''}`;
 
-        // This section of code optimize the query to reduce it at it shortest expression.
-        const fieldOfTheSameValue = GVEsriDynamic.#countFieldOfTheSameValue(styleSettings);
-        const fieldOrder = GVEsriDynamic.#sortFieldOfTheSameValue(styleSettings, fieldOfTheSameValue);
-        const queryTree = GVEsriDynamic.#getQueryTree(styleSettings, fieldOfTheSameValue, fieldOrder);
-        // TODO: Refactor - Layers refactoring. Use the source.featureInfo from the layer, not the layerConfig anymore, here and below
-        const query = GVEsriDynamic.#buildQuery(queryTree, 0, fieldOrder, styleSettings, layerConfig.source.featureInfo!);
-        return `${query}${layerFilter ? ` and (${layerFilter})` : ''}`;
+      case 'classBreaks': {
+        // Check if any fields were retrieved
+        if (!outfields) {
+          // Log warning, so we know
+          logger.logWarning(
+            'A style with filter capabilities was set on the layer, but no fields were read from vector data. Make sure source.featureInfo?.outfields has values.'
+          );
+          return this.#appendLayerFilter(defaultFilter, layerFilter);
+        }
+
+        this.#normalizeVisibility(styleSettings);
+        if (this.#allFeaturesVisible(styleSettings.info)) return this.#appendLayerFilter(defaultFilter, layerFilter);
+
+        const filterExpression = this.#buildQueryClassBreaksFilter(styleSettings, outfields);
+        return this.#appendLayerFilter(filterExpression, layerFilter);
       }
 
-      if (styleSettings.type === 'classBreaks') {
-        setAllUndefinedVisibilityFlagsToYes(styleSettings);
-        if (featuresAreAllVisible(styleSettings.info as { visible: boolean }[]))
-          return `${GVEsriDynamic.DEFAULT_FILTER_1EQUALS1}${layerFilter ? ` and (${layerFilter})` : ''}`;
+      default:
+        return defaultFilter;
+    }
+  }
 
-        const filterArray: string[] = [];
-        let visibleWhenGreatherThisIndex = -1;
-        for (let i = 0; i < styleSettings.info.length; i++) {
-          if (filterArray.length % 2 === 0) {
-            if (i === 0) {
-              // First set, visible, default not visible
-              if (
-                styleSettings.info[0].visible !== false &&
-                (!styleSettings.hasDefault ||
-                  (styleSettings.hasDefault && styleSettings.info[styleSettings.info.length - 1].visible === false))
-              )
-                filterArray.push(
-                  `${styleSettings.fields[0]} >= ${GVEsriDynamic.#formatFieldValue(
-                    styleSettings.fields[0],
-                    styleSettings.info[0].values[0],
-                    layerConfig.source.featureInfo!
-                  )}`
-                );
-              else if (
-                // First set, not visible, default visible
-                styleSettings.info[0].visible === false &&
-                styleSettings.hasDefault &&
-                styleSettings.info[styleSettings.info.length - 1].visible !== false
-              ) {
-                filterArray.push(
-                  `${styleSettings.fields[0]} < ${GVEsriDynamic.#formatFieldValue(
-                    styleSettings.fields[0],
-                    styleSettings.info[0].values[0],
-                    layerConfig.source.featureInfo!
-                  )}`
-                );
-                visibleWhenGreatherThisIndex = i;
-              }
-            } else if (
-              // Visible, default not visible
-              styleSettings.info[i].visible !== false &&
-              (!styleSettings.hasDefault ||
-                (styleSettings.hasDefault && styleSettings.info[styleSettings.info.length - 1].visible === false))
-            ) {
-              filterArray.push(
-                `${styleSettings.fields[0]} > ${GVEsriDynamic.#formatFieldValue(
-                  styleSettings.fields[0],
-                  styleSettings.info[i].values[0],
-                  layerConfig.source.featureInfo!
-                )}`
-              );
-              if (i + 1 === styleSettings.info.length)
-                filterArray.push(
-                  `${styleSettings.fields[0]} <= ${GVEsriDynamic.#formatFieldValue(
-                    styleSettings.fields[0],
-                    styleSettings.info[i].values[1],
-                    layerConfig.source.featureInfo!
-                  )}`
-                );
-            } else if (
-              // Not visible, default visible
-              styleSettings.info[i].visible === false &&
-              styleSettings.hasDefault &&
-              styleSettings.info[styleSettings.info.length - 1].visible !== false
-            ) {
-              filterArray.push(
-                `${styleSettings.fields[0]} <= ${GVEsriDynamic.#formatFieldValue(
-                  styleSettings.fields[0],
-                  styleSettings.info[i].values[0],
-                  layerConfig.source.featureInfo!
-                )}`
-              );
-              visibleWhenGreatherThisIndex = i;
+  /**
+   * Normalizes a style configuration by ensuring that all visibility flags
+   * are explicitly set. Any undefined `visible` properties are defaulted to `true`
+   * (meaning the feature is considered visible).
+   * @param {TypeLayerStyleSettings} styleConfig - The style configuration object to normalize.
+   * @returns {void}
+   */
+  static #normalizeVisibility(styleConfig: TypeLayerStyleSettings): void {
+    styleConfig.info.forEach((s) => {
+      // eslint-disable-next-line no-param-reassign
+      if (s.visible === undefined) s.visible = true;
+    });
+  }
+
+  /**
+   * Determines whether all features in the style configuration are visible.
+   * This is used to skip building a filter expression when no filtering is needed.
+   * @param {TypeLayerStyleConfigInfo[]} settings - The style configuration entries defining visibility.
+   * @returns {boolean} `true` if all features are visible; `false` if any are hidden or filtered.
+   */
+  static #allFeaturesVisible(settings: TypeLayerStyleConfigInfo[]): boolean {
+    return settings.every((s) => s.visible);
+  }
+  /**
+   * Combines a base style-derived filter expression with an optional
+   * layer-level filter, using the logical `AND` operator.
+   * @param {string | undefined} [baseFilter] - The base filter expression derived from style settings.
+   * @param {string | undefined} [layerFilter] - An optional additional filter to append.
+   * @returns {string | undefined} The combined filter expression, or `undefined` if none apply.
+   */
+  static #appendLayerFilter(baseFilter?: string, layerFilter?: string): string | undefined {
+    if (!baseFilter && !layerFilter) return undefined;
+    if (!baseFilter) return layerFilter!;
+    if (!layerFilter) return baseFilter;
+    return `${baseFilter} and (${layerFilter})`;
+  }
+
+  /**
+   * Builds a filter for "classBreaks" style types.
+   * @param styleSettings - The style configuration.
+   * @param outfields - The feature info fields.
+   */
+  static #buildQueryClassBreaksFilter(styleSettings: TypeLayerStyleSettings, outfields: TypeOutfields[] | undefined): string | undefined {
+    const field = styleSettings.fields[0];
+    const { info } = styleSettings;
+    const { hasDefault } = styleSettings;
+    const featureInfo = outfields;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const fmt = (value: any): string => this.#formatFieldValue(field, value, featureInfo);
+
+    const filterArray: string[] = [];
+    let visibleWhenGreaterIndex = -1;
+
+    for (let i = 0; i < info.length; i++) {
+      const entry = info[i];
+      const comparer0: TypeLayerStyleValueCondition = entry.valuesConditions?.[0] || '>=';
+      const comparer1: TypeLayerStyleValueCondition = entry.valuesConditions?.[1] || '<=';
+
+      // Determine even/odd based on filterArray length
+      if (filterArray.length % 2 === 0) {
+        // Even index logic (first half of a range)
+        if (i === 0) {
+          // First entry
+          if (entry.visible !== false && (!hasDefault || (hasDefault && info[info.length - 1].visible === false))) {
+            // visible, default not visible
+            filterArray.push(`${field} ${comparer0} ${fmt(entry.values[0])}`);
+          } else if (entry.visible === false && hasDefault && info[info.length - 1].visible !== false) {
+            // not visible, default visible
+            filterArray.push(`${field} ${comparer0} ${fmt(entry.values[0])}`);
+            visibleWhenGreaterIndex = i;
+          }
+        } else {
+          if (entry.visible !== false && (!hasDefault || (hasDefault && info[info.length - 1].visible === false))) {
+            filterArray.push(`${field} ${comparer0} ${fmt(entry.values[0])}`);
+            if (i + 1 === info.length) {
+              filterArray.push(`${field} ${comparer1} ${fmt(entry.values[1])}`);
             }
-          } else if (
-            !styleSettings.hasDefault ||
-            (styleSettings.hasDefault && styleSettings.info[styleSettings.info.length - 1].visible === false)
-          ) {
-            // Default is not visible/does not exist
-            if (styleSettings.info[i].visible === false) {
-              filterArray.push(
-                `${styleSettings.fields[0]} <= ${GVEsriDynamic.#formatFieldValue(
-                  styleSettings.fields[0],
-                  styleSettings.info[i - 1].values[1],
-                  layerConfig.source.featureInfo!
-                )}`
-              );
-            } else if (i + 1 === styleSettings.info.length) {
-              filterArray.push(
-                `${styleSettings.fields[0]} <= ${GVEsriDynamic.#formatFieldValue(
-                  styleSettings.fields[0],
-                  styleSettings.info[i].values[1],
-                  layerConfig.source.featureInfo!
-                )}`
-              );
-            }
-          } else if (styleSettings.hasDefault && styleSettings.info[i].visible !== false) {
-            // Has default and default is visible
-            filterArray.push(
-              `${styleSettings.fields[0]} > ${GVEsriDynamic.#formatFieldValue(
-                styleSettings.fields[0],
-                styleSettings.info[i - 1].values[1],
-                layerConfig.source.featureInfo!
-              )}`
-            );
-            visibleWhenGreatherThisIndex = -1;
-          } else {
-            visibleWhenGreatherThisIndex = i;
+          } else if (entry.visible === false && hasDefault && info[info.length - 1].visible !== false) {
+            filterArray.push(`${field} ${comparer0} ${fmt(entry.values[0])}`);
+            visibleWhenGreaterIndex = i;
           }
         }
-
-        if (visibleWhenGreatherThisIndex !== -1)
-          filterArray.push(
-            `${styleSettings.fields[0]} > ${GVEsriDynamic.#formatFieldValue(
-              styleSettings.fields[0],
-              styleSettings.info[visibleWhenGreatherThisIndex].values[1],
-              layerConfig.source.featureInfo!
-            )}`
-          );
-
-        if (styleSettings.hasDefault && styleSettings.info[styleSettings.info.length - 1].visible !== false) {
-          const filterValue = `${filterArray.slice(0, -1).reduce((previousFilterValue, filterNode, i) => {
-            if (i === 0) return `(${filterNode} or `;
-            if (i % 2 === 0) return `${previousFilterValue} and ${filterNode}) or `;
-            return `${previousFilterValue}(${filterNode}`;
-          }, '')}${filterArray.slice(-1)[0]})`;
-          return `${filterValue}${layerFilter ? ` and (${layerFilter})` : ''}`;
+      } else {
+        // Odd index logic (closing half of a range)
+        if (!hasDefault || (hasDefault && info[info.length - 1].visible === false)) {
+          if (entry.visible === false) {
+            filterArray.push(`${field} ${comparer1} ${fmt(info[i - 1].values[1])}`);
+          } else if (i + 1 === info.length) {
+            filterArray.push(`${field} ${comparer1} ${fmt(entry.values[1])}`);
+          }
+        } else if (hasDefault && entry.visible !== false) {
+          filterArray.push(`${field} ${comparer1} ${fmt(info[i - 1].values[1])}`);
+          visibleWhenGreaterIndex = -1;
+        } else {
+          visibleWhenGreaterIndex = i;
         }
-
-        const filterValue = filterArray.length
-          ? `${filterArray.reduce((previousFilterValue, filterNode, i) => {
-              if (i === 0) return `((${filterNode} and `;
-              if (i % 2 === 0) return `${previousFilterValue} or (${filterNode} and `;
-              return `${previousFilterValue}${filterNode})`;
-            }, '')})`
-          : // We use '(1=0)' as false to select nothing
-            '(1=0)';
-
-        return `${filterValue}${layerFilter ? ` and (${layerFilter})` : ''}`;
       }
     }
-    return GVEsriDynamic.DEFAULT_FILTER_1EQUALS1;
+
+    // Final "greater than" clause
+    if (visibleWhenGreaterIndex !== -1) {
+      filterArray.push(`${field} > ${fmt(info[visibleWhenGreaterIndex].values[1])}`);
+    }
+
+    // Return the filter
+    return this.#buildClassBreakExpression(filterArray, hasDefault, info);
+  }
+
+  /**
+   * Builds the final SQL-like boolean filter expression used for "classBreaks" style rules.
+   * This function takes the list of already-constructed range conditions (`filterArray`)
+   * and assembles them into a properly parenthesized logical expression. The structure
+   * of the expression depends on whether the style has a “default” class and whether
+   * that default class is visible or not.
+   * Behavior:
+   * - If no filters exist, returns `(1=0)` which represents a false filter (select nothing).
+   * - If `hasDefault` is `true` **and** the last class in `info` is visible, the function
+   *   constructs an `OR`-based expression that mirrors the original ArcGIS classBreaks
+   *   logic where the default class is considered visible.
+   * - Otherwise (default not visible), constructs a nested sequence of `AND`/`OR` blocks
+   *   following the original Esri filtering algorithm, ensuring that non-visible classes
+   *   properly constrain the final range.
+   * @param {string[]} filterArray - The ordered list of base range expressions
+   *   (e.g., `["field >= 1", "field <= 5", "field > 10", "field <= 20"]`) produced by
+   *   the classBreaks preprocessing logic.
+   * @param {boolean} hasDefault - Indicates whether the style definition includes a
+   *   "default" class (the implicit class beyond the listed break ranges).
+   * @param {TypeLayerStyleConfigInfo[]} info - The style configuration entries. Used
+   *   primarily to determine visibility of the last class when `hasDefault` is true.
+   * @returns {string} A fully assembled boolean expression such as:
+   *   - `(1=0)` when nothing should match,
+   *   - `(field >= 1 and field <= 5)`,
+   *   - `((field >= 1 and field <= 5) or (field > 10 and field <= 20))`,
+   *   - or more complex nested expressions depending on break visibility.
+   */
+  static #buildClassBreakExpression(filterArray: string[], hasDefault: boolean, info: TypeLayerStyleConfigInfo[]): string {
+    if (filterArray.length === 0) return '(1=0)';
+
+    // Default visible / has default AND last class visible
+    if (hasDefault && info[info.length - 1].visible !== false) {
+      const expr = `${filterArray.slice(0, -1).reduce((prev, node, i) => {
+        if (i === 0) return `(${node} or `;
+        if (i % 2 === 0) return `${prev} and ${node}) or `;
+        return `${prev}(${node}`;
+      }, '')}${filterArray.at(-1)})`;
+
+      return expr;
+    }
+
+    // Default not visible
+    return `${filterArray.reduce((prev, node, i) => {
+      if (i === 0) return `((${node} and `;
+      if (i % 2 === 0) return `${prev} or (${node} and `;
+      return `${prev}${node})`;
+    }, '')})`;
   }
 
   /**
@@ -1016,67 +1066,88 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {number} level - The level to use for solving the tree.
    * @param {number[]} fieldOrder - The field order to use for solving the tree.
    * @param {TypeLayerStyleSettings} styleSettings - The unique value style settings to evaluate.
-   * @param {TypeFeatureInfoLayerConfig} sourceFeatureInfo - The source feature information that knows the field type.
+   * @param {TypeOutfields[]} outfields - The outfields information that knows the field type.
    * @returns {string} The resulting query.
    * @private
    */
-  static #buildQuery(
+  static #buildQueryUniqueValue(
     queryTree: TypeQueryTree,
     level: number,
     fieldOrder: number[],
     styleSettings: TypeLayerStyleSettings,
-    sourceFeatureInfo: TypeFeatureInfoLayerConfig
+    outFields: TypeOutfields[] | undefined,
+    useExtraSpacingInFilter: boolean
   ): string {
+    // The spacing to be used
+    const spacing = useExtraSpacingInFilter ? ' ' : '';
+    const withQuotes = useExtraSpacingInFilter ? '"' : '';
+
     // TODO The below commented code was previously causing the classes to be reversed by adding a 'not' to the query
     // TO.DO Need to confirm that the 'not' is no longer needed
     // TO.DO Changed on 2025-05-29 in PR 2916
     // let queryString = styleSettings.info[styleSettings.info.length - 1].visible !== false && !level ? 'not (' : '(';
-    let queryString = '(';
+    let queryString = `(${spacing}`;
     for (let i = 0; i < queryTree.length; i++) {
-      const value = GVEsriDynamic.#formatFieldValue(styleSettings.fields[fieldOrder[level]], queryTree[i].fieldValue, sourceFeatureInfo);
+      // Read the value
+      const value = this.#formatFieldValue(styleSettings.fields[fieldOrder[level]], queryTree[i].fieldValue, outFields);
+
       // The nextField array is not empty, then it is is not the last field
       if (queryTree[i].nextField.length) {
         // If i > 0 (true) then we add a OR clause
         if (i) queryString = `${queryString} or `;
         // Add to the query the 'fieldName = value and ' + the result of the recursive call to buildQuery using the next field and level
-        queryString = `${queryString}${styleSettings.fields[fieldOrder[level]]} = ${value} and ${GVEsriDynamic.#buildQuery(
+        queryString = `${queryString}${withQuotes}${styleSettings.fields[fieldOrder[level]]}${withQuotes} = ${value} and ${this.#buildQueryUniqueValue(
           queryTree[i].nextField,
           level + 1,
           fieldOrder,
           styleSettings,
-          sourceFeatureInfo
+          outFields,
+          useExtraSpacingInFilter
         )}`;
       } else {
         // We have reached the last field and i = 0 (false) we concatenate 'fieldName in (value' else we concatenate ', value'
-        queryString = i ? `${queryString}, ${value}` : `${styleSettings.fields[fieldOrder[level]]} in (${value}`;
+        queryString = i
+          ? `${queryString}${spacing}, ${value}`
+          : `${withQuotes}${styleSettings.fields[fieldOrder[level]]}${withQuotes} in (${spacing}${value}`;
       }
       // If i points to the last element of the queryTree, close the parenthesis.
-      if (i === queryTree.length - 1) queryString = `${queryString})`;
+      if (i === queryTree.length - 1) queryString = `${queryString}${spacing})`;
     }
 
-    return queryString === '(' ? '(1=0)' : queryString;
+    return queryString === `(${spacing}` ? `(${spacing}1${spacing}=${spacing}0${spacing})` : queryString;
   }
 
   /**
    * Formats the field value to use in the query.
    * @param {string} fieldName - The field name.
-   * @param {string | number | Date} rawValue - The unformatted field value.
-   * @param {TypeFeatureInfoLayerConfig} sourceFeatureInfo - The source feature information that knows the field type.
+   * @param {unknown} rawValue - The unformatted field value.
+   * @param {TypeOutfields[] | undefined} outfields - The outfields information that knows the field type.
    * @returns {string} The resulting field value.
    * @private
    */
-  static #formatFieldValue(fieldName: string, rawValue: string | number | Date, sourceFeatureInfo: TypeFeatureInfoLayerConfig): string {
-    const fieldEntry = sourceFeatureInfo.outfields?.find((outfield) => outfield.name === fieldName);
+  static #formatFieldValue(fieldName: string, rawValue: unknown, outfields: TypeOutfields[] | undefined): string {
+    const fieldEntry = outfields?.find((outfield) => outfield.name === fieldName);
     const fieldType = fieldEntry?.type;
     switch (fieldType) {
       case 'date':
         return `date '${rawValue}'`;
-      case 'string':
-        return `'${rawValue}'`;
-      default:
-        return `${rawValue}`;
+      case 'string': {
+        // Double the quotes
+        const value = `${rawValue}`.replaceAll("'", "''");
+        return `'${value}'`;
+      }
+      default: {
+        // Should be a number, check it in case...
+        const number = Number(rawValue);
+
+        // If is NaN
+        if (Number.isNaN(number)) return '0'; // We were tricked, it's not a numeric value, use 0 for now..
+        return `${number}`; // All good
+      }
     }
   }
+
+  // #endregion STATIC METHODS
 }
 
 export type EsriQueryJsonResponse = {
@@ -1095,3 +1166,7 @@ export type EsriIdentifyJsonResponseAttribute = {
   attributes: Record<string, unknown>;
   geometry: GeometryJson;
 };
+
+type TypeFieldOfTheSameValue = { value: string | number | Date; nbOccurence: number };
+
+type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryTree }[];

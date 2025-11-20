@@ -1,11 +1,11 @@
-import _ from 'lodash';
 import { darken, lighten, alpha } from '@mui/material';
 import type { Theme } from '@mui/material/styles';
 import type { SxProps } from '@mui/system';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
+import { range } from '@/core/utils/utilities';
 
 // Can populate using https://www.htmlcsscolor.com/hex/F1F2F5
-const ColorKeyValues = _.range(50, 1000, 50);
+const ColorKeyValues = range(50, 1000, 50);
 type ColorKey = (typeof ColorKeyValues)[number];
 type ColorRecord = Record<ColorKey, string>;
 

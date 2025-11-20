@@ -1,7 +1,6 @@
 import type { UseBoundStore, Mutate, StoreApi } from 'zustand';
 import { useStore } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
-import cloneDeep from 'lodash/cloneDeep';
 
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import type { IAppState } from '@/core/stores/store-interface-and-intial-values/app-state';
@@ -65,7 +64,7 @@ export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore): IG
     setMapConfig: (config: TypeMapFeaturesConfig) => {
       // GV this is a copy of the original map configuration, no modifications is allowed
       // ? this configuration is used to reload the map
-      const clonedConfig = cloneDeep(config);
+      const clonedConfig = structuredClone(config);
 
       // Serialize the configuration so that it goes in the store without any mutable class instances
       for (let i = 0; i < (config.map?.listOfGeoviewLayerConfig?.length || 0); i++) {

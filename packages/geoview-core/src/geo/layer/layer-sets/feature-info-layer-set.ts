@@ -4,7 +4,6 @@ import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processo
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
 import type { TypeFeatureInfoEntry, TypeResultSet } from '@/api/types/map-schema-types';
-import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import type { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
@@ -99,7 +98,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    * Queries the features at the provided coordinate for all the registered layers.
    * @param {Coordinate} lonLatCoordinate - The longitude/latitude coordinate where to query the features
    * @returns {Promise<TypeFeatureInfoResultSet>} A promise which will hold the result of the query
-   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    */
   async queryLayers(lonLatCoordinate: Coordinate): Promise<TypeFeatureInfoResultSet> {
     // FIXME: Watch out for code reentrancy between queries!
@@ -159,13 +158,15 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
         // When the promise is done, propagate to store
         promiseResult
           .then((arrayOfRecords) => {
-            // Use the response to align arrayOfRecords fields with layerConfig fields
-            if (arrayOfRecords.length) {
-              AbstractLayerSet.alignRecordsWithOutFields(layer.getLayerConfig(), arrayOfRecords);
-            }
+            // Get the layer config
+            const layerConfig = layer.getLayerConfig();
 
-            // Use the response to possibly patch the layer config metadata
-            if (arrayOfRecords.length) this.#patchMissingMetadataIfNecessary(layerPath, arrayOfRecords[0]);
+            // If the response contain actual fields
+            if (AbstractLayerSet.recordsContainActualFields(layerConfig, arrayOfRecords)) {
+              // Use the response to patch and align arrayOfRecords fields with layerConfig fields
+              FeatureInfoLayerSet.#patchMissingOutfieldsIfNecessary(layerConfig, arrayOfRecords);
+              AbstractLayerSet.alignRecordsWithOutFields(layerConfig, arrayOfRecords);
+            }
 
             // Filter out unsymbolized features if the showUnsymbolizedFeatures config is false
             // GV: KML is excluded as it currently has no symbology.
@@ -261,31 +262,27 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
   }
 
   /**
-   * Updates outfields, aliases and data types from query result if not provided in metadata
-   * @param {string} layerPath - Path of the layer to update.
-   * @param {TypeFeatureInfoEntry} record - Feature info to parse.
+   * Updates outfields and aliases from query result if those weren't set already.
+   * @param {string} layerConfig - The layer config to possibly update.
+   * @param {TypeFeatureInfoEntry[]} records - Feature info to parse.
    * @private
    */
-  #patchMissingMetadataIfNecessary(layerPath: string, record: TypeFeatureInfoEntry): void {
-    // Set up feature info for layers that did not include it in the metadata
-    const layerEntryConfig = this.layerApi.getLayerEntryConfig(layerPath);
+  static #patchMissingOutfieldsIfNecessary(layerConfig: AbstractBaseLayerEntryConfig, records: TypeFeatureInfoEntry[]): void {
+    // If no records
+    if (!records.length) return;
 
-    // If a group, skip
-    if (!layerEntryConfig || layerEntryConfig instanceof GroupLayerEntryConfig) return;
+    // Take the first one
+    const record = records[0];
 
-    // Cast it as regular layer entry
-    const layerEntryConfigCasted = layerEntryConfig as AbstractBaseLayerEntryConfig;
+    // Get the outfields
+    let outfields = layerConfig.getOutfields();
 
-    if (!layerEntryConfigCasted.source) layerEntryConfigCasted.source = {};
+    // Process undefined outfields or aliasFields
+    if (!outfields?.length) {
+      // Create it
+      outfields = [];
 
-    if (!layerEntryConfigCasted.source.featureInfo) {
-      layerEntryConfigCasted.source.featureInfo = { queryable: true };
-    }
-
-    const sourceFeatureInfo = layerEntryConfigCasted.source.featureInfo;
-    if (!sourceFeatureInfo.outfields) {
-      sourceFeatureInfo.outfields = [];
-
+      // Loop
       Object.keys(record.fieldInfo).forEach((fieldName) => {
         const newOutfield = {
           name: fieldName,
@@ -294,11 +291,15 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
           domain: null,
         };
 
-        sourceFeatureInfo.outfields!.push(newOutfield);
+        outfields!.push(newOutfield);
       });
+
+      // Set it
+      layerConfig.setOutfields(outfields);
     }
 
-    if (!sourceFeatureInfo.nameField) sourceFeatureInfo.nameField = sourceFeatureInfo.outfields[0].name;
+    // Set the nameField if not already defined
+    layerConfig.initNameField(outfields?.[0]?.name);
   }
 
   /**

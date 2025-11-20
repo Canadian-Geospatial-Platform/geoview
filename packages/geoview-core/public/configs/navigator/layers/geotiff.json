@@ -54,14 +54,14 @@
   },
   "footerBar": {
     "tabs": {
-      "core": ["legend", "layers", "details", "data-table"]
+      "core": ["layers", "data-table"]
     }
   },
   "corePackages": [],
   "theme": "geo.ca",
   "appBar": {
     "tabs": {
-      "core": ["geolocator", "export"]
+      "core": ["geolocator", "legend", "details", "export"]
     }
   }
 }

@@ -38,11 +38,11 @@ import { MapViewer } from '@/geo/map/map-viewer';
 import type { TypeMapStateForExportLayout } from '@/core/components/export/utilities';
 import type { PluginsContainer } from '@/api/plugin/plugin-types';
 import { Projection } from '@/geo/utils/projection';
-import { isPointInExtent, isExtentLonLat } from '@/geo/utils/utilities';
+import { GeoUtilities } from '@/geo/utils/utilities';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { DEFAULT_OL_FITOPTIONS, NORTH_POLE_POSITION, OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
-import { isValidUUID, whenThisThen } from '@/core/utils/utilities';
+import { delay, isValidUUID, whenThisThen } from '@/core/utils/utilities';
 
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import type { TypeClickMarker } from '@/core/components';
@@ -66,7 +66,6 @@ import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { InvalidExtentError } from '@/core/exceptions/geoview-exceptions';
 import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-vector-tile';
-import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import type { TimeDimension } from '@/core/utils/date-mgt';
@@ -239,7 +238,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   /**
    * Shortcut to get the Map config for a given map id
-   * @param {string} mapId the map id to retrieve the config for
+   * @param {string} mapId - The map id to retrieve the config for
    * @returns {TypeMapFeaturesConfig | undefined} the map config or undefined if there is no config for this map id
    */
   static getGeoViewMapConfig(mapId: string): TypeMapFeaturesConfig | undefined {
@@ -559,7 +558,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // GV No need to save in the store, because this will trigger an event on MapViewer which will take care of updating the store
   }
 
-  static zoom(mapId: string, zoom: number, duration: number = OL_ZOOM_DURATION): Promise<void> {
+  static zoomMap(mapId: string, zoom: number, duration: number = OL_ZOOM_DURATION): Promise<void> {
     // Do the actual zoom
     this.getMapViewer(mapId).map.getView().animate({ zoom, duration });
 
@@ -943,8 +942,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * Remove a layer from the orderedLayerInfo array.
    *
    * @param {string} mapId The ID of the map to remove the layer from.
-   * @param {string} layerPath The path of the layer to remove.
-   * @param {boolean} removeSublayers Should sublayers be removed.
+   * @param {string} layerPath - The path of the layer to remove.
+   * @param {boolean} removeSublayers - Should sublayers be removed.
    * @return {void}
    */
   static removeOrderedLayerInfo(mapId: string, layerPath: string, removeSublayers: boolean = true): void {
@@ -1029,9 +1028,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
   /**
    * Zoom to the specified extent.
    *
-   * @param {string} mapId The map id.
-   * @param {Extent} extent The extent to zoom to.
-   * @param {FitOptions} options The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 13, duration: 500 }).
+   * @param {string} mapId - The map id.
+   * @param {Extent} extent - The extent to zoom to.
+   * @param {FitOptions} options - The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 13, duration: 500 }).
    * @returns Promise<void>
    */
   static zoomToExtent(mapId: string, extent: Extent, options: FitOptions = DEFAULT_OL_FITOPTIONS): Promise<void> {
@@ -1044,20 +1043,11 @@ export class MapEventProcessor extends AbstractEventProcessor {
         return (!number && number !== 0) || Number.isNaN(number);
       })
     ) {
-      // store state will be updated by map event
+      // Store state will be updated by map event
       this.getMapViewer(mapId).getView().fit(extent, mergedOptions);
 
-      // Use a Promise and resolve it when the duration expired
-      return new Promise((resolve) => {
-        setTimeout(
-          () => {
-            resolve();
-          },
-          (options.duration || OL_ZOOM_DURATION) + 150
-        );
-      });
-      // The +150 is to make sure the logic before turning these function async remains
-      // TODO: Refactor - Check the +150 relevancy and try to remove it by clarifying the reason for its existance
+      // Wait a bit and return. The +150 is just to make sure.
+      return delay((mergedOptions.duration || DEFAULT_OL_FITOPTIONS.duration!) + 150);
     }
 
     // Invalid extent
@@ -1138,7 +1128,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     if (homeView.extent) {
       const lonlatExtent = homeView.extent as Extent;
       // If extent is not lon/lat, we assume it is in the map projection and use it as is.
-      extent = isExtentLonLat(lonlatExtent)
+      extent = GeoUtilities.isExtentLonLat(lonlatExtent)
         ? Projection.transformExtentFromProj(
             lonlatExtent,
             Projection.getProjectionLonLat(),
@@ -1188,7 +1178,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    *
    * @param {string} mapId - ID of map to zoom on
    * @param {string} layerPath - Path of layer to zoom to.
-   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    */
   static zoomToLayerVisibleScale(mapId: string, layerPath: string): void {
     const view = this.getMapViewer(mapId).getView();
@@ -1207,7 +1197,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // Check if the map center is already in the layer extent and if so, do not center
     const layerExtent = (geoviewLayer as AbstractGVLayer).getBounds(this.getMapViewer(mapId).getProjection(), MapViewer.DEFAULT_STOPS);
     const centerExtent =
-      layerExtent && layerMinZoom > mapZoom! && !isPointInExtent(view.getCenter()!, layerExtent)
+      layerExtent && layerMinZoom > mapZoom! && !GeoUtilities.isPointInExtent(view.getCenter()!, layerExtent)
         ? [(layerExtent[2] + layerExtent[0]) / 2, (layerExtent[1] + layerExtent[3]) / 2]
         : undefined;
 
@@ -1242,31 +1232,27 @@ export class MapEventProcessor extends AbstractEventProcessor {
   /**
    * Get all active filters for layer.
    *
-   * @param {string} mapId The map id.
-   * @param {string} layerPath The path for the layer to get filters from.
+   * @param {string} mapId - The map id.
+   * @param {string} layerPath - The path for the layer to get filters from.
    */
   static getActiveVectorFilters(mapId: string, layerPath: string): (string | undefined)[] | undefined {
-    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerIfExists(layerPath);
-    if (geoviewLayer) {
-      const initialFilter = this.getInitialFilter(mapId, layerPath);
-      const tableFilter = DataTableEventProcessor.getTableFilter(mapId, layerPath);
+    const initialFilter = this.getInitialFilter(mapId, layerPath);
+    const tableFilter = DataTableEventProcessor.getTableFilter(mapId, layerPath);
 
-      // If the TimeSlider is initialized
-      let sliderFilter;
-      if (TimeSliderEventProcessor.isTimeSliderInitialized(mapId)) {
-        // Assign it for the return
-        sliderFilter = TimeSliderEventProcessor.getTimeSliderFilter(mapId, layerPath);
-      }
-      return [initialFilter, tableFilter, sliderFilter].filter((filter) => filter);
+    // If the TimeSlider is initialized
+    let sliderFilter;
+    if (TimeSliderEventProcessor.isTimeSliderInitialized(mapId)) {
+      // Assign it for the return
+      sliderFilter = TimeSliderEventProcessor.getTimeSliderFilter(mapId, layerPath);
     }
-    return undefined;
+    return [initialFilter, tableFilter, sliderFilter].filter((filter) => filter);
   }
 
   /**
    * Apply all available filters to layer.
    *
-   * @param {string} mapId The map id.
-   * @param {string} layerPath The path of the layer to apply filters to.
+   * @param {string} mapId - The map id.
+   * @param {string} layerPath - The path of the layer to apply filters to.
    */
   static applyLayerFilters(mapId: string, layerPath: string): void {
     // Get the Geoview layer
@@ -1274,39 +1260,17 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     // If found it and of right type
     if (
-      geoviewLayer &&
-      (geoviewLayer instanceof AbstractGVVector ||
-        geoviewLayer instanceof GVWMS ||
-        geoviewLayer instanceof GVEsriImage ||
-        geoviewLayer instanceof GVEsriDynamic)
+      geoviewLayer instanceof AbstractGVVector ||
+      geoviewLayer instanceof GVWMS ||
+      geoviewLayer instanceof GVEsriImage ||
+      geoviewLayer instanceof GVEsriDynamic
     ) {
-      // Depending on the instance
-      if (geoviewLayer instanceof GVWMS || geoviewLayer instanceof GVEsriImage) {
-        // If the Time Slider is initialized
-        if (TimeSliderEventProcessor.isTimeSliderInitialized(mapId)) {
-          // Read filter information
-          const filter = TimeSliderEventProcessor.getTimeSliderFilter(mapId, layerPath);
+      // Read filter information
+      const filters = this.getActiveVectorFilters(mapId, layerPath) || [''];
+      const filter = filters.join(' AND ');
 
-          // If filter was defined
-          if (filter) geoviewLayer.applyViewFilter(filter);
-        }
-      } else {
-        // Read filter information
-        const filters = this.getActiveVectorFilters(mapId, layerPath) || [''];
-        const filter = filters.join(' and ');
-
-        // If EsriDynamic
-        if (geoviewLayer instanceof GVEsriDynamic) {
-          // Force the layer to applyfilter so it refreshes its layerDefs
-          geoviewLayer.applyViewFilter(filter);
-        } else if (geoviewLayer instanceof AbstractGVVector) {
-          // Force the layer to applyfilter so it refreshes its layer config filter
-          geoviewLayer.applyViewFilter(filter);
-        } else {
-          // Not supported
-          throw new NotSupportedError('Layer type not supported when trying to perform an applyLayerFilters.');
-        }
-      }
+      // Force the layer to applyfilter
+      geoviewLayer.applyViewFilter(filter);
     }
   }
 
@@ -1351,6 +1315,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {boolean} isGeocore - Indicates if it is a geocore layer.
    * @param {boolean | 'hybrid'} overrideGeocoreServiceNames - Indicates if geocore layer names should be kept as is or returned to defaults.
    * @returns {TypeLayerEntryConfig} Entry config object.
+   * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
    */
   static #createLayerEntryConfig(
     mapId: string,
@@ -1386,7 +1351,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     // Create list of sublayer entry configs if it is a group layer
     const listOfLayerEntryConfig: TypeLayerEntryConfig[] = [];
-    if (layerEntryConfig!.getEntryTypeIsGroup()) {
+    if (layerEntryConfig.getEntryTypeIsGroup()) {
       const sublayerPaths = this.getMapLayerOrder(mapId).filter(
         (entryLayerPath) =>
           entryLayerPath.startsWith(`${layerPath}/`) && entryLayerPath.split('/').length === layerPath.split('/').length + 1
@@ -1397,10 +1362,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
     }
 
     // Get initial settings
-    const initialSettings = this.#getInitialSettings(layerEntryConfig!, orderedLayerInfo!, legendLayerInfo!);
+    const initialSettings = this.#getInitialSettings(layerEntryConfig, orderedLayerInfo!, legendLayerInfo!);
 
-    const source = (layerEntryConfig! as VectorLayerEntryConfig).source
-      ? { ...(layerEntryConfig! as VectorLayerEntryConfig).source }
+    const source = (layerEntryConfig as VectorLayerEntryConfig).source
+      ? { ...(layerEntryConfig as VectorLayerEntryConfig).source }
       : undefined;
 
     // Only use feature info specified in original config, not drawn from services
@@ -1414,8 +1379,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     // Construct layer entry config
     const newLayerEntryConfig = {
-      layerId: layerEntryConfig!.layerId,
-      layerName: isGeocore && overrideGeocoreServiceNames === false ? undefined : layerEntryConfig!.getLayerName(),
+      layerId: layerEntryConfig.layerId,
+      layerName: isGeocore && overrideGeocoreServiceNames === false ? undefined : layerEntryConfig.getLayerName(),
       layerFilter: AbstractBaseLayerEntryConfig.getClassOrTypeLayerFilter(configLayerEntryConfig),
       initialSettings,
       layerStyle,
@@ -1440,11 +1405,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
     overrideGeocoreServiceNames: boolean | 'hybrid'
   ): MapConfigLayerEntry | undefined {
     // Get needed info
-    const layerEntryConfig = this.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath);
+    const layerEntryConfig = this.getMapViewerLayerAPI(mapId).getLayerEntryConfigIfExists(layerPath);
     const geoviewLayerConfig = layerEntryConfig?.getGeoviewLayerConfig();
 
     // If not found, log warning and skip
     if (!layerEntryConfig || !geoviewLayerConfig) {
+      // TODO: Check if better to use getLayerEntryConfig instead of getLayerEntryConfigIfExists above and have an error be thrown?
       // Log
       logger.logWarning(`Couldn't find the layer entry config for layer path '${layerPath}'`);
       return undefined;
@@ -1526,7 +1492,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
           locked,
           reversed,
           values,
-          delay,
+          delay: delayTimeSlider,
           filtering,
           range,
           discreteValues,
@@ -1559,7 +1525,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
             layerPaths: additionalLayerpaths ? [layerPath, ...additionalLayerpaths] : [layerPath],
             title,
             description,
-            delay,
+            delay: delayTimeSlider,
             fields,
             filtering,
             locked,
@@ -1589,7 +1555,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     if (config) {
       // Get paths of top level layers
       const layerOrder = this.getMapLayerOrder(mapId).filter(
-        (layerPath) => !this.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath)?.getParentLayerConfig()
+        (layerPath) => !this.getMapViewerLayerAPI(mapId).getLayerEntryConfigIfExists(layerPath)?.getParentLayerConfig()
       );
 
       // Build list of geoview layer configs

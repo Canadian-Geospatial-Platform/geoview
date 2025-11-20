@@ -64,8 +64,8 @@ export class GeochartTester extends GVAbstractTester {
           layers: [
             {
               layerId: GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID_WITH_SUFFIX,
-              propertyValue: 'Location_Emplacement',
-              propertyDisplay: 'OBJECTID',
+              propertyValue: 'OBJECTID',
+              propertyDisplay: 'Location_Emplacement',
             },
           ],
           chart: 'line',

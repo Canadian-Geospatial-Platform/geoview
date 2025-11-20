@@ -19,7 +19,7 @@ import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 import type { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
 import { DateMgt } from '@/core/utils/date-mgt';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
-import { validateExtentWhenDefined } from '@/geo/utils/utilities';
+import { GeoUtilities } from '@/geo/utils/utilities';
 
 export interface ConfigBaseClassProps {
   layerId: string;
@@ -37,6 +37,8 @@ export interface ConfigBaseClassProps {
   bounds?: number[];
   timeDimension?: TimeDimension;
   layerStyle?: TypeLayerStyleConfig;
+  wmsLayerId?: string;
+  wfsLayerId?: string;
 }
 
 /**
@@ -58,7 +60,7 @@ export abstract class ConfigBaseClass {
   #initialSettings: TypeLayerInitialSettings;
 
   /** The schema tag for the layer entry config */
-  #schemaTag?: TypeGeoviewLayerType;
+  #schemaTag: TypeGeoviewLayerType;
 
   /** The entry type for the layer entry config */
   #entryType: TypeLayerEntryType;
@@ -110,6 +112,17 @@ export abstract class ConfigBaseClass {
     this.#maxScale = ConfigBaseClass.getClassOrTypeMaxScale(layerConfig);
     this.#isMetadataLayerGroup = ConfigBaseClass.getClassOrTypeIsMetadataLayerGroup(layerConfig);
   }
+
+  /**
+   * Overridable method to apply the service metadata to this layer entry and its children.
+   * Subclasses should override this method to implement the logic needed
+   * to update the service metadata on the current layer entry, including
+   * any recursive behavior for child entries or associated sources.
+   * @param {unknown} metadata - The service metadata to set.
+   * @protected
+   * @abstract
+   */
+  protected abstract onSetServiceMetadata(metadata: unknown): void;
 
   /**
    * Overridable method to apply the data access path to this layer entry and its children.
@@ -165,9 +178,9 @@ export abstract class ConfigBaseClass {
 
   /**
    * Gets the schema tag for the layer entry config.
-   * @returns {TypeGeoviewLayerType | undefined } The layer entry type (or undefined, e.g. groups).
+   * @returns {TypeGeoviewLayerType} The layer entry type (or undefined, e.g. groups).
    */
-  getSchemaTag(): TypeGeoviewLayerType | undefined {
+  getSchemaTag(): TypeGeoviewLayerType {
     return this.#schemaTag;
   }
 
@@ -280,6 +293,42 @@ export abstract class ConfigBaseClass {
    */
   getEntryTypeIsRegular(): this is AbstractBaseLayerEntryConfig {
     return !this.getEntryTypeIsGroup();
+  }
+
+  /**
+   * Gets the service date format as specified by the config.
+   * @returns {string | undefined} The Date Format
+   */
+  getServiceDateFormat(): string | undefined {
+    return this.getGeoviewLayerConfig().serviceDateFormat;
+  }
+
+  /**
+   * Gets the service date fragments order as specified by the config.
+   * @returns {TypeDateFragments} The Date Fragments
+   */
+  getServiceDateFragmentsOrder(): TypeDateFragments | undefined {
+    if (this.getServiceDateFormat()) {
+      return DateMgt.getDateFragmentsOrder(this.getServiceDateFormat());
+    }
+    return undefined;
+  }
+
+  /**
+   * Gets the external date format as specified by the config.
+   * @returns {string | undefined} The Date Format
+   */
+  getExternalDateFormat(): string | undefined {
+    return this.getGeoviewLayerConfig().externalDateFormat;
+  }
+
+  /**
+   * Gets the external fragments order if specified by the config, defaults to ISO_UTC.
+   * Date format object used to translate internal UTC ISO format to the external format.
+   * @returns {TypeDateFragments} The Date Fragments
+   */
+  getExternalFragmentsOrder(): TypeDateFragments {
+    return DateMgt.getDateFragmentsOrder(this.getExternalDateFormat());
   }
 
   /**
@@ -399,7 +448,7 @@ export abstract class ConfigBaseClass {
    */
   validateUpdateInitialSettingsExtent(extentToValidate: Extent | undefined = this.getInitialSettings().extent): this {
     // Validate and update the extent initial settings
-    this.updateInitialSettings({ extent: validateExtentWhenDefined(extentToValidate) });
+    this.updateInitialSettings({ extent: GeoUtilities.validateExtentWhenDefined(extentToValidate) });
     return this;
   }
 
@@ -414,7 +463,7 @@ export abstract class ConfigBaseClass {
    */
   validateUpdateInitialSettingsBounds(boundsToValidate: Extent | undefined = this.getInitialSettings().bounds): this {
     // Validate and update the bounds initial settings
-    this.updateInitialSettings({ bounds: validateExtentWhenDefined(boundsToValidate) });
+    this.updateInitialSettings({ bounds: GeoUtilities.validateExtentWhenDefined(boundsToValidate) });
     return this;
   }
 
@@ -439,11 +488,15 @@ export abstract class ConfigBaseClass {
   }
 
   /**
-   * Gets the external fragments order if specified by the config, defaults to ISO_UTC.
-   * @returns {TypeDateFragments} The Date Fragments
+   * Sets the service metadata for this layer entry.
+   * This is the public entry point for updating the service metadata.
+   * Internally, it delegates the behavior to the `onSetServiceMetadata` method,
+   * which can be overridden by subclasses to implement custom logic.
+   * @param {unknown} metadata - The new service metadata to be used.
    */
-  getExternalFragmentsOrder(): TypeDateFragments {
-    return DateMgt.getDateFragmentsOrder(this.getGeoviewLayerConfig().externalDateFormat);
+  setServiceMetadata(metadata: unknown): void {
+    // Redirect
+    this.onSetServiceMetadata(metadata);
   }
 
   /**
@@ -1105,6 +1158,8 @@ export type TypeLayerEntryShell = {
   subLayers?: TypeLayerEntryShell[];
   source?: TypeLayerEntryShellSource;
   geoviewLayerConfig?: TypeGeoviewLayerConfig;
+  wmsLayerId?: string;
+  wfsLayerId?: string;
   listOfLayerEntryConfig?: TypeLayerEntryShell[]; // For the groups
 };
 

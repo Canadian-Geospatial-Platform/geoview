@@ -11,6 +11,31 @@
     <meta name="msapplication-TileColor" content="#da532c" />
     <meta name="theme-color" content="#ffffff" />
     <link rel="stylesheet" href="css/style.css" />
+
+
+    <link rel="stylesheet" href="css/codemirror/codemirror.min.css"/>
+    <link rel="stylesheet" href="css/codemirror/liquibyte.css"/>
+    <script language="javascript" type="text/javascript" src="js/codemirror/codemirror.min.js"></script>
+    <script language="javascript" type="text/javascript" src="js/codemirror/perl.min.js"></script>
+
+    <style>
+      .CodeMirror {
+        height: 700px; /* Height of the text area */
+        width: 100%;           /* make CM fill its cell */
+        box-sizing: border-box;
+        max-width: 100%;
+      }
+
+      .CodeMirror textarea {
+        width: 1px !important;
+        min-width: 1px !important;
+        max-width: 1px !important;
+        height: 1em;
+        position: absolute;
+        overflow: hidden;
+        resize: none;
+      }
+    </style>
   </head>
 
   <body>
@@ -40,22 +65,12 @@
     </div>
     <div class="demo-section">
       <h4>Input ESRI Renderer:</h4>
-      <div class="editor">
-        <div class="line-numbers" id="inputLineNumbers">
-          <span></span>
-        </div>
-        <textarea id="inputTextArea" cols="110"> </textarea>
-      </div>
+      <textarea id="inputTextArea" cols="110"> </textarea>
     </div>
 
     <div class="demo-section">
-      <h4>Output Style Configuration:</h4>
-      <div class="editor">
-        <div class="line-numbers" id="outputLineNumbers">
-          <span></span>
-        </div>
-        <textarea id="outputTextArea" cols="110"> </textarea>
-      </div>
+      <h4>Geoview Output Style Configuration:</h4>
+      <textarea id="outputTextArea" cols="110"> </textarea>
     </div>
     <div class="demo-section">
       <h4>Usage Example</h4>
@@ -74,15 +89,6 @@
     <script src="codedoc.js"></script>
     <script>
       insertPageHeader();
-
-      // Function used to generate line numbers in the input and output containers.
-      generateLineNumbers = (textContainerId, lineNumbersContainerId) => {
-        const textarea = document.getElementById(textContainerId);
-        const lineNumbersContainer = document.getElementById(lineNumbersContainerId);
-        const lines = textarea.value.split('\n').length + 1;
-        const lineNumbers = Array.from({ length: lines }, (_, index) => '').join('<span />');
-        lineNumbersContainer.innerHTML = lineNumbers;
-      };
 
       const initialValue = {
         simple: {
@@ -228,7 +234,7 @@
           type: 'classBreaks',
           classBreakInfos: [
             {
-              label: '-0.7 – 1.37',
+              label: '-0.7 - 1.37',
               classMaxValue: 1.3749999850988388,
               symbol: {
                 type: 'esriSMS',
@@ -247,7 +253,7 @@
               },
             },
             {
-              label: '> 1.37 – 3.4',
+              label: '> 1.37 - 3.4',
               classMaxValue: 3.4499999582767487,
               symbol: {
                 type: 'esriSMS',
@@ -266,7 +272,7 @@
               },
             },
             {
-              label: '> 3.4 – 5.5',
+              label: '> 3.4 - 5.5',
               classMaxValue: 5.5249999314546585,
               symbol: {
                 type: 'esriSMS',
@@ -285,7 +291,7 @@
               },
             },
             {
-              label: '> 5.5 – 7.5',
+              label: '> 5.5 - 7.5',
               classMaxValue: 7.599999904632568,
               symbol: {
                 type: 'esriSMS',
@@ -314,33 +320,36 @@
       const intputTextArea = document.getElementById('inputTextArea');
       const outputTextArea = document.getElementById('outputTextArea');
 
-      inputTextArea.value = JSON.stringify(initialValue[rendererDropdown.value], undefined, 2);
-      generateLineNumbers('inputTextArea', 'inputLineNumbers');
+      // Transform the text area into a code text area using CodeMirror
+      const editorInputProcess = CodeMirror.fromTextArea(intputTextArea, {
+          lineNumbers: true,
+          mode: 'text/x-perl',
+          theme: 'liquibyte',
+          lineWrapping: true,
+          matchTags: true,
+          autoCloseTags: true,
+      });
+
+      // Transform the text area into a code text area using CodeMirror
+      const editorOutputProcess = CodeMirror.fromTextArea(outputTextArea, {
+          lineNumbers: true,
+          mode: 'text/x-perl',
+          theme: 'liquibyte',
+          lineWrapping: true,
+          matchTags: true,
+          autoCloseTags: true,
+      });
+
+      editorInputProcess.setValue(JSON.stringify(initialValue[rendererDropdown.value], undefined, 2));
 
       rendererDropdown.addEventListener('change', () => {
-        inputTextArea.value = JSON.stringify(initialValue[rendererDropdown.value], undefined, 2);
-        generateLineNumbers('inputTextArea', 'inputLineNumbers');
+        editorInputProcess.setValue(JSON.stringify(initialValue[rendererDropdown.value], undefined, 2));
       });
 
       executeButton.addEventListener('click', async (e) => {
-        const geoViewRenderer = cgpv.api.config.getStyleFromESRIRenderer(inputTextArea.value);
-        outputTextArea.value = JSON.stringify(geoViewRenderer, undefined, 2);
-        generateLineNumbers('outputTextArea', 'outputLineNumbers');
+        const geoViewRenderer = cgpv.api.config.getStyleFromESRIRenderer(editorInputProcess.getValue());
+        editorOutputProcess.setValue(JSON.stringify(geoViewRenderer, undefined, 2));
       });
-
-      // Utility functions ========================================================================================================
-
-      // Function used to display messages to report progression of the process.
-      printMessage = (messageObject, messageString, status) => {
-        if (status === 'error') {
-          messageObject.classList.remove('config-json-valid');
-          messageObject.classList.add('config-error');
-        } else {
-          messageObject.classList.add('config-json-valid');
-          messageObject.classList.remove('config-error');
-        }
-        messageObject.innerHTML = messageString;
-      };
     </script>
   </body>
 </html>

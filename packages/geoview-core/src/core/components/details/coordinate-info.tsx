@@ -9,7 +9,7 @@ import {
   useDetailsCoordinateInfoEnabled,
   useDetailsStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import { coordFormatDMS } from '@/geo/utils/utilities';
+import { GeoUtilities } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
 
 type TypeCoordinateInfoProps = {
@@ -120,10 +120,10 @@ export function CoordinateInfo({ fullWidth }: TypeCoordinateInfoProps): JSX.Elem
               <Typography>{t('details.degreesMinutesSeconds')}:</Typography>
               <Box sx={sxClasses.coordinateInfoSubContent}>
                 <Typography>
-                  {t('details.latitude')}: {coordFormatDMS(lat)}
+                  {t('details.latitude')}: {GeoUtilities.coordFormatDMS(lat)}
                 </Typography>
                 <Typography>
-                  {t('details.longitude')}: {coordFormatDMS(lng)}
+                  {t('details.longitude')}: {GeoUtilities.coordFormatDMS(lng)}
                 </Typography>
               </Box>
             </Box>

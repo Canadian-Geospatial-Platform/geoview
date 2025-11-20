@@ -4,13 +4,15 @@ import type { Extent } from 'ol/extent';
 import type { Projection as OLProjection } from 'ol/proj';
 
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
-import { validateExtent } from '@/geo/utils/utilities';
+import { GeoUtilities } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer vector tile type layer.
  */
 export abstract class AbstractGVVectorTile extends AbstractGVLayer {
+  // #region OVERRIDES
+
   /**
    * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
    * @override
@@ -49,10 +51,12 @@ export abstract class AbstractGVVectorTile extends AbstractGVLayer {
     if (sourceExtent && sourceProjection) {
       // Transform extent to given projection
       sourceExtent = Projection.transformExtentFromProj(sourceExtent, sourceProjection, projection, stops);
-      sourceExtent = validateExtent(sourceExtent, projection.getCode());
+      sourceExtent = GeoUtilities.validateExtent(sourceExtent, projection.getCode());
     }
 
     // Return the calculated layer bounds
     return sourceExtent;
   }
+
+  // #endregion OVERRIDES
 }

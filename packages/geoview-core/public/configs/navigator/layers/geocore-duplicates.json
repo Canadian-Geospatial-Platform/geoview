@@ -23,7 +23,6 @@
       {
         "geoviewLayerId": "5a65ad7c-561a-466a-8375-8d876624df9d:Facility_Emissions",
         "geoviewLayerName": "Air Pollutant Emissions - Fine Particle Emissions by Facility",
-        "metadataAccessPath": "",
         "geoviewLayerType": "geoCore",
         "listOfLayerEntryConfig": [
           {
@@ -139,7 +138,6 @@
       {
         "geoviewLayerId": "5a65ad7c-561a-466a-8375-8d876624df9d:Water",
         "geoviewLayerName": "Air Pollutant Emissions - Water",
-        "metadataAccessPath": "",
         "geoviewLayerType": "geoCore",
         "listOfLayerEntryConfig": [
           {

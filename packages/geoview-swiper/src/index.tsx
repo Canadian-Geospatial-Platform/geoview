@@ -83,7 +83,7 @@ class SwiperPlugin extends MapPlugin {
 
   /**
    * Activates the swiper for the layer indicated by the given layer path.
-   * @param {string} layerPath The layer path to activate swiper functionality
+   * @param {string} layerPath - The layer path to activate swiper functionality
    */
   activateForLayer(layerPath: string): void {
     try {
@@ -100,7 +100,7 @@ class SwiperPlugin extends MapPlugin {
 
   /**
    * Deactivates the swiper for the layer indicated by the given layer path.
-   * @param {string} layerPath The layer path to deactivate swiper functionality
+   * @param {string} layerPath - The layer path to deactivate swiper functionality
    */
   deActivateForLayer(layerPath: string): void {
     // Remove the layer

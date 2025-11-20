@@ -188,8 +188,8 @@ export abstract class Plugin {
   /**
    * Delete a specific plugin loaded in a map
    *
-   * @param {string} pluginId the id of the plugin to delete
-   * @param {string} mapId the map id to remove the plugin from
+   * @param {string} pluginId - The id of the plugin to delete
+   * @param {string} mapId - The map id to remove the plugin from
    */
   static async removePlugin(pluginId: string, mapId: string): Promise<void> {
     // Get the plugin and remove it
@@ -201,7 +201,7 @@ export abstract class Plugin {
   /**
    * Delete all plugins loaded in a map
    *
-   * @param {string} mapId the map id to remove the plugin from (if not provided then plugin will be removed from all maps)
+   * @param {string} mapId - The map id to remove the plugin from (if not provided then plugin will be removed from all maps)
    */
   static async removePlugins(mapId: string): Promise<void> {
     const recordOfPlugins = await MapEventProcessor.getMapViewerPlugins(mapId);
