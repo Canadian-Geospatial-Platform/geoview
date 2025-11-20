@@ -24,6 +24,7 @@ import {
   useMapOrderedLayers,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
+import { doUntil } from '@/core/utils/utilities';
 import type { TypeFeatureInfoEntry, TypeLayerData } from '@/api/types/map-schema-types';
 import type { TypeMapMouseInfo } from '@/geo/map/map-viewer';
 
@@ -189,7 +190,7 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
 
     // Add layers with features that aren't already in the list (out-of-range layers with features)
     arrayOfLayerDataBatch.forEach((layer) => {
-      if ((layer.features?.length ?? 0) > 0 && !existingLayerPaths.has(layer.layerPath)) {
+      if ((layer.features?.length ?? 0) > 0 && !existingLayerPaths.has(layer.layerPath) && layer.layerPath !== 'coordinate-info') {
         layerListEntries.push({
           layerName: layer.layerName ?? '',
           layerPath: layer.layerPath,
@@ -203,24 +204,11 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
       }
     });
 
-    // Add coordinate info layer if it exists in arrayOfLayerDataBatch
-    const coordinateInfoLayer = arrayOfLayerDataBatch.find((layer) => layer.layerPath === 'coordinate-info');
-    if (coordinateInfoLayer && coordinateInfoEnabled) {
-      layerListEntries.unshift({
-        layerName: coordinateInfoLayer.layerName ?? 'Coordinate Information',
-        layerPath: coordinateInfoLayer.layerPath,
-        layerStatus: coordinateInfoLayer.layerStatus,
-        queryStatus: coordinateInfoLayer.queryStatus,
-        numOffeatures: coordinateInfoLayer.features?.length ?? 0,
-        layerFeatures: getNumFeaturesLabel(coordinateInfoLayer),
-        tooltip: `${coordinateInfoLayer.layerName}, ${getNumFeaturesLabel(coordinateInfoLayer)}`,
-        layerUniqueId: `${mapId}-${TABS.DETAILS}-${coordinateInfoLayer.layerPath}`,
-      });
-    }
-
-    // Split the layers list into two groups while preserving order
-    const layersWithFeatures = layerListEntries.filter((layer) => layer.numOffeatures && layer.numOffeatures > 0);
-    const layersWithoutFeatures = layerListEntries.filter((layer) => layer.numOffeatures === 0);
+    // Split the layers list into two groups while preserving order (exclude coordinate-info from sorting)
+    const layersWithFeatures = layerListEntries.filter(
+      (layer) => layer.numOffeatures && layer.numOffeatures > 0 && layer.layerPath !== 'coordinate-info'
+    );
+    const layersWithoutFeatures = layerListEntries.filter((layer) => layer.numOffeatures === 0 && layer.layerPath !== 'coordinate-info');
 
     // Sort layersWithFeatures according to orderedLayers
     layersWithFeatures.sort((a, b) => {
@@ -234,6 +222,22 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
 
     // Combine the lists (features first, then no features)
     const orderedLayerListEntries = [...layersWithFeatures, ...layersWithoutFeatures];
+
+    // Add coordinate info layer at the beginning if it exists and is enabled
+    const coordinateInfoLayer = arrayOfLayerDataBatch.find((layer) => layer.layerPath === 'coordinate-info');
+    if (coordinateInfoLayer && coordinateInfoEnabled) {
+      orderedLayerListEntries.unshift({
+        layerName: coordinateInfoLayer.layerName ?? 'Coordinate Information',
+        layerPath: coordinateInfoLayer.layerPath,
+        layerStatus: coordinateInfoLayer.layerStatus,
+        queryStatus: coordinateInfoLayer.queryStatus,
+        numOffeatures: coordinateInfoLayer.features?.length ?? 0,
+        layerFeatures: getNumFeaturesLabel(coordinateInfoLayer),
+        tooltip: `${coordinateInfoLayer.layerName}, ${getNumFeaturesLabel(coordinateInfoLayer)}`,
+        layerUniqueId: `${mapId}-${TABS.DETAILS}-${coordinateInfoLayer.layerPath}`,
+      });
+    }
+
     return orderedLayerListEntries;
   }, [visibleInRangeLayers, arrayOfLayerDataBatch, coordinateInfoEnabled, isLayerHiddenOnMap, getNumFeaturesLabel, mapId, orderedLayers]);
 
@@ -356,28 +360,31 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
 
     // If feature exists but doesn't have geometry yet, set up polling
     if (featureToCheck && !featureToCheck.geometry) {
-      const intervalId = setInterval(() => {
-        const currentFeature = memoSelectedLayerDataFeatures?.[currentFeatureIndex];
+      const intervalId = doUntil(
+        () => {
+          const currentFeature = memoSelectedLayerDataFeatures?.[currentFeatureIndex];
 
-        if (hasValidGeometry(currentFeature)) {
-          // Geometry loaded! Trigger highlight by forcing a re-render
-          clearInterval(intervalId);
+          if (hasValidGeometry(currentFeature)) {
+            // Geometry loaded! Trigger highlight by forcing a re-render
+            if (isPanelOpen) {
+              addHighlightedFeature(currentFeature);
+            }
 
-          if (isPanelOpen) {
-            addHighlightedFeature(currentFeature);
+            // Force re-render to enable zoom/checkbox buttons
+            setGeometryLoaded((prev) => prev + 1);
+
+            // Return true to stop the interval
+            return true;
           }
 
-          // Force re-render to enable zoom/checkbox buttons
-          setGeometryLoaded((prev) => prev + 1);
-        }
-      }, 500); // Check every 500ms
-
-      // Cleanup interval after 30 seconds or on unmount
-      const timeoutId = setTimeout(() => clearInterval(intervalId), 30000);
+          return false;
+        },
+        500,
+        30000
+      ); // Check every 500ms, timeout after 30 seconds
 
       return () => {
         clearInterval(intervalId);
-        clearTimeout(timeoutId);
       };
     }
 

@@ -445,14 +445,16 @@ export const delay = (ms: number): Promise<void> => {
 };
 
 /**
- * Repeatedly invokes a callback function at a given interval until it returns `true`.
- * Once the callback returns `true`, the interval is cleared and the polling stops.
+ * Repeatedly invokes a callback function at a given interval until it returns `true` or until timeout is reached.
+ * Once the callback returns `true` or the timeout expires, the interval is cleared and the polling stops.
  * @param {() => T} callback - A function that is called every `ms` milliseconds.
  *                                   If it returns `true`, the interval is cleared.
  * @param {number} ms - The interval time in milliseconds between callback executions.
+ * @param {number} [timeout] - Optional timeout in milliseconds. If provided, the interval will be automatically
+ *                              cleared after this duration, regardless of callback return value.
  * @returns {ReturnType<typeof setInterval>} The interval timer ID, which can be used to clear the interval manually if needed.
  */
-export const doUntil = <T>(callback: () => T, ms: number): ReturnType<typeof setInterval> => {
+export const doUntil = <T>(callback: () => T, ms: number, timeout?: number): ReturnType<typeof setInterval> => {
   // Start a recurrent timer
   let done = false;
   const interval = setInterval(() => {
@@ -468,6 +470,16 @@ export const doUntil = <T>(callback: () => T, ms: number): ReturnType<typeof set
       clearInterval(interval);
     }
   }, ms);
+
+  // Set up timeout if provided
+  if (timeout !== undefined) {
+    setTimeout(() => {
+      if (!done) {
+        done = true;
+        clearInterval(interval);
+      }
+    }, timeout);
+  }
 
   // Return the interval timer
   return interval;

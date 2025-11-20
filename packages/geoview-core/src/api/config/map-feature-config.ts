@@ -93,7 +93,7 @@ export class MapFeatureConfig {
     this.theme = userMapFeatureConfig.theme || DEFAULT_MAP_FEATURE_CONFIG.theme;
     this.navBar = [...(userMapFeatureConfig.navBar ?? DEFAULT_MAP_FEATURE_CONFIG.navBar ?? [])];
     this.appBar = defaultsDeep(userMapFeatureConfig.appBar, DEFAULT_MAP_FEATURE_CONFIG.appBar);
-    this.footerBar = userMapFeatureConfig.footerBar;
+    this.footerBar = defaultsDeep(userMapFeatureConfig.footerBar, DEFAULT_MAP_FEATURE_CONFIG.footerBar);
     this.overviewMap = defaultsDeep(userMapFeatureConfig.overviewMap, DEFAULT_MAP_FEATURE_CONFIG.overviewMap);
     this.components = [...(userMapFeatureConfig.components ?? DEFAULT_MAP_FEATURE_CONFIG.components ?? [])];
     this.corePackages = [...(userMapFeatureConfig.corePackages ?? DEFAULT_MAP_FEATURE_CONFIG.corePackages ?? [])];
