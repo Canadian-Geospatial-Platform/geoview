@@ -197,7 +197,7 @@
         "collapsed": {
           "description": "State of footer bar when map is loaded (expanded or collapsed)",
           "type": "boolean",
-          "default": false
+          "default": true
         },
         "selectedTab": {
           "type": "string",

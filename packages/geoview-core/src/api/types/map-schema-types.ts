@@ -458,7 +458,7 @@ export const DEFAULT_MAP_FEATURE_CONFIG = {
       core: ['layers', 'data-table'],
       custom: [],
     },
-    collapsed: false,
+    collapsed: true,
   },
   components: ['north-arrow', 'overview-map'],
   appBar: { tabs: { core: ['geolocator', 'legend', 'details', 'export'] } },

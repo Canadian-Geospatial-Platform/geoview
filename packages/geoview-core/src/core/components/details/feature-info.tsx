@@ -44,6 +44,10 @@ const TYPOGRAPHY_STYLES = {
   display: 'inline-block',
 } as const;
 
+const ZOOM_PADDING = [5, 5, 5, 5];
+const ZOOM_MAX_LEVEL = 17;
+const EXTENT_BUFFER = 1000;
+
 // Extracted Header Component
 const FeatureHeader = memo(function FeatureHeader({ iconSrc, name, hasGeometry, checked, onCheckChange, onZoomIn }: FeatureHeaderProps) {
   // Hooks
@@ -170,10 +174,10 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
 
       // Buffer the extent to avoid zooming too close if it's a point
       const isPoint = featureData.geometry!.getType() === 'Point';
-      const zoomExtent = isPoint ? bufferExtent(featureData.extent, 1000) : featureData.extent;
+      const zoomExtent = isPoint ? bufferExtent(featureData.extent, EXTENT_BUFFER) : featureData.extent;
 
       // Zoom to extent and highlight the feature
-      zoomToExtent(zoomExtent, { padding: [5, 5, 5, 5], maxZoom: 17 })
+      zoomToExtent(zoomExtent, { padding: ZOOM_PADDING, maxZoom: ZOOM_MAX_LEVEL })
         .then(() => {
           // Highlight the bounding box
           if (featureData.extent && !isPoint) {
