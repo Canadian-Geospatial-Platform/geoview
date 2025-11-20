@@ -82,7 +82,7 @@ export abstract class FooterPlugin extends AbstractPlugin {
     // Log
     logger.logTraceCore('FOOTER-PLUGIN - onSelected');
 
-    // TODO: Refactor - Move 'onSelected' in AbstractPlugin class so that AppBar can eventually benefit as well?
+    // TODO: Refactor - Move 'onSelect' in AbstractPlugin class so that AppBar can eventually benefit as well?
 
     // Nothing else here.. but inherited FooterPlugins might override this method to do stuff when they are selected!
   }

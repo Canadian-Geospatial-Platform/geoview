@@ -54,7 +54,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
       super.onRegisterLayerCheck(layer) &&
       AbstractLayerSet.isQueryableType(layer) &&
       !(layer instanceof GVWMS) &&
-      AbstractLayerSet.isSourceQueryable(layer)
+      AbstractLayerSet.isSourceQueryable(layer, 'at_pixel')
     );
   }
 

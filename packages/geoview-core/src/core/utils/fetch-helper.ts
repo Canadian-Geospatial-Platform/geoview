@@ -311,10 +311,10 @@ export class Fetch {
     const text = await Fetch.fetchText(url, init, timeoutMs);
 
     // Parse the text/xml to DOM
-    const xmlDOMCapabilities = new DOMParser().parseFromString(text, 'text/xml');
+    const xmlContent = new DOMParser().parseFromString(text, 'application/xml');
 
     // Parse it using xmlToJson
-    const responseJson = xmlToJson(xmlDOMCapabilities);
+    const responseJson = xmlToJson(xmlContent);
 
     // Check if the response is not an empty object
     if (responseJson.constructor === Object && Object.keys(responseJson).length > 0) {

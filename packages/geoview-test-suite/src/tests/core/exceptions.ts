@@ -1,6 +1,6 @@
 /* eslint-disable max-classes-per-file */
 
-import type { ClassType } from './test';
+import type { ClassType } from 'geoview-core/core/types/global-types';
 
 /**
  * Custom error to indicate that an test execution (not an Assertion) has failed.
@@ -228,14 +228,14 @@ export class AssertionDefinedError extends AssertionError {
  * Custom error to indicate that a value was of wrong instance.
  * @extends {AssertionError}
  */
-export class AssertionWrongInstanceError extends AssertionError {
+export class AssertionWrongInstanceError<T> extends AssertionError {
   /**
    * Creates a new AssertionWrongInstanceError.
    * @param {any} actualObject - The actual object.
    * @param {Type} expectedClassType - The expected class.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor(actualObject: any, expectedClassType: ClassType) {
+  constructor(actualObject: any, expectedClassType: ClassType<T>) {
     // Call the base Error constructor with the provided message
     super(
       `Value class instance is '${actualObject.constructor.name}', expected was '${expectedClassType.name}'.`,
@@ -261,12 +261,12 @@ export class AssertionWrongInstanceError extends AssertionError {
  * Custom error to indicate that no Error was thrown when one was expected (true negative tests).
  * @extends {AssertionError}
  */
-export class AssertionNoErrorThrownError extends AssertionError {
+export class AssertionNoErrorThrownError<T> extends AssertionError {
   /**
    * Creates a new AssertionNoErrorThrownError.
    * @param {Type} expectedClassType - The expected class.
    */
-  constructor(expectedClassType: ClassType) {
+  constructor(expectedClassType: ClassType<T>) {
     // Call the base Error constructor with the provided message
     super(`No error was thrown when an error '${expectedClassType.name}' was expected.`, undefined, expectedClassType);
 
@@ -288,13 +288,13 @@ export class AssertionNoErrorThrownError extends AssertionError {
  * Custom error to indicate that an error was of wrong instance.
  * @extends {AssertionError}
  */
-export class AssertionWrongErrorInstanceError extends AssertionError {
+export class AssertionWrongErrorInstanceError<T> extends AssertionError {
   /**
    * Creates a new AssertionWrongErrorInstanceError.
    * @param {Error} actualError - The actual error object.
    * @param {Type} expectedClassType - The expected class.
    */
-  constructor(actualError: Error, expectedClassType: ClassType) {
+  constructor(actualError: Error, expectedClassType: ClassType<T>) {
     // Call the base Error constructor with the provided message
     super(
       `Error '${actualError.message}' instance is '${actualError.constructor.name}', expected was '${expectedClassType.name}'.`,

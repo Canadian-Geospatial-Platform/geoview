@@ -1,11 +1,12 @@
 import type VectorSource from 'ol/source/Vector';
 import type { GeoJSONObject } from 'ol/format/GeoJSON';
-import { GeoJSON as FormatGeoJSON } from 'ol/format';
 import type { Projection as OLProjection } from 'ol/proj';
 
 import type { GeoJSONLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import { Projection } from '@/geo/utils/projection';
+import { GeoUtilities } from '@/geo/utils/utilities';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Manages a GeoJSON layer.
@@ -50,7 +51,10 @@ export class GVGeoJSON extends AbstractGVVector {
     // If projection is defined
     if (projection) {
       // After a refresh, reload the Geojson Source if any
-      this.updateGeojsonSource(projection);
+      this.updateGeojsonSource(projection).catch((error: unknown) => {
+        // Log error
+        logger.logPromiseFailed('in updateGeojsonSource in GVGeoJSON.onRefresh', error);
+      });
     }
   }
 
@@ -59,19 +63,21 @@ export class GVGeoJSON extends AbstractGVVector {
    * @param {GeoJSONObject | string} geojson - The geoJSON object.
    * @param {OLProjection} projection - The output projection.
    */
-  setGeojsonSource(geojson: GeoJSONObject | string, projection: OLProjection): void {
+  async setGeojsonSource(geojson: GeoJSONObject | string, projection: OLProjection): Promise<void> {
     // Convert string to geoJSON if necessary
     const geojsonObject = typeof geojson === 'string' ? JSON.parse(geojson) : geojson;
 
     // Keep internally
     this.#geoJsonSource = geojsonObject;
 
-    // Create features from geoJSON
-    const dataProjection = geojsonObject.crs?.properties?.name || Projection.PROJECTION_NAMES.LONLAT;
-    const features = new FormatGeoJSON().readFeatures(geojsonObject, {
-      dataProjection,
-      featureProjection: projection,
-    });
+    // Read the EPSG from the data
+    const dataEPSG = GeoUtilities.readEPSGOfGeoJSON(geojsonObject);
+
+    // If found, check if we have it in Projection and try adding it if we're missing it
+    await Projection.addProjectionIfMissingUsingString(dataEPSG);
+
+    // Read the features (dataProjection can remain undefined here to let OpenLayers guess it via the GeoJSON reader)
+    const features = GeoUtilities.readFeaturesFromGeoJSON(geojsonObject, { featureProjection: projection, dataProjection: dataEPSG });
 
     // Get the OL layer
     const olLayer = this.getOLLayer();
@@ -92,11 +98,11 @@ export class GVGeoJSON extends AbstractGVVector {
    * Updates the Geojson object, if any, to reproject the features into the new provided projection.
    * @param {OLProjection} projection - The projection to project the geojson source features into.
    */
-  updateGeojsonSource(projection: OLProjection): void {
+  async updateGeojsonSource(projection: OLProjection): Promise<void> {
     // If a custom geojson is defined
     if (this.#geoJsonSource) {
       // Redirect
-      this.setGeojsonSource(this.#geoJsonSource, projection);
+      await this.setGeojsonSource(this.#geoJsonSource, projection);
     }
   }
 }

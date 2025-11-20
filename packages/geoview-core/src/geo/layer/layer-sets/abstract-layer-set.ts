@@ -11,6 +11,7 @@ import type {
   LayerStatusChangedEvent,
 } from '@/api/config/validation-classes/config-base-class';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import type { LayerApi } from '@/geo/layer/layer';
 import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
@@ -264,7 +265,7 @@ export abstract class AbstractLayerSet {
    */
   unregister(layerPath: string): void {
     // Call the unregistration function for the layer-set. This method is different for each child.
-    this.onUnregisterLayerConfig(this.layerApi.getLayerEntryConfig(layerPath));
+    this.onUnregisterLayerConfig(this.layerApi.getLayerEntryConfigIfExists(layerPath));
 
     // Call the unregistration function for the layer-set. This method is different for each child.
     this.onUnregisterLayer(this.layerApi.getGeoviewLayerIfExists(layerPath));
@@ -420,10 +421,24 @@ export abstract class AbstractLayerSet {
   /**
    * Checks if the layer config source is queryable.
    * @param {AbstractBaseLayer} layer - The layer
+   * @param {QueryType} queryType - The query type we would like to perform
    * @returns {boolean} True if the source is queryable or undefined
    */
-  protected static isSourceQueryable(layer: AbstractBaseLayer): boolean {
-    return !((layer.getLayerConfig() as AbstractBaseLayerEntryConfig)?.source?.featureInfo?.queryable === false);
+  protected static isSourceQueryable(layer: AbstractBaseLayer, queryType: QueryType): boolean {
+    // Cast
+    const layerConfigCasted = layer.getLayerConfig() as AbstractBaseLayerEntryConfig;
+
+    // Get if the source is queryable
+    let sourceIsQueryable = layerConfigCasted.getQueryableDefaulted();
+
+    // In the case of a GVWMS, for a query type of 'all', also check if we has a way to retrieve vector data
+    if (sourceIsQueryable && layer instanceof GVWMS && queryType === 'all') {
+      // If we have a WFS layer config associated with the WMS
+      sourceIsQueryable = layer.getLayerConfig().hasWfsLayerConfig();
+    }
+
+    // Return if the source is queryable
+    return sourceIsQueryable;
   }
 
   /**
@@ -446,47 +461,86 @@ export abstract class AbstractLayerSet {
    * @static
    */
   protected static alignRecordsWithOutFields(layerEntryConfig: AbstractBaseLayerEntryConfig, arrayOfRecords: TypeFeatureInfoEntry[]): void {
-    // If source featureInfo is provided, continue
-    if (layerEntryConfig.source && layerEntryConfig.source.featureInfo) {
-      const sourceFeatureInfo = layerEntryConfig.source.featureInfo;
+    // Get outfields
+    const outfields = layerEntryConfig.getOutfields();
 
-      // If outFields is provided, compare record fields with outFields to remove unwanted one
-      // If there is no outFields, this will be created in the next function patchMissingMetadataIfNecessary
-      if (sourceFeatureInfo.outfields) {
-        const outFields = sourceFeatureInfo.outfields;
+    // If outFields is provided, compare record fields with outFields to remove unwanted one
+    // If there is no outFields, this will be created in the next function patchMissingMetadataIfNecessary
+    if (outfields) {
+      // Loop the array of records to delete fields or align fields info for each record
+      arrayOfRecords.forEach((recordOriginal) => {
+        // Create a copy to avoid the no param reassign ESLint rule
+        const record = { ...recordOriginal };
+        let fieldKeyCounter = 0;
 
-        // Loop the array of records to delete fields or align fields info for each record
-        arrayOfRecords.forEach((recordOriginal) => {
-          // Create a copy to avoid the no param reassign ESLint rule
-          const record = { ...recordOriginal };
-          let fieldKeyCounter = 0;
+        const fieldsToDelete = Object.keys(record.fieldInfo).filter((fieldName) => {
+          // Look for an attribute with the name or alias (alias because a GetFeature responds with the alias in the features response!)
+          const outfield = outfields.find((f) => f.name === fieldName || f.alias === fieldName);
 
-          const fieldsToDelete = Object.keys(record.fieldInfo).filter((fieldName) => {
-            if (outFields.find((outfield) => outfield.name === fieldName)) {
-              const fieldIndex = outFields.findIndex((outfield) => outfield.name === fieldName);
-              record.fieldInfo[fieldName]!.fieldKey = fieldKeyCounter++;
-              record.fieldInfo[fieldName]!.alias = outFields[fieldIndex].alias;
-              record.fieldInfo[fieldName]!.dataType = outFields[fieldIndex].type;
-              return false; // keep this entry
-            }
+          if (outfield) {
+            const field = record.fieldInfo[fieldName]!;
+            field.fieldKey = fieldKeyCounter++;
+            field.alias = outfield.alias;
+            field.dataType = outfield.type;
+            return false; // keep this entry
+          }
 
-            return true; // delete this entry
-          });
-
-          fieldsToDelete.forEach((entryToDelete) => {
-            delete record.fieldInfo[entryToDelete];
-          });
-
-          record.fieldInfo.geoviewID = {
-            fieldKey: fieldKeyCounter,
-            alias: 'geoviewID',
-            dataType: 'string',
-            value: generateId(),
-            domain: null,
-          };
+          return true; // mark for deletion
         });
+
+        fieldsToDelete.forEach((entryToDelete) => {
+          delete record.fieldInfo[entryToDelete];
+        });
+
+        record.fieldInfo.geoviewID = {
+          fieldKey: fieldKeyCounter,
+          alias: 'geoviewID',
+          dataType: 'string',
+          value: generateId(),
+          domain: null,
+        };
+      });
+    }
+  }
+
+  /**
+   * Determines whether the retrieved feature info records contain real attribute fields
+   * (i.e., key–value properties) or whether they were returned in a fallback
+   * HTML/plain-text form, which commonly occurs with WMS `GetFeatureInfo` responses.
+   * This is used primarily to detect when a WMS service cannot return structured
+   * feature attributes and instead provides the feature data as a single HTML or
+   * plain-text block.
+   * **Logic summary:**
+   * - For WMS layers (`OgcWmsLayerEntryConfig`):
+   *   - If the first record contains exactly one property and that property is
+   *     either `html` or `plain_text`, the method considers the response *not*
+   *     to contain actual fields.
+   * - For all other cases, the method assumes records contain valid structured attributes.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig
+   *   The layer configuration used to determine whether special WMS handling applies.
+   * @param {TypeFeatureInfoEntry[]} arrayOfRecords
+   *   The retrieved feature info entries representing attributes or raw text content.
+   * @returns {boolean}
+   *   `true` if the feature info records contain real attribute fields;
+   *   `false` if they consist only of fallback HTML or plain-text content.
+   * @protected
+   * @static
+   */
+  protected static recordsContainActualFields(layerConfig: AbstractBaseLayerEntryConfig, arrayOfRecords: TypeFeatureInfoEntry[]): boolean {
+    // If the layer is WMS and there's only 1 property and it's html or plain_text, let it be, the getFeatureInfo couldn't query object by properties nicely
+    if (layerConfig instanceof OgcWmsLayerEntryConfig && arrayOfRecords.length) {
+      const { fieldInfo } = arrayOfRecords[0];
+      if (
+        Object.keys(fieldInfo).length === 1 &&
+        (Object.prototype.hasOwnProperty.call(fieldInfo, 'html') || Object.prototype.hasOwnProperty.call(fieldInfo, 'plain_text'))
+      ) {
+        // Skip
+        return false;
       }
     }
+
+    // Records have actual fields
+    return true;
   }
 
   /**

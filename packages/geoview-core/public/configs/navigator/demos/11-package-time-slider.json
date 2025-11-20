@@ -27,11 +27,28 @@
         ]
       },
       {
-        "geoviewLayerId": "historical-flood",
+        "geoviewLayerId": "historical-flood-dynamic",
+        "geoviewLayerName": "Hist. Flood Events - EsriDynamic",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",
+        "geoviewLayerType": "esriDynamic",
         "serviceDateFormat": "yyyy/mm/ddThh:mm:ssz",
-        "geoviewLayerName": "Historical Flood Events (HFE)",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "initialSettings": {
+              "states": {
+                "visible": false
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "historical-flood-feature",
+        "geoviewLayerName": "Hist. Flood Events - EsriFeature",
         "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",
         "geoviewLayerType": "esriFeature",
+        "serviceDateFormat": "yyyy/mm/ddThh:mm:ssz",
         "listOfLayerEntryConfig": [
           {
             "layerId": "0"

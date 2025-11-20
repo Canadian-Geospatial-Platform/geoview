@@ -12,6 +12,18 @@
     },
     "listOfGeoviewLayerConfig": [
       {
+        "geoviewLayerId": "Cities",
+        "geoviewLayerName": "Cities",
+        "metadataAccessPath": "https://demo.mapserver.org/cgi-bin/wms",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "cities",
+            "wfsLayerId": "ms:cities"
+          }
+        ]
+      },
+      {
         "geoviewLayerId": "ElevationHRDEM",
         "geoviewLayerName": "Elevation HRDEM Mosaic",
         "metadataAccessPath": "https://datacube.services.geo.ca/wrapper/ramp/ogc/elevation-hrdem-mosaic",
@@ -140,8 +152,7 @@
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "halifax",
-            "layerName": "Halifax"
+            "layerId": "halifax"
           },
           {
             "layerId": "victoria"
@@ -157,6 +168,44 @@
           {
             "layerId": "Photo_Plot",
             "layerName": "Photo Plot"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "ows-mundialis",
+        "geoviewLayerName": "OWS Mundialis",
+        "metadataAccessPath": "https://ows.mundialis.de/services/service",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "Dark",
+            "initialSettings": {
+              "states": {
+                "visible": false
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "LYR13-qgis",
+        "geoviewLayerName": "OpenMaps Water Management (WFS exists, but no GetStyles support)",
+        "metadataAccessPath": "https://openmaps.gov.bc.ca/geo/ows",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "pub:WHSE_WATER_MANAGEMENT.GW_WATER_WELLS_WRBC_SVW"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "LYR15-qgis",
+        "geoviewLayerName": "Elevation Raster",
+        "metadataAccessPath": "https://maps.geogratis.gc.ca/wms/elevation_en",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "cdsm.color-shaded-relief"
           }
         ]
       }

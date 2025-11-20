@@ -193,7 +193,7 @@ export class UUIDmapConfigReader {
               idClean,
               layerName,
               layerUrl,
-              serverType!,
+              serverType,
               layerIsTimeAware,
               layerEntries,
               LayerApi.DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS

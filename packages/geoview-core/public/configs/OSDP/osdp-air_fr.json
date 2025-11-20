@@ -12,25 +12,23 @@
     "listOfGeoviewLayerConfig": [
       {
         "geoviewLayerId": "5a65ad7c-561a-466a-8375-8d876624df9d",
-        "geoviewLayerName": "Émissions de polluants atmosphériques- Émissions de particules fines par installation",
-        "metadataAccessPath": "",
+        "geoviewLayerName": "Émissions de polluants atmosphériques - Émissions de particules fines par installation",
         "geoviewLayerType": "geoCore",
         "listOfLayerEntryConfig": [
           {
             "layerId": "17",
-            "layerName": "Émissions de polluants atmosphériques- Émissions de particules fines par installation"
+            "layerName": "Émissions de polluants atmosphériques - Émissions de particules fines par installation"
           }
         ]
       },
       {
         "geoviewLayerId": "305a4924-afb8-4c7d-8459-8ef309960942",
-        "geoviewLayerName": "Qualité de l’air – Concentrations de pointe de particules fines aux stations de surveillance",
-        "metadataAccessPath": "",
+        "geoviewLayerName": "Qualité de l'air - Concentrations de pointe de particules fines aux stations de surveillance",
         "geoviewLayerType": "geoCore",
         "listOfLayerEntryConfig": [
           {
             "layerId": "27",
-            "layerName": "Qualité de l’air – Concentrations de pointe de particules fines aux stations de surveillance"
+            "layerName": "Qualité de l'air - Concentrations de pointe de particules fines aux stations de surveillance"
           }
         ]
       }

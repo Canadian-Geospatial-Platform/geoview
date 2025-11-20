@@ -26,6 +26,7 @@ import { NotSupportedError } from '@/core/exceptions/core-exceptions';
  * @param {AbstractBaseLayerEntryConfig} layerConfig The layer config
  * @param {string} fieldName field name for which we want to get the type.
  * @returns {TypeOutfieldsType} The type of the field.
+ * @deprecated This function seems deprecated, it's called, but where it's called doesn't seem to be called anywhere, remove it and remove where it's called?
  */
 export function featureInfoGetFieldType(layerConfig: AbstractBaseLayerEntryConfig, fieldName: string): TypeOutfieldsType {
   // GV Can be any object so disable eslint and proceed with caution
@@ -207,6 +208,35 @@ export function esriConvertEsriGeometryTypeToOLGeometryType(esriGeometryType: st
     default:
       // Unsupported geometry type
       throw new NotSupportedError(`Unsupported geometry type: ${esriGeometryType}`);
+  }
+}
+
+/**
+ * Converts a WFS geometry type string to a TypeStyleGeometry.
+ * @param {string} wfsGeometryType - The wfs geometry type to convert
+ * @returns {TypeStyleGeometry} The corresponding TypeStyleGeometry
+ */
+export function wfsConvertGeometryTypeToOLGeometryType(wfsGeometryType: string | undefined): TypeStyleGeometry {
+  switch (wfsGeometryType) {
+    case 'gml:PointPropertyType':
+      return 'Point';
+    case 'gml:MultiPointPropertyType':
+      return 'MultiPoint';
+    case 'gml:LineStringPropertyType':
+    case 'gml:CurvePropertyType':
+      return 'LineString';
+    case 'gml:MultiLineStringPropertyType':
+    case 'gml:MultiCurvePropertyType':
+      return 'MultiLineString';
+    case 'gml:PolygonPropertyType':
+    case 'gml:SurfacePropertyType':
+      return 'Polygon';
+    case 'gml:MultiPolygonPropertyType':
+    case 'gml:MultiSurfacePropertyType':
+      return 'MultiPolygon';
+    default:
+      // Unsupported geometry type
+      throw new NotSupportedError(`Unsupported geometry type: ${wfsGeometryType}`);
   }
 }
 

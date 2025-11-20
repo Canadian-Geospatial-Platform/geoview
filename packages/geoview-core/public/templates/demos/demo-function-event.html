@@ -467,7 +467,7 @@
 
       // add an event listener when a button is clicked
       addLayerButton.addEventListener('click', async () => {
-        const wmsLayerAlreadyExists = cgpv.api.getMapViewer(mapId).layer.getLayerEntryConfigIds().includes('wmsLYR1-msi/msi-94-or-more');
+        const wmsLayerAlreadyExists = cgpv.api.getMapViewer(mapId).layer.getLayerEntryLayerPaths().includes('wmsLYR1-msi/msi-94-or-more');
         if (!wmsLayerAlreadyExists) cgpv.api.getMapViewer(mapId).layer.addGeoviewLayer(config);
         else console.log('WMS layer already exists');
       });
@@ -478,7 +478,7 @@
 
       // add an event listener when a button is clicked
       removeLayerButton.addEventListener('click', async () => {
-        const geojsonLayerAlreadyExists = cgpv.api.getMapViewer(mapId).layer.getLayerEntryConfigIds().includes('geojsonLYR1/base-group');
+        const geojsonLayerAlreadyExists = cgpv.api.getMapViewer(mapId).layer.getLayerEntryLayerPaths().includes('geojsonLYR1/base-group');
         if (geojsonLayerAlreadyExists) cgpv.api.getMapViewer(mapId).layer.removeLayerUsingPath('geojsonLYR1/base-group');
         else console.log('GeoJSON layer does not exist');
       });

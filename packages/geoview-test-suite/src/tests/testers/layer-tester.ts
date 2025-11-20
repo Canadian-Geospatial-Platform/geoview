@@ -20,6 +20,7 @@ import { WKB } from 'geoview-core/geo/layer/geoview-layers/vector/wkb';
 import { KML } from 'geoview-core/geo/layer/geoview-layers/vector/kml';
 import type { GeoViewLayerAddedResult } from 'geoview-core/geo/layer/layer';
 import type { TypeMapFeaturesInstance } from 'geoview-core/api/types/map-schema-types';
+import type { TypeLegendItem } from 'geoview-core/core/components/layers/types';
 
 /**
  * Main Layer testing class.
@@ -68,11 +69,103 @@ export class LayerTester extends GVAbstractTester {
       (test) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        return LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath);
+        LayerTester.helperStepAssertLayerExists(
+          test,
+          this.getMapViewer(),
+          layerPath,
+          undefined,
+          GVAbstractTester.HISTORICAL_FLOOD_ICON_LIST
+        );
       },
       (test) => {
         // Redirect to helper to clean up and assert
         LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests the behavior of initializing a Geocore layer pointing to an Esri Dynamic layer containing Raster Layers.
+   * @returns {Promise<Test<AbstractGVLayer>>}
+   * A promise that resolves with the test result, expecting a `AbstractGVLayer`.
+   */
+  testAddEsriDynamicWithRasterLayersViaGeocore(): Promise<Test<AbstractGVLayer>> {
+    const gvLayerId = GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_UUID;
+    const layerPathGroup = gvLayerId + '/' + GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_GROUP;
+    const layerPathPetroleum = gvLayerId + '/' + GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_PETROLEUM;
+    const layerPathMinerals = gvLayerId + '/' + GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_MINERALS;
+    const layerPathForestry = gvLayerId + '/' + GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_FORESTRY;
+    const layerPathFisheries = gvLayerId + '/' + GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_FISHERIES;
+    const layerPathAgriculture = gvLayerId + '/' + GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_AGRICULTURE;
+    const layerPathCanecumene = gvLayerId + '/' + GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_CANECUMENE;
+
+    // Test
+    return this.test(
+      `Test Adding Esri Dynamic with Raster Layers via Geocore...`,
+      async (test) => {
+        // Creating the configuration
+        test.addStep('Creating the GeoView Layer Configuration...');
+
+        // Redirect to helper to add the layer to the map and wait
+        await LayerTester.helperStepAddLayerOnMapFromUUID(test, this.getMapViewer(), gvLayerId);
+
+        // Find the layer and wait until its ready
+        await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPathPetroleum);
+        await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPathMinerals);
+        await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPathForestry);
+        await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPathFisheries);
+        await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPathAgriculture);
+        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPathCanecumene);
+      },
+      (test) => {
+        // Perform assertions
+        // Redirect to helper to check if the layer exists
+        LayerTester.helperStepAssertLayerExists(
+          test,
+          this.getMapViewer(),
+          layerPathPetroleum,
+          undefined,
+          GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_PETROLEUM_ICON_LIST
+        );
+        LayerTester.helperStepAssertLayerExists(
+          test,
+          this.getMapViewer(),
+          layerPathMinerals,
+          undefined,
+          GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_MINERALS_ICON_LIST
+        );
+        LayerTester.helperStepAssertLayerExists(
+          test,
+          this.getMapViewer(),
+          layerPathForestry,
+          undefined,
+          GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_FORESTRY_ICON_LIST
+        );
+        LayerTester.helperStepAssertLayerExists(
+          test,
+          this.getMapViewer(),
+          layerPathFisheries,
+          undefined,
+          GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_FISHERIES_ICON_LIST
+        );
+        LayerTester.helperStepAssertLayerExists(
+          test,
+          this.getMapViewer(),
+          layerPathAgriculture,
+          undefined,
+          GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_AGRICULTURE_ICON_LIST
+        );
+        LayerTester.helperStepAssertLayerExists(
+          test,
+          this.getMapViewer(),
+          layerPathCanecumene,
+          undefined,
+          GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_CANECUMENE_ICON_LIST
+        );
+      },
+      (test) => {
+        // Redirect to helper to clean up and assert
+        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPathGroup);
       }
     );
   }
@@ -116,56 +209,6 @@ export class LayerTester extends GVAbstractTester {
     );
   }
 
-  /**
-   * Tests the behavior of initializing a Geocore layer pointing to an Esri Dynamic layer containing Raster Layers.
-   * @returns {Promise<Test<AbstractGVLayer>>}
-   * A promise that resolves with the test result, expecting a `AbstractGVLayer`.
-   */
-  testAddEsriDynamicWithRasterLayersViaGeocore(): Promise<Test<AbstractGVLayer>> {
-    const gvLayerId = GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_UUID;
-    const layerPathGroup = gvLayerId + '/' + GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_GROUP;
-    const layerPathPetroleum = gvLayerId + '/' + GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_PETROLEUM;
-    const layerPathMinerals = gvLayerId + '/' + GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_MINERALS;
-    const layerPathForestry = gvLayerId + '/' + GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_FORESTRY;
-    const layerPathFisheries = gvLayerId + '/' + GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_FISHERIES;
-    const layerPathAgriculture = gvLayerId + '/' + GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_AGRICULTURE;
-    const layerPathCanecumene = gvLayerId + '/' + GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_CANECUMENE;
-
-    // Test
-    return this.test(
-      `Test Adding Esri Dynamic with Raster Layers via Geocore...`,
-      async (test) => {
-        // Creating the configuration
-        test.addStep('Creating the GeoView Layer Configuration...');
-
-        // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMapFromUUID(test, this.getMapViewer(), gvLayerId);
-
-        // Find the layer and wait until its ready
-        await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPathPetroleum);
-        await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPathMinerals);
-        await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPathForestry);
-        await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPathFisheries);
-        await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPathAgriculture);
-        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPathCanecumene);
-      },
-      (test) => {
-        // Perform assertions
-        // Redirect to helper to check if the layer exists
-        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPathPetroleum);
-        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPathMinerals);
-        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPathForestry);
-        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPathFisheries);
-        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPathAgriculture);
-        return LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPathCanecumene);
-      },
-      (test) => {
-        // Redirect to helper to clean up and assert
-        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPathGroup);
-      }
-    );
-  }
-
   // #endregion ESRI DYNAMIC
 
   // #region ESRI FEATURE
@@ -202,7 +245,13 @@ export class LayerTester extends GVAbstractTester {
       (test) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        return LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath);
+        LayerTester.helperStepAssertLayerExists(
+          test,
+          this.getMapViewer(),
+          layerPath,
+          undefined,
+          GVAbstractTester.FOREST_INDUSTRY_ICON_LIST
+        );
       },
       (test) => {
         // Redirect to helper to clean up and assert
@@ -284,7 +333,7 @@ export class LayerTester extends GVAbstractTester {
       (test) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        return LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath);
+        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath);
       },
       (test) => {
         // Redirect to helper to clean up and assert
@@ -336,7 +385,7 @@ export class LayerTester extends GVAbstractTester {
         // Perform assertions
         // Redirect to helper to check if the layer exists
         LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPathCities);
-        return LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPathRoads);
+        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPathRoads);
       },
       (test) => {
         // Redirect to helper to clean up and assert
@@ -396,7 +445,6 @@ export class LayerTester extends GVAbstractTester {
     const layerUrl = GVAbstractTester.OWS_MUNDIALIS;
     const layerPath = gvLayerId + '/' + GVAbstractTester.OWS_MUNDIALIS_LAYER_ID;
     const gvLayerName = 'OWS Mundialis';
-    const hasStyle: boolean = false;
 
     // Test
     return this.test(
@@ -410,7 +458,7 @@ export class LayerTester extends GVAbstractTester {
           gvLayerId,
           gvLayerName,
           layerUrl,
-          'mapserver',
+          undefined,
           false,
           [{ id: GVAbstractTester.OWS_MUNDIALIS_LAYER_ID }],
           false
@@ -420,12 +468,12 @@ export class LayerTester extends GVAbstractTester {
         await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
 
         // Find the layer and wait until its ready
-        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath, hasStyle);
+        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath, undefined, false);
       },
       (test) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        return LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath, hasStyle);
+        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath, GVAbstractTester.OWS_MUNDIALIS_ICON_IMAGE);
       },
       (test) => {
         // Redirect to helper to clean up and assert
@@ -444,7 +492,6 @@ export class LayerTester extends GVAbstractTester {
     const layerUrl = GVAbstractTester.DATACUBE_MSI;
     const layerPath = gvLayerId + '/' + GVAbstractTester.DATACUBE_MSI_LAYER_NAME_MSI_OR_MORE;
     const gvLayerName = 'Datacube MSI';
-    const hasStyle: boolean = false;
 
     // Test
     return this.test(
@@ -458,7 +505,7 @@ export class LayerTester extends GVAbstractTester {
           gvLayerId,
           gvLayerName,
           layerUrl,
-          'mapserver',
+          undefined,
           false,
           [{ id: GVAbstractTester.DATACUBE_MSI_LAYER_NAME_MSI_OR_MORE }],
           false
@@ -468,12 +515,12 @@ export class LayerTester extends GVAbstractTester {
         await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
 
         // Find the layer and wait until its ready
-        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath, hasStyle);
+        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath, undefined, false);
       },
       (test) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        return LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath, hasStyle);
+        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath, GVAbstractTester.DATACUBE_MSI_ICON_IMAGE);
       },
       (test) => {
         // Redirect to helper to clean up and assert
@@ -492,7 +539,6 @@ export class LayerTester extends GVAbstractTester {
     const layerUrl = GVAbstractTester.DATACUBE_RING_FIRE;
     const layerPath = gvLayerId + '/' + GVAbstractTester.DATACUBE_RING_FIRE_LAYER_ID_HALIFAX;
     const gvLayerName = 'Halifax';
-    const hasStyle: boolean = false;
 
     // Test
     return this.test(
@@ -506,7 +552,7 @@ export class LayerTester extends GVAbstractTester {
           gvLayerId,
           gvLayerName,
           layerUrl,
-          'mapserver',
+          undefined,
           false,
           [{ id: GVAbstractTester.DATACUBE_RING_FIRE_LAYER_ID_HALIFAX }],
           false
@@ -516,12 +562,17 @@ export class LayerTester extends GVAbstractTester {
         await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
 
         // Find the layer and wait until its ready
-        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath, hasStyle);
+        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath, undefined, false);
       },
       (test) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        return LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath, hasStyle);
+        LayerTester.helperStepAssertLayerExists(
+          test,
+          this.getMapViewer(),
+          layerPath,
+          GVAbstractTester.DATACUBE_RING_FIRE_HALIFAX_ICON_IMAGE
+        );
       },
       (test) => {
         // Redirect to helper to clean up and assert
@@ -551,7 +602,7 @@ export class LayerTester extends GVAbstractTester {
     // Test
     return this.testError(
       `Test Adding WMS with bad url...`,
-      LayerNoCapabilitiesError,
+      LayerServiceMetadataUnableToFetchError,
       async (test) => {
         // Creating the configuration
         test.addStep('Creating the GeoView Layer Configuration...');
@@ -561,7 +612,7 @@ export class LayerTester extends GVAbstractTester {
           gvLayerId,
           gvLayerName,
           layerUrl,
-          'mapserver',
+          undefined,
           false,
           [{ id: GVAbstractTester.DATACUBE_MSI_LAYER_NAME_MSI_OR_MORE }],
           false
@@ -614,7 +665,7 @@ export class LayerTester extends GVAbstractTester {
       (test) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        return LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath);
+        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath, undefined, GVAbstractTester.GEOMET_ICON_LIST);
       },
       (test) => {
         // Redirect to helper to clean up and assert
@@ -737,7 +788,13 @@ export class LayerTester extends GVAbstractTester {
       (test) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        return LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath);
+        LayerTester.helperStepAssertLayerExists(
+          test,
+          this.getMapViewer(),
+          layerPath,
+          undefined,
+          GVAbstractTester.GEOJSON_POLYGONS_ICON_LIST
+        );
       },
       (test) => {
         // Redirect to helper to clean up and assert
@@ -804,7 +861,6 @@ export class LayerTester extends GVAbstractTester {
     const layerUrl = GVAbstractTester.GEOTIFF_VEGETATION;
     const gvLayerName = 'Datacube Vegetation';
     const layerPath = gvLayerId + '/' + GVAbstractTester.GEOTIFF_VEGETATION_FILE;
-    const hasStyle: boolean = false;
 
     // Test
     return this.test(
@@ -821,13 +877,13 @@ export class LayerTester extends GVAbstractTester {
         // Redirect to helper to add the layer to the map and wait
         await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
 
-        // Find the layer and wait until its ready
-        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath, hasStyle);
+        // Find the layer and wait until its ready, wait longer than default timeout, because TIFF
+        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath, 60000, false);
       },
       (test) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        return LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath, hasStyle);
+        return LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath);
       },
       (test) => {
         // Redirect to helper to clean up and assert
@@ -916,7 +972,7 @@ export class LayerTester extends GVAbstractTester {
       (test) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        return LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath);
+        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath, undefined, GVAbstractTester.CSV_STATION_ICON_LIST);
       },
       (test) => {
         // Redirect to helper to clean up and assert
@@ -1005,7 +1061,13 @@ export class LayerTester extends GVAbstractTester {
       (test) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        return LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath);
+        LayerTester.helperStepAssertLayerExists(
+          test,
+          this.getMapViewer(),
+          layerPath,
+          undefined,
+          GVAbstractTester.PYGEOAPI_B6RYUVAKK5_LAKES_ICON_LIST
+        );
       },
       (test) => {
         // Redirect to helper to clean up and assert
@@ -1067,7 +1129,6 @@ export class LayerTester extends GVAbstractTester {
     const layerUrl = GVAbstractTester.WKB_SOUTH_AFRICA;
     const layerPath = gvLayerId + '/' + GVAbstractTester.WKB_SOUTH_AFRICA;
     const gvLayerName = 'WKB South Africa';
-    const hasStyle: boolean = false;
 
     // Test
     return this.test(
@@ -1083,12 +1144,12 @@ export class LayerTester extends GVAbstractTester {
         await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
 
         // Find the layer and wait until its ready
-        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath, hasStyle);
+        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath, undefined, false);
       },
       (test) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        return LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath, hasStyle);
+        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath);
       },
       (test) => {
         // Redirect to helper to clean up and assert
@@ -1153,7 +1214,6 @@ export class LayerTester extends GVAbstractTester {
     const layerUrl = GVAbstractTester.KML_TORNADO;
     const layerPath = gvLayerId + '/' + GVAbstractTester.KML_TORNADO_FILE;
     const gvLayerName = 'KML Tornado';
-    const hasStyle: boolean = false;
 
     // Test
     return this.test(
@@ -1169,12 +1229,12 @@ export class LayerTester extends GVAbstractTester {
         await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
 
         // Find the layer and wait until its ready
-        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath, hasStyle);
+        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath, undefined, false);
       },
       (test) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        return LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath, hasStyle);
+        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath);
       },
       (test) => {
         // Redirect to helper to clean up and assert
@@ -1311,9 +1371,6 @@ export class LayerTester extends GVAbstractTester {
     // Wait for the layer to be fully added on the map
     await result.promiseLayer;
 
-    // Throw if errors
-    result.layer.throwAggregatedLayerLoadErrors();
-
     // Return the layer
     return result;
   }
@@ -1344,9 +1401,6 @@ export class LayerTester extends GVAbstractTester {
     // Wait for the layer to be fully added on the map
     await result?.promiseLayer;
 
-    // Throw if errors
-    result?.layer.throwAggregatedLayerLoadErrors();
-
     // Return the layer
     return result;
   }
@@ -1354,10 +1408,10 @@ export class LayerTester extends GVAbstractTester {
   /**
    * Adds a GeoView layer to the map, waits for it to load completely, and returns the loaded layer instance.
    * Each step of the process is logged into the provided test instance for traceability and debugging.
-   * @param {TypeGeoviewLayerConfig} gvConfig - The configuration object defining the GeoView layer to be added.
    * @param {Test<AbstractGVLayer>} test - The test instance used to log each step in the layer setup process.
    * @param {MapViewer} mapViewer - The map viewer to which the layer will be added.
    * @param {string} layerPath - The unique path or ID used to retrieve the added layer from the map viewer.
+   * @param {number} timeoutOnLoad - A timeout for the period to wait for the layer to be loaded. Defaults to 30,000 ms.
    * @param {boolean} [waitStyle] - Indicates if should wait for the style to be applied (expecting a style icon). Default: true.
    * @returns {Promise<AbstractGVLayer>} A promise that resolves to the fully loaded GeoView layer instance.
    * @static
@@ -1366,6 +1420,7 @@ export class LayerTester extends GVAbstractTester {
     test: Test<T>,
     mapViewer: MapViewer,
     layerPath: string,
+    timeoutOnLoad: number = 30000,
     waitStyle: boolean = true
   ): Promise<AbstractGVLayer> {
     // Creating the configuration
@@ -1378,7 +1433,7 @@ export class LayerTester extends GVAbstractTester {
     test.addStep(`Waiting for the layer to be loaded...`);
 
     // Wait until the layer has at least loaded once
-    await layer.waitLoadedOnce();
+    await layer.waitLoadedOnce(timeoutOnLoad);
 
     // Wait until the legend has been fetched
     test.addStep(`Wait for the legend to be fetched...`);
@@ -1397,17 +1452,24 @@ export class LayerTester extends GVAbstractTester {
   /**
    * Asserts that a layer with the given path exists in the map's legend store.
    * Logs the verification step in the test instance.
-   * @param {Test<AbstractGVLayer>} test - The test instance used to record the verification step.
+   * If `checkIconImage` or `checkIconsList` is provided, this method will also
+   * verify that the layer's style has been applied by delegating to
+   * `helperStepAssertStyleApplied`.
+   * @param {Test<AbstractGVLayer>} test - The test instance used to record the verification steps.
    * @param {MapViewer} mapViewer - The map viewer instance containing the layer store.
    * @param {string} layerPath - The path or ID of the layer to verify.
-   * @param {boolean} [checkStyle] - Indicates if should check that a style has been applied (a style icon was expected). Default: true.
+   * @param {string} [checkIconImage] - Optional expected icon image.
+   *   If provided, the function will additionally check that the legend contains a matching icon.
+   * @param {TypeLegendItem[]} [checkIconsList] - Optional list of expected legend icon items.
+   *   If provided, the function will additionally verify that the legend's icon list matches this array.
    * @static
    */
   static helperStepAssertLayerExists(
     test: Test<AbstractGVLayer>,
     mapViewer: MapViewer,
     layerPath: string,
-    checkStyle: boolean = true
+    checkIconImage?: string,
+    checkIconsList?: Partial<TypeLegendItem>[]
   ): void {
     // Get the layer legend
     const legendLayer = LegendEventProcessor.getLegendLayerInfo(mapViewer.mapId, layerPath);
@@ -1417,21 +1479,35 @@ export class LayerTester extends GVAbstractTester {
     Test.assertIsDefined('legendLayer', legendLayer);
 
     // If checking the style
-    if (checkStyle) {
+    if (checkIconImage || checkIconsList) {
       // Redirect
-      this.helperStepAssertStyleApplied(test, mapViewer, layerPath);
+      this.helperStepAssertStyleApplied(test, mapViewer, layerPath, checkIconImage, checkIconsList);
     }
   }
 
   /**
    * Asserts that a layer with the given path has icons for its style.
    * Logs the verification step in the test instance.
-   * @param {Test<AbstractGVLayer>} test - The test instance used to record the verification step.
+   * This validates that the layer's legend contains at least one icon and that the
+   * first icon indicates a valid style (i.e., the icon image is present and not `"no data"`).
+   * Optionally validates:
+   * - that the first icon's image matches `checkIconImage`
+   * - that the first icon's list of legend items matches `checkIconsList`
+   *
+   * @param {Test<AbstractGVLayer>} test - The test instance used to record the verification steps.
    * @param {MapViewer} mapViewer - The map viewer instance containing the layer store.
-   * @param {string} layerPath - The path or ID of the layer to verify.
+   * @param {string} layerPath - The path or ID of the layer whose style icons are being verified.
+   * @param {string} [checkIconImage] - Optional expected icon image to validate against the legend.
+   * @param {TypeLegendItem[]} [checkIconsList] - Optional expected list of legend icon items.
    * @static
    */
-  static helperStepAssertStyleApplied(test: Test<AbstractGVLayer>, mapViewer: MapViewer, layerPath: string): void {
+  static helperStepAssertStyleApplied(
+    test: Test<AbstractGVLayer>,
+    mapViewer: MapViewer,
+    layerPath: string,
+    checkIconImage?: string,
+    checkIconsList?: Partial<TypeLegendItem>[]
+  ): void {
     // Get the layer legend from the store
     const legendLayer = LegendEventProcessor.getLegendLayerInfo(mapViewer.mapId, layerPath);
 
@@ -1443,6 +1519,20 @@ export class LayerTester extends GVAbstractTester {
     const firstIcon = legendLayer!.icons[0];
     const hasStyleIcon = firstIcon.iconImage && firstIcon.iconImage !== 'no data';
     Test.assertIsEqual(hasStyleIcon, true);
+
+    // If checking the icon image
+    if (checkIconImage) {
+      // Verify the layer has icon image
+      test.addStep(`Verify the legend has an icon image...`);
+      Test.assertIsEqual(firstIcon.iconImage, checkIconImage);
+    }
+
+    // If comparing the icons list
+    if (checkIconsList) {
+      // Verify the layer has icons list
+      test.addStep(`Verify each legend icon information...`);
+      Test.assertIsArrayEqualJsons(firstIcon.iconList!, checkIconsList);
+    }
   }
 
   /**

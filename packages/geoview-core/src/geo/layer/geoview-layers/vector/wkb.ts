@@ -1,13 +1,12 @@
 import type { Options as SourceOptions } from 'ol/source/Vector';
 import { WKB as FormatWkb } from 'ol/format';
-import type { ReadOptions } from 'ol/format/Feature';
 import type { Vector as VectorSource } from 'ol/source';
 import type Feature from 'ol/Feature';
 
 import defaultsDeep from 'lodash/defaultsDeep';
 
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
-import type { TypeGeoviewLayerConfig, TypeBaseVectorSourceInitialConfig, TypeMetadataGeoJSON } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerConfig, TypeMetadataGeoJSON } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { WkbLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
 import type { VectorLayerEntryConfig, VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
@@ -175,23 +174,20 @@ export class WKB extends AbstractGeoViewVector {
    * Overrides the creation of the source configuration for the vector layer.
    * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration.
    * @param {SourceOptions} sourceOptions - The source options.
-   * @param {ReadOptions} readOptions - The read options.
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
+   * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
    */
   protected override onCreateVectorSource(
     layerConfig: VectorLayerEntryConfig,
-    sourceOptions: SourceOptions<Feature>,
-    readOptions: ReadOptions
+    sourceOptions: SourceOptions<Feature>
   ): VectorSource<Feature> {
     // eslint-disable-next-line no-param-reassign
-    readOptions.dataProjection = (layerConfig.source as TypeBaseVectorSourceInitialConfig).dataProjection;
-    // eslint-disable-next-line no-param-reassign
-    sourceOptions.url = layerConfig.source!.dataAccessPath!;
+    sourceOptions.url = layerConfig.getDataAccessPath();
     // eslint-disable-next-line no-param-reassign
     sourceOptions.format = new FormatWkb();
 
     // Call parent
-    return super.onCreateVectorSource(layerConfig, sourceOptions, readOptions);
+    return super.onCreateVectorSource(layerConfig, sourceOptions);
   }
 
   /**
@@ -296,7 +292,7 @@ export class WKB extends AbstractGeoViewVector {
         layerName: `${layerEntry.layerName || layerEntry.id}`,
         source: {
           format: 'WKB',
-          dataAccessPath: layerEntry.source?.dataAccessPath || metadataAccessPath,
+          dataAccessPath: layerEntry.source?.dataAccessPath,
         },
       });
       return layerEntryConfig;

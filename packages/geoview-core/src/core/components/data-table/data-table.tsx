@@ -44,7 +44,6 @@ import { isImage, delay } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import { VALID_DISPLAY_LANGUAGE } from '@/api/types/map-schema-types';
-import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { useFilterRows, useToolbarActionMessage, useGlobalFilter } from './hooks';
 import { getSxClasses } from './data-table-style';
 import { useLightBox } from '@/core/components/common';
@@ -304,16 +303,16 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
       let { extent } = feature;
 
       // Get oid field
-      const oidField =
-        feature && feature.fieldInfo
-          ? Object.keys(feature.fieldInfo).find((key) => feature.fieldInfo[key]!.dataType === 'oid') || undefined
-          : undefined;
+      let oidField: string | undefined;
+      if (feature && feature.fieldInfo) {
+        oidField = Object.keys(feature.fieldInfo).find((key) => feature.fieldInfo[key]?.dataType === 'oid');
+      }
 
-      // If there is no extent, but there's an OID field (ESRI Dynamic layer?)
-      if (!extent && oidField !== undefined) {
+      // If there is no extent, but there's an OID field (ESRI Dynamic layer / WMS with associated WFS) ?
+      if (!extent && oidField) {
         try {
           // Get the feature extent using its oid field
-          extent = await getExtentFromFeatures(layerPath, [feature.fieldInfo[oidField]!.value as string], oidField);
+          extent = await getExtentFromFeatures(layerPath, [feature.fieldInfo[oidField]!.value as number], oidField);
         } catch (error: unknown) {
           // Log error
           logger.logError(error);
@@ -344,6 +343,9 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
             // Log
             logger.logPromiseFailed('zoomToExtent in handleZoomIn in FeatureInfoNew', error);
           });
+      } else {
+        // Log error
+        logger.logError('Cannot zoom to feature, no extent found.');
       }
     },
     [
@@ -395,7 +397,7 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
             onClick={() => {
               handleZoomIn(feature).catch((error) => logger.logError('Zoom failed:', error));
             }}
-            disabled={!feature.extent && feature.geoviewLayerType !== CONST_LAYER_TYPES.ESRI_DYNAMIC}
+            disabled={!feature.supportZoomTo}
           >
             <ZoomInSearchIcon />
           </IconButton>

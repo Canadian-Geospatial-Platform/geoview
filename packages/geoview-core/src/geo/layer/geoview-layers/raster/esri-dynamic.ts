@@ -11,7 +11,6 @@ import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 
 import { commonProcessLayerMetadata, commonValidateListOfLayerEntryConfig } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { logger } from '@/core/utils/logger';
-import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 import { deepMergeObjects } from '@/core/utils/utilities';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
@@ -289,28 +288,22 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * Creates an ImageArcGISRest source from a layer config.
    * @param {EsriDynamicLayerEntryConfig} layerConfig - The configuration for the EsriDynamic layer.
    * @returns {ImageArcGISRest} A fully configured ImageArcGISRest source.
-   * @throws If required config fields like dataAccessPath are missing.
+   * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
    */
   static createEsriDynamicSource(layerConfig: EsriDynamicLayerEntryConfig): ImageArcGISRest {
-    const { source } = layerConfig;
-
-    if (!source?.dataAccessPath) {
-      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
-    }
-
     const sourceOptions: SourceOptions = {
-      url: source.dataAccessPath,
+      url: layerConfig.getDataAccessPath(),
       attributions: layerConfig.getAttributions(),
       params: {
         LAYERS: `show:${layerConfig.layerId}`,
-        ...(source.transparent !== undefined && { transparent: source.transparent }),
-        ...(source.format && { format: source.format }),
+        ...(layerConfig.source.transparent !== undefined && { transparent: layerConfig.source.transparent }),
+        ...(layerConfig.source.format && { format: layerConfig.source.format }),
       },
-      crossOrigin: source.crossOrigin ?? 'Anonymous',
+      crossOrigin: layerConfig.source.crossOrigin ?? 'Anonymous',
     };
 
     // If forcing service projection so that OpenLayers takes care of reprojecting locally on the map
-    if (source.forceServiceProjection) {
+    if (layerConfig.source.forceServiceProjection) {
       // Find the SRID from the layer metadata
       const srid =
         layerConfig.getLayerMetadata()?.sourceSpatialReference?.latestWkid || layerConfig.getLayerMetadata()?.sourceSpatialReference?.wkid;

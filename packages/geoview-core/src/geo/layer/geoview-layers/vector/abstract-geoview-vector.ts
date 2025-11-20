@@ -2,14 +2,13 @@ import Feature from 'ol/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import type { Options as SourceOptions } from 'ol/source/Vector';
 import { all, bbox } from 'ol/loadingstrategy';
-import type { ReadOptions } from 'ol/format/Feature';
 import type { Projection as OLProjection, ProjectionLike } from 'ol/proj';
 import { Point } from 'ol/geom';
 import type { Extent } from 'ol/extent';
 import { getUid } from 'ol/util';
 
 import type { TypeOutfields } from '@/api/types/map-schema-types';
-import type { TypeBaseVectorSourceInitialConfig, TypeFeatureInfoLayerConfig, TypePostSettings } from '@/api/types/layer-schema-types';
+import type { TypePostSettings } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -20,14 +19,11 @@ import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-class
 import { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { Projection } from '@/geo/utils/projection';
 import { Fetch } from '@/core/utils/fetch-helper';
-import {
-  LayerDataAccessPathMandatoryError,
-  LayerNoGeographicDataInCSVError,
-  LayerTooManyEsriFeatures,
-} from '@/core/exceptions/layer-exceptions';
+import { LayerNoGeographicDataInCSVError, LayerTooManyEsriFeatures } from '@/core/exceptions/layer-exceptions';
 import { LayerEntryConfigVectorSourceURLNotDefinedError } from '@/core/exceptions/layer-entry-config-exceptions';
 import type { WkbLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
 import type { GeoJSONLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
+import { GeoUtilities } from '@/geo/utils/utilities';
 
 // Some constants
 const EXCLUDED_HEADERS_LAT = ['latitude', 'lat', 'y', 'ycoord', 'latitude|latitude', 'latitude | latitude'];
@@ -52,14 +48,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @returns An initialized VectorSource ready for use in a layer.
    */
   createVectorSource(layerConfig: VectorLayerEntryConfig): VectorSource<Feature> {
-    // Validate the dataAccessPath exists
-    if (!layerConfig.source?.dataAccessPath) {
-      // Throw error missing dataAccessPath
-      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
-    }
-
     // Redirect
-    return this.onCreateVectorSource(layerConfig, {}, {});
+    return this.onCreateVectorSource(layerConfig, {});
   }
 
   /**
@@ -76,16 +66,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * Overridable function to create a source configuration for the vector layer.
    * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration.
    * @param {SourceOptions} sourceOptions - The source options (default: { strategy: all }).
-   * @param {ReadOptions} readOptions - The read options (default: {}).
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
-  protected onCreateVectorSource(
-    layerConfig: VectorLayerEntryConfig,
-    sourceOptions: SourceOptions<Feature>,
-    readOptions: ReadOptions
-  ): VectorSource<Feature> {
+  protected onCreateVectorSource(layerConfig: VectorLayerEntryConfig, sourceOptions: SourceOptions<Feature>): VectorSource<Feature> {
     // If any attributions
-    if (layerConfig.getAttributions().length > 0) {
+    if (layerConfig.getAttributions()?.length || 0 > 0) {
       // eslint-disable-next-line no-param-reassign
       sourceOptions.attributions = layerConfig.getAttributions();
     }
@@ -102,8 +87,6 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     // eslint-disable-next-line no-param-reassign, @typescript-eslint/no-misused-promises
     sourceOptions.loader = async (extent: Extent, resolution: number, projection: OLProjection, successCallback, failureCallback) => {
       try {
-        let responseText;
-
         // TODO: Refactor - Here, the url is resolved by eventually grabbing it back from the OpenLayer source object.
         // TO.DOCONT: The url should probably never have been 'set' in the OpenLayer Source in the first place.
         // TO.DOCONT: Refactor this for a cleaner getUrl override per layer type class.
@@ -114,46 +97,81 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         // Resolve the url
         const url = AbstractGeoViewVector.#resolveUrl(layerConfig, vectorSource, extent, resolution, projection);
 
+        // If not WKB layer
+        let responseData;
         if (layerConfig.getSchemaTag() !== CONST_LAYER_TYPES.WKB) {
-          // Cast it to a GeoJson layer type, because we treat WKB entry configs like GeoJson's
+          // Cast it to a GeoJson layer type
           const layerConfigGeoJSON = layerConfig as GeoJSONLayerEntryConfig;
 
-          // Fetch the data, or use passed geoJSON if present
-          responseText = layerConfigGeoJSON.source?.geojson
-            ? layerConfigGeoJSON.source.geojson
-            : await AbstractGeoViewVector.#fetchData(url, layerConfig.source?.postSettings);
-        } else responseText = layerConfig.source!.dataAccessPath as string;
+          // If GeoJson is present
+          if (layerConfigGeoJSON.source?.geojson) {
+            // As-is
+            responseData = layerConfigGeoJSON.source.geojson;
+          } else {
+            // Have to fetch it
+            // If we're working with WFS
+            if (layerConfig.getSchemaTag() === CONST_LAYER_TYPES.WFS) {
+              try {
+                // Format the url
+                const urlWithOutputJson = url + '&outputFormat=application/json';
+                const responseJson = await AbstractGeoViewVector.#fetchText(urlWithOutputJson, layerConfig.source?.postSettings);
+
+                // Parse the output into JSON to confirm the service returned correct information
+                responseData = JSON.parse(responseJson);
+              } catch {
+                // Eat the error, we tried...
+              }
+            }
+
+            // If responseData not set yet (either WFS call with outputFormat=application/json has failed or we're working with something else)
+            if (!responseData) {
+              try {
+                // Use the basic fetch and hope for the best
+                responseData = await AbstractGeoViewVector.#fetchText(url, layerConfig.source?.postSettings);
+
+                try {
+                  // Try to parse the output into JSON again in case it works now
+                  responseData = JSON.parse(responseData);
+                } catch {
+                  // Eat the error, we tried to put it as json...
+                  // Let's see what happens with the responseData we have so far - for the rest of the process
+                }
+              } catch (error: unknown) {
+                // Log
+                logger.logError(`Failed to fetch the features for the layer ${layerConfig.layerPath}`, error);
+
+                // Rethrow
+                throw error;
+              }
+            }
+          }
+        } else {
+          // Is WKB format
+          responseData = layerConfig.getDataAccessPath();
+        }
 
         // If Esri Feature
         if (layerConfig instanceof EsriFeatureLayerEntryConfig) {
           // Check and throw exception if the content actually contains an embedded error
           // (EsriFeature type of response might return an embedded error inside a 200 HTTP OK)
-          Fetch.throwIfResponseHasEmbeddedError(responseText);
+          Fetch.throwIfResponseHasEmbeddedError(responseData);
 
           // Check if feature count is too large
-          if (JSON.parse(responseText).count > MAX_ESRI_FEATURES) {
+          if (responseData.count > MAX_ESRI_FEATURES) {
             this.emitMessage(
               'validation.layer.tooManyEsriFeatures',
-              [layerConfig.getLayerNameCascade(), JSON.parse(responseText).count],
+              [layerConfig.getLayerNameCascade(), responseData.count],
               'error',
               true
             );
 
             // Throw
-            throw new LayerTooManyEsriFeatures(layerConfig.layerId, layerConfig.getLayerNameCascade(), JSON.parse(responseText).count);
+            throw new LayerTooManyEsriFeatures(layerConfig.layerId, layerConfig.getLayerNameCascade(), responseData.count);
           }
         }
 
         // Parse the result of the fetch to read the features
-        const features = await AbstractGeoViewVector.#parseFeatures(
-          url,
-          responseText,
-          layerConfig,
-          vectorSource,
-          projection,
-          extent,
-          readOptions
-        );
+        const features = await AbstractGeoViewVector.#parseFeatures(url, responseData, layerConfig, vectorSource, projection, extent);
 
         // If no features read, alright, let's put the layer to loaded right away as it's never going to get loaded otherwise
         if (!features || features.length === 0) {
@@ -197,8 +215,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   /**
    * Parses raw response text into OpenLayers features based on the layer's schema type.
    * Handles CSV, ESRI feature services, and default formats supported by the vector source.
-   * @param {string} url - The URL used to retrieve the data (relevant for ESRI_FEATURE schema).
-   * @param {string} responseText - The raw text response from the data request.
+   * @param {string} urlForEsriFeatures - The URL used to retrieve the data (relevant for ESRI_FEATURE schema).
+   * @param {unknown} responseData - The raw response from the data request.
    * @param {VectorLayerEntryConfig} layerConfig - The configuration object for the layer.
    * @param {VectorSource<Feature>} source - The vector source containing format information for parsing.
    * @param {ProjectionLike} projection - The projection to use when reading features.
@@ -208,50 +226,51 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @private
    */
   static async #parseFeatures(
-    url: string,
-    responseText: string,
+    urlForEsriFeatures: string,
+    responseData: unknown,
     layerConfig: VectorLayerEntryConfig,
     source: VectorSource<Feature>,
-    projection: ProjectionLike,
-    extent: Extent,
-    readOptions: ReadOptions
+    featureProjection: ProjectionLike,
+    extent: Extent
   ): Promise<Feature[] | undefined> {
     // TODO: Refactor - Consider changing the return type to Promise<Feature[]>
+
+    // The read options
+    const options = { dataProjection: layerConfig.source?.dataProjection, featureProjection, extent };
 
     switch (layerConfig.getSchemaTag()) {
       case CONST_LAYER_TYPES.CSV:
         // Attempt to convert CSV text to OpenLayers features
-        return AbstractGeoViewVector.#convertCsv(responseText, layerConfig, Projection.getProjectionFromString(projection));
+        return AbstractGeoViewVector.#convertCsv(
+          responseData as string,
+          layerConfig,
+          Projection.getProjectionFromString(featureProjection)
+        );
 
       case CONST_LAYER_TYPES.ESRI_FEATURE: {
         // Parse the count of features from the initial ESRI response
-        const { count } = JSON.parse(responseText);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { count } = responseData as any;
 
         // Determine the maximum number of records allowed
         const maxRecords = layerConfig.getLayerMetadataCasted()?.maxRecordCount;
 
         // Retrieve the full ESRI feature data
-        const esriData = await AbstractGeoViewVector.#getEsriFeatures(url, count, maxRecords);
+        const esriData = await AbstractGeoViewVector.#getEsriFeatures(urlForEsriFeatures, count, maxRecords);
 
         // Convert each ESRI response chunk to features and flatten the result
-        return esriData.flatMap((json) =>
-          source.getFormat()!.readFeatures(json, {
-            ...readOptions,
-            featureProjection: projection,
-            extent,
-          })
-        );
+        return esriData.flatMap((json) => source.getFormat()!.readFeatures(json, options));
       }
 
       case CONST_LAYER_TYPES.WKB: {
+        // Read the data projection
+        options.dataProjection ??= layerConfig.source?.dataProjection || 'EPSG:4326'; // default: 4326 because OpenLayers struggles to figure it out by itself for WKB here
+
+        // TODO: Add a WKB reader by using the code we have in GVWKB like: const features = new FormatWkb().readFeatures(wkbObject,
         if ((layerConfig as WkbLayerEntryConfig).source.geoPackageFeatures?.length) {
-          const { geoPackageFeatures, dataProjection } = (layerConfig as WkbLayerEntryConfig).source;
+          const { geoPackageFeatures } = (layerConfig as WkbLayerEntryConfig).source;
           const features = geoPackageFeatures!.map(({ geom, properties }) => {
-            const feature = source.getFormat()!.readFeatures(geom, {
-              ...readOptions,
-              dataProjection,
-              featureProjection: projection,
-            })[0];
+            const feature = source.getFormat()!.readFeatures(geom, options)[0];
             if (properties) feature.setProperties(properties);
 
             return feature;
@@ -260,20 +279,36 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
           return features;
         }
 
-        return source.getFormat()!.readFeatures(responseText, {
-          ...readOptions,
-          featureProjection: projection,
-          extent,
-        });
+        // Fallback to using default read method (is this really used?)
+        return source.getFormat()!.readFeatures(responseData, options);
       }
 
-      default:
-        // Fallback to using the format's default read method
-        return source.getFormat()!.readFeatures(responseText, {
-          ...readOptions,
-          featureProjection: projection,
-          extent,
-        });
+      default: {
+        // Check if the data is GeoJSON
+
+        if (GeoUtilities.isGeoJSONObject(responseData)) {
+          // Read the EPSG from the data
+          const dataEPSG = GeoUtilities.readEPSGOfGeoJSON(responseData);
+
+          // If found, check if we have it in Projection and try adding it if we're missing it
+          await Projection.addProjectionIfMissingUsingString(dataEPSG);
+
+          // Assign the data projection reading options best we can, otherwise use the config, otherwise leave it undefined to let OpenLayers figure it out by itself using the GeoJSON parser later
+          // https://openlayers.org/en/latest/apidoc/module-ol_format_GeoJSON-GeoJSON.html
+          options.dataProjection = dataEPSG || layerConfig.source?.dataProjection;
+
+          // The layer supports GeoJSON, great
+          return GeoUtilities.readFeaturesFromGeoJSON(responseData, options);
+        } else {
+          // The output isn't GeoJSON, probably XML/GML
+          // Use the features response to determine the EPSG of the data, otherwise use the config otherwise force it to 4326, because OpenLayers struggles to figure it out by itself here
+          const dataEPSG = GeoUtilities.readEPSGOfGML(responseData);
+          options.dataProjection = dataEPSG || layerConfig.source?.dataProjection || 'EPSG:4326'; // default: 4326
+
+          // Fallback to using the format's default read method and hope for the best
+          return source.getFormat()!.readFeatures(responseData, options);
+        }
+      }
     }
   }
 
@@ -284,11 +319,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @private
    */
   #normalizeDateFields(features: Feature[], layerConfig: VectorLayerEntryConfig): void {
-    // Extract the vector source configuration
-    const config = layerConfig.source as TypeBaseVectorSourceInitialConfig;
-
     // Get all fields declared as type 'date' in the feature info config
-    const dateFields = config.featureInfo?.outfields?.filter((f) => f.type === 'date');
+    const dateFields = layerConfig.getOutfields()?.filter((f) => f.type === 'date');
     if (!dateFields?.length) return;
 
     // Iterate over each feature to normalize its date fields
@@ -305,7 +337,6 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
           if (!this.serverDateFragmentsOrder) {
             this.serverDateFragmentsOrder = DateMgt.getDateFragmentsOrder(DateMgt.deduceDateFormat(value));
           }
-
           const dateStr = DateMgt.applyInputDateFormat(value, this.serverDateFragmentsOrder);
           feature.set(field.name, DateMgt.convertToMilliseconds(dateStr), true);
         }
@@ -382,7 +413,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @returns {Promise<string>} A promise that resolves to the fetched text response.
    * @private
    */
-  static #fetchData(url: string, postSettings?: TypePostSettings): Promise<string> {
+  static #fetchText(url: string, postSettings?: TypePostSettings): Promise<string> {
     // Default to a GET request
     const fetchOptions: RequestInit = { method: 'GET' };
 
@@ -434,13 +465,13 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     // GV: This function and the below private static ones used to be in the CSV class directly, but something wasn't working with a 'Private element not accessible' error.
     // GV: After moving the code to the mother class, it worked. It'll remain here for now until the config refactoring can take care of it in its re-writing
 
-    const inProjection: string = layerConfig.source!.dataProjection || Projection.PROJECTION_NAMES.LONLAT;
+    const inProjection: string = layerConfig.source.dataProjection || Projection.PROJECTION_NAMES.LONLAT; // default: LONLAT
     const inProjectionConv: OLProjection = Projection.getProjectionFromString(inProjection);
 
     const features: Feature[] = [];
     let latIndex: number | undefined;
     let lonIndex: number | undefined;
-    const csvRows = AbstractGeoViewVector.#csvStringToArray(csvData, layerConfig.source!.separator || ',');
+    const csvRows = AbstractGeoViewVector.#csvStringToArray(csvData, layerConfig.source.separator || ',');
     const headers: string[] = csvRows[0];
     for (let i = 0; i < headers.length; i++) {
       if (EXCLUDED_HEADERS_LAT.includes(headers[i].toLowerCase())) latIndex = i;
@@ -537,17 +568,15 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     excludedHeaders: string[],
     layerConfig: VectorLayerEntryConfig
   ): void {
-    // eslint-disable-next-line no-param-reassign
-    if (!layerConfig.source) layerConfig.source = {};
-
-    // eslint-disable-next-line no-param-reassign
-    if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: true };
+    // Get the outfields
+    let outfields = layerConfig.getOutfields();
 
     // Process undefined outfields or aliasFields
-    if (!layerConfig.source.featureInfo.outfields?.length) {
-      // eslint-disable-next-line no-param-reassign
-      if (!layerConfig.source.featureInfo.outfields) layerConfig.source.featureInfo.outfields = [];
+    if (!outfields?.length) {
+      // Create it
+      outfields = [];
 
+      // Loop
       headers.forEach((header, index) => {
         // If not excluded
         if (!excludedHeaders.includes(header)) {
@@ -566,33 +595,34 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
             type: type as 'string' | 'number',
             domain: null,
           };
-          layerConfig.source!.featureInfo!.outfields!.push(newOutfield);
+          outfields!.push(newOutfield);
         }
       });
+
+      // Set it
+      layerConfig.setOutfields(outfields);
     }
 
-    layerConfig.source.featureInfo.outfields.forEach((outfield) => {
-      // eslint-disable-next-line no-param-reassign
-      if (!outfield.alias) outfield.alias = outfield.name;
-    });
+    // Initialize the aliases
+    layerConfig.initOutfieldsAliases();
 
-    // Set name field to first value
-    if (!layerConfig.source.featureInfo.nameField) {
+    // If no name field
+    const nameField = layerConfig.getNameField();
+    if (!nameField) {
       // Try to set nameField to a name field
-      const nameField = NAME_FIELD_KEYWORDS.reduce<TypeOutfields | undefined>((found, keyword) => {
+      const newNameField = NAME_FIELD_KEYWORDS.reduce<TypeOutfields | undefined>((found, keyword) => {
         if (found) return found;
-        return layerConfig.source!.featureInfo!.outfields!.find((field) => {
+        return outfields.find((field) => {
           return new RegExp(keyword, 'i').test(field.name);
         });
       }, undefined);
 
-      if (nameField || layerConfig.source?.featureInfo?.outfields?.length)
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.source.featureInfo.nameField = nameField ? nameField.name : layerConfig.source.featureInfo.outfields[0].name;
+      // Set the name field to the first attribute by default if no nameField is specified already
+      layerConfig.initNameField(newNameField?.name ?? outfields?.[0]?.name);
     }
 
-    // eslint-disable-next-line no-param-reassign
-    if (!layerConfig.source.featureInfo.outfields.length) layerConfig.source.featureInfo.queryable = false;
+    // Vector layer only queryable if there are fields
+    layerConfig.initQueryable(outfields.length > 0);
   }
 
   /**
@@ -608,15 +638,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   // TO.DOCONT: This should be renamed without the esri. The oid type should be mandatory and if not present, we should crate one.
   // TO.DOCONT: We already create the internalGeoviewId but we should make this more officiel by assigning a type of oid
   static #getEsriOidField(layerConfig: AbstractBaseLayerEntryConfig): string {
-    // Get oid field
-    const featureInfo = layerConfig.source?.featureInfo as TypeFeatureInfoLayerConfig;
-    const outfields = featureInfo?.outfields;
-
-    if (featureInfo && outfields && outfields.length > 0) {
-      const oidField = outfields.find((field) => field.type === 'oid');
-      return oidField?.name ?? 'OBJECTID';
-    }
-
-    return 'OBJECTID';
+    // Get outfields
+    const outfields = layerConfig.getOutfields();
+    const oidField = outfields?.find((field) => field.type === 'oid');
+    return oidField?.name ?? 'OBJECTID';
   }
 }

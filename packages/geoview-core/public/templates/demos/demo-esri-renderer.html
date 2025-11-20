@@ -49,7 +49,7 @@
     </div>
 
     <div class="demo-section">
-      <h4>Output Style Configuration:</h4>
+      <h4>Geoview Output Style Configuration:</h4>
       <div class="editor">
         <div class="line-numbers" id="outputLineNumbers">
           <span></span>
@@ -75,6 +75,7 @@
     <script>
       insertPageHeader();
 
+      // TODO: Minor - Get rid of this line number generation happening manually and use codemirror like in demo-wfs-renderer
       // Function used to generate line numbers in the input and output containers.
       generateLineNumbers = (textContainerId, lineNumbersContainerId) => {
         const textarea = document.getElementById(textContainerId);

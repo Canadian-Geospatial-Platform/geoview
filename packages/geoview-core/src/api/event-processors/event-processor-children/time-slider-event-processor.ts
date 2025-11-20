@@ -244,9 +244,8 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
 
     // If the field type has an alias, use that as a label
     let fieldAlias = field;
-    const featureInfo = layerConfig.source?.featureInfo;
-    if (featureInfo) {
-      const { outfields } = featureInfo;
+    const outfields = layerConfig.getOutfields();
+    if (outfields) {
       const timeOutfield = outfields ? outfields.find((outfield) => outfield.name === field) : undefined;
       if (timeOutfield) fieldAlias = timeOutfield.alias;
     }
