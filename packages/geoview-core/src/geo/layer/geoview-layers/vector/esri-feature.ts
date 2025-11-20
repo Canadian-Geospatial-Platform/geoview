@@ -1,7 +1,6 @@
 import type { Vector as VectorSource } from 'ol/source';
 import type { Options as SourceOptions } from 'ol/source/Vector';
 import { EsriJSON } from 'ol/format';
-import type { ReadOptions } from 'ol/format/Feature';
 import type Feature from 'ol/Feature';
 
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
@@ -152,23 +151,19 @@ export class EsriFeature extends AbstractGeoViewVector {
    * Overrides the creation of the source configuration for the vector layer.
    * @param {EsriFeatureLayerEntryConfig} layerConfig - The layer entry configuration.
    * @param {SourceOptions} sourceOptions - The source options.
-   * @param {ReadOptions} readOptions - The read options.
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
   protected override onCreateVectorSource(
     layerConfig: EsriFeatureLayerEntryConfig,
-    sourceOptions: SourceOptions<Feature>,
-    readOptions: ReadOptions
+    sourceOptions: SourceOptions<Feature>
   ): VectorSource<Feature> {
     // eslint-disable-next-line no-param-reassign
-    sourceOptions.url = layerConfig.source.dataAccessPath!;
-    // eslint-disable-next-line no-param-reassign
-    sourceOptions.url = `${sourceOptions.url}${layerConfig.layerId}/query?f=json&where=1%3D1&returnCountOnly=true`;
+    sourceOptions.url = `${layerConfig.getDataAccessPath(true)}${layerConfig.layerId}/query?f=json&where=1%3D1&returnCountOnly=true`;
     // eslint-disable-next-line no-param-reassign
     sourceOptions.format = new EsriJSON();
 
     // Call parent
-    return super.onCreateVectorSource(layerConfig, sourceOptions, readOptions);
+    return super.onCreateVectorSource(layerConfig, sourceOptions);
   }
 
   /**

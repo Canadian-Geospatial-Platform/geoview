@@ -521,6 +521,7 @@ export function AddNewLayer(): JSX.Element {
     // Remove unwanted items from sources before proceeding
     if (newGeoViewLayer.listOfLayerEntryConfig?.length)
       newGeoViewLayer.listOfLayerEntryConfig.forEach((layerEntryConfig) => {
+        // TODO: Check - What is this doing? setting layerEntryConfig.source only when it's already set to something? Shouldn't it be the contrary?
         // eslint-disable-next-line no-param-reassign
         if (layerEntryConfig.source) layerEntryConfig.source = { dataAccessPath: layerEntryConfig.source.dataAccessPath };
       });

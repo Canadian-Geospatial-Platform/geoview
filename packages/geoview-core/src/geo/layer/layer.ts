@@ -19,7 +19,6 @@ import { logger } from '@/core/utils/logger';
 
 import type {
   AbstractGeoViewLayer,
-  LayerEntryProcessedEvent,
   LayerGroupCreatedEvent,
   LayerEntryRegisterInitEvent,
   LayerGVCreatedEvent,
@@ -64,7 +63,7 @@ import { FeatureInfoLayerSet } from '@/geo/layer/layer-sets/feature-info-layer-s
 import { formatError, NotSupportedError } from '@/core/exceptions/core-exceptions';
 import {
   LayerCreatedTwiceError,
-  LayerDifferingFieldLengths,
+  LayerDifferingFieldLengthsError,
   LayerNotFoundError,
   LayerNotGeoJsonError,
   LayerNotQueryableError,
@@ -89,7 +88,7 @@ import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVGeoJSON } from '@/geo/layer/gv-layers/vector/gv-geojson';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 import { GVWMS, type ImageLoadRescueDelegate, type ImageLoadRescueEvent } from '@/geo/layer/gv-layers/raster/gv-wms';
-import { getExtentUnion, getZoomFromScale } from '@/geo/utils/utilities';
+import { GeoUtilities } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 
 import type { EventDelegateBase } from '@/api/events/event-helper';
@@ -286,10 +285,54 @@ export class LayerApi {
    */
   getGeoviewLayerIds(): string[] {
     const uniqueIds = new Set<string>();
-    for (const layerPath of this.getLayerEntryConfigIds()) {
+    for (const layerPath of this.getLayerEntryLayerPaths()) {
       uniqueIds.add(layerPath.split('/')[0]);
     }
     return Array.from(uniqueIds);
+  }
+
+  /**
+   * Verifies if a layer is registered. Returns true if registered.
+   * @param {string} layerPath - The layer path to check.
+   * @returns {boolean} Returns true if the layer configuration is registered.
+   */
+  isLayerEntryConfigRegistered(layerPath: string): boolean {
+    return !!this.#layerEntryConfigs[layerPath];
+  }
+
+  /**
+   * Gets the Layer Entry layer paths
+   * @returns {string[]} The GeoView Layer Paths
+   */
+  getLayerEntryLayerPaths(): string[] {
+    return Object.keys(this.#layerEntryConfigs);
+  }
+
+  /**
+   * Gets the Layer Entry Configs
+   * @returns {string[]} The GeoView Layer Entry Configs
+   */
+  getLayerEntryConfigs(): ConfigBaseClass[] {
+    return Object.values(this.#layerEntryConfigs);
+  }
+
+  /**
+   * Gets the layer configuration of the specified layer path.
+   * @param {string} layerPath The layer path.
+   * @returns {ConfigBaseClass | undefined} The layer configuration or undefined if not found.
+   */
+  getLayerEntryConfig(layerPath: string): ConfigBaseClass | undefined {
+    // TODO: Refactor ALEX - LayerApi - Throw an exception when not found! Use 'getLayerEntryConfigIfExists' when it can be undefined.
+    return this.#layerEntryConfigs?.[layerPath];
+  }
+
+  /**
+   * Gets the layer configuration of the specified layer path.
+   * @param {string} layerPath The layer path.
+   * @returns {ConfigBaseClass | undefined} The layer configuration or undefined if not found.
+   */
+  getLayerEntryConfigIfExists(layerPath: string): ConfigBaseClass | undefined {
+    return this.#layerEntryConfigs?.[layerPath];
   }
 
   /**
@@ -332,51 +375,6 @@ export class LayerApi {
    */
   getGeoviewLayerIfExists(layerPath: string): AbstractBaseLayer | undefined {
     return this.#gvLayers[layerPath];
-  }
-
-  /**
-   * Verifies if a layer is registered. Returns true if registered.
-   * @param {string} layerPath - The layer path to check.
-   * @returns {boolean} Returns true if the layer configuration is registered.
-   */
-  isLayerEntryConfigRegistered(layerPath: string): boolean {
-    return !!this.#layerEntryConfigs[layerPath];
-  }
-
-  /**
-   * Gets the Layer Entry Config Ids
-   * @returns {string[]} The GeoView Layer Ids
-   */
-  getLayerEntryConfigIds(): string[] {
-    // TODO: Refactor - This function could be removed eventually?
-    return Object.keys(this.#layerEntryConfigs);
-  }
-
-  /**
-   * Gets the Layer Entry Configs
-   * @returns {string[]} The GeoView Layer Entry Configs
-   */
-  getLayerEntryConfigs(): ConfigBaseClass[] {
-    return Object.values(this.#layerEntryConfigs);
-  }
-
-  /**
-   * Gets the layer configuration of the specified layer path.
-   * @param {string} layerPath The layer path.
-   * @returns {ConfigBaseClass | undefined} The layer configuration or undefined if not found.
-   */
-  getLayerEntryConfig(layerPath: string): ConfigBaseClass | undefined {
-    // TODO: Refactor - LayerApi - Throw an exception when not found! Use 'getLayerEntryConfigIfExists' when it can be undefined.
-    return this.#layerEntryConfigs?.[layerPath];
-  }
-
-  /**
-   * Gets the layer configuration of the specified layer path.
-   * @param {string} layerPath The layer path.
-   * @returns {ConfigBaseClass | undefined} The layer configuration or undefined if not found.
-   */
-  getLayerEntryConfigIfExists(layerPath: string): ConfigBaseClass | undefined {
-    return this.#layerEntryConfigs?.[layerPath];
   }
 
   /**
@@ -614,21 +612,13 @@ export class LayerApi {
       // Process the addition of the layer
       const result: GeoViewLayerAddedResult = this.#addGeoviewLayerStep2(geoviewLayerConfig, abortSignal);
 
-      // Upon termination, we want to check if there was any errors and log/show them within this addGeoviewLayer function which can be called from external
-      result.promiseLayer
-        .then(() => {
-          // GV This is the major resolver of the layer processing.
-          // GV.CONT The layer processing has completed, though it's possible that we piled up Errors in the layerLoadErrors.
+      // If any errors happened during the processing, we want to show them in the notifications
+      result.promiseLayer.catch((error: unknown) => {
+        // GV This is the major catcher of many possible layer processing issues
 
-          // Time to throw to log/show any/all errors that happened during the layer processing
-          result.layer.throwAggregatedLayerLoadErrors();
-        })
-        .catch((error: unknown) => {
-          // GV This is the major catcher of many possible layer processing issues
-
-          // Show the error(s).
-          this.showLayerError(error, geoviewLayerConfig.geoviewLayerId);
-        });
+        // Show the error(s).
+        this.showLayerError(error, geoviewLayerConfig.geoviewLayerId);
+      });
 
       // Return the result
       return result;
@@ -685,25 +675,27 @@ export class LayerApi {
     // Register a callback when layer wants to send a message
     layerBeingAdded.onLayerMessage(this.#handleLayerMessage.bind(this));
 
-    // Register a callback when layer entry config has become processed (catching on-the-fly layer entry configs as they are further processed)
-    layerBeingAdded.onLayerEntryProcessed((geoviewLayer: AbstractGeoViewLayer, event: LayerEntryProcessedEvent) => {
-      // Log
-      logger.logTraceCore(
-        `LAYERS - 6 - Layer entry config processed for ${event.config.layerPath} on map ${this.getMapId()}`,
-        event.config.layerStatus,
-        event.config
-      );
+    // TODO: Cleanup - Remove commented code
+    // GV Commenting this out as I don't think it's useful anymore, let's see after a couple rounds of testing (2025-11-21)
+    // // Register a callback when layer entry config has become processed (catching on-the-fly layer entry configs as they are further processed)
+    // layerBeingAdded.onLayerEntryProcessed((geoviewLayer: AbstractGeoViewLayer, event: LayerEntryProcessedEvent) => {
+    //   // Log
+    //   logger.logTraceCore(
+    //     `LAYERS - 6 - Layer entry config processed for ${event.config.layerPath} on map ${this.getMapId()}`,
+    //     event.config.layerStatus,
+    //     event.config
+    //   );
 
-      // If is an AbstractBaseLayerEntryConfig
-      if (event.config instanceof AbstractBaseLayerEntryConfig) {
-        // Set the map layer queryable - default to queryable as this will be overridden if not queryable
-        MapEventProcessor.setMapLayerQueryable(
-          this.getMapId(),
-          event.config.layerPath,
-          event.config.source?.featureInfo?.queryable !== undefined ? event.config.source.featureInfo.queryable : true
-        );
-      }
-    });
+    //   // If is an AbstractBaseLayerEntryConfig
+    //   if (event.config instanceof AbstractBaseLayerEntryConfig) {
+    //     // Set the map layer queryable - default to queryable as this will be overridden if not queryable
+    //     MapEventProcessor.setMapLayerQueryable(
+    //       this.getMapId(),
+    //       event.config.layerPath,
+    //       event.config.source?.featureInfo?.queryable !== undefined ? event.config.source.featureInfo.queryable : true
+    //     );
+    //   }
+    // });
 
     // Register a callback when a Group Layer has been created
     layerBeingAdded.onLayerGroupCreated((geoviewLayer: AbstractGeoViewLayer, event: LayerGroupCreatedEvent) => {
@@ -777,6 +769,9 @@ export class LayerApi {
             this.mapViewer.notifications.showWarning('warning.layer.kmlLayerWarning', [], true);
         })
         .catch((error: unknown) => {
+          // Log error
+          GeoViewError.logError(error, this.mapViewer.getDisplayLanguage());
+
           // Reject it higher, because that's not where we want to handle the promise failure, we're returning the promise higher
           reject(formatError(error));
         });
@@ -865,7 +860,7 @@ export class LayerApi {
             this.reloadLayer((sublayerEntryConfig as AbstractBaseLayerEntryConfig).layerPath);
         });
       } else {
-        this.getLayerEntryConfigIds().forEach((registeredLayerPath) => {
+        this.getLayerEntryLayerPaths().forEach((registeredLayerPath) => {
           if (registeredLayerPath.startsWith(`${layerPath}/`) || registeredLayerPath === layerPath) {
             // Remove actual OL layer from the map
             const layer = this.getOLLayerIfExists(registeredLayerPath);
@@ -1004,7 +999,7 @@ export class LayerApi {
    * Removes all geoview layers from the map
    */
   removeAllGeoviewLayers(): void {
-    this.getLayerEntryConfigIds().forEach((layerEntryConfigId) => {
+    this.getLayerEntryLayerPaths().forEach((layerEntryConfigId) => {
       // Remove it
       this.removeLayerUsingPath(layerEntryConfigId);
     });
@@ -1030,7 +1025,7 @@ export class LayerApi {
       this.removeHighlightLayer();
 
     // Reset the result set for the layer and any children
-    this.getLayerEntryConfigIds().forEach((registeredLayerPath) => {
+    this.getLayerEntryLayerPaths().forEach((registeredLayerPath) => {
       if (registeredLayerPath.startsWith(`${layerPath}/`) || registeredLayerPath === layerPath) {
         // Remove feature highlight and result set for features from this layer
         FeatureInfoEventProcessor.resetResultSet(this.getMapId(), registeredLayerPath, 'name');
@@ -1067,7 +1062,7 @@ export class LayerApi {
       const listOfLayerEntryConfigAffected = this.getLayerEntryConfig(layerPath)?.getParentLayerConfig()?.listOfLayerEntryConfig;
 
       // Remove layer info from registered layers
-      this.getLayerEntryConfigIds().forEach((registeredLayerPath) => {
+      this.getLayerEntryLayerPaths().forEach((registeredLayerPath) => {
         if (registeredLayerPath.startsWith(`${layerPath}/`) || registeredLayerPath === layerPath) {
           // Remove actual OL layer from the map
           const layer = this.getOLLayerIfExists(registeredLayerPath);
@@ -1167,7 +1162,7 @@ export class LayerApi {
 
     // If found
     if (layer && layer.getEntryTypeIsGroup()) {
-      this.getLayerEntryConfigIds().forEach((registeredLayerPath) => {
+      this.getLayerEntryLayerPaths().forEach((registeredLayerPath) => {
         // Trying to get the layer associated with the layer path, can be undefined because the layer might be in error
         const theLayer = this.getGeoviewLayerIfExists(registeredLayerPath);
         if (theLayer) {
@@ -1181,7 +1176,7 @@ export class LayerApi {
         }
       });
     } else {
-      this.getLayerEntryConfigIds().forEach((registeredLayerPath) => {
+      this.getLayerEntryLayerPaths().forEach((registeredLayerPath) => {
         // Trying to get the layer associated with the layer path, can be undefined because the layer might be in error
         const theLayer = this.getGeoviewLayerIfExists(registeredLayerPath);
         if (theLayer) {
@@ -1208,7 +1203,7 @@ export class LayerApi {
 
       // IF found and a group
       if (layerConfig?.getEntryTypeIsGroup()) {
-        this.getLayerEntryConfigIds().forEach((registeredLayerPath) => {
+        this.getLayerEntryLayerPaths().forEach((registeredLayerPath) => {
           // Trying to get the layer associated with the layer path, can be undefined because the layer might be in error
           const theLayer = this.getGeoviewLayerIfExists(registeredLayerPath);
           if (theLayer) {
@@ -1222,7 +1217,7 @@ export class LayerApi {
           }
         });
       } else {
-        this.getLayerEntryConfigIds().forEach((registeredLayerPath) => {
+        this.getLayerEntryLayerPaths().forEach((registeredLayerPath) => {
           // Trying to get the layer associated with the layer path, can be undefined because the layer might be in error
           const theLayer = this.getGeoviewLayerIfExists(registeredLayerPath);
           if (theLayer) {
@@ -1245,12 +1240,12 @@ export class LayerApi {
    * @param {string[]} layerIds - IDs or layerPaths of layers to get max extents from.
    * @returns {Extent} The overall extent.
    */
-  getExtentOfMultipleLayers(layerIds: string[] = this.getLayerEntryConfigIds()): Extent {
+  getExtentOfMultipleLayers(layerIds: string[] = this.getLayerEntryLayerPaths()): Extent {
     let bounds: Extent = [];
 
     layerIds.forEach((layerId) => {
       // Get sublayerpaths and layerpaths from layer IDs.
-      const subLayerPaths = this.getLayerEntryConfigIds().filter(
+      const subLayerPaths = this.getLayerEntryLayerPaths().filter(
         (layerPath) => layerPath.startsWith(`${layerId}/`) || layerPath === layerId
       );
 
@@ -1262,7 +1257,7 @@ export class LayerApi {
 
           // If bounds has not yet been defined, set to this layers bounds.
           if (!bounds.length && layerBounds) bounds = layerBounds;
-          else if (layerBounds) bounds = getExtentUnion(bounds, layerBounds)!;
+          else if (layerBounds) bounds = GeoUtilities.getExtentUnion(bounds, layerBounds)!;
         });
       }
     });
@@ -1298,6 +1293,7 @@ export class LayerApi {
       // Assign value to registered layer. This is use by applyFilter function to set visibility
       // TODO: check if we need to refactor to centralize attribute setting....
       const geometryStyleConfig = layer.getStyle()![item.geometryType];
+
       // Get all styles with the label matching the name of the clicked item and update their visibility
       const toggledStyleInfos = geometryStyleConfig?.info.filter((styleInfo) => styleInfo.label === item.name);
       toggledStyleInfos?.forEach((toggledStyleInfo) => {
@@ -1325,7 +1321,7 @@ export class LayerApi {
    * @param {boolean} newValue - The new visibility.
    */
   setAllLayersVisibility(newValue: boolean): void {
-    this.getLayerEntryConfigIds().forEach((layerPath) => {
+    this.getLayerEntryLayerPaths().forEach((layerPath) => {
       this.setOrToggleLayerVisibility(layerPath, newValue);
     });
   }
@@ -1384,7 +1380,7 @@ export class LayerApi {
    * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
    * @throws {LayerNotGeoJsonError} Error thrown when the layer is not a GeoJson layer.
    */
-  setGeojsonSource(layerPath: string, geojson: GeoJSONObject | string): void {
+  async setGeojsonSource(layerPath: string, geojson: GeoJSONObject | string): Promise<void> {
     // Get the map id
     const mapId = this.getMapId();
 
@@ -1395,7 +1391,7 @@ export class LayerApi {
     if (!(gvLayer instanceof GVGeoJSON)) throw new LayerNotGeoJsonError(layerPath, gvLayer.getLayerName());
 
     // Override the GeoJson source
-    gvLayer.setGeojsonSource(geojson, this.mapViewer.getProjection());
+    await gvLayer.setGeojsonSource(geojson, this.mapViewer.getProjection());
 
     // Update the bounds in the store
     const bounds = gvLayer.getBounds(this.mapViewer.getProjection(), MapViewer.DEFAULT_STOPS);
@@ -1429,19 +1425,18 @@ export class LayerApi {
     // Cast it
     const layerConfigCasted = layerConfig as AbstractBaseLayerEntryConfig;
 
-    if (
-      layerConfigCasted.source?.featureInfo &&
-      layerConfigCasted.source.featureInfo.queryable !== false &&
-      layerConfigCasted.source.featureInfo.outfields
-    ) {
+    // Get outfields
+    const outfields = layerConfigCasted.getOutfields();
+
+    if (outfields && layerConfigCasted.source?.featureInfo && layerConfigCasted.source.featureInfo.queryable !== false) {
       // Convert the provided field names to an array so we can index
-      if (layerConfigCasted.source.featureInfo.outfields.length === fieldNames.length)
+      if (outfields.length === fieldNames.length)
         // Override existing values in each outfield with provided field name
-        layerConfigCasted.source.featureInfo.outfields?.forEach((outfield, index) => {
+        outfields.forEach((outfield, index) => {
           // eslint-disable-next-line no-param-reassign
           outfield[fields] = fieldNames[index];
         });
-      else throw new LayerDifferingFieldLengths(layerPath);
+      else throw new LayerDifferingFieldLengthsError(layerPath);
     } else throw new LayerNotQueryableError(layerConfigCasted.layerPath, layerConfigCasted.getLayerNameCascade());
   }
 
@@ -1461,11 +1456,11 @@ export class LayerApi {
     // Cast it
     const layerConfigCasted = layerConfig as AbstractBaseLayerEntryConfig;
 
-    if (
-      layerConfigCasted.source?.featureInfo &&
-      layerConfigCasted.source.featureInfo.queryable !== false &&
-      layerConfigCasted.source.featureInfo.outfields
-    ) {
+    // Get outfields
+    const outfields = layerConfigCasted.getOutfields();
+
+    // If has fields and queryable
+    if ((outfields?.length || 0) > 0 && layerConfigCasted.getQueryableDefaulted()) {
       // Ensure same number of all items are provided
       if (fieldNames.length === types.length) {
         // Convert to array of outfields
@@ -1478,9 +1473,9 @@ export class LayerApi {
           };
         });
 
-        // Set new value asfeature info outfields
-        layerConfigCasted.source.featureInfo.outfields = newOutfields;
-      } else throw new LayerDifferingFieldLengths(layerPath);
+        // Set new outfields
+        layerConfigCasted.setOutfields(newOutfields);
+      } else throw new LayerDifferingFieldLengthsError(layerPath);
     } else throw new LayerNotQueryableError(layerConfigCasted.layerPath, layerConfigCasted.getLayerNameCascade());
   }
 
@@ -1506,7 +1501,7 @@ export class LayerApi {
     let boundsUnion: Extent | undefined;
     boundsArray.forEach((bounds) => {
       // Union the bounds with each other
-      boundsUnion = getExtentUnion(boundsUnion, bounds);
+      boundsUnion = GeoUtilities.getExtentUnion(boundsUnion, bounds);
     });
 
     // Return the unioned bounds
@@ -1518,7 +1513,7 @@ export class LayerApi {
    */
   recalculateBoundsAll(): void {
     // For each layer path
-    this.getLayerEntryConfigIds().forEach((layerPath: string) => {
+    this.getLayerEntryLayerPaths().forEach((layerPath: string) => {
       const bounds = this.calculateBounds(layerPath);
       LegendEventProcessor.setLayerBounds(this.getMapId(), layerPath, bounds);
     });
@@ -1934,14 +1929,14 @@ export class LayerApi {
     // be handled in the map-viewer's handleMapZoomEnd by checking the children visibility
     const mapView = this.mapViewer.getView();
     if ((layerConfig.getInitialSettings().maxZoom || layerConfig.getMaxScale()) && !(gvLayer instanceof GVGroupLayer)) {
-      let maxScaleZoomLevel = getZoomFromScale(mapView, layerConfig.getMaxScale());
+      let maxScaleZoomLevel = GeoUtilities.getZoomFromScale(mapView, layerConfig.getMaxScale());
       maxScaleZoomLevel = maxScaleZoomLevel ? Math.ceil(maxScaleZoomLevel * 100) / 100 : undefined;
       const maxZoom = Math.min(layerConfig.getInitialSettings().maxZoom ?? Infinity, maxScaleZoomLevel ?? Infinity);
       gvLayer.setMaxZoom(maxZoom);
     }
 
     if ((layerConfig.getInitialSettings().minZoom || layerConfig.getMinScale()) && !(gvLayer instanceof GVGroupLayer)) {
-      let minScaleZoomLevel = getZoomFromScale(mapView, layerConfig.getMinScale());
+      let minScaleZoomLevel = GeoUtilities.getZoomFromScale(mapView, layerConfig.getMinScale());
       minScaleZoomLevel = minScaleZoomLevel ? Math.ceil(minScaleZoomLevel * 100) / 100 : undefined;
       const minZoom = Math.max(layerConfig.getInitialSettings().minZoom ?? -Infinity, minScaleZoomLevel ?? -Infinity);
       gvLayer.setMinZoom(minZoom);

@@ -19,10 +19,10 @@ import { NodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { logger } from '@/core/utils/logger';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import type { TypeFeatureInfoEntry, TypeOutfieldsType } from '@/api/types/map-schema-types';
-import { analyzeLayerFilter, getAndCreateFeatureStyle } from '@/geo/utils/renderer/geoview-renderer';
+import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import { createAliasLookup, featureInfoGetFieldType, parseDateTimeValuesVector } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
-import { getExtentUnion, validateExtent } from '@/geo/utils/utilities';
+import { GeoUtilities } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions';
 import { NoExtentError } from '@/core/exceptions/geoview-exceptions';
@@ -254,7 +254,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     if (sourceExtent && sourceProjection) {
       // Transform extent to given projection
       sourceExtent = Projection.transformExtentFromProj(sourceExtent, sourceProjection, projection, stops);
-      sourceExtent = validateExtent(sourceExtent, projection.getCode());
+      sourceExtent = GeoUtilities.validateExtent(sourceExtent, projection.getCode());
     }
 
     // Return the calculated layer bounds
@@ -293,7 +293,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
         // If calculatedExtent has not been defined, set it to extent
         if (!calculatedExtent) calculatedExtent = extent;
-        else getExtentUnion(calculatedExtent, extent);
+        else GeoUtilities.getExtentUnion(calculatedExtent, extent);
       }
     });
 
@@ -366,19 +366,28 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     const style = layer.getStyle() || {};
 
     // Create lookup dictionary of names to alias
-    const outfields = (layer.getLayerConfig() as VectorLayerEntryConfig).source?.featureInfo?.outfields;
+    const outfields = layer.getLayerConfig().getOutfields();
     const aliasLookup = createAliasLookup(outfields);
 
     // Get and create Feature style if necessary
-    return getAndCreateFeatureStyle(feature, style, label, filterEquation, legendFilterIsOff, aliasLookup, (geometryType, theStyle) => {
-      // A new style has been created
-      logger.logDebug('A new style has been created on-the-fly', geometryType, layer);
-      // Update the layer style
-      layer.setStyle({
-        ...style,
-        [geometryType]: { type: 'simple', hasDefault: false, fields: [], info: [theStyle] },
-      });
-    });
+    return GeoviewRenderer.getAndCreateFeatureStyle(
+      feature,
+      style,
+      label,
+      filterEquation,
+      legendFilterIsOff,
+      aliasLookup,
+      (geometryType, theStyle) => {
+        // A new style has been created
+        logger.logDebug('A new style has been created on-the-fly', geometryType, layer);
+
+        // Update the layer style
+        layer.setStyle({
+          ...style,
+          [geometryType]: { type: 'simple', hasDefault: false, fields: [], info: [theStyle] },
+        });
+      }
+    );
   }
 
   /**
@@ -400,7 +409,6 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     filter: string | undefined = '',
     callbackWhenUpdated: ((filterToUse: string) => void) | undefined = undefined
   ): void {
-    // TODO: Check - Is this assignation necessary? What's the intent?
     // Update the layer config on the fly (maybe not ideal to do this here at this stage?)
     layerConfig.setLayerFilter(filter);
 
@@ -415,7 +423,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       filterValueToUse = parseDateTimeValuesVector(filterValueToUse, externalDateFragments);
 
       // Analyze the layer filter
-      const filterEquation = analyzeLayerFilter([{ nodeType: NodeType.unprocessedNode, nodeValue: filterValueToUse }]);
+      const filterEquation = GeoviewRenderer.analyzeLayerFilter([{ nodeType: NodeType.unprocessedNode, nodeValue: filterValueToUse }]);
 
       // Define what is considered the default filter
       const isDefaultFilter = !filterValueToUse;

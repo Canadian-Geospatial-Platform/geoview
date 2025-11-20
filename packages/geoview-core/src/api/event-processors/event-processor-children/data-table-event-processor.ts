@@ -104,7 +104,7 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
    * @returns {Promise<TypeFeatureInfoEntry[] | void>}
    */
   static triggerGetAllFeatureInfo(mapId: string, layerPath: string): Promise<TypeFeatureInfoEntry[] | void> {
-    return MapEventProcessor.getMapViewerLayerAPI(mapId).allFeatureInfoLayerSet.queryLayer(layerPath, 'all');
+    return MapEventProcessor.getMapViewerLayerAPI(mapId).allFeatureInfoLayerSet.queryLayer(layerPath);
   }
 
   /**

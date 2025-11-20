@@ -8,11 +8,13 @@ import type {
   TypeOfServer,
   TypeMetadataWMS,
   TypeMetadataWMSCapabilityLayer,
+  TypeStylesWMS,
 } from '@/api/types/layer-schema-types';
+import type { TypeLayerStyleSettings, TypeStyleGeometry } from '@/api/types/map-schema-types';
 import { CONST_LAYER_TYPES, CONST_LAYER_ENTRY_TYPES } from '@/api/types/layer-schema-types';
 import { DateMgt } from '@/core/utils/date-mgt';
 import type { CallbackNewMetadataDelegate } from '@/geo/utils/utilities';
-import { getWMSServiceMetadata } from '@/geo/utils/utilities';
+import { GeoUtilities } from '@/geo/utils/utilities';
 import type { OgcWmsLayerEntryConfigProps } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import type { GroupLayerEntryConfigProps } from '@/api/config/validation-classes/group-layer-entry-config';
@@ -21,7 +23,7 @@ import type { TypeLayerEntryShell } from '@/api/config/validation-classes/config
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { CancelledError, formatError, PromiseRejectErrorWrapper } from '@/core/exceptions/core-exceptions';
 import {
-  LayerDataAccessPathMandatoryError,
+  LayerEntryConfigFieldsNotFoundError,
   LayerNoCapabilitiesError,
   LayerServiceMetadataUnableToFetchError,
 } from '@/core/exceptions/layer-exceptions';
@@ -30,12 +32,15 @@ import {
   LayerEntryConfigWMSSubLayerNotFoundError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import { deepMergeObjects } from '@/core/utils/utilities';
-import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import { WfsRenderer } from '@/geo/utils/renderer/wfs-renderer';
+import { logger } from '@/core/utils/logger';
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.WMS;
+  fetchVectorsOnWFS?: boolean;
   listOfLayerEntryConfig: OgcWmsLayerEntryConfig[];
 }
 
@@ -46,8 +51,6 @@ export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOf
  * @class WMS
  */
 export class WMS extends AbstractGeoViewRaster {
-  WMSStyles: string[];
-
   fullSubLayers: boolean = false;
 
   /**
@@ -56,7 +59,6 @@ export class WMS extends AbstractGeoViewRaster {
    */
   constructor(layerConfig: TypeWMSLayerConfig, fullSubLayers: boolean) {
     super(layerConfig);
-    this.WMSStyles = [];
     this.fullSubLayers = fullSubLayers;
   }
 
@@ -151,19 +153,18 @@ export class WMS extends AbstractGeoViewRaster {
     const metadata = await this.onFetchServiceMetadata(abortSignal);
 
     // Based on the capabilities
-    const layers = metadata!.Capability.Layer.Layer;
+    const layers = metadata!.Capability.Layer.Layer!;
 
     // Build the layer tree
     const entries = WMS.#buildLayerTree(layers);
 
     // Redirect
-    // TODO: Check - Config init - Check if there's a way to better determine the typeOfServer flag, defaults to mapserver, how is it used here?
     // TODO: Check - Config init - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
     return WMS.createGeoviewLayerConfig(
       this.geoviewLayerId,
       metadata?.Capability.Layer.Title || this.geoviewLayerName,
       this.metadataAccessPath,
-      'mapserver',
+      undefined,
       false,
       entries || [],
       true // We want all sub layers when we're initializing the layer entries (different than when we're processing)
@@ -207,8 +208,8 @@ export class WMS extends AbstractGeoViewRaster {
       return;
     }
 
-    // If no name
-    if (!layerConfig.getLayerName()) layerConfig.setLayerName(layerFound.Title);
+    // If no name and layer has a title
+    if (!layerConfig.getLayerName() && layerFound.Title) layerConfig.setLayerName(layerFound.Title);
   }
 
   /**
@@ -216,7 +217,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {OgcWmsLayerEntryConfig} layerConfig - The layer entry configuration to process.
    * @returns {Promise<OgcWmsLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
-  protected override onProcessLayerMetadata(layerConfig: OgcWmsLayerEntryConfig): Promise<OgcWmsLayerEntryConfig> {
+  protected override async onProcessLayerMetadata(layerConfig: OgcWmsLayerEntryConfig): Promise<OgcWmsLayerEntryConfig> {
     // Get the layer capabilities
     const layerCapabilities = this.getLayerCapabilities(layerConfig.layerId)!;
 
@@ -225,15 +226,12 @@ export class WMS extends AbstractGeoViewRaster {
 
     // If found
     if (layerCapabilities) {
-      const attributions = layerConfig.getAttributions();
-      if (layerCapabilities.Attribution && !attributions.includes(layerCapabilities.Attribution?.Title)) {
-        // Add it
-        attributions.push(layerCapabilities.Attribution.Title);
-        layerConfig.setAttributions(attributions);
-      }
+      // Check if metadata says it's queryable
+      const raw = layerCapabilities['@attributes'].queryable;
+      const queryable = raw === '1' || raw === true;
 
-      // eslint-disable-next-line no-param-reassign
-      if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: !!layerCapabilities.queryable };
+      // Initialize the queryable
+      layerConfig.initQueryable(queryable);
 
       // Set Min/Max Scale Limits (MaxScale should be set to the largest and MinScale should be set to the smallest)
       // Example: If MinScaleDenominator is 100,000 and maxScale is 50,000, then 100,000 should be used. This is because
@@ -250,9 +248,9 @@ export class WMS extends AbstractGeoViewRaster {
       layerConfig.validateUpdateInitialSettingsExtent();
 
       // If no bounds defined in the initial settings and an extent is defined in the layer capabilities metadata
-      if (!layerConfig.getInitialSettings()?.bounds && layerCapabilities.EX_GeographicBoundingBox) {
+      if (!layerConfig.getInitialSettings()?.bounds && layerCapabilities.EX_GeographicBoundingBox?.extent) {
         // Validate and update the bounds initial settings
-        layerConfig.validateUpdateInitialSettingsBounds(layerCapabilities.EX_GeographicBoundingBox);
+        layerConfig.validateUpdateInitialSettingsBounds(layerCapabilities.EX_GeographicBoundingBox.extent);
       }
 
       // If there's a dimension
@@ -268,10 +266,13 @@ export class WMS extends AbstractGeoViewRaster {
           layerConfig.setTimeDimension(DateMgt.createDimensionFromOGC(timeDimension));
         }
       }
+
+      // Try processing vectorial information on the WMS, if any
+      await WMS.#tryProcessLayerVectorialInformationIfAny(layerConfig);
     }
 
     // Return the layer config
-    return Promise.resolve(layerConfig);
+    return layerConfig;
   }
 
   /**
@@ -297,65 +298,49 @@ export class WMS extends AbstractGeoViewRaster {
    * @throws If required config fields like dataAccessPath are missing.
    */
   createImageWMSSource(layerConfig: OgcWmsLayerEntryConfig): ImageWMS {
-    const { source } = layerConfig;
-
-    // Validate required data access path
-    if (!source?.dataAccessPath) {
-      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
-    }
-
-    const { dataAccessPath } = source;
-
     // Get the layer capabilities
     const layerCapabilities = this.getLayerCapabilities(layerConfig.layerId);
 
+    // Validate capabilities exist for the layer
     if (!layerCapabilities) {
       // Throw sub layer not found
       throw new LayerEntryConfigWMSSubLayerNotFoundError(layerConfig, this.geoviewLayerId);
     }
 
-    // Update internal style list for UI or info
-    if (Array.isArray(layerConfig.source?.wmsStyle)) {
-      this.WMSStyles = layerConfig.source.wmsStyle;
-    } else if (layerCapabilities.Style?.length > 1) {
-      this.WMSStyles = layerCapabilities.Style.map((style) => style.Name);
-    } else {
-      const fallbackStyle =
-        layerConfig.source?.wmsStyle || (layerCapabilities.Style?.length > 0 && layerCapabilities.Style?.[0]?.Name) || '';
-      this.WMSStyles = [fallbackStyle];
-    }
+    // Create the source params
+    const sourceParams: Record<string, unknown> = {
+      LAYERS: layerConfig.layerId,
+    };
 
-    // Determine the style to use (layer config > capabilities fallback)
-    let styleToUse = '';
-    if (Array.isArray(source.wmsStyle) && source.wmsStyle.length > 0) {
-      [styleToUse] = source.wmsStyle;
-    } else if (typeof source.wmsStyle === 'string') {
-      styleToUse = source.wmsStyle;
-    } else if (layerCapabilities?.Style && layerCapabilities.Style.length > 0) {
-      styleToUse = layerCapabilities.Style[0].Name;
-    }
+    // Get the style to use
+    const styleToUse = layerConfig.getStyleToUse();
+    if (styleToUse) sourceParams.STYLES = styleToUse;
 
     const sourceOptions: SourceOptions = {
-      url: dataAccessPath,
-      params: {
-        LAYERS: layerConfig.layerId,
-        STYLES: styleToUse,
-      },
+      url: layerConfig.getDataAccessPath(),
+      params: sourceParams,
       attributions: layerConfig.getAttributions(),
-      serverType: source.serverType,
-      crossOrigin: source.crossOrigin ?? 'Anonymous',
+      serverType: layerConfig.getServerType() ?? 'mapserver', // default: mapserver
+      crossOrigin: layerConfig.source.crossOrigin ?? 'Anonymous',
     };
 
     // Optional projection override
-    if (source.projection) {
-      sourceOptions.projection = `EPSG:${source.projection}`;
+    if (layerConfig.source.projection) {
+      sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
     }
 
     // Create the source
     const olSource = new ImageWMS(sourceOptions);
 
     // Apply the filter on the source right away, before the first load
-    GVWMS.applyViewFilterOnSource(layerConfig, olSource, layerConfig.getExternalFragmentsOrder(), undefined, layerConfig.getLayerFilter());
+    GVWMS.applyViewFilterOnSource(
+      layerConfig,
+      olSource,
+      layerConfig.getLayerStyle(),
+      layerConfig.getExternalFragmentsOrder(),
+      undefined,
+      layerConfig.getLayerFilter()
+    );
 
     // Return the source
     return olSource;
@@ -475,8 +460,7 @@ export class WMS extends AbstractGeoViewRaster {
           // Perform the actual metadata fetch
           WMS.fetchMetadataWMSForLayer(url, layerConfig.layerId, (proxyUsed) => {
             // If a proxy was used, update the layer's data access path
-            // eslint-disable-next-line no-param-reassign
-            layerConfig.source!.dataAccessPath = `${proxyUsed}${this.metadataAccessPath}`;
+            layerConfig.setDataAccessPath(`${proxyUsed}${this.metadataAccessPath}`);
           })
             .then((metadata) => {
               if (metadata.Capability) {
@@ -530,17 +514,17 @@ export class WMS extends AbstractGeoViewRaster {
     callbackNewMetadataUrl?: (proxyUsed: string) => void,
     abortSignal?: AbortSignal
   ): Promise<TypeMetadataWMS> {
-    let capabilities;
+    let metadata;
     try {
       // Fetch it
-      capabilities = await WMS.fetchMetadataWMS(metadataUrl, callbackNewMetadataUrl, abortSignal);
+      metadata = await WMS.fetchMetadataWMS(metadataUrl, callbackNewMetadataUrl, abortSignal);
     } catch (error: unknown) {
       // Throw
       throw new LayerServiceMetadataUnableToFetchError(this.geoviewLayerId, this.getLayerEntryNameOrGeoviewLayerName(), formatError(error));
     }
 
     // Validate the metadata response
-    if (!capabilities.Capability) {
+    if (!metadata.Capability) {
       // Throw
       throw new LayerServiceMetadataUnableToFetchError(
         this.geoviewLayerId,
@@ -550,10 +534,10 @@ export class WMS extends AbstractGeoViewRaster {
     }
 
     // Process
-    this.#processMetadataInheritance(capabilities.Capability.Layer);
+    this.#processMetadataInheritance(metadata.Capability.Layer);
 
     // Set the metadata access path
-    this.metadataAccessPath = capabilities?.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource;
+    this.metadataAccessPath = metadata?.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource['@attributes']['xlink:href'];
 
     // Propagate the metadata access path to all data access path of the layers underneath
     this.listOfLayerEntryConfig.forEach((layerEntry) => {
@@ -562,7 +546,7 @@ export class WMS extends AbstractGeoViewRaster {
     });
 
     // Return the metadata
-    return capabilities;
+    return metadata;
   }
 
   /**
@@ -589,14 +573,14 @@ export class WMS extends AbstractGeoViewRaster {
         newLayerPath.push(i);
         if ('Name' in layerProperty[i] && layerProperty[i].Name === layerName) return newLayerPath;
         if ('Layer' in layerProperty[i]) {
-          return this.#getMetadataLayerPath(layerName, layerProperty[i].Layer, newLayerPath);
+          return this.#getMetadataLayerPath(layerName, layerProperty[i].Layer!, newLayerPath);
         }
       }
     } else {
       newLayerPath.push(-1);
       if ('Name' in layerProperty && layerProperty.Name === layerName) return newLayerPath;
       if ('Layer' in layerProperty) {
-        return this.#getMetadataLayerPath(layerName, layerProperty.Layer, newLayerPath);
+        return this.#getMetadataLayerPath(layerName, layerProperty.Layer!, newLayerPath);
       }
     }
     return [];
@@ -627,7 +611,7 @@ export class WMS extends AbstractGeoViewRaster {
       // Treat both target and source as single layer objects
       const targetLayer = target as TypeMetadataWMSCapabilityLayer;
       const sourceLayer = source as TypeMetadataWMSCapabilityLayer;
-      this.#addLayerToMetadataInstance(nextPath, targetLayer.Layer, sourceLayer.Layer);
+      this.#addLayerToMetadataInstance(nextPath, targetLayer.Layer, sourceLayer.Layer!);
     } else {
       // Treat both target and source as arrays of layers
       const targetArray = target as TypeMetadataWMSCapabilityLayer[];
@@ -637,7 +621,7 @@ export class WMS extends AbstractGeoViewRaster {
       const existingEntry = targetArray.find((layer) => layer.Name === sourceEntry.Name);
 
       if (existingEntry) {
-        this.#addLayerToMetadataInstance(nextPath, existingEntry.Layer, sourceEntry.Layer);
+        this.#addLayerToMetadataInstance(nextPath, existingEntry.Layer, sourceEntry.Layer!);
       } else {
         targetArray.push(sourceEntry);
       }
@@ -672,38 +656,41 @@ export class WMS extends AbstractGeoViewRaster {
   #processMetadataInheritance(layer: TypeMetadataWMSCapabilityLayer | undefined, parentLayer?: TypeMetadataWMSCapabilityLayer): void {
     if (layer && parentLayer) {
       // Table 7 — Inheritance of Layer properties specified in the standard with 'replace' behaviour.
+      // eslint-disable-next-line no-param-reassign
+      if (!layer['@attributes']) layer['@attributes'] = {};
+      // eslint-disable-next-line no-param-reassign
+      layer['@attributes'].queryable ??= parentLayer['@attributes']?.queryable;
+      // eslint-disable-next-line no-param-reassign
+      layer['@attributes'].cascaded ??= parentLayer['@attributes']?.cascaded;
+      // eslint-disable-next-line no-param-reassign
+      layer['@attributes'].opaque ??= parentLayer['@attributes']?.opaque;
+      // eslint-disable-next-line no-param-reassign
+      layer['@attributes'].noSubsets ??= parentLayer['@attributes']?.noSubsets;
+      // eslint-disable-next-line no-param-reassign
+      layer['@attributes'].fixedWidth ??= parentLayer['@attributes']?.fixedWidth;
+      // eslint-disable-next-line no-param-reassign
+      layer['@attributes'].fixedHeight ??= parentLayer['@attributes']?.fixedHeight;
+      // eslint-disable-next-line no-param-reassign
+      layer.MinScaleDenominator ??= parentLayer.MinScaleDenominator;
+      // eslint-disable-next-line no-param-reassign
+      layer.MaxScaleDenominator ??= parentLayer.MaxScaleDenominator;
+      // eslint-disable-next-line no-param-reassign
+      layer.BoundingBox ??= parentLayer.BoundingBox;
       // eslint-disable-next-line no-param-reassign, camelcase
-      if (layer.EX_GeographicBoundingBox === undefined) layer.EX_GeographicBoundingBox = parentLayer.EX_GeographicBoundingBox;
+      layer.EX_GeographicBoundingBox ??= parentLayer.EX_GeographicBoundingBox;
       // eslint-disable-next-line no-param-reassign
-      if (layer.queryable === undefined) layer.queryable = parentLayer.queryable;
+      layer.Dimension ??= parentLayer.Dimension;
       // eslint-disable-next-line no-param-reassign
-      if (layer.cascaded === undefined) layer.cascaded = parentLayer.cascaded;
-      // eslint-disable-next-line no-param-reassign
-      if (layer.opaque === undefined) layer.opaque = parentLayer.opaque;
-      // eslint-disable-next-line no-param-reassign
-      if (layer.noSubsets === undefined) layer.noSubsets = parentLayer.noSubsets;
-      // eslint-disable-next-line no-param-reassign
-      if (layer.fixedWidth === undefined) layer.fixedWidth = parentLayer.fixedWidth;
-      // eslint-disable-next-line no-param-reassign
-      if (layer.fixedHeight === undefined) layer.fixedHeight = parentLayer.fixedHeight;
-      // eslint-disable-next-line no-param-reassign
-      if (layer.MinScaleDenominator === undefined) layer.MinScaleDenominator = parentLayer.MinScaleDenominator;
-      // eslint-disable-next-line no-param-reassign
-      if (layer.MaxScaleDenominator === undefined) layer.MaxScaleDenominator = parentLayer.MaxScaleDenominator;
-      // eslint-disable-next-line no-param-reassign
-      if (layer.BoundingBox === undefined) layer.BoundingBox = parentLayer.BoundingBox;
-      // eslint-disable-next-line no-param-reassign
-      if (layer.Dimension === undefined) layer.Dimension = parentLayer.Dimension;
-      // eslint-disable-next-line no-param-reassign
-      if (layer.Attribution === undefined) layer.Attribution = parentLayer.Attribution;
+      layer.Attribution ??= parentLayer.Attribution;
+
       // Table 7 — Inheritance of Layer properties specified in the standard with 'add' behaviour.
       // AuthorityURL inheritance is not implemented in the following code.
       if (parentLayer.Style) {
         // eslint-disable-next-line no-param-reassign
         if (!layer.Style) layer.Style = [];
         parentLayer.Style.forEach((parentStyle) => {
-          const styleFound = layer.Style.find((styleEntry) => styleEntry.Name === parentStyle.Name);
-          if (!styleFound) layer.Style.push(parentStyle);
+          const styleFound = layer.Style?.find((styleEntry) => styleEntry.Name === parentStyle.Name);
+          if (!styleFound) layer.Style?.push(parentStyle);
         });
       }
 
@@ -742,7 +729,7 @@ export class WMS extends AbstractGeoViewRaster {
     abortSignal?: AbortSignal
   ): Promise<TypeMetadataWMS> {
     // Redirect
-    return getWMSServiceMetadata(url, undefined, callbackNewMetadataUrl, abortSignal);
+    return GeoUtilities.getWMSServiceMetadata(url, undefined, callbackNewMetadataUrl, abortSignal);
   }
 
   /**
@@ -763,7 +750,57 @@ export class WMS extends AbstractGeoViewRaster {
     callbackNewMetadataUrl?: CallbackNewMetadataDelegate
   ): Promise<TypeMetadataWMS> {
     // Redirect
-    return getWMSServiceMetadata(url, layers, callbackNewMetadataUrl);
+    return GeoUtilities.getWMSServiceMetadata(url, layers, callbackNewMetadataUrl);
+  }
+
+  /**
+   * Fetches the WMS styles for the specified layer(s) from a WMS service.
+   * @param {string} url - The url to query the metadata from.
+   * @param {string} layers - The layers to get the capabilities for.
+   * @returns {Promise<TypeStylesWMS>} A promise that resolves with a TypeStylesWMS object for the layer(s).
+   * @throws {RequestTimeoutError} Error thrown when the request exceeds the timeout duration.
+   * @throws {RequestAbortedError} Error thrown when the request was aborted by the caller's signal.
+   * @throws {ResponseError} Error thrown when the response is not OK (non-2xx).
+   * @throws {ResponseEmptyError} Error thrown when the JSON response is empty.
+   * @throws {NetworkError} Errow thrown when a network issue happened.
+   */
+  static fetchStylesForLayer(url: string, layers: string): Promise<TypeStylesWMS> {
+    // Redirect
+    return GeoUtilities.getWMSServiceStyles(url, layers);
+  }
+
+  /**
+   * Fetches and constructs style configurations for WMS layers.
+   * This method retrieves style definitions from a WMS (Web Map Service) endpoint
+   * for the specified layers, processes them, and returns a mapping of geometry
+   * types to their corresponding layer style settings.
+   * @param {string} url - The base WMS service URL used to fetch styles.
+   * @param {string} layers - A comma-separated list of WMS layer names to retrieve styles for.
+   * @returns {Promise<Record<TypeStyleGeometry, TypeLayerStyleSettings>>}
+   * A promise that resolves to a record mapping geometry types to layer style settings.
+   * @throws {NotSupportedError} If the symbolizer type in a rule is unsupported.
+   * @static
+   * @async
+   */
+  static async createStylesFromWMS(
+    url: string,
+    layers: string,
+    geomType: TypeStyleGeometry | undefined
+  ): Promise<Record<TypeStyleGeometry, TypeLayerStyleSettings>> {
+    // Fetch styles using the WMS url associated with the WFS
+    const styles = await WMS.fetchStylesForLayer(url, layers);
+
+    // Log it, leaving the logDebug for dev purposes
+    // logger.logDebug('STYLES', styles);
+
+    // Build layer style information from the WMS styles
+    const layerStyle = WfsRenderer.buildLayerStyleInfo(styles, geomType);
+
+    // Log it, leaving the logDebug for dev purposes
+    // logger.logDebug('STYLES OBJ', layerStyle);
+
+    // Return it
+    return layerStyle;
   }
 
   /**
@@ -794,7 +831,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
    * @param {string} geoviewLayerName - The human-readable name of the GeoView layer.
    * @param {string} metadataAccessPath - The URL or path used to access the layer's metadata.
-   * @param {TypeOfServer} serverType - The type of WMS server (e.g., 'geoserver', 'mapserver').
+   * @param {TypeOfServer | undefined} serverType - The type of WMS server (e.g., 'geoserver', 'mapserver').
    * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering or animation.
    * @param {TypeLayerEntryShell[]} layerEntries - The root array of parsed layer entries (may include nested groups).
    * @param {boolean} fullSubLayers - If false, will simulate legacy behavior and skip deeper layers after the first.
@@ -805,7 +842,7 @@ export class WMS extends AbstractGeoViewRaster {
     geoviewLayerId: string,
     geoviewLayerName: string,
     metadataAccessPath: string,
-    serverType: TypeOfServer,
+    serverType: TypeOfServer | undefined,
     isTimeAware: boolean,
     layerEntries: TypeLayerEntryShell[],
     fullSubLayers: boolean,
@@ -839,7 +876,7 @@ export class WMS extends AbstractGeoViewRaster {
    * This function acts as an entry point to recursively transform a WMS layer tree into fully configured layer entry objects.
    * @param {TypeLayerEntryShell} layerEntry - The WMS layer entry shell to convert (may be a group or leaf).
    * @param {TypeWMSLayerConfig} geoviewLayerConfig - The parent GeoView layer config that this entry belongs to.
-   * @param {TypeOfServer} serverType - The type of WMS server (e.g., 'geoserver', 'mapserver', etc.).
+   * @param {TypeOfServer | undefined} serverType - The type of WMS server (e.g., 'geoserver', 'mapserver', etc.).
    * @param {boolean} fullSubLayers - Whether to fully process sublayers (used in recursive group creation).
    * @param {unknown} customGeocoreLayerConfig - Optional custom layer configuration to merge into leaf layers.
    * @returns {OgcWmsLayerEntryConfig | GroupLayerEntryConfig} The fully constructed layer entry configuration object.
@@ -849,7 +886,7 @@ export class WMS extends AbstractGeoViewRaster {
   static #createLayerEntryConfig(
     layerEntry: TypeLayerEntryShell,
     geoviewLayerConfig: TypeWMSLayerConfig,
-    serverType: TypeOfServer,
+    serverType: TypeOfServer | undefined,
     fullSubLayers: boolean,
     customGeocoreLayerConfig: unknown
   ): OgcWmsLayerEntryConfig | GroupLayerEntryConfig {
@@ -902,7 +939,6 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {string} url - The URL of the service endpoint.
    * @param {string[]} layerIds - An array of layer IDs to include in the configuration.
    * @param {boolean} isTimeAware - Indicates if the layer is time aware.
-   * @param {TypeOfServer} typeOfServer - Indicates the type of server.
    * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
    */
   static processGeoviewLayerConfig(
@@ -911,7 +947,6 @@ export class WMS extends AbstractGeoViewRaster {
     url: string,
     layerIds: number[],
     isTimeAware: boolean,
-    typeOfServer: TypeOfServer,
     fullSubLayers: boolean
   ): Promise<ConfigBaseClass[]> {
     // Create the Layer config
@@ -919,7 +954,7 @@ export class WMS extends AbstractGeoViewRaster {
       geoviewLayerId,
       geoviewLayerName,
       url,
-      typeOfServer,
+      undefined,
       isTimeAware,
       layerIds.map((layerId) => {
         return { id: layerId };
@@ -1062,6 +1097,74 @@ export class WMS extends AbstractGeoViewRaster {
 
         return entry;
       });
+  }
+
+  /**
+   * Processes and enriches vectorial (WFS-based) information for a WMS layer if available.
+   * This method:
+   *  - Derives a corresponding WFS layer configuration from the provided WMS layer.
+   *  - Attaches the WFS config back to the original layer for later reference.
+   *  - Validates and forwards WFS `featureInfo` (including `outfields`) into the WMS config.
+   *  - Attempts to generate a dynamic style for the WMS layer using WMS `GetStyles`,
+   *    optionally inferring geometry type from WFS field metadata.
+   *  - Logs warnings if vectorial data or styles cannot be determined.
+   * @param {OgcWmsLayerEntryConfig} layerConfig
+   *   The WMS layer configuration being processed.
+   * @returns {Promise<void>} Resolves when processing is complete.
+   * @throws {LayerEntryConfigFieldsNotFoundError}
+   *   Thrown when WFS `outfields` cannot be read from the derived config.
+   * @description
+   * This helper method enables a WMS layer to benefit from vector-like capabilities by:
+   *  - reading attribute structure from a WFS equivalent,
+   *  - reusing the WFS `featureInfo` definition,
+   *  - generating styles from WMS metadata when available.
+   * Failures during processing do not stop execution; they are logged as warnings.
+   * @private
+   * @static
+   * @async
+   */
+  static async #tryProcessLayerVectorialInformationIfAny(layerConfig: OgcWmsLayerEntryConfig): Promise<void> {
+    // If should fetch vectorial information from WFS
+    if (layerConfig.getShouldFetchVectorInformationFromWFS()) {
+      try {
+        // Get the base url
+        const baseUrl = GeoUtilities.getBaseUrl(layerConfig.getDataAccessPath());
+
+        // Create the Geoview Layer Config WFS equivalent
+        const wfsLayerConfig = await layerConfig.createGeoviewLayerConfigWfs();
+
+        // Keep it as reference
+        layerConfig.setWfsLayerConfig(wfsLayerConfig);
+
+        // Validate the outfields could be read
+        const outFields = wfsLayerConfig.getOutfields();
+        if (!outFields) throw new LayerEntryConfigFieldsNotFoundError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerNameCascade());
+
+        // Override the outfields of the WMS to leverage possibilities working with a WMS layer, like knowing the field types when performing WMS queries
+        layerConfig.setOutfields(outFields);
+
+        // If no layer style defined
+        if (!layerConfig.getLayerStyle()) {
+          // If the service metadata offers GetStyles
+          if (layerConfig.getSupportsGetStyles()) {
+            // Try to create dynamic style from the WMS GetStyles metadata
+            const layerStyle = await WMS.createStylesFromWMS(baseUrl, layerConfig.layerId, wfsLayerConfig.getGeometryType());
+
+            // If style was generated
+            if (layerStyle) {
+              // Set the layer style
+              layerConfig.setLayerStyle(layerStyle);
+            }
+          } else {
+            // Log
+            logger.logWarning(`WMS service ${layerConfig.layerPath} doesn't support vectorial styles via a 'GetStyles' request.`);
+          }
+        }
+      } catch (error: unknown) {
+        // Log
+        logger.logWarning(`Failed to find a vectorial representation of the WMS ${layerConfig.layerPath}`, error);
+      }
+    }
   }
 
   // #endregion

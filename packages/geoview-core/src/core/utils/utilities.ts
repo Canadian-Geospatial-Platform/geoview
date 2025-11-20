@@ -11,6 +11,8 @@ import { Fetch } from '@/core/utils/fetch-helper';
 /** The observers to monitor element removals from the DOM tree */
 const observers: Record<string, MutationObserver> = {};
 
+// TODO: Refactor - Create a CoreUtilities class to embed all these functions here
+
 /**
  * Take string like "My string is __param__" and replace parameters (__param__) from array of values
  *
@@ -61,6 +63,15 @@ export function getLocalizedMessage(language: TypeDisplayLanguage, messageKey: s
 export function deepMergeObjects<T>(...objects: unknown[]): T {
   const deepCopyObjects = objects.map((object) => JSON.parse(JSON.stringify(object)));
   return deepCopyObjects.reduce((merged, current) => ({ ...merged, ...current }), {});
+}
+
+/**
+ * Check if a string is a number
+ * @param {string} str - The object to test
+ * @returns true if the object is numeric, false otherwise
+ */
+export function isNumeric(str: string): boolean {
+  return !Number.isNaN(Number(str));
 }
 
 /**
@@ -254,7 +265,7 @@ export function addUiComponent(targetDivId: string, component: React.ReactElemen
 }
 
 /**
- * Sanitize HTML to remove threat
+ * Sanitizes HTML to remove threat
  *
  * @param {string} contentHtml - HTML content to sanitize
  * @returns {string} Sanitized HTML or empty string if all dirty

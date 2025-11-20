@@ -49,7 +49,7 @@
       {
         "geoviewLayerId": "swipe5",
         "geoviewLayerName": "Airport data",
-        "metadataAccessPath": "https://geo.weather.gc.ca/geomet?REQUEST=GetCapabilities&VERSION=2.0.0&SERVICE=WFS",
+        "metadataAccessPath": "https://geo.weather.gc.ca/geomet?REQUEST=GetCapabilities&VERSION=2.0.0",
         "geoviewLayerType": "ogcWfs",
         "listOfLayerEntryConfig": [
           {

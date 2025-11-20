@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WFS Renderer - Canadian Geospatial Platform Viewer</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.css"></link>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/liquibyte.css"></link>
+
+    <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js"></script>
+    <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/perl/perl.min.js"></script>
+    <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/xml/xml.min.js"></script>
+    <script language="javascript" type="text/javascript" src="https://cdn.jsdelivr.net/npm/@codemirror/matchbrackets@0.19.4/+esm"></script>
+
+
+    <style>
+      label {
+        font-size: 14px;
+        font-style: italic;
+      }
+
+      #serviceUrlInput {
+        width: 700px;
+      }
+
+      .CodeMirror {
+        height: 700px; /* Height of the text area */
+        width: 100%;           /* make CM fill its cell */
+        box-sizing: border-box;
+        max-width: 100%;
+      }
+
+      .CodeMirror textarea {
+        width: 1px !important;
+        min-width: 1px !important;
+        max-width: 1px !important;
+        height: 1em;
+        position: absolute;
+        overflow: hidden;
+        resize: none;
+      }
+    </style>
+
+  </head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./index.html?tab=specific-demos">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>WFS Renderer Style Configuration Demo</h4>
+        <p>This page is used to create a valid GeoView style config from a WMS service to use them for a WFS service.</p>
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h4>Configuration Options</h4>
+      <div style="margin-bottom: 15px">
+        <label for="renderer">Input WMS/WFS Renderer examples:</label>
+        <select class="form-select" name="renderer" id="renderer" style="display: inline-block; width: auto; margin-left: 10px">
+          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/hc/airborne_radioactivity_en?SERVICE=WMS&VERSION=1.1.0","layers":"AIRB_RAD"}'>Airborne (Point simple)</option>
+          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/critical_minerals_en?SERVICE=WMS&VERSION=1.1.0","layers":"mines"}'>Mines (Point simple)</option>
+          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/oam_en?SERVICE=WMS&VERSION=1.1.0","layers":"oam"}'>Abandoned Orphaned Mines (Point uniqueValue)</option>
+          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/earthquakes_en?SERVICE=WMS&VERSION=1.1.0","layers":"earthquakes_2000-2010"}'>Earthquakes 2000-2010 (Point uniqueValue)</option>
+          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/iaac/assessment_inventory_en?SERVICE=WMS&VERSION=1.1.0","layers":"completed"}'>Assessment Completed (Point uniqueValue)</option>
+          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/wind_turbine_database_en?SERVICE=WMS&VERSION=1.1.0","layers":"QC"}'>Wind Turbine (Point uniqueValue (lots!))</option>
+          <option value='{"url":"https://demo.mapserver.org/cgi-bin/wms?SERVICE=WMS&VERSION=1.3.0","layers":"cities"}'>Cities (Point classBreaks)</option>
+          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/charging_corridor_en?SERVICE=WMS&VERSION=1.1.0","layers":"Corridor Public Charging Planning Map"}'>Charging Corridor (LineString uniqueValue)</option>
+          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/gsc_surficial_geology_en?SERVICE=WMS&VERSION=1.1.0","layers":"DMF"}'>Surficial Geology (Polygon simple)</option>
+          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/lidar_point_cloud_canelevation_en?SERVICE=WMS&VERSION=1.1.0","layers":"lidar-projects"}'>Lidar Point Cloud (Polygon simple)</option>
+          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/phys_reg_en?SERVICE=WMS&VERSION=1.3.0","layers":"regions"}'>Regions (Polygon uniqueValue)</option>
+          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/GSC_Seismic_Reflection_en?SERVICE=WMS&VERSION=1.1.0","layers":"pacific"}'>Pacific Seismic (LineString uniqueValue (complex, incomplete))</option>
+          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/EGS_Flood_Archive_DEV_en?SERVICE=WMS&VERSION=1.1.0","layers":"EGS_Flood_Extent_Archive_en"}'>EGS Flood Extent (Polygons with Lines rendering)</option>
+          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/major_projects_inventory_en?SERVICE=WMS&VERSION=1.1.0","layers":"mpi-point"}'>Major Projects (styles with functions!)</option>
+          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_2010_15_20_en?SERVICE=WMS&VERSION=1.3.0","layers":"landcover_2010_19classes"}'>Land Cover 2010-2019 Classes (no GetStyles at all)</option>
+        </select>
+      </div>
+    </div>
+    <div class="demo-section">
+      <span>WMS associated with the WFS to read the styles from</span>
+      <input id="stylesUrl" type="text" style="width:100%;" />
+      <br/>
+      <span>The layers</span>
+      <input id="layers" type="text" style="width:100%;" />
+      <div>
+        <button id="executeFetch" style="margin: 10px 0px;">Fetch XML</button>
+      </div>
+      <div>The GetStyles response from the WMS which will be used to create the Geoview style:</div>
+      <textarea id="inputTextArea" ></textarea>
+      <div>
+        <button id="executeButton" style="margin: 10px 0px;">Execute</button>
+      </div>
+      <div>Geoview Output Style Configuration:</div>
+      <textarea id="outputTextArea"></textarea>
+      <div>
+        <p>
+              The resulting configuration can be used to set a layer's "layerStyle" property. <br>
+              <i>Example:</i>
+              <pre>
+                <code>
+'listOfGeoviewLayerConfig': [{
+  'geoviewLayerId': 'M6QU5DFK9PY3U',
+  "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/GSC_Seismic_Reflection_en",
+  "geoviewLayerType": "ogcWfs",
+  "listOfLayerEntryConfig": [{
+    "layerId": pacific,
+    "layerStyle": {<strong>OUTPUT STYLE CONFIG HERE</strong>}
+  }]
+}]
+                </code>
+              </pre>
+            </p>
+      </div>
+    </div>
+
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
+
+      // The elements
+      const rendererDropdown = document.getElementById('renderer');
+      const executeFetch = document.getElementById('executeFetch');
+      const executeButton = document.getElementById('executeButton');
+      const intputTextArea = document.getElementById('inputTextArea');
+      const outputTextArea = document.getElementById('outputTextArea');
+      const txtWMSUrl = document.getElementById('stylesUrl');
+      const txtLayers = document.getElementById('layers');
+
+      // Transform the text area into a code text area using CodeMirror
+      const editorInputProcess = CodeMirror.fromTextArea(intputTextArea, {
+          lineNumbers: true,
+          mode: 'xml',
+          theme: 'liquibyte',
+          lineWrapping: true,
+          matchTags: true,
+          autoCloseTags: true,
+          // gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+          // extraKeys: {"Ctrl-Q": function(cm){ cm.foldCode(cm.getCursor()); }},
+      });
+
+      // Transform the text area into a code text area using CodeMirror
+      const editorOutputProcess = CodeMirror.fromTextArea(outputTextArea, {
+          lineNumbers: true,
+          mode: 'text/x-perl',
+          theme: 'liquibyte',
+          lineWrapping: true,
+          matchTags: true,
+          autoCloseTags: true,
+      });
+
+      function updateUI() {
+        const value = JSON.parse(rendererDropdown.value);
+        txtWMSUrl.value = value.url;
+        txtLayers.value = value.layers;
+      }
+      updateUI();
+
+      async function fetchWMSStyles() {
+        try {
+          editorInputProcess.setValue('');
+          editorOutputProcess.setValue('');
+          const result = await cgpv.api.config.fetchStyleFromWMS(txtWMSUrl.value, txtLayers.value);
+          editorInputProcess.setValue(result);
+
+          // Wait before parsing the SLD - just for the UI to refresh
+          await cgpv.api.utilities.core.delay(500);
+
+          // Parse it right away
+          parseOutputStyles();
+        } catch (error) {
+          alert(error);
+        }
+      };
+      fetchWMSStyles();
+
+      function parseOutputStyles() {
+        const geoViewRenderer = cgpv.api.config.getStyleFromWMSRenderer(editorInputProcess.getValue());
+        editorOutputProcess.setValue(JSON.stringify(geoViewRenderer, undefined, 2));
+      }
+
+      rendererDropdown.addEventListener('change', (e) => {
+        updateUI();
+        fetchWMSStyles();
+      });
+
+      executeFetch.addEventListener('click', (e) => {
+        // Go
+        fetchWMSStyles();
+      });
+
+      executeButton.addEventListener('click', (e) => {
+        parseOutputStyles();
+      });
+    </script>
+  </body>
+</html>

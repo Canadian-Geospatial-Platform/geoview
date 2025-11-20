@@ -1,14 +1,14 @@
 import type {
   ConfigClassOrType,
   TypeGeoviewLayerConfig,
-  TypeLayerMetadataWfs,
+  TypeMetadataWFS,
   TypeSourceWFSVectorInitialConfig,
 } from '@/api/types/layer-schema-types';
+import type { TypeOutfields } from '@/api/types/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
-import type { TypeWFSLayerConfig } from '@/geo/layer/geoview-layers/vector/wfs';
+import { type TypeWFSLayerConfig } from '@/geo/layer/geoview-layers/vector/wfs';
 import type { VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
-import { Projection } from '@/geo/utils/projection';
 
 export interface WfsLayerEntryConfigProps extends VectorLayerEntryConfigProps {
   /** Source settings to apply to the GeoView layer source at creation time. */
@@ -26,19 +26,50 @@ export class WfsLayerEntryConfig extends VectorLayerEntryConfig {
     super(layerConfig, CONST_LAYER_TYPES.WFS);
 
     // Value for this.source.format can only be WFS.
-    this.source ??= { format: 'WFS' };
     this.source.format ??= 'WFS';
-    this.source.dataProjection ??= Projection.PROJECTION_NAMES.LONLAT;
-    this.source.dataAccessPath ??= layerConfig.source?.dataAccessPath ?? this.getMetadataAccessPath();
   }
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
-   * @returns {TypeLayerMetadataWfs[] | undefined} The strongly-typed layer metadata specific to this layer entry config.
+   * @returns {TypeMetadataWFS | undefined} The strongly-typed layer configuration specific to this layer entry config.
    */
-  override getLayerMetadata(): TypeLayerMetadataWfs[] | undefined {
-    return super.getLayerMetadata() as TypeLayerMetadataWfs[] | undefined;
+  override getServiceMetadata(): TypeMetadataWFS | undefined {
+    return super.getServiceMetadata() as TypeMetadataWFS | undefined;
+  }
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeOutfields[] | undefined} The strongly-typed layer metadata specific to this layer entry config.
+   */
+  override getLayerMetadata(): TypeOutfields[] | undefined {
+    return super.getLayerMetadata() as TypeOutfields[] | undefined;
+  }
+
+  /**
+   * Gets the version. Defaults to 1.3.0.
+   * @returns {string} The service version as read from the metadata attribute.
+   */
+  getVersion(): string {
+    // Redirect
+    return this.getServiceMetadata()?.['@attributes'].version || '1.3.0';
+  }
+
+  /**
+   * Gets if the config has specified that we should fetch the styles from the WMS.
+   * @returns {boolean} True when the styles should be fetched from the WMS. True by default.
+   */
+  getShouldFetchStylesFromWMS(): boolean {
+    return (this.getGeoviewLayerConfig() as TypeWFSLayerConfig).fetchStylesOnWMS ?? true; // default: true
+  }
+
+  /**
+   * Gets the WMS styles layer id associated with this WFS layer entry config if any.
+   * @returns {string} The WMS styles layer id
+   */
+  getWmsStylesLayerId(): string {
+    return this.layerEntryProps.wmsLayerId || this.layerId;
   }
 
   /**

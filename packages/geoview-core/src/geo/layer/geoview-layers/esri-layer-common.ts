@@ -26,7 +26,7 @@ import {
   esriQueryRecordsByUrl,
   esriQueryRelatedRecordsByUrl,
 } from '@/geo/layer/gv-layers/utils';
-import { getStyleFromEsriRenderer } from '@/geo/utils/renderer/esri-renderer';
+import { EsriRenderer } from '@/geo/utils/renderer/esri-renderer';
 import type { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import type { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
@@ -40,7 +40,6 @@ import {
   LayerEntryConfigEmptyLayerGroupError,
   LayerEntryConfigLayerIdNotFoundError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
-import { logger } from '@/core/utils/logger';
 import { formatError } from '@/core/exceptions/core-exceptions';
 
 /**
@@ -230,33 +229,27 @@ export function commonProcessFeatureInfoConfig(
   // If no metadata, throw metadata empty error (maybe change to just return if this is too strict? Trying the more strict approach first..)
   if (!layerMetadata) throw new LayerServiceMetadataEmptyError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerNameCascade());
 
+  // Read variables
   const queryable = layerMetadata.capabilities.includes('Query');
-  if (layerConfig.source.featureInfo) {
-    // if queryable flag is undefined, set it accordingly to what is specified in the metadata
-    if (layerConfig.source.featureInfo.queryable === undefined && layerMetadata.fields?.length) {
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.source.featureInfo.queryable = queryable;
-    }
-    // Set queryable to false if there are no fields defined in the service
-    else if (layerConfig.source.featureInfo.queryable && layerMetadata.type !== 'Group Layer' && !layerMetadata.fields.length) {
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.source.featureInfo.queryable = false;
-      logger.logWarning(`Layer ${layerConfig.layerPath} has no fields defined in the service metadata. Queryable set to false.`);
-    }
-    // The queryable flag comes from the user config
-  } else {
-    // eslint-disable-next-line no-param-reassign
-    layerConfig.source.featureInfo =
-      layerConfig.getIsMetadataLayerGroup() || !layerMetadata.fields?.length ? { queryable: false } : { queryable };
-  }
+  const hasFields = !!layerMetadata.fields?.length;
+  const isGroupLayer = layerMetadata.type === 'Group Layer';
+  const isMetadataGroup = layerConfig.getIsMetadataLayerGroup();
 
+  // Initialize the queryable
+  layerConfig.initQueryable(queryable && hasFields && !isGroupLayer && !isMetadataGroup);
+
+  // Initialize the outfields
   // dynamic group layer doesn't have fields definition
   if (layerMetadata.type !== 'Group Layer' && layerMetadata.fields) {
-    // Process undefined outfields or aliasFields
-    if (!layerConfig.source.featureInfo.outfields?.length) {
-      // eslint-disable-next-line no-param-reassign
-      if (!layerConfig.source.featureInfo.outfields) layerConfig.source.featureInfo.outfields = [];
+    // Get the outfields
+    let outfields = layerConfig.getOutfields();
 
+    // Process undefined outfields or aliasFields
+    if (!outfields?.length) {
+      // Create it
+      outfields = [];
+
+      // Loop
       layerMetadata.fields.forEach((fieldEntry) => {
         if (layerMetadata.geometryField && fieldEntry?.name === layerMetadata.geometryField.name) return;
         const newOutfield: TypeOutfields = {
@@ -266,23 +259,18 @@ export function commonProcessFeatureInfoConfig(
           domain: commonGetFieldDomain(layerConfig, fieldEntry.name),
         };
 
-        layerConfig.source.featureInfo!.outfields!.push(newOutfield);
+        outfields!.push(newOutfield);
       });
+
+      // Set it
+      layerConfig.setOutfields(outfields);
     }
 
-    layerConfig.source.featureInfo.outfields.forEach((outfield) => {
-      // eslint-disable-next-line no-param-reassign
-      if (!outfield.alias) outfield.alias = outfield.name;
-    });
+    // Initialize the outfields aliases
+    layerConfig.initOutfieldsAliases();
 
-    if (!layerConfig.source.featureInfo.nameField)
-      if (layerMetadata.displayField) {
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.source.featureInfo.nameField = layerMetadata.displayField;
-      } else {
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.source.featureInfo.nameField = layerConfig.source.featureInfo.outfields[0]?.name;
-      }
+    // Initialize the name field
+    layerConfig.initNameField(layerMetadata.displayField ?? outfields?.[0]?.name);
   }
 }
 
@@ -385,20 +373,13 @@ export async function commonProcessLayerMetadata<
   // The following line allow the type ascention of the type guard functions on the second line below
   if (layerConfig instanceof EsriDynamicLayerEntryConfig || layerConfig instanceof EsriFeatureLayerEntryConfig) {
     if (!layerConfig.getLayerStyle()) {
-      const styleFromRenderer = getStyleFromEsriRenderer(responseJson.drawingInfo?.renderer);
+      const styleFromRenderer = EsriRenderer.getStyleFromEsriRenderer(responseJson.drawingInfo?.renderer);
       if (styleFromRenderer) layerConfig.setLayerStyle(styleFromRenderer);
     }
   }
 
-  // Add projection definition if not already included
-  if (responseJson.spatialReference) {
-    try {
-      Projection.getProjectionFromObj(responseJson.spatialReference);
-    } catch (error: unknown) {
-      logger.logWarning('Unsupported projection, attempting to add projection now.', error);
-      await Projection.addProjection(responseJson.spatialReference);
-    }
-  }
+  // Check if we support that projection and if not add it on-the-fly
+  await Projection.addProjectionIfMissingUsingObj(responseJson.spatialReference);
 
   commonProcessFeatureInfoConfig(layerConfig);
 

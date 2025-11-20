@@ -142,18 +142,18 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         // Get the geometry type
         const [geometryType] = layerConfig.getTypeGeometries();
 
+        // Get the outfields
+        const outfields = layerConfig.getOutfields();
+
         // Get oid field
-        const oidField =
-          layerConfig.source.featureInfo && layerConfig.source.featureInfo.outfields
-            ? layerConfig.source.featureInfo.outfields.filter((field) => field.type === 'oid')[0].name
-            : 'OBJECTID';
+        const oidField = outfields?.find((field) => field.type === 'oid')?.name ?? 'OBJECTID';
 
         // Query for the specific object ids
         // TODO: Put the server original projection in the config metadata (add a new optional param in source for esri)
         // TO.DOCONT: When we get the projection we can get the projection in original server (will solve error trying to reproject https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/7 in 3857)
         // TO.DOCONT: Then we need to modify the DownloadGeoJSON to use mapProjection for vector and original projection for dynamic.
         return esriQueryRecordsByUrlObjectIds(
-          `${layerConfig.source?.dataAccessPath}/${layerConfig.layerId}`,
+          `${layerConfig.getDataAccessPath(true)}${layerConfig.layerId}`,
           geometryType,
           objectIDs,
           oidField,
@@ -459,9 +459,9 @@ export type LegendQueryStatus = 'init' | 'querying' | 'queried' | 'error';
 
 export type TypeLegend = {
   type: TypeGeoviewLayerType;
-  styleConfig?: TypeLayerStyleConfig | null;
   // Layers other than vector layers use the HTMLCanvasElement type for their legend.
   legend: TypeVectorLayerStyles | HTMLCanvasElement | null;
+  styleConfig?: TypeLayerStyleConfig | null;
 };
 
 export type TypeLegendResultSetEntry = TypeResultSetEntry & TypeLegendResultInfo;

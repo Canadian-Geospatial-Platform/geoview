@@ -14,12 +14,11 @@
       {
         "geoviewLayerId": "wfsLYR1",
         "geoviewLayerName": "US States",
-        "metadataAccessPath": "https://ahocevar.com/geoserver/wfs?REQUEST=GetCapabilities&VERSION=2.0.0&SERVICE=WFS",
+        "metadataAccessPath": "https://ahocevar.com/geoserver/wfs",
         "geoviewLayerType": "ogcWfs",
         "listOfLayerEntryConfig": [
           {
             "layerId": "usa:states",
-            "layerName": "US States",
             "layerFilter": "STATE_ABBR = 'NY'"
           }
         ]
@@ -27,25 +26,59 @@
       {
         "geoviewLayerId": "wfsLYR2",
         "geoviewLayerName": "Current Conditions",
-        "metadataAccessPath": "https://geo.weather.gc.ca/geomet?REQUEST=GetCapabilities&VERSION=2.0.0&SERVICE=WFS",
+        "metadataAccessPath": "https://geo.weather.gc.ca/geomet",
         "geoviewLayerType": "ogcWfs",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "ec-msc:CURRENT_CONDITIONS",
-            "layerName": "Current Conditions"
+            "layerId": "ec-msc:CURRENT_CONDITIONS"
           }
         ]
       },
       {
         "geoviewLayerId": "wfsLYR4",
-        "geoviewLayerName": "USGS mrds bbox strategy",
-        "metadataAccessPath": "https://mrdata.usgs.gov/services/wfs/mrds?request=GetCapabilities&service=WFS&version=1.1.0",
+        "geoviewLayerName": "USGS mrds bbox",
+        "metadataAccessPath": "https://mrdata.usgs.gov/services/wfs/mrds?version=1.1.0",
         "geoviewLayerType": "ogcWfs",
         "listOfLayerEntryConfig": [
           {
             "layerId": "mrds",
-            "source": { "strategy": "bbox" },
-            "layerName": "USGS mrds"
+            "source": { "strategy": "bbox" }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "LYR13-qgis",
+        "geoviewLayerName": "OpenMaps Water Management (not working)",
+        "metadataAccessPath": "https://openmaps.gov.bc.ca/geo/ows",
+        "geoviewLayerType": "ogcWfs",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "pub:WHSE_WATER_MANAGEMENT.GW_WATER_WELLS_WRBC_SVW"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "LYR14-qgis",
+        "geoviewLayerName": "Cities Basic",
+        "metadataAccessPath": "https://demo.mapserver.org/cgi-bin/wfs",
+        "geoviewLayerType": "ogcWfs",
+        "fetchStylesOnWMS": false,
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "ms:cities",
+            "layerFilter": "POPULATION >= 250000"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "LYR15-qgis",
+        "geoviewLayerName": "Cities Experimental",
+        "metadataAccessPath": "https://demo.mapserver.org/cgi-bin/wfs",
+        "geoviewLayerType": "ogcWfs",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "ms:cities",
+            "wmsLayerId": "cities"
           }
         ]
       }

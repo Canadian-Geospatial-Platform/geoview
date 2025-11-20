@@ -33,7 +33,6 @@ import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-cla
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import type { SnackbarType } from '@/core/utils/notifications';
 import { CancelledError, ResponseEmptyError, PromiseRejectErrorWrapper, formatError } from '@/core/exceptions/core-exceptions';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import type { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
@@ -102,7 +101,7 @@ export abstract class AbstractGeoViewLayer {
   listOfLayerEntryConfig: TypeLayerEntryConfig[] = [];
 
   /** List of errors for the layers that did not load. */
-  layerLoadError: Error[] = [];
+  #layerLoadError: Error[] = [];
 
   /** The OpenLayer root layer representing this GeoView Layer. */
   olRootLayer?: BaseLayer;
@@ -323,6 +322,9 @@ export abstract class AbstractGeoViewLayer {
     // Process list of layers and await
     const layer = await this.#processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
 
+    // If any errors were compiled, throw about it
+    this.#throwAggregatedLayerLoadErrors();
+
     // Keep the OL reference
     this.olRootLayer = layer?.getOLLayer();
 
@@ -373,7 +375,7 @@ export abstract class AbstractGeoViewLayer {
       }
     } catch (error: unknown) {
       // Set the layer status to all layer entries to error (that logic was as-is in this refactor, leaving as-is for now)
-      AbstractGeoViewLayer.#logErrorAndSetStatusErrorAll(formatError(error), this.listOfLayerEntryConfig);
+      AbstractGeoViewLayer.#setStatusErrorAll(formatError(error), this.listOfLayerEntryConfig);
 
       // If LayerServiceMetadataUnableToFetchError error
       if (error instanceof LayerServiceMetadataUnableToFetchError || error instanceof LayerNoCapabilitiesError) {
@@ -410,17 +412,6 @@ export abstract class AbstractGeoViewLayer {
         // Copy the service metadata right away
         // TODO: Check - Is this really the right place to set the ServiceMetadata?
         layerConfig.setServiceMetadata(this.getMetadata());
-
-        // If there's a copyrightText found in the metadata
-        // GV Can be any object so disable eslint and proceed with caution
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { copyrightText } = this.#metadata! as any;
-        const attributions = layerConfig.getAttributions();
-        if (copyrightText && !attributions.includes(copyrightText)) {
-          // Add it
-          attributions.push(copyrightText);
-          layerConfig.setAttributions(attributions);
-        }
       }
     });
 
@@ -527,19 +518,9 @@ export abstract class AbstractGeoViewLayer {
 
         // If not error
         if (layerConfig.layerStatus !== 'error') {
-          //
-          // TODO: Refactor - Layers refactoring. Make it a super clear function when moving config information in the layer for real.
-          // TO.DOCONT: After this point(?) the layerConfig should be full static and the system should rely on the Layer class to do stuff.
-          //
-
           // We need to signal to the layer sets that the 'processed' phase is done.
           layerConfig.setLayerStatusProcessed();
           this.#emitLayerEntryProcessed({ config: layerConfig });
-        } else {
-          // This layer config was found to be in error, skip the setStyle and skip the set status processed
-          // TODO: Check - This whole promise handling could probably be rewritten and removed from here
-          // TO.DOCONT: That is, set the style and processed status elsewhere.
-          // TO.DOCONT: Also move the failed promises in the else just below. Refactor it?
         }
       } else {
         // The promise failed. Unwrap the reason.
@@ -553,10 +534,10 @@ export abstract class AbstractGeoViewLayer {
       }
 
       // Callback
-      callbackLayerConfigCreated?.(this, { config: layerConfig, errors: this.layerLoadError });
+      callbackLayerConfigCreated?.(this, { config: layerConfig, errors: this.#layerLoadError });
 
       // Emit that the layer config has been created
-      this.#emitLayerConfigCreated({ config: layerConfig, errors: this.layerLoadError });
+      this.#emitLayerConfigCreated({ config: layerConfig, errors: this.#layerLoadError });
     });
   }
 
@@ -826,28 +807,36 @@ export abstract class AbstractGeoViewLayer {
    */
   addLayerLoadError(error: Error, layerConfig: ConfigBaseClass | undefined): void {
     // Add the error to the list
-    this.layerLoadError.push(error);
+    this.#layerLoadError.push(error);
 
-    // Log the error and set status error right away
-    AbstractGeoViewLayer.#logErrorAndSetStatusError(error, layerConfig);
+    // Set the layer status to error
+    layerConfig?.setLayerStatusError();
   }
 
   /**
-   * Gets if the layer processing has generated errors.
-   * @returns {boolean} True when the layer processing has generated errors in the 'layerLoadError' list.
+   * Throws an aggregate error based on the 'layerLoadError' list, if any.
    */
-  hasLayerLoadedErrors(): boolean {
-    return this.layerLoadError.length > 0;
+  #throwAggregatedLayerLoadErrors(): void {
+    // If no errors
+    if (this.#layerLoadError.length === 0) {
+      // Nothing to do
+    } else {
+      // Errors happened
+      // If only one, throw as-is
+      if (this.#layerLoadError.length === 1) throw this.#layerLoadError[0];
+      // Aggregate the error into one and throw it
+      throw this.#aggregateLayerLoadErrors();
+    }
   }
 
   /**
    * Aggregates the errors that might have happened during processing and that are stored in layerLoadError, if any.
    */
-  aggregateLayerLoadErrors(): AggregateError | undefined {
+  #aggregateLayerLoadErrors(): AggregateError | undefined {
     // If any errors compiled up
-    if (this.hasLayerLoadedErrors()) {
+    if (this.#hasLayerLoadedErrors()) {
       // Throw an aggregated exception
-      return new AggregateError(this.layerLoadError, 'Multiple errors happened. See this.layerLoadError for the list.');
+      return new AggregateError(this.#layerLoadError, 'Multiple errors happened. See this.layerLoadError for the list.');
     }
 
     // No errors
@@ -855,19 +844,11 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
-   * Throws an aggregate error based on the 'layerLoadError' list, if any.
+   * Gets if the layer processing has generated errors.
+   * @returns {boolean} True when the layer processing has generated errors in the 'layerLoadError' list.
    */
-  throwAggregatedLayerLoadErrors(): void {
-    // If no errors
-    if (this.layerLoadError.length === 0) {
-      // Nothing to do
-    } else {
-      // Errors happened
-      // If only one, throw as-is
-      if (this.layerLoadError.length === 1) throw this.layerLoadError[0];
-      // Aggregate the error into one and throw it
-      throw this.aggregateLayerLoadErrors();
-    }
+  #hasLayerLoadedErrors(): boolean {
+    return this.#layerLoadError.length > 0;
   }
 
   /**
@@ -1119,39 +1100,23 @@ export abstract class AbstractGeoViewLayer {
    * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig - The list of layer entry configs to update the status.
    * @private
    */
-  static #logErrorAndSetStatusErrorAll(error: Error, listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
+  static #setStatusErrorAll(error: Error, listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
     // For each layer entry config in the list
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       // If the layer entry is a group
       if (layerConfig.getEntryTypeIsGroup()) {
         // Recursively set the status to the children
-        AbstractGeoViewLayer.#logErrorAndSetStatusErrorAll(error, layerConfig.listOfLayerEntryConfig);
-        // Log the error and set status error right away
-        AbstractGeoViewLayer.#logErrorAndSetStatusError(error, layerConfig);
+        AbstractGeoViewLayer.#setStatusErrorAll(error, layerConfig.listOfLayerEntryConfig);
+        // Set the layer status to error
+        layerConfig?.setLayerStatusError();
       } else {
         // If already set to error, don't touch it
         if (layerConfig.layerStatus === 'error') return;
 
-        // Log the error and set status error right away
-        AbstractGeoViewLayer.#logErrorAndSetStatusError(error, layerConfig);
+        // Set the layer status to error
+        layerConfig?.setLayerStatusError();
       }
     });
-  }
-
-  /**
-   * Logs an error message and updates the given layer's status to "error".
-   * If the error is a `GeoViewError`, its localized message (in English) will be used.
-   * If the error has a `cause`, it will be appended to the message.
-   * @param {Error} error - The error to log.
-   * @param {ConfigBaseClass | undefined} layerConfig - The layer configuration to update, if provided.
-   * @private
-   */
-  static #logErrorAndSetStatusError(error: Error, layerConfig: ConfigBaseClass | undefined): void {
-    // Log the error
-    GeoViewError.logError(error);
-
-    // Set the layer status to error
-    layerConfig?.setLayerStatusError();
   }
 
   /**
@@ -1164,30 +1129,33 @@ export abstract class AbstractGeoViewLayer {
     // Create a promise that the layer config will be created
     const promise = new Promise<ConfigBaseClass[]>((resolve, reject) => {
       // Register a handler when the layer config has been created for this config
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       layer.onLayerConfigCreated((geoviewLayer: AbstractGeoViewLayer, event: LayerConfigCreatedEvent) => {
         // A Layer Config was created
-        logger.logDebug('Config created', event.config);
+        // Leaving the callback here for development purposes
+        // logger.logDebug('Config created', event.config);
       });
 
       // (Extra) Register a handler when a Group layer has been created for this config
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       layer.onLayerGroupCreated((geoviewLayer: AbstractGeoViewLayer, event: LayerGroupCreatedEvent) => {
         // A Group Layer was created
-        logger.logDebug('Group Layer created', event.layer);
+        // Leaving the callback here for development purposes
+        // logger.logDebug('Group Layer created', event.layer);
       });
 
       // (Extra) Register a handler when a GV layer has been created for this config
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       layer.onLayerGVCreated((geoviewLayer: AbstractGeoViewLayer, event: LayerGVCreatedEvent) => {
         // A GV Layer was created
-        logger.logDebug('GV Layer created', event.layer);
+        // Leaving the callback here for development purposes
+        // logger.logDebug('GV Layer created', event.layer);
       });
 
       // Start the geoview-layers config process
       layer
         .createGeoViewLayers()
         .then((configs) => {
-          // Throw if any errors happened
-          layer.throwAggregatedLayerLoadErrors();
-
           // Resolve with the configurations
           resolve(configs);
         })
@@ -1320,11 +1288,6 @@ export type LayerMessageEvent = {
 
 // #endregion
 
-export interface TypeWmsLegend extends Omit<TypeLegend, 'styleConfig'> {
-  legend: HTMLCanvasElement | null;
-  styles?: TypeWmsLegendStyle[];
-}
-
 export interface TypeImageStaticLegend extends Omit<TypeLegend, 'styleConfig'> {
   legend: HTMLCanvasElement | null;
 }
@@ -1353,18 +1316,6 @@ export type TypeVectorLayerStyles = Partial<Record<TypeStyleGeometry, TypeStyleR
  */
 export const isVectorLegend = (verifyIfLegend: TypeLegend): verifyIfLegend is TypeVectorLegend => {
   return validVectorLayerLegendTypes.includes(verifyIfLegend?.type);
-};
-
-/**
- * type guard function that redefines a TypeLegend as a TypeWmsLegend
- * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
- * applies only to the true block of the if clause.
- *
- * @param {TypeLegend} verifyIfLegend object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true if the payload is valid
- */
-export const isWmsLegend = (verifyIfLegend: TypeLegend): verifyIfLegend is TypeWmsLegend => {
-  return verifyIfLegend?.type === CONST_LAYER_TYPES.WMS;
 };
 
 /**

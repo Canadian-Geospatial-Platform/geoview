@@ -13,7 +13,6 @@
       {
         "geoviewLayerId": "b6b6d5a6-bded-4b6e-9e8a-17f6e1b538dc",
         "geoviewLayerName": "Qualité de l’eau des cours d’eau canadiens",
-        "metadataAccessPath": "",
         "geoviewLayerType": "geoCore",
         "listOfLayerEntryConfig": [
           {
@@ -25,7 +24,6 @@
       {
         "geoviewLayerId": "94a51051-ad11-499a-b5f1-8c97b29f695c",
         "geoviewLayerName": "Cartes des installations ayant soumis une déclaration – Rejets totaux dans l’eau",
-        "metadataAccessPath": "",
         "geoviewLayerType": "geoCore",
         "listOfLayerEntryConfig": [
           {

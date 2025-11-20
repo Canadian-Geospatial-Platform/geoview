@@ -13,8 +13,8 @@ import type {
   TypeLayerStyleSettings,
 } from '@/api/types/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
-import { validateExtent } from '@/geo/utils/utilities';
-import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
+import { GeoUtilities } from '@/geo/utils/utilities';
+import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { Projection } from '@/geo/utils/projection';
@@ -133,7 +133,7 @@ export class GVEsriImage extends AbstractGVRaster {
       const legend: TypeLegend = {
         type: CONST_LAYER_TYPES.ESRI_IMAGE,
         styleConfig,
-        legend: await getLegendStyles(styleConfig),
+        legend: await GeoviewRenderer.getLegendStyles(styleConfig),
       };
 
       return legend;
@@ -154,7 +154,7 @@ export class GVEsriImage extends AbstractGVRaster {
   }
 
   /**
-   * Applies a view filter to the layer. When the combineLegendFilter flag is false, the filter paramater is used alone to display
+   * Applies a view filter to the layer. When the combineLegendFilter flag is false, the filter parameter is used alone to display
    * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
    * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
    * is done.
@@ -168,6 +168,7 @@ export class GVEsriImage extends AbstractGVRaster {
     GVWMS.applyViewFilterOnSource(
       this.getLayerConfig(),
       this.getOLSource(),
+      undefined,
       this.getExternalFragmentsOrder(),
       this,
       filter,
@@ -198,7 +199,7 @@ export class GVEsriImage extends AbstractGVRaster {
     if (metadataExtent && metadataProjection) {
       // Transform extent to given projection
       metadataExtent = Projection.transformExtentFromProj(metadataExtent, metadataProjection, projection, stops);
-      metadataExtent = validateExtent(metadataExtent, projection.getCode());
+      metadataExtent = GeoUtilities.validateExtent(metadataExtent, projection.getCode());
     }
 
     // Return the calculated layer bounds

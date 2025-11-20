@@ -483,7 +483,7 @@ export class ConfigTester extends GVAbstractTester {
     const urlBad: string = GVAbstractTester.BAD_URL;
 
     // Test
-    return this.testError(`Test a WMS config with a bad url...`, LayerNoCapabilitiesError, async (test) => {
+    return this.testError(`Test a WMS config with a bad url...`, LayerServiceMetadataUnableToFetchError, async (test) => {
       // Creating the configuration
       test.addStep('Creating the GeoView Layer Configuration...');
 

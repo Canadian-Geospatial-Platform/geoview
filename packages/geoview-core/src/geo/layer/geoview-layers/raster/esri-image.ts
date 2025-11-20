@@ -8,7 +8,6 @@ import type { TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 
 import { commonProcessLayerMetadata } from '@/geo/layer/geoview-layers/esri-layer-common';
-import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
@@ -217,29 +216,30 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @throws If required config fields like dataAccessPath are missing.
    */
   static createEsriImageSource(layerConfig: EsriImageLayerEntryConfig): ImageArcGISRest {
-    const { source } = layerConfig;
-
-    if (!source?.dataAccessPath) {
-      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
-    }
-
     const sourceOptions: SourceOptions = {
-      url: source.dataAccessPath,
+      url: layerConfig.getDataAccessPath(),
       attributions: layerConfig.getAttributions(),
       params: {
         LAYERS: `show:${layerConfig.layerId}`,
-        ...(source.transparent !== undefined && { transparent: source.transparent }),
-        ...(source.format && { format: source.format }),
+        ...(layerConfig.source.transparent !== undefined && { transparent: layerConfig.source.transparent }),
+        ...(layerConfig.source.format && { format: layerConfig.source.format }),
       },
-      crossOrigin: source.crossOrigin ?? 'Anonymous',
-      projection: source.projection ? `EPSG:${source.projection}` : undefined,
+      crossOrigin: layerConfig.source.crossOrigin ?? 'Anonymous',
+      projection: layerConfig.source.projection ? `EPSG:${layerConfig.source.projection}` : undefined,
     };
 
     // Create the source
     const olSource = new ImageArcGISRest(sourceOptions);
 
     // Apply the filter on the source right away, before the first load
-    GVWMS.applyViewFilterOnSource(layerConfig, olSource, layerConfig.getExternalFragmentsOrder(), undefined, layerConfig.getLayerFilter());
+    GVWMS.applyViewFilterOnSource(
+      layerConfig,
+      olSource,
+      undefined,
+      layerConfig.getExternalFragmentsOrder(),
+      undefined,
+      layerConfig.getLayerFilter()
+    );
 
     // Return the source
     return olSource;

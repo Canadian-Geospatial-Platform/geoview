@@ -3,7 +3,6 @@ import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-l
 import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeSourceWkbVectorInitialConfig } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { TypeWkbLayerConfig } from '@/geo/layer/geoview-layers/vector/wkb';
-import { Projection } from '@/geo/utils/projection';
 
 export interface WkbLayerEntryConfigProps extends VectorLayerEntryConfigProps {
   /** Source settings to apply to the GeoView layer source at creation time. */
@@ -21,13 +20,7 @@ export class WkbLayerEntryConfig extends VectorLayerEntryConfig {
     super(layerConfig, CONST_LAYER_TYPES.WKB);
 
     // Value for this.source.format can only be WKB.
-    this.source ??= { format: 'WKB' };
     this.source.format ??= 'WKB';
-    this.source.dataProjection ??= Projection.PROJECTION_NAMES.LONLAT;
-    if (layerConfig.source?.dataAccessPath) this.source.dataAccessPath = layerConfig.source.dataAccessPath;
-
-    // If undefined, we assign the metadataAccessPath of the GeoView layer to dataAccessPath and place the layerId at the end of it.
-    if (!this.source.dataAccessPath) this.source.dataAccessPath = this.getMetadataAccessPath();
   }
 
   /**

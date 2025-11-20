@@ -21,22 +21,16 @@ export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
     this.maxRecordCount = layerConfig.maxRecordCount;
 
     // Write the default properties when not specified
-    this.source ??= { format: 'EsriJSON' };
     this.source.format ??= 'EsriJSON';
-    this.source.dataAccessPath ??= layerConfig.source?.dataAccessPath ?? this.getMetadataAccessPath();
-
-    // Format the dataAccessPath correctly
-    if (!this.source.dataAccessPath!.endsWith('/')) this.source.dataAccessPath += '/';
 
     // Remove ID from dataAccessPath
-    const splitAccessPath = this.source.dataAccessPath!.split('/');
+    const splitAccessPath = this.getDataAccessPath().replace(/\/+$/, '').split('/');
     if (
-      splitAccessPath[splitAccessPath.length - 2].toLowerCase() !== 'featureserver' &&
-      splitAccessPath[splitAccessPath.length - 2].toLowerCase() !== 'mapserver'
+      splitAccessPath[splitAccessPath.length - 1].toLowerCase() !== 'featureserver' &&
+      splitAccessPath[splitAccessPath.length - 1].toLowerCase() !== 'mapserver'
     ) {
       splitAccessPath.pop();
-      splitAccessPath.pop();
-      this.source.dataAccessPath = `${splitAccessPath.join('/')}/`;
+      this.setDataAccessPath(`${splitAccessPath.join('/')}`);
     }
   }
 

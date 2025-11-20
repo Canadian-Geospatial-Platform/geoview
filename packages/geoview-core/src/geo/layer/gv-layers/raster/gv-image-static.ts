@@ -6,11 +6,11 @@ import type { Projection as OLProjection } from 'ol/proj';
 
 import { logger } from '@/core/utils/logger';
 import type { ImageStaticLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
-import { loadImage } from '@/geo/utils/renderer/geoview-renderer';
+import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { Projection } from '@/geo/utils/projection';
-import { validateExtent } from '@/geo/utils/utilities';
+import { GeoUtilities } from '@/geo/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 
@@ -77,27 +77,30 @@ export class GVImageStatic extends AbstractGVRaster {
    */
   static #getLegendImage(layerConfig: ImageStaticLayerEntryConfig): Promise<string | ArrayBuffer | null> {
     const promisedImage = new Promise<string | ArrayBuffer | null>((resolve) => {
-      // If a data access path is defined
-      if (layerConfig.source.dataAccessPath) {
-        const legendUrl = layerConfig.source.dataAccessPath.toLowerCase().startsWith('http:')
-          ? `https${layerConfig.source.dataAccessPath.slice(4)}`
-          : layerConfig.source.dataAccessPath;
+      const legendUrl = layerConfig.getDataAccessPath().toLowerCase().startsWith('http:')
+        ? `https${layerConfig.getDataAccessPath().slice(4)}`
+        : layerConfig.getDataAccessPath();
 
-        // Fetch the blob
-        Fetch.fetchBlob(legendUrl, { credentials: 'omit' })
-          .then((blob) => {
-            // The blob has been read, read it with a FileReader
-            const reader = new FileReader();
-            reader.onloadend = () => {
-              resolve(reader.result);
-            };
-            reader.onerror = () => {
-              resolve(null);
-            };
-            reader.readAsDataURL(blob);
-          })
-          .catch(() => resolve(null));
-      } else resolve(null);
+      // Fetch the blob
+      Fetch.fetchBlob(legendUrl, { credentials: 'omit' })
+        .then((blob) => {
+          // The blob has been read, read it with a FileReader
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            resolve(reader.result);
+          };
+          reader.onerror = () => {
+            // Failed, but resolve nonetheless with a warning
+            logger.logWarning(`The legend could not be fetched for static image ${layerConfig.layerPath}`);
+            resolve(null);
+          };
+          reader.readAsDataURL(blob);
+        })
+        .catch(() => {
+          // Failed, but resolve nonetheless with a warning
+          logger.logWarning(`The legend could not be fetched for static image ${layerConfig.layerPath}`);
+          resolve(null);
+        });
     });
     return promisedImage;
   }
@@ -118,7 +121,7 @@ export class GVImageStatic extends AbstractGVRaster {
       // If legend image was read
       if (legendImage) {
         // Legend was read, load the image
-        const image = await loadImage(legendImage as string);
+        const image = await GeoviewRenderer.loadImage(legendImage as string);
 
         // If image was loaded
         if (image) {
@@ -165,7 +168,7 @@ export class GVImageStatic extends AbstractGVRaster {
     if (sourceExtent && sourceProjection) {
       // Transform extent to given projection
       sourceExtent = Projection.transformExtentFromProj(sourceExtent, sourceProjection, projection, stops);
-      sourceExtent = validateExtent(sourceExtent, projection.getCode());
+      sourceExtent = GeoUtilities.validateExtent(sourceExtent, projection.getCode());
     }
 
     // Return the calculated layer bounds

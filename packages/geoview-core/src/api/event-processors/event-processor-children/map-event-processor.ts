@@ -38,7 +38,7 @@ import { MapViewer } from '@/geo/map/map-viewer';
 import type { TypeMapStateForExportLayout } from '@/core/components/export/utilities';
 import type { PluginsContainer } from '@/api/plugin/plugin-types';
 import { Projection } from '@/geo/utils/projection';
-import { isPointInExtent, isExtentLonLat } from '@/geo/utils/utilities';
+import { GeoUtilities } from '@/geo/utils/utilities';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { DEFAULT_OL_FITOPTIONS, NORTH_POLE_POSITION, OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
@@ -66,7 +66,6 @@ import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { InvalidExtentError } from '@/core/exceptions/geoview-exceptions';
 import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-vector-tile';
-import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import type { TimeDimension } from '@/core/utils/date-mgt';
@@ -559,7 +558,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // GV No need to save in the store, because this will trigger an event on MapViewer which will take care of updating the store
   }
 
-  static zoom(mapId: string, zoom: number, duration: number = OL_ZOOM_DURATION): Promise<void> {
+  static zoomMap(mapId: string, zoom: number, duration: number = OL_ZOOM_DURATION): Promise<void> {
     // Do the actual zoom
     this.getMapViewer(mapId).map.getView().animate({ zoom, duration });
 
@@ -1138,7 +1137,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     if (homeView.extent) {
       const lonlatExtent = homeView.extent as Extent;
       // If extent is not lon/lat, we assume it is in the map projection and use it as is.
-      extent = isExtentLonLat(lonlatExtent)
+      extent = GeoUtilities.isExtentLonLat(lonlatExtent)
         ? Projection.transformExtentFromProj(
             lonlatExtent,
             Projection.getProjectionLonLat(),
@@ -1207,7 +1206,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // Check if the map center is already in the layer extent and if so, do not center
     const layerExtent = (geoviewLayer as AbstractGVLayer).getBounds(this.getMapViewer(mapId).getProjection(), MapViewer.DEFAULT_STOPS);
     const centerExtent =
-      layerExtent && layerMinZoom > mapZoom! && !isPointInExtent(view.getCenter()!, layerExtent)
+      layerExtent && layerMinZoom > mapZoom! && !GeoUtilities.isPointInExtent(view.getCenter()!, layerExtent)
         ? [(layerExtent[2] + layerExtent[0]) / 2, (layerExtent[1] + layerExtent[3]) / 2]
         : undefined;
 
@@ -1246,20 +1245,16 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} layerPath The path for the layer to get filters from.
    */
   static getActiveVectorFilters(mapId: string, layerPath: string): (string | undefined)[] | undefined {
-    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerIfExists(layerPath);
-    if (geoviewLayer) {
-      const initialFilter = this.getInitialFilter(mapId, layerPath);
-      const tableFilter = DataTableEventProcessor.getTableFilter(mapId, layerPath);
+    const initialFilter = this.getInitialFilter(mapId, layerPath);
+    const tableFilter = DataTableEventProcessor.getTableFilter(mapId, layerPath);
 
-      // If the TimeSlider is initialized
-      let sliderFilter;
-      if (TimeSliderEventProcessor.isTimeSliderInitialized(mapId)) {
-        // Assign it for the return
-        sliderFilter = TimeSliderEventProcessor.getTimeSliderFilter(mapId, layerPath);
-      }
-      return [initialFilter, tableFilter, sliderFilter].filter((filter) => filter);
+    // If the TimeSlider is initialized
+    let sliderFilter;
+    if (TimeSliderEventProcessor.isTimeSliderInitialized(mapId)) {
+      // Assign it for the return
+      sliderFilter = TimeSliderEventProcessor.getTimeSliderFilter(mapId, layerPath);
     }
-    return undefined;
+    return [initialFilter, tableFilter, sliderFilter].filter((filter) => filter);
   }
 
   /**
@@ -1274,39 +1269,17 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     // If found it and of right type
     if (
-      geoviewLayer &&
-      (geoviewLayer instanceof AbstractGVVector ||
-        geoviewLayer instanceof GVWMS ||
-        geoviewLayer instanceof GVEsriImage ||
-        geoviewLayer instanceof GVEsriDynamic)
+      geoviewLayer instanceof AbstractGVVector ||
+      geoviewLayer instanceof GVWMS ||
+      geoviewLayer instanceof GVEsriImage ||
+      geoviewLayer instanceof GVEsriDynamic
     ) {
-      // Depending on the instance
-      if (geoviewLayer instanceof GVWMS || geoviewLayer instanceof GVEsriImage) {
-        // If the Time Slider is initialized
-        if (TimeSliderEventProcessor.isTimeSliderInitialized(mapId)) {
-          // Read filter information
-          const filter = TimeSliderEventProcessor.getTimeSliderFilter(mapId, layerPath);
+      // Read filter information
+      const filters = this.getActiveVectorFilters(mapId, layerPath) || [''];
+      const filter = filters.join(' AND ');
 
-          // If filter was defined
-          if (filter) geoviewLayer.applyViewFilter(filter);
-        }
-      } else {
-        // Read filter information
-        const filters = this.getActiveVectorFilters(mapId, layerPath) || [''];
-        const filter = filters.join(' and ');
-
-        // If EsriDynamic
-        if (geoviewLayer instanceof GVEsriDynamic) {
-          // Force the layer to applyfilter so it refreshes its layerDefs
-          geoviewLayer.applyViewFilter(filter);
-        } else if (geoviewLayer instanceof AbstractGVVector) {
-          // Force the layer to applyfilter so it refreshes its layer config filter
-          geoviewLayer.applyViewFilter(filter);
-        } else {
-          // Not supported
-          throw new NotSupportedError('Layer type not supported when trying to perform an applyLayerFilters.');
-        }
-      }
+      // Force the layer to applyfilter
+      geoviewLayer.applyViewFilter(filter);
     }
   }
 
@@ -1493,7 +1466,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
             externalDateFormat: layerEntryConfig.getGeoviewLayerConfig()?.externalDateFormat,
             geoviewLayerId: layerEntryConfig.getGeoviewLayerId(),
             geoviewLayerName: layerEntryConfig.getGeoviewLayerName(),
-            geoviewLayerType: layerEntryConfig.getSchemaTag()!,
+            geoviewLayerType: layerEntryConfig.getSchemaTag(),
             initialSettings,
             isTimeAware: layerEntryConfig.getGeoviewLayerConfig()?.isTimeAware,
             listOfLayerEntryConfig,

@@ -1,13 +1,12 @@
 import type { Options as SourceOptions } from 'ol/source/Vector';
 import { GeoJSON as FormatGeoJSON } from 'ol/format';
-import type { ReadOptions } from 'ol/format/Feature';
 import type { Vector as VectorSource } from 'ol/source';
 import type Feature from 'ol/Feature';
 
 import defaultsDeep from 'lodash/defaultsDeep';
 
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
-import type { TypeGeoviewLayerConfig, TypeBaseVectorSourceInitialConfig, TypeMetadataGeoJSON } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerConfig, TypeMetadataGeoJSON } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { GeoJSONLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
 import type { VectorLayerEntryConfig, VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
@@ -162,6 +161,7 @@ export class GeoJSON extends AbstractGeoViewVector {
           layerConfig.setMinScale(Math.max(layerConfig.getMinScale() || 0, layerMetadataFound.minScale));
         }
 
+        // TODO: Check - DataAccessPath confusion... this guessing seems prone to bugging, can we review or get rid of this?
         // When the dataAccessPath stored in the layerConfig.source object is equal to the root of the metadataAccessPath with a
         // layerId ending, chances are that it was set by the config-validation because of an empty dataAcessPath value in the config.
         // This situation means that we want to use the dataAccessPath found in the metadata if it is set, otherwise we will keep the
@@ -193,23 +193,19 @@ export class GeoJSON extends AbstractGeoViewVector {
    * Overrides the creation of the source configuration for the vector layer.
    * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration.
    * @param {SourceOptions} sourceOptions - The source options.
-   * @param {ReadOptions} readOptions - The read options.
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
   protected override onCreateVectorSource(
     layerConfig: VectorLayerEntryConfig,
-    sourceOptions: SourceOptions<Feature>,
-    readOptions: ReadOptions
+    sourceOptions: SourceOptions<Feature>
   ): VectorSource<Feature> {
     // eslint-disable-next-line no-param-reassign
-    readOptions.dataProjection = (layerConfig.source as TypeBaseVectorSourceInitialConfig).dataProjection;
-    // eslint-disable-next-line no-param-reassign
-    sourceOptions.url = layerConfig.source!.dataAccessPath!;
+    sourceOptions.url = layerConfig.getDataAccessPath();
     // eslint-disable-next-line no-param-reassign
     sourceOptions.format = new FormatGeoJSON();
 
     // Call parent
-    return super.onCreateVectorSource(layerConfig, sourceOptions, readOptions);
+    return super.onCreateVectorSource(layerConfig, sourceOptions);
   }
 
   /**

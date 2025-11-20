@@ -1,7 +1,8 @@
 import type { Vector as VectorSource } from 'ol/source';
+
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import type { WfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
-import type { TypeOutfieldsType } from '@/api/types/map-schema-types';
+import type { TypeOutfields, TypeOutfieldsType } from '@/api/types/map-schema-types';
 
 /**
  * Manages a WFS layer.
@@ -37,8 +38,18 @@ export class GVWFS extends AbstractGVVector {
    * @returns {TypeOutfieldsType} The type of the field.
    */
   protected override onGetFieldType(fieldName: string): TypeOutfieldsType {
-    const fieldDefinitions = this.getLayerConfig().getLayerMetadata();
-    const fieldDefinition = fieldDefinitions?.find((metadataEntry) => metadataEntry.name === fieldName);
+    // Redirect
+    return GVWFS.getFieldType(this.getLayerConfig().getLayerMetadata(), fieldName);
+  }
+
+  /**
+   * Returns field type of the given field name using the povided WFS metadata.
+   * @param {TypeOutfields[]} layerMetadata - The WFS metadata
+   * @param {string} fieldName - The field name to get the field type information
+   * @returns {TypeOutfieldsType} The field type information for the given field name
+   */
+  static getFieldType(layerMetadata: TypeOutfields[] | undefined, fieldName: string): TypeOutfieldsType {
+    const fieldDefinition = layerMetadata?.find((metadataEntry) => metadataEntry.name === fieldName);
     if (!fieldDefinition) return 'string';
     const fieldEntryType = fieldDefinition.type.split(':').slice(-1)[0];
     if (fieldEntryType === 'date') return 'date';

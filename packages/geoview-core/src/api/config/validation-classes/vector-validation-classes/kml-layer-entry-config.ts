@@ -3,7 +3,6 @@ import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-l
 import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeBaseVectorSourceInitialConfig } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { TypeKmlLayerConfig } from '@/geo/layer/geoview-layers/vector/kml';
-import { Projection } from '@/geo/utils/projection';
 
 export interface KmlLayerEntryConfigProps extends VectorLayerEntryConfigProps {
   /** Source settings to apply to the GeoView layer source at creation time. */
@@ -21,21 +20,16 @@ export class KmlLayerEntryConfig extends VectorLayerEntryConfig {
     super(layerConfig, CONST_LAYER_TYPES.KML);
 
     // Value for this.source.format can only be KML.
-    this.source ??= { format: 'KML' };
     this.source.format ??= 'KML';
-    this.source.dataProjection ??= Projection.PROJECTION_NAMES.LONLAT;
-    if (layerConfig.source?.dataAccessPath) this.source.dataAccessPath = layerConfig.source.dataAccessPath;
-
-    // If undefined, we assign the metadataAccessPath of the GeoView layer to dataAccessPath.
-    if (!this.source.dataAccessPath) this.source.dataAccessPath = this.getMetadataAccessPath()!;
 
     // If dataAccessPath doesn't already point to a file (blob, .kml), append the layerId
-    const path = this.source.dataAccessPath;
+    const path = this.getDataAccessPath();
     const isBlob = path.startsWith('blob') && !path.endsWith('/');
     const endsWithKml = path.toUpperCase().endsWith('.KML');
 
     if (!isBlob && !endsWithKml) {
-      this.source.dataAccessPath = path.endsWith('/') ? `${path}${this.layerId}` : `${path}/${this.layerId}`;
+      // Set it
+      this.setDataAccessPath(`${this.getDataAccessPath(true)}${this.layerId}`);
     }
   }
 

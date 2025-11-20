@@ -3,8 +3,7 @@ import type { TimeDimension } from '@/core/utils/date-mgt';
 import type { TypeGeoviewLayerType, TypeLayerControls } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { TypeLegendLayer, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
-import type { TypeWmsLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { isImageStaticLegend, isVectorLegend, isWmsLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { isImageStaticLegend, isVectorLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import type { ILayerState, TypeLegend, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
@@ -236,23 +235,11 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     return undefined;
   }
 
-  static getLayerIconImage(layerLegend: TypeLegend | null): TypeLegendLayerItem[] | undefined {
+  static getLayerIconImage(layerLegend: TypeLegend | null | undefined): TypeLegendLayerItem[] | undefined {
     // TODO: Refactor - Move this function to a utility class instead of at the 'processor' level so it's safer to call from a layer framework level class
     const iconDetails: TypeLegendLayerItem[] = [];
     if (layerLegend) {
-      if (isWmsLegend(layerLegend) || isImageStaticLegend(layerLegend)) {
-        const iconDetailsEntry: TypeLegendLayerItem = {};
-        iconDetailsEntry.iconType = 'simple';
-        // Use icon image if available
-        if (layerLegend.legend) iconDetailsEntry.iconImage = layerLegend.legend.toDataURL();
-        // Otherwise use image from first style
-        else if ((layerLegend as TypeWmsLegend).styles && (layerLegend as TypeWmsLegend).styles![0].legend)
-          iconDetailsEntry.iconImage = (layerLegend as TypeWmsLegend).styles![0].legend!.toDataURL();
-        // No styles or image, no icon
-        else iconDetailsEntry.iconImage = 'no data';
-        iconDetails.push(iconDetailsEntry);
-      } else if (layerLegend.legend === null || Object.keys(layerLegend.legend).length === 0) iconDetails[0] = { iconImage: 'no data' };
-      else if (isVectorLegend(layerLegend)) {
+      if (isVectorLegend(layerLegend)) {
         Object.entries(layerLegend.legend).forEach(([key, styleRepresentation]) => {
           const geometryType = key as TypeStyleGeometry;
           const styleSettings = layerLegend.styleConfig![geometryType]!;
@@ -260,7 +247,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           iconDetailsEntry.geometryType = geometryType;
 
           if (styleSettings.type === 'simple') {
-            iconDetailsEntry.iconType = 'simple';
             iconDetailsEntry.iconImage = (styleRepresentation.defaultCanvas as HTMLCanvasElement).toDataURL();
             iconDetailsEntry.name = styleSettings.info[0].label;
 
@@ -274,7 +260,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
             iconDetailsEntry.iconList = [legendLayerListItem];
             iconDetails.push(iconDetailsEntry);
           } else {
-            iconDetailsEntry.iconType = 'list';
             iconDetailsEntry.iconList = [];
             styleRepresentation.arrayOfCanvas!.forEach((canvas, i) => {
               // Check if there is already an entry for this label before adding it.
@@ -303,6 +288,17 @@ export class LegendEventProcessor extends AbstractEventProcessor {
             iconDetails.push(iconDetailsEntry);
           }
         });
+      } else {
+        const iconDetailsEntry: TypeLegendLayerItem = {};
+        // Use html canvas if available
+        const htmlElement = layerLegend.legend as HTMLCanvasElement | undefined;
+        if (htmlElement?.toDataURL) {
+          iconDetailsEntry.iconImage = htmlElement.toDataURL();
+        } else {
+          // No styles or image, no icon
+          iconDetailsEntry.iconImage = 'no data';
+        }
+        iconDetails.push(iconDetailsEntry);
       }
 
       return iconDetails;
@@ -412,7 +408,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         }
 
         // Read the icons
-        const icons = LegendEventProcessor.getLayerIconImage(legendResultSetEntry.data!);
+        const icons = LegendEventProcessor.getLayerIconImage(legendResultSetEntry.data);
 
         const controls: TypeLayerControls = setLayerControls(layerConfig, currentLevel > 2);
         const legendLayerEntry: TypeLegendLayer = {

@@ -30,7 +30,7 @@ const LegendListItem = memo(
     <ListItem className={!isVisible || !layerVisible ? 'unchecked' : 'checked'}>
       <ListItemIcon>
         <Tooltip title={show ? value : ''} key={`Tooltip-${name}-${icon}1`} placement="left" disableHoverListener={!show}>
-          <Box sx={{ padding: '0 18px 0 18px', margin: '0 -18px 0 -18px' }}>
+          <Box sx={{ display: 'flex', padding: '0 18px 0 18px', margin: '0 -18px 0 -18px' }}>
             {icon ? <Box component="img" alt={name} src={icon} /> : <BrowserNotSupportedIcon />}
           </Box>
         </Tooltip>

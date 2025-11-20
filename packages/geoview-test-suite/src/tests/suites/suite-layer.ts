@@ -75,7 +75,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
     // Test true negative
     const pLayerEsriImageBadUrl = this.#layerTester.testAddEsriImageBadUrl();
 
-    // Test adding layer
+    // Test adding layer OWS Mundialis
     const pLayerWMSOWSMundialis = this.#layerTester.testAddWMSLayerWithOWSMundialis();
 
     // Test adding layer

@@ -6,7 +6,7 @@ import type { Projection as OLProjection } from 'ol/proj';
 import type { GeoTIFFLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/geotiff-layer-entry-config';
 import { AbstractGVTile } from '@/geo/layer/gv-layers/tile/abstract-gv-tile';
 import { featureInfoGetFieldType } from '@/geo/layer/gv-layers/utils';
-import { validateExtent } from '@/geo/utils/utilities';
+import { GeoUtilities } from '@/geo/utils/utilities';
 import type { TypeOutfieldsType } from '@/api/types/map-schema-types';
 import { Projection } from '@/geo/utils/projection';
 
@@ -96,7 +96,7 @@ export class GVGeoTIFF extends AbstractGVTile {
     if (sourceExtent && sourceProjection) {
       // Transform extent to given projection
       sourceExtent = Projection.transformExtentFromProj(sourceExtent, sourceProjection, projection, stops);
-      sourceExtent = validateExtent(sourceExtent, projection.getCode());
+      sourceExtent = GeoUtilities.validateExtent(sourceExtent, projection.getCode());
     }
 
     // Return the calculated layer bounds

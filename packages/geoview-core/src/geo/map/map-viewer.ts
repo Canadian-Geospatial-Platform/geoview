@@ -61,7 +61,7 @@ import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
 import { ModalApi } from '@/ui';
 import { delay, generateId, getLocalizedMessage, whenThisThen } from '@/core/utils/utilities';
-import { createEmptyBasemap, getPointerPositionFromMapEvent, isExtentLonLat } from '@/geo/utils/utilities';
+import { GeoUtilities } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { NORTH_POLE_POSITION } from '@/core/utils/constant';
 import type { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
@@ -321,7 +321,7 @@ export class MapViewer {
 
     const initialMap = new OLMap({
       target: mapElement,
-      layers: [createEmptyBasemap()],
+      layers: [GeoUtilities.createEmptyBasemap()],
       view: new View({
         projection,
         center: Projection.transformFromLonLat(
@@ -912,7 +912,8 @@ export class MapViewer {
   zoomToExtent(extent: Extent, options?: FitOptions): Promise<void> {
     // TODO: Discussion - Where is the line between a function using MapEventProcessor in MapViewer vs in MapState action?
     // TO.DOCONT: This function (and there are many others in this class) redirects to the MapEventProcessor, should it be in MapState with the others or do we keep some in MapViewer and some in MapState?
-    // TO.DOCONT: If we keep some, we should maybe add a fourth call-stack possibility in the MapEventProcessor paradigm documentation.
+    // TO.DOCONT: If we keep some here, we should maybe add a fourth call-stack possibility in the MapEventProcessor paradigm documentation which goes like so:
+    // - 4th paradigm: MapViewer ---calls---> MapEventProcessor ---calls---> MapViewer ---calls/emits events---> MapState.setterActions.
     // Redirect to the processor
     return MapEventProcessor.zoomToExtent(this.mapId, extent, options);
   }
@@ -1413,7 +1414,7 @@ export class MapViewer {
       const projCode = this.getView().getProjection().getCode();
 
       // Get the pointer position information based on the map event
-      const pointerPosition: TypeMapMouseInfo = getPointerPositionFromMapEvent(event, projCode);
+      const pointerPosition: TypeMapMouseInfo = GeoUtilities.getPointerPositionFromMapEvent(event, projCode);
 
       // Save in the store
       MapEventProcessor.setMapPointerPosition(this.mapId, pointerPosition);
@@ -1437,7 +1438,7 @@ export class MapViewer {
       const projCode = this.getView().getProjection().getCode();
 
       // Get the pointer position information based on the map event
-      const pointerPosition: TypeMapMouseInfo = getPointerPositionFromMapEvent(event, projCode);
+      const pointerPosition: TypeMapMouseInfo = GeoUtilities.getPointerPositionFromMapEvent(event, projCode);
 
       // Emit to the outside
       this.#emitMapPointerStop(pointerPosition);
@@ -1458,7 +1459,7 @@ export class MapViewer {
       const projCode = this.getView().getProjection().getCode();
 
       // Get the pointer position information based on the map event
-      const pointerPosition: TypeMapMouseInfo = getPointerPositionFromMapEvent(event, projCode);
+      const pointerPosition: TypeMapMouseInfo = GeoUtilities.getPointerPositionFromMapEvent(event, projCode);
 
       // Save in the store
       MapEventProcessor.setClickCoordinates(this.mapId, pointerPosition);
@@ -1762,7 +1763,7 @@ export class MapViewer {
     if (this.mapFeaturesConfig.map.viewSettings.initialView?.extent) {
       // Not zooming on layers, but we have an extent to zoom to instead
       // If extent is not lon/lat, we assume it is in the map projection and use it as is.
-      const extent = isExtentLonLat(this.mapFeaturesConfig.map.viewSettings.initialView.extent)
+      const extent = GeoUtilities.isExtentLonLat(this.mapFeaturesConfig.map.viewSettings.initialView.extent)
         ? this.convertExtentLonLatToMapProj(this.mapFeaturesConfig.map.viewSettings.initialView.extent as Extent)
         : this.mapFeaturesConfig.map.viewSettings.initialView.extent;
 

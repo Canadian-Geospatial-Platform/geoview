@@ -1,17 +1,12 @@
 import type { Options as SourceOptions } from 'ol/source/Vector';
 import { GeoJSON as FormatGeoJSON } from 'ol/format';
-import type { ReadOptions } from 'ol/format/Feature';
 import type { Vector as VectorSource } from 'ol/source';
 import type Feature from 'ol/Feature';
 
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
-import type {
-  TypeVectorSourceInitialConfig,
-  TypeGeoviewLayerConfig,
-  TypeBaseVectorSourceInitialConfig,
-} from '@/api/types/layer-schema-types';
+import type { TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { CsvLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
@@ -75,23 +70,19 @@ export class CSV extends AbstractGeoViewVector {
    * Overrides the creation of the source configuration for the vector layer
    * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry configuration.
    * @param {SourceOptions} sourceOptions - The source options.
-   * @param {ReadOptions} readOptions - The read options.
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
   protected override onCreateVectorSource(
     layerConfig: VectorLayerEntryConfig,
-    sourceOptions: SourceOptions<Feature>,
-    readOptions: ReadOptions
+    sourceOptions: SourceOptions<Feature>
   ): VectorSource<Feature> {
     // eslint-disable-next-line no-param-reassign
-    readOptions.dataProjection = (layerConfig.source as TypeBaseVectorSourceInitialConfig).dataProjection;
-    // eslint-disable-next-line no-param-reassign
-    sourceOptions.url = layerConfig.source!.dataAccessPath;
+    sourceOptions.url = layerConfig.getDataAccessPath();
     // eslint-disable-next-line no-param-reassign
     sourceOptions.format = new FormatGeoJSON();
 
     // Call parent
-    return super.onCreateVectorSource(layerConfig, sourceOptions, readOptions);
+    return super.onCreateVectorSource(layerConfig, sourceOptions);
   }
 
   /**

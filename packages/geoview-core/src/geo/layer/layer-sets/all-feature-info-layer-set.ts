@@ -2,7 +2,6 @@ import { DataTableEventProcessor } from '@/api/event-processors/event-processor-
 import type { QueryType, TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import type { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
-import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
 import type {
@@ -32,12 +31,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
    */
   protected override onRegisterLayerCheck(layer: AbstractBaseLayer): boolean {
     // Return if the layer is of queryable type and source is queryable
-    return (
-      super.onRegisterLayerCheck(layer) &&
-      AbstractLayerSet.isQueryableType(layer) &&
-      !(layer instanceof GVWMS) &&
-      AbstractLayerSet.isSourceQueryable(layer)
-    );
+    return super.onRegisterLayerCheck(layer) && AbstractLayerSet.isQueryableType(layer) && AbstractLayerSet.isSourceQueryable(layer, 'all');
   }
 
   /**
