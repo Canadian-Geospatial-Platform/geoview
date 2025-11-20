@@ -345,6 +345,7 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
     isPanelOpen,
     hasValidGeometry,
     geometryLoaded,
+    memoLayersList,
   ]);
 
   /**
