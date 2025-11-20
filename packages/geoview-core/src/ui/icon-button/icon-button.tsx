@@ -5,10 +5,22 @@ import { logger } from '@/core/utils/logger';
 
 /**
  * Properties for the icon button extending Material-UI's IconButtonProps
+ *
+ * @property {ReactNode} [children] - The icon or content to display inside the button.
+ * @property {string} aria-label - Screen reader text for accessibility. An icon button will never have a text label so it needs a descriptive label for screen readers.
+ * @property {string | null} [tooltip] - Optional. Tooltip text shown on hover (defaults to aria-label if not provided, set to null to disable).
+ * @property {TooltipProps['placement']} [tooltipPlacement] - Optional. Position of the tooltip (top, bottom, left, right, etc.)
+ * @property {number} [tabIndex] - Optional. Tab order for keyboard navigation
+ * @property {RefObject<HTMLButtonElement>} [iconRef] - Optional. Ref to access the button element
+ * @property {boolean} [visible] - Optional. Controls button visibility
+ *
+ * @see {@link IconButtonProps} for additional inherited props from Material-UI
  */
-export interface IconButtonPropsExtend extends IconButtonProps {
+
+export interface IconButtonPropsExtend extends Omit<IconButtonProps, 'aria-label'> {
   children?: ReactNode;
-  tooltip?: string;
+  'aria-label': string;
+  tooltip?: string | null;
   tooltipPlacement?: TooltipProps['placement'];
   tabIndex?: number;
   iconRef?: RefObject<HTMLButtonElement>;
@@ -19,23 +31,44 @@ export interface IconButtonPropsExtend extends IconButtonProps {
  * Create a customized Material UI Icon Button component.
  *
  * @component
+ * @param {IconButtonPropsExtend} props - The properties passed to the Icon Button element
+ * @returns {JSX.Element} The Icon Button component
  * @example
  * ```tsx
  * // Basic usage
- * <IconButton>
+ * <IconButton aria-label="Delete item">
  *   <DeleteIcon />
  * </IconButton>
  *
- * // With tooltip
+ *  // With implicit tooltip (aria-label)
  * <IconButton
- *   tooltip="Delete item"
+ *   aria-label="Delete item"
  *   tooltipPlacement="top"
  * >
  *   <DeleteIcon />
  * </IconButton>
- *
+ * 
+ * // With explicit tooltip
+ * <IconButton
+ *   aria-label="Delete item"
+ *   tooltip="Delete item permanently"
+ *   tooltipPlacement="top"
+ * >
+ *   <DeleteIcon />
+ * </IconButton>
+ * 
+ * // Tooltip disabled (no tooltip on hover)
+ * <IconButton
+ * aria-label="Close dialog"
+ * tooltip={null}
+ * > 
+ * <CloseIcon />
+ * </IconButton>
+ * 
  * // With custom styling
  * <IconButton
+ *   aria-label="Edit item"
+ *   tooltip="Edit this item"
  *   className="custom-button"
  *   size="small"
  *   color="primary"
@@ -45,22 +78,20 @@ export interface IconButtonPropsExtend extends IconButtonProps {
  *
  * // With disabled state
  * <IconButton
+ *   aria-label="Save document"
  *   disabled={true}
  *   tooltip="Not available"
  * >
  *   <SaveIcon />
  * </IconButton>
  * ```
- *
- * @param {IconButtonPropsExtend} props - The properties passed to the Icon Button element
- * @returns {JSX.Element} The Icon Button component
+
  *
  * @see {@link https://mui.com/material-ui/react-button/#icon-button}
  */
 function IconButtonUI(props: IconButtonPropsExtend): JSX.Element {
   logger.logTraceRenderDetailed('ui/icon-button/icon-button');
 
-  // TODO: WCAG - Do we need to pass aria label? We should freuse toltip or title when define
   // Get constant from props
   const {
     sx,
@@ -80,12 +111,14 @@ function IconButtonUI(props: IconButtonPropsExtend): JSX.Element {
     ...rest
   } = props;
 
+  // Render button without tooltip wrapper if disabled or tooltip explicitly set to null
+  // Otherwise wrap with Tooltip component (using tooltip prop or aria-label as fallback)
   function createIconButtonUI(): JSX.Element {
     return (
       <MaterialIconButton
         id={id}
         sx={sx}
-        aria-label={ariaLabel || tooltip}
+        aria-label={ariaLabel}
         style={style}
         className={className}
         onClick={onClick}
@@ -96,17 +129,17 @@ function IconButtonUI(props: IconButtonPropsExtend): JSX.Element {
         color={color}
         {...rest}
       >
-        {children && children}
+        {children}
       </MaterialIconButton>
     );
   }
 
-  if (disabled) {
+  if (disabled || tooltip === null) {
     return createIconButtonUI();
   }
 
   return (
-    <Tooltip title={tooltip} placement={tooltipPlacement} slots={{ transition: Fade }}>
+    <Tooltip title={tooltip || ariaLabel} placement={tooltipPlacement} slots={{ transition: Fade }}>
       {createIconButtonUI()}
     </Tooltip>
   );

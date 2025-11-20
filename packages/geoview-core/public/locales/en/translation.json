@@ -132,6 +132,7 @@
     "name": "Name",
     "layerSelect": "Select layer(s)",
     "deleteLayer": "Delete layer",
+    "undoLayer": "Undo layer",
     "errorDisabled": "The layer type '__param__' is disabled in this map.",
     "errorEmpty": "__param__ cannot be empty.",
     "errorNone": "No file or source added.",
@@ -175,7 +176,14 @@
     "layerServiceProjection": "Service projection: ",
     "layerHoverable": "Info on mouse over",
     "layerQueryable": "Info on mouse click",
-    "noSelection": "No selection"
+    "noSelection": "No selection",
+    "showAllLayers": "Show all layers",
+    "hideAllLayers": "Hide all layers",
+    "showLayer": "Show {{name}} layer",
+    "hideLayer": "Hide {{name}} layer",
+    "tableViewNone": "Table (unavailable)",
+    "moveLayerUp": "Move layer up",
+    "moveLayerDown": "Move layer down"
   },
   "details": {
     "title": "Details",
@@ -330,7 +338,9 @@
   "guide": {
     "title": "Guide",
     "search": "Search guide...",
-    "errorMessage": "Sorry, unable to find the help document!"
+    "errorMessage": "Sorry, unable to find the help document!",
+    "arrowUp": "Previous match",
+    "arrowDown": "Next match"
   },
   "footerBar": {
     "resizeTooltip": "Resize",
