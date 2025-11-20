@@ -131,6 +131,12 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
     // Test a skip
     const pKMLSkip = this.#configTester.testKMLBadUrlExpectSkip();
 
+    // Test a KML file
+    const pLayerGeoTIFFVegetation = this.#configTester.testGeoTIFFWithVegetation();
+
+    // Test a skip
+    const pGeoTIFFSkip = this.#configTester.testGeoTIFFBadUrlExpectSkip();
+
     // Test a Geocore
     const pGeocoreAirborne = this.#configTester.testStandaloneGeocoreWithAirborne();
 
@@ -162,6 +168,8 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
       pWKBBadUrlFail,
       pKMLTornado,
       pKMLSkip,
+      pLayerGeoTIFFVegetation,
+      pGeoTIFFSkip,
       pGeocoreAirborne,
     ]);
   }

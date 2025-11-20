@@ -211,6 +211,10 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (this.#olSource as any).on(['imageloaderror'], this.onImageLoadError.bind(this));
 
+    // Activate source change listener to catch errors
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (this.#olSource as any).on('change', this.onSourceChange.bind(this));
+
     // Apply render error handling to prevent "Cannot read properties of null (reading 'globalAlpha')" errors
     AbstractGVLayer.#addRenderErrorHandling(this.getOLLayer());
   }
@@ -381,6 +385,28 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
     // Emit event for all layer error events
     this.#emitLayerError({ error: event });
+  }
+
+  /**
+   * Method called when the layer source changes to check for errors.
+   * @param {Event} event - The event which is being triggered.
+   */
+  protected onSourceChange(event: Event): void {
+    const state = this.#olSource.getState();
+    if (state === 'error') {
+      // eslint-disable-next-line no-underscore-dangle, @typescript-eslint/no-explicit-any
+      const error = (this.#olSource as any).error_;
+      const errorMessage = error?.message || String(error);
+
+      // Log the error, we do not throw as the layer can still be added but marked as errored
+      logger.logError('GeoTIFF source failed with error', {
+        layerId: this.getLayerPath(),
+        error: errorMessage,
+      });
+
+      // Trigger onError handling
+      this.onError(error);
+    }
   }
 
   /**
