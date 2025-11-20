@@ -1100,10 +1100,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
       );
 
       const extent: Extent = [...projectedCoords[0], ...projectedCoords[0]];
-      const options: FitOptions = DEFAULT_OL_FITOPTIONS;
 
       // Zoom to extent and await
-      await this.zoomToExtent(mapId, extent, options);
+      await this.zoomToExtent(mapId, extent);
 
       // Now show the click marker icon
       this.clickMarkerIconShow(mapId, { lonlat: coords });
@@ -1180,9 +1179,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
     );
 
     const extent: Extent = [...projectedCoords[0], ...projectedCoords[0]];
-    const options: FitOptions = DEFAULT_OL_FITOPTIONS;
 
-    return this.zoomToExtent(mapId, extent, options);
+    return this.zoomToExtent(mapId, extent);
   }
 
   /**
