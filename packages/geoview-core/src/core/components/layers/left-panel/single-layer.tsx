@@ -53,6 +53,9 @@ import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useUISelectedFooterLayerListItemId } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import type { TypeLayerControls } from '@/api/types/layer-schema-types';
 
+// TODO: WCAG Issue #3108 - Check all disabled buttons. They may need special treatment. Need to find instance in UI first)
+// TODO: WCAG Issue #3108 - Check all icon buttons for "state related" aria values (i.e aria-checked, aria-disabled, etc.)
+
 interface SingleLayerProps {
   layerPath: string;
   depth: number;
@@ -280,6 +283,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
   }, [layerPath, layerStatus, parentHidden, t, layerChildren, layerItems, datatableSettings]);
 
   // Memoize the EditModeButtons component section
+
   const memoEditModeButtons = useMemo((): JSX.Element | null => {
     // Log
     logger.logTraceUseMemo('SINGLE-LAYER - memoEditModeButtons', layerPath);
@@ -304,6 +308,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
           )}
           <IconButton
             id={`${mapId}-${layerPath}-up-order`}
+            aria-label={t('layers.moveLayerUp')}
             disabled={isFirst}
             edge="end"
             size="small"
@@ -314,6 +319,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
           </IconButton>
           <IconButton
             id={`${mapId}-${layerPath}-down-order`}
+            aria-label={t('layers.moveLayerDown')}
             disabled={isLast}
             edge="end"
             size="small"
@@ -338,6 +344,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
     layerPath,
     mapId,
     reorderLayer,
+    t,
     theme.palette.geoViewColor.bgColor.dark,
   ]);
 
@@ -355,7 +362,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
           <IconButton
             edge="end"
             size="small"
-            tooltip={layerChildren && layerChildren.length > 0 ? t('layers.reloadSublayers')! : t('layers.reloadLayer')!}
+            aria-label={layerChildren && layerChildren.length > 0 ? t('layers.reloadSublayers') : t('layers.reloadLayer')}
             className="buttonOutline"
             onClick={handleReload}
           >
@@ -372,7 +379,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
           <IconButton
             edge="end"
             size="small"
-            tooltip={t('layers.visibilityIsAlways')!}
+            aria-label={t('layers.visibilityIsAlways')}
             className="buttonOutline"
             disabled={!inVisibleRange}
           >
@@ -391,7 +398,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
         <IconButton
           edge="end"
           size="small"
-          tooltip={t('layers.zoomVisibleScale')!}
+          aria-label={t('layers.zoomVisibleScale')}
           sx={{ display: isZoomToVisibleScaleCapable ? 'block' : 'none' }}
           onClick={handleZoomToLayerVisibleScale}
         >
@@ -402,7 +409,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
             edge={inVisibleRange ? false : 'end'}
             size="small"
             onClick={handleToggleVisibility}
-            tooltip={t('layers.toggleVisibility')!}
+            aria-label={t('layers.toggleVisibility')}
             className="buttonOutline"
             disabled={!inVisibleRange || parentHidden}
           >
@@ -442,7 +449,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
           edge="end"
           size="small"
           onClick={handleExpandGroupClick}
-          tooltip={t('layers.toggleCollapse')!}
+          aria-label={t('layers.toggleCollapse')}
           className="buttonOutline"
         >
           {legendExpanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}

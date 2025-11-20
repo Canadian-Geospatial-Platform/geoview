@@ -39,6 +39,7 @@ export abstract class AppBarPlugin extends AbstractPlugin {
     // Return dummy plugin button
     return {
       id: 'somePluginButton',
+      'aria-label': 'Some aria label',
       tooltip: 'Some tooltip',
       tooltipPlacement: 'right',
       children: this.react.createElement(MapIcon),

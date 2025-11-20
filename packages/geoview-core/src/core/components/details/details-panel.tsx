@@ -448,8 +448,7 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
                   .replace('{total}', `${memoSelectedLayerDataFeatures?.length}`)}
                 <IconButton
                   sx={{ marginLeft: '1.25rem', [theme.breakpoints.down('sm')]: { display: 'none' } }}
-                  aria-label={t('details.clearAllfeatures')!}
-                  tooltip={t('details.clearAllfeatures')!}
+                  aria-label={t('details.clearAllfeatures')}
                   tooltipPlacement="top"
                   onClick={() => handleClearAllHighlights()}
                   className="buttonOutline"
@@ -462,8 +461,7 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
             <Grid size={{ xs: 6 }}>
               <Box sx={{ textAlign: 'right', marginRight: '1.625rem' }}>
                 <IconButton
-                  aria-label={t('details.previousFeatureBtn')!}
-                  tooltip={t('details.previousFeatureBtn')!}
+                  aria-label={t('details.previousFeatureBtn')}
                   tooltipPlacement="top"
                   onClick={() => handleFeatureNavigateChange(-1)}
                   disabled={currentFeatureIndex <= 0}
@@ -473,8 +471,7 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
                 </IconButton>
                 <IconButton
                   sx={{ marginLeft: '1.25rem' }}
-                  aria-label={t('details.nextFeatureBtn')!}
-                  tooltip={t('details.nextFeatureBtn')!}
+                  aria-label={t('details.nextFeatureBtn')}
                   tooltipPlacement="top"
                   onClick={() => handleFeatureNavigateChange(1)}
                   disabled={!memoSelectedLayerData?.features || currentFeatureIndex + 1 >= memoSelectedLayerData.features.length}
