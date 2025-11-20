@@ -361,8 +361,8 @@ export class GeoPackageReader {
             type: 'filledPolygon',
             color,
             stroke,
-            paternSize: graphicSize || 8,
-            paternWidth: patternWidth || 1,
+            patternSize: graphicSize || 8,
+            patternWidth: patternWidth || 1,
             fillStyle: fillStyle || 'solid',
           };
 

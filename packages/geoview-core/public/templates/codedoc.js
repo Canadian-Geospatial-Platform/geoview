@@ -413,7 +413,7 @@ function testSuiteAddOrUpdateTestResultRow(plugin, testSuite, testTester, test, 
   const testCell = row.cells?.[0];
   let color = '#515ba5';
   if (test.getType() === 'true-negative') {
-    color = '#b778e4ff';
+    color = '#6e78c5';
   }
 
   // Title

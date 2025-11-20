@@ -13,7 +13,6 @@
       {
         "geoviewLayerId": "5a65ad7c-561a-466a-8375-8d876624df9d",
         "geoviewLayerName": "Air Pollutant Emissions - Fine Particle Emissions by Facility",
-        "metadataAccessPath": "",
         "geoviewLayerType": "geoCore",
         "listOfLayerEntryConfig": [
           {
@@ -25,7 +24,6 @@
       {
         "geoviewLayerId": "305a4924-afb8-4c7d-8459-8ef309960942",
         "geoviewLayerName": "Air quality - Peak fine particulate matter concentrations by monitoring station",
-        "metadataAccessPath": "",
         "geoviewLayerType": "geoCore",
         "listOfLayerEntryConfig": [
           {

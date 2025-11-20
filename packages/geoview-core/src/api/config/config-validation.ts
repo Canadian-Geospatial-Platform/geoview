@@ -33,7 +33,7 @@ import { KmlLayerEntryConfig } from '@/api/config/validation-classes/vector-vali
 import { OgcFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
 import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { VectorTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
-import { WfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
+import { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import { WkbLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
 import { XYZTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import type { GroupLayerEntryConfigProps } from '@/api/config/validation-classes/group-layer-entry-config';
@@ -350,9 +350,9 @@ export class ConfigValidation {
       } else if (EsriImageLayerEntryConfig.isClassOrTypeEsriImage(layerConfig)) {
         // eslint-disable-next-line no-param-reassign
         listOfLayerEntryConfig[i] = new EsriImageLayerEntryConfig(layerConfigProps);
-      } else if (WfsLayerEntryConfig.isClassOrTypeWFSLayer(layerConfig)) {
+      } else if (OgcWfsLayerEntryConfig.isClassOrTypeWFSLayer(layerConfig)) {
         // eslint-disable-next-line no-param-reassign
-        listOfLayerEntryConfig[i] = new WfsLayerEntryConfig(layerConfigProps);
+        listOfLayerEntryConfig[i] = new OgcWfsLayerEntryConfig(layerConfigProps);
       } else if (OgcFeatureLayerEntryConfig.isClassOrTypeOGCLayer(layerConfig)) {
         // eslint-disable-next-line no-param-reassign
         listOfLayerEntryConfig[i] = new OgcFeatureLayerEntryConfig(layerConfigProps);

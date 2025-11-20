@@ -13,7 +13,6 @@
       {
         "geoviewLayerId": "756bc907-34bb-4b33-9a87-b3c1a6c3f292",
         "geoviewLayerName": "Émissions de gaz à effet de serre des installations d’envergure",
-        "metadataAccessPath": "",
         "geoviewLayerType": "geoCore",
         "listOfLayerEntryConfig": [
           {
@@ -30,7 +29,6 @@
       {
         "geoviewLayerId": "3e9cc0c9-7e59-478b-befb-a584674baa75",
         "geoviewLayerName": "Vague de chaleur",
-        "metadataAccessPath": "",
         "geoviewLayerType": "geoCore",
         "listOfLayerEntryConfig": [
           {

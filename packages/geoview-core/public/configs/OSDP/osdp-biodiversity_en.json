@@ -13,7 +13,6 @@
       {
         "geoviewLayerId": "6c343726-1e92-451a-876a-76e17d398a1c",
         "geoviewLayerName": "Canadian Protected and Conserved Areas Database (CPCAD)",
-        "metadataAccessPath": "",
         "geoviewLayerType": "geoCore",
         "listOfLayerEntryConfig": [
           {
@@ -25,7 +24,6 @@
       {
         "geoviewLayerId": "91219d24-e877-4c8a-8bd2-b2b662e573e0",
         "geoviewLayerName": "Priority Places For Species at Risk (Terrestrial): Projects",
-        "metadataAccessPath": "",
         "geoviewLayerType": "geoCore",
         "listOfLayerEntryConfig": [
           {

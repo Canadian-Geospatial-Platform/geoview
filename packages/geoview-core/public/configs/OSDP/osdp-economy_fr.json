@@ -13,7 +13,6 @@
       {
         "geoviewLayerId": "f5f2db55-31e4-42fb-8c73-23e1c44de9b2",
         "geoviewLayerName": "Inventaire des grands projets",
-        "metadataAccessPath": "",
         "geoviewLayerType": "geoCore",
         "listOfLayerEntryConfig": [
           {
@@ -29,7 +28,6 @@
       {
         "geoviewLayerId": "65d3db23-b83c-4f49-ab93-65c59ee0e6aa",
         "geoviewLayerName": "Installations de production d’électricité propre par type en mégawatts (MW)",
-        "metadataAccessPath": "",
         "geoviewLayerType": "geoCore",
         "listOfLayerEntryConfig": [
           {

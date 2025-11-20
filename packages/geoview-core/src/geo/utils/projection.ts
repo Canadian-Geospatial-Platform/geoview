@@ -43,9 +43,10 @@ export abstract class Projection {
     CRS84: 'CRS:84', // Supporting CRS:84 which is equivalent to 4326 except it's long-lat, whereas the 4326 standard is lat-long.
     CSRS: 'EPSG:4617',
     CSRS98: 'EPSG:4140',
-    3400: 'EPSG:3400',
     2151: 'EPSG:2151',
     2957: 'EPSG:2957',
+    3005: 'EPSG:3005', // BC Albers
+    3400: 'EPSG:3400',
     26914: 'EPSG:26914',
   };
 
@@ -270,11 +271,23 @@ export abstract class Projection {
     // Add latestWkid if provided
     if (projection.latestWkid && projection.latestWkid !== projection.wkid) await this.addProjection({ wkid: projection.latestWkid });
 
-    const code = projection.wkid;
+    // Redirect
+    return this.addProjectionCode(projection.wkid);
+  }
+
+  /**
+   * Fetches definitions for unsupported projections and adds them.
+   * @param {number} code - Projection code number.
+   */
+  static async addProjectionCode(code: number): Promise<void> {
+    // The projection name
     const projectionName = `EPSG:${code}`;
 
     // Fetch proj4 definition from epsg.io
-    const definition = await Fetch.fetchText(`https://epsg.io/${code}.proj4`);
+    let definition = await Fetch.fetchText(`https://epsg.io/${code}.proj4`);
+
+    // Sanitize the definition, because sometimes it's giving back something we can't support
+    definition = this.#sanitizeProj4Definition(definition);
 
     // Register in proj4 if fetched
     proj4.defs(projectionName, definition);
@@ -283,6 +296,43 @@ export abstract class Projection {
     // Register in supported projections
     this.PROJECTION_NAMES = { ...this.PROJECTION_NAMES, [code]: projectionName };
     this.PROJECTIONS[code] = Projection.getProjectionFromString(projectionName);
+  }
+
+  /**
+   * Checks if a projection exists for GeoView and if not it adds it on-the-fly using the provided TypeProjection information.
+   * @param {TypeProjection | undefined} projection - The projection to check if existing and to add when not existing.
+   */
+  static async addProjectionIfMissingUsingObj(projection: TypeProjection | undefined): Promise<void> {
+    // Add projection definition if not already included
+    if (projection) {
+      try {
+        Projection.getProjectionFromObj(projection);
+      } catch (error: unknown) {
+        logger.logWarning(`Unsupported projection, attempting to add projection ${projection} now.`, error);
+        await Projection.addProjection(projection);
+      }
+    }
+  }
+
+  /**
+   * Checks if a projection exists for GeoView and if not it adds it on-the-fly using the provided projection string information.
+   * @param {string | undefined} projection - The projection string to check if existing and to add when not existing.
+   */
+  static async addProjectionIfMissingUsingString(projection: string | undefined): Promise<void> {
+    // Add projection definition if not already included
+    if (projection) {
+      try {
+        Projection.getProjectionFromString(projection);
+      } catch (error: unknown) {
+        logger.logWarning(`Unsupported projection, attempting to add projection ${projection} now.`, error);
+
+        // Read the number
+        const epsgCode = this.readEPSGNumber(projection);
+        if (epsgCode) {
+          await Projection.addProjectionCode(epsgCode);
+        }
+      }
+    }
   }
 
   /**
@@ -377,6 +427,33 @@ export abstract class Projection {
   }
 
   /**
+   * Reads the numeric EPSG code from a projection string.
+   * Supports case-insensitive formats such as:
+   * - `"EPSG:4326"`
+   * - `"epsg:3857"`
+   * - `"EpSg: 1234"`
+   * The function trims whitespace and validates that the string matches a proper
+   * `EPSG:<number>` pattern. Returns `undefined` if the format is invalid or the
+   * numeric part is not a valid number.
+   * @param {string} projection - The projection identifier containing the EPSG code.
+   * @returns {number | undefined} The extracted EPSG numeric code, or `undefined` if invalid.
+   * @static
+   */
+  static readEPSGNumber(projection: string | undefined): number | undefined {
+    if (!projection) return undefined;
+
+    // Trim and normalize
+    const trimmed = projection.trim();
+
+    // Match patterns like: EPSG:4326, epsg:3857, EpSg:1234, etc.
+    const match = /^epsg\s*:\s*(\d+)$/i.exec(trimmed);
+    if (!match) return undefined;
+
+    const epsgNumber = Number(match[1]);
+    return Number.isFinite(epsgNumber) ? epsgNumber : undefined;
+  }
+
+  /**
    * Reads an extent and verifies if it might be reversed (ymin,xmin,ymax,ymin) and when
    * so puts it back in order (xmin,ymin,xmax,ymax).
    * @param {string} projection - The projection the extent is in
@@ -432,6 +509,43 @@ export abstract class Projection {
     }
 
     return projectedCoordinates;
+  }
+
+  /**
+   * Sanitizes a PROJ.4 projection definition so it can be used safely with OpenLayers.
+   * OpenLayers does **not** support `+nadgrids=` parameters. This method removes
+   * the unsupported grid reference and applies a safe replacement depending on
+   * the characteristics of the projection.
+   * Behavior:
+   * - If no `+nadgrids=` parameter is present, the definition is returned unchanged.
+   * - If the projection appears to be NAD27-like (`+proj=longlat` and `+ellps=clrk66`),
+   *   it replaces the grid and datum with `+datum=NAD27 +no_defs`.
+   * - Otherwise, it removes the grid reference and appends a generic
+   *   fallback transform: `+towgs84=0,0,0`.
+   * @param {string} def - The PROJ.4 definition string to sanitize.
+   * @returns {string} A cleaned and OpenLayers-compatible PROJ.4 definition.
+   * @private
+   * @static
+   */
+  static #sanitizeProj4Definition(def: string): string {
+    if (!def.includes('+nadgrids=')) return def;
+
+    // Here, the defs contains a nadgrids={something} which isn't supported by OpenLayers, so we check if we can replace it
+    const isLongLat = def.includes('+proj=longlat');
+    const usesClarke66 = def.includes('+ellps=clrk66');
+
+    // If NAD27 style, we replace it
+    if (isLongLat && usesClarke66) {
+      return (
+        def
+          .replace(/\+nadgrids=[^\s]+/g, '') // remove the grid ref
+          .replace(/\+datum=[^\s]+/g, '') // remove conflicting datums
+          .trim() + ' +datum=NAD27 +no_defs'
+      );
+    }
+
+    // If we can't detect the datum, fall back to a safe transform
+    return def.replace(/\+nadgrids=[^\s]+/g, '').trim() + ' +towgs84=0,0,0';
   }
 }
 
@@ -659,6 +773,21 @@ function init26914Projection(): void {
   Projection.PROJECTIONS['26914'] = projection;
 }
 
+/**
+ * Initializes the EPSG:3005 projection
+ */
+function initBCAlbersProjection(): void {
+  // define EPSG:3005 projection (BC Albers)
+  proj4.defs(
+    Projection.PROJECTION_NAMES[3005],
+    '+proj=aea +lat_1=50 +lat_2=58.5 +lat_0=45 +lon_0=-126 ' + '+x_0=1000000 +y_0=0 +datum=NAD83 +units=m +no_defs'
+  );
+  register(proj4);
+
+  const projection = Projection.getProjectionFromString('EPSG:3005');
+  Projection.PROJECTIONS['3005'] = projection;
+}
+
 // Initialize the supported projections
 initCRS84Projection();
 init4326Projection();
@@ -677,4 +806,5 @@ init3400Projection();
 init2151Projection();
 init2957Projection();
 init26914Projection();
+initBCAlbersProjection();
 logger.logInfo('Projections initialized');

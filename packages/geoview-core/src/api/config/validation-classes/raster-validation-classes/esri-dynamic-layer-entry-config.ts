@@ -34,13 +34,6 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   constructor(layerConfig: EsriDynamicLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.ESRI_DYNAMIC, CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE);
     this.maxRecordCount = layerConfig.maxRecordCount;
-
-    // Write the default properties when not specified
-    this.source ??= {};
-    this.source.dataAccessPath ??= layerConfig.source?.dataAccessPath ?? this.getMetadataAccessPath();
-
-    // Format the dataAccessPath correctly
-    if (!this.source.dataAccessPath!.endsWith('/')) this.source.dataAccessPath += '/';
   }
 
   /**

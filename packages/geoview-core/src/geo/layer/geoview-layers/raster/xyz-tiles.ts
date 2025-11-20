@@ -14,7 +14,6 @@ import {
   LayerEntryConfigInvalidLayerEntryConfigError,
   LayerEntryConfigLayerIdNotFoundError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
-import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 import { GVXYZTiles } from '@/geo/layer/gv-layers/tile/gv-xyz-tiles';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -243,9 +242,6 @@ export class XYZTiles extends AbstractGeoViewRaster {
         geoviewLayerConfig,
         layerId: `${layerEntry.id}`,
         layerName: `${layerEntry.layerName || layerEntry.id}`,
-        source: {
-          dataAccessPath: metadataAccessPath,
-        },
       });
       return layerEntryConfig;
     });
@@ -298,28 +294,22 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * Creates an XYZ source from a layer config.
    * @param {XYZTilesLayerEntryConfig} layerConfig - The configuration for the XYZ layer.
    * @returns A fully configured XYZ source.
-   * @throws If required config fields like dataAccessPath are missing.
+   * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
    */
   static createXYZSource(layerConfig: XYZTilesLayerEntryConfig): XYZ {
-    const { source } = layerConfig;
-
-    if (!source?.dataAccessPath) {
-      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
-    }
-
     const sourceOptions: SourceOptions = {
-      url: source.dataAccessPath,
+      url: layerConfig.getDataAccessPath(),
       attributions: layerConfig.getAttributions(),
-      crossOrigin: source.crossOrigin ?? 'Anonymous',
-      projection: source.projection ? `EPSG:${source.projection}` : undefined,
+      crossOrigin: layerConfig.source.crossOrigin ?? 'Anonymous',
+      projection: layerConfig.source.projection ? `EPSG:${layerConfig.source.projection}` : undefined,
     };
 
-    if (source.tileGrid) {
+    if (layerConfig.source.tileGrid) {
       const tileGridOptions: TileGridOptions = {
-        origin: source.tileGrid.origin,
-        resolutions: source.tileGrid.resolutions,
-        tileSize: source.tileGrid.tileSize,
-        extent: source.tileGrid.extent,
+        origin: layerConfig.source.tileGrid.origin,
+        resolutions: layerConfig.source.tileGrid.resolutions,
+        tileSize: layerConfig.source.tileGrid.tileSize,
+        extent: layerConfig.source.tileGrid.extent,
       };
 
       sourceOptions.tileGrid = new TileGrid(tileGridOptions);

@@ -66,7 +66,6 @@
         },
         "listOfGeoviewLayerConfig": {
           "description": "List of GeoView Layers in the order which they should be added to the map.",
-          "additionalProperties": false,
           "$ref": "#/definitions/TypeListOfGeoviewLayerConfig"
         },
         "viewSettings": {
@@ -786,6 +785,9 @@
         },
         "width": {
           "type": "number"
+        },
+        "opacity": {
+          "type": "number"
         }
       }
     },
@@ -806,7 +808,6 @@
       ]
     },
     "TypeLineStringVectorConfig": {
-      "additionalProperties": false,
       "type": "object",
       "allOf": [
         {
@@ -821,7 +822,8 @@
             "stroke": {
               "$ref": "#/definitions/TypeStrokeSymbolConfig"
             }
-          }
+          },
+          "additionalProperties": false
         }
       ]
     },
@@ -843,12 +845,12 @@
             "stroke": {
               "$ref": "#/definitions/TypeStrokeSymbolConfig"
             },
-            "paternSize": {
+            "patternSize": {
               "description": "Distance between patern lines.",
               "type": "number",
               "default": 8
             },
-            "paternWidth": {
+            "patternWidth": {
               "description": "Patern line width.",
               "type": "number",
               "default": 1
@@ -858,7 +860,8 @@
               "$ref": "#/definitions/TypeFillStyle",
               "default": "solid"
             }
-          }
+          },
+          "additionalProperties": false
         }
       ]
     },
@@ -903,7 +906,8 @@
             "symbol": {
               "$ref": "#/definitions/TypeSymbol"
             }
-          }
+          },
+          "additionalProperties": false
         }
       ]
     },
@@ -960,7 +964,8 @@
               "type": "string",
               "default": "Anonymous"
             }
-          }
+          },
+          "additionalProperties": false
         }
       ]
     },
@@ -1468,6 +1473,10 @@
           "type": "string",
           "description": "The id of the layer to display on the map."
         },
+        "wmsLayerId": {
+          "type": "string",
+          "description": "The id of the WMS layer associated with the WFS layer."
+        },
         "layerName": {
           "type": "string",
           "description": "The display name of the layer. If it is not present the viewer will make an attempt to scrape this information."
@@ -1604,6 +1613,10 @@
         "layerId": {
           "type": "string",
           "description": "The id of the layer to display on the map."
+        },
+        "wfsLayerId": {
+          "type": "string",
+          "description": "The id of the WFS layer associated with the WMS layer."
         },
         "isLayerGroup": {
           "description": "Flag used to distinguish layer group nodes.",
@@ -2254,6 +2267,16 @@
         "externalDateFormat": {
           "type": "string",
           "description": "Date format used by the getFeatureInfo to output date variable."
+        },
+        "fetchVectorsOnWFS": {
+          "description": "Flag used by WMS layers to indicate if the layer should get the vector information from a WFS and retrieve the styling information.",
+          "type": "boolean",
+          "default": true
+        },
+        "fetchStylesOnWMS": {
+          "description": "Flag used by WFS layers to indicate if the layer should get the styling information from a WMS.",
+          "type": "boolean",
+          "default": true
         },
         "isTimeAware": {
           "type": "boolean",

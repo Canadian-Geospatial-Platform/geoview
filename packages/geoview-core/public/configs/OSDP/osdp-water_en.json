@@ -13,7 +13,6 @@
       {
         "geoviewLayerId": "b6b6d5a6-bded-4b6e-9e8a-17f6e1b538dc",
         "geoviewLayerName": "Water quality in Canadian rivers – Water quality at monitoring sites",
-        "metadataAccessPath": "",
         "geoviewLayerType": "geoCore",
         "listOfLayerEntryConfig": [
           {
@@ -25,7 +24,6 @@
       {
         "geoviewLayerId": "94a51051-ad11-499a-b5f1-8c97b29f695c",
         "geoviewLayerName": "Maps of reporting facilities – total releases to water",
-        "metadataAccessPath": "",
         "geoviewLayerType": "geoCore",
         "listOfLayerEntryConfig": [
           {

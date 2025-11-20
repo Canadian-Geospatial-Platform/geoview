@@ -9,7 +9,6 @@ import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/types/layer-sc
 
 import { GeoTIFFLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/geotiff-layer-entry-config';
 
-import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 import { GVGeoTIFF } from '@/geo/layer/gv-layers/tile/gv-geotiff';
 import { logger } from '@/core/utils/logger';
 import { Projection, type TypeProjection } from '@/geo/utils/projection';
@@ -72,17 +71,11 @@ export class GeoTIFF extends AbstractGeoViewRaster {
    * Creates a GeoTIFF source from a layer config.
    * @param {GeoTIFFLayerEntryConfig} layerConfig - The configuration for the GeoTIFF layer.
    * @returns A fully configured GeoTIFF source.
-   * @throws If required config fields like dataAccessPath are missing.
+   * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
    */
   static createGeoTIFFSource(layerConfig: GeoTIFFLayerEntryConfig): GeoTIFFSource {
-    const { source } = layerConfig;
-
-    if (!source?.dataAccessPath) {
-      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
-    }
-
     const sourceOptions: SourceOptions = {
-      sources: [{ url: source.dataAccessPath, overviews: source.overviews }],
+      sources: [{ url: layerConfig.getDataAccessPath(), overviews: layerConfig.source.overviews }],
     };
 
     return new GeoTIFFSource(sourceOptions);
@@ -117,16 +110,13 @@ export class GeoTIFF extends AbstractGeoViewRaster {
     try {
       const srcView = await source.getView();
       const projection = typeof srcView?.projection === 'string' ? srcView.projection : srcView?.projection?.getCode();
+
+      // TODO: Check this call, unsure if the type is right, here projection is a string like 'EPSG:4326', calling Number() in that will make a NaN value, leaving it unchanged for now
+
       const projectionObject: TypeProjection = projection ? { wkid: Number(projection) } : { wkid: 4326 };
 
       // Add projection definition if not already included
-      // TODO: call Projection.addProjectionIfMissingUsingObj once Alex's PR is merged.
-      try {
-        Projection.getProjectionFromObj(projectionObject);
-      } catch (error: unknown) {
-        logger.logWarning('Unsupported projection, attempting to add projection now.', error);
-        await Projection.addProjection(projectionObject);
-      }
+      await Projection.addProjectionIfMissingUsingObj(projectionObject);
     } catch (error) {
       logger.logError('Failed to initialize GeoTIFF source:', {
         layerId: layerConfig.layerId,
@@ -195,9 +185,6 @@ export class GeoTIFF extends AbstractGeoViewRaster {
           entryType: CONST_LAYER_ENTRY_TYPES.RASTER_TILE,
           layerId: `${layerEntry.id}`,
           layerName: `${layerEntry.layerName || layerEntry.id}`,
-          source: {
-            dataAccessPath: metadataAccessPath,
-          },
         });
         return layerEntryConfig;
       });
@@ -209,9 +196,6 @@ export class GeoTIFF extends AbstractGeoViewRaster {
           entryType: CONST_LAYER_ENTRY_TYPES.RASTER_TILE,
           layerId: metadataAccessPath.split('/').pop() || generateId(18),
           layerName: geoviewLayerName,
-          source: {
-            dataAccessPath: metadataAccessPath,
-          },
         }),
       ];
 

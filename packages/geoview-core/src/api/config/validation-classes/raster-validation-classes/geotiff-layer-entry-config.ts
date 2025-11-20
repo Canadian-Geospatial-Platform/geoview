@@ -23,14 +23,11 @@ export class GeoTIFFLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   constructor(layerConfig: GeoTIFFLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.GEOTIFF, CONST_LAYER_ENTRY_TYPES.RASTER_TILE);
 
-    // Write the default properties when not specified
-    this.source = layerConfig.source ? layerConfig.source : {};
-    this.source.dataAccessPath ??= layerConfig.source?.dataAccessPath ?? this.getMetadataAccessPath();
-
-    if (!this.source.dataAccessPath!.toLowerCase().endsWith('.tif') && !this.source.dataAccessPath!.toLowerCase().startsWith('blob'))
-      this.source.dataAccessPath = this.source.dataAccessPath!.endsWith('/')
-        ? `${this.source.dataAccessPath}${this.layerId}`
-        : `${this.source.dataAccessPath}/${this.layerId}`;
+    // If not pointing to an image file directly
+    if (!this.getDataAccessPath().toLowerCase().endsWith('.tif') && !this.getDataAccessPath().toLowerCase().startsWith('blob')) {
+      // Set it
+      this.setDataAccessPath(`${this.getDataAccessPath(true)}${this.layerId}`);
+    }
   }
 
   /**

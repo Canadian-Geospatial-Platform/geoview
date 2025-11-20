@@ -7,9 +7,16 @@ import { logger } from '@/core/utils/logger';
 import i18n from '@/core/translation/i18n';
 import type { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { Fetch } from '@/core/utils/fetch-helper';
+import type { TypeHTMLElement } from '@/core/types/global-types';
 
 /** The observers to monitor element removals from the DOM tree */
 const observers: Record<string, MutationObserver> = {};
+
+interface TypeDocument extends Document {
+  webkitExitFullscreen: () => void;
+  msExitFullscreen: () => void;
+  mozCancelFullScreen: () => void;
+}
 
 /**
  * Take string like "My string is __param__" and replace parameters (__param__) from array of values
@@ -61,6 +68,15 @@ export function getLocalizedMessage(language: TypeDisplayLanguage, messageKey: s
 export function deepMergeObjects<T>(...objects: unknown[]): T {
   const deepCopyObjects = objects.map((object) => JSON.parse(JSON.stringify(object)));
   return deepCopyObjects.reduce((merged, current) => ({ ...merged, ...current }), {});
+}
+
+/**
+ * Check if a string is a number
+ * @param {string} str - The object to test
+ * @returns true if the object is numeric, false otherwise
+ */
+export function isNumeric(str: string): boolean {
+  return !Number.isNaN(Number(str));
 }
 
 /**
@@ -239,6 +255,8 @@ export function getXMLHttpRequest(url: string): Promise<string> {
   return request;
 }
 
+// #region UI HELPERS
+
 /**
  * Add a UI component to a custom div. Do not listen to event from here, pass in the props
  *
@@ -254,7 +272,7 @@ export function addUiComponent(targetDivId: string, component: React.ReactElemen
 }
 
 /**
- * Sanitize HTML to remove threat
+ * Sanitizes HTML to remove threat
  *
  * @param {string} contentHtml - HTML content to sanitize
  * @returns {string} Sanitized HTML or empty string if all dirty
@@ -265,25 +283,6 @@ export function sanitizeHtmlContent(contentHtml: string): string {
     allowedAttributes: { img: ['src'], a: ['href'] },
     allowedSchemes: ['data', 'http', 'https'],
   });
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function safeStringify(obj: any, space = 2): string {
-  const seen = new WeakSet();
-
-  return JSON.stringify(
-    obj,
-    (key, value) => {
-      if (typeof value === 'object' && value !== null) {
-        if (seen.has(value)) {
-          return '{Circular JSON}'; // Or return undefined to remove the property
-        }
-        seen.add(value);
-      }
-      return value;
-    },
-    space
-  );
 }
 
 /**
@@ -327,6 +326,88 @@ export function watchHtmlElementRemoval(key: string, element: HTMLElement, onHTM
   // Store and activate the observer
   observers[key] = observer;
   observer.observe(parent, { childList: true });
+}
+
+/**
+ * Attempts to place the given HTML element into fullscreen mode.
+ * This function handles browser compatibility by trying the standard
+ * `requestFullscreen()` API first, then falling back to vendor-prefixed
+ * versions for Safari, IE11, and Firefox.
+ * Any errors from the standard promise-based fullscreen request are caught
+ * and logged using `logger.logPromiseFailed`.
+ * @param {TypeHTMLElement} element - The element to display in fullscreen mode.
+ */
+export function requestFullscreen(element: TypeHTMLElement): void {
+  if (element.requestFullscreen) {
+    element.requestFullscreen().catch((error: unknown) => {
+      // Log
+      logger.logPromiseFailed('element.requestFullscreen', error);
+    });
+  } else if (element.webkitRequestFullscreen) {
+    /* Safari */
+    element.webkitRequestFullscreen();
+  } else if (element.msRequestFullscreen) {
+    /* IE11 */
+    element.msRequestFullscreen();
+  } else if (element.mozRequestFullScreen) {
+    /* Firefox */
+    element.mozRequestFullScreen();
+  }
+}
+
+/**
+ * Exits fullscreen mode if the document is currently in fullscreen.
+ * This function uses the standard `exitFullscreen()` API when available,
+ * and falls back to vendor-prefixed exit methods for Safari, IE11, and Firefox.
+ * Any errors from the standard promise-based exit request are caught
+ * and logged using `logger.logPromiseFailed`.
+ */
+export function exitFullscreen(): void {
+  if (document.exitFullscreen) {
+    document.exitFullscreen().catch((error: unknown) => {
+      // Log
+      logger.logPromiseFailed('document.exitFullscreen', error);
+    });
+  } else if ((document as TypeDocument).webkitExitFullscreen) {
+    /* Safari */
+    (document as TypeDocument).webkitExitFullscreen();
+  } else if ((document as TypeDocument).msExitFullscreen) {
+    /* IE11 */
+    (document as TypeDocument).msExitFullscreen();
+  } else if ((document as TypeDocument).mozCancelFullScreen) {
+    /* Firefox */
+    (document as TypeDocument).mozCancelFullScreen();
+  }
+}
+
+// #endregion UI HELPERS
+
+/**
+ * Safely converts a JavaScript value to a JSON string, handling circular references.
+ * Circular objects are replaced with the string `"{Circular JSON}"` to prevent
+ * `JSON.stringify` from throwing an error. The function also supports optional
+ * pretty-printing via the `space` parameter.
+ * @param {*} obj - The value to stringify.
+ * @param {number} [space=2] - Number of spaces to use for indentation in the resulting JSON string.
+ * @returns {string} The JSON string representation of the input value, with circular references handled.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function safeStringify(obj: any, space: number = 2): string {
+  const seen = new WeakSet();
+
+  return JSON.stringify(
+    obj,
+    (key, value) => {
+      if (typeof value === 'object' && value !== null) {
+        if (seen.has(value)) {
+          return '{Circular JSON}'; // Or return undefined to remove the property
+        }
+        seen.add(value);
+      }
+      return value;
+    },
+    space
+  );
 }
 
 /**
@@ -432,17 +513,19 @@ export function stringify(str: unknown): unknown | string {
   return str;
 }
 
+// #region TIMING HELPERS
+
 /**
  * Delay helper function.
  * @param {number} ms - The number of milliseconds to wait for.
  * @returns {Promise<void>} Promise which resolves when the delay timeout expires.
  */
-export const delay = (ms: number): Promise<void> => {
+export function delay(ms: number): Promise<void> {
   return new Promise((resolve) => {
     // Wait
     setTimeout(resolve, ms);
   });
-};
+}
 
 /**
  * Repeatedly invokes a callback function at a given interval until it returns `true` or until timeout is reached.
@@ -454,7 +537,7 @@ export const delay = (ms: number): Promise<void> => {
  *                              cleared after this duration, regardless of callback return value.
  * @returns {ReturnType<typeof setInterval>} The interval timer ID, which can be used to clear the interval manually if needed.
  */
-export const doUntil = <T>(callback: () => T, ms: number, timeout?: number): ReturnType<typeof setInterval> => {
+export function doUntil<T>(callback: () => T, ms: number, timeout?: number): ReturnType<typeof setInterval> {
   // Start a recurrent timer
   let done = false;
   const interval = setInterval(() => {
@@ -483,7 +566,7 @@ export const doUntil = <T>(callback: () => T, ms: number, timeout?: number): Ret
 
   // Return the interval timer
   return interval;
-};
+}
 
 /**
  * Repeatedly invokes a callback function at a specified interval until one of two conditions is met:
@@ -496,7 +579,7 @@ export const doUntil = <T>(callback: () => T, ms: number, timeout?: number): Ret
  * @param {number} ms - The interval duration in milliseconds.
  * @returns {ReturnType<typeof setInterval>} The interval timer, which can be cleared manually if needed.
  */
-export const doUntilPromises = <T>(callback: () => T, promises: Promise<unknown>[], ms: number): ReturnType<typeof setInterval> => {
+export function doUntilPromises<T>(callback: () => T, promises: Promise<unknown>[], ms: number): ReturnType<typeof setInterval> {
   // Start a recurrent timer
   const interval = doUntil(callback, ms);
 
@@ -506,7 +589,7 @@ export const doUntilPromises = <T>(callback: () => T, promises: Promise<unknown>
 
   // Return the interval timer
   return interval;
-};
+}
 
 /**
  * Internal function to work with async "whenThisThat"... methods.
@@ -598,6 +681,8 @@ export function whenThisThen<T>(checkCallback: () => T, timeout?: number, checkF
     whenThisThenThat(checkCallback, resolve, reject, timeout, checkFrequency);
   });
 }
+
+// #endregion TIMING HELPERS
 
 /**
  * Escape special characters from string

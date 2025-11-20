@@ -1,11 +1,11 @@
 import type VectorSource from 'ol/source/Vector';
 import type WKBObject from 'ol/format/WKB';
-import { WKB as FormatWkb } from 'ol/format';
 import type { Projection as OLProjection } from 'ol/proj';
 
 import type { WkbLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import { Projection } from '@/geo/utils/projection';
+import { GeoUtilities } from '@/geo/utils/utilities';
 
 /**
  * Manages a WKB layer.
@@ -66,10 +66,12 @@ export class GVWKB extends AbstractGVVector {
     // Keep internally
     this.#wkbSource = wkbObject;
 
-    // Create features from WKB
-    const dataProjection = wkbObject.crs?.properties?.name || Projection.PROJECTION_NAMES.LONLAT;
-    const features = new FormatWkb().readFeatures(wkbObject, {
-      dataProjection,
+    // Read the EPSG
+    const dataEPSG = GeoUtilities.readEPSGOfGeoJSON(wkbObject) || Projection.PROJECTION_NAMES.LONLAT; // default: read the features as LONLAT
+
+    // Read the features
+    const features = GeoUtilities.readFeaturesFromWKB(wkbObject, {
+      dataProjection: dataEPSG,
       featureProjection: projection,
     });
 
