@@ -103,7 +103,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
           activeFooterBarTabId: geoviewConfig.footerBar?.selectedTab || '',
           corePackagesComponents: geoviewConfig.corePackages || [],
           navBarComponents: geoviewConfig.navBar || [],
-          footerBarIsCollapsed: geoviewConfig.footerBar?.collapsed !== undefined ? geoviewConfig.footerBar.collapsed : false,
+          footerBarIsCollapsed: geoviewConfig.footerBar?.collapsed !== undefined ? geoviewConfig.footerBar.collapsed : true,
           selectedFooterLayerListItemId:
             geoviewConfig.footerBar?.selectedLayersLayerPath || geoviewConfig.appBar?.selectedLayersLayerPath
               ? `${get().mapId}-${geoviewConfig.footerBar?.selectedTab || geoviewConfig.appBar?.selectedTab}-${geoviewConfig.footerBar?.selectedLayersLayerPath || geoviewConfig.appBar?.selectedLayersLayerPath}`

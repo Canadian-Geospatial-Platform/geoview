@@ -40,7 +40,7 @@ import type { PluginsContainer } from '@/api/plugin/plugin-types';
 import { Projection } from '@/geo/utils/projection';
 import { isPointInExtent, isExtentLonLat } from '@/geo/utils/utilities';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
-import { NORTH_POLE_POSITION, OL_ZOOM_DURATION, OL_ZOOM_MAXZOOM, OL_ZOOM_PADDING } from '@/core/utils/constant';
+import { DEFAULT_OL_FITOPTIONS, NORTH_POLE_POSITION, OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
 import { isValidUUID, whenThisThen } from '@/core/utils/utilities';
 
@@ -1031,14 +1031,13 @@ export class MapEventProcessor extends AbstractEventProcessor {
    *
    * @param {string} mapId The map id.
    * @param {Extent} extent The extent to zoom to.
-   * @param {FitOptions} options The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11, duration: 500 }).
+   * @param {FitOptions} options The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 13, duration: 500 }).
    * @returns Promise<void>
    */
-  static zoomToExtent(
-    mapId: string,
-    extent: Extent,
-    options: FitOptions = { padding: OL_ZOOM_PADDING, maxZoom: OL_ZOOM_MAXZOOM, duration: OL_ZOOM_DURATION }
-  ): Promise<void> {
+  static zoomToExtent(mapId: string, extent: Extent, options: FitOptions = DEFAULT_OL_FITOPTIONS): Promise<void> {
+    // Merge user options with defaults
+    const mergedOptions: FitOptions = { ...DEFAULT_OL_FITOPTIONS, ...options };
+
     // Validate the extent coordinates - need to make sure we aren't excluding zero with !number
     if (
       !extent.some((number) => {
@@ -1046,7 +1045,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       })
     ) {
       // store state will be updated by map event
-      this.getMapViewer(mapId).getView().fit(extent, options);
+      this.getMapViewer(mapId).getView().fit(extent, mergedOptions);
 
       // Use a Promise and resolve it when the duration expired
       return new Promise((resolve) => {
@@ -1101,10 +1100,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
       );
 
       const extent: Extent = [...projectedCoords[0], ...projectedCoords[0]];
-      const options: FitOptions = { padding: OL_ZOOM_PADDING, maxZoom: 13, duration: OL_ZOOM_DURATION };
 
       // Zoom to extent and await
-      await this.zoomToExtent(mapId, extent, options);
+      await this.zoomToExtent(mapId, extent);
 
       // Now show the click marker icon
       this.clickMarkerIconShow(mapId, { lonlat: coords });
@@ -1181,9 +1179,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
     );
 
     const extent: Extent = [...projectedCoords[0], ...projectedCoords[0]];
-    const options: FitOptions = { padding: OL_ZOOM_PADDING, maxZoom: 13, duration: OL_ZOOM_DURATION };
 
-    return this.zoomToExtent(mapId, extent, options);
+    return this.zoomToExtent(mapId, extent);
   }
 
   /**

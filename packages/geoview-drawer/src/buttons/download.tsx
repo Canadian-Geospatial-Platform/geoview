@@ -37,7 +37,7 @@ export default function Download(): JSX.Element {
   return (
     <IconButton
       id="download"
-      tooltip={getLocalizedMessage(displayLanguage, 'drawer.downloadTooltip')}
+      aria-label={getLocalizedMessage(displayLanguage, 'drawer.downloadTooltip')}
       tooltipPlacement="left"
       onClick={handleDownload}
       sx={sxClasses.navButton}

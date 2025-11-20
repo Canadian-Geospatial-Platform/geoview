@@ -6,7 +6,7 @@ import { Style, Stroke, Fill, Circle } from 'ol/style';
 import type { Color } from 'ol/color';
 import { getArea as getAreaOL, getLength as getLengthOL } from 'ol/sphere';
 import type { Extent } from 'ol/extent';
-import { containsCoordinate } from 'ol/extent';
+import { containsCoordinate, buffer } from 'ol/extent';
 import type { OSM, VectorTile } from 'ol/source';
 import { XYZ } from 'ol/source';
 import TileLayer from 'ol/layer/Tile';
@@ -594,3 +594,13 @@ export const geometriesAreEqual = (geom1: Geometry, geom2: Geometry): boolean =>
 
   return false;
 };
+
+/**
+ * Apply buffer to extent
+ * @param extent - The extent to check and buffer
+ * @param bufferSize - Buffer size in map units (default: 5000)
+ * @returns Buffered extent
+ */
+export function bufferExtent(extent: Extent, bufferSize: number = 5000): Extent {
+  return buffer(extent, bufferSize);
+}

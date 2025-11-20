@@ -39,7 +39,7 @@ export default function Edit(): JSX.Element {
   return (
     <IconButton
       id="clear"
-      tooltip={getLocalizedMessage(displayLanguage, 'drawer.edit')}
+      aria-label={getLocalizedMessage(displayLanguage, 'drawer.edit')}
       tooltipPlacement="left"
       className={isEditing ? 'highlighted active' : ''}
       onClick={handleToggleEditing}

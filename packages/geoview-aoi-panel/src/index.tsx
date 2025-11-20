@@ -62,7 +62,7 @@ class AoiPanelPlugin extends AppBarPlugin {
     // Button props
     return {
       id: `aoi-panel`,
-      tooltip: 'AoiPanel.title',
+      'aria-label': 'AoiPanel.title',
       tooltipPlacement: 'right',
       children: <AoiIcon />,
       visible: true,

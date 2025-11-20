@@ -37,7 +37,7 @@ export default function Clear(): JSX.Element {
   return (
     <IconButton
       id="clear"
-      tooltip={getLocalizedMessage(displayLanguage, 'drawer.clearTooltip')}
+      aria-label={getLocalizedMessage(displayLanguage, 'drawer.clearTooltip')}
       tooltipPlacement="left"
       onClick={handleClear}
       sx={sxClasses.navButton}

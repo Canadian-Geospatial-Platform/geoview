@@ -52,7 +52,7 @@ export class GeoChartAppBarPlugin extends AppBarPlugin {
     // Button props
     return {
       id: 'geoChartPanelButton',
-      tooltip: 'chartPanel.title',
+      'aria-label': 'chartPanel.title',
       tooltipPlacement: 'right',
       children: <ChartIcon />,
       visible: true,

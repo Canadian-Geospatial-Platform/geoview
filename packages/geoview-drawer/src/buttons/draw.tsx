@@ -39,7 +39,7 @@ export default function Draw(): JSX.Element {
   return (
     <IconButton
       id="draw"
-      tooltip={getLocalizedMessage(displayLanguage, 'drawer.toggleDrawing')}
+      aria-label={getLocalizedMessage(displayLanguage, 'drawer.toggleDrawing')}
       tooltipPlacement="left"
       className={isDrawing ? 'highlighted active' : ''}
       onClick={handleDraw}
