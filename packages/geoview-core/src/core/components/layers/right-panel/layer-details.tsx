@@ -453,7 +453,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
       return (
         <Grid sx={sxClasses.itemsGrid}>
           <Grid container pt={6} pb={6}>
-            <Box component="img" alt="icon" src={layerDetails.icons[0].iconImage} sx={sxClasses.wmsImage} />
+            <Box component="img" alt="" src={layerDetails.icons[0].iconImage} sx={sxClasses.wmsImage} />
           </Grid>
         </Grid>
       );
@@ -520,11 +520,13 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
     return (
       <Box>
-        <Button type="text" sx={{ fontSize: theme.palette.geoViewFontSize.sm }} onClick={() => setIsInfoCollapse(!isInfoCollapse)}>
-          {`${t('layers.moreInfo')}`}
-          <IconButton className="buttonOutline" edge="end" size="small" aria-label={t('layers.toggleCollapse')}>
-            {isInfoCollapse ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-          </IconButton>
+        <Button
+          type="text"
+          sx={{ fontSize: theme.palette.geoViewFontSize.sm }}
+          onClick={() => setIsInfoCollapse(!isInfoCollapse)}
+          endIcon={isInfoCollapse ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+        >
+          {isInfoCollapse ? `${t('layers.lessInfo')}` : `${t('layers.moreInfo')}`}
         </Button>
         <Collapse in={isInfoCollapse} sx={sxClasses.layerInfo}>
           <Box>{`${t('layers.layerType')}${localizedTypeName}`}</Box>

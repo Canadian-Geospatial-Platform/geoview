@@ -313,7 +313,7 @@ export default function ExportModal(): JSX.Element {
           <MenuItem onClick={() => handleSelectFormat('jpeg')}>JPEG</MenuItem>
         </Menu>
         <Button type="text" onClick={handleFormatMenuClick} variant="outlined" size="small" sx={sxClasses.buttonOutlined}>
-          Format: {exportFormat.toUpperCase()}
+          {t('exportModal.formatBtn')} {exportFormat.toUpperCase()}
         </Button>
 
         {/* DPI Selection - Only show for PNG and JPEG */}
