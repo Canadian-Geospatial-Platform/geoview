@@ -1,2 +1,44 @@
 # Set the default behavior, to ignore text end of line character - https://git-scm.com/docs/gitattributes
-* -text
+# Treat all files as text by default unless overridden
+* text=auto eol=lf
+
+# Source code — TypeScript / JS
+*.ts       text
+*.tsx      text
+*.js       text
+
+# JSON data / config files / CSV
+*.json     text
+*.geojson  text
+*.csv      text
+
+# Markup / documentation files
+*.html     text
+*.md       text
+*.txt      text
+
+# SVG (XML-based image, diffable)
+*.svg      text
+
+# Shell scripts & config
+*.sh       text
+*.yml      text
+*.yaml     text
+*.env      text
+
+# Binary assets — truly binary files
+*.png      binary
+*.jpg      binary
+*.jpeg     binary
+*.gif      binary
+*.ico      binary
+
+# Fonts (binary)
+*.ttf      binary
+*.otf      binary
+
+# Archives / compressed files
+*.zip      binary
+*.tar      binary
+*.gz       binary
+*.7z       binary
