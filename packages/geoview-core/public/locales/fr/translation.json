@@ -106,6 +106,7 @@
     "hidden": "La couche est cachée",
     "parentHidden": "La couche parent est cachée",
     "stepOne": "Télécharger des données",
+    "stepOneLoading": "Téléchargement des données...",
     "stepTwo": "Sélectionner le format",
     "stepThree": "Configurer la couche",
     "stepFour": "Entrer le nom",
@@ -167,6 +168,7 @@
     "instructionsNoLayersTitle": "Aucune couche visible",
     "instructionsNoLayersBody": "Ajoutez des couches visibles sur la carte.",
     "moreInfo": "Plus d'informations",
+    "lessInfo": "Moins d'informations",
     "layerType": "Type : ",
     "layerResource": "Ressource : ",
     "layerMetadata": "Métadonnées : ",
@@ -183,7 +185,8 @@
     "hideLayer": "Masquer la couche {{name}}",
     "tableViewNone": "Tableau (indisponible)",
     "moveLayerUp": "Déplacer la couche vers le haut",
-    "moveLayerDown": "Déplacer la couche vers le bas"
+    "moveLayerDown": "Déplacer la couche vers le bas",
+    "layerControls": "Commandes des couches"
   },
   "details": {
     "title": "Détails",
@@ -215,7 +218,8 @@
     "easting": "Easting",
     "northing": "Northing",
     "ntsMapsheet": "Carte SNRC",
-    "elevation": "Élévation"
+    "elevation": "Élévation",
+    "guideControls": "Commandes du guide"
   },
   "lightbox": {
     "next": "Prochaine",

@@ -42,7 +42,7 @@ import { CONTAINER_TYPE } from '@/core/utils/constant';
 import type { TypeValidAppBarCoreProps } from '@/api/types/map-schema-types';
 import { DEFAULT_APPBAR_CORE, DEFAULT_APPBAR_TABS_ORDER } from '@/api/types/map-schema-types';
 import { handleEscapeKey } from '@/core/utils/utilities';
-import { Button } from '@/ui/button/button';
+import { IconButton } from '@/ui/icon-button/icon-button';
 
 interface GroupPanelType {
   icon: ReactNode;
@@ -355,17 +355,16 @@ export function AppBar(props: AppBarProps): JSX.Element {
               {buttonPanel?.button.visible !== undefined && buttonPanel?.button.visible ? (
                 <Fragment key={buttonPanel.button.id}>
                   <ListItem>
-                    <Button
+                    <IconButton
                       id={buttonPanel.button.id}
-                      aria-label={t(buttonPanel.button.tooltip!)!}
-                      tooltip={t(buttonPanel.button.tooltip!)!}
+                      aria-label={t(buttonPanel.button.tooltip!)}
                       tooltipPlacement="right"
                       className={`buttonFilled ${tabId === buttonPanel.button.id && isOpen ? 'active' : ''}`}
                       size="small"
                       onClick={() => handleButtonClicked(buttonPanel.button.id!)}
-                      startIcon={buttonPanel.button.children}
-                      type="icon"
-                    />
+                    >
+                      {buttonPanel.button.children}
+                    </IconButton>
                   </ListItem>
                 </Fragment>
               ) : null}

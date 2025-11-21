@@ -259,21 +259,11 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
       contentModal={<UseHtmlToReact htmlContent={t('keyboardnav.focusdialog.main')} />}
       actions={
         <>
-          <Button
-            id="enable-focus"
-            tooltip={t('keyboardnav.focusdialog.button.enable')!}
-            tooltipPlacement="top-end"
-            autoFocus
-            onClick={handleEnable}
-            type="text"
-            sx={MODAL_BUTTON_STYLES}
-          >
+          <Button id="enable-focus" autoFocus onClick={handleEnable} type="text" sx={MODAL_BUTTON_STYLES}>
             {t('keyboardnav.focusdialog.button.enable')}
           </Button>
           <Button
             id="skip-focus"
-            tooltip={t('keyboardnav.focusdialog.button.skip')!}
-            tooltipPlacement="top-end"
             onClick={handleSkip}
             type="text"
             sx={{
