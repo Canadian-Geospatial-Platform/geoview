@@ -119,7 +119,7 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      */
     static setHomeButtonView(mapId: string, view: TypeMapViewSettings): void;
     static rotate(mapId: string, rotation: number): void;
-    static zoom(mapId: string, zoom: number, duration?: number): void;
+    static zoom(mapId: string, zoom: number, duration?: number): Promise<void>;
     /**
      * Gets the ordered layer info.
      * @param {string} mapId - The map id
@@ -247,7 +247,8 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      *
      * @param {string} mapId The map id.
      * @param {Extent} extent The extent to zoom to.
-     * @param {FitOptions} options The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11, duration: 500 }).
+     * @param {FitOptions} options The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 13, duration: 500 }).
+     * @returns Promise<void>
      */
     static zoomToExtent(mapId: string, extent: Extent, options?: FitOptions): Promise<void>;
     static zoomToGeoLocatorLocation(mapId: string, coords: Coordinate, bbox?: Extent): Promise<void>;

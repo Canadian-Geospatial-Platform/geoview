@@ -1,12 +1,14 @@
+import type { FitOptions } from 'ol/View';
 export declare const GITHUB_REPO = "https://github.com/Canadian-Geospatial-Platform/geoview";
 export declare const GEO_URL_TEXT: {
     url: string;
     text: string;
 };
 export declare const OL_ZOOM_DURATION = 500;
-export declare const OL_ZOOM_MAXZOOM = 11;
-export declare const NORTH_POLE_POSITION: [number, number];
+export declare const OL_ZOOM_MAXZOOM = 13;
 export declare const OL_ZOOM_PADDING: [number, number, number, number];
+export declare const DEFAULT_OL_FITOPTIONS: FitOptions;
+export declare const NORTH_POLE_POSITION: [number, number];
 export declare const OL_OVERVIEWMAP_SIZE: {
     width: string;
     height: string;

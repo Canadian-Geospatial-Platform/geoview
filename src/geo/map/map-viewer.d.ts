@@ -604,6 +604,8 @@ export type TypeMapState = {
     currentProjection: number;
     currentZoom: number;
     mapCenterCoordinates: Coordinate;
+    mapExtent: Extent;
+    rotation: number;
     singleClickedPosition: TypeMapMouseInfo;
     pointerPosition: TypeMapMouseInfo;
 };
