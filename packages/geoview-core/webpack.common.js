@@ -200,6 +200,7 @@ const config = {
         { from: './public/configs', to: 'configs' },
         { from: './public/locales', to: 'locales', noErrorOnMissing: true },
         { from: './public/css', to: 'css' },
+        { from: './public/js', to: 'js' },
         { from: './public/markers', to: 'markers' },
         { from: './public/datasets/geojson', to: 'datasets/geojson' },
         { from: './public/datasets/csv-files', to: 'datasets/csv-files' },
