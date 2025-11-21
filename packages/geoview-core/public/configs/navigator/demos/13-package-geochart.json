@@ -98,10 +98,7 @@
   "components": ["north-arrow", "overview-map"],
   "footerBar": {
     "tabs": {
-      "core": [
-        "layers",
-        "geochart"
-      ]
+      "core": ["layers", "geochart"]
     },
     "selectedTab": "geochart"
   },

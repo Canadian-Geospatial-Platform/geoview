@@ -3,9 +3,7 @@
     "interaction": "dynamic",
     "viewSettings": {
       "initialView": {
-        "layerIds": [
-          "geojsonLYR1/blank.json"
-        ]
+        "layerIds": ["geojsonLYR1/blank.json"]
       },
       "projection": 3978
     },
@@ -28,39 +26,26 @@
       }
     ]
   },
-  "components": [
-    "overview-map"
-  ],
+  "components": ["overview-map"],
   "overviewMap": {
     "hideOnZoom": 7
   },
   "appBar": {
     "tabs": {
-      "core": [
-        "geolocator",
-        "export",
-        "layers",
-        "legend",
-        "details",
-        "guide"
-      ]
+      "core": ["geolocator", "export", "layers", "legend", "details", "guide"]
     }
   },
-  "navBar": [
-    "zoom",
-    "fullscreen",
-    "home"
-  ],
+  "navBar": ["zoom", "fullscreen", "home"],
   "footerBar": {
     "tabs": {
-      "core": [
-        "data-table"
-      ],
-      "custom": [{
-        "id": "download-map-data",
-        "label": "How to download map data", 
-        "contentHTML": "<div><ul><li>How to export map coordinate data to: GeoJSON, or CSV.</li></ul></div>"
-      }]
+      "core": ["data-table"],
+      "custom": [
+        {
+          "id": "download-map-data",
+          "label": "How to download map data",
+          "contentHTML": "<div><ul><li>How to export map coordinate data to: GeoJSON, or CSV.</li></ul></div>"
+        }
+      ]
     },
     "collapsed": true
   },

@@ -23,7 +23,7 @@
         ]
       },
       {
-       "geoviewLayerId": "305a4924-afb8-4c7d-8459-8ef309960942",
+        "geoviewLayerId": "305a4924-afb8-4c7d-8459-8ef309960942",
         "geoviewLayerName": "Qualité de l’air – Concentrations de pointe de particules fines aux stations de surveillance",
         "metadataAccessPath": "",
         "geoviewLayerType": "geoCore",
@@ -36,36 +36,19 @@
       }
     ]
   },
-  "components": [
-    "north-arrow",
-    "overview-map"
-  ],
+  "components": ["north-arrow", "overview-map"],
   "overviewMap": {
     "hideOnZoom": 7
   },
-  "navBar": [
-    "zoom",
-    "fullscreen",
-    "home",
-    "location",
-    "basemap-select"
-  ],
+  "navBar": ["zoom", "fullscreen", "home", "location", "basemap-select"],
   "appBar": {
     "tabs": {
-      "core": [
-        "geolocator",
-        "legend",
-        "details",
-        "export"
-      ]
+      "core": ["geolocator", "legend", "details", "export"]
     }
   },
   "footerBar": {
     "tabs": {
-      "core": [
-        "layers",
-        "data-table"
-      ]
+      "core": ["layers", "data-table"]
     }
   },
   "corePackages": [],

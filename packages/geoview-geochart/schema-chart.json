@@ -10,13 +10,13 @@
       "items": {
         "type": "object",
         "properties": {
-          "layerId" : {
+          "layerId": {
             "type": "string"
           },
           "query": {
             "type": "object",
             "properties": {
-              "url" : {
+              "url": {
                 "type": "string"
               }
             },

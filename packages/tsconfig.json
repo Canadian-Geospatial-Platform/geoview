@@ -15,11 +15,6 @@
     "verbatimModuleSyntax": true,
     "jsx": "react-jsx"
   },
-  "include": [
-    "geoview-**/src/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
+  "include": ["geoview-**/src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }

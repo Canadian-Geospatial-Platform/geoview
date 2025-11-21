@@ -8,9 +8,7 @@
     "version": {
       "description": "The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by this version of the viewer.",
       "type": "string",
-      "enum": [
-        "1.0"
-      ]
+      "enum": ["1.0"]
     },
     "charts": {
       "description": "The array of chart configurations. The actual chart objects are validated with 'schema-chart.json' at the moment",

@@ -12,30 +12,14 @@
     "activeGeom": {
       "description": "The currently active geometry type.",
       "type": "string",
-      "enum": [
-        "Point",
-        "Text",
-        "LineString",
-        "Polygon",
-        "Rectangle",
-        "Circle",
-        "Star"
-      ]
+      "enum": ["Point", "Text", "LineString", "Polygon", "Rectangle", "Circle", "Star"]
     },
     "geomTypes": {
       "description": "The list of geometry types that can be drawn.",
       "type": "array",
       "items": {
         "type": "string",
-        "enum": [
-          "Point",
-          "Text",
-          "LineString",
-          "Polygon",
-          "Rectangle",
-          "Circle",
-          "Star"
-        ]
+        "enum": ["Point", "Text", "LineString", "Polygon", "Rectangle", "Circle", "Star"]
       }
     },
     "hideMeasurements": {
@@ -45,9 +29,7 @@
     "version": {
       "description": "The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by this version of the viewer.",
       "type": "string",
-      "enum": [
-        "1.0"
-      ]
+      "enum": ["1.0"]
     }
   },
   "required": []

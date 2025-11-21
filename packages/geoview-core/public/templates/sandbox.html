@@ -166,67 +166,67 @@
       <p><em>This map loads its configuration from the text area above.</em></p>
     </div>
 
-         <!-- Tabs Navigation -->
-      <div class="tabs">
-        <button class="tab-button active" onclick="openTab(event, 'basemap-options')">Basemap Options</button>
-        <button class="tab-button" onclick="openTab(event, 'view-settings')">View Settings</button>
-        <button class="tab-button" onclick="openTab(event, 'other-map-settings')">Other Map Settings</button>
-        <button class="tab-button" onclick="openTab(event, 'ui-components')">UI Components</button>
-        <button class="tab-button" onclick="openTab(event, 'other-geoview-config')">Other GeoView Config</button>
-      </div>
+    <!-- Tabs Navigation -->
+    <div class="tabs">
+      <button class="tab-button active" onclick="openTab(event, 'basemap-options')">Basemap Options</button>
+      <button class="tab-button" onclick="openTab(event, 'view-settings')">View Settings</button>
+      <button class="tab-button" onclick="openTab(event, 'other-map-settings')">Other Map Settings</button>
+      <button class="tab-button" onclick="openTab(event, 'ui-components')">UI Components</button>
+      <button class="tab-button" onclick="openTab(event, 'other-geoview-config')">Other GeoView Config</button>
+    </div>
 
-      <!-- basemap-options Tab -->
-      <div id="basemap-options" class="tab-content active">
-        <div class="demo-section">
-          <h4>Basemap Options</h4>
-          <p>Configure the basemap settings for your map. These options control the appearance and type of the base layer.</p>
-          
-          <h5>Available Options (TypeBasemapOptions):</h5>
-          
-          <div class="option-item">
-            <p><strong>basemapId</strong> <code>string</code> <em style="color: #d73a49;">*required</em></p>
-            <p>The identifier for the basemap to use.</p>
-            <p><strong>Valid values:</strong></p>
-            <ul>
-              <li><code>'transport'</code> - Transportation basemap (default)</li>
-              <li><code>'osm'</code> - OpenStreetMap basemap</li>
-              <li><code>'simple'</code> - Simple basemap</li>
-              <li><code>'nogeom'</code> - No geometry basemap</li>
-              <li><code>'shaded'</code> - Shaded relief basemap</li>
-              <li><code>'imagery'</code> - Imagery/satellite basemap</li>
-            </ul>
-          </div>
-          
-          <div class="option-item">
-            <p><strong>shaded</strong> <code>boolean</code> <em style="color: #d73a49;">*required</em></p>
-            <p>Enable or disable shaded basemap. If basemap id is set to 'shaded', this should be false.</p>
-            <p><strong>Default:</strong> <code>true</code></p>
-            <ul>
-              <li><code>true</code> - Enable shaded relief</li>
-              <li><code>false</code> - Disable shaded relief</li>
-            </ul>
-          </div>
-          
-          <div class="option-item">
-            <p><strong>labeled</strong> <code>boolean</code> <em style="color: #d73a49;">*required</em></p>
-            <p>Enable or disable basemap labels (place names, roads, etc.).</p>
-            <p><strong>Default:</strong> <code>true</code></p>
-            <ul>
-              <li><code>true</code> - Show labels on basemap</li>
-              <li><code>false</code> - Hide all labels</li>
-            </ul>
-          </div>
+    <!-- basemap-options Tab -->
+    <div id="basemap-options" class="tab-content active">
+      <div class="demo-section">
+        <h4>Basemap Options</h4>
+        <p>Configure the basemap settings for your map. These options control the appearance and type of the base layer.</p>
 
-          <div class="option-item">
-            <p><strong>labelZIndex</strong> <code>number</code> <em style="color: #6c757d;">optional</em></p>
-            <p>Z-index of the basemap labels to control layer stacking order.</p>
-            <p><strong>Default:</strong> <code>0</code></p>
-          </div>
-          
-          <button type="button" class="collapsible">Example Configurations</button>
-          <div class="panel">
-            <h3>Basic Configuration:</h3>
-            <pre id="basemap-example-1"><code>
+        <h5>Available Options (TypeBasemapOptions):</h5>
+
+        <div class="option-item">
+          <p><strong>basemapId</strong> <code>string</code> <em style="color: #d73a49">*required</em></p>
+          <p>The identifier for the basemap to use.</p>
+          <p><strong>Valid values:</strong></p>
+          <ul>
+            <li><code>'transport'</code> - Transportation basemap (default)</li>
+            <li><code>'osm'</code> - OpenStreetMap basemap</li>
+            <li><code>'simple'</code> - Simple basemap</li>
+            <li><code>'nogeom'</code> - No geometry basemap</li>
+            <li><code>'shaded'</code> - Shaded relief basemap</li>
+            <li><code>'imagery'</code> - Imagery/satellite basemap</li>
+          </ul>
+        </div>
+
+        <div class="option-item">
+          <p><strong>shaded</strong> <code>boolean</code> <em style="color: #d73a49">*required</em></p>
+          <p>Enable or disable shaded basemap. If basemap id is set to 'shaded', this should be false.</p>
+          <p><strong>Default:</strong> <code>true</code></p>
+          <ul>
+            <li><code>true</code> - Enable shaded relief</li>
+            <li><code>false</code> - Disable shaded relief</li>
+          </ul>
+        </div>
+
+        <div class="option-item">
+          <p><strong>labeled</strong> <code>boolean</code> <em style="color: #d73a49">*required</em></p>
+          <p>Enable or disable basemap labels (place names, roads, etc.).</p>
+          <p><strong>Default:</strong> <code>true</code></p>
+          <ul>
+            <li><code>true</code> - Show labels on basemap</li>
+            <li><code>false</code> - Hide all labels</li>
+          </ul>
+        </div>
+
+        <div class="option-item">
+          <p><strong>labelZIndex</strong> <code>number</code> <em style="color: #6c757d">optional</em></p>
+          <p>Z-index of the basemap labels to control layer stacking order.</p>
+          <p><strong>Default:</strong> <code>0</code></p>
+        </div>
+
+        <button type="button" class="collapsible">Example Configurations</button>
+        <div class="panel">
+          <h3>Basic Configuration:</h3>
+          <pre id="basemap-example-1"><code>
 {
   "map": {
     "basemapOptions": {
@@ -238,8 +238,8 @@
   }
 }
             </code></pre>
-            <h3>Imagery Basemap Without Labels:</h3>
-            <pre id="basemap-example-2"><code>
+          <h3>Imagery Basemap Without Labels:</h3>
+          <pre id="basemap-example-2"><code>
 {
   "basemapOptions": {
     "basemapId": "imagery",
@@ -248,8 +248,8 @@
   }
 }
             </code></pre>
-            <h3>Shaded Relief Basemap:</h3>
-            <pre id="basemap-example-3"><code>
+          <h3>Shaded Relief Basemap:</h3>
+          <pre id="basemap-example-3"><code>
 {
   "basemapOptions": {
     "basemapId": "shaded",
@@ -258,98 +258,107 @@
   }
 }
             </code></pre>
-          </div>
         </div>
       </div>
-      
-      <!-- view-settings Tab -->
-      <div id="view-settings" class="tab-content">
-        <div class="demo-section">
-          <h4>View Settings</h4>
-          <p>Configure the view settings for your map. These options control the projection, zoom levels, rotation, and initial view area.</p>
-          
-          <h5>Available Options (TypeViewSettings):</h5>
-          
-          <div class="option-item">
-            <p><strong>projection</strong> <code>number</code> <em style="color: #d73a49;">*required</em></p>
-            <p>Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada.</p>
-            <p><strong>Valid values:</strong></p>
-            <ul>
-              <li><code>3978</code> - Lambert Conical Conform Canada (default)</li>
-              <li><code>3857</code> - Web Mercator</li>
-            </ul>
-          </div>
-          
-          <div class="option-item">
-            <p><strong>initialView</strong> <code>object</code> <em style="color: #6c757d;">optional</em></p>
-            <p>Settings for the initial view for map. You can specify either <code>zoomAndCenter</code>, <code>extent</code>, or <code>layerIds</code>.</p>
-            <p><strong>Properties (TypeMapViewSettings):</strong></p>
-            <ul>
-              <li><code>zoomAndCenter</code> - Array of [zoom, [longitude, latitude]]
-                <ul>
-                  <li>Zoom level: 0-28</li>
-                  <li>Center coordinates depend on the projection:
-                    <ul>
-                      <li><strong>EPSG:3978</strong> - Longitude: [-140 to -60], Latitude: [40 to 90]</li>
-                      <li><strong>EPSG:3857</strong> - Longitude: [-180 to 180], Latitude: [-90 to 90]</li>
-                    </ul>
-                  </li>
-                </ul>
-              </li>
-              <li><code>extent</code> - Array of [minX, minY, maxX, maxY] extent coordinates (values depend on projection)</li>
-              <li><code>layerIds</code> - Array of Geoview layer IDs or layer paths to use as initial map focus
-                <ul>
-                  <li>If empty array <code>[]</code>, will use all layers</li>
-                  <li>Format: <code>["geoviewLayerId"]</code> or <code>["geoviewLayerId/layerPath"]</code></li>
-                </ul>
-              </li>
-            </ul>
-          </div>
-          
-          <div class="option-item">
-            <p><strong>homeView</strong> <code>object</code> <em style="color: #6c757d;">optional</em></p>
-            <p>Settings for the home nav bar button. Uses the same structure as <code>initialView</code> (TypeMapViewSettings).</p>
-          </div>
-          
-          <div class="option-item">
-            <p><strong>enableRotation</strong> <code>boolean</code> <em style="color: #6c757d;">optional</em></p>
-            <p>Enable rotation. If false, a rotation constraint that always sets the rotation to zero is used.</p>
-            <p><strong>Default:</strong> <code>true</code></p>
-          </div>
-          
-          <div class="option-item">
-            <p><strong>rotation</strong> <code>number</code> <em style="color: #6c757d;">optional</em></p>
-            <p>The initial rotation for the view in degrees (positive rotation clockwise, 0 means North). Will be converted to radians by the viewer.</p>
-            <p><strong>Range:</strong> 0 to 360</p>
-            <p><strong>Default:</strong> <code>0</code></p>
-          </div>
-          
-          <div class="option-item">
-            <p><strong>maxExtent</strong> <code>array</code> <em style="color: #6c757d;">optional</em></p>
-            <p>The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates.</p>
-            <p><strong>Note:</strong> Coordinate values depend on the projection.</p>
-            <p><strong>Default for EPSG:3978:</strong> <code>[-150, -10, -30, 90]</code></p>
-            <p><strong>Default for EPSG:3857:</strong> <code>[-180, 0, 80, 84]</code></p>
-          </div>
-          
-          <div class="option-item">
-            <p><strong>minZoom</strong> <code>number</code> <em style="color: #6c757d;">optional</em></p>
-            <p>The minimum zoom level used to determine the resolution constraint. If not set, will use default from basemap.</p>
-            <p><strong>Range:</strong> 0 to 20</p>
-            <p><strong>Default:</strong> <code>0</code></p>
-          </div>
-          
-          <div class="option-item">
-            <p><strong>maxZoom</strong> <code>number</code> <em style="color: #6c757d;">optional</em></p>
-            <p>The maximum zoom level used to determine the resolution constraint. If not set, will use default from basemap.</p>
-            <p><strong>Range:</strong> 0 to 20</p>
-            <p><strong>Default:</strong> <code>20</code></p>
-          </div>
-          
-          <button type="button" class="collapsible">Example Configurations</button>
-          <div class="panel">
-            <h3>Basic Configuration with Zoom and Center (EPSG:3978):</h3>
-            <pre id="view-example-1"><code>
+    </div>
+
+    <!-- view-settings Tab -->
+    <div id="view-settings" class="tab-content">
+      <div class="demo-section">
+        <h4>View Settings</h4>
+        <p>Configure the view settings for your map. These options control the projection, zoom levels, rotation, and initial view area.</p>
+
+        <h5>Available Options (TypeViewSettings):</h5>
+
+        <div class="option-item">
+          <p><strong>projection</strong> <code>number</code> <em style="color: #d73a49">*required</em></p>
+          <p>Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada.</p>
+          <p><strong>Valid values:</strong></p>
+          <ul>
+            <li><code>3978</code> - Lambert Conical Conform Canada (default)</li>
+            <li><code>3857</code> - Web Mercator</li>
+          </ul>
+        </div>
+
+        <div class="option-item">
+          <p><strong>initialView</strong> <code>object</code> <em style="color: #6c757d">optional</em></p>
+          <p>
+            Settings for the initial view for map. You can specify either <code>zoomAndCenter</code>, <code>extent</code>, or
+            <code>layerIds</code>.
+          </p>
+          <p><strong>Properties (TypeMapViewSettings):</strong></p>
+          <ul>
+            <li>
+              <code>zoomAndCenter</code> - Array of [zoom, [longitude, latitude]]
+              <ul>
+                <li>Zoom level: 0-28</li>
+                <li>
+                  Center coordinates depend on the projection:
+                  <ul>
+                    <li><strong>EPSG:3978</strong> - Longitude: [-140 to -60], Latitude: [40 to 90]</li>
+                    <li><strong>EPSG:3857</strong> - Longitude: [-180 to 180], Latitude: [-90 to 90]</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li><code>extent</code> - Array of [minX, minY, maxX, maxY] extent coordinates (values depend on projection)</li>
+            <li>
+              <code>layerIds</code> - Array of Geoview layer IDs or layer paths to use as initial map focus
+              <ul>
+                <li>If empty array <code>[]</code>, will use all layers</li>
+                <li>Format: <code>["geoviewLayerId"]</code> or <code>["geoviewLayerId/layerPath"]</code></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+
+        <div class="option-item">
+          <p><strong>homeView</strong> <code>object</code> <em style="color: #6c757d">optional</em></p>
+          <p>Settings for the home nav bar button. Uses the same structure as <code>initialView</code> (TypeMapViewSettings).</p>
+        </div>
+
+        <div class="option-item">
+          <p><strong>enableRotation</strong> <code>boolean</code> <em style="color: #6c757d">optional</em></p>
+          <p>Enable rotation. If false, a rotation constraint that always sets the rotation to zero is used.</p>
+          <p><strong>Default:</strong> <code>true</code></p>
+        </div>
+
+        <div class="option-item">
+          <p><strong>rotation</strong> <code>number</code> <em style="color: #6c757d">optional</em></p>
+          <p>
+            The initial rotation for the view in degrees (positive rotation clockwise, 0 means North). Will be converted to radians by the
+            viewer.
+          </p>
+          <p><strong>Range:</strong> 0 to 360</p>
+          <p><strong>Default:</strong> <code>0</code></p>
+        </div>
+
+        <div class="option-item">
+          <p><strong>maxExtent</strong> <code>array</code> <em style="color: #6c757d">optional</em></p>
+          <p>The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates.</p>
+          <p><strong>Note:</strong> Coordinate values depend on the projection.</p>
+          <p><strong>Default for EPSG:3978:</strong> <code>[-150, -10, -30, 90]</code></p>
+          <p><strong>Default for EPSG:3857:</strong> <code>[-180, 0, 80, 84]</code></p>
+        </div>
+
+        <div class="option-item">
+          <p><strong>minZoom</strong> <code>number</code> <em style="color: #6c757d">optional</em></p>
+          <p>The minimum zoom level used to determine the resolution constraint. If not set, will use default from basemap.</p>
+          <p><strong>Range:</strong> 0 to 20</p>
+          <p><strong>Default:</strong> <code>0</code></p>
+        </div>
+
+        <div class="option-item">
+          <p><strong>maxZoom</strong> <code>number</code> <em style="color: #6c757d">optional</em></p>
+          <p>The maximum zoom level used to determine the resolution constraint. If not set, will use default from basemap.</p>
+          <p><strong>Range:</strong> 0 to 20</p>
+          <p><strong>Default:</strong> <code>20</code></p>
+        </div>
+
+        <button type="button" class="collapsible">Example Configurations</button>
+        <div class="panel">
+          <h3>Basic Configuration with Zoom and Center (EPSG:3978):</h3>
+          <pre id="view-example-1"><code>
 {
   "map": {
     "viewSettings": {
@@ -366,8 +375,8 @@
   }
 }
             </code></pre>
-            <h3>Configuration with Extent (EPSG:3857):</h3>
-            <pre id="view-example-2"><code>
+          <h3>Configuration with Extent (EPSG:3857):</h3>
+          <pre id="view-example-2"><code>
 {
   "viewSettings": {
     "projection": 3857,
@@ -380,8 +389,8 @@
   }
 }
             </code></pre>
-            <h3>Zoom to All Layers:</h3>
-            <pre id="view-example-3"><code>
+          <h3>Zoom to All Layers:</h3>
+          <pre id="view-example-3"><code>
 {
   "viewSettings": {
     "projection": 3978,
@@ -394,8 +403,8 @@
   }
 }
             </code></pre>
-            <h3>Zoom to Specific Layers:</h3>
-            <pre id="view-example-4"><code>
+          <h3>Zoom to Specific Layers:</h3>
+          <pre id="view-example-4"><code>
 {
   "viewSettings": {
     "projection": 3978,
@@ -405,67 +414,70 @@
   }
 }
             </code></pre>
-          </div>
         </div>
       </div>
+    </div>
 
-      <!-- other-map-settings Tab -->
-      <div id="other-map-settings" class="tab-content">
-        <div class="demo-section">
-          <h4>Other Map Settings</h4>
-          <p>Additional configuration options for map interaction, feature highlighting, and overlay objects.</p>
-          
-          <h5>Available Options:</h5>
-          
-          <div class="option-item">
-            <p><strong>interaction</strong> <code>string</code> <em style="color: #d73a49;">*required</em> (TypeInteraction)</p>
-            <p>Type of map interaction. Determines if the map is dynamic (pan/zoom enabled) or static to act as a thumbnail (no component).</p>
-            <p><strong>Valid values:</strong></p>
-            <ul>
-              <li><code>'dynamic'</code> - Interactive map with pan/zoom capabilities (default)</li>
-              <li><code>'static'</code> - Static map acting as a thumbnail, no component</li>
-            </ul>
-          </div>
-          
-          <div class="option-item">
-            <p><strong>highlightColor</strong> <code>string</code> <em style="color: #6c757d;">optional</em> (TypeHighlightColors)</p>
-            <p>Color to use for feature highlights when features are selected or hovered over.</p>
-            <p><strong>Valid values:</strong></p>
-            <ul>
-              <li><code>'black'</code> - Black highlight (default)</li>
-              <li><code>'white'</code> - White highlight</li>
-              <li><code>'red'</code> - Red highlight</li>
-              <li><code>'green'</code> - Green highlight</li>
-            </ul>
-            <p><strong>Default:</strong> <code>'black'</code></p>
-          </div>
-          
-          <div class="option-item">
-            <p><strong>overlayObjects</strong> <code>object</code> <em style="color: #6c757d;">optional</em> (TypeOverlayObjects)</p>
-            <p>Non-interactive markers and overlay objects to add to the map. Only point markers are supported for now...</p>
-            <p><strong>Properties:</strong></p>
-            <ul>
-              <li><code>pointMarkers</code> - Object containing groups of point markers
-                <ul>
-                  <li>Key: Group name (string)</li>
-                  <li>Value: Array of TypePointMarker objects</li>
-                </ul>
-              </li>
-            </ul>
-            <p><strong>TypePointMarker properties:</strong></p>
-            <ul>
-              <li><code>id</code> <em style="color: #d73a49;">*required</em> - Unique ID for the marker within its group</li>
-              <li><code>coordinate</code> <em style="color: #d73a49;">*required</em> - Marker coordinates [x, y]</li>
-              <li><code>color</code> <em style="color: #6c757d;">optional</em> - Marker color (CSS color string)</li>
-              <li><code>opacity</code> <em style="color: #6c757d;">optional</em> - Marker opacity (0 to 1)</li>
-              <li><code>projectionCode</code> <em style="color: #6c757d;">optional</em> - EPSG code if coordinates are not in lon/lat</li>
-            </ul>
-          </div>
-          
-          <button type="button" class="collapsible">Example Configurations</button>
-          <div class="panel">
-            <h3>Dynamic Map with Red Highlights:</h3>
-            <pre id="other-example-1"><code>
+    <!-- other-map-settings Tab -->
+    <div id="other-map-settings" class="tab-content">
+      <div class="demo-section">
+        <h4>Other Map Settings</h4>
+        <p>Additional configuration options for map interaction, feature highlighting, and overlay objects.</p>
+
+        <h5>Available Options:</h5>
+
+        <div class="option-item">
+          <p><strong>interaction</strong> <code>string</code> <em style="color: #d73a49">*required</em> (TypeInteraction)</p>
+          <p>
+            Type of map interaction. Determines if the map is dynamic (pan/zoom enabled) or static to act as a thumbnail (no component).
+          </p>
+          <p><strong>Valid values:</strong></p>
+          <ul>
+            <li><code>'dynamic'</code> - Interactive map with pan/zoom capabilities (default)</li>
+            <li><code>'static'</code> - Static map acting as a thumbnail, no component</li>
+          </ul>
+        </div>
+
+        <div class="option-item">
+          <p><strong>highlightColor</strong> <code>string</code> <em style="color: #6c757d">optional</em> (TypeHighlightColors)</p>
+          <p>Color to use for feature highlights when features are selected or hovered over.</p>
+          <p><strong>Valid values:</strong></p>
+          <ul>
+            <li><code>'black'</code> - Black highlight (default)</li>
+            <li><code>'white'</code> - White highlight</li>
+            <li><code>'red'</code> - Red highlight</li>
+            <li><code>'green'</code> - Green highlight</li>
+          </ul>
+          <p><strong>Default:</strong> <code>'black'</code></p>
+        </div>
+
+        <div class="option-item">
+          <p><strong>overlayObjects</strong> <code>object</code> <em style="color: #6c757d">optional</em> (TypeOverlayObjects)</p>
+          <p>Non-interactive markers and overlay objects to add to the map. Only point markers are supported for now...</p>
+          <p><strong>Properties:</strong></p>
+          <ul>
+            <li>
+              <code>pointMarkers</code> - Object containing groups of point markers
+              <ul>
+                <li>Key: Group name (string)</li>
+                <li>Value: Array of TypePointMarker objects</li>
+              </ul>
+            </li>
+          </ul>
+          <p><strong>TypePointMarker properties:</strong></p>
+          <ul>
+            <li><code>id</code> <em style="color: #d73a49">*required</em> - Unique ID for the marker within its group</li>
+            <li><code>coordinate</code> <em style="color: #d73a49">*required</em> - Marker coordinates [x, y]</li>
+            <li><code>color</code> <em style="color: #6c757d">optional</em> - Marker color (CSS color string)</li>
+            <li><code>opacity</code> <em style="color: #6c757d">optional</em> - Marker opacity (0 to 1)</li>
+            <li><code>projectionCode</code> <em style="color: #6c757d">optional</em> - EPSG code if coordinates are not in lon/lat</li>
+          </ul>
+        </div>
+
+        <button type="button" class="collapsible">Example Configurations</button>
+        <div class="panel">
+          <h3>Dynamic Map with Red Highlights:</h3>
+          <pre id="other-example-1"><code>
 {
   "map": {
     "interaction": "dynamic",
@@ -474,16 +486,16 @@
   }
 }
             </code></pre>
-            <h3>Static Map (Thumbnail):</h3>
-            <pre id="other-example-2"><code>
+          <h3>Static Map (Thumbnail):</h3>
+          <pre id="other-example-2"><code>
 {
   "map": {
     "interaction": "static",
     ... other map settings ...
 }
             </code></pre>
-            <h3>Map with Point Markers (Lon/Lat):</h3>
-            <pre id="other-example-3"><code>
+          <h3>Map with Point Markers (Lon/Lat):</h3>
+          <pre id="other-example-3"><code>
 {
   "map": {
     "interaction": "dynamic",
@@ -510,8 +522,8 @@
   }
 }
             </code></pre>
-            <h3>Map with Point Markers (Projected Coordinates):</h3>
-            <pre id="other-example-4"><code>
+          <h3>Map with Point Markers (Projected Coordinates):</h3>
+          <pre id="other-example-4"><code>
 {
   "map": {
     "overlayObjects": {
@@ -539,8 +551,8 @@
   }
 }
             </code></pre>
-            <h3>Multiple Marker Groups:</h3>
-            <pre id="other-example-5"><code>
+          <h3>Multiple Marker Groups:</h3>
+          <pre id="other-example-5"><code>
 {
   "map": {
     "overlayObjects": {
@@ -567,111 +579,120 @@
   }
 }
             </code></pre>
-          </div>
         </div>
       </div>
+    </div>
 
-       <!-- ui-components Tab -->
-      <div id="ui-components" class="tab-content">
-        <div class="demo-section">
-          <h4>UI Components Configuration</h4>
-          <p>Configure the user interface components including navigation bar, app bar, footer bar, overview map, and other map components.</p>
-          
-          <h5>Available Options:</h5>
-          
-          <div class="option-item">
-            <p><strong>navBar</strong> <code>array</code> <em style="color: #6c757d;">optional</em> (TypeValidNavBarProps[])</p>
-            <p>List of navigation bar buttons to display. Controls which navigation tools are available to the user.</p>
-            <p><strong>Valid values:</strong></p>
-            <ul>
-              <li><code>'zoom'</code> - Zoom in/out buttons</li>
-              <li><code>'fullscreen'</code> - Fullscreen toggle button</li>
-              <li><code>'home'</code> - Return to home view button</li>
-              <li><code>'location'</code> - User location button</li>
-              <li><code>'basemap-select'</code> - Basemap selector</li>
-              <li><code>'projection'</code> - Projection selector</li>
-              <li><code>'drawer'</code> - Drawing tools</li>
-            </ul>
-            <p><strong>Default:</strong> <code>['zoom', 'fullscreen', 'home', 'basemap-select']</code></p>
-          </div>
-          
-          <div class="option-item">
-            <p><strong>appBar</strong> <code>object</code> <em style="color: #6c757d;">optional</em> (TypeAppBarProps)</p>
-            <p>Configuration for the application bar (side panel). The about GeoView and notification buttons are always present.</p>
-            <p><strong>Properties:</strong></p>
-            <ul>
-              <li><code>tabs.core</code> - Array of core tab names to display
-                <ul>
-                  <li><code>'geolocator'</code> - Address search and geolocation</li>
-                  <li><code>'export'</code> - Export functionality</li>
-                  <li><code>'aoi-panel'</code> - Area of Interest panel</li>
-                  <li><code>'guide'</code> - User guide</li>
-                  <li><code>'legend'</code> - Map legend</li>
-                  <li><code>'layers'</code> - Layers panel</li>
-                  <li><code>'details'</code> - Feature details</li>
-                  <li><code>'data-table'</code> - Data table view</li>
-                </ul>
-              </li>
-              <li><code>collapsed</code> - Whether the app bar starts collapsed</li>
-              <li><code>selectedTab</code> - Initially selected tab</li>
-              <li><code>selectedLayersLayerPath</code> - Initial selected layer in layers tab</li>
-              <li><code>selectedDataTableLayerPath</code> - Initially selected layer in data table tab</li>
-              <li><code>selectedTimeSliderLayerPath</code> - Initially selected layer in time slider tab</li>
-            </ul>
-            <p><strong>Default:</strong> <code>{ tabs: { core: ['geolocator', 'legend', 'details', 'export'] } }</code></p>
-          </div>
-          
-          <div class="option-item">
-            <p><strong>footerBar</strong> <code>object</code> <em style="color: #6c757d;">optional</em> (TypeFooterBarProps)</p>
-            <p>Configuration for the footer bar (bottom panel).</p>
-            <p><strong>Properties:</strong></p>
-            <ul>
-              <li><code>tabs.core</code> - Array of core tab names to display
-                <ul>
-                  <li><code>'legend'</code> - Map legend</li>
-                  <li><code>'layers'</code> - Layers panel</li>
-                  <li><code>'details'</code> - Feature details</li>
-                  <li><code>'data-table'</code> - Data table view</li>
-                  <li><code>'time-slider'</code> - Time slider control</li>
-                  <li><code>'geochart'</code> - GeoChart visualization</li>
-                  <li><code>'guide'</code> - User guide</li>
-                </ul>
-              </li>
-              <li><code>tabs.custom</code> - Array of custom tab objects with <code>id</code>, <code>label</code>, and <code>contentHTML</code></li>
-              <li><code>collapsed</code> - Whether the footer bar starts collapsed</li>
-              <li><code>selectedTab</code> - Initially selected tab</li>
-              <li><code>selectedLayersLayerPath</code> - Initial selected layer in layers tab</li>
-              <li><code>selectedDataTableLayerPath</code> - Initially selected layer in data table tab</li>
-              <li><code>selectedTimeSliderLayerPath</code> - Initially selected layer in time slider tab</li>
-            </ul>
-            <p><strong>Default:</strong> <code>{ tabs: { core: ['layers', 'data-table'], custom: [] }, collapsed: false }</code></p>
-          </div>
-          
-          <div class="option-item">
-            <p><strong>overviewMap</strong> <code>object</code> <em style="color: #6c757d;">optional</em> (TypeOverviewMapProps)</p>
-            <p>Configuration for the overview map component.</p>
-            <p><strong>Properties:</strong></p>
-            <ul>
-              <li><code>hideOnZoom</code> - Zoom level at which to hide the overview map (0 = always show, suggested value to hide when zoomed out: 7)</li>
-            </ul>
-            <p><strong>Default:</strong> <code>{ hideOnZoom: 0 }</code></p>
-          </div>
-          
-          <div class="option-item">
-            <p><strong>components</strong> <code>array</code> <em style="color: #6c757d;">optional</em> (TypeValidMapComponentProps[])</p>
-            <p>List of map components to display on the map.</p>
-            <p><strong>Valid values:</strong></p>
-            <ul>
-              <li><code>'overview-map'</code> - Overview/mini map showing full extent</li>
-              <li><code>'north-arrow'</code> - North arrow indicator</li>
-            </ul>
-            <p><strong>Default:</strong> <code>['north-arrow', 'overview-map']</code></p>
-          </div>
-          
-          <button type="button" class="collapsible">Example Configurations</button>
-          <div class="panel">
-            <h3>Basic UI Configuration:</h3>
-            <pre id="ui-example-1"><code>
+    <!-- ui-components Tab -->
+    <div id="ui-components" class="tab-content">
+      <div class="demo-section">
+        <h4>UI Components Configuration</h4>
+        <p>
+          Configure the user interface components including navigation bar, app bar, footer bar, overview map, and other map components.
+        </p>
+
+        <h5>Available Options:</h5>
+
+        <div class="option-item">
+          <p><strong>navBar</strong> <code>array</code> <em style="color: #6c757d">optional</em> (TypeValidNavBarProps[])</p>
+          <p>List of navigation bar buttons to display. Controls which navigation tools are available to the user.</p>
+          <p><strong>Valid values:</strong></p>
+          <ul>
+            <li><code>'zoom'</code> - Zoom in/out buttons</li>
+            <li><code>'fullscreen'</code> - Fullscreen toggle button</li>
+            <li><code>'home'</code> - Return to home view button</li>
+            <li><code>'location'</code> - User location button</li>
+            <li><code>'basemap-select'</code> - Basemap selector</li>
+            <li><code>'projection'</code> - Projection selector</li>
+            <li><code>'drawer'</code> - Drawing tools</li>
+          </ul>
+          <p><strong>Default:</strong> <code>['zoom', 'fullscreen', 'home', 'basemap-select']</code></p>
+        </div>
+
+        <div class="option-item">
+          <p><strong>appBar</strong> <code>object</code> <em style="color: #6c757d">optional</em> (TypeAppBarProps)</p>
+          <p>Configuration for the application bar (side panel). The about GeoView and notification buttons are always present.</p>
+          <p><strong>Properties:</strong></p>
+          <ul>
+            <li>
+              <code>tabs.core</code> - Array of core tab names to display
+              <ul>
+                <li><code>'geolocator'</code> - Address search and geolocation</li>
+                <li><code>'export'</code> - Export functionality</li>
+                <li><code>'aoi-panel'</code> - Area of Interest panel</li>
+                <li><code>'guide'</code> - User guide</li>
+                <li><code>'legend'</code> - Map legend</li>
+                <li><code>'layers'</code> - Layers panel</li>
+                <li><code>'details'</code> - Feature details</li>
+                <li><code>'data-table'</code> - Data table view</li>
+              </ul>
+            </li>
+            <li><code>collapsed</code> - Whether the app bar starts collapsed</li>
+            <li><code>selectedTab</code> - Initially selected tab</li>
+            <li><code>selectedLayersLayerPath</code> - Initial selected layer in layers tab</li>
+            <li><code>selectedDataTableLayerPath</code> - Initially selected layer in data table tab</li>
+            <li><code>selectedTimeSliderLayerPath</code> - Initially selected layer in time slider tab</li>
+          </ul>
+          <p><strong>Default:</strong> <code>{ tabs: { core: ['geolocator', 'legend', 'details', 'export'] } }</code></p>
+        </div>
+
+        <div class="option-item">
+          <p><strong>footerBar</strong> <code>object</code> <em style="color: #6c757d">optional</em> (TypeFooterBarProps)</p>
+          <p>Configuration for the footer bar (bottom panel).</p>
+          <p><strong>Properties:</strong></p>
+          <ul>
+            <li>
+              <code>tabs.core</code> - Array of core tab names to display
+              <ul>
+                <li><code>'legend'</code> - Map legend</li>
+                <li><code>'layers'</code> - Layers panel</li>
+                <li><code>'details'</code> - Feature details</li>
+                <li><code>'data-table'</code> - Data table view</li>
+                <li><code>'time-slider'</code> - Time slider control</li>
+                <li><code>'geochart'</code> - GeoChart visualization</li>
+                <li><code>'guide'</code> - User guide</li>
+              </ul>
+            </li>
+            <li>
+              <code>tabs.custom</code> - Array of custom tab objects with <code>id</code>, <code>label</code>, and <code>contentHTML</code>
+            </li>
+            <li><code>collapsed</code> - Whether the footer bar starts collapsed</li>
+            <li><code>selectedTab</code> - Initially selected tab</li>
+            <li><code>selectedLayersLayerPath</code> - Initial selected layer in layers tab</li>
+            <li><code>selectedDataTableLayerPath</code> - Initially selected layer in data table tab</li>
+            <li><code>selectedTimeSliderLayerPath</code> - Initially selected layer in time slider tab</li>
+          </ul>
+          <p><strong>Default:</strong> <code>{ tabs: { core: ['layers', 'data-table'], custom: [] }, collapsed: false }</code></p>
+        </div>
+
+        <div class="option-item">
+          <p><strong>overviewMap</strong> <code>object</code> <em style="color: #6c757d">optional</em> (TypeOverviewMapProps)</p>
+          <p>Configuration for the overview map component.</p>
+          <p><strong>Properties:</strong></p>
+          <ul>
+            <li>
+              <code>hideOnZoom</code> - Zoom level at which to hide the overview map (0 = always show, suggested value to hide when zoomed
+              out: 7)
+            </li>
+          </ul>
+          <p><strong>Default:</strong> <code>{ hideOnZoom: 0 }</code></p>
+        </div>
+
+        <div class="option-item">
+          <p><strong>components</strong> <code>array</code> <em style="color: #6c757d">optional</em> (TypeValidMapComponentProps[])</p>
+          <p>List of map components to display on the map.</p>
+          <p><strong>Valid values:</strong></p>
+          <ul>
+            <li><code>'overview-map'</code> - Overview/mini map showing full extent</li>
+            <li><code>'north-arrow'</code> - North arrow indicator</li>
+          </ul>
+          <p><strong>Default:</strong> <code>['north-arrow', 'overview-map']</code></p>
+        </div>
+
+        <button type="button" class="collapsible">Example Configurations</button>
+        <div class="panel">
+          <h3>Basic UI Configuration:</h3>
+          <pre id="ui-example-1"><code>
 {
   "navBar": ["zoom", "fullscreen", "home", "basemap-select"],
   "appBar": {
@@ -692,8 +713,8 @@
   }
 }
               </code></pre>
-            <h3>Minimal UI (No Nav Bar, Limited Panels):</h3>
-            <pre id="ui-example-2"><code>
+          <h3>Minimal UI (No Nav Bar, Limited Panels):</h3>
+          <pre id="ui-example-2"><code>
 {
   "navBar": [],
   "appBar": {
@@ -711,8 +732,8 @@
   "components": []
 }
             </code></pre>
-            <h3>Full-Featured UI:</h3>
-            <pre id="ui-example-3"><code>
+          <h3>Full-Featured UI:</h3>
+          <pre id="ui-example-3"><code>
 {
   "navBar": ["zoom", "fullscreen", "home", "location", "basemap-select", "projection", "drawer"],
   "appBar": {
@@ -736,8 +757,8 @@
   }
 }
             </code></pre>
-            <h3>Custom Footer Bar Tab:</h3>
-            <pre id="ui-example-4"><code>
+          <h3>Custom Footer Bar Tab:</h3>
+          <pre id="ui-example-4"><code>
 {
   "footerBar": {
     "tabs": {
@@ -755,8 +776,8 @@
   }
 }
             </code></pre>
-            <h3>App Bar with Specific Tools:</h3>
-            <pre id="ui-example-5"><code>
+          <h3>App Bar with Specific Tools:</h3>
+          <pre id="ui-example-5"><code>
 {
   "navBar": ["zoom", "home"],
   "appBar": {
@@ -768,130 +789,144 @@
   "components": ["north-arrow"]
 }
             </code></pre>
-          </div>
         </div>
       </div>
+    </div>
 
-       <!-- other-geoview-config Tab -->
-      <div id="other-geoview-config" class="tab-content">
-        <div class="demo-section">
-          <h4>Other GeoView Configuration</h4>
-          <p>Additional configuration options for theme, service URLs, and global settings.</p>
-          
-          <h5>Available Options:</h5>
-          
-          <div class="option-item">
-            <p><strong>theme</strong> <code>string</code> <em style="color: #6c757d;">optional</em> (TypeDisplayTheme)</p>
-            <p>Display theme for the viewer.</p>
-            <p><strong>Valid values:</strong></p>
-            <ul>
-              <li><code>'geo.ca'</code> - Geo.ca theme (default)</li>
-              <li><code>'dark'</code> - Dark theme</li>
-              <li><code>'light'</code> - Light theme</li>
-            </ul>
-            <p><strong>Default:</strong> <code>'geo.ca'</code></p>
-          </div>
-          
-          <div class="option-item">
-            <p><strong>serviceUrls</strong> <code>object</code> <em style="color: #d73a49;">*required</em> (TypeServiceUrls)</p>
-            <p>Service endpoint URLs for various GeoView services.</p>
-            <p><strong>Properties:</strong></p>
-            <ul>
-              <li><code>geocoreUrl</code> <em style="color: #d73a49;">*required</em> - Service endpoint to access API for layers specification
-                <ul>
-                  <li>Default: <code>'https://geocore.api.geo.ca'</code></li>
-                </ul>
-              </li>
-              <li><code>rcsUrl</code> <em style="color: #6c757d;">optional</em> - Service endpoint for RCS gcGeo layers
-                <ul>
-                  <li>Default: <code>'https://gcgeo.gc.ca/geonetwork/srv/api/v2/docs'</code></li>
-                </ul>
-              </li>
-              <li><code>proxyUrl</code> <em style="color: #6c757d;">optional</em> - Proxy for dealing with same-origin issues
-                <ul>
-                  <li>Default: <code>'https://maps.canada.ca/wmsproxy/ws/wmsproxy/executeFromProxy'</code></li>
-                </ul>
-              </li>
-              <li><code>geolocatorUrl</code> <em style="color: #6c757d;">optional</em> - Geolocator service for address search
-                <ul>
-                  <li>Default: <code>'https://geolocator.api.geo.ca?keys=geonames,nominatim,locate'</code></li>
-                </ul>
-              </li>
-              <li><code>metadataUrl</code> <em style="color: #6c757d;">optional</em> - Metadata service endpoint for UUID layers
-                <ul>
-                  <li>Default: <code>''</code> (empty, must be set by config)</li>
-                </ul>
-              </li>
-              <li><code>utmZoneUrl</code> <em style="color: #6c757d;">optional</em> - UTM zone service endpoint
-                <ul>
-                  <li>Default: <code>'https://geogratis.gc.ca/services/delimitation/en/utmzone'</code></li>
-                </ul>
-              </li>
-              <li><code>ntsSheetUrl</code> <em style="color: #6c757d;">optional</em> - NTS sheet service endpoint
-                <ul>
-                  <li>Default: <code>'https://geogratis.gc.ca/services/delimitation/en/nts'</code></li>
-                </ul>
-              </li>
-              <li><code>altitudeUrl</code> <em style="color: #6c757d;">optional</em> - Altitude service endpoint
-                <ul>
-                  <li>Default: <code>'https://geogratis.gc.ca/services/elevation/cdem/altitude'</code></li>
-                </ul>
-              </li>
-            </ul>
-          </div>
-          
-          <div class="option-item">
-            <p><strong>globalSettings</strong> <code>object</code> <em style="color: #6c757d;">optional</em> (TypeGlobalSettings)</p>
-            <p>Global settings that affect the behavior of the viewer.</p>
-            <p><strong>Properties:</strong></p>
-            <ul>
-              <li><code>canRemoveSublayers</code> <em style="color: #6c757d;">optional</em> - Whether sublayers can be removed from layer groups
-                <ul>
-                  <li>Type: <code>boolean</code></li>
-                  <li>Default: <code>true</code></li>
-                </ul>
-              </li>
-              <li><code>disabledLayerTypes</code> <em style="color: #6c757d;">optional</em> - Layer types that should be disabled
-                <ul>
-                  <li>Type: <code>array</code> of TypeGeoviewLayerType</li>
-                  <li>Default: <code>[]</code></li>
-                </ul>
-              </li>
-              <li><code>showUnsymbolizedFeatures</code> <em style="color: #6c757d;">optional</em> - Display unsymbolized features in datatable and other components
-                <ul>
-                  <li>Type: <code>boolean</code></li>
-                  <li>Default: <code>false</code></li>
-                </ul>
-              </li>
-              <li><code>coordinateInfoEnabled</code> <em style="color: #6c757d;">optional</em> - Initial state of the coordinate info tool
-                <ul>
-                  <li>Type: <code>boolean</code></li>
-                  <li>Default: <code>false</code></li>
-                </ul>
-              </li>
-              <li><code>hideCoordinateInfoSwitch</code> <em style="color: #6c757d;">optional</em> - Remove coordinate info tool from UI
-                <ul>
-                  <li>Type: <code>boolean</code></li>
-                  <li>Default: <code>false</code></li>
-                </ul>
-              </li>
-            </ul>
-          </div>
-          
-          <div class="option-item">
-            <p><strong>schemaVersionUsed</strong> <code>string</code> <em style="color: #6c757d;">optional</em> (TypeValidVersions)</p>
-            <p>The schema version used to validate the configuration file.</p>
-            <p><strong>Valid values:</strong></p>
-            <ul>
-              <li><code>'1.0'</code> - Version 1.0 (default and only accepted version)</li>
-            </ul>
-            <p><strong>Default:</strong> <code>'1.0'</code></p>
-          </div>
-          
-          <button type="button" class="collapsible">Example Configurations</button>
-          <div class="panel">
-            <h5>Basic Configuration with Default Service URLs:</h5>
-            <pre id="geoview-example-1"><code>
+    <!-- other-geoview-config Tab -->
+    <div id="other-geoview-config" class="tab-content">
+      <div class="demo-section">
+        <h4>Other GeoView Configuration</h4>
+        <p>Additional configuration options for theme, service URLs, and global settings.</p>
+
+        <h5>Available Options:</h5>
+
+        <div class="option-item">
+          <p><strong>theme</strong> <code>string</code> <em style="color: #6c757d">optional</em> (TypeDisplayTheme)</p>
+          <p>Display theme for the viewer.</p>
+          <p><strong>Valid values:</strong></p>
+          <ul>
+            <li><code>'geo.ca'</code> - Geo.ca theme (default)</li>
+            <li><code>'dark'</code> - Dark theme</li>
+            <li><code>'light'</code> - Light theme</li>
+          </ul>
+          <p><strong>Default:</strong> <code>'geo.ca'</code></p>
+        </div>
+
+        <div class="option-item">
+          <p><strong>serviceUrls</strong> <code>object</code> <em style="color: #d73a49">*required</em> (TypeServiceUrls)</p>
+          <p>Service endpoint URLs for various GeoView services.</p>
+          <p><strong>Properties:</strong></p>
+          <ul>
+            <li>
+              <code>geocoreUrl</code> <em style="color: #d73a49">*required</em> - Service endpoint to access API for layers specification
+              <ul>
+                <li>Default: <code>'https://geocore.api.geo.ca'</code></li>
+              </ul>
+            </li>
+            <li>
+              <code>rcsUrl</code> <em style="color: #6c757d">optional</em> - Service endpoint for RCS gcGeo layers
+              <ul>
+                <li>Default: <code>'https://gcgeo.gc.ca/geonetwork/srv/api/v2/docs'</code></li>
+              </ul>
+            </li>
+            <li>
+              <code>proxyUrl</code> <em style="color: #6c757d">optional</em> - Proxy for dealing with same-origin issues
+              <ul>
+                <li>Default: <code>'https://maps.canada.ca/wmsproxy/ws/wmsproxy/executeFromProxy'</code></li>
+              </ul>
+            </li>
+            <li>
+              <code>geolocatorUrl</code> <em style="color: #6c757d">optional</em> - Geolocator service for address search
+              <ul>
+                <li>Default: <code>'https://geolocator.api.geo.ca?keys=geonames,nominatim,locate'</code></li>
+              </ul>
+            </li>
+            <li>
+              <code>metadataUrl</code> <em style="color: #6c757d">optional</em> - Metadata service endpoint for UUID layers
+              <ul>
+                <li>Default: <code>''</code> (empty, must be set by config)</li>
+              </ul>
+            </li>
+            <li>
+              <code>utmZoneUrl</code> <em style="color: #6c757d">optional</em> - UTM zone service endpoint
+              <ul>
+                <li>Default: <code>'https://geogratis.gc.ca/services/delimitation/en/utmzone'</code></li>
+              </ul>
+            </li>
+            <li>
+              <code>ntsSheetUrl</code> <em style="color: #6c757d">optional</em> - NTS sheet service endpoint
+              <ul>
+                <li>Default: <code>'https://geogratis.gc.ca/services/delimitation/en/nts'</code></li>
+              </ul>
+            </li>
+            <li>
+              <code>altitudeUrl</code> <em style="color: #6c757d">optional</em> - Altitude service endpoint
+              <ul>
+                <li>Default: <code>'https://geogratis.gc.ca/services/elevation/cdem/altitude'</code></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+
+        <div class="option-item">
+          <p><strong>globalSettings</strong> <code>object</code> <em style="color: #6c757d">optional</em> (TypeGlobalSettings)</p>
+          <p>Global settings that affect the behavior of the viewer.</p>
+          <p><strong>Properties:</strong></p>
+          <ul>
+            <li>
+              <code>canRemoveSublayers</code> <em style="color: #6c757d">optional</em> - Whether sublayers can be removed from layer groups
+              <ul>
+                <li>Type: <code>boolean</code></li>
+                <li>Default: <code>true</code></li>
+              </ul>
+            </li>
+            <li>
+              <code>disabledLayerTypes</code> <em style="color: #6c757d">optional</em> - Layer types that should be disabled
+              <ul>
+                <li>Type: <code>array</code> of TypeGeoviewLayerType</li>
+                <li>Default: <code>[]</code></li>
+              </ul>
+            </li>
+            <li>
+              <code>showUnsymbolizedFeatures</code> <em style="color: #6c757d">optional</em> - Display unsymbolized features in datatable
+              and other components
+              <ul>
+                <li>Type: <code>boolean</code></li>
+                <li>Default: <code>false</code></li>
+              </ul>
+            </li>
+            <li>
+              <code>coordinateInfoEnabled</code> <em style="color: #6c757d">optional</em> - Initial state of the coordinate info tool
+              <ul>
+                <li>Type: <code>boolean</code></li>
+                <li>Default: <code>false</code></li>
+              </ul>
+            </li>
+            <li>
+              <code>hideCoordinateInfoSwitch</code> <em style="color: #6c757d">optional</em> - Remove coordinate info tool from UI
+              <ul>
+                <li>Type: <code>boolean</code></li>
+                <li>Default: <code>false</code></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+
+        <div class="option-item">
+          <p><strong>schemaVersionUsed</strong> <code>string</code> <em style="color: #6c757d">optional</em> (TypeValidVersions)</p>
+          <p>The schema version used to validate the configuration file.</p>
+          <p><strong>Valid values:</strong></p>
+          <ul>
+            <li><code>'1.0'</code> - Version 1.0 (default and only accepted version)</li>
+          </ul>
+          <p><strong>Default:</strong> <code>'1.0'</code></p>
+        </div>
+
+        <button type="button" class="collapsible">Example Configurations</button>
+        <div class="panel">
+          <h5>Basic Configuration with Default Service URLs:</h5>
+          <pre id="geoview-example-1"><code>
 {
   "theme": "geo.ca",
   "serviceUrls": {
@@ -906,8 +941,8 @@
   "schemaVersionUsed": "1.0"
 }
             </code></pre>
-            <h3>Dark Theme Configuration:</h3>
-            <pre id="geoview-example-2"><code>
+          <h3>Dark Theme Configuration:</h3>
+          <pre id="geoview-example-2"><code>
 {
   "theme": "dark",
   "serviceUrls": {
@@ -915,8 +950,8 @@
   }
 }
             </code></pre>
-            <h3>Global Settings Configuration:</h3>
-            <pre id="geoview-example-3"><code>
+          <h3>Global Settings Configuration:</h3>
+          <pre id="geoview-example-3"><code>
 {
   "globalSettings": {
     "canRemoveSublayers": false,
@@ -930,8 +965,8 @@
   }
 }
             </code></pre>
-            <h3>Complete Configuration:</h3>
-            <pre id="geoview-example-4"><code>
+          <h3>Complete Configuration:</h3>
+          <pre id="geoview-example-4"><code>
 {
   "theme": "geo.ca",
   "serviceUrls": {
@@ -954,9 +989,9 @@
   "schemaVersionUsed": "1.0"
 }
             </code></pre>
-          </div>
         </div>
       </div>
+    </div>
     <script src="codedoc.js"></script>
     <script>
       insertPageHeader();
@@ -980,7 +1015,7 @@
       }
 
       // Initialize collapsible buttons after DOM is loaded
-      document.addEventListener('DOMContentLoaded', function() {
+      document.addEventListener('DOMContentLoaded', function () {
         createCollapsible();
       });
 

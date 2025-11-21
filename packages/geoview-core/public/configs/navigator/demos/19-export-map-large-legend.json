@@ -66,7 +66,7 @@
       },
       {
         "geoviewLayerId": "Hydro",
-        "geoviewLayerName": "Hydro - Scale" ,
+        "geoviewLayerName": "Hydro - Scale",
         "metadataAccessPath": "https://maps.geogratis.gc.ca/wms/hydro_network_en",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
@@ -189,10 +189,10 @@
         ]
       },
       {
-        "geoviewLayerId":"DatacubeXML-Aerial",
-        "geoviewLayerName":"Datacube-Aerial",
-        "metadataAccessPath":"https://datacube.services.geo.ca/web/aerial.xml",
-        "geoviewLayerType":"ogcWms",
+        "geoviewLayerId": "DatacubeXML-Aerial",
+        "geoviewLayerName": "Datacube-Aerial",
+        "metadataAccessPath": "https://datacube.services.geo.ca/web/aerial.xml",
+        "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
             "layerId": "halifax",

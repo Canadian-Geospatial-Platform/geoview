@@ -71,10 +71,7 @@
   },
   "footerBar": {
     "tabs": {
-      "core": [
-        "layers",
-        "data-table"
-      ]
+      "core": ["layers", "data-table"]
     },
     "selectedTab": "layers"
   },

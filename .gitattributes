@@ -1,6 +1,6 @@
 # Set the default behavior, to ignore text end of line character - https://git-scm.com/docs/gitattributes
 # Treat all files as text by default unless overridden
-* text=auto
+* text=auto eol=lf
 
 # Source code — TypeScript / JS
 *.ts       text
