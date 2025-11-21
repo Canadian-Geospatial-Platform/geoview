@@ -102,6 +102,11 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
      */
     protected onImageLoadError(event: unknown): void;
     /**
+     * Method called when the layer source changes to check for errors.
+     * @param {Event} event - The event which is being triggered.
+     */
+    protected onSourceChange(event: Event): void;
+    /**
      * Gets the OpenLayers Layer Source
      * @returns The OpenLayers Layer Source
      */

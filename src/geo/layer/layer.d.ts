@@ -463,8 +463,8 @@ export declare class LayerApi {
      * Creates an instance of a specific `AbstractGeoViewLayer` subclass based on the given GeoView layer configuration.
      * This function determines the correct layer type from the configuration and instantiates it accordingly.
      * @remarks
-     * - This method currently supports GeoJSON, CSV, WMS, Esri Dynamic, Esri Feature, Esri Image,
-     *   ImageStatic, WFS, OGC Feature, XYZ Tiles, and Vector Tiles.
+     * - This method currently supports GeoJSON, CSV, WMS, Esri Dynamic, Esri Feature, Esri Image, GeoTIFF
+     *   ImageStatic, KML, WFS, WKB, OGC Feature, XYZ Tiles, and Vector Tiles.
      * - If the layer type is not supported, an error is thrown.
      * - TODO: Refactor to use the validated configuration with metadata already fetched.
      * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The configuration object for the GeoView layer.

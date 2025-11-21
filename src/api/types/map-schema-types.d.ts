@@ -207,7 +207,7 @@ export type TypeInteraction = 'static' | 'dynamic';
 export declare const VALID_INTERACTION: TypeInteraction[];
 /** Definition of the view settings. */
 export type TypeViewSettings = {
-    /** Settings for the initial view for map, default is zoomAndCenter of [3.5, [-90, 60]] */
+    /** Settings for the initial view for map, default value for zoomAndCenter is defined by the projection */
     initialView?: TypeMapViewSettings;
     /** Settings for the home nav bar button. */
     homeView?: TypeMapViewSettings;
@@ -269,6 +269,7 @@ export declare const BASEMAP_LABEL: Record<TypeValidMapProjectionCodes, boolean[
 export declare const VALID_MAP_CENTER: Record<TypeValidMapProjectionCodes, Record<string, number[]>>;
 export declare const MAP_EXTENTS: Record<TypeValidMapProjectionCodes, number[]>;
 export declare const MAP_CENTER: Record<TypeValidMapProjectionCodes, [number, number]>;
+export declare const MAP_ZOOM_LEVEL: Record<TypeValidMapProjectionCodes, number>;
 /** Type used to define valid highlight colors. */
 export type TypeHighlightColors = 'black' | 'white' | 'red' | 'green';
 /** Type used to define overlay objects. */

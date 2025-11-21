@@ -38,7 +38,7 @@ export declare class GVImageStatic extends AbstractGVRaster {
      */
     getLayerConfig(): ImageStaticLayerEntryConfig;
     /**
-     * Overrides the fetching of the legend for an Esri image layer.
+     * Overrides the fetching of the legend for a static image layer.
      * @override
      * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
      */

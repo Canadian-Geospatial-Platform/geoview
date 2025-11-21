@@ -15,7 +15,7 @@ import type { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-
 import type { TypeLayerStyleConfig, TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
 import type { TypeMetadataWMS } from '@/api/types/layer-schema-types';
 import type { TypeMapMouseInfo } from '@/geo/map/map-viewer';
-export declare const layerTypes: Record<"CSV" | "KML" | "WKB" | "ESRI_DYNAMIC" | "ESRI_FEATURE" | "ESRI_IMAGE" | "IMAGE_STATIC" | "GEOJSON" | "XYZ_TILES" | "VECTOR_TILES" | "OGC_FEATURE" | "WFS" | "WMS", import("@/api/types/layer-schema-types").TypeGeoviewLayerType>;
+export declare const layerTypes: Record<"CSV" | "KML" | "WKB" | "ESRI_DYNAMIC" | "ESRI_FEATURE" | "ESRI_IMAGE" | "IMAGE_STATIC" | "GEOJSON" | "GEOTIFF" | "XYZ_TILES" | "VECTOR_TILES" | "OGC_FEATURE" | "WFS" | "WMS", import("@/api/types/layer-schema-types").TypeGeoviewLayerType>;
 /** The type for the function callback for getWMSServiceMetadata() */
 export type CallbackNewMetadataDelegate = (proxyUsed: string) => void;
 /**
@@ -225,4 +225,11 @@ export declare const getPointerPositionFromMapEvent: (mapEvent: MapBrowserEvent,
  * @returns {boolean} Whether the two geometries are equal or not
  */
 export declare const geometriesAreEqual: (geom1: Geometry, geom2: Geometry) => boolean;
+/**
+ * Apply buffer to extent
+ * @param extent - The extent to check and buffer
+ * @param bufferSize - Buffer size in map units (default: 5000)
+ * @returns Buffered extent
+ */
+export declare function bufferExtent(extent: Extent, bufferSize?: number): Extent;
 //# sourceMappingURL=utilities.d.ts.map
