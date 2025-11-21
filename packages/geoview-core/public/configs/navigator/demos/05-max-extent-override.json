@@ -17,19 +17,11 @@
       }
     ]
   },
-  "components": [
-    "overview-map",
-    "north-arrow"
-  ],
+  "components": ["overview-map", "north-arrow"],
   "navBar": ["home", "projection"],
   "footerBar": {
     "tabs": {
-      "core": [
-        "legend",
-        "layers",
-        "details",
-        "data-table"
-      ]
+      "core": ["legend", "layers", "details", "data-table"]
     }
   },
   "corePackages": [],

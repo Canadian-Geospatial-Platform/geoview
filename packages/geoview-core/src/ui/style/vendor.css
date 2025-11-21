@@ -23,7 +23,8 @@ yet-another-react-lightbox
   height: 24px !important;
 }
 
-.yarl__navigation_prev > svg, .yarl__navigation_next > svg {
+.yarl__navigation_prev > svg,
+.yarl__navigation_next > svg {
   width: 36px !important;
   height: 36px !important;
 }

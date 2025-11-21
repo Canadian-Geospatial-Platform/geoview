@@ -3,6 +3,7 @@
   "editor.renderWhitespace": "selection",
   "editor.tabSize": 2,
   "editor.hover.delay": 1000,
+  "files.eol": "\n",
    "eslint.enable": true,
   "eslint.useFlatConfig": true,
   "eslint.validate": [

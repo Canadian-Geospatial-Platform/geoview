@@ -75,7 +75,9 @@ To add an AOI to your map, you need to create a file as mentioned above containi
   "version": "1.0"
 }
 ```
+
 Where the definition of the different properties are as followed:
+
 - **IsOpen**: is a flag that open the side panel if the value is true.
 - **aoiList**: is an array of AOI.
   - **imageURL**: The URL link to the image of your choice that represent the **AOI**.
@@ -92,4 +94,5 @@ cgpv.api.plugin.removePlugin('aoi-panel', 'myMap');
 ```
 
 ### Links
+
 For more details, please refer to the official documentation or reach out to our support team. You can also try our [demo page](https://canadian-geospatial-platform.github.io/geoview/public/demos-navigator.html?config=./configs/navigator/26-package-area-of-interest.json)

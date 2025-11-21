@@ -76,7 +76,7 @@
       "core": ["layers", "data-table"]
     }
   },
-    "appBar": {
+  "appBar": {
     "tabs": {
       "core": ["geolocator", "legend", "details", "export"]
     }

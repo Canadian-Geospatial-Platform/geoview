@@ -28,25 +28,18 @@
       }
     ]
   },
-  "components": [
-    "overview-map",
-    "north-arrow"
-  ],
+  "components": ["overview-map", "north-arrow"],
   "overviewMap": {
     "hideOnZoom": 7
   },
-   "appBar": {
+  "appBar": {
     "tabs": {
       "core": ["geolocator", "legend", "details", "export"]
     }
   },
   "footerBar": {
     "tabs": {
-      "core": [
-        "layers",
-        "geochart",
-        "data-table"
-      ]
+      "core": ["layers", "geochart", "data-table"]
     }
   },
   "corePackages": [],

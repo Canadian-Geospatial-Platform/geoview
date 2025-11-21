@@ -16,10 +16,7 @@
       }
     ]
   },
-  "components": [
-    "overview-map",
-    "north-arrow"
-  ],
+  "components": ["overview-map", "north-arrow"],
   "overviewMap": {
     "hideOnZoom": 7
   },
@@ -30,12 +27,7 @@
   },
   "footerBar": {
     "tabs": {
-      "core": [
-        "layers",
-        "geochart",
-        "time-slider",
-        "data-table"
-      ]
+      "core": ["layers", "geochart", "time-slider", "data-table"]
     }
   },
   "corePackages": [],

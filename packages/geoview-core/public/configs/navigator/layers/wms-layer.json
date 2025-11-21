@@ -12,8 +12,20 @@
     },
     "listOfGeoviewLayerConfig": [
       {
+        "geoviewLayerId": "ElevationHRDEM",
+        "geoviewLayerName": "Elevation HRDEM Mosaic",
+        "metadataAccessPath": "https://datacube.services.geo.ca/wrapper/ramp/ogc/elevation-hrdem-mosaic",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "dsm-hillshade",
+            "layerName": "Elevation HRDEM Mosaic Hillshade DSM"
+          }
+        ]
+      },
+      {
         "geoviewLayerId": "Hydro",
-        "geoviewLayerName": "Hydro - Scale" ,
+        "geoviewLayerName": "Hydro - Scale",
         "metadataAccessPath": "https://maps.geogratis.gc.ca/wms/hydro_network_en",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
@@ -122,10 +134,10 @@
         ]
       },
       {
-        "geoviewLayerId":"DatacubeXML-Aerial",
-        "geoviewLayerName":"Datacube-Aerial",
-        "metadataAccessPath":"https://datacube.services.geo.ca/web/aerial.xml",
-        "geoviewLayerType":"ogcWms",
+        "geoviewLayerId": "DatacubeXML-Aerial",
+        "geoviewLayerName": "Datacube-Aerial",
+        "metadataAccessPath": "https://datacube.services.geo.ca/web/aerial.xml",
+        "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
             "layerId": "halifax",
@@ -138,7 +150,7 @@
       },
       {
         "geoviewLayerId": "Nfi",
-        "geoviewLayerName": "Nfi Plot Summaries" ,
+        "geoviewLayerName": "Nfi Plot Summaries",
         "metadataAccessPath": "https://nfi.nfis.org/mapserver/cgi-bin/nfi_plot_summaries_en.cgi",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
@@ -150,7 +162,7 @@
       }
     ]
   },
-    "components": ["overview-map", "north-arrow"],
+  "components": ["overview-map", "north-arrow"],
   "overviewMap": { "hideOnZoom": 7 },
   "footerBar": {
     "tabs": {

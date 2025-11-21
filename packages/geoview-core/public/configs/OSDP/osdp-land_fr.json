@@ -3,13 +3,7 @@
     "interaction": "dynamic",
     "viewSettings": {
       "initialView": {
-        "zoomAndCenter": [
-          9,
-          [
-            -113.376,
-            57.86
-          ]
-        ]
+        "zoomAndCenter": [9, [-113.376, 57.86]]
       },
       "projection": 3978
     },
@@ -60,47 +54,26 @@
       }
     ]
   },
-  "components": [
-    "north-arrow",
-    "overview-map"
-  ],
-  "navBar": [
-    "zoom",
-    "fullscreen",
-    "home",
-    "location",
-    "basemap-select"
-  ],
+  "components": ["north-arrow", "overview-map"],
+  "navBar": ["zoom", "fullscreen", "home", "location", "basemap-select"],
   "appBar": {
     "tabs": {
-      "core": [
-        "geolocator",
-        "legend",
-        "details",
-        "export"
-      ]
+      "core": ["geolocator", "legend", "details", "export"]
     }
   },
   "footerBar": {
     "tabs": {
-      "core": [
-        "layers",
-        "data-table"
-      ]
+      "core": ["layers", "data-table"]
     }
   },
-  "corePackages": [
-    "swiper"
-  ],
+  "corePackages": ["swiper"],
   "theme": "geo.ca",
   "corePackagesConfig": [
     {
       "swiper": {
         "orientation": "vertical",
         "keyboardOffset": 10,
-        "layers": [
-          "4e615eae-b90c-420b-adee-2ca35896caf6"
-        ]
+        "layers": ["4e615eae-b90c-420b-adee-2ca35896caf6"]
       }
     }
   ]

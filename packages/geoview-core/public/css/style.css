@@ -120,17 +120,12 @@ img.header-logo {
   width: 60px;
 }
 
-
-
 .geoview-map {
   border: gray 1px solid;
   width: calc(100%);
   margin-bottom: 30px;
- height: 800px;
+  height: 800px;
 }
-
-
-
 
 .map-title-holder {
   display: flex;
@@ -227,7 +222,7 @@ table.state {
 }
 
 .config-json-valid {
-  color: green
+  color: green;
 }
 
 .editor {
@@ -294,14 +289,13 @@ table.state {
   img.header-logo {
     visibility: hidden; /* remove header image when screen is too small */
   }
-
 }
 
 /* Tab Navigation Styles - Footer Bar Style */
 .tabs {
   display: flex;
-  background-color: #F1F2F5 !important;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  background-color: #f1f2f5 !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
   border-bottom: 1px solid #e0e0e0;
 }
@@ -312,7 +306,9 @@ table.state {
   background-color: transparent !important;
   border: none;
   outline: none;
-  transition: background-color 0.2s ease-out, color 0.2s ease-out;
+  transition:
+    background-color 0.2s ease-out,
+    color 0.2s ease-out;
   font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
   font-size: 14px;
   font-weight: 500;
@@ -326,7 +322,7 @@ table.state {
 }
 
 .tab-button.active {
-  background-color: #515BA5 !important;
+  background-color: #515ba5 !important;
   color: #ffffff !important;
 }
 
@@ -335,9 +331,12 @@ table.state {
   position: absolute;
   left: -9999px;
   animation: fadeIn 0.5s;
-  background-color: #F1F2F5;
+  background-color: #f1f2f5;
   padding: 30px;
-  box-shadow: 0px 3px 1px -2px rgba(0,0,0,0.2), 0px 2px 2px 0px rgba(0,0,0,0.14), 0px 1px 5px 0px rgba(0,0,0,0.12);
+  box-shadow:
+    0px 3px 1px -2px rgba(0, 0, 0, 0.2),
+    0px 2px 2px 0px rgba(0, 0, 0, 0.14),
+    0px 1px 5px 0px rgba(0, 0, 0, 0.12);
   margin-bottom: 30px;
   width: calc(100% - 60px);
 }
@@ -349,8 +348,12 @@ table.state {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .demo-grid {
@@ -366,7 +369,7 @@ table.state {
 
 .demo-section h4 {
   color: #333;
-  border-bottom: 2px solid #4CAF50;
+  border-bottom: 2px solid #4caf50;
   padding-bottom: 8px;
   margin-bottom: 15px;
 }
@@ -393,7 +396,7 @@ table.state {
   display: block;
   padding: 12px 16px;
   background-color: #f8f9fa;
-  border-left: 4px solid #4CAF50;
+  border-left: 4px solid #4caf50;
   text-decoration: none;
   color: #333;
   font-size: 15px;
@@ -719,7 +722,7 @@ p code {
 }
 
 .option-item {
-  border-top: 2px solid #4CAF50;
+  border-top: 2px solid #4caf50;
   padding-bottom: 8px;
   margin-bottom: 15px;
 }
@@ -791,7 +794,7 @@ td.display-fields {
   overflow-x: auto;
 }
 
-.demo-function-list input[type="text"] {
+.demo-function-list input[type='text'] {
   font-family: 'Courier New', Courier, monospace;
   font-size: 13px;
 }
