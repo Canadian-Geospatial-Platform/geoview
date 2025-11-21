@@ -24,7 +24,10 @@ export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
     this.source.format ??= 'EsriJSON';
 
     // Remove ID from dataAccessPath
-    const splitAccessPath = this.getDataAccessPath().replace(/\/+$/, '').split('/');
+    let path = this.getDataAccessPath();
+    path = path.endsWith('/') ? path.replace(/\/+$/, '') : path;
+    const splitAccessPath = path.split('/');
+
     if (
       splitAccessPath[splitAccessPath.length - 1].toLowerCase() !== 'featureserver' &&
       splitAccessPath[splitAccessPath.length - 1].toLowerCase() !== 'mapserver'
