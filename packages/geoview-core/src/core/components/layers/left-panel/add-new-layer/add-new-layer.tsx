@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { SelectChangeEvent } from '@mui/material';
 import type { ButtonPropsLayerPanel } from '@/ui';
-import { Box, Button, ButtonGroup, CircularProgressBase, FileUploadIcon, Paper, Select, Stepper, TextField } from '@/ui';
+import { Box, Button, IconButton, ButtonGroup, CircularProgressBase, FileUploadIcon, Paper, Select, Stepper, TextField } from '@/ui';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useAppDisabledLayerTypes, useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
@@ -139,6 +139,7 @@ function FileUploadSection({ onFileSelected, onUrlChanged, displayURL, disabledL
    * @param {React.DragEvent<HTMLDivElement>} event - The drag event containing dropped files
    * @returns {void}
    */
+
   const handleDrop = (event: React.DragEvent<HTMLDivElement>): void => {
     event.preventDefault();
     event.stopPropagation();
@@ -147,7 +148,8 @@ function FileUploadSection({ onFileSelected, onUrlChanged, displayURL, disabledL
       processFile(event.dataTransfer.files[0]);
     }
   };
-
+  // TODO: WCAG Issue #3117 -  aria-label(layers.fileTypes) needs to include button text (layers.upload)...
+  // TODO: WCAG Issue #3117 -  ... button text (Choose a file) does not begin with sane word aria-label (Upload a...)
   return (
     <Box
       className="dropzone"
@@ -209,6 +211,7 @@ function FileUploadSection({ onFileSelected, onUrlChanged, displayURL, disabledL
           }
         }}
         className="buttonOutlineFilled"
+        aria-label={t('layers.fileTypes')!}
         tooltip={t('layers.fileTypes')!}
       >
         <FileUploadIcon />
@@ -742,9 +745,9 @@ export function AddNewLayer(): JSX.Element {
     return (
       <ButtonGroup sx={sxClasses.buttonGroup}>
         {isLoading ? (
-          <Button sx={{ width: '80px' }} type="icon" size="small" variant="contained" className="buttonOutlineFilled" disabled>
+          <IconButton sx={{ width: '80px' }} size="small" className="buttonOutlineFilled" disabled aria-label={t('layers.stepOneLoading')}>
             <CircularProgressBase size="20px" />
-          </Button>
+          </IconButton>
         ) : (
           <Button
             variant="contained"
