@@ -62,7 +62,7 @@ class CustomLegendPanelPlugin extends AppBarPlugin {
     // Button props
     return {
       id: `custom-legend`,
-      'aria-label': 'CustomLegend.title',
+      tooltip: 'CustomLegend.title',
       tooltipPlacement: 'right',
       children: <LegendIcon />,
       visible: true,
