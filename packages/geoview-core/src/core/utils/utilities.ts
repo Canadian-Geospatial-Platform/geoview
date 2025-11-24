@@ -11,8 +11,6 @@ import { Fetch } from '@/core/utils/fetch-helper';
 /** The observers to monitor element removals from the DOM tree */
 const observers: Record<string, MutationObserver> = {};
 
-// TODO: Refactor - Create a CoreUtilities class to embed all these functions here
-
 /**
  * Take string like "My string is __param__" and replace parameters (__param__) from array of values
  *
