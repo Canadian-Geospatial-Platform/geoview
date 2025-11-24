@@ -1,39 +1,47 @@
 {
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GeoView Custom Legend Config Schema",
   "type": "object",
+  "version": "1.0",
+  "comments": "Configuration for the GeoView custom legend package.",
+  "additionalProperties": false,
+
   "properties": {
-    "id": {
-      "type": "string"
-    },
-    "enabled": {
-      "type": "boolean"
-    },
     "isOpen": {
-      "type": "boolean"
+      "type": "boolean",
+      "description": "Whether the custom legend panel is initially open.",
+      "default": false
     },
     "legendList": {
       "type": "array",
+      "description": "Ordered list of custom legend items to render.",
       "items": {
         "type": "object",
+        "additionalProperties": false,
         "properties": {
           "legendTitle": {
-            "type": "string"
+            "type": "string",
+            "description": "Title/label shown for the legend item."
           },
-          "iconUrl": {
-            "type": "string"
+          "symbolUrl": {
+            "type": "string",
+            "description": "URL of the symbol image to display for the legend item."
           },
-          "layerId": {
-            "type": "string"
-          },
-          "visibility": {
-            "type": "boolean"
+          "description": {
+            "type": "string",
+            "description": "Optional descriptive text shown under the title."
           }
         },
-        "required": ["legendTitle", "layerId"]
-      }
+        "required": ["legendTitle", "symbolUrl"]
+      },
+      "default": []
     },
     "version": {
-      "type": "string"
+      "type": "string",
+      "enum": ["1.0"],
+      "description": "Schema version used to validate this configuration."
     }
   },
-  "required": ["id", "legendList"]
+
+  "required": ["legendList"]
 }
