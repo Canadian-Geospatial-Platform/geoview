@@ -168,7 +168,7 @@ export default memo(function Notifications(): JSX.Element {
   // Animation
   const shakeAnimation = useShake();
   const timerRef = useRef<ReturnType<typeof setTimeout>>();
-  const AnimatedBox = animated(Box);
+  const AnimatedSpan = animated('span');
 
   // Handlers
   const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
@@ -240,21 +240,29 @@ export default memo(function Notifications(): JSX.Element {
     [notifications, handleRemoveNotification, theme, sxClasses, t]
   );
 
+  // TODO: WCAG Issue #3154 - add aria-controls to notifications <IconButton>. Needs id of the modal to be passed as a prop.
   return (
     <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
       <Box sx={{ padding: interaction === 'dynamic' ? 'none' : '5px' }}>
         <IconButton
           id="notification"
           aria-label={t('appbar.notifications')}
+          aria-expanded={open}
           tooltipPlacement="right"
           onClick={handleOpenPopover}
           className={`${interaction === 'dynamic' ? 'buttonFilled' : 'style4'} ${open ? 'active' : ''}`}
           color="primary"
         >
           <Badge badgeContent={notificationsCount > 99 ? '99+' : notificationsCount} color="error">
-            <AnimatedBox sx={{ display: 'inline-flex', alignItems: 'center' }} style={hasNewNotification ? shakeAnimation : undefined}>
+            <AnimatedSpan
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                ...(hasNewNotification ? shakeAnimation : {}),
+              }}
+            >
               {hasNewNotification ? <NotificationsActiveIcon /> : <NotificationsIcon />}
-            </AnimatedBox>
+            </AnimatedSpan>
           </Badge>
         </IconButton>
 

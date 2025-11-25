@@ -342,55 +342,62 @@ export function AppBar(props: AppBarProps): JSX.Element {
    * @param {string[]} panelNames tab that will be rendered in appbar.
    * @returns JSX.Element
    */
+  // TODO: WCAG Issue #3154 - add aria-controls to <IconButton>. Needs id of the corresponding panel.
   const renderButtonPanel = (panelNames: string[]): ReactNode => {
-    return (
-      <>
-        {panelNames.map((panelName: string) => {
-          // get button panels from group
-          const buttonPanel = buttonPanels[panelName];
-
-          // display the button panels in the list
+    // Map through panel names and create ListItems for visible buttons
+    const visibleButtons = panelNames
+      .map((panelName: string) => {
+        // Get the button panel configuration for this panel name
+        const buttonPanel = buttonPanels[panelName];
+        // Only render if the button is explicitly set to visible
+        if (buttonPanel?.button.visible !== undefined && buttonPanel?.button.visible) {
           return (
-            <List key={panelName} sx={sxClasses.appBarList}>
-              {buttonPanel?.button.visible !== undefined && buttonPanel?.button.visible ? (
-                <Fragment key={buttonPanel.button.id}>
-                  <ListItem>
-                    <IconButton
-                      id={buttonPanel.button.id}
-                      aria-label={t(buttonPanel.button['aria-label'])}
-                      tooltipPlacement="right"
-                      className={`buttonFilled ${tabId === buttonPanel.button.id && isOpen ? 'active' : ''}`}
-                      size="small"
-                      onClick={() => handleButtonClicked(buttonPanel.button.id!)}
-                    >
-                      {buttonPanel.button.children}
-                    </IconButton>
-                  </ListItem>
-                </Fragment>
-              ) : null}
-            </List>
+            <ListItem key={buttonPanel.button.id}>
+              <IconButton
+                id={buttonPanel.button.id}
+                aria-label={t(buttonPanel.button['aria-label'])}
+                aria-expanded={tabId === buttonPanel.button.id && isOpen ? 'true' : 'false'}
+                tooltipPlacement="right"
+                className={`buttonFilled ${tabId === buttonPanel.button.id && isOpen ? 'active' : ''}`}
+                size="small"
+                onClick={() => handleButtonClicked(buttonPanel.button.id!)}
+              >
+                {buttonPanel.button.children}
+              </IconButton>
+            </ListItem>
           );
-        })}
-      </>
-    );
+        }
+        // Return null for buttons that aren't visible
+        return null;
+      })
+      // Filter out all null values to get only visible buttons
+      .filter(Boolean);
+
+    // Don't render an empty list if there are no visible buttons
+    if (visibleButtons.length === 0) {
+      return null;
+    }
+
+    // Render a single List containing all visible button ListItems
+    return <List sx={sxClasses.appBarList}>{visibleButtons}</List>;
   };
 
   return (
     <Box sx={sxClasses.appBar} className={`interaction-${interaction}`} id={`${mapId}-appBar`} onClick={onScrollShellIntoView}>
-      <Box sx={sxClasses.appBarButtons}>
+      <Box sx={sxClasses.appBarButtons} component="nav" aria-label={t('appbar.navLabel')!}>
         {renderButtonPanel(topPanelNames)}
         <Box sx={sxClasses.versionButtonDiv}>
-          {appBarComponents.includes(DEFAULT_APPBAR_CORE.EXPORT) && interaction === 'dynamic' && (
-            <List sx={sxClasses.appBarList}>
-              <ListItem>
-                <ExportButton className={` buttonFilled ${activeModalId === DEFAULT_APPBAR_CORE.EXPORT ? 'active' : ''}`} />
-              </ListItem>
-            </List>
-          )}
           {renderButtonPanel(bottomPanelNames)}
           <List sx={sxClasses.appBarList}>
-            {interaction === 'dynamic' && <hr />}
-            <ListItem>
+            {appBarComponents.includes(DEFAULT_APPBAR_CORE.EXPORT) && interaction === 'dynamic' && (
+              <ListItem>
+                <ExportButton
+                  ariaExpanded={activeModalId === DEFAULT_APPBAR_CORE.EXPORT}
+                  className={` buttonFilled ${activeModalId === DEFAULT_APPBAR_CORE.EXPORT ? 'active' : ''}`}
+                />
+              </ListItem>
+            )}
+            <ListItem sx={sxClasses.appBarSeparator}>
               <Notifications />
             </ListItem>
             <ListItem>
