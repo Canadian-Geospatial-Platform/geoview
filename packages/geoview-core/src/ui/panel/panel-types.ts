@@ -65,6 +65,9 @@ export interface PanelStyles {
 /**
  * Interface for the button properties used when creating a new button.
  */
+
+// TODO: WCAG Issue #2390 - type prop appears to be unused in codebase. Remove from interface (and all references) once confirmed.
+
 export interface TypeButtonProps extends Omit<ButtonProps, 'type'> {
   /** Button id */
   id?: string;
