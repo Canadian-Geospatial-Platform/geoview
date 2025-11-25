@@ -422,7 +422,7 @@ export class GeometryApi {
   }
 
   /**
-   * Create a new geometry group to manage multiple geometries at once
+   * Create a new geometry group to manage multiple geometries at once (z-index is infinity, set the index to change the behaviour)
    *
    * @param {string} geometryGroupId the id of the group to use when managing this group
    * @param options an optional vector layer and vector source options
@@ -453,7 +453,8 @@ export class GeometryApi {
       };
 
       if (geometryGroup.vectorLayer.getVisible()) {
-        this.mapViewer.map.addLayer(geometryGroup.vectorLayer);
+        // This would give it a z-index equal to infinity. Instead of doing this.mapViewer.map.addLayer(geometryGroup.vectorLayer).
+        vectorLayer.setMap(this.mapViewer.map);
         geometryGroup.vectorLayer.changed();
       }
       this.geometryGroups.push(geometryGroup);
@@ -506,6 +507,15 @@ export class GeometryApi {
   }
 
   /**
+   * Get all geometry groups
+   *
+   * @returns {FeatureCollection[]} array of all geometry groups
+   */
+  getGeometryGroups(): FeatureCollection[] {
+    return this.geometryGroups;
+  }
+
+  /**
    * Find the groups that contain the geometry using it's id
    *
    * @param {string} featureId the id of the geometry
@@ -540,7 +550,7 @@ export class GeometryApi {
   }
 
   /**
-   * hide the identified geometry group from the map
+   * Hide the identified geometry group from the map
    * if groupId is not provided, use the active geometry group
    *
    * @param {string} geometryGroupId optional the id of the group to show on the map
@@ -549,6 +559,37 @@ export class GeometryApi {
     const geometryGroup = this.getGeometryGroup(geometryGroupId)!;
 
     geometryGroup.vectorLayer.setVisible(false);
+    geometryGroup.vectorLayer.changed();
+  }
+
+  /**
+   * Get the z-index of a geometry group's vector layer
+   * if geometryGroupId is not provided, use the active geometry group
+   *
+   * @param {string} geometryGroupId optional the id of the group
+   * @returns {number | undefined} the z-index value of the vector layer
+   */
+  getGeometryGroupZIndex(geometryGroupId?: string): number | undefined {
+    const geometryGroup = this.getGeometryGroup(geometryGroupId);
+    if (!geometryGroup) return undefined;
+    return geometryGroup.vectorLayer.getZIndex();
+  }
+
+  /**
+   * Set the z-index of a geometry group's vector layer
+   * if geometryGroupId is not provided, use the active geometry group
+   *
+   * @param {number} zIndex the z-index value to set
+   * @param {string} geometryGroupId optional the id of the group
+   */
+  setGeometryGroupZIndex(zIndex: number, geometryGroupId?: string): void {
+    const geometryGroup = this.getGeometryGroup(geometryGroupId);
+    if (!geometryGroup) {
+      logger.logWarning(`Geometry group ${geometryGroupId || 'active'} not found`);
+      return;
+    }
+
+    geometryGroup.vectorLayer.setZIndex(zIndex);
     geometryGroup.vectorLayer.changed();
   }
 
