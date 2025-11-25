@@ -27,10 +27,10 @@ const geometryApi = mapViewer.layer.geometry;
 
 ### Geometry Groups
 
-Geometry groups allow you to organize and manage multiple geometries together. Each group has its own vector layer and can be shown/hidden independently.
+Geometry groups allow you to organize and manage multiple geometries together. Each group has its own vector layer and can be shown/hidden and z-index set independently.
 
 ```typescript
-// Create a geometry group
+// Create a geometry group (by deafult z-index is infinity)
 const group = mapViewer.layer.geometry.createGeometryGroup("myGroup");
 
 // Set as active (new geometries will be added to this group)
@@ -428,7 +428,7 @@ mapViewer.layer.geometry.setFeatureCoords(
 
 ### createGeometryGroup()
 
-Creates a new geometry group for organizing multiple geometries.
+Creates a new geometry group for organizing multiple geometries. Each group has its own vector layer and can be shown/hidden and z-index set independently.
 
 ```typescript
 createGeometryGroup(
@@ -535,6 +535,28 @@ if (group) {
 
 ---
 
+#### getGeometryGroups()
+
+Gets all geometry groups.
+
+```typescript
+getGeometryGroups(): FeatureCollection[]
+```
+
+**Returns:** Array of all FeatureCollection objects
+
+**Example:**
+
+```typescript
+const allGroups = mapViewer.layer.geometry.getGeometryGroups();
+allGroups.forEach((group) => {
+  console.log("Group ID:", group.geometryGroupId);
+  console.log("Features count:", group.vectorSource.getFeatures().length);
+});
+```
+
+---
+
 ### getGeometryGroupsByFeatureId()
 
 Finds all groups that contain a specific geometry.
@@ -597,6 +619,50 @@ setGeometryGroupAsInvisible(geometryGroupId?: string): void
 
 ```typescript
 mapViewer.layer.geometry.setGeometryGroupAsInvisible("annotations");
+```
+
+#### getGeometryGroupZIndex()
+
+Gets the z-index of a geometry group's vector layer.
+
+```typescript
+getGeometryGroupZIndex(geometryGroupId?: string): number | undefined
+```
+
+**Parameters:**
+
+- `geometryGroupId` - Optional group ID (uses active group if not specified)
+
+**Returns:** The z-index value, or `undefined` if the group doesn't exist
+
+**Example:**
+
+```typescript
+const zIndex = mapViewer.layer.geometry.getGeometryGroupZIndex("annotations");
+console.log(`Current z-index: ${zIndex}`);
+```
+
+#### setGeometryGroupZIndex()
+
+Sets the z-index of a geometry group's vector layer to control rendering order.
+
+```typescript
+setGeometryGroupZIndex(zIndex: number, geometryGroupId?: string): void
+```
+
+**Parameters:**
+
+- `zIndex` - The z-index value to set (higher values render on top)
+- `geometryGroupId` - Optional group ID (uses active group if not specified)
+
+**Example:**
+
+```typescript
+// Set annotations to render on top
+mapViewer.layer.geometry.setGeometryGroupZIndex(100, "annotations");
+
+// Set highlights to render below other geometries
+mapViewer.layer.geometry.setGeometryGroupZIndex(50, "highlights");
 ```
 
 ---
