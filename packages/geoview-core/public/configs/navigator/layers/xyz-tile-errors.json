@@ -19,7 +19,10 @@
           {
             "layerId": "0",
             "layerName": "World Topo Map",
-            "initialSettings": { "minZoom": 3, "maxZoom": 8 }
+            "initialSettings": {
+              "minZoom": 3,
+              "maxZoom": 8
+            }
           }
         ]
       },
@@ -41,7 +44,9 @@
     ]
   },
   "components": ["overview-map", "north-arrow"],
-  "overviewMap": { "hideOnZoom": 7 },
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
   "footerBar": {
     "tabs": {
       "core": ["layers", "data-table"]

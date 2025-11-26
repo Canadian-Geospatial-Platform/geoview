@@ -1,7 +1,7 @@
 import { GVAbstractTester } from './abstract-gv-tester';
 import type { ClassType } from '../core/test';
 import { Test } from '../core/test';
-import type { TypeGeoviewLayerConfig, TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-types';
+import type { MapConfigLayerEntry, TypeGeoviewLayerConfig, TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-types';
 import { LayerNoCapabilitiesError, LayerServiceMetadataUnableToFetchError } from 'geoview-core/core/exceptions/layer-exceptions';
 import { EsriDynamic } from 'geoview-core/geo/layer/geoview-layers/raster/esri-dynamic';
 import { EsriFeature } from 'geoview-core/geo/layer/geoview-layers/vector/esri-feature';
@@ -28,6 +28,8 @@ import { KmlLayerEntryConfig } from 'geoview-core/api/config/validation-classes/
 import { GeoTIFFLayerEntryConfig } from 'geoview-core/api/config/validation-classes/raster-validation-classes/geotiff-layer-entry-config';
 import type { GeoCoreLayerConfigResponse } from 'geoview-core/api/config/geocore';
 import { GeoCore } from 'geoview-core/api/config/geocore';
+import { Config, getLocalizedMessage } from 'geoview-core/app';
+import { logger } from 'geoview-core/core/utils/logger';
 
 /**
  * Main Config testing class.
@@ -1140,4 +1142,66 @@ export class ConfigTester extends GVAbstractTester {
   }
 
   // #endregion Geocore
+
+  // #region Settings
+
+  /**
+   * Tests the settings cascade properly to the sublayers.
+   * @returns {Promise<Test<MapConfigLayerEntry>>} A Promise that resolves with the Test containing the response from Geocore.
+   */
+  testSettingsCascadeToSublayers(): Promise<Test<MapConfigLayerEntry>> {
+    // The values
+    const config = GVAbstractTester.INITIAL_SETTINGS_CONFIG;
+
+    // Expected config
+    const expectedResults = {
+      geoviewLayer: { highlight: false, zoom: false },
+      group: { highlight: false, remove: false, zoom: false },
+      child: { highlight: true, remove: false, zoom: false },
+    };
+
+    // Perform the test
+    return this.test(
+      'Test Settings Cascade to Sublayers',
+      () => {
+        // Use the config to convert simplified layer config into proper layer config
+        const configObj = Config.initializeMapConfig(
+          this.getMapId(),
+          [config as unknown as MapConfigLayerEntry],
+          (errorKey: string, params: string[]) => {
+            // Get the message for the logger
+            const message = getLocalizedMessage('en', errorKey, params);
+
+            // Log it
+            logger.logWarning(`- Map ${this.getMapId()}: ${message}`);
+
+            // Show the error using its key (which will get translated)
+            this.getMapViewer().notifications.showError(errorKey, params);
+          }
+        );
+
+        if (!configObj || !configObj[0]) {
+          throw new Error('Failed to initialize map config');
+        }
+
+        return configObj[0];
+      },
+      (test, result) => {
+        // Perform assertions on specific properties only
+        test.addStep('Verifying geoview layer controls...');
+        Test.assertJsonObject(result.initialSettings?.controls, expectedResults.geoviewLayer);
+
+        test.addStep('Verifying group layer controls...');
+        Test.assertJsonObject(result.listOfLayerEntryConfig?.[0].getInitialSettings().controls, expectedResults.group);
+
+        test.addStep('Verifying child layer controls...');
+        Test.assertJsonObject(
+          result.listOfLayerEntryConfig?.[0].listOfLayerEntryConfig?.[0].getInitialSettings().controls,
+          expectedResults.child
+        );
+      }
+    );
+  }
+
+  // #endregion Settings
 }
