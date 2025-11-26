@@ -20,6 +20,7 @@ import { logger } from '@/core/utils/logger';
 
 import type { TypeFeatureCircleStyle, TypeFeatureStyle, TypeIconStyle } from '@/geo/layer/geometry/geometry-types';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
+import { InvaliGeometryGroupIdError } from '@/core/exceptions/geoview-exceptions';
 
 /**
  * Store a group of features
@@ -41,7 +42,7 @@ export class GeometryApi {
   #mapId: string;
 
   // used to store geometry groups
-  geometryGroups: FeatureCollection[] = [];
+  #geometryGroups: FeatureCollection[] = [];
 
   // contains all the added geometries
   geometries: Feature[] = [];
@@ -50,20 +51,20 @@ export class GeometryApi {
   defaultGeometryGroupId = 'defaultGeomGroup';
 
   // index of the active geometry group used to add new geometries in the map
-  activeGeometryGroupIndex = 0;
+  #activeGeometryGroupIndex = 0;
 
   /** Reference on the map viewer */
-  mapViewer: MapViewer;
+  #mapViewer: MapViewer;
 
   /** Keep all callback delegates references */
   #onGeometryAddedHandlers: GeometryAddedDelegate[] = [];
 
   /**
    * Constructs a Geometry class and creates a geometry group in the process.
-   * @param {MapViewer} mapViewer a reference to the map viewer
+   * @param {MapViewer} mapViewer - A reference to the map viewer
    */
   constructor(mapViewer: MapViewer) {
-    this.mapViewer = mapViewer;
+    this.#mapViewer = mapViewer;
     this.#mapId = mapViewer.mapId;
   }
 
@@ -98,10 +99,10 @@ export class GeometryApi {
   /**
    * Create a polyline using an array of lon/lat points
    *
-   * @param {Coordinate} points points of lon/lat to draw a polyline
-   * @param options polyline options including styling
-   * @param {string} id an optional id to be used to manage this geometry
-   * @param {string} groupId an optional group id in witch we want to add the geometry
+   * @param {Coordinate} points - The points of lon/lat to draw a polyline
+   * @param options - Optional polyline options including styling
+   * @param {string} id - Optional id to be used to manage this geometry
+   * @param {string} groupId - Optional group id in which we want to add the geometry
    *
    * @returns {Feature} a geometry containing the id and the created geometry
    */
@@ -155,7 +156,7 @@ export class GeometryApi {
 
     // set a feature id and a geometry group index for this geometry
     polyline.set('featureId', featureId);
-    polyline.set('GeometryGroupIndex', this.activeGeometryGroupIndex);
+    polyline.set('GeometryGroupIndex', this.#activeGeometryGroupIndex);
 
     // add geometry to feature collection
     this.addToGeometryGroup(polyline, groupId);
@@ -172,10 +173,10 @@ export class GeometryApi {
   /**
    * Create a new polygon
    *
-   * @param {Coordinate} points array of points to create the polygon
-   * @param options polygon options including styling
-   * @param {string} optionalFeatureId an optional id to be used to manage this geometry
-   * @param {string} groupId an optional group id in witch we want to add the geometry
+   * @param {Coordinate} points - The array of points to create the polygon
+   * @param options - the polygon options including styling
+   * @param {string} optionalFeatureId - Optional id to be used to manage this geometry
+   * @param {string} groupId - Optional group id in which we want to add the geometry
    *
    * @returns {Feature} a geometry containing the id and the created geometry
    */
@@ -229,7 +230,7 @@ export class GeometryApi {
 
     // set a feature id and a geometry group index for this geometry
     polygon.set('featureId', featureId);
-    polygon.set('GeometryGroupIndex', this.activeGeometryGroupIndex);
+    polygon.set('GeometryGroupIndex', this.#activeGeometryGroupIndex);
 
     // add geometry to feature collection
     this.addToGeometryGroup(polygon, groupId);
@@ -246,10 +247,10 @@ export class GeometryApi {
   /**
    * Create a new circle
    *
-   * @param {Coordinate} coordinate long lat coordinate of the circle
-   * @param options circle options including styling
-   * @param {string} optionalFeatureId an optional id to be used to manage this geometry
-   * @param {string} groupId an optional group id in witch we want to add the geometry
+   * @param {Coordinate} coordinate - The long lat coordinate of the circle
+   * @param options - The circle options including styling
+   * @param {string} optionalFeatureId - Optional id to be used to manage this geometry
+   * @param {string} groupId - Optional group id in which we want to add the geometry
    *
    * @returns {Feature} a geometry containing the id and the created geometry
    */
@@ -311,7 +312,7 @@ export class GeometryApi {
 
     // set a feature id and a geometry group index for this geometry
     circle.set('featureId', featureId);
-    circle.set('GeometryGroupIndex', this.activeGeometryGroupIndex);
+    circle.set('GeometryGroupIndex', this.#activeGeometryGroupIndex);
 
     // add geometry to feature collection
     this.addToGeometryGroup(circle, groupId);
@@ -328,10 +329,10 @@ export class GeometryApi {
   /**
    * Create a new marker icon
    *
-   * @param {Coordinate} coordinate the long lat position of the marker
-   * @param options marker options including styling
-   * @param {string} optionalFeatureId an optional id to be used to manage this geometry
-   * @param {string} groupId an optional group id in witch we want to add the geometry
+   * @param {Coordinate} coordinate - The long lat position of the marker
+   * @param options - The marker options including styling
+   * @param {string} optionalFeatureId - Optional id to be used to manage this geometry
+   * @param {string} groupId - Optional group id in witch we want to add the geometry
    *
    * @returns {Feature} a geometry containing the id and the created geometry
    */
@@ -377,7 +378,7 @@ export class GeometryApi {
 
     // set a feature id and a geometry group index for this geometry
     marker.set('featureId', featureId);
-    marker.set('GeometryGroupIndex', this.activeGeometryGroupIndex);
+    marker.set('GeometryGroupIndex', this.#activeGeometryGroupIndex);
 
     // add geometry to feature collection
     this.addToGeometryGroup(marker, groupId);
@@ -394,7 +395,7 @@ export class GeometryApi {
   /**
    * Find a feature using it's id
    *
-   * @param {string} featureId the id of the feature to return
+   * @param {string} featureId - The id of the feature to return
    *
    * @returns {Feature} a feature having the specified id
    */
@@ -405,7 +406,7 @@ export class GeometryApi {
   /**
    * Delete a feature using the id and delete it from the groups and the map
    *
-   * @param {string} featureId the id of the feature to delete
+   * @param {string} featureId - The id of the feature to delete
    */
   deleteGeometry(featureId: string): void {
     for (let i = 0; i < this.geometries.length; i++) {
@@ -424,8 +425,9 @@ export class GeometryApi {
   /**
    * Create a new geometry group to manage multiple geometries at once (z-index is infinity, set the index to change the behaviour)
    *
-   * @param {string} geometryGroupId the id of the group to use when managing this group
-   * @param options an optional vector layer and vector source options
+   * @param {string} geometryGroupId - The id of the group to use when managing this group
+   * @param options - Optional vector layer and vector source options
+   *
    * @returns {FeatureCollection} created geometry group
    */
   createGeometryGroup(
@@ -454,10 +456,11 @@ export class GeometryApi {
 
       if (geometryGroup.vectorLayer.getVisible()) {
         // This would give it a z-index equal to infinity. Instead of doing this.mapViewer.map.addLayer(geometryGroup.vectorLayer).
-        vectorLayer.setMap(this.mapViewer.map);
+        vectorLayer.setMap(this.#mapViewer.map);
+        vectorLayer.setZIndex(9999);
         geometryGroup.vectorLayer.changed();
       }
-      this.geometryGroups.push(geometryGroup);
+      this.getGeometryGroups().push(geometryGroup);
     }
 
     return geometryGroup;
@@ -467,14 +470,15 @@ export class GeometryApi {
    * set the active geometry group (the geometry group used when adding geometries).
    * If id is not specified, use the default geometry group.
    *
-   * @param {string} id optional the id of the group to set as active
+   * @param {string} id - Optional the id of the group to set as active
    */
   setActiveGeometryGroup(id?: string): void {
     // if group name not give, add to default group
     const geometryGroupId = id || this.defaultGeometryGroupId;
-    for (let i = 0; i < this.geometryGroups.length; i++) {
-      if (this.geometryGroups[i].geometryGroupId === geometryGroupId) {
-        this.activeGeometryGroupIndex = i;
+    const geometryGroups = this.getGeometryGroups();
+    for (let i = 0; i < geometryGroups.length; i++) {
+      if (geometryGroups[i].geometryGroupId === geometryGroupId) {
+        this.#activeGeometryGroupIndex = i;
         break;
       }
     }
@@ -483,53 +487,54 @@ export class GeometryApi {
   /**
    * Get the active geometry group
    *
-   * @returns {FeatureCollection} the active geometry group
+   * @returns {FeatureCollection} - The active geometry group
    */
   getActiveGeometryGroup(): FeatureCollection {
-    return this.geometryGroups[this.activeGeometryGroupIndex];
+    return this.getGeometryGroups()[this.#activeGeometryGroupIndex];
   }
 
   /**
    * Get the geometry group by using the ID specified when the group was created
-   * if geometryGroupid is not provided, return the active geometry group
    *
-   * @param {string} geometryGroupId the id of the geometry group to return
+   * @param {string} geometryGroupId - The id of the geometry group to return
    *
    * @returns the geomtry group
    */
-  getGeometryGroup(geometryGroupId?: string): FeatureCollection | undefined {
-    if (geometryGroupId) {
-      const geometryGroupIndex = this.geometryGroups.findIndex((theGeometryGroup) => theGeometryGroup.geometryGroupId === geometryGroupId);
-      if (geometryGroupIndex === -1) return undefined;
-      return this.geometryGroups[geometryGroupIndex];
-    }
-    return this.geometryGroups[this.activeGeometryGroupIndex];
+  getGeometryGroup(geometryGroupId: string): FeatureCollection {
+    const geometryGroups = this.getGeometryGroups();
+    const geometryGroupIndex = geometryGroups.findIndex((theGeometryGroup) => theGeometryGroup.geometryGroupId === geometryGroupId);
+
+    if (geometryGroupIndex === -1) throw new InvaliGeometryGroupIdError(geometryGroupId); // Failed
+
+    return geometryGroups[geometryGroupIndex];
   }
 
   /**
    * Get all geometry groups
    *
-   * @returns {FeatureCollection[]} array of all geometry groups
+   * @returns {FeatureCollection[]} Array of all geometry groups
    */
   getGeometryGroups(): FeatureCollection[] {
-    return this.geometryGroups;
+    return this.#geometryGroups;
   }
 
   /**
    * Find the groups that contain the geometry using it's id
    *
-   * @param {string} featureId the id of the geometry
+   * @param {string} featureId - The id of the geometry
    *
-   * @returns {FeatureCollection[]} the groups that contain the geometry
+   * @returns {FeatureCollection[]} Groups that contain the geometry
    */
   getGeometryGroupsByFeatureId(featureId: string): FeatureCollection[] {
     const returnValue: FeatureCollection[] = [];
-    for (let i = 0; i < this.geometryGroups.length; i++) {
-      const geometries = this.geometryGroups[i].vectorLayer.getSource()?.getFeatures() || [];
+    const geometryGroups = this.getGeometryGroups();
+
+    for (let i = 0; i < geometryGroups.length; i++) {
+      const geometries = geometryGroups[i].vectorLayer.getSource()?.getFeatures() || [];
       for (let j = 0; j < geometries.length; j++) {
         const geometry = geometries[j];
 
-        if (geometry.get('featureId') === featureId) returnValue.push(this.geometryGroups[i]);
+        if (geometry.get('featureId') === featureId) returnValue.push(geometryGroups[i]);
       }
     }
 
@@ -538,12 +543,11 @@ export class GeometryApi {
 
   /**
    * Show the identified geometry group on the map
-   * if geometryGroupId is not provided, use the active geometry group
    *
-   * @param {string} geometryGroupId optional the id of the group to show on the map
+   * @param {string} geometryGroupId - The id of the group to show on the map
    */
-  setGeometryGroupAsVisible(geometryGroupId?: string): void {
-    const geometryGroup = this.getGeometryGroup(geometryGroupId)!;
+  setGeometryGroupAsVisible(geometryGroupId: string): void {
+    const geometryGroup = this.getGeometryGroup(geometryGroupId);
 
     geometryGroup.vectorLayer.setVisible(true);
     geometryGroup.vectorLayer.changed();
@@ -551,28 +555,26 @@ export class GeometryApi {
 
   /**
    * Hide the identified geometry group from the map
-   * if groupId is not provided, use the active geometry group
    *
-   * @param {string} geometryGroupId optional the id of the group to show on the map
+   * @param {string} geometryGroupId - The id of the group to show on the map
    */
-  setGeometryGroupAsInvisible(geometryGroupId?: string): void {
-    const geometryGroup = this.getGeometryGroup(geometryGroupId)!;
+  setGeometryGroupAsInvisible(geometryGroupId: string): void {
+    const geometryGroup = this.getGeometryGroup(geometryGroupId);
 
     geometryGroup.vectorLayer.setVisible(false);
     geometryGroup.vectorLayer.changed();
   }
 
   /**
-   * Get the z-index of a geometry group's vector layer
-   * if geometryGroupId is not provided, use the active geometry group
+   * Get the z-index of a geometry group's vector layer, undefined if group does not exist
    *
    * @param {string} geometryGroupId - The id of the group
-   * @returns {number | undefined} the z-index value of the vector layer
+   * @returns {number | undefined} The z-index value of the vector layer
    */
-  getGeometryGroupZIndex(geometryGroupId: string): number | undefined {
+  getGeometryGroupZIndex(geometryGroupId: string): number {
     const geometryGroup = this.getGeometryGroup(geometryGroupId);
-    if (!geometryGroup) return undefined;
-    return geometryGroup.vectorLayer.getZIndex();
+    const zIndex = geometryGroup.vectorLayer.getZIndex();
+    return zIndex === undefined ? Infinity : zIndex;
   }
 
   /**
@@ -583,11 +585,6 @@ export class GeometryApi {
    */
   setGeometryGroupZIndex(geometryGroupId: string, zIndex: number): void {
     const geometryGroup = this.getGeometryGroup(geometryGroupId);
-    if (!geometryGroup) {
-      logger.logWarning(`Geometry group ${geometryGroupId} not found`);
-      return;
-    }
-
     geometryGroup.vectorLayer.setZIndex(zIndex);
     geometryGroup.vectorLayer.changed();
   }
@@ -597,8 +594,8 @@ export class GeometryApi {
    * if geometryGroupId is not provided, use the active geometry group. If the
    * geometry group doesn't exist, create it.
    *
-   * @param {Feature} geometry the geometry to be added to the group
-   * @param {string} geometryGroupId optional id of the group to add the geometry to
+   * @param {Feature} geometry - The geometry to be added to the group
+   * @param {string} geometryGroupId - Optional id of the group to add the geometry to
    */
   addToGeometryGroup(geometry: Feature, geometryGroupId?: string): void {
     let geometryGroup: FeatureCollection;
@@ -606,7 +603,7 @@ export class GeometryApi {
       // create geometry group if it does not exist
       geometryGroup = this.createGeometryGroup(geometryGroupId);
     } else {
-      geometryGroup = this.geometryGroups[this.activeGeometryGroupIndex];
+      geometryGroup = this.getGeometryGroups()[this.#activeGeometryGroupIndex];
     }
 
     try {
@@ -620,33 +617,34 @@ export class GeometryApi {
   /**
    * Find the groups that the feature exists in and delete the feature from those groups
    *
-   * @param {string} featureId the geometry id
+   * @param {string} featureId - The geometry id
    */
   deleteGeometryFromGroups(featureId: string): void {
     const geometry = this.getGeometry(featureId);
-    for (let i = 0; i < this.geometryGroups.length; i++) {
-      this.geometryGroups[i].vectorLayer
+    const geometryGroups = this.getGeometryGroups();
+
+    for (let i = 0; i < geometryGroups.length; i++) {
+      geometryGroups[i].vectorLayer
         .getSource()
         ?.getFeatures()
         .forEach((layerGeometry) => {
           if (geometry === layerGeometry) {
-            this.geometryGroups[i].vectorLayer.getSource()?.removeFeature(geometry as never);
+            geometryGroups[i].vectorLayer.getSource()?.removeFeature(geometry as never);
           }
         });
-      this.geometryGroups[i].vectorLayer.changed();
+      geometryGroups[i].vectorLayer.changed();
     }
   }
 
   /**
    * Delete a specific feature from a group using the feature id
-   * If geometryGroupid is not provided, the active geometry group is used.
    *
-   * @param {string} featureId the feature id to be deleted
-   * @param {string} geometryGroupid optional group id
+   * @param {string} featureId - The feature id to be deleted
+   * @param {string} geometryGroupid - The group id
    */
-  deleteGeometryFromGroup(featureId: string, geometryGroupid?: string): void {
+  deleteGeometryFromGroup(featureId: string, geometryGroupid: string): void {
     const geometry = this.getGeometry(featureId);
-    const geometryGroup = this.getGeometryGroup(geometryGroupid)!;
+    const geometryGroup = this.getGeometryGroup(geometryGroupid);
     geometryGroup.vectorLayer
       .getSource()
       ?.getFeatures()
@@ -660,13 +658,12 @@ export class GeometryApi {
 
   /**
    * Delete all geometries from the geometry group but keep the group
-   * If geometryGroupid is not provided, the active geometry group is used.
    *
-   * @param {string} geometryGroupid optional group id
-   * @returns {FeatureCollection} the group with empty layers
+   * @param {string} geometryGroupid - The group id
+   * @returns {FeatureCollection} Group with empty layers
    */
-  deleteGeometriesFromGroup(geometryGroupid?: string): FeatureCollection {
-    const geometryGroup = this.getGeometryGroup(geometryGroupid)!;
+  deleteGeometriesFromGroup(geometryGroupid: string): FeatureCollection {
+    const geometryGroup = this.getGeometryGroup(geometryGroupid);
     geometryGroup.vectorLayer
       .getSource()
       ?.getFeatures()
@@ -680,17 +677,18 @@ export class GeometryApi {
 
   /**
    * Delete a geometry group and all the geometries from the map.
-   * If geometryGroupid is not provided, the active geometry group is used.
    * The default geometry group can't be deleted.
    *
-   * @param {string} geometryGroupid optional id of the geometry group to delete
+   * @param {string} geometryGroupid - The id of the geometry group to delete
    */
-  deleteGeometryGroup(geometryGroupid?: string): void {
+  deleteGeometryGroup(geometryGroupid: string): void {
     const geometryGroup = this.deleteGeometriesFromGroup(geometryGroupid);
+    const geometryGroups = this.getGeometryGroups();
+
     if (geometryGroup.geometryGroupId !== this.defaultGeometryGroupId) {
-      for (let i = 0; i < this.geometryGroups.length; i++) {
-        if (this.geometryGroups[i].geometryGroupId === geometryGroup.geometryGroupId) {
-          this.geometryGroups.splice(i, 1);
+      for (let i = 0; i < geometryGroups.length; i++) {
+        if (geometryGroups[i].geometryGroupId === geometryGroup.geometryGroupId) {
+          geometryGroups.splice(i, 1);
         }
       }
     }
@@ -698,10 +696,10 @@ export class GeometryApi {
 
   /**
    * Get the coordinates of a specific feature
-   * @param {string} featureId the id of the feature
-   * @param {number} projection optional, transform the coordinates to the provided projection.
+   * @param {string} featureId - The id of the feature
+   * @param {number} projection - Optional, transform the coordinates to the provided projection.
    *   Otherwise, uses the map's projection by default
-   * @returns {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined} the coordinates of the feature
+   * @returns {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined} Coordinates of the feature
    */
   getFeatureCoords(featureId: string, projection?: number): Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined {
     const feature = this.getGeometry(featureId);
@@ -734,9 +732,9 @@ export class GeometryApi {
 
   /**
    * Allows for a feature's coordinates to be updated programatically.
-   * @param {string} featureId the id of the feature to return
+   * @param {string} featureId - The id of the feature to return
    * @param {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][]} coordinates - The new coordinates for the feature
-   * @param {number} projection optional, the projection of the coordinates, assumes 4326 if not specified
+   * @param {number} projection - Optional, the projection of the coordinates, assumes 4326 if not specified
    */
   setFeatureCoords(
     featureId: string,
@@ -837,7 +835,7 @@ export class GeometryApi {
   /**
    * Typeguards when a list of coordinates should actually be a single coordinate, such as a Point.
    * @param {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][]} coordinates - The coordinates to check
-   * @returns {Coordinate} when the coordinates represent a Point
+   * @returns {Coordinate} When the coordinates represent a Point
    */
   static isCoordinates(coordinates: Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][]): coordinates is Coordinate {
     return Array.isArray(coordinates) && coordinates.length > 0 && !Array.isArray(coordinates[0]);
@@ -846,7 +844,7 @@ export class GeometryApi {
   /**
    * Typeguards when a list of coordinates should actually be a single coordinate, such as a LineString.
    * @param {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][]} coordinates - The coordinates to check
-   * @returns {Coordinate[]} when the coordinates represent a LineString
+   * @returns {Coordinate[]} When the coordinates represent a LineString
    */
   static isArrayOfCoordinates(coordinates: Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][]): coordinates is Coordinate[] {
     return (
@@ -861,7 +859,7 @@ export class GeometryApi {
   /**
    * Typeguards when a list of coordinates should actually be a single coordinate, such as a MultiLineString or Polygon.
    * @param {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][]} coordinates - The coordinates to check
-   * @returns {Coordinate[][]} when the coordinates represent a MultiLineString or Polygon
+   * @returns {Coordinate[][]} When the coordinates represent a MultiLineString or Polygon
    */
   static isArrayOfArrayOfCoordinates(
     coordinates: Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][]
