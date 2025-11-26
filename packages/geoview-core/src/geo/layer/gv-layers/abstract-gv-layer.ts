@@ -886,6 +886,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       layerConfig.getSchemaTag(),
       layerConfig.getNameField(),
       layerConfig.getOutfields(),
+      true,
       (layerConfig.getLayerMetadata() as TypeLayerMetadataEsri | TypeLayerMetadataVector)?.fields,
       this.getStyle(),
       layerConfig.getFilterEquation(),
@@ -1112,6 +1113,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     schemaTag: TypeGeoviewLayerType,
     nameField: string | undefined,
     outFields: TypeOutfields[] | undefined,
+    supportZoomTo: boolean,
     domainsLookup: TypeLayerMetadataFields[] | undefined,
     layerStyle: Partial<Record<TypeStyleGeometry, TypeLayerStyleSettings>> | undefined,
     filterEquation: FilterNodeType[] | undefined,
@@ -1132,9 +1134,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
       const imageSourceDict: Record<string, string | undefined> = {};
 
-      // Check if has oid field and therefore supports zoom to
-      const supportZoomTo = !!outFields?.find((outfield) => outfield.type === 'oid');
-
+      // For each feature
       for (const feature of features) {
         // Get the image source for a feature using styling information and cache it
         const imageSource = layerStyle
