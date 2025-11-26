@@ -569,7 +569,7 @@ export class GeometryApi {
    * @param {string} geometryGroupId - The id of the group
    * @returns {number | undefined} the z-index value of the vector layer
    */
-  getGeometryGroupZIndex(geometryGroupId?: string): number | undefined {
+  getGeometryGroupZIndex(geometryGroupId: string): number | undefined {
     const geometryGroup = this.getGeometryGroup(geometryGroupId);
     if (!geometryGroup) return undefined;
     return geometryGroup.vectorLayer.getZIndex();
