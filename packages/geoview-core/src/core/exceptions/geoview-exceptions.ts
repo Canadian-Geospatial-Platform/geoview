@@ -223,7 +223,7 @@ export class InvaliGeometryGroupIdError extends GeoViewError {
    * @param {string} geometryGroupId - The invalid geometry group id that caused the error.
    */
   constructor(geometryGroupId: string) {
-    super('errors.map.errorGeometryGroupId', [geometryGroupId]);
+    super('error.map.errorGeometryGroupId', [geometryGroupId]);
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'InvaliGeometryGroupIdError';
