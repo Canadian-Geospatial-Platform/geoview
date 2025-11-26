@@ -321,12 +321,20 @@ export class GVWMS extends AbstractGVRaster {
     // Get the Geoview Layer Config WFS equivalent
     const wfsLayerConfig = wmsLayerConfig.getWfsLayerConfig();
 
+    // Get the supported info formats
+    const featureInfoFormat = wfsLayerConfig.getSupportedFormats('application/json'); // application/json by default (QGIS Server doesn't seem to provide the metadata for the output formats, use application/json)
+
+    // If one of those contain application/json, use that format to get features
+    const outputFormat = featureInfoFormat.find((format) => format.toLowerCase().includes('application/json'));
+
+    // TODO: WMS - Add support for other formats not quite GV issue #3134, but similar
+
     // Format the url
     const urlWithOutputJson = GeoUtilities.ensureServiceRequestUrlGetFeature(
       wfsLayerConfig.getMetadataAccessPath()!,
       wfsLayerConfig.layerId,
       wfsLayerConfig.getVersion(),
-      'application/json',
+      outputFormat,
       wfsLayerConfig.getOutfields(),
       undefined, // No filter
       map.getView().getProjection().getCode()

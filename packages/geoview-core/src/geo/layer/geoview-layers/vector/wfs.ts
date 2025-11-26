@@ -12,9 +12,9 @@ import { type TypeOutfields, type TypeOutfieldsType } from '@/api/types/map-sche
 import type {
   TypeGeoviewLayerConfig,
   WFSJsonResponse,
-  TypeMetadataWFSFeatureTypeListFeatureTypeText,
   TypeMetadataWFS,
   VectorStrategy,
+  TypeMetadataWFSTextOnly,
 } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { findPropertyByRegexPath } from '@/core/utils/utilities';
@@ -25,7 +25,6 @@ import {
 } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { LayerNoCapabilitiesError, LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
-import { LayerEntryConfigLayerIdNotFoundError } from '@/core/exceptions/layer-entry-config-exceptions';
 import { GVWFS } from '@/geo/layer/gv-layers/vector/gv-wfs';
 import { wfsConvertGeometryTypeToOLGeometryType } from '@/geo/layer/gv-layers/utils';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
@@ -114,11 +113,9 @@ export class WFS extends AbstractGeoViewVector {
       const metadataLayerList = metadata?.FeatureTypeList.FeatureType;
       entries = metadataLayerList.map((layerMetadata) => {
         let id = layerMetadata.Name as string;
-        if ('#text' in (layerMetadata.Name as TypeMetadataWFSFeatureTypeListFeatureTypeText))
-          id = (layerMetadata.Name as TypeMetadataWFSFeatureTypeListFeatureTypeText)['#text'];
+        if ('#text' in (layerMetadata.Name as TypeMetadataWFSTextOnly)) id = (layerMetadata.Name as TypeMetadataWFSTextOnly)['#text'];
         let title = layerMetadata.Title as string;
-        if ('#text' in (layerMetadata.Title as TypeMetadataWFSFeatureTypeListFeatureTypeText))
-          title = (layerMetadata.Title as TypeMetadataWFSFeatureTypeListFeatureTypeText)['#text'];
+        if ('#text' in (layerMetadata.Title as TypeMetadataWFSTextOnly)) title = (layerMetadata.Title as TypeMetadataWFSTextOnly)['#text'];
 
         return {
           id,
@@ -143,41 +140,15 @@ export class WFS extends AbstractGeoViewVector {
     // you can define them in the configuration section.
     // when there is only one layer, it is not an array but an object
 
-    // Get the metadata
-    const metadata = this.getMetadata();
-
-    // If undefined
-    if (!metadata?.FeatureTypeList?.FeatureType) {
-      // Add a layer load error
-      this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(layerConfig), layerConfig);
-      return;
-    }
-
-    // If metadata FeatureType isn't an array
-    if (metadata && !Array.isArray(metadata?.FeatureTypeList?.FeatureType))
-      metadata.FeatureTypeList.FeatureType = [metadata.FeatureTypeList?.FeatureType];
-
-    // If metadata FeatureType is an array
-    if (Array.isArray(metadata?.FeatureTypeList?.FeatureType)) {
-      const metadataLayerList = metadata.FeatureTypeList.FeatureType;
-      const foundMetadata = metadataLayerList.find((layerMetadata) => {
-        let id = layerMetadata.Name as string;
-        if ('#text' in (layerMetadata.Name as TypeMetadataWFSFeatureTypeListFeatureTypeText))
-          id = (layerMetadata.Name as TypeMetadataWFSFeatureTypeListFeatureTypeText)['#text'];
-        return id === layerConfig.layerId;
-      });
-
-      if (!foundMetadata) {
-        // Add a layer load error
-        this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(layerConfig), layerConfig);
-        return;
-      }
+    try {
+      // Try to get the feature type
+      const layerConfigCasted = layerConfig as OgcWfsLayerEntryConfig;
+      const featureType = layerConfigCasted.getFeatureType();
 
       // If no name
       if (!layerConfig.getLayerName()) {
-        let foundTitle = foundMetadata.Title as string;
-        if ('#text' in (foundMetadata.Title as TypeMetadataWFSFeatureTypeListFeatureTypeText))
-          foundTitle = (foundMetadata.Title as TypeMetadataWFSFeatureTypeListFeatureTypeText)['#text'];
+        let foundTitle = featureType.Title as string;
+        if ('#text' in (featureType.Title as TypeMetadataWFSTextOnly)) foundTitle = (featureType.Title as TypeMetadataWFSTextOnly)['#text'];
         // If found title, use that
         if (foundTitle) layerConfig.setLayerName(foundTitle);
       }
@@ -186,11 +157,11 @@ export class WFS extends AbstractGeoViewVector {
       layerConfig.validateUpdateInitialSettingsExtent();
 
       // If no bounds defined in the initial settings and an extent is defined in the metadata
-      if (!layerConfig.getInitialSettings()?.bounds && foundMetadata['ows:WGS84BoundingBox']) {
+      if (!layerConfig.getInitialSettings()?.bounds && featureType['ows:WGS84BoundingBox']) {
         // TODO: Check - This additional processing seem valid, but is it at the right place? A bit confusing with the rest of the codebase.
         // TODO: Refactor - Layers refactoring. Validate if this code is still being executed after the layers migration. This code may easily have been forgotten.
-        const lowerCorner = foundMetadata['ows:WGS84BoundingBox']['ows:LowerCorner']['#text'].split(' ');
-        const upperCorner = foundMetadata['ows:WGS84BoundingBox']['ows:UpperCorner']['#text'].split(' ');
+        const lowerCorner = featureType['ows:WGS84BoundingBox']['ows:LowerCorner']['#text'].split(' ');
+        const upperCorner = featureType['ows:WGS84BoundingBox']['ows:UpperCorner']['#text'].split(' ');
         const bounds = [Number(lowerCorner[0]), Number(lowerCorner[1]), Number(upperCorner[0]), Number(upperCorner[1])];
 
         // Update the bounds initial settings
@@ -199,6 +170,9 @@ export class WFS extends AbstractGeoViewVector {
 
       // Validate and update the bounds initial settings
       layerConfig.validateUpdateInitialSettingsBounds();
+    } catch (error: unknown) {
+      // Add a layer load error
+      this.addLayerLoadError(formatError(error), layerConfig);
     }
   }
 
