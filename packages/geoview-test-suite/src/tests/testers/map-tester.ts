@@ -215,7 +215,7 @@ export class MapTester extends GVAbstractTester {
         test.addStep('Setting z-index to 0...');
 
         // Set z-index to 0
-        this.getMapViewer().layer.geometry.setGeometryGroupZIndex(0, testGroupId);
+        this.getMapViewer().layer.geometry.setGeometryGroupZIndex(testGroupId, 0);
 
         test.addStep('Getting final z-index...');
 
@@ -229,7 +229,7 @@ export class MapTester extends GVAbstractTester {
       },
       (test, result) => {
         // Perform assertions
-        test.addStep('Verifying initial z-index is defined...');
+        test.addStep('Verifying initial z-index is undefined...');
         Test.assertIsEqual(result.initialZIndex, undefined);
 
         test.addStep('Verifying final z-index is 0...');

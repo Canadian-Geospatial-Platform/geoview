@@ -631,7 +631,7 @@ getGeometryGroupZIndex(geometryGroupId?: string): number | undefined
 
 **Parameters:**
 
-- `geometryGroupId` - Optional group ID (uses active group if not specified)
+- `geometryGroupId` - The group ID
 
 **Returns:** The z-index value, or `undefined` if the group doesn't exist
 
@@ -647,22 +647,22 @@ console.log(`Current z-index: ${zIndex}`);
 Sets the z-index of a geometry group's vector layer to control rendering order.
 
 ```typescript
-setGeometryGroupZIndex(zIndex: number, geometryGroupId?: string): void
+setGeometryGroupZIndex(geometryGroupId: string, zIndex: number): void
 ```
 
 **Parameters:**
 
+- `geometryGroupId` - The group ID
 - `zIndex` - The z-index value to set (higher values render on top)
-- `geometryGroupId` - Optional group ID (uses active group if not specified)
 
 **Example:**
 
 ```typescript
 // Set annotations to render on top
-mapViewer.layer.geometry.setGeometryGroupZIndex(100, "annotations");
+mapViewer.layer.geometry.setGeometryGroupZIndex("annotations", 100);
 
 // Set highlights to render below other geometries
-mapViewer.layer.geometry.setGeometryGroupZIndex(50, "highlights");
+mapViewer.layer.geometry.setGeometryGroupZIndex("highlights", 50);
 ```
 
 ---

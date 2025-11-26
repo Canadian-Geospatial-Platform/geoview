@@ -566,7 +566,7 @@ export class GeometryApi {
    * Get the z-index of a geometry group's vector layer
    * if geometryGroupId is not provided, use the active geometry group
    *
-   * @param {string} geometryGroupId optional the id of the group
+   * @param {string} geometryGroupId - The id of the group
    * @returns {number | undefined} the z-index value of the vector layer
    */
   getGeometryGroupZIndex(geometryGroupId?: string): number | undefined {
@@ -577,15 +577,14 @@ export class GeometryApi {
 
   /**
    * Set the z-index of a geometry group's vector layer
-   * if geometryGroupId is not provided, use the active geometry group
    *
-   * @param {number} zIndex the z-index value to set
-   * @param {string} geometryGroupId optional the id of the group
+   * @param {string} geometryGroupId - The id of the group
+   * @param {number} zIndex - The z-index value to set
    */
-  setGeometryGroupZIndex(zIndex: number, geometryGroupId?: string): void {
+  setGeometryGroupZIndex(geometryGroupId: string, zIndex: number): void {
     const geometryGroup = this.getGeometryGroup(geometryGroupId);
     if (!geometryGroup) {
-      logger.logWarning(`Geometry group ${geometryGroupId || 'active'} not found`);
+      logger.logWarning(`Geometry group ${geometryGroupId} not found`);
       return;
     }
 
