@@ -539,6 +539,33 @@ try {
 
 ---
 
+#### hasGeometryGroup()
+
+Checks if a geometry group exists.
+
+```typescript
+hasGeometryGroup(geometryGroupId: string): boolean
+```
+
+**Parameters:**
+
+- `geometryGroupId` - The group ID to check
+
+**Returns:** `true` if the group exists, `false` otherwise
+
+**Example:**
+
+```typescript
+if (mapViewer.layer.geometry.hasGeometryGroup("annotations")) {
+  console.log("Annotations group exists");
+} else {
+  // Create the group
+  mapViewer.layer.geometry.createGeometryGroup("annotations");
+}
+```
+
+---
+
 #### getGeometryGroups()
 
 Gets all geometry groups.
