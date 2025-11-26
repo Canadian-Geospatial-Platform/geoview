@@ -1739,6 +1739,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * Re-delete deleted features
    * @param {string} mapId - The map ID
    * @param {DrawerHistoryAction} action - The action that will be re-performed
+   * @throws {InvaliGeometryGroupIdError} If the provided geometry group id does not exist.
    */
   static #deleteFeaturesAction(mapId: string, action: DrawerHistoryAction): void {
     const viewer = MapEventProcessor.getMapViewer(mapId);

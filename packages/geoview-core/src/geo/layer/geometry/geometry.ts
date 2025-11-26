@@ -439,7 +439,13 @@ export class GeometryApi {
   ): FeatureCollection {
     const geometryGroupOptions = options || {};
 
-    let geometryGroup = this.getGeometryGroup(geometryGroupId);
+    // Check if geometry group exist. Do not use the getter that throws an error because the group is not suppose
+    // to exist
+    let geometryGroup =
+      this.getGeometryGroups()[
+        this.getGeometryGroups().findIndex((theGeometryGroup) => theGeometryGroup.geometryGroupId === geometryGroupId)
+      ];
+
     if (!geometryGroup) {
       const vectorSource = new VectorSource<Feature>(geometryGroupOptions.vectorSourceOptions);
 
@@ -499,6 +505,7 @@ export class GeometryApi {
    * @param {string} geometryGroupId - The id of the geometry group to return
    *
    * @returns the geomtry group
+   * @throws {InvaliGeometryGroupIdError} If the provided geometry group id does not exist.
    */
   getGeometryGroup(geometryGroupId: string): FeatureCollection {
     const geometryGroups = this.getGeometryGroups();
@@ -545,6 +552,7 @@ export class GeometryApi {
    * Show the identified geometry group on the map
    *
    * @param {string} geometryGroupId - The id of the group to show on the map
+   * @throws {InvaliGeometryGroupIdError} If the provided geometry group id does not exist.
    */
   setGeometryGroupAsVisible(geometryGroupId: string): void {
     const geometryGroup = this.getGeometryGroup(geometryGroupId);
@@ -557,6 +565,7 @@ export class GeometryApi {
    * Hide the identified geometry group from the map
    *
    * @param {string} geometryGroupId - The id of the group to show on the map
+   * @throws {InvaliGeometryGroupIdError} If the provided geometry group id does not exist.
    */
   setGeometryGroupAsInvisible(geometryGroupId: string): void {
     const geometryGroup = this.getGeometryGroup(geometryGroupId);
@@ -570,6 +579,7 @@ export class GeometryApi {
    *
    * @param {string} geometryGroupId - The id of the group
    * @returns {number | undefined} The z-index value of the vector layer
+   * @throws {InvaliGeometryGroupIdError} If the provided geometry group id does not exist.
    */
   getGeometryGroupZIndex(geometryGroupId: string): number {
     const geometryGroup = this.getGeometryGroup(geometryGroupId);
@@ -582,6 +592,7 @@ export class GeometryApi {
    *
    * @param {string} geometryGroupId - The id of the group
    * @param {number} zIndex - The z-index value to set
+   * @throws {InvaliGeometryGroupIdError} If the provided geometry group id does not exist.
    */
   setGeometryGroupZIndex(geometryGroupId: string, zIndex: number): void {
     const geometryGroup = this.getGeometryGroup(geometryGroupId);
@@ -641,6 +652,7 @@ export class GeometryApi {
    *
    * @param {string} featureId - The feature id to be deleted
    * @param {string} geometryGroupid - The group id
+   * @throws {InvaliGeometryGroupIdError} If the provided geometry group id does not exist.
    */
   deleteGeometryFromGroup(featureId: string, geometryGroupid: string): void {
     const geometry = this.getGeometry(featureId);
@@ -661,6 +673,7 @@ export class GeometryApi {
    *
    * @param {string} geometryGroupid - The group id
    * @returns {FeatureCollection} Group with empty layers
+   * @throws {InvaliGeometryGroupIdError} If the provided geometry group id does not exist.
    */
   deleteGeometriesFromGroup(geometryGroupid: string): FeatureCollection {
     const geometryGroup = this.getGeometryGroup(geometryGroupid);
