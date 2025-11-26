@@ -182,7 +182,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     const viewer = MapEventProcessor.getMapViewer(mapId);
 
     // Get features from drawing group
-    const geometryGroup = viewer.layer.geometry.geometryGroups.find((group) => group.geometryGroupId === DRAW_GROUP_KEY);
+    const geometryGroup = viewer.layer.geometry.getGeometryGroups().find((group) => group.geometryGroupId === DRAW_GROUP_KEY);
     const features = geometryGroup?.vectorSource.getFeatures();
     if (!features) {
       return [];
@@ -860,7 +860,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     }
 
     // Only start editing if the drawing group exists
-    if (viewer.layer.geometry.geometryGroups.find((group) => group.geometryGroupId === DRAW_GROUP_KEY) !== undefined) {
+    if (viewer.layer.geometry.getGeometryGroups().find((group) => group.geometryGroupId === DRAW_GROUP_KEY) !== undefined) {
       const transformInstance = viewer.initTransformInteractions({ geometryGroupKey: DRAW_GROUP_KEY, hitTolerance: 5 });
 
       // Handle Transform Events (A feature was edited, the feature is still being edited)
