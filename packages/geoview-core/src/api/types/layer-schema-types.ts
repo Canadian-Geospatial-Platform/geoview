@@ -1027,22 +1027,23 @@ export interface TypeMetadataWFSFeatureTypeList {
 }
 
 export interface TypeMetadataWFSFeatureTypeListFeatureType {
-  Name: string | TypeMetadataWFSFeatureTypeListFeatureTypeText;
-  Title: string | TypeMetadataWFSFeatureTypeListFeatureTypeText;
+  Name: string | TypeMetadataWFSTextOnly;
+  Title: string | TypeMetadataWFSTextOnly;
+  OutputFormats?: TypeMetadataWFSFeatureTypeListFeatureOutputFormat;
   'ows:WGS84BoundingBox': TypeMetadataWFSFeatureTypeListFeatureTypeBBox;
 }
 
 export interface TypeMetadataWFSFeatureTypeListFeatureTypeBBox {
-  'ows:LowerCorner': TypeMetadataWFSFeatureTypeListFeatureTypeBBoxCorner;
-  'ows:UpperCorner': TypeMetadataWFSFeatureTypeListFeatureTypeBBoxCorner;
+  'ows:LowerCorner': TypeMetadataWFSTextOnly;
+  'ows:UpperCorner': TypeMetadataWFSTextOnly;
 }
 
-export interface TypeMetadataWFSFeatureTypeListFeatureTypeBBoxCorner {
+export interface TypeMetadataWFSTextOnly {
   '#text': string;
 }
 
-export interface TypeMetadataWFSFeatureTypeListFeatureTypeText {
-  '#text': string;
+export interface TypeMetadataWFSFeatureTypeListFeatureOutputFormat {
+  Format: (string | TypeMetadataWFSTextOnly)[];
 }
 
 export interface TypeMetadataWFSAttributes {
@@ -1058,11 +1059,7 @@ export interface TypeMetadataWFSOperationMetadataOperation {
 }
 
 export interface TypeMetadataWFSOperationMetadataOperationParameter {
-  'ows:Value': TypeMetadataWFSOperationMetadataOperationParameterValue;
-}
-
-export interface TypeMetadataWFSOperationMetadataOperationParameterValue {
-  '#text': string;
+  'ows:Value': TypeMetadataWFSTextOnly;
 }
 
 export interface TypeMetadataGeoJSON {
