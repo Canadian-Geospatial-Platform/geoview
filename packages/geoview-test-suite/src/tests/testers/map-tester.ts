@@ -169,6 +169,81 @@ export class MapTester extends GVAbstractTester {
   }
 
   /**
+   * Tests geometry group z-index operations.
+   * This test performs the following operations:
+   * 1. Creates a circle geometry in a new test group
+   * 2. Gets the initial z-index value
+   * 3. Sets the z-index to 0
+   * 4. Gets the z-index again
+   * 5. Verifies both values match expectations
+   *
+   * @returns {Promise<Test<{ initialZIndex: number | undefined; finalZIndex: number | undefined }>>} A Promise that resolves with the Test containing the z-index values.
+   */
+  testGeometryGroupZIndex(): Promise<Test<{ initialZIndex: number | undefined; finalZIndex: number | undefined }>> {
+    const testGroupId = 'testZIndexGroup';
+    const circleCoords: [number, number] = [-75.6972, 45.4215]; // Ottawa
+
+    return this.test(
+      'Test geometry group z-index get/set operations',
+      (test) => {
+        test.addStep('Adding circle to test group...');
+
+        // Add a circle to a new geometry group
+        this.getMapViewer().layer.geometry.addCircle(
+          circleCoords,
+          {
+            projection: 4326,
+            style: {
+              radius: 5,
+              fillColor: '#ff0000',
+              fillOpacity: 0.3,
+              strokeColor: '#ff0000',
+              strokeWidth: 2,
+            },
+          },
+          'testCircle',
+          testGroupId
+        );
+
+        test.addStep('Getting initial z-index...');
+
+        // Get the initial z-index
+        const initialZIndex = this.getMapViewer().layer.geometry.getGeometryGroupZIndex(testGroupId);
+
+        test.addStep(`Initial z-index: ${initialZIndex}`);
+
+        test.addStep('Setting z-index to 0...');
+
+        // Set z-index to 0
+        this.getMapViewer().layer.geometry.setGeometryGroupZIndex(0, testGroupId);
+
+        test.addStep('Getting final z-index...');
+
+        // Get the z-index again
+        const finalZIndex = this.getMapViewer().layer.geometry.getGeometryGroupZIndex(testGroupId);
+
+        test.addStep(`Final z-index: ${finalZIndex}`);
+
+        // Return both values
+        return { initialZIndex, finalZIndex };
+      },
+      (test, result) => {
+        // Perform assertions
+        test.addStep('Verifying initial z-index is defined...');
+        Test.assertIsEqual(result.initialZIndex, undefined);
+
+        test.addStep('Verifying final z-index is 0...');
+        Test.assertIsEqual(result.finalZIndex, 0);
+      },
+      (test) => {
+        // Cleanup: remove the test group
+        test.addStep('Cleaning up test geometry group...');
+        this.getMapViewer().layer.geometry.deleteGeometryGroup(testGroupId);
+      }
+    );
+  }
+
+  /**
    * Gets the map config from the store.
    * @returns {TypeMapFeaturesConfig} The map config as read from the store.
    */

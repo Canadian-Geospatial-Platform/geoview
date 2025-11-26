@@ -72,6 +72,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     fontSize: theme.palette.geoViewFontSize.default,
     lineHeight: '19px',
   },
+  featureInfoRow: {
+    marginBottom: '1.25rem',
+  },
   flexBoxAlignCenter: {
     display: 'flex',
     flexDirection: 'row',

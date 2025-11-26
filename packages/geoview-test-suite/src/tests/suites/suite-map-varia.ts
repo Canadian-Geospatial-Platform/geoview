@@ -54,7 +54,10 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
     // Test projection switch and zoom to initial extent
     const pProjection = this.#mapTester.testSwitchProjectionAndExtent(3978, 3857, 1);
 
+    // Test geometry z-index
+    const pZIndex = this.#mapTester.testGeometryGroupZIndex();
+
     // Resolve when all
-    return Promise.all([pmapState, pZoom, pProjection]);
+    return Promise.all([pmapState, pZoom, pProjection, pZIndex]);
   }
 }
