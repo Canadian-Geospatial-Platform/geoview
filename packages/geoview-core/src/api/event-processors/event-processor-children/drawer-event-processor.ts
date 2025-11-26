@@ -173,6 +173,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * Gets all drawing features for a map
    * @param {string} mapId - The map ID
    * @returns {Feature[]} Array of features
+   * @throws {InvaliGeometryGroupIdError} If the provided geometry group id does not exist.
    */
   static #getDrawingFeatures(mapId: string): Feature[] {
     const state = this.getDrawerState(mapId);
@@ -182,7 +183,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     const viewer = MapEventProcessor.getMapViewer(mapId);
 
     // Get features from drawing group
-    const geometryGroup = viewer.layer.geometry.getGeometryGroups().find((group) => group.geometryGroupId === DRAW_GROUP_KEY);
+    const geometryGroup = viewer.layer.geometry.getGeometryGroup(DRAW_GROUP_KEY);
     const features = geometryGroup?.vectorSource.getFeatures();
     if (!features) {
       return [];
@@ -860,7 +861,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     }
 
     // Only start editing if the drawing group exists
-    if (viewer.layer.geometry.getGeometryGroups().find((group) => group.geometryGroupId === DRAW_GROUP_KEY) !== undefined) {
+    if (viewer.layer.geometry.hasGeometryGroup(DRAW_GROUP_KEY)) {
       const transformInstance = viewer.initTransformInteractions({ geometryGroupKey: DRAW_GROUP_KEY, hitTolerance: 5 });
 
       // Handle Transform Events (A feature was edited, the feature is still being edited)
@@ -1760,21 +1761,19 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
       // Remove from vector source directly
       const geometryGroup = viewer.layer.geometry.getGeometryGroup(DRAW_GROUP_KEY);
-      if (geometryGroup) {
-        const vectorSource = geometryGroup.vectorLayer.getSource();
-        const layerFeatures = vectorSource?.getFeatures() || [];
+      const vectorSource = geometryGroup.vectorLayer.getSource();
+      const layerFeatures = vectorSource?.getFeatures() || [];
 
-        layerFeatures.forEach((layerFeature) => {
-          if (layerFeature.get('featureId') === featureId) {
-            const measureTooltip = layerFeature.get('measureTooltip');
-            measureTooltip?.getElement()?.remove();
+      layerFeatures.forEach((layerFeature) => {
+        if (layerFeature.get('featureId') === featureId) {
+          const measureTooltip = layerFeature.get('measureTooltip');
+          measureTooltip?.getElement()?.remove();
 
-            vectorSource?.removeFeature(layerFeature);
-          }
-        });
+          vectorSource?.removeFeature(layerFeature);
+        }
+      });
 
-        geometryGroup.vectorLayer.changed();
-      }
+      geometryGroup.vectorLayer.changed();
     });
   }
 

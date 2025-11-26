@@ -439,14 +439,9 @@ export class GeometryApi {
   ): FeatureCollection {
     const geometryGroupOptions = options || {};
 
-    // Check if geometry group exist. Do not use the getter that throws an error because the group is not suppose
-    // to exist
-    let geometryGroup =
-      this.getGeometryGroups()[
-        this.getGeometryGroups().findIndex((theGeometryGroup) => theGeometryGroup.geometryGroupId === geometryGroupId)
-      ];
-
-    if (!geometryGroup) {
+    // Check if geometry group exist, if not create it, if so get it then return the group
+    let geometryGroup;
+    if (!this.hasGeometryGroup(geometryGroupId)) {
       const vectorSource = new VectorSource<Feature>(geometryGroupOptions.vectorSourceOptions);
 
       const vectorLayer = new VectorLayer<VectorSource>({
@@ -467,7 +462,7 @@ export class GeometryApi {
         geometryGroup.vectorLayer.changed();
       }
       this.getGeometryGroups().push(geometryGroup);
-    }
+    } else geometryGroup = this.getGeometryGroup(geometryGroupId);
 
     return geometryGroup;
   }
@@ -497,6 +492,17 @@ export class GeometryApi {
    */
   getActiveGeometryGroup(): FeatureCollection {
     return this.getGeometryGroups()[this.#activeGeometryGroupIndex];
+  }
+
+  /**
+   * Check if a geometry group exists
+   *
+   * @param {string} geometryGroupId - The id of the geometry group to check
+   * @returns {boolean} True if the group exists, false otherwise
+   */
+  hasGeometryGroup(geometryGroupId: string): boolean {
+    const geometryGroups = this.getGeometryGroups();
+    return geometryGroups.some((group) => group.geometryGroupId === geometryGroupId);
   }
 
   /**
