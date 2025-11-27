@@ -42,7 +42,7 @@ export class FeatureHighlight {
   #highlightFill = new Fill({ color: [0, 230, 242, 0.3] }); // aqua
 
   /** The style for the highlight */
-  #highlightStyle = new Style({ stroke: new Stroke({ color: 'aqua', width: 2 }), fill: this.#highlightFill });
+  #highlightStyle = new Style({ stroke: new Stroke({ color: 'aqua', width: 3 }), fill: this.#highlightFill });
 
   /** The style for the bbox highlight */
   #darkOutlineStyle = new Style({ stroke: new Stroke({ color: 'black', width: 1.25 }) });

@@ -13,6 +13,7 @@ import Fullscreen from './buttons/fullscreen';
 import Home from './buttons/home';
 import Location from './buttons/location';
 import Projection from './buttons/projection';
+import MapRotation from './buttons/map-rotation';
 import { ButtonGroup, Box, IconButton, Collapse } from '@/ui';
 import { ExpandLessIcon, ExpandMoreIcon } from '@/ui/icons';
 import type { TypeButtonPanel } from '@/ui/panel/panel-types';
@@ -30,7 +31,7 @@ type NavBarProps = {
   api: NavBarApi;
 };
 
-type DefaultNavbar = 'fullScreen' | 'location' | 'home' | 'zoomIn' | 'zoomOut' | 'basemapSelect' | 'projection';
+type DefaultNavbar = 'fullScreen' | 'location' | 'home' | 'zoomIn' | 'zoomOut' | 'basemapSelect' | 'projection' | 'mapRotation';
 type NavbarButtonGroup = Record<string, TypeButtonPanel | DefaultNavbar>;
 type NavButtonGroups = Record<string, NavbarButtonGroup>;
 
@@ -42,9 +43,10 @@ const defaultNavbar: Record<DefaultNavbar, JSX.Element> = {
   projection: <Projection />,
   zoomIn: <ZoomIn />,
   zoomOut: <ZoomOut />,
+  mapRotation: <MapRotation />,
 };
 const defaultButtonGroups: NavButtonGroups = {
-  zoom: { zoomIn: 'zoomIn', zoomOut: 'zoomOut' },
+  zoom: { zoomIn: 'zoomIn', zoomOut: 'zoomOut', mapRotation: 'mapRotation' },
 };
 
 /**
@@ -98,6 +100,10 @@ export function NavBar(props: NavBarProps): JSX.Element {
 
     if (navBarComponents.includes('projection')) {
       displayButtons = { ...displayButtons, projection: 'projection' };
+    }
+
+    if (navBarComponents.includes('map-rotation')) {
+      displayButtons = { ...displayButtons, mapRotation: 'mapRotation' };
     }
 
     setButtonPanelGroups({
