@@ -229,7 +229,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     // Redirect
     AbstractGVVector.applyViewFilterOnConfig(
       this.getLayerConfig(),
-      this.getExternalFragmentsOrder(),
+      this.getLayerConfig().getExternalFragmentsOrder(),
       this,
       filter,
       (filterToUse: string) => {

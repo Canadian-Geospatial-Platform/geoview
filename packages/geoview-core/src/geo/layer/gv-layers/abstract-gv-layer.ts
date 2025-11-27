@@ -74,12 +74,6 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   /** Style to apply to the vector layer. */
   #layerStyle?: TypeLayerStyleConfig;
 
-  /** Date format object used to translate server to ISO format and ISO to server format */
-  #serverDateFragmentsOrder?: TypeDateFragments;
-
-  /** Date format object used to translate internal UTC ISO format to the external format, the one used by the user */
-  #externalFragmentsOrder?: TypeDateFragments;
-
   /** Boolean indicating if the layer should be included in time awareness functions such as the Time Slider. True by default. */
   #isTimeAware: boolean;
 
@@ -119,12 +113,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     super(layerConfig);
     this.#olSource = olSource;
 
-    // Keep the date formatting information
-    this.#serverDateFragmentsOrder = layerConfig.getGeoviewLayerConfig()?.serviceDateFormat
-      ? DateMgt.getDateFragmentsOrder(layerConfig.getGeoviewLayerConfig()?.serviceDateFormat)
-      : undefined;
-    this.#externalFragmentsOrder = layerConfig.getExternalFragmentsOrder();
-
+    // TODO: Get rid of this #isTimeAware attribute and use layerConfig.getIsTimeAware() instead (like getExternalFragmentsOrder, etc)
     // Boolean indicating if the layer should be included in time awareness functions such as the Time Slider.
     this.#isTimeAware = layerConfig.getGeoviewLayerConfig()?.isTimeAware ?? true; // default: true
 
@@ -486,14 +475,6 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    */
   getIsTimeAware(): boolean {
     return this.#isTimeAware;
-  }
-
-  /**
-   * Gets the external fragments order.
-   * @returns {TypeDateFragments | undefined} The external fragmets order associated to the layer or undefined.
-   */
-  getExternalFragmentsOrder(): TypeDateFragments | undefined {
-    return this.#externalFragmentsOrder;
   }
 
   /**
@@ -866,7 +847,13 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    */
   protected getFieldValue(feature: Feature, fieldName: string, fieldType: TypeOutfieldsType): string | number | Date {
     // Redirect
-    return AbstractGVLayer.helperGetFieldValue(feature, fieldName, fieldType, this.#serverDateFragmentsOrder, this.#externalFragmentsOrder);
+    return AbstractGVLayer.helperGetFieldValue(
+      feature,
+      fieldName,
+      fieldType,
+      this.getLayerConfig().getServiceDateFragmentsOrder(),
+      this.getLayerConfig().getExternalFragmentsOrder()
+    );
   }
 
   /**

@@ -29,8 +29,11 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {TypeEsriImageLayerConfig} layerConfig The layer configuration.
    */
   constructor(layerConfig: TypeEsriImageLayerConfig) {
+    // TODO: Check - Rework this serviceDateFormat, serverDateFragmentsOrder, externalDateFormat and DateMgt.getDateFragmentsOrder stuff
+    // TO.DOCONT: Why are we setting serviceDateFormat to default only in esri dynamic and esri image?
+    // TO.DOCONT: I've added getters/setters in ConfigBaseClass in preparation to simplify these dates processing
     // eslint-disable-next-line no-param-reassign
-    if (!layerConfig.serviceDateFormat) layerConfig.serviceDateFormat = 'DD/MM/YYYY HH:MM:SSZ';
+    layerConfig.serviceDateFormat ??= 'DD/MM/YYYY HH:MM:SSZ';
     super(layerConfig);
   }
 

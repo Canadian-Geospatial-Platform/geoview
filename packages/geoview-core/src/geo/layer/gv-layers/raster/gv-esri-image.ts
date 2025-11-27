@@ -169,7 +169,7 @@ export class GVEsriImage extends AbstractGVRaster {
       this.getLayerConfig(),
       this.getOLSource(),
       undefined,
-      this.getExternalFragmentsOrder(),
+      this.getLayerConfig().getExternalFragmentsOrder(),
       this,
       filter,
       (filterToUse: string) => {

@@ -285,11 +285,39 @@ export abstract class ConfigBaseClass {
   }
 
   /**
+   * Gets the service date format as specified by the config.
+   * @returns {string | undefined} The Date Format
+   */
+  getServiceDateFormat(): string | undefined {
+    return this.getGeoviewLayerConfig().serviceDateFormat;
+  }
+
+  /**
+   * Gets the service date fragments order as specified by the config.
+   * @returns {TypeDateFragments} The Date Fragments
+   */
+  getServiceDateFragmentsOrder(): TypeDateFragments | undefined {
+    if (this.getServiceDateFormat()) {
+      return DateMgt.getDateFragmentsOrder(this.getServiceDateFormat());
+    }
+    return undefined;
+  }
+
+  /**
+   * Gets the external date format as specified by the config.
+   * @returns {string | undefined} The Date Format
+   */
+  getExternalDateFormat(): string | undefined {
+    return this.getGeoviewLayerConfig().externalDateFormat;
+  }
+
+  /**
    * Gets the external fragments order if specified by the config, defaults to ISO_UTC.
+   * Date format object used to translate internal UTC ISO format to the external format.
    * @returns {TypeDateFragments} The Date Fragments
    */
   getExternalFragmentsOrder(): TypeDateFragments {
-    return DateMgt.getDateFragmentsOrder(this.getGeoviewLayerConfig().externalDateFormat);
+    return DateMgt.getDateFragmentsOrder(this.getExternalDateFormat());
   }
 
   /**

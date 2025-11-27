@@ -536,7 +536,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       this.getLayerConfig(),
       this.getOLSource(),
       this.getStyle(),
-      this.getExternalFragmentsOrder(),
+      this.getLayerConfig().getExternalFragmentsOrder(),
       this,
       filter,
       (filterToUse: string) => {

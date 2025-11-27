@@ -28,7 +28,7 @@ import { Projection } from '@/geo/utils/projection';
 import { LayerInvalidFeatureInfoFormatWMSError, LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { formatError, NetworkError, ResponseContentError } from '@/core/exceptions/core-exceptions';
-import { DateMgt, type TypeDateFragments } from '@/core/utils/date-mgt';
+import { type TypeDateFragments } from '@/core/utils/date-mgt';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVWFS } from '@/geo/layer/gv-layers/vector/gv-wfs';
 import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
@@ -561,12 +561,6 @@ export class GVWMS extends AbstractGVRaster {
     // Read the features
     const features = GeoUtilities.readFeaturesFromGeoJSON(responseData, undefined);
 
-    // TODO: Improve this thing with serviceDateFormat everywhere
-    // Get the server date fragments
-    const serverDateFragments = wfsLayerConfig.getGeoviewLayerConfig()?.serviceDateFormat
-      ? DateMgt.getDateFragmentsOrder(wfsLayerConfig.getGeoviewLayerConfig()?.serviceDateFormat)
-      : undefined;
-
     // Check if has oid field and therefore supports zoom to
     const supportZoomTo = !!wfsLayerConfig.getOutfields()?.find((outfield) => outfield.type === 'oid');
 
@@ -588,7 +582,7 @@ export class GVWMS extends AbstractGVRaster {
           feature,
           fieldName,
           fieldType,
-          serverDateFragments,
+          wfsLayerConfig.getServiceDateFragmentsOrder(),
           wfsLayerConfig.getExternalFragmentsOrder()
         );
       }
@@ -612,7 +606,7 @@ export class GVWMS extends AbstractGVRaster {
       this.getLayerConfig(),
       this.getOLSource(),
       this.getStyle(),
-      this.getExternalFragmentsOrder(),
+      this.getLayerConfig().getExternalFragmentsOrder(),
       this,
       filter,
       (filterToUse: string) => {
