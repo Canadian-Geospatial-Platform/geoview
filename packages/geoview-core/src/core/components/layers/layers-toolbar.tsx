@@ -95,7 +95,7 @@ export function LayersToolbar(): JSX.Element {
 
   return (
     <Box id="layers-toolbar" sx={layerToolbarStyle}>
-      <ButtonGroup size="small" variant="outlined" aria-label="outlined button group">
+      <ButtonGroup size="small" variant="outlined" aria-label={t('layers.layerControls')!}>
         <Button
           makeResponsive
           type="text"

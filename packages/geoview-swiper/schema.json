@@ -2,34 +2,36 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "GeoView Swiper Config Schema",
   "type": "object",
-  "version": 1.0,
-  "comments": "Configuration for GeoView swiper package.",
+  "version": "1.0",
+  "description": "Configuration schema for GeoView swiper package that enables layer comparison through a draggable swiper control.",
   "additionalProperties": false,
-
   "properties": {
     "orientation": {
       "type": "string",
       "enum": ["vertical", "horizontal"],
-      "description": "Orientation of the swiper bar.",
+      "description": "Orientation of the swiper bar. Vertical creates a left-right swipe, horizontal creates a top-bottom swipe.",
       "default": "vertical"
     },
     "keyboardOffset": {
       "type": "number",
-      "minimum": 10,
+      "minimum": 1,
       "maximum": 100,
-      "description": "The offset value when swiper is moved from the keyboard.",
+      "description": "The offset value in pixels when swiper is moved using keyboard arrow keys (Ctrl + Arrow).",
       "default": 10
     },
     "layers": {
       "type": "array",
+      "description": "Array of layer paths that will be affected by the swiper functionality.",
       "items": {
-        "type": "string"
-      }
+        "type": "string",
+        "description": "Layer path identifier for a layer that should be clipped by the swiper."
+      },
+      "default": []
     },
     "version": {
       "type": "string",
       "enum": ["1.0"],
-      "description": "The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by this version of the viewer."
+      "description": "The schema version used to validate the configuration file."
     }
   },
   "required": ["orientation", "layers"]

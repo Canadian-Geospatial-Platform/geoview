@@ -55,6 +55,7 @@ function IconStack({ layerPath }: TypeIconStackProps): JSX.Element | null {
     [iconData]
   );
 
+  // TODO: WCAG Issue #3109 - Add meaningful alt text to image icons if needed
   const renderSingleIcon = useCallback((): JSX.Element => {
     // Log
     logger.logTraceUseCallback('LAYER-ICON - renderSingleIcon');
@@ -65,7 +66,7 @@ function IconStack({ layerPath }: TypeIconStackProps): JSX.Element | null {
           <BrowserNotSupportedIcon />
         ) : (
           <Box sx={sxClasses.legendIcon}>
-            <Box component="img" alt="icon" src={iconImage} sx={sxClasses.maxIconImg} />
+            <Box component="img" alt="" src={iconImage} sx={sxClasses.maxIconImg} />
           </Box>
         )}
       </Icon>
@@ -80,11 +81,11 @@ function IconStack({ layerPath }: TypeIconStackProps): JSX.Element | null {
       <Box sx={sxClasses.stackIconsBox} aria-hidden="true">
         <Icon {...ICON_BUTTON_BASE_PROPS} sx={sxClasses.iconPreviewStacked}>
           <Box sx={sxClasses.legendIconTransparent}>
-            {iconImageStacked && <Box component="img" alt="icon" src={iconImageStacked} sx={sxClasses.maxIconImg} />}
+            {iconImageStacked && <Box component="img" alt="" src={iconImageStacked} sx={sxClasses.maxIconImg} />}
           </Box>
         </Icon>
         <Icon {...ICON_BUTTON_BASE_PROPS} sx={sxClasses.iconPreviewHoverable}>
-          <Box sx={sxClasses.legendIcon}>{iconImage && <Box component="img" alt="icon" src={iconImage} sx={sxClasses.maxIconImg} />}</Box>
+          <Box sx={sxClasses.legendIcon}>{iconImage && <Box component="img" alt="" src={iconImage} sx={sxClasses.maxIconImg} />}</Box>
         </Icon>
       </Box>
     );

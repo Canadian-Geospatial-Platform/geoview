@@ -19,13 +19,17 @@
           {
             "layerId": "polygons.json",
             "layerName": "Polygons",
-            "initialSettings": { "maxZoom": 8 },
+            "initialSettings": {
+              "maxZoom": 8
+            },
             "minScale": 10000000
           },
           {
             "layerId": "lines.json",
             "layerName": "Lines",
-            "initialSettings": { "maxZoom": 8 },
+            "initialSettings": {
+              "maxZoom": 8
+            },
             "minScale": 10000000
           },
           {
@@ -38,14 +42,18 @@
                 "layerName": "Icons",
                 "initialSettings": {
                   "maxZoom": 8,
-                  "states": { "visible": false }
+                  "states": {
+                    "visible": false
+                  }
                 },
                 "minScale": 10000000
               },
               {
                 "layerId": "points.json",
                 "layerName": "Points",
-                "initialSettings": { "maxZoom": 8 },
+                "initialSettings": {
+                  "maxZoom": 8
+                },
                 "minScale": 10000000
               }
             ]
@@ -60,7 +68,9 @@
           {
             "layerId": "NPRI-INRP_WaterEau_MediaGroupMilieu_2022",
             "layerName": "CSV - NPRI Water Media Group 2022",
-            "initialSettings": { "maxZoom": 8 },
+            "initialSettings": {
+              "maxZoom": 8
+            },
             "source": {
               "dataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/csv-files/NPRI-INRP_WaterEau_MediaGroupMilieu_2022.csv",
               "separator": ","
@@ -78,7 +88,9 @@
           {
             "layerId": "4",
             "layerName": "Esri Dynamic - Water Quality",
-            "initialSettings": { "maxZoom": 8 },
+            "initialSettings": {
+              "maxZoom": 8
+            },
             "minScale": 10000000
           }
         ]
@@ -93,7 +105,9 @@
           {
             "layerId": "0",
             "layerName": "Esri Feature - Historical Flood Events",
-            "initialSettings": { "maxZoom": 8 },
+            "initialSettings": {
+              "maxZoom": 8
+            },
             "minScale": 10000000
           }
         ]
@@ -107,7 +121,9 @@
           {
             "layerId": "annual_crop_inventory_2022",
             "layerName": "ESRI Image - Crop Inventory 2022",
-            "initialSettings": { "maxZoom": 8 },
+            "initialSettings": {
+              "maxZoom": 8
+            },
             "minScale": 10000000
           }
         ]
@@ -119,7 +135,9 @@
           {
             "layerId": "0",
             "layerName": "GeoCore - Canada Commemorative Map",
-            "initialSettings": { "maxZoom": 8 },
+            "initialSettings": {
+              "maxZoom": 8
+            },
             "minScale": 10000000
           }
         ]
@@ -133,7 +151,9 @@
           {
             "layerId": "ec-msc:CURRENT_CONDITIONS",
             "layerName": "WFS - Current Conditions",
-            "initialSettings": { "maxZoom": 8 },
+            "initialSettings": {
+              "maxZoom": 8
+            },
             "minScale": 10000000
           }
         ]
@@ -146,7 +166,9 @@
           {
             "layerId": "napl-ring-of-fire-1954",
             "layerName": "Static Image",
-            "initialSettings": { "maxZoom": 8 },
+            "initialSettings": {
+              "maxZoom": 8
+            },
             "source": {
               "dataAccessPath": "https://datacube-prod-data-public.s3.ca-central-1.amazonaws.com/store/imagery/aerial/napl/napl-ring-of-fire/napl-ring-of-fire-1954-08-07-60k-thumbnail.png",
               "extent": [-87.77486341686723, 51.62285357468582, -84.57727128084842, 53.833354975551075],
@@ -164,7 +186,9 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "lakes",
-            "initialSettings": { "maxZoom": 8 },
+            "initialSettings": {
+              "maxZoom": 8
+            },
             "minScale": 10000000
           }
         ]
@@ -178,7 +202,9 @@
           {
             "layerId": "msi-94-or-more",
             "layerName": "OGC WMS - Permanent Snow",
-            "initialSettings": { "maxZoom": 8 },
+            "initialSettings": {
+              "maxZoom": 8
+            },
             "source": {
               "wmsStyle": "msi-binary",
               "featureInfo": {
@@ -207,7 +233,9 @@
           {
             "layerId": "0",
             "layerName": "XYZTiles - World Topo Map",
-            "initialSettings": { "maxZoom": 8 },
+            "initialSettings": {
+              "maxZoom": 8
+            },
             "minScale": 10000000
           }
         ]
@@ -221,7 +249,9 @@
           {
             "layerId": "CBMT_CBCT_3978_V_OSM",
             "layerName": "Vector Tile - CBCT",
-            "initialSettings": { "maxZoom": 8 },
+            "initialSettings": {
+              "maxZoom": 8
+            },
             "styleUrl": "https://nrcan-rncan.maps.arcgis.com/sharing/rest/content/items/88ad9e2ef6e040a19472985e6606a2f9/resources/styles/root.json",
             "minScale": 10000000
           }
@@ -230,7 +260,9 @@
     ]
   },
   "components": ["overview-map", "north-arrow"],
-  "overviewMap": { "hideOnZoom": 7 },
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
   "footerBar": {
     "tabs": {
       "core": ["layers", "data-table"]

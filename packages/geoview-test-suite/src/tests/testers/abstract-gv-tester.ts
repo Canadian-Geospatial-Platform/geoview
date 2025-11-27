@@ -2,6 +2,7 @@ import type { Coordinate } from 'ol/coordinate';
 import { AbstractTester } from '../core/abstract-tester';
 import type { API } from 'geoview-core/api/api';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
+import type { TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-types';
 
 /**
  * Main GeoView Abstract Tester class.
@@ -119,6 +120,42 @@ export abstract class GVAbstractTester extends AbstractTester {
   static readonly GEOTIFF_VEGETATION: string =
     'https://datacube-prod-data-public.s3.ca-central-1.amazonaws.com/store/eo4ce/vegetation/vegetation-2020-fCOVER.tif';
   static readonly GEOTIFF_VEGETATION_FILE: string = 'vegetation-2020-fCOVER.tif';
+
+  static readonly INITIAL_SETTINGS_CONFIG = {
+    geoviewLayerId: 'geojsonLYR1',
+    geoviewLayerName: 'GeoJSON Sample',
+    metadataAccessPath: './datasets/geojson/metadata.meta',
+    geoviewLayerType: 'GeoJSON' as TypeGeoviewLayerType,
+    initialSettings: {
+      controls: {
+        highlight: false,
+        zoom: false,
+      },
+    },
+    listOfLayerEntryConfig: [
+      {
+        entryType: 'group',
+        layerId: 'point-feature-group',
+        layerName: 'Points & Icons',
+        initialSettings: {
+          controls: {
+            remove: false,
+          },
+        },
+        listOfLayerEntryConfig: [
+          {
+            layerId: 'points_1.json',
+            layerName: 'Points 1',
+            initialSettings: {
+              controls: {
+                highlight: true,
+              },
+            },
+          },
+        ],
+      },
+    ],
+  };
 
   /** The API for the tests */
   #api: API;

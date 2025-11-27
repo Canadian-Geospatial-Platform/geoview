@@ -2,46 +2,63 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "GeoView Custom Legend Config Schema",
   "type": "object",
-  "version": "1.0",
-  "comments": "Configuration for the GeoView custom legend package.",
   "additionalProperties": false,
-
   "properties": {
     "isOpen": {
       "type": "boolean",
-      "description": "Whether the custom legend panel is initially open.",
+      "description": "Whether the custom legend panel is initially open when the map loads.",
       "default": false
     },
     "legendList": {
-      "type": "array",
-      "description": "Ordered list of custom legend items to render.",
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "legendTitle": {
-            "type": "string",
-            "description": "Title/label shown for the legend item."
-          },
-          "symbolUrl": {
-            "type": "string",
-            "description": "URL of the symbol image to display for the legend item."
-          },
-          "description": {
-            "type": "string",
-            "description": "Optional descriptive text shown under the title."
-          }
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
         },
-        "required": ["legendTitle", "symbolUrl"]
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/legendItem"
+          }
+        }
       },
-      "default": []
-    },
-    "version": {
-      "type": "string",
-      "enum": ["1.0"],
-      "description": "Schema version used to validate this configuration."
+      "required": ["children"]
     }
   },
-
+  "definitions": {
+    "legendItem": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "symbologyStack": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "image": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/legendItem"
+          }
+        }
+      }
+    }
+  },
+  "version": {
+  "type": "string",
+  "enum": ["1.0"],
+  "description": "Schema version used to validate this configuration."
+},
   "required": ["legendList"]
 }

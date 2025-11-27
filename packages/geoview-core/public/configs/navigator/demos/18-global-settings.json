@@ -45,7 +45,9 @@
                 "layerId": "points_1.json",
                 "layerName": "Points 1",
                 "initialSettings": {
-                  "controls": { "remove": true }
+                  "controls": {
+                    "remove": true
+                  }
                 }
               },
               {

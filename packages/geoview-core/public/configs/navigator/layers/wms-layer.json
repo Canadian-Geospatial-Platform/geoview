@@ -163,7 +163,9 @@
     ]
   },
   "components": ["overview-map", "north-arrow"],
-  "overviewMap": { "hideOnZoom": 7 },
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
   "footerBar": {
     "tabs": {
       "core": ["layers", "data-table", "time-slider"]

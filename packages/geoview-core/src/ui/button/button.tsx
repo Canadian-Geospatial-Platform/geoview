@@ -14,6 +14,9 @@ export type ButtonProps = {
  * A customized Material-UI Button component with tooltip and responsive support.
  *
  * @component
+ * @param {ButtonProps} props - The properties for the Button component
+ * @param {Ref<HTMLButtonElement>} ref - The ref forwarded to the underlying MaterialButton
+ * @returns {JSX.Element} A rendered Button component
  * @example
  * ```tsx
  * // Basic usage
@@ -45,9 +48,6 @@ export type ButtonProps = {
  * </Button>
  * ```
  *
- * @param {ButtonProps} props - The properties for the Button component
- * @param {Ref<HTMLButtonElement>} ref - The ref forwarded to the underlying MaterialButton
- * @returns {JSX.Element} A rendered Button component
  *
  * @note For performance optimization in cases of frequent parent re-renders,
  * consider wrapping this component with React.memo at the consumption level.
@@ -130,5 +130,8 @@ function ButtonUI(props: ButtonProps, ref: Ref<HTMLButtonElement>): JSX.Element 
   );
 }
 
-// Export the Button  using forwardRef so that passing ref is permitted and functional in the react standards
+// Export the Button using forwardRef so that passing ref is permitted and functional in the react standards
+// TODO: WCAG Issue #2390 - This (forwardRef) prevents TypeDoc from documenting the 'Button' component as expected...
+// TODO: WCAG Issue #2390 - IconButton uses a custom prop ('iconRef') to work around this issue...
+// TODO: WCAG Issue #2390 - Investigate if similar approach could work here.
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(ButtonUI);
