@@ -1613,7 +1613,7 @@ export class LayerApi {
   }
 
   /**
-   * Clears all vector features from every layer in the Feature Info layer set.
+   * Clears all vector features from every layer in the All Feature Info Layer Set.
    */
   clearVectorFeaturesFromAllFeatureInfoLayerSet(): void {
     // Get all vector layers

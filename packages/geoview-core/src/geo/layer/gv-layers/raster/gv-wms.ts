@@ -327,7 +327,7 @@ export class GVWMS extends AbstractGVRaster {
     // If one of those contain application/json, use that format to get features
     const outputFormat = featureInfoFormat.find((format) => format.toLowerCase().includes('application/json'));
 
-    // TODO: WMS - Add support for other formats not quite GV issue #3134, but similar
+    // TODO: WMS - Add support for other formats. Not quite the GV issue #3134, but similar
 
     // Format the url
     const urlWithOutputJson = GeoUtilities.ensureServiceRequestUrlGetFeature(
@@ -484,12 +484,18 @@ export class GVWMS extends AbstractGVRaster {
     // Create the filterXML from the sql filter
     const xmlFilter = WfsRenderer.sqlToOlWfsFilterXml(sqlFilter, wfsLayerConfig.getVersion());
 
+    // Get the supported info formats
+    const featureInfoFormat = wfsLayerConfig.getSupportedFormats('application/json'); // application/json by default (QGIS Server doesn't seem to provide the metadata for the output formats, use application/json)
+
+    // If one of those contain application/json, use that format to get features
+    const outputFormat = featureInfoFormat.find((format) => format.toLowerCase().includes('application/json'));
+
     // Format the url
     const urlWithOutputJson = GeoUtilities.ensureServiceRequestUrlGetFeature(
       wfsLayerConfig.getMetadataAccessPath()!,
       wfsLayerConfig.layerId,
       wfsLayerConfig.getVersion(),
-      'application/json',
+      outputFormat,
       [],
       xmlFilter,
       outProjection.getCode()
@@ -498,12 +504,16 @@ export class GVWMS extends AbstractGVRaster {
     // Fetch and parse features
     const parsedFeatures = await GVWMS.fetchAndParseFeaturesFromWFSUrl(urlWithOutputJson, wmsLayerConfig, wfsLayerConfig);
 
-    // If any
-    if (parsedFeatures.length > 0) {
-      // Return the first feature extent for now
-      // TODO: Return a combination of extents for each features
-      return parsedFeatures[0].extent!;
-    }
+    // For each feature
+    let calculatedExtent: Extent | undefined;
+    parsedFeatures.forEach((feature) => {
+      // If calculatedExtent has not been defined, set it to extent
+      if (!calculatedExtent) calculatedExtent = feature.extent;
+      else GeoUtilities.getExtentUnion(calculatedExtent, feature.extent);
+    });
+
+    // If we have an extent, return it
+    if (calculatedExtent) return calculatedExtent;
 
     // Throw
     throw new NoExtentError(this.getLayerPath());
@@ -1261,24 +1271,19 @@ export class GVWMS extends AbstractGVRaster {
         const parts = key.split(':');
         const fieldName = parts[parts.length - 1];
         const fullFieldName = prefix ? `${prefix}.${fieldName}` : fieldName;
-        const value = obj[key];
+        const rawValue = obj[key];
+        let value = rawValue as string;
+        if (typeof rawValue === 'object' && '#text' in rawValue) value = rawValue['#text'];
 
-        if (value && typeof value === 'object') {
-          if ('#text' in value) {
-            featureInfo.fieldInfo[fullFieldName] = {
-              fieldKey: fieldKeyCounter++,
-              value: value['#text'],
-              dataType: 'string',
-              alias: fullFieldName,
-              domain: null,
-            };
-          } else {
-            extractFields(value, fullFieldName);
-          }
+        // If value has to go recursive
+        if (typeof value === 'object') {
+          // Go recursive
+          extractFields(value, fullFieldName);
         } else {
+          // Compile it
           featureInfo.fieldInfo[fullFieldName] = {
             fieldKey: fieldKeyCounter++,
-            value: value as string,
+            value: value,
             dataType: 'string',
             alias: fullFieldName,
             domain: null,

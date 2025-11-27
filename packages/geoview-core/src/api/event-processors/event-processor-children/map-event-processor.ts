@@ -1046,7 +1046,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       // Store state will be updated by map event
       this.getMapViewer(mapId).getView().fit(extent, mergedOptions);
 
-      // Wait a bit and return. The +150 is to make sure the logic before turning these function async remains
+      // Wait a bit and return. The +150 is just to make sure.
       return delay((mergedOptions.duration || DEFAULT_OL_FITOPTIONS.duration!) + 150);
     }
 
