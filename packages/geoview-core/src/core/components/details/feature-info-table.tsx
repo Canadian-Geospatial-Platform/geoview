@@ -105,6 +105,7 @@ export const FeatureItem = memo(function FeatureItem({
 // Extracted FeatureRow component
 export const FeatureRow = memo(function FeatureRow({ featureInfoItem, index, onInitLightBox }: FeatureRowProps): JSX.Element {
   const theme = useTheme();
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const { alias, value } = featureInfoItem;
 
   // Get the original value in an array
@@ -137,8 +138,7 @@ export const FeatureRow = memo(function FeatureRow({ featureInfoItem, index, onI
         } as React.CSSProperties
       }
       sx={{
-        color: index % 2 > 0 ? theme.palette.geoViewColor.bgColor.darken(0.9) : '',
-        marginBottom: '1.25rem',
+        ...sxClasses.featureInfoRow,
       }}
     >
       {featureInfoItem.alias !== 'html' && (
