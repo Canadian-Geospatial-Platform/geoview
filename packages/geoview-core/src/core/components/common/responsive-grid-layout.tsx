@@ -1,7 +1,7 @@
-import type { ReactNode, Ref} from 'react';
+import type { ReactNode, Ref } from 'react';
 import { useState, useCallback, forwardRef, useImperativeHandle, useEffect, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { SxProps} from '@mui/material/styles';
+import type { SxProps } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
 import Markdown from 'markdown-to-jsx';
 import { Box, FullscreenIcon, ButtonGroup, Button, Typography, IconButton } from '@/ui';
@@ -323,7 +323,7 @@ const ResponsiveGridLayout = forwardRef(
         <Box ref={guideContainerRef} tabIndex={0} sx={{ padding: '20px', overflow: 'auto' }}>
           <Box className="guideBox">
             {/* Close button, only shown WCAG is enabled and not fullScreen */}
-            {(isFocusTrap && !isFullScreen) && (
+            {isFocusTrap && !isFullScreen && (
               <IconButton
                 id={`layout-close-guide-${mapId}`}
                 onClick={handleCloseGuide}
@@ -413,7 +413,7 @@ const ResponsiveGridLayout = forwardRef(
               {rightTop ?? <Box />}
 
               <Box sx={sxClasses.rightButtonsContainer}>
-                <ButtonGroup size="small" variant="outlined" aria-label="outlined button group">
+                <ButtonGroup size="small" variant="outlined" aria-label={t('details.guideControls')!}>
                   {!fullWidth && !hideEnlargeBtn && renderEnlargeButton()}
                   {!!guideContentIds?.length && renderGuideButton()}
                   {!isMapFullScreen && renderFullScreenButton()}

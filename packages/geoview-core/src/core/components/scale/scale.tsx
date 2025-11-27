@@ -139,7 +139,8 @@ export const Scale = memo(function Scale({ expanded }: ScaleProps): JSX.Element 
     ),
     [interaction, scaleValues, scaleMode, sxClasses.scaleText, getScaleWidth]
   );
-
+  // TODO: WCAG Issue #2390 - Ensure that scale button updates are announced by screen readers
+  // TODO: WCAG Issue #2390 - Rethink this to use mutliple buttons or select element for better accessibility?
   return (
     <Tooltip title={t('mapnav.scale')} placement="top">
       <Box sx={BOX_STYLES}>

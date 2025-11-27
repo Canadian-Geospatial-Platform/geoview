@@ -15,6 +15,8 @@ interface ItemsListProps {
 
 // Extracted ListItem Component
 // Apply style to increase left/right tooltip area (padding: '0 18px 0 18px', margin: '0 -18px 0 -18px')
+// TODO: WCAG Issue #3121 - List items aren't focusable using keyboard navigation...
+// TODO: WCAG Issue #3121 - ... rework so to use buttons/checkboxes or similar component that is keyboard accessible for toggling
 const LegendListItem = memo(
   ({
     item: { icon, name, isVisible },
@@ -31,7 +33,7 @@ const LegendListItem = memo(
       <ListItemIcon>
         <Tooltip title={show ? value : ''} key={`Tooltip-${name}-${icon}1`} placement="left" disableHoverListener={!show}>
           <Box sx={{ padding: '0 18px 0 18px', margin: '0 -18px 0 -18px' }}>
-            {icon ? <Box component="img" alt={name} src={icon} /> : <BrowserNotSupportedIcon />}
+            {icon ? <Box component="img" alt="" src={icon} /> : <BrowserNotSupportedIcon />}
           </Box>
         </Tooltip>
       </ListItemIcon>

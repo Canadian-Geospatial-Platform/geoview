@@ -106,6 +106,7 @@
     "hidden": "La couche est cachée",
     "parentHidden": "La couche parent est cachée",
     "stepOne": "Télécharger des données",
+    "stepOneLoading": "Téléchargement des données...",
     "stepTwo": "Sélectionner le format",
     "stepThree": "Configurer la couche",
     "stepFour": "Entrer le nom",
@@ -167,6 +168,7 @@
     "instructionsNoLayersTitle": "Aucune couche visible",
     "instructionsNoLayersBody": "Ajoutez des couches visibles sur la carte.",
     "moreInfo": "Plus d'informations",
+    "lessInfo": "Moins d'informations",
     "layerType": "Type : ",
     "layerResource": "Ressource : ",
     "layerMetadata": "Métadonnées : ",
@@ -183,7 +185,8 @@
     "hideLayer": "Masquer la couche {{name}}",
     "tableViewNone": "Tableau (indisponible)",
     "moveLayerUp": "Déplacer la couche vers le haut",
-    "moveLayerDown": "Déplacer la couche vers le bas"
+    "moveLayerDown": "Déplacer la couche vers le bas",
+    "layerControls": "Commandes des couches"
   },
   "details": {
     "title": "Détails",
@@ -215,7 +218,8 @@
     "easting": "Easting",
     "northing": "Northing",
     "ntsMapsheet": "Carte SNRC",
-    "elevation": "Élévation"
+    "elevation": "Élévation",
+    "guideControls": "Commandes du guide"
   },
   "lightbox": {
     "next": "Prochaine",
@@ -382,6 +386,7 @@
       "mapIdNotFound": "La carte avec l'identifiant '__param__' est introuvable.",
       "mapIdAlreadyExists": "La carte avec l'identifiant '__param__' existe déjà.",
       "geoviewStoreNotFound": "Le 'React Store' sur la carte '__param__' est introuvable.",
+      "errorGeometryGroupId": "Identifiant de groupe de géométrie '__param__' est introuvable.",
       "mapDivNotExists": "Div avec identifiant __param__ does not exist.",
       "mapWrongCall": "Div avec identifiant __param__ a une classe 'geoview-map' et devrait être initialisé via un appel à 'cgpv.init()'.",
       "pluginError": "Une erreur majeure sur le Plugin '__param__' sur la carte '__param__' est survenue.",

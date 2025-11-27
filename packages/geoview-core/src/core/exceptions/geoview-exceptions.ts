@@ -214,6 +214,26 @@ export class InvalidProjectionError extends GeoViewError {
 }
 
 /**
+ * Error thrown when an invalid geometry group id is encountered.
+ * @extends {GeoViewError}
+ */
+export class InvaliGeometryGroupIdError extends GeoViewError {
+  /**
+   * Creates a new InvaliGeometryGroupIdError.
+   * @param {string} geometryGroupId - The invalid geometry group id that caused the error.
+   */
+  constructor(geometryGroupId: string) {
+    super('error.map.errorGeometryGroupId', [geometryGroupId]);
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'InvaliGeometryGroupIdError';
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, InvaliGeometryGroupIdError.prototype);
+  }
+}
+
+/**
  * Error thrown when an invalid extent is provided to a GeoView operation, such as zooming.
  * This helps surface cases where extent values are malformed or undefined.
  * @extends {GeoViewError}

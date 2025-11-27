@@ -66,7 +66,7 @@ export class FeatureHighlight {
    * Initializes the FeatureHighlight with the MapViewer, now that the map is accessible inside the MapViewer.
    */
   init(): void {
-    // Initialize the Feature Highlight
+    // Initialize the Feature Highlight (adding the map option sets zIndex to infinity because it is undefined)
     this.overlayLayer = new VectorLayer({ source: this.highlightSource, map: this.mapViewer.map });
     this.pointMarkers = new PointMarkers(this.mapViewer, this);
     if (MapEventProcessor.getFeatureHighlightColor(this.mapViewer.mapId) !== 'black')

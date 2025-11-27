@@ -106,6 +106,7 @@
     "hidden": "Layer is hidden",
     "parentHidden": "Parent layer is hidden",
     "stepOne": "Upload data",
+    "stepOneLoading": "Uploading data...",
     "stepTwo": "Select format",
     "stepThree": "Configure layer",
     "stepFour": "Enter name",
@@ -167,6 +168,7 @@
     "instructionsNoLayersTitle": "No layers visible",
     "instructionsNoLayersBody": "Add visible layers on the map.",
     "moreInfo": "More Information",
+    "lessInfo": "Less Information",
     "layerType": "Type: ",
     "layerResource": "Resource: ",
     "layerMetadata": "Metadata: ",
@@ -183,7 +185,8 @@
     "hideLayer": "Hide {{name}} layer",
     "tableViewNone": "Table (unavailable)",
     "moveLayerUp": "Move layer up",
-    "moveLayerDown": "Move layer down"
+    "moveLayerDown": "Move layer down",
+    "layerControls": "Layers controls"
   },
   "details": {
     "title": "Details",
@@ -215,7 +218,8 @@
     "easting": "Easting",
     "northing": "Northing",
     "ntsMapsheet": "NTS Mapsheet",
-    "elevation": "Elevation"
+    "elevation": "Elevation",
+    "guideControls": "Guide controls"
   },
   "lightbox": {
     "next": "Next",
@@ -381,6 +385,7 @@
     "map": {
       "mapIdNotFound": "Map with ID '__param__' not found.",
       "mapIdAlreadyExists": "Map with ID '__param__' already exists.",
+      "errorGeometryGroupId": "Invalid geometry group id '__param__' not found",
       "geoviewStoreNotFound": "GeoView Store on Map '__param__' not found.",
       "mapDivNotExists": "Div with id ${divId} does not exist",
       "mapWrongCall": "Div with id __param__ has a class 'geoview-map' and should be initialized via a 'cgpv.init()' call.",

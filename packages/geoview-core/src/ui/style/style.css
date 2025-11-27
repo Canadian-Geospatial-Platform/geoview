@@ -49,9 +49,11 @@ Hold viewer specific css not inside theme
 .responsive-layout-right-main-content .MuiGrid-container {
   background: unset !important;
 }
-.responsive-layout-right-main-content .details-feature-info-table .feature-info-row.MuiGrid-container {
-  background: var(--row-bg-color, initial) !important;
-}
 .MuiGrid-container:first-of-type {
   border: none !important;
+}
+
+/* Zebra striping for feature info rows - applies to both panel and modal */
+.details-feature-info-table .feature-info-row.MuiGrid-container {
+  background: var(--row-bg-color, transparent) !important;
 }

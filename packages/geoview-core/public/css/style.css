@@ -374,7 +374,9 @@ table.state {
   margin-bottom: 15px;
 }
 
-.demo-section p {
+/* Only apply to direct paragraph children, not nested components like geoview */
+.demo-section > p,
+.demo-section > div > p:not([class*='MuiTypography']) {
   color: #555;
   margin-bottom: 15px;
 }

@@ -130,6 +130,9 @@ export const MousePosition = memo(function MousePosition({ expanded }: MousePosi
     [positions, positionMode, expanded, sxClasses, theme.palette.geoViewFontSize.lg]
   );
 
+  // TODO: WCAG Issue #2390 - Ensure that mouse position button updates are announced by screen readers
+  // TODO: WCAG Issue #2390 - Rethink this to use mutliple buttons or select element for better accessibility?
+
   const collapsedContent = useMemo(
     () => (
       <Box

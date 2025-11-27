@@ -33,4 +33,4 @@ jobs:
         run: node common/scripts/install-run-rush.js install
 
       - name: Rush Build
-        run: node common/scripts/install-run-rush.js build:core
+        run: node common/scripts/install-run-rush.js build
