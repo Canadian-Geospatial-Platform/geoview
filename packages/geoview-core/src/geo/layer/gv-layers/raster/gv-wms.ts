@@ -1261,24 +1261,19 @@ export class GVWMS extends AbstractGVRaster {
         const parts = key.split(':');
         const fieldName = parts[parts.length - 1];
         const fullFieldName = prefix ? `${prefix}.${fieldName}` : fieldName;
-        const value = obj[key];
+        const rawValue = obj[key];
+        let value = rawValue as string;
+        if (typeof rawValue === 'object' && '#text' in rawValue) value = rawValue['#text'];
 
-        if (value && typeof value === 'object') {
-          if ('#text' in value) {
-            featureInfo.fieldInfo[fullFieldName] = {
-              fieldKey: fieldKeyCounter++,
-              value: value['#text'],
-              dataType: 'string',
-              alias: fullFieldName,
-              domain: null,
-            };
-          } else {
-            extractFields(value, fullFieldName);
-          }
+        // If value has to go recursive
+        if (typeof value === 'object') {
+          // Go recursive
+          extractFields(value, fullFieldName);
         } else {
+          // Compile it
           featureInfo.fieldInfo[fullFieldName] = {
             fieldKey: fieldKeyCounter++,
-            value: value as string,
+            value: value,
             dataType: 'string',
             alias: fullFieldName,
             domain: null,

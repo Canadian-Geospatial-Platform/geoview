@@ -9,13 +9,7 @@ import type { Projection as OLProjection } from 'ol/proj';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
 import { type TypeOutfields, type TypeOutfieldsType } from '@/api/types/map-schema-types';
-import type {
-  TypeGeoviewLayerConfig,
-  WFSJsonResponse,
-  TypeMetadataWFS,
-  VectorStrategy,
-  TypeMetadataWFSTextOnly,
-} from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerConfig, WFSJsonResponse, TypeMetadataWFS, VectorStrategy } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { findPropertyByRegexPath } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
@@ -113,9 +107,9 @@ export class WFS extends AbstractGeoViewVector {
       const metadataLayerList = metadata?.FeatureTypeList.FeatureType;
       entries = metadataLayerList.map((layerMetadata) => {
         let id = layerMetadata.Name as string;
-        if ('#text' in (layerMetadata.Name as TypeMetadataWFSTextOnly)) id = (layerMetadata.Name as TypeMetadataWFSTextOnly)['#text'];
+        if (typeof layerMetadata.Name === 'object' && '#text' in layerMetadata.Name) id = layerMetadata.Name['#text'];
         let title = layerMetadata.Title as string;
-        if ('#text' in (layerMetadata.Title as TypeMetadataWFSTextOnly)) title = (layerMetadata.Title as TypeMetadataWFSTextOnly)['#text'];
+        if (typeof layerMetadata.Title === 'object' && '#text' in layerMetadata.Title) title = layerMetadata.Title['#text'];
 
         return {
           id,
@@ -148,7 +142,7 @@ export class WFS extends AbstractGeoViewVector {
       // If no name
       if (!layerConfig.getLayerName()) {
         let foundTitle = featureType.Title as string;
-        if ('#text' in (featureType.Title as TypeMetadataWFSTextOnly)) foundTitle = (featureType.Title as TypeMetadataWFSTextOnly)['#text'];
+        if (typeof featureType.Title === 'object' && '#text' in featureType.Title) foundTitle = featureType.Title['#text'];
         // If found title, use that
         if (foundTitle) layerConfig.setLayerName(foundTitle);
       }
