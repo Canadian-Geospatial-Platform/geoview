@@ -299,18 +299,36 @@ export abstract class Projection {
   }
 
   /**
+   * Checks if a projection exists for GeoView and if not it adds it on-the-fly using the provided projection string information.
+   * @param {string | undefined} projection - The projection string to check if existing and to add when not existing.
+   */
+  static addProjectionIfMissing(projection: TypeProjection | ProjectionLike | undefined): Promise<void> {
+    // Add projection definition if not already included
+    if (projection) {
+      // If TypeProjection object
+      if (typeof projection === 'object' && 'wkid' in (projection as TypeProjection)) {
+        // Redirect
+        return this.#addProjectionIfMissingUsingObj(projection as TypeProjection);
+      } else {
+        // Redirect
+        return this.#addProjectionIfMissingUsingString(projection as ProjectionLike);
+      }
+    }
+
+    // Nothing to do
+    return Promise.resolve();
+  }
+
+  /**
    * Checks if a projection exists for GeoView and if not it adds it on-the-fly using the provided TypeProjection information.
    * @param {TypeProjection | undefined} projection - The projection to check if existing and to add when not existing.
    */
-  static async addProjectionIfMissingUsingObj(projection: TypeProjection | undefined): Promise<void> {
-    // Add projection definition if not already included
-    if (projection) {
-      try {
-        Projection.getProjectionFromObj(projection);
-      } catch (error: unknown) {
-        logger.logWarning(`Unsupported projection, attempting to add projection ${projection} now.`, error);
-        await Projection.addProjection(projection);
-      }
+  static async #addProjectionIfMissingUsingObj(projection: TypeProjection): Promise<void> {
+    try {
+      Projection.getProjectionFromObj(projection);
+    } catch (error: unknown) {
+      logger.logWarning(`Unsupported projection, attempting to add projection ${projection} now.`, error);
+      await Projection.addProjection(projection);
     }
   }
 
@@ -318,19 +336,16 @@ export abstract class Projection {
    * Checks if a projection exists for GeoView and if not it adds it on-the-fly using the provided projection string information.
    * @param {string | undefined} projection - The projection string to check if existing and to add when not existing.
    */
-  static async addProjectionIfMissingUsingString(projection: string | undefined): Promise<void> {
-    // Add projection definition if not already included
-    if (projection) {
-      try {
-        Projection.getProjectionFromString(projection);
-      } catch (error: unknown) {
-        logger.logWarning(`Unsupported projection, attempting to add projection ${projection} now.`, error);
+  static async #addProjectionIfMissingUsingString(projection: ProjectionLike): Promise<void> {
+    try {
+      Projection.getProjectionFromString(projection);
+    } catch (error: unknown) {
+      logger.logWarning(`Unsupported projection, attempting to add projection ${projection} now.`, error);
 
-        // Read the number
-        const epsgCode = this.readEPSGNumber(projection);
-        if (epsgCode) {
-          await Projection.addProjectionCode(epsgCode);
-        }
+      // Read the number
+      const epsgCode = this.readEPSGNumber(projection);
+      if (epsgCode) {
+        await Projection.addProjectionCode(epsgCode);
       }
     }
   }
@@ -395,7 +410,7 @@ export abstract class Projection {
    * @param {string} projection - A code string which is a combination of authority and identifier such as "EPSG:4326".
    * @return {OLProjection | undefined} Projection object, or undefined if not found.
    */
-  static getProjectionFromString(projection: string | ProjectionLike): OLProjection {
+  static getProjectionFromString(projection: ProjectionLike): OLProjection {
     // Get the projection from string
     const proj = OLGetProjection(projection);
 
@@ -435,18 +450,22 @@ export abstract class Projection {
    * The function trims whitespace and validates that the string matches a proper
    * `EPSG:<number>` pattern. Returns `undefined` if the format is invalid or the
    * numeric part is not a valid number.
-   * @param {string} projection - The projection identifier containing the EPSG code.
+   * @param {ProjectionLike} projection - The projection like identifier containing the EPSG code.
    * @returns {number | undefined} The extracted EPSG numeric code, or `undefined` if invalid.
    * @static
    */
-  static readEPSGNumber(projection: string | undefined): number | undefined {
+  static readEPSGNumber(projection: ProjectionLike): number | undefined {
     if (!projection) return undefined;
 
+    // Treat both OLProjection or string inputs
+    let projectionCode: string = projection as string;
+    if (typeof projection === 'object' && 'getCode' in projection) projectionCode = projection.getCode();
+
     // Trim and normalize
-    const trimmed = projection.trim();
+    const projectionCodeTrimmed = projectionCode.trim();
 
     // Match patterns like: EPSG:4326, epsg:3857, EpSg:1234, etc.
-    const match = /^epsg\s*:\s*(\d+)$/i.exec(trimmed);
+    const match = /^epsg\s*:\s*(\d+)$/i.exec(projectionCodeTrimmed);
     if (!match) return undefined;
 
     const epsgNumber = Number(match[1]);

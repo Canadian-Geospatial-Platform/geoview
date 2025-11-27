@@ -291,7 +291,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
           const dataEPSG = GeoUtilities.readEPSGOfGeoJSON(responseData);
 
           // If found, check if we have it in Projection and try adding it if we're missing it
-          await Projection.addProjectionIfMissingUsingString(dataEPSG);
+          await Projection.addProjectionIfMissing(dataEPSG);
 
           // Assign the data projection reading options best we can, otherwise use the config, otherwise leave it undefined to let OpenLayers figure it out by itself using the GeoJSON parser later
           // https://openlayers.org/en/latest/apidoc/module-ol_format_GeoJSON-GeoJSON.html

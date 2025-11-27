@@ -93,7 +93,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
       layerConfig.validateUpdateInitialSettingsExtent();
 
       // Check if we support that projection and if not add it on-the-fly
-      await Projection.addProjectionIfMissingUsingObj(fullExtent.spatialReference);
+      await Projection.addProjectionIfMissing(fullExtent.spatialReference);
 
       // Set zoom levels. Vector tiles may be unique as they can have both scale and zoom level properties
       // First set the min/max scales based on the service / config

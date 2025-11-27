@@ -109,11 +109,11 @@ export class GeoTIFF extends AbstractGeoViewRaster {
   static async #initializeSourceProjection(source: GeoTIFFSource, layerConfig: GeoTIFFLayerEntryConfig): Promise<void> {
     try {
       const srcView = await source.getView();
-      const projection = typeof srcView?.projection === 'string' ? srcView.projection : srcView?.projection?.getCode();
-      const projectionObject: TypeProjection = projection ? { wkid: Number(projection.replace('EPSG:', '')) } : { wkid: 4326 };
+      const { projection } = srcView;
+      const projectionObject: TypeProjection = projection ? { wkid: Projection.readEPSGNumber(projection)! } : { wkid: 4326 };
 
       // Add projection definition if not already included
-      await Projection.addProjectionIfMissingUsingObj(projectionObject);
+      await Projection.addProjectionIfMissing(projectionObject);
     } catch (error) {
       logger.logError('Failed to initialize GeoTIFF source:', {
         layerId: layerConfig.layerId,

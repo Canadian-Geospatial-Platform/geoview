@@ -38,7 +38,7 @@ import type { TypeEsriImageLayerLegend } from '@/geo/layer/gv-layers/raster/gv-e
 import { FetchEsriWorkerPool } from '@/core/workers/fetch-esri-worker-pool';
 import type { QueryParams } from '@/core/workers/fetch-esri-worker-script';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
-import { NoExtentError, NoFeaturesPropertyError } from '@/core/exceptions/geoview-exceptions';
+import { NoFeaturesPropertyError } from '@/core/exceptions/geoview-exceptions';
 import { formatError, RequestAbortedError } from '@/core/exceptions/core-exceptions';
 import { LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions';
 import type { TypeDateFragments } from '@/core/utils/date-mgt';
@@ -220,34 +220,30 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @override
    * @returns {Promise<Extent>} The extent of the features, if available.
    * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
+   * @throws {RequestTimeoutError} Error thrown when the request exceeds the timeout duration.
+   * @throws {RequestAbortedError} Error thrown when the request was aborted by the caller's signal.
+   * @throws {ResponseError} Error thrown when the response is not OK (non-2xx).
+   * @throws {ResponseEmptyError} Error thrown when the JSON response is empty.
+   * @throws {ResponseTypeError} Errow thrown when the response from the service is not an object.
+   * @throws {ResponseContentError} Error thrown when the response actually contains an error within it.
+   * @throws {NetworkError} Errow thrown when a network issue happened.
    */
   override async onGetExtentFromFeatures(objectIds: number[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
     // Get url for service from layer entry config
     const layerEntryConfig = this.getLayerConfig();
 
-    // Use the returnExtentOnly=true to get only the extent of ids
-    // TODO: We should return a real extent geometry Projection.transformAndDensifyExtent
-    const idString = objectIds.join('%2C');
-    const outfieldQuery = outfield ? `&outFields=${outfield}` : '';
-    const queryUrl = `${layerEntryConfig.getDataAccessPath(true)}${layerEntryConfig.layerId}/query?&f=json&objectIds=${idString}${outfieldQuery}&returnExtentOnly=true`;
+    // Use the returnExtentOnly=true to get only the extent of ids and ask in the right projection right away
+    const idStringClause = `&objectIds=${objectIds.join('%2C')}`;
+    const outfieldQueryClause = outfield ? `&outFields=${outfield}` : '';
+    const outSrClause = `&outSR=${Projection.readEPSGNumber(outProjection)}`;
+    const queryUrl = `${layerEntryConfig.getDataAccessPath(true)}${layerEntryConfig.layerId}/query?${idStringClause}${outfieldQueryClause}${outSrClause}&returnExtentOnly=true&f=json`;
 
     // Fetch
     const responseJson = await Fetch.fetchEsriJson<EsriQueryJsonResponse>(queryUrl);
     const { extent } = responseJson;
 
-    const projectionExtent: OLProjection | undefined = Projection.getProjectionFromObj(extent.spatialReference);
-
-    if (extent && projectionExtent) {
-      const projExtent = Projection.transformExtentFromProj(
-        [extent.xmin, extent.ymin, extent.xmax, extent.ymax],
-        projectionExtent,
-        outProjection
-      );
-      return GeoUtilities.validateExtent(projExtent, outProjection.getCode());
-    }
-
-    // Throw
-    throw new NoExtentError(this.getLayerPath());
+    // Validate and return the extent
+    return GeoUtilities.validateExtent([extent.xmin, extent.ymin, extent.xmax, extent.ymax], outProjection.getCode());
   }
 
   /**

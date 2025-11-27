@@ -379,7 +379,7 @@ export async function commonProcessLayerMetadata<
   }
 
   // Check if we support that projection and if not add it on-the-fly
-  await Projection.addProjectionIfMissingUsingObj(responseJson.spatialReference);
+  await Projection.addProjectionIfMissing(responseJson.spatialReference);
 
   commonProcessFeatureInfoConfig(layerConfig);
 
