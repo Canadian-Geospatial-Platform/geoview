@@ -285,6 +285,14 @@ export abstract class ConfigBaseClass {
   }
 
   /**
+   * Gets the external fragments order if specified by the config, defaults to ISO_UTC.
+   * @returns {TypeDateFragments} The Date Fragments
+   */
+  getExternalFragmentsOrder(): TypeDateFragments {
+    return DateMgt.getDateFragmentsOrder(this.getGeoviewLayerConfig().externalDateFormat);
+  }
+
+  /**
    * Gets the layer min scale if any.
    * @returns {number | undefined} The layer min scale if any.
    */
@@ -438,14 +446,6 @@ export abstract class ConfigBaseClass {
 
     // No siblings
     return [];
-  }
-
-  /**
-   * Gets the external fragments order if specified by the config, defaults to ISO_UTC.
-   * @returns {TypeDateFragments} The Date Fragments
-   */
-  getExternalFragmentsOrder(): TypeDateFragments {
-    return DateMgt.getDateFragmentsOrder(this.getGeoviewLayerConfig().externalDateFormat);
   }
 
   /**
