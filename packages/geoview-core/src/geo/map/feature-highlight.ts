@@ -36,13 +36,13 @@ export class FeatureHighlight {
   pointMarkers?: PointMarkers;
 
   /** The fill for the highlight */
-  #highlightColor: TypeHighlightColors = 'black';
+  #highlightColor: TypeHighlightColors = 'aqua';
 
   /** The fill for the highlight */
-  #highlightFill = new Fill({ color: [0, 0, 0, 0.3] });
+  #highlightFill = new Fill({ color: [0, 230, 242, 0.3] }); // aqua
 
   /** The style for the highlight */
-  #highlightStyle = new Style({ stroke: new Stroke({ color: 'black', width: 1.25 }), fill: this.#highlightFill });
+  #highlightStyle = new Style({ stroke: new Stroke({ color: 'aqua', width: 2 }), fill: this.#highlightFill });
 
   /** The style for the bbox highlight */
   #darkOutlineStyle = new Style({ stroke: new Stroke({ color: 'black', width: 1.25 }) });
@@ -69,7 +69,7 @@ export class FeatureHighlight {
     // Initialize the Feature Highlight (adding the map option sets zIndex to infinity because it is undefined)
     this.overlayLayer = new VectorLayer({ source: this.highlightSource, map: this.mapViewer.map });
     this.pointMarkers = new PointMarkers(this.mapViewer, this);
-    if (MapEventProcessor.getFeatureHighlightColor(this.mapViewer.mapId) !== 'black')
+    if (MapEventProcessor.getFeatureHighlightColor(this.mapViewer.mapId) !== 'aqua')
       this.changeHighlightColor(MapEventProcessor.getFeatureHighlightColor(this.mapViewer.mapId));
   }
 
@@ -80,26 +80,31 @@ export class FeatureHighlight {
   changeHighlightColor(color: TypeHighlightColors): void {
     this.#highlightColor = color;
 
-    // set deafult value to black then check if vallid color
-    let stroke: Stroke = new Stroke({ color: 'black', width: 1.25 });
-    let featureColor: Color = [0, 0, 0, 0.3];
+    // set default value to aqua then check if valid color
+    let stroke: Stroke = new Stroke({ color: 'aqua', width: 2 });
+    let featureColor: Color = [0, 230, 242, 0.3];
     switch (color) {
       case 'white': {
         featureColor = [255, 255, 255, 0.3];
-        stroke = new Stroke({ color: 'white', width: 1.25 });
+        stroke = new Stroke({ color: 'white', width: 2 });
         break;
       }
       case 'red': {
         featureColor = [255, 0, 0, 0.3];
-        stroke = new Stroke({ color: 'red', width: 1.25 });
+        stroke = new Stroke({ color: 'red', width: 2 });
         break;
       }
       case 'green': {
         featureColor = [0, 255, 255, 0.3];
-        stroke = new Stroke({ color: 'green', width: 1.25 });
+        stroke = new Stroke({ color: 'green', width: 2 });
         break;
       }
       case 'black': {
+        featureColor = [0, 0, 0, 0.3];
+        stroke = new Stroke({ color: 'black', width: 2 });
+        break;
+      }
+      case 'aqua': {
         break;
       }
       default: {

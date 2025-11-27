@@ -173,7 +173,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     clickMarker: undefined,
     currentBasemapOptions: { basemapId: 'transport', shaded: true, labeled: true },
     currentProjection: DEFAULT_PROJECTION,
-    featureHighlightColor: 'black',
+    featureHighlightColor: 'aqua',
     fixNorth: false,
     hideCoordinateInfoSwitch: false,
     highlightedFeatures: [],
@@ -222,7 +222,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
             : MAP_CENTER[geoviewConfig.map.viewSettings.projection],
           currentProjection: geoviewConfig.map.viewSettings.projection,
           currentBasemapOptions: geoviewConfig.map.basemapOptions,
-          featureHighlightColor: geoviewConfig.map.highlightColor || 'black',
+          featureHighlightColor: geoviewConfig.map.highlightColor || 'aqua',
           hideCoordinateInfoSwitch: geoviewConfig.globalSettings?.hideCoordinateInfoSwitch || false,
           homeView: geoviewConfig.map.viewSettings.homeView ||
             geoviewConfig.map.viewSettings.initialView || { zoomAndCenter: [MAP_ZOOM_LEVEL[3857], MAP_CENTER[3857]] },

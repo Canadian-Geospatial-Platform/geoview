@@ -378,7 +378,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
   return (
     <Box sx={sxClasses.appBar} className={`interaction-${interaction}`} id={`${mapId}-appBar`} onClick={onScrollShellIntoView}>
       <Box sx={sxClasses.appBarButtons}>
-        {renderButtonPanel(topPanelNames)}
+        {interaction === 'dynamic' && renderButtonPanel(topPanelNames)}
         <Box sx={sxClasses.versionButtonDiv}>
           {appBarComponents.includes(DEFAULT_APPBAR_CORE.EXPORT) && interaction === 'dynamic' && (
             <List sx={sxClasses.appBarList}>

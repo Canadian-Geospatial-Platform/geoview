@@ -353,7 +353,7 @@ export const MAP_ZOOM_LEVEL: Record<TypeValidMapProjectionCodes, number> = {
 };
 
 /** Type used to define valid highlight colors. */
-export type TypeHighlightColors = 'black' | 'white' | 'red' | 'green';
+export type TypeHighlightColors = 'aqua' | 'black' | 'white' | 'red' | 'green';
 
 /** Type used to define overlay objects. */
 // TODO: Add more overlay objects - polygons, bounding box?
@@ -434,7 +434,7 @@ export const DEFAULT_MAP_FEATURE_CONFIG = {
     },
     interaction: 'dynamic',
     listOfGeoviewLayerConfig: [],
-    highlightColor: 'black',
+    highlightColor: 'aqua',
     overlayObjects: {
       pointMarkers: {},
     },

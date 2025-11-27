@@ -660,6 +660,13 @@ export class MapViewer {
    */
   setInteraction(interaction: TypeInteraction): void {
     MapEventProcessor.setInteraction(this.mapId, interaction);
+
+    // Register or unregister pointer handlers
+    if (interaction === 'static') {
+      this.unregisterMapPointerHandlers(this.map);
+    } else {
+      this.registerMapPointerHandlers(this.map);
+    }
   }
 
   /**
