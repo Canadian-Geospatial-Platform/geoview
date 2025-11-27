@@ -325,18 +325,20 @@ export function Shell(props: ShellProps): JSX.Element {
       </Link>
       <FocusTrap open={activeTrapGeoView}>
         <Box ref={shellRef} id={`shell-${mapViewer.mapId}`} sx={sxClasses.shell} className="geoview-shell" tabIndex={-1}>
-          <Link
-            id={`main-map-${mapViewer.mapId}`}
-            href={`#main-map-${mapViewer.mapId}`}
-            tabIndex={0}
-            sx={{ ...sxClasses.skip, top: '0px' }}
-            onClick={(e) => {
-              e.preventDefault();
-              handleSkipToMainContent();
-            }}
-          >
-            {t('keyboardnav.map')}
-          </Link>
+          {interaction === 'dynamic' && (
+            <Link
+              id={`main-map-${mapViewer.mapId}`}
+              href={`#main-map-${mapViewer.mapId}`}
+              tabIndex={0}
+              sx={{ ...sxClasses.skip, top: '0px' }}
+              onClick={(e) => {
+                e.preventDefault();
+                handleSkipToMainContent();
+              }}
+            >
+              {t('keyboardnav.map')}
+            </Link>
+          )}
 
           <Box id={`map-${mapViewer.mapId}`} sx={sxClasses.mapShellContainer} className="mapContainer" ref={mapShellContainerRef}>
             <CircularProgress isLoaded={mapLoaded} />
@@ -356,7 +358,7 @@ export function Shell(props: ShellProps): JSX.Element {
               onClose={handleSnackBarClose}
             />
           </Box>
-          {geoviewConfig?.footerBar && <FooterBar api={mapViewer.footerBarApi} />}
+          {geoviewConfig?.footerBar && interaction === 'dynamic' && <FooterBar api={mapViewer.footerBarApi} />}
           {Object.keys(mapViewer.modal.modals).map((modalId) => (
             <Modal
               key={modalId}
