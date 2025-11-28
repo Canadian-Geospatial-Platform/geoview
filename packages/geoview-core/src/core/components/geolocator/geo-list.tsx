@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { useTheme } from '@mui/material';
-import { Box, ListItemButton, Grid, Tooltip, Typography, ListItem } from '@/ui';
+import { List, ListItem, ListItemButton, Grid, Tooltip, Typography } from '@/ui';
 import type { GeoListItem } from '@/core/components/geolocator/geolocator';
 import { getSxClassesList } from '@/core/components/geolocator/geolocator-style';
 import { getBoldListTitle, getTooltipTitle } from '@/core/components/geolocator/utilities';
@@ -57,15 +57,17 @@ export function GeoList({ geoListItems, searchValue }: GeoListProps): JSX.Elemen
   };
 
   return (
-    <Box>
+    <List>
       {geoListItems.map((geoListItem, index) => (
+        // tootltip is here for when the name is too long to be shown in full in the list
         <Tooltip
           title={getTooltipTitle(geoListItem)}
           placement="right"
           // sometime when we search by `bay`, response have name and lat same, thats why index is used to distinguish
           key={`${geoListItem.name}-${geoListItem.lat}-${index.toString()}`}
+          describeChild
         >
-          <ListItem component="div" disablePadding>
+          <ListItem disablePadding key={`${geoListItem.name}-${geoListItem.lat}-${index.toString()}`}>
             <ListItemButton onClick={() => handleZoomToGeoLocator([geoListItem.lng, geoListItem.lat], geoListItem.bbox)}>
               <Grid container sx={{ width: '100%' }}>
                 <Grid size={{ xs: 12, sm: 8 }}>
@@ -89,6 +91,6 @@ export function GeoList({ geoListItems, searchValue }: GeoListProps): JSX.Elemen
           </ListItem>
         </Tooltip>
       ))}
-    </Box>
+    </List>
   );
 }

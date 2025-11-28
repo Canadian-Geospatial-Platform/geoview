@@ -410,62 +410,73 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
     [allMatches.length, handleNext, handlePrevious]
   );
 
+  // TODO: WCAG Issue #3114 #3115 Contrast issues with search icons/text
   return (
     <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider', width: '400px', maxWidth: '100%' }}>
-      <TextField
-        fullWidth
-        size="small"
-        placeholder={t('guide.search')!}
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        onKeyDown={handleKeyDown}
-        slotProps={{
-          input: {
-            ref: searchInputRef,
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-            endAdornment: searchTerm && (
-              <InputAdornment position="end">
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  {allMatches.length > 0 && (
-                    <>
-                      <Box sx={{ fontSize: '0.75rem', color: 'text.secondary', whiteSpace: 'nowrap' }}>
-                        {currentMatchIndex + 1} of {allMatches.length}
-                      </Box>
-                      <IconButton size="small" aria-label={t('guide.arrowUp')} onClick={handlePrevious} disabled={allMatches.length === 0}>
-                        <KeyboardArrowUpIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />
-                      </IconButton>
-                      <IconButton size="small" aria-label={t('guide.arrowDown')} onClick={handleNext} disabled={allMatches.length === 0}>
-                        <KeyboardArrowDownIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />
-                      </IconButton>
-                    </>
-                  )}
-                  <IconButton
-                    size="small"
-                    edge="end"
-                    color="inherit"
-                    aria-label={t('general.close')}
-                    onClick={handleClear}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleClear();
-                      }
-                    }}
-                    sx={{ ml: 1 }}
-                  >
-                    <CloseIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />
-                  </IconButton>
-                </Box>
-              </InputAdornment>
-            ),
-          },
-        }}
-      />
+      <form role="search" aria-label={t('guide.searchFormLabel')!}>
+        <TextField
+          fullWidth
+          size="small"
+          placeholder={t('guide.search')!}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          onKeyDown={handleKeyDown}
+          slotProps={{
+            htmlInput: {
+              'aria-label': t('guide.searchInputLabel')!,
+            },
+            input: {
+              ref: searchInputRef,
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+              endAdornment: searchTerm && (
+                <InputAdornment position="end">
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    {allMatches.length > 0 && (
+                      <>
+                        <Box sx={{ fontSize: '0.75rem', color: 'text.secondary', whiteSpace: 'nowrap' }}>
+                          {currentMatchIndex + 1} of {allMatches.length}
+                        </Box>
+                        <IconButton
+                          size="small"
+                          aria-label={t('guide.arrowUp')}
+                          onClick={handlePrevious}
+                          disabled={allMatches.length === 0}
+                        >
+                          <KeyboardArrowUpIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />
+                        </IconButton>
+                        <IconButton size="small" aria-label={t('guide.arrowDown')} onClick={handleNext} disabled={allMatches.length === 0}>
+                          <KeyboardArrowDownIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />
+                        </IconButton>
+                      </>
+                    )}
+                    <IconButton
+                      size="small"
+                      edge="end"
+                      color="inherit"
+                      aria-label={t('general.clearSearch')}
+                      onClick={handleClear}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleClear();
+                        }
+                      }}
+                      sx={{ ml: 1 }}
+                    >
+                      <CloseIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />
+                    </IconButton>
+                  </Box>
+                </InputAdornment>
+              ),
+            },
+          }}
+        />
+      </form>
     </Box>
   );
 }

@@ -214,7 +214,7 @@ export const Guide = memo(function GuidePanel({ containerType = CONTAINER_TYPE.F
           onLayerListClicked={handleGuideItemClick}
           aria-label={ariaLabel}
         >
-          <Box sx={sxClasses.rightPanelContainer} aria-label={ariaLabel} className="guidebox-container">
+          <Box sx={sxClasses.rightPanelContainer} className="guidebox-container">
             <Box className="guideBox">{currentGuideContent}</Box>
           </Box>
         </Layout>

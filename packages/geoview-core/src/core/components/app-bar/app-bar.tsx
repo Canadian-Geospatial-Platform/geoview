@@ -332,7 +332,6 @@ export function AppBar(props: AppBarProps): JSX.Element {
    * @param {string[]} panelNames tab that will be rendered in appbar.
    * @returns JSX.Element
    */
-  // TODO: WCAG Issue #3154 - add aria-controls to <IconButton>. Needs id of the corresponding panel.
   const renderButtonPanel = (panelNames: string[]): ReactNode => {
     // Map through panel names and create ListItems for visible buttons
     const visibleButtons = panelNames
@@ -344,7 +343,8 @@ export function AppBar(props: AppBarProps): JSX.Element {
           return (
             <ListItem key={buttonPanel.button.id}>
               <IconButton
-                id={buttonPanel.button.id}
+                id={`${buttonPanel.button.id}-panel-btn`}
+                aria-controls={`appbar-panel-${buttonPanel.button.id}`}
                 aria-label={t(buttonPanel.button['aria-label'])}
                 aria-expanded={tabId === buttonPanel.button.id && isOpen ? 'true' : 'false'}
                 tooltipPlacement="right"

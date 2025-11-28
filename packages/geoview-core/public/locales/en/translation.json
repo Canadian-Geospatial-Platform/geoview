@@ -7,6 +7,7 @@
     "name": "Name",
     "open": "Open",
     "remove": "Remove",
+    "removeAll": "Remove all",
     "view": "View",
     "failed": "failed",
     "started": "started",
@@ -19,7 +20,8 @@
     "clickEnlarge": "Click to enlarge",
     "show": "Show",
     "hide": "Hide",
-    "none": "No"
+    "none": "No",
+    "clearSearch": "Clear search"
   },
   "mapnav": {
     "arianavbar": "Vertical button group for map navigation",
@@ -73,13 +75,17 @@
   },
   "appbar": {
     "export": "Download map",
-    "notifications": "Notification",
+    "notifications": "Notifications",
     "noNotificationsAvailable": "No notifications available",
     "layers": "Layers",
     "share": "Share",
     "version": "About GeoView",
+    "closeVersionsDialog": "Close About GeoView dialog",
     "repoLink": "Github",
-    "removeAllNotifications": "Remove all",
+    "removeNotification": "Remove notification",
+    "removeAllNotifications": "Remove all notifications",
+    "repeatedNotificationTimes": "repeated {{count}} times",
+    "closeNotificationsDialog": "Close notifications dialog",
     "navLabel": "Main map controls"
   },
   "legend": {
@@ -315,8 +321,14 @@
   },
   "geolocator": {
     "title": "Geolocator",
+    "searchFormLabel": "Geolocator search",
+    "searchInputLabel": "Enter keyword(s) (minimum 3 characters)",
     "search": "Search",
+    "searchClose": "Close search",
+    "searchSubmit": "Submit search",
+    "searchResults": "Search results",
     "noResult": "No matches found for",
+    "resultsFound": "{{count}} result(s) found for '{{searchTerm}}'",
     "province": "Province",
     "category": "Category",
     "clearFilters": "Clear filters",
@@ -350,7 +362,10 @@
     "total": "total",
     "selectLayerAndScroll": "Show in Data Table panel",
     "accessAdvancedFunctions": "Access Data Table panel for advanced functions",
-    "filterToggle": "column filters"
+    "filterToggle": "column filters",
+    "searchInputLabel": "Search data table columns",
+    "tableControls": "Data table controls",
+    "tableAriaLabelWithLayer": "{{layerName}} data table"
   },
   "geoChart": {
     "noChartAvailable": "Click on the map on a layer with chart"
@@ -361,6 +376,8 @@
   "guide": {
     "title": "Guide",
     "search": "Search guide...",
+    "searchFormLabel": "Search guide",
+    "searchInputLabel": "Search keyword(s)",
     "errorMessage": "Sorry, unable to find the help document!",
     "arrowUp": "Previous match",
     "arrowDown": "Next match"

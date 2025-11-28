@@ -1,6 +1,6 @@
 =1!loadingStatus=
 
-# Interaction avec la carte et état de chargement
+## Interaction avec la carte et état de chargement
 
 <div style="border-bottom: 2px solid #2a2f39; margin-bottom: 15px;"></div>
 
@@ -51,7 +51,7 @@ Pour amener le focus sur la carte:
 
 =1!navigationControls=
 
-# Commandes de navigation
+## Commandes de navigation
 
 <div style="border-bottom: 2px solid #2a2f39; margin-bottom: 15px;"></div>
 
@@ -59,16 +59,16 @@ Les commandes de navigation permettent d'ajuster l'étendue de la visualisation,
 
 Selon la configuration de la visionneuse, le coin inférieur droit de la carte contient les commandes de navigation suivantes :
 
-| Symbole                                                                                                                  | Nom                      | Description                                                                                                                                                                                                                                                                                                                                                              |
-| ------------------------------------------------------------------------------------------------------------------------ | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| ![Une icône représentant la fonction « Plein écran »]({{assetsURL}}/img/guide/navigation/fullscreen.svg)                 | Plein écran              | Permet de voir la carte sur toute la page en passant de la taille originale au plein écran.                                                                                                                                                                                                                                                                              |
-| ![Une icône représentant la fonction « Zoom avant »]({{assetsURL}}/img/guide/navigation/plus.svg)                        | Zoom avant               | Permet de faire un zoom avant d'un niveau à la fois pour voir le contenu plus en détail; fonctionne aussi avec la touche d'addition du clavier (+).                                                                                                                                                                                                                      |
-| ![Une icône représentant la fonction « Zoom arrière »]({{assetsURL}}/img/guide/navigation/minus.svg)                     | Zoom arrière             | Permet de faire un zoom arrière d'un niveau à la fois pour voir le contenu moins en détail; fonctionne aussi avec la touche de soustraction du clavier (-).                                                                                                                                                                                                              |
+| Symbole                                                                                                                  | Nom                      | Description                                                                                                                                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------ | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ![Une icône représentant la fonction « Plein écran »]({{assetsURL}}/img/guide/navigation/fullscreen.svg)                 | Plein écran              | Permet de voir la carte sur toute la page en passant de la taille originale au plein écran.                                                                                                                                                                                                    |
+| ![Une icône représentant la fonction « Zoom avant »]({{assetsURL}}/img/guide/navigation/plus.svg)                        | Zoom avant               | Permet de faire un zoom avant d'un niveau à la fois pour voir le contenu plus en détail; fonctionne aussi avec la touche d'addition du clavier (+).                                                                                                                                            |
+| ![Une icône représentant la fonction « Zoom arrière »]({{assetsURL}}/img/guide/navigation/minus.svg)                     | Zoom arrière             | Permet de faire un zoom arrière d'un niveau à la fois pour voir le contenu moins en détail; fonctionne aussi avec la touche de soustraction du clavier (-).                                                                                                                                    |
 | ![Une icône représentant la fonction « Rotation de la carte »]({{assetsURL}}/img/guide/navigation/360.svg)               | Rotation de la carte     | Permet de contrôler la rotation de la carte avec un curseur de -180° à +180°. Le panneau comprend un bouton à bascule **Nord fixe** (disponible pour la projection LCC) pour garder la carte orientée le nord au haut, et un bouton de réinitialisation pour revenir à l'orientation initiale. |
-| ![Une icône représentant la fonction « Géolocalisation »]({{assetsURL}}/img/guide/navigation/geolocation.svg)            | Géolocalisation          | Permet de zoomer et de déplacer la carte sur votre position géographique.                                                                                                                                                                                                                                                                                                |
-| ![Une icône représentant la fonction « Vue initiale »]({{assetsURL}}/img/guide/navigation/home.svg)                      | Vue initiale             | Permet de zoomer et de déplacer la carte pour retourner à la vue initiale.                                                                                                                                                                                                                                                                                               |
-| ![Une icône représentant la fonction « Changer la carte de base »]({{assetsURL}}/img/guide/navigation/basemapSelect.svg) | Changer la carte de base | Permet de changer la carte de base.                                                                                                                                                                                                                                                                                                                                      |
-| ![Une icône représentant la fonction « Changer la projection »]({{assetsURL}}/img/guide/navigation/projection.svg)       | Changer la projection    | Permet de changer la projection de la carte entre Web Mercator et LCC.                                                                                                                                                                                                                                                                                                   |
+| ![Une icône représentant la fonction « Géolocalisation »]({{assetsURL}}/img/guide/navigation/geolocation.svg)            | Géolocalisation          | Permet de zoomer et de déplacer la carte sur votre position géographique.                                                                                                                                                                                                                      |
+| ![Une icône représentant la fonction « Vue initiale »]({{assetsURL}}/img/guide/navigation/home.svg)                      | Vue initiale             | Permet de zoomer et de déplacer la carte pour retourner à la vue initiale.                                                                                                                                                                                                                     |
+| ![Une icône représentant la fonction « Changer la carte de base »]({{assetsURL}}/img/guide/navigation/basemapSelect.svg) | Changer la carte de base | Permet de changer la carte de base.                                                                                                                                                                                                                                                            |
+| ![Une icône représentant la fonction « Changer la projection »]({{assetsURL}}/img/guide/navigation/projection.svg)       | Changer la projection    | Permet de changer la projection de la carte entre Web Mercator et LCC.                                                                                                                                                                                                                         |
 
 Vous pouvez aussi déplacer la carte avec les touches fléchées vers la gauche, la droite, le haut et le bas, ou en cliquant sur la carte et en la faisant glisser. Lorsque le pointeur est sur la carte, la molette de la souris permet de faire un zoom avant et arrière.
 
@@ -118,7 +118,7 @@ La carte n’est pas pleinement conforme au niveau AA des Règles pour l’acces
 
 =1!mapInformationBar=
 
-# Barre d’information sur la carte
+## Barre d’information sur la carte
 
 <div style="border-bottom: 2px solid #2a2f39; margin-bottom: 15px;"></div>
 
@@ -135,7 +135,7 @@ Les détails et fonctionnalités de navigation suivants sont accessibles dans la
 
 =1!sidebar=
 
-# Barre latérale
+## Barre latérale
 
 <div style="border-bottom: 2px solid #2a2f39; margin-bottom: 15px;"></div>
 
@@ -202,7 +202,7 @@ Permet de rechercher des endroits au Canada. Si vous cliquez sur l'icône de gé
 
 #### Filtres de recherche géographique
 
-Les résultats d’une recherche d’emplacement s’affichent dans un panneau sous le champ de recherche. Le panneau de résultats comprend deux menus déroulants permettant de filtrer les résultats par **province** et par **catégorie** (lac, village, rivière, etc.). Un bouton **Effacer les filtres** ![]({{assetsURL}}/img/guide/geosearch/clear.svg) se trouve à droite des menus.
+Les résultats d’une recherche d’emplacement s’affichent dans un panneau sous le champ de recherche. Le panneau de résultats comprend deux menus déroulants permettant de filtrer les résultats par **province** et par **catégorie** (lac, village, rivière, etc.). Un bouton **Effacer les filtres** <img src="{{assetsURL}}/img/guide/geosearch/clear.svg" alt=""> se trouve à droite des menus.
 
 =2!export=
 
@@ -219,7 +219,7 @@ Cliquez sur le bouton **Télécharger** au bas de la fenêtre pour générer l�
 
 =1!footerPanel=
 
-# Pied de page
+## Pied de page
 
 <div style="border-bottom: 2px solid #2a2f39; margin-bottom: 15px;"></div>
 <a id="footerSection"></a>
@@ -245,14 +245,14 @@ _N.B. : Certains onglets dans la barre latérale se trouvent aussi sous forme d�
 
 <a id="legendSection"></a>
 
-<h3><img src="{{assetsURL}}/img/guide/sidebar/legend.svg" alt="Icône de légende" width="30"> Légende <a href="#footerSection">Haut de page</a></h3>
+<h3><img src="{{assetsURL}}/img/guide/sidebar/legend.svg" alt="" width="30"> Légende <a href="#footerSection">Haut de page</a></h3>
 <div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
 L’onglet **Légende** présente les symboles des couches affichées sur la carte.
 
-Chaque couche a ses symboles. Pour les couches à éléments simples, il n’y a qu’une seule icône ![]({{assetsURL}}/img/guide/footer/icon_single.png) à côté du nom de la couche.
+Chaque couche a ses symboles. Pour les couches à éléments simples, il n’y a qu’une seule icône <img src="{{assetsURL}}/img/guide/footer/icon_single.png" alt=""> à côté du nom de la couche.
 
-Pour celles à éléments complexes (plusieurs symboles par couche), les icônes prennent la forme d’une pile ![]({{assetsURL}}/img/guide/footer/icon_multiple.png) (placez votre pointeur sur la pile pour voir les icônes).
+Pour celles à éléments complexes (plusieurs symboles par couche), les icônes prennent la forme d’une pile <img src="{{assetsURL}}/img/guide/footer/icon_multiple.png" alt=""> (placez votre pointeur sur la pile pour voir les icônes).
 
 Vous pouvez développer ou réduire la liste des symboles d’une couche sous son nom. Certaines couches ont parfois une légende graphique; le cas échéant, elle sera dans le même format de liste déroulante.
 
@@ -269,7 +269,7 @@ _N.B. : Lorsque la couche est cachée, les fonctions affectant la couche sur la 
 
 <a id="layersSection"></a>
 
-### ![]({{assetsURL}}/img/guide/footer/layers_30.svg) Couches [Haut de page](#footerSection)
+### <img src="{{assetsURL}}/img/guide/footer/layers_30.svg" alt=""> Couches [Haut de page](#footerSection)
 
 <div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
@@ -282,12 +282,12 @@ L’onglet **Couches** comprend les sous-menus suivants :
 
 =3!view=
 
-#### ![]({{assetsURL}}/img/guide/footer/view_25.svg) Vue
+#### <img src="{{assetsURL}}/img/guide/footer/view_25.svg" alt=""> Vue
 
 _**N.B. : Cliquez sur une couche pour afficher ses information dans la section de droite.**_
 
 **Information importante**  
-Si l'icône de visibilité (œil) d'une couche est désactivée (grisée) ![]({{assetsURL}}/img/guide/footer/eye_disabled.png) et que l'icône Zoom sur l'échelle visible <img src="{{assetsURL}}/img/guide/layers/scaleVisible.svg" alt="Icône zoom sur l'échelle visible" /> est visible, cela signifie que la couche n'est pas visible au niveau de zoom actuel de la carte.
+Si l'icône de visibilité (œil) d'une couche est désactivée (grisée) <img src="{{assetsURL}}/img/guide/footer/eye_disabled.png" alt=""> et que l'icône Zoom sur l'échelle visible <img src="{{assetsURL}}/img/guide/layers/scaleVisible.svg" alt="" /> est visible, cela signifie que la couche n'est pas visible au niveau de zoom actuel de la carte.
 
 - En cliquant sur le bouton Zoom sur l'échelle visible, la carte sera ajustée au niveau de zoom approprié, ce qui rendra la couche visible.
 - Cependant, après avoir effectué un zoom, il se peut que vous ne voyiez pas immédiatement les éléments s'il n'y a pas de données dans la zone de visualisation actuelle.
@@ -297,19 +297,19 @@ Le sous-menu **Vue** de l’onglet **Couches** se divise en deux sections. La se
 
 **Icônes de couche**
 
-Chaque couche a ses symboles. Pour les couches à éléments simples, il n’y a qu’une seule icône ![]({{assetsURL}}/img/guide/footer/icon_single.png) à côté du nom de la couche. Pour celles à éléments complexes (plusieurs symboles par couche), les icônes prennent la forme d’une pile (placez votre pointeur sur la pile pour voir les icônes ![]({{assetsURL}}/img/guide/footer/icon_multiple.png)).
+Chaque couche a ses symboles. Pour les couches à éléments simples, il n’y a qu’une seule icône <img src="{{assetsURL}}/img/guide/footer/icon_single.png" alt=""> à côté du nom de la couche. Pour celles à éléments complexes (plusieurs symboles par couche), les icônes prennent la forme d’une pile (placez votre pointeur sur la pile pour voir les icônes <img src="{{assetsURL}}/img/guide/footer/icon_multiple.png" alt="">).
 
 **Groupe de couches**
 
-L’icône de groupe ![]({{assetsURL}}/img/guide/layers/group.svg) indique un groupe de couches. Cliquez sur le groupe pour voir la liste des sous-couches. Les sous-couches peuvent elles aussi être des groupes de couches.
+L’icône de groupe <img src="{{assetsURL}}/img/guide/layers/group.svg" alt=""> indique un groupe de couches. Cliquez sur le groupe pour voir la liste des sous-couches. Les sous-couches peuvent elles aussi être des groupes de couches.
 
 **Affichage des couches**
 
-Cliquez sur l’icône d’œil à côté de chaque couche pour afficher ![]({{assetsURL}}/img/guide/footer/eye.png) ou masquer ![]({{assetsURL}}/img/guide/footer/eye_not_visible.png) la couche sur la carte.
+Cliquez sur l’icône d’œil à côté de chaque couche pour afficher <img src="{{assetsURL}}/img/guide/footer/eye.png" alt=""> ou masquer <img src="{{assetsURL}}/img/guide/footer/eye_not_visible.png" alt=""> la couche sur la carte.
 
 Les couches qui ne sont pas actuellement affichées sur la carte sont grisées et leur texte est en italique.
 
-Si une couche est toujours visible, ou pour les couches dont le couche parent est caché, l’icône d’affichage (œil) est désactivée (grisée) ![]({{assetsURL}}/img/guide/footer/eye_disabled.png).
+Si une couche est toujours visible, ou pour les couches dont le couche parent est caché, l’icône d’affichage (œil) est désactivée (grisée) <img src="{{assetsURL}}/img/guide/footer/eye_disabled.png">.
 
 **Types de couches pris en charge**
 
@@ -346,13 +346,13 @@ _N.B. : Lorsque la couche est cachée, les fonctions affectant la couche sur la 
 
 **Classes de couches**
 
-Si la couche possède des classes, elles seront indiquées dans ses paramètres. Cochez ou décochez la case ![]({{assetsURL}}/img/guide/layers/check.png) à côté de la classe pour afficher ou masquer celle-ci.
+Si la couche possède des classes, elles seront indiquées dans ses paramètres. Cochez ou décochez la case <img src="{{assetsURL}}/img/guide/layers/check.png" alt=""> à côté de la classe pour afficher ou masquer celle-ci.
 
 On voit le nombre de classes visibles sous le nom de la couche.
 
 =3!add=
 
-#### ![]({{assetsURL}}/img/guide/layers/add_25.svg) Ajouter
+#### <img src="{{assetsURL}}/img/guide/layers/add_25.svg" alt=""> Ajouter
 
 Vous pouvez ajouter des couches au visualiseur de cartes dans le sous-menu **Ajouter** de l’onglet **Couches**.
 
@@ -371,21 +371,21 @@ Le visualiseur passe automatiquement à la fonction **Vue**.
 
 =3!sort=
 
-#### ![]({{assetsURL}}/img/guide/layers/sort_25.svg) Trier
+#### <img src="{{assetsURL}}/img/guide/layers/sort_25.svg" alt=""> Trier
 
 Pour trier les couches, vous n’avez qu’à utiliser les flèches vers le haut et le bas dans l’encadré de chaque couche.
 
 =3!remove=
 
-#### ![]({{assetsURL}}/img/guide/layers/remove_25.svg) Retirer
+#### <img src="{{assetsURL}}/img/guide/layers/remove_25.svg" alt=""> Retirer
 
-Pour retirer une couche, cliquez sur l’icône de suppression ![]({{assetsURL}}/img/guide/layers/remove_25.svg) à droite de celle-ci dans le sous-menu **Retirer**.
+Pour retirer une couche, cliquez sur l’icône de suppression <img src="{{assetsURL}}/img/guide/layers/remove_25.svg" alt=""> à droite de celle-ci dans le sous-menu **Retirer**.
 
 =2!details=
 
 <a id="detailsSection"></a>
 
-### ![]({{assetsURL}}/img/guide/sidebar/details_30.svg) Détails [Haut de page](#footerSection)
+### <img src="{{assetsURL}}/img/guide/sidebar/details_30.svg" alt=""> Détails [Haut de page](#footerSection)
 
 <div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
@@ -399,15 +399,15 @@ Le nombre d’éléments pour la couche sélectionnée est indiqué en haut à g
 
 Utilisez les flèches vers la droite et la gauche, en haut à droite de la section, pour passer d’un élément à l’autre de la couche sélectionnée.
 
-L’icône de loupe ![]({{assetsURL}}/img/guide/datatable/zoom.svg) permet de faire un zoom sur l’élément sélectionné sur la carte.
+L’icône de loupe <img src="{{assetsURL}}/img/guide/datatable/zoom.svg" alt=""> permet de faire un zoom sur l’élément sélectionné sur la carte.
 
-Cochez la case ![]({{assetsURL}}/img/guide/layers/check.png) pour garder l’élément sélectionné sur la carte.
+Cochez la case <img src="{{assetsURL}}/img/guide/layers/check.png" alt=""> pour garder l’élément sélectionné sur la carte.
 
 =2!dataTable=
 
 <a id="dataTableSection"></a>
 
-### ![]({{assetsURL}}/img/guide/footer/data_table.svg) Données [Haut de page](#footerSection)
+### <img src="{{assetsURL}}/img/guide/footer/data_table.svg" alt=""> Données [Haut de page](#footerSection)
 
 <div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
@@ -441,14 +441,14 @@ Les trois premières colonnes du tableau de données sont **Icône**, **Zoom** e
 
 En plus de parcourir les données, vous pouvez :
 
-- trier les données en cliquant sur l’icône de tri ![]({{assetsURL}}/img/guide/footer/swap_vert_FILL0_wght400_GRAD0_opsz24.svg) dans le titre de colonne;
-- afficher sur la carte l’emplacement de l’élément associé à une ligne donnée en cliquant sur l’icône de zoom ![]({{assetsURL}}/img/guide/datatable/zoom.svg).
+- trier les données en cliquant sur l’icône de tri <img src="{{assetsURL}}/img/guide/footer/swap_vert_FILL0_wght400_GRAD0_opsz24.svg" alt=""> dans le titre de colonne;
+- afficher sur la carte l’emplacement de l’élément associé à une ligne donnée en cliquant sur l’icône de zoom <img src="{{assetsURL}}/img/guide/datatable/zoom.svg" alt="">.
 
-Cliquez sur l’icône d’actions ![]({{assetsURL}}/img/guide/datatable/column_action.svg) à côté du titre de colonne pour voir le menu déroulant des actions de colonne :
+Cliquez sur l’icône d’actions <img src="{{assetsURL}}/img/guide/datatable/column_action.svg" alt=""> à côté du titre de colonne pour voir le menu déroulant des actions de colonne :
 
-- Épingler des colonnes à gauche ![]({{assetsURL}}/img/guide/datatable/pin_left_25.svg) ou à droite ![]({{assetsURL}}/img/guide/datatable/pin_right_25.svg) du tableau.
-- Filtrer les colonnes par numéro, texte ou date (si la configuration le permet). Pour reporter ou non les changements apportés au tableau, il faut appliquer ou effacer les filtres sur la carte (_appliquer_: ![]({{assetsURL}}/img/guide/datatable/filter_toggle_25.svg), _masquer_: ![]({{assetsURL}}/img/guide/datatable/filter_clear_25.svg)).
-- Afficher ou masquer des colonnes en cliquant sur l’icône _Cacher colonne_ ![]({{assetsURL}}/img/guide/datatable/column_hide_25.svg).
+- Épingler des colonnes à gauche <img src="{{assetsURL}}/img/guide/datatable/pin_left_25.svg" alt=""> ou à droite <img src="{{assetsURL}}/img/guide/datatable/pin_right_25.svg" alt=""> du tableau.
+- Filtrer les colonnes par numéro, texte ou date (si la configuration le permet). Pour reporter ou non les changements apportés au tableau, il faut appliquer ou effacer les filtres sur la carte (_appliquer_: <img src="{{assetsURL}}/img/guide/datatable/filter_toggle_25.svg" alt="">, _masquer_: <img src="{{assetsURL}}/img/guide/datatable/filter_clear_25.svg" alt="">).
+- Afficher ou masquer des colonnes en cliquant sur l’icône _Cacher colonne_ <img src="{{assetsURL}}/img/guide/datatable/column_hide_25.svg" alt="">.
 - Parcourir le tableau avec le clavier.
 
 Si vous cliquez sur une couche, le nombre d’éléments accessibles s’affichera sous le titre de la couche.
@@ -461,8 +461,8 @@ Les colonnes du tableau de données peuvent être accompagnées de deux flèches
 
 **Trier une colonne :** Cliquez sur le titre d’une colonne pour trier les données qu’elle contient.
 
-- Une flèche vers le haut ![]({{assetsURL}}/img/guide/navigation/up_arrow_20.svg) à côté du titre de colonne indique que les données sont triées par ordre croissant ou alphabétique.
-- Une flèche vers le bas ![]({{assetsURL}}/img/guide/navigation/down_arrow_20.svg) à côté du titre de colonne indique que les données sont triées par ordre décroissant ou alphabétique inverse.
+- Une flèche vers le haut <img src="{{assetsURL}}/img/guide/navigation/up_arrow_20.svg" alt=""> à côté du titre de colonne indique que les données sont triées par ordre croissant ou alphabétique.
+- Une flèche vers le bas <img src="{{assetsURL}}/img/guide/navigation/down_arrow_20.svg" alt=""> à côté du titre de colonne indique que les données sont triées par ordre décroissant ou alphabétique inverse.
 - L’absence de flèche à côté du titre de colonne signifie qu’aucun tri n’est appliqué à la colonne.
 
 Les colonnes peuvent être triées en ordre croissant ou décroissant (pour les données numériques) et en ordre alphabétique (pour les données textuelles).
@@ -471,7 +471,7 @@ Les colonnes peuvent être triées en ordre croissant ou décroissant (pour les 
 
 #### Filtrer les données
 
-Les données peuvent être filtrées par colonne. Pour voir les filtres, cliquez sur l’icône pour afficher les filtres ![]({{assetsURL}}/img/guide/datatable/filter_toggle_25.svg). S’il y a un champ de saisie en dessous du titre de colonne, c’est que les données de celle-ci peuvent être filtrées.
+Les données peuvent être filtrées par colonne. Pour voir les filtres, cliquez sur l’icône pour afficher les filtres <img src="{{assetsURL}}/img/guide/datatable/filter_toggle_25.svg" alt="">. S’il y a un champ de saisie en dessous du titre de colonne, c’est que les données de celle-ci peuvent être filtrées.
 
 Il y a trois types de filtres :
 
@@ -481,7 +481,7 @@ Il y a trois types de filtres :
   - Si seulement un minimum est défini, le tri se fera selon l’opération _plus grand que_.
 - **Date :** Semblable au champ pour les chiffres, mais pour les dates.
 
-Pour accéder à d’autres filtres (en fonction du type de données dans la colonne), cliquez sur l’icône d’actions ![]({{assetsURL}}/img/guide/datatable/column_action.svg) à côté du titre de la colonne, puis sur **Filtrer par**.
+Pour accéder à d’autres filtres (en fonction du type de données dans la colonne), cliquez sur l’icône d’actions <img src="{{assetsURL}}/img/guide/datatable/column_action.svg" alt=""> à côté du titre de la colonne, puis sur **Filtrer par**.
 
 =3!keyboardNavigation=
 
@@ -501,7 +501,7 @@ Pour accéder aux boutons ou aux champs de saisie d’une cellule, assurez-vous 
 
 <a id="timeSliderSection"></a>
 
-### ![]({{assetsURL}}/img/guide/footer/time_slider_30.svg) Curseur temporel [Haut de page](#footerSection)
+### img src="{{assetsURL}}/img/guide/footer/time_slider_30.svg" alt=""> Curseur temporel [Haut de page](#footerSection)
 
 <div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
@@ -509,18 +509,18 @@ _**N.B. : Cliquez sur une couche pour afficher son curseur temporel dans la sect
 
 L’onglet **Curseur temporel** dans le pied de page se divise en deux sections. La liste des couches ayant un facteur temporel se trouve dans la section de gauche.
 
-Cette case à cocher ![]({{assetsURL}}/img/guide/layers/check.png) contrôle si le curseur temporel filtre les données.
+Cette case à cocher <img src="{{assetsURL}}/img/guide/layers/check.png" alt=""> contrôle si le curseur temporel filtre les données.
 
 - Lorsque la case est cochée, seules les données correspondant à la date sélectionnée sont affichées.
 - Lorsque la case est décochée, toutes les données, peu importe la date, sont affichées.
 
 Une barre de curseur s’affiche avec un ou deux points déplaçables. Pour les couches à facteur temporel ponctuel, il n’y a qu’un point déplaçable. Pour les couches à plage temporelle, il y a deux points déplaçables permettant de régler le début et la fin de la plage.
 
-Cliquez sur le point et déplacez-le sur la barre pour sélectionner les valeurs de filtre souhaitées ou un moment donné dans le temps. Pour une couche à plage temporelle, cliquez sur l’icône de cadenas ![]({{assetsURL}}/img/guide/footer/lock_30.svg) afin de verrouiller le point de début.
+Cliquez sur le point et déplacez-le sur la barre pour sélectionner les valeurs de filtre souhaitées ou un moment donné dans le temps. Pour une couche à plage temporelle, cliquez sur l’icône de cadenas <img src="{{assetsURL}}/img/guide/footer/lock_30.svg" alt=""> afin de verrouiller le point de début.
 
-Appuyez sur l’icône de lecture ![]({{assetsURL}}/img/guide/footer/play_arrow_30.svg) pour voir les résultats dans le temps. Cliquez sur l’icône de changement de direction ![]({{assetsURL}}/img/guide/footer/direction_arrow_30.svg) pour avancer ou reculer dans le temps.
+Appuyez sur l’icône de lecture <img src="{{assetsURL}}/img/guide/footer/play_arrow_30.svg" alt=""> pour voir les résultats dans le temps. Cliquez sur l’icône de changement de direction <img src="{{assetsURL}}/img/guide/footer/direction_arrow_30.svg" alt=""> pour avancer ou reculer dans le temps.
 
-Cliquez sur l’icône de marche arrière ![]({{assetsURL}}/img/guide/footer/back_arrow_30.svg) ou avant ![]({{assetsURL}}/img/guide/footer/forward_arrow_30.svg) pour reculer ou avancer d’une étape dans le temps.
+Cliquez sur l’icône de marche arrière <img src="{{assetsURL}}/img/guide/footer/back_arrow_30.svg" alt=""> ou avant <img src="{{assetsURL}}/img/guide/footer/forward_arrow_30.svg" alt=""> pour reculer ou avancer d’une étape dans le temps.
 
 Ouvrez le menu déroulant du délai pour choisir le délai d’animation du curseur. Certaines couches peuvent avoir besoin d’un délai plus important pour s’afficher correctement sur la carte.
 
@@ -530,7 +530,7 @@ Le champ visé par le filtre s’affiche en bas à gauche de la section du curse
 
 <a id="chartSection"></a>
 
-### ![]({{assetsURL}}/img/guide/footer/chart_30.svg) Graphique [Haut de page](#footerSection)
+### <img src="{{assetsURL}}/img/guide/footer/chart_30.svg" alt=""> Graphique [Haut de page](#footerSection)
 
 <div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
@@ -540,7 +540,7 @@ L’onglet **Graphique** dans le pied de page se divise en deux sections. La lis
 
 Le menu déroulant **Élément** (en haut à gauche de la section du graphique) permet également de sélectionner un élément. Il s’agit d’une fonction pratique lorsque plusieurs éléments sont rapprochés sur la carte et qu’il est difficile de sélectionner celui voulu.
 
-Vous pouvez cocher ou décocher les cases ![]({{assetsURL}}/img/guide/layers/check.png) des données au-dessus du graphique pour déterminer le contenu de celui-ci (seulement pour les couches comportant plusieurs éléments de données).
+Vous pouvez cocher ou décocher les cases <img src="{{assetsURL}}/img/guide/layers/check.png" alt=""> des données au-dessus du graphique pour déterminer le contenu de celui-ci (seulement pour les couches comportant plusieurs éléments de données).
 
 <img src="{{assetsURL}}/img/guide/footer/checkbox.png" alt="Contrôles de cases à cocher pour activer/désactiver la visibilité des données sur le graphique" style="width: 90%;"/>
 
