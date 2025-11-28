@@ -158,6 +158,7 @@ _N.B. : Certains outils dans la barre latérale se trouvent aussi sous forme d�
 | ![Une icône représentant la fonction « À propos de GéoView »]({{assetsURL}}/img/guide/sidebar/about.svg)    | À propos de GéoView                   | Affiche les renseignements sur le visualiseur GéoView.                                                       |
 
 =2!geolocator=
+
 <a id="geolocatorSection">
 
 ### <img src="{{assetsURL}}/img/guide/geosearch/geolocator.svg" alt="Icône de géolocalisation" width="30"/> Géolocalisation
@@ -204,6 +205,7 @@ Permet de rechercher des endroits au Canada. Si vous cliquez sur l'icône de gé
 Les résultats d’une recherche d’emplacement s’affichent dans un panneau sous le champ de recherche. Le panneau de résultats comprend deux menus déroulants permettant de filtrer les résultats par **province** et par **catégorie** (lac, village, rivière, etc.). Un bouton **Effacer les filtres** ![]({{assetsURL}}/img/guide/geosearch/clear.svg) se trouve à droite des menus.
 
 =2!export=
+
 <a id="exportSection">
 ### <img src="{{assetsURL}}/img/guide/sidebar/export.svg" alt="Icône de téléchargement" width="30"/> Télécharger
 
@@ -240,6 +242,7 @@ Le menu du _pied de page_ se compose des onglets suivants :
 _N.B. : Certains onglets dans la barre latérale se trouvent aussi sous forme d’outils dans la barre latérale, comme **Légende**, **Couches**, **Données** et **Détails**. Lorsqu’ouverts à partir de la barre latérale, **Légende** et **Détails** s’affichent sur la carte dans un format « mobile » condensé (une seule colonne). Ouverts à partir du pied de page, ils s’affichent comme onglets au bas de la carte dans un format détaillé complet._
 
 =2!legend=
+
 <a id="legendSection"></a>
 
 <h3><img src="{{assetsURL}}/img/guide/sidebar/legend.svg" alt="Icône de légende" width="30"> Légende <a href="#footerSection">Haut de page</a></h3>
@@ -263,6 +266,7 @@ Vous pouvez développer ou réduire la liste des symboles d’une couche sous so
 _N.B. : Lorsque la couche est cachée, les fonctions affectant la couche sur la carte sont désactivées et le texte de la couche est gris et en italique._
 
 =2!layers=
+
 <a id="layersSection"></a>
 
 ### ![]({{assetsURL}}/img/guide/footer/layers_30.svg) Couches [Haut de page](#footerSection)
@@ -378,6 +382,7 @@ Pour trier les couches, vous n’avez qu’à utiliser les flèches vers le haut
 Pour retirer une couche, cliquez sur l’icône de suppression ![]({{assetsURL}}/img/guide/layers/remove_25.svg) à droite de celle-ci dans le sous-menu **Retirer**.
 
 =2!details=
+
 <a id="detailsSection"></a>
 
 ### ![]({{assetsURL}}/img/guide/sidebar/details_30.svg) Détails [Haut de page](#footerSection)
@@ -399,6 +404,7 @@ L’icône de loupe ![]({{assetsURL}}/img/guide/datatable/zoom.svg) permet de fa
 Cochez la case ![]({{assetsURL}}/img/guide/layers/check.png) pour garder l’élément sélectionné sur la carte.
 
 =2!dataTable=
+
 <a id="dataTableSection"></a>
 
 ### ![]({{assetsURL}}/img/guide/footer/data_table.svg) Données [Haut de page](#footerSection)
@@ -492,6 +498,7 @@ Lorsque vous avez sélectionné l’un des grands groupes, vous pouvez utiliser 
 Pour accéder aux boutons ou aux champs de saisie d’une cellule, assurez-vous de bien sélectionner celle-ci (en utilisant les flèches, comme susmentionné), puis utilisez la touche de **tabulation** pour parcourir les sous-options.
 
 =2!timeSlider=
+
 <a id="timeSliderSection"></a>
 
 ### ![]({{assetsURL}}/img/guide/footer/time_slider_30.svg) Curseur temporel [Haut de page](#footerSection)
@@ -520,6 +527,7 @@ Ouvrez le menu déroulant du délai pour choisir le délai d’animation du curs
 Le champ visé par le filtre s’affiche en bas à gauche de la section du curseur temporel. Des descriptions personnalisées peuvent aussi s’afficher au même endroit.
 
 =2!chart=
+
 <a id="chartSection"></a>
 
 ### ![]({{assetsURL}}/img/guide/footer/chart_30.svg) Graphique [Haut de page](#footerSection)
