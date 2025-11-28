@@ -70,7 +70,8 @@
     "share": "Share",
     "version": "About GeoView",
     "repoLink": "Github",
-    "removeAllNotifications": "Remove all"
+    "removeAllNotifications": "Remove all",
+    "navLabel": "Main map controls"
   },
   "legend": {
     "title": "Legend",

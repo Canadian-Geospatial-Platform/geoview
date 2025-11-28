@@ -35,12 +35,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       backgroundColor: 'transparent',
       justifyContent: 'center',
     },
-    '& hr': {
-      width: '80%',
-      marginLeft: '5px',
-    },
   },
   appBarButtons: {
+    position: 'relative',
     paddingTop: '16px',
     borderRightColor: theme.palette.geoViewColor.primary.light[100],
     borderRightWidth: 1,
@@ -68,9 +65,25 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       },
     },
   },
+  appBarSeparator: {
+    '&::before': {
+      content: '""',
+      display: 'block',
+      borderTop: `1px solid ${theme.palette.geoViewColor.grey.light[100]}`,
+      width: '40px',
+      margin: 'auto 5px',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+    },
+    marginTop: '0.5em',
+    padding: '0.5em 0 0 0',
+    position: 'relative',
+  },
   versionButtonDiv: {
     position: 'absolute',
     bottom: 0,
+    width: '100%',
   },
   appBarPanels: {},
 });
