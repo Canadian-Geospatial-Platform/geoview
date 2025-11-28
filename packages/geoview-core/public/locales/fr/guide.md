@@ -97,7 +97,7 @@ La carte n’est pas pleinement conforme au niveau AA des Règles pour l’acces
 
 =1!mapInformationBar=
 
-# Barre d’information sur la carte
+## Barre d’information sur la carte
 
 Cliquez sur le chevron vers le haut <img src="{{assetsURL}}/img/guide/navigation/chevron_up.svg" alt="Icône chevron vers le haut" /> à gauche pour développer ou réduire la barre.
 
@@ -200,7 +200,7 @@ Cliquez sur le bouton **Télécharger** au bas de la fenêtre pour générer et 
 
 =1!footerPanel=
 
-# Pied de page
+## Pied de page
 
 <a id="footerSection"></a>
 Le _pied de page_ se trouve sous la carte. Vous pouvez le développer en cliquant sur un des onglets de son menu. Pour le réduire, vous n’avez qu’à recliquer sur l’onglet actif.
