@@ -883,7 +883,18 @@ export interface TypeMetadataWMSCapabilityLayerAttribution {
 }
 
 export interface TypeMetadataWMSCapabilityLayerDimension {
+  '#text': string;
+  '@attributes': TypeMetadataWMSCapabilityLayerDimensionAttribute;
+  default?: string;
+  name?: string;
+  units?: string;
+  values?: string;
+}
+
+export interface TypeMetadataWMSCapabilityLayerDimensionAttribute {
+  default: string;
   name: string;
+  units: string;
 }
 
 export interface TypeLayerMetadataWMSStyleLegendUrl {

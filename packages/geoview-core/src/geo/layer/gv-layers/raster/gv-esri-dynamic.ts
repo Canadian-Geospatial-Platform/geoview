@@ -728,8 +728,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
     const defaultFilter = isWMS ? undefined : this.DEFAULT_FILTER_1EQUALS1;
     const layerFilter = layerConfig.getLayerFilter();
 
-    // No style, default behavior
-    if (!style) return this.#appendLayerFilter(defaultFilter, layerFilter);
+    // No style, no filter on style
+    if (!style) return undefined;
 
     const styleSettings = layerConfig.getFirstStyleSettings();
     if (!styleSettings) return this.#appendLayerFilter(defaultFilter, layerFilter);

@@ -316,7 +316,19 @@ export abstract class ConfigBaseClass {
    * Date format object used to translate internal UTC ISO format to the external format.
    * @returns {TypeDateFragments} The Date Fragments
    */
-  getExternalFragmentsOrder(): TypeDateFragments {
+  getExternalFragmentsOrder(): TypeDateFragments | undefined {
+    if (this.getExternalDateFormat()) {
+      return DateMgt.getDateFragmentsOrder(this.getExternalDateFormat());
+    }
+    return undefined;
+  }
+
+  /**
+   * Gets the external fragments order if specified by the config, defaults to ISO_UTC.
+   * Date format object used to translate internal UTC ISO format to the external format.
+   * @returns {TypeDateFragments} The Date Fragments
+   */
+  getExternalFragmentsOrderOrDefault(): TypeDateFragments {
     return DateMgt.getDateFragmentsOrder(this.getExternalDateFormat());
   }
 

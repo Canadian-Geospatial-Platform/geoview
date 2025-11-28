@@ -556,6 +556,18 @@ export abstract class GeoUtilities {
         ];
       }
     }
+
+    // Write the Dimension for practicality (simulating what ol/Format/WMSCapabilities was doing before)
+    layer.Dimension?.forEach((dimension) => {
+      // eslint-disable-next-line no-param-reassign
+      dimension.name ??= dimension['@attributes'].name;
+      // eslint-disable-next-line no-param-reassign
+      dimension.default ??= dimension['@attributes'].default;
+      // eslint-disable-next-line no-param-reassign
+      dimension.units ??= dimension['@attributes'].units;
+      // eslint-disable-next-line no-param-reassign
+      dimension.values ??= dimension['#text'];
+    });
   }
 
   /**

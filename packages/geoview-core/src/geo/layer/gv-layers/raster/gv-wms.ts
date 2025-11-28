@@ -571,9 +571,6 @@ export class GVWMS extends AbstractGVRaster {
     // Read the features
     const features = GeoUtilities.readFeaturesFromGeoJSON(responseData, undefined);
 
-    // Check if has oid field and therefore supports zoom to
-    const supportZoomTo = !!wfsLayerConfig.getOutfields()?.find((outfield) => outfield.type === 'oid');
-
     // Parse the features
     return AbstractGVLayer.helperFormatFeatureInfoResult(
       features,
@@ -581,7 +578,7 @@ export class GVWMS extends AbstractGVRaster {
       wfsLayerConfig.getSchemaTag(),
       wfsLayerConfig.getNameField(),
       wfsLayerConfig.getOutfields(),
-      supportZoomTo,
+      wfsLayerConfig.hasOutfieldsPK(),
       undefined, // TODO: Support domains?
       wmsLayerConfig.getLayerStyle(), // The styles as read from the WMS layer config (not WFS in case it was overridden in the WMS)
       wmsLayerConfig.getFilterEquation(), // The filter equation as read from the WMS layer config (not WFS in case it was overridden in the WMS)

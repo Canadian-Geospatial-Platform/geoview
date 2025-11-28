@@ -670,6 +670,7 @@ export class WMS extends AbstractGeoViewRaster {
       layer['@attributes'].fixedWidth ??= parentLayer['@attributes']?.fixedWidth;
       // eslint-disable-next-line no-param-reassign
       layer['@attributes'].fixedHeight ??= parentLayer['@attributes']?.fixedHeight;
+
       // eslint-disable-next-line no-param-reassign
       layer.MinScaleDenominator ??= parentLayer.MinScaleDenominator;
       // eslint-disable-next-line no-param-reassign

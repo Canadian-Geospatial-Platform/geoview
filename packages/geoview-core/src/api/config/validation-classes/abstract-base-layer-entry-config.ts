@@ -318,6 +318,14 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   }
 
   /**
+   * Indicates if the source has an out field which represents the primary key.
+   * @returns {boolean} True if the outfield representing the primary key exists, false otherwise.
+   */
+  hasOutfieldsPK(): boolean {
+    return !!this.getFeatureInfo().outfields?.find((outfield) => outfield.type === 'oid');
+  }
+
+  /**
    * Gets the out field which represents the primary key.
    * @returns {TypeOutfields} The outfield.
    * @throws {NoPrimaryKeyFieldError} When the no outfields has the type 'oid'.
