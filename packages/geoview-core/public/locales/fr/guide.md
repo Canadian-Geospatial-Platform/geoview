@@ -205,8 +205,7 @@ Les résultats d’une recherche d’emplacement s’affichent dans un panneau s
 
 =2!export=
 <a id="exportSection">
-
-### ![]({{assetsURL}}/img/guide/sidebar/export_30.svg) Télécharger
+### <img src="{{assetsURL}}/img/guide/sidebar/export.svg" alt="Icône de téléchargement" width="30"/> Télécharger
 
 <div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 

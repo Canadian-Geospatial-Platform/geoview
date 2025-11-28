@@ -161,6 +161,7 @@ _Note: Some tools in the Side Bar are also available as tabs in the Footer Bar, 
 | ![An icon representing the "About Geoview" function]({{assetsURL}}/img/guide/sidebar/about.svg)         | About Geoview                    | Display information about Geoview viewer.                                                |
 
 =2!geolocator=
+
 <a id="geolocatorSection">
 
 ### <img src="{{assetsURL}}/img/guide/geosearch/geolocator.svg" alt="Geolocator icon" width="30"/> Geolocator
@@ -207,9 +208,9 @@ The geolocator component functions to allow users to search for places in Canada
 When searching for a location, a results panel will appear below the search box. This results panel contains two dropdown boxes that allow you to filter the search results by their **province** and by their **category** (lake, town, river, etc.). To the right of these two boxes is a **Clear Filters** ![]({{assetsURL}}/img/guide/geosearch/clear.svg) button, which when clicked clears the selected filter options.
 
 =2!export=
-<a id="exportSection">
 
-### ![]({{assetsURL}}/img/guide/sidebar/export_30.svg) Download
+<a id="exportSection">
+### <img src="{{assetsURL}}/img/guide/sidebar/export.svg" alt="Download icon" width="30"/> Download
 
 <div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
@@ -244,6 +245,7 @@ The _Footer Bar_ menu bar has the following tabs:
 _Note: Some tabs in the Footer Bar are also available as tools in the Side Bar, such as **Legend**, **Layers**, **Data Table** or **Details**. **Legend** and **Details** opened from the Side Bar is displayed on the map, in a condensed 'mobile' view (single column). The same tab opened in the Footer Bar is displayed below the map in a fully expanded view._
 
 =2!legend=
+
 <a id="legendSection"></a>
 
 <h3><img src="{{assetsURL}}/img/guide/sidebar/legend.svg" alt="Legend icon" width="30"> Legend <a href="#footerSection">Top</a></h3>
@@ -267,6 +269,7 @@ The symbology for the layer can be toggled open and closed which is expanded ben
 _Note: When the layer is hidden, functions affecting the layer on the map will be disabled, and the layer text will be grey and in italics._
 
 =2!layers=
+
 <a id="layersSection"></a>
 
 ### ![]({{assetsURL}}/img/guide/footer/layers_30.svg) Layers [Top](#footerSection)
@@ -382,6 +385,7 @@ To sort the layers you can simply click the up or down arrows on each layer pane
 To remove a layer, click on the delete icon ![]({{assetsURL}}/img/guide/layers/remove_25.svg) to the right of the layer after selecting the 'Remove' submenu.
 
 =2!details=
+
 <a id="detailsSection"></a>
 
 ### ![]({{assetsURL}}/img/guide/sidebar/details_30.svg) Details [Top](#footerSection)
@@ -403,6 +407,7 @@ The zoom icon ![]({{assetsURL}}/img/guide/datatable/zoom.svg) will zoom the map 
 Check the highlight box ![]({{assetsURL}}/img/guide/layers/check.png) to keep the feature highlighted on the map.
 
 =2!dataTable=
+
 <a id="dataTableSection"></a>
 
 ### ![]({{assetsURL}}/img/guide/footer/data_table.svg) Data Table [Top](#footerSection)
@@ -496,6 +501,7 @@ Once any major group is focused on, you can use the arrow keys to navigate throu
 To access the buttons and/or input fields within a cell, make sure the cell is highlighted (by using arrow keys as above) and use **Tab** to navigate between its children.
 
 =2!timeSlider=
+
 <a id="timeSliderSection"></a>
 
 ### ![]({{assetsURL}}/img/guide/footer/time_slider_30.svg) Time Slider [Top](#footerSection)
@@ -524,6 +530,7 @@ Click the time delay dropdown to choose the slider animation time delay. Some la
 The field being filtered on is displayed in the lower left of the Time Slider section. Custom descriptions may also be displayed in this area.
 
 =2!chart=
+
 <a id="chartSection"></a>
 
 ### ![]({{assetsURL}}/img/guide/footer/chart_30.svg) Chart [Top](#footerSection)
