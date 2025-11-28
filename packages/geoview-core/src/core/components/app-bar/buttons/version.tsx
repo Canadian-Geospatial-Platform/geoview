@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Theme } from '@mui/material';
-import { Typography, Box, Link, SvgIcon, ClickAwayListener, Paper, useTheme } from '@mui/material';
+import { Typography, Box, Link, SvgIcon, ClickAwayListener, List, Paper, useTheme } from '@mui/material';
 
 import { GITHUB_REPO, GEO_URL_TEXT } from '@/core/utils/constant';
 import { GeoCaIcon, IconButton, Popper, CloseIcon } from '@/ui';
@@ -62,6 +62,25 @@ const getSxClasses = (theme: Theme): SxStyles => ({
     display: 'flex',
     flexDirection: 'column',
   },
+  versionList: {
+    listStyle: 'none',
+    padding: 0,
+    margin: 0,
+    '& li': {
+      margin: '0 0 5px 0',
+    },
+  },
+  visuallyHidden: {
+    position: 'absolute',
+    width: '1px',
+    height: '1px',
+    padding: 0,
+    margin: '-1px',
+    overflow: 'hidden',
+    clip: 'rect(0, 0, 0, 0)',
+    whiteSpace: 'nowrap',
+    border: 0,
+  },
 });
 
 export default function Version(): JSX.Element {
@@ -94,14 +113,15 @@ export default function Version(): JSX.Element {
     if (open) setOpen(false);
   }, [open]);
 
-  // TODO: WCAG Issue #3154 - add aria-controls to <IconButton>. Needs id on the popper container to work correctly.
   return (
     <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
       <Box sx={{ padding: interaction === 'dynamic' ? 'none' : '5px' }}>
         <IconButton
           id="version-button"
-          aria-label={t('appbar.version')}
+          aria-controls={open ? `${mapId}-version-dialog` : undefined}
           aria-expanded={open ? 'true' : 'false'}
+          aria-haspopup="dialog"
+          aria-label={t('appbar.version')}
           tooltipPlacement="right"
           onClick={handleOpenPopover}
           className={`${interaction === 'dynamic' ? 'buttonFilled' : 'style4'} ${open ? 'active' : ''}`}
@@ -112,6 +132,10 @@ export default function Version(): JSX.Element {
         </IconButton>
 
         <Popper
+          role="dialog"
+          id={`${mapId}-version-dialog`}
+          aria-labelledby="version-info-title"
+          aria-modal="true"
           open={open}
           anchorEl={anchorEl}
           placement="right-end"
@@ -132,9 +156,9 @@ export default function Version(): JSX.Element {
           handleKeyDown={(key, callBackFn) => handleEscapeKey(key, '', false, callBackFn)}
         >
           <FocusTrapContainer id={`${mapId}-version`} open={open && activeTrapGeoView}>
-            <Paper sx={sxClasses.versionInfoPanel}>
-              <Box sx={sxClasses.versionHeading}>
-                <Typography sx={sxClasses.versionsInfoTitle} component="h3">
+            <Paper component="section" sx={sxClasses.versionInfoPanel}>
+              <Box component="header" sx={sxClasses.versionHeading}>
+                <Typography sx={sxClasses.versionsInfoTitle} component="h2" id="version-info-title">
                   {t('appbar.version')}
                 </Typography>
                 <IconButton onClick={handleClickAway} size="small" aria-label={t('general.close')} tooltipPlacement="right">
@@ -142,22 +166,28 @@ export default function Version(): JSX.Element {
                 </IconButton>
               </Box>
               <Box sx={sxClasses.versionInfoContent}>
-                <Box sx={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: '6px' }}>
-                  <SvgIcon viewBox="-4 -2 38 36">
-                    <GeoCaIcon />
-                  </SvgIcon>
-                  <Link rel="noopener" href={GEO_URL_TEXT.url} target="_black">
-                    {GEO_URL_TEXT.text}
-                  </Link>
-                </Box>
-                <Box sx={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: '6px' }}>
-                  <GitHubIcon />
-                  <Link rel="noopener" href={GITHUB_REPO} target="_black">
-                    {t('appbar.repoLink')}
-                  </Link>
-                </Box>
-                <Typography component="div">{`v.${__VERSION__.major}.${__VERSION__.minor}.${__VERSION__.patch}`}</Typography>
-                <Typography component="div">{DateMgt.formatDate(__VERSION__.timestamp, 'YYYY-MM-DD')}</Typography>
+                <List sx={sxClasses.versionList}>
+                  <Box component="li" sx={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: '6px' }}>
+                    <SvgIcon viewBox="-4 -2 38 36">
+                      <GeoCaIcon />
+                    </SvgIcon>
+                    <Link rel="noopener" href={GEO_URL_TEXT.url} target="_blank">
+                      {GEO_URL_TEXT.text}
+                    </Link>
+                  </Box>
+                  <Box component="li" sx={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: '6px' }}>
+                    <GitHubIcon />
+                    <Link rel="noopener" href={GITHUB_REPO} target="_blank">
+                      {t('appbar.repoLink')}
+                    </Link>
+                  </Box>
+                  <Typography component="li">{`v.${__VERSION__.major}.${__VERSION__.minor}.${__VERSION__.patch}`}</Typography>
+                  <Typography component="li">
+                    <time dateTime={DateMgt.formatDate(__VERSION__.timestamp, 'YYYY-MM-DD')}>
+                      {DateMgt.formatDate(__VERSION__.timestamp, 'YYYY-MM-DD')}
+                    </time>
+                  </Typography>
+                </List>
               </Box>
             </Paper>
           </FocusTrapContainer>
