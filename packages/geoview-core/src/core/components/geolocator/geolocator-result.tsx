@@ -3,7 +3,7 @@ import type { SelectChangeEvent } from '@mui/material';
 import { useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import type { TypeMenuItemProps } from '@/ui';
-import { Box, Divider, ClearFiltersIcon, IconButton, List, ListItem, ListItemText, Paper, Select, Typography } from '@/ui';
+import { Box, ClearFiltersIcon, IconButton, List, ListItem, ListItemText, Paper, Select, Typography } from '@/ui';
 import type { GeoListItem } from '@/core/components/geolocator/geolocator';
 import { GeoList } from '@/core/components/geolocator/geo-list';
 import { createMenuItems } from '@/core/components/geolocator/utilities';
@@ -84,13 +84,33 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
     });
   }, [geoLocationData, province, category]);
 
+  // List active filters in the results
+  const activeFiltersDisplay = useMemo(() => {
+    if (!(province.length || category.length)) return null;
+
+    return (
+      <List sx={sxClasses.filterListError}>
+        {!!province.length && (
+          <ListItem>
+            <ListItemText primary={`${t('geolocator.province')}: ${province}`} />
+          </ListItem>
+        )}
+        {!!category.length && (
+          <ListItem>
+            <ListItemText primary={`${t('geolocator.category')}: ${category}`} />
+          </ListItem>
+        )}
+      </List>
+    );
+  }, [province, category, t, sxClasses.filterListError]);
+
   return (
     <Paper component="div" elevation={4} square sx={{ width: 350 }}>
       {!error && (
-        <Box sx={sxClasses.filter}>
+        <Box sx={sxClasses.filter} className="geolocator-filters" role="group">
           <Box sx={{ flexGrow: 2, paddingRight: '8px', maxWidth: 150 }}>
             <Select
-              labelId="provinceGeolocatorFiltersLabel"
+              labelId="geolocationProvinceFilter"
               formControlProps={{ variant: 'standard', size: 'small' }}
               id="provinceGeolocatorFilters"
               fullWidth
@@ -106,7 +126,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
           </Box>
           <Box sx={{ flexGrow: 2, paddingRight: '8px', maxWidth: 150 }}>
             <Select
-              labelId="categoryGeolocatorFiltersLabel"
+              labelId="geolocationCategoryFilter"
               id="typeGeolocatorFilters"
               formControlProps={{ variant: 'standard', size: 'small' }}
               value={category ?? ''}
@@ -134,33 +154,38 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
           </Box>
         </Box>
       )}
-      <Divider />
-      <Box sx={{ maxHeight: mapSize[1] - 240, overflowY: 'auto' }}>
+      <Box
+        sx={{ maxHeight: mapSize[1] - 240, overflowY: 'auto' }}
+        id="geolocator-results-region"
+        role="region"
+        aria-label={t('geolocator.searchResults')!}
+        aria-live="polite"
+        aria-atomic="false"
+        aria-relevant="additions removals"
+      >
         {error && (
           <Typography component="p" sx={{ p: 10, fontSize: theme.palette.geoViewFontSize.md }}>
             {t('error.geolocator.noService')}
           </Typography>
         )}
-        {!!memoFilteredData.length && <GeoList geoListItems={memoFilteredData} searchValue={searchValue} />}
+        {!!memoFilteredData.length && (
+          <>
+            {/* An announcement for screen readers about the number of results found */}
+            <Box className="geolocatorResultsStatus" role="status" sx={sxClasses.geolocatorResultsStatus}>
+              <Typography component="p">
+                {t('geolocator.resultsFound', { count: memoFilteredData.length, searchTerm: searchValue })}
+              </Typography>
+              {activeFiltersDisplay}
+            </Box>
+            <GeoList geoListItems={memoFilteredData} searchValue={searchValue} />
+          </>
+        )}
         {!memoFilteredData.length && searchValue.length >= 3 && (
-          <Box sx={{ p: 10 }}>
+          <Box sx={{ p: 10 }} role="status">
             <Typography component="p" sx={{ fontSize: theme.palette.geoViewFontSize.md }}>
               {t('geolocator.noResult')} <b>{searchValue}</b>
             </Typography>
-            {!!(province.length || category.length) && (
-              <List sx={sxClasses.filterListError}>
-                {!!province.length && (
-                  <ListItem>
-                    <ListItemText primary={`${t('geolocator.province')}: ${province}`} />
-                  </ListItem>
-                )}
-                {!!category.length && (
-                  <ListItem>
-                    <ListItemText primary={`${t('geolocator.category')}: ${category}`} />
-                  </ListItem>
-                )}
-              </List>
-            )}
+            {activeFiltersDisplay}
           </Box>
         )}
       </Box>

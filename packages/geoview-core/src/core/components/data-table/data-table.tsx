@@ -117,7 +117,8 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
     logger.logTraceUseCallback('DATA-TABLE - getTableHeader');
 
     return (
-      <Tooltip title={header} placement="top" arrow>
+      // Tooltip allows long titles to be fully visible on hover
+      <Tooltip title={header} placement="top" arrow disableInteractive>
         <Box component="span" sx={{ whiteSpace: 'nowrap', justifyContent: 'end' }}>
           {header}
         </Box>
@@ -173,12 +174,12 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
 
       return typeof cellValue === 'string' || typeof cellValue === 'number' ? (
         <Tooltip title={cellValue} placement="top" arrow>
-          <Box component="span" sx={density === 'compact' ? sxClasses.tableCell : {}}>
+          <Box component="div" sx={density === 'compact' ? sxClasses.tableCell : {}}>
             {createLightBoxButton(cellValue, cellId)}
           </Box>
         </Tooltip>
       ) : (
-        <Box component="span" sx={density === 'compact' ? sxClasses.tableCell : {}}>
+        <Box component="div" sx={density === 'compact' ? sxClasses.tableCell : {}}>
           {cellValue}
         </Box>
       );
@@ -208,6 +209,9 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
    *
    * @param {object} data.fieldAliases object values transformed into required key value property of material react data table
    */
+
+  // TODO: WCAG Issue #3114 Contrast is low on sort and action icons in header.
+  // TODO: WCAG Issue #3116 At times generates empty table headings.
   const columns = useMemo<MRTColumnDef<ColumnsType>[]>(() => {
     // Log
     logger.logTraceUseMemo('DATA-TABLE - columns', density);
@@ -506,6 +510,7 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
       sx: {
         maxHeight: 'calc(100% - 97px)', // 97px is the height of the data table header. Setting max height prevents the containing columns scrollbars from triggering
       },
+      className: 'data-table-container',
     },
     rowVirtualizerInstanceRef,
     columnVirtualizerInstanceRef,
@@ -545,6 +550,17 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
           backgroundColor: `${theme.palette.secondary.light} !important`,
         },
       }),
+    },
+    // Improve global filter accessibility
+    muiSearchTextFieldProps: {
+      inputProps: {
+        type: 'search',
+        'aria-label': t('dataTable.searchInputLabel')!,
+      },
+    },
+    // Improve table accessibility
+    muiTableProps: {
+      'aria-label': t('dataTable.tableAriaLabel', { layerName: data.layerName })!,
     },
   });
 

@@ -1,7 +1,6 @@
 import type { ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '@mui/material';
-import { CloseIcon, SearchIcon, AppBarUI, Box, Divider, IconButton, Toolbar } from '@/ui';
+import { CloseIcon, AppBarUI, Box, IconButton, Toolbar } from '@/ui';
 import { StyledInputField } from '@/core/components/geolocator/geolocator-style';
 import { logger } from '@/core/utils/logger';
 
@@ -18,38 +17,40 @@ interface GeolocatorBarProps {
   isLoading: boolean;
 }
 
+// TODO: WCAG Issue #3114 #3115 Contrast issues with geolocator icons/text
+
 export function GeolocatorBar({ searchValue, onChange, onSearch, onReset, isLoading }: GeolocatorBarProps): JSX.Element {
   logger.logTraceRender('components/geolocator/geolocator-bar');
 
   // Hooks
   const { t } = useTranslation();
-  const theme = useTheme();
 
   return (
-    <AppBarUI position="static">
+    <AppBarUI position="static" component="div">
       <Toolbar variant="dense">
         <form
+          action="#"
+          role="search"
+          aria-label={t('geolocator.searchFormLabel')!}
           onSubmit={(e) => {
             e.preventDefault();
             if (!isLoading) onSearch();
           }}
         >
-          <StyledInputField placeholder={t('geolocator.search')!} autoFocus onChange={onChange} value={searchValue} />
+          <StyledInputField
+            type="search"
+            inputProps={{
+              'aria-label': t('geolocator.searchInputLabel')!,
+              'aria-controls': 'geolocator-results-region',
+            }}
+            placeholder={t('geolocator.search')!}
+            autoFocus
+            onChange={onChange}
+            value={searchValue}
+          />
           <Box sx={{ display: 'flex', marginLeft: 'auto', alignItems: 'center' }}>
-            <IconButton
-              size="small"
-              edge="end"
-              color="inherit"
-              aria-label={t('geolocator.search')}
-              sx={{ mr: 4 }}
-              disabled={!searchValue.length}
-              onClick={onSearch}
-            >
-              <SearchIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />
-            </IconButton>
-            <Divider orientation="vertical" variant="middle" flexItem />
-            <IconButton size="small" edge="end" color="inherit" aria-label={t('general.close')} sx={{ mr: 2, ml: 4 }} onClick={onReset}>
-              <CloseIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />
+            <IconButton edge="end" aria-label={t('geolocator.searchClose')} sx={{ mr: 2, ml: 4 }} onClick={onReset}>
+              <CloseIcon />
             </IconButton>
           </Box>
         </form>

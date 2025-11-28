@@ -90,11 +90,14 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
 
   return (
     <Box
+      component="section"
+      aria-label={`${t(panel.title)} panel`}
       sx={{
         ...sxClasses.panelContainer,
         ...(panelStyles?.panelContainer && { ...panelStyles.panelContainer }),
       }}
       ref={panelContainerRef}
+      id={`appbar-panel-${panel.panelId || ''}`}
       className={`appbar-panel appbar-panel-${panelId}`}
     >
       <FocusTrapContainer open={isFocusTrapped} id="app-bar-focus-trap">
@@ -111,6 +114,7 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
           {...rest}
         >
           <CardHeader
+            component="header"
             sx={panelStyles?.panelCardHeader ? { ...panelStyles.panelCardHeader } : {}}
             ref={panelHeader}
             title={t(panel.title)}
