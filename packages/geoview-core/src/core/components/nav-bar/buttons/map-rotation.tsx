@@ -75,6 +75,9 @@ export default function MapRotation(): JSX.Element {
    */
   const handleFixNorth = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>): void => {
+      // Log
+      logger.logTraceUseCallback('MAP-ROTATION, handleFixNorth', event.target.checked);
+
       const isChecked = event.target.checked;
       setFixNorth(isChecked);
 
