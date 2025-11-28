@@ -102,10 +102,6 @@ export function NavBar(props: NavBarProps): JSX.Element {
       displayButtons = { ...displayButtons, projection: 'projection' };
     }
 
-    if (navBarComponents.includes('map-rotation')) {
-      displayButtons = { ...displayButtons, mapRotation: 'mapRotation' };
-    }
-
     setButtonPanelGroups({
       ...{ display: displayButtons },
       ...buttonPanelGroups,
