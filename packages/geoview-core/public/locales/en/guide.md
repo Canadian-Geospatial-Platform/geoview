@@ -97,7 +97,7 @@ This map is not fully compliant with Web Content Accessibility Guidelines (WCAG)
 
 =1!mapInformationBar=
 
-# Map Information Bar
+## Map Information Bar
 
 Click the up chevron icon <img src="{{assetsURL}}/img/guide/navigation/chevron_up.svg" alt="Chevron up icon" /> on the left to expand/collapse the bar.
 
@@ -200,7 +200,7 @@ Click the **Download** button at the bottom of the dialog to generate and downlo
 
 =1!footerPanel=
 
-# Footer Bar
+## Footer Bar
 
 <a id="footerSection"></a>
 The _Footer Bar_ appears below the map. The _Footer Bar_ can be expanded or collapsed by clicking on a tab in the _Footer Bar_ menu bar. To collapse the panel, simply click again on the active tab.
