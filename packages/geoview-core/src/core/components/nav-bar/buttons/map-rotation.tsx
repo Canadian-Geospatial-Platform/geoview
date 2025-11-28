@@ -101,57 +101,47 @@ export default function MapRotation(): JSX.Element {
    */
   const renderRotationControl = (): ReactNode => {
     return (
-      <Box sx={{ padding: '30px 10px 5px 5px', width: '300px' }}>
-        <Box sx={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
+      <Box sx={{ width: '300px' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', paddingTop: '10px' }}>
           <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
             {rotationLabel}
           </Typography>
         </Box>
-        <Box sx={{ paddingX: '8px' }}>
-          <Slider
-            value={rotationDegrees}
-            onChange={handleSliderChange}
-            min={-180}
-            max={180}
-            step={1}
-            marks={[
-              { value: -180, label: '-180°' },
-              { value: -90, label: '-90°' },
-              { value: 0, label: '0°' },
-              { value: 90, label: '90°' },
-              { value: 180, label: '180°' },
-            ]}
-            valueLabelDisplay="auto"
-            valueLabelFormat={(value) => `${value}°`}
-            disabled={isFixNorth}
-            track={false}
-            sx={{
-              '& .MuiSlider-rail': {
-                opacity: 1,
-              },
-              '& .MuiSlider-thumb': {
-                backgroundColor: rotationDegrees < 0 ? '#d32f2f' : undefined,
-              },
-            }}
-          />
-        </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: '16px' }}>
-          <IconButton
-            id="rotation-reset"
-            aria-label={t('mapnav.rotation.reset')}
-            tooltipPlacement="right"
-            size="small"
-            onClick={handleReset}
-            disabled={rotationDegrees === 0}
-          >
-            {t('mapnav.rotation.reset')}
-          </IconButton>
-        </Box>
-        {showFixNorthSwitch && (
-          <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: '5px' }}>
-            <Switch size="small" onChange={handleFixNorth} label={t('mapctrl.rotation.fixedNorth') || ''} checked={isFixNorth} />
+        <Slider
+          value={rotationDegrees}
+          onChange={handleSliderChange}
+          min={-180}
+          max={180}
+          step={1}
+          marks={[
+            { value: -180, label: '-180°' },
+            { value: -90, label: '-90°' },
+            { value: 0, label: '0°' },
+            { value: 90, label: '90°' },
+            { value: 180, label: '180°' },
+          ]}
+          valueLabelDisplay="auto"
+          valueLabelFormat={(value) => `${value}°`}
+          disabled={isFixNorth}
+          track={false}
+        />
+        <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+            <IconButton
+              id="rotation-reset"
+              aria-label={t('mapnav.rotation.reset')}
+              tooltipPlacement="right"
+              size="small"
+              onClick={handleReset}
+              disabled={rotationDegrees === 0}
+            >
+              {t('mapnav.rotation.reset')}
+            </IconButton>
+            {showFixNorthSwitch && (
+              <Switch size="small" onChange={handleFixNorth} label={t('mapctrl.rotation.fixedNorth') || ''} checked={isFixNorth} />
+            )}
           </Box>
-        )}
+        </Box>
       </Box>
     );
   };
