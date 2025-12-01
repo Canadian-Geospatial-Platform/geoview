@@ -9,7 +9,7 @@ import { fromExtent } from 'ol/geom/Polygon';
 import type { Coordinate } from 'ol/coordinate';
 import type { Color } from 'ol/color';
 
-import type { TypeHighlightColors, TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
+import { type TypeHighlightColors, type TypeFeatureInfoEntry, DEFAULT_HIGHLIGHT_COLOR } from '@/api/types/map-schema-types';
 import { logger } from '@/core/utils/logger';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { PointMarkers } from './point-markers';
@@ -36,7 +36,7 @@ export class FeatureHighlight {
   pointMarkers?: PointMarkers;
 
   /** The fill for the highlight */
-  #highlightColor: TypeHighlightColors = 'aqua';
+  #highlightColor: TypeHighlightColors = DEFAULT_HIGHLIGHT_COLOR;
 
   /** The fill for the highlight */
   #highlightFill = new Fill({ color: [0, 230, 242, 0.3] }); // aqua
@@ -69,7 +69,7 @@ export class FeatureHighlight {
     // Initialize the Feature Highlight (adding the map option sets zIndex to infinity because it is undefined)
     this.overlayLayer = new VectorLayer({ source: this.highlightSource, map: this.mapViewer.map });
     this.pointMarkers = new PointMarkers(this.mapViewer, this);
-    if (MapEventProcessor.getFeatureHighlightColor(this.mapViewer.mapId) !== 'aqua')
+    if (MapEventProcessor.getFeatureHighlightColor(this.mapViewer.mapId) !== DEFAULT_HIGHLIGHT_COLOR)
       this.changeHighlightColor(MapEventProcessor.getFeatureHighlightColor(this.mapViewer.mapId));
   }
 

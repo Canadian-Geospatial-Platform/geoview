@@ -18,7 +18,7 @@ import type {
   TypeFeatureInfoEntry,
   TypePointMarker,
 } from '@/api/types/map-schema-types';
-import { MAP_CENTER, MAP_ZOOM_LEVEL } from '@/api/types/map-schema-types';
+import { DEFAULT_HIGHLIGHT_COLOR, MAP_CENTER, MAP_ZOOM_LEVEL } from '@/api/types/map-schema-types';
 import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
 import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { Projection } from '@/geo/utils/projection';
@@ -173,7 +173,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     clickMarker: undefined,
     currentBasemapOptions: { basemapId: 'transport', shaded: true, labeled: true },
     currentProjection: DEFAULT_PROJECTION,
-    featureHighlightColor: 'aqua',
+    featureHighlightColor: DEFAULT_HIGHLIGHT_COLOR,
     fixNorth: false,
     hideCoordinateInfoSwitch: false,
     highlightedFeatures: [],
@@ -222,7 +222,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
             : MAP_CENTER[geoviewConfig.map.viewSettings.projection],
           currentProjection: geoviewConfig.map.viewSettings.projection,
           currentBasemapOptions: geoviewConfig.map.basemapOptions,
-          featureHighlightColor: geoviewConfig.map.highlightColor || 'aqua',
+          featureHighlightColor: geoviewConfig.map.highlightColor || DEFAULT_HIGHLIGHT_COLOR,
           hideCoordinateInfoSwitch: geoviewConfig.globalSettings?.hideCoordinateInfoSwitch || false,
           homeView: geoviewConfig.map.viewSettings.homeView ||
             geoviewConfig.map.viewSettings.initialView || { zoomAndCenter: [MAP_ZOOM_LEVEL[3857], MAP_CENTER[3857]] },
