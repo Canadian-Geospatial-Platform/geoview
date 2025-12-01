@@ -45,8 +45,6 @@
   },
   "mapctrl": {
     "rotation": {
-      "resetRotation": "Reset map rotation",
-      "fixedNorth": "Fix North",
       "rotation": "Map rotation",
       "projection": "Projection"
     },
@@ -203,6 +201,7 @@
     "closeSelection": "Close selection",
     "externalLink": "External Link",
     "feature": "feature",
+    "selected": "selected",
     "clickOnMap": "Click on map",
     "nextFeatureBtn": "Next feature",
     "previousFeatureBtn": "Previous feature",

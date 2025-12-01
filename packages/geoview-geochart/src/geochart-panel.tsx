@@ -114,10 +114,15 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
       logger.logTraceUseCallback('GEOCHART-PANEL - getNumFeaturesLabel');
 
       const numOfFeatures = layer.features?.length ?? 0;
-      return `${numOfFeatures} ${getLocalizedMessage(displayLanguage, 'geochart.panel.chart')}${numOfFeatures > 1 ? 's' : ''}`;
+      const label =
+        numOfFeatures === 0
+          ? `${numOfFeatures} ${getLocalizedMessage(displayLanguage, 'geochart.panel.empty')}`
+          : `${numOfFeatures} ${getLocalizedMessage(displayLanguage, 'geochart.panel.feature')}${numOfFeatures > 1 ? 's' : ''} ${getLocalizedMessage(displayLanguage, 'geochart.panel.chart')}`;
+
+      return label;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [mapId]
+    [mapId, displayLanguage]
   );
 
   /**

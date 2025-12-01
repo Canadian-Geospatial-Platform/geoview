@@ -43,6 +43,7 @@ export {
   Expand as ExpandIcon,
   ExpandLess as ExpandLessIcon,
   ExpandMore as ExpandMoreIcon,
+  DynamicFeed as LayerGroupIcon,
   FileUpload as FileUploadIcon,
   FilterAlt as FilterAltIcon,
   FilterAltOff as FilterAltOffIcon,
@@ -51,9 +52,6 @@ export {
   Fullscreen as FullscreenIcon,
   FullscreenExit as FullscreenExitIcon,
   GitHub as GitHubIcon,
-  Group as GroupIcon,
-  GroupWork as GroupWorkIcon,
-  GroupWorkOutlined as GroupWorkOutlinedIcon,
   Help as HelpIcon,
   Hexagon as HexagonIcon,
   HighlightOutlined as HighlightOutlinedIcon,
@@ -129,4 +127,4 @@ export {
   ZoomOut as ZoomOutSearchIcon,
 } from '@mui/icons-material';
 
-export { LegendIcon } from '@/ui/svg/svg-icon';
+export { LegendIcon, ClearHighlightIcon } from '@/ui/svg/svg-icon';

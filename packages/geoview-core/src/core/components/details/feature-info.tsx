@@ -101,7 +101,7 @@ const FeatureHeader = memo(function FeatureHeader({ iconSrc, name, hasGeometry, 
             tooltipPlacement="top"
             disabled={!hasGeometry}
             onClick={onCheckChange}
-            sx={sxClasses.selectFeatureCheckbox}
+            className="buttonOutline"
           >
             {checked ? <HighlightIcon /> : <HighlightOutlinedIcon />}
           </IconButton>

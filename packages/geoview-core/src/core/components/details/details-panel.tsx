@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
-import { IconButton, Grid, ArrowForwardIosOutlinedIcon, ArrowBackIosOutlinedIcon, LayersClearOutlinedIcon, Box } from '@/ui';
+import { IconButton, Grid, ArrowForwardIosOutlinedIcon, ArrowBackIosOutlinedIcon, ClearHighlightIcon, Box } from '@/ui';
 import {
   useDetailsStoreActions,
   useDetailsCheckedFeatures,
@@ -78,6 +78,7 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
   const [selectedLayerPathLocal, setSelectedLayerPathLocal] = useState<string>(selectedLayerPath);
   const [arrayOfLayerListLocal, setArrayOfLayerListLocal] = useState<LayerListEntry[]>([]);
   const [geometryLoaded, setGeometryLoaded] = useState<number>(0); // Counter to force re-render when geometry loads
+  const [isRightPanelVisible, setIsRightPanelVisible] = useState<boolean>(false);
   const prevLayerSelected = useRef<TypeLayerData>();
   const prevLayerFeatures = useRef<TypeFeatureInfoEntry[] | undefined | null>();
   const prevFeatureIndex = useRef<number>(0); // 0 because that's the default index for the features
@@ -132,7 +133,7 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
       logger.logTraceUseCallback('DETAILS-PANEL - getNumFeaturesLabel');
 
       const numOfFeatures = layer.features?.length ?? 0;
-      return `${numOfFeatures} ${t('details.feature')}${numOfFeatures > 1 ? 's' : ''}`;
+      return `${numOfFeatures} ${t('details.feature')}${numOfFeatures > 1 ? 's' : ''} ${numOfFeatures === 0 ? t('details.selected') : ''}`;
     },
     [t]
   );
@@ -151,13 +152,13 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
    */
   const isPanelOpen = useMemo(() => {
     if (containerType === CONTAINER_TYPE.FOOTER_BAR) {
-      return selectedTab === TABS.DETAILS && !isCollapsed;
+      return selectedTab === TABS.DETAILS && !isCollapsed && isRightPanelVisible;
     }
     if (containerType === CONTAINER_TYPE.APP_BAR) {
-      return activeAppBarTab.tabId === 'details' && activeAppBarTab.isOpen;
+      return activeAppBarTab.tabId === 'details' && activeAppBarTab.isOpen && isRightPanelVisible;
     }
     return false;
-  }, [containerType, selectedTab, isCollapsed, activeAppBarTab]);
+  }, [containerType, selectedTab, isCollapsed, activeAppBarTab, isRightPanelVisible]);
 
   /**
    * Memoizes the layers list for the LayerList component and centralizing indexing purposes.
@@ -434,6 +435,31 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
   };
 
   /**
+   * Handles when the right panel is closed in responsive layout.
+   * Removes the currently selected feature highlight (but keeps checked features).
+   */
+  const handleRightPanelClosed = useCallback((): void => {
+    // Log
+    logger.logTraceUseCallback('DETAILS-PANEL - handleRightPanelClosed');
+
+    // Only remove the current selected feature highlight if it's not checked
+    const currentFeature = memoSelectedLayerData?.features?.[currentFeatureIndex];
+    if (currentFeature && !isFeatureInCheckedFeatures(currentFeature)) {
+      removeHighlightedFeature(currentFeature);
+    }
+  }, [removeHighlightedFeature, memoSelectedLayerData, currentFeatureIndex, isFeatureInCheckedFeatures]);
+
+  /**
+   * Handles when the right panel visibility changes in responsive layout.
+   * Updates the local state to track panel visibility.
+   */
+  const handleRightPanelVisibilityChanged = useCallback((isVisible: boolean): void => {
+    // Log
+    logger.logTraceUseCallback('DETAILS-PANEL - handleRightPanelVisibilityChanged', isVisible);
+    setIsRightPanelVisible(isVisible);
+  }, []);
+
+  /**
    * Handles clicks to forward and back arrows in right panel.
    * Removes previous feature from selectedFeatures store if it is not checked, and adds new feature.
    *
@@ -464,8 +490,18 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
       logger.logTraceUseCallback('DETAILS-PANEL - handleLayerChange', layerEntry.layerPath);
       // Set the selected layer path in the store which will in turn trigger the store listeners on this component
       setSelectedLayerPath(layerEntry.layerPath);
+
+      // Re-highlight the current feature when panel becomes visible (layer selection makes panel visible)
+      // Use setTimeout to ensure the layer data is updated first
+      setTimeout(() => {
+        const layerData = arrayOfLayerDataBatch.find((layer) => layer.layerPath === layerEntry.layerPath);
+        const featureToHighlight = layerData?.features?.[0]; // Will be index 0 after layer change
+        if (featureToHighlight && hasValidGeometry(featureToHighlight)) {
+          addHighlightedFeature(featureToHighlight);
+        }
+      }, 0);
     },
-    [setSelectedLayerPath]
+    [setSelectedLayerPath, arrayOfLayerDataBatch, hasValidGeometry, addHighlightedFeature]
   );
   // #endregion
 
@@ -665,13 +701,15 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
             className="buttonOutline"
             disabled={checkedFeatures.length === 0}
           >
-            <LayersClearOutlinedIcon />
+            <ClearHighlightIcon />
           </IconButton>
         </Box>
       }
       selectedLayerPath={selectedLayerPath}
       layerList={memoLayersList}
       onLayerListClicked={(layerEntry) => handleLayerChange(layerEntry)}
+      onRightPanelClosed={handleRightPanelClosed}
+      onRightPanelVisibilityChanged={handleRightPanelVisibilityChanged}
       fullWidth={fullWidth}
       guideContentIds={['details']}
     >

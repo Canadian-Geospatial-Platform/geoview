@@ -43,12 +43,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     overflowY: 'auto',
     overflowX: 'hidden',
   },
-  selectFeatureCheckbox: {
-    color: theme.palette.geoViewColor.primary.main,
-    '&.Mui-checked': {
-      color: theme.palette.geoViewColor.primary.main,
-    },
-  },
   featureInfoItemValue: {
     marginRight: 0,
     wordBreak: 'break-word',
