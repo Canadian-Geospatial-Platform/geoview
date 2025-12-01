@@ -1066,7 +1066,6 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     );
 
     if (!featureStyle) {
-      logger.logWarning(`Feature style is undefined for ${layerPath}`);
       return GeoviewRenderer.getFeatureImageSource(feature, layerStyle, filterEquation, true, domainsLookup, aliasLookup);
     }
 
