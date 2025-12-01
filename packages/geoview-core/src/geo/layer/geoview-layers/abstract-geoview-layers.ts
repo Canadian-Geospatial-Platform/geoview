@@ -7,7 +7,7 @@ import { delay, generateId } from '@/core/utils/utilities';
 import type { TypeDateFragments } from '@/core/utils/date-mgt';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
-import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
@@ -405,14 +405,10 @@ export abstract class AbstractGeoViewLayer {
     // When no metadata is provided, there's no validation to be done.
     if (!this.#metadata) return;
 
-    // Copy the service metadata in each layer entry config right away
+    // Copy the service metadata, recursively, in each layer entry config right away
     listOfLayerEntryConfig.forEach((layerConfig) => {
-      // If an AbstractBaseLayerEntryConfig
-      if (layerConfig instanceof AbstractBaseLayerEntryConfig) {
-        // Copy the service metadata right away
-        // TODO: Check - Is this really the right place to set the ServiceMetadata?
-        layerConfig.setServiceMetadata(this.getMetadata());
-      }
+      // Copy the service metadata right away
+      layerConfig.setServiceMetadata(this.getMetadata());
     });
 
     // Redirect to overridable method
@@ -583,6 +579,7 @@ export abstract class AbstractGeoViewLayer {
     try {
       // If no errors already happened on the layer path being processed
       if (layerConfig.layerStatus !== 'error') {
+        // TODO: Check - Is this really the right place to set the ServiceMetadata? Isn't it already set by now?
         // Set the service metadata in the entry config instance as we're about to process the layer metadata
         layerConfig.setServiceMetadata(this.getMetadata());
 

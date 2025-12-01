@@ -91,14 +91,6 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   }
 
   /**
-   * Sets the service metadata for the layer.
-   * @param {unknown} metadata - The service metadata to set
-   */
-  setServiceMetadata(metadata: unknown): void {
-    this.#serviceMetadata = metadata;
-  }
-
-  /**
    * Gets the metadata that is associated to the layer.
    * @returns {unknown} The layer metadata or undefined.
    */
@@ -421,6 +413,14 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    */
   setGeometryType(geomType: TypeStyleGeometry | undefined): void {
     this.source.featureInfo!.geometryType = geomType;
+  }
+
+  /**
+   * Sets the service metadata for the layer.
+   * @param {unknown} metadata - The service metadata to set
+   */
+  override onSetServiceMetadata(metadata: unknown): void {
+    this.#serviceMetadata = metadata;
   }
 
   /**

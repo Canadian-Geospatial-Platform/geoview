@@ -114,6 +114,17 @@ export abstract class ConfigBaseClass {
   }
 
   /**
+   * Overridable method to apply the service metadata to this layer entry and its children.
+   * Subclasses should override this method to implement the logic needed
+   * to update the service metadata on the current layer entry, including
+   * any recursive behavior for child entries or associated sources.
+   * @param {unknown} metadata - The service metadata to set.
+   * @protected
+   * @abstract
+   */
+  protected abstract onSetServiceMetadata(metadata: unknown): void;
+
+  /**
    * Overridable method to apply the data access path to this layer entry and its children.
    * Subclasses should override this method to implement the logic needed
    * to update the data access path on the current layer entry, including
@@ -486,6 +497,18 @@ export abstract class ConfigBaseClass {
 
     // No siblings
     return [];
+  }
+
+  /**
+   * Sets the service metadata for this layer entry.
+   * This is the public entry point for updating the service metadata.
+   * Internally, it delegates the behavior to the `onSetServiceMetadata` method,
+   * which can be overridden by subclasses to implement custom logic.
+   * @param {unknown} metadata - The new service metadata to be used.
+   */
+  setServiceMetadata(metadata: unknown): void {
+    // Redirect
+    this.onSetServiceMetadata(metadata);
   }
 
   /**
