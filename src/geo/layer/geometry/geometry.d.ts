@@ -25,15 +25,11 @@ interface FeatureCollection {
  */
 export declare class GeometryApi {
     #private;
-    geometryGroups: FeatureCollection[];
     geometries: Feature[];
     defaultGeometryGroupId: string;
-    activeGeometryGroupIndex: number;
-    /** Reference on the map viewer */
-    mapViewer: MapViewer;
     /**
      * Constructs a Geometry class and creates a geometry group in the process.
-     * @param {MapViewer} mapViewer a reference to the map viewer
+     * @param {MapViewer} mapViewer - A reference to the map viewer
      */
     constructor(mapViewer: MapViewer);
     /**
@@ -49,10 +45,10 @@ export declare class GeometryApi {
     /**
      * Create a polyline using an array of lon/lat points
      *
-     * @param {Coordinate} points points of lon/lat to draw a polyline
-     * @param options polyline options including styling
-     * @param {string} id an optional id to be used to manage this geometry
-     * @param {string} groupId an optional group id in witch we want to add the geometry
+     * @param {Coordinate} points - The points of lon/lat to draw a polyline
+     * @param options - Optional polyline options including styling
+     * @param {string} id - Optional id to be used to manage this geometry
+     * @param {string} groupId - Optional group id in which we want to add the geometry
      *
      * @returns {Feature} a geometry containing the id and the created geometry
      */
@@ -64,10 +60,10 @@ export declare class GeometryApi {
     /**
      * Create a new polygon
      *
-     * @param {Coordinate} points array of points to create the polygon
-     * @param options polygon options including styling
-     * @param {string} optionalFeatureId an optional id to be used to manage this geometry
-     * @param {string} groupId an optional group id in witch we want to add the geometry
+     * @param {Coordinate} points - The array of points to create the polygon
+     * @param options - the polygon options including styling
+     * @param {string} optionalFeatureId - Optional id to be used to manage this geometry
+     * @param {string} groupId - Optional group id in which we want to add the geometry
      *
      * @returns {Feature} a geometry containing the id and the created geometry
      */
@@ -79,10 +75,10 @@ export declare class GeometryApi {
     /**
      * Create a new circle
      *
-     * @param {Coordinate} coordinate long lat coordinate of the circle
-     * @param options circle options including styling
-     * @param {string} optionalFeatureId an optional id to be used to manage this geometry
-     * @param {string} groupId an optional group id in witch we want to add the geometry
+     * @param {Coordinate} coordinate - The long lat coordinate of the circle
+     * @param options - The circle options including styling
+     * @param {string} optionalFeatureId - Optional id to be used to manage this geometry
+     * @param {string} groupId - Optional group id in which we want to add the geometry
      *
      * @returns {Feature} a geometry containing the id and the created geometry
      */
@@ -94,10 +90,10 @@ export declare class GeometryApi {
     /**
      * Create a new marker icon
      *
-     * @param {Coordinate} coordinate the long lat position of the marker
-     * @param options marker options including styling
-     * @param {string} optionalFeatureId an optional id to be used to manage this geometry
-     * @param {string} groupId an optional group id in witch we want to add the geometry
+     * @param {Coordinate} coordinate - The long lat position of the marker
+     * @param options - The marker options including styling
+     * @param {string} optionalFeatureId - Optional id to be used to manage this geometry
+     * @param {string} groupId - Optional group id in witch we want to add the geometry
      *
      * @returns {Feature} a geometry containing the id and the created geometry
      */
@@ -109,7 +105,7 @@ export declare class GeometryApi {
     /**
      * Find a feature using it's id
      *
-     * @param {string} featureId the id of the feature to return
+     * @param {string} featureId - The id of the feature to return
      *
      * @returns {Feature} a feature having the specified id
      */
@@ -117,14 +113,15 @@ export declare class GeometryApi {
     /**
      * Delete a feature using the id and delete it from the groups and the map
      *
-     * @param {string} featureId the id of the feature to delete
+     * @param {string} featureId - The id of the feature to delete
      */
     deleteGeometry(featureId: string): void;
     /**
-     * Create a new geometry group to manage multiple geometries at once
+     * Create a new geometry group to manage multiple geometries at once (z-index is infinity, set the index to change the behaviour)
      *
-     * @param {string} geometryGroupId the id of the group to use when managing this group
-     * @param options an optional vector layer and vector source options
+     * @param {string} geometryGroupId - The id of the group to use when managing this group
+     * @param options - Optional vector layer and vector source options
+     *
      * @returns {FeatureCollection} created geometry group
      */
     createGeometryGroup(geometryGroupId: string, options?: {
@@ -135,98 +132,126 @@ export declare class GeometryApi {
      * set the active geometry group (the geometry group used when adding geometries).
      * If id is not specified, use the default geometry group.
      *
-     * @param {string} id optional the id of the group to set as active
+     * @param {string} id - Optional the id of the group to set as active
      */
     setActiveGeometryGroup(id?: string): void;
     /**
      * Get the active geometry group
      *
-     * @returns {FeatureCollection} the active geometry group
+     * @returns {FeatureCollection} - The active geometry group
      */
     getActiveGeometryGroup(): FeatureCollection;
     /**
-     * Get the geometry group by using the ID specified when the group was created
-     * if geometryGroupid is not provided, return the active geometry group
+     * Check if a geometry group exists
      *
-     * @param {string} geometryGroupId the id of the geometry group to return
+     * @param {string} geometryGroupId - The id of the geometry group to check
+     * @returns {boolean} True if the group exists, false otherwise
+     */
+    hasGeometryGroup(geometryGroupId: string): boolean;
+    /**
+     * Get the geometry group by using the ID specified when the group was created
+     *
+     * @param {string} geometryGroupId - The id of the geometry group to return
      *
      * @returns the geomtry group
+     * @throws {InvaliGeometryGroupIdError} If the provided geometry group id does not exist.
      */
-    getGeometryGroup(geometryGroupId?: string): FeatureCollection | undefined;
+    getGeometryGroup(geometryGroupId: string): FeatureCollection;
+    /**
+     * Get all geometry groups
+     *
+     * @returns {FeatureCollection[]} Array of all geometry groups
+     */
+    getGeometryGroups(): FeatureCollection[];
     /**
      * Find the groups that contain the geometry using it's id
      *
-     * @param {string} featureId the id of the geometry
+     * @param {string} featureId - The id of the geometry
      *
-     * @returns {FeatureCollection[]} the groups that contain the geometry
+     * @returns {FeatureCollection[]} Groups that contain the geometry
      */
     getGeometryGroupsByFeatureId(featureId: string): FeatureCollection[];
     /**
      * Show the identified geometry group on the map
-     * if geometryGroupId is not provided, use the active geometry group
      *
-     * @param {string} geometryGroupId optional the id of the group to show on the map
+     * @param {string} geometryGroupId - The id of the group to show on the map
+     * @throws {InvaliGeometryGroupIdError} If the provided geometry group id does not exist.
      */
-    setGeometryGroupAsVisible(geometryGroupId?: string): void;
+    setGeometryGroupAsVisible(geometryGroupId: string): void;
     /**
-     * hide the identified geometry group from the map
-     * if groupId is not provided, use the active geometry group
+     * Hide the identified geometry group from the map
      *
-     * @param {string} geometryGroupId optional the id of the group to show on the map
+     * @param {string} geometryGroupId - The id of the group to show on the map
+     * @throws {InvaliGeometryGroupIdError} If the provided geometry group id does not exist.
      */
-    setGeometryGroupAsInvisible(geometryGroupId?: string): void;
+    setGeometryGroupAsInvisible(geometryGroupId: string): void;
+    /**
+     * Get the z-index of a geometry group's vector layer, undefined if group does not exist
+     *
+     * @param {string} geometryGroupId - The id of the group
+     * @returns {number | undefined} The z-index value of the vector layer
+     * @throws {InvaliGeometryGroupIdError} If the provided geometry group id does not exist.
+     */
+    getGeometryGroupZIndex(geometryGroupId: string): number;
+    /**
+     * Set the z-index of a geometry group's vector layer
+     *
+     * @param {string} geometryGroupId - The id of the group
+     * @param {number} zIndex - The z-index value to set
+     * @throws {InvaliGeometryGroupIdError} If the provided geometry group id does not exist.
+     */
+    setGeometryGroupZIndex(geometryGroupId: string, zIndex: number): void;
     /**
      * Add a new geometry to the group whose identifier is equal to geometryGroupId.
      * if geometryGroupId is not provided, use the active geometry group. If the
      * geometry group doesn't exist, create it.
      *
-     * @param {Feature} geometry the geometry to be added to the group
-     * @param {string} geometryGroupId optional id of the group to add the geometry to
+     * @param {Feature} geometry - The geometry to be added to the group
+     * @param {string} geometryGroupId - Optional id of the group to add the geometry to
      */
     addToGeometryGroup(geometry: Feature, geometryGroupId?: string): void;
     /**
      * Find the groups that the feature exists in and delete the feature from those groups
      *
-     * @param {string} featureId the geometry id
+     * @param {string} featureId - The geometry id
      */
     deleteGeometryFromGroups(featureId: string): void;
     /**
      * Delete a specific feature from a group using the feature id
-     * If geometryGroupid is not provided, the active geometry group is used.
      *
-     * @param {string} featureId the feature id to be deleted
-     * @param {string} geometryGroupid optional group id
+     * @param {string} featureId - The feature id to be deleted
+     * @param {string} geometryGroupid - The group id
+     * @throws {InvaliGeometryGroupIdError} If the provided geometry group id does not exist.
      */
-    deleteGeometryFromGroup(featureId: string, geometryGroupid?: string): void;
+    deleteGeometryFromGroup(featureId: string, geometryGroupid: string): void;
     /**
      * Delete all geometries from the geometry group but keep the group
-     * If geometryGroupid is not provided, the active geometry group is used.
      *
-     * @param {string} geometryGroupid optional group id
-     * @returns {FeatureCollection} the group with empty layers
+     * @param {string} geometryGroupid - The group id
+     * @returns {FeatureCollection} Group with empty layers
+     * @throws {InvaliGeometryGroupIdError} If the provided geometry group id does not exist.
      */
-    deleteGeometriesFromGroup(geometryGroupid?: string): FeatureCollection;
+    deleteGeometriesFromGroup(geometryGroupid: string): FeatureCollection;
     /**
      * Delete a geometry group and all the geometries from the map.
-     * If geometryGroupid is not provided, the active geometry group is used.
      * The default geometry group can't be deleted.
      *
-     * @param {string} geometryGroupid optional id of the geometry group to delete
+     * @param {string} geometryGroupid - The id of the geometry group to delete
      */
-    deleteGeometryGroup(geometryGroupid?: string): void;
+    deleteGeometryGroup(geometryGroupid: string): void;
     /**
      * Get the coordinates of a specific feature
-     * @param {string} featureId the id of the feature
-     * @param {number} projection optional, transform the coordinates to the provided projection.
+     * @param {string} featureId - The id of the feature
+     * @param {number} projection - Optional, transform the coordinates to the provided projection.
      *   Otherwise, uses the map's projection by default
-     * @returns {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined} the coordinates of the feature
+     * @returns {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined} Coordinates of the feature
      */
     getFeatureCoords(featureId: string, projection?: number): Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined;
     /**
      * Allows for a feature's coordinates to be updated programatically.
-     * @param {string} featureId the id of the feature to return
+     * @param {string} featureId - The id of the feature to return
      * @param {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][]} coordinates - The new coordinates for the feature
-     * @param {number} projection optional, the projection of the coordinates, assumes 4326 if not specified
+     * @param {number} projection - Optional, the projection of the coordinates, assumes 4326 if not specified
      */
     setFeatureCoords(featureId: string, coordinates: Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][], projection?: number): void;
     /**
@@ -239,19 +264,19 @@ export declare class GeometryApi {
     /**
      * Typeguards when a list of coordinates should actually be a single coordinate, such as a Point.
      * @param {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][]} coordinates - The coordinates to check
-     * @returns {Coordinate} when the coordinates represent a Point
+     * @returns {Coordinate} When the coordinates represent a Point
      */
     static isCoordinates(coordinates: Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][]): coordinates is Coordinate;
     /**
      * Typeguards when a list of coordinates should actually be a single coordinate, such as a LineString.
      * @param {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][]} coordinates - The coordinates to check
-     * @returns {Coordinate[]} when the coordinates represent a LineString
+     * @returns {Coordinate[]} When the coordinates represent a LineString
      */
     static isArrayOfCoordinates(coordinates: Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][]): coordinates is Coordinate[];
     /**
      * Typeguards when a list of coordinates should actually be a single coordinate, such as a MultiLineString or Polygon.
      * @param {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][]} coordinates - The coordinates to check
-     * @returns {Coordinate[][]} when the coordinates represent a MultiLineString or Polygon
+     * @returns {Coordinate[][]} When the coordinates represent a MultiLineString or Polygon
      */
     static isArrayOfArrayOfCoordinates(coordinates: Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][]): coordinates is Coordinate[][];
     /**
