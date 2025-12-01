@@ -12,6 +12,7 @@ import {
   VisibilityOffOutlinedIcon,
   HighlightIcon,
   CenterFocusScaleIcon,
+  LayersIcon,
 } from '@/ui';
 import {
   useLayerHighlightedLayer,
@@ -22,6 +23,12 @@ import {
   useLayerSelectorControls,
   useLayerSelectorStatus,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import {
+  useUIFooterBarIsCollapsed,
+  useUIStoreActions,
+  useUIFooterBarComponents,
+  useUIAppbarComponents,
+} from '@/core/stores/store-interface-and-intial-values/ui-state';
 import type { TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
 import {
   useMapStoreActions,
@@ -31,6 +38,7 @@ import {
 } from '@/core/stores/';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
+import { scrollIfNotVisible } from '@/core/utils/utilities';
 
 // TODO: WCAG Issue #3108 - Check all icon buttons for aria-label clarity and translations
 // TODO: WCAG Issue #3108 - Check all icon buttons for "state related" aria values (i.e aria-checked, aria-disabled, etc.)
@@ -105,6 +113,15 @@ const useSubtitle = (layerPath: string, children: TypeLegendLayer[], items: Type
 
 // SecondaryControls component (no memo to force re render from layers panel modifications)
 export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.Element {
+  // Add store actions for selecting layer and UI
+  const { setSelectedLayerPath } = useLayerStoreActions();
+  const { setFooterBarIsCollapsed, setActiveFooterBarTab, setActiveAppBarTab } = useUIStoreActions();
+  const isFooterCollapsed = useUIFooterBarIsCollapsed();
+  const footerBarComponents = useUIFooterBarComponents();
+  const appBarComponents = useUIAppbarComponents();
+  const hasFooterLayersTab = footerBarComponents.includes('layers');
+  const hasAppBarLayersTab = appBarComponents.includes('layers');
+  const hasLayersTab = hasFooterLayersTab || hasAppBarLayersTab;
   // Log
   logger.logTraceRender('components/legend/legend-layer-ctrl', layerPath);
 
@@ -142,6 +159,37 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
     <Stack direction="row" alignItems="center" sx={sxClasses.layerStackIcons}>
       {!!subTitle.length && <Typography fontSize={14}>{subTitle}</Typography>}
       <Box sx={sxClasses.subtitle}>
+        {/* Button to select layer in panel and scroll to footer */}
+        {hasLayersTab && (
+          <IconButton
+            aria-label={t('legend.selectLayerAndScroll')}
+            className="buttonOutline"
+            onClick={() => {
+              // If there is 2 components with layers tab (app bar or footer), prefer footer
+              if (hasFooterLayersTab) {
+                // Open footer layers tab
+                setActiveFooterBarTab('layers');
+                if (isFooterCollapsed) setFooterBarIsCollapsed(false);
+                setTimeout(() => {
+                  setSelectedLayerPath(layerPath);
+                  // Scroll the footer into view if not visible
+                  const footer = document.querySelector('.tabsContainer');
+                  if (footer) {
+                    scrollIfNotVisible(footer as HTMLElement, 'start');
+                  }
+                }, 350);
+              } else if (hasAppBarLayersTab) {
+                // Open appBar layers tab
+                setActiveAppBarTab('layers', true, false);
+                setTimeout(() => {
+                  setSelectedLayerPath(layerPath);
+                }, 350);
+              }
+            }}
+          >
+            <LayersIcon />
+          </IconButton>
+        )}
         <IconButton
           edge="end"
           aria-label={t('layers.zoomVisibleScale')}

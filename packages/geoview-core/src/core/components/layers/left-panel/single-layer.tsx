@@ -52,6 +52,7 @@ import { Divider } from '@/ui/divider/divider';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useUISelectedFooterLayerListItemId } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import type { TypeLayerControls } from '@/api/types/layer-schema-types';
+import { scrollListItemIntoView } from '@/core/utils/utilities';
 
 // TODO: WCAG Issue #3108 - Check all disabled buttons. They may need special treatment. Need to find instance in UI first)
 // TODO: WCAG Issue #3108 - Check all icon buttons for "state related" aria values (i.e aria-checked, aria-disabled, etc.)
@@ -72,18 +73,18 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
   // Log
   logger.logTraceRender('components/layers/left-panel/single-layer', layerPath);
 
+  // Hook
   const { t } = useTranslation<string>();
-
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Get store states
   const { reloadLayer, setSelectedLayerPath, setSelectedLayerSortingArrowId, zoomToLayerVisibleScale } = useLayerStoreActions();
   const { setOrToggleLayerVisibility, toggleLegendCollapsed, reorderLayer } = useMapStoreActions();
-
   const mapId = useGeoViewMapId();
   const selectedLayerPath = useLayerSelectedLayerPath();
   const displayState = useLayerDisplayState();
+  const layerIsSelected = layerPath === selectedLayerPath && displayState === 'view';
   const datatableSettings = useDataTableLayerSettings();
   const selectedLayerSortingArrowId = useLayerSelectedLayerSortingArrowId();
   const selectedFooterLayerListItemId = useUISelectedFooterLayerListItemId();
@@ -109,6 +110,16 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
   // This is used to determine if the text should be wrapped in a tooltip
   const shouldShowTooltip = (!!layerName && layerName.length > CONST_NAME_LENGTH_TOOLTIP) || isLayoutEnlarged;
 
+  // Scroll this list item into view if selected
+  useEffect(() => {
+    if (layerIsSelected && layerId) {
+      const listItem = document.getElementById(layerId);
+      if (listItem) {
+        scrollListItemIntoView(listItem);
+      }
+    }
+  }, [layerIsSelected, layerId]);
+
   // if any of the child layers is selected return true
   const isLayerChildSelected = useCallback(
     (children: TypeLegendLayer[] | undefined): boolean => {
@@ -131,7 +142,6 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
   );
 
   const layerChildIsSelected = isLayerChildSelected(layerChildren);
-  const layerIsSelected = layerPath === selectedLayerPath && displayState === 'view';
 
   // returns true if any of the layer children has visibility of false
   const layerHasDisabledVisibility = useCallback(

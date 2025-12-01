@@ -94,7 +94,8 @@
     "itemsCount": "{count} sur {totalCount} classes",
     "legendInstructions": "Legend Instructions",
     "noLayersAdded": "Aucune couche ajoutée",
-    "noLayersAddedDescription": "Ajoutez des couches à la carte en cliquant sur le bouton 'Couches' et en sélectionnant les couches que vous souhaitez afficher."
+    "noLayersAddedDescription": "Ajoutez des couches à la carte en cliquant sur le bouton 'Couches' et en sélectionnant les couches que vous souhaitez afficher.",
+    "selectLayerAndScroll": "Accéder au panneau des couches"
   },
   "layers": {
     "title": "Couches",

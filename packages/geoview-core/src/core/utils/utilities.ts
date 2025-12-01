@@ -797,6 +797,52 @@ export function scrollIfNotVisible(el: HTMLElement, blockValue: ScrollLogicalPos
 }
 
 /**
+ * Scrolls a list item into view within its scrollable container only, without scrolling the page.
+ * Adds a 20px gap for better visibility when scrolling.
+ * @param {HTMLElement} listItem - The list item element to scroll into view
+ */
+export function scrollListItemIntoView(listItem: HTMLElement): void {
+  const behaviorScroll = (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth') as ScrollBehavior;
+  const gap = 20;
+
+  // Find the nearest scrollable parent
+  let container: HTMLElement | null = listItem.parentElement;
+  while (container && container !== document.body) {
+    const { overflowY } = window.getComputedStyle(container);
+    if ((overflowY === 'auto' || overflowY === 'scroll') && container.scrollHeight > container.clientHeight) {
+      break;
+    }
+    container = container.parentElement;
+  }
+
+  if (!container || container === document.body) return;
+
+  // Check if item is outside the visible area
+  const itemRect = listItem.getBoundingClientRect();
+  const containerRect = container.getBoundingClientRect();
+  const isAbove = itemRect.top < containerRect.top;
+  const isBelow = itemRect.bottom > containerRect.bottom;
+
+  if (!isAbove && !isBelow) return;
+
+  // Calculate scroll position
+  const itemTop = listItem.offsetTop - container.offsetTop;
+  const itemBottom = itemTop + listItem.offsetHeight;
+
+  let newScrollTop;
+  if (isAbove) {
+    newScrollTop = Math.max(0, itemTop - gap);
+  } else {
+    newScrollTop = itemBottom - container.clientHeight + gap;
+  }
+
+  container.scrollTo({
+    top: newScrollTop,
+    behavior: behaviorScroll,
+  });
+}
+
+/**
  * Checks whether the current environment is running on localhost port 8080.
  *
  * @returns {boolean} True if the current hostname is localhost and the port is 8080; otherwise, false.

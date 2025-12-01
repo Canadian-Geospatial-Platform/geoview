@@ -19,9 +19,11 @@ export function LayersList({ layersList, showLayerDetailsPanel, isLayoutEnlarged
   // Log
   logger.logTraceRender('components/layers/left-panel/layers-list', `Count ${layersList.length}`);
 
+  // Hook
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
+  // Store
   const mapId = useGeoViewMapId();
   const layerPathOrder = useMapOrderedLayers();
 
