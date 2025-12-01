@@ -317,6 +317,12 @@ export const useAppNotifications = (): NotificationDetailsType[] => useStore(use
 export const useAppShowUnsymbolizedFeatures = (): boolean =>
   useStore(useGeoViewStore(), (state) => state.appState.showUnsymbolizedFeatures);
 
+export const useAppShellContainer = (): HTMLElement => {
+  const geoviewElement = useAppGeoviewHTMLElement();
+  const mapId = useStore(useGeoViewStore(), (state) => state.mapId);
+  return geoviewElement.querySelector(`[id^="shell-${mapId}"]`) as HTMLElement;
+};
+
 // GV these 2 selectors are use in app-start.tsx before context is assigned to the map
 // GV DO NOT USE this technique elsewhere, it is only to reload language and theme
 export const useAppDisplayLanguageById = (mapId: string): TypeDisplayLanguage =>

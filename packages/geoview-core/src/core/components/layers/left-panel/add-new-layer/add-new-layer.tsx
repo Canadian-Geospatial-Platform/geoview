@@ -6,7 +6,11 @@ import type { ButtonPropsLayerPanel } from '@/ui';
 import { Box, Button, IconButton, ButtonGroup, CircularProgressBase, FileUploadIcon, Paper, Select, Stepper, TextField } from '@/ui';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { useAppDisabledLayerTypes, useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
+import {
+  useAppDisabledLayerTypes,
+  useAppDisplayLanguage,
+  useAppShellContainer,
+} from '@/core/stores/store-interface-and-intial-values/app-state';
 import { ConfigApi } from '@/api/config/config-api';
 import { logger } from '@/core/utils/logger';
 import { generateId, getLocalizedMessage, isValidUUID } from '@/core/utils/utilities';
@@ -276,6 +280,7 @@ export function AddNewLayer(): JSX.Element {
   const disabledLayerTypes = useAppDisabledLayerTypes();
   const { setDisplayState } = useLayerStoreActions();
   const language = useAppDisplayLanguage();
+  const shellContainer = useAppShellContainer();
 
   // The MapViewer
   const mapViewer = MapEventProcessor.getMapViewer(mapId);
@@ -814,6 +819,7 @@ export function AddNewLayer(): JSX.Element {
                     onChange={handleSelectType}
                     label={t('layers.service')}
                     variant="standard"
+                    MenuProps={{ container: shellContainer }}
                     inputLabel={{
                       id: 'service-type-label',
                     }}

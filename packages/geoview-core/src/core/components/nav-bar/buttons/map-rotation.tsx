@@ -136,7 +136,7 @@ export default function MapRotation(): JSX.Element {
               tooltipPlacement="right"
               size="small"
               onClick={handleReset}
-              disabled={rotationDegrees === 0}
+              disabled={rotationDegrees === 0 || isFixNorth}
             >
               {t('mapnav.rotation.reset')}
             </IconButton>

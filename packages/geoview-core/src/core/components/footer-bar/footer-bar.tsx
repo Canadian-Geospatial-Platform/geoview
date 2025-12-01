@@ -8,7 +8,7 @@ import { Box, Tabs } from '@/ui';
 import { Plugin } from '@/api/plugin/plugin';
 import { getSxClasses } from './footer-bar-style';
 import { ResizeFooterPanel } from '@/core/components/footer-bar/hooks/resize-footer-panel';
-import { useAppFullscreenActive, useAppGeoviewHTMLElement, useAppHeight } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useAppFullscreenActive, useAppHeight, useAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useDetailsLayerDataArrayBatch } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import {
   useUIActiveFooterBarTabId,
@@ -74,8 +74,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   const selectedTab = useUIActiveFooterBarTabId();
   const activeTrapGeoView = useUIActiveTrapGeoView();
   const isCollapsed = useUIFooterBarIsCollapsed();
-  const geoviewElement = useAppGeoviewHTMLElement();
-  const shellContainer = geoviewElement.querySelector(`[id^="shell-${mapId}"]`) as HTMLElement;
+  const shellContainer = useAppShellContainer();
   const { setActiveFooterBarTab, enableFocusTrap, disableFocusTrap, setFooterBarIsCollapsed } = useUIStoreActions();
   const mapSize = useMapSize() || [200, 200]; // Default in case the map isn't rendered yet and the Footer tries to render
   const appHeight: number = useAppHeight();
