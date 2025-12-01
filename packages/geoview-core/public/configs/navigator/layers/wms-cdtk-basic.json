@@ -181,18 +181,6 @@
             "layerId": "regions"
           }
         ]
-      },
-      {
-        "geoviewLayerId": "LYR13-qgis",
-        "geoviewLayerName": "OpenMaps Water Management",
-        "metadataAccessPath": "https://openmaps.gov.bc.ca/geo/ows",
-        "geoviewLayerType": "ogcWms",
-        "fetchVectorsOnWFS": false,
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "pub:WHSE_WATER_MANAGEMENT.GW_WATER_WELLS_WRBC_SVW"
-          }
-        ]
       }
     ]
   },
