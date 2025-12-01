@@ -23,7 +23,7 @@ import { logger } from '@/core/utils/logger';
 import { useDataTableAllFeaturesDataArray } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useFeatureFieldInfos } from './hooks';
 import type { TypeFieldEntry } from '@/api/types/map-schema-types';
-import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useAppDisplayLanguage, useAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
 
 /**
  * Open lighweight version (no function) of data table in a modal window
@@ -47,6 +47,7 @@ export default function DataTableModal(): JSX.Element {
   const selectedLayer = useLayerSelectedLayerPath();
   const layersData = useDataTableAllFeaturesDataArray();
   const language = useAppDisplayLanguage();
+  const shellContainer = useAppShellContainer();
 
   const dataTableLocalization = language === 'fr' ? MRTLocalizationFR : MRTLocalizationEN;
 
@@ -156,7 +157,7 @@ export default function DataTableModal(): JSX.Element {
   }, [layersData, selectedLayer]);
 
   return (
-    <Dialog open={activeModalId === 'layerDataTable'} onClose={() => disableFocusTrap()} maxWidth="xl">
+    <Dialog open={activeModalId === 'layerDataTable'} onClose={() => disableFocusTrap()} maxWidth="xl" container={shellContainer}>
       <DialogTitle>{`${t('legend.tableDetails')} ${layer?.layerName ?? selectedLayer}`}</DialogTitle>
       <DialogContent sx={{ overflow: 'hidden' }}>
         {isLoading && (

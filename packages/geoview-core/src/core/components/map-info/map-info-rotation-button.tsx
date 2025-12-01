@@ -1,16 +1,18 @@
-import { memo, useCallback, useRef } from 'react';
+import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-import { IconButton } from '@/ui/icon-button/icon-button';
-import { ArrowUpIcon } from '@/ui/icons/index';
+import { Box, Tooltip } from '@/ui';
+import { NorthArrowIcon } from '@/core/components/north-arrow/north-arrow-icon';
 
-import { useMapRotation, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useMapRotation } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useManageArrow } from '@/core/components/north-arrow/hooks/useManageArrow';
 import { logger } from '@/core/utils/logger';
 
 /**
- * Map Information Rotation Button component
+ * Map Information Rotation Indicator component
+ * Displays the current map rotation angle
  *
- * @returns {JSX.Element} the rotation buttons
+ * @returns {JSX.Element} the rotation indicator
  */
 // Memoizes entire component, preventing re-renders if props haven't changed
 export const MapInfoRotationButton = memo(function MapInfoRotationButton(): JSX.Element {
@@ -20,36 +22,50 @@ export const MapInfoRotationButton = memo(function MapInfoRotationButton(): JSX.
   const { t } = useTranslation<string>();
   const theme = useTheme();
 
-  // State
-  const iconRef = useRef(null);
-
   // Store
   const mapRotation = useMapRotation();
-  const { setRotation } = useMapStoreActions();
+  const { rotationAngle } = useManageArrow();
 
-  const buttonStyles = {
-    width: '30px',
-    height: '30px',
+  // Convert radians to degrees for tooltip
+  const rotationDegrees = Math.round((mapRotation * 180) / Math.PI);
+
+  // The rotationAngle.angle includes both map rotation and projection-based rotation (e.g., LCC)
+  const totalRotation = Math.round(rotationAngle.angle);
+
+  // Calculate the projection-specific rotation component
+  const projectionRotation = totalRotation - rotationDegrees;
+
+  // Build tooltip text
+  const tooltipText =
+    projectionRotation !== 0
+      ? `${t('mapctrl.rotation.rotation')}: ${rotationDegrees}° (${t('mapctrl.rotation.projection')}: ${projectionRotation}°)`
+      : `${t('mapctrl.rotation.rotation')}: ${rotationDegrees}°`;
+
+  const containerStyles = {
+    width: '40px',
+    height: '40px',
     my: '1rem',
     color: theme.palette.geoViewColor.bgColor.light[800],
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   };
-  const iconStyles = {
-    transform: `rotate(${mapRotation}rad)`,
-    transition: 'transform 0.3s ease-in-out',
-  };
-
-  // Callbacks
-  const handleRotationReset = useCallback(
-    (): void => {
-      setRotation(0);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [] // State setters are stable, no need for dependencies
-  );
 
   return (
-    <IconButton aria-label={t('mapctrl.rotation.resetRotation')} tooltipPlacement="top" onClick={handleRotationReset} sx={buttonStyles}>
-      <ArrowUpIcon ref={iconRef} style={iconStyles} />
-    </IconButton>
+    <Tooltip title={tooltipText} placement="top">
+      <Box sx={containerStyles}>
+        <Box
+          sx={{
+            transform: `rotate(${rotationAngle.angle}deg)`,
+            transition: 'transform 0.3s ease-in-out',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <NorthArrowIcon width={30} height={30} />
+        </Box>
+      </Box>
+    </Tooltip>
   );
 });

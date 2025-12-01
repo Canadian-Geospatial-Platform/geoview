@@ -391,6 +391,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * Method called when the layer source changes to check for errors.
    * @param {Event} event - The event which is being triggered.
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected onSourceChange(event: Event): void {
     const state = this.#olSource.getState();
     if (state === 'error') {

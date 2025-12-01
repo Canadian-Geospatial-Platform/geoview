@@ -42,6 +42,38 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
 
   // #region Helper functions
   /**
+   * Creates a regex pattern that allows proximity search with up to maxWords between keywords
+   * @param {string} term - The search term
+   * @param {number} maxWords - Maximum number of words allowed between keywords (default: 5)
+   * @returns {RegExp} Regex pattern for proximity search
+   */
+  const createProximitySearchPattern = useCallback((term: string, maxWords: number = 5): RegExp => {
+    // Split the term into individual words
+    const words = term.trim().split(/\s+/);
+
+    if (words.length === 1) {
+      // Single word search - match word with optional markdown around it, but only capture the word
+      const escapedWord = words[0].replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
+      return new RegExp(`[*_]*(${escapedWord})[*_]*`, 'gi');
+    }
+
+    // Multi-word search - allow up to maxWords between each keyword
+    // Escape special regex characters in each word
+    const escapedWords = words.map((w) => w.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&'));
+
+    // Build pattern with markdown-aware word matching
+    const wordPatterns = escapedWords.map((w) => `[*_]*${w}[*_]*`);
+
+    // Pattern to match 0 to maxWords between keywords
+    const wordGap = `(?:\\s+\\S+){0,${maxWords}}\\s+`;
+
+    // Join words with the gap pattern and capture the whole phrase
+    const pattern = wordPatterns.join(wordGap);
+
+    return new RegExp(`(${pattern})`, 'gi');
+  }, []);
+
+  /**
    * Gets ranges of protected content that should not be highlighted during search
    * @param {string} content - The content to analyze
    * @returns {Array<{start: number, end: number}>} Array of start/end positions for protected ranges
@@ -79,7 +111,7 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
       }
 
       const matches: SearchMatch[] = [];
-      const regex = new RegExp(`(${term.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')})`, 'gi');
+      const regex = createProximitySearchPattern(term, 5);
 
       Object.keys(guide).forEach((item, sectionIndex) => {
         let { content } = guide[item];
@@ -115,7 +147,7 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
       setAllMatches(matches);
       setCurrentMatchIndex(-1);
     },
-    [guide, getProtectedRanges]
+    [guide, getProtectedRanges, createProximitySearchPattern]
   );
 
   /**
@@ -190,7 +222,7 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = contentWithoutProtected;
 
-      const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')})`, 'gi');
+      const regex = createProximitySearchPattern(searchTerm, 5);
 
       // Count matches from all previous sections to calculate the global match index
       let globalMatchCounter = 0;
@@ -226,7 +258,9 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
             // Create highlighted span
             const mark = document.createElement('mark');
             mark.className = `search-highlight${isThisMatchCurrent ? ' current-match' : ''}`;
-            mark.textContent = match[0];
+            // Use captured group (match[1]) if available, otherwise use full match (match[0])
+            // This strips markdown characters from single-word searches
+            mark.textContent = match[1] || match[0];
             fragment.appendChild(mark);
 
             lastIndex = matchEnd;
@@ -251,7 +285,7 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
 
       return finalHTML;
     },
-    [searchTerm, allMatches, currentMatchIndex, findTextNodes]
+    [searchTerm, allMatches, currentMatchIndex, findTextNodes, createProximitySearchPattern]
   );
 
   /**

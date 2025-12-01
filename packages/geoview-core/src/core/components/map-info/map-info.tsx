@@ -7,7 +7,6 @@ import { MousePosition } from '@/core/components/mouse-position/mouse-position';
 import { Scale } from '@/core/components/scale/scale';
 import { MapInfoExpandButton } from './map-info-expand-button';
 import { MapInfoRotationButton } from './map-info-rotation-button';
-import { MapInfoFixNorthSwitch } from './map-info-fixnorth-switch';
 import { useMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
@@ -85,12 +84,7 @@ export const MapInfo = memo(function MapInfo({ onScrollShellIntoView }: MapInfoP
       )}
       <Scale expanded={expanded} />
       <div className={`${mapId}-mapInfo-flex`} style={FLEX_STYLE} />
-      {interaction === 'dynamic' && (
-        <>
-          <MapInfoFixNorthSwitch expanded={expanded} />
-          <MapInfoRotationButton />
-        </>
-      )}
+      {interaction === 'dynamic' && <MapInfoRotationButton />}
     </Box>
   );
 });

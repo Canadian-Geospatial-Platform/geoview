@@ -59,7 +59,15 @@ export type TypeDisplayTheme = 'dark' | 'light' | 'geo.ca';
 export const VALID_DISPLAY_THEME: TypeDisplayTheme[] = ['dark', 'light', 'geo.ca'];
 
 /** Valid values for the navBar array. */
-export type TypeValidNavBarProps = 'zoom' | 'fullscreen' | 'home' | 'location' | 'basemap-select' | 'projection' | 'drawer';
+export type TypeValidNavBarProps =
+  | 'zoom'
+  | 'fullscreen'
+  | 'home'
+  | 'location'
+  | 'basemap-select'
+  | 'projection'
+  | 'drawer'
+  | 'map-rotation';
 
 /** Supported footer bar tabs */
 export type TypeValidFooterBarTabsCoreProps = 'legend' | 'layers' | 'details' | 'data-table' | 'time-slider' | 'geochart' | 'guide';
@@ -353,7 +361,9 @@ export const MAP_ZOOM_LEVEL: Record<TypeValidMapProjectionCodes, number> = {
 };
 
 /** Type used to define valid highlight colors. */
-export type TypeHighlightColors = 'black' | 'white' | 'red' | 'green';
+export type TypeHighlightColors = 'aqua' | 'black' | 'white' | 'red' | 'green';
+
+export const DEFAULT_HIGHLIGHT_COLOR: TypeHighlightColors = 'aqua';
 
 /** Type used to define overlay objects. */
 // TODO: Add more overlay objects - polygons, bounding box?
@@ -434,7 +444,7 @@ export const DEFAULT_MAP_FEATURE_CONFIG = {
     },
     interaction: 'dynamic',
     listOfGeoviewLayerConfig: [],
-    highlightColor: 'black',
+    highlightColor: DEFAULT_HIGHLIGHT_COLOR,
     overlayObjects: {
       pointMarkers: {},
     },

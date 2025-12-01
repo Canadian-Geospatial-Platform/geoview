@@ -2,7 +2,18 @@ import { useCallback, useEffect, useState, useMemo, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 
-import { List, ZoomInSearchIcon, Tooltip, IconButton, Checkbox, Paper, Box, Typography, BrowserNotSupportedIcon } from '@/ui';
+import {
+  List,
+  ZoomInSearchIcon,
+  Tooltip,
+  IconButton,
+  Paper,
+  Box,
+  Typography,
+  BrowserNotSupportedIcon,
+  HighlightIcon,
+  HighlightOutlinedIcon,
+} from '@/ui';
 import { useDetailsCheckedFeatures, useDetailsStoreActions } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
@@ -20,7 +31,7 @@ interface FeatureHeaderProps {
   name: string;
   hasGeometry: boolean;
   checked: boolean;
-  onCheckChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onCheckChange: (event: React.MouseEvent<HTMLButtonElement>) => void;
   onZoomIn: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
@@ -85,7 +96,15 @@ const FeatureHeader = memo(function FeatureHeader({ iconSrc, name, hasGeometry, 
         }}
       >
         <Tooltip title={t('details.keepFeatureSelected')} placement="top" enterDelay={1000}>
-          <Checkbox disabled={!hasGeometry} onChange={onCheckChange} checked={checked} sx={sxClasses.selectFeatureCheckbox} />
+          <IconButton
+            aria-label={t('details.keepFeatureSelected')}
+            tooltipPlacement="top"
+            disabled={!hasGeometry}
+            onClick={onCheckChange}
+            sx={sxClasses.selectFeatureCheckbox}
+          >
+            {checked ? <HighlightIcon /> : <HighlightOutlinedIcon />}
+          </IconButton>
         </Tooltip>
         <IconButton
           color="primary"
@@ -154,7 +173,7 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
 
   // Event Handlers
   const handleFeatureSelectedChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>): void => {
+    (event: React.MouseEvent<HTMLButtonElement>): void => {
       event.stopPropagation();
       if (!feature) return;
 
