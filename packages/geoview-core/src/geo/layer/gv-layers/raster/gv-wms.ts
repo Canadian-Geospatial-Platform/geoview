@@ -5,6 +5,7 @@ import type { ImageArcGISRest, ImageWMS } from 'ol/source';
 import type { Extent } from 'ol/extent';
 import type { Projection as OLProjection, ProjectionLike } from 'ol/proj';
 import type { Map as OLMap } from 'ol';
+import { Polygon } from 'ol/geom';
 import { isArray } from 'lodash';
 
 import EventHelper, { type EventDelegateBase } from '@/api/events/event-helper';
@@ -286,11 +287,18 @@ export class GVWMS extends AbstractGVRaster {
     const projectionCode = map.getView().getProjection().getCode();
 
     try {
-      // Try various info format and keep in mind which one worked
-      const featureMember = await this.#getFeatureInfoUsingAllPatterns(clickCoordinate, viewResolution, projectionCode, abortController);
+      // If the layer has a WFS associated
+      if (layerConfig.hasWfsLayerConfig()) {
+        try {
+          // We're going to try performing a GetFeature using the WFS query instead of WMS, better chance to retrieve the geometry that way
+          return await this.#getFeatureInfoUsingWFS(clickCoordinate, viewResolution, projectionCode, abortController);
+        } catch {
+          // Failed to get feature info using WFS, continue with WMS
+        }
+      }
 
-      // Format and return the information
-      return GVWMS.#formatWmsFeatureInfoResult(layerConfig.layerPath, featureMember, clickCoordinate);
+      // Try various info formats patterns to get feature info
+      return await this.#getFeatureInfoUsingWMS(clickCoordinate, viewResolution, projectionCode, abortController);
     } catch {
       // Eat the error, we failed
     }
@@ -315,33 +323,8 @@ export class GVWMS extends AbstractGVRaster {
     map: OLMap,
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoEntry[]> {
-    // Get the WMS layer config
-    const wmsLayerConfig = this.getLayerConfig();
-
-    // Get the Geoview Layer Config WFS equivalent
-    const wfsLayerConfig = wmsLayerConfig.getWfsLayerConfig();
-
-    // Get the supported info formats
-    const featureInfoFormat = wfsLayerConfig.getSupportedFormats('application/json'); // application/json by default (QGIS Server doesn't seem to provide the metadata for the output formats, use application/json)
-
-    // If one of those contain application/json, use that format to get features
-    const outputFormat = featureInfoFormat.find((format) => format.toLowerCase().includes('application/json'));
-
-    // TODO: WMS - Add support for other formats. Not quite the GV issue #3134, but similar
-
-    // Format the url
-    const urlWithOutputJson = GeoUtilities.ensureServiceRequestUrlGetFeature(
-      wfsLayerConfig.getMetadataAccessPath()!,
-      wfsLayerConfig.layerId,
-      wfsLayerConfig.getVersion(),
-      outputFormat,
-      wfsLayerConfig.getOutfields(),
-      undefined, // No filter
-      map.getView().getProjection().getCode()
-    );
-
-    // Fetch and parse features
-    return GVWMS.fetchAndParseFeaturesFromWFSUrl(urlWithOutputJson, wmsLayerConfig, wfsLayerConfig, abortController);
+    // Redirect
+    return this.#getFeatureInfoUsingWFS(undefined, undefined, map.getView().getProjection().getCode(), abortController);
   }
 
   /**
@@ -626,6 +609,83 @@ export class GVWMS extends AbstractGVRaster {
   }
 
   /**
+   * Retrieves feature information from a WFS layer based on a clicked map location.
+   * This method is used internally to perform a "GetFeatureInfo" style request
+   * using WFS. If a click coordinate and view resolution are provided, it:
+   * 1. Buffers the clicked point into a small polygon based on the current resolution
+   *    and configured tolerance.
+   * 2. Converts the buffered polygon into a GML string.
+   * 3. Creates a spatial <Intersects> filter for the WFS request.
+   * 4. Builds a WFS GetFeature URL with the appropriate output format and filter.
+   * 5. Fetches the WFS features and parses them into a consistent format.
+   * @param {Coordinate | undefined} clickCoordinate - The clicked map coordinate
+   *        in the map projection. If undefined, the query is non-spatial.
+   * @param {number | undefined} viewResolution - Current map view resolution
+   *        (map units per pixel). Required for buffering the click location.
+   * @param {string} projectionCode - The map projection code (e.g., 'EPSG:3857')
+   *        to use for the WFS request and geometry serialization.
+   * @param {AbortController} [abortController] - Optional AbortController to
+   *        allow cancellation of the WFS request.
+   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise resolving to an array
+   *          of feature info entries retrieved from the WFS service.
+   * @private
+   */
+  #getFeatureInfoUsingWFS(
+    clickCoordinate: Coordinate | undefined,
+    viewResolution: number | undefined,
+    projectionCode: string,
+    abortController?: AbortController
+  ): Promise<TypeFeatureInfoEntry[]> {
+    // Get the WMS layer config
+    const wmsLayerConfig = this.getLayerConfig();
+
+    // Get the Geoview Layer Config WFS equivalent
+    const wfsLayerConfig = wmsLayerConfig.getWfsLayerConfig();
+
+    // Get the supported info formats
+    const featureInfoFormat = wfsLayerConfig.getSupportedFormats('application/json'); // application/json by default (QGIS Server doesn't seem to provide the metadata for the output formats, use application/json)
+
+    // If one of those contain application/json, use that format to get features
+    const outputFormat = featureInfoFormat.find((format) => format.toLowerCase().includes('application/json'));
+
+    // TODO: WMS - Add support for other formats. Not quite the GV issue #3134, but similar
+
+    // Create the filterXML from the sql filter
+    let xmlFilter;
+    let fieldsToReturn = wfsLayerConfig.getOutfields();
+    if (clickCoordinate && viewResolution) {
+      // Get the geometry field name
+      const geomFieldName = wfsLayerConfig.getGeometryField()?.name || 'geometry'; // default: geometry
+
+      // Buffer the point into a polygon-circle to get features around the click point
+      const bufferedPoint = GVWMS.#buildBufferPolygon(clickCoordinate, projectionCode, viewResolution, this.getGetFeatureInfoTolerance());
+
+      // Write the polygon to GML
+      const polygonGML = GeoUtilities.writeGeometryToGML(bufferedPoint, projectionCode);
+
+      // Create the intersects filter
+      xmlFilter = `<Filter><Intersects><PropertyName>${geomFieldName}</PropertyName>${polygonGML}</Intersects></Filter>`;
+
+      // We want all fields in the response, to make sure the geometry is included, clear it
+      fieldsToReturn = undefined;
+    }
+
+    // Format the url
+    const urlWithOutputJson = GeoUtilities.ensureServiceRequestUrlGetFeature(
+      wfsLayerConfig.getMetadataAccessPath()!,
+      wfsLayerConfig.layerId,
+      wfsLayerConfig.getVersion(),
+      outputFormat,
+      fieldsToReturn,
+      xmlFilter,
+      projectionCode
+    );
+
+    // Fetch and parse features
+    return GVWMS.fetchAndParseFeaturesFromWFSUrl(urlWithOutputJson, wmsLayerConfig, wfsLayerConfig, abortController);
+  }
+
+  /**
    * Attempts to retrieve feature information from a WMS layer using a prioritized list of supported formats:
    * `application/geojson`, `application/json`, `text/xml`, `text/html`, and `text/plain`, in that order.
    * For each supported format found in the layer's WMS capabilities, the method tries to fetch feature info
@@ -638,12 +698,12 @@ export class GVWMS extends AbstractGVRaster {
    * @throws {LayerInvalidFeatureInfoFormatWMSError} If no supported format returns usable feature info data.
    * @private
    */
-  async #getFeatureInfoUsingAllPatterns(
+  async #getFeatureInfoUsingWMS(
     clickCoordinate: Coordinate,
     viewResolution: number,
     projectionCode: ProjectionLike,
     abortController: AbortController | undefined = undefined
-  ): Promise<Record<string, unknown>[]> {
+  ): Promise<TypeFeatureInfoEntry[]> {
     // Get the layer config
     const layerConfig = this.getLayerConfig();
 
@@ -777,7 +837,10 @@ export class GVWMS extends AbstractGVRaster {
     }
 
     // If any found result
-    if (featureMember) return featureMember;
+    if (featureMember) {
+      // Format and return the information
+      return GVWMS.#formatWmsFeatureInfoResult(layerConfig.layerPath, featureMember, clickCoordinate);
+    }
 
     // Failed
     throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
@@ -1010,8 +1073,7 @@ export class GVWMS extends AbstractGVRaster {
     const xmlDomResponse = new DOMParser().parseFromString(responseData, 'application/xml');
     const jsonResponse = xmlToJson(xmlDomResponse);
 
-    // GV TODO: We should use a WMS format setting in the schema to decide what feature info response interpreter to use
-    // GV For the moment, we try to guess the response format based on properties returned from the query
+    // Try to get the feature member
     let featureMember: Record<string, unknown> | undefined;
     const featureCollection = GVWMS.#getAttribute(jsonResponse, 'FeatureCollection');
     if (featureCollection) featureMember = GVWMS.#getAttribute(featureCollection, 'featureMember');
@@ -1357,6 +1419,33 @@ export class GVWMS extends AbstractGVRaster {
       return keyFound ? record[keyFound] : undefined;
     }
     return undefined;
+  }
+
+  /**
+   * Build a buffered polygon (GML) around a clicked coordinate.
+   * @param {Coordinate} clickCoordinate - coordinate in map projection
+   * @param {number} resolution
+   * @param {number} pixelTolerance - number of screen pixels (like ArcGIS Identify)
+   * @returns {string} GML polygon snippet
+   */
+  static #buildBufferPolygon(clickCoordinate: Coordinate, srsName: string, resolution: number, pixelTolerance: number = 10): Polygon {
+    // The buffer radius
+    const bufferRadius = resolution * pixelTolerance; // buffer in map units
+
+    // Convert Circle to Polygon manually
+    const segments = 32; // smoothness
+    const coordinates: number[][] = [];
+    for (let i = 0; i < segments; i++) {
+      const angle = (2 * Math.PI * i) / segments;
+      const x = clickCoordinate[0] + bufferRadius * Math.cos(angle);
+      const y = clickCoordinate[1] + bufferRadius * Math.sin(angle);
+      coordinates.push([x, y]);
+    }
+    // Close the polygon
+    coordinates.push(coordinates[0]);
+
+    // Return the polygon
+    return new Polygon([coordinates]);
   }
 
   // #endregion STATIC METHODS

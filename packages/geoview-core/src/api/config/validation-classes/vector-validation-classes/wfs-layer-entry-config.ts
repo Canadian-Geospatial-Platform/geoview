@@ -90,6 +90,25 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
   }
 
   /**
+   * Returns the spatial reference system (SRS) of the layer's data.
+   * This method reads the layer's feature type definition and returns the
+   * default SRS/projection used by the WFS layer. If the `DefaultSRS` is
+   * an object with a `#text` property (common in XML-parsed responses),
+   * the method returns the value of that property. Otherwise, it returns
+   * `DefaultSRS` directly.
+   * @returns {string | undefined} The EPSG code or SRS string (e.g., 'EPSG:3857'),
+   *          or `undefined` if the feature type or SRS cannot be determined.
+   */
+  getProjectionOfData(): string | undefined {
+    // Get the feature type
+    const featureType = this.getFeatureType();
+    if (typeof featureType.DefaultSRS === 'object' && '#text' in featureType.DefaultSRS) {
+      return featureType.DefaultSRS['#text'];
+    }
+    return featureType.DefaultSRS;
+  }
+
+  /**
    * Returns the list of supported mime output formats for this WFS layer.
    * Formats are extracted from the `OutputFormats` section of the layer's WFS
    * `FeatureType` metadata.

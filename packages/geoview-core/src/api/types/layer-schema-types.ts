@@ -1,11 +1,4 @@
-import type {
-  codedValueType,
-  Extent,
-  rangeDomainType,
-  TypeEsriFormatParameter,
-  TypeOutfields,
-  TypeStyleGeometry,
-} from '@/api/types/map-schema-types';
+import type { codedValueType, Extent, rangeDomainType, TypeEsriFormatParameter, TypeOutfields } from '@/api/types/map-schema-types';
 import type {
   AbstractBaseLayerEntryConfig,
   AbstractBaseLayerEntryConfigProps,
@@ -90,8 +83,9 @@ export type TypeFeatureInfoLayerConfig = {
   nameField?: string; // TODO: refactor - remove ?
   /** The list of fields to be displayed by the UI. */
   outfields?: TypeOutfields[];
-  /** The geometry type as read from the fields. */
-  geometryType?: TypeStyleGeometry;
+
+  /** The geometry field information. */
+  geometryField?: TypeOutfields;
 };
 
 // TODO: Refactor - This type should be deleted and 'ConfigBaseClass' should be used instead where a class instance is used and ConfigBaseClassProps should be used where regular json object is used.
@@ -1040,6 +1034,7 @@ export interface TypeMetadataWFSFeatureTypeList {
 export interface TypeMetadataWFSFeatureTypeListFeatureType {
   Name: string | TypeMetadataWFSTextOnly;
   Title: string | TypeMetadataWFSTextOnly;
+  DefaultSRS: string | TypeMetadataWFSTextOnly;
   OutputFormats?: TypeMetadataWFSFeatureTypeListFeatureOutputFormat;
   'ows:WGS84BoundingBox': TypeMetadataWFSFeatureTypeListFeatureTypeBBox;
 }

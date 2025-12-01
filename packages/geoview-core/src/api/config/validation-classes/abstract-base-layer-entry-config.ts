@@ -12,6 +12,7 @@ import type { TimeDimension } from '@/core/utils/date-mgt';
 import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 import { NoPrimaryKeyFieldError } from '@/core/exceptions/geoview-exceptions';
+import { wfsConvertGeometryTypeToOLGeometryType } from '@/geo/layer/gv-layers/utils';
 
 export interface AbstractBaseLayerEntryConfigProps extends ConfigBaseClassProps {
   /** Source settings to apply to the GeoView layer source at creation time. */
@@ -40,6 +41,9 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /** The metadata associated with the layer */
   #layerMetadata?: unknown;
+
+  /** The geometry field information. */
+  #geometryField?: TypeOutfields;
 
   /** Style to apply to the vector layer. */
   #layerStyle?: TypeLayerStyleConfig;
@@ -400,19 +404,30 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   }
 
   /**
-   * Gets the geometry type from the source object.
-   * @returns {TypeStyleGeometry | undefined} The geometry type.
+   * Gets the geometry field.
+   * @returns {TypeOutfields | undefined} The geometry field.
    */
-  getGeometryType(): TypeStyleGeometry | undefined {
-    return this.getFeatureInfo().geometryType;
+  getGeometryField(): TypeOutfields | undefined {
+    return this.#geometryField;
   }
 
   /**
-   * Sets the geometry type in the source object. The source.featureInfo object must already exist.
-   * @param {TypeStyleGeometry | undefined} geomType - The geometry type
+   * Sets the geometry field.
+   * @param {TypeOutfields | undefined} geometryField - The geometry field
    */
-  setGeometryType(geomType: TypeStyleGeometry | undefined): void {
-    this.source.featureInfo!.geometryType = geomType;
+  setGeometryField(geometryField: TypeOutfields | undefined): void {
+    this.#geometryField = geometryField;
+  }
+
+  /**
+   * Returns the OpenLayers-compatible geometry type of this layer's geometry field.
+   * Internally, it converts the WFS geometry type (from the layer's geometry field)
+   * to the corresponding OpenLayers geometry type using `wfsConvertGeometryTypeToOLGeometryType`.
+   * @returns {TypeStyleGeometry | undefined} The OpenLayers geometry type (e.g., 'Point', 'LineString', 'Polygon'),
+   *          or `undefined` if the layer has no geometry field or the type cannot be determined.
+   */
+  getGeometryType(): TypeStyleGeometry | undefined {
+    return wfsConvertGeometryTypeToOLGeometryType(this.getGeometryField()?.type);
   }
 
   /**

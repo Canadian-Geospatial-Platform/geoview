@@ -20,7 +20,6 @@ import {
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { LayerNoCapabilitiesError, LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
 import { GVWFS } from '@/geo/layer/gv-layers/vector/gv-wfs';
-import { wfsConvertGeometryTypeToOLGeometryType } from '@/geo/layer/gv-layers/utils';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import { GeoUtilities } from '@/geo/utils/utilities';
@@ -475,14 +474,8 @@ export class WFS extends AbstractGeoViewVector {
       fields.forEach((fieldEntry) => {
         // If field entry is gml geometry type
         if (this.isGmlGeometryField(fieldEntry)) {
-          try {
-            // Try to read the geometry type and store it for future use
-            const geomType = wfsConvertGeometryTypeToOLGeometryType(fieldEntry.type);
-            layerConfig.setGeometryType(geomType);
-          } catch (error: unknown) {
-            // Log as a warning
-            logger.logWarning(error);
-          }
+          // Keep the geometry field for future use
+          layerConfig.setGeometryField(fieldEntry);
 
           // Skip that geometry field
           return;

@@ -30,6 +30,7 @@ import type { TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
 import type { TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import { NetworkError, ResponseEmptyError } from '@/core/exceptions/core-exceptions';
 import { xmlToJson } from '@/core/utils/utilities';
+import GML3 from 'ol/format/GML3';
 
 // available layer types
 export const layerTypes = CONST_LAYER_TYPES;
@@ -1217,6 +1218,25 @@ export abstract class GeoUtilities {
    */
   static bufferExtent(extent: Extent, bufferSize: number = 5000): Extent {
     return buffer(extent, bufferSize);
+  }
+
+  /**
+   * Serializes an OpenLayers geometry into a GML3 string.
+   * This method uses the OpenLayers `GML3` format to convert the provided
+   * `Geometry` object into a GML XML string, using the specified spatial
+   * reference system (`srsName`).
+   * @param {Geometry} geometry - The OpenLayers geometry to serialize.
+   * @param {string} srsName - The spatial reference system (e.g., 'EPSG:3857')
+   *                            to assign to the GML geometry.
+   * @returns {string} The serialized GML geometry as a string.
+   */
+  static writeGeometryToGML(geometry: Geometry, srsName: string): string {
+    // Serialize to GML
+    const gmlFormat = new GML3({ srsName });
+    const gmlNode = gmlFormat.writeGeometryNode(geometry);
+
+    // Return it
+    return new XMLSerializer().serializeToString(gmlNode);
   }
 }
 
