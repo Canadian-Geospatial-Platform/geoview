@@ -1286,8 +1286,7 @@ export abstract class GeoviewRenderer {
       let allFieldsMatched = true;
       for (let j = 0; j < fields.length; j++) {
         const field = fields[j];
-        const expectedRawValue = uniqueValueStyleInfo[i].values[j];
-        const expectedValue = typeof expectedRawValue === 'string' ? expectedRawValue.replace("''", "'") : expectedRawValue;
+        const expectedValue = uniqueValueStyleInfo[i].values[j];
 
         // Get the target field name: check case-insensitive match in feature keys
         let fieldName = featureKeys.find((key) => key.toLowerCase() === field.toLowerCase());
