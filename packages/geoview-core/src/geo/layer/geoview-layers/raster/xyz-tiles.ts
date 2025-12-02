@@ -3,8 +3,6 @@ import XYZ from 'ol/source/XYZ';
 import type { Options as TileGridOptions } from 'ol/tilegrid/TileGrid';
 import TileGrid from 'ol/tilegrid/TileGrid';
 
-import defaultsDeep from 'lodash/defaultsDeep';
-
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import type { TypeSourceTileInitialConfig, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
@@ -17,6 +15,7 @@ import {
 import { GVXYZTiles } from '@/geo/layer/gv-layers/tile/gv-xyz-tiles';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { deepMerge } from '@/core/utils/utilities';
 
 // ? Do we keep this TODO ? Dynamic parameters can be placed on the dataAccessPath and initial settings can be used on xyz-tiles.
 // TODO: Implement method to validate XYZ tile service
@@ -142,10 +141,10 @@ export class XYZTiles extends AbstractGeoViewRaster {
         layerConfig.setLayerMetadata(metadataLayerConfigFound);
 
         // eslint-disable-next-line no-param-reassign
-        layerConfig.source = defaultsDeep(layerConfig.source, metadataLayerConfigFound.source);
+        layerConfig.source = deepMerge(layerConfig.source, metadataLayerConfigFound.source);
 
         // Set the initial settings
-        layerConfig.setInitialSettings(defaultsDeep(layerConfig.getInitialSettings(), metadataLayerConfigFound.initialSettings));
+        layerConfig.setInitialSettings(deepMerge(layerConfig.getInitialSettings(), metadataLayerConfigFound.initialSettings));
 
         // Validate and update the extent initial settings
         layerConfig.validateUpdateInitialSettingsExtent();

@@ -1,4 +1,3 @@
-import cloneDeep from 'lodash/cloneDeep';
 import Ajv from 'ajv';
 import addErrors from 'ajv-errors';
 
@@ -637,7 +636,7 @@ export class ConfigApi {
    */
   static serializeGeoviewLayerConfig(geoviewLayerConfig: TypeGeoviewLayerConfig): string {
     // Clone the object
-    const cloneConfig = cloneDeep(geoviewLayerConfig);
+    const cloneConfig = structuredClone(geoviewLayerConfig);
 
     // For each entry
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

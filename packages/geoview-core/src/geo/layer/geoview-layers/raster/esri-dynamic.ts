@@ -1,6 +1,5 @@
 import { ImageArcGISRest } from 'ol/source';
 import type { Options as SourceOptions } from 'ol/source/ImageArcGISRest';
-import { cloneDeep } from 'lodash';
 
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
@@ -358,7 +357,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const entryMap: Record<number, any> = {};
     entries.forEach((entry) => {
-      entryMap[entry.layerId] = cloneDeep(entry);
+      entryMap[entry.layerId] = structuredClone(entry);
     });
 
     // Track root entries (those not referenced as sublayers)

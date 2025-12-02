@@ -3,8 +3,6 @@ import { GeoJSON as FormatGeoJSON } from 'ol/format';
 import type { Vector as VectorSource } from 'ol/source';
 import type Feature from 'ol/Feature';
 
-import defaultsDeep from 'lodash/defaultsDeep';
-
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import type { TypeGeoviewLayerConfig, TypeMetadataGeoJSON } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
@@ -20,6 +18,7 @@ import { GVGeoJSON } from '@/geo/layer/gv-layers/vector/gv-geojson';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
 import { formatError } from '@/core/exceptions/core-exceptions';
+import { deepMerge } from '@/core/utils/utilities';
 
 export interface TypeGeoJSONLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.GEOJSON;
@@ -143,13 +142,13 @@ export class GeoJSON extends AbstractGeoViewVector {
         if (!layerConfig.getLayerName()) layerConfig.setLayerName(layerMetadataFound.layerName || layerConfig.getLayerNameCascade());
 
         // eslint-disable-next-line no-param-reassign
-        layerConfig.source = defaultsDeep(layerConfig.source, layerMetadataFound.source);
+        layerConfig.source = deepMerge(layerConfig.source, layerMetadataFound.source);
 
         // Set the initial settings
-        layerConfig.setInitialSettings(defaultsDeep(layerConfig.getInitialSettings(), layerMetadataFound.initialSettings));
+        layerConfig.setInitialSettings(deepMerge(layerConfig.getInitialSettings(), layerMetadataFound.initialSettings));
 
         // Set the layer style
-        layerConfig.setLayerStyle(defaultsDeep(layerConfig.getLayerStyle(), layerMetadataFound.layerStyle));
+        layerConfig.setLayerStyle(deepMerge(layerConfig.getLayerStyle()!, layerMetadataFound.layerStyle));
 
         // If max scale found in metadata
         if (layerMetadataFound.maxScale) {

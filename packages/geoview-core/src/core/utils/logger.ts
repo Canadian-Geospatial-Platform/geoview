@@ -1,4 +1,3 @@
-import { isArray } from 'lodash';
 import { isLocalhost } from './utilities';
 import { LocalStorage } from './localStorage';
 
@@ -380,7 +379,7 @@ export class ConsoleLogger {
    */
   #checkLevel(level: number): boolean {
     // If regular number
-    if (!isArray(this.loggingLevel)) return this.loggingLevel <= level;
+    if (!Array.isArray(this.loggingLevel)) return this.loggingLevel <= level;
     // Is an array. We want the log to show DEBUG and higher and whatever levels (<20) are included in the array
     return level >= LOG_DEBUG || this.loggingLevel.includes(level);
   }

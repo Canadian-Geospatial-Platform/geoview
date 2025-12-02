@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import _ from 'lodash';
 import { animated } from '@react-spring/web';
 import { useTheme } from '@mui/material/styles';
 import { getSxClasses } from '@/core/components/common/layer-list-style';
@@ -123,7 +122,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
           return true;
         }
 
-        return _.some(children, (child) => isLayerChildSelected(child.children));
+        return children.some((child) => isLayerChildSelected(child.children));
       }
       return false;
     },

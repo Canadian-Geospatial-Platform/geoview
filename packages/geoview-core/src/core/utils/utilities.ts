@@ -19,6 +19,164 @@ interface TypeDocument extends Document {
 }
 
 /**
+ * Generates an array of numbers from `start` (inclusive) to `end` (exclusive),
+ * incrementing by `step`.
+ * @param {number} start - The first number in the range.
+ * @param {number} end - The end of the range (exclusive).
+ * @param {number} [step=1] - The increment between numbers.
+ * @returns {number[]} An array of numbers from start to end with the given step.
+ * @example
+ * range(0, 5); // [0, 1, 2, 3, 4]
+ * range(50, 1000, 50); // [50, 100, 150, ..., 950]
+ */
+export function range(start: number, end: number, step: number = 1): number[] {
+  const out = [];
+  for (let i = start; i < end; i += step) out.push(i);
+  return out;
+}
+
+/**
+ * Converts a string to camelCase.
+ * Replaces hyphens (`-`), underscores (`_`), and spaces with capitalization
+ * of the following letter, and ensures the first character is lowercase.
+ * @param {string} str - The input string to convert.
+ * @returns {string} The camelCased version of the input string.
+ * @example
+ * camelCase('my_tab-name'); // 'myTabName'
+ * camelCase('Hello World'); // 'helloWorld'
+ */
+export function camelCase(str: string): string {
+  return str
+    .replace(/[-_ ]+(\w)/g, (_, c) => c.toUpperCase()) // capitalize letters after -, _, or space
+    .replace(/^\w/, (c) => c.toLowerCase()); // lowercase first letter
+}
+
+/**
+ * Deeply compares two values (objects, arrays, or primitives) for equality.
+ * @param a - The first value to compare.
+ * @param b - The second value to compare.
+ * @returns `true` if the values are deeply equal, `false` otherwise.
+ * @example
+ * ```ts
+ * deepEqual({ x: 1, y: [2, 3] }, { x: 1, y: [2, 3] }); // true
+ * deepEqual([1, 2, 3], [1, 2, 4]); // false
+ * deepEqual(5, 5); // true
+ * ```
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function deepEqual(a: any, b: any): boolean {
+  if (a === b) return true;
+  if (typeof a !== typeof b) return false;
+  if (typeof a !== 'object' || a === null || b === null) return false;
+  const aKeys = Object.keys(a);
+  const bKeys = Object.keys(b);
+  if (aKeys.length !== bKeys.length) return false;
+  for (const key of aKeys) {
+    if (!deepEqual(a[key], b[key])) return false;
+  }
+  return true;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function isPlainObject(obj: any): obj is Record<string, any> {
+  return obj !== null && typeof obj === 'object' && !Array.isArray(obj);
+}
+
+/**
+ * Deeply clones a value, preserving functions and non-cloneable types by reference.
+ * @param value The value to clone.
+ * @returns A deep copy of the value.
+ */
+export function deepClone<T>(value: T): T {
+  // Primitives (string, number, boolean, null, undefined, symbol, bigint) are returned as-is
+  if (value === null || typeof value !== 'object') return value;
+
+  // Preserve functions by reference
+  if (typeof value === 'function') return value;
+
+  // Handle arrays
+  if (Array.isArray(value)) {
+    return value.map(deepClone) as unknown as T;
+  }
+
+  // Handle Map
+  if (value instanceof Map) {
+    const copy = new Map();
+    for (const [k, v] of value.entries()) {
+      copy.set(deepClone(k), deepClone(v));
+    }
+    return copy as unknown as T;
+  }
+
+  // Handle Set
+  if (value instanceof Set) {
+    const copy = new Set();
+    for (const v of value.values()) {
+      copy.add(deepClone(v));
+    }
+    return copy as unknown as T;
+  }
+
+  // Handle Date
+  if (value instanceof Date) {
+    return new Date(value.getTime()) as unknown as T;
+  }
+
+  // Handle RegExp
+  if (value instanceof RegExp) {
+    return new RegExp(value.source, value.flags) as unknown as T;
+  }
+
+  // Handle plain objects
+  const copy: Record<string, unknown> = {};
+  for (const key in value) {
+    if (Object.prototype.hasOwnProperty.call(value, key)) {
+      copy[key] = deepClone(value[key]);
+    }
+  }
+  return copy as T;
+}
+
+/**
+ * Deeply merges two objects, filling in undefined or missing properties
+ * from the source object into the target object. Nested objects are merged recursively.
+ * Existing values in the target object are preserved.
+ * @param target - The target object to merge values into.
+ * @param source - The source object to merge values from.
+ * @returns The merged target object.
+ * @example
+ * ```ts
+ * const userSettings = { theme: { darkMode: true } };
+ * const defaultSettings = { theme: { darkMode: false, fontSize: 14 }, locale: 'en' };
+ * const merged = deepMerge(userSettings, defaultSettings);
+ * // merged: { theme: { darkMode: true, fontSize: 14 }, locale: 'en' }
+ * ```
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function deepMerge<T extends any, S extends any>(target: T, source: S): T & S {
+  if (!target) return source as T & S;
+  if (!source) return target as T & S;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const out: any = { ...target };
+
+  for (const key of Object.keys(source)) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const srcVal = (source as any)[key];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const tgtVal = (target as any)[key];
+
+    if (isPlainObject(srcVal) && isPlainObject(tgtVal)) {
+      out[key] = deepMerge(tgtVal, srcVal); // recurse first on children
+    } else if (tgtVal === undefined) {
+      out[key] = srcVal; // only set if target doesn't have a value
+    }
+  }
+
+  return out;
+}
+
+/**
  * Take string like "My string is __param__" and replace parameters (__param__) from array of values
  *
  * @param {unknown[]} params - An array of parameters to replace, i.e. ['short']

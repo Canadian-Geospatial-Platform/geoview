@@ -6,7 +6,6 @@ import type { Extent } from 'ol/extent';
 import type { Projection as OLProjection, ProjectionLike } from 'ol/proj';
 import type { Map as OLMap } from 'ol';
 import { Polygon } from 'ol/geom';
-import { isArray } from 'lodash';
 
 import EventHelper, { type EventDelegateBase } from '@/api/events/event-helper';
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -1054,7 +1053,7 @@ export class GVWMS extends AbstractGVRaster {
     if (responseJson.type === 'FeatureCollection') {
       // Get the features
       const featureCollection = GVWMS.#getAttribute(responseJson, 'features');
-      if (featureCollection && isArray(featureCollection)) {
+      if (featureCollection && Array.isArray(featureCollection)) {
         // If array is empty, the response was good, we trust it as there were no features
         featureMember = [];
 

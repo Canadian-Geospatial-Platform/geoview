@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-import { delay } from 'lodash';
 import { Box, FilterAltIcon } from '@/ui';
 import DataTable from './data-table';
 import {
@@ -187,7 +186,7 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
     // Log
     logger.logTraceUseEffect('DATA-PANEL - isLoading', isLoading, selectedLayerPath);
 
-    const clearLoading = delay(() => {
+    const clearLoading = setTimeout(() => {
       setIsLoading(false);
     }, 100);
     return () => clearTimeout(clearLoading);

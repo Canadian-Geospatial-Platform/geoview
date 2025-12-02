@@ -10,8 +10,8 @@ import type { Coordinate } from 'ol/coordinate';
 import type { Extent } from 'ol/extent';
 import type { Pixel } from 'ol/pixel';
 import type { Projection as OLProjection } from 'ol/proj';
-import isEqual from 'lodash/isEqual';
 
+import { deepEqual } from '@/core/utils/utilities';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
 import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
@@ -438,7 +438,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       const isNewFilterEffectivelyNoop = isDefaultFilter && !currentFilter;
 
       // Check whether the current filter is different from the new one
-      const filterChanged = !isEqual(currentFilter, filterEquation);
+      const filterChanged = !deepEqual(currentFilter, filterEquation);
 
       // Determine if we should apply or reset filter
       const shouldUpdateFilter = (filterChanged && !isNewFilterEffectivelyNoop) || (!!currentFilter && isDefaultFilter);

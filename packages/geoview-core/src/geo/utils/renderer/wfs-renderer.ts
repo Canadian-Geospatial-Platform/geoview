@@ -1,4 +1,3 @@
-import { cloneDeep } from 'lodash';
 import { and, or, not, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo, equalTo, between } from 'ol/format/filter';
 import type Filter from 'ol/format/filter/Filter';
 import { writeFilter } from 'ol/format/WFS';
@@ -686,7 +685,7 @@ export abstract class WfsRenderer {
    */
   static #copyLineStyleForPolygon(styleSettings: TypeLayerStyleSettings): TypeLayerStyleSettings {
     // Clone it
-    const clonePolygonStyleSettings = cloneDeep(styleSettings);
+    const clonePolygonStyleSettings = structuredClone(styleSettings);
 
     // Tweak the style for a polygon with only a border
     clonePolygonStyleSettings.info = clonePolygonStyleSettings.info.map((styleInfo) => ({

@@ -1,7 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { ReactNode, KeyboardEvent } from 'react';
 import { useState, useEffect, useCallback, Fragment, useMemo } from 'react';
-import { camelCase } from 'lodash';
 import { useTheme } from '@mui/material/styles';
 import type { IconButtonPropsExtend } from '@/ui';
 import {
@@ -41,7 +40,7 @@ import { enforceArrayOrder, helpClosePanelById, helpOpenPanelById } from './app-
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import type { TypeValidAppBarCoreProps } from '@/api/types/map-schema-types';
 import { DEFAULT_APPBAR_CORE, DEFAULT_APPBAR_TABS_ORDER } from '@/api/types/map-schema-types';
-import { handleEscapeKey } from '@/core/utils/utilities';
+import { camelCase, handleEscapeKey } from '@/core/utils/utilities';
 import { IconButton } from '@/ui/icon-button/icon-button';
 
 interface GroupPanelType {

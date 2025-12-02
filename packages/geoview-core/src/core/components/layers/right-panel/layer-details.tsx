@@ -1,7 +1,6 @@
 import { Fragment, memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-import _ from 'lodash';
 import type { TypeLegendLayer, TypeLegendItem } from '@/core/components/layers/types';
 import { getSxClasses } from './layer-details-style';
 import {
@@ -258,7 +257,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   }, [allSublayersVisible, layerDetails, setVisibilityForAllSublayers]);
 
   const allItemsChecked = (): boolean => {
-    return _.every(layerDetails.items, (i) => i.isVisible !== false);
+    return layerDetails.items.every((i) => i.isVisible !== false);
   };
 
   function renderItemCheckbox(item: TypeLegendItem): JSX.Element | null {

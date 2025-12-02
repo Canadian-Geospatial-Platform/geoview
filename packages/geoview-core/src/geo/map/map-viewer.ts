@@ -2,7 +2,6 @@ import type { Root } from 'react-dom/client';
 
 import type { i18n } from 'i18next';
 
-import debounce from 'lodash/debounce';
 import type { MapBrowserEvent, MapEvent } from 'ol';
 import { ObjectEvent } from 'ol/Object';
 import OLMap from 'ol/Map';
@@ -61,6 +60,7 @@ import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
 import { ModalApi } from '@/ui';
 import { delay, exitFullscreen, generateId, getLocalizedMessage, requestFullscreen, whenThisThen } from '@/core/utils/utilities';
+import { debounce } from '@/core/utils/debounce';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { NORTH_POLE_POSITION } from '@/core/utils/constant';

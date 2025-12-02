@@ -10,7 +10,6 @@ import type { Projection as OLProjection } from 'ol/proj';
 import type { Map as OLMap } from 'ol';
 import { getUid } from 'ol';
 
-import cloneDeep from 'lodash/cloneDeep';
 import type { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
@@ -1069,7 +1068,8 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       return GeoviewRenderer.getFeatureImageSource(feature, layerStyle, filterEquation, true, domainsLookup, aliasLookup);
     }
 
-    const styleClone = cloneDeep(featureStyle);
+    // Clone the style
+    const styleClone = featureStyle.clone();
     styleClone?.setGeometry?.('');
     const styleKey = `${geometryType}${JSON.stringify(styleClone)}`;
 

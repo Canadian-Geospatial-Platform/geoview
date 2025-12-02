@@ -1,8 +1,6 @@
 import Ajv from 'ajv';
 import type { AnyValidateFunction } from 'ajv/dist/types';
 
-import defaultsDeep from 'lodash/defaultsDeep';
-
 import type {
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
@@ -42,6 +40,7 @@ import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-lay
 import { LayerMetadataAccessPathMandatoryError, LayerMissingGeoviewLayerIdError } from '@/core/exceptions/layer-exceptions';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
+import { deepMerge } from '@/core/utils/utilities';
 
 /**
  * A class to define the default values of a GeoView map configuration and validation methods for the map config attributes.
@@ -308,7 +307,7 @@ export class ConfigValidation {
       // If there's a parent
       if (parentInitialSettings) {
         // Merge the rest of parent and child settings
-        ConfigBaseClass.setClassOrTypeInitialSettings(layerConfig, defaultsDeep(initialSettings, parentInitialSettings));
+        ConfigBaseClass.setClassOrTypeInitialSettings(layerConfig, deepMerge(initialSettings, parentInitialSettings));
       }
 
       const minScale = ConfigBaseClass.getClassOrTypeMinScale(layerConfig);

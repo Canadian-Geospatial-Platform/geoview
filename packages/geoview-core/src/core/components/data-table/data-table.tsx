@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, memo, isValidElement, type ReactNode } from 'react';
 
 import { useTranslation } from 'react-i18next';
-import debounce from 'lodash/debounce';
 
 import { getCenter } from 'ol/extent';
 
@@ -41,6 +40,7 @@ import { useAppDisplayLanguage, useAppShowUnsymbolizedFeatures } from '@/core/st
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { isImage, delay } from '@/core/utils/utilities';
+import { debounce } from '@/core/utils/debounce';
 import { logger } from '@/core/utils/logger';
 import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import { VALID_DISPLAY_LANGUAGE } from '@/api/types/map-schema-types';
