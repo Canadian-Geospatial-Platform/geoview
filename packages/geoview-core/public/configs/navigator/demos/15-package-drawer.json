@@ -34,7 +34,7 @@
       "core": ["legend"]
     }
   },
-  "navBar": ["drawer", "basemap-select", "projection"],
+  "navBar": ["drawer", "basemap-select", "projection", "fullscreen"],
   "corePackages": [],
   "externalPackages": [],
   "corePackagesConfig": [

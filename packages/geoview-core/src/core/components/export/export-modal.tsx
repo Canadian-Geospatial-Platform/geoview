@@ -28,7 +28,7 @@ import { useTheme } from '@mui/material/styles';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, LoadingButton, Skeleton, TextField, Menu, MenuItem } from '@/ui';
 import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
-import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useAppGeoviewHTMLElement, useAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { exportFile } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 
@@ -69,6 +69,7 @@ export default function ExportModal(): JSX.Element {
   const mapElement = useAppGeoviewHTMLElement();
   const { disableFocusTrap, setActiveAppBarTab } = useUIStoreActions();
   const activeModalId = useUIActiveFocusItem().activeElementId;
+  const shellContainer = useAppShellContainer();
 
   // State & refs
   const [isMapLoading, setIsMapLoading] = useState(true);
@@ -262,7 +263,7 @@ export default function ExportModal(): JSX.Element {
   // #endregion HANDLERS
 
   return (
-    <Dialog open={activeModalId === 'export'} onClose={handleCloseModal} fullWidth maxWidth="xl" disablePortal>
+    <Dialog open={activeModalId === 'export'} onClose={handleCloseModal} fullWidth maxWidth="xl" container={shellContainer}>
       <DialogTitle>{t('exportModal.title')}</DialogTitle>
       <DialogContent dividers ref={dialogRef}>
         {/* Title input */}

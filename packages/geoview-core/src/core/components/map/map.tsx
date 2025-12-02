@@ -14,7 +14,12 @@ import { HoverTooltip } from '@/core/components/hover-tooltip/hover-tooltip';
 import type { MapViewer } from '@/geo/map/map-viewer';
 
 import { getSxClasses } from './map-style';
-import { useMapLoaded, useMapNorthArrow, useMapOverviewMap } from '@/core/stores/store-interface-and-intial-values/map-state';
+import {
+  useMapInteraction,
+  useMapLoaded,
+  useMapNorthArrow,
+  useMapOverviewMap,
+} from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import { useLayerAreLayersLoading } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -48,6 +53,7 @@ export function Map(props: MapProps): JSX.Element {
   const northArrow = useMapNorthArrow();
   const mapLoaded = useMapLoaded();
   const layersAreLoading = useLayerAreLayersLoading();
+  const mapInteraction = useMapInteraction();
 
   // flag to check if map is initialized. we added to prevent double rendering in StrictMode
   const hasRun = useRef<boolean>(false);
@@ -69,8 +75,8 @@ export function Map(props: MapProps): JSX.Element {
   }, [viewer]);
 
   return (
-    // ? the map is focusable and needs to be tabbable for keyboard navigation
-    <Box id={`mapTargetElement-${mapId}`} ref={mapElement} sx={sxClasses.mapContainer} tabIndex={0}>
+    // ? the map is focusable and needs to be tabbable for keyboard navigation (only when interaction is dynamic)
+    <Box id={`mapTargetElement-${mapId}`} ref={mapElement} sx={sxClasses.mapContainer} tabIndex={mapInteraction === 'static' ? -1 : 0}>
       {mapLoaded && (
         <>
           {northArrow && <NorthArrow />}

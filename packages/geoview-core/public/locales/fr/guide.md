@@ -55,25 +55,26 @@ Pour amener le focus sur la carte:
 
 <div style="border-bottom: 2px solid #2a2f39; margin-bottom: 15px;"></div>
 
-Les commandes de navigation permettent d'ajuster l'étendue de la visualisation, la projection ou la carte de base.
+Les commandes de navigation permettent d'ajuster l'étendue de la visualisation, la projection, la rotation ou la carte de base.
 
 Selon la configuration de la visionneuse, le coin inférieur droit de la carte contient les commandes de navigation suivantes :
 
-| Symbole                                                                                                                  | Nom                      | Description                                                                                                                                                 |
-| ------------------------------------------------------------------------------------------------------------------------ | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ![Une icône représentant la fonction « Plein écran »]({{assetsURL}}/img/guide/navigation/fullscreen.svg)                 | Plein écran              | Permet de voir la carte sur toute la page en passant de la taille originale au plein écran.                                                                 |
-| ![Une icône représentant la fonction « Zoom avant »]({{assetsURL}}/img/guide/navigation/plus.svg)                        | Zoom avant               | Permet de faire un zoom avant d'un niveau à la fois pour voir le contenu plus en détail; fonctionne aussi avec la touche d'addition du clavier (+).         |
-| ![Une icône représentant la fonction « Zoom arrière »]({{assetsURL}}/img/guide/navigation/minus.svg)                     | Zoom arrière             | Permet de faire un zoom arrière d'un niveau à la fois pour voir le contenu moins en détail; fonctionne aussi avec la touche de soustraction du clavier (-). |
-| ![Une icône représentant la fonction « Géolocalisation »]({{assetsURL}}/img/guide/navigation/geolocation.svg)            | Géolocalisation          | Permet de zoomer et de déplacer la carte sur votre position géographique.                                                                                   |
-| ![Une icône représentant la fonction « Vue initiale »]({{assetsURL}}/img/guide/navigation/home.svg)                      | Vue initiale             | Permet de zoomer et de déplacer la carte pour retourner à la vue initiale.                                                                                  |
-| ![Une icône représentant la fonction « Changer la carte de base »]({{assetsURL}}/img/guide/navigation/basemapSelect.svg) | Changer la carte de base | Permet de changer la carte de base.                                                                                                                         |
-| ![Une icône représentant la fonction « Changer la projection »]({{assetsURL}}/img/guide/navigation/projection.svg)       | Changer la projection    | Permet de changer la projection de la carte entre Web Mercator et LCC.                                                                                      |
+| Symbole                                                                                                                  | Nom                      | Description                                                                                                                                                                                                                                                                                                                                                              |
+| ------------------------------------------------------------------------------------------------------------------------ | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| ![Une icône représentant la fonction « Plein écran »]({{assetsURL}}/img/guide/navigation/fullscreen.svg)                 | Plein écran              | Permet de voir la carte sur toute la page en passant de la taille originale au plein écran.                                                                                                                                                                                                                                                                              |
+| ![Une icône représentant la fonction « Zoom avant »]({{assetsURL}}/img/guide/navigation/plus.svg)                        | Zoom avant               | Permet de faire un zoom avant d'un niveau à la fois pour voir le contenu plus en détail; fonctionne aussi avec la touche d'addition du clavier (+).                                                                                                                                                                                                                      |
+| ![Une icône représentant la fonction « Zoom arrière »]({{assetsURL}}/img/guide/navigation/minus.svg)                     | Zoom arrière             | Permet de faire un zoom arrière d'un niveau à la fois pour voir le contenu moins en détail; fonctionne aussi avec la touche de soustraction du clavier (-).                                                                                                                                                                                                              |
+| ![Une icône représentant la fonction « Rotation de la carte »]({{assetsURL}}/img/guide/navigation/360.svg)               | Rotation de la carte     | Permet de contrôler la rotation de la carte avec un curseur de -180° à +180°. Le panneau comprend un bouton à bascule **Nord fixe** (disponible pour la projection LCC) pour garder la carte orientée le nord au haut, et un bouton de réinitialisation pour revenir à l'orientation initiale. |
+| ![Une icône représentant la fonction « Géolocalisation »]({{assetsURL}}/img/guide/navigation/geolocation.svg)            | Géolocalisation          | Permet de zoomer et de déplacer la carte sur votre position géographique.                                                                                                                                                                                                                                                                                                |
+| ![Une icône représentant la fonction « Vue initiale »]({{assetsURL}}/img/guide/navigation/home.svg)                      | Vue initiale             | Permet de zoomer et de déplacer la carte pour retourner à la vue initiale.                                                                                                                                                                                                                                                                                               |
+| ![Une icône représentant la fonction « Changer la carte de base »]({{assetsURL}}/img/guide/navigation/basemapSelect.svg) | Changer la carte de base | Permet de changer la carte de base.                                                                                                                                                                                                                                                                                                                                      |
+| ![Une icône représentant la fonction « Changer la projection »]({{assetsURL}}/img/guide/navigation/projection.svg)       | Changer la projection    | Permet de changer la projection de la carte entre Web Mercator et LCC.                                                                                                                                                                                                                                                                                                   |
 
 Vous pouvez aussi déplacer la carte avec les touches fléchées vers la gauche, la droite, le haut et le bas, ou en cliquant sur la carte et en la faisant glisser. Lorsque le pointeur est sur la carte, la molette de la souris permet de faire un zoom avant et arrière.
 
 Appuyez sur la touche **Maj.** tout en cliquant et en déplaçant la souris pour définir une zone sur la carte. Relâchez la souris; le zoom se fait sur la zone sélectionnée.
 
-Appuyez sur les touches **Maj.** et **Alt.** tout en cliquant et en déplaçant la souris pour faire tourner la carte. Pour réinitialiser l’orientation de la carte, cliquez sur la flèche **Réinitialiser** la rotation de la carte" à droite de la barre d’information au bas de la carte.
+Appuyez sur les touches **Maj.** et **Alt.** tout en cliquant et en déplaçant la souris pour faire tourner la carte.
 
 _N.B. : La carte doit être focalisée pour que les combinaisons de touches fonctionnent._
 
@@ -123,17 +124,14 @@ La carte n’est pas pleinement conforme au niveau AA des Règles pour l’acces
 
 Cliquez sur le chevron vers le haut ![]({{assetsURL}}/img/guide/navigation/chevron_up.svg) à gauche pour développer ou réduire la barre.
 
-<img src="{{assetsURL}}/img/guide/navigation/map_info.png" alt="Barre d'information sur la carte montrant les coordonnées, l'échelle et les contrôles de la carte" style="width: 90%;"/>
-
 Les détails et fonctionnalités de navigation suivants sont accessibles dans la barre d'information sur la carte (il est nécessaire de développer la barre pour afficher toutes les options) :
 
-| Symbole                                                                                                                          | Nom                                   | Description                                                                                                                                                                                                                                                                     |
-| -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ![Une icône représentant la fonction « Attributs »]({{assetsURL}}/img/guide/navigation/attribute.svg)                            | Attributs                             | Droits d'auteur et autres attributs de la carte.                                                                                                                                                                                                                                |
-|                                                                                                                                  | Coordonnées géographiques             | Cliquez sur les coordonnées pour passer d’un format de coordonnées à l’autre : degrés, minutes et secondes (DMS), degrés décimaux ou coordonnées projetées.                                                                                                                     |
-|                                                                                                                                  | Échelle de la carte                   | Cliquez sur l’échelle de la carte pour basculer entre l’échelle et la résolution.                                                                                                                                                                                               |
-| ![Une icône représentant la fonction « Réinitialiser la rotation de la carte »]({{assetsURL}}/img/guide/navigation/up_arrow.svg) | Réinitialiser la rotation de la carte | Cliquez sur cette flèche pour rétablir l'orientation initiale de la carte. _N.B. : L'option Nord fixe doit être désactivée._                                                                                                                                                    |
-|                                                                                                                                  | Nord fixe                             | Option qui s’active et se désactive. Activez-la pour garder la carte orientée le nord au haut. Accessible seulement sur certaines projections (p. ex. LCC). _N.B. : Il n’est pas possible de réinitialiser la rotation de la carte lorsque l’option **Nord fixe** est activée._ |
+| Symbole                                                                                                              | Nom                       | Description                                                                                                                                                                                                                                                                                                                                                     |
+| -------------------------------------------------------------------------------------------------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ![Une icône représentant la fonction « Attributs »]({{assetsURL}}/img/guide/navigation/attribute.svg)                | Attributs                 | Droits d'auteur et autres attributs de la carte.                                                                                                                                                                                                                                                                                                                |
+|                                                                                                                      | Coordonnées géographiques | Cliquez sur les coordonnées pour passer d’un format de coordonnées à l’autre : degrés, minutes et secondes (DMS), degrés décimaux ou coordonnées projetées.                                                                                                                                                                                                     |
+|                                                                                                                      | Échelle de la carte       | Cliquez sur l’échelle de la carte pour basculer entre l’échelle et la résolution.                                                                                                                                                                                                                                                                               |
+| ![Une icône représentant la fonction « Indicateur de rotation »]({{assetsURL}}/img/guide/navigation/north_arrow.svg) | Indicateur de rotation    | Affiche l'angle de rotation actuel de la carte. Passez le curseur sur l'icône de la flèche nord pour voir une info-bulle indiquant la rotation de la carte et la composante de rotation basée sur la projection. Il s'agit d'un affichage d'information; utilisez le bouton **Rotation de la carte** dans les commandes de navigation pour ajuster la rotation. |
 
 =1!sidebar=
 
@@ -160,6 +158,7 @@ _N.B. : Certains outils dans la barre latérale se trouvent aussi sous forme d�
 | ![Une icône représentant la fonction « À propos de GéoView »]({{assetsURL}}/img/guide/sidebar/about.svg)    | À propos de GéoView                   | Affiche les renseignements sur le visualiseur GéoView.                                                       |
 
 =2!geolocator=
+
 <a id="geolocatorSection">
 
 ### <img src="{{assetsURL}}/img/guide/geosearch/geolocator.svg" alt="Icône de géolocalisation" width="30"/> Géolocalisation
@@ -206,9 +205,9 @@ Permet de rechercher des endroits au Canada. Si vous cliquez sur l'icône de gé
 Les résultats d’une recherche d’emplacement s’affichent dans un panneau sous le champ de recherche. Le panneau de résultats comprend deux menus déroulants permettant de filtrer les résultats par **province** et par **catégorie** (lac, village, rivière, etc.). Un bouton **Effacer les filtres** ![]({{assetsURL}}/img/guide/geosearch/clear.svg) se trouve à droite des menus.
 
 =2!export=
-<a id="exportSection">
 
-### ![]({{assetsURL}}/img/guide/sidebar/export_30.svg) Télécharger
+<a id="exportSection">
+### <img src="{{assetsURL}}/img/guide/sidebar/export.svg" alt="Icône de téléchargement" width="30"/> Télécharger
 
 <div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
@@ -243,6 +242,7 @@ Le menu du _pied de page_ se compose des onglets suivants :
 _N.B. : Certains onglets dans la barre latérale se trouvent aussi sous forme d’outils dans la barre latérale, comme **Légende**, **Couches**, **Données** et **Détails**. Lorsqu’ouverts à partir de la barre latérale, **Légende** et **Détails** s’affichent sur la carte dans un format « mobile » condensé (une seule colonne). Ouverts à partir du pied de page, ils s’affichent comme onglets au bas de la carte dans un format détaillé complet._
 
 =2!legend=
+
 <a id="legendSection"></a>
 
 <h3><img src="{{assetsURL}}/img/guide/sidebar/legend.svg" alt="Icône de légende" width="30"> Légende <a href="#footerSection">Haut de page</a></h3>
@@ -266,6 +266,7 @@ Vous pouvez développer ou réduire la liste des symboles d’une couche sous so
 _N.B. : Lorsque la couche est cachée, les fonctions affectant la couche sur la carte sont désactivées et le texte de la couche est gris et en italique._
 
 =2!layers=
+
 <a id="layersSection"></a>
 
 ### ![]({{assetsURL}}/img/guide/footer/layers_30.svg) Couches [Haut de page](#footerSection)
@@ -381,6 +382,7 @@ Pour trier les couches, vous n’avez qu’à utiliser les flèches vers le haut
 Pour retirer une couche, cliquez sur l’icône de suppression ![]({{assetsURL}}/img/guide/layers/remove_25.svg) à droite de celle-ci dans le sous-menu **Retirer**.
 
 =2!details=
+
 <a id="detailsSection"></a>
 
 ### ![]({{assetsURL}}/img/guide/sidebar/details_30.svg) Détails [Haut de page](#footerSection)
@@ -402,6 +404,7 @@ L’icône de loupe ![]({{assetsURL}}/img/guide/datatable/zoom.svg) permet de fa
 Cochez la case ![]({{assetsURL}}/img/guide/layers/check.png) pour garder l’élément sélectionné sur la carte.
 
 =2!dataTable=
+
 <a id="dataTableSection"></a>
 
 ### ![]({{assetsURL}}/img/guide/footer/data_table.svg) Données [Haut de page](#footerSection)
@@ -495,6 +498,7 @@ Lorsque vous avez sélectionné l’un des grands groupes, vous pouvez utiliser 
 Pour accéder aux boutons ou aux champs de saisie d’une cellule, assurez-vous de bien sélectionner celle-ci (en utilisant les flèches, comme susmentionné), puis utilisez la touche de **tabulation** pour parcourir les sous-options.
 
 =2!timeSlider=
+
 <a id="timeSliderSection"></a>
 
 ### ![]({{assetsURL}}/img/guide/footer/time_slider_30.svg) Curseur temporel [Haut de page](#footerSection)
@@ -523,6 +527,7 @@ Ouvrez le menu déroulant du délai pour choisir le délai d’animation du curs
 Le champ visé par le filtre s’affiche en bas à gauche de la section du curseur temporel. Des descriptions personnalisées peuvent aussi s’afficher au même endroit.
 
 =2!chart=
+
 <a id="chartSection"></a>
 
 ### ![]({{assetsURL}}/img/guide/footer/chart_30.svg) Graphique [Haut de page](#footerSection)

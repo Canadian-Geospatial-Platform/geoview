@@ -276,6 +276,16 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
           },
         },
       },
+      MuiPopper: {
+        defaultProps: {
+          container: tooltipsPopperContainer,
+        },
+      },
+      MuiMenu: {
+        defaultProps: {
+          container: tooltipsPopperContainer,
+        },
+      },
       MuiPaper: {
         styleOverrides: {
           root: {

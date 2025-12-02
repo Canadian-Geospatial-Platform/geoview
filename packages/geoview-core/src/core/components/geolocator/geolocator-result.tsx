@@ -10,6 +10,7 @@ import { createMenuItems } from '@/core/components/geolocator/utilities';
 import { getSxClasses } from '@/core/components/geolocator/geolocator-style';
 import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
+import { useAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
 
 interface GeolocatorFiltersType {
   geoLocationData: GeoListItem[];
@@ -32,6 +33,9 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
   const { t } = useTranslation();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+
+  // Store
+  const shellContainer = useAppShellContainer();
 
   // State
   const [province, setProvince] = useState<string>('');
@@ -97,6 +101,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
               menuItems={memoProvinces}
               disabled={!geoLocationData.length}
               variant="standard"
+              MenuProps={{ container: shellContainer }}
             />
           </Box>
           <Box sx={{ flexGrow: 2, paddingRight: '8px', maxWidth: 150 }}>
@@ -112,6 +117,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
               menuItems={memoCategories}
               disabled={!geoLocationData.length}
               variant="standard"
+              MenuProps={{ container: shellContainer }}
             />
           </Box>
           <Box>

@@ -616,16 +616,6 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
                 {t('details.featureDetailsTitle')
                   .replace('{count}', `${currentFeatureIndex + 1}`)
                   .replace('{total}', `${memoSelectedLayerDataFeatures?.length}`)}
-                <IconButton
-                  sx={{ marginLeft: '1.25rem', [theme.breakpoints.down('sm')]: { display: 'none' } }}
-                  aria-label={t('details.clearAllfeatures')}
-                  tooltipPlacement="top"
-                  onClick={() => handleClearAllHighlights()}
-                  className="buttonOutline"
-                  disabled={checkedFeatures.length === 0}
-                >
-                  <LayersClearOutlinedIcon />
-                </IconButton>
               </Box>
             </Grid>
             <Grid size={{ xs: 6 }}>
@@ -664,7 +654,21 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
   return (
     <Layout
       containerType={containerType}
-      layoutSwitch={!hideCoordinateInfoSwitch ? <CoordinateInfoSwitch /> : undefined}
+      layoutSwitch={
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box sx={{ maxWidth: '80%', flexShrink: 1 }}>{!hideCoordinateInfoSwitch && <CoordinateInfoSwitch />}</Box>
+          <Box sx={{ flexGrow: 1 }} />
+          <IconButton
+            aria-label={t('details.clearAllfeatures')}
+            tooltipPlacement="top"
+            onClick={() => handleClearAllHighlights()}
+            className="buttonOutline"
+            disabled={checkedFeatures.length === 0}
+          >
+            <LayersClearOutlinedIcon />
+          </IconButton>
+        </Box>
+      }
       selectedLayerPath={selectedLayerPath}
       layerList={memoLayersList}
       onLayerListClicked={(layerEntry) => handleLayerChange(layerEntry)}
