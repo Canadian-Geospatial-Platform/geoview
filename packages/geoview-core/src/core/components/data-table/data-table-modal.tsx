@@ -21,6 +21,7 @@ import { useDataTableAllFeaturesDataArray } from '@/core/stores/store-interface-
 import { useFeatureFieldInfos } from './hooks';
 import type { TypeFieldEntry } from '@/api/types/map-schema-types';
 import { useAppDisplayLanguage, useAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { TableViewIcon } from '@/ui/icons';
 
 /**
  * Open lighweight version (no function) of data table in a modal window
@@ -202,7 +203,6 @@ export default function DataTableModal(): JSX.Element {
       title={`${t('legend.tableDetails')} ${layer?.layerName ?? selectedLayer}`}
       container={shellContainer}
       width="90vw"
-      height="90vh"
       contentModal={
         <>
           {isLoading && (
@@ -217,6 +217,20 @@ export default function DataTableModal(): JSX.Element {
           )}
           {!isLoading && (
             <>
+              {hasDataTableTab && selectedLayer && (
+                <Box sx={{ display: 'flex', justifyContent: 'flex-start', marginBottom: 2 }}>
+                  <Button
+                    variant="outlined"
+                    className="buttonOutline"
+                    onClick={handleNavigateToDataTable}
+                    type="text"
+                    size="small"
+                    startIcon={<TableViewIcon />}
+                  >
+                    {t('dataTable.accessAdvancedFunctions')}
+                  </Button>
+                </Box>
+              )}
               <Table
                 columns={columns}
                 data={rows}
@@ -240,20 +254,6 @@ export default function DataTableModal(): JSX.Element {
                 enableHiding={false}
                 enableTopToolbar={false}
               />
-              {hasDataTableTab && selectedLayer && (
-                <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: 2 }}>
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    className="buttonOutlineFilled"
-                    onClick={handleNavigateToDataTable}
-                    type="text"
-                    size="small"
-                  >
-                    {t('dataTable.accessAdvancedFunctions')}
-                  </Button>
-                </Box>
-              )}
             </>
           )}
         </>

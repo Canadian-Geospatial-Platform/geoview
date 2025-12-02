@@ -182,7 +182,10 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
             <IconButton
               aria-label={t('legend.selectLayerAndScroll')}
               className="buttonOutline"
-              onClick={() => {
+              onClick={(event) => {
+                // Stop propagation to prevent AppBar's onScrollShellIntoView from firing
+                event.stopPropagation();
+
                 // If there is 2 components with layers tab (app bar or footer), prefer footer
                 if (hasFooterLayersTab) {
                   // Open footer layers tab

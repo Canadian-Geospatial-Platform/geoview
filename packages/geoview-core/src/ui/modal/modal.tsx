@@ -319,7 +319,7 @@ function ModalUI(props: DialogPropsExtend): JSX.Element {
             ? {
                 '& .MuiDialog-paper': {
                   ...(width && { width }),
-                  ...(height && { height }),
+                  ...(height && { height, maxHeight: 'calc(90vh - 200px)' }),
                   maxWidth: 'none',
                 },
               }

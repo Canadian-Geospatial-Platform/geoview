@@ -66,7 +66,6 @@ export default function FeatureDetailModal(): JSX.Element {
       title={t('details.featureDetailModalTitle')}
       container={shellContainer}
       width="90vw"
-      height="90vh"
       contentModal={
         <>
           <Box display="flex" flexDirection="row" alignItems="center" pb={10}>
