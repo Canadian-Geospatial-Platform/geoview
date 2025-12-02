@@ -214,7 +214,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Sends a query to get ESRI Dynamic feature geometries and calculates an extent from them.
-   * @param {number[]} objectIds - The IDs of the features to calculate the extent from.
+   * @param {number[] | string[]} objectIds - The IDs of the features to calculate the extent from.
    * @param {OLProjection} outProjection - The output projection for the extent.
    * @param {string?} outfield - ID field to return for services that require a value in outfields.
    * @override
@@ -228,7 +228,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @throws {ResponseContentError} Error thrown when the response actually contains an error within it.
    * @throws {NetworkError} Errow thrown when a network issue happened.
    */
-  override async onGetExtentFromFeatures(objectIds: number[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
+  override async onGetExtentFromFeatures(objectIds: number[] | string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
     // Get url for service from layer entry config
     const layerEntryConfig = this.getLayerConfig();
 

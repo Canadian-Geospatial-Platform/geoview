@@ -227,7 +227,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Sets the text value to the default text value of the current language
-   * @param {string} mapId The map ID
+   * @param {string} mapId - The map ID
    */
   static #updateDefaultText(mapId: string): void {
     const state = this.getDrawerState(mapId);

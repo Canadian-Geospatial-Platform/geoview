@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-import { debounce } from '@/core/utils/utilities';
+import { debounce } from '@/core/utils/debounce';
 
 /**
  * A custom hook that debounces a value

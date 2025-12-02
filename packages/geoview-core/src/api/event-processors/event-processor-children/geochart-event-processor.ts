@@ -142,7 +142,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    * In the store, the GeoChart configurations are stored in an object with layerPath as its property name
    * (to retrieve the configuration per layer faster).
    *
-   * @param {string} mapId the map id
+   * @param {string} mapId - The map id
    * @param {GeoViewGeoChartConfig[]} charts The array of JSON configuration for GeoChart
    * @throws {PluginStateUninitializedError} When the Geochart plugin is uninitialized.
    * @static
@@ -178,9 +178,9 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
 
   /**
    * Adds a GeoChart Configuration to the specified map id and layer path
-   * @param {string} mapId The map ID
-   * @param {string} layerPath The layer path
-   * @param {GeoViewGeoChartConfig} chartConfig The Geochart Configuration
+   * @param {string} mapId - The map ID
+   * @param {string} layerPath - The layer path
+   * @param {GeoViewGeoChartConfig} chartConfig - The Geochart Configuration
    * @throws {PluginStateUninitializedError} When the Geochart plugin is uninitialized.
    * @static
    */
@@ -204,8 +204,8 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
 
   /**
    * Removes a GeoChart Configuration at the specified map id and layer path
-   * @param {string} mapId The map ID
-   * @param {string} layerPath The layer path
+   * @param {string} mapId - The map ID
+   * @param {string} layerPath - The layer path
    * @throws {PluginStateUninitializedError} When the Geochart plugin is uninitialized.
    * @static
    */
@@ -237,8 +237,8 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
 
   /**
    * Propagates feature info layer sets to the store. The update of the array will also trigger an update in a batched manner.
-   * @param {string} mapId The map id
-   * @param {TypeGeochartResultSetEntry[]} layerDataArray The layer data array to propagate in the store
+   * @param {string} mapId - The map id
+   * @param {TypeGeochartResultSetEntry[]} layerDataArray - The layer data array to propagate in the store
    * @returns {Promise<void>}
    * @throws {PluginStateUninitializedError} When the Geochart plugin is uninitialized.
    * @static

@@ -268,7 +268,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Gets the extent of an array of features.
-   * @param {number[]} objectIds - The uids of the features to calculate the extent from.
+   * @param {number[] | string[]} objectIds - The uids of the features to calculate the extent from.
    * @param {OLProjection} outProjection - The output projection for the extent.
    * @param {string?} outfield - ID field to return for services that require a value in outfields.
    * @override
@@ -276,7 +276,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @deprecated Seems like this is not used anymore, not called anywhere and unsure how it'd work with adhoc vector layers without 'ids' (objectids) necessarily.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  override onGetExtentFromFeatures(objectIds: number[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
+  override onGetExtentFromFeatures(objectIds: number[] | string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
     // Get the feature source
     const source = this.getOLSource();
 

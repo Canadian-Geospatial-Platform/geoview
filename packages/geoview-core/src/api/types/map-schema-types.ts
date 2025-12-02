@@ -690,16 +690,16 @@ export interface TypePolygonVectorConfig extends TypeBaseVectorGeometryConfig {
   color?: string;
   /** Line stroke symbology */
   stroke: TypeStrokeSymbolConfig;
-  /** Distance between patern lines. Default = 8. */
+  /** Distance between pattern lines. Default = 8. */
   patternSize?: number;
-  /** Patern line width.default = 1. */
+  /** Pattern line width.default = 1. */
   patternWidth?: number;
 
-  /** Patern line width.default = 1.
+  /** Pattern line width.default = 1.
    * @deprecated Remove it after the release, once files like metadata.data are fixed in the hosted website.
    */
   paternSize?: number;
-  /** Patern line width.default = 1.
+  /** Pattern line width.default = 1.
    * @deprecated Remove it after the release, once files like metadata.data are fixed in the hosted website.
    */
   paternWidth?: number;

@@ -319,7 +319,7 @@ export class LayerApi {
 
   /**
    * Gets the layer configuration of the specified layer path.
-   * @param {string} layerPath The layer path.
+   * @param {string} layerPath - The layer path.
    * @returns {ConfigBaseClass} The layer configuration.
    * @throws {LayerConfigNotFoundError} Error thrown when the layer configuration couldn't be found at the given layer path.
    */
@@ -336,7 +336,7 @@ export class LayerApi {
 
   /**
    * Gets the layer configuration of a regular layer (not a group) at the specified layer path.
-   * @param {string} layerPath The layer path.
+   * @param {string} layerPath - The layer path.
    * @returns {AbstractBaseLayerEntryConfig} The layer configuration.
    * @throws {LayerConfigNotFoundError} Error thrown when the layer configuration couldn't be found at the given layer path.
    * @throws {LayerWrongTypeError} Error thrown when the layer configuration is of the wrong type at the given layer path.
@@ -354,7 +354,7 @@ export class LayerApi {
 
   /**
    * Gets the layer configuration of a group layer (not a regular) at the specified layer path.
-   * @param {string} layerPath The layer path.
+   * @param {string} layerPath - The layer path.
    * @returns {AbstractBaseLayerEntryConfig} The layer configuration.
    * @throws {LayerConfigNotFoundError} Error thrown when the layer configuration couldn't be found at the given layer path.
    * @throws {LayerWrongTypeError} Error thrown when the layer configuration is of the wrong type at the given layer path.
@@ -372,7 +372,7 @@ export class LayerApi {
 
   /**
    * Gets the layer configuration of the specified layer path.
-   * @param {string} layerPath The layer path.
+   * @param {string} layerPath - The layer path.
    * @returns {ConfigBaseClass | undefined} The layer configuration or undefined if not found.
    */
   getLayerEntryConfigIfExists(layerPath: string): ConfigBaseClass | undefined {

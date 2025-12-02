@@ -97,7 +97,7 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
 
   /**
    * Check if filtered are being set for each layer.
-   * @param {string} layerPath The path of the layer
+   * @param {string} layerPath - The path of the layer
    * @returns boolean
    */
   const isMapFilteredSelectedForLayer = useCallback(
@@ -112,7 +112,7 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
 
   /**
    * Get number of features of a layer with filtered or selected layer or unknown when data table is loaded.
-   * @param {string} layerPath the path of the layer
+   * @param {string} layerPath - The path of the layer
    * @returns
    */
   const getFeaturesOfLayer = useCallback(
@@ -142,8 +142,8 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
 
   /**
    * Create layer tooltip
-   * @param {string} layerName en/fr layer name
-   * @param {string} layerPath the path of the layer.
+   * @param {string} layerName - en/fr layer name
+   * @param {string} layerPath - The path of the layer.
    * @returns
    */
   const getLayerTooltip = useCallback(

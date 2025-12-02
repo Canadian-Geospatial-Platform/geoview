@@ -39,7 +39,7 @@ import {
   isSimpleSymbolVectorConfig,
 } from '@/api/types/map-schema-types';
 import type { TypeLayerMetadataFields } from '@/api/types/layer-schema-types';
-import type { FillPaternLine, FillPaternSettings, FilterNodeType } from './geoview-renderer-types';
+import type { FillPatternLine, FillPatternSettings, FilterNodeType } from './geoview-renderer-types';
 import { binaryKeywors, defaultColor, groupKeywords, NodeType, operatorPriority, unaryKeywords } from './geoview-renderer-types';
 import type { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { logger } from '@/core/utils/logger';
@@ -874,11 +874,15 @@ export abstract class GeoviewRenderer {
    * Process a pattern fill using the settings.
    *
    * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
-   * @param {FillPaternLine[]} fillPaternLines - Fill patern lines needed to create the fill.
+   * @param {FillPatternLine[]} FillPatternLines - Fill pattern lines needed to create the fill.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
-  static processPaternFill(settings: TypePolygonVectorConfig, fillPaternLines: FillPaternLine[], geometry?: Geometry): Style | undefined {
+  static processPatternFill(
+    settings: TypePolygonVectorConfig,
+    FillPatternLines: FillPatternLine[],
+    geometry?: Geometry
+  ): Style | undefined {
     // Depending on the pattern
     const patternSize = settings.patternSize ?? settings.paternSize ?? 8;
     const patternWidth = settings.patternWidth ?? 16;
@@ -914,8 +918,8 @@ export abstract class GeoviewRenderer {
       context.lineCap = 'round';
       context.lineWidth = settings.patternWidth ?? settings.paternWidth ?? 1;
       context.beginPath();
-      for (let i = 0; i < fillPaternLines.length; i++) {
-        const { moveTo, lineTo } = fillPaternLines[i];
+      for (let i = 0; i < FillPatternLines.length; i++) {
+        const { moveTo, lineTo } = FillPatternLines[i];
         context.moveTo(moveTo[0] * patternSize, moveTo[1] * patternSize);
         context.lineTo(lineTo[0] * patternSize, lineTo[1] * patternSize);
       }
@@ -946,7 +950,7 @@ export abstract class GeoviewRenderer {
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
   static processBackwardDiagonalFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined {
-    return this.processPaternFill(settings, this.fillPaternSettings.backwardDiagonal, geometry);
+    return this.processPatternFill(settings, this.FillPatternSettings.backwardDiagonal, geometry);
   }
 
   /**
@@ -957,7 +961,7 @@ export abstract class GeoviewRenderer {
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
   static processForwardDiagonalFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined {
-    return this.processPaternFill(settings, this.fillPaternSettings.forwardDiagonal, geometry);
+    return this.processPatternFill(settings, this.FillPatternSettings.forwardDiagonal, geometry);
   }
 
   /**
@@ -968,7 +972,7 @@ export abstract class GeoviewRenderer {
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
   static processCrossFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined {
-    return this.processPaternFill(settings, this.fillPaternSettings.cross, geometry);
+    return this.processPatternFill(settings, this.FillPatternSettings.cross, geometry);
   }
 
   /**
@@ -979,7 +983,7 @@ export abstract class GeoviewRenderer {
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
   static processDiagonalCrossFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined {
-    return this.processPaternFill(settings, this.fillPaternSettings.diagonalCross, geometry);
+    return this.processPatternFill(settings, this.FillPatternSettings.diagonalCross, geometry);
   }
 
   /**
@@ -990,7 +994,7 @@ export abstract class GeoviewRenderer {
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
   static processHorizontalFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined {
-    return this.processPaternFill(settings, this.fillPaternSettings.horizontal, geometry);
+    return this.processPatternFill(settings, this.FillPatternSettings.horizontal, geometry);
   }
 
   /**
@@ -1001,7 +1005,7 @@ export abstract class GeoviewRenderer {
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
   static processVerticalFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined {
-    return this.processPaternFill(settings, this.fillPaternSettings.vertical, geometry);
+    return this.processPatternFill(settings, this.FillPatternSettings.vertical, geometry);
   }
 
   /**
@@ -1012,7 +1016,7 @@ export abstract class GeoviewRenderer {
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
   static processDotFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined {
-    return this.processPaternFill(settings, this.fillPaternSettings.dot, geometry);
+    return this.processPatternFill(settings, this.FillPatternSettings.dot, geometry);
   }
 
   /**
@@ -2009,7 +2013,7 @@ export abstract class GeoviewRenderer {
   };
 
   /** Table used to define line symbology to use when drawing polygon fill */
-  static fillPaternSettings: FillPaternSettings = {
+  static FillPatternSettings: FillPatternSettings = {
     null: [],
     dot: [],
     solid: [],

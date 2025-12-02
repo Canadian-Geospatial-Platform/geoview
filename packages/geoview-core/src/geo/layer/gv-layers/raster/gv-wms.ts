@@ -467,7 +467,7 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Sends a query to get feature and calculates an extent from them.
-   * @param {number[]} objectIds - The IDs of the features to calculate the extent from.
+   * @param {number[] | string[]} objectIds - The IDs of the features to calculate the extent from.
    * @param {OLProjection} outProjection - The output projection for the extent.
    * @param {string?} outfield - ID field to return for services that require a value in outfields.
    * @returns {Promise<Extent>} The extent of the features, if available.
@@ -477,7 +477,7 @@ export class GVWMS extends AbstractGVRaster {
    * @override
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  override async onGetExtentFromFeatures(objectIds: number[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
+  override async onGetExtentFromFeatures(objectIds: number[] | string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
     // Get the WMS layer config
     const wmsLayerConfig = this.getLayerConfig();
 
@@ -552,13 +552,13 @@ export class GVWMS extends AbstractGVRaster {
    * - Applies WFS/WMS configuration (schema, outfields, styles, filters).
    * - Formats fields according to WFS metadata, including date parsing rules.
    * - Returns an array of standardized `TypeFeatureInfoEntry` objects.
-   * @param {string} urlWithOutputJson The full WFS GetFeature request URL. Must specify an output format compatible
+   * @param {string} urlWithOutputJson - The full WFS GetFeature request URL. Must specify an output format compatible
    *   with GeoJSON (e.g., `outputFormat=application/json`).
-   * @param {OgcWmsLayerEntryConfig} wmsLayerConfig The associated WMS layer configuration. Styling and filter settings from this
+   * @param {OgcWmsLayerEntryConfig} wmsLayerConfig - The associated WMS layer configuration. Styling and filter settings from this
    *   config are applied when formatting the Feature Info results.
-   * @param {OgcWfsLayerEntryConfig} wfsLayerConfig The WFS layer configuration used for schema tags, outfields, metadata, and
+   * @param {OgcWfsLayerEntryConfig} wfsLayerConfig - The WFS layer configuration used for schema tags, outfields, metadata, and
    *   date formatting.
-   * @param {AbortController} [abortController] Optional `AbortController` used to cancel the fetch request.
+   * @param {AbortController} [abortController] - Optional `AbortController` used to cancel the fetch request.
    * @returns {Promise<TypeFeatureInfoEntry[]>}
    *   A promise resolving to an array of GeoView Feature Info entries representing
    *   the parsed and formatted features from the WFS response.

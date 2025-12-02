@@ -238,7 +238,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   /**
    * Shortcut to get the Map config for a given map id
-   * @param {string} mapId the map id to retrieve the config for
+   * @param {string} mapId - The map id to retrieve the config for
    * @returns {TypeMapFeaturesConfig | undefined} the map config or undefined if there is no config for this map id
    */
   static getGeoViewMapConfig(mapId: string): TypeMapFeaturesConfig | undefined {
@@ -942,8 +942,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * Remove a layer from the orderedLayerInfo array.
    *
    * @param {string} mapId The ID of the map to remove the layer from.
-   * @param {string} layerPath The path of the layer to remove.
-   * @param {boolean} removeSublayers Should sublayers be removed.
+   * @param {string} layerPath - The path of the layer to remove.
+   * @param {boolean} removeSublayers - Should sublayers be removed.
    * @return {void}
    */
   static removeOrderedLayerInfo(mapId: string, layerPath: string, removeSublayers: boolean = true): void {
@@ -1028,9 +1028,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
   /**
    * Zoom to the specified extent.
    *
-   * @param {string} mapId The map id.
-   * @param {Extent} extent The extent to zoom to.
-   * @param {FitOptions} options The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 13, duration: 500 }).
+   * @param {string} mapId - The map id.
+   * @param {Extent} extent - The extent to zoom to.
+   * @param {FitOptions} options - The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 13, duration: 500 }).
    * @returns Promise<void>
    */
   static zoomToExtent(mapId: string, extent: Extent, options: FitOptions = DEFAULT_OL_FITOPTIONS): Promise<void> {
@@ -1232,8 +1232,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
   /**
    * Get all active filters for layer.
    *
-   * @param {string} mapId The map id.
-   * @param {string} layerPath The path for the layer to get filters from.
+   * @param {string} mapId - The map id.
+   * @param {string} layerPath - The path for the layer to get filters from.
    */
   static getActiveVectorFilters(mapId: string, layerPath: string): (string | undefined)[] | undefined {
     const initialFilter = this.getInitialFilter(mapId, layerPath);
@@ -1251,8 +1251,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
   /**
    * Apply all available filters to layer.
    *
-   * @param {string} mapId The map id.
-   * @param {string} layerPath The path of the layer to apply filters to.
+   * @param {string} mapId - The map id.
+   * @param {string} layerPath - The path of the layer to apply filters to.
    */
   static applyLayerFilters(mapId: string, layerPath: string): void {
     // Get the Geoview layer

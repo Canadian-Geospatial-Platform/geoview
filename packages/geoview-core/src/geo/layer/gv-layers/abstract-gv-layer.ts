@@ -176,12 +176,12 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /**
    * Overridable function that gets the extent of an array of features.
-   * @param {number[]} objectIds - The IDs of the features to calculate the extent from.
+   * @param {number[] | string[]} objectIds - The IDs of the features to calculate the extent from.
    * @param {OLProjection} outProjection - The output projection for the extent.
    * @param {string} outfield - ID field to return for services that require a value in outfields.
    * @returns {Promise<Extent>} The extent of the features, if available
    */
-  protected onGetExtentFromFeatures(objectIds: number[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
+  protected onGetExtentFromFeatures(objectIds: number[] | string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
     // Not implemented
     throw new NotImplementedError(`Feature geometry for ${objectIds}-${outfield} is unavailable from ${this.getLayerPath()}`);
   }
@@ -488,12 +488,12 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /**
    * Gets the extent of an array of features.
-   * @param {number[]} objectIds - The IDs of the features to calculate the extent from.
+   * @param {number[] | string[]} objectIds - The IDs of the features to calculate the extent from.
    * @param {OLProjection} outProjection - The output projection for the extent.
    * @param {string} outfield - ID field to return for services that require a value in outfields.
    * @returns {Promise<Extent>} The extent of the features, if available
    */
-  getExtentFromFeatures(objectIds: number[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
+  getExtentFromFeatures(objectIds: number[] | string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
     // Redirect
     return this.onGetExtentFromFeatures(objectIds, outProjection, outfield);
   }
@@ -1089,9 +1089,23 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   /**
-   * Formats a list of features into an array of TypeFeatureInfoEntry, including icons, field values, domains, and metadata.
-   * @param {Feature[]} features - Array of features to format.
-   * @returns {TypeFeatureInfoEntry[]} An array of TypeFeatureInfoEntry objects.
+   * Formats a set of OpenLayers features into a structured array of feature info entries.
+   * Each feature is enriched with geometry, extent, field information, and optional styling.
+   * @param {Feature[]} features - Array of OpenLayers features to process.
+   * @param {string} layerPath - Path of the layer these features belong to.
+   * @param {TypeGeoviewLayerType} schemaTag - The Geoview layer type for the features.
+   * @param {string | undefined} nameField - Optional field name to use as the display name for features.
+   * @param {TypeOutfields[] | undefined} outFields - Optional array of output fields to include in the feature info.
+   * @param {boolean} supportZoomTo - Whether zoom-to functionality is supported for these features.
+   * @param {TypeLayerMetadataFields[] | undefined} domainsLookup - Optional array of field metadata for domain lookups.
+   * @param {Partial<Record<TypeStyleGeometry, TypeLayerStyleSettings>> | undefined} layerStyle - Optional mapping of geometry type to style settings for icons.
+   * @param {FilterNodeType[] | undefined} filterEquation - Optional array of filters applied to the layer.
+   * @param {(fieldName: string) => TypeOutfieldsType} callbackGetFieldType - Callback that returns the field type for a given field name.
+   * @param {(fieldName: string) => codedValueType | rangeDomainType | null} callbackGetFieldDomain - Callback that returns the coded value or range domain for a given field name.
+   * @param {(feature: Feature, fieldName: string, fieldType: TypeOutfieldsType) => string | number | Date} callbackGetFieldValue - Callback that returns the value of a field for a feature, in the correct type.
+   * @returns {TypeFeatureInfoEntry[]} Array of feature info entries representing each feature with enriched metadata.
+   * @description
+   * Will not throw; errors are caught and logged. Returns an empty array if processing fails.
    */
   static helperFormatFeatureInfoResult(
     features: Feature[],
@@ -1170,15 +1184,19 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   /**
    * Processes the fields of a given feature and populates a feature info entry with relevant data.
    * It also updates field domain and type dictionaries if needed.
-   * @param {Feature} feature - The feature object whose fields are being processed.
-   * @param {TypeOutfields[] | undefined} outfields - Optional list of fields to extract, with metadata like name, alias, and type.
+   * @param {Feature} feature - The OpenLayers feature object whose fields are being processed.
+   * @param {TypeOutfields[] | undefined} outfields - Optional array of output field metadata. Each entry can specify name, alias, and type.
    * @param {Record<string, codedValueType | rangeDomainType | null>} dictFieldDomains - A mapping of field names to their domain metadata.
-   * Will be updated in-place if a field domain is not already present.
+   *   This object is updated in-place for fields that do not already have a domain defined.
    * @param {Record<string, TypeOutfieldsType>} dictFieldTypes - A mapping of field names to their data types.
-   * Will be updated in-place if a field type is not already present.
-   * @param {TypeFeatureInfoEntry} featureInfoEntry - The object where processed field info is stored, grouped by field name.
-   * @param {number} fieldKeyCounterStart - A starting value for the field key counter used to assign unique field keys.
-   * @returns {number} The next field key counter value after processing, for continuation in iterative use.
+   *   This object is updated in-place for fields that do not already have a type defined.
+   * @param {TypeFeatureInfoEntry} featureInfoEntry - The feature info entry object where processed field information is stored.
+   *   Fields are stored in `featureInfoEntry.fieldInfo`, keyed by field name.
+   * @param {number} fieldKeyCounterStart - Starting value for the field key counter. Each field processed increments the counter.
+   * @param {(fieldName: string) => TypeOutfieldsType} callbackGetFieldType - Callback function that returns the type of a given field.
+   * @param {(fieldName: string) => codedValueType | rangeDomainType | null} callbackGetFieldDomain - Callback function that returns the domain metadata for a given field.
+   * @param {(feature: Feature, fieldName: string, fieldType: TypeOutfieldsType) => string | number | Date} callbackGetFieldValue - Callback function that returns the value of a given field for the feature, typed according to the field type.
+   * @returns {number} The next field key counter value after processing, to be used for further fields or subsequent features.
    */
   static #helperFeatureFields(
     feature: Feature,
@@ -1246,12 +1264,17 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   /**
-   * Gets and formats the value of the field with the name passed in parameter. Vector GeoView layers convert dates to milliseconds
-   * since the base date. Vector feature dates must be in ISO format.
-   * @param {Feature} feature - The feature that hold the field values.
-   * @param {string} fieldName - The field name.
-   * @param {TypeOutfieldsType} fieldType - The field type.
-   * @returns {string | number | Date} The formatted value of the field.
+   * Gets and formats the value of a field from a feature.
+   * For vector GeoView layers, dates are converted from milliseconds since the base date.
+   * Vector feature dates must be in ISO format if stored as strings.
+   * @param {Feature} feature - The OpenLayers feature that holds the field values.
+   * @param {string} fieldName - The name of the field to retrieve.
+   * @param {TypeOutfieldsType} fieldType - The type of the field ('string', 'number', 'date', etc.).
+   * @param {TypeDateFragments | undefined} serverDateFragmentsOrder - Optional order of date fragments as expected from the server.
+   *   If undefined, the server format will be deduced from the field value.
+   * @param {TypeDateFragments | undefined} externalFragmentsOrder - Optional order of date fragments for external display formatting.
+   * @returns {string | number | Date} The formatted field value.
+   *   Returns a string, number, or Date depending on the field type.
    */
   static helperGetFieldValue(
     feature: Feature,
