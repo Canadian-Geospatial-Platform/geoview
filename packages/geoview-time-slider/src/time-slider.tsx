@@ -353,15 +353,18 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   return (
     <Grid>
       <Box sx={{ padding: '10px 10px' }}>
-        <Grid container sx={{ ...sxClasses.rightPanelBtnHolder, flexWrap: 'nowrap' }}>
+        <Grid container sx={{ ...sxClasses.rightPanelBtnHolder, flexWrap: 'nowrap', alignItems: 'center' }}>
           <Grid size={{ xs: 9 }}>
-            <Typography component="div" sx={{ ...sxClasses.panelHeaders, paddingLeft: '20px', paddingTop: '10px' }}>
+            <Typography component="div" sx={{ ...sxClasses.panelHeaders, paddingLeft: '20px' }}>
               {displayTitle}
               {displayPattern[0] === undefined && ` (${DateMgt.formatDate(DateMgt.formatDateToISO(values[0]), 'YYYY-MM-DD')})`}
             </Typography>
           </Grid>
           <Grid size={{ xs: 3 }}>
-            <Box sx={{ textAlign: 'right', marginRight: '25px' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: '10px' }}>
+              <Typography component="span">
+                <b>{getLocalizedMessage(displayLanguage, 'timeSlider.slider.filter')}</b>
+              </Typography>
               <Tooltip
                 title={
                   filtering
@@ -500,14 +503,13 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
             )}
           </Box>
         </Grid>
-        {description ||
-          (title !== combinedNames && (
-            <Grid size={{ xs: 12 }}>
-              <Typography component="div" sx={{ px: '20px', py: '5px' }}>
-                {description || combinedNames}
-              </Typography>
-            </Grid>
-          ))}
+        {(description || additionalNames?.length) && (
+          <Grid size={{ xs: 12 }}>
+            <Typography component="div" sx={{ px: '20px', py: '5px', paddingTop: '15px', fontSize: theme.palette.geoViewFontSize.sm }}>
+              {description || combinedNames}
+            </Typography>
+          </Grid>
+        )}
       </Box>
     </Grid>
   );

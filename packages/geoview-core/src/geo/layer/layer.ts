@@ -1367,7 +1367,14 @@ export class LayerApi {
    */
   setAllLayersVisibility(newValue: boolean): void {
     this.getLayerEntryLayerPaths().forEach((layerPath) => {
-      this.setOrToggleLayerVisibility(layerPath, newValue);
+      // If the ordered layer info for a layer path doesn't exist or doesn't have visibility info
+      // (ex. the layer is in error or still loading), we want to continue with other layers.
+      try {
+        this.setOrToggleLayerVisibility(layerPath, newValue);
+      } catch (error) {
+        // Log
+        logger.logError(formatError(error));
+      }
     });
   }
 
@@ -1425,7 +1432,7 @@ export class LayerApi {
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    * @throws {LayerNotGeoJsonError} When the layer is not a GeoJson layer.
    */
-  async setGeojsonSource(layerPath: string, geojson: GeoJSONObject | string): Promise<void> {
+  setGeojsonSource(layerPath: string, geojson: GeoJSONObject | string): void {
     // Get the map id
     const mapId = this.getMapId();
 
@@ -1436,7 +1443,7 @@ export class LayerApi {
     if (!(gvLayer instanceof GVGeoJSON)) throw new LayerNotGeoJsonError(layerPath, gvLayer.getLayerName());
 
     // Override the GeoJson source
-    await gvLayer.setGeojsonSource(geojson, this.mapViewer.getProjection());
+    gvLayer.setGeojsonSource(geojson, this.mapViewer.getProjection());
 
     // Update the bounds in the store
     const bounds = gvLayer.getBounds(this.mapViewer.getProjection(), MapViewer.DEFAULT_STOPS);

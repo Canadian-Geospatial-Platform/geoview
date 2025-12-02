@@ -3,7 +3,7 @@ import type { TimeDimension } from '@/core/utils/date-mgt';
 import type { TypeGeoviewLayerType, TypeLayerControls } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { TypeLegendLayer, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
-import { isImageStaticLegend, isVectorLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { isGeoTIFFLegend, isImageStaticLegend, isVectorLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import type { ILayerState, TypeLegend, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
@@ -441,6 +441,16 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
         // Also take care of image static by storing the iconImage into the icon property on-the-fly
         if (isImageStaticLegend(legendResultSetEntry.data!) && icons && icons.length > 0) {
+          legendLayerEntry.items.push({
+            geometryType: 'Point',
+            name: 'image',
+            icon: icons[0].iconImage || null,
+            isVisible: true,
+          });
+        }
+
+        // Also take care of GeoTIFF by storing the iconImage into the icon property on-the-fly
+        if (isGeoTIFFLegend(legendResultSetEntry.data!) && icons && icons.length > 0) {
           legendLayerEntry.items.push({
             geometryType: 'Point',
             name: 'image',

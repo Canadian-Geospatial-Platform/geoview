@@ -1293,6 +1293,10 @@ export interface TypeVectorLegend extends TypeLegend {
   legend: TypeVectorLayerStyles;
 }
 
+export interface TypeGeoTIFFLegend extends Omit<TypeLegend, 'styleConfig'> {
+  legend: HTMLCanvasElement | null;
+}
+
 export type TypeStyleRepresentation = {
   /** The defaultCanvas property is used by Simple styles and default styles when defined in unique value and class
    * break styles.
@@ -1325,4 +1329,16 @@ export const isVectorLegend = (verifyIfLegend: TypeLegend): verifyIfLegend is Ty
  */
 export const isImageStaticLegend = (verifyIfLegend: TypeLegend): verifyIfLegend is TypeImageStaticLegend => {
   return verifyIfLegend?.type === CONST_LAYER_TYPES.IMAGE_STATIC;
+};
+
+/**
+ * type guard function that redefines a TypeLegend as a TypeGeoTIFFLegend
+ * if the type attribute of the verifyIfLegend parameter is valid. The type ascention
+ * applies only to the true block of the if clause.
+ *
+ * @param {TypeLegend} verifyIfLegend object to test in order to determine if the type ascention is valid
+ * @returns {boolean} returns true if the payload is valid
+ */
+export const isGeoTIFFLegend = (verifyIfLegend: TypeLegend): verifyIfLegend is TypeGeoTIFFLegend => {
+  return verifyIfLegend?.type === CONST_LAYER_TYPES.GEOTIFF;
 };
