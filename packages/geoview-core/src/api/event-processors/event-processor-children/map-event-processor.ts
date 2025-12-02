@@ -1178,7 +1178,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    *
    * @param {string} mapId - ID of map to zoom on
    * @param {string} layerPath - Path of layer to zoom to.
-   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    */
   static zoomToLayerVisibleScale(mapId: string, layerPath: string): void {
     const view = this.getMapViewer(mapId).getView();
@@ -1315,7 +1315,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {boolean} isGeocore - Indicates if it is a geocore layer.
    * @param {boolean | 'hybrid'} overrideGeocoreServiceNames - Indicates if geocore layer names should be kept as is or returned to defaults.
    * @returns {TypeLayerEntryConfig} Entry config object.
-   * @throws {LayerConfigNotFoundError} Error thrown when the layer configuration couldn't be found at the given layer path.
+   * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
    */
   static #createLayerEntryConfig(
     mapId: string,

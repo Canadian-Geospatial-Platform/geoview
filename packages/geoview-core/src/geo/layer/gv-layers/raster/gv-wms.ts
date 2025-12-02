@@ -326,11 +326,11 @@ export class GVWMS extends AbstractGVRaster {
    * @param {AbortController?} abortController - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    * @throws {LayerConfigWFSMissingError} If no WFS layer configuration is defined for this WMS layer.
-   * @throws {ResponseError} Error thrown when the response is not OK (non-2xx).
-   * @throws {ResponseEmptyError} Error thrown when the JSON response is empty.
-   * @throws {RequestTimeoutError} Error thrown when the request exceeds the timeout duration.
-   * @throws {RequestAbortedError} Error thrown when the request was aborted by the caller's signal.
-   * @throws {NetworkError} Errow thrown when a network issue happened.
+   * @throws {ResponseError} When the response is not OK (non-2xx).
+   * @throws {ResponseEmptyError} When the JSON response is empty.
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
+   * @throws {NetworkError} When a network issue happened.
    */
   protected override getAllFeatureInfo(
     map: OLMap,
@@ -474,6 +474,11 @@ export class GVWMS extends AbstractGVRaster {
    * @throws {LayerConfigWFSMissingError} If no WFS layer configuration is defined for this WMS layer.
    * @throws {NoPrimaryKeyFieldError} When the no outfields has the type 'oid'.
    * @throws {NoExtentError} When the extent couldn't be computed.
+   * @throws {ResponseError} When the response is not OK (non-2xx).
+   * @throws {ResponseEmptyError} When the JSON response is empty.
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
+   * @throws {NetworkError} When a network issue happened.
    * @override
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -492,7 +497,7 @@ export class GVWMS extends AbstractGVRaster {
 
     // Create the filterXML from the sql filter
     const xmlFilter =
-      '<ogc:filter>' + WfsRenderer.sqlToOlWfsFilterXml(sqlFilter, wfsLayerConfig.getVersion(), pkFieldName) + '</ogc:Filter>';
+      '<ogc:Filter>' + WfsRenderer.sqlToOlWfsFilterXml(sqlFilter, wfsLayerConfig.getVersion(), pkFieldName) + '</ogc:Filter>';
 
     // Get the supported info formats
     const featureInfoFormat = wfsLayerConfig.getSupportedFormats('application/json'); // application/json by default (QGIS Server doesn't seem to provide the metadata for the output formats, use application/json)
@@ -562,11 +567,11 @@ export class GVWMS extends AbstractGVRaster {
    * @returns {Promise<TypeFeatureInfoEntry[]>}
    *   A promise resolving to an array of GeoView Feature Info entries representing
    *   the parsed and formatted features from the WFS response.
-   * @throws {ResponseError} Error thrown when the response is not OK (non-2xx).
-   * @throws {ResponseEmptyError} Error thrown when the JSON response is empty.
-   * @throws {RequestTimeoutError} Error thrown when the request exceeds the timeout duration.
-   * @throws {RequestAbortedError} Error thrown when the request was aborted by the caller's signal.
-   * @throws {NetworkError} Errow thrown when a network issue happened.
+   * @throws {ResponseError} When the response is not OK (non-2xx).
+   * @throws {ResponseEmptyError} When the JSON response is empty.
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
+   * @throws {NetworkError} When a network issue happened.
    * @static
    */
   static async fetchAndParseFeaturesFromWFSUrl(
@@ -586,9 +591,9 @@ export class GVWMS extends AbstractGVRaster {
       features,
       wfsLayerConfig.layerPath,
       wfsLayerConfig.getSchemaTag(),
-      wfsLayerConfig.getNameField(),
-      wfsLayerConfig.getOutfields(),
-      wfsLayerConfig.hasOutfieldsPK(),
+      wmsLayerConfig.getNameField(),
+      wmsLayerConfig.getOutfields(),
+      wmsLayerConfig.hasOutfieldsPK(),
       undefined, // TODO: Support domains?
       wmsLayerConfig.getLayerStyle(), // The styles as read from the WMS layer config (not WFS in case it was overridden in the WMS)
       wmsLayerConfig.getFilterEquation(), // The filter equation as read from the WMS layer config (not WFS in case it was overridden in the WMS)

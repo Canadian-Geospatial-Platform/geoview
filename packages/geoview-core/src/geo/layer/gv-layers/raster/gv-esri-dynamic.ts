@@ -220,13 +220,13 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @override
    * @returns {Promise<Extent>} The extent of the features, if available.
    * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
-   * @throws {RequestTimeoutError} Error thrown when the request exceeds the timeout duration.
-   * @throws {RequestAbortedError} Error thrown when the request was aborted by the caller's signal.
-   * @throws {ResponseError} Error thrown when the response is not OK (non-2xx).
-   * @throws {ResponseEmptyError} Error thrown when the JSON response is empty.
-   * @throws {ResponseTypeError} Errow thrown when the response from the service is not an object.
-   * @throws {ResponseContentError} Error thrown when the response actually contains an error within it.
-   * @throws {NetworkError} Errow thrown when a network issue happened.
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
+   * @throws {ResponseError} When the response is not OK (non-2xx).
+   * @throws {ResponseEmptyError} When the JSON response is empty.
+   * @throws {ResponseTypeError} When the response from the service is not an object.
+   * @throws {ResponseContentError} When the response actually contains an error within it.
+   * @throws {NetworkError} When a network issue happened.
    */
   override async onGetExtentFromFeatures(objectIds: number[] | string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
     // Get url for service from layer entry config

@@ -88,7 +88,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
   /**
    * Queries the features at the provided coordinate for all the registered layers.
    * @param {Coordinate} pixelCoordinate - The pixel coordinate where to query the features
-   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    */
   queryLayers(pixelCoordinate: Coordinate): void {
     // FIXME: Watch out for code reentrancy between queries!
@@ -140,7 +140,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
         promiseResult
           .then((arrayOfRecords) => {
             if (arrayOfRecords.length) {
-              const nameField = arrayOfRecords[0].nameField || (Object.entries(arrayOfRecords[0].fieldInfo)[0] as unknown as string);
+              const nameField = arrayOfRecords[0].nameField || Object.entries(arrayOfRecords[0].fieldInfo)[0]?.[0];
               const fieldInfo = arrayOfRecords[0].fieldInfo[nameField];
 
               this.resultSet[layerPath].feature = {

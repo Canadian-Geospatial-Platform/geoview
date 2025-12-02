@@ -181,9 +181,10 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * @param {string} outfield - ID field to return for services that require a value in outfields.
    * @returns {Promise<Extent>} The extent of the features, if available
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected onGetExtentFromFeatures(objectIds: number[] | string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
     // Not implemented
-    throw new NotImplementedError(`Feature geometry for ${objectIds}-${outfield} is unavailable from ${this.getLayerPath()}`);
+    throw new NotImplementedError(`onGetExtentFromFeatures function not implemented for ${this.getLayerPath()}`);
   }
 
   /**

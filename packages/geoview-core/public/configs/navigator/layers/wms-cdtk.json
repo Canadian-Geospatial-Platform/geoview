@@ -28,7 +28,12 @@
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "completed"
+            "layerId": "completed",
+            "source": {
+              "featureInfo": {
+                "nameField": "project_name_en"
+              }
+            }
           }
         ]
       },
@@ -147,7 +152,12 @@
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "earthquakes_2000-2010"
+            "layerId": "earthquakes_2000-2010",
+            "source": {
+              "featureInfo": {
+                "nameField": "magnitude"
+              }
+            }
           }
         ]
       },

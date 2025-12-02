@@ -632,8 +632,7 @@
             "$ref": "#/definitions/TypeOutfields"
           }
         }
-      },
-      "required": ["queryable"]
+      }
     },
     "TypeOutfields": {
       "type": "object",

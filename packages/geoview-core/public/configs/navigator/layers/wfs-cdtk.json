@@ -28,10 +28,20 @@
         "geoviewLayerType": "ogcWfs",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "completed"
+            "layerId": "completed",
+            "source": {
+              "featureInfo": {
+                "nameField": "project_name_en"
+              }
+            }
           },
           {
-            "layerId": "terminated"
+            "layerId": "terminated",
+            "source": {
+              "featureInfo": {
+                "nameField": "project_name_en"
+              }
+            }
           }
         ]
       },
@@ -280,7 +290,12 @@
         "geoviewLayerType": "ogcWfs",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "earthquakes_2000-2010"
+            "layerId": "earthquakes_2000-2010",
+            "source": {
+              "featureInfo": {
+                "nameField": "magnitude"
+              }
+            }
           }
         ]
       },

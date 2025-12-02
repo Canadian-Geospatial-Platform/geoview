@@ -128,8 +128,8 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
        * @param {number[]} objectIDs - The object ids to filter the query on
        * @returns A Promise of results of type TypeFeatureInfoEntryPartial
        * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
-       * @throws {LayerConfigNotFoundError} Error thrown when the layer configuration couldn't be found at the given layer path.
-       * @throws {LayerNotEsriDynamicError} Error thrown when the layer configuration isn't EsriDynamic.
+       * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
+       * @throws {LayerNotEsriDynamicError} When the layer configuration isn't EsriDynamic.
        */
       queryLayerEsriDynamic: (layerPath: string, objectIDs: number[]): Promise<TypeFeatureInfoEntryPartial[]> => {
         // Get the layer config

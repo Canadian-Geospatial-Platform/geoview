@@ -321,7 +321,7 @@ export class LayerApi {
    * Gets the layer configuration of the specified layer path.
    * @param {string} layerPath - The layer path.
    * @returns {ConfigBaseClass} The layer configuration.
-   * @throws {LayerConfigNotFoundError} Error thrown when the layer configuration couldn't be found at the given layer path.
+   * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
    */
   getLayerEntryConfig(layerPath: string): ConfigBaseClass {
     // Get the layer config
@@ -338,8 +338,8 @@ export class LayerApi {
    * Gets the layer configuration of a regular layer (not a group) at the specified layer path.
    * @param {string} layerPath - The layer path.
    * @returns {AbstractBaseLayerEntryConfig} The layer configuration.
-   * @throws {LayerConfigNotFoundError} Error thrown when the layer configuration couldn't be found at the given layer path.
-   * @throws {LayerWrongTypeError} Error thrown when the layer configuration is of the wrong type at the given layer path.
+   * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
+   * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path.
    */
   getLayerEntryConfigRegular(layerPath: string): AbstractBaseLayerEntryConfig {
     // Get the layer entry config
@@ -356,8 +356,8 @@ export class LayerApi {
    * Gets the layer configuration of a group layer (not a regular) at the specified layer path.
    * @param {string} layerPath - The layer path.
    * @returns {AbstractBaseLayerEntryConfig} The layer configuration.
-   * @throws {LayerConfigNotFoundError} Error thrown when the layer configuration couldn't be found at the given layer path.
-   * @throws {LayerWrongTypeError} Error thrown when the layer configuration is of the wrong type at the given layer path.
+   * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
+   * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path.
    */
   getLayerEntryConfigGroup(layerPath: string): GroupLayerEntryConfig {
     // Get the layer entry config
@@ -399,7 +399,7 @@ export class LayerApi {
    * Returns the GeoView instance associated to the layer path.
    * @param {string} layerPath - The layer path
    * @returns {AbstractBaseLayer} The new Geoview Layer
-   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    */
   getGeoviewLayer(layerPath: string): AbstractBaseLayer {
     // Get the layer
@@ -425,7 +425,7 @@ export class LayerApi {
    * Returns the OpenLayer instance associated with the layer path.
    * @param {string} layerPath - The layer path to the layer's configuration.
    * @returns {BaseLayer} Returns the geoview instance associated to the layer path.
-   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    */
   getOLLayer(layerPath: string): BaseLayer {
     // Get the OpenLayer layer as part of the new GVLayer design
@@ -1376,7 +1376,7 @@ export class LayerApi {
    *
    * @param {string} layerPath - The path of the layer.
    * @param {boolean} newValue - The new value of visibility.
-   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    */
   setOrToggleLayerVisibility(layerPath: string, newValue?: boolean): boolean {
     // Apply some visibility logic
@@ -1397,7 +1397,7 @@ export class LayerApi {
    *
    * @param {string} layerPath - The path of the layer.
    * @param {string} name - The new name to use.
-   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    */
   setLayerName(layerPath: string, name: string): void {
     // Redirect
@@ -1410,7 +1410,7 @@ export class LayerApi {
    * @param {string} layerPath - The path of the layer.
    * @param {number} opacity - The new opacity to use.
    * @param {boolean} emitOpacityChange - Whether to emit the event or not (false to avoid updating the legend layers)
-   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
    */
   setLayerOpacity(layerPath: string, opacity: number, emitOpacityChange?: boolean): void {
     // Redirect
@@ -1422,8 +1422,8 @@ export class LayerApi {
    *
    * @param {string} layerPath - The path of the layer.
    * @param {GeoJSONObject | string} geojson - The new geoJSON.
-   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
-   * @throws {LayerNotGeoJsonError} Error thrown when the layer is not a GeoJson layer.
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+   * @throws {LayerNotGeoJsonError} When the layer is not a GeoJson layer.
    */
   async setGeojsonSource(layerPath: string, geojson: GeoJSONObject | string): Promise<void> {
     // Get the map id
@@ -1459,10 +1459,10 @@ export class LayerApi {
    * @param {string} layerPath - The path of the layer.
    * @param {string[]} fieldNames - The new field names to use.
    * @param {'alias' | 'name'} fields - The fields to change.
-   * @throws {LayerConfigNotFoundError} Error thrown when the layer configuration couldn't be found at the given layer path.
-   * @throws {LayerWrongTypeError} Error thrown when the layer configuration is of the wrong type at the given layer path.
-   * @throws {LayerDifferingFieldLengthsError} Error thrown when the layer configuration has different field lengths.
-   * @throws {LayerNotQueryableError} Error thrown when the layer configuration is not queryable.
+   * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
+   * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path.
+   * @throws {LayerDifferingFieldLengthsError} When the layer configuration has different field lengths.
+   * @throws {LayerNotQueryableError} When the layer configuration is not queryable.
    */
   redefineFeatureFields(layerPath: string, fieldNames: string[], fields: 'alias' | 'name'): void {
     // Get the layer config
@@ -1490,10 +1490,10 @@ export class LayerApi {
    * @param {string[]} types - The new field types (TypeOutfieldsType) to use.
    * @param {string[]} fieldNames - The new field names to use.
    * @param {string[]} fieldAliases - The new field aliases to use.
-   * @throws {LayerConfigNotFoundError} Error thrown when the layer configuration couldn't be found at the given layer path.
-   * @throws {LayerWrongTypeError} Error thrown when the layer configuration is of the wrong type at the given layer path.
-   * @throws {LayerDifferingFieldLengthsError} Error thrown when the layer configuration has different field lengths.
-   * @throws {LayerNotQueryableError} Error thrown when the layer configuration is not queryable.
+   * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
+   * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path.
+   * @throws {LayerDifferingFieldLengthsError} When the layer configuration has different field lengths.
+   * @throws {LayerNotQueryableError} When the layer configuration is not queryable.
    */
   replaceFeatureOutfields(layerPath: string, types: TypeOutfieldsType[], fieldNames: string[], fieldAliases?: string[]): void {
     // Get the layer config
@@ -1969,8 +1969,8 @@ export class LayerApi {
    * Gets all child paths from a parent path
    * @param {string} parentPath - The parent path
    * @returns {string[]} Child layer paths
-   * @throws {LayerConfigNotFoundError} Error thrown when the layer configuration couldn't be found at the given layer path.
-   * @throws {LayerWrongTypeError} Error thrown when the layer configuration is of the wrong type at the given layer path.
+   * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
+   * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path.
    */
   #getAllChildPaths(parentPath: string): string[] {
     // Get the group layer

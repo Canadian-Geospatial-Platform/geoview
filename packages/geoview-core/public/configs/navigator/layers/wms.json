@@ -19,7 +19,12 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "cities",
-            "wfsLayerId": "ms:cities"
+            "wfsLayerId": "ms:cities",
+            "source": {
+              "featureInfo": {
+                "nameField": "NAME"
+              }
+            }
           }
         ]
       },
