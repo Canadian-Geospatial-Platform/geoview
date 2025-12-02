@@ -339,7 +339,10 @@
     "close": "Close",
     "noFeatures": "unknown...",
     "showing": "showing",
-    "total": "total"
+    "total": "total",
+    "selectLayerAndScroll": "Access the data table panel",
+    "accessAdvancedFunctions": "Access data table panel for advanced functions",
+    "filterToggle": "Toggle column filters"
   },
   "geoChart": {
     "noChartAvailable": "Click on the map on a layer with chart"

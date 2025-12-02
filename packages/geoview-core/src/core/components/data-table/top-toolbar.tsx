@@ -4,19 +4,18 @@ import { memo } from 'react';
 import type { MRT_TableInstance as MRTTableInstance, MRT_ColumnDef } from 'material-react-table';
 import {
   MRT_GlobalFilterTextField as MRTGlobalFilterTextField,
-  MRT_ToggleFiltersButton as MRTToggleFiltersButton,
   MRT_ShowHideColumnsButton as MRTShowHideColumnsButton,
   MRT_ToggleDensePaddingButton as MRTToggleDensePaddingButton,
 } from 'material-react-table';
-import ClearFiltersIcon from '@mui/icons-material/ClearAll';
 
-import { Box, IconButton } from '@/ui';
+import { Box, IconButton, Switch } from '@/ui';
 import ExportButton from './export-button';
 import JSONExportButton from './json-export-button';
 import FilterMap from './filter-map';
 import type { ColumnsType } from './data-table-types';
 import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import type { SxStyles } from '@/ui/style/types';
+import { ClearFiltersIcon, FilterListIcon } from '@/ui/icons';
 
 // GV: Disabled prop-types for this to work. From the react 19 ugprade guide it seems that prop-types are deprecated.
 interface TopToolbarProps<TData extends ColumnsType> {
@@ -84,7 +83,15 @@ function TopToolbar(props: TopToolbarProps<ColumnsType>): JSX.Element {
           <MRTGlobalFilterTextField className="buttonOutline" table={table} />
         </Box>
         <Box display="flex" sx={{ justifyContent: 'space-around' }}>
-          <MRTToggleFiltersButton className="buttonOutline" table={table} />
+          <Box display="flex" alignItems="center" gap={1}>
+            <FilterListIcon />
+            <Switch
+              checked={table.getState().showColumnFilters}
+              onChange={() => table.setShowColumnFilters(!table.getState().showColumnFilters)}
+              size="small"
+              aria-label={t('dataTable.filterToggle')}
+            />
+          </Box>
 
           <IconButton
             className="buttonOutline"

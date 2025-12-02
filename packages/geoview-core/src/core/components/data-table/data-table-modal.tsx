@@ -15,9 +15,18 @@ import {
   type MRT_ColumnDef as MRTColumnDef,
   Box,
   CircularProgress,
+  IconButton,
+  TableChartOutlinedIcon,
 } from '@/ui';
-import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import {
+  useUIActiveFocusItem,
+  useUIStoreActions,
+  useUIFooterBarIsCollapsed,
+  useUIFooterBarComponents,
+  useUIAppbarComponents,
+} from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useLayerSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useDataTableStoreActions } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { getSxClasses } from './data-table-style';
 import { logger } from '@/core/utils/logger';
 import { useDataTableAllFeaturesDataArray } from '@/core/stores/store-interface-and-intial-values/data-table-state';
@@ -42,14 +51,23 @@ export default function DataTableModal(): JSX.Element {
   const [isLoading, setIsLoading] = useState(true);
 
   // get store function
-  const { disableFocusTrap } = useUIStoreActions();
+  const { disableFocusTrap, setActiveFooterBarTab, setActiveAppBarTab, setFooterBarIsCollapsed } = useUIStoreActions();
   const activeModalId = useUIActiveFocusItem().activeElementId;
   const selectedLayer = useLayerSelectedLayerPath();
   const layersData = useDataTableAllFeaturesDataArray();
   const language = useAppDisplayLanguage();
   const shellContainer = useAppShellContainer();
+  const isFooterCollapsed = useUIFooterBarIsCollapsed();
+  const footerBarComponents = useUIFooterBarComponents();
+  const appBarComponents = useUIAppbarComponents();
+  const { setSelectedLayerPath: setDataTableSelectedLayerPath } = useDataTableStoreActions();
 
   const dataTableLocalization = language === 'fr' ? MRTLocalizationFR : MRTLocalizationEN;
+
+  // Check if data-table tab exists in footer or appBar
+  const hasFooterDataTableTab = footerBarComponents.includes('data-table');
+  const hasAppBarDataTableTab = appBarComponents.includes('data-table');
+  const hasDataTableTab = hasFooterDataTableTab || hasAppBarDataTableTab;
 
   // Create columns for data table.
   const mappedLayerData = useFeatureFieldInfos(layersData);
@@ -158,7 +176,42 @@ export default function DataTableModal(): JSX.Element {
 
   return (
     <Dialog open={activeModalId === 'layerDataTable'} onClose={() => disableFocusTrap()} maxWidth="xl" container={shellContainer}>
-      <DialogTitle>{`${t('legend.tableDetails')} ${layer?.layerName ?? selectedLayer}`}</DialogTitle>
+      <DialogTitle>
+        <Box component="div">{`${t('legend.tableDetails')} ${layer?.layerName ?? selectedLayer}`}</Box>
+        {hasDataTableTab && selectedLayer && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, marginTop: 1 }}>
+            <IconButton
+              aria-label={t('dataTable.selectLayerAndScroll')}
+              className="buttonOutline"
+              onClick={() => {
+                // Close modal first
+                disableFocusTrap();
+
+                // If there is 2 components with data-table tab (app bar or footer), prefer footer
+                if (hasFooterDataTableTab) {
+                  // Open footer data-table tab
+                  setActiveFooterBarTab('data-table');
+                  if (isFooterCollapsed) setFooterBarIsCollapsed(false);
+                  setTimeout(() => {
+                    setDataTableSelectedLayerPath(selectedLayer);
+                  }, 350);
+                } else if (hasAppBarDataTableTab) {
+                  // Open appBar data-table tab
+                  setActiveAppBarTab('data-table', true, false);
+                  setTimeout(() => {
+                    setDataTableSelectedLayerPath(selectedLayer);
+                  }, 350);
+                }
+              }}
+            >
+              <TableChartOutlinedIcon />
+            </IconButton>
+            <Box component="span" sx={{ fontSize: '0.875rem', color: 'text.secondary' }}>
+              {t('dataTable.accessAdvancedFunctions')}
+            </Box>
+          </Box>
+        )}
+      </DialogTitle>
       <DialogContent sx={{ overflow: 'hidden' }}>
         {isLoading && (
           <Box sx={{ minHeight: '300px', minWidth: '450px', position: 'relative' }}>

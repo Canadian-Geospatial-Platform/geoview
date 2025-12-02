@@ -339,7 +339,10 @@
     "close": "Fermer",
     "noFeatures": "inconnue...",
     "showing": "affiché(s)",
-    "total": "total"
+    "total": "total",
+    "selectLayerAndScroll": "Accéder au panneau du tableau de données",
+    "accessAdvancedFunctions": "Accéder au panneau du tableau de données pour les fonctions avancées",
+    "filterToggle": "Basculer les filtres de colonnes"
   },
   "geochart": {
     "noChartAvailable": "Cliquer sur une couche de la carte qui contient un graphique"

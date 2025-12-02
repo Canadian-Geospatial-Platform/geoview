@@ -3,7 +3,7 @@ import type { SelectChangeEvent } from '@mui/material';
 import { useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import type { TypeMenuItemProps } from '@/ui';
-import { Box, Divider, FilterAltOffIcon, IconButton, List, ListItem, ListItemText, Paper, Select, Typography } from '@/ui';
+import { Box, Divider, ClearFiltersIcon, IconButton, List, ListItem, ListItemText, Paper, Select, Typography } from '@/ui';
 import type { GeoListItem } from '@/core/components/geolocator/geolocator';
 import { GeoList } from '@/core/components/geolocator/geo-list';
 import { createMenuItems } from '@/core/components/geolocator/utilities';
@@ -129,7 +129,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
               onClick={handleClearFilters}
               disabled={!geoLocationData.length}
             >
-              <FilterAltOffIcon sx={{ fontSize: theme.palette.geoViewFontSize.md }} />
+              <ClearFiltersIcon sx={{ fontSize: theme.palette.geoViewFontSize.md }} />
             </IconButton>
           </Box>
         </Box>

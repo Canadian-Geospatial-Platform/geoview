@@ -31,6 +31,7 @@ import {
   ZoomInSearchIcon,
   InfoOutlinedIcon,
   BrowserNotSupportedIcon,
+  ClearFiltersIcon,
 } from '@/ui';
 
 import TopToolbar from './top-toolbar';
@@ -458,6 +459,9 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
       showColumnFilters,
       columnPinning: { left: ['ICON', 'ZOOM', 'DETAILS'] },
       globalFilter,
+    },
+    icons: {
+      FilterListOffIcon: ClearFiltersIcon,
     },
     enableColumnFilterModes: true,
     // NOTE: enable column pinning so that icon, zoom, details can be pinned to left

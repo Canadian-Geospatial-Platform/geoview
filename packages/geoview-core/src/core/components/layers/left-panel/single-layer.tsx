@@ -19,7 +19,6 @@ import {
   VisibilityOffOutlinedIcon,
   VisibilityOutlinedIcon,
   Paper,
-  Typography,
 } from '@/ui';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
 import {
@@ -46,8 +45,8 @@ import { DeleteUndoButton } from './delete-undo-button';
 import { LayersList } from './layers-list';
 import { LayerIcon } from '@/core/components/common/layer-icon';
 import { logger } from '@/core/utils/logger';
-import { useDataTableLayerSettings, useDataTableStoreActions } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { ArrowDownwardIcon, ArrowUpIcon, CenterFocusScaleIcon, LoopIcon, TableViewIcon } from '@/ui/icons';
+import { useDataTableStoreActions } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { ArrowDownwardIcon, ArrowUpIcon, CenterFocusScaleIcon, LoopIcon } from '@/ui/icons';
 import { Divider } from '@/ui/divider/divider';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useUISelectedFooterLayerListItemId } from '@/core/stores/store-interface-and-intial-values/ui-state';
@@ -85,7 +84,6 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
   const selectedLayerPath = useLayerSelectedLayerPath();
   const displayState = useLayerDisplayState();
   const layerIsSelected = layerPath === selectedLayerPath && displayState === 'view';
-  const datatableSettings = useDataTableLayerSettings();
   const selectedLayerSortingArrowId = useLayerSelectedLayerSortingArrowId();
   const selectedFooterLayerListItemId = useUISelectedFooterLayerListItemId();
 
@@ -281,16 +279,8 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
       itemsLengthDesc = '';
     }
 
-    if (datatableSettings[layerPath]) {
-      return (
-        <Typography sx={{ color: 'unset', fontSize: 'unset' }} component="span">
-          {itemsLengthDesc} &nbsp;
-          <TableViewIcon sx={{ marginBottom: '-5px' }} fontSize="small" />
-        </Typography>
-      );
-    }
     return itemsLengthDesc;
-  }, [layerPath, layerStatus, parentHidden, t, layerChildren, layerItems, datatableSettings]);
+  }, [layerPath, layerStatus, parentHidden, t, layerChildren, layerItems]);
 
   // Memoize the EditModeButtons component section
 
