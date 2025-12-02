@@ -4,7 +4,7 @@ import type { TypeGeoviewLayerType, TypeLayerControls } from '@/api/types/layer-
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { TypeLegendLayer, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import type { TypeWmsLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { isImageStaticLegend, isVectorLegend, isWmsLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { isGeoTIFFLegend, isImageStaticLegend, isVectorLegend, isWmsLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import type { ILayerState, TypeLegend, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
@@ -240,9 +240,10 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     // TODO: Refactor - Move this function to a utility class instead of at the 'processor' level so it's safer to call from a layer framework level class
     const iconDetails: TypeLegendLayerItem[] = [];
     if (layerLegend) {
-      if (isWmsLegend(layerLegend) || isImageStaticLegend(layerLegend)) {
+      if (isWmsLegend(layerLegend) || isImageStaticLegend(layerLegend) || isGeoTIFFLegend(layerLegend)) {
         const iconDetailsEntry: TypeLegendLayerItem = {};
         iconDetailsEntry.iconType = 'simple';
+
         // Use icon image if available
         if (layerLegend.legend) iconDetailsEntry.iconImage = layerLegend.legend.toDataURL();
         // Otherwise use image from first style
@@ -250,6 +251,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           iconDetailsEntry.iconImage = (layerLegend as TypeWmsLegend).styles![0].legend!.toDataURL();
         // No styles or image, no icon
         else iconDetailsEntry.iconImage = 'no data';
+
         iconDetails.push(iconDetailsEntry);
       } else if (layerLegend.legend === null || Object.keys(layerLegend.legend).length === 0) iconDetails[0] = { iconImage: 'no data' };
       else if (isVectorLegend(layerLegend)) {
@@ -446,6 +448,16 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
         // Also take care of image static by storing the iconImage into the icon property on-the-fly
         if (isImageStaticLegend(legendResultSetEntry.data!) && icons && icons.length > 0) {
+          legendLayerEntry.items.push({
+            geometryType: 'Point',
+            name: 'image',
+            icon: icons[0].iconImage || null,
+            isVisible: true,
+          });
+        }
+
+        // Also take care of GeoTIFF by storing the iconImage into the icon property on-the-fly
+        if (isGeoTIFFLegend(legendResultSetEntry.data!) && icons && icons.length > 0) {
           legendLayerEntry.items.push({
             geometryType: 'Point',
             name: 'image',

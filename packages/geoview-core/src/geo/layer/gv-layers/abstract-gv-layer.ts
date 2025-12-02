@@ -403,6 +403,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       logger.logError('GeoTIFF source failed with error', {
         layerId: this.getLayerPath(),
         error: errorMessage,
+        event,
       });
 
       // Trigger onError handling

@@ -781,6 +781,28 @@ export interface TypeMetadataEsriFeature {
   name: string;
 }
 
+export interface TypeMetadataGeoTIFF {
+  id: string;
+  bbox: number[];
+  properties: TypeMetadataGeoTIFFProperties;
+  assets: TypeMetadataGeoTIFFAssets;
+}
+
+export interface TypeMetadataGeoTIFFProperties {
+  datetime: string;
+  'proj:epsg': number;
+}
+
+export interface TypeMetadataGeoTIFFAssets {
+  [key: string]: TypeMetadataGeoTIFFAsset;
+  thumbnail: TypeMetadataGeoTIFFAsset;
+}
+
+export interface TypeMetadataGeoTIFFAsset {
+  href: string;
+  type: string;
+}
+
 /**
  * Represents layer metadata as read from an Esri layer service.
  */
