@@ -28,7 +28,12 @@
     "coordinates": "Basculer le format des coordonnées",
     "scale": "Basculer entre l'échelle et la résolution",
     "location": "Zoom sur ma position",
-    "projection": "Changer la projection de la carte"
+    "projection": "Changer la projection de la carte",
+    "rotation": {
+      "title": "Rotation de la carte",
+      "degrees": "Degrés",
+      "reset": "Réinitialiser"
+    }
   },
   "basemaps": {
     "select": "Choisir une carte de base",
@@ -41,7 +46,9 @@
   "mapctrl": {
     "rotation": {
       "resetRotation": "Réinitialiser la rotation de la carte",
-      "fixedNorth": "Nord fixe"
+      "fixedNorth": "Nord fixe",
+      "rotation": "Rotation de la carte",
+      "projection": "Projection"
     },
     "mouseposition": {
       "east": "E",
@@ -70,7 +77,8 @@
     "share": "Partager",
     "version": "À propos de GéoView",
     "repoLink": "Github",
-    "removeAllNotifications": "Effacer tout"
+    "removeAllNotifications": "Effacer tout",
+    "navLabel": "Contrôles principaux de la carte"
   },
   "legend": {
     "title": "Légende",

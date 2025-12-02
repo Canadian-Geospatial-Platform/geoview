@@ -21,24 +21,89 @@
   "corePackagesConfig": [
     {
       "custom-legend": {
+        "id": "custom-legend-1",
+        "title": "Map Legend",
         "isOpen": true,
         "legendList": [
           {
-            "legendTitle": "Highways",
-            "symbolUrl": "https://via.placeholder.com/20x4/FF0000/FF0000.png",
-            "description": "Major highways and expressways"
+            "id": "urban-areas",
+            "name": "Urban Areas",
+            "symbol": {
+              "type": "image",
+              "url": "https://raw.githubusercontent.com/CanFrenchGIS/sample-assets/main/legend/urban.png",
+              "width": 24,
+              "height": 24
+            },
+            "description": "Built-up zones and cities"
           },
           {
-            "legendTitle": "Rivers",
-            "symbolUrl": "https://via.placeholder.com/20x4/0066CC/0066CC.png"
+            "id": "water-bodies",
+            "name": "Water Bodies",
+            "symbol": {
+              "type": "image",
+              "url": "https://raw.githubusercontent.com/CanFrenchGIS/sample-assets/main/legend/water.png",
+              "width": 24,
+              "height": 24
+            },
+            "description": "Lakes and rivers"
           },
           {
-            "legendTitle": "Parks",
-            "symbolUrl": "https://via.placeholder.com/16x16/00AA00/00AA00.png",
-            "description": "National and provincial parks"
+            "id": "forest",
+            "name": "Forest",
+            "symbol": {
+              "type": "image",
+              "url": "https://raw.githubusercontent.com/CanFrenchGIS/sample-assets/main/legend/forest.png",
+              "width": 24,
+              "height": 24
+            }
+          },
+          {
+            "id": "roads",
+            "name": "Roads",
+            "symbol": {
+              "type": "line",
+              "color": "#333333",
+              "width": 3,
+              "height": 20
+            }
+          },
+          {
+            "id": "landmarks",
+            "name": "Landmarks",
+            "type": "group",
+            "items": [
+              {
+                "id": "monuments",
+                "name": "Monuments",
+                "symbol": {
+                  "type": "point",
+                  "color": "#FF5722",
+                  "width": 16,
+                  "height": 16,
+                  "stroke": {
+                    "color": "#D84315",
+                    "width": 2
+                  }
+                }
+              },
+              {
+                "id": "buildings",
+                "name": "Important Buildings",
+                "symbol": {
+                  "type": "polygon",
+                  "color": "#2196F3",
+                  "width": 20,
+                  "height": 20,
+                  "stroke": {
+                    "color": "#1565C0",
+                    "width": 1
+                  }
+                }
+              }
+            ]
           }
         ],
-        "version": "1.0"
+        "version": "1.0.0"
       }
     }
   ]

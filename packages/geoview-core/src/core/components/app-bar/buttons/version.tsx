@@ -94,12 +94,14 @@ export default function Version(): JSX.Element {
     if (open) setOpen(false);
   }, [open]);
 
+  // TODO: WCAG Issue #3154 - add aria-controls to <IconButton>. Needs id on the popper container to work correctly.
   return (
     <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
       <Box sx={{ padding: interaction === 'dynamic' ? 'none' : '5px' }}>
         <IconButton
           id="version-button"
           aria-label={t('appbar.version')}
+          aria-expanded={open ? 'true' : 'false'}
           tooltipPlacement="right"
           onClick={handleOpenPopover}
           className={`${interaction === 'dynamic' ? 'buttonFilled' : 'style4'} ${open ? 'active' : ''}`}

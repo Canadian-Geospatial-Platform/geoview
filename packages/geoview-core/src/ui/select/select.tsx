@@ -1,6 +1,6 @@
 import type { Ref } from 'react';
 import { forwardRef, useMemo } from 'react';
-import type { InputLabelProps, FormControlProps, SelectChangeEvent } from '@mui/material';
+import type { InputLabelProps, FormControlProps, SelectChangeEvent, MenuProps } from '@mui/material';
 import { FormControl, InputLabel, MenuItem, Select as MaterialSelect } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { getSxClasses } from '@/ui/select/select-style';
@@ -21,6 +21,14 @@ type TypeSelectProps = {
   menuItems: TypeMenuItemProps[];
   disabled?: boolean;
   variant?: 'standard' | 'outlined' | 'filled';
+  /**
+   * Props applied to the Menu component.
+   * Use this to specify a container element for the menu dropdown.
+   * This is particularly important when the Select is inside a fullscreen element,
+   * to ensure the menu renders within the fullscreen container.
+   * Example: MenuProps={{ container: shellContainer }}
+   */
+  MenuProps?: Partial<MenuProps>;
 };
 
 /**
@@ -56,6 +64,7 @@ function SelectUI(props: TypeSelectProps, ref: Ref<HTMLDivElement>): JSX.Element
     menuItems,
     disabled,
     variant = 'standard',
+    MenuProps,
     ...selectProps
   } = props;
 
@@ -104,9 +113,10 @@ function SelectUI(props: TypeSelectProps, ref: Ref<HTMLDivElement>): JSX.Element
       disabled,
       variant,
       sx: sxClasses.formControl,
+      ...(MenuProps ? { MenuProps } : {}),
       ...selectProps,
     }),
-    [labelId, id, value, onChange, disabled, variant, sxClasses.formControl, selectProps]
+    [labelId, id, value, onChange, disabled, variant, sxClasses.formControl, MenuProps, selectProps]
   );
 
   return (

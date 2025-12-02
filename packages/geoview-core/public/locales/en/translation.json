@@ -28,7 +28,12 @@
     "coordinates": "Toggle coordinates format",
     "scale": "Toggle between scale and resolution",
     "location": "Zoom to my location",
-    "projection": "Change map projection"
+    "projection": "Change map projection",
+    "rotation": {
+      "title": "Map Rotation",
+      "degrees": "Degrees",
+      "reset": "Reset"
+    }
   },
   "basemaps": {
     "select": "Select a basemap",
@@ -41,7 +46,9 @@
   "mapctrl": {
     "rotation": {
       "resetRotation": "Reset map rotation",
-      "fixedNorth": "Fix North"
+      "fixedNorth": "Fix North",
+      "rotation": "Map rotation",
+      "projection": "Projection"
     },
     "mouseposition": {
       "east": "E",
@@ -70,7 +77,8 @@
     "share": "Share",
     "version": "About GeoView",
     "repoLink": "Github",
-    "removeAllNotifications": "Remove all"
+    "removeAllNotifications": "Remove all",
+    "navLabel": "Main map controls"
   },
   "legend": {
     "title": "Legend",

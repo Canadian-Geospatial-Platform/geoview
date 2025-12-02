@@ -5,8 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { getSxClasses } from './nav-bar-style';
 import { Popper, IconButton, DialogTitle, DialogContent, Paper, Box } from '@/ui';
 import { CloseIcon } from '@/ui/icons';
-import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
 import type { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { logger } from '@/core/utils/logger';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
@@ -32,15 +31,12 @@ export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Store
-  const mapId = useGeoViewMapId();
-  const geoviewElement = useAppGeoviewHTMLElement();
   const activeTrapGeoView = useUIActiveTrapGeoView();
+  const shellContainer = useAppShellContainer();
 
   // States
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [open, setOpen] = useState(false);
-
-  const shellContainer = geoviewElement.querySelector(`[id^="shell-${mapId}"]`) as HTMLElement;
 
   // Close function to pass to panel content
   const closePanel = (): void => {

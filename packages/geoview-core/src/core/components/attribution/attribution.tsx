@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 
-import { Box, MoreHorizIcon, Popover, IconButton, Typography } from '@/ui';
+import { Box, CopyrightIcon, Popover, IconButton, Typography } from '@/ui';
 import { useMapAttribution, useMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
@@ -84,7 +84,7 @@ export const Attribution = memo(function Attribution(): JSX.Element {
         tooltipPlacement="top"
         sx={buttonStyles}
       >
-        <MoreHorizIcon />
+        <CopyrightIcon />
       </IconButton>
       <Popover
         open={open}

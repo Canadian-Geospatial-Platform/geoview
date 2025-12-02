@@ -3,6 +3,7 @@ import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { useDataTableSelectedFeature } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { Dialog, DialogTitle, DialogContent, DialogActions, List, Button, Box, Typography, BrowserNotSupportedIcon } from '@/ui';
 import { getSxClasses } from './details-style';
 import { FeatureInfoTable } from './feature-info-table';
@@ -28,6 +29,7 @@ export default function FeatureDetailModal(): JSX.Element {
   const activeModalId = useUIActiveFocusItem().activeElementId;
   const feature = useDataTableSelectedFeature()!;
   const [nameFieldValue, setNameFieldValue] = useState('');
+  const shellContainer = useAppShellContainer();
 
   /**
    * Build features list to displayed in table
@@ -61,7 +63,7 @@ export default function FeatureDetailModal(): JSX.Element {
       open={activeModalId === 'featureDetailDataTable' && !!feature}
       onClose={() => disableFocusTrap()}
       maxWidth="lg"
-      disablePortal
+      container={shellContainer}
       sx={sxClasses.featureDetailModal}
     >
       <DialogTitle>{t('details.featureDetailModalTitle')}</DialogTitle>

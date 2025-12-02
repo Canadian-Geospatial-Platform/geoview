@@ -90,7 +90,7 @@ export function Layout({
     if (layoutSwitch && containerType === CONTAINER_TYPE.APP_BAR) {
       return (
         <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-          <Box sx={{ alignSelf: 'flex-start', p: 1 }}>{layoutSwitch}</Box>
+          <Box sx={{ alignSelf: 'flex-start', p: 1, width: '100%' }}>{layoutSwitch}</Box>
           <LayerList selectedLayerPath={selectedLayerPath} onListItemClick={handleLayerChange} layerList={layerList} />
         </Box>
       );

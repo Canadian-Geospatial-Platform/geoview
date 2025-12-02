@@ -58,26 +58,26 @@ If you want to focus the map:
 
 <div style="border-bottom: 2px solid #2a2f39; margin-bottom: 15px;"></div>
 
-Navigation controls provide adjustments to the viewing extent, projection, or basemap of the map.
+Navigation controls provide adjustments to the viewing extent, projection, rotation, or basemap of the map.
 
 Depending on the viewer configuration, the map's bottom right corner contains the following navigation controls:
 
-| Symbol                                                                                                      | Name              | Description                                                                                                                          |
-| ----------------------------------------------------------------------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| ![An icon representing the "Fullscreen" function]({{assetsURL}}/img/guide/navigation/fullscreen.svg)        | Fullscreen        | Full screen presents map content using the entire page. Full screen toggles between the entire page and the initial size of the map. |
-| ![An icon representing the "Zoom in" function]({{assetsURL}}/img/guide/navigation/plus.svg)                 | Zoom in           | Zoom in one level on the map to see more detailed content - bound to Plus key (+).                                                   |
-| ![An icon representing the "Zoom out" function]({{assetsURL}}/img/guide/navigation/minus.svg)               | Zoom out          | Zoom out one level on the map to see less detailed content - bound to Minus key (-).                                                 |
-| ![An icon representing the "Geolocation" function]({{assetsURL}}/img/guide/navigation/geolocation.svg)      | Geolocation       | Zoom and pan to your current geographical location.                                                                                  |
-| ![An icon representing the "Initial extent" function]({{assetsURL}}/img/guide/navigation/home.svg)          | Initial extent    | Zoom and pan map such that initial extent is visible.                                                                                |
-| ![An icon representing the "Change Basemap" function]({{assetsURL}}/img/guide/navigation/basemapSelect.svg) | Change Basemap    | Change the basemap.                                                                                                                  |
-| ![An icon representing the "Change Projection" function]({{assetsURL}}/img/guide/navigation/projection.svg) | Change Projection | Change the map projection between Web Mercator and LCC.                                                                              |
+| Symbol                                                                                                      | Name              | Description                                                                                                                                                                                                                                                                                 |
+| ----------------------------------------------------------------------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ![An icon representing the "Fullscreen" function]({{assetsURL}}/img/guide/navigation/fullscreen.svg)        | Fullscreen        | Full screen presents map content using the entire page. Full screen toggles between the entire page and the initial size of the map.                                                                                                                                                        |
+| ![An icon representing the "Zoom in" function]({{assetsURL}}/img/guide/navigation/plus.svg)                 | Zoom in           | Zoom in one level on the map to see more detailed content - bound to Plus key (+).                                                                                                                                                                                                          |
+| ![An icon representing the "Zoom out" function]({{assetsURL}}/img/guide/navigation/minus.svg)               | Zoom out          | Zoom out one level on the map to see less detailed content - bound to Minus key (-).                                                                                                                                                                                                        |
+| ![An icon representing the "Map Rotation" function]({{assetsURL}}/img/guide/navigation/360.svg)             | Map Rotation      | Control map rotation with a slider from -180° to +180°. The panel includes a **Fix North** toggle (available for LCC projection) to keep the map oriented with north at the top, and a reset button to return to the initial orientation. |
+| ![An icon representing the "Geolocation" function]({{assetsURL}}/img/guide/navigation/geolocation.svg)      | Geolocation       | Zoom and pan to your current geographical location.                                                                                                                                                                                                                                         |
+| ![An icon representing the "Initial extent" function]({{assetsURL}}/img/guide/navigation/home.svg)          | Initial extent    | Zoom and pan map such that initial extent is visible.                                                                                                                                                                                                                                       |
+| ![An icon representing the "Change Basemap" function]({{assetsURL}}/img/guide/navigation/basemapSelect.svg) | Change Basemap    | Change the basemap.                                                                                                                                                                                                                                                                         |
+| ![An icon representing the "Change Projection" function]({{assetsURL}}/img/guide/navigation/projection.svg) | Change Projection | Change the map projection between Web Mercator and LCC.                                                                                                                                                                                                                                     |
 
 You can also pan the map by using your left, right, up and down arrow keys, or by click-holding on the map and dragging. Using the mouse scroll wheel while hovering over the map will zoom the map in/out.
 
 Press the **Shift** key while click-holding and dragging the mouse to define a map extent region. When the mouse button is released, the view will zoom to the chosen area.
 
 Press **Shift** and **Alt** keys while click-holding and dragging the mouse to rotate the map.
-To reset the map orientation, click the **Reset Map Rotation** arrow located at the right side of the Map Information Bar at the bottom of the map.
 
 _Note: The map must be focused for key binding to work._
 
@@ -127,17 +127,14 @@ This map is not fully WCAG 2.0 AA compliant.
 
 Click the up chevron icon ![]({{assetsURL}}/img/guide/navigation/chevron_up.svg) on the left to expand/collapse the bar.
 
-<img src="{{assetsURL}}/img/guide/navigation/map_info.png" alt="Map Information Bar showing coordinates, scale, and map controls" style="width: 90%;"/>
-
 The following navigation details and functionalities are accessible in the Map Information Bar (expansion of the bar is required to view all options):
 
-| Symbol                                                                                                     | Name                    | Description                                                                                                                                                                         |
-| ---------------------------------------------------------------------------------------------------------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ![An icon representing the "Attributes" function]({{assetsURL}}/img/guide/navigation/attribute.svg)        | Attributes              | Copyright and other map attributes.                                                                                                                                                 |
-|                                                                                                            | Positioning coordinates | Click on the positioning coordinates to toggle between degrees minutes seconds (DMS), decimal degrees or projected coordinates.                                                     |
-|                                                                                                            | Map scale               | Click on the map scale to toggle between scale and resolution.                                                                                                                      |
-| ![An icon representing the "Reset map rotation" function]({{assetsURL}}/img/guide/navigation/up_arrow.svg) | Reset map rotation      | Click on the arrow to return map to the initial orientation. _Note: Fix North must be Off._                                                                                         |
-|                                                                                                            | Fix North               | On or Off. Set to On to keep map oriented with North to the top. Only available with some projections (eg. LCC). _Note: Reset map rotation will not work when **Fix North** is On._ |
+| Symbol                                                                                                        | Name                    | Description                                                                                                                                                                                                                                                              |
+| ------------------------------------------------------------------------------------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| ![An icon representing the "Attributes" function]({{assetsURL}}/img/guide/navigation/attribute.svg)           | Attributes              | Copyright and other map attributes.                                                                                                                                                                                                                                      |
+|                                                                                                               | Positioning coordinates | Click on the positioning coordinates to toggle between degrees minutes seconds (DMS), decimal degrees or projected coordinates.                                                                                                                                          |
+|                                                                                                               | Map scale               | Click on the map scale to toggle between scale and resolution.                                                                                                                                                                                                           |
+| ![An icon representing the "Rotation indicator" function]({{assetsURL}}/img/guide/navigation/north_arrow.svg) | Rotation indicator      | Displays current map rotation angle. Hover over the north arrow icon to see a tooltip showing the map rotation and projection-based rotation component. This is an informational display; use the **Map Rotation** button in the navigation controls to adjust rotation. |
 
 =1!sidebar=
 
@@ -164,6 +161,7 @@ _Note: Some tools in the Side Bar are also available as tabs in the Footer Bar, 
 | ![An icon representing the "About Geoview" function]({{assetsURL}}/img/guide/sidebar/about.svg)         | About Geoview                    | Display information about Geoview viewer.                                                |
 
 =2!geolocator=
+
 <a id="geolocatorSection">
 
 ### <img src="{{assetsURL}}/img/guide/geosearch/geolocator.svg" alt="Geolocator icon" width="30"/> Geolocator
@@ -210,9 +208,9 @@ The geolocator component functions to allow users to search for places in Canada
 When searching for a location, a results panel will appear below the search box. This results panel contains two dropdown boxes that allow you to filter the search results by their **province** and by their **category** (lake, town, river, etc.). To the right of these two boxes is a **Clear Filters** ![]({{assetsURL}}/img/guide/geosearch/clear.svg) button, which when clicked clears the selected filter options.
 
 =2!export=
-<a id="exportSection">
 
-### ![]({{assetsURL}}/img/guide/sidebar/export_30.svg) Download
+<a id="exportSection">
+### <img src="{{assetsURL}}/img/guide/sidebar/export.svg" alt="Download icon" width="30"/> Download
 
 <div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
@@ -247,6 +245,7 @@ The _Footer Bar_ menu bar has the following tabs:
 _Note: Some tabs in the Footer Bar are also available as tools in the Side Bar, such as **Legend**, **Layers**, **Data Table** or **Details**. **Legend** and **Details** opened from the Side Bar is displayed on the map, in a condensed 'mobile' view (single column). The same tab opened in the Footer Bar is displayed below the map in a fully expanded view._
 
 =2!legend=
+
 <a id="legendSection"></a>
 
 <h3><img src="{{assetsURL}}/img/guide/sidebar/legend.svg" alt="Legend icon" width="30"> Legend <a href="#footerSection">Top</a></h3>
@@ -270,6 +269,7 @@ The symbology for the layer can be toggled open and closed which is expanded ben
 _Note: When the layer is hidden, functions affecting the layer on the map will be disabled, and the layer text will be grey and in italics._
 
 =2!layers=
+
 <a id="layersSection"></a>
 
 ### ![]({{assetsURL}}/img/guide/footer/layers_30.svg) Layers [Top](#footerSection)
@@ -385,6 +385,7 @@ To sort the layers you can simply click the up or down arrows on each layer pane
 To remove a layer, click on the delete icon ![]({{assetsURL}}/img/guide/layers/remove_25.svg) to the right of the layer after selecting the 'Remove' submenu.
 
 =2!details=
+
 <a id="detailsSection"></a>
 
 ### ![]({{assetsURL}}/img/guide/sidebar/details_30.svg) Details [Top](#footerSection)
@@ -406,6 +407,7 @@ The zoom icon ![]({{assetsURL}}/img/guide/datatable/zoom.svg) will zoom the map 
 Check the highlight box ![]({{assetsURL}}/img/guide/layers/check.png) to keep the feature highlighted on the map.
 
 =2!dataTable=
+
 <a id="dataTableSection"></a>
 
 ### ![]({{assetsURL}}/img/guide/footer/data_table.svg) Data Table [Top](#footerSection)
@@ -499,6 +501,7 @@ Once any major group is focused on, you can use the arrow keys to navigate throu
 To access the buttons and/or input fields within a cell, make sure the cell is highlighted (by using arrow keys as above) and use **Tab** to navigate between its children.
 
 =2!timeSlider=
+
 <a id="timeSliderSection"></a>
 
 ### ![]({{assetsURL}}/img/guide/footer/time_slider_30.svg) Time Slider [Top](#footerSection)
@@ -527,6 +530,7 @@ Click the time delay dropdown to choose the slider animation time delay. Some la
 The field being filtered on is displayed in the lower left of the Time Slider section. Custom descriptions may also be displayed in this area.
 
 =2!chart=
+
 <a id="chartSection"></a>
 
 ### ![]({{assetsURL}}/img/guide/footer/chart_30.svg) Chart [Top](#footerSection)
