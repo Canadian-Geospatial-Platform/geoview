@@ -4,7 +4,7 @@ import GeoTIFFSource from 'ol/source/GeoTIFF';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import type { TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerConfig, TypeMetadataGeoTIFF } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 
 import { GeoTIFFLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/geotiff-layer-entry-config';
@@ -14,6 +14,7 @@ import { GVGeoTIFF } from '@/geo/layer/gv-layers/tile/gv-geotiff';
 import { logger } from '@/core/utils/logger';
 import { Projection, type TypeProjection } from '@/geo/utils/projection';
 import { generateId } from '@/core/utils/utilities';
+import { Fetch } from '@/core/utils/fetch-helper';
 
 export interface TypeGeoTIFFLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.GEOTIFF;
@@ -37,13 +38,46 @@ export class GeoTIFF extends AbstractGeoViewRaster {
   }
 
   /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeMetadataGeoTIFF | undefined} The strongly-typed layer configuration specific to this layer.
+   */
+  override getMetadata(): TypeMetadataGeoTIFF | undefined {
+    return super.getMetadata() as TypeMetadataGeoTIFF | undefined;
+  }
+
+  /**
    * Overrides the way the metadata is fetched.
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-   * @returns {Promise<T>} A promise with the metadata or undefined when no metadata for the particular layer type.
+   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+   * @returns {Promise<T = TypeMetadataGeoTIFF | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
+   * @throws {LayerServiceMetadataUnableToFetchError} Error thrown when the metadata fetch fails or contains an error.
    */
-  protected override onFetchServiceMetadata<T>(): Promise<T> {
-    // No metadata
-    return Promise.resolve(undefined as T);
+  protected override async onFetchServiceMetadata<T = TypeMetadataGeoTIFF | undefined>(abortSignal?: AbortSignal): Promise<T> {
+    try {
+      // If metadataAccessPath does not point to a .tif file, we try to fetch metadata
+      // GV: This is currently only for datacube sources that provide a JSON metadata file
+      if (this.metadataAccessPath && !this.metadataAccessPath.endsWith('.tif')) {
+        const url = this.metadataAccessPath.endsWith('/') ? this.metadataAccessPath.slice(0, -1) : this.metadataAccessPath;
+
+        // Fetch it
+        return (await Fetch.fetchJson<T>(url, { signal: abortSignal })) as T;
+      }
+
+      // The metadataAccessPath didn't seem like it was containing actual metadata, so it was skipped
+      logger.logWarning(
+        `The metadataAccessPath '${this.metadataAccessPath}' didn't seem like it was containing actual metadata, so it was skipped`
+      );
+
+      // None
+      return Promise.resolve(undefined) as Promise<T>;
+    } catch (error: unknown) {
+      // Error likely means there is no metadata to fetch
+      logger.logWarning(
+        `The metadataAccessPath '${this.metadataAccessPath}' didn't seem like it was containing actual metadata, so it was skipped. Error: ${error}`
+      );
+      return Promise.resolve(undefined) as Promise<T>;
+    }
   }
 
   /**
@@ -64,7 +98,20 @@ export class GeoTIFF extends AbstractGeoViewRaster {
    * @returns {Promise<GeoTIFFLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
   protected override onProcessLayerMetadata(layerConfig: GeoTIFFLayerEntryConfig): Promise<GeoTIFFLayerEntryConfig> {
-    // Return as-is
+    const metadata = this.getMetadata();
+    if (metadata) {
+      // Set the metadata
+      layerConfig.setServiceMetadata(metadata);
+      // If the data access path points to the layerId, and there's a classification asset, use that as data access path
+      if (
+        layerConfig.source.dataAccessPath?.endsWith(layerConfig.layerId) &&
+        layerConfig.source.dataAccessPath.startsWith(this.metadataAccessPath) &&
+        metadata.assets?.[layerConfig.layerId]?.href
+      )
+        // eslint-disable-next-line no-param-reassign
+        layerConfig.source.dataAccessPath = metadata.assets[layerConfig.layerId].href;
+    }
+
     return Promise.resolve(layerConfig);
   }
 

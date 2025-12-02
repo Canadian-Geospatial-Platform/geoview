@@ -9,6 +9,10 @@ import { featureInfoGetFieldType } from '@/geo/layer/gv-layers/utils';
 import { validateExtent } from '@/geo/utils/utilities';
 import type { TypeOutfieldsType } from '@/api/types/map-schema-types';
 import { Projection } from '@/geo/utils/projection';
+import { type TypeLegend } from '@/index';
+import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
+import { logger } from '@/core/utils/logger';
+import { Fetch } from '@/core/utils/fetch-helper';
 
 /**
  * Manages a GeoTIFF layer.
@@ -101,5 +105,97 @@ export class GVGeoTIFF extends AbstractGVTile {
 
     // Return the calculated layer bounds
     return sourceExtent;
+  }
+
+  /**
+   * Gets the legend image of a layer.
+   * @param {GeoTIFFLayerEntryConfig} layerConfig - The layer configuration.
+   * @returns {blob} A promise of an image blob
+   * @private
+   */
+  static #getLegendImage(layerConfig: GeoTIFFLayerEntryConfig): Promise<string | ArrayBuffer | null> {
+    const promisedImage = new Promise<string | ArrayBuffer | null>((resolve) => {
+      const metadata = layerConfig.getServiceMetadata();
+      // If there is a thumbnail asset in the metadata, use it as legend
+      if (metadata?.assets?.thumbnail?.href) {
+        const legendUrl = metadata.assets.thumbnail.href;
+
+        // Fetch the blob
+        Fetch.fetchBlob(legendUrl, { credentials: 'omit' })
+          .then((blob) => {
+            // The blob has been read, read it with a FileReader
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              resolve(reader.result);
+            };
+            reader.onerror = () => {
+              resolve(null);
+            };
+            reader.readAsDataURL(blob);
+          })
+          .catch(() => resolve(null));
+      } else resolve(null);
+    });
+    return promisedImage;
+  }
+
+  /**
+   * Overrides the fetching of the legend for a static image layer.
+   * @override
+   * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
+   */
+  override async onFetchLegend(): Promise<TypeLegend | null> {
+    // Get the config
+    const layerConfig = this.getLayerConfig();
+
+    try {
+      // Get legend image
+      const legendImage = await GVGeoTIFF.#getLegendImage(layerConfig);
+
+      // If legend image was read
+      if (legendImage) {
+        // Create image element directly to avoid recursion
+        const image = new Image();
+
+        // Create promise for image loading
+        const imageLoaded = new Promise<HTMLImageElement>((resolve, reject) => {
+          image.onload = () => {
+            resolve(image);
+          };
+          image.onerror = (error) => {
+            reject(error);
+          };
+          // Set src to start loading
+          image.src = legendImage as string;
+        });
+
+        // Wait for image to load
+        const loadedImage = await imageLoaded;
+
+        // If image was loaded successfully
+        if (loadedImage && loadedImage.width > 0 && loadedImage.height > 0) {
+          const drawingCanvas = document.createElement('canvas');
+          drawingCanvas.width = image.width;
+          drawingCanvas.height = image.height;
+          const drawingContext = drawingCanvas.getContext('2d', { willReadFrequently: true })!;
+          drawingContext.drawImage(image, 0, 0);
+
+          // Return legend information
+          return {
+            type: CONST_LAYER_TYPES.GEOTIFF,
+            legend: drawingCanvas,
+          };
+        }
+      }
+
+      // No good
+      return {
+        type: CONST_LAYER_TYPES.GEOTIFF,
+        legend: null,
+      };
+    } catch (error: unknown) {
+      logger.logError(`Error getting legend for ${layerConfig.layerPath}`, error);
+      return null;
+    }
   }
 }

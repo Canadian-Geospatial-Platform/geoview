@@ -11,38 +11,13 @@
     },
     "listOfGeoviewLayerConfig": [
       {
-        "geoviewLayerId": "sentinel2-montreal-tci",
-        "geoviewLayerName": "Montreal - True Color (July 2020)",
-        "metadataAccessPath": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/18/T/YR/2020/7/S2A_18TYR_20200706_0_L2A/",
+        "geoviewLayerId": "datacube-landcover",
+        "geoviewLayerName": "Landcover 2020",
+        "metadataAccessPath": "https://datacube.services.geo.ca/stac/api/collections/landcover/items/landcover-2020/",
         "geoviewLayerType": "GeoTIFF",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "TCI",
-            "source": {
-              "dataAccessPath": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/18/T/YR/2020/7/S2A_18TYR_20200706_0_L2A/TCI.tif"
-            }
-          }
-        ]
-      },
-      {
-        "geoviewLayerId": "datacube-vegetation",
-        "geoviewLayerName": "Datacube Vegetation - 2020 fCover",
-        "metadataAccessPath": "https://datacube-prod-data-public.s3.ca-central-1.amazonaws.com/store/eo4ce/vegetation/vegetation-2020-fCOVER.tif",
-        "geoviewLayerType": "GeoTIFF",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "datacube1"
-          }
-        ]
-      },
-      {
-        "geoviewLayerId": "gtLYR1",
-        "geoviewLayerName": "Projection Test Layer",
-        "metadataAccessPath": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/36/Q/WD/2020/7/S2A_36QWD_20200701_0_L2A/",
-        "geoviewLayerType": "GeoTIFF",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "TCI.tif"
+            "layerId": "classification"
           }
         ]
       }
