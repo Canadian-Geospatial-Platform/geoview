@@ -1273,207 +1273,321 @@ export abstract class WfsRenderer {
   // #region FILTER TO OGC_FILTER
 
   /**
-   * Parses a simple SQL-like filter string into an OpenLayers filter, and writes WFS (OGC) Filter XML.
-   * Supports:
-   *  - Comparisons: >, >=, <, <=, =
-   *  - Logical ops: AND, OR, NOT
-   *  - Parentheses
-   *  - Numeric or string literals (string in single quotes)
-   * @param filterStr - The SQL-like filter, e.g. "(POP > '100' AND (POP < '200' OR POP = '300'))"
-   * @returns The OGC Filter XML string.
+   * Converts a SQL-like filter string into an OpenLayers WFS-compatible OGC filter XML fragment.
+   * This function handles:
+   *  - Standard SQL-like expressions (>, >=, <, <=, =, IN, BETWEEN)
+   *  - Boolean operators (AND, OR, NOT)
+   *  - "Always false" queries such as `1=0` or `false`
+   * If the filter string is an "always false" expression, it generates a minimal
+   * OGC filter using the provided `fieldNameForNegativeQueries` to ensure a valid
+   * WFS request that returns no features.
+   * For normal filters, it:
+   *  1. Parses the SQL string into an AST.
+   *  2. Converts the AST into an OpenLayers filter object.
+   *  3. Serializes the filter object into XML suitable for WFS requests.
+   * Only the inner children of the `<Filter>` element are returned; you can wrap them
+   * in `<ogc:Filter>` as needed for a full WFS request.
+   * @param {string} filterStr - The SQL-like filter expression to convert.
+   * @param {string} version - The WFS version to target (only '1.0.0', '1.1.0', '2.0.0' supported; defaults to '2.0.0').
+   * @param {string | undefined} fieldNameForNegativeQueries - The field name to use in "always false" filters (required when filterStr is `1=0` or `false`).
+   * @returns {string} An XML string representing the inner contents of an OGC `<Filter>` element.
+   *                   This can be directly used inside a WFS GetFeature request's `<Filter>` element.
+   * @static
    */
-  static sqlToOlWfsFilterXml(filterStr: string, version: string): string {
-    type AST = ComparisonNode | LogicalNode | NotNode | InNode;
+  static sqlToOlWfsFilterXml(filterStr: string, version: string, fieldNameForNegativeQueries: string | undefined): string {
+    // Trim the filter
+    const filterStrTrimmed = filterStr.trim();
 
-    interface ComparisonNode {
-      type: 'cmp';
-      property: string;
-      op: '>' | '>=' | '<' | '<=' | '=' | 'between';
-      literal1: string | number;
-      literal2?: string | number;
+    // Patterns meaning no features
+    const alwaysFalse =
+      filterStrTrimmed === '1=0' || filterStrTrimmed === '(1=0)' || filterStrTrimmed === 'false' || filterStrTrimmed === '(false)';
+
+    // If we just wanted always false clause
+    if (alwaysFalse) {
+      // Return a valid OGC "false" equivalent
+      return `
+        <ogc:PropertyIsEqualTo>
+          <ogc:PropertyName>${fieldNameForNegativeQueries}</ogc:PropertyName>
+          <ogc:Literal>__NO__MATCH__</ogc:Literal>
+        </ogc:PropertyIsEqualTo>
+    `.trim();
     }
 
-    interface LogicalNode {
-      type: 'and' | 'or';
-      left: AST;
-      right: AST;
-    }
+    // Parse the SQL-like filter expression
+    const ast = this.#sqlToOlWfsFilterXmlParse(filterStrTrimmed);
 
-    interface NotNode {
-      type: 'not';
-      inner: AST;
-    }
-
-    interface InNode {
-      type: 'in';
-      property: string;
-      values: string[];
-    }
-
-    // 1. Parse the filter string into a simple AST
-    function parse(s: string): AST {
-      // eslint-disable-next-line no-param-reassign
-      s = s.trim();
-
-      // Remove outer parentheses
-      if (s.startsWith('(') && s.endsWith(')')) {
-        // Only unwrap if matching parentheses
-        let depth = 0;
-        let match = true;
-        for (let i = 0; i < s.length; i++) {
-          if (s[i] === '(') depth++;
-          else if (s[i] === ')') depth--;
-          if (depth === 0 && i < s.length - 1) {
-            match = false;
-            break;
-          }
-        }
-        if (match) {
-          return parse(s.substring(1, s.length - 1));
-        }
-      }
-
-      // NOT operator
-      // Look for "NOT " at top level
-      const low = s.toLowerCase();
-      if (low.startsWith('not ')) {
-        return { type: 'not', inner: parse(s.substring(4)) };
-      }
-
-      // AND / OR at top level
-      let depth = 0;
-      for (let i = 0; i < s.length; i++) {
-        const c = s[i];
-        if (c === '(') depth++;
-        else if (c === ')') depth--;
-        else if (depth === 0) {
-          const rest = low.substring(i);
-          if (rest.startsWith(' and ')) {
-            return {
-              type: 'and',
-              left: parse(s.substring(0, i)),
-              right: parse(s.substring(i + 5)),
-            };
-          } else if (rest.startsWith(' or ')) {
-            return {
-              type: 'or',
-              left: parse(s.substring(0, i)),
-              right: parse(s.substring(i + 4)),
-            };
-          }
-        }
-      }
-
-      // IN operator
-      const inMatch = s.match(/^\s*("?)([A-Za-z0-9_.]+)\1\s+in\s*\((.+)\)\s*$/i);
-      if (inMatch) {
-        const prop = inMatch[2];
-        const valuesPart = inMatch[3];
-        const vals = valuesPart
-          .split(',')
-          .map((v) => v.trim())
-          .map((v) => {
-            // remove single (or double) quotes around each literal
-            if ((v.startsWith("'") && v.endsWith("'")) || (v.startsWith('"') && v.endsWith('"'))) {
-              return v.substring(1, v.length - 1);
-            }
-            return v;
-          });
-        return { type: 'in', property: prop, values: vals };
-      }
-
-      // BETWEEN
-      const betweenRegex = /^\s*("?)([A-Za-z0-9_.]+)\1\s+between\s+'([^']+)'\s+and\s+'([^']+)'\s*$/i;
-      const mBetween = s.match(betweenRegex);
-      if (mBetween) {
-        return {
-          type: 'cmp',
-          op: 'between',
-          property: mBetween[2],
-          literal1: mBetween[3],
-          literal2: mBetween[4],
-        };
-      }
-
-      // Comparisons (>, <, =, etc.)
-      const cmpRegex = /^\s*("?)([A-Za-z0-9_.]+)\1\s*(<=|>=|<|>|=)\s*(?:'(.*?)'|([0-9]+))\s*$/;
-      const m = s.match(cmpRegex);
-      if (!m) {
-        throw new Error('Cannot parse filter: ' + s);
-      }
-
-      const value = m[4] ?? m[5];
-      return {
-        type: 'cmp',
-        property: m[2],
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        op: m[3] as any,
-        literal1: m[5] ? Number(value) : value,
-      };
-    }
-
-    const ast = parse(filterStr);
-
-    function astToOlFilter(node: AST): Filter {
-      switch (node.type) {
-        case 'cmp': {
-          const { property, op, literal1, literal2 } = node;
-          switch (op) {
-            case '>':
-              return greaterThan(property, Number(literal1));
-            case '>=':
-              return greaterThanOrEqualTo(property, Number(literal1));
-            case '<':
-              return lessThan(property, Number(literal1));
-            case '<=':
-              return lessThanOrEqualTo(property, Number(literal1));
-            case '=':
-              return equalTo(property, literal1);
-            case 'between':
-              if (literal2 === undefined) {
-                throw new Error('Between requires two literals');
-              }
-              return between(property, Number(literal1), Number(literal2));
-          }
-          throw new Error('Unsupported comparison op ' + op);
-        }
-        case 'in': {
-          const { property, values } = node;
-          const equals = values.map((v) => {
-            const val = isNumeric(v) ? Number(v) : v;
-            return equalTo(property, val);
-          });
-          return or(...equals);
-        }
-        case 'and': {
-          const left = astToOlFilter(node.left);
-          const right = astToOlFilter(node.right);
-          return and(left, right);
-        }
-        case 'or': {
-          const left = astToOlFilter(node.left);
-          const right = astToOlFilter(node.right);
-          return or(left, right);
-        }
-        case 'not': {
-          const inner = astToOlFilter(node.inner);
-          return not(inner);
-        }
-        default:
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          throw new Error('Unsupported AST node: ' + (node as any).type);
-      }
-    }
-
-    const olFilter = astToOlFilter(ast);
+    // Convert into filter object
+    const olFilter = this.#astToOlFilter(ast);
 
     // Make sure the version we want is supported by OpenLayers which only support 1.0.0, 1.1.0 and 2.0.0, default to 2.0.0
     const sanitizedVersion = ['1.0.0', '1.1.0', '2.0.0'].includes(version) ? version : '2.0.0';
 
     // Create the filter in XML format
     const filterNode = writeFilter(olFilter, sanitizedVersion);
-    const xmlStr = new XMLSerializer().serializeToString(filterNode);
-    return xmlStr;
+
+    // Only the children, we'll add the <Filter> node later
+    const childrenXml = Array.from(filterNode.childNodes)
+      .map((child) => new XMLSerializer().serializeToString(child))
+      .join('');
+
+    // Return it
+    return childrenXml;
+  }
+
+  /**
+   * Parse a simple SQL-like filter expression string into an internal AST
+   * suitable for later conversion into OGC/OL WFS filters.
+   * This parser supports the following constructs:
+   * - Parentheses for grouping: `( ... )`
+   * - Logical operators at top level: `AND`, `OR`, `NOT`
+   * - Comparison operators: `=`, `<`, `>`, `<=`, `>=`
+   * - `IN` lists: `field IN ('a', 'b', 'c')`
+   * - `BETWEEN`: `field BETWEEN 'x' AND 'y'`
+   * - String or numeric literals
+   * Examples of valid input:
+   * - `"status = 'active'"`
+   * - `"id IN (1, 2, 3)"`
+   * - `"(type = 'A' AND NOT (id = 3))"`
+   * - `"date BETWEEN '2020-01-01' AND '2020-12-31'"`
+   * - `"NOT flag = 'Y'"`
+   * Behavior:
+   * - Leading/trailing whitespace is trimmed.
+   * - Outer parentheses are removed when they fully wrap the expression.
+   * - The function recursively parses nested expressions.
+   * - Throws an error if the string cannot be parsed into a valid AST node.
+   * @param {string} sqlString - A SQL-like filter expression to parse.
+   * @returns {AST} An abstract syntax tree describing the logical and
+   * comparison structure of the filter expression.
+   * @throws {Error} If the filter expression cannot be parsed.
+   * @private
+   * @static
+   */
+  static #sqlToOlWfsFilterXmlParse(sqlString: string): AST {
+    // eslint-disable-next-line no-param-reassign
+    sqlString = sqlString.trim();
+
+    // Remove outer parentheses
+    if (sqlString.startsWith('(') && sqlString.endsWith(')')) {
+      // Only unwrap if matching parentheses
+      let depth = 0;
+      let match = true;
+      for (let i = 0; i < sqlString.length; i++) {
+        if (sqlString[i] === '(') depth++;
+        else if (sqlString[i] === ')') depth--;
+        if (depth === 0 && i < sqlString.length - 1) {
+          match = false;
+          break;
+        }
+      }
+      if (match) {
+        return this.#sqlToOlWfsFilterXmlParse(sqlString.substring(1, sqlString.length - 1));
+      }
+    }
+
+    // NOT operator
+    // Look for "NOT " at top level
+    const low = sqlString.toLowerCase();
+    if (low.startsWith('not ')) {
+      return { type: 'not', inner: this.#sqlToOlWfsFilterXmlParse(sqlString.substring(4)) };
+    }
+
+    // AND / OR at top level
+    let depth = 0;
+    for (let i = 0; i < sqlString.length; i++) {
+      const c = sqlString[i];
+      if (c === '(') depth++;
+      else if (c === ')') depth--;
+      else if (depth === 0) {
+        const rest = low.substring(i);
+        if (rest.startsWith(' and ')) {
+          return {
+            type: 'and',
+            left: this.#sqlToOlWfsFilterXmlParse(sqlString.substring(0, i)),
+            right: this.#sqlToOlWfsFilterXmlParse(sqlString.substring(i + 5)),
+          };
+        } else if (rest.startsWith(' or ')) {
+          return {
+            type: 'or',
+            left: this.#sqlToOlWfsFilterXmlParse(sqlString.substring(0, i)),
+            right: this.#sqlToOlWfsFilterXmlParse(sqlString.substring(i + 4)),
+          };
+        }
+      }
+    }
+
+    // IN operator
+    const inMatch = sqlString.match(/^\s*("?)([A-Za-z0-9_.]+)\1\s+in\s*\((.+)\)\s*$/i);
+    if (inMatch) {
+      const prop = inMatch[2];
+      const valuesPart = inMatch[3];
+      const vals = valuesPart
+        .split(',')
+        .map((v) => v.trim())
+        .map((v) => {
+          // remove single (or double) quotes around each literal
+          if ((v.startsWith("'") && v.endsWith("'")) || (v.startsWith('"') && v.endsWith('"'))) {
+            return v.substring(1, v.length - 1);
+          }
+          return v;
+        });
+      return { type: 'in', property: prop, values: vals };
+    }
+
+    // BETWEEN
+    const betweenRegex = /^\s*("?)([A-Za-z0-9_.]+)\1\s+between\s+'([^']+)'\s+and\s+'([^']+)'\s*$/i;
+    const mBetween = sqlString.match(betweenRegex);
+    if (mBetween) {
+      return {
+        type: 'cmp',
+        op: 'between',
+        property: mBetween[2],
+        literal1: mBetween[3],
+        literal2: mBetween[4],
+      };
+    }
+
+    // Comparisons (>, <, =, etc.)
+    const cmpRegex = /^\s*("?)([A-Za-z0-9_.]+)\1\s*(<=|>=|<|>|=)\s*(?:'(.*?)'|([0-9]+))\s*$/;
+    const m = sqlString.match(cmpRegex);
+    if (!m) {
+      throw new Error('Cannot parse filter: ' + sqlString);
+    }
+
+    const value = m[4] ?? m[5];
+    return {
+      type: 'cmp',
+      property: m[2],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      op: m[3] as any,
+      literal1: m[5] ? Number(value) : value,
+    };
+  }
+
+  /**
+   * Convert an internal SQL-AST node into an OpenLayers WFS filter object.
+   * This method takes the AST produced by `#sqlToOlWfsFilterXmlParse` and
+   * recursively builds the corresponding OpenLayers filter instances from
+   * `ol/format/filter`. The resulting filter can be passed to
+   * `ol/format/WFS` or `ol/format/Filter` serialization functions
+   * (e.g., `writeFilter()`).
+   * Supported AST node types:
+   * • **cmp** — Comparison operators:
+   *    - `>`  → `greaterThan()`
+   *    - `>=` → `greaterThanOrEqualTo()`
+   *    - `<`  → `lessThan()`
+   *    - `<=` → `lessThanOrEqualTo()`
+   *    - `=`  → `equalTo()`
+   *    - `between` → `between()`, requires both `literal1` and `literal2`
+   * • **in** — SQL `IN` list:
+   *    Produces an OR of multiple `equalTo()` filters:
+   *    `property IN (a, b, c)` → `or(equalTo(a), equalTo(b), equalTo(c))`
+   * • **and** — Logical AND:
+   *    Recursively maps children to `and(left, right)`
+   * • **or** — Logical OR:
+   *    Recursively maps children to `or(left, right)`
+   * • **not** — Logical NOT:
+   *    Recursively maps child to `not(inner)`
+   * The function throws if:
+   *  • An unsupported comparison operator is encountered
+   *  • A BETWEEN clause is missing its second literal
+   *  • An unrecognized AST node type is provided
+   * @param {AST} node - The AST node describing a comparison, logical operator, or IN/BETWEEN expression.
+   * @returns {Filter} An OpenLayers filter object from `ol/format/filter/*`,
+   *   suitable for WFS GetFeature serialization.
+   * @throws {Error} If the AST node type or operator is unsupported.
+   * @private
+   * @static
+   */
+  static #astToOlFilter(node: AST): Filter {
+    switch (node.type) {
+      case 'cmp': {
+        const { property, op, literal1, literal2 } = node;
+        switch (op) {
+          case '>':
+            return greaterThan(property, Number(literal1));
+          case '>=':
+            return greaterThanOrEqualTo(property, Number(literal1));
+          case '<':
+            return lessThan(property, Number(literal1));
+          case '<=':
+            return lessThanOrEqualTo(property, Number(literal1));
+          case '=':
+            return equalTo(property, literal1);
+          case 'between':
+            if (literal2 === undefined) {
+              throw new Error('Between requires two literals');
+            }
+            return between(property, Number(literal1), Number(literal2));
+        }
+        throw new Error('Unsupported comparison op ' + op);
+      }
+      case 'in': {
+        const { property, values } = node;
+        const equals = values.map((v) => {
+          const val = isNumeric(v) ? Number(v) : v;
+          return equalTo(property, val);
+        });
+        return or(...equals);
+      }
+      case 'and': {
+        const left = this.#astToOlFilter(node.left);
+        const right = this.#astToOlFilter(node.right);
+        return and(left, right);
+      }
+      case 'or': {
+        const left = this.#astToOlFilter(node.left);
+        const right = this.#astToOlFilter(node.right);
+        return or(left, right);
+      }
+      case 'not': {
+        const inner = this.#astToOlFilter(node.inner);
+        return not(inner);
+      }
+      default:
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        throw new Error('Unsupported AST node: ' + (node as any).type);
+    }
+  }
+
+  /**
+   * Combine a spatial GML filter and an attribute GML filter
+   * into a single OGC <Filter> with <And>.
+   * @param {string | undefined} spatialFilter - XML string for spatial filter, e.g. <ogc:Intersects>...</ogc:Intersects>
+   * @param {string | undefined} attributeFilter - XML string for attribute filter, e.g. <ogc:Or>...</ogc:Or>
+   * @returns {string | undefined} Combined XML <ogc:Filter> or undefined if nothing to combine
+   */
+  static combineGmlFilters(spatialFilter?: string, attributeFilter?: string): string | undefined {
+    // If neither filter is defined, nothing to do
+    if (!spatialFilter && !attributeFilter) {
+      return undefined;
+    }
+
+    // If only one is present, wrap in <ogc:Filter>
+    if (spatialFilter && !attributeFilter) {
+      return `
+      <ogc:Filter xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml">
+        ${spatialFilter}
+      </ogc:Filter>
+    `.trim();
+    }
+
+    if (!spatialFilter && attributeFilter) {
+      return `
+      <ogc:Filter xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml">
+        ${attributeFilter}
+      </ogc:Filter>
+    `.trim();
+    }
+
+    // Combine both under <And>
+    return `
+    <ogc:Filter xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml">
+      <ogc:And>
+        ${attributeFilter}
+        ${spatialFilter}
+      </ogc:And>
+    </ogc:Filter>
+  `.trim();
   }
 
   // #endregion
@@ -1495,3 +1609,30 @@ type FilterInfo = {
   values: (number | string)[];
   valuesConditions?: TypeLayerStyleValueCondition[];
 };
+
+type AST = ComparisonNode | LogicalNode | NotNode | InNode;
+
+interface ComparisonNode {
+  type: 'cmp';
+  property: string;
+  op: '>' | '>=' | '<' | '<=' | '=' | 'between';
+  literal1: string | number;
+  literal2?: string | number;
+}
+
+interface LogicalNode {
+  type: 'and' | 'or';
+  left: AST;
+  right: AST;
+}
+
+interface NotNode {
+  type: 'not';
+  inner: AST;
+}
+
+interface InNode {
+  type: 'in';
+  property: string;
+  values: string[];
+}

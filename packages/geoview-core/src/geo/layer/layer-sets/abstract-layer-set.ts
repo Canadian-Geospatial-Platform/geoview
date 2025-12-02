@@ -421,10 +421,9 @@ export abstract class AbstractLayerSet {
   /**
    * Checks if the layer config source is queryable.
    * @param {AbstractBaseLayer} layer - The layer
-   * @param {QueryType} queryType - The query type we would like to perform
    * @returns {boolean} True if the source is queryable or undefined
    */
-  protected static isSourceQueryable(layer: AbstractBaseLayer, queryType: QueryType): boolean {
+  protected static isSourceQueryable(layer: AbstractBaseLayer): boolean {
     // Cast
     const layerConfigCasted = layer.getLayerConfig() as AbstractBaseLayerEntryConfig;
 
@@ -432,7 +431,7 @@ export abstract class AbstractLayerSet {
     let sourceIsQueryable = layerConfigCasted.getQueryableDefaulted();
 
     // In the case of a GVWMS, for a query type of 'all', also check if we has a way to retrieve vector data
-    if (sourceIsQueryable && layer instanceof GVWMS && queryType === 'all') {
+    if (sourceIsQueryable && layer instanceof GVWMS) {
       // If we have a WFS layer config associated with the WMS
       sourceIsQueryable = layer.getLayerConfig().hasWfsLayerConfig();
     }

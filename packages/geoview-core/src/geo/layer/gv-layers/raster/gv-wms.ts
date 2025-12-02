@@ -232,6 +232,7 @@ export class GVWMS extends AbstractGVRaster {
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} abortController - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+   * @throws {LayerConfigWFSMissingError} If no WFS layer configuration is defined for this WMS layer.
    * @override
    */
   protected override async getFeatureInfoAtLonLat(
@@ -245,8 +246,8 @@ export class GVWMS extends AbstractGVRaster {
     if (!this.getVisible()) return [];
 
     // Get the layer config and its initial settings
-    const layerConfig = this.getLayerConfig();
-    let initialSettings = layerConfig.getInitialSettings();
+    const wmsLayerConfig = this.getLayerConfig();
+    let initialSettings = wmsLayerConfig.getInitialSettings();
 
     // Ensure bounds are available in the settings
     if (!initialSettings.bounds) {
@@ -259,10 +260,10 @@ export class GVWMS extends AbstractGVRaster {
       const transformedBounds = Projection.transformExtentFromProj(computedBounds, projection, Projection.getProjectionLonLat());
 
       // Update initial settings with computed bounds
-      layerConfig.updateInitialSettings({ bounds: transformedBounds });
+      wmsLayerConfig.updateInitialSettings({ bounds: transformedBounds });
 
       // Re-fetch settings after the update to ensure consistency
-      initialSettings = layerConfig.getInitialSettings();
+      initialSettings = wmsLayerConfig.getInitialSettings();
     }
 
     // If bounds still not set, return
@@ -275,7 +276,7 @@ export class GVWMS extends AbstractGVRaster {
     // If out of bounds, don't bother and return
     if (lon < minX || lon > maxX || lat < minY || lat > maxY) {
       // Log warning
-      logger.logWarning(`Coordinates for the bounds were out-of-bounds for layer ${layerConfig.layerPath}`);
+      logger.logWarning(`Coordinates for the bounds were out-of-bounds for layer ${wmsLayerConfig.layerPath}`);
       return [];
     }
 
@@ -288,19 +289,31 @@ export class GVWMS extends AbstractGVRaster {
 
     try {
       // If the layer has a WFS associated
-      if (layerConfig.hasWfsLayerConfig()) {
+      if (wmsLayerConfig.hasWfsLayerConfig()) {
         try {
+          // Get the Geoview Layer Config WFS equivalent
+          const wfsLayerConfig = wmsLayerConfig.getWfsLayerConfig();
+
           // We're going to try performing a GetFeature using the WFS query instead of WMS, better chance to retrieve the geometry that way
-          return await this.#getFeatureInfoUsingWFS(clickCoordinate, viewResolution, projectionCode, abortController);
-        } catch {
+          return await this.#getFeatureInfoUsingWFS(
+            wmsLayerConfig,
+            wfsLayerConfig,
+            clickCoordinate,
+            viewResolution,
+            projectionCode,
+            abortController
+          );
+        } catch (error: unknown) {
           // Failed to get feature info using WFS, continue with WMS
+          logger.logDebug(`Failed to getFeatureInfoUsingWFS for '${wmsLayerConfig.layerPath}'`, error);
         }
       }
 
       // Try various info formats patterns to get feature info
-      return await this.#getFeatureInfoUsingWMS(clickCoordinate, viewResolution, projectionCode, abortController);
-    } catch {
+      return await this.#getFeatureInfoUsingWMS(wmsLayerConfig, clickCoordinate, viewResolution, projectionCode, abortController);
+    } catch (error: unknown) {
       // Eat the error, we failed
+      logger.logDebug(`Eating error, we failed for '${wmsLayerConfig.layerPath}'`, error);
     }
 
     // Failed
@@ -313,6 +326,7 @@ export class GVWMS extends AbstractGVRaster {
    * @param {OLMap} map - The Map so that we can grab the resolution/projection we want to get features on.
    * @param {AbortController?} abortController - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+   * @throws {LayerConfigWFSMissingError} If no WFS layer configuration is defined for this WMS layer.
    * @throws {ResponseError} Error thrown when the response is not OK (non-2xx).
    * @throws {ResponseEmptyError} Error thrown when the JSON response is empty.
    * @throws {RequestTimeoutError} Error thrown when the request exceeds the timeout duration.
@@ -323,8 +337,21 @@ export class GVWMS extends AbstractGVRaster {
     map: OLMap,
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoEntry[]> {
+    // Get the layer config and its initial settings
+    const wmsLayerConfig = this.getLayerConfig();
+
+    // Get the Geoview Layer Config WFS equivalent
+    const wfsLayerConfig = wmsLayerConfig.getWfsLayerConfig();
+
     // Redirect
-    return this.#getFeatureInfoUsingWFS(undefined, undefined, map.getView().getProjection().getCode(), abortController);
+    return this.#getFeatureInfoUsingWFS(
+      wmsLayerConfig,
+      wfsLayerConfig,
+      undefined,
+      undefined,
+      map.getView().getProjection().getCode(),
+      abortController
+    );
   }
 
   /**
@@ -465,7 +492,8 @@ export class GVWMS extends AbstractGVRaster {
     const sqlFilter = objectIds.length === 1 ? `${pkFieldName} = ${objectIds[0]}` : `${pkFieldName} in (${objectIds.join(', ')})`;
 
     // Create the filterXML from the sql filter
-    const xmlFilter = WfsRenderer.sqlToOlWfsFilterXml(sqlFilter, wfsLayerConfig.getVersion());
+    const xmlFilter =
+      '<ogc:filter>' + WfsRenderer.sqlToOlWfsFilterXml(sqlFilter, wfsLayerConfig.getVersion(), pkFieldName) + '</ogc:Filter>';
 
     // Get the supported info formats
     const featureInfoFormat = wfsLayerConfig.getSupportedFormats('application/json'); // application/json by default (QGIS Server doesn't seem to provide the metadata for the output formats, use application/json)
@@ -618,6 +646,8 @@ export class GVWMS extends AbstractGVRaster {
    * 3. Creates a spatial <Intersects> filter for the WFS request.
    * 4. Builds a WFS GetFeature URL with the appropriate output format and filter.
    * 5. Fetches the WFS features and parses them into a consistent format.
+   * @param {OgcWmsLayerEntryConfig} wmsLayerConfig - The current WMS layer config of the WMS layer.
+   * @param {OgcWfsLayerEntryConfig} wfsLayerConfig - The current WFS layer config of the WMS layer.
    * @param {Coordinate | undefined} clickCoordinate - The clicked map coordinate
    *        in the map projection. If undefined, the query is non-spatial.
    * @param {number | undefined} viewResolution - Current map view resolution
@@ -631,17 +661,13 @@ export class GVWMS extends AbstractGVRaster {
    * @private
    */
   #getFeatureInfoUsingWFS(
+    wmsLayerConfig: OgcWmsLayerEntryConfig,
+    wfsLayerConfig: OgcWfsLayerEntryConfig,
     clickCoordinate: Coordinate | undefined,
     viewResolution: number | undefined,
     projectionCode: string,
     abortController?: AbortController
   ): Promise<TypeFeatureInfoEntry[]> {
-    // Get the WMS layer config
-    const wmsLayerConfig = this.getLayerConfig();
-
-    // Get the Geoview Layer Config WFS equivalent
-    const wfsLayerConfig = wmsLayerConfig.getWfsLayerConfig();
-
     // Get the supported info formats
     const featureInfoFormat = wfsLayerConfig.getSupportedFormats('application/json'); // application/json by default (QGIS Server doesn't seem to provide the metadata for the output formats, use application/json)
 
@@ -651,9 +677,23 @@ export class GVWMS extends AbstractGVRaster {
     // TODO: WMS - Add support for other formats. Not quite the GV issue #3134, but similar
 
     // Create the filterXML from the sql filter
-    let xmlFilter;
+    let gmlFilterAttribute;
+    let gmlFilterSpatial;
     let fieldsToReturn = wfsLayerConfig.getOutfields();
     if (clickCoordinate && viewResolution) {
+      // Build the filter from style if any
+      const classFilters = GVEsriDynamic.getFilterFromStyle(wmsLayerConfig, wmsLayerConfig.getLayerStyle());
+
+      // If any
+      if (classFilters) {
+        // Build a OGC Filter for the filter
+        gmlFilterAttribute = WfsRenderer.sqlToOlWfsFilterXml(
+          classFilters,
+          wfsLayerConfig.getVersion(),
+          wfsLayerConfig.getOutfields()?.[0]?.name
+        );
+      }
+
       // Get the geometry field name
       const geomFieldName = wfsLayerConfig.getGeometryField()?.name || 'geometry'; // default: geometry
 
@@ -664,11 +704,14 @@ export class GVWMS extends AbstractGVRaster {
       const polygonGML = GeoUtilities.writeGeometryToGML(bufferedPoint, projectionCode);
 
       // Create the intersects filter
-      xmlFilter = `<Filter><Intersects><PropertyName>${geomFieldName}</PropertyName>${polygonGML}</Intersects></Filter>`;
+      gmlFilterSpatial = `<Intersects><PropertyName>${geomFieldName}</PropertyName>${polygonGML}</Intersects>`;
 
       // We want all fields in the response, to make sure the geometry is included, clear it
       fieldsToReturn = undefined;
     }
+
+    // Build attribute+spatial OGC filter
+    const xmlFilterTotal = WfsRenderer.combineGmlFilters(gmlFilterSpatial, gmlFilterAttribute);
 
     // Format the url
     const urlWithOutputJson = GeoUtilities.ensureServiceRequestUrlGetFeature(
@@ -677,7 +720,7 @@ export class GVWMS extends AbstractGVRaster {
       wfsLayerConfig.getVersion(),
       outputFormat,
       fieldsToReturn,
-      xmlFilter,
+      xmlFilterTotal,
       projectionCode
     );
 
@@ -690,6 +733,7 @@ export class GVWMS extends AbstractGVRaster {
    * `application/geojson`, `application/json`, `text/xml`, `text/html`, and `text/plain`, in that order.
    * For each supported format found in the layer's WMS capabilities, the method tries to fetch feature info
    * using that format. If no format returns usable feature info, an error is thrown.
+   * @param {OgcWmsLayerEntryConfig} wmsLayerConfig - The current WMS layer config of the WMS layer.
    * @param {Coordinate} clickCoordinate - The coordinate on the map where the user clicked.
    * @param {number} viewResolution - The current resolution of the map view.
    * @param {ProjectionLike} projectionCode - The projection used for the request (e.g., 'EPSG:3857').
@@ -699,19 +743,17 @@ export class GVWMS extends AbstractGVRaster {
    * @private
    */
   async #getFeatureInfoUsingWMS(
+    wmsLayerConfig: OgcWmsLayerEntryConfig,
     clickCoordinate: Coordinate,
     viewResolution: number,
     projectionCode: ProjectionLike,
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoEntry[]> {
-    // Get the layer config
-    const layerConfig = this.getLayerConfig();
-
     // Get the layer source
     const wmsSource = this.getOLSource();
 
     // Get the supported info formats
-    const featureInfoFormat = layerConfig.getServiceMetadata()?.Capability?.Request?.GetFeatureInfo?.Format;
+    const featureInfoFormat = wmsLayerConfig.getServiceMetadata()?.Capability?.Request?.GetFeatureInfo?.Format;
 
     // Log the various info format supported for the layer, keeping the line commented, useful for debugging
     // logger.logDebug(layerConfig.getLayerNameCascade(), featureInfoFormat);
@@ -726,7 +768,7 @@ export class GVWMS extends AbstractGVRaster {
       try {
         // Try to get the feature member using GEOJSON format
         featureMember = await GVWMS.#getFeatureInfoUsingJSON(
-          layerConfig,
+          wmsLayerConfig,
           wmsSource,
           clickCoordinate,
           viewResolution,
@@ -739,7 +781,7 @@ export class GVWMS extends AbstractGVRaster {
       } catch (error: unknown) {
         // Failed to retrieve featureMember using GeoJSON, eat the error, we'll try with another format
         logger.logError(
-          `${layerConfig.getLayerNameCascade()} - Failed to retrieve featureMember using GeoJSON, eat the error, we'll try with another format`,
+          `${wmsLayerConfig.getLayerNameCascade()} - Failed to retrieve featureMember using GeoJSON, eat the error, we'll try with another format`,
           error
         );
       }
@@ -749,7 +791,7 @@ export class GVWMS extends AbstractGVRaster {
       try {
         // Try to get the feature member using JSON format
         featureMember = await GVWMS.#getFeatureInfoUsingJSON(
-          layerConfig,
+          wmsLayerConfig,
           wmsSource,
           clickCoordinate,
           viewResolution,
@@ -762,7 +804,7 @@ export class GVWMS extends AbstractGVRaster {
       } catch (error: unknown) {
         // Failed to retrieve featureMember using Json, eat the error, we'll try with another format
         logger.logError(
-          `${layerConfig.getLayerNameCascade()} - Failed to retrieve featureMember using JSON, eat the error, we'll try with another format`,
+          `${wmsLayerConfig.getLayerNameCascade()} - Failed to retrieve featureMember using JSON, eat the error, we'll try with another format`,
           error
         );
       }
@@ -773,7 +815,7 @@ export class GVWMS extends AbstractGVRaster {
       try {
         // Try to get the feature member using XML format
         const featMember = await GVWMS.#getFeatureInfoUsingXML(
-          layerConfig,
+          wmsLayerConfig,
           wmsSource,
           clickCoordinate,
           viewResolution,
@@ -785,7 +827,7 @@ export class GVWMS extends AbstractGVRaster {
       } catch (error: unknown) {
         // Failed to retrieve featureMember using XML, eat the error, we'll try with another format
         logger.logError(
-          `${layerConfig.getLayerNameCascade()} - Failed to retrieve featureMember using XML, eat the error, we'll try with another format`,
+          `${wmsLayerConfig.getLayerNameCascade()} - Failed to retrieve featureMember using XML, eat the error, we'll try with another format`,
           error
         );
       }
@@ -796,7 +838,7 @@ export class GVWMS extends AbstractGVRaster {
       try {
         // Try to get the feature member using HTML format
         const featMember = await GVWMS.#getFeatureInfoUsingHTML(
-          layerConfig,
+          wmsLayerConfig,
           wmsSource,
           clickCoordinate,
           viewResolution,
@@ -808,7 +850,7 @@ export class GVWMS extends AbstractGVRaster {
       } catch (error: unknown) {
         // Failed to retrieve featureMember using HTML, eat the error, we'll try with another format
         logger.logError(
-          `${layerConfig.getLayerNameCascade()} - Failed to retrieve featureMember using HTML, eat the error, we'll try with another format`,
+          `${wmsLayerConfig.getLayerNameCascade()} - Failed to retrieve featureMember using HTML, eat the error, we'll try with another format`,
           error
         );
       }
@@ -818,7 +860,7 @@ export class GVWMS extends AbstractGVRaster {
     if (!featureMember) {
       try {
         const featMember = await GVWMS.#getFeatureInfoUsingPlain(
-          layerConfig,
+          wmsLayerConfig,
           wmsSource,
           clickCoordinate,
           viewResolution,
@@ -830,7 +872,7 @@ export class GVWMS extends AbstractGVRaster {
       } catch (error: unknown) {
         // Failed to retrieve featureMember using plain text, eat the error, we'll handle the case below
         logger.logError(
-          `${layerConfig.getLayerNameCascade()} - Failed to retrieve featureMember using plain text, eat the error, we'll try with another format`,
+          `${wmsLayerConfig.getLayerNameCascade()} - Failed to retrieve featureMember using plain text, eat the error, we'll try with another format`,
           error
         );
       }
@@ -839,11 +881,11 @@ export class GVWMS extends AbstractGVRaster {
     // If any found result
     if (featureMember) {
       // Format and return the information
-      return GVWMS.#formatWmsFeatureInfoResult(layerConfig.layerPath, featureMember, clickCoordinate);
+      return GVWMS.#formatWmsFeatureInfoResult(wmsLayerConfig.layerPath, featureMember, clickCoordinate);
     }
 
     // Failed
-    throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
+    throw new LayerInvalidFeatureInfoFormatWMSError(wmsLayerConfig.layerPath, wmsLayerConfig.getLayerNameCascade());
   }
 
   // #endregion METHODS
@@ -912,8 +954,12 @@ export class GVWMS extends AbstractGVRaster {
             sourceParams.FILTER = layerConfig.layerId + ':' + classFilters;
           } else {
             // Build a OGC Filter for the filter
-            const ogcXmlFilter = WfsRenderer.sqlToOlWfsFilterXml(classFilters, layerConfig.getVersion());
-            sourceParams.FILTER = layerConfig.layerId + ':' + ogcXmlFilter;
+            const ogcXmlFilter = WfsRenderer.sqlToOlWfsFilterXml(
+              classFilters,
+              layerConfig.getVersion(),
+              layerConfig.getOutfields()?.[0]?.name
+            );
+            sourceParams.FILTER = layerConfig.layerId + ':<ogc:Filter>' + ogcXmlFilter + '</ogc:Filter>';
           }
         }
       }
@@ -1430,7 +1476,7 @@ export class GVWMS extends AbstractGVRaster {
    */
   static #buildBufferPolygon(clickCoordinate: Coordinate, srsName: string, resolution: number, pixelTolerance: number = 10): Polygon {
     // The buffer radius
-    const bufferRadius = resolution * pixelTolerance; // buffer in map units
+    const bufferRadius = resolution * (pixelTolerance / 2); // buffer in map units
 
     // Convert Circle to Polygon manually
     const segments = 32; // smoothness

@@ -1231,12 +1231,31 @@ export abstract class GeoUtilities {
    * @returns {string} The serialized GML geometry as a string.
    */
   static writeGeometryToGML(geometry: Geometry, srsName: string): string {
+    // GV I've tried a simplified approach for this function, even some suggested by AI, and they all failed to some degree.
+    // GV Sometimes doubling nodes like <Polygon> or sometimes adding extra node level like <geom> or sometimes forgetting the srsName attribute at the root.
+    // GV This iteration seems the most stable.
+
     // Serialize to GML
     const gmlFormat = new GML3({ srsName });
-    const gmlNode = gmlFormat.writeGeometryNode(geometry);
 
-    // Return it
-    return new XMLSerializer().serializeToString(gmlNode);
+    // Create a dummy parent node
+    const doc = document.implementation.createDocument('http://www.opengis.net/gml', 'dummy', null);
+
+    // Write geometry inside the dummy node
+    gmlFormat.writeGeometryElement(doc.documentElement, geometry, []);
+
+    // Grab the actual geometry node (first child of dummy)
+    const geomNode = doc.documentElement.firstChild as Element;
+
+    if (!geomNode) {
+      throw new Error('Failed to generate GML geometry');
+    }
+
+    // Explicitly set the srsName on the geometry element
+    geomNode.setAttribute('srsName', srsName);
+
+    // Serialize and return
+    return new XMLSerializer().serializeToString(geomNode);
   }
 }
 

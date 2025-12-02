@@ -58,11 +58,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    */
   protected override onRegisterLayerCheck(layer: AbstractBaseLayer): boolean {
     // Return if the layer is of queryable type and source is queryable
-    return (
-      super.onRegisterLayerCheck(layer) &&
-      AbstractLayerSet.isQueryableType(layer) &&
-      AbstractLayerSet.isSourceQueryable(layer, 'at_lon_lat')
-    );
+    return super.onRegisterLayerCheck(layer) && AbstractLayerSet.isQueryableType(layer) && AbstractLayerSet.isSourceQueryable(layer);
   }
 
   /**
