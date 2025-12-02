@@ -16,7 +16,10 @@
     "guide": "Guide",
     "fullScreen": "Plein écran",
     "processing": "Traitement de __param__ element(s) sur __param__",
-    "clickEnlarge": "Cliquer pour agrandir"
+    "clickEnlarge": "Cliquer pour agrandir",
+    "show": "Afficher",
+    "hide": "Masquer",
+    "none": "Aucun"
   },
   "mapnav": {
     "arianavbar": "Groupe de buttons vertical pour navigation sur la carte",
@@ -95,7 +98,7 @@
     "legendInstructions": "Legend Instructions",
     "noLayersAdded": "Aucune couche ajoutée",
     "noLayersAddedDescription": "Ajoutez des couches à la carte en cliquant sur le bouton 'Couches' et en sélectionnant les couches que vous souhaitez afficher.",
-    "selectLayerAndScroll": "Accéder au panneau des couches"
+    "selectLayerAndScroll": "Voir dans le panneau des couches"
   },
   "layers": {
     "title": "Couches",
@@ -342,7 +345,7 @@
     "total": "total",
     "selectLayerAndScroll": "Accéder au panneau du tableau de données",
     "accessAdvancedFunctions": "Accéder au panneau du tableau de données pour les fonctions avancées",
-    "filterToggle": "Basculer les filtres de colonnes"
+    "filterToggle": "les filtres de colonnes"
   },
   "geochart": {
     "noChartAvailable": "Cliquer sur une couche de la carte qui contient un graphique"

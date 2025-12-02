@@ -173,7 +173,7 @@ export function LayerIcon({ layerPath }: LayerIconProps): JSX.Element {
           borderRadius: '4px',
         }}
       >
-        <LayerGroupIcon />
+        <LayerGroupIcon sx={{ transform: 'scaleX(-1)' }} />
       </Box>
     );
   }

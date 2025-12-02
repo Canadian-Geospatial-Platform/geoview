@@ -418,7 +418,18 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   function renderLayerButtons(): JSX.Element {
     return (
       <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px', marginLeft: 'auto' }}>
-        {datatableSettings[layerDetails.layerPath] && renderDetailsButton()}
+        {datatableSettings[layerDetails.layerPath] && (
+          <>
+            {renderDetailsButton()}
+            <Box
+              sx={{
+                width: '1px',
+                height: '30px',
+                backgroundColor: theme.palette.geoViewColor.bgColor.dark[300],
+              }}
+            />
+          </>
+        )}
         <IconButton aria-label={t('legend.refreshLayer')} className="buttonOutline" onClick={handleRefreshLayer}>
           <RestartAltIcon />
         </IconButton>

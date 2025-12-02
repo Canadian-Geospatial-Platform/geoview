@@ -16,7 +16,10 @@
     "guide": "Guide",
     "fullScreen": "Full screen",
     "processing": "Processing __param__ element(s) of __param__",
-    "clickEnlarge": "Click to enlarge"
+    "clickEnlarge": "Click to enlarge",
+    "show": "Show",
+    "hide": "Hide",
+    "none": "No"
   },
   "mapnav": {
     "arianavbar": "Vertical button group for map navigation",
@@ -95,7 +98,7 @@
     "legendInstructions": "Legend Instructions",
     "noLayersAdded": "No layers added to the map",
     "noLayersAddedDescription": "Add layers to the map by clicking on the 'Layers' button and adding the layers you want to display.",
-    "selectLayerAndScroll": "Access the layers panel"
+    "selectLayerAndScroll": "View in layers panel"
   },
   "layers": {
     "title": "Layers",
@@ -342,7 +345,7 @@
     "total": "total",
     "selectLayerAndScroll": "Access the data table panel",
     "accessAdvancedFunctions": "Access data table panel for advanced functions",
-    "filterToggle": "Toggle column filters"
+    "filterToggle": "column filters"
   },
   "geoChart": {
     "noChartAvailable": "Click on the map on a layer with chart"

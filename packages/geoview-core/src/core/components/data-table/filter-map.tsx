@@ -1,7 +1,8 @@
-import { Switch } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 
 import { getSxClasses } from './data-table-style';
+import { Switch } from '@/ui';
 import { useDataTableStoreActions, useDataTableLayerSettings } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { logger } from '@/core/utils/logger';
 
@@ -21,6 +22,8 @@ function FilterMap({ layerPath, isGlobalFilterOn }: FilterMapProps): JSX.Element
   // Log
   logger.logTraceRender('components/data-table/filter-map');
 
+  // Hook
+  const { t } = useTranslation();
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
@@ -34,6 +37,7 @@ function FilterMap({ layerPath, isGlobalFilterOn }: FilterMapProps): JSX.Element
       checked={!!datatableSettings[layerPath].mapFilteredRecord}
       sx={sxClasses.filterMap}
       disabled={isGlobalFilterOn}
+      label={t('dataTable.filterMap')!}
     />
   );
 }

@@ -15,7 +15,7 @@ import FilterMap from './filter-map';
 import type { ColumnsType } from './data-table-types';
 import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import type { SxStyles } from '@/ui/style/types';
-import { ClearFiltersIcon, FilterListIcon } from '@/ui/icons';
+import { ClearFiltersIcon } from '@/ui/icons';
 
 // GV: Disabled prop-types for this to work. From the react 19 ugprade guide it seems that prop-types are deprecated.
 interface TopToolbarProps<TData extends ColumnsType> {
@@ -74,7 +74,6 @@ function TopToolbar(props: TopToolbarProps<ColumnsType>): JSX.Element {
       <Box display="flex" sx={{ flexDirection: 'column', justifyContent: 'space-evenly' }}>
         <Box sx={sxClasses.selectedRows}>{datatableSettings[layerPath].toolbarRowSelectedMessageRecord}</Box>
         <Box display="flex">
-          <Box sx={sxClasses.selectedRows}>{t('dataTable.filterMap')}</Box>
           <FilterMap layerPath={layerPath} isGlobalFilterOn={!!globalFilter?.length} />
         </Box>
       </Box>
@@ -83,15 +82,17 @@ function TopToolbar(props: TopToolbarProps<ColumnsType>): JSX.Element {
           <MRTGlobalFilterTextField className="buttonOutline" table={table} />
         </Box>
         <Box display="flex" sx={{ justifyContent: 'space-around' }}>
-          <Box display="flex" alignItems="center" gap={1}>
-            <FilterListIcon />
-            <Switch
-              checked={table.getState().showColumnFilters}
-              onChange={() => table.setShowColumnFilters(!table.getState().showColumnFilters)}
-              size="small"
-              aria-label={t('dataTable.filterToggle')}
-            />
-          </Box>
+          <Switch
+            checked={table.getState().showColumnFilters}
+            onChange={() => table.setShowColumnFilters(!table.getState().showColumnFilters)}
+            size="small"
+            label={
+              table.getState().showColumnFilters
+                ? `${t('general.hide')} ${t('dataTable.filterToggle')}`
+                : `${t('general.show')} ${t('dataTable.filterToggle')}`
+            }
+            sx={sxClasses.filterMap}
+          />
 
           <IconButton
             className="buttonOutline"

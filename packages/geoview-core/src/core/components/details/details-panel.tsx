@@ -133,7 +133,11 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
       logger.logTraceUseCallback('DETAILS-PANEL - getNumFeaturesLabel');
 
       const numOfFeatures = layer.features?.length ?? 0;
-      return `${numOfFeatures} ${t('details.feature')}${numOfFeatures > 1 ? 's' : ''} ${numOfFeatures === 0 ? t('details.selected') : ''}`;
+      const label =
+        numOfFeatures === 0
+          ? `${t('general.none')} ${t('details.feature')} ${t('details.selected')}`
+          : `${numOfFeatures} ${t('details.feature')}${numOfFeatures > 1 ? 's' : ''}`;
+      return label;
     },
     [t]
   );
@@ -701,7 +705,9 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
             className="buttonOutline"
             disabled={checkedFeatures.length === 0}
           >
-            <ClearHighlightIcon />
+            <Box sx={{ display: 'flex', alignItems: 'center', height: 24 }}>
+              <ClearHighlightIcon sx={{ fontSize: 24 }} />
+            </Box>
           </IconButton>
         </Box>
       }

@@ -158,37 +158,56 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
   return (
     <Stack direction="row" alignItems="center" sx={sxClasses.layerStackIcons}>
       {!!subTitle.length && <Typography fontSize={14}>{subTitle}</Typography>}
-      <Box sx={sxClasses.subtitle}>
+      <Box sx={{ ...sxClasses.subtitle, display: 'flex', alignItems: 'center' }}>
         {/* Button to select layer in panel and scroll to footer */}
         {hasLayersTab && (
-          <IconButton
-            aria-label={t('legend.selectLayerAndScroll')}
-            className="buttonOutline"
-            onClick={() => {
-              // If there is 2 components with layers tab (app bar or footer), prefer footer
-              if (hasFooterLayersTab) {
-                // Open footer layers tab
-                setActiveFooterBarTab('layers');
-                if (isFooterCollapsed) setFooterBarIsCollapsed(false);
-                setTimeout(() => {
-                  setSelectedLayerPath(layerPath);
-                  // Scroll the footer into view if not visible
-                  const footer = document.querySelector('.tabsContainer');
-                  if (footer) {
-                    scrollIfNotVisible(footer as HTMLElement, 'start');
-                  }
-                }, 350);
-              } else if (hasAppBarLayersTab) {
-                // Open appBar layers tab
-                setActiveAppBarTab('layers', true, false);
-                setTimeout(() => {
-                  setSelectedLayerPath(layerPath);
-                }, 350);
-              }
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              marginRight: 2,
+              paddingRight: 2,
+              position: 'relative',
+              '&::after': {
+                content: '""',
+                position: 'absolute',
+                right: 0,
+                top: '15%',
+                bottom: '15%',
+                width: '1px',
+                backgroundColor: theme.palette.geoViewColor.bgColor.dark[300],
+              },
             }}
           >
-            <LayersIcon />
-          </IconButton>
+            <IconButton
+              aria-label={t('legend.selectLayerAndScroll')}
+              className="buttonOutline"
+              onClick={() => {
+                // If there is 2 components with layers tab (app bar or footer), prefer footer
+                if (hasFooterLayersTab) {
+                  // Open footer layers tab
+                  setActiveFooterBarTab('layers');
+                  if (isFooterCollapsed) setFooterBarIsCollapsed(false);
+                  setTimeout(() => {
+                    setSelectedLayerPath(layerPath);
+                    // Scroll the footer into view if not visible
+                    const footer = document.querySelector('.tabsContainer');
+                    if (footer) {
+                      scrollIfNotVisible(footer as HTMLElement, 'start');
+                    }
+                  }, 350);
+                } else if (hasAppBarLayersTab) {
+                  // Open appBar layers tab
+                  setActiveAppBarTab('layers', true, false);
+                  setTimeout(() => {
+                    setSelectedLayerPath(layerPath);
+                  }, 350);
+                }
+              }}
+            >
+              <LayersIcon />
+            </IconButton>
+          </Box>
         )}
         <IconButton
           edge="end"

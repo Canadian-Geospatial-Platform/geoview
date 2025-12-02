@@ -45,9 +45,8 @@ class GeoChartFooterPlugin extends FooterPlugin {
         geochart: {
           title: 'Chart',
           panel: {
-            chart: 'with chart',
             feature: 'feature',
-            empty: 'feature with chart selected',
+            empty: 'No feature selected',
             loadingUI: 'Loading the Chart panel',
           },
         },
@@ -56,9 +55,8 @@ class GeoChartFooterPlugin extends FooterPlugin {
         geochart: {
           title: 'Graphique',
           panel: {
-            chart: 'avec graphique',
             feature: 'élément',
-            empty: 'élément avec graphique sélectionné',
+            empty: 'Aucun élément sélectionné',
             loadingUI: "Chargement de l'interface pour graphique",
           },
         },
