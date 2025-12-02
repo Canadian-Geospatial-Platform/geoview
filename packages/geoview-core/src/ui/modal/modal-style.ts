@@ -14,8 +14,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       backgroundColor: 'transparent',
     },
     '& .MuiPaper-root': {
-      width: 450,
-      height: 'auto',
       borderRadius: '6px',
     },
   },
