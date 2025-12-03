@@ -1432,7 +1432,7 @@ export class LayerApi {
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    * @throws {LayerNotGeoJsonError} When the layer is not a GeoJson layer.
    */
-  setGeojsonSource(layerPath: string, geojson: GeoJSONObject | string): void {
+  async setGeojsonSource(layerPath: string, geojson: GeoJSONObject | string): Promise<void> {
     // Get the map id
     const mapId = this.getMapId();
 
@@ -1443,7 +1443,7 @@ export class LayerApi {
     if (!(gvLayer instanceof GVGeoJSON)) throw new LayerNotGeoJsonError(layerPath, gvLayer.getLayerName());
 
     // Override the GeoJson source
-    gvLayer.setGeojsonSource(geojson, this.mapViewer.getProjection());
+    await gvLayer.setGeojsonSource(geojson, this.mapViewer.getProjection());
 
     // Update the bounds in the store
     const bounds = gvLayer.getBounds(this.mapViewer.getProjection(), MapViewer.DEFAULT_STOPS);
