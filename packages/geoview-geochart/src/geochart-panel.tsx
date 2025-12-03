@@ -51,7 +51,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   const visibleInRangeLayers = useMapAllVisibleandInRangeLayers();
   const storeArrayOfLayerData = useGeochartLayerDataArrayBatch();
   const selectedLayerPath = useGeochartSelectedLayerPath();
-  const geochartActions = useGeochartStoreActions();
+  const { setSelectedLayerPath, setLayerDataArrayBatchLayerPathBypass } = useGeochartStoreActions() ?? {};
   const { isLayerHiddenOnMap } = useMapStoreActions();
   const displayLanguage = useAppDisplayLanguage();
   const mapClickCoordinates = useMapClickCoordinates();
@@ -136,9 +136,9 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
       logger.logTraceUseCallback('GEOCHART-PANEL - handleLayerChange', layer);
 
       // Set the selected layer path in the store which will in turn trigger the store listeners on this component
-      geochartActions?.setSelectedLayerPath(layer.layerPath);
+      setSelectedLayerPath?.(layer.layerPath);
     },
-    [geochartActions]
+    [setSelectedLayerPath]
   );
 
   // Convert the config object from core to geoview-geochart type-equivalent
@@ -204,9 +204,9 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
 
     // Set the layer data array batch bypass to the currently selected layer
     if (selectedLayerPath) {
-      geochartActions?.setLayerDataArrayBatchLayerPathBypass(selectedLayerPath);
+      setLayerDataArrayBatchLayerPathBypass?.(selectedLayerPath);
     }
-  }, [selectedLayerPath, geochartActions]);
+  }, [selectedLayerPath, setLayerDataArrayBatchLayerPathBypass]);
 
   /**
    * Effect used to persist or alter the current layer selection based on the layers list changes.
@@ -217,16 +217,11 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
     logger.logTraceUseEffect('GEOCHART-PANEL - check selection', memoLayerSelectedItem, selectedLayerPath);
 
     // If selected layer path is not empty launch the checker to try to maintain the selection on the correct selected layer
-    if (selectedLayerPath && geochartActions) {
+    if (selectedLayerPath && setLayerDataArrayBatchLayerPathBypass && setSelectedLayerPath) {
       // Redirect to the keep selected layer path logic
-      checkSelectedLayerPathList(
-        geochartActions.setLayerDataArrayBatchLayerPathBypass,
-        geochartActions.setSelectedLayerPath,
-        memoLayerSelectedItem,
-        memoLayersList
-      );
+      checkSelectedLayerPathList(setLayerDataArrayBatchLayerPathBypass, setSelectedLayerPath, memoLayerSelectedItem, memoLayersList);
     }
-  }, [memoLayerSelectedItem, memoLayersList, selectedLayerPath, geochartActions]);
+  }, [memoLayerSelectedItem, memoLayersList, selectedLayerPath, setLayerDataArrayBatchLayerPathBypass, setSelectedLayerPath]);
 
   /**
    * Select a layer after a map click happened on the map.
@@ -236,13 +231,13 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
     logger.logTraceUseEffect('DETAILS-PANEL- mapClickCoordinates', mapClickCoordinates);
 
     // If nothing was previously selected at all
-    if (mapClickCoordinates && memoLayersList?.length && !selectedLayerPath?.length && geochartActions) {
+    if (mapClickCoordinates && memoLayersList?.length && !selectedLayerPath?.length && setSelectedLayerPath) {
       const selectedLayer = memoLayersList.find((layer) => !!layer.numOffeatures);
       // Select the first layer that has features
-      geochartActions.setSelectedLayerPath(selectedLayer?.layerPath ?? '');
+      setSelectedLayerPath(selectedLayer?.layerPath ?? '');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapClickCoordinates, memoLayersList, geochartActions]);
+  }, [mapClickCoordinates, memoLayersList, setSelectedLayerPath]);
 
   // #endregion HOOKS
 

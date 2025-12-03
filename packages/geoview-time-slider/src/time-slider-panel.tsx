@@ -38,7 +38,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   // timeSliderLayers will always be present here, ! used to ignore possibility of it being undefined
   const timeSliderLayers = useTimeSliderLayers()!;
   const selectedLayerPath = useTimeSliderSelectedLayerPath();
-  const { setSelectedLayerPath } = useTimeSliderStoreActions();
+  const { setSelectedLayerPath } = useTimeSliderStoreActions() ?? {};
   const { isLayerHiddenOnMap } = useMapStoreActions();
   const legendLayers = useLayerLegendLayers();
 
@@ -52,7 +52,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
       logger.logTraceUseCallback('TIME-SLIDER-PANEL - handleLayerList');
 
       // Set the layer path
-      setSelectedLayerPath(layer.layerPath);
+      setSelectedLayerPath?.(layer.layerPath);
     },
     [setSelectedLayerPath]
   );
