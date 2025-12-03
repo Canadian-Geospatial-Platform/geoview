@@ -5,9 +5,11 @@ import type { SxStyles } from '@/ui/style/types';
  * Get custom sx classes for the MUI modal
  *
  * @param {Theme} theme the theme object
+ * @param {string | number} [width] - Optional width for the dialog
+ * @param {string | number} [height] - Optional height for the dialog
  * @returns {Object} the sx classes object
  */
-export const getSxClasses = (theme: Theme): SxStyles => ({
+export const getSxClasses = (theme: Theme, width?: string | number, height?: string | number): SxStyles => ({
   dialog: {
     position: 'absolute',
     "& ~ & > div[class*='backdrop']": {
@@ -16,6 +18,15 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     '& .MuiPaper-root': {
       borderRadius: '6px',
     },
+    ...(width || height
+      ? {
+          '& .MuiDialog-paper': {
+            ...(width && { width }),
+            ...(height && { height, maxHeight: 'calc(90vh - 200px)' }),
+            maxWidth: 'none',
+          },
+        }
+      : {}),
   },
   backdrop: {
     position: 'absolute',
@@ -56,4 +67,26 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       textAlign: 'center',
     },
   },
+});
+
+/**
+ * Get dialog styles with optional width and height
+ *
+ * @param {SxStyles} baseDialogStyle - The base dialog style from sxClasses.dialog
+ * @param {string | number} [width] - Optional width for the dialog
+ * @param {string | number} [height] - Optional height for the dialog
+ * @returns {SxStyles} The merged dialog styles
+ * @deprecated Use getSxClasses with width and height parameters instead
+ */
+export const getDialogWithSize = (baseDialogStyle: SxStyles, width?: string | number, height?: string | number): SxStyles => ({
+  ...baseDialogStyle,
+  ...(width || height
+    ? {
+        '& .MuiDialog-paper': {
+          ...(width && { width }),
+          ...(height && { height, maxHeight: 'calc(90vh - 200px)' }),
+          maxWidth: 'none',
+        },
+      }
+    : {}),
 });

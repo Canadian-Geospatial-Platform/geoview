@@ -201,7 +201,7 @@ function ModalUI(props: DialogPropsExtend): JSX.Element {
   // Hooks
   const { t } = useTranslation();
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const sxClasses = useMemo(() => getSxClasses(theme, width, height), [theme, width, height]);
   const fadeInAnimation = useFadeIn();
   const AnimatedDialog = animated(Dialog);
 
@@ -313,18 +313,7 @@ function ModalUI(props: DialogPropsExtend): JSX.Element {
         open={open}
         onClose={onClose}
         maxWidth="xl"
-        sx={{
-          ...sxClasses.dialog,
-          ...(width || height
-            ? {
-                '& .MuiDialog-paper': {
-                  ...(width && { width }),
-                  ...(height && { height, maxHeight: 'calc(90vh - 200px)' }),
-                  maxWidth: 'none',
-                },
-              }
-            : {}),
-        }}
+        sx={sxClasses.dialog}
         className={`${className && className}`}
         style={{ ...style, position: 'fixed' }}
         aria-labelledby={ariaLabeledBy}

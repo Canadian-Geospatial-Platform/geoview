@@ -23,12 +23,7 @@ import {
   useLayerSelectorControls,
   useLayerSelectorStatus,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import {
-  useUIFooterBarIsCollapsed,
-  useUIStoreActions,
-  useUIFooterBarComponents,
-  useUIAppbarComponents,
-} from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useUIFooterBarComponents, useUIAppbarComponents } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import type { TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
 import {
   useMapStoreActions,
@@ -38,7 +33,7 @@ import {
 } from '@/core/stores/';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
-import { scrollIfNotVisible } from '@/core/utils/utilities';
+import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
 
 // TODO: WCAG Issue #3108 - Check all icon buttons for aria-label clarity and translations
 // TODO: WCAG Issue #3108 - Check all icon buttons for "state related" aria values (i.e aria-checked, aria-disabled, etc.)
@@ -115,13 +110,15 @@ const useSubtitle = (layerPath: string, children: TypeLegendLayer[], items: Type
 export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.Element {
   // Add store actions for selecting layer and UI
   const { setSelectedLayerPath } = useLayerStoreActions();
-  const { setFooterBarIsCollapsed, setActiveFooterBarTab, setActiveAppBarTab } = useUIStoreActions();
-  const isFooterCollapsed = useUIFooterBarIsCollapsed();
   const footerBarComponents = useUIFooterBarComponents();
   const appBarComponents = useUIAppbarComponents();
   const hasFooterLayersTab = footerBarComponents.includes('layers');
   const hasAppBarLayersTab = appBarComponents.includes('layers');
   const hasLayersTab = hasFooterLayersTab || hasAppBarLayersTab;
+
+  // Use navigate hook
+  const navigateToLayers = useNavigateToTab('layers', setSelectedLayerPath);
+
   // Log
   logger.logTraceRender('components/legend/legend-layer-ctrl', layerPath);
 
@@ -161,51 +158,14 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
       <Box sx={{ ...sxClasses.subtitle, display: 'flex', alignItems: 'center' }}>
         {/* Button to select layer in panel and scroll to footer */}
         {hasLayersTab && (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              marginRight: 2,
-              paddingRight: 2,
-              position: 'relative',
-              '&::after': {
-                content: '""',
-                position: 'absolute',
-                right: 0,
-                top: '15%',
-                bottom: '15%',
-                width: '1px',
-                backgroundColor: theme.palette.geoViewColor.bgColor.dark[300],
-              },
-            }}
-          >
+          <Box sx={sxClasses.buttonDivider}>
             <IconButton
               aria-label={t('legend.selectLayerAndScroll')}
               className="buttonOutline"
               onClick={(event) => {
                 // Stop propagation to prevent AppBar's onScrollShellIntoView from firing
                 event.stopPropagation();
-
-                // If there is 2 components with layers tab (app bar or footer), prefer footer
-                if (hasFooterLayersTab) {
-                  // Open footer layers tab
-                  setActiveFooterBarTab('layers');
-                  if (isFooterCollapsed) setFooterBarIsCollapsed(false);
-                  setTimeout(() => {
-                    setSelectedLayerPath(layerPath);
-                    // Scroll the footer into view if not visible
-                    const footer = document.querySelector('.tabsContainer');
-                    if (footer) {
-                      scrollIfNotVisible(footer as HTMLElement, 'start');
-                    }
-                  }, 350);
-                } else if (hasAppBarLayersTab) {
-                  // Open appBar layers tab
-                  setActiveAppBarTab('layers', true, false);
-                  setTimeout(() => {
-                    setSelectedLayerPath(layerPath);
-                  }, 350);
-                }
+                navigateToLayers({ layerPath });
               }}
             >
               <LayersIcon />

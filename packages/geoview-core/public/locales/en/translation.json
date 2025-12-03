@@ -49,7 +49,8 @@
   "mapctrl": {
     "rotation": {
       "rotation": "Map rotation",
-      "projection": "Projection"
+      "projection": "Projection",
+      "fixedNorth": "Fix North"
     },
     "mouseposition": {
       "east": "E",
@@ -98,7 +99,7 @@
     "legendInstructions": "Legend Instructions",
     "noLayersAdded": "No layers added to the map",
     "noLayersAddedDescription": "Add layers to the map by clicking on the 'Layers' button and adding the layers you want to display.",
-    "selectLayerAndScroll": "View in layers panel"
+    "selectLayerAndScroll": "Show in Layers panel"
   },
   "layers": {
     "title": "Layers",
@@ -196,7 +197,8 @@
     "tableViewNone": "Table (unavailable)",
     "moveLayerUp": "Move layer up",
     "moveLayerDown": "Move layer down",
-    "layerControls": "Layers controls"
+    "layerControls": "Layers controls",
+    "selectLayerAndScrollTimeSlider": "Show in Time Slider panel"
   },
   "details": {
     "title": "Details",
@@ -230,7 +232,8 @@
     "northing": "Northing",
     "ntsMapsheet": "NTS Mapsheet",
     "elevation": "Elevation",
-    "guideControls": "Guide controls"
+    "guideControls": "Guide controls",
+    "selectLayerAndScrollChart": "Show in Chart panel"
   },
   "lightbox": {
     "next": "Next",
@@ -343,8 +346,8 @@
     "noFeatures": "unknown...",
     "showing": "showing",
     "total": "total",
-    "selectLayerAndScroll": "Access the data table panel",
-    "accessAdvancedFunctions": "Access data table panel for advanced functions",
+    "selectLayerAndScroll": "Show in Data Table panel",
+    "accessAdvancedFunctions": "Access Data Table panel for advanced functions",
     "filterToggle": "column filters"
   },
   "geoChart": {

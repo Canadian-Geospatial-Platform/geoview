@@ -317,4 +317,5 @@ export const useTimeSliderFilters = (): Record<string, string> =>
   useStore(useGeoViewStore(), (state) => state.timeSliderState?.sliderFilters);
 
 // Store Actions
-export const useTimeSliderStoreActions = (): TimeSliderActions => useStore(useGeoViewStore(), (state) => state.timeSliderState.actions);
+export const useTimeSliderStoreActions = (): TimeSliderActions | undefined =>
+  useStore(useGeoViewStore(), (state) => state.timeSliderState?.actions);

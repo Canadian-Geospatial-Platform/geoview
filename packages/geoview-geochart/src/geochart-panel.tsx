@@ -51,7 +51,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   const visibleInRangeLayers = useMapAllVisibleandInRangeLayers();
   const storeArrayOfLayerData = useGeochartLayerDataArrayBatch();
   const selectedLayerPath = useGeochartSelectedLayerPath();
-  const { setSelectedLayerPath, setLayerDataArrayBatchLayerPathBypass } = useGeochartStoreActions();
+  const geochartActions = useGeochartStoreActions();
   const { isLayerHiddenOnMap } = useMapStoreActions();
   const displayLanguage = useAppDisplayLanguage();
   const mapClickCoordinates = useMapClickCoordinates();
@@ -136,26 +136,31 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
       logger.logTraceUseCallback('GEOCHART-PANEL - handleLayerChange', layer);
 
       // Set the selected layer path in the store which will in turn trigger the store listeners on this component
-      setSelectedLayerPath(layer.layerPath);
+      geochartActions?.setSelectedLayerPath(layer.layerPath);
     },
-    [setSelectedLayerPath]
+    [geochartActions]
   );
 
   // Convert the config object from core to geoview-geochart type-equivalent
   const memoConfigObj = useMemo(() => {
     // Memoize a better config object using the geoview-geochart type-equivalent instead of the store's
-    return Object.fromEntries(
-      Object.entries(configObj).map(([layerPath, layerChartConfig]) => [
-        layerPath,
-        { charts: [convertGeoViewGeoChartConfigFromCore(layerChartConfig)] } as GeoViewGeoChartRootConfig,
-      ])
-    );
+    return configObj
+      ? Object.fromEntries(
+          Object.entries(configObj).map(([layerPath, layerChartConfig]) => [
+            layerPath,
+            { charts: [convertGeoViewGeoChartConfigFromCore(layerChartConfig)] } as GeoViewGeoChartRootConfig,
+          ])
+        )
+      : {};
   }, [configObj]);
 
   // Reacts when the array of layer data updates
   const memoLayersList = useMemo(() => {
     // Log
     logger.logTraceUseMemo('GEOCHART-PANEL - memoLayersList', storeArrayOfLayerData);
+
+    // Return empty array if no data
+    if (!storeArrayOfLayerData) return [];
 
     // Set the layers list
     return visibleInRangeLayers.reduce<LayerListEntry[]>((acc, layerPath) => {
@@ -198,8 +203,10 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
     logger.logTraceUseEffect('GEOCHART-PANEL - update layer data bypass', selectedLayerPath);
 
     // Set the layer data array batch bypass to the currently selected layer
-    setLayerDataArrayBatchLayerPathBypass(selectedLayerPath);
-  }, [selectedLayerPath, setLayerDataArrayBatchLayerPathBypass]);
+    if (selectedLayerPath) {
+      geochartActions?.setLayerDataArrayBatchLayerPathBypass(selectedLayerPath);
+    }
+  }, [selectedLayerPath, geochartActions]);
 
   /**
    * Effect used to persist or alter the current layer selection based on the layers list changes.
@@ -210,11 +217,16 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
     logger.logTraceUseEffect('GEOCHART-PANEL - check selection', memoLayerSelectedItem, selectedLayerPath);
 
     // If selected layer path is not empty launch the checker to try to maintain the selection on the correct selected layer
-    if (selectedLayerPath) {
+    if (selectedLayerPath && geochartActions) {
       // Redirect to the keep selected layer path logic
-      checkSelectedLayerPathList(setLayerDataArrayBatchLayerPathBypass, setSelectedLayerPath, memoLayerSelectedItem, memoLayersList);
+      checkSelectedLayerPathList(
+        geochartActions.setLayerDataArrayBatchLayerPathBypass,
+        geochartActions.setSelectedLayerPath,
+        memoLayerSelectedItem,
+        memoLayersList
+      );
     }
-  }, [memoLayerSelectedItem, memoLayersList, selectedLayerPath, setLayerDataArrayBatchLayerPathBypass, setSelectedLayerPath]);
+  }, [memoLayerSelectedItem, memoLayersList, selectedLayerPath, geochartActions]);
 
   /**
    * Select a layer after a map click happened on the map.
@@ -224,13 +236,13 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
     logger.logTraceUseEffect('DETAILS-PANEL- mapClickCoordinates', mapClickCoordinates);
 
     // If nothing was previously selected at all
-    if (mapClickCoordinates && memoLayersList?.length && !selectedLayerPath.length) {
+    if (mapClickCoordinates && memoLayersList?.length && !selectedLayerPath?.length && geochartActions) {
       const selectedLayer = memoLayersList.find((layer) => !!layer.numOffeatures);
       // Select the first layer that has features
-      setSelectedLayerPath(selectedLayer?.layerPath ?? '');
+      geochartActions.setSelectedLayerPath(selectedLayer?.layerPath ?? '');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapClickCoordinates, memoLayersList, setSelectedLayerPath]);
+  }, [mapClickCoordinates, memoLayersList, geochartActions]);
 
   // #endregion HOOKS
 
@@ -249,7 +261,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
         key={key}
         mapId={mapId}
         config={chartsConfig}
-        layers={storeArrayOfLayerData}
+        layers={storeArrayOfLayerData ?? []}
         schemaValidator={schemaValidator}
         provideCallbackRedraw={(theCallbackRedraw) => handleProvideCallbackRedraw(key, theCallbackRedraw)}
       />

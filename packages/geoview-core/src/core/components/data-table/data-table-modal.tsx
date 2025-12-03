@@ -9,7 +9,6 @@ import { Modal, MRTTable as Table, type MRT_ColumnDef as MRTColumnDef, Box, Circ
 import {
   useUIActiveFocusItem,
   useUIStoreActions,
-  useUIFooterBarIsCollapsed,
   useUIFooterBarComponents,
   useUIAppbarComponents,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
@@ -22,6 +21,7 @@ import { useFeatureFieldInfos } from './hooks';
 import type { TypeFieldEntry } from '@/api/types/map-schema-types';
 import { useAppDisplayLanguage, useAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { TableViewIcon } from '@/ui/icons';
+import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
 
 /**
  * Open lighweight version (no function) of data table in a modal window
@@ -40,13 +40,12 @@ export default function DataTableModal(): JSX.Element {
   const [isLoading, setIsLoading] = useState(true);
 
   // get store function
-  const { disableFocusTrap, setActiveFooterBarTab, setActiveAppBarTab, setFooterBarIsCollapsed } = useUIStoreActions();
+  const { disableFocusTrap } = useUIStoreActions();
   const activeModalId = useUIActiveFocusItem().activeElementId;
   const selectedLayer = useLayerSelectedLayerPath();
   const layersData = useDataTableAllFeaturesDataArray();
   const language = useAppDisplayLanguage();
   const shellContainer = useAppShellContainer();
-  const isFooterCollapsed = useUIFooterBarIsCollapsed();
   const footerBarComponents = useUIFooterBarComponents();
   const appBarComponents = useUIAppbarComponents();
   const { setSelectedLayerPath: setDataTableSelectedLayerPath } = useDataTableStoreActions();
@@ -57,6 +56,9 @@ export default function DataTableModal(): JSX.Element {
   const hasFooterDataTableTab = footerBarComponents.includes('data-table');
   const hasAppBarDataTableTab = appBarComponents.includes('data-table');
   const hasDataTableTab = hasFooterDataTableTab || hasAppBarDataTableTab;
+
+  // Use navigate hook with scrollToFooter disabled since modal closes
+  const navigateToDataTable = useNavigateToTab('data-table', setDataTableSelectedLayerPath);
 
   // Create columns for data table.
   const mappedLayerData = useFeatureFieldInfos(layersData);
@@ -167,33 +169,9 @@ export default function DataTableModal(): JSX.Element {
   const handleNavigateToDataTable = useCallback(() => {
     // Close modal first
     disableFocusTrap();
-
-    // If there is 2 components with data-table tab (app bar or footer), prefer footer
-    if (hasFooterDataTableTab) {
-      // Open footer data-table tab
-      setActiveFooterBarTab('data-table');
-      if (isFooterCollapsed) setFooterBarIsCollapsed(false);
-      setTimeout(() => {
-        setDataTableSelectedLayerPath(selectedLayer!);
-      }, 350);
-    } else if (hasAppBarDataTableTab) {
-      // Open appBar data-table tab
-      setActiveAppBarTab('data-table', true, false);
-      setTimeout(() => {
-        setDataTableSelectedLayerPath(selectedLayer!);
-      }, 350);
-    }
-  }, [
-    disableFocusTrap,
-    hasFooterDataTableTab,
-    hasAppBarDataTableTab,
-    isFooterCollapsed,
-    selectedLayer,
-    setActiveFooterBarTab,
-    setFooterBarIsCollapsed,
-    setDataTableSelectedLayerPath,
-    setActiveAppBarTab,
-  ]);
+    // Navigate to data-table tab with selected layer
+    navigateToDataTable({ layerPath: selectedLayer! });
+  }, [disableFocusTrap, navigateToDataTable, selectedLayer]);
 
   return (
     <Modal
