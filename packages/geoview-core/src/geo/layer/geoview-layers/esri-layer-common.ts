@@ -20,12 +20,7 @@ import { Fetch } from '@/core/utils/fetch-helper';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import type { EsriRelatedRecordsJsonResponseRelatedRecord } from '@/geo/layer/gv-layers/utils';
-import {
-  esriConvertEsriGeometryTypeToOLGeometryType,
-  esriParseFeatureInfoEntries,
-  esriQueryRecordsByUrl,
-  esriQueryRelatedRecordsByUrl,
-} from '@/geo/layer/gv-layers/utils';
+import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { EsriRenderer } from '@/geo/utils/renderer/esri-renderer';
 import type { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import type { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
@@ -399,7 +394,7 @@ export async function commonProcessLayerMetadata<
  */
 export function parseFeatureInfoEntries(records: EsriRelatedRecordsJsonResponseRelatedRecord[]): TypeFeatureInfoEntryPartial[] {
   // Redirect
-  return esriParseFeatureInfoEntries(records);
+  return GVLayerUtilities.esriParseFeatureInfoEntries(records);
 }
 
 /**
@@ -409,7 +404,7 @@ export function parseFeatureInfoEntries(records: EsriRelatedRecordsJsonResponseR
  */
 export function queryRecordsByUrl(url: string): Promise<TypeFeatureInfoEntryPartial[]> {
   // Redirect
-  return esriQueryRecordsByUrl(url);
+  return GVLayerUtilities.esriQueryRecordsByUrl(url);
 }
 
 /**
@@ -420,7 +415,7 @@ export function queryRecordsByUrl(url: string): Promise<TypeFeatureInfoEntryPart
  */
 export function queryRelatedRecordsByUrl(url: string, recordGroupIndex: number): Promise<TypeFeatureInfoEntryPartial[]> {
   // Redirect
-  return esriQueryRelatedRecordsByUrl(url, recordGroupIndex);
+  return GVLayerUtilities.esriQueryRelatedRecordsByUrl(url, recordGroupIndex);
 }
 
 /**
@@ -430,5 +425,5 @@ export function queryRelatedRecordsByUrl(url: string, recordGroupIndex: number):
  */
 export function convertEsriGeometryTypeToOLGeometryType(esriGeometryType: string): TypeStyleGeometry {
   // Redirect
-  return esriConvertEsriGeometryTypeToOLGeometryType(esriGeometryType);
+  return GVLayerUtilities.esriConvertEsriGeometryTypeToOLGeometryType(esriGeometryType);
 }

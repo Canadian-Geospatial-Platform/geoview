@@ -30,7 +30,7 @@ import type {
 import type { TypeLayerMetadataEsriExtent } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { GeometryJson } from '@/geo/layer/gv-layers/utils';
-import { esriGetFieldType, esriGetFieldDomain, parseDateTimeValuesEsriDynamic } from '@/geo/layer/gv-layers/utils';
+import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -95,6 +95,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
     // Create and set the OpenLayer layer
     this.setOLLayer(new ImageLayer(imageLayerOptions));
   }
+
+  // #region OVERRIDES
 
   /**
    * Overrides the fetching of the legend for an Esri Dynamic layer.
@@ -293,7 +295,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    */
   protected override onGetFieldType(fieldName: string): TypeOutfieldsType {
     // Redirect
-    return esriGetFieldType(this.getLayerConfig(), fieldName);
+    return GVLayerUtilities.esriGetFieldType(this.getLayerConfig(), fieldName);
   }
 
   /**
@@ -303,7 +305,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    */
   protected override onGetFieldDomain(fieldName: string): null | codedValueType | rangeDomainType {
     // Redirect
-    return esriGetFieldDomain(this.getLayerConfig(), fieldName);
+    return GVLayerUtilities.esriGetFieldDomain(this.getLayerConfig(), fieldName);
   }
 
   /**
@@ -523,6 +525,10 @@ export class GVEsriDynamic extends AbstractGVRaster {
     return arrayOfFeatureInfoEntries;
   }
 
+  // #endregion OVERRIDES
+
+  // #region METHODS
+
   /**
    * Applies a view filter to an Esri Dynamic layer's source by updating the `layerDefs` parameter.
    * @param {string | undefined} filter - The raw filter string input (defaults to an empty string if not provided).
@@ -638,6 +644,10 @@ export class GVEsriDynamic extends AbstractGVRaster {
     }
   }
 
+  // #endregion METHODS
+
+  // #region STATICMETHODS
+
   /**
    * Applies a view filter to an Esri Dynamic layer's source by updating the `layerDefs` parameter.
    * This function is responsible for generating the appropriate filter expression based on the layer configuration,
@@ -672,7 +682,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       filterValueToUse = this.getFilterFromStyle(layerConfig, style)!;
 
       // Parse the filter value to use
-      filterValueToUse = parseDateTimeValuesEsriDynamic(filterValueToUse, externalDateFragments);
+      filterValueToUse = GVLayerUtilities.parseDateTimeValuesEsriDynamic(filterValueToUse, externalDateFragments);
 
       // Create the source parameter to update
       const layerDefs = layerConfig.getLayerMetadata()?.type === 'Raster Layer' ? '' : `{"${layerConfig.layerId}": "${filterValueToUse}"}`;
@@ -1135,6 +1145,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
       }
     }
   }
+
+  // #endregion STATIC METHODS
 }
 
 export type EsriQueryJsonResponse = {

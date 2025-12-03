@@ -20,7 +20,7 @@ import { logger } from '@/core/utils/logger';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import type { TypeFeatureInfoEntry, TypeOutfieldsType } from '@/api/types/map-schema-types';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
-import { createAliasLookup, featureInfoGetFieldType, parseDateTimeValuesVector } from '@/geo/layer/gv-layers/utils';
+import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
@@ -90,6 +90,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     this.setOLLayer(new VectorLayer<VectorSource<Feature<Geometry>>>(layerOptions));
   }
 
+  // #region OVERRIDES
+
   /**
    * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
    * @override
@@ -127,7 +129,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    */
   protected override onGetFieldType(fieldName: string): TypeOutfieldsType {
     // Redirect
-    return featureInfoGetFieldType(this.getLayerConfig(), fieldName);
+    return GVLayerUtilities.featureInfoGetFieldType(this.getLayerConfig(), fieldName);
   }
 
   /**
@@ -219,29 +221,6 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   }
 
   /**
-   * Applies a view filter to a Vector layer's configuration by updating the layerConfig.filterEquation parameter.
-   * @param {string | undefined} filter - The raw filter string input (defaults to an empty string if not provided).
-   */
-  applyViewFilter(filter: string | undefined = ''): void {
-    // Log
-    logger.logTraceCore('ABSTRACT-GV-VECTOR - applyViewFilter', this.getLayerPath());
-
-    // Redirect
-    AbstractGVVector.applyViewFilterOnConfig(
-      this.getLayerConfig(),
-      this.getLayerConfig().getExternalFragmentsOrder(),
-      this,
-      filter,
-      (filterToUse: string) => {
-        // Emit event
-        this.emitLayerFilterApplied({
-          filter: filterToUse,
-        });
-      }
-    );
-  }
-
-  /**
    * Overrides the way to get the bounds for this layer type.
    * @param {OLProjection} projection - The projection to get the bounds into.
    * @param {number} stops - The number of stops to use to generate the extent.
@@ -310,6 +289,33 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     return Promise.resolve(calculatedExtent);
   }
 
+  // #endregion OVERRIDES
+
+  // #region METHODS
+
+  /**
+   * Applies a view filter to a Vector layer's configuration by updating the layerConfig.filterEquation parameter.
+   * @param {string | undefined} filter - The raw filter string input (defaults to an empty string if not provided).
+   */
+  applyViewFilter(filter: string | undefined = ''): void {
+    // Log
+    logger.logTraceCore('ABSTRACT-GV-VECTOR - applyViewFilter', this.getLayerPath());
+
+    // Redirect
+    AbstractGVVector.applyViewFilterOnConfig(
+      this.getLayerConfig(),
+      this.getLayerConfig().getExternalFragmentsOrder(),
+      this,
+      filter,
+      (filterToUse: string) => {
+        // Emit event
+        this.emitLayerFilterApplied({
+          filter: filterToUse,
+        });
+      }
+    );
+  }
+
   /**
    * Sets the style applied flag indicating when a style has been applied for the AbstractGVVector via the style callback function.
    * @param {boolean} styleApplied - Indicates if the style has been applied on the AbstractGVVector.
@@ -319,6 +325,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     this.styleApplied = styleApplied;
     if (changed) this.#emitStyleApplied({ styleApplied });
   }
+
+  // #endregion METHODS
 
   // #region EVENTS
 
@@ -352,6 +360,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   // #endregion EVENTS
 
+  // #region STATIC METHODS
+
   /**
    * Calculates a style for the given feature, based on the layer current style and options.
    * @param {AbstractGVLayer} layer - The layer on which to work for the style.
@@ -373,7 +383,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
     // Create lookup dictionary of names to alias
     const outfields = layer.getLayerConfig().getOutfields();
-    const aliasLookup = createAliasLookup(outfields);
+    const aliasLookup = GVLayerUtilities.createAliasLookup(outfields);
 
     // Get and create Feature style if necessary
     return GeoviewRenderer.getAndCreateFeatureStyle(
@@ -426,7 +436,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
     try {
       // Parse is some more for the dates
-      filterValueToUse = parseDateTimeValuesVector(filterValueToUse, externalDateFragments);
+      filterValueToUse = GVLayerUtilities.parseDateTimeValuesVector(filterValueToUse, externalDateFragments);
 
       // Analyze the layer filter
       const filterEquation = GeoviewRenderer.analyzeLayerFilter([{ nodeType: NodeType.unprocessedNode, nodeValue: filterValueToUse }]);
@@ -467,6 +477,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       );
     }
   }
+
+  // #endregion STATIC METHODS
 }
 
 /**

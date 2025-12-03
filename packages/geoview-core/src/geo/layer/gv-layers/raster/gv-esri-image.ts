@@ -49,6 +49,8 @@ export class GVEsriImage extends AbstractGVRaster {
     this.setOLLayer(new ImageLayer(imageLayerOptions));
   }
 
+  // #region OVERRIDES
+
   /**
    * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
    * @override
@@ -154,6 +156,35 @@ export class GVEsriImage extends AbstractGVRaster {
   }
 
   /**
+   * Overrides the way to get the bounds for this layer type.
+   * @param {OLProjection} projection - The projection to get the bounds into.
+   * @param {number} stops - The number of stops to use to generate the extent.
+   * @override
+   * @returns {Extent | undefined} The layer bounding box.
+   */
+  override onGetBounds(projection: OLProjection, stops: number): Extent | undefined {
+    // Get the metadata projection
+    const metadataProjection = this.getMetadataProjection();
+
+    // Get the metadata extent
+    let metadataExtent = this.getMetadataExtent();
+
+    // If both found
+    if (metadataExtent && metadataProjection) {
+      // Transform extent to given projection
+      metadataExtent = Projection.transformExtentFromProj(metadataExtent, metadataProjection, projection, stops);
+      metadataExtent = GeoUtilities.validateExtent(metadataExtent, projection.getCode());
+    }
+
+    // Return the calculated layer bounds
+    return metadataExtent;
+  }
+
+  // #endregion OVERRIDES
+
+  // #region METHODS
+
+  /**
    * Applies a view filter to the layer. When the combineLegendFilter flag is false, the filter parameter is used alone to display
    * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
    * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
@@ -181,30 +212,7 @@ export class GVEsriImage extends AbstractGVRaster {
     );
   }
 
-  /**
-   * Overrides the way to get the bounds for this layer type.
-   * @param {OLProjection} projection - The projection to get the bounds into.
-   * @param {number} stops - The number of stops to use to generate the extent.
-   * @override
-   * @returns {Extent | undefined} The layer bounding box.
-   */
-  override onGetBounds(projection: OLProjection, stops: number): Extent | undefined {
-    // Get the metadata projection
-    const metadataProjection = this.getMetadataProjection();
-
-    // Get the metadata extent
-    let metadataExtent = this.getMetadataExtent();
-
-    // If both found
-    if (metadataExtent && metadataProjection) {
-      // Transform extent to given projection
-      metadataExtent = Projection.transformExtentFromProj(metadataExtent, metadataProjection, projection, stops);
-      metadataExtent = GeoUtilities.validateExtent(metadataExtent, projection.getCode());
-    }
-
-    // Return the calculated layer bounds
-    return metadataExtent;
-  }
+  // #endregion METHODS
 }
 
 // Exported for use in ESRI Dynamic raster layers

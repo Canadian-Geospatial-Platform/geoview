@@ -44,7 +44,7 @@ import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { SnackbarType } from '@/core/utils/notifications';
 import { NotImplementedError, NotSupportedError } from '@/core/exceptions/core-exceptions';
 import { LayerNotQueryableError, LayerStatusErrorError } from '@/core/exceptions/layer-exceptions';
-import { createAliasLookup } from '@/geo/layer/gv-layers/utils';
+import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { delay, whenThisThen } from '@/core/utils/utilities';
 
 /**
@@ -121,6 +121,8 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     if (style) this.setStyle(style);
   }
 
+  // #region OVERRIDES
+
   /**
    * Must override method to return the bounds of a layer in the given projection.
    * @param {OLProjection} projection - The projection to get the bounds into.
@@ -188,64 +190,22 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   /**
-   * Initializes the GVLayer. This function checks if the source is ready and if so it calls onLoaded() to pursue initialization of the layer.
-   * If the source isn't ready, it registers to the source ready event to pursue initialization of the layer once its source is ready.
+   * Overridable function returning the legend of the layer. Returns null when the layerPath specified is not found. If the style property
+   * of the layerConfig object is undefined, the legend property of the object returned will be null.
+   * @returns {Promise<TypeLegend | null>} The legend of the layer.
    */
-  init(): void {
-    // Activation of the load end/error listeners
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (this.#olSource as any).on(['featuresloadstart', 'imageloadstart', 'tileloadstart'], this.onLoading.bind(this));
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (this.#olSource as any).on(['featuresloadend', 'imageloadend', 'tileloadend'], this.onLoaded.bind(this));
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (this.#olSource as any).on(['featuresloaderror', 'tileloaderror'], this.onError.bind(this));
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (this.#olSource as any).on(['imageloaderror'], this.onImageLoadError.bind(this));
+  async onFetchLegend(): Promise<TypeLegend | null> {
+    try {
+      // Get the style
+      const style = this.getStyle() || this.getLayerConfig().getLayerStyle();
 
-    // Activate source change listener to catch errors
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (this.#olSource as any).on('change', this.onSourceChange.bind(this));
-
-    // Apply render error handling to prevent "Cannot read properties of null (reading 'globalAlpha')" errors
-    AbstractGVLayer.#addRenderErrorHandling(this.getOLLayer());
-  }
-
-  /**
-   * Adds error handling to a layer's render function to prevent globalAlpha errors
-   * that can occur during layer rendering, especially when highlighting layers while others are still loading.
-   * This patches the OpenLayers renderer to safely handle cases where the canvas context is not yet available.
-   *
-   * @param {BaseLayer} layer - The OpenLayers layer to patch
-   */
-  static #addRenderErrorHandling(layer: BaseLayer): void {
-    // Use type assertion to access internal getRenderer method
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const layerWithRenderer = layer as BaseLayer & { getRenderer?: () => any };
-    if (!layerWithRenderer || typeof layerWithRenderer.getRenderer !== 'function') return;
-
-    const renderer = layerWithRenderer.getRenderer();
-    if (!renderer || typeof renderer.renderDeferredInternal !== 'function') return;
-
-    const originalRenderFunction = renderer.renderDeferredInternal;
-
-    renderer.renderDeferredInternal = function renderDeferredInternalPatched(...args: unknown[]) {
-      try {
-        // If the renderer is not ready yet, skip rendering
-        if (!this.context || !this.context.canvas) {
-          // Skip rendering but don't throw an error
-          return false;
-        }
-
-        // Context exists, proceed with original rendering
-        return originalRenderFunction.apply(this, args);
-      } catch (error) {
-        logger.logError('Vector layer rendering error:', error);
-
-        // Attempt recovery by requesting a new frame
-        requestAnimationFrame(() => this.changed());
-        return false; // Return false instead of undefined
-      }
-    };
+      // Redirect
+      return await AbstractGVLayer.createLegendFromStyle(this.getLayerConfig().getSchemaTag(), style);
+    } catch (error: unknown) {
+      // Log
+      logger.logError(error);
+      return null;
+    }
   }
 
   /**
@@ -398,6 +358,175 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       // Trigger onError handling
       this.onError(error);
     }
+  }
+
+  /**
+   * Overridable function to get all feature information for all the features stored in the layer.
+   * @param {OLMap} map - The Map so that we can grab the resolution/projection we want to get features on.
+   * @param {AbortController?} abortController - The optional abort controller.
+   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected getAllFeatureInfo(map: OLMap, abortController: AbortController | undefined = undefined): Promise<TypeFeatureInfoEntry[]> {
+    // Crash on purpose
+    throw new NotImplementedError(`getAllFeatureInfo not implemented on layer path ${this.getLayerPath()}`);
+  }
+
+  /**
+   * Overridable function to return of feature information at a given pixel location.
+   * @param {OLMap} map - The Map where to get Feature Info At Pixel from.
+   * @param {Pixel} location - The pixel coordinate that will be used by the query.
+   * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
+   * @param {AbortController?} abortController - The optional abort controller.
+   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+   */
+  protected getFeatureInfoAtPixel(
+    map: OLMap,
+    location: Pixel,
+    queryGeometry: boolean = true,
+    abortController: AbortController | undefined = undefined
+  ): Promise<TypeFeatureInfoEntry[]> {
+    // Redirect to getFeatureInfoAtCoordinate
+    return this.getFeatureInfoAtCoordinate(map, map.getCoordinateFromPixel(location), queryGeometry, abortController);
+  }
+
+  /**
+   * Overridable function to return of feature information at a given coordinate.
+   * @param {OLMap} map - The Map where to get Feature Info At Coordinate from.
+   * @param {Coordinate} location - The coordinate that will be used by the query.
+   * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
+   * @param {AbortController?} abortController - The optional abort controller.
+   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+   */
+  protected getFeatureInfoAtCoordinate(
+    map: OLMap,
+    location: Coordinate,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    queryGeometry: boolean = true,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    abortController: AbortController | undefined = undefined
+  ): Promise<TypeFeatureInfoEntry[]> {
+    // Crash on purpose
+    throw new NotImplementedError(`getFeatureInfoAtCoordinate not implemented on layer path ${this.getLayerPath()}`);
+  }
+
+  /**
+   * Overridable function to return of feature information at the provided long lat coordinate.
+   * @param {OLMap} map - The Map where to get Feature Info At LonLat from.
+   * @param {Coordinate} lonlat - The coordinate that will be used by the query.
+   * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
+   * @param {AbortController?} abortController - The optional abort controller.
+   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+   */
+  protected getFeatureInfoAtLonLat(
+    map: OLMap,
+    lonlat: Coordinate,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    queryGeometry: boolean = true,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    abortController: AbortController | undefined = undefined
+  ): Promise<TypeFeatureInfoEntry[]> {
+    // Crash on purpose
+    throw new NotImplementedError(`getFeatureInfoAtLonLat not implemented on layer path ${this.getLayerPath()}`);
+  }
+
+  /**
+   * Overridable function to return of feature information at the provided bounding box.
+   * @param {OLMap} map - The Map where to get Feature using BBox from.
+   * @param {Coordinate} location - The bounding box that will be used by the query.
+   * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
+   * @param {AbortController?} abortController - The optional abort controller.
+   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+   */
+  protected getFeatureInfoUsingBBox(
+    map: OLMap,
+    location: Coordinate[],
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    queryGeometry: boolean = true,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    abortController: AbortController | undefined = undefined
+  ): Promise<TypeFeatureInfoEntry[]> {
+    // Crash on purpose
+    throw new NotImplementedError(`getFeatureInfoUsingBBox not implemented on layer path ${this.getLayerPath()}`);
+  }
+
+  /**
+   * Overridable function to return of feature information at the provided polygon.
+   * @param {OLMap} map - The Map where to get Feature Info using Polygon from.
+   * @param {Coordinate} location - The polygon that will be used by the query.
+   * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
+   * @param {AbortController?} abortController - The optional abort controller.
+   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+   */
+  protected getFeatureInfoUsingPolygon(
+    map: OLMap,
+    location: Coordinate[],
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    queryGeometry: boolean = true,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    abortController: AbortController | undefined = undefined
+  ): Promise<TypeFeatureInfoEntry[]> {
+    // Crash on purpose
+    throw new NotImplementedError(`getFeatureInfoUsingPolygon not implemented on layer path ${this.getLayerPath()}`);
+  }
+
+  /**
+   * Overridable function to return the domain of the specified field or null if the field has no domain.
+   * @param {string} fieldName - The field name for which we want to get the domain.
+   * @returns {null | codedValueType | rangeDomainType} The domain of the field.
+   */
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this, @typescript-eslint/no-unused-vars
+  protected onGetFieldDomain(fieldName: string): null | codedValueType | rangeDomainType {
+    // Log - REMOVED as it is trigger for every row of data table, just enable for debuggin purpose
+    // logger.logWarning(`getFieldDomain is not implemented for ${fieldName} on layer path ${this.getLayerPath()}`);
+    return null;
+  }
+
+  /**
+   * Overridable function to return the type of the specified field from the metadata. If the type can not be found, return 'string'.
+   * @param {string} fieldName - The field name for which we want to get the type.
+   * @returns {TypeOutfieldsType} The type of the field.
+   */
+  protected onGetFieldType(fieldName: string): TypeOutfieldsType {
+    // Log
+    logger.logWarning(`getFieldType is not implemented for ${fieldName} on layer path ${this.getLayerPath()}`);
+    return 'string';
+  }
+
+  /**
+   * Overridable function set the style according to the fetched legend information
+   * @param {TypeLegend} legend - The fetched legend information
+   */
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this, @typescript-eslint/no-unused-vars
+  onSetStyleAccordingToLegend(legend: TypeLegend): void {
+    // By default, nothing to do here, check for overrides in children classes
+  }
+
+  // #endregion OVERRIDES
+
+  // #region METHODS
+
+  /**
+   * Initializes the GVLayer. This function checks if the source is ready and if so it calls onLoaded() to pursue initialization of the layer.
+   * If the source isn't ready, it registers to the source ready event to pursue initialization of the layer once its source is ready.
+   */
+  init(): void {
+    // Activation of the load end/error listeners
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (this.#olSource as any).on(['featuresloadstart', 'imageloadstart', 'tileloadstart'], this.onLoading.bind(this));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (this.#olSource as any).on(['featuresloadend', 'imageloadend', 'tileloadend'], this.onLoaded.bind(this));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (this.#olSource as any).on(['featuresloaderror', 'tileloaderror'], this.onError.bind(this));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (this.#olSource as any).on(['imageloaderror'], this.onImageLoadError.bind(this));
+
+    // Activate source change listener to catch errors
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (this.#olSource as any).on('change', this.onSourceChange.bind(this));
+
+    // Apply render error handling to prevent "Cannot read properties of null (reading 'globalAlpha')" errors
+    AbstractGVLayer.#addRenderErrorHandling(this.getOLLayer());
   }
 
   /**
@@ -585,139 +714,6 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   /**
-   * Overridable function to get all feature information for all the features stored in the layer.
-   * @param {OLMap} map - The Map so that we can grab the resolution/projection we want to get features on.
-   * @param {AbortController?} abortController - The optional abort controller.
-   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getAllFeatureInfo(map: OLMap, abortController: AbortController | undefined = undefined): Promise<TypeFeatureInfoEntry[]> {
-    // Crash on purpose
-    throw new NotImplementedError(`getAllFeatureInfo not implemented on layer path ${this.getLayerPath()}`);
-  }
-
-  /**
-   * Overridable function to return of feature information at a given pixel location.
-   * @param {OLMap} map - The Map where to get Feature Info At Pixel from.
-   * @param {Pixel} location - The pixel coordinate that will be used by the query.
-   * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
-   * @param {AbortController?} abortController - The optional abort controller.
-   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
-   */
-  protected getFeatureInfoAtPixel(
-    map: OLMap,
-    location: Pixel,
-    queryGeometry: boolean = true,
-    abortController: AbortController | undefined = undefined
-  ): Promise<TypeFeatureInfoEntry[]> {
-    // Redirect to getFeatureInfoAtCoordinate
-    return this.getFeatureInfoAtCoordinate(map, map.getCoordinateFromPixel(location), queryGeometry, abortController);
-  }
-
-  /**
-   * Overridable function to return of feature information at a given coordinate.
-   * @param {OLMap} map - The Map where to get Feature Info At Coordinate from.
-   * @param {Coordinate} location - The coordinate that will be used by the query.
-   * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
-   * @param {AbortController?} abortController - The optional abort controller.
-   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
-   */
-  protected getFeatureInfoAtCoordinate(
-    map: OLMap,
-    location: Coordinate,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    queryGeometry: boolean = true,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    abortController: AbortController | undefined = undefined
-  ): Promise<TypeFeatureInfoEntry[]> {
-    // Crash on purpose
-    throw new NotImplementedError(`getFeatureInfoAtCoordinate not implemented on layer path ${this.getLayerPath()}`);
-  }
-
-  /**
-   * Overridable function to return of feature information at the provided long lat coordinate.
-   * @param {OLMap} map - The Map where to get Feature Info At LonLat from.
-   * @param {Coordinate} lonlat - The coordinate that will be used by the query.
-   * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
-   * @param {AbortController?} abortController - The optional abort controller.
-   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
-   */
-  protected getFeatureInfoAtLonLat(
-    map: OLMap,
-    lonlat: Coordinate,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    queryGeometry: boolean = true,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    abortController: AbortController | undefined = undefined
-  ): Promise<TypeFeatureInfoEntry[]> {
-    // Crash on purpose
-    throw new NotImplementedError(`getFeatureInfoAtLonLat not implemented on layer path ${this.getLayerPath()}`);
-  }
-
-  /**
-   * Overridable function to return of feature information at the provided bounding box.
-   * @param {OLMap} map - The Map where to get Feature using BBox from.
-   * @param {Coordinate} location - The bounding box that will be used by the query.
-   * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
-   * @param {AbortController?} abortController - The optional abort controller.
-   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
-   */
-  protected getFeatureInfoUsingBBox(
-    map: OLMap,
-    location: Coordinate[],
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    queryGeometry: boolean = true,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    abortController: AbortController | undefined = undefined
-  ): Promise<TypeFeatureInfoEntry[]> {
-    // Crash on purpose
-    throw new NotImplementedError(`getFeatureInfoUsingBBox not implemented on layer path ${this.getLayerPath()}`);
-  }
-
-  /**
-   * Overridable function to return of feature information at the provided polygon.
-   * @param {OLMap} map - The Map where to get Feature Info using Polygon from.
-   * @param {Coordinate} location - The polygon that will be used by the query.
-   * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
-   * @param {AbortController?} abortController - The optional abort controller.
-   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
-   */
-  protected getFeatureInfoUsingPolygon(
-    map: OLMap,
-    location: Coordinate[],
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    queryGeometry: boolean = true,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    abortController: AbortController | undefined = undefined
-  ): Promise<TypeFeatureInfoEntry[]> {
-    // Crash on purpose
-    throw new NotImplementedError(`getFeatureInfoUsingPolygon not implemented on layer path ${this.getLayerPath()}`);
-  }
-
-  /**
-   * Overridable function to return the domain of the specified field or null if the field has no domain.
-   * @param {string} fieldName - The field name for which we want to get the domain.
-   * @returns {null | codedValueType | rangeDomainType} The domain of the field.
-   */
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this, @typescript-eslint/no-unused-vars
-  protected onGetFieldDomain(fieldName: string): null | codedValueType | rangeDomainType {
-    // Log - REMOVED as it is trigger for every row of data table, just enable for debuggin purpose
-    // logger.logWarning(`getFieldDomain is not implemented for ${fieldName} on layer path ${this.getLayerPath()}`);
-    return null;
-  }
-
-  /**
-   * Overridable function to return the type of the specified field from the metadata. If the type can not be found, return 'string'.
-   * @param {string} fieldName - The field name for which we want to get the type.
-   * @returns {TypeOutfieldsType} The type of the field.
-   */
-  protected onGetFieldType(fieldName: string): TypeOutfieldsType {
-    // Log
-    logger.logWarning(`getFieldType is not implemented for ${fieldName} on layer path ${this.getLayerPath()}`);
-    return 'string';
-  }
-
-  /**
    * Queries the legend.
    * This function raises legend querying and queried events. It calls the overridable onFetchLegend() function.
    * @returns {Promise<TypeLegend | null>} The promise when the legend (or null) will be received
@@ -749,25 +745,6 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
     // Return the promise
     return promiseLegend;
-  }
-
-  /**
-   * Overridable function returning the legend of the layer. Returns null when the layerPath specified is not found. If the style property
-   * of the layerConfig object is undefined, the legend property of the object returned will be null.
-   * @returns {Promise<TypeLegend | null>} The legend of the layer.
-   */
-  async onFetchLegend(): Promise<TypeLegend | null> {
-    try {
-      // Get the style
-      const style = this.getStyle() || this.getLayerConfig().getLayerStyle();
-
-      // Redirect
-      return await AbstractGVLayer.createLegendFromStyle(this.getLayerConfig().getSchemaTag(), style);
-    } catch (error: unknown) {
-      // Log
-      logger.logError(error);
-      return null;
-    }
   }
 
   /**
@@ -813,7 +790,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * @param {number} timeout - A timeout for the period to wait for. Defaults to 30,000 ms.
    * @returns {Promise<void>} A Promise that resolves when the layer style has been applied.
    */
-  waitStyleApplied(timeout: number = 30000): Promise<void> {
+  waitStyleApplied(timeout: number = 30000): Promise<TypeLayerStyleConfig | undefined> {
     // Create a promise and wait until the layer is first loaded
     return whenThisThen(() => {
       // If the layer is in error, abort the waiting
@@ -824,17 +801,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
       // If the layer was first loaded
       return this.getStyle();
-    }, timeout).then();
-  }
-
-  /**
-   * Overridable function set the style according to the fetched legend information
-   *
-   * @param {TypeLegend} legend - The fetched legend information
-   */
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this, @typescript-eslint/no-unused-vars
-  onSetStyleAccordingToLegend(legend: TypeLegend): void {
-    // By default, nothing to do here, check for overrides in children classes
+    }, timeout);
   }
 
   /**
@@ -911,32 +878,6 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   /**
-   * Initializes common properties on a layer options.
-   * @param {Options} layerOptions - The layer options to initialize
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The config to read the initial settings from
-   */
-  protected static initOptionsWithInitialSettings(layerOptions: Options, layerConfig: AbstractBaseLayerEntryConfig): void {
-    // GV Note: The visible flag (and maybe others?) must be set in the 'onLoaded' function below, because the layer needs to
-    // GV attempt to be visible on the map in order to trigger its source loaded event.
-
-    // Set the layer options as read from the initialSettings
-    // GV We disable the warnings, because this function purpose is to actually initialize the given parameter
-
-    // If a className is defined in the initial settings, set it in the layer options
-    // eslint-disable-next-line no-param-reassign
-    if (layerConfig.getInitialSettings()?.className !== undefined) layerOptions.className = layerConfig.getInitialSettings().className;
-
-    // If an extent is defined in the initial settings, set it in the layer options
-    // eslint-disable-next-line no-param-reassign
-    if (layerConfig.getInitialSettings()?.extent !== undefined) layerOptions.extent = layerConfig.getInitialSettings().extent;
-
-    // If an opacity is defined in the initial settings, set it in the layer options
-    if (layerConfig.getInitialSettings()?.states?.opacity !== undefined)
-      // eslint-disable-next-line no-param-reassign
-      layerOptions.opacity = layerConfig.getInitialSettings().states!.opacity;
-  }
-
-  /**
    * Extracts the relevant image, tile, or dispatching_ object from the event based on its structure.
    * This method attempts to find the corresponding object (`image`, `tile`, or `dispatching_`) in the event.
    * @param event - The event object, which could contain either an `image`, `tile`, or `dispatching_` property.
@@ -997,312 +938,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     );
   }
 
-  // #region STATIC
-
-  /**
-   * Creates a legend object based on a given GeoView layer type and style configuration.
-   * This method builds a legend representation by combining the provided style settings
-   * with the computed legend symbols retrieved from the renderer. It is asynchronous
-   * because it waits for `GeoviewRenderer.getLegendStyles` to generate the legend items.
-   * @param {TypeGeoviewLayerType} schemaTag - The GeoView layer type identifier (e.g., vector, raster, etc.).
-   * @param {Partial<Record<TypeStyleGeometry, TypeLayerStyleSettings>>} [style] -
-   *   Optional style configuration mapping geometry types to their style settings.
-   * @returns {Promise<TypeLegend>} A promise that resolves to a legend object containing:
-   * - `type`: the layer type.
-   * - `styleConfig`: the provided style configuration.
-   * - `legend`: the legend entries generated from the style.
-   * @async
-   * @static
-   */
-  static async createLegendFromStyle(
-    schemaTag: TypeGeoviewLayerType,
-    style: Partial<Record<TypeStyleGeometry, TypeLayerStyleSettings>> | undefined
-  ): Promise<TypeLegend> {
-    return {
-      type: schemaTag,
-      styleConfig: style,
-      legend: await GeoviewRenderer.getLegendStyles(style),
-    };
-  }
-
-  /**
-   * Retrieves or generates an image source (data URI or path) representing the visual style of a feature.
-   * Caches results in the `imageSourceDict` to avoid redundant processing.
-   * @param {Feature} feature - The feature whose visual representation is to be retrieved.
-   * @param {TypeLayerStyleConfig} layerStyle - Style configuration grouped by geometry type (e.g., Point, LineString, Polygon).
-   * @param {OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig} layerConfig - The configuration for the layer containing the feature.
-   * @param {TypeLayerMetadataFields[]?} domainsLookup - Optional domain information for interpreting coded values.
-   * @param {Record<string, string>} aliasLookup - A mapping of original field names to their aliases.
-   * @param {Record<string, string | undefined>} imageSourceDict - A dictionary used to cache and reuse image sources by style key.
-   * @returns {string | undefined} The image source string representing the feature's style, or `undefined` if generation fails.
-   */
-  static getImageSource(
-    feature: Feature,
-    layerPath: string,
-    layerStyle: TypeLayerStyleConfig,
-    filterEquation: FilterNodeType[] | undefined,
-    domainsLookup: TypeLayerMetadataFields[] | undefined,
-    aliasLookup: Record<string, string>,
-    imageSourceDict: Record<string, string | undefined>
-  ): string | undefined {
-    const geometryType = feature.getGeometry()
-      ? (feature.getGeometry()!.getType() as TypeStyleGeometry)
-      : (Object.keys(layerStyle)[0] as TypeStyleGeometry);
-
-    if (!layerStyle[geometryType]) {
-      return GeoviewRenderer.getFeatureImageSource(feature, layerStyle, filterEquation, true, domainsLookup, aliasLookup);
-    }
-
-    const styleSettings = layerStyle[geometryType];
-    const { type } = styleSettings;
-
-    const featureStyle = GeoviewRenderer.processStyle[type][geometryType](
-      styleSettings,
-      feature,
-      filterEquation,
-      true,
-      domainsLookup,
-      aliasLookup
-    );
-
-    if (!featureStyle) {
-      return GeoviewRenderer.getFeatureImageSource(feature, layerStyle, filterEquation, true, domainsLookup, aliasLookup);
-    }
-
-    // Clone the style
-    const styleClone = featureStyle.clone();
-    styleClone?.setGeometry?.('');
-    const styleKey = `${geometryType}${JSON.stringify(styleClone)}`;
-
-    if (!imageSourceDict[styleKey]) {
-      // eslint-disable-next-line no-param-reassign
-      imageSourceDict[styleKey] = GeoviewRenderer.getFeatureImageSource(
-        feature,
-        layerStyle,
-        filterEquation,
-        true,
-        domainsLookup,
-        aliasLookup
-      );
-    }
-
-    return imageSourceDict[styleKey];
-  }
-
-  /**
-   * Formats a set of OpenLayers features into a structured array of feature info entries.
-   * Each feature is enriched with geometry, extent, field information, and optional styling.
-   * @param {Feature[]} features - Array of OpenLayers features to process.
-   * @param {string} layerPath - Path of the layer these features belong to.
-   * @param {TypeGeoviewLayerType} schemaTag - The Geoview layer type for the features.
-   * @param {string | undefined} nameField - Optional field name to use as the display name for features.
-   * @param {TypeOutfields[] | undefined} outFields - Optional array of output fields to include in the feature info.
-   * @param {boolean} supportZoomTo - Whether zoom-to functionality is supported for these features.
-   * @param {TypeLayerMetadataFields[] | undefined} domainsLookup - Optional array of field metadata for domain lookups.
-   * @param {Partial<Record<TypeStyleGeometry, TypeLayerStyleSettings>> | undefined} layerStyle - Optional mapping of geometry type to style settings for icons.
-   * @param {FilterNodeType[] | undefined} filterEquation - Optional array of filters applied to the layer.
-   * @param {(fieldName: string) => TypeOutfieldsType} callbackGetFieldType - Callback that returns the field type for a given field name.
-   * @param {(fieldName: string) => codedValueType | rangeDomainType | null} callbackGetFieldDomain - Callback that returns the coded value or range domain for a given field name.
-   * @param {(feature: Feature, fieldName: string, fieldType: TypeOutfieldsType) => string | number | Date} callbackGetFieldValue - Callback that returns the value of a field for a feature, in the correct type.
-   * @returns {TypeFeatureInfoEntry[]} Array of feature info entries representing each feature with enriched metadata.
-   * @description
-   * Will not throw; errors are caught and logged. Returns an empty array if processing fails.
-   */
-  static helperFormatFeatureInfoResult(
-    features: Feature[],
-    layerPath: string,
-    schemaTag: TypeGeoviewLayerType,
-    nameField: string | undefined,
-    outFields: TypeOutfields[] | undefined,
-    supportZoomTo: boolean,
-    domainsLookup: TypeLayerMetadataFields[] | undefined,
-    layerStyle: Partial<Record<TypeStyleGeometry, TypeLayerStyleSettings>> | undefined,
-    filterEquation: FilterNodeType[] | undefined,
-    callbackGetFieldType: (fieldName: string) => TypeOutfieldsType,
-    callbackGetFieldDomain: (fieldName: string) => codedValueType | rangeDomainType | null,
-    callbackGetFieldValue: (feature: Feature, fieldName: string, fieldType: TypeOutfieldsType) => string | number | Date
-  ): TypeFeatureInfoEntry[] {
-    try {
-      if (!features.length) return [];
-
-      const aliasLookup = createAliasLookup(outFields);
-      const dictFieldDomains: Record<string, codedValueType | rangeDomainType | null> = {};
-      const dictFieldTypes: Record<string, TypeOutfieldsType> = {};
-
-      let featureKeyCounter = 0;
-      let fieldKeyCounter = 0;
-      const queryResult: TypeFeatureInfoEntry[] = [];
-
-      const imageSourceDict: Record<string, string | undefined> = {};
-
-      // For each feature
-      for (const feature of features) {
-        // Get the image source for a feature using styling information and cache it
-        const imageSource = layerStyle
-          ? AbstractGVLayer.getImageSource(feature, layerPath, layerStyle, filterEquation, domainsLookup, aliasLookup, imageSourceDict)
-          : undefined;
-
-        // Get the extent
-        const extent = feature.getGeometry()?.getExtent();
-
-        // Get the TypeFeatureInfoEntry object
-        const featureInfoEntry: TypeFeatureInfoEntry = {
-          uid: getUid(feature),
-          featureKey: featureKeyCounter++,
-          geoviewLayerType: schemaTag,
-          feature,
-          geometry: feature.getGeometry(),
-          extent,
-          featureIcon: imageSource,
-          fieldInfo: {},
-          nameField: nameField || null,
-          supportZoomTo,
-          layerPath,
-        };
-
-        // Process the feature fields
-        fieldKeyCounter = this.#helperFeatureFields(
-          feature,
-          outFields,
-          dictFieldDomains,
-          dictFieldTypes,
-          featureInfoEntry,
-          fieldKeyCounter,
-          callbackGetFieldType,
-          callbackGetFieldDomain,
-          callbackGetFieldValue
-        );
-        queryResult.push(featureInfoEntry);
-      }
-
-      return queryResult;
-    } catch (error: unknown) {
-      logger.logError(error);
-      return [];
-    }
-  }
-
-  /**
-   * Processes the fields of a given feature and populates a feature info entry with relevant data.
-   * It also updates field domain and type dictionaries if needed.
-   * @param {Feature} feature - The OpenLayers feature object whose fields are being processed.
-   * @param {TypeOutfields[] | undefined} outfields - Optional array of output field metadata. Each entry can specify name, alias, and type.
-   * @param {Record<string, codedValueType | rangeDomainType | null>} dictFieldDomains - A mapping of field names to their domain metadata.
-   *   This object is updated in-place for fields that do not already have a domain defined.
-   * @param {Record<string, TypeOutfieldsType>} dictFieldTypes - A mapping of field names to their data types.
-   *   This object is updated in-place for fields that do not already have a type defined.
-   * @param {TypeFeatureInfoEntry} featureInfoEntry - The feature info entry object where processed field information is stored.
-   *   Fields are stored in `featureInfoEntry.fieldInfo`, keyed by field name.
-   * @param {number} fieldKeyCounterStart - Starting value for the field key counter. Each field processed increments the counter.
-   * @param {(fieldName: string) => TypeOutfieldsType} callbackGetFieldType - Callback function that returns the type of a given field.
-   * @param {(fieldName: string) => codedValueType | rangeDomainType | null} callbackGetFieldDomain - Callback function that returns the domain metadata for a given field.
-   * @param {(feature: Feature, fieldName: string, fieldType: TypeOutfieldsType) => string | number | Date} callbackGetFieldValue - Callback function that returns the value of a given field for the feature, typed according to the field type.
-   * @returns {number} The next field key counter value after processing, to be used for further fields or subsequent features.
-   */
-  static #helperFeatureFields(
-    feature: Feature,
-    outfields: TypeOutfields[] | undefined,
-    dictFieldDomains: Record<string, codedValueType | rangeDomainType | null>,
-    dictFieldTypes: Record<string, TypeOutfieldsType>,
-    featureInfoEntry: TypeFeatureInfoEntry,
-    fieldKeyCounterStart: number,
-    callbackGetFieldType: (fieldName: string) => TypeOutfieldsType,
-    callbackGetFieldDomain: (fieldName: string) => codedValueType | rangeDomainType | null,
-    callbackGetFieldValue: (feature: Feature, fieldName: string, fieldType: TypeOutfieldsType) => string | number | Date
-  ): number {
-    const featureFields = feature.getKeys();
-    let fieldKeyCounter = fieldKeyCounterStart;
-
-    for (const fieldName of featureFields) {
-      // eslint-disable-next-line no-continue
-      if (fieldName === 'geometry') continue;
-
-      const fieldValue = feature.get(fieldName);
-      // eslint-disable-next-line no-continue
-      if (fieldValue && typeof fieldValue === 'object' && !Array.isArray(fieldValue)) continue;
-
-      if (!(fieldName in dictFieldDomains)) {
-        // eslint-disable-next-line no-param-reassign
-        dictFieldDomains[fieldName] = callbackGetFieldDomain(fieldName);
-      }
-      const fieldDomain = dictFieldDomains[fieldName];
-
-      if (!(fieldName in dictFieldTypes)) {
-        // eslint-disable-next-line no-param-reassign
-        dictFieldTypes[fieldName] = callbackGetFieldType(fieldName);
-      }
-      const fieldType = dictFieldTypes[fieldName];
-
-      const fieldEntry = outfields?.find((outfield) => outfield.name === fieldName || outfield.alias === fieldName);
-
-      if (fieldEntry) {
-        const value =
-          callbackGetFieldValue(feature, fieldName, fieldEntry.type as 'string' | 'number' | 'date') ??
-          callbackGetFieldValue(feature, fieldEntry.name, fieldEntry.type as 'string' | 'number' | 'date');
-
-        // eslint-disable-next-line no-param-reassign
-        featureInfoEntry.fieldInfo[fieldEntry.name] = {
-          fieldKey: fieldKeyCounter++,
-          value,
-          dataType: fieldEntry.type,
-          alias: fieldEntry.alias,
-          domain: fieldDomain,
-        };
-      } else if (!outfields) {
-        // eslint-disable-next-line no-param-reassign
-        featureInfoEntry.fieldInfo[fieldName] = {
-          fieldKey: fieldKeyCounter++,
-          value: callbackGetFieldValue(feature, fieldName, fieldType),
-          dataType: fieldType,
-          alias: fieldName,
-          domain: fieldDomain,
-        };
-      }
-    }
-
-    // Return the counter
-    return fieldKeyCounter;
-  }
-
-  /**
-   * Gets and formats the value of a field from a feature.
-   * For vector GeoView layers, dates are converted from milliseconds since the base date.
-   * Vector feature dates must be in ISO format if stored as strings.
-   * @param {Feature} feature - The OpenLayers feature that holds the field values.
-   * @param {string} fieldName - The name of the field to retrieve.
-   * @param {TypeOutfieldsType} fieldType - The type of the field ('string', 'number', 'date', etc.).
-   * @param {TypeDateFragments | undefined} serverDateFragmentsOrder - Optional order of date fragments as expected from the server.
-   *   If undefined, the server format will be deduced from the field value.
-   * @param {TypeDateFragments | undefined} externalFragmentsOrder - Optional order of date fragments for external display formatting.
-   * @returns {string | number | Date} The formatted field value.
-   *   Returns a string, number, or Date depending on the field type.
-   */
-  static helperGetFieldValue(
-    feature: Feature,
-    fieldName: string,
-    fieldType: TypeOutfieldsType,
-    serverDateFragmentsOrder: TypeDateFragments | undefined,
-    externalFragmentsOrder: TypeDateFragments | undefined
-  ): string | number | Date {
-    const fieldValue = feature.get(fieldName);
-    let returnValue: string | number | Date;
-    if (fieldType === 'date') {
-      if (typeof fieldValue === 'string') {
-        // eslint-disable-next-line no-param-reassign
-        if (!serverDateFragmentsOrder) serverDateFragmentsOrder = DateMgt.getDateFragmentsOrder(DateMgt.deduceDateFormat(fieldValue));
-        returnValue = DateMgt.applyInputDateFormat(fieldValue, serverDateFragmentsOrder);
-      } else {
-        // All vector dates are kept internally in UTC.
-        returnValue = DateMgt.convertToUTC(`${DateMgt.convertMilisecondsToDate(fieldValue)}Z`);
-      }
-      const reverseTimeZone = true;
-      if (externalFragmentsOrder) returnValue = DateMgt.applyOutputDateFormat(returnValue, externalFragmentsOrder, reverseTimeZone);
-      return returnValue;
-    }
-    return fieldValue;
-  }
-
-  // #endregion
+  // #endregion METHODS
 
   // #region EVENTS
 
@@ -1555,6 +1191,377 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   // #endregion EVENTS
+
+  // #region STATIC
+
+  /**
+   * Initializes common properties on a layer options.
+   * @param {Options} layerOptions - The layer options to initialize
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - The config to read the initial settings from
+   */
+  protected static initOptionsWithInitialSettings(layerOptions: Options, layerConfig: AbstractBaseLayerEntryConfig): void {
+    // GV Note: The visible flag (and maybe others?) must be set in the 'onLoaded' function below, because the layer needs to
+    // GV attempt to be visible on the map in order to trigger its source loaded event.
+
+    // Set the layer options as read from the initialSettings
+    // GV We disable the warnings, because this function purpose is to actually initialize the given parameter
+
+    // If a className is defined in the initial settings, set it in the layer options
+    // eslint-disable-next-line no-param-reassign
+    if (layerConfig.getInitialSettings()?.className !== undefined) layerOptions.className = layerConfig.getInitialSettings().className;
+
+    // If an extent is defined in the initial settings, set it in the layer options
+    // eslint-disable-next-line no-param-reassign
+    if (layerConfig.getInitialSettings()?.extent !== undefined) layerOptions.extent = layerConfig.getInitialSettings().extent;
+
+    // If an opacity is defined in the initial settings, set it in the layer options
+    if (layerConfig.getInitialSettings()?.states?.opacity !== undefined)
+      // eslint-disable-next-line no-param-reassign
+      layerOptions.opacity = layerConfig.getInitialSettings().states!.opacity;
+  }
+
+  /**
+   * Adds error handling to a layer's render function to prevent globalAlpha errors
+   * that can occur during layer rendering, especially when highlighting layers while others are still loading.
+   * This patches the OpenLayers renderer to safely handle cases where the canvas context is not yet available.
+   *
+   * @param {BaseLayer} layer - The OpenLayers layer to patch
+   */
+  static #addRenderErrorHandling(layer: BaseLayer): void {
+    // Use type assertion to access internal getRenderer method
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const layerWithRenderer = layer as BaseLayer & { getRenderer?: () => any };
+    if (!layerWithRenderer || typeof layerWithRenderer.getRenderer !== 'function') return;
+
+    const renderer = layerWithRenderer.getRenderer();
+    if (!renderer || typeof renderer.renderDeferredInternal !== 'function') return;
+
+    const originalRenderFunction = renderer.renderDeferredInternal;
+
+    renderer.renderDeferredInternal = function renderDeferredInternalPatched(...args: unknown[]) {
+      try {
+        // If the renderer is not ready yet, skip rendering
+        if (!this.context || !this.context.canvas) {
+          // Skip rendering but don't throw an error
+          return false;
+        }
+
+        // Context exists, proceed with original rendering
+        return originalRenderFunction.apply(this, args);
+      } catch (error) {
+        logger.logError('Vector layer rendering error:', error);
+
+        // Attempt recovery by requesting a new frame
+        requestAnimationFrame(() => this.changed());
+        return false; // Return false instead of undefined
+      }
+    };
+  }
+
+  /**
+   * Creates a legend object based on a given GeoView layer type and style configuration.
+   * This method builds a legend representation by combining the provided style settings
+   * with the computed legend symbols retrieved from the renderer. It is asynchronous
+   * because it waits for `GeoviewRenderer.getLegendStyles` to generate the legend items.
+   * @param {TypeGeoviewLayerType} schemaTag - The GeoView layer type identifier (e.g., vector, raster, etc.).
+   * @param {Partial<Record<TypeStyleGeometry, TypeLayerStyleSettings>>} [style] -
+   *   Optional style configuration mapping geometry types to their style settings.
+   * @returns {Promise<TypeLegend>} A promise that resolves to a legend object containing:
+   * - `type`: the layer type.
+   * - `styleConfig`: the provided style configuration.
+   * - `legend`: the legend entries generated from the style.
+   * @async
+   * @static
+   */
+  static async createLegendFromStyle(
+    schemaTag: TypeGeoviewLayerType,
+    style: Partial<Record<TypeStyleGeometry, TypeLayerStyleSettings>> | undefined
+  ): Promise<TypeLegend> {
+    return {
+      type: schemaTag,
+      styleConfig: style,
+      legend: await GeoviewRenderer.getLegendStyles(style),
+    };
+  }
+
+  /**
+   * Retrieves or generates an image source (data URI or path) representing the visual style of a feature.
+   * Caches results in the `imageSourceDict` to avoid redundant processing.
+   * @param {Feature} feature - The feature whose visual representation is to be retrieved.
+   * @param {TypeLayerStyleConfig} layerStyle - Style configuration grouped by geometry type (e.g., Point, LineString, Polygon).
+   * @param {OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig} layerConfig - The configuration for the layer containing the feature.
+   * @param {TypeLayerMetadataFields[]?} domainsLookup - Optional domain information for interpreting coded values.
+   * @param {Record<string, string>} aliasLookup - A mapping of original field names to their aliases.
+   * @param {Record<string, string | undefined>} imageSourceDict - A dictionary used to cache and reuse image sources by style key.
+   * @returns {string | undefined} The image source string representing the feature's style, or `undefined` if generation fails.
+   */
+  static getImageSource(
+    feature: Feature,
+    layerPath: string,
+    layerStyle: TypeLayerStyleConfig,
+    filterEquation: FilterNodeType[] | undefined,
+    domainsLookup: TypeLayerMetadataFields[] | undefined,
+    aliasLookup: Record<string, string>,
+    imageSourceDict: Record<string, string | undefined>
+  ): string | undefined {
+    const geometryType = feature.getGeometry()
+      ? (feature.getGeometry()!.getType() as TypeStyleGeometry)
+      : (Object.keys(layerStyle)[0] as TypeStyleGeometry);
+
+    if (!layerStyle[geometryType]) {
+      return GeoviewRenderer.getFeatureImageSource(feature, layerStyle, filterEquation, true, domainsLookup, aliasLookup);
+    }
+
+    const styleSettings = layerStyle[geometryType];
+    const { type } = styleSettings;
+
+    const featureStyle = GeoviewRenderer.processStyle[type][geometryType](
+      styleSettings,
+      feature,
+      filterEquation,
+      true,
+      domainsLookup,
+      aliasLookup
+    );
+
+    if (!featureStyle) {
+      return GeoviewRenderer.getFeatureImageSource(feature, layerStyle, filterEquation, true, domainsLookup, aliasLookup);
+    }
+
+    // Clone the style
+    const styleClone = featureStyle.clone();
+    styleClone?.setGeometry?.('');
+    const styleKey = `${geometryType}${JSON.stringify(styleClone)}`;
+
+    if (!imageSourceDict[styleKey]) {
+      // eslint-disable-next-line no-param-reassign
+      imageSourceDict[styleKey] = GeoviewRenderer.getFeatureImageSource(
+        feature,
+        layerStyle,
+        filterEquation,
+        true,
+        domainsLookup,
+        aliasLookup
+      );
+    }
+
+    return imageSourceDict[styleKey];
+  }
+
+  /**
+   * Formats a set of OpenLayers features into a structured array of feature info entries.
+   * Each feature is enriched with geometry, extent, field information, and optional styling.
+   * @param {Feature[]} features - Array of OpenLayers features to process.
+   * @param {string} layerPath - Path of the layer these features belong to.
+   * @param {TypeGeoviewLayerType} schemaTag - The Geoview layer type for the features.
+   * @param {string | undefined} nameField - Optional field name to use as the display name for features.
+   * @param {TypeOutfields[] | undefined} outFields - Optional array of output fields to include in the feature info.
+   * @param {boolean} supportZoomTo - Whether zoom-to functionality is supported for these features.
+   * @param {TypeLayerMetadataFields[] | undefined} domainsLookup - Optional array of field metadata for domain lookups.
+   * @param {Partial<Record<TypeStyleGeometry, TypeLayerStyleSettings>> | undefined} layerStyle - Optional mapping of geometry type to style settings for icons.
+   * @param {FilterNodeType[] | undefined} filterEquation - Optional array of filters applied to the layer.
+   * @param {(fieldName: string) => TypeOutfieldsType} callbackGetFieldType - Callback that returns the field type for a given field name.
+   * @param {(fieldName: string) => codedValueType | rangeDomainType | null} callbackGetFieldDomain - Callback that returns the coded value or range domain for a given field name.
+   * @param {(feature: Feature, fieldName: string, fieldType: TypeOutfieldsType) => string | number | Date} callbackGetFieldValue - Callback that returns the value of a field for a feature, in the correct type.
+   * @returns {TypeFeatureInfoEntry[]} Array of feature info entries representing each feature with enriched metadata.
+   * @description
+   * Will not throw; errors are caught and logged. Returns an empty array if processing fails.
+   */
+  static helperFormatFeatureInfoResult(
+    features: Feature[],
+    layerPath: string,
+    schemaTag: TypeGeoviewLayerType,
+    nameField: string | undefined,
+    outFields: TypeOutfields[] | undefined,
+    supportZoomTo: boolean,
+    domainsLookup: TypeLayerMetadataFields[] | undefined,
+    layerStyle: Partial<Record<TypeStyleGeometry, TypeLayerStyleSettings>> | undefined,
+    filterEquation: FilterNodeType[] | undefined,
+    callbackGetFieldType: (fieldName: string) => TypeOutfieldsType,
+    callbackGetFieldDomain: (fieldName: string) => codedValueType | rangeDomainType | null,
+    callbackGetFieldValue: (feature: Feature, fieldName: string, fieldType: TypeOutfieldsType) => string | number | Date
+  ): TypeFeatureInfoEntry[] {
+    try {
+      if (!features.length) return [];
+
+      const aliasLookup = GVLayerUtilities.createAliasLookup(outFields);
+      const dictFieldDomains: Record<string, codedValueType | rangeDomainType | null> = {};
+      const dictFieldTypes: Record<string, TypeOutfieldsType> = {};
+
+      let featureKeyCounter = 0;
+      let fieldKeyCounter = 0;
+      const queryResult: TypeFeatureInfoEntry[] = [];
+
+      const imageSourceDict: Record<string, string | undefined> = {};
+
+      // For each feature
+      for (const feature of features) {
+        // Get the image source for a feature using styling information and cache it
+        const imageSource = layerStyle
+          ? AbstractGVLayer.getImageSource(feature, layerPath, layerStyle, filterEquation, domainsLookup, aliasLookup, imageSourceDict)
+          : undefined;
+
+        // Get the extent
+        const extent = feature.getGeometry()?.getExtent();
+
+        // Get the TypeFeatureInfoEntry object
+        const featureInfoEntry: TypeFeatureInfoEntry = {
+          uid: getUid(feature),
+          featureKey: featureKeyCounter++,
+          geoviewLayerType: schemaTag,
+          feature,
+          geometry: feature.getGeometry(),
+          extent,
+          featureIcon: imageSource,
+          fieldInfo: {},
+          nameField: nameField || null,
+          supportZoomTo,
+          layerPath,
+        };
+
+        // Process the feature fields
+        fieldKeyCounter = this.#helperFeatureFields(
+          feature,
+          outFields,
+          dictFieldDomains,
+          dictFieldTypes,
+          featureInfoEntry,
+          fieldKeyCounter,
+          callbackGetFieldType,
+          callbackGetFieldDomain,
+          callbackGetFieldValue
+        );
+        queryResult.push(featureInfoEntry);
+      }
+
+      return queryResult;
+    } catch (error: unknown) {
+      logger.logError(error);
+      return [];
+    }
+  }
+
+  /**
+   * Processes the fields of a given feature and populates a feature info entry with relevant data.
+   * It also updates field domain and type dictionaries if needed.
+   * @param {Feature} feature - The OpenLayers feature object whose fields are being processed.
+   * @param {TypeOutfields[] | undefined} outfields - Optional array of output field metadata. Each entry can specify name, alias, and type.
+   * @param {Record<string, codedValueType | rangeDomainType | null>} dictFieldDomains - A mapping of field names to their domain metadata.
+   *   This object is updated in-place for fields that do not already have a domain defined.
+   * @param {Record<string, TypeOutfieldsType>} dictFieldTypes - A mapping of field names to their data types.
+   *   This object is updated in-place for fields that do not already have a type defined.
+   * @param {TypeFeatureInfoEntry} featureInfoEntry - The feature info entry object where processed field information is stored.
+   *   Fields are stored in `featureInfoEntry.fieldInfo`, keyed by field name.
+   * @param {number} fieldKeyCounterStart - Starting value for the field key counter. Each field processed increments the counter.
+   * @param {(fieldName: string) => TypeOutfieldsType} callbackGetFieldType - Callback function that returns the type of a given field.
+   * @param {(fieldName: string) => codedValueType | rangeDomainType | null} callbackGetFieldDomain - Callback function that returns the domain metadata for a given field.
+   * @param {(feature: Feature, fieldName: string, fieldType: TypeOutfieldsType) => string | number | Date} callbackGetFieldValue - Callback function that returns the value of a given field for the feature, typed according to the field type.
+   * @returns {number} The next field key counter value after processing, to be used for further fields or subsequent features.
+   */
+  static #helperFeatureFields(
+    feature: Feature,
+    outfields: TypeOutfields[] | undefined,
+    dictFieldDomains: Record<string, codedValueType | rangeDomainType | null>,
+    dictFieldTypes: Record<string, TypeOutfieldsType>,
+    featureInfoEntry: TypeFeatureInfoEntry,
+    fieldKeyCounterStart: number,
+    callbackGetFieldType: (fieldName: string) => TypeOutfieldsType,
+    callbackGetFieldDomain: (fieldName: string) => codedValueType | rangeDomainType | null,
+    callbackGetFieldValue: (feature: Feature, fieldName: string, fieldType: TypeOutfieldsType) => string | number | Date
+  ): number {
+    const featureFields = feature.getKeys();
+    let fieldKeyCounter = fieldKeyCounterStart;
+
+    for (const fieldName of featureFields) {
+      // eslint-disable-next-line no-continue
+      if (fieldName === 'geometry') continue;
+
+      const fieldValue = feature.get(fieldName);
+      // eslint-disable-next-line no-continue
+      if (fieldValue && typeof fieldValue === 'object' && !Array.isArray(fieldValue)) continue;
+
+      if (!(fieldName in dictFieldDomains)) {
+        // eslint-disable-next-line no-param-reassign
+        dictFieldDomains[fieldName] = callbackGetFieldDomain(fieldName);
+      }
+      const fieldDomain = dictFieldDomains[fieldName];
+
+      if (!(fieldName in dictFieldTypes)) {
+        // eslint-disable-next-line no-param-reassign
+        dictFieldTypes[fieldName] = callbackGetFieldType(fieldName);
+      }
+      const fieldType = dictFieldTypes[fieldName];
+
+      const fieldEntry = outfields?.find((outfield) => outfield.name === fieldName || outfield.alias === fieldName);
+
+      if (fieldEntry) {
+        const value =
+          callbackGetFieldValue(feature, fieldName, fieldEntry.type as 'string' | 'number' | 'date') ??
+          callbackGetFieldValue(feature, fieldEntry.name, fieldEntry.type as 'string' | 'number' | 'date');
+
+        // eslint-disable-next-line no-param-reassign
+        featureInfoEntry.fieldInfo[fieldEntry.name] = {
+          fieldKey: fieldKeyCounter++,
+          value,
+          dataType: fieldEntry.type,
+          alias: fieldEntry.alias,
+          domain: fieldDomain,
+        };
+      } else if (!outfields) {
+        // eslint-disable-next-line no-param-reassign
+        featureInfoEntry.fieldInfo[fieldName] = {
+          fieldKey: fieldKeyCounter++,
+          value: callbackGetFieldValue(feature, fieldName, fieldType),
+          dataType: fieldType,
+          alias: fieldName,
+          domain: fieldDomain,
+        };
+      }
+    }
+
+    // Return the counter
+    return fieldKeyCounter;
+  }
+
+  /**
+   * Gets and formats the value of a field from a feature.
+   * For vector GeoView layers, dates are converted from milliseconds since the base date.
+   * Vector feature dates must be in ISO format if stored as strings.
+   * @param {Feature} feature - The OpenLayers feature that holds the field values.
+   * @param {string} fieldName - The name of the field to retrieve.
+   * @param {TypeOutfieldsType} fieldType - The type of the field ('string', 'number', 'date', etc.).
+   * @param {TypeDateFragments | undefined} serverDateFragmentsOrder - Optional order of date fragments as expected from the server.
+   *   If undefined, the server format will be deduced from the field value.
+   * @param {TypeDateFragments | undefined} externalFragmentsOrder - Optional order of date fragments for external display formatting.
+   * @returns {string | number | Date} The formatted field value.
+   *   Returns a string, number, or Date depending on the field type.
+   */
+  static helperGetFieldValue(
+    feature: Feature,
+    fieldName: string,
+    fieldType: TypeOutfieldsType,
+    serverDateFragmentsOrder: TypeDateFragments | undefined,
+    externalFragmentsOrder: TypeDateFragments | undefined
+  ): string | number | Date {
+    const fieldValue = feature.get(fieldName);
+    let returnValue: string | number | Date;
+    if (fieldType === 'date') {
+      if (typeof fieldValue === 'string') {
+        // eslint-disable-next-line no-param-reassign
+        if (!serverDateFragmentsOrder) serverDateFragmentsOrder = DateMgt.getDateFragmentsOrder(DateMgt.deduceDateFormat(fieldValue));
+        returnValue = DateMgt.applyInputDateFormat(fieldValue, serverDateFragmentsOrder);
+      } else {
+        // All vector dates are kept internally in UTC.
+        returnValue = DateMgt.convertToUTC(`${DateMgt.convertMilisecondsToDate(fieldValue)}Z`);
+      }
+      const reverseTimeZone = true;
+      if (externalFragmentsOrder) returnValue = DateMgt.applyOutputDateFormat(returnValue, externalFragmentsOrder, reverseTimeZone);
+      return returnValue;
+    }
+    return fieldValue;
+  }
+
+  // #endregion STATIC
 }
 
 // #region EVENT TYPES

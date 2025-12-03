@@ -28,6 +28,8 @@ export class GVWKB extends AbstractGVVector {
     super(olSource, layerConfig);
   }
 
+  // #region OVERRIDES
+
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
@@ -53,6 +55,10 @@ export class GVWKB extends AbstractGVVector {
       this.updateWkbSource(projection);
     }
   }
+
+  // #endregion OVERRIDES
+
+  // #region METHODS
 
   /**
    * Loads a WKB object as the layer source features, overriding the current features if any.
@@ -101,4 +107,6 @@ export class GVWKB extends AbstractGVVector {
       this.setWkbSource(this.#wkbSource, projection);
     }
   }
+
+  // #endregion METHODS
 }

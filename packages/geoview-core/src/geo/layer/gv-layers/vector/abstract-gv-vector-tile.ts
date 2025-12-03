@@ -11,6 +11,8 @@ import { Projection } from '@/geo/utils/projection';
  * Abstract Geoview Layer managing an OpenLayer vector tile type layer.
  */
 export abstract class AbstractGVVectorTile extends AbstractGVLayer {
+  // #region OVERRIDES
+
   /**
    * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
    * @override
@@ -55,4 +57,6 @@ export abstract class AbstractGVVectorTile extends AbstractGVLayer {
     // Return the calculated layer bounds
     return sourceExtent;
   }
+
+  // #endregion OVERRIDES
 }

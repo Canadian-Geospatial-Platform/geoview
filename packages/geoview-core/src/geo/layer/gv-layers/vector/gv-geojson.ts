@@ -29,6 +29,8 @@ export class GVGeoJSON extends AbstractGVVector {
     super(olSource, layerConfig);
   }
 
+  // #region OVERRIDES
+
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
@@ -57,6 +59,10 @@ export class GVGeoJSON extends AbstractGVVector {
       });
     }
   }
+
+  // #endregion OVERRIDES
+
+  // #region METHODS
 
   /**
    * Loads a Geojson object as the layer source features, overriding the current features if any.
@@ -105,4 +111,6 @@ export class GVGeoJSON extends AbstractGVVector {
       await this.setGeojsonSource(this.#geoJsonSource, projection);
     }
   }
+
+  // #endregion METHODS
 }

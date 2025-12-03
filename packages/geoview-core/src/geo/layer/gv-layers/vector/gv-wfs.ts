@@ -22,6 +22,8 @@ export class GVWFS extends AbstractGVVector {
     super(olSource, layerConfig);
   }
 
+  // #region OVERRIDES
+
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
@@ -42,6 +44,10 @@ export class GVWFS extends AbstractGVVector {
     return GVWFS.getFieldType(this.getLayerConfig().getLayerMetadata(), fieldName);
   }
 
+  // #endregion OVERRIDES
+
+  // #region STATIC
+
   /**
    * Returns field type of the given field name using the povided WFS metadata.
    * @param {TypeOutfields[]} layerMetadata - The WFS metadata
@@ -56,4 +62,6 @@ export class GVWFS extends AbstractGVVector {
     if (['int', 'number'].includes(fieldEntryType)) return 'number';
     return 'string';
   }
+
+  // #endregion STATIC
 }

@@ -12,7 +12,7 @@ import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values
 import { Fetch } from '@/core/utils/fetch-helper';
 import { xmlToJson } from '@/core/utils/utilities';
 import { GeoUtilities } from '@/geo/utils/utilities';
-import { parseDateTimeValuesEsriImageOrWMS } from '@/geo/layer/gv-layers/utils';
+import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import type { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
@@ -152,54 +152,6 @@ export class GVWMS extends AbstractGVRaster {
       // Not rescued, call parent
       super.onImageLoadError(event);
     }
-  }
-
-  /**
-   * Gets if the CRS is to be overridden, because the layer struggles with the current map projection.
-   * @returns {CRSOverride | undefined} The CRS Override properties if any.
-   */
-  getOverrideCRS(): CRSOverride | undefined {
-    return this.#overrideCRS;
-  }
-
-  /**
-   * Sets if the CRS is to be overridden, because the layer struggles with the current map projection.
-   * @param {CRSOverride | undefined} value - The CRS Override properties or undefined.
-   */
-  setOverrideCRS(value: CRSOverride | undefined): void {
-    this.#overrideCRS = value;
-  }
-
-  /**
-   * Gets the feature count used for GetFeatureInfo requests.
-   * @returns {number} The current GetFeatureInfo feature count.
-   */
-  getGetFeatureInfoFeatureCount(): number {
-    return this.#getFeatureInfoFeatureCount;
-  }
-
-  /**
-   * Sets the feature count used for GetFeatureInfo requests.
-   * @param {number} value - The new GetFeatureInfo feature count.
-   */
-  setGetFeatureInfoFeatureCount(value: number): void {
-    this.#getFeatureInfoFeatureCount = value;
-  }
-
-  /**
-   * Gets the current pixel tolerance used for GetFeatureInfo requests for QGIS Server Services.
-   * @returns {number} The current GetFeatureInfo pixel tolerance.
-   */
-  getGetFeatureInfoTolerance(): number {
-    return this.#getFeatureInfoTolerance;
-  }
-
-  /**
-   * Sets the current pixel tolerance used for GetFeatureInfo requests for QGIS Server Services.
-   * @param {number} value - The new GetFeatureInfo pixel tolerance.
-   */
-  setGetFeatureInfoTolerance(value: number): void {
-    this.#getFeatureInfoTolerance = value;
   }
 
   /**
@@ -537,6 +489,54 @@ export class GVWMS extends AbstractGVRaster {
   // #endregion OVERRIDES
 
   // #region METHODS
+
+  /**
+   * Gets if the CRS is to be overridden, because the layer struggles with the current map projection.
+   * @returns {CRSOverride | undefined} The CRS Override properties if any.
+   */
+  getOverrideCRS(): CRSOverride | undefined {
+    return this.#overrideCRS;
+  }
+
+  /**
+   * Sets if the CRS is to be overridden, because the layer struggles with the current map projection.
+   * @param {CRSOverride | undefined} value - The CRS Override properties or undefined.
+   */
+  setOverrideCRS(value: CRSOverride | undefined): void {
+    this.#overrideCRS = value;
+  }
+
+  /**
+   * Gets the feature count used for GetFeatureInfo requests.
+   * @returns {number} The current GetFeatureInfo feature count.
+   */
+  getGetFeatureInfoFeatureCount(): number {
+    return this.#getFeatureInfoFeatureCount;
+  }
+
+  /**
+   * Sets the feature count used for GetFeatureInfo requests.
+   * @param {number} value - The new GetFeatureInfo feature count.
+   */
+  setGetFeatureInfoFeatureCount(value: number): void {
+    this.#getFeatureInfoFeatureCount = value;
+  }
+
+  /**
+   * Gets the current pixel tolerance used for GetFeatureInfo requests for QGIS Server Services.
+   * @returns {number} The current GetFeatureInfo pixel tolerance.
+   */
+  getGetFeatureInfoTolerance(): number {
+    return this.#getFeatureInfoTolerance;
+  }
+
+  /**
+   * Sets the current pixel tolerance used for GetFeatureInfo requests for QGIS Server Services.
+   * @param {number} value - The new GetFeatureInfo pixel tolerance.
+   */
+  setGetFeatureInfoTolerance(value: number): void {
+    this.#getFeatureInfoTolerance = value;
+  }
 
   /**
    * Sets the style id to be used by the WMS layer.
@@ -940,7 +940,7 @@ export class GVWMS extends AbstractGVRaster {
       const currentClassFilter = source.getParams()['FILTER'];
 
       // Parse the filter value to use
-      filterValueToUse = parseDateTimeValuesEsriImageOrWMS(filterValueToUse, externalDateFragments);
+      filterValueToUse = GVLayerUtilities.parseDateTimeValuesEsriImageOrWMS(filterValueToUse, externalDateFragments);
 
       // Create the source parameter to update
       const sourceParams = { [dimension]: filterValueToUse.replace(/\s*/g, '') };

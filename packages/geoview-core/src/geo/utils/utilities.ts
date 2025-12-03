@@ -21,14 +21,14 @@ import { Projection } from '@/geo/utils/projection';
 
 import type { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
-import type { TypeLayerStyleConfig, TypeOutfields, TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
+import type { TypeLayerStyleConfig, TypeOutfields, TypeStyleGeometry, TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
 import { CONFIG_PROXY_URL } from '@/api/types/map-schema-types';
 import type { TypeMetadataWMS, TypeMetadataWMSCapabilityLayer, TypeMetadataWMSRoot, TypeStylesWMS } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 
 import type { TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
 import type { TypeMapMouseInfo } from '@/geo/map/map-viewer';
-import { NetworkError, ResponseEmptyError } from '@/core/exceptions/core-exceptions';
+import { NetworkError, NotSupportedError, ResponseEmptyError } from '@/core/exceptions/core-exceptions';
 import { xmlToJson } from '@/core/utils/utilities';
 import GML3 from 'ol/format/GML3';
 
@@ -1256,6 +1256,35 @@ export abstract class GeoUtilities {
 
     // Serialize and return
     return new XMLSerializer().serializeToString(geomNode);
+  }
+
+  /**
+   * Converts a WFS geometry type string to a TypeStyleGeometry.
+   * @param {string} wfsGeometryType - The wfs geometry type to convert
+   * @returns {TypeStyleGeometry} The corresponding TypeStyleGeometry
+   */
+  static wfsConvertGeometryTypeToOLGeometryType(wfsGeometryType: string | undefined): TypeStyleGeometry {
+    switch (wfsGeometryType) {
+      case 'gml:PointPropertyType':
+        return 'Point';
+      case 'gml:MultiPointPropertyType':
+        return 'MultiPoint';
+      case 'gml:LineStringPropertyType':
+      case 'gml:CurvePropertyType':
+        return 'LineString';
+      case 'gml:MultiLineStringPropertyType':
+      case 'gml:MultiCurvePropertyType':
+        return 'MultiLineString';
+      case 'gml:PolygonPropertyType':
+      case 'gml:SurfacePropertyType':
+        return 'Polygon';
+      case 'gml:MultiPolygonPropertyType':
+      case 'gml:MultiSurfacePropertyType':
+        return 'MultiPolygon';
+      default:
+        // Unsupported geometry type
+        throw new NotSupportedError(`Unsupported geometry type: ${wfsGeometryType}`);
+    }
   }
 }
 

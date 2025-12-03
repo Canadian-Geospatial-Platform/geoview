@@ -17,7 +17,7 @@ import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import type { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
-import { esriQueryRecordsByUrlObjectIds } from '@/geo/layer/gv-layers/utils';
+import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { LayerNotEsriDynamicError } from '@/core/exceptions/layer-exceptions';
 import { NoBoundsError } from '@/core/exceptions/geoview-exceptions';
 import { logger } from '@/core/utils/logger';
@@ -135,6 +135,13 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         // Get the layer config
         const layerConfig = MapEventProcessor.getMapViewerLayerAPI(get().mapId).getLayerEntryConfig(layerPath);
 
+        // TODO: Refactor - If this function is about querying EsriDynamic layer, and we don't hesitate to
+        // TO.DOCONT: grab the MapViewer.layer dependency here, I feel like there's code that should be shared between the
+        // TO.DOCONT: GVEsriDynamic call in GVEsriDynamic.onGetExtentFromFeatures and the layer-state call here. Both standardize and perform a '/query?objectIDs=' call.
+        // TO.DOCONT: Should we centralize all functions to a static reusable method like the one below esriQueryRecordsByUrlObjectIds?
+        // TO.DOCONT: Furthermore, there's also fetch-esri-worker-script.queryEsriFeatures that performs queries on Esri layers, but I think that one is
+        // TO.DOCONT: meant to be more independent from the framework and can stay as such.
+
         // If not EsriDynamic
         if (!(layerConfig instanceof EsriDynamicLayerEntryConfig))
           throw new LayerNotEsriDynamicError(layerPath, layerConfig.getLayerNameCascade());
@@ -152,7 +159,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         // TODO: Put the server original projection in the config metadata (add a new optional param in source for esri)
         // TO.DOCONT: When we get the projection we can get the projection in original server (will solve error trying to reproject https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/7 in 3857)
         // TO.DOCONT: Then we need to modify the DownloadGeoJSON to use mapProjection for vector and original projection for dynamic.
-        return esriQueryRecordsByUrlObjectIds(
+        return GVLayerUtilities.esriQueryRecordsByUrlObjectIds(
           `${layerConfig.getDataAccessPath(true)}${layerConfig.layerId}`,
           geometryType,
           objectIDs,

@@ -39,6 +39,8 @@ export class GVImageStatic extends AbstractGVRaster {
     this.setOLLayer(new ImageLayer(staticImageOptions));
   }
 
+  // #region OVERRIDES
+
   /**
    * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
    * @override
@@ -67,42 +69,6 @@ export class GVImageStatic extends AbstractGVRaster {
   override getLayerConfig(): ImageStaticLayerEntryConfig {
     // Call parent and cast
     return super.getLayerConfig() as ImageStaticLayerEntryConfig;
-  }
-
-  /**
-   * Gets the legend image of a layer.
-   * @param {ImageStaticLayerEntryConfig} layerConfig - The layer configuration.
-   * @returns {blob} A promise of an image blob
-   * @private
-   */
-  static #getLegendImage(layerConfig: ImageStaticLayerEntryConfig): Promise<string | ArrayBuffer | null> {
-    const promisedImage = new Promise<string | ArrayBuffer | null>((resolve) => {
-      const legendUrl = layerConfig.getDataAccessPath().toLowerCase().startsWith('http:')
-        ? `https${layerConfig.getDataAccessPath().slice(4)}`
-        : layerConfig.getDataAccessPath();
-
-      // Fetch the blob
-      Fetch.fetchBlob(legendUrl, { credentials: 'omit' })
-        .then((blob) => {
-          // The blob has been read, read it with a FileReader
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            resolve(reader.result);
-          };
-          reader.onerror = () => {
-            // Failed, but resolve nonetheless with a warning
-            logger.logWarning(`The legend could not be fetched for static image ${layerConfig.layerPath}`);
-            resolve(null);
-          };
-          reader.readAsDataURL(blob);
-        })
-        .catch(() => {
-          // Failed, but resolve nonetheless with a warning
-          logger.logWarning(`The legend could not be fetched for static image ${layerConfig.layerPath}`);
-          resolve(null);
-        });
-    });
-    return promisedImage;
   }
 
   /**
@@ -174,4 +140,46 @@ export class GVImageStatic extends AbstractGVRaster {
     // Return the calculated layer bounds
     return sourceExtent;
   }
+
+  // #endregion OVERRIDES
+
+  // #region STATIC METHODS
+
+  /**
+   * Gets the legend image of a layer.
+   * @param {ImageStaticLayerEntryConfig} layerConfig - The layer configuration.
+   * @returns {blob} A promise of an image blob
+   * @private
+   */
+  static #getLegendImage(layerConfig: ImageStaticLayerEntryConfig): Promise<string | ArrayBuffer | null> {
+    const promisedImage = new Promise<string | ArrayBuffer | null>((resolve) => {
+      const legendUrl = layerConfig.getDataAccessPath().toLowerCase().startsWith('http:')
+        ? `https${layerConfig.getDataAccessPath().slice(4)}`
+        : layerConfig.getDataAccessPath();
+
+      // Fetch the blob
+      Fetch.fetchBlob(legendUrl, { credentials: 'omit' })
+        .then((blob) => {
+          // The blob has been read, read it with a FileReader
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            resolve(reader.result);
+          };
+          reader.onerror = () => {
+            // Failed, but resolve nonetheless with a warning
+            logger.logWarning(`The legend could not be fetched for static image ${layerConfig.layerPath}`);
+            resolve(null);
+          };
+          reader.readAsDataURL(blob);
+        })
+        .catch(() => {
+          // Failed, but resolve nonetheless with a warning
+          logger.logWarning(`The legend could not be fetched for static image ${layerConfig.layerPath}`);
+          resolve(null);
+        });
+    });
+    return promisedImage;
+  }
+
+  // #endregion STATIC METHODS
 }

@@ -12,7 +12,7 @@ import type { TimeDimension } from '@/core/utils/date-mgt';
 import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 import { NoPrimaryKeyFieldError } from '@/core/exceptions/geoview-exceptions';
-import { wfsConvertGeometryTypeToOLGeometryType } from '@/geo/layer/gv-layers/utils';
+import { GeoUtilities } from '@/geo/utils/utilities';
 
 export interface AbstractBaseLayerEntryConfigProps extends ConfigBaseClassProps {
   /** Source settings to apply to the GeoView layer source at creation time. */
@@ -427,7 +427,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    *          or `undefined` if the layer has no geometry field or the type cannot be determined.
    */
   getGeometryType(): TypeStyleGeometry | undefined {
-    return wfsConvertGeometryTypeToOLGeometryType(this.getGeometryField()?.type);
+    return GeoUtilities.wfsConvertGeometryTypeToOLGeometryType(this.getGeometryField()?.type);
   }
 
   /**

@@ -6,7 +6,7 @@ import type { Projection as OLProjection } from 'ol/proj';
 
 import type { XYZTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { AbstractGVTile } from '@/geo/layer/gv-layers/tile/abstract-gv-tile';
-import { featureInfoGetFieldType } from '@/geo/layer/gv-layers/utils';
+import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import type { TypeOutfieldsType } from '@/api/types/map-schema-types';
 import { Projection } from '@/geo/utils/projection';
@@ -35,6 +35,8 @@ export class GVXYZTiles extends AbstractGVTile {
     // Create and set the OpenLayer layer
     this.setOLLayer(new TileLayer(tileLayerOptions));
   }
+
+  // #region OVERRIDES
 
   /**
    * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
@@ -73,7 +75,7 @@ export class GVXYZTiles extends AbstractGVTile {
    */
   protected override onGetFieldType(fieldName: string): TypeOutfieldsType {
     // Redirect
-    return featureInfoGetFieldType(this.getLayerConfig(), fieldName);
+    return GVLayerUtilities.featureInfoGetFieldType(this.getLayerConfig(), fieldName);
   }
 
   /**
@@ -102,4 +104,6 @@ export class GVXYZTiles extends AbstractGVTile {
     // Return the calculated layer bounds
     return sourceExtent;
   }
+
+  // #endregion OVERRIDES
 }
