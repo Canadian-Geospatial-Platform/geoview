@@ -167,13 +167,19 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
   /**
    * Handle expand/shrink of layer groups.
    */
-  const handleExpandGroupClick = useCallback((): void => {
-    // Log
-    logger.logTraceUseCallback('SINGLE-LAYER - handleExpandGroupClick');
+  const handleExpandGroupClick = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>): void => {
+      // Log
+      logger.logTraceUseCallback('SINGLE-LAYER - handleExpandGroupClick');
 
-    // Set legend collapse value
-    toggleLegendCollapsed(layerPath);
-  }, [layerPath, toggleLegendCollapsed]);
+      // Prevent triggering parent onClick
+      event.stopPropagation();
+
+      // Set legend collapse value
+      toggleLegendCollapsed(layerPath);
+    },
+    [layerPath, toggleLegendCollapsed]
+  );
 
   const handleLayerClick = useCallback((): void => {
     // Log
@@ -231,27 +237,47 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
     [layerPath, mapId, reorderLayer, setSelectedLayerSortingArrowId]
   );
 
-  const handleToggleVisibility = useCallback((): void => {
-    // Log
-    logger.logTraceUseCallback('SINGLE-LAYER - handleToggleVisibility');
+  const handleToggleVisibility = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>): void => {
+      // Log
+      logger.logTraceUseCallback('SINGLE-LAYER - handleToggleVisibility');
 
-    // Toggle visibility
-    setOrToggleLayerVisibility(layerPath);
-  }, [layerPath, setOrToggleLayerVisibility]);
+      // Prevent triggering parent onClick
+      event.stopPropagation();
 
-  const handleZoomToLayerVisibleScale = useCallback((): void => {
-    // Log
-    logger.logTraceUseCallback('SINGLE-LAYER - handleZoomToLayerVisibleScale');
+      // Toggle visibility
+      setOrToggleLayerVisibility(layerPath);
+    },
+    [layerPath, setOrToggleLayerVisibility]
+  );
 
-    zoomToLayerVisibleScale(layerPath);
-  }, [layerPath, zoomToLayerVisibleScale]);
+  const handleZoomToLayerVisibleScale = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>): void => {
+      // Log
+      logger.logTraceUseCallback('SINGLE-LAYER - handleZoomToLayerVisibleScale');
 
-  const handleReload = useCallback((): void => {
-    // Log
-    logger.logTraceUseCallback('SINGLE-LAYER - handleReload');
+      // Prevent triggering parent onClick
+      event.stopPropagation();
 
-    reloadLayer(layerPath);
-  }, [layerPath, reloadLayer]);
+      // Zoom to visible scale
+      zoomToLayerVisibleScale(layerPath);
+    },
+    [layerPath, zoomToLayerVisibleScale]
+  );
+
+  const handleReload = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>): void => {
+      // Log
+      logger.logTraceUseCallback('SINGLE-LAYER - handleReload');
+
+      // Prevent triggering parent onClick
+      event.stopPropagation();
+
+      // Reload layer
+      reloadLayer(layerPath);
+    },
+    [layerPath, reloadLayer]
+  );
 
   // #endregion HANDLERS
 
@@ -541,7 +567,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
 
   return (
     <AnimatedPaper className={memoContainerClass} data-layer-depth={depth}>
-      <ListItem id={layerId} key={layerName} divider tabIndex={0} onKeyDown={handleListItemKeyDown}>
+      <ListItem id={layerId} key={layerName} divider tabIndex={0} onKeyDown={handleListItemKeyDown} onClick={handleLayerClick}>
         <ListItemButton
           selected={layerIsSelected || (layerChildIsSelected && !legendExpanded)}
           tabIndex={-1}
@@ -553,11 +579,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
         >
           <LayerIcon layerPath={layerPath} />
           <Tooltip title={layerName} placement="top" enterDelay={1000} arrow disableHoverListener={!shouldShowTooltip}>
-            <ListItemText
-              primary={layerName !== undefined ? layerName : layerId}
-              secondary={memoLayerDescription}
-              onClick={handleLayerClick}
-            />
+            <ListItemText primary={layerName !== undefined ? layerName : layerId} secondary={memoLayerDescription} />
           </Tooltip>
           {!isLayoutEnlarged && (
             <ListItemIcon className="rightIcons-container">

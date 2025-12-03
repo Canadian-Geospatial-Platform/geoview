@@ -11,6 +11,7 @@ import { logger } from 'geoview-core/core/utils/logger';
 
 import { DateMgt } from 'geoview-core/core/utils/date-mgt';
 import { getSxClasses } from './time-slider-style';
+import { Switch } from 'geoview-core/ui/switch/switch';
 
 interface TimeSliderProps {
   layerPath: string;
@@ -35,7 +36,6 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     Grid,
     Slider,
     Typography,
-    Checkbox,
     Tooltip,
     IconButton,
     LockIcon,
@@ -362,19 +362,21 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
           </Grid>
           <Grid size={{ xs: 3 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: '10px' }}>
-              <Typography component="span">
-                <b>{getLocalizedMessage(displayLanguage, 'timeSlider.slider.filter')}</b>
-              </Typography>
               <Tooltip
                 title={
                   filtering
                     ? getLocalizedMessage(displayLanguage, 'timeSlider.slider.disableFilter')
                     : getLocalizedMessage(displayLanguage, 'timeSlider.slider.enableFilter')
                 }
-                placement="top"
-                enterDelay={1000}
               >
-                <Checkbox checked={filtering} onChange={handleCheckbox} />
+                <span>
+                  <Switch
+                    size="small"
+                    checked={filtering}
+                    onChange={handleCheckbox}
+                    label={getLocalizedMessage(displayLanguage, 'timeSlider.slider.filter')}
+                  />
+                </span>
               </Tooltip>
             </Box>
           </Grid>
@@ -505,7 +507,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
         </Grid>
         {(description || additionalNames?.length) && (
           <Grid size={{ xs: 12 }}>
-            <Typography component="div" sx={{ px: '20px', py: '5px', paddingTop: '15px', fontSize: theme.palette.geoViewFontSize.sm }}>
+            <Typography component="div" sx={{ px: '20px', py: '5px', paddingTop: '15px', fontSize: '0.875rem' }}>
               {description || combinedNames}
             </Typography>
           </Grid>

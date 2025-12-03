@@ -29,6 +29,7 @@ import type {
   TypeLayerInitialSettings,
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
+  TypeLayerStatus,
 } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { api } from '@/app';
@@ -38,7 +39,7 @@ import { MapViewer } from '@/geo/map/map-viewer';
 import type { TypeMapStateForExportLayout } from '@/core/components/export/utilities';
 import type { PluginsContainer } from '@/api/plugin/plugin-types';
 import { Projection } from '@/geo/utils/projection';
-import { isPointInExtent, isExtentLonLat } from '@/geo/utils/utilities';
+import { isPointInExtent, isExtentLonLat, validateExtent } from '@/geo/utils/utilities';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { DEFAULT_OL_FITOPTIONS, NORTH_POLE_POSITION, OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
@@ -316,6 +317,17 @@ export class MapEventProcessor extends AbstractEventProcessor {
     return this.getMapStateProtected(mapId).orderedLayerInfo.map((orderedLayerInfo) => {
       return orderedLayerInfo.layerPath;
     });
+  }
+
+  /**
+   * Gets the status of a layer.
+   * @param {string} mapId - The map id.
+   * @param {string} layerPath - The layer path.
+   * @returns {TypeLayerStatus | undefined} The layer status
+   * @static
+   */
+  static getMapLayerStatus(mapId: string, layerPath: string): TypeLayerStatus | undefined {
+    return LegendEventProcessor.getLegendLayerInfo(mapId, layerPath)?.layerStatus;
   }
 
   static getMapState(mapId: string): TypeMapState {
@@ -1038,11 +1050,13 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // Merge user options with defaults
     const mergedOptions: FitOptions = { ...DEFAULT_OL_FITOPTIONS, ...options };
 
-    // Validate the extent coordinates - need to make sure we aren't excluding zero with !number
+    // Validate the extent coordinates - need to make sure we aren't excluding zero with !number or using invalid extents
+    const validatedExtent = validateExtent(extent, `EPSG:${this.getMapStateProtected(mapId).currentProjection.toString()}`);
     if (
       !extent.some((number) => {
         return (!number && number !== 0) || Number.isNaN(number);
-      })
+      }) &&
+      JSON.stringify(extent) === JSON.stringify(validatedExtent)
     ) {
       // store state will be updated by map event
       this.getMapViewer(mapId).getView().fit(extent, mergedOptions);
@@ -1061,6 +1075,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     }
 
     // Invalid extent
+    this.getMapViewer(mapId).notifications.showError('error.map.invalidZoomExtent', [], true);
     throw new InvalidExtentError(extent);
   }
 
