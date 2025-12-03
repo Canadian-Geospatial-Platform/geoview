@@ -408,7 +408,8 @@
       "mapWrongCall": "Div with id __param__ has a class 'geoview-map' and should be initialized via a 'cgpv.init()' call.",
       "pluginError": "A major error on Plugin '__param__' on map '__param__' has happened.",
       "pluginConfigNotFound": "The Plugin configuration '__param__' on map '__param__' at path '__param__' couldn't be found.",
-      "pluginStateUninitialized": "The Plugin state for '__param__' on map '__param__' is uninitialized."
+      "pluginStateUninitialized": "The Plugin state for '__param__' on map '__param__' is uninitialized.",
+      "invalidZoomExtent": "Unable to zoom, the provided extent is invalid."
     },
     "geocore": {
       "uuidNotFound": "GeoCore layer identifier '__param__' does not exist on the server.",
