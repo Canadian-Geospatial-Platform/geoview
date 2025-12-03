@@ -21,14 +21,11 @@ interface LayoutProps {
   onLayerListClicked: (layer: LayerListEntry) => void;
   onIsEnlargeClicked?: (isEnlarge: boolean) => void;
   onGuideIsOpen?: (isGuideOpen: boolean) => void;
-<<<<<<< HEAD
   onRightPanelClosed?: () => void;
   onRightPanelVisibilityChanged?: (isVisible: boolean) => void;
-=======
   containerType?: TypeContainerBox;
   hideEnlargeBtn?: boolean;
   toggleMode?: boolean;
->>>>>>> ab8c937f2 (Adjust the details panel in the app bar to show details and layers simultaneously)
 }
 
 // Constants outside component to prevent recreating every render

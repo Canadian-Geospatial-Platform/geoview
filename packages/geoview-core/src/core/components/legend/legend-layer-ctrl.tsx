@@ -49,11 +49,6 @@ type ControlActions = {
   handleZoomTo: (event: React.MouseEvent) => void;
 };
 
-// Constant style outside of render
-const styles = {
-  btnMargin: { marginTop: '-0.3125rem' },
-} as const;
-
 // Custom hook for control actions
 const useControlActions = (layerPath: string): ControlActions => {
   // Store
@@ -194,7 +189,6 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
         {isLayerHighlightCapable && (
           <IconButton
             aria-label={t('legend.highlightLayer')}
-            sx={styles.btnMargin}
             className="buttonOutline"
             onClick={controls.handleHighlightLayer}
             disabled={!isInVisibleRange || parentHidden || !isVisible || layerStatus === 'error'}

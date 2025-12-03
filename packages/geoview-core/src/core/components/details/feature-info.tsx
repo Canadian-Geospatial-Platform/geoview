@@ -1,23 +1,17 @@
 import { useCallback, useEffect, useState, useMemo, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-<<<<<<< HEAD
-
 import {
-  List,
-  ZoomInSearchIcon,
-  IconButton,
-  Paper,
   Box,
-  Typography,
   BrowserNotSupportedIcon,
+  ChartIcon,
   HighlightIcon,
   HighlightOutlinedIcon,
-  ChartIcon,
+  IconButton,
+  Paper,
+  Typography,
+  ZoomInSearchIcon
 } from '@/ui';
-=======
-import { Box, BrowserNotSupportedIcon, HighlightIcon, HighlightOutlinedIcon, IconButton, Paper, Typography, ZoomInSearchIcon } from '@/ui';
->>>>>>> ab8c937f2 (Adjust the details panel in the app bar to show details and layers simultaneously)
 import { useDetailsCheckedFeatures, useDetailsStoreActions } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useGeochartLayerDataArrayBatch, useGeochartStoreActions } from '@/core/stores/store-interface-and-intial-values/geochart-state';
@@ -46,7 +40,7 @@ interface FeatureHeaderProps {
 // Constants outside component to prevent recreating every render
 const HEADER_STYLES = {
   container: {
-    p: '0 20px 10px 20px',
+    p: '0 16px 10px 16px',
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -119,6 +113,7 @@ const FeatureHeader = memo(function FeatureHeader({
             tooltipPlacement="top"
             onClick={onGeochart}
             className="buttonOutline"
+            size="small"
           >
             <ChartIcon />
           </IconButton>
@@ -129,6 +124,7 @@ const FeatureHeader = memo(function FeatureHeader({
           disabled={!hasGeometry}
           onClick={onCheckChange}
           className="buttonOutline"
+          size="small"
         >
           {checked ? <HighlightIcon /> : <HighlightOutlinedIcon />}
         </IconButton>
@@ -139,6 +135,7 @@ const FeatureHeader = memo(function FeatureHeader({
           disabled={!hasGeometry}
           onClick={onZoomIn}
           className="buttonOutline"
+          size="small"
         >
           <ZoomInSearchIcon />
         </IconButton>
