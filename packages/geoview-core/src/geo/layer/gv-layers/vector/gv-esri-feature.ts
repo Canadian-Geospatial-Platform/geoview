@@ -2,7 +2,7 @@ import type VectorSource from 'ol/source/Vector';
 
 import type { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import type { codedValueType, rangeDomainType, TypeOutfieldsType } from '@/api/types/map-schema-types';
-import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
+import { EsriUtilities } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 
 /**
@@ -42,7 +42,7 @@ export class GVEsriFeature extends AbstractGVVector {
    */
   protected override onGetFieldType(fieldName: string): TypeOutfieldsType {
     // Redirect
-    return GVLayerUtilities.esriGetFieldType(this.getLayerConfig(), fieldName);
+    return EsriUtilities.esriGetFieldType(this.getLayerConfig(), fieldName);
   }
 
   /**
@@ -52,7 +52,7 @@ export class GVEsriFeature extends AbstractGVVector {
    */
   protected override onGetFieldDomain(fieldName: string): null | codedValueType | rangeDomainType {
     // Redirect
-    return GVLayerUtilities.esriGetFieldDomain(this.getLayerConfig(), fieldName);
+    return EsriUtilities.esriGetFieldDomain(this.getLayerConfig(), fieldName);
   }
 
   // #endregion OVERRIDES

@@ -30,6 +30,7 @@ import type {
 import type { TypeLayerMetadataEsriExtent } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { GeometryJson } from '@/geo/layer/gv-layers/utils';
+import { EsriUtilities } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
@@ -295,7 +296,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    */
   protected override onGetFieldType(fieldName: string): TypeOutfieldsType {
     // Redirect
-    return GVLayerUtilities.esriGetFieldType(this.getLayerConfig(), fieldName);
+    return EsriUtilities.esriGetFieldType(this.getLayerConfig(), fieldName);
   }
 
   /**
@@ -305,7 +306,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    */
   protected override onGetFieldDomain(fieldName: string): null | codedValueType | rangeDomainType {
     // Redirect
-    return GVLayerUtilities.esriGetFieldDomain(this.getLayerConfig(), fieldName);
+    return EsriUtilities.esriGetFieldDomain(this.getLayerConfig(), fieldName);
   }
 
   /**
@@ -594,7 +595,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
   ): Promise<EsriFeaturesJsonResponse> {
     const params: QueryParams = {
       url: layerConfig.getDataAccessPath(true) + layerConfig.layerId,
-      geometryType: (layerConfig.getLayerMetadata()!.geometryType as string).replace('esriGeometry', ''),
+      geometryType: layerConfig.getLayerMetadata()!.geometryType.replace('esriGeometry', ''),
       objectIds,
       queryGeometry,
       projection,

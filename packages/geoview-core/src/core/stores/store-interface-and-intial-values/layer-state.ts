@@ -17,7 +17,7 @@ import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import type { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
-import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
+import { EsriUtilities } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { LayerNotEsriDynamicError } from '@/core/exceptions/layer-exceptions';
 import { NoBoundsError } from '@/core/exceptions/geoview-exceptions';
 import { logger } from '@/core/utils/logger';
@@ -159,7 +159,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         // TODO: Put the server original projection in the config metadata (add a new optional param in source for esri)
         // TO.DOCONT: When we get the projection we can get the projection in original server (will solve error trying to reproject https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/7 in 3857)
         // TO.DOCONT: Then we need to modify the DownloadGeoJSON to use mapProjection for vector and original projection for dynamic.
-        return GVLayerUtilities.esriQueryRecordsByUrlObjectIds(
+        return EsriUtilities.esriQueryRecordsByUrlObjectIds(
           `${layerConfig.getDataAccessPath(true)}${layerConfig.layerId}`,
           geometryType,
           objectIDs,

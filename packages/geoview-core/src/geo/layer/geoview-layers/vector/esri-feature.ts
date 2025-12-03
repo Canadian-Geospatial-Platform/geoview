@@ -8,7 +8,7 @@ import { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vec
 import type { TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig, TypeMetadataEsriFeature } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 
-import { commonProcessLayerMetadata, commonValidateListOfLayerEntryConfig } from '@/geo/layer/geoview-layers/esri-layer-common';
+import { EsriUtilities } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { LayerNotFeatureLayerError, LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
@@ -131,7 +131,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @param {ConfigBaseClass[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
   protected override onValidateListOfLayerEntryConfig(listOfLayerEntryConfig: ConfigBaseClass[]): void {
-    commonValidateListOfLayerEntryConfig(this, listOfLayerEntryConfig);
+    EsriUtilities.commonValidateListOfLayerEntryConfig(this, listOfLayerEntryConfig);
   }
 
   /**
@@ -144,7 +144,7 @@ export class EsriFeature extends AbstractGeoViewVector {
     layerConfig: EsriFeatureLayerEntryConfig,
     abortSignal?: AbortSignal
   ): Promise<EsriFeatureLayerEntryConfig> {
-    return commonProcessLayerMetadata(this, layerConfig, abortSignal);
+    return EsriUtilities.commonProcessLayerMetadata(this, layerConfig, abortSignal);
   }
 
   /**

@@ -1262,6 +1262,7 @@ export abstract class GeoUtilities {
    * Converts a WFS geometry type string to a TypeStyleGeometry.
    * @param {string} wfsGeometryType - The wfs geometry type to convert
    * @returns {TypeStyleGeometry} The corresponding TypeStyleGeometry
+   * @throws {NotSupportedError} When the geometry type is not supported.
    */
   static wfsConvertGeometryTypeToOLGeometryType(wfsGeometryType: string | undefined): TypeStyleGeometry {
     switch (wfsGeometryType) {
@@ -1284,6 +1285,32 @@ export abstract class GeoUtilities {
       default:
         // Unsupported geometry type
         throw new NotSupportedError(`Unsupported geometry type: ${wfsGeometryType}`);
+    }
+  }
+
+  /**
+   * Converts an esri geometry type string to a TypeStyleGeometry.
+   * @param {string} esriGeometryType - The esri geometry type to convert
+   * @returns {TypeStyleGeometry} The corresponding TypeStyleGeometry
+   * @throws {NotSupportedError} When the geometry type is not supported.
+   */
+  static esriConvertEsriGeometryTypeToOLGeometryType(esriGeometryType: string): TypeStyleGeometry {
+    switch (esriGeometryType) {
+      case 'esriGeometryPoint':
+        return 'Point';
+      case 'esriGeometryMultipoint':
+        return 'MultiPoint';
+      case 'esriGeometryPolyline':
+        return 'LineString';
+      case 'esriGeometryMultiPolyline':
+        return 'MultiLineString';
+      case 'esriGeometryPolygon':
+        return 'Polygon';
+      case 'esriGeometryMultiPolygon':
+        return 'MultiPolygon';
+      default:
+        // Unsupported geometry type
+        throw new NotSupportedError(`Unsupported geometry type: ${esriGeometryType}`);
     }
   }
 }

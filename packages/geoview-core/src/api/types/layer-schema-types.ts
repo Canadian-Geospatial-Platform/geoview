@@ -937,7 +937,7 @@ export interface TypeLayerMetadataEsri {
   extent: TypeLayerMetadataEsriExtent;
   drawingInfo: TypeLayerMetadataEsriDrawingInfo;
   timeInfo: TimeDimensionESRI;
-  geometryType: unknown;
+  geometryType: string;
   fields: TypeLayerMetadataFields[];
 }
 

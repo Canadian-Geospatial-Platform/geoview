@@ -786,7 +786,7 @@ export class WMS extends AbstractGeoViewRaster {
   static async createStylesFromWMS(
     url: string,
     layers: string,
-    geomType: TypeStyleGeometry | undefined
+    geomType: TypeStyleGeometry
   ): Promise<Record<TypeStyleGeometry, TypeLayerStyleSettings>> {
     // Fetch styles using the WMS url associated with the WFS
     const styles = await WMS.fetchStylesForLayer(url, layers);

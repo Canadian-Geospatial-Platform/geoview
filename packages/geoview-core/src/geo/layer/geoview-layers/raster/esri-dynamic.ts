@@ -8,7 +8,7 @@ import { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/ras
 import type { TypeGeoviewLayerConfig, TypeMetadataEsriDynamic } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 
-import { commonProcessLayerMetadata, commonValidateListOfLayerEntryConfig } from '@/geo/layer/geoview-layers/esri-layer-common';
+import { EsriUtilities } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { logger } from '@/core/utils/logger';
 import { deepMergeObjects } from '@/core/utils/utilities';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
@@ -93,7 +93,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {ConfigBaseClass[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
   protected override onValidateListOfLayerEntryConfig(listOfLayerEntryConfig: ConfigBaseClass[]): void {
-    commonValidateListOfLayerEntryConfig(this, listOfLayerEntryConfig);
+    EsriUtilities.commonValidateListOfLayerEntryConfig(this, listOfLayerEntryConfig);
   }
 
   /**
@@ -106,7 +106,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     layerConfig: EsriDynamicLayerEntryConfig,
     abortSignal?: AbortSignal
   ): Promise<EsriDynamicLayerEntryConfig> {
-    return commonProcessLayerMetadata(this, layerConfig, abortSignal);
+    return EsriUtilities.commonProcessLayerMetadata(this, layerConfig, abortSignal);
   }
 
   /**

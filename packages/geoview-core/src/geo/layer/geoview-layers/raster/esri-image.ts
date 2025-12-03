@@ -7,7 +7,7 @@ import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstrac
 import type { TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 
-import { commonProcessLayerMetadata } from '@/geo/layer/geoview-layers/esri-layer-common';
+import { EsriUtilities } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
@@ -62,7 +62,7 @@ export class EsriImage extends AbstractGeoViewRaster {
     layerConfig: EsriImageLayerEntryConfig,
     abortSignal?: AbortSignal
   ): Promise<EsriImageLayerEntryConfig> {
-    return commonProcessLayerMetadata(this, layerConfig, abortSignal);
+    return EsriUtilities.commonProcessLayerMetadata(this, layerConfig, abortSignal);
   }
 
   /**

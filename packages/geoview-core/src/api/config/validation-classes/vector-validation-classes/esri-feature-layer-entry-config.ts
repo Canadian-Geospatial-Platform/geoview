@@ -3,6 +3,8 @@ import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import type { TypeEsriFeatureLayerConfig, TypeSourceEsriFeatureInitialConfig } from '@/geo/layer/geoview-layers/vector/esri-feature';
+import { GeoUtilities } from '@/geo/utils/utilities';
+import type { TypeStyleGeometry } from '@/api/types/map-schema-types';
 
 export interface EsriFeatureLayerEntryConfigProps extends VectorLayerEntryConfigProps {
   /** Source settings to apply to the GeoView layer source at creation time. */
@@ -47,6 +49,16 @@ export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
    */
   override getLayerMetadata(): TypeLayerMetadataEsri | undefined {
     return super.getLayerMetadata() as TypeLayerMetadataEsri | undefined;
+  }
+
+  /**
+   * Overrides the get geometry type to interpret the esri type name.
+   * @returns {TypeStyleGeometry} The geometry type.
+   * @throws {NotSupportedError} When the geometry type is not supported.
+   */
+  protected override onGetGeometryType(): TypeStyleGeometry {
+    // Check the geometry type based on the Esri name
+    return GeoUtilities.esriConvertEsriGeometryTypeToOLGeometryType(this.getGeometryField()!.type);
   }
 
   /**

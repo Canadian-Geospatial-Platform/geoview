@@ -86,6 +86,60 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
     this.source.dataAccessPath ??= this.layerEntryProps.geoviewLayerConfig.metadataAccessPath;
   }
 
+  // #region OVERRIDES
+
+  /**
+   * Sets the service metadata for the layer.
+   * @param {unknown} metadata - The service metadata to set
+   */
+  override onSetServiceMetadata(metadata: unknown): void {
+    this.#serviceMetadata = metadata;
+  }
+
+  /**
+   * Sets the data access path for the source object.
+   * This method is called when the data access path is being set.
+   * @param {string} dataAccessPath - The path string used to access data.
+   */
+  protected override onSetDataAccessPath(dataAccessPath: string): void {
+    this.source.dataAccessPath = dataAccessPath;
+  }
+
+  /**
+   * Overridable function get the geometry type based on the geometry field type.
+   * It uses the WFS/WMS OGC standard (GML) to interpret the geometry type.
+   * @returns {TypeStyleGeometry} The geometry type.
+   * @throws {NotSupportedError} When the geometry type is not supported.
+   */
+  protected onGetGeometryType(): TypeStyleGeometry {
+    // Default behavior is to get the geometry type using WFS/WMS OGC standard (GML)
+    return GeoUtilities.wfsConvertGeometryTypeToOLGeometryType(this.getGeometryField()?.type);
+  }
+
+  /**
+   * Overrides the toJson of the mother class
+   * @returns {unknown} The Json representation of the instance.
+   * @protected
+   */
+  protected override onToJson<T>(): T {
+    // Call parent
+    // GV Can be any object so disable eslint and proceed with caution
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const serialized = super.onToJson<T>() as any;
+
+    // Copy values
+    serialized.initialSettings = this.getInitialSettings();
+    serialized.attributions = this.getAttributions();
+    serialized.source = this.source;
+
+    // Return it
+    return serialized;
+  }
+
+  // #endregion OVERRIDES
+
+  // #region METHODS
+
   /**
    * Gets the service metadata that is associated to the service.
    * @returns {unknown | undefined} The service metadata or undefined.
@@ -421,51 +475,15 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Returns the OpenLayers-compatible geometry type of this layer's geometry field.
-   * Internally, it converts the WFS geometry type (from the layer's geometry field)
-   * to the corresponding OpenLayers geometry type using `wfsConvertGeometryTypeToOLGeometryType`.
-   * @returns {TypeStyleGeometry | undefined} The OpenLayers geometry type (e.g., 'Point', 'LineString', 'Polygon'),
-   *          or `undefined` if the layer has no geometry field or the type cannot be determined.
+   * @returns {TypeStyleGeometry} The OpenLayers geometry type (e.g., 'Point', 'LineString', 'Polygon')
    */
-  getGeometryType(): TypeStyleGeometry | undefined {
-    return GeoUtilities.wfsConvertGeometryTypeToOLGeometryType(this.getGeometryField()?.type);
+  getGeometryType(): TypeStyleGeometry {
+    return this.onGetGeometryType();
   }
 
-  /**
-   * Sets the service metadata for the layer.
-   * @param {unknown} metadata - The service metadata to set
-   */
-  override onSetServiceMetadata(metadata: unknown): void {
-    this.#serviceMetadata = metadata;
-  }
+  // #endregion METHODS
 
-  /**
-   * Sets the data access path for the source object.
-   * This method is called when the data access path is being set.
-   * @param {string} dataAccessPath - The path string used to access data.
-   */
-  protected override onSetDataAccessPath(dataAccessPath: string): void {
-    this.source.dataAccessPath = dataAccessPath;
-  }
-
-  /**
-   * Overrides the toJson of the mother class
-   * @returns {unknown} The Json representation of the instance.
-   * @protected
-   */
-  protected override onToJson<T>(): T {
-    // Call parent
-    // GV Can be any object so disable eslint and proceed with caution
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const serialized = super.onToJson<T>() as any;
-
-    // Copy values
-    serialized.initialSettings = this.getInitialSettings();
-    serialized.attributions = this.getAttributions();
-    serialized.source = this.source;
-
-    // Return it
-    return serialized;
-  }
+  // #region STATIC METHODS
 
   /**
    * Helper function to support when a layerConfig is either a class instance or a regular json object.
@@ -505,4 +523,6 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
     // Try to narrow the type and return, worst case it will be undefined
     return (layerConfig as AbstractBaseLayerEntryConfigProps)?.attributions;
   }
+
+  // #endregion STATIC METHODS
 }
