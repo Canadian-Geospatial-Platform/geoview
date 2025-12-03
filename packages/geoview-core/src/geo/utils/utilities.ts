@@ -755,7 +755,7 @@ export abstract class GeoUtilities {
     const xml = typeof gml === 'string' ? new DOMParser().parseFromString(gml, 'text/xml') : gml;
 
     // Search for any element with srsName
-    const nodes = xml.querySelectorAll('[srsName]');
+    const nodes = xml.querySelectorAll?.('[srsName]') ?? [];
     for (const node of nodes) {
       const srsName = node.getAttribute('srsName');
 
