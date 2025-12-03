@@ -68,25 +68,3 @@ export const getSxClasses = (theme: Theme, width?: string | number, height?: str
     },
   },
 });
-
-/**
- * Get dialog styles with optional width and height
- *
- * @param {SxStyles} baseDialogStyle - The base dialog style from sxClasses.dialog
- * @param {string | number} [width] - Optional width for the dialog
- * @param {string | number} [height] - Optional height for the dialog
- * @returns {SxStyles} The merged dialog styles
- * @deprecated Use getSxClasses with width and height parameters instead
- */
-export const getDialogWithSize = (baseDialogStyle: SxStyles, width?: string | number, height?: string | number): SxStyles => ({
-  ...baseDialogStyle,
-  ...(width || height
-    ? {
-        '& .MuiDialog-paper': {
-          ...(width && { width }),
-          ...(height && { height, maxHeight: 'calc(90vh - 200px)' }),
-          maxWidth: 'none',
-        },
-      }
-    : {}),
-});
