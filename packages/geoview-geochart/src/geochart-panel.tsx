@@ -51,6 +51,8 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   const visibleInRangeLayers = useMapAllVisibleandInRangeLayers();
   const storeArrayOfLayerData = useGeochartLayerDataArrayBatch();
   const selectedLayerPath = useGeochartSelectedLayerPath();
+  // TODO: evaluate why sometimes undefined, threat all stores as possibly undefined for plugins OR manage this higher up cannot use !
+  // TO.DOCONT: because return type is different then geochart store. We need to check existance of store easily for link component to work
   const { setSelectedLayerPath, setLayerDataArrayBatchLayerPathBypass } = useGeochartStoreActions() ?? {};
   const { isLayerHiddenOnMap } = useMapStoreActions();
   const displayLanguage = useAppDisplayLanguage();
